@@ -7569,13 +7569,8 @@ WSError SceneSessionManager::ShiftFocus(DisplayId displayId, const sptr<SceneSes
     UpdateFocusStatus(displayId, nextSession, true);
     UpdateHighlightStatus(displayId, focusedSession, nextSession, isProactiveUnfocus);
     if (shiftFocusFunc_ != nullptr) {
-        auto displayGroupId = windowFocusController_->GetDisplayGroupId(displayId, true);
-        bool isFocusGroupDeleted = next == INVALID_SESSION_ID && displayGroupId == DISPLAY_ID_INVALID;
-        if (!isFocusGroupDeleted) {
-            shiftFocusFunc_(nextId, displayGroupId);
-        } else {
-            TLOGW(WmsLogTag::WMS_FOCUS, "focusGroupDeleted");
-        }
+        auto displayGroupId = windowFocusController_->GetDisplayGroupId(displayId);
+        shiftFocusFunc_(nextId, displayGroupId);
     }
     bool scbPrevFocus = focusedSession && focusedSession->GetSessionInfo().isSystem_;
     bool scbCurrFocus = nextSession && nextSession->GetSessionInfo().isSystem_;

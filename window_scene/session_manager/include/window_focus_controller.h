@@ -64,7 +64,7 @@ public:
     WindowFocusController() noexcept;
     ~WindowFocusController() = default;
 
-    DisplayId GetDisplayGroupId(DisplayId displayId, bool isRealDisplayGroupId = false);
+    DisplayId GetDisplayGroupId(DisplayId displayId);
     WSError AddFocusGroup(DisplayGroupId displayGroupId, DisplayId displayId);
     WSError RemoveFocusGroup(DisplayGroupId displayGroupId, DisplayId displayId);
     int32_t GetFocusedSessionId(DisplayId displayId);
@@ -79,6 +79,7 @@ private:
 
     std::unordered_map<DisplayId, sptr<FocusGroup>> focusGroupMap_;
     std::unordered_map<DisplayId, DisplayGroupId> displayId2GroupIdMap_;
+    std::unordered_map<DisplayId, DisplayGroupId> deletedDisplayId2GroupIdMap_;
 };
 }
 }

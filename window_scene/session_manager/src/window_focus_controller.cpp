@@ -42,7 +42,7 @@ WindowFocusController::WindowFocusController() noexcept
     AddFocusGroup(DEFAULT_DISPLAY_ID, DEFAULT_DISPLAY_ID);
 }
 
-DisplayId WindowFocusController::GetDisplayGroupId(DisplayId displayId, bool isRealDisplayGroupId)
+DisplayId WindowFocusController::GetDisplayGroupId(DisplayId displayId)
 {
     if (displayId == DEFAULT_DISPLAY_ID) {
         return DEFAULT_DISPLAY_ID;
@@ -53,7 +53,7 @@ DisplayId WindowFocusController::GetDisplayGroupId(DisplayId displayId, bool isR
               displayId, iter->second);
         return iter->second;
     }
-    if (isRealDisplayGroupId) {
+    if (deletedDisplayId2GroupIdMap_.find(displayId) != deletedDisplayId2GroupIdMap_.end()) {
         return DISPLAY_ID_INVALID;
     } else {
         return DEFAULT_DISPLAY_ID;
@@ -82,6 +82,9 @@ WSError WindowFocusController::AddFocusGroup(DisplayGroupId displayGroupId, Disp
         iter->second->displayIds_.insert(displayId);
         LogDisplayIds();
     }
+    if (deletedDisplayId2GroupIdMap_.find(displayId) != deletedDisplayId2GroupIdMap_.end()) {
+        deletedDisplayId2GroupIdMap_.erase(displayId);
+    }
     return WSError::WS_OK;
 }
 
@@ -107,6 +110,7 @@ WSError WindowFocusController::RemoveFocusGroup(DisplayGroupId displayGroupId, D
         TLOGE(WmsLogTag::WMS_FOCUS, "displayGroupId invalid, displayGroupId: %{public}" PRIu64, displayGroupId);
     }
     displayId2GroupIdMap_.erase(displayId);
+    deletedDisplayId2GroupIdMap_[displayId] = displayGroupId;
     LogDisplayIds();
     return WSError::WS_OK;
 }
