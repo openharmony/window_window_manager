@@ -1829,7 +1829,7 @@ void WindowSessionImpl::HideTitleButton(bool& hideSplitButton, bool& hideMaximiz
     }
     hideMaximizeButton = hideMaximizeButton || property_->IsFullScreenDisabled();
     bool isLayoutFullScreen = property_->IsLayoutFullScreen();
-    bool hideSplitBtn = hideSplitButton || property->IsSplitDisabled();
+    bool hideSplitBtn = hideSplitButton || property_->IsSplitDisabled();
     if (property_->IsAdaptToImmersive() && !property_->GetIsAtomicService()) {
         uiContent->HideWindowTitleButton(hideSplitBtn, !isLayoutFullScreen && hideMaximizeButton,
             hideMinimizeButton, hideCloseButton);
