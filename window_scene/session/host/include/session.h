@@ -1107,6 +1107,7 @@ private:
      */
     bool borderUnoccupied_ = false;
     void DeletePersistentImageFit();
+    uint32_t GetBackgroundColor() const;
 
     /*
      * Specific Window
