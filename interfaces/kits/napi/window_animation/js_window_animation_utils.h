@@ -15,7 +15,8 @@
 
 #ifndef OHOS_JS_WINDOW_ANIMATION_UTILS_H
 #define OHOS_JS_WINDOW_ANIMATION_UTILS_H
-#include "js_runtime_utils.h"
+#include "napi/native_api.h"
+#include "native_engine/native_engine.h"
 #include "wm_common.h"
 
 namespace OHOS {
@@ -28,6 +29,15 @@ namespace Rosen {
             TLOGE(WmsLogTag::DEFAULT, "Failed to get object"); \
             return nullptr;                                    \
         }                                                      \
+    } while (0)
+
+#define NAPI_CHECK_RETURN_IF_NULL(func, msg)                                                            \
+    do {                                                                                                \
+        napi_status status = func;                                                                      \
+        if (status != napi_ok) {                                                                        \
+            TLOGE(WmsLogTag::DEFAULT, "Failed with reason %{public}s, code: %{public}d", msg, status);  \
+            return nullptr;                                                                             \
+        }                                                                                               \
     } while (0)
 
 napi_value ConvertTransitionAnimationToJsValue(napi_env env,
