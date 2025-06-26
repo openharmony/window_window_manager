@@ -2527,7 +2527,6 @@ HWTEST_F(SceneSessionManagerTest12, NotifyHookOrientationChange02, TestSize.Leve
     sessionInfo.bundleName_ = "testBundleName";
     sessionInfo.moduleName_ = "testModuleName";
     sessionInfo.abilityName_ = "testAbilityName";
-    sessionInfo.persistentId_ = 101;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
     WMError result = ssm_->NotifyHookOrientationChange(sceneSession->GetPersistentId());
