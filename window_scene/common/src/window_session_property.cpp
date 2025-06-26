@@ -1349,6 +1349,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isFullScreenWaterfallMode_) && parcel.WriteBool(isAbilityHookOff_) &&
         parcel.WriteBool(isAbilityHook_) && parcel.WriteBool(isFollowScreenChange_) &&
         parcel.WriteParcelable(compatibleModeProperty_) && parcel.WriteBool(subWindowOutlineEnabled_) &&
+        parcel.WriteUint32(windowModeSupportType_) &&
         MarshallingShadowsInfo(parcel) &&
         MarshallingFbTemplateInfo(parcel);
 }
@@ -1458,6 +1459,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetFollowScreenChange(parcel.ReadBool());
     property->SetCompatibleModeProperty(parcel.ReadParcelable<CompatibleModeProperty>());
     property->SetSubWindowOutlineEnabled(parcel.ReadBool());
+    property->SetWindowModeSupportType(parcel.ReadUint32());
     UnmarshallingShadowsInfo(parcel, property);
     UnmarshallingFbTemplateInfo(parcel, property);
     return property;

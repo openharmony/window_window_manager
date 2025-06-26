@@ -380,6 +380,26 @@ HWTEST_F(WindowHelperTest, SplitStringByDelimiter_TestOther, TestSize.Level1)
     EXPECT_EQ(0, container.count("e"));
     EXPECT_EQ(1, container.count("a"));
 }
+
+/**
+ * @tc.name: ConvertSupportTypeToSupportModes
+ * @tc.desc: ConvertSupportTypeToSupportModes
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowHelperTest, ConvertSupportTypeToSupportModes, TestSize.Level1)
+{
+    auto supportModes = WindowHelper::ConvertSupportTypeToSupportModes(
+        WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING);
+    EXPECT_EQ(supportModes.size(), 1);
+    EXPECT_EQ(supportModes[0], AppExecFwk::SupportWindowMode::FLOATING);
+    supportModes = WindowHelper::ConvertSupportTypeToSupportModes(
+        WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY | WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY);
+    EXPECT_EQ(supportModes.size(), 1);
+    EXPECT_EQ(supportModes[0], AppExecFwk::SupportWindowMode::SPLIT);
+    supportModes = WindowHelper::ConvertSupportTypeToSupportModes(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN);
+    EXPECT_EQ(supportModes.size(), 1);
+    EXPECT_EQ(supportModes[0], AppExecFwk::SupportWindowMode::FULLSCREEN);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

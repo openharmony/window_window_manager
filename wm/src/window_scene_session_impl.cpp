@@ -5229,6 +5229,10 @@ WSError WindowSceneSessionImpl::SwitchFreeMultiWindow(bool enable)
     }
     UpdateSupportWindowModesWhenSwitchFreeMultiWindow();
     UpdateEnableDragWhenSwitchMultiWindow(enable);
+    if (!enable && !WindowHelper::IsWindowModeSupported(property_->GetWindowModeSupportType(),
+        WindowMode::WINDOW_MODE_FULLSCREEN)) {
+        UpdateDecorEnable(true);
+    }
 
     return WSError::WS_OK;
 }
