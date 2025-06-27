@@ -248,6 +248,7 @@ WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params
         }
         // set keyboard layout params
         auto sessionProperty = session->GetSessionProperty();
+        const KeyboardLayoutParams lastParams = sessionProperty->GetKeyboardLayoutParams();
         sessionProperty->SetKeyboardLayoutParams(params);
         session->MoveAndResizeKeyboard(params, sessionProperty, false);
         // handle keyboard gravity change
@@ -261,18 +262,11 @@ WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params
             session->SetWindowAnimationFlag(true);
         }
         // avoidHeight is set, notify avoidArea in case ui params don't flush
-        bool isLayoutFinished = true;
-        if (params.landscapeAvoidHeight_ >= 0 && params.portraitAvoidHeight_ >= 0) {
-            // If the vsync period terminates, immediately notify all registered listeners.
-            if (session->keyboardCallback_ != nullptr &&
-                session->keyboardCallback_->isLastFrameLayoutFinished != nullptr) {
-                isLayoutFinished = session->keyboardCallback_->isLastFrameLayoutFinished();
-            }
-            if (isLayoutFinished) {
-                TLOGI(WmsLogTag::WMS_KEYBOARD, "vsync period completed, id: %{public}d",
-                    session->GetCallingSessionId());
-                session->ProcessKeyboardOccupiedAreaInfo(session->GetCallingSessionId(), true, false);
-            }
+        if (params.landscapeAvoidHeight_ >= 0 && params.portraitAvoidHeight_ >= 0 && lastParams != params &&
+            session->IsSessionForeground()) {
+            TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard avoidHeight is set, id: %{public}d",
+                session->GetCallingSessionId());
+            session->ProcessKeyboardOccupiedAreaInfo(session->GetCallingSessionId(), true, false);
         }
         // notify keyboard layout param
         if (session->adjustKeyboardLayoutFunc_) {
