@@ -39,7 +39,7 @@ class JsExtensionWindowListener : public IWindowChangeListener,
                                   public IDisplayIdChangeListener,
                                   public ISystemDensityChangeListener,
                                   public IScreenshotListener,
-                                  public IExtensionSecureLimitChangeListener, {
+                                  public IExtensionSecureLimitChangeListener {
 public:
     JsExtensionWindowListener(napi_env env, std::shared_ptr<NativeReference> callback)
         : env_(env), jsCallBack_(callback), weakRef_(wptr<JsExtensionWindowListener> (this)) {
