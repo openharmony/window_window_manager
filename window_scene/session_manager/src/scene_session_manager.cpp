@@ -149,6 +149,7 @@ constexpr uint64_t START_UI_ABILITY_TIMEOUT = 5000;
 constexpr int32_t FORCE_SPLIT_MODE = 5;
 constexpr int32_t NAV_FORCE_SPLIT_MODE = 6;
 const std::string FB_PANEL_NAME = "Fb_panel";
+const std::string BLACK_LIST_TAG = "VirtualScreen";
 
 const std::map<std::string, OHOS::AppExecFwk::DisplayOrientation> STRING_TO_DISPLAY_ORIENTATION_MAP = {
     {"unspecified",                         OHOS::AppExecFwk::DisplayOrientation::UNSPECIFIED},
@@ -3377,7 +3378,7 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
         RequestSessionUnfocus(persistentId, FocusChangeReason::SCB_SESSION_REQUEST_UNFOCUS);
         avoidAreaListenerSessionSet_.erase(persistentId);
         screenshotAppEventListenerSessionSet_.erase(persistentId);
-        RemoveSubSessionFromBlackList(sceneSession);
+        RemoveSessionFromBlackList(sceneSession);
         DestroyDialogWithMainWindow(sceneSession);
         DestroyToastSession(sceneSession);
         DestroySubSession(sceneSession); // destroy sub session by destruction
@@ -3621,7 +3622,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
             CheckFloatWindowIsAnco(pid, newSession);
         }
 
-        AddSubSessionToBlackList(newSession);
+        AddAndNotifySubSessionToBlackList(newSession);
         TLOGNI(WmsLogTag::WMS_LIFE, "create specific session success, id: %{public}d, "
             "parentId: %{public}d, type: %{public}d",
             newSession->GetPersistentId(), newSession->GetParentPersistentId(), type);
@@ -4581,6 +4582,7 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSessionInner(const int3
         return WSError::WS_ERROR_NULLPTR;
     }
     auto ret = sceneSession->UpdateActiveStatus(false);
+    RemoveSessionFromBlackList(sceneSession);
     WindowDestroyNotifyVisibility(sceneSession);
     auto windowType = sceneSession->GetWindowType();
     if (windowType == WindowType::WINDOW_TYPE_DIALOG) {
@@ -9872,7 +9874,8 @@ WMError SceneSessionManager::SetSurfaceNodeIds(DisplayId displayId, const std::v
             }
             TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: %{public}d",
                 where, sceneSession->GetPersistentId());
-            sceneSessionBlackListMap_[displayId].push_back(sceneSession->GetPersistentId());
+            SessionBlackListInfo info = { .windowId_ = sceneSession->GetPersistentId(), .tag_ = BLACK_LIST_TAG};
+            sessionBlackListMap_[displayId].insert(std::move(info));
         }
         return WMError::WM_OK;
     };
@@ -9938,48 +9941,71 @@ void SceneSessionManager::GetSurfaceNodeIdsFromSubSession(const sptr<SceneSessio
     }
 }
 
-void SceneSessionManager::AddSubSessionToBlackList(const sptr<SceneSession>& sceneSession)
+void SceneSessionManager::AddAndNotifySubSessionToBlackList(const sptr<SceneSession>& sceneSession)
 {
     auto parentSession = sceneSession->GetParentSession();
     if (parentSession == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "win:%{public}d parent session is null", sceneSession->GetPersistentId());
         return;
     }
-    for (auto& [displayId, sceneSessionBlackListSet] : sceneSessionBlackListMap_) {
-        if (sceneSessionBlackListSet.find(parentSession->GetPersistentId()) == sceneSessionBlackListSet.end()) {
-            continue;
+    SessionBlackListInfo parentSessionBlackListInfo = { .windowId_ = parentSession->GetPersistentId(),
+                                                        .tag_ = BLACK_LIST_TAG };
+    ScreenId rsScreenId = SCREEN_ID_INVALID;
+    std::unordered_set<SessionBlackListInfo, BlackListHasher, BlackListEqual> funcSet;
+    {
+        std::lock_guard<std::mutex> lock(sessionBlackListMapMutex_);
+        for (auto& [displayId, sessionBlackListSet] : sessionBlackListMap_) {
+            if (sessionBlackListSet.find(parentSessionBlackListInfo) != sessionBlackListSet.end()) {
+                continue;
+            }
+            SessionBlackListInfo sessionBlackListInfo = { .windowId_ = sceneSession->GetPersistentId(),
+                                                          .tag_ = BLACK_LIST_TAG };
+            sessionBlackListSet.insert(std::move(sessionBlackListInfo));
+            rsScreenId = displayId;
+            funcSet = sessionBlackListSet;
+            break;
         }
-        sceneSessionBlackListSet.insert(sceneSession->GetPersistentId());
-        std::vector<uint64_t> surfaceNodeIds(sceneSessionBlackListSet.begin(), sceneSessionBlackListSet.end());
-        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, displayId: %{public}" PRIu64,
-            sceneSession->GetPersistentId(), displayId);
-        rsInterface_.SetVirtualScreenBlackList(displayId, surfaceNodeIds);
-        break;
     }
-}
-
-void NotifyVirtualScreenBlackList(DisplayId displayId, const std::unordered_ser<SceneSession>& sceneSessionBlackListSet)
-{
+    if (funcSet.empty()) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "session: %{public}d not added", sceneSession->GetPersistentId());
+        return;
+    }
     std::vector<uint64_t> surfaceNodeIds;
-    for (const auto& persistentId : sceneSessionBlackListSet) {
-        sptr<SceneSession> sceneSession = GetSceneSession(persistentId);
-        if (sceneSession == nullptr) {
-            TLOGD(WmsLogTag::DEFAULT, "sceneSession nullptr!");
+    for (const auto& sessionBlackListInfo : funcSet) {
+        sptr<SceneSession> session = GetSceneSession(sessionBlackListInfo.windowId_);
+        if (session == nullptr) {
+            TLOGD(WmsLogTag::DEFAULT, "session %{public}d is null", sessionBlackListInfo.windowId_);
             continue;
+        }
+        surfaceNodeIds.push_back(session->GetSurfaceNode()->GetId());
+        if (session->GetLeashWinSurfaceNode()) {
+            surfaceNodeIds.push_back(static_cast<uint64_t>(session->GetPersistentId()));
         }
     }
+    std::ostringstream oss;
+    oss << "surfaceNodeIds[" << rsScreenId << "]: ";
+    for (auto val : surfaceNodeIds) {
+        oss << val << " ";
+    }
+    rsInterface_.SetVirtualScreenBlackList(rsScreenId, surfaceNodeIds);
 }
 
-void SceneSessionManager::RemoveSubSessionFromBlackList(const sptr<SceneSession>& sceneSession)
+void SceneSessionManager::RemoveSessionFromBlackList(const sptr<SceneSession>& sceneSession)
 {
-    for (auto& [displayId, sceneSessionBlackListSet] : sceneSessionBlackListMap_) {
-        if (sceneSessionBlackListSet.find(sceneSession->GetPersistentId()) == sceneSessionBlackListSet.end()) {
-            continue;
+    SessionBlackListInfo sessionBlackListInfo = {
+        .windowId_ = sceneSession->GetPersistentId(),
+        .tag_ = BLACK_LIST_TAG
+    };
+
+    std::lock_guard<std::mutex> lock(sessionBlackListMapMutex_);
+    for (auto& [displayId, sessionBlackListSet] : sessionBlackListMap_) {
+        auto it = sessionBlackListSet.find(sessionBlackListInfo);
+        if (it != sessionBlackListSet.end()) {
+            sessionBlackListSet.erase(it);
+            TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, displayId: %{public}" PRIu64,
+                sessionBlackListInfo.windowId_, displayId);
+            break;
         }
-        sceneSessionBlackListSet.erase(sceneSession->GetPersistentId());
-        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, displayId: %{public}" PRIu64,
-            sceneSession->GetPersistentId(), displayId);
-        break;
     }
 }
 

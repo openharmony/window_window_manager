@@ -436,10 +436,9 @@ public:
     WMError GetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
         std::vector<uint64_t>& surfaceNodeIds, bool isBlackList = false);
     void GetSurfaceNodeIdsFromSubSession(const sptr<SceneSession>& sceneSession, std::vector<uint64_t>& surfaceNodeIds);
-    void AddSubSessionToBlackList(const sptr<SceneSession>& sceneSession);
-    void RemoveSubSessionFromBlackList(const sptr<SceneSession>& sceneSession);
+    void AddAndNotifySubSessionToBlackList(const sptr<SceneSession>& sceneSession);
+    void RemoveSessionFromBlackList(const sptr<SceneSession>& sceneSession);
     WMError SetSurfaceNodeIds(DisplayId displayId, const std::vector<uint64_t>& surfaceNodeIds);
-    void AddSubSessionToBlackList(const sptr<SceneSession>& sceneSession);
     WSError UpdateTitleInTargetPos(int32_t persistentId, bool isShow, int32_t height);
 
     /*
@@ -1494,6 +1493,25 @@ private:
         uint32_t interestInfo, const sptr<IWindowManagerAgent>& windowManagerAgent) override;
     void PackWindowPropertyChangeInfo(const sptr<SceneSession>& sceneSession,
         std::unordered_map<WindowInfoKey, std::any>& windowPropertyChangeInfo);
+
+    struct SessionBlackListInfo {
+        int32_t windowId_ = INVALID_SESSION_ID;
+        std::string tag_;
+    };
+    struct BlackListEqual {
+        bool operator()(const SessionBlackListInfo& left, const SessionBlackListInfo& right) const
+        {
+            return left.windowId_ == right.windowId_ && left.tag_ == right.tag_;
+        }
+    };
+    struct BlackListHasher {
+        size_t operator()(const SessionBlackListInfo& info) const
+        {
+            return std::hash<int32_t>()(info.windowId_) + std::hash<std::string>()(info.tag_);
+        }
+    };
+    std::unordered_map<DisplayId, std::unordered_set<SessionBlackListInfo, BlackListHasher, BlackListEqual>> sessionBlackListMap_;
+    std::mutex sessionBlackListMapMutex_;
 
     /*
      * Move Drag
