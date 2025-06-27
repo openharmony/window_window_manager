@@ -274,24 +274,23 @@ HWTEST_F(KeyboardSessionTest2, AdjustKeyboardLayout04, Function | SmallTest | Le
     params.landscapeAvoidHeight_ = 300;
     params.portraitAvoidHeight_ = 700;
 
-    keyboardSession->keyboardCallback_->isLastFrameLayoutFinished = nullptr;
+    keyboardSession->state_ = SessionState::STATE_FOREGROUND;
     keyboardSession->AdjustKeyboardLayout(params);
-    EXPECT_TRUE(g_logMsg.find("vsync period completed") != std::string::npos);
+    EXPECT_TRUE(g_logMsg.find("Keyboard avoidHeight is set") != std::string::npos);
 
     g_logMsg.clear();
-    keyboardSession->keyboardCallback_->isLastFrameLayoutFinished = []() { return false; };
+    params.landscapeAvoidHeight_ = -100;
     keyboardSession->AdjustKeyboardLayout(params);
-    EXPECT_TRUE(g_logMsg.find("vsync period completed") == std::string::npos);
+    EXPECT_TRUE(g_logMsg.find("Keyboard avoidHeight is set") == std::string::npos);
 
-    g_logMsg.clear();
-    keyboardSession->keyboardCallback_->isLastFrameLayoutFinished = []() { return true; };
+    params.landscapeAvoidHeight_ = 0;
+    keyboardSession->state_ = SessionState::STATE_BACKGROUND;
     keyboardSession->AdjustKeyboardLayout(params);
-    EXPECT_TRUE(g_logMsg.find("vsync period completed") != std::string::npos);
+    EXPECT_TRUE(g_logMsg.find("Keyboard avoidHeight is set") == std::string::npos);
 
-    g_logMsg.clear();
-    keyboardSession->keyboardCallback_ = nullptr;
+    keyboardSession->state_ = SessionState::STATE_FOREGROUND;
     keyboardSession->AdjustKeyboardLayout(params);
-    EXPECT_TRUE(g_logMsg.find("vsync period completed") != std::string::npos);
+    EXPECT_TRUE(g_logMsg.find("Keyboard avoidHeight is set") == std::string::npos);
 }
 
 /**
