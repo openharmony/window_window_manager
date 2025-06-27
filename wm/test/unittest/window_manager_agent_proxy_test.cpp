@@ -17,8 +17,9 @@
 #include <gtest/gtest.h>
 
 #include "display_manager_adapter.h"
-#include "scene_board_judgement.h"
 #include "iremote_object_mocker.h"
+#include "scene_board_judgement.h"
+#include "test/mock/mock_message_parcel.h"
 #include "window_manager_agent_proxy.h"
 
 using namespace testing;
@@ -344,6 +345,8 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifyWindowPropertyChange, TestSize.Level
     uint32_t propertyDirtyFlags = 0;
     std::vector<std::unordered_map<WindowInfoKey, std::any>> windowInfoList;
 
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
     windowManagerAgentProxy->NotifyWindowPropertyChange(propertyDirtyFlags, windowInfoList);
     EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
 }
