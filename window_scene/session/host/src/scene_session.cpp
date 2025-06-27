@@ -7843,33 +7843,8 @@ bool SceneSession::UpdateRectInner(const SessionUIParam& uiParam, SizeChangeReas
     if (WindowHelper::IsSubWindow(GetWindowType())) {
         isSubWindowResizingOrMoving_ = false;
     }
-    ProcessCallingSessionRectDirty();
     NotifyClientToUpdateRect("WMSPipeline", RSSyncTransactionAdapter::GetRSTransaction(GetRSUIContext()));
     return true;
-}
-
-void SceneSession::ProcessCallingSessionRectDirty()
-{
-    // Recalculate keyboard occupied area info when calling session rect is dirty
-    if (specificCallback_->onGetSceneSessionVectorByType_ &&
-        (reason_ < SizeChangeReason::DRAG || reason_ > SizeChangeReason::DRAG_END) &&
-        reason_ != SizeChangeReason::DRAG_MOVE) {
-        const auto& keyboardSessionVec = specificCallback_->onGetSceneSessionVectorByType_(
-            WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-        for (const auto& keyboardSession : keyboardSessionVec) {
-            if (!keyboardSession) {
-                continue;
-            }
-            if (!keyboardSession->IsSystemKeyboard() &&
-                static_cast<int32_t>(keyboardSession->GetCallingSessionId()) == GetPersistentId()) {
-                keyboardSession->ProcessKeyboardOccupiedAreaInfo(GetPersistentId(), true, false, false);
-                break;
-            }
-        }
-    } else {
-        TLOGD(WmsLogTag::WMS_KEYBOARD, "Session rect dirty, id: %{public}d, reason: %{public}d",
-            GetPersistentId(), reason_);
-    }
 }
 
 bool SceneSession::NotifyServerToUpdateRect(const SessionUIParam& uiParam, SizeChangeReason reason)
