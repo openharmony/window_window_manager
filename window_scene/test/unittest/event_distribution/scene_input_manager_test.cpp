@@ -261,10 +261,8 @@ HWTEST_F(SceneInputManagerTest, CheckNeedUpdate6, TestSize.Level1)
     ASSERT_TRUE(result);
     displayInfos[0].name = "";
 
-    displayInfos[0].uniq = "TestUniq";
     result = SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList);
     ASSERT_TRUE(result);
-    displayInfos[0].uniq = "";
 
     displayInfos[0].direction = MMI::Direction::DIRECTION90;
     result = SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList);
