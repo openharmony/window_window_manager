@@ -257,11 +257,10 @@ void JsExtensionWindowListener::OnSystemDensityChanged(float density)
 
 void JsExtensionWindowListener::OnScreenshot()
 {
-    WLOGI("CALLED");
     auto jsCallback = [self = wptr<JsWindowListener>(this)] {
         auto thisListener = self.promote();
         if (thisListener == nullptr) {
-            WLOGFE("this listener is nullptr");
+            TLOGNE(WmsLogTag::WMS_UIEXT, "this listener is nullptr");
             return;
         }
         thisListener->CallJsMethod(SCREENSHOT_EVENT_CB.c_str(), nullptr, 0);
