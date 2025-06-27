@@ -9851,9 +9851,9 @@ WSError SceneSessionManager::BindDialogSessionTarget(uint64_t persistentId, sptr
     return taskScheduler_->PostSyncTask(task, "BindDialogTarget:PID:" + std::to_string(persistentId));
 }
 
-void DisplayChangeListener::OnSetSurfaceNodeIds(const std::vector<uint64_t>& surfaceNodeIds)
+void DisplayChangeListener::OnSetSurfaceNodeIds(DisplayId displayId, const std::vector<uint64_t>& surfaceNodeIds)
 {
-    SceneSessionManager::GetInstance().SetSurfaceNodeIds(missionIds, surfaceNodeIds, isBlackList);
+    SceneSessionManager::GetInstance().SetSurfaceNodeIds(displayId, surfaceNodeIds);
 }
 
 WMError SceneSessionManager::SetSurfaceNodeIds(DisplayId displayId, const std::vector<uint64_t>& surfaceNodeIds)
@@ -9870,7 +9870,7 @@ WMError SceneSessionManager::SetSurfaceNodeIds(DisplayId displayId, const std::v
             if (sceneSession == nullptr) {
                 continue;
             }
-            TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "{public}s: %{public}d",
+            TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: %{public}d",
                 where, sceneSession->GetPersistentId());
             sceneSessionBlackListMap_[displayId].push_back(sceneSession->GetPersistentId());
         }
@@ -9923,18 +9923,18 @@ WMError SceneSessionManager::GetSurfaceNodeIdsFromMissionIds(std::vector<uint64_
 void SceneSessionManager::GetSurfaceNodeIdsFromSubSession(const sptr<SceneSession>& sceneSession,
                                                           std::vector<uint64_t>& surfaceNodeIds)
 {
-    for (const auto& session : sceneSession->GetSubSession()) {
-        if (session == nullptr) {
+    for (const auto& subSession : sceneSession->GetSubSession()) {
+        if (subSession == nullptr) {
             continue;
         }
-        GetSurfaceNodeIdsFromSubSession(session, surfaceNodeIds);
-        std::string logStr = std::to_string(session->GetSurfaceNode()->GetId());
-        surfaceNodeIds.push_back(session->GetSurfaceNode()->GetId());
-        if (session->GetLeashWinSurfaceNode()) {
-            surfaceNodeIds.push_back(session->GetPersistentId());
-            logStr = std::to_string(session->GetPersistentId()) + ", " + logStr;
+        GetSurfaceNodeIdsFromSubSession(subSession, surfaceNodeIds);
+        uint64_t surfaceNodeId = sceneSession->GetSurfaceNode()->GetId();
+        surfaceNodeIds.push_back(surfaceNodeId);
+        if (sceneSession->GetLeashWinSurfaceNode()) {
+            surfaceNodeIds.push_back(static_cast<uint64_t>(sceneSession->GetPersistentId()));
         }
-        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "subSession: %{public}s", logStr.c_str());
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, surfaceId: %{public}" PRIu64,
+            sceneSession->GetPersistentId(), surfaceNodeId);
     }
 }
 
@@ -9955,6 +9955,18 @@ void SceneSessionManager::AddSubSessionToBlackList(const sptr<SceneSession>& sce
             sceneSession->GetPersistentId(), displayId);
         rsInterface_.SetVirtualScreenBlackList(displayId, surfaceNodeIds);
         break;
+    }
+}
+
+void NotifyVirtualScreenBlackList(DisplayId displayId, const std::unordered_ser<SceneSession>& sceneSessionBlackListSet)
+{
+    std::vector<uint64_t> surfaceNodeIds;
+    for (const auto& persistentId : sceneSessionBlackListSet) {
+        sptr<SceneSession> sceneSession = GetSceneSession(persistentId);
+        if (sceneSession == nullptr) {
+            TLOGD(WmsLogTag::DEFAULT, "sceneSession nullptr!");
+            continue;
+        }
     }
 }
 
