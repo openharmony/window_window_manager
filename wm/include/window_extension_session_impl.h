@@ -171,6 +171,8 @@ public:
     static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
     void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
     CrossAxisState GetCrossAxisState() override;
+    WMError ExtensionSetKeepScreenOn(bool keepScreenOn) override;
+    WMError ExtensionSetBrightness(float brightness) override;
     void UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want) override;
     WMError SendExtensionMessageToHost(uint32_t code, const AAFwk::Want& data) const;
     WMError OnExtensionMessage(uint32_t code, int32_t persistentId, const AAFwk::Want& data) override;
@@ -217,6 +219,8 @@ private:
     WMError OnImmersiveModeEnabledChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
     WMError OnHostWindowDelayRaiseStateChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
     WMError OnHostWindowRectChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+    WMError OnScreenshot(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+    WMError OnExtensionSecureLimitChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
 
     /*
      * Compatible Mode

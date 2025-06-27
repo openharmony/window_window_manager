@@ -33,6 +33,10 @@ const std::string SYSTEM_AVOID_AREA_CHANGE_CB = "systemAvoidAreaChange";
 const std::string AVOID_AREA_CHANGE_CB = "avoidAreaChange";
 const std::string LIFECYCLE_EVENT_CB = "lifeCycleEvent";
 const std::string KEYBOARD_HEIGHT_CHANGE_CB = "keyboardHeightChange";
+const std::string WINDOW_DISPLAYID_CHANGE_CB = "displayIdChange";
+const std::string SYSTEM_DENSITY_CHANGE_CB = "systemDensityChange";
+const std::string SCREENSHOT_EVENT_CB = "screenshot";
+const std::string EXTENSION_SECURE_LIMIT_CHANGE_CB = "uiExtensionSecureLimitChange";
 }
 
 JsExtensionWindowListener::~JsExtensionWindowListener()
@@ -211,6 +215,77 @@ void JsExtensionWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>&
     };
     if (napi_send_event(env_, jsCallback, napi_eprio_high, "OnSizeChange") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_UIEXT, "send event failed");
+    }
+}
+
+void JsExtensionWindowListener::OnDisplayIdChanged(DisplayId displayId)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "in");
+    const char* const where = __func__;
+    auto jsCallback = [self = weakRef_, displayId, env = env_, where] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s this listener or env is nullptr", where);
+            return;
+        }
+        HandleScope handleScope(env);
+        napi_value argv[] = { CreateJsValue(env, static_cast<int64_t>(displayId)) };
+        thisListener->CallJsMethod(WINDOW_DISPLAYID_CHANGE_CB.c_str(), argv, ArraySize(argv));
+    };
+    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to send event");
+    }
+}
+
+void JsExtensionWindowListener::OnSystemDensityChanged(float density)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
+    auto jsCallback = [self = weakRef_, density, env = env_] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "This listener or env is nullptr");
+            return;
+        }
+        HandleScope handleScope(env);
+        napi_value argv[] = { CreateJsValue(env, density) };
+        thisListener->CallJsMethod(SYSTEM_DENSITY_CHANGE_CB.c_str(), argv, ArraySize(argv));
+    };
+    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to send event");
+    }
+}
+
+void JsExtensionWindowListener::OnScreenshot()
+{
+    WLOGI("CALLED");
+    auto jsCallback = [self = wptr<JsWindowListener>(this)] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr) {
+            WLOGFE("this listener is nullptr");
+            return;
+        }
+        thisListener->CallJsMethod(SCREENSHOT_EVENT_CB.c_str(), nullptr, 0);
+    };
+    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Failed to send event");
+    }
+}
+
+void JsExtensionWindowListener::OnSecureLimitChange(bool isLimit)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "isLimit: %{public}d", isLimit);
+    auto jsCallback = [self = weakRef_, isLimit, env = env_, where = __func__]() {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            TLOGNE(WmsLogTag::WMS_UIEXT, "%{public}s: this listener or env is nullptr", where);
+            return;
+        }
+        HandleScope handleScope(env);
+        napi_value argv[] = { CreateJsValue(env, isLimit) };
+        thisListener->CallJsMethod(EXTENSION_SECURE_LIMIT_CHANGE_CB.c_str(), argv, ArraySize(argv));
+    };
+    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to send event");
     }
 }
 

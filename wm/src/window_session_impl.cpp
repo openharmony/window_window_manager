@@ -2403,6 +2403,12 @@ WSError WindowSessionImpl::NotifyExtensionSecureLimitChange(bool isLimit)
             listener->OnSecureLimitChange(isLimit);
         }
     }
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        AAFwk::Want want;
+        want.SetParam(Extension::EXTENSION_SECURE_LIMIT_CHANGE, isLimit);
+        uiContent->SendUIExtProprty(static_cast<uint32_t>(Extension::Businesscode::NOTIFY_EXTENSION_SECURE_LIMIT_CHANGE),
+            want, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
+    }
     return WSError::WS_OK;
 }
 
@@ -5146,6 +5152,11 @@ void WindowSessionImpl::NotifyScreenshot()
         if (listener != nullptr) {
             listener->OnScreenshot();
         }
+    }
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        AAFwk::Want want;
+        uiContent->SendUIExtProprty(static_cast<uint32_t>(Extension::Businesscode::NOTIFY_SCREENSHOT),
+            want, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
     }
 }
 

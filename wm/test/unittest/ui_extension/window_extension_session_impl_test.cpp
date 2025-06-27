@@ -28,6 +28,7 @@
 #include "extension_data_handler.h"
 #include "extension_data_handler_mock.h"
 #include "iremote_object_mocker.h"
+#include "mock_sdisplay_manager.h"
 #include "mock_session.h"
 #include "mock_uicontent.h"
 #include "mock_window.h"
@@ -1428,6 +1429,41 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyDisplayInfoChange2, TestSize.Leve
     window_->context_ = nullptr;
     SessionViewportConfig config;
     window_->NotifyDisplayInfoChange(config);
+}
+
+/**
+ * @tc.name: NotifyDisplayInfoChange3
+ * @tc.desc: system demsity change
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifyDisplayInfoChange3, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    SessionViewportConfig config;
+    config.displayId_ = -1ULL;
+    auto lastDensity = windodw->lastSystemDensity_;
+    window->NotifyDisplayInfoChange(config);
+    EXPECT_EQ(lastDensity, windodw->lastSystemDensity_);
+
+    config.displayId_ = 0;
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(config.displayId_);
+    ASSERT_NE(nullptr, display);
+    auto displayInfo = display->GetDisplayInfo();
+    ASSERT_NE(nullptr, displayInfo);
+    auto vpr = displayInfo->GetVirtualPixelRatio();
+    window->NotifyDisplayInfoChange(config);
+    EXPECT_EQ(vpr, windodw->lastSystemDensity_);
+    windodw->lastSystemDensity_ = vpr;
+    window->NotifyDisplayInfoChange(config);
+    EXPECT_EQ(vpr, windodw->lastSystemDensity_);
+
+    sptr<Display> display1 = new Display("displayMock", nullptr);
+    SingletonMocker<DisplayManager, MockDisplayManager> m;
+    EXPECT_CALL(m.Mock(), GetDisplayById(_)).Times(1).WillOnce(Return(display1));
+    windodw->lastSystemDensity_ = lastDensity;
+    window->NotifyDisplayInfoChange(config);
+    EXPECT_EQ(lastDensity, windodw->lastSystemDensity_);
 }
 
 /**
@@ -3125,6 +3161,73 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateHostSpecificSystemBarEnabled, Tes
     window->property_->SetPersistentId(1);
     EXPECT_CALL(*session, TransferExtensionData).WillOnce(Return(ERR_NONE));
     EXPECT_EQ(WMError::WM_OK, window->UpdateHostSpecificSystemBarEnabled("status", true, true));
+}
+
+
+/**
+ * @tc.name: ExtensionSetKeepScreenOn
+ * @tc.desc: ExtensionSetKeepScreenOn test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, ExtensionSetKeepScreenOn, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowName("ExtensionSetKeepScreenOn");
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, window->ExtensionSetKeepScreenOn(true));
+
+    SessionInfo sessionInfo;
+    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+    EXPECT_CALL(*session, TransferExtensionData).WillOnce(Return(ERR_NONE));
+    EXPECT_EQ(WMError::WM_OK, window->ExtensionSetKeepScreenOn(true));
+}
+
+
+/**
+ * @tc.name: ExtensionSetBrightness
+ * @tc.desc: ExtensionSetBrightness test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, ExtensionSetBrightness, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowName("ExtensionSetBrightness");
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, window->ExtensionSetBrightness(0.5));
+
+    SessionInfo sessionInfo;
+    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+    EXPECT_CALL(*session, TransferExtensionData).WillOnce(Return(ERR_NONE));
+    EXPECT_EQ(WMError::WM_OK, window->ExtensionSetBrightness(0.5));
+}
+
+/**
+ * @tc.name: OnScreenshot
+ * @tc.desc: OnScreenshot Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, OnScreenshot, TestSize.Level1)
+{
+    AAFwk::Want want;
+    std::optional<AAFwk::Want> reply = std::make_optional<AAFwk::Want>();
+    ASSERT_EQ(WMError::WM_OK, window_->OnScreenshot(std::move(want), reply));
+}
+
+/**
+ * @tc.name: OnExtensionSecureLimitChange
+ * @tc.desc: OnExtensionSecureLimitChange Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, OnExtensionSecureLimitChange, TestSize.Level1)
+{
+    AAFwk::Want want;
+    want.SetParam(Extension::EXTENSION_SECURE_LIMIT_CHANGE, true);
+    std::optional<AAFwk::Want> reply = std::make_optional<AAFwk::Want>();
+    ASSERT_EQ(WMError::WM_OK, window_->OnExtensionSecureLimitChange(std::move(want), reply));
 }
 }
 } // namespace Rosen
