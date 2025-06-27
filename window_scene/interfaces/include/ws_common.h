@@ -948,7 +948,6 @@ enum class SessionUIDirtyFlag {
     AVOID_AREA = 1 << 6,
     DRAG_RECT = 1 << 7,
     GLOBAL_RECT = 1 << 8,
-    KEYBOARD_OCCUPIED_AREA = 1 << 9,
 };
 
 enum class SessionPropertyFlag {

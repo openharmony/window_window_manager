@@ -22,6 +22,9 @@
 #include "session_info.h"
 #include "session/host/include/scene_session.h"
 #include "session_manager.h"
+#define private public
+#include "session/host/include/keyboard_session.h"
+#undef private
 
 using namespace testing;
 using namespace testing::ext;
@@ -43,7 +46,6 @@ public:
     static ProcessGestureNavigationEnabledChangeFunc callbackFunc_;
     static sptr<SceneSessionManager> ssm_;
 
-private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
     static constexpr uint32_t WAIT_SYNC_FOR_SNAPSHOT_SKIP_IN_NS = 500000;
     static constexpr uint32_t WAIT_SYNC_FOR_TEST_END_IN_NS = 1000000;
@@ -283,6 +285,56 @@ HWTEST_F(SceneSessionManagerTest7, FlushUIParams02, Function | SmallTest | Level
     sessionInfo.screenId_ = -1ULL;
     ssm_->FlushUIParams(screenId, std::move(uiParams));
     ASSERT_NE(sceneSession->dirtyFlags_, 0);
+}
+
+/**
+ * @tc.name: FlushUIParams03
+ * @tc.desc: FlushUIParams keyboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, FlushUIParams03, Function | SmallTest | Level3)
+{
+    SessionInfo callingSessionInfo;
+    callingSessionInfo.bundleName_ = "SceneSessionManagerTest7";
+    callingSessionInfo.abilityName_ = "FlushUIParams03";
+    callingSessionInfo.screenId_ = 2;
+    ScreenId screenId = 2;
+    std::unordered_map<int32_t, SessionUIParam> uiParams;
+    uiParams.clear();
+    sptr<SceneSession> callingSession = sptr<SceneSession>::MakeSptr(callingSessionInfo, nullptr);
+    callingSession->persistentId_ = 1;
+
+    SessionInfo keyboardSessionInfo;
+    keyboardSessionInfo.abilityName_ = "keyboardSession";
+    keyboardSessionInfo.bundleName_ = "keyboardSession";
+    sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(keyboardSessionInfo, nullptr, nullptr);
+    keyboardSession->property_->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    keyboardSession->property_->SetCallingSessionId(1);
+    keyboardSession->persistentId_ = 3;
+    keyboardSession->SetIsSystemKeyboard(false);
+    keyboardSession->SetScreenId(2);
+
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
+    ssm_->sceneSessionMap_.insert({1, callingSession});
+    ssm_->sceneSessionMap_.insert({3, keyboardSession});
+    SessionUIParam callingSessionUIParam;
+    SessionUIParam keyboardSessionUIParam;
+    uiParams.insert(std::make_pair(1, callingSessionUIParam));
+    uiParams.insert(std::make_pair(3, keyboardSessionUIParam));
+    keyboardSession->stateChanged_ = true;
+    ssm_->FlushUIParams(screenId, std::move(uiParams));
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_EQ(false, keyboardSession->stateChanged_);
+    
+    uiParams.clear();
+    uiParams.insert(std::make_pair(1, callingSessionUIParam));
+    uiParams.insert(std::make_pair(3, keyboardSessionUIParam));
+    keyboardSession->SetScreenId(999);
+    keyboardSession->stateChanged_ = true;
+    ssm_->FlushUIParams(screenId, std::move(uiParams));
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_EQ(true, keyboardSession->stateChanged_);
 }
 
 /**

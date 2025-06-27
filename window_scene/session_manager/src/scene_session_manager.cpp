@@ -1930,7 +1930,7 @@ sptr<KeyboardSession::KeyboardSessionCallback> SceneSessionManager::CreateKeyboa
     keyboardCb->isLastFrameLayoutFinished = [this]() {
         if (isRootSceneLastFrameLayoutFinishedFunc_ == nullptr) {
             TLOGE(WmsLogTag::WMS_KEYBOARD, "isRootSceneLastFrameLayoutFinishedFunc_ is nullptr");
-            return false;
+            return true;
         }
         return isRootSceneLastFrameLayoutFinishedFunc_();
     };
@@ -12393,13 +12393,9 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
                     sessionMapDirty_ |= sceneSession->UpdateUIParam();
                 }
             }
-        }
-        if (keyboardSession != nullptr &&
-            (keyboardSession->GetOccupiedAreaDirtyFlags() &
-            static_cast<uint32_t>(SessionUIDirtyFlag::KEYBOARD_OCCUPIED_AREA)) !=
-            static_cast<uint32_t>(SessionUIDirtyFlag::NONE)) {
-            keyboardSession->ProcessKeyboardOccupiedAreaInfo(keyboardSession->GetCallingSessionId(), false, false, true);
-            keyboardSession->ResetOccupiedAreaDirtyFlags();
+            if (keyboardSession != nullptr) {
+                keyboardSession->CalculateOccupiedAreaAfterUIRefresh();
+            }
         }
         processingFlushUIParams_.store(false);
 

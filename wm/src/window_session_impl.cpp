@@ -6435,6 +6435,12 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo
         return;
     }
     auto task = [weak = wptr(this), info, rsTransaction, callingWindowRect, avoidAreas]() {
+        if (info != nullptr) {
+            TLOGNI(WmsLogTag::WMS_KEYBOARD, "transaction: %{public}d, safeHeight: %{public}u"
+                ", occupied rect: x %{public}d, y %{public}d, w %{public}u, h %{public}u, "
+                "callingWindowRect: %{public}s", rsTransaction != nullptr, info->safeHeight_, info->rect_.posX_,
+                info->rect_.posY_, info->rect_.width_, info->rect_.height_, callingWindowRect.ToString().c_str());
+        }
         auto window = weak.promote();
         if (!window) {
             TLOGNE(WmsLogTag::WMS_KEYBOARD, "window is nullptr, notify occupied area change info failed");
@@ -6443,12 +6449,6 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo
         if (rsTransaction) {
             RSTransactionAdapter::FlushImplicitTransaction(window->GetRSUIContext());
             rsTransaction->Begin();
-        }
-        if (info != nullptr) {
-            TLOGNI(WmsLogTag::WMS_KEYBOARD, "transaction: %{public}d, safeHeight: %{public}u"
-                ", occupied rect: x %{public}d, y %{public}d, w %{public}u, h %{public}u, "
-                "callingWindowRect: %{public}s", rsTransaction != nullptr, info->safeHeight_, info->rect_.posX_,
-                info->rect_.posY_, info->rect_.width_, info->rect_.height_, callingWindowRect.ToString().c_str());
         }
         window->NotifyOccupiedAreaChangeInfoInner(info);
         window->occupiedAreaInfo_ = info;
