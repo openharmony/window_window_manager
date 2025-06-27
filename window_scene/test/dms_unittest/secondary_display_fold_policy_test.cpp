@@ -309,7 +309,7 @@ HWTEST_F(SecondaryDisplayFoldPolicyTest, SendPropertyChangeResult02, TestSize.Le
     sptr<ScreenSession> screenSession = new ScreenSession;
     std::vector<uint32_t> secondaryDisplayParams = policy.GetScreenParams();
     EXPECT_EQ(secondaryDisplayParams.size(), SECONDARY_INIT_PARAM_SIZE);
- 
+
     FoldDisplayMode displayMode = FoldDisplayMode::FULL;
     policy.SendPropertyChangeResult(screenSession, 0, ScreenPropertyChangeReason::UNDEFINED, displayMode);
     ScreenProperty screenProperty = screenSession->GetScreenProperty();
@@ -334,7 +334,7 @@ HWTEST_F(SecondaryDisplayFoldPolicyTest, SendPropertyChangeResult03, TestSize.Le
     sptr<ScreenSession> screenSession = new ScreenSession;
     std::vector<uint32_t> secondaryDisplayParams = policy.GetScreenParams();
     EXPECT_EQ(secondaryDisplayParams.size(), SECONDARY_INIT_PARAM_SIZE);
- 
+
     FoldDisplayMode displayMode = FoldDisplayMode::GLOBAL_FULL;
     policy.SendPropertyChangeResult(screenSession, 0, ScreenPropertyChangeReason::UNDEFINED, displayMode);
     ScreenProperty screenProperty = screenSession->GetScreenProperty();
@@ -361,7 +361,7 @@ HWTEST_F(SecondaryDisplayFoldPolicyTest, SendPropertyChangeResult04, TestSize.Le
     sptr<ScreenSession> screenSession = new ScreenSession;
     std::vector<uint32_t> secondaryDisplayParams = policy.GetScreenParams();
     EXPECT_EQ(secondaryDisplayParams.size(), SECONDARY_INIT_PARAM_SIZE);
- 
+
     FoldDisplayMode displayMode = FoldDisplayMode::UNKNOWN;
     policy.SendPropertyChangeResult(screenSession, 0, ScreenPropertyChangeReason::UNDEFINED, displayMode);
     EXPECT_TRUE(g_errLog.find("unKnown displayMode") != std::string::npos);
@@ -389,6 +389,37 @@ HWTEST_F(SecondaryDisplayFoldPolicyTest, SendPropertyChangeResult05, TestSize.Le
     policy.SendPropertyChangeResult(screenSession, 0, ScreenPropertyChangeReason::UNDEFINED, displayMode);
     EXPECT_TRUE(g_errLog.find("screenSession is null") != std::string::npos);
     usleep(200000);
+}
+
+/**
+ * @tc.name: SendPropertyChangeResult06
+ * @tc.desc: test function : SendPropertyChangeResult
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecondaryDisplayFoldPolicyTest, SendPropertyChangeResult06, TestSize.Level1)
+{
+    ONLY_FOR_SECONDARY_DISPLAY_FOLD
+    std::recursive_mutex displayInfoMutex;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = std::make_shared<TaskScheduler>("test");
+    SecondaryDisplayFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
+    sptr<ScreenSession> screenSession = new ScreenSession;
+    std::vector<uint32_t> secondaryDisplayParams = policy.GetScreenParams();
+    EXPECT_EQ(secondaryDisplayParams.size(), SECONDARY_INIT_PARAM_SIZE);
+
+    FoldDisplayMode displayMode = FoldDisplayMode::FULL;
+    policy.SendPropertyChangeResult(screenSession, 0, ScreenPropertyChangeReason::UNDEFINED, displayMode);
+    EXPECT_EQ(screenSession->GetScreenAreaOffsetY(), secondaryDisplayParams[4]);
+    EXPECT_EQ(screenSession->GetScreenAreaHeight(), secondaryDisplayParams[1]);
+
+    displayMode = FoldDisplayMode::MAIN;
+    policy.SendPropertyChangeResult(screenSession, 0, ScreenPropertyChangeReason::UNDEFINED, displayMode);
+    EXPECT_EQ(screenSession->GetScreenAreaOffsetY(), 0);
+    EXPECT_EQ(screenSession->GetScreenAreaHeight(), secondaryDisplayParams[0]);
+
+    displayMode = FoldDisplayMode::GLOBAL_FULL;
+    policy.SendPropertyChangeResult(screenSession, 0, ScreenPropertyChangeReason::UNDEFINED, displayMode);
+    EXPECT_EQ(screenSession->GetScreenAreaOffsetY(), 0);
+    EXPECT_EQ(screenSession->GetScreenAreaHeight(), secondaryDisplayParams[2]);
 }
 
 /**
