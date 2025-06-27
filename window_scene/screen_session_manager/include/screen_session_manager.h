@@ -687,6 +687,7 @@ private:
     uint32_t virtualScreenCount_ = 0;
     uint32_t currentExpandScreenCount_ = 0;
     int32_t connectScreenNumber_ = 0;
+    int32_t connectScreenGroupNumber_ = 0;
     sptr<AgentDeathRecipient> deathRecipient_ { nullptr };
 
     sptr<SessionDisplayPowerController> sessionDisplayPowerController_;
@@ -805,6 +806,7 @@ private:
     LowTempMode lowTemp_ {LowTempMode::UNKNOWN};
     std::mutex lowTempMutex_;
     std::mutex pcModeSwitchMutex_;
+    std::atomic<DisplayGroupId> displayGroupNum_ { 1 };
 
 private:
     class ScbClientListenerDeathRecipient : public IRemoteObject::DeathRecipient {

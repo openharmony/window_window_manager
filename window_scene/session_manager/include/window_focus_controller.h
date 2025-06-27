@@ -48,6 +48,7 @@ public:
     void SetNeedBlockNotifyUnfocusStatus(bool needBlock) { needBlockNotifyUnfocusStatus_ = needBlock; }
     WSError UpdateFocusedSessionId(int32_t persistentId);
     WSError UpdateFocusedAppSessionId(int32_t persistentId);
+    std::unordered_set<DisplayId> displayIds_;
 
 private:
     int32_t focusedSessionId_ = INVALID_SESSION_ID;
@@ -64,19 +65,21 @@ public:
     ~WindowFocusController() = default;
 
     DisplayId GetDisplayGroupId(DisplayId displayId);
-    WSError AddFocusGroup(DisplayId displayId);
-    WSError RemoveFocusGroup(DisplayId displayId);
+    WSError AddFocusGroup(DisplayGroupId displayGroupId, DisplayId displayId);
+    WSError RemoveFocusGroup(DisplayGroupId displayGroupId, DisplayId displayId);
     int32_t GetFocusedSessionId(DisplayId displayId);
     sptr<FocusGroup> GetFocusGroup(DisplayId displayId = DEFAULT_DISPLAY_ID);
     std::vector<std::pair<DisplayId, int32_t>> GetAllFocusedSessionList() const;
     WSError UpdateFocusedSessionId(DisplayId displayId, int32_t persistentId);
     WSError UpdateFocusedAppSessionId(DisplayId displayId, int32_t persistentId);
+    void LogDisplayIds();
 
 private:
     sptr<FocusGroup> GetFocusGroupInner(DisplayId displayId);
 
     std::unordered_map<DisplayId, sptr<FocusGroup>> focusGroupMap_;
-    std::unordered_set<DisplayId> virtualScreenDisplayIdSet_;
+    std::unordered_map<DisplayId, DisplayGroupId> displayId2GroupIdMap_;
+    std::unordered_map<DisplayId, DisplayGroupId> deletedDisplayId2GroupIdMap_;
 };
 }
 }

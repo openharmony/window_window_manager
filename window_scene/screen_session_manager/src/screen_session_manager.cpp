@@ -175,6 +175,7 @@ const std::string FAULT_SUGGESTION = "542003014";
 constexpr uint32_t COMMON_EVENT_SERVICE_ID = 3299;
 const bool IS_SUPPORT_PC_MODE = system::GetBoolParameter("const.window.support_window_pcmode_switch", false);
 const ScreenId SCREEN_GROUP_ID_DEFAULT = 1;
+const std::set<std::string> INDIVIDUAL_SCREEN_GROUP_SET = {"CeliaView", "DevEcoViewer"};
 
 // based on the bundle_util
 inline int32_t GetUserIdByCallingUid()
@@ -728,6 +729,13 @@ void ScreenSessionManager::OnVirtualScreenChange(ScreenId screenId, ScreenEvent 
     }
     auto clientProxy = GetClientProxy();
     if (screenEvent == ScreenEvent::CONNECTED) {
+        TLOGI(WmsLogTag::DMS, "screenCombination:%{public}d, screenName:%{public}s",
+            screenSession->GetScreenCombination(), screenSession->GetName().c_str());
+        if(screenSession->GetScreenCombination() == ScreenCombination::SCREEN_UNIQUE &&
+            INDIVIDUAL_SCREEN_GROUP_SET.find(screenSession->GetName()) != INDIVIDUAL_SCREEN_GROUP_SET.end()) {
+            screenSession->SetDisplayGroupId(displayGroupNum_++);
+            screenSession->SetMainDisplayIdOfGroup(screenId);
+        }
         if (clientProxy) {
             clientProxy->OnScreenConnectionChanged(GetSessionOption(screenSession, screenId),
                 ScreenEvent::CONNECTED);
@@ -2478,6 +2486,12 @@ void ScreenSessionManager::CreateScreenProperty(ScreenId screenId, ScreenPropert
 #endif
     property.CalcDefaultDisplayOrientation();
     property.SetScreenShape(ScreenSettingHelper::GetScreenShape(screenId));
+    if (property.GetDisplayGroupId() == DISPLAY_GROUP_ID_INVALID) {
+        property.SetDisplayGroupId(DISPLAY_GROUP_ID_DEFAULT);
+    }
+    if (property.GetMainDisplayIdOfGroup() == SCREEN_ID_INVALID) {
+        property.SetMainDisplayIdOfGroup(MAIN_SCREEN_ID_DEFAULT);
+    }
 }
 
 void ScreenSessionManager::InitScreenProperty(ScreenId screenId, RSScreenModeInfo& screenMode,
@@ -2500,6 +2514,10 @@ void ScreenSessionManager::InitScreenProperty(ScreenId screenId, RSScreenModeInf
     property.SetScreenRealHeight(property.GetBounds().rect_.GetHeight());
     property.SetScreenRealPPI();
     property.SetScreenRealDPI();
+    property.SetScreenAreaOffsetX(property.GetPhyBounds().rect_.GetLeft());
+    property.SetScreenAreaOffsetY(property.GetPhyBounds().rect_.GetTop());
+    property.SetScreenAreaWidth(property.GetPhyBounds().rect_.GetWidth());
+    property.SetScreenAreaHeight(property.GetPhyBounds().rect_.GetHeight());
 }
 
 void ScreenSessionManager::GetInternalWidth()
@@ -2547,6 +2565,8 @@ void ScreenSessionManager::InitExtendScreenProperty(ScreenId screenId, sptr<Scre
         auto screenBounds = RRect({ 0, 0, FOUR_K_WIDTH, screenAdjustHeight }, 0.0f, 0.0f);
         session->SetExtendProperty(screenBounds, false);
         session->SetAvailableArea({0, 0, FOUR_K_WIDTH, screenAdjustHeight});
+        session->SetValidWidth(FOUR_K_WIDTH);
+        session->SetValidHeight(screenAdjustHeight);
         TLOGD(WmsLogTag::DMS, "screenWidth > 4K, screenId:%{public}" PRIu64"", screenId);
     } else if (screenWidth < THREE_K_WIDTH && screenPPI < offScreenPPIThreshold) {
         float scale = static_cast<float>(g_internalWidth) / screenWidth;
@@ -2554,6 +2574,8 @@ void ScreenSessionManager::InitExtendScreenProperty(ScreenId screenId, sptr<Scre
         auto screenBounds = RRect({ 0, 0, g_internalWidth, screenAdjustHeight }, 0.0f, 0.0f);
         session->SetExtendProperty(screenBounds, true);
         session->SetAvailableArea({0, 0, g_internalWidth, screenAdjustHeight});
+        session->SetValidWidth(g_internalWidth);
+        session->SetValidHeight(screenAdjustHeight);
         TLOGD(WmsLogTag::DMS, "screenWidth < g_internalWidth, screenId:%{public}" PRIu64"", screenId);
     } else {
         TLOGW(WmsLogTag::DMS, "no need adjust, screenId:%{public}" PRIu64"", screenId);
@@ -4961,6 +4983,11 @@ DMError ScreenSessionManager::DoMakeMirror(ScreenId mainScreenId, std::vector<Sc
     }
     for (ScreenId screenId : allMirrorScreenIds) {
         MirrorSwitchNotify(screenId);
+        auto screenSession = GetScreenSession(screenId);
+        if (screenSession != nullptr && mainScreen != nullptr) {
+            screenSession->SetDisplayGroupId(mainScreen->GetDisplayGroupId());
+            screenSession->SetMainDisplayIdOfGroup(mainScreen->GetMainDisplayIdOfGroup());
+        }
     }
     RegisterCastObserver(allMirrorScreenIds);
     TLOGW(WmsLogTag::DMS, "make mirror notify scb end makeResult=%{public}d", makeResult);

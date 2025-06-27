@@ -30,6 +30,7 @@ namespace OHOS::Rosen {
 struct SecSurfaceInfo;
 struct SecRectInfo;
 MMI::Direction ConvertDegreeToMMIRotation(float degree);
+MMI::Rotation ConvertToMMIRotation(float degree);
 std::string DumpWindowInfo(const MMI::WindowInfo& info);
 std::string DumpRect(const std::vector<MMI::Rect>& rects);
 
