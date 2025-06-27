@@ -35,6 +35,7 @@ namespace {
 const int32_t CV_WAIT_SCREENOFF_MS = 1500;
 const int32_t CV_WAIT_SCREENON_MS = 300;
 const int32_t CV_WAIT_SCREENOFF_MS_MAX = 3000;
+const uint32_t INVAILD_DISPLAY_ORIENTATION = 99;
 constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
 constexpr int32_t CAST_WIRED_PROJECTION_START = 1005;
 constexpr int32_t CAST_WIRED_PROJECTION_STOP = 1007;
@@ -62,7 +63,6 @@ public:
     void SetAceessTokenPermission(const std::string processName);
     sptr<ScreenSession> InitTestScreenSession(std::string name, ScreenId &screenId);
     DMHookInfo CreateDefaultHookInfo();
-    DMHookInfo CreateHookInfoInvaildDisplayOrientation();
 };
 
 sptr<ScreenSessionManager> ScreenSessionManagerTest::ssm_ = nullptr;
@@ -109,13 +109,6 @@ DMHookInfo ScreenSessionManagerTest::CreateDefaultHookInfo()
     uint32_t hookRotation = static_cast<uint32_t>(Rotation::ROTATION_0);
     uint32_t hookDisplayOrientation = static_cast<uint32_t>(DisplayOrientation::PORTRAIT);
     DMHookInfo dmHookInfo = { hookWidth, hookHeight, hookDensity, hookRotation, true, hookDisplayOrientation, true };
-    return dmHookInfo;
-}
-
-DMHookInfo ScreenSessionManagerTest::CreateHookInfoInvaildDisplayOrientation()
-{
-    DMHookInfo dmHookInfo = CreateDefaultHookInfo();
-    dmHookInfo.displayOrientation_ = 99;
     return dmHookInfo;
 }
 
@@ -1187,8 +1180,9 @@ HWTEST_F(ScreenSessionManagerTest, HookDisplayInfoByUid03, TestSize.Level1)
     sptr<DisplayInfo> displayInfo = ssm_->GetDefaultDisplayInfo();
     ASSERT_NE(displayInfo, nullptr);
     uint32_t uid = getuid();
-    DMHookInfo dmHookInfo = CreateHookInfoInvaildDisplayOrientation();
+    DMHookInfo dmHookInfo = CreateDefaultHookInfo();
     dmHookInfo.enableHookDisplayOrientation_ = false;
+    dmHookInfo.displayOrientation_ = INVAILD_DISPLAY_ORIENTATION;
     ssm_->displayHookMap_[uid] = dmHookInfo;
     EXPECT_NE(ssm_->displayHookMap_.find(uid), ssm_->displayHookMap_.end());
     displayInfo = ssm_->HookDisplayInfoByUid(displayInfo, screenSession);
@@ -1214,7 +1208,8 @@ HWTEST_F(ScreenSessionManagerTest, HookDisplayInfoByUid04, TestSize.Level1)
     sptr<DisplayInfo> displayInfo = ssm_->GetDefaultDisplayInfo();
     ASSERT_NE(displayInfo, nullptr);
     uint32_t uid = getuid();
-    DMHookInfo dmHookInfo = CreateHookInfoInvaildDisplayOrientation();
+    DMHookInfo dmHookInfo = CreateDefaultHookInfo();
+    dmHookInfo.displayOrientation_ = INVAILD_DISPLAY_ORIENTATION;
     ssm_->displayHookMap_[uid] = dmHookInfo;
     EXPECT_NE(ssm_->displayHookMap_.find(uid), ssm_->displayHookMap_.end());
     displayInfo = ssm_->HookDisplayInfoByUid(displayInfo, screenSession);
