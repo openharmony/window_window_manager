@@ -35,7 +35,7 @@ namespace {
 const int32_t CV_WAIT_SCREENOFF_MS = 1500;
 const int32_t CV_WAIT_SCREENON_MS = 300;
 const int32_t CV_WAIT_SCREENOFF_MS_MAX = 3000;
-const uint32_t INVAILD_DISPLAY_ORIENTATION = 99;
+const uint32_t INVALID_DISPLAY_ORIENTATION = 99;
 constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
 constexpr int32_t CAST_WIRED_PROJECTION_START = 1005;
 constexpr int32_t CAST_WIRED_PROJECTION_STOP = 1007;
@@ -1182,7 +1182,7 @@ HWTEST_F(ScreenSessionManagerTest, HookDisplayInfoByUid03, TestSize.Level1)
     uint32_t uid = getuid();
     DMHookInfo dmHookInfo = CreateDefaultHookInfo();
     dmHookInfo.enableHookDisplayOrientation_ = false;
-    dmHookInfo.displayOrientation_ = INVAILD_DISPLAY_ORIENTATION;
+    dmHookInfo.displayOrientation_ = INVALID_DISPLAY_ORIENTATION;
     ssm_->displayHookMap_[uid] = dmHookInfo;
     EXPECT_NE(ssm_->displayHookMap_.find(uid), ssm_->displayHookMap_.end());
     displayInfo = ssm_->HookDisplayInfoByUid(displayInfo, screenSession);
@@ -1209,7 +1209,7 @@ HWTEST_F(ScreenSessionManagerTest, HookDisplayInfoByUid04, TestSize.Level1)
     ASSERT_NE(displayInfo, nullptr);
     uint32_t uid = getuid();
     DMHookInfo dmHookInfo = CreateDefaultHookInfo();
-    dmHookInfo.displayOrientation_ = INVAILD_DISPLAY_ORIENTATION;
+    dmHookInfo.displayOrientation_ = INVALID_DISPLAY_ORIENTATION;
     ssm_->displayHookMap_[uid] = dmHookInfo;
     EXPECT_NE(ssm_->displayHookMap_.find(uid), ssm_->displayHookMap_.end());
     displayInfo = ssm_->HookDisplayInfoByUid(displayInfo, screenSession);
