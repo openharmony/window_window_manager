@@ -751,41 +751,59 @@ bool ConvertHookInfoFromJs(napi_env env, napi_value jsObject, HookInfo& hookInfo
     napi_get_named_property(env, jsObject, "rotation", &jsRotation);
     napi_value jsEnableHookRotation = nullptr;
     napi_get_named_property(env, jsObject, "enableHookRotation", &jsEnableHookRotation);
+    napi_value jsDisplayOrientation = nullptr;
+    napi_get_named_property(env, jsObject, "displayOrientation", &jsDisplayOrientation);
+    napi_value jsEnableHookDisplayOrientation = nullptr;
+    napi_get_named_property(env, jsObject, "enableHookDisplayOrientation", &jsEnableHookDisplayOrientation);
 
     uint32_t width = 0;
     if (!ConvertFromJsValue(env, jsWidth, width)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to width");
+        TLOGE(WmsLogTag::WMS_COMPAT, "Failed to convert parameter to width");
         return false;
     }
     hookInfo.width_ = width;
 
     uint32_t height = 0;
     if (!ConvertFromJsValue(env, jsHeight, height)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to height");
+        TLOGE(WmsLogTag::WMS_COMPAT, "Failed to convert parameter to height");
         return false;
     }
     hookInfo.height_ = height;
 
     double_t density = 1.0;
     if (!ConvertFromJsValue(env, jsDensity, density)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to density");
+        TLOGE(WmsLogTag::WMS_COMPAT, "Failed to convert parameter to density");
         return false;
     }
     hookInfo.density_ = static_cast<float_t>(density);
 
     uint32_t rotation = 0;
     if (!ConvertFromJsValue(env, jsRotation, rotation)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to rotation");
+        TLOGE(WmsLogTag::WMS_COMPAT, "Failed to convert parameter to rotation");
         return false;
     }
     hookInfo.rotation_ = rotation;
 
     bool enableHookRotation = false;
     if (!ConvertFromJsValue(env, jsEnableHookRotation, enableHookRotation)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to enableHookRotation");
+        TLOGE(WmsLogTag::WMS_COMPAT, "Failed to convert parameter to enableHookRotation");
         return false;
     }
     hookInfo.enableHookRotation_ = enableHookRotation;
+
+    uint32_t displayOrientation = 0;
+    if (!ConvertFromJsValue(env, jsDisplayOrientation, displayOrientation)) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "Failed to convert parameter to displayOrientation");
+        return false;
+    }
+    hookInfo.displayOrientation_ = displayOrientation;
+
+    bool enableHookDisplayOrientation = false;
+    if (!ConvertFromJsValue(env, jsEnableHookDisplayOrientation, enableHookDisplayOrientation)) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "Failed to convert parameter to enableHookDisplayOrientation");
+        return false;
+    }
+    hookInfo.enableHookDisplayOrientation_ = enableHookDisplayOrientation;
     return true;
 }
 
