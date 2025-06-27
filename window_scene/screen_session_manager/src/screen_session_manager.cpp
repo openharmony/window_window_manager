@@ -8738,7 +8738,7 @@ void ScreenSessionManager::SetVirtualScreenBlackList(ScreenId screenId, std::vec
         }
     }
     std::ostringstream oss;
-    oss << "surfaceNodeIdsToRS: ";
+    oss << "surfaceNodeIdsToRS[" << rsScreenId << "]: ";
     for (auto val : surfaceNodeIdsToRS) {
         oss << val << " ";
     }
