@@ -16,6 +16,8 @@
 #ifndef OHOS_ROSEN_WM_ANIMATION_COMMON_H
 #define OHOS_ROSEN_WM_ANIMATION_COMMON_H
 
+#include <iomanip>
+#include <memory>
 #include <sstream>
 #include <string>
 
