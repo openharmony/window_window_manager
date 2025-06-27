@@ -21,6 +21,7 @@
 #include <js_runtime_utils.h>
 #include <napi_common_want.h>
 
+#include "js_window_animation_utils.h"
 #include "property/rs_properties_def.h"
 #include "root_scene.h"
 #include "session/host/include/pc_fold_screen_manager.h"
@@ -161,7 +162,7 @@ napi_value ConvertWindowAnimationOptionToJsValue(napi_env env,
             napi_create_array(env, &params);
             for (uint32_t i = 0; i < ANIMATION_PARAM_SIZE; ++i) {
                 napi_value element;
-                napi_create_double(env, static_cast<double>(animationConfig.param[i]), &element);
+                napi_create_double(env, static_cast<double>(animationConfig.params[i]), &element);
                 napi_set_element(env, params, i, element);
             }
             napi_set_named_property(env, configJsValue, "param", params);
@@ -1354,6 +1355,20 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
     napi_set_named_property(env, objValue, "specifiedFlag", CreateJsValue(env, sessionInfo.specifiedFlag_));
     if (sessionInfo.want != nullptr) {
         napi_set_named_property(env, objValue, "want", AppExecFwk::WrapWant(env, sessionInfo.GetWantSafely()));
+    }
+    if (sessionInfo.startAnimationOptions != nullptr) {
+        napi_status status = napi_set_named_property(env, objValue, "startAnimationOptions",
+            ConvertStartAnimationOptionsToJsValue(env, sessionInfo.startAnimationOptions));
+        if (status != napi_ok) {
+            TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to set startAnimationOptions");
+        }
+    }
+    if (sessionInfo.startAnimationSystemOptions != nullptr) {
+        napi_status status = napi_set_named_property(env, objValue, "startAnimationSystemOptions",
+            ConvertStartAnimationSystemOptionsToJsValue(env, sessionInfo.startAnimationSystemOptions));
+        if (status != napi_ok) {
+            TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to set startAnimationSystemOptions");
+        }
     }
     return objValue;
 }

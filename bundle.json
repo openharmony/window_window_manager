@@ -496,6 +496,16 @@
               ],
               "header_base": "//foundation/window/window_manager/interfaces/kits/ndk/wm"
             }
+          },
+          {
+            "type": "so",
+            "name": "//foundation/window/window_manager/interfaces/kits/napi/window_animation:window_animation_utils",
+            "header": {
+              "header_files": [
+                "wm_animation_common.h"
+              ],
+              "header_base": "//foundation/window/window_manager/interfaces/innerkits/wm"
+            }
           }
         ],
         "test": [
