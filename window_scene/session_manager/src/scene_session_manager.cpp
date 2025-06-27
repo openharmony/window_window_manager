@@ -5490,7 +5490,7 @@ void SceneSessionManager::FillSessionInfo(sptr<SceneSession>& sceneSession)
         return;
     }
     auto abilityInfo = QueryAbilityInfoFromBMS(currentUserId_, sessionInfo.bundleName_, sessionInfo.abilityName_,
-        sessionInfo.moduleName_);
+        sessionInfo.moduleName_, IsAtomicServiceFreeInstall(sessionInfo));
     if (abilityInfo == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "Null");
         return;
@@ -5549,7 +5549,8 @@ void SceneSessionManager::RegisterGetStartWindowConfigCallback(const sptr<SceneS
     
 
 std::shared_ptr<AppExecFwk::AbilityInfo> SceneSessionManager::QueryAbilityInfoFromBMS(const int32_t uId,
-    const std::string& bundleName, const std::string& abilityName, const std::string& moduleName)
+    const std::string& bundleName, const std::string& abilityName, const std::string& moduleName,
+    bool isAtomicServiceFreeInstall)
 {
     if (!bundleMgr_) {
         TLOGE(WmsLogTag::DEFAULT, "bundleMgr_ is nullptr");
@@ -5561,6 +5562,28 @@ std::shared_ptr<AppExecFwk::AbilityInfo> SceneSessionManager::QueryAbilityInfoFr
     if (abilityInfoMap_.count(list)) {
         return abilityInfoMap_[list];
     }
+    if (isAtomicServiceFreeInstall) {
+        AppExecFwk::BundleInfo bundleInfo;
+        auto flag = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_ABILITY) |
+            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE);
+        bool ret = bundleMgr_->GetBundleInfoV9(bundleName, flag, bundleInfo, currentUserId_);
+        if (ret) {
+            TLOGE(WmsLogTag::WMS_LIFE, "Get bundle:%{public}s info from BMS failed!", bundleName.c_str());
+            return nullptr;
+        }
+        for (const auto& hapModuleInfo : bundleInfo.hapModuleInfos) {
+            if (!hapModuleInfo.abilityInfos.empty()) {
+                TLOGI(WmsLogTag::WMS_LIFE, "Get abilityInfo success in AtomicFreeInstall, bundle:%{public}s.",
+                    bundleName.c_str());
+
+                // Atomic services only have one ability.
+                return std::make_shared<AppExecFwk::AbilityInfo>(hapModuleInfo.abilityInfos[0]);
+            }
+        }
+        TLOGE(WmsLogTag::WMS_LIFE, "Get abilityInfo failed, bundleName:%{public}s.", bundleName.c_str());
+        return nullptr;
+    }
+
     AAFwk::Want want;
     want.SetElementName("", bundleName, abilityName, moduleName);
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
