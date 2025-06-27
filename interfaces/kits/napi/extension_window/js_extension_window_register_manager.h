@@ -43,6 +43,10 @@ private:
         AVOID_AREA_CHANGE_CB,
         WINDOW_EVENT_CB,
         WINDOW_STAGE_EVENT_CB,
+        WINDOW_DISPLAYID_CHANGE_CB,
+        SYSTEM_DENSITY_CHANGE_CB,
+        SCREENSHOT_EVENT_CB,
+        EXTENSION_SECURE_LIMIT_CHANGE_CB,
     };
 
     bool IsCallbackRegistered(napi_env env, std::string type, napi_value jsListenerObject);
@@ -53,6 +57,14 @@ private:
     WmErrorCode ProcessAvoidAreaChangeRegister(sptr<JsExtensionWindowListener> listener,
         sptr<Window> window, bool isRegister);
     WmErrorCode ProcessLifeCycleEventRegister(sptr<JsExtensionWindowListener> listener,
+        sptr<Window> window, bool isRegister);
+    WmErrorCode ProcessDisplayIdChangeRegister(sptr<JsExtensionWindowListener> listener,
+        sptr<Window> window, bool isRegister);
+    WmErrorCode ProcessSystemDensityChangeRegister(sptr<JsExtensionWindowListener> listener,
+        sptr<Window> window, bool isRegister);
+    WmErrorCode ProcessScreenshotRegister(sptr<JsExtensionWindowListener> listener,
+        sptr<Window> window, bool isRegister);
+    WmErrorCode ProcessExtensionSecureLimitChangeRegister(sptr<JsExtensionWindowListener> listener,
         sptr<Window> window, bool isRegister);
     WmErrorCode ProcessRegister(CaseType caseType, const sptr<JsExtensionWindowListener>& listener,
         const sptr<Window>& window, const std::string& type, bool isRegister);

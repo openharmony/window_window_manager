@@ -26,6 +26,10 @@ const std::string WINDOW_RECT_CHANGE_CB = "rectChange";
 const std::string AVOID_AREA_CHANGE_CB = "avoidAreaChange";
 const std::string WINDOW_STAGE_EVENT_CB = "windowStageEvent";
 const std::string WINDOW_EVENT_CB = "windowEvent";
+const std::string WINDOW_DISPLAYID_CHANGE_CB = "displayIdChange";
+const std::string SYSTEM_DENSITY_CHANGE_CB = "systemDensityChange";
+const std::string SCREENSHOT_EVENT_CB = "screenshot";
+const std::string EXTENSION_SECURE_LIMIT_CHANGE_CB = "uiExtensionSecureLimitChange";
 }
 
 JsExtensionWindowRegisterManager::JsExtensionWindowRegisterManager()
@@ -36,6 +40,10 @@ JsExtensionWindowRegisterManager::JsExtensionWindowRegisterManager()
         {WINDOW_RECT_CHANGE_CB, ListenerType::WINDOW_RECT_CHANGE_CB},
         {AVOID_AREA_CHANGE_CB, ListenerType::AVOID_AREA_CHANGE_CB},
         {WINDOW_EVENT_CB, ListenerType::WINDOW_EVENT_CB},
+        {WINDOW_DISPLAYID_CHANGE_CB, ListenerType::WINDOW_DISPLAYID_CHANGE_CB},
+        {SYSTEM_DENSITY_CHANGE_CB, ListenerType::SYSTEM_DENSITY_CHANGE_CB},
+        {SCREENSHOT_EVENT_CB, ListenerType::SCREENSHOT_EVENT_CB},
+        {EXTENSION_SECURE_LIMIT_CHANGE_CB, ListenerType::EXTENSION_SECURE_LIMIT_CHANGE_CB},
     };
     // white register list for window stage
     listenerCodeMap_[CaseType::CASE_STAGE] = {
@@ -106,6 +114,74 @@ WmErrorCode JsExtensionWindowRegisterManager::ProcessLifeCycleEventRegister(sptr
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterLifeCycleListener(thisListener));
     } else {
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterLifeCycleListener(thisListener));
+    }
+    return ret;
+}
+
+WmErrorCode JsExtensionWindowRegisterManager::ProcessDisplayIdChangeRegister(
+    const sptr<JsExtensionWindowListener>& listener, sptr<Window> window, bool isRegister)
+{
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Window is nullptr");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    IDisplayIdChangeListenerSptr thisListener(listener);
+    WmErrorCode ret = WmErrorCode::WM_OK;
+    if (isRegister) {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterDisplayIdChangeListener(thisListener));
+    } else {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterDisplayIdChangeListener(thisListener));
+    }
+    return ret;
+}
+
+WmErrorCode JsExtensionWindowRegisterManager::ProcessSystemDensityChangeRegister(
+    const sptr<JsExtensionWindowListener>& listener, sptr<Window> window, bool isRegister)
+{
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Window is nullptr");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    ISystemDensityChangeListener thisListener(listener);
+    WmErrorCode ret = WmErrorCode::WM_OK;
+    if (isRegister) {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterSystemDensityChangeListener(thisListener));
+    } else {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterSystemDensityChangeListener(thisListener));
+    }
+    return ret;
+}
+
+WmErrorCode JsExtensionWindowRegisterManager::ProcessScreenshotRegister(
+    sptr<JsExtensionWindowListener> listener, sptr<Window> window, bool isRegister)
+{
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Window is nullptr");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IScreenshotListener> thisListener(listener);
+    WmErrorCode ret = WmErrorCode::WM_OK;
+    if (isRegister) {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterScreenshotListener(thisListener));
+    } else {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterScreenshotListener(thisListener));
+    }
+    return ret;
+}
+
+WmErrorCode JsExtensionWindowRegisterManager::ProcessExtensionSecureLimitChangeRegister(
+    sptr<JsExtensionWindowListener> listener, sptr<Window> window, bool isRegister)
+{
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Window is nullptr");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IExtensionSecureLimitChangeListener> thisListener(listener);
+    WmErrorCode ret = WmErrorCode::WM_OK;
+    if (isRegister) {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterExtensionSecureLimitChangeListener(thisListener));
+    } else {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterExtensionSecureLimitChangeListener(thisListener));
     }
     return ret;
 }
@@ -231,6 +307,18 @@ WmErrorCode JsExtensionWindowRegisterManager::ProcessRegister(CaseType caseType,
                 break;
             case ListenerType::WINDOW_EVENT_CB:
                 ret = ProcessLifeCycleEventRegister(listener, window, isRegister);
+                break;
+            case WINDOW_DISPLAYID_CHANGE_CB:
+                ret = ProcessDisplayIdChangeRegister(listener, window, isRegister);
+                break;
+            case SYSTEM_DENSITY_CHANGE_CB:
+                ret = ProcessSystemDensityChangeRegister(listener, window, isRegister);
+                break;
+            case SCREENSHOT_EVENT_CB:
+                ret = ProcessScreenshotRegister(listener, window, isRegister);
+                break;
+            case EXTENSION_SECURE_LIMIT_CHANGE_CB:
+                ret = ProcessExtensionSecureLimitChangeRegister(listener, window, isRegister);
                 break;
             default:
                 break;

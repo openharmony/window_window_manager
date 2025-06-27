@@ -1495,6 +1495,12 @@ HWTEST_F(WindowSessionImplTest4, NotifyExtensionSecureLimitChange01, TestSize.Le
     window->RegisterExtensionSecureLimitChangeListener(listener);
     WSError res = window->NotifyExtensionSecureLimitChange(false);
     EXPECT_EQ(res, WSError::WS_OK);
+    window->uiContent = nullptr;
+    res = window->NotifyExtensionSecureLimitChange(false);
+    EXPECT_EQ(res, WSError::WS_OK);
+    window->uiContent = std::make_unique<Ace::UIContentMocker>();
+    res = window->NotifyExtensionSecureLimitChange(false);
+    EXPECT_EQ(res, WSError::WS_OK);
     window->UnregisterExtensionSecureLimitChangeListener(listener);
 }
 

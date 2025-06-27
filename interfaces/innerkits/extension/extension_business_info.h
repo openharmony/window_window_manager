@@ -33,6 +33,8 @@ constexpr const char* const ATOMICSERVICE_KEY_PARAM_STATUS = "ohos.atomicService
 constexpr const char* const ATOMICSERVICE_KEY_PARAM_NAVIGATION = "ohos.atomicService.window.param.navigation";
 constexpr const char* const ATOMICSERVICE_KEY_PARAM_NAME = "ohos.atomicService.window.param.name";
 constexpr const char* const ATOMICSERVICE_KEY_PARAM_ENABLEANIMATION = "ohos.atomicService.window.param.enableAnimation";
+constexpr const char* const ATOMICSERVICE_KEY_PARAM_ISKEEPSCREENON = "ohos.atomicService.window.param.isKeepScreenOn";
+constexpr const char* const ATOMICSERVICE_KEY_PARAM_BRIGHTNESS = "ohos.atomicService.window.param.brightness";
 constexpr const char* const RECT_X = "rectX";
 constexpr const char* const RECT_Y = "rectY";
 constexpr const char* const RECT_WIDTH = "rectWidth";
@@ -42,6 +44,7 @@ constexpr const char* const COMPAT_IS_SIMULATION_SCALE_FIELD = "compat.isSimulat
 constexpr const char* const COMPAT_IS_PROPORTION_SCALE_FIELD = "compat.isProportionScale";
 constexpr const char* const COMPAT_SCALE_X_FIELD = "compat.scaleX";
 constexpr const char* const COMPAT_SCALE_Y_FIELD = "compat.scaleY";
+constexpr const char* const EXTENSION_SECURE_LIMIT_CHANGE = "extensionSecureLimitChange";
 
 enum class Businesscode : uint32_t {
     SYNC_HOST_WINDOW_MODE = 0,  // Synchronize the host's window mode
@@ -53,6 +56,8 @@ enum class Businesscode : uint32_t {
     SYNC_HOST_WINDOW_DELAY_RAISE_STATE,
     NOTIFY_HOST_WINDOW_RECT_CHANGE,
     SYNC_COMPAT_INFO,
+    NOTIFY_SCREENSHOT,
+    NOTIFY_EXTENSION_SECURE_LIMIT_CHANGE,
 
     // IPC messages corresponding to the Businesscode between 10000 and 20000
     // will be forwarded to the host window by the UEC

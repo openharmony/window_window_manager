@@ -1011,6 +1011,15 @@ void WindowExtensionSessionImpl::UpdateExtensionDensity(SessionViewportConfig& c
 
 void WindowExtensionSessionImpl::NotifyDisplayInfoChange(const SessionViewportConfig& config)
 {
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(config.displayId_);
+    if (display != nullptr) {
+        auto displayInfo = display->GetDisplayInfo();
+        if (displayInfo != nullptr && !MathHelper::NearZero(lastSystemDensity_ - displayInfo->GetVirtualPixelRatio())) {
+            auto density = displayInfo->GetVirtualPixelRatio();
+            lastSystemDensity_ = density;
+            NotifySystemDensityChange(density);
+        }
+    }
     if (context_ == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "get token of window:%{public}d failed because of context is null.",
             GetPersistentId());
@@ -1502,6 +1511,30 @@ WMError WindowExtensionSessionImpl::SetImmersiveModeEnabledState(bool enable)
     AAFwk::WantParams want;
     want.SetParam(Extension::ATOMICSERVICE_KEY_FUNCTION, AAFwk::String::Box("setImmersiveModeEnabledState"));
     want.SetParam(Extension::ATOMICSERVICE_KEY_PARAM_ENABLE, AAFwk::Boolean::Box(enable));
+    if (TransferExtensionData(want) != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "send failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return WMError::WM_OK;
+}
+
+WMError WindowExtensionSessionImpl::ExtensionSetKeepScreenOn(bool keepScreenOn)
+{
+    AAFwk::WantParams want;
+    want.SetParam(Extension::ATOMICSERVICE_KEY_FUNCTION, AAFwk::String::Box("setWindowKeepScreenOn"));
+    want.SetParam(Extension::ATOMICSERVICE_KEY_PARAM_ISKEEPSCREENON, AAFwk::Boolean::Box(keepScreenOn));
+    if (TransferExtensionData(want) != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "send failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return WMError::WM_OK;
+}
+
+WMError WindowExtensionSessionImpl::ExtensionSetBrightness(float brightness)
+{
+    AAFwk::WantParams want;
+    want.SetParam(Extension::ATOMICSERVICE_KEY_FUNCTION, AAFwk::String::Box("setWindowBrightness"));
+    want.SetParam(Extension::ATOMICSERVICE_KEY_PARAM_BRIGHTNESS, AAFwk::Float::Box(brightness));
     if (TransferExtensionData(want) != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "send failed");
         return WMError::WM_ERROR_IPC_FAILED;
@@ -2039,6 +2072,19 @@ WMError WindowExtensionSessionImpl::OnHostWindowRectChange(AAFwk::Want&& data, s
     return WMError::WM_OK;
 }
 
+WMError OnScreenshot(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)
+{
+    NotifyScreenshot();
+    return WMError::WM_OK;
+}
+
+WMError OnExtensionSecureLimitChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)
+{
+    bool limit = data.GetBoolParam(Extension::EXTENSION_SECURE_LIMIT_CHANGE, false);
+    NotifyExtensionSecureLimitChange(limit);
+    return WMError::WM_OK;
+}
+
 void WindowExtensionSessionImpl::RegisterConsumer(Extension::Businesscode code,
     const std::function<WMError(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)>& func)
 {
@@ -2088,6 +2134,12 @@ void WindowExtensionSessionImpl::RegisterDataConsumer()
         this, std::placeholders::_1, std::placeholders::_2));
     RegisterConsumer(Extension::Businesscode::NOTIFY_HOST_WINDOW_RECT_CHANGE,
         std::bind(&WindowExtensionSessionImpl::OnHostWindowRectChange,
+        this, std::placeholders::_1, std::placeholders::_2));
+    RegisterConsumer(Extension::Businesscode::NOTIFY_SCREENSHOT,
+        std::bind(&WindowExtensionSessionImpl::OnScreenshot,
+        this, std::placeholders::_1, std::placeholders::_2));
+    RegisterConsumer(Extension::Businesscode::NOTIFY_EXTENSION_SECURE_LIMIT_CHANGE,
+        std::bind(&WindowExtensionSessionImpl::OnExtensionSecureLimitChange,
         this, std::placeholders::_1, std::placeholders::_2));
 
     auto consumersEntry = [weakThis = wptr(this)](SubSystemId id, uint32_t customId, AAFwk::Want&& data,
