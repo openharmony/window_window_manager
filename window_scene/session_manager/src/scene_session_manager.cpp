@@ -3705,7 +3705,6 @@ void SceneSessionManager::ReportSubWindowCreationFailure(const int32_t& pid, con
     }, __func__);
 }
 
-
 void SceneSessionManager::CheckFloatWindowIsAnco(pid_t pid, const sptr<SceneSession>& newSession)
 {
     std::map<int32_t, sptr<SceneSession>> sceneSessionMapCopy;
