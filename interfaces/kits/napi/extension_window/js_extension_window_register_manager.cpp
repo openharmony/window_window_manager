@@ -153,7 +153,7 @@ WmErrorCode JsExtensionWindowRegisterManager::ProcessSystemDensityChangeRegister
 }
 
 WmErrorCode JsExtensionWindowRegisterManager::ProcessScreenshotRegister(
-    sptr<JsExtensionWindowListener> listener, sptr<Window> window, bool isRegister)
+    sptr<JsExtensionWindowListener>& listener, sptr<Window> window, bool isRegister)
 {
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Window is nullptr");
@@ -170,7 +170,7 @@ WmErrorCode JsExtensionWindowRegisterManager::ProcessScreenshotRegister(
 }
 
 WmErrorCode JsExtensionWindowRegisterManager::ProcessExtensionSecureLimitChangeRegister(
-    sptr<JsExtensionWindowListener> listener, sptr<Window> window, bool isRegister)
+    sptr<JsExtensionWindowListener>& listener, sptr<Window> window, bool isRegister)
 {
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Window is nullptr");
@@ -308,16 +308,16 @@ WmErrorCode JsExtensionWindowRegisterManager::ProcessRegister(CaseType caseType,
             case ListenerType::WINDOW_EVENT_CB:
                 ret = ProcessLifeCycleEventRegister(listener, window, isRegister);
                 break;
-            case WINDOW_DISPLAYID_CHANGE_CB:
+            case ListenerType::WINDOW_DISPLAYID_CHANGE_CB:
                 ret = ProcessDisplayIdChangeRegister(listener, window, isRegister);
                 break;
-            case SYSTEM_DENSITY_CHANGE_CB:
+            case ListenerType::SYSTEM_DENSITY_CHANGE_CB:
                 ret = ProcessSystemDensityChangeRegister(listener, window, isRegister);
                 break;
-            case SCREENSHOT_EVENT_CB:
+            case ListenerType::SCREENSHOT_EVENT_CB:
                 ret = ProcessScreenshotRegister(listener, window, isRegister);
                 break;
-            case EXTENSION_SECURE_LIMIT_CHANGE_CB:
+            case ListenerType::EXTENSION_SECURE_LIMIT_CHANGE_CB:
                 ret = ProcessExtensionSecureLimitChangeRegister(listener, window, isRegister);
                 break;
             default:
