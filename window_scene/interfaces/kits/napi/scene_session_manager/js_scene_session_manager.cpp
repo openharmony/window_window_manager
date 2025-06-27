@@ -263,6 +263,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::IsScbCoreEnabled);
     BindNativeFunction(env, exportObj, "updateAppHookDisplayInfo", moduleName,
         JsSceneSessionManager::UpdateAppHookDisplayInfo);
+    BindNativeFunction(env, exportObj, "notifyHookOrientationChange", moduleName,
+        JsSceneSessionManager::NotifyHookOrientationChange);
     BindNativeFunction(env, exportObj, "refreshPcZOrder", moduleName,
         JsSceneSessionManager::RefreshPcZOrder);
     BindNativeFunction(env, exportObj, "getMaxInstanceCount", moduleName,
@@ -1279,6 +1281,13 @@ napi_value JsSceneSessionManager::UpdateAppHookDisplayInfo(napi_env env, napi_ca
     TLOGI(WmsLogTag::WMS_LAYOUT, "[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnUpdateAppHookDisplayInfo(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::NotifyHookOrientationChange(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_COMPAT, "[NAPI]");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnNotifyHookOrientationChange(env, info) : NapiGetUndefined(env);
 }
 
 napi_value JsSceneSessionManager::IsScbCoreEnabled(napi_env env, napi_callback_info info)
@@ -4028,6 +4037,26 @@ napi_value JsSceneSessionManager::OnUpdateAppHookDisplayInfo(napi_env env, napi_
         return NapiGetUndefined(env);
     }
     SceneSessionManager::GetInstance().UpdateAppHookDisplayInfo(uid, hookInfo, enable);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSessionManager::OnNotifyHookOrientationChange(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_ONE;
+    napi_value argv[ARGC_ONE] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+
+    if (argc != ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "Argc is invalid: %{public}zu", argc);
+        return NapiGetUndefined(env);
+    }
+
+    int32_t persistentId = 0;
+    if (!ConvertFromJsValue(env, argv[0], persistentId)) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "Failed to convert parameter to persistentId");
+        return NapiGetUndefined(env);
+    }
+    SceneSessionManager::GetInstance().NotifyHookOrientationChange(persistentId);
     return NapiGetUndefined(env);
 }
 

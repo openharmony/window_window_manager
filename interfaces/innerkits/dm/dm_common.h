@@ -53,6 +53,8 @@ struct DMHookInfo {
     float_t density_;
     uint32_t rotation_;
     bool enableHookRotation_;
+    uint32_t displayOrientation_;
+    bool enableHookDisplayOrientation_;
 };
 
 /**

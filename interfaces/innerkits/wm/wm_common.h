@@ -182,6 +182,19 @@ struct HookInfo {
     float_t density_;
     uint32_t rotation_;
     bool enableHookRotation_;
+    uint32_t displayOrientation_;
+    bool enableHookDisplayOrientation_;
+
+    std::string ToString() const
+    {
+        std::ostringstream oss;
+        oss << "width: " << width_ << ", height: " << height_ << ", density: " << density_
+            << ", rotation: " << rotation_
+            << ", enableHookRotation: " << (enableHookRotation_ ? "true" : "false")
+            << ", orientation: " << displayOrientation_
+            << ", enableHookOrientation: " << (enableHookDisplayOrientation_ ? "true" : "false");
+        return oss.str();
+    }
 };
 
 /**
