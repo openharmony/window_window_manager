@@ -1481,7 +1481,6 @@ private:
         int32_t pid_ = 0;
         int32_t uid_ = 0;
     };
-    std::unordered_map<DisplayId, std::unordered_set<uint32_t>> sceneSessionBlackListMap_;
     uint32_t observedFlags_ = 0;
     uint32_t interestedFlags_ = 0;
     std::unordered_map<uint64_t, DrawingSessionInfo> lastDrawingSessionInfoMap_;
