@@ -3163,7 +3163,6 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateHostSpecificSystemBarEnabled, Tes
     EXPECT_EQ(WMError::WM_OK, window->UpdateHostSpecificSystemBarEnabled("status", true, true));
 }
 
-
 /**
  * @tc.name: ExtensionSetKeepScreenOn
  * @tc.desc: ExtensionSetKeepScreenOn test

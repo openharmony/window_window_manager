@@ -2406,7 +2406,8 @@ WSError WindowSessionImpl::NotifyExtensionSecureLimitChange(bool isLimit)
     if (auto uiContent = GetUIContentSharedPtr()) {
         AAFwk::Want want;
         want.SetParam(Extension::EXTENSION_SECURE_LIMIT_CHANGE, isLimit);
-        uiContent->SendUIExtProprty(static_cast<uint32_t>(Extension::Businesscode::NOTIFY_EXTENSION_SECURE_LIMIT_CHANGE),
+        uiContent->SendUIExtProprty(
+            static_cast<uint32_t>(Extension::Businesscode::NOTIFY_EXTENSION_SECURE_LIMIT_CHANGE),
             want, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
     }
     return WSError::WS_OK;
