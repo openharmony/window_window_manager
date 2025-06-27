@@ -9866,15 +9866,19 @@ WMError SceneSessionManager::SetSurfaceNodeIds(DisplayId displayId, const std::v
     }
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "displayId: %{public}" PRIu64, displayId);
     auto task = [this, displayId, &surfaceNodeIds, where = __func__]() {
+        std::unordered_set<SessionBlackListInfo, BlackListHasher, BlackListEqual> funSet;
         for (auto surfaceNodeId : surfaceNodeIds) {
             sptr<SceneSession> sceneSession = SelectSesssionFromMap(surfaceNodeId);
             if (sceneSession == nullptr) {
                 continue;
             }
-            TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: %{public}d",
-                where, sceneSession->GetPersistentId());
+            TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: %{public}d", where, sceneSession->GetPersistentId());
             SessionBlackListInfo info = { .windowId_ = sceneSession->GetPersistentId(), .tag_ = BLACK_LIST_TAG};
-            sessionBlackListMap_[displayId].insert(std::move(info));
+            funSet.insert(std::move(info));
+        }
+        {
+            std::lock_guard<std::mutex> lock(sessionBlackListMapMutex_);
+            sessionBlackListMap_[displayId] = std::move(funSet);
         }
         return WMError::WM_OK;
     };
