@@ -187,7 +187,7 @@ public:
 
 class TestIWindowLifeCycleListener : public IWindowLifeCycleListener {
 public:
-    void OnWindowDestroyed(WindowLifeCycleInfo lifeCycleInfo, napi_value jsWindowNapiValue) override
+    void OnWindowDestroyed(WindowLifeCycleInfo lifeCycleInfo, void* jsWindowNapiValue) override
     {
         listenerLifeCycleInfo.windowId = lifeCycleInfo.windowId;
         listenerLifeCycleInfo.windowType = lifeCycleInfo.windowType;
@@ -202,7 +202,6 @@ public:
     }
 
     WindowLifeCycleInfo listenerLifeCycleInfo;
-    napi_value jsWindowNapiValue = nullptr;
 };
 
 class WindowManagerTest : public testing::Test {
