@@ -155,10 +155,8 @@ void DisplayManagerAni::getDisplayByIdSyncAni(ani_env* env, ani_object obj, ani_
     }
     sptr<Display> display = SingletonContainer::Get<DisplayManager>().GetDisplayById(static_cast<DisplayId>(displayId));
     if (display == nullptr) {
-        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_SYSTEM_INNORMAL, "");
-    }
-    if (display == nullptr) {
         TLOGE(WmsLogTag::DMS, "[ANI] Display null");
+        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_SYSTEM_INNORMAL, "");
         return;
     }
     DisplayAniUtils::cvtDisplay(display, env, obj);
@@ -344,7 +342,10 @@ DMError DisplayManagerAni::UnregisterAllDisplayListenerWithType(std::string type
             sptr<DisplayManager::IDisplayModeListener> thisListener(it->second);
             ret = SingletonContainer::Get<DisplayManager>().UnregisterDisplayModeListener(thisListener);
         }
+        jsCbMap_[type].erase(it++);
+        TLOGI(WmsLogTag::DMS, "[ANI] UnregisterAllDisplayListenerWithType end");
     }
+    jsCbMap_.erase(type);
     return ret;
 }
 }

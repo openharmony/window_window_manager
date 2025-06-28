@@ -176,7 +176,10 @@ DMError ScreenManagerAni::UnRegisterAllScreenListenerWithType(std::string type)
             sptr<ScreenManager::IScreenListener> thisListener(it->second);
             ret = SingletonContainer::Get<ScreenManager>().UnregisterScreenListener(thisListener);
         }
+        jsCbMap_[type].erase(it++);
+        TLOGI(WmsLogTag::DMS, "[ANI] UnregisterAllScreenListenerWithType end");
     }
+    jsCbMap_.erase(type);
     return ret;
 }
 
