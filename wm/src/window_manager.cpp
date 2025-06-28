@@ -74,7 +74,7 @@ public:
     void NotifyWindowSystemBarPropertyChange(WindowType type, const SystemBarProperty& systemBarProperty);
     void NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info);
     void NotifyWindowRectChange(const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList);
-    void NotifyWMSWindowDestroyed(WindowLifeCycleInfo lifeCycleInfo);
+    void NotifyWMSWindowDestroyed(WindowLifeCycleInfo lifeCycleInfo, napi_value jsWindowNapiValue);
 
     static inline SingletonDelegator<WindowManager> delegator_;
 
@@ -465,7 +465,7 @@ void WindowManager::Impl::NotifyWindowRectChange(
     }
 }
 
-void WindowManager::Impl::NotifyWMSWindowDestroyed(WindowLifeCycleInfo lifeCycleInfo)
+void WindowManager::Impl::NotifyWMSWindowDestroyed(WindowLifeCycleInfo lifeCycleInfo, napi_value jsWindowNapiValue)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "notify window destroyed");
 
@@ -478,7 +478,7 @@ void WindowManager::Impl::NotifyWMSWindowDestroyed(WindowLifeCycleInfo lifeCycle
         TLOGE(WmsLogTag::WMS_LIFE, "window destroyed listener is nullptr");
         return;
     }
-    wmsWindowDestroyedListener->OnWindowDestroyed(lifeCycleInfo);
+    wmsWindowDestroyedListener->OnWindowDestroyed(lifeCycleInfo, jsWindowNapiValue);
 }
 
 WindowManager::WindowManager() : pImpl_(std::make_unique<Impl>())
