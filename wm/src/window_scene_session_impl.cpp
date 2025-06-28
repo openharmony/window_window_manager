@@ -99,6 +99,7 @@ union WSColorParam {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSceneSessionImpl"};
 constexpr int32_t WINDOW_DETACH_TIMEOUT = 300;
+constexpr int32_t WINDOW_ATTACH_TIMEOUT = 300;
 constexpr int32_t WINDOW_LAYOUT_TIMEOUT = 30;
 constexpr int32_t WINDOW_PAGE_ROTATION_TIMEOUT = 2000;
 const std::string PARAM_DUMP_HELP = "-h";
@@ -1433,7 +1434,7 @@ void WindowSceneSessionImpl::PreLayoutOnShow(WindowType type, const sptr<Display
     uiContent->PreLayout();
 }
 
-WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool withFocus)
+WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool withFocus, bool needAttach)
 {
     if (reason == static_cast<uint32_t>(WindowStateChangeReason::USER_SWITCH)) {
         TLOGI(WmsLogTag::WMS_MULTI_USER, "Switch to current user, NotifyAfterForeground");
@@ -1505,6 +1506,10 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
     if (WindowHelper::IsMainWindow(type)) {
         ret = static_cast<WMError>(hostSession->Foreground(property_, true, identityToken_));
     } else if (WindowHelper::IsSubWindow(type) || WindowHelper::IsSystemWindow(type)) {
+        if (!attachCallback_) {
+            attachCallback_ = sptr<LifecycleFutureCallback>::MakeSptr();
+        }
+        attachCallback_->ResetAttachLock();
         PreLayoutOnShow(type, displayInfo);
         // Add maintenance logs before the IPC process.
         TLOGD(WmsLogTag::WMS_LIFE, "Show session [name: %{public}s, id: %{public}d]",
@@ -1515,6 +1520,10 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
     }
     RecordLifeCycleExceptionEvent(LifeCycleEvent::SHOW_EVENT, ret);
     if (ret == WMError::WM_OK) {
+        if (WindowHelper::IsSubWindow(type) && needAttach) {
+            attachCallback_->GetAttachAsyncResult(WINDOW_ATTACH_TIMEOUT);
+            TLOGI(WmsLogTag::WMS_LIFE, "get attach async result, id:%{public}d", GetPersistentId());
+        }
         // update sub window state
         UpdateSubWindowStateAndNotify(GetPersistentId(), WindowState::STATE_SHOWN);
         state_ = WindowState::STATE_SHOWN;
@@ -1584,7 +1593,7 @@ void WindowSceneSessionImpl::Pause()
     NotifyAfterLifecyclePaused();
 }
 
-WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits)
+WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits, bool needDetach)
 {
     if (reason == static_cast<uint32_t>(WindowStateChangeReason::USER_SWITCH)) {
         TLOGI(WmsLogTag::WMS_MULTI_USER, "Switch to another user, NotifyAfterBackground");
@@ -1632,6 +1641,10 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
         }
         res = static_cast<WMError>(hostSession->Background(true, identityToken_));
     } else if (WindowHelper::IsSubWindow(type) || WindowHelper::IsSystemWindow(type)) {
+        if (!detachCallback_) {
+            detachCallback_ = sptr<LifecycleFutureCallback>::MakeSptr();
+        }
+        detachCallback_->ResetDetachLock();
         res = static_cast<WMError>(hostSession->Hide());
     } else {
         res = WMError::WM_ERROR_INVALID_WINDOW;
@@ -1640,6 +1653,10 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
     RecordLifeCycleExceptionEvent(LifeCycleEvent::HIDE_EVENT, res);
     if (res == WMError::WM_OK) {
         // update sub window state if this is main window
+        if (WindowHelper::IsSubWindow(type) && needDetach) {
+            detachCallback_->GetDetachAsyncResult(WINDOW_DETACH_TIMEOUT);
+            TLOGI(WmsLogTag::WMS_LIFE, "get detach async result, id:%{public}d", GetPersistentId());
+        }
         UpdateSubWindowState(type);
         NotifyAfterDidBackground(reason);
         state_ = WindowState::STATE_HIDDEN;
@@ -5722,8 +5739,14 @@ WSError WindowSceneSessionImpl::NotifyWindowAttachStateChange(bool isAttach)
 
     if (isAttach) {
         windowAttachStateChangeListener_->AfterAttached();
+        if (attachCallback_) {
+            attachCallback_->OnNotifyAttachState(isAttach);
+        }
     } else {
         windowAttachStateChangeListener_->AfterDetached();
+        if (detachCallback_) {
+            detachCallback_->OnNotifyAttachState(isAttach);
+        }
     }
     return WSError::WS_OK;
 }

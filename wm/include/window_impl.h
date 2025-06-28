@@ -188,8 +188,10 @@ public:
     virtual WMError Destroy(uint32_t reason = 0) override;
     void SetShowWithOptions(bool showWithOptions) override;
     bool IsShowWithOptions() const override;
-    virtual WMError Show(uint32_t reason = 0, bool withAnimation = false, bool withFocus = true) override;
-    virtual WMError Hide(uint32_t reason = 0, bool withAnimation = false, bool isFromInnerkits = true) override;
+    virtual WMError Show(uint32_t reason = 0, bool withAnimation = false,
+        bool withFocus = true, bool needAttach = false) override;
+    virtual WMError Hide(uint32_t reason = 0, bool withAnimation = false,
+        bool isFromInnerkits = true, bool needDetach = false) override;
     virtual WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false,
         MoveConfiguration moveConfiguration = {}) override;
     virtual WMError Resize(uint32_t width, uint32_t height,

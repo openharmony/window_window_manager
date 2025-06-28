@@ -1269,6 +1269,30 @@ HWTEST_F(WindowSceneSessionImplTest, Hide01, TestSize.Level0)
 }
 
 /**
+ * @tc.name: Hide02
+ * @tc.desc: Hide session
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, Hide02, TestSize.Level0)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("Hide02");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+
+    window->property_->SetPersistentId(1);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    // show with null session
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Hide(2, false, false));
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+
+    window->hostSession_ = session;
+    ASSERT_EQ(WMError::WM_OK, window->Hide(0, false, false, true));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy(false));
+}
+
+/**
  * @tc.name: Show01
  * @tc.desc: Show session
  * @tc.type: FUNC
@@ -1289,6 +1313,28 @@ HWTEST_F(WindowSceneSessionImplTest, Show01, TestSize.Level0)
 
     window->state_ = WindowState::STATE_CREATED;
     ASSERT_EQ(WMError::WM_OK, window->Show(2, false));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy(false));
+}
+
+/**
+ * @tc.name: Show02
+ * @tc.desc: Show session
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, Show02, TestSize.Level0)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("Show02");
+    option->SetDisplayId(0);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+
+    window->hostSession_ = session;
+    ASSERT_EQ(WMError::WM_OK, window->Show(0, false, true, true));
     ASSERT_EQ(WMError::WM_OK, window->Destroy(false));
 }
 

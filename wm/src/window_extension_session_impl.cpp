@@ -1148,14 +1148,14 @@ WMError WindowExtensionSessionImpl::UnregisterAvoidAreaChangeListener(const sptr
     return UnregisterExtensionAvoidAreaChangeListener(listener);
 }
 
-WMError WindowExtensionSessionImpl::Show(uint32_t reason, bool withAnimation, bool withFocus)
+WMError WindowExtensionSessionImpl::Show(uint32_t reason, bool withAnimation, bool withFocus, bool needAttach)
 {
     CheckAndAddExtWindowFlags();
     UpdateSystemViewportConfig();
-    return WindowSessionImpl::Show(reason, withAnimation, withFocus);
+    return WindowSessionImpl::Show(reason, withAnimation, withFocus, needAttach);
 }
 
-WMError WindowExtensionSessionImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits)
+WMError WindowExtensionSessionImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits, bool needDetach)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d Hide, reason:%{public}u, state:%{public}u",
         GetPersistentId(), reason, state_);

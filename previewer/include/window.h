@@ -235,8 +235,10 @@ public:
     virtual WMError Destroy() = 0;
     virtual void SetShowWithOptions(bool showWithOptions) {}
     virtual bool IsShowWithOptions() const { return false; }
-    virtual WMError Show(uint32_t reason = 0, bool withAnimation = false, bool withFocus = true) = 0;
-    virtual WMError Hide(uint32_t reason = 0, bool withAnimation = false, bool isFromInnerkits = true) = 0;
+    virtual WMError Show(uint32_t reason = 0, bool withAnimation = false,
+        bool withFocus = true, bool needAttach = false) = 0;
+    virtual WMError Hide(uint32_t reason = 0, bool withAnimation = false,
+        bool isFromInnerkits = true, bool needDetach = false) = 0;
     virtual WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false,
         MoveConfiguration moveConfiguration = {}) = 0;
     virtual WMError MoveToAsync(int32_t x, int32_t y,

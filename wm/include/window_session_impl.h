@@ -84,8 +84,10 @@ public:
     /*
      * inherits from window
      */
-    WMError Show(uint32_t reason = 0, bool withAnimation = false, bool withFocus = true) override;
-    WMError Hide(uint32_t reason = 0, bool withAnimation = false, bool isFromInnerkits = true) override;
+    WMError Show(uint32_t reason = 0, bool withAnimation = false,
+        bool withFocus = true, bool needAttach = false) override;
+    WMError Hide(uint32_t reason = 0, bool withAnimation = false,
+        bool isFromInnerkits = true, bool needDetach = false) override;
     WMError Destroy(uint32_t reason = 0) override;
     virtual WMError Destroy(bool needNotifyServer, bool needClearListener = true, uint32_t reason = 0);
     WMError NapiSetUIContent(const std::string& contentInfo, ani_env* env, ani_object storage,
