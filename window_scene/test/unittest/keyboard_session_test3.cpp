@@ -252,7 +252,7 @@ HWTEST_F(KeyboardSessionTest3, UpdateSizeChangeReason01, TestSize.Level1)
     ASSERT_NE(keyboardSession, nullptr);
 
     keyboardSession->UpdateSizeChangeReason(SizeChangeReason::DRAG_END);
-    ASSERT_EQ(keyboardSession->reason_, SizeChangeReason::DRAG_END);
+    ASSERT_EQ(keyboardSession->GetSizeChangeReason(), SizeChangeReason::DRAG_END);
     ASSERT_EQ(WSError::WS_OK, keyboardSession->UpdateSizeChangeReason(SizeChangeReason::UNDEFINED));
 }
 

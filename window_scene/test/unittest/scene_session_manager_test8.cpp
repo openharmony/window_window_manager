@@ -354,14 +354,14 @@ HWTEST_F(SceneSessionManagerTest8, SubtractIntersectArea, TestSize.Level1)
     sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     EXPECT_NE(sceneSession, nullptr);
     WSRect wsRect{ .posX_ = 0, .posY_ = 0, .width_ = 100, .height_ = 100 };
-    sceneSession->winRect_ = wsRect;
+    sceneSession->GetLayoutController()->SetSessionRect(wsRect);
     EXPECT_EQ(ssm_->SubtractIntersectArea(unaccountedSpace, sceneSession), true);
 
     SessionInfo sessionInfo2;
     sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(sessionInfo2, nullptr);
     ASSERT_NE(sceneSession2, nullptr);
     WSRect wsRect2 { .posX_ = 100, .posY_ = 150, .width_ = 100, .height_ = 100 };
-    sceneSession2->winRect_ = wsRect2;
+    sceneSession2->GetLayoutController()->SetSessionRect(wsRect2);
     std::vector<Rect> hotAreas;
     hotAreas.push_back(Rect::EMPTY_RECT);
     hotAreas.push_back({.posX_ = 0, .posY_ = 0, .width_ = 10, .height_ = 10});
@@ -718,18 +718,18 @@ HWTEST_F(SceneSessionManagerTest8, GetHostWindowRect, TestSize.Level1)
     EXPECT_EQ(rect.posY_, 0);
     PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(
         0, SuperFoldStatus::KEYBOARD, { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
-    sceneSession->winRect_ = { 0, 100, 0, 0 };
+    sceneSession->GetLayoutController()->SetSessionRect({ 0, 100, 0, 0 });
     ret = ssm_->GetHostWindowRect(hostWindowId, rect);
     EXPECT_EQ(WSError::WS_OK, ret);
     EXPECT_EQ(rect.posY_, 100);
 
     PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(
         0, SuperFoldStatus::HALF_FOLDED, { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1649, 2472, 40 });
-    sceneSession->winRect_ = { 0, 1000, 100, 100 };
+    sceneSession->GetLayoutController()->SetSessionRect({ 0, 1000, 100, 100 });
     ret = ssm_->GetHostWindowRect(hostWindowId, rect);
     EXPECT_EQ(WSError::WS_OK, ret);
     EXPECT_EQ(rect.posY_, 1000);
-    sceneSession->winRect_ = { 0, 2000, 100, 100 };
+    sceneSession->GetLayoutController()->SetSessionRect({ 0, 2000, 100, 100 });
     ret = ssm_->GetHostWindowRect(hostWindowId, rect);
     WSRect hostRect = { 0, 2000, 100, 100 };
     sceneSession->TransformGlobalRectToRelativeRect(hostRect);
@@ -739,13 +739,13 @@ HWTEST_F(SceneSessionManagerTest8, GetHostWindowRect, TestSize.Level1)
     sceneSession->GetSessionProperty()->SetIsSystemKeyboard(false);
     PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(
         0, SuperFoldStatus::UNKNOWN, { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
-    sceneSession->winRect_ = { 0, 0, 0, 0 };
+    sceneSession->GetLayoutController()->SetSessionRect({ 0, 0, 0, 0 });
     ret = ssm_->GetHostWindowRect(hostWindowId, rect);
     EXPECT_EQ(WSError::WS_OK, ret);
     EXPECT_EQ(rect.posY_, 0);
     PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(
         0, SuperFoldStatus::FOLDED, { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
-    sceneSession->winRect_ = { 0, 100, 0, 0 };
+    sceneSession->GetLayoutController()->SetSessionRect({ 0, 100, 0, 0 });
     ret = ssm_->GetHostWindowRect(hostWindowId, rect);
     EXPECT_EQ(WSError::WS_OK, ret);
     EXPECT_EQ(rect.posY_, 100);
@@ -753,7 +753,7 @@ HWTEST_F(SceneSessionManagerTest8, GetHostWindowRect, TestSize.Level1)
     sceneSession->GetSessionProperty()->SetIsSystemKeyboard(true);
     PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(
         0, SuperFoldStatus::HALF_FOLDED, { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1649, 2472, 40 });
-    sceneSession->winRect_ = { 0, 1000, 100, 100 };
+    sceneSession->GetLayoutController()->SetSessionRect({ 0, 1000, 100, 100 });
     ret = ssm_->GetHostWindowRect(hostWindowId, rect);
     EXPECT_EQ(WSError::WS_OK, ret);
     EXPECT_EQ(rect.posY_, 1000);

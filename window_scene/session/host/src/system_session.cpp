@@ -265,7 +265,7 @@ WSError SystemSession::NotifyClientToUpdateRect(const std::string& updateReason,
 
 bool SystemSession::CheckKeyEventDispatch(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const
 {
-    auto currentRect = winRect_;
+    auto currentRect = GetSessionRect();
     if (!GetRSVisible() || currentRect.width_ == 0 || currentRect.height_ == 0) {
         WLOGE("Error size: [width: %{public}d, height: %{public}d], isRSVisible_: %{public}d,"
             " persistentId: %{public}d",

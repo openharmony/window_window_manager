@@ -363,7 +363,7 @@ HWTEST_F(WindowSessionTest, SetSessionRect, TestSize.Level1)
     ASSERT_NE(session_, nullptr);
     WSRect rect = { 0, 0, 320, 240 }; // width: 320, height: 240
     session_->SetSessionRect(rect);
-    ASSERT_EQ(rect, session_->winRect_);
+    ASSERT_EQ(rect, session_->GetSessionRect());
 }
 
 /**
@@ -404,10 +404,9 @@ HWTEST_F(WindowSessionTest, GetGlobalScaledRect, TestSize.Level1)
     SessionInfo info;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     Rect globalScaledRect;
-    sceneSession->globalRect_ = { 100, 100, 50, 40 };
+    sceneSession->SetSessionGlobalRect({ 100, 100, 50, 40 });
     sceneSession->isScbCoreEnabled_ = true;
-    sceneSession->scaleX_ = 0.5f;
-    sceneSession->scaleY_ = 0.5f;
+    sceneSession->SetScale(0.5f, 0.5f, sceneSession->GetPivotX(), sceneSession->GetPivotY());
     WMError ret = sceneSession->GetGlobalScaledRect(globalScaledRect);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(100, globalScaledRect.posX_);
@@ -1640,7 +1639,7 @@ HWTEST_F(WindowSessionTest, SetSessionRect01, TestSize.Level1)
 {
     WSRect rect = session_->GetSessionRect();
     session_->SetSessionRect(rect);
-    ASSERT_EQ(rect, session_->winRect_);
+    ASSERT_EQ(rect, session_->GetSessionRect());
 }
 
 /**
@@ -1749,12 +1748,12 @@ HWTEST_F(WindowSessionTest, TransformRelativeRectToGlobalRect, TestSize.Level1)
     PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(
         0, SuperFoldStatus::HALF_FOLDED, { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
     WSRect rect{ 0, 100, 100, 100 };
-    sceneSession->globalRect_ = { 0, 0, 2472, 1648 };
-    sceneSession->winRect_ = { 0, 0, 2472, 1648 };
+    sceneSession->SetSessionGlobalRect({ 0, 0, 2472, 1648 });
+    sceneSession->GetLayoutController()->SetSessionRect({ 0, 0, 2472, 1648 });
     sceneSession->TransformRelativeRectToGlobalRect(rect);
     EXPECT_EQ(rect.posY_, 100);
-    sceneSession->globalRect_ = { 0, 9999, 2472, 1648 };
-    sceneSession->winRect_ = { 0, 9999, 2472, 1648 };
+    sceneSession->SetSessionGlobalRect({ 0, 9999, 2472, 1648 });
+    sceneSession->GetLayoutController()->SetSessionRect({ 0, 9999, 2472, 1648 });
     sceneSession->TransformRelativeRectToGlobalRect(rect);
     EXPECT_NE(rect.posY_, 100);
 }

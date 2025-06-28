@@ -87,6 +87,10 @@ Session::Session(const SessionInfo& info) : sessionInfo_(info)
 {
     property_ = sptr<WindowSessionProperty>::MakeSptr();
     property_->SetWindowType(static_cast<WindowType>(info.windowType_));
+    layoutController_ = sptr<LayoutController>::MakeSptr(property_);
+    layoutController_->SetSystemConfigFunc([this]() {
+        return this->GetSystemConfig();
+    });
 
     if (!mainHandler_) {
         auto runner = AppExecFwk::EventRunner::GetMainEventRunner();
@@ -605,12 +609,12 @@ void Session::NotifyExtensionDetachToDisplay()
 
 float Session::GetAspectRatio() const
 {
-    return aspectRatio_;
+    return layoutController_->GetAspectRatio();
 }
 
 WSError Session::SetAspectRatio(float ratio)
 {
-    aspectRatio_ = ratio;
+    layoutController_->SetAspectRatio(ratio);
     return WSError::WS_OK;
 }
 
@@ -1027,10 +1031,10 @@ void Session::UpdatePointerArea(const WSRect& rect)
 
 WSError Session::UpdateSizeChangeReason(SizeChangeReason reason)
 {
-    if (reason_ == reason) {
+    if (GetSizeChangeReason() == reason) {
         return WSError::WS_DO_NOTHING;
     }
-    reason_ = reason;
+    GetLayoutController()->UpdateSizeChangeReason(reason);
     return WSError::WS_OK;
 }
 
@@ -1176,29 +1180,29 @@ WSError Session::UpdateRectWithLayoutInfo(const WSRect& rect, SizeChangeReason r
     TLOGD(WmsLogTag::WMS_LAYOUT, "session update rect: id: %{public}d, rect:%{public}s, "
         "reason:%{public}u %{public}s", GetPersistentId(), rect.ToString().c_str(), reason, updateReason.c_str());
     if (!IsSessionValid()) {
-        winRect_ = rect;
+        GetLayoutController()->SetSessionRect(rect);
         TLOGD(WmsLogTag::WMS_MAIN, "Session is invalid, id: %{public}d state: %{public}u",
             GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
-    winRect_ = rect;
     if (!Session::IsBackgroundUpdateRectNotifyEnabled() && !IsSessionForeground()) {
         return WSError::WS_DO_NOTHING;
     }
+    GetLayoutController()->SetSessionRect(rect);
     if (sessionStage_ != nullptr) {
         int32_t rotateAnimationDuration = GetRotateAnimationDuration();
         SceneAnimationConfig config { .rsTransaction_ = rsTransaction, .animationDuration_ = rotateAnimationDuration };
         WSRect updateRect = rect;
         UpdateClientRectPosYAndDisplayId(updateRect);
-        updateRect =
-            IsNeedConvertToRelativeRect(reason) ? ConvertGlobalRectToRelative(updateRect, GetDisplayId()) : updateRect;
+        updateRect = IsNeedConvertToRelativeRect(reason) ?
+            GetLayoutController()->ConvertGlobalRectToRelative(updateRect, GetDisplayId()) : updateRect;
         sessionStage_->UpdateRect(updateRect, reason, config, avoidAreas);
         SetClientRect(rect);
         RectCheckProcess();
     } else {
         WLOGFE("sessionStage_ is nullptr");
     }
-    UpdatePointerArea(winRect_);
+    UpdatePointerArea(GetSessionRect());
     return WSError::WS_OK;
 }
 
@@ -1264,7 +1268,8 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
     SetCallingPid(pid);
     callingUid_ = uid;
     UpdateSessionState(SessionState::STATE_CONNECT);
-    WindowHelper::IsUIExtensionWindow(GetWindowType()) ? UpdateRect(winRect_, SizeChangeReason::UNDEFINED, "Connect") :
+    WindowHelper::IsUIExtensionWindow(GetWindowType()) ?
+        UpdateRect(GetSessionRect(), SizeChangeReason::UNDEFINED, "Connect") :
         NotifyClientToUpdateRect("Connect", nullptr);
 
     // Window Layout Global Coordinate System
@@ -1306,8 +1311,9 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
             session->NotifySessionInfoChange();
         });
 
-    Rect rect = {winRect_.posX_, winRect_.posY_, static_cast<uint32_t>(winRect_.width_),
-        static_cast<uint32_t>(winRect_.height_)};
+    WSRect winRect = GetSessionRect();
+    Rect rect = {winRect.posX_, winRect.posY_, static_cast<uint32_t>(winRect.width_),
+        static_cast<uint32_t>(winRect.height_)};
     property->SetWindowRect(rect);
     property->SetPersistentId(GetPersistentId());
     property->SetFullScreenStart(GetSessionInfo().fullScreenStart_);
@@ -1610,7 +1616,7 @@ WSError Session::SetActive(bool active)
 
 void Session::ProcessClickModalWindowOutside(int32_t posX, int32_t posY)
 {
-    if (clickModalWindowOutsideFunc_ && !winRect_.IsInRegion(posX, posY)) {
+    if (clickModalWindowOutsideFunc_ && !GetSessionRect().IsInRegion(posX, posY)) {
         clickModalWindowOutsideFunc_();
     }
 }
@@ -3523,11 +3529,11 @@ void Session::RectCheckProcess()
 /** @note @window.layout */
 void Session::SetSessionRect(const WSRect& rect)
 {
-    if (winRect_ == rect) {
-        WLOGFW("id: %{public}d skip same rect", persistentId_);
+    if (GetSessionRect() == rect) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "id: %{public}d skip same rect", persistentId_);
         return;
     }
-    winRect_ = rect;
+    layoutController_->SetSessionRect(rect);
     dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
     RectCheckProcess();
 }
@@ -3535,7 +3541,7 @@ void Session::SetSessionRect(const WSRect& rect)
 /** @note @window.layout */
 WSRect Session::GetSessionRect() const
 {
-    return winRect_;
+    return layoutController_->GetSessionRect();
 }
 
 /** @note @window.layout */
@@ -3547,10 +3553,7 @@ WMError Session::GetGlobalScaledRect(Rect& globalScaledRect)
             TLOGNE(WmsLogTag::WMS_LAYOUT, "session is null");
             return WMError::WM_ERROR_DESTROYED_OBJECT;
         }
-        WSRect scaledRect = session->GetSessionGlobalRect();
-        scaledRect.width_ *= session->scaleX_;
-        scaledRect.height_ *= session->scaleY_;
-        globalScaledRect = { scaledRect.posX_, scaledRect.posY_, scaledRect.width_, scaledRect.height_ };
+        session->GetLayoutController()->GetGlobalScaledRect(globalScaledRect);
         TLOGNI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d globalScaledRect:%{public}s",
             session->GetPersistentId(), globalScaledRect.ToString().c_str());
         return WMError::WM_OK;
@@ -3561,18 +3564,14 @@ WMError Session::GetGlobalScaledRect(Rect& globalScaledRect)
 /** @note @window.layout */
 WSRect Session::GetSessionGlobalRect() const
 {
-    if (IsScbCoreEnabled()) {
-        std::lock_guard<std::mutex> lock(globalRectMutex_);
-        return globalRect_;
-    }
-    return winRect_;
+    return layoutController_->GetSessionGlobalRect();
 }
 
 /** @note @window.layout */
 WSRect Session::GetSessionGlobalRectInMultiScreen() const
 {
     if (IsDragMoving()) {
-        return ConvertGlobalRectToRelative(GetSessionRect(), GetDisplayId());
+        return GetLayoutController()->ConvertGlobalRectToRelative(GetSessionRect(), GetDisplayId());
     }
     return GetSessionGlobalRect();
 }
@@ -3580,11 +3579,9 @@ WSRect Session::GetSessionGlobalRectInMultiScreen() const
 /** @note @window.layout */
 void Session::SetSessionGlobalRect(const WSRect& rect)
 {
-    std::lock_guard<std::mutex> lock(globalRectMutex_);
-    if (globalRect_ != rect) {
+    if (layoutController_->SetSessionGlobalRect(rect)) {
         dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::GLOBAL_RECT);
     }
-    globalRect_ = rect;
 }
 
 /** @note @window.layout */
@@ -3616,15 +3613,13 @@ WSRect Session::GetSessionRequestRect() const
 /** @note @window.layout */
 void Session::SetClientRect(const WSRect& rect)
 {
-    clientRect_ = rect;
-    TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, update client rect:%{public}s",
-        GetPersistentId(), rect.ToString().c_str());
+    layoutController_->SetClientRect(rect);
 }
 
 /** @note @window.layout */
 WSRect Session::GetClientRect() const
 {
-    return clientRect_;
+    return layoutController_->GetClientRect();
 }
 
 WSError Session::SetHidingStartingWindow(bool hidingStartWindow)
@@ -4117,40 +4112,32 @@ float Session::GetFloatingScale() const
 
 void Session::SetScale(float scaleX, float scaleY, float pivotX, float pivotY)
 {
-    scaleX_ = scaleX;
-    scaleY_ = scaleY;
-    pivotX_ = pivotX;
-    pivotY_ = pivotY;
+    layoutController_->SetScale(scaleX, scaleY, pivotX, pivotY);
 }
 
 void Session::SetClientScale(float scaleX, float scaleY, float pivotX, float pivotY)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, preScaleX:%{public}f, preScaleY:%{public}f, "
-        "newScaleX:%{public}f, newScaleY:%{public}f", GetPersistentId(), clientScaleX_, clientScaleY_, scaleX, scaleY);
-    clientScaleX_ = scaleX;
-    clientScaleY_ = scaleY;
-    clientPivotX_ = pivotX;
-    clientPivotY_ = pivotY;
+    layoutController_->SetClientScale(scaleX, scaleY, pivotX, pivotY);
 }
 
 float Session::GetScaleX() const
 {
-    return scaleX_;
+    return layoutController_->GetScaleX();
 }
 
 float Session::GetScaleY() const
 {
-    return scaleY_;
+    return layoutController_->GetScaleY();
 }
 
 float Session::GetPivotX() const
 {
-    return pivotX_;
+    return layoutController_->GetPivotX();
 }
 
 float Session::GetPivotY() const
 {
-    return pivotY_;
+    return layoutController_->GetPivotY();
 }
 
 void Session::SetSCBKeepKeyboard(bool scbKeepKeyboardFlag)
@@ -4173,7 +4160,7 @@ void Session::SetOffset(float x, float y)
         .width_ = std::round(bounds_.width_),
         .height_ = std::round(bounds_.height_),
     };
-    if (newRect != winRect_) {
+    if (newRect != GetSessionRect()) {
         UpdateRect(newRect, SizeChangeReason::UNDEFINED, "SetOffset");
     }
 }

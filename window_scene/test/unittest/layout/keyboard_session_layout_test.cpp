@@ -94,7 +94,7 @@ HWTEST_F(KeyboardSessionLayoutTest, NotifyClientToUpdateRect02, TestSize.Level1)
     auto keyboardCb = sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
     sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, specificCb, keyboardCb);
     keyboardSession->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
-    keyboardSession->reason_ = SizeChangeReason::MOVE;
+    keyboardSession->Session::UpdateSizeChangeReason(SizeChangeReason::MOVE);
     keyboardSession->isKeyboardPanelEnabled_ = true;
     sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
     windowSessionProperty->SetWindowType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
@@ -121,14 +121,14 @@ HWTEST_F(KeyboardSessionLayoutTest, NotifyClientToUpdateRect03, TestSize.Level1)
     WSError ret = keyboardSession->NotifyClientToUpdateRect("KeyboardSessionLayoutTest", nullptr);
     ASSERT_EQ(ret, WSError::WS_OK);
 
-    // NotifyClientToUpdateRectTask return ok and session->reason_ is UNDEFINED
+    // NotifyClientToUpdateRectTask return ok and GetSizeChangeReason() is UNDEFINED
     keyboardSession->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
     keyboardSession->state_ = SessionState::STATE_CONNECT;
     ret = keyboardSession->NotifyClientToUpdateRect("KeyboardSessionLayoutTest", nullptr);
     ASSERT_EQ(ret, WSError::WS_OK);
 
-    // NotifyClientToUpdateRectTask return ok and session->reason_ is DRAG
-    keyboardSession->reason_ = SizeChangeReason::DRAG;
+    // NotifyClientToUpdateRectTask return ok and GetSizeChangeReason() is DRAG
+    keyboardSession->Session::UpdateSizeChangeReason(SizeChangeReason::DRAG);
     keyboardSession->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
     ret = keyboardSession->NotifyClientToUpdateRect("KeyboardSessionLayoutTest", nullptr);
     ASSERT_EQ(ret, WSError::WS_OK);

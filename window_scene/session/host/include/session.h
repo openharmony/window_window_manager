@@ -25,6 +25,7 @@
 
 #include "dm_common.h"
 #include "interfaces/include/ws_common.h"
+#include "layout_controller.h"
 #include "occupied_area_change_info.h"
 #include "pattern_detach_callback_interface.h"
 #include "session/container/include/zidl/session_stage_interface.h"
@@ -339,7 +340,7 @@ public:
 
     virtual WSError SetActive(bool active);
     virtual WSError UpdateSizeChangeReason(SizeChangeReason reason);
-    SizeChangeReason GetSizeChangeReason() const { return reason_; }
+    SizeChangeReason GetSizeChangeReason() const { return layoutController_->GetSizeChangeReason(); }
     bool IsDraggingReason(SizeChangeReason reason) const;
     virtual WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
         const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
@@ -675,6 +676,7 @@ public:
     WSRect GetGlobalDisplayRect() const;
     WSRect ComputeGlobalDisplayRect() const;
     virtual WSError UpdateGlobalDisplayRect(const WSRect& rect, SizeChangeReason reason);
+    const sptr<LayoutController>& GetLayoutController() const { return layoutController_; }
 
     /*
      * Screen Lock
@@ -790,11 +792,6 @@ protected:
         return ret;
     }
 
-    /*
-     * Window Layout
-     */
-    void SetClientScale(float scaleX, float scaleY, float pivotX, float pivotY);
-
     static std::shared_ptr<AppExecFwk::EventHandler> mainHandler_;
     int32_t persistentId_ = INVALID_SESSION_ID;
     std::atomic<SessionState> state_ = SessionState::STATE_DISCONNECT;
@@ -809,7 +806,6 @@ protected:
     std::list<sptr<SessionLifeCycleTask>> lifeCycleTaskQueue_;
     bool isActive_ = false;
     bool isSystemActive_ = false;
-    mutable std::mutex globalRectMutex_;
     WSRectF bounds_;
     Rotation rotation_;
     float offsetX_ = 0.0f;
@@ -876,30 +872,20 @@ protected:
      */
     static bool isBackgroundUpdateRectNotifyEnabled_;
     RequestVsyncFunc requestNextVsyncFunc_;
-    WSRect winRect_;
-    WSRect clientRect_;     // rect saved when prelayout or notify client to update rect
     WSRect lastLayoutRect_; // rect saved when go background
     WSRect layoutRect_;     // rect of root view
-    WSRect globalRect_;     // globalRect include translate
-    SizeChangeReason reason_ = SizeChangeReason::UNDEFINED;
     NotifySessionRectChangeFunc sessionRectChangeFunc_;
     NotifySessionDisplayIdChangeFunc sessionDisplayIdChangeFunc_;
     NotifyUpdateFloatingBallFunc updateFloatingBallFunc_;
     NotifyStopFloatingBallFunc stopFloatingBallFunc_;
     NotifyRestoreFloatingBallMainWindowFunc restoreFloatingBallMainWindowFunc_;
-    float clientScaleX_ = 1.0f;
-    float clientScaleY_ = 1.0f;
-    float clientPivotX_ = 0.0f;
-    float clientPivotY_ = 0.0f;
+    sptr<LayoutController> layoutController_ = nullptr;
+    void SetClientScale(float scaleX, float scaleY, float pivotX, float pivotY);
     DisplayId clientDisplayId_ = 0; // Window displayId on the client
     DisplayId configDisplayId_ = DISPLAY_ID_INVALID;
     SuperFoldStatus lastScreenFoldStatus_ = SuperFoldStatus::UNKNOWN;
     virtual bool IsNeedConvertToRelativeRect(
         SizeChangeReason reason = SizeChangeReason::UNDEFINED) const { return false; }
-    virtual WSRect ConvertRelativeRectToGlobal(const WSRect& relativeRect,
-        DisplayId currentDisplayId) const { return { 0, 0, 0, 0 }; }
-    virtual WSRect ConvertGlobalRectToRelative(const WSRect& globalRect,
-        DisplayId targetDisplayId) const { return { 0, 0, 0, 0 }; }
     bool IsDragStart() const { return isDragStart_; }
     void SetDragStart(bool isDragStart);
     HasRequestedVsyncFunc hasRequestedVsyncFunc_;
@@ -922,14 +908,9 @@ protected:
     bool isHighlighted_ { false };
 
     uint32_t uiNodeId_ = 0;
-    float aspectRatio_ = 0.0f;
     std::map<MMI::WindowArea, WSRectF> windowAreas_;
     bool isTerminating_ = false;
     float floatingScale_ = 1.0f;
-    float scaleX_ = 1.0f;
-    float scaleY_ = 1.0f;
-    float pivotX_ = 0.0f;
-    float pivotY_ = 0.0f;
     bool scbKeepKeyboardFlag_ = false;
     mutable std::shared_mutex dialogVecMutex_;
     std::vector<sptr<Session>> dialogVec_;
