@@ -1377,13 +1377,13 @@ HWTEST_F(SceneSessionManagerTest7, SetAppForceLandscapeConfig02, TestSize.Level1
     AppForceLandscapeConfig config;
     config.mode_ = 5; // 5: FORCE_SPLIT_MODE
     config.homePage_ = "homePage";
-    config.isSupportSplitMode_ = true;
+    config.supportSplit_ = 5;
 
     WSError result = ssm_->SetAppForceLandscapeConfig(bundleName, config);
     EXPECT_EQ(result, WSError::WS_OK);
     EXPECT_EQ(ssm_->appForceLandscapeMap_[bundleName].mode_, 5);
     EXPECT_EQ(ssm_->appForceLandscapeMap_[bundleName].homePage_, "homePage");
-    EXPECT_EQ(ssm_->appForceLandscapeMap_[bundleName].isSupportSplitMode_, true);
+    EXPECT_EQ(ssm_->appForceLandscapeMap_[bundleName].supportSplit_, 5);
 }
 
 /**
@@ -1397,19 +1397,19 @@ HWTEST_F(SceneSessionManagerTest7, SetAppForceLandscapeConfig03, TestSize.Level1
     AppForceLandscapeConfig preConfig;
     preConfig.mode_ = 0;
     preConfig.homePage_ = "homePage";
-    preConfig.isSupportSplitMode_ = false;
+    preConfig.supportSplit_ = -1;
     ssm_->appForceLandscapeMap_[bundleName] = preConfig;
 
     AppForceLandscapeConfig config;
     config.mode_ = 5; // 5: FORCE_SPLIT_MODE
     config.homePage_ = "newHomePage";
-    config.isSupportSplitMode_ = true;
+    config.supportSplit_ = 5;
 
     WSError result = ssm_->SetAppForceLandscapeConfig(bundleName, config);
     EXPECT_EQ(result, WSError::WS_OK);
     EXPECT_EQ(ssm_->appForceLandscapeMap_[bundleName].mode_, 5);
     EXPECT_EQ(ssm_->appForceLandscapeMap_[bundleName].homePage_, "newHomePage");
-    EXPECT_EQ(ssm_->appForceLandscapeMap_[bundleName].isSupportSplitMode_, true);
+    EXPECT_EQ(ssm_->appForceLandscapeMap_[bundleName].supportSplit_, 5);
 }
 
 /**
@@ -1423,7 +1423,7 @@ HWTEST_F(SceneSessionManagerTest7, GetAppForceLandscapeConfig, TestSize.Level1)
     AppForceLandscapeConfig config = ssm_->GetAppForceLandscapeConfig(bundleName);
     EXPECT_EQ(config.mode_, 0);
     EXPECT_EQ(config.homePage_, "");
-    EXPECT_EQ(config.isSupportSplitMode_, false);
+    EXPECT_EQ(config.supportSplit_, -1);
 }
 
 /**

@@ -2101,13 +2101,10 @@ void WindowSessionImpl::SetForceSplitEnable(AppForceLandscapeConfig& config)
         return;
     }
     bool isForceSplit = (config.mode_ == FORCE_SPLIT_MODE || config.mode_ == NAV_FORCE_SPLIT_MODE);
-    if (isForceSplit && parallelType_ == 0) {
-        parallelType_ = config.mode_ == FORCE_SPLIT_MODE ? FORCE_SPLIT_MODE : NAV_FORCE_SPLIT_MODE;
-    }
-    bool isRouter = (config.mode_ == FORCE_SPLIT_MODE);
+    bool isRouter = (config.supportSplit_ == FORCE_SPLIT_MODE);
     TLOGI(WmsLogTag::DEFAULT, "windowId: %{public}u, isForceSplit: %{public}u, homePage: %{public}s, "
-        "parallelType: %{public}d, isRouter: %{public}u",
-        GetWindowId(), isForceSplit, config.homePage_.c_str(), parallelType_, isRouter);
+        "supportSplit: %{public}d, isRouter: %{public}u",
+        GetWindowId(), isForceSplit, config.homePage_.c_str(), config.supportSplit_, isRouter);
     uiContent->SetForceSplitEnable(isForceSplit, config.homePage_, isRouter);
 }
 
@@ -2150,7 +2147,7 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, voi
 
     AppForceLandscapeConfig config = {};
     if (WindowHelper::IsMainWindow(winType) && GetAppForceLandscapeConfig(config) == WMError::WM_OK &&
-        config.isSupportSplitMode_ == true) {
+        config.supportSplit_ > 0) {
         SetForceSplitEnable(config);
     }
 

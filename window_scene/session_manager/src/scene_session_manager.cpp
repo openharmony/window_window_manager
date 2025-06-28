@@ -14655,8 +14655,8 @@ WSError SceneSessionManager::SetAppForceLandscapeConfig(const std::string& bundl
     AppForceLandscapeConfig preConfig = appForceLandscapeMap_[bundleName];
 
     appForceLandscapeMap_[bundleName] = config;
-    TLOGI(WmsLogTag::DEFAULT, "app: %{public}s, mode: %{public}d, homePage: %{public}s, isSupportSplitMode: %{public}u",
-        bundleName.c_str(), config.mode_, config.homePage_.c_str(), config.isSupportSplitMode_);
+    TLOGI(WmsLogTag::DEFAULT, "app: %{public}s, mode: %{public}d, homePage: %{public}s, supportSplit: %{public}d",
+        bundleName.c_str(), config.mode_, config.homePage_.c_str(), config.supportSplit_);
 
     if (preConfig.mode_ == FORCE_SPLIT_MODE || config.mode_ == FORCE_SPLIT_MODE ||
         preConfig.mode_ == NAV_FORCE_SPLIT_MODE || config.mode_ == NAV_FORCE_SPLIT_MODE) {
