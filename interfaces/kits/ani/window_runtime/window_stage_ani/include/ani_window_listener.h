@@ -80,7 +80,7 @@ public:
         : env_(env), aniCallBack_(callback), caseType_(caseType),
         weakRef_(wptr<AniWindowListener> (this)) {}
     ~AniWindowListener();
-    ani_ref GetAniCallBack() { return aniCallBack_; }
+    ani_ref GetAniCallBack() const { return aniCallBack_; }
     void OnSystemBarPropertyChange(DisplayId displayId, const SystemBarRegionTints& tints) override;
     void OnSizeChange(Rect rect, WindowSizeChangeReason reason,
     const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
