@@ -142,7 +142,7 @@ WmErrorCode JsExtensionWindowRegisterManager::ProcessSystemDensityChangeRegister
         TLOGE(WmsLogTag::WMS_UIEXT, "Window is nullptr");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
-    ISystemDensityChangeListener thisListener(listener);
+    ISystemDensityChangeListenerSptr thisListener(listener);
     WmErrorCode ret = WmErrorCode::WM_OK;
     if (isRegister) {
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterSystemDensityChangeListener(thisListener));
