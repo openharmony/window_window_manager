@@ -1908,12 +1908,13 @@ void JsSceneSessionManager::RegisterDumpRootSceneElementInfoListener()
         if (session == nullptr) {
             return;
         }
-        const auto& uiContent = rootScene_->GetUIContentByDisplayId(session->GetSessionProperty()->GetDisplayId());
+        const auto& uiContent = rootScene_->
+            GetUIContentByDisplayId(session->GetSessionProperty()->GetDisplayId()).first;
         if (params.size() == 1 && params[0] == ARG_DUMP_HELP) { // 1: params num
             Ace::UIContent::ShowDumpHelp(infos);
             TLOGND(WmsLogTag::WMS_EVENT, "Dump ArkUI help info");
-        } else if (uiContent.second != false) {
-            uiContent.first->DumpInfo(params, infos);
+        } else if (uiContent != nullptr) {
+            uiContent->DumpInfo(params, infos);
             TLOGND(WmsLogTag::WMS_EVENT, "Dump ArkUI element info");
         }
     };
