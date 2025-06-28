@@ -10,14 +10,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-import("//build/config/components/ets_frontend/ets2abc_config.gni")
+ 
 import("//build/ohos.gni")
 import("../../../../windowmanager_aafwk.gni")
-
-config("screen_common_config") {
+ 
+config("screenshot_common_config") {
   visibility = [ ":*" ]
-
+ 
   include_dirs = [
     "../common",
     "../../../../utils/include",
@@ -26,15 +25,15 @@ config("screen_common_config") {
     "../../../../wm/include",
   ]
 }
-
-config("screen_kit_public_config") {
+ 
+config("screenshot_kit_public_config") {
   visibility = [ ":*" ]
-
-  include_dirs = [ "screen_ani/include" ]
+ 
+  include_dirs = [ "screenshot_ani/include" ]
 }
-
+ 
 # lib generate
-ohos_shared_library("screenani_kit") {
+ohos_shared_library("screenshotani_kit") {
   branch_protector_ret = "pac_ret"
   sanitize = {
     cfi = true
@@ -43,27 +42,25 @@ ohos_shared_library("screenani_kit") {
     debug = false
   }
   sources = [
-    "screen_ani/src/ani_err_utils.cpp",
-    "screen_ani/src/screen_ani_listener.cpp",
-    "screen_ani/src/screen_ani_manager.cpp",
-    "screen_ani/src/screen_ani_utils.cpp",
-    "screen_ani/src/screen_ani.cpp"
+    "screenshot_ani/src/ani_err_utils.cpp",
+    "screenshot_ani/src/screenshot_ani_manager.cpp",
+    "screenshot_ani/src/screenshot_ani_utils.cpp",
   ]
-
+ 
   configs = [
-    ":screen_common_config",
-    ":screen_kit_public_config",
+    ":screenshot_common_config",
+    ":screenshot_kit_public_config",
     "../../../../resources/config/build:coverage_flags",
   ]
-
-  public_configs = [ ":screen_kit_public_config" ]
-
+ 
+  public_configs = [ ":screenshot_kit_public_config" ]
+ 
   deps = [
     "../../../../dm:libdm",
     "../../../../utils:libwmutil",
     "../../../../utils:libwmutil_base",
   ]
-
+ 
   external_deps = [
     "ability_runtime:ability_manager",
     "ability_runtime:runtime",
@@ -73,17 +70,20 @@ ohos_shared_library("screenani_kit") {
     "graphic_surface:surface",  # use for SurfaceUtils
     "hilog:libhilog",
     "hitrace:hitrace_meter",
+    "image_framework:image",
+    "image_framework:image_ani",
+    "image_framework:image_native",
     "runtime_core:ani",
   ]
-
+ 
   innerapi_tags = [ "platformsdk" ]
   part_name = "window_manager"
   subsystem_name = "window"
 }
-
-group("screen_ani") {
+ 
+group("screenshot_ani") {
   deps = [
-    ":screenani_kit",
-    "screen_ani:screen_etc",
+    ":screenshotani_kit",
+    "screenshot_ani:screenshot_etc",
   ]
 }
