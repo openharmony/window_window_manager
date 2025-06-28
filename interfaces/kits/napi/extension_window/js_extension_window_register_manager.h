@@ -62,7 +62,7 @@ private:
         sptr<Window> window, bool isRegister);
     WmErrorCode ProcessSystemDensityChangeRegister(const sptr<JsExtensionWindowListener>& listener,
         sptr<Window> window, bool isRegister);
-    WmErrorCode ProcessScreenshotRegister(const sptr<JsExtensionWindowListener> listener&,
+    WmErrorCode ProcessScreenshotRegister(const sptr<JsExtensionWindowListener>& listener,
         sptr<Window> window, bool isRegister);
     WmErrorCode ProcessExtensionSecureLimitChangeRegister(const sptr<JsExtensionWindowListener>& listener,
         sptr<Window> window, bool isRegister);
