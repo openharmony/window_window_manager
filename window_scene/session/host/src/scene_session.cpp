@@ -1525,6 +1525,11 @@ WSError SceneSession::NotifyClientToUpdateRectTask(const std::string& updateReas
     } else {
         TLOGD(WmsLogTag::WMS_IMMS, "win [%{public}d] avoid area update rejected by recent", GetPersistentId());
     }
+    if (winRect_.IsInvalid()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "id:%{public}d rect:%{public}s is invalid",
+            GetPersistentId(), winRect_.ToString().c_str());
+        return WSError::WS_ERROR_INVALID_WINDOW_MODE_OR_SIZE;
+    }
     WSError ret = WSError::WS_OK;
     // once reason is undefined, not use rsTransaction
     // when rotation, sync cnt++ in marshalling. Although reason is undefined caused by resize
@@ -1864,7 +1869,6 @@ WSError SceneSession::UpdateSessionRect(
             newRect.posY_ = (newRect.posY_ - mainGlobalRect.posY_) / mainSession->GetFloatingScale();
         }
     }
-    Session::RectCheckProcess();
     PostTask([weakThis = wptr(this), newRect, reason, newMoveConfiguration, rectAnimationConfig, where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
@@ -3165,16 +3169,9 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
             TLOGD(WmsLogTag::WMS_LAYOUT, "moveDragController_ is null");
             return Session::TransferPointerEvent(pointerEvent, needNotifyClient, isExecuteDelayRaise);
         }
-        bool isFloatingDragAccessible =
-            property->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && IsDragAccessible();
-        bool isPcOrFreeMultiWindowCanDrag = (isFloatingDragAccessible || isDragAccessibleSystemWindow) &&
-            (systemConfig_.IsPcWindow() || IsFreeMultiWindowMode() || (property->GetIsPcAppInPad() && !isMainWindow));
-        bool isPhoneWindowCanDrag = isFloatingDragAccessible &&
-            (WindowHelper::IsSystemWindow(windowType) || WindowHelper::IsSubWindow(windowType)) &&
-            (systemConfig_.IsPhoneWindow() || (systemConfig_.IsPadWindow() && !IsFreeMultiWindowMode()));
         moveDragController_->SetScale(GetScaleX(), GetScaleY()); // need scale ratio to calculate translate
         SetParentRect();
-        if ((isPcOrFreeMultiWindowCanDrag || isPhoneWindowCanDrag) &&
+        if (IsDraggable() &&
             moveDragController_->ConsumeDragEvent(pointerEvent, GetGlobalOrWinRect(), property, systemConfig_)) {
             auto surfaceNode = GetSurfaceNode();
             moveDragController_->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
@@ -3306,6 +3303,28 @@ bool SceneSession::IsMovable()
         return false;
     }
     return true;
+}
+
+bool SceneSession::IsDraggable() const
+{
+    if (!moveDragController_) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "moveDragController is null, id:%{public}d", GetPersistentId());
+        return false;
+    }
+    auto windowType = GetWindowType();
+    bool isMainWindow = WindowHelper::IsMainWindow(windowType);
+    bool isSubWindow = WindowHelper::IsSubWindow(windowType);
+    bool isSystemWindow = WindowHelper::IsSystemWindow(windowType);
+    bool isDialog = WindowHelper::IsDialogWindow(windowType);
+    bool isDragAccessibleSystemWindow = isSystemWindow && IsDragAccessible() && !isDialog;
+    bool isFloatingDragAccessible = GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && IsDragAccessible();
+
+    bool isPcOrFreeMultiWindowCanDrag = (isFloatingDragAccessible || isDragAccessibleSystemWindow) &&
+        (systemConfig_.IsPcWindow() || IsFreeMultiWindowMode() ||
+        (GetSessionProperty()->GetIsPcAppInPad() && !isMainWindow));
+    bool isPhoneWindowCanDrag = isFloatingDragAccessible && (isSubWindow && isSystemWindow) &&
+        (systemConfig_.IsPhoneWindow() || (systemConfig_.IsPadWindow() && !IsFreeMultiWindowMode()));
+    return isPcOrFreeMultiWindowCanDrag || isPhoneWindowCanDrag;
 }
 
 WSError SceneSession::RequestSessionBack(bool needMoveToBackground)

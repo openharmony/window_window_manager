@@ -2078,6 +2078,8 @@ WindowLimits WindowSessionProperty::GetUserWindowLimits() const
 
 void WindowSessionProperty::SetConfigWindowLimitsVP(const WindowLimits& windowConfigLimitsVP)
 {
+    TLOGI(WmsLogTag::WMS_LAYOUT, "id:%{public}d, windowLimits:%{public}s", GetPersistentId(),
+        windowConfigLimitsVP.ToString().c_str());
     configLimitsVP_ = windowConfigLimitsVP;
 }
 

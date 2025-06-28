@@ -356,6 +356,8 @@ public:
     WMError UpdateWindowModeForUITest(int32_t updateMode);
     void RegisterDefaultDensityEnabledCallback(NotifyDefaultDensityEnabledFunc&& callback);
     void SetSessionDisplayIdChangeCallback(NotifySessionDisplayIdChangeFunc&& func);
+    bool IsMovable() const;
+    bool IsDraggable() const;
 
     WSError SetKeepScreenOn(bool keepScreenOn);
     WSError SetViewKeepScreenOn(bool keepScreenOn);
