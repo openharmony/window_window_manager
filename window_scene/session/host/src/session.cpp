@@ -1197,6 +1197,9 @@ WSError Session::UpdateRectWithLayoutInfo(const WSRect& rect, SizeChangeReason r
         updateRect = IsNeedConvertToRelativeRect(reason) ?
             GetLayoutController()->ConvertGlobalRectToRelative(updateRect, GetDisplayId()) : updateRect;
         sessionStage_->UpdateRect(updateRect, reason, config, avoidAreas);
+        if (updateReason == "OnBoundsChanged") {
+            dirtyFlags_ &= ~static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
+        }
         SetClientRect(rect);
         RectCheckProcess();
     } else {
@@ -3513,7 +3516,7 @@ void Session::RectCheckProcess()
         float curHeight = GetSessionRect().height_ / density;
         float ratio = GetAspectRatio();
         float actRatio = curWidth / curHeight;
-        if ((ratio != 0) && !NearEqual(ratio, actRatio)) {
+        if (!NearZero(ratio) && !NearEqual(ratio, actRatio)) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "RectCheck err ratio %{public}f != actRatio: %{public}f", ratio, actRatio);
             std::ostringstream oss;
             oss << " RectCheck err ratio ";

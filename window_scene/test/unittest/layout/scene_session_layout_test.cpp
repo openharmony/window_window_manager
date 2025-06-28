@@ -784,6 +784,31 @@ HWTEST_F(SceneSessionLayoutTest, IsNeedConvertToRelativeRect, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsDraggable
+ * @tc.desc: IsDraggable when moveDragController_ is nullptr or not.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLayoutTest, IsDraggable, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsDraggable";
+    info.bundleName_ = "IsDraggable";
+    info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    sceneSession->GetSessionProperty()->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    sceneSession->GetSessionProperty()->SetDragEnabled(true);
+    sceneSession->SetDragActivated(true);
+
+    sceneSession->moveDragController_ = nullptr;
+    EXPECT_EQ(sceneSession->IsDraggable(), false);
+
+    sceneSession->moveDragController_ =
+        sptr<MoveDragController>::MakeSptr(sceneSession->GetPersistentId(), sceneSession->GetWindowType());
+    EXPECT_EQ(sceneSession->IsDraggable(), true);
+}
+
+/**
  * @tc.name: IsMovable
  * @tc.desc: Test IsMovable when AnchorEnabled or AnchorDisabled
  * @tc.type: FUNC

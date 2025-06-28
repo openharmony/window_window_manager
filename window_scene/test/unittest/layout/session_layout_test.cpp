@@ -224,6 +224,32 @@ HWTEST_F(SessionLayoutTest, SetSingleHandTransform, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateRectWithLayoutInfo
+ * @tc.desc: UpdateRectWithLayoutInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionLayoutTest, UpdateRectWithLayoutInfo, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdateRectWithLayoutInfo";
+    info.bundleName_ = "UpdateRectWithLayoutInfo";
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
+    session->sessionStage_ = mockSessionStage;
+
+    session->state_ = SessionState::STATE_FOREGROUND;
+    session->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
+    WSRect rect = { 0, 0, 800, 800 };
+    session->UpdateRectWithLayoutInfo(rect, SizeChangeReason::RESIZE, "test");
+    EXPECT_EQ(session->dirtyFlags_, static_cast<uint32_t>(SessionUIDirtyFlag::RECT));
+    EXPECT_EQ(session->GetSessionRect(), rect);
+
+    session->UpdateRectWithLayoutInfo(rect, SizeChangeReason::RESIZE, "OnBoundsChanged");
+    EXPECT_EQ(session->dirtyFlags_, static_cast<uint32_t>(SessionUIDirtyFlag::NONE));
+    EXPECT_EQ(session->GetSessionRect(), rect);
+}
+
+/**
  * @tc.name: IsDraggingReason
  * @tc.desc: IsDraggingReason
  * @tc.type: FUNC
