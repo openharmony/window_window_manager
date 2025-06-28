@@ -266,54 +266,19 @@ HWTEST_F(RootSceneSessionTest, GetKeyboardAvoidAreaForRoot_01, TestSize.Level1)
     keyboardSession->property_->type_ = WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT;
     keyboardSession->winRect_ = { 0, 1700, 1260, 1020 };
     keyboardSession->property_->SetPersistentId(2);
-    keyboardSession->isVisible_ = true;
     ssm_->sceneSessionMap_.insert({ keyboardSession->GetPersistentId(), keyboardSession });
     AvoidArea avoidArea;
-    ssm_->rootSceneSession_->GetKeyboardAvoidAreaForRoot(ssm_->rootSceneSession_->winRect_, avoidArea);
-    Rect rect = { 0, 1700, 1260, 1020 };
-    ASSERT_EQ(avoidArea.bottomRect_, rect);
-    keyboardSession->isVisible_ = false;
-    avoidArea.bottomRect_ = { 0, 0, 0, 0 };
-    ssm_->rootSceneSession_->GetKeyboardAvoidAreaForRoot(ssm_->rootSceneSession_->winRect_, avoidArea);
-    EXPECT_TRUE(avoidArea.isEmptyAvoidArea());
-    ssm_->rootSceneSession_->isKeyboardPanelEnabled_ = true;
-    ssm_->rootSceneSession_->GetKeyboardAvoidAreaForRoot(ssm_->rootSceneSession_->winRect_, avoidArea);
-}
-
-/**
- * @tc.name: GetKeyboardAvoidAreaForRoot_02
- * @tc.desc: test function : GetKeyboardAvoidAreaForRoot_02
- * @tc.type: FUNC
- */
-HWTEST_F(RootSceneSessionTest, GetKeyboardAvoidAreaForRoot_02, TestSize.Level1)
-{
-    EXPECT_NE(nullptr, ssm_);
-    auto specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    specificCb->onGetSceneSessionVectorByType_ = [](WindowType type) {
-        return ssm_->GetSceneSessionVectorByType(type);
-    };
-    ssm_->rootSceneSession_ = sptr<RootSceneSession>::MakeSptr(specificCb);
-    ssm_->rootSceneSession_->winRect_ = { 0, 0, 1260, 2720 };
-    ssm_->rootSceneSession_->isKeyboardPanelEnabled_ = false;
-    SessionInfo keyboardSessionInfo;
-    keyboardSessionInfo.abilityName_ = "keyboard";
-    keyboardSessionInfo.bundleName_ = "keyboard";
-    keyboardSessionInfo.screenId_ = 0;
-    sptr<SceneSession> keyboardSession = sptr<SceneSession>::MakeSptr(keyboardSessionInfo, nullptr);
-    ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    keyboardSession->state_ = SessionState::STATE_BACKGROUND;
-    keyboardSession->keyboardAvoidAreaActive_ = true;
-    keyboardSession->property_->type_ = WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT;
-    keyboardSession->winRect_ = { 0, 1700, 1260, 1020 };
-    keyboardSession->property_->SetPersistentId(2);
-    ssm_->sceneSessionMap_.insert({ keyboardSession->GetPersistentId(), keyboardSession });
-    AvoidArea avoidArea;
-    ssm_->rootSceneSession_->GetKeyboardAvoidAreaForRoot(ssm_->rootSceneSession_->winRect_, avoidArea);
-    EXPECT_TRUE(avoidArea.isEmptyAvoidArea());
-    keyboardSession->state_ = SessionState::STATE_FOREGROUND;
     ssm_->rootSceneSession_->GetKeyboardAvoidAreaForRoot(ssm_->rootSceneSession_->winRect_, avoidArea);
     Rect rect = { 0, 1700, 1260, 1020 };
     EXPECT_EQ(avoidArea.bottomRect_, rect);
+    avoidArea.bottomRect_ = { 0, 0, 0, 0 };
+    ssm_->rootSceneSession_->GetKeyboardAvoidAreaForRoot(ssm_->rootSceneSession_->winRect_, avoidArea);
+    EXPECT_TRUE(!avoidArea.isEmptyAvoidArea());
+    ssm_->rootSceneSession_->isKeyboardPanelEnabled_ = true;
+    keyboardSession->state_ = SessionState::STATE_BACKGROUND;
+    avoidArea.bottomRect_ = { 0, 0, 0, 0 };
+    ssm_->rootSceneSession_->GetKeyboardAvoidAreaForRoot(ssm_->rootSceneSession_->winRect_, avoidArea);
+    EXPECT_TRUE(avoidArea.isEmptyAvoidArea());
 }
 
 /**
