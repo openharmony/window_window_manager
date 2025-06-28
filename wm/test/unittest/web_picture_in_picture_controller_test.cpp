@@ -33,7 +33,7 @@ class MockWindow : public Window {
 public:
     MockWindow() {};
     ~MockWindow() {};
-    MOCK_METHOD3(Show, WMError(uint32_t reason, bool withAnimation, bool withFocus));
+    MOCK_METHOD4(Show, WMError(uint32_t reason, bool withAnimation, bool withFocus, bool needAttach));
     MOCK_METHOD1(Destroy, WMError(uint32_t reason));
     MOCK_METHOD0(Destroy, WMError());
     MOCK_METHOD0(NotifyPrepareClosePiPWindow, WMError());

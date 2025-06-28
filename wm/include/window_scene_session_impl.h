@@ -17,6 +17,7 @@
 #define OHOS_ROSEN_WINDOW_SCENE_SESSION_IMPL_H
 
 #include "window_session_impl.h"
+#include "lifecycle_future_callback.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -28,9 +29,11 @@ public:
     WMError Create(const std::shared_ptr<AbilityRuntime::Context>& context,
         const sptr<Rosen::ISession>& iSession, const std::string& identityToken = "",
         bool isModuleAbilityHookEnd = false) override;
-    WMError Show(uint32_t reason = 0, bool withAnimation = false, bool withFocus = true) override;
+    WMError Show(uint32_t reason = 0, bool withAnimation = false,
+        bool withFocus = true, bool needAttach = false) override;
     WMError ShowKeyboard(KeyboardEffectOption effectOption) override;
-    WMError Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
+    WMError Hide(uint32_t reason, bool withAnimation,
+        bool isFromInnerkits, bool needDetach = false) override;
     WMError Destroy(bool needNotifyServer, bool needClearListener = true, uint32_t reason = 0) override;
     WMError DestroyHookWindow();
     WMError NotifyDrawingCompleted() override;
@@ -502,6 +505,8 @@ private:
     void NotifyFreeMultiWindowModeResume();
     std::string TransferLifeCycleEventToString(LifeCycleEvent type) const;
     void RecordLifeCycleExceptionEvent(LifeCycleEvent event, WMError erCode) const;
+    sptr<LifecycleFutureCallback> attachCallback_ = nullptr;
+    sptr<LifecycleFutureCallback> detachCallback_ = nullptr;
 
     /**
      * Window Transition Animation For PC

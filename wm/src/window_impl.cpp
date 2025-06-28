@@ -1864,7 +1864,7 @@ bool WindowImpl::IsShowWithOptions() const
     return showWithOptions_;
 }
 
-WMError WindowImpl::Show(uint32_t reason, bool withAnimation, bool withFocus)
+WMError WindowImpl::Show(uint32_t reason, bool withAnimation, bool withFocus, bool needAttach)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, __PRETTY_FUNCTION__);
     WLOGFD("Window Show [name:%{public}s, id:%{public}u, mode: %{public}u], reason:%{public}u, "
@@ -1931,7 +1931,7 @@ WMError WindowImpl::ShowKeyboard(KeyboardEffectOption effectOption)
     return Show();
 }
 
-WMError WindowImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits)
+WMError WindowImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits, bool needDetach)
 {
     WLOGD("id:%{public}u Hide, reason:%{public}u, Animation:%{public}d",
         property_->GetWindowId(), reason, withAnimation);

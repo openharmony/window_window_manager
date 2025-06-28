@@ -852,7 +852,7 @@ void WindowSessionImpl::UpdateSubWindowStateAndNotify(int32_t parentPersistentId
     }
 }
 
-WMError WindowSessionImpl::Show(uint32_t reason, bool withAnimation, bool withFocus)
+WMError WindowSessionImpl::Show(uint32_t reason, bool withAnimation, bool withFocus, bool needAttach = false)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "name:%{public}s, id:%{public}d, type:%{public}u, reason:%{public}u, state:%{public}u",
         property_->GetWindowName().c_str(), property_->GetPersistentId(), GetType(), reason, state_);
@@ -883,7 +883,7 @@ WMError WindowSessionImpl::Show(uint32_t reason, bool withAnimation, bool withFo
     return res;
 }
 
-WMError WindowSessionImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits)
+WMError WindowSessionImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits, bool needDetach = false)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d Hide, reason:%{public}u, state:%{public}u",
         GetPersistentId(), reason, state_);
