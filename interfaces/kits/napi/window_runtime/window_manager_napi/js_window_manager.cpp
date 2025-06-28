@@ -1592,8 +1592,8 @@ napi_value JsWindowManager::OnShiftAppWindowTouchEvent(napi_env env, napi_callba
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
     auto asyncTask = [sourceWindowId, targetWindowId, fingerId, env, task = napiAsyncTask] {
-        if (sourceWindowId == static_cast<int32_t>(INVALID_WINDOW_ID) ||
-            targetWindowId == static_cast<int32_t>(INVALID_WINDOW_ID) ||
+        if (sourceWindowId <= static_cast<int32_t>(INVALID_WINDOW_ID) ||
+            targetWindowId <= static_cast<int32_t>(INVALID_WINDOW_ID) ||
             (fingerId <= static_cast<int32_t>(INVALID_FINGER_ID))) {
             TLOGE(WmsLogTag::WMS_PC, "invalid sourceWindowId or targetWindowId or fingerId");
             task->Reject(env, JsErrUtils::CreateJsError(env,
