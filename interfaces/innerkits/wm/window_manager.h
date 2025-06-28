@@ -1314,10 +1314,9 @@ public:
 
     /**
      * @brief Register get js window callback.
-     * @param listener IWindowLifeCycleListener.
-     * @return WM_OK means register success, others means register failed.
+     * @param getJSWindowFunc get js window obj callback.
      */
-    WMError RegisterGetJSWindowCallback(const GetJSWindowObjFunc& getJSWindowFunc);
+    void RegisterGetJSWindowCallback(const GetJSWindowObjFunc& getJSWindowFunc);
 
     /**
      * @brief notify window destroyed.
