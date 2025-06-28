@@ -224,7 +224,8 @@ FrameRateLinkerId VsyncStation::GetFrameRateLinkerId()
     return 0;
 }
 
-void VsyncStation::FlushFrameRate(uint32_t rate, int32_t animatorExpectedFrameRate, uint32_t rateType)
+void VsyncStation::FlushFrameRate(const std::shared_ptr<RSUIContext> rsUIContext, uint32_t rate,
+    int32_t animatorExpectedFrameRate, uint32_t rateType = 0)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     if (auto frameRateLinker = GetFrameRateLinkerLocked()) {
@@ -236,12 +237,12 @@ void VsyncStation::FlushFrameRate(uint32_t rate, int32_t animatorExpectedFrameRa
         lastAnimatorExpectedFrameRate_ = animatorExpectedFrameRate;
         if (frameRateLinker->IsEnable()) {
             TLOGD(WmsLogTag::WMS_MAIN, "rate %{public}d, linkerId %{public}" PRIu64, rate, frameRateLinker->GetId());
-            frameRateLinker->UpdateFrameRateRange(*lastFrameRateRange_, lastAnimatorExpectedFrameRate_);
+            frameRateLinker->UpdateFrameRateRange(*lastFrameRateRange_, lastAnimatorExpectedFrameRate_, rsUIContext);
         }
     }
 }
 
-void VsyncStation::SetFrameRateLinkerEnable(bool enabled)
+void VsyncStation::SetFrameRateLinkerEnable(const std::shared_ptr<RSUIContext> rsUIContext, bool enabled)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     if (auto frameRateLinker = GetFrameRateLinkerLocked()) {
@@ -250,14 +251,14 @@ void VsyncStation::SetFrameRateLinkerEnable(bool enabled)
             FrameRateRange range = {0, RANGE_MAX_REFRESHRATE, 0};
             TLOGI(WmsLogTag::WMS_MAIN, "rate %{public}d, linkerId %{public}" PRIu64,
                 range.preferred_, frameRateLinker->GetId());
-            frameRateLinker->UpdateFrameRateRange(range);
+            frameRateLinker->UpdateFrameRateRange(range, -1, rsUIContext);
             frameRateLinker->UpdateFrameRateRangeImme(range);
         } else if (lastFrameRateRange_) {
             // to resolve these cases:
             // case 1: when app go backGround and haven't cleared the vote itself, the vote will be invalid forever,
             //         so we restore the vote which is cleared here.
             // case 2: when frameRateLinker is disabled, the frameRate vote by app will be delayed until linker enable.
-            frameRateLinker->UpdateFrameRateRange(*lastFrameRateRange_, lastAnimatorExpectedFrameRate_);
+            frameRateLinker->UpdateFrameRateRange(*lastFrameRateRange_, lastAnimatorExpectedFrameRate_, rsUIContext);
         }
         frameRateLinker->SetEnable(enabled);
     }

@@ -4585,7 +4585,7 @@ void WindowSessionImpl::NotifyAfterForeground(bool needNotifyListeners, bool nee
     if (vsyncStation_ != nullptr) {
         TLOGD(WmsLogTag::WMS_MAIN, "enable FrameRateLinker, linkerId=%{public}" PRIu64,
             vsyncStation_->GetFrameRateLinkerId());
-        vsyncStation_->SetFrameRateLinkerEnable(true);
+        vsyncStation_->SetFrameRateLinkerEnable(GetRSUIContext(), true);
         if (WindowHelper::IsMainWindow(GetType())) {
             TLOGD(WmsLogTag::WMS_MAIN, "IsMainWindow: enable soloist linker");
             vsyncStation_->SetDisplaySoloistFrameRateLinkerEnable(true);
@@ -4655,7 +4655,7 @@ void WindowSessionImpl::NotifyAfterBackground(bool needNotifyListeners, bool nee
     if (vsyncStation_ != nullptr) {
         TLOGD(WmsLogTag::WMS_MAIN, "disable FrameRateLinker, linkerId=%{public}" PRIu64,
             vsyncStation_->GetFrameRateLinkerId());
-        vsyncStation_->SetFrameRateLinkerEnable(false);
+        vsyncStation_->SetFrameRateLinkerEnable(GetRSUIContext(), false);
         if (WindowHelper::IsMainWindow(GetType())) {
             TLOGD(WmsLogTag::WMS_MAIN, "IsMainWindow: disable soloist linker");
             vsyncStation_->SetDisplaySoloistFrameRateLinkerEnable(false);
@@ -6242,7 +6242,7 @@ void WindowSessionImpl::FlushFrameRate(uint32_t rate, int32_t animatorExpectedFr
         TLOGW(WmsLogTag::WMS_MAIN, "vsyncStation is null");
         return;
     }
-    vsyncStation_->FlushFrameRate(rate, animatorExpectedFrameRate, rateType);
+    vsyncStation_->FlushFrameRate(GetRSUIContext(), rate, animatorExpectedFrameRate, rateType);
 }
 
 WMError WindowSessionImpl::UpdateProperty(WSPropertyChangeAction action)

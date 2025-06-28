@@ -21,6 +21,7 @@
 #include <unordered_set>
 
 #include <event_handler.h>
+#include <ui/rs_ui_context.h>
 
 #include "wm_common.h"
 
@@ -47,8 +48,9 @@ public:
     void Destroy();
 
     FrameRateLinkerId GetFrameRateLinkerId();
-    void FlushFrameRate(uint32_t rate, int32_t animatorExpectedFrameRate, uint32_t rateType = 0);
-    void SetFrameRateLinkerEnable(bool enabled);
+    void FlushFrameRate(const std::shared_ptr<RSUIContext> rsUIContext, uint32_t rate,
+        int32_t animatorExpectedFrameRate, uint32_t rateType = 0);
+    void SetFrameRateLinkerEnable(const std::shared_ptr<RSUIContext> rsUIContext, bool enabled);
     void SetDisplaySoloistFrameRateLinkerEnable(bool enabled);
     void SetUiDvsyncSwitch(bool dvsyncSwitch);
 
