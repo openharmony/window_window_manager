@@ -2072,13 +2072,13 @@ WMError WindowExtensionSessionImpl::OnHostWindowRectChange(AAFwk::Want&& data, s
     return WMError::WM_OK;
 }
 
-WMError OnScreenshot(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)
+WMError WindowExtensionSessionImpl::OnScreenshot(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)
 {
     NotifyScreenshot();
     return WMError::WM_OK;
 }
 
-WMError OnExtensionSecureLimitChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)
+WMError WindowExtensionSessionImpl::OnExtensionSecureLimitChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)
 {
     bool limit = data.GetBoolParam(Extension::EXTENSION_SECURE_LIMIT_CHANGE, false);
     NotifyExtensionSecureLimitChange(limit);

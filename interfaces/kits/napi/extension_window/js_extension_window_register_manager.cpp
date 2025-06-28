@@ -153,7 +153,7 @@ WmErrorCode JsExtensionWindowRegisterManager::ProcessSystemDensityChangeRegister
 }
 
 WmErrorCode JsExtensionWindowRegisterManager::ProcessScreenshotRegister(
-    sptr<JsExtensionWindowListener>& listener, sptr<Window> window, bool isRegister)
+    const sptr<JsExtensionWindowListener>& listener, sptr<Window> window, bool isRegister)
 {
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Window is nullptr");
@@ -170,7 +170,7 @@ WmErrorCode JsExtensionWindowRegisterManager::ProcessScreenshotRegister(
 }
 
 WmErrorCode JsExtensionWindowRegisterManager::ProcessExtensionSecureLimitChangeRegister(
-    sptr<JsExtensionWindowListener>& listener, sptr<Window> window, bool isRegister)
+    const sptr<JsExtensionWindowListener>& listener, sptr<Window> window, bool isRegister)
 {
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Window is nullptr");
