@@ -2040,6 +2040,13 @@ HWTEST_F(WindowSceneSessionImplTest5, UpdateEnableDragWhenSwitchMultiWindow, Fun
     EXPECT_EQ(false, window->property_->dragEnabled_);
 
     window->property_->type_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+    sptr<CompatibleModeProperty> property = sptr<CompatibleModeProperty>::MakeSptr();
+    property->disableDragResize_ = true;
+    window->property_->compatibleModeProperty_ = property;
+    window->UpdateEnableDragWhenSwitchMultiWindow(true);
+    EXPECT_EQ(false, window->property_->dragEnabled_);
+
+    property->disableDragResize_ = false;
     window->UpdateEnableDragWhenSwitchMultiWindow(true);
     EXPECT_EQ(true, window->property_->dragEnabled_);
 }
