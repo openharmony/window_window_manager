@@ -2130,8 +2130,8 @@ void WindowManager::NotifyWindowPropertyChange(uint32_t propertyDirtyFlags,
     }
 }
 
-WMError WindowManager::AnimateTo(int32_t windowId, const WindowAnimationProperty& animationProperty,
-    const WindowAnimationOption& animationOption)
+WMError WindowManager::AnimateTo(int32_t windowId, WindowAnimationProperty animationProperty,
+    WindowAnimationOption animationOption)
 {
     TLOGI(WmsLogTag::WMS_ANIMATION, "In, windowId: %{public}d, targetScale: %{public}f, animationOption: %{public}s",
         windowId, animationProperty.targetScale, animationOption.ToString().c_str());
