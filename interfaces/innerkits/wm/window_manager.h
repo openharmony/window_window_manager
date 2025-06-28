@@ -42,6 +42,7 @@ struct SystemBarRegionTint {
         : type_(type), prop_(prop), region_(region) {}
 };
 using SystemBarRegionTints = std::vector<SystemBarRegionTint>;
+using GetJSWindowObjFunc = std::function<napi_value(std::string windowName)>;
 
 struct VisibleWindowNumInfo {
     uint32_t displayId;
@@ -67,20 +68,12 @@ struct WindowLifeCycleInfo {
 class IWindowLifeCycleListener : virtual public RefBase {
 public:
     /**
-     * @brief Notify caller when window is created
-     *
-     * @param lifeCycleInfo window info while its lifecycle status changed.
-     *
-     */
-    virtual void OnWindowCreated(WindowLifeCycleInfo lifeCycleInfo) = 0;
-
-    /**
      * @brief Notify caller when window is destroyed
      *
      * @param lifeCycleInfo window info while its lifecycle status changed.
      *
      */
-    virtual void OnWindowDestroyed(WindowLifeCycleInfo lifeCycleInfo) = 0;
+    virtual void OnWindowDestroyed(WindowLifeCycleInfo lifeCycleInfo, napi_value jsWindowNapiValue) = 0;
 };
 
 /**
@@ -1306,24 +1299,25 @@ public:
         const WindowAnimationOption& animationOption);
 
     /**
-     * @brief Register window lifecycle status changed listener.
+     * @brief Register window lifecycle status changed callback.
      * @param listener IWindowLifeCycleListener.
      * @return WM_OK means register success, others means register failed.
      */
-    WMError RegisterWindowLifeCycleListener(const sptr<IWindowLifeCycleListener>& listener);
+    WMError RegisterWindowLifeCycleCallback(const sptr<IWindowLifeCycleListener>& listener);
 
     /**
-     * @brief Unregister window lifecycle status changed listener.
+     * @brief Unregister window lifecycle status changed callback.
      * @param listener IWindowLifeCycleListener.
      * @return WM_OK means unregister success, others means unregister failed.
      */
-    WMError UnregisterWindowLifeCycleListener(const sptr<IWindowLifeCycleListener>& listener);
+    WMError UnregisterWindowLifeCycleCallback(const sptr<IWindowLifeCycleListener>& listener);
 
     /**
-     * @brief notify window created.
-     * @param lifeCycleInfo window lifecycle info.
+     * @brief Register get js window callback.
+     * @param listener IWindowLifeCycleListener.
+     * @return WM_OK means register success, others means register failed.
      */
-    void NotifyWMSWindowCreated(WindowLifeCycleInfo lifeCycleInfo);
+    WMError RegisterGetJSWindowCallback(const GetJSWindowObjFunc& getJSWindowFunc);
 
     /**
      * @brief notify window destroyed.
@@ -1340,6 +1334,7 @@ private:
     bool destroyed_ = false;
     std::unordered_set<std::string> isModuleHookOffSet_;
     std::unordered_map<WindowInfoKey, uint32_t> interestInfoMap_;
+    GetJSWindowObjFunc getJSWindowObjFunc_;
 
     void OnWMSConnectionChanged(int32_t userId, int32_t screenId, bool isConnected) const;
     void UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObject>& abilityToken, WindowType windowType,

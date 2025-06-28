@@ -17,6 +17,7 @@
 #define OHOS_ROSEN_WINDOW_SCENE_SESSION_IMPL_H
 
 #include "window_session_impl.h"
+#include "window_manager.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -501,6 +502,7 @@ private:
     void NotifyFreeMultiWindowModeResume();
     std::string TransferLifeCycleEventToString(LifeCycleEvent type) const;
     void RecordLifeCycleExceptionEvent(LifeCycleEvent event, WMError erCode) const;
+    WindowLifeCycleInfo GetWindowLifecycleInfo();
 
     /**
      * Window Transition Animation For PC
