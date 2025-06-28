@@ -791,17 +791,17 @@ bool AniWindowUtils::SetDecorButtonStyleFromAni(ani_env* env, DecorButtonStyle& 
     }
     ani_double buttonBackgroundSize;
     if (ANI_OK == env->Object_GetPropertyByName_Double(decorStyle, "buttonBackgroundSize", &buttonBackgroundSize)) {
-        decorButtonStyle.buttonBackgroundSize = static_cast<int32_t>(buttonBackgroundSize);
+        decorButtonStyle.buttonBackgroundSize = static_cast<uint32_t>(buttonBackgroundSize);
         emptyParam = false;
     }
     ani_double spacingBetweenButtons;
     if (ANI_OK == env->Object_GetPropertyByName_Double(decorStyle, "spacingBetweenButtons", &spacingBetweenButtons)) {
-        decorButtonStyle.spacingBetweenButtons = static_cast<int32_t>(spacingBetweenButtons);
+        decorButtonStyle.spacingBetweenButtons = static_cast<uint32_t>(spacingBetweenButtons);
         emptyParam = false;
     }
     ani_double closeButtonRightMargin;
     if (ANI_OK == env->Object_GetPropertyByName_Double(decorStyle, "closeButtonRightMargin", &closeButtonRightMargin)) {
-        decorButtonStyle.closeButtonRightMargin = static_cast<int32_t>(closeButtonRightMargin);
+        decorButtonStyle.closeButtonRightMargin = static_cast<uint32_t>(closeButtonRightMargin);
         emptyParam = false;
     }
     return !emptyParam;
