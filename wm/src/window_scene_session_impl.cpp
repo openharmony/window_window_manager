@@ -650,7 +650,6 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         }
         RegisterWindowInspectorCallback();
     }
-
     TLOGD(WmsLogTag::WMS_LIFE, "Window Create success [name:%{public}s, id:%{public}d], state:%{public}u, "
         "mode:%{public}u, enableDefaultDensity:%{public}d, displayId:%{public}" PRIu64,
         property_->GetWindowName().c_str(), property_->GetPersistentId(), state_, GetWindowMode(),
