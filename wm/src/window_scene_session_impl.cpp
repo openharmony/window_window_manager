@@ -1867,6 +1867,15 @@ WMError WindowSceneSessionImpl::DestroyHookWindow()
     return WMError::WM_OK;
 }
 
+WindowLifeCycleInfo WindowSceneSessionImpl::GetWindowLifecycleInfo()
+{
+    WindowLifeCycleInfo lifeCycleInfo;
+    lifeCycleInfo.windowId = GetPersistentId();
+    lifeCycleInfo.windowType = GetType();
+    lifeCycleInfo.windowName = GetWindowName();
+    return lifeCycleInfo;
+}
+
 WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearListener, uint32_t reason)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "Destroy start, id:%{public}d, state:%{public}u, needNotifyServer:%{public}d, "
@@ -1889,12 +1898,7 @@ WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearLis
         WLOGFW("Destroy window failed, id: %{public}d", GetPersistentId());
         return ret;
     }
-
-    WindowLifeCycleInfo lifeCycleInfo;
-    lifeCycleInfo.windowId = GetPersistentId();
-    lifeCycleInfo.windowType = GetType();
-    lifeCycleInfo.windowName = GetWindowName();
-    SingletonContainer::Get<WindowManager>().NotifyWMSWindowDestroyed(lifeCycleInfo);
+    SingletonContainer::Get<WindowManager>().NotifyWMSWindowDestroyed(GetWindowLifecycleInfo());
 
     // delete after replace WSError with WMError
     NotifyBeforeDestroy(GetWindowName());
