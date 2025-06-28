@@ -519,20 +519,25 @@ WmErrorCode AniWindowRegisterManager::UnregisterListener(sptr<Window> window, st
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     RegisterListenerType listenerType = iterCallbackType->second;
-    if (callback == nullptr) {
+    ani_boolean isUndef = ANI_FALSE;
+    env->Reference_IsUndefined(callback, &isUndef);
+    if (isUndef == ANI_TRUE) {
+        TLOGD(WmsLogTag::DEFAULT, "[ANI]Unregister all callback, type:%{public}s", type.c_str());
         for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
             WmErrorCode ret = ProcessListener(listenerType, caseType, it->second, window, false, env, 0);
             if (ret != WmErrorCode::WM_OK) {
                 TLOGE(WmsLogTag::DEFAULT, "[ANI]Unregister type %{public}s failed, no value", type.c_str());
                 return ret;
             }
+            env->GlobalReference_Delete(it->second->GetAniCallBack());
             jsCbMap_[type].erase(it++);
         }
     } else {
         bool findFlag = false;
         for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end(); ++it) {
             ani_boolean isEquals = 0;
-            env->Reference_StrictEquals(callback, it->first, &isEquals);
+            env->Reference_StrictEquals(callback, it->second->GetAniCallBack(), &isEquals);
+            TLOGD(WmsLogTag::DEFAULT, "[ANI]callback isEquals:%{public}d", static_cast<int32_t>(isEquals));
             if (!isEquals) {
                 continue;
             }
@@ -542,6 +547,7 @@ WmErrorCode AniWindowRegisterManager::UnregisterListener(sptr<Window> window, st
                 TLOGE(WmsLogTag::DEFAULT, "[ANI]Unregister type %{public}s failed", type.c_str());
                 return ret;
             }
+            env->GlobalReference_Delete(it->second->GetAniCallBack());
             jsCbMap_[type].erase(it);
             break;
         }

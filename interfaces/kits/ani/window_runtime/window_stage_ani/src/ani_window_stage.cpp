@@ -45,7 +45,7 @@ AniWindowStage::~AniWindowStage()
     TLOGE(WmsLogTag::DEFAULT, "[ANI] Ani WindowStage died");
 }
 
-ani_object AniWindowStage::GetMainWindow(ani_env* env)
+ani_ref AniWindowStage::GetMainWindow(ani_env* env)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI] Get main window");
     std::shared_ptr<WindowScene> weakScene = windowScene_.lock();
@@ -324,7 +324,7 @@ void AniWindowStage::OnLoadContentWithStorage(ani_env* env, ani_string path, ani
 }  // namespace Rosen
 }  // namespace OHOS
 
-static ani_object WindowGetMainWindow(ani_env* env, ani_object obj, ani_long nativeObj)
+static ani_ref WindowGetMainWindow(ani_env* env, ani_object obj, ani_long nativeObj)
 {
     using namespace OHOS::Rosen;
     TLOGD(WmsLogTag::DEFAULT, "[ANI]");
