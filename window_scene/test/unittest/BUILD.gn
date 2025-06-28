@@ -1521,6 +1521,7 @@ ohos_unittest("ws_session_change_recorder_test") {
     "eventhandler:libeventhandler",
     "hilog:libhilog",
     "image_framework:image_native",
+    "image_framework:pixelconvertadapter",
   ]
 }
 
