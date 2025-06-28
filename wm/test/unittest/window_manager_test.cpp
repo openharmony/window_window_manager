@@ -202,7 +202,7 @@ public:
     }
 
     WindowLifeCycleInfo listenerLifeCycleInfo;
-    napi_value jsWindowNapiValue = nullptr
+    napi_value jsWindowNapiValue = nullptr;
 };
 
 class WindowManagerTest : public testing::Test {
@@ -2183,13 +2183,13 @@ HWTEST_F(WindowManagerTest, RegisterWindowLifeCycleListener01, TestSize.Level1)
     WMError ret;
     sptr<TestIWindowLifeCycleListener> listener = sptr<TestIWindowLifeCycleListener>::MakeSptr();
     ret = WindowManager::GetInstance().RegisterWindowLifeCycleCallback(listener);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(WMError::WM_OK, ret);
 
     ret = WindowManager::GetInstance().RegisterWindowLifeCycleCallback(nullptr);
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
 
     ret = WindowManager::GetInstance().RegisterWindowLifeCycleCallback(listener);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(WMError::WM_OK, ret);
 }
 
 /**
@@ -2202,13 +2202,13 @@ HWTEST_F(WindowManagerTest, UnregisterWindowLifeCycleListener01, TestSize.Level1
     WMError ret;
     sptr<TestIWindowLifeCycleListener> listener = sptr<TestIWindowLifeCycleListener>::MakeSptr();
     ret = WindowManager::GetInstance().UnregisterWindowLifeCycleCallback(listener);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(WMError::WM_OK, ret);
 
     ret = WindowManager::GetInstance().UnregisterWindowLifeCycleCallback(nullptr);
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
 
     ret = WindowManager::GetInstance().UnregisterWindowLifeCycleCallback(listener);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(WMError::WM_OK, ret);
 }
 
 /**
@@ -2221,48 +2221,48 @@ HWTEST_F(WindowManagerTest, NotifyWMSWindowDestroyed01, TestSize.Level1)
     WMError ret;
     sptr<TestIWindowLifeCycleListener> listener = sptr<TestIWindowLifeCycleListener>::MakeSptr();
     ret = WindowManager::GetInstance().RegisterWindowLifeCycleCallback(listener);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(WMError::WM_OK, ret);
 
     WindowLifeCycleInfo lifeCycleInfo;
     lifeCycleInfo.windowId = 101;
     lifeCycleInfo.windowType = WindowType::APP_WINDOW_BASE;
     lifeCycleInfo.windowName = "window101";
     WindowManager::GetInstance().NotifyWMSWindowDestroyed(lifeCycleInfo);
-    ASSERT_EQ(lifeCycleInfo.windowId, listener->listenerLifeCycleInfo.windowId);
-    ASSERT_EQ(lifeCycleInfo.windowType, listener->listenerLifeCycleInfo.windowType);
-    ASSERT_EQ(lifeCycleInfo.windowName, listener->listenerLifeCycleInfo.windowName);
+    EXPECT_EQ(lifeCycleInfo.windowId, listener->listenerLifeCycleInfo.windowId);
+    EXPECT_EQ(lifeCycleInfo.windowType, listener->listenerLifeCycleInfo.windowType);
+    EXPECT_EQ(lifeCycleInfo.windowName, listener->listenerLifeCycleInfo.windowName);
 
     lifeCycleInfo.windowId = 102;
     lifeCycleInfo.windowType = WindowType::APP_SUB_WINDOW_BASE;
     lifeCycleInfo.windowName = "window102";
     WindowManager::GetInstance().NotifyWMSWindowDestroyed(lifeCycleInfo);
-    ASSERT_EQ(lifeCycleInfo.windowId, listener->listenerLifeCycleInfo.windowId);
-    ASSERT_EQ(lifeCycleInfo.windowType, listener->listenerLifeCycleInfo.windowType);
-    ASSERT_EQ(lifeCycleInfo.windowName, listener->listenerLifeCycleInfo.windowName);
+    EXPECT_EQ(lifeCycleInfo.windowId, listener->listenerLifeCycleInfo.windowId);
+    EXPECT_EQ(lifeCycleInfo.windowType, listener->listenerLifeCycleInfo.windowType);
+    EXPECT_EQ(lifeCycleInfo.windowName, listener->listenerLifeCycleInfo.windowName);
 
     lifeCycleInfo.windowId = 103;
     lifeCycleInfo.windowType = WindowType::SYSTEM_WINDOW_BASE;
     lifeCycleInfo.windowName = "window103";
     WindowManager::GetInstance().NotifyWMSWindowDestroyed(lifeCycleInfo);
-    ASSERT_EQ(lifeCycleInfo.windowId, listener->listenerLifeCycleInfo.windowId);
-    ASSERT_EQ(lifeCycleInfo.windowType, listener->listenerLifeCycleInfo.windowType);
-    ASSERT_EQ(lifeCycleInfo.windowName, listener->listenerLifeCycleInfo.windowName);
+    EXPECT_EQ(lifeCycleInfo.windowId, listener->listenerLifeCycleInfo.windowId);
+    EXPECT_EQ(lifeCycleInfo.windowType, listener->listenerLifeCycleInfo.windowType);
+    EXPECT_EQ(lifeCycleInfo.windowName, listener->listenerLifeCycleInfo.windowName);
 
     lifeCycleInfo.windowId = 104;
     lifeCycleInfo.windowType = WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE;
     lifeCycleInfo.windowName = "window104";
     WindowManager::GetInstance().NotifyWMSWindowDestroyed(lifeCycleInfo);
-    ASSERT_EQ(lifeCycleInfo.windowId, listener->listenerLifeCycleInfo.windowId);
-    ASSERT_EQ(lifeCycleInfo.windowType, listener->listenerLifeCycleInfo.windowType);
-    ASSERT_EQ(lifeCycleInfo.windowName, listener->listenerLifeCycleInfo.windowName);
+    EXPECT_EQ(lifeCycleInfo.windowId, listener->listenerLifeCycleInfo.windowId);
+    EXPECT_EQ(lifeCycleInfo.windowType, listener->listenerLifeCycleInfo.windowType);
+    EXPECT_EQ(lifeCycleInfo.windowName, listener->listenerLifeCycleInfo.windowName);
 
     lifeCycleInfo.windowId = 105;
     lifeCycleInfo.windowType = WindowType::SYSTEM_SUB_WINDOW_BASE;
     lifeCycleInfo.windowName = "window105";
     WindowManager::GetInstance().NotifyWMSWindowDestroyed(lifeCycleInfo);
-    ASSERT_EQ(lifeCycleInfo.windowId, listener->listenerLifeCycleInfo.windowId);
-    ASSERT_EQ(lifeCycleInfo.windowType, listener->listenerLifeCycleInfo.windowType);
-    ASSERT_EQ(lifeCycleInfo.windowName, listener->listenerLifeCycleInfo.windowName);
+    EXPECT_EQ(lifeCycleInfo.windowId, listener->listenerLifeCycleInfo.windowId);
+    EXPECT_EQ(lifeCycleInfo.windowType, listener->listenerLifeCycleInfo.windowType);
+    EXPECT_EQ(lifeCycleInfo.windowName, listener->listenerLifeCycleInfo.windowName);
 }
 
 /**
@@ -2275,7 +2275,7 @@ HWTEST_F(WindowManagerTest, NotifyWMSWindowDestroyed02, TestSize.Level1)
     WMError ret;
     sptr<TestIWindowLifeCycleListener> listener = sptr<TestIWindowLifeCycleListener>::MakeSptr();
     ret = WindowManager::GetInstance().UnregisterWindowLifeCycleCallback(listener);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(WMError::WM_OK, ret);
 
     WindowLifeCycleInfo lifeCycleInfo;
     lifeCycleInfo.windowId = 101;
@@ -2287,11 +2287,10 @@ HWTEST_F(WindowManagerTest, NotifyWMSWindowDestroyed02, TestSize.Level1)
     };
     WindowManager::GetInstance().RegisterGetJSWindowCallback(func);
     WindowManager::GetInstance().NotifyWMSWindowDestroyed(lifeCycleInfo);
-    ASSERT_NE(lifeCycleInfo.windowId, listener->listenerLifeCycleInfo.windowId);
-    ASSERT_NE(lifeCycleInfo.windowType, listener->listenerLifeCycleInfo.windowType);
-    ASSERT_NE(lifeCycleInfo.windowName, listener->listenerLifeCycleInfo.windowName);
+    EXPECT_EQ(lifeCycleInfo.windowId, listener->listenerLifeCycleInfo.windowId);
+    EXPECT_EQ(lifeCycleInfo.windowType, listener->listenerLifeCycleInfo.windowType);
+    EXPECT_EQ(lifeCycleInfo.windowName, listener->listenerLifeCycleInfo.windowName);
 }
-
 }
 } // namespace
 } // namespace Rosen
