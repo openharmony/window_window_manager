@@ -120,7 +120,7 @@ public:
 
 void WindowManager::Impl::NotifyWMSConnected(int32_t userId, int32_t screenId)
 {
-    TLOGD(WmsLogTag::WMS_LIFE, "WMS connected [userId:%{public}d; screenId:%{public}d]", userId, screenId);
+    TLOGD(WmsLogTag::WMS_MULTI_USER, "WMS connected [userId:%{public}d; screenId:%{public}d]", userId, screenId);
     sptr<IWMSConnectionChangedListener> wmsConnectionChangedListener;
     {
         std::shared_lock<std::shared_mutex> lock(listenerMutex_);
@@ -133,7 +133,7 @@ void WindowManager::Impl::NotifyWMSConnected(int32_t userId, int32_t screenId)
 
 void WindowManager::Impl::NotifyWMSDisconnected(int32_t userId, int32_t screenId)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "WMS disconnected [userId:%{public}d; screenId:%{public}d]", userId, screenId);
+    TLOGI(WmsLogTag::WMS_MULTI_USER, "WMS disconnected [userId:%{public}d; screenId:%{public}d]", userId, screenId);
     sptr<IWMSConnectionChangedListener> wmsConnectionChangedListener;
     {
         std::shared_lock<std::shared_mutex> lock(listenerMutex_);
