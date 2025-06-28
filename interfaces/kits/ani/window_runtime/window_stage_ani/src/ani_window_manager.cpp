@@ -87,24 +87,21 @@ ani_status AniWindowManager::AniWindowManagerInit(ani_env* env)
 
 ani_object AniWindowManager::WindowStageCreate(ani_env* env, ani_long scene)
 {
-    TLOGD(WmsLogTag::DEFAULT, "[ANI] create windowstage with scene 0x%{public}p %{public}d",
-        reinterpret_cast<void*>(env), (int32_t)scene);
     std::shared_ptr<WindowScene> scenePtr;
     return CreateAniWindowStage(env, scenePtr);
 }
 
-ani_object AniWindowManager::GetLastWindow(ani_env* env, ani_long nativeObj, ani_object context)
+ani_ref AniWindowManager::GetLastWindow(ani_env* env, ani_long nativeObj, ani_object context)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     AniWindowManager* aniWindowManager = reinterpret_cast<AniWindowManager*>(nativeObj);
     return aniWindowManager != nullptr ? aniWindowManager->OnGetLastWindow(env, context) : nullptr;
 }
 
-ani_object AniWindowManager::OnGetLastWindow(ani_env* env, ani_object aniContext)
+ani_ref AniWindowManager::OnGetLastWindow(ani_env* env, ani_object aniContext)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     auto contextPtr = AniWindowUtils::GetAbilityContext(env, aniContext);
-    TLOGI(WmsLogTag::DEFAULT, "[ANI] nativeContextLong : %{public}p", contextPtr);
     auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(contextPtr);
     if (context == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] context is nullptr");
@@ -118,14 +115,14 @@ ani_object AniWindowManager::OnGetLastWindow(ani_env* env, ani_object aniContext
     return CreateAniWindowObject(env, window);
 }
 
-ani_object AniWindowManager::FindWindow(ani_env* env, ani_long nativeObj, ani_string windowName)
+ani_ref AniWindowManager::FindWindow(ani_env* env, ani_long nativeObj, ani_string windowName)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     AniWindowManager* aniWindowManager = reinterpret_cast<AniWindowManager*>(nativeObj);
     return aniWindowManager != nullptr ? aniWindowManager->OnFindWindow(env, windowName) : nullptr;
 }
 
-ani_object AniWindowManager::OnFindWindow(ani_env* env, ani_string windowName)
+ani_ref AniWindowManager::OnFindWindow(ani_env* env, ani_string windowName)
 {
     std::string name;
     AniWindowUtils::GetStdString(env, windowName, name);
@@ -133,7 +130,7 @@ ani_object AniWindowManager::OnFindWindow(ani_env* env, ani_string windowName)
     if (name.compare(PIP_WINDOW) == 0) {
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    ani_object aniWindowObj = FindAniWindowObject(name);
+    ani_ref aniWindowObj = FindAniWindowObject(name);
     if (aniWindowObj != nullptr) {
         TLOGD(WmsLogTag::DEFAULT, "[ANI]Find window: %{public}s, use exist js window", name.c_str());
         return aniWindowObj;

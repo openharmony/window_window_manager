@@ -44,7 +44,7 @@ class AniWindowStage {
         ani_string path, ani_object storage);
 
     std::weak_ptr<WindowScene> GetWindowScene() { return windowScene_; }
-    ani_object GetMainWindow(ani_env* env);
+    ani_ref GetMainWindow(ani_env* env);
     ani_boolean WindowIsWindowSupportWideGamut(ani_env* env, ani_class cls, ani_object obj);
 private:
     void OnDisableWindowDecor(ani_env* env);
