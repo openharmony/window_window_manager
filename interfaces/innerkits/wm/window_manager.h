@@ -73,7 +73,7 @@ public:
      * @param lifeCycleInfo window info while its lifecycle status changed.
      *
      */
-    virtual void OnWindowDestroyed(WindowLifeCycleInfo lifeCycleInfo, void* jsWindowNapiValue) = 0;
+    virtual void OnWindowDestroyed(WindowLifeCycleInfo& lifeCycleInfo, void* jsWindowNapiValue) = 0;
 };
 
 /**
@@ -1322,7 +1322,7 @@ public:
      * @brief notify window destroyed.
      * @param lifeCycleInfo window lifecycle info.
      */
-    void NotifyWMSWindowDestroyed(WindowLifeCycleInfo lifeCycleInfo);
+    void NotifyWMSWindowDestroyed(WindowLifeCycleInfo& lifeCycleInfo);
 
 private:
     WindowManager();
