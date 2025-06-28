@@ -55,6 +55,16 @@ constexpr uint32_t API_VERSION_18 = 18;
 
 JsWindowManager::JsWindowManager() : registerManager_(std::make_unique<JsWindowRegisterManager>())
 {
+    GetJSWindowObjFunc func = [](const std::string& windowName) {
+        napi_value jsWindowNapiValue = nullptr;
+        std::shared_ptr<NativeReference> jsWindowObj = FindJsWindowObject(windowName);
+        if (jsWindowObj != nullptr && jsWindowObj->GetNapiValue() != nullptr) {
+            TLOGNI(WmsLogTag::WMS_LIFE, "find window, window name: %{public}s", windowName.c_str());
+            jsWindowNapiValue = jsWindowObj->GetNapiValue();
+        }
+        return jsWindowNapiValue;
+    };
+    SingletonContainer::Get<WindowManager>().RegisterGetJSWindowCallback(func);
 }
 
 JsWindowManager::~JsWindowManager()
