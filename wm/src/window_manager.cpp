@@ -2160,7 +2160,6 @@ WMError WindowManager::AnimateTo(int32_t windowId, const WindowAnimationProperty
     return ret;
 }
 
-
 WMError WindowManager::RegisterWindowLifeCycleCallback(const sptr<IWindowLifeCycleListener>& listener)
 {
     if (listener == nullptr) {
