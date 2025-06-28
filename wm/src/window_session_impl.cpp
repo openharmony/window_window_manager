@@ -1829,11 +1829,12 @@ void WindowSessionImpl::HideTitleButton(bool& hideSplitButton, bool& hideMaximiz
     }
     hideMaximizeButton = hideMaximizeButton || property_->IsFullScreenDisabled();
     bool isLayoutFullScreen = property_->IsLayoutFullScreen();
+    bool hideSplitBtn = hideSplitButton || property_->IsSplitDisabled();
     if (property_->IsAdaptToImmersive() && !property_->GetIsAtomicService()) {
-        uiContent->HideWindowTitleButton(true, !isLayoutFullScreen && hideMaximizeButton,
+        uiContent->HideWindowTitleButton(hideSplitBtn, !isLayoutFullScreen && hideMaximizeButton,
             hideMinimizeButton, hideCloseButton);
     } else {
-        uiContent->HideWindowTitleButton(hideSplitButton, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
+        uiContent->HideWindowTitleButton(hideSplitBtn, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
     }
     // compatible mode adapt to proportional scale, will show its button
     bool showScaleBtn = property_->IsAdaptToProportionalScale() && !property_->GetIsAtomicService();

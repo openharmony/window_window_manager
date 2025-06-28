@@ -310,6 +310,7 @@ public:
     bool IsDragResizeDisabled() const;
     bool IsResizeWithDpiDisabled() const;
     bool IsFullScreenDisabled() const;
+    bool IsSplitDisabled() const;
     bool IsWindowLimitDisabled() const;
     bool IsSupportRotateFullScreen() const;
     bool IsAdaptToSubWindow() const;
@@ -599,6 +600,9 @@ public:
     void SetDisableFullScreen(bool setDisableFullScreen);
     bool IsFullScreenDisabled() const;
 
+    void SetDisableSplit(bool disableSplit);
+    bool IsSplitDisabled() const;
+
     void SetDisableWindowLimit(bool disableWindowLimit);
     bool IsWindowLimitDisabled() const;
 
@@ -643,6 +647,7 @@ private:
     bool disableDragResize_ { false };
     bool disableResizeWithDpi_ { false };
     bool disableFullScreen_ { false };
+    bool disableSplit_ { false };
     bool disableWindowLimit_ { false };
     bool isSupportRotateFullScreen_ { false };
     bool isAdaptToSubWindow_ { false };
