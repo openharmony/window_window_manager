@@ -74,7 +74,7 @@ public:
     void NotifyWindowSystemBarPropertyChange(WindowType type, const SystemBarProperty& systemBarProperty);
     void NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info);
     void NotifyWindowRectChange(const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList);
-    void NotifyWMSWindowDestroyed(WindowLifeCycleInfo lifeCycleInfo, napi_value jsWindowNapiValue);
+    void NotifyWMSWindowDestroyed(WindowLifeCycleInfo lifeCycleInfo, void* jsWindowNapiValue);
 
     static inline SingletonDelegator<WindowManager> delegator_;
 
@@ -465,7 +465,7 @@ void WindowManager::Impl::NotifyWindowRectChange(
     }
 }
 
-void WindowManager::Impl::NotifyWMSWindowDestroyed(WindowLifeCycleInfo lifeCycleInfo, napi_value jsWindowNapiValue)
+void WindowManager::Impl::NotifyWMSWindowDestroyed(WindowLifeCycleInfo lifeCycleInfo, void* jsWindowNapiValue)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "notify window destroyed");
 
@@ -2201,14 +2201,11 @@ void WindowManager::RegisterGetJSWindowCallback(const GetJSWindowObjFunc& getJSW
 
 void WindowManager::NotifyWMSWindowDestroyed(WindowLifeCycleInfo lifeCycleInfo)
 {
-    napi_value jsWindowNapiValue = nullptr;
+    void* jsWindowNapiValue = nullptr;
     if (getJSWindowObjFunc_ != nullptr) {
         TLOGI(WmsLogTag::WMS_LIFE, "window name: %{public}s, window id: %{public}d", lifeCycleInfo.windowName.c_str(),
             lifeCycleInfo.windowId);
         jsWindowNapiValue = getJSWindowObjFunc_(lifeCycleInfo.windowName);
-    }
-    if (jsWindowNapiValue == nullptr) {
-        TLOGI(WmsLogTag::WMS_LIFE, "js window napi value is nullptr");
     }
     pImpl_->NotifyWMSWindowDestroyed(lifeCycleInfo, jsWindowNapiValue);
 }
