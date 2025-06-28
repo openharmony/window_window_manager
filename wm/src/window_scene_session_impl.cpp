@@ -58,7 +58,6 @@
 #include "picture_in_picture_manager.h"
 #include "window_session_impl.h"
 #include "sys_cap_util.h"
-#include "window_manager.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -651,12 +650,6 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         }
         RegisterWindowInspectorCallback();
     }
-
-    WindowLifeCycleInfo lifeCycleInfo;
-    lifeCycleInfo.windowId = GetPersistentId();
-    lifeCycleInfo.windowType = GetType();
-    lifeCycleInfo.windowName = GetWindowName();
-    SingletonContainer::Get<WindowManager>().NotifyWMSWindowCreated(lifeCycleInfo);
 
     TLOGD(WmsLogTag::WMS_LIFE, "Window Create success [name:%{public}s, id:%{public}d], state:%{public}u, "
         "mode:%{public}u, enableDefaultDensity:%{public}d, displayId:%{public}" PRIu64,
