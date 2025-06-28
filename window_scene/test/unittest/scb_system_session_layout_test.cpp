@@ -157,7 +157,7 @@ HWTEST_F(SCBSystemSessionLayoutTest, NotifyClientToUpdateRect03, TestSize.Level1
     ret = scbSystemSession_->NotifyClientToUpdateRect("SCBSystemSessionLayoutTest", nullptr);
     ASSERT_EQ(WSError::WS_OK, ret);
 
-    scbSystemSession_->reason_ = SizeChangeReason::DRAG;
+    scbSystemSession_->Session::UpdateSizeChangeReason(SizeChangeReason::DRAG);
     ret = scbSystemSession_->NotifyClientToUpdateRect("SCBSystemSessionLayoutTest", nullptr);
     ASSERT_EQ(WSError::WS_OK, ret);
 }

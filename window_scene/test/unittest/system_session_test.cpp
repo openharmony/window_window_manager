@@ -602,19 +602,20 @@ HWTEST_F(SystemSessionTest, CheckKeyEventDispatch03, TestSize.Level1)
     ASSERT_EQ(ret, false);
 
     sysSession->isRSVisible_ = true;
-    sysSession->winRect_.width_ = 0;
+    WSRect curRect = sysSession->GetSessionRect();
+    sysSession->GetLayoutController()->SetSessionRect({ curRect.posX_, curRect.posY_, 0, curRect.height_ });
     ret = sysSession->CheckKeyEventDispatch(keyEvent);
     ASSERT_EQ(ret, false);
 
     sysSession->isRSVisible_ = true;
-    sysSession->winRect_.width_ = 1;
-    sysSession->winRect_.height_ = 0;
+    curRect = sysSession->GetSessionRect();
+    sysSession->GetLayoutController()->SetSessionRect({ curRect.posX_, curRect.posY_, 1, 0 });
     ret = sysSession->CheckKeyEventDispatch(keyEvent);
     ASSERT_EQ(ret, false);
 
     sysSession->isRSVisible_ = true;
-    sysSession->winRect_.width_ = 1;
-    sysSession->winRect_.height_ = 1;
+    curRect = sysSession->GetSessionRect();
+    sysSession->GetLayoutController()->SetSessionRect({ curRect.posX_, curRect.posY_, 1, 1 });
     ret = sysSession->CheckKeyEventDispatch(keyEvent);
     ASSERT_EQ(ret, false);
 }
@@ -631,8 +632,8 @@ HWTEST_F(SystemSessionTest, CheckKeyEventDispatch04, TestSize.Level1)
     ASSERT_NE(sysSession, nullptr);
     sysSession->persistentId_ = 1;
     sysSession->isRSVisible_ = true;
-    sysSession->winRect_.width_ = 1;
-    sysSession->winRect_.height_ = 1;
+    WSRect curRect = sysSession->GetSessionRect();
+    sysSession->GetLayoutController()->SetSessionRect({ curRect.posX_, curRect.posY_, 1, 1 });
     sysSession->state_ = SessionState::STATE_DISCONNECT;
 
     auto parentSesssion = GetSceneSession("parentSession");
@@ -679,15 +680,15 @@ HWTEST_F(SystemSessionTest, NotifyClientToUpdateRect02, TestSize.Level1)
     sysSession->isKeyboardPanelEnabled_ = true;
 
     sysSession->dirtyFlags_ = 0;
-    sysSession->reason_ = SizeChangeReason::MAXIMIZE;
+    sysSession->Session::UpdateSizeChangeReason(SizeChangeReason::MAXIMIZE);
     sysSession->NotifyClientToUpdateRect("SystemSessionTest", nullptr);
     usleep(WAIT_ASYNC_US);
-    ASSERT_EQ(sysSession->reason_, SizeChangeReason::UNDEFINED);
+    ASSERT_EQ(sysSession->GetSizeChangeReason(), SizeChangeReason::UNDEFINED);
 
-    sysSession->reason_ = SizeChangeReason::DRAG;
+    sysSession->Session::UpdateSizeChangeReason(SizeChangeReason::DRAG);
     sysSession->NotifyClientToUpdateRect("SystemSessionTest", nullptr);
     usleep(WAIT_ASYNC_US);
-    ASSERT_EQ(sysSession->reason_, SizeChangeReason::DRAG);
+    ASSERT_EQ(sysSession->GetSizeChangeReason(), SizeChangeReason::DRAG);
 }
 
 /**
@@ -705,7 +706,7 @@ HWTEST_F(SystemSessionTest, NotifyClientToUpdateRect03, TestSize.Level1)
 
     sysSession->dirtyFlags_ = 0;
     sysSession->isKeyboardPanelEnabled_ = true;
-    sysSession->reason_ = SizeChangeReason::MAXIMIZE;
+    sysSession->Session::UpdateSizeChangeReason(SizeChangeReason::MAXIMIZE);
 
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
@@ -718,7 +719,7 @@ HWTEST_F(SystemSessionTest, NotifyClientToUpdateRect03, TestSize.Level1)
 
     sysSession->dirtyFlags_ = 0;
     sysSession->SetScbCoreEnabled(true);
-    sysSession->reason_ = SizeChangeReason::MAXIMIZE;
+    sysSession->Session::UpdateSizeChangeReason(SizeChangeReason::MAXIMIZE);
     sysSession->specificCallback_->onUpdateAvoidArea_ = [](const int32_t& persistentId) {};
     sysSession->NotifyClientToUpdateRect("SystemSessionTest", nullptr);
     usleep(WAIT_ASYNC_US);

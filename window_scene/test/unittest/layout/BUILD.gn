@@ -26,6 +26,7 @@ ohos_unittest("ws_layout_test") {
 
   sources = [
     "keyboard_session_layout_test.cpp",
+    "layout_controller_test.cpp",
     "main_session_layout_test.cpp",
     "scb_system_session_layout_test.cpp",
     "scene_session_layout_test.cpp",

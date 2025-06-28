@@ -47,9 +47,12 @@ MainSession::MainSession(const SessionInfo& info, const sptr<SpecificSessionCall
     std::string key = GetRatioPreferenceKey();
     if (!key.empty()) {
         if (ScenePersistentStorage::HasKey(key, ScenePersistentStorageType::ASPECT_RATIO)) {
-            ScenePersistentStorage::Get(key, aspectRatio_, ScenePersistentStorageType::ASPECT_RATIO);
-            WLOGFD("init aspectRatio, key %{public}s, value: %{public}f", key.c_str(), aspectRatio_);
-            moveDragController_->SetAspectRatio(aspectRatio_);
+            float aspectRatio = 0.f;
+            ScenePersistentStorage::Get(key, aspectRatio, ScenePersistentStorageType::ASPECT_RATIO);
+            TLOGI(WmsLogTag::WMS_LAYOUT, "init aspectRatio, bundleName:%{public}s, key:%{public}s, value:%{public}f",
+                info.bundleName_.c_str(), key.c_str(), aspectRatio);
+            Session::SetAspectRatio(aspectRatio);
+            moveDragController_->SetAspectRatio(aspectRatio);
         }
     }
     auto isPersistentImageFit = ScenePersistentStorage::HasKey(

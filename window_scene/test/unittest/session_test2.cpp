@@ -1062,7 +1062,7 @@ HWTEST_F(WindowSessionTest2, NotifyTransferAccessibilityEvent, TestSize.Level1)
 HWTEST_F(WindowSessionTest2, GetAspectRatio, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
-    float ret = session_->aspectRatio_;
+    float ret = session_->GetAspectRatio();
     float res = 0.0f;
     ASSERT_EQ(ret, res);
 }
@@ -1077,7 +1077,7 @@ HWTEST_F(WindowSessionTest2, SetAspectRatio02, TestSize.Level1)
     ASSERT_NE(session_, nullptr);
     float radio = 2.0f;
     WSError ERR = session_->SetAspectRatio(radio);
-    float ret = session_->aspectRatio_;
+    float ret = session_->GetAspectRatio();
     ASSERT_EQ(ret, radio);
     ASSERT_EQ(ERR, WSError::WS_OK);
 }

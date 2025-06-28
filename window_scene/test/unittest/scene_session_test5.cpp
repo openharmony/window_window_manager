@@ -606,59 +606,6 @@ HWTEST_F(SceneSessionTest5, GetSystemAvoidArea02, TestSize.Level1)
 }
 
 /**
- * @tc.name: AdjustRectByAspectRatio
- * @tc.desc: AdjustRectByAspectRatio function01
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest5, AdjustRectByAspectRatio, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "AdjustRectByAspectRatio";
-    info.bundleName_ = "AdjustRectByAspectRatio";
-    info.isSystem_ = false;
-    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(session, nullptr);
-    WSRect rect;
-    EXPECT_EQ(false, session->AdjustRectByAspectRatio(rect));
-    session->property_->SetWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
-    EXPECT_EQ(false, session->AdjustRectByAspectRatio(rect));
-    session->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    session->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
-    EXPECT_EQ(false, session->AdjustRectByAspectRatio(rect));
-    session->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    EXPECT_EQ(false, session->AdjustRectByAspectRatio(rect));
-}
-
-/**
- * @tc.name: AdjustRectByAspectRatio01
- * @tc.desc: AdjustRectByAspectRatio function01
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest5, AdjustRectByAspectRatio01, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "AdjustRectByAspectRatio01";
-    info.bundleName_ = "AdjustRectByAspectRatio01";
-    info.isSystem_ = false;
-    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(session, nullptr);
-    WSRect rect;
-    session->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    info.windowType_ = static_cast<uint32_t>(WindowType::APP_MAIN_WINDOW_BASE);
-    session->aspectRatio_ = 0.5f;
-    EXPECT_NE(nullptr, DisplayManager::GetInstance().GetDefaultDisplay());
-
-    SystemSessionConfig systemConfig;
-    systemConfig.isSystemDecorEnable_ = true;
-    systemConfig.decorWindowModeSupportType_ = 2;
-    session->SetSystemConfig(systemConfig);
-    EXPECT_EQ(true, session->AdjustRectByAspectRatio(rect));
-
-    systemConfig.isSystemDecorEnable_ = false;
-    EXPECT_EQ(false, session->AdjustRectByAspectRatio(rect));
-}
-
-/**
  * @tc.name: OnMoveDragCallback
  * @tc.desc: OnMoveDragCallback function01
  * @tc.type: FUNC
@@ -1113,16 +1060,16 @@ HWTEST_F(SceneSessionTest5, UpdateWinRectForSystemBar, TestSize.Level1)
     session->UpdateWinRectForSystemBar(rect);
 
     session->isVisible_ = true;
-    session->winRect_ = rect;
+    session->GetLayoutController()->SetSessionRect(rect);
     session->UpdateWinRectForSystemBar(rect);
 
     WSRect rect1 = { 1, 2, 10, 4 };
-    session->winRect_ = rect1;
+    session->GetLayoutController()->SetSessionRect(rect1);
     session->UpdateWinRectForSystemBar(rect);
     EXPECT_EQ(4, session->GetSessionRect().height_);
 
     WSRect rect2 = { 1, 2, 10, 8 };
-    session->winRect_ = rect2;
+    session->GetLayoutController()->SetSessionRect(rect2);
     session->UpdateWinRectForSystemBar(rect);
 }
 
@@ -1962,7 +1909,7 @@ HWTEST_F(SceneSessionTest5, NotifyServerToUpdateRect01, TestSize.Level1)
     EXPECT_EQ(session->NotifyServerToUpdateRect(uiParam, SizeChangeReason::UNDEFINED), true);
     EXPECT_EQ(session->GetSessionRect(), uiParam.rect_);
 
-    session->clientRect_ = session->winRect_;
+    session->SetClientRect(session->GetSessionRect());
     EXPECT_EQ(session->NotifyServerToUpdateRect(uiParam, SizeChangeReason::UNDEFINED), false); // skip same rect
 }
 
@@ -2023,10 +1970,10 @@ HWTEST_F(SceneSessionTest5, WindowScaleTransfer01, TestSize.Level1)
     WSRect resultRect = { 200, 200, 200, 200 };
     float scaleX = 0.5f;
     float scaleY = 0.5f;
-    mainSession->winRect_ = rect;
+    mainSession->GetLayoutController()->SetSessionRect(rect);
     mainSession->SetScale(scaleX, scaleY, 0.5f, 0.5f);
-    mainSession->WindowScaleTransfer(mainSession->winRect_, scaleX, scaleY);
-    EXPECT_EQ(mainSession->winRect_, resultRect);
+    mainSession->WindowScaleTransfer(mainSession->GetLayoutController()->winRect_, scaleX, scaleY);
+    EXPECT_EQ(mainSession->GetSessionRect(), resultRect);
 }
 
 /**
@@ -2045,10 +1992,10 @@ HWTEST_F(SceneSessionTest5, WindowScaleTransfer02, TestSize.Level1)
     WSRect resultRect = { 100, 100, 400, 400 };
     float scaleX = 2.0f;
     float scaleY = 2.0f;
-    mainSession->winRect_ = rect;
+    mainSession->GetLayoutController()->SetSessionRect(rect);
     mainSession->SetScale(scaleX, scaleY, 0.5f, 0.5f);
-    mainSession->WindowScaleTransfer(mainSession->winRect_, scaleX, scaleY);
-    EXPECT_EQ(mainSession->winRect_, resultRect);
+    mainSession->WindowScaleTransfer(mainSession->GetLayoutController()->winRect_, scaleX, scaleY);
+    EXPECT_EQ(mainSession->GetSessionRect(), resultRect);
 }
 
 /**
@@ -2181,9 +2128,9 @@ HWTEST_F(SceneSessionTest5, ThrowSlipDirectly, TestSize.Level1)
     info.screenId_ = 0;
     sptr<MainSession> mainSession = sptr<MainSession>::MakeSptr(info, nullptr);
     WSRect rect = { 100, 100, 400, 400 };
-    mainSession->winRect_ = rect;
+    mainSession->GetLayoutController()->SetSessionRect(rect);
     mainSession->ThrowSlipDirectly(ThrowSlipMode::THREE_FINGERS_SWIPE, WSRectF{ 0.0f, 0.0f, 0.0f, 0.0f });
-    EXPECT_EQ(mainSession->winRect_, rect);
+    EXPECT_EQ(mainSession->GetSessionRect(), rect);
 }
 
 /**
@@ -2614,7 +2561,7 @@ HWTEST_F(SceneSessionTest5, UpdateDensity, TestSize.Level1)
     session->property_->SetDisplayId(0);
 
     WSRect rect = { 10, 10, 800, 600 };
-    session->winRect_ = rect;
+    session->GetLayoutController()->SetSessionRect(rect);
     DMRect availableArea = { 0, 0, 1000, 800 };
     ScreenProperty screenProperty;
     screenProperty.SetAvailableArea(availableArea);
@@ -2629,7 +2576,7 @@ HWTEST_F(SceneSessionTest5, UpdateDensity, TestSize.Level1)
 
     session->UpdateDensity();
     WSRect resultRect = { 10, 10, 800, 600 };
-    EXPECT_EQ(session->winRect_, resultRect);
+    EXPECT_EQ(session->GetSessionRect(), resultRect);
 }
 
 /**

@@ -72,24 +72,24 @@ HWTEST_F(MainSessionLayoutTest, SetSubWindowBoundsDuringCross, TestSize.Level1)
     sptr<SceneSession> subSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     mainSession->subSession_.emplace_back(nullptr);
     mainSession->subSession_.emplace_back(subSession);
-    mainSession->winRect_ = { 50, 50, 500, 500 };
-    subSession->winRect_ = { 0, 0, 200, 200 };
+    mainSession->GetLayoutController()->SetSessionRect({ 50, 50, 500, 500 });
+    subSession->GetLayoutController()->SetSessionRect({ 0, 0, 200, 200 });
 
     subSession->state_ = SessionState::STATE_FOREGROUND;
     subSession->windowAnchorInfo_.isAnchorEnabled_ = false;
-    subSession->reason_ = SizeChangeReason::RESIZE;
+    subSession->Session::UpdateSizeChangeReason(SizeChangeReason::RESIZE);
     mainSession->SetSubWindowBoundsDuringCross(mainSession->GetSessionRect(), true, true);
-    EXPECT_EQ(subSession->reason_, SizeChangeReason::RESIZE);
+    EXPECT_EQ(subSession->GetSizeChangeReason(), SizeChangeReason::RESIZE);
 
     subSession->windowAnchorInfo_.isAnchorEnabled_ = true;
-    subSession->reason_ = SizeChangeReason::RESIZE;
+    subSession->Session::UpdateSizeChangeReason(SizeChangeReason::RESIZE);
     mainSession->SetSubWindowBoundsDuringCross(mainSession->GetSessionRect(), true, true);
-    EXPECT_EQ(subSession->reason_, SizeChangeReason::UNDEFINED);
+    EXPECT_EQ(subSession->GetSizeChangeReason(), SizeChangeReason::UNDEFINED);
 
     subSession->state_ = SessionState::STATE_BACKGROUND;
-    subSession->reason_ = SizeChangeReason::RESIZE;
+    subSession->Session::UpdateSizeChangeReason(SizeChangeReason::RESIZE);
     mainSession->SetSubWindowBoundsDuringCross(mainSession->GetSessionRect(), true, true);
-    EXPECT_EQ(subSession->reason_, SizeChangeReason::RESIZE);
+    EXPECT_EQ(subSession->GetSizeChangeReason(), SizeChangeReason::RESIZE);
 }
 
 /**
@@ -107,26 +107,26 @@ HWTEST_F(MainSessionLayoutTest, NotifySubSessionRectChangeByAnchor, TestSize.Lev
     sptr<SceneSession> subSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     mainSession->subSession_.emplace_back(nullptr);
     mainSession->subSession_.emplace_back(subSession);
-    mainSession->winRect_ = { 50, 50, 500, 500 };
-    subSession->winRect_ = { 0, 0, 200, 200 };
+    mainSession->GetLayoutController()->SetSessionRect({ 50, 50, 500, 500 });
+    subSession->GetLayoutController()->SetSessionRect({ 0, 0, 200, 200 });
     const auto& func = [subSession](const WSRect& rect,
                                     SizeChangeReason reason,
                                     DisplayId displayId,
                                     const RectAnimationConfig& rectAnimationConfig) {
-        subSession->winRect_ = rect;
-        subSession->reason_ = reason;
+        subSession->GetLayoutController()->SetSessionRect(rect);
+        subSession->Session::UpdateSizeChangeReason(reason);
     };
     subSession->SetSessionRectChangeCallback(func);
 
     subSession->windowAnchorInfo_.isAnchorEnabled_ = false;
-    subSession->reason_ = SizeChangeReason::UNDEFINED;
+    subSession->Session::UpdateSizeChangeReason(SizeChangeReason::UNDEFINED);
     mainSession->NotifySubSessionRectChangeByAnchor(mainSession->GetSessionRect(), SizeChangeReason::RESIZE);
-    EXPECT_EQ(subSession->reason_, SizeChangeReason::UNDEFINED);
+    EXPECT_EQ(subSession->GetSizeChangeReason(), SizeChangeReason::UNDEFINED);
 
     subSession->windowAnchorInfo_.isAnchorEnabled_ = true;
-    subSession->reason_ = SizeChangeReason::UNDEFINED;
+    subSession->Session::UpdateSizeChangeReason(SizeChangeReason::UNDEFINED);
     mainSession->NotifySubSessionRectChangeByAnchor(mainSession->GetSessionRect(), SizeChangeReason::RESIZE);
-    EXPECT_EQ(subSession->reason_, SizeChangeReason::RESIZE);
+    EXPECT_EQ(subSession->GetSizeChangeReason(), SizeChangeReason::RESIZE);
 }
 
 /**

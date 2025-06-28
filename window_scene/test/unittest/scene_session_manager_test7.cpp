@@ -1290,7 +1290,7 @@ HWTEST_F(SceneSessionManagerTest7, UpdateNormalSessionAvoidArea02, TestSize.Leve
     ASSERT_NE(nullptr, sceneSession);
     sceneSession->isVisible_ = true;
     sceneSession->state_ = SessionState::STATE_FOREGROUND;
-    sceneSession->winRect_ = { 1, 1, 1, 1 };
+    sceneSession->GetLayoutController()->SetSessionRect({ 1, 1, 1, 1 });
     int32_t persistentId = 1;
     bool needUpdate = true;
     ASSERT_NE(nullptr, ssm_);
