@@ -5192,7 +5192,7 @@ void WindowSceneSessionImpl::UpdateSupportWindowModesWhenSwitchFreeMultiWindow()
 
 void WindowSceneSessionImpl::UpdateEnableDragWhenSwitchMultiWindow(bool enable)
 {
-    if (hasSetEnableDrag_.load()) {
+    if (hasSetEnableDrag_.load() || property_->IsDragResizeDisabled()) {
         TLOGI(WmsLogTag::WMS_LAYOUT, "EnableDrag is already set, id: %{public}d", GetPersistentId());
         return;
     }
