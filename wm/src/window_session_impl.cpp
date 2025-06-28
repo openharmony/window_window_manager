@@ -7227,8 +7227,14 @@ bool WindowSessionImpl::IsDeviceFeatureCapableFor(const std::string& feature) co
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window [%{public}d] context is nullptr", GetPersistentId());
         return false;
     }
-    std::vector<std::string> deviceFeatures = context_->GetHapModuleInfo()->deviceFeatures;
-    return std::find(deviceFeatures.begin(), deviceFeatures.end(), feature) != deviceFeatures.end();
+    std::string deviceType = system::GetParameter("const.product.devicetype", "");
+    std::map<std::string, std::vector<std::string>>& requiredDeviceFeatures =
+        context_->GetHapModuleInfo()->requiredDeviceFeatures;
+    if (requiredDeviceFeatures.find(deviceType) == requiredDeviceFeatures.end()) {
+        return false;
+    }
+    auto& features = requiredDeviceFeatures[deviceType];
+    return std::find(features.begin(), features.end(), feature) != features.end();
 }
 
 bool WindowSessionImpl::IsDeviceFeatureCapableForFreeMultiWindow() const
