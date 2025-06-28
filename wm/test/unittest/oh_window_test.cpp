@@ -121,7 +121,7 @@ HWTEST_F(OHWindowTest, OH_WindowManager_GetAllWindowLayoutInfoList, TestSize.Lev
     EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM), ret);
     displayId = 0;
     EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM), ret);
-    windowLayoutInfo = (WindowManager_Rect**)malloc(sizeof(WindowManager_Rect*));
+    windowLayoutInfo = (WindowManager_Rect**)malloc(sizeof(WindowManager_Rect**));
     windowLayoutInfoSize = (size_t*)malloc(sizeof(size_t*));
     ret = OH_WindowManager_GetAllWindowLayoutInfoList(displayId, windowLayoutInfo, windowLayoutInfoSize);
     EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::OK), ret);
