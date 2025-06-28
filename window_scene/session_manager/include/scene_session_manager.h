@@ -125,8 +125,8 @@ using ProcessGestureNavigationEnabledChangeFunc = std::function<void(bool enable
 using ProcessOutsideDownEventFunc = std::function<void(int32_t x, int32_t y)>;
 using ProcessShiftFocusFunc = std::function<void(int32_t persistentId, DisplayId displayGroupId)>;
 using NotifySetFocusSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
-using DumpRootSceneElementInfoFunc = std::function<void(const std::vector<std::string>& params,
-    std::vector<std::string>& infos)>;
+using DumpRootSceneElementInfoFunc = std::function<void(const sptr<SceneSession>& session, 
+    const std::vector<std::string>& params, std::vector<std::string>& infos)>;
 using WindowChangedFunc = std::function<void(int32_t persistentId, WindowUpdateType type)>;
 using TraverseFunc = std::function<bool(const sptr<SceneSession>& session)>;
 using CmpFunc = std::function<bool(std::pair<int32_t, sptr<SceneSession>>& lhs,
