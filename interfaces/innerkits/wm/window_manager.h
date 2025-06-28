@@ -42,7 +42,7 @@ struct SystemBarRegionTint {
         : type_(type), prop_(prop), region_(region) {}
 };
 using SystemBarRegionTints = std::vector<SystemBarRegionTint>;
-using GetJSWindowObjFunc = std::function<napi_value(std::string windowName)>;
+using GetJSWindowObjFunc = std::function<void*(const std::string& windowName)>;
 
 struct VisibleWindowNumInfo {
     uint32_t displayId;
@@ -73,7 +73,7 @@ public:
      * @param lifeCycleInfo window info while its lifecycle status changed.
      *
      */
-    virtual void OnWindowDestroyed(WindowLifeCycleInfo lifeCycleInfo, napi_value jsWindowNapiValue) = 0;
+    virtual void OnWindowDestroyed(WindowLifeCycleInfo lifeCycleInfo, void* jsWindowNapiValue) = 0;
 };
 
 /**
