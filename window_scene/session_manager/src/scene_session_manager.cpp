@@ -9901,13 +9901,12 @@ void SceneSessionManager::GetSurfaceNodeIdsFromSubSession(const sptr<SceneSessio
             continue;
         }
         GetSurfaceNodeIdsFromSubSession(subSession, surfaceNodeIds);
-        uint64_t surfaceNodeId = sceneSession->GetSurfaceNode()->GetId();
-        surfaceNodeIds.push_back(surfaceNodeId);
+        surfaceNodeIds.push_back(sceneSession->GetSurfaceNode()->GetId());
         if (sceneSession->GetLeashWinSurfaceNode()) {
             surfaceNodeIds.push_back(static_cast<uint64_t>(sceneSession->GetPersistentId()));
         }
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, surfaceId: %{public}" PRIu64,
-            sceneSession->GetPersistentId(), surfaceNodeId);
+            sceneSession->GetPersistentId(), sceneSession->GetSurfaceNode()->GetId());
     }
 }
 
