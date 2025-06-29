@@ -34,8 +34,8 @@ public:
     explicit AniWindow(const sptr<Window>& window);
     explicit AniWindow(const std::shared_ptr<OHOS::Rosen::Window>& window);
     sptr<Window> GetWindow() { return windowToken_; }
-    ani_object GetAniObject() { return aniObject_; }
-    void SetAniObject(const ani_object& aniObject) { aniObject_ = aniObject; }
+    ani_ref GetAniRef() { return aniRef_; }
+    void SetAniRef(const ani_ref& aniRef) { aniRef_ = aniRef; }
 
     /* window obj stored in ANI */
     static AniWindow* GetWindowObjectFromEnv(ani_env* env, ani_object obj);
@@ -142,15 +142,15 @@ private:
 
     sptr<Window> windowToken_ = nullptr;
     std::unique_ptr<AniWindowRegisterManager> registerManager_ = nullptr;
-    ani_object aniObject_ = nullptr;
+    ani_ref aniRef_ = nullptr;
 };
 
 /* window obj stored in ANI */
 AniWindow* GetWindowObjectFromAni(void* aniObj);
-ani_object CreateAniWindowObject(ani_env* env, sptr<Window>& window);
+ani_ref CreateAniWindowObject(ani_env* env, sptr<Window>& window);
 void DropWindowObjectByAni(ani_object obj);
 ani_status ANI_Window_Constructor(ani_vm *vm, uint32_t *result);
-ani_object FindAniWindowObject(const std::string& windowName);
+ani_ref FindAniWindowObject(const std::string& windowName);
 }  // namespace Rosen
 }  // namespace OHOS
 #endif  // OHOS_ANI_WINDOW_H

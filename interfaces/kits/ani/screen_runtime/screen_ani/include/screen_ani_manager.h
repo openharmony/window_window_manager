@@ -36,6 +36,8 @@ public:
     static ani_status initScreenManagerAni(ani_namespace screenNameSpace, ani_env* env);
     DmErrorCode processRegisterCallback(ani_env* env, std::string& typeStr,
         sptr<ScreenAniListener> screenAniListener);
+    static ani_double makeMirror(ani_env* env, ani_double mainScreen, ani_object mirrorScreen);
+    static void getAllScreens(ani_env* env, ani_object screensAni);
 private:
     void onRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
     void onUnRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
