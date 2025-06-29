@@ -9925,7 +9925,7 @@ WMError SceneSessionManager::SetSurfaceNodeIds(DisplayId displayId, const std::v
     }
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "displayId: %{public}" PRIu64, displayId);
     auto task = [this, displayId, &surfaceNodeIds, where = __func__]() {
-        std::unordered_set<SessionBlackListInfo, BlackListHasher, BlackListEqual> funSet;
+        SessionBlackListInfoSet funSet;
         for (auto surfaceNodeId : surfaceNodeIds) {
             sptr<SceneSession> sceneSession = SelectSesssionFromMap(surfaceNodeId);
             if (sceneSession == nullptr) {
@@ -9937,8 +9937,8 @@ WMError SceneSessionManager::SetSurfaceNodeIds(DisplayId displayId, const std::v
             funSet.insert(std::move(info));
         }
         {
-            std::lock_guard<std::mutex> lock(sessionBlackListMapMutex_);
-            sessionBlackListMap_[displayId] = std::move(funSet);
+            std::lock_guard<std::mutex> lock(sessionBlackListInfoMapMutex_);
+            sessionBlackListInfoMap_[displayId] = std::move(funSet);
         }
         return WMError::WM_OK;
     };
@@ -9955,16 +9955,16 @@ WMError SceneSessionManager::AddAndNotifySubSessionToBlackList(const sptr<SceneS
     SessionBlackListInfo parentSessionBlackListInfo = { .windowId_ = parentSession->GetPersistentId(),
                                                         .tag_ = BLACK_LIST_TAG };
     ScreenId rsScreenId = SCREEN_ID_INVALID;
-    std::unordered_set<SessionBlackListInfo, BlackListHasher, BlackListEqual> funcSet;
+    SessionBlackListInfoSet funcSet;
     {
-        std::lock_guard<std::mutex> lock(sessionBlackListMapMutex_);
-        for (auto& [displayId, sessionBlackListSet] : sessionBlackListMap_) {
+        std::lock_guard<std::mutex> lock(sessionBlackListInfoMapMutex_);
+        for (auto& [displayId, sessionBlackListInfoSet] : sessionBlackListInfoMap_) {
             if (sessionBlackListSet.find(parentSessionBlackListInfo) == sessionBlackListSet.end()) {
                 continue;
             }
             SessionBlackListInfo sessionBlackListInfo = { .windowId_ = sceneSession->GetPersistentId(),
                                                           .tag_ = BLACK_LIST_TAG };
-            sessionBlackListSet.insert(std::move(sessionBlackListInfo));
+            sessionBlackListInfoSet.insert(std::move(sessionBlackListInfo));
             rsScreenId = displayId;
             funcSet = sessionBlackListSet;
             break;
@@ -10001,8 +10001,8 @@ WMError SceneSessionManager::RemoveSessionFromBlackList(const sptr<SceneSession>
     WMError ret = WMError::WM_DO_NOTHING;
     SessionBlackListInfo sessionBlackListInfo = { .windowId_ = sceneSession->GetPersistentId(),
                                                   .tag_ = BLACK_LIST_TAG };
-    std::lock_guard<std::mutex> lock(sessionBlackListMapMutex_);
-    for (auto& [displayId, sessionBlackListSet] : sessionBlackListMap_) {
+    std::lock_guard<std::mutex> lock(sessionBlackListInfoMapMutex_);
+    for (auto& [displayId, sessionBlackListSet] : sessionBlackListInfoMap_) {
         if (sessionBlackListSet.find(sessionBlackListInfo) == sessionBlackListSet.end()) {
             continue;
         }

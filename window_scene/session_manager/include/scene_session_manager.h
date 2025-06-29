@@ -1509,8 +1509,9 @@ private:
             return std::hash<int32_t>()(info.windowId_) + std::hash<std::string>()(info.tag_);
         }
     };
-    std::unordered_map<DisplayId, std::unordered_set<SessionBlackListInfo, BlackListHasher, BlackListEqual>> sessionBlackListMap_;
-    std::mutex sessionBlackListMapMutex_;
+    using SessionBlackListInfoSet = std::unordered_set<SessionBlackListInfo, BlackListHasher, BlackListEqual>;
+    std::unordered_map<DisplayId, SessionBlackListInfoSet> sessionBlackListInfoMap_;
+    std::mutex sessionBlackListInfoMapMutex_;
 
     /*
      * Move Drag
