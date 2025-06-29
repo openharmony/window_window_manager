@@ -41,9 +41,9 @@ constexpr int32_t MIN_DECOR_HEIGHT = 37;
 constexpr int32_t MAX_DECOR_HEIGHT = 112;
 namespace {
 /* used for free, ani has no destructor right now, only free when aniObj freed */
-static std::map<ani_object, AniWindow*> localObjs;
+static std::map<ani_ref, AniWindow*> localObjs;
 } // namespace
-static thread_local std::map<std::string, ani_object> g_aniWindowMap;
+static thread_local std::map<std::string, ani_ref> g_aniWindowMap;
 
 AniWindow::AniWindow(const sptr<Window>& window)
     : windowToken_(window), registerManager_(std::make_unique<AniWindowRegisterManager>())
@@ -539,7 +539,11 @@ void AniWindow::OnSetWindowPrivacyMode(ani_env* env, ani_boolean isPrivacyMode)
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
-    auto ret = window->SetPrivacyMode(static_cast<bool>(isPrivacyMode));
+    auto ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetPrivacyMode(static_cast<bool>(isPrivacyMode)));
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "[ANI] failed");
+        AniWindowUtils::AniThrowError(env, ret);
+    }
     TLOGI(WmsLogTag::DEFAULT, "[ANI] ret:%{public}d", static_cast<int32_t>(ret));
 }
 
@@ -926,9 +930,9 @@ ani_object AniWindow::OnGetWindowAvoidArea(ani_env* env, ani_int type)
     return AniWindowUtils::CreateAniAvoidArea(env, avoidArea, static_cast<AvoidAreaType>(type));
 }
 
-void DropWindowObjectByAni(ani_object aniObj)
+void DropWindowObjectByAni(ani_ref aniObj)
 {
-    auto obj = localObjs.find(reinterpret_cast<ani_object>(aniObj));
+    auto obj = localObjs.find(reinterpret_cast<ani_ref>(aniObj));
     if (obj != localObjs.end()) {
         delete obj->second;
     }
@@ -937,14 +941,14 @@ void DropWindowObjectByAni(ani_object aniObj)
 
 AniWindow* GetWindowObjectFromAni(void* aniObj)
 {
-    auto obj = localObjs.find(reinterpret_cast<ani_object>(aniObj));
+    auto obj = localObjs.find(reinterpret_cast<ani_ref>(aniObj));
     if (obj == localObjs.end()) {
         return nullptr;
     }
     return obj->second;
 }
 
-ani_object CreateAniWindowObject(ani_env* env, sptr<Window>& window)
+ani_ref CreateAniWindowObject(ani_env* env, sptr<Window>& window)
 __attribute__((no_sanitize("cfi")))
 {
     if (env == nullptr || window == nullptr) {
@@ -953,7 +957,7 @@ __attribute__((no_sanitize("cfi")))
     }
     std::string windowName = window->GetWindowName();
     // avoid repeatedly create ani window when getWindow
-    ani_object aniWindowObj = FindAniWindowObject(windowName);
+    ani_ref aniWindowObj = FindAniWindowObject(windowName);
     if (aniWindowObj != nullptr) {
         TLOGI(WmsLogTag::DEFAULT, "[ANI] FindAniWindowObject %{public}s", windowName.c_str());
         return aniWindowObj;
@@ -985,8 +989,14 @@ __attribute__((no_sanitize("cfi")))
         return nullptr;
     }
     env->Object_CallMethod_Void(obj, setObjFunc, reinterpret_cast<ani_long>(aniWindow.get()));
-    localObjs.insert(std::pair(obj, aniWindow.release()));
-    g_aniWindowMap[windowName] = obj;
+    ani_ref ref = nullptr;
+    if (env->GlobalReference_Create(obj, &ref) != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] create global ref fail");
+        return nullptr;
+    };
+    aniWindow->SetAniRef(ref);
+    localObjs.insert(std::pair(ref, aniWindow.release()));
+    g_aniWindowMap[windowName] = ref;
     return obj;
 }
 
@@ -1739,7 +1749,7 @@ ani_object AniWindow::SetSpecificSystemBarEnabled(ani_env* env, ani_string name,
     return AniWindowUtils::AniThrowError(env, err);
 }
 
-ani_object FindAniWindowObject(const std::string& windowName)
+ani_ref FindAniWindowObject(const std::string& windowName)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI] Try to find window %{public}s in g_aniWindowMap", windowName.c_str());
     if (g_aniWindowMap.find(windowName) == g_aniWindowMap.end()) {
@@ -1801,7 +1811,8 @@ void AniWindow::Finalizer(ani_env* env, ani_long nativeObj)
         if (window != nullptr) {
             g_aniWindowMap.erase(window->GetWindowName());
         }
-        DropWindowObjectByAni(aniWindow->GetAniObject());
+        DropWindowObjectByAni(aniWindow->GetAniRef());
+        env->GlobalReference_Delete(aniWindow->GetAniRef());
     } else {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] aniWindow is nullptr");
     }
