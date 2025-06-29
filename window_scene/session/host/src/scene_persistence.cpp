@@ -71,19 +71,17 @@ void ScenePersistence::SetSnapshotCapacity(SnapshotStatus capacity)
 ScenePersistence::ScenePersistence(const std::string& bundleName, int32_t persistentId, SnapshotStatus capacity)
     : bundleName_(bundleName), persistentId_(persistentId), capacity_(capacity)
 {
+    InitAstcEnabled();
+    auto suffix = isAstcEnabled_ ? ASTC_IMAGE_SUFFIX : IMAGE_SUFFIX;
     for (uint32_t screen = SCREEN_UNKNOWN; screen < SCREEN_COUNT; screen++) {
         for (uint32_t orientation = SNAPSHOT_PORTRAIT; orientation < ORIENTATION_COUNT; orientation++) {
-            if (isAstcEnabled_) {
-                snapshotPath_[screen][orientation] = snapshotDirectory_ + bundleName + UNDERLINE_SEPARATOR +
-                    std::to_string(persistentId) + std::to_string(screen) +
-                    std::to_string(orientation) + ASTC_IMAGE_SUFFIX;
-            } else {
-                snapshotPath_[screen][orientation] = snapshotDirectory_ + bundleName + UNDERLINE_SEPARATOR +
-                    std::to_string(persistentId) + std::to_string(screen) +
-                    std::to_string(orientation) + IMAGE_SUFFIX;
-            }
+            snapshotPath_[screen][orientation] = snapshotDirectory_ + bundleName + UNDERLINE_SEPARATOR +
+                std::to_string(persistentId) + UNDERLINE_SEPARATOR + std::to_string(screen) +
+                std::to_string(orientation) + suffix;
         }
     }
+    snapshotTmpPath_ = snapshotDirectory_ + bundleName + UNDERLINE_SEPARATOR +
+        std::to_string(persistentId) + suffix;
     updatedIconPath_ = updatedIconDirectory_ + bundleName + IMAGE_SUFFIX;
     if (snapshotFfrtHelper_ == nullptr) {
         snapshotFfrtHelper_ = std::make_shared<WSFFRTHelper>();
@@ -98,6 +96,7 @@ ScenePersistence::~ScenePersistence()
             remove(snapshotPath.c_str());
         }
     }
+    remove(snapshotTmpPath_.c_str());
 }
 
 std::shared_ptr<WSFFRTHelper> ScenePersistence::GetSnapshotFfrtHelper() const
@@ -117,15 +116,16 @@ bool ScenePersistence::IsAstcEnabled()
 }
 
 void ScenePersistence::SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixelMap,
-    const std::function<void()> resetSnapshotCallback, SnapshotStatus key, DisplayOrientation rotate)
+    const std::function<void()> resetSnapshotCallback, SnapshotStatus key, DisplayOrientation rotate, bool specialType)
 {
     savingSnapshotSum_.fetch_add(1);
-    isSavingSnapshot_[key.first][key.second].store(true);
+    SetIsSavingSnapshot(key, specialType, true);
+    std::string path = specialType ? snapshotTmpPath_ : snapshotPath_[key.first][key.second];
     auto task = [weakThis = wptr(this), pixelMap, resetSnapshotCallback,
-        savingSnapshotSum = savingSnapshotSum_.load(), key, rotate]() {
+        savingSnapshotSum = savingSnapshotSum_.load(), key, rotate, path, specialType]() {
         auto scenePersistence = weakThis.promote();
         if (scenePersistence == nullptr || pixelMap == nullptr ||
-            scenePersistence->snapshotPath_[key.first][key.second].find('/') == std::string::npos) {
+            path.find('/') == std::string::npos) {
             TLOGNE(WmsLogTag::WMS_PATTERN, "scenePersistence %{public}s nullptr, pixelMap %{public}s nullptr",
                 scenePersistence == nullptr ? "" : "not", pixelMap == nullptr ? "" : "not");
             resetSnapshotCallback();
@@ -133,8 +133,7 @@ void ScenePersistence::SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixe
         }
 
         TLOGNI(WmsLogTag::WMS_PATTERN, "Save snapshot begin");
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SaveSnapshot %s",
-            scenePersistence->snapshotPath_[key.first][key.second].c_str());
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SaveSnapshot %s", path.c_str());
         OHOS::Media::ImagePacker imagePacker;
         OHOS::Media::PackOption option;
         option.format = IsAstcEnabled() ? ASTC_IMAGE_FORMAT : IMAGE_FORMAT;
@@ -142,9 +141,9 @@ void ScenePersistence::SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixe
         option.numberHint = 1;
 
         std::lock_guard lock(scenePersistence->savingSnapshotMutex_);
-        remove(scenePersistence->snapshotPath_[key.first][key.second].c_str());
-        scenePersistence->snapshotSize_[key.first][key.second] = { pixelMap->GetWidth(), pixelMap->GetHeight() };
-        if (imagePacker.StartPacking(scenePersistence->snapshotPath_[key.first][key.second], option)) {
+        remove(path.c_str());
+        scenePersistence->SetSnapshotSize(key, specialType, { pixelMap->GetWidth(), pixelMap->GetHeight() });
+        if (imagePacker.StartPacking(path, option)) {
             TLOGNE(WmsLogTag::WMS_PATTERN, "Save snapshot failed, starting packing error");
             resetSnapshotCallback();
             return;
@@ -167,12 +166,24 @@ void ScenePersistence::SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixe
         scenePersistence->rotate_[key.first][key.second] = rotate;
         TLOGNI(WmsLogTag::WMS_PATTERN, "Save snapshot end, packed size %{public}" PRIu64, packedSize);
     };
-    snapshotFfrtHelper_->SubmitTask(std::move(task), "SaveSnapshot" + snapshotPath_[key.first][key.second]);
+    snapshotFfrtHelper_->SubmitTask(std::move(task), "SaveSnapshot" + path);
 }
 
-bool ScenePersistence::IsSavingSnapshot(SnapshotStatus key)
+bool ScenePersistence::IsSavingSnapshot(SnapshotStatus key, bool specialType)
 {
+    if (specialType) {
+        return isSavingSnapshotTmp_.load();
+    }
     return isSavingSnapshot_[key.first][key.second].load();
+}
+
+void ScenePersistence::SetIsSavingSnapshot(SnapshotStatus key, bool specialType, bool isSavingSnapshot)
+{
+    if (specialType) {
+        isSavingSnapshotTmp_.store(isSavingSnapshot);
+    } else {
+        isSavingSnapshot_[key.first][key.second].store(isSavingSnapshot);
+    }
 }
 
 void ScenePersistence::ResetSnapshotCache()
@@ -197,6 +208,19 @@ void ScenePersistence::RenameSnapshotFromOldPersistentId(const int32_t& oldPersi
                 scenePersistence->RenameSnapshotFromOldPersistentId(oldPersistentId, { screen, orientation });
             }
         }
+        auto suffix = scenePersistence->isAstcEnabled_ ? ASTC_IMAGE_SUFFIX : IMAGE_SUFFIX;
+        std::string oldSnapshotTmpPath = snapshotDirectory_ + scenePersistence->bundleName_ + UNDERLINE_SEPARATOR +
+            std::to_string(oldPersistentId) + suffix;
+        auto& snapshotPath = scenePersistence->snapshotTmpPath_;
+        std::lock_guard lock(scenePersistence->savingSnapshotMutex_);
+        int ret = std::rename(oldSnapshotTmpPath.c_str(), snapshotPath.c_str());
+        if (ret == 0) {
+            TLOGNI(WmsLogTag::WMS_PATTERN, "Rename snapshot from %{public}s to %{public}s.",
+                oldSnapshotTmpPath.c_str(), snapshotPath.c_str());
+        } else {
+            TLOGNW(WmsLogTag::WMS_PATTERN, "Failed to rename snapshot from %{public}s to %{public}s.",
+                oldSnapshotTmpPath.c_str(), snapshotPath.c_str());
+        }
     };
     snapshotFfrtHelper_->SubmitTask(std::move(task), "RenameSnapshotFromOldPersistentId"
         + std::to_string(oldPersistentId));
@@ -204,31 +228,26 @@ void ScenePersistence::RenameSnapshotFromOldPersistentId(const int32_t& oldPersi
 
 void ScenePersistence::RenameSnapshotFromOldPersistentId(const int32_t& oldPersistentId, SnapshotStatus key)
 {
-    std::lock_guard lock(savingSnapshotMutex_);
-    std::string oldSnapshotPath;
     auto& snapshotPath = snapshotPath_[key.first][key.second];
-    if (isAstcEnabled_) {
-        oldSnapshotPath = snapshotDirectory_ + bundleName_ + UNDERLINE_SEPARATOR +
-            std::to_string(oldPersistentId) + std::to_string(key.first) +
-            std::to_string(key.second) + ASTC_IMAGE_SUFFIX;
-    } else {
-        oldSnapshotPath = snapshotDirectory_ + bundleName_ + UNDERLINE_SEPARATOR +
-            std::to_string(oldPersistentId) + std::to_string(key.first) +
-            std::to_string(key.second) + IMAGE_SUFFIX;
-    }
+    auto suffix = isAstcEnabled_ ? ASTC_IMAGE_SUFFIX : IMAGE_SUFFIX;
+    std::string oldSnapshotPath = snapshotDirectory_ + bundleName_ + UNDERLINE_SEPARATOR +
+        std::to_string(oldPersistentId) + UNDERLINE_SEPARATOR + std::to_string(key.first) +
+        std::to_string(key.second) + suffix;
+    std::lock_guard lock(savingSnapshotMutex_);
     int ret = std::rename(oldSnapshotPath.c_str(), snapshotPath.c_str());
     if (ret == 0) {
-        TLOGNI(WmsLogTag::WMS_PATTERN, "Rename snapshot from %{public}s to %{public}s.",
+        TLOGI(WmsLogTag::WMS_PATTERN, "Rename snapshot from %{public}s to %{public}s.",
             oldSnapshotPath.c_str(), snapshotPath.c_str());
     } else {
-        TLOGNW(WmsLogTag::WMS_PATTERN, "Failed to rename snapshot from %{public}s to %{public}s.",
+        TLOGW(WmsLogTag::WMS_PATTERN, "Failed to rename snapshot from %{public}s to %{public}s.",
             oldSnapshotPath.c_str(), snapshotPath.c_str());
     }
 }
 
-std::string ScenePersistence::GetSnapshotFilePath(SnapshotStatus& key)
+std::string ScenePersistence::GetSnapshotFilePath(SnapshotStatus& key, bool useKey, bool specialType)
 {
-    if (hasSnapshot_[key.first][key.second]) {
+    if (specialType) return snapshotTmpPath_;
+    if (useKey || hasSnapshot_[key.first][key.second]) {
         return snapshotPath_[key.first][key.second];
     }
     for (uint32_t orientation = SNAPSHOT_PORTRAIT; orientation < capacity_.second; orientation++) {
@@ -238,11 +257,16 @@ std::string ScenePersistence::GetSnapshotFilePath(SnapshotStatus& key)
         }
     }
     for (uint32_t screen = SCREEN_UNKNOWN; screen < capacity_.first; screen++) {
-        for (uint32_t orientation = SNAPSHOT_PORTRAIT; orientation < capacity_.second; orientation++) {
-            if (hasSnapshot_[screen][orientation]) {
-                key.second = orientation;
-                return snapshotPath_[screen][orientation];
-            }
+        if (hasSnapshot_[screen][key.second]) {
+            key.first = screen;
+            return snapshotPath_[screen][key.second];
+        }
+    }
+    uint32_t orientation = key.second == SNAPSHOT_PORTRAIT ? SNAPSHOT_LANDSCAPE : SNAPSHOT_PORTRAIT;
+    for (uint32_t screen = SCREEN_UNKNOWN; screen < capacity_.first; screen++) {
+        if (hasSnapshot_[screen][orientation]) {
+            key = { screen, orientation };
+            return snapshotPath_[screen][orientation];
         }
     }
     return snapshotPath_[SCREEN_UNKNOWN][SNAPSHOT_PORTRAIT];
@@ -284,14 +308,29 @@ std::string ScenePersistence::GetUpdatedIconPath() const
     return updatedIconPath_;
 }
 
-std::pair<uint32_t, uint32_t> ScenePersistence::GetSnapshotSize(SnapshotStatus key) const
+void ScenePersistence::SetSnapshotSize(SnapshotStatus key, bool specialType, std::pair<uint32_t, uint32_t> size)
 {
+    if (specialType) {
+        snapshotTmpSize_ = size;
+    } else {
+        snapshotSize_[key.first][key.second] = size;
+    }
+}
+
+std::pair<uint32_t, uint32_t> ScenePersistence::GetSnapshotSize(SnapshotStatus key, bool specialType) const
+{
+    if (specialType) return snapshotTmpSize_;
     return snapshotSize_[key.first][key.second];
 }
 
 void ScenePersistence::SetHasSnapshot(bool hasSnapshot, SnapshotStatus key)
 {
     hasSnapshot_[key.first][key.second] = hasSnapshot;
+}
+
+void ScenePersistence::SetHasSnapshotTmp(bool hasSnapshot)
+{
+    hasSnapshotTmp_ = hasSnapshot;
 }
 
 bool ScenePersistence::HasSnapshot() const
@@ -303,15 +342,27 @@ bool ScenePersistence::HasSnapshot() const
             }
         }
     }
-    return false;
+    return hasSnapshotTmp_;
 }
 
-bool ScenePersistence::HasSnapshot(SnapshotStatus key) const
+bool ScenePersistence::HasSnapshot(SnapshotStatus key, bool specialType) const
 {
+    if (specialType) return hasSnapshotTmp_;
     return hasSnapshot_[key.first][key.second];
 }
 
-bool ScenePersistence::IsSnapshotExisted(SnapshotStatus key) const
+void ScenePersistence::ClearSnapshot(SnapshotStatus key)
+{
+    for (auto& row : hasSnapshot_) {
+        for (auto& hasSnapshot : row) {
+            hasSnapshot = false;
+        }
+    }
+    hasSnapshotTmp_ = false;
+    hasSnapshot_[key.first][key.second] = true;
+}
+
+bool ScenePersistence::IsSnapshotExisted(SnapshotStatus key)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "IsSnapshotExisted");
     struct stat buf;
@@ -320,13 +371,14 @@ bool ScenePersistence::IsSnapshotExisted(SnapshotStatus key) const
             snapshotPath_[key.first][key.second].c_str());
         return false;
     }
+    hasSnapshot_[key.first][key.second] = true;
     return S_ISREG(buf.st_mode);
 }
 
 std::shared_ptr<Media::PixelMap> ScenePersistence::GetLocalSnapshotPixelMap(const float oriScale,
-    const float newScale, SnapshotStatus key) const
+    const float newScale, SnapshotStatus key, bool specialType)
 {
-    if (!IsSnapshotExisted()) {
+    if (!IsSnapshotExisted(key)) {
         TLOGE(WmsLogTag::WMS_PATTERN, "local snapshot pic is not existed");
         return nullptr;
     }
@@ -334,9 +386,9 @@ std::shared_ptr<Media::PixelMap> ScenePersistence::GetLocalSnapshotPixelMap(cons
     uint32_t errorCode = 0;
     Media::SourceOptions sourceOpts;
     sourceOpts.formatHint = IsAstcEnabled() ? ASTC_IMAGE_FORMAT : IMAGE_FORMAT;
+    std::string path = GetSnapshotFilePath(key, true, specialType);
     std::lock_guard lock(savingSnapshotMutex_);
-    auto imageSource = Media::ImageSource::CreateImageSource(snapshotPath_[key.first][key.second],
-        sourceOpts, errorCode);
+    auto imageSource = Media::ImageSource::CreateImageSource(path, sourceOpts, errorCode);
     if (!imageSource) {
         TLOGE(WmsLogTag::WMS_PATTERN, "create image source fail, errCode: %{public}u", errorCode);
         return nullptr;

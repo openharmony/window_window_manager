@@ -512,6 +512,7 @@ WSError SceneSession::BackgroundTask(const bool isSaveSnapshot)
             return ret;
         }
         if (WindowHelper::IsMainWindow(session->GetWindowType()) && isSaveSnapshot && needSaveSnapshot) {
+            session->SetSpecialType();
             session->SaveSnapshot(true);
         }
         session->MarkAvoidAreaAsDirty();

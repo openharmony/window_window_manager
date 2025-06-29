@@ -714,6 +714,14 @@ public:
     SnapshotStatus GetSessionStatus() const;
     DisplayOrientation GetWindowOrientation() const;
     uint32_t GetLastOrientation() const;
+    bool HasSnapshotTmp();
+    bool HasSnapshot(SnapshotStatus key);
+    bool HasSnapshot();
+    void DeleteHasSnapshot();
+    void DeleteHasSnapshot(SnapshotStatus key);
+    void DeleteHasSnapshotTmp();
+    void SetSpecialType();
+    bool specialType_ = false;
 
     /*
      * Specific Window
@@ -791,7 +799,7 @@ protected:
     mutable std::mutex surfaceNodeMutex_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
     mutable std::mutex snapshotMutex_;
-    std::shared_ptr<Media::PixelMap> snapshot_[SCREEN_COUNT][ORIENTATION_COUNT] = {};
+    std::shared_ptr<Media::PixelMap> snapshot_;
     sptr<ISessionStage> sessionStage_;
     std::mutex lifeCycleTaskQueueMutex_;
     std::list<sptr<SessionLifeCycleTask>> lifeCycleTaskQueue_;
