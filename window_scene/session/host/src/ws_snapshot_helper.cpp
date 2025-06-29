@@ -34,7 +34,9 @@ uint32_t WSSnapshotHelper::GetScreenStatus()
 
 uint32_t WSSnapshotHelper::GetScreenStatus(FoldStatus foldStatus)
 {
-    if (static_cast<int>(foldStatus) % SCREEN_FOLDED == 0) {
+    if (foldStatus == FoldStatus::UNKNOWN || foldStatus == FoldStatus::FOLDED ||
+        foldStatus == FoldStatus::FOLD_STATE_FOLDED_WITH_SECOND_EXPAND ||
+        foldStatus == FoldStatus::FOLD_STATE_FOLDED_WITH_SECOND_HALF_FOLDED) {
         return SCREEN_FOLDED;
     } else if (foldStatus == FoldStatus::EXPAND || foldStatus == FoldStatus::HALF_FOLD) {
         return SCREEN_EXPAND;
