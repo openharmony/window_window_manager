@@ -436,8 +436,8 @@ public:
     WMError GetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
         std::vector<uint64_t>& surfaceNodeIds, bool isBlackList = false);
     void GetSurfaceNodeIdsFromSubSession(const sptr<SceneSession>& sceneSession, std::vector<uint64_t>& surfaceNodeIds);
-    void AddAndNotifySubSessionToBlackList(const sptr<SceneSession>& sceneSession);
-    void RemoveSessionFromBlackList(const sptr<SceneSession>& sceneSession);
+    WMError AddAndNotifySubSessionToBlackList(const sptr<SceneSession>& sceneSession);
+    WMError RemoveSessionFromBlackList(const sptr<SceneSession>& sceneSession);
     WMError SetSurfaceNodeIds(DisplayId displayId, const std::vector<uint64_t>& surfaceNodeIds);
     WSError UpdateTitleInTargetPos(int32_t persistentId, bool isShow, int32_t height);
 
