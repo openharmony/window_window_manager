@@ -74,7 +74,7 @@ public:
     void NotifyWindowSystemBarPropertyChange(WindowType type, const SystemBarProperty& systemBarProperty);
     void NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info);
     void NotifyWindowRectChange(const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList);
-    void NotifyWMSWindowDestroyed(WindowLifeCycleInfo& lifeCycleInfo, void* jsWindowNapiValue);
+    void NotifyWMSWindowDestroyed(const WindowLifeCycleInfo& lifeCycleInfo, void* jsWindowNapiValue);
 
     static inline SingletonDelegator<WindowManager> delegator_;
 

@@ -1324,7 +1324,7 @@ public:
      * @brief notify window destroyed.
      * @param lifeCycleInfo window lifecycle info.
      */
-    void NotifyWMSWindowDestroyed(WindowLifeCycleInfo& lifeCycleInfo);
+    void NotifyWMSWindowDestroyed(const WindowLifeCycleInfo& lifeCycleInfo);
 
 private:
     WindowManager();
