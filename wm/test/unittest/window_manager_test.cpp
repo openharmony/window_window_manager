@@ -2282,7 +2282,7 @@ HWTEST_F(WindowManagerTest, NotifyWMSWindowDestroyed02, TestSize.Level1)
     lifeCycleInfo.windowName = "window101";
     auto func = [](const std::string& windowName) {
         std::cout << "window name: " << windowName << std::endl;
-        reutrn napi_value();
+        return napi_value();
     };
     WindowManager::GetInstance().RegisterGetJSWindowCallback(func);
     WindowManager::GetInstance().NotifyWMSWindowDestroyed(lifeCycleInfo);
