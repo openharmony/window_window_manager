@@ -2194,7 +2194,7 @@ WMError WindowManager::UnregisterWindowLifeCycleCallback(const sptr<IWindowLifeC
     return WMError::WM_OK;
 }
 
-void WindowManager::RegisterGetJSWindowCallback(const GetJSWindowObjFunc&& getJSWindowFunc)
+void WindowManager::RegisterGetJSWindowCallback(GetJSWindowObjFunc&& getJSWindowFunc)
 {
     getJSWindowObjFunc_ = std::move(getJSWindowFunc);
 }
