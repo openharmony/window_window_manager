@@ -27,9 +27,8 @@ namespace Rosen {
  */
 class IFbLifeCycle : virtual public RefBase {
 public:
-    virtual void OnFloatingBallStart() {}
-    virtual void OnFloatingBallStop() {}
-};
+    virtual void OnFloatingBallStart() = 0;
+    virtual void OnFloatingBallStop() = 0;
  
 /**
  * @class IFbClickObserver
@@ -38,7 +37,7 @@ public:
  */
 class IFbClickObserver : virtual public RefBase {
 public:
-    virtual void OnClickEvent() {}
+    virtual void OnClickEvent() = 0;
 };
  
 } // namespace Rosen

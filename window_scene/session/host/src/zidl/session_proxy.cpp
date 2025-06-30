@@ -1875,9 +1875,10 @@ WMError SessionProxy::UpdateFloatingBall(const FloatingBallTemplateInfo& fbTempl
         TLOGE(WmsLogTag::WMS_SYSTEM, "remote is null");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_FLOATING_BALL),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "SendRequest failed");
+    auto errCode = remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_FLOATING_BALL),
+                                       data, reply, option);
+    if (errCode != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "SendRequest failed code: %{public}d", errCode);
         return WMError::WM_ERROR_IPC_FAILED;
     }
     int32_t ret = 0;
@@ -1893,6 +1894,11 @@ WMError SessionProxy::RestoreFbMainWindow(const std::shared_ptr<AAFwk::Want>& wa
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
+    if (want == nullptr) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "want is nullptr");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "writeInterfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
@@ -1906,9 +1912,10 @@ WMError SessionProxy::RestoreFbMainWindow(const std::shared_ptr<AAFwk::Want>& wa
         TLOGE(WmsLogTag::WMS_SYSTEM, "remote is null");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_START_FLOATING_BALL_MAIN_WINDOW),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "SendRequest failed");
+    auto errCode = remote->SendRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_START_FLOATING_BALL_MAIN_WINDOW), data, reply, option);
+    if (errCode != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "SendRequest failed code: %{public}d", errCode);
         return WMError::WM_ERROR_IPC_FAILED;
     }
     int32_t ret = 0;
@@ -1934,9 +1941,10 @@ WMError SessionProxy::GetFloatingBallWindowId(uint32_t& windowId)
         TLOGE(WmsLogTag::WMS_SYSTEM, "remote is null");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_FLOATING_BALL_WINDOW_ID),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "SendRequest failed");
+    auto errCode = remote->SendRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_FLOATING_BALL_WINDOW_ID), data, reply, option);
+    if (errCode != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "SendRequest failed code: %{public}d", errCode);
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
@@ -3492,9 +3500,10 @@ void SessionProxy::NotifyFloatingBallPrepareClose()
         TLOGE(WmsLogTag::WMS_SYSTEM, "remote is null");
         return;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_FLOATING_BALL_PREPARE_CLOSE),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "SendRequest failed");
+    auto errCode = remote->SendRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_FLOATING_BALL_PREPARE_CLOSE), data, reply, option);
+    if (errCode != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "SendRequest failed code: %{public}d", errCode);
         return;
     }
 }
