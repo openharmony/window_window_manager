@@ -71,7 +71,6 @@ public:
      * @brief Notify caller when window is destroyed
      *
      * @param lifeCycleInfo window lifecycle info.
-     * 
      * @param jsWindowNapiValue js window object napi value.
      *
      */
