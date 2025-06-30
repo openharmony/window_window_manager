@@ -506,8 +506,7 @@ private:
     void NotifyFreeMultiWindowModeResume();
     std::string TransferLifeCycleEventToString(LifeCycleEvent type) const;
     void RecordLifeCycleExceptionEvent(LifeCycleEvent event, WMError erCode) const;
-    sptr<LifecycleFutureCallback> attachCallback_ = nullptr;
-    sptr<LifecycleFutureCallback> detachCallback_ = nullptr;
+    sptr<LifecycleFutureCallback> lifecycleCallback_ = nullptr;
     WindowLifeCycleInfo GetWindowLifecycleInfo() const;
 
     /**
