@@ -9923,6 +9923,7 @@ WMError SceneSessionManager::SetSurfaceNodeIds(DisplayId displayId, const std::v
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "displayId: %{public}" PRIu64, displayId);
+    workingVirtualScreen.store(displayId);
     auto task = [this, displayId, &surfaceNodeIds, where = __func__]() {
         SessionBlackListInfoSet funSet;
         for (auto surfaceNodeId : surfaceNodeIds) {
@@ -9953,20 +9954,18 @@ WMError SceneSessionManager::AddAndNotifySubSessionToBlackList(const sptr<SceneS
     }
     SessionBlackListInfo parentSessionBlackListInfo = { .windowId_ = parentSession->GetPersistentId(),
                                                         .tag_ = BLACK_LIST_TAG };
-    ScreenId rsScreenId = SCREEN_ID_INVALID;
+    ScreenId rsScreenId = workingVirtualScreen.load();
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "screenId: %{public}" PRIu64 " win: %{public}d patentId: %{public}d",
+        rsScreenId, sceneSession->GetPersistentId(), parentSession->GetPersistentId());
     SessionBlackListInfoSet funcSet;
     {
         std::lock_guard<std::mutex> lock(sessionBlackListInfoMapMutex_);
-        for (auto& [displayId, sessionBlackListInfoSet] : sessionBlackListInfoMap_) {
-            if (sessionBlackListSet.find(parentSessionBlackListInfo) == sessionBlackListSet.end()) {
-                continue;
-            }
-            SessionBlackListInfo sessionBlackListInfo = { .windowId_ = sceneSession->GetPersistentId(),
-                                                          .tag_ = BLACK_LIST_TAG };
+        SessionBlackListInfoSet& sessionBlackListInfoSet = sessionBlackListInfoMap_[rsScreenId];
+        if (sessionBlackListInfoSet.find(parentSessionBlackListInfo) != sessionBlackListInfoSet.end()) {
+            SessionBlackListInfo sessionBlackListInfo = {.windowId_ = sceneSession->GetPersistentId(),
+                                                         .tag_ = BLACK_LIST_TAG};
             sessionBlackListInfoSet.insert(std::move(sessionBlackListInfo));
-            rsScreenId = displayId;
-            funcSet = sessionBlackListSet;
-            break;
+            funcSet = sessionBlackListInfoSet;
         }
     }
     if (funcSet.empty()) {
@@ -10009,7 +10008,6 @@ WMError SceneSessionManager::RemoveSessionFromBlackList(const sptr<SceneSession>
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, displayId: %{public}" PRIu64,
             sessionBlackListInfo.windowId_, displayId);
         ret = WMError::WM_OK;
-        break;
     }
     return ret;
 }

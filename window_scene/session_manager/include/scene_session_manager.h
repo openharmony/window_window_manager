@@ -1512,6 +1512,7 @@ private:
     using SessionBlackListInfoSet = std::unordered_set<SessionBlackListInfo, BlackListHasher, BlackListEqual>;
     std::unordered_map<DisplayId, SessionBlackListInfoSet> sessionBlackListInfoMap_;
     std::mutex sessionBlackListInfoMapMutex_;
+    std::atomic<DisplayId> workingVirtualScreen = DISPLAY_ID_INVALID;
 
     /*
      * Move Drag
