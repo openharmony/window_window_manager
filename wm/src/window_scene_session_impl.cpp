@@ -6487,7 +6487,7 @@ WMError WindowSceneSessionImpl::GetWindowPropertyInfo(WindowPropertyInfo& window
     windowPropertyInfo.windowRect = GetRect();
     auto uicontent = GetUIContentSharedPtr();
     if (uicontent == nullptr) {
-        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "uicontent is nullptr");
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "uicontent is nullptr");
     } else {
         uicontent->GetWindowPaintSize(windowPropertyInfo.drawableRect);
     }
