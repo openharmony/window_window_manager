@@ -409,13 +409,8 @@ public:
     void AddRSNodeModifier(bool isDark, const std::shared_ptr<RSBaseNode>& rsNode);
     void SetSidebarBlur(bool isDefaultSidebarBlur, bool isNeedAnimation);
     void ModifyRSAnimatableProperty(bool isDefaultSidebarBlur, bool isDark, bool isNeedAnimation);
-    WSError UpdateDensity(bool isNotSessionRectWithDpiChange = false);
-    void UpdateNewSizeForPCWindow(bool isNotSessionRectWithDpiChange = false);
-    bool CalcNewWindowRectIfNeed(DMRect& availableArea, float newVpr, WSRect& winRect);
-    void CalcNewClientRectForSuperFold(WSRect& rect);
+    WSError UpdateDensity();
     void SaveLastDensity();
-    void UpdateSuperFoldThreshold(DMRect& availableArea, int32_t& topThreshold, int32_t& bottomThreshold);
-    WSRect GetCreaseRegion(CreaseRegionName regionName) const;
     virtual bool IsFollowParentMultiScreenPolicy() const { return false; }
     void NotifyUpdateFlagCallback(NotifyUpdateFlagFunc&& func);
     void SetSidebarBlurMaximize(bool isMaximize);
@@ -772,10 +767,6 @@ public:
     WSError SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo) override;
     WindowAnchorInfo GetWindowAnchorInfo() const { return windowAnchorInfo_; }
     void CalcSubWindowRectByAnchor(const WSRect& parentRect, WSRect& subRect);
-    void SetTempRect(WSRect rect)
-    {
-        tempRect_ = rect;
-    }
     bool IsAnyParentSessionDragMoving() const override;
     bool IsAnyParentSessionDragZooming() const override;
     bool IsCompatibleModeDirtyDragScaleWindow() const;
@@ -1371,9 +1362,7 @@ private:
      * PC Window Layout
      */
     bool isLayoutFullScreen_ { false };
-    bool displayChangedByMoveDrag_ = false;
     bool isDefaultDensityEnabled_ = false;
-    WSRect tempRect_ = { 0, 0, 0, 0 };  // need not sync to service, only for calculate
 
     /**
      * Window pattern

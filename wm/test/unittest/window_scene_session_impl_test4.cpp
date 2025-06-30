@@ -1290,6 +1290,28 @@ HWTEST_F(WindowSceneSessionImplTest4, UpdateNewSize01, TestSize.Level1)
     Rect windowRect2 = { 200, 200, 200, 200 };
     subWindow->property_->SetRequestRect(windowRect2);
     subWindow->UpdateNewSize();
+    subWindow->windowSystemConfig_.windowUIType_ = WindowUIType::INVALID_WINDOW;
+    subWindow->windowSystemConfig_.freeMultiWindowEnable_ = false;
+    subWindow->windowSystemConfig_.freeMultiWindowSupport_ = false;
+    subWindow->UpdateNewSize();
+    subWindow->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    subWindow->UpdateNewSize();
+    subWindow->windowSystemConfig_.freeMultiWindowEnable_ = true;
+    subWindow->windowSystemConfig_.freeMultiWindowSupport_ = false;
+    subWindow->UpdateNewSize();
+    subWindow->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    subWindow->UpdateNewSize();
+    subWindow->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    subWindow->windowSystemConfig_.freeMultiWindowEnable_ = false;
+    subWindow->windowSystemConfig_.freeMultiWindowSupport_ = false;
+    subWindow->UpdateNewSize();
+    subWindow->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    subWindow->UpdateNewSize();
+    subWindow->windowSystemConfig_.freeMultiWindowEnable_ = true;
+    subWindow->windowSystemConfig_.freeMultiWindowSupport_ = false;
+    subWindow->UpdateNewSize();
+    subWindow->windowSystemConfig_.freeMultiWindowSupport_ = false;
+    subWindow->UpdateNewSize();
 }
 
 /**

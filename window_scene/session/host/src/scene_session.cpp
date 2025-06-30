@@ -3615,7 +3615,6 @@ void SceneSession::HandleMoveDragEnd(WSRect& rect, SizeChangeReason reason)
         NotifySessionRectChange(rect, reason);
         NotifySubSessionRectChangeByAnchor(rect, SizeChangeReason::UNDEFINED);
     } else {
-        displayChangedByMoveDrag_ = true;
         NotifySessionRectChange(rect, reason, endDisplayId);
         NotifySubSessionRectChangeByAnchor(rect, SizeChangeReason::UNDEFINED, endDisplayId);
         CheckSubSessionShouldFollowParent(endDisplayId);
@@ -8703,114 +8702,10 @@ void SceneSession::NotifyKeyboardDidHideRegistered(bool registered)
     GetSessionProperty()->EditSessionInfo().isKeyboardDidHideRegistered_ = registered;
 }
 
-WSError SceneSession::UpdateDensity(bool isNotSessionRectWithDpiChange)
+WSError SceneSession::UpdateDensity()
 {
-    if (systemConfig_.IsPcWindow() && WindowHelper::IsAppWindow(GetWindowType()) &&
-        Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && !isDefaultDensityEnabled_) {
-        UpdateNewSizeForPCWindow(isNotSessionRectWithDpiChange);
-    }
-    SetTempRect({ 0, 0, 0, 0 });
     SaveLastDensity();
     return Session::UpdateDensity();
-}
-
-void SceneSession::UpdateNewSizeForPCWindow(bool isNotSessionRectWithDpiChange)
-{
-    if (isNotSessionRectWithDpiChange) {
-        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "dip change do nothing.");
-        return;
-    }
-
-    if (auto property = GetSessionProperty()) {
-        DisplayId displayId = property->GetDisplayId();
-        auto display = DisplayManager::GetInstance().GetDisplayById(displayId);
-        if (display == nullptr) {
-            TLOGE(WmsLogTag::WMS_LAYOUT_PC, "get available area failed!");
-            return;
-        }
-
-        DMRect availableArea = { 0, 0, 0, 0 };
-        DMError ret = display->GetAvailableArea(availableArea);
-        if (ret != DMError::DM_OK || availableArea.IsUninitializedRect()) {
-            TLOGE(WmsLogTag::WMS_LAYOUT_PC, "get available area failed!");
-            return;
-        }
-
-        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "availableArea: %{public}d, %{public}d, %{public}u, %{public}u, "
-            "Id: %{public}u", availableArea.posX_, availableArea.posY_,
-            availableArea.width_, availableArea.height_, GetPersistentId());
-        WSRect winRect = winRect_;
-        if (!tempRect_.IsEmpty()) {
-            winRect = tempRect_;
-        }
-        float newVpr = display->GetVirtualPixelRatio();
-        if (CalcNewWindowRectIfNeed(availableArea, newVpr, winRect)) {
-            NotifySessionRectChange(winRect, SizeChangeReason::UPDATE_DPI_SYNC);
-            CalcNewClientRectForSuperFold(winRect);
-            SetFrameGravity(Gravity::RESIZE);
-            if (sessionStage_) {
-                sessionStage_->UpdateRect(winRect, SizeChangeReason::UPDATE_DPI_SYNC);
-            }
-            winRect_ = winRect;
-            TLOGI(WmsLogTag::WMS_LAYOUT_PC, "left: %{public}d, top: %{public}d, width: %{public}u, "
-                "height: %{public}u, Id: %{public}u, displayId: %{public}" PRIu64, winRect.posX_, winRect.posY_,
-                winRect.width_, winRect.height_, GetPersistentId(), GetDisplayId());
-        }
-    }
-    displayChangedByMoveDrag_ = false;
-}
-
-bool SceneSession::CalcNewWindowRectIfNeed(DMRect& availableArea, float newVpr, WSRect& winRect)
-{
-    auto property = GetSessionProperty();
-    if (property == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "property is nullptr");
-        return false;
-    }
-    // The size of the window does not change in CompatibleMode
-    if (property->IsWindowLimitDisabled()) {
-        return false;
-    }
-    float currVpr = 0.0f;
-    currVpr = property->GetLastLimitsVpr();
-    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "currVpr: %{public}f, newVpr: %{public}f, Id: %{public}u",
-        currVpr, newVpr, GetPersistentId());
-    if (MathHelper::NearZero(currVpr - newVpr) || MathHelper::NearZero(currVpr)) {
-        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "need not update new rect, currVpr: %{public}f newVpr: %{public}f "
-            "Id: %{public}u", currVpr, newVpr, GetPersistentId());
-        return false;
-    }
-    int32_t left = winRect.posX_;
-    int32_t top = winRect.posY_;
-    float scaleRatio = newVpr / currVpr;
-    uint32_t width = static_cast<uint32_t>(winRect.width_ * scaleRatio);
-    uint32_t height = static_cast<uint32_t>(winRect.height_ * scaleRatio);
-    int32_t topThreshold = availableArea.posY_;
-    int32_t bottomThreshold = static_cast<int32_t>(availableArea.posY_ + availableArea.height_);
-
-    UpdateSuperFoldThreshold(availableArea, topThreshold, bottomThreshold);
-    width = MathHelper::Min(width, availableArea.width_);
-    height = MathHelper::Min(height, availableArea.height_);
-    height = MathHelper::Min(height, static_cast<uint32_t>(bottomThreshold));
-    bool needMove = top < topThreshold || left < 0 ||
-        top > static_cast<int32_t>(bottomThreshold - height) ||
-        left > static_cast<int32_t>(availableArea.width_ - width) || displayChangedByMoveDrag_;
-    if (displayChangedByMoveDrag_ && moveDragController_) {
-        int32_t pointerPosX = moveDragController_->GetLastMovePointerPosX();
-        left = pointerPosX - static_cast<int32_t>((pointerPosX -left) * scaleRatio);
-    } else {
-        top = MathHelper::Min(top, static_cast<int32_t>(bottomThreshold - height));
-        top = MathHelper::Max(top, topThreshold);
-        left = MathHelper::Min(left, static_cast<int32_t>(availableArea.width_ - width));
-        left = MathHelper::Max(left, 0);
-    }
-    winRect.width_ = width;
-    winRect.height_ = height;
-    if (needMove) {
-        winRect.posX_ = left;
-        winRect.posY_ = top;
-    }
-    return true;
 }
 
 void SceneSession::SaveLastDensity()
@@ -8820,73 +8715,6 @@ void SceneSession::SaveLastDensity()
     if (auto display = DisplayManager::GetInstance().GetDisplayById(displayId)) {
         property->SetLastLimitsVpr(display->GetVirtualPixelRatio());
     }
-}
-
-void SceneSession::CalcNewClientRectForSuperFold(WSRect& rect)
-{
-    auto currScreenFoldStatus = PcFoldScreenManager::GetInstance().GetScreenFoldStatus();
-    if (currScreenFoldStatus == SuperFoldStatus::HALF_FOLDED) {
-        WSRect creaseRect = GetCreaseRegion(CreaseRegionName::FIRST_CREASE_REGION);
-        if (creaseRect.IsEmpty()) {
-            return;
-        }
-        if (winRect_.posY_ >= creaseRect.posY_ + creaseRect.height_) {
-            rect.posY_ = winRect_.posY_ - creaseRect.posY_ - creaseRect.height_;
-        }
-    }
-}
-
-void SceneSession::UpdateSuperFoldThreshold(DMRect& availableArea, int32_t& topThreshold, int32_t& bottomThreshold)
-{
-    auto currScreenFoldStatus = PcFoldScreenManager::GetInstance().GetScreenFoldStatus();
-    if (currScreenFoldStatus == SuperFoldStatus::HALF_FOLDED) {
-        WSRect creaseRect = GetCreaseRegion(CreaseRegionName::FIRST_CREASE_REGION);
-        if (creaseRect.IsEmpty()) {
-            return;
-        }
-        // is in C side
-        if (winRect_.posY_ >= creaseRect.posY_ + creaseRect.height_) {
-            sptr<ScreenSession> currentScreenSession =
-                ScreenSessionManagerClient::GetInstance().GetScreenSessionById(GetSessionProperty()->GetDisplayId());
-            if (currentScreenSession == nullptr) {
-                TLOGW(WmsLogTag::WMS_LAYOUT_PC, "Screen session is null");
-                return;
-            }
-            int32_t currentScreenHeight =
-                static_cast<int32_t>(currentScreenSession->GetScreenProperty().GetBounds().rect_.height_);
-            int32_t dockHeight = GetDockHeight();
-            topThreshold = creaseRect.posY_ + creaseRect.height_;
-            bottomThreshold = currentScreenHeight - dockHeight - creaseRect.posY_ - creaseRect.height_;
-            TLOGI(WmsLogTag::WMS_LAYOUT_PC, "currentScreenHeight: %{public}d, topThreshold: %{public}d, "
-                "bottomThreshold: %{public}d Id: %{public}u", currentScreenHeight, topThreshold,
-                bottomThreshold, GetPersistentId());
-        }
-    }
-}
-
-WSRect SceneSession::GetCreaseRegion(CreaseRegionName regionName) const
-{
-    sptr<FoldCreaseRegion> creaseRegion = DisplayManager::GetInstance().GetCurrentFoldCreaseRegion();
-    if (creaseRegion == nullptr) {
-        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "creaseRegion is null.");
-        return { 0, 0, 0, 0 };
-    }
-    std::vector<DMRect> creaseRects = creaseRegion->GetCreaseRects();
-    uint8_t index = static_cast<uint8_t>(regionName);
-    if (index >= 0 && index < creaseRects.size()) {
-        // posX_ from left to right. Otherwise posY_ from top to bottom.
-        std::sort(creaseRects.begin(), creaseRects.end(), [] (const DMRect& rectA, const DMRect& rectB) {
-            if (rectA.posX_ != rectB.posX_) {
-                return rectA.posX_ < rectB.posX_;
-            }
-            return rectA.posY_ < rectB.posY_;
-        });
-        return { creaseRects[index].posX_, creaseRects[index].posY_,
-            creaseRects[index].width_, creaseRects[index].height_ };
-    } else {
-        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "creaseRegion index %{public}u is out of range", index);
-    }
-    return { 0, 0, 0, 0 };
 }
 
 void SceneSession::NotifyUpdateFlagCallback(NotifyUpdateFlagFunc&& func)

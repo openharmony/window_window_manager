@@ -3167,22 +3167,7 @@ napi_value JsSceneSessionManager::OnUpdateSessionDisplayId(napi_env env, napi_ca
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-
-    WSRect winRect = { 0, 0, 0, 0 };
-    if (argc > ARGC_TWO) {
-        ConvertRectInfoFromJs(env, argv[ARG_INDEX_TWO], winRect);
-    }
-
-    bool isNotSessionRectWithDpiChange = false;
-    if (argc > ARGC_THREE && !ConvertFromJsValue(env, argv[ARGC_THREE], isNotSessionRectWithDpiChange)) {
-        WLOGFE("Failed to convert parameter to isNotSessionRectWithDpiChange");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
-        return NapiGetUndefined(env);
-    }
-
-    SceneSessionManager::GetInstance().UpdateSessionDisplayId(persistentId, screenId, winRect,
-        isNotSessionRectWithDpiChange);
+    SceneSessionManager::GetInstance().UpdateSessionDisplayId(persistentId, screenId);
     return NapiGetUndefined(env);
 }
 
