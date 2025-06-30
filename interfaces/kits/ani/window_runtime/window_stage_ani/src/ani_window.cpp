@@ -2017,7 +2017,6 @@ static ani_object WindowGetWindowProperties(ani_env* env, ani_object obj, ani_lo
 {
     using namespace OHOS::Rosen;
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
-    TLOGD(WmsLogTag::DEFAULT, "[ANI], %{public}p", aniWindow);
     if (aniWindow == nullptr || aniWindow->GetWindow() == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] windowToken_ is nullptr");
         return AniWindowUtils::CreateAniUndefined(env);
