@@ -187,7 +187,7 @@ public:
 
 class TestIWindowLifeCycleListener : public IWindowLifeCycleListener {
 public:
-    void OnWindowDestroyed(WindowLifeCycleInfo& lifeCycleInfo, void* jsWindowNapiValue) override
+    void OnWindowDestroyed(const WindowLifeCycleInfo& lifeCycleInfo, void* jsWindowNapiValue) override
     {
         listenerLifeCycleInfo.windowId = lifeCycleInfo.windowId;
         listenerLifeCycleInfo.windowType = lifeCycleInfo.windowType;

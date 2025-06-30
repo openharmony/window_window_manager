@@ -465,7 +465,7 @@ void WindowManager::Impl::NotifyWindowRectChange(
     }
 }
 
-void WindowManager::Impl::NotifyWMSWindowDestroyed(WindowLifeCycleInfo& lifeCycleInfo, void* jsWindowNapiValue)
+void WindowManager::Impl::NotifyWMSWindowDestroyed(const WindowLifeCycleInfo& lifeCycleInfo, void* jsWindowNapiValue)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "notify window destroyed");
 
@@ -2194,12 +2194,12 @@ WMError WindowManager::UnregisterWindowLifeCycleCallback(const sptr<IWindowLifeC
     return WMError::WM_OK;
 }
 
-void WindowManager::RegisterGetJSWindowCallback(const GetJSWindowObjFunc& getJSWindowFunc)
+void WindowManager::RegisterGetJSWindowCallback(const GetJSWindowObjFunc&& getJSWindowFunc)
 {
     getJSWindowObjFunc_ = std::move(getJSWindowFunc);
 }
 
-void WindowManager::NotifyWMSWindowDestroyed(WindowLifeCycleInfo& lifeCycleInfo)
+void WindowManager::NotifyWMSWindowDestroyed(const WindowLifeCycleInfo& lifeCycleInfo)
 {
     void* jsWindowNapiValue = nullptr;
     if (getJSWindowObjFunc_ != nullptr) {

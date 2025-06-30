@@ -65,7 +65,7 @@ JsWindowManager::JsWindowManager() : registerManager_(std::make_unique<JsWindowR
         }
         return jsWindowNapiValue;
     };
-    SingletonContainer::Get<WindowManager>().RegisterGetJSWindowCallback(func);
+    SingletonContainer::Get<WindowManager>().RegisterGetJSWindowCallback(std::move(func));
 }
 
 JsWindowManager::~JsWindowManager()
