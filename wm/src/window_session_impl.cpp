@@ -1829,11 +1829,12 @@ void WindowSessionImpl::HideTitleButton(bool& hideSplitButton, bool& hideMaximiz
     }
     hideMaximizeButton = hideMaximizeButton || property_->IsFullScreenDisabled();
     bool isLayoutFullScreen = property_->IsLayoutFullScreen();
+    bool hideSplitBtn = hideSplitButton || property_->IsSplitDisabled();
     if (property_->IsAdaptToImmersive() && !property_->GetIsAtomicService()) {
-        uiContent->HideWindowTitleButton(true, !isLayoutFullScreen && hideMaximizeButton,
+        uiContent->HideWindowTitleButton(hideSplitBtn, !isLayoutFullScreen && hideMaximizeButton,
             hideMinimizeButton, hideCloseButton);
     } else {
-        uiContent->HideWindowTitleButton(hideSplitButton, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
+        uiContent->HideWindowTitleButton(hideSplitBtn, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
     }
     // compatible mode adapt to proportional scale, will show its button
     bool showScaleBtn = property_->IsAdaptToProportionalScale() && !property_->GetIsAtomicService();
@@ -6435,6 +6436,12 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo
         return;
     }
     auto task = [weak = wptr(this), info, rsTransaction, callingWindowRect, avoidAreas]() {
+        if (info != nullptr) {
+            TLOGNI(WmsLogTag::WMS_KEYBOARD, "transaction: %{public}d, safeHeight: %{public}u"
+                ", occupied rect: x %{public}d, y %{public}d, w %{public}u, h %{public}u, "
+                "callingWindowRect: %{public}s", rsTransaction != nullptr, info->safeHeight_, info->rect_.posX_,
+                info->rect_.posY_, info->rect_.width_, info->rect_.height_, callingWindowRect.ToString().c_str());
+        }
         auto window = weak.promote();
         if (!window) {
             TLOGNE(WmsLogTag::WMS_KEYBOARD, "window is nullptr, notify occupied area change info failed");
@@ -6443,12 +6450,6 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo
         if (rsTransaction) {
             RSTransactionAdapter::FlushImplicitTransaction(window->GetRSUIContext());
             rsTransaction->Begin();
-        }
-        if (info != nullptr) {
-            TLOGNI(WmsLogTag::WMS_KEYBOARD, "transaction: %{public}d, safeHeight: %{public}u"
-                ", occupied rect: x %{public}d, y %{public}d, w %{public}u, h %{public}u, "
-                "callingWindowRect: %{public}s", rsTransaction != nullptr, info->safeHeight_, info->rect_.posX_,
-                info->rect_.posY_, info->rect_.width_, info->rect_.height_, callingWindowRect.ToString().c_str());
         }
         window->NotifyOccupiedAreaChangeInfoInner(info);
         window->occupiedAreaInfo_ = info;
@@ -7227,8 +7228,14 @@ bool WindowSessionImpl::IsDeviceFeatureCapableFor(const std::string& feature) co
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window [%{public}d] context is nullptr", GetPersistentId());
         return false;
     }
-    std::vector<std::string> deviceFeatures = context_->GetHapModuleInfo()->deviceFeatures;
-    return std::find(deviceFeatures.begin(), deviceFeatures.end(), feature) != deviceFeatures.end();
+    std::string deviceType = system::GetParameter("const.product.devicetype", "");
+    std::map<std::string, std::vector<std::string>>& requiredDeviceFeatures =
+        context_->GetHapModuleInfo()->requiredDeviceFeatures;
+    if (requiredDeviceFeatures.find(deviceType) == requiredDeviceFeatures.end()) {
+        return false;
+    }
+    auto& features = requiredDeviceFeatures[deviceType];
+    return std::find(features.begin(), features.end(), feature) != features.end();
 }
 
 bool WindowSessionImpl::IsDeviceFeatureCapableForFreeMultiWindow() const

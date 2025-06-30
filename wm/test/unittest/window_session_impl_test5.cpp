@@ -343,7 +343,10 @@ HWTEST_F(WindowSessionImplTest5, IsDeviceFeatureCapableFor, Function | SmallTest
     window->context_ = context;
     context->hapModuleInfo_ = std::make_shared<AppExecFwk::HapModuleInfo>();
     EXPECT_EQ(window->IsDeviceFeatureCapableFor(feature), false);
-    context->hapModuleInfo_->deviceFeatures.push_back(feature);
+    std::string deviceType = system::GetParameter("const.product.devicetype", "");
+    context->hapModuleInfo_->requiredDeviceFeatures = {{deviceType, {}}};
+    EXPECT_EQ(window->IsDeviceFeatureCapableFor(feature), false);
+    context->hapModuleInfo_->requiredDeviceFeatures = {{deviceType, {feature}}};
     EXPECT_EQ(window->IsDeviceFeatureCapableFor(feature), true);
 }
 
@@ -363,7 +366,8 @@ HWTEST_F(WindowSessionImplTest5, IsDeviceFeatureCapableForFreeMultiWindow, Funct
     window->context_ = context;
     context->hapModuleInfo_ = std::make_shared<AppExecFwk::HapModuleInfo>();
     EXPECT_EQ(window->IsDeviceFeatureCapableForFreeMultiWindow(), false);
-    context->hapModuleInfo_->deviceFeatures.push_back(feature);
+    std::string deviceType = system::GetParameter("const.product.devicetype", "");
+    context->hapModuleInfo_->requiredDeviceFeatures = {{deviceType, {feature}}};
     EXPECT_EQ(window->IsDeviceFeatureCapableForFreeMultiWindow(),
         system::GetParameter("const.window.device_feature_support_type", "0") == "1");
 }

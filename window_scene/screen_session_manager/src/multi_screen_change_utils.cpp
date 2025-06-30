@@ -268,6 +268,30 @@ void MultiScreenChangeUtils::ScreenPropertyChange(sptr<ScreenSession>& innerScre
     externalScreen->SetScreenProperty(innerPhyProperty);
 }
 
+void MultiScreenChangeUtils::ExchangeScreenSupportedRefreshRate(sptr<ScreenSession>& innerScreen,
+    sptr<ScreenSession>& externalScreen)
+{
+    if (innerScreen == nullptr || externalScreen == nullptr) {
+        TLOGE(WmsLogTag::DMS, "screen sessions null.");
+        return;
+    }
+    /* change screen supported refresh rate from physical session */
+    sptr<ScreenSession> innerPhyScreen =
+        ScreenSessionManager::GetInstance().GetPhysicalScreenSession(innerScreen->GetRSScreenId());
+    sptr<ScreenSession> externalPhyScreen =
+        ScreenSessionManager::GetInstance().GetPhysicalScreenSession(externalScreen->GetRSScreenId());
+
+    if (innerPhyScreen == nullptr || externalPhyScreen == nullptr) {
+        TLOGE(WmsLogTag::DMS, "physicalScreen is null!");
+        return;
+    }
+
+    std::vector<uint32_t> innerSupportedRefreshRate = innerPhyScreen->GetSupportedRefreshRate();
+    std::vector<uint32_t> externalSupportedRefreshRate = externalPhyScreen->GetSupportedRefreshRate();
+    innerScreen->SetSupportedRefreshRate(std::move(externalSupportedRefreshRate));
+    externalScreen->SetSupportedRefreshRate(std::move(innerSupportedRefreshRate));
+}
+
 void MultiScreenChangeUtils::SetScreenNotifyFlag(sptr<ScreenSession>& innerScreen,
     sptr<ScreenSession>& externalScreen)
 {
@@ -298,6 +322,9 @@ void MultiScreenChangeUtils::ScreenPhysicalInfoChange(sptr<ScreenSession>& inner
 
     /* change screen property */
     ScreenPropertyChange(innerScreen, externalScreen);
+
+    /* change screen supported refresh rate */
+    ExchangeScreenSupportedRefreshRate(innerScreen, externalScreen);
 
     /* change screen rsId */
     ScreenRSIdChange(innerScreen, externalScreen);

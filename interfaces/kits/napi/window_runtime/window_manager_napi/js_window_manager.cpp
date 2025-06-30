@@ -55,6 +55,17 @@ constexpr uint32_t API_VERSION_18 = 18;
 
 JsWindowManager::JsWindowManager() : registerManager_(std::make_unique<JsWindowRegisterManager>())
 {
+    const char* const where = __func__;
+    GetJSWindowObjFunc func = [where](const std::string& windowName) {
+        void* jsWindowNapiValue = nullptr;
+        std::shared_ptr<NativeReference> jsWindowObj = FindJsWindowObject(windowName);
+        if (jsWindowObj != nullptr) {
+            TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s find window, window name: %{public}s", where, windowName.c_str());
+            jsWindowNapiValue = jsWindowObj->GetNapiValue();
+        }
+        return jsWindowNapiValue;
+    };
+    SingletonContainer::Get<WindowManager>().RegisterGetJSWindowCallback(std::move(func));
 }
 
 JsWindowManager::~JsWindowManager()
@@ -1592,8 +1603,8 @@ napi_value JsWindowManager::OnShiftAppWindowTouchEvent(napi_env env, napi_callba
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
     auto asyncTask = [sourceWindowId, targetWindowId, fingerId, env, task = napiAsyncTask] {
-        if (sourceWindowId == static_cast<int32_t>(INVALID_WINDOW_ID) ||
-            targetWindowId == static_cast<int32_t>(INVALID_WINDOW_ID) ||
+        if (sourceWindowId <= static_cast<int32_t>(INVALID_WINDOW_ID) ||
+            targetWindowId <= static_cast<int32_t>(INVALID_WINDOW_ID) ||
             (fingerId <= static_cast<int32_t>(INVALID_FINGER_ID))) {
             TLOGE(WmsLogTag::WMS_PC, "invalid sourceWindowId or targetWindowId or fingerId");
             task->Reject(env, JsErrUtils::CreateJsError(env,

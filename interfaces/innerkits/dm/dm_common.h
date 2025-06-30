@@ -26,10 +26,13 @@ namespace OHOS::Rosen {
 using DisplayId = uint64_t;
 using ScreenId = uint64_t;
 using NodeId = uint64_t;
+using DisplayGroupId = uint64_t;
 
 namespace {
 constexpr DisplayId DISPLAY_ID_INVALID = -1ULL;
 constexpr ScreenId SCREEN_ID_INVALID = -1ULL;
+constexpr DisplayGroupId DISPLAY_GROUP_ID_INVALID = -1ULL;
+constexpr DisplayGroupId DISPLAY_GROUP_ID_DEFAULT = 0;
 constexpr ScreenId MAIN_SCREEN_ID_DEFAULT = 0;
 constexpr ScreenId SCREEN_ID_FAKE = 999;
 constexpr DisplayId DISPLAY_ID_FAKE = 999;
@@ -53,6 +56,8 @@ struct DMHookInfo {
     float_t density_;
     uint32_t rotation_;
     bool enableHookRotation_;
+    uint32_t displayOrientation_;
+    bool enableHookDisplayOrientation_;
 };
 
 /**

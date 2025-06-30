@@ -30,6 +30,7 @@
 
 #include "dm_common.h"
 #include "securec.h"
+#include "wm_animation_common.h"
 #include "wm_math.h"
 #include "wm_type.h"
 
@@ -182,6 +183,19 @@ struct HookInfo {
     float_t density_;
     uint32_t rotation_;
     bool enableHookRotation_;
+    uint32_t displayOrientation_;
+    bool enableHookDisplayOrientation_;
+
+    std::string ToString() const
+    {
+        std::ostringstream oss;
+        oss << "width: " << width_ << ", height: " << height_ << ", density: " << density_
+            << ", rotation: " << rotation_
+            << ", enableHookRotation: " << (enableHookRotation_ ? "true" : "false")
+            << ", orientation: " << displayOrientation_
+            << ", enableHookOrientation: " << (enableHookDisplayOrientation_ ? "true" : "false");
+        return oss.str();
+    }
 };
 
 /**
@@ -2594,157 +2608,6 @@ enum class RotationChangeType : uint32_t {
      * rotate end.
      */
     WINDOW_DID_ROTATE,
-};
-
-/*
- * @brief Enumerates window transition type.
- */
-enum class WindowTransitionType : uint32_t {
-    /**
-     * window destroy.
-     */
-    DESTROY = 0,
-    
-    /**
-     * end type.
-     */
-    END,
-};
-
-/*
- * @brief Enumerates window animation curve type.
- */
-enum class WindowAnimationCurve : uint32_t {
-    /**
-     * animation curve type linear.
-     */
-    LINEAR = 0,
-
-    /**
-     * animation curve type interpolation_spring.
-     */
-    INTERPOLATION_SPRING = 1,
-};
-
-const uint32_t ANIMATION_PARAM_SIZE = 4;
-const uint32_t ANIMATION_MAX_DURATION = 3000;
-
-struct WindowAnimationProperty : public Parcelable {
-    float targetScale = 0.0f;
-
-    bool Marshalling(Parcel& parcel) const override
-    {
-        if (!parcel.WriteFloat(targetScale)) {
-            return false;
-        }
-        return true;
-    }
-
-    static WindowAnimationProperty* Unmarshalling(Parcel& parcel)
-    {
-        WindowAnimationProperty* animationProperty = new WindowAnimationProperty();
-        if (!parcel.ReadFloat(animationProperty->targetScale)) {
-            delete animationProperty;
-            return nullptr;
-        }
-        return animationProperty;
-    }
-};
-
-/*
- * @brief Window transition animation configuration.
- */
-struct WindowAnimationOption : public Parcelable {
-    WindowAnimationCurve curve = WindowAnimationCurve::LINEAR;
-    uint32_t duration = 0;
-    std::array<float, ANIMATION_PARAM_SIZE> param;
-
-    bool Marshalling(Parcel& parcel) const override
-    {
-        if (!(parcel.WriteUint32(static_cast<uint32_t>(curve)) && parcel.WriteUint32(duration))) {
-            return false;
-        }
-        if (param.size() > ANIMATION_PARAM_SIZE) {
-            return false;
-        }
-        for (auto p: param) {
-            if (!parcel.WriteFloat(p)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    static WindowAnimationOption* Unmarshalling(Parcel& parcel)
-    {
-        WindowAnimationOption* windowAnimationConfig = new WindowAnimationOption();
-        uint32_t curve = 0;
-        if (!parcel.ReadUint32(curve)) {
-            delete windowAnimationConfig;
-            return nullptr;
-        }
-        windowAnimationConfig->curve = static_cast<WindowAnimationCurve>(curve);
-        if (!parcel.ReadUint32(windowAnimationConfig->duration)) {
-            delete windowAnimationConfig;
-            return nullptr;
-        }
-        if (windowAnimationConfig->param.size() > ANIMATION_PARAM_SIZE) {
-            delete windowAnimationConfig;
-            return nullptr;
-        }
-        for (auto& param: windowAnimationConfig->param) {
-            if (!parcel.ReadFloat(param)) {
-                delete windowAnimationConfig;
-                return nullptr;
-            }
-        }
-        return windowAnimationConfig;
-    }
-
-    std::string ToString() const
-    {
-        std::ostringstream oss;
-        oss << "curve: " << std::to_string(static_cast<int32_t>(curve)) << ", duration: " << \
-            std::to_string(static_cast<int32_t>(duration)) << ", param: [ ";
-        for (auto p: param) {
-            oss << std::fixed << std::setprecision(2) << p << ", "; // 2 means print float value length
-        }
-        oss << "]";
-        return oss.str();
-    }
-};
-
-/*
- * @brief Transition animation configuration.
- */
-struct TransitionAnimation : public Parcelable {
-    WindowAnimationOption config;
-    float opacity = 1.0f;
-    
-    bool Marshalling(Parcel& parcel) const override
-    {
-        if (!(parcel.WriteFloat(opacity) && parcel.WriteParcelable(&config))) {
-            return false;
-        }
-        return true;
-    }
-
-    static TransitionAnimation* Unmarshalling(Parcel& parcel)
-    {
-        TransitionAnimation* transitionAnimation = new TransitionAnimation();
-        if (!parcel.ReadFloat(transitionAnimation->opacity)) {
-            delete transitionAnimation;
-            return nullptr;
-        }
-        std::shared_ptr<WindowAnimationOption> animationConfig =
-            std::shared_ptr<WindowAnimationOption>(parcel.ReadParcelable<WindowAnimationOption>());
-        if (animationConfig == nullptr) {
-            delete transitionAnimation;
-            return nullptr;
-        }
-        transitionAnimation->config = *animationConfig;
-        return transitionAnimation;
-    }
 };
 
 /**

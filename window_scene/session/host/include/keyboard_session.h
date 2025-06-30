@@ -108,19 +108,17 @@ private:
     void SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool needFlush = true) override;
     bool IsNeedRaiseSubWindow(const sptr<SceneSession>& callingSession, const WSRect& callingSessionRect);
     void PostKeyboardAnimationSyncTimeoutTask();
-    void ProcessKeyboardOccupiedAreaInfo(uint32_t callingId, bool needCheckVisible,
-        bool needRecalculateAvoidAreas, bool needCheckRSTransaction) override;
+    void ProcessKeyboardOccupiedAreaInfo(uint32_t callingId, bool needRecalculateAvoidAreas,
+        bool needCheckRSTransaction);
     void NotifyOccupiedAreaChanged(const sptr<SceneSession>& callingSession,
         sptr<OccupiedAreaChangeInfo>& occupiedAreaInfo, bool needRecalculateAvoidAreas,
         std::shared_ptr<RSTransaction> rsTransaction);
-    bool RaiseCallingSession(const sptr<SceneSession>& callingSession, sptr<OccupiedAreaChangeInfo>& occupiedAreaInfo,
-        const bool needCheckVisible);
+    bool RaiseCallingSession(const sptr<SceneSession>& callingSession, sptr<OccupiedAreaChangeInfo>& occupiedAreaInfo);
     bool CalculateOccupiedArea(const sptr<SceneSession>& callingSession, const WSRect& callingSessionRect,
         const WSRect& panelRect, sptr<OccupiedAreaChangeInfo>& occupiedAreaInfo);
     void CloseRSTransaction();
-    void MarkOccupiedAreaAsDirty() override;
-    void ResetOccupiedAreaDirtyFlags() override;
-    uint32_t GetOccupiedAreaDirtyFlags() override;
+    bool stateChanged_ = false;
+    void CalculateOccupiedAreaAfterUIRefresh() override;
 
     sptr<KeyboardSessionCallback> keyboardCallback_ = nullptr;
     bool isKeyboardSyncTransactionOpen_ = false;

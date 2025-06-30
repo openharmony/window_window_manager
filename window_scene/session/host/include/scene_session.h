@@ -818,13 +818,8 @@ public:
     void NotifyKeyboardWillHideRegistered(bool registered) override;
     void NotifyKeyboardDidShowRegistered(bool registered) override;
     void NotifyKeyboardDidHideRegistered(bool registered) override;
-    virtual void ProcessKeyboardOccupiedAreaInfo(uint32_t callingId, bool needCheckVisible,
-        bool needRecalculateAvoidAreas, bool needCheckRSTransaction) {}
-    virtual void MarkOccupiedAreaAsDirty() {}
-    virtual void ResetOccupiedAreaDirtyFlags() {}
-    virtual uint32_t GetOccupiedAreaDirtyFlags() { return dirtyFlags_; }
-    void ProcessCallingSessionRectDirty();
     bool isSubWindowResizingOrMoving_ = false;
+    virtual void CalculateOccupiedAreaAfterUIRefresh() {}
 
     /*
      * Window Focus

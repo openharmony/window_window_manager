@@ -526,17 +526,17 @@ void ScreenSession::SetValidHeight(uint32_t validHeight)
 {
     property_.SetValidHeight(validHeight);
 }
- 
+
 void ScreenSession::SetValidWidth(uint32_t validWidth)
 {
     property_.SetValidWidth(validWidth);
 }
- 
+
 uint32_t ScreenSession::GetValidHeight() const
 {
     return property_.GetValidHeight();
 }
- 
+
 uint32_t ScreenSession::GetValidWidth() const
 {
     return property_.GetValidWidth();
@@ -2080,6 +2080,11 @@ void ScreenSession::SetSupportedRefreshRate(std::vector<uint32_t>&& supportedRef
     supportedRefreshRate_ = std::move(supportedRefreshRate);
 }
 
+std::vector<uint32_t> ScreenSession::GetSupportedRefreshRate() const
+{
+    return supportedRefreshRate_;
+}
+
 void ScreenSession::SetForceCloseHdr(bool isForceCloseHdr)
 {
     std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
@@ -2319,7 +2324,7 @@ void ScreenSession::SetIsEnableRegionRotation(bool isEnableRegionRotation)
     std::lock_guard<std::mutex> lock(isEnableRegionRotationMutex_);
     isEnableRegionRotation_ = isEnableRegionRotation;
 }
- 
+
 bool ScreenSession::GetIsEnableRegionRotation()
 {
     std::lock_guard<std::mutex> lock(isEnableRegionRotationMutex_);
@@ -2462,5 +2467,65 @@ bool ScreenSession::GetIsEnableCanvasRotation()
 {
     std::lock_guard<std::mutex> lock(isEnableCanvasRotationMutex_);
     return isEnableCanvasRotation_;
+}
+
+void ScreenSession::SetDisplayGroupId(DisplayGroupId displayGroupId)
+{
+    property_.SetDisplayGroupId(displayGroupId);
+}
+
+DisplayGroupId ScreenSession::GetDisplayGroupId() const
+{
+    return property_.GetDisplayGroupId();
+}
+
+void ScreenSession::SetMainDisplayIdOfGroup(ScreenId screenId)
+{
+    property_.SetMainDisplayIdOfGroup(screenId);
+}
+
+ScreenId ScreenSession::GetMainDisplayIdOfGroup() const
+{
+    return property_.GetMainDisplayIdOfGroup();
+}
+
+void ScreenSession::SetScreenAreaOffsetX(uint32_t screenAreaOffsetX)
+{
+    property_.SetScreenAreaOffsetX(screenAreaOffsetX);
+}
+
+uint32_t ScreenSession::GetScreenAreaOffsetX() const
+{
+    return property_.GetScreenAreaOffsetX();
+}
+
+void ScreenSession::SetScreenAreaOffsetY(uint32_t screenAreaOffsetY)
+{
+    property_.SetScreenAreaOffsetY(screenAreaOffsetY);
+}
+
+uint32_t ScreenSession::GetScreenAreaOffsetY() const
+{
+    return property_.GetScreenAreaOffsetY();
+}
+
+void ScreenSession::SetScreenAreaWidth(uint32_t screenAreaWidth)
+{
+    property_.SetScreenAreaWidth(screenAreaWidth);
+}
+
+uint32_t ScreenSession::GetScreenAreaWidth() const
+{
+    return property_.GetScreenAreaWidth();
+}
+
+void ScreenSession::SetScreenAreaHeight(uint32_t screenAreaHeight)
+{
+    property_.SetScreenAreaHeight(screenAreaHeight);
+}
+
+uint32_t ScreenSession::GetScreenAreaHeight() const
+{
+    return property_.GetScreenAreaHeight();
 }
 } // namespace OHOS::Rosen

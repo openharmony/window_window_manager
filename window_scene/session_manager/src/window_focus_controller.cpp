@@ -39,46 +39,77 @@ WSError FocusGroup::UpdateFocusedAppSessionId(int32_t persistentId)
 WindowFocusController::WindowFocusController() noexcept
 {
     TLOGI(WmsLogTag::WMS_FOCUS, "constructor");
-    AddFocusGroup(DEFAULT_DISPLAY_ID);
+    AddFocusGroup(DEFAULT_DISPLAY_ID, DEFAULT_DISPLAY_ID);
 }
 
 DisplayId WindowFocusController::GetDisplayGroupId(DisplayId displayId)
 {
-    if (displayId == DEFAULT_DISPLAY_ID || virtualScreenDisplayIdSet_.size() == 0) {
+    if (displayId == DEFAULT_DISPLAY_ID) {
         return DEFAULT_DISPLAY_ID;
     }
-    if (virtualScreenDisplayIdSet_.find(displayId) != virtualScreenDisplayIdSet_.end()) {
-        return displayId;
+    auto iter = displayId2GroupIdMap_.find(displayId);
+    if (iter != displayId2GroupIdMap_.end()) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "displayId: %{public}" PRIu64", displayGroupId: %{public}" PRIu64,
+              displayId, iter->second);
+        return iter->second;
     }
-    return DEFAULT_DISPLAY_ID;
+    if (deletedDisplayId2GroupIdMap_.find(displayId) != deletedDisplayId2GroupIdMap_.end()) {
+        return DISPLAY_ID_INVALID;
+    } else {
+        return DEFAULT_DISPLAY_ID;
+    }
 }
 
-WSError WindowFocusController::AddFocusGroup(DisplayId displayId)
+WSError WindowFocusController::AddFocusGroup(DisplayGroupId displayGroupId, DisplayId displayId)
 {
-    TLOGI(WmsLogTag::WMS_FOCUS, "displayId: %{public}" PRIu64, displayId);
+    TLOGI(WmsLogTag::WMS_FOCUS,
+          "displayId: %{public}" PRIu64", displayGroupId: %{public}" PRIu64,
+          displayId,
+          displayGroupId);
     if (displayId == DISPLAY_ID_INVALID) {
         TLOGE(WmsLogTag::WMS_FOCUS, "displayId invalid");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
-    sptr<FocusGroup> focusGroup = sptr<FocusGroup>::MakeSptr(displayId);
-    focusGroupMap_.insert(std::make_pair(displayId, focusGroup));
-    if (displayId != DEFAULT_DISPLAY_ID) {
-        virtualScreenDisplayIdSet_.emplace(displayId);
+    displayId2GroupIdMap_[displayId] = displayGroupId;
+    auto iter = focusGroupMap_.find(displayGroupId);
+    if (iter == focusGroupMap_.end()) {
+        sptr<FocusGroup> focusGroup = sptr<FocusGroup>::MakeSptr(displayGroupId);
+        focusGroup->displayIds_.insert(displayId);
+        focusGroupMap_.insert(std::make_pair(displayGroupId, focusGroup));
+        LogDisplayIds();
+    } else {
+        iter->second->displayIds_.insert(displayId);
+        LogDisplayIds();
+    }
+    if (deletedDisplayId2GroupIdMap_.find(displayId) != deletedDisplayId2GroupIdMap_.end()) {
+        deletedDisplayId2GroupIdMap_.erase(displayId);
     }
     return WSError::WS_OK;
 }
 
-WSError WindowFocusController::RemoveFocusGroup(DisplayId displayId)
+WSError WindowFocusController::RemoveFocusGroup(DisplayGroupId displayGroupId, DisplayId displayId)
 {
-    TLOGI(WmsLogTag::WMS_FOCUS, "displayId: %{public}" PRIu64, displayId);
+    TLOGI(WmsLogTag::WMS_FOCUS,
+          "displayId: %{public}" PRIu64", displayGroupId: %{public}" PRIu64,
+          displayId,
+          displayGroupId);
     if (displayId == DISPLAY_ID_INVALID) {
         TLOGE(WmsLogTag::WMS_FOCUS, "displayId invalid");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
-    focusGroupMap_.erase(displayId);
-    if (displayId != DEFAULT_DISPLAY_ID) {
-        virtualScreenDisplayIdSet_.erase(displayId);
+    auto iter = focusGroupMap_.find(displayGroupId);
+    if (iter != focusGroupMap_.end()) {
+        auto displayIds = iter->second->displayIds_;
+        displayIds.erase(displayId);
+        if (displayIds.size() == 0) {
+            focusGroupMap_.erase(displayGroupId);
+        }
+    } else {
+        TLOGE(WmsLogTag::WMS_FOCUS, "displayGroupId invalid, displayGroupId: %{public}" PRIu64, displayGroupId);
     }
+    displayId2GroupIdMap_.erase(displayId);
+    deletedDisplayId2GroupIdMap_[displayId] = displayGroupId;
+    LogDisplayIds();
     return WSError::WS_OK;
 }
 
@@ -162,5 +193,31 @@ WSError WindowFocusController::UpdateFocusedAppSessionId(DisplayId displayId, in
     }
     return focusGroup->UpdateFocusedAppSessionId(persistentId);
 }
+
+void WindowFocusController::LogDisplayIds()
+{
+    std::ostringstream oss;
+    {
+        for (auto it = focusGroupMap_.begin(); it != focusGroupMap_.end(); it++) {
+            oss << "focusGroupId: " << it->first << ", displayids:";
+            auto displayIds = it->second->displayIds_;
+            for (auto it2 = displayIds.begin(); it2 != displayIds.end(); it2++) {
+                oss << *it2;
+                if (std::next(it2) != displayIds.end()) {
+                    oss << ",";
+                } else {
+                    oss << ";";
+                }
+            }
+        }
+        for (auto it = displayId2GroupIdMap_.begin(); it != displayId2GroupIdMap_.end(); it++) {
+            oss << "displayId2GroupIdMap:" << it->first << "-" << it->second;
+            if (std::next(it) != displayId2GroupIdMap_.end()) {
+                oss << ", ";
+            }
+        }
+    }
+    TLOGI(WmsLogTag::WMS_FOCUS, "%{public}s", oss.str().c_str());
 }
-}
+} // namespace Rosen
+} // namespace OHOS
