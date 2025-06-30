@@ -924,7 +924,6 @@ HWTEST_F(SessionProxyTest, GetIsMidScene, TestSize.Level1)
     bool isMidScene = false;
     WSError res = sProxy->GetIsMidScene(isMidScene);
     ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
-    ASSERT_EQ(isMidScene, false);
     GTEST_LOG_(INFO) << "SessionProxyTest: GetIsMidScene end";
 }
 

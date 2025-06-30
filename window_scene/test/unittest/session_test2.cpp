@@ -40,6 +40,12 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 const std::string UNDEFINED = "undefined";
+    std::string g_logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
+        const char *msg)
+    {
+        g_logMsg = msg;
+    }
 }
 
 class WindowSessionTest2 : public testing::Test {
@@ -617,8 +623,10 @@ HWTEST_F(WindowSessionTest2, UpdateWindowMode01, TestSize.Level1)
  */
 HWTEST_F(WindowSessionTest2, NotifyForegroundInteractiveStatus, TestSize.Level1)
 {
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     ASSERT_NE(session_, nullptr);
-    int res = 0;
+    int32_t persistentId = 123;
     session_->sessionStage_ = nullptr;
     bool interactive = true;
     session_->NotifyForegroundInteractiveStatus(interactive);
@@ -627,9 +635,11 @@ HWTEST_F(WindowSessionTest2, NotifyForegroundInteractiveStatus, TestSize.Level1)
     ASSERT_NE(mockSessionStage, nullptr);
     session_->sessionStage_ = mockSessionStage;
     session_->state_ = SessionState::STATE_FOREGROUND;
+    session_->persistentId_ = persistentId;
     interactive = false;
     session_->NotifyForegroundInteractiveStatus(interactive);
-    ASSERT_EQ(0, res);
+    EXPECT_TRUE(g_logMsg.find("id:123") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -639,11 +649,13 @@ HWTEST_F(WindowSessionTest2, NotifyForegroundInteractiveStatus, TestSize.Level1)
  */
 HWTEST_F(WindowSessionTest2, SetEventHandler001, TestSize.Level1)
 {
+
     ASSERT_NE(session_, nullptr);
-    int res = 0;
     std::shared_ptr<AppExecFwk::EventHandler> handler = nullptr;
-    session_->SetEventHandler(handler);
-    ASSERT_EQ(res, 0);
+    std::shared_ptr<AppExecFwk::EventHandler> exportHandler = nullptr;
+    session_->SetEventHandler(handler, exportHandler);
+    EXPECT_EQ(nullptr, session_->handler_);
+    EXPECT_EQ(nullptr, session_->exportHandler_);
 }
 
 /**
@@ -698,10 +710,9 @@ HWTEST_F(WindowSessionTest2, GetLeashWinSurfaceNode, TestSize.Level1)
 HWTEST_F(WindowSessionTest2, SetSessionInfoAncoSceneState, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
-    int res = 0;
     int32_t ancoSceneState = 0;
     session_->SetSessionInfoAncoSceneState(ancoSceneState);
-    ASSERT_EQ(res, 0);
+    EXPECT_EQ(0, session_->sessionInfo_.ancoSceneState);
 }
 
 /**
@@ -712,10 +723,9 @@ HWTEST_F(WindowSessionTest2, SetSessionInfoAncoSceneState, TestSize.Level1)
 HWTEST_F(WindowSessionTest2, SetSessionInfoTime, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
-    int res = 0;
     std::string time = "";
     session_->SetSessionInfoTime(time);
-    ASSERT_EQ(res, 0);
+    EXPECT_EQ("", session_->sessionInfo_.time);
 }
 
 /**
@@ -726,10 +736,9 @@ HWTEST_F(WindowSessionTest2, SetSessionInfoTime, TestSize.Level1)
 HWTEST_F(WindowSessionTest2, SetSessionInfoAbilityInfo, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
-    int res = 0;
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = nullptr;
     session_->SetSessionInfoAbilityInfo(abilityInfo);
-    ASSERT_EQ(res, 0);
+    EXPECT_EQ(nullptr, session_->sessionInfo_.abilityInfo);
 }
 
 /**
@@ -740,10 +749,9 @@ HWTEST_F(WindowSessionTest2, SetSessionInfoAbilityInfo, TestSize.Level1)
 HWTEST_F(WindowSessionTest2, SetSessionInfoWant, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
-    int res = 0;
     std::shared_ptr<AAFwk::Want> want = nullptr;
     session_->SetSessionInfoWant(want);
-    ASSERT_EQ(res, 0);
+    EXPECT_EQ(nullptr, session_->sessionInfo_.want);
 }
 
 /**
@@ -754,10 +762,9 @@ HWTEST_F(WindowSessionTest2, SetSessionInfoWant, TestSize.Level1)
 HWTEST_F(WindowSessionTest2, SetSessionInfoPersistentId, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
-    int res = 0;
     int32_t persistentId = 0;
     session_->SetSessionInfoPersistentId(persistentId);
-    ASSERT_EQ(res, 0);
+    EXPECT_EQ(0, session_->sessionInfo_.persistentId_);
 }
 
 /**
@@ -768,10 +775,9 @@ HWTEST_F(WindowSessionTest2, SetSessionInfoPersistentId, TestSize.Level1)
 HWTEST_F(WindowSessionTest2, SetSessionInfoCallerPersistentId, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
-    int res = 0;
     int32_t callerPersistentId = 0;
     session_->SetSessionInfoCallerPersistentId(callerPersistentId);
-    ASSERT_EQ(res, 0);
+    EXPECT_EQ(0, session_->sessionInfo_.callerPersistentId_);
 }
 
 /**
@@ -802,9 +808,7 @@ HWTEST_F(WindowSessionTest2, GetPersistentId, TestSize.Level1)
     ASSERT_NE(session_, nullptr);
     int32_t persistentId = 0;
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    if (property == nullptr) {
-        return;
-    }
+    EXPECT_NE(nullptr, property);
     property->SetPersistentId(persistentId);
     int32_t ret = session_->GetPersistentId();
     ASSERT_EQ(ret, 0);
