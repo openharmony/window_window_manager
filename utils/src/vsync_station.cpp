@@ -225,7 +225,7 @@ FrameRateLinkerId VsyncStation::GetFrameRateLinkerId()
 }
 
 void VsyncStation::FlushFrameRate(const std::shared_ptr<RSUIContext> rsUIContext, uint32_t rate,
-    int32_t animatorExpectedFrameRate, uint32_t rateType = 0)
+    int32_t animatorExpectedFrameRate, uint32_t rateType)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     if (auto frameRateLinker = GetFrameRateLinkerLocked()) {
