@@ -1589,6 +1589,21 @@ void ScreenSessionManager::OnHgmRefreshRateChange(uint32_t refreshRate)
         screenSession->UpdateRefreshRate(refreshRate);
         NotifyDisplayChanged(screenSession->ConvertToDisplayInfo(),
             DisplayChangeEvent::UPDATE_REFRESHRATE);
+        std::map<ScreenId, sptr<ScreenSession>> screenSessionMap;
+        {
+            std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+            screenSessionMap = screenSessionMap_;
+        }
+        for (const auto &sessionItem : screenSessionMap) {
+            const auto &screenSessionItem = sessionItem.second;
+            const auto &screenType = screenSessionItem->GetScreenProperty().GetScreenType();
+            if (screenType == ScreenType::VIRTUAL) {
+                screenSessionItem->UpdateRefreshRate(refreshRate);
+                screenSessionItem->SetSupportedRefreshRate({refreshRate});
+                NotifyDisplayChanged(screenSessionItem->ConvertToDisplayInfo(),
+                    DisplayChangeEvent::UPDATE_REFRESHRATE);
+            }
+        }
     } else {
         TLOGE(WmsLogTag::DMS, "Get default screen session failed.");
     }
@@ -2753,6 +2768,11 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
     SetHdrFormats(screenId, session);
     SetColorSpaces(screenId, session);
     SetSupportedRefreshRate(session);
+    if (session->GetFakeScreenSession() != nullptr) {
+        std::vector<uint32_t> supportedRefreshRateFake = session->GetSupportedRefreshRate();
+        sptr<ScreenSession> screenSessionFake = session->GetFakeScreenSession();
+        screenSessionFake->SetSupportedRefreshRate(std::move(supportedRefreshRateFake));
+    }
     RegisterRefreshRateChangeListener();
     TLOGW(WmsLogTag::DMS, "CreateScreenSession success. ScreenId: %{public}" PRIu64 "", screenId);
     return session;
@@ -5217,9 +5237,12 @@ DMError ScreenSessionManager::SetVirtualScreenRefreshRate(ScreenId screenId, uin
     // when skipFrameInterval > 10 means the skipFrameInterval is the virtual screen refresh rate
     if (refreshInterval > IRREGULAR_REFRESH_RATE_SKIP_THRETHOLD) {
         screenSession->UpdateRefreshRate(refreshInterval);
+        screenSession->SetSupportedRefreshRate({refreshInterval});
     } else {
         screenSession->UpdateRefreshRate(defaultScreenSession->GetRefreshRate() / refreshInterval);
+        screenSession->SetSupportedRefreshRate({defaultScreenSession->GetRefreshRate() / refreshInterval});
     }
+    NotifyDisplayChanged(screenSession->ConvertToDisplayInfo(), DisplayChangeEvent::UPDATE_REFRESHRATE);
     TLOGW(WmsLogTag::DMS, "refreshInterval is %{public}d", refreshInterval);
     return DMError::DM_OK;
 }
@@ -5537,6 +5560,9 @@ sptr<ScreenSession> ScreenSessionManager::InitVirtualScreen(ScreenId smsScreenId
     auto defaultScreen = GetScreenSession(GetDefaultScreenId());
     if (defaultScreen != nullptr && defaultScreen->GetActiveScreenMode() != nullptr) {
         info->refreshRate_ = defaultScreen->GetActiveScreenMode()->refreshRate_;
+        screenSession->UpdateRefreshRate(info->refreshRate_);
+        std::vector<uint32_t> virtualRefreshRateVec = {info->refreshRate_};
+        screenSession->SetSupportedRefreshRate(std::move(virtualRefreshRateVec));
     }
     screenSession->modes_.emplace_back(info);
     screenSession->activeIdx_ = 0;
@@ -9512,6 +9538,8 @@ DMError ScreenSessionManager::SetVirtualScreenMaxRefreshRate(ScreenId id, uint32
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     screenSession->UpdateRefreshRate(actualRefreshRate);
+    screenSession->SetSupportedRefreshRate({actualRefreshRate});
+    NotifyDisplayChanged(screenSession->ConvertToDisplayInfo(), DisplayChangeEvent::UPDATE_REFRESHRATE);
     return DMError::DM_OK;
 }
 
@@ -10011,6 +10039,7 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreatePhysicalScreenSession(Scree
     }
     SetHdrFormats(screenId, session);
     SetColorSpaces(screenId, session);
+    SetSupportedRefreshRate(session);
     TLOGW(WmsLogTag::DMS, "Create success. ScreenId: %{public}" PRIu64, screenId);
     return session;
 }
