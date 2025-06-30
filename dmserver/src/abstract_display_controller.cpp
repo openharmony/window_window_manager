@@ -251,7 +251,7 @@ DisplayId AbstractDisplayController::ProcessExpandScreenDisconnected(
         } else {
             abstractDisplay->SetOffset(0, 0);
             auto screenId = abstractDisplay->GetAbstractScreenId();
-            abstractScreenController_->GetRSDisplayNodeByScreenId(screenId)->SetDisplayOffset(0, 0);
+            SetScreenOffsetInner(screenId);
         }
     }
     return displayId;
@@ -711,5 +711,17 @@ DisplayId AbstractDisplayController::GetDefaultDisplayId()
         defaultDisplayId = defaultDisplay->GetId();
     }
     return defaultDisplayId;
+}
+
+bool AbstractDisplayController::SetScreenOffsetInner(ScreenId screenId)
+{
+    sptr<AbstractScreen> absScreen = abstractScreenController_->GetAbstractScreen(screenId);
+    if (absScreen == nullptr) {
+        TLOGE(WmsLogTag::DMS, "did not find screen:%{public}" PRIu64"", screenId);
+        return false;
+    }
+    TLOGI(WmsLogTag::DMS, "screenId = %{public}" PRIu64 " rsId = %{public}" PRIu64, screenId, absScreen->rsId_);
+    RSInterfaces::GetInstance().SetScreenOffset(absScreen->rsId_, 0, 0);
+    return true;
 }
 } // namespace OHOS::Rosen

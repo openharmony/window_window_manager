@@ -159,7 +159,8 @@ public:
     DisplayOrientation CalcDisplayOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode) const;
     DisplayOrientation CalcDeviceOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode) const;
     void FillScreenInfo(sptr<ScreenInfo> info) const;
-    void InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint, bool isExtend = false);
+    void InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint, bool isExtend = false,
+        float positionX = 0, float positionY = 0);
 
     DMError GetScreenSupportedColorGamuts(std::vector<ScreenColorGamut>& colorGamuts);
     DMError GetScreenColorGamut(ScreenColorGamut& colorGamut);
