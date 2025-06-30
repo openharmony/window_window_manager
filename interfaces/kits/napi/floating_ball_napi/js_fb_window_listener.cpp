@@ -51,23 +51,23 @@ std::shared_ptr<NativeReference> JsFbWindowListener::GetCallbackRef() const
 
 void JsFbWindowListener::OnFloatingBallStart()
 {
-    OnFbListenerCallback(FloatingBallState::STARTED, 0);
+    OnFbListenerCallback(FloatingBallState::STARTED);
 }
 
 void JsFbWindowListener::OnFloatingBallStop()
 {
-    OnFbListenerCallback(FloatingBallState::STOPPED, 0);
+    OnFbListenerCallback(FloatingBallState::STOPPED);
 }
 
-void JsFbWindowListener::OnFbListenerCallback(const FloatingBallState& state, const int32_t& errorCode)
+void JsFbWindowListener::OnFbListenerCallback(const FloatingBallState& state)
 {
     TLOGI(WmsLogTag::WMS_SYSTEM, "state: %{public}d", static_cast<int32_t>(state));
-    auto napiTask = [jsCallback = jsCallBack_, state, errorCode, env = env_]() {
+    auto napiTask = [jsCallback = jsCallBack_, state, env = env_]() {
         if (jsCallback == nullptr) {
             TLOGE(WmsLogTag::WMS_SYSTEM, "js callback is null");
             return;
         }
-        napi_value argv[] = {CreateJsValue(env, static_cast<uint32_t>(state)), CreateJsValue(env, errorCode)};
+        napi_value argv[] = {CreateJsValue(env, static_cast<uint32_t>(state))};
         CallJsFunction(env, jsCallback->GetNapiValue(), argv, ArraySize(argv));
     };
     if (env_ != nullptr) {

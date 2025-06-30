@@ -836,7 +836,7 @@ HWTEST_F(SystemSessionTest, SetAndGetFbTemplateInfo, TestSize.Level1)
     info.abilityName_ = "Background01";
     info.bundleName_ = "Background01";
 
-    sptr<SystemSession> systemSession = new (std::nothrow) SystemSession(info, nullptr);
+    sptr<SystemSession> systemSession = sptr<SystemSession>::MakeSptr(info, nullptr);
     ASSERT_NE(systemSession, nullptr);
     systemSession->isActive_ = true;
     FloatingBallTemplateInfo fbTemplateInfo;
@@ -856,7 +856,7 @@ HWTEST_F(SystemSessionTest, GetFbWindowId, TestSize.Level1)
     info.abilityName_ = "SetAndGetFbWindowId";
     info.bundleName_ = "SetAndGetFbWindowId";
 
-    sptr<SystemSession> systemSession = new (std::nothrow) SystemSession(info, nullptr);
+    sptr<SystemSession> systemSession = sptr<SystemSession>::MakeSptr(info, nullptr);
     ASSERT_NE(systemSession, nullptr);
 
     EXPECT_EQ(systemSession->GetFbWindowId(), 0);

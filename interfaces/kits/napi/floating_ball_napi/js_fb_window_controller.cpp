@@ -30,7 +30,7 @@ namespace Rosen {
 using namespace AbilityRuntime;
 namespace {
 const std::string STATE_CHANGE_CB = "stateChange";
-const std::string CLICK_EVENT = "clickEvent";
+const std::string CLICK_EVENT = "click";
 const std::string FLOATING_BALL_PERMISSION = "ohos.permission.USE_FLOAT_BALL";
 constexpr uint32_t TITLE_MIN_LEN = 1;
 constexpr uint32_t TITLE_MAX_LEN = 64;

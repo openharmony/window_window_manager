@@ -44,7 +44,6 @@ ohos_shared_library("floatingball_napi") {
     "../../../../utils:libwmutil",
     "../../../../utils:libwmutil_base",
     "../../../../wm:libwm",
-    "../common:wm_napi_util",
   ]
 
   external_deps = [
@@ -57,7 +56,7 @@ ohos_shared_library("floatingball_napi") {
     "image_framework:image",
   ]
 
-  relative_install_dir = "module"
+  relative_install_dir = "module/window"
   part_name = "window_manager"
   subsystem_name = "window"
 

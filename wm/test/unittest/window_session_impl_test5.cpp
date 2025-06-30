@@ -1477,7 +1477,7 @@ HWTEST_F(WindowSessionImplTest5, SendFbActionEvent, TestSize.Level1)
 HWTEST_F(WindowSessionImplTest5, UpdateFloatingBall, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SendFbActionEvent");
+    option->SetWindowName("UpdateFloatingBall");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->hostSession_ = nullptr;
     FloatingBallTemplateBaseInfo fbTemplateInfo;
@@ -1503,7 +1503,7 @@ HWTEST_F(WindowSessionImplTest5, UpdateFloatingBall, TestSize.Level1)
 HWTEST_F(WindowSessionImplTest5, NotifyPrepareCloseFloatingBall, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SendFbActionEvent");
+    option->SetWindowName("NotifyPrepareCloseFloatingBall");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->hostSession_ = nullptr;
 
@@ -1528,7 +1528,7 @@ HWTEST_F(WindowSessionImplTest5, NotifyPrepareCloseFloatingBall, TestSize.Level1
 HWTEST_F(WindowSessionImplTest5, RestoreFbMainWindow, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SendFbActionEvent");
+    option->SetWindowName("RestoreFbMainWindow");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->hostSession_ = nullptr;
 
