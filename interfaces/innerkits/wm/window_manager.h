@@ -1318,7 +1318,7 @@ public:
      * @brief Register get js window callback.
      * @param getJSWindowFunc get js window obj callback.
      */
-    void RegisterGetJSWindowCallback(const GetJSWindowObjFunc&& getJSWindowFunc);
+    void RegisterGetJSWindowCallback(GetJSWindowObjFunc&& getJSWindowFunc);
 
     /**
      * @brief notify window destroyed.
