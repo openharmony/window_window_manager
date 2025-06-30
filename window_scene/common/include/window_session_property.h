@@ -691,11 +691,11 @@ struct FreeMultiWindowConfig : public Parcelable {
 struct AppForceLandscapeConfig : public Parcelable {
     int32_t mode_ = 0;
     std::string homePage_;
-    bool isSupportSplitMode_ = false;
+    int32_t supportSplit_ = -1;
 
     AppForceLandscapeConfig() {}
-    AppForceLandscapeConfig(int32_t mode, const std::string& homePage, bool isSupportSplitMode)
-        : mode_(mode), homePage_(homePage), isSupportSplitMode_(isSupportSplitMode)
+    AppForceLandscapeConfig(int32_t mode, const std::string& homePage, int32_t supportSplit)
+        : mode_(mode), homePage_(homePage), supportSplit_(supportSplit)
     {
     }
 
@@ -703,7 +703,7 @@ struct AppForceLandscapeConfig : public Parcelable {
     {
         if (!parcel.WriteInt32(mode_) ||
             !parcel.WriteString(homePage_) ||
-            !parcel.WriteBool(isSupportSplitMode_)) {
+            !parcel.WriteInt32(supportSplit_)) {
             return false;
         }
         return true;
@@ -717,7 +717,7 @@ struct AppForceLandscapeConfig : public Parcelable {
         }
         if (!parcel.ReadInt32(config->mode_) ||
             !parcel.ReadString(config->homePage_) ||
-            !parcel.ReadBool(config->isSupportSplitMode_)) {
+            !parcel.ReadInt32(config->supportSplit_)) {
             delete config;
             return nullptr;
         }

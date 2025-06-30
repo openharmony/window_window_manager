@@ -1096,11 +1096,6 @@ private:
      * RS Client Multi Instance
      */
     std::shared_ptr<RSUIDirector> rsUIDirector_;
-
-    /**
-     * Parallel Type For PAD
-     */
-    int32_t parallelType_ = 0;
 };
 } // namespace Rosen
 } // namespace OHOS

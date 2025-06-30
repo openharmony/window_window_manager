@@ -4104,17 +4104,17 @@ napi_value JsSceneSessionManager::OnSetAppForceLandscapeConfig(napi_env env, nap
         TLOGD(WmsLogTag::DEFAULT, "homePage: %{public}s", homePage.c_str());
     }
 
-    bool isSupportSplitMode = false;
-    if (argc >= ARGC_FOUR && !ConvertFromJsValue(env, argv[ARGC_THREE], isSupportSplitMode)) {
-        TLOGE(WmsLogTag::DEFAULT, "Failed to convert parameter to isSupportSplitMode");
+    int32_t supportSplit = -1;
+    if (argc >= ARGC_FOUR && !ConvertFromJsValue(env, argv[ARGC_THREE], supportSplit)) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to convert parameter to supportSplit");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
 
-    TLOGI(WmsLogTag::DEFAULT, "app: %{public}s, mode: %{public}d, homePage: %{public}s, isSupportSplitMode: %{public}u",
-        bundleName.c_str(), mode, homePage.c_str(), isSupportSplitMode);
-    AppForceLandscapeConfig config = { mode, homePage, isSupportSplitMode };
+    TLOGI(WmsLogTag::DEFAULT, "app: %{public}s, mode: %{public}d, homePage: %{public}s, supportSplit: %{public}d",
+        bundleName.c_str(), mode, homePage.c_str(), supportSplit);
+    AppForceLandscapeConfig config = { mode, homePage, supportSplit };
     SceneSessionManager::GetInstance().SetAppForceLandscapeConfig(bundleName, config);
     return NapiGetUndefined(env);
 }
