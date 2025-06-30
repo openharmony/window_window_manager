@@ -149,10 +149,6 @@ public:
     void ClearSpecifyMoveStartDisplay();
     WSRect GetTargetDisplayRectRelatedToStartDisplay(WSRect rect, DisplayId displayId) const;
     void StopMoving();
-    int32_t GetLastMovePointerPosX() const;
-    void SetLastMovePointerPosX(int32_t lastMovePointerPosX);
-    bool IsMoveDragHotAreaCrossDisplay() const;
-    void SetMoveDragHotAreaCrossDisplay(bool isMoveDragHotAreaCrossDisplay);
 
 private:
     struct MoveDragProperty {
@@ -360,8 +356,6 @@ private:
     DMRect moveAvailableArea_ = {0, 0, 0, 0};
     DisplayId moveInputBarStartDisplayId_ = DISPLAY_ID_INVALID;
     ScreenSizeProperty screenSizeProperty_;
-    int32_t lastMovePointerPosX_ = -1;
-    bool isMoveDragHotAreaCrossDisplay_ = false;
     // Above guarded by displayIdSetDuringMoveDragMutex_
     std::mutex specifyMoveStartMutex_;
     DisplayId specifyMoveStartDisplayId_ = DISPLAY_ID_INVALID;
