@@ -265,15 +265,15 @@ public:
         DmErrorCode* errorCode = nullptr, bool isUseDma = false, bool isCaptureFullOfScreen = false);
     
     /**
-     * @brief Get SDR&HDR screenshot of the target display.
+     * @brief Get SDR and HDR screenshots of the specified display.
      *
      * @param displayId Display id.
-     * @param errorCode error code.
+     * @param errorCode Error code.
      * @param isUseDma Whether to use DMA, not used by default.
      * @param isCaptureFullOfScreen Whether to take screenshots of all displays on this screen.
-     * @return PixelMap vector object of screenshot.
+     * @return std::vector<std::shared_ptr<Media::PixelMap>> Vector of screenshot pixel maps.
      */
-    std::vector<std::shared_ptr<Media::PixelMap>> GetScreenHdrshot(DisplayId displayId,
+    std::vector<std::shared_ptr<Media::PixelMap>> GetScreenHDRshot(DisplayId displayId,
         DmErrorCode* errorCode = nullptr, bool isUseDma = false, bool isCaptureFullOfScreen = false);
 
     /**
@@ -854,13 +854,12 @@ public:
         const Media::Rect &rect, const Media::Size &size, int rotation, DmErrorCode* errorCode = nullptr);
 
     /**
-     * @brief Get SDR&HDR screenshot with capture option.
-     *
-     * @param captureOption  screen capture option.
-     * @param errorCode error code.
-     * @return PixelMap vector object of screenshot.
+     * @brief Get SDR and HDR screenshot with capture option.
+     * @param captureOption  Screen capture option.
+     * @param errorCode Error code.
+     * @return std::vector<std::shared_ptr<Media::PixelMap>> Vector of screenshot pixel maps.
      */
-    std::vector<std::shared_ptr<Media::PixelMap>> GetScreenHdrshotWithOption(
+    std::vector<std::shared_ptr<Media::PixelMap>> GetScreenHDRshotWithOption(
         const CaptureOption& captureOption, DmErrorCode* errorCode = nullptr);
 
     /**

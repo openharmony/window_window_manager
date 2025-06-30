@@ -425,6 +425,36 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest07, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ProcessRemoteRequestTest08
+ * @tc.desc: sessionStub ProcessRemoteRequestTest08
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionStubTest, ProcessRemoteRequestTest08, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_SYNC };
+    FloatingBallTemplateInfo fbTemplateInfo {{1, "fb", "fb_content", "red"}, nullptr};
+    data.WriteParcelable(&fbTemplateInfo);
+    auto res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_FLOATING_BALL), data, reply, option);
+    ASSERT_EQ(ERR_NONE, res);
+    data.WriteParcelable(nullptr);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_FLOATING_BALL_PREPARE_CLOSE), data, reply, option);
+    ASSERT_EQ(ERR_NONE, res);
+    data.WriteParcelable(nullptr);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_START_FLOATING_BALL_MAIN_WINDOW), data, reply, option);
+    ASSERT_EQ(ERR_INVALID_DATA, res);
+    data.WriteParcelable(nullptr);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_FLOATING_BALL_WINDOW_ID), data, reply, option);
+    ASSERT_EQ(ERR_NONE, res);
+}
+
+/**
  * @tc.name: sessionStubTest02
  * @tc.desc: sessionStub sessionStubTest02
  * @tc.type: FUNC
@@ -1631,6 +1661,171 @@ HWTEST_F(SessionStubTest, HandleSetFrameRectForPartialZoomIn, Function | SmallTe
     res = data.WriteInt32(0) && data.WriteInt32(0) && data.WriteUint32(0) && data.WriteUint32(0);
     EXPECT_EQ(res, true);
     EXPECT_EQ(session_->HandleSetFrameRectForPartialZoomIn(data, reply), ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleUpdateFloatingBall
+ * @tc.desc: sessionStub HandleUpdateFloatingBall
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleUpdateFloatingBall, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteParcelable(nullptr);
+    auto result = session_->HandleUpdateFloatingBall(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+ 
+    FloatingBallTemplateInfo fbTemplateInfo {{1, "fb", "fb_content", "red"}, nullptr};
+    data.WriteParcelable(&fbTemplateInfo);
+    result = session_->HandleUpdateFloatingBall(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleStopFloatingBall
+ * @tc.desc: sessionStub HandleStopFloatingBall
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleStopFloatingBall, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteParcelable(nullptr);
+    auto result = session_->HandleStopFloatingBall(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleStartFloatingBallMainWindow
+ * @tc.desc: sessionStub HandleStartFloatingBallMainWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleStartFloatingBallMainWindow, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    
+    data.WriteParcelable(nullptr);
+    auto result = session_->HandleStartFloatingBallMainWindow(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+ 
+    std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
+    data.WriteParcelable(want.get());
+    result = session_->HandleStartFloatingBallMainWindow(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleGetFloatingBallWindowId
+ * @tc.desc: sessionStub HandleGetFloatingBallWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleGetFloatingBallWindowId, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteParcelable(nullptr);
+    auto result = session_->HandleGetFloatingBallWindowId(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleUpdateGlobalDisplayRectFromClientWithInvalidRect
+ * @tc.desc: Verify HandleUpdateGlobalDisplayRectFromClient with invalid rect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleUpdateGlobalDisplayRectFromClientWithInvalidRect, TestSize.Level1)
+{
+    uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_GLOBAL_DISPLAY_RECT);
+    MessageParcel reply;
+    MessageOption option;
+    MessageParcel data;
+    data.WriteInt32(100); // posX
+    data.WriteInt32(200); // posY
+    data.WriteInt32(300); // width
+    // missing height
+    EXPECT_EQ(ERR_INVALID_DATA, session_->ProcessRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleUpdateGlobalDisplayRectFromClientWithInvalidReason
+ * @tc.desc: Verify that ProcessRemoteRequest rejects missing or invalid reason values
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleUpdateGlobalDisplayRectFromClientWithInvalidReason, TestSize.Level1)
+{
+    constexpr uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_GLOBAL_DISPLAY_RECT);
+    MessageOption option;
+
+    auto writeRect = [](MessageParcel& data) {
+        data.WriteInt32(10); // posX
+        data.WriteInt32(20); // posY
+        data.WriteInt32(300); // width
+        data.WriteInt32(400); // height
+    };
+
+    // Case 1: Missing reason field
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        writeRect(data);
+        EXPECT_EQ(session_->ProcessRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
+    }
+
+    // Case 2: reason < SizeChangeReason::UNDEFINED
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        writeRect(data);
+        data.WriteUint32(static_cast<uint32_t>(SizeChangeReason::UNDEFINED) - 1);
+        EXPECT_EQ(session_->ProcessRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
+    }
+
+    // Case 3: reason == SizeChangeReason::END (boundary overflow)
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        writeRect(data);
+        data.WriteUint32(static_cast<uint32_t>(SizeChangeReason::END));
+        EXPECT_EQ(session_->ProcessRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
+    }
+
+    // Case 4: reason > SizeChangeReason::END
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        writeRect(data);
+        data.WriteUint32(static_cast<uint32_t>(SizeChangeReason::END) + 1);
+        EXPECT_EQ(session_->ProcessRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
+    }
+}
+
+/**
+ * @tc.name: HandleUpdateGlobalDisplayRectFromClientSuccess
+ * @tc.desc: Verify that ProcessRemoteRequest accepts valid rect and reason data
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleUpdateGlobalDisplayRectFromClientSuccess, TestSize.Level1)
+{
+    constexpr int32_t posX = 100;
+    constexpr int32_t posY = 200;
+    constexpr int32_t width = 300;
+    constexpr int32_t height = 400;
+    constexpr SizeChangeReason reason = SizeChangeReason::RESIZE;
+    constexpr uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_GLOBAL_DISPLAY_RECT);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInt32(posX);
+    data.WriteInt32(posY);
+    data.WriteInt32(width);
+    data.WriteInt32(height);
+    data.WriteUint32(static_cast<uint32_t>(reason));
+
+    EXPECT_EQ(session_->ProcessRemoteRequest(code, data, reply, option), ERR_NONE);
 }
 } // namespace
 } // namespace Rosen

@@ -41,10 +41,33 @@ public:
     WSError SetDialogSessionBackGestureEnabled(bool isEnabled) override;
     int32_t GetSubWindowZLevel() const override;
 
+    /*
+     * Floating Ball Window
+     */
+    WMError UpdateFloatingBall(const FloatingBallTemplateInfo& fbTemplateInfo) override;
+    WSError StopFloatingBall() override;
+    WMError GetFloatingBallWindowId(uint32_t& windowId) override;
+    WMError RestoreFbMainWindow(const std::shared_ptr<AAFwk::Want>& want) override;
+    WSError SendFbActionEvent(const std::string& action) override;
+    FloatingBallTemplateInfo GetFbTemplateInfo() const override;
+    void SetFbTemplateInfo(const FloatingBallTemplateInfo& fbTemplateInfo) override;
+    uint32_t GetFbWindowId() const override;
+    void SetFloatingBallUpdateCallback(NotifyUpdateFloatingBallFunc&& func) override;
+    void SetFloatingBallStopCallback(NotifyStopFloatingBallFunc&& func) override;
+    void SetFloatingBallRestoreMainWindowCallback(NotifyRestoreFloatingBallMainWindowFunc&& func) override;
+    void RegisterGetFbPanelWindowIdFunc(GetFbPanelWindowIdFunc&& func) override;
+
 protected:
     bool CheckKeyEventDispatch(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
     void UpdatePointerArea(const WSRect& rect) override;
     bool CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const override;
+
+    /*
+     * Floating Ball Window
+     */
+    void NotifyUpdateFloatingBall(const FloatingBallTemplateInfo& fbTemplateInfo) override;
+    void NotifyStopFloatingBall() override;
+    void NotifyRestoreFloatingBallMainWindow(const std::shared_ptr<AAFwk::Want>& want) override;
 
 private:
     void UpdateCameraWindowStatus(bool isShowing);
@@ -52,6 +75,15 @@ private:
     void UpdatePiPWindowStateChanged(bool isForeground);
 
     bool dialogSessionBackGestureEnabled_ = false;
+
+    /*
+     * Floating Ball Window
+     */
+    std::shared_mutex fbCallBackMutex_;
+    bool needStopFb_ = false;
+    std::shared_ptr<AAFwk::Want> fbWant_ = nullptr;
+
+    GetFbPanelWindowIdFunc getFbPanelWindowIdFunc_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SYSTEM_SESSION_H

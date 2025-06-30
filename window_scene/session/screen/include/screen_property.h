@@ -152,7 +152,7 @@ public:
 
     void SetValidHeight(uint32_t validHeight);
     uint32_t GetValidHeight() const;
- 
+
     void SetValidWidth(uint32_t validWidth);
     uint32_t GetValidWidth() const;
 
@@ -235,11 +235,27 @@ public:
     void SetPointerActiveHeight(uint32_t pointerActiveHeight);
     uint32_t GetPointerActiveHeight();
 
+    // displayInfo
+    void SetDisplayGroupId(DisplayGroupId displayGroupId) { displayGroupId_ = displayGroupId; }
+    DisplayGroupId GetDisplayGroupId() const { return displayGroupId_; }
+    void SetMainDisplayIdOfGroup(ScreenId screenId) { mainDisplayIdOfGroup_ = screenId; }
+    ScreenId GetMainDisplayIdOfGroup() const { return mainDisplayIdOfGroup_; }
+    void SetScreenAreaOffsetX(uint32_t screenAreaOffsetX) { screenAreaOffsetX_ = screenAreaOffsetX; }
+    uint32_t GetScreenAreaOffsetX() const { return screenAreaOffsetX_; }
+    void SetScreenAreaOffsetY(uint32_t screenAreaOffsetY) { screenAreaOffsetY_ = screenAreaOffsetY; }
+    uint32_t GetScreenAreaOffsetY() const { return screenAreaOffsetY_; }
+    void SetScreenAreaWidth(uint32_t screenAreaWidth) { screenAreaWidth_ = screenAreaWidth; }
+    uint32_t GetScreenAreaWidth() const { return screenAreaWidth_; }
+    void SetScreenAreaHeight(uint32_t screenAreaHeight) { screenAreaHeight_ = screenAreaHeight; }
+    uint32_t GetScreenAreaHeight() const { return screenAreaHeight_; }
+
 private:
     static inline bool IsVertical(Rotation rotation)
     {
         return (rotation == Rotation::ROTATION_0 || rotation == Rotation::ROTATION_180);
     }
+    DisplayGroupId displayGroupId_ = DISPLAY_GROUP_ID_INVALID;
+    ScreenId mainDisplayIdOfGroup_ = SCREEN_ID_INVALID;
     float rotation_ { 0.0f };
     float physicalRotation_ { 0.0f };
     float screenComponentRotation_ { 0.0f };
@@ -319,6 +335,12 @@ private:
     uint32_t screenRealHeight_ { UINT32_MAX };
     float screenRealPPI_ { 0.0f };
     uint32_t screenRealDPI_ { 0 };
+
+    // screenArea
+    uint32_t screenAreaOffsetX_ { 0 };
+    uint32_t screenAreaOffsetY_ { 0 };
+    uint32_t screenAreaWidth_ { 0 };
+    uint32_t screenAreaHeight_ { 0 };
 };
 } // namespace OHOS::Rosen
 

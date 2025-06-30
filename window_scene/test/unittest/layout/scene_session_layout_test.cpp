@@ -996,6 +996,30 @@ HWTEST_F(SceneSessionLayoutTest, HandleSubSessionCrossNode, TestSize.Level1)
     sceneSession->HandleSubSessionCrossNode(SizeChangeReason::DRAG_MOVE);
     ASSERT_EQ(sceneSession->IsDragStart(), true);
 }
+
+/**
+ * @tc.name: UpdateWindowModeForUITest01
+ * @tc.desc: UpdateWindowModeForUITest
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLayoutTest, UpdateWindowModeForUITest01, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdateWindowModeForUITest";
+    info.bundleName_ = "UpdateWindowModeForUITest";
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback);
+
+    const int32_t updateMode = 1;
+    WMError errCode = sceneSession->UpdateWindowModeForUITest(updateMode);
+    EXPECT_EQ(errCode, WMError::WM_ERROR_NULLPTR);
+
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
+    sceneSession->sessionStage_ = mockSessionStage;
+    errCode = sceneSession->UpdateWindowModeForUITest(updateMode);
+    EXPECT_EQ(errCode, WMError::WM_OK);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

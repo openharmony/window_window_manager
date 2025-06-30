@@ -1168,15 +1168,16 @@ HWTEST_F(SceneSessionManagerTest5, PutSnapshotToCache, TestSize.Level1)
     info.bundleName_ = "test2";
     info.persistentId_ = 30;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto key = sceneSession->GetWindowStatus();
     std::string bundleName = "testBundleName";
     int32_t persistentId = 30;
     sceneSession->scenePersistence_ = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
-    sceneSession->snapshot_ = std::make_shared<Media::PixelMap>();
+    sceneSession->snapshot_[key.first][key.second] = std::make_shared<Media::PixelMap>();
     ssm_->sceneSessionMap_.insert({ 30, sceneSession });
     for (int32_t id = 30; id <= 30 + ssm_->snapshotCapacity_; ++id) {
         ssm_->PutSnapshotToCache(id);
     }
-    ASSERT_EQ(sceneSession->snapshot_, nullptr);
+    ASSERT_EQ(sceneSession->snapshot_[key.first][key.second], nullptr);
 }
 
 /**
@@ -1193,17 +1194,18 @@ HWTEST_F(SceneSessionManagerTest5, VisitSnapshotFromCache, TestSize.Level1)
     info.bundleName_ = "test2";
     info.persistentId_ = 30;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto key = sceneSession->GetWindowStatus();
     std::string bundleName = "testBundleName";
     int32_t persistentId = 30;
     sceneSession->scenePersistence_ = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
     ssm_->sceneSessionMap_.insert({ 30, sceneSession });
-    sceneSession->snapshot_ = std::make_shared<Media::PixelMap>();
+    sceneSession->snapshot_[key.first][key.second] = std::make_shared<Media::PixelMap>();
     for (int32_t id = 30; id < 30 + ssm_->snapshotCapacity_; ++id) {
         ssm_->PutSnapshotToCache(id);
     }
     ssm_->VisitSnapshotFromCache(30);
     ssm_->PutSnapshotToCache(30 + ssm_->snapshotCapacity_);
-    ASSERT_NE(sceneSession->snapshot_, nullptr);
+    ASSERT_NE(sceneSession->snapshot_[key.first][key.second], nullptr);
 }
 
 /**
@@ -1220,17 +1222,18 @@ HWTEST_F(SceneSessionManagerTest5, RemoveSnapshotFromCache, TestSize.Level1)
     info.bundleName_ = "test2";
     info.persistentId_ = 30;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto key = sceneSession->GetWindowStatus();
     std::string bundleName = "testBundleName";
     int32_t persistentId = 30;
     sceneSession->scenePersistence_ = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
     ssm_->sceneSessionMap_.insert({ 30, sceneSession });
-    sceneSession->snapshot_ = std::make_shared<Media::PixelMap>();
+    sceneSession->snapshot_[key.first][key.second] = std::make_shared<Media::PixelMap>();
     for (int32_t id = 30; id < 30 + ssm_->snapshotCapacity_; ++id) {
         ssm_->PutSnapshotToCache(id);
     }
     ssm_->RemoveSnapshotFromCache(31);
     ssm_->PutSnapshotToCache(30 + ssm_->snapshotCapacity_);
-    ASSERT_NE(sceneSession->snapshot_, nullptr);
+    ASSERT_NE(sceneSession->snapshot_[key.first][key.second], nullptr);
 }
 
 /**
@@ -1360,57 +1363,6 @@ HWTEST_F(SceneSessionManagerTest5, CreateAndConnectSpecificSession02, TestSize.L
     ASSERT_EQ(WSError::WS_ERROR_NOT_SYSTEM_APP, res);
     ssm_->shouldHideNonSecureFloatingWindows_.store(false);
     ssm_->systemConfig_.windowUIType_ = WindowUIType::INVALID_WINDOW;
-}
-
-/**
- * @tc.name: CheckSubSessionStartedByExtensionAndSetDisplayId
- * @tc.desc: CheckSubSessionStartedByExtensionAndSetDisplayId
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest5, CheckUIExtensionAndSetDisplayId01, TestSize.Level1)
-{
-    ASSERT_NE(ssm_, nullptr);
-    SessionInfo info;
-    sptr<SceneSession::SpecificSessionCallback> callback = ssm_->CreateSpecificSessionCallback();
-    sptr<SceneSession> parentSession = sptr<SceneSession>::MakeSptr(info, callback);
-    ssm_->sceneSessionMap_.insert({ parentSession->GetPersistentId(), parentSession });
-    sptr<IRemoteObject> token;
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    sptr<ISessionStage> sessionStage = sptr<SessionStageMocker>::MakeSptr();
-    EXPECT_EQ(ssm_->CheckSubSessionStartedByExtensionAndSetDisplayId(token, property, sessionStage),
-              WSError::WS_ERROR_NULLPTR);
-    property->SetParentPersistentId(parentSession->GetPersistentId());
-    property->SetIsUIExtFirstSubWindow(true);
-    constexpr DisplayId displayId = 0;
-    parentSession->GetSessionProperty()->SetDisplayId(displayId);
-    EXPECT_EQ(ssm_->CheckSubSessionStartedByExtensionAndSetDisplayId(token, property, sessionStage), WSError::WS_OK);
-    EXPECT_EQ(property->GetDisplayId(), displayId);
-}
-
-/**
- * @tc.name: CheckSubSessionStartedByExtensionAndSetDisplayId02
- * @tc.desc: CheckSubSessionStartedByExtensionAndSetDisplayId
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest5, CheckUIExtensionAndSetDisplayId02, TestSize.Level1)
-{
-    ASSERT_NE(ssm_, nullptr);
-    SessionInfo info;
-    sptr<SceneSession::SpecificSessionCallback> callback = ssm_->CreateSpecificSessionCallback();
-    sptr<SceneSession> parentSession = sptr<SceneSession>::MakeSptr(info, callback);
-    ssm_->sceneSessionMap_.insert({ parentSession->GetPersistentId(), parentSession });
-    sptr<IRemoteObject> token;
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    sptr<ISessionStage> sessionStage = sptr<SessionStageMocker>::MakeSptr();
-    EXPECT_EQ(ssm_->CheckSubSessionStartedByExtensionAndSetDisplayId(token, property, sessionStage),
-              WSError::WS_ERROR_NULLPTR);
-    property->SetParentPersistentId(parentSession->GetPersistentId());
-    property->SetIsUIExtFirstSubWindow(true);
-    constexpr DisplayId displayId = 0;
-    parentSession->GetSessionProperty()->SetDisplayId(displayId);
-    parentSession->SetClientDisplayId(999);
-    EXPECT_EQ(ssm_->CheckSubSessionStartedByExtensionAndSetDisplayId(token, property, sessionStage), WSError::WS_OK);
-    EXPECT_EQ(property->GetDisplayId(), displayId);
 }
 
 /**

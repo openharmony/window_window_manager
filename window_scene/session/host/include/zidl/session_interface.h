@@ -135,6 +135,22 @@ public:
         bool isFromMoveToGlobal = false, const MoveConfiguration& moveConfiguration = {},
         const RectAnimationConfig& rectAnimationConfig = {}) { return WSError::WS_OK; }
     virtual WSError UpdateClientRect(const WSRect& rect) { return WSError::WS_OK; }
+
+    /**
+     * @brief Updates the window's rectangle in global coordinates from client-side state.
+     *
+     * This method is called internally to synchronize the window's position and size in global coordinates
+     * based on the client-side changes (e.g., from the client application or user interactions).
+     *
+     * @param rect The updated rectangle (position and size) in global coordinates.
+     * @param reason The reason for the size or position change.
+     * @return WSError::WS_OK if the update is successful; otherwise, returns the corresponding error code.
+     */
+    virtual WSError UpdateGlobalDisplayRectFromClient(const WSRect& rect, SizeChangeReason reason)
+    {
+        return WSError::WS_DO_NOTHING;
+    }
+
     virtual WMError GetGlobalScaledRect(Rect& globalScaledRect) { return WMError::WM_OK; }
     virtual WSError OnNeedAvoid(bool status) { return WSError::WS_OK; }
     virtual AvoidArea GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect = WSRect::EMPTY_RECT,
@@ -509,6 +525,41 @@ public:
      * @return WSError::WS_OK means set success, otherwise failed.
      */
     virtual WSError SetFrameRectForPartialZoomIn(const Rect& frameRect) { return WSError::WS_OK; }
+
+    /**
+     * @brief update the floating-ball window instance.
+     *
+     * @param fbTemplateInfo the template info of the floating-ball.
+     */
+    virtual WMError UpdateFloatingBall(const FloatingBallTemplateInfo& fbTemplateInfo)
+    {
+        return WMError::WM_OK;
+    }
+ 
+    virtual WMError GetFloatingBallWindowId(uint32_t& windowId)
+    {
+        return WMError::WM_OK;
+    }
+ 
+    /**
+     * @brief Close flating ball window while stopFb is called.
+     *
+     * Notify system that flating ball window is stopping and execute animation.
+     */
+    virtual void NotifyFloatingBallPrepareClose() {}
+ 
+    /**
+     * @brief Notify prepare to close window
+     */
+    virtual WSError StopFloatingBall()
+    {
+        return WSError::WS_OK;
+    }
+ 
+    virtual WMError RestoreFbMainWindow(const std::shared_ptr<AAFwk::Want>& want)
+    {
+        return WMError::WM_OK;
+    }
 };
 } // namespace OHOS::Rosen
 

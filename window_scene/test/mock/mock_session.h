@@ -42,6 +42,7 @@ public:
         bool isGlobal, bool isFromMoveToGlobal, const MoveConfiguration& moveConfiguration,
         const RectAnimationConfig& rectAnimationConfig));
     MOCK_METHOD1(UpdateClientRect, WSError(const WSRect& rect));
+    MOCK_METHOD(WSError, UpdateGlobalDisplayRectFromClient, (const WSRect& rect, SizeChangeReason reason), (override));
 
     MOCK_METHOD0(Recover, WSError(void));
     MOCK_METHOD0(Maximize, WSError(void));

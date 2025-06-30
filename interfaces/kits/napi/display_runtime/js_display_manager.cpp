@@ -512,7 +512,7 @@ DMError RegisterDisplayListenerWithType(napi_env env, const std::string& type, n
 bool IfCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
 {
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
-        TLOGI(WmsLogTag::DMS, "IfCallbackRegistered methodName %{public}s not registered!", type.c_str());
+        TLOGI(WmsLogTag::DMS, "method %{public}s not registered!", type.c_str());
         return false;
     }
 
@@ -520,7 +520,7 @@ bool IfCallbackRegistered(napi_env env, const std::string& type, napi_value jsLi
         bool isEquals = false;
         napi_strict_equals(env, jsListenerObject, iter.first->GetNapiValue(), &isEquals);
         if (isEquals) {
-            TLOGE(WmsLogTag::DMS, "IfCallbackRegistered callback already registered!");
+            TLOGE(WmsLogTag::DMS, "callback already registered!");
             return true;
         }
     }
@@ -530,8 +530,7 @@ bool IfCallbackRegistered(napi_env env, const std::string& type, napi_value jsLi
 DMError UnregisterAllDisplayListenerWithType(const std::string& type)
 {
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
-        TLOGI(WmsLogTag::DMS, "UnregisterAllDisplayListenerWithType methodName %{public}s not registered!",
-            type.c_str());
+        TLOGI(WmsLogTag::DMS, "methodName %{public}s not registered!", type.c_str());
         return DMError::DM_OK;
     }
     DMError ret = DMError::DM_OK;
@@ -562,7 +561,7 @@ DMError UnregisterAllDisplayListenerWithType(const std::string& type)
             ret = DMError::DM_ERROR_INVALID_PARAM;
         }
         jsCbMap_[type].erase(it++);
-        TLOGI(WmsLogTag::DMS, "unregister display listener with type %{public}s  ret: %{public}u", type.c_str(), ret);
+        TLOGI(WmsLogTag::DMS, "type %{public}s  ret: %{public}u", type.c_str(), ret);
     }
     jsCbMap_.erase(type);
     return ret;
@@ -571,7 +570,7 @@ DMError UnregisterAllDisplayListenerWithType(const std::string& type)
 DMError UnRegisterDisplayListenerWithType(napi_env env, const std::string& type, napi_value value)
 {
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
-        TLOGI(WmsLogTag::DMS, "UnRegisterDisplayListenerWithType methodName %{public}s not registered!", type.c_str());
+        TLOGI(WmsLogTag::DMS, "methodName %{public}s not registered!", type.c_str());
         return DMError::DM_OK;
     }
     DMError ret = DMError::DM_OK;
@@ -605,8 +604,7 @@ DMError UnRegisterDisplayListenerWithType(napi_env env, const std::string& type,
                 ret = DMError::DM_ERROR_INVALID_PARAM;
             }
             jsCbMap_[type].erase(it++);
-            TLOGI(WmsLogTag::DMS, "unregister display listener with type %{public}s  ret: %{public}u", type.c_str(),
-                ret);
+            TLOGI(WmsLogTag::DMS, "type %{public}s  ret: %{public}u", type.c_str(), ret);
             break;
         } else {
             it++;
@@ -674,7 +672,7 @@ napi_value OnRegisterDisplayManagerCallback(napi_env env, napi_callback_info inf
 
 napi_value OnUnregisterDisplayManagerCallback(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::DMS, "OnUnregisterDisplayCallback is called");
+    TLOGD(WmsLogTag::DMS, "called");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -784,7 +782,7 @@ napi_value OnIsFoldable(napi_env env, napi_callback_info info)
         return NapiGetUndefined(env);
     }
     bool foldable = SingletonContainer::Get<DisplayManager>().IsFoldable();
-    TLOGD(WmsLogTag::DMS, "[NAPI]" PRIu64", isFoldable = %{public}u", foldable);
+    TLOGD(WmsLogTag::DMS, "[NAPI]foldable = %{public}u", foldable);
     napi_value result;
     napi_get_boolean(env, foldable, &result);
     return result;
@@ -801,7 +799,7 @@ napi_value OnIsCaptured(napi_env env, napi_callback_info info)
         return NapiGetUndefined(env);
     }
     bool isCapture = SingletonContainer::Get<DisplayManager>().IsCaptured();
-    TLOGD(WmsLogTag::DMS, "[NAPI]" PRIu64", IsCaptured = %{public}u", isCapture);
+    TLOGD(WmsLogTag::DMS, "[NAPI]IsCaptured = %{public}u", isCapture);
     napi_value result;
     napi_get_boolean(env, isCapture, &result);
     return result;
@@ -818,7 +816,7 @@ napi_value OnGetFoldStatus(napi_env env, napi_callback_info info)
         return NapiGetUndefined(env);
     }
     FoldStatus status = SingletonContainer::Get<DisplayManager>().GetFoldStatus();
-    TLOGD(WmsLogTag::DMS, "[NAPI]" PRIu64", getFoldStatus = %{public}u", status);
+    TLOGD(WmsLogTag::DMS, "[NAPI]status = %{public}u", status);
     return CreateJsValue(env, status);
 }
 
@@ -833,7 +831,7 @@ napi_value OnGetFoldDisplayMode(napi_env env, napi_callback_info info)
         return NapiGetUndefined(env);
     }
     FoldDisplayMode mode = SingletonContainer::Get<DisplayManager>().GetFoldDisplayModeForExternal();
-    TLOGD(WmsLogTag::DMS, "[NAPI]" PRIu64", getFoldDisplayMode = %{public}u", mode);
+    TLOGD(WmsLogTag::DMS, "[NAPI]mode = %{public}u", mode);
     return CreateJsValue(env, mode);
 }
 
@@ -866,7 +864,7 @@ napi_value OnSetFoldDisplayMode(napi_env env, napi_callback_info info)
     }
     DmErrorCode errCode = DM_JS_TO_ERROR_CODE_MAP.at(
         SingletonContainer::Get<DisplayManager>().SetFoldDisplayModeFromJs(mode, reason));
-    TLOGI(WmsLogTag::DMS, "[NAPI]setFoldDisplayMode, %{public}d", static_cast<int32_t>(errCode));
+    TLOGI(WmsLogTag::DMS, "[NAPI]%{public}d", static_cast<int32_t>(errCode));
     if (errCode != DmErrorCode::DM_OK) {
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(errCode)));
         return NapiGetUndefined(env);
@@ -898,7 +896,7 @@ napi_value OnSetFoldStatusLocked(napi_env env, napi_callback_info info)
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(errCode)));
         return NapiGetUndefined(env);
     }
-    TLOGI(WmsLogTag::DMS, "[NAPI]" PRIu64", SetFoldStatusLocked");
+    TLOGI(WmsLogTag::DMS, "[NAPI]locked: %{public}d", locked);
     return NapiGetUndefined(env);
 }
 
@@ -913,13 +911,12 @@ napi_value OnGetCurrentFoldCreaseRegion(napi_env env, napi_callback_info info)
         return NapiGetUndefined(env);
     }
     sptr<FoldCreaseRegion> region = SingletonContainer::Get<DisplayManager>().GetCurrentFoldCreaseRegion();
-    TLOGI(WmsLogTag::DMS, "[NAPI]" PRIu64", getCurrentFoldCreaseRegion");
     return CreateJsFoldCreaseRegionObject(env, region);
 }
 
 napi_value CreateJsFoldCreaseRegionObject(napi_env env, sptr<FoldCreaseRegion> region)
 {
-    TLOGI(WmsLogTag::DMS, "JsDisplay::CreateJsFoldCreaseRegionObject is called");
+    TLOGI(WmsLogTag::DMS, "called");
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
@@ -1818,9 +1815,9 @@ napi_value InitDisplaySourceMode(napi_env env)
 
 static void BindCoordinateConvertNativeFunction(napi_env env, napi_value exportObj, const char* moduleName)
 {
-    BindNativeFunction(env, exportObj, "convertRelativeCoordinateToGlobal", moduleName,
+    BindNativeFunction(env, exportObj, "convertRelativeToGlobalCoordinate", moduleName,
         JsDisplayManager::ConvertRelativeCoordinateToGlobal);
-    BindNativeFunction(env, exportObj, "convertGlobalCoordinateToRelative", moduleName,
+    BindNativeFunction(env, exportObj, "convertGlobalToRelativeCoordinate", moduleName,
         JsDisplayManager::ConvertGlobalCoordinateToRelative);
 }
 

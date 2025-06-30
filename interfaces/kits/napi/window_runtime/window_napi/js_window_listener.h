@@ -36,6 +36,7 @@ const std::string SYSTEM_AVOID_AREA_CHANGE_CB = "systemAvoidAreaChange";
 const std::string AVOID_AREA_CHANGE_CB = "avoidAreaChange";
 const std::string LIFECYCLE_EVENT_CB = "lifeCycleEvent";
 const std::string WINDOW_STAGE_EVENT_CB = "windowStageEvent";
+const std::string WINDOW_STAGE_LIFECYCLE_EVENT_CB = "windowStageLifecycleEvent";
 const std::string WINDOW_EVENT_CB = "windowEvent";
 const std::string KEYBOARD_HEIGHT_CHANGE_CB = "keyboardHeightChange";
 const std::string KEYBOARD_WILL_SHOW_CB = "keyboardWillShow";
@@ -58,6 +59,7 @@ const std::string WINDOW_STATUS_DID_CHANGE_CB = "windowStatusDidChange";
 const std::string WINDOW_TITLE_BUTTON_RECT_CHANGE_CB = "windowTitleButtonRectChange";
 const std::string WINDOW_NO_INTERACTION_DETECT_CB = "noInteractionDetected";
 const std::string WINDOW_RECT_CHANGE_CB = "windowRectChange";
+const std::string RECT_CHANGE_IN_GLOBAL_DISPLAY_CB = "rectChangeInGlobalDisplay";
 const std::string SUB_WINDOW_CLOSE_CB = "subWindowClose";
 const std::string WINDOW_STAGE_CLOSE_CB = "windowStageClose";
 const std::string EXTENSION_SECURE_LIMIT_CHANGE_CB = "uiExtensionSecureLimitChange";
@@ -69,6 +71,7 @@ class JsWindowListener : public IWindowChangeListener,
                          public ISystemBarChangedListener,
                          public IAvoidAreaChangedListener,
                          public IWindowLifeCycle,
+                         public IWindowStageLifeCycle,
                          public IOccupiedAreaChangeListener,
                          public ITouchOutsideListener,
                          public IScreenshotListener,
@@ -86,6 +89,7 @@ class JsWindowListener : public IWindowChangeListener,
                          public IWindowStatusDidChangeListener,
                          public IWindowNoInteractionListener,
                          public IWindowRectChangeListener,
+                         public IRectChangeInGlobalDisplayListener,
                          public IExtensionSecureLimitChangeListener,
                          public IWindowWillCloseListener,
                          public IMainWindowCloseListener,
@@ -112,9 +116,11 @@ public:
     void AfterUnfocused() override;
     void AfterResumed() override;
     void AfterPaused() override;
-    void AfterInteractive() override;
-    void AfterNonInteractive() override;
     void AfterDestroyed() override;
+    void AfterLifecycleForeground() override;
+    void AfterLifecycleBackground() override;
+    void AfterLifecycleResumed() override;
+    void AfterLifecyclePaused() override;
     void OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
     void OnKeyboardWillShow(const KeyboardAnimationInfo& keyboardAnimationInfo,
@@ -143,7 +149,13 @@ public:
     void OnWindowTitleButtonRectChanged(const TitleButtonRect& titleButtonRect) override;
     void SetTimeout(int64_t timeout) override;
     int64_t GetTimeout() const override;
+
+    /*
+     * Window Layout
+     */
     void OnRectChange(Rect rect, WindowSizeChangeReason reason) override;
+    void OnRectChangeInGlobalDisplay(const Rect& rect, WindowSizeChangeReason reason) override;
+
     void OnSecureLimitChange(bool isLimit) override;
     void OnWindowHighlightChange(bool isHighlight) override;
     void OnRotationChange(const RotationChangeInfo& rotationChangeInfo,
@@ -176,6 +188,7 @@ private:
     Rect currRect_ = {0, 0, 0, 0};
     WindowState state_ {WindowState::STATE_INITIAL};
     void LifeCycleCallBack(LifeCycleEventType eventType);
+    void WindowStageLifecycleCallback(WindowStageLifeCycleEventType eventType);
     int64_t noInteractionTimeout_ = 0;
     napi_env env_ = nullptr;
     std::shared_ptr<NativeReference> jsCallBack_;

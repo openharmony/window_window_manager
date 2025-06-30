@@ -1132,16 +1132,143 @@ HWTEST_F(SessionStageStubTest, HandleCloseSpecificScene, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleUpdateWindowLayoutById01
- * @tc.desc: test function : HandleUpdateWindowLayoutById
+ * @tc.name: HandleUpdateWindowModeForUITest01
+ * @tc.desc: test function : HandleUpdateWindowModeForUITest
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubTest, HandleUpdateWindowLayoutById01, TestSize.Level1)
+HWTEST_F(SessionStageStubTest, HandleUpdateWindowModeForUITest01, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
     ASSERT_TRUE(sessionStageStub_ != nullptr);
-    EXPECT_EQ(ERR_NONE, sessionStageStub_->HandleUpdateWindowLayoutById(data, reply));
+    EXPECT_EQ(ERR_INVALID_DATA, sessionStageStub_->HandleUpdateWindowModeForUITest(data, reply));
+
+    data.WriteInt32(0);
+    EXPECT_EQ(ERR_NONE, sessionStageStub_->HandleUpdateWindowModeForUITest(data, reply));
+}
+
+/**
+ * @tc.name: HandleSendFbActionEvent
+ * @tc.desc: test function : HandleSendFbActionEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleSendFbActionEvent, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    sptr<KeyboardPanelInfo> keyboardPanelInfo = sptr<KeyboardPanelInfo>::MakeSptr();
+
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SEND_FB_ACTION_EVENT);
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(ERR_INVALID_VALUE, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+
+    MessageParcel data1;
+    std::string action = "SendFbActionEvent";
+    data1.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data1.WriteString(action);
+    code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SEND_FB_ACTION_EVENT);
+    ASSERT_EQ(ERR_NONE, sessionStageStub_->OnRemoteRequest(code, data1, reply, option));
+}
+
+/**
+ * @tc.name: HandleUpdateGlobalDisplayRectFromServerWithIncompleteRect
+ * @tc.desc: Verify that HandleUpdateGlobalDisplayRectFromServer returns error when rect data is incomplete
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleUpdateGlobalDisplayRectFromServerWithIncompleteRect, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    // Missing width and height fields
+    data.WriteInt32(10); // posX
+    data.WriteInt32(20); // posY
+
+    int result = sessionStageStub_->HandleUpdateGlobalDisplayRectFromServer(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandleUpdateGlobalDisplayRectFromServerWithInvalidReason
+ * @tc.desc: Verify that HandleUpdateGlobalDisplayRectFromServer rejects missing or invalid reason values
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleUpdateGlobalDisplayRectFromServerWithInvalidReason, TestSize.Level1)
+{
+    auto writeRect = [](MessageParcel& data) {
+        data.WriteInt32(10); // posX
+        data.WriteInt32(20); // posY
+        data.WriteInt32(100); // width
+        data.WriteInt32(200); // height
+    };
+
+    // Case 1: Missing reason field
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        writeRect(data);
+        int result = sessionStageStub_->HandleUpdateGlobalDisplayRectFromServer(data, reply);
+        EXPECT_EQ(result, ERR_INVALID_DATA);
+    }
+
+    // Case 2: reason < SizeChangeReason::UNDEFINED (invalid)
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        writeRect(data);
+        data.WriteUint32(static_cast<uint32_t>(SizeChangeReason::UNDEFINED) - 1);
+        int result = sessionStageStub_->HandleUpdateGlobalDisplayRectFromServer(data, reply);
+        EXPECT_EQ(result, ERR_INVALID_DATA);
+    }
+
+    // Case 3: reason == SizeChangeReason::END (boundary out-of-range)
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        writeRect(data);
+        data.WriteUint32(static_cast<uint32_t>(SizeChangeReason::END));
+        int result = sessionStageStub_->HandleUpdateGlobalDisplayRectFromServer(data, reply);
+        EXPECT_EQ(result, ERR_INVALID_DATA);
+    }
+
+    // Case 4: reason > SizeChangeReason::END (overflow)
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        writeRect(data);
+        data.WriteUint32(static_cast<uint32_t>(SizeChangeReason::END) + 1);
+        int result = sessionStageStub_->HandleUpdateGlobalDisplayRectFromServer(data, reply);
+        EXPECT_EQ(result, ERR_INVALID_DATA);
+    }
+}
+
+/**
+ * @tc.name: HandleUpdateGlobalDisplayRectFromServerSuccess
+ * @tc.desc: Verify HandleUpdateGlobalDisplayRectFromServer accepts valid parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleUpdateGlobalDisplayRectFromServerSuccess, TestSize.Level1)
+{
+    constexpr int32_t posX = 10;
+    constexpr int32_t posY = 20;
+    constexpr int32_t width = 100;
+    constexpr int32_t height = 200;
+    constexpr SizeChangeReason reason = SizeChangeReason::UNDEFINED;
+
+    MessageParcel data;
+    MessageParcel reply;
+
+    // Write valid rect and reason
+    data.WriteInt32(posX);
+    data.WriteInt32(posY);
+    data.WriteInt32(width);
+    data.WriteInt32(height);
+    data.WriteUint32(static_cast<uint32_t>(reason));
+
+    int result = sessionStageStub_->HandleUpdateGlobalDisplayRectFromServer(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
 }
 } // namespace
 } // namespace Rosen

@@ -28,6 +28,7 @@ bool g_setWriteFloatErrorFlag = false;
 bool g_setWriteString16ErrorFlag = false;
 bool g_setWriteParcelableErrorFlag = false;
 bool g_setWriteInterfaceTokenErrorFlag = false;
+bool g_setReadBoolErrorFlag = false;
 bool g_setReadUint32ErrorFlag = false;
 bool g_setReadInt32ErrorFlag = false;
 bool g_setReadInt64ErrorFlag = false;
@@ -54,6 +55,7 @@ void MockMessageParcel::ClearAllErrorFlag()
     g_setWriteString16ErrorFlag = false;
     g_setWriteParcelableErrorFlag = false;
     g_setWriteInterfaceTokenErrorFlag = false;
+    g_setReadBoolErrorFlag = false;
     g_setReadUint32ErrorFlag = false;
     g_setReadInt32ErrorFlag = false;
     g_setReadInt64ErrorFlag = false;
@@ -113,6 +115,11 @@ void MockMessageParcel::SetReadUint32ErrorFlag(bool flag)
 void MockMessageParcel::SetReadInt32ErrorFlag(bool flag)
 {
     g_setReadInt32ErrorFlag = flag;
+}
+
+void MockMessageParcel::SetReadBoolErrorFlag(bool flag)
+{
+    g_setReadBoolErrorFlag = flag;
 }
 
 void MockMessageParcel::SetReadInt64ErrorFlag(bool flag)
@@ -209,6 +216,14 @@ bool Parcel::WriteString16(const std::u16string& value)
 {
     (void)value;
     return !g_setWriteString16ErrorFlag;
+}
+
+bool Parcel::ReadBool(bool& value)
+{
+    if (g_setReadBoolErrorFlag) {
+        return false;
+    }
+    return true;
 }
 
 #ifdef ENABLE_MOCK_READ_UINT32

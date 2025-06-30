@@ -698,6 +698,10 @@ void ScreenSessionDumper::DumpScreenPropertyById(ScreenId id)
         << screenProperty.GetAvailableArea().height_ << ", " << std::endl;
     oss << std::left << std::setw(LINE_WIDTH) << "DefaultDeviceRotationOffset "
         << screenProperty.GetDefaultDeviceRotationOffset() << std::endl;
+    oss << std::left << std::setw(LINE_WIDTH) << "DisplayGroupId "
+        << screenProperty.GetDisplayGroupId() << std::endl;
+    oss << std::left << std::setw(LINE_WIDTH) << "MainDisplayIdOfGroup "
+        << screenProperty.GetMainDisplayIdOfGroup() << std::endl;
     dumpInfo_.append(oss.str());
 }
 

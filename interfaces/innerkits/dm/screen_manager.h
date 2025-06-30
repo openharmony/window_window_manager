@@ -454,6 +454,15 @@ public:
      */
     void SetFoldStatusExpandAndLocked(bool locked);
 
+    /**
+     * @brief Set that if resize buffer and keep content horizontal while rotating the virtual display.
+     *
+     * @param screenId virtual screen id.
+     * @param enable True means enable, false means disable.
+     * @return DM_OK means set success, others means faild.
+     */
+    DMError SetVirtualScreenAutoRotation(ScreenId screenId, bool enable);
+
 private:
     ScreenManager();
     ~ScreenManager();

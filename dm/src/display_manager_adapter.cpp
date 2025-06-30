@@ -108,13 +108,13 @@ std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetDisplaySnapshot(Displ
     return pixelMap;
 }
 
-std::vector<std::shared_ptr<Media::PixelMap>> DisplayManagerAdapter::GetDisplayHdrSnapshot(DisplayId displayId,
+std::vector<std::shared_ptr<Media::PixelMap>> DisplayManagerAdapter::GetDisplayHDRSnapshot(DisplayId displayId,
     DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen)
 {
     INIT_PROXY_CHECK_RETURN({});
  
     if (screenSessionManagerServiceProxy_) {
-        return screenSessionManagerServiceProxy_->GetDisplayHdrSnapshot(displayId, errorCode, isUseDma,
+        return screenSessionManagerServiceProxy_->GetDisplayHDRSnapshot(displayId, errorCode, isUseDma,
             isCaptureFullOfScreen);
     }
     if (errorCode != nullptr) {
@@ -1441,7 +1441,7 @@ VirtualScreenFlag ScreenManagerAdapter::GetVirtualScreenFlag(ScreenId screenId)
 {
     INIT_PROXY_CHECK_RETURN(VirtualScreenFlag::DEFAULT);
     if (screenId == SCREEN_ID_INVALID) {
-        TLOGE(WmsLogTag::DMS, "screen id is invalid");
+        TLOGE(WmsLogTag::DMS, "screenId invalid");
         return VirtualScreenFlag::DEFAULT;
     }
 
@@ -1625,13 +1625,13 @@ std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetDisplaySnapshotWithOp
     return nullptr;
 }
 
-std::vector<std::shared_ptr<Media::PixelMap>> DisplayManagerAdapter::GetDisplayHdrSnapshotWithOption(
+std::vector<std::shared_ptr<Media::PixelMap>> DisplayManagerAdapter::GetDisplayHDRSnapshotWithOption(
     const CaptureOption& captureOption, DmErrorCode* errorCode)
 {
     std::vector<std::shared_ptr<Media::PixelMap>> ret = { nullptr, nullptr };
     INIT_PROXY_CHECK_RETURN(ret);
     if (screenSessionManagerServiceProxy_) {
-        return screenSessionManagerServiceProxy_->GetDisplayHdrSnapshotWithOption(captureOption, errorCode);
+        return screenSessionManagerServiceProxy_->GetDisplayHDRSnapshotWithOption(captureOption, errorCode);
     }
  
     if (errorCode != nullptr) {
@@ -1665,6 +1665,17 @@ DMError DisplayManagerAdapter::GetScreenAreaOfDisplayArea(DisplayId displayId, c
     if (screenSessionManagerServiceProxy_) {
         return screenSessionManagerServiceProxy_->GetScreenAreaOfDisplayArea(
             displayId, displayArea, screenId, screenArea);
+    }
+    return DMError::DM_OK;
+}
+
+DMError ScreenManagerAdapter::SetVirtualScreenAutoRotation(ScreenId screenId, bool enable)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+
+    TLOGI(WmsLogTag::DMS, "enter!");
+    if (screenSessionManagerServiceProxy_) {
+        return screenSessionManagerServiceProxy_->SetVirtualScreenAutoRotation(screenId, enable);
     }
     return DMError::DM_OK;
 }

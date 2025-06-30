@@ -142,6 +142,7 @@ WMError WindowAdapter::RegisterWindowManagerAgent(WindowManagerAgentType type,
 WMError WindowAdapter::UnregisterWindowManagerAgent(WindowManagerAgentType type,
     const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
+    TLOGI(WmsLogTag::DEFAULT, "called, type: %{public}d", type);
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
 
     auto wmsProxy = GetWindowManagerServiceProxy();
@@ -161,6 +162,7 @@ WMError WindowAdapter::UnregisterWindowManagerAgent(WindowManagerAgentType type,
         return ret;
     }
     agentSet.erase(agent);
+    TLOGI(WmsLogTag::DEFAULT, "success, type: %{public}d", type);
 
     return ret;
 }
@@ -1099,6 +1101,14 @@ WMError WindowAdapter::IsPcWindow(bool& isPcWindow)
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
     return wmsProxy->IsPcWindow(isPcWindow);
+}
+
+WMError WindowAdapter::IsFreeMultiWindowMode(bool& isFreeMultiWindow)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->IsFreeMultiWindow(isFreeMultiWindow);
 }
 
 WMError WindowAdapter::IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode)

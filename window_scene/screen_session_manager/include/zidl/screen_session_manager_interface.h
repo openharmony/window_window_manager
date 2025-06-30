@@ -81,7 +81,7 @@ public:
     virtual DMError SetOrientation(ScreenId screenId, Orientation orientation) { return DMError::DM_OK; }
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId, DmErrorCode* errorCode = nullptr,
         bool isUseDma = false, bool isCaptureFullOfScreen = false) { return nullptr; }
-    virtual std::vector<std::shared_ptr<Media::PixelMap>> GetDisplayHdrSnapshot(
+    virtual std::vector<std::shared_ptr<Media::PixelMap>> GetDisplayHDRSnapshot(
         DisplayId displayId, DmErrorCode* errorCode = nullptr, bool isUseDma = false,
         bool isCaptureFullOfScreen = false) { return { nullptr, nullptr }; }
     virtual std::shared_ptr<Media::PixelMap> GetSnapshotByPicker(Media::Rect &rect,
@@ -346,7 +346,7 @@ public:
         *errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
         return nullptr;
     }
-    virtual std::vector<std::shared_ptr<Media::PixelMap>> GetDisplayHdrSnapshotWithOption(
+    virtual std::vector<std::shared_ptr<Media::PixelMap>> GetDisplayHDRSnapshotWithOption(
         const CaptureOption& captureOption, DmErrorCode* errorCode = nullptr)
     {
         if (errorCode == nullptr) {
@@ -373,6 +373,7 @@ public:
     virtual uint32_t GetDeviceStatus() { return 0; }
     virtual DMError GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
         ScreenId& screenId, DMRect& screenArea) { return DMError::DM_OK; }
+    virtual DMError SetVirtualScreenAutoRotation(ScreenId screenId, bool enable) { return DMError::DM_OK; }
 };
 } // namespace Rosen
 } // namespace OHOS

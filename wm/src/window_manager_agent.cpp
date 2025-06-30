@@ -78,6 +78,12 @@ void WindowManagerAgent::NotifyWindowStyleChange(WindowStyleType type)
     SingletonContainer::Get<WindowManager>().NotifyWindowStyleChange(type);
 }
 
+void WindowManagerAgent::NotifyWindowSystemBarPropertyChange(
+    WindowType type, const SystemBarProperty& systemBarProperty)
+{
+    SingletonContainer::Get<WindowManager>().NotifyWindowSystemBarPropertyChange(type, systemBarProperty);
+}
+
 void WindowManagerAgent::NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info)
 {
     SingletonContainer::Get<WindowManager>().NotifyWindowPidVisibilityChanged(info);

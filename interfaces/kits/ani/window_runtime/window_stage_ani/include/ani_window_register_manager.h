@@ -96,6 +96,15 @@ private:
         bool isRegister, ani_env* env);
     WmErrorCode ProcessMainWindowCloseRegister(const sptr<AniWindowListener>& listener, const sptr<Window>& window,
         bool isRegister, ani_env* env);
+    WmErrorCode ProcessWindowStageListener(RegisterListenerType registerListenerType,
+        const sptr<AniWindowListener>& windowManagerListener, const sptr<Window>& window, bool isRegister,
+        ani_env* env);
+    WmErrorCode ProcessWindowListener(RegisterListenerType registerListenerType,
+        const sptr<AniWindowListener>& windowManagerListener, const sptr<Window>& window, bool isRegister,
+        ani_env* env);
+    WmErrorCode ProcessWindowManagerListener(RegisterListenerType registerListenerType,
+        const sptr<AniWindowListener>& windowManagerListener, const sptr<Window>& window, bool isRegister,
+        ani_env* env);
     WmErrorCode ProcessListener(RegisterListenerType registerListenerType, CaseType caseType,
         const sptr<AniWindowListener>& windowManagerListener, const sptr<Window>& window, bool isRegister,
         ani_env* env);

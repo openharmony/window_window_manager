@@ -120,8 +120,6 @@ __attribute__((no_sanitize("cfi")))
     }
 
     std::unique_ptr<AniWindowStage> windowStage = std::make_unique<AniWindowStage>(windowScene);
-    TLOGD(WmsLogTag::DEFAULT, "[ANI] native obj %{public}p", windowStage.get());
-
     ani_field contextField;
     if ((ret = env->Class_FindField(cls, "nativeObj", &contextField)) != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] get field fail %{public}u", ret);
@@ -145,8 +143,6 @@ __attribute__((no_sanitize("cfi")))
     }
     env->Object_CallMethod_Void(obj, setObjFunc, reinterpret_cast<ani_long>(windowStage.get()));
     localObjs.insert(std::pair(obj, windowStage.release()));
-
-    TLOGD(WmsLogTag::DEFAULT, "[ANI] window stage created  %{public}p", reinterpret_cast<void*>(obj));
     return obj;
 }
 
@@ -241,7 +237,6 @@ static ani_int WindowStageLoadContent(ani_env* env, ani_object obj,
     AniWindowStage* windowStage = reinterpret_cast<AniWindowStage*>(nativeObj);
     std::string contentStr;
     GetStdString(env, content, contentStr);
-    TLOGI(WmsLogTag::DEFAULT, "[ANI] loadcontent 0x%{public}p: %{public}s", windowStage, contentStr.c_str());
     windowStage->LoadContent(env, contentStr);
     return (ani_int)0u;
 }
@@ -249,8 +244,6 @@ static ani_int WindowStageLoadContent(ani_env* env, ani_object obj,
 static ani_object WindowStageCreate(ani_env* env, ani_long scene)
 {
     using namespace OHOS::Rosen;
-    TLOGD(WmsLogTag::DEFAULT, "[ANI] create windowstage with scene 0x%{public}p %{public}d",
-        reinterpret_cast<void*>(env), (int32_t)scene);
     std::shared_ptr<WindowScene> scenePtr;
     return CreateAniWindowStage(env, scenePtr); // just for test
 }

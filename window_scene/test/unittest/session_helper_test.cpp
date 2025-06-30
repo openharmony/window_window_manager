@@ -45,6 +45,41 @@ HWTEST_F(SessionHelperTest, ConvertDisplayOrientationToFloat, TestSize.Level1)
     EXPECT_EQ(SessionHelper::ConvertDisplayOrientationToFloat(orientation), 0.f); // degree 0
 }
 
+/**
+ * @tc.name: GetAreaTypeForScaleResize
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionHelperTest, GetAreaTypeForScaleResize, TestSize.Level1)
+{
+    int32_t pointWinX = 1249;
+    int32_t pointWinY = 2717;
+    int outside = 7;
+    const WSRect& rect = {579, -418, 1260, 2720};
+    // RIGHT_BOTTOM
+    EXPECT_EQ(SessionHelper::GetAreaTypeForScaleResize(pointWinX, pointWinY, outside, rect), AreaType::RIGHT_BOTTOM);
+
+    pointWinX = 6;
+    pointWinY = 2707;
+    outside = 7;
+    const WSRect& rect2 = {614, -342, 1260, 2720};
+    // LEFT_BOTTOM
+    EXPECT_EQ(SessionHelper::GetAreaTypeForScaleResize(pointWinX, pointWinY, outside, rect2), AreaType::LEFT_BOTTOM);
+
+    pointWinX = 1255;
+    pointWinY = 15;
+    outside = 7;
+    const WSRect& rect3 = {659, -440, 1260, 2720};
+    // RIGHT_TOP
+    EXPECT_EQ(SessionHelper::GetAreaTypeForScaleResize(pointWinX, pointWinY, outside, rect3), AreaType::RIGHT_TOP);
+
+    pointWinX = -3;
+    pointWinY = 10;
+    outside = 7;
+    const WSRect& rect4 = {697, -522, 1260, 2720};
+    // LEFT_TOP
+    EXPECT_EQ(SessionHelper::GetAreaTypeForScaleResize(pointWinX, pointWinY, outside, rect4), AreaType::LEFT_TOP);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
