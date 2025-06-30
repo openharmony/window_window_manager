@@ -1272,8 +1272,8 @@ public:
      * @param animationOption the option of animation.
      * @return WM_OK means set success, others means failed.
      */
-    WMError AnimateTo(int32_t windowId, const WindowAnimationProperty& animationProperty,
-        const WindowAnimationOption& animationOption);
+    WMError AnimateTo(int32_t windowId, WindowAnimationProperty animationProperty,
+        WindowAnimationOption animationOption);
 
 private:
     WindowManager();
