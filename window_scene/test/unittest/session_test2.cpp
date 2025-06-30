@@ -649,7 +649,6 @@ HWTEST_F(WindowSessionTest2, NotifyForegroundInteractiveStatus, TestSize.Level1)
  */
 HWTEST_F(WindowSessionTest2, SetEventHandler001, TestSize.Level1)
 {
-
     ASSERT_NE(session_, nullptr);
     std::shared_ptr<AppExecFwk::EventHandler> handler = nullptr;
     std::shared_ptr<AppExecFwk::EventHandler> exportHandler = nullptr;
