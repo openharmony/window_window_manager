@@ -1903,12 +1903,17 @@ napi_value JsSceneSessionManager::OnInitUserInfo(napi_env env, napi_callback_inf
 
 void JsSceneSessionManager::RegisterDumpRootSceneElementInfoListener()
 {
-    DumpRootSceneElementInfoFunc func = [this](const std::vector<std::string>& params,
-        std::vector<std::string>& infos) {
+    DumpRootSceneElementInfoFunc func = [this](const sptr<SceneSession>& session,
+        const std::vector<std::string>& params, std::vector<std::string>& infos) {
+        if (session == nullptr) {
+            return;
+        }
+        const auto& uiContent = rootScene_->
+            GetUIContentByDisplayId(session->GetSessionProperty()->GetDisplayId()).first;
         if (params.size() == 1 && params[0] == ARG_DUMP_HELP) { // 1: params num
             Ace::UIContent::ShowDumpHelp(infos);
             TLOGND(WmsLogTag::WMS_EVENT, "Dump ArkUI help info");
-        } else if (const auto uiContent = RootScene::staticRootScene_->GetUIContent()) {
+        } else if (uiContent != nullptr) {
             uiContent->DumpInfo(params, infos);
             TLOGND(WmsLogTag::WMS_EVENT, "Dump ArkUI element info");
         }

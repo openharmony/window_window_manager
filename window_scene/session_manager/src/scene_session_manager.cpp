@@ -6540,7 +6540,7 @@ void SceneSessionManager::DumpSessionElementInfo(const sptr<SceneSession>& sessi
     } else {
         TLOGD(WmsLogTag::DEFAULT, "Dump system session");
         std::vector<std::string> infos;
-        dumpRootSceneFunc_(resetParams, infos);
+        dumpRootSceneFunc_(session, resetParams, infos);
         for (auto& info: infos) {
             dumpInfo.append(info).append("\n");
         }
@@ -6565,7 +6565,7 @@ WSError SceneSessionManager::GetSpecifiedSessionDumpInfo(std::string& dumpInfo, 
     bool isFirstFrameAvailable = true;
     std::ostringstream oss;
     oss << "WindowName: " << session->GetWindowName()  << std::endl;
-    oss << "DisplayId: " << 0 << std::endl;
+    oss << "DisplayId: " << session->GetSessionProperty()->GetDisplayId() << std::endl;
     oss << "WinId: " << session->GetPersistentId() << std::endl;
     oss << "Pid: " << session->GetCallingPid() << std::endl;
     oss << "Type: " << static_cast<uint32_t>(session->GetWindowType()) << std::endl;
