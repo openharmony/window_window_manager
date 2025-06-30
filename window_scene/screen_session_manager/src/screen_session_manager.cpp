@@ -175,6 +175,7 @@ const std::string FAULT_SUGGESTION = "542003014";
 constexpr uint32_t COMMON_EVENT_SERVICE_ID = 3299;
 const bool IS_SUPPORT_PC_MODE = system::GetBoolParameter("const.window.support_window_pcmode_switch", false);
 const ScreenId SCREEN_GROUP_ID_DEFAULT = 1;
+const std::set<std::string> INDIVIDUAL_SCREEN_GROUP_SET = {"CeliaView", "DevEcoViewer"};
 
 // based on the bundle_util
 inline int32_t GetUserIdByCallingUid()
@@ -728,6 +729,13 @@ void ScreenSessionManager::OnVirtualScreenChange(ScreenId screenId, ScreenEvent 
     }
     auto clientProxy = GetClientProxy();
     if (screenEvent == ScreenEvent::CONNECTED) {
+        TLOGI(WmsLogTag::DMS, "screenCombination:%{public}d, screenName:%{public}s",
+            screenSession->GetScreenCombination(), screenSession->GetName().c_str());
+        if(screenSession->GetScreenCombination() == ScreenCombination::SCREEN_UNIQUE &&
+            INDIVIDUAL_SCREEN_GROUP_SET.find(screenSession->GetName()) != INDIVIDUAL_SCREEN_GROUP_SET.end()) {
+            screenSession->SetDisplayGroupId(displayGroupNum_++);
+            screenSession->SetMainDisplayIdOfGroup(screenId);
+        }
         if (clientProxy) {
             clientProxy->OnScreenConnectionChanged(GetSessionOption(screenSession, screenId),
                 ScreenEvent::CONNECTED);
@@ -1581,6 +1589,21 @@ void ScreenSessionManager::OnHgmRefreshRateChange(uint32_t refreshRate)
         screenSession->UpdateRefreshRate(refreshRate);
         NotifyDisplayChanged(screenSession->ConvertToDisplayInfo(),
             DisplayChangeEvent::UPDATE_REFRESHRATE);
+        std::map<ScreenId, sptr<ScreenSession>> screenSessionMap;
+        {
+            std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+            screenSessionMap = screenSessionMap_;
+        }
+        for (const auto &sessionItem : screenSessionMap) {
+            const auto &screenSessionItem = sessionItem.second;
+            const auto &screenType = screenSessionItem->GetScreenProperty().GetScreenType();
+            if (screenType == ScreenType::VIRTUAL) {
+                screenSessionItem->UpdateRefreshRate(refreshRate);
+                screenSessionItem->SetSupportedRefreshRate({refreshRate});
+                NotifyDisplayChanged(screenSessionItem->ConvertToDisplayInfo(),
+                    DisplayChangeEvent::UPDATE_REFRESHRATE);
+            }
+        }
     } else {
         TLOGE(WmsLogTag::DMS, "Get default screen session failed.");
     }
@@ -1654,10 +1677,14 @@ sptr<DisplayInfo> ScreenSessionManager::HookDisplayInfoByUid(sptr<DisplayInfo> d
     std::shared_lock<std::shared_mutex> lock(hookInfoMutex_);
     if (displayHookMap_.find(uid) != displayHookMap_.end()) {
         auto info = displayHookMap_[uid];
-        TLOGI(WmsLogTag::DMS, "hW: %{public}u, hH: %{public}u, hD: %{public}f, hR: %{public}u, hER: %{public}d, "
-            "dW: %{public}u, dH: %{public}u, dR: %{public}u, dO: %{public}u", info.width_, info.height_, info.density_,
-            info.rotation_, info.enableHookRotation_, displayInfo->GetWidth(), displayInfo->GetHeight(),
-            displayInfo->GetRotation(), displayInfo->GetDisplayOrientation());
+        std::ostringstream oss;
+        oss << "hW: " << info.width_ << ", hH: " << info.height_ << ", hD: " << info.density_
+            << ", hR: " << info.rotation_ << ", hER: " << info.enableHookRotation_
+            << " hO: " << info.displayOrientation_ << ", hEO: " << info.enableHookDisplayOrientation_
+            << ", dW: " << displayInfo->GetHeight() << ", dH: " << displayInfo->GetHeight()
+            << ", dR: " << static_cast<uint32_t>(displayInfo->GetRotation())
+            << ", dO: " << static_cast<uint32_t>(displayInfo->GetDisplayOrientation());
+        TLOGI(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
 
         displayInfo->SetWidth(info.width_);
         displayInfo->SetHeight(info.height_);
@@ -1674,6 +1701,10 @@ sptr<DisplayInfo> ScreenSessionManager::HookDisplayInfoByUid(sptr<DisplayInfo> d
                 TLOGI(WmsLogTag::DMS, "ConvertToDisplayInfo error, screenSession is nullptr.");
                 return nullptr;
             }
+        }
+        if (info.enableHookDisplayOrientation_ &&
+            info.displayOrientation_ < static_cast<uint32_t>(DisplayOrientation::UNKNOWN)) {
+            displayInfo->SetDisplayOrientation(static_cast<DisplayOrientation>(info.displayOrientation_));
         }
     }
     return displayInfo;
@@ -2470,6 +2501,12 @@ void ScreenSessionManager::CreateScreenProperty(ScreenId screenId, ScreenPropert
 #endif
     property.CalcDefaultDisplayOrientation();
     property.SetScreenShape(ScreenSettingHelper::GetScreenShape(screenId));
+    if (property.GetDisplayGroupId() == DISPLAY_GROUP_ID_INVALID) {
+        property.SetDisplayGroupId(DISPLAY_GROUP_ID_DEFAULT);
+    }
+    if (property.GetMainDisplayIdOfGroup() == SCREEN_ID_INVALID) {
+        property.SetMainDisplayIdOfGroup(MAIN_SCREEN_ID_DEFAULT);
+    }
 }
 
 void ScreenSessionManager::InitScreenProperty(ScreenId screenId, RSScreenModeInfo& screenMode,
@@ -2492,6 +2529,10 @@ void ScreenSessionManager::InitScreenProperty(ScreenId screenId, RSScreenModeInf
     property.SetScreenRealHeight(property.GetBounds().rect_.GetHeight());
     property.SetScreenRealPPI();
     property.SetScreenRealDPI();
+    property.SetScreenAreaOffsetX(property.GetPhyBounds().rect_.GetLeft());
+    property.SetScreenAreaOffsetY(property.GetPhyBounds().rect_.GetTop());
+    property.SetScreenAreaWidth(property.GetPhyBounds().rect_.GetWidth());
+    property.SetScreenAreaHeight(property.GetPhyBounds().rect_.GetHeight());
 }
 
 void ScreenSessionManager::GetInternalWidth()
@@ -2539,6 +2580,8 @@ void ScreenSessionManager::InitExtendScreenProperty(ScreenId screenId, sptr<Scre
         auto screenBounds = RRect({ 0, 0, FOUR_K_WIDTH, screenAdjustHeight }, 0.0f, 0.0f);
         session->SetExtendProperty(screenBounds, false);
         session->SetAvailableArea({0, 0, FOUR_K_WIDTH, screenAdjustHeight});
+        session->SetValidWidth(FOUR_K_WIDTH);
+        session->SetValidHeight(screenAdjustHeight);
         TLOGD(WmsLogTag::DMS, "screenWidth > 4K, screenId:%{public}" PRIu64"", screenId);
     } else if (screenWidth < THREE_K_WIDTH && screenPPI < offScreenPPIThreshold) {
         float scale = static_cast<float>(g_internalWidth) / screenWidth;
@@ -2546,6 +2589,8 @@ void ScreenSessionManager::InitExtendScreenProperty(ScreenId screenId, sptr<Scre
         auto screenBounds = RRect({ 0, 0, g_internalWidth, screenAdjustHeight }, 0.0f, 0.0f);
         session->SetExtendProperty(screenBounds, true);
         session->SetAvailableArea({0, 0, g_internalWidth, screenAdjustHeight});
+        session->SetValidWidth(g_internalWidth);
+        session->SetValidHeight(screenAdjustHeight);
         TLOGD(WmsLogTag::DMS, "screenWidth < g_internalWidth, screenId:%{public}" PRIu64"", screenId);
     } else {
         TLOGW(WmsLogTag::DMS, "no need adjust, screenId:%{public}" PRIu64"", screenId);
@@ -2723,6 +2768,11 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
     SetHdrFormats(screenId, session);
     SetColorSpaces(screenId, session);
     SetSupportedRefreshRate(session);
+    if (session->GetFakeScreenSession() != nullptr) {
+        std::vector<uint32_t> supportedRefreshRateFake = session->GetSupportedRefreshRate();
+        sptr<ScreenSession> screenSessionFake = session->GetFakeScreenSession();
+        screenSessionFake->SetSupportedRefreshRate(std::move(supportedRefreshRateFake));
+    }
     RegisterRefreshRateChangeListener();
     TLOGW(WmsLogTag::DMS, "CreateScreenSession success. ScreenId: %{public}" PRIu64 "", screenId);
     return session;
@@ -4953,6 +5003,11 @@ DMError ScreenSessionManager::DoMakeMirror(ScreenId mainScreenId, std::vector<Sc
     }
     for (ScreenId screenId : allMirrorScreenIds) {
         MirrorSwitchNotify(screenId);
+        auto screenSession = GetScreenSession(screenId);
+        if (screenSession != nullptr && mainScreen != nullptr) {
+            screenSession->SetDisplayGroupId(mainScreen->GetDisplayGroupId());
+            screenSession->SetMainDisplayIdOfGroup(mainScreen->GetMainDisplayIdOfGroup());
+        }
     }
     RegisterCastObserver(allMirrorScreenIds);
     TLOGW(WmsLogTag::DMS, "make mirror notify scb end makeResult=%{public}d", makeResult);
@@ -5182,9 +5237,12 @@ DMError ScreenSessionManager::SetVirtualScreenRefreshRate(ScreenId screenId, uin
     // when skipFrameInterval > 10 means the skipFrameInterval is the virtual screen refresh rate
     if (refreshInterval > IRREGULAR_REFRESH_RATE_SKIP_THRETHOLD) {
         screenSession->UpdateRefreshRate(refreshInterval);
+        screenSession->SetSupportedRefreshRate({refreshInterval});
     } else {
         screenSession->UpdateRefreshRate(defaultScreenSession->GetRefreshRate() / refreshInterval);
+        screenSession->SetSupportedRefreshRate({defaultScreenSession->GetRefreshRate() / refreshInterval});
     }
+    NotifyDisplayChanged(screenSession->ConvertToDisplayInfo(), DisplayChangeEvent::UPDATE_REFRESHRATE);
     TLOGW(WmsLogTag::DMS, "refreshInterval is %{public}d", refreshInterval);
     return DMError::DM_OK;
 }
@@ -5502,6 +5560,9 @@ sptr<ScreenSession> ScreenSessionManager::InitVirtualScreen(ScreenId smsScreenId
     auto defaultScreen = GetScreenSession(GetDefaultScreenId());
     if (defaultScreen != nullptr && defaultScreen->GetActiveScreenMode() != nullptr) {
         info->refreshRate_ = defaultScreen->GetActiveScreenMode()->refreshRate_;
+        screenSession->UpdateRefreshRate(info->refreshRate_);
+        std::vector<uint32_t> virtualRefreshRateVec = {info->refreshRate_};
+        screenSession->SetSupportedRefreshRate(std::move(virtualRefreshRateVec));
     }
     screenSession->modes_.emplace_back(info);
     screenSession->activeIdx_ = 0;
@@ -9477,6 +9538,8 @@ DMError ScreenSessionManager::SetVirtualScreenMaxRefreshRate(ScreenId id, uint32
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     screenSession->UpdateRefreshRate(actualRefreshRate);
+    screenSession->SetSupportedRefreshRate({actualRefreshRate});
+    NotifyDisplayChanged(screenSession->ConvertToDisplayInfo(), DisplayChangeEvent::UPDATE_REFRESHRATE);
     return DMError::DM_OK;
 }
 
@@ -9976,6 +10039,7 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreatePhysicalScreenSession(Scree
     }
     SetHdrFormats(screenId, session);
     SetColorSpaces(screenId, session);
+    SetSupportedRefreshRate(session);
     TLOGW(WmsLogTag::DMS, "Create success. ScreenId: %{public}" PRIu64, screenId);
     return session;
 }

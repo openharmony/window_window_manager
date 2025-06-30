@@ -125,8 +125,8 @@ using ProcessGestureNavigationEnabledChangeFunc = std::function<void(bool enable
 using ProcessOutsideDownEventFunc = std::function<void(int32_t x, int32_t y)>;
 using ProcessShiftFocusFunc = std::function<void(int32_t persistentId, DisplayId displayGroupId)>;
 using NotifySetFocusSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
-using DumpRootSceneElementInfoFunc = std::function<void(const std::vector<std::string>& params,
-    std::vector<std::string>& infos)>;
+using DumpRootSceneElementInfoFunc = std::function<void(const sptr<SceneSession>& session,
+    const std::vector<std::string>& params, std::vector<std::string>& infos)>;
 using WindowChangedFunc = std::function<void(int32_t persistentId, WindowUpdateType type)>;
 using TraverseFunc = std::function<bool(const sptr<SceneSession>& session)>;
 using CmpFunc = std::function<bool(std::pair<int32_t, sptr<SceneSession>>& lhs,
@@ -308,8 +308,8 @@ public:
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId = DEFAULT_DISPLAY_ID) override;
     WSError GetFocusSessionToken(sptr<IRemoteObject>& token, DisplayId displayId = DEFAULT_DISPLAY_ID) override;
     WSError GetFocusSessionElement(AppExecFwk::ElementName& element, DisplayId displayId = DEFAULT_DISPLAY_ID) override;
-    WSError AddFocusGroup(DisplayId displayId);
-    WSError RemoveFocusGroup(DisplayId displayId);
+    WSError AddFocusGroup(DisplayGroupId displayGroupId, DisplayId displayId);
+    WSError RemoveFocusGroup(DisplayGroupId displayGroupId, DisplayId displayId);
     WSError SendPointerEventForHover(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
     WSError UpdateWindowMode(int32_t persistentId, int32_t windowMode);
@@ -535,6 +535,7 @@ public:
     WSError NotifyEnterRecentTask(bool enterRecent);
     WMError UpdateDisplayHookInfo(int32_t uid, uint32_t width, uint32_t height, float_t density, bool enable);
     WMError UpdateAppHookDisplayInfo(int32_t uid, const HookInfo& hookInfo, bool enable);
+    WMError NotifyHookOrientationChange(int32_t persistentId);
     void InitScheduleUtils();
     void ProcessDisplayScale(sptr<DisplayInfo>& displayInfo);
     WMError GetRootMainWindowId(int32_t persistentId, int32_t& hostWindowId);
@@ -806,7 +807,7 @@ private:
     sptr<KeyboardSession::KeyboardSessionCallback> CreateKeyboardSessionCallback();
     void FillSessionInfo(sptr<SceneSession>& sceneSession);
     std::shared_ptr<AppExecFwk::AbilityInfo> QueryAbilityInfoFromBMS(const int32_t uId, const std::string& bundleName,
-        const std::string& abilityName, const std::string& moduleName);
+        const std::string& abilityName, const std::string& moduleName, bool isAtomicServiceFreeInstall = false);
     std::vector<sptr<SceneSession>> GetSubSceneSession(int32_t parentWindowId);
     void RemoveDuplicateSubSession(const std::vector<std::pair<uint64_t, WindowVisibilityState>>& visibilityChangeInfo,
         std::vector<sptr<SceneSession>>& subSessions);

@@ -835,7 +835,8 @@ HWTEST_F(SceneSessionManagerTest11, GetTopNearestBlockingFocusSession_branch02, 
     sptr<SceneSession::SpecificSessionCallback> specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCb);
     sceneSession->GetSessionProperty()->SetDisplayId(100);
-    ssm_->windowFocusController_->virtualScreenDisplayIdSet_.insert(20);
+    ssm_->windowFocusController_->displayId2GroupIdMap_[100] = 20;
+    ssm_->windowFocusController_->displayId2GroupIdMap_[20] = 20;
     ssm_->sceneSessionMap_.insert({ 1, sceneSession });
     ASSERT_EQ(nullptr, ssm_->GetTopNearestBlockingFocusSession(displayId, zOrder, includingAppSession));
     ssm_->sceneSessionMap_.clear();
@@ -1208,6 +1209,84 @@ HWTEST_F(SceneSessionManagerTest11, QueryAbilityInfoFromBMSTest001, TestSize.Lev
     auto res = ssm_->QueryAbilityInfoFromBMS(
         uId, sessionInfo_.bundleName_, sessionInfo_.abilityName_, sessionInfo_.moduleName_);
     EXPECT_NE(res, nullptr);
+}
+
+/**
+ * @tc.name: QueryAbilityInfoFromBMSTest
+ * @tc.desc: SceneSesionManager QueryAbilityInfoFromBMS AtomicFreeInstall query failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, QueryAbilityInfoFromBMSTest02, TestSize.Level1)
+{
+    const int32_t uId = 32;
+    SessionInfo sessionInfo_;
+    sessionInfo_.bundleName_ = "BundleName";
+    sessionInfo_.abilityName_ = "AbilityName";
+    sessionInfo_.moduleName_ = "ModuleName";
+    sptr<IBundleMgrMocker> bundleMgrMocker = sptr<IBundleMgrMocker>::MakeSptr();
+    EXPECT_CALL(*bundleMgrMocker, GetBundleInfoV9(_, _, _, _)).WillOnce(Return(1));
+    ssm_->bundleMgr_ = bundleMgrMocker;
+
+    auto res = ssm_->QueryAbilityInfoFromBMS(
+        uId, sessionInfo_.bundleName_, sessionInfo_.abilityName_, sessionInfo_.moduleName_, true);
+    EXPECT_EQ(res, nullptr);
+}
+
+/**
+ * @tc.name: QueryAbilityInfoFromBMSTest
+ * @tc.desc: SceneSesionManager QueryAbilityInfoFromBMS AtomicFreeInstall query failed hapModuleInfosis nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, QueryAbilityInfoFromBMSTest03, TestSize.Level1)
+{
+    const int32_t uId = 32;
+    SessionInfo sessionInfo_;
+    sessionInfo_.bundleName_ = "BundleName";
+    sessionInfo_.abilityName_ = "AbilityName";
+    sessionInfo_.moduleName_ = "ModuleName";
+    sptr<IBundleMgrMocker> bundleMgrMocker = sptr<IBundleMgrMocker>::MakeSptr();
+    EXPECT_CALL(*bundleMgrMocker, GetBundleInfoV9(_, _, _, _))
+        .WillOnce([](const std::string& bundleName, int32_t flags, AppExecFwk::BundleInfo& bundleInfo, int32_t userId) {
+            bundleInfo.hapModuleInfos = {};
+            return 0;
+        });
+    ssm_->bundleMgr_ = bundleMgrMocker;
+
+    auto res = ssm_->QueryAbilityInfoFromBMS(
+        uId, sessionInfo_.bundleName_, sessionInfo_.abilityName_, sessionInfo_.moduleName_, true);
+    EXPECT_EQ(res, nullptr);
+}
+
+/**
+ * @tc.name: QueryAbilityInfoFromBMSTest
+ * @tc.desc: SceneSesionManager QueryAbilityInfoFromBMS AtomicFreeInstall query success.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, QueryAbilityInfoFromBMSTest04, TestSize.Level1)
+{
+    const int32_t uId = 32;
+    SessionInfo sessionInfo_;
+    sessionInfo_.bundleName_ = "BundleName";
+    sessionInfo_.abilityName_ = "AbilityName";
+    sessionInfo_.moduleName_ = "ModuleName";
+    sptr<IBundleMgrMocker> bundleMgrMocker = sptr<IBundleMgrMocker>::MakeSptr();
+    EXPECT_CALL(*bundleMgrMocker, GetBundleInfoV9(_, _, _, _))
+        .WillOnce([](const std::string& bundleName, int32_t flags, AppExecFwk::BundleInfo& bundleInfo, int32_t userId) {
+            AppExecFwk::AbilityInfo abilityInfo;
+            abilityInfo.moduleName = "moduleName";
+            abilityInfo.name = "abilityName";
+            AppExecFwk::HapModuleInfo hapModuleInfo;
+            hapModuleInfo.abilityInfos = { abilityInfo };
+            bundleInfo.hapModuleInfos = { hapModuleInfo };
+            return 0;
+        });
+    ssm_->bundleMgr_ = bundleMgrMocker;
+
+    auto res = ssm_->QueryAbilityInfoFromBMS(
+        uId, sessionInfo_.bundleName_, sessionInfo_.abilityName_, sessionInfo_.moduleName_, true);
+    ASSERT_EQ(res, nullptr);
+    EXPECT_EQ(res->name, "abilityName");
+    EXPECT_EQ(res->moduleName, "moduleName");
 }
 
 /**

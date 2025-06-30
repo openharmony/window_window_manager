@@ -262,14 +262,20 @@ void SecondaryDisplayFoldPolicy::SendPropertyChangeResult(sptr<ScreenSession> sc
             auto fullStatusScreenBounds = RRect({ 0, screenParams_[FULL_STATUS_OFFSET_X],
                 screenParams_[FULL_STATUS_WIDTH], screenParams_[SCREEN_HEIGHT] }, 0.0f, 0.0f);
             screenProperty_.SetBounds(fullStatusScreenBounds);
+            screenSession->SetScreenAreaOffsetY(screenParams_[FULL_STATUS_OFFSET_X]);
+            screenSession->SetScreenAreaHeight(screenParams_[FULL_STATUS_WIDTH]);
         } else if (displayMode == FoldDisplayMode::MAIN) {
             auto mainStatusScreenBounds =
                 RRect({ 0, 0, screenParams_[MAIN_STATUS_WIDTH], screenParams_[SCREEN_HEIGHT] }, 0.0f, 0.0f);
             screenProperty_.SetBounds(mainStatusScreenBounds);
+            screenSession->SetScreenAreaOffsetY(0);
+            screenSession->SetScreenAreaHeight(screenParams_[MAIN_STATUS_WIDTH]);
         } else if (displayMode == FoldDisplayMode::GLOBAL_FULL) {
             auto globalFullStatusScreenBounds =
                 RRect({ 0, 0, screenParams_[GLOBAL_FULL_STATUS_WIDTH], screenParams_[SCREEN_HEIGHT] }, 0.0f, 0.0f);
             screenProperty_.SetBounds(globalFullStatusScreenBounds);
+            screenSession->SetScreenAreaOffsetY(0);
+            screenSession->SetScreenAreaHeight(screenParams_[GLOBAL_FULL_STATUS_WIDTH]);
         } else {
             TLOGW(WmsLogTag::DMS, "unKnown displayMode");
         }

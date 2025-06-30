@@ -18,6 +18,7 @@
 
 #include "window_session_impl.h"
 #include "lifecycle_future_callback.h"
+#include "window_manager.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -507,6 +508,7 @@ private:
     void RecordLifeCycleExceptionEvent(LifeCycleEvent event, WMError erCode) const;
     sptr<LifecycleFutureCallback> attachCallback_ = nullptr;
     sptr<LifecycleFutureCallback> detachCallback_ = nullptr;
+    WindowLifeCycleInfo GetWindowLifecycleInfo() const;
 
     /**
      * Window Transition Animation For PC
