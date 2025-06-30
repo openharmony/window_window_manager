@@ -3949,6 +3949,7 @@ std::vector<AppExecFwk::SupportWindowMode> Session::ExtractSupportWindowModeFrom
 {
     std::vector<AppExecFwk::SupportWindowMode> updateWindowModes = {};
     if (abilityInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "id: %{public}d, abilityInfo is nullptr", GetPersistentId());
         return updateWindowModes;
     }
     if (IsPcWindow() || systemConfig_.IsFreeMultiWindowMode()) {
@@ -3978,6 +3979,8 @@ std::vector<AppExecFwk::SupportWindowMode> Session::ParseWindowModeFromMetaData(
             updateWindowModes.push_back(AppExecFwk::SupportWindowMode::SPLIT);
         } else if (supportWindowMode == "floating") {
             updateWindowModes.push_back(AppExecFwk::SupportWindowMode::FLOATING);
+        } else {
+            TLOGW(WmsLogTag::WMS_LAYOUT, "invalid input");
         }
     }
     return updateWindowModes;
