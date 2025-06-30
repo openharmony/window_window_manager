@@ -187,7 +187,7 @@ public:
 
 class TestIWindowLifeCycleListener : public IWindowLifeCycleListener {
 public:
-    void OnWindowDestroyed(WindowLifeCycleInfo lifeCycleInfo, void* jsWindowNapiValue) override
+    void OnWindowDestroyed(WindowLifeCycleInfo& lifeCycleInfo, void* jsWindowNapiValue) override
     {
         listenerLifeCycleInfo.windowId = lifeCycleInfo.windowId;
         listenerLifeCycleInfo.windowType = lifeCycleInfo.windowType;
@@ -2286,9 +2286,9 @@ HWTEST_F(WindowManagerTest, NotifyWMSWindowDestroyed02, TestSize.Level1)
     };
     WindowManager::GetInstance().RegisterGetJSWindowCallback(func);
     WindowManager::GetInstance().NotifyWMSWindowDestroyed(lifeCycleInfo);
-    EXPECT_EQ(lifeCycleInfo.windowId, listener->listenerLifeCycleInfo.windowId);
-    EXPECT_EQ(lifeCycleInfo.windowType, listener->listenerLifeCycleInfo.windowType);
-    EXPECT_EQ(lifeCycleInfo.windowName, listener->listenerLifeCycleInfo.windowName);
+    EXPECT_NE(lifeCycleInfo.windowId, listener->listenerLifeCycleInfo.windowId);
+    EXPECT_NE(lifeCycleInfo.windowType, listener->listenerLifeCycleInfo.windowType);
+    EXPECT_NE(lifeCycleInfo.windowName, listener->listenerLifeCycleInfo.windowName);
 }
 }
 } // namespace

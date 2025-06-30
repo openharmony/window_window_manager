@@ -1890,7 +1890,8 @@ WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearLis
         WLOGFW("Destroy window failed, id: %{public}d", GetPersistentId());
         return ret;
     }
-    SingletonContainer::Get<WindowManager>().NotifyWMSWindowDestroyed(GetWindowLifecycleInfo());
+    WindowLifeCycleInfo windowLifeCycleInfo = GetWindowLifecycleInfo();
+    SingletonContainer::Get<WindowManager>().NotifyWMSWindowDestroyed(windowLifeCycleInfo);
 
     // delete after replace WSError with WMError
     NotifyBeforeDestroy(GetWindowName());
