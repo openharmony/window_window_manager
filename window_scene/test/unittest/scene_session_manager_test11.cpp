@@ -1212,6 +1212,84 @@ HWTEST_F(SceneSessionManagerTest11, QueryAbilityInfoFromBMSTest001, TestSize.Lev
 }
 
 /**
+ * @tc.name: QueryAbilityInfoFromBMSTest
+ * @tc.desc: SceneSesionManager QueryAbilityInfoFromBMS AtomicFreeInstall query failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, QueryAbilityInfoFromBMSTest02, TestSize.Level1)
+{
+    const int32_t uId = 32;
+    SessionInfo sessionInfo_;
+    sessionInfo_.bundleName_ = "BundleName";
+    sessionInfo_.abilityName_ = "AbilityName";
+    sessionInfo_.moduleName_ = "ModuleName";
+    sptr<IBundleMgrMocker> bundleMgrMocker = sptr<IBundleMgrMocker>::MakeSptr();
+    EXPECT_CALL(*bundleMgrMocker, GetBundleInfoV9(_, _, _, _)).WillOnce(Return(1));
+    ssm_->bundleMgr_ = bundleMgrMocker;
+
+    auto res = ssm_->QueryAbilityInfoFromBMS(
+        uId, sessionInfo_.bundleName_, sessionInfo_.abilityName_, sessionInfo_.moduleName_, true);
+    EXPECT_EQ(res, nullptr);
+}
+
+/**
+ * @tc.name: QueryAbilityInfoFromBMSTest
+ * @tc.desc: SceneSesionManager QueryAbilityInfoFromBMS AtomicFreeInstall query failed hapModuleInfosis nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, QueryAbilityInfoFromBMSTest03, TestSize.Level1)
+{
+    const int32_t uId = 32;
+    SessionInfo sessionInfo_;
+    sessionInfo_.bundleName_ = "BundleName";
+    sessionInfo_.abilityName_ = "AbilityName";
+    sessionInfo_.moduleName_ = "ModuleName";
+    sptr<IBundleMgrMocker> bundleMgrMocker = sptr<IBundleMgrMocker>::MakeSptr();
+    EXPECT_CALL(*bundleMgrMocker, GetBundleInfoV9(_, _, _, _))
+        .WillOnce([](const std::string& bundleName, int32_t flags, AppExecFwk::BundleInfo& bundleInfo, int32_t userId) {
+            bundleInfo.hapModuleInfos = {};
+            return 0;
+        });
+    ssm_->bundleMgr_ = bundleMgrMocker;
+
+    auto res = ssm_->QueryAbilityInfoFromBMS(
+        uId, sessionInfo_.bundleName_, sessionInfo_.abilityName_, sessionInfo_.moduleName_, true);
+    EXPECT_EQ(res, nullptr);
+}
+
+/**
+ * @tc.name: QueryAbilityInfoFromBMSTest
+ * @tc.desc: SceneSesionManager QueryAbilityInfoFromBMS AtomicFreeInstall query success.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, QueryAbilityInfoFromBMSTest04, TestSize.Level1)
+{
+    const int32_t uId = 32;
+    SessionInfo sessionInfo_;
+    sessionInfo_.bundleName_ = "BundleName";
+    sessionInfo_.abilityName_ = "AbilityName";
+    sessionInfo_.moduleName_ = "ModuleName";
+    sptr<IBundleMgrMocker> bundleMgrMocker = sptr<IBundleMgrMocker>::MakeSptr();
+    EXPECT_CALL(*bundleMgrMocker, GetBundleInfoV9(_, _, _, _))
+        .WillOnce([](const std::string& bundleName, int32_t flags, AppExecFwk::BundleInfo& bundleInfo, int32_t userId) {
+            AppExecFwk::AbilityInfo abilityInfo;
+            abilityInfo.moduleName = "moduleName";
+            abilityInfo.name = "abilityName";
+            AppExecFwk::HapModuleInfo hapModuleInfo;
+            hapModuleInfo.abilityInfos = { abilityInfo };
+            bundleInfo.hapModuleInfos = { hapModuleInfo };
+            return 0;
+        });
+    ssm_->bundleMgr_ = bundleMgrMocker;
+
+    auto res = ssm_->QueryAbilityInfoFromBMS(
+        uId, sessionInfo_.bundleName_, sessionInfo_.abilityName_, sessionInfo_.moduleName_, true);
+    ASSERT_EQ(res, nullptr);
+    EXPECT_EQ(res->name, "abilityName");
+    EXPECT_EQ(res->moduleName, "moduleName");
+}
+
+/**
  * @tc.name: RequestFocusSpecificCheckTest
  * @tc.desc: Test for RequestFocusSpecificCheck
  * @tc.type: FUNC
