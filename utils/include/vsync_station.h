@@ -21,13 +21,13 @@
 #include <unordered_set>
 
 #include <event_handler.h>
-#include <ui/rs_ui_context.h>
 
 #include "wm_common.h"
 
 namespace OHOS {
 namespace Rosen {
 class RSFrameRateLinker;
+class RSUIContext;
 class VSyncReceiver;
 class FrameRateRange;
 
