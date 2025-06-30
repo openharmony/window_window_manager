@@ -70,10 +70,12 @@ public:
     /**
      * @brief Notify caller when window is destroyed
      *
-     * @param lifeCycleInfo window info while its lifecycle status changed.
+     * @param lifeCycleInfo window lifecycle info.
+     * 
+     * @param jsWindowNapiValue js window object napi value.
      *
      */
-    virtual void OnWindowDestroyed(WindowLifeCycleInfo& lifeCycleInfo, void* jsWindowNapiValue) = 0;
+    virtual void OnWindowDestroyed(const WindowLifeCycleInfo& lifeCycleInfo, void* jsWindowNapiValue) = 0;
 };
 
 /**
@@ -1316,13 +1318,13 @@ public:
      * @brief Register get js window callback.
      * @param getJSWindowFunc get js window obj callback.
      */
-    void RegisterGetJSWindowCallback(const GetJSWindowObjFunc& getJSWindowFunc);
+    void RegisterGetJSWindowCallback(GetJSWindowObjFunc&& getJSWindowFunc);
 
     /**
      * @brief notify window destroyed.
      * @param lifeCycleInfo window lifecycle info.
      */
-    void NotifyWMSWindowDestroyed(WindowLifeCycleInfo& lifeCycleInfo);
+    void NotifyWMSWindowDestroyed(const WindowLifeCycleInfo& lifeCycleInfo);
 
 private:
     WindowManager();

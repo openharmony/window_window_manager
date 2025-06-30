@@ -1859,7 +1859,7 @@ WMError WindowSceneSessionImpl::DestroyHookWindow()
     return WMError::WM_OK;
 }
 
-WindowLifeCycleInfo WindowSceneSessionImpl::GetWindowLifecycleInfo()
+WindowLifeCycleInfo WindowSceneSessionImpl::GetWindowLifecycleInfo() const
 {
     WindowLifeCycleInfo lifeCycleInfo;
     lifeCycleInfo.windowId = GetPersistentId();
