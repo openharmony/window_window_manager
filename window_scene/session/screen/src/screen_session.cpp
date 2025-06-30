@@ -2080,6 +2080,11 @@ void ScreenSession::SetSupportedRefreshRate(std::vector<uint32_t>&& supportedRef
     supportedRefreshRate_ = std::move(supportedRefreshRate);
 }
 
+std::vector<uint32_t> ScreenSession::GetSupportedRefreshRate() const
+{
+    return supportedRefreshRate_;
+}
+
 void ScreenSession::SetForceCloseHdr(bool isForceCloseHdr)
 {
     std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
