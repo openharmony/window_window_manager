@@ -1854,6 +1854,42 @@ HWTEST_F(SceneSessionTest5, HandleMoveDragSurfaceNode, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleMoveDragSurfaceBounds
+ * @tc.desc: HandleMoveDragSurfaceBounds Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, HandleMoveDragSurfaceBounds, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "HandleMoveDragSurfaceBounds";
+    info.bundleName_ = "HandleMoveDragSurfaceBounds";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+
+    WSRect preRect = { 0, 0, 50, 50 };
+    WSRect rect = { 0, 0, 100, 100 };
+    WSRect globalRect = { 0, 0, 100, 100 };
+
+    session->SetRequestNextVsyncFunc([](const std::shared_ptr<VsyncCallback>& callback) {
+        callback->onCallback(1, 1);
+    });
+    ASSERT_NE(nullptr, session->requestNextVsyncFunc_);
+    session->SetSessionRect(preRect);
+    EXPECT_EQ(preRect, session->GetSessionRect());
+    session->keyFramePolicy_.running_ = true;
+    session->HandleMoveDragSurfaceBounds(rect, globalRect, SizeChangeReason::DRAG_MOVE);
+    EXPECT_EQ(preRect, session->GetSessionRect());
+    session->HandleMoveDragSurfaceBounds(rect, globalRect, SizeChangeReason::DRAG);
+    EXPECT_EQ(rect, session->GetSessionRect());
+
+    session->keyFramePolicy_.running_ = false;
+    session->HandleMoveDragSurfaceBounds(rect, globalRect, SizeChangeReason::DRAG_END);
+    session->HandleMoveDragSurfaceBounds(rect, globalRect, SizeChangeReason::DRAG);
+    EXPECT_EQ(rect, session->GetSessionRect());
+}
+
+/**
  * @tc.name: SetNotifyVisibleChangeFunc
  * @tc.desc: SetNotifyVisibleChangeFunc Test
  * @tc.type: FUNC

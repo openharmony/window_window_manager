@@ -91,9 +91,6 @@ WSError SCBSystemSession::NotifyClientToUpdateRect(const std::string& updateReas
             }
             session->specificCallback_->onClearDisplayStatusBarTemporarilyFlags_();
         }
-        if (session->GetWindowType() == WindowType::WINDOW_TYPE_KEYBOARD_PANEL && session->GetKeyboardSession()) {
-            session->GetKeyboardSession()->MarkOccupiedAreaAsDirty();
-        }
         return ret;
     }, "NotifyClientToUpdateRect");
     return WSError::WS_OK;
@@ -116,7 +113,7 @@ sptr<SceneSession> SCBSystemSession::GetKeyboardSession() const
 
 void SCBSystemSession::PresentFocusIfPointDown()
 {
-    WLOGFI("PresentFocusIfPointDown, id: %{public}d, type: %{public}d", GetPersistentId(), GetWindowType());
+    TLOGI(WmsLogTag::DEFAULT, "Id:%{public}d,type:%{public}d", GetPersistentId(), GetWindowType());
     if (!isFocused_ && GetFocusable()) {
         FocusChangeReason reason = FocusChangeReason::CLICK;
         NotifyRequestFocusStatusNotifyManager(true, false, reason);
@@ -133,19 +130,6 @@ WSError SCBSystemSession::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>&
 
     WSError ret = Session::TransferKeyEvent(keyEvent);
     return ret;
-}
-
-void SCBSystemSession::PresentFoucusIfNeed(int32_t pointerAction)
-{
-    WLOGFD("OnClick down, id: %{public}d", GetPersistentId());
-    if (pointerAction == MMI::PointerEvent::POINTER_ACTION_DOWN ||
-        pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
-        if (!isFocused_ && GetFocusable()) {
-            FocusChangeReason reason = FocusChangeReason::CLICK;
-            NotifyRequestFocusStatusNotifyManager(true, false, reason);
-        }
-        NotifyClick();
-    }
 }
 
 WSError SCBSystemSession::UpdateFocus(bool isFocused)

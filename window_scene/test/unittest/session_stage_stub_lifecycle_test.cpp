@@ -35,6 +35,15 @@
 using namespace testing;
 using namespace testing::ext;
 
+namespace {
+    std::string logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
+        const char* msg)
+    {
+        logMsg = msg;
+    }
+}
+
 namespace OHOS {
 namespace Rosen {
 class SessionStageStubLifecycleTest : public testing::Test {
@@ -85,18 +94,37 @@ HWTEST_F(SessionStageStubLifecycleTest, HandleNotifyForegroundInteractiveStatus,
 }
 
 /**
- * @tc.name: HandleNotifyNonInteractiveStatus
- * @tc.desc: test function : HandleNotifyNonInteractiveStatus
+ * @tc.name: HandleNotifyPausedStatus
+ * @tc.desc: test function : HandleNotifyPausedStatus
  * @tc.type: FUNC
  */
- HWTEST_F(SessionStageStubLifecycleTest, HandleNotifyNonInteractiveStatus, TestSize.Level1)
- {
-     MessageParcel data;
-     MessageParcel reply;
-     data.WriteBool(true);
-     ASSERT_TRUE((sessionStageStub_ != nullptr));
-     ASSERT_EQ(0, sessionStageStub_->HandleNotifyNonInteractiveStatus(data, reply));
- }
+HWTEST_F(SessionStageStubLifecycleTest, HandleNotifyPausedStatus, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    EXPECT_EQ(0, sessionStageStub_->HandleNotifyPausedStatus());
+    EXPECT_TRUE(logMsg.find("SendRequest failed") == std::string::npos);
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: HandleNotifyAppUseControlStatus
+ * @tc.desc: test function : HandleNotifyAppUseControlStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubLifecycleTest, HandleNotifyAppUseControlStatus, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteBool(true);
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    EXPECT_EQ(0, sessionStageStub_->HandleNotifyAppUseControlStatus(data, reply));
+    EXPECT_TRUE(logMsg.find("SendRequest failed") == std::string::npos);
+    LOG_SetCallback(nullptr);
+}
 
 /**
  * @tc.name: NotifySessionForeground

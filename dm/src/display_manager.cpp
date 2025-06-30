@@ -810,15 +810,15 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId display
     return screenShot;
 }
 
-std::vector<std::shared_ptr<Media::PixelMap>> DisplayManager::GetScreenHdrshot(DisplayId displayId,
+std::vector<std::shared_ptr<Media::PixelMap>> DisplayManager::GetScreenHDRshot(DisplayId displayId,
     DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen)
 {
     if (displayId == DISPLAY_ID_INVALID) {
         TLOGE(WmsLogTag::DMS, "displayId invalid!");
         return { nullptr, nullptr };
     }
-    std::vector<std::shared_ptr<Media::PixelMap>> screenShotVec =
-        SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayHdrSnapshot(displayId, errorCode,
+    const std::vector<std::shared_ptr<Media::PixelMap>>& screenShotVec =
+        SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayHDRSnapshot(displayId, errorCode,
             isUseDma, isCaptureFullOfScreen);
     if (screenShotVec.size() != PIXMAP_VECTOR_SIZE) {
         TLOGE(WmsLogTag::DMS, "failed!");
@@ -2524,7 +2524,7 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshotWithOption(const C
     return dstScreenshot;
 }
 
-std::vector<std::shared_ptr<Media::PixelMap>> DisplayManager::GetScreenHdrshotWithOption(
+std::vector<std::shared_ptr<Media::PixelMap>> DisplayManager::GetScreenHDRshotWithOption(
     const CaptureOption& captureOption, DmErrorCode* errorCode)
 {
     TLOGI(WmsLogTag::DMS, "start!");
@@ -2532,8 +2532,8 @@ std::vector<std::shared_ptr<Media::PixelMap>> DisplayManager::GetScreenHdrshotWi
         TLOGE(WmsLogTag::DMS, "displayId invalid!");
         return { nullptr, nullptr };
     }
-    std::vector<std::shared_ptr<Media::PixelMap>> screenShotVec =
-        SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayHdrSnapshotWithOption(captureOption, errorCode);
+    const std::vector<std::shared_ptr<Media::PixelMap>>& screenShotVec =
+        SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayHDRSnapshotWithOption(captureOption, errorCode);
     if (screenShotVec.size() != PIXMAP_VECTOR_SIZE) {
         TLOGE(WmsLogTag::DMS, "get snapshot with option failed!");
         return { nullptr, nullptr };

@@ -42,6 +42,7 @@ struct SystemBarRegionTint {
         : type_(type), prop_(prop), region_(region) {}
 };
 using SystemBarRegionTints = std::vector<SystemBarRegionTint>;
+using GetJSWindowObjFunc = std::function<void*(const std::string& windowName)>;
 
 struct VisibleWindowNumInfo {
     uint32_t displayId;
@@ -51,6 +52,29 @@ struct VisibleWindowNumInfo {
 struct WindowSnapshotDataPack {
     std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
     WMError result = WMError::WM_OK;
+};
+
+struct WindowLifeCycleInfo {
+    int32_t windowId;
+    WindowType windowType;
+    std::string windowName;
+};
+
+/**
+ * @class IWMSConnectionChangedListener
+ *
+ * @brief Listener to observe window lifecycle status.
+ */
+class IWindowLifeCycleListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when window is destroyed
+     *
+     * @param lifeCycleInfo window lifecycle info.
+     * @param jsWindowNapiValue js window object napi value.
+     *
+     */
+    virtual void OnWindowDestroyed(const WindowLifeCycleInfo& lifeCycleInfo, void* jsWindowNapiValue) = 0;
 };
 
 /**
@@ -254,6 +278,22 @@ public:
 private:
     std::unordered_set<WindowInfoKey> interestInfo_;
     std::unordered_set<int32_t> interestWindowIds_;
+};
+
+/*
+ * @class IWindowSystemBarPropertyChangedListener
+ *
+ * @brief Observe the property change of System Bar.
+ */
+class IWindowSystemBarPropertyChangedListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when System Bar property changed.
+     *
+     * @param type Type of System Bar
+     * @param systemBarProperty Property of System Bar
+     */
+    virtual void OnWindowSystemBarPropertyChanged(WindowType type, const SystemBarProperty& systemBarProperty) = 0;
 };
 
 /**
@@ -784,6 +824,32 @@ public:
      */
     WMError UnregisterWindowPidVisibilityChangedListener(const sptr<IWindowPidVisibilityChangedListener>& listener);
 
+    /*
+     * @brief Register window System Bar property changed Listener.
+     *
+     * @param listener IWindowSystemBarPropertyChangedListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    WMError RegisterWindowSystemBarPropertyChangedListener(
+        const sptr<IWindowSystemBarPropertyChangedListener>& listener);
+
+    /*
+     * @brief Unregister window System Bar property changed Listener.
+     *
+     * @param listener IWindowSystemBarPropertyChangedListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    WMError UnregisterWindowSystemBarPropertyChangedListener(
+        const sptr<IWindowSystemBarPropertyChangedListener>& listener);
+
+    /*
+     * @brief Notify window System Bar property changed.
+     *
+     * @param type Type of System Bar
+     * @param systemBarProperty Property of System Bar
+     */
+    void NotifyWindowSystemBarPropertyChange(WindowType type, const SystemBarProperty& systemBarProperty);
+
     /**
      * @brief notify display information change.
      *
@@ -1230,8 +1296,34 @@ public:
      * @param animationOption the option of animation.
      * @return WM_OK means set success, others means failed.
      */
-    WMError AnimateTo(int32_t windowId, const WindowAnimationProperty& animationProperty,
-        const WindowAnimationOption& animationOption);
+    WMError AnimateTo(int32_t windowId, WindowAnimationProperty animationProperty,
+        WindowAnimationOption animationOption);
+
+    /**
+     * @brief Register window lifecycle status changed callback.
+     * @param listener IWindowLifeCycleListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    WMError RegisterWindowLifeCycleCallback(const sptr<IWindowLifeCycleListener>& listener);
+
+    /**
+     * @brief Unregister window lifecycle status changed callback.
+     * @param listener IWindowLifeCycleListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    WMError UnregisterWindowLifeCycleCallback(const sptr<IWindowLifeCycleListener>& listener);
+
+    /**
+     * @brief Register get js window callback.
+     * @param getJSWindowFunc get js window obj callback.
+     */
+    void RegisterGetJSWindowCallback(GetJSWindowObjFunc&& getJSWindowFunc);
+
+    /**
+     * @brief notify window destroyed.
+     * @param lifeCycleInfo window lifecycle info.
+     */
+    void NotifyWMSWindowDestroyed(const WindowLifeCycleInfo& lifeCycleInfo);
 
 private:
     WindowManager();
@@ -1242,6 +1334,7 @@ private:
     bool destroyed_ = false;
     std::unordered_set<std::string> isModuleHookOffSet_;
     std::unordered_map<WindowInfoKey, uint32_t> interestInfoMap_;
+    GetJSWindowObjFunc getJSWindowObjFunc_;
 
     void OnWMSConnectionChanged(int32_t userId, int32_t screenId, bool isConnected) const;
     void UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObject>& abilityToken, WindowType windowType,

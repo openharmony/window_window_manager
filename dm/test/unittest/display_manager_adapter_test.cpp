@@ -889,11 +889,11 @@ HWTEST_F(DisplayManagerAdapterTest, GetExpandAvailableArea, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetDisplayHdrSnapshotWithOption001
- * @tc.desc: GetDisplayHdrSnapshotWithOption test
+ * @tc.name: GetDisplayHDRSnapshotWithOption001
+ * @tc.desc: GetDisplayHDRSnapshotWithOption test
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, GetDisplayHdrSnapshotWithOption001, TestSize.Level1)
+HWTEST_F(DisplayManagerAdapterTest, GetDisplayHDRSnapshotWithOption001, TestSize.Level1)
 {
     CaptureOption captureOption;
     DmErrorCode errorCode;
@@ -902,7 +902,7 @@ HWTEST_F(DisplayManagerAdapterTest, GetDisplayHdrSnapshotWithOption001, TestSize
         SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_;
     SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_ = nullptr;
     std::vector<std::shared_ptr<Media::PixelMap>> result =
-        SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayHdrSnapshotWithOption(captureOption, &errorCode);
+        SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayHDRSnapshotWithOption(captureOption, &errorCode);
     SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_ =
         screenSessionManagerServiceProxyTmp;
     EXPECT_EQ(result.size(), PIXELMAP_SIZE);
@@ -911,11 +911,11 @@ HWTEST_F(DisplayManagerAdapterTest, GetDisplayHdrSnapshotWithOption001, TestSize
 }
  
 /**
- * @tc.name: GetDisplayHdrSnapshotWithOption002
- * @tc.desc: GetDisplayHdrSnapshotWithOption test
+ * @tc.name: GetDisplayHDRSnapshotWithOption002
+ * @tc.desc: GetDisplayHDRSnapshotWithOption test
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, GetDisplayHdrSnapshotWithOption002, TestSize.Level1)
+HWTEST_F(DisplayManagerAdapterTest, GetDisplayHDRSnapshotWithOption002, TestSize.Level1)
 {
     CaptureOption captureOption;
     DmErrorCode *errorCode = nullptr;
@@ -924,7 +924,7 @@ HWTEST_F(DisplayManagerAdapterTest, GetDisplayHdrSnapshotWithOption002, TestSize
         SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_;
     SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_ = nullptr;
     std::vector<std::shared_ptr<Media::PixelMap>> result =
-        SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayHdrSnapshotWithOption(captureOption, errorCode);
+        SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayHDRSnapshotWithOption(captureOption, errorCode);
     SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_ =
         screenSessionManagerServiceProxyTmp;
     EXPECT_EQ(result.size(), PIXELMAP_SIZE);
@@ -933,11 +933,11 @@ HWTEST_F(DisplayManagerAdapterTest, GetDisplayHdrSnapshotWithOption002, TestSize
 }
  
 /**
- * @tc.name: GetDisplayHdrSnapshot001
- * @tc.desc: GetDisplayHdrSnapshot test
+ * @tc.name: GetDisplayHDRSnapshot001
+ * @tc.desc: GetDisplayHDRSnapshot test
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, GetDisplayHdrSnapshot001, TestSize.Level1)
+HWTEST_F(DisplayManagerAdapterTest, GetDisplayHDRSnapshot001, TestSize.Level1)
 {
     DisplayId validDisplayId = DEFAULT_DISPLAY;
     DmErrorCode errorCode;
@@ -945,7 +945,7 @@ HWTEST_F(DisplayManagerAdapterTest, GetDisplayHdrSnapshot001, TestSize.Level1)
     bool isCaptureFullOfScreen = false;
  
     std::vector<std::shared_ptr<Media::PixelMap>> result =
-        SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayHdrSnapshot(
+        SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayHDRSnapshot(
             validDisplayId, &errorCode, isUseDma, isCaptureFullOfScreen);
  
     EXPECT_EQ(result.size(), PIXELMAP_SIZE);
@@ -954,11 +954,11 @@ HWTEST_F(DisplayManagerAdapterTest, GetDisplayHdrSnapshot001, TestSize.Level1)
 }
  
 /**
- * @tc.name: GetDisplayHdrSnapshot002
- * @tc.desc: GetDisplayHdrSnapshot test
+ * @tc.name: GetDisplayHDRSnapshot002
+ * @tc.desc: GetDisplayHDRSnapshot test
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, GetDisplayHdrSnapshot002, TestSize.Level1)
+HWTEST_F(DisplayManagerAdapterTest, GetDisplayHDRSnapshot002, TestSize.Level1)
 {
     DisplayId validDisplayId = DEFAULT_DISPLAY;
     DmErrorCode *errorCode = nullptr;
@@ -966,7 +966,7 @@ HWTEST_F(DisplayManagerAdapterTest, GetDisplayHdrSnapshot002, TestSize.Level1)
     bool isCaptureFullOfScreen = false;
  
     std::vector<std::shared_ptr<Media::PixelMap>> result =
-        SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayHdrSnapshot(
+        SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayHDRSnapshot(
             validDisplayId, errorCode, isUseDma, isCaptureFullOfScreen);
  
     EXPECT_EQ(result.size(), PIXELMAP_SIZE);
@@ -974,5 +974,17 @@ HWTEST_F(DisplayManagerAdapterTest, GetDisplayHdrSnapshot002, TestSize.Level1)
     EXPECT_EQ(result[HDR_PIXELMAP], nullptr);
 }
 
+/**
+ * @tc.name: SetVirtualScreenAutoRotation
+ * @tc.desc: SetVirtualScreenAutoRotation test
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, SetVirtualScreenAutoRotation, TestSize.Level1)
+{
+    ScreenId screenId = 1111;
+    bool enable = false;
+    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualScreenAutoRotation(screenId, enable);
+    EXPECT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
+}
 }
 }

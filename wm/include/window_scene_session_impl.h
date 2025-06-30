@@ -17,6 +17,7 @@
 #define OHOS_ROSEN_WINDOW_SCENE_SESSION_IMPL_H
 
 #include "window_session_impl.h"
+#include "window_manager.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -50,6 +51,7 @@ public:
         MoveConfiguration moveConfiguration = {}) override;
     WMError MoveToAsync(int32_t x, int32_t y, MoveConfiguration moveConfiguration = {}) override;
     WMError MoveWindowToGlobal(int32_t x, int32_t y, MoveConfiguration moveConfiguration = {}) override;
+    WMError MoveWindowToGlobalDisplay(int32_t x, int32_t y, MoveConfiguration moveConfiguration = {}) override;
     WMError GetGlobalScaledRect(Rect& globalScaledRect) override;
     WMError Resize(uint32_t width, uint32_t height,
         const RectAnimationConfig& rectAnimationConfig = {}) override;
@@ -59,7 +61,7 @@ public:
     WMError SetFollowParentWindowLayoutEnabled(bool isFollow) override;
     WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) override;
     WMError SetFrameRectForParticalZoomIn(const Rect& frameRect) override;
-    WMError UpdateWindowLayoutById(int32_t windowId, int32_t updateMode) override;
+    WMError UpdateWindowModeForUITest(int32_t updateMode) override;
 
     /*
      * Window Hierarchy
@@ -307,7 +309,8 @@ public:
     /*
      * Window LifeCycle
      */
-    void Interactive() override;
+    void Resume() override;
+    void Pause() override;
 
     WSError CloseSpecificScene() override;
     WMError SetSubWindowSource(SubWindowSource source) override;
@@ -497,9 +500,10 @@ private:
     /*
      * Window Lifecycle
      */
-    void NotifyFreeMultiWindowModeInteractive();
+    void NotifyFreeMultiWindowModeResume();
     std::string TransferLifeCycleEventToString(LifeCycleEvent type) const;
     void RecordLifeCycleExceptionEvent(LifeCycleEvent event, WMError erCode) const;
+    WindowLifeCycleInfo GetWindowLifecycleInfo() const;
 
     /**
      * Window Transition Animation For PC

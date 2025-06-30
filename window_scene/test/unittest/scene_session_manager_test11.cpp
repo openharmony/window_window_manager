@@ -18,6 +18,7 @@
 #include <bundlemgr/launcher_service.h>
 #include "interfaces/include/ws_common.h"
 #include "iremote_object_mocker.h"
+#include "mock/mock_accesstoken_kit.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "session_info.h"
 #include "session/host/include/scene_session.h"
@@ -29,6 +30,7 @@
 #include "session/host/include/multi_instance_manager.h"
 #include "test/mock/mock_session_stage.h"
 #include "test/mock/mock_window_event_channel.h"
+#include "test/mock/mock_accesstoken_kit.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -78,6 +80,7 @@ void SceneSessionManagerTest11::TearDown()
     MultiInstanceManager::GetInstance().Init(bundleMgrMocker, GetTaskScheduler());
     ssm_->RefreshAppInfo(BUNDLE_NAME);
     usleep(SLEEP_TIME);
+    MockAccesstokenKit::ChangeMockStateToInit();
 }
 
 sptr<SceneSession> SceneSessionManagerTest11::GetSceneSession(const std::string& instanceKey)
@@ -360,6 +363,7 @@ HWTEST_F(SceneSessionManagerTest11, LockSessionByAbilityInfo, TestSize.Level1)
     abilityInfo.abilityName = "LockSessionByAbilityInfoAbility";
     abilityInfo.appIndex = 0;
 
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
     auto result = ssm_->LockSessionByAbilityInfo(abilityInfo, true);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, result);
 }
@@ -678,6 +682,22 @@ HWTEST_F(SceneSessionManagerTest11, CreateAndConnectSpecificSession01, TestSize.
     result = ssm_->CreateAndConnectSpecificSession(
         sessionStage, eventChannel, node, property, persistentId, session, systemConfig, iRemoteObjectMocker);
     ASSERT_EQ(result, WSError::WS_ERROR_INVALID_WINDOW);
+
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
+    parentSession->GetSessionProperty()->SetSubWindowLevel(1);
+    property->SetWindowType(WindowType::WINDOW_TYPE_FB);
+    result = ssm_->CreateAndConnectSpecificSession(
+        sessionStage, eventChannel, node, property, persistentId, session, systemConfig, iRemoteObjectMocker);
+    ASSERT_EQ(WSError::WS_ERROR_NOT_SYSTEM_APP, result);
+    MockAccesstokenKit::MockAccessTokenKitRet(0);
+    parentSession->SetSessionState(SessionState::STATE_DISCONNECT);
+    result = ssm_->CreateAndConnectSpecificSession(
+        sessionStage, eventChannel, node, property, persistentId, session, systemConfig, iRemoteObjectMocker);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_PARENT, result);
+    parentSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    result = ssm_->CreateAndConnectSpecificSession(
+        sessionStage, eventChannel, node, property, persistentId, session, systemConfig, iRemoteObjectMocker);
+    ASSERT_EQ(WSError::WS_OK, result);
 }
 
 /**
@@ -815,7 +835,8 @@ HWTEST_F(SceneSessionManagerTest11, GetTopNearestBlockingFocusSession_branch02, 
     sptr<SceneSession::SpecificSessionCallback> specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCb);
     sceneSession->GetSessionProperty()->SetDisplayId(100);
-    ssm_->windowFocusController_->virtualScreenDisplayIdSet_.insert(20);
+    ssm_->windowFocusController_->displayId2GroupIdMap_[100] = 20;
+    ssm_->windowFocusController_->displayId2GroupIdMap_[20] = 20;
     ssm_->sceneSessionMap_.insert({ 1, sceneSession });
     ASSERT_EQ(nullptr, ssm_->GetTopNearestBlockingFocusSession(displayId, zOrder, includingAppSession));
     ssm_->sceneSessionMap_.clear();
@@ -1191,6 +1212,84 @@ HWTEST_F(SceneSessionManagerTest11, QueryAbilityInfoFromBMSTest001, TestSize.Lev
 }
 
 /**
+ * @tc.name: QueryAbilityInfoFromBMSTest
+ * @tc.desc: SceneSesionManager QueryAbilityInfoFromBMS AtomicFreeInstall query failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, QueryAbilityInfoFromBMSTest02, TestSize.Level1)
+{
+    const int32_t uId = 32;
+    SessionInfo sessionInfo_;
+    sessionInfo_.bundleName_ = "BundleName";
+    sessionInfo_.abilityName_ = "AbilityName";
+    sessionInfo_.moduleName_ = "ModuleName";
+    sptr<IBundleMgrMocker> bundleMgrMocker = sptr<IBundleMgrMocker>::MakeSptr();
+    EXPECT_CALL(*bundleMgrMocker, GetBundleInfoV9(_, _, _, _)).WillOnce(Return(1));
+    ssm_->bundleMgr_ = bundleMgrMocker;
+
+    auto res = ssm_->QueryAbilityInfoFromBMS(
+        uId, sessionInfo_.bundleName_, sessionInfo_.abilityName_, sessionInfo_.moduleName_, true);
+    EXPECT_EQ(res, nullptr);
+}
+
+/**
+ * @tc.name: QueryAbilityInfoFromBMSTest
+ * @tc.desc: SceneSesionManager QueryAbilityInfoFromBMS AtomicFreeInstall query failed hapModuleInfosis nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, QueryAbilityInfoFromBMSTest03, TestSize.Level1)
+{
+    const int32_t uId = 32;
+    SessionInfo sessionInfo_;
+    sessionInfo_.bundleName_ = "BundleName";
+    sessionInfo_.abilityName_ = "AbilityName";
+    sessionInfo_.moduleName_ = "ModuleName";
+    sptr<IBundleMgrMocker> bundleMgrMocker = sptr<IBundleMgrMocker>::MakeSptr();
+    EXPECT_CALL(*bundleMgrMocker, GetBundleInfoV9(_, _, _, _))
+        .WillOnce([](const std::string& bundleName, int32_t flags, AppExecFwk::BundleInfo& bundleInfo, int32_t userId) {
+            bundleInfo.hapModuleInfos = {};
+            return 0;
+        });
+    ssm_->bundleMgr_ = bundleMgrMocker;
+
+    auto res = ssm_->QueryAbilityInfoFromBMS(
+        uId, sessionInfo_.bundleName_, sessionInfo_.abilityName_, sessionInfo_.moduleName_, true);
+    EXPECT_EQ(res, nullptr);
+}
+
+/**
+ * @tc.name: QueryAbilityInfoFromBMSTest
+ * @tc.desc: SceneSesionManager QueryAbilityInfoFromBMS AtomicFreeInstall query success.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, QueryAbilityInfoFromBMSTest04, TestSize.Level1)
+{
+    const int32_t uId = 32;
+    SessionInfo sessionInfo_;
+    sessionInfo_.bundleName_ = "BundleName";
+    sessionInfo_.abilityName_ = "AbilityName";
+    sessionInfo_.moduleName_ = "ModuleName";
+    sptr<IBundleMgrMocker> bundleMgrMocker = sptr<IBundleMgrMocker>::MakeSptr();
+    EXPECT_CALL(*bundleMgrMocker, GetBundleInfoV9(_, _, _, _))
+        .WillOnce([](const std::string& bundleName, int32_t flags, AppExecFwk::BundleInfo& bundleInfo, int32_t userId) {
+            AppExecFwk::AbilityInfo abilityInfo;
+            abilityInfo.moduleName = "moduleName";
+            abilityInfo.name = "abilityName";
+            AppExecFwk::HapModuleInfo hapModuleInfo;
+            hapModuleInfo.abilityInfos = { abilityInfo };
+            bundleInfo.hapModuleInfos = { hapModuleInfo };
+            return 0;
+        });
+    ssm_->bundleMgr_ = bundleMgrMocker;
+
+    auto res = ssm_->QueryAbilityInfoFromBMS(
+        uId, sessionInfo_.bundleName_, sessionInfo_.abilityName_, sessionInfo_.moduleName_, true);
+    ASSERT_EQ(res, nullptr);
+    EXPECT_EQ(res->name, "abilityName");
+    EXPECT_EQ(res->moduleName, "moduleName");
+}
+
+/**
  * @tc.name: RequestFocusSpecificCheckTest
  * @tc.desc: Test for RequestFocusSpecificCheck
  * @tc.type: FUNC
@@ -1461,6 +1560,62 @@ HWTEST_F(SceneSessionManagerTest11, GetVisibilityWindowInfo, Function | SmallTes
     EXPECT_EQ(infos.size(), 1);
     ssm_->lastVisibleData_ = oldVisibleData;
     ssm_->sceneSessionMap_ = oldSessionMap;
+}
+
+/**
+ * @tc.name: SendPointerEventForHover
+ * @tc.desc: SendPointerEventForHover
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, SendPointerEventForHover_Vaild, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
+    MockAccesstokenKit::MockIsSACalling(false);
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
+    WSError ret = ssm_->SendPointerEventForHover(pointerEvent);
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_PERMISSION);
+
+    MockAccesstokenKit::MockIsSACalling(true);
+    ret = ssm_->SendPointerEventForHover(pointerEvent);
+    EXPECT_EQ(ret, WSError::WS_ERROR_NULLPTR);
+
+    pointerEvent = MMI::PointerEvent::Create();
+    ret = ssm_->SendPointerEventForHover(pointerEvent);
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_PARAM);
+
+    pointerEvent->pointerAction_ = MMI::PointerEvent::POINTER_ACTION_HOVER_ENTER;
+    pointerEvent->sourceType_ = MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN;
+    pointerEvent->agentWindowId_ = 1;
+    ret = ssm_->SendPointerEventForHover(pointerEvent);
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_SESSION);
+}
+
+/**
+ * @tc.name: SendPointerEventForHover_Success
+ * @tc.desc: SendPointerEventForHover
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, SendPointerEventForHover_Success, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
+    MockAccesstokenKit::MockIsSACalling(true);
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    pointerEvent->pointerAction_ = MMI::PointerEvent::POINTER_ACTION_HOVER_ENTER;
+    pointerEvent->sourceType_ = MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN;
+    pointerEvent->agentWindowId_ = 1;
+
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest11";
+    sessionInfo.abilityName_ = "SendPointerEventForHover";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    sceneSession->persistentId_ = 1;
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
+    WSError ret = ssm_->SendPointerEventForHover(pointerEvent);
+    EXPECT_EQ(ret, WSError::WS_OK);
 }
 } // namespace
 } // namespace Rosen

@@ -21,6 +21,7 @@
 #include <js_runtime_utils.h>
 #include <napi_common_want.h>
 
+#include "js_window_animation_utils.h"
 #include "property/rs_properties_def.h"
 #include "root_scene.h"
 #include "session/host/include/pc_fold_screen_manager.h"
@@ -161,7 +162,7 @@ napi_value ConvertWindowAnimationOptionToJsValue(napi_env env,
             napi_create_array(env, &params);
             for (uint32_t i = 0; i < ANIMATION_PARAM_SIZE; ++i) {
                 napi_value element;
-                napi_create_double(env, static_cast<double>(animationConfig.param[i]), &element);
+                napi_create_double(env, static_cast<double>(animationConfig.params[i]), &element);
                 napi_set_element(env, params, i, element);
             }
             napi_set_named_property(env, configJsValue, "param", params);
@@ -751,41 +752,59 @@ bool ConvertHookInfoFromJs(napi_env env, napi_value jsObject, HookInfo& hookInfo
     napi_get_named_property(env, jsObject, "rotation", &jsRotation);
     napi_value jsEnableHookRotation = nullptr;
     napi_get_named_property(env, jsObject, "enableHookRotation", &jsEnableHookRotation);
+    napi_value jsDisplayOrientation = nullptr;
+    napi_get_named_property(env, jsObject, "displayOrientation", &jsDisplayOrientation);
+    napi_value jsEnableHookDisplayOrientation = nullptr;
+    napi_get_named_property(env, jsObject, "enableHookDisplayOrientation", &jsEnableHookDisplayOrientation);
 
     uint32_t width = 0;
     if (!ConvertFromJsValue(env, jsWidth, width)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to width");
+        TLOGE(WmsLogTag::WMS_COMPAT, "Failed to convert parameter to width");
         return false;
     }
     hookInfo.width_ = width;
 
     uint32_t height = 0;
     if (!ConvertFromJsValue(env, jsHeight, height)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to height");
+        TLOGE(WmsLogTag::WMS_COMPAT, "Failed to convert parameter to height");
         return false;
     }
     hookInfo.height_ = height;
 
     double_t density = 1.0;
     if (!ConvertFromJsValue(env, jsDensity, density)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to density");
+        TLOGE(WmsLogTag::WMS_COMPAT, "Failed to convert parameter to density");
         return false;
     }
     hookInfo.density_ = static_cast<float_t>(density);
 
     uint32_t rotation = 0;
     if (!ConvertFromJsValue(env, jsRotation, rotation)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to rotation");
+        TLOGE(WmsLogTag::WMS_COMPAT, "Failed to convert parameter to rotation");
         return false;
     }
     hookInfo.rotation_ = rotation;
 
     bool enableHookRotation = false;
     if (!ConvertFromJsValue(env, jsEnableHookRotation, enableHookRotation)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to enableHookRotation");
+        TLOGE(WmsLogTag::WMS_COMPAT, "Failed to convert parameter to enableHookRotation");
         return false;
     }
     hookInfo.enableHookRotation_ = enableHookRotation;
+
+    uint32_t displayOrientation = 0;
+    if (!ConvertFromJsValue(env, jsDisplayOrientation, displayOrientation)) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "Failed to convert parameter to displayOrientation");
+        return false;
+    }
+    hookInfo.displayOrientation_ = displayOrientation;
+
+    bool enableHookDisplayOrientation = false;
+    if (!ConvertFromJsValue(env, jsEnableHookDisplayOrientation, enableHookDisplayOrientation)) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "Failed to convert parameter to enableHookDisplayOrientation");
+        return false;
+    }
+    hookInfo.enableHookDisplayOrientation_ = enableHookDisplayOrientation;
     return true;
 }
 
@@ -1205,6 +1224,7 @@ bool ConvertCompatibleModePropertyFromJs(napi_env env, napi_value value, Compati
         {"disableDragResize", &CompatibleModeProperty::SetDisableDragResize},
         {"disableResizeWithDpi", &CompatibleModeProperty::SetDisableResizeWithDpi},
         {"disableFullScreen", &CompatibleModeProperty::SetDisableFullScreen},
+        {"disableSplit", &CompatibleModeProperty::SetDisableSplit},
         {"disableWindowLimit", &CompatibleModeProperty::SetDisableWindowLimit},
         {"isSupportRotateFullScreen", &CompatibleModeProperty::SetIsSupportRotateFullScreen},
         {"isAdaptToSubWindow", &CompatibleModeProperty::SetIsAdaptToSubWindow},
@@ -1337,6 +1357,20 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
     if (sessionInfo.want != nullptr) {
         napi_set_named_property(env, objValue, "want", AppExecFwk::WrapWant(env, sessionInfo.GetWantSafely()));
     }
+    if (sessionInfo.startAnimationOptions != nullptr) {
+        napi_status status = napi_set_named_property(env, objValue, "startAnimationOptions",
+            ConvertStartAnimationOptionsToJsValue(env, sessionInfo.startAnimationOptions));
+        if (status != napi_ok) {
+            TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to set startAnimationOptions");
+        }
+    }
+    if (sessionInfo.startAnimationSystemOptions != nullptr) {
+        napi_status status = napi_set_named_property(env, objValue, "startAnimationSystemOptions",
+            ConvertStartAnimationSystemOptionsToJsValue(env, sessionInfo.startAnimationSystemOptions));
+        if (status != napi_ok) {
+            TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to set startAnimationSystemOptions");
+        }
+    }
     return objValue;
 }
 
@@ -1386,6 +1420,8 @@ napi_value CreateJsSessionRecoverInfo(
     napi_set_named_property(env, objValue, "isFullScreenWaterfallMode",
         CreateJsValue(env, property->GetIsFullScreenWaterfallMode()));
     napi_set_named_property(env, objValue, "currentRotation", CreateJsValue(env, sessionInfo.currentRotation_));
+    napi_set_named_property(env, objValue, "supportWindowModes",
+        CreateSupportWindowModes(env, sessionInfo.supportedWindowModes));
 
     napi_value jsTransitionAnimationMapValue = nullptr;
     napi_create_object(env, &jsTransitionAnimationMapValue);
@@ -2093,7 +2129,7 @@ static void SetTypeProperty(napi_value object, napi_env env, const std::string& 
 
 napi_value KeyboardGravityInit(napi_env env)
 {
-    WLOGFI("KeyboardGravityInit");
+    TLOGD(WmsLogTag::DEFAULT, "KeyboardGravityInit");
 
     if (env == nullptr) {
         WLOGFE("Env is nullptr");
@@ -2263,6 +2299,7 @@ napi_value SessionTypeInit(napi_env env)
     SetTypeProperty(objValue, env, "TYPE_MAGNIFICATION", JsSessionType::TYPE_MAGNIFICATION);
     SetTypeProperty(objValue, env, "TYPE_MAGNIFICATION_MENU", JsSessionType::TYPE_MAGNIFICATION_MENU);
     SetTypeProperty(objValue, env, "TYPE_SELECTION", JsSessionType::TYPE_SELECTION);
+    SetTypeProperty(objValue, env, "TYPE_FLOATING_BALL", JsSessionType::TYPE_FLOATING_BALL);
     return objValue;
 }
 

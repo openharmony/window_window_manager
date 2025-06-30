@@ -104,6 +104,9 @@ enum class SessionInterfaceCode {
     // Window Transition Animation For PC
     TRANS_ID_SET_WINDOW_TRANSITION_ANIMATION,
 
+    // Window Layout Global Coordinate System
+    TRANS_ID_UPDATE_GLOBAL_DISPLAY_RECT,
+
     // Extension
     TRANS_ID_TRANSFER_ABILITY_RESULT = 500,
     TRANS_ID_TRANSFER_EXTENSION_DATA = 501,
@@ -143,6 +146,12 @@ enum class SessionInterfaceCode {
 
     // window animation
     TRANS_ID_SET_FRAMERECT_FOR_PARTIAL_ZOOMIN,
+
+    // Floating Ball
+    TRANS_ID_UPDATE_FLOATING_BALL,
+    TRANS_ID_NOTIFY_FLOATING_BALL_PREPARE_CLOSE,
+    TRANS_ID_START_FLOATING_BALL_MAIN_WINDOW,
+    TRANS_ID_GET_FLOATING_BALL_WINDOW_ID,
 };
 } // namespace Rosen
 } // namespace OHOS

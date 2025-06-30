@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include "mock_window_adapter_lite.h"
 #include "singleton_mocker.h"
+#include "window_manager_hilog.h"
 #include "window_manager_lite.cpp"
 #include "wm_common.h"
 #include "session/host/include/scene_session.h"
@@ -25,6 +26,13 @@
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Rosen {
+namespace {
+    std::string g_errLog;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
+        const char *msg)
+    {
+        g_errLog = msg;
+    }
 using Mocker = SingletonMocker<WindowAdapterLite, MockWindowAdapterLite>;
 
 class TestCameraWindowChangedListener : public ICameraWindowChangedListener {
@@ -165,11 +173,13 @@ HWTEST_F(WindowManagerLiteTest, GetFocusWindowInfo, TestSize.Level1)
  */
 HWTEST_F(WindowManagerLiteTest, UpdateCameraWindowStatus01, TestSize.Level1)
 {
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
     uint32_t accessTokenId = 0;
     bool isShowing = true;
-    auto ret = 0;
     WindowManagerLite::GetInstance().UpdateCameraWindowStatus(accessTokenId, isShowing);
-    ASSERT_EQ(0, ret);
+    EXPECT_FALSE(g_errLog.find("Camera window, accessTokenId=%{public}u, isShowing=%{public}u") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -187,9 +197,7 @@ HWTEST_F(WindowManagerLiteTest, UpdateCameraWindowStatus02, TestSize.Level1)
 
     uint32_t accessTokenId = 0;
     bool isShowing = true;
-    auto ret = 0;
     WindowManagerLite::GetInstance().UpdateCameraWindowStatus(accessTokenId, isShowing);
-    ASSERT_EQ(0, ret);
 }
 
 /**
@@ -1452,6 +1460,29 @@ HWTEST_F(WindowManagerLiteTest, UnregisterVisibilityStateChangedListener01, Func
 
     windowManager.pImpl_->windowVisibilityStateListenerAgent_ = oldWindowManagerAgent;
     windowManager.pImpl_->windowVisibilityStateListeners_ = oldListeners;
+}
+
+/**
+ * @tc.name: SendPointerEventForHover
+ * @tc.desc: SendPointerEventForHover
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, SendPointerEventForHover, Function | SmallTest | Level2)
+{
+    auto& windowManager = WindowManagerLite::GetInstance();
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
+    WMError ret = windowManager.SendPointerEventForHover(pointerEvent);
+    EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+
+    pointerEvent = MMI::PointerEvent::Create();
+    ret = windowManager.SendPointerEventForHover(pointerEvent);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
+
+    pointerEvent->pointerAction_ = MMI::PointerEvent::POINTER_ACTION_HOVER_ENTER;
+    pointerEvent->sourceType_ = MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN;
+    ret = windowManager.SendPointerEventForHover(pointerEvent);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PERMISSION);
+}
 }
 } // namespace
 } // namespace OHOS::Rosen

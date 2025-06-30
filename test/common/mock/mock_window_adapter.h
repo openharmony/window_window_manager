@@ -68,6 +68,8 @@ public:
         const sptr<CompatibleModeProperty>& property));
     MOCK_METHOD3(AnimateTo, WMError(int32_t windowId, const WindowAnimationProperty& animationProperty,
         const WindowAnimationOption& animationOption));
+    MOCK_METHOD1(IsFreeMultiWindowMode, WMError(bool& isFreeMultiWindow));
+    MOCK_METHOD1(IsPcOrPadFreeMultiWindowMode, WMError(bool& IsPcOrPadFreeMultiWindowMode));
 };
 }
 } // namespace OHOS

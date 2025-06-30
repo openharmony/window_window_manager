@@ -111,6 +111,28 @@ HWTEST_F(MainSessionTest, MainSession01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: MainSession02
+ * @tc.desc: check func MainSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, MainSession02, TestSize.Level1)
+{
+    MainSession* pMainSession = nullptr;
+    sptr<MainSession::SpecificSessionCallback> pSpecificCallback = nullptr;
+
+    SessionInfo info;
+    info.persistentId_ = 1999;
+    info.abilityName_ = "test";
+    info.moduleName_ = "test";
+    info.bundleName_ = "test";
+    pMainSession = sptr<MainSession>::MakeSptr(info, pSpecificCallback);
+    EXPECT_NE(nullptr, pMainSession);
+
+    auto hasSnapshot = pMainSession->scenePersistence_->HasSnapshot();
+    ASSERT_EQ(hasSnapshot, false);
+}
+
+/**
  * @tc.name: TransferKeyEvent01
  * @tc.desc: check func TransferKeyEvent
  * @tc.type: FUNC

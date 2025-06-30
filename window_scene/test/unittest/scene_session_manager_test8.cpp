@@ -18,6 +18,7 @@
 #include "iremote_object_mocker.h"
 #include "interfaces/include/ws_common.h"
 #include "mock/mock_session_stage.h"
+#include "mock/mock_accesstoken_kit.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "session_info.h"
 #include "session/host/include/scene_session.h"
@@ -39,6 +40,7 @@ public:
 private:
     sptr<SceneSessionManager> ssm_;
     static constexpr uint32_t WAIT_SYNC_IN_NS = 500000;
+    sptr<SceneSession> CreateSceneSession(const std::string& bundleName, WindowType windowType);
 };
 
 void SceneSessionManagerTest8::SetUpTestCase() {}
@@ -57,6 +59,20 @@ void SceneSessionManagerTest8::TearDown()
     ssm_->sceneSessionMap_.clear();
     usleep(WAIT_SYNC_IN_NS);
     ssm_ = nullptr;
+}
+
+sptr<SceneSession> SceneSessionManagerTest8::CreateSceneSession(const std::string& bundleName, WindowType windowType)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = bundleName;
+ 
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowType(windowType);
+    property->SetWindowName(bundleName);
+ 
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession->property_ = property;
+    return sceneSession;
 }
 
 namespace {
@@ -659,6 +675,7 @@ HWTEST_F(SceneSessionManagerTest8, ReportScreenFoldStatus, TestSize.Level1)
 
 HWTEST_F(SceneSessionManagerTest8, GetWindowModeType, TestSize.Level1)
 {
+    MockAccesstokenKit::MockIsSACalling(false);
     SessionInfo info;
     info.bundleName_ = "GetWindowModeType";
     info.abilityName_ = "GetWindowModeType";
@@ -1022,6 +1039,7 @@ HWTEST_F(SceneSessionManagerTest8, GetIsLayoutFullScreen, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest8, RegisterWindowPropertyChangeAgent01, TestSize.Level1)
 {
+    MockAccesstokenKit::MockIsSACalling(false);
     uint32_t interestInfo = 0;
     interestInfo |= static_cast<uint32_t>(WindowInfoKey::WINDOW_ID);
     sptr<IWindowManagerAgent> windowManagerAgent = nullptr;
@@ -1040,6 +1058,7 @@ HWTEST_F(SceneSessionManagerTest8, RegisterWindowPropertyChangeAgent01, TestSize
  */
 HWTEST_F(SceneSessionManagerTest8, UnregisterWindowPropertyChangeAgent01, TestSize.Level1)
 {
+    MockAccesstokenKit::MockIsSACalling(false);
     uint32_t interestInfo = 0;
     interestInfo |= static_cast<uint32_t>(WindowInfoKey::WINDOW_ID);
     sptr<IWindowManagerAgent> windowManagerAgent = nullptr;
@@ -1076,6 +1095,66 @@ HWTEST_F(SceneSessionManagerTest8, PackWindowPropertyChangeInfo01, TestSize.Leve
     std::unordered_map<WindowInfoKey, std::any> windowPropertyChangeInfo;
     ssm_->PackWindowPropertyChangeInfo(sceneSession1, windowPropertyChangeInfo);
     EXPECT_EQ(windowPropertyChangeInfo.size(), 7);
+}
+
+/**
+ * @tc.name: TestCheckSystemWindowPermission_Fb
+ * @tc.desc: Test CheckSystemWindowPermission with windowType WINDOW_TYPE_FB then true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, TestCheckSystemWindowPermission_Fb, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_FB);
+    ASSERT_EQ(true, ssm_->CheckSystemWindowPermission(property));
+}
+
+/**
+ * @tc.name: InitFbWindow
+ * @tc.desc: test function : InitFbWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, InitFbWindow, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo sessionInfo;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+
+    ssm_->InitFbWindow(sceneSession, nullptr);
+
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    property->SetWindowType(WindowType::WINDOW_TYPE_PIP);
+    ssm_->InitFbWindow(sceneSession, property);
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_FB);
+    ssm_->InitFbWindow(sceneSession, property);
+    EXPECT_EQ(0, sceneSession->GetFbTemplateInfo().template_);
+}
+
+/**
+@tc.name: GetFbPanelWindowId
+@tc.desc: test function : GetFbPanelWindowId
+@tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest8, GetFbPanelWindowId, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    uint32_t windowId = 0;
+    EXPECT_EQ(WMError::WM_ERROR_FB_INTERNAL_ERROR, ssm_->GetFbPanelWindowId(windowId));
+    ssm_->sceneSessionMap_.insert({0, nullptr});
+    ssm_->sceneSessionMap_.insert({1, CreateSceneSession("", WindowType::WINDOW_TYPE_PIP)});
+    ssm_->sceneSessionMap_.insert({2, CreateSceneSession("SCBGlobalSearch7", WindowType::WINDOW_TYPE_FB)});
+    sptr<SceneSession> sceneSession = CreateSceneSession("Fb_panel8", WindowType::WINDOW_TYPE_FB);
+    ssm_->sceneSessionMap_.insert({3, sceneSession});
+
+    MockAccesstokenKit::MockAccessTokenKitRet(0);
+    EXPECT_EQ(WMError::WM_OK, ssm_->GetFbPanelWindowId(windowId));
+    EXPECT_EQ(sceneSession->GetWindowId(), windowId);
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
 }
 } // namespace
 } // namespace Rosen

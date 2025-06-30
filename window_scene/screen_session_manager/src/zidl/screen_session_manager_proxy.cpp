@@ -1799,7 +1799,7 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetDisplaySnapshot(D
     return pixelMap;
 }
 
-std::vector<std::shared_ptr<Media::PixelMap>> ScreenSessionManagerProxy::GetDisplayHdrSnapshot(DisplayId displayId,
+std::vector<std::shared_ptr<Media::PixelMap>> ScreenSessionManagerProxy::GetDisplayHDRSnapshot(DisplayId displayId,
     DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen)
 {
     TLOGD(WmsLogTag::DMS, "enter");
@@ -3864,7 +3864,8 @@ void OHOS::Rosen::ScreenSessionManagerProxy::UpdateDisplayHookInfo(int32_t uid, 
 
     if (!data.WriteUint32(hookInfo.width_) || !data.WriteUint32(hookInfo.height_) ||
         !data.WriteFloat(hookInfo.density_) || !data.WriteUint32(hookInfo.rotation_) ||
-        !data.WriteBool(hookInfo.enableHookRotation_)) {
+        !data.WriteBool(hookInfo.enableHookRotation_) || !data.WriteUint32(hookInfo.displayOrientation_) ||
+        !data.WriteBool(hookInfo.enableHookDisplayOrientation_)) {
         TLOGE(WmsLogTag::DMS, "Write hookInfo failed");
         return;
     }
@@ -4161,7 +4162,8 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetDisplaySnapshotWi
     }
     if (!data.WriteUint64(captureOption.displayId_) ||
         !data.WriteBool(captureOption.isNeedNotify_) || !data.WriteBool(captureOption.isNeedPointer_) ||
-        !data.WriteBool(captureOption.isCaptureFullOfScreen_) || !data.WriteUInt64Vector(captureOption.blackList_)) {
+        !data.WriteBool(captureOption.isCaptureFullOfScreen_) ||
+        !data.WriteUInt64Vector(captureOption.surfaceNodesList_)) {
         TLOGE(WmsLogTag::DMS, "Write displayId or isNeedNotify or isNeedPointer failed");
         return nullptr;
     }
@@ -4183,7 +4185,7 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetDisplaySnapshotWi
     return pixelMap;
 }
 
-std::vector<std::shared_ptr<Media::PixelMap>> ScreenSessionManagerProxy::GetDisplayHdrSnapshotWithOption(
+std::vector<std::shared_ptr<Media::PixelMap>> ScreenSessionManagerProxy::GetDisplayHDRSnapshotWithOption(
     const CaptureOption& captureOption, DmErrorCode* errorCode)
 {
     TLOGD(WmsLogTag::DMS, "enter");
@@ -4201,7 +4203,8 @@ std::vector<std::shared_ptr<Media::PixelMap>> ScreenSessionManagerProxy::GetDisp
         return { nullptr, nullptr };
     }
     if (!data.WriteUint64(captureOption.displayId_) || !data.WriteBool(captureOption.isNeedNotify_) ||
-        !data.WriteBool(captureOption.isCaptureFullOfScreen_) || !data.WriteUInt64Vector(captureOption.blackList_)) {
+        !data.WriteBool(captureOption.isCaptureFullOfScreen_) ||
+        !data.WriteUInt64Vector(captureOption.surfaceNodesList_)) {
         TLOGE(WmsLogTag::DMS, "Write displayId or isNeedNotify or isNeedPointer failed");
         return { nullptr, nullptr };
     }
@@ -4460,5 +4463,37 @@ DMError ScreenSessionManagerProxy::SetPrimaryDisplaySystemDpi(float dpi)
         return DMError::DM_ERROR_IPC_FAILED;
     }
     return DMError::DM_OK;
+}
+
+DMError ScreenSessionManagerProxy::SetVirtualScreenAutoRotation(ScreenId screenId, bool enable)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DMS, "remote is null");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageParcel data;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (!data.WriteUint64(static_cast<uint64_t>(screenId))) {
+        TLOGE(WmsLogTag::DMS, "Write screenId failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(enable)) {
+        TLOGE(WmsLogTag::DMS, "Write enable failed");
+        return DMError::DM_ERROR_WRITE_DATA_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_AUTO_ROTATION),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    return static_cast<DMError>(reply.ReadInt32());
 }
 } // namespace OHOS::Rosen

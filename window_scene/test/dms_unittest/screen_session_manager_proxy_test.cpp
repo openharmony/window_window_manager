@@ -55,13 +55,6 @@ void ScreenSessionManagerProxyTest::SetUp()
 }
 
 namespace {
-static constexpr DisplayId DEFAULT_DISPLAY = 1ULL;
-static const int32_t PIXELMAP_SIZE = 2;
-static const int32_t SDR_PIXELMAP = 0;
-static const int32_t HDR_PIXELMAP = 1;
-static const int ERR_NO_PERMISSION = 201;
-static const int ERR_NO = 0;
-
 /**
  * @tc.name: SetPrivacyStateByDisplayId
  * @tc.desc: SetPrivacyStateByDisplayId
@@ -1253,7 +1246,16 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualScreenMaxRefreshRate, TestSize
  */
 HWTEST_F(ScreenSessionManagerProxyTest, IsScreenRotationLocked, TestSize.Level1)
 {
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     bool isLocked = true;
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    EXPECT_EQ(DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED,
+            screenSessionManagerProxy->IsScreenRotationLocked(isLocked));
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         EXPECT_NE(DMError::DM_ERROR_IPC_FAILED,
                 screenSessionManagerProxy->IsScreenRotationLocked(isLocked));
@@ -1270,11 +1272,26 @@ HWTEST_F(ScreenSessionManagerProxyTest, IsScreenRotationLocked, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, GetCutoutInfo, TestSize.Level1)
 {
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     sptr<CutoutInfo> expectation = nullptr;
     DisplayId displayId = 0;
+
     MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     auto res = screenSessionManagerProxy->GetCutoutInfo(displayId);
-    ASSERT_EQ(res, expectation);
+    EXPECT_TRUE(logMsg.find("failed") != std::string::npos);
+    EXPECT_EQ(res, expectation);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint64ErrorFlag(true);
+    res = screenSessionManagerProxy->GetCutoutInfo(displayId);
+    EXPECT_TRUE(logMsg.find("write displayId failed") != std::string::npos);
+    EXPECT_EQ(res, expectation);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    res = screenSessionManagerProxy->GetCutoutInfo(displayId);
+    EXPECT_EQ(res, expectation);
 }
 
 /**
@@ -1284,12 +1301,25 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetCutoutInfo, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, HasImmersiveWindow, TestSize.Level1)
 {
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     bool immersive = true;
+
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         EXPECT_NE(DMError::DM_ERROR_IPC_FAILED, screenSessionManagerProxy->HasImmersiveWindow(0u, immersive));
     } else {
         EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED, screenSessionManagerProxy->HasImmersiveWindow(0u, immersive));
     }
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    EXPECT_EQ(DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED,
+        screenSessionManagerProxy->HasImmersiveWindow(0u, immersive));
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint64ErrorFlag(true);
+    EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED, screenSessionManagerProxy->HasImmersiveWindow(0u, immersive));
 }
 
 /**
@@ -1299,9 +1329,24 @@ HWTEST_F(ScreenSessionManagerProxyTest, HasImmersiveWindow, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, ConvertScreenIdToRsScreenId, TestSize.Level1)
 {
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     ScreenId screenId = 1001;
     ScreenId rsScreenId = 1002;
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     auto ret = screenSessionManagerProxy->ConvertScreenIdToRsScreenId(screenId, rsScreenId);
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+    EXPECT_EQ(ret, false);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint64ErrorFlag(true);
+    ret = screenSessionManagerProxy->ConvertScreenIdToRsScreenId(screenId, rsScreenId);
+    EXPECT_EQ(ret, false);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    ret = screenSessionManagerProxy->ConvertScreenIdToRsScreenId(screenId, rsScreenId);
     EXPECT_EQ(ret, false);
 }
 
@@ -1312,8 +1357,23 @@ HWTEST_F(ScreenSessionManagerProxyTest, ConvertScreenIdToRsScreenId, TestSize.Le
  */
 HWTEST_F(ScreenSessionManagerProxyTest, HasPrivateWindow, TestSize.Level1)
 {
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     bool hasPrivateWindow = true;
     DisplayId displayId = 0;
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    EXPECT_EQ(DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED,
+            screenSessionManagerProxy->HasPrivateWindow(displayId, hasPrivateWindow));
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint64ErrorFlag(true);
+    EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED,
+            screenSessionManagerProxy->HasPrivateWindow(displayId, hasPrivateWindow));
+
+    MockMessageParcel::ClearAllErrorFlag();
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         EXPECT_NE(DMError::DM_ERROR_IPC_FAILED,
                 screenSessionManagerProxy->HasPrivateWindow(displayId, hasPrivateWindow));
@@ -1330,7 +1390,16 @@ HWTEST_F(ScreenSessionManagerProxyTest, HasPrivateWindow, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, DumpAllScreensInfo, TestSize.Level1)
 {
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     std::string dumpInfo;
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    screenSessionManagerProxy->DumpAllScreensInfo(dumpInfo);
+    EXPECT_TRUE(logMsg.find("failed") != std::string::npos);
+    EXPECT_EQ(dumpInfo, "");
+
     MockMessageParcel::ClearAllErrorFlag();
     screenSessionManagerProxy->DumpAllScreensInfo(dumpInfo);
     EXPECT_EQ(dumpInfo, "");
@@ -1343,8 +1412,23 @@ HWTEST_F(ScreenSessionManagerProxyTest, DumpAllScreensInfo, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, DumpSpecialScreenInfo, TestSize.Level1)
 {
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     ScreenId id = 1001;
     std::string dumpInfo;
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    screenSessionManagerProxy->DumpSpecialScreenInfo(id, dumpInfo);
+    EXPECT_TRUE(logMsg.find("failed") != std::string::npos);
+    EXPECT_EQ(dumpInfo, "");
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint64ErrorFlag(true);
+    screenSessionManagerProxy->DumpSpecialScreenInfo(id, dumpInfo);
+    EXPECT_TRUE(logMsg.find("write ScreenId failed") != std::string::npos);
+    EXPECT_EQ(dumpInfo, "");
+
     MockMessageParcel::ClearAllErrorFlag();
     screenSessionManagerProxy->DumpSpecialScreenInfo(id, dumpInfo);
     EXPECT_EQ(dumpInfo, "");
@@ -1357,7 +1441,21 @@ HWTEST_F(ScreenSessionManagerProxyTest, DumpSpecialScreenInfo, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, SetFoldDisplayMode, TestSize.Level1)
 {
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     FoldDisplayMode displayMode = FoldDisplayMode::UNKNOWN;
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    screenSessionManagerProxy->SetFoldDisplayMode(displayMode);
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken Failed") != std::string::npos);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    screenSessionManagerProxy->SetFoldDisplayMode(displayMode);
+    EXPECT_TRUE(logMsg.find("Write displayMode failed") != std::string::npos);
+
+    MockMessageParcel::ClearAllErrorFlag();
     screenSessionManagerProxy->SetFoldDisplayMode(displayMode);
     if (screenSessionManagerProxy->IsFoldable() && !FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         EXPECT_NE(ScreenSessionManager::GetInstance().foldScreenController_, nullptr);
@@ -1373,7 +1471,22 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetFoldDisplayMode, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, SetFoldDisplayModeFromJs, TestSize.Level1)
 {
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     FoldDisplayMode displayMode = FoldDisplayMode::UNKNOWN;
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    EXPECT_EQ(DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED,
+        screenSessionManagerProxy->SetFoldDisplayModeFromJs(displayMode));
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken Failed") != std::string::npos);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED, screenSessionManagerProxy->SetFoldDisplayModeFromJs(displayMode));
+    EXPECT_TRUE(logMsg.find("Write displayMode failed") != std::string::npos);
+
+    MockMessageParcel::ClearAllErrorFlag();
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         EXPECT_NE(DMError::DM_ERROR_IPC_FAILED, screenSessionManagerProxy->SetFoldDisplayModeFromJs(displayMode));
     } else {
@@ -1388,7 +1501,21 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetFoldDisplayModeFromJs, TestSize.Level
  */
 HWTEST_F(ScreenSessionManagerProxyTest, SetFoldStatusLocked, TestSize.Level1)
 {
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     bool locked = true;
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    screenSessionManagerProxy->SetFoldStatusLocked(locked);
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken Failed") != std::string::npos);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    screenSessionManagerProxy->SetFoldStatusLocked(locked);
+    EXPECT_TRUE(logMsg.find("Write lock fold display status failed") != std::string::npos);
+
+    MockMessageParcel::ClearAllErrorFlag();
     screenSessionManagerProxy->SetFoldStatusLocked(locked);
     if (screenSessionManagerProxy->IsFoldable() && !FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         EXPECT_NE(ScreenSessionManager::GetInstance().foldScreenController_, nullptr);
@@ -1404,6 +1531,15 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetFoldStatusLocked, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, GetFoldDisplayMode, TestSize.Level1)
 {
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    EXPECT_EQ(FoldDisplayMode::UNKNOWN, screenSessionManagerProxy->GetFoldDisplayMode());
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken Failed") != std::string::npos);
+
+    MockMessageParcel::ClearAllErrorFlag();
     EXPECT_EQ(FoldDisplayMode::UNKNOWN, screenSessionManagerProxy->GetFoldDisplayMode());
 }
 
@@ -1414,6 +1550,15 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetFoldDisplayMode, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, IsFoldable, TestSize.Level1)
 {
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    screenSessionManagerProxy->IsFoldable();
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+
+    MockMessageParcel::ClearAllErrorFlag();
     screenSessionManagerProxy->IsFoldable();
     auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession(2000);
     EXPECT_EQ(screenSession, nullptr);
@@ -1426,7 +1571,17 @@ HWTEST_F(ScreenSessionManagerProxyTest, IsFoldable, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, IsCaptured, TestSize.Level1)
 {
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     auto ret = screenSessionManagerProxy->IsCaptured();
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+    EXPECT_EQ(ret, false);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    ret = screenSessionManagerProxy->IsCaptured();
     EXPECT_EQ(ret, false);
 }
 
@@ -1437,7 +1592,17 @@ HWTEST_F(ScreenSessionManagerProxyTest, IsCaptured, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, GetFoldStatus, TestSize.Level1)
 {
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     auto foldStatus = screenSessionManagerProxy->GetFoldStatus();
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+    EXPECT_EQ(foldStatus, FoldStatus::UNKNOWN);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    foldStatus = screenSessionManagerProxy->GetFoldStatus();
     EXPECT_EQ(foldStatus, FoldStatus::UNKNOWN);
 }
 
@@ -1448,7 +1613,17 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetFoldStatus, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, GetSuperFoldStatus, TestSize.Level1)
 {
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     auto superFoldStatus = screenSessionManagerProxy->GetSuperFoldStatus();
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+    EXPECT_EQ(superFoldStatus, SuperFoldStatus::UNKNOWN);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    superFoldStatus = screenSessionManagerProxy->GetSuperFoldStatus();
     EXPECT_EQ(superFoldStatus, SuperFoldStatus::UNKNOWN);
 }
 
@@ -1459,6 +1634,14 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetSuperFoldStatus, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, GetSuperRotation, TestSize.Level1)
 {
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    EXPECT_FLOAT_EQ(screenSessionManagerProxy->GetSuperRotation(), -1.f);
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+
     MockMessageParcel::ClearAllErrorFlag();
     EXPECT_FLOAT_EQ(screenSessionManagerProxy->GetSuperRotation(), 0);
 }
@@ -1470,7 +1653,23 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetSuperRotation, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, SetLandscapeLockStatus, Function | SmallTest | Level1)
 {
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     bool isLocked = false;
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    screenSessionManagerProxy->SetLandscapeLockStatus(isLocked);
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+    EXPECT_EQ(isLocked, false);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    screenSessionManagerProxy->SetLandscapeLockStatus(isLocked);
+    EXPECT_TRUE(logMsg.find("Write isLocked failed") != std::string::npos);
+    EXPECT_EQ(isLocked, false);
+
+    MockMessageParcel::ClearAllErrorFlag();
     screenSessionManagerProxy->SetLandscapeLockStatus(isLocked);
     EXPECT_EQ(isLocked, false);
 }
@@ -1482,7 +1681,17 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetLandscapeLockStatus, Function | Small
  */
 HWTEST_F(ScreenSessionManagerProxyTest, GetCurrentFoldCreaseRegion, TestSize.Level1)
 {
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     auto foldCreaseRegion = screenSessionManagerProxy->GetCurrentFoldCreaseRegion();
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+    EXPECT_EQ(foldCreaseRegion, nullptr);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    foldCreaseRegion = screenSessionManagerProxy->GetCurrentFoldCreaseRegion();
     EXPECT_EQ(foldCreaseRegion, nullptr);
 }
 
@@ -1493,9 +1702,23 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetCurrentFoldCreaseRegion, TestSize.Lev
  */
 HWTEST_F(ScreenSessionManagerProxyTest, MakeUniqueScreen, TestSize.Level1)
 {
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     const std::vector<ScreenId> screenIds {1001, 1002, 1003};
     std::vector<DisplayId> displayIds;
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     EXPECT_EQ(DMError::DM_ERROR_NULLPTR, screenSessionManagerProxy->MakeUniqueScreen(screenIds, displayIds));
+    EXPECT_TRUE(logMsg.find("writeInterfaceToken failed") != std::string::npos);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    EXPECT_EQ(DMError::DM_ERROR_INVALID_PARAM, screenSessionManagerProxy->MakeUniqueScreen(screenIds, displayIds));
+    EXPECT_TRUE(logMsg.find("write screenIds size failed") != std::string::npos);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    EXPECT_EQ(DMError::DM_OK, screenSessionManagerProxy->MakeUniqueScreen(screenIds, displayIds));
 }
 
 /**
@@ -1505,8 +1728,19 @@ HWTEST_F(ScreenSessionManagerProxyTest, MakeUniqueScreen, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, SetClient, TestSize.Level1)
 {
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     const sptr<IScreenSessionManagerClient> client = nullptr;
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     screenSessionManagerProxy->SetClient(client);
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+    EXPECT_EQ(client, nullptr);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    screenSessionManagerProxy->SetClient(client);
+    EXPECT_TRUE(logMsg.find("WriteRemoteObject failed") != std::string::npos);
     EXPECT_EQ(client, nullptr);
 }
 
@@ -1517,6 +1751,15 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetClient, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, SwitchUser, TestSize.Level1)
 {
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    screenSessionManagerProxy->SwitchUser();
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+
+    MockMessageParcel::ClearAllErrorFlag();
     screenSessionManagerProxy->SwitchUser();
     auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession(2000);
     EXPECT_EQ(screenSession, nullptr);
@@ -1529,7 +1772,21 @@ HWTEST_F(ScreenSessionManagerProxyTest, SwitchUser, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, GetScreenProperty, TestSize.Level1)
 {
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     ScreenId screenId = 1001;
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    screenSessionManagerProxy->GetScreenProperty(screenId);
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint64ErrorFlag(true);
+    screenSessionManagerProxy->GetScreenProperty(screenId);
+    EXPECT_TRUE(logMsg.find("Write screenId failed") != std::string::npos);
+
+    MockMessageParcel::ClearAllErrorFlag();
     screenSessionManagerProxy->GetScreenProperty(screenId);
     auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession(2000);
     EXPECT_EQ(screenSession, nullptr);
@@ -1542,8 +1799,16 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetScreenProperty, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHookInfo, Function | SmallTest | Level1)
 {
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     int32_t uid = 0;
     DMHookInfo hookInfo;
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    screenSessionManagerProxy->GetDisplayHookInfo(uid, hookInfo);
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+
     MockMessageParcel::ClearAllErrorFlag();
     screenSessionManagerProxy->GetDisplayHookInfo(uid, hookInfo);
     EXPECT_EQ(hookInfo.height_, 0);
@@ -1557,25 +1822,35 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHookInfo, Function | SmallTest
  */
 HWTEST_F(ScreenSessionManagerProxyTest, GetScreenCapture, TestSize.Level1)
 {
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     ASSERT_TRUE(screenSessionManagerProxy != nullptr);
 
-    std::shared_ptr<Media::PixelMap> res = nullptr;
     CaptureOption option;
     option.displayId_ = 0;
     DmErrorCode errorCode = DmErrorCode::DM_OK;
-    std::function<void()> func = [&]() {
-        res = screenSessionManagerProxy->GetScreenCapture(option, &errorCode);
-    };
-    func();
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        if (errorCode == DmErrorCode::DM_OK) {
-            ASSERT_NE(res, nullptr);
-        } else {
-            ASSERT_EQ(res, nullptr);
-        }
-    } else {
-        ASSERT_EQ(res, nullptr);
-    }
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    auto res = screenSessionManagerProxy->GetScreenCapture(option, &errorCode);
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+    EXPECT_EQ(res, nullptr);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint64ErrorFlag(true);
+    res = screenSessionManagerProxy->GetScreenCapture(option, &errorCode);
+    EXPECT_TRUE(logMsg.find("Write displayId or isNeedNotify or isNeedPointer failed") != std::string::npos);
+    EXPECT_EQ(res, nullptr);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    res = screenSessionManagerProxy->GetScreenCapture(option, &errorCode);
+    EXPECT_TRUE(logMsg.find("Write displayId or isNeedNotify or isNeedPointer failed") != std::string::npos);
+    EXPECT_EQ(res, nullptr);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    res = screenSessionManagerProxy->GetScreenCapture(option, &errorCode);
+    EXPECT_EQ(res, nullptr);
 }
 
 /**
@@ -1585,18 +1860,19 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetScreenCapture, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, GetPrimaryDisplayInfo, TestSize.Level1)
 {
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     ASSERT_TRUE(screenSessionManagerProxy != nullptr);
 
-    sptr<DisplayInfo> res = nullptr;
-    std::function<void()> func = [&]() {
-        res = screenSessionManagerProxy->GetPrimaryDisplayInfo();
-    };
-    func();
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(res, nullptr);
-    } else {
-        ASSERT_EQ(res, nullptr);
-    }
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    auto res = screenSessionManagerProxy->GetPrimaryDisplayInfo();
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+    EXPECT_EQ(res, nullptr);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    res = screenSessionManagerProxy->GetPrimaryDisplayInfo();
+    EXPECT_EQ(res, nullptr);
 }
 
 /**
@@ -1606,17 +1882,28 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetPrimaryDisplayInfo, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, SetScreenSkipProtectedWindow, TestSize.Level1)
 {
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     ASSERT_TRUE(screenSessionManagerProxy != nullptr);
 
     const std::vector<ScreenId> screenIds = {1001, 1002};
     bool isEnable = true;
-    int resultValue = 0;
-    std::function<void()> func = [&]() {
-        screenSessionManagerProxy->SetScreenSkipProtectedWindow(screenIds, isEnable);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    auto res = screenSessionManagerProxy->SetScreenSkipProtectedWindow(screenIds, isEnable);
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+    EXPECT_EQ(res, DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    res = screenSessionManagerProxy->SetScreenSkipProtectedWindow(screenIds, isEnable);
+    EXPECT_TRUE(logMsg.find("Write isEnable failed") != std::string::npos);
+    EXPECT_EQ(res, DMError::DM_ERROR_WRITE_DATA_FAILED);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    res = screenSessionManagerProxy->SetScreenSkipProtectedWindow(screenIds, isEnable);
+    EXPECT_EQ(res, DMError::DM_OK);
 }
 
 /**
@@ -1626,8 +1913,18 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetScreenSkipProtectedWindow, TestSize.L
  */
 HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayCapability, TestSize.Level1)
 {
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     ASSERT_TRUE(screenSessionManagerProxy != nullptr);
     std::string capabilitInfo;
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    EXPECT_EQ(DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED,
+            screenSessionManagerProxy->GetDisplayCapability(capabilitInfo));
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+
+    MockMessageParcel::ClearAllErrorFlag();
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         EXPECT_NE(DMError::DM_ERROR_IPC_FAILED,
                 screenSessionManagerProxy->GetDisplayCapability(capabilitInfo));
@@ -1644,35 +1941,22 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayCapability, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerProxyTest, SetFoldStatusExpandAndLocked, Function | SmallTest | Level1)
 {
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    screenSessionManagerProxy->SetFoldStatusExpandAndLocked(false);
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken Failed") != std::string::npos);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    screenSessionManagerProxy->SetFoldStatusExpandAndLocked(false);
+    EXPECT_TRUE(logMsg.find("Write lock fold display status failed") != std::string::npos);
+
+    MockMessageParcel::ClearAllErrorFlag();
     screenSessionManagerProxy->SetFoldStatusExpandAndLocked(false);
     EXPECT_EQ(ScreenSessionManager::GetInstance().GetIsFoldStatusLocked(), false);
-}
-
-/**
- * @tc.name: GetScreenAreaOfDisplayArea
- * @tc.desc: GetScreenAreaOfDisplayArea
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerProxyTest, GetScreenAreaOfDisplayArea, Function | SmallTest | Level1)
-{
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
-    ASSERT_TRUE(screenSessionManagerProxy != nullptr);
-    DisplayId displayId = 0;
-    DMRect displayArea = DMRect::NONE();
-    ScreenId screenId = 0;
-    DMRect screenArea = DMRect::NONE();
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_NE(DMError::DM_ERROR_IPC_FAILED,
-                screenSessionManagerProxy->GetScreenAreaOfDisplayArea(displayId, displayArea, screenId, screenArea));
-    } else {
-        EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED,
-                screenSessionManagerProxy->GetScreenAreaOfDisplayArea(displayId, displayArea, screenId, screenArea));
-    }
 }
 
 /**
@@ -1682,13 +1966,73 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetScreenAreaOfDisplayArea, Function | S
  */
 HWTEST_F(ScreenSessionManagerProxyTest, SetPrimaryDisplaySystemDpi, Function | SmallTest | Level1)
 {
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    float dpi = 2.2f;
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    auto ret = screenSessionManagerProxy->SetPrimaryDisplaySystemDpi(dpi);
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+    EXPECT_EQ(DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED, ret);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteFloatErrorFlag(true);
+    ret = screenSessionManagerProxy->SetPrimaryDisplaySystemDpi(dpi);
+    EXPECT_TRUE(logMsg.find("write dpi failed") != std::string::npos);
+    EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED, ret);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    ret = screenSessionManagerProxy->SetPrimaryDisplaySystemDpi(dpi);
+    EXPECT_EQ(DMError::DM_OK, ret);
+}
+
+/**
+ * @tc.name: GetScreenAreaOfDisplayArea
+ * @tc.desc: GetScreenAreaOfDisplayArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, GetScreenAreaOfDisplayArea, Function | SmallTest | Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     DisplayId displayId = 0;
     DMRect displayArea = DMRect::NONE();
     ScreenId screenId = 0;
     DMRect screenArea = DMRect::NONE();
-    float dpi = 2.2f;
-    auto ret = screenSessionManagerProxy->SetPrimaryDisplaySystemDpi(dpi);
-    EXPECT_EQ(DMError::DM_OK, ret);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    auto ret = screenSessionManagerProxy->GetScreenAreaOfDisplayArea(displayId, displayArea, screenId, screenArea);
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+    EXPECT_EQ(DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED, ret);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint64ErrorFlag(true);
+    ret = screenSessionManagerProxy->GetScreenAreaOfDisplayArea(displayId, displayArea, screenId, screenArea);
+    EXPECT_TRUE(logMsg.find("Write displayId failed") != std::string::npos);
+    EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED, ret);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    ret = screenSessionManagerProxy->GetScreenAreaOfDisplayArea(displayId, displayArea, screenId, screenArea);
+    EXPECT_TRUE(logMsg.find("Write displayArea failed") != std::string::npos);
+    EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED, ret);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    ret = screenSessionManagerProxy->GetScreenAreaOfDisplayArea(displayId, displayArea, screenId, screenArea);
+    EXPECT_TRUE(logMsg.find("Write displayArea failed") != std::string::npos);
+    EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED, ret);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_NE(DMError::DM_ERROR_IPC_FAILED,
+                screenSessionManagerProxy->GetScreenAreaOfDisplayArea(displayId, displayArea, screenId, screenArea));
+    } else {
+        EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED,
+                screenSessionManagerProxy->GetScreenAreaOfDisplayArea(displayId, displayArea, screenId, screenArea));
+    }
 }
 
 /**
@@ -1730,253 +2074,23 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetPhysicalScreenIds, Function | SmallTe
 }
 
 /**
- * @tc.name: GetDisplayHdrSnapshot
- * @tc.desc: GetDisplayHdrSnapshot
+ * @tc.name: SetVirtualScreenAutoRotation
+ * @tc.desc: SetVirtualScreenAutoRotation test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHdrSnapshot, TestSize.Level1)
+HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualScreenAutoRotation, Function | SmallTest | Level1)
 {
-    std::vector<std::shared_ptr<Media::PixelMap>> expectation = { nullptr, nullptr };
-    std::vector<std::shared_ptr<Media::PixelMap>> res = { nullptr, nullptr };
-    DisplayId displayId = DEFAULT_DISPLAY;
-    DmErrorCode* errorCode = nullptr;
-    std::function<void()> func = [&]()
-    {
-        res = screenSessionManagerProxy->GetDisplayHdrSnapshot(displayId, errorCode, false, false);
-    };
-    func();
-    EXPECT_EQ(res, expectation);
-}
- 
-/**
- * @tc.name: GetDisplayHdrSnapshotWithOption001
- * @tc.desc: GetDisplayHdrSnapshotWithOption
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHdrSnapshotWithOption001, TestSize.Level1)
-{
-    CaptureOption captureOption = {
-        .displayId_ = DEFAULT_DISPLAY,
-        .isNeedNotify_ = false,
-        .isNeedPointer_ = false,
-        .isCaptureFullOfScreen = false,
-        .blackList_ = {}
-    };
-    DmErrorCode errorCode;
-    std::vector<std::shared_ptr<Media::PixelMap>> result =
-        screenSessionManagerProxy->GetDisplayHdrSnapshotWithOption(captureOption, &errorCode);
-    EXPECT_EQ(result.size(), PIXELMAP_SIZE);
-    EXPECT_EQ(result[SDR_PIXELMAP], nullptr);
-    EXPECT_EQ(result[HDR_PIXELMAP], nullptr);
-}
- 
-/**
- * @tc.name: GetDisplayHdrSnapshotWithOption002
- * @tc.desc: GetDisplayHdrSnapshotWithOption
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHdrSnapshotWithOption002, TestSize.Level1)
-{
-    CaptureOption captureOption = {
-        .displayId_ = DEFAULT_DISPLAY,
-        .isNeedNotify_ = false,
-        .isNeedPointer_ = false,
-        .isCaptureFullOfScreen = false,
-        .blackList_ = {}
-    };
-    DmErrorCode errorCode;
-    std::vector<std::shared_ptr<Media::PixelMap>> tmpVec = { nullptr, nullptr };
- 
-    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
-    std::vector<std::shared_ptr<Media::PixelMap>> result = screenSessionManagerProxy->GetDisplayHdrSnapshotWithOption(
-        captureOption, &errorCode);
-    EXPECT_EQ(result, tmpVec);
-    MockMessageParcel::ClearAllErrorFlag();
- 
-    MockMessageParcel::SetWriteUint64ErrorFlag(true);
-    result = screenSessionManagerProxy->GetDisplayHdrSnapshotWithOption(
-        captureOption, &errorCode);
-    EXPECT_EQ(result, tmpVec);
-    MockMessageParcel::ClearAllErrorFlag();
-}
- 
-/**
- * @tc.name: GetDisplayHdrSnapshotWithOption003
- * @tc.desc: GetDisplayHdrSnapshotWithOption
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHdrSnapshotWithOption003, TestSize.Level1)
-{
-    CaptureOption captureOption = {
-        .displayId_ = DEFAULT_DISPLAY,
-        .isNeedNotify_ = false,
-        .isNeedPointer_ = false,
-        .isCaptureFullOfScreen = false,
-        .blackList_ = {}
-    };
-    DmErrorCode errorCode;
-    sptr<ScreenSessionManagerProxy> screenSessionManagerProxyTmp = sptr<ScreenSessionManagerProxy>::MakeSptr(nullptr);
-    std::vector<std::shared_ptr<Media::PixelMap>> result =
-        screenSessionManagerProxyTmp->GetDisplayHdrSnapshotWithOption(captureOption, &errorCode);
-    EXPECT_EQ(result.size(), PIXELMAP_SIZE);
-    EXPECT_EQ(result[SDR_PIXELMAP], nullptr);
-    EXPECT_EQ(result[HDR_PIXELMAP], nullptr);
-}
- 
-/**
- * @tc.name: GetDisplayHdrSnapshotWithOption004
- * @tc.desc: GetDisplayHdrSnapshotWithOption
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHdrSnapshotWithOption004, TestSize.Level1)
-{
-    CaptureOption captureOption = {
-        .displayId_ = DEFAULT_DISPLAY,
-        .isNeedNotify_ = false,
-        .isNeedPointer_ = false,
-        .isCaptureFullOfScreen = false,
-        .blackList_ = {}
-    };
-    DmErrorCode errorCode;
-    auto remoteObj = sptr<MockIRemoteObject>::MakeSptr();
-    sptr<ScreenSessionManagerProxy> screenSessionManagerProxyTmp =
-        sptr<ScreenSessionManagerProxy>::MakeSptr(remoteObj);
-    remoteObj->SetRequestResult(ERR_NO_PERMISSION);
-    std::vector<std::shared_ptr<Media::PixelMap>> result =
-        screenSessionManagerProxyTmp->GetDisplayHdrSnapshotWithOption(captureOption, &errorCode);
-    EXPECT_EQ(result.size(), PIXELMAP_SIZE);
-    EXPECT_EQ(result[SDR_PIXELMAP], nullptr);
-    EXPECT_EQ(result[HDR_PIXELMAP], nullptr);
-    remoteObj->SetRequestResult(ERR_NON);
-}
- 
-/**
- * @tc.name: GetDisplayHdrSnapshot001
- * @tc.desc: GetDisplayHdrSnapshot
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHdrSnapshot001, TestSize.Level1)
-{
-    DmErrorCode errorCode;
-    DisplayId validDisplayId = DEFAULT_DISPLAY;
-    bool isUseDma = false;
-    bool isCaptureFullOfScreen = false;
-    std::vector<std::shared_ptr<Media::PixelMap>> result =
-        screenSessionManagerProxy->GetDisplayHdrSnapshot(validDisplayId, &errorCode, isUseDma, isCaptureFullOfScreen);
-    EXPECT_EQ(result.size(), PIXELMAP_SIZE);
-    EXPECT_EQ(result[SDR_PIXELMAP], nullptr);
-    EXPECT_EQ(result[HDR_PIXELMAP], nullptr);
-}
- 
-/**
- * @tc.name: GetDisplayHdrSnapshot002
- * @tc.desc: GetDisplayHdrSnapshotWithOption
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHdrSnapshot002, TestSize.Level1)
-{
-    DmErrorCode errorCode;
-    DisplayId validDisplayId = DEFAULT_DISPLAY;
-    bool isUseDma = false;
-    bool isCaptureFullOfScreen = false;
-    std::vector<std::shared_ptr<Media::PixelMap>> tmpVec = { nullptr, nullptr };
- 
-    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
-    std::vector<std::shared_ptr<Media::PixelMap>> result = screenSessionManagerProxy->GetDisplayHdrSnapshot(
-        validDisplayId, &errorCode, isUseDma, isCaptureFullOfScreen);
-    EXPECT_EQ(result, tmpVec);
-    MockMessageParcel::ClearAllErrorFlag();
- 
-    MockMessageParcel::SetWriteUint64ErrorFlag(true);
-    result = screenSessionManagerProxy->GetDisplayHdrSnapshot(
-        validDisplayId, &errorCode, isUseDma, isCaptureFullOfScreen);
-    EXPECT_EQ(result, tmpVec);
-    MockMessageParcel::ClearAllErrorFlag();
- 
-    MockMessageParcel::SetWriteBoolErrorFlag(true);
-    result = screenSessionManagerProxy->GetDisplayHdrSnapshot(
-        validDisplayId, &errorCode, isUseDma, isCaptureFullOfScreen);
-    EXPECT_EQ(result, tmpVec);
-    MockMessageParcel::ClearAllErrorFlag();
-}
- 
-/**
- * @tc.name: GetDisplayHdrSnapshot003
- * @tc.desc: GetDisplayHdrSnapshotWithOption
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHdrSnapshot003, TestSize.Level1)
-{
-    DmErrorCode errorCode;
-    DisplayId validDisplayId = DEFAULT_DISPLAY;
-    bool isUseDma = false;
-    bool isCaptureFullOfScreen = false;
-    std::vector<std::shared_ptr<Media::PixelMap>> tmpVec = { nullptr, nullptr };
- 
-    std::vector<std::shared_ptr<Media::PixelMap>> result = screenSessionManagerProxy->GetDisplayHdrSnapshot(
-        validDisplayId, &errorCode, isUseDma, isCaptureFullOfScreen);
-    EXPECT_EQ(result, tmpVec);
-}
- 
-/**
- * @tc.name: GetDisplayHdrSnapshot004
- * @tc.desc: GetDisplayHdrSnapshotWithOption
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHdrSnapshot004, TestSize.Level1)
-{
-    DmErrorCode errorCode;
-    DisplayId validDisplayId = DEFAULT_DISPLAY;
-    bool isUseDma = false;
-    bool isCaptureFullOfScreen = false;
-    std::vector<std::shared_ptr<Media::PixelMap>> tmpVec = { nullptr, nullptr };
- 
-    sptr<ScreenSessionManagerProxy> screenSessionManagerProxyTmp = sptr<ScreenSessionManagerProxy>::MakeSptr(nullptr);
-    std::vector<std::shared_ptr<Media::PixelMap>> result = screenSessionManagerProxyTmp->GetDisplayHdrSnapshot(
-        validDisplayId, &errorCode, isUseDma, isCaptureFullOfScreen);
-    EXPECT_EQ(result, tmpVec);
-}
- 
-/**
- * @tc.name: GetDisplayHdrSnapshot005
- * @tc.desc: GetDisplayHdrSnapshotWithOption
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHdrSnapshot005, TestSize.Level1)
-{
-    sptr<ScreenSessionManagerProxy> screenSessionManagerProxyTmp = sptr<ScreenSessionManagerProxy>::MakeSptr(nullptr);
-    DmErrorCode* errorCode = nullptr;
-    DisplayId validDisplayId = DEFAULT_DISPLAY;
-    bool isUseDma = false;
-    bool isCaptureFullOfScreen = false;
-    std::vector<std::shared_ptr<Media::PixelMap>> tmpVec = { nullptr, nullptr };
- 
-    std::vector<std::shared_ptr<Media::PixelMap>> result = screenSessionManagerProxyTmp->GetDisplayHdrSnapshot(
-        validDisplayId, errorCode, isUseDma, isCaptureFullOfScreen);
-    EXPECT_EQ(result, tmpVec);
-}
- 
-/**
- * @tc.name: GetDisplayHdrSnapshot006
- * @tc.desc: GetDisplayHdrSnapshotWithOption
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHdrSnapshot006, TestSize.Level1)
-{
-    DmErrorCode* errorCode = nullptr;
-    DisplayId validDisplayId = DEFAULT_DISPLAY;
-    bool isUseDma = false;
-    bool isCaptureFullOfScreen = false;
-    auto remoteObj = sptr<MockIRemoteObject>::MakeSptr();
-    sptr<ScreenSessionManagerProxy> screenSessionManagerProxyTmp =
-        sptr<ScreenSessionManagerProxy>::MakeSptr(remoteObj);
-    remoteObj->SetRequestResult(ERR_NO_PERMISSION);
-    std::vector<std::shared_ptr<Media::PixelMap>> result = screenSessionManagerProxyTmp->GetDisplayHdrSnapshot(
-        validDisplayId, errorCode, isUseDma, isCaptureFullOfScreen);
-    std::vector<std::shared_ptr<Media::PixelMap>> tmpVec = { nullptr, nullptr };
-    EXPECT_EQ(result, tmpVec);
-    remoteObj->SetRequestResult(ERR_NON);
-}
+    ASSERT_TRUE(screenSessionManagerProxy != nullptr);
+    ScreenId screenId = 0;
+    bool enable = false;
+    auto res = screenSessionManagerProxy->SetVirtualScreenAutoRotation(screenId, enable);
+    EXPECT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
 
+    ScreenId screenId = 111;
+    bool enable = false;
+
+    auto ret = screenSessionManagerProxy->SetVirtualScreenAutoRotation(screenId, enable);
+    EXPECT_EQ(DMError::DM_ERROR_INVALID_PARAM, ret);
+}
 }
 }

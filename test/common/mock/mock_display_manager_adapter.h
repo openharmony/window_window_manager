@@ -47,9 +47,9 @@ public:
     MOCK_METHOD2(GetAvailableArea, DMError(ScreenId screenId, DMRect& area));
     MOCK_METHOD2(HasImmersiveWindow, DMError(ScreenId screenId, bool& immersive));
     MOCK_METHOD0(GetAllDisplayIds, std::vector<DisplayId>());
-    MOCK_METHOD4(GetDisplayHdrSnapshot, std::vector<std::shared_ptr<Media::PixelMap>>(DisplayId displayId,
+    MOCK_METHOD4(GetDisplayHDRSnapshot, std::vector<std::shared_ptr<Media::PixelMap>>(DisplayId displayId,
         DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen));
-    MOCK_METHOD2(GetDisplayHdrSnapshotWithOption, std::vector<std::shared_ptr<Media::PixelMap>>(
+    MOCK_METHOD2(GetDisplayHDRSnapshotWithOption, std::vector<std::shared_ptr<Media::PixelMap>>(
         const CaptureOption& captureOption, DmErrorCode* errorCode));
 };
 
@@ -101,9 +101,9 @@ public:
 
 class MockDisplayManger : public DisplayManager {
     public:
-        MOCK_METHOD4(GetScreenHdrshot, std::vector<std::shared_ptr<Media::PixelMap>>(DisplayId displayId,
+        MOCK_METHOD4(GetScreenHDRshot, std::vector<std::shared_ptr<Media::PixelMap>>(DisplayId displayId,
             DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen));
-        MOCK_METHOD2(GetDisplayHdrSnapshotWithOption, std::vector<std::shared_ptr<Media::PixelMap>>(
+        MOCK_METHOD2(GetDisplayHDRSnapshotWithOption, std::vector<std::shared_ptr<Media::PixelMap>>(
             const CaptureOption& captureOption, DmErrorCode* errorCode));
 };
 } // namespace Rosen

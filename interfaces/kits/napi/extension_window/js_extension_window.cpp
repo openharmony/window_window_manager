@@ -183,7 +183,6 @@ napi_value JsExtensionWindow::CreateJsExtensionWindowObject(napi_env env, sptr<R
     BindNativeFunction(env, objValue, "getWindowDensityInfo", moduleName, JsExtensionWindow::GetWindowDensityInfo);
     BindNativeFunction(env, objValue, "getWindowSystemBarProperties", moduleName,
         JsExtensionWindow::GetWindowSystemBarProperties);
-    BindNativeFunction(env, objValue, "isWindowShowing", moduleName, JsExtensionWindow::IsWindowShowing);
 
     RegisterUnsupportFuncs(env, objValue, moduleName);
 
@@ -554,11 +553,6 @@ napi_value JsExtensionWindow::GetWindowSystemBarProperties(napi_env env, napi_ca
     return objValue;
 }
 
-napi_value JsExtensionWindow::IsWindowShowing(napi_env env, napi_callback_info info)
-{
-    return CreateJsValue(env, true);
-}
-
 napi_valuetype GetType(napi_env env, napi_value value)
 {
     napi_valuetype res = napi_undefined;
@@ -877,7 +871,7 @@ napi_value JsExtensionWindow::OnGetWindowAvoidArea(napi_env env, napi_callback_i
     }
     napi_value avoidAreaObj = ConvertAvoidAreaToJsValue(env, avoidArea, avoidAreaType);
     if (avoidAreaObj != nullptr) {
-        TLOGI(WmsLogTag::WMS_UIEXT, "avoidAreaObj is finish");
+        TLOGD(WmsLogTag::WMS_UIEXT, "avoidAreaObj is finish");
         return avoidAreaObj;
     } else {
         TLOGE(WmsLogTag::WMS_UIEXT, "avoidAreaObj is nullptr");

@@ -2671,12 +2671,12 @@ WMError SceneSessionManagerProxy::GetWindowModeType(WindowModeType& windowModeTy
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("GetWindowModeType Write interfaceToken failed");
+        TLOGD(WmsLogTag::DEFAULT, "Write interfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("remote is null");
+        TLOGE(WmsLogTag::DEFAULT, "Remote is null");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(
@@ -3045,6 +3045,42 @@ WMError SceneSessionManagerProxy::IsPcWindow(bool& isPcWindow)
     }
     isPcWindow = result;
     return static_cast<WMError>(ret);
+}
+
+WMError SceneSessionManagerProxy::IsFreeMultiWindow(bool& isFreeMultiWindow)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_PC, "Write interfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_PC, "Remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(
+        SceneSessionManagerMessage::TRANS_ID_IS_FREE_MULTI_WINDOW),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_PC, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_PC, "Read ret failed ret:%{public}d", ret);
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    auto ipcRes = static_cast<WMError>(ret);
+    bool result = false;
+    if (ipcRes == WMError::WM_OK && !reply.ReadBool(result)) {
+        TLOGE(WmsLogTag::WMS_PC, "Read isFreeMultiWindow failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+
+    isFreeMultiWindow = result;
+    return ipcRes;
 }
 
 WMError SceneSessionManagerProxy::GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,

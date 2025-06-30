@@ -13,24 +13,24 @@
  * limitations under the License.
  */
  
- #ifndef MOCK_SCREEN_SESSION_MANAGER_H
- #define MOCK_SCREEN_SESSION_MANAGER_H
-  
- #include "screen_session_manager/include/screen_session_manager.h"
- #include <gmock/gmock.h>
-  
- namespace OHOS {
- namespace Rosen {
- class MockScreenSessionManager : public ScreenSessionManager {
- public:
-     MockScreenSessionManager() {};
-     ~MockScreenSessionManager() {};
-  
-     MOCK_METHOD4(GetDisplayHdrSnapshot, std::vector<std::shared_ptr<Media::PixelMap>>(DisplayId displayId,
-         DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen));
-     MOCK_METHOD2(GetDisplayHdrSnapshotWithOption, std::vector<std::shared_ptr<Media::PixelMap>>(
-         const CaptureOption& captureOption, DmErrorCode* errorCode));
- };
- }
- }
- #endif // MOCK_SCREEN_SESSION_MANAGER_H
+#ifndef MOCK_SCREEN_SESSION_MANAGER_H
+#define MOCK_SCREEN_SESSION_MANAGER_H
+
+#include "screen_session_manager/include/screen_session_manager.h"
+#include <gmock/gmock.h>
+
+namespace OHOS {
+namespace Rosen {
+class MockScreenSessionManager : public ScreenSessionManager {
+public:
+    MockScreenSessionManager() {};
+    ~MockScreenSessionManager() {};
+
+    MOCK_METHOD4(GetDisplayHDRSnapshot, std::vector<std::shared_ptr<Media::PixelMap>>(DisplayId displayId,
+        DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen));
+    MOCK_METHOD2(GetDisplayHDRSnapshotWithOption, std::vector<std::shared_ptr<Media::PixelMap>>(
+        const CaptureOption& captureOption, DmErrorCode* errorCode));
+};
+}
+}
+#endif // MOCK_SCREEN_SESSION_MANAGER_H

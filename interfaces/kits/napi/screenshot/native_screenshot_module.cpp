@@ -280,7 +280,7 @@ static void AsyncGetScreenshot(napi_env env, std::unique_ptr<Param> &param)
     }
 }
 
-static void AsyncGetScreenHdrshot(napi_env env, std::unique_ptr<HdrParam>& param)
+static void AsyncGetScreenHDRshot(napi_env env, std::unique_ptr<HdrParam>& param)
 {
     if (!param->validInputParam) {
         TLOGE(WmsLogTag::DMS, "Invalid Input Param!");
@@ -292,10 +292,10 @@ static void AsyncGetScreenHdrshot(napi_env env, std::unique_ptr<HdrParam>& param
     CaptureOption option = { param->option.displayId, param->option.isNeedNotify, param->option.isNeedPointer,
         param->option.isCaptureFullOfScreen};
     if (!option.isNeedNotify_) {
-        param->imageVec = DisplayManager::GetInstance().GetScreenHdrshotWithOption(option, &param->wret);
+        param->imageVec = DisplayManager::GetInstance().GetScreenHDRshotWithOption(option, &param->wret);
     } else {
         TLOGI(WmsLogTag::DMS, "Get Screenshot by default option");
-        param->imageVec = DisplayManager::GetInstance().GetScreenHdrshot(param->option.displayId, &param->wret,
+        param->imageVec = DisplayManager::GetInstance().GetScreenHDRshot(param->option.displayId, &param->wret,
             true, param->option.isCaptureFullOfScreen);
     }
     if ((param->imageVec.size() != PIXMAP_VECTOR_SIZE || param->imageVec[SDR_PIXMAP] == nullptr) &&
@@ -390,8 +390,9 @@ napi_value Resolve(napi_env env, std::unique_ptr<Param> &param)
     return jsImage;
 }
 
-napi_value HdrResolve(napi_env env, std::unique_ptr<HdrParam> &param)
+napi_value HDRResolve(napi_env env, std::unique_ptr<HdrParam>& param)
 {
+    napi_status ret = napi_ok;
     napi_value result;
     napi_value error;
     napi_value code;
@@ -402,16 +403,28 @@ napi_value HdrResolve(napi_env env, std::unique_ptr<HdrParam> &param)
     }
     switch (param->wret) {
         case DmErrorCode::DM_ERROR_NO_PERMISSION:
-            napi_set_named_property(env, error, "DM_ERROR_NO_PERMISSION", code);
+            ret = napi_set_named_property(env, error, "DM_ERROR_NO_PERMISSION", code);
+            if (ret != napi_ok) {
+                TLOGE(WmsLogTag::DMS, "napi_set_named_property error, code is %{public}d", ret);
+            }
             break;
         case DmErrorCode::DM_ERROR_INVALID_PARAM:
-            napi_set_named_property(env, error, "DM_ERROR_INVALID_PARAM", code);
+            ret = napi_set_named_property(env, error, "DM_ERROR_INVALID_PARAM", code);
+            if (ret != napi_ok) {
+                TLOGE(WmsLogTag::DMS, "napi_set_named_property error, code is %{public}d", ret);
+            }
             break;
         case DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT:
-            napi_set_named_property(env, error, "DM_ERROR_DEVICE_NOT_SUPPORT", code);
+            ret = napi_set_named_property(env, error, "DM_ERROR_DEVICE_NOT_SUPPORT", code);
+            if (ret != napi_ok) {
+                TLOGE(WmsLogTag::DMS, "napi_set_named_property error, code is %{public}d", ret);
+            }
             break;
         case DmErrorCode::DM_ERROR_SYSTEM_INNORMAL:
-            napi_set_named_property(env, error, "DM_ERROR_SYSTEM_INNORMAL", code);
+            ret = napi_set_named_property(env, error, "DM_ERROR_SYSTEM_INNORMAL", code);
+            if (ret != napi_ok) {
+                TLOGE(WmsLogTag::DMS, "napi_set_named_property error, code is %{public}d", ret);
+            }
             break;
         default:
             isThrowError = false;
@@ -551,7 +564,7 @@ napi_value MainFunc(napi_env env, napi_callback_info info)
     return AsyncProcess<Param>(env, __PRETTY_FUNCTION__, AsyncGetScreenshot, Resolve, ref, param);
 }
 
-napi_value SaveHdrFunc(napi_env env, napi_callback_info info)
+napi_value SaveHDRFunc(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::DMS, "%{public}s called", __PRETTY_FUNCTION__);
     napi_value argv[1] = {nullptr}; // the max number of input parameters is 1
@@ -560,7 +573,7 @@ napi_value SaveHdrFunc(napi_env env, napi_callback_info info)
  
     auto param = std::make_unique<Param>();
     auto hdrParam = std::make_unique<HdrParam>();
-    if (param == nullptr) {
+    if ((param == nullptr) || (hdrParam == nullptr)) {
         TLOGE(WmsLogTag::DMS, "Create param failed.");
         return nullptr;
     }
@@ -583,7 +596,7 @@ napi_value SaveHdrFunc(napi_env env, napi_callback_info info)
     hdrParam->errMessage = param->errMessage;
     hdrParam->validInputParam = param->validInputParam;
     hdrParam->useInputOption = param->useInputOption;
-    return AsyncProcess<HdrParam>(env, __PRETTY_FUNCTION__, AsyncGetScreenHdrshot, HdrResolve, ref, hdrParam);
+    return AsyncProcess<HdrParam>(env, __PRETTY_FUNCTION__, AsyncGetScreenHDRshot, HDRResolve, ref, hdrParam);
 }
 } // namespace save
 
@@ -645,7 +658,7 @@ napi_value ScreenshotModuleInit(napi_env env, napi_value exports)
 
     napi_property_descriptor properties[] = {
         DECLARE_NAPI_FUNCTION("save", save::MainFunc),
-        DECLARE_NAPI_FUNCTION("saveHdrPicture", save::SaveHdrFunc),
+        DECLARE_NAPI_FUNCTION("saveHdrPicture", save::SaveHDRFunc),
         DECLARE_NAPI_FUNCTION("pick", save::PickFunc),
         DECLARE_NAPI_FUNCTION("capture", save::CaptureFunc),
         DECLARE_NAPI_PROPERTY("DMError", errorCode),

@@ -343,7 +343,10 @@ HWTEST_F(WindowSessionImplTest5, IsDeviceFeatureCapableFor, Function | SmallTest
     window->context_ = context;
     context->hapModuleInfo_ = std::make_shared<AppExecFwk::HapModuleInfo>();
     EXPECT_EQ(window->IsDeviceFeatureCapableFor(feature), false);
-    context->hapModuleInfo_->deviceFeatures.push_back(feature);
+    std::string deviceType = system::GetParameter("const.product.devicetype", "");
+    context->hapModuleInfo_->requiredDeviceFeatures = {{deviceType, {}}};
+    EXPECT_EQ(window->IsDeviceFeatureCapableFor(feature), false);
+    context->hapModuleInfo_->requiredDeviceFeatures = {{deviceType, {feature}}};
     EXPECT_EQ(window->IsDeviceFeatureCapableFor(feature), true);
 }
 
@@ -363,7 +366,8 @@ HWTEST_F(WindowSessionImplTest5, IsDeviceFeatureCapableForFreeMultiWindow, Funct
     window->context_ = context;
     context->hapModuleInfo_ = std::make_shared<AppExecFwk::HapModuleInfo>();
     EXPECT_EQ(window->IsDeviceFeatureCapableForFreeMultiWindow(), false);
-    context->hapModuleInfo_->deviceFeatures.push_back(feature);
+    std::string deviceType = system::GetParameter("const.product.devicetype", "");
+    context->hapModuleInfo_->requiredDeviceFeatures = {{deviceType, {feature}}};
     EXPECT_EQ(window->IsDeviceFeatureCapableForFreeMultiWindow(),
         system::GetParameter("const.window.device_feature_support_type", "0") == "1");
 }
@@ -1266,6 +1270,39 @@ HWTEST_F(WindowSessionImplTest5, HideTitleButton03, Function | SmallTest | Level
 }
 
 /**
+ * @tc.name: SetUIContentByName
+ * @tc.desc: SetUIContentByName, load content by name
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, SetUIContentByName, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetUIContentByName");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    SessionInfo sessionInfo = {"SetUIContentByName", "SetUIContentByName", "SetUIContentByName"};
+    auto hostSession = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetPersistentId(1);
+    window->property_ = property;
+    window->hostSession_ = hostSession;
+    sptr<IRemoteObject> token;
+    window->state_ = WindowState::STATE_SHOWN;
+
+    auto testCallback = [](){};
+    bool isColdStart = true;
+    std::string intentParam = "test";
+    window->SetIntentParam(intentParam, testCallback, isColdStart);
+
+    window->SetUIContentByName("info", (napi_env)nullptr, nullptr, nullptr);
+    EXPECT_EQ(window->intentParam_, "");
+
+    intentParam = "";
+    window->SetUIContentByName("info", (napi_env)nullptr, nullptr, nullptr);
+    EXPECT_EQ(window->intentParam_, "");
+}
+
+/**
  * @tc.name: HideTitleButton04
  * @tc.desc: HideTitleButton04
  * @tc.type: FUNC
@@ -1391,6 +1428,284 @@ HWTEST_F(WindowSessionImplTest5, HideTitleButton08, Function | SmallTest | Level
     EXPECT_FALSE(hideMaximizeButton);
     EXPECT_FALSE(hideMinimizeButton);
     EXPECT_FALSE(hideCloseButton);
+}
+
+/**
+ * @tc.name: GetFloatingBallWindowId
+ * @tc.desc: GetFloatingBallWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, GetFloatingBallWindowId, TestSize.Level1)
+{
+    uint32_t windowId = 0;
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetFloatingBallWindowId");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->hostSession_ = nullptr;
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->GetFloatingBallWindowId(windowId));
+
+    auto session = sptr<SessionStubMocker>::MakeSptr();
+    window->hostSession_ = session;
+    window->property_->persistentId_ = 1234;
+    EXPECT_CALL(*session, GetFloatingBallWindowId(_)).Times(1).WillOnce(Return(WMError::WM_ERROR_INVALID_OPERATION));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, window->GetFloatingBallWindowId(windowId));
+
+    EXPECT_CALL(*session, GetFloatingBallWindowId(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->GetFloatingBallWindowId(windowId));
+}
+
+/**
+ * @tc.name: SendFbActionEvent
+ * @tc.desc: SendFbActionEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, SendFbActionEvent, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SendFbActionEvent");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->hostSession_ = nullptr;
+    std::string action = "click";
+    ASSERT_EQ(WSError::WS_OK, window->SendFbActionEvent(action));
+}
+
+/**
+ * @tc.name: UpdateFloatingBall
+ * @tc.desc: UpdateFloatingBall
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, UpdateFloatingBall, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SendFbActionEvent");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->hostSession_ = nullptr;
+    FloatingBallTemplateBaseInfo fbTemplateInfo;
+    std::shared_ptr<Media::PixelMap> icon = nullptr;
+
+    EXPECT_EQ(window->GetHostSession(), nullptr);
+    auto error = window->UpdateFloatingBall(fbTemplateInfo, icon);
+    EXPECT_EQ(WMError::WM_ERROR_FB_STATE_ABNORMALLY, error);
+
+    auto session = sptr<SessionStubMocker>::MakeSptr();
+    window->hostSession_ = session;
+    window->property_->persistentId_ = 1234;
+    EXPECT_FALSE(window->IsWindowSessionInvalid());
+    error = window->UpdateFloatingBall(fbTemplateInfo, icon);
+    EXPECT_EQ(WMError::WM_OK, error);
+}
+
+/**
+ * @tc.name: NotifyPrepareCloseFloatingBall
+ * @tc.desc: NotifyPrepareCloseFloatingBall
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, NotifyPrepareCloseFloatingBall, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SendFbActionEvent");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->hostSession_ = nullptr;
+
+    EXPECT_EQ(window->GetHostSession(), nullptr);
+    window->NotifyPrepareCloseFloatingBall();
+
+    auto session = sptr<SessionStubMocker>::MakeSptr();
+    window->hostSession_ = session;
+    EXPECT_TRUE(window->IsWindowSessionInvalid());
+    window->NotifyPrepareCloseFloatingBall();
+
+    window->property_->persistentId_ = 1234;
+    EXPECT_FALSE(window->IsWindowSessionInvalid());
+    window->NotifyPrepareCloseFloatingBall();
+}
+
+/**
+ * @tc.name: RestoreFbMainWindow
+ * @tc.desc: RestoreFbMainWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, RestoreFbMainWindow, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SendFbActionEvent");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->hostSession_ = nullptr;
+
+    std::shared_ptr<AAFwk::Want> want = nullptr;
+    ASSERT_EQ(WMError::WM_ERROR_FB_STATE_ABNORMALLY, window->RestoreFbMainWindow(want));
+
+    auto session = sptr<SessionStubMocker>::MakeSptr();
+    window->hostSession_ = session;
+    window->property_->persistentId_ = 1234;
+
+    EXPECT_CALL(*session, RestoreFbMainWindow(_)).Times(1).WillOnce(Return(WMError::WM_ERROR_FB_STATE_ABNORMALLY));
+    ASSERT_EQ(WMError::WM_ERROR_FB_STATE_ABNORMALLY, window->RestoreFbMainWindow(want));
+
+    EXPECT_CALL(*session, RestoreFbMainWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->RestoreFbMainWindow(want));
+}
+
+/**
+ * @tc.name: TestGetGlobalDisplayRect
+ * @tc.desc: Get global display rect from window property
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, TestGetGlobalDisplayRect, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    Rect expected { 100, 200, 300, 400 };
+    window->property_->SetGlobalDisplayRect(expected);
+
+    Rect actual = window->GetGlobalDisplayRect();
+    EXPECT_EQ(actual, expected);
+}
+
+/**
+ * @tc.name: TestClientToGlobalDisplay
+ * @tc.desc: Convert client position to global display position
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, TestClientToGlobalDisplay, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    Rect globalRect { 100, 200, 300, 400 };
+    window->property_->SetGlobalDisplayRect(globalRect);
+
+    Position clientPos { 10, 20 };
+    Position expectedGlobalPos { 110, 220 };
+
+    auto result = window->ClientToGlobalDisplay(clientPos);
+    EXPECT_EQ(result, expectedGlobalPos);
+}
+
+/**
+ * @tc.name: TestGlobalDisplayToClient
+ * @tc.desc: Convert global display position to client position
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, TestGlobalDisplayToClient, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    Rect globalRect { 100, 200, 300, 400 };
+    window->property_->SetGlobalDisplayRect(globalRect);
+
+    Position globalPos { 110, 220 };
+    Position expectedClientPos { 10, 20 };
+
+    auto result = window->GlobalDisplayToClient(globalPos);
+    EXPECT_EQ(result, expectedClientPos);
+}
+
+/**
+ * @tc.name: TestUpdateGlobalDisplayRectFromServer
+ * @tc.desc: Update global display rect if different
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, TestUpdateGlobalDisplayRectFromServer, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1001);
+
+    WSRect oldRect { 100, 200, 300, 400 };
+    window->property_->SetGlobalDisplayRect({ 100, 200, 300, 400 });
+    auto ret = window->UpdateGlobalDisplayRectFromServer(oldRect, SizeChangeReason::UNDEFINED);
+    EXPECT_EQ(ret, WSError::WS_DO_NOTHING);
+
+    WSRect newRect { 150, 250, 300, 400 };
+    ret = window->UpdateGlobalDisplayRectFromServer(newRect, SizeChangeReason::UNDEFINED);
+    EXPECT_EQ(ret, WSError::WS_OK);
+
+    Rect expectedRect { 150, 250, 300, 400 };
+    EXPECT_EQ(window->GetGlobalDisplayRect(), expectedRect);
+}
+
+/**
+ * @tc.name: TestRegisterRectChangeInGlobalDisplayListener
+ * @tc.desc: Register a new listener successfully
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, TestRegisterRectChangeInGlobalDisplayListener, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(123);
+
+    auto listener = sptr<MockRectChangeInGlobalDisplayListener>::MakeSptr();
+
+    auto result = window->RegisterRectChangeInGlobalDisplayListener(listener);
+    EXPECT_EQ(result, WMError::WM_OK);
+
+    {
+        std::lock_guard<std::mutex> lock(window->rectChangeInGlobalDisplayListenerMutex_);
+        window->rectChangeInGlobalDisplayListeners_.clear();
+    }
+}
+
+/**
+ * @tc.name: TestUnregisterRectChangeInGlobalDisplayListener
+ * @tc.desc: Unregister an existing listener successfully
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, TestUnregisterRectChangeInGlobalDisplayListener, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(123);
+
+    auto listener = sptr<MockRectChangeInGlobalDisplayListener>::MakeSptr();
+    window->RegisterRectChangeInGlobalDisplayListener(listener);
+
+    auto result = window->UnregisterRectChangeInGlobalDisplayListener(listener);
+    EXPECT_EQ(result, WMError::WM_OK);
+
+    {
+        std::lock_guard<std::mutex> lock(window->rectChangeInGlobalDisplayListenerMutex_);
+        window->rectChangeInGlobalDisplayListeners_.clear();
+    }
+}
+
+/**
+ * @tc.name: TestNotifyGlobalDisplayRectChange
+ * @tc.desc: Notify all valid listeners and skip nullptr ones
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, TestNotifyGlobalDisplayRectChange, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1001);
+
+    auto listener1 = sptr<MockRectChangeInGlobalDisplayListener>::MakeSptr();
+    auto listener2 = sptr<MockRectChangeInGlobalDisplayListener>::MakeSptr();
+    sptr<IRectChangeInGlobalDisplayListener> nullListener = nullptr;
+
+    {
+        std::lock_guard<std::mutex> lock(window->rectChangeInGlobalDisplayListenerMutex_);
+        window->rectChangeInGlobalDisplayListeners_[window->GetPersistentId()] = {
+            listener1, nullListener, listener2
+        };
+    }
+
+    Rect rect { 10, 20, 100, 200 };
+    WindowSizeChangeReason reason = WindowSizeChangeReason::UNDEFINED;
+
+    EXPECT_CALL(*listener1, OnRectChangeInGlobalDisplay(rect, reason)).Times(1);
+    EXPECT_CALL(*listener2, OnRectChangeInGlobalDisplay(rect, reason)).Times(1);
+
+    window->NotifyGlobalDisplayRectChange(rect, reason);
+
+    {
+        std::lock_guard<std::mutex> lock(window->rectChangeInGlobalDisplayListenerMutex_);
+        window->rectChangeInGlobalDisplayListeners_.clear();
+    }
 }
 } // namespace
 } // namespace Rosen

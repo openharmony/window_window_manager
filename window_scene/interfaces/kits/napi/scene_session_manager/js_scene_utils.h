@@ -101,6 +101,7 @@ enum class JsSessionType : uint32_t {
     TYPE_MAGNIFICATION = 42,
     TYPE_MAGNIFICATION_MENU = 43,
     TYPE_SELECTION = 44,
+    TYPE_FLOATING_BALL = 45,
 };
 
 const std::map<WindowType, JsSessionType> WINDOW_TO_JS_SESSION_TYPE_MAP {
@@ -148,6 +149,7 @@ const std::map<WindowType, JsSessionType> WINDOW_TO_JS_SESSION_TYPE_MAP {
     { WindowType::WINDOW_TYPE_MAGNIFICATION,            JsSessionType::TYPE_MAGNIFICATION           },
     { WindowType::WINDOW_TYPE_MAGNIFICATION_MENU,       JsSessionType::TYPE_MAGNIFICATION_MENU      },
     { WindowType::WINDOW_TYPE_SELECTION,                JsSessionType::TYPE_SELECTION               },
+    { WindowType::WINDOW_TYPE_FB,                       JsSessionType::TYPE_FLOATING_BALL           },
 };
 
 const std::map<JsSessionType, WindowType> JS_SESSION_TO_WINDOW_TYPE_MAP {
@@ -195,6 +197,7 @@ const std::map<JsSessionType, WindowType> JS_SESSION_TO_WINDOW_TYPE_MAP {
     { JsSessionType::TYPE_MAGNIFICATION,            WindowType::WINDOW_TYPE_MAGNIFICATION           },
     { JsSessionType::TYPE_MAGNIFICATION_MENU,       WindowType::WINDOW_TYPE_MAGNIFICATION_MENU      },
     { JsSessionType::TYPE_SELECTION,                WindowType::WINDOW_TYPE_SELECTION               },
+    { JsSessionType::TYPE_FLOATING_BALL,            WindowType::WINDOW_TYPE_FB                      },
 };
 
 enum class ThrowSlipMode;

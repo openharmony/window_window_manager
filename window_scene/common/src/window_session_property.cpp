@@ -843,6 +843,16 @@ PiPTemplateInfo WindowSessionProperty::GetPiPTemplateInfo() const
     return pipTemplateInfo_;
 }
 
+void WindowSessionProperty::SetFbTemplateInfo(const FloatingBallTemplateInfo& fbTemplateInfo)
+{
+    fbTemplateInfo_ = fbTemplateInfo;
+}
+
+FloatingBallTemplateInfo WindowSessionProperty::GetFbTemplateInfo() const
+{
+    return fbTemplateInfo_;
+}
+
 void WindowSessionProperty::SetIsNeedUpdateWindowMode(bool isNeedUpdateWindowMode)
 {
     isNeedUpdateWindowMode_ = isNeedUpdateWindowMode;
@@ -875,6 +885,18 @@ ShadowsInfo WindowSessionProperty::GetWindowShadows() const
 {
     std::lock_guard<std::mutex> lock(shadowsInfoMutex_);
     return shadowsInfo_;
+}
+
+void WindowSessionProperty::SetUseControlStateToProperty(bool isUseControlState)
+{
+    std::lock_guard<std::mutex> lock(lifecycleUseControlMutex_);
+    isUseControlState_ = isUseControlState;
+}
+
+bool WindowSessionProperty::GetUseControlStateFromProperty() const
+{
+    std::lock_guard<std::mutex> lock(lifecycleUseControlMutex_);
+    return isUseControlState_;
 }
 
 bool WindowSessionProperty::MarshallingWindowLimits(Parcel& parcel) const
@@ -1009,6 +1031,26 @@ void WindowSessionProperty::UnmarshallingPiPTemplateInfo(Parcel& parcel, WindowS
         return;
     }
     property->SetPiPTemplateInfo(*pipTemplateInfo);
+}
+
+bool WindowSessionProperty::MarshallingFbTemplateInfo(Parcel& parcel) const
+{
+    if (!WindowHelper::IsFbWindow(type_)) {
+        return true;
+    }
+    return parcel.WriteParcelable(&fbTemplateInfo_);
+}
+
+void WindowSessionProperty::UnmarshallingFbTemplateInfo(Parcel& parcel, WindowSessionProperty* property)
+{
+    if (!WindowHelper::IsFbWindow(property->GetWindowType())) {
+        return;
+    }
+    sptr<FloatingBallTemplateInfo> fbTemplateInfo = parcel.ReadParcelable<FloatingBallTemplateInfo>();
+    if (fbTemplateInfo == nullptr) {
+        return;
+    }
+    property->SetFbTemplateInfo(*fbTemplateInfo);
 }
 
 bool WindowSessionProperty::MarshallingWindowMask(Parcel& parcel) const
@@ -1307,7 +1349,9 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isFullScreenWaterfallMode_) && parcel.WriteBool(isAbilityHookOff_) &&
         parcel.WriteBool(isAbilityHook_) && parcel.WriteBool(isFollowScreenChange_) &&
         parcel.WriteParcelable(compatibleModeProperty_) && parcel.WriteBool(subWindowOutlineEnabled_) &&
-        MarshallingShadowsInfo(parcel);
+        parcel.WriteUint32(windowModeSupportType_) &&
+        MarshallingShadowsInfo(parcel) &&
+        MarshallingFbTemplateInfo(parcel);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1415,7 +1459,9 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetFollowScreenChange(parcel.ReadBool());
     property->SetCompatibleModeProperty(parcel.ReadParcelable<CompatibleModeProperty>());
     property->SetSubWindowOutlineEnabled(parcel.ReadBool());
+    property->SetWindowModeSupportType(parcel.ReadUint32());
     UnmarshallingShadowsInfo(parcel, property);
+    UnmarshallingFbTemplateInfo(parcel, property);
     return property;
 }
 
@@ -1465,6 +1511,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     configLimitsVP_ = property->configLimitsVP_;
     lastVpr_ = property->lastVpr_;
     pipTemplateInfo_ = property->pipTemplateInfo_;
+    fbTemplateInfo_ = property->fbTemplateInfo_;
     keyboardLayoutParams_ = property->keyboardLayoutParams_;
     windowModeSupportType_ = property->windowModeSupportType_;
     sysBarPropMap_ = property->sysBarPropMap_;
@@ -2197,7 +2244,12 @@ bool WindowSessionProperty::IsFullScreenDisabled() const
 {
     return compatibleModeProperty_ && compatibleModeProperty_->IsFullScreenDisabled();
 }
-        
+
+bool WindowSessionProperty::IsSplitDisabled() const
+{
+    return compatibleModeProperty_ && compatibleModeProperty_->IsSplitDisabled();
+}
+
 bool WindowSessionProperty::IsWindowLimitDisabled() const
 {
     return compatibleModeProperty_ && compatibleModeProperty_->IsWindowLimitDisabled();
@@ -2298,6 +2350,16 @@ bool CompatibleModeProperty::IsFullScreenDisabled() const
     return disableFullScreen_;
 }
 
+void CompatibleModeProperty::SetDisableSplit(bool disableSplit)
+{
+    disableSplit_ = disableSplit;
+}
+
+bool CompatibleModeProperty::IsSplitDisabled() const
+{
+    return disableSplit_;
+}
+
 void CompatibleModeProperty::SetDisableWindowLimit(bool disableWindowLimit)
 {
     disableWindowLimit_ = disableWindowLimit;
@@ -2348,6 +2410,7 @@ bool CompatibleModeProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(disableDragResize_) &&
         parcel.WriteBool(disableResizeWithDpi_) &&
         parcel.WriteBool(disableFullScreen_) &&
+        parcel.WriteBool(disableSplit_) &&
         parcel.WriteBool(disableWindowLimit_) &&
         parcel.WriteBool(isSupportRotateFullScreen_) &&
         parcel.WriteBool(isAdaptToSubWindow_) &&
@@ -2368,6 +2431,7 @@ CompatibleModeProperty* CompatibleModeProperty::Unmarshalling(Parcel& parcel)
     property->disableDragResize_ = parcel.ReadBool();
     property->disableResizeWithDpi_ = parcel.ReadBool();
     property->disableFullScreen_ = parcel.ReadBool();
+    property->disableSplit_ = parcel.ReadBool();
     property->disableWindowLimit_ = parcel.ReadBool();
     property->isSupportRotateFullScreen_ = parcel.ReadBool();
     property->isAdaptToSubWindow_ = parcel.ReadBool();

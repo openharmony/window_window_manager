@@ -181,6 +181,8 @@ public:
     void UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
         SystemBarProperty& property) override;
 
+    WMError SetIntentParam(const std::string& intentParam, const std::function<void()>& loadPageCallback,
+        bool isColdStart) override;
     WMError Create(uint32_t parentId,
         const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
     virtual WMError Destroy(uint32_t reason = 0) override;
@@ -589,6 +591,13 @@ private:
      * RS Client Multi Instance
      */
     std::shared_ptr<RSUIDirector> rsUIDirector_;
+
+    /*
+     * Window Lifecycle
+     */
+    std::string intentParam_;
+    std::function<void()> loadPageCallback_;
+    bool isIntentColdStart_ = true;
 };
 } // namespace Rosen
 } // namespace OHOS

@@ -552,6 +552,39 @@ HWTEST_F(SceneSessionTest6, UpdateNewSizeForPCWindow, Function | SmallTest | Lev
 }
 
 /**
+ * @tc.name: IsInCompatScaleStatus
+ * @tc.desc: IsInCompatScaleStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, IsInCompatScaleStatus, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsInCompatScaleStatus";
+    info.bundleName_ = "IsInCompatScaleStatus";
+    info.screenId_ = 0;
+    sptr<SceneSession> session = sptr<MainSession>::MakeSptr(info, nullptr);
+
+    EXPECT_FALSE(session->IsInCompatScaleStatus());
+    session->SetScale(1.0f, 1.0f, 0.5f, 0.5f);
+
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToProportionalScale(true);
+    session->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    EXPECT_FALSE(session->IsInCompatScaleStatus());
+
+    compatibleModeProperty->SetIsAdaptToProportionalScale(false);
+    compatibleModeProperty->SetIsAdaptToSimulationScale(true);
+    EXPECT_FALSE(session->IsInCompatScaleStatus());
+    compatibleModeProperty->SetIsAdaptToProportionalScale(true);
+    EXPECT_FALSE(session->IsInCompatScaleStatus());
+
+    session->SetScale(2.0f, 1.0f, 0.5f, 0.5f);
+    EXPECT_TRUE(session->IsInCompatScaleStatus());
+    session->SetScale(2.0f, 0.5f, 0.5f, 0.5f);
+    EXPECT_TRUE(session->IsInCompatScaleStatus());
+}
+
+/**
  * @tc.name: CalcNewWindowRectIfNeed
  * @tc.desc: CalcNewWindowRectIfNeed
  * @tc.type: FUNC
@@ -1158,6 +1191,52 @@ HWTEST_F(SceneSessionTest6, GetRotatePolicy, Function | SmallTest | Level3)
     info.abilityName_ = "GetRotatePolicy";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession->GetRotatePolicy(), 10); // 10: invalid rotate policy
+}
+
+/**
+ * @tc.name: SendPointerEventForHover
+ * @tc.desc: SendPointerEventForHover
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, SendPointerEventForHover, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.bundleName_ = "SendPointerEventForHover";
+    info.abilityName_ = "SendPointerEventForHover";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    WSError ret = sceneSession->SendPointerEventForHover(pointerEvent);
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_SESSION);
+
+    sceneSession->state_ = SessionState::STATE_FOREGROUND;
+    ret = sceneSession->SendPointerEventForHover(pointerEvent);
+    EXPECT_EQ(ret, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: TestUpdateGlobalDisplayRectFromClient
+ * @tc.desc: Verify UpdateGlobalDisplayRectFromClient updates rect asynchronously when necessary.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, TestUpdateGlobalDisplayRectFromClient, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    // Case 1: Same rect, should early return and skip update
+    {
+        WSRect rect = session->GetGlobalDisplayRect();
+        auto result = session->UpdateGlobalDisplayRectFromClient(rect, SizeChangeReason::MOVE);
+        EXPECT_EQ(result, WSError::WS_OK);
+    }
+
+    // Case 2: Different rect, update should be posted and processed
+    {
+        WSRect rect = session->GetGlobalDisplayRect();
+        WSRect newRect = { rect.posX_ + 10, rect.posY_ + 20, rect.width_, rect.height_ };
+        auto result = session->UpdateGlobalDisplayRectFromClient(newRect, SizeChangeReason::MOVE);
+        EXPECT_EQ(result, WSError::WS_OK);
+    }
 }
 } // namespace
 } // namespace Rosen

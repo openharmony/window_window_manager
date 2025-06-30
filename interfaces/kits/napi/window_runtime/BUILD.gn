@@ -64,7 +64,6 @@ ohos_shared_library("window_native_kit") {
     "window_napi/js_extension_window_config.cpp",
     "window_napi/js_transition_controller.cpp",
     "window_napi/js_window.cpp",
-    "window_napi/js_window_animation_utils.cpp",
     "window_napi/js_window_listener.cpp",
     "window_napi/js_window_register_manager.cpp",
     "window_napi/js_window_utils.cpp",
@@ -82,6 +81,7 @@ ohos_shared_library("window_native_kit") {
     "../../../../utils:libwmutil_base",
     "../../../../wm:libwm",
     "../common:wm_napi_util",
+    "${window_base_path}/interfaces/kits/napi/window_animation:window_animation_utils",
   ]
 
   external_deps = [
@@ -161,6 +161,11 @@ ohos_shared_library("window_napi") {
 
   part_name = "window_manager"
   subsystem_name = "window"
+
+  defines = []
+  if (build_variant == "user") {
+    defines += [ "IS_RELEASE_VERSION" ]
+  }
 }
 
 ohos_shared_library("windowstage_kit") {
@@ -199,4 +204,9 @@ ohos_shared_library("windowstage_kit") {
   innerapi_tags = [ "platformsdk" ]
   part_name = "window_manager"
   subsystem_name = "window"
+
+  defines = []
+  if (build_variant == "user") {
+    defines += [ "IS_RELEASE_VERSION" ]
+  }
 }

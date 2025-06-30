@@ -29,6 +29,7 @@
 #include <parcel.h>
 #include "dm_common.h"
 #include "securec.h"
+#include "wm_animation_common.h"
 #include "wm_type.h"
 
 namespace OHOS {
@@ -125,6 +126,7 @@ enum class WindowType : uint32_t {
     WINDOW_TYPE_MAGNIFICATION,
     WINDOW_TYPE_MAGNIFICATION_MENU,
     WINDOW_TYPE_SELECTION,
+    WINDOW_TYPE_FB,
     ABOVE_APP_SYSTEM_WINDOW_END,
 
     SYSTEM_SUB_WINDOW_BASE = 2500,
@@ -169,11 +171,13 @@ enum WindowModeSupport : uint32_t {
     WINDOW_MODE_SUPPORT_SPLIT_PRIMARY = 1 << 2,
     WINDOW_MODE_SUPPORT_SPLIT_SECONDARY = 1 << 3,
     WINDOW_MODE_SUPPORT_PIP = 1 << 4,
+    WINDOW_MODE_SUPPORT_FB = 1 << 5,
     WINDOW_MODE_SUPPORT_ALL = WINDOW_MODE_SUPPORT_FLOATING |
                               WINDOW_MODE_SUPPORT_FULLSCREEN |
                               WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
                               WINDOW_MODE_SUPPORT_SPLIT_SECONDARY |
-                              WINDOW_MODE_SUPPORT_PIP
+                              WINDOW_MODE_SUPPORT_PIP |
+                              WINDOW_MODE_SUPPORT_FB
 };
 
 /**
@@ -185,7 +189,8 @@ enum class WindowMode : uint32_t {
     WINDOW_MODE_SPLIT_PRIMARY = 100,
     WINDOW_MODE_SPLIT_SECONDARY,
     WINDOW_MODE_FLOATING,
-    WINDOW_MODE_PIP
+    WINDOW_MODE_PIP,
+    WINDOW_MODE_FB,
 };
 
 /**
@@ -257,6 +262,14 @@ enum class WMError : int32_t {
     WM_ERROR_ILLEGAL_PARAM,
     WM_ERROR_FILTER_ERROR,
     WM_ERROR_TIMEOUT,
+    WM_ERROR_FB_PARAM_INVALID,
+    WM_ERROR_FB_CREATE_FAILED,
+    WM_ERROR_FB_REPEAT_CONTROLLER,
+    WM_ERROR_FB_REPEAT_OPERATION,
+    WM_ERROR_FB_INTERNAL_ERROR,
+    WM_ERROR_FB_STATE_ABNORMALLY,
+    WM_ERROR_FB_INVALID_STATE,
+    WM_ERROR_FB_RESTORE_MAIN_WINDOW_FAILED,
 };
 
 /**
@@ -287,6 +300,14 @@ enum class WmErrorCode : int32_t {
     WM_ERROR_ILLEGAL_PARAM = 1300016,
     WM_ERROR_FILTER_ERROR = 1300017,
     WM_ERROR_TIMEOUT = 1300018,
+    WM_ERROR_FB_PARAM_INVALID = 1300019,
+    WM_ERROR_FB_CREATE_FAILED = 1300020,
+    WM_ERROR_FB_REPEAT_CONTROLLER = 1300021,
+    WM_ERROR_FB_REPEAT_OPERATION = 1300022,
+    WM_ERROR_FB_INTERNAL_ERROR = 1300023,
+    WM_ERROR_FB_STATE_ABNORMALLY = 1300024,
+    WM_ERROR_FB_INVALID_STATE = 1300025,
+    WM_ERROR_FB_RESTORE_MAIN_WINDOW_FAILED = 1300026,
 };
 
 /**
@@ -371,6 +392,14 @@ const std::map<WMError, WmErrorCode> WM_JS_TO_ERROR_CODE_MAP {
     {WMError::WM_ERROR_SYSTEM_ABNORMALLY,              WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY        },
     {WMError::WM_ERROR_TIMEOUT,                        WmErrorCode::WM_ERROR_TIMEOUT                  },
     {WMError::WM_ERROR_ILLEGAL_PARAM,                  WmErrorCode::WM_ERROR_ILLEGAL_PARAM            },
+    {WMError::WM_ERROR_FB_PARAM_INVALID,               WmErrorCode::WM_ERROR_FB_PARAM_INVALID         },
+    {WMError::WM_ERROR_FB_CREATE_FAILED,               WmErrorCode::WM_ERROR_FB_CREATE_FAILED         },
+    {WMError::WM_ERROR_FB_REPEAT_CONTROLLER,           WmErrorCode::WM_ERROR_FB_REPEAT_CONTROLLER     },
+    {WMError::WM_ERROR_FB_REPEAT_OPERATION,            WmErrorCode::WM_ERROR_FB_REPEAT_OPERATION      },
+    {WMError::WM_ERROR_FB_INTERNAL_ERROR,              WmErrorCode::WM_ERROR_FB_INTERNAL_ERROR        },
+    {WMError::WM_ERROR_FB_STATE_ABNORMALLY,            WmErrorCode::WM_ERROR_FB_STATE_ABNORMALLY      },
+    {WMError::WM_ERROR_FB_INVALID_STATE,               WmErrorCode::WM_ERROR_FB_INVALID_STATE         },
+    {WMError::WM_ERROR_FB_RESTORE_MAIN_WINDOW_FAILED,  WmErrorCode::WM_ERROR_FB_RESTORE_MAIN_WINDOW_FAILED  },
 };
 
 /**
@@ -412,6 +441,7 @@ enum class WindowSizeChangeReason : uint32_t {
     RESIZE_BY_LIMIT,
     MAXIMIZE_IN_IMPLICT = 32,
     RECOVER_IN_IMPLICIT = 33,
+    SCREEN_RELATIVE_POSITION_CHANGE,
     END
 };
 
@@ -695,6 +725,11 @@ struct Rect {
         return width_ == 0 && height_ == 0;
     }
 
+    bool IsSamePosition(int32_t x, int32_t y) const
+    {
+        return posX_ == x && posY_ == y;
+    }
+
     inline std::string ToString() const
     {
         std::ostringstream oss;
@@ -703,26 +738,25 @@ struct Rect {
     }
 
     static const Rect EMPTY_RECT;
+
+    /**
+     * @brief Checks whether the right-bottom corner of a rectangle stays within the valid range.
+     *
+     * @param x The x-coordinate of the left-top corner.
+     * @param y The y-coordinate of the left-top corner.
+     * @param width The rectangle's width.
+     * @param height The rectangle's height.
+     * @return true if right-bottom corner stays within int32_t range; false if overflow happens.
+     */
+    static bool IsRightBottomValid(int32_t x, int32_t y, uint32_t width, uint32_t height)
+    {
+        int64_t right = static_cast<int64_t>(x) + width;
+        int64_t bottom = static_cast<int64_t>(y) + height;
+        return right <= INT32_MAX && bottom <= INT32_MAX;
+    }
 };
 
 inline constexpr Rect Rect::EMPTY_RECT { 0, 0, 0, 0 };
-
-/**
- * @struct Position
- *
- * @brief Represent a two-dimensional position in a specific coordinate system.
- */
-struct Position {
-    int32_t x = 0;
-    int32_t y = 0;
-
-    inline std::string ToString() const
-    {
-        std::ostringstream oss;
-        oss << "[" << x << ", " << y << "]";
-        return oss.str();
-    }
-};
 
 /**
  * @struct SystemBarProperty
@@ -1469,148 +1503,6 @@ enum class RotationChangeType : uint32_t {
      * rotate end.
      */
     WINDOW_DID_ROTATE,
-};
-
-/*
- * @brief Enumerates window transition type.
- */
-enum class WindowTransitionType : uint32_t {
-    /**
-     * window destroy.
-     */
-    DESTROY = 0,
-    
-    /**
-     * end type.
-     */
-    END,
-};
-
-/*
- * @brief Enumerates window animation curve type.
- */
-enum class WindowAnimationCurve : uint32_t {
-    /**
-     * animation curve type linear.
-     */
-    LINEAR = 0,
-
-    /**
-     * animation curve type interpolation_spring.
-     */
-    INTERPOLATION_SPRING = 1,
-};
-
-const uint32_t ANIMATION_PARAM_SIZE = 4;
-const uint32_t ANIMATION_MAX_DURATION = 3000;
-
-/*
- * @brief Window animation property.
- */
-struct WindowAnimationProperty : public Parcelable {
-    float targetScale = 0.0f;
-
-    bool Marshalling(Parcel& parcel) const override
-    {
-        if (!parcel.WriteFloat(targetScale)) {
-            return false;
-        }
-        return true;
-    }
-
-    static WindowAnimationProperty* Unmarshalling(Parcel& parcel)
-    {
-        WindowAnimationProperty* animationProperty = new WindowAnimationProperty();
-        if (!parcel.ReadFloat(animationProperty->targetScale)) {
-            delete animationProperty;
-            return nullptr;
-        }
-        return animationProperty;
-    }
-};
-
-/*
- * @brief Window transition animation configuration.
- */
-struct WindowAnimationOption : public Parcelable {
-    WindowAnimationCurve curve = WindowAnimationCurve::LINEAR;
-    uint32_t duration = 0;
-    std::array<float, ANIMATION_PARAM_SIZE> param;
-
-    bool Marshalling(Parcel& parcel) const override
-    {
-        if (!(parcel.WriteUint32(static_cast<uint32_t>(curve)) && parcel.WriteUint32(duration))) {
-            return false;
-        }
-        if (param.size() > ANIMATION_PARAM_SIZE) {
-            return false;
-        }
-        for (auto p: param) {
-            if (!parcel.WriteFloat(p)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    static WindowAnimationOption* Unmarshalling(Parcel& parcel)
-    {
-        WindowAnimationOption* windowAnimationConfig = new WindowAnimationOption();
-        uint32_t curve = 0;
-        if (!parcel.ReadUint32(curve)) {
-            delete windowAnimationConfig;
-            return nullptr;
-        }
-        windowAnimationConfig->curve = static_cast<WindowAnimationCurve>(curve);
-        if (!parcel.ReadUint32(windowAnimationConfig->duration)) {
-            delete windowAnimationConfig;
-            return nullptr;
-        }
-        if (windowAnimationConfig->param.size() > ANIMATION_PARAM_SIZE) {
-            delete windowAnimationConfig;
-            return nullptr;
-        }
-        for (auto& param: windowAnimationConfig->param) {
-            if (!parcel.ReadFloat(param)) {
-                delete windowAnimationConfig;
-                return nullptr;
-            }
-        }
-        return windowAnimationConfig;
-    }
-};
-
-/*
- * @brief Transition animation configuration.
- */
-struct TransitionAnimation : public Parcelable {
-    WindowAnimationOption config;
-    float opacity = 1.0f;
-    
-    bool Marshalling(Parcel& parcel) const override
-    {
-        if (!(parcel.WriteFloat(opacity) && parcel.WriteParcelable(&config))) {
-            return false;
-        }
-        return true;
-    }
-
-    static TransitionAnimation* Unmarshalling(Parcel& parcel)
-    {
-        TransitionAnimation* transitionAnimation = new TransitionAnimation();
-        if (!parcel.ReadFloat(transitionAnimation->opacity)) {
-            delete transitionAnimation;
-            return nullptr;
-        }
-        std::shared_ptr<WindowAnimationOption> animationConfig =
-            std::shared_ptr<WindowAnimationOption>(parcel.ReadParcelable<WindowAnimationOption>());
-        if (animationConfig == nullptr) {
-            delete transitionAnimation;
-            return nullptr;
-        }
-        transitionAnimation->config = *animationConfig;
-        return transitionAnimation;
-    }
 };
 
 /**
