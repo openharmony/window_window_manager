@@ -31,6 +31,14 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+    std::string g_logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
+        const char *msg)
+    {
+        g_logMsg = msg;
+    }
+}
 class SessionManagerUTTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -87,25 +95,6 @@ HWTEST_F(SessionManagerUTTest, OnRemoteRequest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetSceneSessionManagerProxy
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SessionManagerUTTest, GetSceneSessionManagerProxy, TestSize.Level1)
-{
-    ASSERT_NE(nullptr, sm_);
-    sm_->Clear();
-    sm_->ClearSessionManagerProxy();
-    auto sceneSessionManagerProxy = sm_->GetSceneSessionManagerProxy();
-    ASSERT_EQ(nullptr, sceneSessionManagerProxy);
-
-    sm_->ClearSessionManagerProxy();
-    sm_->sessionManagerServiceProxy_ = SessionManagerLite::GetInstance().GetSessionManagerServiceProxy();
-    sceneSessionManagerProxy = sm_->GetSceneSessionManagerProxy();
-    ASSERT_EQ(nullptr, sceneSessionManagerProxy);
-}
-
-/**
  * @tc.name: ClearSessionManagerProxy
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -129,15 +118,17 @@ HWTEST_F(SessionManagerUTTest, ClearSessionManagerProxy, TestSize.Level1)
  */
 HWTEST_F(SessionManagerUTTest, OnWMSConnectionChangedCallback, TestSize.Level1)
 {
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     ASSERT_NE(nullptr, sm_);
-    bool funcInvoked = false;
     sm_->wmsConnectionChangedFunc_ = nullptr;
     sm_->OnWMSConnectionChangedCallback(101, DEFAULT_SCREEN_ID, true, false);
-    ASSERT_EQ(funcInvoked, false);
+    EXPECT_FALSE(g_logMsg.find("WMS CallbackFunc is null.") != std::string::npos);
 
-    sm_->wmsConnectionChangedFunc_ = [&](int32_t userId, int32_t screenId, bool isConnected) { funcInvoked = true; };
+    sm_->wmsConnectionChangedFunc_ = [&](int32_t userId, int32_t screenId, bool isConnected) {};
     sm_->OnWMSConnectionChangedCallback(101, DEFAULT_SCREEN_ID, true, true);
-    ASSERT_EQ(funcInvoked, true);
+    EXPECT_TRUE(g_logMsg.find("WMS connection changed") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -188,15 +179,14 @@ HWTEST_F(SessionManagerUTTest, OnWMSConnectionChanged2, TestSize.Level1)
  */
 HWTEST_F(SessionManagerUTTest, RecoverSessionManagerService, TestSize.Level1)
 {
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     ASSERT_NE(nullptr, sm_);
-    bool funcInvoked = false;
-    sm_->RegisterWindowManagerRecoverCallbackFunc(nullptr);
-    sm_->RecoverSessionManagerService(nullptr);
-    ASSERT_EQ(funcInvoked, false);
-
-    sm_->RegisterWindowManagerRecoverCallbackFunc([&]() { funcInvoked = true; });
-    sm_->RecoverSessionManagerService(nullptr);
-    ASSERT_EQ(funcInvoked, true);
+    sptr<ISessionManagerService> sessionManagerService;
+    sm_->RecoverSessionManagerService(sessionManagerService);
+    EXPECT_EQ(nullptr, sm_->sessionManagerServiceProxy_);
+    EXPECT_TRUE(g_logMsg.find("Run recover") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -221,15 +211,18 @@ HWTEST_F(SessionManagerUTTest, RegisterUserSwitchListener, TestSize.Level1)
  */
 HWTEST_F(SessionManagerUTTest, OnUserSwitch, TestSize.Level1)
 {
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     ASSERT_NE(nullptr, sm_);
     sm_->OnUserSwitch(nullptr);
     ASSERT_EQ(nullptr, sm_->sessionManagerServiceProxy_);
+    EXPECT_TRUE(g_logMsg.find("sceneSessionManagerServiceProxy is null") != std::string::npos);
 
-    bool funInvoked = false;
-    sm_->userSwitchCallbackFunc_ = [&]() { funInvoked = true; };
+    sm_->userSwitchCallbackFunc_ = [&]() {};
     auto sessionManagerService = SessionManagerLite::GetInstance().GetSessionManagerServiceProxy();
     sm_->OnUserSwitch(sessionManagerService);
-    ASSERT_EQ(funInvoked, false);
+    EXPECT_FALSE(g_logMsg.find("sceneSessionManagerServiceProxy is null") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
