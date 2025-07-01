@@ -4427,6 +4427,7 @@ WMError WindowSessionImpl::SetWindowContainerColor(const std::string& activeColo
     }
     if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_WINDOW_TRANSPARENT) &&
         containerColorList_.count(property_->GetSessionInfo().bundleName_) == 0) {
+        TLOGE(WmsLogTag::WMS_DECOR, "winId: %{public}d, permission denied", GetPersistentId());
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
     if (IsWindowSessionInvalid()) {
