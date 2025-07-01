@@ -9970,8 +9970,8 @@ WMError SceneSessionManager::UpdateSubSessionBlackList(const sptr<SceneSession>&
     SessionBlackListInfo parentSessionBlackListInfo = { .windowId = parentSession->GetPersistentId() };
     ScreenId rsScreenId = SCREEN_ID_INVALID;
     for (auto& [displayId, sessionBlackListInfoSet] : sessionBlackListInfoMap_) {
-        if (sessionBlackListSet.count(parentSessionBlackListInfo) > 0) {
-            sessionBlackListInfoSet.insert({.windowId = sceneSession->GetPersistentId()});
+        if (sessionBlackListInfoSet.count(parentSessionBlackListInfo) > 0) {
+            sessionBlackListInfoSet.insert({ .windowId = sceneSession->GetPersistentId() });
             rsScreenId = displayId;
             ret = WMError::WM_OK;
         }
@@ -9979,7 +9979,7 @@ WMError SceneSessionManager::UpdateSubSessionBlackList(const sptr<SceneSession>&
     if (ret != WMError::WM_OK) {
         return ret;
     }
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "screenId: %{public}" PRIu64 " win: %{public}d patentId: %{public}d",
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "rsScreenId: %{public}" PRIu64 " win: %{public}d parentId: %{public}d",
         rsScreenId, sceneSession->GetPersistentId(), parentSession->GetPersistentId());
     SessionBlackListInfoSet funcSet = sessionBlackListInfoMap_[rsScreenId];
     std::vector<uint64_t> surfaceNodeIds;
@@ -10011,7 +10011,7 @@ WMError SceneSessionManager::UpdateSubSessionBlackList(const sptr<SceneSession>&
 WMError SceneSessionManager::RemoveSessionFromBlackList(const sptr<SceneSession>& sceneSession)
 {
     WMError ret = WMError::WM_DO_NOTHING;
-    SessionBlackListInfo sessionBlackListInfo = {.windowId = sceneSession->GetPersistentId()};
+    SessionBlackListInfo sessionBlackListInfo = { .windowId = sceneSession->GetPersistentId() };
     for (auto it = sessionBlackListInfoMap_.begin(); it != sessionBlackListInfoMap_.end();) {
         auto& sessionBlackListInfoSet = it->second;
         if (sessionBlackListInfoSet.find(sessionBlackListInfo) == sessionBlackListInfoSet.end()) {
