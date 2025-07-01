@@ -446,7 +446,7 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, OnSetSurfaceNodeIdsChanged, TestSi
  * @tc.desc: OnVirtualScreenDisconnected test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerClientProxyTest, OnSetSurfaceNodeIdsChanged, TestSize.Level1)
+HWTEST_F(ScreenSessionManagerClientProxyTest, OnVirtualScreenDisconnected, TestSize.Level1)
 {
     MockMessageParcel::ClearAllErrorFlag();
     DisplayId displayId = 10;
