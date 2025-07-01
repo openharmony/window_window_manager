@@ -1924,7 +1924,7 @@ HWTEST_F(SceneSessionManagerTest2, OnVirtualScreenDisconnected, TestSize.Level1)
     auto ret = ssm_->OnVirtualScreenDisconnected(1);
     EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
 
-    auto ret = ssm_->OnVirtualScreenDisconnected(10);
+    ret = ssm_->OnVirtualScreenDisconnected(10);
     EXPECT_EQ(WMError::WM_OK, ret);
 }
 
@@ -1951,7 +1951,7 @@ HWTEST_F(SceneSessionManagerTest2, UpdateSubSessionBlackList, TestSize.Level1)
     sceneSession->SetParentSession(parentSceneSession);
     ssm_->sessionBlackListInfoMap_[11].insert({ .windowId = 100001 });
     ssm_->sessionBlackListInfoMap_[11].insert({ .windowId = 100002 });
-    EXPECT_EQ(2, sessionBlackListInfoMap_[11].size());
+    EXPECT_EQ(2, ssm_->sessionBlackListInfoMap_[11].size());
     ret = ssm_->UpdateSubSessionBlackList(sceneSession);
     EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
 

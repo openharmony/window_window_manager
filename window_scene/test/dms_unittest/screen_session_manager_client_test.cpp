@@ -807,7 +807,7 @@ HWTEST_F(ScreenSessionManagerClientTest, OnSetSurfaceNodeIdsChanged01, TestSize.
     ASSERT_NE(nullptr, client);
 
     DisplayId displayId = 0;
-    std::vector<uint64_t> surfaceNodeIds { 100, 101 };
+    std::vector<uint64_t> surfaceNodeIds = { 100, 101 };
     sptr<MockDisplayChangeListener> listener = sptr<MockDisplayChangeListener>::MakeSptr();
     client->displayChangeListener_ = listener;
     client->OnSetSurfaceNodeIdsChanged(displayId, surfaceNodeIds);
