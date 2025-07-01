@@ -320,7 +320,7 @@ int ScreenSessionManagerClientStub::HandleOnSetSurfaceNodeIdsChanged(MessageParc
 int ScreenSessionManagerClientStub::HandleOnVirtualScreenDisconnected(MessageParcel& data, MessageParcel& reply)
 {
     auto displayId = static_cast<DisplayId>(data.ReadUint64());
-    OnSetSurfaceNodeIdsChanged(displayId);
+    OnVirtualScreenDisconnected(displayId);
     return ERR_NONE;
 }
 

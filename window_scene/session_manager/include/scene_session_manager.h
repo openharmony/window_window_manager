@@ -438,7 +438,7 @@ public:
         std::vector<uint64_t>& surfaceNodeIds, bool isBlackList = false);
     WMError GetSurfaceNodeIdsFromSubSession(
         const sptr<SceneSession>& sceneSession, std::vector<uint64_t>& surfaceNodeIds);
-    WMError updateSubSessionBlackList(const sptr<SceneSession>& sceneSession);
+    WMError UpdateSubSessionBlackList(const sptr<SceneSession>& sceneSession);
     WMError RemoveSessionFromBlackList(const sptr<SceneSession>& sceneSession);
     WMError SetSurfaceNodeIds(DisplayId displayId, const std::vector<uint64_t>& surfaceNodeIds);
     WMError OnVirtualScreenDisconnected(DisplayId displayId);
