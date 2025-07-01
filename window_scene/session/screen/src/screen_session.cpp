@@ -1054,6 +1054,7 @@ void ScreenSession::UpdateDisplayNodeRotation(int rotation)
     std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
     if (displayNode_ != nullptr) {
         displayNode_->SetScreenRotation(static_cast<uint32_t>(targetRotation));
+        TLOGI(WmsLogTag::DMS, "Set RS screen rotation:%{public}d", targetRotation);
     }
 }
 
@@ -2308,6 +2309,7 @@ int32_t ScreenSession::GetApiVersion()
         TLOGI(WmsLogTag::DMS, "IPC get");
         g_uidVersionMap.Set(currentPid, apiVersion);
     }
+    TLOGI(WmsLogTag::DMS, "pid:%{public}d, apiVersion:%{public}d", apiVersion, apiVersion);
     lastRequestTime = currentTime;
     return apiVersion;
 }
