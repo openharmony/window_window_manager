@@ -47,6 +47,9 @@ private:
         SYSTEM_DENSITY_CHANGE_CB,
         SCREENSHOT_EVENT_CB,
         EXTENSION_SECURE_LIMIT_CHANGE_CB,
+        KEYBOARD_DID_SHOW_CB,
+        KEYBOARD_DID_HIDE_CB,
+        KEYBOARD_HEIGHT_CHANGE_CB,
     };
 
     bool IsCallbackRegistered(napi_env env, std::string type, napi_value jsListenerObject);
@@ -65,6 +68,10 @@ private:
     WmErrorCode ProcessScreenshotRegister(const sptr<JsExtensionWindowListener>& listener,
         sptr<Window> window, bool isRegister);
     WmErrorCode ProcessExtensionSecureLimitChangeRegister(const sptr<JsExtensionWindowListener>& listener,
+        sptr<Window> window, bool isRegister);
+    WmErrorCode ProcessKeyboardDidShowRegister(const sptr<JsExtensionWindowListener>& listener,
+        sptr<Window> window, bool isRegister);
+    WmErrorCode ProcessKeyboardDidHideRegister(const sptr<JsExtensionWindowListener>& listener,
         sptr<Window> window, bool isRegister);
     WmErrorCode ProcessRegister(CaseType caseType, const sptr<JsExtensionWindowListener>& listener,
         const sptr<Window>& window, const std::string& type, bool isRegister);

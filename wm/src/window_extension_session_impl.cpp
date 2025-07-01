@@ -480,6 +480,78 @@ WMError WindowExtensionSessionImpl::UnregisterHostWindowRectChangeListener(
     return ret;
 }
 
+WMError WindowExtensionSessionImpl::RegisterKeyboardDidShowListener(const sptr<IKeyboardDidShowListener>& listener)
+{
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "in");
+    AAFwk::Want want;
+    auto ret = SendExtensionMessageToHost(
+        static_cast<uint32_t>(Extension::Businesscode::REGISTER_KEYBOARD_DID_SHOW_LISTENER), want);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Send register listener message failed, errCode: %{public}d", ret);
+        return ret;
+    }
+    std::lock_guard<std::mutex> lockListener(keyboardDidShowListenerMutex_);
+    ret = RegisterListener(keyboardDidShowListenerList_, listener);
+    return ret;
+}
+
+WMError WindowExtensionSessionImpl::UnregisterKeyboardDidShowListener(const sptr<IKeyboardDidShowListener>& listener)
+{
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "in");
+    WMError ret = WMError::WM_OK;
+    bool needNotifyHost = false;
+    {
+        std::lock_guard<std::mutex> lockListener(keyboardDidShowListenerMutex_);
+        ret = UnregisterListener(keyboardDidShowListenerList_, listener);
+        if (ret != WMError::WM_OK) {
+            return ret;
+        }
+        needNotifyHost = keyboardDidShowListenerList_.empty() && keyboardDidShowUIExtListeners_.empty();
+    }
+    if (needNotifyHost) {
+        AAFwk::Want want;
+        ret = SendExtensionMessageToHost(
+            static_cast<uint32_t>(Extension::Businesscode::UNREGISTER_KEYBOARD_DID_SHOW_LISTENER), want);
+    }
+    return ret;
+}
+
+WMError WindowExtensionSessionImpl::RegisterKeyboardDidHideListener(const sptr<IKeyboardDidHideListener>& listener)
+{
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "in");
+    AAFwk::Want want;
+    auto ret = SendExtensionMessageToHost(
+        static_cast<uint32_t>(Extension::Businesscode::REGISTER_KEYBOARD_DID_HIDE_LISTENER), want);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Send register listener message failed, errCode: %{public}d", ret);
+        return ret;
+    }
+    std::lock_guard<std::mutex> lockListener(keyboardDidHideListenerMutex_);
+    ret = RegisterListener(keyboardDidHideListenerList_, listener);
+    return ret;
+}
+
+WMError WindowExtensionSessionImpl::UnregisterKeyboardDidHideListener(const sptr<IKeyboardDidHideListener>& listener)
+{
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "in");
+    WMError ret = WMError::WM_OK;
+    bool needNotifyHost = false;
+    {
+        std::lock_guard<std::mutex> lockListener(keyboardDidHideListenerMutex_);
+        ret = UnregisterListener(keyboardDidHideListenerList_, listener);
+        if (ret != WMError::WM_OK) {
+            return ret;
+        }
+        needNotifyHost = keyboardDidHideListenerList_.empty() && keyboardDidHideUIExtListeners_.empty();
+    }
+    if (needNotifyHost) {
+        AAFwk::Want want;
+        ret = SendExtensionMessageToHost(
+            static_cast<uint32_t>(Extension::Businesscode::UNREGISTER_KEYBOARD_DID_HIDE_LISTENER), want);
+    }
+    return ret;
+}
+
 void WindowExtensionSessionImpl::TriggerBindModalUIExtension()
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "id: %{public}d", GetPersistentId());
@@ -1862,6 +1934,22 @@ WMError WindowExtensionSessionImpl::OnExtensionMessage(uint32_t code, int32_t pe
             return HandleUnregisterHostWindowRectChangeListener(code, persistentId, data);
             break;
         }
+        case static_cast<uint32_t>(Extension::Businesscode::REGISTER_KEYBOARD_DID_SHOW_LISTENER): {
+            return HandleUIExtRegisterKeyboardDidShowListener(code, persistentId, data);
+            break;
+        }
+        case static_cast<uint32_t>(Extension::Businesscode::UNREGISTER_KEYBOARD_DID_SHOW_LISTENER): {
+            return HandleUIExtUnregisterKeyboardDidShowListener(code, persistentId, data);
+            break;
+        }
+        case static_cast<uint32_t>(Extension::Businesscode::REGISTER_KEYBOARD_DID_HIDE_LISTENER): {
+            return HandleUIExtRegisterKeyboardDidHideListener(code, persistentId, data);
+            break;
+        }
+        case static_cast<uint32_t>(Extension::Businesscode::UNREGISTER_KEYBOARD_DID_HIDE_LISTENER): {
+            return HandleUIExtUnregisterKeyboardDidHideListener(code, persistentId, data);
+            break;
+        }
         default: {
             TLOGI(WmsLogTag::WMS_UIEXT, "Message was not processed, businessCode: %{public}u", code);
             break;
@@ -2085,6 +2173,24 @@ WMError WindowExtensionSessionImpl::OnExtensionSecureLimitChange(AAFwk::Want&& d
     return WMError::WM_OK;
 }
 
+WMError WindowExtensionSessionImpl::OnKeyboardDidShow(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)
+{
+    KeyboardPanelInfo info;
+    ReadKeyboardInfoFromWant(data, info);
+    NotifyKeyboardDidShow(info);
+    delete infoPtr;
+    return WMError::WM_OK;
+}
+
+WMError WindowExtensionSessionImpl::OnKeyboardDidHide(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)
+{
+    KeyboardPanelInfo info;
+    ReadKeyboardInfoFromWant(data, info);
+    NotifyKeyboardDidHide(info);
+    delete infoPtr;
+    return WMError::WM_OK;
+}
+
 void WindowExtensionSessionImpl::RegisterConsumer(Extension::Businesscode code,
     const std::function<WMError(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)>& func)
 {
@@ -2141,6 +2247,12 @@ void WindowExtensionSessionImpl::RegisterDataConsumer()
     RegisterConsumer(Extension::Businesscode::NOTIFY_EXTENSION_SECURE_LIMIT_CHANGE,
         std::bind(&WindowExtensionSessionImpl::OnExtensionSecureLimitChange,
         this, std::placeholders::_1, std::placeholders::_2));
+    RegisterConsumer(Extension::Businesscode::NOTIFY_KEYBOARD_DID_SHOW,
+        std::bind(&WindowExtensionSessionImpl::OnKeyboardDidShow,
+        this, std::placeholders::_1, std::placeholders::_2));
+    RegisterConsumer(Extension::Businesscode::NOTIFY_KEYBOARD_DID_HIDE,
+        std::bind(&WindowExtensionSessionImpl::OnKeyboardDidHide,
+            this, std::placeholders::_1, std::placeholders::_2));
 
     auto consumersEntry = [weakThis = wptr(this)](SubSystemId id, uint32_t customId, AAFwk::Want&& data,
                                                   std::optional<AAFwk::Want>& reply) -> int32_t {

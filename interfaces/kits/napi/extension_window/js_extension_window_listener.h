@@ -39,7 +39,9 @@ class JsExtensionWindowListener : public IWindowChangeListener,
                                   public IDisplayIdChangeListener,
                                   public ISystemDensityChangeListener,
                                   public IScreenshotListener,
-                                  public IExtensionSecureLimitChangeListener {
+                                  public IExtensionSecureLimitChangeListener,
+                                  public IKeyboardDidShowListener,
+                                  public IKeyboardDidHideListener {
 public:
     JsExtensionWindowListener(napi_env env, std::shared_ptr<NativeReference> callback)
         : env_(env), jsCallBack_(callback), weakRef_(wptr<JsExtensionWindowListener> (this)) {
@@ -55,6 +57,8 @@ public:
     void OnSystemDensityChanged(float density) override;
     void OnScreenshot() override;
     void OnSecureLimitChange(bool isLimit) override;
+    void OnKeyboardDidShow(const KeyboardPanelInfo& keyboardPanelInfo) override;
+    void OnKeyboardDidHide(const KeyboardPanelInfo& keyboardPanelInfo) override;
     void AfterForeground() override;
     void AfterBackground() override;
     void AfterFocused() override;
