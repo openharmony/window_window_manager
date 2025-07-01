@@ -535,6 +535,10 @@ WSError SessionProxy::PendingSessionActivation(sptr<AAFwk::SessionInfo> abilityS
         TLOGE(WmsLogTag::WMS_LIFE, "Write hideStartWindow failed.");
         return WSError::WS_ERROR_IPC_FAILED;
     }
+    if (!data.WriteUint32(abilitySessionInfo->scenarios)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write scenarios failed.");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
     if (!data.WriteParcelable(abilitySessionInfo->windowCreateParams.get())) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write windowCreateParams failed");
         return WSError::WS_ERROR_IPC_FAILED;
