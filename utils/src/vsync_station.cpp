@@ -35,6 +35,7 @@ namespace {
 const std::string VSYNC_THREAD_ID = "VsyncThread";
 const std::string VSYNC_TIME_OUT_TASK = "vsync_time_out_task_";
 constexpr int64_t VSYNC_TIME_OUT_MILLISECONDS = 600;
+constexpr int32_t DEFAULT_ANIMATOR_EXPECTED_FRAME_RATE = -1;
 }
 
 VsyncStation::VsyncStation(NodeId nodeId, const std::shared_ptr<AppExecFwk::EventHandler>& vsyncHandler)
@@ -225,7 +226,7 @@ FrameRateLinkerId VsyncStation::GetFrameRateLinkerId()
     return 0;
 }
 
-void VsyncStation::FlushFrameRate(const std::shared_ptr<RSUIContext> rsUIContext, uint32_t rate,
+void VsyncStation::FlushFrameRate(const std::shared_ptr<RSUIContext>& rsUIContext, uint32_t rate,
     int32_t animatorExpectedFrameRate, uint32_t rateType)
 {
     std::lock_guard<std::mutex> lock(mutex_);
@@ -243,7 +244,7 @@ void VsyncStation::FlushFrameRate(const std::shared_ptr<RSUIContext> rsUIContext
     }
 }
 
-void VsyncStation::SetFrameRateLinkerEnable(const std::shared_ptr<RSUIContext> rsUIContext, bool enabled)
+void VsyncStation::SetFrameRateLinkerEnable(const std::shared_ptr<RSUIContext>& rsUIContext, bool enabled)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     if (auto frameRateLinker = GetFrameRateLinkerLocked()) {
@@ -252,7 +253,7 @@ void VsyncStation::SetFrameRateLinkerEnable(const std::shared_ptr<RSUIContext> r
             FrameRateRange range = {0, RANGE_MAX_REFRESHRATE, 0};
             TLOGI(WmsLogTag::WMS_MAIN, "rate %{public}d, linkerId %{public}" PRIu64,
                 range.preferred_, frameRateLinker->GetId());
-            frameRateLinker->UpdateFrameRateRange(range, -1, rsUIContext);
+            frameRateLinker->UpdateFrameRateRange(range, DEFAULT_ANIMATOR_EXPECTED_FRAME_RATE, rsUIContext);
             frameRateLinker->UpdateFrameRateRangeImme(range);
         } else if (lastFrameRateRange_) {
             // to resolve these cases:

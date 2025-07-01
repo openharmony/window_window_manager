@@ -48,9 +48,9 @@ public:
     void Destroy();
 
     FrameRateLinkerId GetFrameRateLinkerId();
-    void FlushFrameRate(const std::shared_ptr<RSUIContext> rsUIContext, uint32_t rate,
+    void FlushFrameRate(const std::shared_ptr<RSUIContext>& rsUIContext, uint32_t rate,
         int32_t animatorExpectedFrameRate, uint32_t rateType = 0);
-    void SetFrameRateLinkerEnable(const std::shared_ptr<RSUIContext> rsUIContext, bool enabled);
+    void SetFrameRateLinkerEnable(const std::shared_ptr<RSUIContext>& rsUIContext, bool enabled);
     void SetDisplaySoloistFrameRateLinkerEnable(bool enabled);
     void SetUiDvsyncSwitch(bool dvsyncSwitch);
 
