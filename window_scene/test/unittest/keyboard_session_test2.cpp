@@ -1008,6 +1008,38 @@ HWTEST_F(KeyboardSessionTest2, EnableCallingSessionAvoidArea01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CloseKeyboardSyncTransaction6
+ * @tc.desc: test function: CloseKeyboardSyncTransaction
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest2, CloseKeyboardSyncTransaction6, TestSize.Level1)
+{
+    std::string abilityName = "CloseKeyboardSyncTransaction6";
+    std::string bundleName = "CloseKeyboardSyncTransaction6";
+    sptr<KeyboardSession> keyboardSession = GetKeyboardSession(abilityName, bundleName);
+    WSRect keyboardPanelRect = { 0, 0, 0, 0 };
+    WindowAnimationInfo animationInfo;
+    animationInfo.callingId = 3;
+    sptr<KeyboardSession::KeyboardSessionCallback> keyboardCallback =
+        new (std::nothrow) KeyboardSession::KeyboardSessionCallback();
+    keyboardSession->keyboardCallback_ = keyboardCallback;
+
+    animationInfo.isGravityChanged = false;
+    keyboardSession->keyboardCallback_->isLastFrameLayoutFinished = []() { return true; };
+    keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, true, animationInfo);
+    EXPECT_EQ(false, keyboardSession->stateChanged_);
+
+    keyboardSession->keyboardCallback_->isLastFrameLayoutFinished = []() { return false; };
+    keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, true, animationInfo);
+    EXPECT_EQ(true, keyboardSession->stateChanged_);
+
+    keyboardSession->stateChanged_ = false;
+    animationInfo.isGravityChanged = true;
+    keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, true, animationInfo);
+    EXPECT_EQ(false, keyboardSession->stateChanged_);
+}
+
+/**
  * @tc.name: CloseKeyboardSyncTransaction5
  * @tc.desc: test function: CloseKeyboardSyncTransaction
  * @tc.type: FUNC
