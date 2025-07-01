@@ -177,6 +177,7 @@ public:
     void OnGetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
         std::vector<uint64_t>& surfaceNodeIds, bool isBlackList = false) override;
     void OnSetSurfaceNodeIds(DisplayId displayId, const std::vector<uint64_t>& surfaceNodeIds) override;
+    void OnVirtualScreenDisconnected(DisplayId displayId) override;
 
     /*
      * Fold Screen Status Change Report
@@ -435,10 +436,12 @@ public:
         ScreenId fromScreenId = SCREEN_ID_INVALID);
     WMError GetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
         std::vector<uint64_t>& surfaceNodeIds, bool isBlackList = false);
-    void GetSurfaceNodeIdsFromSubSession(const sptr<SceneSession>& sceneSession, std::vector<uint64_t>& surfaceNodeIds);
-    WMError AddAndNotifySubSessionToBlackList(const sptr<SceneSession>& sceneSession);
+    WMError GetSurfaceNodeIdsFromSubSession(
+        const sptr<SceneSession>& sceneSession, std::vector<uint64_t>& surfaceNodeIds);
+    WMError updateSubSessionBlackList(const sptr<SceneSession>& sceneSession);
     WMError RemoveSessionFromBlackList(const sptr<SceneSession>& sceneSession);
     WMError SetSurfaceNodeIds(DisplayId displayId, const std::vector<uint64_t>& surfaceNodeIds);
+    WMError OnVirtualScreenDisconnected(DisplayId displayId);
     WSError UpdateTitleInTargetPos(int32_t persistentId, bool isShow, int32_t height);
 
     /*
@@ -1494,25 +1497,22 @@ private:
         std::unordered_map<WindowInfoKey, std::any>& windowPropertyChangeInfo);
 
     struct SessionBlackListInfo {
-        int32_t windowId_ = INVALID_SESSION_ID;
-        std::string tag_;
+        int32_t windowId = INVALID_SESSION_ID;
     };
     struct BlackListEqual {
         bool operator()(const SessionBlackListInfo& left, const SessionBlackListInfo& right) const
         {
-            return left.windowId_ == right.windowId_ && left.tag_ == right.tag_;
+            return left.windowId == right.windowId;
         }
     };
     struct BlackListHasher {
         size_t operator()(const SessionBlackListInfo& info) const
         {
-            return std::hash<int32_t>()(info.windowId_) + std::hash<std::string>()(info.tag_);
+            return std::hash<int32_t>()(info.windowId);
         }
     };
     using SessionBlackListInfoSet = std::unordered_set<SessionBlackListInfo, BlackListHasher, BlackListEqual>;
     std::unordered_map<DisplayId, SessionBlackListInfoSet> sessionBlackListInfoMap_;
-    std::mutex sessionBlackListInfoMapMutex_;
-    std::atomic<DisplayId> workingVirtualScreen = DISPLAY_ID_INVALID;
 
     /*
      * Move Drag

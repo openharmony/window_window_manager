@@ -4868,7 +4868,10 @@ DMError ScreenSessionManager::DestroyVirtualScreen(ScreenId screenId)
             screenSessionMap_.erase(screenId);
         }
         NotifyScreenDisconnected(screenId);
-        TLOGW(WmsLogTag::DMS, "destroy success, id: %{public}" PRIu64, screenId);
+        if (auto clientProxy = GetClientProxy()) {
+            clientProxy->OnVirtualScreenDisconnected(rsScreenId);
+        }
+        TLOGW(WmsLogTag::DMS, "destroy success, id: %{public}" PRIu64 "rsId: %{public}" PRIu64, screenId, rsScreenId);
     }
     screenIdManager_.DeleteScreenId(screenId);
     virtualScreenCount_ = virtualScreenCount_ > 0 ? virtualScreenCount_ - 1 : 0;

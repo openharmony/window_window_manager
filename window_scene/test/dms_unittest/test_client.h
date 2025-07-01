@@ -42,6 +42,7 @@ public:
     void OnGetSurfaceNodeIdsFromMissionIdsChanged(std::vector<uint64_t>& missionIds,
         std::vector<uint64_t>& surfaceNodeIds, bool isBlackList = false) override {};
     void OnSetSurfaceNodeIdsChanged(DisplayId displayId, const std::vector<uint64_t>& surfaceNodeIds) override {};
+    void OnVirtualScreenDisconnected(DisplayId displayId) override {};
     void OnUpdateFoldDisplayMode(FoldDisplayMode displayMode) override {};
     void SetVirtualPixelRatioSystem(ScreenId screenId, float virtualPixelRatio) override {};
     void OnFoldStatusChangedReportUE(const std::vector<std::string>& screenFoldInfo) override {};
