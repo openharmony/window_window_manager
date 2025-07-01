@@ -1547,6 +1547,36 @@ HWTEST_F(SceneSessionManagerTest, GetUnreliableWindowInfo06, Function | SmallTes
 }
 
 /**
+ * @tc.name: GetUnreliableWindowInfo07
+ * @tc.desc: system touchable
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, GetUnreliableWindowInfo07, TestSize.Level1)
+{
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo info;
+    info.windowType_ = 2122;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    property->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, property);
+    ASSERT_NE(nullptr, sceneSession);
+    sceneSession->SetRSVisible(true);
+    sceneSession->SetSystemTouchable(false);
+    ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
+    ssm_->sceneSessionMap_.insert({ 0, nullptr });
+
+    int32_t windowId = 0;
+    std::vector<sptr<UnreliableWindowInfo>> infos;
+    WMError result = ssm_->GetUnreliableWindowInfo(windowId, infos);
+    EXPECT_EQ(WMError::WM_OK, result);
+    sceneSession->SetRSVisible(false);
+    result = ssm_->GetUnreliableWindowInfo(windowId, infos);
+    EXPECT_EQ(WMError::WM_OK, result);
+    EXPECT_EQ(0, infos.size());
+}
+
+/**
  * @tc.name: GetAllMainWindowInfos001
  * @tc.desc: SceneSessionManager get all main window infos.
  * @tc.type: FUNC
