@@ -717,7 +717,7 @@ bool AbstractDisplayController::SetScreenOffsetInner(ScreenId screenId)
 {
     sptr<AbstractScreen> absScreen = abstractScreenController_->GetAbstractScreen(screenId);
     if (absScreen == nullptr) {
-        TLOGE(WmsLogTag::DMS, "did not find screen:%{public}" PRIu64"", screenId);
+        TLOGE(WmsLogTag::DMS, "did not find screen:%{public}" PRIu64, screenId);
         return false;
     }
     TLOGI(WmsLogTag::DMS, "screenId = %{public}" PRIu64 " rsId = %{public}" PRIu64, screenId, absScreen->rsId_);

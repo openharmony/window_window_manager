@@ -17,6 +17,7 @@
 #include <hitrace_meter.h>
 #include <transaction/rs_interfaces.h>
 #include <parameters.h>
+#include "rs_adapter.h"
 #include "session/screen/include/screen_session.h"
 #include "screen_session_manager.h"
 #include "screen_scene_config.h"
@@ -41,9 +42,9 @@ const int32_t GLOBAL_FULL_STATUS_WIDTH = 2;
 const int32_t SCREEN_HEIGHT = 3;
 const int32_t FULL_STATUS_OFFSET_X = 4;
 constexpr uint32_t HALF_DIVIDER = 2;
-const float MAIN_DISPLAY_ROTATION_DEGREE = 180;
-const float TRANSLATE_X = 612;
-const float TRANSLATE_Y = -612;
+constexpr float MAIN_DISPLAY_ROTATION_DEGREE = 180;
+constexpr float ROTATION_TRANSLATE_X = 612;
+constexpr float ROTATION_TRANSLATE_Y = -612;
 #ifdef TP_FEATURE_ENABLE
 const int32_t TP_TYPE = 12;
 const char* STATUS_MAIN = "version:3+main";
@@ -193,11 +194,8 @@ void SecondaryDisplayFoldPolicy::AddOrRemoveDisplayNodeToTree(ScreenId screenId,
         displayNode->RemoveDisplayNodeFromTree();
     }
     displayNode = nullptr;
-    auto transactionProxy = RSTransactionProxy::GetInstance();
-    if (transactionProxy != nullptr) {
-        TLOGI(WmsLogTag::DMS, "add or remove displayNode");
-        transactionProxy->FlushImplicitTransaction();
-    }
+    TLOGI(WmsLogTag::DMS, "add or remove displayNode");
+    RSTransactionAdapter::FlushImplicitTransaction(screenSession->GetRSUIContext());
 }
  
 void SecondaryDisplayFoldPolicy::UpdateDisplayNodeBasedOnScreenId(ScreenId screenId,
@@ -209,7 +207,7 @@ void SecondaryDisplayFoldPolicy::UpdateDisplayNodeBasedOnScreenId(ScreenId scree
     TLOGW(WmsLogTag::DMS, "UpdateDisplayNodeBasedOnScreenId: %{public}" PRIu64, screenId);
     displayNode->SetScreenId(SCREEN_ID_FULL);
     displayNode->SetRotation(MAIN_DISPLAY_ROTATION_DEGREE);
-    displayNode->SetTranslate({TRANSLATE_X, TRANSLATE_Y});
+    displayNode->SetTranslate({ROTATION_TRANSLATE_X, ROTATION_TRANSLATE_Y});
     displayNode->SetFrame(0, 0, screenParams_[MAIN_STATUS_WIDTH], screenParams_[SCREEN_HEIGHT]);
     displayNode->SetBounds(0, 0, screenParams_[MAIN_STATUS_WIDTH], screenParams_[SCREEN_HEIGHT]);
 }
@@ -382,6 +380,10 @@ void SecondaryDisplayFoldPolicy::SendPropertyChangeResult(sptr<ScreenSession> sc
 void SecondaryDisplayFoldPolicy::HandleScreenOnFullOn(sptr<ScreenSession> screenSession, ScreenId screenId,
     ScreenPropertyChangeReason reason, FoldDisplayMode displayMode)
 {
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "screenSession is null");
+        return;
+    }
     std::lock_guard<std::recursive_mutex> lock_info(displayInfoMutex_);
     screenProperty_ = ScreenSessionManager::GetInstance().GetPhyScreenProperty(screenId);
     if (displayMode == FoldDisplayMode::FULL) {
@@ -418,6 +420,10 @@ void SecondaryDisplayFoldPolicy::HandleScreenOnFullOn(sptr<ScreenSession> screen
 void SecondaryDisplayFoldPolicy::SendCoordinationPropertyChangeResultSync(sptr<ScreenSession> screenSession,
     ScreenId screenId, ScreenPropertyChangeReason reason, FoldDisplayMode displayMode)
 {
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "screenSession is null");
+        return;
+    }
     std::lock_guard<std::recursive_mutex> lock_info(displayInfoMutex_);
     screenProperty_ = ScreenSessionManager::GetInstance().GetPhyScreenProperty(screenId);
     TLOGW(WmsLogTag::DMS, "COORDINATION");
@@ -496,7 +502,7 @@ void SecondaryDisplayFoldPolicy::SetStatusConditionalActiveRectAndTpFeature(Scre
     auto globalFullStatusScreenBounds = RRect({0, screenParams_[FULL_STATUS_OFFSET_X],
         screenParams_[FULL_STATUS_WIDTH], screenParams_[SCREEN_HEIGHT]}, 0.0f, 0.0f);
     screenProperty.SetBounds(globalFullStatusScreenBounds);
-    OHOS::Rect rectCur{
+    OHOS::Rect rectCur {
         .x = 0,
         .y = 0,
         .w = screenParams_[SCREEN_HEIGHT],
