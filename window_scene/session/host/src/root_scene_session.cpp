@@ -70,7 +70,7 @@ void RootSceneSession::GetKeyboardAvoidAreaForRoot(const WSRect& rect, AvoidArea
     }
     for (auto& inputMethod : inputMethodVector) {
         if (inputMethod == nullptr || (inputMethod->GetSessionState() != SessionState::STATE_FOREGROUND &&
-            inputMethod->GetSessionState() != SessionState::STATE_ACTIVE)) {
+                inputMethod->GetSessionState() != SessionState::STATE_ACTIVE)) {
             continue;
         }
         SessionGravity gravity = inputMethod->GetKeyboardGravity();
