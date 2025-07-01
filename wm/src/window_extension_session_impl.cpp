@@ -2340,5 +2340,39 @@ WMError WindowExtensionSessionImpl::OnHostWindowCompatInfoChange(AAFwk::Want&& d
     }
     return WMError::WM_OK;
 }
+
+void WindowSessionImpl::NotifyKeyboardDidShow(const KeyboardPanelInfo& keyboardPanelInfo)
+{
+    std::lock_guard<std::mutex> lockListener(keyboardDidShowListenerMutex_);
+    for (const auto& listener : keyboardDidShowListenerList_) {
+        if (listener != nullptr) {
+            listener->OnKeyboardDidShow(keyboardPanelInfo);
+        }
+    }
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        AAFwk::Want want;
+        WriteKeyboardInfoToWant(want, keyboardPanelInfo);
+        uiContent->SendUIExtProprtyByPersistentId(
+            static_cast<uint32_t>(Extension::Businesscode::NOTIFY_KEYBOARD_DID_SHOW), want,
+            keyboardDidShowUIExtListenerIds_, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
+    }
+}
+
+void WindowSessionImpl::NotifyKeyboardDidHide(const KeyboardPanelInfo& keyboardPanelInfo)
+{
+    std::lock_guard<std::mutex> lockListener(keyboardDidHideListenerMutex_);
+    for (const auto& listener : keyboardDidHideListenerList_) {
+        if (listener != nullptr) {
+            listener->OnKeyboardDidHide(keyboardPanelInfo);
+        }
+    }
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        AAFwk::Want want;
+        WriteKeyboardInfoToWant(want, keyboardPanelInfo);
+        uiContent->SendUIExtProprtyByPersistentId(
+            static_cast<uint32_t>(Extension::Businesscode::NOTIFY_KEYBOARD_DID_HIDE), want,
+            keyboardDidHideUIExtListenerIds_, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
+    }
+}
 } // namespace Rosen
 } // namespace OHOS

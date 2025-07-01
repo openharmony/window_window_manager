@@ -226,8 +226,8 @@ public:
         const std::map<AvoidAreaType, AvoidArea>& avoidAreas) override;
     void NotifyKeyboardWillShow(const KeyboardAnimationInfo& keyboardAnimationInfo);
     void NotifyKeyboardWillHide(const KeyboardAnimationInfo& keyboardAnimationInfo);
-    void NotifyKeyboardDidShow(const KeyboardPanelInfo& keyboardPanelInfo);
-    void NotifyKeyboardDidHide(const KeyboardPanelInfo& keyboardPanelInfo);
+    virtual void NotifyKeyboardDidShow(const KeyboardPanelInfo& keyboardPanelInfo);
+    virtual void NotifyKeyboardDidHide(const KeyboardPanelInfo& keyboardPanelInfo);
     void NotifyKeyboardAnimationCompleted(const KeyboardPanelInfo& keyboardPanelInfo) override;
     void NotifyKeyboardAnimationWillBegin(const KeyboardAnimationInfo& keyboardAnimationInfo,
         const std::shared_ptr<RSTransaction>& rsTransaction) override;

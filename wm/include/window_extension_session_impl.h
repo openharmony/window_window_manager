@@ -114,6 +114,8 @@ public:
     void NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info,
         const std::shared_ptr<RSTransaction>& rsTransaction, const Rect& callingSessionRect,
         const std::map<AvoidAreaType, AvoidArea>& avoidAreas) override;
+    void NotifyKeyboardDidShow(const KeyboardPanelInfo& keyboardPanelInfo) override;
+    void NotifyKeyboardDidHide(const KeyboardPanelInfo& keyboardPanelInfo) override;
     WMError RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
     WMError UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
     void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
