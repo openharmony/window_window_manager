@@ -89,7 +89,6 @@ constexpr int64_t SET_UIEXTENSION_DESTROY_TIMEOUT_TIME_MS = 4000;
 
 const std::string SCB_BACK_VISIBILITY = "scb_back_visibility";
 const std::string SCB_COMPATIBLE_MAXIMIZE_VISIBILITY = "scb_compatible_maximize_visibility";
-constexpr const char* PERMISSION_WINDOW_TRANSPARENT = "ohos.permission.WINDOW_TRANSPARENT";
 
 Ace::ContentInfoType GetAceContentInfoType(BackupAndRestoreType type)
 {
