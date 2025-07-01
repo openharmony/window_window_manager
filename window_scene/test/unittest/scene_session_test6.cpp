@@ -535,23 +535,6 @@ HWTEST_F(SceneSessionTest6, NotifyKeyboardAnimationCompleted, Function | SmallTe
 }
 
 /**
- * @tc.name: UpdateNewSizeForPCWindow
- * @tc.desc: UpdateNewSizeForPCWindow
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest6, UpdateNewSizeForPCWindow, Function | SmallTest | Level1)
-{
-    LOG_SetCallback(ScreenSessionLogCallback);
-    SessionInfo info;
-    info.abilityName_ = "UpdateNewSizeForPCWindow";
-    info.bundleName_ = "UpdateNewSizeForPCWindow";
-    info.windowType_ = 1;
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSession->UpdateNewSizeForPCWindow(true);
-    EXPECT_TRUE(g_errlog.find("dip change do nothing.") != std::string::npos);
-}
-
-/**
  * @tc.name: IsInCompatScaleStatus
  * @tc.desc: IsInCompatScaleStatus
  * @tc.type: FUNC
@@ -582,29 +565,6 @@ HWTEST_F(SceneSessionTest6, IsInCompatScaleStatus, TestSize.Level1)
     EXPECT_TRUE(session->IsInCompatScaleStatus());
     session->SetScale(2.0f, 0.5f, 0.5f, 0.5f);
     EXPECT_TRUE(session->IsInCompatScaleStatus());
-}
-
-/**
- * @tc.name: CalcNewWindowRectIfNeed
- * @tc.desc: CalcNewWindowRectIfNeed
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest6, CalcNewWindowRectIfNeed, Function | SmallTest | Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "CalcNewWindowRectIfNeed";
-    info.bundleName_ = "CalcNewWindowRectIfNeed";
-    info.windowType_ = 1;
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    property->SetLastLimitsVpr(1.9);
-    sceneSession->property_ = property;
-    DMRect availableArea = { 0, 0, 1920, 1080 };
-    float newVpr = 2.85;
-    WSRect winRect = { 0, 0, 800, 600 };
-    sceneSession->CalcNewWindowRectIfNeed(availableArea, newVpr, winRect);
-    WSRect result = { 0, 0, 1200, 900 };
-    ASSERT_EQ(result, winRect);
 }
 
 /**

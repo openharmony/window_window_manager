@@ -5379,7 +5379,9 @@ void WindowSceneSessionImpl::UpdateNewSize()
         needResize = true;
     }
     if (needResize) {
-        isResizedByLimit_ = true;
+        if (IsPcOrPadFreeMultiWindowMode()) {
+            isResizedByLimit_ = true;
+        }
         Resize(width, height);
         TLOGI(WmsLogTag::WMS_LAYOUT, "Resize window by limits. Id: %{public}u, width: %{public}u,"
             " height: %{public}u", GetWindowId(), width, height);
