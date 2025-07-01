@@ -39,7 +39,6 @@ const std::string SCREENSHOT_EVENT_CB = "screenshot";
 const std::string EXTENSION_SECURE_LIMIT_CHANGE_CB = "uiExtensionSecureLimitChange";
 const std::string KEYBOARD_DID_SHOW_CB = "keyboardDidShow";
 const std::string KEYBOARD_DID_HIDE_CB = "keyboardDidHide";
-const std::string KEYBOARD_HEIGHT_CHANGE_CB = "keyboardHeightChange";
 }
 
 JsExtensionWindowListener::~JsExtensionWindowListener()
