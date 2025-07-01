@@ -1929,30 +1929,6 @@ HWTEST_F(SceneSessionManagerTest2, OnVirtualScreenDisconnected, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnVirtualScreenDisconnected
- * @tc.desc: Test OnVirtualScreenDisconnected;
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest2, OnVirtualScreenDisconnected, TestSize.Level1)
-{
-    sptr<IDisplayChangeListener> listener = sptr<DisplayChangeListener>::MakeSptr();
-    ASSERT_NE(nullptr, listener);
-    listener->OnVirtualScreenDisconnected(9999);
-
-    ASSERT_NE(nullptr, ssm_);
-
-    SessionInfo info;
-    info.abilityName_ = "OnVirtualScreenDisconnected";
-    info.bundleName_ = "OnVirtualScreenDisconnected";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    auto ret = ssm_->OnVirtualScreenDisconnected(1);
-    EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
-
-    auto ret = ssm_->OnVirtualScreenDisconnected(10);
-    EXPECT_EQ(WMError::WM_OK, ret);
-}
-
-/**
  * @tc.name: updateSubSessionBlackList
  * @tc.desc: Test updateSubSessionBlackList;
  * @tc.type: FUNC
