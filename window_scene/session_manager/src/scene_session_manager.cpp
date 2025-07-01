@@ -9954,7 +9954,7 @@ WMError SceneSessionManager::OnVirtualScreenDisconnected(DisplayId displayId)
             TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: displayId %{public}" PRIu64, where, displayId);
             return WMError::WM_OK;
         }
-        return WMError::WM_OK;
+        return WMError::WM_DO_NOTHING;
     };
     return taskScheduler_->PostSyncTask(task, __func__);
 }
