@@ -19,7 +19,6 @@ config("libwm_private_config") {
 
   include_dirs = [
     "include",
-    "../wmserver/include",
     "../wmserver/include/zidl",
     "../window_scene/session/host/include",
     "${dmserver_gen_path}",
@@ -28,6 +27,7 @@ config("libwm_private_config") {
 
 config("libwm_public_config") {
   include_dirs = [
+    "../wmserver/include",
     "../interfaces/innerkits",
     "../interfaces/innerkits/dm",
     "../interfaces/innerkits/wm",

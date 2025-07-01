@@ -112,6 +112,8 @@ class UnreliableWindowInfo;
 class ScbDumpSubscriber;
 class StartingWindowRdbManager;
 struct StartingWindowRdbItemKey;
+class IUIEffectController;
+class IUIEffectControllerClient;
 
 using NotifyCreateSystemSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 using NotifyCreateKeyboardSessionFunc = std::function<void(const sptr<SceneSession>& keyboardSession,
@@ -951,6 +953,12 @@ private:
      */
     WMError ShiftAppWindowPointerEventInner(
         int32_t sourceWindowId, int32_t targetWindowId, DisplayId targetDisplayId, int32_t fingerId);
+
+    /*
+     * Window Animation
+     */
+    WMError CreateUIEffectController(const sptr<IUIEffectControllerClient>& controllerClient,
+        sptr<IUIEffectController>& controller, int32_t& controllerId) override;
 
     /*
      * Sub Window

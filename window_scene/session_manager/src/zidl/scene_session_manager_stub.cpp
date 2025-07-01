@@ -18,6 +18,8 @@
 #include <ui/rs_surface_node.h>
 #include "marshalling_helper.h"
 #include "rs_adapter.h"
+#include "ui_effect_controller_client_interface.h"
+#include "ui_effect_controller_stub.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -244,6 +246,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleSetImageForRecent(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_ANIMATE_TO_WINDOW):
             return HandleAnimateTo(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_CREATE_UI_EFFECT_CONTROLLER):
+            return HandleCreateUIEffectController(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -2201,6 +2205,34 @@ int SceneSessionManagerStub::HandleAnimateTo(MessageParcel& data, MessageParcel&
     WMError errCode = AnimateTo(windowId, *animationProperty, *animationOption);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Write errCode failed");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+int SceneSessionManagerStub::HandleCreateUIEffectController(MessageParcel& data, MessageParcel& reply)
+{
+    sptr<IRemoteObject> controllerObject = data.ReadRemoteObject();
+    sptr<IUIEffectControllerClient> controllerClient = iface_cast<IUIEffectControllerClient>(controllerObject);
+    if (controllerObject == nullptr || controllerClient == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "get client controller failed");
+        return ERR_INVALID_DATA;
+    }
+    sptr<IUIEffectController> controller;
+    int32_t controllerId = -1;
+    WMError errCode = CreateUIEffectController(controllerClient, controller, controllerId);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Write errCode failed.");
+        return ERR_INVALID_DATA;
+    }
+    if (errCode != WMError::WM_OK) {
+        return ERR_NONE;
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(controllerId))) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Write id failed.");
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteRemoteObject(controller->AsObject())) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Write controller failed.");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;

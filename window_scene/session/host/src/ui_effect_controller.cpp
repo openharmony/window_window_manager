@@ -25,11 +25,6 @@ void UIEffectControllerClientDeath::OnRemoteDied(const wptr<IRemoteObject>& remo
         TLOGE(WmsLogTag::WMS_ANIMATION, "remote is null");
         return;
     }
-    sptr<IRemoteObject> object = remote.promote();
-    if (!object) {
-        TLOGE(WmsLogTag::WMS_ANIMATION, "object is null");
-        return;
-    }
     if (eraseFunc_) {
         eraseFunc_();
     } else {
@@ -45,7 +40,7 @@ UIEffectController::UIEffectController(int32_t id,
     animateToCallback_ = animateCallback;
 }
 
-WMError UIEffectController::SetParam(const sptr<UIEffectParams>& param)
+WMError UIEffectController::SetParams(const sptr<UIEffectParams>& param)
 {
     if (!SessionPermission::IsSystemCalling()) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "not system calling, permission denied!");

@@ -65,7 +65,7 @@ HWTEST_F(UIEffectControllerTest, UIEffectManagerTestCreateUIEffectController, Te
         WMError::WM_ERROR_NULLPTR);
     bool setParamCalled = false;
     bool animateToCalled = false;
-    UIEffectManager::GetInstance().RegisterUIEffectSetParamCallback([&setParamCalled](int32_t, sptr<UIEffectParams>) {
+    UIEffectManager::GetInstance().RegisterUIEffectSetParamsCallback([&setParamCalled](int32_t, sptr<UIEffectParams>) {
         setParamCalled = true;
     });
     EXPECT_EQ(UIEffectManager::GetInstance().CreateUIEffectController(controllerClient, controller, id),
@@ -93,7 +93,7 @@ HWTEST_F(UIEffectControllerTest, UIEffectManagerTestCreateUIEffectController, Te
             return false;
         });
     EXPECT_EQ(UIEffectManager::GetInstance().CreateUIEffectController(controllerClient, controller, id),
-        WMError::WM_OK);
+        WMError::WM_ERROR_NULLPTR);
     EXPECT_CALL(*remoteObjectMocker, AddDeathRecipient(_)).
         WillOnce([](const sptr<IRemoteObject::DeathRecipient>& recipient) {
             return true;
@@ -104,21 +104,37 @@ HWTEST_F(UIEffectControllerTest, UIEffectManagerTestCreateUIEffectController, Te
 
 HWTEST_F(UIEffectControllerTest, UIEffectManagerTestSetUIEffectControllerAliveState, TestSize.Level1)
 {
-    sptr<UIEffectControllerClient> controllerClient = sptr<UIEffectControllerClient>::MakeSptr();
+    sptr<UIEffectControllerClient> client = sptr<UIEffectControllerClient>::MakeSptr();
     sptr<UIEffectController> controller = sptr<UIEffectController>::MakeSptr(0, nullptr, nullptr);
+    sptr<UIEffectControllerClientDeath> death = sptr<UIEffectControllerClientDeath>::MakeSptr(nullptr);
     controller->isAliveInUI_ = false;
     UIEffectManager::GetInstance().SetUIEffectControllerAliveState(10000, true);
     EXPECT_EQ(controller->isAliveInUI_, false);
     UIEffectManager::GetInstance().UIEffectControllerMap_[100] = std::make_tuple(nullptr, nullptr, nullptr);
     UIEffectManager::GetInstance().SetUIEffectControllerAliveState(100, true);
     EXPECT_EQ(controller->isAliveInUI_, false);
-    UIEffectManager::GetInstance().UIEffectControllerMap_[200] = std::make_tuple(controller, nullptr, nullptr);
+    UIEffectManager::GetInstance().UIEffectControllerMap_[200] = std::make_tuple(controller, client, death);
     UIEffectManager::GetInstance().SetUIEffectControllerAliveState(200, true);
     EXPECT_EQ(controller->isAliveInUI_, true);
-    UIEffectManager::GetInstance().EraseUIEffectController(200);
 }
 
-// 需要mock_accesstoken_kit.h
+HWTEST_F(UIEffectControllerTest, UIEffectManagerTestEraseController, TestSize.Level1)
+{
+    sptr<UIEffectControllerClientStubMocker> client = sptr<UIEffectControllerClientStubMocker>::MakeSptr();
+    sptr<UIEffectController> controller = sptr<UIEffectController>::MakeSptr(0, nullptr, nullptr);
+    sptr<UIEffectControllerClientDeath> death = sptr<UIEffectControllerClientDeath>::MakeSptr(nullptr);
+    UIEffectManager::GetInstance().UIEffectControllerMap_.clear();
+    UIEffectManager::GetInstance().UIEffectControllerMap_[100] = std::make_tuple(nullptr, nullptr, nullptr);
+    UIEffectManager::GetInstance().EraseUIEffectController(100);
+    EXPECT_EQ(UIEffectManager::GetInstance().UIEffectControllerMap_.size(), 0);
+    UIEffectManager::GetInstance().UIEffectControllerMap_[100] = std::make_tuple(controller, client, death);
+    EXPECT_CALL(*client, AsObject()).WillRepeatedly(Return(nullptr));
+    UIEffectManager::GetInstance().EraseUIEffectController(100);
+    UIEffectManager::GetInstance().UIEffectControllerMap_[100] = std::make_tuple(controller, client, death);
+    EXPECT_CALL(*client, AsObject()).WillRepeatedly(Return(sptr<RemoteObjectMocker>::MakeSptr()));
+    UIEffectManager::GetInstance().EraseUIEffectController(100);
+}
+
 HWTEST_F(UIEffectControllerTest, UIEffectControllerTest, TestSize.Level1)
 {
     sptr<UIEffectController> controller = sptr<UIEffectController>::MakeSptr(0, nullptr, nullptr);
@@ -148,6 +164,23 @@ HWTEST_F(UIEffectControllerTest, UIEffectControllerTest, TestSize.Level1)
         animateToCalled = true;
     };
     EXPECT_EQ(controller->AnimateTo(param, option, option), WMError::WM_OK);
+}
+
+HWTEST_F(UIEffectControllerTest, UIEffectControllerClientDeathTest, TestSize.Level1)
+{
+    bool called = false;
+    auto eraseFunc = [&called]() {
+        called = true;
+    };
+    sptr<UIEffectControllerClient> client = sptr<UIEffectControllerClient>::MakeSptr();
+    UIEffectControllerClientDeath deathRecipientNull(nullptr);
+    deathRecipientNull.OnRemoteDied(client);
+    EXPECT_EQ(called, false);
+    UIEffectControllerClientDeath deathRecipient(eraseFunc);
+    deathRecipient.OnRemoteDied(nullptr);
+    EXPECT_EQ(called, false);
+    deathRecipient.OnRemoteDied(client);
+    EXPECT_EQ(called, true);
 }
 }
 } // namespace OHOS::Rosen

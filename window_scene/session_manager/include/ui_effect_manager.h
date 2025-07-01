@@ -26,16 +26,16 @@ namespace OHOS::Rosen {
 class UIEffectManager {
 WM_DECLARE_SINGLE_INSTANCE(UIEffectManager)
 public:
-    using NotifyUIEffectSetParamFunc = UIEffectController::SetParamFunc;
+    using NotifyUIEffectSetParamFunc = UIEffectController::SetParamsFunc;
     using NotifyUIEffectAnimateToFunc = UIEffectController::AnimateToFunc;
     using ControllerList = std::tuple<sptr<UIEffectController>,
         sptr<IUIEffectControllerClient>, sptr<UIEffectControllerClientDeath>>;
-    void RegisterUIEffectSetParamCallback(NotifyUIEffectSetParamFunc func);
+    void RegisterUIEffectSetParamsCallback(NotifyUIEffectSetParamFunc func);
     void RegisterUIEffectAnimateToCallback(NotifyUIEffectAnimateToFunc func);
 
     WMError CreateUIEffectController(const sptr<IUIEffectControllerClient>& controllerClient,
         sptr<IUIEffectController>& controller, int32_t& controllerId);
-    NotifyUIEffectSetParamFunc onUIEffectSetParam_;
+    NotifyUIEffectSetParamFunc onUIEffectSetParams_;
     NotifyUIEffectAnimateToFunc onUIEffectAnimateTo_;
     void EraseUIEffectController(int32_t id);
     void SetUIEffectControllerAliveState(int32_t id, bool isAlive);
