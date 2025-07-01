@@ -1929,21 +1929,21 @@ HWTEST_F(SceneSessionManagerTest2, OnVirtualScreenDisconnected, TestSize.Level1)
 }
 
 /**
- * @tc.name: updateSubSessionBlackList
- * @tc.desc: Test updateSubSessionBlackList;
+ * @tc.name: UpdateSubSessionBlackList
+ * @tc.desc: Test UpdateSubSessionBlackList;
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, updateSubSessionBlackList, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest2, UpdateSubSessionBlackList, TestSize.Level1)
 {
     ASSERT_NE(nullptr, ssm_);
     ssm_->sessionBlackListInfoMap_.clear();
     SessionInfo info;
-    info.abilityName_ = "updateSubSessionBlackList";
-    info.bundleName_ = "updateSubSessionBlackList";
+    info.abilityName_ = "UpdateSubSessionBlackList";
+    info.bundleName_ = "UpdateSubSessionBlackList";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->persistentId_ = 9998;
     sceneSession->parentSession_ = nullptr;
-    auto ret = ssm_->updateSubSessionBlackList(sceneSession);
+    auto ret = ssm_->UpdateSubSessionBlackList(sceneSession);
     EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
 
     sptr<SceneSession> parentSceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
@@ -1952,7 +1952,7 @@ HWTEST_F(SceneSessionManagerTest2, updateSubSessionBlackList, TestSize.Level1)
     ssm_->sessionBlackListInfoMap_[11].insert({ .windowId = 100001 });
     ssm_->sessionBlackListInfoMap_[11].insert({ .windowId = 100002 });
     EXPECT_EQ(2, sessionBlackListInfoMap_[11].size());
-    ret = ssm_->updateSubSessionBlackList(sceneSession);
+    ret = ssm_->UpdateSubSessionBlackList(sceneSession);
     EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
 
     struct RSSurfaceNodeConfig config;
@@ -1968,11 +1968,11 @@ HWTEST_F(SceneSessionManagerTest2, updateSubSessionBlackList, TestSize.Level1)
     ssm_->sceneSessionMap_.insert({ 100001, sceneSession1 });
     ssm_->sceneSessionMap_.insert({ 100002, sceneSession2 });
     parentSceneSession->persistentId_ = 100002;
-    ret = ssm_->updateSubSessionBlackList(sceneSession);
+    ret = ssm_->UpdateSubSessionBlackList(sceneSession);
     EXPECT_EQ(WMError::WM_OK, ret);
 
     sceneSession->persistentId_ = 9999;
-    ret = ssm_->updateSubSessionBlackList(sceneSession);
+    ret = ssm_->UpdateSubSessionBlackList(sceneSession);
     EXPECT_EQ(WMError::WM_OK, ret);
 }
 

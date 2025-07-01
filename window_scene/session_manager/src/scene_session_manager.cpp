@@ -3621,7 +3621,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
             CheckFloatWindowIsAnco(pid, newSession);
         }
 
-        updateSubSessionBlackList(newSession);
+        UpdateSubSessionBlackList(newSession);
         TLOGNI(WmsLogTag::WMS_LIFE, "create specific session success, id: %{public}d, "
             "parentId: %{public}d, type: %{public}d",
             newSession->GetPersistentId(), newSession->GetParentPersistentId(), type);
@@ -9959,7 +9959,7 @@ WMError SceneSessionManager::OnVirtualScreenDisconnected(DisplayId displayId)
     return taskScheduler_->PostSyncTask(task, __func__);
 }
 
-WMError SceneSessionManager::updateSubSessionBlackList(const sptr<SceneSession>& sceneSession)
+WMError SceneSessionManager::UpdateSubSessionBlackList(const sptr<SceneSession>& sceneSession)
 {
     WMError ret = WMError::WM_DO_NOTHING;
     auto parentSession = sceneSession->GetParentSession();
