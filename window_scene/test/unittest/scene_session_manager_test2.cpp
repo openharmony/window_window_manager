@@ -1832,6 +1832,203 @@ HWTEST_F(SceneSessionManagerTest2, OnScreenshot, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetSurfaceNodeIdsFromSubSession
+ * @tc.desc: Test GetSurfaceNodeIdsFromSubSession;
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, GetSurfaceNodeIdsFromSubSession, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    std::vector<uint64_t> surfaceNodeIds;
+    auto ret = ssm_->GetSurfaceNodeIdsFromSubSession(nullptr, surfaceNodeIds);
+    EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
+
+    SessionInfo info;
+    info.abilityName_ = "GetSurfaceNodeIdsFromSubSession";
+    info.bundleName_ = "GetSurfaceNodeIdsFromSubSession";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ret = ssm_->GetSurfaceNodeIdsFromSubSession(sceneSession, surfaceNodeIds);
+    EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
+
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    ASSERT_NE(nullptr, surfaceNode);
+    sceneSession->SetSurfaceNode(surfaceNode);
+    sceneSession->SetLeashWinSurfaceNode(surfaceNode);
+
+    sptr<SceneSession> subSession1 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    subSession1->SetSurfaceNode(surfaceNode);
+    subSession1->SetLeashWinSurfaceNode(surfaceNode);
+    sptr<SceneSession> subSession2 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    subSession2->surfaceNode_ = nullptr;
+    sptr<SceneSession> subSession3 = nullptr;
+    sceneSession->subSession_.push_back(subSession1);
+    sceneSession->subSession_.push_back(subSession2);
+    sceneSession->subSession_.push_back(subSession3);
+
+    ret = ssm_->GetSurfaceNodeIdsFromSubSession(sceneSession, surfaceNodeIds);
+    EXPECT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: SetSurfaceNodeIds
+ * @tc.desc: Test SetSurfaceNodeIds;
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, SetSurfaceNodeIds, TestSize.Level1)
+{
+    sptr<IDisplayChangeListener> listener = sptr<DisplayChangeListener>::MakeSptr();
+    ASSERT_NE(nullptr, listener);
+    DisplayId displayId = 9999;
+    std::vector<uint64_t> surfaceNodeIds = { 1001, 1002 };
+    listener->OnSetSurfaceNodeIds(displayId, surfaceNodeIds);
+
+    ASSERT_NE(nullptr, ssm_);
+    displayId = 10;
+
+    SessionInfo info;
+    info.abilityName_ = "SetSurfaceNodeIds";
+    info.bundleName_ = "SetSurfaceNodeIds";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ssm_->sceneSessionMap_.insert({ 100001, sceneSession });
+    auto ret = ssm_->SetSurfaceNodeIds(displayId, surfaceNodeIds);
+    EXPECT_EQ(WMError::WM_OK, ret);
+
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    ASSERT_NE(nullptr, surfaceNode);
+    sceneSession->SetSurfaceNode(surfaceNode);
+    sceneSession->GetSurfaceNode()->SetId(1001);
+    ret = ssm_->SetSurfaceNodeIds(displayId, surfaceNodeIds);
+    EXPECT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: OnVirtualScreenDisconnected
+ * @tc.desc: Test OnVirtualScreenDisconnected;
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, OnVirtualScreenDisconnected, TestSize.Level1)
+{
+    sptr<IDisplayChangeListener> listener = sptr<DisplayChangeListener>::MakeSptr();
+    ASSERT_NE(nullptr, listener);
+    listener->OnVirtualScreenDisconnected(9999);
+
+    ASSERT_NE(nullptr, ssm_);
+
+    SessionInfo info;
+    info.abilityName_ = "OnVirtualScreenDisconnected";
+    info.bundleName_ = "OnVirtualScreenDisconnected";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto ret = ssm_->OnVirtualScreenDisconnected(1);
+    EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
+
+    auto ret = ssm_->OnVirtualScreenDisconnected(10);
+    EXPECT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: OnVirtualScreenDisconnected
+ * @tc.desc: Test OnVirtualScreenDisconnected;
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, OnVirtualScreenDisconnected, TestSize.Level1)
+{
+    sptr<IDisplayChangeListener> listener = sptr<DisplayChangeListener>::MakeSptr();
+    ASSERT_NE(nullptr, listener);
+    listener->OnVirtualScreenDisconnected(9999);
+
+    ASSERT_NE(nullptr, ssm_);
+
+    SessionInfo info;
+    info.abilityName_ = "OnVirtualScreenDisconnected";
+    info.bundleName_ = "OnVirtualScreenDisconnected";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto ret = ssm_->OnVirtualScreenDisconnected(1);
+    EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
+
+    auto ret = ssm_->OnVirtualScreenDisconnected(10);
+    EXPECT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: updateSubSessionBlackList
+ * @tc.desc: Test updateSubSessionBlackList;
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, updateSubSessionBlackList, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sessionBlackListInfoMap_.clear();
+    SessionInfo info;
+    info.abilityName_ = "updateSubSessionBlackList";
+    info.bundleName_ = "updateSubSessionBlackList";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->persistentId_ = 9998;
+    sceneSession->parentSession_ = nullptr;
+    auto ret = ssm_->updateSubSessionBlackList(sceneSession);
+    EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
+
+    sptr<SceneSession> parentSceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    parentSceneSession->persistentId_ = 100003;
+    sceneSession->SetParentSession(parentSceneSession);
+    ssm_->sessionBlackListInfoMap_[11].insert({ .windowId = 100001 });
+    ssm_->sessionBlackListInfoMap_[11].insert({ .windowId = 100002 });
+    EXPECT_EQ(2, sessionBlackListInfoMap_[11].size());
+    ret = ssm_->updateSubSessionBlackList(sceneSession);
+    EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
+
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    ASSERT_NE(nullptr, surfaceNode);
+    sceneSession->SetSurfaceNode(surfaceNode);
+    sceneSession->GetSurfaceNode()->SetId(1001);
+    sceneSession->SetLeashWinSurfaceNode(surfaceNode);
+
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession2 = nullptr;
+    ssm_->sceneSessionMap_.insert({ 9998, sceneSession });
+    ssm_->sceneSessionMap_.insert({ 100001, sceneSession1 });
+    ssm_->sceneSessionMap_.insert({ 100002, sceneSession2 });
+    parentSceneSession->persistentId_ = 100002;
+    ret = ssm_->updateSubSessionBlackList(sceneSession);
+    EXPECT_EQ(WMError::WM_OK, ret);
+
+    sceneSession->persistentId_ = 9999;
+    ret = ssm_->updateSubSessionBlackList(sceneSession);
+    EXPECT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: RemoveSessionFromBlackList
+ * @tc.desc: Test RemoveSessionFromBlackList;
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, RemoveSessionFromBlackList, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sessionBlackListInfoMap_.clear();
+    SessionInfo info;
+    info.abilityName_ = "RemoveSessionFromBlackList";
+    info.bundleName_ = "RemoveSessionFromBlackList";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->persistentId_ = 9998;
+    auto ret = ssm_->RemoveSessionFromBlackList(sceneSession);
+    EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
+
+    ssm_->sessionBlackListInfoMap_[11].insert({ .windowId = 9996 });
+    ssm_->sessionBlackListInfoMap_[11].insert({ .windowId = 9997 });
+    ssm_->sessionBlackListInfoMap_[12].insert({ .windowId = 9998 });
+    ret = ssm_->RemoveSessionFromBlackList(sceneSession);
+    EXPECT_EQ(WMError::WM_OK, ret);
+
+    sceneSession->persistentId_ = 9996;
+    ret = ssm_->RemoveSessionFromBlackList(sceneSession);
+    EXPECT_EQ(WMError::WM_OK, ret);
+}
+
+/**
  * @tc.name: ProcessSubSessionForeground
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
