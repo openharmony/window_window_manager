@@ -1857,7 +1857,7 @@ sptr<DisplayInfo> ScreenSessionManagerProxy::GetDisplayInfoById(DisplayId displa
 
     sptr<DisplayInfo> info = reply.ReadParcelable<DisplayInfo>();
     if (info == nullptr) {
-        TLOGW(WmsLogTag::DMS, "SendRequest nullptr.");
+        TLOGD(WmsLogTag::DMS, "SendRequest nullptr.");
         return nullptr;
     }
     return info;
