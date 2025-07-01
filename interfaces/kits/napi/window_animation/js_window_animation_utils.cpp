@@ -53,7 +53,7 @@ napi_value CreateJsValue(napi_env env, const T& value)
         napi_create_string_utf8(env, value.c_str(), value.length(), &result);
         return result;
     } else if constexpr (std::is_enum_v<ValueType>) {
-        return CreateJsNumber(env, static_cast<std::make_signed_t<ValueType>>(value));
+        return CreateJsNumber(env, static_cast<std::make_signed_t<std::underlying_type_t<ValueType>>>(value));
     } else if constexpr (std::is_same_v<ValueType, const char*>) {
         (value != nullptr) ? napi_create_string_utf8(env, value, strlen(value), &result) :
             napi_get_undefined(env, &result);
