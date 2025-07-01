@@ -1290,28 +1290,57 @@ HWTEST_F(WindowSceneSessionImplTest4, UpdateNewSize01, TestSize.Level1)
     Rect windowRect2 = { 200, 200, 200, 200 };
     subWindow->property_->SetRequestRect(windowRect2);
     subWindow->UpdateNewSize();
+}
+
+/**
+ * @tc.name: UpdateNewSize02
+ * @tc.desc: UpdateNewSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, UpdateNewSize02, TestSize.Level1)
+{
+    sptr<WindowOption> subOption = sptr<WindowOption>::MakeSptr();
+    subOption->SetWindowName("UpdateNewSize01SubWindow");
+    sptr<WindowSceneSessionImpl> subWindow = sptr<WindowSceneSessionImpl>::MakeSptr(subOption);
+    subWindow->property_->SetPersistentId(1003);
+    SessionInfo subSessionInfo = { "CreateSubTestBundle", "CreateSubTestModule", "CreateSubTestAbility" };
+    sptr<SessionMocker> subSession = sptr<SessionMocker>::MakeSptr(subSessionInfo);
+    subWindow->hostSession_ = subSession;
+    subWindow->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    WindowLimits windowLimits = { 100, 100, 100, 100, 0.0, 0, 0 };
+    subWindow->property_->SetWindowLimits(windowLimits);
+    Rect windowRect = { 200, 200, 200, 200 };
+    subWindow->property_->SetRequestRect(windowRect);
     subWindow->windowSystemConfig_.windowUIType_ = WindowUIType::INVALID_WINDOW;
     subWindow->windowSystemConfig_.freeMultiWindowEnable_ = false;
     subWindow->windowSystemConfig_.freeMultiWindowSupport_ = false;
     subWindow->UpdateNewSize();
+    subWindow->property_->SetRequestRect(windowRect);
     subWindow->windowSystemConfig_.freeMultiWindowSupport_ = true;
     subWindow->UpdateNewSize();
+    subWindow->property_->SetRequestRect(windowRect);
     subWindow->windowSystemConfig_.freeMultiWindowEnable_ = true;
     subWindow->windowSystemConfig_.freeMultiWindowSupport_ = false;
     subWindow->UpdateNewSize();
+    subWindow->property_->SetRequestRect(windowRect);
     subWindow->windowSystemConfig_.freeMultiWindowSupport_ = true;
     subWindow->UpdateNewSize();
+    subWindow->property_->SetRequestRect(windowRect);
     subWindow->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     subWindow->windowSystemConfig_.freeMultiWindowEnable_ = false;
     subWindow->windowSystemConfig_.freeMultiWindowSupport_ = false;
     subWindow->UpdateNewSize();
+    subWindow->property_->SetRequestRect(windowRect);
     subWindow->windowSystemConfig_.freeMultiWindowSupport_ = true;
     subWindow->UpdateNewSize();
+    subWindow->property_->SetRequestRect(windowRect);
     subWindow->windowSystemConfig_.freeMultiWindowEnable_ = true;
     subWindow->windowSystemConfig_.freeMultiWindowSupport_ = false;
     subWindow->UpdateNewSize();
+    subWindow->property_->SetRequestRect(windowRect);
     subWindow->windowSystemConfig_.freeMultiWindowSupport_ = false;
     subWindow->UpdateNewSize();
+    ASSERT_NE(nullptr, subWindow->property_);
 }
 
 /**
