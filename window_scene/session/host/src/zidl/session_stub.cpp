@@ -799,6 +799,22 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
         TLOGE(WmsLogTag::WMS_LIFE, "Read hideStartWindow failed.");
         return ERR_INVALID_DATA;
     }
+    bool hasAnimationOptions = false;
+    if (!data.ReadBool(hasAnimationOptions)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read hasAnimationOptions failed.");
+        return ERR_INVALID_DATA;
+    }
+    if (hasAnimationOptions) {
+        abilitySessionInfo->animationOptions.reset(data.ReadParcelable<StartAnimationOptions>());
+    }
+    bool hasAnimationSystemOptions = false;
+    if (!data.ReadBool(hasAnimationSystemOptions)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read hasAnimationSystemOptions failed.");
+        return ERR_INVALID_DATA;
+    }
+    if (hasAnimationSystemOptions) {
+        abilitySessionInfo->animationSystemOptions.reset(data.ReadParcelable<StartAnimationSystemOptions>());
+    }
     WSError errCode = PendingSessionActivation(abilitySessionInfo);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
