@@ -9986,7 +9986,11 @@ WMError SceneSessionManager::updateSubSessionBlackList(const sptr<SceneSession>&
     for (const auto& sessionBlackListInfo : funcSet) {
         sptr<SceneSession> session = GetSceneSession(sessionBlackListInfo.windowId);
         if (session == nullptr) {
-            TLOGD(WmsLogTag::WMS_ATTRIBUTE, "session %{public}d is null", sessionBlackListInfo.windowId);
+            TLOGW(WmsLogTag::WMS_ATTRIBUTE, "session %{public}d is null", sessionBlackListInfo.windowId);
+            continue;
+        }
+        if (session->GetSurfaceNode() == nullptr) {
+            TLOGW(WmsLogTag::WMS_ATTRIBUTE, "surfaceNode %{public}d is null", sessionBlackListInfo.windowId);
             continue;
         }
         surfaceNodeIds.push_back(session->GetSurfaceNode()->GetId());
