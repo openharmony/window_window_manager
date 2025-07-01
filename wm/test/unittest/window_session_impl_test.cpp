@@ -1473,9 +1473,9 @@ HWTEST_F(WindowSessionImplTest, Notify01, TestSize.Level1)
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
 
     window->NotifyTouchDialogTarget();
-    window->uiContent = nullptr;
+    window->uiContent_ = nullptr;
     window->NotifyScreenshot();
-    window->uiContent = std::make_unique<Ace::UIContentMocker>();
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     window->NotifyScreenshot();
     WSError res = window->NotifyDestroy();
     ASSERT_EQ(res, WSError::WS_OK);

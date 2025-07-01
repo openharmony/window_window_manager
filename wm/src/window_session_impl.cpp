@@ -6511,8 +6511,9 @@ void WindowSessionImpl::NotifyKeyboardDidShow(const KeyboardPanelInfo& keyboardP
     if (auto uiContent = GetUIContentSharedPtr()) {
         AAFwk::Want want;
         WriteKeyboardInfoToWant(want, keyboardPanelInfo);
-        uiContent->SendUIExtProprty(static_cast<uint32_t>(Extension::Businesscode::NOTIFY_KEYBOARD_DID_SHOW),
-            want, keyboardDidShowUIExtListenerIds_, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
+        uiContent->SendUIExtProprtyByPersistentId(
+            static_cast<uint32_t>(Extension::Businesscode::NOTIFY_KEYBOARD_DID_SHOW), want,
+            keyboardDidShowUIExtListenerIds_, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
     }
 }
 
@@ -6528,8 +6529,9 @@ void WindowSessionImpl::NotifyKeyboardDidHide(const KeyboardPanelInfo& keyboardP
     if (auto uiContent = GetUIContentSharedPtr()) {
         AAFwk::Want want;
         WriteKeyboardInfoToWant(want, keyboardPanelInfo);
-        uiContent->SendUIExtProprty(static_cast<uint32_t>(Extension::Businesscode::NOTIFY_KEYBOARD_DID_HIDE),
-            want, keyboardDidHideUIExtListenerIds_, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
+        uiContent->SendUIExtProprtyByPersistentId(
+            static_cast<uint32_t>(Extension::Businesscode::NOTIFY_KEYBOARD_DID_HIDE), want,
+            keyboardDidHideUIExtListenerIds_, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
     }
 }
 
@@ -6572,7 +6574,7 @@ void WindowSessionImpl::ReadKeyboardInfoFromWant(const AAFwk::Want& want, Keyboa
         want.GetIntParam(Extension::END_HEIGHT, 0)
     };
     keyboardPanelInfo.gravity_ = static_cast<WindowGravity>(want.GetIntParam(Extension::GRAVITY, 0));
-    keyboardPanelInfo.isShowing_ = want.GetBoolParam(Extension::ISSHOWING, 0);
+    keyboardPanelInfo.isShowing_ = want.GetBoolParam(Extension::ISSHOWING, false);
 }
 
 void WindowSessionImpl::NotifyKeyboardAnimationCompleted(const KeyboardPanelInfo& keyboardPanelInfo)

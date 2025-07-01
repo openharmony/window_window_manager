@@ -1442,9 +1442,9 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyDisplayInfoChange3, TestSize.Leve
     sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
     SessionViewportConfig config;
     config.displayId_ = -1ULL;
-    auto lastDensity = windodw->lastSystemDensity_;
+    auto lastDensity = window->lastSystemDensity_;
     window->NotifyDisplayInfoChange(config);
-    EXPECT_EQ(lastDensity, windodw->lastSystemDensity_);
+    EXPECT_EQ(lastDensity, window->lastSystemDensity_);
 
     config.displayId_ = 0;
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(config.displayId_);
@@ -1453,17 +1453,17 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyDisplayInfoChange3, TestSize.Leve
     ASSERT_NE(nullptr, displayInfo);
     auto vpr = displayInfo->GetVirtualPixelRatio();
     window->NotifyDisplayInfoChange(config);
-    EXPECT_EQ(vpr, windodw->lastSystemDensity_);
-    windodw->lastSystemDensity_ = vpr;
+    EXPECT_EQ(vpr, window->lastSystemDensity_);
+    window->lastSystemDensity_ = vpr;
     window->NotifyDisplayInfoChange(config);
-    EXPECT_EQ(vpr, windodw->lastSystemDensity_);
+    EXPECT_EQ(vpr, window->lastSystemDensity_);
 
     sptr<Display> display1 = new Display("displayMock", nullptr);
     SingletonMocker<DisplayManager, MockDisplayManager> m;
     EXPECT_CALL(m.Mock(), GetDisplayById(_)).Times(1).WillOnce(Return(display1));
-    windodw->lastSystemDensity_ = lastDensity;
+    window->lastSystemDensity_ = lastDensity;
     window->NotifyDisplayInfoChange(config);
-    EXPECT_EQ(lastDensity, windodw->lastSystemDensity_);
+    EXPECT_EQ(lastDensity, window->lastSystemDensity_);
 }
 
 /**
@@ -3183,7 +3183,6 @@ HWTEST_F(WindowExtensionSessionImplTest, ExtensionSetKeepScreenOn, TestSize.Leve
     EXPECT_EQ(WMError::WM_OK, window->ExtensionSetKeepScreenOn(true));
 }
 
-
 /**
  * @tc.name: ExtensionSetBrightness
  * @tc.desc: ExtensionSetBrightness test
@@ -3213,7 +3212,7 @@ HWTEST_F(WindowExtensionSessionImplTest, OnScreenshot, TestSize.Level1)
 {
     AAFwk::Want want;
     std::optional<AAFwk::Want> reply = std::make_optional<AAFwk::Want>();
-    ASSERT_EQ(WMError::WM_OK, window_->OnScreenshot(std::move(want), reply));
+    EXPECT_EQ(WMError::WM_OK, window_->OnScreenshot(std::move(want), reply));
 }
 
 /**
@@ -3226,7 +3225,7 @@ HWTEST_F(WindowExtensionSessionImplTest, OnExtensionSecureLimitChange, TestSize.
     AAFwk::Want want;
     want.SetParam(Extension::EXTENSION_SECURE_LIMIT_CHANGE, true);
     std::optional<AAFwk::Want> reply = std::make_optional<AAFwk::Want>();
-    ASSERT_EQ(WMError::WM_OK, window_->OnExtensionSecureLimitChange(std::move(want), reply));
+    EXPECT_EQ(WMError::WM_OK, window_->OnExtensionSecureLimitChange(std::move(want), reply));
 }
 }
 } // namespace Rosen

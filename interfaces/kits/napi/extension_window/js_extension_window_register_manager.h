@@ -62,17 +62,17 @@ private:
     WmErrorCode ProcessLifeCycleEventRegister(sptr<JsExtensionWindowListener> listener,
         sptr<Window> window, bool isRegister);
     WmErrorCode ProcessDisplayIdChangeRegister(const sptr<JsExtensionWindowListener>& listener,
-        sptr<Window> window, bool isRegister);
+        const sptr<Window>& window, bool isRegister);
     WmErrorCode ProcessSystemDensityChangeRegister(const sptr<JsExtensionWindowListener>& listener,
-        sptr<Window> window, bool isRegister);
+        const sptr<Window>& window, bool isRegister);
     WmErrorCode ProcessScreenshotRegister(const sptr<JsExtensionWindowListener>& listener,
-        sptr<Window> window, bool isRegister);
+        const sptr<Window>& window, bool isRegister);
     WmErrorCode ProcessExtensionSecureLimitChangeRegister(const sptr<JsExtensionWindowListener>& listener,
-        sptr<Window> window, bool isRegister);
+        const sptr<Window>& window, bool isRegister);
     WmErrorCode ProcessKeyboardDidShowRegister(const sptr<JsExtensionWindowListener>& listener,
-        sptr<Window> window, bool isRegister);
+        const sptr<Window>& window, bool isRegister);
     WmErrorCode ProcessKeyboardDidHideRegister(const sptr<JsExtensionWindowListener>& listener,
-        sptr<Window> window, bool isRegister);
+        const sptr<Window>& window, bool isRegister);
     WmErrorCode ProcessRegister(CaseType caseType, const sptr<JsExtensionWindowListener>& listener,
         const sptr<Window>& window, const std::string& type, bool isRegister);
     std::map<std::string, std::map<std::shared_ptr<NativeReference>, sptr<JsExtensionWindowListener>>> jsCbMap_;

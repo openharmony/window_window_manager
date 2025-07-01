@@ -125,7 +125,7 @@ WmErrorCode JsExtensionWindowRegisterManager::ProcessLifeCycleEventRegister(sptr
 }
 
 WmErrorCode JsExtensionWindowRegisterManager::ProcessDisplayIdChangeRegister(
-    const sptr<JsExtensionWindowListener>& listener, sptr<Window> window, bool isRegister)
+    const sptr<JsExtensionWindowListener>& listener, const sptr<Window>& window, bool isRegister)
 {
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Window is nullptr");
@@ -142,7 +142,7 @@ WmErrorCode JsExtensionWindowRegisterManager::ProcessDisplayIdChangeRegister(
 }
 
 WmErrorCode JsExtensionWindowRegisterManager::ProcessSystemDensityChangeRegister(
-    const sptr<JsExtensionWindowListener>& listener, sptr<Window> window, bool isRegister)
+    const sptr<JsExtensionWindowListener>& listener, const sptr<Window>& window, bool isRegister)
 {
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Window is nullptr");
@@ -159,7 +159,7 @@ WmErrorCode JsExtensionWindowRegisterManager::ProcessSystemDensityChangeRegister
 }
 
 WmErrorCode JsExtensionWindowRegisterManager::ProcessScreenshotRegister(
-    const sptr<JsExtensionWindowListener>& listener, sptr<Window> window, bool isRegister)
+    const sptr<JsExtensionWindowListener>& listener, const sptr<Window>& window, bool isRegister)
 {
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Window is nullptr");
@@ -176,7 +176,7 @@ WmErrorCode JsExtensionWindowRegisterManager::ProcessScreenshotRegister(
 }
 
 WmErrorCode JsExtensionWindowRegisterManager::ProcessExtensionSecureLimitChangeRegister(
-    const sptr<JsExtensionWindowListener>& listener, sptr<Window> window, bool isRegister)
+    const sptr<JsExtensionWindowListener>& listener, const sptr<Window>& window, bool isRegister)
 {
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Window is nullptr");
@@ -193,7 +193,7 @@ WmErrorCode JsExtensionWindowRegisterManager::ProcessExtensionSecureLimitChangeR
 }
 
 WmErrorCode JsExtensionWindowRegisterManager::ProcessKeyboardDidShowRegister(
-    const sptr<JsExtensionWindowListener>& listener, sptr<Window> window, bool isRegister)
+    const sptr<JsExtensionWindowListener>& listener, const sptr<Window>& window, bool isRegister)
 {
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Window is nullptr");
@@ -210,7 +210,7 @@ WmErrorCode JsExtensionWindowRegisterManager::ProcessKeyboardDidShowRegister(
 }
 
 WmErrorCode JsExtensionWindowRegisterManager::ProcessKeyboardDidHideRegister(
-    const sptr<JsExtensionWindowListener>& listener, sptr<Window> window, bool isRegister)
+    const sptr<JsExtensionWindowListener>& listener, const sptr<Window>& window, bool isRegister)
 {
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Window is nullptr");
