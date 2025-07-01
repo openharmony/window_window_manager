@@ -895,6 +895,17 @@ HWTEST_F(SystemSessionTest, UpdateFloatingBall, Function | SmallTest | Level2)
 
     LOCK_GUARD_EXPR(SCENE_GUARD, systemSession->SetCallingPid(IPCSkeleton::GetCallingPid()));
     EXPECT_EQ(systemSession->UpdateFloatingBall(fbTemplateInfo), WMError::WM_OK);
+
+    FloatingBallTemplateInfo fbTmpInfo {static_cast<uint32_t>(FloatingBallTemplate::STATIC), "", "", "", nullptr};
+    systemSession->SetFbTemplateInfo(fbTmpInfo);
+    EXPECT_EQ(systemSession->UpdateFloatingBall(fbTemplateInfo), WMError::WM_ERROR_FB_UPDATE_STATIC_TEMPLATE_DENIED);
+
+    fbTmpInfo.template_ = static_cast<uint32_t>(FloatingBallTemplate::NORMAL);
+    systemSession->SetFbTemplateInfo(fbTmpInfo);
+    EXPECT_EQ(systemSession->UpdateFloatingBall(fbTemplateInfo), WMError::WM_ERROR_FB_UPDATE_TEMPLATE_TYPE_DENIED);
+
+    fbTemplateInfo.template_ = static_cast<uint32_t>(FloatingBallTemplate::NORMAL);
+    EXPECT_EQ(systemSession->UpdateFloatingBall(fbTemplateInfo), WMError::WM_OK);
 }
 
 /**

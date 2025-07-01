@@ -1490,6 +1490,18 @@ HWTEST_F(WindowSessionImplTest5, UpdateFloatingBall, TestSize.Level1)
     auto session = sptr<SessionStubMocker>::MakeSptr();
     window->hostSession_ = session;
     window->property_->persistentId_ = 1234;
+
+    FloatingBallTemplateInfo windowFbTemplateInfo;
+    windowFbTemplateInfo.template_ = static_cast<uint32_t>(FloatingBallTemplate::STATIC);
+    window->GetProperty()->SetFbTemplateInfo(windowFbTemplateInfo);
+    EXPECT_EQ(WMError::WM_ERROR_FB_UPDATE_STATIC_TEMPLATE_DENIED, window->UpdateFloatingBall(fbTemplateInfo, icon));
+
+    windowFbTemplateInfo.template_ = static_cast<uint32_t>(FloatingBallTemplate::NORMAL);
+    window->GetProperty()->SetFbTemplateInfo(windowFbTemplateInfo);
+    fbTemplateInfo.template_ = static_cast<uint32_t>(FloatingBallTemplate::STATIC);
+    EXPECT_EQ(WMError::WM_ERROR_FB_UPDATE_TEMPLATE_TYPE_DENIED, window->UpdateFloatingBall(fbTemplateInfo, icon));
+
+    fbTemplateInfo.template_ = static_cast<uint32_t>(FloatingBallTemplate::NORMAL);
     EXPECT_FALSE(window->IsWindowSessionInvalid());
     error = window->UpdateFloatingBall(fbTemplateInfo, icon);
     EXPECT_EQ(WMError::WM_OK, error);

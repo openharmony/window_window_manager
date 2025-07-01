@@ -142,7 +142,7 @@ WMError FloatingBallController::CreateFloatingBallWindow()
         mainWindowId_, mainWindowState, uid);
     if (mainWindowState != WindowState::STATE_SHOWN) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "mainWindow:%{public}u is not shown", mainWindowId_);
-        return WMError::WM_ERROR_INVALID_WINDOW;
+        return WMError::WM_ERROR_FB_CREATE_FAILED;
     }
     auto windowOption = sptr<WindowOption>::MakeSptr();
     windowOption->SetWindowName(FB_WINDOW_NAME + "_" + std::to_string(uid));
