@@ -89,6 +89,7 @@ constexpr int64_t SET_UIEXTENSION_DESTROY_TIMEOUT_TIME_MS = 4000;
 
 const std::string SCB_BACK_VISIBILITY = "scb_back_visibility";
 const std::string SCB_COMPATIBLE_MAXIMIZE_VISIBILITY = "scb_compatible_maximize_visibility";
+constexpr const char* PERMISSION_WINDOW_TRANSPARENT = "ohos.permission.WINDOW_TRANSPARENT";
 
 Ace::ContentInfoType GetAceContentInfoType(BackupAndRestoreType type)
 {
@@ -4425,7 +4426,7 @@ WMError WindowSessionImpl::SetWindowContainerColor(const std::string& activeColo
     if (!windowSystemConfig_.IsPcWindow()) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
-    if (!SessionPermission::VerifyCallingPermission("ohos.permission.WINDOW_TRANSPARENT") &&
+    if (!SessionPermission::VerifyCallingPermission(PERMISSION_WINDOW_TRANSPARENT) &&
         containerColorList_.count(property_->GetSessionInfo().bundleName_) == 0) {
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
