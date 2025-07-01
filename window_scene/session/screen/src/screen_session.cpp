@@ -1750,8 +1750,7 @@ void ScreenSession::SetPrivateSessionForeground(bool hasPrivate)
     hasPrivateWindowForeground_ = hasPrivate;
 }
 
-void ScreenSession::InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint, bool isExtend,
-    float positionX, float positionY)
+void ScreenSession::InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint, bool isExtend)
 {
     std::unique_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
     if (displayNode_ != nullptr) {
@@ -1771,12 +1770,8 @@ void ScreenSession::InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startP
         TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST,
               "Create RSDisplayNode: %{public}s", RSAdapterUtil::RSNodeToStr(displayNode_).c_str());
     }
-    if (startPoint.posX_ < 0 || startPoint.posY_ < 0) {
-        TLOGE(WmsLogTag::DMS, "startPoint invalid!");
-        return;
-    }
-    TLOGI(WmsLogTag::DMS, "posX:%{public}d, posY:%{public}d", startPoint.posX_, startPoint.posY_);
-    RSInterfaces::GetInstance().SetScreenOffset(config.screenId, startPoint.posX_, startPoint.posY_);
+    TLOGI(WmsLogTag::DMS, "SetDisplayOffset: posX:%{public}d, posY:%{public}d", startPoint.posX_, startPoint.posY_);
+    displayNode_->SetDisplayOffset(startPoint.posX_, startPoint.posY_);
     uint32_t width = 0;
     uint32_t height = 0;
     if (isExtend) {
@@ -1796,12 +1791,11 @@ void ScreenSession::InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startP
         displayNode_->SetSecurityDisplay(isSecurity_);
         TLOGI(WmsLogTag::DMS, "virtualScreen SetSecurityDisplay success, isSecurity:%{public}d", isSecurity_);
     }
-    // If SetScreenOffset is not valid for SetFrame/SetBounds
-    TLOGI(WmsLogTag::DMS, "InitRSDisplayNode screenId:%{public}" PRIu64" \
-        width:%{public}u height:%{public}u positionX:%{public}f positionY:%{public}f",
-        screenId_, width, height, positionX, positionY);
-    displayNode_->SetFrame(positionX, positionY, static_cast<float>(width), static_cast<float>(height));
-    displayNode_->SetBounds(positionX, positionY, static_cast<float>(width), static_cast<float>(height));
+    // If setDisplayOffset is not valid for SetFrame/SetBounds
+    TLOGI(WmsLogTag::DMS, "InitRSDisplayNode screenId:%{public}" PRIu64" width:%{public}u height:%{public}u",
+        screenId_, width, height);
+    displayNode_->SetFrame(0, 0, static_cast<float>(width), static_cast<float>(height));
+    displayNode_->SetBounds(0, 0, static_cast<float>(width), static_cast<float>(height));
     if (config.isMirrored) {
         EnableMirrorScreenRegion();
     }
@@ -1915,7 +1909,7 @@ bool ScreenSessionGroup::RemoveChild(sptr<ScreenSession>& smsScreen)
     smsScreen->groupSmsId_ = SCREEN_ID_INVALID;
     std::shared_ptr<RSDisplayNode> displayNode = smsScreen->GetDisplayNode();
     if (displayNode != nullptr) {
-        RSInterfaces::GetInstance().SetScreenOffset(smsScreen->rsId_, 0, 0);
+        displayNode->SetDisplayOffset(0, 0);
         displayNode->RemoveFromTree();
         smsScreen->ReleaseDisplayNode();
     }
@@ -2020,7 +2014,15 @@ void ScreenSession::Resize(uint32_t width, uint32_t height, bool isFreshBoundsSy
 
 void ScreenSession::SetFrameGravity(Gravity gravity)
 {
-    RSInterfaces::GetInstance().SetScreenFrameGravity(rsId_, static_cast<int32_t>(gravity));
+    {
+        std::unique_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
+        if (displayNode_ == nullptr) {
+            TLOGE(WmsLogTag::DMS, "displayNode_ is null, setFrameGravity failed");
+            return;
+        }
+        displayNode_->SetFrameGravity(gravity);
+    }
+    RSTransactionAdapter::FlushImplicitTransaction(GetRSUIContext());
 }
 
 bool ScreenSession::UpdateAvailableArea(DMRect area)

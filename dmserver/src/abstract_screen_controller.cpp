@@ -820,7 +820,7 @@ void AbstractScreenController::UpdateScreenGroupLayout(sptr<AbstractScreenGroup>
         }
 
         if (screen->startPoint_.posX_ != point.posX_) {
-            screen->UpdateRSDisplayNode(point, screen);
+            screen->UpdateRSDisplayNode(point);
             if (abstractScreenCallback_ != nullptr) {
                 abstractScreenCallback_->onChange_(screen, DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
             }
