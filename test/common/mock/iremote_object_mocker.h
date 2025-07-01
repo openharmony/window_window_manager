@@ -121,7 +121,6 @@ public:
         return 0;
     }
 
-
     void SetRequestResult(int result)
     {
         sendRequestResult_ = result;
