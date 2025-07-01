@@ -42,10 +42,11 @@ WMError UIEffectManager::CreateUIEffectController(const sptr<IUIEffectController
     globalControllerId++;
     controllerId = globalControllerId;
     sptr<UIEffectControllerClientDeath> controllerDeath = sptr<UIEffectControllerClientDeath>::MakeSptr(
-        [id, this] () { EraseUIEffectController(controllerId); }
+        [controllerId, this] () { EraseUIEffectController(controllerId); }
     );
     if (!controllerClient->AsObject() || !controllerClient->AsObject()->AddDeathRecipient(controllerDeath)) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to add death recipient");
+        return WMError::WM_ERROR_NULLPTR;
     }
     sptr<UIEffectController> newController =
         sptr<UIEffectController>::MakeSptr(controllerId, onUIEffectSetParams_, onUIEffectAnimateTo_);
@@ -79,7 +80,7 @@ void UIEffectManager::SetUIEffectControllerAliveState(int32_t id, bool isAlive)
         sptr<UIEffectController> controller = std::get<CONTROLLER_INDEX>(controllerList);
         controller->SetIsAliveInUI(isAlive);
     } else {
-        TLOGE(WmsLogTag::WMS_ANIMATION, "can not find current ccontroller");
+        TLOGE(WmsLogTag::WMS_ANIMATION, "can not find current controller");
     }
 }
 
@@ -95,11 +96,12 @@ void UIEffectManager::EraseUIEffectController(int32_t id)
         }
         sptr<IUIEffectControllerClient> controllerClient = std::get<CONTROLLER_CLIENT_INDEX>(controllerList);
         sptr<UIEffectControllerClientDeath> clientDeath = std::get<CONTROLLER_CLIENT_DEATH>(controllerList);
-        if (!controllerClient->AsObject() || controllerClient->AsObject()->RemoveDeathRecipient(clientDeath)) {
+        if (!controllerClient->AsObject()) {
             TLOGE(WmsLogTag::WMS_ANIMATION, "controllerClient is nullptr or not proxy");
             UIEffectControllerMap_.erase(id);
             return;
         }
+        controllerClient->AsObject()->RemoveDeathRecipient(clientDeath);
     }
     UIEffectControllerMap_.erase(id);
 }

@@ -61,7 +61,7 @@ HWTEST_F(UIEffectControllerStubTest, UIEffectControllerClientStubSetParam, Funct
     EXPECT_EQ(stub->OnRemoteRequest(code, dataValid2, reply, option), ERR_INVALID_DATA);
     // last invalid case
     uint32_t codeInvalid = 10000;
-    stub->OnRemoteRequest(codeInvalid, dataValid2, reply, option);
+    stub->OnRemoteRequest(codeInvalid, dataValid, reply, option);
 }
 
 HWTEST_F(UIEffectControllerStubTest, UIEffectControllerStubSetParam, TestSize.Level1)
@@ -75,7 +75,7 @@ HWTEST_F(UIEffectControllerStubTest, UIEffectControllerStubSetParam, TestSize.Le
     MessageParcel reply2;
     sptr<UIEffectParams> effectPtr = sptr<UIEffectParams>::MakeSptr();
     data2.WriteStrongParcelable(effectPtr);
-    EXPECT_EQ(stub->HandleSetParams(data1, reply1), ERR_NONE);
+    EXPECT_EQ(stub->HandleSetParams(data2, reply2), ERR_NONE);
 }
 
 HWTEST_F(UIEffectControllerStubTest, UIEffectControllerStubAnimateTo, TestSize.Level1)
@@ -124,10 +124,14 @@ HWTEST_F(UIEffectControllerStubTest, UIEffectControllerStubOnRemoteRequest, Test
     dataValid.WriteInterfaceToken(stub->GetDescriptor());
     code = static_cast<uint32_t>(IUIEffectController::UIEffectControllerMessage::TRANS_ID_UIEFFECT_SET_PARAM);
     stub->OnRemoteRequest(code, dataValid, reply, option);
+    MessageParcel dataValid2;
+    dataValid2.WriteInterfaceToken(stub->GetDescriptor());
     code = static_cast<uint32_t>(IUIEffectController::UIEffectControllerMessage::TRANS_ID_UIEFFECT_ANIMATE_TO);
-    stub->OnRemoteRequest(code, dataValid, reply, option);
+    stub->OnRemoteRequest(code, dataValid2, reply, option);
+    MessageParcel dataValid3;
+    dataValid3.WriteInterfaceToken(stub->GetDescriptor());
     code = 10000;
-    stub->OnRemoteRequest(code, dataValid, reply, option);
+    stub->OnRemoteRequest(code, dataValid3, reply, option);
 }
 }
 } // namespace OHOS::Rosen

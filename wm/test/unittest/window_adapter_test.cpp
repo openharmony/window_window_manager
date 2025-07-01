@@ -24,6 +24,8 @@
 #include "window_agent.h"
 #include "window_property.h"
 #include "window_transition_info.h"
+#include "ui_effect_controller_interface.h"
+#include "ui_effect_controller_client.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -284,12 +286,21 @@ HWTEST_F(WindowAdapterTest, WindowManagerAndSessionRecover, TestSize.Level1)
         ret += 1;
         return WMError::WM_OK;
     };
+
+    auto testFunc3 = [] {
+        return WMError::WM_OK;
+    };
+    auto testFunc4 = [] {
+        return WMError::WM_DO_NOTHING;
+    };
     windowAdapter.RegisterSessionRecoverCallbackFunc(persistentId, testFunc);
+    windowAdapter.RegisterUIEffectRecoverCallbackFunc(persistentId, testFunc3);
     windowAdapter.WindowManagerAndSessionRecover();
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(ret, 1);
     }
     windowAdapter.RegisterSessionRecoverCallbackFunc(persistentId, testFunc2);
+    windowAdapter.RegisterUIEffectRecoverCallbackFunc(persistentId, testFunc4);
     windowAdapter.WindowManagerAndSessionRecover();
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(ret, 2);
@@ -977,6 +988,24 @@ HWTEST_F(WindowAdapterTest, UnregisterWindowPropertyChangeAgent01, Function | Sm
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, err);
     auto ret = windowAdapter.InitWMSProxy();
     EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: UnregisterWindowPropertyChangeAgent01
+ * @tc.desc: WindowAdapter/UnregisterWindowPropertyChangeAgent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, CreateUIEffectController, Function | SmallTest | Level2)
+{
+    WindowAdapter windowAdapter;
+    sptr<UIEffectControllerClient> client = sptr<UIEffectControllerClient>::MakeSptr();
+    sptr<IUIEffectController> controller;
+    int32_t controllerId = 0;
+    auto err = windowAdapter.CreateUIEffectController(client, controller, controllerId);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, err);
+    auto ret = windowAdapter.InitWMSProxy();
+    EXPECT_EQ(ret, true);
+    windowAdapter.CreateUIEffectController(client, controller, controllerId);
 }
 } // namespace
 } // namespace Rosen

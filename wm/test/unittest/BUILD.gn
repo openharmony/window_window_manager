@@ -669,6 +669,7 @@ ohos_unittest("wm_window_adapter_test") {
   deps = [
     ":wm_unittest_common",
     "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+    "${window_base_path}/window_scene/session_manager:session_manager",
   ]
 
   external_deps = test_external_deps
