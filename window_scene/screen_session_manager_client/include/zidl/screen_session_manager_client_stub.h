@@ -46,6 +46,7 @@ private:
     int HandleOnSetDisplayNodeScreenId(MessageParcel& data, MessageParcel& reply);
     int HandleOnGetSurfaceNodeIdsFromMissionIdsChanged(MessageParcel& data, MessageParcel& reply);
     int HandleOnSetSurfaceNodeIdsChanged(MessageParcel& data, MessageParcel& reply);
+    int HandleOnVirtualScreenDisconnected(MessageParcel& data, MessageParcel& reply);
     int HandleOnUpdateFoldDisplayMode(MessageParcel& data, MessageParcel& reply);
     int HandleSetVirtualPixelRatioSystem(MessageParcel& data, MessageParcel& reply);
     int HandleSwitchUserCallback(MessageParcel& data, MessageParcel& reply);

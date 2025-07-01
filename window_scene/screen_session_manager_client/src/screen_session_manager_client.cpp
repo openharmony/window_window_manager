@@ -329,6 +329,13 @@ void ScreenSessionManagerClient::OnSetSurfaceNodeIdsChanged(DisplayId displayId,
     }
 }
 
+void ScreenSessionManagerClient::OnVirtualScreenDisconnected(DisplayId displayId)
+{
+    if (displayChangeListener_) {
+        displayChangeListener_->OnVirtualScreenDisconnected(displayId);
+    }
+}
+
 void ScreenSessionManagerClient::OnScreenshot(DisplayId displayId)
 {
     if (displayChangeListener_) {
