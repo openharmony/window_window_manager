@@ -18,19 +18,19 @@
 #include <ipc_types.h>
 #include <pointer_event.h>
 #include <ui/rs_surface_node.h>
-#include "iremote_object_mocker.h"
-#include "mock/mock_session_stub.h"
-#include "session/host/include/zidl/session_stub.h"
 #include "ability_start_setting.h"
+#include "iremote_object_mocker.h"
+#include "mock/mock_session_stage.h"
+#include "mock/mock_session_stub.h"
+#include "mock/mock_window_event_channel.h"
 #include "parcel/accessibility_event_info_parcel.h"
 #include "session/host/include/zidl/session_ipc_interface_code.h"
-#include "want.h"
-#include "ws_common.h"
-#include "wm_common.h"
-#include "mock/mock_session_stage.h"
-#include "mock/mock_window_event_channel.h"
-#include "ui/rs_canvas_node.h"
+#include "session/host/include/zidl/session_stub.h"
 #include "transaction/rs_transaction.h"
+#include "want.h"
+#include "wm_common.h"
+#include "ws_common.h"
+#include "ui/rs_canvas_node.h"
 
 using namespace testing;
 using namespace testing::ext;
