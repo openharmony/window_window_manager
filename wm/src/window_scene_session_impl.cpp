@@ -2306,7 +2306,7 @@ WMError WindowSceneSessionImpl::ResizeAsync(uint32_t width, uint32_t height,
     return static_cast<WMError>(ret);
 }
 
-WMError WindowSceneSessionImpl::SetFrameRectForParticalZoomIn(const Rect& frameRect)
+WMError WindowSceneSessionImpl::SetFrameRectForPartialZoomIn(const Rect& frameRect)
 {
     TLOGI(WmsLogTag::WMS_ANIMATION, "set frame rect start, rect: %{public}s", frameRect.ToString().c_str());
     if (GetType() != WindowType::WINDOW_TYPE_MAGNIFICATION) {
