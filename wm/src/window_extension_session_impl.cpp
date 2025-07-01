@@ -2162,6 +2162,7 @@ WMError WindowExtensionSessionImpl::OnHostWindowRectChange(AAFwk::Want&& data, s
 
 WMError WindowExtensionSessionImpl::OnScreenshot(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)
 {
+    TLOGD(WmsLogTag::WMS_UIEXT, "in");
     NotifyScreenshot();
     return WMError::WM_OK;
 }
@@ -2169,25 +2170,26 @@ WMError WindowExtensionSessionImpl::OnScreenshot(AAFwk::Want&& data, std::option
 WMError WindowExtensionSessionImpl::OnExtensionSecureLimitChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)
 {
     bool limit = data.GetBoolParam(Extension::EXTENSION_SECURE_LIMIT_CHANGE, false);
+    TLOGD(WmsLogTag::WMS_UIEXT, "limit: %{public}d", limit);
     NotifyExtensionSecureLimitChange(limit);
     return WMError::WM_OK;
 }
 
 WMError WindowExtensionSessionImpl::OnKeyboardDidShow(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)
 {
+    TLOGD(WmsLogTag::WMS_UIEXT, "in");
     KeyboardPanelInfo info;
     ReadKeyboardInfoFromWant(data, info);
     NotifyKeyboardDidShow(info);
-    delete infoPtr;
     return WMError::WM_OK;
 }
 
 WMError WindowExtensionSessionImpl::OnKeyboardDidHide(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)
 {
+    TLOGD(WmsLogTag::WMS_UIEXT, "in");
     KeyboardPanelInfo info;
     ReadKeyboardInfoFromWant(data, info);
     NotifyKeyboardDidHide(info);
-    delete infoPtr;
     return WMError::WM_OK;
 }
 

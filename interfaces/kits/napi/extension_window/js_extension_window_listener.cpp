@@ -260,7 +260,7 @@ void JsExtensionWindowListener::OnSystemDensityChanged(float density)
 
 void JsExtensionWindowListener::OnScreenshot()
 {
-    auto jsCallback = [self = wptr<JsExtensionWindowListener>(this)] {
+    auto jsCallback = [self = weakRef_] {
         auto thisListener = self.promote();
         if (thisListener == nullptr) {
             TLOGNE(WmsLogTag::WMS_UIEXT, "this listener is nullptr");
