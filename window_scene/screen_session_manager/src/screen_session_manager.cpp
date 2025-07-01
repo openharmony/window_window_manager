@@ -177,8 +177,13 @@ const bool IS_SUPPORT_PC_MODE = system::GetBoolParameter("const.window.support_w
 const ScreenId SCREEN_GROUP_ID_DEFAULT = 1;
 const std::set<std::string> INDIVIDUAL_SCREEN_GROUP_SET = {"CeliaView", "DevEcoViewer"};
 
-constexpr uint32_t MAIN_STATUS_WIDTH = 1008;
-constexpr uint32_t SCREEN_HEIGHT = 2232;
+constexpr int32_t MAIN_STATUS_WIDTH_INDEX = 0;
+constexpr int32_t FULL_STATUS_WIDTH_INDEX = 1;
+constexpr int32_t GLOBAL_FULL_STATUS_WIDTH_INDEX = 2;
+constexpr int32_t SCREEN_HEIGHT_INDEX = 3;
+constexpr int32_t STATUS_PARAM_VALID_INDEX = 4;
+constexpr uint32_t MAIN_STATUS_DEFAULT_WIDTH = 1008;
+constexpr uint32_t SCREEN_DEFAULT_HEIGHT = 2232;
 
 // based on the bundle_util
 inline int32_t GetUserIdByCallingUid()
@@ -220,6 +225,9 @@ ScreenSessionManager::ScreenSessionManager()
     }
     if (g_foldScreenFlag) {
         HandleFoldScreenPowerInit();
+    }
+    if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        InitSecondaryDisplayPhysicalParams();
     }
     WatchParameter(BOOTEVENT_BOOT_COMPLETED.c_str(), BootFinishedCallback, this);
 }
@@ -2547,7 +2555,11 @@ void ScreenSessionManager::InitScreenProperty(ScreenId screenId, RSScreenModeInf
 RRect ScreenSessionManager::GetScreenBounds(ScreenId screenId, RSScreenModeInfo& screenMode)
 {
     if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice() && screenId == SCREEN_ID_MAIN) {
-        return RRect({ 0, 0, MAIN_STATUS_WIDTH, SCREEN_HEIGHT }, 0.0f, 0.0f);
+        if (screenParams_.size() < STATUS_PARAM_VALID_INDEX) {
+            TLOGE(WmsLogTag::DMS, "invalid param num, use default");
+            return RRect({ 0, 0, MAIN_STATUS_DEFAULT_WIDTH, SCREEN_DEFAULT_HEIGHT }, 0.0f, 0.0f);
+        }
+        return RRect({ 0, 0, screenParams_[MAIN_STATUS_WIDTH_INDEX], screenParams_[SCREEN_HEIGHT_INDEX] }, 0.0f, 0.0f);
     }
     return RRect({ 0, 0, screenMode.GetScreenWidth(), screenMode.GetScreenHeight() }, 0.0f, 0.0f);
 }
@@ -8908,6 +8920,33 @@ std::vector<DisplayPhysicalResolution> ScreenSessionManager::GetAllDisplayPhysic
         }
     }
     return allDisplayPhysicalResolution_;
+}
+
+void ScreenSessionManager::InitSecondaryDisplayPhysicalParams()
+{
+    std::vector<DisplayPhysicalResolution> resolutions = ScreenSceneConfig::GetAllDisplayPhysicalConfig();
+    for (auto &resolution : resolutions) {
+        if (FoldDisplayMode::MAIN == resolution.foldDisplayMode_) {
+            screenParams_.push_back(resolution.physicalWidth_);
+        } else if (FoldDisplayMode::FULL == resolution.foldDisplayMode_) {
+            screenParams_.push_back(resolution.physicalWidth_);
+        } else if (FoldDisplayMode::GLOBAL_FULL == resolution.foldDisplayMode_) {
+            screenParams_.push_back(resolution.physicalWidth_);
+            screenParams_.push_back(resolution.physicalHeight_);
+        } else {
+            TLOGW(WmsLogTag::DMS, "unKnown displayMode");
+        }
+    }
+    if (screenParams_.size() < STATUS_PARAM_VALID_INDEX) {
+        TLOGE(WmsLogTag::DMS, "invalid param num");
+        return;
+    }
+    screenParams_.push_back(screenParams_[GLOBAL_FULL_STATUS_WIDTH_INDEX] - screenParams_[FULL_STATUS_WIDTH_INDEX]);
+    TLOGI(WmsLogTag::DMS,
+        "PhysicalResolution : mainStatusWidth_= %{public}d, fullStatusWidth_= %{public}d, gloablFullStatusWidth_="
+        "%{public}d, screenHeight_= %{public}d",
+          screenParams_[MAIN_STATUS_WIDTH_INDEX], screenParams_[FULL_STATUS_WIDTH_INDEX],
+          screenParams_[GLOBAL_FULL_STATUS_WIDTH_INDEX], screenParams_[SCREEN_HEIGHT_INDEX]);
 }
 
 nlohmann::ordered_json ScreenSessionManager::GetCapabilityJson(FoldStatus foldStatus, FoldDisplayMode displayMode,

@@ -587,10 +587,10 @@ HWTEST_F(AbstractDisplayControllerTest, FeatureTest, TestSize.Level1)
 {
     ScreenId screenId = 0;
     auto ret = absDisplayController_->SetScreenOffsetInner(screenId);
-    ASSERT_TRUE(ret);
+    EXPECT_TRUE(ret);
     screenId = 6;
     ret = absDisplayController_->SetScreenOffsetInner(screenId);
-    ASSERT_FALSE(ret);
+    EXPECT_FALSE(ret);
 }
 }
 } // namespace Rosen
