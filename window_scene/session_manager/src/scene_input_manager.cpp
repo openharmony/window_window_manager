@@ -530,7 +530,7 @@ void DumpUIExtentionWindowInfo(const MMI::WindowInfo& windowInfo)
     for (const auto& uiExtWindowInfo : windowInfo.uiExtentionWindowInfo) {
         auto str = DumpWindowInfo(uiExtWindowInfo);
         str = "sec:" + std::to_string(uiExtWindowInfo.privacyUIFlag) + " " + str;
-        TLOGI(WmsLogTag::WMS_EVENT, "uiExtWindowInfo:%{public}s", str.c_str());
+        TLOGI(WmsLogTag::WMS_EVENT, "uecInfo:%{public}s", str.c_str());
     }
 }
 
