@@ -766,7 +766,7 @@ HWTEST_F(ScreenSessionManagerClientStubTest,
  * @tc.desc: HandleOnSetSurfaceNodeIdsChanged test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerClientStubTest, HandleOnGetSurfaceNodeIdsFromMissionIdsChanged, TestSize.Level1)
+HWTEST_F(ScreenSessionManagerClientStubTest, HandleOnSetSurfaceNodeIdsChanged, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -780,7 +780,7 @@ HWTEST_F(ScreenSessionManagerClientStubTest, HandleOnGetSurfaceNodeIdsFromMissio
  * @tc.desc: HandleOnVirtualScreenDisconnected test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerClientStubTest, HandleOnGetSurfaceNodeIdsFromMissionIdsChanged, TestSize.Level1)
+HWTEST_F(ScreenSessionManagerClientStubTest, HandleOnVirtualScreenDisconnected, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;

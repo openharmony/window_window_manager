@@ -419,7 +419,7 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, OnBeforeScreenPropertyChanged, Tes
 HWTEST_F(ScreenSessionManagerClientProxyTest, OnSetSurfaceNodeIdsChanged, TestSize.Level1)
 {
     MockMessageParcel::ClearAllErrorFlag();
-    Display displayId = 10;
+    DisplayId displayId = 10;
     std::vector<uint64_t> surfaceNodeIds = { 100, 101 };
     auto ssmProxy = sptr<ScreenSessionManagerClientProxy>::MakeSptr(nullptr);
     ssmProxy->OnSetSurfaceNodeIdsChanged(displayId, surfaceNodeIds);
@@ -442,14 +442,14 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, OnSetSurfaceNodeIdsChanged, TestSi
 }
 
 /**
- * @tc.name: OnSetSurfaceNodeIdsChanged
- * @tc.desc: OnSetSurfaceNodeIdsChanged test
+ * @tc.name: OnVirtualScreenDisconnected
+ * @tc.desc: OnVirtualScreenDisconnected test
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenSessionManagerClientProxyTest, OnSetSurfaceNodeIdsChanged, TestSize.Level1)
 {
     MockMessageParcel::ClearAllErrorFlag();
-    Display displayId = 10;
+    DisplayId displayId = 10;
     auto ssmProxy = sptr<ScreenSessionManagerClientProxy>::MakeSptr(nullptr);
     ssmProxy->OnVirtualScreenDisconnected(displayId);
 
