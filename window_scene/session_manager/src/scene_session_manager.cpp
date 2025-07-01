@@ -10020,7 +10020,7 @@ WMError SceneSessionManager::RemoveSessionFromBlackList(const sptr<SceneSession>
         }
         sessionBlackListInfoSet.erase(sessionBlackListInfo);
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, displayId: %{public}" PRIu64,
-            sessionBlackListInfo.windowId, displayId);
+            sessionBlackListInfo.windowId, it->first);
         ret = WMError::WM_OK;
         if (sessionBlackListInfoSet.empty()) {
             it = sessionBlackListInfoMap_.erase(it);
