@@ -164,7 +164,6 @@ WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
         if (session->pcFoldScreenController_) {
             session->pcFoldScreenController_->OnConnect();
         }
-        session->SaveLastDensity();
         return ret;
     }, __func__);
 }
@@ -8700,12 +8699,6 @@ void SceneSession::NotifyKeyboardDidShowRegistered(bool registered)
 void SceneSession::NotifyKeyboardDidHideRegistered(bool registered)
 {
     GetSessionProperty()->EditSessionInfo().isKeyboardDidHideRegistered_ = registered;
-}
-
-WSError SceneSession::UpdateDensity()
-{
-    SaveLastDensity();
-    return Session::UpdateDensity();
 }
 
 void SceneSession::SaveLastDensity()
