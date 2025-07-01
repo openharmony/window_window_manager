@@ -454,6 +454,50 @@ HWTEST_F(SessionProxyTest, UpdatePiPTemplateInfo, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetWindowAnchorInfo
+ * @tc.desc: sessionStub sessionStubTest
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionProxyTest, SetWindowAnchorInfo, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SetWindowAnchorInfo: SetWindowAnchorInfo start";
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    auto sProxy = sptr<SessionProxy>::MakeSptr(remoteMocker);
+    ASSERT_NE(sProxy, nullptr);
+    WindowAnchorInfo anchorInfo;
+    WSError res = sProxy->SetWindowAnchorInfo(anchorInfo);
+    ASSERT_EQ(res, WSError::WS_OK);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    res = sProxy->SetWindowAnchorInfo(anchorInfo);
+    ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    MockMessageParcel::SetWriteParcelableErrorFlag(true);
+    res = sProxy->SetWindowAnchorInfo(anchorInfo);
+    ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteParcelableErrorFlag(false);
+
+    sptr<SessionProxy> tempProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    res = tempProxy->SetWindowAnchorInfo(anchorInfo);
+    ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    res = sProxy->SetWindowAnchorInfo(anchorInfo);
+    ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    remoteMocker->SetRequestResult(ERR_NONE);
+
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    res = sProxy->SetWindowAnchorInfo(anchorInfo);
+    ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetReadInt32ErrorFlag(false);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    GTEST_LOG_(INFO) << "SetWindowAnchorInfo: SetWindowAnchorInfo end";
+}
+
+/**
  * @tc.name: SetWindowTransitionAnimation
  * @tc.desc: sessionStub sessionStubTest
  * @tc.type: FUNC

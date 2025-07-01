@@ -452,6 +452,10 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest08, TestSize.Level1)
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_FLOATING_BALL_WINDOW_ID), data, reply, option);
     ASSERT_EQ(ERR_NONE, res);
+    data.WriteParcelable(nullptr);
+    res = session_->ProcessRemoteRequest(
+    static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_ANCHOR_INFO), data, reply, option);
+    ASSERT_EQ(ERR_INVALID_DATA, res);
 }
 
 /**
@@ -1447,6 +1451,24 @@ HWTEST_F(SessionStubTest, HandleSetFollowParentWindowLayoutEnabled, Function | S
     ASSERT_EQ(result, ERR_INVALID_DATA);
     data.WriteBool(true);
     result = session_->HandleSetFollowParentWindowLayoutEnabled(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleSetWindowAnchorInfo
+ * @tc.desc: sessionStub HandleSetWindowAnchorInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleSetWindowAnchorInfo, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto result = session_->HandleSetWindowAnchorInfo(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+
+    WindowAnchorInfo windowAnchor;
+    data.WriteParcelable(&windowAnchor);
+    result = session_->HandleSetWindowAnchorInfo(data, reply);
     ASSERT_EQ(result, ERR_NONE);
 }
 
