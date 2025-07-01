@@ -755,7 +755,6 @@ protected:
     /*
      * Window Property
      */
-    constexpr const char* PERMISSION_WINDOW_TRANSPARENT = "ohos.permission.WINDOW_TRANSPARENT";
     std::unordered_set<std::string> containerColorList_;
     float lastSystemDensity_ = UNDEFINED_DENSITY;
     WSError NotifySystemDensityChange(float density);

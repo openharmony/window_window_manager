@@ -4425,7 +4425,7 @@ WMError WindowSessionImpl::SetWindowContainerColor(const std::string& activeColo
     if (!windowSystemConfig_.IsPcWindow()) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
-    if (!SessionPermission::VerifyCallingPermission(PERMISSION_WINDOW_TRANSPARENT) &&
+    if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_WINDOW_TRANSPARENT) &&
         containerColorList_.count(property_->GetSessionInfo().bundleName_) == 0) {
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
