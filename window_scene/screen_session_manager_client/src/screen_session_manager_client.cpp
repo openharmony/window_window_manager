@@ -382,6 +382,7 @@ void ScreenSessionManagerClient::UpdateScreenRotationProperty(ScreenId screenId,
     screenSession->UpdateToInputManager(bounds, directionInfo.notifyRotation_, directionInfo.rotation_,
         foldDisplayMode);
     screenSession->UpdateTouchBoundsAndOffset();
+    TLOGW(WmsLogTag::DMS, "superFoldStatus:%{public}d", currentstate_);
     if (currentstate_ != SuperFoldStatus::KEYBOARD) {
         screenSession->SetValidHeight(bounds.rect_.GetHeight());
         screenSession->SetValidWidth(bounds.rect_.GetWidth());

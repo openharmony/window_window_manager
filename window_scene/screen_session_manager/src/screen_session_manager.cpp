@@ -1878,7 +1878,7 @@ DisplayId ScreenSessionManager::GetFakeDisplayId(sptr<ScreenSession> screenSessi
 
 std::vector<DisplayId> ScreenSessionManager::GetAllDisplayIds()
 {
-    TLOGI(WmsLogTag::DMS, "enter");
+    TLOGD(WmsLogTag::DMS, "enter");
     std::vector<DisplayId> res;
     std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     for (auto sessionIt : screenSessionMap_) {
@@ -6077,6 +6077,7 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenSnapshot(Display
         }
         realDisplayId = 0;
     }
+    TLOGW(WmsLogTag::DMS, "dma=%{public}d, displayId:%{public}" PRIu64, isUseDma, realDisplayId);
     std::shared_ptr<RSDisplayNode> displayNode = GetDisplayNodeByDisplayId(realDisplayId);
     if (displayNode == nullptr) {
         TLOGE(WmsLogTag::DMS, "displayNode is null!");
@@ -6085,7 +6086,6 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenSnapshot(Display
     std::shared_ptr<SurfaceCaptureFuture> callback = std::make_shared<SurfaceCaptureFuture>();
     RSSurfaceCaptureConfig config;
     config.useDma = isUseDma;
-    TLOGW(WmsLogTag::DMS, "dma=%{public}d", isUseDma);
 #ifdef FOLD_ABILITY_ENABLE
     if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() &&
         SuperFoldPolicy::GetInstance().IsNeedSetSnapshotRect(displayId)) {
@@ -8694,6 +8694,11 @@ void ScreenSessionManager::NotifyUnfreezedAgents(const int32_t& pid, const std::
     const std::set<DisplayManagerAgentType>& pidAgentTypes, const sptr<ScreenSession>& screenSession)
 {
     bool isAgentTypeNotify = false;
+    std::ostringstream oss;
+    for (auto type : pidAgentTypes) {
+        oss << static_cast<int32_t>(type) << ",";
+    }
+    TLOGW(WmsLogTag::DMS, "pid:%{public}d, agentTypes:%{public}s", pid, oss.str().c_str());
     for (auto agentType : pidAgentTypes) {
         auto agents = dmAgentContainer_.GetAgentsByType(agentType);
         for (auto agent : agents) {
