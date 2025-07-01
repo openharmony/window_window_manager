@@ -324,7 +324,7 @@ HWTEST_F(WindowPatternSnapshotTest, HasSnapshot, TestSize.Level1)
 
     EXPECT_EQ(scenePersistence->HasSnapshot(key, true), false);
     EXPECT_EQ(scenePersistence->HasSnapshot(key, false), false);
-    scenePersistence->SetHasSnapshotTmp(true);
+    scenePersistence->SetHasSnapshotFreeMultiWindow(true);
     EXPECT_EQ(scenePersistence->HasSnapshot(key, true), true);
 }
 
@@ -855,7 +855,7 @@ HWTEST_F(WindowPatternSnapshotTest, SetIsSavingSnapshot, TestSize.Level1)
     ASSERT_NE(scenePersistence, nullptr);
     auto key = defaultStatus;
     scenePersistence->SetIsSavingSnapshot(key, true, true);
-    EXPECT_EQ(scenePersistence->isSavingSnapshotTmp_, true);
+    EXPECT_EQ(scenePersistence->isSavingSnapshotFreeMultiWindow_, true);
     
     scenePersistence->SetIsSavingSnapshot(key, false, true);
     EXPECT_EQ(scenePersistence->isSavingSnapshot_[key.first][key.second], true);
@@ -901,7 +901,7 @@ HWTEST_F(WindowPatternSnapshotTest, DeleteHasSnapshot, TestSize.Level1)
     ASSERT_NE(session_, nullptr);
     ASSERT_NE(scenePersistence, nullptr);
     session_->scenePersistence_ = scenePersistence;
-    session_->specialType_ = false;
+    session_->freeMultiWindow_ = false;
     auto pixelMap = std::make_shared<Media::PixelMap>();
     ScenePersistentStorage::InitDir("/data/Snapshot");
     session_->SaveSnapshot(false, true, pixelMap);
@@ -918,29 +918,29 @@ HWTEST_F(WindowPatternSnapshotTest, DeleteHasSnapshot, TestSize.Level1)
     ScenePersistentStorage::Insert("Snapshot_" + std::to_string(session_->persistentId_) +
         "_" + std::to_string(key.first) + std::to_string(key.second), true,
         ScenePersistentStorageType::MAXIMIZE_STATE);
-    session_->specialType_ = true;
+    session_->freeMultiWindow_ = true;
     session_->SaveSnapshot(false, true, pixelMap);
     EXPECT_EQ(session_->HasSnapshot(), true);
-    session_->DeleteHasSnapshotTmp();
+    session_->DeleteHasSnapshotFreeMultiWindow();
     session_->scenePersistence_ = scenePersistence;
     EXPECT_EQ(session_->HasSnapshot(), false);
 }
 
 /**
- * @tc.name: SetSpecialType
- * @tc.desc: SetSpecialType Test
+ * @tc.name: SetFreeMultiWindow
+ * @tc.desc: SetfreeMultiWindow Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPatternSnapshotTest, SetSpecialType, TestSize.Level1)
+HWTEST_F(WindowPatternSnapshotTest, SetFreeMultiWindow, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     session_->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    session_->SetSpecialType();
-    EXPECT_EQ(session_->specialType_, true);
+    session_->SetFreeMultiWindow();
+    EXPECT_EQ(session_->freeMultiWindow_, true);
 
     session_->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    session_->SetSpecialType();
-    EXPECT_EQ(session_->specialType_, false);
+    session_->SetFreeMultiWindow();
+    EXPECT_EQ(session_->freeMultiWindow_, false);
 }
 } // namespace
 } // namespace Rosen

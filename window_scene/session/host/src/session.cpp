@@ -2564,7 +2564,7 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(bool runInFfrt, float scalePa
     if (isPersistentImageFit) key = defaultStatus;
     if (!surfaceNode || !surfaceNode->IsBufferAvailable()) {
         scenePersistence_->SetHasSnapshot(false, key);
-        scenePersistence_->SetHasSnapshotTmp(false);
+        scenePersistence_->SetHasSnapshotFreeMultiWindow(false);
         return nullptr;
     }
     auto callback = std::make_shared<SurfaceCaptureFuture>();
@@ -2684,8 +2684,8 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
             TLOGNE(WmsLogTag::WMS_PATTERN, "scenePersistence_ is null");
             return;
         }
-        if (session->specialType_) {
-            session->scenePersistence_->SetHasSnapshotTmp(true);
+        if (session->freeMultiWindow_) {
+            session->scenePersistence_->SetHasSnapshotFreeMultiWindow(true);
             ScenePersistentStorage::Insert("Snapshot_" + std::to_string(session->persistentId_), true,
                 ScenePersistentStorageType::MAXIMIZE_STATE);
         } else {
@@ -2700,7 +2700,8 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
             std::lock_guard lock(session->removeSnapshotCallbackMutex_);
             removeSnapshotCallback = session->removeSnapshotCallback_;
         }
-        session->scenePersistence_->SaveSnapshot(pixelMap, removeSnapshotCallback, key, rotate, session->specialType_);
+        session->scenePersistence_->SaveSnapshot(pixelMap, removeSnapshotCallback, key, rotate,
+            session->freeMultiWindow_);
         if (updateSnapshot) {
             session->SetExitSplitOnBackground(false);
             session->scenePersistence_->ClearSnapshot(key);
@@ -2717,12 +2718,12 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
     snapshotFfrtHelper->SubmitTask(std::move(task), taskName);
 }
 
-void Session::SetSpecialType()
+void Session::SetFreeMultiWindow()
 {
     if (GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
-        specialType_ = false;
+        freeMultiWindow_ = false;
     } else {
-        specialType_ = true;
+        freeMultiWindow_ = true;
     }
 }
 
@@ -2733,7 +2734,7 @@ void Session::DeleteHasSnapshot()
             DeleteHasSnapshot({ screen, orientation });
         }
     }
-    DeleteHasSnapshotTmp();
+    DeleteHasSnapshotFreeMultiWindow();
 }
 
 void Session::DeleteHasSnapshot(SnapshotStatus key)
@@ -2748,11 +2749,11 @@ void Session::DeleteHasSnapshot(SnapshotStatus key)
     }
 }
 
-void Session::DeleteHasSnapshotTmp()
+void Session::DeleteHasSnapshotFreeMultiWindow()
 {
-    auto hasSnapshotTmp = ScenePersistentStorage::HasKey("Snapshot_" + std::to_string(persistentId_),
+    auto hasSnapshotFreeMultiWindow = ScenePersistentStorage::HasKey("Snapshot_" + std::to_string(persistentId_),
         ScenePersistentStorageType::MAXIMIZE_STATE);
-    if (hasSnapshotTmp) {
+    if (hasSnapshotFreeMultiWindow) {
         ScenePersistentStorage::Delete("Snapshot_" + std::to_string(persistentId_),
             ScenePersistentStorageType::MAXIMIZE_STATE);
     }
@@ -2763,16 +2764,20 @@ bool Session::HasSnapshot(SnapshotStatus key)
     auto hasSnapshot = ScenePersistentStorage::HasKey("Snapshot_" + std::to_string(persistentId_) +
         "_" + std::to_string(key.first) + std::to_string(key.second),
         ScenePersistentStorageType::MAXIMIZE_STATE);
-    if (hasSnapshot && scenePersistence_) scenePersistence_->SetHasSnapshot(true, key);
+    if (hasSnapshot && scenePersistence_) {
+        scenePersistence_->SetHasSnapshot(true, key);
+    }
     return hasSnapshot;
 }
 
-bool Session::HasSnapshotTmp()
+bool Session::HasSnapshotFreeMultiWindow()
 {
-    auto hasSnapshotTmp = ScenePersistentStorage::HasKey("Snapshot_" + std::to_string(persistentId_),
+    auto hasSnapshotFreeMultiWindow = ScenePersistentStorage::HasKey("Snapshot_" + std::to_string(persistentId_),
         ScenePersistentStorageType::MAXIMIZE_STATE);
-    if (hasSnapshotTmp && scenePersistence_) scenePersistence_->SetHasSnapshotTmp(true);
-    return hasSnapshotTmp;
+    if (hasSnapshotFreeMultiWindow && scenePersistence_) {
+        scenePersistence_->SetHasSnapshotFreeMultiWindow(true);
+    }
+    return hasSnapshotFreeMultiWindow;
 }
 
 bool Session::HasSnapshot()
@@ -2784,7 +2789,7 @@ bool Session::HasSnapshot()
             }
         }
     }
-    return HasSnapshotTmp();
+    return HasSnapshotFreeMultiWindow();
 }
 
 void Session::InitSnapshotCapacity()
@@ -4355,8 +4360,8 @@ std::shared_ptr<Media::PixelMap> Session::GetSnapshotPixelMap(const float oriSca
         return nullptr;
     }
     auto key = GetWindowStatus();
-    return scenePersistence_->IsSavingSnapshot(key, specialType_) ? GetSnapshot() :
-        scenePersistence_->GetLocalSnapshotPixelMap(oriScale, newScale, key, specialType_);
+    return scenePersistence_->IsSavingSnapshot(key, freeMultiWindow_) ? GetSnapshot() :
+        scenePersistence_->GetLocalSnapshotPixelMap(oriScale, newScale, key, freeMultiWindow_);
 }
 
 bool Session::IsVisibleForeground() const
