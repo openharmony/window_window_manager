@@ -77,11 +77,9 @@ void MultiScreenChangeUtils::ScreenExtendPositionChange(sptr<ScreenSession>& inn
         std::shared_ptr<RSDisplayNode> innerNode = innerScreen->GetDisplayNode();
         std::shared_ptr<RSDisplayNode> externalNode = externalScreen->GetDisplayNode();
         if (innerNode && externalNode) {
-            ScreenSessionManager::GetInstance().SetScreenOffset(innerScreen->GetScreenId(),
-                innerScreen->GetScreenProperty().GetStartX(),
+            innerNode->SetDisplayOffset(innerScreen->GetScreenProperty().GetStartX(),
                 innerScreen->GetScreenProperty().GetStartY());
-            ScreenSessionManager::GetInstance().SetScreenOffset(externalScreen->GetScreenId(),
-                externalScreen->GetScreenProperty().GetStartX(),
+            externalNode->SetDisplayOffset(externalScreen->GetScreenProperty().GetStartX(),
                 externalScreen->GetScreenProperty().GetStartY());
         } else {
             TLOGW(WmsLogTag::DMS, "DisplayNode is null");
@@ -128,8 +126,8 @@ void MultiScreenChangeUtils::ScreenMainPositionChange(sptr<ScreenSession>& inner
         std::shared_ptr<RSDisplayNode> innerNode = innerScreen->GetDisplayNode();
         std::shared_ptr<RSDisplayNode> externalNode = externalScreen->GetDisplayNode();
         if (innerNode && externalNode) {
-            ScreenSessionManager::GetInstance().SetScreenOffset(innerScreen->GetScreenId(), 0, 0);
-            ScreenSessionManager::GetInstance().SetScreenOffset(externalScreen->GetScreenId(), 0, 0);
+            innerNode->SetDisplayOffset(0, 0);
+            externalNode->SetDisplayOffset(0, 0);
         } else {
             TLOGW(WmsLogTag::DMS, "DisplayNode is null");
         }

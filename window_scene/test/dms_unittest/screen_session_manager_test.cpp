@@ -7108,21 +7108,6 @@ HWTEST_F(ScreenSessionManagerTest, SwitchExternalScreenToMirror, TestSize.Level1
     ssm_->DestroyVirtualScreen(screenId);
     ssm_->DestroyVirtualScreen(virtualScreenId);
 }
-
-/**
- * @tc.name: SetScreenOffsetFeatureTest
- * @tc.desc: SetScreenOffsetInner
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, SetScreenOffsetFeatureTest, Function | SmallTest | Level3)
-{
-    ScreenId screenId = 0;
-    EXPECT_TRUE(ssm_->SetScreenOffset(screenId, 0.0F, 0.0F));
-    EXPECT_TRUE(ssm_->SetScreenOffset(screenId, 100.0F, 100.0F));
-    screenId = -1;
-    EXPECT_FALSE(ssm_->SetScreenOffset(screenId, 0.0F, 0.0F));
-    EXPECT_FALSE(ssm_->SetScreenOffset(screenId, 100.0F, 100.0F));
-}
 }
 } // namespace Rosen
 } // namespace OHOS
