@@ -730,8 +730,8 @@ void ScreenSessionManager::OnVirtualScreenChange(ScreenId screenId, ScreenEvent 
         TLOGE(WmsLogTag::DMS, "screenSession is nullptr");
         return;
     }
-    auto clientProxy = GetClientProxy();
     if (screenEvent == ScreenEvent::CONNECTED) {
+        auto clientProxy = GetClientProxy();
         TLOGI(WmsLogTag::DMS, "screenCombination:%{public}d, screenName:%{public}s",
             screenSession->GetScreenCombination(), screenSession->GetName().c_str());
         if(screenSession->GetScreenCombination() == ScreenCombination::SCREEN_UNIQUE &&
@@ -746,9 +746,12 @@ void ScreenSessionManager::OnVirtualScreenChange(ScreenId screenId, ScreenEvent 
         return;
     }
     if (screenEvent == ScreenEvent::DISCONNECTED) {
-        if (clientProxy) {
-            clientProxy->OnScreenConnectionChanged(GetSessionOption(screenSession, screenId),
-                ScreenEvent::DISCONNECTED);
+        std::lock_guard<std::mutex> lock(clientProxyMutex_);
+        for (const auto& [userId, clientProxy] : clientProxyMap_) {
+            if (clientProxy) {
+                clientProxy->OnScreenConnectionChanged(screenId, ScreenEvent::DISCONNECTED,
+                    screenSession->GetRSScreenId(), screenSession->GetName());
+            }
         }
     }
 }
