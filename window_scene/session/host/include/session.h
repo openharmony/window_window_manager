@@ -714,14 +714,14 @@ public:
     SnapshotStatus GetSessionStatus() const;
     DisplayOrientation GetWindowOrientation() const;
     uint32_t GetLastOrientation() const;
-    bool HasSnapshotTmp();
+    bool HasSnapshotFreeMultiWindow();
     bool HasSnapshot(SnapshotStatus key);
     bool HasSnapshot();
     void DeleteHasSnapshot();
     void DeleteHasSnapshot(SnapshotStatus key);
-    void DeleteHasSnapshotTmp();
-    void SetSpecialType();
-    bool specialType_ = false;
+    void DeleteHasSnapshotFreeMultiWindow();
+    void SetFreeMultiWindow();
+    bool freeMultiWindow_ = false;
 
     /*
      * Specific Window
