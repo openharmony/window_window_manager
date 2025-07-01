@@ -1462,12 +1462,12 @@ HWTEST_F(WindowSceneSessionImplTest5, SetWindowAnchorInfo01, Function | SmallTes
     property->persistentId_ = 100;
     window->state_ = WindowState::STATE_CREATED;
     ret = window->SetWindowAnchorInfo(windowAnchorInfo);
-    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_OPERATION);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
 
     property->subWindowLevel_ = 100;
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     ret = window->SetWindowAnchorInfo(windowAnchorInfo);
-    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_OPERATION);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
 
     property->subWindowLevel_ = 1;
     window->windowSystemConfig_.supportFollowRelativePositionToParent_ = false;

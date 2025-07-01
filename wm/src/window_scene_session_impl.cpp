@@ -6281,11 +6281,11 @@ WMError WindowSceneSessionImpl::SetWindowAnchorInfo(const WindowAnchorInfo& wind
     const auto& property = GetProperty();
     if (!WindowHelper::IsSubWindow(property->GetWindowType())) {
         TLOGE(WmsLogTag::WMS_SUB, "only sub window is valid");
-        return WMError::WM_ERROR_INVALID_OPERATION;
+        return WMError::WM_ERROR_INVALID_CALLING;
     }
     if (property->GetSubWindowLevel() > 1) {
         TLOGI(WmsLogTag::WMS_SUB, "not support more than 1 level window");
-        return WMError::WM_ERROR_INVALID_OPERATION;
+        return WMError::WM_ERROR_INVALID_CALLING;
     }
     if (!windowSystemConfig_.supportFollowRelativePositionToParent_) {
         TLOGI(WmsLogTag::WMS_SUB, "not support device");
