@@ -397,6 +397,18 @@ WMError SystemSession::UpdateFloatingBall(const FloatingBallTemplateInfo& fbTemp
     if (!WindowHelper::IsFbWindow(GetWindowType())) {
         return WMError::WM_DO_NOTHING;
     }
+
+    if (GetFbTemplateInfo().template_ == static_cast<uint32_t>(FloatingBallTemplate::STATIC)) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Fb static template can't update");
+        return WMError::WM_ERROR_FB_UPDATE_STATIC_TEMPLATE_DENIED;
+    }
+
+    if (GetFbTemplateInfo().template_ != 0 && GetFbTemplateInfo().template_ != fbTemplateInfo.template_) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Fb template type can't update %{public}d, %{public}d",
+            GetFbTemplateInfo().template_, fbTemplateInfo.template_);
+        return WMError::WM_ERROR_FB_UPDATE_TEMPLATE_TYPE_DENIED;
+    }
+
     int32_t callingPid = IPCSkeleton::GetCallingPid();
     auto task = [weakThis = wptr(this), fbTemplateInfo, callingPid, where = __func__] {
         auto session = weakThis.promote();

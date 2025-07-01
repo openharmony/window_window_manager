@@ -46,13 +46,6 @@ napi_value JsFbWindowManager::CreateFbController(napi_env env, napi_callback_inf
 
 napi_value JsFbWindowManager::OnCreateFbController(napi_env env, napi_callback_info info)
 {
-    if (!FloatingBallManager::IsSupportFloatingBall()) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "Device is not phone or pad, do not support floating ball");
-        napi_throw(env, AbilityRuntime::CreateJsError(env,
-            static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT),
-            "Device is not phone or pad, do not support floating ball"));
-        return NapiGetUndefined(env);
-    }
     size_t argc = 1;
     napi_value argv[1] = {nullptr};
     // 解析应用传参FloatingBallConfiguration对象
@@ -84,6 +77,13 @@ napi_value JsFbWindowManager::NapiSendTask(napi_env env, void* contextPtr)
         if (errCodePtr == nullptr) {
             return;
         }
+
+        if (!FloatingBallManager::IsSupportFloatingBall()) {
+            TLOGE(WmsLogTag::WMS_SYSTEM, "Device is not phone or pad, do not support floating ball");
+            *errCodePtr = WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
+            return;
+        }
+
         auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(contextPtr);
         if (context == nullptr) {
             *errCodePtr = WmErrorCode::WM_ERROR_FB_INTERNAL_ERROR;

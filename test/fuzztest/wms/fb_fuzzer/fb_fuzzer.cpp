@@ -48,10 +48,10 @@ public:
     MockFbListener() = default;
     virtual ~MockFbListener() = default;
 
-    void OnFloatingBallStart() override;
-    void OnFloatingBallStop() override;
+    void OnFloatingBallStart() override {};
+    void OnFloatingBallStop() override {};
 
-    void OnClickEvent() override;
+    void OnClickEvent() override {};
 };
 
 void CheckFbControllerFunctionsPart(sptr<FloatingBallController> controller, const uint8_t* data, size_t size)
