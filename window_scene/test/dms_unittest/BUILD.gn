@@ -425,7 +425,10 @@ ohos_unittest("ws_screen_session_manager_client_stub_test") {
 ohos_unittest("ws_screen_session_manager_client_test") {
   module_out_path = module_out_path
 
-  sources = [ "screen_session_manager_client_test.cpp" ]
+  sources = [
+    "../mock/mock_message_parcel.cpp",
+    "screen_session_manager_client_test.cpp"
+  ]
 
   deps = [
     ":ws_unittest_common",
