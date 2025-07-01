@@ -6508,6 +6508,12 @@ void WindowSessionImpl::NotifyKeyboardDidShow(const KeyboardPanelInfo& keyboardP
             listener->OnKeyboardDidShow(keyboardPanelInfo);
         }
     }
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        AAFwk::Want want;
+        WriteKeyboardInfoToWant(want, keyboardPanelInfo);
+        uiContent->SendUIExtProprty(static_cast<uint32_t>(Extension::Businesscode::NOTIFY_KEYBOARD_DID_SHOW),
+            want, keyboardDidShowUIExtListenerIds_, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
+    }
 }
 
 void WindowSessionImpl::NotifyKeyboardDidHide(const KeyboardPanelInfo& keyboardPanelInfo)
@@ -6519,6 +6525,54 @@ void WindowSessionImpl::NotifyKeyboardDidHide(const KeyboardPanelInfo& keyboardP
             listener->OnKeyboardDidHide(keyboardPanelInfo);
         }
     }
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        AAFwk::Want want;
+        WriteKeyboardInfoToWant(want, keyboardPanelInfo);
+        uiContent->SendUIExtProprty(static_cast<uint32_t>(Extension::Businesscode::NOTIFY_KEYBOARD_DID_HIDE),
+            want, keyboardDidHideUIExtListenerIds_, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
+    }
+}
+
+void WindowSessionImpl::WriteKeyboardInfoToWant(AAFwk::Want& want, const KeyboardPanelInfo& keyboardPanelInfo) const
+{
+    want.SetParam(Extension::RECT_X, static_cast<int>(keyboardPanelInfo.rect_.posX_));
+    want.SetParam(Extension::RECT_Y, static_cast<int>(keyboardPanelInfo.rect_.posY_));
+    want.SetParam(Extension::RECT_WIDTH, static_cast<int>(keyboardPanelInfo.rect_.width_));
+    want.SetParam(Extension::RECT_HEIGHT, static_cast<int>(keyboardPanelInfo.rect_.height_));
+    want.SetParam(Extension::BEGIN_X, static_cast<int>(keyboardPanelInfo.beginRect_.posX_));
+    want.SetParam(Extension::BEGIN_Y, static_cast<int>(keyboardPanelInfo.beginRect_.posY_));
+    want.SetParam(Extension::BEGIN_WIDTH, static_cast<int>(keyboardPanelInfo.beginRect_.width_));
+    want.SetParam(Extension::BEGIN_HEIGHT, static_cast<int>(keyboardPanelInfo.beginRect_.height_));
+    want.SetParam(Extension::END_X, static_cast<int>(keyboardPanelInfo.endRect_.posX_));
+    want.SetParam(Extension::END_Y, static_cast<int>(keyboardPanelInfo.endRect_.posY_));
+    want.SetParam(Extension::END_WIDTH, static_cast<int>(keyboardPanelInfo.endRect_.width_));
+    want.SetParam(Extension::END_HEIGHT, static_cast<int>(keyboardPanelInfo.endRect_.height_));
+    want.SetParam(Extension::GRAVITY, static_cast<int>(keyboardPanelInfo.gravity_));
+    want.SetParam(Extension::ISSHOWING, keyboardPanelInfo.isShowing_);
+}
+
+void WindowSessionImpl::ReadKeyboardInfoFromWant(const AAFwk::Want& want, KeyboardPanelInfo& keyboardPanelInfo) const
+{
+    keyboardPanelInfo.rect_ = {
+        want.GetIntParam(Extension::RECT_X, 0),
+        want.GetIntParam(Extension::RECT_Y, 0),
+        want.GetIntParam(Extension::RECT_WIDTH, 0),
+        want.GetIntParam(Extension::RECT_HEIGHT, 0)
+    };
+    keyboardPanelInfo.beginRect_ = {
+        want.GetIntParam(Extension::BEGIN_X, 0),
+        want.GetIntParam(Extension::BEGIN_Y, 0),
+        want.GetIntParam(Extension::BEGIN_WIDTH, 0),
+        want.GetIntParam(Extension::BEGIN_HEIGHT, 0)
+    };
+    keyboardPanelInfo.endRect_ = {
+        want.GetIntParam(Extension::END_X, 0),
+        want.GetIntParam(Extension::END_Y, 0),
+        want.GetIntParam(Extension::END_WIDTH, 0),
+        want.GetIntParam(Extension::END_HEIGHT, 0)
+    };
+    keyboardPanelInfo.gravity_ = static_cast<WindowGravity>(want.GetIntParam(Extension::GRAVITY, 0));
+    keyboardPanelInfo.isShowing_ = want.GetBoolParam(Extension::ISSHOWING, 0);
 }
 
 void WindowSessionImpl::NotifyKeyboardAnimationCompleted(const KeyboardPanelInfo& keyboardPanelInfo)
@@ -7369,6 +7423,22 @@ WMError WindowSessionImpl::OnExtensionMessage(uint32_t code, int32_t persistentI
             return HandleUnregisterHostWindowRectChangeListener(code, persistentId, data);
             break;
         }
+        case static_cast<uint32_t>(Extension::Businesscode::REGISTER_KEYBOARD_DID_SHOW_LISTENER): {
+            return HandleUIExtRegisterKeyboardDidShowListener(code, persistentId, data);
+            break;
+        }
+        case static_cast<uint32_t>(Extension::Businesscode::UNREGISTER_KEYBOARD_DID_SHOW_LISTENER): {
+            return HandleUIExtUnregisterKeyboardDidShowListener(code, persistentId, data);
+            break;
+        }
+        case static_cast<uint32_t>(Extension::Businesscode::REGISTER_KEYBOARD_DID_HIDE_LISTENER): {
+            return HandleUIExtRegisterKeyboardDidHideListener(code, persistentId, data);
+            break;
+        }
+        case static_cast<uint32_t>(Extension::Businesscode::UNREGISTER_KEYBOARD_DID_HIDE_LISTENER): {
+            return HandleUIExtUnregisterKeyboardDidHideListener(code, persistentId, data);
+            break;
+        }
         default: {
             TLOGI(WmsLogTag::WMS_UIEXT, "Message was not processed, businessCode: %{public}u", code);
             break;
@@ -7405,6 +7475,54 @@ WMError WindowSessionImpl::HandleUnregisterHostWindowRectChangeListener(uint32_t
     TLOGI(WmsLogTag::WMS_UIEXT, "businessCode: %{public}u", code);
     rectChangeUIExtListenerIds_.erase(persistentId);
     TLOGI(WmsLogTag::WMS_UIEXT, "persistentId: %{public}d unregister rect change listener", persistentId);
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::HandleUIExtRegisterKeyboardDidShowListener(uint32_t code, int32_t persistentId,
+    const AAFwk::Want& data)
+{
+    if (keyboardDidShowUIExtListeners_.find(persistentId) == keyboardDidShowUIExtListeners_.end()) {
+        sptr<IKeyboardDidShowListener> listener = sptr<IKeyboardDidShowListener>::MakeSptr();
+        keyboardDidShowUIExtListeners_[persistentId] = listener;
+        keyboardDidShowUIExtListenerIds_.emplace(persistentId);
+        RegisterKeyboardDidShowListener(listener);
+    }
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::HandleUIExtUnregisterKeyboardDidShowListener(uint32_t code, int32_t persistentId,
+    const AAFwk::Want& data)
+{
+    if (keyboardDidShowUIExtListeners_.find(persistentId) != keyboardDidShowUIExtListeners_.end()) {
+        sptr<IKeyboardDidShowListener> listener = keyboardDidShowUIExtListeners_[persistentId];
+        keyboardDidShowUIExtListeners_.erase(persistentId);
+        keyboardDidShowUIExtListenerIds_.erase(persistentId);
+        UnregisterKeyboardDidShowListener(listener);
+    }
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::HandleUIExtRegisterKeyboardDidHideListener(uint32_t code, int32_t persistentId,
+    const AAFwk::Want& data)
+{
+    if (keyboardDidHideUIExtListeners_.find(persistentId) == keyboardDidHideUIExtListeners_.end()) {
+        sptr<IKeyboardDidHideListener> listener = sptr<IKeyboardDidHideListener>::MakeSptr();
+        keyboardDidHideUIExtListeners_[persistentId] = listener;
+        keyboardDidHideUIExtListenerIds_.emplace(persistentId);
+        RegisterKeyboardDidHideListener(listener);
+    }
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::HandleUIExtUnregisterKeyboardDidHideListener(uint32_t code, int32_t persistentId,
+    const AAFwk::Want& data)
+{
+    if (keyboardDidHideUIExtListeners_.find(persistentId) != keyboardDidHideUIExtListeners_.end()) {
+        sptr<IKeyboardDidHideListener> listener = keyboardDidHideUIExtListeners_[persistentId];
+        keyboardDidHideUIExtListeners_.erase(persistentId);
+        keyboardDidHideUIExtListenerIds_.erase(persistentId);
+        UnregisterKeyboardDidHideListener(listener);
+    }
     return WMError::WM_OK;
 }
 

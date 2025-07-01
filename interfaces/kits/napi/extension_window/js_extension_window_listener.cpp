@@ -37,6 +37,9 @@ const std::string WINDOW_DISPLAYID_CHANGE_CB = "displayIdChange";
 const std::string SYSTEM_DENSITY_CHANGE_CB = "systemDensityChange";
 const std::string SCREENSHOT_EVENT_CB = "screenshot";
 const std::string EXTENSION_SECURE_LIMIT_CHANGE_CB = "uiExtensionSecureLimitChange";
+const std::string KEYBOARD_DID_SHOW_CB = "keyboardDidShow";
+const std::string KEYBOARD_DID_HIDE_CB = "keyboardDidHide";
+const std::string KEYBOARD_HEIGHT_CHANGE_CB = "keyboardHeightChange";
 }
 
 JsExtensionWindowListener::~JsExtensionWindowListener()
@@ -285,6 +288,78 @@ void JsExtensionWindowListener::OnSecureLimitChange(bool isLimit)
     };
     if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Failed to send event");
+    }
+}
+
+void JsExtensionWindowListener::OnKeyboardDidShow(const KeyboardPanelInfo& keyboardPanelInfo)
+{
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Called");
+    auto jsCallback = [self = weakRef_, env = env_, keyboardPanelInfo, funcName = __func__] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s: this listener or env is nullptr", funcName);
+            return;
+        }
+        HandleScope handleScope(env);
+        napi_value objValue = nullptr;
+        napi_create_object(env, &objValue);
+        if (objValue == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s failed to create js object", funcName);
+            return;
+        }
+        napi_value beginRectObjValue = GetRectAndConvertToJsValue(env, keyboardPanelInfo.beginRect_);
+        if (beginRectObjValue == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s failed to convert begin rect to jsObject", funcName);
+            return;
+        }
+        napi_value endRectObjValue = GetRectAndConvertToJsValue(env, keyboardPanelInfo.endRect_);
+        if (endRectObjValue == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s failed to convert end rect to jsObject", funcName);
+            return;
+        }
+        napi_set_named_property(env, objValue, "beginRect", beginRectObjValue);
+        napi_set_named_property(env, objValue, "endRect", endRectObjValue);
+        napi_value argv[] = { objValue };
+        thisListener->CallJsMethod(KEYBOARD_DID_SHOW_CB.c_str(), argv, ArraySize(argv));
+    };
+    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to send event");
+    }
+}
+
+void JsExtensionWindowListener::OnKeyboardDidHide(const KeyboardPanelInfo& keyboardPanelInfo)
+{
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Called");
+    auto jsCallback = [self = weakRef_, env = env_, keyboardPanelInfo, funcName = __func__] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "%{public}s: this listener or env is nullptr", funcName);
+            return;
+        }
+        HandleScope handleScope(env);
+        napi_value objValue = nullptr;
+        napi_create_object(env, &objValue);
+        if (objValue == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s failed to create js object", funcName);
+            return;
+        }
+        napi_value beginRectObjValue = GetRectAndConvertToJsValue(env, keyboardPanelInfo.beginRect_);
+        if (beginRectObjValue == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s failed to convert begin rect to jsObject", funcName);
+            return;
+        }
+        napi_value endRectObjValue = GetRectAndConvertToJsValue(env, keyboardPanelInfo.endRect_);
+        if (endRectObjValue == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s failed to convert end rect to jsObject", funcName);
+            return;
+        }
+        napi_set_named_property(env, objValue, "beginRect", beginRectObjValue);
+        napi_set_named_property(env, objValue, "endRect", endRectObjValue);
+        napi_value argv[] = { objValue };
+        thisListener->CallJsMethod(KEYBOARD_DID_HIDE_CB.c_str(), argv, ArraySize(argv));
+    };
+    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to send event");
     }
 }
 

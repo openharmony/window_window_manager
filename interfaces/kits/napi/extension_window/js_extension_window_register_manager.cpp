@@ -30,6 +30,9 @@ const std::string WINDOW_DISPLAYID_CHANGE_CB = "displayIdChange";
 const std::string SYSTEM_DENSITY_CHANGE_CB = "systemDensityChange";
 const std::string SCREENSHOT_EVENT_CB = "screenshot";
 const std::string EXTENSION_SECURE_LIMIT_CHANGE_CB = "uiExtensionSecureLimitChange";
+const std::string KEYBOARD_DID_SHOW_CB = "keyboardDidShow";
+const std::string KEYBOARD_DID_HIDE_CB = "keyboardDidHide";
+const std::string KEYBOARD_HEIGHT_CHANGE_CB = "keyboardHeightChange";
 }
 
 JsExtensionWindowRegisterManager::JsExtensionWindowRegisterManager()
@@ -44,6 +47,9 @@ JsExtensionWindowRegisterManager::JsExtensionWindowRegisterManager()
         {SYSTEM_DENSITY_CHANGE_CB, ListenerType::SYSTEM_DENSITY_CHANGE_CB},
         {SCREENSHOT_EVENT_CB, ListenerType::SCREENSHOT_EVENT_CB},
         {EXTENSION_SECURE_LIMIT_CHANGE_CB, ListenerType::EXTENSION_SECURE_LIMIT_CHANGE_CB},
+        {KEYBOARD_DID_SHOW_CB, ListenerType::KEYBOARD_DID_SHOW_CB},
+        {KEYBOARD_DID_HIDE_CB, ListenerType::KEYBOARD_DID_HIDE_CB},
+        {KEYBOARD_HEIGHT_CHANGE_CB, ListenerType::KEYBOARD_HEIGHT_CHANGE_CB},
     };
     // white register list for window stage
     listenerCodeMap_[CaseType::CASE_STAGE] = {
@@ -186,6 +192,40 @@ WmErrorCode JsExtensionWindowRegisterManager::ProcessExtensionSecureLimitChangeR
     return ret;
 }
 
+WmErrorCode JsExtensionWindowRegisterManager::ProcessKeyboardDidShowRegister(
+    const sptr<JsExtensionWindowListener>& listener, sptr<Window> window, bool isRegister)
+{
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Window is nullptr");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IKeyboardDidShowListener> thisListener(listener);
+    WmErrorCode ret = WmErrorCode::WM_OK;
+    if (isRegister) {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterKeyboardDidShowListener(thisListener));
+    } else {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterKeyboardDidShowListener(thisListener));
+    }
+    return ret;
+}
+
+WmErrorCode JsExtensionWindowRegisterManager::ProcessKeyboardDidHideRegister(
+    const sptr<JsExtensionWindowListener>& listener, sptr<Window> window, bool isRegister)
+{
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Window is nullptr");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IKeyboardDidHideListener> thisListener(listener);
+    WmErrorCode ret = WmErrorCode::WM_OK;
+    if (isRegister) {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterKeyboardDidHideListener(thisListener));
+    } else {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterKeyboardDidHideListener(thisListener));
+    }
+    return ret;
+}
+
 bool JsExtensionWindowRegisterManager::IsCallbackRegistered(napi_env env, std::string type, napi_value jsListenerObject)
 {
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
@@ -319,6 +359,12 @@ WmErrorCode JsExtensionWindowRegisterManager::ProcessRegister(CaseType caseType,
                 break;
             case ListenerType::EXTENSION_SECURE_LIMIT_CHANGE_CB:
                 ret = ProcessExtensionSecureLimitChangeRegister(listener, window, isRegister);
+                break;
+            case ListenerType::KEYBOARD_DID_SHOW_CB:
+                ret = ProcessKeyboardDidShowRegister(listener, window, isRegister);
+                break;
+            case ListenerType::KEYBOARD_DID_HIDE_CB:
+                ret = ProcessKeyboardDidHideRegister(listener, window, isRegister);
                 break;
             default:
                 break;

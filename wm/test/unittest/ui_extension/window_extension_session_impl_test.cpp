@@ -28,7 +28,7 @@
 #include "extension_data_handler.h"
 #include "extension_data_handler_mock.h"
 #include "iremote_object_mocker.h"
-#include "mock_sdisplay_manager.h"
+#include "mock_display_manager.h"
 #include "mock_session.h"
 #include "mock_uicontent.h"
 #include "mock_window.h"

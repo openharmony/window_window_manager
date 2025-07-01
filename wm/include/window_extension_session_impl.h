@@ -53,6 +53,10 @@ public:
         const NotifyTransferComponentDataForResultFunc& func) override;
     WMError RegisterHostWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener) override;
     WMError UnregisterHostWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener) override;
+    WMError RegisterKeyboardDidShowListener(const sptr<IKeyboardDidShowListener>& listener) override;
+    WMError UnregisterKeyboardDidShowListener(const sptr<IKeyboardDidShowListener>& listener) override;
+    WMError RegisterKeyboardDidHideListener(const sptr<IKeyboardDidHideListener>& listener) override;
+    WMError UnregisterKeyboardDidHideListener(const sptr<IKeyboardDidHideListener>& listener) override;
     void TriggerBindModalUIExtension() override;
     std::shared_ptr<IDataHandler> GetExtensionDataHandler() const override;
     WSError SendExtensionData(MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
@@ -221,6 +225,8 @@ private:
     WMError OnHostWindowRectChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
     WMError OnScreenshot(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
     WMError OnExtensionSecureLimitChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+    WMError OnKeyboardDidShow(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+    WMError OnKeyboardDidHide(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
 
     /*
      * Compatible Mode
@@ -246,7 +252,11 @@ private:
     bool hostGestureBackEnabled_ { true };
     bool hostImmersiveModeEnabled_ { false };
     std::mutex hostWindowRectChangeListenerMutex_;
+    std::mutex keyboardDidShowListenerMutex_;
+    std::mutex keyboardDidHideListenerMutex_;
     std::vector<sptr<IWindowRectChangeListener>> hostWindowRectChangeListener_;
+    std::vector<sptr<IKeyboardDidShowListener>> keyboardDidShowListenerList_;
+    std::vector<sptr<IKeyboardDidHideListener>> keyboardDidHideListenerList_;
 
     /*
      * PC Fold Screen
