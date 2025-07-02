@@ -176,6 +176,8 @@ public:
     void OnImmersiveStateChange(ScreenId screenId, bool& immersive) override;
     void OnGetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
         std::vector<uint64_t>& surfaceNodeIds, bool isBlackList = false) override;
+    void OnSetSurfaceNodeIds(DisplayId displayId, const std::vector<uint64_t>& surfaceNodeIds) override;
+    void OnVirtualScreenDisconnected(DisplayId displayId) override;
 
     /*
      * Fold Screen Status Change Report
@@ -433,6 +435,12 @@ public:
         ScreenId fromScreenId = SCREEN_ID_INVALID);
     WMError GetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
         std::vector<uint64_t>& surfaceNodeIds, bool isBlackList = false);
+    WMError GetSurfaceNodeIdsFromSubSession(
+        const sptr<SceneSession>& sceneSession, std::vector<uint64_t>& surfaceNodeIds);
+    WMError UpdateSubSessionBlackList(const sptr<SceneSession>& sceneSession);
+    WMError RemoveSessionFromBlackList(const sptr<SceneSession>& sceneSession);
+    WMError SetSurfaceNodeIds(DisplayId displayId, const std::vector<uint64_t>& surfaceNodeIds);
+    WMError OnVirtualScreenDisconnected(DisplayId displayId);
     WSError UpdateTitleInTargetPos(int32_t persistentId, bool isShow, int32_t height);
 
     /*
@@ -1494,6 +1502,24 @@ private:
         uint32_t interestInfo, const sptr<IWindowManagerAgent>& windowManagerAgent) override;
     void PackWindowPropertyChangeInfo(const sptr<SceneSession>& sceneSession,
         std::unordered_map<WindowInfoKey, std::any>& windowPropertyChangeInfo);
+
+    struct SessionBlackListInfo {
+        int32_t windowId = INVALID_SESSION_ID;
+    };
+    struct BlackListEqual {
+        bool operator()(const SessionBlackListInfo& left, const SessionBlackListInfo& right) const
+        {
+            return left.windowId == right.windowId;
+        }
+    };
+    struct BlackListHasher {
+        size_t operator()(const SessionBlackListInfo& info) const
+        {
+            return std::hash<int32_t>()(info.windowId);
+        }
+    };
+    using SessionBlackListInfoSet = std::unordered_set<SessionBlackListInfo, BlackListHasher, BlackListEqual>;
+    std::unordered_map<DisplayId, SessionBlackListInfoSet> sessionBlackListInfoMap_;
 
     /*
      * Move Drag

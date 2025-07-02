@@ -77,6 +77,14 @@ void ScreenSessionManagerClientStub::InitScreenChangeMap()
         [this](MessageParcel& data, MessageParcel& reply) {
         return HandleOnGetSurfaceNodeIdsFromMissionIdsChanged(data, reply);
     };
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_SET_SURFACENODEIDS] =
+        [this](MessageParcel& data, MessageParcel& reply) {
+        return HandleOnSetSurfaceNodeIdsChanged(data, reply);
+    };
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_ON_VIRTUAL_SCREEN_DISCONNECTED] =
+        [this](MessageParcel& data, MessageParcel& reply) {
+        return HandleOnVirtualScreenDisconnected(data, reply);
+    };
     HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_SET_FOLD_DISPLAY_MODE] =
         [this](MessageParcel& data, MessageParcel& reply) {
         return HandleOnUpdateFoldDisplayMode(data, reply);
@@ -297,6 +305,22 @@ int ScreenSessionManagerClientStub::HandleOnGetSurfaceNodeIdsFromMissionIdsChang
         TLOGE(WmsLogTag::DMS, "Write surfaceNodeIds failed");
         return ERR_TRANSACTION_FAILED;
     }
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerClientStub::HandleOnSetSurfaceNodeIdsChanged(MessageParcel& data, MessageParcel& reply)
+{
+    auto displayId = static_cast<DisplayId>(data.ReadUint64());
+    std::vector<uint64_t> surfaceNodeIds;
+    data.ReadUInt64Vector(&surfaceNodeIds);
+    OnSetSurfaceNodeIdsChanged(displayId, surfaceNodeIds);
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerClientStub::HandleOnVirtualScreenDisconnected(MessageParcel& data, MessageParcel& reply)
+{
+    auto displayId = static_cast<DisplayId>(data.ReadUint64());
+    OnVirtualScreenDisconnected(displayId);
     return ERR_NONE;
 }
 

@@ -39,6 +39,8 @@ public:
         TRANS_ID_ON_IMMERSIVE_STATE_CHANGED,
         TRANS_ID_SET_DISPLAY_NODE_SCREEN_ID,
         TRANS_ID_GET_SURFACENODEID_FROM_MISSIONID,
+        TRANS_ID_SET_SURFACENODEIDS,
+        TRANS_ID_ON_VIRTUAL_SCREEN_DISCONNECTED,
         TRANS_ID_SET_FOLD_DISPLAY_MODE,
         TRANS_ID_ON_SWITCH_USER_CMD,
         TRANS_ID_SET_VIRTUAL_PIXEL_RATIO_SYSTEM,
@@ -81,6 +83,8 @@ public:
     virtual void SetDisplayNodeScreenId(ScreenId screenId, ScreenId displayNodeScreenId) = 0;
     virtual void OnGetSurfaceNodeIdsFromMissionIdsChanged(std::vector<uint64_t>& missionIds,
         std::vector<uint64_t>& surfaceNodeIds, bool isBlackList = false) = 0;
+    virtual void OnSetSurfaceNodeIdsChanged(DisplayId displayId, const std::vector<uint64_t>& surfaceNodeIds) = 0;
+    virtual void OnVirtualScreenDisconnected(DisplayId displayId) = 0;
     virtual void OnUpdateFoldDisplayMode(FoldDisplayMode displayMode) = 0;
     virtual void SetVirtualPixelRatioSystem(ScreenId screenId, float virtualPixelRatio) = 0;
     virtual void OnFoldStatusChangedReportUE(const std::vector<std::string>& screenFoldInfo) = 0;
