@@ -106,8 +106,8 @@ void ScreenAniListener::OnConnect(ScreenId id)
         }
 
         auto task = [env = env_, oneAniCallback, id] {
-            ScreenAniUtils::CallAniFunctionVoid(env, "L@ohos/screen/screen;", "screenEventCallBack",
-                "Lstd/core/Object;D:V", oneAniCallback, static_cast<ani_double>(id));
+            ScreenAniUtils::CallAniFunctionVoid(env, "@ohos.screen.screen", "screenEventCallBack",
+                "C{std.core.Object}d:", oneAniCallback, static_cast<ani_double>(id));
         };
         if (!eventHandler_) {
             TLOGE(WmsLogTag::DMS, "[ANI] get main event handler failed!");
@@ -153,8 +153,8 @@ void ScreenAniListener::OnDisconnect(ScreenId id)
         }
 
         auto task = [env = env_, oneAniCallback, id] {
-            ScreenAniUtils::CallAniFunctionVoid(env, "L@ohos/screen/screen;", "screenEventCallBack",
-                "Lstd/core/Object;D:V", oneAniCallback, static_cast<ani_double>(id));
+            ScreenAniUtils::CallAniFunctionVoid(env, "@ohos.screen.screen", "screenEventCallBack",
+                "C{std.core.Object}d:", oneAniCallback, static_cast<ani_double>(id));
         };
         if (!eventHandler_) {
             TLOGE(WmsLogTag::DMS, "[ANI] get main event handler failed!");
@@ -198,8 +198,8 @@ void ScreenAniListener::OnChange(ScreenId id)
             continue;
         }
         auto task = [env = env_, oneAniCallback, id] () {
-            ScreenAniUtils::CallAniFunctionVoid(env, "L@ohos/screen/screen;", "screenEventCallBack",
-                "Lstd/core/Object;D:V", oneAniCallback, static_cast<ani_double>(id));
+            ScreenAniUtils::CallAniFunctionVoid(env, "@ohos.screen.screen", "screenEventCallBack",
+                "C{std.core.Object}d:", oneAniCallback, static_cast<ani_double>(id));
         };
         if (!eventHandler_) {
             TLOGE(WmsLogTag::DMS, "get main event handler failed!");
