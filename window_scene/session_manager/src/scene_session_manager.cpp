@@ -28,6 +28,7 @@
 #include <hitrace_meter.h>
 #include "hitrace/hitracechain.h"
 #include "parameter.h"
+#include "resource_manager.h"
 #include "session/host/include/pc_fold_screen_manager.h"
 #include "publish/scb_dump_subscriber.h"
 #include <ui/rs_node.h>

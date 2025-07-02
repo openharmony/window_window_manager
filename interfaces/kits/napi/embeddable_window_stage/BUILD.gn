@@ -104,6 +104,7 @@ ohos_shared_library("embeddablewindowstage_kit") {
   ]
 
   external_deps = [
+    "ability_base:session_info",
     "ability_runtime:runtime",
     "ace_engine:ace_uicontent",
     "bundle_framework:appexecfwk_base",
