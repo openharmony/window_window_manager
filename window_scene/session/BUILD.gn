@@ -86,6 +86,7 @@ ohos_shared_library("scene_session") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_runtime:ability_manager",
     "ability_runtime:ability_start_setting",
     "ability_runtime:app_context",

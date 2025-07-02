@@ -19,6 +19,7 @@
 #include <ability_manager_client.h>
 #include <algorithm>
 #include <climits>
+#include "configuration.h"
 #include <hitrace_meter.h>
 #include "hitrace/hitracechain.h"
 #include <type_traits>
