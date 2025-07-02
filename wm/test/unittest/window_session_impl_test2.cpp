@@ -1755,12 +1755,17 @@ HWTEST_F(WindowSessionImplTest2, GetListeners03, TestSize.Level1)
     window_->RegisterKeyboardDidShowListener(listener);
     keyboardPanelInfo.isShowing_ = true;
     window_->NotifyKeyboardAnimationCompleted(keyboardPanelInfo);
+    window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    window_->NotifyKeyboardAnimationCompleted(keyboardPanelInfo);
     ASSERT_FALSE(window_->keyboardDidShowListeners_[window_->GetPersistentId()].empty());
     window_->UnregisterKeyboardDidShowListener(listener);
 
     sptr<IKeyboardDidHideListener> listener1 = sptr<MockIKeyboardDidHideListener>::MakeSptr();
     window_->RegisterKeyboardDidHideListener(listener1);
     keyboardPanelInfo.isShowing_ = false;
+    window_->uiContent_ = nullptr;
+    window_->NotifyKeyboardAnimationCompleted(keyboardPanelInfo);
+    window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     window_->NotifyKeyboardAnimationCompleted(keyboardPanelInfo);
     ASSERT_FALSE(window_->keyboardDidHideListeners_[window_->GetPersistentId()].empty());
     window_->UnregisterKeyboardDidHideListener(listener1);

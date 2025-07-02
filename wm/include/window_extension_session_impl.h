@@ -116,6 +116,7 @@ public:
         const std::map<AvoidAreaType, AvoidArea>& avoidAreas) override;
     void NotifyKeyboardDidShow(const KeyboardPanelInfo& keyboardPanelInfo) override;
     void NotifyKeyboardDidHide(const KeyboardPanelInfo& keyboardPanelInfo) override;
+    void NotifyOccupiedAreaChange(sptr<OccupiedAreaChangeInfo> info);
     WMError RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
     WMError UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
     void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
@@ -187,6 +188,7 @@ public:
         const AAFwk::Want& data) override;
     WMError HandleUnregisterHostWindowRectChangeListener(uint32_t code, int32_t persistentId,
         const AAFwk::Want& data) override;
+    uint32_t GetHostStatusBarContentColor() const override;
 
 protected:
     NotifyTransferComponentDataFunc notifyTransferComponentDataFunc_;
@@ -229,6 +231,7 @@ private:
     WMError OnExtensionSecureLimitChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
     WMError OnKeyboardDidShow(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
     WMError OnKeyboardDidHide(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+    WMError OnHostStatusBarContentColorChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
 
     /*
      * Compatible Mode
@@ -256,9 +259,12 @@ private:
     std::mutex hostWindowRectChangeListenerMutex_;
     std::mutex keyboardDidShowListenerMutex_;
     std::mutex keyboardDidHideListenerMutex_;
+    std::mutex occupiedAreaChangeListenerMutex_;
     std::vector<sptr<IWindowRectChangeListener>> hostWindowRectChangeListener_;
     std::vector<sptr<IKeyboardDidShowListener>> keyboardDidShowListenerList_;
     std::vector<sptr<IKeyboardDidHideListener>> keyboardDidHideListenerList_;
+    std::vector<sptr<IOccupiedAreaChangeListener>> occupiedAreaChangeListenerList_;
+    uint32_t hostStatusBarContentColor_;
 
     /*
      * PC Fold Screen
