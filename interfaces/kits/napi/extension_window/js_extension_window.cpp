@@ -486,7 +486,7 @@ napi_value JsExtensionWindow::GetGlobalScaledRect(napi_env env, napi_callback_in
 napi_value JsExtensionWindow::GetStatusBarProperty(napi_env env, napi_callback_info info)
 {
     JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
-    return (me != nullptr) ? me->OnGetStatusBarProperty(env, info) : nullptr;
+    return (me != nullptr) ? me->OnGetStatusBarPropertySync(env, info) : nullptr;
 }
 
 napi_value JsExtensionWindow::GetTitleButtonRect(napi_env env, napi_callback_info info)
@@ -1756,7 +1756,7 @@ napi_value JsExtensionWindow::OnGetStatusBarPropertySync(napi_env env, napi_call
         TLOGE(WmsLogTag::WMS_IMMS, "window is null");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    auto objValue = GetStatusBarPropertyObject(env, windowToken_);
+    auto objValue = GetStatusBarPropertyObject(env, windowImpl);
     if (objValue == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "get property failed");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
