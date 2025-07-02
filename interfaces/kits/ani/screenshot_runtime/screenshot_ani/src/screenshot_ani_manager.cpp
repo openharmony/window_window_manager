@@ -127,7 +127,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_NOT_FOUND;
     }
     ani_namespace nsp;
-    if ((ret = env->FindNamespace("L@ohos/screenshot/screenshot;", &nsp)) != ANI_OK) {
+    if ((ret = env->FindNamespace("@ohos.screenshot.screenshot", &nsp)) != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] null env %{public}u", ret);
         return ANI_NOT_FOUND;
     }

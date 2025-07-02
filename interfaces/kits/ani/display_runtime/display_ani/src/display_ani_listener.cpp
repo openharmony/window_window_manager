@@ -115,7 +115,7 @@ void DisplayAniListener::OnCreate(DisplayId id)
             continue;
         }
         auto task = [env = env_, oneAniCallback, id] {
-            DisplayAniUtils::CallAniFunctionVoid(env, "L@ohos/display/display;", "displayEventCallBack",
+            DisplayAniUtils::CallAniFunctionVoid(env, "@ohos.display.display", "displayEventCallBack",
                 nullptr, oneAniCallback, static_cast<ani_double>(id));
         };
         if (!eventHandler_) {
@@ -160,7 +160,7 @@ void DisplayAniListener::OnDestroy(DisplayId id)
             continue;
         }
         auto task = [env = env_, oneAniCallback, id] {
-            DisplayAniUtils::CallAniFunctionVoid(env, "L@ohos/display/display;", "displayEventCallBack",
+            DisplayAniUtils::CallAniFunctionVoid(env, "@ohos.display.display", "displayEventCallBack",
                 nullptr, oneAniCallback, static_cast<ani_double>(id));
         };
         if (!eventHandler_) {
@@ -202,7 +202,7 @@ void DisplayAniListener::OnChange(DisplayId id)
             continue;
         }
         auto task = [env = env_, oneAniCallback, id] {
-            DisplayAniUtils::CallAniFunctionVoid(env, "L@ohos/display/display;", "displayEventCallBack",
+            DisplayAniUtils::CallAniFunctionVoid(env, "@ohos.display.display", "displayEventCallBack",
                 nullptr, oneAniCallback, static_cast<ani_double>(id));
         };
         if (!eventHandler_) {
@@ -239,7 +239,7 @@ void DisplayAniListener::OnPrivateWindow(bool hasPrivate)
     auto it = aniCallback_.find(EVENT_PRIVATE_MODE_CHANGE);
     for (auto oneAniCallback : it->second) {
         auto task = [env = env_, oneAniCallback, hasPrivate] () {
-            DisplayAniUtils::CallAniFunctionVoid(env, "L@ohos/display/display;", "captureStatusChangedCallback",
+            DisplayAniUtils::CallAniFunctionVoid(env, "@ohos.display.display", "captureStatusChangedCallback",
                 nullptr, oneAniCallback, hasPrivate);
         };
         if (!eventHandler_) {
@@ -275,7 +275,7 @@ void DisplayAniListener::OnFoldStatusChanged(FoldStatus foldStatus)
     auto it = aniCallback_.find(EVENT_FOLD_STATUS_CHANGED);
     for (auto oneAniCallback : it->second) {
         auto task = [env = env_, oneAniCallback, foldStatus] () {
-            DisplayAniUtils::CallAniFunctionVoid(env, "L@ohos/display/display;", "foldStatusCallback",
+            DisplayAniUtils::CallAniFunctionVoid(env, "@ohos.display.display", "foldStatusCallback",
                 nullptr, oneAniCallback, static_cast<ani_int>(foldStatus));
         };
         if (!eventHandler_) {
@@ -309,7 +309,7 @@ void DisplayAniListener::OnFoldAngleChanged(std::vector<float> foldAngles)
         DisplayAniUtils::CreateAniArrayDouble(env_, foldAngles.size(), &cbArray, foldAngles);
         for (auto oneAniCallback : it->second) {
             auto task = [env = env_, oneAniCallback, cbArray] () {
-                DisplayAniUtils::CallAniFunctionVoid(env, "L@ohos/display/display;", "foldAngleChangeCallback",
+                DisplayAniUtils::CallAniFunctionVoid(env, "@ohos.display.display", "foldAngleChangeCallback",
                     nullptr, oneAniCallback, cbArray);
             };
             if (!eventHandler_) {
@@ -344,7 +344,7 @@ void DisplayAniListener::OnCaptureStatusChanged(bool isCapture)
         auto it = aniCallback_.find(EVENT_CAPTURE_STATUS_CHANGED);
         for (auto oneAniCallback : it->second) {
             auto task = [env = env_, oneAniCallback, isCapture] () {
-                DisplayAniUtils::CallAniFunctionVoid(env, "L@ohos/display/display;", "captureStatusChangedCallback",
+                DisplayAniUtils::CallAniFunctionVoid(env, "@ohos.display.display", "captureStatusChangedCallback",
                     nullptr, oneAniCallback, isCapture);
             };
             if (!eventHandler_) {
@@ -380,7 +380,7 @@ void DisplayAniListener::OnDisplayModeChanged(FoldDisplayMode foldDisplayMode)
         auto it = aniCallback_.find(EVENT_DISPLAY_MODE_CHANGED);
         for (auto oneAniCallback : it->second) {
             auto task = [env = env_, oneAniCallback, foldDisplayMode] () {
-                DisplayAniUtils::CallAniFunctionVoid(env, "L@ohos/display/display;", "foldDisplayModeCallback",
+                DisplayAniUtils::CallAniFunctionVoid(env, "@ohos.display.display", "foldDisplayModeCallback",
                     nullptr, oneAniCallback, static_cast<ani_int>(foldDisplayMode));
             };
             if (!eventHandler_) {
@@ -417,7 +417,7 @@ void DisplayAniListener::OnAvailableAreaChanged(DMRect area)
             ani_object rectObj = nullptr;
             DisplayAniUtils::ConvertRect(area, rectObj, env_);
             auto task = [env = env_, oneAniCallback, rectObj] () {
-                DisplayAniUtils::CallAniFunctionVoid(env, "L@ohos/display/display;", "availableAreaChangedCallback",
+                DisplayAniUtils::CallAniFunctionVoid(env, "@ohos.display.display", "availableAreaChangedCallback",
                     nullptr, oneAniCallback, rectObj);
             };
             if (!eventHandler_) {

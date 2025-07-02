@@ -76,11 +76,11 @@ ani_status ScreenAniUtils::ConvertScreen(ani_env *env, sptr<Screen> screen, ani_
         return ANI_ERROR;
     }
     std::vector<sptr<SupportedScreenModes>> modes = info->GetModes();
-    ani_array_ref screenModeInfos = NewNativeArray(env, "L@ohos/screen/screen/ScreenModeInfoImpl;",
+    ani_array_ref screenModeInfos = NewNativeArray(env, "@ohos.screen.screen.ScreenModeInfoImpl",
         static_cast<uint32_t>(modes.size()));
     ani_size index = 0;
     for (auto mode : modes) {
-        ani_object screenModeInfo = NewNativeObject(env, "L@ohos/screen/screen/ScreenModeInfoImpl;");
+        ani_object screenModeInfo = NewNativeObject(env, "@ohos.screen.screen.ScreenModeInfoImpl");
         ConvertScreenMode(env, mode, screenModeInfo);
         if (ANI_OK != env->Array_Set_Ref(screenModeInfos, index, screenModeInfo)) {
             TLOGE(WmsLogTag::DMS, "[ANI] Array_Set_Ref fail");
@@ -142,7 +142,7 @@ ani_status ScreenAniUtils::ConvertScreens(ani_env *env, std::vector<sptr<Screen>
     TLOGI(WmsLogTag::DMS, "[ANI] screens size %{public}u", static_cast<uint32_t>(screens.size()));
     for (uint32_t i = 0; i < screens.size(); i++) {
         ani_ref currentScreenAni;
-        if (ANI_OK != env->Object_CallMethodByName_Ref(screensAni, "$_get", "I:Lstd/core/Object;",
+        if (ANI_OK != env->Object_CallMethodByName_Ref(screensAni, "$_get", "i:C{std.core.Object}",
             &currentScreenAni, (ani_int)i)) {
             TLOGE(WmsLogTag::DMS, "[ANI] get ani_array index %{public}u fail", (ani_int)i);
             return ANI_ERROR;
