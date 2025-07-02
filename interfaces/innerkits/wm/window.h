@@ -4436,7 +4436,7 @@ public:
     /**
      * @brief update the floating ball window instance.
      *
-     * @param fbTemplateInfo the tempalte info of the floating-ball.
+     * @param fbTemplateInfo the template info of the floating-ball.
      * @param icon the icon of the floating-ball.
      */
     virtual WMError UpdateFloatingBall(const FloatingBallTemplateBaseInfo& fbTemplateBaseInfo,

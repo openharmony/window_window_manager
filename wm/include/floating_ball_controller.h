@@ -79,6 +79,7 @@ private:
         void AfterDestroyed() override;
     };
     sptr<IWindowLifeCycle> mainWindowLifeCycleListener_ = nullptr;
+    std::mutex listenerMutex_;
 };
 } // namespace Rosen
 } // namespace OHOS

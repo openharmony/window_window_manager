@@ -6735,6 +6735,16 @@ WMError WindowSessionImpl::UpdateFloatingBall(const FloatingBallTemplateBaseInfo
         TLOGE(WmsLogTag::WMS_SYSTEM, "session is invalid");
         return WMError::WM_ERROR_FB_STATE_ABNORMALLY;
     }
+
+    if (GetProperty()->GetFbTemplateInfo().template_ == static_cast<uint32_t>(FloatingBallTemplate::STATIC)) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Fb static template can't update");
+        return WMError::WM_ERROR_FB_UPDATE_STATIC_TEMPLATE_DENIED;
+    }
+
+    if (GetProperty()->GetFbTemplateInfo().template_ != fbTemplateBaseInfo.template_) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Fb template type can't update");
+        return WMError::WM_ERROR_FB_UPDATE_TEMPLATE_TYPE_DENIED;
+    }
     FloatingBallTemplateInfo fbTemplateInfo = FloatingBallTemplateInfo(fbTemplateBaseInfo, icon);
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_FB_STATE_ABNORMALLY);
