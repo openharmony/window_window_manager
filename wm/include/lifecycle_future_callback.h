@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,8 +25,8 @@ namespace Rosen {
 class LifecycleFutureCallback : public RefBase {
 public:
     void OnNotifyAttachState(bool isAttach);
-    void GetAttachAsyncResult(long timeOut); // unit: ms
-    void GetDetachAsyncResult(long timeOut); // unit: ms
+    void GetAttachSyncResult(long timeOut); // unit: ms
+    void GetDetachSyncResult(long timeOut); // unit: ms
     void ResetAttachLock();
     void ResetDetachLock();
 

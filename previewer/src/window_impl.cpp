@@ -556,7 +556,12 @@ bool WindowImpl::IsShowWithOptions() const
     return showWithOptions_;
 }
 
-WMError WindowImpl::Show(uint32_t reason, bool withAnimation, bool withFocus, bool needAttach)
+WMError WindowImpl::Show(uint32_t reason, bool withAnimation, bool withFocus)
+{
+    return Show(reason, withAnimation, withFocus, false);
+}
+
+WMError WindowImpl::Show(uint32_t reason, bool withAnimation, bool withFocus, bool waitAttach)
 {
     if (IsShowWithOptions()) {
         SetShowWithOptions(false);
@@ -565,7 +570,12 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation, bool withFocus, bo
     return WMError::WM_OK;
 }
 
-WMError WindowImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits, bool needDetach)
+WMError WindowImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits)
+{
+    return Hide(reason, withAnimation, isFromInnerkits, false);
+}
+
+WMError WindowImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits, bool waitDetach)
 {
     return WMError::WM_OK;
 }
