@@ -71,6 +71,7 @@ enum class Businesscode : uint32_t {
     NOTIFY_EXTENSION_SECURE_LIMIT_CHANGE,
     NOTIFY_KEYBOARD_DID_HIDE,
     NOTIFY_KEYBOARD_DID_SHOW,
+    SYNC_HOST_STATUS_BAR_CONTENT_COLOR,
 
     // IPC messages corresponding to the Businesscode between 10000 and 20000
     // will be forwarded to the host window by the UEC
