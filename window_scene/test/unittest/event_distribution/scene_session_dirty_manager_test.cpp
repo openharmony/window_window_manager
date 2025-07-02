@@ -637,7 +637,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, DumpRect, TestSize.Level1)
         rects.emplace_back(rect);
     }
     std::string ret = DumpRect(rects);
-    std::string checkStr = " hot : [ 0 , 0 , 0 , 0] hot : [ 10 , 10 , 10 , 10]";
+    std::string checkStr = "hot:[0,0,0,0]|[10,10,10,10]|";
     ASSERT_EQ(ret, checkStr);
 }
 
