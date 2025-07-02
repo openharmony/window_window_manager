@@ -86,6 +86,13 @@ void SingleDisplayFoldPolicy::SetdisplayModeChangeStatus(bool status, bool isOnB
 
 void SingleDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode, DisplayModeChangeReason reason)
 {
+    {
+        std::unique_lock<std::mutex> lock(clearingBootAnimationMutex_);
+        if (isClearingBootAnimation_) {
+            TLOGI(WmsLogTag::DMS, "clearing bootAnimation not change displayMode");
+            return;
+        }
+    }
     SetLastCacheDisplayMode(displayMode);
     if (GetModeChangeRunningStatus()) {
         TLOGW(WmsLogTag::DMS, "last process not complete, skip mode: %{public}d", displayMode);
@@ -426,5 +433,12 @@ void SingleDisplayFoldPolicy::ChangeScreenDisplayModeToFullOnBootAnimation(sptr<
         screenSession->GetScreenProperty().GetBounds().rect_.width_,
         screenSession->GetScreenProperty().GetBounds().rect_.height_);
     screenId_ = SCREEN_ID_FULL;
+}
+
+void SingleDisplayFoldPolicy::SetIsClearingBootAnimation(bool isClearingBootAnimation)
+{
+    std::unique_lock<std::mutex> lock(clearingBootAnimationMutex_);
+    TLOGI(WmsLogTag::DMS, "isClearingBootAnimation: %{public}d", isClearingBootAnimation);
+    isClearingBootAnimation_ = isClearingBootAnimation;
 }
 } // namespace OHOS::Rosen

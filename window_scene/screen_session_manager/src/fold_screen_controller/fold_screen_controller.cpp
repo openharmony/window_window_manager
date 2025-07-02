@@ -320,4 +320,13 @@ void FoldScreenController::SetIsFirstFrameCommitReported(bool isFirstFrameCommit
 {
     foldScreenPolicy_->SetIsFirstFrameCommitReported(isFirstFrameCommitReported);
 }
+
+void FoldScreenController::SetIsClearingBootAnimation(bool isClearingBootAnimation)
+{
+    if (foldScreenPolicy_ == nullptr) {
+        TLOGW(WmsLogTag::DMS, "GetCurrentScreenId: foldScreenPolicy_ is null");
+        return;
+    }
+    foldScreenPolicy_->SetIsClearingBootAnimation(isClearingBootAnimation);
+}
 } // namespace OHOS::Rosen
