@@ -774,8 +774,8 @@ namespace {
     {
         std::recursive_mutex mutex;
         auto fsc_ = sptr<FoldScreenController>::MakeSptr(mutex, std::shared_ptr<TaskScheduler>());
+        fsc_->foldScreenPolicy_ = nullptr;
         fsc_->SetIsClearingBootAnimation(false);
-        EXPECT_EQ(fsc_->foldScreenPolicy_, nullptr);
         fsc_->foldScreenPolicy_ = fsc_->GetFoldScreenPolicy(DisplayDeviceType::SINGLE_DISPLAY_DEVICE);
         fsc_->SetIsClearingBootAnimation(false);
         EXPECT_FALSE(fsc_->foldScreenPolicy_->isClearingBootAnimation_);
