@@ -62,6 +62,7 @@ public:
     std::chrono::steady_clock::time_point GetStartTimePoint();
     bool GetIsFirstFrameCommitReported();
     void SetIsFirstFrameCommitReported(bool isFirstFrameCommitReported);
+    virtual void SetIsClearingBootAnimation(bool isClearingBootAnimation);
     
     ScreenId screenId_ { SCREEN_ID_INVALID };
     ScreenProperty screenProperty_;
@@ -73,6 +74,8 @@ public:
     sptr<FoldCreaseRegion> currentFoldCreaseRegion_ = nullptr;
     bool lockDisplayStatus_ = false;
     bool onBootAnimation_ = false;
+    bool isClearingBootAnimation_ = false;
+    std::mutex clearingBootAnimationMutex_;
     bool isFirstFrameCommitReported_ = false;
     std::vector<uint32_t> screenParams_ = {};
     /*

@@ -136,4 +136,6 @@ Drawing::Rect FoldScreenPolicy::GetScreenSnapshotRect()
 }
 
 void FoldScreenPolicy::SetMainScreenRegion(DMRect& mainScreenRegion) {}
+
+void FoldScreenPolicy::SetIsClearingBootAnimation(bool isClearingBootAnimation) {}
 } // namespace OHOS::Rosen
