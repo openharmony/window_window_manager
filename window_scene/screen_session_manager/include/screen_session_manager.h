@@ -491,6 +491,7 @@ private:
     void InitScreenProperty(ScreenId screenId, RSScreenModeInfo& screenMode,
         RSScreenCapability& screenCapability, ScreenProperty& property);
     RRect GetScreenBounds(ScreenId screenId, RSScreenModeInfo& screenMode);
+    void InitSecondaryDisplayPhysicalParams();
     void GetInternalWidth();
     void InitExtendScreenDensity(sptr<ScreenSession> session, ScreenProperty property);
     void InitExtendScreenProperty(ScreenId screenId, sptr<ScreenSession> session, ScreenProperty property);
@@ -653,6 +654,7 @@ private:
     ClientAgentContainer<IDisplayManagerAgent, DisplayManagerAgentType> dmAgentContainer_;
     DeviceScreenConfig deviceScreenConfig_;
     std::vector<DisplayPhysicalResolution> allDisplayPhysicalResolution_ {};
+    std::vector<uint32_t> screenParams_ {};
     std::map<int32_t, std::set<DisplayManagerAgentType>> pidAgentTypeMap_;
     std::vector<float> lastFoldAngles_ {};
     sptr<DisplayChangeInfo> lastDisplayChangeInfo_;

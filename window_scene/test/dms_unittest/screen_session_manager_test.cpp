@@ -7123,6 +7123,21 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenOffsetFeatureTest, Function | SmallT
     EXPECT_FALSE(ssm_->SetScreenOffset(screenId, 0.0F, 0.0F));
     EXPECT_FALSE(ssm_->SetScreenOffset(screenId, 100.0F, 100.0F));
 }
+
++/**
++ * @tc.name: InitSecondaryDisplayPhysicalParams
++ * @tc.desc: test function : InitSecondaryDisplayPhysicalParams
++ * @tc.type: FUNC
++ */
+HWTEST_F(ScreenSessionManagerTest, InitSecondaryDisplayPhysicalParams, TestSize.Level1)
+{
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        return;
+    }
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->InitSecondaryDisplayPhysicalParams();
+    EXPECT_FALSE(ssm_->screenParams_.empty());
+}
 }
 } // namespace Rosen
 } // namespace OHOS
