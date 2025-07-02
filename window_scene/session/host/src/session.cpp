@@ -776,7 +776,7 @@ void Session::SetForceTouchable(bool forceTouchable)
 void Session::SetSystemTouchable(bool touchable)
 {
     if (touchable != systemTouchable_) {
-        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, %{public}d", GetPersistentId(), touchable);
+        TLOGNI(WmsLogTag::WMS_EVENT, "sysTouch:%{public}d, %{public}d", GetPersistentId(), touchable);
     }
     systemTouchable_ = touchable;
     NotifySessionInfoChange();
