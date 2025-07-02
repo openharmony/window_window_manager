@@ -2000,6 +2000,10 @@ HWTEST_F(WindowSceneSessionImplTest4, SetWindowContainerColor01, TestSize.Level1
     res = window->SetWindowContainerColor(activeColor, inactiveColor);
     EXPECT_EQ(res, WMError::WM_OK);
 
+    inactiveColor = "#F1000000";
+    res = window->SetWindowContainerColor(activeColor, inactiveColor);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
+
     inactiveColor = "rgb#FF000000";
     res = window->SetWindowContainerColor(activeColor, inactiveColor);
     EXPECT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
