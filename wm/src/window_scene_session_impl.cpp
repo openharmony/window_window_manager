@@ -2056,12 +2056,6 @@ WMError WindowSceneSessionImpl::MoveWindowToGlobalDisplay(
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     auto winId = GetPersistentId();
-    const auto curGlobalDisplayRect = GetGlobalDisplayRect();
-    if (curGlobalDisplayRect.IsSamePosition(x, y)) {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, request same position: [%{public}d, %{public}d]",
-            winId, x, y);
-        return WMError::WM_DO_NOTHING;
-    }
     // Use RequestRect to quickly get width and height from Resize method.
     const auto requestRect = GetRequestRect();
     if (!Rect::IsRightBottomValid(x, y, requestRect.width_, requestRect.height_)) {
