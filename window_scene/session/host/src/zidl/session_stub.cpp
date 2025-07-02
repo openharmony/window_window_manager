@@ -1664,7 +1664,7 @@ int SessionStub::HandleChangeKeyboardEffectOption(MessageParcel& data, MessagePa
     if (effectOption->viewMode_ >= KeyboardViewMode::VIEW_MODE_END ||
         effectOption->flowLightMode_ >= KeyboardFlowLightMode::END ||
         effectOption->gradientMode_ >= KeyboardGradientMode::END) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid keyboard effectOption: %{publc}s",
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid keyboard effectOption: %{public}s",
             effectOption->ToString().c_str());
         return ERR_INVALID_DATA;
     }
