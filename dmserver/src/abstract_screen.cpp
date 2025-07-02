@@ -248,7 +248,7 @@ void AbstractScreen::InitRSDefaultDisplayNode(const RSDisplayNodeConfig& config,
     TLOGD(WmsLogTag::DMS, "InitRSDefaultDisplayNode success");
 }
 
-void AbstractScreen::UpdateRSDisplayNode(Point startPoint, sptr<AbstractScreen> absScreen)
+void AbstractScreen::UpdateRSDisplayNode(Point startPoint, const sptr<AbstractScreen>& absScreen)
 {
     TLOGD(WmsLogTag::DMS, "update display offset from [%{public}d %{public}d] to [%{public}d %{public}d]",
         startPoint_.posX_, startPoint_.posY_, startPoint.posX_, startPoint.posY_);
