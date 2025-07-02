@@ -1414,19 +1414,19 @@ napi_value JsWindowManager::OnGetTopNavDestinationName(napi_env env, napi_callba
         return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
     }
     std::string topNavDestName;
-    WMError retErrCode = WMError::WM_OK;
-    NapiAsyncTask::ExecuteCallback execute = [windowId, &topNavDestName, &retErrCode, where = __func__]() {
-        retErrCode = SingletonContainer::Get<WindowManager>().GetTopNavDestinationName(windowId, topNavDestName);
+    std::shared_ptr<WMError> errCodePtr = std::make_shared<WMError>(WMError::WM_OK);
+    NapiAsyncTask::ExecuteCallback execute = [windowId, &topNavDestName, errCodePtr, where = __func__]() {
+        *errCodePtr = SingletonContainer::Get<WindowManager>().GetTopNavDestinationName(windowId, topNavDestName);
         TLOGND(WmsLogTag::WMS_ATTRIBUTE,
             "%{public}s: topNavDestName: %{public}s, windowId: %{public}d, errCode: %{public}d",
-            where, topNavDestName.c_str(), windowId, static_cast<int32_t>(retErrCode));
+            where, topNavDestName.c_str(), windowId, static_cast<int32_t>(*errCodePtr));
     };
-    NapiAsyncTask::CompleteCallback complete = [windowId, &topNavDestName, &retErrCode, where = __func__](
+    NapiAsyncTask::CompleteCallback complete = [windowId, &topNavDestName, errCodePtr, where = __func__](
         napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (retErrCode != WMError::WM_OK) {
+            if (*errCodePtr != WMError::WM_OK) {
                 TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s failed, errCode: %{public}d, windowId: %{public}d",
-                    where, static_cast<int32_t>(retErrCode), windowId);
-                task.Reject(env, JsErrUtils::CreateJsError(env, WM_JS_TO_ERROR_CODE_MAP.at(retErrCode)));
+                    where, static_cast<int32_t>(*errCodePtr), windowId);
+                task.Reject(env, JsErrUtils::CreateJsError(env, WM_JS_TO_ERROR_CODE_MAP.at(*errCodePtr)));
                 return;
             }
             TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s ok, topNavDestName: %{public}s, windowId: %{public}d",
