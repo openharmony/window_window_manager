@@ -535,27 +535,13 @@ WSError SessionProxy::PendingSessionActivation(sptr<AAFwk::SessionInfo> abilityS
         TLOGE(WmsLogTag::WMS_LIFE, "Write hideStartWindow failed.");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (abilitySessionInfo->animationOptions) {
-        if (!data.WriteBool(true) || !data.WriteParcelable(abilitySessionInfo->animationOptions.get())) {
-            TLOGE(WmsLogTag::WMS_LIFE, "Write animationOptions failed");
-            return WSError::WS_ERROR_IPC_FAILED;
-        }
-    } else {
-        if (!data.WriteBool(false)) {
-            TLOGE(WmsLogTag::WMS_LIFE, "Write has not animationOptions failed");
-            return WSError::WS_ERROR_IPC_FAILED;
-        }
+    if (!data.WriteParcelable(abilitySessionInfo->animationOptions.get())) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write animationOptions failed");
+        return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (abilitySessionInfo->animationSystemOptions) {
-        if (!data.WriteBool(true) || !data.WriteParcelable(abilitySessionInfo->animationSystemOptions.get())) {
+    if (!data.WriteParcelable(abilitySessionInfo->animationSystemOptions.get())) {
             TLOGE(WmsLogTag::WMS_LIFE, "Write animationSystemOptions failed");
             return WSError::WS_ERROR_IPC_FAILED;
-        }
-    } else {
-        if (!data.WriteBool(false)) {
-            TLOGE(WmsLogTag::WMS_LIFE, "Write has not animationSystemOptions failed");
-            return WSError::WS_ERROR_IPC_FAILED;
-        }
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
