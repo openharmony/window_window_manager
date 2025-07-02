@@ -1473,6 +1473,9 @@ HWTEST_F(WindowSessionImplTest, Notify01, TestSize.Level1)
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
 
     window->NotifyTouchDialogTarget();
+    window->uiContent_ = nullptr;
+    window->NotifyScreenshot();
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     window->NotifyScreenshot();
     WSError res = window->NotifyDestroy();
     ASSERT_EQ(res, WSError::WS_OK);
@@ -2295,6 +2298,43 @@ HWTEST_F(WindowSessionImplTest, OnExtensionMessage, TestSize.Level1)
     code = static_cast<uint32_t>(Extension::Businesscode::REGISTER_HOST_WINDOW_RECT_CHANGE_LISTENER);
     EXPECT_EQ(WMError::WM_OK, window->OnExtensionMessage(code, persistentId, want));
     code = static_cast<uint32_t>(Extension::Businesscode::UNREGISTER_HOST_WINDOW_RECT_CHANGE_LISTENER);
+    EXPECT_EQ(WMError::WM_OK, window->OnExtensionMessage(code, persistentId, want));
+}
+
+/**
+ * @tc.name: OnExtensionMessage_KeyboardListener
+ * @tc.desc: OnExtensionMessage_KeyboardListener test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, OnExtensionMessage_KeyboardListener, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("OnExtensionMessage");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    uint32_t code = 9999;
+    int32_t persistentId = 1111;
+    AAFwk::Want want;
+
+    ASSERT_TRUE(window->keyboardDidShowUIExtListeners_.empty());
+    code = static_cast<uint32_t>(Extension::Businesscode::REGISTER_KEYBOARD_DID_SHOW_LISTENER);
+    EXPECT_EQ(WMError::WM_OK, window->OnExtensionMessage(code, persistentId, want));
+    ASSERT_FALSE(window->keyboardDidShowUIExtListeners_.empty());
+    EXPECT_EQ(WMError::WM_OK, window->OnExtensionMessage(code, persistentId, want));
+
+    code = static_cast<uint32_t>(Extension::Businesscode::UNREGISTER_KEYBOARD_DID_SHOW_LISTENER);
+    EXPECT_EQ(WMError::WM_OK, window->OnExtensionMessage(code, persistentId, want));
+    ASSERT_TRUE(window->keyboardDidShowUIExtListeners_.empty());
+    EXPECT_EQ(WMError::WM_OK, window->OnExtensionMessage(code, persistentId, want));
+
+    ASSERT_TRUE(window->keyboardDidHideUIExtListeners_.empty());
+    code = static_cast<uint32_t>(Extension::Businesscode::REGISTER_KEYBOARD_DID_HIDE_LISTENER);
+    EXPECT_EQ(WMError::WM_OK, window->OnExtensionMessage(code, persistentId, want));
+    ASSERT_FALSE(window->keyboardDidHideUIExtListeners_.empty());
+    EXPECT_EQ(WMError::WM_OK, window->OnExtensionMessage(code, persistentId, want));
+
+    code = static_cast<uint32_t>(Extension::Businesscode::UNREGISTER_KEYBOARD_DID_HIDE_LISTENER);
+    EXPECT_EQ(WMError::WM_OK, window->OnExtensionMessage(code, persistentId, want));
+    ASSERT_TRUE(window->keyboardDidHideUIExtListeners_.empty());
     EXPECT_EQ(WMError::WM_OK, window->OnExtensionMessage(code, persistentId, want));
 }
 

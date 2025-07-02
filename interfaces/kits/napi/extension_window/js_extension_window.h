@@ -85,6 +85,7 @@ public:
     static napi_value InvalidSyncCall(napi_env env, napi_callback_info info);
     static napi_value GetWindowDensityInfo(napi_env env, napi_callback_info info);
     static napi_value GetWindowSystemBarProperties(napi_env env, napi_callback_info info);
+    static napi_value GetStatusBarProperty(napi_env env, napi_callback_info info);
 
 private:
     napi_value OnGetWindowAvoidArea(napi_env env, napi_callback_info info);
@@ -125,6 +126,7 @@ private:
     napi_value OnUnsupportAsyncCall(napi_env env, napi_callback_info info);
     napi_value OnEmptyAsyncCall(napi_env env, napi_callback_info info);
     napi_value OnInvalidAsyncCall(napi_env env, napi_callback_info info);
+    napi_value OnGetStatusBarPropertySync(napi_env env, napi_callback_info info);
     
     static napi_value GetProperties(napi_env env, napi_callback_info info);
 

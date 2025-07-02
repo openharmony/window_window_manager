@@ -2797,6 +2797,11 @@ WMError WindowSceneSessionImpl::NotifySpecificWindowSessionProperty(WindowType t
         UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_STATUS_PROPS);
         if (auto uiContent = GetUIContentSharedPtr()) {
             uiContent->SetStatusBarItemColor(property.contentColor_);
+            AAFwk::Want want;
+            want.SetParam(Extension::HOST_STATUS_BAR_CONTENT_COLOR, static_cast<int32_t>(property.contentColor_));
+            uiContent->SendUIExtProprty(
+                static_cast<uint32_t>(Extension::Businesscode::SYNC_HOST_STATUS_BAR_CONTENT_COLOR), want,
+                static_cast<uint8_t>(SubSystemId::WM_UIEXT));
         }
         if (property_->IsAdaptToImmersive() && isIgnoreSafeArea_) {
             HookDecorButtonStyleInCompatibleMode(property.contentColor_);
