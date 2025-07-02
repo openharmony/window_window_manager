@@ -101,10 +101,10 @@ void FloatingBallControllerTest::TearDownTestCase()
 
 void FloatingBallControllerTest::SetUp()
 {
-    int32_t mockWindowId = 100;
+    int32_t windowId = 100;
     mw_ = sptr<MockWindow>::MakeSptr();
     ASSERT_NE(nullptr, mw_);
-    fbController_ = sptr<FloatingBallController>::MakeSptr(mw_, mockWindowId, nullptr);
+    fbController_ = sptr<FloatingBallController>::MakeSptr(mw_, windowId, nullptr);
     ASSERT_NE(nullptr, fbController_);
     option_ = sptr<FbOption>::MakeSptr();
     ASSERT_NE(nullptr, option_);
@@ -125,8 +125,9 @@ namespace {
  */
 HWTEST_F(FloatingBallControllerTest, CreateFloatingBallWindow01, TestSize.Level1)
 {
-    AbilityRuntime::AbilityContextImpl* contextPtr = new AbilityRuntime::AbilityContextImpl();
-    fbController_->contextPtr_ = contextPtr;
+    std::unique_ptr<AbilityRuntime::AbilityContextImpl> contextPtr =
+        std::make_unique<AbilityRuntime::AbilityContextImpl>();
+    fbController_->contextPtr_ = contextPtr.get();
     fbController_->fbOption_ = nullptr;
     EXPECT_EQ(WMError::WM_ERROR_FB_STATE_ABNORMALLY, fbController_->CreateFloatingBallWindow());
     fbController_->fbOption_ = option_;
@@ -140,7 +141,7 @@ HWTEST_F(FloatingBallControllerTest, CreateFloatingBallWindow01, TestSize.Level1
     EXPECT_EQ(100, fbController_->mainWindowId_);
     fbController_->UpdateMainWindow(mw_);
     EXPECT_EQ(101, fbController_->mainWindowId_);
-    delete contextPtr;
+    fbController_->contextPtr_ = nullptr;
 }
 
 /**
@@ -170,11 +171,12 @@ HWTEST_F(FloatingBallControllerTest, StartFloatingBall01, TestSize.Level1)
     EXPECT_EQ(WMError::WM_ERROR_FB_STATE_ABNORMALLY, fbController_->StartFloatingBall(option_));
     EXPECT_EQ(FbWindowState::STATE_UNDEFINED, fbController_->curState_);
 
-    AbilityRuntime::AbilityContextImpl* contextPtr = new AbilityRuntime::AbilityContextImpl();
-    fbController_->contextPtr_ = contextPtr;
+    std::unique_ptr<AbilityRuntime::AbilityContextImpl> contextPtr =
+        std::make_unique<AbilityRuntime::AbilityContextImpl>();
+    fbController_->contextPtr_ = contextPtr.get();
     EXPECT_NE(WMError::WM_OK, fbController_->StartFloatingBall(option_));
     EXPECT_EQ(FbWindowState::STATE_UNDEFINED, fbController_->GetControllerState());
-    delete contextPtr;
+    fbController_->contextPtr_ = nullptr;
 }
 
 /**

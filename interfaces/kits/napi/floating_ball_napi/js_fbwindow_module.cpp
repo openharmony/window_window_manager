@@ -20,7 +20,7 @@ namespace {
 static napi_module g_winManagerModule = {
     .nm_filename = nullptr,
     .nm_register_func = OHOS::Rosen::JsFbWindowManagerInit,
-    .nm_modname = "FloatingBall",
+    .nm_modname = "window.floatingBall",
 };
 
 extern "C" __attribute__((constructor)) void NapiApplicationFbWindowAutoRegister()
