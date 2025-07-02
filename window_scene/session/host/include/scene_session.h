@@ -1387,7 +1387,6 @@ private:
     /*
      * Window Property
      */
-    std::unordered_set<std::string> containerColorList_;
     NotifySetWindowCornerRadiusFunc onSetWindowCornerRadiusFunc_;
     NotifyPrivacyModeChangeFunc privacyModeChangeNotifyFunc_;
     // Set true if either sessionProperty privacyMode or combinedExtWindowFlags_ privacyModeFlag is true.

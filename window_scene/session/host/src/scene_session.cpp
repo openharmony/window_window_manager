@@ -117,8 +117,6 @@ SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCa
     specificCallback_ = specificCallback;
     SetCollaboratorType(info.collaboratorType_);
     TLOGI(WmsLogTag::WMS_LIFE, "Create session, id: %{public}d", GetPersistentId());
-    WindowHelper::SplitStringByDelimiter(
-        system::GetParameter("const.window.containerColorLists", ""), ",", containerColorList_);
 }
 
 SceneSession::~SceneSession()
