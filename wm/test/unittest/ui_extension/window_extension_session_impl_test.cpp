@@ -28,6 +28,7 @@
 #include "extension_data_handler.h"
 #include "extension_data_handler_mock.h"
 #include "iremote_object_mocker.h"
+#include "mock_display_manager.h"
 #include "mock_session.h"
 #include "mock_uicontent.h"
 #include "mock_window.h"
@@ -1428,6 +1429,41 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyDisplayInfoChange2, TestSize.Leve
     window_->context_ = nullptr;
     SessionViewportConfig config;
     window_->NotifyDisplayInfoChange(config);
+}
+
+/**
+ * @tc.name: NotifyDisplayInfoChange3
+ * @tc.desc: system demsity change
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifyDisplayInfoChange3, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    SessionViewportConfig config;
+    config.displayId_ = -1ULL;
+    auto lastDensity = window->lastSystemDensity_;
+    window->NotifyDisplayInfoChange(config);
+    EXPECT_EQ(lastDensity, window->lastSystemDensity_);
+
+    config.displayId_ = 0;
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(config.displayId_);
+    ASSERT_NE(nullptr, display);
+    auto displayInfo = display->GetDisplayInfo();
+    ASSERT_NE(nullptr, displayInfo);
+    auto vpr = displayInfo->GetVirtualPixelRatio();
+    window->NotifyDisplayInfoChange(config);
+    EXPECT_EQ(vpr, window->lastSystemDensity_);
+    window->lastSystemDensity_ = vpr;
+    window->NotifyDisplayInfoChange(config);
+    EXPECT_EQ(vpr, window->lastSystemDensity_);
+
+    sptr<Display> display1 = new Display("displayMock", nullptr);
+    SingletonMocker<DisplayManager, MockDisplayManager> m;
+    EXPECT_CALL(m.Mock(), GetDisplayById(_)).Times(1).WillOnce(Return(display1));
+    window->lastSystemDensity_ = lastDensity;
+    window->NotifyDisplayInfoChange(config);
+    EXPECT_EQ(lastDensity, window->lastSystemDensity_);
 }
 
 /**
@@ -2903,6 +2939,28 @@ HWTEST_F(WindowExtensionSessionImplTest, OnExtensionMessage, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnExtensionMessage_KeyboardListener
+ * @tc.desc: OnExtensionMessage_KeyboardListener test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, OnExtensionMessage_KeyboardListener, TestSize.Level1)
+{
+    SessionInfo sessionInfo;
+    window_->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    uint32_t code = 9999;
+    int32_t persistentId = 1111;
+    AAFwk::Want want;
+    code = static_cast<uint32_t>(Extension::Businesscode::REGISTER_KEYBOARD_DID_SHOW_LISTENER);
+    EXPECT_EQ(WMError::WM_OK, window_->OnExtensionMessage(code, persistentId, want));
+    code = static_cast<uint32_t>(Extension::Businesscode::REGISTER_KEYBOARD_DID_HIDE_LISTENER);
+    EXPECT_EQ(WMError::WM_OK, window_->OnExtensionMessage(code, persistentId, want));
+    code = static_cast<uint32_t>(Extension::Businesscode::UNREGISTER_KEYBOARD_DID_SHOW_LISTENER);
+    EXPECT_EQ(WMError::WM_OK, window_->OnExtensionMessage(code, persistentId, want));
+    code = static_cast<uint32_t>(Extension::Businesscode::UNREGISTER_KEYBOARD_DID_HIDE_LISTENER);
+    EXPECT_EQ(WMError::WM_OK, window_->OnExtensionMessage(code, persistentId, want));
+}
+
+/**
  * @tc.name: UpdateExtensionConfig
  * @tc.desc: UpdateExtensionConfig test
  * @tc.type: FUNC
@@ -3125,6 +3183,213 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateHostSpecificSystemBarEnabled, Tes
     window->property_->SetPersistentId(1);
     EXPECT_CALL(*session, TransferExtensionData).WillOnce(Return(ERR_NONE));
     EXPECT_EQ(WMError::WM_OK, window->UpdateHostSpecificSystemBarEnabled("status", true, true));
+}
+
+/**
+ * @tc.name: ExtensionSetKeepScreenOn
+ * @tc.desc: ExtensionSetKeepScreenOn test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, ExtensionSetKeepScreenOn, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowName("ExtensionSetKeepScreenOn");
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, window->ExtensionSetKeepScreenOn(true));
+
+    SessionInfo sessionInfo;
+    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+    EXPECT_CALL(*session, TransferExtensionData).WillOnce(Return(ERR_NONE));
+    EXPECT_EQ(WMError::WM_OK, window->ExtensionSetKeepScreenOn(true));
+}
+
+/**
+ * @tc.name: ExtensionSetBrightness
+ * @tc.desc: ExtensionSetBrightness test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, ExtensionSetBrightness, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowName("ExtensionSetBrightness");
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, window->ExtensionSetBrightness(0.5));
+
+    SessionInfo sessionInfo;
+    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+    EXPECT_CALL(*session, TransferExtensionData).WillOnce(Return(ERR_NONE));
+    EXPECT_EQ(WMError::WM_OK, window->ExtensionSetBrightness(0.5));
+}
+
+/**
+ * @tc.name: OnScreenshot
+ * @tc.desc: OnScreenshot Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, OnScreenshot, TestSize.Level1)
+{
+    AAFwk::Want want;
+    std::optional<AAFwk::Want> reply = std::make_optional<AAFwk::Want>();
+    EXPECT_EQ(WMError::WM_OK, window_->OnScreenshot(std::move(want), reply));
+}
+
+/**
+ * @tc.name: OnExtensionSecureLimitChange
+ * @tc.desc: OnExtensionSecureLimitChange Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, OnExtensionSecureLimitChange, TestSize.Level1)
+{
+    AAFwk::Want want;
+    want.SetParam(Extension::EXTENSION_SECURE_LIMIT_CHANGE, true);
+    std::optional<AAFwk::Want> reply = std::make_optional<AAFwk::Want>();
+    EXPECT_EQ(WMError::WM_OK, window_->OnExtensionSecureLimitChange(std::move(want), reply));
+}
+
+/**
+ * @tc.name: RegisterKeyboardDidShowListener
+ * @tc.desc: RegisterKeyboardDidShowListener Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, RegisterKeyboardDidShowListener, TestSize.Level1)
+{
+    window_->dataHandler_ = nullptr;
+    sptr<IKeyboardDidShowListener> listener = sptr<IKeyboardDidShowListener>::MakeSptr();
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, window_->RegisterKeyboardDidShowListener(listener));
+    window_->dataHandler_ = std::make_shared<Extension::MockDataHandler>();
+
+    EXPECT_EQ(WMError::WM_OK, window_->RegisterKeyboardDidShowListener(listener));
+    // Test listener already registered
+    EXPECT_EQ(WMError::WM_OK, window_->RegisterKeyboardDidShowListener(listener));
+}
+
+/**
+ * @tc.name: UnregisterKeyboardDidShowListener
+ * @tc.desc: UnregisterKeyboardDidShowListener Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UnregisterKeyboardDidShowListener, TestSize.Level1)
+{
+    window_->dataHandler_ = nullptr;
+    sptr<IKeyboardDidShowListener> listener = nullptr;
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, window_->UnregisterKeyboardDidShowListener(listener));
+
+    // Test need notify host
+    listener = sptr<IKeyboardDidShowListener>::MakeSptr();
+    window_->dataHandler_ = std::make_shared<Extension::MockDataHandler>();
+    window_->RegisterKeyboardDidShowListener(listener);
+    EXPECT_EQ(WMError::WM_OK, window_->UnregisterKeyboardDidShowListener(listener));
+    ASSERT_TRUE(window_->keyboardDidShowListenerList_.empty());
+
+    // Test no need notify host
+    window_->keyboardDidShowUIExtListeners_[1] = listener;
+    EXPECT_EQ(WMError::WM_OK, window_->UnregisterKeyboardDidShowListener(listener));
+}
+
+/**
+ * @tc.name: RegisterKeyboardDidHideListener
+ * @tc.desc: RegisterKeyboardDidHideListener Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, RegisterKeyboardDidHideListener, TestSize.Level1)
+{
+    window_->dataHandler_ = nullptr;
+    sptr<IKeyboardDidHideListener> listener = sptr<IKeyboardDidHideListener>::MakeSptr();
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, window_->RegisterKeyboardDidHideListener(listener));
+    window_->dataHandler_ = std::make_shared<Extension::MockDataHandler>();
+
+    EXPECT_EQ(WMError::WM_OK, window_->RegisterKeyboardDidHideListener(listener));
+    // Test listener already registered
+    EXPECT_EQ(WMError::WM_OK, window_->RegisterKeyboardDidHideListener(listener));
+}
+
+/**
+ * @tc.name: UnregisterKeyboardDidHideListener
+ * @tc.desc: UnregisterKeyboardDidHideListener Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UnregisterKeyboardDidHideListener, TestSize.Level1)
+{
+    window_->dataHandler_ = nullptr;
+    sptr<IKeyboardDidHideListener> listener = nullptr;
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, window_->UnregisterKeyboardDidHideListener(listener));
+
+    // Test need notify host
+    listener = sptr<IKeyboardDidHideListener>::MakeSptr();
+    window_->dataHandler_ = std::make_shared<Extension::MockDataHandler>();
+    window_->RegisterKeyboardDidHideListener(listener);
+    EXPECT_EQ(WMError::WM_OK, window_->UnregisterKeyboardDidHideListener(listener));
+    ASSERT_TRUE(window_->keyboardDidHideListenerList_.empty());
+
+    // Test no need notify host
+    window_->keyboardDidHideUIExtListeners_[1] = listener;
+    EXPECT_EQ(WMError::WM_OK, window_->UnregisterKeyboardDidHideListener(listener));
+}
+
+/**
+ * @tc.name: OnKeyboardDidShow
+ * @tc.desc: OnKeyboardDidShow Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, OnKeyboardDidShow, TestSize.Level1)
+{
+    AAFwk::Want want;
+    std::optional<AAFwk::Want> reply;
+    sptr<IKeyboardDidShowListener> listener = sptr<IKeyboardDidShowListener>::MakeSptr();
+    window_->dataHandler_ = std::make_shared<Extension::MockDataHandler>();
+    window_->RegisterKeyboardDidShowListener(listener);
+    EXPECT_EQ(WMError::WM_OK, window_->OnKeyboardDidShow(std::move(want), reply));
+    window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    EXPECT_EQ(WMError::WM_OK, window_->OnKeyboardDidShow(std::move(want), reply));
+}
+
+/**
+ * @tc.name: OnKeyboardDidHide
+ * @tc.desc: OnKeyboardDidHide Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, OnKeyboardDidHide, TestSize.Level1)
+{
+    AAFwk::Want want;
+    std::optional<AAFwk::Want> reply;
+    sptr<IKeyboardDidHideListener> listener = sptr<IKeyboardDidHideListener>::MakeSptr();
+    window_->dataHandler_ = std::make_shared<Extension::MockDataHandler>();
+    window_->RegisterKeyboardDidHideListener(listener);
+    EXPECT_EQ(WMError::WM_OK, window_->OnKeyboardDidHide(std::move(want), reply));
+    window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    EXPECT_EQ(WMError::WM_OK, window_->OnKeyboardDidHide(std::move(want), reply));
+}
+
+/**
+ * @tc.name: OnHostStatusBarContentColorChange
+ * @tc.desc: OnHostStatusBarContentColorChange Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, OnHostStatusBarContentColorChange, TestSize.Level1)
+{
+    AAFwk::Want want;
+    std::optional<AAFwk::Want> reply;
+    want.SetParam(Extension::HOST_STATUS_BAR_CONTENT_COLOR, static_cast<int32_t>(8888));
+    EXPECT_EQ(WMError::WM_OK, window_->OnHostStatusBarContentColorChange(std::move(want), reply));
+    EXPECT_EQ(8888, window_->GetHostStatusBarContentColor());
+}
+
+/**
+ * @tc.name: RegisterOccupiedAreaChangeListener
+ * @tc.desc: RegisterOccupiedAreaChangeListener Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, RegisterOccupiedAreaChangeListener, TestSize.Level1)
+{
+    sptr<IOccupiedAreaChangeListener> listener = sptr<IOccupiedAreaChangeListener>::MakeSptr();
+    EXPECT_EQ(WMError::WM_OK, window_->RegisterOccupiedAreaChangeListener(listener));
+    sptr<OccupiedAreaChangeInfo> info = sptr<OccupiedAreaChangeInfo>::MakeSptr();
+    window_->NotifyOccupiedAreaChange(info);
+    EXPECT_EQ(WMError::WM_OK, window_->UnregisterOccupiedAreaChangeListener(listener));
 }
 }
 } // namespace Rosen

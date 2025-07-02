@@ -1548,6 +1548,14 @@ public:
     virtual WMError SetKeepScreenOn(bool keepScreenOn) { return WMError::WM_OK; }
 
     /**
+     * @brief Extension told host to set the screen always on, only for NAPI call.
+     *
+     * @param keepScreenOn
+     * @return WMError
+     */
+    virtual WMError ExtensionSetKeepScreenOn(bool keepScreenOn) { return WMError::WM_OK; }
+
+    /**
      * @brief Get the screen is always on or not.
      *
      * @return True means screen is always on, false means the opposite.
@@ -1614,6 +1622,14 @@ public:
      * @return WM_OK means set success, others means set failed.
      */
     virtual WMError SetBrightness(float brightness) { return WMError::WM_OK; }
+
+    /**
+     * @brief Extension told host to set brightness value of window, only for NAPI call.
+     *
+     * @param brightness Brightness of window.
+     * @return WM_OK means set success, others means set failed.
+     */
+    virtual WMError ExtensionSetBrightness(float brightness) { return WMError::WM_OK; }
 
     /**
      * @brief Get brightness value of window.
@@ -4453,6 +4469,13 @@ public:
     {
         return WMError::WM_OK;
     }
+
+    /**
+     * @brief UIExtension get host status bar content color, only for NAPI Call.
+     *
+     * @return content color
+     */
+    virtual uint32_t GetHostStatusBarContentColor() const { return 0; }
 };
 }
 }

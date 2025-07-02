@@ -226,8 +226,8 @@ public:
         const std::map<AvoidAreaType, AvoidArea>& avoidAreas) override;
     void NotifyKeyboardWillShow(const KeyboardAnimationInfo& keyboardAnimationInfo);
     void NotifyKeyboardWillHide(const KeyboardAnimationInfo& keyboardAnimationInfo);
-    void NotifyKeyboardDidShow(const KeyboardPanelInfo& keyboardPanelInfo);
-    void NotifyKeyboardDidHide(const KeyboardPanelInfo& keyboardPanelInfo);
+    virtual void NotifyKeyboardDidShow(const KeyboardPanelInfo& keyboardPanelInfo);
+    virtual void NotifyKeyboardDidHide(const KeyboardPanelInfo& keyboardPanelInfo);
     void NotifyKeyboardAnimationCompleted(const KeyboardPanelInfo& keyboardPanelInfo) override;
     void NotifyKeyboardAnimationWillBegin(const KeyboardAnimationInfo& keyboardAnimationInfo,
         const std::shared_ptr<RSTransaction>& rsTransaction) override;
@@ -288,6 +288,14 @@ public:
     virtual WMError HandleRegisterHostWindowRectChangeListener(uint32_t code, int32_t persistentId,
         const AAFwk::Want& data);
     virtual WMError HandleUnregisterHostWindowRectChangeListener(uint32_t code, int32_t persistentId,
+        const AAFwk::Want& data);
+    virtual WMError HandleUIExtRegisterKeyboardDidShowListener(uint32_t code, int32_t persistentId,
+        const AAFwk::Want& data);
+    virtual WMError HandleUIExtUnregisterKeyboardDidShowListener(uint32_t code, int32_t persistentId,
+        const AAFwk::Want& data);
+    virtual WMError HandleUIExtRegisterKeyboardDidHideListener(uint32_t code, int32_t persistentId,
+        const AAFwk::Want& data);
+    virtual WMError HandleUIExtUnregisterKeyboardDidHideListener(uint32_t code, int32_t persistentId,
         const AAFwk::Want& data);
 
     WMError SetBackgroundColor(const std::string& color) override;
@@ -615,6 +623,12 @@ protected:
      * UIExtension
      */
     std::unordered_set<int32_t> rectChangeUIExtListenerIds_;
+    std::unordered_set<int32_t> keyboardDidShowUIExtListenerIds_;
+    std::unordered_set<int32_t> keyboardDidHideUIExtListenerIds_;
+    std::unordered_map<int32_t, sptr<IKeyboardDidShowListener>> keyboardDidShowUIExtListeners_;
+    std::unordered_map<int32_t, sptr<IKeyboardDidHideListener>> keyboardDidHideUIExtListeners_;
+    void WriteKeyboardInfoToWant(AAFwk::Want& want, const KeyboardPanelInfo& keyboardPanelInfo) const;
+    void ReadKeyboardInfoFromWant(const AAFwk::Want& want, KeyboardPanelInfo& keyboardPanelInfo) const;
 
     /*
      * Sub Window
