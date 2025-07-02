@@ -33,6 +33,7 @@ constexpr uint32_t PORTRAIT_ANGLE = 0;
 constexpr uint32_t LANDSCAPE_ANGLE = 90;
 constexpr uint32_t PORTRAIT_INVERTED_ANGLE = 180;
 constexpr uint32_t LANDSCAPE_INVERTED_ANGLE = 270;
+constexpr uint32_t ROTATION_ANGLE = 360;
 constexpr uint32_t ROTATION_COUNT = 4;
 constexpr uint32_t SECONDARY_EXPAND_OFFSET = 1;
 }
