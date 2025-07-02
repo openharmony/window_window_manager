@@ -1973,6 +1973,7 @@ HWTEST_F(WindowSceneSessionImplTest4, SetWindowContainerColor01, TestSize.Level1
     WMError res = window->SetWindowContainerColor(activeColor, inactiveColor);
     EXPECT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
 
+    window->containerColorList_.insert("SetWindowContainerColor");
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     res = window->SetWindowContainerColor(activeColor, inactiveColor);
     EXPECT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);

@@ -4434,7 +4434,7 @@ WMError WindowSessionImpl::SetWindowContainerColor(const std::string& activeColo
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (!WindowHelper::IsMainWindow(GetType())) {
-        TLOGE(WmsLogTag::WMS_DECOR, "winId: %{public}d, type: %{public}u is not supported",
+        TLOGE(WmsLogTag::WMS_DECOR, "winId: %{public}d, type: %{public}u not supported",
             GetPersistentId(), GetType());
         return WMError::WM_ERROR_INVALID_CALLING;
     }
