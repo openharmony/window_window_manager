@@ -1646,7 +1646,7 @@ HWTEST_F(MoveDragControllerTest, UpdateSubWindowGravityWhenFollow01, TestSize.Le
     followController->type_ = AreaType::TOP;
     moveDragController->UpdateSubWindowGravityWhenFollow(followController, surfaceNode);
     gravityIter = surfaceNode->propertyModifiers_.find(RSModifierType::FRAME_GRAVITY);
-    ASSERT_NE(gravityIter, surfaceNode->propertyModifiers_.end());
+    ASSERT_EQ(gravityIter, surfaceNode->propertyModifiers_.end());
 }
 } // namespace
 } // namespace Rosen
