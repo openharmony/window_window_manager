@@ -659,14 +659,14 @@ napi_value JsExtensionWindow::OnSetWindowBrightness(napi_env env, napi_callback_
     napi_value argv[INDEX_TWO] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARG_COUNT_ONE) {
-        WLOGFE("Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_UIEXT, "Argc is invalid: %{public}zu", argc);
         errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
     double brightness = UNDEFINED_BRIGHTNESS;
     if (errCode == WmErrorCode::WM_OK) {
         napi_value nativeVal = argv[0];
         if (nativeVal == nullptr) {
-            WLOGFE("Failed to convert parameter to brightness");
+            TLOGE(WmsLogTag::WMS_UIEXT, "Failed to convert parameter to brightness");
             errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
         } else {
             CHECK_NAPI_RETCODE(errCode, WmErrorCode::WM_ERROR_INVALID_PARAM,
@@ -1580,7 +1580,7 @@ napi_value JsExtensionWindow::OnSetWindowSystemBarEnable(napi_env env, napi_call
 
 napi_value JsExtensionWindow::OnGetGestureBackEnabled(napi_env env, napi_callback_info info)
 {
-    sptr<Window> windowImpl =  extensionWindow_->GetWindow();
+    sptr<Window> windowImpl = extensionWindow_->GetWindow();
     if (windowImpl == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "extensionWindow is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
@@ -1672,7 +1672,7 @@ napi_value JsExtensionWindow::OnSetImmersiveModeEnabledState(napi_env env, napi_
 
 napi_value JsExtensionWindow::OnGetImmersiveModeEnabledState(napi_env env, napi_callback_info info)
 {
-    sptr<Window> windowImpl =  extensionWindow_->GetWindow();
+    sptr<Window> windowImpl = extensionWindow_->GetWindow();
     if (windowImpl == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "extensionWindow is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
@@ -1684,7 +1684,7 @@ napi_value JsExtensionWindow::OnGetImmersiveModeEnabledState(napi_env env, napi_
 
 napi_value JsExtensionWindow::OnIsFocused(napi_env env, napi_callback_info info)
 {
-    sptr<Window> windowImpl =  extensionWindow_->GetWindow();
+    sptr<Window> windowImpl = extensionWindow_->GetWindow();
     if (windowImpl == nullptr) {
         TLOGE(WmsLogTag::WMS_FOCUS, "window is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
@@ -1729,7 +1729,7 @@ napi_value JsExtensionWindow::OnIsWindowSupportWideGamut(napi_env env, napi_call
 
 napi_value JsExtensionWindow::OnGetGlobalScaledRect(napi_env env, napi_callback_info info)
 {
-    sptr<Window> windowImpl =  extensionWindow_->GetWindow();
+    sptr<Window> windowImpl = extensionWindow_->GetWindow();
     if (windowImpl == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "extensionWindow is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
@@ -1751,7 +1751,7 @@ napi_value JsExtensionWindow::OnGetGlobalScaledRect(napi_env env, napi_callback_
 
 napi_value JsExtensionWindow::OnGetStatusBarPropertySync(napi_env env, napi_callback_info info)
 {
-    sptr<Window> windowImpl =  extensionWindow_->GetWindow();
+    sptr<Window> windowImpl = extensionWindow_->GetWindow();
     if (windowImpl == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "window is null");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
