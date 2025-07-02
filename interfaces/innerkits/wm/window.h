@@ -1624,7 +1624,7 @@ public:
     virtual WMError SetBrightness(float brightness) { return WMError::WM_OK; }
 
     /**
-     * @brief Extension told host to set brightness value of window, only for NAPI call.Set 
+     * @brief Extension told host to set brightness value of window, only for NAPI call.
      *
      * @param brightness Brightness of window.
      * @return WM_OK means set success, others means set failed.
