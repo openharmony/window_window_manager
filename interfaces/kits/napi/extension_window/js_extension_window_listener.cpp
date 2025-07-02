@@ -259,6 +259,7 @@ void JsExtensionWindowListener::OnSystemDensityChanged(float density)
 
 void JsExtensionWindowListener::OnScreenshot()
 {
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
     auto jsCallback = [self = weakRef_] {
         auto thisListener = self.promote();
         if (thisListener == nullptr) {
