@@ -99,7 +99,6 @@ union WSColorParam {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSceneSessionImpl"};
 constexpr int32_t WINDOW_DETACH_TIMEOUT = 300;
-constexpr int32_t WINDOW_LIFECYCLE_TIMEOUT = 300;
 constexpr int32_t WINDOW_LAYOUT_TIMEOUT = 30;
 constexpr int32_t WINDOW_PAGE_ROTATION_TIMEOUT = 2000;
 const std::string PARAM_DUMP_HELP = "-h";
@@ -1434,7 +1433,12 @@ void WindowSceneSessionImpl::PreLayoutOnShow(WindowType type, const sptr<Display
     uiContent->PreLayout();
 }
 
-WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool withFocus, bool needAttach)
+WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool withFocus)
+{
+    return Show(reason, withAnimation, withFocus, false);
+}
+
+WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool withFocus, bool waitAttach)
 {
     if (reason == static_cast<uint32_t>(WindowStateChangeReason::USER_SWITCH)) {
         TLOGI(WmsLogTag::WMS_MULTI_USER, "Switch to current user, NotifyAfterForeground");
@@ -1469,21 +1473,7 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
         RefreshNoInteractionTimeoutMonitor();
         return WMError::WM_OK;
     }
-    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
-    if (display == nullptr && (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT ||
-        type == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW || WindowHelper::IsSubWindow(type))) {
-        display = SingletonContainer::Get<DisplayManager>().GetDefaultDisplay();
-        if (display != nullptr) {
-            property_->SetDisplayId(display->GetId());
-            TLOGI(WmsLogTag::WMS_KEYBOARD, "use default display id: %{public}" PRIu64, display->GetId());
-        }
-    }
-    if (display == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Window show failed, display is null, name: %{public}s, id: %{public}d",
-            property_->GetWindowName().c_str(), GetPersistentId());
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    auto displayInfo = display->GetDisplayInfo();
+    auto displayInfo = GetDisplayInfo();
     if (displayInfo == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "Window show failed, displayInfo is null, name: %{public}s, id: %{public}d",
             property_->GetWindowName().c_str(), GetPersistentId());
@@ -1506,10 +1496,14 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
     if (WindowHelper::IsMainWindow(type)) {
         ret = static_cast<WMError>(hostSession->Foreground(property_, true, identityToken_));
     } else if (WindowHelper::IsSubWindow(type) || WindowHelper::IsSystemWindow(type)) {
-        if (!lifecycleCallback_) {
+        if (waitAttach && !lifecycleCallback_ &&
+            SysCapUtil::GetBundleName() != AppExecFwk::Constants::SCENE_BOARD_BUNDLE_NAME) {
             lifecycleCallback_ = sptr<LifecycleFutureCallback>::MakeSptr();
+            TLOGI(WmsLogTag::WMS_LIFE, "init lifecycleCallback, id:%{public}d", GetPersistentId());
         }
-        lifecycleCallback_->ResetAttachLock();
+        if (waitAttach && lifecycleCallback_) {
+            lifecycleCallback_->ResetAttachLock();
+        }
         PreLayoutOnShow(type, displayInfo);
         // Add maintenance logs before the IPC process.
         TLOGD(WmsLogTag::WMS_LIFE, "Show session [name: %{public}s, id: %{public}d]",
@@ -1520,15 +1514,11 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
     }
     RecordLifeCycleExceptionEvent(LifeCycleEvent::SHOW_EVENT, ret);
     if (ret == WMError::WM_OK) {
-        if ((WindowHelper::IsSubWindow(type) || WindowHelper::IsSystemWindow(type)) && needAttach) {
-            lifecycleCallback_->GetAttachAsyncResult(WINDOW_LIFECYCLE_TIMEOUT);
-            TLOGI(WmsLogTag::WMS_LIFE, "get attach async result, id:%{public}d", GetPersistentId());
-        }
         // update sub window state
         UpdateSubWindowStateAndNotify(GetPersistentId(), WindowState::STATE_SHOWN);
         state_ = WindowState::STATE_SHOWN;
         requestState_ = WindowState::STATE_SHOWN;
-        NotifyAfterForeground(true, true);
+        NotifyAfterForeground(true, true, waitAttach);
         NotifyAfterDidForeground(reason);
         NotifyFreeMultiWindowModeResume();
         RefreshNoInteractionTimeoutMonitor();
@@ -1543,6 +1533,26 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
     NotifyWindowStatusDidChange(GetWindowMode());
     NotifyDisplayInfoChange(displayInfo);
     return ret;
+}
+
+sptr<DisplayInfo> WindowSceneSessionImpl::GetDisplayInfo() const
+{
+    const auto type = GetType();
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
+    if (display == nullptr && (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT ||
+        type == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW || WindowHelper::IsSubWindow(type))) {
+        display = SingletonContainer::Get<DisplayManager>().GetDefaultDisplay();
+        if (display != nullptr) {
+            property_->SetDisplayId(display->GetId());
+            TLOGI(WmsLogTag::WMS_KEYBOARD, "use default display id: %{public}" PRIu64, display->GetId());
+        }
+    }
+    if (display == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "failed, display is null, name: %{public}s, id: %{public}d",
+            property_->GetWindowName().c_str(), GetPersistentId());
+        return nullptr;
+    }
+    return display->GetDisplayInfo();
 }
 
 WMError WindowSceneSessionImpl::ShowKeyboard(KeyboardEffectOption effectOption)
@@ -1593,7 +1603,12 @@ void WindowSceneSessionImpl::Pause()
     NotifyAfterLifecyclePaused();
 }
 
-WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits, bool needDetach)
+WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits)
+{
+    return Hide(reason, withAnimation, isFromInnerkits, false);
+}
+
+WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits, bool waitDetach)
 {
     if (reason == static_cast<uint32_t>(WindowStateChangeReason::USER_SWITCH)) {
         TLOGI(WmsLogTag::WMS_MULTI_USER, "Switch to another user, NotifyAfterBackground");
@@ -1641,10 +1656,14 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
         }
         res = static_cast<WMError>(hostSession->Background(true, identityToken_));
     } else if (WindowHelper::IsSubWindow(type) || WindowHelper::IsSystemWindow(type)) {
-        if (!lifecycleCallback_) {
+        if (waitDetach && !lifecycleCallback_ &&
+            SysCapUtil::GetBundleName() != AppExecFwk::Constants::SCENE_BOARD_BUNDLE_NAME) {
             lifecycleCallback_ = sptr<LifecycleFutureCallback>::MakeSptr();
+            TLOGI(WmsLogTag::WMS_LIFE, "init lifecycleCallback, id:%{public}d", GetPersistentId());
         }
-        lifecycleCallback_->ResetDetachLock();
+        if (waitDetach && lifecycleCallback_) {
+            lifecycleCallback_->ResetDetachLock();
+        }
         res = static_cast<WMError>(hostSession->Hide());
     } else {
         res = WMError::WM_ERROR_INVALID_WINDOW;
@@ -1653,11 +1672,7 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
     RecordLifeCycleExceptionEvent(LifeCycleEvent::HIDE_EVENT, res);
     if (res == WMError::WM_OK) {
         // update sub window state if this is main window
-        if ((WindowHelper::IsSubWindow(type) || WindowHelper::IsSystemWindow(type)) && needDetach) {
-            lifecycleCallback_->GetDetachAsyncResult(WINDOW_DETACH_TIMEOUT);
-            TLOGI(WmsLogTag::WMS_LIFE, "get detach async result, id:%{public}d", GetPersistentId());
-        }
-        UpdateSubWindowState(type);
+        UpdateSubWindowState(type, waitDetach);
         NotifyAfterDidBackground(reason);
         state_ = WindowState::STATE_HIDDEN;
         requestState_ = WindowState::STATE_HIDDEN;
@@ -1713,15 +1728,15 @@ WMError WindowSceneSessionImpl::NotifyRemoveStartingWindow()
     return res;
 }
 
-void WindowSceneSessionImpl::UpdateSubWindowState(const WindowType& type)
+void WindowSceneSessionImpl::UpdateSubWindowState(const WindowType& type, bool waitDetach)
 {
     UpdateSubWindowStateAndNotify(GetPersistentId(), WindowState::STATE_HIDDEN);
     if (WindowHelper::IsSubWindow(type)) {
         if (state_ == WindowState::STATE_SHOWN) {
-            NotifyAfterBackground();
+            NotifyAfterBackground(true, true, waitDetach);
         }
     } else {
-        NotifyAfterBackground();
+        NotifyAfterBackground(true, true, waitDetach);
     }
 }
 
@@ -5747,17 +5762,13 @@ WSError WindowSceneSessionImpl::NotifyWindowAttachStateChange(bool isAttach)
         TLOGW(WmsLogTag::WMS_SUB, "listener is null");
         return WSError::WS_ERROR_NULLPTR;
     }
-
     if (isAttach) {
         windowAttachStateChangeListener_->AfterAttached();
-        if (lifecycleCallback_) {
-            lifecycleCallback_->OnNotifyAttachState(isAttach);
-        }
     } else {
         windowAttachStateChangeListener_->AfterDetached();
-        if (lifecycleCallback_) {
-            lifecycleCallback_->OnNotifyAttachState(isAttach);
-        }
+    }
+    if (lifecycleCallback_) {
+        lifecycleCallback_->OnNotifyAttachState(isAttach);
     }
     return WSError::WS_OK;
 }

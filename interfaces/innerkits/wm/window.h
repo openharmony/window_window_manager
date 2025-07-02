@@ -1413,11 +1413,22 @@ public:
      * @param reason Reason for window state change.
      * @param withAnimation True means window show with animation, false means window show without animation.
      * @param withFocus True means window can get focus when it shows to foreground, false means the opposite;
-     * @param needAttach True means window need waiting for attach when it shows to foreground, false means the opposite;
      * @return WM_OK means window show success, others means failed.
      */
     virtual WMError Show(uint32_t reason = 0, bool withAnimation = false,
-                         bool withFocus = true, bool needAttach = false) { return WMError::WM_OK; }
+                         bool withFocus = true) { return WMError::WM_OK; }
+
+    /**
+     * @brief Show window
+     *
+     * @param reason Reason for window state change.
+     * @param withAnimation True means window show with animation, false means window show without animation.
+     * @param withFocus True means window can get focus when it shows to foreground, false means the opposite;
+     * @param waitAttach True means window need waiting for attach when it, false means the opposite;
+     * @return WM_OK means window show success, others means failed.
+     */
+    virtual WMError Show(uint32_t reason, bool withAnimation,
+                         bool withFocus, bool waitAttach) { return WMError::WM_OK; }
 
     /**
      * @brief Resume window
@@ -1435,11 +1446,24 @@ public:
      * @param reason Reason for window state change.
      * @param withAnimation True means window show with animation, false means window show without animation.
      * @param isFromInnerkits True means remove command is from inner kits.
-     * @param needAttach True means window need waiting for detach when it shows to background, false means the opposite;
      * @return WM_OK means window hide success, others means failed.
      */
-    virtual WMError Hide(uint32_t reason = 0, bool withAnimation = false,
-        bool isFromInnerkits = true, bool needDetach = false)
+    virtual WMError Hide(uint32_t reason = 0, bool withAnimation = false, bool isFromInnerkits = true)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Hide window
+     *
+     * @param reason Reason for window state change.
+     * @param withAnimation True means window show with animation, false means window show without animation.
+     * @param isFromInnerkits True means remove command is from inner kits.
+     * @param waitDetach True means window need waiting for detach, false means the opposite;
+     * @return WM_OK means window hide success, others means failed.
+     */
+    virtual WMError Hide(uint32_t reason, bool withAnimation,
+        bool isFromInnerkits, bool waitDetach)
     {
         return WMError::WM_OK;
     }

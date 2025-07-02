@@ -117,10 +117,10 @@ public:
         const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager) override;
     static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration,
         const std::vector<std::shared_ptr<AbilityRuntime::Context>>& ignoreWindowContexts = {});
-    WMError Show(uint32_t reason = 0, bool withAnimation = false,
-        bool withFocus = true, bool needAttach = false) override;
-    WMError Hide(uint32_t reason, bool withAnimation,
-        bool isFromInnerkits, bool needDetach = false) override;
+    WMError Show(uint32_t reason = 0, bool withAnimation = false, bool withFocus = true) override;
+    WMError Show(uint32_t reason, bool withAnimation, bool withFocus, bool waitAttach) override;
+    WMError Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
+    WMError Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits, bool waitDetach) override;
     WSError NotifyDensityFollowHost(bool isFollowHost, float densityValue) override;
     float GetVirtualPixelRatio(const sptr<DisplayInfo>& displayInfo) override;
     float GetDefaultDensity(const sptr<DisplayInfo>& displayInfo);

@@ -35,7 +35,7 @@ public:
     const uint32_t mockWindowId_ = 101;
     MockWindow() {};
     ~MockWindow() {};
-    MOCK_METHOD4(Show, WMError(uint32_t reason, bool withAnimation, bool withFocus, bool needAttach));
+    MOCK_METHOD3(Show, WMError(uint32_t reason, bool withAnimation, bool withFocus));
     MOCK_METHOD1(Destroy, WMError(uint32_t reason));
     MOCK_METHOD0(NotifyPrepareCloseFloatingBall, void());
     MOCK_METHOD2(UpdateFloatingBall, WMError(const FloatingBallTemplateBaseInfo& fbTemplateBaseInfo,

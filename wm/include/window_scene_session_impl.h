@@ -17,7 +17,6 @@
 #define OHOS_ROSEN_WINDOW_SCENE_SESSION_IMPL_H
 
 #include "window_session_impl.h"
-#include "lifecycle_future_callback.h"
 #include "window_manager.h"
 
 namespace OHOS {
@@ -30,11 +29,11 @@ public:
     WMError Create(const std::shared_ptr<AbilityRuntime::Context>& context,
         const sptr<Rosen::ISession>& iSession, const std::string& identityToken = "",
         bool isModuleAbilityHookEnd = false) override;
-    WMError Show(uint32_t reason = 0, bool withAnimation = false,
-        bool withFocus = true, bool needAttach = false) override;
+    WMError Show(uint32_t reason = 0, bool withAnimation = false, bool withFocus = true) override;
+    WMError Show(uint32_t reason, bool withAnimation, bool withFocus, bool waitAttach) override;
     WMError ShowKeyboard(KeyboardEffectOption effectOption) override;
-    WMError Hide(uint32_t reason, bool withAnimation,
-        bool isFromInnerkits, bool needDetach = false) override;
+    WMError Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
+    WMError Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits, bool waitDetach) override;
     WMError Destroy(bool needNotifyServer, bool needClearListener = true, uint32_t reason = 0) override;
     WMError DestroyHookWindow();
     WMError NotifyDrawingCompleted() override;
@@ -142,7 +141,7 @@ public:
     void NotifySessionForeground(uint32_t reason, bool withAnimation) override;
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
     WMError NotifyPrepareClosePiPWindow() override;
-    void UpdateSubWindowState(const WindowType& type);
+    void UpdateSubWindowState(const WindowType& type, bool waitDetach = false);
     WMError SetSystemBarProperties(const std::map<WindowType, SystemBarProperty>& properties,
         const std::map<WindowType, SystemBarPropertyFlag>& propertyFlags) override;
     WMError GetSystemBarProperties(std::map<WindowType, SystemBarProperty>& properties) override;
@@ -385,6 +384,7 @@ private:
     void CalculateNewLimitsByRatio(WindowLimits& newLimits, WindowLimits& customizedLimits);
     void NotifyDisplayInfoChange(const sptr<DisplayInfo>& info = nullptr);
     void UpdateDensityInner(const sptr<DisplayInfo>& info = nullptr);
+    sptr<DisplayInfo> GetDisplayInfo() const;
 
     /*
      * Window Input Event
@@ -506,7 +506,6 @@ private:
     void NotifyFreeMultiWindowModeResume();
     std::string TransferLifeCycleEventToString(LifeCycleEvent type) const;
     void RecordLifeCycleExceptionEvent(LifeCycleEvent event, WMError erCode) const;
-    sptr<LifecycleFutureCallback> lifecycleCallback_ = nullptr;
     WindowLifeCycleInfo GetWindowLifecycleInfo() const;
 
     /**
