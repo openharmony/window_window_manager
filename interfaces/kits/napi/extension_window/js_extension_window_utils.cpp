@@ -112,20 +112,6 @@ napi_value CreateJsExtensionWindowProperties(napi_env env, sptr<Window>& window)
     return objValue;
 }
 
-napi_value GetStatusBarPropertyObject(napi_env env, sptr<Window>& window)
-{
-    TLOGI(WmsLogTag::WMS_UIEXT, "in");
-    napi_value objValue = nullptr;
-    napi_create_object(env, &objValue);
-    if (objValue == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to convert statusbar property to jsObject");
-        return nullptr;
-    }
-    uint32_t contentColor = window->GetHostStatusBarContentColor();
-    napi_set_named_property(env, objValue, "contentColor", CreateJsValue(env, GetHexColor(contentColor)));
-    return objValue;
-}
-
 static std::string GetHexColor(uint32_t color)
 {
     std::stringstream ioss;
@@ -138,6 +124,20 @@ static std::string GetHexColor(uint32_t color)
     std::string finalColor("#");
     finalColor += tmpColor;
     return finalColor;
+}
+
+napi_value GetStatusBarPropertyObject(napi_env env, sptr<Window>& window)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "in");
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to convert statusbar property to jsObject");
+        return nullptr;
+    }
+    uint32_t contentColor = window->GetHostStatusBarContentColor();
+    napi_set_named_property(env, objValue, "contentColor", CreateJsValue(env, GetHexColor(contentColor)));
+    return objValue;
 }
 
 bool NapiIsCallable(napi_env env, napi_value value)
