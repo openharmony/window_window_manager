@@ -5368,7 +5368,7 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
     }
     session->CalculatedStartWindowType(info, abilitySessionInfo->hideStartWindow);
     bool isSystemCalling = SessionPermission::IsSystemCalling() || SessionPermission::IsStartByHdcd();
-    if (!abilitySessionInfo->animationSystemOptions && isSystemCalling) {
+    if (abilitySessionInfo->animationSystemOptions && isSystemCalling) {
         info.startAnimationSystemOptions = abilitySessionInfo->animationSystemOptions;
     }
     info.startAnimationOptions = abilitySessionInfo->animationOptions;
