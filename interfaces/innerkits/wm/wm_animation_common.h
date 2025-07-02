@@ -230,14 +230,44 @@ struct StartAnimationSystemOptions : public Parcelable {
             return nullptr;
         }
         startAnimationSystemOptions->animationType = static_cast<AnimationType>(animationType);
-        std::shared_ptr<WindowAnimationOption> animationConfig =
+        startAnimationSystemOptions->animationConfig =
             std::shared_ptr<WindowAnimationOption>(parcel.ReadParcelable<WindowAnimationOption>());
-        if (animationConfig == nullptr) {
-            delete startAnimationSystemOptions;
-            return nullptr;
-        }
-        startAnimationSystemOptions->animationConfig = animationConfig;
         return startAnimationSystemOptions;
+    }
+};
+
+/**
+ * The animation params of window create
+ */
+struct WindowCreateParams : public Parcelable {
+    /**
+     * The animation configuration of start scene animation
+     */
+    std::shared_ptr<StartAnimationOptions> animationParams = nullptr;
+    /**
+     * The animation configuration of SA start scene animation
+     */
+    std::shared_ptr<StartAnimationSystemOptions> animationSystemParams = nullptr;
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        if (!parcel.WriteParcelable(animationParams.get())) {
+            return false;
+        }
+        if (!parcel.WriteParcelable(animationSystemParams.get())) {
+            return false;
+        }
+        return true;
+    }
+
+    static WindowCreateParams* Unmarshalling(Parcel& parcel)
+    {
+        WindowCreateParams* windowCreateParams = new WindowCreateParams();    
+        windowCreateParams->animationParams =
+            std::shared_ptr<StartAnimationOptions>(parcel.ReadParcelable<StartAnimationOptions>());
+        windowCreateParams->animationSystemParams =
+            std::shared_ptr<StartAnimationSystemOptions>(parcel.ReadParcelable<StartAnimationSystemOptions>());
+        return windowCreateParams;
     }
 };
 
