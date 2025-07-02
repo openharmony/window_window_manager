@@ -53,6 +53,7 @@ constexpr const char* const COMPAT_IS_PROPORTION_SCALE_FIELD = "compat.isProport
 constexpr const char* const COMPAT_SCALE_X_FIELD = "compat.scaleX";
 constexpr const char* const COMPAT_SCALE_Y_FIELD = "compat.scaleY";
 constexpr const char* const EXTENSION_SECURE_LIMIT_CHANGE = "extensionSecureLimitChange";
+constexpr const char* const HOST_STATUS_BAR_CONTENT_COLOR = "hostStatusBarContentColor";
 constexpr const char* const GRAVITY = "gravity";
 constexpr const char* const ISSHOWING = "isShowing";
 

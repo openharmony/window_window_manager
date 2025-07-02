@@ -4466,6 +4466,13 @@ public:
     {
         return WMError::WM_OK;
     }
+
+    /**
+     * @brief UIExtension get host status bar content color, only for NAPI Call.
+     *
+     * @return content color
+     */
+    virtual uint32_t GetHostStatusBarContentColor() const { return 0; }
 };
 }
 }

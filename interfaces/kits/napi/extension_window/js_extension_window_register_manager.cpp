@@ -226,6 +226,23 @@ WmErrorCode JsExtensionWindowRegisterManager::ProcessKeyboardDidHideRegister(
     return ret;
 }
 
+WmErrorCode JsExtensionWindowRegisterManager::ProcessOccupiedAreaChangeRegister(
+    const sptr<JsExtensionWindowListener>& listener, const sptr<Window>& window, bool isRegister)
+{
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Window is nullptr");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IOccupiedAreaChangeListener> thisListener(listener);
+    WmErrorCode ret = WmErrorCode::WM_OK;
+    if (isRegister) {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterOccupiedAreaChangeListener(thisListener));
+    } else {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterOccupiedAreaChangeListener(thisListener));
+    }
+    return ret;
+}
+
 bool JsExtensionWindowRegisterManager::IsCallbackRegistered(napi_env env, std::string type, napi_value jsListenerObject)
 {
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
@@ -365,6 +382,9 @@ WmErrorCode JsExtensionWindowRegisterManager::ProcessRegister(CaseType caseType,
                 break;
             case ListenerType::KEYBOARD_DID_HIDE_CB:
                 ret = ProcessKeyboardDidHideRegister(listener, window, isRegister);
+                break;
+            case ListenerType::KEYBOARD_HEIGHT_CHANGE_CB:
+                ret = ProcessOccupiedAreaChangeRegister(listener, window, isRegister);
                 break;
             default:
                 break;

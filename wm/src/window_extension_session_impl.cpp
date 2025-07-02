@@ -1194,15 +1194,15 @@ void WindowExtensionSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaC
 WMError WindowExtensionSessionImpl::RegisterOccupiedAreaChangeListener(
     const sptr<IOccupiedAreaChangeListener>& listener)
 {
-    occupiedAreaChangeListener_ = listener;
-    return WMError::WM_OK;
+    std::lock_guard<std::mutex> lockListener(occupiedAreaChangeListenerMutex_);
+    return RegisterListener(occupiedAreaChangeListenerList_, listener);
 }
 
 WMError WindowExtensionSessionImpl::UnregisterOccupiedAreaChangeListener(
     const sptr<IOccupiedAreaChangeListener>& listener)
 {
-    occupiedAreaChangeListener_ = nullptr;
-    return WMError::WM_OK;
+    std::lock_guard<std::mutex> lockListener(occupiedAreaChangeListenerMutex_);
+    return UnregisterListener(occupiedAreaChangeListenerList_, listener);
 }
 
 WMError WindowExtensionSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea,
@@ -2255,6 +2255,9 @@ void WindowExtensionSessionImpl::RegisterDataConsumer()
     RegisterConsumer(Extension::Businesscode::NOTIFY_KEYBOARD_DID_HIDE,
         std::bind(&WindowExtensionSessionImpl::OnKeyboardDidHide,
             this, std::placeholders::_1, std::placeholders::_2));
+    RegisterConsumer(Extension::Businesscode::SYNC_HOST_STATUS_BAR_CONTENT_COLOR,
+        std::bind(&WindowExtensionSessionImpl::OnHostStatusBarContentColorChange,
+        this, std::placeholders::_1, std::placeholders::_2));
 
     auto consumersEntry = [weakThis = wptr(this)](SubSystemId id, uint32_t customId, AAFwk::Want&& data,
                                                   std::optional<AAFwk::Want>& reply) -> int32_t {
@@ -2341,7 +2344,7 @@ WMError WindowExtensionSessionImpl::OnHostWindowCompatInfoChange(AAFwk::Want&& d
     return WMError::WM_OK;
 }
 
-void WindowSessionImpl::NotifyKeyboardDidShow(const KeyboardPanelInfo& keyboardPanelInfo)
+void WindowExtensionSessionImpl::NotifyKeyboardDidShow(const KeyboardPanelInfo& keyboardPanelInfo)
 {
     std::lock_guard<std::mutex> lockListener(keyboardDidShowListenerMutex_);
     for (const auto& listener : keyboardDidShowListenerList_) {
@@ -2358,7 +2361,7 @@ void WindowSessionImpl::NotifyKeyboardDidShow(const KeyboardPanelInfo& keyboardP
     }
 }
 
-void WindowSessionImpl::NotifyKeyboardDidHide(const KeyboardPanelInfo& keyboardPanelInfo)
+void WindowExtensionSessionImpl::NotifyKeyboardDidHide(const KeyboardPanelInfo& keyboardPanelInfo)
 {
     std::lock_guard<std::mutex> lockListener(keyboardDidHideListenerMutex_);
     for (const auto& listener : keyboardDidHideListenerList_) {
@@ -2372,6 +2375,30 @@ void WindowSessionImpl::NotifyKeyboardDidHide(const KeyboardPanelInfo& keyboardP
         uiContent->SendUIExtProprtyByPersistentId(
             static_cast<uint32_t>(Extension::Businesscode::NOTIFY_KEYBOARD_DID_HIDE), want,
             keyboardDidHideUIExtListenerIds_, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
+    }
+}
+
+WMError WindowExtensionSessionImpl::OnHostStatusBarContentColorChange(AAFwk::Want&& data,
+    std::optional<AAFwk::Want>& reply)
+{
+    auto contentColor = data.GetIntParam(Extension::HOST_STATUS_BAR_CONTENT_COLOR, 0);
+    TLOGI(WmsLogTag::WMS_UIEXT, "contentColor: %{public}u", contentColor);
+    hostStatusBarContentColor_ = contentColor;
+    return WMError::WM_OK;
+}
+
+uint32_t WindowExtensionSessionImpl::GetHostStatusBarContentColor() const
+{
+    return hostStatusBarContentColor_;
+}
+
+void WindowExtensionSessionImpl::NotifyOccupiedAreaChange(sptr<OccupiedAreaChangeInfo> info)
+{
+    std::lock_guard<std::mutex> lockListener(occupiedAreaChangeListenerMutex_);
+    for (auto& listener : occupiedAreaChangeListenerList_) {
+        if (listener != nullptr) {
+            listener->OnSizeChange(info);
+        }
     }
 }
 } // namespace Rosen
