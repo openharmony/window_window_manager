@@ -696,7 +696,9 @@ void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRe
         if (isKeyboardShow) {
             // When the keyboard shows/hides rapidly in succession,
             // the attributes aren't refreshed but occupied area info recalculation needs to be triggered.
-            session->stateChanged_ = true;
+            if (!animationInfo.isGravityChanged) {
+                session->stateChanged_ = true;
+            }
             // If the vsync period terminates, immediately notify all registered listeners.
             if (session->keyboardCallback_ != nullptr &&
                 session->keyboardCallback_->isLastFrameLayoutFinished != nullptr) {
