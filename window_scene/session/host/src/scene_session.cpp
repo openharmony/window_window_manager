@@ -5551,13 +5551,6 @@ WMError SceneSession::UpdateSessionPropertyByAction(const sptr<WindowSessionProp
         TLOGE(WmsLogTag::DEFAULT, "get session property failed");
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (action == WSPropertyChangeAction::ACTION_UPDATE_WINDOW_SHADOW_ENABLED) {
-        if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_WINDOW_TRANSPARENT) &&
-            containerColorList_.count(property->GetSessionInfo().bundleName_) == 0) {
-            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, permission denied", GetPersistentId());
-            return WMError::WM_ERROR_INVALID_PERMISSION;
-        }
-    }
     if (action == WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE) {
         if (!SessionPermission::VerifyCallingPermission("ohos.permission.PRIVACY_WINDOW")) {
             return WMError::WM_ERROR_INVALID_PERMISSION;
