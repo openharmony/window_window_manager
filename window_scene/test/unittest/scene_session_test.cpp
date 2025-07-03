@@ -1941,36 +1941,6 @@ HWTEST_F(SceneSessionTest, SetMoveDragCallback, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetScreenWidthAndHeightFromServer
- * @tc.desc: GetScreenWidthAndHeightFromServer
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest, GetScreenWidthAndHeightFromServer, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "GetScreenWidthAndHeightFromServer";
-    info.bundleName_ = "GetScreenWidthAndHeightFromServer";
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-    sceneSession->isActive_ = true;
-
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    EXPECT_NE(property, nullptr);
-    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
-    sceneSession->SetSessionProperty(property);
-
-    uint32_t screenWidth = 0;
-    uint32_t screenHeight = 0;
-    bool result = sceneSession->GetScreenWidthAndHeightFromServer(property, screenWidth, screenHeight);
-    ASSERT_EQ(result, true);
-}
-
-/**
  * @tc.name: SetDefaultDisplayIdIfNeed
  * @tc.desc: SetDefaultDisplayIdIfNeed
  * @tc.type: FUNC

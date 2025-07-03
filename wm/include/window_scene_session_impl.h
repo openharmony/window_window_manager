@@ -410,7 +410,6 @@ private:
      * Window Immersive
      */
     void UpdateDefaultStatusBarColor();
-    WMError MoveAndResizeKeyboard(const KeyboardLayoutParams& params);
     bool userLimitsSet_ = false;
     bool forceLimits_ = false;
     bool enableDefaultAnimation_ = true;

@@ -99,8 +99,6 @@ private:
     WSError AdjustKeyboardLayout(const KeyboardLayoutParams& params) override;
     std::shared_ptr<RSTransaction> GetRSTransaction();
     std::string GetSessionScreenName();
-    void MoveAndResizeKeyboard(const KeyboardLayoutParams& params, const sptr<WindowSessionProperty>& sessionProperty,
-        bool isShow);
     void NotifySystemKeyboardAvoidChange(SystemKeyboardAvoidChangeReason reason);
     void NotifyRootSceneOccupiedAreaChange(const sptr<OccupiedAreaChangeInfo>& info);
     void HandleCrossScreenChild(bool isMoveOrDrag);
