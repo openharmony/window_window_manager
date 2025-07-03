@@ -24,6 +24,7 @@
 #include <ability_manager_client.h>
 #include <mock_uiext_session_permission.h>
 #include <mock_ability_manager_client.h>
+#include <mock_window_event_channel.h>
 
 using namespace testing;
 using namespace testing::ext;
@@ -114,7 +115,7 @@ HWTEST_F(SceneSessionManagerExtensionTest, CheckSubSessionStartedByExtensionAndS
     property->SetIsUIExtensionAbilityProcess(true);
     EXPECT_EQ(ssm_->CheckSubSessionStartedByExtensionAndSetDisplayId(token, property, sessionStage), WSError::WS_OK);
 
-    MockSessionPermission::SetIsStartedByUIExtensionFlag(true);
+    MockUIExtSessionPermission::SetIsStartedByUIExtensionFlag(true);
     AAFwk::UIExtensionHostInfo hostInfo;
     hostInfo.elementName_.SetBundleName(BUNDLE_NAME);
     AAFwk::MockAbilityManagerClient::SetUIExtensionRootHostInfo(hostInfo);
@@ -131,7 +132,7 @@ HWTEST_F(SceneSessionManagerExtensionTest, CheckSubSessionStartedByExtensionAndS
     AAFwk::MockAbilityManagerClient::SetUIExtensionSessionInfo(extensionSessionInfo);
     EXPECT_EQ(ssm_->CheckSubSessionStartedByExtensionAndSetDisplayId(token, property, sessionStage),
         WSError::WS_ERROR_INVALID_WINDOW);
-    MockSessionPermission::ClearAllFlag();
+    MockUIExtSessionPermission::ClearAllFlag();
     AAFwk::MockAbilityManagerClient::ClearAll();
 }
 
@@ -140,7 +141,7 @@ HWTEST_F(SceneSessionManagerExtensionTest, CheckSubSessionStartedByExtensionAndS
  * @tc.desc: CreateAndConnectSpecificSession test uiextension hideNonSecureFloatWindows
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest12, CreateAndConnectSpecificSession_TestHideNonSecureFloatWindow, TestSize.Level1)
+HWTEST_F(SceneSessionManagerExtensionTest, CreateAndConnectSpecificSession_TestHideFloatWindow, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     sptr<ISessionStage> sessionStage = sptr<SessionStageMocker>::MakeSptr();
@@ -176,7 +177,7 @@ HWTEST_F(SceneSessionManagerTest12, CreateAndConnectSpecificSession_TestHideNonS
  * @tc.desc: CreateAndConnectSpecificSession test uiextension hideNonSecureSubWindows
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest12, CreateAndConnectSpecificSession_TestHideNonSecureSubWindow, TestSize.Level1)
+HWTEST_F(SceneSessionManagerExtensionTest, CreateAndConnectSpecificSession_TestHideSubWindow, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     sptr<ISessionStage> sessionStage = sptr<SessionStageMocker>::MakeSptr();
