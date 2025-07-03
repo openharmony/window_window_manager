@@ -1421,7 +1421,7 @@ napi_value JsWindowManager::OnGetTopNavDestinationName(napi_env env, napi_callba
         *topNavDestNamePtr = topNavDestName;
         TLOGND(WmsLogTag::WMS_ATTRIBUTE,
             "%{public}s: topNavDestName: %{public}s, windowId: %{public}d, errCode: %{public}d",
-            where, *topNavDestNamePtr.c_str(), windowId, static_cast<int32_t>(*errCodePtr));
+            where, topNavDestNamePtr->c_str(), windowId, static_cast<int32_t>(*errCodePtr));
     };
     NapiAsyncTask::CompleteCallback complete = [windowId, topNavDestNamePtr, errCodePtr, where = __func__](
         napi_env env, NapiAsyncTask& task, int32_t status) {
@@ -1436,7 +1436,7 @@ napi_value JsWindowManager::OnGetTopNavDestinationName(napi_env env, napi_callba
                 return;
             }
             TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s ok, topNavDestName: %{public}s, windowId: %{public}d",
-                where, *topNavDestNamePtr.c_str(), windowId);
+                where, topNavDestNmePtr->c_str(), windowId);
             task.Resolve(env, CreateJsValue(env, *topNavDestNamePtr));
         };
     napi_value result = nullptr;
