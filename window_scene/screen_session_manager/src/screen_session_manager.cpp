@@ -377,7 +377,8 @@ void ScreenSessionManager::FixPowerStatus()
 
 void ScreenSessionManager::Init()
 {
-    if (ScreenSceneConfig::GetExternalScreenDefaultMode() == "none") {
+    if (ScreenSceneConfig::GetExternalScreenDefaultMode() == "none" ||
+        system::GetBoolParameter("persist.sceneboard.ispcmode", false)) {
         g_isPcDevice = true;
     }
     if (system::GetParameter("soc.boot.mode", "") != "rescue") {
@@ -8198,10 +8199,18 @@ bool ScreenSessionManager::SwitchPcMode()
     if (system::GetBoolParameter("persist.sceneboard.ispcmode", false)) {
         TLOGI(WmsLogTag::DMS, "PcMode change isPcDevice true");
         g_isPcDevice = true;
+#ifdef WM_MULTI_SCREEN_CTL_ABILITY_ENABLE
+        SetMultiScreenFrameControl();
+#endif
     } else {
         TLOGI(WmsLogTag::DMS, "PadMode change isPcDevice false");
         g_isPcDevice = false;
         SwitchExternalScreenToMirror();
+#ifdef WM_MULTI_SCREEN_CTL_ABILITY_ENABLE
+        TLOGI(WmsLogTag::DMS, "Disable frame rate control");
+        EventInfo event = { "VOTER_MUTIPHYSICALSCREEN", REMOVE_VOTE };
+        rsInterface_.NotifyRefreshRateEvent(event);
+#endif
     }
     return g_isPcDevice;
 }
