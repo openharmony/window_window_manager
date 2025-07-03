@@ -46,7 +46,6 @@
 #include "interaction_manager.h"
 #endif // DEVICE_STATUS_ENABLE
 #include "interfaces/include/ws_common.h"
-#include "permission.h"
 #include "pixel_map.h"
 #include "rs_adapter.h"
 #include "session_coordinate_helper.h"
@@ -5368,7 +5367,8 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
         info.fullScreenStart_ = true;
     }
     session->CalculatedStartWindowType(info, abilitySessionInfo->hideStartWindow);
-    if (abilitySessionInfo->animationSystemOptions && Permission::IsSystemCalling()) {
+    if (abilitySessionInfo->animationSystemOptions &&
+        SessionPermission::IsSystemAppCallByCallingTokenID(info.callingTokenId_)) {
         info.startAnimationSystemOptions = abilitySessionInfo->animationSystemOptions;
     }
     info.startAnimationOptions = abilitySessionInfo->animationOptions;
