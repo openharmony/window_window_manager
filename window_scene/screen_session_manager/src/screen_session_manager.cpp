@@ -8537,7 +8537,11 @@ void ScreenSessionManager::UpdateAvailableArea(ScreenId screenId, DMRect area)
         TLOGE(WmsLogTag::DMS, "update available area permission denied!");
         return;
     }
-
+    if (GetUserIdByCallingUid() != currentUserId_) {
+        TLOGE(WmsLogTag::DMS, "not currentuser, callingUid:%{pubilc}d, currentUserId:%{public}d",
+            GetUserIdByCallingUid(), currentUserId_);
+        return;
+    }
     auto screenSession = GetScreenSession(screenId);
     if (screenSession == nullptr) {
         TLOGE(WmsLogTag::DMS, "can not get default screen now");
