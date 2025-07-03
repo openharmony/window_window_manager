@@ -324,6 +324,7 @@ void ScreenSessionManager::FoldScreenPowerInit()
             TLOGE(WmsLogTag::DMS, "foldScreenController_ is nullptr");
             return;
         }
+        foldScreenController_->SetIsClearingBootAnimation(true);
         ScreenId currentScreenId = foldScreenController_->GetCurrentScreenId();
         if (currentScreenId == SCREEN_ID_FULL) {
             TLOGI(WmsLogTag::DMS, "ScreenSessionManager Fold Screen Power Full animation Init 1.");
@@ -361,6 +362,7 @@ void ScreenSessionManager::FoldScreenPowerInit()
             TLOGI(WmsLogTag::DMS, "ScreenSessionManager Fold Screen Power Init, invalid active screen id");
         }
         FixPowerStatus();
+        foldScreenController_->SetIsClearingBootAnimation(false);
         foldScreenController_->SetOnBootAnimation(false);
         RegisterApplicationStateObserver();
     });
@@ -1471,6 +1473,7 @@ void ScreenSessionManager::HandlePhysicalMirrorDisconnect(sptr<ScreenSession> sc
     if (phyMirrorEnable) {
         NotifyCastWhenScreenConnectChange(false);
         FreeDisplayMirrorNodeInner(screenSession);
+        isPhyScreenConnected_ = false;
         if (!g_isPcDevice) {
             std::vector<ScreenId> screenIdsToExclude = { screenId };
             if (!HasCastEngineOrPhyMirror(screenIdsToExclude)) {

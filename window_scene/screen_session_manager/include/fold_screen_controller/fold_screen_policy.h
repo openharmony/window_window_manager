@@ -55,6 +55,7 @@ public:
     virtual void ChangeOffTentMode();
     virtual Drawing::Rect GetScreenSnapshotRect();
     virtual void SetMainScreenRegion(DMRect& mainScreenRegion);
+    virtual void SetIsClearingBootAnimation(bool isClearingBootAnimation);
     void ClearState();
     FoldDisplayMode GetScreenDisplayMode();
     FoldStatus GetFoldStatus();
@@ -73,6 +74,7 @@ public:
     sptr<FoldCreaseRegion> currentFoldCreaseRegion_ = nullptr;
     bool lockDisplayStatus_ = false;
     bool onBootAnimation_ = false;
+    std::atomic<bool> isClearingBootAnimation_ = false;
     bool isFirstFrameCommitReported_ = false;
     std::vector<uint32_t> screenParams_ = {};
     /*
