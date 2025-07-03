@@ -41,7 +41,8 @@ private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
 
-void DumpRootSceneElementInfoFuncTest(const std::vector<std::string>& params, std::vector<std::string>& infos) {}
+void DumpRootSceneElementInfoFuncTest(const sptr<SceneSession>& session,
+    const std::vector<std::string>& params, std::vector<std::string>& infos) {}
 
 void WindowManagerServiceDumpTest::SetUpTestCase() {}
 

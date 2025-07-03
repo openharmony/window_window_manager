@@ -25,6 +25,7 @@
 #include <iremote_broker.h>
 #include <want.h>
 #include "pixel_map.h"
+#include "wm_animation_common.h"
 
 namespace OHOS::AAFwk {
 class AbilityStartSetting;
@@ -480,6 +481,9 @@ struct SessionInfo {
         }
         *want = newWant;
     }
+
+    std::shared_ptr<StartAnimationOptions> startAnimationOptions = nullptr;
+    std::shared_ptr<StartAnimationSystemOptions> startAnimationSystemOptions = nullptr;
 };
 
 enum class SessionFlag : uint32_t {
@@ -948,7 +952,6 @@ enum class SessionUIDirtyFlag {
     AVOID_AREA = 1 << 6,
     DRAG_RECT = 1 << 7,
     GLOBAL_RECT = 1 << 8,
-    KEYBOARD_OCCUPIED_AREA = 1 << 9,
 };
 
 enum class SessionPropertyFlag {

@@ -15,23 +15,8 @@
 
 #ifndef OHOS_JS_WINDOW_ANIMATION_UTILS_H
 #define OHOS_JS_WINDOW_ANIMATION_UTILS_H
-#include <array>
-#include <map>
-#include "js_runtime_utils.h"
-#include "js_window_utils.h"
+#include "napi/native_api.h"
 #include "native_engine/native_engine.h"
-#include "native_engine/native_value.h"
-#include "window.h"
-
-#ifndef WINDOW_PREVIEW
-#include "window_manager.h"
-#else
-#include "mock/window_manager.h"
-#endif
-
-#include "window_helper.h"
-#include "window_option.h"
-#include "window_visibility_info.h"
 #include "wm_common.h"
 
 namespace OHOS {
@@ -46,12 +31,29 @@ namespace Rosen {
         }                                                      \
     } while (0)
 
+#define NAPI_CHECK_RETURN_IF_NULL(func, msg)                                                            \
+    do {                                                                                                \
+        napi_status status = func;                                                                      \
+        if (status != napi_ok) {                                                                        \
+            TLOGE(WmsLogTag::DEFAULT, "Failed with reason %{public}s, code: %{public}d", msg, status);  \
+            return nullptr;                                                                             \
+        }                                                                                               \
+    } while (0)
+
 napi_value ConvertTransitionAnimationToJsValue(napi_env env,
     std::shared_ptr<TransitionAnimation> transitionAnimation);
 napi_value ConvertWindowAnimationOptionToJsValue(napi_env env,
     const WindowAnimationOption& animationConfig);
+napi_value ConvertStartAnimationOptionsToJsValue(napi_env env,
+    std::shared_ptr<StartAnimationOptions> startAnimationOptions);
+napi_value ConvertStartAnimationSystemOptionsToJsValue(napi_env env,
+    std::shared_ptr<StartAnimationSystemOptions> startAnimationSystemOptions);
 bool ConvertTransitionAnimationFromJsValue(napi_env env, napi_value jsObject,
     TransitionAnimation& transitionAnimation, WmErrorCode& result);
+bool ConvertStartAnimationOptionsFromJsValue(napi_env env, napi_value jsObject,
+    StartAnimationOptions& startAnimationOptions);
+bool ConvertStartAnimationSystemOptionsFromJsValue(napi_env env, napi_value jsObject,
+    StartAnimationSystemOptions& startAnimationSystemOptions);
 bool ConvertWindowAnimationOptionFromJsValue(napi_env env, napi_value config,
     WindowAnimationOption& animationConfig, WmErrorCode& result);
 bool CheckWindowAnimationOption(napi_env env, WindowAnimationOption& animationConfig, WmErrorCode& result);

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_FLOATING_BALL_TEMPALTE_BASE_INFO_H
-#define OHOS_FLOATING_BALL_TEMPALTE_BASE_INFO_H
+#ifndef OHOS_FLOATING_BALL_TEMPLATE_BASE_INFO_H
+#define OHOS_FLOATING_BALL_TEMPLATE_BASE_INFO_H
 
 #include "wm_common.h"
 
@@ -33,4 +33,4 @@ public:
     std::string backgroundColor_ {};
 };
 } // namespace OHOS::Rosen
-#endif // OHOS_FLOATING_BALL_TEMPALTE_BASE_INFO_H
+#endif // OHOS_FLOATING_BALL_TEMPLATE_BASE_INFO_H

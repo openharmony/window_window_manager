@@ -55,6 +55,17 @@ constexpr uint32_t API_VERSION_18 = 18;
 
 JsWindowManager::JsWindowManager() : registerManager_(std::make_unique<JsWindowRegisterManager>())
 {
+    const char* const where = __func__;
+    GetJSWindowObjFunc func = [where](const std::string& windowName) {
+        void* jsWindowNapiValue = nullptr;
+        std::shared_ptr<NativeReference> jsWindowObj = FindJsWindowObject(windowName);
+        if (jsWindowObj != nullptr) {
+            TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s find window, window name: %{public}s", where, windowName.c_str());
+            jsWindowNapiValue = jsWindowObj->GetNapiValue();
+        }
+        return jsWindowNapiValue;
+    };
+    SingletonContainer::Get<WindowManager>().RegisterGetJSWindowCallback(std::move(func));
 }
 
 JsWindowManager::~JsWindowManager()
@@ -1402,25 +1413,31 @@ napi_value JsWindowManager::OnGetTopNavDestinationName(napi_env env, napi_callba
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "invalid windowId value: %{public}d", windowId);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
     }
-    std::string topNavDestName;
-    WMError retErrCode = WMError::WM_OK;
-    NapiAsyncTask::ExecuteCallback execute = [windowId, &topNavDestName, &retErrCode, where = __func__]() {
-        retErrCode = SingletonContainer::Get<WindowManager>().GetTopNavDestinationName(windowId, topNavDestName);
+    std::shared_ptr<std::string> topNavDestNamePtr = std::make_shared<std::string>();
+    std::shared_ptr<WMError> errCodePtr = std::make_shared<WMError>(WMError::WM_OK);
+    NapiAsyncTask::ExecuteCallback execute = [windowId, topNavDestNamePtr, errCodePtr, where = __func__]() {
+        std::string topNavDestName;
+        *errCodePtr = SingletonContainer::Get<WindowManager>().GetTopNavDestinationName(windowId, topNavDestName);
+        *topNavDestNamePtr = topNavDestName;
         TLOGND(WmsLogTag::WMS_ATTRIBUTE,
             "%{public}s: topNavDestName: %{public}s, windowId: %{public}d, errCode: %{public}d",
-            where, topNavDestName.c_str(), windowId, static_cast<int32_t>(retErrCode));
+            where, topNavDestNamePtr->c_str(), windowId, static_cast<int32_t>(*errCodePtr));
     };
-    NapiAsyncTask::CompleteCallback complete = [windowId, &topNavDestName, &retErrCode, where = __func__](
+    NapiAsyncTask::CompleteCallback complete = [windowId, topNavDestNamePtr, errCodePtr, where = __func__](
         napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (retErrCode != WMError::WM_OK) {
+            if (*errCodePtr != WMError::WM_OK) {
                 TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s failed, errCode: %{public}d, windowId: %{public}d",
-                    where, static_cast<int32_t>(retErrCode), windowId);
-                task.Reject(env, JsErrUtils::CreateJsError(env, WM_JS_TO_ERROR_CODE_MAP.at(retErrCode)));
+                    where, static_cast<int32_t>(*errCodePtr), windowId);
+                auto retErrCode = WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY;
+                if (WM_JS_TO_ERROR_CODE_MAP.count(*errCodePtr) > 0) {
+                    retErrCode = WM_JS_TO_ERROR_CODE_MAP.at(*errCodePtr);
+                }
+                task.Reject(env, JsErrUtils::CreateJsError(env, retErrCode));
                 return;
             }
             TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s ok, topNavDestName: %{public}s, windowId: %{public}d",
-                where, topNavDestName.c_str(), windowId);
-            task.Resolve(env, CreateJsValue(env, topNavDestName));
+                where, topNavDestNamePtr->c_str(), windowId);
+            task.Resolve(env, CreateJsValue(env, *topNavDestNamePtr));
         };
     napi_value result = nullptr;
     auto asyncTask = CreateAsyncTask(env, nullptr,
@@ -1592,8 +1609,8 @@ napi_value JsWindowManager::OnShiftAppWindowTouchEvent(napi_env env, napi_callba
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
     auto asyncTask = [sourceWindowId, targetWindowId, fingerId, env, task = napiAsyncTask] {
-        if (sourceWindowId == static_cast<int32_t>(INVALID_WINDOW_ID) ||
-            targetWindowId == static_cast<int32_t>(INVALID_WINDOW_ID) ||
+        if (sourceWindowId <= static_cast<int32_t>(INVALID_WINDOW_ID) ||
+            targetWindowId <= static_cast<int32_t>(INVALID_WINDOW_ID) ||
             (fingerId <= static_cast<int32_t>(INVALID_FINGER_ID))) {
             TLOGE(WmsLogTag::WMS_PC, "invalid sourceWindowId or targetWindowId or fingerId");
             task->Reject(env, JsErrUtils::CreateJsError(env,

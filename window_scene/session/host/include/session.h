@@ -308,6 +308,7 @@ public:
     void SetSessionInfoAffinity(std::string affinity);
     void GetCloseAbilityWantAndClean(AAFwk::Want& outWant);
     void SetSessionInfo(const SessionInfo& info);
+    void SetSessionInfoWindowInputType(uint32_t windowInputType);
     const SessionInfo& GetSessionInfo() const;
     SessionInfo& EditSessionInfo();
     DisplayId GetScreenId() const;
@@ -486,6 +487,7 @@ public:
      */
     bool CheckEmptyKeyboardAvoidAreaIfNeeded() const;
     void SetKeyboardStateChangeListener(const NotifyKeyboardStateChangeFunc& func);
+    uint32_t GetDirtyFlags() const { return dirtyFlags_; }
 
     bool IsSessionValid() const;
     bool IsActive() const;
@@ -714,6 +716,14 @@ public:
     SnapshotStatus GetSessionStatus() const;
     DisplayOrientation GetWindowOrientation() const;
     uint32_t GetLastOrientation() const;
+    bool HasSnapshotFreeMultiWindow();
+    bool HasSnapshot(SnapshotStatus key);
+    bool HasSnapshot();
+    void DeleteHasSnapshot();
+    void DeleteHasSnapshot(SnapshotStatus key);
+    void DeleteHasSnapshotFreeMultiWindow();
+    void SetFreeMultiWindow();
+    bool freeMultiWindow_ = false;
 
     /*
      * Specific Window
@@ -791,7 +801,7 @@ protected:
     mutable std::mutex surfaceNodeMutex_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
     mutable std::mutex snapshotMutex_;
-    std::shared_ptr<Media::PixelMap> snapshot_[SCREEN_COUNT][ORIENTATION_COUNT] = {};
+    std::shared_ptr<Media::PixelMap> snapshot_;
     sptr<ISessionStage> sessionStage_;
     std::mutex lifeCycleTaskQueueMutex_;
     std::list<sptr<SessionLifeCycleTask>> lifeCycleTaskQueue_;
@@ -1107,6 +1117,7 @@ private:
      */
     bool borderUnoccupied_ = false;
     void DeletePersistentImageFit();
+    uint32_t GetBackgroundColor() const;
 
     /*
      * Specific Window

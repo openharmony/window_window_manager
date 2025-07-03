@@ -71,24 +71,34 @@ void InputWindowMonitor::UpdateInputWindowByDisplayId(DisplayId displayId)
     if (displayInfos.empty()) {
         return;
     }
-    UpdateDisplayGroupInfo(container, displayGroupInfo_);
+    std::vector<MMI::ScreenInfo> screenInfos;
+    UpdateDisplayGroupInfo(container, displayGroupInfo_, displayId);
     UpdateDisplayInfo(displayInfos, displayGroupInfo_.displaysInfo);
+    ConstructScreenInfos(displayGroupInfo_.displaysInfo, screenInfos);
     std::vector<sptr<WindowNode>> windowNodes;
     container->TraverseContainer(windowNodes);
     TraverseWindowNodes(windowNodes, displayGroupInfo_.windowsInfo);
     WLOGFD("update display info to IMS, displayId: %{public}" PRIu64"", displayId);
-    auto task = [displayGroupInfo = displayGroupInfo_]() {
-        MMI::InputManager::GetInstance()->UpdateDisplayInfo(displayGroupInfo);
+    std::vector<MMI::DisplayGroupInfo> displayGroups;
+    displayGroups.emplace_back(displayGroupInfo_);
+    MMI::UserScreenInfo userScreenInfo = {
+        .userId = 0,
+        .screens = screenInfos,
+        .displayGroups = displayGroups
+    };
+    auto task = [userScreenInfo]() {
+        MMI::InputManager::GetInstance()->UpdateDisplayInfo(userScreenInfo);
     };
     WindowInnerManager::GetInstance().PostTask(std::move(task), "wms:UpdateDisplayInfoBydisplayId");
 }
 
 void InputWindowMonitor::UpdateDisplayGroupInfo(const sptr<WindowNodeContainer>& windowNodeContainer,
-                                                MMI::DisplayGroupInfo& displayGroupInfo)
+                                                MMI::DisplayGroupInfo& displayGroupInfo, DisplayId displayId)
 {
-    const Rect&& rect = windowNodeContainer->GetDisplayGroupRect();
-    displayGroupInfo.width = static_cast<int32_t>(rect.width_);
-    displayGroupInfo.height = static_cast<int32_t>(rect.height_);
+    displayGroupInfo.id = 0;
+    displayGroupInfo.name = "displayGroup0";
+    displayGroupInfo.type = MMI::GROUP_DEFAULT;
+    displayGroupInfo.mainDisplayId = displayId;
     displayGroupInfo.focusWindowId = static_cast<int32_t>(windowNodeContainer->GetFocusWindow());
     displayGroupInfo.windowsInfo.clear();
     displayGroupInfo.displaysInfo.clear();
@@ -125,9 +135,12 @@ void InputWindowMonitor::UpdateDisplayInfo(const std::vector<sptr<DisplayInfo>>&
             .height = static_cast<int32_t>(displayHeight),
             .dpi = displayInfo->GetDpi(),
             .name = "display " + std::to_string(displayInfo->GetDisplayId()),
-            .uniq = "default" + std::to_string(displayInfo->GetDisplayId()),
             .direction = GetDisplayDirectionForMmi(displayInfo->GetRotation()),
             .displayDirection = GetDisplayDirectionForMmi(displayInfo->GetRotation()),
+            .screenArea = {
+                .id = static_cast<int32_t>(displayInfo->GetDisplayId()),
+                .area = { offsetX, offsetY, static_cast<int32_t>(displayWidth), static_cast<int32_t>(displayHeight) }
+            }
         };
         auto displayIter = std::find_if(displayInfoVector.begin(), displayInfoVector.end(),
             [&display](MMI::DisplayInfo& displayInfoTmp) {
@@ -141,6 +154,23 @@ void InputWindowMonitor::UpdateDisplayInfo(const std::vector<sptr<DisplayInfo>>&
         WLOGFD("UpdateDisplayInfo, displayId: %{public}d, displayRect: "
             "[%{public}d, %{public}d, %{public}u, %{public}u]",
             display.id, display.x, display.y, display.width, display.height);
+    }
+}
+
+void InputWindowMonitor::ConstructScreenInfos(std::vector<MMI::DisplayInfo>& displayInfoVector,
+    std::vector<MMI::ScreenInfo>& screenInfos)
+{
+    for (auto& displayInfo : displayInfoVector) {
+        MMI::ScreenInfo screenInfo;
+        screenInfo.id = displayInfo.id;
+        screenInfo.uniqueId = "default" + std::to_string(displayInfo.id);
+        screenInfo.screenType = MMI::ScreenType::REAL;
+        screenInfo.width = displayInfo.width;
+        screenInfo.height = displayInfo.height;
+        screenInfo.tpDirection = displayInfo.direction;
+        screenInfo.dpi = displayInfo.dpi;
+        screenInfo.rotation = static_cast<MMI::Rotation>(displayInfo.direction);
+        screenInfos.emplace_back(screenInfo);
     }
 }
 

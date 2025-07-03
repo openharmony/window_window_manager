@@ -101,9 +101,7 @@ void FloatingBallManager::DoFbActionEvent(const std::string& actionName)
 
 bool FloatingBallManager::IsSupportFloatingBall()
 {
-    const std::string multiWindowUIType = system::GetParameter("const.window.multiWindowUIType", "");
-    TLOGI(WmsLogTag::WMS_SYSTEM, "multiWindowUIType %{public}s", multiWindowUIType.c_str());
-    return multiWindowUIType == "HandsetSmartWindow"  || multiWindowUIType == "TabletSmartWindow";
+    return false;
 }
 
 }

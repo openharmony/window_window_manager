@@ -550,8 +550,19 @@ HWTEST_F(SceneSessionManagerTest3, GetWindowLimits, TestSize.Level1)
     WindowLimits windowlimits;
     ssm_->sceneSessionMap_.insert({ windowId, sceneSession });
     auto defaultUIType = ssm_->systemConfig_.windowUIType_;
-    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::INVALID_WINDOW;
+    ssm_->systemConfig_.freeMultiWindowEnable_ = false;
+    ssm_->systemConfig_.freeMultiWindowSupport_ = false;
     auto ret = ssm_->GetWindowLimits(windowId, windowlimits);
+    ASSERT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+
+    ssm_->systemConfig_.freeMultiWindowEnable_ = true;
+    ssm_->systemConfig_.freeMultiWindowSupport_ = true;
+    ret = ssm_->GetWindowLimits(windowId, windowlimits);
+    ASSERT_EQ(ret, WMError::WM_OK);
+
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ret = ssm_->GetWindowLimits(windowId, windowlimits);
     ssm_->sceneSessionMap_.erase(windowId);
     ssm_->systemConfig_.windowUIType_ = defaultUIType;
     ASSERT_EQ(ret, WMError::WM_OK);
@@ -1833,7 +1844,7 @@ HWTEST_F(SceneSessionManagerTest3, NotifySessionTouchOutside02, TestSize.Level1)
     property->SetDisplayId(DEFAULT_DISPLAY_ID);
     sceneSession->SetSessionProperty(property);
     ssm->sceneSessionMap_.insert({1, sceneSession});
-    ssm->windowFocusController_->virtualScreenDisplayIdSet_.insert(20);
+    ssm->windowFocusController_->displayId2GroupIdMap_[20] = 20;
 
     SessionInfo info02;
     info02.abilityName_ = "test1";

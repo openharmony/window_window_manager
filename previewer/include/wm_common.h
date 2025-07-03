@@ -29,6 +29,7 @@
 #include <parcel.h>
 #include "dm_common.h"
 #include "securec.h"
+#include "wm_animation_common.h"
 #include "wm_type.h"
 
 namespace OHOS {
@@ -269,6 +270,8 @@ enum class WMError : int32_t {
     WM_ERROR_FB_STATE_ABNORMALLY,
     WM_ERROR_FB_INVALID_STATE,
     WM_ERROR_FB_RESTORE_MAIN_WINDOW_FAILED,
+    WM_ERROR_FB_UPDATE_TEMPLATE_TYPE_DENIED,
+    WM_ERROR_FB_UPDATE_STATIC_TEMPLATE_DENIED,
 };
 
 /**
@@ -307,6 +310,8 @@ enum class WmErrorCode : int32_t {
     WM_ERROR_FB_STATE_ABNORMALLY = 1300024,
     WM_ERROR_FB_INVALID_STATE = 1300025,
     WM_ERROR_FB_RESTORE_MAIN_WINDOW_FAILED = 1300026,
+    WM_ERROR_FB_UPDATE_TEMPLATE_TYPE_DENIED = 1300027,
+    WM_ERROR_FB_UPDATE_STATIC_TEMPLATE_DENIED = 1300028,
 };
 
 /**
@@ -399,6 +404,8 @@ const std::map<WMError, WmErrorCode> WM_JS_TO_ERROR_CODE_MAP {
     {WMError::WM_ERROR_FB_STATE_ABNORMALLY,            WmErrorCode::WM_ERROR_FB_STATE_ABNORMALLY      },
     {WMError::WM_ERROR_FB_INVALID_STATE,               WmErrorCode::WM_ERROR_FB_INVALID_STATE         },
     {WMError::WM_ERROR_FB_RESTORE_MAIN_WINDOW_FAILED,  WmErrorCode::WM_ERROR_FB_RESTORE_MAIN_WINDOW_FAILED  },
+    {WMError::WM_ERROR_FB_UPDATE_TEMPLATE_TYPE_DENIED, WmErrorCode::WM_ERROR_FB_UPDATE_TEMPLATE_TYPE_DENIED  },
+    {WMError::WM_ERROR_FB_UPDATE_STATIC_TEMPLATE_DENIED,  WmErrorCode::WM_ERROR_FB_UPDATE_STATIC_TEMPLATE_DENIED  },
 };
 
 /**
@@ -1502,148 +1509,6 @@ enum class RotationChangeType : uint32_t {
      * rotate end.
      */
     WINDOW_DID_ROTATE,
-};
-
-/*
- * @brief Enumerates window transition type.
- */
-enum class WindowTransitionType : uint32_t {
-    /**
-     * window destroy.
-     */
-    DESTROY = 0,
-    
-    /**
-     * end type.
-     */
-    END,
-};
-
-/*
- * @brief Enumerates window animation curve type.
- */
-enum class WindowAnimationCurve : uint32_t {
-    /**
-     * animation curve type linear.
-     */
-    LINEAR = 0,
-
-    /**
-     * animation curve type interpolation_spring.
-     */
-    INTERPOLATION_SPRING = 1,
-};
-
-const uint32_t ANIMATION_PARAM_SIZE = 4;
-const uint32_t ANIMATION_MAX_DURATION = 3000;
-
-/*
- * @brief Window animation property.
- */
-struct WindowAnimationProperty : public Parcelable {
-    float targetScale = 0.0f;
-
-    bool Marshalling(Parcel& parcel) const override
-    {
-        if (!parcel.WriteFloat(targetScale)) {
-            return false;
-        }
-        return true;
-    }
-
-    static WindowAnimationProperty* Unmarshalling(Parcel& parcel)
-    {
-        WindowAnimationProperty* animationProperty = new WindowAnimationProperty();
-        if (!parcel.ReadFloat(animationProperty->targetScale)) {
-            delete animationProperty;
-            return nullptr;
-        }
-        return animationProperty;
-    }
-};
-
-/*
- * @brief Window transition animation configuration.
- */
-struct WindowAnimationOption : public Parcelable {
-    WindowAnimationCurve curve = WindowAnimationCurve::LINEAR;
-    uint32_t duration = 0;
-    std::array<float, ANIMATION_PARAM_SIZE> param;
-
-    bool Marshalling(Parcel& parcel) const override
-    {
-        if (!(parcel.WriteUint32(static_cast<uint32_t>(curve)) && parcel.WriteUint32(duration))) {
-            return false;
-        }
-        if (param.size() > ANIMATION_PARAM_SIZE) {
-            return false;
-        }
-        for (auto p: param) {
-            if (!parcel.WriteFloat(p)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    static WindowAnimationOption* Unmarshalling(Parcel& parcel)
-    {
-        WindowAnimationOption* windowAnimationConfig = new WindowAnimationOption();
-        uint32_t curve = 0;
-        if (!parcel.ReadUint32(curve)) {
-            delete windowAnimationConfig;
-            return nullptr;
-        }
-        windowAnimationConfig->curve = static_cast<WindowAnimationCurve>(curve);
-        if (!parcel.ReadUint32(windowAnimationConfig->duration)) {
-            delete windowAnimationConfig;
-            return nullptr;
-        }
-        if (windowAnimationConfig->param.size() > ANIMATION_PARAM_SIZE) {
-            delete windowAnimationConfig;
-            return nullptr;
-        }
-        for (auto& param: windowAnimationConfig->param) {
-            if (!parcel.ReadFloat(param)) {
-                delete windowAnimationConfig;
-                return nullptr;
-            }
-        }
-        return windowAnimationConfig;
-    }
-};
-
-/*
- * @brief Transition animation configuration.
- */
-struct TransitionAnimation : public Parcelable {
-    WindowAnimationOption config;
-    float opacity = 1.0f;
-    
-    bool Marshalling(Parcel& parcel) const override
-    {
-        if (!(parcel.WriteFloat(opacity) && parcel.WriteParcelable(&config))) {
-            return false;
-        }
-        return true;
-    }
-
-    static TransitionAnimation* Unmarshalling(Parcel& parcel)
-    {
-        TransitionAnimation* transitionAnimation = new TransitionAnimation();
-        if (!parcel.ReadFloat(transitionAnimation->opacity)) {
-            delete transitionAnimation;
-            return nullptr;
-        }
-        std::shared_ptr<WindowAnimationOption> animationConfig =
-            std::shared_ptr<WindowAnimationOption>(parcel.ReadParcelable<WindowAnimationOption>());
-        if (animationConfig == nullptr) {
-            delete transitionAnimation;
-            return nullptr;
-        }
-        transitionAnimation->config = *animationConfig;
-        return transitionAnimation;
-    }
 };
 
 /**

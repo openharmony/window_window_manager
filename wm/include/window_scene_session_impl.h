@@ -17,6 +17,7 @@
 #define OHOS_ROSEN_WINDOW_SCENE_SESSION_IMPL_H
 
 #include "window_session_impl.h"
+#include "window_manager.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -59,7 +60,7 @@ public:
     WMError SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo) override;
     WMError SetFollowParentWindowLayoutEnabled(bool isFollow) override;
     WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) override;
-    WMError SetFrameRectForParticalZoomIn(const Rect& frameRect) override;
+    WMError SetFrameRectForPartialZoomIn(const Rect& frameRect) override;
     WMError UpdateWindowModeForUITest(int32_t updateMode) override;
 
     /*
@@ -502,6 +503,7 @@ private:
     void NotifyFreeMultiWindowModeResume();
     std::string TransferLifeCycleEventToString(LifeCycleEvent type) const;
     void RecordLifeCycleExceptionEvent(LifeCycleEvent event, WMError erCode) const;
+    WindowLifeCycleInfo GetWindowLifecycleInfo() const;
 
     /**
      * Window Transition Animation For PC

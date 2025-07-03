@@ -359,8 +359,9 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithSameInfo, TestSize.Leve
     auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
     focusGroup->SetFocusedSessionId(focusedSession);
     bool checkNeedUpdateFlag = true;
+    std::vector<MMI::ScreenInfo> screenInfos;
     // check the same information
-    checkNeedUpdateFlag = sim_->CheckNeedUpdate(currDisplayInfos, currWindowInfoList);
+    checkNeedUpdateFlag = sim_->CheckNeedUpdate(screenInfos, currDisplayInfos, currWindowInfoList);
     ASSERT_EQ(checkNeedUpdateFlag, false);
 }
 
@@ -396,7 +397,8 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithPidDiff, TestSize.Level
     auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
     focusGroup->SetFocusedSessionId(focusedSession);
     bool checkNeedUpdateFlag = false;
-    checkNeedUpdateFlag = sim_->CheckNeedUpdate(currDisplayInfos, currWindowInfoList);
+    std::vector<MMI::ScreenInfo> screenInfos;
+    checkNeedUpdateFlag = sim_->CheckNeedUpdate(screenInfos, currDisplayInfos, currWindowInfoList);
     ASSERT_EQ(checkNeedUpdateFlag, true);
 }
 
@@ -432,7 +434,8 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithAreaDiff, TestSize.Leve
     auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
     focusGroup->SetFocusedSessionId(focusedSession);
     bool checkNeedUpdateFlag = false;
-    checkNeedUpdateFlag = sim_->CheckNeedUpdate(currDisplayInfos, currWindowInfoList);
+    std::vector<MMI::ScreenInfo> screenInfos;
+    checkNeedUpdateFlag = sim_->CheckNeedUpdate(screenInfos, currDisplayInfos, currWindowInfoList);
     ASSERT_EQ(checkNeedUpdateFlag, true);
 }
 
@@ -468,7 +471,8 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithzOrderDiff, TestSize.Le
     auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
     focusGroup->SetFocusedSessionId(focusedSession);
     bool checkNeedUpdateFlag = false;
-    checkNeedUpdateFlag = sim_->CheckNeedUpdate(currDisplayInfos, currWindowInfoList);
+    std::vector<MMI::ScreenInfo> screenInfos;
+    checkNeedUpdateFlag = sim_->CheckNeedUpdate(screenInfos, currDisplayInfos, currWindowInfoList);
     ASSERT_EQ(checkNeedUpdateFlag, true);
 }
 

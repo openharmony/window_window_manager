@@ -34,6 +34,7 @@ constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
 constexpr uint32_t M_STATUS_WIDTH = 1008;
 constexpr uint32_t F_STATUS_WIDTH = 2048;
 constexpr uint32_t G_STATUS_WIDTH = 3184;
+const ScreenId SCREENID = 1000;
 }
 namespace {
     std::string g_errLog;
@@ -920,19 +921,87 @@ HWTEST_F(ScreenSessionManagerTest, SetVirtualScreenAutoRotation03, Function | Sm
 }
 
 /**
- * @tc.name: IsSystemSleep
- * @tc.desc: IsSystemSleep test
+ * @tc.name: CreateScreenProperty
+ * @tc.desc: CreateScreenProperty test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerTest, IsSystemSleep, Function | SmallTest | Level3)
+HWTEST_F(ScreenSessionManagerTest, CreateScreenProperty, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
-    ssm_->SuspendBegin(PowerStateChangeReason::STATE_CHANGE_REASON_SYSTEM);
-    EXPECT_TRUE(ssm->IsSystemSleep());
-    ssm_->SuspendBegin(PowerStateChangeReason::STATE_CHANGE_REASON_INIT);
-    EXPECT_FALSE(ssm->IsSystemSleep());
-    ssm_->SuspendBegin(PowerStateChangeReason::STATE_CHANGE_REASON_HARD_KEY);
-    EXPECT_TRUE(ssm->IsSystemSleep());
+    ScreenId screenId = 0;
+    ScreenProperty property = ScreenProperty();
+    EXPECT_EQ(DISPLAY_GROUP_ID_INVALID, property.GetDisplayGroupId());
+    EXPECT_EQ(SCREEN_ID_INVALID, property.GetMainDisplayIdOfGroup());
+
+    ssm_->CreateScreenProperty(screenId, property);
+    EXPECT_EQ(DISPLAY_GROUP_ID_DEFAULT, property.GetDisplayGroupId());
+    EXPECT_EQ(MAIN_SCREEN_ID_DEFAULT, property.GetMainDisplayIdOfGroup());
+
+    property.SetDisplayGroupId(1);
+    property.SetMainDisplayIdOfGroup(1);
+    ssm_->CreateScreenProperty(screenId, property);
+    EXPECT_EQ(1, property.GetDisplayGroupId());
+    EXPECT_EQ(1, property.GetMainDisplayIdOfGroup());
+}
+
+/**
+ * @tc.name: InitScreenProperty
+ * @tc.desc: InitScreenProperty test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, InitScreenProperty, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ScreenId screenId = 0;
+    ScreenProperty property = ScreenProperty();
+    RSScreenModeInfo screenModeInfo = RSScreenModeInfo();
+    screenModeInfo.SetScreenWidth(100);
+    screenModeInfo.SetScreenHeight(200);
+    RSScreenCapability screenCapability = RSScreenCapability();
+
+    ssm_->InitScreenProperty(screenId, screenModeInfo, screenCapability, property);
+    EXPECT_EQ(0, property.GetScreenAreaOffsetX());
+    EXPECT_EQ(0, property.GetScreenAreaOffsetY());
+    EXPECT_EQ(100, property.GetScreenAreaWidth());
+    EXPECT_EQ(200, property.GetScreenAreaHeight());
+}
+
+/**
+ * @tc.name: InitExtendScreenProperty
+ * @tc.desc: InitExtendScreenProperty test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, InitExtendScreenProperty, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ScreenId screenId = 0;
+    ScreenProperty property = ScreenProperty();
+    property.SetBounds({{0, 0, 4000, 4000}, 0, 0});
+    ScreenSceneConfig::enableConfig_["isSupportOffScreenRendering"] = true;
+    ScreenSceneConfig::offScreenPPIThreshold_ = 100;
+    ScreenSceneConfig::stringConfig_["externalScreenDefaultMode"] = "none";
+
+    ssm_->Init();
+    sptr<ScreenSession> screenSession = ssm_->GetScreenSessionInner(screenId, property);
+    ssm_->InitExtendScreenProperty(screenId, screenSession, property);
+    EXPECT_EQ(3840, screenSession->GetValidWidth());
+
+    property.SetBounds({{0, 0, 1000, 1000}, 0, 0});
+    ssm_->InitExtendScreenProperty(screenId, screenSession, property);
+    EXPECT_EQ(3120, screenSession->GetValidWidth());
+}
+
+/**
+ * @tc.name: GetOrCreateScreenSession
+ * @tc.desc: GetOrCreateScreenSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetOrCreateScreenSession, Function | SmallTest | Level3)
+{
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        sptr<ScreenSession> session = ssm_->GetOrCreateScreenSession(SCREENID);
+        EXPECT_NE(session, nullptr);
+    }
 }
 }
 }

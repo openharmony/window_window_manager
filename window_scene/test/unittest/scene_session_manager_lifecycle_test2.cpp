@@ -64,8 +64,6 @@ void WindowChangedFuncTest(int32_t persistentId, WindowUpdateType type) {}
 
 void ProcessStatusBarEnabledChangeFuncTest(bool enable) {}
 
-void DumpRootSceneElementInfoFuncTest(const std::vector<std::string>& params, std::vector<std::string>& infos) {}
-
 void SceneSessionManagerLifecycleTest2::SetUpTestCase()
 {
     ssm_ = &SceneSessionManager::GetInstance();
