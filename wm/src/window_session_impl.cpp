@@ -4426,6 +4426,7 @@ WMError WindowSessionImpl::SetWindowContainerColor(const std::string& activeColo
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_WINDOW_TRANSPARENT) &&
+        !SessionPermission::IsSystemCalling() &&
         containerColorList_.count(property_->GetSessionInfo().bundleName_) == 0) {
         TLOGE(WmsLogTag::WMS_DECOR, "winId: %{public}d, permission denied", GetPersistentId());
         return WMError::WM_ERROR_INVALID_PERMISSION;
@@ -4453,7 +4454,7 @@ WMError WindowSessionImpl::SetWindowContainerColor(const std::string& activeColo
             GetWindowName().c_str(), inactiveColor.c_str(), inactiveColorValue);
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    if ((inactiveColorValue & OPAQUE) != OPAQUE) {
+    if (!SessionPermission::IsSystemCalling() && (inactiveColorValue & OPAQUE) != OPAQUE) {
         TLOGE(WmsLogTag::WMS_DECOR, "winId: %{public}d, inactive alpha value error", GetPersistentId());
         return WMError::WM_ERROR_INVALID_PARAM;
     }
