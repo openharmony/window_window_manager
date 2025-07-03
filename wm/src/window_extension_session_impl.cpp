@@ -1184,6 +1184,7 @@ void WindowExtensionSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaC
             TLOGNI(WmsLogTag::WMS_KEYBOARD, "TextFieldPosY: %{public}f, KeyBoardHeight: %{public}d",
                 info->textFieldPositionY_, info->rect_.height_);
         }
+        window->NotifyOccupiedAreaChange(info);
         window->occupiedAreaInfo_ = info;
         window->UpdateViewportConfig(
             window->GetRect(), WindowSizeChangeReason::OCCUPIED_AREA_CHANGE, rsTransaction, nullptr, avoidAreas);

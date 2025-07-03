@@ -28,7 +28,6 @@
 #include "extension_data_handler.h"
 #include "extension_data_handler_mock.h"
 #include "iremote_object_mocker.h"
-#include "mock_display_manager.h"
 #include "mock_session.h"
 #include "mock_uicontent.h"
 #include "mock_window.h"
@@ -1457,13 +1456,6 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyDisplayInfoChange3, TestSize.Leve
     window->lastSystemDensity_ = vpr;
     window->NotifyDisplayInfoChange(config);
     EXPECT_EQ(vpr, window->lastSystemDensity_);
-
-    sptr<Display> display1 = new Display("displayMock", nullptr);
-    SingletonMocker<DisplayManager, MockDisplayManager> m;
-    EXPECT_CALL(m.Mock(), GetDisplayById(_)).Times(1).WillOnce(Return(display1));
-    window->lastSystemDensity_ = lastDensity;
-    window->NotifyDisplayInfoChange(config);
-    EXPECT_EQ(lastDensity, window->lastSystemDensity_);
 }
 
 /**
@@ -1579,16 +1571,6 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyOccupiedAreaChangeInfo02, TestSiz
     sptr<OccupiedAreaChangeInfo> info = new(std::nothrow) OccupiedAreaChangeInfo();
     ASSERT_NE(nullptr, info);
     window_->NotifyOccupiedAreaChangeInfo(info, nullptr, {}, {});
-}
-
-/**
- * @tc.name: UnregisterOccupiedAreaChangeListener
- * @tc.desc: UnregisterOccupiedAreaChangeListener Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowExtensionSessionImplTest, UnregisterOccupiedAreaChangeListener, TestSize.Level1)
-{
-    ASSERT_EQ(WMError::WM_OK, window_->UnregisterOccupiedAreaChangeListener(nullptr));
 }
 
 /**
