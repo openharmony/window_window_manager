@@ -5367,11 +5367,13 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
         info.fullScreenStart_ = true;
     }
     session->CalculatedStartWindowType(info, abilitySessionInfo->hideStartWindow);
-    if (abilitySessionInfo->animationSystemOptions &&
-        SessionPermission::IsSystemAppCallByCallingTokenID(info.callingTokenId_)) {
-        info.startAnimationSystemOptions = abilitySessionInfo->animationSystemOptions;
+    if (abilitySessionInfo->windowCreateParams) {
+        if (abilitySessionInfo->windowCreateParams->animationSystemParams &&
+            SessionPermission::IsSystemAppCallByCallingTokenID(info.callingTokenId_)) {
+            info.startAnimationSystemOptions = abilitySessionInfo->windowCreateParams->animationSystemParams;
+        }
+        info.startAnimationOptions = abilitySessionInfo->windowCreateParams->animationParams;
     }
-    info.startAnimationOptions = abilitySessionInfo->animationOptions;
     TLOGI(WmsLogTag::WMS_LIFE, "bundleName:%{public}s, moduleName:%{public}s, abilityName:%{public}s, "
         "appIndex:%{public}d, affinity:%{public}s. callState:%{public}d, want persistentId:%{public}d, "
         "uiAbilityId:%{public}" PRIu64 ", windowMode:%{public}d, callerId:%{public}d, "
