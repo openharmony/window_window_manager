@@ -57,7 +57,7 @@ ohos_shared_library("floatingball_napi") {
     "image_framework:image",
   ]
 
-  relative_install_dir = "module"
+  relative_install_dir = "module/window"
   part_name = "window_manager"
   subsystem_name = "window"
 

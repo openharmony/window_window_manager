@@ -20,7 +20,6 @@
 #include "window.h"
 #include "wm_common.h"
 #include "floating_ball_controller.h"
-#include "floating_ball_window_info.h"
  
 namespace OHOS {
 namespace Rosen {

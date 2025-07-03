@@ -4405,12 +4405,12 @@ public:
     virtual WMError SetSubWindowSource(SubWindowSource source) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
-     * @brief Set the frameRect in a partical zoom-in scene.
+     * @brief Set the frameRect in a partial zoom-in scene.
      *
-     * @param frameRect The original rect of frameBuffer before partical zoom-in.
+     * @param frameRect The original rect of frameBuffer before partial zoom-in.
      * @return WMError::WM_OK means set success, otherwise failed.
      */
-    virtual WMError SetFrameRectForParticalZoomIn(const Rect& frameRect)
+    virtual WMError SetFrameRectForPartialZoomIn(const Rect& frameRect)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -4428,12 +4428,15 @@ public:
      * @param pointerEvent PointerEvent of Multi-Model Input.
      * @return WM_OK means set success.
      */
-    virtual WMError InjectTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) { return WMError::WM_OK; }
+    virtual WMError InjectTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+    {
+        return WMError::WM_ERROR_SYSTEM_ABNORMALLY;
+    }
 
     /**
      * @brief update the floating ball window instance.
      *
-     * @param fbTemplateInfo the tempalte info of the floating-ball.
+     * @param fbTemplateInfo the template info of the floating-ball.
      * @param icon the icon of the floating-ball.
      */
     virtual WMError UpdateFloatingBall(const FloatingBallTemplateBaseInfo& fbTemplateBaseInfo,

@@ -1552,13 +1552,22 @@ HWTEST_F(WindowSessionPropertyTest, UnmarshallingFbTemplateInfoTest, TestSize.Le
     property->SetWindowType(WindowType::WINDOW_TYPE_FB);
 
     Parcel parcel;
-    FloatingBallTemplateInfo fbTemplateInfo {{1, "fb", "fb_content", "red"}, nullptr};
+    std::shared_ptr<Media::PixelMap> icon;
+    FloatingBallTemplateInfo fbTemplateInfo {{1, "fb", "fb_content", "red"}, icon};
     property->UnmarshallingFbTemplateInfo(parcel, property);
     ASSERT_NE(property->GetFbTemplateInfo().template_, fbTemplateInfo.template_);
+    ASSERT_NE(property->GetFbTemplateInfo().title_, fbTemplateInfo.title_);
+    ASSERT_NE(property->GetFbTemplateInfo().content_, fbTemplateInfo.content_);
+    ASSERT_NE(property->GetFbTemplateInfo().backgroundColor_, fbTemplateInfo.backgroundColor_);
+    ASSERT_EQ(property->GetFbTemplateInfo().icon_, fbTemplateInfo.icon_);
 
     parcel.WriteParcelable(&fbTemplateInfo);
     property->UnmarshallingFbTemplateInfo(parcel, property);
     ASSERT_EQ(property->GetFbTemplateInfo().template_, fbTemplateInfo.template_);
+    ASSERT_EQ(property->GetFbTemplateInfo().title_, fbTemplateInfo.title_);
+    ASSERT_EQ(property->GetFbTemplateInfo().content_, fbTemplateInfo.content_);
+    ASSERT_EQ(property->GetFbTemplateInfo().backgroundColor_, fbTemplateInfo.backgroundColor_);
+    ASSERT_EQ(property->GetFbTemplateInfo().icon_, fbTemplateInfo.icon_);
 }
 } // namespace
 } // namespace Rosen

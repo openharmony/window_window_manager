@@ -762,6 +762,34 @@ HWTEST_F(ScreenSessionManagerClientStubTest,
 }
 
 /**
+ * @tc.name: HandleOnSetSurfaceNodeIdsChanged
+ * @tc.desc: HandleOnSetSurfaceNodeIdsChanged test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientStubTest, HandleOnSetSurfaceNodeIdsChanged, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteInterfaceToken(ScreenSessionManagerClientStub::GetDescriptor());
+    int ret = screenSessionManagerClientStub_->HandleOnSetSurfaceNodeIdsChanged(data, reply);
+    EXPECT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: HandleOnVirtualScreenDisconnected
+ * @tc.desc: HandleOnVirtualScreenDisconnected test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientStubTest, HandleOnVirtualScreenDisconnected, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteInterfaceToken(ScreenSessionManagerClientStub::GetDescriptor());
+    int ret = screenSessionManagerClientStub_->HandleOnVirtualScreenDisconnected(data, reply);
+    EXPECT_EQ(ret, 0);
+}
+
+/**
  * @tc.name: HandleOnSetDisplayNodeScreenId
  * @tc.desc: HandleOnSetDisplayNodeScreenId test
  * @tc.type: FUNC

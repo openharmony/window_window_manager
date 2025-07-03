@@ -74,6 +74,7 @@ public:
     void NotifyWindowSystemBarPropertyChange(WindowType type, const SystemBarProperty& systemBarProperty);
     void NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info);
     void NotifyWindowRectChange(const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList);
+    void NotifyWMSWindowDestroyed(const WindowLifeCycleInfo& lifeCycleInfo, void* jsWindowNapiValue);
 
     static inline SingletonDelegator<WindowManager> delegator_;
 
@@ -114,6 +115,7 @@ public:
     std::vector<sptr<IWindowInfoChangedListener>> windowRectChangeListeners_;
     sptr<WindowManagerAgent> windowSystemBarPropertyChangeAgent_;
     std::vector<sptr<IWindowSystemBarPropertyChangedListener>> windowSystemBarPropertyChangedListeners_;
+    sptr<IWindowLifeCycleListener> windowLifeCycleListener_;
 };
 
 void WindowManager::Impl::NotifyWMSConnected(int32_t userId, int32_t screenId)
@@ -461,6 +463,22 @@ void WindowManager::Impl::NotifyWindowRectChange(
             listener->OnWindowInfoChanged(windowInfoList);
         }
     }
+}
+
+void WindowManager::Impl::NotifyWMSWindowDestroyed(const WindowLifeCycleInfo& lifeCycleInfo, void* jsWindowNapiValue)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "notify window destroyed");
+
+    sptr<IWindowLifeCycleListener> wmsWindowDestroyedListener;
+    {
+        std::shared_lock<std::shared_mutex> lock(listenerMutex_);
+        wmsWindowDestroyedListener = windowLifeCycleListener_;
+    }
+    if (wmsWindowDestroyedListener == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "window destroyed listener is nullptr");
+        return;
+    }
+    wmsWindowDestroyedListener->OnWindowDestroyed(lifeCycleInfo, jsWindowNapiValue);
 }
 
 WindowManager::WindowManager() : pImpl_(std::make_unique<Impl>())
@@ -2130,8 +2148,8 @@ void WindowManager::NotifyWindowPropertyChange(uint32_t propertyDirtyFlags,
     }
 }
 
-WMError WindowManager::AnimateTo(int32_t windowId, const WindowAnimationProperty& animationProperty,
-    const WindowAnimationOption& animationOption)
+WMError WindowManager::AnimateTo(int32_t windowId, WindowAnimationProperty animationProperty,
+    WindowAnimationOption animationOption)
 {
     TLOGI(WmsLogTag::WMS_ANIMATION, "In, windowId: %{public}d, targetScale: %{public}f, animationOption: %{public}s",
         windowId, animationProperty.targetScale, animationOption.ToString().c_str());
@@ -2140,6 +2158,56 @@ WMError WindowManager::AnimateTo(int32_t windowId, const WindowAnimationProperty
         TLOGE(WmsLogTag::WMS_ANIMATION, "Failed, errorCode: %{public}d", static_cast<int32_t>(ret));
     }
     return ret;
+}
+
+WMError WindowManager::RegisterWindowLifeCycleCallback(const sptr<IWindowLifeCycleListener>& listener)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "window lifecycle listener registered could not be null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    TLOGI(WmsLogTag::WMS_LIFE, "Register window lifecycle listener");
+    {
+        std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
+        if (pImpl_->windowLifeCycleListener_) {
+            TLOGI(WmsLogTag::WMS_LIFE, "WindowLifeCycleListener is already registered, do nothing");
+            return WMError::WM_OK;
+        }
+        pImpl_->windowLifeCycleListener_ = listener;
+    }
+ 
+    return WMError::WM_OK;
+}
+
+WMError WindowManager::UnregisterWindowLifeCycleCallback(const sptr<IWindowLifeCycleListener>& listener)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "window lifecycle listener unregistered could not be null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    TLOGI(WmsLogTag::WMS_LIFE, "Unregister window lifecycle listener");
+    {
+        std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
+        pImpl_->windowLifeCycleListener_ = nullptr;
+    }
+ 
+    return WMError::WM_OK;
+}
+
+void WindowManager::RegisterGetJSWindowCallback(GetJSWindowObjFunc&& getJSWindowFunc)
+{
+    getJSWindowObjFunc_ = std::move(getJSWindowFunc);
+}
+
+void WindowManager::NotifyWMSWindowDestroyed(const WindowLifeCycleInfo& lifeCycleInfo)
+{
+    void* jsWindowNapiValue = nullptr;
+    if (getJSWindowObjFunc_ != nullptr) {
+        TLOGI(WmsLogTag::WMS_LIFE, "window name: %{public}s, window id: %{public}d", lifeCycleInfo.windowName.c_str(),
+            lifeCycleInfo.windowId);
+        jsWindowNapiValue = getJSWindowObjFunc_(lifeCycleInfo.windowName);
+    }
+    pImpl_->NotifyWMSWindowDestroyed(lifeCycleInfo, jsWindowNapiValue);
 }
 } // namespace Rosen
 } // namespace OHOS

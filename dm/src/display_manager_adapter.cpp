@@ -108,6 +108,21 @@ std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetDisplaySnapshot(Displ
     return pixelMap;
 }
 
+std::vector<std::shared_ptr<Media::PixelMap>> DisplayManagerAdapter::GetDisplayHDRSnapshot(DisplayId displayId,
+    DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen)
+{
+    INIT_PROXY_CHECK_RETURN({});
+ 
+    if (screenSessionManagerServiceProxy_) {
+        return screenSessionManagerServiceProxy_->GetDisplayHDRSnapshot(displayId, errorCode, isUseDma,
+            isCaptureFullOfScreen);
+    }
+    if (errorCode != nullptr) {
+        *errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    return { nullptr, nullptr };
+}
+
 std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetSnapshotByPicker(Media::Rect& rect, DmErrorCode* errorCode)
 {
     INIT_PROXY_CHECK_RETURN(nullptr);
@@ -1608,6 +1623,21 @@ std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetDisplaySnapshotWithOp
         *errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
     }
     return nullptr;
+}
+
+std::vector<std::shared_ptr<Media::PixelMap>> DisplayManagerAdapter::GetDisplayHDRSnapshotWithOption(
+    const CaptureOption& captureOption, DmErrorCode* errorCode)
+{
+    std::vector<std::shared_ptr<Media::PixelMap>> ret = { nullptr, nullptr };
+    INIT_PROXY_CHECK_RETURN(ret);
+    if (screenSessionManagerServiceProxy_) {
+        return screenSessionManagerServiceProxy_->GetDisplayHDRSnapshotWithOption(captureOption, errorCode);
+    }
+ 
+    if (errorCode != nullptr) {
+        *errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    return ret;
 }
 
 void ScreenManagerAdapter::SetFoldStatusExpandAndLocked(bool locked)

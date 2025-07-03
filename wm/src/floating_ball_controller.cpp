@@ -93,7 +93,6 @@ WMError FloatingBallController::StartFloatingBall(sptr<FbOption>& option)
                 curState_, (window_ == nullptr) ? INVALID_WINDOW_ID : window_->GetWindowId(), mainWindowId_);
             return WMError::WM_ERROR_FB_REPEAT_OPERATION;
         }
-
         curState_ = FbWindowState::STATE_STARTING;
         FloatingBallManager::SetActiveController(this);
     }
@@ -143,7 +142,7 @@ WMError FloatingBallController::CreateFloatingBallWindow()
         mainWindowId_, mainWindowState, uid);
     if (mainWindowState != WindowState::STATE_SHOWN) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "mainWindow:%{public}u is not shown", mainWindowId_);
-        return WMError::WM_ERROR_INVALID_WINDOW;
+        return WMError::WM_ERROR_FB_CREATE_FAILED;
     }
     auto windowOption = sptr<WindowOption>::MakeSptr();
     windowOption->SetWindowName(FB_WINDOW_NAME + "_" + std::to_string(uid));
@@ -249,7 +248,8 @@ WMError FloatingBallController::RestoreMainWindow(const std::shared_ptr<AAFwk::W
 
 void FloatingBallController::OnFloatingBallClick()
 {
-    for (auto& listener : fbClickObservers_) {
+    auto fbClickObservers = fbClickObservers_;
+    for (auto& listener : fbClickObservers) {
         if (listener == nullptr) {
             TLOGE(WmsLogTag::WMS_SYSTEM, "one click observer is nullptr");
             continue;
@@ -260,7 +260,8 @@ void FloatingBallController::OnFloatingBallClick()
 
 void FloatingBallController::OnFloatingBallStart()
 {
-    for (auto& listener : fbLifeCycleListeners_) {
+    auto fbLifeCycleListeners = fbLifeCycleListeners_;
+    for (auto& listener : fbLifeCycleListeners) {
         if (listener == nullptr) {
             TLOGE(WmsLogTag::WMS_SYSTEM, "one lifecycle listener is nullptr");
             continue;
@@ -271,7 +272,8 @@ void FloatingBallController::OnFloatingBallStart()
 
 void FloatingBallController::OnFloatingBallStop()
 {
-    for (auto& listener : fbLifeCycleListeners_) {
+    auto fbLifeCycleListeners = fbLifeCycleListeners_;
+    for (auto& listener : fbLifeCycleListeners) {
         if (listener == nullptr) {
             TLOGE(WmsLogTag::WMS_SYSTEM, "one lifecycle listener is nullptr");
             continue;
@@ -303,6 +305,7 @@ WMError FloatingBallController::UnRegisterFbClickObserver(const sptr<IFbClickObs
 template<typename T>
 WMError FloatingBallController::RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener)
 {
+    std::lock_guard<std::mutex> lock(listenerMutex_);
     if (listener == nullptr) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "listener is nullptr");
         return WMError::WM_ERROR_FB_INTERNAL_ERROR;
@@ -318,6 +321,7 @@ WMError FloatingBallController::RegisterListener(std::vector<sptr<T>>& holder, c
 template<typename T>
 WMError FloatingBallController::UnRegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener)
 {
+    std::lock_guard<std::mutex> lock(listenerMutex_);
     if (listener == nullptr) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "listener could not be null");
         return WMError::WM_ERROR_FB_INTERNAL_ERROR;

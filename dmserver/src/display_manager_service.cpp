@@ -716,11 +716,18 @@ DMError DisplayManagerService::MakeExpand(std::vector<ScreenId> expandScreenIds,
     std::shared_ptr<RSDisplayNode> rsDisplayNode;
     std::vector<Point> points;
     for (uint32_t i = 0; i < allExpandScreenIds.size(); i++) {
-        rsDisplayNode = abstractScreenController_->GetRSDisplayNodeByScreenId(allExpandScreenIds[i]);
-        points.emplace_back(pointsMap[allExpandScreenIds[i]]);
+        ScreenId expandScreenId = allExpandScreenIds[i];
+        if (pointsMap.find(expandScreenId) == pointsMap.end()) {
+            continue;
+        }
+        points.emplace_back(pointsMap[expandScreenId]);
+        rsDisplayNode = abstractScreenController_->GetRSDisplayNodeByScreenId(expandScreenId);
         if (rsDisplayNode != nullptr) {
-            rsDisplayNode->SetDisplayOffset(pointsMap[allExpandScreenIds[i]].posX_,
-                pointsMap[allExpandScreenIds[i]].posY_);
+            sptr<AbstractScreen> absScreen = abstractScreenController_->GetAbstractScreen(expandScreenId);
+            if (absScreen != nullptr) {
+                RSInterfaces::GetInstance().SetScreenOffset(absScreen->rsId_,
+                    pointsMap[expandScreenId].posX_, pointsMap[expandScreenId].posY_);
+            }
         }
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:MakeExpand");

@@ -88,9 +88,6 @@ WSError MainSession::Reconnect(const sptr<ISessionStage>& sessionStage, const sp
         } else {
             session->isActive_ = false;
             session->UpdateSessionState(SessionState::STATE_BACKGROUND);
-            if (session->scenePersistence_) {
-                session->scenePersistence_->SetHasSnapshot(true, session->GetWindowStatus());
-            }
         }
         if (session->pcFoldScreenController_) {
             session->pcFoldScreenController_->OnConnect();

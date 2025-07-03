@@ -125,8 +125,8 @@ using ProcessGestureNavigationEnabledChangeFunc = std::function<void(bool enable
 using ProcessOutsideDownEventFunc = std::function<void(int32_t x, int32_t y)>;
 using ProcessShiftFocusFunc = std::function<void(int32_t persistentId, DisplayId displayGroupId)>;
 using NotifySetFocusSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
-using DumpRootSceneElementInfoFunc = std::function<void(const std::vector<std::string>& params,
-    std::vector<std::string>& infos)>;
+using DumpRootSceneElementInfoFunc = std::function<void(const sptr<SceneSession>& session,
+    const std::vector<std::string>& params, std::vector<std::string>& infos)>;
 using WindowChangedFunc = std::function<void(int32_t persistentId, WindowUpdateType type)>;
 using TraverseFunc = std::function<bool(const sptr<SceneSession>& session)>;
 using CmpFunc = std::function<bool(std::pair<int32_t, sptr<SceneSession>>& lhs,
@@ -176,6 +176,8 @@ public:
     void OnImmersiveStateChange(ScreenId screenId, bool& immersive) override;
     void OnGetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
         std::vector<uint64_t>& surfaceNodeIds, bool isBlackList = false) override;
+    void OnSetSurfaceNodeIds(DisplayId displayId, const std::vector<uint64_t>& surfaceNodeIds) override;
+    void OnVirtualScreenDisconnected(DisplayId displayId) override;
 
     /*
      * Fold Screen Status Change Report
@@ -308,8 +310,8 @@ public:
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId = DEFAULT_DISPLAY_ID) override;
     WSError GetFocusSessionToken(sptr<IRemoteObject>& token, DisplayId displayId = DEFAULT_DISPLAY_ID) override;
     WSError GetFocusSessionElement(AppExecFwk::ElementName& element, DisplayId displayId = DEFAULT_DISPLAY_ID) override;
-    WSError AddFocusGroup(DisplayId displayId);
-    WSError RemoveFocusGroup(DisplayId displayId);
+    WSError AddFocusGroup(DisplayGroupId displayGroupId, DisplayId displayId);
+    WSError RemoveFocusGroup(DisplayGroupId displayGroupId, DisplayId displayId);
     WSError SendPointerEventForHover(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
     WSError UpdateWindowMode(int32_t persistentId, int32_t windowMode);
@@ -427,13 +429,18 @@ public:
     void AddWindowDragHotArea(DisplayId displayId, uint32_t type, WSRect& area);
     void PreloadInLakeApp(const std::string& bundleName);
     WSError UpdateMaximizeMode(int32_t persistentId, bool isMaximize);
-    WSError UpdateSessionDisplayId(int32_t persistentId, uint64_t screenId, WSRect winRect = { 0, 0, 0, 0 },
-        bool isNotSessionRectWithDpiChange = false);
+    WSError UpdateSessionDisplayId(int32_t persistentId, uint64_t screenId);
     WSError NotifyStackEmpty(int32_t persistentId);
     void NotifySessionUpdate(const SessionInfo& sessionInfo, ActionType type,
         ScreenId fromScreenId = SCREEN_ID_INVALID);
     WMError GetSurfaceNodeIdsFromMissionIds(std::vector<uint64_t>& missionIds,
         std::vector<uint64_t>& surfaceNodeIds, bool isBlackList = false);
+    WMError GetSurfaceNodeIdsFromSubSession(
+        const sptr<SceneSession>& sceneSession, std::vector<uint64_t>& surfaceNodeIds);
+    WMError UpdateSubSessionBlackList(const sptr<SceneSession>& sceneSession);
+    WMError RemoveSessionFromBlackList(const sptr<SceneSession>& sceneSession);
+    WMError SetSurfaceNodeIds(DisplayId displayId, const std::vector<uint64_t>& surfaceNodeIds);
+    WMError OnVirtualScreenDisconnected(DisplayId displayId);
     WSError UpdateTitleInTargetPos(int32_t persistentId, bool isShow, int32_t height);
 
     /*
@@ -535,6 +542,7 @@ public:
     WSError NotifyEnterRecentTask(bool enterRecent);
     WMError UpdateDisplayHookInfo(int32_t uid, uint32_t width, uint32_t height, float_t density, bool enable);
     WMError UpdateAppHookDisplayInfo(int32_t uid, const HookInfo& hookInfo, bool enable);
+    WMError NotifyHookOrientationChange(int32_t persistentId);
     void InitScheduleUtils();
     void ProcessDisplayScale(sptr<DisplayInfo>& displayInfo);
     WMError GetRootMainWindowId(int32_t persistentId, int32_t& hostWindowId);
@@ -806,7 +814,7 @@ private:
     sptr<KeyboardSession::KeyboardSessionCallback> CreateKeyboardSessionCallback();
     void FillSessionInfo(sptr<SceneSession>& sceneSession);
     std::shared_ptr<AppExecFwk::AbilityInfo> QueryAbilityInfoFromBMS(const int32_t uId, const std::string& bundleName,
-        const std::string& abilityName, const std::string& moduleName);
+        const std::string& abilityName, const std::string& moduleName, bool isAtomicServiceFreeInstall = false);
     std::vector<sptr<SceneSession>> GetSubSceneSession(int32_t parentWindowId);
     void RemoveDuplicateSubSession(const std::vector<std::pair<uint64_t, WindowVisibilityState>>& visibilityChangeInfo,
         std::vector<sptr<SceneSession>>& subSessions);
@@ -1494,6 +1502,24 @@ private:
         uint32_t interestInfo, const sptr<IWindowManagerAgent>& windowManagerAgent) override;
     void PackWindowPropertyChangeInfo(const sptr<SceneSession>& sceneSession,
         std::unordered_map<WindowInfoKey, std::any>& windowPropertyChangeInfo);
+
+    struct SessionBlackListInfo {
+        int32_t windowId = INVALID_SESSION_ID;
+    };
+    struct BlackListEqual {
+        bool operator()(const SessionBlackListInfo& left, const SessionBlackListInfo& right) const
+        {
+            return left.windowId == right.windowId;
+        }
+    };
+    struct BlackListHasher {
+        size_t operator()(const SessionBlackListInfo& info) const
+        {
+            return std::hash<int32_t>()(info.windowId);
+        }
+    };
+    using SessionBlackListInfoSet = std::unordered_set<SessionBlackListInfo, BlackListHasher, BlackListEqual>;
+    std::unordered_map<DisplayId, SessionBlackListInfoSet> sessionBlackListInfoMap_;
 
     /*
      * Move Drag

@@ -251,25 +251,25 @@ void SuperFoldSensorManager::HandleSuperSensorChange(SuperFoldStatusChangeEvents
 
 void SuperFoldSensorManager::HandleScreenConnectChange()
 {
-    TLOGI(WmsLogTag::DMS, "Screen connect to stop statemachine.");
+    TLOGW(WmsLogTag::DMS, "Screen connect to stop statemachine.");
     SuperFoldStateManager::GetInstance().HandleScreenConnectChange();
 }
 
 void SuperFoldSensorManager::HandleScreenDisconnectChange()
 {
     if (ScreenSessionManager::GetInstance().GetIsFoldStatusLocked()) {
-        TLOGI(WmsLogTag::DMS, "Fold status is still locked.");
+        TLOGW(WmsLogTag::DMS, "Fold status is still locked.");
         return;
     }
     if (ScreenSessionManager::GetInstance().GetIsExtendScreenConnected()) {
-        TLOGI(WmsLogTag::DMS, "Extend screen is still connected.");
+        TLOGW(WmsLogTag::DMS, "Extend screen is still connected.");
         return;
     }
     if (ScreenSessionManager::GetInstance().GetIsLandscapeLockStatus()) {
-        TLOGI(WmsLogTag::DMS, "Landscape status is still locked.");
+        TLOGW(WmsLogTag::DMS, "Landscape status is still locked.");
         return;
     }
-    TLOGI(WmsLogTag::DMS, "All locks have been unlocked to start statemachine.");
+    TLOGW(WmsLogTag::DMS, "All locks have been unlocked to start statemachine.");
     NotifyHallChanged(curHall_);
     NotifyFoldAngleChanged(curAngle_);
 }

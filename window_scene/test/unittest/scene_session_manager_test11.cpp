@@ -30,7 +30,6 @@
 #include "session/host/include/multi_instance_manager.h"
 #include "test/mock/mock_session_stage.h"
 #include "test/mock/mock_window_event_channel.h"
-#include "test/mock/mock_accesstoken_kit.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -48,6 +47,8 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+
+    sptr<SceneSession> CreateSceneSession(const std::string& bundleName, WindowType windowType);
 
     static sptr<SceneSessionManager> ssm_;
 
@@ -118,6 +119,20 @@ std::shared_ptr<TaskScheduler> SceneSessionManagerTest11::GetTaskScheduler()
     std::string threadName = "threadName";
     std::shared_ptr<TaskScheduler> taskScheduler = std::make_shared<TaskScheduler>(threadName);
     return taskScheduler;
+}
+
+sptr<SceneSession> SceneSessionManagerTest11::CreateSceneSession(const std::string& bundleName, WindowType windowType)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = bundleName;
+
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowType(windowType);
+    property->SetWindowName(bundleName);
+
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession->property_ = property;
+    return sceneSession;
 }
 
 namespace {
@@ -835,7 +850,8 @@ HWTEST_F(SceneSessionManagerTest11, GetTopNearestBlockingFocusSession_branch02, 
     sptr<SceneSession::SpecificSessionCallback> specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCb);
     sceneSession->GetSessionProperty()->SetDisplayId(100);
-    ssm_->windowFocusController_->virtualScreenDisplayIdSet_.insert(20);
+    ssm_->windowFocusController_->displayId2GroupIdMap_[100] = 20;
+    ssm_->windowFocusController_->displayId2GroupIdMap_[20] = 20;
     ssm_->sceneSessionMap_.insert({ 1, sceneSession });
     ASSERT_EQ(nullptr, ssm_->GetTopNearestBlockingFocusSession(displayId, zOrder, includingAppSession));
     ssm_->sceneSessionMap_.clear();
@@ -1211,6 +1227,84 @@ HWTEST_F(SceneSessionManagerTest11, QueryAbilityInfoFromBMSTest001, TestSize.Lev
 }
 
 /**
+ * @tc.name: QueryAbilityInfoFromBMSTest
+ * @tc.desc: SceneSesionManager QueryAbilityInfoFromBMS AtomicFreeInstall query failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, QueryAbilityInfoFromBMSTest02, TestSize.Level1)
+{
+    const int32_t uId = 32;
+    SessionInfo sessionInfo_;
+    sessionInfo_.bundleName_ = "BundleName";
+    sessionInfo_.abilityName_ = "AbilityName";
+    sessionInfo_.moduleName_ = "ModuleName";
+    sptr<IBundleMgrMocker> bundleMgrMocker = sptr<IBundleMgrMocker>::MakeSptr();
+    EXPECT_CALL(*bundleMgrMocker, GetBundleInfoV9(_, _, _, _)).WillOnce(Return(1));
+    ssm_->bundleMgr_ = bundleMgrMocker;
+
+    auto res = ssm_->QueryAbilityInfoFromBMS(
+        uId, sessionInfo_.bundleName_, sessionInfo_.abilityName_, sessionInfo_.moduleName_, true);
+    EXPECT_EQ(res, nullptr);
+}
+
+/**
+ * @tc.name: QueryAbilityInfoFromBMSTest
+ * @tc.desc: SceneSesionManager QueryAbilityInfoFromBMS AtomicFreeInstall query failed hapModuleInfosis nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, QueryAbilityInfoFromBMSTest03, TestSize.Level1)
+{
+    const int32_t uId = 32;
+    SessionInfo sessionInfo_;
+    sessionInfo_.bundleName_ = "BundleName";
+    sessionInfo_.abilityName_ = "AbilityName";
+    sessionInfo_.moduleName_ = "ModuleName";
+    sptr<IBundleMgrMocker> bundleMgrMocker = sptr<IBundleMgrMocker>::MakeSptr();
+    EXPECT_CALL(*bundleMgrMocker, GetBundleInfoV9(_, _, _, _))
+        .WillOnce([](const std::string& bundleName, int32_t flags, AppExecFwk::BundleInfo& bundleInfo, int32_t userId) {
+            bundleInfo.hapModuleInfos = {};
+            return 0;
+        });
+    ssm_->bundleMgr_ = bundleMgrMocker;
+
+    auto res = ssm_->QueryAbilityInfoFromBMS(
+        uId, sessionInfo_.bundleName_, sessionInfo_.abilityName_, sessionInfo_.moduleName_, true);
+    EXPECT_EQ(res, nullptr);
+}
+
+/**
+ * @tc.name: QueryAbilityInfoFromBMSTest
+ * @tc.desc: SceneSesionManager QueryAbilityInfoFromBMS AtomicFreeInstall query success.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, QueryAbilityInfoFromBMSTest04, TestSize.Level1)
+{
+    const int32_t uId = 32;
+    SessionInfo sessionInfo_;
+    sessionInfo_.bundleName_ = "BundleName";
+    sessionInfo_.abilityName_ = "AbilityName";
+    sessionInfo_.moduleName_ = "ModuleName";
+    sptr<IBundleMgrMocker> bundleMgrMocker = sptr<IBundleMgrMocker>::MakeSptr();
+    EXPECT_CALL(*bundleMgrMocker, GetBundleInfoV9(_, _, _, _))
+        .WillOnce([](const std::string& bundleName, int32_t flags, AppExecFwk::BundleInfo& bundleInfo, int32_t userId) {
+            AppExecFwk::AbilityInfo abilityInfo;
+            abilityInfo.moduleName = "moduleName";
+            abilityInfo.name = "abilityName";
+            AppExecFwk::HapModuleInfo hapModuleInfo;
+            hapModuleInfo.abilityInfos = { abilityInfo };
+            bundleInfo.hapModuleInfos = { hapModuleInfo };
+            return 0;
+        });
+    ssm_->bundleMgr_ = bundleMgrMocker;
+
+    auto res = ssm_->QueryAbilityInfoFromBMS(
+        uId, sessionInfo_.bundleName_, sessionInfo_.abilityName_, sessionInfo_.moduleName_, true);
+    ASSERT_EQ(res, nullptr);
+    EXPECT_EQ(res->name, "abilityName");
+    EXPECT_EQ(res->moduleName, "moduleName");
+}
+
+/**
  * @tc.name: RequestFocusSpecificCheckTest
  * @tc.desc: Test for RequestFocusSpecificCheck
  * @tc.type: FUNC
@@ -1537,6 +1631,67 @@ HWTEST_F(SceneSessionManagerTest11, SendPointerEventForHover_Success, Function |
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     WSError ret = ssm_->SendPointerEventForHover(pointerEvent);
     EXPECT_EQ(ret, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: TestCheckSystemWindowPermission_Fb
+ * @tc.desc: Test CheckSystemWindowPermission with windowType WINDOW_TYPE_FB then true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, TestCheckSystemWindowPermission_Fb, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_FB);
+    ASSERT_EQ(true, ssm_->CheckSystemWindowPermission(property));
+}
+
+/**
+ * @tc.name: InitFbWindow
+ * @tc.desc: test function : InitFbWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, InitFbWindow, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo sessionInfo;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+
+    ssm_->InitFbWindow(sceneSession, nullptr);
+
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    property->SetWindowType(WindowType::WINDOW_TYPE_PIP);
+    ssm_->InitFbWindow(sceneSession, property);
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_FB);
+    ssm_->InitFbWindow(sceneSession, property);
+    EXPECT_EQ(0, sceneSession->GetFbTemplateInfo().template_);
+}
+
+/**
+ * @tc.name: GetFbPanelWindowId
+ * @tc.desc: test function : GetFbPanelWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, GetFbPanelWindowId, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    uint32_t windowId = 0;
+    EXPECT_EQ(WMError::WM_ERROR_FB_INTERNAL_ERROR, ssm_->GetFbPanelWindowId(windowId));
+    ssm_->sceneSessionMap_.insert({0, nullptr});
+    ssm_->sceneSessionMap_.insert({1, CreateSceneSession("", WindowType::WINDOW_TYPE_PIP)});
+    ssm_->sceneSessionMap_.insert({2, CreateSceneSession("SCBGlobalSearch7", WindowType::WINDOW_TYPE_FB)});
+    sptr<SceneSession> sceneSession = CreateSceneSession("Fb_panel8", WindowType::WINDOW_TYPE_FB);
+    ssm_->sceneSessionMap_.insert({3, sceneSession});
+
+    MockAccesstokenKit::MockAccessTokenKitRet(0);
+    EXPECT_EQ(WMError::WM_OK, ssm_->GetFbPanelWindowId(windowId));
+    EXPECT_EQ(sceneSession->GetWindowId(), windowId);
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
+    ssm_->sceneSessionMap_.clear();
 }
 } // namespace
 } // namespace Rosen

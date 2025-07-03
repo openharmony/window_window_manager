@@ -38,9 +38,11 @@ private:
     void TraverseWindowNodes(const std::vector<sptr<WindowNode>>& windowNodes,
                              std::vector<MMI::WindowInfo>& windowsInfo);
     void UpdateDisplayGroupInfo(const sptr<WindowNodeContainer>& windowNodeContainer,
-                                MMI::DisplayGroupInfo& displayGroupInfo);
+                                MMI::DisplayGroupInfo& displayGroupInfo, DisplayId displayId);
     void UpdateDisplayInfo(const std::vector<sptr<DisplayInfo>>& displayInfos,
                            std::vector<MMI::DisplayInfo>& displayInfoVector);
+    void ConstructScreenInfos(std::vector<MMI::DisplayInfo>& displayInfoVector,
+        std::vector<MMI::ScreenInfo>& screenInfos);
     MMI::Direction GetDisplayDirectionForMmi(Rotation rotation);
     void TransformWindowRects(const sptr<WindowNode>& windowNode, Rect& areaRect,
         std::vector<Rect>& touchHotAreas, std::vector<Rect>& pointerHotAreas);

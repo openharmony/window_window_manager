@@ -216,6 +216,7 @@ void DisplayManagerAni::onRegisterCallback(ani_env* env, ani_string type, ani_re
         return;
     }
     displayAniListener->AddCallback(typeString, cbRef);
+    displayAniListener->SetMainEventHandler();
 
     ret = processRegisterCallback(env, typeString, displayAniListener);
     if (ret != DmErrorCode::DM_OK) {
@@ -226,19 +227,6 @@ void DisplayManagerAni::onRegisterCallback(ani_env* env, ani_string type, ani_re
     }
     // add listener to map
     jsCbMap_[typeString][callback] = displayAniListener;
-    // invoke callback manually
-    if (typeString == EVENT_ADD) {
-        displayAniListener->OnCreate(1);
-    } else if (typeString == EVENT_CHANGE) {
-        TLOGI(WmsLogTag::DMS, "exe callback type change %{public}s", typeString.c_str());
-        displayAniListener->OnChange(0);
-    } else if (typeString == EVENT_FOLD_STATUS_CHANGED) {
-        TLOGI(WmsLogTag::DMS, "exe event fold status change %{public}s", typeString.c_str());
-        displayAniListener->OnFoldStatusChanged(FoldStatus::UNKNOWN);
-    } else if (typeString == EVENT_DISPLAY_MODE_CHANGED) {
-        TLOGI(WmsLogTag::DMS, "exe event fold mode change %{public}s", typeString.c_str());
-        displayAniListener->OnDisplayModeChanged(FoldDisplayMode::UNKNOWN);
-    }
 }
 
 DmErrorCode DisplayManagerAni::processRegisterCallback(ani_env* env, std::string& typeStr,

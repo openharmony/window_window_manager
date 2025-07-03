@@ -29,6 +29,7 @@
 #include "session_manager.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "window_manager_agent.h"
+#include "window_manager_hilog.h"
 #include "zidl/window_manager_agent_interface.h"
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
 
@@ -40,6 +41,12 @@ namespace Rosen {
 namespace {
 const std::string EMPTY_DEVICE_ID = "";
 using ConfigItem = WindowSceneConfig::ConfigItem;
+    std::string g_logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
+        const char *msg)
+    {
+        g_logMsg = msg;
+    }
 } // namespace
 class SceneSessionManagerTest6 : public testing::Test {
 public:
@@ -1051,6 +1058,8 @@ HWTEST_F(SceneSessionManagerTest6, NotifyCompleteFirstFrameDrawing, TestSize.Lev
  */
 HWTEST_F(SceneSessionManagerTest6, NotifyCompleteFirstFrameDrawing02, TestSize.Level1)
 {
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     ASSERT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.clear();
     SessionInfo sessionInfo;
@@ -1067,7 +1076,8 @@ HWTEST_F(SceneSessionManagerTest6, NotifyCompleteFirstFrameDrawing02, TestSize.L
     ASSERT_NE(nullptr, sceneSession);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     ssm_->NotifyCompleteFirstFrameDrawing(1);
-    ASSERT_EQ(nullptr, sessionInfo.abilityInfo);
+    EXPECT_FALSE(g_logMsg.find("sceneSession is nullptr.") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -1698,10 +1708,14 @@ HWTEST_F(SceneSessionManagerTest6, DeleteStateDetectTask, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest6, GetWindowStyleType, TestSize.Level1)
 {
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     ASSERT_NE(nullptr, ssm_);
     WindowStyleType windowModeType = Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT;
-    ssm_->GetWindowStyleType(windowModeType);
-    ASSERT_EQ(windowModeType, Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT);
+    auto ret = ssm_->GetWindowStyleType(windowModeType);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
+    EXPECT_TRUE(g_logMsg.find("permission denied!") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**

@@ -1829,11 +1829,12 @@ void WindowSessionImpl::HideTitleButton(bool& hideSplitButton, bool& hideMaximiz
     }
     hideMaximizeButton = hideMaximizeButton || property_->IsFullScreenDisabled();
     bool isLayoutFullScreen = property_->IsLayoutFullScreen();
+    bool hideSplitBtn = hideSplitButton || property_->IsSplitDisabled();
     if (property_->IsAdaptToImmersive() && !property_->GetIsAtomicService()) {
-        uiContent->HideWindowTitleButton(true, !isLayoutFullScreen && hideMaximizeButton,
+        uiContent->HideWindowTitleButton(hideSplitBtn, !isLayoutFullScreen && hideMaximizeButton,
             hideMinimizeButton, hideCloseButton);
     } else {
-        uiContent->HideWindowTitleButton(hideSplitButton, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
+        uiContent->HideWindowTitleButton(hideSplitBtn, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
     }
     // compatible mode adapt to proportional scale, will show its button
     bool showScaleBtn = property_->IsAdaptToProportionalScale() && !property_->GetIsAtomicService();
@@ -2101,13 +2102,10 @@ void WindowSessionImpl::SetForceSplitEnable(AppForceLandscapeConfig& config)
         return;
     }
     bool isForceSplit = (config.mode_ == FORCE_SPLIT_MODE || config.mode_ == NAV_FORCE_SPLIT_MODE);
-    if (isForceSplit && parallelType_ == 0) {
-        parallelType_ = config.mode_ == FORCE_SPLIT_MODE ? FORCE_SPLIT_MODE : NAV_FORCE_SPLIT_MODE;
-    }
-    bool isRouter = (config.mode_ == FORCE_SPLIT_MODE);
+    bool isRouter = (config.supportSplit_ == FORCE_SPLIT_MODE);
     TLOGI(WmsLogTag::DEFAULT, "windowId: %{public}u, isForceSplit: %{public}u, homePage: %{public}s, "
-        "parallelType: %{public}d, isRouter: %{public}u",
-        GetWindowId(), isForceSplit, config.homePage_.c_str(), parallelType_, isRouter);
+        "supportSplit: %{public}d, isRouter: %{public}u",
+        GetWindowId(), isForceSplit, config.homePage_.c_str(), config.supportSplit_, isRouter);
     uiContent->SetForceSplitEnable(isForceSplit, config.homePage_, isRouter);
 }
 
@@ -2150,7 +2148,7 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, voi
 
     AppForceLandscapeConfig config = {};
     if (WindowHelper::IsMainWindow(winType) && GetAppForceLandscapeConfig(config) == WMError::WM_OK &&
-        config.isSupportSplitMode_ == true) {
+        config.supportSplit_ > 0) {
         SetForceSplitEnable(config);
     }
 
@@ -4591,7 +4589,7 @@ void WindowSessionImpl::NotifyAfterForeground(bool needNotifyListeners, bool nee
     if (vsyncStation_ != nullptr) {
         TLOGD(WmsLogTag::WMS_MAIN, "enable FrameRateLinker, linkerId=%{public}" PRIu64,
             vsyncStation_->GetFrameRateLinkerId());
-        vsyncStation_->SetFrameRateLinkerEnable(true);
+        vsyncStation_->SetFrameRateLinkerEnable(GetRSUIContext(), true);
         if (WindowHelper::IsMainWindow(GetType())) {
             TLOGD(WmsLogTag::WMS_MAIN, "IsMainWindow: enable soloist linker");
             vsyncStation_->SetDisplaySoloistFrameRateLinkerEnable(true);
@@ -4661,7 +4659,7 @@ void WindowSessionImpl::NotifyAfterBackground(bool needNotifyListeners, bool nee
     if (vsyncStation_ != nullptr) {
         TLOGD(WmsLogTag::WMS_MAIN, "disable FrameRateLinker, linkerId=%{public}" PRIu64,
             vsyncStation_->GetFrameRateLinkerId());
-        vsyncStation_->SetFrameRateLinkerEnable(false);
+        vsyncStation_->SetFrameRateLinkerEnable(GetRSUIContext(), false);
         if (WindowHelper::IsMainWindow(GetType())) {
             TLOGD(WmsLogTag::WMS_MAIN, "IsMainWindow: disable soloist linker");
             vsyncStation_->SetDisplaySoloistFrameRateLinkerEnable(false);
@@ -6253,7 +6251,7 @@ void WindowSessionImpl::FlushFrameRate(uint32_t rate, int32_t animatorExpectedFr
         TLOGW(WmsLogTag::WMS_MAIN, "vsyncStation is null");
         return;
     }
-    vsyncStation_->FlushFrameRate(rate, animatorExpectedFrameRate, rateType);
+    vsyncStation_->FlushFrameRate(GetRSUIContext(), rate, animatorExpectedFrameRate, rateType);
 }
 
 WMError WindowSessionImpl::UpdateProperty(WSPropertyChangeAction action)
@@ -6447,6 +6445,12 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo
         return;
     }
     auto task = [weak = wptr(this), info, rsTransaction, callingWindowRect, avoidAreas]() {
+        if (info != nullptr) {
+            TLOGNI(WmsLogTag::WMS_KEYBOARD, "transaction: %{public}d, safeHeight: %{public}u"
+                ", occupied rect: x %{public}d, y %{public}d, w %{public}u, h %{public}u, "
+                "callingWindowRect: %{public}s", rsTransaction != nullptr, info->safeHeight_, info->rect_.posX_,
+                info->rect_.posY_, info->rect_.width_, info->rect_.height_, callingWindowRect.ToString().c_str());
+        }
         auto window = weak.promote();
         if (!window) {
             TLOGNE(WmsLogTag::WMS_KEYBOARD, "window is nullptr, notify occupied area change info failed");
@@ -6455,12 +6459,6 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo
         if (rsTransaction) {
             RSTransactionAdapter::FlushImplicitTransaction(window->GetRSUIContext());
             rsTransaction->Begin();
-        }
-        if (info != nullptr) {
-            TLOGNI(WmsLogTag::WMS_KEYBOARD, "transaction: %{public}d, safeHeight: %{public}u"
-                ", occupied rect: x %{public}d, y %{public}d, w %{public}u, h %{public}u, "
-                "callingWindowRect: %{public}s", rsTransaction != nullptr, info->safeHeight_, info->rect_.posX_,
-                info->rect_.posY_, info->rect_.width_, info->rect_.height_, callingWindowRect.ToString().c_str());
         }
         window->NotifyOccupiedAreaChangeInfoInner(info);
         window->occupiedAreaInfo_ = info;
@@ -6736,6 +6734,16 @@ WMError WindowSessionImpl::UpdateFloatingBall(const FloatingBallTemplateBaseInfo
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "session is invalid");
         return WMError::WM_ERROR_FB_STATE_ABNORMALLY;
+    }
+
+    if (GetProperty()->GetFbTemplateInfo().template_ == static_cast<uint32_t>(FloatingBallTemplate::STATIC)) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Fb static template can't update");
+        return WMError::WM_ERROR_FB_UPDATE_STATIC_TEMPLATE_DENIED;
+    }
+
+    if (GetProperty()->GetFbTemplateInfo().template_ != fbTemplateBaseInfo.template_) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Fb template type can't update");
+        return WMError::WM_ERROR_FB_UPDATE_TEMPLATE_TYPE_DENIED;
     }
     FloatingBallTemplateInfo fbTemplateInfo = FloatingBallTemplateInfo(fbTemplateBaseInfo, icon);
     auto hostSession = GetHostSession();
@@ -7295,8 +7303,14 @@ bool WindowSessionImpl::IsDeviceFeatureCapableFor(const std::string& feature) co
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window [%{public}d] context is nullptr", GetPersistentId());
         return false;
     }
-    std::vector<std::string> deviceFeatures = context_->GetHapModuleInfo()->deviceFeatures;
-    return std::find(deviceFeatures.begin(), deviceFeatures.end(), feature) != deviceFeatures.end();
+    std::string deviceType = system::GetParameter("const.product.devicetype", "");
+    std::map<std::string, std::vector<std::string>>& requiredDeviceFeatures =
+        context_->GetHapModuleInfo()->requiredDeviceFeatures;
+    if (requiredDeviceFeatures.find(deviceType) == requiredDeviceFeatures.end()) {
+        return false;
+    }
+    auto& features = requiredDeviceFeatures[deviceType];
+    return std::find(features.begin(), features.end(), feature) != features.end();
 }
 
 bool WindowSessionImpl::IsDeviceFeatureCapableForFreeMultiWindow() const
