@@ -447,6 +447,35 @@ HWTEST_F(SceneSessionTest, IsViewKeepScreenOn02, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleActionUpdateWindowShadowEnabled01
+ * @tc.desc: HandleActionUpdateWindowShadowEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, HandleActionUpdateWindowShadowEnabled01, TestSize.Level1)
+{
+    WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_WINDOW_SHADOW_ENABLED;
+    SessionInfo info;
+    info.abilityName_ = "HandleActionUpdateWindowShadowEnabled";
+    info.bundleName_ = "HandleActionUpdateWindowShadowEnabled";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    sceneSession->containerColorList_.insert("abc");
+
+    auto ret = sceneSession->HandleActionUpdateWindowShadowEnabled(property, action);
+    EXPECT_EQ(WMError::WS_ERROR_INVALID_PERMISSION, ret);
+
+    sceneSession->containerColorList_.insert("HandleActionUpdateWindowShadowEnabled");
+    ret = sceneSession->HandleActionUpdateWindowShadowEnabled(property, action);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
+
+    sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    ret = sceneSession->HandleActionUpdateWindowShadowEnabled(property, action);
+    EXPECT_EQ(WMError::WM_OK, ret);
+}
+
+/**
  * @tc.name: SetWindowShadowEnabled01
  * @tc.desc: SetWindowShadowEnabled
  * @tc.type: FUNC
