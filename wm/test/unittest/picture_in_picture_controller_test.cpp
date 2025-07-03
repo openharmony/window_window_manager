@@ -1205,24 +1205,21 @@ HWTEST_F(PictureInPictureControllerTest, GetPiPSettingSwitchStatus, TestSize.Lev
 {
     auto mw = sptr<MockWindow>::MakeSptr();
     ASSERT_NE(nullptr, mw);
-    auto option = sptr<PipOption>::MakeSptr();
-    ASSERT_NE(nullptr, option);
-    auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
+    auto pipOption = sptr<PipOption>::MakeSptr();
+    ASSERT_NE(nullptr, pipOption);
+    auto pipControl = sptr<PictureInPictureController>::MakeSptr(pipOption, mw, 1, nullptr);
     EXPECT_EQ(false, pipControl->GetPiPSettingSwitchStatus());
 
-    sptr<WindowOption> windowOption = sptr<WindowOption>::MakeSptr();
-    windowOption->SetWindowName("GetPiPSettingSwitchStatus");
-    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(windowOption);
-
-    window->property_->SetPersistentId(100);
-    SessionInfo sessionInfo = {"CreateTestBundle0", "CreateTestModule0", "CreateTestAbility0"};
-    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    window->hostSession_ = session;
-    window->state_ = WindowState::STATE_SHOWN;
-    window->windowSessionMap_.insert(std::make_pair(window->GetWindowName(),
-        std::make_pair(window->GetWindowId(), window)));
-    pipControl->GetPiPSettingSwitchStatus();
-    usleep(WAIT_SYNC_IN_NS);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetPiPSettingSwitchStatus");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    WindowSessionImpl::windowSessionMap_.clear();
+    WindowSessionImpl::windowSessionMap_.insert(std::make_pair(window->GetWindowName(),
+        std::pair<uint64_t, sptr<WindowSessionImpl>>(window->GetWindowId(), window)));
+    EXPECT_EQ(false, pipControl->GetPiPSettingSwitchStatus());
+    WindowSessionImpl::windowSessionMap_.clear();
 }
 } // namespace
 } // namespace Rosen
