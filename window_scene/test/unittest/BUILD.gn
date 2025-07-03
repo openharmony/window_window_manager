@@ -616,6 +616,7 @@ ohos_unittest("ws_scene_session_manager_one_test") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "eventhandler:libeventhandler",
+    "safwk:system_ability_fwk",
   ]
 }
 

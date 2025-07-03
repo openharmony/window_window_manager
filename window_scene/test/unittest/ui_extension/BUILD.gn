@@ -121,8 +121,14 @@ ohos_unittest("ws_scene_session_manager_extension_test") {
 
   sources = [
     "scene_session_manager_extension_test.cpp",
-    "mock/mock_session_permission.cpp",
+    "mock/mock_uiext_session_permission.cpp",
     "../../mock/mock_ability_manager_client.cpp",
+  ]
+
+  defines = [
+    "ENABLE_MOCK_IS_SYSTEM_CALLING",
+    "ENABLE_MOCK_VERIFY_CALLING_PERMISSION",
+    "ENABLE_MOCK_START_BY_HDCD",
   ]
 
   deps = [ ws_unittest_common ]

@@ -18,10 +18,13 @@
 
 namespace OHOS {
 namespace Rosen {
-class MockSessionPermission {
+class MockUIExtSessionPermission {
 public:
     static void ClearAllFlag();
     static void SetIsStartedByUIExtensionFlag(const bool isStartedByUIExtensionFlag);
+    static void SetIsSystemCallingFlag(const bool isSystemCallingFlag);
+    static void SetVerifyCallingPermissionFlag(const bool verifyCallingPermissionFlag);
+    static void SetIsStartByHdcdFlag(const bool isStartByHdcdFlag);
 };
 }
 }
