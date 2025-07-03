@@ -74,8 +74,7 @@ public:
     sptr<FoldCreaseRegion> currentFoldCreaseRegion_ = nullptr;
     bool lockDisplayStatus_ = false;
     bool onBootAnimation_ = false;
-    bool isClearingBootAnimation_ = false;
-    std::mutex clearingBootAnimationMutex_;
+    std::atomic<bool> isClearingBootAnimation_ = false;
     bool isFirstFrameCommitReported_ = false;
     std::vector<uint32_t> screenParams_ = {};
     /*
