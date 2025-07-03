@@ -27,6 +27,7 @@
 #include "zidl/window_manager_agent_interface.h"
 #include "pattern_detach_callback.h"
 #include "test/mock/mock_session_stage.h"
+#include "../../session/host/include/ui_effect_controller_client.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -2759,6 +2760,20 @@ HWTEST_F(SceneSessionManagerStubTest, HandleAnimateTo, Function | SmallTest | Le
 
     int res = stub_->HandleAnimateTo(data, reply);
     EXPECT_EQ(res, ERR_NONE);
+}
+
+HWTEST_F(SceneSessionManagerStubTest, HandleCreateUIEffectController, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint32_t code = static_cast<uint32_t>(
+        ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_CREATE_UI_EFFECT_CONTROLLER);
+    sptr<IUIEffectControllerClient> client = sptr<UIEffectControllerClient>::MakeSptr();
+    stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(stub_->HandleCreateUIEffectController(data, reply), ERR_INVALID_DATA);
+    data.WriteRemoteObject(client->AsObject());
+    stub_->HandleCreateUIEffectController(data, reply);
 }
 } // namespace
 } // namespace Rosen

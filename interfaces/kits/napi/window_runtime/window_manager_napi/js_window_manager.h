@@ -55,6 +55,7 @@ public:
     static napi_value SetStartWindowBackgroundColor(napi_env env, napi_callback_info info);
     static napi_value ShiftAppWindowTouchEvent(napi_env env, napi_callback_info info);
     static napi_value NotifyScreenshotEvent(napi_env env, napi_callback_info info);
+    static napi_value CreateUIEffectController(napi_env env, napi_callback_info info);
 
 private:
     static napi_value OnCreate(napi_env env, napi_callback_info info);
@@ -81,6 +82,7 @@ private:
     static napi_value OnSetStartWindowBackgroundColor(napi_env env, napi_callback_info info);
     static napi_value OnShiftAppWindowTouchEvent(napi_env env, napi_callback_info info);
     static napi_value OnNotifyScreenshotEvent(napi_env env, napi_callback_info info);
+    static napi_value OnCreateUIEffectController(napi_env env, napi_callback_info info);
     static bool ParseRequiredConfigOption(
         napi_env env, napi_value jsObject, WindowOption& option);
     static bool ParseConfigOption(

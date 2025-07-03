@@ -169,6 +169,8 @@ public:
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
     WMError AnimateTo(int32_t windowId, const WindowAnimationProperty& animationProperty,
         const WindowAnimationOption& animationOption) override;
+    WMError CreateUIEffectController(const sptr<IUIEffectControllerClient>& controllerClient,
+        sptr<IUIEffectController>& controller, int32_t& controllerId) override;
 
 private:
     template<typename T>

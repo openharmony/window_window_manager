@@ -86,6 +86,8 @@ const std::string SCENE_SESSION_DESTRUCT_CB = "sceneSessionDestruct";
 const std::string SCENE_SESSION_TRANSFER_TO_TARGET_SCREEN_CB = "sceneSessionTransferToTargetScreen";
 const std::string UPDATE_KIOSK_APP_LIST_CB = "updateKioskAppList";
 const std::string KIOSK_MODE_CHANGE_CB = "kioskModeChange";
+const std::string UI_EFFECT_SET_PARAMS_CB = "uiEffectSetParams";
+const std::string UI_EFFECT_ANIMATE_TO_CB = "uiEffectAnimateTo";
 
 const std::map<std::string, ListenerFunctionType> ListenerFunctionTypeMap {
     {CREATE_SYSTEM_SESSION_CB,     ListenerFunctionType::CREATE_SYSTEM_SESSION_CB},
@@ -110,6 +112,8 @@ const std::map<std::string, ListenerFunctionType> ListenerFunctionTypeMap {
     {SCENE_SESSION_TRANSFER_TO_TARGET_SCREEN_CB,    ListenerFunctionType::SCENE_SESSION_TRANSFER_TO_TARGET_SCREEN_CB},
     {UPDATE_KIOSK_APP_LIST_CB,     ListenerFunctionType::UPDATE_KIOSK_APP_LIST_CB},
     {KIOSK_MODE_CHANGE_CB,         ListenerFunctionType::KIOSK_MODE_CHANGE_CB},
+    {UI_EFFECT_SET_PARAMS_CB,       ListenerFunctionType::UI_EFFECT_SET_PARAMS_CB},
+    {UI_EFFECT_ANIMATE_TO_CB,      ListenerFunctionType::UI_EFFECT_ANIMATE_TO_CB},
 };
 } // namespace
 
@@ -310,6 +314,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::UpdateRecentMainSessionInfos);
     BindNativeFunction(env, exportObj, "supportSnapshotAllSessionStatus", moduleName,
         JsSceneSessionManager::SupportSnapshotAllSessionStatus);
+    BindNativeFunction(env, exportObj, "setUIEffectControllerAliveInUI", moduleName,
+        JsSceneSessionManager::SetUIEffectControllerAliveInUI);
     return NapiGetUndefined(env);
 }
 
@@ -1579,6 +1585,12 @@ void JsSceneSessionManager::ProcessRegisterCallback(ListenerFunctionType listene
             break;
         case ListenerFunctionType::KIOSK_MODE_CHANGE_CB:
             RegisterKioskModeChangeCallback();
+            break;
+        case ListenerFunctionType::UI_EFFECT_SET_PARAMS_CB:
+            RegisterUIEffectSetParamsCallback();
+            break;
+        case ListenerFunctionType::UI_EFFECT_ANIMATE_TO_CB:
+            RegisterUIEffectAnimateToCallback();
             break;
         default:
             break;
@@ -4797,6 +4809,79 @@ void JsSceneSessionManager::RegisterSceneSessionDestructCallback()
     });
 }
 
+void JsSceneSessionManager::RegisterUIEffectSetParamsCallback()
+{
+    UIEffectManager::GetInstance().RegisterUIEffectSetParamsCallback(
+        [this](int32_t id, sptr<UIEffectParams> param) {
+        this->OnUIEffectSetParams(id, param);
+    });
+}
+
+void JsSceneSessionManager::RegisterUIEffectAnimateToCallback()
+{
+    UIEffectManager::GetInstance().RegisterUIEffectAnimateToCallback(
+        [this](int32_t id, sptr<UIEffectParams> param, sptr<WindowAnimationOption> options,
+            sptr<WindowAnimationOption> interruptOption) {
+            this->OnUIEffectAnimateTo(id, param, options, interruptOption);
+    });
+}
+
+void JsSceneSessionManager::OnUIEffectSetParams(int32_t id, sptr<UIEffectParams> param)
+{
+    const char* const where = __func__;
+    taskScheduler_->PostMainThreadTask(
+        [this, id, param, where, jsCallBack = GetJSCallback(UI_EFFECT_SET_PARAMS_CB), env = env_] {
+            if (jsCallBack == nullptr || param == nullptr) {
+                TLOGNE(WmsLogTag::WMS_ANIMATION, "%{public}s:jsCallBack or param is nullptr", where);
+                return;
+            }
+            napi_value jsParam = nullptr;
+            if (napi_status status = param->ConvertToJsValue(env, jsParam); status != napi_status::napi_ok) {
+                TLOGNE(WmsLogTag::WMS_ANIMATION, "OnUIEffectSetParams trans failed with code %{public}d", status);
+                return;
+            }
+            napi_value argv[] = { CreateJsValue(env, id), jsParam };
+            napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+        }, __func__ + std::to_string(id));
+}
+
+void JsSceneSessionManager::OnUIEffectAnimateTo(int32_t id, sptr<UIEffectParams> param,
+    sptr<WindowAnimationOption> option, sptr<WindowAnimationOption> interruptOption)
+{
+    const char* const where = __func__;
+    taskScheduler_->PostMainThreadTask(
+        [this, id, param, option, interruptOption, where,
+            jsCallBack = GetJSCallback(UI_EFFECT_ANIMATE_TO_CB), env = env_] {
+            if (jsCallBack == nullptr || param == nullptr || option == nullptr) {
+                TLOGNE(WmsLogTag::WMS_ANIMATION, "%{public}s:jsCallBack or param or option is nullptr", where);
+                return;
+            }
+            napi_value jsParam = nullptr;
+            if (napi_status status = param->ConvertToJsValue(env, jsParam); status != napi_status::napi_ok) {
+                TLOGNE(WmsLogTag::WMS_ANIMATION, "%{public}s:trans failed with code %{public}d", where, status);
+                return;
+            }
+            napi_value jsOption = ConvertWindowAnimationOptionToJsValue(env, *option);
+            if (!jsOption) {
+                TLOGNE(WmsLogTag::WMS_ANIMATION, "%{public}s:jsOption is nullptr", where);
+                return;
+            }
+            if (interruptOption) {
+                napi_value jsInterruptOption = ConvertWindowAnimationOptionToJsValue(env, *interruptOption);
+                if (!jsInterruptOption) {
+                    TLOGNE(WmsLogTag::WMS_ANIMATION, "%{public}s:js interrupt option is nullptr", where);
+                    return;
+                }
+                napi_value argv[] = { CreateJsValue(env, id), jsParam, jsOption, jsInterruptOption};
+                napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(),
+                    ArraySize(argv), argv, nullptr);
+                return;
+            }
+            napi_value argv[] = { CreateJsValue(env, id), jsParam, jsOption};
+            napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+        }, __func__ + std::to_string(id));
+}
+
 void JsSceneSessionManager::OnSceneSessionDestruct(int32_t persistentId)
 {
     taskScheduler_->PostMainThreadTask(
@@ -4955,6 +5040,42 @@ napi_value JsSceneSessionManager::OnUpdateRecentMainSessionInfos(napi_env env, n
         return NapiGetUndefined(env);
     }
     SceneSessionManager::GetInstance().UpdateRecentMainSessionInfos(recentMainSessionIdList);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSessionManager::SetUIEffectControllerAliveInUI(napi_env env, napi_callback_info info)
+{
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnSetUIEffectControllerAliveInUI(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::OnSetUIEffectControllerAliveInUI(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "in");
+    size_t argc = DEFAULT_ARG_COUNT;
+    napi_value argv[DEFAULT_ARG_COUNT] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_TWO) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Argc count is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t id = -1;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_ZERO], id)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to convert enabled to %{public}d", id);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool alive = false;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_ONE], alive)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to convert enabled to %{public}d", alive);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    UIEffectManager::GetInstance().SetUIEffectControllerAliveState(id, alive);
     return NapiGetUndefined(env);
 }
 

@@ -57,7 +57,7 @@ enum class WindowAnimationCurve : uint32_t {
     /**
      * animation curve type cubic bezier curve.
      */
-    CUBIC_BEZIER_CURVE = 2,
+    CUBIC_BEZIER = 2,
 };
 
 /**

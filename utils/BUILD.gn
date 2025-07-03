@@ -27,7 +27,47 @@ config("libwmutil_public_config") {
   include_dirs = [
     "include",
     "${window_base_path}/window_scene/interfaces/include",
+    "../interfaces/innerkits/dm",
+    "../interfaces/innerkits/wm",
   ]
+}
+
+ohos_source_set("ui_effect_controller_common") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+  }
+
+  sources = [
+    "src/ui_effect_controller_common.cpp",
+  ]
+
+  public_configs = [
+    ":libwmutil_public_config",
+  ]
+
+  external_deps = [
+    "hilog:libhilog",
+  ]
+
+  public_deps = [
+    ":libwmutil_base",
+  ]
+  
+  public_external_deps = [
+    "c_utils:utils",
+    "graphic_2d:librender_service_client",
+    "ability_runtime:runtime",
+    "napi:ace_napi",
+  ]
+  part_name = "window_manager"
+  subsystem_name = "window"
 }
 
 ## build libwmutil_static.a

@@ -16,7 +16,7 @@
 #include "ui_effect_controller_common.h"
 
 namespace OHOS::Rosen {
-WMError UIEffectControllerClientProxy::SetParams(const sptr<UIEffectParams>& param)
+WMError UIEffectControllerClientProxy::SetParams(const sptr<UIEffectParams>& params)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -25,8 +25,8 @@ WMError UIEffectControllerClientProxy::SetParams(const sptr<UIEffectParams>& par
         TLOGE(WmsLogTag::WMS_ANIMATION, "Write interfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (!data.WriteStrongParcelable(param)) {
-        TLOGE(WmsLogTag::WMS_ANIMATION, "Write ui effect param failed");
+    if (!data.WriteStrongParcelable(params)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Write ui effect params failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();
