@@ -121,6 +121,81 @@ HWTEST_F(SessionStubLifecycleTest, HandlePendingSessionActivation011, TestSize.L
     auto res = session_->HandlePendingSessionActivation(data, reply);
     ASSERT_EQ(5, res);
 }
+
+/**
+ * @tc.name: HandlePendingSessionActivation011
+ * @tc.desc: sessionStub SessionStubLifecycleTest
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionStubLifecycleTest, HandlePendingSessionActivation02, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    AAFwk::Want want;
+    EXPECT_EQ(data.WriteParcelable(&want), true);
+    EXPECT_EQ(data.WriteInt32(1), true);
+    EXPECT_EQ(data.WriteInt32(2), true);
+    EXPECT_EQ(data.WriteInt32(3), true);
+    EXPECT_EQ(data.WriteInt64(10), true);
+    EXPECT_EQ(data.WriteUint32(9), true);
+    EXPECT_EQ(data.WriteInt32(4), true);
+    EXPECT_EQ(data.WriteBool(false), true);
+    EXPECT_EQ(data.WriteParcelable(nullptr), true);
+
+    EXPECT_EQ(data.WriteBool(true), true);
+    EXPECT_EQ(data.WriteBool(true), true);
+    EXPECT_EQ(data.WriteBool(true), true);
+    EXPECT_EQ(data.WriteBool(true), true);
+    EXPECT_EQ(data.WriteBool(false), true);
+    EXPECT_EQ(data.WriteBool(false), true);
+    EXPECT_EQ(data.WriteBool(false), true);
+    EXPECT_EQ(data.WriteString("instanceKey"), true);
+    EXPECT_EQ(data.WriteBool(false), true);
+    EXPECT_EQ(data.WriteUint32(0), true);
+    EXPECT_EQ(data.WriteString("specifiedFlag"), true);
+    EXPECT_EQ(data.WriteBool(false), true);
+    auto res = session_->HandlePendingSessionActivation(data, reply);
+    ASSERT_EQ(5, res);
+}
+
+/**
+ * @tc.name: HandlePendingSessionActivation03
+ * @tc.desc: sessionStub SessionStubLifecycleTest
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionStubLifecycleTest, HandlePendingSessionActivation03, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    AAFwk::Want want;
+    EXPECT_EQ(data.WriteParcelable(&want), true);
+    EXPECT_EQ(data.WriteInt32(1), true);
+    EXPECT_EQ(data.WriteInt32(2), true);
+    EXPECT_EQ(data.WriteInt32(3), true);
+    EXPECT_EQ(data.WriteInt64(10), true);
+    EXPECT_EQ(data.WriteUint32(9), true);
+    EXPECT_EQ(data.WriteInt32(4), true);
+    EXPECT_EQ(data.WriteBool(false), true);
+    EXPECT_EQ(data.WriteParcelable(nullptr), true);
+
+    EXPECT_EQ(data.WriteBool(true), true);
+    EXPECT_EQ(data.WriteBool(true), true);
+    EXPECT_EQ(data.WriteBool(true), true);
+    EXPECT_EQ(data.WriteBool(true), true);
+    EXPECT_EQ(data.WriteBool(false), true);
+    EXPECT_EQ(data.WriteBool(false), true);
+    EXPECT_EQ(data.WriteBool(false), true);
+    EXPECT_EQ(data.WriteString("instanceKey"), true);
+    EXPECT_EQ(data.WriteBool(false), true);
+    EXPECT_EQ(data.WriteUint32(0), true);
+    EXPECT_EQ(data.WriteString("specifiedFlag"), true);
+    EXPECT_EQ(data.WriteBool(false), true);
+    EXPECT_EQ(data.WriteInt32(9), true);
+    auto res = session_->HandlePendingSessionActivation(data, reply);
+    ASSERT_EQ(0, res);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

@@ -801,7 +801,7 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
     }
     if (!data.ReadInt32(abilitySessionInfo->scenarios)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read scenarios failed.");
-        return WSError::WS_ERROR_IPC_FAILED;
+        return WSError::ERR_INVALID_DATA;
     }
     abilitySessionInfo->windowCreateParams.reset(data.ReadParcelable<WindowCreateParams>());
     WSError errCode = PendingSessionActivation(abilitySessionInfo);
