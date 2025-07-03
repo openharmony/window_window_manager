@@ -173,6 +173,10 @@ const bool IS_COORDINATION_SUPPORT =
 const std::string FAULT_DESCRIPTION = "842003014";
 const std::string FAULT_SUGGESTION = "542003014";
 constexpr uint32_t COMMON_EVENT_SERVICE_ID = 3299;
+const long GET_HDR_PIXELMAP_TIMEOUT = 2000;
+
+const static uint32_t PIXMAP_VECTOR_SIZE = 2;
+static const uint32_t SDR_PIXMAP = 0;
 const bool IS_SUPPORT_PC_MODE = system::GetBoolParameter("const.window.support_window_pcmode_switch", false);
 const ScreenId SCREEN_GROUP_ID_DEFAULT = 1;
 const std::set<std::string> INDIVIDUAL_SCREEN_GROUP_SET = {"CeliaView", "DevEcoViewer"};
@@ -6089,7 +6093,7 @@ bool ScreenSessionManager::IsFakeDisplayExist()
 }
 
 std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenSnapshot(DisplayId displayId, bool isUseDma,
-    bool isCaptureFullOfScreen, const std::vector<NodeId>& blackList)
+    bool isCaptureFullOfScreen, const std::vector<NodeId>& surfaceNodesList)
 {
     DisplayId realDisplayId = displayId;
     if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && displayId == DISPLAY_ID_FAKE) {
@@ -6107,6 +6111,7 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenSnapshot(Display
     }
     std::shared_ptr<SurfaceCaptureFuture> callback = std::make_shared<SurfaceCaptureFuture>();
     RSSurfaceCaptureConfig config;
+    config.isHdrCapture = false;
     config.useDma = isUseDma;
 #ifdef FOLD_ABILITY_ENABLE
     if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() &&
@@ -6114,16 +6119,17 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenSnapshot(Display
         config.mainScreenRect = SuperFoldPolicy::GetInstance().GetSnapshotRect(displayId, isCaptureFullOfScreen);
     }
 #endif
-    config.blackList = blackList;
-    if (blackList.size() > 0) {
-        TLOGI(WmsLogTag::DMS, "Snapshot filtering blackList surfaceNodes, size:%{public}ud", static_cast<uint32_t>(blackList.size()));
+    config.blackList = surfaceNodesList;
+    if (surfaceNodesList.size() > 0) {
+        TLOGI(WmsLogTag::DMS, "Snapshot filtering surfaceNodesList surfaceNodes, size:%{public}ud",
+            static_cast<uint32_t>(surfaceNodesList.size()));
     }
     bool ret = rsInterface_.TakeSurfaceCapture(displayNode, callback, config);
     if (!ret) {
         TLOGE(WmsLogTag::DMS, "TakeSurfaceCapture failed");
         return nullptr;
     }
-    std::shared_ptr<Media::PixelMap> screenshot = callback->GetResult(2000);  // wait for <= 2000ms
+    std::shared_ptr<Media::PixelMap> screenshot = callback->GetResult(GET_HDR_PIXELMAP_TIMEOUT);  // wait for <= 2000ms
     if (screenshot == nullptr) {
         TLOGE(WmsLogTag::DMS, "Failed to get pixelmap from RS, return nullptr!");
     } else {
@@ -6135,6 +6141,61 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenSnapshot(Display
     snapshotInfo->SetDisplayId(displayId);
     OnScreenshot(snapshotInfo);
     return screenshot;
+}
+
+std::vector<std::shared_ptr<Media::PixelMap>> ScreenSessionManager::GetScreenHDRSnapshot(
+    DisplayId displayId, bool isUseDma, bool isCaptureFullOfScreen, const std::vector<NodeId>& surfaceNodesList)
+{
+    DisplayId realDisplayId = displayId;
+#ifdef FOLD_ABILITY_ENABLE
+    static bool isSuperFoldDisplayDevice = FoldScreenStateInternel::IsSuperFoldDisplayDevice();
+    if (isSuperFoldDisplayDevice && displayId == DISPLAY_ID_FAKE) {
+        if (!SuperFoldPolicy::GetInstance().IsFakeDisplayExist()) {
+            TLOGE(WmsLogTag::DMS, "fake display is not exist!");
+            return {nullptr, nullptr};
+        }
+        realDisplayId = 0;
+    }
+#endif
+    std::shared_ptr<RSDisplayNode> displayNode = GetDisplayNodeByDisplayId(realDisplayId);
+    if (displayNode == nullptr) {
+        TLOGE(WmsLogTag::DMS, "displayNode is null!");
+        return {nullptr, nullptr};
+    }
+    std::shared_ptr<SurfaceCaptureFuture> callback = std::make_shared<SurfaceCaptureFuture>();
+    RSSurfaceCaptureConfig config;
+    config.isHdrCapture = true;
+    config.useDma = isUseDma;
+    TLOGI(WmsLogTag::DMS, "take surface capture with dma=%{public}d", isUseDma);
+#ifdef FOLD_ABILITY_ENABLE
+    if (foldScreenController_ != nullptr && FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        config.mainScreenRect = foldScreenController_->GetScreenSnapshotRect();
+    }
+    if (isSuperFoldDisplayDevice && SuperFoldPolicy::GetInstance().IsNeedSetSnapshotRect(displayId)) {
+        config.mainScreenRect = SuperFoldPolicy::GetInstance().GetSnapshotRect(displayId, isCaptureFullOfScreen);
+    }
+#endif
+    config.blackList = surfaceNodesList;
+    if (surfaceNodesList.size() > 0) {
+        TLOGI(WmsLogTag::DMS, "Snapshot filter, size:%{public}ud", static_cast<uint32_t>(surfaceNodesList.size()));
+    }
+    bool ret = rsInterface_.TakeSurfaceCapture(displayNode, callback, config);
+    if (!ret) {
+        TLOGE(WmsLogTag::DMS, "TakeSurfaceCapture failed");
+        return {nullptr, nullptr};
+    }
+    // wait for <= 2000ms
+    std::vector<std::shared_ptr<Media::PixelMap>> screenshotVec = callback->GetHDRResult(GET_HDR_PIXELMAP_TIMEOUT);
+    if (screenshotVec.size() != PIXMAP_VECTOR_SIZE || screenshotVec[0] == nullptr) {
+        TLOGE(WmsLogTag::DMS, "Failed to get pixelmap vector from RS, return nullptr!");
+        return {nullptr, nullptr};
+    }
+    // notify dm listener
+    sptr<ScreenshotInfo> snapshotInfo = new ScreenshotInfo();
+    snapshotInfo->SetTrigger(SysCapUtil::GetClientName());
+    snapshotInfo->SetDisplayId(displayId);
+    OnScreenshot(snapshotInfo);
+    return screenshotVec;
 }
 
 std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshot(DisplayId displayId,
@@ -6174,6 +6235,52 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshot(Displa
     return nullptr;
 }
 
+std::vector<std::shared_ptr<Media::PixelMap>> ScreenSessionManager::GetDisplayHDRSnapshot(DisplayId displayId,
+    DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen)
+{
+    TLOGI(WmsLogTag::DMS, "enter!");
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsShellCall()) {
+        if (errorCode != nullptr) {
+            *errorCode = DmErrorCode::DM_ERROR_NOT_SYSTEM_APP;
+        }
+        return {nullptr, nullptr};
+    }
+    if (system::GetBoolParameter("persist.edm.disallow_screenshot", false)) {
+        TLOGE(WmsLogTag::DMS, "snapshot disabled by edm!");
+        if (errorCode != nullptr) {
+            *errorCode = DmErrorCode::DM_ERROR_NO_PERMISSION;
+        }
+        return {nullptr, nullptr};
+    }
+    if (displayId == DISPLAY_ID_FAKE && !IsFakeDisplayExist()) {
+        TLOGE(WmsLogTag::DMS, "fake display not exist!");
+        if (errorCode != nullptr) {
+            *errorCode = DmErrorCode::DM_ERROR_INVALID_SCREEN;
+        }
+        return {nullptr, nullptr};
+    }
+    if ((Permission::IsSystemCalling() && Permission::CheckCallingPermission(SCREEN_CAPTURE_PERMISSION)) ||
+        SessionPermission::IsShellCall()) {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetDisplayHDRSnapshot(%" PRIu64")", displayId);
+        std::vector<std::shared_ptr<Media::PixelMap>> res = GetScreenHDRSnapshot(
+            displayId, isUseDma, isCaptureFullOfScreen);
+        if (res.size() == PIXMAP_VECTOR_SIZE && res[SDR_PIXMAP] != nullptr) {
+            NotifyScreenshot(displayId);
+            if (SessionPermission::IsBetaVersion()) {
+                CheckAndSendHiSysEvent("GET_DISPLAY_SNAPSHOT", "hmos.screenshot");
+            }
+        } else {
+            TLOGE(WmsLogTag::DMS, "GetScreenHDRSnapshot get PixelMap vector failed");
+        }
+        isScreenShot_ = true;
+        NotifyCaptureStatusChanged();
+        return res;
+    } else if (errorCode) {
+        *errorCode = DmErrorCode::DM_ERROR_NO_PERMISSION;
+    }
+    return {nullptr, nullptr};
+}
+
 std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshotWithOption(const CaptureOption& option,
     DmErrorCode* errorCode)
 {
@@ -6197,7 +6304,7 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshotWithOpt
     if ((Permission::IsSystemCalling() && Permission::CheckCallingPermission(SCREEN_CAPTURE_PERMISSION)) ||
         SessionPermission::IsShellCall()) {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetDisplaySnapshot(%" PRIu64")", option.displayId_);
-        auto res = GetScreenSnapshot(option.displayId_, true, option.isCaptureFullOfScreen_, option.blackList_);
+        auto res = GetScreenSnapshot(option.displayId_, true, option.isCaptureFullOfScreen_, option.surfaceNodesList_);
         if (res != nullptr) {
             if (SessionPermission::IsBetaVersion()) {
                 CheckAndSendHiSysEvent("GET_DISPLAY_SNAPSHOT", "hmos.screenshot");
@@ -6214,6 +6321,51 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshotWithOpt
         *errorCode = DmErrorCode::DM_ERROR_NO_PERMISSION;
     }
     return nullptr;
+}
+
+std::vector<std::shared_ptr<Media::PixelMap>> ScreenSessionManager::GetDisplayHDRSnapshotWithOption(
+    const CaptureOption& option, DmErrorCode* errorCode)
+{
+    TLOGD(WmsLogTag::DMS, "enter!");
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsShellCall() &&
+        !SessionPermission::IsSACalling()) {
+        if (errorCode != nullptr) {
+            *errorCode = DmErrorCode::DM_ERROR_NOT_SYSTEM_APP;
+        }
+        return {nullptr, nullptr};
+    }
+    if (system::GetBoolParameter("persist.edm.disallow_screenshot", false)) {
+        TLOGE(WmsLogTag::DMS, "snapshot was disabled by edm!");
+        return {nullptr, nullptr};
+    }
+    if (option.displayId_ == DISPLAY_ID_FAKE && !IsFakeDisplayExist()) {
+        TLOGE(WmsLogTag::DMS, "fake display not exist!");
+        if (errorCode != nullptr) {
+            *errorCode = DmErrorCode::DM_ERROR_INVALID_SCREEN;
+        }
+        return {nullptr, nullptr};
+    }
+    if ((Permission::IsSystemCalling() && Permission::CheckCallingPermission(SCREEN_CAPTURE_PERMISSION)) ||
+        SessionPermission::IsShellCall()) {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetDisplayHDRSnapshot(%" PRIu64")", option.displayId_);
+        std::vector<std::shared_ptr<Media::PixelMap>> res = GetScreenHDRSnapshot(
+            option.displayId_, true, option.isCaptureFullOfScreen_, option.surfaceNodesList_);
+        if (res.size() == PIXMAP_VECTOR_SIZE && res[SDR_PIXMAP] != nullptr) {
+            if (SessionPermission::IsBetaVersion()) {
+                CheckAndSendHiSysEvent("GET_DISPLAY_SNAPSHOT", "hmos.screenshot");
+            }
+            TLOGI(WmsLogTag::DMS, "isNeedNotify_:%{public}d", option.isNeedNotify_);
+            if (option.isNeedNotify_) {
+                isScreenShot_ = true;
+                NotifyScreenshot(option.displayId_);
+                NotifyCaptureStatusChanged();
+            }
+        }
+        return res;
+    } else if (errorCode) {
+        *errorCode = DmErrorCode::DM_ERROR_NO_PERMISSION;
+    }
+    return {nullptr, nullptr};
 }
 
 std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetSnapshotByPicker(Media::Rect &rect, DmErrorCode* errorCode)
