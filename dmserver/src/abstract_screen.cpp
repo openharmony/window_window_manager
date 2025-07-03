@@ -516,6 +516,7 @@ sptr<ScreenGroupInfo> AbstractScreenGroup::ConvertToScreenGroupInfo() const
     }
     FillScreenInfo(screenGroupInfo);
     screenGroupInfo->combination_ = combination_;
+    std::lock_guard<std::mutex> lock(screenMapMutex_);
     for (auto iter = screenMap_.begin(); iter != screenMap_.end(); iter++) {
         screenGroupInfo->children_.push_back(iter->first);
         screenGroupInfo->position_.push_back(iter->second->startPoint_);
@@ -574,14 +575,17 @@ bool AbstractScreenGroup::AddChild(sptr<AbstractScreen>& dmsScreen, Point& start
     }
     ScreenId screenId = dmsScreen->dmsId_;
     TLOGD(WmsLogTag::DMS, "AbstractScreenGroup AddChild dmsScreenId: %{public}" PRIu64"", screenId);
-    auto iter = screenMap_.find(screenId);
-    if (iter != screenMap_.end()) {
-        if (dmsScreen->rsDisplayNode_ != nullptr && dmsScreen->type_ == ScreenType::REAL &&
-            defaultScreenId_ == screenId) {
-            TLOGD(WmsLogTag::DMS, "Add default screen, id: %{public}" PRIu64"", screenId);
-        } else {
-            TLOGE(WmsLogTag::DMS, "AddChild, screenMap_ has dmsScreen:%{public}" PRIu64"", screenId);
-            return false;
+    {
+        std::lock_guard<std::mutex> lock(screenMapMutex_);
+        auto iter = screenMap_.find(screenId);
+        if (iter != screenMap_.end()) {
+            if (dmsScreen->rsDisplayNode_ != nullptr && dmsScreen->type_ == ScreenType::REAL &&
+                defaultScreenId_ == screenId) {
+                TLOGD(WmsLogTag::DMS, "Add default screen, id: %{public}" PRIu64, screenId);
+            } else {
+                TLOGE(WmsLogTag::DMS, "AddChild, screenMap_ has dmsScreen:%{public}" PRIu64, screenId);
+                return false;
+            }
         }
     }
     struct RSDisplayNodeConfig config;
@@ -596,6 +600,7 @@ bool AbstractScreenGroup::AddChild(sptr<AbstractScreen>& dmsScreen, Point& start
         dmsScreen->InitRSDisplayNode(config, startPoint);
         dmsScreen->lastGroupDmsId_ = dmsScreen->groupDmsId_;
         dmsScreen->groupDmsId_ = dmsId_;
+        std::lock_guard<std::mutex> lock(screenMapMutex_);
         screenMap_.insert(std::make_pair(screenId, dmsScreen));
     }
     return true;
@@ -633,6 +638,7 @@ bool AbstractScreenGroup::RemoveChild(sptr<AbstractScreen>& dmsScreen)
     }
     TLOGD(WmsLogTag::DMS, "groupDmsId:%{public}" PRIu64", screenId:%{public}" PRIu64"",
         dmsScreen->groupDmsId_, screenId);
+    std::lock_guard<std::mutex> lock(screenMapMutex_);
     return screenMap_.erase(screenId);
 }
 
@@ -657,12 +663,14 @@ bool AbstractScreenGroup::RemoveDefaultScreen(const sptr<AbstractScreen>& dmsScr
 
 bool AbstractScreenGroup::HasChild(ScreenId childScreen) const
 {
+    std::lock_guard<std::mutex> lock(screenMapMutex_);
     return screenMap_.find(childScreen) != screenMap_.end();
 }
 
 std::vector<sptr<AbstractScreen>> AbstractScreenGroup::GetChildren() const
 {
     std::vector<sptr<AbstractScreen>> res;
+    std::lock_guard<std::mutex> lock(screenMapMutex_);
     for (auto iter = screenMap_.begin(); iter != screenMap_.end(); iter++) {
         res.push_back(iter->second);
     }
@@ -672,6 +680,7 @@ std::vector<sptr<AbstractScreen>> AbstractScreenGroup::GetChildren() const
 std::vector<Point> AbstractScreenGroup::GetChildrenPosition() const
 {
     std::vector<Point> res;
+    std::lock_guard<std::mutex> lock(screenMapMutex_);
     for (auto iter = screenMap_.begin(); iter != screenMap_.end(); iter++) {
         res.push_back(iter->second->startPoint_);
     }
@@ -681,6 +690,7 @@ std::vector<Point> AbstractScreenGroup::GetChildrenPosition() const
 Point AbstractScreenGroup::GetChildPosition(ScreenId screenId) const
 {
     Point point;
+    std::lock_guard<std::mutex> lock(screenMapMutex_);
     auto iter = screenMap_.find(screenId);
     if (iter != screenMap_.end()) {
         point = iter->second->startPoint_;
@@ -690,6 +700,7 @@ Point AbstractScreenGroup::GetChildPosition(ScreenId screenId) const
 
 size_t AbstractScreenGroup::GetChildCount() const
 {
+    std::lock_guard<std::mutex> lock(screenMapMutex_);
     return screenMap_.size();
 }
 
