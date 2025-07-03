@@ -73,6 +73,8 @@ public:
     void OnImmersiveStateChanged(ScreenId screenId, bool& immersive) override;
     void OnGetSurfaceNodeIdsFromMissionIdsChanged(std::vector<uint64_t>& missionIds,
         std::vector<uint64_t>& surfaceNodeIds, bool isBlackList = false) override;
+    void OnSetSurfaceNodeIdsChanged(DisplayId displayId, const std::vector<uint64_t>& surfaceNodeIds) override;
+    void OnVirtualScreenDisconnected(DisplayId displayId) override;
     void OnUpdateFoldDisplayMode(FoldDisplayMode displayMode) override;
     void UpdateAvailableArea(ScreenId screenId, DMRect area);
     void UpdateSuperFoldAvailableArea(ScreenId screenId, DMRect bArea, DMRect cArea);
@@ -117,6 +119,7 @@ public:
     void NotifyExtendScreenCreateFinish();
     void NotifyExtendScreenDestroyFinish();
     void NotifyScreenMaskAppear();
+    DMError SetPrimaryDisplaySystemDpi(float dpi);
 
     /*
      * RS Client Multi Instance

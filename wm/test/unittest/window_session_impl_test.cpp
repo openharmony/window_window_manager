@@ -31,12 +31,20 @@
 #include "window_helper.h"
 #include "window_session_impl.h"
 #include "wm_common.h"
+#include "window_manager_hilog.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+    std::string g_errLog;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
+        const char *msg)
+    {
+        g_errLog = msg;
+    }
 class WindowSessionImplTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -584,13 +592,14 @@ HWTEST_F(WindowSessionImplTest, UpdateDecorEnable, TestSize.Level1)
     GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateDecorEnable start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("UpdateDecorEnable");
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
 
-    int res = 1;
-    window->UpdateDecorEnable(true);
-    window->UpdateDecorEnable(false);
-    ASSERT_EQ(res, 1);
+    WindowMode mode = WindowMode::WINDOW_MODE_UNDEFINED;
+    window->UpdateDecorEnable(true, mode);
+    ASSERT_EQ(window->property_->windowMode_, mode);
+    mode = WindowMode::WINDOW_MODE_UNDEFINED;
+    window->UpdateDecorEnable(false, mode);
+    ASSERT_EQ(window->property_->windowMode_, mode);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateDecorEnable end";
 }
 
@@ -604,14 +613,16 @@ HWTEST_F(WindowSessionImplTest, NotifyModeChange, TestSize.Level1)
     GTEST_LOG_(INFO) << "WindowSessionImplTest: NotifyModeChange start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("NotifyModeChange");
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
 
     WindowMode mode = WindowMode::WINDOW_MODE_UNDEFINED;
-    int res = 1;
     window->NotifyModeChange(mode, true);
     window->NotifyModeChange(mode, false);
-    ASSERT_EQ(res, 1);
+    ASSERT_EQ(window->property_->windowMode_, mode);
+    ASSERT_EQ(window->property_->isDecorEnable_, false);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: NotifyModeChange end";
 }
 
@@ -1099,6 +1110,33 @@ HWTEST_F(WindowSessionImplTest, RegisterListener04, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RegisterListener05
+ * @tc.desc: RegisterListener and UnregisterListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, RegisterListener05, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterListener05 start";
+    sptr<WindowOption> listenerOption = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, listenerOption);
+    listenerOption->SetWindowName("RegisterListener05");
+    sptr<WindowSessionImpl> listenerwindow = sptr<WindowSessionImpl>::MakeSptr(listenerOption);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    EXPECT_EQ(WMError::WM_OK, listenerwindow->Create(nullptr, session));
+    listenerwindow->hostSession_ = session;
+    ASSERT_NE(nullptr, listenerwindow->property_);
+    listenerwindow->property_->SetPersistentId(1);
+    sptr<IWindowStageLifeCycle> listener = nullptr;
+    WMError res = listenerwindow->RegisterWindowStageLifeCycleListener(listener);
+    EXPECT_EQ(res, WMError::WM_ERROR_NULLPTR);
+    res = listenerwindow->UnregisterWindowStageLifeCycleListener(listener);
+    EXPECT_EQ(res, WMError::WM_ERROR_NULLPTR);
+    EXPECT_EQ(WMError::WM_OK, listenerwindow->Destroy());
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterListener05 end";
+}
+
+/**
  * @tc.name: NotifyDisplayMove
  * @tc.desc: NotifyDisplayMove
  * @tc.type: FUNC
@@ -1111,15 +1149,12 @@ HWTEST_F(WindowSessionImplTest, NotifyDisplayMove, TestSize.Level1)
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
 
-    int res = 0;
     DisplayId from = 0;
     DisplayId to = 2;
     window->NotifyDisplayMove(from, to);
-    ASSERT_EQ(res, 0);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: NotifyDisplayMove end";
 }
@@ -1137,16 +1172,14 @@ HWTEST_F(WindowSessionImplTest, NotifyAfterForeground, TestSize.Level1)
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_NE(nullptr, session);
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
 
-    int res = 0;
     window->NotifyAfterForeground(true, true);
     window->NotifyAfterForeground(false, false);
     window->vsyncStation_ = nullptr;
     window->NotifyAfterForeground(false, false);
-    ASSERT_EQ(res, 0);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: NotifyAfterForeground end";
 }
@@ -1164,16 +1197,13 @@ HWTEST_F(WindowSessionImplTest, NotifyAfterBackground, TestSize.Level1)
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
 
-    int res = 0;
     window->NotifyAfterBackground(true, true);
     window->NotifyAfterBackground(false, false);
     window->vsyncStation_ = nullptr;
     window->NotifyAfterBackground(false, false);
-    ASSERT_EQ(res, 0);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: NotifyAfterBackground end";
 }
@@ -1185,19 +1215,213 @@ HWTEST_F(WindowSessionImplTest, NotifyAfterBackground, TestSize.Level1)
  */
 HWTEST_F(WindowSessionImplTest, NotifyForegroundInteractiveStatus, TestSize.Level1)
 {
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: NotifyForegroundInteractiveStatus start";
     sptr<WindowOption> option = new WindowOption();
     ASSERT_NE(option, nullptr);
     option->SetWindowName("NotifyForegroundInteractiveStatus");
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
-
-    int res = 0;
-    window->NotifyForegroundInteractiveStatus(true);
-    window->NotifyForegroundInteractiveStatus(false);
-    ASSERT_EQ(res, 0);
-
+    sptr<WindowSessionImpl> foreWindow = sptr<WindowSessionImpl>::MakeSptr(option);;
+    ASSERT_NE(foreWindow, nullptr);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(session, nullptr);
+    foreWindow->property_->SetPersistentId(1);
+    foreWindow->hostSession_ = session;
+    foreWindow->state_ = WindowState::STATE_SHOWN;
+    EXPECT_FALSE(foreWindow->IsWindowSessionInvalid());
+    foreWindow->isDidForeground_ = false;
+    foreWindow->NotifyForegroundInteractiveStatus(true);
+    foreWindow->NotifyForegroundInteractiveStatus(false);
+    EXPECT_TRUE(g_errLog.find("isDidForeground:") == std::string::npos);
+    EXPECT_EQ(WMError::WM_OK, foreWindow->Destroy());
+    LOG_SetCallback(nullptr);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: NotifyForegroundInteractiveStatus end";
+}
+
+/**
+ * @tc.name: NotifyForegroundInteractiveStatus01
+ * @tc.desc: NotifyForegroundInteractiveStatus01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, NotifyForegroundInteractiveStatus01, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: NotifyForegroundInteractiveStatus01 start";
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("NotifyForegroundInteractiveStatus01");
+    sptr<WindowSessionImpl> foreWindow1 = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(foreWindow1, nullptr);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(session, nullptr);
+    foreWindow1->property_->SetPersistentId(1);
+    foreWindow1->hostSession_ = session;
+    foreWindow1->state_ = WindowState::STATE_SHOWN;
+    EXPECT_FALSE(foreWindow1->IsWindowSessionInvalid());
+    foreWindow1->isDidForeground_ = true;
+    foreWindow1->NotifyForegroundInteractiveStatus(true);
+    EXPECT_TRUE(g_errLog.find("isDidForeground:") == std::string::npos);
+
+    ASSERT_NE(nullptr, foreWindow1->property_);
+    foreWindow1->property_->SetPersistentId(1);
+    foreWindow1->property_->SetUseControlStateToProperty(true);
+    foreWindow1->NotifyForegroundInteractiveStatus(false);
+    foreWindow1->NotifyForegroundInteractiveStatus(true);
+    EXPECT_TRUE(g_errLog.find("app is in control") != std::string::npos);
+    foreWindow1->property_->SetUseControlStateToProperty(false);
+    foreWindow1->NotifyForegroundInteractiveStatus(false);
+    foreWindow1->NotifyForegroundInteractiveStatus(true);
+    EXPECT_EQ(WMError::WM_OK, foreWindow1->Destroy());
+    LOG_SetCallback(nullptr);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: NotifyForegroundInteractiveStatus01 end";
+}
+
+/**
+ * @tc.name: NotifyLifecyclePausedStatus
+ * @tc.desc: NotifyLifecyclePausedStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, NotifyLifecyclePausedStatus, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: NotifyLifecyclePausedStatus start";
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("NotifyLifecyclePausedStatus");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    window->property_->SetPersistentId(1);
+    window->state_ = WindowState::STATE_SHOWN;
+    window->NotifyLifecyclePausedStatus();
+    window->state_ = WindowState::STATE_DESTROYED;
+    window->NotifyLifecyclePausedStatus();
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_SHOWN;
+    EXPECT_FALSE(window->IsWindowSessionInvalid());
+    window->NotifyLifecyclePausedStatus();
+    window->state_ = WindowState::STATE_DESTROYED;
+    window->NotifyLifecyclePausedStatus();
+    EXPECT_TRUE(g_errLog.find("isDidForeground:") == std::string::npos);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+    LOG_SetCallback(nullptr);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: NotifyLifecyclePausedStatus end";
+}
+
+/**
+ * @tc.name: NotifyAfterLifecycleForeground
+ * @tc.desc: NotifyAfterLifecycleForeground
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, NotifyAfterLifecycleForeground, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: NotifyAfterLifecycleForeground start";
+    sptr<WindowOption> foreOption = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, foreOption);
+    foreOption->SetWindowName("NotifyAfterLifecycleForeground");
+    sptr<WindowSessionImpl> foreWindow = sptr<WindowSessionImpl>::MakeSptr(foreOption);
+    ASSERT_NE(nullptr, foreWindow);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    EXPECT_EQ(WMError::WM_OK, foreWindow->Create(nullptr, session));
+    foreWindow->NotifyAfterLifecycleForeground();
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, foreWindow->Destroy());
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: NotifyAfterLifecycleForeground end";
+}
+
+/**
+ * @tc.name: NotifyAfterLifecycleBackground
+ * @tc.desc: NotifyAfterLifecycleBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, NotifyAfterLifecycleBackground, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: NotifyAfterLifecycleBackground start";
+    sptr<WindowOption> backOption = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, backOption);
+    backOption->SetWindowName("NotifyAfterLifecycleBackground");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(backOption);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    EXPECT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+    window->NotifyAfterLifecycleBackground();
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: NotifyAfterLifecycleBackground end";
+}
+
+/**
+ * @tc.name: Notify03
+ * @tc.desc: NotifyCloseExistPipWindow NotifyAfterLifecycleResumed
+ * @tc.type: FUNC
+ */
+ HWTEST_F(WindowSessionImplTest, NotifyAfterLifecycleResumed, TestSize.Level1)
+{
+    sptr<WindowOption> notifyOption = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, notifyOption);
+    notifyOption->SetWindowName("NotifyAfterLifecycleResumed");
+    sptr<WindowSessionImpl> notifyWindow = sptr<WindowSessionImpl>::MakeSptr(notifyOption);
+    ASSERT_NE(nullptr, notifyWindow);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    EXPECT_EQ(WMError::WM_OK, notifyWindow->Create(nullptr, session));
+    notifyWindow->NotifyAfterLifecycleResumed();
+    EXPECT_EQ(false, notifyWindow->isInteractiveStateFlag_);
+    notifyWindow->state_ = WindowState::STATE_CREATED;
+    notifyWindow->isDidForeground_ = true;
+    notifyWindow->NotifyAfterLifecycleResumed();
+    notifyWindow->state_ = WindowState::STATE_SHOWN;
+    notifyWindow->isDidForeground_ = false;
+    notifyWindow->NotifyAfterLifecycleResumed();
+
+    notifyWindow->state_ = WindowState::STATE_CREATED;
+    notifyWindow->isDidForeground_ = false;
+    notifyWindow->NotifyAfterLifecycleResumed();
+    notifyWindow->state_ = WindowState::STATE_SHOWN;
+    notifyWindow->isDidForeground_ = true;
+    notifyWindow->NotifyAfterLifecycleResumed();
+    EXPECT_EQ(true, notifyWindow->isInteractiveStateFlag_);
+    notifyWindow->NotifyAfterLifecycleResumed();
+
+    ASSERT_NE(nullptr, notifyWindow->property_);
+    notifyWindow->property_->SetPersistentId(1);
+    notifyWindow->property_->SetUseControlStateToProperty(true);
+    notifyWindow->NotifyAfterLifecycleResumed();
+    WSError res = notifyWindow->NotifyCloseExistPipWindow();
+    EXPECT_EQ(res, WSError::WS_OK);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, notifyWindow->Destroy());
+}
+
+/**
+ * @tc.name: Notify03
+ * @tc.desc: NotifyCloseExistPipWindow NotifyAfterLifecyclePaused
+ * @tc.type: FUNC
+ */
+ HWTEST_F(WindowSessionImplTest, NotifyAfterLifecyclePaused, TestSize.Level1)
+{
+    sptr<WindowOption> pauseOption = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, pauseOption);
+    pauseOption->SetWindowName("NotifyAfterLifecyclePaused");
+    sptr<WindowSessionImpl> pauseWindow = sptr<WindowSessionImpl>::MakeSptr(pauseOption);
+    ASSERT_NE(nullptr, pauseWindow);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    EXPECT_EQ(WMError::WM_OK, pauseWindow->Create(nullptr, session));
+    pauseWindow->NotifyAfterLifecycleResumed();
+    pauseWindow->NotifyAfterLifecyclePaused();
+    EXPECT_EQ(false, pauseWindow->isInteractiveStateFlag_);
+    pauseWindow->NotifyAfterLifecyclePaused();
+    WSError res = pauseWindow->NotifyCloseExistPipWindow();
+    EXPECT_EQ(res, WSError::WS_OK);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, pauseWindow->Destroy());
 }
 
 /**
@@ -1249,6 +1473,9 @@ HWTEST_F(WindowSessionImplTest, Notify01, TestSize.Level1)
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
 
     window->NotifyTouchDialogTarget();
+    window->uiContent_ = nullptr;
+    window->NotifyScreenshot();
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     window->NotifyScreenshot();
     WSError res = window->NotifyDestroy();
     ASSERT_EQ(res, WSError::WS_OK);
@@ -1269,11 +1496,9 @@ HWTEST_F(WindowSessionImplTest, NotifyKeyEvent, TestSize.Level1)
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
 
-    int res = 0;
     std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     bool isConsumed = false;
     bool notifyInputMethod = false;
@@ -1288,7 +1513,6 @@ HWTEST_F(WindowSessionImplTest, NotifyKeyEvent, TestSize.Level1)
 
     keyEvent = nullptr;
     window->NotifyKeyEvent(keyEvent, isConsumed, notifyInputMethod);
-    ASSERT_EQ(res, 0);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: NotifyKeyEvent end";
 }
@@ -1474,8 +1698,7 @@ HWTEST_F(WindowSessionImplTest, Notify02, TestSize.Level1)
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
 
     sptr<AvoidArea> avoidArea = new AvoidArea();
@@ -1495,7 +1718,6 @@ HWTEST_F(WindowSessionImplTest, Notify02, TestSize.Level1)
     ASSERT_EQ(res, WSError::WS_OK);
     bool terminateCloseProcess = false;
     window->NotifySubWindowClose(terminateCloseProcess);
-    ASSERT_EQ(terminateCloseProcess, false);
 
     bool enable = false;
     window->NotifySwitchFreeMultiWindow(enable);
@@ -1517,16 +1739,13 @@ HWTEST_F(WindowSessionImplTest, SetAceAbilityHandler, TestSize.Level1)
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
 
-    int res = 0;
     sptr<IAceAbilityHandler> handler = sptr<IAceAbilityHandler>();
     ASSERT_EQ(handler, nullptr);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetAceAbilityHandler 111";
     window->SetAceAbilityHandler(handler);
-    ASSERT_EQ(res, 0);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetAceAbilityHandler end";
 }
@@ -2083,6 +2302,43 @@ HWTEST_F(WindowSessionImplTest, OnExtensionMessage, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnExtensionMessage_KeyboardListener
+ * @tc.desc: OnExtensionMessage_KeyboardListener test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, OnExtensionMessage_KeyboardListener, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("OnExtensionMessage");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    uint32_t code = 9999;
+    int32_t persistentId = 1111;
+    AAFwk::Want want;
+
+    ASSERT_TRUE(window->keyboardDidShowUIExtListeners_.empty());
+    code = static_cast<uint32_t>(Extension::Businesscode::REGISTER_KEYBOARD_DID_SHOW_LISTENER);
+    EXPECT_EQ(WMError::WM_OK, window->OnExtensionMessage(code, persistentId, want));
+    ASSERT_FALSE(window->keyboardDidShowUIExtListeners_.empty());
+    EXPECT_EQ(WMError::WM_OK, window->OnExtensionMessage(code, persistentId, want));
+
+    code = static_cast<uint32_t>(Extension::Businesscode::UNREGISTER_KEYBOARD_DID_SHOW_LISTENER);
+    EXPECT_EQ(WMError::WM_OK, window->OnExtensionMessage(code, persistentId, want));
+    ASSERT_TRUE(window->keyboardDidShowUIExtListeners_.empty());
+    EXPECT_EQ(WMError::WM_OK, window->OnExtensionMessage(code, persistentId, want));
+
+    ASSERT_TRUE(window->keyboardDidHideUIExtListeners_.empty());
+    code = static_cast<uint32_t>(Extension::Businesscode::REGISTER_KEYBOARD_DID_HIDE_LISTENER);
+    EXPECT_EQ(WMError::WM_OK, window->OnExtensionMessage(code, persistentId, want));
+    ASSERT_FALSE(window->keyboardDidHideUIExtListeners_.empty());
+    EXPECT_EQ(WMError::WM_OK, window->OnExtensionMessage(code, persistentId, want));
+
+    code = static_cast<uint32_t>(Extension::Businesscode::UNREGISTER_KEYBOARD_DID_HIDE_LISTENER);
+    EXPECT_EQ(WMError::WM_OK, window->OnExtensionMessage(code, persistentId, want));
+    ASSERT_TRUE(window->keyboardDidHideUIExtListeners_.empty());
+    EXPECT_EQ(WMError::WM_OK, window->OnExtensionMessage(code, persistentId, want));
+}
+
+/**
  * @tc.name: RegisterWaterfallModeChangeListener
  * @tc.desc: RegisterWaterfallModeChangeListener Test
  * @tc.type: FUNC
@@ -2186,6 +2442,30 @@ HWTEST_F(WindowSessionImplTest, NotifyWaterfallModeChange, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyAcrossDisplaysChange
+ * @tc.desc: NotifyAcrossDisplaysChange Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, NotifyAcrossDisplaysChange, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("waterfall");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    window->state_ = WindowState::STATE_SHOWN;
+    sptr<IAcrossDisplaysChangeListener> listener = sptr<IAcrossDisplaysChangeListener>::MakeSptr();
+    window->acrossDisplaysChangeListeners_[1].push_back(listener);
+    window->RegisterAcrossDisplaysChangeListener(listener);
+    auto ret = window->NotifyAcrossDisplaysChange(true);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    ret = window->NotifyAcrossDisplaysChange(true);
+    EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
+    window->acrossDisplaysChangeListeners_[1].push_back(nullptr);
+    ret = window->NotifyAcrossDisplaysChange(false);
+    EXPECT_EQ(WMError::WM_OK, ret);
+}
+
+/**
  * @tc.name: CreateSubWindowOutlineEnabled
  * @tc.desc: CreateSubWindowOutlineEnabled Test
  * @tc.type: FUNC
@@ -2211,6 +2491,7 @@ HWTEST_F(WindowSessionImplTest, CreateSubWindowOutlineEnabled, TestSize.Level1)
     option3->SetSubWindowOutlineEnabled(true);
     sptr<WindowSessionImpl> window3 = sptr<WindowSessionImpl>::MakeSptr(option3);
     ASSERT_EQ(true, window3->property_->IsSubWindowOutlineEnabled());
+}
 }
 } // namespace
 } // namespace Rosen

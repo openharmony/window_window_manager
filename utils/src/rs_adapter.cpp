@@ -32,35 +32,26 @@ namespace Rosen {
 
 InvokerType RSTransactionAdapter::invokerType_ = InvokerType::NONE;
 
-void RSTransactionAdapter::InitByRSUIContext(const std::shared_ptr<RSUIContext>& rsUIContext)
+RSTransactionAdapter::RSTransactionAdapter(const std::shared_ptr<RSUIContext>& rsUIContext)
 {
     rsUIContext_ = rsUIContext;
     if (RSAdapterUtil::IsClientMultiInstanceEnabled()) {
         rsTransHandler_ = rsUIContext_ ? rsUIContext_->GetRSTransaction() : nullptr;
-        RETURN_IF_PARAM_IS_NULL(rsTransHandler_);
+        rsTransProxy_ = nullptr;
         TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "Use RSTransactionHandler: %{public}s",
               RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str());
     } else {
+        rsTransHandler_ = nullptr;
         rsTransProxy_ = RSTransactionProxy::GetInstance();
-        RETURN_IF_PARAM_IS_NULL(rsTransProxy_);
         TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "Fallback to RSTransactionProxy");
     }
 }
 
-RSTransactionAdapter::RSTransactionAdapter(const std::shared_ptr<RSUIContext>& rsUIContext)
-{
-    InitByRSUIContext(rsUIContext);
-}
+RSTransactionAdapter::RSTransactionAdapter(const std::shared_ptr<RSNode>& rsNode) :
+    RSTransactionAdapter(rsNode ? rsNode->GetRSUIContext() : nullptr) {}
 
-RSTransactionAdapter::RSTransactionAdapter(const std::shared_ptr<RSNode>& rsNode)
-{
-    InitByRSUIContext(rsNode ? rsNode->GetRSUIContext() : nullptr);
-}
-
-RSTransactionAdapter::RSTransactionAdapter(const std::shared_ptr<RSUIDirector>& rsUIDirector)
-{
-    InitByRSUIContext(rsUIDirector ? rsUIDirector->GetRSUIContext() : nullptr);
-}
+RSTransactionAdapter::RSTransactionAdapter(const std::shared_ptr<RSUIDirector>& rsUIDirector) :
+    RSTransactionAdapter(rsUIDirector ? rsUIDirector->GetRSUIContext() : nullptr) {}
 
 std::shared_ptr<RSUIContext> RSTransactionAdapter::GetRSUIContext() const
 {
@@ -205,23 +196,20 @@ void RSTransactionAdapter::FlushImplicitTransaction(
     FlushImplicitTransaction(rsUIContexts, timestamp, abilityName);
 }
 
-void AutoRSTransaction::InitByRSUIContext(const std::shared_ptr<RSUIContext>& rsUIContext, bool enable)
+AutoRSTransaction::AutoRSTransaction(const std::shared_ptr<RSUIContext>& rsUIContext, bool enable)
 {
     if (enable) {
         rsTransAdapter_ = std::make_shared<RSTransactionAdapter>(rsUIContext);
         rsTransAdapter_->Begin();
+    } else {
+        rsTransAdapter_ = nullptr;
     }
 }
 
-AutoRSTransaction::AutoRSTransaction(const std::shared_ptr<RSUIContext>& rsUIContext, bool enable)
-{
-    InitByRSUIContext(rsUIContext, enable);
-}
-
-AutoRSTransaction::AutoRSTransaction(const std::shared_ptr<RSNode>& rsNode, bool enable)
+AutoRSTransaction::AutoRSTransaction(const std::shared_ptr<RSNode>& rsNode, bool enable) :
+    AutoRSTransaction(rsNode ? rsNode->GetRSUIContext() : nullptr, enable)
 {
     TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "%{public}s", RSAdapterUtil::RSNodeToStr(rsNode).c_str());
-    InitByRSUIContext(rsNode ? rsNode->GetRSUIContext() : nullptr, enable);
 }
 
 AutoRSTransaction::AutoRSTransaction(const std::shared_ptr<RSTransactionAdapter>& rsTransAdapter, bool enable)
@@ -229,6 +217,8 @@ AutoRSTransaction::AutoRSTransaction(const std::shared_ptr<RSTransactionAdapter>
     if (rsTransAdapter != nullptr && enable) {
         rsTransAdapter_ = rsTransAdapter;
         rsTransAdapter_->Begin();
+    } else {
+        rsTransAdapter_ = nullptr;
     }
 }
 
@@ -241,30 +231,23 @@ AutoRSTransaction::~AutoRSTransaction()
 
 InvokerType RSSyncTransactionAdapter::invokerType_ = InvokerType::NONE;
 
-void RSSyncTransactionAdapter::InitByRSUIContext(const std::shared_ptr<RSUIContext>& rsUIContext)
+RSSyncTransactionAdapter::RSSyncTransactionAdapter(const std::shared_ptr<RSUIContext>& rsUIContext)
 {
     rsUIContext_ = rsUIContext;
     if (RSAdapterUtil::IsClientMultiInstanceEnabled()) {
         rsSyncTransHandler_ = rsUIContext_ ? rsUIContext_->GetSyncTransactionHandler() : nullptr;
-        RETURN_IF_PARAM_IS_NULL(rsSyncTransHandler_);
+        rsSyncTransController_ = nullptr;
         TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "Use RSSyncTransactionHandler: %{public}s",
               RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str());
     } else {
+        rsSyncTransHandler_ = nullptr;
         rsSyncTransController_ = RSSyncTransactionController::GetInstance();
-        RETURN_IF_PARAM_IS_NULL(rsSyncTransController_);
         TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "Fallback to RSSyncTransactionController");
     }
 }
 
-RSSyncTransactionAdapter::RSSyncTransactionAdapter(const std::shared_ptr<RSUIContext>& rsUIContext)
-{
-    InitByRSUIContext(rsUIContext);
-}
-
-RSSyncTransactionAdapter::RSSyncTransactionAdapter(const std::shared_ptr<RSNode>& rsNode)
-{
-    InitByRSUIContext(rsNode ? rsNode->GetRSUIContext() : nullptr);
-}
+RSSyncTransactionAdapter::RSSyncTransactionAdapter(const std::shared_ptr<RSNode>& rsNode) :
+    RSSyncTransactionAdapter(rsNode ? rsNode->GetRSUIContext() : nullptr) {}
 
 template<typename ReturnType, typename Func>
 ReturnType RSSyncTransactionAdapter::InvokeSyncTransaction(Func&& func, const char* caller)
@@ -412,8 +395,10 @@ void RSSyncTransactionAdapter::CloseSyncTransaction(
     CloseSyncTransaction(rsNode ? rsNode->GetRSUIContext() : nullptr, handler);
 }
 
-void AutoRSSyncTransaction::InitByRSUIContext(
-    const std::shared_ptr<RSUIContext>& rsUIContext, bool needFlushImplicitTransaction)
+AutoRSSyncTransaction::AutoRSSyncTransaction(
+    const std::shared_ptr<RSUIContext>& rsUIContext,
+    bool needFlushImplicitTransaction,
+    const std::shared_ptr<AppExecFwk::EventHandler>& handler) : handler_(handler)
 {
     if (needFlushImplicitTransaction) {
         RSTransactionAdapter::FlushImplicitTransaction(rsUIContext);
@@ -423,27 +408,19 @@ void AutoRSSyncTransaction::InitByRSUIContext(
 }
 
 AutoRSSyncTransaction::AutoRSSyncTransaction(
-    const std::shared_ptr<RSUIContext>& rsUIContext,
-    bool needFlushImplicitTransaction,
-    const std::shared_ptr<AppExecFwk::EventHandler>& handler) : handler_(handler)
-{
-    InitByRSUIContext(rsUIContext, needFlushImplicitTransaction);
-}
-
-AutoRSSyncTransaction::AutoRSSyncTransaction(
     const std::shared_ptr<RSNode>& rsNode,
     bool needFlushImplicitTransaction,
-    const std::shared_ptr<AppExecFwk::EventHandler>& handler) : handler_(handler)
+    const std::shared_ptr<AppExecFwk::EventHandler>& handler) :
+    AutoRSSyncTransaction(rsNode ? rsNode->GetRSUIContext() : nullptr, needFlushImplicitTransaction, handler)
 {
     TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "%{public}s", RSAdapterUtil::RSNodeToStr(rsNode).c_str());
-    InitByRSUIContext(rsNode ? rsNode->GetRSUIContext() : nullptr, needFlushImplicitTransaction);
 }
 
 AutoRSSyncTransaction::AutoRSSyncTransaction(
     const std::shared_ptr<RSSyncTransactionAdapter>& rsSyncTransAdapter,
     bool needFlushImplicitTransaction,
-    const std::shared_ptr<AppExecFwk::EventHandler>& handler)
-    : rsSyncTransAdapter_(rsSyncTransAdapter), handler_(handler)
+    const std::shared_ptr<AppExecFwk::EventHandler>& handler) :
+    rsSyncTransAdapter_(rsSyncTransAdapter), handler_(handler)
 {
     if (rsSyncTransAdapter_) {
         if (needFlushImplicitTransaction) {

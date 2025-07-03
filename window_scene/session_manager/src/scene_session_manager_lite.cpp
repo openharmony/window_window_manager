@@ -197,6 +197,11 @@ WMError SceneSessionManagerLite::CheckWindowId(int32_t windowId, int32_t& pid)
     return SceneSessionManager::GetInstance().CheckWindowId(windowId, pid);
 }
 
+WMError SceneSessionManagerLite::UpdateWindowModeByIdForUITest(int32_t windowId, int32_t updateMode)
+{
+    return SceneSessionManager::GetInstance().UpdateWindowModeByIdForUITest(windowId, updateMode);
+}
+
 WMError SceneSessionManagerLite::CheckUIExtensionCreation(int32_t windowId, uint32_t tokenId,
     const AppExecFwk::ElementName& element, AppExecFwk::ExtensionAbilityType extensionAbilityType, int32_t& pid)
 {
@@ -342,6 +347,13 @@ WSError SceneSessionManagerLite::GetRecentMainSessionInfoList(std::vector<Recent
     return SceneSessionManager::GetInstance().GetRecentMainSessionInfoList(recentSessionInfoList);
 }
 
+WSError SceneSessionManagerLite::PendingSessionToBackgroundByPersistentId(const int32_t persistentId,
+    bool shouldBackToCaller)
+{
+    return SceneSessionManager::GetInstance().PendingSessionToBackgroundByPersistentId(persistentId,
+        shouldBackToCaller);
+}
+
 WMError SceneSessionManagerLite::CreateNewInstanceKey(const std::string& bundleName, std::string& instanceKey)
 {
     return SceneSessionManager::GetInstance().CreateNewInstanceKey(bundleName, instanceKey);
@@ -376,5 +388,10 @@ WMError SceneSessionManagerLite::EnterKioskMode(const sptr<IRemoteObject>& token
 WMError SceneSessionManagerLite::ExitKioskMode(const sptr<IRemoteObject>& token)
 {
     return SceneSessionManager::GetInstance().ExitKioskMode();
+}
+
+WSError SceneSessionManagerLite::SendPointerEventForHover(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    return SceneSessionManager::GetInstance().SendPointerEventForHover(pointerEvent);
 }
 } // namespace OHOS::Rosen

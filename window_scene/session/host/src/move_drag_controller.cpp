@@ -240,7 +240,8 @@ void MoveDragController::UpdateSubWindowGravityWhenFollow(const sptr<MoveDragCon
 /** @note @window.drag */
 void MoveDragController::InitMoveDragProperty()
 {
-    moveDragProperty_ = {-1, -1, -1, -1, -1, -1, 1.0f, 1.0f, {0, 0, 0, 0}, {0, 0, 0, 0}};
+    moveDragProperty_ = {
+        -1, -1, -1, -1, -1, -1, moveDragProperty_.scaleX_, moveDragProperty_.scaleY_, {0, 0, 0, 0}, {0, 0, 0, 0}};
 }
 
 void MoveDragController::InitCrossDisplayProperty(DisplayId displayId, uint64_t initParentNodeId)
@@ -412,7 +413,6 @@ bool MoveDragController::ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEven
             moveDragEndDisplayId_ = static_cast<uint64_t>(pointerEvent->GetTargetDisplayId());
             UpdateHotAreaType(pointerEvent);
             ProcessWindowDragHotAreaFunc(windowDragHotAreaType_ != WINDOW_HOT_AREA_TYPE_UNDEFINED, reason);
-            isMoveDragHotAreaCrossDisplay_ = windowDragHotAreaType_ != WINDOW_HOT_AREA_TYPE_UNDEFINED;
             // The Pointer up event sent to the ArkUI.
             ret = false;
             break;
@@ -511,6 +511,15 @@ void MoveDragController::CalcDragTargetRect(const std::shared_ptr<MMI::PointerEv
     }
     TLOGD(WmsLogTag::WMS_LAYOUT, "drag rect:%{public}s, tranX:%{public}d, tranY:%{public}d",
         moveDragProperty_.targetRect_.ToString().c_str(), trans.first, trans.second);
+}
+
+Gravity MoveDragController::GetGravity() const
+{
+    auto iter = GRAVITY_MAP.find(dragAreaType_);
+    if (iter != GRAVITY_MAP.end()) {
+        return iter->second;
+    }
+    return Gravity::TOP_LEFT;
 }
 
 /** @note @window.drag */
@@ -695,7 +704,7 @@ void MoveDragController::SetScale(float scaleX, float scaleY)
 void MoveDragController::SetParentRect(const Rect& parentRect)
 {
     parentRect_ = parentRect;
-    TLOGD(WmsLogTag::WMS_LAYOUT, "parentRect_:%{public}s",parentRect_.ToString().c_str());
+    TLOGD(WmsLogTag::WMS_LAYOUT, "parentRect_:%{public}s", parentRect_.ToString().c_str());
 }
 
 std::pair<int32_t, int32_t> MoveDragController::CalcUnifiedTranslate(
@@ -717,6 +726,9 @@ std::pair<int32_t, int32_t> MoveDragController::CalcUnifiedTranslate(
         (moveDragProperty_.originalPointerPosX_ + originalDisplayOffsetX_);
     int32_t tranY = (pointerItem.GetDisplayY() + currentDisplayTranY) -
         (moveDragProperty_.originalPointerPosY_ + originalDisplayOffsetY_);
+    if (isAdaptToProportionalScale_) {
+        return std::make_pair(tranX, tranY);
+    }
     if (MathHelper::NearZero(moveDragProperty_.scaleX_) || MathHelper::NearZero(moveDragProperty_.scaleY_)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "scale ratio is 0");
         return std::make_pair(tranX, tranY);
@@ -1012,6 +1024,8 @@ bool MoveDragController::EventDownInit(const std::shared_ptr<MMI::PointerEvent>&
     int outside = (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) ? HOTZONE_POINTER * vpr_ : HOTZONE_TOUCH * vpr_;
     type_ = SessionHelper::GetAreaType(pointerItem.GetWindowX(), pointerItem.GetWindowY(), sourceType, outside, vpr_,
         moveDragProperty_.originalRect_);
+    dragAreaType_ = SessionHelper::GetAreaTypeForScaleResize(pointerItem.GetWindowX(), pointerItem.GetWindowY(),
+        outside, moveDragProperty_.originalRect_);
     TLOGI(WmsLogTag::WMS_LAYOUT, "pointWinX:%{public}d, pointWinY:%{public}d, outside:%{public}d, vpr:%{public}f, "
         "rect:%{public}s, type:%{public}d", pointerItem.GetWindowX(), pointerItem.GetWindowY(), outside, vpr_,
         moveDragProperty_.originalRect_.ToString().c_str(), type_);
@@ -1027,8 +1041,8 @@ bool MoveDragController::EventDownInit(const std::shared_ptr<MMI::PointerEvent>&
     if (aspectRatio_ <= NEAR_ZERO) {
         CalcFreeformTranslateLimits(type_);
     }
-    moveDragProperty_.originalRect_.posX_ = pointerItem.GetDisplayX() - pointerItem.GetWindowX() - parentRect_.posX_;
-    moveDragProperty_.originalRect_.posY_ = pointerItem.GetDisplayY() - pointerItem.GetWindowY() - parentRect_.posY_;
+    moveDragProperty_.originalRect_.posX_ = (originalRect.posX_ - parentRect_.posX_) / moveDragProperty_.scaleX_;
+    moveDragProperty_.originalRect_.posY_ = (originalRect.posY_ - parentRect_.posY_) / moveDragProperty_.scaleY_;
     mainMoveAxis_ = AxisType::UNDEFINED;
     isStartDrag_ = true;
     NotifyWindowInputPidChange(isStartDrag_);
@@ -1421,7 +1435,6 @@ WSError MoveDragController::UpdateMoveTempProperty(const std::shared_ptr<MMI::Po
             }
             moveTempProperty_.lastMovePointerPosX_ = pointerDisplayX;
             moveTempProperty_.lastMovePointerPosY_ = pointerDisplayY;
-            lastMovePointerPosX_ = pointerDisplayX;
             break;
         case MMI::PointerEvent::POINTER_ACTION_UP:
         case MMI::PointerEvent::POINTER_ACTION_BUTTON_UP:
@@ -1476,8 +1489,8 @@ void MoveDragController::CalcFirstMoveTargetRect(const WSRect& windowRect, bool 
     }
 
     WSRect originalRect = {
-        moveTempProperty_.lastDownPointerPosX_ - moveTempProperty_.lastDownPointerWindowX_ - parentRect_.posX_,
-        moveTempProperty_.lastDownPointerPosY_ - moveTempProperty_.lastDownPointerWindowY_ - parentRect_.posY_,
+        (windowRect.posX_ - parentRect_.posX_) / moveDragProperty_.scaleX_,
+        (windowRect.posY_ - parentRect_.posY_) / moveDragProperty_.scaleY_,
         windowRect.width_,
         windowRect.height_
     };
@@ -1519,6 +1532,7 @@ void MoveDragController::CalcFirstMoveTargetRect(const WSRect& windowRect, bool 
     TLOGI(WmsLogTag::WMS_LAYOUT, "first move rect: [%{public}d, %{public}d, %{public}u, %{public}u]", targetRect.posX_,
         targetRect.posY_, targetRect.width_, targetRect.height_);
     moveDragProperty_.targetRect_ = targetRect;
+    isAdaptToProportionalScale_ = useWindowRect;
     ProcessSessionRectChange(SizeChangeReason::DRAG_MOVE);
 }
 
@@ -1638,25 +1652,5 @@ void MoveDragController::ResSchedReportData(int32_t type, bool onOffTag)
     }
     WLOGFD("ResSchedReportData success type: %{public}d onOffTag: %{public}d", type, onOffTag);
 #endif
-}
-
-int32_t MoveDragController::GetLastMovePointerPosX() const
-{
-    return lastMovePointerPosX_;
-}
-
-void MoveDragController::SetLastMovePointerPosX(int32_t lastMovePointerPosX)
-{
-    lastMovePointerPosX_ = lastMovePointerPosX;
-}
-
-bool MoveDragController::IsMoveDragHotAreaCrossDisplay() const
-{
-    return isMoveDragHotAreaCrossDisplay_;
-}
-
-void MoveDragController::SetMoveDragHotAreaCrossDisplay(bool isMoveDragHotAreaCrossDisplay)
-{
-    isMoveDragHotAreaCrossDisplay_ = isMoveDragHotAreaCrossDisplay;
 }
 }  // namespace OHOS::Rosen

@@ -240,6 +240,46 @@ HWTEST_F(SuperFoldSensorManagerTest, HandlePostureData04, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandlePostureData05
+ * @tc.desc: test function: HandlePostureData when taskScheduler is valid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SuperFoldSensorManagerTest, HandlePostureData05, TestSize.Level1)
+{
+    SuperFoldSensorManager mgr = SuperFoldSensorManager();
+    auto scheduler = std::make_shared<TaskScheduler>("task_test");
+
+    mgr.SetTaskScheduler(scheduler);
+    SensorEvent event;
+    PostureData postureData;
+    postureData.angle = 45.0F;
+    event.data = reinterpret_cast<uint8_t*>(&postureData);
+    event.dataLen = sizeof(PostureData);
+    mgr.HandlePostureData(&event);
+    EXPECT_EQ(mgr.curAngle_, 45.0F);
+}
+
+/**
+ * @tc.name: HandlePostureData06
+ * @tc.desc: test function: HandlePostureData when taskScheduler is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SuperFoldSensorManagerTest, HandlePostureData06, TestSize.Level1)
+{
+    SuperFoldSensorManager mgr = SuperFoldSensorManager();
+
+    mgr.SetTaskScheduler(nullptr);
+    SensorEvent event;
+    PostureData postureData;
+    postureData.angle = 45.0F;
+    event.data = reinterpret_cast<uint8_t*>(&postureData);
+    event.dataLen = sizeof(PostureData);
+    mgr.HandlePostureData(&event);
+    EXPECT_EQ(mgr.curAngle_, 45.0F);
+}
+
+
+/**
  * @tc.name: NotifyFoldAngleChanged01
  * @tc.desc: test function : NotifyFoldAngleChanged
  * @tc.type: FUNC
@@ -446,6 +486,44 @@ HWTEST_F(SuperFoldSensorManagerTest, HandleHallData06, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleHallData07
+ * @tc.desc: test function : HandleHallData when taskScheduler is valid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SuperFoldSensorManagerTest, HandleHallData07, TestSize.Level1)
+{
+    SuperFoldSensorManager mgr = SuperFoldSensorManager();
+    SensorEvent event;
+    HallData hallData;
+    event.data = reinterpret_cast<uint8_t*>(&hallData);
+    event.dataLen = sizeof(HallData);
+
+    auto scheduler = std::make_shared<TaskScheduler>("task_test");
+    mgr.SetTaskScheduler(scheduler);
+    mgr.HandleHallData(&event);
+    EXPECT_EQ(mgr.curHall_, VALID_HALL_STATUS);
+}
+
+/**
+ * @tc.name: HandleHallData08
+ * @tc.desc: test function : HandleHallData when taskScheduler is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SuperFoldSensorManagerTest, HandleHallData08, TestSize.Level1)
+{
+    SuperFoldSensorManager mgr = SuperFoldSensorManager();
+    SensorEvent event;
+    HallData hallData;
+    event.data = reinterpret_cast<uint8_t*>(&hallData);
+    event.dataLen = sizeof(HallData);
+
+    mgr.SetTaskScheduler(nullptr);
+    mgr.HandleHallData(&event);
+    EXPECT_EQ(mgr.curHall_, VALID_HALL_STATUS);
+}
+
+
+/**
  * @tc.name: NotifyHallChanged
  * @tc.desc: test function : NotifyHallChanged
  * @tc.type: FUNC
@@ -533,6 +611,33 @@ HWTEST_F(SuperFoldSensorManagerTest, HandleFoldStatusLockedToExpand, TestSize.Le
 
     mgr.HandleFoldStatusLockedToExpand();
     EXPECT_NE(SuperFoldStateManager::GetInstance().curState_, SuperFoldStatus::UNKNOWN);
+}
+
+/**
+ * @tc.name: SetTaskScheduler01
+ * @tc.number: SetTaskSchedulerTest_001
+ * @tc.desc: taskScheduler_ could be properly set when the input is valid.
+ */
+HWTEST_F(SuperFoldSensorManagerTest, SetTaskScheduler01, TestSize.Level1)
+{
+    SuperFoldSensorManager mgr = SuperFoldSensorManager();
+    auto scheduler = std::make_shared<TaskScheduler>("task_test");
+
+    mgr.SetTaskScheduler(scheduler);
+    EXPECT_EQ(mgr.taskScheduler_.get(), scheduler.get());
+}
+
+/**
+ * @tc.name: SetTaskScheduler02
+ * @tc.number: SetTaskSchedulerTest_002
+ * @tc.desc: taskScheduler_ could be properly set when the input is nullptr.
+ */
+HWTEST_F(SuperFoldSensorManagerTest, SetTaskScheduler02, TestSize.Level1)
+{
+    SuperFoldSensorManager mgr = SuperFoldSensorManager();
+
+    mgr.SetTaskScheduler(nullptr);
+    EXPECT_EQ(mgr.taskScheduler_, nullptr);
 }
 }
 } // namespace Rosen

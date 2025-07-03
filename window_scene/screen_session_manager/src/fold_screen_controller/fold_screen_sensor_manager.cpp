@@ -228,6 +228,35 @@ bool FoldScreenSensorManager::GetSensorRegisterStatus()
 {
     return registerHall_ || registerPosture_;
 }
+
+float FoldScreenSensorManager::GetGlobalAngle() const
+{
+    return globalAngle;
+}
+
+void FoldScreenSensorManager::SetGlobalAngle(float angle)
+{
+    if (std::isless(angle, ANGLE_MIN_VAL) ||
+        std::isgreater(angle, ANGLE_MAX_VAL + ACCURACY_ERROR_FOR_ALTA)) {
+        TLOGI(WmsLogTag::DMS, "Invalid angle: %{public}f", angle);
+        return;
+    }
+    globalAngle = angle;
+}
+
+uint16_t FoldScreenSensorManager::GetGlobalHall() const
+{
+    return globalHall;
+}
+
+void FoldScreenSensorManager::SetGlobalHall(uint16_t hall)
+{
+    if (hall == USHRT_MAX) {
+        TLOGI(WmsLogTag::DMS, "Invalid hall: %{public}u", hall);
+        return;
+    }
+    globalHall = hall;
+}
 } // Rosen
 } // OHOS
 #endif

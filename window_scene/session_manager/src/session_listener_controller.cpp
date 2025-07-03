@@ -103,6 +103,15 @@ void SessionListenerController::NotifySessionDestroyed(int32_t persistentId)
     CallListeners(&ISessionListener::OnMissionDestroyed, persistentId);
 }
 
+void SessionListenerController::NotifySessionBackground(int32_t persistentId)
+{
+    if (persistentId == -1) {
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_LIFE, "Id:%{public}d", persistentId);
+    CallListeners(&ISessionListener::OnMissionMovedToBackground, persistentId);
+}
+
 void SessionListenerController::HandleUnInstallApp(const std::list<int32_t>& sessions)
 {
     for (auto id : sessions) {
@@ -444,6 +453,9 @@ void SessionListenerController::NotifyMissionEvent(
             break;
         case ISessionLifecycleListener::SessionLifecycleEvent::DESTROYED:
             NotifySessionDestroyed(persistentId);
+            break;
+        case ISessionLifecycleListener::SessionLifecycleEvent::BACKGROUND:
+            NotifySessionBackground(persistentId);
             break;
         default:
             break;

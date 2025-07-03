@@ -219,12 +219,15 @@ HWTEST_F(WindowSessionTest, UpdateClientDisplayId02, TestSize.Level1)
     ASSERT_NE(session_, nullptr);
     ASSERT_NE(mockSessionStage_, nullptr);
     session_->sessionStage_ = mockSessionStage_;
+    session_->SetPropertyDirtyFlags(0);
     session_->clientDisplayId_ = 0;
     DisplayId updatedDisplayId = 0;
     EXPECT_EQ(session_->UpdateClientDisplayId(updatedDisplayId), WSError::WS_OK);
+    EXPECT_EQ(session_->GetPropertyDirtyFlags(), 0);
     EXPECT_EQ(updatedDisplayId, session_->clientDisplayId_);
     updatedDisplayId = 100;
     EXPECT_EQ(session_->UpdateClientDisplayId(updatedDisplayId), WSError::WS_OK);
+    EXPECT_EQ(session_->GetPropertyDirtyFlags(), static_cast<uint32_t>(SessionPropertyFlag::DISPLAY_ID));
     EXPECT_EQ(updatedDisplayId, session_->clientDisplayId_);
 }
 
@@ -848,6 +851,33 @@ HWTEST_F(WindowSessionTest, SetFocusable, TestSize.Level1)
     session_->state_ = SessionState::STATE_DISCONNECT;
     ASSERT_EQ(WSError::WS_OK, session_->SetFocusable(false));
     ASSERT_EQ(session_->GetFocusable(), false);
+}
+
+/**
+ * @tc.name: Snapshot
+ * @tc.desc: Snapshot Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, Snapshot, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    int32_t persistentId = 1999;
+    std::string bundleName = "test";
+    session_->scenePersistence_ = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
+    ASSERT_NE(session_->scenePersistence_, nullptr);
+    struct RSSurfaceNodeConfig config;
+    session_->surfaceNode_ = RSSurfaceNode::Create(config);
+    ASSERT_NE(session_->surfaceNode_, nullptr);
+    EXPECT_EQ(nullptr, session_->Snapshot(false, 0.0f));
+
+    session_->bufferAvailable_ = true;
+    EXPECT_EQ(nullptr, session_->Snapshot(false, 0.0f));
+
+    session_->surfaceNode_->bufferAvailable_ = true;
+    EXPECT_EQ(nullptr, session_->Snapshot(false, 0.0f));
+
+    session_->surfaceNode_ = nullptr;
+    EXPECT_EQ(nullptr, session_->Snapshot(false, 0.0f));
 }
 
 /**

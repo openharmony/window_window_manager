@@ -39,6 +39,7 @@ enum class WindowManagerAgentType : uint32_t {
     WINDOW_MANAGER_AGENT_TYPE_PIP,
     WINDOW_MANAGER_AGENT_TYPE_CALLING_DISPLAY,
     WINDOW_MANAGER_AGENT_TYPE_PROPERTY,
+    WINDOW_MANAGER_AGENT_STATUS_BAR_PROPERTY,
     WINDOW_MANAGER_AGENT_TYPE_END,
 };
 
@@ -63,6 +64,7 @@ public:
         TRANS_ID_UPDATE_PIP_WINDOW_STATE_CHANGED,
         TRANS_ID_NOTIFY_CALLING_DISPLAY_CHANGE,
         TRANS_ID_NOTIFY_WINDOW_PROPERTY_CHANGE,
+        TRANS_ID_NOTIFY_WINDOW_SYSTEM_BAR_PROPERTY_CHANGE,
     };
 
     virtual void UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused) = 0;
@@ -81,6 +83,7 @@ public:
     virtual void NotifyWindowStyleChange(WindowStyleType type) = 0;
     virtual void NotifyCallingWindowDisplayChanged(const CallingWindowInfo& callingWindowInfo) = 0;
     virtual void NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info) = 0;
+    virtual void NotifyWindowSystemBarPropertyChange(WindowType type, const SystemBarProperty& systemBarProperty) = 0;
     virtual void UpdatePiPWindowStateChanged(const std::string& bundleName, bool isForeground) = 0;
     virtual void NotifyWindowPropertyChange(uint32_t propertyDirtyFlags,
         const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList) = 0;

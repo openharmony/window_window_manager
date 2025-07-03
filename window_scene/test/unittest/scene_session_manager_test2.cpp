@@ -27,6 +27,7 @@
 #include "window_manager_agent.h"
 #include "session_manager.h"
 #include "zidl/window_manager_agent_interface.h"
+#include "mock/mock_accesstoken_kit.h"
 #include "mock/mock_session_stage.h"
 #include "mock/mock_window_event_channel.h"
 #include "context.h"
@@ -101,6 +102,7 @@ void SceneSessionManagerTest2::SetUp()
 
 void SceneSessionManagerTest2::TearDown()
 {
+    MockAccesstokenKit::ChangeMockStateToInit();
     usleep(WAIT_SYNC_IN_NS);
     ssm_->sceneSessionMap_.clear();
 }
@@ -135,17 +137,53 @@ HWTEST_F(SceneSessionManagerTest2, SetGestureNavigationEnabled, TestSize.Level1)
 }
 
 /**
- * @tc.name: RegisterWindowManagerAgent
+ * @tc.name: RegisterWindowManagerAgent01
  * @tc.desc: SceneSesionManager rigister window manager agent
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, RegisterWindowManagerAgent, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest2, RegisterWindowManagerAgent01, TestSize.Level1)
 {
     sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
     WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
 
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ssm_->RegisterWindowManagerAgent(type, windowManagerAgent));
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ssm_->UnregisterWindowManagerAgent(type, windowManagerAgent));
+}
+
+/**
+ * @tc.name: RegisterWindowManagerAgent02
+ * @tc.desc: SceneSesionManager rigister window manager agent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, RegisterWindowManagerAgent02, TestSize.Level1)
+{
+    sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
+    WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_PROPERTY;
+
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ssm_->RegisterWindowManagerAgent(type, windowManagerAgent));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ssm_->UnregisterWindowManagerAgent(type, windowManagerAgent));
+}
+
+/**
+ * @tc.name: RegisterWindowPropertyChangeAgent01
+ * @tc.desc: Register and unregister window property change agent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, RegisterWindowPropertyChangeAgent01, TestSize.Level1)
+{
+    sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
+    uint32_t interestInfo = static_cast<uint32_t>(WindowInfoKey::WINDOW_ID);
+    ssm_->observedFlags_ = 0;
+    ssm_->interestedFlags_ = 0;
+
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION,
+        ssm_->RegisterWindowPropertyChangeAgent(WindowInfoKey::DISPLAY_ID, interestInfo, windowManagerAgent));
+    EXPECT_EQ(ssm_->observedFlags_, static_cast<uint32_t>(WindowInfoKey::DISPLAY_ID));
+    EXPECT_EQ(ssm_->interestedFlags_, static_cast<uint32_t>(WindowInfoKey::WINDOW_ID));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION,
+        ssm_->UnregisterWindowPropertyChangeAgent(WindowInfoKey::DISPLAY_ID, interestInfo, windowManagerAgent));
+    EXPECT_EQ(0, ssm_->observedFlags_);
+    EXPECT_EQ(0, ssm_->interestedFlags_);
 }
 
 /**
@@ -1678,8 +1716,8 @@ HWTEST_F(SceneSessionManagerTest2, GetSessionSnapshotById, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest2, ClearSession, TestSize.Level1)
 {
-    WSError ret;
-    ret = ssm_->ClearSession(100);
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
+    auto ret = ssm_->ClearSession(100);
     ASSERT_EQ(WSError::WS_ERROR_INVALID_PERMISSION, ret);
 }
 
@@ -1690,8 +1728,8 @@ HWTEST_F(SceneSessionManagerTest2, ClearSession, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest2, ClearAllSessions, TestSize.Level1)
 {
-    WSError ret;
-    ret = ssm_->ClearAllSessions();
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
+    auto ret = ssm_->ClearAllSessions();
     ASSERT_EQ(WSError::WS_ERROR_INVALID_PERMISSION, ret);
 }
 
@@ -1791,6 +1829,179 @@ HWTEST_F(SceneSessionManagerTest2, OnScreenshot, TestSize.Level1)
     ssm_->OnScreenshot(displayId);
     sceneSession->SetSessionState(SessionState::STATE_END);
     ssm_->OnScreenshot(displayId);
+}
+
+/**
+ * @tc.name: GetSurfaceNodeIdsFromSubSession
+ * @tc.desc: Test GetSurfaceNodeIdsFromSubSession;
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, GetSurfaceNodeIdsFromSubSession, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    std::vector<uint64_t> surfaceNodeIds;
+    auto ret = ssm_->GetSurfaceNodeIdsFromSubSession(nullptr, surfaceNodeIds);
+    EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
+
+    SessionInfo info;
+    info.abilityName_ = "GetSurfaceNodeIdsFromSubSession";
+    info.bundleName_ = "GetSurfaceNodeIdsFromSubSession";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ret = ssm_->GetSurfaceNodeIdsFromSubSession(sceneSession, surfaceNodeIds);
+    EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
+
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    ASSERT_NE(nullptr, surfaceNode);
+    sceneSession->SetSurfaceNode(surfaceNode);
+    sceneSession->SetLeashWinSurfaceNode(surfaceNode);
+
+    sptr<SceneSession> subSession1 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    subSession1->SetSurfaceNode(surfaceNode);
+    subSession1->SetLeashWinSurfaceNode(surfaceNode);
+    sptr<SceneSession> subSession2 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    subSession2->surfaceNode_ = nullptr;
+    sptr<SceneSession> subSession3 = nullptr;
+    sceneSession->subSession_.push_back(subSession1);
+    sceneSession->subSession_.push_back(subSession2);
+    sceneSession->subSession_.push_back(subSession3);
+
+    ret = ssm_->GetSurfaceNodeIdsFromSubSession(sceneSession, surfaceNodeIds);
+    EXPECT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: SetSurfaceNodeIds
+ * @tc.desc: Test SetSurfaceNodeIds;
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, SetSurfaceNodeIds, TestSize.Level1)
+{
+    sptr<IDisplayChangeListener> listener = sptr<DisplayChangeListener>::MakeSptr();
+    ASSERT_NE(nullptr, listener);
+    DisplayId displayId = 9999;
+    std::vector<uint64_t> surfaceNodeIds = { 1001, 1002 };
+    listener->OnSetSurfaceNodeIds(displayId, surfaceNodeIds);
+
+    ASSERT_NE(nullptr, ssm_);
+    displayId = 10;
+
+    SessionInfo info;
+    info.abilityName_ = "SetSurfaceNodeIds";
+    info.bundleName_ = "SetSurfaceNodeIds";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ssm_->sceneSessionMap_.insert({ 100001, sceneSession });
+    auto ret = ssm_->SetSurfaceNodeIds(displayId, surfaceNodeIds);
+    EXPECT_EQ(WMError::WM_OK, ret);
+
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    ASSERT_NE(nullptr, surfaceNode);
+    sceneSession->SetSurfaceNode(surfaceNode);
+    sceneSession->GetSurfaceNode()->SetId(1001);
+    ret = ssm_->SetSurfaceNodeIds(displayId, surfaceNodeIds);
+    EXPECT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: OnVirtualScreenDisconnected
+ * @tc.desc: Test OnVirtualScreenDisconnected;
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, OnVirtualScreenDisconnected, TestSize.Level1)
+{
+    sptr<IDisplayChangeListener> listener = sptr<DisplayChangeListener>::MakeSptr();
+    ASSERT_NE(nullptr, listener);
+    listener->OnVirtualScreenDisconnected(9999);
+
+    ASSERT_NE(nullptr, ssm_);
+
+    SessionInfo info;
+    info.abilityName_ = "OnVirtualScreenDisconnected";
+    info.bundleName_ = "OnVirtualScreenDisconnected";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto ret = ssm_->OnVirtualScreenDisconnected(1);
+    EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
+
+    ret = ssm_->OnVirtualScreenDisconnected(10);
+    EXPECT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: UpdateSubSessionBlackList
+ * @tc.desc: Test UpdateSubSessionBlackList;
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, UpdateSubSessionBlackList, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sessionBlackListInfoMap_.clear();
+    SessionInfo info;
+    info.abilityName_ = "UpdateSubSessionBlackList";
+    info.bundleName_ = "UpdateSubSessionBlackList";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->persistentId_ = 9998;
+    sceneSession->parentSession_ = nullptr;
+    auto ret = ssm_->UpdateSubSessionBlackList(sceneSession);
+    EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
+
+    sptr<SceneSession> parentSceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    parentSceneSession->persistentId_ = 100003;
+    sceneSession->SetParentSession(parentSceneSession);
+    ssm_->sessionBlackListInfoMap_[11].insert({ .windowId = 100001 });
+    ssm_->sessionBlackListInfoMap_[11].insert({ .windowId = 100002 });
+    EXPECT_EQ(2, ssm_->sessionBlackListInfoMap_[11].size());
+    ret = ssm_->UpdateSubSessionBlackList(sceneSession);
+    EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
+
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    ASSERT_NE(nullptr, surfaceNode);
+    sceneSession->SetSurfaceNode(surfaceNode);
+    sceneSession->GetSurfaceNode()->SetId(1001);
+    sceneSession->SetLeashWinSurfaceNode(surfaceNode);
+
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession2 = nullptr;
+    ssm_->sceneSessionMap_.insert({ 9998, sceneSession });
+    ssm_->sceneSessionMap_.insert({ 100001, sceneSession1 });
+    ssm_->sceneSessionMap_.insert({ 100002, sceneSession2 });
+    parentSceneSession->persistentId_ = 100002;
+    ret = ssm_->UpdateSubSessionBlackList(sceneSession);
+    EXPECT_EQ(WMError::WM_OK, ret);
+
+    sceneSession->persistentId_ = 9999;
+    ret = ssm_->UpdateSubSessionBlackList(sceneSession);
+    EXPECT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: RemoveSessionFromBlackList
+ * @tc.desc: Test RemoveSessionFromBlackList;
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, RemoveSessionFromBlackList, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sessionBlackListInfoMap_.clear();
+    SessionInfo info;
+    info.abilityName_ = "RemoveSessionFromBlackList";
+    info.bundleName_ = "RemoveSessionFromBlackList";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->persistentId_ = 9998;
+    auto ret = ssm_->RemoveSessionFromBlackList(sceneSession);
+    EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
+
+    ssm_->sessionBlackListInfoMap_[11].insert({ .windowId = 9996 });
+    ssm_->sessionBlackListInfoMap_[11].insert({ .windowId = 9997 });
+    ssm_->sessionBlackListInfoMap_[12].insert({ .windowId = 9998 });
+    ret = ssm_->RemoveSessionFromBlackList(sceneSession);
+    EXPECT_EQ(WMError::WM_OK, ret);
+
+    sceneSession->persistentId_ = 9996;
+    ret = ssm_->RemoveSessionFromBlackList(sceneSession);
+    EXPECT_EQ(WMError::WM_OK, ret);
 }
 
 /**

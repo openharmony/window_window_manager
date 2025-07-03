@@ -92,6 +92,7 @@ enum class ApiWindowType : uint32_t {
     TYPE_FLOAT_NAVIGATION,
     TYPE_DYNAMIC,
     TYPE_MUTISCREEN_COLLABORATION,
+    TYPE_FB,
     TYPE_END
 };
 
@@ -100,11 +101,16 @@ enum class LifeCycleEventType : uint32_t {
     ACTIVE,
     INACTIVE,
     BACKGROUND,
-    RESUMED, // RESUMED and PAUSED deprecated since api version 20, use INTERACTIVE and NONINTERACTIVE instead.
+    RESUMED,
     PAUSED,
     DESTROYED,
-    INTERACTIVE,
-    NONINTERACTIVE,
+};
+
+enum class WindowStageLifeCycleEventType : uint32_t {
+    FOREGROUND = 1,
+    RESUMED,
+    PAUSED,
+    BACKGROUND,
 };
 
 const std::map<WindowType, ApiWindowType> NATIVE_JS_TO_WINDOW_TYPE_MAP {
@@ -135,6 +141,7 @@ const std::map<WindowType, ApiWindowType> NATIVE_JS_TO_WINDOW_TYPE_MAP {
     { WindowType::WINDOW_TYPE_FLOAT_NAVIGATION,         ApiWindowType::TYPE_FLOAT_NAVIGATION         },
     { WindowType::WINDOW_TYPE_DYNAMIC,                  ApiWindowType::TYPE_DYNAMIC                  },
     { WindowType::WINDOW_TYPE_MUTISCREEN_COLLABORATION, ApiWindowType::TYPE_MUTISCREEN_COLLABORATION },
+    { WindowType::WINDOW_TYPE_FB,                       ApiWindowType::TYPE_FB                       },
 };
 
 const std::map<ApiWindowType, WindowType> JS_TO_NATIVE_WINDOW_TYPE_MAP {
@@ -165,6 +172,7 @@ const std::map<ApiWindowType, WindowType> JS_TO_NATIVE_WINDOW_TYPE_MAP {
     { ApiWindowType::TYPE_FLOAT_NAVIGATION,         WindowType::WINDOW_TYPE_FLOAT_NAVIGATION         },
     { ApiWindowType::TYPE_DYNAMIC,                  WindowType::WINDOW_TYPE_DYNAMIC                  },
     { ApiWindowType::TYPE_MUTISCREEN_COLLABORATION, WindowType::WINDOW_TYPE_MUTISCREEN_COLLABORATION },
+    { ApiWindowType::TYPE_FB,                       WindowType::WINDOW_TYPE_FB                       },
 };
 
 enum class ApiWindowMode : uint32_t {
@@ -269,33 +277,34 @@ enum class RectChangeReason : uint32_t {
 };
 
 const std::map<WindowSizeChangeReason, RectChangeReason> JS_SIZE_CHANGE_REASON {
-    { WindowSizeChangeReason::UNDEFINED,             RectChangeReason::UNDEFINED  },
-    { WindowSizeChangeReason::MAXIMIZE,              RectChangeReason::MAXIMIZE   },
-    { WindowSizeChangeReason::RECOVER,               RectChangeReason::RECOVER    },
-    { WindowSizeChangeReason::ROTATION,              RectChangeReason::UNDEFINED  },
-    { WindowSizeChangeReason::DRAG,                  RectChangeReason::DRAG       },
-    { WindowSizeChangeReason::DRAG_START,            RectChangeReason::DRAG_START },
-    { WindowSizeChangeReason::DRAG_MOVE,             RectChangeReason::MOVE       },
-    { WindowSizeChangeReason::DRAG_END,              RectChangeReason::DRAG_END   },
-    { WindowSizeChangeReason::RESIZE,                RectChangeReason::UNDEFINED  },
-    { WindowSizeChangeReason::MOVE,                  RectChangeReason::MOVE       },
-    { WindowSizeChangeReason::HIDE,                  RectChangeReason::UNDEFINED  },
-    { WindowSizeChangeReason::TRANSFORM,             RectChangeReason::UNDEFINED  },
-    { WindowSizeChangeReason::CUSTOM_ANIMATION_SHOW, RectChangeReason::UNDEFINED  },
-    { WindowSizeChangeReason::FULL_TO_SPLIT,         RectChangeReason::UNDEFINED  },
-    { WindowSizeChangeReason::SPLIT_TO_FULL,         RectChangeReason::UNDEFINED  },
-    { WindowSizeChangeReason::FULL_TO_FLOATING,      RectChangeReason::UNDEFINED  },
-    { WindowSizeChangeReason::FLOATING_TO_FULL,      RectChangeReason::UNDEFINED  },
-    { WindowSizeChangeReason::MAXIMIZE_TO_SPLIT,     RectChangeReason::UNDEFINED  },
-    { WindowSizeChangeReason::SPLIT_TO_MAXIMIZE,     RectChangeReason::UNDEFINED  },
-    { WindowSizeChangeReason::PAGE_ROTATION,         RectChangeReason::UNDEFINED  },
-    { WindowSizeChangeReason::SPLIT_DRAG_START,      RectChangeReason::UNDEFINED  },
-    { WindowSizeChangeReason::SPLIT_DRAG,            RectChangeReason::UNDEFINED  },
-    { WindowSizeChangeReason::SPLIT_DRAG_END,        RectChangeReason::UNDEFINED  },
-    { WindowSizeChangeReason::RESIZE_BY_LIMIT,       RectChangeReason::UNDEFINED  },
-    { WindowSizeChangeReason::MAXIMIZE_IN_IMPLICT,   RectChangeReason::MAXIMIZE   },
-    { WindowSizeChangeReason::RECOVER_IN_IMPLICIT,   RectChangeReason::RECOVER    },
-    { WindowSizeChangeReason::END,                   RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::UNDEFINED,                       RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::MAXIMIZE,                        RectChangeReason::MAXIMIZE   },
+    { WindowSizeChangeReason::RECOVER,                         RectChangeReason::RECOVER    },
+    { WindowSizeChangeReason::ROTATION,                        RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::DRAG,                            RectChangeReason::DRAG       },
+    { WindowSizeChangeReason::DRAG_START,                      RectChangeReason::DRAG_START },
+    { WindowSizeChangeReason::DRAG_MOVE,                       RectChangeReason::MOVE       },
+    { WindowSizeChangeReason::DRAG_END,                        RectChangeReason::DRAG_END   },
+    { WindowSizeChangeReason::RESIZE,                          RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::MOVE,                            RectChangeReason::MOVE       },
+    { WindowSizeChangeReason::HIDE,                            RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::TRANSFORM,                       RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::CUSTOM_ANIMATION_SHOW,           RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::FULL_TO_SPLIT,                   RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::SPLIT_TO_FULL,                   RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::FULL_TO_FLOATING,                RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::FLOATING_TO_FULL,                RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::MAXIMIZE_TO_SPLIT,               RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::SPLIT_TO_MAXIMIZE,               RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::PAGE_ROTATION,                   RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::SPLIT_DRAG_START,                RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::SPLIT_DRAG,                      RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::SPLIT_DRAG_END,                  RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::RESIZE_BY_LIMIT,                 RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::MAXIMIZE_IN_IMPLICT,             RectChangeReason::MAXIMIZE   },
+    { WindowSizeChangeReason::RECOVER_IN_IMPLICIT,             RectChangeReason::RECOVER    },
+    { WindowSizeChangeReason::SCREEN_RELATIVE_POSITION_CHANGE, RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::END,                             RectChangeReason::UNDEFINED  },
 };
 
 enum class ApiModalityType : uint32_t {
@@ -365,10 +374,12 @@ public:
     napi_value WindowTypeInit(napi_env env);
     napi_value AvoidAreaTypeInit(napi_env env);
     napi_value WindowModeInit(napi_env env);
+    napi_value GlobalWindowModeInit(napi_env env);
     napi_value ScreenshotEventTypeInit(napi_env env);
     napi_value ColorSpaceInit(napi_env env);
     napi_value OrientationInit(napi_env env);
     napi_value WindowStageEventTypeInit(napi_env env);
+    napi_value WindowStageLifecycleEventTypeInit(napi_env env);
     napi_value WindowAnchorInit(napi_env env);
     napi_value WindowEventTypeInit(napi_env env);
     napi_value WindowLayoutModeInit(napi_env env);
@@ -402,6 +413,7 @@ public:
     std::unique_ptr<AbilityRuntime::NapiAsyncTask> CreateEmptyAsyncTask(
         napi_env env, napi_value lastParam, napi_value* result);
     bool ParseSubWindowOptions(napi_env env, napi_value jsObject, const sptr<WindowOption>& windowOption);
+    WmErrorCode ParseShowWindowOptions(napi_env env, napi_value showWindowOptions, bool& focusOnShow);
     bool ParseKeyFramePolicy(napi_env env, napi_value jsObject, KeyFramePolicy& keyFramePolicy);
     napi_value ConvertKeyFramePolicyToJsValue(napi_env env, const KeyFramePolicy& keyFramePolicy);
     bool GetRotationResultFromJs(napi_env env, napi_value jsObject, RotationChangeResult& rotationChangeResult);
@@ -463,6 +475,39 @@ public:
         }
         return true;
     }
+
+    /**
+     * @brief Create a JS object representing a window rectangle change event.
+     *
+     * The resulting object has the following structure:
+     * {
+     *   rect: { x, y, width, height },
+     *   reason: <RectChangeReason enum value>
+     * }
+     *
+     * Used to pass rectangle change info from native code to JavaScript.
+     *
+     * @param env The NAPI environment.
+     * @param rect The window rectangle.
+     * @param reason The change reason.
+     * @return The JS object on success, or nullptr on failure.
+     */
+    napi_value BuildJsRectChangeOptions(napi_env env, const Rect& rect, RectChangeReason reason);
+
+    /**
+     * @brief Create a JS object from a native Position.
+     *
+     * The resulting object has the form:
+     * {
+     *   x: <number>,
+     *   y: <number>
+     * }
+     *
+     * @param env The NAPI environment.
+     * @param position The Position to convert.
+     * @return The JS object on success, or nullptr on failure.
+     */
+    napi_value BuildJsPosition(napi_env env, const Position& position);
 }
 }
 #endif

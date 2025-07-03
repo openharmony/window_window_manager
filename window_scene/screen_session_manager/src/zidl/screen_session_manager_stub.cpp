@@ -27,6 +27,7 @@ namespace {
 const static uint32_t MAX_SCREEN_SIZE = 32;
 const static int32_t ERR_INVALID_DATA = -1;
 const static int32_t MAX_BUFF_SIZE = 100;
+const static float INVALID_DEFAULT_DENSITY = 1.0f;
 }
 
 int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
@@ -184,6 +185,21 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             static_cast<void>(reply.WriteInt32(static_cast<int32_t>(ret)));
             if (!MarshallingHelper::MarshallingVectorParcelableObj<ScreenInfo>(reply, screenInfos)) {
                 TLOGE(WmsLogTag::DMS, "fail to marshalling screenInfos in stub.");
+            }
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_GET_PHYSICAL_SCREEN_IDS: {
+            std::vector<ScreenId> screenIds;
+            DMError ret  = GetPhysicalScreenIds(screenIds);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            bool res = MarshallingHelper::MarshallingVectorObj<ScreenId>(reply, screenIds,
+                [](Parcel& parcel, const ScreenId& screenId) {
+                    return parcel.WriteUint64(static_cast<uint64_t>(screenId));
+                }
+            );
+            if (!res) {
+                TLOGE(WmsLogTag::DMS, "fail to marshalling screenIds in stub.");
+                break;
             }
             break;
         }
@@ -1052,6 +1068,8 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             hookInfo.density_ = data.ReadFloat();
             hookInfo.rotation_ = data.ReadUint32();
             hookInfo.enableHookRotation_ = data.ReadBool();
+            hookInfo.displayOrientation_ = data.ReadUint32();
+            hookInfo.enableHookDisplayOrientation_ = data.ReadBool();
             UpdateDisplayHookInfo(uid, enable, hookInfo);
             break;
         }
@@ -1186,6 +1204,14 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         }
         case DisplayManagerMessage::TRANS_ID_GET_SCREEN_AREA_OF_DISPLAY_AREA: {
             ProcGetScreenAreaOfDisplayArea(data, reply);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SET_PRIMARY_DISPLAY_SYSTEM_DPI: {
+            ProcSetPrimaryDisplaySystemDpi(data, reply);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_AUTO_ROTATION: {
+            ProcSetVirtualScreenAutoRotation(data, reply);
             break;
         }
         default:
@@ -1347,5 +1373,32 @@ void ScreenSessionManagerStub::ProcGetScreenAreaOfDisplayArea(MessageParcel& dat
     static_cast<void>(reply.WriteInt32(screenArea.posY_));
     static_cast<void>(reply.WriteUint32(screenArea.width_));
     static_cast<void>(reply.WriteUint32(screenArea.height_));
+}
+
+void ScreenSessionManagerStub::ProcSetPrimaryDisplaySystemDpi(MessageParcel& data, MessageParcel& reply)
+{
+    float dpi = INVALID_DEFAULT_DENSITY;
+    if (!data.ReadFloat(dpi)) {
+        TLOGE(WmsLogTag::DMS, "Read dpi failed.");
+        return;
+    }
+    DMError ret = SetPrimaryDisplaySystemDpi(dpi);
+    reply.WriteInt32(static_cast<int32_t>(ret));
+}
+
+void ScreenSessionManagerStub::ProcSetVirtualScreenAutoRotation(MessageParcel& data, MessageParcel& reply)
+{
+    ScreenId screenId = 0;
+    if (!data.ReadUint64(screenId)) {
+        TLOGE(WmsLogTag::DMS, "Read screenId failed.");
+        return;
+    }
+    bool enable = false;
+    if (!data.ReadBool(enable)) {
+        TLOGE(WmsLogTag::DMS, "Read enable failed.");
+        return;
+    }
+    DMError ret = SetVirtualScreenAutoRotation(screenId, enable);
+    reply.WriteInt32(static_cast<int32_t>(ret));
 }
 } // namespace OHOS::Rosen

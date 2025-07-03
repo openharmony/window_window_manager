@@ -208,6 +208,14 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetAutoStartPiP(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_PIP_TEMPLATE_INFO):
             return HandleUpdatePiPTemplateInfo(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_FLOATING_BALL):
+            return HandleUpdateFloatingBall(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_FLOATING_BALL_PREPARE_CLOSE):
+            return HandleStopFloatingBall(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_START_FLOATING_BALL_MAIN_WINDOW):
+            return HandleStartFloatingBallMainWindow(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_FLOATING_BALL_WINDOW_ID):
+            return HandleGetFloatingBallWindowId(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_LAYOUT_FULL_SCREEN_CHANGE):
             return HandleLayoutFullScreenChange(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_DEFAULT_DENSITY_ENABLED):
@@ -254,6 +262,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleGetCrossAxisState(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_WATERFALL_MODE):
             return HandleGetWaterfallMode(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_MAIN_WINDOW_FULL_SCREEN_ACROSS_DISPLAYS):
+            return HandleIsMainWindowFullScreenAcrossDisplays(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_USE_IMPLICT_ANIMATION):
             return HandleUseImplicitAnimation(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CONTAINER_MODAL_EVENT):
@@ -266,6 +276,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetWindowAnchorInfo(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_TRANSITION_ANIMATION):
             return HandleSetWindowTransitionAnimation(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_GLOBAL_DISPLAY_RECT):
+            return HandleUpdateGlobalDisplayRectFromClient(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_FOLLOW_PARENT_MULTI_SCREEN_POLICY):
             return HandleNotifyFollowParentMultiScreenPolicy(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_KEY_FRAME_ANIMATE_END):
@@ -288,6 +300,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleUpdateRotationChangeListenerRegistered(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_SCREEN_SHOT_APP_EVENT_REGISTERED):
             return HandleUpdateScreenshotAppEventRegistered(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_ACROSS_DISPLAYS_REGISTERED):
+            return HandleUpdateAcrossDisplaysChangeRegistered(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_IS_HIGHLIGHTED):
             return HandleGetIsHighlighted(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_DISABLE_DELEGATOR_CHANGE):
@@ -296,6 +310,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetWindowShadows(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_SUBWINDOW_SOURCE):
             return HandleSetSubWindowSource(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_FRAMERECT_FOR_PARTIAL_ZOOMIN):
+            return HandleSetFrameRectForPartialZoomIn(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -474,6 +490,7 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteBool(property->GetIsAtomicService());
         reply.WriteBool(property->GetIsAbilityHook());
         reply.WriteParcelable(property->GetCompatibleModeProperty());
+        reply.WriteBool(property->GetUseControlStateFromProperty());
     }
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
@@ -776,6 +793,10 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
     }
     if (!data.ReadBool(abilitySessionInfo->reuseDelegatorWindow)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read reuseDelegatorWindow failed.");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.ReadBool(abilitySessionInfo->hideStartWindow)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read hideStartWindow failed.");
         return ERR_INVALID_DATA;
     }
     WSError errCode = PendingSessionActivation(abilitySessionInfo);
@@ -1283,6 +1304,65 @@ int SessionStub::HandleUpdatePiPTemplateInfo(MessageParcel& data, MessageParcel&
     return ERR_NONE;
 }
 
+int SessionStub::HandleUpdateFloatingBall(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_SYSTEM, "HandleUpdateFloatingBall");
+    sptr<FloatingBallTemplateInfo> fbTemplateInfo = data.ReadParcelable<FloatingBallTemplateInfo>();
+    if (fbTemplateInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "read fbTemplateInfo failed");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = UpdateFloatingBall(*fbTemplateInfo);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "write errCode fail");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SessionStub::HandleStopFloatingBall(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGI(WmsLogTag::WMS_SYSTEM, "HandleStopFloatingBall");
+    WSError errCode = StopFloatingBall();
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "write errCode fail");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SessionStub::HandleStartFloatingBallMainWindow(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_SYSTEM, "HandleStartFloatingBallMainWindow");
+    std::shared_ptr<AAFwk::Want> want = std::shared_ptr<AAFwk::Want>(data.ReadParcelable<AAFwk::Want>());
+    if (!want) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "read want error");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = RestoreFbMainWindow(want);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "write errCode fail");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SessionStub::HandleGetFloatingBallWindowId(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGI(WmsLogTag::WMS_SYSTEM, "HandleGetFloatingBallWindowId");
+    uint32_t windowId = 0;
+    WMError errCode = GetFloatingBallWindowId(windowId);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "write errCode fail");
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteUint32(windowId)) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "write windowId fail");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
 int SessionStub::HandleSetSystemEnableDrag(MessageParcel& data, MessageParcel& reply)
 {
     bool enableDrag = false;
@@ -1584,12 +1664,11 @@ int SessionStub::HandleChangeKeyboardEffectOption(MessageParcel& data, MessagePa
     if (effectOption->viewMode_ >= KeyboardViewMode::VIEW_MODE_END ||
         effectOption->flowLightMode_ >= KeyboardFlowLightMode::END ||
         effectOption->gradientMode_ >= KeyboardGradientMode::END) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid keyboard effectOption: %{publc}s",
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid keyboard effectOption: %{public}s",
             effectOption->ToString().c_str());
         return ERR_INVALID_DATA;
     }
-    WSError ret = ChangeKeyboardEffectOption(*effectOption);
-    reply.WriteInt32(static_cast<int32_t>(ret));
+    ChangeKeyboardEffectOption(*effectOption);
     return ERR_NONE;
 }
 
@@ -1779,6 +1858,21 @@ int SessionStub::HandleGetWaterfallMode(MessageParcel& data, MessageParcel& repl
     return ERR_NONE;
 }
 
+int SessionStub::HandleIsMainWindowFullScreenAcrossDisplays(MessageParcel& data, MessageParcel& reply)
+{
+    bool isAcrossDisplays = false;
+    WMError ret = IsMainWindowFullScreenAcrossDisplays(isAcrossDisplays);
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write ret fail.");
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteBool(isAcrossDisplays)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write isAcrossDisplays fail.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
 int SessionStub::HandleUseImplicitAnimation(MessageParcel& data, MessageParcel& reply)
 {
     bool useImplicit = false;
@@ -1927,6 +2021,21 @@ int SessionStub::HandleUpdateScreenshotAppEventRegistered(MessageParcel& data, M
     return ERR_NONE;
 }
 
+int SessionStub::HandleUpdateAcrossDisplaysChangeRegistered(MessageParcel& data, MessageParcel& reply)
+{
+    bool isRegister = false;
+    if (!data.ReadBool(isRegister)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read isRegister failed");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = UpdateAcrossDisplaysChangeRegistered(isRegister);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
 int SessionStub::HandleGetIsHighlighted(MessageParcel& data, MessageParcel& reply)
 {
     bool isHighlighted = false;
@@ -1961,6 +2070,52 @@ int SessionStub::HandleSetSubWindowSource(MessageParcel& data, MessageParcel& re
         TLOGE(WmsLogTag::WMS_SUB, "write errCode fail.");
         return ERR_INVALID_DATA;
     }
+    return ERR_NONE;
+}
+
+int SessionStub::HandleSetFrameRectForPartialZoomIn(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_ANIMATION, "In");
+    int32_t posX = 0;
+    int32_t posY = 0;
+    uint32_t width = 0;
+    uint32_t height = 0;
+    if (!data.ReadInt32(posX) || !data.ReadInt32(posY) || !data.ReadUint32(width) || !data.ReadUint32(height)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "read frame rect failed");
+        return ERR_INVALID_DATA;
+    }
+    Rect frameRect = { posX, posY, width, height };
+    WSError ret = SetFrameRectForPartialZoomIn(frameRect);
+    if (!reply.WriteUint32(static_cast<uint32_t>(ret))) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "write ret failed");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SessionStub::HandleUpdateGlobalDisplayRectFromClient(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t posX = 0;
+    int32_t posY = 0;
+    int32_t width = 0;
+    int32_t height = 0;
+    if (!data.ReadInt32(posX) || !data.ReadInt32(posY) || !data.ReadInt32(width) || !data.ReadInt32(height)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to read rect");
+        return ERR_INVALID_DATA;
+    }
+    WSRect globalDisplayRect = { posX, posY, width, height };
+
+    uint32_t reasonValue = 0;
+    if (!data.ReadUint32(reasonValue)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to read reason");
+        return ERR_INVALID_DATA;
+    }
+    SizeChangeReason reason = static_cast<SizeChangeReason>(reasonValue);
+    if (reason < SizeChangeReason::UNDEFINED || reason >= SizeChangeReason::END) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid reason: %{public}u", reasonValue);
+        return ERR_INVALID_DATA;
+    }
+    UpdateGlobalDisplayRectFromClient(globalDisplayRect, reason);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

@@ -22,6 +22,7 @@
 #include "context.h"
 #include "interfaces/include/ws_common.h"
 #include "iremote_object_mocker.h"
+#include "mock/mock_accesstoken_kit.h"
 #include "mock/mock_session_stage.h"
 #include "mock/mock_scene_session.h"
 #include "mock/mock_window_event_channel.h"
@@ -59,6 +60,7 @@ public:
                                                      DisplayId kDisplayId,
                                                      SessionState keyboardState,
                                                      WindowGravity gravity);
+    WSError NotifyDisplayIdChanged(int32_t persistentId, uint64_t displayId);
 
     static sptr<SceneSessionManager> ssm_;
 
@@ -83,6 +85,7 @@ void SceneSessionManagerTest12::SetUp() {}
 void SceneSessionManagerTest12::TearDown()
 {
     usleep(WAIT_SYNC_IN_NS);
+    MockAccesstokenKit::ChangeMockStateToInit();
 }
 
 const Rect landscapePanelRect_ = { 0, 538, 2720, 722 };
@@ -190,7 +193,20 @@ void SceneSessionManagerTest12::ConstructKeyboardCallingWindowTestData(const Key
     ssm_->sceneSessionMap_.insert({ 2, keyboardSession });
 }
 
+WSError SceneSessionManagerTest12::NotifyDisplayIdChanged(int32_t persistentId, uint64_t displayId)
+{
+    return WSError::WS_OK;
+}
+
 namespace {
+
+std::string g_logMsg;
+void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
+    const char* msg)
+{
+    g_logMsg = msg;
+}
+
 /**
  * @tc.name: GetResourceManager
  * @tc.desc: GetResourceManager
@@ -363,6 +379,7 @@ HWTEST_F(SceneSessionManagerTest12, TestCheckSystemWindowPermission_05, TestSize
 
     property->SetIsSystemKeyboard(true);
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
     ASSERT_EQ(false, ssm_->CheckSystemWindowPermission(property));
 }
 
@@ -405,6 +422,7 @@ HWTEST_F(SceneSessionManagerTest12, TestCheckSystemWindowPermission_08, TestSize
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
 
     property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
     ASSERT_EQ(false, ssm_->CheckSystemWindowPermission(property));
 }
 
@@ -485,6 +503,47 @@ HWTEST_F(SceneSessionManagerTest12, TestCheckSystemWindowPermission_012, TestSiz
 }
 
 /**
+ * @tc.name: TestCheckSystemWindowPermission_013
+ * @tc.desc: Test CheckSystemWindowPermission with windowType WINDOW_TYPE_SELECTION
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, TestCheckSystemWindowPermission_013, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowType(WindowType::WINDOW_TYPE_SELECTION);
+
+    MockAccesstokenKit::MockIsSACalling(false);
+    EXPECT_EQ(false, ssm_->CheckSystemWindowPermission(property));
+
+    MockAccesstokenKit::MockIsSACalling(true);
+    EXPECT_EQ(true, ssm_->CheckSystemWindowPermission(property));
+}
+
+/**
+ * @tc.name: TestCheckSystemWindowPermission_014
+ * @tc.desc: Test CheckSystemWindowPermission with windowType WINDOW_TYPE_MAGNIFICATION
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, TestCheckSystemWindowPermission_014, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowType(WindowType::WINDOW_TYPE_MAGNIFICATION);
+
+    MockAccesstokenKit::MockIsSACalling(false);
+    EXPECT_EQ(false, ssm_->CheckSystemWindowPermission(property));
+
+    MockAccesstokenKit::MockIsSACalling(true);
+    EXPECT_EQ(true, ssm_->CheckSystemWindowPermission(property));
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_MAGNIFICATION_MENU);
+    MockAccesstokenKit::MockIsSACalling(false);
+    EXPECT_EQ(false, ssm_->CheckSystemWindowPermission(property));
+
+    MockAccesstokenKit::MockIsSACalling(true);
+    EXPECT_EQ(true, ssm_->CheckSystemWindowPermission(property));
+}
+
+/**
  * @tc.name: CreateAndConnectSpecificSession
  * @tc.desc: CreateAndConnectSpecificSession
  * @tc.type: FUNC
@@ -504,7 +563,7 @@ HWTEST_F(SceneSessionManagerTest12, CreateAndConnectSpecificSession03, TestSize.
     property->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
     auto res = ssm_->CreateAndConnectSpecificSession(
         sessionStage, eventChannel, node, property, id, session, systemConfig, token);
-    ASSERT_EQ(WSError::WS_ERROR_NOT_SYSTEM_APP, res);
+    EXPECT_EQ(WSError::WS_ERROR_NOT_SYSTEM_APP, res);
 
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     property->SetTopmost(true);
@@ -512,25 +571,25 @@ HWTEST_F(SceneSessionManagerTest12, CreateAndConnectSpecificSession03, TestSize.
     property->SetWindowFlags(flags);
     res = ssm_->CreateAndConnectSpecificSession(
         sessionStage, eventChannel, node, property, id, session, systemConfig, token);
-    ASSERT_EQ(WSError::WS_ERROR_NOT_SYSTEM_APP, res);
+    EXPECT_EQ(WSError::WS_ERROR_NOT_SYSTEM_APP, res);
 
     property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     property->SetFloatingWindowAppType(true);
     ssm_->shouldHideNonSecureFloatingWindows_.store(true);
     res = ssm_->CreateAndConnectSpecificSession(
         sessionStage, eventChannel, node, property, id, session, systemConfig, token);
-    ASSERT_EQ(WSError::WS_ERROR_NOT_SYSTEM_APP, res);
+    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, res);
 
     property->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW);
     res = ssm_->CreateAndConnectSpecificSession(
         sessionStage, eventChannel, node, property, id, session, systemConfig, token);
-    ASSERT_EQ(WSError::WS_ERROR_INVALID_WINDOW, res);
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_WINDOW, res);
 
     property->SetWindowType(WindowType::WINDOW_TYPE_PIP);
     ssm_->isScreenLocked_ = true;
     res = ssm_->CreateAndConnectSpecificSession(
         sessionStage, eventChannel, node, property, id, session, systemConfig, token);
-    ASSERT_EQ(WSError::WS_DO_NOTHING, res);
+    EXPECT_EQ(WSError::WS_DO_NOTHING, res);
 }
 
 /**
@@ -619,7 +678,7 @@ HWTEST_F(SceneSessionManagerTest12, SetCreateKeyboardSessionListener, TestSize.L
     sessionInfo.abilityInfo = nullptr;
     sessionInfo.isAtomicService_ = true;
     sessionInfo.screenId_ = SCREEN_ID_INVALID;
-    ssm_->NotifySessionTouchOutside(123);
+    ssm_->NotifySessionTouchOutside(123, 0);
 }
 
 /**
@@ -875,7 +934,8 @@ HWTEST_F(SceneSessionManagerTest12, ShiftAppWindowPointerEvent_01, TestSize.Leve
 
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     int32_t fingerId = 0;
-    WMError result = ssm_->ShiftAppWindowPointerEvent(INVALID_SESSION_ID, targetSceneSession->GetPersistentId(), fingerId);
+    WMError result = ssm_->ShiftAppWindowPointerEvent(INVALID_SESSION_ID, targetSceneSession->GetPersistentId(),
+                                                      fingerId);
     EXPECT_EQ(result, WMError::WM_ERROR_INVALID_SESSION);
     result = ssm_->ShiftAppWindowPointerEvent(sourceSceneSession->GetPersistentId(), INVALID_SESSION_ID, fingerId);
     EXPECT_EQ(result, WMError::WM_ERROR_INVALID_SESSION);
@@ -1580,9 +1640,8 @@ HWTEST_F(SceneSessionManagerTest12, HasFloatingWindowForeground01, TestSize.Leve
 HWTEST_F(SceneSessionManagerTest12, ConfigSupportFollowRelativePositionToParent01, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
-    bool ret = true;
     ssm_->ConfigSupportFollowRelativePositionToParent();
-    EXPECT_EQ(ret, true);
+    EXPECT_EQ(ssm_->systemConfig_.supportFollowRelativePositionToParent_, false);
 }
 
 /**
@@ -2071,8 +2130,472 @@ HWTEST_F(SceneSessionManagerTest12, UpdateSessionDisplayId3, TestSize.Level1)
     KeyboardTestData keyboardTestData(0, 57256, 0, WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, false);
     keyboardTestData.SetCallingSessionId(86);
     ConstructKeyboardCallingWindowTestData(keyboardTestData);
-    EXPECT_CALL(*wmAgentLiteMocker, NotifyCallingWindowDisplayChanged(_)).Times(1);
+    EXPECT_CALL(*wmAgentLiteMocker, NotifyCallingWindowDisplayChanged(_)).Times(0);
     ssm_->UpdateSessionDisplayId(86, 12);
+}
+
+/**
+ * @tc.name: NotifyDisplayIdChanged
+ * @tc.desc: test function : NotifyDisplayIdChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, NotifyDisplayIdChanged, TestSize.Level1)
+{
+    sptr<WindowManagerAgentLiteMocker> wmAgentLiteMocker = sptr<WindowManagerAgentLiteMocker>::MakeSptr();
+    SessionManagerAgentController::GetInstance().RegisterWindowManagerAgent(
+        wmAgentLiteMocker, WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CALLING_DISPLAY, 12345);
+    KeyboardTestData keyboardTestData(0, 57256, 0, WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, false);
+    keyboardTestData.SetCallingSessionId(86);
+    ConstructKeyboardCallingWindowTestData(keyboardTestData);
+    EXPECT_CALL(*wmAgentLiteMocker, NotifyCallingWindowDisplayChanged(_)).Times(0);
+    ssm_->NotifyDisplayIdChanged(85, 12);
+    EXPECT_CALL(*wmAgentLiteMocker, NotifyCallingWindowDisplayChanged(_)).Times(1);
+    ssm_->NotifyDisplayIdChanged(86, 12);
+}
+
+/**
+ * @tc.name: RegisterDisplayIdChangedNotifyManagerFunc
+ * @tc.desc: test function : RegisterDisplayIdChangedNotifyManagerFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, RegisterDisplayIdChangedNotifyManagerFunc, TestSize.Level1)
+{
+    sptr<SceneSession> sceneSession = nullptr;
+    ssm_->RegisterDisplayIdChangedNotifyManagerFunc(sceneSession);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "RegisterDisplayIdChangedNotifyManagerFunc";
+    sessionInfo.abilityName_ = "RegisterDisplayIdChangedNotifyManagerFunc";
+    sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ssm_->RegisterDisplayIdChangedNotifyManagerFunc(sceneSession);
+    EXPECT_NE(nullptr, sceneSession->displayIdChangedNotifyManagerFunc_);
+}
+
+/**
+ * @tc.name: SetDisplayIdChangedNotifyManagerListener
+ * @tc.desc: test function : SetDisplayIdChangedNotifyManagerListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, SetDisplayIdChangedNotifyManagerListener, TestSize.Level1)
+{
+    sptr<SceneSession> sceneSession = nullptr;
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SetDisplayIdChangedNotifyManagerListener";
+    sessionInfo.abilityName_ = "SetDisplayIdChangedNotifyManagerListener";
+    sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession->SetDisplayIdChangedNotifyManagerListener([this](int32_t persistentId, uint64_t displayId) {
+        NotifyDisplayIdChanged(persistentId, displayId);
+    });
+    EXPECT_NE(nullptr, sceneSession->displayIdChangedNotifyManagerFunc_);
+}
+
+/**
+ * @tc.name: TerminateSessionByPersistentIdWhenNoPermission
+ * @tc.desc: test function : TerminateSessionByPersistentIdWhenNoPermission
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, TerminateSessionByPersistentIdWhenNoPermission, Function | SmallTest | Level3)
+{
+    const int32_t persistentId = 1;
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
+    auto result = ssm_->TerminateSessionByPersistentId(persistentId);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
+    MockAccesstokenKit::MockAccessTokenKitRet(0);
+ 
+    MockAccesstokenKit::MockIsSystemApp(false);
+    result = ssm_->TerminateSessionByPersistentId(persistentId);
+    EXPECT_EQ(result, WMError::WM_ERROR_NOT_SYSTEM_APP);
+    MockAccesstokenKit::MockIsSystemApp(true);
+ 
+    MockAccesstokenKit::MockIsSACalling(false);
+    result = ssm_->TerminateSessionByPersistentId(persistentId);
+    EXPECT_EQ(result, WMError::WM_ERROR_NOT_SYSTEM_APP);
+    MockAccesstokenKit::MockIsSACalling(true);
+ 
+    result = ssm_->TerminateSessionByPersistentId(persistentId);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
+}
+ 
+/**
+ * @tc.name: PendingSessionToBackgroundByPersistentId
+ * @tc.desc: test function : PendingSessionToBackgroundByPersistentId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, PendingSessionToBackgroundByPersistentId, Function | SmallTest | Level3)
+{
+    const int32_t persistentId = 1;
+    bool shouldBackToCaller = true;
+    MockAccesstokenKit::MockIsSystemApp(false);
+    MockAccesstokenKit::MockIsSACalling(false);
+    auto result = ssm_->PendingSessionToBackgroundByPersistentId(persistentId, shouldBackToCaller);
+    EXPECT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
+ 
+    MockAccesstokenKit::MockIsSystemApp(false);
+    result = ssm_->PendingSessionToBackgroundByPersistentId(persistentId, shouldBackToCaller);
+    EXPECT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
+    MockAccesstokenKit::MockIsSystemApp(true);
+ 
+    MockAccesstokenKit::MockIsSACalling(false);
+    result = ssm_->PendingSessionToBackgroundByPersistentId(persistentId, shouldBackToCaller);
+    EXPECT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
+    MockAccesstokenKit::MockIsSACalling(true);
+ 
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
+    result = ssm_->PendingSessionToBackgroundByPersistentId(persistentId, shouldBackToCaller);
+    EXPECT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
+    MockAccesstokenKit::MockAccessTokenKitRet(0);
+ 
+    result = ssm_->PendingSessionToBackgroundByPersistentId(persistentId, shouldBackToCaller);
+    EXPECT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
+ 
+    SessionInfo targetInfo;
+    targetInfo.persistentId_ = persistentId;
+    targetInfo.windowType_ = 1000;
+    sptr<SceneSession> targetSceneSession = sptr<SceneSession>::MakeSptr(targetInfo, nullptr);
+    ssm_->sceneSessionMap_.insert({ persistentId, targetSceneSession });
+    result = ssm_->PendingSessionToBackgroundByPersistentId(persistentId, shouldBackToCaller);
+    EXPECT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
+ 
+    targetInfo.windowType_ = 1;
+    targetSceneSession = sptr<SceneSession>::MakeSptr(targetInfo, nullptr);
+    ssm_->sceneSessionMap_.insert({ persistentId, targetSceneSession });
+    result = ssm_->PendingSessionToBackgroundByPersistentId(persistentId, shouldBackToCaller);
+    EXPECT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: GetRecentMainSessionInfoList_Invalid_Permission
+ * @tc.desc: test function : UpdateSessionDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetRecentMainSessionInfoList_Invalid_Permission, TestSize.Level1)
+{
+    std::vector<RecentSessionInfo> recentSessionInfoList = {};
+    MockAccesstokenKit::MockIsSystemApp(false);
+    MockAccesstokenKit::MockIsSACalling(false);
+    auto result = ssm_->GetRecentMainSessionInfoList(recentSessionInfoList);
+    EXPECT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
+}
+
+/**
+ * @tc.name: GetRecentMainSessionInfoList_Invalid_Param
+ * @tc.desc: test function : UpdateSessionDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetRecentMainSessionInfoList_Invalid_Param, TestSize.Level1)
+{
+    std::vector<RecentSessionInfo> recentSessionInfoList = {};
+    RecentSessionInfo(101);
+    recentSessionInfoList.emplace_back(101);
+    MockAccesstokenKit::MockIsSystemApp(true);
+    MockAccesstokenKit::MockIsSACalling(false);
+    auto result = ssm_->GetRecentMainSessionInfoList(recentSessionInfoList);
+    EXPECT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetRecentMainSessionInfoList_OK
+ * @tc.desc: test function : UpdateSessionDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetRecentMainSessionInfoList_OK, TestSize.Level1)
+{
+    std::vector<RecentSessionInfo> recentSessionInfoList = {};
+    SessionInfo info;
+    info.bundleName_ = "mockBundleName";
+    info.moduleName_ = "mockModuleName";
+    info.abilityName_ = "mockAbilityName";
+    info.persistentId_ = 101;
+    info.appIndex_ = 0;
+    sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->state_ = SessionState::STATE_CONNECT;
+    ssm_->sceneSessionMap_[101] = sceneSession;
+    const std::vector<int32_t> idList = { 101 };
+    MockAccesstokenKit::MockIsSystemApp(true);
+    MockAccesstokenKit::MockIsSACalling(false);
+    ssm_->UpdateRecentMainSessionInfos(idList);
+    auto result = ssm_->GetRecentMainSessionInfoList(recentSessionInfoList);
+    EXPECT_EQ(recentSessionInfoList[0].missionId, 101);
+}
+
+/**
+ * @tc.name: CreateNewInstanceKey_No_Permission
+ * @tc.desc: test function : UpdateSessionDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, CreateNewInstanceKey_No_Permission, TestSize.Level1)
+{
+    const std::string bundleName = "bundleName";
+    std::string instanceKey = "1";
+    MockAccesstokenKit::MockIsSystemApp(false);
+    MockAccesstokenKit::MockIsSACalling(false);
+    auto result = ssm_->CreateNewInstanceKey(bundleName, instanceKey);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
+}
+
+/**
+ * @tc.name: CreateNewInstanceKey_Invalid_Param
+ * @tc.desc: test function : UpdateSessionDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, CreateNewInstanceKey_Invalid_Param, TestSize.Level1)
+{
+    const std::string bundleName = "bundleName";
+    std::string instanceKey = "1";
+
+    MockAccesstokenKit::MockIsSystemApp(false);
+    MockAccesstokenKit::MockIsSACalling(true);
+    auto result = ssm_->CreateNewInstanceKey("", instanceKey);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
+
+    MockAccesstokenKit::MockIsSystemApp(true);
+    MockAccesstokenKit::MockIsSACalling(false);
+    result = ssm_->CreateNewInstanceKey("", instanceKey);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: CreateNewInstanceKey_OK
+ * @tc.desc: test function : UpdateSessionDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, CreateNewInstanceKey_OK, TestSize.Level1)
+{
+    const std::string bundleName = "bundleName";
+    std::string instanceKey = "1";
+
+    MockAccesstokenKit::MockIsSystemApp(true);
+    MockAccesstokenKit::MockIsSACalling(true);
+    auto result = ssm_->CreateNewInstanceKey(bundleName, instanceKey);
+    EXPECT_EQ(result, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: RemoveInstanceKey_No_Permission
+ * @tc.desc: test function : UpdateSessionDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, RemoveInstanceKey_No_Permission, TestSize.Level1)
+{
+    const std::string bundleName = "bundleName";
+    std::string instanceKey = "1";
+    MockAccesstokenKit::MockIsSystemApp(false);
+    MockAccesstokenKit::MockIsSACalling(false);
+    auto result = ssm_->RemoveInstanceKey(bundleName, instanceKey);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
+}
+
+/**
+ * @tc.name: RemoveInstanceKey_Invalid_Param
+ * @tc.desc: test function : UpdateSessionDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, RemoveInstanceKey_Invalid_Param, TestSize.Level1)
+{
+    const std::string bundleName = "bundleName";
+    std::string instanceKey = "1";
+
+    MockAccesstokenKit::MockIsSystemApp(false);
+    MockAccesstokenKit::MockIsSACalling(true);
+    auto result = ssm_->RemoveInstanceKey("", instanceKey);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
+
+    MockAccesstokenKit::MockIsSystemApp(true);
+    MockAccesstokenKit::MockIsSACalling(false);
+    result = ssm_->RemoveInstanceKey(bundleName, "");
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: UpdateWindowModeByIdForUITest01
+ * @tc.desc: test function : UpdateWindowModeByIdForUITest
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, UpdateWindowModeByIdForUITest01, TestSize.Level1)
+{
+    const int32_t windowId = 123456;
+    const int32_t updateMode = 1;
+
+    MockAccesstokenKit::MockIsSACalling(false);
+    auto result = ssm_->UpdateWindowModeByIdForUITest(windowId, updateMode);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
+    MockAccesstokenKit::MockIsSACalling(true);
+
+    result = ssm_->UpdateWindowModeByIdForUITest(windowId, updateMode);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_WINDOW);
+}
+
+/**
+ * @tc.name: RemoveInstanceKey_OK
+ * @tc.desc: test function : UpdateSessionDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, RemoveInstanceKey_OK, TestSize.Level1)
+{
+    const std::string bundleName = "bundleName";
+    std::string instanceKey = "1";
+
+    MockAccesstokenKit::MockIsSystemApp(true);
+    MockAccesstokenKit::MockIsSACalling(true);
+    auto result = ssm_->RemoveInstanceKey(bundleName, instanceKey);
+    EXPECT_EQ(result, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: SetSessionInfoStartWindowType01
+ * @tc.desc: test function : SetSessionInfoStartWindowType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, SetSessionInfoStartWindowType01, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "SetSessionInfoStartWindowType01";
+    info.bundleName_ = "SetSessionInfoStartWindowType01";
+    info.isSetStartWindowType_ = false;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto oldUIType = ssm_->systemConfig_.windowUIType_;
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+
+    ssm_->SetSessionInfoStartWindowType(sceneSession);
+
+    EXPECT_EQ(sceneSession->GetSessionInfo().startWindowType_, StartWindowType::DEFAULT);
+    ssm_->systemConfig_.windowUIType_ = oldUIType;
+}
+
+/**
+ * @tc.name: SetSessionInfoStartWindowType02
+ * @tc.desc: test function : SetSessionInfoStartWindowType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, SetSessionInfoStartWindowType02, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "SetSessionInfoStartWindowType02";
+    info.bundleName_ = "SetSessionInfoStartWindowType02";
+    info.isSetStartWindowType_ = false;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto oldUIType = ssm_->systemConfig_.windowUIType_;
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+
+    ssm_->SetSessionInfoStartWindowType(sceneSession);
+
+    EXPECT_EQ(sceneSession->GetSessionInfo().startWindowType_, StartWindowType::DEFAULT);
+    ssm_->systemConfig_.windowUIType_ = oldUIType;
+}
+
+/**
+ * @tc.name: SetSessionInfoStartWindowType03
+ * @tc.desc: test function : SetSessionInfoStartWindowType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, SetSessionInfoStartWindowType03, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "SetSessionInfoStartWindowType03";
+    info.bundleName_ = "SetSessionInfoStartWindowType03";
+    info.isSetStartWindowType_ = true;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto oldUIType = ssm_->systemConfig_.windowUIType_;
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+
+    ssm_->SetSessionInfoStartWindowType(sceneSession);
+
+    EXPECT_EQ(sceneSession->GetSessionInfo().startWindowType_, StartWindowType::DEFAULT);
+    ssm_->systemConfig_.windowUIType_ = oldUIType;
+}
+
+/**
+ * @tc.name: RegisterGetStartWindowConfigCallback
+ * @tc.desc: test function : RegisterGetStartWindowConfigCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, RegisterGetStartWindowConfigCallback, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "RegisterGetStartWindowConfigCallback";
+    info.bundleName_ = "RegisterGetStartWindowConfigCallback";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    ssm_->RegisterGetStartWindowConfigCallback(sceneSession);
+
+    EXPECT_NE(sceneSession->getStartWindowConfigFunc_, nullptr);
+    
+    g_logMsg.clear();
+    ssm_->RegisterGetStartWindowConfigCallback(nullptr);
+    EXPECT_TRUE(g_logMsg.find("session is nullptr") != std::string::npos);
+}
+
+/**
+ * @tc.name: NotifyHookOrientationChange01
+ * @tc.desc: test function : NotifyHookOrientationChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, NotifyHookOrientationChange01, TestSize.Level1)
+{
+    ssm_->sceneSessionMap_.clear();
+    WMError result = ssm_->NotifyHookOrientationChange(INVALID_SESSION_ID);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: NotifyHookOrientationChange02
+ * @tc.desc: test function : NotifyHookOrientationChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, NotifyHookOrientationChange02, TestSize.Level1)
+{
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "testBundleName";
+    sessionInfo.moduleName_ = "testModuleName";
+    sessionInfo.abilityName_ = "testAbilityName";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
+    WMError result = ssm_->NotifyHookOrientationChange(sceneSession->GetPersistentId());
+    EXPECT_EQ(result, WMError::WM_OK);
+    ssm_->sceneSessionMap_.erase(sceneSession->GetPersistentId());
+}
+
+/**
+ * @tc.name: TestGetSceneSessions
+ * @tc.desc: Verify that GetSceneSessions correctly filters sessions by screenId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, TestGetSceneSessions, TestSize.Level1)
+{
+    constexpr ScreenId screenId = 1001;
+    SessionInfo info;
+    auto session1 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    session1->SetScreenId(screenId);
+    auto session2 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    session2->SetScreenId(screenId);
+    auto session3 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    session3->SetScreenId(1000); // 1000: different screenId
+
+    {
+        std::unique_lock<std::shared_mutex> lock(ssm_->sceneSessionMapMutex_);
+        auto& sessionMap = ssm_->sceneSessionMap_;
+        sessionMap.clear();
+        sessionMap.emplace(1, session1);
+        sessionMap.emplace(2, session2);
+        sessionMap.emplace(3, session3);
+    }
+
+    auto result = ssm_->GetSceneSessions(screenId);
+    EXPECT_EQ(result.size(), 2u);
+    EXPECT_NE(std::find(result.begin(), result.end(), session1), result.end());
+    EXPECT_NE(std::find(result.begin(), result.end(), session2), result.end());
+    EXPECT_EQ(std::find(result.begin(), result.end(), session3), result.end());
+
+    {
+        std::unique_lock<std::shared_mutex> lock(ssm_->sceneSessionMapMutex_);
+        ssm_->sceneSessionMap_.clear();
+    }
 }
 } // namespace
 } // namespace Rosen

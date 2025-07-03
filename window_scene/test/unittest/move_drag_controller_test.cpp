@@ -689,6 +689,30 @@ HWTEST_F(MoveDragControllerTest, InitDecorValue01, TestSize.Level1)
 }
 
 /**
+ *@tc.name: GetGravity_TopLeft
+ *@tc.desc: test function : GetGravity
+ *@tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, GetGravity_TopLeft, TestSize.Level1)
+{
+    moveDragController->dragAreaType_ = AreaType::UNDEFINED;
+    Gravity gravity = moveDragController->GetGravity();
+    ASSERT_EQ(gravity, Gravity::TOP_LEFT);
+}
+
+/**
+ *@tc.name: GetGravity_TopRight
+ *@tc.desc: test function : GetGravity
+ *@tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, GetGravity_TopRight, TestSize.Level1)
+{
+    moveDragController->dragAreaType_ = AreaType::LEFT_BOTTOM;
+    Gravity gravity = moveDragController->GetGravity();
+    ASSERT_EQ(gravity, Gravity::TOP_RIGHT);
+}
+
+/**
  * @tc.name: ConsumeMoveEvent
  * @tc.desc: test function : ConsumeMoveEvent
  * @tc.type: FUNC
@@ -1335,14 +1359,30 @@ HWTEST_F(MoveDragControllerTest, CalcUnifiedTranslate, TestSize.Level1)
     pointerItem.SetDisplayY(30);
     pointerEvent->AddPointerItem(pointerItem);
     std::pair<int32_t, int32_t> res = moveDragController->CalcUnifiedTranslate(pointerEvent);
-    ASSERT_EQ(0, res.first);
-    ASSERT_EQ(0, res.second);
+    EXPECT_EQ(0, res.first);
+    EXPECT_EQ(0, res.second);
     sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert(std::make_pair(0, screenSession));
     res = moveDragController->CalcUnifiedTranslate(pointerEvent);
-    ASSERT_EQ(1, res.first);
-    ASSERT_EQ(1, res.second);
+    EXPECT_EQ(1, res.first);
+    EXPECT_EQ(1, res.second);
+
+    moveDragController->moveDragProperty_.scaleX_ = 0.0001f;
+    res = moveDragController->CalcUnifiedTranslate(pointerEvent);
+    EXPECT_EQ(1, res.first);
+    EXPECT_EQ(1, res.second);
+
+    moveDragController->moveDragProperty_.scaleX_ = 0.5f;
+    moveDragController->moveDragProperty_.scaleY_ = 0.5f;
+    res = moveDragController->CalcUnifiedTranslate(pointerEvent);
+    EXPECT_EQ(2, res.first);
+    EXPECT_EQ(2, res.second);
+
+    moveDragController->isAdaptToProportionalScale_ = true;
+    res = moveDragController->CalcUnifiedTranslate(pointerEvent);
+    EXPECT_EQ(1, res.first);
+    EXPECT_EQ(1, res.second);
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
 }
 
@@ -1606,7 +1646,7 @@ HWTEST_F(MoveDragControllerTest, UpdateSubWindowGravityWhenFollow01, TestSize.Le
     followController->type_ = AreaType::TOP;
     moveDragController->UpdateSubWindowGravityWhenFollow(followController, surfaceNode);
     gravityIter = surfaceNode->propertyModifiers_.find(RSModifierType::FRAME_GRAVITY);
-    ASSERT_NE(gravityIter, surfaceNode->propertyModifiers_.end());
+    ASSERT_EQ(gravityIter, surfaceNode->propertyModifiers_.end());
 }
 } // namespace
 } // namespace Rosen

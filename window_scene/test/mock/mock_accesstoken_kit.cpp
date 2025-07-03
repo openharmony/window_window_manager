@@ -22,6 +22,7 @@ namespace OHOS::Rosen {
 namespace {
 bool g_isSystemApp = true;
 bool g_isMockGetTokenTypeFlagRet = true;
+int32_t g_accessTokenKitRet = 0;
 }
 
 void MockAccesstokenKit::MockIsSystemApp(const bool isSystemApp)
@@ -34,6 +35,17 @@ void MockAccesstokenKit::MockIsSACalling(const bool mockGetTokenTypeFlagRet)
     g_isMockGetTokenTypeFlagRet = mockGetTokenTypeFlagRet;
 }
 
+void MockAccesstokenKit::MockAccessTokenKitRet(int32_t accessTokenKitRet)
+{
+    g_accessTokenKitRet = accessTokenKitRet;
+}
+
+void MockAccesstokenKit::ChangeMockStateToInit()
+{
+    g_isSystemApp = true;
+    g_isMockGetTokenTypeFlagRet = true;
+    g_accessTokenKitRet = 0;
+}
 }
 
 namespace OHOS::Security::AccessToken {
@@ -48,5 +60,10 @@ ATokenTypeEnum AccessTokenKit::GetTokenTypeFlag(AccessTokenID tokenId)
         return Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE;
     }
     return Security::AccessToken::ATokenTypeEnum::TOKEN_INVALID;
+}
+
+int32_t AccessTokenKit::VerifyAccessToken(uint32_t AccessTokenID, const std::string& permissionName)
+{
+    return Rosen::g_accessTokenKitRet;
 }
 } // namespace OHOS::Security::AccessToken

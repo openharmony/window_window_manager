@@ -22,7 +22,6 @@ namespace OHOS {
 namespace Rosen {
 
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsWindowStage"};
 /* used for free, ani has no destructor right now, only free when aniObj freed */
 static std::map<ani_object, AniEmbeddableWindowStage*> localObjs;
 } // namespace
@@ -70,7 +69,6 @@ ani_object CreateAniEmbeddableWindowStage(ani_env* env, sptr<Rosen::Window> wind
 
     std::unique_ptr<AniEmbeddableWindowStage> aniEmbeddableWindowStage =
         std::make_unique<AniEmbeddableWindowStage>(window, sessionInfo);
-    WLOGFI("[ANI] native obj %{public}p", aniEmbeddableWindowStage.get());
 
     ani_field contextField;
     if ((ret = env->Class_FindField(cls, "nativeWindowStage", &contextField)) != ANI_OK) {

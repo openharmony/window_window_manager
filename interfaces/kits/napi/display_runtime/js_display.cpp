@@ -445,7 +445,7 @@ napi_value JsDisplay::OnGetCutoutInfo(napi_env env, napi_callback_info info)
         }
         delete task;
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_immediate, "OnGetCutoutInfo") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env, CreateJsError(env,
                 static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN), "Send event failed!"));
     } else {
@@ -498,7 +498,7 @@ napi_value JsDisplay::OnGetAvailableArea(napi_env env, napi_callback_info info)
         }
         delete task;
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_immediate, "OnGetAvailableArea") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env, CreateJsError(env,
                 static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN), "Send event failed!"));
     } else {
@@ -551,7 +551,7 @@ napi_value JsDisplay::OnHasImmersiveWindow(napi_env env, napi_callback_info info
         }
         delete task;
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_immediate, "OnHasImmersiveWindow") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env, CreateJsError(env,
                 static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN), "Send event failed!"));
     } else {
@@ -620,7 +620,7 @@ napi_value JsDisplay::OnGetSupportedColorSpaces(napi_env env, napi_callback_info
         }
         delete task;
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_immediate, "OnGetSupportedColorSpaces") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env, CreateJsError(env,
                 static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN), "Send event failed!"));
     } else {
@@ -689,13 +689,29 @@ napi_value JsDisplay::OnGetSupportedHDRFormats(napi_env env, napi_callback_info 
         }
         delete task;
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_immediate, "OnGetSupportedHDRFormats") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env, CreateJsError(env,
                 static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN), "Send event failed!"));
     } else {
         napiAsyncTask.release();
     }
     return result;
+}
+
+static napi_value CreateJsSupportedRefreshRateArray(napi_env env, const std::vector<uint32_t>& supportedRefreshRate)
+{
+    TLOGD(WmsLogTag::DMS, "called");
+    napi_value arrayValue = nullptr;
+    napi_create_array_with_length(env, supportedRefreshRate.size(), &arrayValue);
+    if (arrayValue == nullptr) {
+        TLOGE(WmsLogTag::DMS, "Failed to create supported Refresh Rate array");
+        return NapiGetUndefined(env);
+    }
+    uint32_t index = 0;
+    for (const auto refreshRate : supportedRefreshRate) {
+        napi_set_element(env, arrayValue, index++, CreateJsValue(env, refreshRate));
+    }
+    return arrayValue;
 }
 
 std::shared_ptr<NativeReference> FindJsDisplayObject(DisplayId displayId)
@@ -817,6 +833,8 @@ void NapiSetNamedProperty(napi_env env, napi_value objValue, sptr<DisplayInfo> i
         napi_set_named_property(env, objValue, "y", NapiGetUndefined(env));
     }
     napi_set_named_property(env, objValue, "sourceMode", CreateJsValue(env, info->GetDisplaySourceMode()));
+    napi_set_named_property(env, objValue, "supportedRefreshRate", CreateJsSupportedRefreshRateArray(
+        env, info->GetSupportedRefreshRate()));
 }
 
 napi_value CreateJsDisplayObject(napi_env env, sptr<Display>& display)

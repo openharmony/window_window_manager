@@ -149,8 +149,13 @@ HWTEST_F(WindowTest, GetAndVerifyWindowTypeForArkUI, TestSize.Level1)
 
     ret = Window::GetAndVerifyWindowTypeForArkUI(100, "GetAndVerifyWindowTypeForArkUITest",
         WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW, windowType);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_TYPE, ret);
-
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(WMError::WM_ERROR_INVALID_TYPE, ret);
+    } else {
+        EXPECT_EQ(WMError::WM_OK, ret);
+        EXPECT_EQ(windowType == WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW, true);
+    }
+    
     ret = Window::GetAndVerifyWindowTypeForArkUI(100, "GetAndVerifyWindowTypeForArkUITest",
         WindowType::WINDOW_TYPE_FLOAT, windowType);
     EXPECT_EQ(WMError::WM_OK, ret);
@@ -158,7 +163,12 @@ HWTEST_F(WindowTest, GetAndVerifyWindowTypeForArkUI, TestSize.Level1)
 
     ret = Window::GetAndVerifyWindowTypeForArkUI(100, "GetAndVerifyWindowTypeForArkUITest",
         WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, windowType);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+    } else {
+        EXPECT_EQ(WMError::WM_OK, ret);
+        EXPECT_EQ(windowType == WindowType::WINDOW_TYPE_APP_SUB_WINDOW, true);
+    }
 }
 
 /**
@@ -189,6 +199,38 @@ HWTEST_F(WindowTest, CreatePiP, TestSize.Level1)
         }
     } else {
         ASSERT_EQ(nullptr, Window::CreatePiP(option, pipTemplateInfo, abilityContext_, errCode));
+    }
+}
+
+/**
+ * @tc.name: CreateFb
+ * @tc.desc: Create FloatingBall window with option
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, CreateFb, TestSize.Level1)
+{
+    sptr<WindowOption> option = nullptr;
+    FloatingBallTemplateBaseInfo fbTemplateBaseInfo;
+    std::shared_ptr<Media::PixelMap> icon = nullptr;
+    WMError errCode = WMError::WM_OK;
+    ASSERT_EQ(nullptr, Window::CreateFb(option, fbTemplateBaseInfo, icon, abilityContext_, errCode));
+    option = sptr<WindowOption>::MakeSptr();
+    ASSERT_EQ(nullptr, Window::CreateFb(option, fbTemplateBaseInfo, icon, abilityContext_, errCode));
+    option->SetWindowName("fb_window");
+    ASSERT_EQ(nullptr, Window::CreateFb(option, fbTemplateBaseInfo, icon, abilityContext_, errCode));
+    option->SetWindowType(WindowType::WINDOW_TYPE_FB);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FB);
+    Rect rect = {0, 0, 10, 10};
+    option->SetWindowRect(rect);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        sptr<Window> window = Window::CreateFb(option, fbTemplateBaseInfo, icon, abilityContext_, errCode);
+        if (errCode == WMError::WM_OK) {
+            ASSERT_NE(nullptr, window);
+        } else {
+            ASSERT_EQ(nullptr, window);
+        }
+    } else {
+        ASSERT_EQ(nullptr, Window::CreateFb(option, fbTemplateBaseInfo, icon, abilityContext_, errCode));
     }
 }
 
@@ -2936,6 +2978,52 @@ HWTEST_F(WindowTest, SetFollowParentMultiScreenPolicy, Function | SmallTest | Le
     sptr<Window> window = sptr<Window>::MakeSptr();
     EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetFollowParentMultiScreenPolicy(true));
     EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetFollowParentMultiScreenPolicy(false));
+    EXPECT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: IsPcOrPadFreeMultiWindowMode
+ * @tc.desc: IsPcOrPadFreeMultiWindowMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, IsPcOrPadFreeMultiWindowMode, TestSize.Level1)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    bool isPcOrFreeMultiWindow = true;
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), IsPcOrPadFreeMultiWindowMode(_)).Times(1).WillOnce(DoAll(
+        SetArgReferee<0>(isPcOrFreeMultiWindow),
+        Return(WMError::WM_OK)
+    ));
+    auto ret = window->IsPcOrPadFreeMultiWindowMode();
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(ret, isPcOrFreeMultiWindow);
+    } else {
+        EXPECT_EQ(ret, false);
+    }
+    EXPECT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: GetFreeMultiWindowModeEnabledState
+ * @tc.desc: GetFreeMultiWindowModeEnabledState
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, GetFreeMultiWindowModeEnabledState, TestSize.Level1)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    bool isFreeMultiWindow = true;
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), IsFreeMultiWindowMode(_)).Times(1).WillOnce(DoAll(
+        SetArgReferee<0>(isFreeMultiWindow),
+        Return(WMError::WM_OK)
+    ));
+    auto ret = window->GetFreeMultiWindowModeEnabledState();
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(ret, isFreeMultiWindow);
+    } else {
+        EXPECT_EQ(ret, false);
+    }
     EXPECT_EQ(WMError::WM_OK, window->Destroy());
 }
 } // namespace

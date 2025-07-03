@@ -450,7 +450,7 @@ void WindowOption::SetSubWindowOutlineEnabled(bool outlineEnabled)
 
 bool WindowOption::IsSubWindowOutlineEnabled() const
 {
-   return subWindowOutlineEnabled_;
+    return subWindowOutlineEnabled_;
 }
 } // namespace Rosen
 } // namespace OHOS

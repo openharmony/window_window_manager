@@ -108,6 +108,11 @@ public:
         return (type == WindowType::WINDOW_TYPE_PIP);
     }
 
+    static inline bool IsFbWindow(WindowType type)
+    {
+        return (type == WindowType::WINDOW_TYPE_FB);
+    }
+
     static inline bool IsBelowSystemWindow(WindowType type)
     {
         return (type >= WindowType::BELOW_APP_SYSTEM_WINDOW_BASE && type < WindowType::BELOW_APP_SYSTEM_WINDOW_END);
@@ -215,7 +220,7 @@ public:
     {
         return mode == WindowMode::WINDOW_MODE_FULLSCREEN || mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
             mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY || mode == WindowMode::WINDOW_MODE_FLOATING ||
-            mode == WindowMode::WINDOW_MODE_PIP;
+            mode == WindowMode::WINDOW_MODE_PIP || mode == WindowMode::WINDOW_MODE_FB;
     }
 
     static inline bool IsEmptyRect(const Rect& r)
@@ -261,6 +266,8 @@ public:
                 return WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY & windowModeSupportType;
             case WindowMode::WINDOW_MODE_PIP:
                 return WindowModeSupport::WINDOW_MODE_SUPPORT_PIP & windowModeSupportType;
+            case WindowMode::WINDOW_MODE_FB:
+                return WindowModeSupport::WINDOW_MODE_SUPPORT_FB & windowModeSupportType;
             case WindowMode::WINDOW_MODE_UNDEFINED:
                 return false;
             default:
@@ -284,6 +291,8 @@ public:
                 return WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
             case WindowModeSupport::WINDOW_MODE_SUPPORT_PIP:
                 return WindowMode::WINDOW_MODE_PIP;
+            case WindowModeSupport::WINDOW_MODE_SUPPORT_FB:
+                return WindowMode::WINDOW_MODE_FB;
             default:
                 return WindowMode::WINDOW_MODE_UNDEFINED;
         }
@@ -303,6 +312,22 @@ public:
             }
         }
         return windowModeSupportType;
+    }
+
+    static std::vector<AppExecFwk::SupportWindowMode> ConvertSupportTypeToSupportModes(uint32_t windowModeSupportType)
+    {
+        std::vector<AppExecFwk::SupportWindowMode> supportModes;
+        if ((windowModeSupportType & WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN) != 0) {
+            supportModes.push_back(AppExecFwk::SupportWindowMode::FULLSCREEN);
+        }
+        if ((windowModeSupportType & (WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
+            WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY)) != 0) {
+            supportModes.push_back(AppExecFwk::SupportWindowMode::SPLIT);
+        }
+        if ((windowModeSupportType & WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING) != 0) {
+            supportModes.push_back(AppExecFwk::SupportWindowMode::FLOATING);
+        }
+        return supportModes;
     }
 
     static bool IsPointInTargetRect(int32_t pointPosX, int32_t pointPosY, const Rect& targetRect)

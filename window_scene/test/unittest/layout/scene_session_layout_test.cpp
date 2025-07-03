@@ -202,14 +202,14 @@ HWTEST_F(SceneSessionLayoutTest, UpdateRectInner02, TestSize.Level0)
     sceneSession->SetForegroundInteractiveStatus(true);
 
     sceneSession->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
-    sceneSession->isSubWinowResizingOrMoving_ = true;
+    sceneSession->isSubWindowResizingOrMoving_ = true;
     sceneSession->GetSessionProperty()->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     ASSERT_EQ(true, sceneSession->UpdateRectInner(uiParam, reason));
-    ASSERT_EQ(true, sceneSession->isSubWinowResizingOrMoving_);
+    ASSERT_EQ(true, sceneSession->isSubWindowResizingOrMoving_);
 
     sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     ASSERT_EQ(true, sceneSession->UpdateRectInner(uiParam, reason));
-    ASSERT_EQ(false, sceneSession->isSubWinowResizingOrMoving_);
+    ASSERT_EQ(false, sceneSession->isSubWindowResizingOrMoving_);
 }
 
 /**
@@ -995,6 +995,30 @@ HWTEST_F(SceneSessionLayoutTest, HandleSubSessionCrossNode, TestSize.Level1)
     ASSERT_EQ(sceneSession->IsDragStart(), false);
     sceneSession->HandleSubSessionCrossNode(SizeChangeReason::DRAG_MOVE);
     ASSERT_EQ(sceneSession->IsDragStart(), true);
+}
+
+/**
+ * @tc.name: UpdateWindowModeForUITest01
+ * @tc.desc: UpdateWindowModeForUITest
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLayoutTest, UpdateWindowModeForUITest01, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdateWindowModeForUITest";
+    info.bundleName_ = "UpdateWindowModeForUITest";
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback);
+
+    const int32_t updateMode = 1;
+    WMError errCode = sceneSession->UpdateWindowModeForUITest(updateMode);
+    EXPECT_EQ(errCode, WMError::WM_ERROR_NULLPTR);
+
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
+    sceneSession->sessionStage_ = mockSessionStage;
+    errCode = sceneSession->UpdateWindowModeForUITest(updateMode);
+    EXPECT_EQ(errCode, WMError::WM_OK);
 }
 } // namespace
 } // namespace Rosen

@@ -220,12 +220,20 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetCurrentRotation(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_APP_FORCE_LANDSCAPE_CONFIG_UPDATED):
             return HandleNotifyAppForceLandscapeConfigUpdated(data, reply);
-        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_NONINTERACTIVE_STATUS):
-            return HandleNotifyNonInteractiveStatus(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_PAUSED_STATUS):
+            return HandleNotifyPausedStatus();
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_USE_CONTROL_STATUS):
+            return HandleNotifyAppUseControlStatus(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_CLOSE_SPECIFIC_SCENE):
             return HandleCloseSpecificScene(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_GET_ROUTER_STACK_INFO):
             return HandleGetRouterStackInfo(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_WINDOW_MODE_FOR_UI_TEST):
+            return HandleUpdateWindowModeForUITest(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_GLOBAL_DISPLAY_RECT):
+            return HandleUpdateGlobalDisplayRectFromServer(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SEND_FB_ACTION_EVENT):
+            return HandleSendFbActionEvent(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -304,6 +312,32 @@ int SessionStageStub::HandleUpdateRect(MessageParcel& data, MessageParcel& reply
     }
     WSError errCode = UpdateRect(rect, reason, config, avoidAreas);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleUpdateGlobalDisplayRectFromServer(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t posX = 0;
+    int32_t posY = 0;
+    int32_t width = 0;
+    int32_t height = 0;
+    if (!data.ReadInt32(posX) || !data.ReadInt32(posY) || !data.ReadInt32(width) || !data.ReadInt32(height)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to read rect");
+        return ERR_INVALID_DATA;
+    }
+    WSRect globalDisplayRect = { posX, posY, width, height };
+
+    uint32_t reasonValue = 0;
+    if (!data.ReadUint32(reasonValue)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to read reason");
+        return ERR_INVALID_DATA;
+    }
+    SizeChangeReason reason = static_cast<SizeChangeReason>(reasonValue);
+    if (reason < SizeChangeReason::UNDEFINED || reason >= SizeChangeReason::END) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid reason: %{public}u", reasonValue);
+        return ERR_INVALID_DATA;
+    }
+    UpdateGlobalDisplayRectFromServer(globalDisplayRect, reason);
     return ERR_NONE;
 }
 
@@ -574,6 +608,22 @@ int SessionStageStub::HandleNotifyLayoutFinishAfterWindowModeChange(MessageParce
     return ERR_NONE;
 }
 
+int SessionStageStub::HandleUpdateWindowModeForUITest(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    int32_t updateMode = 0;
+    if (!data.ReadInt32(updateMode)) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Failed to read updateMode");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = UpdateWindowModeForUITest(updateMode);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to write errCode");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
 int SessionStageStub::HandleNotifyWindowVisibilityChange(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("HandleNotifyWindowVisibilityChange!");
@@ -591,10 +641,18 @@ int SessionStageStub::HandleNotifyForegroundInteractiveStatus(MessageParcel& dat
     return ERR_NONE;
 }
 
-int SessionStageStub::HandleNotifyNonInteractiveStatus(MessageParcel& data, MessageParcel& reply)
+int SessionStageStub::HandleNotifyAppUseControlStatus(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "called");
-    NotifyNonInteractiveStatus();
+    bool useControlState = data.ReadBool();
+    NotifyAppUseControlStatus(useControlState);
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleNotifyPausedStatus()
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "called");
+    NotifyLifecyclePausedStatus();
     return ERR_NONE;
 }
 
@@ -692,6 +750,22 @@ int SessionStageStub::HandleSetPipActionEvent(MessageParcel& data, MessageParcel
         return ERR_INVALID_VALUE;
     }
     SetPipActionEvent(action, status);
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleSendFbActionEvent(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_SYSTEM, "HandleSendFbActionEvent");
+    std::string action;
+    if (!data.ReadString(action)) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Read action failed.");
+        reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_IPC_FAILED));
+        return ERR_INVALID_VALUE;
+    }
+    auto error = SendFbActionEvent(action);
+    if (!reply.WriteInt32(static_cast<int32_t>(error))) {
+        return ERR_INVALID_VALUE;
+    }
     return ERR_NONE;
 }
 

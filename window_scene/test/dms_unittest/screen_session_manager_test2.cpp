@@ -21,7 +21,7 @@
 #include "screen_session_manager/include/screen_session_manager.h"
 #include "screen_scene_config.h"
 #include "fold_screen_state_internel.h"
-#include "../mock/mock_accesstoken_kit.h"
+#include "mock/mock_accesstoken_kit.h"
 #include "window_manager_hilog.h"
 
 using namespace testing;
@@ -34,6 +34,7 @@ constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
 constexpr uint32_t M_STATUS_WIDTH = 1008;
 constexpr uint32_t F_STATUS_WIDTH = 2048;
 constexpr uint32_t G_STATUS_WIDTH = 3184;
+const ScreenId SCREENID = 1000;
 }
 namespace {
     std::string g_errLog;
@@ -354,7 +355,7 @@ HWTEST_F(ScreenSessionManagerTest, GetCutoutInfoWithRotatio03, Function | SmallT
     auto cutoutInfo = ssm_->GetCutoutInfoWithRotation(id, rotation);
     EXPECT_EQ(cutoutInfo, nullptr);
 }
- 
+
 /**
  * @tc.name: GetCutoutInfoWithRotation04
  * @tc.desc: GetCutoutInfoWithRotation test with controller is nullptr
@@ -369,7 +370,7 @@ HWTEST_F(ScreenSessionManagerTest, GetCutoutInfoWithRotatio04, Function | SmallT
     auto cutoutInfo = ssm_->GetCutoutInfoWithRotation(id, rotation);
     EXPECT_NE(cutoutInfo, nullptr);
 }
- 
+
 /**
  * @tc.name: GetCutoutInfoWithRotation05
  * @tc.desc: GetCutoutInfoWithRotation test with controller is nullptr
@@ -384,7 +385,7 @@ HWTEST_F(ScreenSessionManagerTest, GetCutoutInfoWithRotatio05, Function | SmallT
     auto cutoutInfo = ssm_->GetCutoutInfoWithRotation(id, rotation);
     EXPECT_NE(cutoutInfo, nullptr);
 }
- 
+
 /**
  * @tc.name: SetForceCloseHdr01
  * @tc.desc: SetForceCloseHdr test
@@ -401,7 +402,7 @@ HWTEST_F(ScreenSessionManagerTest, SetForceCloseHdr01, Function | SmallTest | Le
     ssm_->SetForceCloseHdr(screenId, isForceCloseHdr);
     EXPECT_TRUE(g_errLog.find("permission denied!") != std::string::npos);
 }
- 
+
 /**
  * @tc.name: SetForceCloseHdr02
  * @tc.desc: SetForceCloseHdr test
@@ -418,7 +419,7 @@ HWTEST_F(ScreenSessionManagerTest, SetForceCloseHdr02, Function | SmallTest | Le
     ssm_->SetForceCloseHdr(screenId, isForceCloseHdr);
     EXPECT_TRUE(g_errLog.find("permission denied!") == std::string::npos);
 }
- 
+
 /**
  * @tc.name: SetForceCloseHdr03
  * @tc.desc: SetForceCloseHdr test
@@ -435,7 +436,7 @@ HWTEST_F(ScreenSessionManagerTest, SetForceCloseHdr03, Function | SmallTest | Le
     ssm_->SetForceCloseHdr(screenId, isForceCloseHdr);
     EXPECT_TRUE(g_errLog.find("permission denied!") == std::string::npos);
 }
- 
+
 /**
  * @tc.name: SetDefaultMultiScreenModeWhenSwitchUser01
  * @tc.desc: SetDefaultMultiScreenModeWhenSwitchUser test
@@ -450,7 +451,7 @@ HWTEST_F(ScreenSessionManagerTest, SetDefaultMultiScreenModeWhenSwitchUser01, Fu
     ssm_->SetDefaultMultiScreenModeWhenSwitchUser();
     EXPECT_TRUE(g_errLog.find("permission denied!") != std::string::npos);
 }
- 
+
 /**
  * @tc.name: SetDefaultMultiScreenModeWhenSwitchUser02
  * @tc.desc: SetDefaultMultiScreenModeWhenSwitchUser test
@@ -465,7 +466,7 @@ HWTEST_F(ScreenSessionManagerTest, SetDefaultMultiScreenModeWhenSwitchUser02, Fu
     ssm_->SetDefaultMultiScreenModeWhenSwitchUser();
     EXPECT_TRUE(g_errLog.find("permission denied!") == std::string::npos);
 }
- 
+
 /**
  * @tc.name: SetDefaultMultiScreenModeWhenSwitchUser03
  * @tc.desc: SetDefaultMultiScreenModeWhenSwitchUser test
@@ -480,7 +481,7 @@ HWTEST_F(ScreenSessionManagerTest, SetDefaultMultiScreenModeWhenSwitchUser03, Fu
     ssm_->SetDefaultMultiScreenModeWhenSwitchUser();
     EXPECT_TRUE(g_errLog.find("permission denied!") == std::string::npos);
 }
- 
+
 /**
  * @tc.name: NotifyExtendScreenCreateFinish01
  * @tc.desc: NotifyExtendScreenCreateFinish test
@@ -495,7 +496,7 @@ HWTEST_F(ScreenSessionManagerTest, NotifyExtendScreenCreateFinish01, Function | 
     ssm_->NotifyExtendScreenCreateFinish();
     EXPECT_TRUE(g_errLog.find("permission denied!") != std::string::npos);
 }
- 
+
 /**
  * @tc.name: NotifyExtendScreenCreateFinish02
  * @tc.desc: NotifyExtendScreenCreateFinish test
@@ -510,7 +511,7 @@ HWTEST_F(ScreenSessionManagerTest, NotifyExtendScreenCreateFinish02, Function | 
     ssm_->NotifyExtendScreenCreateFinish();
     EXPECT_TRUE(g_errLog.find("permission denied!") == std::string::npos);
 }
- 
+
 /**
  * @tc.name: NotifyExtendScreenCreateFinish03
  * @tc.desc: NotifyExtendScreenCreateFinish test
@@ -525,7 +526,7 @@ HWTEST_F(ScreenSessionManagerTest, NotifyExtendScreenCreateFinish03, Function | 
     ssm_->NotifyExtendScreenCreateFinish();
     EXPECT_TRUE(g_errLog.find("permission denied!") == std::string::npos);
 }
- 
+
 /**
  * @tc.name: NotifyExtendScreenDestroyFinish01
  * @tc.desc: NotifyExtendScreenDestroyFinish test
@@ -540,7 +541,7 @@ HWTEST_F(ScreenSessionManagerTest, NotifyExtendScreenDestroyFinish01, Function |
     ssm_->NotifyExtendScreenDestroyFinish();
     EXPECT_TRUE(g_errLog.find("permission denied!") != std::string::npos);
 }
- 
+
 /**
  * @tc.name: NotifyExtendScreenDestroyFinish02
  * @tc.desc: NotifyExtendScreenDestroyFinish test
@@ -555,7 +556,7 @@ HWTEST_F(ScreenSessionManagerTest, NotifyExtendScreenDestroyFinish02, Function |
     ssm_->NotifyExtendScreenDestroyFinish();
     EXPECT_TRUE(g_errLog.find("permission denied!") == std::string::npos);
 }
- 
+
 /**
  * @tc.name: NotifyExtendScreenDestroyFinish03
  * @tc.desc: NotifyExtendScreenDestroyFinish test
@@ -570,7 +571,7 @@ HWTEST_F(ScreenSessionManagerTest, NotifyExtendScreenDestroyFinish03, Function |
     ssm_->NotifyExtendScreenDestroyFinish();
     EXPECT_TRUE(g_errLog.find("permission denied!") == std::string::npos);
 }
- 
+
 /**
  * @tc.name: SetFoldStatusExpandAndLocked01
  * @tc.desc: SetFoldStatusExpandAndLocked test
@@ -586,7 +587,7 @@ HWTEST_F(ScreenSessionManagerTest, SetFoldStatusExpandAndLocked01, Function | Sm
     ssm_->SetFoldStatusExpandAndLocked(isLocked);
     EXPECT_TRUE(g_errLog.find("permission denied!") != std::string::npos);
 }
- 
+
 /**
  * @tc.name: SetFoldStatusExpandAndLocked02
  * @tc.desc: SetFoldStatusExpandAndLocked test
@@ -852,6 +853,155 @@ HWTEST_F(ScreenSessionManagerTest, ConvertIntToRotation, Function | SmallTest | 
     rotation = 270;
     targetRotation = ssm_->ConvertIntToRotation(rotation);
     EXPECT_EQ(targetRotation, Rotation::ROTATION_270);
+}
+
+/**
+ * @tc.name: GetPhysicalScreenIds
+ * @tc.desc: GetPhysicalScreenIds
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetPhysicalScreenIds, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    std::vector<ScreenId> screenIds;
+    auto ret = ssm_->GetPhysicalScreenIds(screenIds);
+    EXPECT_EQ(ret, DMError::DM_OK);
+
+    ScreenId screenId = 11;
+    sptr<ScreenSession> screenSession = nullptr;
+    ssm_->screenSessionMap_.insert(std::make_pair(screenId, screenSession));
+    std::vector<ScreenId> screenIds1;
+    auto ret1 = ssm_->GetPhysicalScreenIds(screenIds1);
+    EXPECT_EQ(ret, DMError::DM_OK);
+}
+
+/**
+ * @tc.name: SetVirtualScreenAutoRotation01
+ * @tc.desc: SetVirtualScreenAutoRotation test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetVirtualScreenAutoRotation01, Function | SmallTest | Level3)
+{
+    ScreenId screenId = 0;
+    bool enable = true;
+    MockAccesstokenKit::MockIsSACalling(false);
+    MockAccesstokenKit::MockIsSASystemApp(false);
+    auto ret = ssm_->SetVirtualScreenAutoRotation(screenId, enable);
+    EXPECT_EQ(ret, DMError::DM_ERROR_INVALID_PERMISSION);
+}
+
+/**
+ * @tc.name: SetVirtualScreenAutoRotation02
+ * @tc.desc: SetVirtualScreenAutoRotation test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetVirtualScreenAutoRotation02, Function | SmallTest | Level3)
+{
+    ScreenId screenId = 0;
+    bool enable = true;
+    MockAccesstokenKit::MockIsSACalling(false);
+    MockAccesstokenKit::MockIsSASystemApp(true);
+    auto ret = ssm_->SetVirtualScreenAutoRotation(screenId, enable);
+    EXPECT_EQ(ret, DMError::DM_ERROR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: SetVirtualScreenAutoRotation03
+ * @tc.desc: SetVirtualScreenAutoRotation test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetVirtualScreenAutoRotation03, Function | SmallTest | Level3)
+{
+    ScreenId screenId = 0;
+    bool enable = true;
+    MockAccesstokenKit::MockIsSACalling(true);
+    MockAccesstokenKit::MockIsSASystemApp(true);
+    auto ret = ssm_->SetVirtualScreenAutoRotation(screenId, enable);
+    EXPECT_EQ(ret, DMError::DM_ERROR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: CreateScreenProperty
+ * @tc.desc: CreateScreenProperty test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CreateScreenProperty, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ScreenId screenId = 0;
+    ScreenProperty property = ScreenProperty();
+    EXPECT_EQ(DISPLAY_GROUP_ID_INVALID, property.GetDisplayGroupId());
+    EXPECT_EQ(SCREEN_ID_INVALID, property.GetMainDisplayIdOfGroup());
+
+    ssm_->CreateScreenProperty(screenId, property);
+    EXPECT_EQ(DISPLAY_GROUP_ID_DEFAULT, property.GetDisplayGroupId());
+    EXPECT_EQ(MAIN_SCREEN_ID_DEFAULT, property.GetMainDisplayIdOfGroup());
+
+    property.SetDisplayGroupId(1);
+    property.SetMainDisplayIdOfGroup(1);
+    ssm_->CreateScreenProperty(screenId, property);
+    EXPECT_EQ(1, property.GetDisplayGroupId());
+    EXPECT_EQ(1, property.GetMainDisplayIdOfGroup());
+}
+
+/**
+ * @tc.name: InitScreenProperty
+ * @tc.desc: InitScreenProperty test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, InitScreenProperty, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ScreenId screenId = 0;
+    ScreenProperty property = ScreenProperty();
+    RSScreenModeInfo screenModeInfo = RSScreenModeInfo();
+    screenModeInfo.SetScreenWidth(100);
+    screenModeInfo.SetScreenHeight(200);
+    RSScreenCapability screenCapability = RSScreenCapability();
+
+    ssm_->InitScreenProperty(screenId, screenModeInfo, screenCapability, property);
+    EXPECT_EQ(0, property.GetScreenAreaOffsetX());
+    EXPECT_EQ(0, property.GetScreenAreaOffsetY());
+    EXPECT_EQ(100, property.GetScreenAreaWidth());
+    EXPECT_EQ(200, property.GetScreenAreaHeight());
+}
+
+/**
+ * @tc.name: InitExtendScreenProperty
+ * @tc.desc: InitExtendScreenProperty test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, InitExtendScreenProperty, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ScreenId screenId = 0;
+    ScreenProperty property = ScreenProperty();
+    property.SetBounds({{0, 0, 4000, 4000}, 0, 0});
+    ScreenSceneConfig::enableConfig_["isSupportOffScreenRendering"] = true;
+    ScreenSceneConfig::offScreenPPIThreshold_ = 100;
+    ScreenSceneConfig::stringConfig_["externalScreenDefaultMode"] = "none";
+
+    ssm_->Init();
+    sptr<ScreenSession> screenSession = ssm_->GetScreenSessionInner(screenId, property);
+    ssm_->InitExtendScreenProperty(screenId, screenSession, property);
+    EXPECT_EQ(3840, screenSession->GetValidWidth());
+
+    property.SetBounds({{0, 0, 1000, 1000}, 0, 0});
+    ssm_->InitExtendScreenProperty(screenId, screenSession, property);
+    EXPECT_EQ(3120, screenSession->GetValidWidth());
+}
+
+/**
+ * @tc.name: GetOrCreateScreenSession
+ * @tc.desc: GetOrCreateScreenSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetOrCreateScreenSession, Function | SmallTest | Level3)
+{
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        sptr<ScreenSession> session = ssm_->GetOrCreateScreenSession(SCREENID);
+        EXPECT_NE(session, nullptr);
+    }
 }
 }
 }

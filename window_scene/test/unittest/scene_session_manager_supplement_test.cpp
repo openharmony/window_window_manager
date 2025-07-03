@@ -1248,13 +1248,13 @@ HWTEST_F(SceneSessionManagerSupplementTest, NotifyCreateSubSession, TestSize.Lev
     sceneSession->SetSessionProperty(property);
     ssm_->sceneSessionMap_.insert({ 1, sceneSession });
     ASSERT_TRUE(ssm_->sceneSessionMap_.find(1) != ssm_->sceneSessionMap_.end());
-    ssm_->NotifySessionTouchOutside(1);
+    ssm_->NotifySessionTouchOutside(1, 0);
     sceneSession->state_ = SessionState::STATE_FOREGROUND;
-    ssm_->NotifySessionTouchOutside(1);
+    ssm_->NotifySessionTouchOutside(1, 0);
     sceneSession->persistentId_ = property->callingSessionId_;
-    ssm_->NotifySessionTouchOutside(1);
+    ssm_->NotifySessionTouchOutside(1, 0);
     sceneSession->persistentId_ = property->callingSessionId_ + 1;
-    ssm_->NotifySessionTouchOutside(1);
+    ssm_->NotifySessionTouchOutside(1, 0);
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
     usleep(WAIT_SYNC_IN_NS);
 }

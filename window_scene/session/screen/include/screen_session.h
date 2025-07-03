@@ -41,25 +41,25 @@ using DestroyScreenSceneFunc = std::function<void()>;
 
 class IScreenChangeListener {
 public:
-    virtual void OnConnect(ScreenId screenId) = 0;
-    virtual void OnDisconnect(ScreenId screenId) = 0;
+    virtual void OnConnect(ScreenId screenId) {}
+    virtual void OnDisconnect(ScreenId screenId) {}
     virtual void OnPropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason,
-        ScreenId screenId) = 0;
+        ScreenId screenId) {}
     virtual void OnPowerStatusChange(DisplayPowerEvent event, EventStatus status,
-        PowerStateChangeReason reason) = 0;
-    virtual void OnSensorRotationChange(float sensorRotation, ScreenId screenId) = 0;
-    virtual void OnScreenOrientationChange(float screenOrientation, ScreenId screenId) = 0;
-    virtual void OnScreenRotationLockedChange(bool isLocked, ScreenId screenId) = 0;
-    virtual void OnScreenExtendChange(ScreenId mainScreenId, ScreenId extendScreenId) = 0;
-    virtual void OnHoverStatusChange(int32_t hoverStatus, bool needRotate, ScreenId extendScreenId) = 0;
-    virtual void OnScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) = 0;
-    virtual void OnCameraBackSelfieChange(bool isCameraBackSelfie, ScreenId screenId) = 0;
-    virtual void OnSuperFoldStatusChange(ScreenId screenId, SuperFoldStatus superFoldStatus) = 0;
-    virtual void OnSecondaryReflexionChange(ScreenId screenId, bool isSecondaryReflexion) = 0;
+        PowerStateChangeReason reason) {}
+    virtual void OnSensorRotationChange(float sensorRotation, ScreenId screenId) {}
+    virtual void OnScreenOrientationChange(float screenOrientation, ScreenId screenId) {}
+    virtual void OnScreenRotationLockedChange(bool isLocked, ScreenId screenId) {}
+    virtual void OnScreenExtendChange(ScreenId mainScreenId, ScreenId extendScreenId) {}
+    virtual void OnHoverStatusChange(int32_t hoverStatus, bool needRotate, ScreenId extendScreenId) {}
+    virtual void OnScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) {}
+    virtual void OnCameraBackSelfieChange(bool isCameraBackSelfie, ScreenId screenId) {}
+    virtual void OnSuperFoldStatusChange(ScreenId screenId, SuperFoldStatus superFoldStatus) {}
+    virtual void OnSecondaryReflexionChange(ScreenId screenId, bool isSecondaryReflexion) {}
     virtual void OnExtendScreenConnectStatusChange(ScreenId screenId,
-        ExtendScreenConnectStatus extendScreenConnectStatus) = 0;
-    virtual void OnBeforeScreenPropertyChange(FoldStatus foldStatus) = 0;
-    virtual void OnScreenModeChange(ScreenModeChangeEvent screenModeChangeEvent) = 0;
+        ExtendScreenConnectStatus extendScreenConnectStatus) {}
+    virtual void OnBeforeScreenPropertyChange(FoldStatus foldStatus) {}
+    virtual void OnScreenModeChange(ScreenModeChangeEvent screenModeChangeEvent) {}
 };
 
 enum class MirrorScreenType : int32_t {
@@ -159,7 +159,8 @@ public:
     DisplayOrientation CalcDisplayOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode) const;
     DisplayOrientation CalcDeviceOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode) const;
     void FillScreenInfo(sptr<ScreenInfo> info) const;
-    void InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint, bool isExtend = false);
+    void InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint, bool isExtend = false,
+        float positionX = 0, float positionY = 0);
 
     DMError GetScreenSupportedColorGamuts(std::vector<ScreenColorGamut>& colorGamuts);
     DMError GetScreenColorGamut(ScreenColorGamut& colorGamut);
@@ -213,6 +214,8 @@ public:
 
     void SetHdrFormats(std::vector<uint32_t>&& hdrFormats);
     void SetColorSpaces(std::vector<uint32_t>&& colorSpaces);
+    void SetSupportedRefreshRate(std::vector<uint32_t>&& supportedRefreshRate);
+    std::vector<uint32_t> GetSupportedRefreshRate() const;
     void SetForceCloseHdr(bool isForceCloseHdr);
 
     VirtualScreenFlag GetVirtualScreenFlag();
@@ -348,6 +351,22 @@ public:
     std::shared_ptr<RSUIDirector> GetRSUIDirector() const;
     std::shared_ptr<RSUIContext> GetRSUIContext() const;
 
+    /*
+     * Display Group Info
+     */
+    void SetDisplayGroupId(DisplayGroupId displayGroupId);
+    DisplayGroupId GetDisplayGroupId() const;
+    void SetMainDisplayIdOfGroup(ScreenId screenId);
+    ScreenId GetMainDisplayIdOfGroup() const;
+    void SetScreenAreaOffsetX(uint32_t screenAreaOffsetX);
+    uint32_t GetScreenAreaOffsetX() const;
+    void SetScreenAreaOffsetY(uint32_t screenAreaOffsetY);
+    uint32_t GetScreenAreaOffsetY() const;
+    void SetScreenAreaWidth(uint32_t screenAreaWidth);
+    uint32_t GetScreenAreaWidth() const;
+    void SetScreenAreaHeight(uint32_t screenAreaHeight);
+    uint32_t GetScreenAreaHeight() const;
+
 private:
     ScreenProperty property_;
     mutable std::mutex propertyMutex_; // above guarded by clientProxyMutex_
@@ -373,6 +392,7 @@ private:
     float currentValidSensorRotation_ { -1.0f };
     std::vector<uint32_t> hdrFormats_;
     std::vector<uint32_t> colorSpaces_;
+    std::vector<uint32_t> supportedRefreshRate_;
     MirrorScreenType mirrorScreenType_ { MirrorScreenType::VIRTUAL_MIRROR };
     std::string serialNumber_;
     std::pair<ScreenId, DMRect> mirrorScreenRegion_ = std::make_pair(INVALID_SCREEN_ID, DMRect::NONE());

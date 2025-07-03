@@ -195,7 +195,7 @@ void MultiScreenPowerChangeManager::ScreenDisplayNodeRemove(sptr<ScreenSession>&
         TLOGW(WmsLogTag::DMS, "removeNode screenId=%{public}" PRIu64, screenScreen->GetScreenId());
         std::shared_ptr<RSDisplayNode> displayNode = screenScreen->GetDisplayNode();
         if (displayNode != nullptr) {
-            displayNode->SetDisplayOffset(0, 0);
+            ScreenSessionManager::GetInstance().SetScreenOffset(screenScreen->GetScreenId(), 0, 0);
             displayNode->RemoveFromTree();
             screenScreen->ReleaseDisplayNode();
         }

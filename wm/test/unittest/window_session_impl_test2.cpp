@@ -277,25 +277,33 @@ HWTEST_F(WindowSessionImplTest2, RecoverSessionListener, TestSize.Level1)
     window->property_->SetPersistentId(id);
     window->RecoverSessionListener();
 
+    std::vector<sptr<IAcrossDisplaysChangeListener>> iAcrossDisplaysChangeListener;
     std::vector<sptr<IAvoidAreaChangedListener>> iAvoidAreaChangedListeners;
     std::vector<sptr<ITouchOutsideListener>> iTouchOutsideListeners;
     window->avoidAreaChangeListeners_.insert({ id, iAvoidAreaChangedListeners });
+    window->acrossDisplaysChangeListeners_.insert({ id, iAcrossDisplaysChangeListener });
     window->touchOutsideListeners_.insert({ id, iTouchOutsideListeners });
     window->RecoverSessionListener();
 
     window->avoidAreaChangeListeners_.clear();
+    window->acrossDisplaysChangeListeners_.clear();
     window->touchOutsideListeners_.clear();
     sptr<MockAvoidAreaChangedListener> changedListener = sptr<MockAvoidAreaChangedListener>::MakeSptr();
     sptr<MockTouchOutsideListener> touchOutsideListener = sptr<MockTouchOutsideListener>::MakeSptr();
+    sptr<MockAcrossDisplaysChangeListener> changedListener2 = sptr<MockAcrossDisplaysChangeListener>::MakeSptr();
     iAvoidAreaChangedListeners.insert(iAvoidAreaChangedListeners.begin(), changedListener);
+    iAcrossDisplaysChangeListener.insert(iAcrossDisplaysChangeListener.begin(), changedListener2);
     iTouchOutsideListeners.insert(iTouchOutsideListeners.begin(), touchOutsideListener);
     window->avoidAreaChangeListeners_.insert({ id, iAvoidAreaChangedListeners });
+    window->acrossDisplaysChangeListeners_.insert({ id, iAcrossDisplaysChangeListener });
     window->touchOutsideListeners_.insert({ id, iTouchOutsideListeners });
     window->RecoverSessionListener();
     ASSERT_TRUE(window->avoidAreaChangeListeners_.find(id) != window->avoidAreaChangeListeners_.end() &&
                 !window->avoidAreaChangeListeners_[id].empty());
     ASSERT_TRUE(window->touchOutsideListeners_.find(id) != window->touchOutsideListeners_.end() &&
                 !window->touchOutsideListeners_[id].empty());
+    ASSERT_TRUE(window->acrossDisplaysChangeListeners_.find(id) != window->acrossDisplaysChangeListeners_.end() &&
+                !window->acrossDisplaysChangeListeners_[id].empty());
     window->Destroy();
 }
 
@@ -1747,12 +1755,17 @@ HWTEST_F(WindowSessionImplTest2, GetListeners03, TestSize.Level1)
     window_->RegisterKeyboardDidShowListener(listener);
     keyboardPanelInfo.isShowing_ = true;
     window_->NotifyKeyboardAnimationCompleted(keyboardPanelInfo);
+    window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    window_->NotifyKeyboardAnimationCompleted(keyboardPanelInfo);
     ASSERT_FALSE(window_->keyboardDidShowListeners_[window_->GetPersistentId()].empty());
     window_->UnregisterKeyboardDidShowListener(listener);
 
     sptr<IKeyboardDidHideListener> listener1 = sptr<MockIKeyboardDidHideListener>::MakeSptr();
     window_->RegisterKeyboardDidHideListener(listener1);
     keyboardPanelInfo.isShowing_ = false;
+    window_->uiContent_ = nullptr;
+    window_->NotifyKeyboardAnimationCompleted(keyboardPanelInfo);
+    window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     window_->NotifyKeyboardAnimationCompleted(keyboardPanelInfo);
     ASSERT_FALSE(window_->keyboardDidHideListeners_[window_->GetPersistentId()].empty());
     window_->UnregisterKeyboardDidHideListener(listener1);
@@ -1925,6 +1938,78 @@ HWTEST_F(WindowSessionImplTest2, unregisterScreenshotAppEventListener01, TestSiz
     EXPECT_EQ(ret, WMError::WM_OK);
 
     holder = window->screenshotAppEventListeners_[window->property_->GetPersistentId()];
+    auto existsListener = std::find(holder.begin(), holder.end(), listener);
+    EXPECT_EQ(existsListener, holder.end());
+}
+
+/**
+ * @tc.name: RegisterAcrossDisplaysChangeListener
+ * @tc.desc: RegisterAcrossDisplaysChangeListener01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest2, RegisterAcrossDisplaysChangeListener01, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("RegisterAcrossDisplaysChangeListener");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    sptr<IAcrossDisplaysChangeListener> listener = nullptr;
+    auto ret = window->RegisterAcrossDisplaysChangeListener(listener);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    ret = window->RegisterAcrossDisplaysChangeListener(listener);
+    EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+
+    listener = sptr<IAcrossDisplaysChangeListener>::MakeSptr();
+    std::vector<sptr<IAcrossDisplaysChangeListener>> holder;
+    window->acrossDisplaysChangeListeners_[window->property_->GetPersistentId()] = holder;
+    ret = window->RegisterAcrossDisplaysChangeListener(listener);
+    EXPECT_EQ(ret, WMError::WM_OK);
+    holder = window->acrossDisplaysChangeListeners_[window->property_->GetPersistentId()];
+    auto existsListener = std::find(holder.begin(), holder.end(), listener);
+    EXPECT_NE(existsListener, holder.end());
+
+    ret = window->RegisterAcrossDisplaysChangeListener(listener);
+    EXPECT_EQ(ret, WMError::WM_OK);
+    holder = window->acrossDisplaysChangeListeners_[window->property_->GetPersistentId()];
+    EXPECT_EQ(holder.size(), 1);
+}
+
+/**
+ * @tc.name: UnRegisterAcrossDisplaysChangeListener
+ * @tc.desc: UnRegisterAcrossDisplaysChangeListener01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest2, UnRegisterAcrossDisplaysChangeListener01, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UnRegisterAcrossDisplaysChangeListener01");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    sptr<IAcrossDisplaysChangeListener> listener = nullptr;
+    auto ret = window->UnRegisterAcrossDisplaysChangeListener(listener);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    ret = window->UnRegisterAcrossDisplaysChangeListener(listener);
+    EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+
+    listener = sptr<IAcrossDisplaysChangeListener>::MakeSptr();
+    std::vector<sptr<IAcrossDisplaysChangeListener>> holder;
+    window->acrossDisplaysChangeListeners_[window->property_->GetPersistentId()] = holder;
+    ret = window->UnRegisterAcrossDisplaysChangeListener(listener);
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    holder = window->acrossDisplaysChangeListeners_[window->property_->GetPersistentId()];
     auto existsListener = std::find(holder.begin(), holder.end(), listener);
     EXPECT_EQ(existsListener, holder.end());
 }

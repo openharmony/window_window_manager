@@ -40,6 +40,7 @@ public:
     void NotifyGestureNavigationEnabledResult(bool enable) override {};
     void UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing) override;
     void NotifyWindowStyleChange(WindowStyleType type) override;
+    void NotifyWindowSystemBarPropertyChange(WindowType type, const SystemBarProperty& systemBarProperty) override {};
     void NotifyCallingWindowDisplayChanged(const CallingWindowInfo& callingWindowInfo) override;
     void NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info) override {};
     void UpdatePiPWindowStateChanged(const std::string& bundleName, bool isForeground) override;

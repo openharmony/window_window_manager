@@ -1061,6 +1061,9 @@ HWTEST_F(WindowSessionTest4, GetWindowMetaInfoForWindowInfo01, TestSize.Level1)
     sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
     sceneSession->GetSessionProperty()->SetDisplayId(0);
     sceneSession->callingPid_ = 123;
+    sceneSession->UpdateWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    sceneSession->isMidScene_ = true;
+    sceneSession->isFocused_ = true;
     SessionInfo sessionInfo1;
     sessionInfo1.isSystem_ = true;
     sessionInfo1.abilityName_ = "abilityName1";
@@ -1083,6 +1086,9 @@ HWTEST_F(WindowSessionTest4, GetWindowMetaInfoForWindowInfo01, TestSize.Level1)
     ASSERT_EQ(windowMetaInfo.abilityName, sceneSession->GetSessionInfo().abilityName_);
     ASSERT_EQ(windowMetaInfo.pid, sceneSession->GetCallingPid());
     ASSERT_EQ(windowMetaInfo.windowType, WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ASSERT_EQ(windowMetaInfo.windowMode, WindowMode::WINDOW_MODE_FULLSCREEN);
+    ASSERT_EQ(windowMetaInfo.isMidScene, true);
+    ASSERT_EQ(windowMetaInfo.isFocused, true);
     WindowMetaInfo windowMetaInfo1 = sceneSession1->GetWindowMetaInfoForWindowInfo();
     ASSERT_EQ(windowMetaInfo1.windowName, sceneSession1->GetSessionInfo().abilityName_);
     ASSERT_EQ(windowMetaInfo1.parentWindowId, sceneSession->GetWindowId());
@@ -1320,6 +1326,59 @@ HWTEST_F(WindowSessionTest4, SetLifeCycleTaskRunning, TestSize.Level1)
     sptr<Session::SessionLifeCycleTask> lifeCycleNullTask = nullptr;
     ret = session_->SetLifeCycleTaskRunning(lifeCycleNullTask);
     EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: SetHidingStartingWindow
+ * @tc.desc: check func SetHidingStartingWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, SetHidingStartingWindow, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+
+    session_->SetLeashWinSurfaceNode(nullptr);
+    auto ret = session_->SetHidingStartingWindow(false);
+    EXPECT_EQ(ret, WSError::WS_ERROR_NULLPTR);
+    EXPECT_TRUE(session_->GetHidingStartingWindow() == false);
+
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    session_->SetLeashWinSurfaceNode(surfaceNode);
+    ret = session_->SetHidingStartingWindow(true);
+    EXPECT_TRUE(session_->GetHidingStartingWindow());
+    EXPECT_EQ(ret, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: SetAndGetGlobalDisplayRect
+ * @tc.desc: Verify that setting and getting global display rect works as expected
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, SetAndGetGlobalDisplayRect, TestSize.Level1)
+{
+    WSRect rect = { 10, 20, 200, 100 };
+    session_->SetGlobalDisplayRect(rect);
+    WSRect result = session_->GetGlobalDisplayRect();
+    EXPECT_EQ(result, rect);
+}
+
+/**
+ * @tc.name: TestUpdateGlobalDisplayRect
+ * @tc.desc: Verify that updating global display rect works as expected
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, TestUpdateGlobalDisplayRect, TestSize.Level1)
+{
+    WSRect rect = { 10, 20, 200, 100 };
+    session_->SetGlobalDisplayRect(rect);
+    auto result = session_->UpdateGlobalDisplayRect(rect, SizeChangeReason::RESIZE);
+    EXPECT_EQ(result, WSError::WS_DO_NOTHING);
+
+    session_->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
+    WSRect updated = { 30, 40, 200, 100 };
+    result = session_->UpdateGlobalDisplayRect(updated, SizeChangeReason::MOVE);
+    EXPECT_EQ(result, WSError::WS_OK);
 }
 } // namespace
 } // namespace Rosen

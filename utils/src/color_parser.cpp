@@ -56,5 +56,15 @@ bool ColorParser::IsValidHexString(const std::string& colorStr)
     }
     return true;
 }
+
+// check color string, format:#008EF5 or #FF008EF5. Alpha must be 0xff or none.
+bool ColorParser::IsValidColorNoAlpha(const std::string& colorStr)
+{
+    uint32_t colorValue = 0;
+    if (Parse(colorStr, colorValue)) {
+        return (colorValue & 0xff000000) == 0xff000000;
+    }
+    return false;
+}
 } // namespace Rosen
 } // namespace OHOS

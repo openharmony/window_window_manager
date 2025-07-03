@@ -87,6 +87,7 @@ enum class SessionInterfaceCode {
     TRANS_ID_SET_FOLLOW_PARENT_LAYOUT_ENABLED,
     TRANS_ID_UPDATE_ROTATION_CHANGE,
     TRANS_ID_UPDATE_SCREEN_SHOT_APP_EVENT_REGISTERED,
+    TRANS_ID_UPDATE_ACROSS_DISPLAYS_REGISTERED,
     TRANS_ID_UPDATE_FLAG,
     TRANS_ID_GET_IS_HIGHLIGHTED,
     TRANS_ID_NOTIFY_DISABLE_DELEGATOR_CHANGE,
@@ -102,6 +103,9 @@ enum class SessionInterfaceCode {
 
     // Window Transition Animation For PC
     TRANS_ID_SET_WINDOW_TRANSITION_ANIMATION,
+
+    // Window Layout Global Coordinate System
+    TRANS_ID_UPDATE_GLOBAL_DISPLAY_RECT,
 
     // Extension
     TRANS_ID_TRANSFER_ABILITY_RESULT = 500,
@@ -123,6 +127,7 @@ enum class SessionInterfaceCode {
 
     // PC Fold Screen
     TRANS_ID_GET_WATERFALL_MODE,
+    TRANS_ID_MAIN_WINDOW_FULL_SCREEN_ACROSS_DISPLAYS,
     TRANS_ID_USE_IMPLICT_ANIMATION,
 
     // PictureInPicture
@@ -138,6 +143,15 @@ enum class SessionInterfaceCode {
 
     // Window source
     TRANS_ID_SET_SUBWINDOW_SOURCE,
+
+    // window animation
+    TRANS_ID_SET_FRAMERECT_FOR_PARTIAL_ZOOMIN,
+
+    // Floating Ball
+    TRANS_ID_UPDATE_FLOATING_BALL,
+    TRANS_ID_NOTIFY_FLOATING_BALL_PREPARE_CLOSE,
+    TRANS_ID_START_FLOATING_BALL_MAIN_WINDOW,
+    TRANS_ID_GET_FLOATING_BALL_WINDOW_ID,
 };
 } // namespace Rosen
 } // namespace OHOS

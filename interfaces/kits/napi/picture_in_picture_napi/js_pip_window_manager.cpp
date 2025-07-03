@@ -234,8 +234,8 @@ napi_value JsPipWindowManager::IsPipEnabled(napi_env env, napi_callback_info inf
 napi_value JsPipWindowManager::OnIsPipEnabled(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_PIP, "OnIsPipEnabled called");
-    bool isPc = PictureInPictureManager::IsPcType();
-    return CreateJsValue(env, !isPc);
+    bool isPipEnabled = PictureInPictureManager::GetPipEnabled();
+    return CreateJsValue(env, isPipEnabled);
 }
 
 napi_value JsPipWindowManager::CreatePipController(napi_env env, napi_callback_info info)
@@ -282,7 +282,7 @@ napi_value JsPipWindowManager::NapiSendTask(napi_env env, PipOption& pipOption)
         pipOption.GetPiPTemplateInfo(pipTemplateInfo);
         mainWindow->UpdatePiPTemplateInfo(pipTemplateInfo);
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_immediate, "NapiSendTask") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env, CreateJsError(env,
             static_cast<int32_t>(WMError::WM_ERROR_PIP_INTERNAL_ERROR), "Send event failed"));
     }

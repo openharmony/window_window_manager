@@ -299,6 +299,13 @@ DMError ScreenManagerAdapterLite::GetAllScreenInfos(std::vector<sptr<ScreenInfo>
     return displayManagerServiceProxy_->GetAllScreenInfos(screenInfos);
 }
 
+DMError ScreenManagerAdapterLite::GetPhysicalScreenIds(std::vector<ScreenId>& screenIds)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+
+    return displayManagerServiceProxy_->GetPhysicalScreenIds(screenIds);
+}
+
 DMSDeathRecipientLite::DMSDeathRecipientLite(BaseAdapterLite& adapter) : adapter_(adapter)
 {
 }

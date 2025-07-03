@@ -101,6 +101,7 @@ public:
     AreaType GetAreaType() const { return type_; };
     void SetScale(float scalex, float scaley);
     void SetParentRect(const Rect& parentRect);
+    Gravity GetGravity() const;
 
     /*
      * Cross Display Move Drag
@@ -148,10 +149,6 @@ public:
     void ClearSpecifyMoveStartDisplay();
     WSRect GetTargetDisplayRectRelatedToStartDisplay(WSRect rect, DisplayId displayId) const;
     void StopMoving();
-    int32_t GetLastMovePointerPosX() const;
-    void SetLastMovePointerPosX(int32_t lastMovePointerPosX);
-    bool IsMoveDragHotAreaCrossDisplay() const;
-    void SetMoveDragHotAreaCrossDisplay(bool isMoveDragHotAreaCrossDisplay);
 
 private:
     struct MoveDragProperty {
@@ -297,6 +294,7 @@ private:
     int32_t maxTranX_ = INT32_MAX;
     int32_t maxTranY_ = INT32_MAX;
     AreaType type_ = AreaType::UNDEFINED;
+    AreaType dragAreaType_ = AreaType::UNDEFINED;
     AxisType mainMoveAxis_ = AxisType::UNDEFINED;
     WindowLimits limits_;
     MoveDragProperty moveDragProperty_;
@@ -358,12 +356,11 @@ private:
     DMRect moveAvailableArea_ = {0, 0, 0, 0};
     DisplayId moveInputBarStartDisplayId_ = DISPLAY_ID_INVALID;
     ScreenSizeProperty screenSizeProperty_;
-    int32_t lastMovePointerPosX_ = -1;
-    bool isMoveDragHotAreaCrossDisplay_ = false;
     // Above guarded by displayIdSetDuringMoveDragMutex_
     std::mutex specifyMoveStartMutex_;
     DisplayId specifyMoveStartDisplayId_ = DISPLAY_ID_INVALID;
     bool isSpecifyMoveStart_ = false;
+    bool isAdaptToProportionalScale_ = false;
     // Above guarded by specifyMoveStartMutex_
 };
 } // namespace OHOS::Rosen
