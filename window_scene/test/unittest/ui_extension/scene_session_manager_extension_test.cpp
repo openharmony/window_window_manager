@@ -43,6 +43,8 @@ public:
     void TearDown() override;
 
     static sptr<SceneSessionManager> ssm_;
+private:
+    static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
 
 sptr<SceneSessionManager> SceneSessionManagerExtensionTest::ssm_ = nullptr;
@@ -65,6 +67,7 @@ void SceneSessionManagerExtensionTest::SetUp()
 void SceneSessionManagerExtensionTest::TearDown()
 {
     ssm_->sceneSessionMap_.clear();
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 namespace {
