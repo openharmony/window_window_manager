@@ -83,5 +83,6 @@ ohos_shared_library("screenani_kit") {
 group("screen_ani") {
   deps = [
     ":screenani_kit",
+    "screen_ani:screen_etc",
   ]
 }

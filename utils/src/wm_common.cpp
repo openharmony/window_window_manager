@@ -14,6 +14,7 @@
  */
 
 #include "wm_common.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
 const std::map<WMError, WmErrorCode> WM_JS_TO_ERROR_CODE_MAP {
@@ -47,5 +48,26 @@ const std::map<WMError, WmErrorCode> WM_JS_TO_ERROR_CODE_MAP {
     {WMError::WM_ERROR_INVALID_SESSION,                WmErrorCode::WM_ERROR_STATE_ABNORMALLY         },
     {WMError::WM_ERROR_SYSTEM_ABNORMALLY,              WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY        },
     {WMError::WM_ERROR_TIMEOUT,                        WmErrorCode::WM_ERROR_TIMEOUT                  },
+    {WMError::WM_ERROR_ILLEGAL_PARAM,                  WmErrorCode::WM_ERROR_ILLEGAL_PARAM            },
+    {WMError::WM_ERROR_FB_PARAM_INVALID,               WmErrorCode::WM_ERROR_FB_PARAM_INVALID         },
+    {WMError::WM_ERROR_FB_CREATE_FAILED,               WmErrorCode::WM_ERROR_FB_CREATE_FAILED         },
+    {WMError::WM_ERROR_FB_REPEAT_CONTROLLER,           WmErrorCode::WM_ERROR_FB_REPEAT_CONTROLLER     },
+    {WMError::WM_ERROR_FB_REPEAT_OPERATION,            WmErrorCode::WM_ERROR_FB_REPEAT_OPERATION      },
+    {WMError::WM_ERROR_FB_INTERNAL_ERROR,              WmErrorCode::WM_ERROR_FB_INTERNAL_ERROR        },
+    {WMError::WM_ERROR_FB_STATE_ABNORMALLY,            WmErrorCode::WM_ERROR_FB_STATE_ABNORMALLY      },
+    {WMError::WM_ERROR_FB_INVALID_STATE,               WmErrorCode::WM_ERROR_FB_INVALID_STATE         },
+    {WMError::WM_ERROR_FB_RESTORE_MAIN_WINDOW_FAILED,  WmErrorCode::WM_ERROR_FB_RESTORE_MAIN_WINDOW_FAILED  },
+    {WMError::WM_ERROR_FB_UPDATE_TEMPLATE_TYPE_DENIED, WmErrorCode::WM_ERROR_FB_UPDATE_TEMPLATE_TYPE_DENIED  },
+    {WMError::WM_ERROR_FB_UPDATE_STATIC_TEMPLATE_DENIED,  WmErrorCode::WM_ERROR_FB_UPDATE_STATIC_TEMPLATE_DENIED  },
 };
+
+WmErrorCode ConvertErrorToCode(WMError error)
+{
+    auto iter = WM_JS_TO_ERROR_CODE_MAP.find(error);
+    if (iter != WM_JS_TO_ERROR_CODE_MAP.end()) {
+        return iter->second;
+    }
+    TLOGE(WmsLogTag::DEFAULT, "not find error::%{public}d", static_cast<int32_t>(error));
+    return WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY;
+}
 }

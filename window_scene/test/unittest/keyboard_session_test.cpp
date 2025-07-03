@@ -596,7 +596,7 @@ HWTEST_F(KeyboardSessionTest, ChangeKeyboardEffectOption, TestSize.Level1)
     info.abilityName_ = "ChangeKeyboardEffectOption";
     info.bundleName_ = "ChangeKeyboardEffectOption";
     sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, nullptr, nullptr);
-    
+
     KeyboardEffectOption effectOption;
     effectOption.viewMode_ = KeyboardViewMode::DARK_IMMERSIVE_MODE;
     auto result = KeyboardViewMode::NON_IMMERSIVE_MODE;

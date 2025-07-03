@@ -302,10 +302,9 @@ void PictureInPictureManager::PipSizeChange(double width, double height, double 
     }
 }
 
-bool PictureInPictureManager::IsPcType()
+bool PictureInPictureManager::GetPipEnabled()
 {
-    const std::string multiWindowUIType = system::GetParameter("const.window.multiWindowUIType", "");
-    return multiWindowUIType == "FreeFormMultiWindow";
+    return true;
 }
 
 }

@@ -28,6 +28,12 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr uint32_t SLEEP_TIME_US = 100000;
+    std::string g_errLog;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
+        const char *msg)
+    {
+        g_errLog = msg;
+    }
 }
 
 class SensorFoldStateManagerTest : public testing::Test {
@@ -64,20 +70,22 @@ namespace {
  */
 HWTEST_F(SensorFoldStateManagerTest, HandleSensorChange, TestSize.Level1)
 {
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
     SensorFoldStateManager mgr = SensorFoldStateManager();
     FoldStatus nextState = FoldStatus::UNKNOWN;
     float angle = 0.0f;
-    sptr<FoldScreenPolicy> foldScreenPolicy = new FoldScreenPolicy();
+    sptr<FoldScreenPolicy> foldScreenPolicy = sptr<FoldScreenPolicy>::MakeSptr();
     mgr.HandleSensorChange(nextState, angle, foldScreenPolicy);
-    ASSERT_EQ(mgr.mState_, FoldStatus::UNKNOWN);
+    EXPECT_TRUE(g_errLog.find("fold state is UNKNOWN") != std::string::npos);
 
     mgr.mState_ = FoldStatus::EXPAND;
     mgr.HandleSensorChange(nextState, angle, foldScreenPolicy);
-    ASSERT_EQ(mgr.mState_, FoldStatus::EXPAND);
+    EXPECT_FALSE(g_errLog.find("current state: %{public}d, next state: %{public}d.") != std::string::npos);
 
     nextState = FoldStatus::EXPAND;
     mgr.HandleSensorChange(nextState, angle, foldScreenPolicy);
-    ASSERT_EQ(mgr.mState_, FoldStatus::EXPAND);
+    LOG_SetCallback(nullptr);
 }
 
 /**

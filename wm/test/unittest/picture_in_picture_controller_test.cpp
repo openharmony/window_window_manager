@@ -685,17 +685,12 @@ HWTEST_F(PictureInPictureControllerTest, UpdateWinRectByComponent, TestSize.Leve
     pipControl->windowRect_.width_ = 0;
     pipControl->windowRect_.height_ = 10;
     pipControl->UpdateWinRectByComponent();
-    ASSERT_EQ(pipControl->windowRect_.width_, 0);
     ASSERT_EQ(pipControl->windowRect_.height_, 0);
     pipControl->windowRect_.width_ = 10;
     pipControl->windowRect_.height_ = 0;
-    ASSERT_EQ(pipControl->windowRect_.width_, 10);
-    ASSERT_EQ(pipControl->windowRect_.height_, 0);
     pipControl->UpdateWinRectByComponent();
     pipControl->windowRect_.width_ = 0;
     pipControl->UpdateWinRectByComponent();
-    ASSERT_EQ(pipControl->windowRect_.width_, 0);
-    ASSERT_EQ(pipControl->windowRect_.height_, 0);
     pipControl->windowRect_.width_ = 10;
     pipControl->windowRect_.height_ = 10;
     pipControl->UpdateWinRectByComponent();

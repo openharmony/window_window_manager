@@ -2194,6 +2194,155 @@ HWTEST_F(DisplayManagerTest, ShouldReturnNullptrWhenScreenshotCaptureFailes, Tes
         DisplayManager::GetInstance().GetScreenshotWithOption(captureOption, rect, size, rotation, &errorCode);
     EXPECT_EQ(result, nullptr);
 }
+
+/**
+ * @tc.name: GetPrimaryDisplaySystemDpi
+ * @tc.desc: Test GetPrimaryDisplaySystemDpi
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetPrimaryDisplaySystemDpi, TestSize.Level1)
+{
+    sptr<DisplayInfo> displayInfo = new DisplayInfo();
+    float dpi = DisplayManager::GetInstance().GetPrimaryDisplaySystemDpi();
+    EXPECT_EQ(dpi, displayInfo->GetDensityInCurResolution());
+}
+
+/**
+ * @tc.name: ConvertRelativeCoordinateToGlobalNullDisplay
+ * @tc.desc: Test convert relative coordinate to global coordinate failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, ConvertRelativeCoordinateToGlobalNullDisplay, TestSize.Level1)
+{
+    RelativePosition relativePosition = {100, {1, 2}};
+    Position globalPosition;
+    DMError errorCode = DisplayManager::GetInstance().ConvertRelativeCoordinateToGlobal(relativePosition,
+        globalPosition);
+    EXPECT_EQ(errorCode, DMError::DM_ERROR_ILLEGAL_PARAM);
+}
+
+/**
+ * @tc.name: ConvertRelativeCoordinateToGlobalSuccess
+ * @tc.desc: Test convert relative coordinate to global coordinate success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, ConvertRelativeCoordinateToGlobalSuccess, TestSize.Level1)
+{
+    RelativePosition relativePosition = {0, {10, 20}};
+    Position globalPosition;
+    DMError errorCode = DisplayManager::GetInstance().ConvertRelativeCoordinateToGlobal(relativePosition,
+        globalPosition);
+    EXPECT_EQ(errorCode, DMError::DM_OK);
+    EXPECT_EQ(globalPosition.x, 10);
+    EXPECT_EQ(globalPosition.y, 20);
+}
+
+/**
+ * @tc.name: ConvertGlobalCoordinateToRelativeOutDisplay
+ * @tc.desc: Test convert relative coordinate to global coordinate failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, ConvertGlobalCoordinateToRelativeOutDisplay, TestSize.Level1)
+{
+    RelativePosition relativePosition;
+    Position globalPosition = {10000, 20000};
+    DMError errorCode = DisplayManager::GetInstance().ConvertGlobalCoordinateToRelative(globalPosition,
+        relativePosition);
+    EXPECT_EQ(errorCode, DMError::DM_OK);
+    EXPECT_EQ(relativePosition.displayId, 0);
+    EXPECT_EQ(relativePosition.position.x, 10000);
+    EXPECT_EQ(relativePosition.position.y, 20000);
+}
+
+/**
+ * @tc.name: ConvertGlobalCoordinateToRelativeIndisplay
+ * @tc.desc: Test convert relative coordinate to global coordinate success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, ConvertGlobalCoordinateToRelativeIndisplay, TestSize.Level1)
+{
+    RelativePosition relativePosition;
+    Position globalPosition = {10, 20};
+    DMError errorCode = DisplayManager::GetInstance().ConvertGlobalCoordinateToRelative(globalPosition,
+        relativePosition);
+    EXPECT_EQ(errorCode, DMError::DM_OK);
+    EXPECT_EQ(relativePosition.displayId, 0);
+    EXPECT_EQ(relativePosition.position.x, 10);
+    EXPECT_EQ(relativePosition.position.y, 20);
+}
+
+/**
+ * @tc.name: ConvertGlobalCoordinateToRelativeNullDisplay
+ * @tc.desc: Test convert relative coordinate to global coordinate while display is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, ConvertGlobalCoordinateToRelativeNullDisplay, TestSize.Level1)
+{
+    RelativePosition relativePosition;
+    Position globalPosition = {10000, 20000};
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), GetAllDisplayIds()).Times(1).WillOnce(Return(std::vector<DisplayId>{-1}));
+    DMError errorCode = DisplayManager::GetInstance().ConvertGlobalCoordinateToRelative(globalPosition,
+        relativePosition);
+    EXPECT_EQ(errorCode, DMError::DM_OK);
+    EXPECT_EQ(relativePosition.displayId, 0);
+    EXPECT_EQ(relativePosition.position.x, 10000);
+    EXPECT_EQ(relativePosition.position.y, 20000);
+}
+
+/**
+ * @tc.name: ConvertGlobalCoordinateToRelativeWithDisplayIdInvalidDisplay
+ * @tc.desc: Test convert relative coordinate to global coordinate failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, ConvertGlobalCoordinateToRelativeWithDisplayIdInvalidDisplay, TestSize.Level1)
+{
+    RelativePosition relativePosition;
+    Position globalPosition = {10, 20};
+    DisplayId displayId = 100;
+    DMError errorCode = DisplayManager::GetInstance().ConvertGlobalCoordinateToRelativeWithDisplayId(globalPosition,
+        displayId, relativePosition);
+    EXPECT_EQ(errorCode, DMError::DM_OK);
+    EXPECT_EQ(relativePosition.displayId, 0);
+    EXPECT_EQ(relativePosition.position.x, 10);
+    EXPECT_EQ(relativePosition.position.y, 20);
+}
+
+/**
+ * @tc.name: ConvertGlobalCoordinateToRelativeWithDisplayIdOutRange
+ * @tc.desc: Test convert relative coordinate to global coordinate failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, ConvertGlobalCoordinateToRelativeWithDisplayIdOutRange, TestSize.Level1)
+{
+    RelativePosition relativePosition;
+    Position globalPosition = {-10000, -20000};
+    DisplayId displayId = 0;
+    DMError errorCode = DisplayManager::GetInstance().ConvertGlobalCoordinateToRelativeWithDisplayId(globalPosition,
+        displayId, relativePosition);
+    EXPECT_EQ(errorCode, DMError::DM_OK);
+    EXPECT_EQ(relativePosition.displayId, 0);
+    EXPECT_EQ(relativePosition.position.x, -10000);
+    EXPECT_EQ(relativePosition.position.y, -20000);
+}
+
+/**
+ * @tc.name: ConvertGlobalCoordinateToRelativeWithDisplayIdInRange
+ * @tc.desc: Test convert relative coordinate to global coordinate success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, ConvertGlobalCoordinateToRelativeWithDisplayIdInRange, TestSize.Level1)
+{
+    RelativePosition relativePosition;
+    Position globalPosition = {10, 20};
+    DisplayId displayId = 0;
+    DMError errorCode = DisplayManager::GetInstance().ConvertGlobalCoordinateToRelativeWithDisplayId(globalPosition,
+        displayId, relativePosition);
+    EXPECT_EQ(errorCode, DMError::DM_OK);
+    EXPECT_EQ(relativePosition.displayId, 0);
+    EXPECT_EQ(relativePosition.position.x, 10);
+    EXPECT_EQ(relativePosition.position.y, 20);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

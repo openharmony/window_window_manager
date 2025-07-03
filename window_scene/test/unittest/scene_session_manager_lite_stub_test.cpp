@@ -142,6 +142,10 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return WMError::WM_OK;
     }
+    WMError UpdateWindowModeByIdForUITest(int32_t windowId, int32_t updateMode) override
+    {
+        return WMError::WM_OK;
+    }
     WMError GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo) override
     {
         MainWindowInfo mainWindowInfo;
@@ -255,6 +259,11 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     }
     WMError GetRouterStackInfo(int32_t persistentId, const sptr<ISessionRouterStackListener>& listener)
         override { return WMError::WM_OK; }
+    WSError PendingSessionToBackgroundByPersistentId(const int32_t persistentId,
+        bool shouldBackToCaller) override
+    {
+        return WSError::WS_OK;
+    }
     WMError CreateNewInstanceKey(const std::string& bundleName, std::string& instanceKey) override
     {
         return WMError::WM_OK;
@@ -283,6 +292,10 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     WMError ExitKioskMode(const sptr<IRemoteObject>& token) override
     {
         return WMError::WM_OK;
+    }
+    WSError SendPointerEventForHover(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override
+    {
+        return WSError::WS_OK;
     }
 };
 
@@ -788,6 +801,32 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleCheckWindowId, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleUpdateWindowModeByIdForUITest01
+ * @tc.desc: test function : HandleUpdateWindowModeByIdForUITest
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleUpdateWindowModeByIdForUITest01, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleUpdateWindowModeByIdForUITest(data, reply);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
+
+    data.WriteInt32(1);
+    res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleUpdateWindowModeByIdForUITest(data, reply);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
+
+    MessageParcel data2;
+    data2.WriteInt32(1);
+    data2.WriteInt32(2);
+    res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleUpdateWindowModeByIdForUITest(data2, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
  * @tc.name: HandleRegisterWindowManagerAgent
  * @tc.desc: test function : HandleRegisterWindowManagerAgent
  * @tc.type: FUNC
@@ -1122,6 +1161,32 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetRecentMainSessionInfoList, Fu
 }
 
 /**
+ * @tc.name: HandlePendingSessionToBackgroundByPersistentId
+ * @tc.desc: test function : HandlePendingSessionToBackgroundByPersistentId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandlePendingSessionToBackgroundByPersistentId, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandlePendingSessionToBackgroundByPersistentId(data, reply);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
+    
+    data.WriteInt32(1);
+    res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandlePendingSessionToBackgroundByPersistentId(data, reply);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
+ 
+    MessageParcel data2;
+    data2.WriteInt32(1);
+    data2.WriteBool(true);
+    res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandlePendingSessionToBackgroundByPersistentId(data2, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
  * @tc.name: HandleUpdateKioskAppList
  * @tc.desc: test function : HandleUpdateKioskAppList
  * @tc.type: FUNC
@@ -1164,6 +1229,47 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleExitKioskMode, Function | SmallT
     data.WriteRemoteObject(token);
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleExitKioskMode(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: ProcessRemoteRequest
+ * @tc.desc: ProcessRemoteRequest TRANS_ID_SEND_POINTER_EVENT_FOR_HOVER
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, ProcessRemoteRequest_Hover, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_SYNC };
+    const sptr<IRemoteObject> token = sptr<MockIRemoteObject>::MakeSptr();
+    data.WriteRemoteObject(token);
+    uint32_t code = static_cast<uint32_t>(
+        ISceneSessionManagerLite::SceneSessionManagerLiteMessage::TRANS_ID_SEND_POINTER_EVENT_FOR_HOVER);
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::ProcessRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
+}
+
+/**
+ * @tc.name: HandleSendPointerEventForHover
+ * @tc.desc: HandleSendPointerEventForHover
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleSendPointerEventForHover, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    const sptr<IRemoteObject> token = sptr<MockIRemoteObject>::MakeSptr();
+    data.WriteRemoteObject(token);
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleSendPointerEventForHover(data, reply);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
+
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    pointerEvent->WriteToParcel(data);
+    res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleSendPointerEventForHover(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 } // namespace

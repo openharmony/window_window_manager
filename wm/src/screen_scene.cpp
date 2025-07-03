@@ -201,7 +201,7 @@ int64_t ScreenScene::GetVSyncPeriod()
 
 void ScreenScene::FlushFrameRate(uint32_t rate, int32_t animatorExpectedFrameRate, uint32_t rateType)
 {
-    vsyncStation_->FlushFrameRate(rate, animatorExpectedFrameRate, rateType);
+    vsyncStation_->FlushFrameRate(GetRSUIContext(), rate, animatorExpectedFrameRate, rateType);
 }
 
 void ScreenScene::OnBundleUpdated(const std::string& bundleName)

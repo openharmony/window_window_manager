@@ -117,6 +117,10 @@ public:
 
     void SetZOrder(uint32_t zOrder) { zOrder_ = zOrder; }
 
+    void SetGlobalDisplayRect(const Rect& globalDisplayRect) { globalDisplayRect_ = globalDisplayRect; }
+
+    Rect GetGlobalDisplayRect() const { return globalDisplayRect_; }
+
     int32_t GetCallingPid() const { return callingPid_; }
 
     void SetCallingPid(int32_t callingPid) { callingPid_ = callingPid; }
@@ -128,6 +132,7 @@ public:
     WindowType windowType_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW };
     WindowStatus windowStatus_ = WindowStatus::WINDOW_STATUS_UNDEFINED;
     Rect rect_ = {0, 0, 0, 0};
+    Rect globalDisplayRect_ { 0, 0, 0, 0 };
     std::string bundleName_;
     std::string abilityName_;
     bool isFocused_ = false;

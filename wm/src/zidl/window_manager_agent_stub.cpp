@@ -49,6 +49,47 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
             UpdateFocusChangeInfo(info, focused);
             break;
         }
+        case WindowManagerAgentMsg::TRANS_ID_NOTIFY_WINDOW_SYSTEM_BAR_PROPERTY_CHANGE: {
+            uint32_t type = 0;
+            if (!data.ReadUint32(type) ||
+                type < static_cast<uint32_t>(WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE) ||
+                type > static_cast<uint32_t>(WindowType::ABOVE_APP_SYSTEM_WINDOW_END)) {
+                TLOGE(WmsLogTag::WMS_IMMS, "read type failed");
+                return ERR_INVALID_DATA;
+            }
+            bool enable = false;
+            if (!data.ReadBool(enable)) {
+                TLOGE(WmsLogTag::WMS_IMMS, "read enable failed");
+                return ERR_INVALID_DATA;
+            }
+            uint32_t backgroundColor = 0;
+            if (!data.ReadUint32(backgroundColor)) {
+                TLOGE(WmsLogTag::WMS_IMMS, "read backgroundColor failed");
+                return ERR_INVALID_DATA;
+            }
+            uint32_t contentColor = 0;
+            if (!data.ReadUint32(contentColor)) {
+                TLOGE(WmsLogTag::WMS_IMMS, "read contentColor failed");
+                return ERR_INVALID_DATA;
+            }
+            bool enableAnimation = false;
+            if (!data.ReadBool(enableAnimation)) {
+                TLOGE(WmsLogTag::WMS_IMMS, "read enableAnimation failed");
+                return ERR_INVALID_DATA;
+            }
+            uint32_t settingFlag = 0;
+            uint32_t MAX_SETTINGFLAG = 7;
+            if (!data.ReadUint32(settingFlag) ||
+                settingFlag < static_cast<uint32_t>(SystemBarSettingFlag::DEFAULT_SETTING) ||
+                settingFlag > MAX_SETTINGFLAG) {
+                TLOGE(WmsLogTag::WMS_IMMS, "read settingFlag failed");
+                return ERR_INVALID_DATA;
+            }
+            SystemBarProperty systemBarProperty = { enable, backgroundColor,
+                contentColor, enableAnimation, static_cast<SystemBarSettingFlag>(settingFlag) };
+            NotifyWindowSystemBarPropertyChange(static_cast<WindowType>(type), systemBarProperty);
+            break;
+        }
         case WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_MODE_TYPE: {
             uint8_t typeId = 0;
             if (!data.ReadUint8(typeId) ||

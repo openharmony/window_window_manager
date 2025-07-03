@@ -867,7 +867,7 @@ HWTEST_F(SceneSessionTest2, ProcessPointDownSession, TestSize.Level1)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->specificCallback_ = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(nullptr, sceneSession->specificCallback_);
-    auto sessionTouchOutsideFun = [sceneSession](int32_t persistentId) {
+    auto sessionTouchOutsideFun = [sceneSession](int32_t persistentId, DisplayId displayId) {
         sceneSession->SetCollaboratorType(persistentId);
     };
     auto outsideDownEventFun = [sceneSession](int32_t x, int32_t y) {
@@ -891,6 +891,29 @@ HWTEST_F(SceneSessionTest2, ProcessPointDownSession, TestSize.Level1)
     EXPECT_NE(nullptr, sceneSession1->specificCallback_);
     sceneSession1->specificCallback_->onOutsideDownEvent_ = nullptr;
     EXPECT_EQ(WSError::WS_ERROR_INVALID_TYPE, sceneSession1->ProcessPointDownSession(3, 4));
+}
+
+/**
+ * @tc.name: SetSessionInfoWindowInputType
+ * @tc.desc: SetSessionInfoWindowInputType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, SetSessionInfoWindowInputType, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetSessionInfoWindowInputType";
+    info.bundleName_ = "SetSessionInfoWindowInputType";
+    info.windowInputType_ = static_cast<uint32_t>(MMI::WindowInputType::NORMAL);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->isActive_ = true;
+    sceneSession->SetSessionInfoWindowInputType(static_cast<uint32_t>(MMI::WindowInputType::TRANSMIT_AXIS_MOVE));
+
+    SessionInfo sessionInfo = sceneSession->GetSessionInfo();
+    ASSERT_EQ(sessionInfo.windowInputType_, static_cast<uint32_t>(MMI::WindowInputType::TRANSMIT_AXIS_MOVE));
+
+    sceneSession->SetSessionInfoWindowInputType(static_cast<uint32_t>(MMI::WindowInputType::TRANSMIT_ALL));
+    sessionInfo = sceneSession->GetSessionInfo();
+    ASSERT_EQ(sessionInfo.windowInputType_, static_cast<uint32_t>(MMI::WindowInputType::TRANSMIT_ALL));
 }
 
 /**
@@ -1623,6 +1646,81 @@ HWTEST_F(SceneSessionTest2, SetTitleAndDockHoverShowChangeCallback, TestSize.Lev
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->SetTitleAndDockHoverShowChangeCallback([](bool isTitleHoverShown, bool isDockHoverShown) { return; });
     EXPECT_NE(sceneSession->onTitleAndDockHoverShowChangeFunc_, nullptr);
+}
+
+/**
+ * @tc.name: HandleMoveDragEvent
+ * @tc.desc: HandleMoveDragEvent function01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, HandleMoveDragEvent, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "HandleMoveDragEvent";
+    info.bundleName_ = "HandleMoveDragEvent";
+    info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    SizeChangeReason reason = { SizeChangeReason::DRAG };
+    session->HandleMoveDragEvent(reason);
+    SessionEvent event = { SessionEvent::EVENT_DRAG };
+    EXPECT_EQ(WSError::WS_OK, session->OnSessionEvent(event));
+ 
+    auto moveDragController = sptr<MoveDragController>::MakeSptr(2024, session->GetWindowType());
+    session->moveDragController_ = moveDragController;
+    session->moveDragController_->isStartDrag_ = true;
+    session->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    session->systemConfig_.freeMultiWindowSupport_ = true;
+    session->systemConfig_.freeMultiWindowEnable_ = true;
+    session->dragResizeTypeDuringDrag_ = DragResizeType::RESIZE_SCALE;
+    session->compatibleDragScaleFlags_ = true;
+ 
+    session->SetRequestNextVsyncFunc(nullptr);
+    ASSERT_EQ(nullptr, session->requestNextVsyncFunc_);
+    session->HandleMoveDragEvent(reason);
+ 
+    session->SetRequestNextVsyncFunc([](const std::shared_ptr<VsyncCallback>& callback) {
+        SessionInfo info1;
+        info1.abilityName_ = "HandleMoveDragEventRequestNextVsync";
+        info1.bundleName_ = "HandleMoveDragEventRequestNextVsync";
+    });
+    ASSERT_NE(nullptr, session->requestNextVsyncFunc_);
+    session->HandleMoveDragEvent(reason);
+    EXPECT_EQ(WSError::WS_OK, session->OnSessionEvent(event));
+}
+ 
+/**
+ * @tc.name: IsDragResizeScale
+ * @tc.desc: IsDragResizeScale function01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, IsDragResizeScale, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsDragResizeScale";
+    info.bundleName_ = "IsDragResizeScale";
+    info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+    auto oriProperty = session->GetSessionProperty();
+    session->property_ = nullptr;
+    SizeChangeReason reason = { SizeChangeReason::DRAG_START };
+    EXPECT_EQ(session->IsDragResizeScale(reason), false);
+ 
+    reason = { SizeChangeReason::DRAG_END };
+    EXPECT_EQ(session->IsDragResizeScale(reason), false);
+ 
+    session->property_ = oriProperty;
+    reason = { SizeChangeReason::DRAG };
+    auto moveDragController = sptr<MoveDragController>::MakeSptr(2024, session->GetWindowType());
+    session->moveDragController_ = moveDragController;
+ 
+    session->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    session->systemConfig_.freeMultiWindowSupport_ = true;
+    session->systemConfig_.freeMultiWindowEnable_ = true;
+    session->dragResizeTypeDuringDrag_ = DragResizeType::RESIZE_SCALE;
+    session->moveDragController_->isStartDrag_ = true;
+    session->compatibleDragScaleFlags_ = true;
+    EXPECT_EQ(session->IsDragResizeScale(reason), true);
 }
 } // namespace
 } // namespace Rosen

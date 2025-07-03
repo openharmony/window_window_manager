@@ -592,6 +592,29 @@ HWTEST_F(SceneSessionTest, SetPrivacyMode02, TestSize.Level0)
 }
 
 /**
+ * @tc.name: SetPrivacyMode03
+ * @tc.desc: Set PrivacyMode as true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetPrivacyMode03, TestSize.Level0)
+{
+    SessionInfo info;
+    info.abilityName_ = "TestAbility";
+    info.bundleName_ = "TestBundle";
+    info.windowType_ = static_cast<uint32_t>(WindowType::APP_SUB_WINDOW_BASE);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    auto runner = AppExecFwk::EventRunner::Create("SceneSessionTest");
+    auto handler = std::make_shared<AppExecFwk::EventHandler>(runner);
+    sceneSession->SetEventHandler(handler, handler);
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    sceneSession->surfaceNode_ = surfaceNode;
+    sceneSession->SetPrivacyMode(true);
+    ASSERT_EQ(true, sceneSession->appUseControlMap_.size() == 0);
+}
+
+/**
  * @tc.name: UpdateScreenshotAppEventRegistered
  * @tc.desc: UpdateScreenshotAppEventRegistered01
  * @tc.type: FUNC
@@ -621,6 +644,168 @@ HWTEST_F(SceneSessionTest, SetNotifyScreenshotAppEventRegisteredFunc01, TestSize
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->SetNotifyScreenshotAppEventRegisteredFunc([](int32_t persistentId, bool isRegister) {});
     EXPECT_NE(sceneSession->updateScreenshotAppEventRegisteredFunc_, nullptr);
+}
+
+/**
+ * @tc.name: UpdateAcrossDisplaysChangeRegistered
+ * @tc.desc: UpdateAcrossDisplaysChangeRegistered01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, UpdateAcrossDisplaysChangeRegistered01, TestSize.Level0)
+{
+    SessionInfo info;
+    info.abilityName_ = "test";
+    info.bundleName_ = "test";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_PANEL);
+    auto ret = sceneSession->UpdateAcrossDisplaysChangeRegistered(true);
+    EXPECT_NE(ret, WMError::WM_ERROR_INVALID_CALLING);
+
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ret = sceneSession->UpdateAcrossDisplaysChangeRegistered(true);
+    EXPECT_NE(ret, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: IsMainWindowFullScreenAcrossDisplays
+ * @tc.desc: IsMainWindowFullScreenAcrossDisplays01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, IsMainWindowFullScreenAcrossDisplays01, TestSize.Level0)
+{
+    bool isAcrossDisplays = false;
+    SessionInfo info;
+    info.abilityName_ = "test";
+    info.bundleName_ = "test";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_PANEL);
+    auto ret = sceneSession->IsMainWindowFullScreenAcrossDisplays(isAcrossDisplays);
+    EXPECT_NE(ret, WMError::WM_ERROR_INVALID_CALLING);
+
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    ret = sceneSession->IsMainWindowFullScreenAcrossDisplays(isAcrossDisplays);
+    EXPECT_NE(ret, WMError::WM_OK);
+
+    sptr<SceneSession> parentSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    parentSession->property_->SetPersistentId(12);
+    sceneSession->SetParentSession(parentSession);
+    ret = sceneSession->IsMainWindowFullScreenAcrossDisplays(isAcrossDisplays);
+    EXPECT_NE(ret, WMError::WM_ERROR_NULLPTR);
+
+    sptr<SceneSession::SpecificSessionCallback> callBack = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    ASSERT_NE(nullptr, callBack);
+    sceneSession->specificCallback_ = callBack;
+    auto task = [&parentSession](int32_t persistentId) { return parentSession; };
+    callBack->onGetSceneSessionByIdCallback_ = task;
+
+    ret = sceneSession->IsMainWindowFullScreenAcrossDisplays(isAcrossDisplays);
+    EXPECT_NE(ret, WMError::WM_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: SetFullScreenWaterfallMode
+ * @tc.desc: SetFullScreenWaterfallMode true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetFullScreenWaterfallMode, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "test";
+    info.bundleName_ = "test";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->pcFoldScreenController_ =
+        sptr<PcFoldScreenController>::MakeSptr(wptr(sceneSession), sceneSession->GetPersistentId());
+    sceneSession->SetFullScreenWaterfallMode(true);
+    EXPECT_EQ(true, sceneSession->IsFullScreenWaterfallMode());
+
+    sceneSession->pcFoldScreenController_ = nullptr;
+    sceneSession->SetFullScreenWaterfallMode(true);
+    EXPECT_EQ(false, sceneSession->IsFullScreenWaterfallMode());
+}
+
+/**
+ * @tc.name: NotifySubSessionAcrossDisplaysChange
+ * @tc.desc: NotifySubSessionAcrossDisplaysChange01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, NotifySubSessionAcrossDisplaysChange01, TestSize.Level0)
+{
+    SessionInfo info;
+    info.abilityName_ = "test";
+    info.bundleName_ = "test";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+
+    sptr<SceneSession> subSession1 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    subSession1->isRegisterAcrossDisplaysChanged_ = false;
+    sptr<SceneSession> subSession2 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    subSession2->isRegisterAcrossDisplaysChanged_ = true;
+    subSession2->sessionStage_ = nullptr;
+    sptr<SceneSession> subSession3 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    subSession3->isRegisterAcrossDisplaysChanged_ = true;
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
+    ASSERT_NE(mockSessionStage, nullptr);
+    subSession3->sessionStage_ = mockSessionStage;
+    sptr<SceneSession> subSession4 = nullptr;
+    sceneSession->subSession_.push_back(subSession1);
+    sceneSession->subSession_.push_back(subSession2);
+    sceneSession->subSession_.push_back(subSession3);
+    sceneSession->subSession_.push_back(subSession4);
+    auto ret = sceneSession->NotifySubSessionAcrossDisplaysChange(true);
+    EXPECT_NE(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: NotifyFollowedParentWindowAcrossDisplaysChange
+ * @tc.desc: NotifyFollowedParentWindowAcrossDisplaysChange01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, NotifyFollowedParentWindowAcrossDisplaysChange01, TestSize.Level0)
+{
+    SessionInfo info;
+    info.abilityName_ = "test";
+    info.bundleName_ = "test";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    sptr<SceneSession> subSession1 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    subSession1->property_->SetPersistentId(1);
+    subSession1->isFollowParentLayout_ = false;
+    sptr<SceneSession> subSession2 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    subSession2->property_->SetPersistentId(2);
+    subSession2->isFollowParentLayout_ = true;
+    subSession2->sessionStage_ = nullptr;
+    sptr<SceneSession> subSession3 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    subSession3->property_->SetPersistentId(3);
+    subSession3->isFollowParentLayout_ = true;
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
+    ASSERT_NE(mockSessionStage, nullptr);
+    subSession3->sessionStage_ = mockSessionStage;
+    sptr<SceneSession> subSession4 = nullptr;
+
+    sceneSession->notifySurfaceBoundsChangeFuncMap_[1] = nullptr;
+    sceneSession->notifySurfaceBoundsChangeFuncMap_[2] = nullptr;
+    sceneSession->notifySurfaceBoundsChangeFuncMap_[3] = nullptr;
+    sceneSession->notifySurfaceBoundsChangeFuncMap_[4] = nullptr;
+
+    sptr<SceneSession::SpecificSessionCallback> callBack = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    ASSERT_NE(nullptr, callBack);
+    sceneSession->specificCallback_ = callBack;
+
+    auto task = [&subSession1, &subSession2, &subSession3, &subSession4](int32_t persistentId) {
+        if (persistentId == 1) {
+            return subSession1;
+        } else if (persistentId == 2) {
+            return subSession2;
+        } else if (persistentId == 3) {
+            return subSession3;
+        }
+        return subSession4;
+    };
+    callBack->onGetSceneSessionByIdCallback_ = task;
+    auto ret = sceneSession->NotifyFollowedParentWindowAcrossDisplaysChange(true);
+    EXPECT_NE(WMError::WM_OK, ret);
 }
 
 /**
@@ -746,6 +931,20 @@ HWTEST_F(SceneSessionTest, NotifySessionRectChange, TestSize.Level1)
                                               const RectAnimationConfig& rectAnimationConfig) { return; };
     sceneSession->NotifySessionRectChange(overlapRect, SizeChangeReason::ROTATION, -1);
     sceneSession->NotifySessionRectChange(overlapRect, SizeChangeReason::ROTATION, 11);
+
+    auto oriProperty = sceneSession->GetSessionProperty();
+    sceneSession->property_ = oriProperty;
+    auto moveDragController = sptr<MoveDragController>::MakeSptr(2024, sceneSession->GetWindowType());
+    sceneSession->moveDragController_ = moveDragController;
+    SizeChangeReason reason = { SizeChangeReason::DRAG };
+    sceneSession->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    sceneSession->systemConfig_.freeMultiWindowSupport_ = true;
+    sceneSession->systemConfig_.freeMultiWindowEnable_ = true;
+    sceneSession->dragResizeTypeDuringDrag_ = DragResizeType::RESIZE_SCALE;
+    sceneSession->moveDragController_->isStartDrag_ = true;
+    sceneSession->compatibleDragScaleFlags_ = true;
+    sceneSession->NotifySessionRectChange(overlapRect, reason, 11);
+    EXPECT_EQ(sceneSession->IsDragResizeScale(reason), true);
 }
 
 /**
@@ -852,6 +1051,36 @@ HWTEST_F(SceneSessionTest, SetSystemBarProperty02, TestSize.Level0)
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     ASSERT_EQ(sceneSession->SetSystemBarProperty(WindowType::WINDOW_TYPE_FLOAT_CAMERA, statusBarProperty),
               WSError::WS_OK);
+}
+
+/**
+ * @tc.name: SetSystemBarProperty03
+ * @tc.desc: SetSystemBarProperty03
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetSystemBarProperty03, TestSize.Level0)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetSystemBarProperty03";
+    info.bundleName_ = "SetSystemBarProperty03";
+    info.windowType_ = 1;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    specificCallback->onNotifyWindowSystemBarPropertyChangeFunc_ = [](
+        WindowType type, const SystemBarProperty& systemBarProperty) {};
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback);
+    sceneSession->onSystemBarPropertyChange_ =[](
+        const std::unordered_map<WindowType, SystemBarProperty>& propertyMap) {};
+    SystemBarProperty statusBarProperty;
+    EXPECT_EQ(sceneSession->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusBarProperty),
+        WSError::WS_OK);
+    auto propMap = sceneSession->property_->GetSystemBarProperty();
+    EXPECT_EQ(statusBarProperty, propMap[WindowType::WINDOW_TYPE_STATUS_BAR]);
+    EXPECT_EQ(sceneSession->SetSystemBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR, statusBarProperty),
+        WSError::WS_OK);
+    sceneSession->specificCallback_->onNotifyWindowSystemBarPropertyChangeFunc_ = nullptr;
+    EXPECT_EQ(sceneSession->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusBarProperty),
+        WSError::WS_OK);
 }
 
 /**
@@ -1918,6 +2147,39 @@ HWTEST_F(SceneSessionTest, CloneWindow, TestSize.Level1)
     sceneSession->SetSurfaceNode(surfaceNode);
     sceneSession->CloneWindow(surfaceNodeId, needOffScreen);
     EXPECT_TRUE(logMsg.find("cloned") != std::string::npos);
+}
+
+/**
+ * @tc.name: GetGlobalOrWinRect
+ * @tc.desc: GetGlobalOrWinRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, GetGlobalOrWinRect, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback);
+    sceneSession->winRect_ = {1, 1, 1, 1};
+    sceneSession->globalRect_ = {2, 2, 1, 1};
+    sceneSession->isScbCoreEnabled_ = true;
+    sceneSession->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    auto rect = sceneSession->GetGlobalOrWinRect();
+    EXPECT_EQ(1, rect.posX_);
+    EXPECT_EQ(1, rect.posY_);
+
+    sceneSession->systemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    sceneSession->systemConfig_.freeMultiWindowEnable_ = true;
+    sceneSession->systemConfig_.freeMultiWindowSupport_ = true;
+    rect = sceneSession->GetGlobalOrWinRect();
+    EXPECT_EQ(1, rect.posX_);
+    EXPECT_EQ(1, rect.posY_);
+
+    sceneSession->systemConfig_.freeMultiWindowEnable_ = false;
+    sceneSession->systemConfig_.freeMultiWindowSupport_ = false;
+    rect = sceneSession->GetGlobalOrWinRect();
+    EXPECT_EQ(2, rect.posX_);
+    EXPECT_EQ(2, rect.posY_);
 }
 } // namespace
 } // namespace Rosen

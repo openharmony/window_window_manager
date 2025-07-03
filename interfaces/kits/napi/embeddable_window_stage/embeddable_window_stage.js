@@ -57,6 +57,34 @@ class EmbeddableWindowStage {
   setUIContent(context, url, storage) {
     return this.__embeddable_window_stage__.setUIContent(context, url, storage);
   }
+
+  setDefaultDensityEnabled(enabled) {
+    return this.__embeddable_window_stage__.setDefaultDensityEnabled(enabled);
+  }
+
+  setCustomDensity(density) {
+    return this.__embeddable_window_stage__.setCustomDensity(density);
+  }
+
+  removeStartingWindow(asyncCallback) {
+    return this.__embeddable_window_stage__.removeStartingWindow(asyncCallback);
+  }
+
+  setWindowModal(isModal, asyncCallback) {
+    return this.__embeddable_window_stage__.setWindowModal(isModal, asyncCallback);
+  }
+
+  setWindowRectAutoSave(enabled, isSaveBySpecifiedFlag) {
+    return this.__embeddable_window_stage__.setWindowRectAutoSave(enabled, isSaveBySpecifiedFlag);
+  }
+
+  isWindowRectAutoSave(asyncCallback) {
+    return this.__embeddable_window_stage__.isWindowRectAutoSave(asyncCallback);
+  }
+
+  setSupportedWindowModes(supportedWindowModes, asyncCallback) {
+    return this.__embeddable_window_stage__.setSupportedWindowModes(supportedWindowModes, asyncCallback);
+  }
 }
 
 export default EmbeddableWindowStage;

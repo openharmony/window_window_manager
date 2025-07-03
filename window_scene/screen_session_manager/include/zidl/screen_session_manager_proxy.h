@@ -156,6 +156,7 @@ public:
     void SetFoldStatusExpandAndLocked(bool locked) override;
 
     FoldDisplayMode GetFoldDisplayMode() override;
+    DMError GetPhysicalScreenIds(std::vector<ScreenId>& screenIds) override;
 
     bool IsFoldable() override;
     bool IsCaptured() override;
@@ -228,6 +229,8 @@ public:
     void NotifyScreenMaskAppear() override;
     DMError GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
         ScreenId& screenId, DMRect& screenArea) override;
+    DMError SetPrimaryDisplaySystemDpi(float dpi) override;
+    DMError SetVirtualScreenAutoRotation(ScreenId screenId, bool enable) override;
 
 private:
     static inline BrokerDelegator<ScreenSessionManagerProxy> delegator_;

@@ -128,7 +128,7 @@ void RootScene::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason re
     }
 
     if (uiContent_ == nullptr) {
-        WLOGFE("uiContent_ is nullptr!");
+        TLOGD(WmsLogTag::DEFAULT, "uiContent_ is nullptr!");
         return;
     }
     Ace::ViewportConfig config;
@@ -289,7 +289,7 @@ int64_t RootScene::GetVSyncPeriod()
 
 void RootScene::FlushFrameRate(uint32_t rate, int32_t animatorExpectedFrameRate, uint32_t rateType)
 {
-    vsyncStation_->FlushFrameRate(rate, animatorExpectedFrameRate, rateType);
+    vsyncStation_->FlushFrameRate(GetRSUIContext(), rate, animatorExpectedFrameRate, rateType);
 }
 
 bool RootScene::IsLastFrameLayoutFinished()

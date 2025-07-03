@@ -18,6 +18,7 @@
 
 #include "rs_adapter.h"
 #include "window_agent.h"
+#include "window_manager_hilog.h"
 #include "window_stub.h"
 
 using namespace testing;
@@ -25,6 +26,13 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+    std::string g_errLog;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
+        const char *msg)
+    {
+        g_errLog = msg;
+    }
 class WindowAgentTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -407,14 +415,15 @@ HWTEST_F(WindowAgentTest, NotifyWindowClientPointUp, TestSize.Level1)
  */
 HWTEST_F(WindowAgentTest, ConsumeKeyEvent, TestSize.Level1)
 {
-    auto res = 0;
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
     auto keyEvent = MMI::KeyEvent::Create();
     windowAgent_->ConsumeKeyEvent(keyEvent);
-    ASSERT_EQ(0, res);
 
     windowAgent_->window_ = nullptr;
     windowAgent_->ConsumeKeyEvent(keyEvent);
-    ASSERT_EQ(0, res);
+    EXPECT_TRUE(g_errLog.find("window_ is nullptr") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -424,17 +433,18 @@ HWTEST_F(WindowAgentTest, ConsumeKeyEvent, TestSize.Level1)
  */
 HWTEST_F(WindowAgentTest, NotifyForegroundInteractiveStatus, TestSize.Level1)
 {
-    auto res = 0;
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
     bool interactive = false;
     windowAgent_->NotifyForegroundInteractiveStatus(interactive);
-    ASSERT_EQ(0, res);
 
     interactive = true;
     windowAgent_->window_ = nullptr;
     windowAgent_->NotifyForegroundInteractiveStatus(interactive);
-    ASSERT_EQ(0, res);
+    EXPECT_TRUE(g_errLog.find("window_ is nullptr") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
-
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

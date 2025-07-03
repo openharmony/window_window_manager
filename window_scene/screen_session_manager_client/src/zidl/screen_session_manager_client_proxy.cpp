@@ -414,6 +414,62 @@ void ScreenSessionManagerClientProxy::OnGetSurfaceNodeIdsFromMissionIdsChanged(s
     reply.ReadUInt64Vector(&surfaceNodeIds);
 }
 
+void ScreenSessionManagerClientProxy::OnSetSurfaceNodeIdsChanged(DisplayId displayId,
+    const std::vector<uint64_t>& surfaceNodeIds)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DMS, "remote is nullptr");
+        return;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint64(displayId)) {
+        TLOGE(WmsLogTag::DMS, "Write displayId failed");
+        return;
+    }
+    if (!data.WriteUInt64Vector(surfaceNodeIds)) {
+        TLOGE(WmsLogTag::DMS, "Write surfaceNodeIds failed");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(ScreenSessionManagerClientMessage::TRANS_ID_SET_SURFACENODEIDS),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
+        return;
+    }
+}
+
+void ScreenSessionManagerClientProxy::OnVirtualScreenDisconnected(DisplayId displayId)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DMS, "remote is nullptr");
+        return;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint64(displayId)) {
+        TLOGE(WmsLogTag::DMS, "Write displayId failed");
+        return;
+    }
+    if (remote->SendRequest(
+        static_cast<uint32_t>(ScreenSessionManagerClientMessage::TRANS_ID_ON_VIRTUAL_SCREEN_DISCONNECTED),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
+        return;
+    }
+}
+
 void ScreenSessionManagerClientProxy::OnUpdateFoldDisplayMode(FoldDisplayMode displayMode)
 {
     sptr<IRemoteObject> remote = Remote();

@@ -81,6 +81,10 @@ public:
         WSPropertyChangeAction action));
     MOCK_METHOD1(GetCrossAxisState, WSError(CrossAxisState& state));
     MOCK_METHOD1(GetWaterfallMode, WSError(bool& isWaterfallMode));
+    MOCK_METHOD1(IsMainWindowFullScreenAcrossDisplays, WMError(bool& isAcrossDisplays));
+    MOCK_METHOD1(GetFloatingBallWindowId, WMError(uint32_t& windowId));
+    MOCK_METHOD1(SendFbActionEvent, WSError(const std::string& action));
+    MOCK_METHOD1(RestoreFbMainWindow, WMError(const std::shared_ptr<AAFwk::Want>& want));
 };
 } // namespace Rosen
 } // namespace OHOS

@@ -25,6 +25,14 @@
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session/host/include/scene_session.h"
 
+#define protected public
+#include "session/host/include/session.h"
+#undef protected
+
+#define private public
+#include "session/host/include/keyboard_session.h"
+#undef private
+
 using namespace testing;
 using namespace testing::ext;
 
@@ -32,6 +40,12 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr uint32_t SLEEP_TIME_US = 100000; // 100ms
+std::string g_logMsg;
+void KeyboardSessionTest2Callback(const LogType type, const LogLevel level,
+    const unsigned int domain, const char *tag, const char *msg)
+{
+    g_logMsg = msg;
+}
 }
 class KeyboardSessionTest3 : public testing::Test {
 public:
@@ -40,7 +54,6 @@ public:
     void SetUp() override;
     void TearDown() override;
 
-private:
     sptr<KeyboardSession> GetKeyboardSession(const std::string& abilityName, const std::string& bundleName);
     sptr<SceneSession> GetSceneSession(const std::string& abilityName, const std::string& bundleName);
 };
@@ -88,6 +101,23 @@ sptr<SceneSession> KeyboardSessionTest3::GetSceneSession(const std::string& abil
 }
 
 namespace {
+/**
+ * @tc.name: IsVisibleNotBackground
+ * @tc.desc: test IsVisibleNotBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest3, IsVisibleNotBackground, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsVisibleNotBackground";
+    info.bundleName_ = "IsVisibleNotBackground";
+    sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, nullptr, nullptr);
+    keyboardSession->isVisible_ = false;
+    EXPECT_EQ(false, keyboardSession->IsVisibleNotBackground());
+    keyboardSession->isVisible_ = true;
+    EXPECT_EQ(true, keyboardSession->IsVisibleNotBackground());
+}
+
 /**
  * @tc.name: GetRSTransaction01
  * @tc.desc: test function: GetRSTransaction
@@ -456,6 +486,67 @@ HWTEST_F(KeyboardSessionTest3, CalculateOccupiedArea_MIDSCENE, Function | SmallT
     EXPECT_EQ(rectEqual, true);
     ret = keyboardSession->CalculateOccupiedArea(callingSession, zeroRect1, zeroRect2, occupiedAreaInfo);
     EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: CalculateOccupiedAreaAfterUIRefresh01
+ * @tc.desc: check func CalculateOccupiedAreaAfterUIRefresh
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest3, CalculateOccupiedAreaAfterUIRefresh01, Function | SmallTest | Level1)
+{
+    sptr<KeyboardSession::KeyboardSessionCallback> keyboardCallback =
+        sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
+    keyboardCallback->onGetSceneSession = [](uint32_t persistentId) {
+        SessionInfo callingSessionInfo;
+        callingSessionInfo.abilityName_ = "CallingSession";
+        callingSessionInfo.bundleName_ = "CallingSession";
+        auto callingSession = sptr<SceneSession>::MakeSptr(callingSessionInfo, nullptr);
+        callingSession->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
+        callingSession->persistentId_ = persistentId;
+        return callingSession;
+    };
+
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+
+    SessionInfo info;
+    info.abilityName_ = "keyboardSession";
+    info.bundleName_ = "keyboardSession";
+    sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, specificCallback, keyboardCallback);
+    keyboardSession->property_->SetCallingSessionId(36);
+    keyboardSession->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::VISIBLE);
+    keyboardSession->isVisible_ = true;
+
+    keyboardSession->CalculateOccupiedAreaAfterUIRefresh();
+    EXPECT_EQ(keyboardSession->stateChanged_, false);
+
+    keyboardSession->isVisible_ = false;
+    keyboardSession->dirtyFlags_ &= ~static_cast<uint32_t>(SessionUIDirtyFlag::VISIBLE);
+    keyboardSession->CalculateOccupiedAreaAfterUIRefresh();
+    EXPECT_EQ(keyboardSession->stateChanged_, false);
+
+    keyboardCallback->onGetSceneSession = [](uint32_t persistentId) { return nullptr; };
+    keyboardSession->isVisible_ = true;
+    keyboardSession->CalculateOccupiedAreaAfterUIRefresh();
+    EXPECT_EQ(keyboardSession->stateChanged_, false);
+
+    keyboardSession->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
+    keyboardCallback->onGetSceneSession = [](uint32_t persistentId) {
+        SessionInfo callingSessionInfo;
+        callingSessionInfo.abilityName_ = "CallingSession";
+        callingSessionInfo.bundleName_ = "CallingSession";
+        auto callingSession = sptr<SceneSession>::MakeSptr(callingSessionInfo, nullptr);
+        callingSession->persistentId_ = persistentId;
+        return callingSession;
+    };
+    keyboardSession->CalculateOccupiedAreaAfterUIRefresh();
+    EXPECT_EQ(keyboardSession->stateChanged_, false);
+
+    keyboardSession->stateChanged_ = true;
+    keyboardSession->dirtyFlags_ &= ~static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
+    keyboardSession->CalculateOccupiedAreaAfterUIRefresh();
+    EXPECT_EQ(keyboardSession->stateChanged_, false);
 }
 } // namespace
 } // namespace Rosen

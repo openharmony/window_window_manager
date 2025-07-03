@@ -820,6 +820,8 @@ HWTEST_F(ScreenSceneConfigTest, ReadStringListConfigInfo04, TestSize.Level1)
     ASSERT_NE(rootNode, nullptr);
     xmlNodePtr curNode = xmlNewNode(nullptr, BAD_CAST "invalidNode");
     rootNode->children = curNode;
+    curNode->parent = rootNode;
+    curNode->next = nullptr;
     std::string name = "testName";
     ScreenSceneConfig::ReadStringListConfigInfo(rootNode, name);
     xmlFreeNode(rootNode);
@@ -837,6 +839,8 @@ HWTEST_F(ScreenSceneConfigTest, ReadStringListConfigInfo05, TestSize.Level1)
     xmlNodePtr curNode = xmlNewNode(nullptr, BAD_CAST "invalidNode");
     xmlNodeSetContent(curNode, BAD_CAST "validContent");
     rootNode->children = curNode;
+    curNode->parent = rootNode;
+    curNode->next = nullptr;
     std::string name = "testName";
     ScreenSceneConfig::ReadStringListConfigInfo(rootNode, name);
     xmlFreeNode(rootNode);

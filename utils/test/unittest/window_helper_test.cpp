@@ -238,6 +238,8 @@ HWTEST_F(WindowHelperTest, WindowType, TestSize.Level1)
     ASSERT_EQ(true, WindowHelper::IsSystemWindow(WindowType::WINDOW_TYPE_MAGNIFICATION));
     ASSERT_EQ(false, WindowHelper::IsSystemSubWindow(WindowType::WINDOW_TYPE_MAGNIFICATION_MENU));
     ASSERT_EQ(true, WindowHelper::IsSystemWindow(WindowType::WINDOW_TYPE_MAGNIFICATION_MENU));
+    ASSERT_EQ(false, WindowHelper::IsSystemSubWindow(WindowType::WINDOW_TYPE_SELECTION));
+    ASSERT_EQ(true, WindowHelper::IsSystemWindow(WindowType::WINDOW_TYPE_SELECTION));
 }
 
 /**
@@ -377,6 +379,26 @@ HWTEST_F(WindowHelperTest, SplitStringByDelimiter_TestOther, TestSize.Level1)
     WindowHelper::SplitStringByDelimiter(inputStr, delimiter, container);
     EXPECT_EQ(0, container.count("e"));
     EXPECT_EQ(1, container.count("a"));
+}
+
+/**
+ * @tc.name: ConvertSupportTypeToSupportModes
+ * @tc.desc: ConvertSupportTypeToSupportModes
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowHelperTest, ConvertSupportTypeToSupportModes, TestSize.Level1)
+{
+    auto supportModes = WindowHelper::ConvertSupportTypeToSupportModes(
+        WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING);
+    EXPECT_EQ(supportModes.size(), 1);
+    EXPECT_EQ(supportModes[0], AppExecFwk::SupportWindowMode::FLOATING);
+    supportModes = WindowHelper::ConvertSupportTypeToSupportModes(
+        WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY | WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY);
+    EXPECT_EQ(supportModes.size(), 1);
+    EXPECT_EQ(supportModes[0], AppExecFwk::SupportWindowMode::SPLIT);
+    supportModes = WindowHelper::ConvertSupportTypeToSupportModes(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN);
+    EXPECT_EQ(supportModes.size(), 1);
+    EXPECT_EQ(supportModes[0], AppExecFwk::SupportWindowMode::FULLSCREEN);
 }
 } // namespace
 } // namespace Rosen

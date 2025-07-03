@@ -50,12 +50,15 @@ enum class RegisterListenerType : uint32_t {
     WINDOW_VISIBILITY_CHANGE_CB,
     WINDOW_DISPLAYID_CHANGE_CB,
     SYSTEM_DENSITY_CHANGE_CB,
+    ACROSS_DISPLAYS_CHANGE_CB,
     WINDOW_NO_INTERACTION_DETECT_CB,
     WINDOW_RECT_CHANGE_CB,
+    RECT_CHANGE_IN_GLOBAL_DISPLAY_CB,
     EXTENSION_SECURE_LIMIT_CHANGE_CB,
     SUB_WINDOW_CLOSE_CB,
     WINDOW_WILL_CLOSE_CB,
     WINDOW_STAGE_EVENT_CB,
+    WINDOW_STAGE_LIFECYCLE_EVENT_CB,
     WINDOW_STAGE_CLOSE_CB,
     WINDOW_HIGHLIGHT_CHANGE_CB,
     WINDOW_ROTATION_CHANGE_CB,
@@ -79,6 +82,8 @@ private:
         napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessLifeCycleEventRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister,
         napi_env env, napi_value parameter = nullptr);
+    WmErrorCode ProcessWindowStageLifeCycleEventRegister(sptr<JsWindowListener> listener, sptr<Window> window,
+        bool isRegister, napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessOccupiedAreaChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window,
         bool isRegister, napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessKeyboardWillShowRegister(sptr<JsWindowListener> listener, const sptr<Window>& window,
@@ -111,6 +116,8 @@ private:
         bool isRegister, napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessSystemDensityChangeRegister(const sptr<JsWindowListener>& listener, const sptr<Window>& window,
         bool isRegister, napi_env env, napi_value parameter = nullptr);
+    WmErrorCode ProcessAcrossDisplaysChangeRegister(const sptr<JsWindowListener>& listener, const sptr<Window>& window,
+        bool isRegister, napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessWindowNoInteractionRegister(sptr<JsWindowListener> listener, sptr<Window> window,
         bool isRegister, napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessWindowStatusChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window,
@@ -120,6 +127,9 @@ private:
     WmErrorCode ProcessWindowTitleButtonRectChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window,
         bool isRegister, napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessWindowRectChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window,
+        bool isRegister, napi_env env, napi_value parameter = nullptr);
+    WmErrorCode ProcessRectChangeInGlobalDisplayRegister(
+        const sptr<JsWindowListener>& listener, const sptr<Window>& window,
         bool isRegister, napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessExtensionSecureLimitChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window,
         bool isRegister, napi_env env, napi_value parameter = nullptr);

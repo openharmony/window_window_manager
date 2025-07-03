@@ -567,7 +567,7 @@ HWTEST_F(OHDisplayManagerTest, DisplayRemoveListener02, TestSize.Level1)
     uint32_t* testIndex = nullptr;
     NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_RegisterDisplayRemoveListener(
         DisplayRemoveCallback, testIndex);
-    EXPECT_EQ(ret, NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM);
+    EXPECT_EQ(ret, NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK);
 }
 
 /**
@@ -582,6 +582,10 @@ HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_CreateAvailableArea01, Te
     NativeDisplayManager_Rect *availableArea;
     NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_CreateAvailableArea(testId, &availableArea);
     EXPECT_EQ(ret, NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK);
+    if (ret == NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK) {
+        ret = OH_NativeDisplayManager_DestroyAvailableArea(availableArea);
+        EXPECT_EQ(ret, NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK);
+    }
 }
 
 /**
@@ -596,6 +600,10 @@ HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_CreateAvailableArea02, Te
     NativeDisplayManager_Rect *availableArea = nullptr;
     NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_CreateAvailableArea(testId, &availableArea);
     EXPECT_EQ(ret, NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK);
+    if (ret == NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK) {
+        ret = OH_NativeDisplayManager_DestroyAvailableArea(availableArea);
+        EXPECT_EQ(ret, NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM);
+    }
 }
 
 /**
@@ -613,6 +621,20 @@ HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_CreateAvailableArea03, Te
 }
 
 /**
+ * @tc.name: OH_NativeDisplayManager_CreateAvailableArea04
+
+ * @tc.desc: availableArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_CreateAvailableArea04, TestSize.Level1)
+{
+    uint64_t testId = -1;
+    NativeDisplayManager_Rect *availableArea = nullptr;
+    NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_CreateAvailableArea(testId, &availableArea);
+    EXPECT_EQ(ret, NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM);
+}
+
+/**
  * @tc.name: OH_NativeDisplayManager_DestroyAvailableArea01
  * @tc.desc: availableArea = nullptr
  * @tc.type: FUNC
@@ -622,18 +644,6 @@ HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_DestroyAvailableArea01, T
     NativeDisplayManager_Rect *availableArea = nullptr;
     NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_DestroyAvailableArea(availableArea);
     EXPECT_EQ(ret, NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM);
-}
-
-/**
- * @tc.name: OH_NativeDisplayManager_DestroyAvailableArea02
- * @tc.desc: availableArea = nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_DestroyAvailableArea02, TestSize.Level1)
-{
-    NativeDisplayManager_Rect availableArea = {0, 0, 0, 0};
-    NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_DestroyAvailableArea(&availableArea);
-    EXPECT_EQ(ret, NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK);
 }
 
 /**
@@ -659,6 +669,19 @@ HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDisplaySourceMode02, T
     uint64_t testId = 0;
     NativeDisplayManager_SourceMode *sourceMode = nullptr;
     NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_GetDisplaySourceMode(testId, sourceMode);
+    EXPECT_EQ(ret, NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM);
+}
+
+/**
+ * @tc.name: OH_NativeDisplayManager_GetDisplaySourceMode_03
+ * @tc.desc: sourcemode == null
+ * @tc.type: FUNC
+ */
+HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDisplaySourceMode03, TestSize.Level1)
+{
+    uint64_t testId = -1;
+    NativeDisplayManager_SourceMode sourceMode = DISPLAY_SOURCE_MODE_NONE;
+    NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_GetDisplaySourceMode(testId, &sourceMode);
     EXPECT_EQ(ret, NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM);
 }
 
@@ -731,9 +754,7 @@ HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDisplayPosition05, Tes
     int32_t x = -1;
     int32_t y = -1;
     NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_GetDisplayPosition(testId, &x, &y);
-    EXPECT_EQ(ret, NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK);
-    EXPECT_NE(x, -1);
-    EXPECT_NE(y, -1);
+    EXPECT_EQ(ret, NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL);
 }
 
 /**
@@ -748,8 +769,20 @@ HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDisplayPosition06, Tes
     int32_t y = -1;
     NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_GetDisplayPosition(testId, &x, &y);
     EXPECT_EQ(ret, NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM);
-    EXPECT_EQ(x, -1);
-    EXPECT_EQ(y, -1);
+}
+
+/**
+ * @tc.name: OH_NativeDisplayManager_GetDisplayPosition_07
+ * @tc.desc: x,y
+ * @tc.type: FUNC
+ */
+HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDisplayPosition07, TestSize.Level1)
+{
+    uint64_t testId = -1; // 异常屏幕
+    int32_t x = -1;
+    int32_t y = -1;
+    NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_GetDisplayPosition(testId, &x, &y);
+    EXPECT_EQ(ret, NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM);
 }
 
 }

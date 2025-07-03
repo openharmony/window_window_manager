@@ -139,7 +139,7 @@ private:
                 task->Reject(env, CreateJsError(env, static_cast<int32_t>(ret)));
             }
         };
-        if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+        if (napi_send_event(env, asyncTask, napi_eprio_high, "OnStartAbility") != napi_status::napi_ok) {
             napiAsyncTask->Reject(env, CreateJsError(env,
                 static_cast<int32_t>(WmErrorCode::WM_ERROR_CONTEXT_ABNORMALLY), "send event failed"));
         }

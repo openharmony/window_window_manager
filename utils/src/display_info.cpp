@@ -44,7 +44,8 @@ bool DisplayInfo::Marshalling(Parcel &parcel) const
         parcel.WriteUint32(static_cast<uint32_t>(screenShape_)) &&
         parcel.WriteUint32(static_cast<uint32_t>(originRotation_)) &&
         parcel.WriteInt32(x_) && parcel.WriteInt32(y_) &&
-        parcel.WriteUint32(static_cast<uint32_t>(displaySourceMode_));
+        parcel.WriteUint32(static_cast<uint32_t>(displaySourceMode_)) &&
+        parcel.WriteUInt32Vector(supportedRefreshRate_);
 }
 
 DisplayInfo *DisplayInfo::Unmarshalling(Parcel &parcel)
@@ -82,7 +83,8 @@ DisplayInfo *DisplayInfo::Unmarshalling(Parcel &parcel)
         parcel.ReadFloat(displayInfo->pivotY_) && parcel.ReadFloat(displayInfo->translateX_) &&
         parcel.ReadFloat(displayInfo->translateY_) && parcel.ReadUint32(screenShape) &&
         parcel.ReadUint32(originRotation) && parcel.ReadInt32(displayInfo->x_) &&
-        parcel.ReadInt32(displayInfo->y_) && parcel.ReadUint32(displaySourceMode);
+        parcel.ReadInt32(displayInfo->y_) && parcel.ReadUint32(displaySourceMode) &&
+        parcel.ReadUInt32Vector(&(displayInfo->supportedRefreshRate_));
     if (!res) {
         delete displayInfo;
         return nullptr;

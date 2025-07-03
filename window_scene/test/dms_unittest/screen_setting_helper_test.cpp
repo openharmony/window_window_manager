@@ -781,10 +781,10 @@ namespace {
         auto ret = ScreenSettingHelper::GetScreenRelativePosition(info, inputString);
         if (SceneBoardJudgement::IsSceneBoardEnabled()) {
             ASSERT_FALSE(ret);
-            ASSERT_EQ(info.mainScreenOption.screenId_, 0);
+            ASSERT_EQ(info.secondaryScreenOption.screenId_, 0);
         } else {
             ASSERT_TRUE(ret);
-            ASSERT_EQ(info.mainScreenOption.screenId_, 1001);
+            ASSERT_EQ(info.secondaryScreenOption.screenId_, 1001);
         }
         ScreenSessionManager::GetInstance().screenSessionMap_.erase(screenId);
     }
@@ -812,10 +812,10 @@ namespace {
         auto ret = ScreenSettingHelper::GetScreenRelativePosition(info, inputString);
         if (SceneBoardJudgement::IsSceneBoardEnabled()) {
             ASSERT_FALSE(ret);
-            ASSERT_EQ(info.secondaryScreenOption.screenId_, 0);
+            ASSERT_EQ(info.mainScreenOption.screenId_, 0);
         } else {
             ASSERT_TRUE(ret);
-            ASSERT_EQ(info.secondaryScreenOption.screenId_, 1001);
+            ASSERT_EQ(info.mainScreenOption.screenId_, 1001);
         }
         ScreenSessionManager::GetInstance().screenSessionMap_.erase(screenId);
     }

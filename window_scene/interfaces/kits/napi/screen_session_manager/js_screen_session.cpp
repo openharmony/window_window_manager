@@ -69,6 +69,10 @@ napi_value JsScreenSession::Create(napi_env env, const sptr<ScreenSession>& scre
     napi_set_named_property(env, objValue, "isExtend", CreateJsValue(env, screenSession->GetIsExtend()));
     napi_set_named_property(env, objValue, "innerName",
         CreateJsValue(env, static_cast<std::string>(screenSession->GetInnerName())));
+    napi_set_named_property(env, objValue, "displayGroupId",
+        CreateJsValue(env, static_cast<int64_t>(screenSession->GetDisplayGroupId())));
+    napi_set_named_property(env, objValue, "mainDisplayIdOfGroup",
+        CreateJsValue(env, static_cast<int64_t>(screenSession->GetMainDisplayIdOfGroup())));
 
     const char* moduleName = "JsScreenSession";
     BindNativeFunction(env, objValue, "on", moduleName, JsScreenSession::RegisterCallback);
@@ -247,7 +251,7 @@ napi_value JsScreenSession::OnSetScreenRotationLocked(napi_env env, napi_callbac
         }
         delete task;
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_immediate, "OnSetScreenRotationLocked") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env, CreateJsError(env,
                 static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN), "Send event failed!"));
     } else {
@@ -440,7 +444,7 @@ void JsScreenSession::CallJsCallback(const std::string& callbackType)
         TLOGNI(WmsLogTag::DMS, "The js callback has been executed: %{public}s.", callbackType.c_str());
     };
     if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_vip);
+        napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_vip, "CallJsCallback");
         if (ret != napi_status::napi_ok) {
             TLOGE(WmsLogTag::DMS, "Failed to SendEvent.");
         }
@@ -489,7 +493,7 @@ void JsScreenSession::OnSensorRotationChange(float sensorRotation, ScreenId scre
     };
 
     if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate);
+        napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate, "OnSensorRotationChange");
         if (ret != napi_status::napi_ok) {
             TLOGE(WmsLogTag::DMS, "Failed to SendEvent.");
         }
@@ -529,7 +533,7 @@ void JsScreenSession::OnScreenOrientationChange(float screenOrientation, ScreenI
         napi_call_function(env, NapiGetUndefined(env), method, ArraySize(argv), argv, nullptr);
     };
     if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate);
+        napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate, "OnScreenOrientationChange");
         if (ret != napi_status::napi_ok) {
             TLOGE(WmsLogTag::DMS, "Failed to SendEvent.");
         }
@@ -574,7 +578,7 @@ void JsScreenSession::OnPropertyChange(const ScreenProperty& newProperty, Screen
         napi_call_function(env, NapiGetUndefined(env), method, ArraySize(argv), argv, nullptr);
     };
     if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate);
+        napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate, "OnPropertyChange");
         if (ret != napi_status::napi_ok) {
             TLOGE(WmsLogTag::DMS, "Failed to SendEvent.");
         }
@@ -614,7 +618,7 @@ void JsScreenSession::OnScreenDensityChange()
         napi_call_function(env, NapiGetUndefined(env), method, 0, argv, nullptr);
     };
     if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate);
+        napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate, "OnScreenDensityChange");
         if (ret != napi_status::napi_ok) {
             TLOGE(WmsLogTag::DMS, "Failed to SendEvent.");
         }
@@ -657,7 +661,7 @@ void JsScreenSession::OnPowerStatusChange(DisplayPowerEvent event, EventStatus e
         napi_call_function(env, NapiGetUndefined(env), method, ArraySize(argv), argv, nullptr);
     };
     if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_vip);
+        napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_vip, "OnPowerStatusChange");
         if (ret != napi_status::napi_ok) {
             TLOGE(WmsLogTag::DMS, "Failed to SendEvent.");
         } else {
@@ -693,7 +697,7 @@ void JsScreenSession::OnScreenRotationLockedChange(bool isLocked, ScreenId scree
         napi_call_function(env, NapiGetUndefined(env), method, ArraySize(argv), argv, nullptr);
     };
     if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate);
+        napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate, "OnScreenRotationLockedChange");
         if (ret != napi_status::napi_ok) {
             TLOGE(WmsLogTag::DMS, "Failed to SendEvent.");
         }
@@ -728,7 +732,7 @@ void JsScreenSession::OnScreenExtendChange(ScreenId mainScreenId, ScreenId exten
         napi_call_function(env, NapiGetUndefined(env), method, ArraySize(argv), argv, nullptr);
     };
     if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate);
+        napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate, "OnScreenExtendChange");
         if (ret != napi_status::napi_ok) {
             TLOGE(WmsLogTag::DMS, "OnScreenExtendChange: Failed to SendEvent.");
         }
@@ -768,7 +772,7 @@ void JsScreenSession::OnHoverStatusChange(int32_t hoverStatus, bool needRotate, 
         napi_call_function(env, NapiGetUndefined(env), method, ArraySize(argv), argv, nullptr);
     };
     if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
+        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate, "OnHoverStatusChange");
         if (ret != napi_status::napi_ok) {
             TLOGE(WmsLogTag::DMS, "Failed to SendEvent.");
         }
@@ -803,7 +807,7 @@ void JsScreenSession::OnScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, 
         napi_call_function(env, NapiGetUndefined(env), method, ArraySize(argv), argv, nullptr);
     };
     if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate);
+        napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate, "OnScreenCaptureNotify");
         if (ret != napi_status::napi_ok) {
             TLOGE(WmsLogTag::DMS, "OnScreenCaptureNotify: Failed to SendEvent.");
         }
@@ -843,7 +847,7 @@ void JsScreenSession::OnCameraBackSelfieChange(bool isCameraBackSelfie, ScreenId
         napi_call_function(env, NapiGetUndefined(env), method, ArraySize(argv), argv, nullptr);
     };
     if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
+        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate, "OnCameraBackSelfieChange");
         if (ret != napi_status::napi_ok) {
             TLOGE(WmsLogTag::DMS, "OnCameraBackSelfieChange: Failed to SendEvent.");
         }
@@ -878,7 +882,7 @@ void JsScreenSession::OnSuperFoldStatusChange(ScreenId screenId, SuperFoldStatus
         napi_call_function(env, NapiGetUndefined(env), method, ArraySize(argv), argv, nullptr);
     };
     if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate);
+        napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate, "OnSuperFoldStatusChange");
         if (ret != napi_status::napi_ok) {
             TLOGE(WmsLogTag::DMS, "Failed to SendEvent.");
         }
@@ -913,7 +917,7 @@ void JsScreenSession::OnSecondaryReflexionChange(ScreenId screenId, bool isSecon
         napi_call_function(env, NapiGetUndefined(env), method, ArraySize(argv), argv, nullptr);
     };
     if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate);
+        napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate, "OnSecondaryReflexionChange");
         if (ret != napi_status::napi_ok) {
             TLOGE(WmsLogTag::DMS, "Failed to SendEvent.");
         }
@@ -949,7 +953,7 @@ void JsScreenSession::OnExtendScreenConnectStatusChange(ScreenId screenId,
         napi_call_function(env, NapiGetUndefined(env), method, ArraySize(argv), argv, nullptr);
     };
     if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate);
+        napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate, "OnExtendScreenConnectStatusChange");
         if (ret != napi_status::napi_ok) {
             TLOGE(WmsLogTag::DMS, "OnExtendScreenConnectStatusChange: Failed to SendEvent.");
         }
@@ -983,7 +987,7 @@ void JsScreenSession::OnBeforeScreenPropertyChange(FoldStatus foldStatus)
         napi_call_function(env, NapiGetUndefined(env), method, ArraySize(argv), argv, nullptr);
     };
     if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate);
+        napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate, "OnBeforeScreenPropertyChange");
         if (ret != napi_status::napi_ok) {
             TLOGE(WmsLogTag::DMS, "Failed to SendEvent.");
         }
@@ -1017,7 +1021,7 @@ void JsScreenSession::OnScreenModeChange(ScreenModeChangeEvent screenModeChangeE
         napi_call_function(env, NapiGetUndefined(env), method, ArraySize(argv), argv, nullptr);
     };
     if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate);
+        napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate, "OnScreenModeChange");
         if (ret != napi_status::napi_ok) {
             TLOGE(WmsLogTag::DMS, "Failed to SendEvent.");
         }

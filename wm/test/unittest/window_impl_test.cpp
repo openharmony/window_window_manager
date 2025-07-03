@@ -1443,6 +1443,35 @@ HWTEST_F(WindowImplTest, GetWindowPropertyInfo02, TestSize.Level1)
     EXPECT_EQ(true, windowPropertyInfo.isTouchable);
     EXPECT_EQ(999, windowPropertyInfo.displayId);
 }
+
+/**
+ * @tc.name: GetWindowTypeForArkUI
+ * @tc.desc: get and verify WindowType
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, GetWindowTypeForArkUI, TestSize.Level1)
+{
+    WindowType windowType;
+    auto ret = WindowImpl::GetWindowTypeForArkUI(WindowType::WINDOW_TYPE_SCENE_BOARD, windowType);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(windowType == WindowType::WINDOW_TYPE_SYSTEM_FLOAT, true);
+
+    ret = WindowImpl::GetWindowTypeForArkUI(WindowType::WINDOW_TYPE_DESKTOP, windowType);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(windowType == WindowType::WINDOW_TYPE_SYSTEM_FLOAT, true);
+
+    ret = WindowImpl::GetWindowTypeForArkUI(WindowType::WINDOW_TYPE_UI_EXTENSION, windowType);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(windowType == WindowType::WINDOW_TYPE_APP_SUB_WINDOW, true);
+
+    ret = WindowImpl::GetWindowTypeForArkUI(WindowType::WINDOW_TYPE_FLOAT, windowType);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(windowType == WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW, true);
+
+    ret = WindowImpl::GetWindowTypeForArkUI(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, windowType);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(windowType == WindowType::WINDOW_TYPE_APP_SUB_WINDOW, true);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

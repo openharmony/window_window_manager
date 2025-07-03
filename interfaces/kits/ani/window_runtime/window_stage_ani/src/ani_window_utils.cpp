@@ -22,9 +22,9 @@
 #include "ani_err_utils.h"
 #include "ani_window.h"
 #include "bundle_constants.h"
-#include "foundation/arkui/ace_engine/interfaces/inner_api/ace/ui_content.h"
 #include "ipc_skeleton.h"
 #include "window_manager_hilog.h"
+#include "ui_content.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -149,8 +149,8 @@ ani_object AniWindowUtils::CreateAniSize(ani_env* env, int32_t width, int32_t he
         TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to new obj");
         return AniWindowUtils::CreateAniUndefined(env);
     }
-    CallAniMethodVoid(env, aniRect, aniClass, "<set>width", nullptr, ani_int(width));
-    CallAniMethodVoid(env, aniRect, aniClass, "<set>height", nullptr, ani_int(height));
+    CallAniMethodVoid(env, aniRect, aniClass, "<set>width", nullptr, ani_double(width));
+    CallAniMethodVoid(env, aniRect, aniClass, "<set>height", nullptr, ani_double(height));
     return aniRect;
 }
 

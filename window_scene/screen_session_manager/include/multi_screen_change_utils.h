@@ -67,6 +67,8 @@ private:
     static void ScreenSerialNumberChange(sptr<ScreenSession>& innerScreen, sptr<ScreenSession>& externalScreen);
     static void ScreenActiveModesChange(sptr<ScreenSession>& innerScreen, sptr<ScreenSession>& externalScreen);
     static void SetScreenNotifyFlag(sptr<ScreenSession>& innerScreen, sptr<ScreenSession>& externalScreen);
+    static void ExchangeScreenSupportedRefreshRate(
+        sptr<ScreenSession>& innerScreen, sptr<ScreenSession>& externalScreen);
 };
 } // Rosen
 } // OHOS

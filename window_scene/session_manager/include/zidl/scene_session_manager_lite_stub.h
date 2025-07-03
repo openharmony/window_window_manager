@@ -60,6 +60,7 @@ private:
     int HandleRegisterWindowManagerAgent(MessageParcel& data, MessageParcel& reply);
     int HandleUnregisterWindowManagerAgent(MessageParcel& data, MessageParcel& reply);
     int HandleCheckWindowId(MessageParcel& data, MessageParcel& reply);
+    int HandleUpdateWindowModeByIdForUITest(MessageParcel& data, MessageParcel& reply);
     int HandleCheckUIExtensionCreation(MessageParcel& data, MessageParcel& reply);
     int HandleListWindowInfo(MessageParcel& data, MessageParcel& reply);
     int HandleGetVisibilityWindowInfo(MessageParcel& data, MessageParcel& reply);
@@ -86,6 +87,7 @@ private:
     int HandleRegisterSessionLifecycleListenerByBundles(MessageParcel& data, MessageParcel& reply);
     int HandleUnregisterSessionLifecycleListener(MessageParcel& data, MessageParcel& reply);
     int HandleGetRecentMainSessionInfoList(MessageParcel& data, MessageParcel& reply);
+    int HandlePendingSessionToBackgroundByPersistentId(MessageParcel& data, MessageParcel& reply);
     int HandleCreateNewInstanceKey(MessageParcel& data, MessageParcel& reply);
     int HandleGetRouterStackInfo(MessageParcel& data, MessageParcel& reply);
     int HandleRemoveInstanceKey(MessageParcel& data, MessageParcel& reply);
@@ -93,6 +95,7 @@ private:
     int HandleUpdateKioskAppList(MessageParcel& data, MessageParcel& reply);
     int HandleEnterKioskMode(MessageParcel& data, MessageParcel& reply);
     int HandleExitKioskMode(MessageParcel& data, MessageParcel& reply);
+    int HandleSendPointerEventForHover(MessageParcel& data, MessageParcel& reply);
 
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
 };

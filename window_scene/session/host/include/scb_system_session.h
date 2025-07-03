@@ -29,7 +29,6 @@ public:
         std::shared_ptr<RSTransaction> rsTransaction) override;
     void PresentFocusIfPointDown() override;
     WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
-    void PresentFoucusIfNeed(int32_t pointerAcrion) override;
     WSError UpdateFocus(bool isFocused) override;
     WSError UpdateWindowMode(WindowMode mode) override;
     WSError SetSystemSceneBlockingFocus(bool blocking) override;
@@ -40,6 +39,7 @@ public:
     void SyncScenePanelGlobalPosition(bool needSync) override;
     bool IsNeedSyncScenePanelGlobalPosition() override { return isNeedSyncGlobalPos_; }
     bool IsVisibleForeground() const override;
+    bool IsVisibleNotBackground() const override;
 
     /*
      * App Use Control

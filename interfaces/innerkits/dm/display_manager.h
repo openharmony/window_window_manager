@@ -861,6 +861,42 @@ public:
     DMError GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
         ScreenId& screenId, DMRect& screenArea);
 
+    /**
+     * @brief Get primary display system dpi.
+     *
+     * @return primary display system dpi.
+     */
+    float GetPrimaryDisplaySystemDpi() const;
+
+    /**
+     * @brief Convert a relative position to a global position
+     *
+     * @param relativePosition Position relative to current display
+     * @param position Global position convert from  relativePosition
+     * @return DM_OK means process convert position success, others means convert failed.
+     */
+    DMError ConvertRelativeCoordinateToGlobal(const RelativePosition& relativePosition, Position& position);
+    
+    /**
+     * @brief Convert a global position to a relative position
+     *
+     * @param globalPosition Global position
+     * @param relativePosition Relative position convert from globalPosition
+     * @return DM_OK means process convert position success, others means convert failed.
+     */
+    DMError ConvertGlobalCoordinateToRelative(const Position& globalPosition, RelativePosition& relativePosition);
+
+    /**
+     * @brief Convert a global position to a relative position
+     *
+     * @param globalPosition Global position
+     * @param displayId DisplayId of current display
+     * @param relativePosition Relative position convert from globalPosition
+     * @return DM_OK means process convert position success, others means convert failed.
+     */
+    DMError ConvertGlobalCoordinateToRelativeWithDisplayId(const Position& globalPosition, DisplayId displayId,
+        RelativePosition& relativePosition);
+
 private:
     DisplayManager();
     ~DisplayManager();

@@ -43,14 +43,25 @@ public:
     MOCK_METHOD0(AfterDestroyed, void(void));
     MOCK_METHOD0(AfterDidForeground, void(void));
     MOCK_METHOD0(AfterDidBackground, void(void));
-    MOCK_METHOD0(AfterInteractive, void(void));
-    MOCK_METHOD0(AfterNonInteractive, void(void));
+};
+
+class MockWindowStageLifeCycleListener : public IWindowStageLifeCycle {
+public:
+    MOCK_METHOD0(AfterLifecycleForeground, void(void));
+    MOCK_METHOD0(AfterLifecycleBackground, void(void));
+    MOCK_METHOD0(AfterLifecycleResumed, void(void));
+    MOCK_METHOD0(AfterLifecyclePaused, void(void));
 };
 
 class MockAvoidAreaChangedListener : public IAvoidAreaChangedListener {
 public:
     MOCK_METHOD3(OnAvoidAreaChanged, void(const AvoidArea avoidArea, AvoidAreaType type,
         const sptr<OccupiedAreaChangeInfo>& info));
+};
+
+class MockAcrossDisplaysChangeListener : public IAcrossDisplaysChangeListener {
+public:
+    MOCK_METHOD1(OnAvoidAreaChanged, void(bool isAcrossDisplays));
 };
 
 class MockTouchOutsideListener : public ITouchOutsideListener {
@@ -179,6 +190,11 @@ public:
 class MockIWaterfallModeChangeListener : public IWaterfallModeChangeListener {
 public:
     MOCK_METHOD1(OnWaterfallModeChange, void(bool isWaterfallMode));
+};
+
+class MockRectChangeInGlobalDisplayListener : public IRectChangeInGlobalDisplayListener {
+public:
+    MOCK_METHOD(void, OnRectChangeInGlobalDisplay, (const Rect& rect, WindowSizeChangeReason reason), (override));
 };
 } // Rosen
 } // OHOS

@@ -53,6 +53,10 @@ public:
         const NotifyTransferComponentDataForResultFunc& func) override;
     WMError RegisterHostWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener) override;
     WMError UnregisterHostWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener) override;
+    WMError RegisterKeyboardDidShowListener(const sptr<IKeyboardDidShowListener>& listener) override;
+    WMError UnregisterKeyboardDidShowListener(const sptr<IKeyboardDidShowListener>& listener) override;
+    WMError RegisterKeyboardDidHideListener(const sptr<IKeyboardDidHideListener>& listener) override;
+    WMError UnregisterKeyboardDidHideListener(const sptr<IKeyboardDidHideListener>& listener) override;
     void TriggerBindModalUIExtension() override;
     std::shared_ptr<IDataHandler> GetExtensionDataHandler() const override;
     WSError SendExtensionData(MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
@@ -110,6 +114,9 @@ public:
     void NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info,
         const std::shared_ptr<RSTransaction>& rsTransaction, const Rect& callingSessionRect,
         const std::map<AvoidAreaType, AvoidArea>& avoidAreas) override;
+    void NotifyKeyboardDidShow(const KeyboardPanelInfo& keyboardPanelInfo) override;
+    void NotifyKeyboardDidHide(const KeyboardPanelInfo& keyboardPanelInfo) override;
+    void NotifyOccupiedAreaChange(sptr<OccupiedAreaChangeInfo> info);
     WMError RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
     WMError UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
     void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
@@ -126,7 +133,7 @@ public:
     WMError SetWaterMarkFlag(bool isEnable) override;
     Rect GetHostWindowRect(int32_t hostWindowId) override;
     WMError GetGlobalScaledRect(Rect& globalScaledRect) override;
-    bool IsFocused() const override;
+    bool IsComponentFocused() const override;
 
     /*
      * Gesture Back
@@ -171,6 +178,8 @@ public:
     static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
     void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
     CrossAxisState GetCrossAxisState() override;
+    WMError ExtensionSetKeepScreenOn(bool keepScreenOn) override;
+    WMError ExtensionSetBrightness(float brightness) override;
     void UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want) override;
     WMError SendExtensionMessageToHost(uint32_t code, const AAFwk::Want& data) const;
     WMError OnExtensionMessage(uint32_t code, int32_t persistentId, const AAFwk::Want& data) override;
@@ -179,6 +188,7 @@ public:
         const AAFwk::Want& data) override;
     WMError HandleUnregisterHostWindowRectChangeListener(uint32_t code, int32_t persistentId,
         const AAFwk::Want& data) override;
+    uint32_t GetHostStatusBarContentColor() const override;
 
 protected:
     NotifyTransferComponentDataFunc notifyTransferComponentDataFunc_;
@@ -217,6 +227,11 @@ private:
     WMError OnImmersiveModeEnabledChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
     WMError OnHostWindowDelayRaiseStateChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
     WMError OnHostWindowRectChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+    WMError OnScreenshot(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+    WMError OnExtensionSecureLimitChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+    WMError OnKeyboardDidShow(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+    WMError OnKeyboardDidHide(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+    WMError OnHostStatusBarContentColorChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
 
     /*
      * Compatible Mode
@@ -229,7 +244,6 @@ private:
     sptr<IRemoteObject> abilityToken_ { nullptr };
     std::atomic<bool> isDensityFollowHost_ { false };
     std::optional<std::atomic<float>> hostDensityValue_ = std::nullopt;
-    sptr<IOccupiedAreaChangeListener> occupiedAreaChangeListener_;
     std::optional<std::atomic<bool>> focusState_ = std::nullopt;
     std::optional<AccessibilityChildTreeInfo> accessibilityChildTreeInfo_ = std::nullopt;
     ExtensionWindowFlags extensionWindowFlags_ { 0 };
@@ -242,7 +256,14 @@ private:
     bool hostGestureBackEnabled_ { true };
     bool hostImmersiveModeEnabled_ { false };
     std::mutex hostWindowRectChangeListenerMutex_;
+    std::mutex keyboardDidShowListenerMutex_;
+    std::mutex keyboardDidHideListenerMutex_;
+    std::mutex occupiedAreaChangeListenerMutex_;
     std::vector<sptr<IWindowRectChangeListener>> hostWindowRectChangeListener_;
+    std::vector<sptr<IKeyboardDidShowListener>> keyboardDidShowListenerList_;
+    std::vector<sptr<IKeyboardDidHideListener>> keyboardDidHideListenerList_;
+    std::vector<sptr<IOccupiedAreaChangeListener>> occupiedAreaChangeListenerList_;
+    uint32_t hostStatusBarContentColor_;
 
     /*
      * PC Fold Screen

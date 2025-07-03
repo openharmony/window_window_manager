@@ -27,9 +27,11 @@
 #include "window_manager_agent.h"
 #include "session_manager.h"
 #include "zidl/window_manager_agent_interface.h"
+#include "mock/mock_accesstoken_kit.h"
 #include "mock/mock_session_stage.h"
 #include "mock/mock_window_event_channel.h"
 #include "context.h"
+#include "session_manager/include/scene_session_dirty_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -104,6 +106,7 @@ void SceneSessionManagerTest3::SetUp()
 
 void SceneSessionManagerTest3::TearDown()
 {
+    MockAccesstokenKit::ChangeMockStateToInit();
     ssm_->sceneSessionMap_.clear();
     usleep(WAIT_SYNC_IN_NS);
 }
@@ -547,8 +550,19 @@ HWTEST_F(SceneSessionManagerTest3, GetWindowLimits, TestSize.Level1)
     WindowLimits windowlimits;
     ssm_->sceneSessionMap_.insert({ windowId, sceneSession });
     auto defaultUIType = ssm_->systemConfig_.windowUIType_;
-    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::INVALID_WINDOW;
+    ssm_->systemConfig_.freeMultiWindowEnable_ = false;
+    ssm_->systemConfig_.freeMultiWindowSupport_ = false;
     auto ret = ssm_->GetWindowLimits(windowId, windowlimits);
+    ASSERT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+
+    ssm_->systemConfig_.freeMultiWindowEnable_ = true;
+    ssm_->systemConfig_.freeMultiWindowSupport_ = true;
+    ret = ssm_->GetWindowLimits(windowId, windowlimits);
+    ASSERT_EQ(ret, WMError::WM_OK);
+
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ret = ssm_->GetWindowLimits(windowId, windowlimits);
     ssm_->sceneSessionMap_.erase(windowId);
     ssm_->systemConfig_.windowUIType_ = defaultUIType;
     ASSERT_EQ(ret, WMError::WM_OK);
@@ -796,8 +810,37 @@ HWTEST_F(SceneSessionManagerTest3, OnOutsideDownEvent, TestSize.Level1)
 HWTEST_F(SceneSessionManagerTest3, NotifySessionTouchOutside, TestSize.Level1)
 {
     int ret = 0;
-    ssm_->NotifySessionTouchOutside(0);
+    ssm_->NotifySessionTouchOutside(0, 0);
     ASSERT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: IsSameDisplayGroupId
+ * @tc.desc: test IsSameDisplayGroupId01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest3, IsSameDisplayGroupId01, TestSize.Level1)
+{
+    bool result = ssm_->IsSameDisplayGroupId(nullptr, 0);
+    ASSERT_EQ(result, false);
+}
+
+/**
+ * @tc.name: IsSameDisplayGroupId
+ * @tc.desc: test IsSameDisplayGroupId02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest3, IsSameDisplayGroupId02, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsSameDisplayGroupId02";
+    info.bundleName_ = "IsSameDisplayGroupId02";
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetDisplayId(DEFAULT_DISPLAY_ID);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->SetSessionProperty(property);
+    bool result = ssm_->IsSameDisplayGroupId(sceneSession, 0);
+    ASSERT_EQ(result, true);
 }
 
 /**
@@ -885,6 +928,8 @@ HWTEST_F(SceneSessionManagerTest3, HandleUserSwitch1, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest3, GetSessionInfoByContinueSessionId, TestSize.Level1)
 {
+    MockAccesstokenKit::MockIsSACalling(false);
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
     std::string continueSessionId = "";
     SessionInfoBean missionInfo;
     EXPECT_EQ(ssm_->GetSessionInfoByContinueSessionId(continueSessionId, missionInfo),
@@ -1532,8 +1577,8 @@ HWTEST_F(SceneSessionManagerTest3, GetTopWindowId, TestSize.Level1)
     sceneSession1->AddSubSession(sceneSession2);
     sceneSession1->AddSubSession(sceneSession3);
     uint32_t topWinId;
-    ASSERT_NE(ssm_->GetTopWindowId(static_cast<uint32_t>(sceneSession1->GetPersistentId()), topWinId),
-              WMError::WM_ERROR_INVALID_WINDOW);
+    ASSERT_EQ(ssm_->GetTopWindowId(static_cast<uint32_t>(sceneSession1->GetPersistentId()), topWinId),
+              WMError::WM_ERROR_INVALID_PERMISSION);
 }
 
 /**
@@ -1548,7 +1593,7 @@ HWTEST_F(SceneSessionManagerTest3, ConfigWindowImmersive01, TestSize.Level1)
     ASSERT_NE(ssm_, nullptr);
     ssm_->ConfigWindowImmersive(immersiveConfig);
 
-    ASSERT_NE(ssm_->SwitchFreeMultiWindow(false), WSError::WS_OK);
+    ASSERT_EQ(ssm_->SwitchFreeMultiWindow(false), WSError::WS_ERROR_DEVICE_NOT_SUPPORT);
     SystemSessionConfig systemConfig;
     systemConfig.freeMultiWindowSupport_ = true;
     ssm_->SwitchFreeMultiWindow(false);
@@ -1780,6 +1825,61 @@ HWTEST_F(SceneSessionManagerTest3, UpdateRootSceneAvoidArea, TestSize.Level1)
     ssm_->UpdateRootSceneAvoidArea();
     auto res = ssm_->rootSceneSession_->GetPersistentId();
     EXPECT_NE(res, 0);
+}
+
+/**
+ * @tc.name: NotifySessionTouchOutside
+ * @tc.desc: call NotifySessionTouchOutside02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest3, NotifySessionTouchOutside02, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    auto ssm = ssm_;
+    SessionInfo info;
+    info.bundleName_ = "test1";
+    info.abilityName_ = "test2";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetDisplayId(DEFAULT_DISPLAY_ID);
+    sceneSession->SetSessionProperty(property);
+    ssm->sceneSessionMap_.insert({1, sceneSession});
+    ssm->windowFocusController_->displayId2GroupIdMap_[20] = 20;
+
+    SessionInfo info02;
+    info02.abilityName_ = "test1";
+    info02.bundleName_ = "test2";
+    info02.windowInputType_ = static_cast<uint32_t>(MMI::WindowInputType::NORMAL);
+    sptr<SceneSession> sceneSession02 = sptr<SceneSession>::MakeSptr(info02, nullptr);
+    sceneSession02->specificCallback_ = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+
+    auto sessionTouchOutsideFun = [ssm](int32_t persistentId, DisplayId displayId) {
+        ssm->NotifySessionTouchOutside(persistentId, 20);
+    };
+    auto outsideDownEventFun = [sceneSession02](int32_t x, int32_t y) {
+        int z = x + y;
+        sceneSession02->SetCollaboratorType(z);
+    };
+    sceneSession02->specificCallback_->onSessionTouchOutside_ = sessionTouchOutsideFun;
+    sceneSession02->specificCallback_->onOutsideDownEvent_ = outsideDownEventFun;
+    sceneSession02->SetSessionProperty(property);
+    ssm->sceneSessionMap_.insert({2, sceneSession02});
+    sceneSession->isVisible_ = true;
+    sceneSession02->isVisible_ = true;
+    ssm->NotifySessionTouchOutside(1, 20);
+    ssm->NotifySessionTouchOutside(1, 0);
+    EXPECT_EQ(true, sceneSession->IsVisible());
+    EXPECT_EQ(true, sceneSession02->IsVisible());
+    EXPECT_EQ(0, sceneSession->GetDisplayId());
+    EXPECT_EQ(0, sceneSession02->GetDisplayId());
+    EXPECT_EQ(20, ssm->GetDisplayGroupId(20));
+    EXPECT_EQ(false, ssm->IsSameDisplayGroupId(sceneSession, 20));
+    EXPECT_EQ(false, ssm->IsSameDisplayGroupId(sceneSession02, 20));
+    EXPECT_EQ(0, ssm->GetDisplayGroupId(sceneSession->GetDisplayId()));
+    EXPECT_EQ(0, ssm->GetDisplayGroupId(sceneSession02->GetDisplayId()));
+    EXPECT_EQ(WSError::WS_OK, sceneSession02->ProcessPointDownSession(3, 4));
+    ssm->sceneSessionMap_.erase(1);
+    ssm->sceneSessionMap_.erase(2);
 }
 } // namespace
 } // namespace Rosen

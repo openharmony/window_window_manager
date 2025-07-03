@@ -152,17 +152,31 @@ void ScreenSessionManagerClient::OnScreenConnectionChanged(SessionOption option,
 
 void ScreenSessionManagerClient::ExtraDestroyScreen(ScreenId screenId)
 {
-    auto screenSession = GetScreenSessionExtra(screenId);
+    sptr<ScreenSession> screenSession = nullptr;
+    {
+        std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
+        for (const auto& iter : extraScreenSessionMap_) {
+            sptr<ScreenSession> tempScreenSession = iter.second;
+            if (tempScreenSession != nullptr) {
+                if (tempScreenSession->GetScreenId() == screenId) {
+                    screenSession = tempScreenSession;
+                    break;
+                }
+            }
+        }
+    }
     if (!screenSession) {
         TLOGE(WmsLogTag::DMS, "extra screenSession is null");
         return;
     }
+    TLOGI(WmsLogTag::DMS, "ScreenId:%{public}" PRIu64 ", rsId:%{public}" PRIu64,
+        screenSession->GetScreenId(), screenSession->GetRSScreenId());
     screenSession->DestroyScreenScene();
     {
         std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
         extraScreenSessionMap_.erase(screenId);
     }
-    TLOGI(WmsLogTag::DMS, "ExtraDestroyScreen end");
+    TLOGI(WmsLogTag::DMS, "end");
 }
 
 void ScreenSessionManagerClient::OnScreenExtendChanged(ScreenId mainScreenId, ScreenId extendScreenId)
@@ -307,6 +321,21 @@ void ScreenSessionManagerClient::OnGetSurfaceNodeIdsFromMissionIdsChanged(std::v
     }
 }
 
+void ScreenSessionManagerClient::OnSetSurfaceNodeIdsChanged(DisplayId displayId,
+    const std::vector<uint64_t>& surfaceNodeIds)
+{
+    if (displayChangeListener_) {
+        displayChangeListener_->OnSetSurfaceNodeIds(displayId, surfaceNodeIds);
+    }
+}
+
+void ScreenSessionManagerClient::OnVirtualScreenDisconnected(DisplayId displayId)
+{
+    if (displayChangeListener_) {
+        displayChangeListener_->OnVirtualScreenDisconnected(displayId);
+    }
+}
+
 void ScreenSessionManagerClient::OnScreenshot(DisplayId displayId)
 {
     if (displayChangeListener_) {
@@ -368,6 +397,7 @@ void ScreenSessionManagerClient::UpdateScreenRotationProperty(ScreenId screenId,
     screenSession->UpdateToInputManager(bounds, directionInfo.notifyRotation_, directionInfo.rotation_,
         foldDisplayMode);
     screenSession->UpdateTouchBoundsAndOffset();
+    TLOGW(WmsLogTag::DMS, "superFoldStatus:%{public}d", currentstate_);
     if (currentstate_ != SuperFoldStatus::KEYBOARD) {
         screenSession->SetValidHeight(bounds.rect_.GetHeight());
         screenSession->SetValidWidth(bounds.rect_.GetWidth());
@@ -1200,5 +1230,14 @@ void ScreenSessionManagerClient::NotifyScreenMaskAppear()
         return;
     }
     return screenSessionManager_->NotifyScreenMaskAppear();
+}
+
+DMError ScreenSessionManagerClient::SetPrimaryDisplaySystemDpi(float dpi)
+{
+    if (!screenSessionManager_) {
+        TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    return screenSessionManager_->SetPrimaryDisplaySystemDpi(dpi);
 }
 } // namespace OHOS::Rosen

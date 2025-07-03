@@ -108,6 +108,7 @@ public:
     static napi_value NotifyEnterRecentTask(napi_env env, napi_callback_info info);
     static napi_value UpdateDisplayHookInfo(napi_env env, napi_callback_info info);
     static napi_value UpdateAppHookDisplayInfo(napi_env env, napi_callback_info info);
+    static napi_value NotifyHookOrientationChange(napi_env env, napi_callback_info info);
     static napi_value InitScheduleUtils(napi_env env, napi_callback_info info);
     static napi_value SetAppForceLandscapeConfig(napi_env env, napi_callback_info info);
     static napi_value SwitchFreeMultiWindow(napi_env env, napi_callback_info info);
@@ -158,6 +159,11 @@ public:
      */
     static napi_value InitUserInfo(napi_env env, napi_callback_info info);
     static napi_value HandleUserSwitch(napi_env env, napi_callback_info info);
+
+    /*
+     * Window Pattern
+     */
+    static napi_value SupportSnapshotAllSessionStatus(napi_env env, napi_callback_info info);
 
 private:
     napi_value OnSetBehindWindowFilterEnabled(napi_env env, napi_callback_info info);
@@ -217,6 +223,7 @@ private:
     napi_value OnNotifyEnterRecentTask(napi_env env, napi_callback_info info);
     napi_value OnUpdateDisplayHookInfo(napi_env env, napi_callback_info info);
     napi_value OnUpdateAppHookDisplayInfo(napi_env env, napi_callback_info info);
+    napi_value OnNotifyHookOrientationChange(napi_env env, napi_callback_info info);
     napi_value OnInitScheduleUtils(napi_env env, napi_callback_info info);
     napi_value OnSetAppForceLandscapeConfig(napi_env env, napi_callback_info info);
     napi_value OnIsScbCoreEnabled(napi_env env, napi_callback_info info);
@@ -362,6 +369,11 @@ private:
     std::unordered_map<int32_t, RotationChangeResult> GetRotationChangeResult(
         const std::vector<sptr<SceneSession>>& activeSceneSessionMapCopy,
         const RotationChangeInfo& rotationChangeInfo);
+
+    /*
+     * Window Pattern
+     */
+    napi_value OnSupportSnapshotAllSessionStatus(napi_env env, napi_callback_info info);
 };
 } // namespace OHOS::Rosen
 

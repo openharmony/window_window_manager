@@ -689,8 +689,10 @@ HWTEST_F(SceneSessionManagerTest4, UpdateSessionDisplayId, TestSize.Level1)
     ASSERT_NE(sceneSession, nullptr);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     sceneSession->sessionInfo_.screenId_ = 6;
+    sceneSession->SetPropertyDirtyFlags(0);
     result = ssm_->UpdateSessionDisplayId(1, 2);
     EXPECT_EQ(result, WSError::WS_OK);
+    EXPECT_EQ(sceneSession->GetPropertyDirtyFlags(), static_cast<uint32_t>(SessionPropertyFlag::DISPLAY_ID));
 }
 
 /**
@@ -726,7 +728,7 @@ HWTEST_F(SceneSessionManagerTest4, NotifyScreenshotEvent, TestSize.Level1)
 
     ssm_->screenshotAppEventListenerSessionSet_.insert(1);
     ret = ssm_->NotifyScreenshotEvent(ScreenshotEventType::SCROLL_SHOT_START);
-    EXPECT_TRUE(g_logMsg.find("session is null") == std::string::npos);
+    EXPECT_EQ(ret, WMError::WM_OK);
 
     SessionInfo info;
     info.abilityName_ = "NotifyScreenshotEvent";
@@ -736,16 +738,14 @@ HWTEST_F(SceneSessionManagerTest4, NotifyScreenshotEvent, TestSize.Level1)
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
 
     sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
-    EXPECT_FALSE(g_logMsg.find("NotifyScreenshotEvent") != std::string::npos);
     ret = ssm_->NotifyScreenshotEvent(ScreenshotEventType::SCROLL_SHOT_START);
     EXPECT_EQ(ret, WMError::WM_OK);
 
     sceneSession->SetSessionState(SessionState::STATE_ACTIVE);
-    EXPECT_TRUE(g_logMsg.find("NotifyScreenshotEvent") != std::string::npos);
     ret = ssm_->NotifyScreenshotEvent(ScreenshotEventType::SCROLL_SHOT_START);
     EXPECT_EQ(ret, WMError::WM_OK);
 
-    sceneSession->SetSessionState(SessionState::STATE_INACTIVE);
+    sceneSession->SetSessionState(SessionState::STATE_BACKGROUND);
     ret = ssm_->NotifyScreenshotEvent(ScreenshotEventType::SCROLL_SHOT_START);
     EXPECT_EQ(ret, WMError::WM_OK);
 }
@@ -824,6 +824,16 @@ HWTEST_F(SceneSessionManagerTest4, NotifySessionAINavigationBarChange, TestSize.
     sceneSession->state_ = SessionState::STATE_ACTIVE;
     ssm_->NotifySessionAINavigationBarChange(1);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, ssm_->HandleSecureSessionShouldHide(nullptr));
+
+    ssm_->sceneSessionMap_.clear();
+    auto persistentId = sceneSession->GetPersistentId();
+    ssm_->sceneSessionMap_.insert({ persistentId, sceneSession });
+
+    sceneSession->SetScbCoreEnabled(true);
+    sceneSession->isVisible_ = true;
+    sceneSession->state_ = SessionState::STATE_FOREGROUND;
+    ssm_->NotifySessionAINavigationBarChange(persistentId);
+    EXPECT_EQ(WSError::WS_OK, ssm_->HandleSecureSessionShouldHide(sceneSession));
 }
 
 /**

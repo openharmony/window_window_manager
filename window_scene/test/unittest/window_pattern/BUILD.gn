@@ -43,6 +43,7 @@ ohos_unittest("window_pattern_snapshot_test") {
     "hilog:libhilog",
     "image_framework:image_native",
     "input:libmmi-napi",
+    "preferences:native_preferences",
   ]
 }
 

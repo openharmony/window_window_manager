@@ -102,7 +102,7 @@ HWTEST_F(ScreenEdidTest, GetEdidCheckCode01, Function | SmallTest | Level3)
  HWTEST_F(ScreenEdidTest, GetEdidCheckCode02, Function | SmallTest | Level3)
  {
     std::vector<uint8_t> edidData(20, 0);
-    for (uint32_t i = 0; i <= edidData.size(); i++) {
+    for (uint32_t i = 0; i < edidData.size(); i++) {
         edidData[i] = i + 1;
     }
     int32_t result = GetEdidCheckCode(edidData);

@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 
+#include "mock/mock_accesstoken_kit.h"
 #include "mock/mock_session_stage.h"
 #include "iremote_object_mocker.h"
 #include "interfaces/include/ws_common.h"
@@ -40,7 +41,8 @@ private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
 
-void DumpRootSceneElementInfoFuncTest(const std::vector<std::string>& params, std::vector<std::string>& infos) {}
+void DumpRootSceneElementInfoFuncTest(const sptr<SceneSession>& session,
+    const std::vector<std::string>& params, std::vector<std::string>& infos) {}
 
 void WindowManagerServiceDumpTest::SetUpTestCase() {}
 
@@ -69,7 +71,11 @@ HWTEST_F(WindowManagerServiceDumpTest, GetSessionDumpInfo01, TestSize.Level1)
     ASSERT_NE(ssm_, nullptr);
     std::string dumpInfo = "testDumpInfo";
     std::vector<std::string> params = { "testDumpInfo" };
+    MockAccesstokenKit::MockIsSACalling(false);
     WSError result = ssm_->GetSessionDumpInfo(params, dumpInfo);
+    EXPECT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
+    MockAccesstokenKit::MockIsSACalling(true);
+    result = ssm_->GetSessionDumpInfo(params, dumpInfo);
     EXPECT_EQ(result, WSError::WS_ERROR_INVALID_OPERATION);
 
     params.clear();
@@ -234,6 +240,7 @@ HWTEST_F(WindowManagerServiceDumpTest, DumpSessionElementInfo, TestSize.Level1)
  */
 HWTEST_F(WindowManagerServiceDumpTest, NotifyDumpInfoResult, TestSize.Level1)
 {
+    MockAccesstokenKit::MockIsSACalling(true);
     std::vector<std::string> info = { "std::", "vector", "<std::string>" };
     ssm_->NotifyDumpInfoResult(info);
     std::vector<std::string> params = { "-a" };

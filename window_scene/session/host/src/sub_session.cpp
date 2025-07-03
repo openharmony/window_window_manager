@@ -131,10 +131,10 @@ void SubSession::UpdateSessionRectInner(const WSRect& rect, SizeChangeReason rea
         SetOriPosYBeforeRaisedByKeyboard(0);
         const WSRect& winRect = GetSessionRect();
         if (reason == SizeChangeReason::MOVE && (rect.posX_ != winRect.posX_ || rect.posY_ != winRect.posY_)) {
-            isSubWinowResizingOrMoving_ = true;
+            isSubWindowResizingOrMoving_ = true;
         }
         if (reason == SizeChangeReason::RESIZE && (rect.width_ != winRect.width_ || rect.height_ != winRect.height_)) {
-            isSubWinowResizingOrMoving_ = true;
+            isSubWindowResizingOrMoving_ = true;
         }
     }
 
@@ -162,7 +162,7 @@ WSError SubSession::Hide(bool needSyncHide)
             TLOGNE(WmsLogTag::WMS_SUB, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        session->isSubWinowResizingOrMoving_ = false;
+        session->isSubWindowResizingOrMoving_ = false;
         TLOGNI(WmsLogTag::WMS_LIFE, "Hide session, id: %{public}d", session->GetPersistentId());
         auto ret = session->SetActive(false);
         if (ret != WSError::WS_OK) {
@@ -296,6 +296,15 @@ bool SubSession::IsVisibleForeground() const
         return mainOrFloatSession->IsVisibleForeground() && Session::IsVisibleForeground();
     }
     return Session::IsVisibleForeground();
+}
+
+bool SubSession::IsVisibleNotBackground() const
+{
+    const auto& mainOrFloatSession = GetMainOrFloatSession();
+    if (mainOrFloatSession) {
+        return mainOrFloatSession->IsVisibleNotBackground() && Session::IsVisibleNotBackground();
+    }
+    return Session::IsVisibleNotBackground();
 }
 
 WSError SubSession::NotifyFollowParentMultiScreenPolicy(bool enabled)

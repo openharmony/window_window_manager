@@ -121,6 +121,7 @@ public:
     static std::vector<sptr<Window>> GetSubWindow(uint32_t parantId);
     static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration,
         const std::vector<std::shared_ptr<AbilityRuntime::Context>>& ignoreWindowContexts = {});
+    static WMError GetWindowTypeForArkUI(WindowType parentWindowType, WindowType& windowType);
     virtual std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const override;
     virtual Rect GetRect() const override;
     virtual Rect GetRequestRect() const override;
@@ -180,9 +181,13 @@ public:
     void UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
         SystemBarProperty& property) override;
 
+    WMError SetIntentParam(const std::string& intentParam, const std::function<void()>& loadPageCallback,
+        bool isColdStart) override;
     WMError Create(uint32_t parentId,
         const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
     virtual WMError Destroy(uint32_t reason = 0) override;
+    void SetShowWithOptions(bool showWithOptions) override;
+    bool IsShowWithOptions() const override;
     virtual WMError Show(uint32_t reason = 0, bool withAnimation = false, bool withFocus = true) override;
     virtual WMError Hide(uint32_t reason = 0, bool withAnimation = false, bool isFromInnerkits = true) override;
     virtual WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false,
@@ -521,6 +526,7 @@ private:
     WindowState state_ { WindowState::STATE_INITIAL };
     WindowState subWindowState_ {WindowState::STATE_INITIAL};
     WindowTag windowTag_;
+    bool showWithOptions_ = false;
     sptr<IAceAbilityHandler> aceAbilityHandler_;
     static std::map<uint32_t, std::vector<sptr<IScreenshotListener>>> screenshotListeners_;
     static std::map<uint32_t, std::vector<IScreenshotAppEventListenerSptr>> screenshotAppEventListeners_;
@@ -585,6 +591,13 @@ private:
      * RS Client Multi Instance
      */
     std::shared_ptr<RSUIDirector> rsUIDirector_;
+
+    /*
+     * Window Lifecycle
+     */
+    std::string intentParam_;
+    std::function<void()> loadPageCallback_;
+    bool isIntentColdStart_ = true;
 };
 } // namespace Rosen
 } // namespace OHOS

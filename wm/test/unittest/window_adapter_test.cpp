@@ -276,12 +276,12 @@ HWTEST_F(WindowAdapterTest, WindowManagerAndSessionRecover, TestSize.Level1)
     int32_t persistentId = 1;
     int32_t ret = 0;
     auto testFunc = [&ret] {
-        ret = 1;
+        ret += 1;
         return WMError::WM_DO_NOTHING;
     };
 
     auto testFunc2 = [&ret] {
-        ret = 2;
+        ret += 1;
         return WMError::WM_OK;
     };
     windowAdapter.RegisterSessionRecoverCallbackFunc(persistentId, testFunc);
@@ -674,8 +674,7 @@ HWTEST_F(WindowAdapterTest, GetWindowStyleType, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
     WindowStyleType windowStyleType = Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT;
-    windowAdapter.GetWindowStyleType(windowStyleType);
-    ASSERT_EQ(Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT, windowStyleType);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, windowAdapter.GetWindowStyleType(windowStyleType));
 }
 
 /**
@@ -757,6 +756,30 @@ HWTEST_F(WindowAdapterTest, IsPcWindow, TestSize.Level1)
     WindowAdapter windowAdapter;
     bool isPcWindow = false;
     auto err = windowAdapter.IsPcWindow(isPcWindow);
+    ASSERT_EQ(err, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: IsFreeMultiWindowMode
+ * @tc.desc: WindowAdapter/IsFreeMultiWindowMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, IsFreeMultiWindowMode, TestSize.Level1)
+{
+    WindowAdapter windowAdapter;
+    auto ret = windowAdapter.InitWMSProxy();
+    ASSERT_EQ(ret, true);
+
+    auto proxy = windowAdapter.GetWindowManagerServiceProxy();
+    ASSERT_NE(proxy, nullptr);
+    bool proxyIsFreeMultWindow = false;
+    auto proxyRet = proxy->IsFreeMultiWindow(proxyIsFreeMultWindow);
+    ASSERT_EQ(proxyRet, WMError::WM_OK);
+
+    bool isFreeMultiWindow = false;
+    auto err = windowAdapter.IsFreeMultiWindowMode(isFreeMultiWindow);
+
+    ASSERT_EQ(isFreeMultiWindow, proxyIsFreeMultWindow);
     ASSERT_EQ(err, WMError::WM_OK);
 }
 

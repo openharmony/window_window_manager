@@ -227,6 +227,7 @@ public:
         std::shared_ptr<class RSSurfaceNode>& surfaceNode) { return DMError::DM_OK; }
     virtual void DumpAllScreensInfo(std::string& dumpInfo) {}
     virtual void DumpSpecialScreenInfo(ScreenId id, std::string& dumpInfo) {}
+    virtual DMError SetPrimaryDisplaySystemDpi(float dpi) { return DMError::DM_OK; }
     // Fold Screen
     virtual void SetFoldDisplayMode(const FoldDisplayMode displayMode) {}
     virtual DMError SetFoldDisplayModeFromJs(const FoldDisplayMode displayMode,
@@ -239,6 +240,7 @@ public:
     virtual void SetFoldStatusExpandAndLocked(bool locked) {}
 
     virtual FoldDisplayMode GetFoldDisplayMode() { return FoldDisplayMode::UNKNOWN; }
+    virtual DMError GetPhysicalScreenIds(std::vector<ScreenId>& screenIds) { return DMError::DM_OK; }
 
     virtual bool IsFoldable() { return false; }
     virtual bool IsCaptured() { return false; }
@@ -359,6 +361,7 @@ public:
     virtual uint32_t GetDeviceStatus() { return 0; }
     virtual DMError GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
         ScreenId& screenId, DMRect& screenArea) { return DMError::DM_OK; }
+    virtual DMError SetVirtualScreenAutoRotation(ScreenId screenId, bool enable) { return DMError::DM_OK; }
 };
 } // namespace Rosen
 } // namespace OHOS

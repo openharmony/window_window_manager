@@ -20,6 +20,7 @@
 #include "ability_state_data.h"
 #include "process_data.h"
 
+#include "common/include/task_scheduler.h"
 #include "dm_common.h"
 #include "fold_screen_controller/fold_screen_policy.h"
 #include "fold_screen_controller/sensor_fold_state_manager/sensor_fold_state_manager.h"
@@ -54,7 +55,7 @@ private:
 
 class DualDisplaySensorFoldStateManager : public SensorFoldStateManager {
 public:
-    DualDisplaySensorFoldStateManager();
+    explicit DualDisplaySensorFoldStateManager(const std::shared_ptr<TaskScheduler>& screenPowerTaskScheduler);
     virtual ~DualDisplaySensorFoldStateManager();
 
     void HandleAngleChange(float angle, int hall, sptr<FoldScreenPolicy> foldScreenPolicy) override;
@@ -68,12 +69,18 @@ public:
 private:
     FoldStatus GetNextFoldState(float angle, int hall);
     void UpdateHallSwitchAppInfo(FoldStatus foldStatus);
+    void HandleHallChangeInner(float angle, int hall, const sptr<FoldScreenPolicy>& foldScreenPolicy);
+    void SensorReportTimeOutPro(float angle, int hall, const sptr<FoldScreenPolicy>& foldScreenPolicy);
+    bool CheckUpdateAngle(float& angle, int hall);
+    void HandleAngleChangeInTask(float angle, int hall, const sptr<FoldScreenPolicy>& foldScreenPolicy);
     sptr<ApplicationStateObserver> applicationStateObserver_;
     bool isHallSwitchApp_ = true;
     std::vector<std::string> packageNames_;
     int tentModeType_ = 0;
     float currentAngle_ = -1.0F;
     int32_t currentHall_ = -1;
+    std::atomic_bool isInTask_ = false;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler_;
 };
 } // namespace Rosen
 } // namespace OHOS

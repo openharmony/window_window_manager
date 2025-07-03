@@ -27,13 +27,10 @@ group("unittest") {
     ":ws_screen_scene_config_test",
     ":ws_screen_session_manager_client_proxy_test",
     ":ws_screen_session_manager_client_stub_test",
-    ":ws_screen_session_manager_client_test",
     ":ws_screen_session_manager_lite_proxy_test",
     ":ws_screen_session_manager_lite_stub_test",
     ":ws_screen_session_manager_lite_test",
     ":ws_screen_session_manager_stub_test",
-    ":ws_screen_session_manager_test",
-    ":ws_screen_session_manager_test2",
     ":ws_screen_session_publish_test",
     ":ws_screen_session_test",
     ":ws_screen_setting_helper_test",
@@ -46,7 +43,12 @@ group("unittest") {
   if (!window_manager_use_sceneboard) {
     deps += [ ":ws_screen_session_manager_proxy_ut_test" ]
   } else {
-    deps += [ ":ws_screen_session_manager_proxy_test" ]
+    deps += [
+      ":ws_screen_session_manager_proxy_test",
+      ":ws_screen_session_manager_client_test",
+      ":ws_screen_session_manager_test",
+      ":ws_screen_session_manager_test2",
+    ]
   }
 
   if (!window_manager_use_sceneboard) {
@@ -403,7 +405,10 @@ ohos_unittest("ws_screen_scene_config_test") {
 ohos_unittest("ws_screen_session_manager_client_proxy_test") {
   module_out_path = module_out_path
 
-  sources = [ "screen_session_manager_client_proxy_test.cpp" ]
+  sources = [
+    "../mock/mock_message_parcel.cpp",
+    "screen_session_manager_client_proxy_test.cpp"
+  ]
 
   deps = [ ":ws_unittest_common" ]
   external_deps = test_external_deps
@@ -478,7 +483,12 @@ ohos_unittest("ws_screen_session_manager_stub_test") {
 ohos_unittest("ws_screen_session_manager_proxy_test") {
   module_out_path = module_out_path
 
-  sources = [ "screen_session_manager_proxy_test.cpp" ]
+  sources = [
+    "../mock/mock_message_parcel.cpp",
+    "screen_session_manager_proxy_test.cpp",
+  ]
+
+  include_dirs = [ "../mock" ]
 
   deps = [
     ":ws_unittest_common",
@@ -689,12 +699,22 @@ if (window_manager_fold_ability) {
 
     sources = [ "dual_display_sensor_fold_state_manager_test.cpp" ]
 
-    deps = [ ":ws_unittest_common" ]
+    deps = [
+      ":ws_unittest_common",
+      "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+    ]
 
     external_deps = test_external_deps
     external_deps += [ "init:libbegetutil" ]
-  }
 
+    defines = []
+    if (defined(global_parts_info) &&
+        defined(global_parts_info.sensors_sensor)) {
+      external_deps += [ "sensor:sensor_interface_native" ]
+      defines += [ "SENSOR_ENABLE" ]
+    }
+  }
+  
   ohos_unittest("ws_fold_screen_sensor_manager_test") {
     module_out_path = module_out_path
 

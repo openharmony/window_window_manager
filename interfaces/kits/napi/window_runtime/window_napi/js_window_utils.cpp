@@ -158,6 +158,24 @@ napi_value WindowModeInit(napi_env env)
     return objValue;
 }
 
+napi_value GlobalWindowModeInit(napi_env env)
+{
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+
+    napi_set_named_property(env, objValue, "FULLSCREEN", CreateJsValue(env,
+        static_cast<int32_t>(GlobalWindowMode::FULLSCREEN)));
+    napi_set_named_property(env, objValue, "SPLIT", CreateJsValue(env,
+        static_cast<int32_t>(GlobalWindowMode::SPLIT)));
+    napi_set_named_property(env, objValue, "FLOAT", CreateJsValue(env,
+        static_cast<int32_t>(GlobalWindowMode::FLOAT)));
+    napi_set_named_property(env, objValue, "PIP", CreateJsValue(env,
+        static_cast<int32_t>(GlobalWindowMode::PIP)));
+    return objValue;
+}
+
 napi_value ScreenshotEventTypeInit(napi_env env)
 {
     CHECK_NAPI_ENV_RETURN_IF_NULL(env);
@@ -263,6 +281,26 @@ napi_value WindowStageEventTypeInit(napi_env env)
         static_cast<int32_t>(LifeCycleEventType::RESUMED)));
     napi_set_named_property(env, objValue, "PAUSED", CreateJsValue(env,
         static_cast<int32_t>(LifeCycleEventType::PAUSED)));
+    return objValue;
+}
+
+napi_value WindowStageLifecycleEventTypeInit(napi_env env)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+
+    napi_set_named_property(env, objValue, "SHOWN", CreateJsValue(env,
+        static_cast<int32_t>(WindowStageLifeCycleEventType::FOREGROUND)));
+    napi_set_named_property(env, objValue, "RESUMED", CreateJsValue(env,
+        static_cast<int32_t>(WindowStageLifeCycleEventType::RESUMED)));
+    napi_set_named_property(env, objValue, "PAUSED", CreateJsValue(env,
+        static_cast<int32_t>(WindowStageLifeCycleEventType::PAUSED)));
+    napi_set_named_property(env, objValue, "HIDDEN", CreateJsValue(env,
+        static_cast<int32_t>(WindowStageLifeCycleEventType::BACKGROUND)));
     return objValue;
 }
 
@@ -566,6 +604,12 @@ napi_value CreateJsWindowPropertiesObject(napi_env env, const WindowPropertyInfo
     }
     napi_set_named_property(env, objValue, "drawableRect", drawableRectObj);
 
+    napi_value globalDisplayRectObj = GetRectAndConvertToJsValue(env, windowPropertyInfo.globalDisplayRect);
+    if (globalDisplayRectObj == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "GetGlobalDisplayRect failed!");
+    }
+    napi_set_named_property(env, objValue, "globalDisplayRect", globalDisplayRectObj);
+
     WindowType type = windowPropertyInfo.type;
     if (NATIVE_JS_TO_WINDOW_TYPE_MAP.count(type) != 0) {
         napi_set_named_property(env, objValue, "type", CreateJsValue(env, NATIVE_JS_TO_WINDOW_TYPE_MAP.at(type)));
@@ -746,7 +790,7 @@ napi_value CreateJsWindowLayoutInfoObject(napi_env env, const sptr<WindowLayoutI
 {
     napi_value objValue = nullptr;
     CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
-    napi_set_named_property(env, objValue, "rect", GetRectAndConvertToJsValue(env, info->rect));
+    napi_set_named_property(env, objValue, "windowRect", GetRectAndConvertToJsValue(env, info->rect));
     return objValue;
 }
 
@@ -755,6 +799,8 @@ napi_value CreateJsWindowInfoObject(napi_env env, const sptr<WindowVisibilityInf
     napi_value objValue = nullptr;
     CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
     napi_set_named_property(env, objValue, "rect", GetRectAndConvertToJsValue(env, info->GetRect()));
+    napi_set_named_property(env, objValue, "globalDisplayRect",
+        GetRectAndConvertToJsValue(env, info->GetGlobalDisplayRect()));
     napi_set_named_property(env, objValue, "bundleName", CreateJsValue(env, info->GetBundleName()));
     napi_set_named_property(env, objValue, "abilityName", CreateJsValue(env, info->GetAbilityName()));
     napi_set_named_property(env, objValue, "windowId", CreateJsValue(env, info->GetWindowId()));
@@ -1626,6 +1672,23 @@ bool ParseSubWindowOptions(napi_env env, napi_value jsObject, const sptr<WindowO
     return ParseZLevelParam(env, jsObject, windowOption);
 }
 
+WmErrorCode ParseShowWindowOptions(napi_env env, napi_value showWindowOptions, bool& focusOnShow)
+{
+    napi_value focusOnShowValue = nullptr;
+    napi_get_named_property(env, showWindowOptions, "focusOnShow", &focusOnShowValue);
+    if (focusOnShowValue != nullptr) {
+        if (GetType(env, focusOnShowValue) == napi_undefined) {
+            focusOnShow = true;
+            return WmErrorCode::WM_OK;
+        }
+        if (GetType(env, focusOnShowValue) != napi_boolean || !ConvertFromJsValue(env, focusOnShowValue, focusOnShow)) {
+            TLOGE(WmsLogTag::WMS_FOCUS, "failed to convert focusOnShow to boolean");
+            return WmErrorCode::WM_ERROR_ILLEGAL_PARAM;
+        }
+    }
+    return WmErrorCode::WM_OK;
+}
+
 bool ParseKeyFramePolicy(napi_env env, napi_value jsObject, KeyFramePolicy& keyFramePolicy)
 {
     if (jsObject == nullptr) {
@@ -1812,6 +1875,42 @@ bool ParseZIndex(napi_env env, napi_value jsObject, WindowOption& option)
     }
     option.SetZIndex(zIndex);
     return true;
+}
+
+napi_value BuildJsRectChangeOptions(napi_env env, const Rect& rect, RectChangeReason reason)
+{
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+    napi_value jsRectChangeOptions = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, jsRectChangeOptions);
+    napi_value jsRect = GetRectAndConvertToJsValue(env, rect);
+    if (jsRect == nullptr || napi_set_named_property(env, jsRectChangeOptions, "rect", jsRect) != napi_ok) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to set rect");
+        return nullptr;
+    }
+    napi_value jsReason = CreateJsValue(env, reason);
+    if (jsReason == nullptr || napi_set_named_property(env, jsRectChangeOptions, "reason", jsReason) != napi_ok) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to set rectChangeReason");
+        return nullptr;
+    }
+    return jsRectChangeOptions;
+}
+
+napi_value BuildJsPosition(napi_env env, const Position& position)
+{
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+    napi_value jsPosition = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, jsPosition);
+    napi_value jsX = CreateJsValue(env, position.x);
+    if (jsX == nullptr || napi_set_named_property(env, jsPosition, "x", jsX) != napi_ok) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to set x pos");
+        return nullptr;
+    }
+    napi_value jsY = CreateJsValue(env, position.y);
+    if (jsY == nullptr || napi_set_named_property(env, jsPosition, "y", jsY) != napi_ok) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to set y pos");
+        return nullptr;
+    }
+    return jsPosition;
 }
 } // namespace Rosen
 } // namespace OHOS

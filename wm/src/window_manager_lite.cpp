@@ -1233,13 +1233,31 @@ WMError WindowManagerLite::UnregisterWindowInfoChangeCallback(const std::unorder
 WMError WindowManagerLite::ListWindowInfo(const WindowInfoOption& windowInfoOption,
     std::vector<sptr<WindowInfo>>& infos) const
 {
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "windowInfoOption: %{public}u %{public}u %{public}" PRIu64" %{public}d",
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "windowInfoOption: %{public}u %{public}u %{public}" PRIu64 " %{public}d",
         static_cast<WindowInfoFilterOptionDataType>(windowInfoOption.windowInfoFilterOption),
         static_cast<WindowInfoTypeOptionDataType>(windowInfoOption.windowInfoTypeOption),
         windowInfoOption.displayId, windowInfoOption.windowId);
     WMError ret = SingletonContainer::Get<WindowAdapterLite>().ListWindowInfo(windowInfoOption, infos);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "failed");
+    }
+    return ret;
+}
+
+WMError WindowManagerLite::SendPointerEventForHover(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    if (pointerEvent == nullptr) {
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    bool isHoverDown = pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_HOVER_ENTER &&
+        pointerEvent->GetSourceType() ==  MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN;
+    if (!isHoverDown) {
+        TLOGE(WmsLogTag::WMS_EVENT, "pointer event is not hover down");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    WMError ret = SingletonContainer::Get<WindowAdapterLite>().SendPointerEventForHover(pointerEvent);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_EVENT, "send failed");
     }
     return ret;
 }

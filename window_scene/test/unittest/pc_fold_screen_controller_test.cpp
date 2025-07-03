@@ -656,8 +656,10 @@ HWTEST_F(PcFoldScreenManagerTest, ExecuteFoldScreenStatusChangeCallbacks, TestSi
             testPrevStatus = prevStatus;
         });
     manager_.RegisterFoldScreenStatusChangeCallback(persistentId, std::weak_ptr<FoldScreenStatusChangeCallback>(func));
+    manager_.RegisterFoldScreenStatusChangeCallback(101, std::weak_ptr<FoldScreenStatusChangeCallback>());
     EXPECT_NE(callbacks.find(persistentId), callbacks.end());
     manager_.ExecuteFoldScreenStatusChangeCallbacks(100, SuperFoldStatus::EXPANDED, SuperFoldStatus::HALF_FOLDED);
+    EXPECT_EQ(callbacks.find(101), callbacks.end());
     EXPECT_EQ(testDisplayId, 100);
     EXPECT_EQ(testStatus, SuperFoldStatus::EXPANDED);
     EXPECT_EQ(testPrevStatus, SuperFoldStatus::HALF_FOLDED);
@@ -703,8 +705,10 @@ HWTEST_F(PcFoldScreenManagerTest, ExecuteSystemKeyboardStatusChangeCallbacks, Te
         });
     manager_.RegisterSystemKeyboardStatusChangeCallback(persistentId,
                                                         std::weak_ptr<SystemKeyboardStatusChangeCallback>(func));
+    manager_.RegisterSystemKeyboardStatusChangeCallback(101, std::weak_ptr<SystemKeyboardStatusChangeCallback>());
     EXPECT_NE(callbacks.find(persistentId), callbacks.end());
     manager_.ExecuteSystemKeyboardStatusChangeCallbacks(100, true);
+    EXPECT_EQ(callbacks.find(101), callbacks.end());
     EXPECT_EQ(testDisplayId, 100);
     EXPECT_EQ(testStatus, true);
 }
@@ -974,6 +978,19 @@ HWTEST_F(PcFoldScreenControllerTest, UpdateFullScreenWaterfallMode, TestSize.Lev
     EXPECT_TRUE(controller_->IsFullScreenWaterfallMode());
     controller_->UpdateFullScreenWaterfallMode(false);
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    EXPECT_FALSE(controller_->IsFullScreenWaterfallMode());
+}
+
+/**
+ * @tc.name: SetFullScreenWaterfallMode
+ * @tc.desc: test function : SetFullScreenWaterfallMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(PcFoldScreenControllerTest, SetFullScreenWaterfallMode, TestSize.Level1)
+{
+    controller_->SetFullScreenWaterfallMode(true);
+    EXPECT_TRUE(controller_->IsFullScreenWaterfallMode());
+    controller_->SetFullScreenWaterfallMode(false);
     EXPECT_FALSE(controller_->IsFullScreenWaterfallMode());
 }
 

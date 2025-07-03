@@ -34,8 +34,36 @@ const static uint32_t RETRY_WAIT_MS = 500;
 const static uint32_t MAX_DISPLAY_SIZE = 32;
 const static uint32_t SCB_GET_DISPLAY_INTERVAL_US = 5000;
 const static uint32_t APP_GET_DISPLAY_INTERVAL_US = 25000;
+const static float INVALID_DEFAULT_DENSITY = 1.0f;
 std::atomic<bool> g_dmIsDestroyed = false;
 std::mutex snapBypickerMutex;
+
+bool IsTargetDisplay(const sptr<DisplayInfo>& displayInfo, const Position& globalPosition)
+{
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::DMS, "displayInfo is nullptr while judgging target display!");
+        return false;
+    }
+    int32_t posX = globalPosition.x - displayInfo->GetX();
+    int32_t posY = globalPosition.y - displayInfo->GetY();
+    return !(posX < 0 || posY < 0 || posX >= displayInfo->GetWidth() || posY >= displayInfo->GetHeight());
+}
+
+bool IsInt32AddOverflow(int32_t num1, int32_t num2)
+{
+    if ((num2 > 0 && num1 > INT32_MAX - num2) || (num2 < 0 && num1 < INT32_MIN - num2)) {
+        return true;
+    }
+    return false;
+}
+
+bool IsInt32SubOverflow(int32_t num1, int32_t num2)
+{
+    if ((num2 > 0 && num1 < INT32_MIN + num2) || (num2 < 0 && num1 > INT32_MAX + num2)) {
+        return true;
+    }
+    return false;
+}
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManager)
 
@@ -103,6 +131,10 @@ public:
     sptr<CutoutInfo> GetCutoutInfoWithRotation(Rotation rotation);
     DMError GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
         ScreenId& screenId, DMRect& screenArea);
+    DMError ConvertRelativeCoordinateToGlobal(const RelativePosition& relativePosition, Position& position);
+    DMError ConvertGlobalCoordinateToRelative(const Position& globalPosition, RelativePosition& relativePosition);
+    DMError ConvertGlobalCoordinateToRelativeWithDisplayId(const Position& globalPosition, DisplayId displayId,
+        RelativePosition& relativePosition);
 
 private:
     void ClearDisplayStateCallback();
@@ -2474,6 +2506,15 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshotWithOption(const C
     return dstScreenshot;
 }
 
+float DisplayManager::GetPrimaryDisplaySystemDpi() const
+{
+    sptr<DisplayInfo> displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetPrimaryDisplayInfo();
+    if (displayInfo == nullptr) {
+        return INVALID_DEFAULT_DENSITY;
+    }
+    return displayInfo->GetDensityInCurResolution();
+}
+
 sptr<CutoutInfo> DisplayManager::GetCutoutInfoWithRotation(Rotation rotation)
 {
     return pImpl_->GetCutoutInfoWithRotation(rotation);
@@ -2501,6 +2542,116 @@ DMError DisplayManager::Impl::GetScreenAreaOfDisplayArea(DisplayId displayId, co
 {
     return SingletonContainer::Get<DisplayManagerAdapter>().GetScreenAreaOfDisplayArea(
         displayId, displayArea, screenId, screenArea);
+}
+
+DMError DisplayManager::ConvertRelativeCoordinateToGlobal(const RelativePosition& relativePosition, Position& position)
+{
+    return pImpl_->ConvertRelativeCoordinateToGlobal(relativePosition, position);
+}
+
+DMError DisplayManager::Impl::ConvertRelativeCoordinateToGlobal(const RelativePosition& relativePosition,
+    Position& position)
+{
+    sptr<Display> display = GetDisplayById(relativePosition.displayId);
+    if (display == nullptr) {
+        TLOGE(WmsLogTag::DMS, "Get display by ID failed, display:%{public}" PRIu64 "nullptr",
+            relativePosition.displayId);
+        return DMError::DM_ERROR_ILLEGAL_PARAM;
+    }
+    sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::DMS, "get display info failed, display id: %{public}" PRIu64,
+            relativePosition.displayId);
+        return DMError::DM_ERROR_NULLPTR;
+    }
+
+    int32_t startX = displayInfo->GetX();
+    int32_t startY = displayInfo->GetY();
+    if (IsInt32AddOverflow(relativePosition.position.x, startX) ||
+        IsInt32AddOverflow(relativePosition.position.y, startY)) {
+        TLOGE(WmsLogTag::DMS, "coordinate x or y overflowed!");
+        return DMError::DM_ERROR_ILLEGAL_PARAM;
+    }
+    position.x = relativePosition.position.x + startX;
+    position.y = relativePosition.position.y + startY;
+    return DMError::DM_OK;
+}
+
+DMError DisplayManager::ConvertGlobalCoordinateToRelative(const Position& globalPosition,
+    RelativePosition& relativePosition)
+{
+    return pImpl_->ConvertGlobalCoordinateToRelative(globalPosition, relativePosition);
+}
+
+DMError DisplayManager::Impl::ConvertGlobalCoordinateToRelative(const Position& globalPosition,
+    RelativePosition& relativePosition)
+{
+    auto displayIds = SingletonContainer::Get<DisplayManagerAdapter>().GetAllDisplayIds();
+    for (auto displayId : displayIds) {
+        const sptr<Display> display = GetDisplayById(displayId);
+        if (display == nullptr) {
+            TLOGW(WmsLogTag::DMS, "get display failed, display id : %{public}" PRIu64, displayId);
+            continue;
+        }
+        const sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
+        if (displayInfo == nullptr) {
+            TLOGW(WmsLogTag::DMS, "get display info failed, display id : %{public}" PRIu64, displayId);
+            continue;
+        }
+        if (IsTargetDisplay(displayInfo, globalPosition)) {
+            int32_t startX = displayInfo->GetX();
+            int32_t startY = displayInfo->GetY();
+            if (IsInt32SubOverflow(globalPosition.x, startX) ||
+                IsInt32SubOverflow(globalPosition.y, startY)) {
+                TLOGE(WmsLogTag::DMS, "coordinate x or y overflowed!");
+                return DMError::DM_ERROR_ILLEGAL_PARAM;
+            }
+            relativePosition.displayId = displayInfo->GetDisplayId();
+            relativePosition.position.x = globalPosition.x - startX;
+            relativePosition.position.y = globalPosition.y - startY;
+            return DMError::DM_OK;
+        }
+    }
+    relativePosition.displayId = 0;
+    relativePosition.position.x = globalPosition.x;
+    relativePosition.position.y = globalPosition.y;
+    return DMError::DM_OK;
+}
+
+DMError DisplayManager::ConvertGlobalCoordinateToRelativeWithDisplayId(const Position& globalPosition,
+    DisplayId displayId, RelativePosition& relativePosition)
+{
+    return pImpl_->ConvertGlobalCoordinateToRelativeWithDisplayId(globalPosition, displayId, relativePosition);
+}
+
+DMError DisplayManager::Impl::ConvertGlobalCoordinateToRelativeWithDisplayId(const Position& globalPosition,
+    DisplayId displayId, RelativePosition& relativePosition)
+{
+    const sptr<Display> display = GetDisplayById(displayId);
+    if (display == nullptr) {
+        TLOGW(WmsLogTag::DMS, "get display failed, display id : %{public}" PRIu64, displayId);
+        relativePosition.displayId = 0;
+        relativePosition.position.x = globalPosition.x;
+        relativePosition.position.y = globalPosition.y;
+        return DMError::DM_OK;
+    }
+
+    const sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
+    if (displayInfo == nullptr) {
+        TLOGW(WmsLogTag::DMS, "get display info failed, display id : %{public}" PRIu64, displayId);
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    int32_t startX = displayInfo->GetX();
+    int32_t startY = displayInfo->GetY();
+    if (IsInt32SubOverflow(globalPosition.x, startX) ||
+        IsInt32SubOverflow(globalPosition.y, startY)) {
+        TLOGE(WmsLogTag::DMS, "coordinate x or y overflowed!");
+        return DMError::DM_ERROR_ILLEGAL_PARAM;
+    }
+    relativePosition.displayId = displayId;
+    relativePosition.position.x = globalPosition.x - displayInfo->GetX();
+    relativePosition.position.y = globalPosition.y - displayInfo->GetY();
+    return DMError::DM_OK;
 }
 } // namespace OHOS::Rosen
 

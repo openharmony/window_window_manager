@@ -137,6 +137,14 @@
     },
     {
         "first_instroduced":"20",
+        "name":"OH_PictureInPicture_SetPipInitialSurfaceRect"
+    },
+    {
+        "first_instroduced":"20",
+        "name":"OH_PictureInPicture_UnsetPipInitialSurfaceRect"
+    },
+    {
+        "first_instroduced":"20",
         "name":"OH_PictureInPicture_RegisterStartPipCallback"
     },
     {

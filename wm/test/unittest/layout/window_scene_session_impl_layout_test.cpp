@@ -666,6 +666,35 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, MoveTo03, TestSize.Level1)
     ASSERT_EQ(WMError::WM_OK, subWindow->MoveTo(5, 4));
     WindowSceneSessionImpl::windowSessionMap_.erase(window->GetWindowName());
 }
+
+/**
+ * @tc.name: UpdateWindowModeForUITest01
+ * @tc.desc: UpdateWindowModeForUITest
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplLayoutTest, UpdateWindowModeForUITest01, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateWindowModeForUITest01");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    const int32_t windowId = 1;
+    window->property_->SetPersistentId(windowId);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+
+    WMError res = window->UpdateWindowModeForUITest(static_cast<int32_t>(WindowMode::WINDOW_MODE_UNDEFINED));
+    EXPECT_EQ(WMError::WM_DO_NOTHING, res);
+    res = window->UpdateWindowModeForUITest(static_cast<int32_t>(WindowMode::WINDOW_MODE_FULLSCREEN));
+    EXPECT_EQ(WMError::WM_OK, res);
+    res = window->UpdateWindowModeForUITest(static_cast<int32_t>(WindowMode::WINDOW_MODE_SPLIT_PRIMARY));
+    EXPECT_EQ(WMError::WM_OK, res);
+    res = window->UpdateWindowModeForUITest(static_cast<int32_t>(WindowMode::WINDOW_MODE_SPLIT_SECONDARY));
+    EXPECT_EQ(WMError::WM_OK, res);
+    res = window->UpdateWindowModeForUITest(static_cast<int32_t>(WindowMode::WINDOW_MODE_FLOATING));
+    EXPECT_EQ(WMError::WM_OK, res);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

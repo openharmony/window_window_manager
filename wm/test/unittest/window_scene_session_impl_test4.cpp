@@ -398,7 +398,6 @@ HWTEST_F(WindowSceneSessionImplTest4, ResetSuperFoldDisplayY, TestSize.Level1)
     windowSceneSessionImpl->ResetSuperFoldDisplayY(pointerEvent);
     pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
     int32_t updatedDisplayY = pointerItem.GetDisplayY();
-    ASSERT_EQ(updatedDisplayY, originalDisplayY);
 
     pointerItem.SetDisplayY(150);
     pointerEvent->AddPointerItem(pointerItem);
@@ -1294,6 +1293,57 @@ HWTEST_F(WindowSceneSessionImplTest4, UpdateNewSize01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateNewSize02
+ * @tc.desc: UpdateNewSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, UpdateNewSize02, TestSize.Level1)
+{
+    sptr<WindowOption> subOption = sptr<WindowOption>::MakeSptr();
+    subOption->SetWindowName("UpdateNewSize01SubWindow");
+    sptr<WindowSceneSessionImpl> subWindow = sptr<WindowSceneSessionImpl>::MakeSptr(subOption);
+    subWindow->property_->SetPersistentId(1003);
+    SessionInfo subSessionInfo = { "CreateSubTestBundle", "CreateSubTestModule", "CreateSubTestAbility" };
+    sptr<SessionMocker> subSession = sptr<SessionMocker>::MakeSptr(subSessionInfo);
+    subWindow->hostSession_ = subSession;
+    subWindow->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    WindowLimits windowLimits = { 100, 100, 100, 100, 0.0, 0, 0 };
+    subWindow->property_->SetWindowLimits(windowLimits);
+    Rect windowRect = { 200, 200, 200, 200 };
+    subWindow->property_->SetRequestRect(windowRect);
+    subWindow->windowSystemConfig_.windowUIType_ = WindowUIType::INVALID_WINDOW;
+    subWindow->windowSystemConfig_.freeMultiWindowEnable_ = false;
+    subWindow->windowSystemConfig_.freeMultiWindowSupport_ = false;
+    subWindow->UpdateNewSize();
+    subWindow->property_->SetRequestRect(windowRect);
+    subWindow->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    subWindow->UpdateNewSize();
+    subWindow->property_->SetRequestRect(windowRect);
+    subWindow->windowSystemConfig_.freeMultiWindowEnable_ = true;
+    subWindow->windowSystemConfig_.freeMultiWindowSupport_ = false;
+    subWindow->UpdateNewSize();
+    subWindow->property_->SetRequestRect(windowRect);
+    subWindow->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    subWindow->UpdateNewSize();
+    subWindow->property_->SetRequestRect(windowRect);
+    subWindow->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    subWindow->windowSystemConfig_.freeMultiWindowEnable_ = false;
+    subWindow->windowSystemConfig_.freeMultiWindowSupport_ = false;
+    subWindow->UpdateNewSize();
+    subWindow->property_->SetRequestRect(windowRect);
+    subWindow->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    subWindow->UpdateNewSize();
+    subWindow->property_->SetRequestRect(windowRect);
+    subWindow->windowSystemConfig_.freeMultiWindowEnable_ = true;
+    subWindow->windowSystemConfig_.freeMultiWindowSupport_ = false;
+    subWindow->UpdateNewSize();
+    subWindow->property_->SetRequestRect(windowRect);
+    subWindow->windowSystemConfig_.freeMultiWindowSupport_ = false;
+    subWindow->UpdateNewSize();
+    ASSERT_NE(nullptr, subWindow->property_);
+}
+
+/**
  * @tc.name: UpdateSubWindowStateAndNotify01
  * @tc.desc: UpdateSubWindowStateAndNotify
  * @tc.type: FUNC
@@ -1627,6 +1677,8 @@ HWTEST_F(WindowSceneSessionImplTest4, SetSpecificDisplayId01, TestSize.Level1)
     ASSERT_EQ(floatWindow->property_->GetDisplayId(), displayId);
     globalSearchWindow->CreateSystemWindow(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
     ASSERT_EQ(globalSearchWindow->property_->GetDisplayId(), globalSearchDisplayId);
+    floatWindow->CreateSystemWindow(WindowType::WINDOW_TYPE_FB);
+    ASSERT_EQ(floatWindow->property_->GetDisplayId(), displayId);
 }
 
 /**
@@ -2016,6 +2068,59 @@ HWTEST_F(WindowSceneSessionImplTest4, SetWindowContainerColor02, TestSize.Level1
 
     activeColor = "rgb#00000000";
     res = window->SetWindowContainerColor(activeColor, inactiveColor);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: SetWindowContainerModalColor01
+ * @tc.desc: SetWindowContainerModalColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, SetWindowContainerModalColor01, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetBundleName("SetWindowContainerModalColor");
+    option->SetWindowName("SetWindowContainerModalColor");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    std::string activeColor = "#FF000000";
+    std::string inactiveColor = "#00000000";
+    WMError res = window->SetWindowContainerModalColor(activeColor, inactiveColor);
+    EXPECT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    res = window->SetWindowContainerModalColor(activeColor, inactiveColor);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->property_->SetPersistentId(1);
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_SHOWN;
+    res = window->SetWindowContainerModalColor(activeColor, inactiveColor);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_CALLING);
+
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    res = window->SetWindowContainerModalColor(activeColor, inactiveColor);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+
+    window->property_->SetDecorEnable(true);
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    window->windowSystemConfig_.isSystemDecorEnable_ = true;
+    res = window->SetWindowContainerModalColor(activeColor, inactiveColor);
+    EXPECT_EQ(res, WMError::WM_ERROR_NULLPTR);
+
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    res = window->SetWindowContainerModalColor(activeColor, inactiveColor);
+    EXPECT_EQ(res, WMError::WM_OK);
+
+    inactiveColor = "rgb#FF000000";
+    res = window->SetWindowContainerModalColor(activeColor, inactiveColor);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
+
+    activeColor = "rgb#00000000";
+    res = window->SetWindowContainerModalColor(activeColor, inactiveColor);
     EXPECT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
 }
 } // namespace

@@ -36,21 +36,30 @@ public:
     void SetOnBootAnimation(bool onBootAnimation) override;
     FoldDisplayMode GetModeMatchStatus() override;
     std::vector<uint32_t> GetScreenParams() override;
-    Drawing::Rect GetScreenSnapshotRect() override;
-    void SetMainScreenRegion(DMRect& mainScreenRegion) override;
+    void ExitCoordination() override;
     void SetSecondaryDisplayModeChangeStatus(bool status) override;
+    void AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32_t command) override;
 private:
     void ChangeSuperScreenDisplayMode(sptr<ScreenSession> screenSession,
         FoldDisplayMode displayMode);
+    void CloseCoordinationScreen();
+    void ChangeScreenDisplayModeToCoordination();
+    void UpdateDisplayNodeBasedOnScreenId(ScreenId screenId, std::shared_ptr<RSDisplayNode> displayNode);
     void RecoverWhenBootAnimationExit();
     void ReportFoldDisplayModeChange(FoldDisplayMode displayMode);
     void SendPropertyChangeResult(sptr<ScreenSession> screenSession, ScreenId screenId,
         ScreenPropertyChangeReason reason, FoldDisplayMode displayMode);
-    void SetStatusFullActiveRectAndTpFeature(ScreenProperty &screenProperty);
-    void SetStatusMainActiveRectAndTpFeature(ScreenProperty &screenProperty);
-    void SetStatusGlobalFullActiveRectAndTpFeature(ScreenProperty &screenProperty);
+    void HandleScreenOnFullOn(sptr<ScreenSession> screenSession, ScreenId screenId,
+        ScreenPropertyChangeReason reason, FoldDisplayMode displayMode);
+    void SendCoordinationPropertyChangeResultSync(sptr<ScreenSession> screenSession, ScreenId screenId,
+        ScreenPropertyChangeReason reason, FoldDisplayMode displayMode);
+    void SetStatusConditionalActiveRectAndTpFeature(ScreenProperty &screenProperty);
+    void SetStatusFullActiveRectAndTpFeature();
+    void SetStatusMainActiveRectAndTpFeature();
+    void SetStatusGlobalFullActiveRectAndTpFeature();
     void InitScreenParams();
     std::recursive_mutex& displayInfoMutex_;
+    std::mutex coordinationMutex_;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler_;
     std::vector<uint32_t> screenParams_;
     bool isChangeScreenWhenBootCompleted = false;

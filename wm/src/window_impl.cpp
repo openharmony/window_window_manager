@@ -719,6 +719,11 @@ WMError WindowImpl::SetUIContentInner(const std::string& contentInfo, void* env,
                 TLOGI(WmsLogTag::WMS_LIFE, "Restore router stack succeed.");
                 break;
             }
+            if (!intentParam_.empty()) {
+                TLOGI(WmsLogTag::WMS_LIFE, "Default setIntentParam, isColdStart:%{public}u", isIntentColdStart_);
+                uiContent->SetIntentParam(intentParam_, std::move(loadPageCallback_), isIntentColdStart_);
+                intentParam_ = "";
+            }
             aceRet = UIContentInit(uiContent.get(), contentInfo, storage, isAni);
             break;
         }
@@ -726,6 +731,11 @@ WMError WindowImpl::SetUIContentInner(const std::string& contentInfo, void* env,
             aceRet = UIContentRestore(uiContent.get(), contentInfo, storage, GetAceContentInfoType(restoreType), isAni);
             break;
         case WindowSetUIContentType::BY_NAME:
+            if (!intentParam_.empty()) {
+                TLOGI(WmsLogTag::WMS_LIFE, "By name setIntentParam, isColdStart:%{public}u", isIntentColdStart_);
+                uiContent->SetIntentParam(intentParam_, std::move(loadPageCallback_), isIntentColdStart_);
+                intentParam_ = "";
+            }
             aceRet = UIContentInitByName(uiContent.get(), contentInfo, storage, isAni);
             break;
         case WindowSetUIContentType::BY_ABC:
@@ -1533,6 +1543,22 @@ WMError WindowImpl::Create(uint32_t parentId, const std::shared_ptr<AbilityRunti
     return ret;
 }
 
+WMError WindowImpl::GetWindowTypeForArkUI(WindowType parentWindowType, WindowType& windowType)
+{
+    if (parentWindowType == WindowType::WINDOW_TYPE_SCENE_BOARD ||
+        parentWindowType == WindowType::WINDOW_TYPE_DESKTOP) {
+        windowType = WindowType::WINDOW_TYPE_SYSTEM_FLOAT;
+    } else if (WindowHelper::IsUIExtensionWindow(parentWindowType)) {
+        windowType = WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
+    } else if (WindowHelper::IsSystemWindow(parentWindowType)) {
+        windowType = WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW;
+    } else {
+        windowType = WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
+    }
+    TLOGI(WmsLogTag::WMS_SUB, "parentWindowType:%{public}d, windowType:%{public}d", parentWindowType, windowType);
+    return WMError::WM_OK;
+}
+
 bool WindowImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
     if (uiContent_ != nullptr) {
@@ -1828,11 +1854,25 @@ void WindowImpl::NotifyMainWindowDidForeground(uint32_t reason)
     }
 }
 
+void WindowImpl::SetShowWithOptions(bool showWithOptions)
+{
+    showWithOptions_ = showWithOptions;
+}
+
+bool WindowImpl::IsShowWithOptions() const
+{
+    return showWithOptions_;
+}
+
 WMError WindowImpl::Show(uint32_t reason, bool withAnimation, bool withFocus)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, __PRETTY_FUNCTION__);
     WLOGFD("Window Show [name:%{public}s, id:%{public}u, mode: %{public}u], reason:%{public}u, "
         "withAnimation:%{public}d", name_.c_str(), property_->GetWindowId(), GetWindowMode(), reason, withAnimation);
+    if (IsShowWithOptions()) {
+        SetShowWithOptions(false);
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -4092,6 +4132,16 @@ void WindowImpl::NotifyAfterForeground(bool needNotifyListeners, bool needNotify
     if (needNotifyUiContent) {
         CALL_UI_CONTENT(Foreground);
     }
+    if (!intentParam_.empty()) {
+        auto uiContent = GetUIContent();
+        if (uiContent != nullptr) {
+            TLOGI(WmsLogTag::WMS_LIFE, "SetIntentParam, isColdStart:%{public}u", isIntentColdStart_);
+            uiContent->SetIntentParam(intentParam_, std::move(loadPageCallback_), isIntentColdStart_);
+            intentParam_ = "";
+        } else {
+            TLOGE(WmsLogTag::WMS_LIFE, "uiContent is nullptr.");
+        }
+    }
 }
 
 void WindowImpl::NotifyAfterDidForeground(uint32_t reason)
@@ -4734,6 +4784,16 @@ std::shared_ptr<RSUIContext> WindowImpl::GetRSUIContext() const
     TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "%{public}s, windowId: %{public}u",
           RSAdapterUtil::RSUIContextToStr(rsUIContext).c_str(), GetWindowId());
     return rsUIContext;
+}
+
+WMError WindowImpl::SetIntentParam(const std::string& intentParam,
+    const std::function<void()>& loadPageCallback, bool isColdStart)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "in");
+    intentParam_ = intentParam;
+    loadPageCallback_ = loadPageCallback;
+    isIntentColdStart_ = isColdStart;
+    return WMError::WM_OK;
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -291,7 +291,6 @@ void SuperFoldStateManager::HandleSuperFoldStatusChange(SuperFoldStatusChangeEve
 
 SuperFoldStatus SuperFoldStateManager::GetCurrentStatus()
 {
-    std::unique_lock<std::mutex> lock(superStatusMutex_);
     return curState_.load();
 }
 
@@ -420,6 +419,7 @@ void SuperFoldStateManager::HandleKeyboardOffDisplayNotify(sptr<ScreenSession> s
     auto screeBounds = screenSession->GetScreenProperty().GetBounds();
     screenSession->UpdatePropertyByFakeInUse(true);
     screenSession->SetIsBScreenHalf(true);
+    screenSession->SetValidWidth(screeBounds.rect_.GetWidth());
     screenSession->SetValidHeight(screeBounds.rect_.GetHeight());
     sptr<ScreenSession> fakeScreenSession = screenSession->GetFakeScreenSession();
     ScreenSessionManager::GetInstance().NotifyDisplayCreate(
@@ -517,7 +517,8 @@ bool SuperFoldStateManager::ChangeScreenState(bool toHalf)
         TLOGE(WmsLogTag::DMS, "screen session is null!");
         return false;
     }
-    auto screenProperty = screenSession->GetScreenProperty();
+    auto screenProperty = ScreenSessionManager::GetInstance().
+        GetPhyScreenProperty(screenSession->GetScreenId());
     auto screenWidth = screenProperty.GetPhyBounds().rect_.GetWidth();
     auto screenHeight = screenProperty.GetPhyBounds().rect_.GetHeight();
     if (toHalf) {

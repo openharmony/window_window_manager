@@ -21,6 +21,9 @@ export default namespace display {
 
 loadLibrary('displayani_kit.z');
 
+const DISPLAY_ARRAY_LENGTH = 15;  
+const CUTO_ARRAY_LENGTH = 5;  
+
 export interface Rect {
     left: number;
 
@@ -75,7 +78,7 @@ export interface CutoutInfo {
 
 export class CutoutInfoImpl implements CutoutInfo {
     constructor() {
-        this.boundingRects = new Array<Rect>(5);
+        this.boundingRects = new Array<Rect>(CUTO_ARRAY_LENGTH);
         for (let i = 0; i < this.boundingRects.length; i++) {
             this.boundingRects[i] = new RectImpl();
         }
@@ -342,27 +345,24 @@ export native function getDefaultDisplaySyncNative(obj: object): void;
 
 export native function getAllDisplaysSyncNative(displayArray: Array<Display>): void;
 
-export function getAllDisplays(callback?: AsyncCallback<Array<Display>>): undefined | Promise<Array<Display>> {
-    if (callback != undefined) {
-        let AsyncCallback: AsyncCallback<Array<Display>> = callback as AsyncCallback<Array<Display>>;
+export function getAllDisplays(callback: AsyncCallback<Array<Display>>): void {
+    let res: Array<Display> = new Array<Display>(DISPLAY_ARRAY_LENGTH);
+    for (let i = 0; i < res.length; i++) {
+        res[i] = new DisplayImpl();
+    }
+    try {
+        getAllDisplaysSyncNative(res);
+        minusDisplayArray(res);
+        callback(new BusinessError(), res);
+    } catch (err: BusinessError) {
+        callback(err, res);
+    }
+    return;
+}
+export function getAllDisplays(): Promise<Array<Display>> {
+    return new Promise<Array<Display>>((resolve: (value: Array<Display>) => void, reject: (error: BusinessError) => void ) => {
         taskpool.execute((): Array<Display> => {
-            let res: Array<Display> = new Array<Display>(5);
-            for (let i = 0; i < res.length; i++) {
-                res[i] = new DisplayImpl();
-            }
-            getAllDisplaysSyncNative(res);
-            minusDisplayArray(res);
-            return res;
-        }).then((ret: NullishType) => {
-            AsyncCallback(new BusinessError(), ret as Array<Display>);
-        }).catch((err: NullishType) => {
-            AsyncCallback(err as BusinessError, new Array<Display>());
-        });
-        return undefined;
-    } else {
-        return new Promise<Array<Display>>((resolve: (value: Array<Display>) => void, reject: (error: BusinessError) => void ) => {
-        taskpool.execute((): Array<Display> => {
-            let res: Array<Display> = new Array<Display>(5);
+            let res: Array<Display> = new Array<Display>(DISPLAY_ARRAY_LENGTH);
             for (let i = 0; i < res.length; i++) {
                 res[i] = new DisplayImpl();
             }
@@ -375,7 +375,6 @@ export function getAllDisplays(callback?: AsyncCallback<Array<Display>>): undefi
             reject(err as BusinessError);
         });
     });
-    }
 }
 
 function minusDisplayArray(displayArr: Array<Display>): void {
@@ -392,29 +391,17 @@ export function getNewDisplay(): DisplayImpl {
     return new DisplayImpl();
 }
 
-export function on(type: 'add' | 'remove' | 'change' | 'privateModeChange' | 'foldStatusChange' |
-    'foldAngleChange' | 'captureStatusChange' | 'foldDisplayModeChange',
-    callback: Callback<number> | Callback<boolean> | Callback<FoldStatus> | Callback<Array<number>> |
-    Callback<boolean> | Callback<FoldDisplayMode>): void
-{
+export function on<T>(type: string, callback: Callback<T>): void {
     syncOn(type, callback as object, displayMgrRef);
 }
 
-export native function syncOn(type: 'add' | 'remove' | 'change' | 'privateModeChange' | 'foldStatusChange' |
-    'foldAngleChange' | 'captureStatusChange' | 'foldDisplayModeChange',
-    callback: object, nativeObj: long): void;
+export native function syncOn(type: string, callback: object, nativeObj: long): void;
 
-export function off(type: 'add' | 'remove' | 'change' | 'privateModeChange' | 'foldStatusChange' |
-      'foldAngleChange' | 'captureStatusChange' | 'foldDisplayModeChange',
-      callback?: Callback<number> | Callback<boolean> | Callback<FoldStatus> | Callback<Array<number>> |
-      Callback<boolean> | Callback<FoldDisplayMode>): void
-{
+export function off<T>(type: string, callback?: Callback<T>): void {
     syncOff(type, displayMgrRef, callback);
 }
 
-export native function syncOff(type: 'add' | 'remove' | 'change' | 'privateModeChange' | 'foldStatusChange' |
-      'foldAngleChange' | 'captureStatusChange' | 'foldDisplayModeChange',
-    nativeObj: long, callback?: object) : void;
+export native function syncOff(type: string, nativeObj: long, callback?: object) : void;
 
 export function displayEventCallBack(cb: object, cbArg: double): void {
     const func = cb as (cbArg: double) => void;

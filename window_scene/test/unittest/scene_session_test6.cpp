@@ -30,6 +30,8 @@
 #include "session/host/include/system_session.h"
 #include <ui/rs_surface_node.h>
 #include "wm_common.h"
+#include "dm_common.h"
+#include "parameters.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -533,43 +535,36 @@ HWTEST_F(SceneSessionTest6, NotifyKeyboardAnimationCompleted, Function | SmallTe
 }
 
 /**
- * @tc.name: UpdateNewSizeForPCWindow
- * @tc.desc: UpdateNewSizeForPCWindow
+ * @tc.name: IsInCompatScaleStatus
+ * @tc.desc: IsInCompatScaleStatus
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest6, UpdateNewSizeForPCWindow, Function | SmallTest | Level1)
+HWTEST_F(SceneSessionTest6, IsInCompatScaleStatus, TestSize.Level1)
 {
-    LOG_SetCallback(ScreenSessionLogCallback);
     SessionInfo info;
-    info.abilityName_ = "UpdateNewSizeForPCWindow";
-    info.bundleName_ = "UpdateNewSizeForPCWindow";
-    info.windowType_ = 1;
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSession->UpdateNewSizeForPCWindow(true);
-    EXPECT_TRUE(g_errlog.find("dip change do nothing.") != std::string::npos);
-}
+    info.abilityName_ = "IsInCompatScaleStatus";
+    info.bundleName_ = "IsInCompatScaleStatus";
+    info.screenId_ = 0;
+    sptr<SceneSession> session = sptr<MainSession>::MakeSptr(info, nullptr);
 
-/**
- * @tc.name: CalcNewWindowRectIfNeed
- * @tc.desc: CalcNewWindowRectIfNeed
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest6, CalcNewWindowRectIfNeed, Function | SmallTest | Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "CalcNewWindowRectIfNeed";
-    info.bundleName_ = "CalcNewWindowRectIfNeed";
-    info.windowType_ = 1;
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    property->SetLastLimitsVpr(1.9);
-    sceneSession->property_ = property;
-    DMRect availableArea = { 0, 0, 1920, 1080 };
-    float newVpr = 2.85;
-    WSRect winRect = { 0, 0, 800, 600 };
-    sceneSession->CalcNewWindowRectIfNeed(availableArea, newVpr, winRect);
-    WSRect result = { 0, 0, 1200, 900 };
-    ASSERT_EQ(result, winRect);
+    EXPECT_FALSE(session->IsInCompatScaleStatus());
+    session->SetScale(1.0f, 1.0f, 0.5f, 0.5f);
+
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToProportionalScale(true);
+    session->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    EXPECT_FALSE(session->IsInCompatScaleStatus());
+
+    compatibleModeProperty->SetIsAdaptToProportionalScale(false);
+    compatibleModeProperty->SetIsAdaptToSimulationScale(true);
+    EXPECT_FALSE(session->IsInCompatScaleStatus());
+    compatibleModeProperty->SetIsAdaptToProportionalScale(true);
+    EXPECT_FALSE(session->IsInCompatScaleStatus());
+
+    session->SetScale(2.0f, 1.0f, 0.5f, 0.5f);
+    EXPECT_TRUE(session->IsInCompatScaleStatus());
+    session->SetScale(2.0f, 0.5f, 0.5f, 0.5f);
+    EXPECT_TRUE(session->IsInCompatScaleStatus());
 }
 
 /**
@@ -936,6 +931,9 @@ HWTEST_F(SceneSessionTest6, SetSubWindowSource, TestSize.Level1)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    auto res = sceneSession->SetSubWindowSource(SubWindowSource::SUB_WINDOW_SOURCE_ARKUI);
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_WINDOW, res);
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     sceneSession->property_ = property;
     // test set SubWindowSource::SUB_WINDOW_SOURCE_UNKNOWN
@@ -979,23 +977,13 @@ HWTEST_F(SceneSessionTest6, AnimateTo01, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetAllAppUseControlMap
- * @tc.desc: GetAllAppUseControlMap
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest6, GetAllAppUseControlMap, Function | SmallTest | Level3)
-{
-    EXPECT_EQ(0, SceneSession::GetAllAppUseControlMap().size());
-}
-
-/**
  * @tc.name: RegisterUpdateAppUseControlCallback
  * @tc.desc: RegisterUpdateAppUseControlCallback
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionTest6, RegisterUpdateAppUseControlCallback, Function | SmallTest | Level3)
 {
-    SceneSession::ControlInfo controlInfo = {
+    ControlInfo controlInfo = {
         .isNeedControl = true,
         .isControlRecentOnly = true
     };
@@ -1003,8 +991,13 @@ HWTEST_F(SceneSessionTest6, RegisterUpdateAppUseControlCallback, Function | Smal
     info.bundleName_ = "app";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     auto callback = [](ControlAppType type, bool isNeedControl, bool isControlRecentOnly) {};
-    std::unordered_map<std::string, std::unordered_map<ControlAppType, SceneSession::ControlInfo>>&
-        allAppUseMap = sceneSession->GetAllAppUseControlMap();
+    sceneSession->RegisterUpdateAppUseControlCallback(callback);
+ 
+    std::unordered_map<std::string, std::unordered_map<ControlAppType, ControlInfo>> allAppUseMap;
+    sceneSession->SetGetAllAppUseControlMapFunc([&allAppUseMap]() ->
+        std::unordered_map<std::string, std::unordered_map<ControlAppType, ControlInfo>>& {return allAppUseMap;});
+    sceneSession->RegisterUpdateAppUseControlCallback(callback);
+
     std::string key = "app#0";
     allAppUseMap[key][ControlAppType::APP_LOCK] = controlInfo;
     sceneSession->RegisterUpdateAppUseControlCallback(callback);
@@ -1057,6 +1050,91 @@ HWTEST_F(SceneSessionTest6, GetScreenWidthAndHeightFromClient, Function | SmallT
     sceneSession->SetIsSystemKeyboard(true);
     EXPECT_EQ(sceneSession->IsSystemKeyboard(), true);
     EXPECT_EQ(sceneSession->GetScreenWidthAndHeightFromClient(property, screenWidth, screenHeight), true);
+}
+
+/**
+ * @tc.name: SetFrameRectForPartialZoomIn
+ * @tc.desc: SetFrameRectForPartialZoomIn
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, SetFrameRectForPartialZoomIn, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.bundleName_ = "SetFrameRectForPartialZoomIn";
+    info.abilityName_ = "SetFrameRectForPartialZoomIn";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    Rect frameRect = { 10, 10, 10, 10 };  // 10 is valid frame rect param
+    EXPECT_EQ(sceneSession->SetFrameRectForPartialZoomIn(frameRect), WSError::WS_ERROR_INVALID_PERMISSION);
+}
+
+/**
+ * @tc.name: SetFrameRectForPartialZoomInInner
+ * @tc.desc: SetFrameRectForPartialZoomInInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, SetFrameRectForPartialZoomInInner, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.bundleName_ = "SetFrameRectForPartialZoomInInner";
+    info.abilityName_ = "SetFrameRectForPartialZoomInInner";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    Rect frameRect = { 10, 10, 10, 10 };  // 10 is valid frame rect param
+    WSError ret = sceneSession->SetFrameRectForPartialZoomInInner(frameRect);
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_WINDOW);
+
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    EXPECT_NE(surfaceNode, nullptr);
+    sceneSession->surfaceNode_ = surfaceNode;
+    ret = sceneSession->SetFrameRectForPartialZoomInInner(frameRect);
+    EXPECT_EQ(ret, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: SendPointerEventForHover
+ * @tc.desc: SendPointerEventForHover
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, SendPointerEventForHover, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.bundleName_ = "SendPointerEventForHover";
+    info.abilityName_ = "SendPointerEventForHover";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    WSError ret = sceneSession->SendPointerEventForHover(pointerEvent);
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_SESSION);
+
+    sceneSession->state_ = SessionState::STATE_FOREGROUND;
+    ret = sceneSession->SendPointerEventForHover(pointerEvent);
+    EXPECT_EQ(ret, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: TestUpdateGlobalDisplayRectFromClient
+ * @tc.desc: Verify UpdateGlobalDisplayRectFromClient updates rect asynchronously when necessary.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, TestUpdateGlobalDisplayRectFromClient, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    // Case 1: Same rect, should early return and skip update
+    {
+        WSRect rect = session->GetGlobalDisplayRect();
+        auto result = session->UpdateGlobalDisplayRectFromClient(rect, SizeChangeReason::MOVE);
+        EXPECT_EQ(result, WSError::WS_OK);
+    }
+
+    // Case 2: Different rect, update should be posted and processed
+    {
+        WSRect rect = session->GetGlobalDisplayRect();
+        WSRect newRect = { rect.posX_ + 10, rect.posY_ + 20, rect.width_, rect.height_ };
+        auto result = session->UpdateGlobalDisplayRectFromClient(newRect, SizeChangeReason::MOVE);
+        EXPECT_EQ(result, WSError::WS_OK);
+    }
 }
 } // namespace
 } // namespace Rosen

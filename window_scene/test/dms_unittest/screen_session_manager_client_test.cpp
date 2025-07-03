@@ -31,6 +31,16 @@ namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenSessionManagerClientTest"};
 }
+
+namespace {
+    std::string logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
+        const char* msg)
+    {
+        logMsg = msg;
+    }
+}
+
 class DmPrivateWindowListener : public DisplayManager::IPrivateWindowListener {
 public:
     void OnPrivateWindow(bool hasPrivate) {WLOGFI("IPrivateWindowListener hasPrivatewindow: %{public}u", hasPrivate);}
@@ -56,6 +66,14 @@ public:
 private:
     std::function<void(std::vector<std::string>)> callback_;
 };
+
+class MockDisplayChangeListener : public IDisplayChangeListener {
+public:
+    virtual void OnDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> info,
+        const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type) { return; }
+    virtual void OnScreenshot(DisplayId displayId) { return; }
+};
+
 class ScreenSessionManagerClientTest : public testing::Test {
 public:
     void SetUp() override;
@@ -776,6 +794,45 @@ HWTEST_F(ScreenSessionManagerClientTest, OnGetSurfaceNodeIdsFromMissionIdsChange
     ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
     screenSessionManagerClient_->displayChangeListener_ = nullptr;
     screenSessionManagerClient_->OnGetSurfaceNodeIdsFromMissionIdsChanged(missionIds, surfaceNodeIds, isBlackList);
+}
+
+/**
+ * @tc.name: OnSetSurfaceNodeIdsChanged01
+ * @tc.desc: OnSetSurfaceNodeIdsChanged test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, OnSetSurfaceNodeIdsChanged01, TestSize.Level1)
+{
+    sptr<ScreenSessionManagerClient> client = sptr<ScreenSessionManagerClient>::MakeSptr();
+    ASSERT_NE(nullptr, client);
+
+    DisplayId displayId = 0;
+    std::vector<uint64_t> surfaceNodeIds = { 100, 101 };
+    sptr<MockDisplayChangeListener> listener = sptr<MockDisplayChangeListener>::MakeSptr();
+    client->displayChangeListener_ = listener;
+    client->OnSetSurfaceNodeIdsChanged(displayId, surfaceNodeIds);
+
+    client->displayChangeListener_ = nullptr;
+    client->OnSetSurfaceNodeIdsChanged(displayId, surfaceNodeIds);
+}
+
+/**
+ * @tc.name: OnVirtualScreenDisconnected01
+ * @tc.desc: OnVirtualScreenDisconnected test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, OnVirtualScreenDisconnected01, TestSize.Level1)
+{
+    sptr<ScreenSessionManagerClient> client = sptr<ScreenSessionManagerClient>::MakeSptr();
+    ASSERT_NE(nullptr, client);
+
+    DisplayId displayId = 0;
+    sptr<MockDisplayChangeListener> listener = sptr<MockDisplayChangeListener>::MakeSptr();
+    client->displayChangeListener_ = listener;
+    client->OnVirtualScreenDisconnected(displayId);
+
+    client->displayChangeListener_ = nullptr;
+    client->OnVirtualScreenDisconnected(displayId);
 }
 
 /**
@@ -1600,6 +1657,31 @@ HWTEST_F(ScreenSessionManagerClientTest, SetScreenCombination, TestSize.Level2)
 }
 
 /**
+ * @tc.name: ExtraDestroyScreen
+ * @tc.desc: ExtraDestroyScreen test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, ExtraDestroyScreen, TestSize.Level2)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    sptr<ScreenSessionManagerClient> client = new ScreenSessionManagerClient();
+    ASSERT_TRUE(client != nullptr);
+    client->ConnectToServer();
+
+    ScreenId screenId = 1;
+    sptr<ScreenSession> screenSession1 = new ScreenSession(screenId, ScreenProperty(), 0);
+    ASSERT_NE(nullptr, screenSession1);
+    client->extraScreenSessionMap_.emplace(screenId, screenSession1);
+
+    ScreenId screenId11 = 11;
+    client->extraScreenSessionMap_.emplace(screenId11, nullptr);
+    client->ExtraDestroyScreen(screenId11);
+    EXPECT_TRUE(logMsg.find("extra screenSession is null") != std::string::npos);
+}
+
+/**
  * @tc.name: OnDumperClientScreenSessions
  * @tc.desc: OnDumperClientScreenSessions test
  * @tc.type: FUNC
@@ -1654,6 +1736,31 @@ HWTEST_F(ScreenSessionManagerClientTest, OnBeforeScreenPropertyChanged, TestSize
     FoldStatus foldStatus = FoldStatus::UNKNOWN;
     client->OnBeforeScreenPropertyChanged(foldStatus);
     EXPECT_NE(client, nullptr);
+}
+
+/**
+ * @tc.name: SetPrimaryDisplaySystemDpi
+ * @tc.desc: SetPrimaryDisplaySystemDpi test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, SetPrimaryDisplaySystemDpi, TestSize.Level2)
+{
+    sptr<ScreenSessionManagerClient> client = new ScreenSessionManagerClient();
+    ASSERT_TRUE(client != nullptr);
+    client->ConnectToServer();
+
+    RSDisplayNodeConfig config;
+    std::shared_ptr<RSDisplayNode> node = std::make_shared<RSDisplayNode>(config);
+    sptr<ScreenSession> screenSession = new ScreenSession(50, 50, "SetPrimaryDisplaySystemDpi", ScreenProperty(), node);
+    ASSERT_NE(nullptr, screenSession);
+    float dpi = 2.125f;
+    screenSession->SetDensityInCurResolution(dpi);
+    screenSession->SetIsExtend(false);
+    client->screenSessionMap_[0] = screenSession;
+    EXPECT_EQ(screenSession->GetDensityInCurResolution(), 2.125f);
+    dpi = 2.2f;
+    client->SetPrimaryDisplaySystemDpi(dpi);
+    EXPECT_EQ(DisplayManager::GetInstance().GetPrimaryDisplaySystemDpi(), 2.2f);
 }
 } // namespace Rosen
 } // namespace OHOS

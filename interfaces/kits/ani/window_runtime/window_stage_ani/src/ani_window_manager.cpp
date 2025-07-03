@@ -54,7 +54,6 @@ ani_object AniWindowManager::OnGetLastWindow(ani_env* env, ani_object aniContext
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     auto contextPtr = AniWindowUtils::GetAbilityContext(env, aniContext);
-    TLOGI(WmsLogTag::DEFAULT, "[ANI] nativeContextLong : %{public}p", contextPtr);
     auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(contextPtr);
     if (context == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] context is nullptr");

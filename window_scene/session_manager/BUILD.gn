@@ -73,6 +73,7 @@ ohos_shared_library("scene_session_manager") {
     "src/rdb/wms_rdb_open_callback.cpp",
     "src/scb_session_handler.cpp",
     "src/scene_input_manager.cpp",
+    "src/scene_screen_change_listener.cpp",
     "src/scene_session_converter.cpp",
     "src/scene_session_dirty_manager.cpp",
     "src/scene_session_manager.cpp",
@@ -87,8 +88,8 @@ ohos_shared_library("scene_session_manager") {
     "src/zidl/scene_session_manager_lite_stub.cpp",
     "src/zidl/scene_session_manager_stub.cpp",
     "src/zidl/session_lifecycle_listener_stub.cpp",
-    "src/zidl/session_router_stack_listener_stub.cpp",
     "src/zidl/session_router_stack_listener_proxy.cpp",
+    "src/zidl/session_router_stack_listener_stub.cpp",
   ]
 
   public_configs = [ ":session_manager_public_config" ]
@@ -289,6 +290,7 @@ ohos_shared_library("session_manager_lite") {
   public_external_deps = [
     "ability_runtime:session_handler",
     "accessibility:accessibility_common",
+    "input:libmmi-client",
     "input:libmmi-napi",
   ]
 

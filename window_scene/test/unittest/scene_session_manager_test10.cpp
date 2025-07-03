@@ -17,8 +17,10 @@
 
 #include "interfaces/include/ws_common.h"
 #include "iremote_object_mocker.h"
+#include "mock/mock_accesstoken_kit.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "session_info.h"
+#include "session/host/include/root_scene_session.h"
 #include "session/host/include/scene_session.h"
 #include "session_manager.h"
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
@@ -78,6 +80,7 @@ void SceneSessionManagerTest10::SetUp() {}
 
 void SceneSessionManagerTest10::TearDown()
 {
+    MockAccesstokenKit::ChangeMockStateToInit();
     usleep(WAIT_SYNC_IN_NS);
 }
 
@@ -1048,7 +1051,7 @@ HWTEST_F(SceneSessionManagerTest10, TestIsNeedSkipWindowModeTypeCheck_04, TestSi
     DisplayId displayId = 1001;
     sceneSession->property_->SetDisplayId(displayId);
     auto ret = ssm_->IsNeedSkipWindowModeTypeCheck(sceneSession, true);
-    ASSERT_TRUE(ret);
+    EXPECT_TRUE(ret);
 
     ret = ssm_->IsNeedSkipWindowModeTypeCheck(sceneSession, false);
     ASSERT_FALSE(ret);
@@ -1085,6 +1088,11 @@ HWTEST_F(SceneSessionManagerTest10, GetStatusBarConstantlyShow, TestSize.Level0)
     info.bundleName_ = "test";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
+    sptr<RootSceneSession> rootSceneSession = sptr<RootSceneSession>::MakeSptr();
+    ASSERT_NE(nullptr, rootSceneSession);
+    sceneSession->property_->SetPersistentId(1);
+    rootSceneSession->property_->SetPersistentId(2);
+    ssm_->rootSceneSession_ = rootSceneSession;
 
     ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
     bool isVisible;
@@ -1104,6 +1112,7 @@ HWTEST_F(SceneSessionManagerTest10, NotifyAppUseControlList, TestSize.Level1)
     ASSERT_NE(ssm_, nullptr);
     std::vector<AppUseControlInfo> controlList;
     controlList.emplace_back();
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_PERMISSION,
               ssm_->NotifyAppUseControlList(ControlAppType::APP_LOCK, -1, controlList));
 
@@ -1608,22 +1617,46 @@ HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_AIBar, TestSize.Leve
 }
 
 /**
- * @tc.name: refreshAllAppUseControlMap
- * @tc.desc: refreshAllAppUseControlMap
+ * @tc.name: NotifyWindowSystemBarPropertyChange
+ * @tc.desc: SceneSesionManager test NotifyWindowSystemBarPropertyChange
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest10, refreshAllAppUseControlMap, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest10, NotifyWindowSystemBarPropertyChange, TestSize.Level0)
+{
+    EXPECT_NE(ssm_, nullptr);
+    SystemBarProperty systemBarProperty;
+    ssm_->NotifyWindowSystemBarPropertyChange(WindowType::WINDOW_TYPE_STATUS_BAR, systemBarProperty);
+    EXPECT_EQ(ssm_->lastSystemBarPropertyMap_[WindowType::WINDOW_TYPE_STATUS_BAR], systemBarProperty);
+    ssm_->NotifyWindowSystemBarPropertyChange(WindowType::WINDOW_TYPE_STATUS_BAR, systemBarProperty);
+    EXPECT_EQ(ssm_->lastSystemBarPropertyMap_[WindowType::WINDOW_TYPE_STATUS_BAR], systemBarProperty);
+}
+
+/**
+ * @tc.name: RefreshAllAppUseControlMap
+ * @tc.desc: RefreshAllAppUseControlMap
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, RefreshAllAppUseControlMap, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     AppUseControlInfo appUseControlInfo;
     appUseControlInfo.bundleName_ = "app_bundle_name";
+    ssm_->RefreshAllAppUseControlMap(appUseControlInfo, ControlAppType::APP_LOCK);
+ 
     appUseControlInfo.isNeedControl_ = true;
-    ssm_->refreshAllAppUseControlMap(appUseControlInfo, ControlAppType::APP_LOCK);
-    EXPECT_EQ(1, SceneSession::GetAllAppUseControlMap().size());
-
+    ssm_->RefreshAllAppUseControlMap(appUseControlInfo, ControlAppType::APP_LOCK);
+    EXPECT_EQ(1, ssm_->allAppUseControlMap_.size());
+ 
     appUseControlInfo.isNeedControl_ = false;
-    ssm_->refreshAllAppUseControlMap(appUseControlInfo, ControlAppType::APP_LOCK);
-    EXPECT_EQ(0, SceneSession::GetAllAppUseControlMap().size());
+    ssm_->RefreshAllAppUseControlMap(appUseControlInfo, ControlAppType::APP_LOCK);
+    EXPECT_EQ(0, ssm_->allAppUseControlMap_.size());
+ 
+    appUseControlInfo.isNeedControl_ = false;
+    appUseControlInfo.isControlRecentOnly_ = true;
+    appUseControlInfo.isControlRecentOnly_ = false;
+    ssm_->RefreshAllAppUseControlMap(appUseControlInfo, ControlAppType::APP_LOCK);
+    ssm_->RefreshAllAppUseControlMap(appUseControlInfo, ControlAppType::PARENT_CONTROL);
+    EXPECT_EQ(0, ssm_->allAppUseControlMap_.size());
 }
 } // namespace
 } // namespace Rosen

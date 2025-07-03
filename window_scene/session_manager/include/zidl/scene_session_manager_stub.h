@@ -55,6 +55,7 @@ private:
     int HandleGetFocusSessionElement(MessageParcel& data, MessageParcel& reply);
     int HandleSetGestureNavigationEnabled(MessageParcel& data, MessageParcel& reply);
     int HandleCheckWindowId(MessageParcel& data, MessageParcel& reply);
+    int HandleUpdateWindowModeByIdForUITest(MessageParcel& data, MessageParcel& reply);
 
     int HandleRegisterSessionListener(MessageParcel& data, MessageParcel& reply);
     int HandleUnRegisterSessionListener(MessageParcel& data, MessageParcel& reply);
@@ -122,6 +123,7 @@ private:
     int HandleAddSkipSelfWhenShowOnVirtualScreenList(MessageParcel& data, MessageParcel& reply);
     int HandleRemoveSkipSelfWhenShowOnVirtualScreenList(MessageParcel& data, MessageParcel& reply);
     int HandleIsPcWindow(MessageParcel& data, MessageParcel& reply);
+    int HandleIsFreeMultiWindow(MessageParcel& data, MessageParcel& reply);
     int HandleIsPcOrPadFreeMultiWindowMode(MessageParcel& data, MessageParcel& reply);
     int HandleIsWindowRectAutoSave(MessageParcel& data, MessageParcel& reply);
     int HandleSetImageForRecent(MessageParcel& data, MessageParcel& reply);

@@ -33,7 +33,7 @@ constexpr float ANGLE_MIN_VAL = 30.0F;
 constexpr float ANGLE_MAX_VAL = 180.0F;
 constexpr float ANGLE_FLAT_THRESHOLD = 160.0F;
 constexpr float ANGLE_SENSOR_THRESHOLD = 160.0F;
-constexpr float ANGLE_HALF_FOLD_THRESHOLD = 135.0F;
+constexpr float ANGLE_HALF_FOLD_THRESHOLD = 150.0F;
 constexpr uint16_t HALL_HAVE_KEYBOARD_THRESHOLD = 0B0100;
 constexpr uint16_t HALL_REMOVE_KEYBOARD_THRESHOLD = 0B0000;
 constexpr uint16_t HALL_ACTIVE = 1 << 2;
@@ -147,7 +147,12 @@ void SuperFoldSensorManager::HandlePostureData(const SensorEvent * const event)
         return;
     }
     TLOGD(WmsLogTag::DMS, "angle value is: %{public}f.", curAngle_);
-    NotifyFoldAngleChanged(curAngle_);
+    auto task = [this, curAngle = curAngle_] {
+        NotifyFoldAngleChanged(curAngle);
+    };
+    if (taskScheduler_) {
+        taskScheduler_->PostAsyncTask(task, "DMSHandlePosture");
+    }
 }
 
 void SuperFoldSensorManager::NotifyFoldAngleChanged(float foldAngle)
@@ -204,7 +209,12 @@ void SuperFoldSensorManager::HandleHallData(const SensorEvent * const event)
     }
     curHall_ = (status & HALL_ACTIVE);
     TLOGI(WmsLogTag::DMS, "Hall change, hall = %{public}u", curHall_);
-    NotifyHallChanged(curHall_);
+    auto task = [this, curHall = curHall_] {
+        NotifyHallChanged(curHall);
+    };
+    if (taskScheduler_) {
+        taskScheduler_->PostAsyncTask(task, "DMSHandleHall");
+    }
 }
 
 void SuperFoldSensorManager::NotifyHallChanged(uint16_t Hall)
@@ -241,25 +251,25 @@ void SuperFoldSensorManager::HandleSuperSensorChange(SuperFoldStatusChangeEvents
 
 void SuperFoldSensorManager::HandleScreenConnectChange()
 {
-    TLOGI(WmsLogTag::DMS, "Screen connect to stop statemachine.");
+    TLOGW(WmsLogTag::DMS, "Screen connect to stop statemachine.");
     SuperFoldStateManager::GetInstance().HandleScreenConnectChange();
 }
 
 void SuperFoldSensorManager::HandleScreenDisconnectChange()
 {
     if (ScreenSessionManager::GetInstance().GetIsFoldStatusLocked()) {
-        TLOGI(WmsLogTag::DMS, "Fold status is still locked.");
+        TLOGW(WmsLogTag::DMS, "Fold status is still locked.");
         return;
     }
     if (ScreenSessionManager::GetInstance().GetIsExtendScreenConnected()) {
-        TLOGI(WmsLogTag::DMS, "Extend screen is still connected.");
+        TLOGW(WmsLogTag::DMS, "Extend screen is still connected.");
         return;
     }
     if (ScreenSessionManager::GetInstance().GetIsLandscapeLockStatus()) {
-        TLOGI(WmsLogTag::DMS, "Landscape status is still locked.");
+        TLOGW(WmsLogTag::DMS, "Landscape status is still locked.");
         return;
     }
-    TLOGI(WmsLogTag::DMS, "All locks have been unlocked to start statemachine.");
+    TLOGW(WmsLogTag::DMS, "All locks have been unlocked to start statemachine.");
     NotifyHallChanged(curHall_);
     NotifyFoldAngleChanged(curAngle_);
 }
@@ -293,5 +303,11 @@ float SuperFoldSensorManager::GetCurAngle()
 SuperFoldSensorManager::SuperFoldSensorManager() {}
 
 SuperFoldSensorManager::~SuperFoldSensorManager() {}
+
+void SuperFoldSensorManager::SetTaskScheduler(std::shared_ptr<TaskScheduler> scheduler)
+{
+    TLOGI(WmsLogTag::DMS, "Set task scheduler.");
+    taskScheduler_ = scheduler;
+}
 } // Rosen
 } // OHOS
