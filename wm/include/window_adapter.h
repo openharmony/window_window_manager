@@ -231,7 +231,7 @@ private:
     bool isRegisteredUserSwitchListener_ = false;
     std::map<WindowManagerAgentType, std::set<sptr<IWindowManagerAgent>>> windowManagerAgentMap_;
     std::map<int32_t, SessionRecoverCallbackFunc> sessionRecoverCallbackFuncMap_;
-    std::mutex filterMutex_;
+    std::mutex effectMutex_;
     std::map<int32_t, UIEffectRecoverCallbackFunc> uiEffectRecoverCallbackFuncMap_;
     bool recoverInitialized_ = false;
     // above guarded by mutex_

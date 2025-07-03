@@ -86,7 +86,7 @@ const std::string SCENE_SESSION_DESTRUCT_CB = "sceneSessionDestruct";
 const std::string SCENE_SESSION_TRANSFER_TO_TARGET_SCREEN_CB = "sceneSessionTransferToTargetScreen";
 const std::string UPDATE_KIOSK_APP_LIST_CB = "updateKioskAppList";
 const std::string KIOSK_MODE_CHANGE_CB = "kioskModeChange";
-const std::string UI_EFFECT_SET_PARAM_CB = "uiEffectSetParam";
+const std::string UI_EFFECT_SET_PARAMS_CB = "uiEffectSetParams";
 const std::string UI_EFFECT_ANIMATE_TO_CB = "uiEffectAnimateTo";
 
 const std::map<std::string, ListenerFunctionType> ListenerFunctionTypeMap {
@@ -112,7 +112,7 @@ const std::map<std::string, ListenerFunctionType> ListenerFunctionTypeMap {
     {SCENE_SESSION_TRANSFER_TO_TARGET_SCREEN_CB,    ListenerFunctionType::SCENE_SESSION_TRANSFER_TO_TARGET_SCREEN_CB},
     {UPDATE_KIOSK_APP_LIST_CB,     ListenerFunctionType::UPDATE_KIOSK_APP_LIST_CB},
     {KIOSK_MODE_CHANGE_CB,         ListenerFunctionType::KIOSK_MODE_CHANGE_CB},
-    {UI_EFFECT_SET_PARAM_CB,       ListenerFunctionType::UI_EFFECT_SET_PARAM_CB},
+    {UI_EFFECT_SET_PARAMS_CB,       ListenerFunctionType::UI_EFFECT_SET_PARAMS_CB},
     {UI_EFFECT_ANIMATE_TO_CB,      ListenerFunctionType::UI_EFFECT_ANIMATE_TO_CB},
 };
 } // namespace
@@ -1585,7 +1585,7 @@ void JsSceneSessionManager::ProcessRegisterCallback(ListenerFunctionType listene
         case ListenerFunctionType::KIOSK_MODE_CHANGE_CB:
             RegisterKioskModeChangeCallback();
             break;
-        case ListenerFunctionType::UI_EFFECT_SET_PARAM_CB:
+        case ListenerFunctionType::UI_EFFECT_SET_PARAMS_CB:
             RegisterUIEffectSetParamsCallback();
             break;
         case ListenerFunctionType::UI_EFFECT_ANIMATE_TO_CB:
@@ -4812,7 +4812,7 @@ void JsSceneSessionManager::RegisterUIEffectSetParamsCallback()
 {
     UIEffectManager::GetInstance().RegisterUIEffectSetParamsCallback(
         [this](int32_t id, sptr<UIEffectParams> param) {
-        this->OnUIEffectSetParam(id, param);
+        this->OnUIEffectSetParams(id, param);
     });
 }
 
@@ -4825,18 +4825,18 @@ void JsSceneSessionManager::RegisterUIEffectAnimateToCallback()
     });
 }
 
-void JsSceneSessionManager::OnUIEffectSetParam(int32_t id, sptr<UIEffectParams> param)
+void JsSceneSessionManager::OnUIEffectSetParams(int32_t id, sptr<UIEffectParams> param)
 {
     const char* const where = __func__;
     taskScheduler_->PostMainThreadTask(
-        [this, id, param, where, jsCallBack = GetJSCallback(UI_EFFECT_SET_PARAM_CB), env = env_] {
+        [this, id, param, where, jsCallBack = GetJSCallback(UI_EFFECT_SET_PARAMS_CB), env = env_] {
             if (jsCallBack == nullptr || param == nullptr) {
                 TLOGNE(WmsLogTag::WMS_ANIMATION, "%{public}s:jsCallBack or param is nullptr", where);
                 return;
             }
             napi_value jsParam = nullptr;
             if (napi_status status = param->ConvertToJsValue(env, jsParam); status != napi_status::napi_ok) {
-                TLOGNE(WmsLogTag::WMS_ANIMATION, "OnUIEffectSetParam trans failed with code %{public}d", status);
+                TLOGNE(WmsLogTag::WMS_ANIMATION, "OnUIEffectSetParams trans failed with code %{public}d", status);
                 return;
             }
             napi_value argv[] = { CreateJsValue(env, id), jsParam };

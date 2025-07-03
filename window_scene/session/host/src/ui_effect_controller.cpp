@@ -40,7 +40,7 @@ UIEffectController::UIEffectController(int32_t id,
     animateToCallback_ = animateCallback;
 }
 
-WMError UIEffectController::SetParams(const sptr<UIEffectParams>& param)
+WMError UIEffectController::SetParams(const sptr<UIEffectParams>& params)
 {
     if (!SessionPermission::IsSystemCalling()) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "not system calling, permission denied!");
@@ -48,7 +48,7 @@ WMError UIEffectController::SetParams(const sptr<UIEffectParams>& param)
     }
     isAliveInUI_ = true;
     if (setParamsCallback_) {
-        setParamsCallback_(id_, param);
+        setParamsCallback_(id_, params);
         return WMError::WM_OK;
     } else {
         TLOGE(WmsLogTag::WMS_ANIMATION, "setParamCallback not exist, id: %{public}d", id_);
@@ -56,7 +56,7 @@ WMError UIEffectController::SetParams(const sptr<UIEffectParams>& param)
     }
 }
 
-WMError UIEffectController::AnimateTo(const sptr<UIEffectParams>& param,
+WMError UIEffectController::AnimateTo(const sptr<UIEffectParams>& params,
     const sptr<WindowAnimationOption>& config, const sptr<WindowAnimationOption>& interruptOption)
 {
     if (!SessionPermission::IsSystemCalling()) {
@@ -67,7 +67,7 @@ WMError UIEffectController::AnimateTo(const sptr<UIEffectParams>& param,
         return WMError::WM_ERROR_UI_EFFECT_ERROR;
     }
     if (animateToCallback_) {
-        animateToCallback_(id_, param, config, interruptOption);
+        animateToCallback_(id_, params, config, interruptOption);
         return WMError::WM_OK;
     } else {
         TLOGE(WmsLogTag::WMS_ANIMATION, "animateToCallback not exist, id: %{public}d", id_);

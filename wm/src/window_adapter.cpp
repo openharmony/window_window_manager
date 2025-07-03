@@ -414,12 +414,12 @@ void WindowAdapter::RegisterSessionRecoverCallbackFunc(
 void WindowAdapter::RegisterUIEffectRecoverCallbackFunc(int32_t id,
     const UIEffectRecoverCallbackFunc& callbackFunc)
 {
-    std::lock_guard<std::mutex> lock(filterMutex_);
+    std::lock_guard<std::mutex> lock(effectMutex_);
     uiEffectRecoverCallbackFuncMap_[id] = callbackFunc;
 }
 void WindowAdapter::UnregisterUIEffectRecoverCallbackFunc(int32_t id)
 {
-    std::lock_guard<std::mutex> lock(filterMutex_);
+    std::lock_guard<std::mutex> lock(effectMutex_);
     uiEffectRecoverCallbackFuncMap_.erase(id);
 }
 
@@ -472,7 +472,7 @@ void WindowAdapter::WindowManagerAndSessionRecover()
     }
     std::map<int32_t, UIEffectRecoverCallbackFunc> uiEffectRecoverCallbackFuncMap;
     {
-        std::lock_guard<std::mutex> lock(filterMutex_);
+        std::lock_guard<std::mutex> lock(effectMutex_);
         uiEffectRecoverCallbackFuncMap = uiEffectRecoverCallbackFuncMap_;
     }
     for (const auto& it : uiEffectRecoverCallbackFuncMap) {
