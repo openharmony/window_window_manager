@@ -1944,7 +1944,9 @@ HWTEST_F(WindowSceneSessionImplTest, SetWindowShadowEnabled01, TestSize.Level1)
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
     EXPECT_EQ(WMError::WM_OK, window->SetWindowShadowEnabled(true));
+    EXPECT_EQ(true, window->GetWindowShadowEnabled());
     EXPECT_EQ(WMError::WM_OK, window->SetWindowShadowEnabled(false));
+    EXPECT_EQ(false, window->GetWindowShadowEnabled());
 }
 
 /**
