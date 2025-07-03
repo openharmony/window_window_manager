@@ -464,7 +464,7 @@ HWTEST_F(SceneSessionTest, HandleActionUpdateWindowShadowEnabled01, TestSize.Lev
     sceneSession->containerColorList_.insert("abc");
 
     auto ret = sceneSession->HandleActionUpdateWindowShadowEnabled(property, action);
-    EXPECT_EQ(WMError::WS_ERROR_INVALID_PERMISSION, ret);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
 
     sceneSession->containerColorList_.insert("HandleActionUpdateWindowShadowEnabled");
     ret = sceneSession->HandleActionUpdateWindowShadowEnabled(property, action);
