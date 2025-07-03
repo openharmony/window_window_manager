@@ -174,6 +174,18 @@ napi_value ConvertWindowAnimationOptionToJsValue(napi_env env,
     return configJsValue;
 }
 
+napi_value AnimationTypeInit(napi_env env)
+{
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_set_named_property(env, objValue, "FADE_IN_OUT",
+        CreateJsValue(env, static_cast<uint32_t>(AnimationType::FADE_IN_OUT)));
+    napi_set_named_property(env, objValue, "FADE_IN",
+        CreateJsValue(env, static_cast<uint32_t>(AnimationType::FADE_IN)));
+    return objValue;
+}
+
 napi_value WindowTransitionTypeInit(napi_env env)
 {
     CHECK_NAPI_ENV_RETURN_IF_NULL(env);
