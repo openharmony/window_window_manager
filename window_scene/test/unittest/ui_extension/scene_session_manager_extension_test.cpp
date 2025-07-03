@@ -203,7 +203,7 @@ HWTEST_F(SceneSessionManagerExtensionTest, CreateAndConnectSpecificSession_TestH
     extWindowFlags.hideNonSecureWindowsFlag = true;
     parentSession->UpdateExtWindowFlags(parentSession->GetPersistentId(), extWindowFlags, extWindowFlags);
     parentSession->SetSessionState(SessionState::STATE_FOREGROUND);
-    ssm_->sceneSessionMap_.insert( {parentSession->GetPersistentId(), parentSession} );
+    ssm_->sceneSessionMap_.insert({parentSession->GetPersistentId(), parentSession});
     WSError res = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
         systemConfig, token);
     ASSERT_EQ(WSError::WS_ERROR_INVALID_OPERATION, res);
