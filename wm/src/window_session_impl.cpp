@@ -4500,19 +4500,25 @@ WSError WindowSessionImpl::SendContainerModalEvent(const std::string& eventName,
 
 WMError WindowSessionImpl::SetWindowContainerColor(const std::string& activeColor, const std::string& inactiveColor)
 {
-    if (!SessionPermission::IsSystemCalling() &&
+    if (!windowSystemConfig_.IsPcWindow()) {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_WINDOW_TRANSPARENT) &&
+        !SessionPermission::IsSystemCalling() &&
         containerColorList_.count(property_->GetSessionInfo().bundleName_) == 0) {
         TLOGE(WmsLogTag::WMS_DECOR, "winId: %{public}d, permission denied", GetPersistentId());
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     if (!WindowHelper::IsMainWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_DECOR, "winId: %{public}d, type: %{public}u not supported",
+            GetPersistentId(), GetType());
         return WMError::WM_ERROR_INVALID_CALLING;
     }
     if (!IsDecorEnable()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-    if (!(windowSystemConfig_.IsPcWindow() || windowSystemConfig_.IsPadWindow())) {
-        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     uint32_t activeColorValue;
     if (!ColorParser::Parse(activeColor, activeColorValue)) {
@@ -4532,6 +4538,9 @@ WMError WindowSessionImpl::SetWindowContainerColor(const std::string& activeColo
     }
     if (auto uiContent = GetUIContentSharedPtr()) {
         uiContent->SetWindowContainerColor(activeColorValue, inactiveColorValue);
+    } else {
+        TLOGE(WmsLogTag::WMS_DECOR, "winId: %{public}d, uicontent is null", GetPersistentId());
+        return WMError::WM_ERROR_NULLPTR;
     }
     return WMError::WM_OK;
 }
