@@ -4476,6 +4476,14 @@ public:
      * @return content color
      */
     virtual uint32_t GetHostStatusBarContentColor() const { return 0; }
+
+    /**
+     * @brief Get autoStart picture-in-picture switch status of system setting.
+     *
+     * @param switchStatus autoStart picture-in-picture switch status.
+     * @return WM_OK means get success.
+     */
+    virtual WMError GetPiPSettingSwitchStatus(bool& switchStatus) const { return WMError::WM_OK; }
 };
 }
 }

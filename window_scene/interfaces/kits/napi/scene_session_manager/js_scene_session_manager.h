@@ -169,6 +169,11 @@ public:
      */
     static napi_value SupportSnapshotAllSessionStatus(napi_env env, napi_callback_info info);
 
+    /*
+     * PiP Window
+     */
+    static napi_value SetPiPSettingSwitchStatus(napi_env env, napi_callback_info info);
+
 private:
     napi_value OnSetBehindWindowFilterEnabled(napi_env env, napi_callback_info info);
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
@@ -331,6 +336,7 @@ private:
      */
     void OnStartPiPFailed(DisplayId displayId);
     void ProcessStartPiPFailedRegister();
+    napi_value OnSetPiPSettingSwitchStatus(napi_env env, napi_callback_info info);
 
     /*
      * Window Animation
