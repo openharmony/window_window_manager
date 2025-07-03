@@ -160,9 +160,14 @@ HWTEST_F(SceneSessionManagerTest12, CreateAndConnectSpecificSession_TestHideNonS
     property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     property->SetFloatingWindowAppType(true);
     ssm_->shouldHideNonSecureFloatingWindows_ = true;
-    WSError res = ssm_->CreateAndConnectSpecificSession(
-        sessionStage, eventChannel, node, property, id, session, systemConfig, token);
-    ASSERT_EQ(ssm_->systemConfig_.IsPcWindow()? WSError::WS_OK : WSError::WS_ERROR_INVALID_OPERATION, res);
+    WSError res = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
+        systemConfig, token);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_OPERATION, res);
+
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    res = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
+        systemConfig, token);
+    ASSERT_EQ(WSError::WS_OK, res);
     MockUIExtSessionPermission::ClearAllFlag();
 }
 
@@ -195,13 +200,13 @@ HWTEST_F(SceneSessionManagerTest12, CreateAndConnectSpecificSession_TestHideNonS
     parentSession->UpdateExtWindowFlags(parentSession->GetPersistentId(), extWindowFlags, extWindowFlags);
     parentSession->SetSessionState(SessionState::STATE_FOREGROUND);
     ssm_->sceneSessionMap_.insert( {parentSession->GetPersistentId(), parentSession} );
-    WSError res = ssm_->CreateAndConnectSpecificSession(
-        sessionStage, eventChannel, node, property, id, session, systemConfig, token);
+    WSError res = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
+        systemConfig, token);
     ASSERT_EQ(WSError::WS_ERROR_INVALID_OPERATION, res);
 
     ssm_->sceneSessionMap_.erase(parentSession->GetPersistentId());
-    res = ssm_->CreateAndConnectSpecificSession(
-        sessionStage, eventChannel, node, property, id, session, systemConfig, token);
+    res = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
+        systemConfig, token);
     ASSERT_EQ(WSError::WS_OK, res);
     MockUIExtSessionPermission::ClearAllFlag();
 }
