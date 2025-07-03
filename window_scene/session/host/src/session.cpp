@@ -351,6 +351,7 @@ void Session::SetScreenId(uint64_t screenId)
     if (sessionStage_) {
         sessionStage_->UpdateDisplayId(screenId);
     }
+    RSAdapterUtil::SetRSUIContext(GetSurfaceNode(), GetRSUIContext(), true);
 }
 
 void Session::SetAppInstanceKey(const std::string& appInstanceKey)
