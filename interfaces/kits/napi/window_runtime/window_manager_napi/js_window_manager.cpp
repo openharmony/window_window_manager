@@ -1436,7 +1436,7 @@ napi_value JsWindowManager::OnGetTopNavDestinationName(napi_env env, napi_callba
                 return;
             }
             TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s ok, topNavDestName: %{public}s, windowId: %{public}d",
-                where, topNavDestNmePtr->c_str(), windowId);
+                where, topNavDestNamePtr->c_str(), windowId);
             task.Resolve(env, CreateJsValue(env, *topNavDestNamePtr));
         };
     napi_value result = nullptr;
