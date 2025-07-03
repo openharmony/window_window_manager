@@ -35,7 +35,6 @@
 #include "window_manager_agent.h"
 #include "zidl/window_manager_agent_interface.h"
 #include "mock/mock_window_manager_agent_lite.h"
-#include "mock/mock_session_permission.h"
 #include "session_manager/include/session_manager_agent_controller.h"
 #include "session_manager/include/zidl/session_router_stack_listener_stub.h"
 
