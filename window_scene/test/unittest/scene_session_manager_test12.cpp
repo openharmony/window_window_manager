@@ -2535,7 +2535,6 @@ HWTEST_F(SceneSessionManagerTest12, TestGetSceneSessions, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest12, CreateUIEffectController, TestSize.Level1)
 {
-
     sptr<MockIRemoteObject> mocker = sptr<MockIRemoteObject>::MakeSptr();
     sptr<UIEffectControllerClientProxy> controllerClient = sptr<UIEffectControllerClientProxy>::MakeSptr(mocker);
     sptr<IUIEffectController> controller = sptr<UIEffectController>::MakeSptr(0, nullptr, nullptr);
