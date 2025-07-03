@@ -171,6 +171,7 @@ HWTEST_F(SessionProxyMockTest, PendingSessionActivation01, TestSize.Level1)
     auto res = sProxy->PendingSessionActivation(abilitySessionInfo);
     EXPECT_EQ(res, WSError::WS_OK);
     GTEST_LOG_(INFO) << "SessionProxyMockTest::PendingSessionActivation01 end";
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
