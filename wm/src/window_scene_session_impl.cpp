@@ -4708,10 +4708,6 @@ WMError WindowSceneSessionImpl::SetWindowShadowEnabled(bool isEnabled)
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (!WindowHelper::IsMainWindow(GetType())) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, type is not supported", GetPersistentId());
-        return WMError::WM_ERROR_INVALID_CALLING;
-    }
     property_->SetWindowShadowEnabled(isEnabled);
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_SHADOW_ENABLED);
 }
