@@ -206,6 +206,11 @@ public:
     virtual WMError CreateUIEffectController(const sptr<IUIEffectControllerClient>& controllerClient,
         sptr<IUIEffectController>& controller, int32_t& controllerId);
 
+     /*
+     * PiP Window
+     */
+    WMError GetPiPSettingSwitchStatus(bool& switchStatus);
+
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;
     bool InitWMSProxy();

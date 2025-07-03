@@ -2560,6 +2560,38 @@ HWTEST_F(SceneSessionManagerTest12, CreateUIEffectController, TestSize.Level1)
     EXPECT_NE(ssm_->CreateUIEffectController(controllerClient, controller, controllerId),
         WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
 }
+
+**
+ * @tc.name: SetPiPSettingSwitchStatus
+ * @tc.desc: test function : SetPiPSettingSwitchStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, SetPiPSettingSwitchStatus, Function | SmallTest | Level2)
+{
+    ssm_->SetPiPSettingSwitchStatus(true);
+    EXPECT_EQ(ssm_->pipSwitchStatus_, true);
+    ssm_->SetPiPSettingSwitchStatus(false);
+    EXPECT_EQ(ssm_->pipSwitchStatus_, false);
+}
+
+/**
+ * @tc.name: GetPiPSettingSwitchStatus
+ * @tc.desc: test function : GetPiPSettingSwitchStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetPiPSettingSwitchStatus, Function | SmallTest | Level2)
+{
+    bool switchStatus = false;
+    ssm_->SetPiPSettingSwitchStatus(true);
+    WMError ret = ssm_->GetPiPSettingSwitchStatus(switchStatus);
+    EXPECT_EQ(switchStatus, true);
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    ssm_->SetPiPSettingSwitchStatus(false);
+    ret = ssm_->GetPiPSettingSwitchStatus(switchStatus);
+    EXPECT_EQ(switchStatus, false);
+    EXPECT_EQ(ret, WMError::WM_OK);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

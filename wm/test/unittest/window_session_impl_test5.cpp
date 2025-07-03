@@ -1719,6 +1719,27 @@ HWTEST_F(WindowSessionImplTest5, TestNotifyGlobalDisplayRectChange, TestSize.Lev
         window->rectChangeInGlobalDisplayListeners_.clear();
     }
 }
+
+/**
+ * @tc.name: GetPiPSettingSwitchStatus
+ * @tc.desc: GetPiPSettingSwitchStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, GetPiPSettingSwitchStatus, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetPiPSettingSwitchStatus");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    bool switchStatus = false;
+    WMError retCode = window->GetPiPSettingSwitchStatus(switchStatus);
+    ASSERT_EQ(retCode, WMError::WM_ERROR_INVALID_WINDOW);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_CREATED;
+    window->GetPiPSettingSwitchStatus(switchStatus);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
