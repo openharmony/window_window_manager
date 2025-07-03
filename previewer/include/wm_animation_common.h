@@ -262,7 +262,7 @@ struct WindowCreateParams : public Parcelable {
 
     static WindowCreateParams* Unmarshalling(Parcel& parcel)
     {
-        WindowCreateParams* windowCreateParams = new WindowCreateParams();    
+        WindowCreateParams* windowCreateParams = new WindowCreateParams();
         windowCreateParams->animationParams =
             std::shared_ptr<StartAnimationOptions>(parcel.ReadParcelable<StartAnimationOptions>());
         windowCreateParams->animationSystemParams =

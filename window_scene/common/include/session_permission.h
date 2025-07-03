@@ -50,6 +50,7 @@ public:
     static bool CheckCallingIsUserTestMode(pid_t pid);
     static bool IsBetaVersion();
     static bool IsSystemAppCall();
+    static bool IsSystemAppCallByCallingTokenID(uint32_t callingTokenId);
     static bool IsFoundationCall();
     static std::string GetCallingBundleName();
 };
