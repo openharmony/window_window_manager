@@ -55,6 +55,7 @@ public:
     virtual void ChangeOffTentMode();
     virtual Drawing::Rect GetScreenSnapshotRect();
     virtual void SetMainScreenRegion(DMRect& mainScreenRegion);
+    virtual void SetIsClearingBootAnimation(bool isClearingBootAnimation);
     void ClearState();
     FoldDisplayMode GetScreenDisplayMode();
     FoldStatus GetFoldStatus();
@@ -62,7 +63,6 @@ public:
     std::chrono::steady_clock::time_point GetStartTimePoint();
     bool GetIsFirstFrameCommitReported();
     void SetIsFirstFrameCommitReported(bool isFirstFrameCommitReported);
-    virtual void SetIsClearingBootAnimation(bool isClearingBootAnimation);
     
     ScreenId screenId_ { SCREEN_ID_INVALID };
     ScreenProperty screenProperty_;
