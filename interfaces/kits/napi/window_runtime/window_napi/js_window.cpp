@@ -2310,47 +2310,37 @@ napi_value JsWindow::HandlePositionTransform(
     napi_value argv[TWO_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != TWO_PARAMS_SIZE) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid argc: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_LAYOUT, "%{public}s: Invalid argc: %{public}zu", caller, argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
 
     int32_t x = 0;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], x)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to x");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "%{public}s: Failed to convert parameter to x", caller);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     int32_t y = 0;
     if (!ConvertFromJsValue(env, argv[INDEX_ONE], y)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to y");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "%{public}s: Failed to convert parameter to y", caller);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
 
-    napi_value result = nullptr;
-    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
-    auto asyncTask = [windowToken = wptr<Window>(windowToken_), x, y, env, napiAsyncTask, transformFunc, caller] {
-        auto window = windowToken.promote();
-        if (!window) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: window is nullptr", caller);
-            napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
-            return;
-        }
-        Position inputPos { x, y };
-        Position resultPos = transformFunc(window, inputPos);
-        auto jsPosition = BuildJsPosition(env, resultPos);
-        if (!jsPosition) {
-            napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(
-                env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "Failed to convert position to JS value"));
-            return;
-        }
-        napiAsyncTask->Resolve(env, jsPosition);
-        TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s: inputPos: %{public}s, resultPos: %{public}s",
-            caller, inputPos.ToString().c_str(), resultPos.ToString().c_str());
-    };
-    if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_ok) {
-        napiAsyncTask->Reject(env,
-            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "Failed to send event"));
+    if (!windowToken_) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "%{public}s: window is nullptr", caller);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    return result;
+
+    Position inputPos { x, y };
+    Position resultPos = transformFunc(windowToken_, inputPos);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "%{public}s: inputPos: %{public}s, resultPos: %{public}s",
+        caller, inputPos.ToString().c_str(), resultPos.ToString().c_str());
+
+    auto jsPosition = BuildJsPosition(env, resultPos);
+    if (!jsPosition) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "%{public}s: Failed to build JS position object", caller);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    return jsPosition;
 }
 
 /** @note @window.layout */
