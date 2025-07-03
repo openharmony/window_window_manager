@@ -8248,6 +8248,10 @@ WMError SceneSessionManager::GetUnreliableWindowInfo(int32_t windowId,
                 FillUnreliableWindowInfo(sceneSession, infos);
                 continue;
             }
+            if (sceneSession->GetSystemTouchable() && sceneSession->GetForegroundInteractiveStatus()) {
+                TLOGND(WmsLogTag::DEFAULT, "persistentId: %{public}d is system touchable", sessionId);
+                continue;
+            }
             if (!sceneSession->GetRSVisible()) {
                 TLOGD(WmsLogTag::DEFAULT, "persistentId: %{public}d is not visible", sessionId);
                 continue;
