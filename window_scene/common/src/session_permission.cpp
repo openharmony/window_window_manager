@@ -95,7 +95,8 @@ bool SessionPermission::IsSystemAppCall()
     return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(callingTokenId);
 }
 
-bool SessionPermission::IsSystemAppCallByCallingTokenID(uint32_t callingTokenId) {
+bool SessionPermission::IsSystemAppCallByCallingTokenID(uint32_t callingTokenId)
+{
     return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(callingTokenId);
 }
 
