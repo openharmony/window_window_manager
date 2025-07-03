@@ -5946,9 +5946,9 @@ WMError SceneSession::HandleActionUpdateWindowShadowEnabled(const sptr<WindowSes
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "id: %{public}d, enabled: %{public}u",
         GetPersistentId(), property->GetWindowShadowEnabled());
     if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_WINDOW_TRANSPARENT) &&
-        containerColorList_.count(property_->GetSessionInfo().bundleName_) == 0) {
+        containerColorList_.count(GetSessionInfo().bundleName_) == 0) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "id: %{public}d: permission denied", GetPersistentId());
-        return WSError::WS_ERROR_INVALID_PERMISSION;
+        return WMError::WM_ERROR_INVALID_PERMISSION;
     }
     if (!WindowHelper::IsMainWindow(GetWindowType())) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, type is not supported", GetPersistentId());
