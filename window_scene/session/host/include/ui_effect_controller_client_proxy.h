@@ -25,7 +25,7 @@ public:
     explicit UIEffectControllerClientProxy(const sptr<IRemoteObject>& impl)
         : IRemoteProxy<IUIEffectControllerClient>(impl) {}
     virtual ~UIEffectControllerClientProxy() = default;
-    WMError SetParams(const sptr<UIEffectParams>& param) override;
+    WMError SetParams(const sptr<UIEffectParams>& params) override;
 
 private:
     static inline BrokerDelegator<UIEffectControllerClientProxy> delegator_;

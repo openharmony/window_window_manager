@@ -83,9 +83,9 @@ HWTEST_F(UIEffectControllerProxyTest, UIEffectControllerProxySetParam, TestSize.
     sptr<UIEffectControllerProxy> proxy =
         sptr<UIEffectControllerProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(proxy, nullptr);
-    sptr<UIEffectParams> param = sptr<UIEffectParams>::MakeSptr();
+    sptr<UIEffectParams> params = sptr<UIEffectParams>::MakeSptr();
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
-    EXPECT_EQ(proxy->SetParams(param), WMError::WM_ERROR_IPC_FAILED);
+    EXPECT_EQ(proxy->SetParams(params), WMError::WM_ERROR_IPC_FAILED);
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
     MockMessageParcel::ClearAllErrorFlag();
     SetWriteStrongParcelableErrorFlag(true);
@@ -93,15 +93,15 @@ HWTEST_F(UIEffectControllerProxyTest, UIEffectControllerProxySetParam, TestSize.
     EXPECT_EQ(proxy->SetParams(nullptr), WMError::WM_ERROR_IPC_FAILED);
     SetWriteStrongParcelableErrorFlag(false);
     iRemoteObjectMocker->SetRequestResult(10);
-    EXPECT_EQ(proxy->SetParams(param), WMError::WM_ERROR_IPC_FAILED);
+    EXPECT_EQ(proxy->SetParams(params), WMError::WM_ERROR_IPC_FAILED);
     iRemoteObjectMocker->SetRequestResult(0);
     MockMessageParcel::SetReadUint32ErrorFlag(true);
-    EXPECT_EQ(proxy->SetParams(param), WMError::WM_ERROR_IPC_FAILED);
+    EXPECT_EQ(proxy->SetParams(params), WMError::WM_ERROR_IPC_FAILED);
     MockMessageParcel::SetReadUint32ErrorFlag(false);
-    proxy->SetParams(param);
+    proxy->SetParams(params);
     sptr<UIEffectControllerProxy> proxyInValid =
         sptr<UIEffectControllerProxy>::MakeSptr(nullptr);
-    EXPECT_EQ(proxyInValid->SetParams(param), WMError::WM_ERROR_IPC_FAILED);
+    EXPECT_EQ(proxyInValid->SetParams(params), WMError::WM_ERROR_IPC_FAILED);
 }
 
 HWTEST_F(UIEffectControllerProxyTest, UIEffectControllerProxyAnimateTo, TestSize.Level1)
@@ -111,49 +111,49 @@ HWTEST_F(UIEffectControllerProxyTest, UIEffectControllerProxyAnimateTo, TestSize
         sptr<UIEffectControllerProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(proxy, nullptr);
     MockMessageParcel::ClearAllErrorFlag();
-    sptr<UIEffectParams> param = sptr<UIEffectParams>::MakeSptr();
+    sptr<UIEffectParams> params = sptr<UIEffectParams>::MakeSptr();
     sptr<WindowAnimationOption> config = sptr<WindowAnimationOption>::MakeSptr();
     sptr<WindowAnimationOption> interruptOption = sptr<WindowAnimationOption>::MakeSptr();
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
-    EXPECT_EQ(proxy->AnimateTo(param, config, interruptOption), WMError::WM_ERROR_IPC_FAILED);
+    EXPECT_EQ(proxy->AnimateTo(params, config, interruptOption), WMError::WM_ERROR_IPC_FAILED);
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
     // index 0 failed
     ResetWriteStrongParcelableState();
     SetWriteStrongParcelableErrorFlag(true);
     SetWriteStrongParcelableErrorIndex(0);
-    EXPECT_EQ(proxy->AnimateTo(param, config, interruptOption), WMError::WM_ERROR_IPC_FAILED);
+    EXPECT_EQ(proxy->AnimateTo(params, config, interruptOption), WMError::WM_ERROR_IPC_FAILED);
     SetWriteStrongParcelableErrorFlag(false);
     // index 1 failed
     ResetWriteStrongParcelableState();
     SetWriteStrongParcelableErrorFlag(true);
     SetWriteStrongParcelableErrorIndex(1);
-    EXPECT_EQ(proxy->AnimateTo(param, config, interruptOption), WMError::WM_ERROR_IPC_FAILED);
+    EXPECT_EQ(proxy->AnimateTo(params, config, interruptOption), WMError::WM_ERROR_IPC_FAILED);
     SetWriteStrongParcelableErrorFlag(false);
     // index 2 bool failed
     MockMessageParcel::SetWriteBoolErrorFlag(true);
-    EXPECT_EQ(proxy->AnimateTo(param, config, interruptOption), WMError::WM_ERROR_IPC_FAILED);
+    EXPECT_EQ(proxy->AnimateTo(params, config, interruptOption), WMError::WM_ERROR_IPC_FAILED);
     MockMessageParcel::SetWriteBoolErrorFlag(false);
     // index 2 failed
     ResetWriteStrongParcelableState();
     SetWriteStrongParcelableErrorFlag(true);
     SetWriteStrongParcelableErrorIndex(2);
-    EXPECT_EQ(proxy->AnimateTo(param, config, interruptOption), WMError::WM_ERROR_IPC_FAILED);
+    EXPECT_EQ(proxy->AnimateTo(params, config, interruptOption), WMError::WM_ERROR_IPC_FAILED);
     SetWriteStrongParcelableErrorFlag(false);
     // index 2 nullptr
-    proxy->AnimateTo(param, config, nullptr);
+    proxy->AnimateTo(params, config, nullptr);
     // send request failed
     iRemoteObjectMocker->SetRequestResult(10);
-    EXPECT_EQ(proxy->AnimateTo(param, config, interruptOption), WMError::WM_ERROR_IPC_FAILED);
+    EXPECT_EQ(proxy->AnimateTo(params, config, interruptOption), WMError::WM_ERROR_IPC_FAILED);
     iRemoteObjectMocker->SetRequestResult(0);
     // read result failed
     MockMessageParcel::SetReadUint32ErrorFlag(true);
-    EXPECT_EQ(proxy->AnimateTo(param, config, interruptOption), WMError::WM_ERROR_IPC_FAILED);
+    EXPECT_EQ(proxy->AnimateTo(params, config, interruptOption), WMError::WM_ERROR_IPC_FAILED);
     MockMessageParcel::SetReadUint32ErrorFlag(false);
     // read result ok
-    proxy->AnimateTo(param, config, interruptOption);
+    proxy->AnimateTo(params, config, interruptOption);
     sptr<UIEffectControllerProxy> proxyInValid =
         sptr<UIEffectControllerProxy>::MakeSptr(nullptr);
-    EXPECT_EQ(proxyInValid->AnimateTo(param, config, interruptOption), WMError::WM_ERROR_IPC_FAILED);
+    EXPECT_EQ(proxyInValid->AnimateTo(params, config, interruptOption), WMError::WM_ERROR_IPC_FAILED);
 }
 
 HWTEST_F(UIEffectControllerProxyTest, UIEffectControllerClientProxySetParam, TestSize.Level1)
@@ -163,9 +163,9 @@ HWTEST_F(UIEffectControllerProxyTest, UIEffectControllerClientProxySetParam, Tes
         sptr<UIEffectControllerClientProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(proxy, nullptr);
     MockMessageParcel::ClearAllErrorFlag();
-    sptr<UIEffectParams> param = sptr<UIEffectParams>::MakeSptr();
+    sptr<UIEffectParams> params = sptr<UIEffectParams>::MakeSptr();
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
-    EXPECT_EQ(proxy->SetParams(param), WMError::WM_ERROR_IPC_FAILED);
+    EXPECT_EQ(proxy->SetParams(params), WMError::WM_ERROR_IPC_FAILED);
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
     ResetWriteStrongParcelableState();
     SetWriteStrongParcelableErrorFlag(true);
@@ -173,12 +173,12 @@ HWTEST_F(UIEffectControllerProxyTest, UIEffectControllerClientProxySetParam, Tes
     EXPECT_EQ(proxy->SetParams(nullptr), WMError::WM_ERROR_IPC_FAILED);
     SetWriteStrongParcelableErrorFlag(false);
     iRemoteObjectMocker->SetRequestResult(10);
-    EXPECT_EQ(proxy->SetParams(param), WMError::WM_ERROR_IPC_FAILED);
+    EXPECT_EQ(proxy->SetParams(params), WMError::WM_ERROR_IPC_FAILED);
     iRemoteObjectMocker->SetRequestResult(0);
-    EXPECT_EQ(proxy->SetParams(param), WMError::WM_OK);
+    EXPECT_EQ(proxy->SetParams(params), WMError::WM_OK);
     sptr<UIEffectControllerClientProxy> proxyInValid =
         sptr<UIEffectControllerClientProxy>::MakeSptr(nullptr);
-    EXPECT_EQ(proxyInValid->SetParams(param), WMError::WM_ERROR_IPC_FAILED);
+    EXPECT_EQ(proxyInValid->SetParams(params), WMError::WM_ERROR_IPC_FAILED);
 }
 }
 } // namespace OHOS::Rosen

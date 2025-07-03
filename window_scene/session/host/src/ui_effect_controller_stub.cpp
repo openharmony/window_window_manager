@@ -38,12 +38,12 @@ int32_t UIEffectControllerStub::OnRemoteRequest(uint32_t code, MessageParcel& da
 
 int UIEffectControllerStub::HandleSetParams(MessageParcel& data, MessageParcel& reply)
 {
-    sptr<UIEffectParams> param = data.ReadStrongParcelable<UIEffectParams>();
-    if (param == nullptr) {
-        TLOGE(WmsLogTag::WMS_ANIMATION, "read ui effect param failed");
+    sptr<UIEffectParams> params = data.ReadStrongParcelable<UIEffectParams>();
+    if (params == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "read ui effect params failed");
         return ERR_INVALID_DATA;
     }
-    WMError errCode = SetParams(param);
+    WMError errCode = SetParams(params);
     if (!reply.WriteUint32(static_cast<uint32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Write errCode failed.");
         return ERR_INVALID_DATA;
@@ -53,9 +53,9 @@ int UIEffectControllerStub::HandleSetParams(MessageParcel& data, MessageParcel& 
 
 int UIEffectControllerStub::HandleAnimateTo(MessageParcel& data, MessageParcel& reply)
 {
-    sptr<UIEffectParams> param = data.ReadStrongParcelable<UIEffectParams>();
-    if (param == nullptr) {
-        TLOGE(WmsLogTag::WMS_ANIMATION, "read ui effect param failed");
+    sptr<UIEffectParams> params = data.ReadStrongParcelable<UIEffectParams>();
+    if (params == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "read ui effect params failed");
         return ERR_INVALID_DATA;
     }
     sptr<WindowAnimationOption> config = data.ReadStrongParcelable<WindowAnimationOption>();
@@ -76,7 +76,7 @@ int UIEffectControllerStub::HandleAnimateTo(MessageParcel& data, MessageParcel& 
             return ERR_INVALID_DATA;
         }
     }
-    WMError errCode = AnimateTo(param, config, interruptOption);
+    WMError errCode = AnimateTo(params, config, interruptOption);
     if (!reply.WriteUint32(static_cast<uint32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Write errCode failed.");
         return ERR_INVALID_DATA;

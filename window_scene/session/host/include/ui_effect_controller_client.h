@@ -23,14 +23,14 @@ namespace OHOS::Rosen {
 class UIEffectControllerClient : public UIEffectControllerClientStub {
 public:
     UIEffectControllerClient();
-    WMError SetParams(const sptr<UIEffectParams>& param) override;
+    WMError SetParams(const sptr<UIEffectParams>& params) override;
     void SetId(int32_t id) { id_ = id; }
     int32_t GetId() const { return id_; }
 
 private:
     // unique id of ui effect controller
     int32_t id_;
-    sptr<UIEffectParams> param_;
+    sptr<UIEffectParams> params_;
 };
 }
 #endif

@@ -26,8 +26,8 @@ public:
     explicit UIEffectControllerProxy(const sptr<IRemoteObject>& impl)
         : IRemoteProxy<IUIEffectController>(impl) {}
     virtual ~UIEffectControllerProxy() = default;
-    WMError SetParams(const sptr<UIEffectParams>& param) override;
-    WMError AnimateTo(const sptr<UIEffectParams>& param, const sptr<WindowAnimationOption>& config,
+    WMError SetParams(const sptr<UIEffectParams>& params) override;
+    WMError AnimateTo(const sptr<UIEffectParams>& params, const sptr<WindowAnimationOption>& config,
         const sptr<WindowAnimationOption>& interruptedOption) override;
 
 private:

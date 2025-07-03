@@ -52,7 +52,7 @@ enum class ListenerFunctionType : uint32_t {
     SCENE_SESSION_TRANSFER_TO_TARGET_SCREEN_CB,
     UPDATE_KIOSK_APP_LIST_CB,
     KIOSK_MODE_CHANGE_CB,
-    UI_EFFECT_SET_PARAM_CB,
+    UI_EFFECT_SET_PARAMS_CB,
     UI_EFFECT_ANIMATE_TO_CB,
 };
 
@@ -336,7 +336,7 @@ private:
      * Window Animation
      */
     void RegisterUIEffectSetParamsCallback();
-    void OnUIEffectSetParam(int32_t id, sptr<UIEffectParams> param);
+    void OnUIEffectSetParams(int32_t id, sptr<UIEffectParams> param);
     void RegisterUIEffectAnimateToCallback();
     void OnUIEffectAnimateTo(int32_t id, sptr<UIEffectParams> param, sptr<WindowAnimationOption> option,
         sptr<WindowAnimationOption> interruptOption);

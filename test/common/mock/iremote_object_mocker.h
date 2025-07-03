@@ -88,9 +88,6 @@ public:
 
     int SendRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option)
     {
-        if (replyWriteFunc_) {
-            replyWriteFunc_(reply);
-        }
         return sendRequestResult_;
     }
 
@@ -129,12 +126,6 @@ public:
         sendRequestResult_ = result;
     }
 
-    void SetReplyWriteFunc(std::function<void(MessageParcel&)> func)
-    {
-        replyWriteFunc_ = func;
-    }
-
-    std::function<void(MessageParcel&)> replyWriteFunc_ = nullptr;
     int sendRequestResult_ = 0;
     int count_ = 0;
 };

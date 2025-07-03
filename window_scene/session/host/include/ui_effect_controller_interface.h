@@ -28,8 +28,8 @@ public:
         TRANS_ID_UIEFFECT_SET_PARAM,
         TRANS_ID_UIEFFECT_ANIMATE_TO,
     };
-    virtual WMError SetParams(const sptr<UIEffectParams>& param) = 0;
-    virtual WMError AnimateTo(const sptr<UIEffectParams>& param, const sptr<WindowAnimationOption>& config,
+    virtual WMError SetParams(const sptr<UIEffectParams>& params) = 0;
+    virtual WMError AnimateTo(const sptr<UIEffectParams>& params, const sptr<WindowAnimationOption>& config,
         const sptr<WindowAnimationOption>& interruptedOption) = 0;
 };
 }

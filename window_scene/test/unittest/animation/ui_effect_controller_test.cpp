@@ -51,9 +51,9 @@ HWTEST_F(UIEffectControllerTest, UIEffectControllerClientAll, TestSize.Level1)
     int32_t id = 23423;
     client.SetId(id);
     EXPECT_EQ(client.GetId(), id);
-    sptr<UIEffectParams> param = sptr<UIEffectParams>::MakeSptr();
-    client.SetParams(param);
-    EXPECT_EQ(client.param_, param);
+    sptr<UIEffectParams> params = sptr<UIEffectParams>::MakeSptr();
+    client.SetParams(params);
+    EXPECT_EQ(client.params_, params);
 }
 
 HWTEST_F(UIEffectControllerTest, UIEffectManagerTestCreateUIEffectController, TestSize.Level1)
@@ -138,32 +138,32 @@ HWTEST_F(UIEffectControllerTest, UIEffectManagerTestEraseController, TestSize.Le
 HWTEST_F(UIEffectControllerTest, UIEffectControllerTest, TestSize.Level1)
 {
     sptr<UIEffectController> controller = sptr<UIEffectController>::MakeSptr(0, nullptr, nullptr);
-    sptr<UIEffectParams> param = sptr<UIEffectParams>::MakeSptr();
+    sptr<UIEffectParams> params = sptr<UIEffectParams>::MakeSptr();
     sptr<WindowAnimationOption> option = sptr<WindowAnimationOption>::MakeSptr();
     MockAccesstokenKit::MockIsSystemApp(false);
     MockAccesstokenKit::MockIsSACalling(false);
-    EXPECT_EQ(controller->SetParams(param), WMError::WM_ERROR_NOT_SYSTEM_APP);
-    EXPECT_EQ(controller->AnimateTo(param, option, option), WMError::WM_ERROR_NOT_SYSTEM_APP);
+    EXPECT_EQ(controller->SetParams(params), WMError::WM_ERROR_NOT_SYSTEM_APP);
+    EXPECT_EQ(controller->AnimateTo(params, option, option), WMError::WM_ERROR_NOT_SYSTEM_APP);
     MockAccesstokenKit::MockIsSystemApp(true);
     MockAccesstokenKit::MockIsSACalling(true);
     bool setParamCalled = false;
     controller->setParamsCallback_ = nullptr;
-    EXPECT_EQ(controller->SetParams(param), WMError::WM_ERROR_NULLPTR);
+    EXPECT_EQ(controller->SetParams(params), WMError::WM_ERROR_NULLPTR);
     controller->setParamsCallback_ = [&setParamCalled](int32_t, sptr<UIEffectParams>) {
         setParamCalled = true;
     };
-    EXPECT_EQ(controller->SetParams(param), WMError::WM_OK);
+    EXPECT_EQ(controller->SetParams(params), WMError::WM_OK);
     controller->isAliveInUI_ = false;
-    EXPECT_EQ(controller->AnimateTo(param, option, option), WMError::WM_ERROR_UI_EFFECT_ERROR);
+    EXPECT_EQ(controller->AnimateTo(params, option, option), WMError::WM_ERROR_UI_EFFECT_ERROR);
     controller->isAliveInUI_ = true;
     controller->animateToCallback_ = nullptr;
-    EXPECT_EQ(controller->AnimateTo(param, option, option), WMError::WM_ERROR_NULLPTR);
+    EXPECT_EQ(controller->AnimateTo(params, option, option), WMError::WM_ERROR_NULLPTR);
     bool animateToCalled = false;
     controller->animateToCallback_ = [&animateToCalled](int32_t, sptr<UIEffectParams>, sptr<WindowAnimationOption>,
         sptr<WindowAnimationOption>) {
         animateToCalled = true;
     };
-    EXPECT_EQ(controller->AnimateTo(param, option, option), WMError::WM_OK);
+    EXPECT_EQ(controller->AnimateTo(params, option, option), WMError::WM_OK);
 }
 
 HWTEST_F(UIEffectControllerTest, UIEffectControllerClientDeathTest, TestSize.Level1)
