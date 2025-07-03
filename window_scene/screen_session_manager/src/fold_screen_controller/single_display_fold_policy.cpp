@@ -86,12 +86,9 @@ void SingleDisplayFoldPolicy::SetdisplayModeChangeStatus(bool status, bool isOnB
 
 void SingleDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode, DisplayModeChangeReason reason)
 {
-    {
-        std::unique_lock<std::mutex> lock(clearingBootAnimationMutex_);
-        if (isClearingBootAnimation_) {
-            TLOGI(WmsLogTag::DMS, "clearing bootAnimation not change displayMode");
-            return;
-        }
+    if (isClearingBootAnimation_) {
+        TLOGI(WmsLogTag::DMS, "clearing bootAnimation not change displayMode");
+        return;
     }
     SetLastCacheDisplayMode(displayMode);
     if (GetModeChangeRunningStatus()) {
@@ -437,7 +434,6 @@ void SingleDisplayFoldPolicy::ChangeScreenDisplayModeToFullOnBootAnimation(sptr<
 
 void SingleDisplayFoldPolicy::SetIsClearingBootAnimation(bool isClearingBootAnimation)
 {
-    std::unique_lock<std::mutex> lock(clearingBootAnimationMutex_);
     TLOGI(WmsLogTag::DMS, "isClearingBootAnimation: %{public}d", isClearingBootAnimation);
     isClearingBootAnimation_ = isClearingBootAnimation;
 }
