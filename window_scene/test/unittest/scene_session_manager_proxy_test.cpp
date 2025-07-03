@@ -19,6 +19,8 @@
 #include "mock/mock_session.h"
 #include "mock/mock_session_stage.h"
 #include "mock/mock_window_event_channel.h"
+#include "mock/mock_ui_effect_controller_client_stub.h"
+#include "mock/mock_ui_effect_controller_stub.h"
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "session_manager/include/zidl/scene_session_manager_interface.h"
@@ -1671,6 +1673,32 @@ HWTEST_F(sceneSessionManagerProxyTest, AnimateTo, Function | SmallTest | Level2)
     sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
     res = sceneSessionManagerProxy->AnimateTo(windowId, animationProperty, animationOption);
     ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, res);
+}
+
+/**
+ * @tc.name: AnimateTo
+ * @tc.desc: AnimateTo
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, CreateUIEffectController, Function | SmallTest | Level2)
+{
+    sptr<MockIRemoteObject> iRemoteObjectMocker = sptr<MockIRemoteObject>::MakeSptr();
+    sptr<SceneSessionManagerProxy> proxy =
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+    sptr<UIEffectControllerClientStubMocker> controllerClient = sptr<UIEffectControllerClientStubMocker>::MakeSptr();
+    sptr<IUIEffectController> controller = sptr<UIEffectControllerStubMocker>::MakeSptr();
+    int32_t id = -1;
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+    EXPECT_EQ(proxy->CreateUIEffectController(controllerClient, controller, id), WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    sptr<SceneSessionManagerProxy> proxyNull =
+        sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
+    EXPECT_EQ(proxyNull->CreateUIEffectController(controllerClient, controller, id), WMError::WM_ERROR_IPC_FAILED);
+    iRemoteObjectMocker->SetRequestResult(10);
+    EXPECT_EQ(proxy->CreateUIEffectController(controllerClient, controller, id), WMError::WM_ERROR_IPC_FAILED);
+    iRemoteObjectMocker->SetRequestResult(0);
+    proxy->CreateUIEffectController(controllerClient, controller, id);
 }
 } // namespace
 } // namespace Rosen

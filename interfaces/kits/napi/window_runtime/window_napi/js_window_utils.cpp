@@ -1543,6 +1543,8 @@ napi_value WindowAnimationCurveInit(napi_env env)
         CreateJsValue(env, static_cast<uint32_t>(WindowAnimationCurve::LINEAR)));
     napi_set_named_property(env, objValue, "INTERPOLATION_SPRING",
         CreateJsValue(env, static_cast<uint32_t>(WindowAnimationCurve::INTERPOLATION_SPRING)));
+    napi_set_named_property(env, objValue, "CUBIC_BEZIER",
+        CreateJsValue(env, static_cast<uint32_t>(WindowAnimationCurve::CUBIC_BEZIER)));
     return objValue;
 }
 

@@ -33,6 +33,56 @@ config("session_public_config") {
   ]
 }
 
+config("ui_effect_public_config") {
+  include_dirs = [
+    "${window_base_path}/window_scene/session/host/include",
+  ]
+}
+
+ohos_source_set("ui_effect_controller_client") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+  sources = [
+    "host/src/ui_effect_controller_proxy.cpp",
+    "host/src/ui_effect_controller_client_stub.cpp",
+    "host/src/ui_effect_controller_client.cpp",
+  ]
+  public_configs = [":ui_effect_public_config"]
+  public_deps = [
+    "${window_base_path}/utils:ui_effect_controller_common",
+  ]
+  part_name = "window_manager"
+  subsystem_name = "window"
+}
+
+ohos_source_set("ui_effect_controller") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+  sources = [
+    "host/src/ui_effect_controller_stub.cpp",
+    "host/src/ui_effect_controller.cpp",
+    "host/src/ui_effect_controller_client_proxy.cpp",
+  ]
+  public_configs = [":ui_effect_public_config"]
+  public_deps = ["${window_base_path}/utils:ui_effect_controller_common"]
+
+  deps = [
+    "${window_base_path}/window_scene/common:window_scene_common",
+  ]
+  part_name = "window_manager"
+  subsystem_name = "window"
+}
+
 ohos_shared_library("scene_session") {
   branch_protector_ret = "pac_ret"
   sanitize = {

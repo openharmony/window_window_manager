@@ -23,8 +23,8 @@ namespace OHOS {
 namespace Rosen {
 class UIEffectControllerStubMocker : public UIEffectControllerStub {
 public:
-    MOCK_METHOD(WMError, SetParams, (const sptr<UIEffectParams>& param), (override));
-    MOCK_METHOD(WMError, AnimateTo, ((const sptr<UIEffectParams>& param), (const sptr<WindowAnimationOption>& config),
+    MOCK_METHOD(WMError, SetParams, (const sptr<UIEffectParams>& params), (override));
+    MOCK_METHOD(WMError, AnimateTo, ((const sptr<UIEffectParams>& params), (const sptr<WindowAnimationOption>& config),
         (const sptr<WindowAnimationOption>& interruptedOption)), (override));
 };
 }

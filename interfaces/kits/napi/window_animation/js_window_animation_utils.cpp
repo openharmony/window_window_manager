@@ -193,7 +193,7 @@ napi_value ConvertWindowAnimationOptionToJsValue(napi_env env,
             break;
         }
         case WindowAnimationCurve::INTERPOLATION_SPRING:
-        case WindowAnimationCurve::CUBIC_BEZIER_CURVE: {
+        case WindowAnimationCurve::CUBIC_BEZIER: {
             napi_value params = nullptr;
             napi_create_array(env, &params);
             for (uint32_t i = 0; i < ANIMATION_PARAM_SIZE; ++i) {
@@ -326,7 +326,7 @@ bool CheckWindowAnimationOption(napi_env env, WindowAnimationOption& animationCo
             }
             break;
         }
-        case WindowAnimationCurve::CUBIC_BEZIER_CURVE: {
+        case WindowAnimationCurve::CUBIC_BEZIER: {
             break;
         }
         default:
@@ -361,7 +361,7 @@ bool ConvertWindowAnimationOptionFromJsValue(napi_env env, napi_value jsAnimatio
             break;
         }
         case static_cast<uint32_t>(WindowAnimationCurve::INTERPOLATION_SPRING):
-        case static_cast<uint32_t>(WindowAnimationCurve::CUBIC_BEZIER_CURVE): {
+        case static_cast<uint32_t>(WindowAnimationCurve::CUBIC_BEZIER): {
             napi_value paramsValue = nullptr;
             napi_get_named_property(env, jsAnimationConfig, "param", &paramsValue);
             for (uint32_t i = 0; i < ANIMATION_PARAM_SIZE; ++i) {

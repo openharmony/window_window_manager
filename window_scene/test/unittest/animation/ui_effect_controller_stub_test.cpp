@@ -52,8 +52,8 @@ HWTEST_F(UIEffectControllerStubTest, UIEffectControllerClientStubSetParam, Funct
     EXPECT_EQ(stub->OnRemoteRequest(code, dataInvalid, reply, option), ERR_TRANSACTION_FAILED);
     MessageParcel dataValid;
     dataValid.WriteInterfaceToken(stub->GetDescriptor());
-    sptr<UIEffectParams> param = sptr<UIEffectParams>::MakeSptr();
-    dataValid.WriteStrongParcelable(param);
+    sptr<UIEffectParams> params = sptr<UIEffectParams>::MakeSptr();
+    dataValid.WriteStrongParcelable(params);
     EXPECT_EQ(stub->OnRemoteRequest(code, dataValid, reply, option), ERR_NONE);
     MessageParcel dataValid2;
     dataValid2.WriteInterfaceToken(stub->GetDescriptor());
@@ -61,7 +61,7 @@ HWTEST_F(UIEffectControllerStubTest, UIEffectControllerClientStubSetParam, Funct
     EXPECT_EQ(stub->OnRemoteRequest(code, dataValid2, reply, option), ERR_INVALID_DATA);
     // last invalid case
     uint32_t codeInvalid = 10000;
-    stub->OnRemoteRequest(codeInvalid, dataValid2, reply, option);
+    stub->OnRemoteRequest(codeInvalid, dataValid, reply, option);
 }
 
 HWTEST_F(UIEffectControllerStubTest, UIEffectControllerStubSetParam, TestSize.Level1)
@@ -75,36 +75,36 @@ HWTEST_F(UIEffectControllerStubTest, UIEffectControllerStubSetParam, TestSize.Le
     MessageParcel reply2;
     sptr<UIEffectParams> effectPtr = sptr<UIEffectParams>::MakeSptr();
     data2.WriteStrongParcelable(effectPtr);
-    EXPECT_EQ(stub->HandleSetParams(data1, reply1), ERR_NONE);
+    EXPECT_EQ(stub->HandleSetParams(data2, reply2), ERR_NONE);
 }
 
 HWTEST_F(UIEffectControllerStubTest, UIEffectControllerStubAnimateTo, TestSize.Level1)
 {
     sptr<UIEffectControllerStub> stub = sptr<UIEffectController>::MakeSptr(1, nullptr, nullptr);
-    sptr<UIEffectParams> param = sptr<UIEffectParams>::MakeSptr();
+    sptr<UIEffectParams> params = sptr<UIEffectParams>::MakeSptr();
     sptr<WindowAnimationOption> option = sptr<WindowAnimationOption>::MakeSptr();
     MessageParcel reply;
     MessageParcel data1;
     data1.WriteStrongParcelable(nullptr);
     EXPECT_EQ(stub->HandleAnimateTo(data1, reply), ERR_INVALID_DATA);
     MessageParcel data2;
-    data2.WriteStrongParcelable(param);
+    data2.WriteStrongParcelable(params);
     data2.WriteStrongParcelable(nullptr);
     EXPECT_EQ(stub->HandleAnimateTo(data2, reply), ERR_INVALID_DATA);
     MessageParcel data3;
-    data3.WriteStrongParcelable(param);
+    data3.WriteStrongParcelable(params);
     data3.WriteStrongParcelable(option);
     data3.WriteBool(true);
     data3.WriteStrongParcelable(nullptr);
     EXPECT_EQ(stub->HandleAnimateTo(data3, reply), ERR_INVALID_DATA);
     MessageParcel data4;
-    data4.WriteStrongParcelable(param);
+    data4.WriteStrongParcelable(params);
     data4.WriteStrongParcelable(option);
     data4.WriteBool(true);
     data4.WriteStrongParcelable(option);
     EXPECT_EQ(stub->HandleAnimateTo(data4, reply), ERR_NONE);
     MessageParcel data5;
-    data5.WriteStrongParcelable(param);
+    data5.WriteStrongParcelable(params);
     data5.WriteStrongParcelable(option);
     data5.WriteBool(false);
     EXPECT_EQ(stub->HandleAnimateTo(data5, reply), ERR_NONE);
@@ -124,10 +124,14 @@ HWTEST_F(UIEffectControllerStubTest, UIEffectControllerStubOnRemoteRequest, Test
     dataValid.WriteInterfaceToken(stub->GetDescriptor());
     code = static_cast<uint32_t>(IUIEffectController::UIEffectControllerMessage::TRANS_ID_UIEFFECT_SET_PARAM);
     stub->OnRemoteRequest(code, dataValid, reply, option);
+    MessageParcel dataValid2;
+    dataValid2.WriteInterfaceToken(stub->GetDescriptor());
     code = static_cast<uint32_t>(IUIEffectController::UIEffectControllerMessage::TRANS_ID_UIEFFECT_ANIMATE_TO);
-    stub->OnRemoteRequest(code, dataValid, reply, option);
+    stub->OnRemoteRequest(code, dataValid2, reply, option);
+    MessageParcel dataValid3;
+    dataValid3.WriteInterfaceToken(stub->GetDescriptor());
     code = 10000;
-    stub->OnRemoteRequest(code, dataValid, reply, option);
+    stub->OnRemoteRequest(code, dataValid3, reply, option);
 }
 }
 } // namespace OHOS::Rosen

@@ -82,6 +82,7 @@
 #include "xcollie/xcollie_define.h"
 #include "session_permission.h"
 
+#include "ui_effect_manager.h"
 #ifdef MEMMGR_WINDOW_ENABLE
 #include "mem_mgr_client.h"
 #include "mem_mgr_window_info.h"
@@ -3122,6 +3123,20 @@ void SceneSessionManager::ConfigSupportSnapshotAllSessionStatus()
         systemConfig_.supportSnapshotAllSessionStatus_ = true;
     };
     taskScheduler_->PostAsyncTask(task, "ConfigSupportSnapshotAllSessionStatus");
+}
+
+WMError SceneSessionManager::CreateUIEffectController(const sptr<IUIEffectControllerClient>& controllerClient,
+        sptr<IUIEffectController>& controller, int32_t& controllerId)
+{
+    if (!SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "not system calling, permission denied!");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+    if (!systemConfig_.IsPhoneWindow() && (!systemConfig_.IsPadWindow() || systemConfig_.IsFreeMultiWindowMode())) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "device not support!");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    return UIEffectManager::GetInstance().CreateUIEffectController(controllerClient, controller, controllerId);
 }
 
 WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSession>& sceneSession,

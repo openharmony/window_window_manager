@@ -46,13 +46,13 @@ namespace {
  */
 HWTEST_F(UIEffectControllerCommonTest, WriteAndReadParcelable, TestSize.Level1)
 {
-    UIEffectParams param;
+    UIEffectParams params;
     Parcel parcelWrite;
-    EXPECT_EQ(param.Marshalling(parcel), false);
-    param.backgroundFilter_ = sptr<Filter>::MakeSptr();
-    EXPECT_EQ(param.Marshalling(parcel), false);
-    param.effect_ = sptr<VisualEffect>::MakeSptr();
-    EXPECT_EQ(param.Marshalling(parcel), true);
+    EXPECT_EQ(params.Marshalling(parcel), false);
+    params.backgroundFilter_ = sptr<Filter>::MakeSptr();
+    EXPECT_EQ(params.Marshalling(parcel), false);
+    params.effect_ = sptr<VisualEffect>::MakeSptr();
+    EXPECT_EQ(params.Marshalling(parcel), true);
     EXPECT_EQ(UIEffectParams::Unmarshalling(parcelRead), nullptr);
     sptr<Filter> backgroundFilter = sptr<Filter>::MakeSptr();
     parcelRead.WriteStrongParcelable(backgroundFilter);
