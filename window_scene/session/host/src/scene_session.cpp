@@ -117,6 +117,8 @@ SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCa
     specificCallback_ = specificCallback;
     SetCollaboratorType(info.collaboratorType_);
     TLOGI(WmsLogTag::WMS_LIFE, "Create session, id: %{public}d", GetPersistentId());
+    WindowHelper::SplitStringByDelimiter(
+        system::GetParameter("const.window.containerColorLists", ""), ",", containerColorList_);
 }
 
 SceneSession::~SceneSession()
@@ -5943,6 +5945,15 @@ WMError SceneSession::HandleActionUpdateWindowShadowEnabled(const sptr<WindowSes
 {
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "id: %{public}d, enabled: %{public}u",
         GetPersistentId(), property->GetWindowShadowEnabled());
+    if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_WINDOW_TRANSPARENT) &&
+        containerColorList_.count(property_->GetSessionInfo().bundleName_) == 0) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "id: %{public}d: permission denied", GetPersistentId());
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
+    if (!WindowHelper::IsMainWindow(GetWindowType())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, type is not supported", GetPersistentId());
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
     SetWindowShadowEnabled(property->GetWindowShadowEnabled());
     return WMError::WM_OK;
 }
