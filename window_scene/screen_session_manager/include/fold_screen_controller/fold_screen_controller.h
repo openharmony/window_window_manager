@@ -68,6 +68,7 @@ public:
     bool GetdisplayModeRunningStatus();
     FoldDisplayMode GetLastCacheDisplayMode();
     void AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32_t command);
+    void SetIsClearingBootAnimation(bool isClearingBootAnimation);
 private:
     sptr<FoldScreenPolicy> GetFoldScreenPolicy(DisplayDeviceType productType);
     sptr<FoldScreenPolicy> foldScreenPolicy_;

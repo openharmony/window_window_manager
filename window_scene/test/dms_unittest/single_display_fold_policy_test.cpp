@@ -472,6 +472,44 @@ HWTEST_F(SingleDisplayFoldPolicyTest, ChangeScreenDisplayModeInner, TestSize.Lev
     policy.ChangeScreenDisplayModeInner(displayMode, reason);
     EXPECT_FALSE(policy.onBootAnimation_);
 }
+
+/**
+ * @tc.name: SetIsClearingBootAnimation
+ * @tc.desc: test function : SetIsClearingBootAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SingleDisplayFoldPolicyTest, SetIsClearingBootAnimation, TestSize.Level1)
+{
+    std::recursive_mutex displayInfoMutex;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+    auto policy = sptr<SingleDisplayFoldPolicy>::MakeSptr(displayInfoMutex, screenPowerTaskScheduler);
+ 
+    policy->SetIsClearingBootAnimation(false);
+    EXPECT_FALSE(policy->isClearingBootAnimation_);
+    policy->SetIsClearingBootAnimation(true);
+    EXPECT_TRUE(policy->isClearingBootAnimation_);
+}
+ 
+/**
+ * @tc.name: ChangeScreenDisplayMode
+ * @tc.desc: test function : ChangeScreenDisplayMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SingleDisplayFoldPolicyTest, ChangeScreenDisplayMode03, TestSize.Level1)
+{
+    std::recursive_mutex displayInfoMutex;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+    auto policy = sptr<SingleDisplayFoldPolicy>::MakeSptr(displayInfoMutex, screenPowerTaskScheduler);
+ 
+    policy->SetIsClearingBootAnimation(false);
+    FoldDisplayMode displayMode = FoldDisplayMode::MAIN;
+    policy->ChangeScreenDisplayMode(displayMode);
+    EXPECT_EQ(policy->lastCachedisplayMode_, displayMode);
+    policy->SetIsClearingBootAnimation(true);
+    displayMode = FoldDisplayMode::FULL;
+    policy->ChangeScreenDisplayMode(displayMode);
+    EXPECT_NE(policy->lastCachedisplayMode_, displayMode);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
