@@ -5161,6 +5161,13 @@ WSError WindowSceneSessionImpl::UpdateMaximizeMode(MaximizeMode mode)
     }
     uiContent->UpdateMaximizeMode(mode);
     property_->SetMaximizeMode(mode);
+    if (mode == Maximize::MODE_RECOVER && enableImmersiveMode_) {
+        enableImmersiveMode_ = false;
+        property_->SetIsLayoutFullScreen(enableImmersiveMode_);
+        if (auto hostSession = GetHostSession()) {
+            hostSession->OnLayoutFullScreenChange(enableImmersiveMode_);
+        }
+    }
     return WSError::WS_OK;
 }
 
