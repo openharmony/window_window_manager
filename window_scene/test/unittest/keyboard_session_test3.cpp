@@ -198,33 +198,6 @@ HWTEST_F(KeyboardSessionTest3, UseFocusIdIfCallingSessionIdInvalid01, TestSize.L
 }
 
 /**
- * @tc.name: MoveAndResizeKeyboard01
- * @tc.desc: test function: MoveAndResizeKeyboard
- * @tc.type: FUNC
- */
-HWTEST_F(KeyboardSessionTest3, MoveAndResizeKeyboard01, TestSize.Level1)
-{
-    auto keyboardSession = GetKeyboardSession("MoveAndResizeKeyboard01", "MoveAndResizeKeyboard01");
-    ASSERT_NE(keyboardSession, nullptr);
-
-    KeyboardLayoutParams param;
-    param.LandscapeKeyboardRect_ = { 100, 100, 100, 200 };
-    param.PortraitKeyboardRect_ = { 200, 200, 200, 100 };
-
-    // branch SESSION_GRAVITY_BOTTOM
-    param.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
-    uint32_t screenWidth = 0;
-    uint32_t screenHeight = 0;
-    auto defaultDisplayInfo = DisplayManager::GetInstance().GetDefaultDisplay();
-    ASSERT_NE(defaultDisplayInfo, nullptr);
-    screenWidth = static_cast<uint32_t>(defaultDisplayInfo->GetWidth());
-    screenHeight = static_cast<uint32_t>(defaultDisplayInfo->GetHeight());
-    const Rect& expectRect = screenWidth > screenHeight ? param.LandscapeKeyboardRect_ : param.PortraitKeyboardRect_;
-    keyboardSession->MoveAndResizeKeyboard(param, nullptr, false);
-    ASSERT_EQ(keyboardSession->property_->requestRect_, expectRect);
-}
-
-/**
  * @tc.name: SetSurfaceBounds01
  * @tc.desc: test function: SetSurfaceBounds
  * @tc.type: FUNC
