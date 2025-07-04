@@ -1564,35 +1564,6 @@ WSError SceneSession::NotifyClientToUpdateRect(const std::string& updateReason,
     return WSError::WS_OK;
 }
 
-bool SceneSession::GetScreenWidthAndHeightFromServer(const sptr<WindowSessionProperty>& sessionProperty,
-    uint32_t& screenWidth, uint32_t& screenHeight)
-{
-    const auto& screenSession = sessionProperty == nullptr ? nullptr :
-        ScreenSessionManagerClient::GetInstance().GetScreenSession(sessionProperty->GetDisplayId());
-    if (screenSession != nullptr) {
-        screenWidth = screenSession->GetScreenProperty().GetBounds().rect_.width_;
-        screenHeight = screenSession->GetScreenProperty().GetBounds().rect_.height_;
-    } else {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "sessionProperty or screenSession is nullptr, use defaultDisplayInfo");
-        auto defaultDisplayInfo = DisplayManager::GetInstance().GetDefaultDisplay();
-        if (defaultDisplayInfo != nullptr) {
-            screenWidth = static_cast<uint32_t>(defaultDisplayInfo->GetWidth());
-            screenHeight = static_cast<uint32_t>(defaultDisplayInfo->GetHeight());
-        } else {
-            TLOGE(WmsLogTag::WMS_KEYBOARD, "defaultDisplayInfo is null, get screenWidthAndHeight failed");
-            return false;
-        }
-    }
-    if (IsSystemKeyboard() && DisplayManager::GetInstance().GetFoldStatus() == FoldStatus::HALF_FOLD) {
-        auto defaultDisplay = DisplayManager::GetInstance().GetDefaultDisplay();
-        screenHeight = defaultDisplay != nullptr ?
-            static_cast<uint32_t>(defaultDisplay->GetPhysicalHeight()) : screenHeight;
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, display is half-fold", GetPersistentId());
-    }
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "screenWidth: [%{public}d, %{public}d]", screenWidth, screenHeight);
-    return true;
-}
-
 bool SceneSession::GetScreenWidthAndHeightFromClient(const sptr<WindowSessionProperty>& sessionProperty,
     uint32_t& screenWidth, uint32_t& screenHeight)
 {
