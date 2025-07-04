@@ -354,6 +354,7 @@ public:
     void UpdatePiPControlStatus(PiPControlType controlType, PiPControlStatus status) override;
     void SetAutoStartPiP(bool isAutoStart, uint32_t priority, uint32_t width, uint32_t height) override;
     void UpdatePiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo) override;
+    WMError GetPiPSettingSwitchStatus(bool& switchStatus) const override;
 
     WMError UpdateFloatingBall(const FloatingBallTemplateBaseInfo& fbTemplateBaseInfo,
         const std::shared_ptr<Media::PixelMap>& icon) override;

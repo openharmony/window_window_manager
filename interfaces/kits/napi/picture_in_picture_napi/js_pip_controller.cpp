@@ -42,6 +42,7 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "setAutoStartEnabled", moduleName, JsPipController::SetAutoStartEnabled);
     BindNativeFunction(env, object, "setPiPControlEnabled", moduleName, JsPipController::SetPiPControlEnabled);
     BindNativeFunction(env, object, "getPiPWindowInfo", moduleName, JsPipController::GetPiPWindowInfo);
+    BindNativeFunction(env, object, "getPiPSettingSwitch", moduleName, JsPipController::GetPiPSettingSwitch);
     BindNativeFunction(env, object, "on", moduleName, JsPipController::RegisterCallback);
     BindNativeFunction(env, object, "off", moduleName, JsPipController::UnregisterCallback);
     // test api
@@ -393,6 +394,39 @@ napi_value JsPipController::OnGetPiPWindowInfo(napi_env env, napi_callback_info 
         task->Resolve(env, CreateJsPiPWindowInfoObject(env, pipWindow));
     };
     if (napi_send_event(env, asyncTask, napi_eprio_immediate, "OnGetPiPWindowInfo") != napi_status::napi_ok) {
+        napiAsyncTask->Reject(env, CreateJsError(env,
+            static_cast<int32_t>(WMError::WM_ERROR_PIP_INTERNAL_ERROR), "Send event failed"));
+    }
+    return result;
+}
+
+napi_value JsPipController::GetPiPSettingSwitch(napi_env env, napi_callback_info info)
+{
+    JsPipController* me = CheckParamsAndGetThis<JsPipController>(env, info);
+    return (me != nullptr) ? me->OnGetPiPSettingSwitch(env, info) : nullptr;
+}
+
+napi_value JsPipController::OnGetPiPSettingSwitch(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "called");
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [this, env, task = napiAsyncTask,
+        weak = wptr<PictureInPictureController>(pipController_)]() {
+        auto pipController = weak.promote();
+        if (pipController == nullptr) {
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_PIP_INTERNAL_ERROR),
+                "PiP internal error."));
+            return;
+        }
+        if (!pipController->GetPipSettingSwitchStatusEnabled()) {
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT),
+                "Capability not supported. Failed to call the API due to limited device capabilities."));
+            return;
+        }
+        task->Resolve(env, CreateJsValue(env, pipController->GetPiPSettingSwitchStatus()));
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
         napiAsyncTask->Reject(env, CreateJsError(env,
             static_cast<int32_t>(WMError::WM_ERROR_PIP_INTERNAL_ERROR), "Send event failed"));
     }

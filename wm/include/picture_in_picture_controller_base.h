@@ -100,6 +100,8 @@ public:
     void SetSurfaceId(uint64_t surfaceId);
     static bool GetPipEnabled();
     uint64_t GetSurfaceId() const;
+    bool GetPipSettingSwitchStatusEnabled();
+    bool GetPiPSettingSwitchStatus();
     bool isWeb_ = false;
 
     // diffrent between normal and web

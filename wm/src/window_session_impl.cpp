@@ -7742,5 +7742,14 @@ WMError WindowSessionImpl::SetIntentParam(const std::string& intentParam,
     isIntentColdStart_ = isColdStart;
     return WMError::WM_OK;
 }
+
+WMError WindowSessionImpl::GetPiPSettingSwitchStatus(bool& switchStatus) const
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_PIP, "session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    return SingletonContainer::Get<WindowAdapter>().GetPiPSettingSwitchStatus(switchStatus);
+}
 } // namespace Rosen
 } // namespace OHOS

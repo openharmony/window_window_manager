@@ -17,10 +17,12 @@
 
 #include <gmock/gmock.h>
 #include "ability_context_impl.h"
+#include "mock_session.h"
 #include "parameters.h"
 #include "picture_in_picture_controller.h"
 #include "picture_in_picture_manager.h"
 #include "window.h"
+#include "window_session_impl.h"
 #include "wm_common.h"
 #include "xcomponent_controller.h"
 
@@ -58,6 +60,8 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+private:
+    static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
 
 void PictureInPictureControllerTest::SetUpTestCase() {}
@@ -1173,6 +1177,49 @@ HWTEST_F(PictureInPictureControllerTest, GetPipEnabled, TestSize.Level1)
         multiWindowUIType == "TabletSmartWindow";
     bool pipSupported = PictureInPictureControllerBase::GetPipEnabled();
     ASSERT_EQ(isDeviceSupported, pipSupported);
+}
+
+/**
+ * @tc.name: GetPipSettingSwitchStatusEnabled
+ * @tc.desc: GetPipSettingSwitchStatusEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureControllerTest, GetPipSettingSwitchStatusEnabled, TestSize.Level1)
+{
+    auto mw = sptr<MockWindow>::MakeSptr();
+    ASSERT_NE(nullptr, mw);
+    auto option = sptr<PipOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
+    const std::string multiWindowUIType = system::GetParameter("const.window.multiWindowUIType", "");
+    bool isDeviceSupported = multiWindowUIType == "HandsetSmartWindow" || multiWindowUIType == "TabletSmartWindow";
+    ASSERT_EQ(isDeviceSupported, pipControl->GetPipSettingSwitchStatusEnabled());
+}
+
+/**
+ * @tc.name: GetPiPSettingSwitchStatus
+ * @tc.desc: GetPiPSettingSwitchStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureControllerTest, GetPiPSettingSwitchStatus, TestSize.Level1)
+{
+    auto mw = sptr<MockWindow>::MakeSptr();
+    ASSERT_NE(nullptr, mw);
+    auto pipOption = sptr<PipOption>::MakeSptr();
+    ASSERT_NE(nullptr, pipOption);
+    auto pipControl = sptr<PictureInPictureController>::MakeSptr(pipOption, mw, 1, nullptr);
+    EXPECT_EQ(false, pipControl->GetPiPSettingSwitchStatus());
+
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetPiPSettingSwitchStatus");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    WindowSessionImpl::windowSessionMap_.clear();
+    WindowSessionImpl::windowSessionMap_.insert(std::make_pair(window->GetWindowName(),
+        std::pair<uint64_t, sptr<WindowSessionImpl>>(window->GetWindowId(), window)));
+    EXPECT_EQ(false, pipControl->GetPiPSettingSwitchStatus());
+    WindowSessionImpl::windowSessionMap_.clear();
 }
 } // namespace
 } // namespace Rosen

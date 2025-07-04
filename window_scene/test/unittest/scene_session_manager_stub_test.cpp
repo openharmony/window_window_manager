@@ -2775,6 +2775,22 @@ HWTEST_F(SceneSessionManagerStubTest, HandleCreateUIEffectController, Function |
     data.WriteRemoteObject(client->AsObject());
     stub_->HandleCreateUIEffectController(data, reply);
 }
+
+/**
+ * @tc.name: HandleGetPiPSettingSwitchStatus
+ * @tc.desc: test HandleGetPiPSettingSwitchStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleGetPiPSettingSwitchStatus, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    bool switchStatus = false;
+    data.WriteBool(switchStatus);
+
+    int res = stub_->HandleGetPiPSettingSwitchStatus(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

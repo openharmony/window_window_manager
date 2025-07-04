@@ -316,6 +316,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::SupportSnapshotAllSessionStatus);
     BindNativeFunction(env, exportObj, "setUIEffectControllerAliveInUI", moduleName,
         JsSceneSessionManager::SetUIEffectControllerAliveInUI);
+    BindNativeFunction(env, exportObj, "setPiPSettingSwitchStatus", moduleName,
+        JsSceneSessionManager::SetPiPSettingSwitchStatus);
     return NapiGetUndefined(env);
 }
 
@@ -5137,5 +5139,34 @@ void JsSceneSessionManager::RegisterKioskModeChangeCallback()
     TLOGI(WmsLogTag::WMS_LIFE, "in");
     SceneSessionManager::GetInstance().RegisterKioskModeChangeCallback(
         [this](bool isKioskMode, int32_t persistentId) { this->OnKioskModeChangeCallback(isKioskMode, persistentId); });
+}
+
+napi_value JsSceneSessionManager::SetPiPSettingSwitchStatus(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "in");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnSetPiPSettingSwitchStatus(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::OnSetPiPSettingSwitchStatus(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_PIP, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool switchStatus = true;
+    if (!ConvertFromJsValue(env, argv[0], switchStatus)) {
+        TLOGE(WmsLogTag::WMS_PIP, "Failed to convert parameter to switchStatus");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    SceneSessionManager::GetInstance().SetPiPSettingSwitchStatus(switchStatus);
+    return NapiGetUndefined(env);
 }
 } // namespace OHOS::Rosen

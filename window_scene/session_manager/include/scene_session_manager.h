@@ -624,6 +624,8 @@ public:
      */
     WMError CloseTargetPiPWindow(const std::string& bundleName);
     WMError GetCurrentPiPWindowInfo(std::string& bundleName);
+    WMError GetPiPSettingSwitchStatus(bool& switchStatus) override;
+    void SetPiPSettingSwitchStatus(bool switchStatus);
     void SetStartPiPFailedListener(NotifyStartPiPFailedFunc&& func);
 
      /*
@@ -1303,7 +1305,9 @@ private:
     /*
      * PiP Window
      */
+    std::mutex pipSettingSwitchMutex_;
     uint64_t pipWindowSurfaceId_ = 0;
+    bool pipSwitchStatus_ = true;
     bool CheckPiPPriority(const PiPTemplateInfo& pipTemplateInfo, DisplayId displayId = 0);
     bool IsEnablePiPCreate(const sptr<WindowSessionProperty>& property);
     bool IsPiPForbidden(const sptr<WindowSessionProperty>& property, const WindowType& type);
