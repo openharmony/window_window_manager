@@ -344,6 +344,7 @@ public:
 
     void SetIsAvailableAreaNeedNotify(bool isAvailableAreaNeedNotify);
     bool GetIsAvailableAreaNeedNotify() const;
+    uint64_t GetSessionId() const;
 
     /*
      * RS Client Multi Instance
@@ -411,11 +412,14 @@ private:
     std::mutex isEnableCanvasRotationMutex_;
     bool isAvailableAreaNeedNotify_ = false;
     bool isSecurity_ = true;
+    uint64_t sessionId_;
 
     /*
      * RS Client Multi Instance
      */
     std::shared_ptr<RSUIDirector> rsUIDirector_;
+
+    static std::atomic<uint64_t> sessionIdGenerator_;
 };
 
 class ScreenSessionGroup : public ScreenSession {

@@ -68,6 +68,7 @@ ScreenSession::ScreenSession(const ScreenSessionConfig& config, ScreenSessionRea
     TLOGI(WmsLogTag::DMS,
         "[DPNODE]Config name: %{public}s, defaultId: %{public}" PRIu64", mirrorNodeId: %{public}" PRIu64"",
         name_.c_str(), defaultScreenId_, config.mirrorNodeId);
+    sessionId_ = sessionIdGenerator_++;
     RSAdapterUtil::InitRSUIDirector(rsUIDirector_, true, true);
     RSAdapterUtil::SetRSUIContext(displayNode_, GetRSUIContext(), true);
     Rosen::RSDisplayNodeConfig rsConfig;
@@ -108,6 +109,8 @@ ScreenSession::ScreenSession(const ScreenSessionConfig& config, ScreenSessionRea
         CreateDisplayNode(rsConfig);
     }
 }
+
+std::atomic<uint64_t> ScreenSession::sessionIdGenerator_ = 0;
 
 void ScreenSession::CreateDisplayNode(const Rosen::RSDisplayNodeConfig& config)
 {
@@ -156,6 +159,7 @@ ScreenSession::ScreenSession(ScreenId screenId, ScreenId rsId, const std::string
 {
     TLOGI(WmsLogTag::DMS, "Success to create screenSession in constructor_0, screenid is %{public}" PRIu64"",
         screenId_);
+    sessionId_ = sessionIdGenerator_++;
     property_.SetRsId(rsId_);
     RSAdapterUtil::InitRSUIDirector(rsUIDirector_, true, true);
     RSAdapterUtil::SetRSUIContext(displayNode_, GetRSUIContext(), true);
@@ -164,6 +168,7 @@ ScreenSession::ScreenSession(ScreenId screenId, ScreenId rsId, const std::string
 ScreenSession::ScreenSession(ScreenId screenId, const ScreenProperty& property, ScreenId defaultScreenId)
     : screenId_(screenId), defaultScreenId_(defaultScreenId), property_(property)
 {
+    sessionId_ = sessionIdGenerator_++;
     RSAdapterUtil::InitRSUIDirector(rsUIDirector_, true, true);
     Rosen::RSDisplayNodeConfig config = { .screenId = screenId_ };
     displayNode_ = Rosen::RSDisplayNode::Create(config, GetRSUIContext());
@@ -188,6 +193,7 @@ ScreenSession::ScreenSession(ScreenId screenId, const ScreenProperty& property,
     NodeId nodeId, ScreenId defaultScreenId)
     : screenId_(screenId), defaultScreenId_(defaultScreenId), property_(property)
 {
+    sessionId_ = sessionIdGenerator_++;
     rsId_ = screenId;
     property_.SetRsId(rsId_);
     RSAdapterUtil::InitRSUIDirector(rsUIDirector_, true, true);
@@ -475,6 +481,11 @@ void ScreenSession::SetIsCurrentInUse(bool isInUse)
 bool ScreenSession::GetIsCurrentInUse() const
 {
     return isInUse_;
+}
+
+uint64_t ScreenSession::GetSessionId() const
+{
+    return sessionId_;
 }
 
 void ScreenSession::SetIsExtendVirtual(bool isExtendVirtual)

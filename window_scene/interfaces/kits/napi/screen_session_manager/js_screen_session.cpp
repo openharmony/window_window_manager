@@ -49,8 +49,7 @@ const std::string ON_SCREEN_CHANGE_CALLBACK = "screenModeChange";
 constexpr size_t ARGC_ONE = 1;
 } // namespace
 
-napi_value JsScreenSession::Create(napi_env env, const sptr<ScreenSession>& screenSession,
-    const ScreenEvent screenEvent)
+napi_value JsScreenSession::Create(napi_env env, const sptr<ScreenSession>& screenSession)
 {
     TLOGD(WmsLogTag::DMS, "Create.");
     napi_value objValue = nullptr;
@@ -60,7 +59,7 @@ napi_value JsScreenSession::Create(napi_env env, const sptr<ScreenSession>& scre
         return NapiGetUndefined(env);
     }
 
-    auto jsScreenSession = std::make_unique<JsScreenSession>(env, screenSession, screenEvent);
+    auto jsScreenSession = std::make_unique<JsScreenSession>(env, screenSession);
     napi_wrap(env, objValue, jsScreenSession.release(), JsScreenSession::Finalizer, nullptr, nullptr);
     napi_set_named_property(env, objValue, "screenId",
         CreateJsValue(env, static_cast<int64_t>(screenSession->GetScreenId())));
@@ -83,6 +82,8 @@ napi_value JsScreenSession::Create(napi_env env, const sptr<ScreenSession>& scre
     BindNativeFunction(env, objValue, "loadContent", moduleName, JsScreenSession::LoadContent);
     BindNativeFunction(env, objValue, "getScreenUIContext", moduleName,
         JsScreenSession::GetScreenUIContext);
+    BindNativeFunction(env, objValue, "destroyContent", moduleName,
+        JsScreenSession::DestroyContent);
     return objValue;
 }
 
@@ -92,7 +93,7 @@ void JsScreenSession::Finalizer(napi_env env, void* data, void* hint)
     std::unique_ptr<JsScreenSession>(static_cast<JsScreenSession*>(data));
 }
 
-JsScreenSession::JsScreenSession(napi_env env, const sptr<ScreenSession>& screenSession, const ScreenEvent screenEvent)
+JsScreenSession::JsScreenSession(napi_env env, const sptr<ScreenSession>& screenSession)
     : env_(env), screenSession_(screenSession)
 {
     std::string name = screenSession_ ? screenSession_->GetName() : "UNKNOWN";
@@ -120,10 +121,6 @@ JsScreenSession::JsScreenSession(napi_env env, const sptr<ScreenSession>& screen
             OnScreenDensityChange();
         };
         screenSession_->SetScreenSceneDpiChangeListener(func);
-        if (screenEvent == ScreenEvent::DISCONNECTED) {
-            TLOGI(WmsLogTag::DMS, "ScreenEvent is DISCONNECTED, not set destroyFunc");
-            return;
-        }
         DestroyScreenSceneFunc destroyFunc = [screenScene = screenScene_]() {
             if (screenScene) {
                 screenScene->Destroy();
@@ -361,6 +358,39 @@ napi_value JsScreenSession::OnRegisterCallback(napi_env env, napi_callback_info 
     mCallback_[callbackType] = callbackRef;
     RegisterScreenChangeListener();
 
+    return NapiGetUndefined(env);
+}
+
+napi_value JsScreenSession::DestroyContent(napi_env env, napi_callback_info info)
+{
+    JsScreenSession* me = CheckParamsAndGetThis<JsScreenSession>(env, info);
+    return (me != nullptr) ? me->OnDestroyContent(env, info) : nullptr;
+}
+
+napi_value JsScreenSession::OnDestroyContent(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::DMS, "[NAPI]OnDestroyContent");
+    size_t argc = 1;
+    napi_value argv[1] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc > 0) { // 0: params num
+        TLOGE(WmsLogTag::DMS, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
+    }
+
+    if (screenScene_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "screenScene_ is nullptr");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+        return NapiGetUndefined(env);
+    }
+
+    screenScene_->Destroy();
+    TLOGI(WmsLogTag::DMS, "destroy screen scene finish");
+    if (screenSession_ != nullptr) {
+        TLOGW(WmsLogTag::DMS, "destroy screen scene, screenId:%{public}" PRIu64 "sessionId:%{public}" PRIu64,
+            screenSession_->GetScreenId(), screenSession_->GetSessionId());
+    }
     return NapiGetUndefined(env);
 }
 

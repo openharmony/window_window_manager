@@ -120,6 +120,7 @@ public:
     void NotifyExtendScreenDestroyFinish();
     void NotifyScreenMaskAppear();
     DMError SetPrimaryDisplaySystemDpi(float dpi);
+    void SendScreenEventTaskFinish(ScreenId screenId, ScreenEvent event);
 
     /*
      * RS Client Multi Instance
@@ -135,8 +136,8 @@ private:
     void ConnectToServer();
     bool CheckIfNeedConnectScreen(SessionOption option);
     void OnScreenConnectionChanged(SessionOption option, ScreenEvent screenEvent) override;
-    void HandleScreenConnection(SessionOption option);
-    void HandleScreenDisconnection(SessionOption option);
+    bool HandleScreenConnection(SessionOption option);
+    bool HandleScreenDisconnection(SessionOption option);
     void NotifyClientScreenConnect(sptr<ScreenSession>& screenSession);
     void OnPropertyChanged(ScreenId screenId,
         const ScreenProperty& property, ScreenPropertyChangeReason reason) override;
@@ -174,6 +175,17 @@ private:
     sptr<IDisplayChangeListener> displayChangeListener_;
     FoldDisplayMode displayMode_ = FoldDisplayMode::UNKNOWN;
     SuperFoldStatus currentstate_ = SuperFoldStatus::UNKNOWN;
+
+    enum class ScreenEventProcessStatus : uint8_t {
+        DISCONNECTED = 0,
+        CONNECTING,
+        CONNECTED,
+        DISCONNECTING
+    };
+    std::mutex screenEventMutex_;
+    std::mutex screenEventProcessingMutex_;
+    std::condition_variable screenEventCond_;
+    std::map<ScreenId, ScreenEventProcessStatus> screenEventProcessMap_;
 };
 } // namespace OHOS::Rosen
 

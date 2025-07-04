@@ -358,13 +358,13 @@ napi_value JsScreenSessionManager::GetPrimaryDisplaySystemDpi(napi_env env, napi
 
 void JsScreenSessionManager::OnScreenConnected(const sptr<ScreenSession>& screenSession)
 {
-    if (screenConnectionCallback_ == nullptr) {
+    if (screenConnectionCallback_ == nullptr || screenSession == nullptr) {
         TLOGE(WmsLogTag::DMS, "[NAPI]screenConnectionCallback is nullptr");
         return;
     }
     TLOGD(WmsLogTag::DMS, "[NAPI]OnScreenConnected");
     std::shared_ptr<NativeReference> callback_ = screenConnectionCallback_;
-    auto asyncTask = [callback_, screenSession, env = env_]() {
+    auto asyncTask = [this, callback_, screenSession, env = env_]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsScreenSessionManager::OnScreenConnected");
         napi_value objValue = nullptr;
         napi_create_object(env, &objValue);
@@ -372,8 +372,13 @@ void JsScreenSessionManager::OnScreenConnected(const sptr<ScreenSession>& screen
             TLOGNE(WmsLogTag::DMS, "Object is null!");
             return;
         }
-        napi_set_named_property(env, objValue, "screenSession",
-            JsScreenSession::Create(env, screenSession, ScreenEvent::CONNECTED));
+        napi_value jsScreenSession = JsScreenSession::Create(env_, screenSession);
+        napi_ref ref;
+        napi_create_reference(env_, jsScreenSession, 1, &ref);
+        jsScreenSessionMap_[screenSession->GetSessionId()] = ref;
+        TLOGW(WmsLogTag::DMS, "screen connection, screenId: %{public}" PRIu64 " sessionId:%{public}" PRIu64,
+            screenSession->GetScreenId(), screenSession->GetSessionId());
+        napi_set_named_property(env, objValue, "screenSession", jsScreenSession);
         napi_set_named_property(env, objValue, "screenConnectChangeType", CreateJsValue(env, 0));
 
         napi_value argv[] = { objValue };
@@ -392,6 +397,9 @@ void JsScreenSessionManager::OnScreenConnected(const sptr<ScreenSession>& screen
     } else {
         TLOGE(WmsLogTag::DMS, "OnScreenConnected: env is nullptr");
     }
+
+    ScreenSessionManagerClient::GetInstance().SendScreenEventTaskFinish(screenSession->GetScreenId(),
+        ScreenEvent::CONNECTED);
 }
 
 napi_value JsScreenSessionManager::SetCameraStatus(napi_env env, napi_callback_info info)
@@ -403,12 +411,12 @@ napi_value JsScreenSessionManager::SetCameraStatus(napi_env env, napi_callback_i
 
 void JsScreenSessionManager::OnScreenDisconnected(const sptr<ScreenSession>& screenSession)
 {
-    if (screenConnectionCallback_ == nullptr) {
+    if (screenConnectionCallback_ == nullptr || screenSession == nullptr) {
         return;
     }
     TLOGD(WmsLogTag::DMS, "[NAPI]OnScreenDisconnected");
     std::shared_ptr<NativeReference> callback_ = screenConnectionCallback_;
-    auto asyncTask = [callback_, screenSession, env = env_]() {
+    auto asyncTask = [this, callback_, screenSession, env = env_]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsScreenSessionManager::OnScreenDisconnected");
         napi_value objValue = nullptr;
         napi_create_object(env, &objValue);
@@ -416,8 +424,18 @@ void JsScreenSessionManager::OnScreenDisconnected(const sptr<ScreenSession>& scr
             TLOGNE(WmsLogTag::DMS, "Object is null!");
             return;
         }
-        napi_set_named_property(env, objValue, "screenSession",
-            JsScreenSession::Create(env, screenSession, ScreenEvent::DISCONNECTED));
+        napi_ref jsScreenSessionRef = jsScreenSessionMap_[screenSession->GetSessionId()];
+        if (jsScreenSessionRef == nullptr) {
+            TLOGE(WmsLogTag::DMS, "js screen session ref invalid");
+            return;
+        }
+        napi_value jsScreenSession;
+        napi_get_reference_value(env, jsScreenSessionRef, &jsScreenSession);
+        napi_delete_reference(env, jsScreenSessionRef);
+        jsScreenSessionMap_.erase(screenSession->GetScreenId());
+        TLOGW(WmsLogTag::DMS, "screen disconnection, screenId: %{public}" PRIu64 "sessionId:%{public}" PRIu64,
+            screenSession->GetScreenId(), screenSession->GetSessionId());
+        napi_set_named_property(env, objValue, "screenSession", jsScreenSession);
         napi_set_named_property(env, objValue, "screenConnectChangeType", CreateJsValue(env, 1));
 
         napi_value argv[] = { objValue };
@@ -437,6 +455,9 @@ void JsScreenSessionManager::OnScreenDisconnected(const sptr<ScreenSession>& scr
     } else {
         TLOGE(WmsLogTag::DMS, "OnScreenDisconnected: env is nullptr");
     }
+
+    ScreenSessionManagerClient::GetInstance().SendScreenEventTaskFinish(screenSession->GetScreenId(),
+        ScreenEvent::DISCONNECTED);
 }
 
 bool JsScreenSessionManager::OnTakeOverShutdown(const PowerMgr::TakeOverInfo& info)
