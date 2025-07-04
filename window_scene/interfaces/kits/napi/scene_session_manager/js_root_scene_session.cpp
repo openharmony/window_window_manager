@@ -115,7 +115,7 @@ napi_value JsRootSceneSession::OnRegisterCallback(napi_env env, napi_callback_in
     }
     auto iterFunctionType = ListenerFuncMap.find(cbType);
     if (iterFunctionType == ListenerFuncMap.end()) {
-        WLOGFE("callback type is not supported, type=%{public}s", cbType.c_str());
+        TLOGE(WmsLogTag::WMS_MAIN, "callback type is not supported, type=%{public}s", cbType.c_str());
         return NapiGetUndefined(env);
     }
     RootListenerFuncType rootlistenerFuncType = iterFunctionType->second;
@@ -166,7 +166,7 @@ void JsRootSceneSession::ProcessPendingSceneSessionActivationRegister()
 void JsRootSceneSession::ProcessBatchPendingSceneSessionsActivationRegister()
 {
     rootSceneSession_->SetBatchPendingSessionsActivationEventListener([this]
-        (std::vector<std::shared_ptr<SessionInfo>>& sessionInfos) {
+        (const std::vector<std::shared_ptr<SessionInfo>>& sessionInfos) {
         this->BatchPendingSessionsActivation(sessionInfos);
     });
     TLOGD(WmsLogTag::WMS_LIFE, "success");
@@ -333,7 +333,7 @@ void JsRootSceneSession::BatchPendingSessionsActivationInner(
     const char* const where = __func__;
     auto task = [jsCallBack = GetJSCallback(BATCH_PENDING_SCENE_ACTIVE_CB), sessionInfos, env = env_, where] {
         if (!jsCallBack) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s jsSceneSession has been destroyed", where);
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s jsCallBack is nullptr", where);
             return;
         }
  

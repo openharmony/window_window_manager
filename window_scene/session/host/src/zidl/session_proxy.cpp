@@ -552,8 +552,8 @@ WSError SessionProxy::PendingSessionActivation(sptr<AAFwk::SessionInfo> abilityS
 WSError SessionProxy::BatchPendingSessionsActivation(const std::vector<sptr<AAFwk::SessionInfo>>& abilitySessionInfos)
 {
     if (abilitySessionInfos.empty()) {
-        WLOGFE("abilitySessionInfos is empty");
-        return WSError::WS_ERROR_INVALID_SESSION;
+        TLOGE(WmsLogTag::WMS_LIFE, "abilitySessionInfos is empty");
+        return WSError::WS_ERROR_INVALID_PARAM;
     }
     MessageParcel data;
     MessageParcel reply;
@@ -574,20 +574,24 @@ WSError SessionProxy::BatchPendingSessionsActivation(const std::vector<sptr<AAFw
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("remote is null");
+        TLOGE(WmsLogTag::WMS_LIFE, "remote is null");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     TLOGI(WmsLogTag::WMS_LIFE, "batch pending session activations size: %{public}zu", abilitySessionInfos.size());
     if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_BATCH_ACTIVE_PENDING_SESSION),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    int32_t ret = reply.ReadInt32();
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
     return static_cast<WSError>(ret);
 }
  
-WSError SessionProxy::WriteOneSessionInfo(MessageParcel& data, sptr<AAFwk::SessionInfo> abilitySessionInfo)
+WSError SessionProxy::WriteOneSessionInfo(MessageParcel& data, const sptr<AAFwk::SessionInfo>& abilitySessionInfo)
 {
     if (!WriteAbilitySessionInfoBasic(data, abilitySessionInfo)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write abilitySessionInfoBasic failed");

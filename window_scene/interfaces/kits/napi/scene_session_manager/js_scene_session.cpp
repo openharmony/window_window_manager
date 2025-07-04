@@ -4689,7 +4689,7 @@ void JsSceneSession::BatchPendingSessionsActivationInner(const std::vector<std::
             TLOGNE(WmsLogTag::WMS_LIFE, "target session info is nullptr");
             return;
         }
-        napi_value argv[] = {jsSessionInfos};
+        napi_value argv[] = { jsSessionInfos };
         TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s task success, id:%{public}d", where, persistentId);
         napi_call_function(env, NapiGetUndefined(env),
             jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);

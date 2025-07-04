@@ -81,7 +81,7 @@ public:
     WSError SetSessionLabelAndIcon(const std::string& label,
         const std::shared_ptr<Media::PixelMap>& icon) override;
     WSError SetSubWindowSource(SubWindowSource source) override;
-    WSError WriteOneSessionInfo(MessageParcel& data, sptr<AAFwk::SessionInfo> abilitySessionInfo);
+    WSError WriteOneSessionInfo(MessageParcel& data, const sptr<AAFwk::SessionInfo>& abilitySessionInfo);
 
     /*
      * UIExtension

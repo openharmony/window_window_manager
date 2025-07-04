@@ -37,7 +37,7 @@ class AccessibilityEventInfo;
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionStub" };
-constexpr int32_t MAX_ABILITY_SESSION_INFOS = 5;
+constexpr int32_t MAX_ABILITY_SESSION_INFOS = 4;
 
 int ReadBasicAbilitySessionInfo(MessageParcel& data, sptr<AAFwk::SessionInfo> abilitySessionInfo)
 {
@@ -825,7 +825,9 @@ int SessionStub::HandleBatchPendingSessionsActivation(MessageParcel& data, Messa
         abilitySessionInfos.emplace_back(abilitySessionInfo);
     }
     WSError errCode = BatchPendingSessionsActivation(abilitySessionInfos);
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    if(!reply.WriteUint32(static_cast<uint32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write errCode failed");
+    }
     return ERR_NONE;
 }
 

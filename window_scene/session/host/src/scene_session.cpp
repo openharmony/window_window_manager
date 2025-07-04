@@ -5494,9 +5494,8 @@ WSError SceneSession::DoBatchPendingSessionsActivation(std::vector<std::shared_p
 {
     for (auto& abilitySessionInfo : abilitySessionInfos) {
         if (abilitySessionInfo == nullptr) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s abilitySessionInfo is null", where);
-            return
-            WSError::WS_ERROR_NULLPTR;
+            TLOGE(WmsLogTag::WMS_LIFE, "abilitySessionInfo is null");
+            return WSError::WS_ERROR_NULLPTR;
         }
         bool isFromAncoAndToAnco = session->IsAnco() && AbilityInfoManager::GetInstance().IsAnco(
             abilitySessionInfo->want.GetElement().GetBundleName(),
@@ -5512,10 +5511,10 @@ WSError SceneSession::DoBatchPendingSessionsActivation(std::vector<std::shared_p
         if (MultiInstanceManager::IsSupportMultiInstance(session->systemConfig_) &&
             MultiInstanceManager::GetInstance().IsMultiInstance(info->bundleName_)) {
             if (!MultiInstanceManager::GetInstance().MultiInstancePendingSessionActivation(*info)) {
-                TLOGNE(WmsLogTag::WMS_LIFE,
-                    "%{public}s multi instance start fail, id:%{public}d instanceKey:%{public}s",
-                    where, session->GetPersistentId(), info->appInstanceKey_.c_str());
-            return WSError::WS_ERROR_INVALID_PARAM;
+                TLOGE(WmsLogTag::WMS_LIFE,
+                    "multi instance start fail, id:%{public}d instanceKey:%{public}s",
+                    session->GetPersistentId(), info->appInstanceKey_.c_str());
+                return WSError::WS_ERROR_INVALID_PARAM;
             }
         }
         session->sessionInfo_.reuseDelegatorWindow = abilitySessionInfo->reuseDelegatorWindow;
