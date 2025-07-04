@@ -65,10 +65,7 @@ namespace {
  */
 HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleRecoverAndReconnectSceneSession, TestSize.Level1)
 {
-    if (stub_ == nullptr) {
-        return;
-    }
-
+    ASSERT_NE(nullptr, stub_);
     MessageParcel data;
     MessageParcel reply;
 
@@ -180,10 +177,7 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleSetSessionContinueState, Te
  */
 HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleClearSession, TestSize.Level1)
 {
-    if (stub_ == nullptr) {
-        return;
-    }
-
+    ASSERT_NE(nullptr, stub_);
     MessageParcel data;
     MessageParcel reply;
 
@@ -204,10 +198,7 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleClearSession, TestSize.Leve
  */
 HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleClearAllSessions, TestSize.Level1)
 {
-    if (stub_ == nullptr) {
-        return;
-    }
-
+    ASSERT_NE(nullptr, stub_);
     MessageParcel data;
     MessageParcel reply;
 
@@ -222,10 +213,7 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleClearAllSessions, TestSize.
  */
 HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleLockSession, TestSize.Level1)
 {
-    if (stub_ == nullptr) {
-        return;
-    }
-
+    ASSERT_NE(nullptr, stub_);
     MessageParcel data;
     MessageParcel reply;
 
@@ -244,10 +232,7 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleLockSession, TestSize.Level
  */
 HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleUnlockSession, TestSize.Level1)
 {
-    if (stub_ == nullptr) {
-        return;
-    }
-
+    ASSERT_NE(nullptr, stub_);
     MessageParcel data;
     MessageParcel reply;
 
@@ -266,10 +251,7 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleUnlockSession, TestSize.Lev
  */
 HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleMoveSessionsToForeground, TestSize.Level1)
 {
-    if (stub_ == nullptr) {
-        return;
-    }
-
+    ASSERT_NE(nullptr, stub_);
     MessageParcel data;
     MessageParcel reply;
 
@@ -291,10 +273,7 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleMoveSessionsToForeground, T
  */
 HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleMoveSessionsToBackground, TestSize.Level1)
 {
-    if (stub_ == nullptr) {
-        return;
-    }
-
+    ASSERT_NE(nullptr, stub_);
     MessageParcel data;
     MessageParcel reply;
 
@@ -331,10 +310,7 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleUpdateSessionWindowVisibili
  */
 HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleGetVisibilityWindowInfo, TestSize.Level1)
 {
-    if (stub_ == nullptr) {
-        return;
-    }
-
+    ASSERT_NE(nullptr, stub_);
     MessageParcel data;
     MessageParcel reply;
 

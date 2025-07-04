@@ -36,6 +36,8 @@ public:
 
     MOCK_METHOD3(GetApplicationInfos, bool(const AppExecFwk::ApplicationFlag flag,
         const int32_t userId, std::vector<AppExecFwk::ApplicationInfo>& appInfos));
+    MOCK_METHOD3(GetApplicationInfosV9, ErrCode(int32_t flags,
+        int32_t userId, std::vector<AppExecFwk::ApplicationInfo>& appInfos));
     MOCK_METHOD4(GetApplicationInfo, bool(const std::string& appName, const AppExecFwk::ApplicationFlag flag,
         const int32_t userId, AppExecFwk::ApplicationInfo& appInfo));
     MOCK_METHOD4(GetBundleInfoV9, ErrCode(const std::string& bundleName, int32_t flags,

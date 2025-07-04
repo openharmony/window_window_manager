@@ -71,17 +71,15 @@ sptr<SceneSession> MultiInstanceManagerTest::GetSceneSession(const std::string& 
 void MultiInstanceManagerTest::Init(AppExecFwk::MultiAppModeType modeType, uint32_t maxCount)
 {
     sptr<IBundleMgrMocker> bundleMgrMocker = sptr<IBundleMgrMocker>::MakeSptr();
-    EXPECT_CALL(*bundleMgrMocker, GetApplicationInfos(_, _, _))
-        .WillOnce([modeType, maxCount](const AppExecFwk::ApplicationFlag flag,
-                                       const int32_t userId,
-                                       std::vector<AppExecFwk::ApplicationInfo>& appInfos) {
-            AppExecFwk::ApplicationInfo appInfo;
-            appInfo.bundleName = BUNDLE_NAME;
-            appInfo.multiAppMode.multiAppModeType = modeType;
-            appInfo.multiAppMode.maxCount = maxCount;
-            appInfos.push_back(appInfo);
-            return true;
-        });
+    EXPECT_CALL(*bundleMgrMocker, GetApplicationInfosV9(_, _, _)).WillOnce([modeType, maxCount](
+        int32_t flags, int32_t userId, std::vector<AppExecFwk::ApplicationInfo>& appInfos) {
+        AppExecFwk::ApplicationInfo appInfo;
+        appInfo.bundleName = BUNDLE_NAME;
+        appInfo.multiAppMode.multiAppModeType = modeType;
+        appInfo.multiAppMode.maxCount = maxCount;
+        appInfos.push_back(appInfo);
+        return ERR_OK;
+    });
     MultiInstanceManager::GetInstance().Init(bundleMgrMocker, GetTaskScheduler());
     MultiInstanceManager::GetInstance().SetCurrentUserId(USER_ID);
     usleep(SLEEP_TIME);
