@@ -1305,7 +1305,7 @@ private:
     /*
      * PiP Window
      */
-    std::shared_mutex pipSettingSwitchMutex_;
+    std::mutex pipSettingSwitchMutex_;
     uint64_t pipWindowSurfaceId_ = 0;
     bool pipSwitchStatus_ = true;
     bool CheckPiPPriority(const PiPTemplateInfo& pipTemplateInfo, DisplayId displayId = 0);

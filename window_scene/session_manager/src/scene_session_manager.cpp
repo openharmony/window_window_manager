@@ -16504,13 +16504,13 @@ std::vector<sptr<SceneSession>> SceneSessionManager::GetSceneSessions(ScreenId s
 
 void SceneSessionManager::SetPiPSettingSwitchStatus(bool switchStatus)
 {
-    std::unique_lock<std::shared_mutex> lock(pipSettingSwitchMutex_);
+    std::lock_guard<std::mutex> lock(pipSettingSwitchMutex_);
     pipSwitchStatus_ = switchStatus;
 }
 
 WMError SceneSessionManager::GetPiPSettingSwitchStatus(bool& switchStatus)
 {
-    std::shared_lock<std::shared_mutex> lock(pipSettingSwitchMutex_);
+    std::lock_guard<std::mutex> lock(pipSettingSwitchMutex_);
     switchStatus = pipSwitchStatus_;
     return WMError::WM_OK;
 }
