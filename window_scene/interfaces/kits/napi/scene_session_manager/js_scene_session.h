@@ -128,7 +128,7 @@ private:
      * Window Lifecycle
      */
     void ProcessPendingSceneSessionActivationRegister();
-	void ProcessBatchPendingSceneSessionsActivationRegister();
+    void ProcessBatchPendingSceneSessionsActivationRegister();
     void ProcessSessionStateChangeRegister();
     void ProcessUpdateTransitionAnimationRegister();
     void ProcessSessionEventRegister();

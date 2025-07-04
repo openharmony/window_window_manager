@@ -145,7 +145,7 @@ napi_value JsRootSceneSession::OnRegisterCallback(napi_env env, napi_callback_in
 void JsRootSceneSession::ProcessRegisterCallback(RootListenerFuncType rootlistenerFuncType)
 {
     switch (static_cast<uint32_t>(rootlistenerFuncType)) {
-       case static_cast<uint32_t>(RootListenerFuncType::PENDING_SCENE_CB):
+        case static_cast<uint32_t>(RootListenerFuncType::PENDING_SCENE_CB):
             ProcessPendingSceneSessionActivationRegister();
             break;
         case static_cast<uint32_t>(RootListenerFuncType::BATCH_PENDING_SCENE_ACTIVE_CB):
@@ -327,7 +327,8 @@ napi_value JsRootSceneSession::CreateSessionInfosNapiValue(
     return arrayValue;
 }
  
-void JsRootSceneSession::BatchPendingSessionsActivationInner(const std::vector<std::shared_ptr<SessionInfo>>& sessionInfos)
+void JsRootSceneSession::BatchPendingSessionsActivationInner(
+    const std::vector<std::shared_ptr<SessionInfo>>& sessionInfos)
 {
     const char* const where = __func__;
     auto task = [jsCallBack = GetJSCallback(BATCH_PENDING_SCENE_ACTIVE_CB), sessionInfos, env = env_, where] {
@@ -441,7 +442,8 @@ void JsRootSceneSession::BatchPendingSessionsActivation(const std::vector<std::s
             auto focusedOnShow = info->want->GetBoolParam(AAFwk::Want::PARAM_RESV_WINDOW_FOCUSED, true);
             sceneSession->SetFocusedOnShow(focusedOnShow);
  
-            std::string continueSessionId = info->want->GetStringParam(Rosen::PARAM_KEY::PARAM_DMS_CONTINUE_SESSION_ID_KEY);
+            std::string continueSessionId =
+                info->want->GetStringParam(Rosen::PARAM_KEY::PARAM_DMS_CONTINUE_SESSION_ID_KEY);
             if (!continueSessionId.empty()) {
                 info->continueSessionId_ = continueSessionId;
                 TLOGI(WmsLogTag::WMS_LIFE, "continueSessionId from ability manager: %{public}s",

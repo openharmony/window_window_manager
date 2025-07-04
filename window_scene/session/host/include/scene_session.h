@@ -274,6 +274,9 @@ public:
     WSError ChangeSessionVisibilityWithStatusBar(const sptr<AAFwk::SessionInfo> info, bool visible) override;
     WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> info) override;
     WSError BatchPendingSessionsActivation(const std::vector<sptr<AAFwk::SessionInfo>>& abilitySessionInfos) override;
+    WSError DoBatchPendingSessionsActivation(std::vector<std::shared_ptr<SessionInfo>>& sessionInfos,
+        const std::vector<sptr<AAFwk::SessionInfo>>& abilitySessionInfos, sptr<SceneSession>& session,
+        bool isFoundationCall);
     bool DisallowActivationFromPendingBackground(bool isPcOrPadEnableActivation, bool isFoundationCall,
         bool canStartAbilityFromBackground, bool isFromAncoAndToAnco);
     WSError TerminateSession(const sptr<AAFwk::SessionInfo> info) override;

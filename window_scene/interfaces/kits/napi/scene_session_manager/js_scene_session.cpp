@@ -4669,11 +4669,11 @@ void JsSceneSession::BatchPendingSessionsActivationInner(const std::vector<std::
     const char* const where = __func__;
     auto task = [weakThis = wptr(this), persistentId = persistentId_, weakSession = weakSession_,
         sessionInfos, env = env_, where] {
-         auto session = weakSession.promote();
-         if (session == nullptr) {
-             TLOGNE(WmsLogTag::WMS_LIFE, "session is nullptr");
-             return;
-         }
+        auto session = weakSession.promote();
+        if (session == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "session is nullptr");
+            return;
+        }
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGNE(WmsLogTag::WMS_LIFE, "jsSceneSession id:%{public}d has been destroyed", persistentId);
