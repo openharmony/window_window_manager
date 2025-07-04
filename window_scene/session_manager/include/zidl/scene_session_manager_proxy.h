@@ -171,6 +171,7 @@ public:
         const WindowAnimationOption& animationOption) override;
     WMError CreateUIEffectController(const sptr<IUIEffectControllerClient>& controllerClient,
         sptr<IUIEffectController>& controller, int32_t& controllerId) override;
+    WMError GetPiPSettingSwitchStatus(bool& switchStatus) override;
 
 private:
     template<typename T>

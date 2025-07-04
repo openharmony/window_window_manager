@@ -1700,6 +1700,59 @@ HWTEST_F(sceneSessionManagerProxyTest, CreateUIEffectController, Function | Smal
     iRemoteObjectMocker->SetRequestResult(0);
     proxy->CreateUIEffectController(controllerClient, controller, id);
 }
+
+/**
+ * @tc.name: GetPiPSettingSwitchStatus
+ * @tc.desc: GetPiPSettingSwitchStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, GetPiPSettingSwitchStatus, TestSize.Level1)
+{
+    auto tempProxy = sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
+    bool switchStatus = false;
+
+    // remote == nullptr
+    auto ret = tempProxy->GetPiPSettingSwitchStatus(switchStatus);
+    EXPECT_EQ(switchStatus, false);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+
+    // WriteInterfaceToken failed
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    auto proxy = sptr<SceneSessionManagerProxy>::MakeSptr(remoteMocker);
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ASSERT_NE(proxy, nullptr);
+    ret = proxy->GetPiPSettingSwitchStatus(switchStatus);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    // SendRequest failed
+    ASSERT_NE(proxy, nullptr);
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    ret = proxy->GetPiPSettingSwitchStatus(switchStatus);
+    EXPECT_EQ(switchStatus, false);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    remoteMocker->SetRequestResult(ERR_NONE);
+
+    // ReadBool failed
+    MockMessageParcel::SetReadBoolErrorFlag(true);
+    ret = proxy->GetPiPSettingSwitchStatus(switchStatus);
+    EXPECT_EQ(switchStatus, false);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::SetReadBoolErrorFlag(false);
+
+    // ReadInt32 failed
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    ret = proxy->GetPiPSettingSwitchStatus(switchStatus);
+    EXPECT_EQ(switchStatus, false);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::SetReadInt32ErrorFlag(false);
+    MockMessageParcel::ClearAllErrorFlag();
+
+    // interface success
+    ret = proxy->GetPiPSettingSwitchStatus(switchStatus);
+    EXPECT_EQ(ret, WMError::WM_OK);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

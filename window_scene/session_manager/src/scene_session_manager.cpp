@@ -16497,4 +16497,17 @@ std::vector<sptr<SceneSession>> SceneSessionManager::GetSceneSessions(ScreenId s
         screenId, sceneSessions.size());
     return sceneSessions;
 }
+
+void SceneSessionManager::SetPiPSettingSwitchStatus(bool switchStatus)
+{
+    std::lock_guard<std::mutex> lock(pipSettingSwitchMutex_);
+    pipSwitchStatus_ = switchStatus;
+}
+
+WMError SceneSessionManager::GetPiPSettingSwitchStatus(bool& switchStatus)
+{
+    std::lock_guard<std::mutex> lock(pipSettingSwitchMutex_);
+    switchStatus = pipSwitchStatus_;
+    return WMError::WM_OK;
+}
 } // namespace OHOS::Rosen

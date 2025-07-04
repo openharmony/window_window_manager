@@ -322,6 +322,11 @@ public:
      */
     virtual WMError CreateUIEffectController(const sptr<IUIEffectControllerClient>& controllerClient,
         sptr<IUIEffectController>& controller, int32_t& controllerId) { return WMError::WM_OK; };
+
+    /*
+     * PiP Window
+     */
+    virtual WMError GetPiPSettingSwitchStatus(bool& switchStatus) { return WMError::WM_OK; }
 };
 }
 }

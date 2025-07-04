@@ -1007,6 +1007,19 @@ HWTEST_F(WindowAdapterTest, CreateUIEffectController, Function | SmallTest | Lev
     EXPECT_EQ(ret, true);
     windowAdapter.CreateUIEffectController(client, controller, controllerId);
 }
+
+/**
+ * @tc.name: GetPiPSettingSwitchStatus
+ * @tc.desc: WindowAdapter/GetPiPSettingSwitchStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, GetPiPSettingSwitchStatus, TestSize.Level1)
+{
+    WindowAdapter windowAdapter;
+    bool switchStatus = false;
+    auto err = windowAdapter.GetPiPSettingSwitchStatus(switchStatus);
+    ASSERT_EQ(WMError::WM_OK, err);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

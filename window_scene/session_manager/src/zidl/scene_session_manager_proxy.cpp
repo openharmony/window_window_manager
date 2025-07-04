@@ -3620,4 +3620,37 @@ WMError SceneSessionManagerProxy::CreateUIEffectController(const sptr<IUIEffectC
     controller = iface_cast<IUIEffectController>(controllerObject);
     return err;
 }
+
+WMError SceneSessionManagerProxy::GetPiPSettingSwitchStatus(bool& switchStatus)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_PIP, "Write interfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "Remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_PIP_SWITCH_STATUS),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_PIP, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    bool status = false;
+    if (!reply.ReadBool(status)) {
+        TLOGE(WmsLogTag::WMS_PIP, "Read status failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_PIP, "Read ret failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    switchStatus = status;
+    return static_cast<WMError>(ret);
+}
 } // namespace OHOS::Rosen

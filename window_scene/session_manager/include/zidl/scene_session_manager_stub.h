@@ -143,6 +143,7 @@ private:
     int HandleSetForegroundWindowNum(MessageParcel& data, MessageParcel& reply);
     int HandleUseImplicitAnimation(MessageParcel& data, MessageParcel& reply);
     int HandleCreateUIEffectController(MessageParcel& data, MessageParcel& reply);
+    int HandleGetPiPSettingSwitchStatus(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_STUB_H
