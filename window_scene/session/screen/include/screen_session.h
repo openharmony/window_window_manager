@@ -159,7 +159,8 @@ public:
     DisplayOrientation CalcDisplayOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode) const;
     DisplayOrientation CalcDeviceOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode) const;
     void FillScreenInfo(sptr<ScreenInfo> info) const;
-    void InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint, bool isExtend = false);
+    void InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint, bool isExtend = false,
+        float positionX = 0, float positionY = 0);
 
     DMError GetScreenSupportedColorGamuts(std::vector<ScreenColorGamut>& colorGamuts);
     DMError GetScreenColorGamut(ScreenColorGamut& colorGamut);
@@ -214,6 +215,7 @@ public:
     void SetHdrFormats(std::vector<uint32_t>&& hdrFormats);
     void SetColorSpaces(std::vector<uint32_t>&& colorSpaces);
     void SetSupportedRefreshRate(std::vector<uint32_t>&& supportedRefreshRate);
+    std::vector<uint32_t> GetSupportedRefreshRate() const;
     void SetForceCloseHdr(bool isForceCloseHdr);
 
     VirtualScreenFlag GetVirtualScreenFlag();
@@ -348,6 +350,22 @@ public:
      */
     std::shared_ptr<RSUIDirector> GetRSUIDirector() const;
     std::shared_ptr<RSUIContext> GetRSUIContext() const;
+
+    /*
+     * Display Group Info
+     */
+    void SetDisplayGroupId(DisplayGroupId displayGroupId);
+    DisplayGroupId GetDisplayGroupId() const;
+    void SetMainDisplayIdOfGroup(ScreenId screenId);
+    ScreenId GetMainDisplayIdOfGroup() const;
+    void SetScreenAreaOffsetX(uint32_t screenAreaOffsetX);
+    uint32_t GetScreenAreaOffsetX() const;
+    void SetScreenAreaOffsetY(uint32_t screenAreaOffsetY);
+    uint32_t GetScreenAreaOffsetY() const;
+    void SetScreenAreaWidth(uint32_t screenAreaWidth);
+    uint32_t GetScreenAreaWidth() const;
+    void SetScreenAreaHeight(uint32_t screenAreaHeight);
+    uint32_t GetScreenAreaHeight() const;
 
 private:
     ScreenProperty property_;

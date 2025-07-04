@@ -66,6 +66,14 @@ public:
 private:
     std::function<void(std::vector<std::string>)> callback_;
 };
+
+class MockDisplayChangeListener : public IDisplayChangeListener {
+public:
+    virtual void OnDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> info,
+        const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type) { return; }
+    virtual void OnScreenshot(DisplayId displayId) { return; }
+};
+
 class ScreenSessionManagerClientTest : public testing::Test {
 public:
     void SetUp() override;
@@ -786,6 +794,45 @@ HWTEST_F(ScreenSessionManagerClientTest, OnGetSurfaceNodeIdsFromMissionIdsChange
     ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
     screenSessionManagerClient_->displayChangeListener_ = nullptr;
     screenSessionManagerClient_->OnGetSurfaceNodeIdsFromMissionIdsChanged(missionIds, surfaceNodeIds, isBlackList);
+}
+
+/**
+ * @tc.name: OnSetSurfaceNodeIdsChanged01
+ * @tc.desc: OnSetSurfaceNodeIdsChanged test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, OnSetSurfaceNodeIdsChanged01, TestSize.Level1)
+{
+    sptr<ScreenSessionManagerClient> client = sptr<ScreenSessionManagerClient>::MakeSptr();
+    ASSERT_NE(nullptr, client);
+
+    DisplayId displayId = 0;
+    std::vector<uint64_t> surfaceNodeIds = { 100, 101 };
+    sptr<MockDisplayChangeListener> listener = sptr<MockDisplayChangeListener>::MakeSptr();
+    client->displayChangeListener_ = listener;
+    client->OnSetSurfaceNodeIdsChanged(displayId, surfaceNodeIds);
+
+    client->displayChangeListener_ = nullptr;
+    client->OnSetSurfaceNodeIdsChanged(displayId, surfaceNodeIds);
+}
+
+/**
+ * @tc.name: OnVirtualScreenDisconnected01
+ * @tc.desc: OnVirtualScreenDisconnected test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, OnVirtualScreenDisconnected01, TestSize.Level1)
+{
+    sptr<ScreenSessionManagerClient> client = sptr<ScreenSessionManagerClient>::MakeSptr();
+    ASSERT_NE(nullptr, client);
+
+    DisplayId displayId = 0;
+    sptr<MockDisplayChangeListener> listener = sptr<MockDisplayChangeListener>::MakeSptr();
+    client->displayChangeListener_ = listener;
+    client->OnVirtualScreenDisconnected(displayId);
+
+    client->displayChangeListener_ = nullptr;
+    client->OnVirtualScreenDisconnected(displayId);
 }
 
 /**
@@ -1630,7 +1677,7 @@ HWTEST_F(ScreenSessionManagerClientTest, ExtraDestroyScreen, TestSize.Level2)
 
     ScreenId screenId11 = 11;
     client->extraScreenSessionMap_.emplace(screenId11, nullptr);
-    client->ExtraDestroyScreen(screenId11)
+    client->ExtraDestroyScreen(screenId11);
     EXPECT_TRUE(logMsg.find("extra screenSession is null") != std::string::npos);
 }
 

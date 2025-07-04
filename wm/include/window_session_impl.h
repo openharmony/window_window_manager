@@ -360,7 +360,7 @@ public:
     void NotifyPrepareCloseFloatingBall() override;
     WSError SendFbActionEvent(const std::string& action) override;
     WMError RestoreFbMainWindow(const std::shared_ptr<AAFwk::Want>& want) override;
-    
+
     WMError GetFloatingBallWindowId(uint32_t& windowId) override;
 
     void SetDrawingContentState(bool drawingContentState);
@@ -1110,11 +1110,6 @@ private:
      * RS Client Multi Instance
      */
     std::shared_ptr<RSUIDirector> rsUIDirector_;
-
-    /**
-     * Parallel Type For PAD
-     */
-    int32_t parallelType_ = 0;
 };
 } // namespace Rosen
 } // namespace OHOS

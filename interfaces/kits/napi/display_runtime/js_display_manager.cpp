@@ -45,7 +45,7 @@ explicit JsDisplayManager(napi_env env) {
 
 static void Finalizer(napi_env env, void* data, void* hint)
 {
-    TLOGI(WmsLogTag::DMS, "Finalizer is called");
+    TLOGD(WmsLogTag::DMS, "Finalizer is called");
     std::unique_ptr<JsDisplayManager>(static_cast<JsDisplayManager*>(data));
 }
 

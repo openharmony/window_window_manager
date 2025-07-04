@@ -213,6 +213,14 @@ public:
     virtual WSError RaiseAppMainWindowToTop() { return WSError::WS_OK; }
     virtual WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
         { return WSError::WS_OK; }
+ 
+    /**
+     * @brief Pending session active batch
+     *
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError BatchPendingSessionsActivation(const std::vector<sptr<AAFwk::SessionInfo>>& abilitySessionInfos)
+        { return WSError::WS_OK; }
     virtual WSError TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionInfo) { return WSError::WS_OK; }
     virtual WSError SetLandscapeMultiWindow(bool isLandscapeMultiWindow) { return WSError::WS_OK; }
     virtual WSError GetIsMidScene(bool& isMidScene) { return WSError::WS_OK; }

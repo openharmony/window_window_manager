@@ -343,7 +343,10 @@ HWTEST_F(WindowSessionImplTest5, IsDeviceFeatureCapableFor, Function | SmallTest
     window->context_ = context;
     context->hapModuleInfo_ = std::make_shared<AppExecFwk::HapModuleInfo>();
     EXPECT_EQ(window->IsDeviceFeatureCapableFor(feature), false);
-    context->hapModuleInfo_->deviceFeatures.push_back(feature);
+    std::string deviceType = system::GetParameter("const.product.devicetype", "");
+    context->hapModuleInfo_->requiredDeviceFeatures = {{deviceType, {}}};
+    EXPECT_EQ(window->IsDeviceFeatureCapableFor(feature), false);
+    context->hapModuleInfo_->requiredDeviceFeatures = {{deviceType, {feature}}};
     EXPECT_EQ(window->IsDeviceFeatureCapableFor(feature), true);
 }
 
@@ -363,7 +366,8 @@ HWTEST_F(WindowSessionImplTest5, IsDeviceFeatureCapableForFreeMultiWindow, Funct
     window->context_ = context;
     context->hapModuleInfo_ = std::make_shared<AppExecFwk::HapModuleInfo>();
     EXPECT_EQ(window->IsDeviceFeatureCapableForFreeMultiWindow(), false);
-    context->hapModuleInfo_->deviceFeatures.push_back(feature);
+    std::string deviceType = system::GetParameter("const.product.devicetype", "");
+    context->hapModuleInfo_->requiredDeviceFeatures = {{deviceType, {feature}}};
     EXPECT_EQ(window->IsDeviceFeatureCapableForFreeMultiWindow(),
         system::GetParameter("const.window.device_feature_support_type", "0") == "1");
 }
@@ -1473,7 +1477,7 @@ HWTEST_F(WindowSessionImplTest5, SendFbActionEvent, TestSize.Level1)
 HWTEST_F(WindowSessionImplTest5, UpdateFloatingBall, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SendFbActionEvent");
+    option->SetWindowName("UpdateFloatingBall");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->hostSession_ = nullptr;
     FloatingBallTemplateBaseInfo fbTemplateInfo;
@@ -1486,6 +1490,18 @@ HWTEST_F(WindowSessionImplTest5, UpdateFloatingBall, TestSize.Level1)
     auto session = sptr<SessionStubMocker>::MakeSptr();
     window->hostSession_ = session;
     window->property_->persistentId_ = 1234;
+
+    FloatingBallTemplateInfo windowFbTemplateInfo;
+    windowFbTemplateInfo.template_ = static_cast<uint32_t>(FloatingBallTemplate::STATIC);
+    window->GetProperty()->SetFbTemplateInfo(windowFbTemplateInfo);
+    EXPECT_EQ(WMError::WM_ERROR_FB_UPDATE_STATIC_TEMPLATE_DENIED, window->UpdateFloatingBall(fbTemplateInfo, icon));
+
+    windowFbTemplateInfo.template_ = static_cast<uint32_t>(FloatingBallTemplate::NORMAL);
+    window->GetProperty()->SetFbTemplateInfo(windowFbTemplateInfo);
+    fbTemplateInfo.template_ = static_cast<uint32_t>(FloatingBallTemplate::STATIC);
+    EXPECT_EQ(WMError::WM_ERROR_FB_UPDATE_TEMPLATE_TYPE_DENIED, window->UpdateFloatingBall(fbTemplateInfo, icon));
+
+    fbTemplateInfo.template_ = static_cast<uint32_t>(FloatingBallTemplate::NORMAL);
     EXPECT_FALSE(window->IsWindowSessionInvalid());
     error = window->UpdateFloatingBall(fbTemplateInfo, icon);
     EXPECT_EQ(WMError::WM_OK, error);
@@ -1499,7 +1515,7 @@ HWTEST_F(WindowSessionImplTest5, UpdateFloatingBall, TestSize.Level1)
 HWTEST_F(WindowSessionImplTest5, NotifyPrepareCloseFloatingBall, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SendFbActionEvent");
+    option->SetWindowName("NotifyPrepareCloseFloatingBall");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->hostSession_ = nullptr;
 
@@ -1524,7 +1540,7 @@ HWTEST_F(WindowSessionImplTest5, NotifyPrepareCloseFloatingBall, TestSize.Level1
 HWTEST_F(WindowSessionImplTest5, RestoreFbMainWindow, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SendFbActionEvent");
+    option->SetWindowName("RestoreFbMainWindow");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->hostSession_ = nullptr;
 

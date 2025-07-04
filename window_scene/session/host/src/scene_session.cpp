@@ -19,6 +19,7 @@
 #include <ability_manager_client.h>
 #include <algorithm>
 #include <climits>
+#include "configuration.h"
 #include <hitrace_meter.h>
 #include "hitrace/hitracechain.h"
 #include <type_traits>
@@ -164,7 +165,6 @@ WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
         if (session->pcFoldScreenController_) {
             session->pcFoldScreenController_->OnConnect();
         }
-        session->SaveLastDensity();
         return ret;
     }, __func__);
 }
@@ -512,6 +512,7 @@ WSError SceneSession::BackgroundTask(const bool isSaveSnapshot)
             return ret;
         }
         if (WindowHelper::IsMainWindow(session->GetWindowType()) && isSaveSnapshot && needSaveSnapshot) {
+            session->SetFreeMultiWindow();
             session->SaveSnapshot(true);
         }
         session->MarkAvoidAreaAsDirty();
@@ -3615,7 +3616,6 @@ void SceneSession::HandleMoveDragEnd(WSRect& rect, SizeChangeReason reason)
         NotifySessionRectChange(rect, reason);
         NotifySubSessionRectChangeByAnchor(rect, SizeChangeReason::UNDEFINED);
     } else {
-        displayChangedByMoveDrag_ = true;
         NotifySessionRectChange(rect, reason, endDisplayId);
         NotifySubSessionRectChangeByAnchor(rect, SizeChangeReason::UNDEFINED, endDisplayId);
         CheckSubSessionShouldFollowParent(endDisplayId);
@@ -3761,7 +3761,7 @@ bool SceneSession::MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeR
                 TLOGNW(WmsLogTag::WMS_LAYOUT_PC, "%{public}s session is nullptr", where);
                 return;
             }
-            session->OnThrowSlipAnimationStateChange(false);
+            session->OnThrowSlipAnimationStateChange(false, true);
             session->NotifyFullScreenAfterThrowSlip(rect);
         };
     } else {
@@ -3771,19 +3771,19 @@ bool SceneSession::MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeR
                 TLOGNW(WmsLogTag::WMS_LAYOUT_PC, "%{public}s session is nullptr", where);
                 return;
             }
-            session->OnThrowSlipAnimationStateChange(false);
+            session->OnThrowSlipAnimationStateChange(false, false);
         };
     }
     auto throwSlipPair = std::make_pair(pcFoldScreenController_->GetThrowSlipTimingProtocol(),
         pcFoldScreenController_->GetThrowSlipTimingCurve());
     SetSurfaceBoundsWithAnimation(throwSlipPair, endRect, finishCallback);
-    OnThrowSlipAnimationStateChange(true);
+    OnThrowSlipAnimationStateChange(true, needSetFullScreen);
     rect = endRect;
     pcFoldScreenController_->ResetRecords();
     return true;
 }
 
-void SceneSession::OnThrowSlipAnimationStateChange(bool isAnimating)
+void SceneSession::OnThrowSlipAnimationStateChange(bool isAnimating, bool isFullScreen)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT_PC, "status: %{public}d", isAnimating);
     if (isAnimating) {
@@ -3798,7 +3798,7 @@ void SceneSession::OnThrowSlipAnimationStateChange(bool isAnimating)
         leashWinSurfaceNode->SetUIFirstSwitch(isAnimating ? RSUIFirstSwitch::FORCE_DISABLE : RSUIFirstSwitch::NONE);
     }
     if (onThrowSlipAnimationStateChangeFunc_) {
-        onThrowSlipAnimationStateChangeFunc_(isAnimating);
+        onThrowSlipAnimationStateChangeFunc_(isAnimating, isFullScreen);
     }
 }
 
@@ -5783,7 +5783,8 @@ void SceneSession::RegisterFullScreenWaterfallModeChangeCallback(std::function<v
     }, __func__);
 }
 
-void SceneSession::RegisterThrowSlipAnimationStateChangeCallback(std::function<void(bool isAnimating)>&& func)
+void SceneSession::RegisterThrowSlipAnimationStateChangeCallback(
+    std::function<void(bool isAnimating, bool isFullScreen)>&& func)
 {
     PostTask([weakThis = wptr(this), func = std::move(func), where = __func__]() mutable {
         auto session = weakThis.promote();
@@ -7842,33 +7843,8 @@ bool SceneSession::UpdateRectInner(const SessionUIParam& uiParam, SizeChangeReas
     if (WindowHelper::IsSubWindow(GetWindowType())) {
         isSubWindowResizingOrMoving_ = false;
     }
-    ProcessCallingSessionRectDirty();
     NotifyClientToUpdateRect("WMSPipeline", RSSyncTransactionAdapter::GetRSTransaction(GetRSUIContext()));
     return true;
-}
-
-void SceneSession::ProcessCallingSessionRectDirty()
-{
-    // Recalculate keyboard occupied area info when calling session rect is dirty
-    if (specificCallback_->onGetSceneSessionVectorByType_ &&
-        (reason_ < SizeChangeReason::DRAG || reason_ > SizeChangeReason::DRAG_END) &&
-        reason_ != SizeChangeReason::DRAG_MOVE) {
-        const auto& keyboardSessionVec = specificCallback_->onGetSceneSessionVectorByType_(
-            WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-        for (const auto& keyboardSession : keyboardSessionVec) {
-            if (!keyboardSession) {
-                continue;
-            }
-            if (!keyboardSession->IsSystemKeyboard() &&
-                static_cast<int32_t>(keyboardSession->GetCallingSessionId()) == GetPersistentId()) {
-                keyboardSession->ProcessKeyboardOccupiedAreaInfo(GetPersistentId(), true, false, false);
-                break;
-            }
-        }
-    } else {
-        TLOGD(WmsLogTag::WMS_KEYBOARD, "Session rect dirty, id: %{public}d, reason: %{public}d",
-            GetPersistentId(), reason_);
-    }
 }
 
 bool SceneSession::NotifyServerToUpdateRect(const SessionUIParam& uiParam, SizeChangeReason reason)
@@ -8727,116 +8703,6 @@ void SceneSession::NotifyKeyboardDidHideRegistered(bool registered)
     GetSessionProperty()->EditSessionInfo().isKeyboardDidHideRegistered_ = registered;
 }
 
-WSError SceneSession::UpdateDensity(bool isNotSessionRectWithDpiChange)
-{
-    if (systemConfig_.IsPcWindow() && WindowHelper::IsAppWindow(GetWindowType()) &&
-        Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && !isDefaultDensityEnabled_) {
-        UpdateNewSizeForPCWindow(isNotSessionRectWithDpiChange);
-    }
-    SetTempRect({ 0, 0, 0, 0 });
-    SaveLastDensity();
-    return Session::UpdateDensity();
-}
-
-void SceneSession::UpdateNewSizeForPCWindow(bool isNotSessionRectWithDpiChange)
-{
-    if (isNotSessionRectWithDpiChange) {
-        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "dip change do nothing.");
-        return;
-    }
-
-    if (auto property = GetSessionProperty()) {
-        DisplayId displayId = property->GetDisplayId();
-        auto display = DisplayManager::GetInstance().GetDisplayById(displayId);
-        if (display == nullptr) {
-            TLOGE(WmsLogTag::WMS_LAYOUT_PC, "get available area failed!");
-            return;
-        }
-
-        DMRect availableArea = { 0, 0, 0, 0 };
-        DMError ret = display->GetAvailableArea(availableArea);
-        if (ret != DMError::DM_OK || availableArea.IsUninitializedRect()) {
-            TLOGE(WmsLogTag::WMS_LAYOUT_PC, "get available area failed!");
-            return;
-        }
-
-        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "availableArea: %{public}d, %{public}d, %{public}u, %{public}u, "
-            "Id: %{public}u", availableArea.posX_, availableArea.posY_,
-            availableArea.width_, availableArea.height_, GetPersistentId());
-        WSRect winRect = winRect_;
-        if (!tempRect_.IsEmpty()) {
-            winRect = tempRect_;
-        }
-        float newVpr = display->GetVirtualPixelRatio();
-        if (CalcNewWindowRectIfNeed(availableArea, newVpr, winRect)) {
-            NotifySessionRectChange(winRect, SizeChangeReason::UPDATE_DPI_SYNC);
-            CalcNewClientRectForSuperFold(winRect);
-            SetFrameGravity(Gravity::RESIZE);
-            if (sessionStage_) {
-                sessionStage_->UpdateRect(winRect, SizeChangeReason::UPDATE_DPI_SYNC);
-            }
-            winRect_ = winRect;
-            TLOGI(WmsLogTag::WMS_LAYOUT_PC, "left: %{public}d, top: %{public}d, width: %{public}u, "
-                "height: %{public}u, Id: %{public}u, displayId: %{public}" PRIu64, winRect.posX_, winRect.posY_,
-                winRect.width_, winRect.height_, GetPersistentId(), GetDisplayId());
-        }
-    }
-    displayChangedByMoveDrag_ = false;
-}
-
-bool SceneSession::CalcNewWindowRectIfNeed(DMRect& availableArea, float newVpr, WSRect& winRect)
-{
-    auto property = GetSessionProperty();
-    if (property == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "property is nullptr");
-        return false;
-    }
-    // The size of the window does not change in CompatibleMode
-    if (property->IsWindowLimitDisabled()) {
-        return false;
-    }
-    float currVpr = 0.0f;
-    currVpr = property->GetLastLimitsVpr();
-    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "currVpr: %{public}f, newVpr: %{public}f, Id: %{public}u",
-        currVpr, newVpr, GetPersistentId());
-    if (MathHelper::NearZero(currVpr - newVpr) || MathHelper::NearZero(currVpr)) {
-        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "need not update new rect, currVpr: %{public}f newVpr: %{public}f "
-            "Id: %{public}u", currVpr, newVpr, GetPersistentId());
-        return false;
-    }
-    int32_t left = winRect.posX_;
-    int32_t top = winRect.posY_;
-    float scaleRatio = newVpr / currVpr;
-    uint32_t width = static_cast<uint32_t>(winRect.width_ * scaleRatio);
-    uint32_t height = static_cast<uint32_t>(winRect.height_ * scaleRatio);
-    int32_t topThreshold = availableArea.posY_;
-    int32_t bottomThreshold = static_cast<int32_t>(availableArea.posY_ + availableArea.height_);
-
-    UpdateSuperFoldThreshold(availableArea, topThreshold, bottomThreshold);
-    width = MathHelper::Min(width, availableArea.width_);
-    height = MathHelper::Min(height, availableArea.height_);
-    height = MathHelper::Min(height, static_cast<uint32_t>(bottomThreshold));
-    bool needMove = top < topThreshold || left < 0 ||
-        top > static_cast<int32_t>(bottomThreshold - height) ||
-        left > static_cast<int32_t>(availableArea.width_ - width) || displayChangedByMoveDrag_;
-    if (displayChangedByMoveDrag_ && moveDragController_) {
-        int32_t pointerPosX = moveDragController_->GetLastMovePointerPosX();
-        left = pointerPosX - static_cast<int32_t>((pointerPosX -left) * scaleRatio);
-    } else {
-        top = MathHelper::Min(top, static_cast<int32_t>(bottomThreshold - height));
-        top = MathHelper::Max(top, topThreshold);
-        left = MathHelper::Min(left, static_cast<int32_t>(availableArea.width_ - width));
-        left = MathHelper::Max(left, 0);
-    }
-    winRect.width_ = width;
-    winRect.height_ = height;
-    if (needMove) {
-        winRect.posX_ = left;
-        winRect.posY_ = top;
-    }
-    return true;
-}
-
 void SceneSession::SaveLastDensity()
 {
     auto property = GetSessionProperty();
@@ -8844,73 +8710,6 @@ void SceneSession::SaveLastDensity()
     if (auto display = DisplayManager::GetInstance().GetDisplayById(displayId)) {
         property->SetLastLimitsVpr(display->GetVirtualPixelRatio());
     }
-}
-
-void SceneSession::CalcNewClientRectForSuperFold(WSRect& rect)
-{
-    auto currScreenFoldStatus = PcFoldScreenManager::GetInstance().GetScreenFoldStatus();
-    if (currScreenFoldStatus == SuperFoldStatus::HALF_FOLDED) {
-        WSRect creaseRect = GetCreaseRegion(CreaseRegionName::FIRST_CREASE_REGION);
-        if (creaseRect.IsEmpty()) {
-            return;
-        }
-        if (winRect_.posY_ >= creaseRect.posY_ + creaseRect.height_) {
-            rect.posY_ = winRect_.posY_ - creaseRect.posY_ - creaseRect.height_;
-        }
-    }
-}
-
-void SceneSession::UpdateSuperFoldThreshold(DMRect& availableArea, int32_t& topThreshold, int32_t& bottomThreshold)
-{
-    auto currScreenFoldStatus = PcFoldScreenManager::GetInstance().GetScreenFoldStatus();
-    if (currScreenFoldStatus == SuperFoldStatus::HALF_FOLDED) {
-        WSRect creaseRect = GetCreaseRegion(CreaseRegionName::FIRST_CREASE_REGION);
-        if (creaseRect.IsEmpty()) {
-            return;
-        }
-        // is in C side
-        if (winRect_.posY_ >= creaseRect.posY_ + creaseRect.height_) {
-            sptr<ScreenSession> currentScreenSession =
-                ScreenSessionManagerClient::GetInstance().GetScreenSessionById(GetSessionProperty()->GetDisplayId());
-            if (currentScreenSession == nullptr) {
-                TLOGW(WmsLogTag::WMS_LAYOUT_PC, "Screen session is null");
-                return;
-            }
-            int32_t currentScreenHeight =
-                static_cast<int32_t>(currentScreenSession->GetScreenProperty().GetBounds().rect_.height_);
-            int32_t dockHeight = GetDockHeight();
-            topThreshold = creaseRect.posY_ + creaseRect.height_;
-            bottomThreshold = currentScreenHeight - dockHeight - creaseRect.posY_ - creaseRect.height_;
-            TLOGI(WmsLogTag::WMS_LAYOUT_PC, "currentScreenHeight: %{public}d, topThreshold: %{public}d, "
-                "bottomThreshold: %{public}d Id: %{public}u", currentScreenHeight, topThreshold,
-                bottomThreshold, GetPersistentId());
-        }
-    }
-}
-
-WSRect SceneSession::GetCreaseRegion(CreaseRegionName regionName) const
-{
-    sptr<FoldCreaseRegion> creaseRegion = DisplayManager::GetInstance().GetCurrentFoldCreaseRegion();
-    if (creaseRegion == nullptr) {
-        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "creaseRegion is null.");
-        return { 0, 0, 0, 0 };
-    }
-    std::vector<DMRect> creaseRects = creaseRegion->GetCreaseRects();
-    uint8_t index = static_cast<uint8_t>(regionName);
-    if (index >= 0 && index < creaseRects.size()) {
-        // posX_ from left to right. Otherwise posY_ from top to bottom.
-        std::sort(creaseRects.begin(), creaseRects.end(), [] (const DMRect& rectA, const DMRect& rectB) {
-            if (rectA.posX_ != rectB.posX_) {
-                return rectA.posX_ < rectB.posX_;
-            }
-            return rectA.posY_ < rectB.posY_;
-        });
-        return { creaseRects[index].posX_, creaseRects[index].posY_,
-            creaseRects[index].width_, creaseRects[index].height_ };
-    } else {
-        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "creaseRegion index %{public}u is out of range", index);
-    }
-    return { 0, 0, 0, 0 };
 }
 
 void SceneSession::NotifyUpdateFlagCallback(NotifyUpdateFlagFunc&& func)
@@ -9288,78 +9087,6 @@ void SceneSession::SetGetAllAppUseControlMapFunc(GetAllAppUseControlMapFunc&& fu
     onGetAllAppUseControlMapFunc_ = std::move(func);
 }
 
-/**
- * Get the rotate policy of a screen :
- * const.window.device.rotate_policy defines the rotate policy of unfoldable phone and pad, and:
- *     0 is default value and means window rotate policy;
- *     1 means screen rotate policy;
- *     2 means foldable device, should use const.window.foldabledevice.rotate_policy to define rotate policy
- * const.window.foldabledevice.rotate_policy defines the rotate policy of foldable device, and:
- *     "0,0" is default value and means window rotate in folded device and window rotate in expand device
- *     "0,1" means window rotate in folded device and screen rotate in expand device
- *     "1,0" means screen rotate in folded device and window rotate in expand device
- *     "1,1" means screen rotate in folded device and screen rotate in expand device
- */
-int32_t SceneSession::GetRotatePolicy()
-{
-    static const int32_t ROTATE_POLICY = system::GetIntParameter("const.window.device.rotate_policy", 0);
-    static const std::string FOLDABLE_ROTATE_POLICY =
-        system::GetParameter("const.window.foldabledevice.rotate_policy", "0,0");
-    FoldStatus foldStatus = ScreenSessionManagerClient::GetInstance().GetFoldStatus();
-    TLOGI(WmsLogTag::WMS_ANIMATION, "ROTATE_POLICY: %{public}d, FOLDABLE_ROTATE_POLICY: %{public}s, "
-          "foldstatus: %{public}d", ROTATE_POLICY, FOLDABLE_ROTATE_POLICY.c_str(), foldStatus);
-    if (ROTATE_POLICY != 2) { // 2 : foldable device
-        return ROTATE_POLICY;
-    }
-    auto foldableRotatePolicyArr = WindowHelper::Split(FOLDABLE_ROTATE_POLICY, ",");
-    if (foldableRotatePolicyArr.size() >= 2) { // 2 rotate policies in foldable device
-        // 0 is window rotate policy index; 1 is screen rotate policy index
-        return (foldStatus == FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND || foldStatus == FoldStatus::EXPAND) ?
-            std::atoi(foldableRotatePolicyArr[1].c_str()) : std::atoi(foldableRotatePolicyArr[0].c_str());
-    }
-    // If the size of foldableRotatePolicyArr is 1 return foldableRotatePolicyArr[0]
-    return foldableRotatePolicyArr.size() == 1 ? std::atoi(foldableRotatePolicyArr[0].c_str()) : ROTATE_POLICY_WINDOW;
-}
-
-/**
- * Translate frameRect to the coordinate of frameBuffer when
- * the coordinate of frameRect and frameBuffer is different in rotation scene.
- */
-Rect SceneSession::RecalculateFrameRect(const Rect& frameRect, uint32_t rotation,
-                                        uint32_t displayWidth, uint32_t displayHeight)
-{
-    Rect newRect = frameRect;
-    switch (rotation) {
-        case 90: { // degree 90
-            newRect.posX_ = frameRect.posY_;
-            newRect.posY_ = displayWidth - frameRect.posX_ - frameRect.width_;
-            newRect.width_ = frameRect.height_;
-            newRect.height_ = frameRect.width_;
-            break;
-        }
-        case 180: { // degree 180
-            newRect.posX_ = displayWidth - frameRect.posX_ - frameRect.width_;
-            newRect.posY_ = displayHeight - frameRect.posY_ - frameRect.height_;
-            newRect.width_ = frameRect.width_;
-            newRect.height_ = frameRect.height_;
-            break;
-        }
-        case 270: { // degree 270
-            newRect.posX_ = displayHeight - frameRect.posY_ - frameRect.height_;
-            newRect.posY_ = frameRect.posX_;
-            newRect.width_ = frameRect.height_;
-            newRect.height_ = frameRect.width_;
-            break;
-        }
-        default:
-            break;
-    }
-    TLOGI(WmsLogTag::WMS_ANIMATION, "rotation: %{public}d, displayWidth: %{public}d, displayHeight: %{public}d"
-        "frameRect: %{public}s, newRect: %{public}s", rotation, displayWidth, displayHeight,
-        frameRect.ToString().c_str(), newRect.ToString().c_str());
-    return newRect;
-}
-
 WSError SceneSession::SetFrameRectForPartialZoomIn(const Rect& frameRect)
 {
     if (!SessionPermission::IsSACalling()) {
@@ -9372,49 +9099,21 @@ WSError SceneSession::SetFrameRectForPartialZoomIn(const Rect& frameRect)
             TLOGE(WmsLogTag::WMS_ANIMATION, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        int32_t rotatePolicy = session->GetRotatePolicy();
-        return session->SetFrameRectForPartialZoomInInner(frameRect, rotatePolicy);
+        return session->SetFrameRectForPartialZoomInInner(frameRect);
     }, __func__);
     return WSError::WS_OK;
 }
 
-WSError SceneSession::SetFrameRectForPartialZoomInInner(const Rect& frameRect, int rotatePolicy)
+WSError SceneSession::SetFrameRectForPartialZoomInInner(const Rect& frameRect)
 {
     auto surfaceNode = GetSurfaceNode();
     if (surfaceNode == nullptr) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "surface node is null");
         return WSError::WS_ERROR_INVALID_WINDOW;
     }
-    auto currentScreenSession =
-        ScreenSessionManagerClient::GetInstance().GetScreenSessionById(GetDisplayId());
-    if (currentScreenSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_ANIMATION, "screen session is null");
-        return WSError::WS_ERROR_INVALID_DISPLAY;
-    }
-    const ScreenProperty& screenProperty = currentScreenSession->GetScreenProperty();
-    uint32_t screenWidth = screenProperty.GetBounds().rect_.width_;
-    uint32_t screenHeight = screenProperty.GetBounds().rect_.height_;
-    Rect screenRect = {
-        screenProperty.GetBounds().rect_.left_,
-        screenProperty.GetBounds().rect_.top_,
-        screenWidth,
-        screenHeight
-    };
-    if (!frameRect.IsInsideOf(screenRect)) {
-        TLOGE(WmsLogTag::WMS_ANIMATION, "frame rect is out of screen rect: %{public}s",
-              screenRect.ToString().c_str());
-        return WSError::WS_ERROR_INVALID_PARAM;
-    }
-    float deviceRotation = SessionHelper::ConvertDisplayOrientationToFloat(screenProperty.GetDeviceOrientation());
-    float screenComponentRotation = screenProperty.GetScreenComponentRotation();
-    uint32_t rotation = static_cast<uint32_t>(deviceRotation + screenComponentRotation) % 360; // degree 360
-    TLOGI(WmsLogTag::WMS_ANIMATION, "rotate policy: %{public}d, device rotation: %{public}f, "
-        "screen component rotation: %{public}f", rotatePolicy, deviceRotation, screenComponentRotation);
-    rotation = rotatePolicy != ROTATE_POLICY_SCREEN ? rotation :
-        static_cast<uint32_t>(screenComponentRotation) % 360; // degree 360
     AutoRSTransaction trans(GetRSUIContext(), true);
-    Rect newRect = RecalculateFrameRect(frameRect, rotation, screenWidth, screenHeight);
-    surfaceNode->SetRegionToBeMagnified({ newRect.posX_, newRect.posY_, newRect.width_, newRect.height_ });
+    surfaceNode->SetRegionToBeMagnified({ frameRect.posX_, frameRect.posY_, frameRect.width_, frameRect.height_ });
+    TLOGI(WmsLogTag::WMS_ANIMATION, "frameRect: %{public}s", frameRect.ToString().c_str());
     return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen

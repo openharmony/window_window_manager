@@ -409,13 +409,7 @@ public:
     void AddRSNodeModifier(bool isDark, const std::shared_ptr<RSBaseNode>& rsNode);
     void SetSidebarBlur(bool isDefaultSidebarBlur, bool isNeedAnimation);
     void ModifyRSAnimatableProperty(bool isDefaultSidebarBlur, bool isDark, bool isNeedAnimation);
-    WSError UpdateDensity(bool isNotSessionRectWithDpiChange = false);
-    void UpdateNewSizeForPCWindow(bool isNotSessionRectWithDpiChange = false);
-    bool CalcNewWindowRectIfNeed(DMRect& availableArea, float newVpr, WSRect& winRect);
-    void CalcNewClientRectForSuperFold(WSRect& rect);
     void SaveLastDensity();
-    void UpdateSuperFoldThreshold(DMRect& availableArea, int32_t& topThreshold, int32_t& bottomThreshold);
-    WSRect GetCreaseRegion(CreaseRegionName regionName) const;
     virtual bool IsFollowParentMultiScreenPolicy() const { return false; }
     void NotifyUpdateFlagCallback(NotifyUpdateFlagFunc&& func);
     void SetSidebarBlurMaximize(bool isMaximize);
@@ -772,10 +766,6 @@ public:
     WSError SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo) override;
     WindowAnchorInfo GetWindowAnchorInfo() const { return windowAnchorInfo_; }
     void CalcSubWindowRectByAnchor(const WSRect& parentRect, WSRect& subRect);
-    void SetTempRect(WSRect rect)
-    {
-        tempRect_ = rect;
-    }
     bool IsAnyParentSessionDragMoving() const override;
     bool IsAnyParentSessionDragZooming() const override;
     bool IsCompatibleModeDirtyDragScaleWindow() const;
@@ -792,8 +782,8 @@ public:
      */
     void UpdateFullScreenWaterfallMode(bool isWaterfallMode);
     void RegisterFullScreenWaterfallModeChangeCallback(std::function<void(bool isWaterfallMode)>&& func);
-    void OnThrowSlipAnimationStateChange(bool isAnimating);
-    void RegisterThrowSlipAnimationStateChangeCallback(std::function<void(bool isAnimating)>&& func);
+    void OnThrowSlipAnimationStateChange(bool isAnimating, bool isFullScreen);
+    void RegisterThrowSlipAnimationStateChangeCallback(std::function<void(bool isAnimating, bool isFullScreen)>&& func);
     bool IsMissionHighlighted();
     bool IsPcFoldDevice();
     void MaskSupportEnterWaterfallMode();
@@ -818,13 +808,8 @@ public:
     void NotifyKeyboardWillHideRegistered(bool registered) override;
     void NotifyKeyboardDidShowRegistered(bool registered) override;
     void NotifyKeyboardDidHideRegistered(bool registered) override;
-    virtual void ProcessKeyboardOccupiedAreaInfo(uint32_t callingId, bool needCheckVisible,
-        bool needRecalculateAvoidAreas, bool needCheckRSTransaction) {}
-    virtual void MarkOccupiedAreaAsDirty() {}
-    virtual void ResetOccupiedAreaDirtyFlags() {}
-    virtual uint32_t GetOccupiedAreaDirtyFlags() { return dirtyFlags_; }
-    void ProcessCallingSessionRectDirty();
     bool isSubWindowResizingOrMoving_ = false;
+    virtual void CalculateOccupiedAreaAfterUIRefresh() {}
 
     /*
      * Window Focus
@@ -1009,7 +994,7 @@ protected:
     void UpdateWaterfallMode(SessionEvent event);
     sptr<PcFoldScreenController> pcFoldScreenController_ = nullptr;
     std::atomic<uint32_t> throwSlipToFullScreenAnimCount_ = 0;
-    std::function<void(bool isAnimating)> onThrowSlipAnimationStateChangeFunc_;
+    std::function<void(bool isAnimating, bool isFullScreen)> onThrowSlipAnimationStateChangeFunc_;
 
     /*
      * Compatible Mode
@@ -1199,9 +1184,7 @@ private:
     void NotifyExtensionSecureLimitChange(bool isLimit);
 
     // window animation
-    WSError SetFrameRectForPartialZoomInInner(const Rect& frameRect, int32_t rotatePolicy);
-    Rect RecalculateFrameRect(const Rect& frameRect, uint32_t rotation, uint32_t displayWidth, uint32_t displayHeight);
-    int32_t GetRotatePolicy();
+    WSError SetFrameRectForPartialZoomInInner(const Rect& frameRect);
 
     /*
      * PiP Window
@@ -1376,9 +1359,7 @@ private:
      * PC Window Layout
      */
     bool isLayoutFullScreen_ { false };
-    bool displayChangedByMoveDrag_ = false;
     bool isDefaultDensityEnabled_ = false;
-    WSRect tempRect_ = { 0, 0, 0, 0 };  // need not sync to service, only for calculate
 
     /**
      * Window pattern

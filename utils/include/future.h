@@ -50,7 +50,7 @@ protected:
 
     std::mutex mutex_;
 
-private:
+protected:
     std::condition_variable conditionVariable_;
 };
 

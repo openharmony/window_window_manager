@@ -577,6 +577,21 @@ HWTEST_F(AbstractDisplayControllerTest, GetScreenSnapshot03, TestSize.Level1)
     auto ret = absDisplayController_->GetScreenSnapshot(screenId);
     ASSERT_EQ(nullptr, ret);
 }
+
+/**
+ * @tc.name: FeatureTest
+ * @tc.desc: SetScreenOffsetInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractDisplayControllerTest, FeatureTest, TestSize.Level1)
+{
+    ScreenId screenId = 0;
+    auto ret = absDisplayController_->SetScreenOffsetInner(screenId);
+    EXPECT_TRUE(ret);
+    screenId = 6;
+    ret = absDisplayController_->SetScreenOffsetInner(screenId);
+    EXPECT_FALSE(ret);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

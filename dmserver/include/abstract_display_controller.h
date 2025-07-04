@@ -69,6 +69,7 @@ private:
         Point offset = Point(0, 0));
     void SetDisplayStateChangeListener(sptr<AbstractDisplay> abstractDisplay, DisplayStateChangeType type);
     DisplayId GetDefaultDisplayId();
+    bool SetScreenOffsetInner(ScreenId screenId);
 
     std::recursive_mutex& mutex_;
     std::atomic<DisplayId> displayCount_ { 0 };

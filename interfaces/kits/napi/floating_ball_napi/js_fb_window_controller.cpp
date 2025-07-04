@@ -30,7 +30,7 @@ namespace Rosen {
 using namespace AbilityRuntime;
 namespace {
 const std::string STATE_CHANGE_CB = "stateChange";
-const std::string CLICK_EVENT = "clickEvent";
+const std::string CLICK_EVENT = "click";
 const std::string FLOATING_BALL_PERMISSION = "ohos.permission.USE_FLOAT_BALL";
 constexpr uint32_t TITLE_MIN_LEN = 1;
 constexpr uint32_t TITLE_MAX_LEN = 64;
@@ -363,9 +363,9 @@ napi_value JsFbController::CheckParams(napi_env env, const FbOption& option)
 {
     if (option.GetTemplate() < static_cast<uint32_t>(FloatingBallTemplate::STATIC) ||
         option.GetTemplate() >= static_cast<uint32_t>(FloatingBallTemplate::END)) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "tempalte %{public}d is invalid.", option.GetTemplate());
+        TLOGE(WmsLogTag::WMS_SYSTEM, "template %{public}d is invalid.", option.GetTemplate());
         napi_throw(env, AbilityRuntime::CreateJsError(env,
-            static_cast<int32_t>(WmErrorCode::WM_ERROR_FB_PARAM_INVALID), "tempalte is invalid."));
+            static_cast<int32_t>(WmErrorCode::WM_ERROR_FB_PARAM_INVALID), "template is invalid."));
         return nullptr;
     }
     if (option.GetTitle().length() < TITLE_MIN_LEN || option.GetTitle().length() > TITLE_MAX_LEN) {
@@ -394,7 +394,7 @@ napi_value JsFbController::CheckParams(napi_env env, const FbOption& option)
     }
     if (option.GetTemplate() == static_cast<uint32_t>(FloatingBallTemplate::STATIC) &&
         option.GetIcon() == nullptr) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "tempalte %{public}u need icon.", option.GetTemplate());
+        TLOGE(WmsLogTag::WMS_SYSTEM, "template %{public}u need icon.", option.GetTemplate());
         napi_throw(env, AbilityRuntime::CreateJsError(env,
             static_cast<int32_t>(WmErrorCode::WM_ERROR_FB_PARAM_INVALID), "current template need icon"));
         return nullptr;

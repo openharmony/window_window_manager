@@ -29,7 +29,7 @@
 #include "color_parser.h"
 #include "common/include/fold_screen_state_internel.h"
 #include "common/include/fold_screen_common.h"
-#include "singleton_container.h"
+#include "configuration.h"
 #include "display_manager.h"
 #include "display_manager_adapter.h"
 #include "dm_common.h"
@@ -42,6 +42,7 @@
 #include "session_permission.h"
 #include "session/container/include/window_event_channel.h"
 #include "session_manager/include/session_manager.h"
+#include "singleton_container.h"
 #include "sys_cap_util.h"
 #include "window_adapter.h"
 #include "window_helper.h"
@@ -1859,6 +1860,15 @@ WMError WindowSceneSessionImpl::DestroyHookWindow()
     return WMError::WM_OK;
 }
 
+WindowLifeCycleInfo WindowSceneSessionImpl::GetWindowLifecycleInfo() const
+{
+    WindowLifeCycleInfo lifeCycleInfo;
+    lifeCycleInfo.windowId = GetPersistentId();
+    lifeCycleInfo.windowType = GetType();
+    lifeCycleInfo.windowName = GetWindowName();
+    return lifeCycleInfo;
+}
+
 WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearListener, uint32_t reason)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "Destroy start, id:%{public}d, state:%{public}u, needNotifyServer:%{public}d, "
@@ -1881,6 +1891,8 @@ WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearLis
         WLOGFW("Destroy window failed, id: %{public}d", GetPersistentId());
         return ret;
     }
+    WindowLifeCycleInfo windowLifeCycleInfo = GetWindowLifecycleInfo();
+    SingletonContainer::Get<WindowManager>().NotifyWMSWindowDestroyed(windowLifeCycleInfo);
 
     // delete after replace WSError with WMError
     NotifyBeforeDestroy(GetWindowName());
@@ -2295,7 +2307,7 @@ WMError WindowSceneSessionImpl::ResizeAsync(uint32_t width, uint32_t height,
     return static_cast<WMError>(ret);
 }
 
-WMError WindowSceneSessionImpl::SetFrameRectForParticalZoomIn(const Rect& frameRect)
+WMError WindowSceneSessionImpl::SetFrameRectForPartialZoomIn(const Rect& frameRect)
 {
     TLOGI(WmsLogTag::WMS_ANIMATION, "set frame rect start, rect: %{public}s", frameRect.ToString().c_str());
     if (GetType() != WindowType::WINDOW_TYPE_MAGNIFICATION) {
@@ -5373,7 +5385,9 @@ void WindowSceneSessionImpl::UpdateNewSize()
         needResize = true;
     }
     if (needResize) {
-        isResizedByLimit_ = true;
+        if (IsPcOrPadFreeMultiWindowMode()) {
+            isResizedByLimit_ = true;
+        }
         Resize(width, height);
         TLOGI(WmsLogTag::WMS_LAYOUT, "Resize window by limits. Id: %{public}u, width: %{public}u,"
             " height: %{public}u", GetWindowId(), width, height);
@@ -6275,11 +6289,11 @@ WMError WindowSceneSessionImpl::SetWindowAnchorInfo(const WindowAnchorInfo& wind
     const auto& property = GetProperty();
     if (!WindowHelper::IsSubWindow(property->GetWindowType())) {
         TLOGE(WmsLogTag::WMS_SUB, "only sub window is valid");
-        return WMError::WM_ERROR_INVALID_OPERATION;
+        return WMError::WM_ERROR_INVALID_CALLING;
     }
     if (property->GetSubWindowLevel() > 1) {
         TLOGI(WmsLogTag::WMS_SUB, "not support more than 1 level window");
-        return WMError::WM_ERROR_INVALID_OPERATION;
+        return WMError::WM_ERROR_INVALID_CALLING;
     }
     if (!windowSystemConfig_.supportFollowRelativePositionToParent_) {
         TLOGI(WmsLogTag::WMS_SUB, "not support device");
@@ -6481,7 +6495,7 @@ WMError WindowSceneSessionImpl::GetWindowPropertyInfo(WindowPropertyInfo& window
     windowPropertyInfo.windowRect = GetRect();
     auto uicontent = GetUIContentSharedPtr();
     if (uicontent == nullptr) {
-        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "uicontent is nullptr");
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "uicontent is nullptr");
     } else {
         uicontent->GetWindowPaintSize(windowPropertyInfo.drawableRect);
     }
@@ -6536,7 +6550,7 @@ WSError WindowSceneSessionImpl::NotifyAppForceLandscapeConfigUpdated()
     WindowType winType = GetType();
     AppForceLandscapeConfig config = {};
     if (WindowHelper::IsMainWindow(winType) && GetAppForceLandscapeConfig(config) == WMError::WM_OK &&
-        config.isSupportSplitMode_ == true) {
+        config.supportSplit_ > 0) {
         SetForceSplitEnable(config);
         return WSError::WS_OK;
     }
