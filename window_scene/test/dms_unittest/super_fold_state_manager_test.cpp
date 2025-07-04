@@ -656,7 +656,7 @@ HWTEST_F(SuperFoldStateManagerTest, CalculateScreenRelativePosition_ShouldSetRig
     int32_t p1Width = 100, p1Height = 100;
     int32_t p2Width = 50, p2Height = 100;
     int32_t secondStartX = mainStartX + p1Width, secondStartY = 0;
-    DirectionType p2Direction;
+    ScreenDirectionType p2Direction;
     Drawing::Rect p1 = {mainStartX, mainStartY, mainStartX + p1Width, mainStartY + p1Height};
     Drawing::Rect p2 = {secondStartX, secondStartY, secondStartX + p2Width, secondStartX + p2Height};
     auto result = manager.CalculateScreenRelativePosition(p1, p2, secondStartX, secondStartY, mainStartX, mainStartY);
@@ -694,7 +694,7 @@ HWTEST_F(SuperFoldStateManagerTest, CalculateScreenRelativePosition_ShouldSetLef
  
     int32_t secondStartX = 0, secondStartY = 0;
     int32_t mainStartX = secondStartX + p2Width, mainStartY = secondStartY;
-    DirectionType p2Direction;
+    ScreenDirectionType p2Direction;
     Drawing::Rect p1 = {mainStartX, mainStartY, mainStartX + p1Width, mainStartY + p1Height};
     Drawing::Rect p2 = {secondStartX, secondStartY, secondStartX + p2Width, secondStartX + p2Height};
     auto result = manager.CalculateScreenRelativePosition(p1, p2, secondStartX, secondStartY, mainStartX, mainStartY);
@@ -732,7 +732,7 @@ HWTEST_F(SuperFoldStateManagerTest, CalculateScreenRelativePosition_ShouldSetTop
     int32_t p2Width = 50, p2Height = 100;
     int32_t secondStartX = p1Width / 2, secondStartY = 0;
     int32_t mainStartX = secondStartX, mainStartY = secondStartY + p2Height;
-    DirectionType p2Direction;
+    ScreenDirectionType p2Direction;
     Drawing::Rect p1 = {mainStartX, mainStartY, mainStartX + p1Width, mainStartY + p1Height};
     Drawing::Rect p2 = {secondStartX, secondStartY, secondStartX + p2Width, secondStartX + p2Height};
  
@@ -771,7 +771,7 @@ HWTEST_F(SuperFoldStateManagerTest, CalculateScreenRelativePosition_ShouldSetBot
     int32_t p2Width = 50, p2Height = 100;
     int32_t mainStartX = 0, mainStartY = 0;
     int32_t secondStartX = p1Width / 2, secondStartY = mainStartY + p1Height;
-    DirectionType p2Direction;
+    ScreenDirectionType p2Direction;
     Drawing::Rect p1 = {mainStartX, mainStartY, mainStartX + p1Width, mainStartY + p1Height};
     Drawing::Rect p2 = {secondStartX, secondStartY, secondStartX + p2Width, secondStartX + p2Height};
  
@@ -812,7 +812,7 @@ HWTEST_F(SuperFoldStateManagerTest, CalculateScreenRelativePosition_ShouldSetDir
     int32_t secondStartY = 0;
     Drawing::Rect p1 = {0, 0, 100, 100};
     Drawing::Rect p2 = {-50, 0, 50, 100};
-    DirectionType p2Direction = DirectionType::LEFT;
+    ScreenDirectionType p2Direction = ScreenDirectionType::LEFT;
     int32_t p1Width = 100;
     int32_t p1Height = 100;
     int32_t p2Width = 100;
@@ -821,7 +821,7 @@ HWTEST_F(SuperFoldStateManagerTest, CalculateScreenRelativePosition_ShouldSetDir
     DMError result = manager.CalculateScreenRelativePosition(p1, p2, secondStartX, secondStartY, mainStartX, mainStartY);
  
     EXPECT_EQ(result, DMError::DM_OK);
-    EXPECT_EQ(p2Direction, DirectionType::LEFT);
+    EXPECT_EQ(p2Direction, ScreenDirectionType::LEFT);
     EXPECT_EQ(secondStartX, mainStartX - p2Width);
     EXPECT_EQ(secondStartY, mainStartY);
 }
@@ -842,7 +842,7 @@ HWTEST_F(SuperFoldStateManagerTest, CalculateScreenRelativePosition_ShouldSetDir
     int32_t secondStartY = 0;
     Drawing::Rect p1 = {0, 0, 100, 100};
     Drawing::Rect p2 = {150, 0, 250, 100};
-    DirectionType p2Direction = DirectionType::RIGHT;
+    ScreenDirectionType p2Direction = ScreenDirectionType::RIGHT;
     int32_t p1Width = 100;
     int32_t p1Height = 100;
     int32_t p2Width = 100;
@@ -851,7 +851,7 @@ HWTEST_F(SuperFoldStateManagerTest, CalculateScreenRelativePosition_ShouldSetDir
     DMError result = manager.CalculateScreenRelativePosition(p1, p2, secondStartX, secondStartY, mainStartX, mainStartY);
  
     EXPECT_EQ(result, DMError::DM_OK);
-    EXPECT_EQ(p2Direction, DirectionType::RIGHT);
+    EXPECT_EQ(p2Direction, ScreenDirectionType::RIGHT);
     EXPECT_EQ(secondStartX, mainStartX + p1Width);
     EXPECT_EQ(secondStartY, mainStartY);
 }
@@ -872,7 +872,7 @@ HWTEST_F(SuperFoldStateManagerTest, CalculateScreenRelativePosition_ShouldSetDir
     int32_t secondStartY = 0;
     Drawing::Rect p1 = {0, 0, 100, 100};
     Drawing::Rect p2 = {0, -50, 100, 50};
-    DirectionType p2Direction = DirectionType::TOP;
+    ScreenDirectionType p2Direction = ScreenDirectionType::TOP;
     int32_t p1Width = 100;
     int32_t p1Height = 100;
     int32_t p2Width = 100;
@@ -881,7 +881,7 @@ HWTEST_F(SuperFoldStateManagerTest, CalculateScreenRelativePosition_ShouldSetDir
     DMError result = manager.CalculateScreenRelativePosition(p1, p2, secondStartX, secondStartY, mainStartX, mainStartY);
  
     EXPECT_EQ(result, DMError::DM_OK);
-    EXPECT_EQ(p2Direction, DirectionType::TOP);
+    EXPECT_EQ(p2Direction, ScreenDirectionType::TOP);
     EXPECT_EQ(secondStartX, mainStartX);
     EXPECT_EQ(secondStartY, mainStartY - p2Height);
 }
