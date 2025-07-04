@@ -424,8 +424,8 @@ ScreenDirectionType SuperFoldStateManager::GetOuterScreenDirection(const Drawing
 }
 
 DMError SuperFoldStateManager::CalculateScreenRelativePosition(const Drawing::Rect& innerScreenRect,
-    const Drawing::Rect& outerScreenRect, int32_t& secondStartX, int32_t& secondStartY,
-    int32_t mainStartX, int32_t mainStartY)
+    const Drawing::Rect& outerScreenRect, const MultiScreenPositionOptions& mainScreenOptions,
+    int32_t& secondStartX, int32_t& secondStartY)
 {
     bool isToExpanded = GetCurrentStatus() == SuperFoldStatus::EXPANDED;
     int32_t p1Width = innerScreenRect.right_ - innerScreenRect.left_;
@@ -435,6 +435,8 @@ DMError SuperFoldStateManager::CalculateScreenRelativePosition(const Drawing::Re
     }
     int32_t p2Width = outerScreenRect.right_ - outerScreenRect.left_;
     int32_t p2Height = outerScreenRect.bottom_ - outerScreenRect.top_;
+    int32_t mainStartX = static_cast<int32_t>(mainScreenOptions.startX_);
+    int32_t mainStartY = static_cast<int32_t>(mainScreenOptions.startY_);
     ScreenDirectionType p2Direction = GetOuterScreenDirection(innerScreenRect, outerScreenRect);
     if (p2Direction == ScreenDirectionType::LEFT) {
         secondStartX = mainStartX - p2Width;
@@ -474,12 +476,10 @@ DMError SuperFoldStateManager::RefreshScreenRelativePositionInner(const Drawing:
     const Drawing::Rect& outerScreenRect, MultiScreenPositionOptions& mainScreenOptions,
     MultiScreenPositionOptions& secondScreenOption)
 {
-    int32_t mainStartX = static_cast<int32_t>(mainScreenOptions.startX_);
-    int32_t mainStartY = static_cast<int32_t>(mainScreenOptions.startY_);
     int32_t secondStartX = static_cast<int32_t>(secondScreenOption.startX_);
     int32_t secondStartY = static_cast<int32_t>(secondScreenOption.startY_);
-    CalculateScreenRelativePosition(innerScreenRect, outerScreenRect, secondStartX,
-        secondStartY, mainStartX, mainStartY);
+    CalculateScreenRelativePosition(innerScreenRect, outerScreenRect, mainScreenOptions, secondStartX,
+        secondStartY);
     if (secondStartX < 0) {
         mainScreenOptions.startX_ = -static_cast<uint32_t>(secondStartX);
         secondStartX = 0;
