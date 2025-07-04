@@ -120,7 +120,7 @@ private:
     DMError RefreshScreenRelativePosition(sptr<ScreenSession>& mainScreenSession, sptr<ScreenSession>& secondarySession);
     DMError RefreshScreenRelativePositionInner(const Drawing::Rect& innerScreenRect,
         const Drawing::Rect& outerScreenRect, MultiScreenPositionOptions& mainScreenOptions,
-        MultiScreenPositionOptions &secondScreenOption);
+        MultiScreenPositionOptions& secondScreenOption);
     ScreenDirectionType GetOuterScreenDirection(const Drawing::Rect& innerScreenRect,
         const Drawing::Rect& outerScreenRect);
     DMError CalculateScreenRelativePosition(const Drawing::Rect& innerScreenRect, const Drawing::Rect& outerScreenRect,
