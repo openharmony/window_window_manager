@@ -366,7 +366,7 @@ void SuperFoldStateManager::HandleExtendToHalfFoldDisplayNotify(sptr<ScreenSessi
     RefreshExternalRegion();
 }
 
-const uint32_t SuperFoldStateManager::GetFoldHeight()
+uint32_t SuperFoldStateManager::GetFoldHeight()
 {
     uint32_t foldHeight = DEFAULT_FOLD_REGION_HEIGHT;
     if (currentSuperFoldCreaseRegion_ != nullptr) {
@@ -449,9 +449,9 @@ DMError SuperFoldStateManager::CalculateScreenRelativePosition(const Drawing::Re
         secondStartX = mainStartX + (outerScreenRect.left_ - innerScreenRect.left_);
         secondStartY = mainStartY + p1Height;
     }
-    int32_t crossoverWidthMin = static_cast<int32_t>(p1Width * CROSSOVER_MAIN);
+    int32_t crossoverWidthMin = static_cast<int32_t>(p1Width * CROSSOVER_MIN);
     int32_t crossoverWidthMax = p1Width - crossoverWidthMin;
-    int32_t crossoverHeightMin = static_cast<int32_t>(p1Width * CROSSOVER_MAIN);
+    int32_t crossoverHeightMin = static_cast<int32_t>(p1Width * CROSSOVER_MIN);
     int32_t crossoverHeightMax = p1Width - crossoverHeightMin;
     if (p2Direction == ScreenDirectionType::LEFT || p2Direction == ScreenDirectionType::RIGHT) {
         if (secondStartY + p2Height < mainStartY + crossoverHeightMin) {
@@ -473,15 +473,6 @@ DMError SuperFoldStateManager::CalculateScreenRelativePosition(const Drawing::Re
 DMError SuperFoldStateManager::RefreshScreenRelativePositionInner(MultiScreenPositionOptions &mainScreenOptions,
     MultiScreenPositionOptions &secondScreenOption, Drawing::Rect &innerScreenRect, Drawing::Rect &outerScreenRect)
 {
-    DirectionType p2Direction = DirectionType::RIGHT;
-    bool isToExpanded = GetCurrentStatus() == SuperFoldStatus::EXPANDED;
-    int32_t p1Width = p1.right_ - p1.left_;
-    int32_t p1Height = p1.bottom_ - p1.top_;
-    if (isToExpanded ^ (p1Width > p1Height)) {
-        std::swap(p1Width, p1Height);
-    }
-    int32_t p2Width = p2.right_ - p2.left_;
-    int32_t p2Height = p2.bottom_ - p2.top_;
     int32_t mainStartX = (int32_t)mainScreenOptions.startX_;
     int32_t mainStartY = (int32_t)mainScreenOptions.startY_;
     int32_t secondStartX = (int32_t)secondScreenOption.startX_;
@@ -517,23 +508,23 @@ DMError SuperFoldStateManager::RefreshScreenRelativePosition(
     secondScreenOption.screenId_ = externalSession->GetRSScreenId();
     mainScreenOptions.startX_ = 0;
     mainScreenOptions.startY_ = 0;
-    Drawing::Rect p1 = {
+    Drawing::Rect mainScreenRect = {
         mainScreenProperty.GetStartX(),
         mainScreenProperty.GetStartY(),
         mainScreenProperty.GetStartX() + mainScreenProperty.GetBounds().rect_.GetWidth(),
         mainScreenProperty.GetStartY() + mainScreenProperty.GetBounds().rect_.GetHeight(),
     };
-    Drawing::Rect p2 = {
+    Drawing::Rect externScreenRect = {
         externScreenProperty.GetStartX(),
         externScreenProperty.GetStartY(),
         externScreenProperty.GetStartX() + externScreenProperty.GetBounds().rect_.GetWidth(),
         externScreenProperty.GetStartY() + externScreenProperty.GetBounds().rect_.GetHeight(),
     };
-    secondScreenOption.startX_ = p2.left_;
-    secondScreenOption.startY_ = p2.top_;
-    mainScreenOptions.startX_ = p1.left_;
-    mainScreenOptions.startY_ = p1.top_;
-    RefreshScreenRelativePositionInner(mainScreenOptions, secondScreenOption, p1, p2);
+    secondScreenOption.startX_ = externScreenRect.left_;
+    secondScreenOption.startY_ = externScreenRect.top_;
+    mainScreenOptions.startX_ = mainScreenRect.left_;
+    mainScreenOptions.startY_ = mainScreenRect.top_;
+    RefreshScreenRelativePositionInner(mainScreenOptions, secondScreenOption, mainScreenRect, externScreenRect);
     return DMError::DM_OK;
 }
 
@@ -556,6 +547,13 @@ DMError SuperFoldStateManager::RefreshMirrorRegionInner(
     mirrorRegion.posY_ = 0;
     mirrorRegion.width_ = mainScreenProperty.GetScreenRealWidth();
     mirrorRegion.height_ = (mainScreenProperty.GetScreenRealHeight() - GetFoldHeight()) / HEIGHT_HALF;
+    if (mirrorRegion.width_ == 0 || mirrorRegion.height_ == 0) {
+        TLOGE(WmsLogTag::DMS,
+            "RefreshMirrorRegionInner mirrorRegion.width_:%{public}d mirrorRegion.height_:%{public}d",
+            mirrorRegion.width_,
+            mirrorRegion.height_);
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
     RefreshActiveRegion(mirrorRegion, secondarySession, mainScreenProperty.GetScreenRealHeight());
     secondarySession->SetMirrorScreenRegion(secondarySession->GetScreenId(), mirrorRegion);
     secondarySession->SetIsPhysicalMirrorSwitch(true);

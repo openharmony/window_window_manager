@@ -123,9 +123,8 @@ private:
         MultiScreenPositionOptions &secondScreenOption, Drawing::Rect &innerScreenRect, Drawing::Rect &outerScreenRect);
     ScreenDirectionType GetOuterScreenDirection(const Drawing::Rect &innerScreenRect,
         const Drawing::Rect &outerScreenRect);
-    DMError CalculateScreenRelativePosition(const Drawing::Rect &innerScreenRect,
-        const Drawing::Rect &outerScreenRect, int32_t &secondStartX, int32_t &secondStartY,
-        int32_t mainStartX, int32_t mainStartY);
+    DMError CalculateScreenRelativePosition(const Drawing::Rect &innerScreenRect, const Drawing::Rect &outerScreenRect,
+        int32_t &secondStartX, int32_t &secondStartY, int32_t mainStartX, int32_t mainStartY);
 };
 } // Rosen
 } // OHOS
