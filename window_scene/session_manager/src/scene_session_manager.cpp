@@ -15806,7 +15806,7 @@ void SceneSessionManager::SetStatusBarAvoidHeight(DisplayId displayId, int32_t h
 void SceneSessionManager::GetStatusBarAvoidHeight(DisplayId displayId, WSRect& barArea)
 {
     auto it = statusBarAvoidHeight_.find(displayId);
-    if (it == statusBarAvoidHeight.end()) {
+    if (it == statusBarAvoidHeight_.end()) {
         return;
     }
     if (it->second == INVALID_STATUS_BAR_AVOID_HEIGHT) {

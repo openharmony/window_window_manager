@@ -7694,7 +7694,7 @@ int32_t SceneSession::GetStatusBarHeight()
                 session->onGetStatusBarAvoidHeightFunc_(displayId, statusBarRect);
                 TLOGND(WmsLogTag::WMS_IMMS, "%{public}s win %{public}d displayId %{public} " PRIu64 " status " 
                     "bar height %{public}d",
-                    where, displayId, session->GetPersistentId(), statusBarRect.height_);
+                    where, session->GetPersistentId(), displayId, statusBarRect.height_);
             }
             height = statusBarRect.height_;
         }
