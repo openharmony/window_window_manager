@@ -380,7 +380,7 @@ uint32_t SuperFoldStateManager::GetFoldCreaseHeight()
     return foldHeight;
 }
 
-DMError SuperFoldStateManager::RefreshActiveRegion(DMRect &mirrorRegion, sptr<ScreenSession> screenSession,
+DMError SuperFoldStateManager::RefreshActiveRegion(DMRect& mirrorRegion, sptr<ScreenSession> screenSession,
     uint32_t mainScreenHeight)
 {
     if (mainScreenHeight == 0 || mirrorRegion.height_ == 0) {
@@ -402,14 +402,14 @@ DMError SuperFoldStateManager::RefreshActiveRegion(DMRect &mirrorRegion, sptr<Sc
         activeMode->width_ = screenProperty.GetScreenRealWidth();
     } else {
         float ratio = (float)mainScreenHeight / mirrorRegion.height_;
-        activeMode->height_ = screenProperty.GetScreenRealHeight() * ratio;
+        activeMode->height_ = ratio * screenProperty.GetScreenRealHeight();
         activeMode->width_ = screenProperty.GetScreenRealWidth();
     }
     return DMError::DM_OK;
 }
 
-ScreenDirectionType SuperFoldStateManager::GetOuterScreenDirection(const Drawing::Rect &innerScreenRect,
-    const Drawing::Rect &outerScreenRect)
+ScreenDirectionType SuperFoldStateManager::GetOuterScreenDirection(const Drawing::Rect& innerScreenRect,
+    const Drawing::Rect& outerScreenRect)
 {
     if (outerScreenRect.left_ >= innerScreenRect.right_) {
         return ScreenDirectionType::RIGHT;
@@ -423,8 +423,8 @@ ScreenDirectionType SuperFoldStateManager::GetOuterScreenDirection(const Drawing
     return ScreenDirectionType::RIGHT;
 }
 
-DMError SuperFoldStateManager::CalculateScreenRelativePosition(const Drawing::Rect &innerScreenRect,
-    const Drawing::Rect &outerScreenRect, int32_t &secondStartX, int32_t &secondStartY,
+DMError SuperFoldStateManager::CalculateScreenRelativePosition(const Drawing::Rect& innerScreenRect,
+    const Drawing::Rect& outerScreenRect, int32_t& secondStartX, int32_t& secondStartY,
     int32_t mainStartX, int32_t mainStartY)
 {
     bool isToExpanded = GetCurrentStatus() == SuperFoldStatus::EXPANDED;
@@ -470,8 +470,8 @@ DMError SuperFoldStateManager::CalculateScreenRelativePosition(const Drawing::Re
     return DMError::DM_OK;
 }
 
-DMError SuperFoldStateManager::RefreshScreenRelativePositionInner(MultiScreenPositionOptions &mainScreenOptions,
-    MultiScreenPositionOptions &secondScreenOption, Drawing::Rect &innerScreenRect, Drawing::Rect &outerScreenRect)
+DMError SuperFoldStateManager::RefreshScreenRelativePositionInner(MultiScreenPositionOptions& mainScreenOptions,
+    MultiScreenPositionOptions& secondScreenOption, Drawing::Rect& innerScreenRect, Drawing::Rect& outerScreenRect)
 {
     int32_t mainStartX = (int32_t)mainScreenOptions.startX_;
     int32_t mainStartY = (int32_t)mainScreenOptions.startY_;
