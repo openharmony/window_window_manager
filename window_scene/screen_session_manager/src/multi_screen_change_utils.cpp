@@ -17,6 +17,8 @@
 
 #include <transaction/rs_transaction.h>
 
+#include "fold_screen_state_internel.h"
+#include "fold_screen_controller/super_fold_state_manager.h"
 #include "rs_adapter.h"
 #include "screen_session_manager.h"
 #include "window_manager_hilog.h"
@@ -367,8 +369,16 @@ void MultiScreenChangeUtils::CreateMirrorSession(sptr<ScreenSession>& mainSessio
     }
     screenSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
     screenSession->SetIsExtend(true);
-    RSDisplayNodeConfig config = { screenSession->rsId_, true, displayNode->GetId() };
-    screenSession->ReuseDisplayNode(config);
+#ifdef FOLD_ABILITY_ENABLE
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        SuperFoldStateManager::GetInstance().RefreshExternalRegion();
+    } else {
+#endif
+        RSDisplayNodeConfig config = { screenSession->rsId_, true, displayNode->GetId() };
+        screenSession->ReuseDisplayNode(config);
+#ifdef FOLD_ABILITY_ENABLE
+    }
+#endif
 }
 
 void MultiScreenChangeUtils::ScreenConnectionChange(sptr<IScreenSessionManagerClient> ssmClient,
@@ -398,6 +408,11 @@ void MultiScreenChangeUtils::CreateExtendSession(sptr<ScreenSession>& screenSess
     screenSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
     RSDisplayNodeConfig config = { screenSession->rsId_, false, INVALID_NODEID };
     screenSession->ReuseDisplayNode(config);
+#ifdef FOLD_ABILITY_ENABLE
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        SuperFoldStateManager::GetInstance().RefreshExternalRegion();
+    }
+#endif
 }
 
 void MultiScreenChangeUtils::SetMultiScreenModeChangeTracker(std::string changeProc)
