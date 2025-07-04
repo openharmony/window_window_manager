@@ -1398,6 +1398,12 @@ napi_value CreateJsSessionRecoverInfo(
             ConvertTransitionAnimationToJsValue(env, animation));
     }
     napi_set_named_property(env, objValue, "transitionAnimationMap", jsTransitionAnimationMapValue);
+    napi_value jsPropertyArrayObject = CreateJsSystemBarPropertyArrayObject(env, property->GetSystemBarProperty());
+    if (jsPropertyArrayObject == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "jsPropertyArrayObject is nullptr");
+        return nullptr;
+    }
+    napi_set_named_property(env, objValue, "systemBarPropertyArray", jsPropertyArrayObject);
 
     return objValue;
 }
