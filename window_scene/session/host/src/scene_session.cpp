@@ -5551,7 +5551,7 @@ WSError SceneSession::BatchPendingSessionsActivation(const std::vector<sptr<AAFw
             WSError::WS_ERROR_INVALID_PARAM;
         }
         std::vector<std::shared_ptr<SessionInfo>> sessionInfos;
-        WSError ret = DoBatchPendingSessionsActivation(sessionInfos, abilitySessionInfos, session);
+        WSError ret = DoBatchPendingSessionsActivation(sessionInfos, abilitySessionInfos, session, isFoundationCall);
         if (ret != WSError::WS_OK) {
             return ret;
         }
