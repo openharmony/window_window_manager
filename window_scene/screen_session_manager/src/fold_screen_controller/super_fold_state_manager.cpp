@@ -423,7 +423,7 @@ ScreenDirectionType SuperFoldStateManager::GetOuterScreenDirection(const Drawing
     return ScreenDirectionType::RIGHT;
 }
 
-DMError SuperFoldStateManager::CalculateScreenRelativePosition(const Drawing::Rect& innerScreenRect,
+void SuperFoldStateManager::CalculateScreenRelativePosition(const Drawing::Rect& innerScreenRect,
     const Drawing::Rect& outerScreenRect, const MultiScreenPositionOptions& mainScreenOptions,
     int32_t& secondStartX, int32_t& secondStartY)
 {
@@ -461,7 +461,7 @@ DMError SuperFoldStateManager::CalculateScreenRelativePosition(const Drawing::Re
         } else if (secondStartY > mainStartY + crossoverHeightMax) {
             secondStartY = mainStartY + crossoverHeightMax;
         }
-        return DMError::DM_OK;
+        return;
     }
 
     if (secondStartX + p2Width < mainStartX + crossoverWidthMin) {
@@ -469,10 +469,9 @@ DMError SuperFoldStateManager::CalculateScreenRelativePosition(const Drawing::Re
     } else if (secondStartX > mainStartX + crossoverWidthMax) {
         secondStartX = mainStartX + crossoverWidthMax;
     }
-    return DMError::DM_OK;
 }
 
-DMError SuperFoldStateManager::RefreshScreenRelativePositionInner(const Drawing::Rect& innerScreenRect,
+void SuperFoldStateManager::RefreshScreenRelativePositionInner(const Drawing::Rect& innerScreenRect,
     const Drawing::Rect& outerScreenRect, MultiScreenPositionOptions& mainScreenOptions,
     MultiScreenPositionOptions& secondScreenOption)
 {
@@ -491,7 +490,6 @@ DMError SuperFoldStateManager::RefreshScreenRelativePositionInner(const Drawing:
     secondScreenOption.startX_ = static_cast<uint32_t>(secondStartX);
     secondScreenOption.startY_ = static_cast<uint32_t>(secondStartY);
     ScreenSessionManager::GetInstance().SetMultiScreenRelativePosition(mainScreenOptions, secondScreenOption);
-    return DMError::DM_OK;
 }
 
 DMError SuperFoldStateManager::RefreshScreenRelativePosition(
