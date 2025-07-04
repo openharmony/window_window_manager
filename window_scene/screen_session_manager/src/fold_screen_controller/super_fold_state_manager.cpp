@@ -368,11 +368,12 @@ void SuperFoldStateManager::HandleExtendToHalfFoldDisplayNotify(sptr<ScreenSessi
 
 uint32_t SuperFoldStateManager::GetFoldCreaseHeight() const
 {
-    if (currentSuperFoldCreaseRegion_ != nullptr) {
-        std::vector<DMRect> creaseRects = currentSuperFoldCreaseRegion_->GetCreaseRects();
-        if (!creaseRects.empty()) {
-            return creaseRects[0].height_;
-        }
+    if (currentSuperFoldCreaseRegion_ == nullptr) {
+        return DEFAULT_FOLD_REGION_HEIGHT;
+    }
+    std::vector<DMRect> creaseRects = currentSuperFoldCreaseRegion_->GetCreaseRects();
+    if (!creaseRects.empty()) {
+        return creaseRects[0].height_;
     }
     return DEFAULT_FOLD_REGION_HEIGHT;
 }
@@ -480,11 +481,11 @@ void SuperFoldStateManager::RefreshScreenRelativePositionInner(const Drawing::Re
     CalculateScreenRelativePosition(innerScreenRect, outerScreenRect, mainScreenOptions, secondStartX,
         secondStartY);
     if (secondStartX < 0) {
-        mainScreenOptions.startX_ = -static_cast<uint32_t>(secondStartX);
+        mainScreenOptions.startX_ += static_cast<uint32_t>(-secondStartX);
         secondStartX = 0;
     }
     if (secondStartY < 0) {
-        mainScreenOptions.startY_ = -static_cast<uint32_t>(secondStartY);
+        mainScreenOptions.startY_ += static_cast<uint32_t>(-secondStartY);
         secondStartY = 0;
     }
     secondScreenOption.startX_ = static_cast<uint32_t>(secondStartX);
