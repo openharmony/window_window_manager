@@ -2561,7 +2561,7 @@ HWTEST_F(SceneSessionManagerTest12, CreateUIEffectController, TestSize.Level1)
         WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
 }
 
-**
+/**
  * @tc.name: SetPiPSettingSwitchStatus
  * @tc.desc: test function : SetPiPSettingSwitchStatus
  * @tc.type: FUNC
