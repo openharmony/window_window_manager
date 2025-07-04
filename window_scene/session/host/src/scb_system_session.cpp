@@ -29,7 +29,10 @@ const std::unordered_map<std::string, SurfaceWindowType> surfaceWindowTypeMap = 
     { "SCBWallpaper", SurfaceWindowType::SCB_WALLPAPER },
     { "SCBScreenLock", SurfaceWindowType::SCB_SCREEN_LOCK },
     { "SCBNegativeScreen", SurfaceWindowType::SCB_NEGATIVE_SCREEN },
-    { "SCBDropdownPanel", SurfaceWindowType::SCB_DROPDOWN_PANEL }
+    { "SCBDropdownPanel", SurfaceWindowType::SCB_DROPDOWN_PANEL },
+    { "SCBVolumePanel", SurfaceWindowType::SCB_VOLUME_PANEL },
+    { "SCBBannerNotification", SurfaceWindowType::SCB_BANNER_NOTIFICATION },
+    { "SCBGestureBack", SurfaceWindowType::SCB_GESTURE_BACK }
 };
 } // namespace
 
