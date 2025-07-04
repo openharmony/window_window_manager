@@ -15796,7 +15796,7 @@ void SceneSessionManager::SetStatusBarAvoidHeight(DisplayId displayId, int32_t h
     const char* const where = __func__;
     auto task = [this, where, displayId, height] {
         statusBarAvoidHeight_[displayId] = height >= 0 ? height : INVALID_STATUS_BAR_AVOID_HEIGHT;
-        TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s, displayId %{public} " PRIu64 " height %{public}d",
+        TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s, displayId %{public}" PRIu64 " height %{public}d",
             where, displayId, statusBarAvoidHeight_[displayId]);
         return WMError::WM_OK;
     };
@@ -15812,7 +15812,7 @@ void SceneSessionManager::GetStatusBarAvoidHeight(DisplayId displayId, WSRect& b
     if (it->second == INVALID_STATUS_BAR_AVOID_HEIGHT) {
         return;
     }
-    TLOGD(WmsLogTag::WMS_IMMS, "displayId %{public} " PRIu64 " height %{public}d", displayId, it->second);
+    TLOGD(WmsLogTag::WMS_IMMS, "displayId %{public}" PRIu64 " height %{public}d", displayId, it->second);
     barArea.height_ = it->second;
 }
 
