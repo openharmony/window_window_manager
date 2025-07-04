@@ -86,6 +86,9 @@ sptr<WindowSessionImpl> GetTestWindowImpl(const std::string& name)
     }
 
     window->hostSession_ = session;
+    auto runner = AppExecFwk::EventRunner::Create("WindowSessionImpl");
+    std::shared_ptr<AppExecFwk::EventHandler> handler = std::make_shared<AppExecFwk::EventHandler>(runner);
+    window->handler_ = handler;
     return window;
 }
 

@@ -1184,6 +1184,7 @@ void WindowExtensionSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaC
             TLOGNE(WmsLogTag::WMS_KEYBOARD, "window is nullptr, notify occupied area info failed");
             return;
         }
+        window->NotifyOccupiedAreaChange(info);
         window->occupiedAreaInfo_ = info;
         window->UpdateViewportConfig(
             window->GetRect(), WindowSizeChangeReason::OCCUPIED_AREA_CHANGE, rsTransaction, nullptr, avoidAreas);
