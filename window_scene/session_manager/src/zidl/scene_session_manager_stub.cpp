@@ -2245,11 +2245,11 @@ int SceneSessionManagerStub::HandleGetPiPSettingSwitchStatus(MessageParcel& data
     bool switchStatus = false;
     WMError errCode = GetPiPSettingSwitchStatus(switchStatus);
     if (!reply.WriteBool(switchStatus)) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "Write switchStatus fail.");
+        TLOGE(WmsLogTag::WMS_PIP, "Write switchStatus fail.");
         return ERR_INVALID_DATA;
     }
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "Write errCode fail.");
+        TLOGE(WmsLogTag::WMS_PIP, "Write errCode fail.");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;
