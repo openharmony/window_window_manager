@@ -378,37 +378,6 @@ uint32_t SuperFoldStateManager::GetFoldCreaseHeight() const
     return DEFAULT_FOLD_REGION_HEIGHT;
 }
 
-DMError SuperFoldStateManager::RefreshActiveRegion(DMRect& mirrorRegion, sptr<ScreenSession>& screenSession,
-    uint32_t mainScreenHeight)
-{
-    if (mainScreenHeight == 0 || mirrorRegion.height_ == 0) {
-        TLOGE(WmsLogTag::DMS, "mainScreenHeight: %{public}u mirrorRegion.height_:%{public}u",
-            mainScreenHeight, mirrorRegion.height_);
-        return DMError::DM_ERROR_INVALID_PARAM;
-    }
-    if (screenSession == nullptr) {
-        TLOGE(WmsLogTag::DMS, "screenSession is null");
-        return DMError::DM_ERROR_NULLPTR;
-    }
-
-    sptr<SupportedScreenModes> activeMode = screenSession->GetActiveScreenMode();
-    if (activeMode == nullptr) {
-        TLOGE(WmsLogTag::DMS, "activeMode null");
-        return DMError::DM_ERROR_NULLPTR;
-    }
-    auto screenProperty = screenSession->GetScreenProperty();
-    if (GetCurrentStatus() == SuperFoldStatus::EXPANDED) {
-        mirrorRegion = DMRect::NONE();
-        activeMode->height_ = screenProperty.GetScreenRealHeight();
-        activeMode->width_ = screenProperty.GetScreenRealWidth();
-    } else {
-        float ratio = static_cast<float>(mainScreenHeight / mirrorRegion.height_);
-        activeMode->height_ = ratio * screenProperty.GetScreenRealHeight();
-        activeMode->width_ = screenProperty.GetScreenRealWidth();
-    }
-    return DMError::DM_OK;
-}
-
 ScreenDirectionType SuperFoldStateManager::GetOuterScreenDirection(const Drawing::Rect& innerScreenRect,
     const Drawing::Rect& outerScreenRect)
 {
@@ -552,7 +521,9 @@ DMError SuperFoldStateManager::RefreshMirrorRegionInner(
             mirrorRegion.width_, mirrorRegion.height_);
         return DMError::DM_ERROR_INVALID_PARAM;
     }
-    RefreshActiveRegion(mirrorRegion, secondarySession, mainScreenProperty.GetScreenRealHeight());
+    if (GetCurrentStatus() == SuperFoldStatus::EXPANDED) {
+        mirrorRegion = DMRect::NONE();
+    }
     secondarySession->SetMirrorScreenRegion(secondarySession->GetScreenId(), mirrorRegion);
     secondarySession->SetIsPhysicalMirrorSwitch(true);
     secondarySession->EnableMirrorScreenRegion();

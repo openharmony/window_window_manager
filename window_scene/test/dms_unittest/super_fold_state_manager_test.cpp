@@ -446,62 +446,6 @@ HWTEST_F(SuperFoldStateManagerTest, GetFoldCreaseHeight, TestSize.Level1)
 }
  
 /**
-* @tc.name  : RefreshActiveRegion_HeightZero
-* @tc.desc  : Test When currentSuperFoldCreaseRegion_ is nullptr, return defalut
-* @tc.type: FUNC
-*/
-HWTEST_F(SuperFoldStateManagerTest, RefreshActiveRegion_HeightZero, TestSize.Level1)
-{
-    ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
-    DMRect mirrorRegion = {100, 100, 0, 0};
-    SuperFoldStateManager superFoldStateManager;
-    sptr<ScreenSession> innerScreen = sptr<ScreenSession>::MakeSptr();
-    auto result = superFoldStateManager.RefreshActiveRegion(mirrorRegion, innerScreen, 0);
-    EXPECT_EQ(result, DMError::DM_ERROR_INVALID_PARAM);
-    result = superFoldStateManager.RefreshActiveRegion(mirrorRegion, innerScreen, 100);
-    EXPECT_EQ(result, DMError::DM_ERROR_INVALID_PARAM);
-    EXPECT_EQ(mirrorRegion.height_, 0);
-}
- 
-/**
-* @tc.name  : RefreshActiveRegion_ExpandedStatus
-* @tc.desc  : Test When ExpandedStatus, return ok
-* @tc.type: FUNC
-*/
-HWTEST_F(SuperFoldStateManagerTest, RefreshActiveRegion_ExpandedStatus, TestSize.Level1)
-{
-    ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
-    DMRect mirrorRegion = {100, 100, 100, 100};
-    SuperFoldStateManager superFoldStateManager;
-    superFoldStateManager.SetCurrentStatus(SuperFoldStatus::EXPANDED);
-    sptr<ScreenSession> innerScreen = nullptr;
-    innerScreen = ssm_.GetOrCreateScreenSession(0);
-    auto result = superFoldStateManager.RefreshActiveRegion(mirrorRegion, innerScreen, 100);
-    EXPECT_EQ(innerScreen->GetActiveScreenMode()->height_, 3296);
-    EXPECT_EQ(result, DMError::DM_OK);
-    EXPECT_EQ(mirrorRegion.width_, 100);
-}
- 
-/**
-* @tc.name  : RefreshActiveRegion_NonExpandedStatus
-* @tc.desc  : Test When NonExpandedStatus, return ok
-* @tc.type: FUNC
-*/
-HWTEST_F(SuperFoldStateManagerTest, RefreshActiveRegion_NonExpandedStatus, TestSize.Level1)
-{
-    ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
-    DMRect mirrorRegion = {100, 100, 100, 100};
-    SuperFoldStateManager superFoldStateManager;
-    superFoldStateManager.SetCurrentStatus(SuperFoldStatus::UNKNOWN);
-    sptr<ScreenSession> innerScreen = nullptr;
-    innerScreen = ssm_.GetOrCreateScreenSession(0);
-    auto result = superFoldStateManager.RefreshActiveRegion(mirrorRegion, innerScreen, 100);
-    EXPECT_EQ(innerScreen->GetActiveScreenMode()->height_, 3296);
-    EXPECT_EQ(result, DMError::DM_OK);
-    EXPECT_EQ(mirrorRegion.height_, 100);
-}
- 
-/**
 * @tc.name  : RefreshMirrorRegionInner_NullptrScreenSession
 * @tc.desc  : Test When null, return expect
 * @tc.type: FUNC

@@ -116,7 +116,6 @@ private:
 
     uint32_t GetFoldCreaseHeight() const;
     DMError RefreshMirrorRegionInner(sptr<ScreenSession>& mainScreenSession, sptr<ScreenSession>& secondarySession);
-    DMError RefreshActiveRegion(DMRect& mirrorRegion, sptr<ScreenSession>& screenSession, uint32_t mainScreenHeight);
     DMError RefreshScreenRelativePosition(sptr<ScreenSession>& mainScreenSession, sptr<ScreenSession>& secondarySession);
     void RefreshScreenRelativePositionInner(const Drawing::Rect& innerScreenRect,
         const Drawing::Rect& outerScreenRect, MultiScreenPositionOptions& mainScreenOptions,
