@@ -825,7 +825,7 @@ int SessionStub::HandleBatchPendingSessionsActivation(MessageParcel& data, Messa
         abilitySessionInfos.emplace_back(abilitySessionInfo);
     }
     WSError errCode = BatchPendingSessionsActivation(abilitySessionInfos);
-    if(!reply.WriteUint32(static_cast<uint32_t>(errCode))) {
+    if (!reply.WriteUint32(static_cast<uint32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write errCode failed");
     }
     return ERR_NONE;
