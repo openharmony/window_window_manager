@@ -880,7 +880,6 @@ HWTEST_F(SuperFoldStateManagerTest, CalculateScreenRelativePosition_ShouldSetDir
     int32_t p1Height = 100;
     int32_t p2Width = 100;
     int32_t p2Height = 100;
-    int32_t p2Height = 100;
     MultiScreenPositionOptions mainScreenOptions = {0, mainStartX, mainStartY};
     DMError result =  manager.CalculateScreenRelativePosition(p1, p2, mainScreenOptions, secondStartX, secondStartY);
  
