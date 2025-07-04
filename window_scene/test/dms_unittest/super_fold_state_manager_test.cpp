@@ -507,10 +507,10 @@ HWTEST_F(SuperFoldStateManagerTest, RefreshMirrorRegionInner_NullptrScreenSessio
     sptr<ScreenSession> mainScreenSession = nullptr;
     sptr<ScreenSession> secondarySession = nullptr;
     SuperFoldStateManager superFoldStateManager = SuperFoldStateManager();
-    EXPECT_EQ(superFoldStateManager.RefreshMirrorRegionInner(mainScreenSession, secondarySession),
+    ASSERT_EQ(superFoldStateManager.RefreshMirrorRegionInner(mainScreenSession, secondarySession),
         DMError::DM_ERROR_NULLPTR);
     mainScreenSession = new ScreenSession();
-    EXPECT_EQ(superFoldStateManager.RefreshMirrorRegionInner(mainScreenSession, secondarySession),
+    ASSERT_EQ(superFoldStateManager.RefreshMirrorRegionInner(mainScreenSession, secondarySession),
         DMError::DM_ERROR_NULLPTR);
 }
  
@@ -600,11 +600,11 @@ HWTEST_F(SuperFoldStateManagerTest, RefreshScreenRelativePosition_ShouldUpdatePo
     sptr<ScreenSession> mainScreenSession = nullptr;
     sptr<ScreenSession> secondarySession = nullptr;
     DMError result = manager.RefreshScreenRelativePosition(mainScreenSession, secondarySession);
-    EXPECT_EQ(DMError::DM_ERROR_NULLPTR, result);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, result);
  
     mainScreenSession = new ScreenSession();
     result = manager.RefreshScreenRelativePosition(mainScreenSession, secondarySession);
-    EXPECT_EQ(DMError::DM_ERROR_NULLPTR, result);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, result);
 }
  
 /**

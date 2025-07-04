@@ -29,8 +29,8 @@ WM_IMPLEMENT_SINGLE_INSTANCE(SuperFoldStateManager)
 
 namespace {
 const std::string g_FoldScreenRect = system::GetParameter("const.window.foldscreen.config_rect", "");
-const uint32_t DEFAULT_FOLD_REGION_HEIGHT = 82;
-const float CROSSOVER_MAIN = 0.14;
+const uint32_t DEFAULT_FOLD_REGION_HEIGHT = 82; // default height of pivot area
+const float CROSSOVER_MIN = 0.14;  // Minium ratio of the border between the two screens
 const int32_t PARAM_NUMBER_MIN = 10;
 const int32_t HEIGHT_HALF = 2;
 #ifdef TP_FEATURE_ENABLE
@@ -366,7 +366,7 @@ void SuperFoldStateManager::HandleExtendToHalfFoldDisplayNotify(sptr<ScreenSessi
     RefreshExternalRegion();
 }
 
-uint32_t SuperFoldStateManager::GetFoldHeight()
+const uint32_t SuperFoldStateManager::GetFoldHeight()
 {
     uint32_t foldHeight = DEFAULT_FOLD_REGION_HEIGHT;
     if (currentSuperFoldCreaseRegion_ != nullptr) {
@@ -374,12 +374,14 @@ uint32_t SuperFoldStateManager::GetFoldHeight()
         if (!creaseRects.empty()) {
             foldHeight = creaseRects[0].height_;
         }
+    } else {
+        TLOGE(WmsLogTag::DMS, "RcurrentSuperFoldCreaseRegion_ null");
     }
     return foldHeight;
 }
 
-DMError SuperFoldStateManager::RefreshActiveRegion(
-    sptr<ScreenSession> screenSession, uint32_t mainScreenHeight, DMRect &mirrorRegion)
+DMError SuperFoldStateManager::RefreshActiveRegion(DMRect &mirrorRegion, sptr<ScreenSession> screenSession,
+    uint32_t mainScreenHeight)
 {
     if (mainScreenHeight == 0 || mirrorRegion.height_ == 0) {
         TLOGE(WmsLogTag::DMS,
@@ -393,7 +395,7 @@ DMError SuperFoldStateManager::RefreshActiveRegion(
         TLOGE(WmsLogTag::DMS, "RefreshActiveRegion activeMode null");
         return DMError::DM_ERROR_NULLPTR;
     }
-    ScreenProperty screenProperty = screenSession->GetScreenProperty();
+    auto screenProperty = screenSession->GetScreenProperty();
     if (GetCurrentStatus() == SuperFoldStatus::EXPANDED) {
         mirrorRegion = DMRect::NONE();
         activeMode->height_ = screenProperty.GetScreenRealHeight();
@@ -406,58 +408,70 @@ DMError SuperFoldStateManager::RefreshActiveRegion(
     return DMError::DM_OK;
 }
 
-DMError SuperFoldStateManager::CalculateScreenRelativePosition(int32_t &mainStartX, int32_t &mainStartY,
-    int32_t &secondStartX, int32_t &secondStartY, Drawing::Rect &p1, Drawing::Rect &p2, DirectionType &p2Direction,
-    int32_t p1Width, int32_t &p1Height, int32_t p2Width, int32_t p2Height)
+ScreenDirectionType SuperFoldStateManager::GetOuterScreenDirection(const Drawing::Rect &innerScreenRect,
+    const Drawing::Rect &outerScreenRect)
+{
+    if (outerScreenRect.left_ >= innerScreenRect.right_) {
+        return ScreenDirectionType::RIGHT;
+    } else if (outerScreenRect.right_ <= innerScreenRect.left_) {
+        return ScreenDirectionType::LEFT;
+    } else if (outerScreenRect.bottom_ <= innerScreenRect.top_) {
+        return ScreenDirectionType::TOP;
+    } else if (outerScreenRect.top_ >= innerScreenRect.bottom_) {
+        return ScreenDirectionType::BOTTOM;
+    }
+    return ScreenDirectionType::RIGHT;
+}
+
+DMError SuperFoldStateManager::CalculateScreenRelativePosition(const Drawing::Rect &innerScreenRect,
+    const Drawing::Rect &outerScreenRect, int32_t &secondStartX, int32_t &secondStartY,
+    int32_t mainStartX, int32_t mainStartY)
 {
     bool isToExpanded = GetCurrentStatus() == SuperFoldStatus::EXPANDED;
-    if (p2.left_ >= p1.right_) {
-        p2Direction = DirectionType::RIGHT;
-    } else if (p2.right_ <= p1.left_) {
-        p2Direction = DirectionType::LEFT;
-    } else if (p2.bottom_ <= p1.top_) {
-        p2Direction = DirectionType::TOP;
-    } else if (p2.top_ >= p1.bottom_) {
-        p2Direction = DirectionType::BOTTOM;
+    int32_t p1Width = innerScreenRect.right_ - innerScreenRect.left_;
+    int32_t p1Height = innerScreenRect.bottom_ - innerScreenRect.top_;
+    if (isToExpanded ^ (p1Width > p1Height)) {
+        std::swap(p1Width, p1Height);
     }
-    if (p2Direction == DirectionType::LEFT) {
+    int32_t p2Width = outerScreenRect.right_ - outerScreenRect.left_;
+    int32_t p2Height = outerScreenRect.bottom_ - outerScreenRect.top_;
+    ScreenDirectionType p2Direction = GetOuterScreenDirection(innerScreenRect, outerScreenRect);
+    if (p2Direction == ScreenDirectionType::LEFT) {
         secondStartX = mainStartX - p2Width;
-        secondStartY = mainStartY + (p2.top_ - p1.top_);
-    } else if (p2Direction == DirectionType::RIGHT) {
+        secondStartY = mainStartY + (outerScreenRect.top_ - innerScreenRect.top_);
+    } else if (p2Direction == ScreenDirectionType::RIGHT) {
         secondStartX = mainStartX + p1Width;
-        secondStartY = mainStartY + (p2.top_ - p1.top_);
-    } else if (p2Direction == DirectionType::TOP) {
-        secondStartX = mainStartX + (p2.left_ - p1.left_);
+        secondStartY = mainStartY + (outerScreenRect.top_ - innerScreenRect.top_);
+    } else if (p2Direction == ScreenDirectionType::TOP) {
+        secondStartX = mainStartX + (outerScreenRect.left_ - innerScreenRect.left_);
         secondStartY = mainStartY - p2Height;
-    } else if (p2Direction == DirectionType::BOTTOM) {
-        secondStartX = mainStartX + (p2.left_ - p1.left_);
+    } else if (p2Direction == ScreenDirectionType::BOTTOM) {
+        secondStartX = mainStartX + (outerScreenRect.left_ - innerScreenRect.left_);
         secondStartY = mainStartY + p1Height;
-    }
-    if (!isToExpanded) {
-        p1Height /= HEIGHT_HALF;
     }
     int32_t crossoverWidthMin = static_cast<int32_t>(p1Width * CROSSOVER_MAIN);
     int32_t crossoverWidthMax = p1Width - crossoverWidthMin;
     int32_t crossoverHeightMin = static_cast<int32_t>(p1Width * CROSSOVER_MAIN);
     int32_t crossoverHeightMax = p1Width - crossoverHeightMin;
-    if (p2Direction == DirectionType::LEFT || p2Direction == DirectionType::RIGHT) {
+    if (p2Direction == ScreenDirectionType::LEFT || p2Direction == ScreenDirectionType::RIGHT) {
         if (secondStartY + p2Height < mainStartY + crossoverHeightMin) {
             secondStartY = mainStartY + crossoverHeightMin;
         } else if (secondStartY > mainStartY + crossoverHeightMax) {
             secondStartY = mainStartY + crossoverHeightMax;
         }
-    } else if (p2Direction == DirectionType::TOP || p2Direction == DirectionType::BOTTOM) {
-        if (secondStartX + p2Width < mainStartX + crossoverWidthMin) {
-            secondStartX = mainStartX + crossoverWidthMin;
-        } else if (secondStartX > mainStartX + crossoverWidthMax) {
-            secondStartX = mainStartX + crossoverWidthMax;
-        }
+        return DMError::DM_OK;
+    } 
+
+    if (secondStartX + p2Width < mainStartX + crossoverWidthMin) {
+        secondStartX = mainStartX + crossoverWidthMin;
+    } else if (secondStartX > mainStartX + crossoverWidthMax) {
+        secondStartX = mainStartX + crossoverWidthMax;
     }
     return DMError::DM_OK;
 }
 
 DMError SuperFoldStateManager::RefreshScreenRelativePositionInner(MultiScreenPositionOptions &mainScreenOptions,
-    MultiScreenPositionOptions &secondScreenOption, Drawing::Rect &p1, Drawing::Rect &p2)
+    MultiScreenPositionOptions &secondScreenOption, Drawing::Rect &innerScreenRect, Drawing::Rect &outerScreenRect)
 {
     DirectionType p2Direction = DirectionType::RIGHT;
     bool isToExpanded = GetCurrentStatus() == SuperFoldStatus::EXPANDED;
@@ -472,8 +486,8 @@ DMError SuperFoldStateManager::RefreshScreenRelativePositionInner(MultiScreenPos
     int32_t mainStartY = (int32_t)mainScreenOptions.startY_;
     int32_t secondStartX = (int32_t)secondScreenOption.startX_;
     int32_t secondStartY = (int32_t)secondScreenOption.startY_;
-    CalculateScreenRelativePosition(
-        mainStartX, mainStartY, secondStartX, secondStartY, p1, p2, p2Direction, p1Width, p1Height, p2Width, p2Height);
+    CalculateScreenRelativePosition(innerScreenRect, outerScreenRect, secondStartX,
+        secondStartY, mainStartX, mainStartY);
     if (secondStartX < 0) {
         mainScreenOptions.startX_ = -(uint32_t)secondStartX;
         secondStartX = 0;
@@ -495,8 +509,8 @@ DMError SuperFoldStateManager::RefreshScreenRelativePosition(
         TLOGE(WmsLogTag::DMS, "RefreshScreenRelativePosition mainScreenSession is null");
         return DMError::DM_ERROR_NULLPTR;
     }
-    ScreenProperty mainScreenProperty = mainScreenSession->GetScreenProperty();
-    ScreenProperty externScreenProperty = externalSession->GetScreenProperty();
+    auto mainScreenProperty = mainScreenSession->GetScreenProperty();
+    auto externScreenProperty = externalSession->GetScreenProperty();
     MultiScreenPositionOptions mainScreenOptions;
     mainScreenOptions.screenId_ = mainScreenSession->GetRSScreenId();
     MultiScreenPositionOptions secondScreenOption;
@@ -530,8 +544,8 @@ DMError SuperFoldStateManager::RefreshMirrorRegionInner(
         TLOGE(WmsLogTag::DMS, "RefreshMirrorRegionInner mainScreenSession is null");
         return DMError::DM_ERROR_NULLPTR;
     }
-    ScreenProperty mainScreenProperty = mainScreenSession->GetScreenProperty();
-    ScreenProperty screenProperty = secondarySession->GetScreenProperty();
+    auto mainScreenProperty = mainScreenSession->GetScreenProperty();
+    auto screenProperty = secondarySession->GetScreenProperty();
     std::shared_ptr<RSDisplayNode> displayNode = mainScreenSession->GetDisplayNode();
     if (displayNode == nullptr) {
         TLOGE(WmsLogTag::DMS, "displayNode is null.");
@@ -542,7 +556,7 @@ DMError SuperFoldStateManager::RefreshMirrorRegionInner(
     mirrorRegion.posY_ = 0;
     mirrorRegion.width_ = mainScreenProperty.GetScreenRealWidth();
     mirrorRegion.height_ = (mainScreenProperty.GetScreenRealHeight() - GetFoldHeight()) / HEIGHT_HALF;
-    RefreshActiveRegion(secondarySession, mainScreenProperty.GetScreenRealHeight(), mirrorRegion);
+    RefreshActiveRegion(mirrorRegion, secondarySession, mainScreenProperty.GetScreenRealHeight());
     secondarySession->SetMirrorScreenRegion(secondarySession->GetScreenId(), mirrorRegion);
     secondarySession->SetIsPhysicalMirrorSwitch(true);
     secondarySession->EnableMirrorScreenRegion();

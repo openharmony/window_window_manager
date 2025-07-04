@@ -32,7 +32,7 @@
 namespace OHOS {
 
 namespace Rosen {
-enum class DirectionType : uint32_t {
+enum class ScreenDirectionType : uint32_t {
     UNDEFINED,
     LEFT,
     TOP,
@@ -117,14 +117,15 @@ private:
 
     uint32_t GetFoldHeight();
     DMError RefreshMirrorRegionInner(sptr<ScreenSession> mainScreenSession, sptr<ScreenSession> secondarySession);
-    DMError RefreshActiveRegion(sptr<ScreenSession> screenSession, uint32_t mainScreenHeight,
-         DMRect &mirrorRegion);
+    DMError RefreshActiveRegion(DMRect &mirrorRegion, sptr<ScreenSession> screenSession, uint32_t mainScreenHeight);
     DMError RefreshScreenRelativePosition(sptr<ScreenSession> mainScreenSession, sptr<ScreenSession> secondarySession);
     DMError RefreshScreenRelativePositionInner(MultiScreenPositionOptions &mainScreenOptions,
-        MultiScreenPositionOptions &secondScreenOption, Drawing::Rect &p1, Drawing::Rect &p2);
-    DMError CalculateScreenRelativePosition(int32_t &mainStartX, int32_t &mainStartY,
-        int32_t &startX, int32_t &startY, Drawing::Rect &p1, Drawing::Rect &p2,
-        DirectionType &p2Direction, int32_t p1Width, int32_t &p1Height, int32_t p2Width, int32_t p2Height);
+        MultiScreenPositionOptions &secondScreenOption, Drawing::Rect &innerScreenRect, Drawing::Rect &outerScreenRect);
+    ScreenDirectionType GetOuterScreenDirection(const Drawing::Rect &innerScreenRect,
+        const Drawing::Rect &outerScreenRect);
+    DMError CalculateScreenRelativePosition(const Drawing::Rect &innerScreenRect,
+        const Drawing::Rect &outerScreenRect, int32_t &secondStartX, int32_t &secondStartY,
+        int32_t mainStartX, int32_t mainStartY);
 };
 } // Rosen
 } // OHOS
