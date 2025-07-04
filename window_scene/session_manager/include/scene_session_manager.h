@@ -1601,6 +1601,8 @@ private:
     bool needCloseSync_ = false;
     std::function<void()> closeSyncFunc_ = nullptr;
     WMError SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit, int32_t persistentId) override;
+    void UpdateAllStartingWindowRdb();
+    bool needUpdateRdb_ = true;
 };
 } // namespace OHOS::Rosen
 
