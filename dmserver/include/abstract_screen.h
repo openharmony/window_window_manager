@@ -146,6 +146,7 @@ private:
     bool GetRSDisplayNodeConfig(sptr<AbstractScreen>& dmsScreen, struct RSDisplayNodeConfig& config);
 
     std::map<ScreenId, sptr<AbstractScreen>> screenMap_;
+    mutable std::mutex screenMapMutex_;
 };
 } // namespace OHOS::Rosen
 #endif // FOUNDATION_DMSERVER_ABSTRACT_SCREEN_H
