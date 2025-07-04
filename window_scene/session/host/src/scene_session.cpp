@@ -5488,6 +5488,74 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
     return WSError::WS_OK;
 }
 
+WSError SceneSession::BatchPendingSessionsActivation(const std::vector<sptr<AAFwk::SessionInfo>>& abilitySessionInfos)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "Batch pending session activations size: %{public}zu", abilitySessionInfos.size());
+    if (!SessionPermission::IsSystemAppCall() && !SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller is neither a system app nor an SA.");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
+    if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller has not permission granted");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
+ 
+    bool isFoundationCall = SessionPermission::IsFoundationCall();
+    PostTask([weakThis = wptr(this), abilitySessionInfos, isFoundationCall, where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        if (abilitySessionInfos.empty()) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s abilitySessionInfo is null", where);
+            return WSError::WS_ERROR_NULLPTR;
+        }
+        if (session->sessionInfo_.reuseDelegatorWindow) {
+            // 不支持hook
+            WSError::WS_ERROR_INVALID_PARAM;
+        }
+        std::vector<std::shared_ptr<SessionInfo>> sessionInfos;
+        int index = 0;
+        for (auto& abilitySessionInfo : abilitySessionInfos) {
+            if (abilitySessionInfo == nullptr) {
+                TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s abilitySessionInfo is null", where);
+                return
+                WSError::WS_ERROR_NULLPTR;
+            }
+            bool isFromAncoAndToAnco = session->IsAnco() && AbilityInfoManager::GetInstance().IsAnco(
+                abilitySessionInfo->want.GetElement().GetBundleName(),
+                abilitySessionInfo->want.GetElement().GetAbilityName(), abilitySessionInfo->want.GetModuleName());
+            if (session->DisallowActivationFromPendingBackground(session->IsPcOrPadEnableActivation(), isFoundationCall,
+                abilitySessionInfo->canStartAbilityFromBackground, isFromAncoAndToAnco)) {
+                return WSError::WS_ERROR_INVALID_OPERATION;
+            }
+            std::shared_ptr<SessionInfo> info =
+                std::make_shared<SessionInfo>(
+                    MakeSessionInfoDuringPendingActivation(abilitySessionInfo, session, isFoundationCall));
+            sessionInfos.emplace_back(info);
+            if (MultiInstanceManager::IsSupportMultiInstance(session->systemConfig_) &&
+                MultiInstanceManager::GetInstance().IsMultiInstance(info->bundleName_)) {
+                if (!MultiInstanceManager::GetInstance().MultiInstancePendingSessionActivation(*info)) {
+                    TLOGNE(WmsLogTag::WMS_LIFE,
+                           "%{public}s multi instance start fail, id:%{public}d instanceKey:%{public}s",
+                           where, session->GetPersistentId(), info->appInstanceKey_.c_str());
+                return WSError::WS_ERROR_INVALID_PARAM;
+                }
+            }
+            session->sessionInfo_.reuseDelegatorWindow = abilitySessionInfo->reuseDelegatorWindow;
+            session->HandleCastScreenConnection(*info, session);
+ 
+        }
+        session->sessionInfo_.startMethod = StartMethod::START_CALL;
+        if (session->batchPendingSessionsActivationFunc_) {
+            session->batchPendingSessionsActivationFunc_(sessionInfos);
+        }
+        return WSError::WS_OK;
+    }, __func__);
+    return WSError::WS_OK;
+}
+
 bool SceneSession::DisallowActivationFromPendingBackground(bool isPcOrPadEnableActivation, bool isFoundationCall,
     bool canStartAbilityFromBackground, bool isFromAncoAndToAnco)
 {

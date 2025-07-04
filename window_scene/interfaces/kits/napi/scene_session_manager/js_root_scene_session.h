@@ -22,6 +22,11 @@
 #include "js_scene_utils.h"
 
 namespace OHOS::Rosen {
+enum class RootListenerFuncType : uint32_t {
+    PENDING_SCENE_CB,
+    BATCH_PENDING_SCENE_ACTIVE_CB,
+};
+
 class JsRootSceneSession : public RefBase {
 public:
     JsRootSceneSession(napi_env env, const sptr<RootSceneSession>& rootSceneSession);
@@ -41,7 +46,17 @@ private:
     void PendingSessionActivationInner(std::shared_ptr<SessionInfo> sessionInfo);
     sptr<SceneSession> GenSceneSession(SessionInfo& info);
     std::shared_ptr<NativeReference> GetJSCallback(const std::string& functionName) const;
+    void ProcessRegisterCallback(RootListenerFuncType rootlistenerFuncType);
 
+    /*
+     * Window Lifecycle
+     */
+    void ProcessPendingSceneSessionActivationRegister();
+    void ProcessBatchPendingSceneSessionsActivationRegister();
+    void BatchPendingSessionsActivation(const std::vector<std::shared_ptr<SessionInfo>>& sessionInfos);
+    void BatchPendingSessionsActivationInner(const std::vector<std::shared_ptr<SessionInfo>>& sessionInfos);
+    static napi_value CreateSessionInfosNapiValue(
+        napi_env env, const std::vector<std::shared_ptr<SessionInfo>>& sessionInfos);
     napi_env env_;
     std::map<std::string, std::shared_ptr<NativeReference>> jsCbMap_;
     mutable std::shared_mutex jsCbMapMutex_;

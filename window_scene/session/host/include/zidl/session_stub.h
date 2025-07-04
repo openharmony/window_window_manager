@@ -63,6 +63,7 @@ private:
     int HandleRaiseAppMainWindowToTop(MessageParcel& data, MessageParcel& reply);
     int HandleChangeSessionVisibilityWithStatusBar(MessageParcel& data, MessageParcel& reply);
     int HandlePendingSessionActivation(MessageParcel& data, MessageParcel& reply);
+    int HandleBatchPendingSessionsActivation(MessageParcel& data, MessageParcel& reply);
     int HandleTerminateSession(MessageParcel& data, MessageParcel& reply);
     int HandleSessionException(MessageParcel& data, MessageParcel& reply);
     int HandleProcessPointDownSession(MessageParcel& data, MessageParcel& reply);
@@ -95,6 +96,7 @@ private:
     int HandleUpdateScreenshotAppEventRegistered(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateAcrossDisplaysChangeRegistered(MessageParcel& data, MessageParcel& reply);
     int HandleGetIsHighlighted(MessageParcel& data, MessageParcel& reply);
+    int ReadOneAbilitySessionInfo(MessageParcel& data, sptr<AAFwk::SessionInfo> abilitySessionInfo);
 
     // extension extension
     int HandleTransferAbilityResult(MessageParcel& data, MessageParcel& reply);
