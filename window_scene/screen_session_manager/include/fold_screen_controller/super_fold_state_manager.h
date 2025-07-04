@@ -124,7 +124,7 @@ private:
     ScreenDirectionType GetOuterScreenDirection(const Drawing::Rect& innerScreenRect,
         const Drawing::Rect& outerScreenRect);
     DMError CalculateScreenRelativePosition(const Drawing::Rect& innerScreenRect, const Drawing::Rect& outerScreenRect,
-        int32_t& secondStartX, int32_t& secondStartY, int32_t mainStartX, int32_t mainStartY);
+        const MultiScreenPositionOptions& mainScreenOptions, int32_t& secondStartX, int32_t& secondStartY);
 };
 } // Rosen
 } // OHOS
