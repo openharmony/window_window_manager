@@ -114,12 +114,13 @@ private:
     static bool ChangeScreenState(bool toHalf);
     int32_t GetCurrentValidHeight(sptr<ScreenSession> screenSession);
 
-    uint32_t GetFoldCreaseHeight();
-    DMError RefreshMirrorRegionInner(sptr<ScreenSession> mainScreenSession, sptr<ScreenSession> secondarySession);
-    DMError RefreshActiveRegion(DMRect& mirrorRegion, sptr<ScreenSession> screenSession, uint32_t mainScreenHeight);
-    DMError RefreshScreenRelativePosition(sptr<ScreenSession> mainScreenSession, sptr<ScreenSession> secondarySession);
-    DMError RefreshScreenRelativePositionInner(MultiScreenPositionOptions& mainScreenOptions,
-        MultiScreenPositionOptions &secondScreenOption, Drawing::Rect& innerScreenRect, Drawing::Rect& outerScreenRect);
+    uint32_t GetFoldCreaseHeight() const;
+    DMError RefreshMirrorRegionInner(sptr<ScreenSession>& mainScreenSession, sptr<ScreenSession>& secondarySession);
+    DMError RefreshActiveRegion(DMRect& mirrorRegion, sptr<ScreenSession>& screenSession, uint32_t mainScreenHeight);
+    DMError RefreshScreenRelativePosition(sptr<ScreenSession>& mainScreenSession, sptr<ScreenSession>& secondarySession);
+    DMError RefreshScreenRelativePositionInner(const Drawing::Rect& innerScreenRect,
+        const Drawing::Rect& outerScreenRect, MultiScreenPositionOptions& mainScreenOptions,
+        MultiScreenPositionOptions &secondScreenOption);
     ScreenDirectionType GetOuterScreenDirection(const Drawing::Rect& innerScreenRect,
         const Drawing::Rect& outerScreenRect);
     DMError CalculateScreenRelativePosition(const Drawing::Rect& innerScreenRect, const Drawing::Rect& outerScreenRect,
