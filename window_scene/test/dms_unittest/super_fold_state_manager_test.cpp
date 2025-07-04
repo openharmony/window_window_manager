@@ -434,13 +434,13 @@ HWTEST_F(SuperFoldStateManagerTest, GetFoldCreaseHeight, TestSize.Level1)
     uint32_t result = superFoldStateManager.GetFoldCreaseHeight();
     EXPECT_EQ(result, DEFAULT_FOLD_REGION_HEIGHT);
     std::vector<DMRect> rect = {};
-    superFoldStateManager.currentSuperFoldCreaseRegion_ = new FoldCreaseRegion(0, rect);
+    superFoldStateManager.currentSuperFoldCreaseRegion_ = sptr<FoldCreaseRegion>::MakeSptr(0, rect);
     result = superFoldStateManager.GetFoldCreaseHeight();
     EXPECT_EQ(result, DEFAULT_FOLD_REGION_HEIGHT);
     rect.push_back({0, 0,
         DEFAULT_FOLD_REGION_HEIGHT * 2, DEFAULT_FOLD_REGION_HEIGHT * 2
     });
-    superFoldStateManager.currentSuperFoldCreaseRegion_ = new FoldCreaseRegion(0, rect);
+    superFoldStateManager.currentSuperFoldCreaseRegion_ = sptr<FoldCreaseRegion>::MakeSptr(0, rect);
     result = superFoldStateManager.GetFoldCreaseHeight();
     EXPECT_EQ(result, DEFAULT_FOLD_REGION_HEIGHT * 2);
 }
@@ -605,7 +605,7 @@ HWTEST_F(SuperFoldStateManagerTest, RefreshScreenRelativePosition_ShouldUpdatePo
     DMError result = manager.RefreshScreenRelativePosition(mainScreenSession, secondarySession);
     ASSERT_EQ(DMError::DM_ERROR_NULLPTR, result);
  
-    mainScreenSession = new ScreenSession();
+    mainScreenSession = sptr<ScreenSession>::MakeSptr();
     result = manager.RefreshScreenRelativePosition(mainScreenSession, secondarySession);
     ASSERT_EQ(DMError::DM_ERROR_NULLPTR, result);
 }
@@ -619,19 +619,9 @@ HWTEST_F(SuperFoldStateManagerTest, RefreshScreenRelativePosition_ShouldUpdatePo
     TestSize.Level1)
 {
     ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
-<<<<<<< HEAD
     SuperFoldStateManager manager;
     sptr<ScreenSession> mainScreenSession = sptr<ScreenSession>::MakeSptr();;
     sptr<ScreenSession> secondarySession = sptr<ScreenSession>::MakeSptr();;
-||||||| parent of 688e33db32... TicketNo:AR20250702930931
-    SuperFoldStateManager manager = SuperFoldStateManager();
-    sptr<ScreenSession> mainScreenSession = new ScreenSession();
-    sptr<ScreenSession> secondarySession = new ScreenSession();
-=======
-    SuperFoldStateManager manager;
-    sptr<ScreenSession> mainScreenSession = sptr<ScreenSession>::MakeSptr();
-    sptr<ScreenSession> secondarySession = sptr<ScreenSession>::MakeSptr();
->>>>>>> 688e33db32... TicketNo:AR20250702930931
     DMError result = manager.RefreshScreenRelativePosition(mainScreenSession, secondarySession);
     EXPECT_EQ(DMError::DM_OK, result);
 }
