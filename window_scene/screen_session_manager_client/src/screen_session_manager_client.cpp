@@ -30,6 +30,7 @@
 namespace OHOS::Rosen {
 namespace {
 constexpr int LINE_WIDTH = 30;
+constexpr int CV_WAIT_SCREENEVENT_MS = 200;
 std::mutex g_instanceMutex;
 } // namespace
 
@@ -137,16 +138,85 @@ bool ScreenSessionManagerClient::CheckIfNeedConnectScreen(SessionOption option)
     return true;
 }
 
+void ScreenSessionManagerClient::SendScreenEventTaskFinish(ScreenId screenId, ScreenEvent event)
+{
+    TLOGI(WmsLogTag::DMS, "screen event finish, screenId:%{public}" PRIu64"event:%{public}d",
+        screenId, static_cast<int>(event));
+    {
+        std::unique_lock<std::mutex> lockCond(screenEventProcessingMutex_);
+        if (event == ScreenEvent::CONNECTED) {
+            screenEventProcessMap_[screenId] = ScreenEventProcessStatus::CONNECTED;
+        } else {
+            screenEventProcessMap_[screenId] = ScreenEventProcessStatus::DISCONNECTED;
+        }
+    }
+    screenEventCond_.notify_one();
+}
+
 void ScreenSessionManagerClient::OnScreenConnectionChanged(SessionOption option, ScreenEvent screenEvent)
 {
-    TLOGI(WmsLogTag::DMS, "sId: %{public}" PRIu64 " sEvent: %{public}d rsId: %{public}" PRIu64 " name: %{public}s "
-        "iName: %{public}s", option.screenId_, static_cast<int>(screenEvent), option.rsId_, option.name_.c_str(),
-        option.innerName_.c_str());
+    TLOGI(WmsLogTag::DMS,
+        "sId: %{public}" PRIu64 " sEvent: %{public}d rsId: %{public}" PRIu64 " name: %{public}s iName: %{public}s",
+        option.screenId_, static_cast<int>(screenEvent), option.rsId_, option.name_.c_str(), option.innerName_.c_str());
+    std::unique_lock<std::mutex> lock(screenEventMutex_);
+    auto iter = screenEventProcessMap_.find(option.screenId_);
+    if (iter == screenEventProcessMap_.end()) {
+        if (screenEvent == ScreenEvent::DISCONNECTED) {
+            TLOGW(WmsLogTag::DMS,
+                "discard disconnect task, sid:%{public}" PRIu64" sEvent:%{public}d rsId: %{public}" PRIu64,
+                option.screenId_, static_cast<int>(screenEvent), option.rsId_);
+            return;
+        }
+    } else {
+        if ((iter->second == ScreenEventProcessStatus::CONNECTING && screenEvent == ScreenEvent::CONNECTED)
+            || (iter->second == ScreenEventProcessStatus::CONNECTED && screenEvent == ScreenEvent::CONNECTED)
+            || (iter->second == ScreenEventProcessStatus::DISCONNECTING
+                && screenEvent == ScreenEvent::DISCONNECTED)
+            || (iter->second == ScreenEventProcessStatus::DISCONNECTED
+                && screenEvent == ScreenEvent::DISCONNECTED)) {
+                TLOGE(WmsLogTag::DMS,
+                "discard repeat task, sid:%{public}" PRIu64" sEvent:%{public}d rsId: %{public}" PRIu64,
+                option.screenId_, static_cast<int>(screenEvent), option.rsId_);
+                return;
+        }
+        if (iter->second == ScreenEventProcessStatus::CONNECTING ||
+            iter->second == ScreenEventProcessStatus::DISCONNECTING) {
+            std::unique_lock<std::mutex> lockCond(screenEventProcessingMutex_);
+            if (screenEventCond_.wait_for(lockCond, std::chrono::milliseconds(CV_WAIT_SCREENEVENT_MS))
+                == std::cv_status::timeout) {
+                TLOGI(WmsLogTag::DMS,
+                    "screen event wait timeout, sId: %{public}" PRIu64 " sEvent: %{public}d rsId: %{public}" PRIu64,
+                    option.screenId_, static_cast<int>(screenEvent), option.rsId_);
+            } else {
+                TLOGW(WmsLogTag::DMS,
+                    "screen event wait ready, sId: %{public}" PRIu64 " sEvent:%{public}d rsId: %{public}" PRIu64,
+                    option.screenId_, static_cast<int>(screenEvent), option.rsId_);
+            }
+        }
+    }
     if (screenEvent == ScreenEvent::CONNECTED) {
-        HandleScreenConnection(option);
+        if (HandleScreenConnection(option)) {
+            screenEventProcessMap_[option.screenId_] = ScreenEventProcessStatus::CONNECTING;
+            TLOGI(WmsLogTag::DMS,
+                "screen event wait connecting, sId: %{public}" PRIu64 " sEvent: %{public}d rsId: %{public}" PRIu64,
+                option.screenId_, static_cast<int>(screenEvent), option.rsId_);
+        } else {
+            TLOGI(WmsLogTag::DMS,
+                "screen event not conent, sId: %{public}" PRIu64 " sEvent: %{public}d rsId: %{public}" PRIu64,
+                option.screenId_, static_cast<int>(screenEvent), option.rsId_);
+        }
     }
     if (screenEvent == ScreenEvent::DISCONNECTED) {
-        HandleScreenDisconnection(option);
+        if (HandleScreenDisconnection(option)) {
+            screenEventProcessMap_[option.screenId_] = ScreenEventProcessStatus::DISCONNECTING;
+            TLOGI(WmsLogTag::DMS,
+                "screen event wait disconnecting, sId: %{public}" PRIu64 " sEvent: %{public}d rsId: %{public}" PRIu64,
+                option.screenId_, static_cast<int>(screenEvent), option.rsId_);
+        } else {
+            TLOGI(WmsLogTag::DMS,
+                "screen event not disconent, sId: %{public}" PRIu64 " sEvent: %{public}d rsId: %{public}" PRIu64,
+                option.screenId_, static_cast<int>(screenEvent), option.rsId_);
+        }
     }
 }
 
@@ -919,11 +989,11 @@ void ScreenSessionManagerClient::NotifyClientScreenConnect(sptr<ScreenSession>& 
     screenSession->Connect();
 }
 
-void ScreenSessionManagerClient::HandleScreenConnection(SessionOption option)
+bool ScreenSessionManagerClient::HandleScreenConnection(SessionOption option)
 {
     if (!CheckIfNeedConnectScreen(option)) {
         TLOGW(WmsLogTag::DMS, "no need to connect the screen");
-        return;
+        return false;
     }
     sptr<ScreenSession> screenSession = nullptr;
     auto iter = screenSessionMap_.find(option.screenId_);
@@ -956,14 +1026,15 @@ void ScreenSessionManagerClient::HandleScreenConnection(SessionOption option)
     screenSession->SetIsExtend(option.isExtend_);
     screenSession->SetIsRealScreen(screenSessionManager_->GetIsRealScreen(option.screenId_));
     NotifyClientScreenConnect(screenSession);
+    return true;
 }
 
-void ScreenSessionManagerClient::HandleScreenDisconnection(SessionOption option)
+bool ScreenSessionManagerClient::HandleScreenDisconnection(SessionOption option)
 {
     auto screenSession = GetScreenSession(option.screenId_);
     if (!screenSession) {
         TLOGE(WmsLogTag::DMS, "screenSession is null");
-        return;
+        return false;
     }
     screenSession->DestroyScreenScene();
     NotifyScreenDisconnect(screenSession);
@@ -973,6 +1044,7 @@ void ScreenSessionManagerClient::HandleScreenDisconnection(SessionOption option)
     }
     TLOGW(WmsLogTag::DMS, "disconnect screenId=%{public}" PRIu64, screenSession->GetScreenId());
     screenSession->Disconnect();
+    return true;
 }
 
 bool ScreenSessionManagerClient::OnCreateScreenSessionOnly(ScreenId screenId, ScreenId rsId,
