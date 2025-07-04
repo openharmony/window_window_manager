@@ -460,7 +460,7 @@ DMError SuperFoldStateManager::CalculateScreenRelativePosition(const Drawing::Re
             secondStartY = mainStartY + crossoverHeightMax;
         }
         return DMError::DM_OK;
-    } 
+    }
 
     if (secondStartX + p2Width < mainStartX + crossoverWidthMin) {
         secondStartX = mainStartX + crossoverWidthMin;
