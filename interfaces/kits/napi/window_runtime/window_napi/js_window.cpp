@@ -1358,7 +1358,7 @@ napi_value JsWindow::OnShowWindow(napi_env env, napi_callback_info info)
             return;
         }
         weakWindow->SetShowWithOptions(isShowWithOptions);
-        WMError ret = weakWindow->Show(0, false, focusOnShow);
+        WMError ret = weakWindow->Show(0, false, focusOnShow, true);
         TLOGNI(WmsLogTag::WMS_LIFE, "Window [%{public}u, %{public}s] show with ret=%{public}d",
             weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
         if (ret == WMError::WM_OK) {
@@ -1554,7 +1554,7 @@ napi_value JsWindow::HideWindowFunction(napi_env env, napi_callback_info info, W
             task->Resolve(env, NapiGetUndefined(env));
             return;
         }
-        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->Hide(0, false, false));
+        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->Hide(0, false, false, true));
         if (ret == WmErrorCode::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
         } else {
