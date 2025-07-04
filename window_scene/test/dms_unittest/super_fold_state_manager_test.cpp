@@ -477,6 +477,7 @@ HWTEST_F(SuperFoldStateManagerTest, RefreshActiveRegion_ExpandedStatus, TestSize
     sptr<ScreenSession> innerScreen = nullptr;
     innerScreen = ssm_.GetOrCreateScreenSession(0);
     auto result = superFoldStateManager.RefreshActiveRegion(mirrorRegion, innerScreen, 100);
+    EXPECT_EQ(innerScreen->GetActiveScreenMode()->height_, 3296);
     EXPECT_EQ(result, DMError::DM_OK);
     EXPECT_EQ(mirrorRegion.width_, 100);
 }
@@ -495,6 +496,7 @@ HWTEST_F(SuperFoldStateManagerTest, RefreshActiveRegion_NonExpandedStatus, TestS
     sptr<ScreenSession> innerScreen = nullptr;
     innerScreen = ssm_.GetOrCreateScreenSession(0);
     auto result = superFoldStateManager.RefreshActiveRegion(mirrorRegion, innerScreen, 100);
+    EXPECT_EQ(innerScreen->GetActiveScreenMode()->height_, 3296);
     EXPECT_EQ(result, DMError::DM_OK);
     EXPECT_EQ(mirrorRegion.height_, 100);
 }
