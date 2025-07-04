@@ -452,6 +452,7 @@ HWTEST_F(SuperFoldStateManagerTest, GetFoldHeight, TestSize.Level1)
 */
 HWTEST_F(SuperFoldStateManagerTest, RefreshActiveRegion_HeightZero, TestSize.Level1)
 {
+    ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
     DMRect mirrorRegion = {100, 100, 0, 0};
     SuperFoldStateManager superFoldStateManager = SuperFoldStateManager();
     sptr<ScreenSession> innerScreen = new ScreenSession();
@@ -468,6 +469,7 @@ HWTEST_F(SuperFoldStateManagerTest, RefreshActiveRegion_HeightZero, TestSize.Lev
 */
 HWTEST_F(SuperFoldStateManagerTest, RefreshActiveRegion_ExpandedStatus, TestSize.Level1)
 {
+    ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
     DMRect mirrorRegion = {100, 100, 100, 100};
     SuperFoldStateManager superFoldStateManager = SuperFoldStateManager();
     superFoldStateManager.SetCurrentStatus(SuperFoldStatus::EXPANDED);
@@ -484,6 +486,7 @@ HWTEST_F(SuperFoldStateManagerTest, RefreshActiveRegion_ExpandedStatus, TestSize
 */
 HWTEST_F(SuperFoldStateManagerTest, RefreshActiveRegion_NonExpandedStatus, TestSize.Level1)
 {
+    ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
     DMRect mirrorRegion = {100, 100, 100, 100};
     SuperFoldStateManager superFoldStateManager = SuperFoldStateManager();
     superFoldStateManager.SetCurrentStatus(SuperFoldStatus::UNKNOWN);
@@ -498,7 +501,9 @@ HWTEST_F(SuperFoldStateManagerTest, RefreshActiveRegion_NonExpandedStatus, TestS
 * @tc.desc  : Test When null, return expect
 * @tc.type: FUNC
 */
-HWTEST_F(SuperFoldStateManagerTest, RefreshMirrorRegionInner_NullptrScreenSession, TestSize.Level1) {
+HWTEST_F(SuperFoldStateManagerTest, RefreshMirrorRegionInner_NullptrScreenSession, TestSize.Level1)
+{
+    ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
     sptr<ScreenSession> mainScreenSession = nullptr;
     sptr<ScreenSession> secondarySession = nullptr;
     SuperFoldStateManager superFoldStateManager = SuperFoldStateManager();
@@ -514,7 +519,9 @@ HWTEST_F(SuperFoldStateManagerTest, RefreshMirrorRegionInner_NullptrScreenSessio
 * @tc.desc  : Test When NormalCase, return DMError::OK
 * @tc.type: FUNC
 */
-HWTEST_F(SuperFoldStateManagerTest, RefreshMirrorRegionInner_NormalCase, TestSize.Level1) {
+HWTEST_F(SuperFoldStateManagerTest, RefreshMirrorRegionInner_NormalCase, TestSize.Level1)
+{
+    ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
     SuperFoldStateManager superFoldStateManager = SuperFoldStateManager();
     superFoldStateManager.SetCurrentStatus(SuperFoldStatus::UNKNOWN);
     sptr<ScreenSession> mainScreenSession = ssm_.GetOrCreateScreenSession(0);
@@ -536,6 +543,7 @@ HWTEST_F(SuperFoldStateManagerTest, RefreshMirrorRegionInner_NormalCase, TestSiz
  */
 HWTEST_F(SuperFoldStateManagerTest, RefreshExternalRegion_ShouldReturnOk_WhenNoExtendScreenConnected, TestSize.Level1)
 {
+    ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
     ssm_.SetIsExtendScreenConnected(false);
     SuperFoldStateManager superFoldStateManager = SuperFoldStateManager();
     DMError result = superFoldStateManager.RefreshExternalRegion();
@@ -587,6 +595,7 @@ HWTEST_F(SuperFoldStateManagerTest, RefreshExternalRegion_ShouldReturnOk_WhenNoE
 HWTEST_F(SuperFoldStateManagerTest, RefreshScreenRelativePosition_ShouldUpdatePosition_WhenNull,
     TestSize.Level1)
 {
+    ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
     SuperFoldStateManager manager = SuperFoldStateManager();
     sptr<ScreenSession> mainScreenSession = nullptr;
     sptr<ScreenSession> secondarySession = nullptr;
@@ -606,6 +615,7 @@ HWTEST_F(SuperFoldStateManagerTest, RefreshScreenRelativePosition_ShouldUpdatePo
 HWTEST_F(SuperFoldStateManagerTest, RefreshScreenRelativePosition_ShouldUpdatePosition_Normal,
     TestSize.Level1)
 {
+    ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
     SuperFoldStateManager manager = SuperFoldStateManager();
     sptr<ScreenSession> mainScreenSession = new ScreenSession();
     sptr<ScreenSession> secondarySession = new ScreenSession();
@@ -620,6 +630,7 @@ HWTEST_F(SuperFoldStateManagerTest, RefreshScreenRelativePosition_ShouldUpdatePo
  */
 HWTEST_F(SuperFoldStateManagerTest, RefreshScreenRelativePositionInner, TestSize.Level0)
 {
+    ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
     SuperFoldStateManager manager = SuperFoldStateManager();
     MultiScreenPositionOptions mainScreenOptions = {0, 0, 0};
     MultiScreenPositionOptions secondScreenOption = {1, 100, 50};
@@ -633,12 +644,13 @@ HWTEST_F(SuperFoldStateManagerTest, RefreshScreenRelativePositionInner, TestSize
 }
 /**
  * @tc.name  : CalculateScreenRelativePosition_ShouldSetRightDirection_WhenSecondRectIsRightOfMain
- * @tc.desc  : Test when the second screen area is on the right side of the main screen, the direction should be set to RIGHT
+ * @tc.desc  : Test when the second screen is on the right side of the main screen, the direction set to RIGHT
 * @tc.type: FUNC
  */
 HWTEST_F(SuperFoldStateManagerTest, CalculateScreenRelativePosition_ShouldSetRightDirection_WhenSecondRectIsRightOfMain,
     TestSize.Level1)
 {
+    ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
     SuperFoldStateManager manager = SuperFoldStateManager();
     int32_t mainStartX = 0, mainStartY = 0;
     int32_t p1Width = 100, p1Height = 100;
@@ -673,12 +685,13 @@ HWTEST_F(SuperFoldStateManagerTest, CalculateScreenRelativePosition_ShouldSetRig
  
 /**
  * @tc.name  : CalculateScreenRelativePosition_ShouldSetLeftDirection_WhenSecondRectIsLeftOfMain
- * @tc.desc  : Test that the orientation is set to LEFT when the second screen area is on the left side of the main screen
+ * @tc.desc  : Test the orientation set to LEFT when the second screen is on the left side of the main screen
  * @tc.type: FUNC
  */
 HWTEST_F(SuperFoldStateManagerTest, CalculateScreenRelativePosition_ShouldSetLeftDirection_WhenSecondRectIsLeftOfMain,
     TestSize.Level1)
 {
+    ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
     SuperFoldStateManager manager = SuperFoldStateManager();
     int32_t p1Width = 100, p1Height = 100;
     int32_t p2Width = 50, p2Height = 100;
@@ -720,6 +733,7 @@ HWTEST_F(SuperFoldStateManagerTest, CalculateScreenRelativePosition_ShouldSetLef
 HWTEST_F(SuperFoldStateManagerTest, CalculateScreenRelativePosition_ShouldSetTopDirection_WhenSecondRectIsAboveMain,
     TestSize.Level1)
 {
+    ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
     SuperFoldStateManager manager = SuperFoldStateManager();
     int32_t p1Width = 100, p1Height = 100;
     int32_t p2Width = 50, p2Height = 100;
@@ -761,6 +775,7 @@ HWTEST_F(SuperFoldStateManagerTest, CalculateScreenRelativePosition_ShouldSetTop
 HWTEST_F(SuperFoldStateManagerTest, CalculateScreenRelativePosition_ShouldSetBottomDirection_WhenSecondRectIsBelowMain,
     TestSize.Level1)
 {
+    ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
     SuperFoldStateManager manager = SuperFoldStateManager();
     int32_t p1Width = 100, p1Height = 100;
     int32_t p2Width = 50, p2Height = 100;
@@ -802,6 +817,7 @@ HWTEST_F(SuperFoldStateManagerTest, CalculateScreenRelativePosition_ShouldSetBot
 HWTEST_F(SuperFoldStateManagerTest, CalculateScreenRelativePosition_ShouldSetDirectionLeft_WhenP2LeftOfP1,
     TestSize.Level0)
 {
+    ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
     SuperFoldStateManager manager = SuperFoldStateManager();
     int32_t mainStartX = 0;
     int32_t mainStartY = 0;
@@ -832,6 +848,7 @@ HWTEST_F(SuperFoldStateManagerTest, CalculateScreenRelativePosition_ShouldSetDir
 HWTEST_F(SuperFoldStateManagerTest, CalculateScreenRelativePosition_ShouldSetDirectionRight_WhenP2RightOfP1,
     TestSize.Level0)
 {
+    ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
     SuperFoldStateManager manager = SuperFoldStateManager();
     int32_t mainStartX = 0;
     int32_t mainStartY = 0;
@@ -862,6 +879,7 @@ HWTEST_F(SuperFoldStateManagerTest, CalculateScreenRelativePosition_ShouldSetDir
 HWTEST_F(SuperFoldStateManagerTest, CalculateScreenRelativePosition_ShouldSetDirectionTop_WhenP2AboveP1,
     TestSize.Level0)
 {
+    ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
     SuperFoldStateManager manager = SuperFoldStateManager();
     int32_t mainStartX = 0;
     int32_t mainStartY = 0;
