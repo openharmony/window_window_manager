@@ -853,6 +853,10 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteStrongParcelable(GetCurrentFoldCreaseRegion());
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_GET_LIVE_CREASE_REGION: {
+            reply.WriteStrongParcelable(GetLiveCreaseRegion());
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_MAKE_UNIQUE_SCREEN: {
             std::vector<ScreenId> uniqueScreenIds;
             uint32_t size = data.ReadUint32();

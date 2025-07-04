@@ -33,6 +33,7 @@ public:
         DisplayModeChangeReason reason = DisplayModeChangeReason::DEFAULT) override;
     void SendSensorResult(FoldStatus foldStatus) override;
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() override;
+    sptr<FoldCreaseRegion> GetLiveCreaseRegion() override;
     void LockDisplayStatus(bool locked) override;
     void SetOnBootAnimation(bool onBootAnimation) override;
     void UpdateForPhyScreenPropertyChange() override;
@@ -66,6 +67,8 @@ private:
     void ChangeOffTentMode() override;
     void CloseCoordinationScreen();
     void NotifyRefreshRateEvent(bool isEventStatus);
+    sptr<FoldCreaseRegion> GetVerticalFoldCreaseRect();
+    sptr<FoldCreaseRegion> GetHorizontalFoldCreaseRect();
     std::recursive_mutex& displayInfoMutex_;
     std::mutex coordinationMutex_;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler_;

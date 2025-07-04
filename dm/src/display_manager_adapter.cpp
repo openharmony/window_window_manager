@@ -1236,6 +1236,18 @@ sptr<FoldCreaseRegion> DisplayManagerAdapter::GetCurrentFoldCreaseRegion()
     return nullptr;
 }
 
+sptr<FoldCreaseRegion> DisplayManagerAdapter::GetLiveCreaseRegion()
+{
+    INIT_PROXY_CHECK_RETURN(nullptr);
+
+    TLOGI(WmsLogTag::DMS, "enter");
+    if (screenSessionManagerServiceProxy_) {
+        return screenSessionManagerServiceProxy_->GetLiveCreaseRegion();
+    }
+
+    return nullptr;
+}
+
 sptr<ScreenGroupInfo> ScreenManagerAdapter::GetScreenGroupInfoById(ScreenId screenId)
 {
     if (screenId == SCREEN_ID_INVALID) {

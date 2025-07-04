@@ -243,4 +243,9 @@ DMError Display::GetDisplayCapability(std::string& capabilitInfo) const
     return SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayCapability(capabilitInfo);
 }
 
+sptr<FoldCreaseRegion> Display::GetLiveCreaseRegion() const
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().GetLiveCreaseRegion();
+}
+
 } // namespace OHOS::Rosen
