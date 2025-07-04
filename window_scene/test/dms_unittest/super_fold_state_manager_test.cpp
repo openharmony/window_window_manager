@@ -455,7 +455,7 @@ HWTEST_F(SuperFoldStateManagerTest, RefreshActiveRegion_HeightZero, TestSize.Lev
     ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
     DMRect mirrorRegion = {100, 100, 0, 0};
     SuperFoldStateManager superFoldStateManager;
-    sptr<ScreenSession> innerScreen = new ScreenSession();
+    sptr<ScreenSession> innerScreen = sptr<ScreenSession>::MakeSptr();
     auto result = superFoldStateManager.RefreshActiveRegion(mirrorRegion, innerScreen, 0);
     EXPECT_EQ(result, DMError::DM_ERROR_INVALID_PARAM);
     result = superFoldStateManager.RefreshActiveRegion(mirrorRegion, innerScreen, 100);
@@ -619,9 +619,19 @@ HWTEST_F(SuperFoldStateManagerTest, RefreshScreenRelativePosition_ShouldUpdatePo
     TestSize.Level1)
 {
     ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
+<<<<<<< HEAD
     SuperFoldStateManager manager;
     sptr<ScreenSession> mainScreenSession = sptr<ScreenSession>::MakeSptr();;
     sptr<ScreenSession> secondarySession = sptr<ScreenSession>::MakeSptr();;
+||||||| parent of 688e33db32... TicketNo:AR20250702930931
+    SuperFoldStateManager manager = SuperFoldStateManager();
+    sptr<ScreenSession> mainScreenSession = new ScreenSession();
+    sptr<ScreenSession> secondarySession = new ScreenSession();
+=======
+    SuperFoldStateManager manager;
+    sptr<ScreenSession> mainScreenSession = sptr<ScreenSession>::MakeSptr();
+    sptr<ScreenSession> secondarySession = sptr<ScreenSession>::MakeSptr();
+>>>>>>> 688e33db32... TicketNo:AR20250702930931
     DMError result = manager.RefreshScreenRelativePosition(mainScreenSession, secondarySession);
     EXPECT_EQ(DMError::DM_OK, result);
 }
