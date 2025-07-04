@@ -25,6 +25,7 @@
 #include "js_display_listener.h"
 #include "js_display.h"
 #include "js_display_manager.h"
+#include "scene_board_judgement.h"
 #include "screen.h"
 #include "screen_manager.h"
 #include "surface_utils.h"
@@ -954,6 +955,10 @@ napi_value OnCreateVirtualScreen(napi_env env, napi_callback_info info)
     std::string errMsg = "";
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        errMsg = "Device not support.";
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT, errMsg);
+    }
     if (argc < ARGC_ONE) {
         errMsg = "Invalid args count, need one arg at least!";
         errCode = DmErrorCode::DM_ERROR_INVALID_PARAM;
