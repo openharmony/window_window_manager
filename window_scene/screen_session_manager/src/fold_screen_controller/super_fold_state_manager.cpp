@@ -38,6 +38,9 @@ const char* KEYBOARD_OFF_CONFIG = "version:3+whole";
 #endif
 static bool isKeyboardOn_ = false;
 static bool isSystemKeyboardOn_ = false;
+const int32_t FOLD_CREASE_RECT_SIZE = 4;
+const std::string g_LiveCreaseRegion = system::GetParameter("const.display.foldscreen.crease_region", "");
+const ScreenId SCREEN_ID_FULL = 0;
 }
 
 void SuperFoldStateManager::DoAngleChangeFolded(SuperFoldStatusChangeEvents event)
@@ -182,6 +185,54 @@ void SuperFoldStateManager::InitSuperFoldCreaseRegionParams()
     currentSuperFoldCreaseRegion_ = new FoldCreaseRegion(screenIdFull, rect);
 }
 
+sptr<FoldCreaseRegion> SuperFoldStateManager::GetHorizontalFoldCreaseRect()
+{
+    std::vector<int32_t> foldRect = FoldScreenStateInternel::StringFoldRectSplitToInt(g_FoldScreenRect, ",;");
+    if (foldRect.size() != FOLD_CREASE_RECT_SIZE) {
+        // ccm numbers of parameter on the current device is 4
+        TLOGE(WmsLogTag::DMS, "foldRect is invalid");
+        return nullptr;
+    }
+
+    ScreenId screenIdFull = 0;
+    int32_t liveCreaseRegionPosX = foldRect[0]; // ccm PosX
+    int32_t liveCreaseRegionPosY = foldRect[1]; // ccm PosY
+    int32_t liveCreaseRegionPosWidth = foldRect[2]; // ccm PosWidth
+    int32_t liveCreaseRegionPosHeight = foldRect[3]; // ccm PosHeight
+
+    std::vector<DMRect> foldCreaseRect = {
+        {
+            liveCreaseRegionPosX, liveCreaseRegionPosY,
+            liveCreaseRegionPosWidth, liveCreaseRegionPosHeight
+        }
+    };
+    return new FoldCreaseRegion(screenIdFull, foldCreaseRect);
+}
+
+sptr<FoldCreaseRegion> SuperFoldStateManager::GetVerticalFoldCreaseRect()
+{
+    std::vector<int32_t> foldRect = FoldScreenStateInternel::StringFoldRectSplitToInt(g_FoldScreenRect, ",;");
+    if (foldRect.size() != FOLD_CREASE_RECT_SIZE) {
+        // ccm numbers of parameter on the current device is 4
+        TLOGE(WmsLogTag::DMS, "foldRect is invalid");
+        return nullptr;
+    }
+
+    ScreenId screenIdFull = 0;
+    int32_t liveCreaseRegionPosX = foldRect[1]; // ccm PosX
+    int32_t liveCreaseRegionPosY = foldRect[0]; // ccm PosY
+    int32_t liveCreaseRegionPosWidth = foldRect[3]; // ccm PosWidth
+    int32_t liveCreaseRegionPosHeight = foldRect[2]; // ccm PosHeight
+
+    std::vector<DMRect> foldCreaseRect = {
+        {
+            liveCreaseRegionPosX, liveCreaseRegionPosY,
+            liveCreaseRegionPosWidth, liveCreaseRegionPosHeight
+        }
+    };
+    return new FoldCreaseRegion(screenIdFull, foldCreaseRect);
+}
+
 SuperFoldStateManager::SuperFoldStateManager()
 {
     InitSuperFoldStateManagerMap();
@@ -304,6 +355,37 @@ sptr<FoldCreaseRegion> SuperFoldStateManager::GetCurrentFoldCreaseRegion()
 {
     TLOGI(WmsLogTag::DMS, "GetCurrentFoldCreaseRegion()");
     return currentSuperFoldCreaseRegion_;
+}
+
+sptr<FoldCreaseRegion> SuperFoldStateManager::GetLiveCreaseRegion()
+{
+    TLOGI(WmsLogTag::DMS, "enter");
+    SuperFoldStatus curFoldState = ScreenSessionManager::GetInstance().GetSuperFoldStatus();
+    if (curFoldState == SuperFoldStatus::UNKNOWN || curFoldState == SuperFoldStatus::FOLDED) {
+        return nullptr;
+    }
+    sptr<ScreenSession> screenSession = ScreenSessionManager::GetInstance().GetScreenSession(SCREEN_ID_FULL);
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "default screenSession is null");
+        return nullptr;
+    }
+    DisplayOrientation displayOrientation = screenSession->GetScreenProperty().GetDisplayOrientation();
+    switch (displayOrientation) {
+        case DisplayOrientation::PORTRAIT:
+        case DisplayOrientation::PORTRAIT_INVERTED: {
+            liveCreaseRegion_ = GetHorizontalFoldCreaseRect();
+            break;
+        }
+        case DisplayOrientation::LANDSCAPE:
+        case DisplayOrientation::LANDSCAPE_INVERTED: {
+            liveCreaseRegion_ = GetVerticalFoldCreaseRect();
+            break;
+        }
+        default: {
+            TLOGI(WmsLogTag::DMS, "displayOrientation is invalid");
+        }
+    }
+    return liveCreaseRegion_;
 }
 
 void SuperFoldStateManager::HandleDisplayNotify(SuperFoldStatusChangeEvents changeEvent)

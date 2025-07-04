@@ -23,6 +23,7 @@
 namespace OHOS::Rosen {
 class DisplayInfo;
 class CutoutInfo;
+class FoldCreaseRegion;
 
 class Display : public RefBase {
 friend class DisplayManager;
@@ -175,6 +176,13 @@ public:
      * @return DMError
      */
     DMError GetDisplayCapability(std::string& capabilitInfo) const;
+
+    /**
+     * @brief Get the fold crease region in the current display mode.
+     *
+     * @return { FoldCreaseRegion } fold crease region in the current display mode.
+     */
+    sptr<FoldCreaseRegion> GetLiveCreaseRegion() const;
 
 protected:
     // No more methods or variables can be defined here.

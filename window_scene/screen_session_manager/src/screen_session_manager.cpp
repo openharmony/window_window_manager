@@ -7671,6 +7671,21 @@ sptr<FoldCreaseRegion> ScreenSessionManager::GetCurrentFoldCreaseRegion()
 #endif
 }
 
+sptr<FoldCreaseRegion> ScreenSessionManager::GetLiveCreaseRegion()
+{
+#ifdef FOLD_ABILITY_ENABLE
+    if (!g_foldScreenFlag || foldScreenController_ == nullptr) {
+        return nullptr;
+    }
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        return SuperFoldStateManager::GetInstance().GetLiveCreaseRegion();
+    }
+    return foldScreenController_->GetLiveCreaseRegion();
+#else
+    return nullptr;
+#endif
+}
+
 uint32_t ScreenSessionManager::GetCurvedCompressionArea()
 {
     return ScreenSceneConfig::GetCurvedCompressionAreaInLandscape();

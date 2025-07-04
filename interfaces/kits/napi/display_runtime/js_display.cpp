@@ -209,6 +209,12 @@ napi_value JsDisplay::UnregisterDisplayManagerCallback(napi_env env, napi_callba
     return (me != nullptr) ? me->OnUnregisterDisplayManagerCallback(env, info) : nullptr;
 }
 
+napi_value JsDisplay::getLiveCreaseRegion(napi_env env, napi_callback_info info)
+{
+    JsDisplay* me = CheckParamsAndGetThis<JsDisplay>(env, info);
+    return (me != nullptr) ? me->OnGetLiveCreaseRegion(env, info) : nullptr;
+}
+
 bool NapiIsCallable(napi_env env, napi_value value)
 {
     bool result = false;
@@ -560,6 +566,21 @@ napi_value JsDisplay::OnHasImmersiveWindow(napi_env env, napi_callback_info info
     return result;
 }
 
+napi_value JsDisplay::OnGetLiveCreaseRegion(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::DMS, "OnGetLiveCreaseRegion is called");
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc >= ARGC_ONE) {
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
+    }
+    
+    sptr<FoldCreaseRegion> region = display_->GetLiveCreaseRegion();
+    return CreateJsFoldCreaseRegionObject(env, region);
+}
+
 napi_value JsDisplay::GetSupportedColorSpaces(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::DMS, "called");
@@ -872,6 +893,7 @@ napi_value CreateJsDisplayObject(napi_env env, sptr<Display>& display)
         BindNativeFunction(env, objValue, "on", "JsDisplay", JsDisplay::RegisterDisplayManagerCallback);
         BindNativeFunction(env, objValue, "off", "JsDisplay", JsDisplay::UnregisterDisplayManagerCallback);
         BindNativeFunction(env, objValue, "getDisplayCapability", "JsDisplay", JsDisplay::GetDisplayCapability);
+        BindNativeFunction(env, objValue, "getLiveCreaseRegion", "JsDisplay", JsDisplay::getLiveCreaseRegion);
         std::shared_ptr<NativeReference> jsDisplayRef;
         napi_ref result = nullptr;
         napi_create_reference(env, objValue, 1, &result);
@@ -881,6 +903,37 @@ napi_value CreateJsDisplayObject(napi_env env, sptr<Display>& display)
         g_JsDisplayMap[displayId] = jsDisplayRef;
     }
     return objValue;
+}
+
+napi_value CreateJsFoldCreaseRegionObject(napi_env env, sptr<FoldCreaseRegion> region)
+{
+    TLOGI(WmsLogTag::DMS, "called");
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::DMS, "Failed to convert prop to jsObject");
+        return NapiGetUndefined(env);
+    }
+    if (region == nullptr) {
+        TLOGW(WmsLogTag::DMS, "Get null fold crease region");
+        return NapiGetUndefined(env);
+    }
+    DisplayId displayId = region->GetDisplayId();
+    std::vector<DMRect> creaseRects = region->GetCreaseRects();
+    napi_set_named_property(env, objValue, "displayId", CreateJsValue(env, static_cast<uint32_t>(displayId)));
+    napi_set_named_property(env, objValue, "creaseRects", CreateJsCreaseRectsArrayObject(env, creaseRects));
+    return objValue;
+}
+
+napi_value CreateJsCreaseRectsArrayObject(napi_env env, std::vector<DMRect> creaseRects)
+{
+    napi_value arrayValue = nullptr;
+    napi_create_array_with_length(env, creaseRects.size(), &arrayValue);
+    size_t i = 0;
+    for (const auto& rect : creaseRects) {
+        napi_set_element(env, arrayValue, i++, CreateJsRectObject(env, rect));
+    }
+    return arrayValue;
 }
 }  // namespace Rosen
 }  // namespace OHOS

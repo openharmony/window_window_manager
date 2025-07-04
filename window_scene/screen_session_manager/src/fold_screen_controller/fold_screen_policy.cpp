@@ -38,6 +38,12 @@ sptr<FoldCreaseRegion> FoldScreenPolicy::GetCurrentFoldCreaseRegion()
     return currentFoldCreaseRegion_;
 }
 
+sptr<FoldCreaseRegion> FoldScreenPolicy::GetLiveCreaseRegion()
+{
+    std::lock_guard<std::recursive_mutex> lock_mode(liveCreaseRegionMutex_);
+    return liveCreaseRegion_;
+}
+
 void FoldScreenPolicy::SetOnBootAnimation(bool onBootAnimation)
 {
     onBootAnimation_ = onBootAnimation;

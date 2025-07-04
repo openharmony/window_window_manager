@@ -21,6 +21,7 @@
 #include "rs_adapter.h"
 #include "session/screen/include/screen_session.h"
 #include "screen_session_manager.h"
+#include "fold_screen_state_internel.h"
 
 #include "window_manager_hilog.h"
 
@@ -38,6 +39,8 @@ const ScreenId SCREEN_ID_MAIN = 5;
 
 const int32_t REMOVE_DISPLAY_NODE = 0;
 const int32_t ADD_DISPLAY_NODE = 1;
+const std::string g_FoldScreenRect = system::GetParameter("const.display.foldscreen.crease_region", "");
+const int32_t FOLD_CREASE_RECT_SIZE = 4;
 
 #ifdef TP_FEATURE_ENABLE
 const int32_t TP_TYPE = 12;
@@ -68,6 +71,55 @@ SingleDisplayPocketFoldPolicy::SingleDisplayPocketFoldPolicy(std::recursive_mute
         }
     };
     currentFoldCreaseRegion_ = new FoldCreaseRegion(screenIdFull, rect);
+    liveCreaseRegion_ = GetVerticalFoldCreaseRect();
+}
+
+sptr<FoldCreaseRegion> SingleDisplayPocketFoldPolicy::GetHorizontalFoldCreaseRect()
+{
+    std::vector<int32_t> foldRect = FoldScreenStateInternel::StringFoldRectSplitToInt(g_FoldScreenRect, ",;");
+    if (foldRect.size() != FOLD_CREASE_RECT_SIZE) {
+        // ccm numbers of parameter on the current device is 4
+        TLOGE(WmsLogTag::DMS, "foldRect is invalid");
+        return nullptr;
+    }
+
+    ScreenId screenIdFull = 0;
+    int32_t liveCreaseRegionPosX = foldRect[0]; // ccm PosY
+    int32_t liveCreaseRegionPosY = foldRect[1]; // ccm PosY
+    int32_t liveCreaseRegionPosWidth = foldRect[2]; // ccm PosWidth
+    int32_t liveCreaseRegionPosHeight = foldRect[3]; // ccm PosHeight
+
+    std::vector<DMRect> foldCreaseRect = {
+        {
+            liveCreaseRegionPosX, liveCreaseRegionPosY,
+            liveCreaseRegionPosWidth, liveCreaseRegionPosHeight
+        }
+    };
+    return new FoldCreaseRegion(screenIdFull, foldCreaseRect);
+}
+
+sptr<FoldCreaseRegion> SingleDisplayPocketFoldPolicy::GetVerticalFoldCreaseRect()
+{
+    std::vector<int32_t> foldRect = FoldScreenStateInternel::StringFoldRectSplitToInt(g_FoldScreenRect, ",;");
+    if (foldRect.size() != FOLD_CREASE_RECT_SIZE) {
+        // ccm numbers of parameter on the current device is 4
+        TLOGE(WmsLogTag::DMS, "foldRect is invalid");
+        return nullptr;
+    }
+
+    ScreenId screenIdFull = 0;
+    int32_t liveCreaseRegionPosX = foldRect[1]; // ccm PosY
+    int32_t liveCreaseRegionPosY = foldRect[0]; // ccm PosY
+    int32_t liveCreaseRegionPosWidth = foldRect[3]; // ccm PosWidth
+    int32_t liveCreaseRegionPosHeight = foldRect[2]; // ccm PosHeight
+
+    std::vector<DMRect> foldCreaseRect = {
+        {
+            liveCreaseRegionPosX, liveCreaseRegionPosY,
+            liveCreaseRegionPosWidth, liveCreaseRegionPosHeight
+        }
+    };
+    return new FoldCreaseRegion(screenIdFull, foldCreaseRect);
 }
 
 void SingleDisplayPocketFoldPolicy::SetdisplayModeChangeStatus(bool status, bool isOnBootAnimation)
@@ -193,6 +245,39 @@ sptr<FoldCreaseRegion> SingleDisplayPocketFoldPolicy::GetCurrentFoldCreaseRegion
 {
     TLOGI(WmsLogTag::DMS, "GetCurrentFoldCreaseRegion");
     return currentFoldCreaseRegion_;
+}
+
+sptr<FoldCreaseRegion> SingleDisplayPocketFoldPolicy::GetLiveCreaseRegion()
+{
+    TLOGI(WmsLogTag::DMS, "enter");
+    FoldDisplayMode displayMode = GetScreenDisplayMode();
+    if (displayMode == FoldDisplayMode::UNKNOWN || displayMode == FoldDisplayMode::MAIN) {
+        return nullptr;
+    }
+    sptr<ScreenSession> screenSession = ScreenSessionManager::GetInstance().GetScreenSession(SCREEN_ID_FULL);
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "default screenSession is null");
+        return nullptr;
+    }
+    DisplayOrientation displayOrientation = screenSession->GetScreenProperty().GetDisplayOrientation();
+    if (displayMode == FoldDisplayMode::FULL || displayMode == FoldDisplayMode::COORDINATION) {
+        switch (displayOrientation) {
+            case DisplayOrientation::PORTRAIT:
+            case DisplayOrientation::PORTRAIT_INVERTED: {
+                liveCreaseRegion_ = GetHorizontalFoldCreaseRect();
+                break;
+            }
+            case DisplayOrientation::LANDSCAPE:
+            case DisplayOrientation::LANDSCAPE_INVERTED: {
+                liveCreaseRegion_ = GetVerticalFoldCreaseRect();
+                break;
+            }
+            default: {
+                TLOGI(WmsLogTag::DMS, "displayOrientation is invalid");
+            }
+        }
+    }
+    return liveCreaseRegion_;
 }
 
 void SingleDisplayPocketFoldPolicy::LockDisplayStatus(bool locked)
