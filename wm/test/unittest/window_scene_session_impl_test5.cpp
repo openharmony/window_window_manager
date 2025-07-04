@@ -1464,8 +1464,13 @@ HWTEST_F(WindowSceneSessionImplTest5, SetWindowAnchorInfo01, Function | SmallTes
     ret = window->SetWindowAnchorInfo(windowAnchorInfo);
     EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
 
-    property->subWindowLevel_ = 100;
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    ret = window->SetWindowAnchorInfo(windowAnchorInfo);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
+
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    property->subWindowLevel_ = 100;
     ret = window->SetWindowAnchorInfo(windowAnchorInfo);
     EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
 

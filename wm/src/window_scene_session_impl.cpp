@@ -6281,6 +6281,10 @@ WMError WindowSceneSessionImpl::SetWindowAnchorInfo(const WindowAnchorInfo& wind
         TLOGE(WmsLogTag::WMS_SUB, "only sub window is valid");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
+    if (WindowHelper::IsFullScreenWindow(property->GetWindowMode())) {
+        TLOGE(WmsLogTag::WMS_SUB, "not support fullscreen sub window");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
     if (property->GetSubWindowLevel() > 1) {
         TLOGI(WmsLogTag::WMS_SUB, "not support more than 1 level window");
         return WMError::WM_ERROR_INVALID_CALLING;
