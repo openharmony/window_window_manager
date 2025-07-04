@@ -369,13 +369,13 @@ void SuperFoldStateManager::HandleExtendToHalfFoldDisplayNotify(sptr<ScreenSessi
 uint32_t SuperFoldStateManager::GetFoldHeight()
 {
     uint32_t foldHeight = DEFAULT_FOLD_REGION_HEIGHT;
-     if (currentSuperFoldCreaseRegion_ != nullptr) {
+    if (currentSuperFoldCreaseRegion_ != nullptr) {
         std::vector<DMRect> creaseRects = currentSuperFoldCreaseRegion_->GetCreaseRects();
         if (!creaseRects.empty()) {
             foldHeight = creaseRects[0].height_;
         }
-     }
-     return foldHeight;
+    }
+    return foldHeight;
 }
 
 DMError SuperFoldStateManager::RefreshActiveRegion(
@@ -434,7 +434,7 @@ DMError SuperFoldStateManager::CalculateScreenRelativePosition(int32_t &mainStar
         secondStartY = mainStartY + p1Height;
     }
     if (!isToExpanded) {
-        p1Height /= 2;
+        p1Height /= 2;  // half height for B screen
     }
     int32_t crossoverWidthMin = static_cast<int32_t>(p1Width * CROSSOVER_MAIN);
     int32_t crossoverWidthMax = p1Width - crossoverWidthMin;
