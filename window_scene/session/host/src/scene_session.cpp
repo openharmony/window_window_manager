@@ -2395,12 +2395,13 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
         }
         WSRect statusBarRect = statusBar->GetSessionRect();
         if (onGetStatusBarAvoidHeightFunc_) {
-            onGetStatusBarAvoidHeightFunc_(statusBarRect);
-            TLOGD(WmsLogTag::WMS_IMMS, "win %{public}d status bar height %{public}d",
-                GetPersistentId(), statusBarRect.height_);
+            onGetStatusBarAvoidHeightFunc_(displayId, statusBarRect);
+            TLOGD(WmsLogTag::WMS_IMMS, "win %{public}d displayId %{public}" PRIu64 " status bar height %{public}d",
+                GetPersistentId(), displayId, statusBarRect.height_);
         }
-        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d rect %{public}s status bar %{public}s",
-            GetPersistentId(), rect.ToString().c_str(), statusBarRect.ToString().c_str());
+        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d displayId %{public}" PRIu64
+            " rect %{public}s status bar %{public}s",
+            GetPersistentId(), displayId, rect.ToString().c_str(), statusBarRect.ToString().c_str());
         CalculateAvoidAreaRect(rect, statusBarRect, avoidArea);
     }
     return;
@@ -7689,14 +7690,16 @@ int32_t SceneSession::GetStatusBarHeight()
             }
             WSRect statusBarRect = statusBar->GetSessionRect();
             if (session->onGetStatusBarAvoidHeightFunc_) {
-                session->onGetStatusBarAvoidHeightFunc_(statusBarRect);
-                TLOGND(WmsLogTag::WMS_IMMS, "%{public}s win %{public}d status bar height %{public}d",
-                    where, session->GetPersistentId(), statusBarRect.height_);
+                DisplayId displayId = session->GetSessionProperty()->GetDisplayId();
+                session->onGetStatusBarAvoidHeightFunc_(displayId, statusBarRect);
+                TLOGND(WmsLogTag::WMS_IMMS, "%{public}s win %{public}d displayId %{public} " PRIu64
+                    " status bar height %{public}d",
+                    where, displayId, session->GetPersistentId(), statusBarRect.height_);
             }
             height = statusBarRect.height_;
         }
-        TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s win %{public}d height %{public}d",
-            where, session->GetPersistentId(), height);
+        TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s win %{public}d displayId %{public} " PRIu64 " height %{public}d",
+            where, session->GetPersistentId(), displayId, height);
         return height;
     }, __func__);
 }

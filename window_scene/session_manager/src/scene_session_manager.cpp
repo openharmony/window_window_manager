@@ -1531,8 +1531,8 @@ void SceneSessionManager::CreateRootSceneSession()
         TLOGI(WmsLogTag::WMS_LIFE, "SetRootSceneSession success.");
     }
 
-    rootSceneSession_->RegisterGetStatusBarAvoidHeightFunc([this](WSRect& barArea) {
-        return this->GetStatusBarAvoidHeight(barArea);
+    rootSceneSession_->RegisterGetStatusBarAvoidHeightFunc([this](DisplayId displayId, WSRect& barArea) {
+        return this->GetStatusBarAvoidHeight(displayId, barArea);
     });
     rootSceneSession_->RegisterGetStatusBarConstantlyShowFunc([this](DisplayId displayId, bool& isVisible) {
         return this->GetStatusBarConstantlyShow(displayId, isVisible);
@@ -2269,8 +2269,8 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         sceneSession->SetIsAINavigationBarAvoidAreaValidFunc([this](const AvoidArea& avoidArea, int32_t sessionBottom) {
             return CheckAvoidAreaForAINavigationBar(isAINavigationBarVisible_, avoidArea, sessionBottom);
         });
-        sceneSession->RegisterGetStatusBarAvoidHeightFunc([this](WSRect& barArea) {
-            return this->GetStatusBarAvoidHeight(barArea);
+        sceneSession->RegisterGetStatusBarAvoidHeightFunc([this](DisplayId displayId, WSRect& barArea) {
+            return this->GetStatusBarAvoidHeight(displayId, barArea);
         });
         sceneSession->RegisterGetStatusBarConstantlyShowFunc([this](DisplayId displayId, bool& isVisible) {
             return this->GetStatusBarConstantlyShow(displayId, isVisible);
@@ -15791,21 +15791,29 @@ WMError SceneSessionManager::GetFbPanelWindowId(uint32_t& windowId)
     return WMError::WM_ERROR_FB_INTERNAL_ERROR;
 }
 
-void SceneSessionManager::SetStatusBarAvoidHeight(int32_t height)
+void SceneSessionManager::SetStatusBarAvoidHeight(DisplayId displayId, int32_t height)
 {
     const char* const where = __func__;
-    auto task = [this, where, height] {
-        statusBarAvoidHeight_ = height >= 0 ? height : INVALID_STATUS_BAR_AVOID_HEIGHT;
-        TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s, height %{public}d", where, statusBarAvoidHeight_);
+    auto task = [this, where, displayId, height] {
+        statusBarAvoidHeight_[displayId] = height >= 0 ? height : INVALID_STATUS_BAR_AVOID_HEIGHT;
+        TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s, displayId %{public} " PRIu64 " height %{public}d",
+            where, displayId, statusBarAvoidHeight_[displayId]);
         return WMError::WM_OK;
     };
     taskScheduler_->PostSyncTask(task, where);
 }
 
-void SceneSessionManager::GetStatusBarAvoidHeight(WSRect& barArea)
+void SceneSessionManager::GetStatusBarAvoidHeight(DisplayId displayId, WSRect& barArea)
 {
-    barArea.height_ = statusBarAvoidHeight_ == INVALID_STATUS_BAR_AVOID_HEIGHT ?
-        barArea.height_ : statusBarAvoidHeight_;
+    auto it = statusBarAvoidHeight_.find(displayId);
+    if (it == statusBarAvoidHeight.end()) {
+        return;
+    }
+    if (it->second == INVALID_STATUS_BAR_AVOID_HEIGHT) {
+        return;
+    }
+    TLOGD(WmsLogTag::WMS_IMMS, "displayId %{public} " PRIu64 " height %{public}d", displayId, it->second);
+    barArea.height_ = it->second;
 }
 
 WSError SceneSessionManager::CloneWindow(int32_t fromPersistentId, int32_t toPersistentId, bool needOffScreen)
