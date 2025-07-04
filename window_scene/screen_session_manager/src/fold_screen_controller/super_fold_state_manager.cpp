@@ -390,6 +390,11 @@ DMError SuperFoldStateManager::RefreshActiveRegion(DMRect& mirrorRegion, sptr<Sc
             mirrorRegion.height_);
         return DMError::DM_ERROR_INVALID_PARAM;
     }
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "screenSession is null");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+
     sptr<SupportedScreenModes> activeMode = screenSession->GetActiveScreenMode();
     if (activeMode == nullptr) {
         TLOGE(WmsLogTag::DMS, "RefreshActiveRegion activeMode null");
@@ -532,7 +537,7 @@ DMError SuperFoldStateManager::RefreshMirrorRegionInner(
     sptr<ScreenSession> mainScreenSession, sptr<ScreenSession> secondarySession)
 {
     if (mainScreenSession == nullptr || secondarySession == nullptr) {
-        TLOGE(WmsLogTag::DMS, "RefreshMirrorRegionInner mainScreenSession is null");
+        TLOGE(WmsLogTag::DMS, "RefreshMirrorRegionInner mainScreenSession or secondarySession is null");
         return DMError::DM_ERROR_NULLPTR;
     }
     auto mainScreenProperty = mainScreenSession->GetScreenProperty();
