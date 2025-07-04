@@ -33,7 +33,6 @@ namespace OHOS {
 
 namespace Rosen {
 enum class ScreenDirectionType : uint32_t {
-    UNDEFINED,
     LEFT,
     TOP,
     RIGHT,
@@ -115,7 +114,7 @@ private:
     static bool ChangeScreenState(bool toHalf);
     int32_t GetCurrentValidHeight(sptr<ScreenSession> screenSession);
 
-    uint32_t GetFoldHeight();
+    uint32_t GetFoldCreaseHeight();
     DMError RefreshMirrorRegionInner(sptr<ScreenSession> mainScreenSession, sptr<ScreenSession> secondarySession);
     DMError RefreshActiveRegion(DMRect &mirrorRegion, sptr<ScreenSession> screenSession, uint32_t mainScreenHeight);
     DMError RefreshScreenRelativePosition(sptr<ScreenSession> mainScreenSession, sptr<ScreenSession> secondarySession);

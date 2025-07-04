@@ -366,7 +366,7 @@ void SuperFoldStateManager::HandleExtendToHalfFoldDisplayNotify(sptr<ScreenSessi
     RefreshExternalRegion();
 }
 
-uint32_t SuperFoldStateManager::GetFoldHeight()
+uint32_t SuperFoldStateManager::GetFoldCreaseHeight()
 {
     uint32_t foldHeight = DEFAULT_FOLD_REGION_HEIGHT;
     if (currentSuperFoldCreaseRegion_ != nullptr) {
@@ -385,7 +385,7 @@ DMError SuperFoldStateManager::RefreshActiveRegion(DMRect &mirrorRegion, sptr<Sc
 {
     if (mainScreenHeight == 0 || mirrorRegion.height_ == 0) {
         TLOGE(WmsLogTag::DMS,
-            "RefreshActiveRegion mainScreenHeight: %{public}d mirrorRegion.height_:%{public}d",
+            "RefreshActiveRegion mainScreenHeight: %{public}u mirrorRegion.height_:%{public}u",
             mainScreenHeight,
             mirrorRegion.height_);
         return DMError::DM_ERROR_INVALID_PARAM;
@@ -497,7 +497,7 @@ DMError SuperFoldStateManager::RefreshScreenRelativePosition(
     sptr<ScreenSession> mainScreenSession, sptr<ScreenSession> externalSession)
 {
     if (mainScreenSession == nullptr || externalSession == nullptr) {
-        TLOGE(WmsLogTag::DMS, "RefreshScreenRelativePosition mainScreenSession is null");
+        TLOGE(WmsLogTag::DMS, "RefreshScreenRelativePosition mainScreenSession or externalSession is null");
         return DMError::DM_ERROR_NULLPTR;
     }
     auto mainScreenProperty = mainScreenSession->GetScreenProperty();
@@ -546,7 +546,7 @@ DMError SuperFoldStateManager::RefreshMirrorRegionInner(
     mirrorRegion.posX_ = 0;
     mirrorRegion.posY_ = 0;
     mirrorRegion.width_ = mainScreenProperty.GetScreenRealWidth();
-    mirrorRegion.height_ = (mainScreenProperty.GetScreenRealHeight() - GetFoldHeight()) / HEIGHT_HALF;
+    mirrorRegion.height_ = (mainScreenProperty.GetScreenRealHeight() - GetFoldCreaseHeight()) / HEIGHT_HALF;
     if (mirrorRegion.width_ == 0 || mirrorRegion.height_ == 0) {
         TLOGE(WmsLogTag::DMS,
             "RefreshMirrorRegionInner mirrorRegion.width_:%{public}d mirrorRegion.height_:%{public}d",
