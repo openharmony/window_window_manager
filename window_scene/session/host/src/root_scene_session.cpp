@@ -57,8 +57,8 @@ void RootSceneSession::GetSystemAvoidAreaForRoot(const WSRect& rect, AvoidArea& 
                 displayId, statusBarRect.height_);
         }
         CalculateAvoidAreaRect(rect, statusBarRect, avoidArea);
-        TLOGI(WmsLogTag::WMS_IMMS, "displayId %{public}" PRIu64
-              " root scene %{public}s status bar %{public}s area %{public}s",
+        TLOGI(WmsLogTag::WMS_IMMS, "displayId %{public}" PRIu64 " root scene %{public}s "
+              "status bar %{public}s area %{public}s",
               displayId, rect.ToString().c_str(), statusBarRect.ToString().c_str(), avoidArea.ToString().c_str());
     }
 }
