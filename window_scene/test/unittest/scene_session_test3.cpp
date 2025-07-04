@@ -807,7 +807,7 @@ HWTEST_F(SceneSessionTest3, RegisterThrowSlipAnimationStateChangeCallback, TestS
     info.bundleName_ = "RegisterThrowSlipAnimationStateChangeCallback";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
 
-    std::function<void(bool isAnimating)> func = [](bool isAnimating) { return; };
+    std::function<void(bool isAnimating, bool isFullScreen)> func = [](bool isAnimating, bool isFullScreen) { return; };
     sceneSession->RegisterThrowSlipAnimationStateChangeCallback(std::move(func));
     EXPECT_NE(sceneSession, nullptr);
 }

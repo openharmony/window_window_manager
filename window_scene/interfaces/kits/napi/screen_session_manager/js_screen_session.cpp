@@ -69,6 +69,10 @@ napi_value JsScreenSession::Create(napi_env env, const sptr<ScreenSession>& scre
     napi_set_named_property(env, objValue, "isExtend", CreateJsValue(env, screenSession->GetIsExtend()));
     napi_set_named_property(env, objValue, "innerName",
         CreateJsValue(env, static_cast<std::string>(screenSession->GetInnerName())));
+    napi_set_named_property(env, objValue, "displayGroupId",
+        CreateJsValue(env, static_cast<int64_t>(screenSession->GetDisplayGroupId())));
+    napi_set_named_property(env, objValue, "mainDisplayIdOfGroup",
+        CreateJsValue(env, static_cast<int64_t>(screenSession->GetMainDisplayIdOfGroup())));
 
     const char* moduleName = "JsScreenSession";
     BindNativeFunction(env, objValue, "on", moduleName, JsScreenSession::RegisterCallback);

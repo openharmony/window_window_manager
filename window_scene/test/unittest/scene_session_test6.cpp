@@ -535,23 +535,6 @@ HWTEST_F(SceneSessionTest6, NotifyKeyboardAnimationCompleted, Function | SmallTe
 }
 
 /**
- * @tc.name: UpdateNewSizeForPCWindow
- * @tc.desc: UpdateNewSizeForPCWindow
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest6, UpdateNewSizeForPCWindow, Function | SmallTest | Level1)
-{
-    LOG_SetCallback(ScreenSessionLogCallback);
-    SessionInfo info;
-    info.abilityName_ = "UpdateNewSizeForPCWindow";
-    info.bundleName_ = "UpdateNewSizeForPCWindow";
-    info.windowType_ = 1;
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSession->UpdateNewSizeForPCWindow(true);
-    EXPECT_TRUE(g_errlog.find("dip change do nothing.") != std::string::npos);
-}
-
-/**
  * @tc.name: IsInCompatScaleStatus
  * @tc.desc: IsInCompatScaleStatus
  * @tc.type: FUNC
@@ -582,29 +565,6 @@ HWTEST_F(SceneSessionTest6, IsInCompatScaleStatus, TestSize.Level1)
     EXPECT_TRUE(session->IsInCompatScaleStatus());
     session->SetScale(2.0f, 0.5f, 0.5f, 0.5f);
     EXPECT_TRUE(session->IsInCompatScaleStatus());
-}
-
-/**
- * @tc.name: CalcNewWindowRectIfNeed
- * @tc.desc: CalcNewWindowRectIfNeed
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest6, CalcNewWindowRectIfNeed, Function | SmallTest | Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "CalcNewWindowRectIfNeed";
-    info.bundleName_ = "CalcNewWindowRectIfNeed";
-    info.windowType_ = 1;
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    property->SetLastLimitsVpr(1.9);
-    sceneSession->property_ = property;
-    DMRect availableArea = { 0, 0, 1920, 1080 };
-    float newVpr = 2.85;
-    WSRect winRect = { 0, 0, 800, 600 };
-    sceneSession->CalcNewWindowRectIfNeed(availableArea, newVpr, winRect);
-    WSRect result = { 0, 0, 1200, 900 };
-    ASSERT_EQ(result, winRect);
 }
 
 /**
@@ -1093,34 +1053,6 @@ HWTEST_F(SceneSessionTest6, GetScreenWidthAndHeightFromClient, Function | SmallT
 }
 
 /**
- * @tc.name: RecalculateFrameRect
- * @tc.desc: RecalculateFrameRect
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest6, RecalculateFrameRect, Function | SmallTest | Level3)
-{
-    SessionInfo info;
-    info.bundleName_ = "RecalculateFrameRect";
-    info.abilityName_ = "RecalculateFrameRect";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    uint32_t displayWidth = 100; // 100 is display width
-    uint32_t displayHeight = 100; // 100 is display height
-
-    Rect frameRect {10, 10, 10, 10}; // 10 is valid frame rect param
-    Rect res = sceneSession->RecalculateFrameRect(frameRect, 90, displayWidth, displayHeight); // degree 90
-    EXPECT_EQ(res.posX_, frameRect.posY_);
-
-    res = sceneSession->RecalculateFrameRect(frameRect, 180, displayWidth, displayHeight); // degree 180
-    EXPECT_EQ(res.width_, frameRect.width_);
-
-    res = sceneSession->RecalculateFrameRect(frameRect, 270, displayWidth, displayHeight); // degree 270
-    EXPECT_EQ(res.posY_, frameRect.posX_);
-
-    res = sceneSession->RecalculateFrameRect(frameRect, 0, displayWidth, displayHeight); // degree 0
-    EXPECT_EQ(res.posY_, frameRect.posY_);
-}
-
-/**
  * @tc.name: SetFrameRectForPartialZoomIn
  * @tc.desc: SetFrameRectForPartialZoomIn
  * @tc.type: FUNC
@@ -1148,49 +1080,15 @@ HWTEST_F(SceneSessionTest6, SetFrameRectForPartialZoomInInner, Function | SmallT
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
 
     Rect frameRect = { 10, 10, 10, 10 };  // 10 is valid frame rect param
-    WSError ret = sceneSession->SetFrameRectForPartialZoomInInner(frameRect, 0); // 0 is window rotate
+    WSError ret = sceneSession->SetFrameRectForPartialZoomInInner(frameRect);
     EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_WINDOW);
 
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
     EXPECT_NE(surfaceNode, nullptr);
     sceneSession->surfaceNode_ = surfaceNode;
-    ret = sceneSession->SetFrameRectForPartialZoomInInner(frameRect, 0); // 0 is window rotate
-    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_DISPLAY);
-
-    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
-    screenSession->name_ = "SetFrameRectForPartialZoomInInner";
-    screenSession->screenId_ = 100; // screen id 100
-    ScreenProperty screenProperty;
-    screenProperty.bounds_.rect_ = { 0, 0, 100, 100 }; // 0, 100 is valid screen rect param
-    screenSession->SetScreenProperty(screenProperty);
-    ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(100, screenSession); // screen id 100
-    EXPECT_NE(sceneSession->GetSessionProperty(), nullptr);
-    sceneSession->GetSessionProperty()->SetDisplayId(100); // screen id 100
-    EXPECT_EQ(sceneSession->GetDisplayId(), 100); // screen id 100
-    ret = sceneSession->SetFrameRectForPartialZoomInInner(frameRect, 0); // 0 is window rotate
+    ret = sceneSession->SetFrameRectForPartialZoomInInner(frameRect);
     EXPECT_EQ(ret, WSError::WS_OK);
-
-    ret = sceneSession->SetFrameRectForPartialZoomInInner(frameRect, 1); // 1 is screen rotate
-    EXPECT_EQ(ret, WSError::WS_OK);
-
-    frameRect.posX_ = -1; // -1 is invalid frame rect param
-    ret = sceneSession->SetFrameRectForPartialZoomInInner(frameRect, 0); // 0 is window rotate
-    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_PARAM);
-}
-
-/**
- * @tc.name: GetRotatePolicy
- * @tc.desc: GetRotatePolicy
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest6, GetRotatePolicy, Function | SmallTest | Level3)
-{
-    SessionInfo info;
-    info.bundleName_ = "GetRotatePolicy";
-    info.abilityName_ = "GetRotatePolicy";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession->GetRotatePolicy(), 10); // 10: invalid rotate policy
 }
 
 /**

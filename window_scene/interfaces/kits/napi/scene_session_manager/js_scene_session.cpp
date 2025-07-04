@@ -470,6 +470,7 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
     BindNativeFunction(env, objValue, "setZOrder", moduleName, JsSceneSession::SetZOrder);
     BindNativeFunction(env, objValue, "getZOrder", moduleName, JsSceneSession::GetZOrder);
     BindNativeFunction(env, objValue, "setTouchable", moduleName, JsSceneSession::SetTouchable);
+    BindNativeFunction(env, objValue, "setWindowInputType", moduleName, JsSceneSession::SetWindowInputType);
     BindNativeFunction(env, objValue, "setSystemActive", moduleName, JsSceneSession::SetSystemActive);
     BindNativeFunction(env, objValue, "setPrivacyMode", moduleName, JsSceneSession::SetPrivacyMode);
     BindNativeFunction(env, objValue, "setSystemSceneOcclusionAlpha",
@@ -1802,13 +1803,14 @@ void JsSceneSession::RegisterThrowSlipAnimationStateChangeCallback()
         return;
     }
     const char* const where = __func__;
-    session->RegisterThrowSlipAnimationStateChangeCallback([weakThis = wptr(this), where](bool isAnimating) {
+    session->RegisterThrowSlipAnimationStateChangeCallback(
+        [weakThis = wptr(this), where](bool isAnimating, bool isFullScreen) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s jsSceneSession is null", where);
             return;
         }
-        jsSceneSession->OnThrowSlipAnimationStateChange(isAnimating);
+        jsSceneSession->OnThrowSlipAnimationStateChange(isAnimating, isFullScreen);
     });
     TLOGD(WmsLogTag::WMS_LAYOUT_PC, "register success, persistent id: %{public}d", persistentId_);
 }
@@ -2411,6 +2413,12 @@ napi_value JsSceneSession::SetTouchable(napi_env env, napi_callback_info info)
 {
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetTouchable(env, info): nullptr;
+}
+
+napi_value JsSceneSession::SetWindowInputType(napi_env env, napi_callback_info info)
+{
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSetWindowInputType(env, info): nullptr;
 }
 
 napi_value JsSceneSession::SetSystemActive(napi_env env, napi_callback_info info)
@@ -4294,10 +4302,10 @@ void JsSceneSession::OnMainModalTypeChange(bool isModal)
     taskScheduler_->PostMainThreadTask(task, "OnMainModalTypeChange: " + std::to_string(isModal));
 }
 
-void JsSceneSession::OnThrowSlipAnimationStateChange(bool isAnimating)
+void JsSceneSession::OnThrowSlipAnimationStateChange(bool isAnimating, bool isFullScreen)
 {
     const char* const where = __func__;
-    auto task = [weakThis = wptr(this), persistentId = persistentId_, isAnimating, env = env_, where] {
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, isAnimating, isFullScreen, env = env_, where] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s jsSceneSession id: %{public}d has been destroyed",
@@ -4310,7 +4318,8 @@ void JsSceneSession::OnThrowSlipAnimationStateChange(bool isAnimating)
             return;
         }
         napi_value jsIsAnimating = CreateJsValue(env, isAnimating);
-        napi_value argv[] = { jsIsAnimating };
+        napi_value jsIsFullScreen = CreateJsValue(env, isFullScreen);
+        napi_value argv[] = { jsIsAnimating, jsIsFullScreen };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, __func__);
@@ -5414,6 +5423,36 @@ napi_value JsSceneSession::OnSetTouchable(napi_env env, napi_callback_info info)
     }
 
     session->SetSystemTouchable(touchable);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnSetWindowInputType(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != 1) {
+        WLOGFE("Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input Parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    uint32_t windowInputType = 0;
+    if (!ConvertFromJsValue(env, argv[0], windowInputType)) {
+        WLOGFE("Failed to convert parameter to windowInputType");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        WLOGFE("session is null, id:%{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+
+    session->SetSessionInfoWindowInputType(windowInputType);
     return NapiGetUndefined(env);
 }
 

@@ -220,51 +220,6 @@ HWTEST_F(SceneSessionManagerTest12, GetResourceManager, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetDisplayGroupId
- * @tc.desc: GetDisplayGroupId
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest12, GetDisplayGroupId, TestSize.Level1)
-{
-    DisplayId displayGroupId = ssm_->GetDisplayGroupId(DEFAULT_DISPLAY_ID);
-    EXPECT_EQ(displayGroupId, DEFAULT_DISPLAY_ID);
-    displayGroupId = ssm_->GetDisplayGroupId(1);
-    EXPECT_EQ(displayGroupId, DEFAULT_DISPLAY_ID);
-}
-
-/**
- * @tc.name: GetDisplayGroupId01
- * @tc.desc: GetDisplayGroupId
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest12, GetDisplayGroupId01, TestSize.Level1)
-{
-    ssm_->AddFocusGroup(1);
-    DisplayId displayGroupId = ssm_->GetDisplayGroupId(1);
-    EXPECT_EQ(displayGroupId, 1);
-    displayGroupId = ssm_->GetDisplayGroupId(2);
-    EXPECT_EQ(displayGroupId, DEFAULT_DISPLAY_ID);
-    ssm_->RemoveFocusGroup(1);
-}
-
-/**
- * @tc.name: GetAllFocusedSessionList
- * @tc.desc: GetAllFocusedSessionList
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest12, GetAllFocusedSessionList, TestSize.Level1)
-{
-    auto focusInfoMapArray = ssm_->GetAllFocusedSessionList();
-    EXPECT_EQ(focusInfoMapArray.size(), 1);
-    ssm_->AddFocusGroup(1);
-    ssm_->AddFocusGroup(2);
-    focusInfoMapArray = ssm_->GetAllFocusedSessionList();
-    EXPECT_EQ(focusInfoMapArray.size(), 3);
-    ssm_->RemoveFocusGroup(1);
-    ssm_->RemoveFocusGroup(2);
-}
-
-/**
  * @tc.name: RequestKeyboardPanelSession
  * @tc.desc: test RequestKeyboardPanelSession
  * @tc.type: FUNC
@@ -2501,6 +2456,37 @@ HWTEST_F(SceneSessionManagerTest12, RegisterGetStartWindowConfigCallback, TestSi
     g_logMsg.clear();
     ssm_->RegisterGetStartWindowConfigCallback(nullptr);
     EXPECT_TRUE(g_logMsg.find("session is nullptr") != std::string::npos);
+}
+
+/**
+ * @tc.name: NotifyHookOrientationChange01
+ * @tc.desc: test function : NotifyHookOrientationChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, NotifyHookOrientationChange01, TestSize.Level1)
+{
+    ssm_->sceneSessionMap_.clear();
+    WMError result = ssm_->NotifyHookOrientationChange(INVALID_SESSION_ID);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: NotifyHookOrientationChange02
+ * @tc.desc: test function : NotifyHookOrientationChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, NotifyHookOrientationChange02, TestSize.Level1)
+{
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "testBundleName";
+    sessionInfo.moduleName_ = "testModuleName";
+    sessionInfo.abilityName_ = "testAbilityName";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
+    WMError result = ssm_->NotifyHookOrientationChange(sceneSession->GetPersistentId());
+    EXPECT_EQ(result, WMError::WM_OK);
+    ssm_->sceneSessionMap_.erase(sceneSession->GetPersistentId());
 }
 
 /**

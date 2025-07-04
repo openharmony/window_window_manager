@@ -162,6 +162,7 @@ private:
     static napi_value SetShowRecent(napi_env env, napi_callback_info info);
     static napi_value SetZOrder(napi_env env, napi_callback_info info);
     static napi_value SetTouchable(napi_env env, napi_callback_info info);
+    static napi_value SetWindowInputType(napi_env env, napi_callback_info info);
     static napi_value SetSystemActive(napi_env env, napi_callback_info info);
     static napi_value SetPrivacyMode(napi_env env, napi_callback_info info);
     static napi_value SetFloatingScale(napi_env env, napi_callback_info info);
@@ -254,6 +255,7 @@ private:
     napi_value OnSetShowRecent(napi_env env, napi_callback_info info);
     napi_value OnSetZOrder(napi_env env, napi_callback_info info);
     napi_value OnSetTouchable(napi_env env, napi_callback_info info);
+    napi_value OnSetWindowInputType(napi_env env, napi_callback_info info);
     napi_value OnSetSystemActive(napi_env env, napi_callback_info info);
     napi_value OnSetPrivacyMode(napi_env env, napi_callback_info info);
     napi_value OnSetFloatingScale(napi_env env, napi_callback_info info);
@@ -445,7 +447,7 @@ private:
     void OnSubSessionZLevelChange(int32_t zLevel);
     void OnSubModalTypeChange(SubWindowModalType subWindowModalType);
     void OnMainModalTypeChange(bool isModal);
-    void OnThrowSlipAnimationStateChange(bool isAnimating);
+    void OnThrowSlipAnimationStateChange(bool isAnimating, bool isFullScreen);
     void OnFullScreenWaterfallModeChange(bool isWaterfallMode);
     void OnClick(bool requestFocus, bool isClick);
     void UpdateSessionLabel(const std::string& label);

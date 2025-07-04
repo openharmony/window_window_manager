@@ -28,6 +28,7 @@ const static uint32_t MAX_SCREEN_SIZE = 32;
 const static int32_t ERR_INVALID_DATA = -1;
 const static int32_t MAX_BUFF_SIZE = 100;
 const static float INVALID_DEFAULT_DENSITY = 1.0f;
+const static uint32_t PIXMAP_VECTOR_SIZE = 2;
 }
 
 int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
@@ -492,6 +493,37 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
                 isCaptureFullOfScreen);
             reply.WriteParcelable(displaySnapshot == nullptr ? nullptr : displaySnapshot.get());
             static_cast<void>(reply.WriteInt32(static_cast<int32_t>(errCode)));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_GET_DISPLAY_HDR_SNAPSHOT: {
+            DisplayId displayId = DISPLAY_ID_INVALID;
+            bool isUseDma = false;
+            bool isCaptureFullOfScreen = false;
+            DmErrorCode errCode = DmErrorCode::DM_OK;
+            if (!data.ReadUint64(displayId)) {
+                TLOGE(WmsLogTag::DMS, "Read displayId failed");
+                return ERR_INVALID_DATA;
+            }
+            if (!data.ReadBool(isUseDma)) {
+                TLOGE(WmsLogTag::DMS, "Read isUseDma failed");
+                return ERR_INVALID_DATA;
+            }
+            if (!data.ReadBool(isCaptureFullOfScreen)) {
+                TLOGE(WmsLogTag::DMS, "Read isCaptureFullOfScreen failed");
+                return ERR_INVALID_DATA;
+            }
+            std::vector<std::shared_ptr<Media::PixelMap>> displaySnapshotVec = GetDisplayHDRSnapshot(
+                displayId, &errCode, isUseDma, isCaptureFullOfScreen);
+            if (displaySnapshotVec.size() != PIXMAP_VECTOR_SIZE) {
+                TLOGE(WmsLogTag::DMS, "Dail to receive displaySnapshotVec in stub.");
+                reply.WriteParcelable(nullptr);
+                reply.WriteParcelable(nullptr);
+            } else {
+                TLOGI(WmsLogTag::DMS, "WriteParcelable to receive displaySnapshotVec in stub.");
+                reply.WriteParcelable(displaySnapshotVec[0] == nullptr ? nullptr : displaySnapshotVec[0].get());
+                reply.WriteParcelable(displaySnapshotVec[1] == nullptr ? nullptr : displaySnapshotVec[1].get());
+            }
+            reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
         case DisplayManagerMessage::TRANS_ID_GET_SNAPSHOT_BY_PICKER: {
@@ -1068,6 +1100,8 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             hookInfo.density_ = data.ReadFloat();
             hookInfo.rotation_ = data.ReadUint32();
             hookInfo.enableHookRotation_ = data.ReadBool();
+            hookInfo.displayOrientation_ = data.ReadUint32();
+            hookInfo.enableHookDisplayOrientation_ = data.ReadBool();
             UpdateDisplayHookInfo(uid, enable, hookInfo);
             break;
         }
@@ -1117,6 +1151,10 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         }
         case DisplayManagerMessage::TRANS_ID_GET_DISPLAY_SNAPSHOT_WITH_OPTION: {
             ProcGetDisplaySnapshotWithOption(data, reply);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_GET_DISPLAY_HDR_SNAPSHOT_WITH_OPTION: {
+            ProcGetDisplayHDRSnapshotWithOption(data, reply);
             break;
         }
         case DisplayManagerMessage::TRANS_ID_SET_CAMERA_STATUS: {
@@ -1331,14 +1369,49 @@ void ScreenSessionManagerStub::ProcGetDisplaySnapshotWithOption(MessageParcel& d
     option.displayId_ = static_cast<DisplayId>(data.ReadUint64());
     option.isNeedNotify_ = static_cast<bool>(data.ReadBool());
     option.isNeedPointer_ = static_cast<bool>(data.ReadBool());
-    if(!data.ReadUInt64Vector(&option.blackList_)) {
-        TLOGE(WmsLogTag::DMS, "Read node blackList failed");
+    if (!data.ReadUInt64Vector(&option.surfaceNodesList_)) {
+        TLOGE(WmsLogTag::DMS, "Read node surfaceNodesList failed");
         return;
     }
     option.isCaptureFullOfScreen_ = static_cast<bool>(data.ReadBool());
     DmErrorCode errCode = DmErrorCode::DM_OK;
     std::shared_ptr<Media::PixelMap> capture = GetDisplaySnapshotWithOption(option, &errCode);
     reply.WriteParcelable(capture == nullptr ? nullptr : capture.get());
+    static_cast<void>(reply.WriteInt32(static_cast<int32_t>(errCode)));
+}
+
+void ScreenSessionManagerStub::ProcGetDisplayHDRSnapshotWithOption(MessageParcel& data, MessageParcel& reply)
+{
+    CaptureOption option;
+    option.displayId_ = DISPLAY_ID_INVALID;
+    option.isNeedNotify_ = false;
+    option.isCaptureFullOfScreen_ = false;
+    if (!data.ReadUint64(option.displayId_)) {
+        TLOGE(WmsLogTag::DMS, "Read displayId failed");
+        return;
+    }
+    if (!data.ReadBool(option.isNeedNotify_)) {
+        TLOGE(WmsLogTag::DMS, "Read isNeedNotify failed");
+        return;
+    }
+    if (!data.ReadBool(option.isCaptureFullOfScreen_)) {
+        TLOGE(WmsLogTag::DMS, "Read isCaptureFullOfScreen failed");
+        return;
+    }
+    if (!data.ReadUInt64Vector(&option.surfaceNodesList_)) {
+        TLOGE(WmsLogTag::DMS, "Read surfaceNodesList failed");
+        return;
+    }
+    DmErrorCode errCode = DmErrorCode::DM_OK;
+    std::vector<std::shared_ptr<Media::PixelMap>> captureVec = GetDisplayHDRSnapshotWithOption(option, &errCode);
+    if (captureVec.size() != PIXMAP_VECTOR_SIZE) {
+        TLOGE(WmsLogTag::DMS, "captureVec size: %{public}u", captureVec.size());
+        reply.WriteParcelable(nullptr);
+        reply.WriteParcelable(nullptr);
+    } else {
+        reply.WriteParcelable(captureVec[0] == nullptr ? nullptr : captureVec[0].get());
+        reply.WriteParcelable(captureVec[1] == nullptr ? nullptr : captureVec[1].get());
+    }
     static_cast<void>(reply.WriteInt32(static_cast<int32_t>(errCode)));
 }
 

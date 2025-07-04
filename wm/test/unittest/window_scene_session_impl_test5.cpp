@@ -1462,12 +1462,12 @@ HWTEST_F(WindowSceneSessionImplTest5, SetWindowAnchorInfo01, Function | SmallTes
     property->persistentId_ = 100;
     window->state_ = WindowState::STATE_CREATED;
     ret = window->SetWindowAnchorInfo(windowAnchorInfo);
-    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_OPERATION);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
 
     property->subWindowLevel_ = 100;
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     ret = window->SetWindowAnchorInfo(windowAnchorInfo);
-    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_OPERATION);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
 
     property->subWindowLevel_ = 1;
     window->windowSystemConfig_.supportFollowRelativePositionToParent_ = false;
@@ -1915,7 +1915,7 @@ HWTEST_F(WindowSceneSessionImplTest5, GetAppForceLandscapeConfig01, TestSize.Lev
         ASSERT_EQ(res, WMError::WM_OK);
         EXPECT_EQ(config.mode_, 0);
         EXPECT_EQ(config.homePage_, "");
-        EXPECT_EQ(config.isSupportSplitMode_, false);
+        EXPECT_EQ(config.supportSplit_, -1);
     }
 }
 
@@ -1937,7 +1937,7 @@ HWTEST_F(WindowSceneSessionImplTest5, GetAppForceLandscapeConfig02, TestSize.Lev
         ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
         EXPECT_EQ(config.mode_, 0);
         EXPECT_EQ(config.homePage_, "");
-        EXPECT_EQ(config.isSupportSplitMode_, false);
+        EXPECT_EQ(config.supportSplit_, -1);
     }
 }
 
@@ -1980,44 +1980,44 @@ HWTEST_F(WindowSceneSessionImplTest5, NotifyAppForceLandscapeConfigUpdated02, Te
 }
 
 /**
- * @tc.name: SetFrameRectForParticalZoomIn01
- * @tc.desc: Test SetFrameRectForParticalZoomIn when window type is invalid
+ * @tc.name: SetFrameRectForPartialZoomIn01
+ * @tc.desc: Test SetFrameRectForPartialZoomIn when window type is invalid
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest5, SetFrameRectForParticalZoomIn01, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplTest5, SetFrameRectForPartialZoomIn01, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SetFrameRectForParticalZoomIn01");
+    option->SetWindowName("SetFrameRectForPartialZoomIn01");
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
     Rect frameRect = { 10, 10, 10, 10 }; // 10 is valid frame rect param
     // window type is WINDOW_TYPE_APP_MAIN_WINDOW
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetFrameRectForParticalZoomIn(frameRect));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetFrameRectForPartialZoomIn(frameRect));
 }
 
 /**
- * @tc.name: SetFrameRectForParticalZoomIn02
- * @tc.desc: Test SetFrameRectForParticalZoomIn when window session is invalid
+ * @tc.name: SetFrameRectForPartialZoomIn02
+ * @tc.desc: Test SetFrameRectForPartialZoomIn when window session is invalid
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest5, SetFrameRectForParticalZoomIn02, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplTest5, SetFrameRectForPartialZoomIn02, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SetFrameRectForParticalZoomIn02");
+    option->SetWindowName("SetFrameRectForPartialZoomIn02");
     option->SetWindowType(WindowType::WINDOW_TYPE_MAGNIFICATION);
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
     Rect frameRect = { 10, 10, 10, 10 }; // 10 is valid frame rect param
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetFrameRectForParticalZoomIn(frameRect));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetFrameRectForPartialZoomIn(frameRect));
 
     SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "SetFrameRectForParticalZoomIn02";
-    sessionInfo.abilityName_ = "SetFrameRectForParticalZoomIn02";
+    sessionInfo.bundleName_ = "SetFrameRectForPartialZoomIn02";
+    sessionInfo.abilityName_ = "SetFrameRectForPartialZoomIn02";
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
     window->property_->persistentId_ = 100; // 100 is persistent id
     window->state_ = WindowState::STATE_CREATED;
-    EXPECT_EQ(WMError::WM_OK, window->SetFrameRectForParticalZoomIn(frameRect));
+    EXPECT_EQ(WMError::WM_OK, window->SetFrameRectForPartialZoomIn(frameRect));
 }
 
 /**
@@ -2042,6 +2042,31 @@ HWTEST_F(WindowSceneSessionImplTest5, UpdateEnableDragWhenSwitchMultiWindow, Fun
     window->property_->type_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
     window->UpdateEnableDragWhenSwitchMultiWindow(true);
     EXPECT_EQ(true, window->property_->dragEnabled_);
+}
+
+/**
+ * @tc.name: GetConfigurationFromAbilityInfo
+ * @tc.desc: GetConfigurationFromAbilityInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, GetConfigurationFromAbilityInfo, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetConfigurationFromAbilityInfo");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    std::shared_ptr<AbilityRuntime::AbilityContextImpl> context =
+        std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    std::shared_ptr<AppExecFwk::AbilityInfo> info = std::make_shared<AppExecFwk::AbilityInfo>();
+    context->SetAbilityInfo(info);
+    window->context_ = context;
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsSupportRotateFullScreen(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    window->GetConfigurationFromAbilityInfo();
+    auto supportType = window->property_->GetWindowModeSupportType();
+    auto expceted = WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN |
+                    WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING;
+    EXPECT_EQ(supportType & expceted, expceted);
 }
 
 /**

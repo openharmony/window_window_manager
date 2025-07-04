@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "iremote_object_mocker.h"
+#include "mock/mock_message_parcel.h"
 #include "zidl/screen_session_manager_client_proxy.h"
 
 using namespace testing;
@@ -408,6 +409,65 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, OnBeforeScreenPropertyChanged, Tes
 {
     screenSessionManagerClientProxy_->OnBeforeScreenPropertyChanged(FoldStatus::UNKNOWN);
     ASSERT_TRUE(screenSessionManagerClientProxy_ != nullptr);
+}
+
+/**
+ * @tc.name: OnSetSurfaceNodeIdsChanged
+ * @tc.desc: OnSetSurfaceNodeIdsChanged test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientProxyTest, OnSetSurfaceNodeIdsChanged, TestSize.Level1)
+{
+    MockMessageParcel::ClearAllErrorFlag();
+    DisplayId displayId = 10;
+    std::vector<uint64_t> surfaceNodeIds = { 100, 101 };
+    auto ssmProxy = sptr<ScreenSessionManagerClientProxy>::MakeSptr(nullptr);
+    ssmProxy->OnSetSurfaceNodeIdsChanged(displayId, surfaceNodeIds);
+
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    ssmProxy = sptr<ScreenSessionManagerClientProxy>::MakeSptr(remoteMocker);
+    ASSERT_NE(nullptr, ssmProxy);
+    ssmProxy->OnSetSurfaceNodeIdsChanged(displayId, surfaceNodeIds);
+
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    ssmProxy->OnSetSurfaceNodeIdsChanged(displayId, surfaceNodeIds);
+    remoteMocker->SetRequestResult(ERR_NONE);
+
+    MockMessageParcel::SetWriteUint64ErrorFlag(true);
+    ssmProxy->OnSetSurfaceNodeIdsChanged(displayId, surfaceNodeIds);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ssmProxy->OnSetSurfaceNodeIdsChanged(displayId, surfaceNodeIds);
+    MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
+ * @tc.name: OnVirtualScreenDisconnected
+ * @tc.desc: OnVirtualScreenDisconnected test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientProxyTest, OnVirtualScreenDisconnected, TestSize.Level1)
+{
+    MockMessageParcel::ClearAllErrorFlag();
+    DisplayId displayId = 10;
+    auto ssmProxy = sptr<ScreenSessionManagerClientProxy>::MakeSptr(nullptr);
+    ssmProxy->OnVirtualScreenDisconnected(displayId);
+
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    ssmProxy = sptr<ScreenSessionManagerClientProxy>::MakeSptr(remoteMocker);
+    ASSERT_NE(nullptr, ssmProxy);
+    ssmProxy->OnVirtualScreenDisconnected(displayId);
+
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    ssmProxy->OnVirtualScreenDisconnected(displayId);
+    remoteMocker->SetRequestResult(ERR_NONE);
+
+    MockMessageParcel::SetWriteUint64ErrorFlag(true);
+    ssmProxy->OnVirtualScreenDisconnected(displayId);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ssmProxy->OnVirtualScreenDisconnected(displayId);
+    MockMessageParcel::ClearAllErrorFlag();
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -263,6 +263,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::IsScbCoreEnabled);
     BindNativeFunction(env, exportObj, "updateAppHookDisplayInfo", moduleName,
         JsSceneSessionManager::UpdateAppHookDisplayInfo);
+    BindNativeFunction(env, exportObj, "notifyHookOrientationChange", moduleName,
+        JsSceneSessionManager::NotifyHookOrientationChange);
     BindNativeFunction(env, exportObj, "refreshPcZOrder", moduleName,
         JsSceneSessionManager::RefreshPcZOrder);
     BindNativeFunction(env, exportObj, "getMaxInstanceCount", moduleName,
@@ -1281,6 +1283,13 @@ napi_value JsSceneSessionManager::UpdateAppHookDisplayInfo(napi_env env, napi_ca
     return (me != nullptr) ? me->OnUpdateAppHookDisplayInfo(env, info) : nullptr;
 }
 
+napi_value JsSceneSessionManager::NotifyHookOrientationChange(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_COMPAT, "[NAPI]");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnNotifyHookOrientationChange(env, info) : NapiGetUndefined(env);
+}
+
 napi_value JsSceneSessionManager::IsScbCoreEnabled(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_PIPELINE, "[NAPI]");
@@ -1894,12 +1903,17 @@ napi_value JsSceneSessionManager::OnInitUserInfo(napi_env env, napi_callback_inf
 
 void JsSceneSessionManager::RegisterDumpRootSceneElementInfoListener()
 {
-    DumpRootSceneElementInfoFunc func = [this](const std::vector<std::string>& params,
-        std::vector<std::string>& infos) {
+    DumpRootSceneElementInfoFunc func = [this](const sptr<SceneSession>& session,
+        const std::vector<std::string>& params, std::vector<std::string>& infos) {
+        if (session == nullptr) {
+            return;
+        }
+        const auto& uiContent = rootScene_->
+            GetUIContentByDisplayId(session->GetSessionProperty()->GetDisplayId()).first;
         if (params.size() == 1 && params[0] == ARG_DUMP_HELP) { // 1: params num
             Ace::UIContent::ShowDumpHelp(infos);
             TLOGND(WmsLogTag::WMS_EVENT, "Dump ArkUI help info");
-        } else if (const auto uiContent = RootScene::staticRootScene_->GetUIContent()) {
+        } else if (uiContent != nullptr) {
             uiContent->DumpInfo(params, infos);
             TLOGND(WmsLogTag::WMS_EVENT, "Dump ArkUI element info");
         }
@@ -3153,22 +3167,7 @@ napi_value JsSceneSessionManager::OnUpdateSessionDisplayId(napi_env env, napi_ca
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-
-    WSRect winRect = { 0, 0, 0, 0 };
-    if (argc > ARGC_TWO) {
-        ConvertRectInfoFromJs(env, argv[ARG_INDEX_TWO], winRect);
-    }
-
-    bool isNotSessionRectWithDpiChange = false;
-    if (argc > ARGC_THREE && !ConvertFromJsValue(env, argv[ARGC_THREE], isNotSessionRectWithDpiChange)) {
-        WLOGFE("Failed to convert parameter to isNotSessionRectWithDpiChange");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
-        return NapiGetUndefined(env);
-    }
-
-    SceneSessionManager::GetInstance().UpdateSessionDisplayId(persistentId, screenId, winRect,
-        isNotSessionRectWithDpiChange);
+    SceneSessionManager::GetInstance().UpdateSessionDisplayId(persistentId, screenId);
     return NapiGetUndefined(env);
 }
 
@@ -4031,6 +4030,26 @@ napi_value JsSceneSessionManager::OnUpdateAppHookDisplayInfo(napi_env env, napi_
     return NapiGetUndefined(env);
 }
 
+napi_value JsSceneSessionManager::OnNotifyHookOrientationChange(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_ONE;
+    napi_value argv[ARGC_ONE] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+
+    if (argc != ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "Argc is invalid: %{public}zu", argc);
+        return NapiGetUndefined(env);
+    }
+
+    int32_t persistentId = 0;
+    if (!ConvertFromJsValue(env, argv[0], persistentId)) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "Failed to convert parameter to persistentId");
+        return NapiGetUndefined(env);
+    }
+    SceneSessionManager::GetInstance().NotifyHookOrientationChange(persistentId);
+    return NapiGetUndefined(env);
+}
+
 napi_value JsSceneSessionManager::SetAppForceLandscapeConfig(napi_env env, napi_callback_info info)
 {
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
@@ -4070,17 +4089,17 @@ napi_value JsSceneSessionManager::OnSetAppForceLandscapeConfig(napi_env env, nap
         TLOGD(WmsLogTag::DEFAULT, "homePage: %{public}s", homePage.c_str());
     }
 
-    bool isSupportSplitMode = false;
-    if (argc >= ARGC_FOUR && !ConvertFromJsValue(env, argv[ARGC_THREE], isSupportSplitMode)) {
-        TLOGE(WmsLogTag::DEFAULT, "Failed to convert parameter to isSupportSplitMode");
+    int32_t supportSplit = -1;
+    if (argc >= ARGC_FOUR && !ConvertFromJsValue(env, argv[ARGC_THREE], supportSplit)) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to convert parameter to supportSplit");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
 
-    TLOGI(WmsLogTag::DEFAULT, "app: %{public}s, mode: %{public}d, homePage: %{public}s, isSupportSplitMode: %{public}u",
-        bundleName.c_str(), mode, homePage.c_str(), isSupportSplitMode);
-    AppForceLandscapeConfig config = { mode, homePage, isSupportSplitMode };
+    TLOGI(WmsLogTag::DEFAULT, "app: %{public}s, mode: %{public}d, homePage: %{public}s, supportSplit: %{public}d",
+        bundleName.c_str(), mode, homePage.c_str(), supportSplit);
+    AppForceLandscapeConfig config = { mode, homePage, supportSplit };
     SceneSessionManager::GetInstance().SetAppForceLandscapeConfig(bundleName, config);
     return NapiGetUndefined(env);
 }

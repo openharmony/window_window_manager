@@ -321,6 +321,21 @@ void ScreenSessionManagerClient::OnGetSurfaceNodeIdsFromMissionIdsChanged(std::v
     }
 }
 
+void ScreenSessionManagerClient::OnSetSurfaceNodeIdsChanged(DisplayId displayId,
+    const std::vector<uint64_t>& surfaceNodeIds)
+{
+    if (displayChangeListener_) {
+        displayChangeListener_->OnSetSurfaceNodeIds(displayId, surfaceNodeIds);
+    }
+}
+
+void ScreenSessionManagerClient::OnVirtualScreenDisconnected(DisplayId displayId)
+{
+    if (displayChangeListener_) {
+        displayChangeListener_->OnVirtualScreenDisconnected(displayId);
+    }
+}
+
 void ScreenSessionManagerClient::OnScreenshot(DisplayId displayId)
 {
     if (displayChangeListener_) {
@@ -382,6 +397,7 @@ void ScreenSessionManagerClient::UpdateScreenRotationProperty(ScreenId screenId,
     screenSession->UpdateToInputManager(bounds, directionInfo.notifyRotation_, directionInfo.rotation_,
         foldDisplayMode);
     screenSession->UpdateTouchBoundsAndOffset();
+    TLOGW(WmsLogTag::DMS, "superFoldStatus:%{public}d", currentstate_);
     if (currentstate_ != SuperFoldStatus::KEYBOARD) {
         screenSession->SetValidHeight(bounds.rect_.GetHeight());
         screenSession->SetValidWidth(bounds.rect_.GetWidth());

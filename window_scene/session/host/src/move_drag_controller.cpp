@@ -413,7 +413,6 @@ bool MoveDragController::ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEven
             moveDragEndDisplayId_ = static_cast<uint64_t>(pointerEvent->GetTargetDisplayId());
             UpdateHotAreaType(pointerEvent);
             ProcessWindowDragHotAreaFunc(windowDragHotAreaType_ != WINDOW_HOT_AREA_TYPE_UNDEFINED, reason);
-            isMoveDragHotAreaCrossDisplay_ = windowDragHotAreaType_ != WINDOW_HOT_AREA_TYPE_UNDEFINED;
             // The Pointer up event sent to the ArkUI.
             ret = false;
             break;
@@ -1025,8 +1024,8 @@ bool MoveDragController::EventDownInit(const std::shared_ptr<MMI::PointerEvent>&
     int outside = (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) ? HOTZONE_POINTER * vpr_ : HOTZONE_TOUCH * vpr_;
     type_ = SessionHelper::GetAreaType(pointerItem.GetWindowX(), pointerItem.GetWindowY(), sourceType, outside, vpr_,
         moveDragProperty_.originalRect_);
-    dragAreaType_ = SessionHelper::GetDragAreaType(pointerItem.GetWindowX(), pointerItem.GetWindowY(), outside,
-        moveDragProperty_.originalRect_);
+    dragAreaType_ = SessionHelper::GetAreaTypeForScaleResize(pointerItem.GetWindowX(), pointerItem.GetWindowY(),
+        outside, moveDragProperty_.originalRect_);
     TLOGI(WmsLogTag::WMS_LAYOUT, "pointWinX:%{public}d, pointWinY:%{public}d, outside:%{public}d, vpr:%{public}f, "
         "rect:%{public}s, type:%{public}d", pointerItem.GetWindowX(), pointerItem.GetWindowY(), outside, vpr_,
         moveDragProperty_.originalRect_.ToString().c_str(), type_);
@@ -1436,7 +1435,6 @@ WSError MoveDragController::UpdateMoveTempProperty(const std::shared_ptr<MMI::Po
             }
             moveTempProperty_.lastMovePointerPosX_ = pointerDisplayX;
             moveTempProperty_.lastMovePointerPosY_ = pointerDisplayY;
-            lastMovePointerPosX_ = pointerDisplayX;
             break;
         case MMI::PointerEvent::POINTER_ACTION_UP:
         case MMI::PointerEvent::POINTER_ACTION_BUTTON_UP:
@@ -1654,25 +1652,5 @@ void MoveDragController::ResSchedReportData(int32_t type, bool onOffTag)
     }
     WLOGFD("ResSchedReportData success type: %{public}d onOffTag: %{public}d", type, onOffTag);
 #endif
-}
-
-int32_t MoveDragController::GetLastMovePointerPosX() const
-{
-    return lastMovePointerPosX_;
-}
-
-void MoveDragController::SetLastMovePointerPosX(int32_t lastMovePointerPosX)
-{
-    lastMovePointerPosX_ = lastMovePointerPosX;
-}
-
-bool MoveDragController::IsMoveDragHotAreaCrossDisplay() const
-{
-    return isMoveDragHotAreaCrossDisplay_;
-}
-
-void MoveDragController::SetMoveDragHotAreaCrossDisplay(bool isMoveDragHotAreaCrossDisplay)
-{
-    isMoveDragHotAreaCrossDisplay_ = isMoveDragHotAreaCrossDisplay;
 }
 }  // namespace OHOS::Rosen
