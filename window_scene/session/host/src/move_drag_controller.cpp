@@ -1075,7 +1075,6 @@ WSRect MoveDragController::CalcFreeformTargetRect(AreaType type, int32_t tranX, 
     if (isAdaptToDragScale_) {
         return targetRect;
     }
-    
     float curRatio = static_cast<float>(targetRect.width_) / static_cast<float>(targetRect.height_);
     if (!MathHelper::GreatNotEqual(limits_.minRatio_, curRatio) &&
         !MathHelper::GreatNotEqual(curRatio, limits_.maxRatio_)) {
