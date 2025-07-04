@@ -422,26 +422,26 @@ HWTEST_F(SuperFoldStateManagerTest, GetCurrentStatus_ShouldReturnKeyboard_WhenHa
 }
 
 /**
-* @tc.name  : GetFoldHeight
-* @tc.desc  : GetFoldHeight
+* @tc.name  : GetFoldCreaseHeight
+* @tc.desc  : GetFoldCreaseHeight
 * @tc.type: FUNC
 */
-HWTEST_F(SuperFoldStateManagerTest, GetFoldHeight, TestSize.Level1)
+HWTEST_F(SuperFoldStateManagerTest, GetFoldCreaseHeight, TestSize.Level1)
 {
     SuperFoldStateManager superFoldStateManager = SuperFoldStateManager();
     const uint32_t DEFAULT_FOLD_REGION_HEIGHT = 82;
     superFoldStateManager.currentSuperFoldCreaseRegion_ = nullptr;
-    uint32_t result = superFoldStateManager.GetFoldHeight();
+    uint32_t result = superFoldStateManager.GetFoldCreaseHeight();
     EXPECT_EQ(result, DEFAULT_FOLD_REGION_HEIGHT);
     std::vector<DMRect> rect = {};
     superFoldStateManager.currentSuperFoldCreaseRegion_ = new FoldCreaseRegion(0, rect);
-    result = superFoldStateManager.GetFoldHeight();
+    result = superFoldStateManager.GetFoldCreaseHeight();
     EXPECT_EQ(result, DEFAULT_FOLD_REGION_HEIGHT);
     rect.push_back({0, 0,
         DEFAULT_FOLD_REGION_HEIGHT * 2, DEFAULT_FOLD_REGION_HEIGHT * 2
     });
     superFoldStateManager.currentSuperFoldCreaseRegion_ = new FoldCreaseRegion(0, rect);
-    result = superFoldStateManager.GetFoldHeight();
+    result = superFoldStateManager.GetFoldCreaseHeight();
     EXPECT_EQ(result, DEFAULT_FOLD_REGION_HEIGHT * 2);
 }
  
