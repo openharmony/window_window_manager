@@ -317,6 +317,7 @@ void Session::SetSessionInfo(const SessionInfo& info)
     sessionInfo_.want = info.want;
     sessionInfo_.callerToken_ = info.callerToken_;
     sessionInfo_.requestCode = info.requestCode;
+    sessionInfo_.scenarios = info.scenarios;
     sessionInfo_.callerPersistentId_ = info.callerPersistentId_;
     sessionInfo_.callingTokenId_ = info.callingTokenId_;
     sessionInfo_.uiAbilityId_ = info.uiAbilityId_;

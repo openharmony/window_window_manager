@@ -5339,6 +5339,7 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
     if (info.windowMode == static_cast<int32_t>(WindowMode::WINDOW_MODE_FULLSCREEN)) {
         info.fullScreenStart_ = true;
     }
+    info.scenarios = abilitySessionInfo->scenarios;
     session->CalculatedStartWindowType(info, abilitySessionInfo->hideStartWindow);
     if (abilitySessionInfo->windowCreateParams) {
         if (abilitySessionInfo->windowCreateParams->animationSystemParams &&

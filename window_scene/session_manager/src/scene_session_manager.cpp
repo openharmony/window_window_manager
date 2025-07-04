@@ -2761,6 +2761,7 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
     } else {
         TLOGW(WmsLogTag::WMS_LIFE, "Invalid callState:%{public}d", sessionInfo.callState_);
     }
+    abilitySessionInfo->scenarios = sessionInfo.scenarios;
     return abilitySessionInfo;
 }
 
@@ -2864,6 +2865,11 @@ void SceneSessionManager::RequestInputMethodCloseKeyboard(const int32_t persiste
     }
 }
 
+void SceneSessionManager::ResetSceneMissionInfo(const sptr<AAFwk::SessionInfo>& abilitySessionInfo)
+{
+    abilitySessionInfo->scenarios = 0; // 0 after app started, scenarios reset to initial value
+}
+
 int32_t SceneSessionManager::StartUIAbilityBySCBTimeoutCheck(const sptr<AAFwk::SessionInfo>& abilitySessionInfo,
     const uint32_t& windowStateChangeReason, bool& isColdStart)
 {
@@ -2884,6 +2890,7 @@ int32_t SceneSessionManager::StartUIAbilityBySCBTimeoutCheck(const sptr<AAFwk::S
         TLOGE(WmsLogTag::WMS_LIFE, "start ui ability timeout, currentUserId: %{public}d", currentUserId_.load());
         return static_cast<int32_t>(WSError::WS_ERROR_START_UI_ABILITY_TIMEOUT);
     }
+    ResetSceneMissionInfo(abilitySessionInfo);
     isColdStart = *coldStartFlag;
     return *retCode;
 }
