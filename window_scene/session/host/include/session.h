@@ -723,7 +723,7 @@ public:
     void DeleteHasSnapshot(SnapshotStatus key);
     void DeleteHasSnapshotFreeMultiWindow();
     void SetFreeMultiWindow();
-    bool freeMultiWindow_ = false;
+    std::atomic<bool> freeMultiWindow_ { false };
 
     /*
      * Specific Window
