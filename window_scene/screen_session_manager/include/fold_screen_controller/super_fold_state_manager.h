@@ -118,12 +118,12 @@ private:
     DMError RefreshMirrorRegionInner(sptr<ScreenSession>& mainScreenSession, sptr<ScreenSession>& secondarySession);
     DMError RefreshActiveRegion(DMRect& mirrorRegion, sptr<ScreenSession>& screenSession, uint32_t mainScreenHeight);
     DMError RefreshScreenRelativePosition(sptr<ScreenSession>& mainScreenSession, sptr<ScreenSession>& secondarySession);
-    DMError RefreshScreenRelativePositionInner(const Drawing::Rect& innerScreenRect,
+    void RefreshScreenRelativePositionInner(const Drawing::Rect& innerScreenRect,
         const Drawing::Rect& outerScreenRect, MultiScreenPositionOptions& mainScreenOptions,
         MultiScreenPositionOptions& secondScreenOption);
     ScreenDirectionType GetOuterScreenDirection(const Drawing::Rect& innerScreenRect,
         const Drawing::Rect& outerScreenRect);
-    DMError CalculateScreenRelativePosition(const Drawing::Rect& innerScreenRect, const Drawing::Rect& outerScreenRect,
+    void CalculateScreenRelativePosition(const Drawing::Rect& innerScreenRect, const Drawing::Rect& outerScreenRect,
         const MultiScreenPositionOptions& mainScreenOptions, int32_t& secondStartX, int32_t& secondStartY);
 };
 } // Rosen
