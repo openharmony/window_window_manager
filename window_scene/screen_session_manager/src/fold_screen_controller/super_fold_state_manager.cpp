@@ -511,18 +511,17 @@ DMError SuperFoldStateManager::RefreshMirrorRegionInner(
         TLOGE(WmsLogTag::DMS, "displayNode is null.");
         return DMError::DM_ERROR_NULLPTR;
     }
-    DMRect mirrorRegion;
-    mirrorRegion.posX_ = 0;
-    mirrorRegion.posY_ = 0;
-    mirrorRegion.width_ = mainScreenProperty.GetScreenRealWidth();
-    mirrorRegion.height_ = (mainScreenProperty.GetScreenRealHeight() - GetFoldCreaseHeight()) / HEIGHT_HALF;
-    if (mirrorRegion.width_ == 0 || mirrorRegion.height_ == 0) {
-        TLOGE(WmsLogTag::DMS, "mirrorRegion.width_:%{public}d mirrorRegion.height_:%{public}d",
-            mirrorRegion.width_, mirrorRegion.height_);
-        return DMError::DM_ERROR_INVALID_PARAM;
-    }
-    if (GetCurrentStatus() == SuperFoldStatus::EXPANDED) {
-        mirrorRegion = DMRect::NONE();
+    DMRect mirrorRegion = DMRect::NONE();
+    if (GetCurrentStatus() != SuperFoldStatus::EXPANDED) {
+        mirrorRegion.posX_ = 0;
+        mirrorRegion.posY_ = 0;
+        mirrorRegion.width_ = mainScreenProperty.GetScreenRealWidth();
+        mirrorRegion.height_ = (mainScreenProperty.GetScreenRealHeight() - GetFoldCreaseHeight()) / HEIGHT_HALF;
+        if (mirrorRegion.width_ == 0 || mirrorRegion.height_ == 0) {
+            TLOGE(WmsLogTag::DMS, "mirrorRegion.width_:%{public}d mirrorRegion.height_:%{public}d",
+                mirrorRegion.width_, mirrorRegion.height_);
+            return DMError::DM_ERROR_INVALID_PARAM;
+        }
     }
     secondarySession->SetMirrorScreenRegion(secondarySession->GetScreenId(), mirrorRegion);
     secondarySession->SetIsPhysicalMirrorSwitch(true);
