@@ -587,7 +587,8 @@ WSError SessionProxy::BatchPendingSessionsActivation(const std::vector<sptr<AAFw
     return static_cast<WSError>(ret);
 }
  
-WSError SessionProxy::WriteOneSessionInfo(MessageParcel& data, sptr<AAFwk::SessionInfo> abilitySessionInfo) {
+WSError SessionProxy::WriteOneSessionInfo(MessageParcel& data, sptr<AAFwk::SessionInfo> abilitySessionInfo)
+{
     if (!WriteAbilitySessionInfoBasic(data, abilitySessionInfo)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write abilitySessionInfoBasic failed");
         return WSError::WS_ERROR_IPC_FAILED;
