@@ -434,7 +434,7 @@ DMError SuperFoldStateManager::CalculateScreenRelativePosition(int32_t &mainStar
         secondStartY = mainStartY + p1Height;
     }
     if (!isToExpanded) {
-        p1Height /= 2;  // half height for B screen
+        p1Height /= HEIGHT_HALF;
     }
     int32_t crossoverWidthMin = static_cast<int32_t>(p1Width * CROSSOVER_MAIN);
     int32_t crossoverWidthMax = p1Width - crossoverWidthMin;
