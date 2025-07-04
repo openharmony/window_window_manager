@@ -871,6 +871,7 @@ private:
     void RegisterHookSceneSessionActivationFunc(const sptr<SceneSession>& sceneSession);
     void SetSessionInfoStartWindowType(const sptr<SceneSession>& sceneSession);
     void RegisterSceneSessionDestructNotifyManagerFunc(const sptr<SceneSession>& sceneSession);
+    void ResetSceneMissionInfo(const sptr<AAFwk::SessionInfo>& abilitySessionInfo);
     void UpdateAbilityHookState(sptr<SceneSession>& sceneSession, bool isAbilityHook);
 
     /*

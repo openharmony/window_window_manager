@@ -799,6 +799,10 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
         TLOGE(WmsLogTag::WMS_LIFE, "Read hideStartWindow failed.");
         return ERR_INVALID_DATA;
     }
+    if (!data.ReadInt32(abilitySessionInfo->scenarios)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read scenarios failed.");
+        return ERR_INVALID_DATA;
+    }
     abilitySessionInfo->windowCreateParams.reset(data.ReadParcelable<WindowCreateParams>());
     WSError errCode = PendingSessionActivation(abilitySessionInfo);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
