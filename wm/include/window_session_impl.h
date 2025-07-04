@@ -43,6 +43,7 @@
 #include "wm_common.h"
 #include "wm_common_inner.h"
 #include "floating_ball_template_info.h"
+#include "lifecycle_future_callback.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -85,7 +86,9 @@ public:
      * inherits from window
      */
     WMError Show(uint32_t reason = 0, bool withAnimation = false, bool withFocus = true) override;
+    WMError Show(uint32_t reason, bool withAnimation, bool withFocus, bool waitAttach) override;
     WMError Hide(uint32_t reason = 0, bool withAnimation = false, bool isFromInnerkits = true) override;
+    WMError Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits, bool waitDetach) override;
     WMError Destroy(uint32_t reason = 0) override;
     virtual WMError Destroy(bool needNotifyServer, bool needClearListener = true, uint32_t reason = 0);
     WMError NapiSetUIContent(const std::string& contentInfo, ani_env* env, ani_object storage,
@@ -307,8 +310,10 @@ public:
     SystemSessionConfig GetSystemSessionConfig() const;
     sptr<ISession> GetHostSession() const;
     int32_t GetFloatingWindowParentId();
-    void NotifyAfterForeground(bool needNotifyListeners = true, bool needNotifyUiContent = true);
-    void NotifyAfterBackground(bool needNotifyListeners = true, bool needNotifyUiContent = true);
+    void NotifyAfterForeground(bool needNotifyListeners = true,
+        bool needNotifyUiContent = true, bool waitAttach = false);
+    void NotifyAfterBackground(bool needNotifyListeners = true,
+        bool needNotifyUiContent = true, bool waitDetach = false);
     void NotifyAfterDidForeground(uint32_t reason = static_cast<uint32_t>(WindowStateChangeReason::NORMAL));
     void NotifyAfterDidBackground(uint32_t reason = static_cast<uint32_t>(WindowStateChangeReason::NORMAL));
     void NotifyForegroundFailed(WMError ret);
@@ -727,6 +732,7 @@ protected:
     bool isColdStart_ = true;
     bool isIntentColdStart_ = true;
     std::string navDestinationInfo_;
+    sptr<LifecycleFutureCallback> lifecycleCallback_ = nullptr;
 
     /*
      * Window Layout

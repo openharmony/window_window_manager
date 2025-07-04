@@ -58,6 +58,7 @@
 #include "parameters.h"
 #include "session_helper.h"
 #include "floating_ball_manager.h"
+#include "sys_cap_util.h"
 
 namespace OHOS::Accessibility {
 class AccessibilityEventInfo;
@@ -74,6 +75,7 @@ constexpr int32_t  WINDOW_ROTATION_CHANGE = 20;
 constexpr uint32_t INVALID_TARGET_API_VERSION = 0;
 constexpr uint32_t OPAQUE = 0xFF000000;
 constexpr int32_t WINDOW_CONNECT_TIMEOUT = 3000;
+constexpr int32_t WINDOW_LIFECYCLE_TIMEOUT = 100;
 
 /*
  * DFX
@@ -854,6 +856,11 @@ void WindowSessionImpl::UpdateSubWindowStateAndNotify(int32_t parentPersistentId
 
 WMError WindowSessionImpl::Show(uint32_t reason, bool withAnimation, bool withFocus)
 {
+    return Show(reason, withAnimation, withFocus, false);
+}
+
+WMError WindowSessionImpl::Show(uint32_t reason, bool withAnimation, bool withFocus, bool waitAttach)
+{
     TLOGI(WmsLogTag::WMS_LIFE, "name:%{public}s, id:%{public}d, type:%{public}u, reason:%{public}u, state:%{public}u",
         property_->GetWindowName().c_str(), property_->GetPersistentId(), GetType(), reason, state_);
     if (IsWindowSessionInvalid()) {
@@ -884,6 +891,11 @@ WMError WindowSessionImpl::Show(uint32_t reason, bool withAnimation, bool withFo
 }
 
 WMError WindowSessionImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits)
+{
+    return Hide(reason, withAnimation, isFromInnerkits, false);
+}
+
+WMError WindowSessionImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits, bool waitDetach)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d Hide, reason:%{public}u, state:%{public}u",
         GetPersistentId(), reason, state_);
@@ -4581,7 +4593,7 @@ WMError WindowSessionImpl::SetWindowContainerModalColor(const std::string& activ
     return WMError::WM_OK;
 }
 
-void WindowSessionImpl::NotifyAfterForeground(bool needNotifyListeners, bool needNotifyUiContent)
+void WindowSessionImpl::NotifyAfterForeground(bool needNotifyListeners, bool needNotifyUiContent, bool waitAttach)
 {
     if (needNotifyListeners) {
         NotifyAfterLifecycleForeground();
@@ -4590,6 +4602,20 @@ void WindowSessionImpl::NotifyAfterForeground(bool needNotifyListeners, bool nee
             auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
             CALL_LIFECYCLE_LISTENER(AfterForeground, lifecycleListeners);
         }
+    }
+    if (waitAttach && lifecycleCallback_ &&
+        (WindowHelper::IsSubWindow(GetType()) || WindowHelper::IsSystemWindow(GetType())) &&
+        SysCapUtil::GetBundleName() != AppExecFwk::Constants::SCENE_BOARD_BUNDLE_NAME) {
+        auto startTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count();
+        lifecycleCallback_->GetAttachSyncResult(WINDOW_LIFECYCLE_TIMEOUT);
+        auto endTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count();
+        auto waitTime = endTime - startTime;
+        if (waitTime >= WINDOW_LIFECYCLE_TIMEOUT) {
+            TLOGW(WmsLogTag::WMS_LIFE, "window attach timeout, persistentId:%{public}d", GetPersistentId());
+        }
+        TLOGI(WmsLogTag::WMS_LIFE, "get attach async result, id:%{public}d", GetPersistentId());
     }
     if (needNotifyUiContent) {
         CALL_UI_CONTENT(Foreground);
@@ -4651,7 +4677,7 @@ void WindowSessionImpl::NotifyAfterDidForeground(uint32_t reason)
     }, where, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
-void WindowSessionImpl::NotifyAfterBackground(bool needNotifyListeners, bool needNotifyUiContent)
+void WindowSessionImpl::NotifyAfterBackground(bool needNotifyListeners, bool needNotifyUiContent, bool waitDetach)
 {
     if (needNotifyListeners) {
         {
@@ -4660,6 +4686,20 @@ void WindowSessionImpl::NotifyAfterBackground(bool needNotifyListeners, bool nee
             CALL_LIFECYCLE_LISTENER(AfterBackground, lifecycleListeners);
         }
         NotifyAfterLifecycleBackground();
+    }
+    if (waitDetach && lifecycleCallback_ &&
+        (WindowHelper::IsSubWindow(GetType()) || WindowHelper::IsSystemWindow(GetType())) &&
+        SysCapUtil::GetBundleName() != AppExecFwk::Constants::SCENE_BOARD_BUNDLE_NAME) {
+        auto startTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count();
+        lifecycleCallback_->GetDetachSyncResult(WINDOW_LIFECYCLE_TIMEOUT);
+        auto endTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count();
+        auto waitTime = endTime - startTime;
+        if (waitTime >= WINDOW_LIFECYCLE_TIMEOUT) {
+            TLOGW(WmsLogTag::WMS_LIFE, "window detach timeout, persistentId:%{public}d", GetPersistentId());
+        }
+        TLOGI(WmsLogTag::WMS_LIFE, "get detach async result, id:%{public}d", GetPersistentId());
     }
     if (needNotifyUiContent) {
         CALL_UI_CONTENT(Background);
