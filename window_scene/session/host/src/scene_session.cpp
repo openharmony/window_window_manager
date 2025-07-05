@@ -7810,7 +7810,6 @@ bool SceneSession::NotifyServerToUpdateRect(const SessionUIParam& uiParam, SizeC
     SetSessionGlobalRect(uiParam.rect_);
     if (globalRect != uiParam.rect_) {
         UpdateAllModalUIExtensions(uiParam.rect_);
-
         // Window Layout Global Coordinate System
         auto globalDisplayRect = ComputeGlobalDisplayRect();
         UpdateGlobalDisplayRect(globalDisplayRect, reason);

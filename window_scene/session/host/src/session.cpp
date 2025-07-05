@@ -1185,10 +1185,10 @@ WSError Session::UpdateRectWithLayoutInfo(const WSRect& rect, SizeChangeReason r
             GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
+    GetLayoutController()->SetSessionRect(rect);
     if (!Session::IsBackgroundUpdateRectNotifyEnabled() && !IsSessionForeground()) {
         return WSError::WS_DO_NOTHING;
     }
-    GetLayoutController()->SetSessionRect(rect);
     if (sessionStage_ != nullptr) {
         int32_t rotateAnimationDuration = GetRotateAnimationDuration();
         SceneAnimationConfig config { .rsTransaction_ = rsTransaction, .animationDuration_ = rotateAnimationDuration };

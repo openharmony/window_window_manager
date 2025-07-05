@@ -73,6 +73,7 @@ private:
     float aspectRatio_ = 0.0f;
     sptr<WindowSessionProperty> sessionProperty_;
     GetSystemConfigFunc getSystemConfigFunc_;
+
     void AdjustRectByLimits(WindowLimits limits, float ratio, bool isDecor, float vpr, WSRect& rect);
 };
 } // namespace OHOS::Rosen

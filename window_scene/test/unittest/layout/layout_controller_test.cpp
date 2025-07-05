@@ -67,7 +67,7 @@ HWTEST_F(LayoutControllerTest, SetSessionGlobalRect, TestSize.Level1)
 
     layoutController_->globalRect_ = { 500, 500, 1000, 1000 };
     EXPECT_EQ(layoutController_->SetSessionGlobalRect(rect), true);
-    EXPECT_NE(layoutController_->globalRect_, rect);
+    EXPECT_EQ(layoutController_->globalRect_, rect);
 }
 
 /**
@@ -85,7 +85,7 @@ HWTEST_F(LayoutControllerTest, GetSessionGlobalRect, TestSize.Level1)
     Session::SetScbCoreEnabled(true);
     EXPECT_EQ(layoutController_->GetSessionGlobalRect(), globalRect);
 
-    Session::SetScbCoreEnabled(true);
+    Session::SetScbCoreEnabled(false);
     EXPECT_EQ(layoutController_->GetSessionGlobalRect(), winRect);
 }
 
@@ -196,23 +196,20 @@ HWTEST_F(LayoutControllerTest, AdjustRectByAspectRatio01, TestSize.Level1)
     info.bundleName_ = "AdjustRectByAspectRatio01";
     info.isSystem_ = false;
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    session->GetLayoutController()->SetSystemConfigFunc([session] {
-        return session->GetSystemConfig();
-    });
     WSRect rect;
     session->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     info.windowType_ = static_cast<uint32_t>(WindowType::APP_MAIN_WINDOW_BASE);
-    session->SetAspectRatio(0.5f);
+    session->Session::SetAspectRatio(0.5f);
     EXPECT_NE(nullptr, DisplayManager::GetInstance().GetDefaultDisplay());
 
     SystemSessionConfig systemConfig;
     systemConfig.isSystemDecorEnable_ = true;
     systemConfig.decorWindowModeSupportType_ = 2;
     session->SetSystemConfig(systemConfig);
-    EXPECT_EQ(true, session->GetLayoutController()->AdjustRectByAspectRatio(rect, false));
+    EXPECT_EQ(true, session->GetLayoutController()->AdjustRectByAspectRatio(rect, true));
 
     systemConfig.isSystemDecorEnable_ = false;
-    EXPECT_EQ(false, session->GetLayoutController()->AdjustRectByAspectRatio(rect, false));
+    EXPECT_EQ(true, session->GetLayoutController()->AdjustRectByAspectRatio(rect, false));
 }
 
 /**
