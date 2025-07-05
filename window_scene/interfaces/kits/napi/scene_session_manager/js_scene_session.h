@@ -106,6 +106,7 @@ enum class ListenerFuncType : uint32_t {
     SET_SUB_WINDOW_SOURCE_CB,
     ANIMATE_TO_CB,
     PENDING_SESSION_TO_BACKGROUND_CB,
+    BATCH_PENDING_SCENE_ACTIVE_CB,
     FLOATING_BALL_UPDATE_CB,
     FLOATING_BALL_STOP_CB,
     FLOATING_BALL_RESTORE_MAIN_WINDOW_CB,
@@ -127,6 +128,7 @@ private:
      * Window Lifecycle
      */
     void ProcessPendingSceneSessionActivationRegister();
+    void ProcessBatchPendingSceneSessionsActivationRegister();
     void ProcessSessionStateChangeRegister();
     void ProcessUpdateTransitionAnimationRegister();
     void ProcessSessionEventRegister();
@@ -143,6 +145,8 @@ private:
     sptr<SceneSession> GenSceneSession(SessionInfo& info);
     void PendingSessionActivation(SessionInfo& info);
     void PendingSessionActivationInner(std::shared_ptr<SessionInfo> sessionInfo);
+    void BatchPendingSessionsActivation(const std::vector<std::shared_ptr<SessionInfo>>& sessionInfos);
+    void BatchPendingSessionsActivationInner(const std::vector<std::shared_ptr<SessionInfo>>& sessionInfos);
     void OnSessionStateChange(const SessionState& state);
     void OnUpdateTransitionAnimation(const WindowTransitionType& type, const TransitionAnimation& animation);
     void OnSessionEvent(uint32_t eventId, const SessionEventParam& param);
@@ -243,6 +247,8 @@ private:
     static napi_value SetSidebarBlurMaximize(napi_env env, napi_callback_info info);
     static napi_value RequestSpecificSessionClose(napi_env env, napi_callback_info info);
     static napi_value SendFbActionEvent(napi_env env, napi_callback_info info);
+    static napi_value CreateSessionInfosNapiValue(
+        napi_env env, const std::vector<std::shared_ptr<SessionInfo>>& sessionInfos);
 
     /*
      * PC Window

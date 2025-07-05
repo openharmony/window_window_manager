@@ -59,6 +59,7 @@ using NotifyStopFloatingBallFunc = std::function<void()>;
 using NotifyRestoreFloatingBallMainWindowFunc = std::function<void(const std::shared_ptr<AAFwk::Want>& want)>;
 using NotifySessionDisplayIdChangeFunc = std::function<void(uint64_t displayId)>;
 using NotifyPendingSessionActivationFunc = std::function<void(SessionInfo& info)>;
+using NotifyBatchPendingSessionsActivationFunc = std::function<void(std::vector<std::shared_ptr<SessionInfo>>& info)>;
 using NotifyChangeSessionVisibilityWithStatusBarFunc = std::function<void(const SessionInfo& info, bool visible)>;
 using NotifySessionStateChangeFunc = std::function<void(const SessionState& state)>;
 using NotifyBufferAvailableChangeFunc = std::function<void(const bool isAvailable, bool startWindowInvisible)>;
@@ -187,6 +188,7 @@ public:
     bool RegisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
     bool UnregisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
     void SetPendingSessionActivationEventListener(NotifyPendingSessionActivationFunc&& func);
+    void SetBatchPendingSessionsActivationEventListener(NotifyBatchPendingSessionsActivationFunc&& func);
     void SetTerminateSessionListener(NotifyTerminateSessionFunc&& func);
     void SetTerminateSessionListenerNew(NotifyTerminateSessionFuncNew&& func);
     void SetSessionExceptionListener(NotifySessionExceptionFunc&& func, bool fromJsScene);
@@ -845,6 +847,7 @@ protected:
      * Window LifeCycle
      */
     NotifyPendingSessionActivationFunc pendingSessionActivationFunc_;
+    NotifyBatchPendingSessionsActivationFunc batchPendingSessionsActivationFunc_;
     NotifyPendingSessionToForegroundFunc pendingSessionToForegroundFunc_;
     NotifyPendingSessionToBackgroundFunc pendingSessionToBackgroundFunc_;
     NotifyPendingSessionToBackgroundForDelegatorFunc pendingSessionToBackgroundForDelegatorFunc_;

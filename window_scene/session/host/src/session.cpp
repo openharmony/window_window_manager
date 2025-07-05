@@ -1783,6 +1783,19 @@ void Session::SetPendingSessionActivationEventListener(NotifyPendingSessionActiv
     }, where);
 }
 
+void Session::SetBatchPendingSessionsActivationEventListener(NotifyBatchPendingSessionsActivationFunc&& func)
+{
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), func = std::move(func), where] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is nullptr", where);
+            return;
+        }
+        session->batchPendingSessionsActivationFunc_ = std::move(func);
+    }, where);
+}
+
 void Session::SetBackPressedListenser(NotifyBackPressedFunc&& func)
 {
     const char* const where = __func__;
