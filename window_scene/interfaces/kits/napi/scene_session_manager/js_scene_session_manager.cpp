@@ -4712,14 +4712,21 @@ napi_value JsSceneSessionManager::OnSetStatusBarAvoidHeight(napi_env env, napi_c
             "Device is not supported"));
         return NapiGetUndefined(env);
     }
+    int64_t displayId = -1;
+    if (!ConvertFromJsValue(env, argv[0], displayId) || displayId < 0) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to displayId");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
     int32_t height = 0;
-    if (!ConvertFromJsValue(env, argv[0], height)) {
+    if (!ConvertFromJsValue(env, argv[1], height)) {
         TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to height");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    SceneSessionManager::GetInstance().SetStatusBarAvoidHeight(height);
+    SceneSessionManager::GetInstance().SetStatusBarAvoidHeight(static_cast<uint64_t>(displayId), height);
     return NapiGetUndefined(env);
 }
 

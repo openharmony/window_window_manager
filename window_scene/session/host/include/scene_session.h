@@ -118,7 +118,7 @@ using UpdateAppUseControlFunc = std::function<void(ControlAppType type, bool isN
 using NotifyAvoidAreaChangeCallback = std::function<void(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)>;
 using NotifySetSupportedWindowModesFunc = std::function<void(
     std::vector<AppExecFwk::SupportWindowMode>&& supportedWindowModes)>;
-using GetStatusBarAvoidHeightFunc = std::function<void(WSRect& barArea)>;
+using GetStatusBarAvoidHeightFunc = std::function<void(DisplayId displayId, WSRect& barArea)>;
 using GetStatusBarConstantlyShowFunc = std::function<void(DisplayId dispalyId, bool& isVisible)>;
 using NotifySetWindowCornerRadiusFunc = std::function<void(float cornerRadius)>;
 using GetKeyboardOccupiedAreaWithRotationCallback =

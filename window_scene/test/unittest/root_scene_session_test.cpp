@@ -219,7 +219,7 @@ HWTEST_F(RootSceneSessionTest, GetSystemAvoidAreaForRoot_01, TestSize.Level1)
     };
     ssm_->rootSceneSession_ = sptr<RootSceneSession>::MakeSptr(specificCb);
     ssm_->rootSceneSession_->winRect_ = { 0, 0, 1260, 2720 };
-    ssm_->rootSceneSession_->onGetStatusBarAvoidHeightFunc_ = [](WSRect& barArea) {};
+    ssm_->rootSceneSession_->onGetStatusBarAvoidHeightFunc_ = [](DisplayId displayId, WSRect& barArea) {};
     SessionInfo statusBarSessionInfo;
     statusBarSessionInfo.abilityName_ = "statusBar";
     statusBarSessionInfo.bundleName_ = "statusBar";
@@ -386,7 +386,8 @@ HWTEST_F(RootSceneSessionTest, GetStatusBarHeight, TestSize.Level1)
     ssm_->sceneSessionMap_.insert({ statusBarSession->GetPersistentId(), statusBarSession });
     height = ssm_->rootSceneSession_->GetStatusBarHeight();
     EXPECT_EQ(123, height);
-    ssm_->rootSceneSession_->onGetStatusBarAvoidHeightFunc_ = [](WSRect& barArea) { barArea.height_ = 100; };
+    ssm_->rootSceneSession_->onGetStatusBarAvoidHeightFunc_ = [](DisplayId displayId, WSRect& barArea)
+        { barArea.height_ = 100; };
     height = ssm_->rootSceneSession_->GetStatusBarHeight();
     EXPECT_EQ(100, height);
 }
