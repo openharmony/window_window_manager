@@ -1176,10 +1176,18 @@ HWTEST_F(SceneSessionManagerTest11, RemoveLifeCycleTaskByPersistentId, TestSize.
 HWTEST_F(SceneSessionManagerTest11, SetStatusBarAvoidHeight, TestSize.Level1)
 {
     int32_t height = 10;
-    ssm_->SetStatusBarAvoidHeight(height);
-    WSRect barArea;
-    ssm_->GetStatusBarAvoidHeight(barArea);
-    ASSERT_EQ(barArea.height_, height);
+    int32_t height2 = -1;
+    ssm_->SetStatusBarAvoidHeight(0, height);
+    ssm_->SetStatusBarAvoidHeight(1, height);
+    WSRect barArea = { 0, 0, 100, 100 };
+    WSRect barArea2 = { 0, 0, 100, 100 };
+    WSRect barArea3 = { 0, 0, 100, 100 };
+    ssm_->GetStatusBarAvoidHeight(0, barArea);
+    EXPECT_EQ(barArea.height_, height);
+    ssm_->GetStatusBarAvoidHeight(1, barArea2);
+    EXPECT_EQ(barArea2.height_, 100);
+    ssm_->GetStatusBarAvoidHeight(2, barArea3);
+    EXPECT_EQ(barArea3.height_, 100);
 }
 
 /**
