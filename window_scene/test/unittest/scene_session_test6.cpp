@@ -601,7 +601,7 @@ HWTEST_F(SceneSessionTest6, GetSystemAvoidArea, Function | SmallTest | Level1)
 
     auto task = [](DisplayId displayId, WSRect& barArea) {
         barArea.height_ = 100;
-    }
+    };
     session->RegisterGetStatusBarAvoidHeightFunc(std::move(task));
     session->GetSystemAvoidArea(rect, avoidArea);
     EXPECT_EQ(0, avoidArea.topRect_.height_);
