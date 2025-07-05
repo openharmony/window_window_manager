@@ -418,7 +418,7 @@ private:
     uint32_t setSameSystembarPropertyCnt_ = 0;
     std::atomic<bool> isDefaultDensityEnabled_ = false;
     std::atomic<uint32_t> getAvoidAreaCnt_ = 0;
-    bool enableImmersiveMode_ = false;
+    std::atomic<bool> enableImmersiveMode_ = false;
     bool titleHoverShowEnabled_ = true;
     bool dockHoverShowEnabled_ = true;
     void PreLayoutOnShow(WindowType type, const sptr<DisplayInfo>& info = nullptr);
