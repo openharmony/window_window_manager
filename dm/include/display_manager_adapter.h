@@ -100,7 +100,7 @@ public:
     virtual void SetFoldStatusLocked(bool locked);
     virtual DMError SetFoldStatusLockedFromJs(bool locked);
     virtual sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
-    virtual sptr<FoldCreaseRegion> GetLiveCreaseRegion();
+    virtual sptr<FoldCreaseRegion> GetLiveCreaseRegion(DmErrorCode* errorCode = nullptr);
     virtual void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
         std::vector<uint64_t> surfaceIdList = {}, std::vector<uint8_t> typeBlackList = {});
     virtual void SetVirtualDisplayMuteFlag(ScreenId screenId, bool muteFlag);

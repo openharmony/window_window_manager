@@ -280,6 +280,22 @@ HWTEST_F(DisplayTest, GetDisplayInfoWithCache01, TestSize.Level1)
     auto changedInfo = defaultDisplay_->GetDisplayInfoWithCache();
     EXPECT_EQ(changedInfo->GetName(), defaultName);
 }
+
+/**
+ * @tc.name: GetLiveCreaseRegion
+ * @tc.desc: test GetLiveCreaseRegion
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayTest, GetLiveCreaseRegion, TestSize.Level1)
+{
+    DmErrorCode errCode = DmErrorCode::DM_OK;
+    defaultDisplay_->GetLiveCreaseRegion(&errCode);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(errCode, DMError::DM_OK);
+    } else {
+        ASSERT_NE(errCode, DMError::DM_OK);
+    }
+}
 }
 } // namespace Rosen
 } // namespace OHOS

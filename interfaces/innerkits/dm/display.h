@@ -182,7 +182,7 @@ public:
      *
      * @return { FoldCreaseRegion } fold crease region in the current display mode.
      */
-    sptr<FoldCreaseRegion> GetLiveCreaseRegion() const;
+    sptr<FoldCreaseRegion> GetLiveCreaseRegion(DmErrorCode* errorCode) const;
 
 protected:
     // No more methods or variables can be defined here.

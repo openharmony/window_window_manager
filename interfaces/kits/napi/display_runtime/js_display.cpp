@@ -576,7 +576,12 @@ napi_value JsDisplay::OnGetLiveCreaseRegion(napi_env env, napi_callback_info inf
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
-    
+    DmErrorCode errorCode = DmErrorCode::DM_OK;
+    sptr<FoldCreaseRegion> region = display_->GetLiveCreaseRegion(&errorCode);
+    if (errorCode != DmErrorCode::DM_OK) {
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(errorCode)));
+        return NapiGetUndefined(env);
+    }
     sptr<FoldCreaseRegion> region = display_->GetLiveCreaseRegion();
     return CreateJsFoldCreaseRegionObject(env, region);
 }
