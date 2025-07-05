@@ -239,7 +239,7 @@ sptr<FoldCreaseRegion> SingleDisplayFoldPolicy::GetLiveCreaseRegion()
                 break;
             }
             default: {
-                TLOGI(WmsLogTag::DMS, "displayOrientation is invalid");
+                TLOGE(WmsLogTag::DMS, "displayOrientation is invalid");
             }
         }
     }
