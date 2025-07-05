@@ -2623,6 +2623,7 @@ WMError WindowSessionImpl::SetResizeByDragEnabled(bool dragEnabled)
     if (WindowHelper::IsMainWindow(GetType()) ||
         (WindowHelper::IsSubWindow(GetType()) && windowOption_->GetSubWindowDecorEnable())) {
         property_->SetDragEnabled(dragEnabled);
+        hasSetEnableDrag_.store(true);
     } else {
         TLOGE(WmsLogTag::WMS_LAYOUT, "This is not main window or decor enabled sub window.");
         return WMError::WM_ERROR_INVALID_TYPE;
@@ -7312,6 +7313,7 @@ WSError WindowSessionImpl::SetEnableDragBySystem(bool enableDrag)
 {
     TLOGE(WmsLogTag::WMS_LAYOUT, "enableDrag: %{public}d", enableDrag);
     property_->SetDragEnabled(enableDrag);
+    hasSetEnableDrag_.store(true);
     return WSError::WS_OK;
 }
 
