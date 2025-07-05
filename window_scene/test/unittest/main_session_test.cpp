@@ -126,10 +126,11 @@ HWTEST_F(MainSessionTest, MainSession02, TestSize.Level1)
     info.moduleName_ = "test";
     info.bundleName_ = "test";
     pMainSession = sptr<MainSession>::MakeSptr(info, pSpecificCallback);
-    EXPECT_NE(nullptr, pMainSession);
+    ASSERT_NE(nullptr, pMainSession);
 
+    ASSERT_NE(nullptr, pMainSession->scenePersistence_);
     auto hasSnapshot = pMainSession->scenePersistence_->HasSnapshot();
-    ASSERT_EQ(hasSnapshot, false);
+    EXPECT_EQ(hasSnapshot, false);
 }
 
 /**
