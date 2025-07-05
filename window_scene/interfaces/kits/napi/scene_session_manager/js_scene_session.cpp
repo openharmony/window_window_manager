@@ -4630,6 +4630,10 @@ void JsSceneSession::BatchPendingSessionsActivation(const std::vector<std::share
 {
     std::vector<sptr<SceneSession>> sceneSessions;
     for (auto& info : sessionInfos) {
+        if (info == nullptr) {
+            TLOGE(WmsLogTag::WMS_LIFE, "sessioninfo is null");
+            return;
+        }
         TLOGI(WmsLogTag::WMS_LIFE, "bundleName %{public}s, moduleName %{public}s, abilityName %{public}s, "
             "appIndex %{public}d, reuse %{public}d, requestId %{public}d, specifiedFlag %{public}s",
             info->bundleName_.c_str(), info->moduleName_.c_str(),
@@ -4639,14 +4643,12 @@ void JsSceneSession::BatchPendingSessionsActivation(const std::vector<std::share
             TLOGE(WmsLogTag::WMS_LIFE, "GenSceneSession failed");
             return;
         }
- 
         if (info->want != nullptr) {
             auto focusedOnShow = info->want->GetBoolParam(AAFwk::Want::PARAM_RESV_WINDOW_FOCUSED, true);
             sceneSession->SetFocusedOnShow(focusedOnShow);
         } else {
             sceneSession->SetFocusedOnShow(true);
         }
- 
         auto callerSession = SceneSessionManager::GetInstance().GetSceneSession(info->callerPersistentId_);
         if (callerSession != nullptr) {
             info->isCalledRightlyByCallerId_ = (info->callerToken_ == callerSession->GetAbilityToken()) &&
