@@ -169,7 +169,7 @@ public:
     void SetLandscapeLockStatus(bool isLocked) override;
     ExtendScreenConnectStatus GetExtendScreenConnectStatus() override;
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() override;
-    sptr<FoldCreaseRegion> GetLiveCreaseRegion() override;
+    sptr<FoldCreaseRegion> GetLiveCreaseRegion(DmErrorCode* errorCode) override;
     void SetForceCloseHdr(ScreenId screenId, bool isForceCloseHdr) override;
 
     void SetCameraStatus(int32_t cameraStatus, int32_t cameraPosition) override;

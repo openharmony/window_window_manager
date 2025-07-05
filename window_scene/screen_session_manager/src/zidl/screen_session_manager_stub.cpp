@@ -854,7 +854,10 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             break;
         }
         case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_GET_LIVE_CREASE_REGION: {
-            reply.WriteStrongParcelable(GetLiveCreaseRegion());
+            DmErrorCode errCode = DmErrorCode::DM_OK;
+            sptr<FoldCreaseRegion> foldCreaseRegion = GetLiveCreaseRegion(&errCode);
+            reply.WriteInt32(static_cast<int32_t>(errCode));
+            reply.WriteStrongParcelable(foldCreaseRegion);
             break;
         }
         case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_MAKE_UNIQUE_SCREEN: {

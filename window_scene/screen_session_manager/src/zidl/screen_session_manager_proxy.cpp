@@ -2857,9 +2857,10 @@ sptr<FoldCreaseRegion> ScreenSessionManagerProxy::GetCurrentFoldCreaseRegion()
     return reply.ReadStrongParcelable<FoldCreaseRegion>();
 }
 
-sptr<FoldCreaseRegion> ScreenSessionManagerProxy::GetLiveCreaseRegion()
+sptr<FoldCreaseRegion> ScreenSessionManagerProxy::GetLiveCreaseRegion(DmErrorCode* errorCode)
 {
     sptr<IRemoteObject> remote = Remote();
+    *errorCode = DmErrorCode::DM_ERROR_SYSTEM_INNORMAL;
     if (remote == nullptr) {
         TLOGW(WmsLogTag::DMS, "remote is null");
         return nullptr;
@@ -2878,6 +2879,7 @@ sptr<FoldCreaseRegion> ScreenSessionManagerProxy::GetLiveCreaseRegion()
         TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return nullptr;
     }
+    *errorCode = static_cast<DmErrorCode>(reply.ReadInt32());
     return reply.ReadStrongParcelable<FoldCreaseRegion>();
 }
 
