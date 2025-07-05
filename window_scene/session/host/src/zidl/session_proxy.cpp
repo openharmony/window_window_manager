@@ -624,6 +624,11 @@ WSError SessionProxy::WriteOneSessionInfo(MessageParcel& data, const sptr<AAFwk:
             return WSError::WS_ERROR_IPC_FAILED;
         }
     }
+    return WriteOneSessionInfoPart(data, abilitySessionInfo);
+}
+
+WSError SessionProxy::WriteOneSessionInfoPart(MessageParcel& data, const sptr<AAFwk::SessionInfo>& abilitySessionInfo)
+{
     if (abilitySessionInfo->startWindowOption) {
         if (!data.WriteBool(true) || !data.WriteParcelable(abilitySessionInfo->startWindowOption.get())) {
             TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "Write startWindowOption failed");
