@@ -7682,13 +7682,13 @@ int32_t SceneSession::GetStatusBarHeight()
         }
         const auto& statusBarVector = session->specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_(
             WindowType::WINDOW_TYPE_STATUS_BAR, session->GetSessionProperty()->GetDisplayId());
+        DisplayId displayId = session->GetSessionProperty()->GetDisplayId();
         for (auto& statusBar : statusBarVector) {
             if (statusBar == nullptr) {
                 continue;
             }
             WSRect statusBarRect = statusBar->GetSessionRect();
             if (session->onGetStatusBarAvoidHeightFunc_) {
-                DisplayId displayId = session->GetSessionProperty()->GetDisplayId();
                 session->onGetStatusBarAvoidHeightFunc_(displayId, statusBarRect);
             }
             height = statusBarRect.height_;
