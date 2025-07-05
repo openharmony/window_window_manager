@@ -5488,9 +5488,9 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
     return WSError::WS_OK;
 }
 
-WSError SceneSession::DoBatchPendingSessionsActivation(std::vector<std::shared_ptr<SessionInfo>>& sessionInfos,
-    const std::vector<sptr<AAFwk::SessionInfo>>& abilitySessionInfos, sptr<SceneSession>& session,
-    bool isFoundationCall)
+WSError SceneSession::DoBatchPendingSessionsActivation(
+    const std::vector<sptr<AAFwk::SessionInfo>>& abilitySessionInfos,
+    sptr<SceneSession>& session, bool isFoundationCall)
 {
     std::vector<std::shared_ptr<SessionInfo>> sessionInfos;
     for (auto& abilitySessionInfo : abilitySessionInfos) {
@@ -5555,12 +5555,7 @@ WSError SceneSession::BatchPendingSessionsActivation(const std::vector<sptr<AAFw
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s not support hook", where);
             WSError::WS_ERROR_INVALID_PARAM;
         }
-        WSError ret = session->DoBatchPendingSessionsActivation(sessionInfos,
-            abilitySessionInfos, session, isFoundationCall);
-        if (ret != WSError::WS_OK) {
-            return ret;
-        }
-        return WSError::WS_OK;
+        return session->DoBatchPendingSessionsActivation(abilitySessionInfos, session, isFoundationCall);
     }, __func__);
     return WSError::WS_OK;
 }
