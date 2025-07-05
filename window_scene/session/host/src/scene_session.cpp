@@ -1525,9 +1525,9 @@ WSError SceneSession::NotifyClientToUpdateRectTask(const std::string& updateReas
     } else {
         TLOGD(WmsLogTag::WMS_IMMS, "win [%{public}d] avoid area update rejected by recent", GetPersistentId());
     }
-    if (winRect_.IsInvalid()) {
+    if (winRect.IsInvalid()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "id:%{public}d rect:%{public}s is invalid",
-            GetPersistentId(), winRect_.ToString().c_str());
+            GetPersistentId(), winRect.ToString().c_str());
         return WSError::WS_ERROR_INVALID_WINDOW_MODE_OR_SIZE;
     }
     WSError ret = WSError::WS_OK;
@@ -3255,7 +3255,7 @@ void SceneSession::SetTransitionAnimationCallback(UpdateTransitionAnimationFunc&
     }, __func__);
 }
 
-bool SceneSession::IsMovableWindowType()
+bool SceneSession::IsMovableWindowType() const
 {
     auto property = GetSessionProperty();
     if (property == nullptr) {
@@ -3269,7 +3269,7 @@ bool SceneSession::IsMovableWindowType()
         IsFullScreenMovable();
 }
 
-bool SceneSession::IsFullScreenMovable()
+bool SceneSession::IsFullScreenMovable() const
 {
     auto property = GetSessionProperty();
     if (property == nullptr) {
@@ -3280,7 +3280,7 @@ bool SceneSession::IsFullScreenMovable()
         WindowHelper::IsWindowModeSupported(property->GetWindowModeSupportType(), WindowMode::WINDOW_MODE_FLOATING);
 }
 
-bool SceneSession::IsMovable()
+bool SceneSession::IsMovable() const
 {
     if (!moveDragController_) {
         TLOGW(WmsLogTag::WMS_LAYOUT, "moveDragController_ is null, id: %{public}d", GetPersistentId());
@@ -3322,7 +3322,7 @@ bool SceneSession::IsDraggable() const
     bool isPcOrFreeMultiWindowCanDrag = (isFloatingDragAccessible || isDragAccessibleSystemWindow) &&
         (systemConfig_.IsPcWindow() || IsFreeMultiWindowMode() ||
         (GetSessionProperty()->GetIsPcAppInPad() && !isMainWindow));
-    bool isPhoneWindowCanDrag = isFloatingDragAccessible && (isSubWindow && isSystemWindow) &&
+    bool isPhoneWindowCanDrag = isFloatingDragAccessible && (isSystemWindow || isSubWindow) &&
         (systemConfig_.IsPhoneWindow() || (systemConfig_.IsPadWindow() && !IsFreeMultiWindowMode()));
     return isPcOrFreeMultiWindowCanDrag || isPhoneWindowCanDrag;
 }

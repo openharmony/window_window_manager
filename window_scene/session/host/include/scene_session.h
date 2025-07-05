@@ -1105,9 +1105,8 @@ private:
     void NotifyPropertyWhenConnect();
     WSError RaiseAppMainWindowToTop() override;
     void UpdateWinRectForSystemBar(WSRect& rect);
-    bool IsMovableWindowType();
-    bool IsFullScreenMovable();
-    bool IsMovable();
+    bool IsMovableWindowType() const;
+    bool IsFullScreenMovable() const;
     void HandleCastScreenConnection(SessionInfo& info, sptr<SceneSession> session);
     WMError HandleUpdatePropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);

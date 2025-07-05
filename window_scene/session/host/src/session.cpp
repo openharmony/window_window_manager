@@ -1197,9 +1197,6 @@ WSError Session::UpdateRectWithLayoutInfo(const WSRect& rect, SizeChangeReason r
         updateRect = IsNeedConvertToRelativeRect(reason) ?
             GetLayoutController()->ConvertGlobalRectToRelative(updateRect, GetDisplayId()) : updateRect;
         sessionStage_->UpdateRect(updateRect, reason, config, avoidAreas);
-        if (updateReason == "OnBoundsChanged") {
-            dirtyFlags_ &= ~static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
-        }
         SetClientRect(rect);
         RectCheckProcess();
     } else {
