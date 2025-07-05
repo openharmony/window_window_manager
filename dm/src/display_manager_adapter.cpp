@@ -1236,7 +1236,7 @@ sptr<FoldCreaseRegion> DisplayManagerAdapter::GetCurrentFoldCreaseRegion()
     return nullptr;
 }
 
-sptr<FoldCreaseRegion> DisplayManagerAdapter::GetLiveCreaseRegion(DmErrorCode* errorCode = nullptr)
+sptr<FoldCreaseRegion> DisplayManagerAdapter::GetLiveCreaseRegion(DmErrorCode* errorCode)
 {
     INIT_PROXY_CHECK_RETURN(nullptr);
 
