@@ -583,12 +583,7 @@ WSError SessionProxy::BatchPendingSessionsActivation(const std::vector<sptr<AAFw
         TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    int32_t ret = 0;
-    if (!reply.ReadInt32(ret)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    return static_cast<WSError>(ret);
+    return static_cast<WSError>(reply.ReadInt32());
 }
  
 WSError SessionProxy::WriteOneSessionInfo(MessageParcel& data, const sptr<AAFwk::SessionInfo>& abilitySessionInfo)

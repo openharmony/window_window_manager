@@ -31,7 +31,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsRootSceneSession" };
 const std::string PENDING_SCENE_CB = "pendingSceneSessionActivation";
 const std::string BATCH_PENDING_SCENE_ACTIVE_CB = "batchPendingSceneSessionsActivation";
-const std::map<std::string, RootListenerFuncType> ListenerFuncMap {
+const std::unordered_map<std::string, RootListenerFuncType> ListenerFuncMap {
     {PENDING_SCENE_CB,                      RootListenerFuncType::PENDING_SCENE_CB},
     {BATCH_PENDING_SCENE_ACTIVE_CB,         RootListenerFuncType::BATCH_PENDING_SCENE_ACTIVE_CB},
 };
@@ -418,6 +418,10 @@ void JsRootSceneSession::BatchPendingSessionsActivation(const std::vector<std::s
 {
     std::vector<sptr<SceneSession>> sceneSessions;
     for (auto& info : sessionInfos) {
+        if (info == nullptr) {
+            TLOGE(WmsLogTag::WMS_LIFE, "sessionInfo is null");
+            return;
+        }
         TLOGI(WmsLogTag::WMS_LIFE, "bundleName %{public}s, moduleName %{public}s, abilityName %{public}s, "
             "appIndex %{public}d, reuse %{public}d, requestId %{public}d, specifiedFlag %{public}s",
             info->bundleName_.c_str(), info->moduleName_.c_str(),
@@ -456,6 +460,7 @@ void JsRootSceneSession::BatchPendingSessionsActivation(const std::vector<std::s
                 SingletonContainer::Get<DmsReporter>().ReportContinueApp(true, static_cast<int32_t>(WSError::WS_OK));
             }
         } else {
+            TLOGI(WmsLogTag::WMS_LIFE, "session: %{public}d want is empty", sceneSession->GetPersistentId());
             sceneSession->SetFocusedOnShow(true);
         }
  
