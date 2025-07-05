@@ -346,6 +346,7 @@ HWTEST_F(SceneSessionLayoutTest, NotifyClientToUpdateRectTask, TestSize.Level0)
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     session->moveDragController_ = nullptr;
     session->isKeyboardPanelEnabled_ = false;
+    session->SetSessionRect({ 0, 0, 800, 800 });
 
     session->Session::UpdateSizeChangeReason(SizeChangeReason::UNDEFINED);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION,
