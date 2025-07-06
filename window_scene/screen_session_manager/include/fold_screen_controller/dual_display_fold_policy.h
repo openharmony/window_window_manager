@@ -56,8 +56,8 @@ private:
     void SetdisplayModeChangeStatus(bool status, bool isOnBootAnimation = false) override;
     ScreenId GetScreenIdByDisplayMode(FoldDisplayMode displayMode);
     void TriggerSensorInSub(const sptr<ScreenSession>& screenSession);
-    FoldCreaseRegion GetVerticalFoldCreaseRect();
-    FoldCreaseRegion GetHorizontalFoldCreaseRect();
+    FoldCreaseRegion GetFoldCreaseRegion(bool isVertical);
+    void GetFoldCreaseRect(bool isVertical, std::vector<DMRect>& foldCreaseRect, const std::vector<int32_t>& foldRect);
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler_;
 };
 } // namespace OHOS::Rosen

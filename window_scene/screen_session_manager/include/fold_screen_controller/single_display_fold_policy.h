@@ -61,8 +61,8 @@ private:
         ScreenPropertyChangeReason reason);
     void SetdisplayModeChangeStatus(bool status, bool isOnBootAnimation = false) override;
     void ChangeScreenDisplayModeInner(FoldDisplayMode displayMode, DisplayModeChangeReason reason);
-    FoldCreaseRegion GetVerticalFoldCreaseRect();
-    FoldCreaseRegion GetHorizontalFoldCreaseRect();
+    FoldCreaseRegion GetFoldCreaseRegion(bool isVertical);
+    void GetFoldCreaseRect(bool isVertical, std::vector<DMRect>& foldCreaseRect, const std::vector<int32_t>& foldRect);
     std::recursive_mutex& displayInfoMutex_;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler_;
 };
