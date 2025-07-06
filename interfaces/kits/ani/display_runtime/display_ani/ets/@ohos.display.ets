@@ -22,7 +22,7 @@ export default namespace display {
 loadLibrary('displayani_kit.z');
 
 const DISPLAY_ARRAY_LENGTH = 15;  
-const CUTO_ARRAY_LENGTH = 5;  
+const CUTO_ARRAY_LENGTH = 5;
 
 export interface Rect {
     left: number;
@@ -78,7 +78,7 @@ export interface CutoutInfo {
 
 export class CutoutInfoImpl implements CutoutInfo {
     constructor() {
-        this.boundingRects = new Array<Rect>(CUTO_ARRAY_LENGTH);
+        this.boundingRects = new Array<Rect>(5);
         for (let i = 0; i < this.boundingRects.length; i++) {
             this.boundingRects[i] = new RectImpl();
         }
@@ -359,6 +359,7 @@ export function getAllDisplays(callback: AsyncCallback<Array<Display>>): void {
     }
     return;
 }
+
 export function getAllDisplays(): Promise<Array<Display>> {
     return new Promise<Array<Display>>((resolve: (value: Array<Display>) => void, reject: (error: BusinessError) => void ) => {
         taskpool.execute((): Array<Display> => {
@@ -392,9 +393,9 @@ export function getNewDisplay(): DisplayImpl {
 }
 
 export function on<T>(type: string, callback: Callback<T>): void {
-    syncOn(type, callback as object, displayMgrRef);
+    syncOn(type, callback, displayMgrRef);
 }
-
+ 
 export native function syncOn(type: string, callback: object, nativeObj: long): void;
 
 export function off<T>(type: string, callback?: Callback<T>): void {
