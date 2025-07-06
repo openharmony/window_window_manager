@@ -881,22 +881,24 @@ HWTEST_F(WindowSessionTest3, RectCheckProcess01, TestSize.Level1)
     session_->RectCheckProcess();
 
     WSRect rect = { 0, 0, 0, 0 };
-    session_->winRect_ = rect;
+    session_->GetLayoutController()->SetSessionRect(rect);
     session_->RectCheckProcess();
 
-    session_->winRect_.height_ = 200;
+    WSRect curRect = session_->GetSessionRect();
+    session_->GetLayoutController()->SetSessionRect({ curRect.posX_, curRect.posY_, curRect.width_, 200 });
     session_->RectCheckProcess();
 
-    session_->aspectRatio_ = 0.0f;
+    session_->SetAspectRatio(0.0f);
     session_->RectCheckProcess();
 
-    session_->aspectRatio_ = 0.5f;
+    session_->SetAspectRatio(0.5f);
     session_->RectCheckProcess();
 
-    session_->winRect_.width_ = 200;
+    curRect = session_->GetSessionRect();
+    session_->GetLayoutController()->SetSessionRect({ curRect.posX_, curRect.posY_, 200, curRect.height_ });
     session_->RectCheckProcess();
 
-    session_->aspectRatio_ = 1.0f;
+    session_->SetAspectRatio(1.0f);
     session_->RectCheckProcess();
 
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();

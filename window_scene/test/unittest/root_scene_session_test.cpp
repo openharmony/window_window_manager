@@ -165,7 +165,7 @@ HWTEST_F(RootSceneSessionTest, SetRootSessionRect, TestSize.Level1)
     AvoidArea avoidArea;
     WSRect rect;
     rootSceneSession.SetRootSessionRect(rect);
-    ASSERT_EQ(rootSceneSession.winRect_, rect);
+    ASSERT_EQ(rootSceneSession.GetSessionRect(), rect);
 }
 
 /**
@@ -218,7 +218,7 @@ HWTEST_F(RootSceneSessionTest, GetSystemAvoidAreaForRoot_01, TestSize.Level1)
         return ssm_->GetSceneSessionVectorByTypeAndDisplayId(type, displayId);
     };
     ssm_->rootSceneSession_ = sptr<RootSceneSession>::MakeSptr(specificCb);
-    ssm_->rootSceneSession_->winRect_ = { 0, 0, 1260, 2720 };
+    ssm_->rootSceneSession_->GetLayoutController()->SetSessionRect({ 0, 0, 1260, 2720 });
     ssm_->rootSceneSession_->onGetStatusBarAvoidHeightFunc_ = [](DisplayId displayId, WSRect& barArea) {};
     SessionInfo statusBarSessionInfo;
     statusBarSessionInfo.abilityName_ = "statusBar";
@@ -227,16 +227,16 @@ HWTEST_F(RootSceneSessionTest, GetSystemAvoidAreaForRoot_01, TestSize.Level1)
     sptr<SceneSession> statusBarSession = sptr<SceneSession>::MakeSptr(statusBarSessionInfo, nullptr);
     statusBarSession->property_->SetPersistentId(2);
     statusBarSession->property_->type_ = WindowType::WINDOW_TYPE_STATUS_BAR;
-    statusBarSession->winRect_ = { 0, 0, 1260, 123 };
+    statusBarSession->GetLayoutController()->SetSessionRect({ 0, 0, 1260, 123 });
     statusBarSession->isVisible_ = true;
     ssm_->sceneSessionMap_.insert({ statusBarSession->GetPersistentId(), statusBarSession });
     AvoidArea avoidArea;
-    ssm_->rootSceneSession_->GetSystemAvoidAreaForRoot(ssm_->rootSceneSession_->winRect_, avoidArea);
+    ssm_->rootSceneSession_->GetSystemAvoidAreaForRoot(ssm_->rootSceneSession_->GetSessionRect(), avoidArea);
     Rect rect = { 0, 0, 1260, 123 };
     ASSERT_EQ(avoidArea.topRect_, rect);
     statusBarSession->isVisible_ = false;
     avoidArea.topRect_ = { 0, 0, 0, 0 };
-    ssm_->rootSceneSession_->GetSystemAvoidAreaForRoot(ssm_->rootSceneSession_->winRect_, avoidArea);
+    ssm_->rootSceneSession_->GetSystemAvoidAreaForRoot(ssm_->rootSceneSession_->GetSessionRect(), avoidArea);
     EXPECT_TRUE(avoidArea.isEmptyAvoidArea());
 }
 
@@ -253,7 +253,7 @@ HWTEST_F(RootSceneSessionTest, GetKeyboardAvoidAreaForRoot_01, TestSize.Level1)
         return ssm_->GetSceneSessionVectorByType(type);
     };
     ssm_->rootSceneSession_ = sptr<RootSceneSession>::MakeSptr(specificCb);
-    ssm_->rootSceneSession_->winRect_ = { 0, 0, 1260, 2720 };
+    ssm_->rootSceneSession_->GetLayoutController()->SetSessionRect({ 0, 0, 1260, 2720 });
     ssm_->rootSceneSession_->isKeyboardPanelEnabled_ = false;
     SessionInfo keyboardSessionInfo;
     keyboardSessionInfo.abilityName_ = "keyboard";
@@ -264,20 +264,20 @@ HWTEST_F(RootSceneSessionTest, GetKeyboardAvoidAreaForRoot_01, TestSize.Level1)
     keyboardSession->state_ = SessionState::STATE_FOREGROUND;
     keyboardSession->keyboardAvoidAreaActive_ = true;
     keyboardSession->property_->type_ = WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT;
-    keyboardSession->winRect_ = { 0, 1700, 1260, 1020 };
+    keyboardSession->GetLayoutController()->SetSessionRect({ 0, 1700, 1260, 1020 });
     keyboardSession->property_->SetPersistentId(2);
     ssm_->sceneSessionMap_.insert({ keyboardSession->GetPersistentId(), keyboardSession });
     AvoidArea avoidArea;
-    ssm_->rootSceneSession_->GetKeyboardAvoidAreaForRoot(ssm_->rootSceneSession_->winRect_, avoidArea);
+    ssm_->rootSceneSession_->GetKeyboardAvoidAreaForRoot(ssm_->rootSceneSession_->GetSessionRect(), avoidArea);
     Rect rect = { 0, 1700, 1260, 1020 };
     EXPECT_EQ(avoidArea.bottomRect_, rect);
     avoidArea.bottomRect_ = { 0, 0, 0, 0 };
-    ssm_->rootSceneSession_->GetKeyboardAvoidAreaForRoot(ssm_->rootSceneSession_->winRect_, avoidArea);
+    ssm_->rootSceneSession_->GetKeyboardAvoidAreaForRoot(ssm_->rootSceneSession_->GetSessionRect(), avoidArea);
     EXPECT_TRUE(!avoidArea.isEmptyAvoidArea());
     ssm_->rootSceneSession_->isKeyboardPanelEnabled_ = true;
     keyboardSession->state_ = SessionState::STATE_BACKGROUND;
     avoidArea.bottomRect_ = { 0, 0, 0, 0 };
-    ssm_->rootSceneSession_->GetKeyboardAvoidAreaForRoot(ssm_->rootSceneSession_->winRect_, avoidArea);
+    ssm_->rootSceneSession_->GetKeyboardAvoidAreaForRoot(ssm_->rootSceneSession_->GetSessionRect(), avoidArea);
     EXPECT_TRUE(avoidArea.isEmptyAvoidArea());
 }
 
@@ -290,13 +290,13 @@ HWTEST_F(RootSceneSessionTest, GetCutoutAvoidAreaForRoot_01, TestSize.Level1)
 {
     ASSERT_NE(nullptr, ssm_);
     ssm_->rootSceneSession_ = sptr<RootSceneSession>::MakeSptr();
-    ssm_->rootSceneSession_->winRect_ = { 0, 0, 1260, 2720 };
+    ssm_->rootSceneSession_->GetLayoutController()->SetSessionRect({ 0, 0, 1260, 2720 });
     ssm_->rootSceneSession_->property_->displayId_ = -1;
     AvoidArea avoidArea;
-    ssm_->rootSceneSession_->GetCutoutAvoidAreaForRoot(ssm_->rootSceneSession_->winRect_, avoidArea);
+    ssm_->rootSceneSession_->GetCutoutAvoidAreaForRoot(ssm_->rootSceneSession_->GetSessionRect(), avoidArea);
     EXPECT_TRUE(avoidArea.isEmptyAvoidArea());
     ssm_->rootSceneSession_->property_->displayId_ = 0;
-    ssm_->rootSceneSession_->GetCutoutAvoidAreaForRoot(ssm_->rootSceneSession_->winRect_, avoidArea);
+    ssm_->rootSceneSession_->GetCutoutAvoidAreaForRoot(ssm_->rootSceneSession_->GetSessionRect(), avoidArea);
 }
 
 /**
@@ -310,12 +310,12 @@ HWTEST_F(RootSceneSessionTest, GetAINavigationBarAreaForRoot_01, TestSize.Level1
     auto specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     specificCb->onGetAINavigationBarArea_ = [](uint64_t displayId) { return ssm_->GetAINavigationBarArea(displayId); };
     ssm_->rootSceneSession_ = sptr<RootSceneSession>::MakeSptr(specificCb);
-    ssm_->rootSceneSession_->winRect_ = { 0, 0, 1260, 2720 };
+    ssm_->rootSceneSession_->GetLayoutController()->SetSessionRect({ 0, 0, 1260, 2720 });
     AvoidArea avoidArea;
-    ssm_->rootSceneSession_->GetAINavigationBarAreaForRoot(ssm_->rootSceneSession_->winRect_, avoidArea);
+    ssm_->rootSceneSession_->GetAINavigationBarAreaForRoot(ssm_->rootSceneSession_->GetSessionRect(), avoidArea);
     EXPECT_TRUE(avoidArea.isEmptyAvoidArea());
     ssm_->currAINavigationBarAreaMap_[0] = { 409, 2629, 442, 91 };
-    ssm_->rootSceneSession_->GetAINavigationBarAreaForRoot(ssm_->rootSceneSession_->winRect_, avoidArea);
+    ssm_->rootSceneSession_->GetAINavigationBarAreaForRoot(ssm_->rootSceneSession_->GetSessionRect(), avoidArea);
     Rect rect = { 409, 2629, 442, 91 };
     ASSERT_EQ(avoidArea.bottomRect_, rect);
 }
@@ -329,14 +329,14 @@ HWTEST_F(RootSceneSessionTest, SetRootSessionRect_01, TestSize.Level1)
 {
     ASSERT_NE(nullptr, ssm_);
     ssm_->rootSceneSession_ = sptr<RootSceneSession>::MakeSptr();
-    ssm_->rootSceneSession_->winRect_ = { 0, 0, 1260, 2720 };
+    ssm_->rootSceneSession_->GetLayoutController()->SetSessionRect({ 0, 0, 1260, 2720 });
     ssm_->rootSceneSession_->SetRootSessionRect({ 0, 0, 1260, 2720 });
     WSRect rect = { 0, 0, 1260, 2720 };
-    ASSERT_EQ(ssm_->rootSceneSession_->winRect_, rect);
-    ssm_->rootSceneSession_->winRect_ = { 0, 0, 2720, 1260 };
+    ASSERT_EQ(ssm_->rootSceneSession_->GetSessionRect(), rect);
+    ssm_->rootSceneSession_->GetLayoutController()->SetSessionRect({ 0, 0, 2720, 1260 });
     ssm_->rootSceneSession_->SetRootSessionRect({ 0, 0, 1260, 2720 });
     rect = { 0, 0, 1260, 2720 };
-    ASSERT_EQ(ssm_->rootSceneSession_->winRect_, rect);
+    ASSERT_EQ(ssm_->rootSceneSession_->GetSessionRect(), rect);
 }
 
 /**
@@ -372,7 +372,7 @@ HWTEST_F(RootSceneSessionTest, GetStatusBarHeight, TestSize.Level1)
         return ssm_->GetSceneSessionVectorByTypeAndDisplayId(type, displayId);
     };
     ssm_->rootSceneSession_ = sptr<RootSceneSession>::MakeSptr(specificCb);
-    ssm_->rootSceneSession_->winRect_ = { 0, 0, 1260, 2720 };
+    ssm_->rootSceneSession_->GetLayoutController()->SetSessionRect({ 0, 0, 1260, 2720 });
 
     SessionInfo statusBarSessionInfo;
     statusBarSessionInfo.abilityName_ = "statusBar";
@@ -381,7 +381,7 @@ HWTEST_F(RootSceneSessionTest, GetStatusBarHeight, TestSize.Level1)
     sptr<SceneSession> statusBarSession = sptr<SceneSession>::MakeSptr(statusBarSessionInfo, nullptr);
     statusBarSession->property_->SetPersistentId(2);
     statusBarSession->property_->type_ = WindowType::WINDOW_TYPE_STATUS_BAR;
-    statusBarSession->winRect_ = { 0, 0, 1260, 123 };
+    statusBarSession->GetLayoutController()->SetSessionRect({ 0, 0, 1260, 123 });
     statusBarSession->isVisible_ = true;
     ssm_->sceneSessionMap_.insert({ statusBarSession->GetPersistentId(), statusBarSession });
     height = ssm_->rootSceneSession_->GetStatusBarHeight();

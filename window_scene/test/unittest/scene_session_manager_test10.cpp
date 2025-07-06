@@ -1396,7 +1396,7 @@ HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_01, TestSize.Level0)
         };
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCb);
     sceneSession->property_->SetPersistentId(1);
-    sceneSession->winRect_ = { 0, 0, 1260, 2720 };
+    sceneSession->GetLayoutController()->SetSessionRect({ 0, 0, 1260, 2720 });
     ssm_->sceneSessionMap_.insert({ 1, sceneSession });
     std::pair<WSRect, WSRect> nextSystemBarAvoidAreaRectInfo;
     ret = sceneSession->specificCallback_->onGetNextAvoidAreaRectInfo_(
@@ -1432,7 +1432,7 @@ HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_statusBar, TestSize.
     sceneSession->property_->SetPersistentId(1);
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     sceneSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    sceneSession->winRect_ = { 0, 0, 1260, 2720 };
+    sceneSession->GetLayoutController()->SetSessionRect({ 0, 0, 1260, 2720 });
     ssm_->sceneSessionMap_.insert({ 1, sceneSession });
     std::map<WindowType, SystemBarProperty> properties;
     properties[WindowType::WINDOW_TYPE_STATUS_BAR] = SystemBarProperty();
@@ -1474,7 +1474,7 @@ HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_statusBar_01, TestSi
     sceneSession->property_->SetPersistentId(1);
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     sceneSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    sceneSession->winRect_ = { 0, 0, 1260, 2720 };
+    sceneSession->GetLayoutController()->SetSessionRect({ 0, 0, 1260, 2720 });
     ssm_->sceneSessionMap_.insert({ 1, sceneSession });
     std::map<WindowType, SystemBarProperty> properties;
     properties[WindowType::WINDOW_TYPE_STATUS_BAR] = SystemBarProperty();
@@ -1590,7 +1590,7 @@ HWTEST_F(SceneSessionManagerTest10, NotifyNextAvoidRectInfo_AIBar, TestSize.Leve
     sceneSession->property_->SetPersistentId(1);
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     sceneSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    sceneSession->winRect_ = { 0, 0, 1260, 2720 };
+    sceneSession->GetLayoutController()->SetSessionRect({ 0, 0, 1260, 2720 });
     ssm_->sceneSessionMap_.insert({ 1, sceneSession });
     std::map<WindowType, SystemBarProperty> properties;
     properties[WindowType::WINDOW_TYPE_STATUS_BAR] = SystemBarProperty();

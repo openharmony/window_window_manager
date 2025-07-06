@@ -100,6 +100,7 @@ ohos_shared_library("scene_session") {
     "host/src/ability_info_manager.cpp",
     "host/src/extension_session.cpp",
     "host/src/keyboard_session.cpp",
+    "host/src/layout_controller.cpp",
     "host/src/main_session.cpp",
     "host/src/move_drag_controller.cpp",
     "host/src/multi_instance_manager.cpp",

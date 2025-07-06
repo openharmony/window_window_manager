@@ -928,7 +928,7 @@ void KeyboardSession::SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool n
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
         "KeyboardSession::SetSurfaceBounds id:%d [%d, %d, %d, %d] reason:%u",
-        GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_, reason_);
+        GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_, GetSizeChangeReason());
     TLOGD(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, rect: %{public}s isGlobal: %{public}d needFlush: %{public}d",
         GetPersistentId(), rect.ToString().c_str(), isGlobal, needFlush);
     {

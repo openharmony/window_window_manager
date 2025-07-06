@@ -119,7 +119,8 @@ void SubSession::UpdateSessionRectInner(const WSRect& rect, SizeChangeReason rea
         }
         SetSessionRequestRect(newRequestRect);
         SetRequestRectWhenFollowParent(newRequestRect);
-        WSRect globaleRect = ConvertRelativeRectToGlobal(newRequestRect, moveConfiguration.displayId);
+        WSRect globaleRect =
+            layoutController_->ConvertRelativeRectToGlobal(newRequestRect, moveConfiguration.displayId);
         UpdateSizeChangeReason(reason);
         TLOGI(WmsLogTag::WMS_LAYOUT, "need show cross window, id:%{public}d, globalRect:%{public}s",
             GetPersistentId(), globaleRect.ToString().c_str());
@@ -489,9 +490,9 @@ void SubSession::AddSurfaceNodeToScreen(DisplayId draggingOrMovingParentDisplayI
         return;
     }
     DisplayId currDisplayId = GetDisplayId();
-    WSRect targetRect = ConvertRelativeRectToGlobal(winRect_, currDisplayId);
+    WSRect targetRect = GetLayoutController()->ConvertRelativeRectToGlobal(GetSessionRect(), currDisplayId);
     TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, currDisplayId:%{public}" PRIu64 ", winRect:%{public}s",
-        GetPersistentId(), currDisplayId, winRect_.ToString().c_str());
+        GetPersistentId(), currDisplayId, GetSessionRect().ToString().c_str());
     for (const auto displayId : GetNewDisplayIdsDuringMoveTo(targetRect)) {
         if (displayId == currDisplayId && currDisplayId == draggingOrMovingParentDisplayId) {
             continue;
