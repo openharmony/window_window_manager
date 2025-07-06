@@ -41,6 +41,7 @@ private:
     void onUnRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
     DMError UnRegisterScreenListenerWithType(std::string type, ani_env* env, ani_ref callback);
     DMError UnRegisterAllScreenListenerWithType(std::string type);
+    bool IsCallbackRegistered(ani_env* env, const std::string& type, ani_ref callback);
     std::mutex mtx_;
     std::map<std::string, std::map<ani_ref, sptr<ScreenAniListener>>> jsCbMap_;
 };
