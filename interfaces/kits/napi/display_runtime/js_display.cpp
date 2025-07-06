@@ -898,7 +898,7 @@ napi_value CreateJsDisplayObject(napi_env env, sptr<Display>& display)
         BindNativeFunction(env, objValue, "on", "JsDisplay", JsDisplay::RegisterDisplayManagerCallback);
         BindNativeFunction(env, objValue, "off", "JsDisplay", JsDisplay::UnregisterDisplayManagerCallback);
         BindNativeFunction(env, objValue, "getDisplayCapability", "JsDisplay", JsDisplay::GetDisplayCapability);
-        BindNativeFunction(env, objValue, "getLiveCreaseRegion", "JsDisplay", JsDisplay::getLiveCreaseRegion);
+        BindNativeFunction(env, objValue, "getLiveCreaseRegion", "JsDisplay", JsDisplay::GetLiveCreaseRegion);
         std::shared_ptr<NativeReference> jsDisplayRef;
         napi_ref result = nullptr;
         napi_create_reference(env, objValue, 1, &result);

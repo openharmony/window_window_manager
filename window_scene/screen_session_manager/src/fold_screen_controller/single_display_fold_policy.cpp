@@ -72,7 +72,8 @@ SingleDisplayFoldPolicy::SingleDisplayFoldPolicy(std::recursive_mutex& displayIn
 
 FoldCreaseRegion SingleDisplayFoldPolicy::GetFoldCreaseRegion(bool isVertical)
 {
-    std::vector<int32_t> foldRect = FoldScreenStateInternel::StringFoldRectSplitToInt(g_FoldScreenRect, FOLD_CREASE_DELIMITER);
+    std::vector<int32_t> foldRect = FoldScreenStateInternel::StringFoldRectSplitToInt(g_FoldScreenRect,
+        FOLD_CREASE_DELIMITER);
     if (foldRect.size() != FOLD_CREASE_RECT_SIZE) {
         TLOGE(WmsLogTag::DMS, "foldRect is invalid");
         return FoldCreaseRegion(0, {});
@@ -223,12 +224,12 @@ FoldCreaseRegion SingleDisplayFoldPolicy::GetLiveCreaseRegion()
         switch (displayOrientation) {
             case DisplayOrientation::PORTRAIT:
             case DisplayOrientation::PORTRAIT_INVERTED: {
-                liveCreaseRegion_ = GetFoldCreaseRegion(true);;
+                liveCreaseRegion_ = GetFoldCreaseRegion(true);
                 break;
             }
             case DisplayOrientation::LANDSCAPE:
             case DisplayOrientation::LANDSCAPE_INVERTED: {
-                liveCreaseRegion_ = GetFoldCreaseRegion(false);;
+                liveCreaseRegion_ = GetFoldCreaseRegion(false);
                 break;
             }
             default: {
