@@ -200,9 +200,6 @@ public:
 
     static bool IsParamsDigitsOnly(const std::vector<std::string>& params)
     {
-        if (params.empty()) {
-            return false; // the parameter list is empty
-        }
         for (const auto& param : params) {
             if (param.size() == 0) {
                 return false;
