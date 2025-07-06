@@ -60,29 +60,29 @@ ani_status ScreenAniUtils::GetAniString(ani_env* env, const std::string& str, an
 ani_status ScreenAniUtils::CallAniFunctionVoid(ani_env *env, const char* ns,
     const char* fn, const char* signature, ...)
 {
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]CallAniFunctionVoid begin");
+    TLOGI(WmsLogTag::DMS, "[ANI]CallAniFunctionVoid begin");
     ani_status ret = ANI_OK;
     ani_namespace aniNamespace{};
     if ((ret = env->FindNamespace(ns, &aniNamespace)) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI]canot find ns %{public}d", ret);
+        TLOGE(WmsLogTag::DMS, "[ANI]canot find ns %{public}d", ret);
         return ret;
     }
     ani_function func{};
     if ((ret = env->Namespace_FindFunction(aniNamespace, fn, signature, &func)) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI]canot find callBack %{public}d", ret);
+        TLOGE(WmsLogTag::DMS, "[ANI]canot find callBack %{public}d", ret);
         return ret;
     }
     va_list args;
     va_start(args, signature);
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]CallAniFunctionVoid begin %{public}s", signature);
+    TLOGI(WmsLogTag::DMS, "[ANI]CallAniFunctionVoid begin %{public}s", signature);
     if (func == nullptr) {
-        TLOGI(WmsLogTag::DEFAULT, "[ANI] null func ani");
+        TLOGI(WmsLogTag::DMS, "[ANI] null func ani");
         return ret;
     }
     ret = env->Function_Call_Void_V(func, args);
     va_end(args);
     if (ret != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI]canot run callBack %{public}d", ret);
+        TLOGE(WmsLogTag::DMS, "[ANI]canot run callBack %{public}d", ret);
         return ret;
     }
     return ret;

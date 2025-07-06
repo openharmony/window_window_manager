@@ -51,6 +51,7 @@ public:
     void OnAvailableAreaChanged(DMRect area) override;
     ani_status CallAniMethodVoid(ani_object object, const char* cls,
         const char* method, const char* signature, ...);
+    bool IsAniCallBackExist(ani_env* env, const std::string& type, ani_ref callback);
 
 private:
     ani_env* env_;
