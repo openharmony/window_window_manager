@@ -117,18 +117,22 @@ FoldCreaseRegion SecondaryDisplayFoldPolicy::GetStatusFullFoldCreaseRegion(bool 
 void SecondaryDisplayFoldPolicy::GetStatusFullFoldCreaseRect(bool isVertical,
     std::vector<DMRect>& foldCreaseRect, const std::vector<int32_t>& foldRect)
 {
+    int32_t liveCreaseRegionPosX; // live Crease Region PosX
+    int32_t liveCreaseRegionPosY; // live Crease Region PosY
+    uint32_t liveCreaseRegionPosWidth; // live Crease Region PosWidth
+    uint32_t liveCreaseRegionPosHeight; // live Crease Region PosHeight
     if (isVertical) {
         TLOGI(WmsLogTag::DMS, "the current FoldCreaseRect is vertical");
-        int32_t liveCreaseRegionPosX = foldRect[0]; // live Crease Region PosX
-        int32_t liveCreaseRegionPosY = foldRect[1]; // live Crease Region PosY
-        int32_t liveCreaseRegionPosWidth = foldRect[2]; // live Crease Region PosWidth
-        int32_t liveCreaseRegionPosHeight = foldRect[3]; // live Crease Region PosHeight
+        liveCreaseRegionPosX = foldRect[0];
+        liveCreaseRegionPosY = foldRect[1];
+        liveCreaseRegionPosWidth = static_cast<uint32_t>(foldRect[2]);
+        liveCreaseRegionPosHeight = static_cast<uint32_t>(foldRect[3]);
     } else {
         TLOGI(WmsLogTag::DMS, "the current FoldCreaseRect is horizontal");
-        int32_t liveCreaseRegionPosX = foldRect[1]; // live Crease Region PosX
-        int32_t liveCreaseRegionPosY = foldRect[0]; // live Crease Region PosY
-        int32_t liveCreaseRegionPosWidth = foldRect[3]; // live Crease Region PosWidth
-        int32_t liveCreaseRegionPosHeight = foldRect[2]; // live Crease Region PosHeight
+        liveCreaseRegionPosX = foldRect[1];
+        liveCreaseRegionPosY = foldRect[0];
+        liveCreaseRegionPosWidth = foldRect[3];
+        liveCreaseRegionPosHeight = foldRect[2];
     }
     foldCreaseRect = {
         {
@@ -157,26 +161,34 @@ FoldCreaseRegion SecondaryDisplayFoldPolicy::GetStatusGlobalFullFoldCreaseRegion
 void SecondaryDisplayFoldPolicy::GetStatusGlobalFullFoldCreaseRect(bool isVertical,
     std::vector<DMRect>& foldCreaseRect, const std::vector<int32_t>& foldRect)
 {
+    int32_t liveCreaseRegionABPosX; // live Crease Region ABPosX
+    int32_t liveCreaseRegionABPosY; // live Crease Region ABPosY
+    uint32_t liveCreaseRegionABPosWidth; // live Crease Region ABPosWidth
+    uint32_t liveCreaseRegionABPosHeight; // live Crease Region ABPosHeight
+    int32_t liveCreaseRegionBCPosX; // live Crease Region BCPosX
+    int32_t liveCreaseRegionBCPosY; // live Crease Region BCPosY
+    uint32_t liveCreaseRegionBCPosWidth; // live Crease Region BCPosWidth
+    uint32_t liveCreaseRegionBCPosHeight; // live Crease Region BCPosHeight
     if (isVertical) {
         TLOGI(WmsLogTag::DMS, "the current FoldCreaseRect is vertical");
-        int32_t liveCreaseRegionABPosX = foldRect[0]; // live Crease Region ABPosX
-        int32_t liveCreaseRegionABPosY = foldRect[1]; // live Crease Region ABPosY
-        int32_t liveCreaseRegionABPosWidth = foldRect[2]; // live Crease Region ABPosWidth
-        int32_t liveCreaseRegionABPosHeight = foldRect[3]; // live Crease Region ABPosHeight
-        int32_t liveCreaseRegionBCPosX = foldRect[4]; // live Crease Region BCPosX
-        int32_t liveCreaseRegionBCPosY = foldRect[5]; // live Crease Region BCPosY
-        int32_t liveCreaseRegionBCPosWidth = foldRect[6]; // live Crease Region BCPosWidth
-        int32_t liveCreaseRegionBCPosHeight = foldRect[7]; // live Crease Region BCPosHeight
+        liveCreaseRegionABPosX = foldRect[0];
+        liveCreaseRegionABPosY = foldRect[1];
+        liveCreaseRegionABPosWidth = static_cast<uint32_t>(foldRect[2]);
+        liveCreaseRegionABPosHeight = static_cast<uint32_t>(foldRect[3]);
+        liveCreaseRegionBCPosX = foldRect[4];
+        liveCreaseRegionBCPosY = foldRect[5];
+        liveCreaseRegionBCPosWidth = static_cast<uint32_t>(foldRect[6]);
+        liveCreaseRegionBCPosHeight = static_cast<uint32_t>(foldRect[7]);
     } else {
         TLOGI(WmsLogTag::DMS, "the current FoldCreaseRect is horizontal");
-        int32_t liveCreaseRegionABPosX = foldRect[1]; // live Crease Region ABPosX
-        int32_t liveCreaseRegionABPosY = foldRect[0]; // live Crease Region ABPosY
-        int32_t liveCreaseRegionABPosWidth = foldRect[3]; // live Crease Region ABPosWidth
-        int32_t liveCreaseRegionABPosHeight = foldRect[2]; // live Crease Region ABPosHeight
-        int32_t liveCreaseRegionBCPosX = foldRect[5]; // live Crease Region BCPosX
-        int32_t liveCreaseRegionBCPosY = foldRect[4]; // live Crease Region BCPosY
-        int32_t liveCreaseRegionBCPosWidth = foldRect[7]; // live Crease Region BCPosWidth
-        int32_t liveCreaseRegionBCPosHeight = foldRect[6]; // live Crease Region BCPosHeight
+        liveCreaseRegionABPosX = foldRect[1];
+        liveCreaseRegionABPosY = foldRect[0];
+        liveCreaseRegionABPosWidth = static_cast<uint32_t>(foldRect[3]);
+        liveCreaseRegionABPosHeight = static_cast<uint32_t>(foldRect[2]);
+        liveCreaseRegionBCPosX = foldRect[5];
+        liveCreaseRegionBCPosY = foldRect[4];
+        liveCreaseRegionBCPosWidth = static_cast<uint32_t>(foldRect[7]);
+        liveCreaseRegionBCPosHeight = static_cast<uint32_t>(foldRect[6]);
     }
     foldCreaseRect = {
         {

@@ -856,8 +856,8 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         }
         case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_GET_LIVE_CREASE_REGION: {
             FoldCreaseRegion region;
-            static_cast<void>(reply.WriteInt32(static_cast<int32_t>(ret)));
             DMError ret = GetLiveCreaseRegion(region);
+            static_cast<void>(reply.WriteInt32(static_cast<int32_t>(ret)));
             if (ret != DMError::DM_OK) {
                 break;
             }
