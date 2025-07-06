@@ -1525,7 +1525,7 @@ HWTEST_F(SceneSessionTest, CalcRectForStatusBar, TestSize.Level1)
     ASSERT_EQ(statusBarRect.height_, 0);
 
     WSRect rect({0, 0, 1, 1});
-    sceneSession->winRect_ = rect;
+    sceneSession->GetLayoutController()->SetSessionRect(rect);
     sceneSession->specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ =
         [&](WindowType type, uint64_t displayId) -> std::vector<sptr<SceneSession>> {
         std::vector<sptr<SceneSession>> vec;
@@ -1877,7 +1877,7 @@ HWTEST_F(SceneSessionTest, GetStatusBarHeight, TestSize.Level1)
     height = sceneSession->GetStatusBarHeight();
     ASSERT_EQ(height, 0);
     WSRect rect({ 0, 0, 0, 1 });
-    sceneSession->winRect_ = rect;
+    sceneSession->GetLayoutController()->SetSessionRect(rect);
     specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ =
         [&](WindowType type, uint64_t displayId) -> std::vector<sptr<SceneSession>> {
         std::vector<sptr<SceneSession>> vec;
@@ -1912,7 +1912,7 @@ HWTEST_F(SceneSessionTest, GetDockHeight, TestSize.Level1)
     sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback_);
     ASSERT_EQ(sceneSession->GetDockHeight(), 0);
     WSRect rect({ 0, 0, 0, 112 });
-    sceneSession->winRect_ = rect;
+    sceneSession->GetLayoutController()->SetSessionRect(rect);
     specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ =
         [&](WindowType type, uint64_t displayId) -> std::vector<sptr<SceneSession>> {
         std::vector<sptr<SceneSession>> vec;
@@ -2159,8 +2159,8 @@ HWTEST_F(SceneSessionTest, GetGlobalOrWinRect, Function | SmallTest | Level2)
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback);
-    sceneSession->winRect_ = {1, 1, 1, 1};
-    sceneSession->globalRect_ = {2, 2, 1, 1};
+    sceneSession->GetLayoutController()->SetSessionRect({1, 1, 1, 1});
+    sceneSession->SetSessionGlobalRect({2, 2, 1, 1});
     sceneSession->isScbCoreEnabled_ = true;
     sceneSession->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     auto rect = sceneSession->GetGlobalOrWinRect();

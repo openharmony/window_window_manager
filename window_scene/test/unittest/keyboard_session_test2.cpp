@@ -97,7 +97,7 @@ void KeyboardSessionTest2::ConstructKeyboardCallingWindowTestData(sptr<SceneSess
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     statusBarSession = sptr<SceneSession>::MakeSptr(info2, specificCallback_);
     WSRect rect({ 0, 0, 0, 10 });
-    statusBarSession->winRect_ = rect;
+    statusBarSession->GetLayoutController()->SetSessionRect(rect);
     specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ = [&](WindowType type,
         uint64_t displayId) -> std::vector<sptr<SceneSession>>{
         std::vector<sptr<SceneSession>> vec;

@@ -878,7 +878,6 @@ protected:
     bool PipelineNeedNotifyClientToUpdateRect() const;
     bool UpdateRectInner(const SessionUIParam& uiParam, SizeChangeReason reason);
     bool NotifyServerToUpdateRect(const SessionUIParam& uiParam, SizeChangeReason reason);
-    bool IsTransformNeedChange(float scaleX, float scaleY, float pivotX, float pivotY);
     bool UpdateScaleInner(float scaleX, float scaleY, float pivotX, float pivotY);
     bool UpdateZOrderInner(uint32_t zOrder);
 
@@ -959,8 +958,6 @@ protected:
     void SetShouldFollowParentWhenShow(bool shouldFollow) { shouldFollowParentWhenShow_ = shouldFollow; }
     bool GetShouldFollowParentWhenShow() const { return shouldFollowParentWhenShow_; }
     void CheckSubSessionShouldFollowParent(uint64_t displayId);
-    WSRect ConvertRelativeRectToGlobal(const WSRect& relativeRect, DisplayId currentDisplayId) const override;
-    WSRect ConvertGlobalRectToRelative(const WSRect& globalRect, DisplayId targetDisplayId) const override;
     bool IsNeedConvertToRelativeRect(SizeChangeReason reason = SizeChangeReason::UNDEFINED) const override;
     void SetRequestMoveConfiguration(const MoveConfiguration& config) { requestMoveConfiguration_ = config; }
     MoveConfiguration GetRequestMoveConfiguration() const { return requestMoveConfiguration_; }
@@ -1222,8 +1219,6 @@ private:
     /*
      * Window Layout
      */
-    void AdjustRectByLimits(WindowLimits limits, float ratio, bool isDecor, float vpr, WSRect& rect);
-    bool AdjustRectByAspectRatio(WSRect& rect);
     bool SaveAspectRatio(float ratio);
     WSError UpdateRectForDrag(const WSRect& rect);
     void UpdateSessionRectPosYFromClient(SizeChangeReason reason, DisplayId& configDisplayId, WSRect& rect);

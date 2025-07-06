@@ -356,7 +356,7 @@ HWTEST_F(SceneSessionTest2, UpdateSizeChangeReason01, TestSize.Level1)
     sceneSession->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
     sceneSession->sessionStage_ = mockSessionStage;
     sceneSession->UpdateSizeChangeReason(SizeChangeReason::ROTATION);
-    ASSERT_EQ(sceneSession->reason_, SizeChangeReason::ROTATION);
+    ASSERT_EQ(sceneSession->GetSizeChangeReason(), SizeChangeReason::ROTATION);
     ASSERT_EQ(WSError::WS_OK, sceneSession->UpdateSizeChangeReason(SizeChangeReason::UNDEFINED));
 }
 
@@ -1284,7 +1284,7 @@ HWTEST_F(SceneSessionTest2, TransferPointerEvent03, TestSize.Level1)
     float ratio = 0.0;
     bool isDecor = true;
     float vpr = 0.0;
-    sceneSession->AdjustRectByLimits(limits, ratio, isDecor, vpr, rect);
+    sceneSession->GetLayoutController()->AdjustRectByLimits(limits, ratio, isDecor, vpr, rect);
     sceneSession->SetPipActionEvent("pointerEvent", 0);
 
     auto property = sptr<WindowSessionProperty>::MakeSptr();
@@ -1297,7 +1297,7 @@ HWTEST_F(SceneSessionTest2, TransferPointerEvent03, TestSize.Level1)
     property->SetWindowType(WindowType::WINDOW_TYPE_PIP);
     property->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
     sceneSession->SetSessionProperty(property);
-    sceneSession->AdjustRectByLimits(limits, ratio, false, vpr, rect);
+    sceneSession->GetLayoutController()->AdjustRectByLimits(limits, ratio, false, vpr, rect);
     ASSERT_EQ(WSError::WS_OK, sceneSession->SetPipActionEvent("pointerEvent", 0));
 }
 
