@@ -102,8 +102,8 @@ void SingleDisplayFoldPolicy::GetFoldCreaseRect(bool isVertical,
         TLOGI(WmsLogTag::DMS, "the current FoldCreaseRect is horizontal");
         liveCreaseRegionPosX = foldRect[1];
         liveCreaseRegionPosY = foldRect[0];
-        liveCreaseRegionPosWidth = foldRect[3];
-        liveCreaseRegionPosHeight = foldRect[2];
+        liveCreaseRegionPosWidth = static_cast<uint32_t>(foldRect[3]);
+        liveCreaseRegionPosHeight = static_cast<uint32_t>(foldRect[2]);
     }
     foldCreaseRect = {
         {
