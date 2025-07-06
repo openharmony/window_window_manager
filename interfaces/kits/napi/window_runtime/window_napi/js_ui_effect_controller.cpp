@@ -175,7 +175,7 @@ napi_value JsUIEffectController::OnAnimateTo(napi_env env, napi_callback_info in
     WmErrorCode err = WmErrorCode::WM_OK;
     if (!ConvertWindowAnimationOptionFromJsValue(env, argv[INDEX_ZERO], *lists->option, err)) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "parse window animation config failed");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, err);
     }
     if (lists->params->ConvertFromJsValue(env, argv[INDEX_ONE]) != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "parse ui effect params failed");
@@ -189,7 +189,7 @@ napi_value JsUIEffectController::OnAnimateTo(napi_env env, napi_callback_info in
         lists->interruptOption = sptr<WindowAnimationOption>::MakeSptr();
         if (!ConvertWindowAnimationOptionFromJsValue(env, argv[INDEX_TWO], *lists->interruptOption, err)) {
             TLOGE(WmsLogTag::WMS_ANIMATION, "parse window animation config failed");
-            return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+            return NapiThrowError(env, err);
         }
     }
     NapiAsyncTask::ExecuteCallback execute = [lists, client = client_, server = server_] {
