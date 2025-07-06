@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "fold_screen_state_internel.h"
 #include <hisysevent.h>
 #include <hitrace_meter.h>
 #include <parameters.h>
@@ -21,7 +22,6 @@
 #include "rs_adapter.h"
 #include "session/screen/include/screen_session.h"
 #include "screen_session_manager.h"
-#include "fold_screen_state_internel.h"
 
 #include "window_manager_hilog.h"
 
@@ -40,7 +40,8 @@ const ScreenId SCREEN_ID_MAIN = 5;
 const int32_t REMOVE_DISPLAY_NODE = 0;
 const int32_t ADD_DISPLAY_NODE = 1;
 const std::string g_FoldScreenRect = system::GetParameter("const.display.foldscreen.crease_region", "");
-const int32_t FOLD_CREASE_RECT_SIZE = 4;
+const std::string FOLD_CREASE_DELIMITER = ",;";
+constexpr int32_t FOLD_CREASE_RECT_SIZE = 4;
 
 #ifdef TP_FEATURE_ENABLE
 const int32_t TP_TYPE = 12;
@@ -74,13 +75,13 @@ SingleDisplayPocketFoldPolicy::SingleDisplayPocketFoldPolicy(std::recursive_mute
     liveCreaseRegion_ = GetVerticalFoldCreaseRect();
 }
 
-sptr<FoldCreaseRegion> SingleDisplayPocketFoldPolicy::GetHorizontalFoldCreaseRect()
+FoldCreaseRegion SingleDisplayPocketFoldPolicy::GetHorizontalFoldCreaseRect()
 {
-    std::vector<int32_t> foldRect = FoldScreenStateInternel::StringFoldRectSplitToInt(g_FoldScreenRect, ",;");
+    std::vector<int32_t> foldRect = FoldScreenStateInternel::StringFoldRectSplitToInt(g_FoldScreenRect, FOLD_CREASE_DELIMITER);
     if (foldRect.size() != FOLD_CREASE_RECT_SIZE) {
         // ccm numbers of parameter on the current device is 4
         TLOGE(WmsLogTag::DMS, "foldRect is invalid");
-        return nullptr;
+        return FoldCreaseRegion(0, {});
     }
 
     ScreenId screenIdFull = 0;
@@ -95,16 +96,16 @@ sptr<FoldCreaseRegion> SingleDisplayPocketFoldPolicy::GetHorizontalFoldCreaseRec
             liveCreaseRegionPosWidth, liveCreaseRegionPosHeight
         }
     };
-    return new FoldCreaseRegion(screenIdFull, foldCreaseRect);
+    return FoldCreaseRegion(screenIdFull, foldCreaseRect);
 }
 
-sptr<FoldCreaseRegion> SingleDisplayPocketFoldPolicy::GetVerticalFoldCreaseRect()
+FoldCreaseRegion SingleDisplayPocketFoldPolicy::GetVerticalFoldCreaseRect()
 {
-    std::vector<int32_t> foldRect = FoldScreenStateInternel::StringFoldRectSplitToInt(g_FoldScreenRect, ",;");
+    std::vector<int32_t> foldRect = FoldScreenStateInternel::StringFoldRectSplitToInt(g_FoldScreenRect, FOLD_CREASE_DELIMITER);
     if (foldRect.size() != FOLD_CREASE_RECT_SIZE) {
         // ccm numbers of parameter on the current device is 4
         TLOGE(WmsLogTag::DMS, "foldRect is invalid");
-        return nullptr;
+       return FoldCreaseRegion(0, {});
     }
 
     ScreenId screenIdFull = 0;
@@ -119,7 +120,7 @@ sptr<FoldCreaseRegion> SingleDisplayPocketFoldPolicy::GetVerticalFoldCreaseRect(
             liveCreaseRegionPosWidth, liveCreaseRegionPosHeight
         }
     };
-    return new FoldCreaseRegion(screenIdFull, foldCreaseRect);
+    return FoldCreaseRegion(screenIdFull, foldCreaseRect);
 }
 
 void SingleDisplayPocketFoldPolicy::SetdisplayModeChangeStatus(bool status, bool isOnBootAnimation)
@@ -247,17 +248,18 @@ sptr<FoldCreaseRegion> SingleDisplayPocketFoldPolicy::GetCurrentFoldCreaseRegion
     return currentFoldCreaseRegion_;
 }
 
-sptr<FoldCreaseRegion> SingleDisplayPocketFoldPolicy::GetLiveCreaseRegion()
+FoldCreaseRegion SingleDisplayPocketFoldPolicy::GetLiveCreaseRegion()
 {
     TLOGI(WmsLogTag::DMS, "enter");
+    std::lock_guard<std::mutex> lock_mode(liveCreaseRegionMutex_);
     FoldDisplayMode displayMode = GetScreenDisplayMode();
     if (displayMode == FoldDisplayMode::UNKNOWN || displayMode == FoldDisplayMode::MAIN) {
-        return nullptr;
+        return FoldCreaseRegion(0, {});
     }
     sptr<ScreenSession> screenSession = ScreenSessionManager::GetInstance().GetScreenSession(SCREEN_ID_FULL);
     if (screenSession == nullptr) {
         TLOGE(WmsLogTag::DMS, "default screenSession is null");
-        return nullptr;
+        return FoldCreaseRegion(0, {});
     }
     DisplayOrientation displayOrientation = screenSession->GetScreenProperty().GetDisplayOrientation();
     if (displayMode == FoldDisplayMode::FULL || displayMode == FoldDisplayMode::COORDINATION) {

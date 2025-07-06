@@ -7671,27 +7671,26 @@ sptr<FoldCreaseRegion> ScreenSessionManager::GetCurrentFoldCreaseRegion()
 #endif
 }
 
-sptr<FoldCreaseRegion> ScreenSessionManager::GetLiveCreaseRegion(DmErrorCode* errorCode)
+DMError ScreenSessionManager::GetLiveCreaseRegion(FoldCreaseRegion& region)
 {
-    *errorCode = DmErrorCode::DM_ERROR_SYSTEM_INNORMAL;
 #ifdef FOLD_ABILITY_ENABLE
     if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
-        *errorCode = DmErrorCode::DM_OK;
-        return SuperFoldStateManager::GetInstance().GetLiveCreaseRegion();
+        region = screenSession->GetLiveCreaseRegion();
+        return DMError::DM_OK;
     }
     if (!g_foldScreenFlag) {
-    *errorCode = DmErrorCode::DM_OK;
-    return nullptr;
+        region = FoldCreaseRegion(0, {});
+        return DMError::DM_OK;
     }
     if (foldScreenController_ == nullptr) {
         TLOGE(WmsLogTag::DMS, "foldScreenController_ is null");
-        return nullptr;
+        return DMError::DM_ERROR_INVALID_MODE_ID;
     }
-    *errorCode = DmErrorCode::DM_OK;
-    return foldScreenController_->GetLiveCreaseRegion();
+    region = foldScreenController_->GetLiveCreaseRegion();
+    return DMError::DM_OK;
 #else
-    *errorCode = DmErrorCode::DM_OK;
-    return nullptr;
+    region = FoldCreaseRegion(0, {});
+    return DMError::DM_OK;
 #endif
 }
 

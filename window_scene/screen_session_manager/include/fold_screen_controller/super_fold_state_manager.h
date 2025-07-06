@@ -54,7 +54,7 @@ public:
 
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
 
-    sptr<FoldCreaseRegion> GetLiveCreaseRegion();
+    FoldCreaseRegion GetLiveCreaseRegion();
 
     SuperFoldStatus GetCurrentStatus();
 
@@ -67,9 +67,9 @@ public:
 private:
     std::atomic<SuperFoldStatus> curState_ = SuperFoldStatus::UNKNOWN;
     sptr<FoldCreaseRegion> currentSuperFoldCreaseRegion_ = nullptr;
-    sptr<FoldCreaseRegion> liveCreaseRegion_ = nullptr;
-    sptr<FoldCreaseRegion> GetVerticalFoldCreaseRect();
-    sptr<FoldCreaseRegion> GetHorizontalFoldCreaseRect();
+    FoldCreaseRegion liveCreaseRegion_ = FoldCreaseRegion(0, {});
+    FoldCreaseRegion GetVerticalFoldCreaseRect();
+    FoldCreaseRegion GetHorizontalFoldCreaseRect();
     std::mutex superStatusMutex_;
     struct Transition {
         SuperFoldStatus nextState;

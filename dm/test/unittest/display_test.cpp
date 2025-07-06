@@ -288,12 +288,12 @@ HWTEST_F(DisplayTest, GetDisplayInfoWithCache01, TestSize.Level1)
  */
 HWTEST_F(DisplayTest, GetLiveCreaseRegion, TestSize.Level1)
 {
-    DmErrorCode errCode = DmErrorCode::DM_OK;
-    defaultDisplay_->GetLiveCreaseRegion(&errCode);
+    FoldCreaseRegion region;
+    auto res = defaultDisplay_->GetLiveCreaseRegion(region);
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(errCode, DMError::DM_OK);
+        EXPECT_EQ(res, DMError::DM_OK);
     } else {
-        ASSERT_NE(errCode, DMError::DM_OK);
+        EXPECT_NE(res, DMError::DM_ERROR_DEVICE_NOT_SUPPORT);
     }
 }
 }

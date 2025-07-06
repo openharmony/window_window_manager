@@ -168,11 +168,11 @@ public:
 
     static std::vector<int32_t> StringFoldRectSplitToInt(const std::string& str, const std::string& delims)
     {
-        std::vector<int32_t> numbers;
-        std::vector<std::string> tokens;
         if (str.empty()) {
             return {};
         }
+        std::vector<int32_t> numbers;
+        std::vector<std::string> tokens;
         if (delims.empty()) {
             tokens.push_back(str);
         } else {
@@ -189,25 +189,25 @@ public:
                 tokens.push_back(str.substr(previous));
             }
         }
-        if (!isParamsValid(tokens)) {
+        if (!IsParamsDigitsOnly(tokens)) {
             return {};
         }
         for (const auto& token : tokens) {
-            numbers.push_back(std::stoi(token));
+            numbers.push_back(std::from_chars(token));
         }
         return numbers;
     }
 
-    static bool isParamsValid(std::vector<std::string>& params)
+    static bool IsParamsDigitsOnly(const std::vector<std::string>& params)
     {
         if (params.empty()) {
             return false; // the parameter list is empty
         }
-        for (auto &param : params) {
+        for (const auto& param : params) {
             if (param.size() == 0) {
                 return false;
             }
-            for (int32_t i = 0; i < static_cast<int32_t>(param.size()); ++i) {
+            for (int32_t i = 0; i < param.size(); ++i) {
                 if (param.at(i) < '0' || param.at(i) > '9') {
                     return false;
                 }
