@@ -51,10 +51,11 @@ public:
     void OnAvailableAreaChanged(DMRect area) override;
     ani_status CallAniMethodVoid(ani_object object, const char* cls,
         const char* method, const char* signature, ...);
+    bool IsAniCallBackExist(ani_env* env, const std::string& type, ani_ref callback);
 
 private:
     ani_env* env_;
-    std::mutex mtx_;
+    std::mutex aniCallBackMtx_;
     std::map<std::string, std::vector<ani_ref>> aniCallBack_;
     wptr<DisplayAniListener> weakRef_  = nullptr;
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_ = nullptr;

@@ -117,7 +117,7 @@ void DisplayManagerAni::onGetCurrentFoldCreaseRegion(ani_env* env, ani_object ob
             "$_get", "I:Lstd/core/Object;", &currentCrease, (ani_int)i)) {
             TLOGE(WmsLogTag::DMS, "[ANI] get ani_array index %{public}u fail", (ani_int)i);
         }
-        TLOGI(WmsLogTag::DMS, "current i: %{public}u", i);
+        TLOGI(WmsLogTag::DMS, "current i: %{public}u", (ani_int)i);
         DisplayAniUtils::convertRect(rects[i], static_cast<ani_object>(currentCrease), env);
     }
 }
@@ -189,33 +189,36 @@ void DisplayManagerAni::registerCallback(ani_env* env, ani_string type,
 
 void DisplayManagerAni::onRegisterCallback(ani_env* env, ani_string type, ani_ref callback)
 {
-    TLOGI(WmsLogTag::DMS, "[ANI] onRegisterCallback");
-    std::lock_guard<std::mutex> lock(mtx_);
     std::string typeString;
     DisplayAniUtils::GetStdString(env, type, typeString);
+    ani_ref cbRef{};
+    if (env->GlobalReference_Create(callback, &cbRef) != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] create global ref fail");
+        return;
+    };
+    if (IsCallbackRegistered(env, typeString, cbRef)) {
+        TLOGE(WmsLogTag::DMS, "[ANI] type %{public}s callback already registered!", typeString.c_str());
+        return;
+    }
+    TLOGI(WmsLogTag::DMS, "[ANI] onRegisterCallback");
+    std::lock_guard<std::mutex> lock(mtx_);
     ani_boolean callbackUndefined = 0;
-    ani_boolean callbackIsNull = 0;
-    env->Reference_IsUndefined(callback, &callbackUndefined);
-    env->Reference_IsNull(callback, &callbackIsNull);
+    env->Reference_IsUndefined(cbRef, &callbackUndefined);
     DmErrorCode ret;
-    if (callbackUndefined || callbackIsNull) {
+    if (callbackUndefined) {
         std::string errMsg = "[ANI] failed to register display listener with type, cbk null or undefined";
-        TLOGE(WmsLogTag::DMS, "callbackNull or undefined");
+        TLOGE(WmsLogTag::DMS, " callbackNull or undefined");
         AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, errMsg);
         return;
     }
-    ani_ref cbRef{};
-    if (env->GlobalReference_Create(callback, &cbRef) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI]create global ref fail");
-    };
-    TLOGI(WmsLogTag::DMS, "create listener");
     sptr<DisplayAniListener> displayAniListener = new(std::nothrow) DisplayAniListener(env);
     if (displayAniListener == nullptr) {
-        TLOGE(WmsLogTag::DMS, "[ANI]displayListener is nullptr");
+        TLOGE(WmsLogTag::DMS, "[ANI] displayListener is nullptr");
         AniErrUtils::ThrowBusinessError(env, DMError::DM_ERROR_INVALID_PARAM, "displayListener is nullptr");
         return;
     }
     displayAniListener->AddCallback(typeString, cbRef);
+    displayAniListener->SetMainEventHandler();
 
     ret = processRegisterCallback(env, typeString, displayAniListener);
     if (ret != DmErrorCode::DM_OK) {
@@ -225,20 +228,26 @@ void DisplayManagerAni::onRegisterCallback(ani_env* env, ani_string type, ani_re
         return;
     }
     // add listener to map
-    jsCbMap_[typeString][callback] = displayAniListener;
-    // invoke callback manually
-    if (typeString == EVENT_ADD) {
-        displayAniListener->OnCreate(1);
-    } else if (typeString == EVENT_CHANGE) {
-        TLOGI(WmsLogTag::DMS, "exe callback type change %{public}s", typeString.c_str());
-        displayAniListener->OnChange(0);
-    } else if (typeString == EVENT_FOLD_STATUS_CHANGED) {
-        TLOGI(WmsLogTag::DMS, "exe event fold status change %{public}s", typeString.c_str());
-        displayAniListener->OnFoldStatusChanged(FoldStatus::UNKNOWN);
-    } else if (typeString == EVENT_DISPLAY_MODE_CHANGED) {
-        TLOGI(WmsLogTag::DMS, "exe event fold mode change %{public}s", typeString.c_str());
-        displayAniListener->OnDisplayModeChanged(FoldDisplayMode::UNKNOWN);
+    jsCbMap_[typeString][cbRef] = displayAniListener;
+}
+
+bool DisplayManagerAni::IsCallbackRegistered(ani_env* env, const std::string& type, ani_ref callback)
+{
+    std::lock_guard<std::mutex> lock(mtx_);
+    if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
+        TLOGI(WmsLogTag::DMS, "method %{public}s not registered!", type.c_str());
+        return false;
     }
+
+    for (auto& iter : jsCbMap_[type]) {
+        ani_boolean isEquals = false;
+        env->Reference_StrictEquals(callback, iter.first, &isEquals);
+        if (isEquals) {
+            TLOGE(WmsLogTag::DMS, "callback already registered!");
+            return true;
+        }
+    }
+    return false;
 }
 
 DmErrorCode DisplayManagerAni::processRegisterCallback(ani_env* env, std::string& typeStr,
@@ -267,25 +276,30 @@ void DisplayManagerAni::unRegisterCallback(ani_env* env, ani_string type,
     if (displayManagerAni != nullptr) {
         displayManagerAni->onUnRegisterCallback(env, type, callback);
     } else {
-        TLOGI(WmsLogTag::DMS, "[ANI] null ptr");
+        TLOGI(WmsLogTag::DMS, "[ANI]  null ptr");
     }
 }
 
 void DisplayManagerAni::onUnRegisterCallback(ani_env* env, ani_string type, ani_ref callback)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] onUnRegisterCallback begin");
+    ani_ref cbRef{};
+    if (env->GlobalReference_Create(callback, &cbRef) != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] create global ref fail");
+        return;
+    };
     std::string typeString;
     DisplayAniUtils::GetStdString(env, type, typeString);
     std::lock_guard<std::mutex> lock(mtx_);
     ani_boolean callbackNull = 0;
-    env->Reference_IsUndefined(callback, &callbackNull);
+    env->Reference_IsUndefined(cbRef, &callbackNull);
     DmErrorCode ret;
     if (callbackNull) {
         TLOGI(WmsLogTag::DMS, "[ANI] onUnRegisterCallback for all");
         ret = DM_JS_TO_ERROR_CODE_MAP.at(UnregisterAllDisplayListenerWithType(typeString));
     } else {
         TLOGI(WmsLogTag::DMS, "[ANI] onUnRegisterCallback with type");
-        ret = DM_JS_TO_ERROR_CODE_MAP.at(UnRegisterDisplayListenerWithType(typeString, env, callback));
+        ret = DM_JS_TO_ERROR_CODE_MAP.at(UnRegisterDisplayListenerWithType(typeString, env, cbRef));
     }
 
     if (ret != DmErrorCode::DM_OK) {
@@ -301,19 +315,19 @@ void DisplayManagerAni::onUnRegisterCallback(ani_env* env, ani_string type, ani_
 
 DMError DisplayManagerAni::UnRegisterDisplayListenerWithType(std::string type, ani_env* env, ani_ref callback)
 {
-    TLOGI(WmsLogTag::DMS, "[ANI] UnRegisterDisplayListenerWithType begin");
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
         TLOGI(WmsLogTag::DMS, "[ANI] methodName %{public}s not registered!", type.c_str());
         return DMError::DM_OK;
     }
     DMError ret = DMError::DM_OK;
-    for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end(); it++) {
-        ani_boolean isEquals = 0;
-        env->Reference_StrictEquals(callback, it->first, &isEquals);
+    for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();it++) {
+        bool isEquals = it->second->IsAniCallBackExist(env, type, callback);
+        TLOGI(WmsLogTag::DMS, "[ANI] isEquals %{public}u", isEquals);
         if (isEquals) {
+            TLOGI(WmsLogTag::DMS, "[ANI] isEquals check begin");
             it->second->RemoveCallback(env, type, callback);
             if (type == EVENT_ADD || type == EVENT_REMOVE || type == EVENT_CHANGE) {
-                TLOGI(WmsLogTag::DMS, "[ANI] start to unregis display event listener! event = %{public}s",
+                TLOGI(WmsLogTag::DMS, "[ANI]  start to unregis display event listener! event = %{public}s",
                     type.c_str());
                 sptr<DisplayManager::IDisplayListener> thisListener(it->second);
                 ret = SingletonContainer::Get<DisplayManager>().UnregisterDisplayListener(thisListener);
@@ -330,6 +344,8 @@ DMError DisplayManagerAni::UnRegisterDisplayListenerWithType(std::string type, a
                 ret = SingletonContainer::Get<DisplayManager>().UnregisterDisplayModeListener(thisListener);
                 TLOGI(WmsLogTag::DMS, "[ANI] UnRegisterDisplayListener foldDisplayModeChange success");
             }
+            jsCbMap_[type].erase(it);
+            break;
         }
     }
     return ret;
@@ -356,7 +372,10 @@ DMError DisplayManagerAni::UnregisterAllDisplayListenerWithType(std::string type
             sptr<DisplayManager::IDisplayModeListener> thisListener(it->second);
             ret = SingletonContainer::Get<DisplayManager>().UnregisterDisplayModeListener(thisListener);
         }
+        jsCbMap_[type].erase(it++);
+        TLOGI(WmsLogTag::DMS, "[ANI] UnregisterAllDisplayListenerWithType end");
     }
+    jsCbMap_.erase(type);
     return ret;
 }
 }

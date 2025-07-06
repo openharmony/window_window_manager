@@ -48,6 +48,8 @@ private:
     void onRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
     void onUnRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
     void onGetCurrentFoldCreaseRegion(ani_env* env, ani_object obj);
+    bool IsCallbackRegistered(ani_env* env, const std::string& type, ani_ref callback);
+    void SetMainEventHandler();
     std::mutex mtx_;
     std::map<std::string, std::map<ani_ref, sptr<DisplayAniListener>>> jsCbMap_;
 };
