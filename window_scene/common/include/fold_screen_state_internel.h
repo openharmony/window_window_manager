@@ -193,7 +193,7 @@ public:
             return {};
         }
         for (const auto& token : tokens) {
-            numbers.push_back(std::from_chars(token));
+            numbers.push_back(std::stoi(token));
         }
         return numbers;
     }
@@ -204,7 +204,7 @@ public:
             if (param.size() == 0) {
                 return false;
             }
-            for (int32_t i = 0; i < param.size(); ++i) {
+            for (size_t i = 0; i < param.size(); ++i) {
                 if (param.at(i) < '0' || param.at(i) > '9') {
                     return false;
                 }

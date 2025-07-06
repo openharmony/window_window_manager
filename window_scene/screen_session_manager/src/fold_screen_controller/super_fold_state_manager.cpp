@@ -188,7 +188,8 @@ void SuperFoldStateManager::InitSuperFoldCreaseRegionParams()
 
 FoldCreaseRegion SuperFoldStateManager::GetFoldCreaseRegion(bool isVertical)
 {
-    std::vector<int32_t> foldRect = FoldScreenStateInternel::StringFoldRectSplitToInt(g_FoldScreenRect, FOLD_CREASE_DELIMITER);
+    std::vector<int32_t> foldRect = FoldScreenStateInternel::StringFoldRectSplitToInt(g_FoldScreenRect,
+        FOLD_CREASE_DELIMITER);
     if (foldRect.size() != FOLD_CREASE_RECT_SIZE) {
         TLOGE(WmsLogTag::DMS, "foldRect is invalid");
         return FoldCreaseRegion(0, {});

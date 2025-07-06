@@ -29,6 +29,7 @@ const static int32_t ERR_INVALID_DATA = -1;
 const static int32_t MAX_BUFF_SIZE = 100;
 const static float INVALID_DEFAULT_DENSITY = 1.0f;
 const static uint32_t PIXMAP_VECTOR_SIZE = 2;
+constexpr uint32_t  MAX_CREASE_REGION_SIZE = 20;
 }
 
 int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
@@ -858,6 +859,30 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             DMError ret = GetLiveCreaseRegion(region);
             static_cast<void>(reply.WriteInt32(static_cast<int32_t>(ret)));
             reply.WriteStrongParcelable(region);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_GET_LIVE_CREASE_REGION: {
+            FoldCreaseRegion region;
+            static_cast<void>(reply.WriteInt32(static_cast<int32_t>(ret)));
+            DMError ret = GetLiveCreaseRegion(region);
+            if (ret != DMError::DM_OK) {
+                break;
+            }
+            static_cast<void>(reply.WriteUint64(region.GetDisplayId()));
+            const auto& creaseRects = region.GetCreaseRects();
+            uint32_t size = static_cast<uint32_t>(creaseRects.size());
+            constexpr uint32_t  MAX_CREASE_REGION_SIZE = 20;
+            if (size > MAX_CREASE_REGION_SIZE) {
+                TLOGE(WmsLogTag::DMS, "CreaseRects size exceeds max limit");
+                break;
+            }
+            static_cast<void>(reply.WriteUint32(size));
+            for (const auto& rect : creaseRects) {
+                static_cast<void>(reply.WriteInt32(rect.posX_));
+                static_cast<void>(reply.WriteInt32(rect.posY_));
+                static_cast<void>(reply.WriteUint32(rect.width_));
+                static_cast<void>(reply.WriteUint32(rect.height_));
+            }
             break;
         }
         case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_MAKE_UNIQUE_SCREEN: {
