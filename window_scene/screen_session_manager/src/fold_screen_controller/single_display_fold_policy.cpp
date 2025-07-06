@@ -67,7 +67,6 @@ SingleDisplayFoldPolicy::SingleDisplayFoldPolicy(std::recursive_mutex& displayIn
         }
     };
     currentFoldCreaseRegion_ = new FoldCreaseRegion(screenIdFull, rect);
-    liveCreaseRegion_ = GetVerticalFoldCreaseRect();
 }
 
 FoldCreaseRegion SingleDisplayFoldPolicy::GetFoldCreaseRegion(bool isVertical)
