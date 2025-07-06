@@ -864,7 +864,6 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             static_cast<void>(reply.WriteUint64(region.GetDisplayId()));
             const auto& creaseRects = region.GetCreaseRects();
             uint32_t size = static_cast<uint32_t>(creaseRects.size());
-            constexpr uint32_t  MAX_CREASE_REGION_SIZE = 20;
             if (size > MAX_CREASE_REGION_SIZE) {
                 TLOGE(WmsLogTag::DMS, "CreaseRects size exceeds max limit");
                 break;
