@@ -752,6 +752,10 @@ void ScreenSessionManager::OnVirtualScreenChange(ScreenId screenId, ScreenEvent 
             INDIVIDUAL_SCREEN_GROUP_SET.find(screenSession->GetName()) != INDIVIDUAL_SCREEN_GROUP_SET.end()) {
             screenSession->SetDisplayGroupId(displayGroupNum_++);
             screenSession->SetMainDisplayIdOfGroup(screenId);
+        } else {
+            // Unique screens outside of INDIVIDUAL_SCREEN_GROUP_SET are placed in the default group.
+            screenSession->SetDisplayGroupId(DISPLAY_GROUP_ID_DEFAULT);
+            screenSession->SetMainDisplayIdOfGroup(MAIN_SCREEN_ID_DEFAULT);
         }
         if (clientProxy) {
             clientProxy->OnScreenConnectionChanged(GetSessionOption(screenSession, screenId),
@@ -5443,7 +5447,6 @@ DMError ScreenSessionManager::MakeExpand(std::vector<ScreenId> screenId,
         rsDisplayNode = GetRSDisplayNodeByScreenId(expandScreenId);
         if (rsDisplayNode != nullptr) {
             SetScreenOffset(expandScreenId, pointsMap[expandScreenId].posX_, pointsMap[expandScreenId].posY_);
- 
         }
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:MakeExpand");
@@ -5621,6 +5624,12 @@ sptr<ScreenSession> ScreenSessionManager::InitVirtualScreen(ScreenId smsScreenId
     screenSession->SetIsPcUse(g_isPcDevice ? true : false);
     screenSession->SetDisplayBoundary(RectF(0, 0, option.width_, option.height_), 0);
     screenSession->RegisterScreenChangeListener(this);
+    screenSession->SetValidWidth(option.width_);
+    screenSession->SetValidHeight(option.height_);
+    screenSession->SetRealWidth(option.width_);
+    screenSession->SetRealHeight(option.height_);
+    screenSession->SetScreenAreaWidth(option.width_);
+    screenSession->SetScreenAreaHeight(option.height_);
     return screenSession;
 }
 
