@@ -251,6 +251,8 @@ public:
     void SetValidWidth(uint32_t validWidth);
     uint32_t GetValidHeight() const;
     uint32_t GetValidWidth() const;
+    void SetRealHeight(uint32_t realHeight) { property_.SetScreenRealHeight(realHeight); }
+    void SetRealWidth(uint32_t realWidth) { property_.SetScreenRealWidth(realWidth); }
 
     void SetPointerActiveWidth(uint32_t pointerActiveWidth);
     uint32_t GetPointerActiveWidth();
