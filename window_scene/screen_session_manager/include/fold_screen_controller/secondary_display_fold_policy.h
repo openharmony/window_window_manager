@@ -59,10 +59,10 @@ private:
     void SetStatusMainActiveRectAndTpFeature();
     void SetStatusGlobalFullActiveRectAndTpFeature();
     void InitScreenParams();
-    FoldCreaseRegion GetStatusFullVerticalFoldCreaseRect();
-    FoldCreaseRegion GetStatusFullHorizontalFoldCreaseRect();
-    FoldCreaseRegion GetStatusGlobalFullVerticalFoldCreaseRect();
-    FoldCreaseRegion GetStatusGlobalFullHorizontalFoldCreaseRect();
+    FoldCreaseRegion GetStatusFullFoldCreaseRegion(bool isVertical);
+    void GetStatusFullFoldCreaseRect(bool isVertical, std::vector<DMRect>& foldCreaseRect, const std::vector<int32_t>& foldRect);
+    FoldCreaseRegion GetStatusGlobalFullFoldCreaseRegion(bool isVertical);
+    void GetStatusGlobalFullFoldCreaseRect(bool isVertical, std::vector<DMRect>& foldCreaseRect, const std::vector<int32_t>& foldRect);
     std::recursive_mutex& displayInfoMutex_;
     std::mutex coordinationMutex_;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler_;

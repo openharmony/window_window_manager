@@ -68,8 +68,8 @@ private:
     std::atomic<SuperFoldStatus> curState_ = SuperFoldStatus::UNKNOWN;
     sptr<FoldCreaseRegion> currentSuperFoldCreaseRegion_ = nullptr;
     FoldCreaseRegion liveCreaseRegion_ = FoldCreaseRegion(0, {});
-    FoldCreaseRegion GetVerticalFoldCreaseRect();
-    FoldCreaseRegion GetHorizontalFoldCreaseRect();
+    FoldCreaseRegion GetFoldCreaseRegion(bool isVertical);
+    void GetFoldCreaseRect(bool isVertical, std::vector<DMRect>& foldCreaseRect, const std::vector<int32_t>& foldRect);
     std::mutex superStatusMutex_;
     struct Transition {
         SuperFoldStatus nextState;
