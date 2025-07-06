@@ -2857,13 +2857,12 @@ sptr<FoldCreaseRegion> ScreenSessionManagerProxy::GetCurrentFoldCreaseRegion()
     return reply.ReadStrongParcelable<FoldCreaseRegion>();
 }
 
-sptr<FoldCreaseRegion> ScreenSessionManagerProxy::GetLiveCreaseRegion(DmErrorCode* errorCode)
+DMError ScreenSessionManagerProxy::GetLiveCreaseRegion(FoldCreaseRegion& region)
 {
     sptr<IRemoteObject> remote = Remote();
-    *errorCode = DmErrorCode::DM_ERROR_SYSTEM_INNORMAL;
     if (remote == nullptr) {
         TLOGW(WmsLogTag::DMS, "remote is null");
-        return nullptr;
+        return DMError::DM_ERROR_IPC_FAILED;
     }
 
     MessageParcel data;
@@ -2871,16 +2870,17 @@ sptr<FoldCreaseRegion> ScreenSessionManagerProxy::GetLiveCreaseRegion(DmErrorCod
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
-        return nullptr;
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     if (remote->SendRequest(
         static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCENE_BOARD_GET_LIVE_CREASE_REGION),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::DMS, "SendRequest failed");
-        return nullptr;
+        return DMError::DM_ERROR_IPC_FAILED;
     }
-    *errorCode = static_cast<DmErrorCode>(reply.ReadInt32());
-    return reply.ReadStrongParcelable<FoldCreaseRegion>();
+    DMError ret = static_cast<DMError>(reply.ReadInt32());
+    region = reply.ReadStrongParcelable<FoldCreaseRegion>();
+    return ret;
 }
 
 DMError ScreenSessionManagerProxy::MakeUniqueScreen(const std::vector<ScreenId>& screenIds,

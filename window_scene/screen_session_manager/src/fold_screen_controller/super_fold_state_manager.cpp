@@ -38,9 +38,10 @@ const char* KEYBOARD_OFF_CONFIG = "version:3+whole";
 #endif
 static bool isKeyboardOn_ = false;
 static bool isSystemKeyboardOn_ = false;
-const int32_t FOLD_CREASE_RECT_SIZE = 4;
+constexpr int32_t FOLD_CREASE_RECT_SIZE = 4;
 const std::string g_LiveCreaseRegion = system::GetParameter("const.display.foldscreen.crease_region", "");
-const ScreenId SCREEN_ID_FULL = 0;
+const std::string FOLD_CREASE_DELIMITER = ",;";
+constexpr ScreenId SCREEN_ID_FULL = 0;
 }
 
 void SuperFoldStateManager::DoAngleChangeFolded(SuperFoldStatusChangeEvents event)
@@ -185,13 +186,13 @@ void SuperFoldStateManager::InitSuperFoldCreaseRegionParams()
     currentSuperFoldCreaseRegion_ = new FoldCreaseRegion(screenIdFull, rect);
 }
 
-sptr<FoldCreaseRegion> SuperFoldStateManager::GetHorizontalFoldCreaseRect()
+FoldCreaseRegion SuperFoldStateManager::GetHorizontalFoldCreaseRect()
 {
-    std::vector<int32_t> foldRect = FoldScreenStateInternel::StringFoldRectSplitToInt(g_FoldScreenRect, ",;");
+    std::vector<int32_t> foldRect = FoldScreenStateInternel::StringFoldRectSplitToInt(g_LiveCreaseRegion, FOLD_CREASE_DELIMITER);
     if (foldRect.size() != FOLD_CREASE_RECT_SIZE) {
         // ccm numbers of parameter on the current device is 4
         TLOGE(WmsLogTag::DMS, "foldRect is invalid");
-        return nullptr;
+        return FoldCreaseRegion(0, {});
     }
 
     ScreenId screenIdFull = 0;
@@ -206,16 +207,16 @@ sptr<FoldCreaseRegion> SuperFoldStateManager::GetHorizontalFoldCreaseRect()
             liveCreaseRegionPosWidth, liveCreaseRegionPosHeight
         }
     };
-    return new FoldCreaseRegion(screenIdFull, foldCreaseRect);
+    return FoldCreaseRegion(screenIdFull, foldCreaseRect);
 }
 
-sptr<FoldCreaseRegion> SuperFoldStateManager::GetVerticalFoldCreaseRect()
+FoldCreaseRegion SuperFoldStateManager::GetVerticalFoldCreaseRect()
 {
-    std::vector<int32_t> foldRect = FoldScreenStateInternel::StringFoldRectSplitToInt(g_FoldScreenRect, ",;");
+    std::vector<int32_t> foldRect = FoldScreenStateInternel::StringFoldRectSplitToInt(g_LiveCreaseRegion, FOLD_CREASE_DELIMITER);
     if (foldRect.size() != FOLD_CREASE_RECT_SIZE) {
         // ccm numbers of parameter on the current device is 4
         TLOGE(WmsLogTag::DMS, "foldRect is invalid");
-        return nullptr;
+        return FoldCreaseRegion(0, {});
     }
 
     ScreenId screenIdFull = 0;
@@ -230,7 +231,7 @@ sptr<FoldCreaseRegion> SuperFoldStateManager::GetVerticalFoldCreaseRect()
             liveCreaseRegionPosWidth, liveCreaseRegionPosHeight
         }
     };
-    return new FoldCreaseRegion(screenIdFull, foldCreaseRect);
+    return FoldCreaseRegion(screenIdFull, foldCreaseRect);
 }
 
 SuperFoldStateManager::SuperFoldStateManager()
@@ -357,17 +358,17 @@ sptr<FoldCreaseRegion> SuperFoldStateManager::GetCurrentFoldCreaseRegion()
     return currentSuperFoldCreaseRegion_;
 }
 
-sptr<FoldCreaseRegion> SuperFoldStateManager::GetLiveCreaseRegion()
+FoldCreaseRegion SuperFoldStateManager::GetLiveCreaseRegion()
 {
     TLOGI(WmsLogTag::DMS, "enter");
     SuperFoldStatus curFoldState = ScreenSessionManager::GetInstance().GetSuperFoldStatus();
     if (curFoldState == SuperFoldStatus::UNKNOWN || curFoldState == SuperFoldStatus::FOLDED) {
-        return nullptr;
+        return FoldCreaseRegion(0, {});
     }
     sptr<ScreenSession> screenSession = ScreenSessionManager::GetInstance().GetScreenSession(SCREEN_ID_FULL);
     if (screenSession == nullptr) {
         TLOGE(WmsLogTag::DMS, "default screenSession is null");
-        return nullptr;
+        return FoldCreaseRegion(0, {});
     }
     DisplayOrientation displayOrientation = screenSession->GetScreenProperty().GetDisplayOrientation();
     switch (displayOrientation) {

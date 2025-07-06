@@ -50,7 +50,7 @@ public:
     void SetFoldStatus(FoldStatus foldStatus);
     void OnTentModeChanged(int tentType, int32_t hall = -1);
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
-    sptr<FoldCreaseRegion> GetLiveCreaseRegion();
+    FoldCreaseRegion GetLiveCreaseRegion() const;
     ScreenId GetCurrentScreenId();
     void LockDisplayStatus(bool locked);
     void SetOnBootAnimation(bool onBootAnimation);

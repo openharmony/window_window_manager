@@ -38,9 +38,9 @@ sptr<FoldCreaseRegion> FoldScreenPolicy::GetCurrentFoldCreaseRegion()
     return currentFoldCreaseRegion_;
 }
 
-sptr<FoldCreaseRegion> FoldScreenPolicy::GetLiveCreaseRegion()
+FoldCreaseRegion FoldScreenPolicy::GetLiveCreaseRegion()
 {
-    std::lock_guard<std::recursive_mutex> lock_mode(liveCreaseRegionMutex_);
+    std::lock_guard<std::mutex> lock_mode(liveCreaseRegionMutex_);
     return liveCreaseRegion_;
 }
 

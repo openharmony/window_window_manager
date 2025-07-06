@@ -1236,20 +1236,15 @@ sptr<FoldCreaseRegion> DisplayManagerAdapter::GetCurrentFoldCreaseRegion()
     return nullptr;
 }
 
-sptr<FoldCreaseRegion> DisplayManagerAdapter::GetLiveCreaseRegion(DmErrorCode* errorCode)
+DMError DisplayManagerAdapter::GetLiveCreaseRegion(FoldCreaseRegion& region)
 {
-    INIT_PROXY_CHECK_RETURN(nullptr);
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
     TLOGI(WmsLogTag::DMS, "enter");
     if (screenSessionManagerServiceProxy_) {
-        return screenSessionManagerServiceProxy_->GetLiveCreaseRegion(errorCode);
+        return screenSessionManagerServiceProxy_->GetLiveCreaseRegion(region);
     }
-
-    if (errorCode != nullptr) {
-        *errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
-    }
-
-    return nullptr;
+    return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
 }
 
 sptr<ScreenGroupInfo> ScreenManagerAdapter::GetScreenGroupInfoById(ScreenId screenId)

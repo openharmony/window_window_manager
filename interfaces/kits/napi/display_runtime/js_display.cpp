@@ -209,8 +209,9 @@ napi_value JsDisplay::UnregisterDisplayManagerCallback(napi_env env, napi_callba
     return (me != nullptr) ? me->OnUnregisterDisplayManagerCallback(env, info) : nullptr;
 }
 
-napi_value JsDisplay::getLiveCreaseRegion(napi_env env, napi_callback_info info)
+napi_value JsDisplay::GetLiveCreaseRegion(napi_env env, napi_callback_info info)
 {
+    TLOGI(WmsLogTag::DMS, "called");
     JsDisplay* me = CheckParamsAndGetThis<JsDisplay>(env, info);
     return (me != nullptr) ? me->OnGetLiveCreaseRegion(env, info) : nullptr;
 }
@@ -576,13 +577,12 @@ napi_value JsDisplay::OnGetLiveCreaseRegion(napi_env env, napi_callback_info inf
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
-    DmErrorCode errorCode = DmErrorCode::DM_OK;
-    sptr<FoldCreaseRegion> region = display_->GetLiveCreaseRegion(&errorCode);
-    if (errorCode != DmErrorCode::DM_OK) {
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(errorCode)));
+    FoldCreaseRegion region;
+    DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(display_->GetLiveCreaseRegion(region));
+    if (ret != DmErrorCode::DM_OK) {
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(ret)));
         return NapiGetUndefined(env);
     }
-    sptr<FoldCreaseRegion> region = display_->GetLiveCreaseRegion();
     return CreateJsFoldCreaseRegionObject(env, region);
 }
 
@@ -910,7 +910,7 @@ napi_value CreateJsDisplayObject(napi_env env, sptr<Display>& display)
     return objValue;
 }
 
-napi_value CreateJsFoldCreaseRegionObject(napi_env env, sptr<FoldCreaseRegion> region)
+napi_value CreateJsFoldCreaseRegionObject(napi_env env, const FoldCreaseRegion& region)
 {
     TLOGI(WmsLogTag::DMS, "called");
     napi_value objValue = nullptr;
@@ -919,18 +919,14 @@ napi_value CreateJsFoldCreaseRegionObject(napi_env env, sptr<FoldCreaseRegion> r
         TLOGE(WmsLogTag::DMS, "Failed to convert prop to jsObject");
         return NapiGetUndefined(env);
     }
-    if (region == nullptr) {
-        TLOGW(WmsLogTag::DMS, "Get null fold crease region");
-        return NapiGetUndefined(env);
-    }
-    DisplayId displayId = region->GetDisplayId();
-    std::vector<DMRect> creaseRects = region->GetCreaseRects();
+    DisplayId displayId = region.GetDisplayId();
+    std::vector<DMRect> creaseRects = region.GetCreaseRects();
     napi_set_named_property(env, objValue, "displayId", CreateJsValue(env, static_cast<uint32_t>(displayId)));
     napi_set_named_property(env, objValue, "creaseRects", CreateJsCreaseRectsArrayObject(env, creaseRects));
     return objValue;
 }
 
-napi_value CreateJsCreaseRectsArrayObject(napi_env env, std::vector<DMRect> creaseRects)
+napi_value CreateJsCreaseRectsArrayObject(napi_env env, const std::vector<DMRect>& creaseRects)
 {
     napi_value arrayValue = nullptr;
     napi_create_array_with_length(env, creaseRects.size(), &arrayValue);
