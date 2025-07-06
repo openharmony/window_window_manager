@@ -909,6 +909,14 @@ napi_value JsWindow::RaiseAboveTarget(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnRaiseAboveTarget(env, info) : nullptr;
 }
 
+/** @note @window.hierarchy */
+napi_value JsWindow::RaiseMainWindowAboveTarget(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_HIERARCHY, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnRaiseMainWindowAboveTarget(env, info) : nullptr;
+}
+
 napi_value JsWindow::KeepKeyboardOnFocus(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::DEFAULT, "[NAPI]");
@@ -5070,6 +5078,66 @@ napi_value JsWindow::OnRaiseAboveTarget(napi_env env, napi_callback_info info)
     return result;
 }
 
+napi_value JsWindow::OnRaiseMainWindowAboveTarget(napi_env env, napi_callback_info info)
+{
+    WmErrorCode errCode = WmErrorCode::WM_OK;
+    if (!Permission::IsSystemCallingOrStartByHdcd(true)) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "permission denied, require system application");
+        errCode = WmErrorCode::WM_ERROR_NOT_SYSTEM_APP;
+    }
+
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    int32_t targetId = static_cast<int32_t>(INVALID_WINDOW_ID);
+    if (errCode == WmErrorCode::WM_OK) {
+        if (argc != ONE_PARAMS_SIZE || argv[0] == nullptr) {
+            TLOGE(WmsLogTag::WMS_HIERARCHY, "argc is invalid: %{public}zu", argc);
+            errCode = WmErrorCode::WM_ERROR_ILLEGAL_PARAM;
+        }
+        if (errCode == WmErrorCode::WM_OK && !ConvertFromJsValue(env, argv[INDEX_ZERO], targetId)) {
+            TLOGE(WmsLogTag::WMS_HIERARCHY, "failed to convert parameter to target window id");
+            errCode = WmErrorCode::WM_ERROR_ILLEGAL_PARAM;
+        }
+        if (targetId <= static_cast<int32_t>(INVALID_WINDOW_ID) || targetId == windowToken_->GetWindowId()) {
+            TLOGE(WmsLogTag::WMS_HIERARCHY, "target window id is invalid or equals to source window id");
+            errCode = WmErrorCode::WM_ERROR_ILLEGAL_PARAM;
+        }
+    }
+    napi_value lastParam = nullptr;
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    auto asyncTask = [weakToken = wptr<Window>(windowToken_), targetId, env, task = napiAsyncTask, errCode] {
+        if (errCode != WmErrorCode::WM_OK) {
+            task->Reject(env, JsErrUtils::CreateJsError(env, errCode));
+            return;
+        }
+
+        auto window = weakToken.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_HIERARCHY, "window is nullptr");
+            task->Reject(env,
+                         JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "window is nullptr"));
+            return;
+        }
+
+        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RaiseMainWindowAboveTarget(targetId));
+        if (ret == WmErrorCode::WM_OK) {
+            task->Resolve(env, NapiGetUndefined(env));
+        } else {
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "raise main window above target failed"));
+        }
+        TLOGNI(WmsLogTag::WMS_HIERARCHY,
+               "source window: %{public}u, target window: %{public}u, ret =  %{public}d",
+               window->GetWindowId(), targetId, ret);
+    };
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnRaiseMainWindowAboveTarget") != napi_status::napi_ok) {
+        napiAsyncTask->Reject(
+            env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "send event failed"));
+    }
+    return result;
+}
+
 napi_value JsWindow::OnKeepKeyboardOnFocus(napi_env env, napi_callback_info info)
 {
     size_t argc = 4;
@@ -8873,6 +8941,7 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "setResizeByDragEnabled", moduleName, JsWindow::SetResizeByDragEnabled);
     BindNativeFunction(env, object, "setRaiseByClickEnabled", moduleName, JsWindow::SetRaiseByClickEnabled);
     BindNativeFunction(env, object, "raiseAboveTarget", moduleName, JsWindow::RaiseAboveTarget);
+    BindNativeFunction(env, object, "raiseMainWindowAboveTarget", moduleName, JsWindow::RaiseMainWindowAboveTarget);
     BindNativeFunction(env, object, "hideNonSystemFloatingWindows", moduleName,
         JsWindow::HideNonSystemFloatingWindows);
     BindNativeFunction(env, object, "keepKeyboardOnFocus", moduleName, JsWindow::KeepKeyboardOnFocus);

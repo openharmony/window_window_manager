@@ -153,6 +153,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleGetIsMidScene(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RAISE_ABOVE_TARGET):
             return HandleRaiseAboveTarget(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RAISE_MAIN_WINDOW_ABOVE_TARGET):
+            return HandleRaiseMainWindowAboveTarget(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RAISE_APP_MAIN_WINDOW):
             return HandleRaiseAppMainWindowToTop(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CHANGE_SESSION_VISIBILITY_WITH_STATUS_BAR):
@@ -1025,6 +1027,19 @@ int SessionStub::HandleRaiseAboveTarget(MessageParcel& data, MessageParcel& repl
     }
     WSError errCode = RaiseAboveTarget(subWindowId);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleRaiseMainWindowAboveTarget(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_HIERARCHY, "In");
+    int32_t targetId = 0;
+    if (!data.ReadInt32(targetId)) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "read targetId failed");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = RaiseMainWindowAboveTarget(targetId);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 

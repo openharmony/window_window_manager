@@ -86,6 +86,7 @@ using NotifyPendingSessionToBackgroundFunc = std::function<void(const SessionInf
 using NotifyPendingSessionToBackgroundForDelegatorFunc = std::function<void(const SessionInfo& info,
     bool shouldBackToCaller)>;
 using NotifyClickModalWindowOutsideFunc = std::function<void()>;
+using NotifyRaiseMainWindowAboveTargetFunc = std::function<void(int32_t targetId)>;
 using NotifyRaiseToTopForPointDownFunc = std::function<void()>;
 using NotifyUIRequestFocusFunc = std::function<void()>;
 using NotifyUILostFocusFunc = std::function<void()>;
@@ -925,6 +926,7 @@ protected:
     /*
      * Window Hierarchy
      */
+    NotifyRaiseMainWindowAboveTargetFunc onRaiseMainWindowAboveTarget_;
     NotifyClickModalWindowOutsideFunc clickModalWindowOutsideFunc_;
 
     /*
