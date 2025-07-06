@@ -300,6 +300,7 @@ public:
     void SetScale(float scaleX, float scaleY, float pivotX, float pivotY) override;
     void SetFloatingScale(float floatingScale) override;
     WSError RaiseAboveTarget(int32_t subWindowId) override;
+    WSError RaiseMainWindowAboveTarget(int32_t targetId) override;
 
     /*
      * PiP Window
@@ -596,6 +597,7 @@ public:
      */
     void RegisterRaiseToTopCallback(NotifyRaiseToTopFunc&& callback);
     void RegisterRaiseAboveTargetCallback(NotifyRaiseAboveTargetFunc&& callback);
+    void RegisterRaiseMainWindowAboveTargetCallback(NotifyRaiseMainWindowAboveTargetFunc&& callback);
     void RegisterSessionTopmostChangeCallback(NotifySessionTopmostChangeFunc&& callback);
     void RegisterSubSessionZLevelChangeCallback(NotifySubSessionZLevelChangeFunc&& callback);
 

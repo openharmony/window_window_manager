@@ -66,6 +66,7 @@ enum class ListenerFuncType : uint32_t {
     SHOW_WHEN_LOCKED_CB,
     REQUESTED_ORIENTATION_CHANGE_CB,
     RAISE_ABOVE_TARGET_CB,
+    RAISE_MAIN_WINDOW_ABOVE_TARGET_CB,
     FORCE_HIDE_CHANGE_CB,
     WINDOW_DRAG_HOT_AREA_CB,
     TOUCH_OUTSIDE_CB,
@@ -338,7 +339,7 @@ private:
     static napi_value GetJsPanelSessionObj(napi_env env, const sptr<SceneSession>& session);
     napi_value OnRequestSpecificSessionClose(napi_env env, napi_callback_info info);
     napi_value OnSendFbActionEvent(napi_env env, napi_callback_info info);
-    
+
     /*
      * PC Window
      */
@@ -379,6 +380,7 @@ private:
     void ProcessShowWhenLockedRegister();
     void ProcessRequestedOrientationChange();
     void ProcessRaiseAboveTargetRegister();
+    void ProcessRaiseMainWindowAboveTargetRegister();
     void ProcessForceHideChangeRegister();
     void ProcessWindowDragHotAreaRegister();
     void ProcessTouchOutsideRegister();
@@ -445,6 +447,7 @@ private:
     void OnRaiseToTopForPointDown();
     void OnClickModalWindowOutside();
     void OnRaiseAboveTarget(int32_t subWindowId);
+    void OnRaiseMainWindowAboveTarget(int32_t targetId);
     void OnBackPressed(bool needMoveToBackground);
     void OnSessionFocusableChange(bool isFocusable);
     void OnSessionTouchableChange(bool touchable);
