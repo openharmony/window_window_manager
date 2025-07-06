@@ -2897,8 +2897,10 @@ DMError ScreenSessionManagerProxy::GetLiveCreaseRegion(FoldCreaseRegion& region)
     }
     std::vector<DMRect> creaseRects;
     for (uint32_t i = 0; i < size; i++) {
-        int32_t posX, posY;
-        uint32_t width, height;
+        int32_t posX;
+        int32_t posY;
+        uint32_t width;
+        uint32_t height;
         if (!reply.ReadInt32(posX) || !reply.ReadInt32(posY) ||
         !reply.ReadUint32(width) || !reply.ReadUint32(height)) {
             TLOGE(WmsLogTag::DMS, "Failed to read crease rect");
