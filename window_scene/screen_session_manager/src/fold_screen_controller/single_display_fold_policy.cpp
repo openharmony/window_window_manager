@@ -21,7 +21,6 @@
 #include "screen_session_manager.h"
 #include "fold_screen_state_internel.h"
 
-
 #include "window_manager_hilog.h"
 
 #ifdef POWER_MANAGER_ENABLE
