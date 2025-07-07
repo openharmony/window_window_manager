@@ -7772,7 +7772,7 @@ std::shared_ptr<RSUIContext> WindowSessionImpl::GetRSUIContext() const
 
 bool WindowSessionImpl::IsAnco() const
 {
-    return property_->GetCollaboratorType == static_cast<int32_t>(CollaboratorType::RESERVE_TYPE);
+    return property_->GetCollaboratorType() == static_cast<int32_t>(CollaboratorType::RESERVE_TYPE);
 }
 
 bool WindowSessionImpl::OnPointDown(int32_t eventId, int32_t posX, int32_t posY)
