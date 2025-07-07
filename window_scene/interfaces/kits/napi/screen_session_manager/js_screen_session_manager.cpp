@@ -397,9 +397,6 @@ void JsScreenSessionManager::OnScreenConnected(const sptr<ScreenSession>& screen
     } else {
         TLOGE(WmsLogTag::DMS, "OnScreenConnected: env is nullptr");
     }
-
-    ScreenSessionManagerClient::GetInstance().SendScreenEventTaskFinish(screenSession->GetScreenId(),
-        ScreenEvent::CONNECTED);
 }
 
 napi_value JsScreenSessionManager::SetCameraStatus(napi_env env, napi_callback_info info)
@@ -455,9 +452,6 @@ void JsScreenSessionManager::OnScreenDisconnected(const sptr<ScreenSession>& scr
     } else {
         TLOGE(WmsLogTag::DMS, "OnScreenDisconnected: env is nullptr");
     }
-
-    ScreenSessionManagerClient::GetInstance().SendScreenEventTaskFinish(screenSession->GetScreenId(),
-        ScreenEvent::DISCONNECTED);
 }
 
 bool JsScreenSessionManager::OnTakeOverShutdown(const PowerMgr::TakeOverInfo& info)

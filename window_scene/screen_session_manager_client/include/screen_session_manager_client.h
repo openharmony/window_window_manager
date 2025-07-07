@@ -17,6 +17,7 @@
 #define OHOS_ROSEN_SCREEN_SESSION_MANAGER_CLIENT_H
 
 #include <map>
+#include <set>
 #include <mutex>
 
 #include <common/rs_rect.h>
@@ -120,7 +121,6 @@ public:
     void NotifyExtendScreenDestroyFinish();
     void NotifyScreenMaskAppear();
     DMError SetPrimaryDisplaySystemDpi(float dpi);
-    void SendScreenEventTaskFinish(ScreenId screenId, ScreenEvent event);
 
     /*
      * RS Client Multi Instance
@@ -176,16 +176,8 @@ private:
     FoldDisplayMode displayMode_ = FoldDisplayMode::UNKNOWN;
     SuperFoldStatus currentstate_ = SuperFoldStatus::UNKNOWN;
 
-    enum class ScreenEventProcessStatus : uint8_t {
-        DISCONNECTED = 0,
-        CONNECTING,
-        CONNECTED,
-        DISCONNECTING
-    };
     std::mutex screenEventMutex_;
-    std::mutex screenEventProcessingMutex_;
-    std::condition_variable screenEventCond_;
-    std::map<ScreenId, ScreenEventProcessStatus> screenEventProcessMap_;
+    std::set<ScreenId> connectedScreenSet_;
 };
 } // namespace OHOS::Rosen
 
