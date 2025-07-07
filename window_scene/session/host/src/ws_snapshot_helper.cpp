@@ -48,7 +48,7 @@ DisplayOrientation WSSnapshotHelper::GetDisplayOrientation(int32_t rotation)
 {
     auto it = ROTATION_TO_DISPLAYORIENTATION_MAP.find(rotation);
     if (it != ROTATION_TO_DISPLAYORIENTATION_MAP.end()) {
-        return it->second();
+        return it->second;
     }
     return DisplayOrientation::PORTRAIT;
 }

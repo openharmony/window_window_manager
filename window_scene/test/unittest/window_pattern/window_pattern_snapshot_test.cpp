@@ -948,37 +948,37 @@ HWTEST_F(WindowPatternSnapshotTest, SetFreeMultiWindow, TestSize.Level1)
 }
 
 /**
- * @tc.name: FindNearestSnapshot
- * @tc.desc: FindNearestSnapshot Test
+ * @tc.name: FindClosestFormSnapshot
+ * @tc.desc: FindClosestFormSnapshot Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPatternSnapshotTest, FindNearestSnapshot, TestSize.Level1)
+HWTEST_F(WindowPatternSnapshotTest, FindClosestFormSnapshot, TestSize.Level1)
 {
     std::string bundleName = "testBundleName";
     int32_t persistentId = 1423;
     sptr<ScenePersistence> scenePersistence = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
     scenePersistence->capacity_ = maxCapacity;
     SnapshotStatus key = defaultStatus;
-    auto ret = scenePersistence->FindNearestSnapshot(key);
+    auto ret = scenePersistence->FindClosestFormSnapshot(key);
     EXPECT_EQ(ret, false);
 
     scenePersistence->hasSnapshot_[SCREEN_EXPAND][SNAPSHOT_PORTRAIT] = true;
-    ret = scenePersistence->FindNearestSnapshot(key);
+    ret = scenePersistence->FindClosestFormSnapshot(key);
     EXPECT_EQ(ret, true);
 
     key.first = SCREEN_FOLDED;
-    ret = scenePersistence->FindNearestSnapshot(key);
+    ret = scenePersistence->FindClosestFormSnapshot(key);
     EXPECT_EQ(ret, true);
 
     key.first = SCREEN_FOLDED;
     scenePersistence->hasSnapshot_[SCREEN_EXPAND][SNAPSHOT_PORTRAIT] = false;
     scenePersistence->hasSnapshot_[SCREEN_EXPAND][SNAPSHOT_LANDSCAPE] = true;
-    ret = scenePersistence->FindNearestSnapshot(key);
+    ret = scenePersistence->FindClosestFormSnapshot(key);
     EXPECT_EQ(ret, true);
 
     key.first = SCREEN_FOLDED;
     scenePersistence->hasSnapshot_[SCREEN_EXPAND][SNAPSHOT_LANDSCAPE] = false;
-    ret = scenePersistence->FindNearestSnapshot(key);
+    ret = scenePersistence->FindClosestFormSnapshot(key);
     EXPECT_EQ(ret, false);
 }
 } // namespace

@@ -73,10 +73,10 @@ ScenePersistence::ScenePersistence(const std::string& bundleName, int32_t persis
 {
     InitAstcEnabled();
     auto suffix = isAstcEnabled_ ? ASTC_IMAGE_SUFFIX : IMAGE_SUFFIX;
-    for (uint32_t screen = SCREEN_UNKNOWN; screen < SCREEN_COUNT; screen++) {
+    for (uint32_t screenStatus = SCREEN_UNKNOWN; screenStatus < SCREEN_COUNT; screenStatus++) {
         for (uint32_t orientation = SNAPSHOT_PORTRAIT; orientation < ORIENTATION_COUNT; orientation++) {
-            snapshotPath_[screen][orientation] = snapshotDirectory_ + bundleName + UNDERLINE_SEPARATOR +
-                std::to_string(persistentId) + UNDERLINE_SEPARATOR + std::to_string(screen) +
+            snapshotPath_[screenStatus][orientation] = snapshotDirectory_ + bundleName + UNDERLINE_SEPARATOR +
+                std::to_string(persistentId) + UNDERLINE_SEPARATOR + std::to_string(screenStatus) +
                 std::to_string(orientation) + suffix;
         }
     }
@@ -204,9 +204,9 @@ void ScenePersistence::RenameSnapshotFromOldPersistentId(const int32_t& oldPersi
             TLOGNE(WmsLogTag::WMS_PATTERN, "scenePersistence is nullptr");
             return;
         }
-        for (uint32_t screen = SCREEN_UNKNOWN; screen < SCREEN_COUNT; screen++) {
+        for (uint32_t screenStatus = SCREEN_UNKNOWN; screenStatus < SCREEN_COUNT; screenStatus++) {
             for (uint32_t orientation = SNAPSHOT_PORTRAIT; orientation < ORIENTATION_COUNT; orientation++) {
-                scenePersistence->RenameSnapshotFromOldPersistentId(oldPersistentId, { screen, orientation });
+                scenePersistence->RenameSnapshotFromOldPersistentId(oldPersistentId, { screenStatus, orientation });
             }
         }
         auto suffix = scenePersistence->isAstcEnabled_ ? ASTC_IMAGE_SUFFIX : IMAGE_SUFFIX;
@@ -253,13 +253,13 @@ std::string ScenePersistence::GetSnapshotFilePath(SnapshotStatus& key, bool useK
     if (useKey || hasSnapshot_[key.first][key.second]) {
         return snapshotPath_[key.first][key.second];
     }
-    if (FindNearestSnapshot(key)) {
+    if (FindClosestFormSnapshot(key)) {
         return snapshotPath_[key.first][key.second];
     }
     return snapshotPath_[SCREEN_UNKNOWN][SNAPSHOT_PORTRAIT];
 }
 
-bool ScenePersistence::FindNearestSnapshot(SnapshotStatus& key)
+bool ScenePersistence::FindClosestFormSnapshot(SnapshotStatus& key)
 {
     for (uint32_t orientation = SNAPSHOT_PORTRAIT; orientation < capacity_.second; orientation++) {
         if (hasSnapshot_[key.first][orientation]) {
@@ -269,31 +269,31 @@ bool ScenePersistence::FindNearestSnapshot(SnapshotStatus& key)
     }
     bool isFolded = (key.first == SCREEN_FOLDED);
     if (isFolded) {
-        for (uint32_t screen = SCREEN_EXPAND; screen < capacity_.first; screen--) {
-            if (hasSnapshot_[screen][key.second]) {
-                key.first = screen;
+        for (uint32_t screenStatus = SCREEN_EXPAND; screenStatus < capacity_.first; screenStatus--) {
+            if (hasSnapshot_[screenStatus][key.second]) {
+                key.first = screenStatus;
                 return true;
             }
         }
-        uint32_t orientation = key.second == SNAPSHOT_PORTRAIT ? SNAPSHOT_LANDSCAPE : SNAPSHOT_PORTRAIT;
-        for (uint32_t screen = SCREEN_EXPAND; screen < capacity_.first; screen--) {
-            if (hasSnapshot_[screen][orientation]) {
-                key = { screen, orientation };
+        uint32_t orientation = (key.second == SNAPSHOT_PORTRAIT) ? SNAPSHOT_LANDSCAPE : SNAPSHOT_PORTRAIT;
+        for (uint32_t screenStatus = SCREEN_EXPAND; screenStatus < capacity_.first; screenStatus--) {
+            if (hasSnapshot_[screenStatus][orientation]) {
+                key = { screenStatus, orientation };
                 return true;
             }
         }
         return false;
     }
-    for (uint32_t screen = SCREEN_UNKNOWN; screen < capacity_.first; screen++) {
-        if (hasSnapshot_[screen][key.second]) {
-            key.first = screen;
+    for (uint32_t screenStatus = SCREEN_UNKNOWN; screenStatus < capacity_.first; screenStatus++) {
+        if (hasSnapshot_[screenStatus][key.second]) {
+            key.first = screenStatus;
             return true;
         }
     }
-    uint32_t orientation = key.second == SNAPSHOT_PORTRAIT ? SNAPSHOT_LANDSCAPE : SNAPSHOT_PORTRAIT;
-    for (uint32_t screen = SCREEN_UNKNOWN; screen < capacity_.first; screen++) {
-        if (hasSnapshot_[screen][orientation]) {
-            key = { screen, orientation };
+    uint32_t orientation = (key.second == SNAPSHOT_PORTRAIT) ? SNAPSHOT_LANDSCAPE : SNAPSHOT_PORTRAIT;
+    for (uint32_t screenStatus = SCREEN_UNKNOWN; screenStatus < capacity_.first; screenStatus++) {
+        if (hasSnapshot_[screenStatus][orientation]) {
+            key = { screenStatus, orientation };
             return true;
         }
     }
