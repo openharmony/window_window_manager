@@ -93,6 +93,11 @@ WMError FloatingBallController::StartFloatingBall(sptr<FbOption>& option)
                 curState_, (window_ == nullptr) ? INVALID_WINDOW_ID : window_->GetWindowId(), mainWindowId_);
             return WMError::WM_ERROR_FB_REPEAT_OPERATION;
         }
+        if (curState_ == FbWindowState::STATE_STOPPING) {
+            TLOGW(WmsLogTag::WMS_SYSTEM, "fbWindow state is: %{public}u, id: %{public}u, mainWindow: %{public}u",
+                curState_, (window_ == nullptr) ? INVALID_WINDOW_ID : window_->GetWindowId(), mainWindowId_);
+            return WMError::WM_ERROR_FB_START_ON_STOPPING_WINDOW;
+        }
         curState_ = FbWindowState::STATE_STARTING;
         FloatingBallManager::SetActiveController(this);
     }
