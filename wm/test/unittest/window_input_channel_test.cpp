@@ -14,8 +14,10 @@
  */
 
 #include <gtest/gtest.h>
+#include "mock_session.h"
 #include "mock_window_adapter.h"
 #include "singleton_mocker.h"
+#include "window_scene_session_impl.h"
 #include "window_impl.h"
 #include "window_input_channel.h"
 
@@ -53,6 +55,15 @@ void WindowInputChannelTest::TearDown()
     usleep(WAIT_SYNC_IN_NS);
     window_->Destroy();
     window_ = nullptr;
+}
+
+namespace {
+    std::string g_logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
+        const char* msg)
+    {
+        g_logMsg += msg;
+    }
 }
 
 namespace {
@@ -179,6 +190,65 @@ HWTEST_F(WindowInputChannelTest, GetWindowRect, TestSize.Level1)
     inputChannel->window_ = window_;
     auto rect2 = inputChannel->GetWindowRect();
     ASSERT_EQ(tempTect, rect2);
+}
+
+/**
+ * @tc.name: HandleKeyEventTest
+ * @tc.desc: consume key event when receive callback from input
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowInputChannelTest, HandleKeyEventTest, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    auto keyEvent = MMI::KeyEvent::Create();
+    ASSERT_NE(keyEvent, nullptr);
+    keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_BACK);
+    keyEvent->SetAgentWindowId(0);
+    keyEvent->SetTargetWindowId(0);
+    keyEvent->SetKeyAction(MMI::KeyEvent::KEY_ACTION_UP);
+
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("HandleKeyEventTest");
+    option->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    sptr<WindowSceneSessionImpl> sceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    sceneSession->hostSession_ = session;
+    sceneSession->property_->SetPersistentId(1001);
+
+    sptr<WindowInputChannel> inputChannel = sptr<WindowInputChannel>::MakeSptr(sceneSession);
+    ASSERT_NE(inputChannel, nullptr);
+
+    auto ret = sceneSession->SetDialogBackGestureEnabled(true);
+    EXPECT_EQ(ret, WMError::WM_OK);
+    inputChannel->HandleKeyEvent(keyEvent);
+    EXPECT_TRUE(g_logMsg.find("keyEvent is nullptr") == std::string::npos);
+    EXPECT_TRUE(g_logMsg.find("ConsumeBackEvent") != std::string::npos);
+
+    g_logMsg.clear();
+    ret = sceneSession->SetDialogBackGestureEnabled(false);
+    EXPECT_EQ(ret, WMError::WM_OK);
+    inputChannel->HandleKeyEvent(keyEvent);
+    EXPECT_TRUE(g_logMsg.find("ConsumeBackEvent") == std::string::npos);
+
+    g_logMsg.clear();
+    keyEvent->SetKeyAction(MMI::KeyEvent::KEY_ACTION_UNKNOWN);
+    ret = sceneSession->SetDialogBackGestureEnabled(true);
+    EXPECT_EQ(ret, WMError::WM_OK);
+    inputChannel->HandleKeyEvent(keyEvent);
+    EXPECT_TRUE(g_logMsg.find("ConsumeBackEvent") == std::string::npos);
+
+    g_logMsg.clear();
+    ret = sceneSession->SetDialogBackGestureEnabled(false);
+    EXPECT_EQ(ret, WMError::WM_OK);
+    inputChannel->HandleKeyEvent(keyEvent);
+    EXPECT_TRUE(g_logMsg.find("ConsumeBackEvent") == std::string::npos);
+
+    g_logMsg.clear();
+    inputChannel->Destroy();
+    LOG_SetCallback(nullptr);
 }
 } // namespace
 } // namespace Rosen

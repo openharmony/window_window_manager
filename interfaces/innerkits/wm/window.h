@@ -1881,6 +1881,19 @@ public:
     virtual void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& inputEvent) {}
 
     /**
+     * @brief Consume BackEvent by keyEvent with keyCode_back.
+     */
+    virtual void ConsumeBackEvent() {}
+
+    /**
+     * @brief Determine whether the dialog session back gesture is enabled.
+     */
+    virtual bool IsDialogSessionBackGestureEnabled()
+    {
+        return false;
+    }
+
+    /**
      * @brief Notify KeyEvent to arkui.
      *
      * @param inputEvent Keyboard input event
