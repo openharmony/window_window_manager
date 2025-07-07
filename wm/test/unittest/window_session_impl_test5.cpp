@@ -1762,9 +1762,9 @@ HWTEST_F(WindowSessionImplTest5, OnPointDown, TestSize.Level1)
 
     SessionInfo sessionInfo = {"OnPointDown", "OnPointDown", "OnPointDown"};
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    window->hostSession = session;
+    window->hostSession_ = session;
 
-    EXPECT_CALL(*(session), ProcessPointDownSession(_, _)).Time(1).WillOnce(WSError::WS_OK);
+    EXPECT_CALL(*(session), ProcessPointDownSession(_, _)).Times(1).WillOnce(Return(WSError::WS_OK));
     EXPECT_TRUE(window->OnPointDown(0, 0, 0));
 }
 } // namespace
