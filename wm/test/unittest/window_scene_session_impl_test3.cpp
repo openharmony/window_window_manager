@@ -293,6 +293,39 @@ HWTEST_F(WindowSceneSessionImplTest3, GetWindowFlags, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsApplicationModalSubWindowShowing
+ * @tc.desc: Test whether application modal sub window could be detected correctly
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest3, IsApplicationModalSubWindowShowing, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("IsApplicationModalSubWindowShowing_ParentWindow");
+    option->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(101);
+
+    sptr<WindowOption> subOption = sptr<WindowOption>::MakeSptr();
+    subOption->SetWindowName("IsApplicationModalSubWindowShowing_SubWindow1");
+    subOption->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    sptr<WindowSceneSessionImpl> subWindow1 = sptr<WindowSceneSessionImpl>::MakeSptr(subOption);
+    subWindow1->property_->SetPersistentId(102);
+    subWindow1->property_->SetParentPersistentId(101);
+    window->subWindowSessionMap_[window->GetPersistentId()].push_back(subWindow1);
+    EXPECT_EQ(false, window->IsApplicationModalSubWindowShowing(101));
+
+    subOption->SetWindowName("IsApplicationModalSubWindowShowing_SubWindow2");
+    sptr<WindowSceneSessionImpl> subWindow2 = sptr<WindowSceneSessionImpl>::MakeSptr(subOption);
+    subWindow2->property_->SetPersistentId(103);
+    subWindow2->property_->SetParentPersistentId(101);
+    subWindow2->property_->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL);
+    subWindow2->property_->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL);
+    subWindow2->state_ = WindowState::STATE_SHOWN;
+    window->subWindowSessionMap_[window->GetPersistentId()].push_back(subWindow2);
+    EXPECT_EQ(false, window->IsApplicationModalSubWindowShowing(101));
+}
+
+/**
  * @tc.name: NotifyPrepareClosePiPWindow
  * @tc.desc: NotifyPrepareClosePiPWindow
  * @tc.type: FUNC
