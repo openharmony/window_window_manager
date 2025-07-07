@@ -130,19 +130,19 @@ HWTEST_F(WindowInputChannelTest, HandlePointEvent01, TestSize.Level1)
     auto window = sptr<MockWindow>::MakeSptr();
     sptr<WindowInputChannel> inputChannel = sptr<WindowInputChannel>::MakeSptr(window);
 
-    EXPECT_CALL(*(window), IsAnco()).Time(1).WillOnce(Return(true));
-    EXPECT_CALL(*(window), OnPointDown(_, _, _)).Time(0);
-    inputChannel->HandlePointEvent(pointerEvent);
+    EXPECT_CALL(*(window), IsAnco()).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(*(window), OnPointDown(_, _, _)).Times(0);
+    inputChannel->HandlePointerEvent(pointerEvent);
     testing::Mock::VerifyAndClearExpectations(window);
 
     MMI::PointerEvent::PointerItem item;
-    inputChannel->HandlePointEvent(pointerEvent);
+    inputChannel->HandlePointerEvent(pointerEvent);
 
     pointerEvent->AddPointerItem(item);
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_DOWN);
-    EXPECT_CALL(*(window), IsAnco()).Time(1).WillOnce(Return(true));
-    EXPECT_CALL(*(window), OnPointDown(_, _, _)).Time(1);
-    inputChannel->HandlePointEvent(pointerEvent);
+    EXPECT_CALL(*(window), IsAnco()).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(*(window), OnPointDown(_, _, _)).Times(1);
+    inputChannel->HandlePointerEvent(pointerEvent);
     testing::Mock::VerifyAndClearExpectations(window);
 }
 
