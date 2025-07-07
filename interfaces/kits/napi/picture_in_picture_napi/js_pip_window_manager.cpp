@@ -283,6 +283,7 @@ napi_value JsPipWindowManager::NapiSendTask(napi_env env, PipOption& pipOption)
         mainWindow->UpdatePiPTemplateInfo(pipTemplateInfo);
     };
     if (napi_send_event(env, asyncTask, napi_eprio_immediate, "NapiSendTask") != napi_status::napi_ok) {
+        pipOption.ClearNapiRefs(env);
         napiAsyncTask->Reject(env, CreateJsError(env,
             static_cast<int32_t>(WMError::WM_ERROR_PIP_INTERNAL_ERROR), "Send event failed"));
     }
@@ -308,6 +309,7 @@ napi_value JsPipWindowManager::OnCreatePipController(napi_env env, napi_callback
         std::string errMsg = "Invalid parameters in config, please check if context/xComponentController is null,"
             " or controlGroup mismatch the corresponding pipTemplateType, or defaultWindowSizeType is invalid";
         TLOGE(WmsLogTag::WMS_PIP, "%{public}s", errMsg.c_str());
+        pipOption.ClearNapiRefs(env);
         return NapiThrowInvalidParam(env, errMsg);
     }
     if (argc > 1) {

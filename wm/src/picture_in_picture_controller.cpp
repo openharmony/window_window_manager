@@ -152,15 +152,18 @@ void PictureInPictureController::SetAutoStartEnabled(bool enable)
     uint32_t contentWidth = 0;
     uint32_t contentHeight = 0;
     pipOption_->GetContentSize(contentWidth, contentHeight);
-    mainWindow_->SetAutoStartPiP(enable, priority, contentWidth, contentHeight);
     if (isAutoStartEnabled_) {
         // cache navigation here as we cannot get containerId while BG
         if (!IsPullPiPAndHandleNavigation()) {
             TLOGE(WmsLogTag::WMS_PIP, "Navigation operate failed");
+            isAutoStartEnabled_ = false;
+            mainWindow_->SetAutoStartPiP(false, priority, contentWidth, contentHeight);
             return;
         }
+        mainWindow_->SetAutoStartPiP(true, priority, contentWidth, contentHeight);
         PictureInPictureManager::AttachAutoStartController(handleId_, weakRef_);
     } else {
+        mainWindow_->SetAutoStartPiP(false, priority, contentWidth, contentHeight);
         PictureInPictureManager::DetachAutoStartController(handleId_, weakRef_);
         if (IsTypeNodeEnabled()) {
             TLOGI(WmsLogTag::WMS_PIP, "typeNode enabled");
