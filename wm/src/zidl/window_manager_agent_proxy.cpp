@@ -455,7 +455,7 @@ void WindowManagerAgentProxy::NotifyWindowPidVisibilityChanged(const sptr<Window
 {
     MessageParcel data;
     if (info == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Invalid window pid visibility info.");
+        TLOGE(WmsLogTag::WMS_LIFE, "Invalid window pid visibility info");
         return;
     }
 
