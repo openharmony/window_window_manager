@@ -27,12 +27,17 @@
 
 namespace OHOS::AppExecFwk {
 class IBundleMgr;
+struct AbilityInfo;
+struct BundleInfo;
 } // namespace OHOS::AppExecFwk
 
 namespace OHOS::Rosen {
 class AbilityInfoManager {
 WM_DECLARE_SINGLE_INSTANCE(AbilityInfoManager);
 public:
+    static bool FindAbilityInfo(const AppExecFwk::BundleInfo& bundleInfo,
+        const std::string& moduleName, const std::string& abilityName, AppExecFwk::AbilityInfo& abilityInfo);
+
     void Init(const sptr<AppExecFwk::IBundleMgr>& bundleMgr);
     void SetCurrentUserId(int32_t userId);
 

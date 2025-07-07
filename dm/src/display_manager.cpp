@@ -29,14 +29,42 @@
 
 namespace OHOS::Rosen {
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayManager"};
 const static uint32_t MAX_RETRY_NUM = 6;
 const static uint32_t RETRY_WAIT_MS = 500;
 const static uint32_t MAX_DISPLAY_SIZE = 32;
 const static uint32_t SCB_GET_DISPLAY_INTERVAL_US = 5000;
 const static uint32_t APP_GET_DISPLAY_INTERVAL_US = 25000;
+const static float INVALID_DEFAULT_DENSITY = 1.0f;
+const static uint32_t PIXMAP_VECTOR_SIZE = 2;
 std::atomic<bool> g_dmIsDestroyed = false;
 std::mutex snapBypickerMutex;
+
+bool IsTargetDisplay(const sptr<DisplayInfo>& displayInfo, const Position& globalPosition)
+{
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::DMS, "displayInfo is nullptr while judgging target display!");
+        return false;
+    }
+    int32_t posX = globalPosition.x - displayInfo->GetX();
+    int32_t posY = globalPosition.y - displayInfo->GetY();
+    return !(posX < 0 || posY < 0 || posX >= displayInfo->GetWidth() || posY >= displayInfo->GetHeight());
+}
+
+bool IsInt32AddOverflow(int32_t num1, int32_t num2)
+{
+    if ((num2 > 0 && num1 > INT32_MAX - num2) || (num2 < 0 && num1 < INT32_MIN - num2)) {
+        return true;
+    }
+    return false;
+}
+
+bool IsInt32SubOverflow(int32_t num1, int32_t num2)
+{
+    if ((num2 > 0 && num1 < INT32_MIN + num2) || (num2 < 0 && num1 > INT32_MAX + num2)) {
+        return true;
+    }
+    return false;
+}
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManager)
 
@@ -102,7 +130,13 @@ public:
     sptr<Display> GetPrimaryDisplaySync();
     void OnRemoteDied();
     sptr<CutoutInfo> GetCutoutInfoWithRotation(Rotation rotation);
-    
+    DMError GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
+        ScreenId& screenId, DMRect& screenArea);
+    DMError ConvertRelativeCoordinateToGlobal(const RelativePosition& relativePosition, Position& position);
+    DMError ConvertGlobalCoordinateToRelative(const Position& globalPosition, RelativePosition& relativePosition);
+    DMError ConvertGlobalCoordinateToRelativeWithDisplayId(const Position& globalPosition, DisplayId displayId,
+        RelativePosition& relativePosition);
+
 private:
     void ClearDisplayStateCallback();
     void ClearFoldStatusCallback();
@@ -185,11 +219,11 @@ public:
     void OnDisplayCreate(sptr<DisplayInfo> displayInfo) override
     {
         if (displayInfo == nullptr || displayInfo->GetDisplayId() == DISPLAY_ID_INVALID) {
-            WLOGFE("OnDisplayCreate, displayInfo is invalid.");
+            TLOGE(WmsLogTag::DMS, "displayInfo is invalid.");
             return;
         }
         if (pImpl_ == nullptr) {
-            WLOGFE("OnDisplayCreate, impl is nullptr.");
+            TLOGE(WmsLogTag::DMS, "impl is nullptr.");
             return;
         }
         pImpl_->NotifyDisplayCreate(displayInfo);
@@ -206,11 +240,11 @@ public:
     void OnDisplayDestroy(DisplayId displayId) override
     {
         if (displayId == DISPLAY_ID_INVALID) {
-            WLOGFE("OnDisplayDestroy, displayId is invalid.");
+            TLOGE(WmsLogTag::DMS, "displayId is invalid.");
             return;
         }
         if (pImpl_ == nullptr) {
-            WLOGFE("OnDisplayDestroy, impl is nullptr.");
+            TLOGE(WmsLogTag::DMS, "impl is nullptr.");
             return;
         }
         pImpl_->NotifyDisplayDestroy(displayId);
@@ -227,14 +261,14 @@ public:
     void OnDisplayChange(sptr<DisplayInfo> displayInfo, DisplayChangeEvent event) override
     {
         if (displayInfo == nullptr || displayInfo->GetDisplayId() == DISPLAY_ID_INVALID) {
-            WLOGFE("OnDisplayChange, displayInfo is invalid.");
+            TLOGE(WmsLogTag::DMS, "displayInfo is invalid.");
             return;
         }
         if (pImpl_ == nullptr) {
-            WLOGFE("OnDisplayChange, impl is nullptr.");
+            TLOGE(WmsLogTag::DMS, "impl is nullptr.");
             return;
         }
-        WLOGD("OnDisplayChange. display %{public}" PRIu64", event %{public}u", displayInfo->GetDisplayId(), event);
+        TLOGD(WmsLogTag::DMS, "display %{public}" PRIu64", event %{public}u", displayInfo->GetDisplayId(), event);
         pImpl_->NotifyDisplayChange(displayInfo);
         std::set<sptr<IDisplayListener>> displayListeners;
         {
@@ -462,10 +496,10 @@ bool DisplayManager::Impl::CheckSizeValid(const Media::Size& size, int32_t oriHe
 void DisplayManager::Impl::ClearDisplayStateCallback()
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    WLOGFD("[UL_POWER]Clear displaystatecallback enter");
+    TLOGD(WmsLogTag::DMS, "[UL_POWER]Clear displaystatecallback enter");
     displayStateCallback_ = nullptr;
     if (displayStateAgent_ != nullptr) {
-        WLOGFI("[UL_POWER]UnregisterDisplayManagerAgent enter and displayStateAgent_ is cleared");
+        TLOGI(WmsLogTag::DMS, "[UL_POWER]UnregisterDisplayManagerAgent enter and displayStateAgent_ is cleared");
         SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(displayStateAgent_,
             DisplayManagerAgentType::DISPLAY_STATE_LISTENER);
         displayStateAgent_ = nullptr;
@@ -480,10 +514,10 @@ void DisplayManager::Impl::ClearFoldStatusCallback()
         res = SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(foldStatusListenerAgent_,
             DisplayManagerAgentType::FOLD_STATUS_CHANGED_LISTENER);
         foldStatusListenerAgent_ = nullptr;
-        WLOGI("ClearFoldStatusCallback foldStatusListenerAgent_ is nullptr !");
+        TLOGI(WmsLogTag::DMS, "ClearFoldStatusCallback foldStatusListenerAgent_ is nullptr !");
     }
     if (res != DMError::DM_OK) {
-        WLOGFW("UnregisterDisplayManagerAgent FOLD_STATUS_CHANGED_LISTENER failed !");
+        TLOGW(WmsLogTag::DMS, "UnregisterDisplayManagerAgent FOLD_STATUS_CHANGED_LISTENER failed !");
     }
 }
 
@@ -497,9 +531,9 @@ void DisplayManager::Impl::ClearFoldAngleCallback()
         foldAngleListenerAgent_, DisplayManagerAgentType::FOLD_ANGLE_CHANGED_LISTENER);
     foldAngleListenerAgent_ = nullptr;
     if (res != DMError::DM_OK) {
-        WLOGFE("ClearFoldAngleCallback FOLD_ANGLE_CHANGED_LISTENER failed !");
+        TLOGE(WmsLogTag::DMS, "ClearFoldAngleCallback FOLD_ANGLE_CHANGED_LISTENER failed !");
     } else {
-        WLOGI("ClearFoldAngleCallback foldAngleListenerAgent_!");
+        TLOGI(WmsLogTag::DMS, "ClearFoldAngleCallback foldAngleListenerAgent_!");
     }
 }
 
@@ -513,9 +547,9 @@ void DisplayManager::Impl::ClearCaptureStatusCallback()
         captureStatusListenerAgent_, DisplayManagerAgentType::CAPTURE_STATUS_CHANGED_LISTENER);
     captureStatusListenerAgent_ = nullptr;
     if (res != DMError::DM_OK) {
-        WLOGFE("ClearCaptureStatusCallback FOLD_ANGLE_CHANGED_LISTENER failed !");
+        TLOGE(WmsLogTag::DMS, "ClearCaptureStatusCallback FOLD_ANGLE_CHANGED_LISTENER failed !");
     } else {
-        WLOGI("ClearCaptureStatusCallback captureStatusListenerAgent_!");
+        TLOGI(WmsLogTag::DMS, "ClearCaptureStatusCallback captureStatusListenerAgent_!");
     }
 }
 
@@ -527,16 +561,16 @@ void DisplayManager::Impl::ClearDisplayModeCallback()
         res = SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(displayModeListenerAgent_,
             DisplayManagerAgentType::DISPLAY_MODE_CHANGED_LISTENER);
         displayModeListenerAgent_ = nullptr;
-        WLOGI("ClearDisplayStateCallback displayModeListenerAgent_ is nullptr !");
+        TLOGI(WmsLogTag::DMS, "ClearDisplayStateCallback displayModeListenerAgent_ is nullptr !");
     }
     if (res != DMError::DM_OK) {
-        WLOGFW("UnregisterDisplayManagerAgent DISPLAY_MODE_CHANGED_LISTENER failed !");
+        TLOGW(WmsLogTag::DMS, "UnregisterDisplayManagerAgent DISPLAY_MODE_CHANGED_LISTENER failed !");
     }
 }
 
 void DisplayManager::Impl::Clear()
 {
-    WLOGFI("Clear listener");
+    TLOGI(WmsLogTag::DMS, "Clear listener");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     DMError res = DMError::DM_OK;
     if (displayManagerListener_ != nullptr) {
@@ -545,7 +579,7 @@ void DisplayManager::Impl::Clear()
     }
     displayManagerListener_ = nullptr;
     if (res != DMError::DM_OK) {
-        WLOGFW("UnregisterDisplayManagerAgent DISPLAY_EVENT_LISTENER failed !");
+        TLOGW(WmsLogTag::DMS, "UnregisterDisplayManagerAgent DISPLAY_EVENT_LISTENER failed !");
     }
     res = DMError::DM_OK;
     if (powerEventListenerAgent_ != nullptr) {
@@ -554,7 +588,7 @@ void DisplayManager::Impl::Clear()
     }
     powerEventListenerAgent_ = nullptr;
     if (res != DMError::DM_OK) {
-        WLOGFW("UnregisterDisplayManagerAgent DISPLAY_POWER_EVENT_LISTENER failed !");
+        TLOGW(WmsLogTag::DMS, "UnregisterDisplayManagerAgent DISPLAY_POWER_EVENT_LISTENER failed !");
     }
     ClearDisplayStateCallback();
     ClearFoldStatusCallback();
@@ -570,13 +604,13 @@ DisplayManager::Impl::~Impl()
 
 DisplayManager::DisplayManager() : pImpl_(new Impl(mutex_))
 {
-    WLOGFD("Create instance");
+    TLOGD(WmsLogTag::DMS, "Create instance");
     g_dmIsDestroyed = false;
 }
 
 DisplayManager::~DisplayManager()
 {
-    WLOGFI("Destroy instance");
+    TLOGI(WmsLogTag::DMS, "Destroy instance");
     g_dmIsDestroyed = true;
 }
 
@@ -625,11 +659,11 @@ sptr<Display> DisplayManager::Impl::GetDefaultDisplaySync()
             break;
         }
         retryTimes++;
-        WLOGFW("Current get display info is null, retry %{public}u times", retryTimes);
+        TLOGW(WmsLogTag::DMS, "Current get display info is null, retry %{public}u times", retryTimes);
         std::this_thread::sleep_for(std::chrono::milliseconds(RETRY_WAIT_MS));
     }
     if (retryTimes >= MAX_RETRY_NUM || displayInfo == nullptr) {
-        WLOGFE("Get display info failed, please check whether the onscreenchange event is triggered");
+        TLOGE(WmsLogTag::DMS, "Get display info failed, please check whether the onscreenchange event is triggered");
         return nullptr;
     }
 
@@ -646,7 +680,7 @@ sptr<Display> DisplayManager::Impl::GetDefaultDisplaySync()
 
 sptr<Display> DisplayManager::Impl::GetDisplayById(DisplayId displayId)
 {
-    WLOGFD("GetDisplayById start, displayId: %{public}" PRIu64" ", displayId);
+    TLOGD(WmsLogTag::DMS, "GetDisplayById start, displayId: %{public}" PRIu64" ", displayId);
     auto currentTime = std::chrono::steady_clock::now();
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -666,7 +700,7 @@ sptr<Display> DisplayManager::Impl::GetDisplayById(DisplayId displayId)
     }
     sptr<DisplayInfo> displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayInfo(displayId);
     if (displayInfo == nullptr) {
-        WLOGFW("display null id : %{public}" PRIu64" ", displayId);
+        TLOGW(WmsLogTag::DMS, "display null id : %{public}" PRIu64" ", displayId);
         return nullptr;
     }
 
@@ -684,11 +718,11 @@ sptr<Display> DisplayManager::Impl::GetDisplayById(DisplayId displayId)
 
 sptr<DisplayInfo> DisplayManager::Impl::GetVisibleAreaDisplayInfoById(DisplayId displayId)
 {
-    WLOGFD("start, displayId: %{public}" PRIu64" ", displayId);
+    TLOGD(WmsLogTag::DMS, "start, displayId: %{public}" PRIu64" ", displayId);
     sptr<DisplayInfo> displayInfo =
         SingletonContainer::Get<DisplayManagerAdapter>().GetVisibleAreaDisplayInfoById(displayId);
     if (displayInfo == nullptr) {
-        WLOGFW("display null id : %{public}" PRIu64" ", displayId);
+        TLOGW(WmsLogTag::DMS, "display null id : %{public}" PRIu64" ", displayId);
         return nullptr;
     }
     return displayInfo;
@@ -697,7 +731,7 @@ sptr<DisplayInfo> DisplayManager::Impl::GetVisibleAreaDisplayInfoById(DisplayId 
 sptr<Display> DisplayManager::GetDisplayById(DisplayId displayId)
 {
     if (g_dmIsDestroyed) {
-        WLOGFI("DM has been destructed");
+        TLOGI(WmsLogTag::DMS, "DM has been destructed");
         return nullptr;
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -707,7 +741,7 @@ sptr<Display> DisplayManager::GetDisplayById(DisplayId displayId)
 sptr<DisplayInfo> DisplayManager::GetVisibleAreaDisplayInfoById(DisplayId displayId)
 {
     if (g_dmIsDestroyed) {
-        WLOGFI("DM has been destructed");
+        TLOGI(WmsLogTag::DMS, "DM has been destructed");
         return nullptr;
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -727,12 +761,12 @@ DMError DisplayManager::Impl::GetExpandAvailableArea(DisplayId displayId, DMRect
 sptr<Display> DisplayManager::GetDisplayByScreen(ScreenId screenId)
 {
     if (screenId == SCREEN_ID_INVALID) {
-        WLOGFE("screenId is invalid.");
+        TLOGE(WmsLogTag::DMS, "screenId is invalid.");
         return nullptr;
     }
     sptr<Display> display = pImpl_->GetDisplayByScreenId(screenId);
     if (display == nullptr) {
-        WLOGFE("get display by screenId failed. screen %{public}" PRIu64"", screenId);
+        TLOGE(WmsLogTag::DMS, "get display by screenId failed. screen %{public}" PRIu64"", screenId);
     }
     return display;
 }
@@ -741,12 +775,12 @@ sptr<Display> DisplayManager::Impl::GetDisplayByScreenId(ScreenId screenId)
 {
     sptr<DisplayInfo> displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayInfoByScreenId(screenId);
     if (displayInfo == nullptr) {
-        WLOGFE("get display by screenId: displayInfo is null");
+        TLOGE(WmsLogTag::DMS, "get display by screenId: displayInfo is null");
         return nullptr;
     }
     DisplayId displayId = displayInfo->GetDisplayId();
     if (displayId == DISPLAY_ID_INVALID) {
-        WLOGFE("get display by screenId: invalid displayInfo");
+        TLOGE(WmsLogTag::DMS, "get display by screenId: invalid displayInfo");
         return nullptr;
     }
 
@@ -759,41 +793,59 @@ sptr<Display> DisplayManager::Impl::GetDisplayByScreenId(ScreenId screenId)
 }
 
 std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId displayId,
-    DmErrorCode* errorCode, bool isUseDma)
+    DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen)
 {
     if (displayId == DISPLAY_ID_INVALID) {
-        WLOGFE("displayId invalid!");
+        TLOGE(WmsLogTag::DMS, "displayId invalid!");
         return nullptr;
     }
     std::shared_ptr<Media::PixelMap> screenShot =
-        SingletonContainer::Get<DisplayManagerAdapter>().GetDisplaySnapshot(displayId, errorCode, isUseDma);
+        SingletonContainer::Get<DisplayManagerAdapter>().GetDisplaySnapshot(displayId, errorCode,
+            isUseDma, isCaptureFullOfScreen);
     if (screenShot == nullptr) {
-        WLOGFE("DisplayManager::GetScreenshot failed!");
+        TLOGE(WmsLogTag::DMS, "failed!");
         return nullptr;
     }
 
     return screenShot;
 }
 
+std::vector<std::shared_ptr<Media::PixelMap>> DisplayManager::GetScreenHDRshot(DisplayId displayId,
+    DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen)
+{
+    if (displayId == DISPLAY_ID_INVALID) {
+        TLOGE(WmsLogTag::DMS, "displayId invalid!");
+        return { nullptr, nullptr };
+    }
+    const std::vector<std::shared_ptr<Media::PixelMap>>& screenShotVec =
+        SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayHDRSnapshot(displayId, errorCode,
+            isUseDma, isCaptureFullOfScreen);
+    if (screenShotVec.size() != PIXMAP_VECTOR_SIZE) {
+        TLOGE(WmsLogTag::DMS, "failed!");
+        return { nullptr, nullptr };
+    }
+    return screenShotVec;
+}
+
 std::shared_ptr<Media::PixelMap> DisplayManager::GetSnapshotByPicker(Media::Rect &rect, DmErrorCode* errorCode)
 {
     std::unique_lock<std::mutex> lock(snapBypickerMutex, std::defer_lock);
     if (!lock.try_lock()) {
-        WLOGFE("DisplayManager::GetSnapshotByPicker try_lock failed!");
+        TLOGE(WmsLogTag::DMS, "try_lock failed!");
         return nullptr;
     }
     std::shared_ptr<Media::PixelMap> screenShot =
         SingletonContainer::Get<DisplayManagerAdapter>().GetSnapshotByPicker(rect, errorCode);
     lock.unlock();
     if (screenShot == nullptr) {
-        WLOGFE("DisplayManager::GetSnapshotByPicker failed!");
+        TLOGE(WmsLogTag::DMS, "failed!");
         return nullptr;
     }
-    WLOGFI("snapshot area left:%{public}d, top:%{public}d, width:%{public}d, height:%{public}d",
+    TLOGI(WmsLogTag::DMS, "snapshot area left:%{public}d, top:%{public}d, width:%{public}d, height:%{public}d",
         rect.left, rect.top, rect.width, rect.height);
     // create crop pixel map
     if (rect.width == 0 || rect.height == 0) {
-        WLOGFE("width or height is invalid!");
+        TLOGE(WmsLogTag::DMS, "width or height is invalid!");
         return nullptr;
     }
     Media::InitializationOptions opt;
@@ -803,7 +855,7 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetSnapshotByPicker(Media::Rect
     opt.editable = false;
     auto pixelMap = Media::PixelMap::Create(*screenShot, rect, opt);
     if (pixelMap == nullptr) {
-        WLOGFE("Media pixel map create failed");
+        TLOGE(WmsLogTag::DMS, "Media pixel map create failed");
         return nullptr;
     }
     return pixelMap;
@@ -812,22 +864,23 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetSnapshotByPicker(Media::Rect
 std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshotwithConfig(const SnapShotConfig &snapShotConfig,
     DmErrorCode* errorCode, bool isUseDma)
 {
-    std::shared_ptr<Media::PixelMap> screenShot = GetScreenshot(snapShotConfig.displayId_, errorCode, isUseDma);
+    std::shared_ptr<Media::PixelMap> screenShot = GetScreenshot(snapShotConfig.displayId_, errorCode, isUseDma,
+        snapShotConfig.isCaptureFullOfScreen_);
     if (screenShot == nullptr) {
-        WLOGFE("DisplayManager::GetScreenshot failed!");
+        TLOGE(WmsLogTag::DMS, "failed!");
         return nullptr;
     }
     // check parameters
     int32_t oriHeight = screenShot->GetHeight();
     int32_t oriWidth = screenShot->GetWidth();
     if (!pImpl_->CheckRectValid(snapShotConfig.imageRect_, oriHeight, oriWidth)) {
-        WLOGFE("rect invalid! left %{public}d, top %{public}d, w %{public}d, h %{public}d",
+        TLOGE(WmsLogTag::DMS, "rect invalid! left %{public}d, top %{public}d, w %{public}d, h %{public}d",
             snapShotConfig.imageRect_.left, snapShotConfig.imageRect_.top,
             snapShotConfig.imageRect_.width, snapShotConfig.imageRect_.height);
         return nullptr;
     }
     if (!pImpl_->CheckSizeValid(snapShotConfig.imageSize_, oriHeight, oriWidth)) {
-        WLOGFE("size invalid! w %{public}d, h %{public}d", snapShotConfig.imageSize_.width,
+        TLOGE(WmsLogTag::DMS, "size invalid! w %{public}d, h %{public}d", snapShotConfig.imageSize_.width,
             snapShotConfig.imageSize_.height);
         return nullptr;
     }
@@ -839,7 +892,7 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshotwithConfig(const S
     opt.editable = false;
     auto pixelMap = Media::PixelMap::Create(*screenShot, snapShotConfig.imageRect_, opt);
     if (pixelMap == nullptr) {
-        WLOGFE("Media::PixelMap::Create failed!");
+        TLOGE(WmsLogTag::DMS, "Media::PixelMap::Create failed!");
         return nullptr;
     }
     std::shared_ptr<Media::PixelMap> dstScreenshot(pixelMap.release());
@@ -851,7 +904,7 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId display
 {
     std::shared_ptr<Media::PixelMap> screenShot = GetScreenshot(displayId, errorCode);
     if (screenShot == nullptr) {
-        WLOGFE("DisplayManager::GetScreenshot failed!");
+        TLOGE(WmsLogTag::DMS, "failed!");
         return nullptr;
     }
 
@@ -859,12 +912,12 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId display
     int32_t oriHeight = screenShot->GetHeight();
     int32_t oriWidth = screenShot->GetWidth();
     if (!pImpl_->CheckRectValid(rect, oriHeight, oriWidth)) {
-        WLOGFE("rect invalid! left %{public}d, top %{public}d, w %{public}d, h %{public}d",
+        TLOGE(WmsLogTag::DMS, "rect invalid! left %{public}d, top %{public}d, w %{public}d, h %{public}d",
             rect.left, rect.top, rect.width, rect.height);
         return nullptr;
     }
     if (!pImpl_->CheckSizeValid(size, oriHeight, oriWidth)) {
-        WLOGFE("size invalid! w %{public}d, h %{public}d", rect.width, rect.height);
+        TLOGE(WmsLogTag::DMS, "size invalid! w %{public}d, h %{public}d", rect.width, rect.height);
         return nullptr;
     }
 
@@ -876,7 +929,7 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId display
     opt.editable = false;
     auto pixelMap = Media::PixelMap::Create(*screenShot, rect, opt);
     if (pixelMap == nullptr) {
-        WLOGFE("Media::PixelMap::Create failed!");
+        TLOGE(WmsLogTag::DMS, "Media::PixelMap::Create failed!");
         return nullptr;
     }
     std::shared_ptr<Media::PixelMap> dstScreenshot(pixelMap.release());
@@ -892,7 +945,7 @@ sptr<Display> DisplayManager::GetDefaultDisplay()
 void DisplayManager::AddDisplayIdFromAms(DisplayId displayId, const wptr<IRemoteObject>& abilityToken)
 {
     if (abilityToken == nullptr || displayId == DISPLAY_ID_INVALID) {
-        WLOGFE("abilityToken is nullptr or display id invalid.");
+        TLOGE(WmsLogTag::DMS, "abilityToken is nullptr or display id invalid.");
         return;
     }
     std::lock_guard<std::mutex> lock(displayOperateMutex_);
@@ -901,7 +954,7 @@ void DisplayManager::AddDisplayIdFromAms(DisplayId displayId, const wptr<IRemote
             return item.first == abilityToken && item.second == displayId;
     });
     if (iter != displayIdList_.end()) {
-        WLOGFI("abilityToken and display[%{public}" PRIu64"] has been added.", displayId);
+        TLOGI(WmsLogTag::DMS, "abilityToken and display[%{public}" PRIu64"] has been added.", displayId);
     } else {
         displayIdList_.push_back(std::make_pair(abilityToken, displayId));
     }
@@ -911,12 +964,12 @@ void DisplayManager::AddDisplayIdFromAms(DisplayId displayId, const wptr<IRemote
 void DisplayManager::RemoveDisplayIdFromAms(const wptr<IRemoteObject>& abilityToken)
 {
     if (abilityToken == nullptr) {
-        WLOGFE("abilityToken is nullptr.");
+        TLOGE(WmsLogTag::DMS, "abilityToken is nullptr.");
         return;
     }
     std::lock_guard<std::mutex> lock(displayOperateMutex_);
     if (displayIdList_.empty()) {
-        WLOGFI("displayIdList_ is empty.");
+        TLOGI(WmsLogTag::DMS, "displayIdList_ is empty.");
         return;
     }
     auto iter = std::find_if(displayIdList_.begin(), displayIdList_.end(),
@@ -934,7 +987,7 @@ DisplayId DisplayManager::GetCallingAbilityDisplayId()
     DisplayId displayId = DISPLAY_ID_INVALID;
     std::lock_guard<std::mutex> lock(displayOperateMutex_);
     if (displayIdList_.empty()) {
-        WLOGFI("displayIdList is empty.");
+        TLOGI(WmsLogTag::DMS, "displayIdList is empty.");
         return displayId;
     }
     int displayCount = 0;
@@ -959,9 +1012,9 @@ void DisplayManager::ShowDisplayIdList(bool isShowLog)
         oss << iter.second << ",";
     }
     if (isShowLog) {
-        WLOGFI("%{public}s]", oss.str().c_str());
+        TLOGI(WmsLogTag::DMS, "%{public}s]", oss.str().c_str());
     } else {
-        WLOGFD("%{public}s]", oss.str().c_str());
+        TLOGD(WmsLogTag::DMS, "%{public}s]", oss.str().c_str());
     }
 }
 
@@ -971,13 +1024,13 @@ sptr<Display> DisplayManager::GetDefaultDisplaySync(bool isFromNapi)
         sptr<Display> display = nullptr;
         DisplayId displayId = GetCallingAbilityDisplayId();
         if (displayId != DISPLAY_ID_INVALID) {
-            WLOGFD("displayId:%{public}" PRIu64, displayId);
+            TLOGD(WmsLogTag::DMS, "displayId:%{public}" PRIu64, displayId);
             display = pImpl_->GetDisplayById(displayId);
         }
         if (display != nullptr) {
             return display;
         } else {
-            WLOGFI("get displayId:%{public}" PRIu64" info nullptr.", displayId);
+            TLOGI(WmsLogTag::DMS, "get displayId:%{public}" PRIu64" info nullptr.", displayId);
         }
     }
     return pImpl_->GetDefaultDisplaySync();
@@ -1000,7 +1053,7 @@ std::vector<DisplayPhysicalResolution> DisplayManager::GetAllDisplayPhysicalReso
 
 std::vector<sptr<Display>> DisplayManager::GetAllDisplays()
 {
-    WLOGFD("GetAllDisplays start");
+    TLOGD(WmsLogTag::DMS, "GetAllDisplays start");
     std::vector<sptr<Display>> res;
     auto displayIds = GetAllDisplayIds();
     for (auto displayId : displayIds) {
@@ -1008,7 +1061,7 @@ std::vector<sptr<Display>> DisplayManager::GetAllDisplays()
         if (display != nullptr) {
             res.emplace_back(display);
         } else {
-            WLOGFE("DisplayManager::GetAllDisplays display %" PRIu64" nullptr!", displayId);
+            TLOGE(WmsLogTag::DMS, "DisplayManager::GetAllDisplays display %" PRIu64" nullptr!", displayId);
         }
     }
     return res;
@@ -1150,7 +1203,7 @@ DMError DisplayManager::Impl::RegisterDisplayListener(sptr<IDisplayListener> lis
             DisplayManagerAgentType::DISPLAY_EVENT_LISTENER);
     }
     if (ret != DMError::DM_OK) {
-        WLOGFW("RegisterDisplayManagerAgent failed !");
+        TLOGW(WmsLogTag::DMS, "RegisterDisplayManagerAgent failed !");
         displayManagerListener_ = nullptr;
     } else {
         displayListeners_.insert(listener);
@@ -1185,7 +1238,7 @@ void DisplayManager::Impl::NotifyPrivateStateWindowListChanged(DisplayId id, std
 DMError DisplayManager::RegisterPrivateWindowListener(sptr<IPrivateWindowListener> listener)
 {
     if (listener == nullptr) {
-        WLOGFE("RegisterPrivateWindowListener listener is nullptr.");
+        TLOGE(WmsLogTag::DMS, "listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->RegisterPrivateWindowListener(listener);
@@ -1194,7 +1247,7 @@ DMError DisplayManager::RegisterPrivateWindowListener(sptr<IPrivateWindowListene
 DMError DisplayManager::UnregisterPrivateWindowListener(sptr<IPrivateWindowListener> listener)
 {
     if (listener == nullptr) {
-        WLOGFE("UnregisterPrivateWindowListener listener is nullptr.");
+        TLOGE(WmsLogTag::DMS, "listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->UnregisterPrivateWindowListener(listener);
@@ -1203,7 +1256,7 @@ DMError DisplayManager::UnregisterPrivateWindowListener(sptr<IPrivateWindowListe
 DMError DisplayManager::RegisterPrivateWindowListChangeListener(sptr<IPrivateWindowListChangeListener> listener)
 {
     if (listener == nullptr) {
-        WLOGFE("RegisterPrivateWindowListChangeListener listener is nullptr.");
+        TLOGE(WmsLogTag::DMS, "listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->RegisterPrivateWindowListChangeListener(listener);
@@ -1212,7 +1265,7 @@ DMError DisplayManager::RegisterPrivateWindowListChangeListener(sptr<IPrivateWin
 DMError DisplayManager::UnregisterPrivateWindowListChangeListener(sptr<IPrivateWindowListChangeListener> listener)
 {
     if (listener == nullptr) {
-        WLOGFE("UnregisterPrivateWindowListChangeListener listener is nullptr.");
+        TLOGE(WmsLogTag::DMS, "listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->UnregisterPrivateWindowListChangeListener(listener);
@@ -1229,10 +1282,10 @@ DMError DisplayManager::Impl::RegisterPrivateWindowListener(sptr<IPrivateWindowL
             DisplayManagerAgentType::PRIVATE_WINDOW_LISTENER);
     }
     if (ret != DMError::DM_OK) {
-        WLOGFW("RegisterDisplayManagerAgent failed !");
+        TLOGW(WmsLogTag::DMS, "RegisterDisplayManagerAgent failed !");
         privateWindowListenerAgent_ = nullptr;
     } else {
-        WLOGI("privateWindowListener register success");
+        TLOGI(WmsLogTag::DMS, "privateWindowListener register success");
         privateWindowListeners_.insert(listener);
     }
     return ret;
@@ -1243,7 +1296,7 @@ DMError DisplayManager::Impl::UnregisterPrivateWindowListener(sptr<IPrivateWindo
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = std::find(privateWindowListeners_.begin(), privateWindowListeners_.end(), listener);
     if (iter == privateWindowListeners_.end()) {
-        WLOGFE("could not find this listener");
+        TLOGE(WmsLogTag::DMS, "could not find this listener");
         return DMError::DM_ERROR_NULLPTR;
     }
     privateWindowListeners_.erase(iter);
@@ -1268,10 +1321,10 @@ DMError DisplayManager::Impl::RegisterPrivateWindowListChangeListener(sptr<IPriv
             DisplayManagerAgentType::PRIVATE_WINDOW_LIST_LISTENER);
     }
     if (ret != DMError::DM_OK) {
-        WLOGFW("RegisterDisplayManagerAgent failed !");
+        TLOGW(WmsLogTag::DMS, "RegisterDisplayManagerAgent failed !");
         privateWindowListChangeListenerAgent_ = nullptr;
     } else {
-        WLOGI("privateWindowListChangeListener register success");
+        TLOGI(WmsLogTag::DMS, "privateWindowListChangeListener register success");
         privateWindowListChangeListeners_.insert(listener);
     }
     return ret;
@@ -1282,7 +1335,7 @@ DMError DisplayManager::Impl::UnregisterPrivateWindowListChangeListener(sptr<IPr
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = std::find(privateWindowListChangeListeners_.begin(), privateWindowListChangeListeners_.end(), listener);
     if (iter == privateWindowListChangeListeners_.end()) {
-        WLOGFE("could not find this listener");
+        TLOGE(WmsLogTag::DMS, "could not find this listener");
         return DMError::DM_ERROR_NULLPTR;
     }
     privateWindowListChangeListeners_.erase(iter);
@@ -1299,7 +1352,7 @@ DMError DisplayManager::Impl::UnregisterPrivateWindowListChangeListener(sptr<IPr
 DMError DisplayManager::RegisterDisplayListener(sptr<IDisplayListener> listener)
 {
     if (listener == nullptr) {
-        WLOGFE("RegisterDisplayListener listener is nullptr.");
+        TLOGE(WmsLogTag::DMS, "RegisterDisplayListener listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->RegisterDisplayListener(listener);
@@ -1310,7 +1363,7 @@ DMError DisplayManager::Impl::UnregisterDisplayListener(sptr<IDisplayListener> l
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = std::find(displayListeners_.begin(), displayListeners_.end(), listener);
     if (iter == displayListeners_.end()) {
-        WLOGFE("could not find this listener");
+        TLOGE(WmsLogTag::DMS, "could not find this listener");
         return DMError::DM_ERROR_NULLPTR;
     }
     displayListeners_.erase(iter);
@@ -1327,7 +1380,7 @@ DMError DisplayManager::Impl::UnregisterDisplayListener(sptr<IDisplayListener> l
 DMError DisplayManager::UnregisterDisplayListener(sptr<IDisplayListener> listener)
 {
     if (listener == nullptr) {
-        WLOGFW("UnregisterDisplayListener listener is nullptr.");
+        TLOGW(WmsLogTag::DMS, "UnregisterDisplayListener listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->UnregisterDisplayListener(listener);
@@ -1344,19 +1397,19 @@ DMError DisplayManager::Impl::RegisterDisplayPowerEventListener(sptr<IDisplayPow
             DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER);
     }
     if (ret != DMError::DM_OK) {
-        WLOGFW("RegisterDisplayManagerAgent failed !");
+        TLOGW(WmsLogTag::DMS, "RegisterDisplayManagerAgent failed !");
         powerEventListenerAgent_ = nullptr;
     } else {
         powerEventListeners_.insert(listener);
     }
-    WLOGFD("RegisterDisplayPowerEventListener end");
+    TLOGD(WmsLogTag::DMS, "end");
     return ret;
 }
 
 DMError DisplayManager::RegisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener)
 {
     if (listener == nullptr) {
-        WLOGFE("listener is nullptr");
+        TLOGE(WmsLogTag::DMS, "listener is nullptr");
         return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->RegisterDisplayPowerEventListener(listener);
@@ -1367,7 +1420,7 @@ DMError DisplayManager::Impl::UnregisterDisplayPowerEventListener(sptr<IDisplayP
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = std::find(powerEventListeners_.begin(), powerEventListeners_.end(), listener);
     if (iter == powerEventListeners_.end()) {
-        WLOGFE("could not find this listener");
+        TLOGE(WmsLogTag::DMS, "could not find this listener");
         return DMError::DM_ERROR_NULLPTR;
     }
     powerEventListeners_.erase(iter);
@@ -1378,14 +1431,14 @@ DMError DisplayManager::Impl::UnregisterDisplayPowerEventListener(sptr<IDisplayP
             DisplayManagerAgentType::DISPLAY_POWER_EVENT_LISTENER);
         powerEventListenerAgent_ = nullptr;
     }
-    WLOGFD("UnregisterDisplayPowerEventListener end");
+    TLOGD(WmsLogTag::DMS, "end");
     return ret;
 }
 
 DMError DisplayManager::UnregisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener)
 {
     if (listener == nullptr) {
-        WLOGFE("listener is nullptr");
+        TLOGE(WmsLogTag::DMS, "listener is nullptr");
         return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->UnregisterDisplayPowerEventListener(listener);
@@ -1402,7 +1455,7 @@ DMError DisplayManager::Impl::RegisterScreenshotListener(sptr<IScreenshotListene
             DisplayManagerAgentType::SCREENSHOT_EVENT_LISTENER);
     }
     if (ret != DMError::DM_OK) {
-        WLOGFW("RegisterDisplayManagerAgent failed !");
+        TLOGW(WmsLogTag::DMS, "RegisterDisplayManagerAgent failed !");
         screenshotListenerAgent_ = nullptr;
     } else {
         screenshotListeners_.insert(listener);
@@ -1413,7 +1466,7 @@ DMError DisplayManager::Impl::RegisterScreenshotListener(sptr<IScreenshotListene
 DMError DisplayManager::RegisterScreenshotListener(sptr<IScreenshotListener> listener)
 {
     if (listener == nullptr) {
-        WLOGFE("RegisterScreenshotListener listener is nullptr.");
+        TLOGE(WmsLogTag::DMS, "listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->RegisterScreenshotListener(listener);
@@ -1424,7 +1477,7 @@ DMError DisplayManager::Impl::UnregisterScreenshotListener(sptr<IScreenshotListe
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = std::find(screenshotListeners_.begin(), screenshotListeners_.end(), listener);
     if (iter == screenshotListeners_.end()) {
-        WLOGFE("could not find this listener");
+        TLOGE(WmsLogTag::DMS, "could not find this listener");
         return DMError::DM_ERROR_NULLPTR;
     }
     screenshotListeners_.erase(iter);
@@ -1441,7 +1494,7 @@ DMError DisplayManager::Impl::UnregisterScreenshotListener(sptr<IScreenshotListe
 DMError DisplayManager::UnregisterScreenshotListener(sptr<IScreenshotListener> listener)
 {
     if (listener == nullptr) {
-        WLOGFE("UnregisterScreenshotListener listener is nullptr.");
+        TLOGE(WmsLogTag::DMS, "listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->UnregisterScreenshotListener(listener);
@@ -1462,7 +1515,7 @@ void DisplayManager::Impl::NotifyFoldAngleChanged(std::vector<float> foldAngles)
 DMError DisplayManager::RegisterFoldAngleListener(sptr<IFoldAngleListener> listener)
 {
     if (listener == nullptr) {
-        WLOGFE("IFoldAngleListener listener is nullptr.");
+        TLOGE(WmsLogTag::DMS, "IFoldAngleListener listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->RegisterFoldAngleListener(listener);
@@ -1479,10 +1532,10 @@ DMError DisplayManager::Impl::RegisterFoldAngleListener(sptr<IFoldAngleListener>
             DisplayManagerAgentType::FOLD_ANGLE_CHANGED_LISTENER);
     }
     if (ret != DMError::DM_OK) {
-        WLOGFW("RegisterFoldAngleListener failed !");
+        TLOGW(WmsLogTag::DMS, "failed !");
         foldAngleListenerAgent_ = nullptr;
     } else {
-        WLOGD("IFoldAngleListener register success");
+        TLOGD(WmsLogTag::DMS, "IFoldAngleListener register success");
         foldAngleListeners_.insert(listener);
     }
     return ret;
@@ -1491,7 +1544,7 @@ DMError DisplayManager::Impl::RegisterFoldAngleListener(sptr<IFoldAngleListener>
 DMError DisplayManager::UnregisterFoldAngleListener(sptr<IFoldAngleListener> listener)
 {
     if (listener == nullptr) {
-        WLOGFE("UnregisterFoldAngleListener listener is nullptr.");
+        TLOGE(WmsLogTag::DMS, "listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->UnregisterFoldAngleListener(listener);
@@ -1502,7 +1555,7 @@ DMError DisplayManager::Impl::UnregisterFoldAngleListener(sptr<IFoldAngleListene
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = std::find(foldAngleListeners_.begin(), foldAngleListeners_.end(), listener);
     if (iter == foldAngleListeners_.end()) {
-        WLOGFE("could not find this listener");
+        TLOGE(WmsLogTag::DMS, "could not find this listener");
         return DMError::DM_ERROR_NULLPTR;
     }
     foldAngleListeners_.erase(iter);
@@ -1531,7 +1584,7 @@ void DisplayManager::Impl::NotifyCaptureStatusChanged(bool isCapture)
 DMError DisplayManager::RegisterCaptureStatusListener(sptr<ICaptureStatusListener> listener)
 {
     if (listener == nullptr) {
-        WLOGFE("ICaptureStatusListener listener is nullptr.");
+        TLOGE(WmsLogTag::DMS, "ICaptureStatusListener listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->RegisterCaptureStatusListener(listener);
@@ -1548,10 +1601,10 @@ DMError DisplayManager::Impl::RegisterCaptureStatusListener(sptr<ICaptureStatusL
             DisplayManagerAgentType::CAPTURE_STATUS_CHANGED_LISTENER);
     }
     if (ret != DMError::DM_OK) {
-        WLOGFE("RegisterCaptureStatusListener failed !");
+        TLOGE(WmsLogTag::DMS, "failed !");
         captureStatusListenerAgent_ = nullptr;
     } else {
-        WLOGD("ICaptureStatusListener register success");
+        TLOGD(WmsLogTag::DMS, "ICaptureStatusListener register success");
         captureStatusListeners_.insert(listener);
     }
     return ret;
@@ -1560,7 +1613,7 @@ DMError DisplayManager::Impl::RegisterCaptureStatusListener(sptr<ICaptureStatusL
 DMError DisplayManager::UnregisterCaptureStatusListener(sptr<ICaptureStatusListener> listener)
 {
     if (listener == nullptr) {
-        WLOGFE("UnregisterCaptureStatusListener listener is nullptr.");
+        TLOGE(WmsLogTag::DMS, "UnregisterCaptureStatusListener listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->UnregisterCaptureStatusListener(listener);
@@ -1571,7 +1624,7 @@ DMError DisplayManager::Impl::UnregisterCaptureStatusListener(sptr<ICaptureStatu
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = std::find(captureStatusListeners_.begin(), captureStatusListeners_.end(), listener);
     if (iter == captureStatusListeners_.end()) {
-        WLOGFE("could not find this listener");
+        TLOGE(WmsLogTag::DMS, "could not find this listener");
         return DMError::DM_ERROR_NULLPTR;
     }
     captureStatusListeners_.erase(iter);
@@ -1600,7 +1653,7 @@ void DisplayManager::Impl::NotifyFoldStatusChanged(FoldStatus foldStatus)
 DMError DisplayManager::RegisterFoldStatusListener(sptr<IFoldStatusListener> listener)
 {
     if (listener == nullptr) {
-        WLOGFE("IFoldStatusListener listener is nullptr.");
+        TLOGE(WmsLogTag::DMS, "IFoldStatusListener listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->RegisterFoldStatusListener(listener);
@@ -1617,10 +1670,10 @@ DMError DisplayManager::Impl::RegisterFoldStatusListener(sptr<IFoldStatusListene
             DisplayManagerAgentType::FOLD_STATUS_CHANGED_LISTENER);
     }
     if (ret != DMError::DM_OK) {
-        WLOGFW("RegisterFoldStatusListener failed !");
+        TLOGW(WmsLogTag::DMS, "failed !");
         foldStatusListenerAgent_ = nullptr;
     } else {
-        WLOGD("IFoldStatusListener register success");
+        TLOGD(WmsLogTag::DMS, "IFoldStatusListener register success");
         foldStatusListeners_.insert(listener);
     }
     return ret;
@@ -1629,7 +1682,7 @@ DMError DisplayManager::Impl::RegisterFoldStatusListener(sptr<IFoldStatusListene
 DMError DisplayManager::UnregisterFoldStatusListener(sptr<IFoldStatusListener> listener)
 {
     if (listener == nullptr) {
-        WLOGFE("UnregisterFoldStatusListener listener is nullptr.");
+        TLOGE(WmsLogTag::DMS, "listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->UnregisterFoldStatusListener(listener);
@@ -1640,7 +1693,7 @@ DMError DisplayManager::Impl::UnregisterFoldStatusListener(sptr<IFoldStatusListe
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = std::find(foldStatusListeners_.begin(), foldStatusListeners_.end(), listener);
     if (iter == foldStatusListeners_.end()) {
-        WLOGFE("could not find this listener");
+        TLOGE(WmsLogTag::DMS, "could not find this listener");
         return DMError::DM_ERROR_NULLPTR;
     }
     foldStatusListeners_.erase(iter);
@@ -1669,7 +1722,7 @@ void DisplayManager::Impl::NotifyDisplayChangeInfoChanged(const sptr<DisplayChan
 DMError DisplayManager::RegisterDisplayUpdateListener(sptr<IDisplayUpdateListener> listener)
 {
     if (listener == nullptr) {
-        WLOGFE("IDisplayUpdateListener listener is nullptr.");
+        TLOGE(WmsLogTag::DMS, "IDisplayUpdateListener listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->RegisterDisplayUpdateListener(listener);
@@ -1686,10 +1739,10 @@ DMError DisplayManager::Impl::RegisterDisplayUpdateListener(sptr<IDisplayUpdateL
             DisplayManagerAgentType::DISPLAY_UPDATE_LISTENER);
     }
     if (ret != DMError::DM_OK) {
-        WLOGFW("RegisterDisplayUpdateListener failed !");
+        TLOGW(WmsLogTag::DMS, "RegisterDisplayUpdateListener failed !");
         displayUpdateListenerAgent_ = nullptr;
     } else {
-        WLOGI("IDisplayUpdateListener register success");
+        TLOGI(WmsLogTag::DMS, "IDisplayUpdateListener register success");
         displayUpdateListeners_.insert(listener);
     }
     return ret;
@@ -1698,7 +1751,7 @@ DMError DisplayManager::Impl::RegisterDisplayUpdateListener(sptr<IDisplayUpdateL
 DMError DisplayManager::UnregisterDisplayUpdateListener(sptr<IDisplayUpdateListener> listener)
 {
     if (listener == nullptr) {
-        WLOGFE("UnregisterDisplayUpdateListener listener is nullptr.");
+        TLOGE(WmsLogTag::DMS, "UnregisterDisplayUpdateListener listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->UnregisterDisplayUpdateListener(listener);
@@ -1709,7 +1762,7 @@ DMError DisplayManager::Impl::UnregisterDisplayUpdateListener(sptr<IDisplayUpdat
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = std::find(displayUpdateListeners_.begin(), displayUpdateListeners_.end(), listener);
     if (iter == displayUpdateListeners_.end()) {
-        WLOGFE("could not find this listener");
+        TLOGE(WmsLogTag::DMS, "could not find this listener");
         return DMError::DM_ERROR_NULLPTR;
     }
     displayUpdateListeners_.erase(iter);
@@ -1774,7 +1827,7 @@ void DisplayManager::Impl::NotifyAvailableAreaChanged(DMRect rect, DisplayId dis
 DMError DisplayManager::RegisterDisplayModeListener(sptr<IDisplayModeListener> listener)
 {
     if (listener == nullptr) {
-        WLOGFE("IDisplayModeListener listener is nullptr.");
+        TLOGE(WmsLogTag::DMS, "IDisplayModeListener listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->RegisterDisplayModeListener(listener);
@@ -1791,10 +1844,10 @@ DMError DisplayManager::Impl::RegisterDisplayModeListener(sptr<IDisplayModeListe
             DisplayManagerAgentType::DISPLAY_MODE_CHANGED_LISTENER);
     }
     if (ret != DMError::DM_OK) {
-        WLOGFW("RegisterDisplayModeListener failed !");
+        TLOGW(WmsLogTag::DMS, "RegisterDisplayModeListener failed !");
         displayModeListenerAgent_ = nullptr;
     } else {
-        WLOGD("IDisplayModeListener register success");
+        TLOGD(WmsLogTag::DMS, "IDisplayModeListener register success");
         displayModeListeners_.insert(listener);
     }
     return ret;
@@ -1803,7 +1856,7 @@ DMError DisplayManager::Impl::RegisterDisplayModeListener(sptr<IDisplayModeListe
 DMError DisplayManager::UnregisterDisplayModeListener(sptr<IDisplayModeListener> listener)
 {
     if (listener == nullptr) {
-        WLOGFE("UnregisterPrivateWindowListener listener is nullptr.");
+        TLOGE(WmsLogTag::DMS, "UnregisterPrivateWindowListener listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->UnregisterDisplayModeListener(listener);
@@ -1814,7 +1867,7 @@ DMError DisplayManager::Impl::UnregisterDisplayModeListener(sptr<IDisplayModeLis
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = std::find(displayModeListeners_.begin(), displayModeListeners_.end(), listener);
     if (iter == displayModeListeners_.end()) {
-        WLOGFE("could not find this listener");
+        TLOGE(WmsLogTag::DMS, "could not find this listener");
         return DMError::DM_ERROR_NULLPTR;
     }
     displayModeListeners_.erase(iter);
@@ -1831,7 +1884,7 @@ DMError DisplayManager::Impl::UnregisterDisplayModeListener(sptr<IDisplayModeLis
 DMError DisplayManager::RegisterScreenMagneticStateListener(sptr<IScreenMagneticStateListener> listener)
 {
     if (listener == nullptr) {
-        WLOGFE("IScreenMagneticStateListener listener is nullptr.");
+        TLOGE(WmsLogTag::DMS, "IScreenMagneticStateListener listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->RegisterScreenMagneticStateListener(listener);
@@ -1848,10 +1901,10 @@ DMError DisplayManager::Impl::RegisterScreenMagneticStateListener(sptr<IScreenMa
             DisplayManagerAgentType::SCREEN_MAGNETIC_STATE_CHANGED_LISTENER);
     }
     if (ret != DMError::DM_OK) {
-        WLOGFW("RegisterScreenMagneticStateListener failed !");
+        TLOGW(WmsLogTag::DMS, "RegisterScreenMagneticStateListener failed !");
         screenMagneticStateListenerAgent_ = nullptr;
     } else {
-        WLOGD("IScreenMagneticStateListener register success");
+        TLOGD(WmsLogTag::DMS, "IScreenMagneticStateListener register success");
         screenMagneticStateListeners_.insert(listener);
     }
     return ret;
@@ -1860,7 +1913,7 @@ DMError DisplayManager::Impl::RegisterScreenMagneticStateListener(sptr<IScreenMa
 DMError DisplayManager::UnregisterScreenMagneticStateListener(sptr<IScreenMagneticStateListener> listener)
 {
     if (listener == nullptr) {
-        WLOGFE("UnregisterScreenMagneticStateListener listener is nullptr.");
+        TLOGE(WmsLogTag::DMS, "listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->UnregisterScreenMagneticStateListener(listener);
@@ -1871,7 +1924,7 @@ DMError DisplayManager::Impl::UnregisterScreenMagneticStateListener(sptr<IScreen
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = std::find(screenMagneticStateListeners_.begin(), screenMagneticStateListeners_.end(), listener);
     if (iter == screenMagneticStateListeners_.end()) {
-        WLOGFE("could not find this listener");
+        TLOGE(WmsLogTag::DMS, "could not find this listener");
         return DMError::DM_ERROR_NULLPTR;
     }
     screenMagneticStateListeners_.erase(iter);
@@ -1888,7 +1941,7 @@ DMError DisplayManager::Impl::UnregisterScreenMagneticStateListener(sptr<IScreen
 DMError DisplayManager::RegisterAvailableAreaListener(sptr<IAvailableAreaListener> listener)
 {
     if (listener == nullptr) {
-        WLOGFE("RegisterAvailableAreaListener listener is nullptr.");
+        TLOGE(WmsLogTag::DMS, "listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->RegisterAvailableAreaListener(listener);
@@ -1905,10 +1958,10 @@ DMError DisplayManager::Impl::RegisterAvailableAreaListener(sptr<IAvailableAreaL
             DisplayManagerAgentType::AVAILABLE_AREA_CHANGED_LISTENER);
     }
     if (ret != DMError::DM_OK) {
-        WLOGFW("RegisterAvailableAreaListener failed !");
+        TLOGW(WmsLogTag::DMS, "RegisterAvailableAreaListener failed !");
         availableAreaListenerAgent_ = nullptr;
     } else {
-        WLOGD("IAvailableAreaListener register success");
+        TLOGD(WmsLogTag::DMS, "IAvailableAreaListener register success");
         availableAreaListeners_.insert(listener);
     }
     return ret;
@@ -1917,7 +1970,7 @@ DMError DisplayManager::Impl::RegisterAvailableAreaListener(sptr<IAvailableAreaL
 DMError DisplayManager::RegisterAvailableAreaListener(sptr<IAvailableAreaListener> listener, DisplayId displayId)
 {
     if (listener == nullptr) {
-        WLOGFE("RegisterAvailableAreaListener listener is nullptr.");
+        TLOGE(WmsLogTag::DMS, "listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->RegisterAvailableAreaListener(listener, displayId);
@@ -1934,10 +1987,10 @@ DMError DisplayManager::Impl::RegisterAvailableAreaListener(sptr<IAvailableAreaL
             DisplayManagerAgentType::AVAILABLE_AREA_CHANGED_LISTENER);
     }
     if (ret != DMError::DM_OK) {
-        WLOGFW("RegisterAvailableAreaListener failed !");
+        TLOGW(WmsLogTag::DMS, "RegisterAvailableAreaListener failed !");
         availableAreaListenerAgent_ = nullptr;
     } else {
-        WLOGD("IAvailableAreaListener register success");
+        TLOGD(WmsLogTag::DMS, "IAvailableAreaListener register success");
         availableAreaListenersMap_[displayId].insert(listener);
     }
     return ret;
@@ -1946,7 +1999,7 @@ DMError DisplayManager::Impl::RegisterAvailableAreaListener(sptr<IAvailableAreaL
 DMError DisplayManager::UnregisterAvailableAreaListener(sptr<IAvailableAreaListener> listener)
 {
     if (listener == nullptr) {
-        WLOGFE("UnregisterPrivateWindowListener listener is nullptr.");
+        TLOGE(WmsLogTag::DMS, "listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->UnregisterAvailableAreaListener(listener);
@@ -1957,7 +2010,7 @@ DMError DisplayManager::Impl::UnregisterAvailableAreaListener(sptr<IAvailableAre
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = std::find(availableAreaListeners_.begin(), availableAreaListeners_.end(), listener);
     if (iter == availableAreaListeners_.end()) {
-        WLOGFE("could not find this listener");
+        TLOGE(WmsLogTag::DMS, "could not find this listener");
         return DMError::DM_ERROR_NULLPTR;
     }
     availableAreaListeners_.erase(iter);
@@ -1975,7 +2028,7 @@ DMError DisplayManager::Impl::UnregisterAvailableAreaListener(sptr<IAvailableAre
 DMError DisplayManager::UnregisterAvailableAreaListener(sptr<IAvailableAreaListener> listener, DisplayId displayId)
 {
     if (listener == nullptr) {
-        WLOGFE("UnregisterPrivateWindowListener listener is nullptr.");
+        TLOGE(WmsLogTag::DMS, "listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->UnregisterAvailableAreaListener(listener, displayId);
@@ -1986,13 +2039,13 @@ DMError DisplayManager::Impl::UnregisterAvailableAreaListener(sptr<IAvailableAre
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (availableAreaListenersMap_.find(displayId) == availableAreaListenersMap_.end()) {
-        WLOGFE("could not find this listener");
+        TLOGE(WmsLogTag::DMS, "could not find this listener");
         return DMError::DM_ERROR_NULLPTR;
     }
     auto iter = std::find(availableAreaListenersMap_[displayId].begin(), availableAreaListenersMap_[displayId].end(),
         listener);
     if (iter == availableAreaListenersMap_[displayId].end()) {
-        WLOGFE("could not find this listener");
+        TLOGE(WmsLogTag::DMS, "could not find this listener");
         return DMError::DM_ERROR_NULLPTR;
     }
     availableAreaListenersMap_[displayId].erase(iter);
@@ -2012,7 +2065,7 @@ DMError DisplayManager::Impl::UnregisterAvailableAreaListener(sptr<IAvailableAre
 
 void DisplayManager::Impl::NotifyScreenshot(sptr<ScreenshotInfo> info)
 {
-    WLOGFI("NotifyScreenshot trigger:[%{public}s] displayId:%{public}" PRIu64" size:%{public}zu",
+    TLOGI(WmsLogTag::DMS, "NotifyScreenshot trigger:[%{public}s] displayId:%{public}" PRIu64" size:%{public}zu",
         info->GetTrigger().c_str(), info->GetDisplayId(), screenshotListeners_.size());
     std::set<sptr<IScreenshotListener>> screenshotListeners;
     {
@@ -2026,8 +2079,8 @@ void DisplayManager::Impl::NotifyScreenshot(sptr<ScreenshotInfo> info)
 
 void DisplayManager::Impl::NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status)
 {
-    WLOGFD("[UL_POWER]NotifyDisplayPowerEvent event:%{public}u, status:%{public}u, size:%{public}zu", event, status,
-        powerEventListeners_.size());
+    TLOGD(WmsLogTag::DMS, "[UL_POWER]NotifyDisplayPowerEvent event:%{public}u, status:%{public}u, size:%{public}zu",
+        event, status, powerEventListeners_.size());
     std::set<sptr<IDisplayPowerEventListener>> powerEventListeners;
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -2040,7 +2093,7 @@ void DisplayManager::Impl::NotifyDisplayPowerEvent(DisplayPowerEvent event, Even
 
 void DisplayManager::Impl::NotifyDisplayStateChanged(DisplayId id, DisplayState state)
 {
-    WLOGFD("state:%{public}u", state);
+    TLOGD(WmsLogTag::DMS, "state:%{public}u", state);
     DisplayStateCallback displayStateCallback = nullptr;
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -2051,7 +2104,7 @@ void DisplayManager::Impl::NotifyDisplayStateChanged(DisplayId id, DisplayState 
         ClearDisplayStateCallback();
         return;
     }
-    WLOGFW("callback_ target is not set!");
+    TLOGW(WmsLogTag::DMS, "callback_ target is not set!");
 }
 
 void DisplayManager::Impl::NotifyDisplayCreate(sptr<DisplayInfo> info)
@@ -2062,7 +2115,7 @@ void DisplayManager::Impl::NotifyDisplayCreate(sptr<DisplayInfo> info)
 
 void DisplayManager::Impl::NotifyDisplayDestroy(DisplayId displayId)
 {
-    WLOGFD("displayId:%{public}" PRIu64".", displayId);
+    TLOGD(WmsLogTag::DMS, "displayId:%{public}" PRIu64".", displayId);
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     displayMap_.erase(displayId);
 }
@@ -2076,25 +2129,25 @@ void DisplayManager::Impl::NotifyDisplayChange(sptr<DisplayInfo> displayInfo)
 bool DisplayManager::Impl::UpdateDisplayInfoLocked(sptr<DisplayInfo> displayInfo)
 {
     if (displayInfo == nullptr) {
-        WLOGFW("displayInfo is null");
+        TLOGW(WmsLogTag::DMS, "displayInfo is null");
         return false;
     }
     DisplayId displayId = displayInfo->GetDisplayId();
-    WLOGFD("displayId:%{public}" PRIu64".", displayId);
+    TLOGD(WmsLogTag::DMS, "displayId:%{public}" PRIu64".", displayId);
     if (displayId == DISPLAY_ID_INVALID) {
-        WLOGFE("displayId is invalid.");
+        TLOGE(WmsLogTag::DMS, "displayId is invalid.");
         return false;
     }
     auto iter = displayMap_.find(displayId);
     if (iter != displayMap_.end() && iter->second != nullptr) {
-        WLOGFD("display Info Updated: %{public}s",
+        TLOGD(WmsLogTag::DMS, "display Info Updated: %{public}s",
             GetDisplayInfoSrting(displayInfo).c_str());
         iter->second->UpdateDisplayInfo(displayInfo);
         return true;
     }
     sptr<Display> display = new (std::nothrow) Display("", displayInfo);
     if (display == nullptr) {
-        WLOGFE("malloc display failed");
+        TLOGE(WmsLogTag::DMS, "malloc display failed");
         return false;
     }
     displayMap_[displayId] = display;
@@ -2104,7 +2157,7 @@ bool DisplayManager::Impl::UpdateDisplayInfoLocked(sptr<DisplayInfo> displayInfo
 std::string DisplayManager::Impl::GetDisplayInfoSrting(sptr<DisplayInfo> displayInfo)
 {
     if (displayInfo == nullptr) {
-        WLOGFE("displayInfo nullptr.");
+        TLOGE(WmsLogTag::DMS, "displayInfo nullptr.");
         return "";
     }
     std::ostringstream oss;
@@ -2120,53 +2173,53 @@ std::string DisplayManager::Impl::GetDisplayInfoSrting(sptr<DisplayInfo> display
 
 bool DisplayManager::WakeUpBegin(PowerStateChangeReason reason)
 {
-    WLOGFD("[UL_POWER]WakeUpBegin start, reason:%{public}u", reason);
+    TLOGD(WmsLogTag::DMS, "[UL_POWER]WakeUpBegin start, reason:%{public}u", reason);
     return SingletonContainer::Get<DisplayManagerAdapter>().WakeUpBegin(reason);
 }
 
 bool DisplayManager::WakeUpEnd()
 {
-    WLOGFD("[UL_POWER]WakeUpEnd start");
+    TLOGD(WmsLogTag::DMS, "[UL_POWER]WakeUpEnd start");
     return SingletonContainer::Get<DisplayManagerAdapter>().WakeUpEnd();
 }
 
 bool DisplayManager::SuspendBegin(PowerStateChangeReason reason)
 {
     // dms->wms notify other windows to hide
-    WLOGFD("[UL_POWER]SuspendBegin start, reason:%{public}u", reason);
+    TLOGD(WmsLogTag::DMS, "[UL_POWER]SuspendBegin start, reason:%{public}u", reason);
     return SingletonContainer::Get<DisplayManagerAdapter>().SuspendBegin(reason);
 }
 
 bool DisplayManager::SuspendEnd()
 {
-    WLOGFD("[UL_POWER]SuspendEnd start");
+    TLOGD(WmsLogTag::DMS, "[UL_POWER]SuspendEnd start");
     return SingletonContainer::Get<DisplayManagerAdapter>().SuspendEnd();
 }
 
 ScreenId DisplayManager::GetInternalScreenId()
 {
-    WLOGFD("[UL_POWER]GetInternalScreenId start");
+    TLOGD(WmsLogTag::DMS, "[UL_POWER]GetInternalScreenId start");
     return SingletonContainer::Get<DisplayManagerAdapter>().GetInternalScreenId();
 }
 
 bool DisplayManager::SetScreenPowerById(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason)
 {
-    WLOGFD("[UL_POWER]SetScreenPowerById start");
+    TLOGD(WmsLogTag::DMS, "[UL_POWER]SetScreenPowerById start");
     return SingletonContainer::Get<DisplayManagerAdapter>().SetScreenPowerById(screenId, state, reason);
 }
 
 bool DisplayManager::Impl::SetDisplayState(DisplayState state, DisplayStateCallback callback)
 {
-    WLOGFD("[UL_POWER]state:%{public}u", state);
+    TLOGD(WmsLogTag::DMS, "[UL_POWER]state:%{public}u", state);
     bool ret = true;
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         if (displayStateCallback_ != nullptr || callback == nullptr) {
             if (displayStateCallback_ != nullptr) {
-                WLOGFI("[UL_POWER]previous callback not called, the displayStateCallback_ is not null");
+                TLOGI(WmsLogTag::DMS, "[UL_POWER]previous callback not called, the displayStateCallback_ is not null");
             }
             if (callback == nullptr) {
-                WLOGFI("[UL_POWER]Invalid callback received");
+                TLOGI(WmsLogTag::DMS, "[UL_POWER]Invalid callback received");
             }
             return false;
         }
@@ -2198,13 +2251,13 @@ DisplayState DisplayManager::GetDisplayState(DisplayId displayId)
 
 bool DisplayManager::TryToCancelScreenOff()
 {
-    WLOGFD("[UL_POWER]TryToCancelScreenOff start");
+    TLOGD(WmsLogTag::DMS, "[UL_POWER]TryToCancelScreenOff start");
     return SingletonContainer::Get<DisplayManagerAdapter>().TryToCancelScreenOff();
 }
 
 bool DisplayManager::SetScreenBrightness(uint64_t screenId, uint32_t level)
 {
-    WLOGFI("[UL_POWER]ScreenId:%{public}" PRIu64", level:%{public}u,", screenId, level);
+    TLOGI(WmsLogTag::DMS, "[UL_POWER]ScreenId:%{public}" PRIu64", level:%{public}u,", screenId, level);
     RSInterfaces::GetInstance().SetScreenBacklight(screenId, level);
     return true;
 }
@@ -2212,26 +2265,26 @@ bool DisplayManager::SetScreenBrightness(uint64_t screenId, uint32_t level)
 uint32_t DisplayManager::GetScreenBrightness(uint64_t screenId) const
 {
     uint32_t level = static_cast<uint32_t>(RSInterfaces::GetInstance().GetScreenBacklight(screenId));
-    WLOGFI("GetScreenBrightness screenId:%{public}" PRIu64", level:%{public}u,", screenId, level);
+    TLOGI(WmsLogTag::DMS, "screenId:%{public}" PRIu64", level:%{public}u,", screenId, level);
     return level;
 }
 
 void DisplayManager::NotifyDisplayEvent(DisplayEvent event)
 {
     // Unlock event dms->wms restore other hidden windows
-    WLOGFD("[UL_POWER]DisplayEvent:%{public}u", event);
+    TLOGD(WmsLogTag::DMS, "[UL_POWER]DisplayEvent:%{public}u", event);
     SingletonContainer::Get<DisplayManagerAdapter>().NotifyDisplayEvent(event);
 }
 
 bool DisplayManager::Freeze(std::vector<DisplayId> displayIds)
 {
-    WLOGFD("freeze display");
+    TLOGD(WmsLogTag::DMS, "freeze display");
     if (displayIds.size() == 0) {
-        WLOGFE("freeze fail, num of display is 0");
+        TLOGE(WmsLogTag::DMS, "freeze fail, num of display is 0");
         return false;
     }
     if (displayIds.size() > MAX_DISPLAY_SIZE) {
-        WLOGFE("freeze fail, displayIds size is bigger than %{public}u.", MAX_DISPLAY_SIZE);
+        TLOGE(WmsLogTag::DMS, "freeze fail, displayIds size is bigger than %{public}u.", MAX_DISPLAY_SIZE);
         return false;
     }
     return SingletonContainer::Get<DisplayManagerAdapter>().SetFreeze(displayIds, true);
@@ -2239,13 +2292,13 @@ bool DisplayManager::Freeze(std::vector<DisplayId> displayIds)
 
 bool DisplayManager::Unfreeze(std::vector<DisplayId> displayIds)
 {
-    WLOGFD("unfreeze display");
+    TLOGD(WmsLogTag::DMS, "unfreeze display");
     if (displayIds.size() == 0) {
-        WLOGFE("unfreeze fail, num of display is 0");
+        TLOGE(WmsLogTag::DMS, "unfreeze fail, num of display is 0");
         return false;
     }
     if (displayIds.size() > MAX_DISPLAY_SIZE) {
-        WLOGFE("unfreeze fail, displayIds size is bigger than %{public}u.", MAX_DISPLAY_SIZE);
+        TLOGE(WmsLogTag::DMS, "unfreeze fail, displayIds size is bigger than %{public}u.", MAX_DISPLAY_SIZE);
         return false;
     }
     return SingletonContainer::Get<DisplayManagerAdapter>().SetFreeze(displayIds, false);
@@ -2265,9 +2318,9 @@ DMError DisplayManager::RemoveSurfaceNodeFromDisplay(DisplayId displayId,
 
 void DisplayManager::Impl::OnRemoteDied()
 {
-    WLOGFI("dms is died");
+    TLOGI(WmsLogTag::DMS, "dms is died");
     if (g_dmIsDestroyed) {
-        WLOGFE("dm has been destructed, mutex_ is invalid");
+        TLOGE(WmsLogTag::DMS, "dm has been destructed, mutex_ is invalid");
         return;
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -2285,7 +2338,7 @@ void DisplayManager::Impl::OnRemoteDied()
 void DisplayManager::OnRemoteDied()
 {
     if (g_dmIsDestroyed) {
-        WLOGFE("dms is dying, pImpl_ is nullptr");
+        TLOGE(WmsLogTag::DMS, "dms is dying, pImpl_ is nullptr");
         return;
     }
     pImpl_->OnRemoteDied();
@@ -2299,7 +2352,7 @@ bool DisplayManager::ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rs
 bool DisplayManager::Impl::ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId)
 {
     bool res = SingletonContainer::Get<DisplayManagerAdapter>().ConvertScreenIdToRsScreenId(screenId, rsScreenId);
-    WLOGFD("Convert ScreenId %{public}" PRIu64" To RsScreenId %{public}" PRIu64"", screenId, rsScreenId);
+    TLOGD(WmsLogTag::DMS, "Convert ScreenId %{public}" PRIu64" To RsScreenId %{public}" PRIu64"", screenId, rsScreenId);
     return res;
 }
 
@@ -2319,7 +2372,7 @@ DMError DisplayManager::ProxyForFreeze(std::set<int32_t> pidList, bool isProxy)
     for (auto pid : pidList) {
         oss << pid << " ";
     }
-    WLOGFI("pidList:%{public}s, isProxy: %{public}d", oss.str().c_str(), isProxy);
+    TLOGI(WmsLogTag::DMS, "pidList:%{public}s, isProxy: %{public}d", oss.str().c_str(), isProxy);
     return pImpl_->ProxyForFreeze(pidList, isProxy);
 }
 
@@ -2339,9 +2392,10 @@ DMError DisplayManager::Impl::ResetAllFreezeStatus()
 }
 
 void DisplayManager::SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
-    std::vector<uint64_t> surfaceIdList)
+    std::vector<uint64_t> surfaceIdList, std::vector<uint8_t> typeBlackList)
 {
-    SingletonContainer::Get<DisplayManagerAdapter>().SetVirtualScreenBlackList(screenId, windowIdList, surfaceIdList);
+    SingletonContainer::Get<DisplayManagerAdapter>().SetVirtualScreenBlackList(screenId, windowIdList, surfaceIdList,
+        typeBlackList);
 }
 
 void DisplayManager::DisablePowerOffRenderControl(ScreenId screenId)
@@ -2383,11 +2437,11 @@ sptr<Display> DisplayManager::Impl::GetPrimaryDisplaySync()
             break;
         }
         retryTimes++;
-        WLOGFW("get display info null, retry %{public}u times", retryTimes);
+        TLOGW(WmsLogTag::DMS, "get display info null, retry %{public}u times", retryTimes);
         std::this_thread::sleep_for(std::chrono::milliseconds(RETRY_WAIT_MS));
     }
     if (retryTimes >= MAX_RETRY_NUM || displayInfo == nullptr) {
-        WLOGFE("get display info failed");
+        TLOGE(WmsLogTag::DMS, "get display info failed");
         return nullptr;
     }
 
@@ -2413,7 +2467,7 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenCapture(const CaptureO
     std::shared_ptr<Media::PixelMap> screenCapture =
         SingletonContainer::Get<DisplayManagerAdapter>().GetScreenCapture(captureOption, errorCode);
     if (screenCapture == nullptr) {
-        WLOGFE("screen capture failed!");
+        TLOGE(WmsLogTag::DMS, "screen capture failed!");
         return nullptr;
     }
     return screenCapture;
@@ -2423,13 +2477,13 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshotWithOption(const C
     DmErrorCode* errorCode)
 {
     if (captureOption.displayId_ == DISPLAY_ID_INVALID) {
-        WLOGFE("displayId invalid!");
+        TLOGE(WmsLogTag::DMS, "displayId invalid!");
         return nullptr;
     }
     std::shared_ptr<Media::PixelMap> screenShot =
         SingletonContainer::Get<DisplayManagerAdapter>().GetDisplaySnapshotWithOption(captureOption, errorCode);
     if (screenShot == nullptr) {
-        WLOGFE("get snapshot with option failed!");
+        TLOGE(WmsLogTag::DMS, "get snapshot with option failed!");
         return nullptr;
     }
     return screenShot;
@@ -2440,19 +2494,19 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshotWithOption(const C
 {
     std::shared_ptr<Media::PixelMap> screenShot = GetScreenshotWithOption(captureOption, errorCode);
     if (screenShot == nullptr) {
-        WLOGFE("set snapshot with option failed!");
+        TLOGE(WmsLogTag::DMS, "set snapshot with option failed!");
         return nullptr;
     }
     // check parameters
     int32_t oriHeight = screenShot->GetHeight();
     int32_t oriWidth = screenShot->GetWidth();
     if (!pImpl_->CheckRectValid(rect, oriHeight, oriWidth)) {
-        WLOGFE("rect invalid! left %{public}d, top %{public}d, w %{public}d, h %{public}d",
+        TLOGE(WmsLogTag::DMS, "rect invalid! left %{public}d, top %{public}d, w %{public}d, h %{public}d",
             rect.left, rect.top, rect.width, rect.height);
         return nullptr;
     }
     if (!pImpl_->CheckSizeValid(size, oriHeight, oriWidth)) {
-        WLOGFE("size invalid! w %{public}d, h %{public}d", rect.width, rect.height);
+        TLOGE(WmsLogTag::DMS, "size invalid! w %{public}d, h %{public}d", rect.width, rect.height);
         return nullptr;
     }
     // create crop dest pixelmap
@@ -2463,11 +2517,37 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshotWithOption(const C
     opt.editable = false;
     auto pixelMap = Media::PixelMap::Create(*screenShot, rect, opt);
     if (pixelMap == nullptr) {
-        WLOGFE("Media::PixelMap::Create failed!");
+        TLOGE(WmsLogTag::DMS, "Media::PixelMap::Create failed!");
         return nullptr;
     }
     std::shared_ptr<Media::PixelMap> dstScreenshot(pixelMap.release());
     return dstScreenshot;
+}
+
+std::vector<std::shared_ptr<Media::PixelMap>> DisplayManager::GetScreenHDRshotWithOption(
+    const CaptureOption& captureOption, DmErrorCode* errorCode)
+{
+    TLOGI(WmsLogTag::DMS, "start!");
+    if (captureOption.displayId_ == DISPLAY_ID_INVALID) {
+        TLOGE(WmsLogTag::DMS, "displayId invalid!");
+        return { nullptr, nullptr };
+    }
+    const std::vector<std::shared_ptr<Media::PixelMap>>& screenShotVec =
+        SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayHDRSnapshotWithOption(captureOption, errorCode);
+    if (screenShotVec.size() != PIXMAP_VECTOR_SIZE) {
+        TLOGE(WmsLogTag::DMS, "get snapshot with option failed!");
+        return { nullptr, nullptr };
+    }
+    return screenShotVec;
+}
+
+float DisplayManager::GetPrimaryDisplaySystemDpi() const
+{
+    sptr<DisplayInfo> displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetPrimaryDisplayInfo();
+    if (displayInfo == nullptr) {
+        return INVALID_DEFAULT_DENSITY;
+    }
+    return displayInfo->GetDensityInCurResolution();
 }
 
 sptr<CutoutInfo> DisplayManager::GetCutoutInfoWithRotation(Rotation rotation)
@@ -2484,6 +2564,129 @@ sptr<CutoutInfo> DisplayManager::Impl::GetCutoutInfoWithRotation(Rotation rotati
     }
     auto displayId = displayInfo->GetDisplayId();
     return SingletonContainer::Get<DisplayManagerAdapter>().GetCutoutInfoWithRotation(displayId, rotationNum);
+}
+
+DMError DisplayManager::GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
+    ScreenId& screenId, DMRect& screenArea)
+{
+    return pImpl_->GetScreenAreaOfDisplayArea(displayId, displayArea, screenId, screenArea);
+}
+
+DMError DisplayManager::Impl::GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
+    ScreenId& screenId, DMRect& screenArea)
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().GetScreenAreaOfDisplayArea(
+        displayId, displayArea, screenId, screenArea);
+}
+
+DMError DisplayManager::ConvertRelativeCoordinateToGlobal(const RelativePosition& relativePosition, Position& position)
+{
+    return pImpl_->ConvertRelativeCoordinateToGlobal(relativePosition, position);
+}
+
+DMError DisplayManager::Impl::ConvertRelativeCoordinateToGlobal(const RelativePosition& relativePosition,
+    Position& position)
+{
+    sptr<Display> display = GetDisplayById(relativePosition.displayId);
+    if (display == nullptr) {
+        TLOGE(WmsLogTag::DMS, "Get display by ID failed, display:%{public}" PRIu64 "nullptr",
+            relativePosition.displayId);
+        return DMError::DM_ERROR_ILLEGAL_PARAM;
+    }
+    sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::DMS, "get display info failed, display id: %{public}" PRIu64,
+            relativePosition.displayId);
+        return DMError::DM_ERROR_NULLPTR;
+    }
+
+    int32_t startX = displayInfo->GetX();
+    int32_t startY = displayInfo->GetY();
+    if (IsInt32AddOverflow(relativePosition.position.x, startX) ||
+        IsInt32AddOverflow(relativePosition.position.y, startY)) {
+        TLOGE(WmsLogTag::DMS, "coordinate x or y overflowed!");
+        return DMError::DM_ERROR_ILLEGAL_PARAM;
+    }
+    position.x = relativePosition.position.x + startX;
+    position.y = relativePosition.position.y + startY;
+    return DMError::DM_OK;
+}
+
+DMError DisplayManager::ConvertGlobalCoordinateToRelative(const Position& globalPosition,
+    RelativePosition& relativePosition)
+{
+    return pImpl_->ConvertGlobalCoordinateToRelative(globalPosition, relativePosition);
+}
+
+DMError DisplayManager::Impl::ConvertGlobalCoordinateToRelative(const Position& globalPosition,
+    RelativePosition& relativePosition)
+{
+    auto displayIds = SingletonContainer::Get<DisplayManagerAdapter>().GetAllDisplayIds();
+    for (auto displayId : displayIds) {
+        const sptr<Display> display = GetDisplayById(displayId);
+        if (display == nullptr) {
+            TLOGW(WmsLogTag::DMS, "get display failed, display id : %{public}" PRIu64, displayId);
+            continue;
+        }
+        const sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
+        if (displayInfo == nullptr) {
+            TLOGW(WmsLogTag::DMS, "get display info failed, display id : %{public}" PRIu64, displayId);
+            continue;
+        }
+        if (IsTargetDisplay(displayInfo, globalPosition)) {
+            int32_t startX = displayInfo->GetX();
+            int32_t startY = displayInfo->GetY();
+            if (IsInt32SubOverflow(globalPosition.x, startX) ||
+                IsInt32SubOverflow(globalPosition.y, startY)) {
+                TLOGE(WmsLogTag::DMS, "coordinate x or y overflowed!");
+                return DMError::DM_ERROR_ILLEGAL_PARAM;
+            }
+            relativePosition.displayId = displayInfo->GetDisplayId();
+            relativePosition.position.x = globalPosition.x - startX;
+            relativePosition.position.y = globalPosition.y - startY;
+            return DMError::DM_OK;
+        }
+    }
+    relativePosition.displayId = 0;
+    relativePosition.position.x = globalPosition.x;
+    relativePosition.position.y = globalPosition.y;
+    return DMError::DM_OK;
+}
+
+DMError DisplayManager::ConvertGlobalCoordinateToRelativeWithDisplayId(const Position& globalPosition,
+    DisplayId displayId, RelativePosition& relativePosition)
+{
+    return pImpl_->ConvertGlobalCoordinateToRelativeWithDisplayId(globalPosition, displayId, relativePosition);
+}
+
+DMError DisplayManager::Impl::ConvertGlobalCoordinateToRelativeWithDisplayId(const Position& globalPosition,
+    DisplayId displayId, RelativePosition& relativePosition)
+{
+    const sptr<Display> display = GetDisplayById(displayId);
+    if (display == nullptr) {
+        TLOGW(WmsLogTag::DMS, "get display failed, display id : %{public}" PRIu64, displayId);
+        relativePosition.displayId = 0;
+        relativePosition.position.x = globalPosition.x;
+        relativePosition.position.y = globalPosition.y;
+        return DMError::DM_OK;
+    }
+
+    const sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
+    if (displayInfo == nullptr) {
+        TLOGW(WmsLogTag::DMS, "get display info failed, display id : %{public}" PRIu64, displayId);
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    int32_t startX = displayInfo->GetX();
+    int32_t startY = displayInfo->GetY();
+    if (IsInt32SubOverflow(globalPosition.x, startX) ||
+        IsInt32SubOverflow(globalPosition.y, startY)) {
+        TLOGE(WmsLogTag::DMS, "coordinate x or y overflowed!");
+        return DMError::DM_ERROR_ILLEGAL_PARAM;
+    }
+    relativePosition.displayId = displayId;
+    relativePosition.position.x = globalPosition.x - displayInfo->GetX();
+    relativePosition.position.y = globalPosition.y - displayInfo->GetY();
+    return DMError::DM_OK;
 }
 } // namespace OHOS::Rosen
 

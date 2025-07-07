@@ -18,15 +18,12 @@
 #include "marshalling_helper.h"
 
 namespace OHOS::Rosen {
-namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenSessionManagerProxy" };
-}
 
 sptr<DisplayInfo> OHOS::Rosen::ScreenSessionManagerProxy::GetDefaultDisplayInfo()
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("GetDefaultDisplayInfo: remote is nullptr");
+        TLOGW(WmsLogTag::DMS, "remote is nullptr");
         return nullptr;
     }
 
@@ -34,18 +31,18 @@ sptr<DisplayInfo> OHOS::Rosen::ScreenSessionManagerProxy::GetDefaultDisplayInfo(
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return nullptr;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DEFAULT_DISPLAY_INFO),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return nullptr;
     }
 
     sptr<DisplayInfo> info = reply.ReadParcelable<DisplayInfo>();
     if (info == nullptr) {
-        WLOGFW("read display info failed, info is nullptr.");
+        TLOGW(WmsLogTag::DMS, "read display info failed, info is nullptr.");
     }
     return info;
 }
@@ -54,7 +51,7 @@ DMError ScreenSessionManagerProxy::SetScreenActiveMode(ScreenId screenId, uint32
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("SetScreenActiveMode: remote is nullptr");
+        TLOGW(WmsLogTag::DMS, "remote is nullptr");
         return DMError::DM_ERROR_IPC_FAILED;
     }
 
@@ -62,16 +59,16 @@ DMError ScreenSessionManagerProxy::SetScreenActiveMode(ScreenId screenId, uint32
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("SetScreenActiveMode: WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     if (!data.WriteUint64(screenId) || !data.WriteUint32(modeId)) {
-        WLOGFE("SetScreenActiveMode: write screenId/modeId failed");
+        TLOGE(WmsLogTag::DMS, "write screenId/modeId failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREEN_ACTIVE_MODE),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SetScreenActiveMode: SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     return static_cast<DMError>(reply.ReadInt32());
@@ -81,7 +78,7 @@ DMError ScreenSessionManagerProxy::SetVirtualPixelRatio(ScreenId screenId, float
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("SetVirtualPixelRatio: remote is nullptr");
+        TLOGW(WmsLogTag::DMS, "remote is nullptr");
         return DMError::DM_ERROR_IPC_FAILED;
     }
 
@@ -89,16 +86,16 @@ DMError ScreenSessionManagerProxy::SetVirtualPixelRatio(ScreenId screenId, float
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     if (!data.WriteUint64(screenId) || !data.WriteFloat(virtualPixelRatio)) {
-        WLOGFE("write screenId/modeId failed");
+        TLOGE(WmsLogTag::DMS, "write screenId/modeId failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_PIXEL_RATIO),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     return static_cast<DMError>(reply.ReadInt32());
@@ -108,7 +105,7 @@ DMError ScreenSessionManagerProxy::SetVirtualPixelRatioSystem(ScreenId screenId,
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("SetVirtualPixelRatioSystem: remote is nullptr");
+        TLOGW(WmsLogTag::DMS, "remote is nullptr");
         return DMError::DM_ERROR_IPC_FAILED;
     }
 
@@ -116,16 +113,16 @@ DMError ScreenSessionManagerProxy::SetVirtualPixelRatioSystem(ScreenId screenId,
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     if (!data.WriteUint64(screenId) || !data.WriteFloat(virtualPixelRatio)) {
-        WLOGFE("write screenId/modeId failed");
+        TLOGE(WmsLogTag::DMS, "write screenId/modeId failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_PIXEL_RATIO_SYSTEM),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     return static_cast<DMError>(reply.ReadInt32());
@@ -135,7 +132,7 @@ DMError ScreenSessionManagerProxy::SetDefaultDensityDpi(ScreenId screenId, float
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("SetDefaultDensity: remote is nullptr");
+        TLOGW(WmsLogTag::DMS, "remote is nullptr");
         return DMError::DM_ERROR_IPC_FAILED;
     }
 
@@ -143,16 +140,16 @@ DMError ScreenSessionManagerProxy::SetDefaultDensityDpi(ScreenId screenId, float
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     if (!data.WriteUint64(screenId) || !data.WriteFloat(virtualPixelRatio)) {
-        WLOGFE("write screenId/virtualPixelRatio failed");
+        TLOGE(WmsLogTag::DMS, "write screenId/virtualPixelRatio failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_DEFAULT_DENSITY_DPI),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     return static_cast<DMError>(reply.ReadInt32());
@@ -163,7 +160,7 @@ DMError ScreenSessionManagerProxy::SetResolution(ScreenId screenId, uint32_t wid
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("SetResolution: remote is nullptr");
+        TLOGW(WmsLogTag::DMS, "remote is nullptr");
         return DMError::DM_ERROR_IPC_FAILED;
     }
 
@@ -171,17 +168,17 @@ DMError ScreenSessionManagerProxy::SetResolution(ScreenId screenId, uint32_t wid
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     if (!data.WriteUint64(screenId) || !data.WriteUint32(width) ||
         !data.WriteUint32(height) || !data.WriteFloat(virtualPixelRatio)) {
-        WLOGFE("write screenId/width/height/virtualPixelRatio failed");
+        TLOGE(WmsLogTag::DMS, "write screenId/width/height/virtualPixelRatio failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_RESOLUTION),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     return static_cast<DMError>(reply.ReadInt32());
@@ -191,7 +188,7 @@ DMError ScreenSessionManagerProxy::GetDensityInCurResolution(ScreenId screenId, 
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("GetDensityInCurResolution: remote is nullptr");
+        TLOGW(WmsLogTag::DMS, "remote is nullptr");
         return DMError::DM_ERROR_IPC_FAILED;
     }
 
@@ -199,16 +196,16 @@ DMError ScreenSessionManagerProxy::GetDensityInCurResolution(ScreenId screenId, 
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     if (!data.WriteUint64(screenId)) {
-        WLOGFE("write screenId failed");
+        TLOGE(WmsLogTag::DMS, "write screenId failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DENSITY_IN_CURRENT_RESOLUTION),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     virtualPixelRatio = reply.ReadFloat();
@@ -219,7 +216,7 @@ DMError ScreenSessionManagerProxy::GetScreenColorGamut(ScreenId screenId, Screen
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("DisplayManagerProxy::GetScreenColorGamut: remote is nullptr");
+        TLOGW(WmsLogTag::DMS, "remote is nullptr");
         return DMError::DM_ERROR_NULLPTR;
     }
 
@@ -227,16 +224,16 @@ DMError ScreenSessionManagerProxy::GetScreenColorGamut(ScreenId screenId, Screen
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFW("DisplayManagerProxy::GetScreenColorGamut: WriteInterfaceToken failed");
+        TLOGW(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     if (!data.WriteUint64(static_cast<uint64_t>(screenId))) {
-        WLOGFW("DisplayManagerProxy::GetScreenColorGamut: WriteUint64 uint64_t failed");
+        TLOGW(WmsLogTag::DMS, "WriteUint64 uint64_t failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCREEN_GET_COLOR_GAMUT),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("DisplayManagerProxy::GetScreenColorGamut: SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     DMError ret = static_cast<DMError>(reply.ReadInt32());
@@ -251,7 +248,7 @@ DMError ScreenSessionManagerProxy::SetScreenColorGamut(ScreenId screenId, int32_
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("DisplayManagerProxy::SetScreenColorGamut: remote is nullptr");
+        TLOGW(WmsLogTag::DMS, "remote is nullptr");
         return DMError::DM_ERROR_NULLPTR;
     }
 
@@ -259,16 +256,16 @@ DMError ScreenSessionManagerProxy::SetScreenColorGamut(ScreenId screenId, int32_
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFW("DisplayManagerProxy::SetScreenColorGamut: WriteInterfaceToken failed");
+        TLOGW(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     if (!data.WriteUint64(static_cast<uint64_t>(screenId)) || !data.WriteInt32(colorGamutIdx)) {
-        WLOGFW("DisplayManagerProxy::SetScreenColorGamut: Write failed");
+        TLOGW(WmsLogTag::DMS, "Write failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCREEN_SET_COLOR_GAMUT),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("DisplayManagerProxy::SetScreenColorGamut: SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     return static_cast<DMError>(reply.ReadInt32());
@@ -278,7 +275,7 @@ DMError ScreenSessionManagerProxy::GetScreenGamutMap(ScreenId screenId, ScreenGa
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("DisplayManagerProxy::GetScreenGamutMap: remote is nullptr");
+        TLOGW(WmsLogTag::DMS, "remote is nullptr");
         return DMError::DM_ERROR_NULLPTR;
     }
 
@@ -286,16 +283,16 @@ DMError ScreenSessionManagerProxy::GetScreenGamutMap(ScreenId screenId, ScreenGa
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFW("DisplayManagerProxy::GetScreenGamutMap: WriteInterfaceToken failed");
+        TLOGW(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     if (!data.WriteUint64(static_cast<uint64_t>(screenId))) {
-        WLOGFW("DisplayManagerProxy::GetScreenGamutMap: WriteUint64 screenId failed");
+        TLOGW(WmsLogTag::DMS, "WriteUint64 screenId failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCREEN_GET_GAMUT_MAP),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("DisplayManagerProxy::GetScreenGamutMap: SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     DMError ret = static_cast<DMError>(reply.ReadInt32());
@@ -310,7 +307,7 @@ DMError ScreenSessionManagerProxy::SetScreenGamutMap(ScreenId screenId, ScreenGa
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("DisplayManagerProxy::SetScreenGamutMap: remote is nullptr");
+        TLOGW(WmsLogTag::DMS, "remote is nullptr");
         return DMError::DM_ERROR_NULLPTR;
     }
 
@@ -318,16 +315,16 @@ DMError ScreenSessionManagerProxy::SetScreenGamutMap(ScreenId screenId, ScreenGa
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFW("DisplayManagerProxy::SetScreenGamutMap: WriteInterfaceToken failed");
+        TLOGW(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     if (!data.WriteUint64(static_cast<uint64_t>(screenId)) || !data.WriteUint32(static_cast<uint32_t>(gamutMap))) {
-        WLOGFW("DisplayManagerProxy::SetScreenGamutMap: Writ failed");
+        TLOGW(WmsLogTag::DMS, "Write failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCREEN_SET_GAMUT_MAP),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("DisplayManagerProxy::SetScreenGamutMap: SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     return static_cast<DMError>(reply.ReadInt32());
@@ -337,7 +334,7 @@ DMError ScreenSessionManagerProxy::SetScreenColorTransform(ScreenId screenId)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("DisplayManagerProxy::SetScreenColorTransform: remote is nullptr");
+        TLOGW(WmsLogTag::DMS, "remote is nullptr");
         return DMError::DM_ERROR_NULLPTR;
     }
 
@@ -345,16 +342,16 @@ DMError ScreenSessionManagerProxy::SetScreenColorTransform(ScreenId screenId)
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFW("DisplayManagerProxy::SetScreenColorTransform: WriteInterfaceToken failed");
+        TLOGW(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     if (!data.WriteUint64(static_cast<uint64_t>(screenId))) {
-        WLOGFW("DisplayManagerProxy::SetScreenColorTransform: WriteUint64 screenId failed");
+        TLOGW(WmsLogTag::DMS, "WriteUint64 screenId failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCREEN_SET_COLOR_TRANSFORM),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("DisplayManagerProxy::SetScreenColorTransform: SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     return static_cast<DMError>(reply.ReadInt32());
@@ -364,7 +361,7 @@ DMError ScreenSessionManagerProxy::GetPixelFormat(ScreenId screenId, GraphicPixe
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("GetPixelFormat: remote is nullptr");
+        TLOGW(WmsLogTag::DMS, "remote is nullptr");
         return DMError::DM_ERROR_NULLPTR;
     }
 
@@ -372,16 +369,16 @@ DMError ScreenSessionManagerProxy::GetPixelFormat(ScreenId screenId, GraphicPixe
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFW("GetPixelFormat: WriteInterfaceToken failed");
+        TLOGW(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     if (!data.WriteUint64(static_cast<uint64_t>(screenId))) {
-        WLOGFW("GetPixelFormat: WriteUint64 uint64_t failed");
+        TLOGW(WmsLogTag::DMS, "WriteUint64 uint64_t failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCREEN_GET_PIXEL_FORMAT),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("GetPixelFormat: SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     DMError ret = static_cast<DMError>(reply.ReadInt32());
@@ -396,7 +393,7 @@ DMError ScreenSessionManagerProxy::SetPixelFormat(ScreenId screenId, GraphicPixe
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("SetPixelFormat: remote is nullptr");
+        TLOGW(WmsLogTag::DMS, "remote is nullptr");
         return DMError::DM_ERROR_NULLPTR;
     }
 
@@ -404,16 +401,16 @@ DMError ScreenSessionManagerProxy::SetPixelFormat(ScreenId screenId, GraphicPixe
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFW("SetPixelFormat: WriteInterfaceToken failed");
+        TLOGW(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     if (!data.WriteUint64(static_cast<uint64_t>(screenId)) || !data.WriteInt32(pixelFormat)) {
-        WLOGFW("SetPixelFormat: WriteUint64 screenId failed");
+        TLOGW(WmsLogTag::DMS, "WriteUint64 screenId failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCREEN_SET_PIXEL_FORMAT),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("SetPixelFormat: SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     return static_cast<DMError>(reply.ReadInt32());
@@ -423,7 +420,7 @@ DMError ScreenSessionManagerProxy::GetSupportedHDRFormats(ScreenId screenId, std
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("GetSupportedHDRFormats: remote is nullptr");
+        TLOGW(WmsLogTag::DMS, "remote is nullptr");
         return DMError::DM_ERROR_NULLPTR;
     }
 
@@ -431,16 +428,16 @@ DMError ScreenSessionManagerProxy::GetSupportedHDRFormats(ScreenId screenId, std
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFW("GetSupportedHDRFormats: WriteInterfaceToken failed");
+        TLOGW(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     if (!data.WriteUint64(static_cast<uint64_t>(screenId))) {
-        WLOGFW("GetSupportedHDRFormats: WriteUint64 screenId failed");
+        TLOGW(WmsLogTag::DMS, "WriteUint64 screenId failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCREEN_GET_SUPPORTED_HDR_FORMAT),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("GetSupportedHDRFormats: SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     DMError ret = static_cast<DMError>(reply.ReadInt32());
@@ -462,7 +459,7 @@ DMError ScreenSessionManagerProxy::GetScreenHDRFormat(ScreenId screenId, ScreenH
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("GetScreenHDRFormat: remote is nullptr");
+        TLOGW(WmsLogTag::DMS, "remote is nullptr");
         return DMError::DM_ERROR_NULLPTR;
     }
 
@@ -470,16 +467,16 @@ DMError ScreenSessionManagerProxy::GetScreenHDRFormat(ScreenId screenId, ScreenH
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFW("GetScreenHDRFormat: WriteInterfaceToken failed");
+        TLOGW(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     if (!data.WriteUint64(static_cast<uint64_t>(screenId))) {
-        WLOGFW("GetScreenHDRFormat: WriteUint64 uint64_t failed");
+        TLOGW(WmsLogTag::DMS, "WriteUint64 uint64_t failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCREEN_GET_HDR_FORMAT),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("GetScreenHDRFormat: SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     DMError ret = static_cast<DMError>(reply.ReadInt32());
@@ -494,7 +491,7 @@ DMError ScreenSessionManagerProxy::SetScreenHDRFormat(ScreenId screenId, int32_t
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("SetScreenHDRFormat: remote is nullptr");
+        TLOGW(WmsLogTag::DMS, "remote is nullptr");
         return DMError::DM_ERROR_NULLPTR;
     }
 
@@ -502,16 +499,16 @@ DMError ScreenSessionManagerProxy::SetScreenHDRFormat(ScreenId screenId, int32_t
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFW("SetScreenHDRFormat: WriteInterfaceToken failed");
+        TLOGW(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     if (!data.WriteUint64(static_cast<uint64_t>(screenId)) || !data.WriteInt32(modeIdx)) {
-        WLOGFW("SetScreenHDRFormat: WriteUint64 screenId failed");
+        TLOGW(WmsLogTag::DMS, "WriteUint64 screenId failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCREEN_SET_HDR_FORMAT),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("SetScreenHDRFormat: SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     return static_cast<DMError>(reply.ReadInt32());
@@ -522,7 +519,7 @@ DMError ScreenSessionManagerProxy::GetSupportedColorSpaces(ScreenId screenId,
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("GetSupportedColorSpaces: remote is nullptr");
+        TLOGW(WmsLogTag::DMS, "remote is nullptr");
         return DMError::DM_ERROR_NULLPTR;
     }
 
@@ -530,16 +527,16 @@ DMError ScreenSessionManagerProxy::GetSupportedColorSpaces(ScreenId screenId,
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFW("GetSupportedColorSpaces: WriteInterfaceToken failed");
+        TLOGW(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     if (!data.WriteUint64(static_cast<uint64_t>(screenId))) {
-        WLOGFW("GetSupportedColorSpaces: WriteUint64 screenId failed");
+        TLOGW(WmsLogTag::DMS, "WriteUint64 screenId failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCREEN_GET_SUPPORTED_COLOR_SPACE),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("GetSupportedColorSpaces: SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     DMError ret = static_cast<DMError>(reply.ReadInt32());
@@ -561,7 +558,7 @@ DMError ScreenSessionManagerProxy::GetScreenColorSpace(ScreenId screenId, Graphi
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("GetScreenColorSpace: remote is nullptr");
+        TLOGW(WmsLogTag::DMS, "remote is nullptr");
         return DMError::DM_ERROR_NULLPTR;
     }
 
@@ -569,16 +566,16 @@ DMError ScreenSessionManagerProxy::GetScreenColorSpace(ScreenId screenId, Graphi
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFW("GetScreenColorSpace: WriteInterfaceToken failed");
+        TLOGW(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     if (!data.WriteUint64(static_cast<uint64_t>(screenId))) {
-        WLOGFW("GetScreenColorSpace: WriteUint64 screenId failed");
+        TLOGW(WmsLogTag::DMS, "WriteUint64 screenId failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCREEN_GET_COLOR_SPACE),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("GetScreenColorSpace: SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     DMError ret = static_cast<DMError>(reply.ReadInt32());
@@ -593,7 +590,7 @@ DMError ScreenSessionManagerProxy::SetScreenColorSpace(ScreenId screenId, Graphi
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("SetScreenColorSpace: remote is nullptr");
+        TLOGW(WmsLogTag::DMS, "remote is nullptr");
         return DMError::DM_ERROR_NULLPTR;
     }
 
@@ -601,16 +598,16 @@ DMError ScreenSessionManagerProxy::SetScreenColorSpace(ScreenId screenId, Graphi
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFW("SetScreenColorSpace: WriteInterfaceToken failed");
+        TLOGW(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     if (!data.WriteUint64(static_cast<uint64_t>(screenId)) || !data.WriteInt32(colorSpace)) {
-        WLOGFW("SetScreenColorSpace: Write failed");
+        TLOGW(WmsLogTag::DMS, "Write failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCREEN_SET_COLOR_SPACE),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("SetScreenColorSpace: SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     return static_cast<DMError>(reply.ReadInt32());
@@ -621,7 +618,7 @@ DMError ScreenSessionManagerProxy::RegisterDisplayManagerAgent(const sptr<IDispl
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("RegisterDisplayManagerAgent: remote is nullptr");
+        TLOGW(WmsLogTag::DMS, "remote is nullptr");
         return DMError::DM_ERROR_IPC_FAILED;
     }
 
@@ -629,27 +626,27 @@ DMError ScreenSessionManagerProxy::RegisterDisplayManagerAgent(const sptr<IDispl
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     if (displayManagerAgent == nullptr) {
-        WLOGFE("IDisplayManagerAgent is null");
+        TLOGE(WmsLogTag::DMS, "IDisplayManagerAgent is null");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
 
     if (!data.WriteRemoteObject(displayManagerAgent->AsObject())) {
-        WLOGFE("Write IDisplayManagerAgent failed");
+        TLOGE(WmsLogTag::DMS, "Write IDisplayManagerAgent failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
 
     if (!data.WriteUint32(static_cast<uint32_t>(type))) {
-        WLOGFE("Write DisplayManagerAgent type failed");
+        TLOGE(WmsLogTag::DMS, "Write DisplayManagerAgent type failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
 
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_REGISTER_DISPLAY_MANAGER_AGENT),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     return static_cast<DMError>(reply.ReadInt32());
@@ -660,7 +657,7 @@ DMError ScreenSessionManagerProxy::UnregisterDisplayManagerAgent(const sptr<IDis
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("UnregisterDisplayManagerAgent: remote is nullptr");
+        TLOGW(WmsLogTag::DMS, "remote is nullptr");
         return DMError::DM_ERROR_IPC_FAILED;
     }
 
@@ -668,28 +665,28 @@ DMError ScreenSessionManagerProxy::UnregisterDisplayManagerAgent(const sptr<IDis
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
 
     if (displayManagerAgent == nullptr) {
-        WLOGFE("IDisplayManagerAgent is null");
+        TLOGE(WmsLogTag::DMS, "IDisplayManagerAgent is null");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
 
     if (!data.WriteRemoteObject(displayManagerAgent->AsObject())) {
-        WLOGFE("Write IWindowManagerAgent failed");
+        TLOGE(WmsLogTag::DMS, "Write IWindowManagerAgent failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
 
     if (!data.WriteUint32(static_cast<uint32_t>(type))) {
-        WLOGFE("Write DisplayManagerAgent type failed");
+        TLOGE(WmsLogTag::DMS, "Write DisplayManagerAgent type failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
 
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_UNREGISTER_DISPLAY_MANAGER_AGENT),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     return static_cast<DMError>(reply.ReadInt32());
@@ -699,7 +696,7 @@ bool OHOS::Rosen::ScreenSessionManagerProxy::WakeUpBegin(PowerStateChangeReason 
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("[UL_POWER]WakeUpBegin remote is nullptr");
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]WakeUpBegin remote is nullptr");
         return false;
     }
 
@@ -708,16 +705,16 @@ bool OHOS::Rosen::ScreenSessionManagerProxy::WakeUpBegin(PowerStateChangeReason 
     MessageOption option;
 
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("[UL_POWER]WakeUpBegin: WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]WakeUpBegin: WriteInterfaceToken failed");
         return false;
     }
     if (!data.WriteUint32(static_cast<uint32_t>(reason))) {
-        WLOGFE("[UL_POWER]WakeUpBegin: Write PowerStateChangeReason failed");
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]WakeUpBegin: Write PowerStateChangeReason failed");
         return false;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_WAKE_UP_BEGIN),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("[UL_POWER]WakeUpBegin: SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "[UL_POWER]WakeUpBegin: SendRequest failed");
         return false;
     }
     return reply.ReadBool();
@@ -727,7 +724,7 @@ bool OHOS::Rosen::ScreenSessionManagerProxy::WakeUpEnd()
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("[UL_POWER]WakeUpEnd remote is nullptr");
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]WakeUpEnd remote is nullptr");
         return false;
     }
 
@@ -736,12 +733,12 @@ bool OHOS::Rosen::ScreenSessionManagerProxy::WakeUpEnd()
     MessageOption option;
 
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("[UL_POWER]WakeUpEnd: WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]WakeUpEnd: WriteInterfaceToken failed");
         return false;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_WAKE_UP_END),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("[UL_POWER]WakeUpEnd: SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "[UL_POWER]WakeUpEnd: SendRequest failed");
         return false;
     }
     return reply.ReadBool();
@@ -751,7 +748,7 @@ bool OHOS::Rosen::ScreenSessionManagerProxy::SuspendBegin(PowerStateChangeReason
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("[UL_POWER]SuspendBegin remote is nullptr");
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]SuspendBegin remote is nullptr");
         return false;
     }
 
@@ -760,16 +757,16 @@ bool OHOS::Rosen::ScreenSessionManagerProxy::SuspendBegin(PowerStateChangeReason
     MessageOption option;
 
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("[UL_POWER]SuspendBegin: WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]SuspendBegin: WriteInterfaceToken failed");
         return false;
     }
     if (!data.WriteUint32(static_cast<uint32_t>(reason))) {
-        WLOGFE("[UL_POWER]SuspendBegin: Write PowerStateChangeReason failed");
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]SuspendBegin: Write PowerStateChangeReason failed");
         return false;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SUSPEND_BEGIN),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("[UL_POWER]SuspendBegin: SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "[UL_POWER]SuspendBegin: SendRequest failed");
         return false;
     }
     return reply.ReadBool();
@@ -779,7 +776,7 @@ bool OHOS::Rosen::ScreenSessionManagerProxy::SuspendEnd()
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("[UL_POWER]SuspendEnd remote is nullptr");
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]SuspendEnd remote is nullptr");
         return false;
     }
 
@@ -788,12 +785,12 @@ bool OHOS::Rosen::ScreenSessionManagerProxy::SuspendEnd()
     MessageOption option;
 
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("[UL_POWER]SuspendEnd: WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]SuspendEnd: WriteInterfaceToken failed");
         return false;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SUSPEND_END),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("[UL_POWER]SuspendEnd: SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "[UL_POWER]SuspendEnd: SendRequest failed");
         return false;
     }
     return reply.ReadBool();
@@ -803,7 +800,7 @@ ScreenId OHOS::Rosen::ScreenSessionManagerProxy::GetInternalScreenId()
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("[UL_POWER]GetInternalScreenId remote is nullptr");
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]GetInternalScreenId remote is nullptr");
         return SCREEN_ID_INVALID;
     }
 
@@ -812,12 +809,12 @@ ScreenId OHOS::Rosen::ScreenSessionManagerProxy::GetInternalScreenId()
     MessageOption option(MessageOption::TF_SYNC);
 
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("[UL_POWER]GetInternalScreenId: WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]GetInternalScreenId: WriteInterfaceToken failed");
         return SCREEN_ID_INVALID;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_INTERNAL_SCREEN_ID),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("[UL_POWER]GetInternalScreenId: SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "[UL_POWER]GetInternalScreenId: SendRequest failed");
         return SCREEN_ID_INVALID;
     }
     return reply.ReadUint64();
@@ -828,7 +825,7 @@ bool OHOS::Rosen::ScreenSessionManagerProxy::SetScreenPowerById(ScreenId screenI
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("[UL_POWER]SetScreenPowerById remote is nullptr");
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]SetScreenPowerById remote is nullptr");
         return false;
     }
 
@@ -836,24 +833,24 @@ bool OHOS::Rosen::ScreenSessionManagerProxy::SetScreenPowerById(ScreenId screenI
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("[UL_POWER]WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]WriteInterfaceToken failed");
         return false;
     }
     if (!data.WriteUint64(screenId)) {
-        WLOGFE("[UL_POWER]Write ScreenId failed");
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]Write ScreenId failed");
         return false;
     }
     if (!data.WriteUint32(static_cast<uint32_t>(state))) {
-        WLOGFE("[UL_POWER]Write ScreenPowerState failed");
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]Write ScreenPowerState failed");
         return false;
     }
     if (!data.WriteUint32(static_cast<uint32_t>(reason))) {
-        WLOGFE("[UL_POWER]Write PowerStateChangeReason failed");
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]Write PowerStateChangeReason failed");
         return false;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREEN_POWER_BY_ID),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("[UL_POWER]SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "[UL_POWER]SendRequest failed");
         return false;
     }
     return reply.ReadBool();
@@ -863,7 +860,7 @@ bool OHOS::Rosen::ScreenSessionManagerProxy::SetDisplayState(DisplayState state)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("[UL_POWER]SetDisplayState remote is nullptr");
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]SetDisplayState remote is nullptr");
         return false;
     }
 
@@ -871,16 +868,16 @@ bool OHOS::Rosen::ScreenSessionManagerProxy::SetDisplayState(DisplayState state)
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("[UL_POWER]WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]WriteInterfaceToken failed");
         return false;
     }
     if (!data.WriteUint32(static_cast<uint32_t>(state))) {
-        WLOGFE("[UL_POWER]Write DisplayState failed");
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]Write DisplayState failed");
         return false;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_DISPLAY_STATE),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("[UL_POWER]SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "[UL_POWER]SendRequest failed");
         return false;
     }
     return reply.ReadBool();
@@ -890,7 +887,7 @@ bool OHOS::Rosen::ScreenSessionManagerProxy::SetSpecifiedScreenPower(ScreenId sc
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("[UL_POWER]SetSpecifiedScreenPower remote is nullptr");
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]SetSpecifiedScreenPower remote is nullptr");
         return false;
     }
 
@@ -898,24 +895,24 @@ bool OHOS::Rosen::ScreenSessionManagerProxy::SetSpecifiedScreenPower(ScreenId sc
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("[UL_POWER]WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]WriteInterfaceToken failed");
         return false;
     }
     if (!data.WriteUint32(static_cast<uint32_t>(screenId))) {
-        WLOGFE("[UL_POWER]Write ScreenId failed");
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]Write ScreenId failed");
         return false;
     }
     if (!data.WriteUint32(static_cast<uint32_t>(state))) {
-        WLOGFE("[UL_POWER]Write ScreenPowerState failed");
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]Write ScreenPowerState failed");
         return false;
     }
     if (!data.WriteUint32(static_cast<uint32_t>(reason))) {
-        WLOGFE("[UL_POWER]Write PowerStateChangeReason failed");
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]Write PowerStateChangeReason failed");
         return false;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SPECIFIED_SCREEN_POWER),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("[UL_POWER]SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "[UL_POWER]SendRequest failed");
         return false;
     }
     return reply.ReadBool();
@@ -925,7 +922,7 @@ bool OHOS::Rosen::ScreenSessionManagerProxy::SetScreenPowerForAll(ScreenPowerSta
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("[UL_POWER]SetScreenPowerForAll remote is nullptr");
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]SetScreenPowerForAll remote is nullptr");
         return false;
     }
 
@@ -933,20 +930,20 @@ bool OHOS::Rosen::ScreenSessionManagerProxy::SetScreenPowerForAll(ScreenPowerSta
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("[UL_POWER]WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]WriteInterfaceToken failed");
         return false;
     }
     if (!data.WriteUint32(static_cast<uint32_t>(state))) {
-        WLOGFE("[UL_POWER]Write ScreenPowerState failed");
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]Write ScreenPowerState failed");
         return false;
     }
     if (!data.WriteUint32(static_cast<uint32_t>(reason))) {
-        WLOGFE("[UL_POWER]Write PowerStateChangeReason failed");
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]Write PowerStateChangeReason failed");
         return false;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREEN_POWER_FOR_ALL),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("[UL_POWER]SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "[UL_POWER]SendRequest failed");
         return false;
     }
     return reply.ReadBool();
@@ -956,7 +953,7 @@ DisplayState OHOS::Rosen::ScreenSessionManagerProxy::GetDisplayState(DisplayId d
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("GetDisplayState remote is nullptr");
+        TLOGE(WmsLogTag::DMS, "remote is nullptr");
         return DisplayState::UNKNOWN;
     }
 
@@ -964,16 +961,16 @@ DisplayState OHOS::Rosen::ScreenSessionManagerProxy::GetDisplayState(DisplayId d
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DisplayState::UNKNOWN;
     }
     if (!data.WriteUint64(displayId)) {
-        WLOGFE("Write displayId failed");
+        TLOGE(WmsLogTag::DMS, "Write displayId failed");
         return DisplayState::UNKNOWN;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DISPLAY_STATE),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "SendRequest failed");
         return DisplayState::UNKNOWN;
     }
     return static_cast<DisplayState>(reply.ReadUint32());
@@ -983,7 +980,7 @@ void OHOS::Rosen::ScreenSessionManagerProxy::NotifyDisplayEvent(DisplayEvent eve
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("[UL_POWER]NotifyDisplayEvent remote is nullptr");
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]NotifyDisplayEvent remote is nullptr");
         return;
     }
 
@@ -991,16 +988,16 @@ void OHOS::Rosen::ScreenSessionManagerProxy::NotifyDisplayEvent(DisplayEvent eve
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("[UL_POWER]WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]WriteInterfaceToken failed");
         return;
     }
     if (!data.WriteUint32(static_cast<uint32_t>(event))) {
-        WLOGFE("[UL_POWER]Write DisplayEvent failed");
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]Write DisplayEvent failed");
         return;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_NOTIFY_DISPLAY_EVENT),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("[UL_POWER]SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "[UL_POWER]SendRequest failed");
         return;
     }
 }
@@ -1009,7 +1006,7 @@ ScreenPowerState OHOS::Rosen::ScreenSessionManagerProxy::GetScreenPower(ScreenId
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("GetScreenPower remote is nullptr");
+        TLOGE(WmsLogTag::DMS, "remote is nullptr");
         return ScreenPowerState::INVALID_STATE;
     }
 
@@ -1017,16 +1014,16 @@ ScreenPowerState OHOS::Rosen::ScreenSessionManagerProxy::GetScreenPower(ScreenId
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return ScreenPowerState::INVALID_STATE;
     }
     if (!data.WriteUint64(static_cast<uint64_t>(dmsScreenId))) {
-        WLOGFE("Write dmsScreenId failed");
+        TLOGE(WmsLogTag::DMS, "Write dmsScreenId failed");
         return ScreenPowerState::INVALID_STATE;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_SCREEN_POWER),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "SendRequest failed");
         return ScreenPowerState::INVALID_STATE;
     }
     return static_cast<ScreenPowerState>(reply.ReadUint32());
@@ -1036,7 +1033,7 @@ ScreenPowerState OHOS::Rosen::ScreenSessionManagerProxy::GetScreenPower()
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("GetScreenPower remote is nullptr");
+        TLOGE(WmsLogTag::DMS, "remote is nullptr");
         return ScreenPowerState::INVALID_STATE;
     }
 
@@ -1044,12 +1041,12 @@ ScreenPowerState OHOS::Rosen::ScreenSessionManagerProxy::GetScreenPower()
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return ScreenPowerState::INVALID_STATE;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_SCREEN_POWER_AUTO),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "SendRequest failed");
         return ScreenPowerState::INVALID_STATE;
     }
     return static_cast<ScreenPowerState>(reply.ReadUint32());
@@ -1059,7 +1056,7 @@ bool OHOS::Rosen::ScreenSessionManagerProxy::TryToCancelScreenOff()
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("[UL_POWER]TryToCancelScreenOff remote is nullptr");
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]TryToCancelScreenOff remote is nullptr");
         return false;
     }
 
@@ -1068,12 +1065,12 @@ bool OHOS::Rosen::ScreenSessionManagerProxy::TryToCancelScreenOff()
     MessageOption option;
 
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("[UL_POWER]TryToCancelScreenOff: WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]TryToCancelScreenOff: WriteInterfaceToken failed");
         return false;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_TRY_TO_CANCEL_SCREEN_OFF),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("[UL_POWER]TryToCancelScreenOff: SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "[UL_POWER]TryToCancelScreenOff: SendRequest failed");
         return false;
     }
     return reply.ReadBool();
@@ -1082,10 +1079,10 @@ bool OHOS::Rosen::ScreenSessionManagerProxy::TryToCancelScreenOff()
 ScreenId ScreenSessionManagerProxy::CreateVirtualScreen(VirtualScreenOption virtualOption,
                                                         const sptr<IRemoteObject>& displayManagerAgent)
 {
-    WLOGFI("SCB: ScreenSessionManagerProxy::CreateVirtualScreen: ENTER");
+    TLOGI(WmsLogTag::DMS, "SCB: ENTER");
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("SCB: ScreenSessionManagerProxy::CreateVirtualScreen: remote is nullptr");
+        TLOGW(WmsLogTag::DMS, "SCB: remote is nullptr");
         return SCREEN_ID_INVALID;
     }
 
@@ -1093,20 +1090,21 @@ ScreenId ScreenSessionManagerProxy::CreateVirtualScreen(VirtualScreenOption virt
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("SCB: ScreenSessionManagerProxy::CreateVirtualScreen: WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "SCB: WriteInterfaceToken failed");
         return SCREEN_ID_INVALID;
     }
     bool res = data.WriteString(virtualOption.name_) && data.WriteUint32(virtualOption.width_) &&
         data.WriteUint32(virtualOption.height_) && data.WriteFloat(virtualOption.density_) &&
         data.WriteInt32(virtualOption.flags_) && data.WriteBool(virtualOption.isForShot_) &&
         data.WriteUInt64Vector(virtualOption.missionIds_) &&
-        data.WriteUint32(static_cast<uint32_t>(virtualOption.virtualScreenType_));
+        data.WriteUint32(static_cast<uint32_t>(virtualOption.virtualScreenType_)) &&
+        data.WriteBool(virtualOption.isSecurity_);
     if (virtualOption.surface_ != nullptr && virtualOption.surface_->GetProducer() != nullptr) {
         res = res &&
             data.WriteBool(true) &&
             data.WriteRemoteObject(virtualOption.surface_->GetProducer()->AsObject());
     } else {
-        WLOGFW("SCB: ScreenSessionManagerProxy::CreateVirtualScreen: surface is nullptr");
+        TLOGW(WmsLogTag::DMS, "SCB: surface is nullptr");
         res = res && data.WriteBool(false);
     }
     if (displayManagerAgent != nullptr) {
@@ -1114,12 +1112,12 @@ ScreenId ScreenSessionManagerProxy::CreateVirtualScreen(VirtualScreenOption virt
             data.WriteRemoteObject(displayManagerAgent);
     }
     if (!res) {
-        WLOGFE("SCB: ScreenSessionManagerProxy::Write data failed");
+        TLOGE(WmsLogTag::DMS, "SCB: ScreenSessionManagerProxy::Write data failed");
         return SCREEN_ID_INVALID;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_CREATE_VIRTUAL_SCREEN),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("SCB: ScreenSessionManagerProxy::CreateVirtualScreen: SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "SCB: SendRequest failed");
         return SCREEN_ID_INVALID;
     }
 
@@ -1129,10 +1127,10 @@ ScreenId ScreenSessionManagerProxy::CreateVirtualScreen(VirtualScreenOption virt
 
 DMError ScreenSessionManagerProxy::SetVirtualScreenSurface(ScreenId screenId, sptr<IBufferProducer> surface)
 {
-    WLOGFW("SCB: ScreenSessionManagerProxy::SetVirtualScreenSurface: ENTER");
+    TLOGW(WmsLogTag::DMS, "SCB: ENTER");
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("SCB: ScreenSessionManagerProxy::SetVirtualScreenSurface: remote is nullptr");
+        TLOGW(WmsLogTag::DMS, "SCB: remote is nullptr");
         return DMError::DM_ERROR_REMOTE_CREATE_FAILED;
     }
 
@@ -1140,7 +1138,7 @@ DMError ScreenSessionManagerProxy::SetVirtualScreenSurface(ScreenId screenId, sp
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("SCB: ScreenSessionManagerProxy::SetVirtualScreenSurface: WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "SCB: WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     bool res = data.WriteUint64(static_cast<uint64_t>(screenId));
@@ -1149,16 +1147,16 @@ DMError ScreenSessionManagerProxy::SetVirtualScreenSurface(ScreenId screenId, sp
             data.WriteBool(true) &&
             data.WriteRemoteObject(surface->AsObject());
     } else {
-        WLOGFW("SCB: ScreenSessionManagerProxy::SetVirtualScreenSurface: surface is nullptr");
+        TLOGW(WmsLogTag::DMS, "SCB: surface is nullptr");
         res = res && data.WriteBool(false);
     }
     if (!res) {
-        WLOGFW("SCB: ScreenSessionManagerProxy::SetVirtualScreenSurface: Write screenId/surface failed");
+        TLOGW(WmsLogTag::DMS, "SCB: Write screenId/surface failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_SURFACE),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("SCB: ScreenSessionManagerProxy::SetVirtualScreenSurface: SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "SCB: SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     return static_cast<DMError>(reply.ReadInt32());
@@ -1235,10 +1233,10 @@ DMError ScreenSessionManagerProxy::RemoveVirtualScreenBlockList(const std::vecto
 DMError ScreenSessionManagerProxy::SetScreenPrivacyMaskImage(ScreenId screenId,
     const std::shared_ptr<Media::PixelMap>& privacyMaskImg)
 {
-    WLOGFW("SCB: ScreenSessionManagerProxy::SetScreenPrivacyMaskImage: ENTER");
+    TLOGW(WmsLogTag::DMS, "SCB: ENTER");
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("SCB: ScreenSessionManagerProxy::SetScreenPrivacyMaskImage: remote is nullptr");
+        TLOGW(WmsLogTag::DMS, "SCB: remote is nullptr");
         return DMError::DM_ERROR_REMOTE_CREATE_FAILED;
     }
 
@@ -1246,28 +1244,28 @@ DMError ScreenSessionManagerProxy::SetScreenPrivacyMaskImage(ScreenId screenId,
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("SCB: ScreenSessionManagerProxy::SetScreenPrivacyMaskImage: WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "SCB: WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     if (privacyMaskImg != nullptr) {
         if (!data.WriteBool(true) || !data.WriteParcelable(privacyMaskImg.get())) {
-            WLOGFW("SCB: ScreenSessionManagerProxy::SetScreenPrivacyMaskImage: Write privacyMaskImg failed");
+            TLOGW(WmsLogTag::DMS, "SCB: Write privacyMaskImg failed");
             return DMError::DM_ERROR_IPC_FAILED;
         }
     } else {
         if (!data.WriteBool(false)) {
-            WLOGFW("SCB: ScreenSessionManagerProxy::SetScreenPrivacyMaskImage: failed");
+            TLOGW(WmsLogTag::DMS, "SCB: failed");
             return DMError::DM_ERROR_IPC_FAILED;
         }
     }
     if (!data.WriteUint64(static_cast<uint64_t>(screenId))) {
-        WLOGFW("SCB: ScreenSessionManagerProxy::SetScreenPrivacyMaskImage: Write screenId failed");
+        TLOGW(WmsLogTag::DMS, "SCB: Write screenId failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
 
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREEN_PRIVACY_MASKIMAGE),
         data, reply, option) != ERR_NONE) {
-    WLOGFW("SCB: ScreenSessionManagerProxy::SetScreenPrivacyMaskImage: SendRequest failed");
+    TLOGW(WmsLogTag::DMS, "SCB: SendRequest failed");
     return DMError::DM_ERROR_IPC_FAILED;
     }
     return static_cast<DMError>(reply.ReadInt32());
@@ -1275,10 +1273,10 @@ DMError ScreenSessionManagerProxy::SetScreenPrivacyMaskImage(ScreenId screenId,
 
 DMError ScreenSessionManagerProxy::SetVirtualMirrorScreenCanvasRotation(ScreenId screenId, bool canvasRotation)
 {
-    WLOGFW("SCB: ScreenSessionManagerProxy::SetVirtualMirrorScreenCanvasRotation: ENTER");
+    TLOGW(WmsLogTag::DMS, "SCB: ENTER");
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("SCB: SetVirtualMirrorScreenCanvasRotation: remote is nullptr");
+        TLOGW(WmsLogTag::DMS, "SCB: remote is nullptr");
         return DMError::DM_ERROR_REMOTE_CREATE_FAILED;
     }
 
@@ -1286,17 +1284,17 @@ DMError ScreenSessionManagerProxy::SetVirtualMirrorScreenCanvasRotation(ScreenId
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("SCB: SetVirtualMirrorScreenCanvasRotation: WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "SCB: WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     bool res = data.WriteUint64(static_cast<uint64_t>(screenId)) && data.WriteBool(canvasRotation);
     if (!res) {
-        WLOGFW("SCB:SetVirtualMirrorScreenCanvasRotation: Write screenId/bufferRotation failed");
+        TLOGW(WmsLogTag::DMS, "SCB:Write screenId/bufferRotation failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_CANVAS_ROTATION),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("SCB:SetVirtualMirrorScreenCanvasRotation: SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "SCB:SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     return static_cast<DMError>(reply.ReadInt32());
@@ -1306,7 +1304,7 @@ DMError ScreenSessionManagerProxy::SetVirtualMirrorScreenScaleMode(ScreenId scre
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("SetVirtualMirrorScreenScaleMode: remote is nullptr");
+        TLOGW(WmsLogTag::DMS, "remote is nullptr");
         return DMError::DM_ERROR_IPC_FAILED;
     }
 
@@ -1317,17 +1315,17 @@ DMError ScreenSessionManagerProxy::SetVirtualMirrorScreenScaleMode(ScreenId scre
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     bool res = data.WriteUint64(static_cast<uint64_t>(screenId)) && data.WriteUint32(static_cast<uint32_t>(scaleMode));
     if (!res) {
-        WLOGFE("Write screenId/scaleMode failed");
+        TLOGE(WmsLogTag::DMS, "Write screenId/scaleMode failed");
         return DMError::DM_ERROR_WRITE_DATA_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_SCALE_MODE),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     return static_cast<DMError>(reply.ReadInt32());
@@ -1335,10 +1333,10 @@ DMError ScreenSessionManagerProxy::SetVirtualMirrorScreenScaleMode(ScreenId scre
 
 DMError ScreenSessionManagerProxy::ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height)
 {
-    WLOGFI("ScreenSessionManagerProxy::ResizeVirtualScreen: ENTER");
+    TLOGI(WmsLogTag::DMS, "ENTER");
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("ScreenSessionManagerProxy::ResizeVirtualScreen: remote is nullptr");
+        TLOGW(WmsLogTag::DMS, "remote is nullptr");
         return DMError::DM_ERROR_REMOTE_CREATE_FAILED;
     }
 
@@ -1347,24 +1345,24 @@ DMError ScreenSessionManagerProxy::ResizeVirtualScreen(ScreenId screenId, uint32
     MessageOption option;
 
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("ScreenSessionManagerProxy::ResizeVirtualScreen: WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     if (!data.WriteUint64(static_cast<uint64_t>(screenId))) {
-        WLOGFE("ScreenSessionManagerProxy::ResizeVirtualScreen: WriteUnit64 screenId failed");
+        TLOGE(WmsLogTag::DMS, "WriteUnit64 screenId failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (!data.WriteUint32(width)) {
-        WLOGFE("ScreenSessionManagerProxy::ResizeVirtualScreen: WriteUnit32 width failed");
+        TLOGE(WmsLogTag::DMS, "WriteUnit32 width failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (!data.WriteUint32(height)) {
-        WLOGFE("ScreenSessionManagerProxy::ResizeVirtualScreen: WriteUnit32 height failed");
+        TLOGE(WmsLogTag::DMS, "WriteUnit32 height failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_RESIZE_VIRTUAL_SCREEN),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("ScreenSessionManagerProxy::ResizeVirtualScreen fail: SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_NULLPTR;
     }
     return static_cast<DMError>(reply.ReadInt32());
@@ -1372,10 +1370,10 @@ DMError ScreenSessionManagerProxy::ResizeVirtualScreen(ScreenId screenId, uint32
 
 DMError ScreenSessionManagerProxy::DestroyVirtualScreen(ScreenId screenId)
 {
-    WLOGFW("SCB: ScreenSessionManagerProxy::DestroyVirtualScreen: ENTER");
+    TLOGW(WmsLogTag::DMS, "SCB: ENTER");
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("SCB: ScreenSessionManagerProxy::DestroyVirtualScreen: remote is nullptr");
+        TLOGW(WmsLogTag::DMS, "SCB: remote is nullptr");
         return DMError::DM_ERROR_REMOTE_CREATE_FAILED;
     }
 
@@ -1383,16 +1381,16 @@ DMError ScreenSessionManagerProxy::DestroyVirtualScreen(ScreenId screenId)
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("SCB: ScreenSessionManagerProxy::DestroyVirtualScreen: WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "SCB: WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     if (!data.WriteUint64(static_cast<uint64_t>(screenId))) {
-        WLOGFW("SCB: ScreenSessionManagerProxy::DestroyVirtualScreen: WriteUint64 screenId failed");
+        TLOGW(WmsLogTag::DMS, "SCB: WriteUint64 screenId failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_DESTROY_VIRTUAL_SCREEN),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("SCB: ScreenSessionManagerProxy::DestroyVirtualScreen: SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "SCB: SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     return static_cast<DMError>(reply.ReadInt32());
@@ -1401,10 +1399,10 @@ DMError ScreenSessionManagerProxy::DestroyVirtualScreen(ScreenId screenId)
 DMError ScreenSessionManagerProxy::MakeMirror(ScreenId mainScreenId,
                                               std::vector<ScreenId> mirrorScreenIds, ScreenId& screenGroupId)
 {
-    WLOGFW("SCB: ScreenSessionManagerProxy::MakeMirror: ENTER");
+    TLOGW(WmsLogTag::DMS, "SCB: ENTER");
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("SCB: ScreenSessionManagerProxy::MakeMirror: create mirror fail: remote is null");
+        TLOGW(WmsLogTag::DMS, "SCB: remote is null");
         return DMError::DM_ERROR_NULLPTR;
     }
 
@@ -1412,18 +1410,18 @@ DMError ScreenSessionManagerProxy::MakeMirror(ScreenId mainScreenId,
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("SCB: ScreenSessionManagerProxy::MakeMirror: create mirror fail: WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "SCB: WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     bool res = data.WriteUint64(static_cast<uint64_t>(mainScreenId)) &&
         data.WriteUInt64Vector(mirrorScreenIds);
     if (!res) {
-        WLOGFE("SCB: ScreenSessionManagerProxy::MakeMirror: create mirror fail: data write failed");
+        TLOGE(WmsLogTag::DMS, "SCB: data write failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCREEN_MAKE_MIRROR),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("SCB: ScreenSessionManagerProxy::MakeMirror: create mirror fail: SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "SCB: SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     DMError ret = static_cast<DMError>(reply.ReadInt32());
@@ -1434,10 +1432,10 @@ DMError ScreenSessionManagerProxy::MakeMirror(ScreenId mainScreenId,
 DMError ScreenSessionManagerProxy::MakeMirrorForRecord(ScreenId mainScreenId,
     std::vector<ScreenId> mirrorScreenIds, ScreenId& screenGroupId)
 {
-    WLOGFW("SCB: ScreenSessionManagerProxy::MakeMirror: ENTER");
+    TLOGW(WmsLogTag::DMS, "SCB: ENTER");
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("SCB: ScreenSessionManagerProxy::MakeMirror: create mirror fail: remote is null");
+        TLOGW(WmsLogTag::DMS, "SCB: remote is null");
         return DMError::DM_ERROR_NULLPTR;
     }
 
@@ -1445,18 +1443,18 @@ DMError ScreenSessionManagerProxy::MakeMirrorForRecord(ScreenId mainScreenId,
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("SCB: ScreenSessionManagerProxy::MakeMirror: create mirror fail: WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "SCB: WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     bool res = data.WriteUint64(static_cast<uint64_t>(mainScreenId)) &&
         data.WriteUInt64Vector(mirrorScreenIds);
     if (!res) {
-        WLOGFE("SCB: ScreenSessionManagerProxy::MakeMirror: create mirror fail: data write failed");
+        TLOGE(WmsLogTag::DMS, "SCB: data write failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCREEN_MAKE_MIRROR_FOR_RECORD),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("SCB: ScreenSessionManagerProxy::MakeMirror: create mirror fail: SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "SCB: SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     DMError ret = static_cast<DMError>(reply.ReadInt32());
@@ -1467,10 +1465,10 @@ DMError ScreenSessionManagerProxy::MakeMirrorForRecord(ScreenId mainScreenId,
 DMError ScreenSessionManagerProxy::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
                                               DMRect mainScreenRegion, ScreenId& screenGroupId)
 {
-    WLOGFW("ScreenSessionManagerProxy::MakeMirror: ENTER");
+    TLOGW(WmsLogTag::DMS, "ENTER");
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("ScreenSessionManagerProxy::MakeMirror: create mirror fail: remote is null");
+        TLOGW(WmsLogTag::DMS, "remote is null");
         return DMError::DM_ERROR_NULLPTR;
     }
 
@@ -1478,23 +1476,23 @@ DMError ScreenSessionManagerProxy::MakeMirror(ScreenId mainScreenId, std::vector
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("ScreenSessionManagerProxy::MakeMirror: create mirror fail: WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     bool res = data.WriteUint64(static_cast<uint64_t>(mainScreenId)) &&
         data.WriteUInt64Vector(mirrorScreenIds);
     if (!res) {
-        WLOGFE("ScreenSessionManagerProxy::MakeMirror: create mirror fail: write screenId failed");
+        TLOGE(WmsLogTag::DMS, "write screenId failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (!data.WriteInt32(mainScreenRegion.posX_) || !data.WriteInt32(mainScreenRegion.posY_) ||
         !data.WriteUint32(mainScreenRegion.width_) || !data.WriteUint32(mainScreenRegion.height_)) {
-        WLOGFE("ScreenSessionManagerProxy::MakeMirror: Write mainScreenRegion failed");
+        TLOGE(WmsLogTag::DMS, "Write mainScreenRegion failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCREEN_MAKE_MIRROR_WITH_REGION),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("ScreenSessionManagerProxy::MakeMirror: create mirror fail: SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     DMError ret = static_cast<DMError>(reply.ReadInt32());
@@ -1507,7 +1505,7 @@ DMError ScreenSessionManagerProxy::SetMultiScreenMode(ScreenId mainScreenId, Scr
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("remote is null");
+        TLOGW(WmsLogTag::DMS, "remote is null");
         return DMError::DM_ERROR_NULLPTR;
     }
 
@@ -1515,19 +1513,19 @@ DMError ScreenSessionManagerProxy::SetMultiScreenMode(ScreenId mainScreenId, Scr
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     bool res = data.WriteUint64(static_cast<uint64_t>(mainScreenId)) &&
         data.WriteUint64(static_cast<uint64_t>(secondaryScreenId)) &&
         data.WriteUint32(static_cast<uint32_t>(screenMode));
     if (!res) {
-        WLOGFE("data write failed");
+        TLOGE(WmsLogTag::DMS, "data write failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_MULTI_SCREEN_MODE_SWITCH),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     DMError ret = static_cast<DMError>(reply.ReadInt32());
@@ -1539,7 +1537,7 @@ DMError ScreenSessionManagerProxy::SetMultiScreenRelativePosition(MultiScreenPos
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("remote is null");
+        TLOGW(WmsLogTag::DMS, "remote is null");
         return DMError::DM_ERROR_NULLPTR;
     }
 
@@ -1547,7 +1545,7 @@ DMError ScreenSessionManagerProxy::SetMultiScreenRelativePosition(MultiScreenPos
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     bool res = data.WriteUint64(mainScreenOptions.screenId_) &&
@@ -1555,12 +1553,12 @@ DMError ScreenSessionManagerProxy::SetMultiScreenRelativePosition(MultiScreenPos
         data.WriteUint64(secondScreenOption.screenId_) &&
         data.WriteUint32(secondScreenOption.startX_) && data.WriteUint32(secondScreenOption.startY_);
     if (!res) {
-        WLOGFE("data write failed");
+        TLOGE(WmsLogTag::DMS, "data write failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_MULTI_SCREEN_POSITION),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     DMError ret = static_cast<DMError>(reply.ReadInt32());
@@ -1571,7 +1569,7 @@ DMError ScreenSessionManagerProxy::StopMirror(const std::vector<ScreenId>& mirro
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("StopMirror fail: remote is null");
+        TLOGW(WmsLogTag::DMS, "StopMirror fail: remote is null");
         return DMError::DM_ERROR_NULLPTR;
     }
 
@@ -1579,17 +1577,17 @@ DMError ScreenSessionManagerProxy::StopMirror(const std::vector<ScreenId>& mirro
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("StopMirror fail: WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "StopMirror fail: WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     bool res = data.WriteUInt64Vector(mirrorScreenIds);
     if (!res) {
-        WLOGFE("StopMirror fail: data write failed");
+        TLOGE(WmsLogTag::DMS, "StopMirror fail: data write failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCREEN_STOP_MIRROR),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("StopMirror fail: SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "StopMirror fail: SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     return static_cast<DMError>(reply.ReadInt32());
@@ -1597,10 +1595,10 @@ DMError ScreenSessionManagerProxy::StopMirror(const std::vector<ScreenId>& mirro
 
 DMError ScreenSessionManagerProxy::DisableMirror(bool disableOrNot)
 {
-    WLOGFI("SCB: ScreenSessionManagerProxy::DisableMirror %{public}d", disableOrNot);
+    TLOGI(WmsLogTag::DMS, "SCB: ScreenSessionManagerProxy::DisableMirror %{public}d", disableOrNot);
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("DisableMirror fail: remote is null");
+        TLOGW(WmsLogTag::DMS, "DisableMirror fail: remote is null");
         return DMError::DM_ERROR_NULLPTR;
     }
 
@@ -1608,16 +1606,16 @@ DMError ScreenSessionManagerProxy::DisableMirror(bool disableOrNot)
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("DisableMirror fail: WriteinterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "DisableMirror fail: WriteinterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     if (!data.WriteBool(disableOrNot)) {
-        WLOGFE("DisableMirror fail: data write failed");
+        TLOGE(WmsLogTag::DMS, "DisableMirror fail: data write failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCREEN_DISABLE_MIRROR),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("DisableMirror fail: SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "DisableMirror fail: SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     return static_cast<DMError>(reply.ReadInt32());
@@ -1626,10 +1624,10 @@ DMError ScreenSessionManagerProxy::DisableMirror(bool disableOrNot)
 DMError ScreenSessionManagerProxy::MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint,
                                               ScreenId& screenGroupId)
 {
-    WLOGFW("SCB: ScreenSessionManagerProxy::MakeExpand: ENTER");
+    TLOGW(WmsLogTag::DMS, "SCB: ENTER");
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("SCB: ScreenSessionManagerProxy::MakeExpand: remote is null");
+        TLOGW(WmsLogTag::DMS, "SCB: remote is null");
         return DMError::DM_ERROR_IPC_FAILED;
     }
 
@@ -1637,22 +1635,22 @@ DMError ScreenSessionManagerProxy::MakeExpand(std::vector<ScreenId> screenId, st
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("SCB: ScreenSessionManagerProxy::MakeExpand: WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "SCB: WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     if (!data.WriteUInt64Vector(screenId)) {
-        WLOGFE("SCB: ScreenSessionManagerProxy::MakeExpand: write screenId failed");
+        TLOGE(WmsLogTag::DMS, "SCB: write screenId failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (!MarshallingHelper::MarshallingVectorObj<Point>(data, startPoint, [](Parcel& parcel, const Point& point) {
             return parcel.WriteInt32(point.posX_) && parcel.WriteInt32(point.posY_);
         })) {
-        WLOGFE("SCB: ScreenSessionManagerProxy::MakeExpand: write startPoint failed");
+        TLOGE(WmsLogTag::DMS, "SCB: write startPoint failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCREEN_MAKE_EXPAND),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SCB: ScreenSessionManagerProxy::MakeExpand: SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SCB: SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     DMError ret = static_cast<DMError>(reply.ReadInt32());
@@ -1664,7 +1662,7 @@ DMError ScreenSessionManagerProxy::StopExpand(const std::vector<ScreenId>& expan
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("StopExpand fail: remote is null");
+        TLOGW(WmsLogTag::DMS, "remote is null");
         return DMError::DM_ERROR_NULLPTR;
     }
 
@@ -1672,17 +1670,17 @@ DMError ScreenSessionManagerProxy::StopExpand(const std::vector<ScreenId>& expan
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("StopExpand fail: WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     bool res = data.WriteUInt64Vector(expandScreenIds);
     if (!res) {
-        WLOGFE("StopExpand fail: data write failed");
+        TLOGE(WmsLogTag::DMS, "data write failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCREEN_STOP_EXPAND),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("StopExpand fail: SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     return static_cast<DMError>(reply.ReadInt32());
@@ -1690,10 +1688,10 @@ DMError ScreenSessionManagerProxy::StopExpand(const std::vector<ScreenId>& expan
 
 sptr<ScreenGroupInfo> ScreenSessionManagerProxy::GetScreenGroupInfoById(ScreenId screenId)
 {
-    WLOGFW("SCB: ScreenSessionManagerProxy::GetScreenGroupInfoById: ENTER!");
+    TLOGW(WmsLogTag::DMS, "SCB:ENTER!");
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("SCB: ScreenSessionManagerProxy::GetScreenGroupInfoById: remote is nullptr");
+        TLOGW(WmsLogTag::DMS, "SCB:remote is nullptr");
         return nullptr;
     }
 
@@ -1701,22 +1699,22 @@ sptr<ScreenGroupInfo> ScreenSessionManagerProxy::GetScreenGroupInfoById(ScreenId
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("SCB: ScreenSessionManagerProxy::GetScreenGroupInfoById: WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "SCB: WriteInterfaceToken failed");
         return nullptr;
     }
     if (!data.WriteUint64(screenId)) {
-        WLOGFE("SCB: ScreenSessionManagerProxy::GetScreenGroupInfoById: Write screenId failed");
+        TLOGE(WmsLogTag::DMS, "SCB: Write screenId failed");
         return nullptr;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_SCREEN_GROUP_INFO_BY_ID),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("SCB: ScreenSessionManagerProxy::GetScreenGroupInfoById: SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "SCB: SendRequest failed");
         return nullptr;
     }
 
     sptr<ScreenGroupInfo> info = reply.ReadStrongParcelable<ScreenGroupInfo>();
     if (info == nullptr) {
-        WLOGFW("SCB: ScreenSessionManagerProxy::GetScreenGroupInfoById SendRequest nullptr.");
+        TLOGW(WmsLogTag::DMS, "SCB: SendRequest nullptr.");
         return nullptr;
     }
     return info;
@@ -1724,10 +1722,10 @@ sptr<ScreenGroupInfo> ScreenSessionManagerProxy::GetScreenGroupInfoById(ScreenId
 
 void ScreenSessionManagerProxy::RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens)
 {
-    WLOGFW("SCB: ScreenSessionManagerProxy::RemoveVirtualScreenFromGroup: ENTER!");
+    TLOGW(WmsLogTag::DMS, "SCB: ENTER!");
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("SCB: ScreenSessionManagerProxy::RemoveVirtualScreenFromGroup:remote is null");
+        TLOGW(WmsLogTag::DMS, "SCB: remote is null");
         return;
     }
 
@@ -1735,28 +1733,28 @@ void ScreenSessionManagerProxy::RemoveVirtualScreenFromGroup(std::vector<ScreenI
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("SCB: ScreenSessionManagerProxy::RemoveVirtualScreenFromGroup: WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "SCB: WriteInterfaceToken failed");
         return;
     }
     bool res = data.WriteUInt64Vector(screens);
     if (!res) {
-        WLOGFE("SCB: ScreenSessionManagerProxy::RemoveVirtualScreenFromGroup: write screens failed.");
+        TLOGE(WmsLogTag::DMS, "SCB: write screens failed.");
         return;
     }
     if (remote->SendRequest(static_cast<uint32_t>(
         DisplayManagerMessage::TRANS_ID_REMOVE_VIRTUAL_SCREEN_FROM_SCREEN_GROUP),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("SCB: ScreenSessionManagerProxy::RemoveVirtualScreenFromGroup:: SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "SCB:SendRequest failed");
     }
 }
 
 std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetDisplaySnapshot(DisplayId displayId,
-    DmErrorCode* errorCode, bool isUseDma)
+    DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen)
 {
-    WLOGFD("SCB: ScreenSessionManagerProxy::GetDisplaySnapshot enter");
+    TLOGD(WmsLogTag::DMS, "SCB: enter");
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("SCB: ScreenSessionManagerProxy::GetDisplaySnapshot: remote is nullptr");
+        TLOGW(WmsLogTag::DMS, "SCB: remote is nullptr");
         return nullptr;
     }
 
@@ -1764,23 +1762,28 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetDisplaySnapshot(D
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("SCB: ScreenSessionManagerProxy::GetDisplaySnapshot: WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "SCB: WriteInterfaceToken failed");
         return nullptr;
     }
 
     if (!data.WriteUint64(displayId)) {
-        WLOGFE("SCB: ScreenSessionManagerProxy::GetDisplaySnapshot: Write displayId failed");
+        TLOGE(WmsLogTag::DMS, "SCB: Write displayId failed");
         return nullptr;
     }
 
     if (!data.WriteBool(isUseDma)) {
-        WLOGFE("isUseDma fail: data write failed");
+        TLOGE(WmsLogTag::DMS, "isUseDma fail: data write failed");
+        return nullptr;
+    }
+
+    if (!data.WriteBool(isCaptureFullOfScreen)) {
+        TLOGE(WmsLogTag::DMS, "isCaptureFullOfScreen fail: data write failed");
         return nullptr;
     }
 
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DISPLAY_SNAPSHOT),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("SCB: ScreenSessionManagerProxy::GetDisplaySnapshot: SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "SCB: SendRequest failed");
         return nullptr;
     }
 
@@ -1790,32 +1793,84 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetDisplaySnapshot(D
         *errorCode = replyErrorCode;
     }
     if (pixelMap == nullptr) {
-        WLOGFW("SCB: ScreenSessionManagerProxy::GetDisplaySnapshot: SendRequest nullptr.");
+        TLOGW(WmsLogTag::DMS, "SCB: SendRequest nullptr.");
         return nullptr;
     }
     return pixelMap;
 }
 
+std::vector<std::shared_ptr<Media::PixelMap>> ScreenSessionManagerProxy::GetDisplayHDRSnapshot(DisplayId displayId,
+    DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen)
+{
+    TLOGD(WmsLogTag::DMS, "enter");
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGW(WmsLogTag::DMS, "SCB: remote is nullptr");
+        return { nullptr, nullptr };
+    }
+ 
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "SCB: WriteInterfaceToken failed");
+        return { nullptr, nullptr };
+    }
+ 
+    if (!data.WriteUint64(displayId)) {
+        TLOGE(WmsLogTag::DMS, "SCB: Write displayId failed");
+        return { nullptr, nullptr };
+    }
+ 
+    if (!data.WriteBool(isUseDma)) {
+        TLOGE(WmsLogTag::DMS, "isUseDma fail: data write failed");
+        return { nullptr, nullptr };
+    }
+ 
+    if (!data.WriteBool(isCaptureFullOfScreen)) {
+        TLOGE(WmsLogTag::DMS, "isCaptureFullOfScreen fail: data write failed");
+        return { nullptr, nullptr };
+    }
+ 
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DISPLAY_HDR_SNAPSHOT),
+        data, reply, option) != ERR_NONE) {
+        TLOGW(WmsLogTag::DMS, "SCB: SendRequest failed");
+        return { nullptr, nullptr };
+    }
+    TLOGI(WmsLogTag::DMS, "reply pixelMap and hdrPixelMap");
+    std::shared_ptr<Media::PixelMap> sdrpixelMap(reply.ReadParcelable<Media::PixelMap>());
+    std::shared_ptr<Media::PixelMap> hdrPixelMap(reply.ReadParcelable<Media::PixelMap>());
+    DmErrorCode replyErrorCode = static_cast<DmErrorCode>(reply.ReadInt32());
+    if (errorCode) {
+        *errorCode = replyErrorCode;
+    }
+    if (sdrpixelMap == nullptr) {
+        TLOGW(WmsLogTag::DMS, "SendRequest sdrpixelMap is nullptr.");
+        return { nullptr, nullptr };
+    }
+    return { sdrpixelMap, hdrPixelMap };
+}
+
 std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetSnapshotByPicker(Media::Rect &rect,
     DmErrorCode* errorCode)
 {
-    WLOGFD("enter");
+    TLOGD(WmsLogTag::DMS, "enter");
     sptr<IRemoteObject> remote = Remote();
     *errorCode = DmErrorCode::DM_ERROR_SYSTEM_INNORMAL;
     if (remote == nullptr) {
-        WLOGFE("remote is nullptr");
+        TLOGE(WmsLogTag::DMS, "remote is nullptr");
         return nullptr;
     }
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return nullptr;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_SNAPSHOT_BY_PICKER),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "SendRequest failed");
         return nullptr;
     }
     std::shared_ptr<Media::PixelMap> pixelMap(reply.ReadParcelable<Media::PixelMap>()); // need't to check nullptr
@@ -1831,7 +1886,7 @@ sptr<DisplayInfo> ScreenSessionManagerProxy::GetDisplayInfoById(DisplayId displa
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("GetDisplayInfoById: remote is nullptr");
+        TLOGW(WmsLogTag::DMS, "remote is nullptr");
         return nullptr;
     }
 
@@ -1839,22 +1894,22 @@ sptr<DisplayInfo> ScreenSessionManagerProxy::GetDisplayInfoById(DisplayId displa
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("GetDisplayInfoById: WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return nullptr;
     }
     if (!data.WriteUint64(displayId)) {
-        WLOGFW("GetDisplayInfoById: WriteUint64 displayId failed");
+        TLOGW(WmsLogTag::DMS, "WriteUint64 displayId failed");
         return nullptr;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DISPLAY_BY_ID),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("GetDisplayInfoById: SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "SendRequest failed");
         return nullptr;
     }
 
     sptr<DisplayInfo> info = reply.ReadParcelable<DisplayInfo>();
     if (info == nullptr) {
-        WLOGFW("DisplayManagerProxy::GetDisplayInfoById SendRequest nullptr.");
+        TLOGD(WmsLogTag::DMS, "SendRequest nullptr.");
         return nullptr;
     }
     return info;
@@ -1864,7 +1919,7 @@ sptr<DisplayInfo> ScreenSessionManagerProxy::GetVisibleAreaDisplayInfoById(Displ
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("remote is nullptr");
+        TLOGW(WmsLogTag::DMS, "remote is nullptr");
         return nullptr;
     }
 
@@ -1872,22 +1927,22 @@ sptr<DisplayInfo> ScreenSessionManagerProxy::GetVisibleAreaDisplayInfoById(Displ
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return nullptr;
     }
     if (!data.WriteUint64(displayId)) {
-        WLOGFW("WriteUint64 displayId failed");
+        TLOGW(WmsLogTag::DMS, "WriteUint64 displayId failed");
         return nullptr;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_VISIBLE_AREA_DISPLAY_INFO_BY_ID),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "SendRequest failed");
         return nullptr;
     }
 
     sptr<DisplayInfo> info = reply.ReadParcelable<DisplayInfo>();
     if (info == nullptr) {
-        WLOGFW("SendRequest nullptr.");
+        TLOGW(WmsLogTag::DMS, "SendRequest nullptr.");
         return nullptr;
     }
     return info;
@@ -1897,7 +1952,7 @@ sptr<DisplayInfo> ScreenSessionManagerProxy::GetDisplayInfoByScreen(ScreenId scr
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("fail to get displayInfo by screenId: remote is null");
+        TLOGE(WmsLogTag::DMS, "remote is null");
         return nullptr;
     }
 
@@ -1905,22 +1960,22 @@ sptr<DisplayInfo> ScreenSessionManagerProxy::GetDisplayInfoByScreen(ScreenId scr
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("fail to get displayInfo by screenId: WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return nullptr;
     }
     if (!data.WriteUint64(screenId)) {
-        WLOGFW("fail to get displayInfo by screenId: WriteUint64 displayId failed");
+        TLOGW(WmsLogTag::DMS, "WriteUint64 displayId failed");
         return nullptr;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DISPLAY_BY_SCREEN),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("fail to get displayInfo by screenId: SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "SendRequest failed");
         return nullptr;
     }
 
     sptr<DisplayInfo> info = reply.ReadParcelable<DisplayInfo>();
     if (info == nullptr) {
-        WLOGFW("fail to get displayInfo by screenId: SendRequest null");
+        TLOGW(WmsLogTag::DMS, "SendRequest null");
         return nullptr;
     }
     return info;
@@ -1931,7 +1986,7 @@ std::vector<DisplayId> ScreenSessionManagerProxy::GetAllDisplayIds()
     std::vector<DisplayId> allDisplayIds;
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("GetAllDisplayIds: remote is null");
+        TLOGE(WmsLogTag::DMS, "remote is null");
         return allDisplayIds;
     }
 
@@ -1939,12 +1994,12 @@ std::vector<DisplayId> ScreenSessionManagerProxy::GetAllDisplayIds()
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return allDisplayIds;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_ALL_DISPLAYIDS),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "SendRequest failed");
         return allDisplayIds;
     }
     reply.ReadUInt64Vector(&allDisplayIds);
@@ -1955,7 +2010,7 @@ sptr<ScreenInfo> ScreenSessionManagerProxy::GetScreenInfoById(ScreenId screenId)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("GetScreenInfoById: remote is nullptr");
+        TLOGW(WmsLogTag::DMS, "remote is nullptr");
         return nullptr;
     }
 
@@ -1963,26 +2018,26 @@ sptr<ScreenInfo> ScreenSessionManagerProxy::GetScreenInfoById(ScreenId screenId)
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("GetScreenInfoById: WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return nullptr;
     }
     if (!data.WriteUint64(screenId)) {
-        WLOGFE("GetScreenInfoById: Write screenId failed");
+        TLOGE(WmsLogTag::DMS, "Write screenId failed");
         return nullptr;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_SCREEN_INFO_BY_ID),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("GetScreenInfoById: SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "SendRequest failed");
         return nullptr;
     }
 
     sptr<ScreenInfo> info = reply.ReadStrongParcelable<ScreenInfo>();
     if (info == nullptr) {
-        WLOGFW("GetScreenInfoById SendRequest nullptr.");
+        TLOGW(WmsLogTag::DMS, "SendRequest nullptr.");
         return nullptr;
     }
     for (auto& mode : info->GetModes()) {
-        WLOGFD("info modes is id: %{public}u, width: %{public}u, height: %{public}u, refreshRate: %{public}u",
+        TLOGD(WmsLogTag::DMS, "info modes is id: %{public}u, width: %{public}u, height: %{public}u, refreshRate: %{public}u",
             mode->id_, mode->width_, mode->height_, mode->refreshRate_);
     }
     return info;
@@ -1992,7 +2047,7 @@ DMError ScreenSessionManagerProxy::GetAllScreenInfos(std::vector<sptr<ScreenInfo
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("GetAllScreenInfos: remote is nullptr");
+        TLOGW(WmsLogTag::DMS, "remote is nullptr");
         return DMError::DM_ERROR_NULLPTR;
     }
 
@@ -2000,12 +2055,12 @@ DMError ScreenSessionManagerProxy::GetAllScreenInfos(std::vector<sptr<ScreenInfo
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("GetAllScreenInfos: WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_ALL_SCREEN_INFOS),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("GetAllScreenInfos: SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     DMError ret = static_cast<DMError>(reply.ReadInt32());
@@ -2018,7 +2073,7 @@ DMError ScreenSessionManagerProxy::GetScreenSupportedColorGamuts(ScreenId screen
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("DisplayManagerProxy::GetScreenSupportedColorGamuts: remote is nullptr");
+        TLOGW(WmsLogTag::DMS, "remote is nullptr");
         return DMError::DM_ERROR_NULLPTR;
     }
 
@@ -2026,16 +2081,16 @@ DMError ScreenSessionManagerProxy::GetScreenSupportedColorGamuts(ScreenId screen
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFW("DisplayManagerProxy::GetScreenSupportedColorGamuts: WriteInterfaceToken failed");
+        TLOGW(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     if (!data.WriteUint64(static_cast<uint64_t>(screenId))) {
-        WLOGFW("DisplayManagerProxy::GetScreenSupportedColorGamuts: WriteUint64 screenId failed");
+        TLOGW(WmsLogTag::DMS, "WriteUint64 screenId failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCREEN_GET_SUPPORTED_COLOR_GAMUTS),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("DisplayManagerProxy::GetScreenSupportedColorGamuts: SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     DMError ret = static_cast<DMError>(reply.ReadInt32());
@@ -2053,11 +2108,11 @@ DMError ScreenSessionManagerProxy::GetScreenSupportedColorGamuts(ScreenId screen
     return ret;
 }
 
-DMError OHOS::Rosen::ScreenSessionManagerProxy::SetOrientation(ScreenId screenId, Orientation orientation)
+DMError ScreenSessionManagerProxy::GetPhysicalScreenIds(std::vector<ScreenId>& screenIds)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("fail to set orientation: remote is null");
+        TLOGE(WmsLogTag::DMS, "remote is nullptr");
         return DMError::DM_ERROR_NULLPTR;
     }
 
@@ -2065,20 +2120,59 @@ DMError OHOS::Rosen::ScreenSessionManagerProxy::SetOrientation(ScreenId screenId
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("fail to set orientation: WriteInterfaceToken failed");
+        TLOGW(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_PHYSICAL_SCREEN_IDS),
+        data, reply, option) != ERR_NONE) {
+        TLOGW(WmsLogTag::DMS, "SendRequest failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    DMError ret = static_cast<DMError>(reply.ReadInt32());
+    if (ret != DMError::DM_OK) {
+        return ret;
+    }
+    bool res = MarshallingHelper::UnmarshallingVectorObj<ScreenId>(reply, screenIds,
+        [](Parcel& parcel, ScreenId& screenId) {
+            uint64_t value;
+            bool res = parcel.ReadUint64(value);
+            screenId = static_cast<ScreenId>(value);
+            return res;
+        }
+    );
+    if (!res) {
+        TLOGE(WmsLogTag::DMS, "fail to unmarshalling screenIds in stub.");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    return ret;
+}
+
+DMError OHOS::Rosen::ScreenSessionManagerProxy::SetOrientation(ScreenId screenId, Orientation orientation)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGW(WmsLogTag::DMS, "remote is null");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     if (!data.WriteUint64(static_cast<uint64_t>(screenId))) {
-        WLOGFW("fail to set orientation: Write screenId failed");
+        TLOGW(WmsLogTag::DMS, "Write screenId failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (!data.WriteUint32(static_cast<uint32_t>(orientation))) {
-        WLOGFW("fail to set orientation: Write orientation failed");
+        TLOGW(WmsLogTag::DMS, "Write orientation failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_ORIENTATION),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("fail to set orientation: SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     return static_cast<DMError>(reply.ReadInt32());
@@ -2088,7 +2182,7 @@ DMError OHOS::Rosen::ScreenSessionManagerProxy::SetScreenRotationLocked(bool isL
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("remote is null");
+        TLOGW(WmsLogTag::DMS, "remote is null");
         return DMError::DM_ERROR_NULLPTR;
     }
 
@@ -2096,16 +2190,16 @@ DMError OHOS::Rosen::ScreenSessionManagerProxy::SetScreenRotationLocked(bool isL
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     if (!data.WriteBool(isLocked)) {
-        WLOGFE("write isLocked failed");
+        TLOGE(WmsLogTag::DMS, "write isLocked failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREEN_ROTATION_LOCKED),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     return static_cast<DMError>(reply.ReadInt32());
@@ -2115,7 +2209,7 @@ DMError OHOS::Rosen::ScreenSessionManagerProxy::SetScreenRotationLockedFromJs(bo
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("remote is null");
+        TLOGW(WmsLogTag::DMS, "remote is null");
         return DMError::DM_ERROR_NULLPTR;
     }
 
@@ -2123,16 +2217,16 @@ DMError OHOS::Rosen::ScreenSessionManagerProxy::SetScreenRotationLockedFromJs(bo
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     if (!data.WriteBool(isLocked)) {
-        WLOGFE("write isLocked failed");
+        TLOGE(WmsLogTag::DMS, "write isLocked failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREEN_ROTATION_LOCKED_FROM_JS),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     return static_cast<DMError>(reply.ReadInt32());
@@ -2142,7 +2236,7 @@ DMError OHOS::Rosen::ScreenSessionManagerProxy::IsScreenRotationLocked(bool& isL
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("remote is nullptr");
+        TLOGW(WmsLogTag::DMS, "remote is nullptr");
         return DMError::DM_ERROR_NULLPTR;
     }
 
@@ -2150,12 +2244,12 @@ DMError OHOS::Rosen::ScreenSessionManagerProxy::IsScreenRotationLocked(bool& isL
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_IS_SCREEN_ROTATION_LOCKED),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     DMError ret = static_cast<DMError>(reply.ReadInt32());
@@ -2167,23 +2261,23 @@ sptr<CutoutInfo> ScreenSessionManagerProxy::GetCutoutInfo(DisplayId displayId)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("get cutout info : remote is null");
+        TLOGW(WmsLogTag::DMS, "remote is null");
         return nullptr;
     }
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("get cutout info : failed");
+        TLOGE(WmsLogTag::DMS, "failed");
         return nullptr;
     }
     if (!data.WriteUint64(displayId)) {
-        WLOGFE("get cutout info: write displayId failed");
+        TLOGE(WmsLogTag::DMS, "write displayId failed");
         return nullptr;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_CUTOUT_INFO),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("GetCutoutInfo: GetCutoutInfo failed");
+        TLOGW(WmsLogTag::DMS, "GetCutoutInfo failed");
         return nullptr;
     }
     sptr<CutoutInfo> info = reply.ReadParcelable<CutoutInfo>();
@@ -2225,7 +2319,7 @@ DMError ScreenSessionManagerProxy::HasImmersiveWindow(ScreenId screenId, bool& i
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("remote is nullptr");
+        TLOGW(WmsLogTag::DMS, "remote is nullptr");
         return DMError::DM_ERROR_NULLPTR;
     }
 
@@ -2233,7 +2327,7 @@ DMError ScreenSessionManagerProxy::HasImmersiveWindow(ScreenId screenId, bool& i
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     if (!data.WriteUint64(screenId)) {
@@ -2242,7 +2336,7 @@ DMError ScreenSessionManagerProxy::HasImmersiveWindow(ScreenId screenId, bool& i
 
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_HAS_IMMERSIVE_WINDOW),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     DMError ret = static_cast<DMError>(reply.ReadInt32());
@@ -2254,7 +2348,7 @@ bool OHOS::Rosen::ScreenSessionManagerProxy::ConvertScreenIdToRsScreenId(ScreenI
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("remote is nullptr");
+        TLOGW(WmsLogTag::DMS, "remote is nullptr");
         return false;
     }
 
@@ -2262,7 +2356,7 @@ bool OHOS::Rosen::ScreenSessionManagerProxy::ConvertScreenIdToRsScreenId(ScreenI
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return false;
     }
 
@@ -2272,7 +2366,7 @@ bool OHOS::Rosen::ScreenSessionManagerProxy::ConvertScreenIdToRsScreenId(ScreenI
 
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_CONVERT_SCREENID_TO_RSSCREENID),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "SendRequest failed");
         return false;
     }
     bool ret = reply.ReadBool();
@@ -2284,7 +2378,7 @@ DMError OHOS::Rosen::ScreenSessionManagerProxy::HasPrivateWindow(DisplayId displ
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("remote is nullptr");
+        TLOGW(WmsLogTag::DMS, "remote is nullptr");
         return DMError::DM_ERROR_NULLPTR;
     }
 
@@ -2292,7 +2386,7 @@ DMError OHOS::Rosen::ScreenSessionManagerProxy::HasPrivateWindow(DisplayId displ
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
 
@@ -2302,7 +2396,7 @@ DMError OHOS::Rosen::ScreenSessionManagerProxy::HasPrivateWindow(DisplayId displ
 
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_HAS_PRIVATE_WINDOW),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     DMError ret = static_cast<DMError>(reply.ReadInt32());
@@ -2314,19 +2408,19 @@ void ScreenSessionManagerProxy::DumpAllScreensInfo(std::string& dumpInfo)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("remote is null");
+        TLOGW(WmsLogTag::DMS, "remote is null");
         return;
     }
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("failed");
+        TLOGE(WmsLogTag::DMS, "failed");
         return;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCENE_BOARD_DUMP_ALL_SCREEN),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("failed");
+        TLOGW(WmsLogTag::DMS, "failed");
         return;
     }
     dumpInfo = reply.ReadString();
@@ -2336,23 +2430,23 @@ void ScreenSessionManagerProxy::DumpSpecialScreenInfo(ScreenId id, std::string& 
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("remote is null");
+        TLOGW(WmsLogTag::DMS, "remote is null");
         return;
     }
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("failed");
+        TLOGE(WmsLogTag::DMS, "failed");
         return;
     }
     if (!data.WriteUint64(id)) {
-        WLOGFE("write ScreenId failed");
+        TLOGE(WmsLogTag::DMS, "write ScreenId failed");
         return;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCENE_BOARD_DUMP_SPECIAL_SCREEN),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("failed");
+        TLOGW(WmsLogTag::DMS, "failed");
         return;
     }
     dumpInfo = reply.ReadString();
@@ -2363,23 +2457,23 @@ void ScreenSessionManagerProxy::SetFoldDisplayMode(const FoldDisplayMode display
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("remote is null");
+        TLOGW(WmsLogTag::DMS, "remote is null");
         return;
     }
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken Failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken Failed");
         return;
     }
     if (!data.WriteUint32(static_cast<uint32_t>(displayMode))) {
-        WLOGFE("Write displayMode failed");
+        TLOGE(WmsLogTag::DMS, "Write displayMode failed");
         return;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCENE_BOARD_SET_FOLD_DISPLAY_MODE),
                             data, reply, option) != ERR_NONE) {
-        WLOGFE("Send TRANS_ID_SCENE_BOARD_SET_FOLD_DISPLAY_MODE request failed");
+        TLOGE(WmsLogTag::DMS, "Send TRANS_ID_SCENE_BOARD_SET_FOLD_DISPLAY_MODE request failed");
     }
 }
 
@@ -2388,27 +2482,27 @@ DMError ScreenSessionManagerProxy::SetFoldDisplayModeFromJs(const FoldDisplayMod
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("remote is null");
+        TLOGW(WmsLogTag::DMS, "remote is null");
         return DMError::DM_ERROR_NULLPTR;
     }
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken Failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken Failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     if (!data.WriteUint32(static_cast<uint32_t>(displayMode))) {
-        WLOGFE("Write displayMode failed");
+        TLOGE(WmsLogTag::DMS, "Write displayMode failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (!data.WriteString(reason)) {
-        WLOGFE("Write reason failed");
+        TLOGE(WmsLogTag::DMS, "Write reason failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_FOLD_DISPLAY_MODE_FROM_JS),
                             data, reply, option) != ERR_NONE) {
-        WLOGFE("Send request failed");
+        TLOGE(WmsLogTag::DMS, "Send request failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
 
@@ -2421,24 +2515,24 @@ void ScreenSessionManagerProxy::SetDisplayScale(ScreenId screenId, float scaleX,
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("remote is null");
+        TLOGW(WmsLogTag::DMS, "remote is null");
         return;
     }
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken Failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken Failed");
         return;
     }
     if (!(data.WriteUint64(static_cast<uint64_t>(screenId)) && data.WriteFloat(scaleX) && data.WriteFloat(scaleY) &&
         data.WriteFloat(pivotX) && data.WriteFloat(pivotY))) {
-        WLOGFE("Write screen scale info failed");
+        TLOGE(WmsLogTag::DMS, "Write screen scale info failed");
         return;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCENE_BOARD_SET_DISPLAY_SCALE),
                             data, reply, option) != ERR_NONE) {
-        WLOGFE("Send TRANS_ID_SCENE_BOARD_SET_DISPLAY_SCALE request failed");
+        TLOGE(WmsLogTag::DMS, "Send TRANS_ID_SCENE_BOARD_SET_DISPLAY_SCALE request failed");
     }
 }
 
@@ -2446,24 +2540,24 @@ void ScreenSessionManagerProxy::SetFoldStatusLocked(bool locked)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("remote is null");
+        TLOGW(WmsLogTag::DMS, "remote is null");
         return;
     }
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken Failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken Failed");
         return;
     }
     if (!data.WriteUint32(static_cast<uint32_t>(locked))) {
-        WLOGFE("Write lock fold display status failed");
+        TLOGE(WmsLogTag::DMS, "Write lock fold display status failed");
         return;
     }
     if (remote->SendRequest(static_cast<uint32_t>(
                             DisplayManagerMessage::TRANS_ID_SCENE_BOARD_LOCK_FOLD_DISPLAY_STATUS),
                             data, reply, option) != ERR_NONE) {
-        WLOGFE("Send TRANS_ID_SCENE_BOARD_LOCK_FOLD_DISPLAY_STATUS request failed");
+        TLOGE(WmsLogTag::DMS, "Send TRANS_ID_SCENE_BOARD_LOCK_FOLD_DISPLAY_STATUS request failed");
     }
 }
 
@@ -2472,24 +2566,24 @@ DMError ScreenSessionManagerProxy::SetFoldStatusLockedFromJs(bool locked)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("remote is null");
+        TLOGW(WmsLogTag::DMS, "remote is null");
         return DMError::DM_ERROR_NULLPTR;
     }
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken Failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken Failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     if (!data.WriteUint32(static_cast<uint32_t>(locked))) {
-        WLOGFE("Write lock fold display status failed");
+        TLOGE(WmsLogTag::DMS, "Write lock fold display status failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(
                             DisplayManagerMessage::TRANS_ID_SET_LOCK_FOLD_DISPLAY_STATUS_FROM_JS),
                             data, reply, option) != ERR_NONE) {
-        WLOGFE("Send request failed");
+        TLOGE(WmsLogTag::DMS, "Send request failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
 
@@ -2497,23 +2591,48 @@ DMError ScreenSessionManagerProxy::SetFoldStatusLockedFromJs(bool locked)
     return ret;
 }
 
+void ScreenSessionManagerProxy::SetFoldStatusExpandAndLocked(bool locked)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DMS, "remote is null");
+        return;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken Failed");
+        return;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(locked))) {
+        TLOGE(WmsLogTag::DMS, "Write lock fold display status failed");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(
+                            DisplayManagerMessage::TRANS_ID_SET_FOLD_STATUS_EXPAND_AND_LOCKED),
+                            data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "Send TRANS_ID_SET_FOLD_STATUS_EXPAND_AND_LOCKED request failed");
+    }
+}
+
 FoldDisplayMode ScreenSessionManagerProxy::GetFoldDisplayMode()
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("remote is null");
+        TLOGW(WmsLogTag::DMS, "remote is null");
         return FoldDisplayMode::UNKNOWN;
     }
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken Failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken Failed");
         return FoldDisplayMode::UNKNOWN;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCENE_BOARD_GET_FOLD_DISPLAY_MODE),
                             data, reply, option) != ERR_NONE) {
-        WLOGFE("Send TRANS_ID_SCENE_BOARD_GET_FOLD_DISPLAY_MODE request failed");
+        TLOGE(WmsLogTag::DMS, "Send TRANS_ID_SCENE_BOARD_GET_FOLD_DISPLAY_MODE request failed");
         return FoldDisplayMode::UNKNOWN;
     }
     return static_cast<FoldDisplayMode>(reply.ReadUint32());
@@ -2523,7 +2642,7 @@ bool ScreenSessionManagerProxy::IsFoldable()
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("remote is null");
+        TLOGW(WmsLogTag::DMS, "remote is null");
         return false;
     }
 
@@ -2531,12 +2650,12 @@ bool ScreenSessionManagerProxy::IsFoldable()
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return false;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCENE_BOARD_IS_FOLDABLE),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return false;
     }
     return reply.ReadBool();
@@ -2546,7 +2665,7 @@ bool ScreenSessionManagerProxy::IsCaptured()
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("remote is null");
+        TLOGW(WmsLogTag::DMS, "remote is null");
         return false;
     }
 
@@ -2554,35 +2673,12 @@ bool ScreenSessionManagerProxy::IsCaptured()
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return false;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_DEVICE_IS_CAPTURE),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
-        return false;
-    }
-    return reply.ReadBool();
-}
-
-bool ScreenSessionManagerProxy::IsOrientationNeedChanged()
-{
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        WLOGFW("remote is null");
-        return false;
-    }
- 
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
-        return false;
-    }
-    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_IS_ORIENTATION_NEED_CHANGE),
-        data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return false;
     }
     return reply.ReadBool();
@@ -2592,7 +2688,7 @@ FoldStatus ScreenSessionManagerProxy::GetFoldStatus()
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("remote is null");
+        TLOGW(WmsLogTag::DMS, "remote is null");
         return FoldStatus::UNKNOWN;
     }
 
@@ -2600,12 +2696,12 @@ FoldStatus ScreenSessionManagerProxy::GetFoldStatus()
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return FoldStatus::UNKNOWN;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCENE_BOARD_GET_FOLD_STATUS),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return FoldStatus::UNKNOWN;
     }
     return static_cast<FoldStatus>(reply.ReadUint32());
@@ -2615,7 +2711,7 @@ SuperFoldStatus ScreenSessionManagerProxy::GetSuperFoldStatus()
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("remote is null");
+        TLOGW(WmsLogTag::DMS, "remote is null");
         return SuperFoldStatus::UNKNOWN;
     }
 
@@ -2623,22 +2719,45 @@ SuperFoldStatus ScreenSessionManagerProxy::GetSuperFoldStatus()
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return SuperFoldStatus::UNKNOWN;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCENE_BOARD_GET_SUPER_FOLD_STATUS),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return SuperFoldStatus::UNKNOWN;
     }
     return static_cast<SuperFoldStatus>(reply.ReadUint32());
+}
+
+float ScreenSessionManagerProxy::GetSuperRotation()
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DMS, "remote is null");
+        return -1.f;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return -1.f;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCENE_BOARD_GET_SUPER_ROTATION),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
+        return -1.f;
+    }
+    return reply.ReadFloat();
 }
 
 void ScreenSessionManagerProxy::SetLandscapeLockStatus(bool isLocked)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("remote is null");
+        TLOGW(WmsLogTag::DMS, "remote is null");
         return;
     }
 
@@ -2646,17 +2765,47 @@ void ScreenSessionManagerProxy::SetLandscapeLockStatus(bool isLocked)
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return;
     }
     if (!data.WriteBool(isLocked)) {
-        WLOGFE("Write isLocked failed");
+        TLOGE(WmsLogTag::DMS, "Write isLocked failed");
         return;
     }
     if (remote->SendRequest(
         static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCENE_BOARD_LANDSCAPE_LOCK_STATUS),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
+        return;
+    }
+}
+
+void ScreenSessionManagerProxy::SetForceCloseHdr(ScreenId screenId, bool isForceCloseHdr)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGW(WmsLogTag::DMS, "remote is null");
+        return;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return;
+    }
+    if (!(data.WriteUint64(static_cast<uint64_t>(screenId)))) {
+        TLOGE(WmsLogTag::DMS, "Write screenId failed");
+        return;
+    }
+    if (!data.WriteBool(isForceCloseHdr)) {
+        TLOGE(WmsLogTag::DMS, "Write isForceCloseHdr failed");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCENE_BOARD_FORCE_CLOSE_HDR),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return;
     }
 }
@@ -2665,7 +2814,7 @@ ExtendScreenConnectStatus ScreenSessionManagerProxy::GetExtendScreenConnectStatu
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("remote is null");
+        TLOGW(WmsLogTag::DMS, "remote is null");
         return ExtendScreenConnectStatus::UNKNOWN;
     }
 
@@ -2673,12 +2822,12 @@ ExtendScreenConnectStatus ScreenSessionManagerProxy::GetExtendScreenConnectStatu
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return ExtendScreenConnectStatus::UNKNOWN;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_EXTEND_SCREEN_CONNECT_STATUS),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return ExtendScreenConnectStatus::UNKNOWN;
     }
     return static_cast<ExtendScreenConnectStatus>(reply.ReadUint32());
@@ -2688,7 +2837,7 @@ sptr<FoldCreaseRegion> ScreenSessionManagerProxy::GetCurrentFoldCreaseRegion()
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("remote is null");
+        TLOGW(WmsLogTag::DMS, "remote is null");
         return nullptr;
     }
 
@@ -2696,13 +2845,13 @@ sptr<FoldCreaseRegion> ScreenSessionManagerProxy::GetCurrentFoldCreaseRegion()
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return nullptr;
     }
     if (remote->SendRequest(
         static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCENE_BOARD_GET_CURRENT_FOLD_CREASE_REGION),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return nullptr;
     }
     return reply.ReadStrongParcelable<FoldCreaseRegion>();
@@ -2711,10 +2860,10 @@ sptr<FoldCreaseRegion> ScreenSessionManagerProxy::GetCurrentFoldCreaseRegion()
 DMError ScreenSessionManagerProxy::MakeUniqueScreen(const std::vector<ScreenId>& screenIds,
     std::vector<DisplayId>& displayIds)
 {
-    WLOGFI("ScreenSessionManagerProxy::MakeUniqueScreen");
+    TLOGI(WmsLogTag::DMS, "enter");
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("make unique screen failed: remote is null");
+        TLOGW(WmsLogTag::DMS, "remote is null");
         return DMError::DM_ERROR_NULLPTR;
     }
 
@@ -2722,22 +2871,22 @@ DMError ScreenSessionManagerProxy::MakeUniqueScreen(const std::vector<ScreenId>&
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("MakeUniqueScreen writeInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "writeInterfaceToken failed");
         return DMError::DM_ERROR_NULLPTR;
     }
     if (!data.WriteUint32(screenIds.size())) {
-        WLOGFE("MakeUniqueScreen write screenIds size failed");
+        TLOGE(WmsLogTag::DMS, "write screenIds size failed");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     bool res = data.WriteUInt64Vector(screenIds);
     if (!res) {
-        WLOGFE("MakeUniqueScreen fail: write screens failed");
+        TLOGE(WmsLogTag::DMS, "write screens failed");
         return DMError::DM_ERROR_NULLPTR;
     }
     if (remote->SendRequest(
         static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCENE_BOARD_MAKE_UNIQUE_SCREEN),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("MakeUniqueScreen fail: SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_NULLPTR;
     }
     reply.ReadUInt64Vector(&displayIds);
@@ -2748,7 +2897,7 @@ void ScreenSessionManagerProxy::SetClient(const sptr<IScreenSessionManagerClient
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("SetClient: remote is null");
+        TLOGE(WmsLogTag::DMS, "remote is null");
         return;
     }
 
@@ -2756,16 +2905,16 @@ void ScreenSessionManagerProxy::SetClient(const sptr<IScreenSessionManagerClient
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return;
     }
     if (!client || !data.WriteRemoteObject(client->AsObject())) {
-        WLOGFE("WriteRemoteObject failed");
+        TLOGE(WmsLogTag::DMS, "WriteRemoteObject failed");
         return;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_CLIENT),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return;
     }
 }
@@ -2774,7 +2923,7 @@ void ScreenSessionManagerProxy::SwitchUser()
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("SwitchUser: remote is null");
+        TLOGE(WmsLogTag::DMS, "remote is null");
         return;
     }
 
@@ -2782,12 +2931,12 @@ void ScreenSessionManagerProxy::SwitchUser()
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SWITCH_USER),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return;
     }
 }
@@ -2796,7 +2945,7 @@ ScreenProperty ScreenSessionManagerProxy::GetScreenProperty(ScreenId screenId)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("GetScreenProperty: remote is null");
+        TLOGE(WmsLogTag::DMS, "remote is null");
         return {};
     }
 
@@ -2804,21 +2953,21 @@ ScreenProperty ScreenSessionManagerProxy::GetScreenProperty(ScreenId screenId)
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return {};
     }
     if (!data.WriteUint64(screenId)) {
-        WLOGFE("Write screenId failed");
+        TLOGE(WmsLogTag::DMS, "Write screenId failed");
         return {};
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_SCREEN_PROPERTY),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return {};
     }
     ScreenProperty screenProperty;
     if (!RSMarshallingHelper::Unmarshalling(reply, screenProperty)) {
-        WLOGFE("Read screenProperty failed");
+        TLOGE(WmsLogTag::DMS, "Read screenProperty failed");
         return {};
     }
     return screenProperty;
@@ -2828,7 +2977,7 @@ std::shared_ptr<RSDisplayNode> ScreenSessionManagerProxy::GetDisplayNode(ScreenI
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("GetDisplayNode: remote is null");
+        TLOGE(WmsLogTag::DMS, "remote is null");
         return nullptr;
     }
 
@@ -2836,22 +2985,22 @@ std::shared_ptr<RSDisplayNode> ScreenSessionManagerProxy::GetDisplayNode(ScreenI
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return nullptr;
     }
     if (!data.WriteUint64(screenId)) {
-        WLOGFE("Write screenId failed");
+        TLOGE(WmsLogTag::DMS, "Write screenId failed");
         return nullptr;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DISPLAY_NODE),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return nullptr;
     }
 
     auto displayNode = RSDisplayNode::Unmarshalling(reply);
     if (!displayNode) {
-        WLOGFE("displayNode is null");
+        TLOGE(WmsLogTag::DMS, "displayNode is null");
         return nullptr;
     }
     return displayNode;
@@ -2861,7 +3010,7 @@ ScreenCombination ScreenSessionManagerProxy::GetScreenCombination(ScreenId scree
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("GetScreenCombination: remote is null");
+        TLOGE(WmsLogTag::DMS, "remote is null");
         return ScreenCombination::SCREEN_ALONE;
     }
 
@@ -2869,16 +3018,16 @@ ScreenCombination ScreenSessionManagerProxy::GetScreenCombination(ScreenId scree
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return ScreenCombination::SCREEN_ALONE;
     }
     if (!data.WriteUint64(screenId)) {
-        WLOGFE("Write screenId failed");
+        TLOGE(WmsLogTag::DMS, "Write screenId failed");
         return ScreenCombination::SCREEN_ALONE;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_SCREEN_COMBINATION),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return ScreenCombination::SCREEN_ALONE;
     }
     return static_cast<ScreenCombination>(reply.ReadUint32());
@@ -2889,7 +3038,7 @@ void ScreenSessionManagerProxy::UpdateScreenDirectionInfo(ScreenId screenId, flo
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("UpdateScreenDirectionInfo: remote is null");
+        TLOGE(WmsLogTag::DMS, "remote is null");
         return;
     }
 
@@ -2897,42 +3046,42 @@ void ScreenSessionManagerProxy::UpdateScreenDirectionInfo(ScreenId screenId, flo
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return;
     }
     if (!data.WriteUint64(screenId)) {
-        WLOGFE("Write screenId failed");
+        TLOGE(WmsLogTag::DMS, "Write screenId failed");
         return;
     }
     if (!data.WriteFloat(screenComponentRotation)) {
-        WLOGFE("Write screenComponentRotation failed");
+        TLOGE(WmsLogTag::DMS, "Write screenComponentRotation failed");
         return;
     }
     if (!data.WriteFloat(rotation)) {
-        WLOGFE("Write rotation failed");
+        TLOGE(WmsLogTag::DMS, "Write rotation failed");
         return;
     }
     if (!data.WriteFloat(phyRotation)) {
-        WLOGFE("Write phyRotation failed");
+        TLOGE(WmsLogTag::DMS, "Write phyRotation failed");
         return;
     }
     if (!data.WriteUint32(static_cast<uint32_t>(screenPropertyChangeType))) {
-        WLOGFE("Write screenPropertyChangeType failed");
+        TLOGE(WmsLogTag::DMS, "Write screenPropertyChangeType failed");
         return;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_UPDATE_SCREEN_DIRECTION_INFO),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return;
     }
 }
 
 void ScreenSessionManagerProxy::UpdateScreenRotationProperty(ScreenId screenId, const RRect& bounds, float rotation,
-    ScreenPropertyChangeType screenPropertyChangeType)
+    ScreenPropertyChangeType screenPropertyChangeType, bool isSwitchUser)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("UpdateScreenRotationProperty: remote is null");
+        TLOGE(WmsLogTag::DMS, "remote is null");
         return;
     }
 
@@ -2940,28 +3089,32 @@ void ScreenSessionManagerProxy::UpdateScreenRotationProperty(ScreenId screenId, 
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return;
     }
     if (!data.WriteUint64(screenId)) {
-        WLOGFE("Write screenId failed");
+        TLOGE(WmsLogTag::DMS, "Write screenId failed");
         return;
     }
     if (!RSMarshallingHelper::Marshalling(data, bounds)) {
-        WLOGFE("Write bounds failed");
+        TLOGE(WmsLogTag::DMS, "Write bounds failed");
         return;
     }
     if (!data.WriteFloat(rotation)) {
-        WLOGFE("Write rotation failed");
+        TLOGE(WmsLogTag::DMS, "Write rotation failed");
+        return;
+    }
+    if (!data.WriteBool(isSwitchUser)) {
+        TLOGE(WmsLogTag::DMS, "Write isSwitchUser failed");
         return;
     }
     if (!data.WriteUint32(static_cast<uint32_t>(screenPropertyChangeType))) {
-        WLOGFE("Write screenPropertyChangeType failed");
+        TLOGE(WmsLogTag::DMS, "Write screenPropertyChangeType failed");
         return;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_UPDATE_SCREEN_ROTATION_PROPERTY),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return;
     }
 }
@@ -2970,7 +3123,7 @@ uint32_t ScreenSessionManagerProxy::GetCurvedCompressionArea()
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("GetCurvedCompressionArea: remote is null");
+        TLOGE(WmsLogTag::DMS, "remote is null");
         return 0;
     }
 
@@ -2978,12 +3131,12 @@ uint32_t ScreenSessionManagerProxy::GetCurvedCompressionArea()
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return 0;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_CURVED_SCREEN_COMPRESSION_AREA),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return 0;
     }
 
@@ -2994,7 +3147,7 @@ ScreenProperty ScreenSessionManagerProxy::GetPhyScreenProperty(ScreenId screenId
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("GetPhyScreenProperty: remote is null");
+        TLOGE(WmsLogTag::DMS, "remote is null");
         return {};
     }
 
@@ -3002,21 +3155,21 @@ ScreenProperty ScreenSessionManagerProxy::GetPhyScreenProperty(ScreenId screenId
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return {};
     }
     if (!data.WriteUint64(screenId)) {
-        WLOGFE("Write screenId failed");
+        TLOGE(WmsLogTag::DMS, "Write screenId failed");
         return {};
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_PHY_SCREEN_PROPERTY),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return {};
     }
     ScreenProperty screenProperty;
     if (!RSMarshallingHelper::Unmarshalling(reply, screenProperty)) {
-        WLOGFE("Read screenProperty failed");
+        TLOGE(WmsLogTag::DMS, "Read screenProperty failed");
         return {};
     }
     return screenProperty;
@@ -3026,7 +3179,7 @@ void ScreenSessionManagerProxy::NotifyDisplayChangeInfoChanged(const sptr<Displa
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("NotifyDisplayChangeInfoChanged: remote is null");
+        TLOGE(WmsLogTag::DMS, "remote is null");
         return;
     }
 
@@ -3034,16 +3187,16 @@ void ScreenSessionManagerProxy::NotifyDisplayChangeInfoChanged(const sptr<Displa
     MessageParcel reply;
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return;
     }
     if (!info->Marshalling(data)) {
-        WLOGFE("Write display change info failed");
+        TLOGE(WmsLogTag::DMS, "Write display change info failed");
         return;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_NOTIFY_DISPLAY_CHANGE_INFO),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return;
     }
 }
@@ -3052,7 +3205,7 @@ void ScreenSessionManagerProxy::SetScreenPrivacyState(bool hasPrivate)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("SetScreenPrivacyState: remote is null");
+        TLOGE(WmsLogTag::DMS, "remote is null");
         return;
     }
 
@@ -3060,16 +3213,16 @@ void ScreenSessionManagerProxy::SetScreenPrivacyState(bool hasPrivate)
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return;
     }
     if (!data.WriteBool(hasPrivate)) {
-        WLOGFE("Write hasPrivate failed");
+        TLOGE(WmsLogTag::DMS, "Write hasPrivate failed");
         return;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREEN_PRIVACY_STATE),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return;
     }
 }
@@ -3078,7 +3231,7 @@ void ScreenSessionManagerProxy::SetPrivacyStateByDisplayId(DisplayId id, bool ha
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("SetPrivacyStateByDisplayId: remote is null");
+        TLOGE(WmsLogTag::DMS, "remote is null");
         return;
     }
 
@@ -3086,20 +3239,20 @@ void ScreenSessionManagerProxy::SetPrivacyStateByDisplayId(DisplayId id, bool ha
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return;
     }
     if (!data.WriteUint64(id)) {
-        WLOGFE("Write DisplayId failed");
+        TLOGE(WmsLogTag::DMS, "Write DisplayId failed");
         return;
     }
     if (!data.WriteBool(hasPrivate)) {
-        WLOGFE("Write hasPrivate failed");
+        TLOGE(WmsLogTag::DMS, "Write hasPrivate failed");
         return;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREENID_PRIVACY_STATE),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return;
     }
 }
@@ -3108,7 +3261,7 @@ void ScreenSessionManagerProxy::SetScreenPrivacyWindowList(DisplayId id, std::ve
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("SetScreenPrivacyWindowList: remote is null");
+        TLOGE(WmsLogTag::DMS, "remote is null");
         return;
     }
 
@@ -3116,20 +3269,20 @@ void ScreenSessionManagerProxy::SetScreenPrivacyWindowList(DisplayId id, std::ve
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return;
     }
     if (!data.WriteUint64(id)) {
-        WLOGFE("Write DisplayId failed");
+        TLOGE(WmsLogTag::DMS, "Write DisplayId failed");
         return;
     }
     if (!data.WriteStringVector(privacyWindowList)) {
-        WLOGFE("Write privacyWindowList failed");
+        TLOGE(WmsLogTag::DMS, "Write privacyWindowList failed");
         return;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREEN_PRIVACY_WINDOW_LIST),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return;
     }
 }
@@ -3138,7 +3291,7 @@ void ScreenSessionManagerProxy::UpdateAvailableArea(ScreenId screenId, DMRect ar
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("UpdateAvailableArea: remote is null");
+        TLOGE(WmsLogTag::DMS, "remote is null");
         return;
     }
 
@@ -3146,21 +3299,21 @@ void ScreenSessionManagerProxy::UpdateAvailableArea(ScreenId screenId, DMRect ar
     MessageParcel reply;
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return;
     }
     if (!data.WriteUint64(screenId)) {
-        WLOGFE("Write screenId failed");
+        TLOGE(WmsLogTag::DMS, "Write screenId failed");
         return;
     }
     if (!data.WriteInt32(area.posX_) || !data.WriteInt32(area.posY_) || !data.WriteUint32(area.width_) ||
         !data.WriteInt32(area.height_)) {
-        WLOGFE("Write area failed");
+        TLOGE(WmsLogTag::DMS, "Write area failed");
         return;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_UPDATE_AVAILABLE_AREA),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return;
     }
 }
@@ -3169,7 +3322,7 @@ void ScreenSessionManagerProxy::UpdateSuperFoldAvailableArea(ScreenId screenId, 
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("UpdateSuperFoldAvailableArea: remote is null");
+        TLOGE(WmsLogTag::DMS, "remote is null");
         return;
     }
 
@@ -3177,26 +3330,26 @@ void ScreenSessionManagerProxy::UpdateSuperFoldAvailableArea(ScreenId screenId, 
     MessageParcel reply;
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return;
     }
     if (!data.WriteUint64(screenId)) {
-        WLOGFE("Write screenId failed");
+        TLOGE(WmsLogTag::DMS, "Write screenId failed");
         return;
     }
     if (!data.WriteInt32(bArea.posX_) || !data.WriteInt32(bArea.posY_) || !data.WriteUint32(bArea.width_) ||
         !data.WriteUint32(bArea.height_)) {
-        WLOGFE("Write bArea failed");
+        TLOGE(WmsLogTag::DMS, "Write bArea failed");
         return;
     }
     if (!data.WriteInt32(cArea.posX_) || !data.WriteInt32(cArea.posY_) || !data.WriteUint32(cArea.width_) ||
         !data.WriteUint32(cArea.height_)) {
-        WLOGFE("Write cArea failed");
+        TLOGE(WmsLogTag::DMS, "Write cArea failed");
         return;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_UPDATE_SUPER_FOLD_AVAILABLE_AREA),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return;
     }
 }
@@ -3205,7 +3358,7 @@ void ScreenSessionManagerProxy::UpdateSuperFoldExpandAvailableArea(ScreenId scre
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("UpdateSuperFoldExpandAvailableArea: remote is null");
+        TLOGE(WmsLogTag::DMS, "remote is null");
         return;
     }
 
@@ -3213,22 +3366,22 @@ void ScreenSessionManagerProxy::UpdateSuperFoldExpandAvailableArea(ScreenId scre
     MessageParcel reply;
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return;
     }
     if (!data.WriteUint64(screenId)) {
-        WLOGFE("Write screenId failed");
+        TLOGE(WmsLogTag::DMS, "Write screenId failed");
         return;
     }
     if (!data.WriteInt32(area.posX_) || !data.WriteInt32(area.posY_) || !data.WriteUint32(area.width_) ||
         !data.WriteUint32(area.height_)) {
-        WLOGFE("Write area failed");
+        TLOGE(WmsLogTag::DMS, "Write area failed");
         return;
     }
     if (remote->SendRequest(
         static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_UPDATE_SUPER_FOLD_EXPAND_AVAILABLE_AREA),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return;
     }
 }
@@ -3237,7 +3390,7 @@ int32_t ScreenSessionManagerProxy::SetScreenOffDelayTime(int32_t delay)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("SetScreenOffDelayTime: remote is null");
+        TLOGE(WmsLogTag::DMS, "remote is null");
         return 0;
     }
 
@@ -3245,16 +3398,16 @@ int32_t ScreenSessionManagerProxy::SetScreenOffDelayTime(int32_t delay)
     MessageParcel reply;
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return 0;
     }
     if (!data.WriteInt32(delay)) {
-        WLOGFE("Write delay failed");
+        TLOGE(WmsLogTag::DMS, "Write delay failed");
         return 0;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREEN_OFF_DELAY_TIME),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return 0;
     }
     return reply.ReadInt32();
@@ -3264,7 +3417,7 @@ void ScreenSessionManagerProxy::SetCameraStatus(int32_t cameraStatus, int32_t ca
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("SetCameraStatus: remote is null");
+        TLOGE(WmsLogTag::DMS, "remote is null");
         return;
     }
 
@@ -3272,20 +3425,20 @@ void ScreenSessionManagerProxy::SetCameraStatus(int32_t cameraStatus, int32_t ca
     MessageParcel reply;
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return;
     }
     if (!data.WriteInt32(cameraStatus)) {
-        WLOGFE("Write cameraStatus failed");
+        TLOGE(WmsLogTag::DMS, "Write cameraStatus failed");
         return;
     }
     if (!data.WriteInt32(cameraPosition)) {
-        WLOGFE("Write cameraPosition failed");
+        TLOGE(WmsLogTag::DMS, "Write cameraPosition failed");
         return;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_CAMERA_STATUS),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return;
     }
 }
@@ -3294,7 +3447,7 @@ DMError ScreenSessionManagerProxy::GetAvailableArea(DisplayId displayId, DMRect&
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("GetAvailableArea: remote is null");
+        TLOGE(WmsLogTag::DMS, "remote is null");
         return DMError::DM_ERROR_IPC_FAILED;
     }
 
@@ -3302,16 +3455,16 @@ DMError ScreenSessionManagerProxy::GetAvailableArea(DisplayId displayId, DMRect&
     MessageParcel reply;
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     if (!data.WriteUint64(displayId)) {
-        WLOGFE("Write displayId failed");
+        TLOGE(WmsLogTag::DMS, "Write displayId failed");
         return DMError::DM_ERROR_WRITE_DATA_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_AVAILABLE_AREA),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     DMError ret = static_cast<DMError>(reply.ReadInt32());
@@ -3327,7 +3480,7 @@ DMError ScreenSessionManagerProxy::GetExpandAvailableArea(DisplayId displayId, D
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("GetExpandAvailableArea: remote is null");
+        TLOGE(WmsLogTag::DMS, "remote is null");
         return DMError::DM_ERROR_IPC_FAILED;
     }
 
@@ -3335,16 +3488,16 @@ DMError ScreenSessionManagerProxy::GetExpandAvailableArea(DisplayId displayId, D
     MessageParcel reply;
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     if (!data.WriteUint64(displayId)) {
-        WLOGFE("Write displayId failed");
+        TLOGE(WmsLogTag::DMS, "Write displayId failed");
         return DMError::DM_ERROR_WRITE_DATA_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_EXPAND_AVAILABLE_AREA),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     DMError ret = static_cast<DMError>(reply.ReadInt32());
@@ -3360,7 +3513,7 @@ void ScreenSessionManagerProxy::NotifyFoldToExpandCompletion(bool foldToExpand)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("NotifyFoldToExpandCompletion: remote is null");
+        TLOGE(WmsLogTag::DMS, "remote is null");
         return;
     }
 
@@ -3368,16 +3521,16 @@ void ScreenSessionManagerProxy::NotifyFoldToExpandCompletion(bool foldToExpand)
     MessageParcel reply;
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return ;
     }
     if (!data.WriteBool(foldToExpand)) {
-        WLOGFE("Write foldToExpand failed");
+        TLOGE(WmsLogTag::DMS, "Write foldToExpand failed");
         return;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_NOTIFY_FOLD_TO_EXPAND_COMPLETION),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return;
     }
 }
@@ -3386,7 +3539,7 @@ void ScreenSessionManagerProxy::RecordEventFromScb(std::string description, bool
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("RecordEventFromScb: remote is null");
+        TLOGE(WmsLogTag::DMS, "remote is null");
         return;
     }
 
@@ -3394,20 +3547,20 @@ void ScreenSessionManagerProxy::RecordEventFromScb(std::string description, bool
     MessageParcel reply;
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return ;
     }
     if (!data.WriteString(description)) {
-        WLOGFE("Write description failed");
+        TLOGE(WmsLogTag::DMS, "Write description failed");
         return;
     }
     if (!data.WriteBool(needRecordEvent)) {
-        WLOGFE("Write needRecordEvent failed");
+        TLOGE(WmsLogTag::DMS, "Write needRecordEvent failed");
         return;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_RECORD_EVENT_FROM_SCB),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return;
     }
 }
@@ -3416,7 +3569,7 @@ VirtualScreenFlag ScreenSessionManagerProxy::GetVirtualScreenFlag(ScreenId scree
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("GetVirtualScreenFlag: remote is null");
+        TLOGE(WmsLogTag::DMS, "remote is null");
         return VirtualScreenFlag::DEFAULT;
     }
 
@@ -3427,16 +3580,16 @@ VirtualScreenFlag ScreenSessionManagerProxy::GetVirtualScreenFlag(ScreenId scree
     MessageParcel reply;
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return VirtualScreenFlag::DEFAULT;
     }
     if (!data.WriteUint64(screenId)) {
-        WLOGFE("Write screenId failed");
+        TLOGE(WmsLogTag::DMS, "Write screenId failed");
         return VirtualScreenFlag::DEFAULT;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_VIRTUAL_SCREEN_FLAG),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return VirtualScreenFlag::DEFAULT;
     }
     return static_cast<VirtualScreenFlag>(reply.ReadUint32());
@@ -3446,7 +3599,7 @@ DMError ScreenSessionManagerProxy::SetVirtualScreenFlag(ScreenId screenId, Virtu
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("SetVirtualScreenFlag: remote is null");
+        TLOGE(WmsLogTag::DMS, "remote is null");
         return DMError::DM_ERROR_IPC_FAILED;
     }
 
@@ -3460,16 +3613,16 @@ DMError ScreenSessionManagerProxy::SetVirtualScreenFlag(ScreenId screenId, Virtu
     MessageParcel reply;
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     if (!data.WriteUint64(screenId) || !data.WriteUint32(static_cast<uint32_t>(screenFlag))) {
-        WLOGFE("Write screenId or screenFlag failed");
+        TLOGE(WmsLogTag::DMS, "Write screenId or screenFlag failed");
         return DMError::DM_ERROR_WRITE_DATA_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_FLAG),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     return static_cast<DMError>(reply.ReadInt32());
@@ -3479,7 +3632,7 @@ DeviceScreenConfig ScreenSessionManagerProxy::GetDeviceScreenConfig()
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("GetDeviceScreenConfig: remote is null");
+        TLOGE(WmsLogTag::DMS, "remote is null");
         return {};
     }
 
@@ -3505,10 +3658,10 @@ DeviceScreenConfig ScreenSessionManagerProxy::GetDeviceScreenConfig()
 
 DMError ScreenSessionManagerProxy::SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t refreshInterval)
 {
-    WLOGFI("ScreenSessionManagerProxy::SetVirtualScreenRefreshRate: ENTER");
+    TLOGI(WmsLogTag::DMS, "ENTER");
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("SetVirtualScreenRefreshRate: remote is null");
+        TLOGE(WmsLogTag::DMS, "remote is null");
         return DMError::DM_ERROR_IPC_FAILED;
     }
 
@@ -3516,51 +3669,55 @@ DMError ScreenSessionManagerProxy::SetVirtualScreenRefreshRate(ScreenId screenId
     MessageParcel reply;
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     if (!data.WriteUint64(screenId) || !data.WriteUint32(refreshInterval)) {
-        WLOGFE("Write screenId or refreshInterval failed");
+        TLOGE(WmsLogTag::DMS, "Write screenId or refreshInterval failed");
         return DMError::DM_ERROR_WRITE_DATA_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_REFRESH_RATE),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     return static_cast<DMError>(reply.ReadInt32());
 }
 
 void ScreenSessionManagerProxy::SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
-    std::vector<uint64_t> surfaceIdList)
+    std::vector<uint64_t> surfaceIdList, std::vector<uint8_t> typeBlackList)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("Remote is nullptr");
+        TLOGE(WmsLogTag::DMS, "Remote is nullptr");
         return;
     }
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return;
     }
     if (!data.WriteUint64(static_cast<uint64_t>(screenId))) {
-        WLOGFE("Write screenId failed");
+        TLOGE(WmsLogTag::DMS, "Write screenId failed");
         return;
     }
     if (!data.WriteUInt64Vector(windowIdList)) {
-        WLOGFE("Write windowIdList failed");
+        TLOGE(WmsLogTag::DMS, "Write windowIdList failed");
         return;
     }
     if (!data.WriteUInt64Vector(surfaceIdList)) {
-        WLOGFE("Write surfaceIdList failed");
+        TLOGE(WmsLogTag::DMS, "Write surfaceIdList failed");
+        return;
+    }
+    if (!data.WriteUInt8Vector(typeBlackList)) {
+        TLOGE(WmsLogTag::DMS, "Write typeBlackList failed");
         return;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_BLACK_LIST),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return;
     }
 }
@@ -3569,28 +3726,28 @@ void ScreenSessionManagerProxy::SetVirtualDisplayMuteFlag(ScreenId screenId, boo
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("Remote is nullptr");
+        TLOGE(WmsLogTag::DMS, "Remote is nullptr");
         return;
     }
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return;
     }
     if (!data.WriteUint64(static_cast<uint64_t>(screenId))) {
-        WLOGFE("Write screenId failed");
+        TLOGE(WmsLogTag::DMS, "Write screenId failed");
         return;
     }
     if (!data.WriteBool(muteFlag)) {
-        WLOGFE("Write muteFlag failed");
+        TLOGE(WmsLogTag::DMS, "Write muteFlag failed");
         return;
     }
-    
+
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_DISPLAY_MUTE_FLAG),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return;
     }
 }
@@ -3599,23 +3756,23 @@ void ScreenSessionManagerProxy::DisablePowerOffRenderControl(ScreenId screenId)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("Remote is nullptr");
+        TLOGE(WmsLogTag::DMS, "Remote is nullptr");
         return;
     }
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return;
     }
     if (!data.WriteUint64(static_cast<uint64_t>(screenId))) {
-        WLOGFE("Write screenId failed");
+        TLOGE(WmsLogTag::DMS, "Write screenId failed");
         return;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_DISABLE_POWEROFF_RENDER_CONTROL),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return;
     }
 }
@@ -3624,33 +3781,33 @@ DMError ScreenSessionManagerProxy::ProxyForFreeze(const std::set<int32_t>& pidLi
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("Remote is nullptr");
+        TLOGE(WmsLogTag::DMS, "Remote is nullptr");
         return DMError::DM_ERROR_NULLPTR;
     }
     MessageParcel reply;
     MessageParcel data;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("proxy for freeze: failed");
+        TLOGE(WmsLogTag::DMS, "proxy for freeze: failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     if (!data.WriteInt32(pidList.size())) {
-        WLOGFE("proxy for freeze write date: failed");
+        TLOGE(WmsLogTag::DMS, "proxy for freeze write date: failed");
         return DMError::DM_ERROR_WRITE_DATA_FAILED;
     }
     for (auto it = pidList.begin(); it != pidList.end(); it++) {
         if (!data.WriteInt32(*it)) {
-            WLOGFE("proxy for freeze write date: failed");
+            TLOGE(WmsLogTag::DMS, "proxy for freeze write date: failed");
             return DMError::DM_ERROR_WRITE_DATA_FAILED;
         }
     }
     if (!data.WriteBool(isProxy)) {
-        WLOGFE("proxy for freeze write date: failed");
+        TLOGE(WmsLogTag::DMS, "proxy for freeze write date: failed");
         return DMError::DM_ERROR_WRITE_DATA_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_PROXY_FOR_FREEZE),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("proxy for freeze send request: failed");
+        TLOGE(WmsLogTag::DMS, "proxy for freeze send request: failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     return static_cast<DMError>(reply.ReadInt32());
@@ -3660,19 +3817,19 @@ DMError ScreenSessionManagerProxy::ResetAllFreezeStatus()
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("Remote is nullptr");
+        TLOGE(WmsLogTag::DMS, "Remote is nullptr");
         return DMError::DM_ERROR_NULLPTR;
     }
     MessageParcel reply;
     MessageParcel data;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_RESET_ALL_FREEZE_STATUS),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     return static_cast<DMError>(reply.ReadInt32());
@@ -3707,7 +3864,8 @@ void OHOS::Rosen::ScreenSessionManagerProxy::UpdateDisplayHookInfo(int32_t uid, 
 
     if (!data.WriteUint32(hookInfo.width_) || !data.WriteUint32(hookInfo.height_) ||
         !data.WriteFloat(hookInfo.density_) || !data.WriteUint32(hookInfo.rotation_) ||
-        !data.WriteBool(hookInfo.enableHookRotation_)) {
+        !data.WriteBool(hookInfo.enableHookRotation_) || !data.WriteUint32(hookInfo.displayOrientation_) ||
+        !data.WriteBool(hookInfo.enableHookDisplayOrientation_)) {
         TLOGE(WmsLogTag::DMS, "Write hookInfo failed");
         return;
     }
@@ -3746,9 +3904,9 @@ void ScreenSessionManagerProxy::GetDisplayHookInfo(int32_t uid, DMHookInfo& hook
         TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return;
     }
-    if (!reply.WriteUint32(hookInfo.width_) || !reply.WriteUint32(hookInfo.height_) ||
-        !reply.WriteFloat(hookInfo.density_) || !reply.WriteUint32(hookInfo.rotation_)||
-        !reply.WriteBool(hookInfo.enableHookRotation_)) {
+    if (!reply.ReadUint32(hookInfo.width_) || !reply.ReadUint32(hookInfo.height_) ||
+        !reply.ReadFloat(hookInfo.density_) || !reply.ReadUint32(hookInfo.rotation_)||
+        !reply.ReadBool(hookInfo.enableHookRotation_)) {
         TLOGE(WmsLogTag::DMS, "reply write hookInfo failed!");
     }
 }
@@ -3758,33 +3916,33 @@ DMError ScreenSessionManagerProxy::SetVirtualScreenSecurityExemption(ScreenId sc
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("Remote is nullptr");
+        TLOGE(WmsLogTag::DMS, "Remote is nullptr");
         return DMError::DM_ERROR_NULLPTR;
     }
     MessageParcel reply;
     MessageParcel data;
     MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("proxy for freeze: failed");
+        TLOGE(WmsLogTag::DMS, "proxy for freeze: failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     if (!data.WriteUint64(screenId)) {
-        WLOGFE("write date: failed");
+        TLOGE(WmsLogTag::DMS, "write date: failed");
         return DMError::DM_ERROR_WRITE_DATA_FAILED;
     }
     if (!data.WriteUint32(pid)) {
-        WLOGFE("write date: failed");
+        TLOGE(WmsLogTag::DMS, "write date: failed");
         return DMError::DM_ERROR_WRITE_DATA_FAILED;
     }
 
     if (!data.WriteUInt64Vector(windowIdList)) {
-        WLOGFE("write date: failed");
+        TLOGE(WmsLogTag::DMS, "write date: failed");
         return DMError::DM_ERROR_WRITE_DATA_FAILED;
     }
     if (remote->SendRequest(
         static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_SECURITY_EXEMPTION),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("send request: failed");
+        TLOGE(WmsLogTag::DMS, "send request: failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     return static_cast<DMError>(reply.ReadInt32());
@@ -3889,10 +4047,10 @@ bool ScreenSessionManagerProxy::SetVirtualScreenStatus(ScreenId screenId, Virtua
 DMError ScreenSessionManagerProxy::SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refreshRate,
     uint32_t& actualRefreshRate)
 {
-    WLOGFI("ENTER");
+    TLOGI(WmsLogTag::DMS, "ENTER");
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("remote is nullptr");
+        TLOGW(WmsLogTag::DMS, "remote is nullptr");
         return DMError::DM_ERROR_REMOTE_CREATE_FAILED;
     }
 
@@ -3901,20 +4059,20 @@ DMError ScreenSessionManagerProxy::SetVirtualScreenMaxRefreshRate(ScreenId id, u
     MessageOption option;
 
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
     if (!data.WriteUint64(static_cast<uint64_t>(id))) {
-        WLOGFE("WriteUnit64 screenId failed");
+        TLOGE(WmsLogTag::DMS, "WriteUnit64 screenId failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (!data.WriteUint32(refreshRate)) {
-        WLOGFE("WriteUnit32 width failed");
+        TLOGE(WmsLogTag::DMS, "WriteUnit32 width failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_MAX_REFRESHRATE),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_NULLPTR;
     }
     actualRefreshRate = reply.ReadUint32();
@@ -3926,24 +4084,24 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetScreenCapture(con
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("remote is nullptr");
+        TLOGE(WmsLogTag::DMS, "remote is nullptr");
         return nullptr;
     }
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return nullptr;
     }
     if (!data.WriteUint64(captureOption.displayId_) ||
         !data.WriteBool(captureOption.isNeedNotify_) || !data.WriteBool(captureOption.isNeedPointer_)) {
-        WLOGFE("Write displayId or isNeedNotify or isNeedPointer failed");
+        TLOGE(WmsLogTag::DMS, "Write displayId or isNeedNotify or isNeedPointer failed");
         return nullptr;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DISPLAY_CAPTURE),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return nullptr;
     }
     std::shared_ptr<Media::PixelMap> pixelMap(reply.ReadParcelable<Media::PixelMap>());
@@ -3952,7 +4110,7 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetScreenCapture(con
         *errorCode = replyErrorCode;
     }
     if (pixelMap == nullptr) {
-        WLOGFE("Send pixelMap nullptr.");
+        TLOGE(WmsLogTag::DMS, "Send pixelMap nullptr.");
         return nullptr;
     }
     return pixelMap;
@@ -3962,25 +4120,25 @@ sptr<DisplayInfo> ScreenSessionManagerProxy::GetPrimaryDisplayInfo()
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("GetPrimaryDisplayInfo: remote is nullptr");
+        TLOGW(WmsLogTag::DMS, "GetPrimaryDisplayInfo: remote is nullptr");
         return nullptr;
     }
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return nullptr;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_PRIMARY_DISPLAY_INFO),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return nullptr;
     }
 
     sptr<DisplayInfo> info = reply.ReadParcelable<DisplayInfo>();
     if (info == nullptr) {
-        WLOGFE("get display info.");
+        TLOGE(WmsLogTag::DMS, "get display info.");
     }
     return info;
 }
@@ -3988,10 +4146,10 @@ sptr<DisplayInfo> ScreenSessionManagerProxy::GetPrimaryDisplayInfo()
 std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetDisplaySnapshotWithOption(
     const CaptureOption& captureOption, DmErrorCode* errorCode)
 {
-    WLOGFD("enter");
+    TLOGD(WmsLogTag::DMS, "enter");
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW("remote is nullptr");
+        TLOGW(WmsLogTag::DMS, "remote is nullptr");
         return nullptr;
     }
 
@@ -3999,17 +4157,19 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetDisplaySnapshotWi
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return nullptr;
     }
     if (!data.WriteUint64(captureOption.displayId_) ||
-        !data.WriteBool(captureOption.isNeedNotify_) || !data.WriteBool(captureOption.isNeedPointer_)) {
-        WLOGFE("Write displayId or isNeedNotify or isNeedPointer failed");
+        !data.WriteBool(captureOption.isNeedNotify_) || !data.WriteBool(captureOption.isNeedPointer_) ||
+        !data.WriteBool(captureOption.isCaptureFullOfScreen_) ||
+        !data.WriteUInt64Vector(captureOption.surfaceNodesList_)) {
+        TLOGE(WmsLogTag::DMS, "Write displayId or isNeedNotify or isNeedPointer failed");
         return nullptr;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DISPLAY_SNAPSHOT_WITH_OPTION),
         data, reply, option) != ERR_NONE) {
-        WLOGFW("SendRequest failed");
+        TLOGW(WmsLogTag::DMS, "SendRequest failed");
         return nullptr;
     }
 
@@ -4019,17 +4179,59 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetDisplaySnapshotWi
         *errorCode = replyErrorCode;
     }
     if (pixelMap == nullptr) {
-        WLOGFW("SendRequest nullptr.");
+        TLOGW(WmsLogTag::DMS, "SendRequest nullptr.");
         return nullptr;
     }
     return pixelMap;
+}
+
+std::vector<std::shared_ptr<Media::PixelMap>> ScreenSessionManagerProxy::GetDisplayHDRSnapshotWithOption(
+    const CaptureOption& captureOption, DmErrorCode* errorCode)
+{
+    TLOGD(WmsLogTag::DMS, "enter");
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGW(WmsLogTag::DMS, "remote is nullptr");
+        return { nullptr, nullptr };
+    }
+ 
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return { nullptr, nullptr };
+    }
+    if (!data.WriteUint64(captureOption.displayId_) || !data.WriteBool(captureOption.isNeedNotify_) ||
+        !data.WriteBool(captureOption.isCaptureFullOfScreen_) ||
+        !data.WriteUInt64Vector(captureOption.surfaceNodesList_)) {
+        TLOGE(WmsLogTag::DMS, "Write displayId or isNeedNotify or isNeedPointer failed");
+        return { nullptr, nullptr };
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(
+        DisplayManagerMessage::TRANS_ID_GET_DISPLAY_HDR_SNAPSHOT_WITH_OPTION), data, reply, option) != ERR_NONE) {
+        TLOGW(WmsLogTag::DMS, "SendRequest failed");
+        return { nullptr, nullptr };
+    }
+ 
+    std::shared_ptr<Media::PixelMap> sdrpixelMap(reply.ReadParcelable<Media::PixelMap>());
+    std::shared_ptr<Media::PixelMap> hdrPixelMap(reply.ReadParcelable<Media::PixelMap>());
+    DmErrorCode replyErrorCode = static_cast<DmErrorCode>(reply.ReadInt32());
+    if (errorCode) {
+        *errorCode = replyErrorCode;
+    }
+    if (sdrpixelMap == nullptr) {
+        TLOGW(WmsLogTag::DMS, "SendRequest sdrpixelMap is nullptr.");
+        return { nullptr, nullptr };
+    }
+    return { sdrpixelMap, hdrPixelMap };
 }
 
 int32_t ScreenSessionManagerProxy::SetScreenOnDelayTime(int32_t delay)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("SetScreenOnDelayTime: remote is null");
+        TLOGE(WmsLogTag::DMS, "SetScreenOnDelayTime: remote is null");
         return 0;
     }
 
@@ -4037,16 +4239,16 @@ int32_t ScreenSessionManagerProxy::SetScreenOnDelayTime(int32_t delay)
     MessageParcel reply;
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return 0;
     }
     if (!data.WriteInt32(delay)) {
-        WLOGFE("Write delay failed");
+        TLOGE(WmsLogTag::DMS, "Write delay failed");
         return 0;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREEN_ON_DELAY_TIME),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return 0;
     }
     return reply.ReadInt32();
@@ -4106,5 +4308,192 @@ bool ScreenSessionManagerProxy::GetIsRealScreen(ScreenId screenId)
         return false;
     }
     return reply.ReadBool();
+}
+
+void ScreenSessionManagerProxy::SetDefaultMultiScreenModeWhenSwitchUser()
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DMS, "remote is null");
+        return;
+    }
+
+    MessageParcel reply;
+    MessageParcel data;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_DEFAULT_MODE_WHEN_SWITCH_USER),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
+        return;
+    }
+    return;
+}
+
+void ScreenSessionManagerProxy::NotifyExtendScreenCreateFinish()
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DMS, "remote is null");
+        return;
+    }
+
+    MessageParcel reply;
+    MessageParcel data;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_NOTIFY_EXTEND_SCREEN_CREATE_FINISH),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
+        return;
+    }
+}
+
+void ScreenSessionManagerProxy::NotifyExtendScreenDestroyFinish()
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DMS, "remote is null");
+        return;
+    }
+
+    MessageParcel reply;
+    MessageParcel data;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_NOTIFY_EXTEND_SCREEN_DESTROY_FINISH),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
+        return;
+    }
+}
+
+void ScreenSessionManagerProxy::NotifyScreenMaskAppear()
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DMS, "remote is null");
+        return;
+    }
+
+    MessageParcel reply;
+    MessageParcel data;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_NOTIFY_SCREEN_MASK_APPEAR),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
+        return;
+    }
+}
+
+DMError ScreenSessionManagerProxy::GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
+    ScreenId& screenId, DMRect& screenArea)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DMS, "remote is nullptr");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    MessageOption option(MessageOption::TF_SYNC);
+    MessageParcel reply;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (!data.WriteUint64(static_cast<uint64_t>(displayId))) {
+        TLOGE(WmsLogTag::DMS, "Write displayId failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(displayArea.posX_) || !data.WriteInt32(displayArea.posY_) ||
+        !data.WriteUint32(displayArea.width_) || !data.WriteUint32(displayArea.height_)) {
+        TLOGE(WmsLogTag::DMS, "Write displayArea failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_SCREEN_AREA_OF_DISPLAY_AREA),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    DMError ret = static_cast<DMError>(reply.ReadInt32());
+    screenId = static_cast<ScreenId>(reply.ReadUint64());
+    int32_t posX = reply.ReadInt32();
+    int32_t posY = reply.ReadInt32();
+    uint32_t width = reply.ReadUint32();
+    uint32_t height = reply.ReadUint32();
+    screenArea = { posX, posY, width, height };
+    return ret;
+}
+
+DMError ScreenSessionManagerProxy::SetPrimaryDisplaySystemDpi(float dpi)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DMS, "remote is null");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageParcel data;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (!data.WriteFloat(dpi)) {
+        TLOGE(WmsLogTag::DMS, "write dpi failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_PRIMARY_DISPLAY_SYSTEM_DPI),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    return DMError::DM_OK;
+}
+
+DMError ScreenSessionManagerProxy::SetVirtualScreenAutoRotation(ScreenId screenId, bool enable)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DMS, "remote is null");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageParcel data;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (!data.WriteUint64(static_cast<uint64_t>(screenId))) {
+        TLOGE(WmsLogTag::DMS, "Write screenId failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(enable)) {
+        TLOGE(WmsLogTag::DMS, "Write enable failed");
+        return DMError::DM_ERROR_WRITE_DATA_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_AUTO_ROTATION),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    return static_cast<DMError>(reply.ReadInt32());
 }
 } // namespace OHOS::Rosen

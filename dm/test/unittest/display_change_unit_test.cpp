@@ -28,7 +28,6 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayChangeUnitTest"};
 using Mocker = SingletonMocker<DisplayManagerAdapter, MockDisplayManagerAdapter>;
 
 class DisplayChangeEventListener : public DisplayManager::IDisplayListener {
@@ -80,7 +79,7 @@ bool DisplayChangeUnitTest::DisplaySizeEqual(const sptr<Display> display, const 
 {
     uint32_t dWidth = static_cast<uint32_t>(display->GetWidth());
     uint32_t dHeight = static_cast<uint32_t>(display->GetHeight());
-    WLOGI("DisplaySizeEqual:: DisplaySize: %{public}u %{public}u, ActiveModeInfoSize: %{public}u %{public}u",
+    TLOGI(WmsLogTag::DMS, "DisplaySize: %{public}u %{public}u, ActiveModeInfoSize: %{public}u %{public}u",
         dWidth, dHeight, curInfo->width_, curInfo->height_);
     return ((curInfo->width_ == dWidth) && (curInfo->height_ == dHeight));
 }

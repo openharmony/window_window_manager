@@ -29,6 +29,149 @@
 using namespace OHOS;
 using namespace Rosen;
 
+namespace OHOS {
+namespace {
+class AvailableAreaChangeListener : public DisplayManager::IAvailableAreaListener {
+public:
+    explicit AvailableAreaChangeListener(OH_NativeDisplayManager_AvailableAreaChangeCallback availableAreaChangeFunc)
+    {
+        innerAvailableAreaChangeFunc_ = availableAreaChangeFunc;
+    }
+
+    void OnAvailableAreaChanged(DMRect area)
+    {
+        if (innerAvailableAreaChangeFunc_ == nullptr) {
+            TLOGE(WmsLogTag::DMS, "[DMNDK] callback is nullptr");
+            return;
+        }
+        DisplayId displayId = DisplayManager::GetInstance().GetDefaultDisplayId();
+        innerAvailableAreaChangeFunc_(displayId);
+    }
+
+    OH_NativeDisplayManager_AvailableAreaChangeCallback GetAvailableAreaChangeInnerFunc()
+    {
+        return innerAvailableAreaChangeFunc_;
+    }
+
+private:
+    OH_NativeDisplayManager_AvailableAreaChangeCallback innerAvailableAreaChangeFunc_;
+};
+
+class DisplayAddListener : public DisplayManager::IDisplayListener {
+public:
+    explicit DisplayAddListener(OH_NativeDisplayManager_DisplayAddCallback displayAddFunc)
+    {
+        innerDisplayAddFunc_ = displayAddFunc;
+    }
+
+    void OnCreate(DisplayId displayId)
+    {
+        if (innerDisplayAddFunc_ == nullptr) {
+            TLOGE(WmsLogTag::DMS, "[DMNDK] AddListener callback is nullptr");
+            return;
+        }
+        TLOGI(WmsLogTag::DMS, "[DMNDK] AddListener callback displayId=%{public}" PRIu64, displayId);
+        innerDisplayAddFunc_(displayId);
+    }
+
+    void OnDestroy(DisplayId displayId)
+    {
+        TLOGI(WmsLogTag::DMS, "[DMNDK] AddListener current not support delete callback.");
+    }
+
+    void OnChange(DisplayId displayId)
+    {
+        TLOGI(WmsLogTag::DMS, "[DMNDK] AddListener current not support Change callback.");
+    }
+
+    OH_NativeDisplayManager_DisplayAddCallback GetDisplayAddInnerFunc()
+    {
+        return innerDisplayAddFunc_;
+    }
+
+private:
+    OH_NativeDisplayManager_DisplayAddCallback innerDisplayAddFunc_;
+};
+
+class DisplayRemoveListener : public DisplayManager::IDisplayListener {
+public:
+    explicit DisplayRemoveListener(OH_NativeDisplayManager_DisplayRemoveCallback displayRemoveFunc)
+    {
+        innerDisplayRemoveFunc_ = displayRemoveFunc;
+    }
+
+    void OnCreate(DisplayId displayId)
+    {
+        TLOGI(WmsLogTag::DMS, "[DMNDK] RemoveListener current not support create callback.");
+    }
+
+    void OnDestroy(DisplayId displayId)
+    {
+        if (innerDisplayRemoveFunc_ == nullptr) {
+            TLOGE(WmsLogTag::DMS, "[DMNDK] RemoveListener callback is nullptr");
+            return;
+        }
+        TLOGI(WmsLogTag::DMS, "[DMNDK] RemoveListener callback displayId=%{public}" PRIu64, displayId);
+        innerDisplayRemoveFunc_(displayId);
+    }
+
+    void OnChange(DisplayId displayId)
+    {
+        TLOGI(WmsLogTag::DMS, "[DMNDK] RemoveListener current not support Change callback.");
+    }
+
+    OH_NativeDisplayManager_DisplayRemoveCallback GetDisplayRemoveInnerFunc()
+    {
+        return innerDisplayRemoveFunc_;
+    }
+
+private:
+    OH_NativeDisplayManager_DisplayRemoveCallback innerDisplayRemoveFunc_;
+};
+
+std::shared_mutex availableAreaChangeMutex;
+std::unordered_map<uint32_t, sptr<AvailableAreaChangeListener>> availableAreaChangeListenerMap;
+std::shared_mutex displayAddMutex;
+std::unordered_map<uint32_t, sptr<DisplayAddListener>> displayAddListenerMap;
+std::shared_mutex displayRemoveMutex;
+std::unordered_map<uint32_t, sptr<DisplayRemoveListener>> displayRemoveListenerMap;
+
+bool CheckAvailableAreaChangeHasRegistered(const sptr<AvailableAreaChangeListener>& availableAreaChangeListener)
+{
+    std::unique_lock<std::shared_mutex> lock(availableAreaChangeMutex);
+    for (const auto& iter : availableAreaChangeListenerMap) {
+        if (iter.second->GetAvailableAreaChangeInnerFunc() ==
+            availableAreaChangeListener->GetAvailableAreaChangeInnerFunc()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool CheckDisplayAddHasRegistered(const sptr<DisplayAddListener>& displayAddListener)
+{
+    std::unique_lock<std::shared_mutex> lock(displayAddMutex);
+    for (const auto& iter : displayAddListenerMap) {
+        if (iter.second->GetDisplayAddInnerFunc() == displayAddListener->GetDisplayAddInnerFunc()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool CheckDisplayRemoveHasRegistered(const sptr<DisplayRemoveListener>& displayRemoveListener)
+{
+    std::unique_lock<std::shared_mutex> lock(displayRemoveMutex);
+    for (const auto& iter : displayRemoveListenerMap) {
+        if (iter.second->GetDisplayRemoveInnerFunc() == displayRemoveListener->GetDisplayRemoveInnerFunc()) {
+            return true;
+        }
+    }
+    return false;
+}
+}
+}
+
 class OH_DisplayModeChangeListener : public DisplayManager::IDisplayModeListener {
 private:
     OH_NativeDisplayManager_FoldDisplayModeChangeCallback innerDisplayModeChangeFunc_;
@@ -964,4 +1107,257 @@ NativeDisplayManager_ErrorCode OH_NativeDisplayManager_CaptureScreenPixelmap(uin
     }
     TLOGI(WmsLogTag::DMS, "[DMNDK] get screen capture end.");
     return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK;
+}
+
+NativeDisplayManager_ErrorCode OH_NativeDisplayManager_RegisterAvailableAreaChangeListener(
+    OH_NativeDisplayManager_AvailableAreaChangeCallback availableAreaChangeCallback, uint32_t* listenerIndex)
+{
+    if (availableAreaChangeCallback == nullptr || listenerIndex == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[DMNDK] input params null.");
+        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM;
+    }
+    sptr<AvailableAreaChangeListener> availableAreaChangeListener =
+        sptr<AvailableAreaChangeListener>::MakeSptr(availableAreaChangeCallback);
+    if (CheckAvailableAreaChangeHasRegistered(availableAreaChangeListener)) {
+        TLOGE(WmsLogTag::DMS, "[DMNDK] input params error (has registered).");
+        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK;
+    }
+    sptr<DisplayManager::IAvailableAreaListener> displayAvailableAreaListener = availableAreaChangeListener;
+
+    static std::atomic<uint32_t> registerCount = 1;
+    DMError ret = DisplayManager::GetInstance().RegisterAvailableAreaListener(displayAvailableAreaListener);
+    if (ret != DMError::DM_OK) {
+        TLOGE(WmsLogTag::DMS, "[DMNDK] register failed ret=%{public}d.", ret);
+        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL;
+    }
+    *listenerIndex = registerCount++;
+    std::unique_lock<std::shared_mutex> lock(availableAreaChangeMutex);
+    availableAreaChangeListenerMap.emplace(*listenerIndex, availableAreaChangeListener);
+    TLOGI(WmsLogTag::DMS, "[DMNDK] register listenerIndex=%{public}d.", *listenerIndex);
+    return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK;
+}
+
+NativeDisplayManager_ErrorCode OH_NativeDisplayManager_UnregisterAvailableAreaChangeListener(uint32_t listenerIndex)
+{
+    std::unique_lock<std::shared_mutex> lock(availableAreaChangeMutex);
+    auto iter = availableAreaChangeListenerMap.find(listenerIndex);
+    if (iter == availableAreaChangeListenerMap.end()) {
+        TLOGE(WmsLogTag::DMS, "[DMNDK] unregister listener fail(not find register info).");
+        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM;
+    }
+    DMError ret = DMError::DM_OK;
+    if (iter->second != nullptr) {
+        ret = DisplayManager::GetInstance().UnregisterAvailableAreaListener(iter->second);
+        availableAreaChangeListenerMap.erase(listenerIndex);
+        TLOGI(WmsLogTag::DMS, "[DMNDK] unregister listener ret=%{public}d", ret);
+    }
+    return ret == DMError::DM_OK ? NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK :
+        NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL;
+}
+
+NativeDisplayManager_ErrorCode OH_NativeDisplayManager_RegisterDisplayAddListener(
+    OH_NativeDisplayManager_DisplayAddCallback displayAddCallback, uint32_t* listenerIndex)
+{
+    if (displayAddCallback == nullptr || listenerIndex == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[DMNDK] register fail(input params null).");
+        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM;
+    }
+    sptr<DisplayAddListener> displayAddListener =
+        sptr<DisplayAddListener>::MakeSptr(displayAddCallback);
+    if (CheckDisplayAddHasRegistered(displayAddListener)) {
+        TLOGE(WmsLogTag::DMS, "[DMNDK] input params error (has registered).");
+        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK;
+    }
+    sptr<DisplayManager::IDisplayListener> displayListener = displayAddListener;
+
+    static std::atomic<uint32_t> registerCount = 1;
+    DMError ret = DisplayManager::GetInstance().RegisterDisplayListener(displayListener);
+    if (ret != DMError::DM_OK) {
+        TLOGE(WmsLogTag::DMS, "[DMNDK] register failed ret=%{public}d.", ret);
+        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL;
+    }
+    *listenerIndex = registerCount++;
+    std::unique_lock<std::shared_mutex> lock(displayAddMutex);
+    displayAddListenerMap.emplace(*listenerIndex, displayAddListener);
+    TLOGI(WmsLogTag::DMS, "[DMNDK] register listenerIndex= %{public}d.", *listenerIndex);
+    return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK;
+}
+
+NativeDisplayManager_ErrorCode OH_NativeDisplayManager_UnregisterDisplayAddListener(uint32_t listenerIndex)
+{
+    std::unique_lock<std::shared_mutex> lock(displayAddMutex);
+    auto iter = displayAddListenerMap.find(listenerIndex);
+    if (iter == displayAddListenerMap.end()) {
+        TLOGE(WmsLogTag::DMS, "[DMNDK] unregister fail(not find register info).");
+        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM;
+    }
+    DMError ret = DMError::DM_OK;
+    if (iter->second != nullptr) {
+        ret = DisplayManager::GetInstance().UnregisterDisplayListener(iter->second);
+        displayAddListenerMap.erase(listenerIndex);
+        TLOGI(WmsLogTag::DMS, "[DMNDK] unregister listener ret=%{public}d", ret);
+    }
+    return ret == DMError::DM_OK ? NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK :
+        NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL;
+}
+
+NativeDisplayManager_ErrorCode OH_NativeDisplayManager_RegisterDisplayRemoveListener(
+    OH_NativeDisplayManager_DisplayRemoveCallback displayRemoveCallback, uint32_t* listenerIndex)
+{
+    if (displayRemoveCallback == nullptr || listenerIndex == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[DMNDK] register fail(input params null).");
+        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM;
+    }
+    sptr<DisplayRemoveListener> displayRemoveListener =
+        sptr<DisplayRemoveListener>::MakeSptr(displayRemoveCallback);
+    if (CheckDisplayRemoveHasRegistered(displayRemoveListener)) {
+        TLOGE(WmsLogTag::DMS, "[DMNDK] input params error (has registered).");
+        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK;
+    }
+    sptr<DisplayManager::IDisplayListener> displayListener = displayRemoveListener;
+
+    static std::atomic<uint32_t> registerCount = 1;
+    DMError ret = DisplayManager::GetInstance().RegisterDisplayListener(displayListener);
+    if (ret != DMError::DM_OK) {
+        TLOGE(WmsLogTag::DMS, "[DMNDK] register failed ret=%{public}d.", ret);
+        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL;
+    }
+    *listenerIndex = registerCount++;
+    std::unique_lock<std::shared_mutex> lock(displayRemoveMutex);
+    displayRemoveListenerMap.emplace(*listenerIndex, displayRemoveListener);
+    TLOGI(WmsLogTag::DMS, "[DMNDK] register listenerIndex= %{public}d.", *listenerIndex);
+    return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK;
+}
+
+NativeDisplayManager_ErrorCode OH_NativeDisplayManager_UnregisterDisplayRemoveListener(uint32_t listenerIndex)
+{
+    std::unique_lock<std::shared_mutex> lock(displayRemoveMutex);
+    auto iter = displayRemoveListenerMap.find(listenerIndex);
+    if (iter == displayRemoveListenerMap.end()) {
+        TLOGE(WmsLogTag::DMS, "[DMNDK] unregister fail(not find register info).");
+        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM;
+    }
+    DMError ret = DMError::DM_OK;
+    if (iter->second != nullptr) {
+        ret = DisplayManager::GetInstance().UnregisterDisplayListener(iter->second);
+        displayRemoveListenerMap.erase(listenerIndex);
+        TLOGI(WmsLogTag::DMS, "[DMNDK] unregister listener ret=%{public}d", ret);
+    }
+    return ret == DMError::DM_OK ? NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK :
+        NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL;
+}
+
+NativeDisplayManager_ErrorCode OH_NativeDisplayManager_CreateAvailableArea(
+    uint64_t displayId, NativeDisplayManager_Rect** availableArea)
+{
+    if (availableArea == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[DMNDK] input availableArea null.");
+        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM;
+    }
+    int64_t displayCheck = static_cast<int64_t>(displayId);
+    if (displayCheck < 0) {
+        TLOGE(WmsLogTag::DMS, "[DMNDK] input display illegal.");
+        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM;
+    }
+    sptr<Display> display = DisplayManager::GetInstance().GetDisplayById(static_cast<DisplayId>(displayId));
+    if (display == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[DMNDK] display is  null, id %{public}" PRIu64" ", displayId);
+        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL;
+    }
+    NativeDisplayManager_Rect* availableAreaInfo =
+        static_cast<NativeDisplayManager_Rect*>(malloc(sizeof(NativeDisplayManager_Rect)));
+    if (availableAreaInfo == NULL) {
+        TLOGE(WmsLogTag::DMS, "[DMNDK] memory failed.");
+        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL;
+    }
+
+    auto retMemset = memset_s(availableAreaInfo, sizeof(NativeDisplayManager_Rect), 0,
+        sizeof(NativeDisplayManager_Rect));
+    if (retMemset != EOK) {
+        free(availableAreaInfo);
+        availableAreaInfo = nullptr;
+        TLOGE(WmsLogTag::DMS, "[DMNDK] memset failed.");
+        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL;
+    }
+
+    DMRect displayAvailableArea = DMRect::NONE();
+    display->GetAvailableArea(displayAvailableArea);
+    TLOGI(WmsLogTag::DMS, "[DMNDK] posX_=%{public}d posY_=%{public}d width_=%{public}d height_=%{public}d",
+        displayAvailableArea.posX_, displayAvailableArea.posY_,
+        displayAvailableArea.width_, displayAvailableArea.height_);
+    OH_SetDisplayRect(displayAvailableArea, availableAreaInfo);
+    *availableArea = availableAreaInfo;
+    return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK;
+}
+
+NativeDisplayManager_ErrorCode OH_NativeDisplayManager_DestroyAvailableArea(NativeDisplayManager_Rect* availableArea)
+{
+    if (availableArea == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[DMNDK] input availableArea null.");
+        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM;
+    }
+    free(availableArea);
+    availableArea = nullptr;
+    TLOGI(WmsLogTag::DMS, "[DMNDK] destroy availableArea end");
+    return  NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK;
+}
+
+NativeDisplayManager_ErrorCode OH_NativeDisplayManager_GetDisplaySourceMode(
+    uint64_t displayId, NativeDisplayManager_SourceMode* sourceMode)
+{
+    if (sourceMode == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[DMNDK] input sourceMode null.");
+        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM;
+    }
+    int64_t displayCheck = static_cast<int64_t>(displayId);
+    if (displayCheck < 0) {
+        TLOGE(WmsLogTag::DMS, "[DMNDK] input display illegal.");
+        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM;
+    }
+    sptr<Display> display = DisplayManager::GetInstance().GetDisplayById(static_cast<DisplayId>(displayId));
+    if (display == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[DMNDK] display is  null, id %{public}" PRIu64" ", displayId);
+        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL;
+    }
+    sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[DMNDK] get displayInfo null.");
+        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL;
+    }
+    DisplaySourceMode getSourceMode = displayInfo->GetDisplaySourceMode();
+    TLOGI(WmsLogTag::DMS, "[DMNDK] getSourceMode = %{public}d", getSourceMode);
+    *sourceMode = static_cast<NativeDisplayManager_SourceMode>(getSourceMode);
+    return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK;
+}
+
+NativeDisplayManager_ErrorCode OH_NativeDisplayManager_GetDisplayPosition(uint64_t displayId, int32_t* x, int32_t* y)
+{
+    if (x == nullptr || y == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[DMNDK] input x or y is null.");
+        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM;
+    }
+    int64_t displayCheck = static_cast<int64_t>(displayId);
+    if (displayCheck < 0) {
+        TLOGE(WmsLogTag::DMS, "[DMNDK] input display illegal.");
+        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM;
+    }
+    sptr<Display> display = DisplayManager::GetInstance().GetDisplayById(static_cast<DisplayId>(displayId));
+    if (display == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[DMNDK] display is  null, id %{public}" PRIu64" ", displayId);
+        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL;
+    }
+    sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[DMNDK] get displayInfo null.");
+        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_SYSTEM_ABNORMAL;
+    }
+    DisplaySourceMode getSourceMode = displayInfo->GetDisplaySourceMode();
+    if (getSourceMode == DisplaySourceMode::MAIN || getSourceMode == DisplaySourceMode::EXTEND) {
+        *x = displayInfo->GetX();
+        *y = displayInfo->GetY();
+        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK;
+    } else {
+        TLOGE(WmsLogTag::DMS, "[DMNDK] just main and extend has x, y.");
+        return NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_ERROR_ILLEGAL_PARAM;
+    }
 }

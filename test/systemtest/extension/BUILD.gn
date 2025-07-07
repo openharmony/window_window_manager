@@ -33,7 +33,6 @@ config("we_systemtest_common_public_config") {
     "../../../interfaces/innerkits/wm",
     "../../../utils/include",
     "../../common/mock",
-    "//third_party/googletest/googlemock/include",
   ]
 }
 
@@ -57,8 +56,6 @@ ohos_systemtest("modal_system_ui_extension_test") {
     "../../../dm:libdm",
     "../../../extension/modal_system_ui_extension:libmodal_system_ui_extension_client",
     "../../../window_scene/interfaces/innerkits:libwsutils",
-    "//third_party/googletest:gmock",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -66,6 +63,8 @@ ohos_systemtest("modal_system_ui_extension_test") {
     "ability_base:want",
     "ability_runtime:ability_manager",
     "c_utils:utils",
+    "googletest:gmock",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_single",
@@ -96,9 +95,11 @@ ohos_systemtest("window_extension_connection_test") {
     "c_utils:utils",
     "googletest:gmock",
     "googletest:gtest_main",
+    "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
+    "image_framework:image_native",
     "input:libmmi-client",
     "ipc:ipc_single",
   ]

@@ -39,6 +39,7 @@ public:
     void ExitCoordination() override {};
     void AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32_t command) override {};
     FoldDisplayMode GetModeMatchStatus() override;
+    void SetIsClearingBootAnimation(bool isClearingBootAnimation) override;
 private:
     void ChangeScreenDisplayModeToMain(sptr<ScreenSession> screenSession,
         DisplayModeChangeReason reason = DisplayModeChangeReason::DEFAULT);

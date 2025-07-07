@@ -318,6 +318,22 @@ HWTEST_F(DisplayDumperTest, IsValidDigitString03, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsValidDigitString04
+ * @tc.desc: IsValidDigitString empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayDumperTest, IsValidDigitString04, TestSize.Level1)
+{
+    sptr<DisplayDumper> displayDumper;
+    displayDumper = new DisplayDumper(DisplayManagerService::GetInstance().abstractDisplayController_,
+        DisplayManagerService::GetInstance().abstractScreenController_,
+        DisplayManagerService::GetInstance().mutex_);
+    std::string idStr = "1909";
+    bool ret = displayDumper->IsValidDigitString(idStr);
+    EXPECT_EQ(ret, true);
+}
+
+/**
  * @tc.name: DumpAllScreenInfo01
  * @tc.desc: DumpAllScreenInfo
  * @tc.type: FUNC

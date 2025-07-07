@@ -19,12 +19,12 @@
 #include <functional>
 #include <shared_mutex>
 
+#include "imock_session_manager_interface.h"
 #include "session_manager_service_interface.h"
-#include "mock_session_manager_service_interface.h"
+#include "wm_common.h"
+#include "wm_single_instance.h"
 #include "zidl/scene_session_manager_lite_interface.h"
 #include "zidl/screen_session_manager_lite_interface.h"
-#include "wm_single_instance.h"
-#include "wm_common.h"
 
 namespace OHOS::Rosen {
 class SSMDeathRecipientLite : public IRemoteObject::DeathRecipient {

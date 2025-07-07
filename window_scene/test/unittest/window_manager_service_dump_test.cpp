@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 
+#include "mock/mock_accesstoken_kit.h"
 #include "mock/mock_session_stage.h"
 #include "iremote_object_mocker.h"
 #include "interfaces/include/ws_common.h"
@@ -35,21 +36,17 @@ public:
     void SetUp() override;
     void TearDown() override;
     sptr<SceneSessionManager> ssm_;
+
 private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
 
-void DumpRootSceneElementInfoFuncTest(const std::vector<std::string>& params, std::vector<std::string>& infos)
-{
-}
+void DumpRootSceneElementInfoFuncTest(const sptr<SceneSession>& session,
+    const std::vector<std::string>& params, std::vector<std::string>& infos) {}
 
-void WindowManagerServiceDumpTest::SetUpTestCase()
-{
-}
+void WindowManagerServiceDumpTest::SetUpTestCase() {}
 
-void WindowManagerServiceDumpTest::TearDownTestCase()
-{
-}
+void WindowManagerServiceDumpTest::TearDownTestCase() {}
 
 void WindowManagerServiceDumpTest::SetUp()
 {
@@ -73,8 +70,12 @@ HWTEST_F(WindowManagerServiceDumpTest, GetSessionDumpInfo01, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     std::string dumpInfo = "testDumpInfo";
-    std::vector<std::string> params = {"testDumpInfo"};
+    std::vector<std::string> params = { "testDumpInfo" };
+    MockAccesstokenKit::MockIsSACalling(false);
     WSError result = ssm_->GetSessionDumpInfo(params, dumpInfo);
+    EXPECT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
+    MockAccesstokenKit::MockIsSACalling(true);
+    result = ssm_->GetSessionDumpInfo(params, dumpInfo);
     EXPECT_EQ(result, WSError::WS_ERROR_INVALID_OPERATION);
 
     params.clear();
@@ -173,6 +174,18 @@ HWTEST_F(WindowManagerServiceDumpTest, DumpSessionAll, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DumpSesGetFloatWidthsionAll
+ * @tc.desc: Get Float Width
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceDumpTest, GetFloatWidth, TestSize.Level1)
+{
+    float value = 0.1234;
+    std::string strValue = ssm_->GetFloatWidth(5, value);
+    ASSERT_EQ("0.123", strValue);
+}
+
+/**
  * @tc.name: DumpSessionWithId
  * @tc.desc: ScreenSesionManager dump session with id
  * @tc.type: FUNC
@@ -227,9 +240,10 @@ HWTEST_F(WindowManagerServiceDumpTest, DumpSessionElementInfo, TestSize.Level1)
  */
 HWTEST_F(WindowManagerServiceDumpTest, NotifyDumpInfoResult, TestSize.Level1)
 {
-    std::vector<std::string> info = {"std::", "vector", "<std::string>"};
+    MockAccesstokenKit::MockIsSACalling(true);
+    std::vector<std::string> info = { "std::", "vector", "<std::string>" };
     ssm_->NotifyDumpInfoResult(info);
-    std::vector<std::string> params = {"-a"};
+    std::vector<std::string> params = { "-a" };
     std::string dumpInfo = "";
     WSError result01 = ssm_->GetSessionDumpInfo(params, dumpInfo);
     EXPECT_EQ(result01, WSError::WS_OK);
@@ -266,8 +280,8 @@ HWTEST_F(WindowManagerServiceDumpTest, GetAllSessionDumpInfo01, TestSize.Level1)
     ASSERT_NE(sceneSession2, nullptr);
     sceneSession2->UpdateNativeVisibility(false);
 
-    ssm_->sceneSessionMap_.insert({1, sceneSession1});
-    ssm_->sceneSessionMap_.insert({2, sceneSession2});
+    ssm_->sceneSessionMap_.insert({ 1, sceneSession1 });
+    ssm_->sceneSessionMap_.insert({ 2, sceneSession2 });
     std::string dumpInfo;
     ASSERT_EQ(ssm_->GetAllSessionDumpInfo(dumpInfo), WSError::WS_OK);
 }
@@ -352,9 +366,9 @@ HWTEST_F(WindowManagerServiceDumpTest, GetAllSessionDumpDetailInfo, TestSize.Lev
     ASSERT_NE(sceneSession2, nullptr);
     sceneSession2->UpdateNativeVisibility(false);
 
-    ssm_->sceneSessionMap_.insert({0, nullptr});
-    ssm_->sceneSessionMap_.insert({1, sceneSession1});
-    ssm_->sceneSessionMap_.insert({2, sceneSession2});
+    ssm_->sceneSessionMap_.insert({ 0, nullptr });
+    ssm_->sceneSessionMap_.insert({ 1, sceneSession1 });
+    ssm_->sceneSessionMap_.insert({ 2, sceneSession2 });
     std::string dumpInfo;
     ASSERT_EQ(ssm_->GetAllSessionDumpDetailInfo(dumpInfo), WSError::WS_OK);
 }
@@ -372,7 +386,7 @@ HWTEST_F(WindowManagerServiceDumpTest, GetSpecifiedSessionDumpInfo, TestSize.Lev
     info.persistentId_ = 1234;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
-    ssm_->sceneSessionMap_.insert({1234, sceneSession});
+    ssm_->sceneSessionMap_.insert({ 1234, sceneSession });
     std::string dumpInfo;
     std::string strId = "1234";
     std::vector<std::string> params_(5, "");
@@ -388,9 +402,7 @@ HWTEST_F(WindowManagerServiceDumpTest, GetTotalUITreeInfo, TestSize.Level1)
     std::string dumpInfo = "dumpInfo";
     ssm_->SetDumpUITreeFunc(nullptr);
     EXPECT_EQ(WSError::WS_OK, ssm_->GetTotalUITreeInfo(dumpInfo));
-    DumpUITreeFunc func = [](std::string& dumpInfo) {
-        return;
-    };
+    DumpUITreeFunc func = [](std::string& dumpInfo) { return; };
     ssm_->SetDumpUITreeFunc(func);
     EXPECT_EQ(WSError::WS_OK, ssm_->GetTotalUITreeInfo(dumpInfo));
 }
@@ -441,6 +453,6 @@ HWTEST_F(WindowManagerServiceDumpTest, SceneSessionDumpSessionElementInfo, TestS
     ASSERT_EQ(ret, 1);
 }
 
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

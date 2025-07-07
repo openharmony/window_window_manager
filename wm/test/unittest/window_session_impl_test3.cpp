@@ -21,11 +21,21 @@
 #include "mock_window.h"
 #include "parameters.h"
 #include "scene_board_judgement.h"
+#include "window_manager_hilog.h"
 #include "window_session_impl.h"
 #include "wm_common.h"
 
 using namespace testing;
 using namespace testing::ext;
+
+namespace {
+    std::string logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
+        const char* msg)
+    {
+        logMsg = msg;
+    }
+}
 
 namespace OHOS {
 namespace Rosen {
@@ -156,54 +166,36 @@ HWTEST_F(WindowSessionImplTest3, RegisterWindowNoInteractionListener01, TestSize
  */
 HWTEST_F(WindowSessionImplTest3, SetForceSplitEnable, TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetForceSplitEnable start";
+    GTEST_LOG_(INFO) << "WindowSessionImplTest3: SetForceSplitEnable start";
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     window_ = GetTestWindowImpl("SetForceSplitEnable");
     ASSERT_NE(window_, nullptr);
 
-    bool isForceSplit = false;
-    std::string homePage = "MainPage";
-    int32_t res = 0;
-    window_->SetForceSplitEnable(isForceSplit, homePage);
-    ASSERT_EQ(res, 0);
+    int32_t FORCE_SPLIT_MODE = 5;
+    int32_t NAV_FORCE_SPLIT_MODE = 6;
+    AppForceLandscapeConfig config = { FORCE_SPLIT_MODE, "MainPage", true };
+    window_->SetForceSplitEnable(config);
 
-    isForceSplit = true;
-    window_->SetForceSplitEnable(isForceSplit, homePage);
-    ASSERT_EQ(res, 0);
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetForceSplitEnable end";
+    config = { FORCE_SPLIT_MODE, "MainPage", false };
+    window_->SetForceSplitEnable(config);
+
+    config = { NAV_FORCE_SPLIT_MODE, "MainPage", true };
+    window_->SetForceSplitEnable(config);
+
+    config = { NAV_FORCE_SPLIT_MODE, "MainPage", false };
+    window_->SetForceSplitEnable(config);
+    EXPECT_TRUE(logMsg.find("uiContent is null!") != std::string::npos);
+    LOG_SetCallback(nullptr);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest3: SetForceSplitEnable end";
 }
 
 /**
- * @tc.name: GetAppForceLandscapeConfig01
+ * @tc.name: GetAppForceLandscapeConfig
  * @tc.desc: GetAppForceLandscapeConfig
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, GetAppForceLandscapeConfig01, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: GetAppForceLandscapeConfig start";
-    window_ = GetTestWindowImpl("GetAppForceLandscapeConfig01");
-    ASSERT_NE(window_, nullptr);
-
-    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    window_->hostSession_ = session;
-    window_->property_->SetPersistentId(1);
-    window_->state_ = WindowState::STATE_CREATED;
-    AppForceLandscapeConfig config = {};
-    auto res = window_->GetAppForceLandscapeConfig(config);
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(res, WMError::WM_OK);
-        ASSERT_EQ(config.mode_, 0);
-        ASSERT_EQ(config.homePage_, "");
-    }
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: GetAppForceLandscapeConfig end";
-}
-
-/**
- * @tc.name: GetAppForceLandscapeConfig02
- * @tc.desc: GetAppForceLandscapeConfig
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest3, GetAppForceLandscapeConfig02, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest3, GetAppForceLandscapeConfig, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: GetAppForceLandscapeConfig start";
     window_ = GetTestWindowImpl("GetAppForceLandscapeConfig");
@@ -212,12 +204,29 @@ HWTEST_F(WindowSessionImplTest3, GetAppForceLandscapeConfig02, TestSize.Level1)
     AppForceLandscapeConfig config = {};
     window_->hostSession_ = nullptr;
     auto res = window_->GetAppForceLandscapeConfig(config);
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
-        ASSERT_EQ(config.mode_, 0);
-        ASSERT_EQ(config.homePage_, "");
-    }
+    ASSERT_EQ(res, WMError::WM_OK);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: GetAppForceLandscapeConfig end";
+}
+
+/**
+ * @tc.name: IsSceneBoardEnabled
+ * @tc.desc: IsSceneBoardEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, IsSceneBoardEnabled, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: IsSceneBoardEnabled start";
+    window_ = GetTestWindowImpl("IsSceneBoardEnabled");
+    ASSERT_NE(window_, nullptr);
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window_->hostSession_ = session;
+    window_->property_->SetPersistentId(1);
+    window_->state_ = WindowState::STATE_CREATED;
+    bool result = SceneBoardJudgement::IsSceneBoardEnabled();
+    ASSERT_EQ(result, window_->IsSceneBoardEnabled());
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: IsSceneBoardEnabled end";
 }
 
 /**
@@ -606,6 +615,40 @@ HWTEST_F(WindowSessionImplTest3, IsVerticalOrientation, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsHorizontalOrientation
+ * @tc.desc: IsHorizontalOrientation
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, IsHorizontalOrientation, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: IsHorizontalOrientation start";
+    window_ = GetTestWindowImpl("IsHorizontalOrientation");
+    ASSERT_NE(window_, nullptr);
+    Orientation orientation = Orientation::HORIZONTAL;
+    auto ret = window_->IsHorizontalOrientation(orientation);
+    ASSERT_EQ(ret, true);
+    orientation = Orientation::REVERSE_HORIZONTAL;
+    ret = window_->IsHorizontalOrientation(orientation);
+    ASSERT_EQ(ret, true);
+    orientation = Orientation::SENSOR_HORIZONTAL;
+    ret = window_->IsHorizontalOrientation(orientation);
+    ASSERT_EQ(ret, true);
+    orientation = Orientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED;
+    ret = window_->IsHorizontalOrientation(orientation);
+    ASSERT_EQ(ret, true);
+    orientation = Orientation::USER_ROTATION_LANDSCAPE;
+    ret = window_->IsHorizontalOrientation(orientation);
+    ASSERT_EQ(ret, true);
+    orientation = Orientation::USER_ROTATION_LANDSCAPE_INVERTED;
+    ret = window_->IsHorizontalOrientation(orientation);
+    ASSERT_EQ(ret, true);
+    orientation = Orientation::UNSPECIFIED;
+    ret = window_->IsHorizontalOrientation(orientation);
+    ASSERT_EQ(ret, false);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: IsHorizontalOrientation end";
+}
+
+/**
  * @tc.name: MarkProcessed
  * @tc.desc: MarkProcessed
  * @tc.type: FUNC
@@ -672,6 +715,37 @@ HWTEST_F(WindowSessionImplTest3, CopyUniqueDensityParameter, TestSize.Level1)
     parentWindow = nullptr;
     window_->CopyUniqueDensityParameter(parentWindow);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: CopyUniqueDensityParameter end";
+}
+
+/**
+ * @tc.name: RaiseToAppTopOnDrag
+ * @tc.desc: RaiseToAppTopOnDrag
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, RaiseToAppTopOnDrag, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: RaiseToAppTopOnDrag start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("RaiseToAppTop");
+    sptr<WindowSessionImpl> windowSessionImpl = sptr<WindowSessionImpl>::MakeSptr(option);
+    windowSessionImpl->property_->SetPersistentId(1);
+    windowSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    auto ret = windowSessionImpl->RaiseToAppTopOnDrag();
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+
+    SessionInfo sessionInfo = { "CreateTestBundle0", "CreateTestModule0", "CreateTestAbility0" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    windowSessionImpl->hostSession_ = session;
+    ret = windowSessionImpl->RaiseToAppTopOnDrag();
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
+
+    windowSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    ret = windowSessionImpl->RaiseToAppTopOnDrag();
+    EXPECT_EQ(WMError::WM_OK, ret);
+    windowSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ret = windowSessionImpl->RaiseToAppTopOnDrag();
+    EXPECT_EQ(WMError::WM_OK, ret);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: RaiseToAppTopOnDrag end";
 }
 
 /**
@@ -930,41 +1004,21 @@ HWTEST_F(WindowSessionImplTest3, IsFloatingWindowAppType, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetCompatibleModeInPc
- * @tc.desc: GetCompatibleModeInPc
+ * @tc.name: IsAdaptToCompatibleImmersive
+ * @tc.desc: IsAdaptToCompatibleImmersive
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, GetCompatibleModeInPc, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest3, IsAdaptToCompatibleImmersive, TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "WindowSessionImplTest3: GetCompatibleModeInPc start";
+    GTEST_LOG_(INFO) << "WindowSessionImplTest3: IsAdaptToCompatibleImmersive start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("GetCompatibleModeInPc");
+    option->SetWindowName("IsAdaptToCompatibleImmersive");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    bool enable = true;
-    window->property_->SetCompatibleModeInPc(enable);
-    EXPECT_EQ(true, window->GetCompatibleModeInPc());
-    GTEST_LOG_(INFO) << "WindowSessionImplTest3: GetCompatibleModeInPc end";
-}
-
-/**
- * @tc.name: SetWindowContainerColor
- * @tc.desc: SetWindowContainerColor
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest3, SetWindowContainerColor, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetWindowContainerColor start";
-    window_ = GetTestWindowImpl("SetWindowContainerColor");
-    ASSERT_NE(window_, nullptr);
-    window_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    window_->windowSystemConfig_.freeMultiWindowSupport_ = true;
-    window_->windowSystemConfig_.isSystemDecorEnable_ = true;
-    window_->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    std::string activeColor = "";
-    std::string inactiveColor = "";
-    auto ret = window_->SetWindowContainerColor(activeColor, inactiveColor);
-    ASSERT_NE(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetWindowContainerColor end";
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToImmersive(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    EXPECT_EQ(true, window->IsAdaptToCompatibleImmersive());
+    GTEST_LOG_(INFO) << "WindowSessionImplTest3: IsAdaptToCompatibleImmersive end";
 }
 
 /**
@@ -1175,12 +1229,16 @@ HWTEST_F(WindowSessionImplTest3, FilterPointerEvent, TestSize.Level1)
 
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     pointerEvent->SetSourceType(OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
+    pointerEvent->SetPointerAction(OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE);
     window->touchEventFilter_ = nullptr;
     auto ret = window->FilterPointerEvent(pointerEvent);
     ASSERT_EQ(false, ret);
 
-    window->touchEventFilter_ = [](const MMI::PointerEvent&) { return true; };
-    window->FilterPointerEvent(pointerEvent);
+    window->SetTouchEventFilter([](const OHOS::MMI::PointerEvent& event) {
+        return true;
+    });
+    ret = window->FilterPointerEvent(pointerEvent);
+    ASSERT_EQ(true, ret);
 }
 
 /**
@@ -1195,14 +1253,17 @@ HWTEST_F(WindowSessionImplTest3, FilterPointerEvent01, TestSize.Level1)
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
 
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
-    pointerEvent->SetSourceType(OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
-    pointerEvent->SetPointerAction(OHOS::MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
+    pointerEvent->SetSourceType(OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE);
+    pointerEvent->SetPointerAction(OHOS::MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
     window->mouseEventFilter_ = nullptr;
     auto ret = window->FilterPointerEvent(pointerEvent);
     ASSERT_EQ(false, ret);
 
-    window->mouseEventFilter_ = [](const MMI::PointerEvent&) { return true; };
-    window->FilterPointerEvent(pointerEvent);
+    window->SetMouseEventFilter([](const OHOS::MMI::PointerEvent& event) {
+        return true;
+    });
+    ret = window->FilterPointerEvent(pointerEvent);
+    ASSERT_EQ(true, ret);
 }
 
 /**
@@ -1212,6 +1273,8 @@ HWTEST_F(WindowSessionImplTest3, FilterPointerEvent01, TestSize.Level1)
  */
 HWTEST_F(WindowSessionImplTest3, NotifyPointerEvent, TestSize.Level1)
 {
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("NotifyPointerEvent");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
@@ -1219,6 +1282,33 @@ HWTEST_F(WindowSessionImplTest3, NotifyPointerEvent, TestSize.Level1)
     window->NotifyPointerEvent(pointerEvent);
 
     pointerEvent = MMI::PointerEvent::Create();
+
+    window->inputEventConsumer_ = nullptr;
+    window->NotifyPointerEvent(pointerEvent);
+
+    window->state_ = WindowState::STATE_CREATED;
+    window->property_->persistentId_ = ROTATE_ANIMATION_DURATION;
+    SessionInfo info;
+    window->hostSession_ = sptr<SessionMocker>::MakeSptr(info);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    window->SetWindowDelayRaiseEnabled(true);
+    ASSERT_EQ(true, window->IsWindowDelayRaiseEnabled());
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
+    window->NotifyPointerEvent(pointerEvent);
+    EXPECT_TRUE(logMsg.find("Delay,id") == std::string::npos);
+    logMsg.clear();
+
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
+    window->NotifyPointerEvent(pointerEvent);
+    EXPECT_TRUE(logMsg.find("Delay,id") != std::string::npos);
+    logMsg.clear();
+
+    window->SetWindowDelayRaiseEnabled(false);
+    window->NotifyPointerEvent(pointerEvent);
+    EXPECT_TRUE(logMsg.find("UI content dose not consume") != std::string::npos);
+    logMsg.clear();
+
     window->inputEventConsumer_ = std::make_shared<MockInputEventConsumer>();
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
     ASSERT_EQ(pointerEvent->GetPointerAction(), MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
@@ -1226,34 +1316,39 @@ HWTEST_F(WindowSessionImplTest3, NotifyPointerEvent, TestSize.Level1)
 
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
     window->NotifyPointerEvent(pointerEvent);
-
-    window->inputEventConsumer_ = nullptr;
-    window->NotifyPointerEvent(pointerEvent);
 }
 
 /**
- * @tc.name: SetWindowContainerColor01
- * @tc.desc: SetWindowContainerColor01
+ * @tc.name: InjectTouchEvent
+ * @tc.desc: InjectTouchEvent
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, SetWindowContainerColor01, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest3, InjectTouchEvent, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SetWindowContainerColor01");
+    option->SetWindowName("InjectTouchEvent");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
+    auto ret = window->InjectTouchEvent(pointerEvent);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
+ 
+    pointerEvent = MMI::PointerEvent::Create();
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
+    window->uiContent_ = nullptr;
+    ret = window->InjectTouchEvent(pointerEvent);
+    ASSERT_EQ(ret, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
 
-    std::string activeColor = "";
-    std::string inactiveColor = "";
-    window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
-    auto ret = window->SetWindowContainerColor(activeColor, inactiveColor);
-    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
+    ret = window->InjectTouchEvent(pointerEvent);
+    ASSERT_EQ(ret, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
 
-    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    window->property_->SetIsPcAppInPad(true);
-    window->property_->isDecorEnable_ = true;
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    ret = window->SetWindowContainerColor(activeColor, inactiveColor);
-    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    ret = window->InjectTouchEvent(pointerEvent);
+    ASSERT_EQ(ret, WMError::WM_OK);
+
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
+    ret = window->InjectTouchEvent(pointerEvent);
+    ASSERT_EQ(ret, WMError::WM_OK);
 }
 
 /**
@@ -1314,6 +1409,7 @@ HWTEST_F(WindowSessionImplTest3, SetWindowDelayRaiseEnabled, TestSize.Level1)
     ASSERT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     ret = window->SetWindowDelayRaiseEnabled(true);
     ASSERT_EQ(ret, WMError::WM_OK);
 }

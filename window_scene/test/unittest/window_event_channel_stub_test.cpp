@@ -38,7 +38,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowEventChannelStubTest"};
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowEventChannelStubTest" };
 }
 class WindowEventChannelStubTest : public testing::Test {
 public:
@@ -51,21 +51,13 @@ public:
     sptr<WindowEventChannelStub> windowEventChannelStub_ = sptr<WindowEventChannelMocker>::MakeSptr(sessionStage);
 };
 
-void WindowEventChannelStubTest::SetUpTestCase()
-{
-}
+void WindowEventChannelStubTest::SetUpTestCase() {}
 
-void WindowEventChannelStubTest::TearDownTestCase()
-{
-}
+void WindowEventChannelStubTest::TearDownTestCase() {}
 
-void WindowEventChannelStubTest::SetUp()
-{
-}
+void WindowEventChannelStubTest::SetUp() {}
 
-void WindowEventChannelStubTest::TearDown()
-{
-}
+void WindowEventChannelStubTest::TearDown() {}
 
 namespace {
 /**
@@ -333,7 +325,7 @@ HWTEST_F(WindowEventChannelStubTest, HandleTransferAccessibilityChildTreeRegiste
     WLOGI("HandleTransferAccessibilityChildTreeRegister02 begin");
     MessageParcel data;
     MessageParcel reply;
-    
+
     ASSERT_TRUE(windowEventChannelStub_ != nullptr);
     ASSERT_EQ(ERR_INVALID_DATA, windowEventChannelStub_->HandleTransferAccessibilityChildTreeRegister(data, reply));
     WLOGI("HandleTransferAccessibilityChildTreeRegister02 end");
@@ -406,6 +398,6 @@ HWTEST_F(WindowEventChannelStubTest, HandleTransferAccessibilityDumpChildInfo01,
     ASSERT_EQ(0, windowEventChannelStub_->HandleTransferAccessibilityDumpChildInfo(data, reply));
     WLOGI("HandleTransferAccessibilityDumpChildInfo01 end");
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

@@ -34,21 +34,13 @@ public:
     sptr<SceneSession> GetSceneSession(std::string name);
 };
 
-void HidumpControllerTest::SetUpTestCase()
-{
-}
+void HidumpControllerTest::SetUpTestCase() {}
 
-void HidumpControllerTest::TearDownTestCase()
-{
-}
+void HidumpControllerTest::TearDownTestCase() {}
 
-void HidumpControllerTest::SetUp()
-{
-}
+void HidumpControllerTest::SetUp() {}
 
-void HidumpControllerTest::TearDown()
-{
-}
+void HidumpControllerTest::TearDown() {}
 
 sptr<SceneSession> HidumpControllerTest::GetSceneSession(std::string name)
 {

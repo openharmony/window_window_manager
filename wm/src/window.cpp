@@ -18,6 +18,7 @@
 #include "root_scene.h"
 #include "scene_board_judgement.h"
 #include "session/host/include/zidl/session_interface.h"
+#include "window_adapter.h"
 #include "window_helper.h"
 #include "window_impl.h"
 #include "window_session_impl.h"
@@ -25,6 +26,7 @@
 #include "window_extension_session_impl.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
+#include "floating_ball_template_info.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -34,7 +36,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "Window"
 
 static sptr<Window> CreateWindowWithSession(sptr<WindowOption>& option,
     const std::shared_ptr<OHOS::AbilityRuntime::Context>& context, WMError& errCode,
-    sptr<ISession> iSession = nullptr, const std::string& identityToken = "")
+    sptr<ISession> iSession = nullptr, const std::string& identityToken = "", bool isModuleAbilityHookEnd = false)
 {
     WLOGFD("in");
     sptr<WindowSessionImpl> windowSessionImpl = nullptr;
@@ -51,7 +53,7 @@ static sptr<Window> CreateWindowWithSession(sptr<WindowOption>& option,
     }
 
     windowSessionImpl->SetWindowType(option->GetWindowType());
-    WMError error = windowSessionImpl->Create(context, iSession, identityToken);
+    WMError error = windowSessionImpl->Create(context, iSession, identityToken, isModuleAbilityHookEnd);
     if (error != WMError::WM_OK) {
         errCode = error;
         WLOGFE("error: %{public}u", static_cast<uint32_t>(errCode));
@@ -105,7 +107,8 @@ sptr<Window> Window::Create(const std::string& windowName, sptr<WindowOption>& o
 }
 
 sptr<Window> Window::Create(sptr<WindowOption>& option, const std::shared_ptr<OHOS::AbilityRuntime::Context>& context,
-    const sptr<IRemoteObject>& iSession, WMError& errCode, const std::string& identityToken)
+    const sptr<IRemoteObject>& iSession, WMError& errCode, const std::string& identityToken,
+    bool isModuleAbilityHookEnd)
 {
     // create from ability mgr service
     if (!iSession || !option) {
@@ -132,7 +135,18 @@ sptr<Window> Window::Create(sptr<WindowOption>& option, const std::shared_ptr<OH
         return nullptr;
     }
     return CreateWindowWithSession(option, context, errCode,
-        iface_cast<Rosen::ISession>(iSession), identityToken);
+        iface_cast<Rosen::ISession>(iSession), identityToken, isModuleAbilityHookEnd);
+}
+
+WMError Window::GetAndVerifyWindowTypeForArkUI(uint32_t parentId, const std::string& windowName,
+    WindowType parentWindowType, WindowType& windowType)
+{
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return WindowSceneSessionImpl::GetAndVerifyWindowTypeForArkUI(parentId, windowName,
+            parentWindowType, windowType);
+    } else {
+        return WindowImpl::GetWindowTypeForArkUI(parentWindowType, windowType);
+    }
 }
 
 sptr<Window> Window::CreatePiP(sptr<WindowOption>& option, const PiPTemplateInfo& pipTemplateInfo,
@@ -163,6 +177,41 @@ sptr<Window> Window::CreatePiP(sptr<WindowOption>& option, const PiPTemplateInfo
     if (error != WMError::WM_OK) {
         errCode = error;
         TLOGW(WmsLogTag::WMS_PIP, "Create pip window, error: %{public}u", static_cast<uint32_t>(errCode));
+        return nullptr;
+    }
+    return windowSessionImpl;
+}
+
+sptr<Window> Window::CreateFb(sptr<WindowOption>& option, const FloatingBallTemplateBaseInfo& fbTemplateBaseInfo,
+    const std::shared_ptr<Media::PixelMap>& icon, const std::shared_ptr<OHOS::AbilityRuntime::Context>& context,
+    WMError& errCode)
+{
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return nullptr;
+    }
+    if (!option) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "option is null.");
+        return nullptr;
+    }
+    if (option->GetWindowName().empty()) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "the window name of option is empty.");
+        return nullptr;
+    }
+    if (!WindowHelper::IsFbWindow(option->GetWindowType())) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "window type is not fb window.");
+        return nullptr;
+    }
+    sptr<WindowSessionImpl> windowSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    if (windowSessionImpl == nullptr) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "malloc windowSessionImpl failed.");
+        return nullptr;
+    }
+    FloatingBallTemplateInfo fbTemplateInfo = FloatingBallTemplateInfo(fbTemplateBaseInfo, icon);
+    windowSessionImpl->GetProperty()->SetFbTemplateInfo(fbTemplateInfo);
+    WMError error = windowSessionImpl->Create(context, nullptr);
+    if (error != WMError::WM_OK) {
+        errCode = error;
+        TLOGW(WmsLogTag::WMS_SYSTEM, "Create fb window, error: %{public}u", static_cast<uint32_t>(errCode));
         return nullptr;
     }
     return windowSessionImpl;
@@ -251,6 +300,28 @@ void Window::UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Con
         WindowExtensionSessionImpl::UpdateConfigurationSyncForAll(configuration);
     } else {
         WindowImpl::UpdateConfigurationSyncForAll(configuration);
+    }
+}
+
+bool Window::IsPcOrPadFreeMultiWindowMode() const
+{
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        bool isPcOrFreeMultiWindow = false;
+        SingletonContainer::Get<WindowAdapter>().IsPcOrPadFreeMultiWindowMode(isPcOrFreeMultiWindow);
+        return isPcOrFreeMultiWindow;
+    } else {
+        return false;
+    }
+}
+
+bool Window::GetFreeMultiWindowModeEnabledState()
+{
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        bool isFreeMultiWindow = false;
+        SingletonContainer::Get<WindowAdapter>().IsFreeMultiWindowMode(isFreeMultiWindow);
+        return isFreeMultiWindow;
+    } else {
+        return false;
     }
 }
 } // namespace Rosen

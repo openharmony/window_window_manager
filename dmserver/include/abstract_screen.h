@@ -23,6 +23,8 @@
 #include <screen_manager/screen_types.h>
 #include <ui/rs_display_node.h>
 #include <ui/rs_surface_node.h>
+#include <ui/rs_ui_context.h>
+#include <ui/rs_ui_director.h>
 
 #include "noncopyable.h"
 #include "screen.h"
@@ -53,10 +55,11 @@ public:
     void UpdateRSTree(std::shared_ptr<RSSurfaceNode>& surfaceNode, bool isAdd, bool needToUpdate = true);
     DMError AddSurfaceNode(std::shared_ptr<RSSurfaceNode>& surfaceNode, bool onTop, bool needToRecord = true);
     DMError RemoveSurfaceNode(std::shared_ptr<RSSurfaceNode>& surfaceNode);
-    void UpdateDisplayGroupRSTree(std::shared_ptr<RSSurfaceNode>& surfaceNode, NodeId parentNodeId, bool isAdd);
+    void UpdateDisplayGroupRSTree(
+        std::shared_ptr<RSSurfaceNode>& surfaceNode, std::shared_ptr<RSDisplayNode>& parentNode, bool isAdd);
     void InitRSDisplayNode(const RSDisplayNodeConfig& config, const Point& startPoint);
     void InitRSDefaultDisplayNode(const RSDisplayNodeConfig& config, const Point& startPoint);
-    void UpdateRSDisplayNode(Point startPoint);
+    void UpdateRSDisplayNode(Point startPoint, const sptr<AbstractScreen>& absScreen);
     ScreenId GetScreenGroupId() const;
 
     // colorspace, gamut
@@ -71,6 +74,11 @@ public:
     void SetPhyHeight(uint32_t phyHeight);
     uint32_t GetPhyWidth() const;
     uint32_t GetPhyHeight() const;
+
+    /*
+     * RS Client Multi Instance
+     */
+    std::shared_ptr<RSUIContext> GetRSUIContext() const;
 
     const ScreenId dmsId_;
     const ScreenId rsId_;
@@ -103,6 +111,11 @@ private:
     uint32_t phyWidth_ { UINT32_MAX };
     uint32_t phyHeight_ { UINT32_MAX };
     mutable std::recursive_mutex mutex_;
+
+    /*
+     * RS Client Multi Instance
+     */
+    std::shared_ptr<RSUIDirector> rsUIDirector_;
 };
 
 class AbstractScreenGroup : public AbstractScreen {
@@ -133,6 +146,7 @@ private:
     bool GetRSDisplayNodeConfig(sptr<AbstractScreen>& dmsScreen, struct RSDisplayNodeConfig& config);
 
     std::map<ScreenId, sptr<AbstractScreen>> screenMap_;
+    mutable std::mutex screenMapMutex_;
 };
 } // namespace OHOS::Rosen
 #endif // FOUNDATION_DMSERVER_ABSTRACT_SCREEN_H

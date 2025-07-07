@@ -39,13 +39,17 @@ public:
     MOCK_METHOD2(NotifyTransferComponentDataSync, WSErrorCode(const AAFwk::WantParams& wantParams,
         AAFwk::WantParams& reWantParams));
     MOCK_METHOD1(MarkProcessed, WSError(int32_t eventId));
-    MOCK_METHOD2(NotifyOccupiedAreaChangeInfo, void(sptr<OccupiedAreaChangeInfo> info,
-        const std::shared_ptr<RSTransaction>& rsTransaction));
+    MOCK_METHOD4(NotifyOccupiedAreaChangeInfo, void(sptr<OccupiedAreaChangeInfo> info,
+        const std::shared_ptr<RSTransaction>& rsTransaction, const Rect& callingWindowRect,
+        const std::map<AvoidAreaType, AvoidArea>& avoidAreas));
     MOCK_METHOD2(UpdateAvoidArea, WSError(const sptr<AvoidArea>& avoidArea, AvoidAreaType type));
     MOCK_METHOD1(DumpSessionElementInfo, void(const std::vector<std::string>& params));
     MOCK_METHOD0(NotifyScreenshot, void(void));
+    MOCK_METHOD1(NotifyScreenshotAppEvent, WSError(ScreenshotEventType type));
     MOCK_METHOD0(NotifyTouchOutside, WSError(void));
     MOCK_METHOD1(UpdateWindowMode, WSError(WindowMode mode));
+    MOCK_METHOD1(GetTopNavDestinationName, WSError(std::string& topNavDestName));
+    MOCK_METHOD1(NotifyLayoutFinishAfterWindowModeChange, WSError(WindowMode mode));
     MOCK_METHOD1(NotifyForegroundInteractiveStatus, void(bool interactive));
     MOCK_METHOD1(UpdateMaximizeMode, WSError(MaximizeMode mode));
     MOCK_METHOD0(NotifyCloseExistPipWindow, WSError(void));
@@ -63,11 +67,8 @@ public:
     MOCK_METHOD2(NotifyDisplayMove, void(DisplayId from, DisplayId to));
     MOCK_METHOD1(SwitchFreeMultiWindow, WSError(bool enable));
     MOCK_METHOD2(SetUniqueVirtualPixelRatio, void(bool useUniqueDensity, float virtualPixelRatio));
-    MOCK_METHOD0(CompatibleFullScreenRecover, WSError(void));
-    MOCK_METHOD0(CompatibleFullScreenMinimize, WSError(void));
-    MOCK_METHOD0(CompatibleFullScreenClose, WSError(void));
     MOCK_METHOD0(PcAppInPadNormalClose, WSError(void));
-    MOCK_METHOD1(NotifyCompatibleModeEnableInPad, WSError(bool enable));
+    MOCK_METHOD1(NotifyCompatibleModePropertyChange, WSError(const sptr<CompatibleModeProperty> property));
     MOCK_METHOD1(NotifySessionFullScreen, void(bool fullScreen));
     MOCK_METHOD1(GetUIContentRemoteObj, WSError(sptr<IRemoteObject>& uiContentRemoteObj));
     MOCK_METHOD2(NotifyDumpInfo, WSError(const std::vector<std::string>& params,
@@ -75,6 +76,7 @@ public:
     MOCK_METHOD1(SetSplitButtonVisible, WSError(bool isVisible));
     MOCK_METHOD1(SetEnableDragBySystem, WSError(bool enableDrag));
     MOCK_METHOD2(SendContainerModalEvent, WSError(const std::string& eventName, const std::string& eventValue));
+    MOCK_METHOD2(UpdateWindowModeByIdForUITest, WMError(int32_t windowId, int32_t updateMode));
     MOCK_METHOD1(NotifyHighlightChange, WSError(bool isHighlight));
     MOCK_METHOD1(SetDragActivated, WSError(bool dragActivated));
     MOCK_METHOD1(NotifyWindowCrossAxisChange, void(CrossAxisState state));
@@ -82,6 +84,12 @@ public:
     MOCK_METHOD1(LinkKeyFrameCanvasNode, WSError(std::shared_ptr<RSCanvasNode>& rsCanvasNode));
     MOCK_METHOD1(SetKeyFramePolicy, WSError(KeyFramePolicy& keyFramePolicy));
     MOCK_METHOD1(SetCurrentRotation, WSError(int32_t currentRotation));
+    MOCK_METHOD0(NotifyLifecyclePausedStatus, void(void));
+    MOCK_METHOD1(NotifyAppUseControlStatus, void(bool isUseControl));
+    MOCK_METHOD0(NotifyAppForceLandscapeConfigUpdated, WSError(void));
+    MOCK_METHOD1(NotifyExtensionSecureLimitChange, WSError(bool isLimit));
+    MOCK_METHOD1(GetRouterStackInfo, WMError(std::string& routerStackInfo));
+    MOCK_METHOD1(SendFbActionEvent, WSError(const std::string& action));
 };
 } // namespace Rosen
 } // namespace OHOS

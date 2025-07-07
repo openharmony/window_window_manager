@@ -37,6 +37,10 @@ constexpr int UPDATE_TASK_DURATION = 10;
 const std::string UPDATE_WINDOW_INFO_TASK = "UpdateWindowInfoTask";
 static int32_t g_screenRotationOffset = system::GetIntParameter<int32_t>("const.fold.screen_rotation.offset", 0);
 constexpr float ZORDER_UIEXTENSION_INDEX = 0.1;
+constexpr int WINDOW_NAME_TYPE_UNKNOWN = 0;
+constexpr int WINDOW_NAME_TYPE_THUMBNAIL = 1;
+const std::string SCREENSHOT_WINDOW_NAME_PREFIX = "ScreenShotWindow";
+const std::string PREVIEW_WINDOW_NAME_PREFIX = "PreviewWindow";
 } // namespace
 
 static bool operator==(const MMI::Rect left, const MMI::Rect right)
@@ -74,6 +78,21 @@ MMI::Direction ConvertDegreeToMMIRotation(float degree)
         rotation = MMI::DIRECTION180;
     } else if (NearEqual(degree, DIRECTION270)) {
         rotation = MMI::DIRECTION270;
+    }
+    return rotation;
+}
+
+MMI::Rotation ConvertToMMIRotation(float degree)
+{
+    MMI::Rotation rotation = MMI::Rotation::ROTATION_0;
+    if (NearEqual(degree, DIRECTION0)) {
+        rotation = MMI::Rotation::ROTATION_0;
+    } else if (NearEqual(degree, DIRECTION90)) {
+        rotation = MMI::Rotation::ROTATION_90;
+    } else if (NearEqual(degree, DIRECTION180)) {
+        rotation = MMI::Rotation::ROTATION_180;
+    } else if (NearEqual(degree, DIRECTION270)) {
+        rotation = MMI::Rotation::ROTATION_270;
     }
     return rotation;
 }
@@ -178,6 +197,10 @@ void SceneSessionDirtyManager::CalTransform(const sptr<SceneSession>& sceneSessi
         FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()))) {
         Vector2f scale(sceneSession->GetScaleX(), sceneSession->GetScaleY());
         Vector2f translate = sceneSession->GetSessionGlobalPosition(useUIExtension);
+        if (useUIExtension && UpdateModalExtensionInCompatStatus(sceneSession, transform)) {
+            TLOGD(WmsLogTag::WMS_EVENT, "sceneSession is compat mode");
+            return;
+        }
         transform = transform.Translate(translate)
                              .Scale(scale, sceneSession->GetPivotX(), sceneSession->GetPivotY()).Inverse();
         return;
@@ -185,6 +208,34 @@ void SceneSessionDirtyManager::CalTransform(const sptr<SceneSession>& sceneSessi
     CalNotRotateTransform(sceneSession, transform, useUIExtension);
 }
 
+bool SceneSessionDirtyManager::UpdateModalExtensionInCompatStatus(const sptr<SceneSession>& sceneSession,
+    Matrix3f& transform) const
+{
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr");
+        return false;
+    }
+    if (!sceneSession->IsInCompatScaleStatus()) {
+        TLOGD(WmsLogTag::WMS_EVENT, "sceneSession not is compat scale status");
+        return false;
+    }
+    auto modalUIExtensionEventInfo = sceneSession->GetLastModalUIExtensionEventInfo();
+    if (!modalUIExtensionEventInfo) {
+        TLOGE(WmsLogTag::WMS_EVENT, "modalUIExtensionEventInfo is nullptr");
+        return false;
+    }
+    const WSRect& rect = sceneSession->GetSessionGlobalRect();
+    float heightDiff = rect.height_ - modalUIExtensionEventInfo.value().windowRect.height_;
+    Vector2f scale(sceneSession->GetScaleX(), sceneSession->GetScaleY());
+    Vector2f translate(rect.posX_, rect.posY_ + heightDiff);
+    transform = transform.Translate(translate)
+        .Scale(scale, sceneSession->GetPivotX(), sceneSession->GetPivotY()).Inverse();
+    if (!sceneSession->GetSessionProperty()->IsAdaptToImmersive()) {
+        Vector2f translateOffset(0, heightDiff * (1 - sceneSession->GetScaleY()));
+        transform = transform.Translate(translateOffset);
+    }
+    return true;
+}
 
 void SceneSessionDirtyManager::UpdateDefaultHotAreas(sptr<SceneSession> sceneSession,
     std::vector<MMI::Rect>& touchHotAreas,
@@ -194,13 +245,22 @@ void SceneSessionDirtyManager::UpdateDefaultHotAreas(sptr<SceneSession> sceneSes
         TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr");
         return;
     }
-    WSRect windowRect = sceneSession->GetSessionGlobalRect();
+    WSRect windowRect = sceneSession->GetSessionGlobalRectInMultiScreen();
     uint32_t touchOffset = 0;
     uint32_t pointerOffset = 0;
     bool isMidScene = sceneSession->GetIsMidScene();
-    bool isAppMainWindowOrPip = sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW ||
-                                sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_PIP;
-    if (isAppMainWindowOrPip && !isMidScene) {
+    bool isAppPipWindow = sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_PIP;
+    bool isAppMainWindow = sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+    const auto& singleHandData = GetSingleHandData(sceneSession);
+    sptr<WindowSessionProperty> windowSessionProperty = sceneSession->GetSessionProperty();
+    bool isSystemOrSubWindow = (WindowHelper::IsSystemWindow(sceneSession->GetWindowType()) ||
+        WindowHelper::IsSubWindow(sceneSession->GetWindowType()));
+    bool isDragAccessibleWindow = windowSessionProperty->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
+        sceneSession->IsDragAccessible();
+    bool isSingleHandAffectedWindow = singleHandData.mode != SingleHandMode::MIDDLE &&
+        windowSessionProperty->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN;
+    if ((isAppPipWindow || isAppMainWindow || (isSystemOrSubWindow && isDragAccessibleWindow)) &&
+        !isMidScene && !isSingleHandAffectedWindow) {
         float vpr = 1.5f; // 1.5: default vp
         auto sessionProperty = sceneSession->GetSessionProperty();
         if (sessionProperty != nullptr) {
@@ -715,7 +775,7 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
         return {};
     }
     Matrix3f transform;
-    WSRect windowRect = sceneSession->GetSessionGlobalRect();
+    WSRect windowRect = sceneSession->GetSessionGlobalRectInMultiScreen();
     auto pid = sceneSession->GetCallingPid();
     auto uid = sceneSession->GetCallingUid();
     auto windowId = sceneSession->GetWindowId();
@@ -732,6 +792,15 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
     std::vector<MMI::Rect> touchHotAreas;
     std::vector<MMI::Rect> pointerHotAreas;
     UpdateHotAreas(sceneSession, touchHotAreas, pointerHotAreas);
+    int windowNameType = WINDOW_NAME_TYPE_UNKNOWN;
+    std::string windowName = sceneSession->GetWindowNameAllType();
+    auto startsWith = [](const std::string& str, const std::string& prefix) {
+        return str.size() >= prefix.size() &&
+            std::equal(prefix.begin(), prefix.end(), str.begin());
+    };
+    if (startsWith(windowName, SCREENSHOT_WINDOW_NAME_PREFIX) || startsWith(windowName, PREVIEW_WINDOW_NAME_PREFIX)) {
+        windowNameType = WINDOW_NAME_TYPE_THUMBNAIL;
+    }
     auto pixelMap = windowSessionProperty->GetWindowMask();
     MMI::WindowInfo windowInfo = {
         .id = windowId,
@@ -745,6 +814,7 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
         .agentWindowId = agentWindowId,
         .action = static_cast<MMI::WINDOW_UPDATE_ACTION>(action),
         .displayId = displayId,
+        .groupId = SceneSessionManager::GetInstance().GetDisplayGroupId(displayId),
         .zOrder = zOrder,
         .pointerChangeAreas = std::move(pointerChangeAreas),
         .transform = transformData,
@@ -752,6 +822,7 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
         .windowInputType = static_cast<MMI::WindowInputType>(sceneSession->GetSessionInfo().windowInputType_),
         .windowType = static_cast<int32_t>(windowType),
         .isSkipSelfWhenShowOnVirtualScreen = sceneSession->GetSessionProperty()->GetSkipEventOnCastPlus(),
+        .windowNameType = windowNameType,
     };
     UpdateWindowFlags(displayId, sceneSession, windowInfo);
     if (windowSessionProperty->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_HANDWRITING)) {
@@ -817,43 +888,45 @@ void SceneSessionDirtyManager::ResetSessionDirty()
 
 std::string DumpRect(const std::vector<MMI::Rect>& rects)
 {
-    std::string rectStr = "";
+    std::string rectStr = "hot:";
     for (const auto& rect : rects) {
-        rectStr = rectStr + " hot : [ " + std::to_string(rect.x) +" , " + std::to_string(rect.y) +
-        " , " + std::to_string(rect.width) + " , " + std::to_string(rect.height) + "]";
+        rectStr = rectStr + "[" + std::to_string(rect.x) +"," + std::to_string(rect.y) +
+        "," + std::to_string(rect.width) + "," + std::to_string(rect.height) + "]|";
     }
     return rectStr;
 }
 
 std::string DumpWindowInfo(const MMI::WindowInfo& info)
 {
-    std::string infoStr = "windowInfo:";
-    infoStr = infoStr + "windowId: " + std::to_string(info.id) + " pid : " + std::to_string(info.pid) +
-        " uid: " + std::to_string(info.uid) + " area: [ " + std::to_string(info.area.x) + " , " +
-        std::to_string(info.area.y) +  " , " + std::to_string(info.area.width) + " , " +
-        std::to_string(info.area.height) + "] agentWindowId:" + std::to_string(info.agentWindowId) + " flags:" +
-        std::to_string(info.flags)  +" displayId: " + std::to_string(info.displayId) +
-        " action: " + std::to_string(static_cast<int>(info.action)) + " zOrder: " + std::to_string(info.zOrder);
+    std::string infoStr = "wInfo:";
+    infoStr = infoStr + std::to_string(info.id) + "|" + std::to_string(info.pid) +
+        "|" + std::to_string(info.uid) + "|[" + std::to_string(info.area.x) + "," +
+        std::to_string(info.area.y) + "," + std::to_string(info.area.width) + "," +
+        std::to_string(info.area.height) + "]|" + std::to_string(info.agentWindowId) + "|" +
+        std::to_string(info.flags) + "|" + std::to_string(info.displayId) +
+        "|" + std::to_string(static_cast<int>(info.action)) + "|" + std::to_string(info.zOrder) + ",";
     return infoStr + DumpRect(info.defaultHotAreas);
 }
 
 std::string DumpSecRectInfo(const SecRectInfo & secRectInfo)
 {
-    std::string infoStr = " area: [ " + std::to_string(secRectInfo.relativeCoords.GetLeft()) + " , " +
-        std::to_string(secRectInfo.relativeCoords.GetTop()) +  " , " +
-        std::to_string(secRectInfo.relativeCoords.GetWidth()) + " , " +
+    std::string infoStr = "area:[" + std::to_string(secRectInfo.relativeCoords.GetLeft()) + "," +
+        std::to_string(secRectInfo.relativeCoords.GetTop()) +  "," +
+        std::to_string(secRectInfo.relativeCoords.GetWidth()) + "," +
         std::to_string(secRectInfo.relativeCoords.GetHeight()) + "]" +
-        " scaleX:" + std::to_string(secRectInfo.scale[0]) + " scaleY:" + std::to_string(secRectInfo.scale[1]) +
-        " anchorX:" + std::to_string(secRectInfo.anchor[0]) + " anchorY:" + std::to_string(secRectInfo.anchor[1]);
+        "|" + std::to_string(static_cast<int>(secRectInfo.scale[0])) +
+        "|" + std::to_string(static_cast<int>(secRectInfo.scale[1])) +
+        "|" + std::to_string(static_cast<int>(secRectInfo.anchor[0])) +
+        "|" + std::to_string(static_cast<int>(secRectInfo.anchor[1]));
     return infoStr;
 }
 
 std::string DumpSecSurfaceInfo(const SecSurfaceInfo& secSurfaceInfo)
 {
-    std::string infoStr = "hostPid:" + std::to_string(secSurfaceInfo.hostPid) +
-        " uiExtensionPid:" + std::to_string(secSurfaceInfo.uiExtensionPid) +
-        " hostNodeId:" + std::to_string(secSurfaceInfo.hostNodeId) +
-        " uiExtensionNodeId:" + std::to_string(secSurfaceInfo.uiExtensionNodeId);
+    std::string infoStr = std::to_string(secSurfaceInfo.hostPid) +
+        "|" + std::to_string(secSurfaceInfo.uiExtensionPid) +
+        "|" + std::to_string(secSurfaceInfo.hostNodeId) +
+        "|" + std::to_string(secSurfaceInfo.uiExtensionNodeId);
     return infoStr;
 }
 
@@ -977,19 +1050,19 @@ bool operator==(const SecSurfaceInfo& a, const SecSurfaceInfo& b)
 
 void DumpSecSurfaceInfoMap(const std::map<uint64_t, std::vector<SecSurfaceInfo>>& secSurfaceInfoMap)
 {
-    TLOGI(WmsLogTag::WMS_EVENT, "size:%{public}d", static_cast<int>(secSurfaceInfoMap.size()));
+    TLOGNI(WmsLogTag::WMS_EVENT, "DumpSecSurface map:%{public}d", static_cast<int>(secSurfaceInfoMap.size()));
     for (auto& e : secSurfaceInfoMap) {
         auto hostNodeId = e.first;
-        TLOGI(WmsLogTag::WMS_EVENT, "hostNodeId:%{public}" PRIu64 " secSurfaceInfoList size:%{public}d",
+        TLOGNI(WmsLogTag::WMS_EVENT, "DumpSecSurface id:%{public}" PRIu64 "list:%{public}d",
             hostNodeId, static_cast<int>(e.second.size()));
         for (const auto& secSurfaceInfo : e.second) {
             auto surfaceInfoStr = DumpSecSurfaceInfo(secSurfaceInfo);
             auto rectInfoStr = DumpSecRectInfo(secSurfaceInfo.uiExtensionRectInfo);
-            TLOGI(WmsLogTag::WMS_EVENT, "secSurfaceInfo:%{public}s secRectInfo:%{public}s", surfaceInfoStr.c_str(),
-                rectInfoStr.c_str());
+            TLOGNI(WmsLogTag::WMS_EVENT, "DumpSecSurface:secSurface:%{public}s secRect:%{public}s",
+                surfaceInfoStr.c_str(), rectInfoStr.c_str());
             for (const auto& secRectInfo : secSurfaceInfo.upperNodes) {
                 auto infoStr = DumpSecRectInfo(secRectInfo);
-                TLOGI(WmsLogTag::WMS_EVENT, "hostRectInfo:%{public}s", infoStr.c_str());
+                TLOGNI(WmsLogTag::WMS_EVENT, "DumpSecSurface:%{public}s", infoStr.c_str());
             }
         }
     }

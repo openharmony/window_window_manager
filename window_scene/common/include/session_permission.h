@@ -28,6 +28,8 @@ constexpr const char* PERMISSION_CALLED_EXTENSION_ON_LOCK_SCREEN = "ohos.permiss
 constexpr const char* PERMISSION_WRITE_APP_LOCK = "ohos.permission.WRITE_APP_LOCK";
 constexpr const char* PERMISSION_SET_ABILITY_INSTANCE_INFO = "ohos.permission.SET_ABILITY_INSTANCE_INFO";
 constexpr const char* PERMISSION_VISIBLE_WINDOW_INFO = "ohos.permission.VISIBLE_WINDOW_INFO";
+constexpr const char* PERMISSION_FLOATING_BALL = "ohos.permission.USE_FLOAT_BALL";
+constexpr const char* PERMISSION_WINDOW_TRANSPARENT = "ohos.permission.SET_WINDOW_TRANSPARENT";
 }
 class SessionPermission {
 public:
@@ -49,6 +51,7 @@ public:
     static bool CheckCallingIsUserTestMode(pid_t pid);
     static bool IsBetaVersion();
     static bool IsSystemAppCall();
+    static bool IsSystemAppCallByCallingTokenID(uint32_t callingTokenId);
     static bool IsFoundationCall();
     static std::string GetCallingBundleName();
 };

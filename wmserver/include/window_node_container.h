@@ -182,8 +182,7 @@ private:
         const WindowMode& dstMode, const WindowMode& srcMode);
     void ResetAllMainFloatingWindowZOrder(sptr<WindowNode>& rootNode);
     void HandleRemoveWindowDisplayOrientation(sptr<WindowNode>& node, bool fromAnimation);
-    void OpenInputMethodSyncTransaction();
-    void CloseInputMethodSyncTransaction();
+    void RunInInputMethodSyncTransaction(sptr<WindowNode>& node, std::function<void()> task);
 
     void JudgeToReportSystemBarInfo(const sptr<WindowNode> window,
         const std::unordered_map<WindowType, SystemBarProperty>& systemBarPropInfo) const;

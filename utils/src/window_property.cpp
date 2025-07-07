@@ -124,6 +124,16 @@ void WindowProperty::SetTransform(const Transform& trans)
     trans_ = trans;
 }
 
+void WindowProperty::SetFollowScreenChange(bool isFollowScreenChange)
+{
+    isFollowScreenChange_ = isFollowScreenChange;
+}
+
+bool WindowProperty::GetFollowScreenChange() const
+{
+    return isFollowScreenChange_;
+}
+
 void WindowProperty::HandleComputeTransform(const Transform& trans)
 {
     TransformHelper::Vector3 pivotPos = { windowRect_.posX_ + trans.pivotX_ * windowRect_.width_,
@@ -737,7 +747,8 @@ bool WindowProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isDisplayZoomOn_) && parcel.WriteString(abilityInfo_.bundleName_) &&
         parcel.WriteString(abilityInfo_.abilityName_) && parcel.WriteInt32(abilityInfo_.missionId_) &&
         parcel.WriteBool(isSnapshotSkip_) &&
-        parcel.WriteDouble(textFieldPositionY_) && parcel.WriteDouble(textFieldHeight_);
+        parcel.WriteDouble(textFieldPositionY_) && parcel.WriteDouble(textFieldHeight_) &&
+        parcel.WriteBool(isFollowScreenChange_);
 }
 
 WindowProperty* WindowProperty::Unmarshalling(Parcel& parcel)
@@ -797,6 +808,7 @@ WindowProperty* WindowProperty::Unmarshalling(Parcel& parcel)
     property->SetSnapshotSkip(parcel.ReadBool());
     property->SetTextFieldPositionY(parcel.ReadDouble());
     property->SetTextFieldHeight(parcel.ReadDouble());
+    property->SetFollowScreenChange(parcel.ReadBool());
     return property;
 }
 
@@ -871,6 +883,9 @@ bool WindowProperty::Write(Parcel& parcel, PropertyChangeAction action)
             break;
         case PropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO:
             ret = ret && parcel.WriteDouble(textFieldPositionY_) && parcel.WriteDouble(textFieldHeight_);
+            break;
+        case PropertyChangeAction::ACTION_UPDATE_FOLLOW_SCREEN_CHANGE:
+            ret = ret && parcel.WriteBool(isFollowScreenChange_);
             break;
         default:
             break;
@@ -955,6 +970,9 @@ void WindowProperty::Read(Parcel& parcel, PropertyChangeAction action)
             SetTextFieldPositionY(parcel.ReadDouble());
             SetTextFieldHeight(parcel.ReadDouble());
             break;
+        case PropertyChangeAction::ACTION_UPDATE_FOLLOW_SCREEN_CHANGE:
+            SetFollowScreenChange(parcel.ReadBool());
+            break;
         default:
             break;
     }
@@ -1006,6 +1024,7 @@ void WindowProperty::CopyFrom(const sptr<WindowProperty>& property)
     isSnapshotSkip_ = property->isSnapshotSkip_;
     textFieldPositionY_ = property->textFieldPositionY_;
     textFieldHeight_ = property->textFieldHeight_;
+    isFollowScreenChange_ = property->isFollowScreenChange_;
 }
 void WindowProperty::SetTextFieldPositionY(double textFieldPositionY)
 {

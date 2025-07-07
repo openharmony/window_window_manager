@@ -23,16 +23,28 @@
 #include "extension_manager_client.h"
 #include "ipc_skeleton.h"
 #include "scene_board_judgement.h"
+#include "iremote_object_mocker.h"
+#include "window_manager_hilog.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+std::string g_errlog;
+void ScreenSessionLogCallback(
+    const LogType type, const LogLevel level, const unsigned int domain, const char *tag, const char *msg)
+{
+    g_errlog = msg;
+}
+} // namespace name
+
 constexpr int32_t DEFAULT_VALUE = -1;
 constexpr uint32_t EXTENSION_CONNECT_OUT_TIME = 300; // ms
 constexpr uint32_t TRANS_CMD_SEND_SNAPSHOT_RECT = 2;
 constexpr int32_t RES_FAILURE = -1;
+constexpr int32_t RES_SUCCESS = -1;
 namespace {
 constexpr uint32_t SLEEP_TIME_US = 100000;
 }
@@ -600,6 +612,145 @@ HWTEST_F(ScreenSessionAbilityConnectionTest, EraseErrCode, TestSize.Level1)
     abilityConnectionStub.clear();
     abilityConnectionStub = nullptr;
 }
+
+/**
+ * @tc.name: OnAbilityConnectDone01
+ * @tc.desc: EraseErrCode func test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionAbilityConnectionTest, OnAbilityConnectDone01, TestSize.Level1)
+{
+    LOG_SetCallback(ScreenSessionLogCallback);
+    auto abilityConnectionStub = sptr<ScreenSessionAbilityConnectionStub>::MakeSptr();
+    AppExecFwk::ElementName element;
+    sptr<IRemoteObject> remoteObject = nullptr;
+    int32_t resultCode = 1;
+    abilityConnectionStub->OnAbilityConnectDone(element, remoteObject, resultCode);
+
+    resultCode = 0;
+    abilityConnectionStub->OnAbilityConnectDone(element, remoteObject, resultCode);
+    remoteObject = sptr<MockIRemoteObject>::MakeSptr();
+    auto ret = abilityConnectionStub->AddObjectDeathRecipient();
+    EXPECT_EQ(ret, false);
+    abilityConnectionStub->OnAbilityConnectDone(element, remoteObject, resultCode);
+    EXPECT_TRUE(g_errlog.find("OnAbilityConnectDone exit") != std::string::npos);
 }
+
+/**
+ * @tc.name: OnAbilityDisconnectDone01
+ * @tc.desc: EraseErrCode func test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionAbilityConnectionTest, OnAbilityDisconnectDone01, TestSize.Level1)
+{
+    LOG_SetCallback(ScreenSessionLogCallback);
+    auto abilityConnectionStub = sptr<ScreenSessionAbilityConnectionStub>::MakeSptr();
+    AppExecFwk::ElementName element;
+    int32_t resultCode = 0;
+    abilityConnectionStub->remoteObject_ = nullptr;
+    abilityConnectionStub->OnAbilityDisconnectDone(element, resultCode);
+
+    resultCode = 1;
+    abilityConnectionStub->remoteObject_ = sptr<MockIRemoteObject>::MakeSptr();
+    abilityConnectionStub->OnAbilityDisconnectDone(element, resultCode);
+    EXPECT_TRUE(g_errlog.find("OnAbilityDisconnectDone exit") != std::string::npos);
+}
+
+/**
+ * @tc.name: AddObjectDeathRecipient01
+ * @tc.desc: EraseErrCode func test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionAbilityConnectionTest, AddObjectDeathRecipient01, TestSize.Level1)
+{
+    auto abilityConnectionStub = sptr<ScreenSessionAbilityConnectionStub>::MakeSptr();
+    auto ret = abilityConnectionStub->AddObjectDeathRecipient();
+    EXPECT_EQ(ret, false);
+
+    abilityConnectionStub->remoteObject_ = nullptr;
+    ret = abilityConnectionStub->AddObjectDeathRecipient();
+    EXPECT_TRUE(g_errlog.find("remoteObject") != std::string::npos);
+    EXPECT_EQ(ret, false);
+    abilityConnectionStub->remoteObject_ = sptr<MockIRemoteObject>::MakeSptr();
+    abilityConnectionStub->AddObjectDeathRecipient();
+    EXPECT_FALSE(g_errlog.find("AddDeathRecipient") != std::string::npos);
+}
+
+/**
+ * @tc.name: IsConnected01
+ * @tc.desc: EraseErrCode func test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionAbilityConnectionTest, IsConnected01, TestSize.Level1)
+{
+    ScreenSessionAbilityConnection abilityConnection;
+    abilityConnection.abilityConnectionStub_ = nullptr;
+    auto ret = abilityConnection.IsConnected();
+    EXPECT_EQ(ret, false);
+
+    abilityConnection.abilityConnectionStub_ = sptr<ScreenSessionAbilityConnectionStub>::MakeSptr();
+    abilityConnection.IsConnected();
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: SendMessageBlock01
+ * @tc.desc: EraseErrCode func test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionAbilityConnectionTest, SendMessageBlock01, TestSize.Level1)
+{
+    int32_t transCode = 0;
+    MessageParcel data;
+    MessageParcel reply;
+    ScreenSessionAbilityConnection abilityConnection;
+    abilityConnection.abilityConnectionStub_ = nullptr;
+    auto ret = abilityConnection.SendMessageBlock(transCode, data, reply);
+    EXPECT_EQ(ret, RES_FAILURE);
+
+    abilityConnection.abilityConnectionStub_ = sptr<ScreenSessionAbilityConnectionStub>::MakeSptr();
+    ret = abilityConnection.SendMessageBlock(transCode, data, reply);
+    EXPECT_EQ(ret, RES_SUCCESS);
+}
+
+/**
+ * @tc.name: SendMessage01
+ * @tc.desc: EraseErrCode func test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionAbilityConnectionTest, SendMessage01, TestSize.Level1)
+{
+    int32_t transCode = 0;
+    MessageParcel data;
+    MessageParcel reply;
+    ScreenSessionAbilityConnection abilityConnection;
+    abilityConnection.abilityConnectionStub_ = nullptr;
+    auto ret = abilityConnection.SendMessage(transCode, data, reply);
+    EXPECT_EQ(ret, RES_FAILURE);
+
+    abilityConnection.abilityConnectionStub_ = sptr<ScreenSessionAbilityConnectionStub>::MakeSptr();
+    ret = abilityConnection.SendMessageBlock(transCode, data, reply);
+    EXPECT_EQ(ret, RES_SUCCESS);
+}
+
+/**
+ * @tc.name: OnRemoteDied01
+ * @tc.desc: EraseErrCode func test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionAbilityConnectionTest, OnRemoteDied01, TestSize.Level1)
+{
+    wptr<IRemoteObject> remoteObject = nullptr;
+    std::function<void(void)> deathHandler;
+    ScreenSessionAbilityDeathRecipient abilityDeathRecipient(deathHandler);
+    abilityDeathRecipient.OnRemoteDied(remoteObject);
+    EXPECT_TRUE(g_errlog.find("remoteObject is null") != std::string::npos);
+
+    remoteObject = sptr<MockIRemoteObject>::MakeSptr();
+    abilityDeathRecipient.deathHandler_ = []() { std::cout << "Death handler called" << std::endl; };
+    EXPECT_NE(abilityDeathRecipient.deathHandler_, nullptr);
+    abilityDeathRecipient.OnRemoteDied(remoteObject);
+}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

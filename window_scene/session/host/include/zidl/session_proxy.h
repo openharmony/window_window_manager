@@ -57,6 +57,7 @@ public:
     WSError UpdateSessionRect(const WSRect& rect, SizeChangeReason reason, bool isGlobal = false,
         bool isFromMoveToGlobal = false, const MoveConfiguration& moveConfiguration = {},
         const RectAnimationConfig& rectAnimationConfig = {}) override;
+    WSError UpdateGlobalDisplayRectFromClient(const WSRect& rect, SizeChangeReason reason) override;
     WMError GetGlobalScaledRect(Rect& globalScaledRect) override;
     WSError UpdateClientRect(const WSRect& rect) override;
     WSError OnNeedAvoid(bool status) override;
@@ -78,6 +79,7 @@ public:
     WSError RaiseAppMainWindowToTop() override;
     WSError SetSessionLabelAndIcon(const std::string& label,
         const std::shared_ptr<Media::PixelMap>& icon) override;
+    WSError SetSubWindowSource(SubWindowSource source) override;
 
     /*
      * UIExtension
@@ -100,21 +102,29 @@ public:
     WSError SetAutoStartPiP(bool isAutoStart, uint32_t priority, uint32_t width, uint32_t height) override;
     WSError UpdatePiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo) override;
 
+    WMError UpdateFloatingBall(const FloatingBallTemplateInfo& fbTemplateInfo) override;
+    WMError RestoreFbMainWindow(const std::shared_ptr<AAFwk::Want>& want) override;
+    WMError GetFloatingBallWindowId(uint32_t& windowId) override;
+    void NotifyFloatingBallPrepareClose() override;
+
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
     WSError SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         bool isExecuteDelayRaise = false) override;
     bool IsStartMoving() override;
     WSError UpdateRectChangeListenerRegistered(bool isRegister) override;
     void SetCallingSessionId(uint32_t callingSessionId) override;
+    void NotifyKeyboardWillShowRegistered(bool registered) override;
+    void NotifyKeyboardWillHideRegistered(bool registered) override;
     void NotifyKeyboardDidShowRegistered(bool registered) override;
     void NotifyKeyboardDidHideRegistered(bool registered) override;
     void SetCustomDecorHeight(int32_t height) override;
     WSError AdjustKeyboardLayout(const KeyboardLayoutParams& params) override;
-    WSError ChangeKeyboardViewMode(KeyboardViewMode mode) override;
+    WSError ChangeKeyboardEffectOption(const KeyboardEffectOption& effectOption) override;
     WMError UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action) override;
     WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) override;
     WSError NotifyFrameLayoutFinishFromApp(bool notifyListener, const WSRect& rect) override;
+    WMError NotifySnapshotUpdate() override;
     WSError SetDialogSessionBackGestureEnabled(bool isEnabled) override;
     int32_t GetStatusBarHeight() override;
     WMError SetSystemWindowEnableDrag(bool enableDrag) override;
@@ -137,24 +147,29 @@ public:
      * Window Property
      */
     WSError SetWindowCornerRadius(float cornerRadius) override;
+    WSError SetWindowShadows(const ShadowsInfo& shadowsInfo) override;
 
     WSError NotifySupportWindowModesChange(
         const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes) override;
     WSError GetCrossAxisState(CrossAxisState& state) override;
+    WMError UpdateScreenshotAppEventRegistered(int32_t persistentId, bool isRegister) override;
+    WMError UpdateAcrossDisplaysChangeRegistered(bool isRegister) override;
 
     /*
      * PC Fold Screen
      */
     WSError GetWaterfallMode(bool& isWaterfallMode) override;
+    WMError IsMainWindowFullScreenAcrossDisplays(bool& isWaterfallMode) override;
 
     /*
      * PC Window
      */
     WSError StartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
-        int32_t pointerPosX, int32_t pointerPosY) override;
+        int32_t pointerPosX, int32_t pointerPosY, DisplayId displayId) override;
     WSError OnContainerModalEvent(const std::string& eventName, const std::string& eventValue) override;
     WSError NotifyFollowParentMultiScreenPolicy(bool enabled) override;
     WSError UpdateFlag(const std::string& flag) override;
+    WSError UseImplicitAnimation(bool useImplicit) override;
 
     /*
      * Window Pattern
@@ -165,9 +180,17 @@ public:
      * Window layout
      */
     WSError SetFollowParentWindowLayoutEnabled(bool isFollow) override;
+    WSError SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo) override;
     WSError KeyFrameAnimateEnd() override;
     WSError UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode,
         std::shared_ptr<RSTransaction>& rsTransaction) override;
+    WSError SetDragKeyFramePolicy(const KeyFramePolicy& keyFramePolicy) override;
+
+    /**
+     * Window Transition Animation For PC
+     */
+    WSError SetWindowTransitionAnimation(WindowTransitionType transitionType,
+        const TransitionAnimation& animation) override;
 
     /**
      * window rotation
@@ -180,6 +203,11 @@ public:
     WSError RequestFocus(bool isFocused) override;
     WSError GetIsHighlighted(bool& isHighlighted) override;
     WMError NotifyDisableDelegatorChange() override;
+
+    /**
+     * window animation
+     */
+    WSError SetFrameRectForPartialZoomIn(const Rect& frameRect) override;
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;
 };

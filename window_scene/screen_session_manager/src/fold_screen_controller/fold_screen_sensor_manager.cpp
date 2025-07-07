@@ -83,7 +83,7 @@ void FoldScreenSensorManager::RegisterPostureCallback()
         TLOGE(WmsLogTag::DMS, "RegisterPostureCallback failed.");
     } else {
         registerPosture_ = true;
-        TLOGI(WmsLogTag::DMS, "FoldScreenSensorManager.RegisterPostureCallback success.");
+        TLOGI(WmsLogTag::DMS, "RegisterPostureCallback success.");
     }
 }
 
@@ -95,7 +95,7 @@ void FoldScreenSensorManager::UnRegisterPostureCallback()
         deactivateRet, unsubscribeRet);
     if (deactivateRet == SENSOR_SUCCESS && unsubscribeRet == SENSOR_SUCCESS) {
         registerPosture_ = false;
-        TLOGI(WmsLogTag::DMS, "FoldScreenSensorManager.UnRegisterPostureCallback success.");
+        TLOGI(WmsLogTag::DMS, "UnRegisterPostureCallback success.");
     }
 }
 
@@ -122,7 +122,7 @@ void FoldScreenSensorManager::UnRegisterHallCallback()
     int32_t deactivateRet1 = DeactivateSensor(SENSOR_TYPE_ID_HALL_EXT, &hallUser);
     int32_t unsubscribeRet1 = UnsubscribeSensor(SENSOR_TYPE_ID_HALL_EXT, &hallUser);
     if (deactivateRet1 == SENSOR_SUCCESS && unsubscribeRet1 == SENSOR_SUCCESS) {
-        TLOGI(WmsLogTag::DMS, "FoldScreenSensorManager.UnRegisterHallCallback success.");
+        TLOGI(WmsLogTag::DMS, "UnRegisterHallCallback success.");
         registerHall_ = false;
     }
 }
@@ -227,6 +227,35 @@ void FoldScreenSensorManager::TriggerDisplaySwitch()
 bool FoldScreenSensorManager::GetSensorRegisterStatus()
 {
     return registerHall_ || registerPosture_;
+}
+
+float FoldScreenSensorManager::GetGlobalAngle() const
+{
+    return globalAngle;
+}
+
+void FoldScreenSensorManager::SetGlobalAngle(float angle)
+{
+    if (std::isless(angle, ANGLE_MIN_VAL) ||
+        std::isgreater(angle, ANGLE_MAX_VAL + ACCURACY_ERROR_FOR_ALTA)) {
+        TLOGI(WmsLogTag::DMS, "Invalid angle: %{public}f", angle);
+        return;
+    }
+    globalAngle = angle;
+}
+
+uint16_t FoldScreenSensorManager::GetGlobalHall() const
+{
+    return globalHall;
+}
+
+void FoldScreenSensorManager::SetGlobalHall(uint16_t hall)
+{
+    if (hall == USHRT_MAX) {
+        TLOGI(WmsLogTag::DMS, "Invalid hall: %{public}u", hall);
+        return;
+    }
+    globalHall = hall;
 }
 } // Rosen
 } // OHOS

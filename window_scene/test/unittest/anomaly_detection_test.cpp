@@ -264,6 +264,22 @@ void IsShowWhenLockedTest(sptr<SceneSessionManager> ssm_)
     ssm_->sceneSessionMap_.clear();
 }
 
+void WallPaperTest(sptr<SceneSessionManager> ssm_)
+{
+    int32_t order = 100;
+    int32_t id = 1;
+    auto sceneSession1 = GetSceneSession("wallpaperTest");
+    ASSERT_NE(sceneSession1, nullptr);
+    sceneSession1->property_->SetWindowType(WindowType::WINDOW_TYPE_WALLPAPER);
+    sceneSession1->zOrder_ = order;
+    sceneSession1->persistentId_ = id;
+    sceneSession1->isVisible_ = true;
+    sceneSession1->state_ = SessionState::STATE_ACTIVE;
+    ssm_->sceneSessionMap_.insert({ sceneSession1->GetPersistentId(), sceneSession1 });
+    AnomalyDetection::SceneZOrderCheckProcess();
+    ssm_->sceneSessionMap_.clear();
+}
+
 /**
  * @tc.name: SceneZOrderCheckProcess
  * @tc.desc: check func SceneZOrderCheckProcess
@@ -282,6 +298,7 @@ HWTEST_F(AnomalyDetectionTest, SceneZOrderCheckProcess, TestSize.Level1)
     SubWindowTest(ssm_);
     KeyGUARDTest(ssm_);
     IsShowWhenLockedTest(ssm_);
+    WallPaperTest(ssm_);
     ASSERT_EQ(ret, 0);
     GTEST_LOG_(INFO) << "AnomalyDetectionTest: SceneZOrderCheckProcess end";
 }

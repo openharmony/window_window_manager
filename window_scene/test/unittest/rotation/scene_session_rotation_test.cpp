@@ -46,21 +46,13 @@ public:
     void TearDown() override;
 };
 
-void SceneSessionRotationTest::SetUpTestCase()
-{
-}
+void SceneSessionRotationTest::SetUpTestCase() {}
 
-void SceneSessionRotationTest::TearDownTestCase()
-{
-}
+void SceneSessionRotationTest::TearDownTestCase() {}
 
-void SceneSessionRotationTest::SetUp()
-{
-}
+void SceneSessionRotationTest::SetUp() {}
 
-void SceneSessionRotationTest::TearDown()
-{
-}
+void SceneSessionRotationTest::TearDown() {}
 
 namespace {
 /**
@@ -105,6 +97,6 @@ HWTEST_F(SceneSessionRotationTest, SetDefaultRequestedOrientation, TestSize.Leve
     ret = sceneSession->GetRequestedOrientation();
     ASSERT_EQ(orientation, ret);
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

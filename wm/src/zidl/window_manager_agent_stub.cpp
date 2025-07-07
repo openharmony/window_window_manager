@@ -49,6 +49,47 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
             UpdateFocusChangeInfo(info, focused);
             break;
         }
+        case WindowManagerAgentMsg::TRANS_ID_NOTIFY_WINDOW_SYSTEM_BAR_PROPERTY_CHANGE: {
+            uint32_t type = 0;
+            if (!data.ReadUint32(type) ||
+                type < static_cast<uint32_t>(WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE) ||
+                type > static_cast<uint32_t>(WindowType::ABOVE_APP_SYSTEM_WINDOW_END)) {
+                TLOGE(WmsLogTag::WMS_IMMS, "read type failed");
+                return ERR_INVALID_DATA;
+            }
+            bool enable = false;
+            if (!data.ReadBool(enable)) {
+                TLOGE(WmsLogTag::WMS_IMMS, "read enable failed");
+                return ERR_INVALID_DATA;
+            }
+            uint32_t backgroundColor = 0;
+            if (!data.ReadUint32(backgroundColor)) {
+                TLOGE(WmsLogTag::WMS_IMMS, "read backgroundColor failed");
+                return ERR_INVALID_DATA;
+            }
+            uint32_t contentColor = 0;
+            if (!data.ReadUint32(contentColor)) {
+                TLOGE(WmsLogTag::WMS_IMMS, "read contentColor failed");
+                return ERR_INVALID_DATA;
+            }
+            bool enableAnimation = false;
+            if (!data.ReadBool(enableAnimation)) {
+                TLOGE(WmsLogTag::WMS_IMMS, "read enableAnimation failed");
+                return ERR_INVALID_DATA;
+            }
+            uint32_t settingFlag = 0;
+            uint32_t MAX_SETTINGFLAG = 7;
+            if (!data.ReadUint32(settingFlag) ||
+                settingFlag < static_cast<uint32_t>(SystemBarSettingFlag::DEFAULT_SETTING) ||
+                settingFlag > MAX_SETTINGFLAG) {
+                TLOGE(WmsLogTag::WMS_IMMS, "read settingFlag failed");
+                return ERR_INVALID_DATA;
+            }
+            SystemBarProperty systemBarProperty = { enable, backgroundColor,
+                contentColor, enableAnimation, static_cast<SystemBarSettingFlag>(settingFlag) };
+            NotifyWindowSystemBarPropertyChange(static_cast<WindowType>(type), systemBarProperty);
+            break;
+        }
         case WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_MODE_TYPE: {
             uint8_t typeId = 0;
             if (!data.ReadUint8(typeId) ||
@@ -201,11 +242,130 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
             NotifyCallingWindowDisplayChanged(*callingWindowInfo);
             break;
         }
+        case WindowManagerAgentMsg::TRANS_ID_NOTIFY_WINDOW_PROPERTY_CHANGE: {
+            uint32_t propertyDirtyFlags = 0;
+            if (!data.ReadUint32(propertyDirtyFlags)) {
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read propertyDirtyFlags failed");
+                return ERR_INVALID_DATA;
+            }
+
+            std::vector<std::unordered_map<WindowInfoKey, std::any>> windowInfoList;
+            if (!ReadWindowInfoList(data, windowInfoList)) {
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "fail to read windowInfoList.");
+                return ERR_INVALID_DATA;
+            }
+            NotifyWindowPropertyChange(propertyDirtyFlags, windowInfoList);
+            break;
+        }
         default:
             WLOGFW("unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
     return ERR_NONE;
+}
+
+bool WindowManagerAgentStub::ReadWindowInfoList(MessageParcel& data,
+    std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList)
+{
+    uint32_t windowInfoListLength = 0;
+    if (!data.ReadUint32(windowInfoListLength)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read windowInfoListLength failed");
+        return false;
+    }
+    size_t windowInfoListSize = static_cast<size_t>(windowInfoListLength);
+
+    for (size_t i = 0; i < windowInfoListSize; i++) {
+        uint32_t windowInfoLength = 0;
+        if (!data.ReadUint32(windowInfoLength)) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read windowInfoLength failed");
+            return false;
+        }
+        size_t windowInfoSize = static_cast<size_t>(windowInfoLength);
+        std::unordered_map<WindowInfoKey, std::any> windowInfo;
+        for (size_t j = 0; j < windowInfoSize; j++) {
+            if (!ReadWindowInfo(data, windowInfo)) {
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "fail to read windowInfo.");
+                return false;
+            }
+        }
+        windowInfoList.emplace_back(windowInfo);
+    }
+    return true;
+}
+
+bool WindowManagerAgentStub::ReadWindowInfo(MessageParcel& data,
+    std::unordered_map<WindowInfoKey, std::any>& windowInfo)
+{
+    int32_t windowInfoKeyValue = 0;
+    if (!data.ReadInt32(windowInfoKeyValue)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read windowInfoKeyValue failed");
+        return false;
+    }
+
+    WindowInfoKey windowInfoKey = static_cast<WindowInfoKey>(windowInfoKeyValue);
+    switch (windowInfoKey) {
+        case WindowInfoKey::WINDOW_ID : {
+            uint32_t value = 0;
+            if (!data.ReadUint32(value)) {
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read uint32_t failed");
+                return false;
+            }
+            windowInfo[windowInfoKey] = value;
+            break;
+        }
+        case WindowInfoKey::BUNDLE_NAME :
+        case WindowInfoKey::ABILITY_NAME : {
+            std::string value;
+            if (!data.ReadString(value)) {
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read string failed");
+                return false;
+            }
+            windowInfo[windowInfoKey] = value;
+            break;
+        }
+        case WindowInfoKey::APP_INDEX : {
+            int32_t value = 0;
+            if (!data.ReadInt32(value)) {
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read int32_t failed");
+                return false;
+            }
+            windowInfo[windowInfoKey] = value;
+            break;
+        }
+        case WindowInfoKey::VISIBILITY_STATE : {
+            uint32_t value = 0;
+            if (!data.ReadUint32(value)) {
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read WindowVisibilityState failed");
+                return false;
+            }
+            windowInfo[windowInfoKey] = static_cast<WindowVisibilityState>(value);
+            break;
+        }
+        case WindowInfoKey::DISPLAY_ID : {
+            uint64_t value = 0;
+            if (!data.ReadUint64(value)) {
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read uint64_t failed");
+                return false;
+            }
+            windowInfo[windowInfoKey] = value;
+            break;
+        }
+        case WindowInfoKey::WINDOW_RECT : {
+            Rect rect = Rect::EMPTY_RECT;
+            if (!data.ReadInt32(rect.posX_) || !data.ReadInt32(rect.posY_) ||
+                !data.ReadUint32(rect.width_) || !data.ReadUint32(rect.height_)) {
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read Rect failed");
+                return false;
+            }
+            windowInfo[windowInfoKey] = rect;
+            break;
+        }
+        default : {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "unknown WindowInfoKey");
+            return false;
+        }
+    }
+    return true;
 }
 } // namespace Rosen
 } // namespace OHOS

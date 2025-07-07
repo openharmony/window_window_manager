@@ -49,13 +49,9 @@ private:
     sptr<WindowEventChannelMocker> mockEventChannel_ = nullptr;
 };
 
-void SessionSpecificWindowTest::SetUpTestCase()
-{
-}
+void SessionSpecificWindowTest::SetUpTestCase() {}
 
-void SessionSpecificWindowTest::TearDownTestCase()
-{
-}
+void SessionSpecificWindowTest::TearDownTestCase() {}
 
 void SessionSpecificWindowTest::SetUp()
 {
@@ -109,7 +105,6 @@ HWTEST_F(SessionSpecificWindowTest, BindDialogSessionTarget, TestSize.Level1)
     result = sceneSession->BindDialogSessionTarget(sceneSession2);
     ASSERT_EQ(result, WSError::WS_OK);
 }
-
 
 /**
  * @tc.name: AddSubSession
@@ -170,9 +165,7 @@ HWTEST_F(SessionSpecificWindowTest, ClearSpecificSessionCbMap, TestSize.Level1)
     info.bundleName_ = "ClearSpecificSessionCbMap";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     auto result = false;
-    sceneSession->clearCallbackMapFunc_ = [&result](bool needRemove) {
-        result = needRemove;
-    };
+    sceneSession->clearCallbackMapFunc_ = [&result](bool needRemove) { result = needRemove; };
     sceneSession->ClearSpecificSessionCbMap();
     usleep(WAIT_SYNC_IN_NS);
     ASSERT_EQ(result, true);
@@ -593,7 +586,7 @@ HWTEST_F(SessionSpecificWindowTest, HandleDialogForeground, TestSize.Level1)
 HWTEST_F(SessionSpecificWindowTest, HandleSubWindowClick01, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
-    auto result = session_->HandleSubWindowClick(MMI::PointerEvent::POINTER_ACTION_DOWN);
+    auto result = session_->HandleSubWindowClick(MMI::PointerEvent::POINTER_ACTION_DOWN, 0);
     EXPECT_EQ(result, WSError::WS_OK);
 }
 
@@ -612,10 +605,10 @@ HWTEST_F(SessionSpecificWindowTest, HandleSubWindowClick03, TestSize.Level1)
     sptr<Session> dialogSession = sptr<Session>::MakeSptr(info);
     session_->SetParentSession(dialogSession);
 
-    auto result = session_->HandleSubWindowClick(MMI::PointerEvent::POINTER_ACTION_DOWN);
+    auto result = session_->HandleSubWindowClick(MMI::PointerEvent::POINTER_ACTION_DOWN, 0);
     EXPECT_EQ(result, WSError::WS_OK);
 
-    result = session_->HandleSubWindowClick(MMI::PointerEvent::POINTER_ACTION_MOVE);
+    result = session_->HandleSubWindowClick(MMI::PointerEvent::POINTER_ACTION_MOVE, 0);
     EXPECT_EQ(result, WSError::WS_OK);
 }
 
@@ -637,11 +630,11 @@ HWTEST_F(SessionSpecificWindowTest, HandleSubWindowClick04, TestSize.Level1)
     session_->property_->SetRaiseEnabled(true);
     int32_t action = MMI::PointerEvent::POINTER_ACTION_BUTTON_UP;
     bool isExecuteDelayRaise = true;
-    auto result = session_->HandleSubWindowClick(action, isExecuteDelayRaise);
+    auto result = session_->HandleSubWindowClick(action, 0, isExecuteDelayRaise);
     EXPECT_EQ(result, WSError::WS_OK);
 
     session_->property_->SetRaiseEnabled(false);
-    result = session_->HandleSubWindowClick(action, isExecuteDelayRaise);
+    result = session_->HandleSubWindowClick(action, 0, isExecuteDelayRaise);
     EXPECT_EQ(result, WSError::WS_OK);
 }
 
@@ -669,12 +662,59 @@ HWTEST_F(SessionSpecificWindowTest, HandleSubWindowClick05, Function | SmallTest
     property->SetRaiseEnabled(false);
     session->SetSessionProperty(property);
 
-    auto result = session->HandleSubWindowClick(MMI::PointerEvent::POINTER_ACTION_DOWN, false);
+    auto result = session->HandleSubWindowClick(MMI::PointerEvent::POINTER_ACTION_DOWN, 0, false);
     EXPECT_EQ(result, WSError::WS_OK);
 
-    result = session->HandleSubWindowClick(MMI::PointerEvent::POINTER_ACTION_DOWN, true);
+    result = session->HandleSubWindowClick(MMI::PointerEvent::POINTER_ACTION_DOWN, 0, true);
     EXPECT_EQ(result, WSError::WS_OK);
 }
+
+/**
+ * @tc.name: HandleSubWindowClick06
+ * @tc.desc: HandleSubWindowClick
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionSpecificWindowTest, HandleSubWindowClick06, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "testSession1";
+    info.moduleName_ = "testSession2";
+    info.bundleName_ = "testSession3";
+    sptr<Session> subSession = sptr<Session>::MakeSptr(info);
+    subSession->SetParentSession(session_);
+    auto property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_MODAL));
+    subSession->SetSessionProperty(property);
+    bool isExecuteDelayRaise = false;
+    auto result = session_->HandleSubWindowClick(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN, 0, isExecuteDelayRaise);
+    EXPECT_EQ(result, WSError::WS_OK);
 }
+
+/**
+ * @tc.name: HandleSubWindowClick07
+ * @tc.desc: HandleSubWindowClick
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionSpecificWindowTest, HandleSubWindowClick07, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    bool hasNotifyManagerToRequestFocus = false;
+    session_->SetRaiseToAppTopForPointDownFunc([&hasNotifyManagerToRequestFocus]() {
+        hasNotifyManagerToRequestFocus = true;
+    });
+    SessionInfo info;
+    info.abilityName_ = "testSession1";
+    info.moduleName_ = "testSession2";
+    info.bundleName_ = "testSession3";
+    sptr<Session> subSession = sptr<Session>::MakeSptr(info);
+    subSession->SetParentSession(session_);
+    session_->property_->SetRaiseEnabled(true);
+    hasNotifyManagerToRequestFocus = false;
+    session_->HandleSubWindowClick(MMI::PointerEvent::POINTER_ACTION_HOVER_ENTER,
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, false);
+    EXPECT_EQ(hasNotifyManagerToRequestFocus, true);
+}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

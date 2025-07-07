@@ -22,9 +22,6 @@
 
 namespace OHOS {
 namespace Rosen {
-namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenRotationController"};
-}
 
 DisplayId ScreenRotationController::defaultDisplayId_ = 0;
 Rotation ScreenRotationController::currentDisplayRotation_;
@@ -45,7 +42,7 @@ void ScreenRotationController::Init()
     currentDisplayRotation_ = GetCurrentDisplayRotation();
     defaultDisplayId_ = DisplayManagerServiceInner::GetInstance().GetDefaultDisplayId();
     if (defaultDisplayId_  == DISPLAY_ID_INVALID) {
-        WLOGFE("defaultDisplayId_ is invalid");
+        TLOGE(WmsLogTag::DMS, "defaultDisplayId_ is invalid");
     }
     lastSensorDecidedRotation_ = currentDisplayRotation_;
     rotationLockedRotation_ = currentDisplayRotation_;
@@ -85,19 +82,19 @@ void ScreenRotationController::SetDefaultDeviceRotationOffset(uint32_t defaultDe
 void ScreenRotationController::HandleSensorEventInput(DeviceRotation deviceRotation)
 {
     if (deviceRotation == DeviceRotation::INVALID) {
-        WLOGFW("deviceRotation is invalid, return.");
+        TLOGW(WmsLogTag::DMS, "deviceRotation is invalid, return.");
         return;
     }
     Orientation orientation = GetPreferredOrientation();
     currentDisplayRotation_ = GetCurrentDisplayRotation();
     lastSensorRotationConverted_ = deviceRotation;
     if (!IsSensorRelatedOrientation(orientation)) {
-        WLOGFD("If the current preferred orientation is locked or sensor-independent, return.");
+        TLOGD(WmsLogTag::DMS, "If the current preferred orientation is locked or sensor-independent, return.");
         return;
     }
 
     if (currentDisplayRotation_ == ConvertDeviceToDisplayRotation(deviceRotation)) {
-        WLOGFD("If the current display rotation is same to sensor rotation, return.");
+        TLOGD(WmsLogTag::DMS, "If the current display rotation is same to sensor rotation, return.");
         return;
     }
     Rotation targetDisplayRotation = CalcTargetDisplayRotation(orientation, deviceRotation);
@@ -108,7 +105,7 @@ Rotation ScreenRotationController::GetCurrentDisplayRotation()
 {
     sptr<DisplayInfo> defaultDisplayInfo = DisplayManagerServiceInner::GetInstance().GetDefaultDisplay();
     if (defaultDisplayInfo == nullptr) {
-        WLOGFE("Cannot get default display info");
+        TLOGE(WmsLogTag::DMS, "Cannot get default display info");
         return defaultDeviceRotation_ == 0 ? ConvertDeviceToDisplayRotation(DeviceRotation::ROTATION_PORTRAIT) :
             ConvertDeviceToDisplayRotation(DeviceRotation::ROTATION_LANDSCAPE);
     }
@@ -119,7 +116,7 @@ Orientation ScreenRotationController::GetPreferredOrientation()
 {
     sptr<ScreenInfo> screenInfo = DisplayManagerServiceInner::GetInstance().GetScreenInfoByDisplayId(defaultDisplayId_);
     if (screenInfo == nullptr) {
-        WLOGFE("Cannot get default screen info");
+        TLOGE(WmsLogTag::DMS, "Cannot get default screen info");
         return Orientation::UNSPECIFIED;
     }
     return screenInfo->GetOrientation();
@@ -189,7 +186,8 @@ void ScreenRotationController::SetScreenRotation(Rotation targetRotation, bool w
     }
     DisplayManagerServiceInner::GetInstance().GetDefaultDisplay()->SetRotation(targetRotation);
     DisplayManagerServiceInner::GetInstance().SetRotationFromWindow(defaultDisplayId_, targetRotation, withAnimation);
-    WLOGFI("dms: Set screen rotation: %{public}u withAnimation: %{public}u", targetRotation, withAnimation);
+    TLOGI(WmsLogTag::DMS, "dms: Set screen rotation: %{public}u withAnimation: %{public}u", targetRotation,
+        withAnimation);
 }
 
 DeviceRotation ScreenRotationController::CalcDeviceRotation(SensorRotation sensorRotation)

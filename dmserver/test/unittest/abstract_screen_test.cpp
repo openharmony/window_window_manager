@@ -109,30 +109,30 @@ HWTEST_F(AbstractScreenTest, RSTree, TestSize.Level1)
     std::shared_ptr<RSSurfaceNode> surfaceNode;
     absScreen_->rsDisplayNode_ = nullptr;
     absScreen_->UpdateRSTree(surfaceNode, true);
-    absScreen_->UpdateDisplayGroupRSTree(surfaceNode, 0, true);
+    absScreen_->UpdateDisplayGroupRSTree(surfaceNode, absScreen_->rsDisplayNode_, true);
 
     struct RSDisplayNodeConfig config;
-    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
+    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config, absScreen_->GetRSUIContext());
     ASSERT_NE(nullptr, absScreen_->rsDisplayNode_);
     absScreen_->UpdateRSTree(surfaceNode, true);
-    absScreen_->UpdateDisplayGroupRSTree(surfaceNode, 0, true);
+    absScreen_->UpdateDisplayGroupRSTree(surfaceNode, absScreen_->rsDisplayNode_, true);
 
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
     surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
     absScreen_->UpdateRSTree(surfaceNode, true);
-    absScreen_->UpdateDisplayGroupRSTree(surfaceNode, 0, false);
+    absScreen_->UpdateDisplayGroupRSTree(surfaceNode, absScreen_->rsDisplayNode_, false);
     ASSERT_NE(nullptr, absScreen_->rsDisplayNode_);
 
     absScreen_->UpdateRSTree(surfaceNode, false);
-    absScreen_->UpdateDisplayGroupRSTree(surfaceNode, 0, false);
-    ASSERT_NE(nullptr, absScreen_->rsDisplayNode_);
-    
-    absScreen_->UpdateRSTree(surfaceNode, false, false);
-    absScreen_->UpdateDisplayGroupRSTree(surfaceNode, 0, false);
+    absScreen_->UpdateDisplayGroupRSTree(surfaceNode, absScreen_->rsDisplayNode_, false);
     ASSERT_NE(nullptr, absScreen_->rsDisplayNode_);
 
     absScreen_->UpdateRSTree(surfaceNode, false, false);
-    absScreen_->UpdateDisplayGroupRSTree(surfaceNode, 0, true);
+    absScreen_->UpdateDisplayGroupRSTree(surfaceNode, absScreen_->rsDisplayNode_, false);
+    ASSERT_NE(nullptr, absScreen_->rsDisplayNode_);
+
+    absScreen_->UpdateRSTree(surfaceNode, false, false);
+    absScreen_->UpdateDisplayGroupRSTree(surfaceNode, absScreen_->rsDisplayNode_, true);
     ASSERT_NE(nullptr, absScreen_->rsDisplayNode_);
     absScreen_->rsDisplayNode_ = nullptr;
 }
@@ -145,9 +145,9 @@ HWTEST_F(AbstractScreenTest, RSTree, TestSize.Level1)
 HWTEST_F(AbstractScreenTest, InitRSDisplayNode, TestSize.Level1)
 {
     struct RSDisplayNodeConfig config;
-    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
+    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config, absScreen_->GetRSUIContext());
     ASSERT_NE(nullptr, absScreen_->rsDisplayNode_);
-    
+
     RSDisplayNodeConfig config_;
     Point startPoint;
     absScreen_->InitRSDisplayNode(config_, startPoint);
@@ -162,9 +162,9 @@ HWTEST_F(AbstractScreenTest, InitRSDisplayNode, TestSize.Level1)
 HWTEST_F(AbstractScreenTest, InitRSDefaultDisplayNode, TestSize.Level1)
 {
     struct RSDisplayNodeConfig config;
-    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
+    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config, absScreen_->GetRSUIContext());
     ASSERT_NE(nullptr, absScreen_->rsDisplayNode_);
-    
+
     RSDisplayNodeConfig config_;
     Point startPoint;
     absScreen_->InitRSDefaultDisplayNode(config_, startPoint);
@@ -275,7 +275,7 @@ HWTEST_F(AbstractScreenTest, SetScreenGamutMap, TestSize.Level1)
     ScreenGamutMap gamutMap = ScreenGamutMap::GAMUT_MAP_HDR_CONSTANT;
     DMError result = absScreen_->SetScreenGamutMap(gamutMap);
     EXPECT_EQ(result, DMError::DM_ERROR_RENDER_SERVICE_FAILED);
-    
+
     gamutMap = static_cast<ScreenGamutMap>(static_cast<uint32_t>(ScreenGamutMap::GAMUT_MAP_HDR_EXTENSION) + 1);
     result = absScreen_->SetScreenGamutMap(gamutMap);
     EXPECT_EQ(result, DMError::DM_ERROR_INVALID_PARAM);
@@ -441,7 +441,7 @@ HWTEST_F(AbstractScreenTest, AddChild01, TestSize.Level1)
     EXPECT_FALSE(result);
 
     struct RSDisplayNodeConfig config;
-    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
+    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config, absScreen_->GetRSUIContext());
     absScreen_->type_ = ScreenType::REAL;
     absScreenGroup_->defaultScreenId_ = 0;
     result = absScreenGroup_->AddChild(absScreen_, point_);
@@ -466,7 +466,7 @@ HWTEST_F(AbstractScreenTest, AddChild02, TestSize.Level1)
     EXPECT_FALSE(result);
 
     struct RSDisplayNodeConfig config;
-    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
+    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config, absScreen_->GetRSUIContext());
     absScreen_->type_ = ScreenType::REAL;
     absScreenGroup_->defaultScreenId_ = 0;
     result = absScreenGroup_->AddChild(absScreen_, point_);
@@ -503,7 +503,7 @@ HWTEST_F(AbstractScreenTest, RemoveChild01, TestSize.Level1)
     EXPECT_FALSE(result);
 
     struct RSDisplayNodeConfig config;
-    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
+    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config, absScreen_->GetRSUIContext());
     result = absScreenGroup_->RemoveChild(absScreen_);
     EXPECT_TRUE(result);
 }
@@ -517,7 +517,7 @@ HWTEST_F(AbstractScreenTest, RemoveChild02, TestSize.Level1)
 {
     Point point_(159, 357);
     struct RSDisplayNodeConfig config;
-    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
+    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config, absScreen_->GetRSUIContext());
     absScreen_->startPoint_ = point_;
     (absScreenGroup_->screenMap_).insert({0, absScreen_});
     bool result = absScreenGroup_->RemoveChild(absScreen_);
@@ -540,7 +540,7 @@ HWTEST_F(AbstractScreenTest, RemoveDefaultScreen, TestSize.Level1)
     EXPECT_TRUE(result);
 
     struct RSDisplayNodeConfig config;
-    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
+    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config, absScreen_->GetRSUIContext());
     result = absScreenGroup_->RemoveDefaultScreen(absScreen_);
     ASSERT_TRUE(result);
 }
@@ -595,13 +595,14 @@ HWTEST_F(AbstractScreenTest, AbstractScreenGroup, TestSize.Level1)
 HWTEST_F(AbstractScreenTest, AddSurfaceNode, TestSize.Level1)
 {
     struct RSDisplayNodeConfig config;
-    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
+    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config, absScreen_->GetRSUIContext());
     std::shared_ptr<RSSurfaceNode> surfaceNode;
     DMError ret = absScreen_->AddSurfaceNode(surfaceNode, true);
     ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
 
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
-    surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+    surfaceNode = RSSurfaceNode::Create(
+        rsSurfaceNodeConfig, RSSurfaceNodeType::DEFAULT, true, false, absScreen_->GetRSUIContext());
 
     ret = absScreen_->AddSurfaceNode(surfaceNode, true);
     ASSERT_EQ(ret, DMError::DM_OK);
@@ -629,13 +630,14 @@ HWTEST_F(AbstractScreenTest, AddSurfaceNode, TestSize.Level1)
 HWTEST_F(AbstractScreenTest, RemoveSurfaceNode, TestSize.Level1)
 {
     struct RSDisplayNodeConfig config;
-    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
+    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config, absScreen_->GetRSUIContext());
     std::shared_ptr<RSSurfaceNode> surfaceNode;
     DMError ret = absScreen_->RemoveSurfaceNode(surfaceNode);
     ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
 
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
-    surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+    surfaceNode = RSSurfaceNode::Create(
+        rsSurfaceNodeConfig, RSSurfaceNodeType::DEFAULT, true, false, absScreen_->GetRSUIContext());
     ret = absScreen_->RemoveSurfaceNode(surfaceNode);
     ASSERT_EQ(ret, DMError::DM_ERROR_INVALID_PARAM);
 
@@ -690,7 +692,7 @@ HWTEST_F(AbstractScreenTest, AddChild03, TestSize.Level1)
     EXPECT_FALSE(result);
 
     struct RSDisplayNodeConfig config;
-    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
+    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config, absScreen_->GetRSUIContext());
     absScreen_->type_ = ScreenType::REAL;
     absScreenGroup_->defaultScreenId_ = 0;
     result = absScreenGroup_->AddChild(absScreen_, point_);
@@ -738,7 +740,7 @@ HWTEST_F(AbstractScreenTest, RemoveDefaultScreen02, TestSize.Level1)
     EXPECT_TRUE(result);
 
     struct RSDisplayNodeConfig config;
-    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
+    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config, absScreen_->GetRSUIContext());
     result = absScreenGroup_->RemoveDefaultScreen(absScreen_);
     ASSERT_TRUE(result);
 }
@@ -768,7 +770,7 @@ HWTEST_F(AbstractScreenTest, UpdateRSTree02, TestSize.Level1)
 {
     std::shared_ptr<RSSurfaceNode> surfaceNode;
     struct RSDisplayNodeConfig config;
-    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
+    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config, absScreen_->GetRSUIContext());
     bool isAdd = true;
     bool needToUpdate = true;
 
@@ -786,7 +788,7 @@ HWTEST_F(AbstractScreenTest, UpdateRSTree03, TestSize.Level1)
 {
     std::shared_ptr<RSSurfaceNode> surfaceNode;
     struct RSDisplayNodeConfig config;
-    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
+    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config, absScreen_->GetRSUIContext());
     bool isAdd = true;
     bool needToUpdate = false;
 
@@ -804,7 +806,7 @@ HWTEST_F(AbstractScreenTest, UpdateRSTree04, TestSize.Level1)
 {
     std::shared_ptr<RSSurfaceNode> surfaceNode;
     struct RSDisplayNodeConfig config;
-    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
+    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config, absScreen_->GetRSUIContext());
     bool isAdd = false;
     bool needToUpdate = false;
 
@@ -822,7 +824,7 @@ HWTEST_F(AbstractScreenTest, UpdateRSTree05, TestSize.Level1)
 {
     std::shared_ptr<RSSurfaceNode> surfaceNode;
     struct RSDisplayNodeConfig config;
-    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
+    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config, absScreen_->GetRSUIContext());
     bool isAdd = false;
     bool needToUpdate = true;
 
@@ -839,12 +841,12 @@ HWTEST_F(AbstractScreenTest, UpdateRSTree05, TestSize.Level1)
 HWTEST_F(AbstractScreenTest, UpdateRSTree06, TestSize.Level1)
 {
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
-    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig,
-        RSSurfaceNodeType::DEFAULT);
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(
+        rsSurfaceNodeConfig, RSSurfaceNodeType::DEFAULT, true, false, absScreen_->GetRSUIContext());
     bool isAdd = false;
     bool needToUpdate = true;
     struct RSDisplayNodeConfig config;
-    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
+    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config, absScreen_->GetRSUIContext());
     ASSERT_NE(nullptr, absScreen_->rsDisplayNode_);
 
     absScreen_->UpdateRSTree(surfaceNode, isAdd, needToUpdate);
@@ -859,12 +861,12 @@ HWTEST_F(AbstractScreenTest, UpdateRSTree06, TestSize.Level1)
 HWTEST_F(AbstractScreenTest, UpdateRSTree07, TestSize.Level1)
 {
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
-    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig,
-        RSSurfaceNodeType::DEFAULT);
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(
+        rsSurfaceNodeConfig, RSSurfaceNodeType::DEFAULT, true, false, absScreen_->GetRSUIContext());
     bool isAdd = true;
     bool needToUpdate = false;
     struct RSDisplayNodeConfig config;
-    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
+    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config, absScreen_->GetRSUIContext());
     ASSERT_NE(nullptr, absScreen_->rsDisplayNode_);
 
     absScreen_->UpdateRSTree(surfaceNode, isAdd, needToUpdate);
@@ -879,12 +881,12 @@ HWTEST_F(AbstractScreenTest, UpdateRSTree07, TestSize.Level1)
 HWTEST_F(AbstractScreenTest, UpdateRSTree08, TestSize.Level1)
 {
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
-    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig,
-        RSSurfaceNodeType::DEFAULT);
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(
+        rsSurfaceNodeConfig, RSSurfaceNodeType::DEFAULT, true, false, absScreen_->GetRSUIContext());
     bool isAdd = false;
     bool needToUpdate = false;
     struct RSDisplayNodeConfig config;
-    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
+    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config, absScreen_->GetRSUIContext());
     ASSERT_NE(nullptr, absScreen_->rsDisplayNode_);
 
     absScreen_->UpdateRSTree(surfaceNode, isAdd, needToUpdate);
@@ -899,12 +901,12 @@ HWTEST_F(AbstractScreenTest, UpdateRSTree08, TestSize.Level1)
 HWTEST_F(AbstractScreenTest, UpdateRSTree09, TestSize.Level1)
 {
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
-    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig,
-        RSSurfaceNodeType::DEFAULT);
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(
+        rsSurfaceNodeConfig, RSSurfaceNodeType::DEFAULT, true, false, absScreen_->GetRSUIContext());
     bool isAdd = false;
     bool needToUpdate = true;
     struct RSDisplayNodeConfig config;
-    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
+    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config, absScreen_->GetRSUIContext());
     ASSERT_NE(nullptr, absScreen_->rsDisplayNode_);
 
     absScreen_->UpdateRSTree(surfaceNode, isAdd, needToUpdate);
@@ -919,11 +921,11 @@ HWTEST_F(AbstractScreenTest, UpdateRSTree09, TestSize.Level1)
 HWTEST_F(AbstractScreenTest, UpdateDisplayGroupRSTree01, TestSize.Level1)
 {
     std::shared_ptr<RSSurfaceNode> surfaceNode;
-    NodeId parentNodeId = 0;
+    struct RSDisplayNodeConfig config;
+    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config, absScreen_->GetRSUIContext());
     bool isAdd = true;
-
-    absScreen_->UpdateDisplayGroupRSTree(surfaceNode, parentNodeId, isAdd);
-    ASSERT_EQ(nullptr, absScreen_->rsDisplayNode_);
+    absScreen_->UpdateDisplayGroupRSTree(surfaceNode, absScreen_->rsDisplayNode_, isAdd);
+    ASSERT_NE(nullptr, absScreen_->rsDisplayNode_);
 }
 
 /**
@@ -934,13 +936,12 @@ HWTEST_F(AbstractScreenTest, UpdateDisplayGroupRSTree01, TestSize.Level1)
 HWTEST_F(AbstractScreenTest, UpdateDisplayGroupRSTree02, TestSize.Level1)
 {
     std::shared_ptr<RSSurfaceNode> surfaceNode;
-    NodeId parentNodeId = 0;
     bool isAdd = true;
     struct RSDisplayNodeConfig config;
-    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
+    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config, absScreen_->GetRSUIContext());
     ASSERT_NE(nullptr, absScreen_->rsDisplayNode_);
 
-    absScreen_->UpdateDisplayGroupRSTree(surfaceNode, parentNodeId, isAdd);
+    absScreen_->UpdateDisplayGroupRSTree(surfaceNode, absScreen_->rsDisplayNode_, isAdd);
     absScreen_->rsDisplayNode_ = nullptr;
 }
 
@@ -952,15 +953,14 @@ HWTEST_F(AbstractScreenTest, UpdateDisplayGroupRSTree02, TestSize.Level1)
 HWTEST_F(AbstractScreenTest, UpdateDisplayGroupRSTree03, TestSize.Level1)
 {
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
-    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig,
-        RSSurfaceNodeType::DEFAULT);
-    NodeId parentNodeId = 0;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(
+        rsSurfaceNodeConfig, RSSurfaceNodeType::DEFAULT, true, false, absScreen_->GetRSUIContext());
     bool isAdd = false;
     struct RSDisplayNodeConfig config;
-    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
+    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config, absScreen_->GetRSUIContext());
     ASSERT_NE(nullptr, absScreen_->rsDisplayNode_);
 
-    absScreen_->UpdateDisplayGroupRSTree(surfaceNode, parentNodeId, isAdd);
+    absScreen_->UpdateDisplayGroupRSTree(surfaceNode, absScreen_->rsDisplayNode_, isAdd);
     absScreen_->rsDisplayNode_ = nullptr;
 }
 
@@ -972,15 +972,14 @@ HWTEST_F(AbstractScreenTest, UpdateDisplayGroupRSTree03, TestSize.Level1)
 HWTEST_F(AbstractScreenTest, UpdateDisplayGroupRSTree04, TestSize.Level1)
 {
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
-    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig,
-        RSSurfaceNodeType::DEFAULT);
-    NodeId parentNodeId = 0;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(
+        rsSurfaceNodeConfig, RSSurfaceNodeType::DEFAULT, true, false, absScreen_->GetRSUIContext());
     bool isAdd = true;
     struct RSDisplayNodeConfig config;
-    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
+    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config, absScreen_->GetRSUIContext());
     ASSERT_NE(nullptr, absScreen_->rsDisplayNode_);
 
-    absScreen_->UpdateDisplayGroupRSTree(surfaceNode, parentNodeId, isAdd);
+    absScreen_->UpdateDisplayGroupRSTree(surfaceNode, absScreen_->rsDisplayNode_, isAdd);
     absScreen_->rsDisplayNode_ = nullptr;
 }
 
@@ -992,13 +991,12 @@ HWTEST_F(AbstractScreenTest, UpdateDisplayGroupRSTree04, TestSize.Level1)
 HWTEST_F(AbstractScreenTest, UpdateDisplayGroupRSTree05, TestSize.Level1)
 {
     std::shared_ptr<RSSurfaceNode> surfaceNode;
-    NodeId parentNodeId = 0;
     bool isAdd = false;
     struct RSDisplayNodeConfig config;
-    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
+    absScreen_->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config, absScreen_->GetRSUIContext());
     ASSERT_NE(nullptr, absScreen_->rsDisplayNode_);
 
-    absScreen_->UpdateDisplayGroupRSTree(surfaceNode, parentNodeId, isAdd);
+    absScreen_->UpdateDisplayGroupRSTree(surfaceNode, absScreen_->rsDisplayNode_, isAdd);
     absScreen_->rsDisplayNode_ = nullptr;
 }
 }

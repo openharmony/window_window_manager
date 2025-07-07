@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
-#include "window_extension_connection.h"
-#include "window_extension_connection.cpp"
-#include "wm_common.h"
 #include "iremote_object_mocker.h"
+#include "window_extension_connection.cpp"
+#include "window_extension_connection.h"
+#include "wm_common.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -29,21 +29,20 @@ namespace Rosen {
 
 class MockWindowExtensionProxy : public IRemoteProxy<IWindowExtension> {
 public:
-    explicit MockWindowExtensionProxy(const sptr<IRemoteObject>& impl)
-        : IRemoteProxy<IWindowExtension>(impl) {};
+    explicit MockWindowExtensionProxy(const sptr<IRemoteObject>& impl) : IRemoteProxy<IWindowExtension>(impl) {};
     ~MockWindowExtensionProxy() {};
 
     MOCK_METHOD(void, SetBounds, (const Rect& rect), (override));
     MOCK_METHOD(void, Hide, (), (override));
     MOCK_METHOD(void, Show, (), (override));
     MOCK_METHOD(void, RequestFocus, (), (override));
-    MOCK_METHOD(void, GetExtensionWindow, (sptr<IWindowExtensionClient>& token), (override));
+    MOCK_METHOD(void, GetExtensionWindow, (sptr<IWindowExtensionClient> & token), (override));
 };
 
 class ExtensionCallback : public Rosen::IWindowExtensionCallback {
 public:
     ExtensionCallback() = default;
-    ~ExtensionCallback()  = default;
+    ~ExtensionCallback() = default;
     void OnWindowReady(const std::shared_ptr<Rosen::RSSurfaceNode>& rsSurfaceNode) override;
     void OnExtensionDisconnected() override;
     void OnKeyEvent(const std::shared_ptr<MMI::KeyEvent>& event) override;
@@ -57,21 +56,13 @@ void ExtensionCallback::OnWindowReady(const std::shared_ptr<Rosen::RSSurfaceNode
     isWindowReady_ = true;
 }
 
-void ExtensionCallback::OnExtensionDisconnected()
-{
-}
+void ExtensionCallback::OnExtensionDisconnected() {}
 
-void ExtensionCallback::OnKeyEvent(const std::shared_ptr<MMI::KeyEvent>& event)
-{
-}
+void ExtensionCallback::OnKeyEvent(const std::shared_ptr<MMI::KeyEvent>& event) {}
 
-void ExtensionCallback::OnPointerEvent(const std::shared_ptr<MMI::PointerEvent>& event)
-{
-}
+void ExtensionCallback::OnPointerEvent(const std::shared_ptr<MMI::PointerEvent>& event) {}
 
-void ExtensionCallback::OnBackPress()
-{
-}
+void ExtensionCallback::OnBackPress() {}
 
 class ExtensionConnectionTest : public testing::Test {
 public:
@@ -79,21 +70,18 @@ public:
     static void TearDownTestCase();
     virtual void SetUp() override;
     virtual void TearDown() override;
+
 private:
     sptr<WindowExtensionConnection> connection_ = nullptr;
 };
 
-void ExtensionConnectionTest::SetUpTestCase()
-{
-}
+void ExtensionConnectionTest::SetUpTestCase() {}
 
-void ExtensionConnectionTest::TearDownTestCase()
-{
-}
+void ExtensionConnectionTest::TearDownTestCase() {}
 
 void ExtensionConnectionTest::SetUp()
 {
-    connection_ = new(std::nothrow)WindowExtensionConnection();
+    connection_ = new (std::nothrow) WindowExtensionConnection();
     ASSERT_NE(nullptr, connection_);
 }
 
@@ -113,7 +101,7 @@ HWTEST_F(ExtensionConnectionTest, WindowExtensionConnection01, TestSize.Level1)
     AppExecFwk::ElementName element;
     element.SetBundleName("com.test.windowextension");
     element.SetAbilityName("WindowExtAbility");
-    Rosen::Rect rect {100, 100, 60, 60};
+    Rosen::Rect rect{ 100, 100, 60, 60 };
     ASSERT_TRUE(connection_->ConnectExtension(element, rect, 100, INVALID_WINDOW_ID, nullptr) != ERR_OK);
     connection_->Show();
     connection_->RequestFocus();
@@ -128,9 +116,9 @@ HWTEST_F(ExtensionConnectionTest, WindowExtensionConnection01, TestSize.Level1)
  */
 HWTEST_F(ExtensionConnectionTest, Show, TestSize.Level1)
 {
-    sptr<IRemoteObject> remoteObject = new(std::nothrow) IRemoteObjectMocker();
+    sptr<IRemoteObject> remoteObject = new (std::nothrow) IRemoteObjectMocker();
     ASSERT_NE(nullptr, remoteObject);
-    auto mockProxy = new(std::nothrow) MockWindowExtensionProxy(remoteObject);
+    auto mockProxy = new (std::nothrow) MockWindowExtensionProxy(remoteObject);
     ASSERT_NE(nullptr, mockProxy);
     ASSERT_NE(nullptr, connection_->pImpl_);
     connection_->pImpl_->proxy_ = mockProxy;
@@ -145,9 +133,9 @@ HWTEST_F(ExtensionConnectionTest, Show, TestSize.Level1)
  */
 HWTEST_F(ExtensionConnectionTest, Hide, TestSize.Level1)
 {
-    sptr<IRemoteObject> remoteObject = new(std::nothrow) IRemoteObjectMocker();
+    sptr<IRemoteObject> remoteObject = new (std::nothrow) IRemoteObjectMocker();
     ASSERT_NE(nullptr, remoteObject);
-    auto mockProxy = new(std::nothrow) MockWindowExtensionProxy(remoteObject);
+    auto mockProxy = new (std::nothrow) MockWindowExtensionProxy(remoteObject);
     ASSERT_NE(nullptr, mockProxy);
     ASSERT_NE(nullptr, connection_->pImpl_);
     connection_->pImpl_->proxy_ = mockProxy;
@@ -162,9 +150,9 @@ HWTEST_F(ExtensionConnectionTest, Hide, TestSize.Level1)
  */
 HWTEST_F(ExtensionConnectionTest, RequestFocus, TestSize.Level1)
 {
-    sptr<IRemoteObject> remoteObject = new(std::nothrow) IRemoteObjectMocker();
+    sptr<IRemoteObject> remoteObject = new (std::nothrow) IRemoteObjectMocker();
     ASSERT_NE(nullptr, remoteObject);
-    auto mockProxy = new(std::nothrow) MockWindowExtensionProxy(remoteObject);
+    auto mockProxy = new (std::nothrow) MockWindowExtensionProxy(remoteObject);
     ASSERT_NE(nullptr, mockProxy);
     ASSERT_NE(nullptr, connection_->pImpl_);
     connection_->pImpl_->proxy_ = mockProxy;
@@ -179,9 +167,9 @@ HWTEST_F(ExtensionConnectionTest, RequestFocus, TestSize.Level1)
  */
 HWTEST_F(ExtensionConnectionTest, SetBounds, TestSize.Level1)
 {
-    sptr<IRemoteObject> remoteObject = new(std::nothrow) IRemoteObjectMocker();
+    sptr<IRemoteObject> remoteObject = new (std::nothrow) IRemoteObjectMocker();
     ASSERT_NE(nullptr, remoteObject);
-    auto mockProxy = new(std::nothrow) MockWindowExtensionProxy(remoteObject);
+    auto mockProxy = new (std::nothrow) MockWindowExtensionProxy(remoteObject);
     ASSERT_NE(nullptr, mockProxy);
     ASSERT_NE(nullptr, connection_->pImpl_);
     connection_->pImpl_->proxy_ = mockProxy;
@@ -200,7 +188,7 @@ HWTEST_F(ExtensionConnectionTest, OnRemoteDied01, TestSize.Level1)
     sptr<IRemoteObject> remoteObject = nullptr;
     ASSERT_NE(nullptr, connection_->pImpl_);
     connection_->pImpl_->deathRecipient_ =
-        new(std::nothrow) WindowExtensionConnection::Impl::WindowExtensionClientRecipient(nullptr);
+        new (std::nothrow) WindowExtensionConnection::Impl::WindowExtensionClientRecipient(nullptr);
     ASSERT_NE(nullptr, connection_->pImpl_->deathRecipient_);
     connection_->pImpl_->deathRecipient_->OnRemoteDied(remoteObject);
 }
@@ -212,11 +200,11 @@ HWTEST_F(ExtensionConnectionTest, OnRemoteDied01, TestSize.Level1)
  */
 HWTEST_F(ExtensionConnectionTest, OnRemoteDied02, TestSize.Level1)
 {
-    sptr<IRemoteObject> remoteObject = new(std::nothrow) IRemoteObjectMocker();
+    sptr<IRemoteObject> remoteObject = new (std::nothrow) IRemoteObjectMocker();
     ASSERT_NE(nullptr, remoteObject);
     ASSERT_NE(nullptr, connection_->pImpl_);
     connection_->pImpl_->deathRecipient_ =
-        new(std::nothrow) WindowExtensionConnection::Impl::WindowExtensionClientRecipient(nullptr);
+        new (std::nothrow) WindowExtensionConnection::Impl::WindowExtensionClientRecipient(nullptr);
     ASSERT_NE(nullptr, connection_->pImpl_->deathRecipient_);
     connection_->pImpl_->deathRecipient_->OnRemoteDied(remoteObject);
 }
@@ -228,13 +216,13 @@ HWTEST_F(ExtensionConnectionTest, OnRemoteDied02, TestSize.Level1)
  */
 HWTEST_F(ExtensionConnectionTest, OnRemoteDied03, TestSize.Level1)
 {
-    sptr<IRemoteObject> remoteObject = new(std::nothrow) IRemoteObjectMocker();
+    sptr<IRemoteObject> remoteObject = new (std::nothrow) IRemoteObjectMocker();
     ASSERT_NE(nullptr, remoteObject);
     ASSERT_NE(nullptr, connection_->pImpl_);
     connection_->pImpl_->deathRecipient_ =
-        new(std::nothrow) WindowExtensionConnection::Impl::WindowExtensionClientRecipient(nullptr);
+        new (std::nothrow) WindowExtensionConnection::Impl::WindowExtensionClientRecipient(nullptr);
     ASSERT_NE(nullptr, connection_->pImpl_->deathRecipient_);
-    connection_->pImpl_->deathRecipient_->callback_ = new(std::nothrow) ExtensionCallback();
+    connection_->pImpl_->deathRecipient_->callback_ = new (std::nothrow) ExtensionCallback();
     ASSERT_NE(nullptr, connection_->pImpl_->deathRecipient_->callback_);
     connection_->pImpl_->deathRecipient_->OnRemoteDied(remoteObject);
 }
@@ -261,7 +249,7 @@ HWTEST_F(ExtensionConnectionTest, OnAbilityConnectDone01, TestSize.Level1)
 HWTEST_F(ExtensionConnectionTest, OnAbilityConnectDone02, TestSize.Level1)
 {
     AppExecFwk::ElementName element;
-    sptr<IRemoteObject> remoteObject = new(std::nothrow) IRemoteObjectMocker();
+    sptr<IRemoteObject> remoteObject = new (std::nothrow) IRemoteObjectMocker();
     ASSERT_NE(nullptr, remoteObject);
     int resultCode = 0;
     ASSERT_NE(nullptr, connection_->pImpl_);
@@ -276,13 +264,13 @@ HWTEST_F(ExtensionConnectionTest, OnAbilityConnectDone02, TestSize.Level1)
 HWTEST_F(ExtensionConnectionTest, OnAbilityConnectDone03, TestSize.Level1)
 {
     AppExecFwk::ElementName element;
-    sptr<IRemoteObject> remoteObject = new(std::nothrow) IRemoteObjectMocker();
+    sptr<IRemoteObject> remoteObject = new (std::nothrow) IRemoteObjectMocker();
     ASSERT_NE(nullptr, remoteObject);
-    auto mockProxy = new(std::nothrow) MockWindowExtensionProxy(remoteObject);
+    auto mockProxy = new (std::nothrow) MockWindowExtensionProxy(remoteObject);
     ASSERT_NE(nullptr, mockProxy);
     ASSERT_NE(nullptr, connection_->pImpl_);
     connection_->pImpl_->deathRecipient_ =
-        new(std::nothrow) WindowExtensionConnection::Impl::WindowExtensionClientRecipient(nullptr);
+        new (std::nothrow) WindowExtensionConnection::Impl::WindowExtensionClientRecipient(nullptr);
     ASSERT_NE(nullptr, connection_->pImpl_->deathRecipient_);
     connection_->pImpl_->proxy_ = mockProxy;
     int resultCode = 0;
@@ -312,10 +300,10 @@ HWTEST_F(ExtensionConnectionTest, OnAbilityDisconnectDone02, TestSize.Level1)
     AppExecFwk::ElementName element;
     int resultCode = 0;
     ASSERT_NE(nullptr, connection_->pImpl_);
-    connection_->pImpl_->componentCallback_ = new(std::nothrow) ExtensionCallback();
+    connection_->pImpl_->componentCallback_ = new (std::nothrow) ExtensionCallback();
     ASSERT_NE(nullptr, connection_->pImpl_->componentCallback_);
     connection_->pImpl_->OnAbilityDisconnectDone(element, resultCode);
 }
-}
-} // Rosen
-} // OHOS
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

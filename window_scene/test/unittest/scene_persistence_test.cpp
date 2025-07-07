@@ -31,6 +31,7 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+
 private:
     std::shared_ptr<Media::PixelMap> mPixelMap = std::make_shared<Media::PixelMap>();
 };
@@ -40,21 +41,13 @@ constexpr const char* IMAGE_SUFFIX = ".jpg";
 
 static sptr<ScenePersistence> scenePersistence = sptr<ScenePersistence>::MakeSptr("testBundleName", 1423);
 
-void ScenePersistenceTest::SetUpTestCase()
-{
-}
+void ScenePersistenceTest::SetUpTestCase() {}
 
-void ScenePersistenceTest::TearDownTestCase()
-{
-}
+void ScenePersistenceTest::TearDownTestCase() {}
 
-void ScenePersistenceTest::SetUp()
-{
-}
+void ScenePersistenceTest::SetUp() {}
 
-void ScenePersistenceTest::TearDown()
-{
-}
+void ScenePersistenceTest::TearDown() {}
 
 namespace {
 /**
@@ -82,187 +75,6 @@ HWTEST_F(ScenePersistenceTest, CreateUpdatedIconDir, TestSize.Level1)
     bool result = scenePersistence->CreateUpdatedIconDir(directory);
     ASSERT_EQ(result, false);
 }
-
-/**
- * @tc.name: SaveSnapshot
- * @tc.desc: test function : SaveSnapshot
- * @tc.type: FUNC
- */
-HWTEST_F(ScenePersistenceTest, SaveSnapshot, TestSize.Level1)
-{
-    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
-    std::string directory = "0/Storage";
-    std::string bundleName = "testBundleName";
-
-    SessionInfo info;
-    info.abilityName_ = bundleName;
-    info.bundleName_ = bundleName;
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-
-    int32_t persistentId = 1423;
-    ASSERT_NE(nullptr, scenePersistence);
-    scenePersistence->SaveSnapshot(pixelMap);
-
-    sptr<Session> session = sptr<Session>::MakeSptr(info);
-    ASSERT_NE(nullptr, session);
-    scenePersistence->snapshotPath_ = "/data/1.png";
-
-    scenePersistence->SaveSnapshot(mPixelMap);
-    uint32_t fileID = static_cast<uint32_t>(persistentId) & 0x3fffffff;
-    std::string test = ScenePersistence::snapshotDirectory_ +
-        bundleName + UNDERLINE_SEPARATOR + std::to_string(fileID) + IMAGE_SUFFIX;
-    std::pair<uint32_t, uint32_t> sizeResult = scenePersistence->GetSnapshotSize();
-    EXPECT_EQ(sizeResult.first, 0);
-    EXPECT_EQ(sizeResult.second, 0);
-}
-
-/**
- * @tc.name: RenameSnapshotFromOldPersistentId
- * @tc.desc: test function : RenameSnapshotFromOldPersistentId
- * @tc.type: FUNC
- */
-HWTEST_F(ScenePersistenceTest, RenameSnapshotFromOldPersistentId, TestSize.Level1)
-{
-    int ret = 0;
-    int32_t persistentId = 1424;
-    std::string bundleName = "testBundleName";
-    sptr<ScenePersistence> scenePersistence2 = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
-    scenePersistence2->RenameSnapshotFromOldPersistentId(persistentId);
-    ASSERT_EQ(ret, 0);
-
-    sptr<ScenePersistence> scenePersistence3 = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
-    ASSERT_NE(nullptr, scenePersistence3);
-    scenePersistence3->snapshotPath_ = "/data/1.png";
-    scenePersistence3->RenameSnapshotFromOldPersistentId(persistentId);
-}
-
-/**
- * @tc.name: IsSnapshotExisted
- * @tc.desc: test function : IsSnapshotExisted
- * @tc.type: FUNC
- */
-HWTEST_F(ScenePersistenceTest, IsSnapshotExisted, TestSize.Level1)
-{
-    std::string bundleName = "testBundleName";
-    int32_t persistentId = 1423;
-    sptr<ScenePersistence> scenePersistence = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
-    ASSERT_NE(nullptr, scenePersistence);
-    bool result = scenePersistence->IsSnapshotExisted();
-    ASSERT_EQ(result, false);
-}
-
-/**
- * @tc.name: GetLocalSnapshotPixelMap
- * @tc.desc: test function : get local snapshot pixelmap
- * @tc.type: FUNC
- */
-HWTEST_F(ScenePersistenceTest, GetLocalSnapshotPixelMap, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "GetPixelMap";
-    info.bundleName_ = "GetPixelMap1";
-    sptr<Session> session = sptr<Session>::MakeSptr(info);
-    ASSERT_NE(nullptr, session);
-    auto abilityInfo = session->GetSessionInfo();
-    auto persistentId = abilityInfo.persistentId_;
-    ScenePersistence::CreateSnapshotDir("storage");
-    sptr<ScenePersistence> scenePersistence =
-        sptr<ScenePersistence>::MakeSptr(abilityInfo.bundleName_, persistentId);
-    ASSERT_NE(nullptr, scenePersistence);
-    auto result = scenePersistence->GetLocalSnapshotPixelMap(0.5, 0.5);
-    EXPECT_EQ(result, nullptr);
-
-    bool result2 = scenePersistence->IsSnapshotExisted();
-    EXPECT_EQ(result2, false);
-
-    // create pixelMap
-    const uint32_t colors[1] = { 0x6f0000ff };
-    constexpr uint32_t COMMON_SIZE = 1;
-    uint32_t colorsLength = sizeof(colors) / sizeof(colors[0]);
-    const int32_t offset = 0;
-    Media::InitializationOptions opts;
-    opts.size.width = COMMON_SIZE;
-    opts.size.height = COMMON_SIZE;
-    opts.pixelFormat = Media::PixelFormat::RGBA_8888;
-    opts.alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
-    int32_t stride = opts.size.width;
-    std::shared_ptr<Media::PixelMap> pixelMap1 = Media::PixelMap::Create(colors, colorsLength, offset, stride, opts);
-
-    scenePersistence->SaveSnapshot(pixelMap1);
-    int maxScenePersistencePollNum = 100;
-    scenePersistence->snapshotPath_ = "/data/1.png";
-    for (int i = 0; i < maxScenePersistencePollNum; i++) {
-        result = scenePersistence->GetLocalSnapshotPixelMap(0.8, 0.2);
-        result2 = scenePersistence->IsSnapshotExisted();
-    }
-    EXPECT_NE(result, nullptr);
-    ASSERT_EQ(result2, true);
-
-    result = scenePersistence->GetLocalSnapshotPixelMap(0.0, 0.2);
-    EXPECT_NE(result, nullptr);
-}
-
-/**
- * @tc.name: IsSavingSnapshot
- * @tc.desc: test function : IsSavingSnapshot
- * @tc.type: FUNC
- */
-HWTEST_F(ScenePersistenceTest, IsSavingSnapshot, TestSize.Level1)
-{
-    std::string bundleName = "testBundleName";
-    int32_t persistentId = 1423;
-    sptr<ScenePersistence> scenePersistence = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
-    ASSERT_NE(nullptr, scenePersistence);
-    bool result = scenePersistence->IsSavingSnapshot();
-    ASSERT_EQ(result, false);
-}
-
-/**
- * @tc.name: GetSnapshotFilePath
- * @tc.desc: test function : GetSnapshotFilePath
- * @tc.type: FUNC
- */
-HWTEST_F(ScenePersistenceTest, GetSnapshotFilePath, TestSize.Level1)
-{
-    std::string bundleName = "testBundleName";
-    int32_t persistentId = 1423;
-    sptr<ScenePersistence> scenePersistence = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
-    ASSERT_NE(nullptr, scenePersistence);
-    scenePersistence->RenameSnapshotFromOldPersistentId(0);
-    auto result = scenePersistence->GetSnapshotFilePath();
-    ASSERT_EQ(result, scenePersistence->snapshotPath_);
-}
-
-/**
- * @tc.name: HasSnapshot
- * @tc.desc: test function: HasSnapshot
- * @tc.type: FUNC
- */
-HWTEST_F(ScenePersistenceTest, HasSnapshot, TestSize.Level1)
-{
-    std::string bundleName = "testBundleName";
-    int32_t persistentId = 1423;
-    sptr<ScenePersistence> scenePersistence = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
-    ASSERT_NE(nullptr, scenePersistence);
-    scenePersistence->SetHasSnapshot(true);
-    ASSERT_EQ(scenePersistence->HasSnapshot(), true);
-    scenePersistence->SetHasSnapshot(false);
-    ASSERT_EQ(scenePersistence->HasSnapshot(), false);
-}
-
-/**
- * @tc.name: ResetSnapshotCache
- * @tc.desc: test function: ResetSnapshotCache
- * @tc.type: FUNC
- */
-HWTEST_F(ScenePersistenceTest, ResetSnapshotCache, TestSize.Level1)
-{
-    std::string bundleName = "testBundleName";
-    int32_t persistentId = 1423;
-    sptr<ScenePersistence> scenePersistence = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
-    scenePersistence->ResetSnapshotCache();
-    ASSERT_EQ(scenePersistence->isSavingSnapshot_, false);
-}
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

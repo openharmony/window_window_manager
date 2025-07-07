@@ -20,13 +20,10 @@
 
 namespace OHOS {
 namespace Rosen {
-namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayPowerController"};
-}
 
 bool DisplayPowerController::SuspendBegin(PowerStateChangeReason reason)
 {
-    WLOGFI("reason:%{public}u", reason);
+    TLOGI(WmsLogTag::DMS, "reason:%{public}u", reason);
     std::map<DisplayId, sptr<DisplayInfo>> emptyMap;
     displayStateChangeListener_(DISPLAY_ID_INVALID, nullptr, emptyMap, DisplayStateChangeType::BEFORE_SUSPEND);
     return true;
@@ -34,11 +31,11 @@ bool DisplayPowerController::SuspendBegin(PowerStateChangeReason reason)
 
 bool DisplayPowerController::SetDisplayState(DisplayState state)
 {
-    WLOGFI("state:%{public}u", state);
+    TLOGI(WmsLogTag::DMS, "state:%{public}u", state);
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         if (displayState_ == state) {
-            WLOGFE("state is already set");
+            TLOGE(WmsLogTag::DMS, "state is already set");
             return false;
         }
     }
@@ -62,7 +59,7 @@ bool DisplayPowerController::SetDisplayState(DisplayState state)
             break;
         }
         default: {
-            WLOGFW("unknown DisplayState!");
+            TLOGW(WmsLogTag::DMS, "unknown DisplayState!");
             return false;
         }
     }
@@ -77,7 +74,7 @@ DisplayState DisplayPowerController::GetDisplayState(DisplayId displayId)
 
 void DisplayPowerController::NotifyDisplayEvent(DisplayEvent event)
 {
-    WLOGFI("DisplayEvent:%{public}u", event);
+    TLOGI(WmsLogTag::DMS, "DisplayEvent:%{public}u", event);
     if (event == DisplayEvent::UNLOCK) {
         std::map<DisplayId, sptr<DisplayInfo>> emptyMap;
         displayStateChangeListener_(DISPLAY_ID_INVALID, nullptr, emptyMap, DisplayStateChangeType::BEFORE_UNLOCK);

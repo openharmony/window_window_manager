@@ -30,6 +30,7 @@ namespace OHOS::Rosen {
 struct SecSurfaceInfo;
 struct SecRectInfo;
 MMI::Direction ConvertDegreeToMMIRotation(float degree);
+MMI::Rotation ConvertToMMIRotation(float degree);
 std::string DumpWindowInfo(const MMI::WindowInfo& info);
 std::string DumpRect(const std::vector<MMI::Rect>& rects);
 
@@ -107,6 +108,12 @@ private:
     void ResetFlushWindowInfoTask();
     void CheckIfUpdatePointAreas(WindowType windowType, const sptr<SceneSession>& sceneSession,
         const sptr<WindowSessionProperty>& windowSessionProperty, std::vector<int32_t>& pointerChangeAreas) const;
+
+    /*
+     * Compatible Mode
+     */
+    bool UpdateModalExtensionInCompatStatus(const sptr<SceneSession>& sceneSession, Matrix3f& transform) const;
+
     std::mutex mutexlock_;
     mutable std::shared_mutex secSurfaceInfoMutex_;
     mutable std::shared_mutex constrainedModalUIExtInfoMutex_;

@@ -18,12 +18,21 @@
 #include "screen_session_manager/include/screen_session_manager.h"
 #include "scene_board_judgement.h"
 #include "fold_screen_state_internel.h"
+#include "window_manager_hilog.h"
 
 // using namespace FRAME_TRACE;
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
+namespace {
+    std::string g_errLog;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
+        const char *msg)
+    {
+    g_errLog = msg;
+    }
+}
 class MockScreenChangeListener : public IScreenChangeListener {
 public:
     void OnConnect(ScreenId screenId) override {}
@@ -43,6 +52,8 @@ public:
     void OnSecondaryReflexionChange(ScreenId screenId, bool isSecondaryReflexion) override {}
     void OnExtendScreenConnectStatusChange(ScreenId screenId,
         ExtendScreenConnectStatus extendScreenConnectStatus) override {}
+    void OnBeforeScreenPropertyChange(FoldStatus foldStatus) override {}
+    void OnScreenModeChange(ScreenModeChangeEvent screenModeChangeEvent) override {}
 };
 class ScreenSessionTest : public testing::Test {
   public:
@@ -64,7 +75,8 @@ HWTEST_F(ScreenSessionTest, ScreenSession, TestSize.Level1)
         .rsId = 0,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
     EXPECT_NE(nullptr, screenSession);
 }
 
@@ -80,7 +92,8 @@ HWTEST_F(ScreenSessionTest, ScreenSession02, TestSize.Level1)
         .rsId = 0,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     EXPECT_NE(nullptr, screenSession);
 }
 
@@ -96,7 +109,8 @@ HWTEST_F(ScreenSessionTest, ScreenSession03, TestSize.Level1)
         .rsId = 0,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_MIRROR);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_MIRROR);
     EXPECT_NE(nullptr, screenSession);
 }
 
@@ -112,7 +126,8 @@ HWTEST_F(ScreenSessionTest, ScreenSession04, TestSize.Level1)
         .rsId = 0,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_REAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_REAL);
     EXPECT_NE(nullptr, screenSession);
 }
 
@@ -128,7 +143,8 @@ HWTEST_F(ScreenSessionTest, ScreenSession05, TestSize.Level1)
         .rsId = 0,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::INVALID);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::INVALID);
     EXPECT_NE(nullptr, screenSession);
 }
 
@@ -137,7 +153,7 @@ HWTEST_F(ScreenSessionTest, ScreenSession05, TestSize.Level1)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, CreateDisplayNode, TestSize.Level1)
+HWTEST_F(ScreenSessionTest, CreateDisplayNode, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: CreateDisplayNode start";
     Rosen::RSDisplayNodeConfig rsConfig;
@@ -148,7 +164,8 @@ HWTEST_F(ScreenSessionTest, CreateDisplayNode, TestSize.Level1)
     };
     rsConfig.isMirrored = true;
     rsConfig.screenId = 101;
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     EXPECT_NE(nullptr, screenSession);
     screenSession->CreateDisplayNode(rsConfig);
     GTEST_LOG_(INFO) << "ScreenSessionTest: CreateDisplayNode end";
@@ -170,7 +187,8 @@ HWTEST_F(ScreenSessionTest, SetMirrorScreenType, TestSize.Level1)
     Rosen::RSDisplayNodeConfig rsConfig;
     rsConfig.isMirrored = true;
     rsConfig.screenId = 101;
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     EXPECT_NE(nullptr, screenSession);
     MirrorScreenType mirrorType = MirrorScreenType::VIRTUAL_MIRROR;
     screenSession->SetMirrorScreenType(mirrorType);
@@ -190,7 +208,8 @@ HWTEST_F(ScreenSessionTest, GetMirrorScreenType, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     EXPECT_NE(nullptr, screenSession);
     MirrorScreenType mirrorType = MirrorScreenType::VIRTUAL_MIRROR;
     screenSession->SetMirrorScreenType(mirrorType);
@@ -212,7 +231,8 @@ HWTEST_F(ScreenSessionTest, SetDefaultDeviceRotationOffset, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     EXPECT_NE(nullptr, screenSession);
     uint32_t defaultRotationOffset = 0;
     screenSession->SetDefaultDeviceRotationOffset(defaultRotationOffset);
@@ -232,7 +252,8 @@ HWTEST_F(ScreenSessionTest, UpdateDisplayState, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     EXPECT_NE(nullptr, screenSession);
     DisplayState displayState = DisplayState::OFF;
     screenSession->UpdateDisplayState(displayState);
@@ -252,7 +273,8 @@ HWTEST_F(ScreenSessionTest, UpdateRefreshRate, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     EXPECT_NE(nullptr, screenSession);
     uint32_t refreshRate = 2;
     screenSession->UpdateRefreshRate(refreshRate);
@@ -272,7 +294,8 @@ HWTEST_F(ScreenSessionTest, GetRefreshRate, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     EXPECT_NE(nullptr, screenSession);
     uint32_t refreshRate = 2;
     screenSession->UpdateRefreshRate(refreshRate);
@@ -294,7 +317,8 @@ HWTEST_F(ScreenSessionTest, UpdatePropertyByResolution, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     EXPECT_NE(nullptr, screenSession);
     uint32_t width = 1000;
     uint32_t height = 1500;
@@ -315,7 +339,8 @@ HWTEST_F(ScreenSessionTest, HandleSensorRotation, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     EXPECT_NE(nullptr, screenSession);
     float sensorRotation = 0.0f;
     screenSession->HandleSensorRotation(sensorRotation);
@@ -330,7 +355,7 @@ HWTEST_F(ScreenSessionTest, HandleSensorRotation, TestSize.Level1)
 HWTEST_F(ScreenSessionTest, ConvertIntToRotation, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: ConvertIntToRotation start";
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     int rotation = 0;
     auto res = session->ConvertIntToRotation(rotation);
     ASSERT_EQ(res, Rotation::ROTATION_0);
@@ -351,7 +376,7 @@ HWTEST_F(ScreenSessionTest, ConvertIntToRotation, TestSize.Level1)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, SetVirtualScreenFlag, TestSize.Level1)
+HWTEST_F(ScreenSessionTest, SetVirtualScreenFlag, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "SetVirtualScreenFlag start";
     ScreenSessionConfig config = {
@@ -359,7 +384,8 @@ HWTEST_F(ScreenSessionTest, SetVirtualScreenFlag, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     EXPECT_NE(nullptr, screenSession);
     VirtualScreenFlag screenFlag = VirtualScreenFlag::CAST;
     screenSession->SetVirtualScreenFlag(screenFlag);
@@ -371,7 +397,7 @@ HWTEST_F(ScreenSessionTest, SetVirtualScreenFlag, TestSize.Level1)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, GetVirtualScreenFlag, TestSize.Level1)
+HWTEST_F(ScreenSessionTest, GetVirtualScreenFlag, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "GetVirtualScreenFlag start";
     ScreenSessionConfig config = {
@@ -379,7 +405,8 @@ HWTEST_F(ScreenSessionTest, GetVirtualScreenFlag, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     EXPECT_NE(nullptr, screenSession);
     VirtualScreenFlag screenFlag = VirtualScreenFlag::CAST;
     screenSession->SetVirtualScreenFlag(screenFlag);
@@ -401,7 +428,8 @@ HWTEST_F(ScreenSessionTest, SetPhysicalRotation, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     EXPECT_NE(nullptr, screenSession);
     int rotation = 0;
     screenSession->SetPhysicalRotation(rotation);
@@ -421,7 +449,8 @@ HWTEST_F(ScreenSessionTest, SetScreenComponentRotation, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     EXPECT_NE(nullptr, screenSession);
     int rotation = 0;
     screenSession->SetScreenComponentRotation(rotation);
@@ -441,55 +470,20 @@ HWTEST_F(ScreenSessionTest, UpdateToInputManager, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     EXPECT_NE(nullptr, screenSession);
     RRect bounds;
     int rotation = 90;
     int deviceRotation = 90;
     FoldDisplayMode foldDisplayMode = FoldDisplayMode::FULL;
-    screenSession->UpdateToInputManager(bounds, rotation, deviceRotation, foldDisplayMode, false);
+    screenSession->UpdateToInputManager(bounds, rotation, deviceRotation, foldDisplayMode);
     bounds.rect_.width_ = 1344;
     bounds.rect_.height_ = 2772;
     rotation = 0;
     foldDisplayMode = FoldDisplayMode::MAIN;
-    screenSession->UpdateToInputManager(bounds, rotation, deviceRotation, foldDisplayMode, false);
+    screenSession->UpdateToInputManager(bounds, rotation, deviceRotation, foldDisplayMode);
     GTEST_LOG_(INFO) << "UpdateToInputManager end";
-}
-
-/**
- * @tc.name: OptimizeSecondaryDisplayMode
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionTest, OptimizeSecondaryDisplayMode01, TestSize.Level1)
-{
-    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
-        GTEST_SKIP();
-    }
-    GTEST_LOG_(INFO) << "OptimizeSecondaryDisplayMode start";
-    ScreenSessionConfig config = {
-        .screenId = 100,
-        .rsId = 101,
-        .name = "OpenHarmony",
-    };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
-    ASSERT_NE(screenSession, nullptr);
-    FoldDisplayMode foldDisplayMode = FoldDisplayMode::UNKNOWN;
-    RRect bounds;
-    bounds.rect_.width_ = 1008;
-    bounds.rect_.height_ = 2232;
-    screenSession->OptimizeSecondaryDisplayMode(bounds, foldDisplayMode);
-    EXPECT_EQ(foldDisplayMode, FoldDisplayMode::MAIN);
-
-    bounds.rect_.width_ = 2048;
-    screenSession->OptimizeSecondaryDisplayMode(bounds, foldDisplayMode);
-    EXPECT_EQ(foldDisplayMode, FoldDisplayMode::FULL);
-
-    bounds.rect_.width_ = 3184;
-    screenSession->OptimizeSecondaryDisplayMode(bounds, foldDisplayMode);
-    EXPECT_EQ(foldDisplayMode, FoldDisplayMode::GLOBAL_FULL);
-
-    GTEST_LOG_(INFO) << "OptimizeSecondaryDisplayMode end";
 }
 
 /**
@@ -505,14 +499,15 @@ HWTEST_F(ScreenSessionTest, UpdatePropertyAfterRotation, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     EXPECT_NE(nullptr, screenSession);
     RRect bounds;
     bounds.rect_.width_ = 1344;
     bounds.rect_.height_ = 2772;
     int rotation = 90;
     FoldDisplayMode foldDisplayMode = FoldDisplayMode::MAIN;
-    screenSession->UpdatePropertyAfterRotation(bounds, rotation, foldDisplayMode, false);
+    screenSession->UpdatePropertyAfterRotation(bounds, rotation, foldDisplayMode);
     GTEST_LOG_(INFO) << "UpdatePropertyAfterRotation end";
 }
 
@@ -529,7 +524,8 @@ HWTEST_F(ScreenSessionTest, ReportNotifyModeChange, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     EXPECT_NE(nullptr, screenSession);
     DisplayOrientation displayOrientation = DisplayOrientation::LANDSCAPE;
     screenSession->ReportNotifyModeChange(displayOrientation);
@@ -553,7 +549,8 @@ HWTEST_F(ScreenSessionTest, SuperFoldStatusChange, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     EXPECT_NE(nullptr, screenSession);
     ScreenId screenId = 0;
     SuperFoldStatus superFoldStatus = SuperFoldStatus::UNKNOWN;
@@ -582,7 +579,8 @@ HWTEST_F(ScreenSessionTest, UpdateRotationAfterBoot01, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     EXPECT_NE(nullptr, screenSession);
     bool foldToExpand = true;
     screenSession->UpdateRotationAfterBoot(foldToExpand);
@@ -602,7 +600,8 @@ HWTEST_F(ScreenSessionTest, UpdateRotationAfterBoot02, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     EXPECT_NE(nullptr, screenSession);
     bool foldToExpand = false;
     screenSession->UpdateRotationAfterBoot(foldToExpand);
@@ -622,7 +621,8 @@ HWTEST_F(ScreenSessionTest, UpdateValidRotationToScb, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     EXPECT_NE(nullptr, screenSession);
     screenSession->UpdateValidRotationToScb();
     GTEST_LOG_(INFO) << "UpdateValidRotationToScb end";
@@ -641,7 +641,8 @@ HWTEST_F(ScreenSessionTest, SetScreenSceneDpiChangeListener, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     EXPECT_NE(nullptr, screenSession);
     SetScreenSceneDpiFunc func = nullptr;
     screenSession->SetScreenSceneDpiChangeListener(func);
@@ -661,7 +662,8 @@ HWTEST_F(ScreenSessionTest, SetScreenSceneDestroyListener, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     EXPECT_NE(nullptr, screenSession);
     DestroyScreenSceneFunc func = nullptr;
     screenSession->SetScreenSceneDestroyListener(func);
@@ -681,7 +683,8 @@ HWTEST_F(ScreenSessionTest, SetScreenSceneDpi, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     EXPECT_NE(nullptr, screenSession);
     float density = 1.5f;
     SetScreenSceneDpiFunc func = nullptr;
@@ -708,7 +711,8 @@ HWTEST_F(ScreenSessionTest, DestroyScreenScene, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     EXPECT_NE(nullptr, screenSession);
     DestroyScreenSceneFunc func = nullptr;
     screenSession->SetScreenSceneDestroyListener(func);
@@ -734,7 +738,8 @@ HWTEST_F(ScreenSessionTest, SetDensityInCurResolution, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     EXPECT_NE(nullptr, screenSession);
     float densityInCurResolution = 1.5f;
     screenSession->SetDensityInCurResolution(densityInCurResolution);
@@ -746,10 +751,10 @@ HWTEST_F(ScreenSessionTest, SetDensityInCurResolution, TestSize.Level1)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, GetSourceMode, TestSize.Level1)
+HWTEST_F(ScreenSessionTest, GetSourceMode, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetSourceMode start";
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     session->screenId_ = session->defaultScreenId_;
     ScreenSourceMode mode = session->GetSourceMode();
     ASSERT_EQ(mode, ScreenSourceMode::SCREEN_MAIN);
@@ -758,7 +763,8 @@ HWTEST_F(ScreenSessionTest, GetSourceMode, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     mode = screenSession->GetSourceMode();
     ASSERT_EQ(mode, ScreenSourceMode::SCREEN_ALONE);
     screenSession->SetScreenCombination(ScreenCombination::SCREEN_EXPAND);
@@ -770,6 +776,12 @@ HWTEST_F(ScreenSessionTest, GetSourceMode, TestSize.Level1)
     screenSession->SetScreenCombination(ScreenCombination::SCREEN_UNIQUE);
     mode = screenSession->GetSourceMode();
     ASSERT_EQ(mode, ScreenSourceMode::SCREEN_UNIQUE);
+    screenSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
+    mode = screenSession->GetSourceMode();
+    ASSERT_EQ(mode, ScreenSourceMode::SCREEN_EXTEND);
+    screenSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    mode = screenSession->GetSourceMode();
+    ASSERT_EQ(mode, ScreenSourceMode::SCREEN_MAIN);
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetSourceMode end";
 }
 
@@ -778,10 +790,10 @@ HWTEST_F(ScreenSessionTest, GetSourceMode, TestSize.Level1)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, GetSourceMode02, TestSize.Level1)
+HWTEST_F(ScreenSessionTest, GetSourceMode02, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetSourceMode02 start";
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     session->screenId_ = session->defaultScreenId_;
     ScreenSourceMode mode = session->GetSourceMode();
     ASSERT_EQ(mode, ScreenSourceMode::SCREEN_MAIN);
@@ -790,7 +802,8 @@ HWTEST_F(ScreenSessionTest, GetSourceMode02, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
 
     screenSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
     mode = screenSession->GetSourceMode();
@@ -814,7 +827,8 @@ HWTEST_F(ScreenSessionTest, GetPixelFormat, TestSize.Level1)
         .rsId = 0,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     EXPECT_NE(nullptr, screenSession);
     GraphicPixelFormat pixelFormat;
     auto res = screenSession->GetPixelFormat(pixelFormat);
@@ -835,7 +849,8 @@ HWTEST_F(ScreenSessionTest, SetPixelFormat, TestSize.Level1)
         .rsId = 0,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     EXPECT_NE(nullptr, screenSession);
     GraphicPixelFormat pixelFormat = GraphicPixelFormat{GRAPHIC_PIXEL_FMT_CLUT8};
     auto res = screenSession->SetPixelFormat(pixelFormat);
@@ -857,7 +872,8 @@ HWTEST_F(ScreenSessionTest, GetSupportedHDRFormats, TestSize.Level1)
         .rsId = 0,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     EXPECT_NE(nullptr, screenSession);
     std::vector<ScreenHDRFormat> hdrFormats;
     auto res = screenSession->GetSupportedHDRFormats(hdrFormats);
@@ -883,7 +899,8 @@ HWTEST_F(ScreenSessionTest, GetScreenHDRFormat, TestSize.Level1)
         .rsId = 0,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     EXPECT_NE(nullptr, screenSession);
     ScreenHDRFormat hdrFormat;
     auto res = screenSession->GetScreenHDRFormat(hdrFormat);
@@ -909,7 +926,8 @@ HWTEST_F(ScreenSessionTest, SetScreenHDRFormat, TestSize.Level1)
         .rsId = 0,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     EXPECT_NE(nullptr, screenSession);
     int32_t modeIdx = 0;
     auto res = screenSession->SetScreenHDRFormat(modeIdx);
@@ -938,7 +956,8 @@ HWTEST_F(ScreenSessionTest, GetSupportedColorSpaces, TestSize.Level1)
         .rsId = 0,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     EXPECT_NE(nullptr, screenSession);
     std::vector<GraphicCM_ColorSpaceType> colorSpaces;
     auto res = screenSession->GetSupportedColorSpaces(colorSpaces);
@@ -963,7 +982,8 @@ HWTEST_F(ScreenSessionTest, GetScreenColorSpace, TestSize.Level1)
         .rsId = 0,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     EXPECT_NE(nullptr, screenSession);
     GraphicCM_ColorSpaceType colorSpace;
     auto res = screenSession->GetScreenColorSpace(colorSpace);
@@ -988,7 +1008,8 @@ HWTEST_F(ScreenSessionTest, SetScreenColorSpace, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     EXPECT_NE(nullptr, screenSession);
     GraphicCM_ColorSpaceType colorSpace = GraphicCM_ColorSpaceType{GRAPHIC_CM_COLORSPACE_NONE};
     screenSession->SetScreenColorSpace(colorSpace);
@@ -1009,7 +1030,8 @@ HWTEST_F(ScreenSessionTest, SetPrivateSessionForeground, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     EXPECT_NE(nullptr, screenSession);
     bool hasPrivate = true;
     screenSession->SetPrivateSessionForeground(hasPrivate);
@@ -1023,7 +1045,7 @@ HWTEST_F(ScreenSessionTest, SetPrivateSessionForeground, TestSize.Level1)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, GetScreenCombination, TestSize.Level1)
+HWTEST_F(ScreenSessionTest, GetScreenCombination, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "GetScreenCombination start";
     ScreenSessionConfig config = {
@@ -1031,7 +1053,8 @@ HWTEST_F(ScreenSessionTest, GetScreenCombination, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     EXPECT_NE(nullptr, screenSession);
     ScreenCombination combination { ScreenCombination::SCREEN_ALONE };
     screenSession->SetScreenCombination(combination);
@@ -1053,7 +1076,8 @@ HWTEST_F(ScreenSessionTest, Resize001, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     ASSERT_NE(nullptr, screenSession);
     uint32_t width = 1000;
     uint32_t height = 1000;
@@ -1074,7 +1098,8 @@ HWTEST_F(ScreenSessionTest, Resize002, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     ASSERT_NE(nullptr, screenSession);
     uint32_t width = 1000;
     uint32_t height = 1000;
@@ -1087,7 +1112,7 @@ HWTEST_F(ScreenSessionTest, Resize002, TestSize.Level1)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, UpdateAvailableArea, TestSize.Level1)
+HWTEST_F(ScreenSessionTest, UpdateAvailableArea, TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "UpdateAvailableArea start";
     ScreenSessionConfig config = {
@@ -1095,7 +1120,8 @@ HWTEST_F(ScreenSessionTest, UpdateAvailableArea, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     EXPECT_NE(nullptr, screenSession);
     DMRect area = screenSession->GetAvailableArea();
     auto res = screenSession->UpdateAvailableArea(area);
@@ -1119,7 +1145,8 @@ HWTEST_F(ScreenSessionTest, SetAvailableArea, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     EXPECT_NE(nullptr, screenSession);
     DMRect area = {2, 2, 2, 2};
     screenSession->SetAvailableArea(area);
@@ -1139,7 +1166,8 @@ HWTEST_F(ScreenSessionTest, GetAvailableArea, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     EXPECT_NE(nullptr, screenSession);
     DMRect area = {2, 2, 2, 2};
     screenSession->SetAvailableArea(area);
@@ -1161,7 +1189,8 @@ HWTEST_F(ScreenSessionTest, SetFoldScreen, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     EXPECT_NE(nullptr, screenSession);
     bool isFold = false;
     screenSession->SetFoldScreen(isFold);
@@ -1181,7 +1210,8 @@ HWTEST_F(ScreenSessionTest, SetHdrFormats, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     EXPECT_NE(nullptr, screenSession);
     std::vector<uint32_t> hdrFormats = { 0, 0, 0, 0 };
     screenSession->SetHdrFormats(std::move(hdrFormats));
@@ -1201,11 +1231,35 @@ HWTEST_F(ScreenSessionTest, SetColorSpaces, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     EXPECT_NE(nullptr, screenSession);
     std::vector<uint32_t> colorSpaces = { 0, 0, 0, 0 };
     screenSession->SetColorSpaces(std::move(colorSpaces));
     GTEST_LOG_(INFO) << "SetColorSpaces end";
+}
+
+/**
+ * @tc.name: SetSupportedRefreshRate
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetSupportedRefreshRate, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SetSupportedRefreshRate start";
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    EXPECT_NE(nullptr, screenSession);
+    std::vector<uint32_t> supportedRefreshRate = { 0, 0, 0, 0 };
+    std::vector<uint32_t> supportedRefreshRate_cmp = { 0, 0, 0, 0 };
+    screenSession->SetSupportedRefreshRate(std::move(supportedRefreshRate));
+    EXPECT_EQ(screenSession->supportedRefreshRate_, supportedRefreshRate_cmp);
+    GTEST_LOG_(INFO) << "SetSupportedRefreshRate end";
 }
 
 /**
@@ -1223,7 +1277,7 @@ HWTEST_F(ScreenSessionTest, SetDisplayNodeScreenId, TestSize.Level1)
     RSDisplayNodeConfig displayNodeConfig;
     std::shared_ptr<RSDisplayNode> displayNode = RSDisplayNode::Create(displayNodeConfig);
     EXPECT_NE(nullptr, displayNode);
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession(screenId, rsId, name, property, displayNode);
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr(screenId, rsId, name, property, displayNode);
     session->SetDisplayNodeScreenId(screenId);
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetDisplayNodeScreenId end";
 }
@@ -1237,7 +1291,7 @@ HWTEST_F(ScreenSessionTest, UnregisterScreenChangeListener, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: UnregisterScreenChangeListener start";
     IScreenChangeListener* screenChangeListener = nullptr;
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     int64_t ret = 0;
     session->UnregisterScreenChangeListener(screenChangeListener);
     ASSERT_EQ(ret, 0);
@@ -1253,7 +1307,7 @@ HWTEST_F(ScreenSessionTest, UnregisterScreenChangeListener02, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: UnregisterScreenChangeListener02 start";
     IScreenChangeListener* screenChangeListener = new ScreenSessionManager();
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     int64_t ret = 0;
     session->UnregisterScreenChangeListener(screenChangeListener);
     ASSERT_EQ(ret, 0);
@@ -1268,12 +1322,12 @@ HWTEST_F(ScreenSessionTest, UnregisterScreenChangeListener02, TestSize.Level1)
 HWTEST_F(ScreenSessionTest, ConvertToDisplayInfo, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: ConvertToDisplayInfo start";
-    sptr<DisplayInfo> displayInfo = new(std::nothrow) DisplayInfo();
+    sptr<DisplayInfo> displayInfo = sptr<DisplayInfo>::MakeSptr();
     EXPECT_NE(displayInfo, nullptr);
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     EXPECT_NE(nullptr, session->ConvertToDisplayInfo());
 
-    sptr<ScreenInfo> info = new(std::nothrow) ScreenInfo();
+    sptr<ScreenInfo> info = sptr<ScreenInfo>::MakeSptr();
     EXPECT_NE(info, nullptr);
     EXPECT_NE(nullptr, session->ConvertToScreenInfo());
     GTEST_LOG_(INFO) << "ScreenSessionTest: ConvertToDisplayInfo end";
@@ -1287,7 +1341,7 @@ HWTEST_F(ScreenSessionTest, ConvertToDisplayInfo, TestSize.Level1)
 HWTEST_F(ScreenSessionTest, SetMirrorScreenRegion, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetMirrorScreenRegion start";
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     ASSERT_NE(session, nullptr);
     DMRect area = {2, 2, 2, 2};
     ScreenId screenId = 0;
@@ -1307,8 +1361,15 @@ HWTEST_F(ScreenSessionTest, GetScreenSupportedColorGamuts, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetScreenSupportedColorGamuts start";
     std::vector<ScreenColorGamut> colorGamuts;
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
-    DMError ret = session->GetScreenSupportedColorGamuts(colorGamuts);
+    ScreenSessionConfig config = {
+        .screenId = 0,
+        .rsId = 0,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    ASSERT_NE(screenSession, nullptr);
+    DMError ret = screenSession->GetScreenSupportedColorGamuts(colorGamuts);
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(ret, DMError::DM_OK);
     } else {
@@ -1325,7 +1386,7 @@ HWTEST_F(ScreenSessionTest, GetScreenSupportedColorGamuts, TestSize.Level1)
 HWTEST_F(ScreenSessionTest, GetActiveScreenMode, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetActiveScreenMode start";
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     session->activeIdx_ = -1;
     sptr<SupportedScreenModes> mode1 = session->GetActiveScreenMode();
     session->GetActiveScreenMode();
@@ -1352,7 +1413,7 @@ HWTEST_F(ScreenSessionTest, SetScreenCombination, TestSize.Level1)
     NodeId nodeId = 0;
     ScreenId defaultScreenId = 0;
     ScreenCombination combination { ScreenCombination::SCREEN_ALONE };
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession(screenId, property, nodeId, defaultScreenId);
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr(screenId, property, nodeId, defaultScreenId);
     session->SetScreenCombination(combination);
     EXPECT_NE(session, nullptr);
     EXPECT_EQ(combination, session->GetScreenCombination());
@@ -1368,11 +1429,16 @@ HWTEST_F(ScreenSessionTest, GetScreenColorGamut, TestSize.Level1)
 {
 #ifdef WM_SCREEN_COLOR_GAMUT_ENABLE
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetScreenColorGamut start";
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
-    ASSERT_NE(session, nullptr);
-
+    ScreenSessionConfig config = {
+        .screenId = 0,
+        .rsId = 0,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    ASSERT_NE(screenSession, nullptr);
     ScreenColorGamut colorGamut;
-    DMError res = session->GetScreenColorGamut(colorGamut);
+    DMError res = screenSession->GetScreenColorGamut(colorGamut);
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(res, DMError::DM_OK);
     } else {
@@ -1391,7 +1457,7 @@ HWTEST_F(ScreenSessionTest, SetScreenColorGamut01, TestSize.Level1)
 {
 #ifdef WM_SCREEN_COLOR_GAMUT_ENABLE
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetScreenColorGamut start";
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     ASSERT_NE(session, nullptr);
 
     int32_t colorGamut = 1;
@@ -1410,12 +1476,12 @@ HWTEST_F(ScreenSessionTest, SetScreenColorGamut02, TestSize.Level1)
 {
 #ifdef WM_SCREEN_COLOR_GAMUT_ENABLE
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetScreenColorGamut start";
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     ASSERT_NE(session, nullptr);
 
     int32_t colorGamut = -1;
     DMError res = session->SetScreenColorGamut(colorGamut);
-    ASSERT_EQ(res, DMError::DM_ERROR_INVALID_PARAM);
+    EXPECT_NE(res, DMError::DM_OK);
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetScreenColorGamut end";
 #endif
 }
@@ -1429,7 +1495,7 @@ HWTEST_F(ScreenSessionTest, GetScreenGamutMap, TestSize.Level1)
 {
 #ifdef WM_SCREEN_COLOR_GAMUT_ENABLE
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetScreenGamutMap start";
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     ASSERT_NE(session, nullptr);
 
     ScreenGamutMap gamutMap;
@@ -1448,7 +1514,7 @@ HWTEST_F(ScreenSessionTest, SetScreenGamutMap, TestSize.Level1)
 {
 #ifdef WM_SCREEN_COLOR_GAMUT_ENABLE
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetScreenGamutMap start";
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     ASSERT_NE(session, nullptr);
     ScreenGamutMap gamutMap = GAMUT_MAP_CONSTANT;
     DMError res = session->SetScreenGamutMap(gamutMap);
@@ -1470,7 +1536,7 @@ HWTEST_F(ScreenSessionTest, InitRSDisplayNode, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: InitRSDisplayNode start";
     ScreenSessionGroup sessionGroup(1, 1, "create", ScreenCombination::SCREEN_ALONE);
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     ASSERT_NE(session, nullptr);
     RSDisplayNodeConfig config;
     Point startPoint;
@@ -1495,7 +1561,7 @@ HWTEST_F(ScreenSessionTest, GetRSDisplayNodeConfig, TestSize.Level1)
     bool res = sessionGroup.GetRSDisplayNodeConfig(session0, config, defaultScreenSession);
     ASSERT_EQ(res, false);
 
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     sessionGroup.combination_ = ScreenCombination::SCREEN_ALONE;
     res = sessionGroup.GetRSDisplayNodeConfig(session, config, defaultScreenSession);
     ASSERT_EQ(res, true);
@@ -1525,7 +1591,7 @@ HWTEST_F(ScreenSessionTest, AddChild, TestSize.Level1)
     bool res = sessionGroup.AddChild(session0, startPoint, defaultScreenSession);
     ASSERT_EQ(res, false);
 
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     res = sessionGroup.AddChild(session, startPoint, defaultScreenSession);
     ASSERT_EQ(res, true);
     GTEST_LOG_(INFO) << "ScreenSessionTest: AddChild end";
@@ -1576,7 +1642,7 @@ HWTEST_F(ScreenSessionTest, RemoveChild, TestSize.Level1)
     bool res = sessionGroup.RemoveChild(session0);
     ASSERT_EQ(res, false);
 
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     res = sessionGroup.RemoveChild(session);
     ASSERT_EQ(res, false);
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetRSDisplayNodeConfig end";
@@ -1621,7 +1687,7 @@ HWTEST_F(ScreenSessionTest, RegisterScreenChangeListener01, TestSize.Level1)
     GTEST_LOG_(INFO) << "ScreenSessionTest: RegisterScreenChangeListener start";
     int res = 0;
     IScreenChangeListener* screenChangeListener = nullptr;
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     session->RegisterScreenChangeListener(screenChangeListener);
     ASSERT_EQ(res, 0);
     GTEST_LOG_(INFO) << "ScreenSessionTest: RegisterScreenChangeListener end";
@@ -1637,7 +1703,7 @@ HWTEST_F(ScreenSessionTest, RegisterScreenChangeListener02, TestSize.Level1)
     GTEST_LOG_(INFO) << "ScreenSessionTest: RegisterScreenChangeListener start";
     IScreenChangeListener* screenChangeListener = new MockScreenChangeListener();
     IScreenChangeListener* screenChangeListener1 = new MockScreenChangeListener();
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     session->RegisterScreenChangeListener(screenChangeListener);
     session->RegisterScreenChangeListener(screenChangeListener1);
     ASSERT_FALSE(session->isFold_);
@@ -1650,7 +1716,7 @@ HWTEST_F(ScreenSessionTest, RegisterScreenChangeListener02, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionTest, RegisterScreenChangeListener03, TestSize.Level1)
 {
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     ASSERT_EQ(session->screenState_, ScreenState::INIT);
     session->screenState_ = ScreenState::CONNECTION;
     IScreenChangeListener* screenChangeListener = new MockScreenChangeListener();
@@ -1667,7 +1733,7 @@ HWTEST_F(ScreenSessionTest, RegisterScreenChangeListener03, TestSize.Level1)
 HWTEST_F(ScreenSessionTest, Connect, TestSize.Level1)
 {
     IScreenChangeListener* screenChangeListener = new MockScreenChangeListener();
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     session->RegisterScreenChangeListener(screenChangeListener);
     session->Connect();
     ASSERT_FALSE(session->isFold_);
@@ -1682,7 +1748,7 @@ HWTEST_F(ScreenSessionTest, UpdatePropertyByActiveMode, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: UpdatePropertyByActiveMode start";
     int res = 0;
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     session->UpdatePropertyByActiveMode();
     ASSERT_EQ(res, 0);
     GTEST_LOG_(INFO) << "ScreenSessionTest: UpdatePropertyByActiveMode end";
@@ -1697,7 +1763,7 @@ HWTEST_F(ScreenSessionTest, Disconnect, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: Disconnect start";
     int res = 0;
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     session->Disconnect();
     ASSERT_EQ(res, 0);
     GTEST_LOG_(INFO) << "ScreenSessionTest: Disconnect end";
@@ -1712,8 +1778,8 @@ HWTEST_F(ScreenSessionTest, Disconnect02, TestSize.Level1)
 {
     IScreenChangeListener* screenChangeListener = new MockScreenChangeListener();
     IScreenChangeListener* screenChangeListener1 = new MockScreenChangeListener();
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
-    sptr<ScreenSession> session1 = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    sptr<ScreenSession> session1 = sptr<ScreenSession>::MakeSptr();
     session->RegisterScreenChangeListener(screenChangeListener);
     session1->RegisterScreenChangeListener(screenChangeListener1);
     session1->Connect();
@@ -1731,7 +1797,7 @@ HWTEST_F(ScreenSessionTest, SensorRotationChange01, TestSize.Level1)
     GTEST_LOG_(INFO) << "ScreenSessionTest: SensorRotationChange start";
     int res = 0;
     Rotation sensorRotation = Rotation::ROTATION_0;
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     session->SensorRotationChange(sensorRotation);
     ASSERT_EQ(res, 0);
     GTEST_LOG_(INFO) << "ScreenSessionTest: SensorRotationChange end";
@@ -1745,7 +1811,7 @@ HWTEST_F(ScreenSessionTest, SensorRotationChange01, TestSize.Level1)
 HWTEST_F(ScreenSessionTest, SensorRotationChange02, TestSize.Level1)
 {
     IScreenChangeListener* screenChangeListener = new MockScreenChangeListener();
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     session->RegisterScreenChangeListener(screenChangeListener);
     Rotation sensorRotation = Rotation::ROTATION_90;
     session->SensorRotationChange(sensorRotation);
@@ -1760,7 +1826,7 @@ HWTEST_F(ScreenSessionTest, SensorRotationChange02, TestSize.Level1)
 HWTEST_F(ScreenSessionTest, SetOrientation, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetOrientation start";
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     Orientation orientation = Orientation::UNSPECIFIED;
     session->SetOrientation(orientation);
     Orientation res = session->GetOrientation();
@@ -1776,7 +1842,7 @@ HWTEST_F(ScreenSessionTest, SetOrientation, TestSize.Level1)
 HWTEST_F(ScreenSessionTest, SetScreenRequestedOrientation, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetScreenRequestedOrientation start";
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     Orientation orientation = Orientation::UNSPECIFIED;
     session->SetScreenRequestedOrientation(orientation);
     Orientation res = session->GetScreenRequestedOrientation();
@@ -1792,7 +1858,7 @@ HWTEST_F(ScreenSessionTest, SetScreenRequestedOrientation, TestSize.Level1)
 HWTEST_F(ScreenSessionTest, SetUpdateToInputManagerCallback, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetUpdateToInputManagerCallback start";
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     auto func = [session](float x) {
         session->SetVirtualPixelRatio(x);
     };
@@ -1802,7 +1868,7 @@ HWTEST_F(ScreenSessionTest, SetUpdateToInputManagerCallback, TestSize.Level1)
     ScreenProperty screenPropert = session->GetScreenProperty();
     EXPECT_NE(nullptr, &screenPropert);
     session->SetVirtualPixelRatio(3.14);
-     
+
     ScreenType screenType { ScreenType::REAL };
     session->SetScreenType(screenType);
 
@@ -1818,7 +1884,7 @@ HWTEST_F(ScreenSessionTest, SetScreenRotationLocked, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetScreenRotationLocked start";
     bool isLocked = true;
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     session->SetScreenRotationLocked(isLocked);
     bool res = session->IsScreenRotationLocked();
     ASSERT_EQ(res, isLocked);
@@ -1834,7 +1900,7 @@ HWTEST_F(ScreenSessionTest, SetScreenRotationLockedFromJs, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetScreenRotationLockedFromJs start";
     bool isLocked = true;
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     session->SetScreenRotationLockedFromJs(isLocked);
     bool res = session->IsScreenRotationLocked();
     ASSERT_EQ(res, isLocked);
@@ -1849,7 +1915,7 @@ HWTEST_F(ScreenSessionTest, SetScreenRotationLockedFromJs, TestSize.Level1)
 HWTEST_F(ScreenSessionTest, IsScreenRotationLocked, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: IsScreenRotationLocked start";
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     bool res = session->IsScreenRotationLocked();
     ASSERT_EQ(res, session->isScreenLocked_);
     GTEST_LOG_(INFO) << "ScreenSessionTest: IsScreenRotationLocked end";
@@ -1863,7 +1929,7 @@ HWTEST_F(ScreenSessionTest, IsScreenRotationLocked, TestSize.Level1)
 HWTEST_F(ScreenSessionTest, GetScreenRequestedOrientation, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetScreenRequestedOrientation start";
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     Orientation res = session->GetScreenRequestedOrientation();
     ASSERT_EQ(res, session->property_.GetScreenRequestedOrientation());
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetScreenRequestedOrientation end";
@@ -1877,7 +1943,7 @@ HWTEST_F(ScreenSessionTest, GetScreenRequestedOrientation, TestSize.Level1)
 HWTEST_F(ScreenSessionTest, SetVirtualPixelRatio, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetVirtualPixelRatio start";
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     float virtualPixelRatio = 1;
     session->SetVirtualPixelRatio(virtualPixelRatio);
     float res = session->property_.GetVirtualPixelRatio();
@@ -1894,7 +1960,7 @@ HWTEST_F(ScreenSessionTest, screen_session_test001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test001 start";
     IScreenChangeListener* screenChangeListener = nullptr;
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     session->screenState_ = ScreenState::CONNECTION;
     int res = 0;
     session->RegisterScreenChangeListener(screenChangeListener);
@@ -1910,7 +1976,7 @@ HWTEST_F(ScreenSessionTest, screen_session_test001, TestSize.Level1)
 HWTEST_F(ScreenSessionTest, screen_session_test002, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test002 start";
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     ScreenId res = session->GetScreenId();
     ASSERT_EQ(res, session->screenId_);
     GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test002 end";
@@ -1924,7 +1990,7 @@ HWTEST_F(ScreenSessionTest, screen_session_test002, TestSize.Level1)
 HWTEST_F(ScreenSessionTest, screen_session_test003, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test003 start";
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     DMError res = session->SetScreenColorTransform();
     ASSERT_EQ(res, DMError::DM_OK);
     GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test003 end";
@@ -1938,7 +2004,7 @@ HWTEST_F(ScreenSessionTest, screen_session_test003, TestSize.Level1)
 HWTEST_F(ScreenSessionTest, screen_session_test004, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test004 start";
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     ScreenProperty newProperty;
     int res = 0;
     session->UpdatePropertyByFoldControl(newProperty);
@@ -1954,10 +2020,12 @@ HWTEST_F(ScreenSessionTest, screen_session_test004, TestSize.Level1)
 HWTEST_F(ScreenSessionTest, screen_session_test005, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test005 start";
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     ScreenProperty newProperty;
     ScreenPropertyChangeReason reason = ScreenPropertyChangeReason::CHANGE_MODE;
     int res = 0;
+    session->PropertyChange(newProperty, reason);
+    reason = ScreenPropertyChangeReason::VIRTUAL_PIXEL_RATIO_CHANGE;
     session->PropertyChange(newProperty, reason);
     ASSERT_EQ(res, 0);
     GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test005 end";
@@ -1971,7 +2039,7 @@ HWTEST_F(ScreenSessionTest, screen_session_test005, TestSize.Level1)
 HWTEST_F(ScreenSessionTest, screen_session_test006, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test006 start";
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     Rotation sensorRotation = Rotation::ROTATION_90;
     float res = session->ConvertRotationToFloat(sensorRotation);
     ASSERT_EQ(res, 90.f);
@@ -1995,7 +2063,7 @@ HWTEST_F(ScreenSessionTest, screen_session_test006, TestSize.Level1)
 HWTEST_F(ScreenSessionTest, screen_session_test007, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test007 start";
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     Orientation orientation = Orientation::UNSPECIFIED;
     int res = 0;
     session->ScreenOrientationChange(orientation, FoldDisplayMode::UNKNOWN);
@@ -2011,7 +2079,7 @@ HWTEST_F(ScreenSessionTest, screen_session_test007, TestSize.Level1)
 HWTEST_F(ScreenSessionTest, screen_session_test008, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test008 start";
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     bool res = session->HasPrivateSessionForeground();
     ASSERT_EQ(res, false);
     GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test008 end";
@@ -2025,7 +2093,7 @@ HWTEST_F(ScreenSessionTest, screen_session_test008, TestSize.Level1)
 HWTEST_F(ScreenSessionTest, screen_session_test009, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test009 start";
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     Rotation rotation = Rotation::ROTATION_90;
     session->SetRotation(rotation);
     Rotation res = session->GetRotation();
@@ -2070,7 +2138,7 @@ HWTEST_F(ScreenSessionTest, screen_session_test011, TestSize.Level1)
 HWTEST_F(ScreenSessionTest, screen_session_test012, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: screen_session_test012 start";
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     int res = 0;
     RectF rect = RectF(0, 0, 0, 0);
     uint32_t offsetY = 0;
@@ -2087,8 +2155,8 @@ HWTEST_F(ScreenSessionTest, screen_session_test012, TestSize.Level1)
 HWTEST_F(ScreenSessionTest, GetName, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetName start";
-    std::string name { "UNKNOW" };
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    std::string name { "UNKNOWN" };
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     ASSERT_EQ(name, session->GetName());
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetName end";
 }
@@ -2103,7 +2171,7 @@ HWTEST_F(ScreenSessionTest, SetName, TestSize.Level1)
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetName start";
     std::string name { "UNKNOWN" };
     int ret = 0;
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     session->SetName(name);
     ASSERT_EQ(ret, 0);
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetName end";
@@ -2117,13 +2185,13 @@ HWTEST_F(ScreenSessionTest, SetName, TestSize.Level1)
 HWTEST_F(ScreenSessionTest, GetScreenSnapshot, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetScreenSnapshot start";
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     session->displayNode_ = nullptr;
     auto pixelmap = session->GetScreenSnapshot(1.0, 1.0);
     EXPECT_EQ(pixelmap, nullptr);
 
     ScreenProperty newScreenProperty;
-    session = new(std::nothrow) ScreenSession(0, newScreenProperty, 0);
+    session = sptr<ScreenSession>::MakeSptr(0, newScreenProperty, 0);
     pixelmap = session->GetScreenSnapshot(1.0, 1.0);
     int ret = 0;
     ASSERT_EQ(ret, 0);
@@ -2139,13 +2207,12 @@ HWTEST_F(ScreenSessionTest, GetRSScreenId, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetRSScreenId start";
     ScreenProperty property;
-    sptr<ScreenSession> session = new(std::nothrow)
-        ScreenSession("OpenHarmony", 1, 100, 0);
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr("OpenHarmony", 1, 100, 0);
     EXPECT_EQ(100, session->GetRSScreenId());
 
     RSDisplayNodeConfig displayNodeConfig;
     std::shared_ptr<RSDisplayNode> displayNode = RSDisplayNode::Create(displayNodeConfig);
-    session = new ScreenSession(1, 100, "OpenHarmony",
+    session = sptr<ScreenSession>::MakeSptr(1, 100, "OpenHarmony",
         property, displayNode);
     EXPECT_NE(nullptr, session->GetDisplayNode());
     session->ReleaseDisplayNode();
@@ -2163,7 +2230,7 @@ HWTEST_F(ScreenSessionTest, CalcRotation01, TestSize.Level1)
     GTEST_LOG_(INFO) << "ScreenSessionTest: CalcRotation start";
     Orientation orientation { Orientation::BEGIN };
     FoldDisplayMode foldDisplayMode { FoldDisplayMode::COORDINATION };
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     session->activeIdx_ = -1;
     auto res = session->CalcRotation(orientation, foldDisplayMode);
     EXPECT_EQ(Rotation::ROTATION_0, res);
@@ -2185,7 +2252,7 @@ HWTEST_F(ScreenSessionTest, CalcRotation01, TestSize.Level1)
     } else {
         EXPECT_EQ(Rotation::ROTATION_90, res);
     }
-    
+
     orientation = Orientation::HORIZONTAL;
     res = session->CalcRotation(orientation, foldDisplayMode);
     if (ScreenSessionManager::GetInstance().IsFoldable() && !FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
@@ -2227,7 +2294,7 @@ HWTEST_F(ScreenSessionTest, CalcRotation02, TestSize.Level1)
     GTEST_LOG_(INFO) << "ScreenSessionTest: CalcRotation start";
     Orientation orientation { Orientation::BEGIN };
     FoldDisplayMode foldDisplayMode { FoldDisplayMode::UNKNOWN };
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     session->activeIdx_ = -1;
     auto res = session->CalcRotation(orientation, foldDisplayMode);
     EXPECT_EQ(Rotation::ROTATION_0, res);
@@ -2245,7 +2312,7 @@ HWTEST_F(ScreenSessionTest, CalcRotation02, TestSize.Level1)
     orientation = Orientation::VERTICAL;
     res = session->CalcRotation(orientation, foldDisplayMode);
     EXPECT_EQ(Rotation::ROTATION_90, res);
-    
+
     orientation = Orientation::HORIZONTAL;
     res = session->CalcRotation(orientation, foldDisplayMode);
     EXPECT_EQ(Rotation::ROTATION_0, res);
@@ -2275,9 +2342,9 @@ HWTEST_F(ScreenSessionTest, CalcDisplayOrientation01, TestSize.Level1)
     GTEST_LOG_(INFO) << "ScreenSessionTest: CalcDisplayOrientation start";
     Rotation rotation { Rotation::ROTATION_0 };
     FoldDisplayMode foldDisplayMode { FoldDisplayMode::COORDINATION };
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     session->activeIdx_ = -1;
-    auto res = session->CalcDisplayOrientation(rotation, foldDisplayMode, false);
+    auto res = session->CalcDisplayOrientation(rotation, foldDisplayMode);
     EXPECT_EQ(DisplayOrientation::LANDSCAPE, res);
 
     sptr<SupportedScreenModes> supportedScreenModes = new SupportedScreenModes;
@@ -2287,19 +2354,19 @@ HWTEST_F(ScreenSessionTest, CalcDisplayOrientation01, TestSize.Level1)
     session->activeIdx_ = 0;
 
     rotation = Rotation::ROTATION_0;
-    res = session->CalcDisplayOrientation(rotation, foldDisplayMode, false);
+    res = session->CalcDisplayOrientation(rotation, foldDisplayMode);
     EXPECT_EQ(DisplayOrientation::LANDSCAPE, res);
 
     rotation = Rotation::ROTATION_90;
-    res = session->CalcDisplayOrientation(rotation, foldDisplayMode, false);
+    res = session->CalcDisplayOrientation(rotation, foldDisplayMode);
     EXPECT_EQ(DisplayOrientation::PORTRAIT, res);
 
     rotation = Rotation::ROTATION_180;
-    res = session->CalcDisplayOrientation(rotation, foldDisplayMode, false);
+    res = session->CalcDisplayOrientation(rotation, foldDisplayMode);
     EXPECT_EQ(DisplayOrientation::LANDSCAPE_INVERTED, res);
 
     rotation = Rotation::ROTATION_270;
-    res = session->CalcDisplayOrientation(rotation, foldDisplayMode, false);
+    res = session->CalcDisplayOrientation(rotation, foldDisplayMode);
     EXPECT_EQ(DisplayOrientation::PORTRAIT_INVERTED, res);
 
     GTEST_LOG_(INFO) << "ScreenSessionTest: CalcDisplayOrientation end";
@@ -2315,9 +2382,9 @@ HWTEST_F(ScreenSessionTest, CalcDisplayOrientation02, TestSize.Level1)
     GTEST_LOG_(INFO) << "ScreenSessionTest: CalcDisplayOrientation start";
     Rotation rotation { Rotation::ROTATION_0 };
     FoldDisplayMode foldDisplayMode { FoldDisplayMode::UNKNOWN };
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     session->activeIdx_ = -1;
-    auto res = session->CalcDisplayOrientation(rotation, foldDisplayMode, false);
+    auto res = session->CalcDisplayOrientation(rotation, foldDisplayMode);
     EXPECT_EQ(DisplayOrientation::LANDSCAPE, res);
 
     sptr<SupportedScreenModes> supportedScreenModes = new SupportedScreenModes;
@@ -2327,19 +2394,19 @@ HWTEST_F(ScreenSessionTest, CalcDisplayOrientation02, TestSize.Level1)
     session->activeIdx_ = 0;
 
     rotation = Rotation::ROTATION_0;
-    res = session->CalcDisplayOrientation(rotation, foldDisplayMode, false);
+    res = session->CalcDisplayOrientation(rotation, foldDisplayMode);
     EXPECT_EQ(DisplayOrientation::LANDSCAPE, res);
 
     rotation = Rotation::ROTATION_90;
-    res = session->CalcDisplayOrientation(rotation, foldDisplayMode, false);
+    res = session->CalcDisplayOrientation(rotation, foldDisplayMode);
     EXPECT_EQ(DisplayOrientation::PORTRAIT, res);
 
     rotation = Rotation::ROTATION_180;
-    res = session->CalcDisplayOrientation(rotation, foldDisplayMode, false);
+    res = session->CalcDisplayOrientation(rotation, foldDisplayMode);
     EXPECT_EQ(DisplayOrientation::LANDSCAPE_INVERTED, res);
 
     rotation = Rotation::ROTATION_270;
-    res = session->CalcDisplayOrientation(rotation, foldDisplayMode, false);
+    res = session->CalcDisplayOrientation(rotation, foldDisplayMode);
     EXPECT_EQ(DisplayOrientation::PORTRAIT_INVERTED, res);
 
     GTEST_LOG_(INFO) << "ScreenSessionTest: CalcDisplayOrientation end";
@@ -2378,7 +2445,7 @@ HWTEST_F(ScreenSessionTest, PropertyChange, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: PropertyChange start";
     int res = 0;
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     ScreenProperty newProperty;
     ScreenPropertyChangeReason reason = ScreenPropertyChangeReason::CHANGE_MODE;
     session->PropertyChange(newProperty, reason);
@@ -2395,7 +2462,7 @@ HWTEST_F(ScreenSessionTest, PowerStatusChange, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: PowerStatusChange start";
     int res = 0;
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     DisplayPowerEvent event = DisplayPowerEvent::DISPLAY_ON;
     EventStatus status = EventStatus::BEGIN;
     PowerStateChangeReason reason = PowerStateChangeReason::POWER_BUTTON;
@@ -2440,7 +2507,8 @@ HWTEST_F(ScreenSessionTest, HoverStatusChange01, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     EXPECT_NE(nullptr, screenSession);
     int32_t HoverStatus = 0;
     screenSession->HoverStatusChange(HoverStatus);
@@ -2455,7 +2523,7 @@ HWTEST_F(ScreenSessionTest, HoverStatusChange01, TestSize.Level1)
 HWTEST_F(ScreenSessionTest, HoverStatusChange02, TestSize.Level1)
 {
     IScreenChangeListener* screenChangeListener = new MockScreenChangeListener();
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     EXPECT_NE(nullptr, session);
     session->RegisterScreenChangeListener(screenChangeListener);
     int32_t hoverStatus = 0;
@@ -2470,7 +2538,7 @@ HWTEST_F(ScreenSessionTest, HoverStatusChange02, TestSize.Level1)
 HWTEST_F(ScreenSessionTest, HandleHoverStatusChange01, TestSize.Level1)
 {
     IScreenChangeListener* screenChangeListener = new MockScreenChangeListener();
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     EXPECT_NE(nullptr, session);
     session->RegisterScreenChangeListener(screenChangeListener);
     int32_t hoverStatus = 0;
@@ -2484,7 +2552,7 @@ HWTEST_F(ScreenSessionTest, HandleHoverStatusChange01, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionTest, ScreenCaptureNotify, TestSize.Level1)
 {
-    sptr<ScreenSession> session = new ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     ASSERT_NE(session, nullptr);
     ScreenId screenId = 0;
     int32_t uid = 0;
@@ -2499,7 +2567,7 @@ HWTEST_F(ScreenSessionTest, ScreenCaptureNotify, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionTest, GetIsInternal01, TestSize.Level1)
 {
-    sptr<ScreenSession> session = new ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     ASSERT_NE(session, nullptr);
     session->SetIsInternal(true);
     ASSERT_EQ(session->GetIsInternal(), true);
@@ -2512,7 +2580,7 @@ HWTEST_F(ScreenSessionTest, GetIsInternal01, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionTest, GetIsInternal02, TestSize.Level1)
 {
-    sptr<ScreenSession> session = new ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     ASSERT_NE(session, nullptr);
     session->SetIsInternal(false);
     ASSERT_EQ(session->GetIsInternal(), false);
@@ -2525,7 +2593,7 @@ HWTEST_F(ScreenSessionTest, GetIsInternal02, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionTest, GetIsFakeInUse01, TestSize.Level1)
 {
-    sptr<ScreenSession> session = new ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     ASSERT_NE(session, nullptr);
     session->SetIsFakeInUse(true);
     ASSERT_EQ(session->GetIsFakeInUse(), true);
@@ -2538,7 +2606,7 @@ HWTEST_F(ScreenSessionTest, GetIsFakeInUse01, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionTest, GetIsFakeInUse02, TestSize.Level1)
 {
-    sptr<ScreenSession> session = new ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     ASSERT_NE(session, nullptr);
     session->SetIsFakeInUse(false);
     ASSERT_EQ(session->GetIsFakeInUse(), false);
@@ -2551,7 +2619,7 @@ HWTEST_F(ScreenSessionTest, GetIsFakeInUse02, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionTest, GetIsRealScreen01, TestSize.Level1)
 {
-    sptr<ScreenSession> session = new ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     ASSERT_NE(session, nullptr);
     session->SetIsRealScreen(true);
     ASSERT_EQ(session->GetIsRealScreen(), true);
@@ -2564,7 +2632,7 @@ HWTEST_F(ScreenSessionTest, GetIsRealScreen01, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionTest, GetIsRealScreen02, TestSize.Level1)
 {
-    sptr<ScreenSession> session = new ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     ASSERT_NE(session, nullptr);
     session->SetIsRealScreen(false);
     ASSERT_EQ(session->GetIsRealScreen(), false);
@@ -2577,7 +2645,7 @@ HWTEST_F(ScreenSessionTest, GetIsRealScreen02, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionTest, GetIsPcUse01, TestSize.Level1)
 {
-    sptr<ScreenSession> session = new ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     ASSERT_NE(session, nullptr);
     session->SetIsPcUse(true);
     ASSERT_EQ(session->GetIsPcUse(), true);
@@ -2590,10 +2658,36 @@ HWTEST_F(ScreenSessionTest, GetIsPcUse01, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionTest, GetIsPcUse02, TestSize.Level1)
 {
-    sptr<ScreenSession> session = new ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     ASSERT_NE(session, nullptr);
     session->SetIsPcUse(false);
     ASSERT_EQ(session->GetIsPcUse(), false);
+}
+
+/**
+ * @tc.name: SetIsExtendVirtual001
+ * @tc.desc: Test when isPcUse is true, GetIsPcUse should return true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetIsExtendVirtual001, TestSize.Level1)
+{
+    sptr<ScreenSession> session = new ScreenSession();
+    ASSERT_NE(session, nullptr);
+    session->SetIsExtendVirtual(true);
+    EXPECT_EQ(session->GetIsExtendVirtual(), true);
+}
+
+/**
+ * @tc.name: SetIsExtendVirtual002
+ * @tc.desc: Test when isPcUse is false, GetIsPcUse should return false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetIsExtendVirtual002, TestSize.Level1)
+{
+    sptr<ScreenSession> session = new ScreenSession();
+    ASSERT_NE(session, nullptr);
+    session->SetIsExtendVirtual(false);
+    EXPECT_EQ(session->GetIsExtendVirtual(), false);
 }
 
 /**
@@ -2603,7 +2697,7 @@ HWTEST_F(ScreenSessionTest, GetIsPcUse02, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionTest, GetIsBScreenHalf01, TestSize.Level1)
 {
-    sptr<ScreenSession> session = new ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     ASSERT_NE(session, nullptr);
     session->SetIsBScreenHalf(true);
     ASSERT_EQ(session->GetIsBScreenHalf(), true);
@@ -2616,7 +2710,7 @@ HWTEST_F(ScreenSessionTest, GetIsBScreenHalf01, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionTest, GetIsBScreenHalf02, TestSize.Level1)
 {
-    sptr<ScreenSession> session = new ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     ASSERT_NE(session, nullptr);
     session->SetIsBScreenHalf(false);
     ASSERT_EQ(session->GetIsBScreenHalf(), false);
@@ -2629,9 +2723,9 @@ HWTEST_F(ScreenSessionTest, GetIsBScreenHalf02, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionTest, CalcDeviceOrientation01, TestSize.Level1)
 {
-    sptr<ScreenSession> session = new ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     ASSERT_NE(session, nullptr);
-    DisplayOrientation result = session->CalcDeviceOrientation(Rotation::ROTATION_0, FoldDisplayMode::FULL, false);
+    DisplayOrientation result = session->CalcDeviceOrientation(Rotation::ROTATION_0, FoldDisplayMode::FULL);
     ASSERT_EQ(result, DisplayOrientation::PORTRAIT);
 }
 
@@ -2642,9 +2736,9 @@ HWTEST_F(ScreenSessionTest, CalcDeviceOrientation01, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionTest, CalcDeviceOrientation02, TestSize.Level1)
 {
-    sptr<ScreenSession> session = new ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     ASSERT_NE(session, nullptr);
-    DisplayOrientation result = session->CalcDeviceOrientation(Rotation::ROTATION_90, FoldDisplayMode::FULL, false);
+    DisplayOrientation result = session->CalcDeviceOrientation(Rotation::ROTATION_90, FoldDisplayMode::FULL);
     ASSERT_EQ(result, DisplayOrientation::LANDSCAPE);
 }
 
@@ -2655,9 +2749,9 @@ HWTEST_F(ScreenSessionTest, CalcDeviceOrientation02, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionTest, CalcDeviceOrientation03, TestSize.Level1)
 {
-    sptr<ScreenSession> session = new ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     ASSERT_NE(session, nullptr);
-    DisplayOrientation result = session->CalcDeviceOrientation(Rotation::ROTATION_180, FoldDisplayMode::FULL, false);
+    DisplayOrientation result = session->CalcDeviceOrientation(Rotation::ROTATION_180, FoldDisplayMode::FULL);
     ASSERT_EQ(result, DisplayOrientation::PORTRAIT_INVERTED);
 }
 
@@ -2668,9 +2762,9 @@ HWTEST_F(ScreenSessionTest, CalcDeviceOrientation03, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionTest, CalcDeviceOrientation04, TestSize.Level1)
 {
-    sptr<ScreenSession> session = new ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     ASSERT_NE(session, nullptr);
-    DisplayOrientation result = session->CalcDeviceOrientation(Rotation::ROTATION_270, FoldDisplayMode::FULL, false);
+    DisplayOrientation result = session->CalcDeviceOrientation(Rotation::ROTATION_270, FoldDisplayMode::FULL);
     ASSERT_EQ(result, DisplayOrientation::LANDSCAPE_INVERTED);
 }
 
@@ -2681,10 +2775,10 @@ HWTEST_F(ScreenSessionTest, CalcDeviceOrientation04, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionTest, CalcDeviceOrientation05, TestSize.Level1)
 {
-    sptr<ScreenSession> session = new ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     ASSERT_NE(session, nullptr);
     DisplayOrientation result = session->CalcDeviceOrientation(static_cast<Rotation>(100),
-        FoldDisplayMode::FULL, false);
+        FoldDisplayMode::FULL);
     ASSERT_EQ(result, DisplayOrientation::UNKNOWN);
 }
 
@@ -2695,7 +2789,7 @@ HWTEST_F(ScreenSessionTest, CalcDeviceOrientation05, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionTest, GetIsPhysicalMirrorSwitch01, TestSize.Level1)
 {
-    sptr<ScreenSession> session = new ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     ASSERT_NE(session, nullptr);
     session->SetIsPhysicalMirrorSwitch(true);
     ASSERT_EQ(session->GetIsPhysicalMirrorSwitch(), true);
@@ -2708,7 +2802,7 @@ HWTEST_F(ScreenSessionTest, GetIsPhysicalMirrorSwitch01, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionTest, GetIsPhysicalMirrorSwitch02, TestSize.Level1)
 {
-    sptr<ScreenSession> session = new ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     ASSERT_NE(session, nullptr);
     session->SetIsPhysicalMirrorSwitch(false);
     ASSERT_EQ(session->GetIsPhysicalMirrorSwitch(), false);
@@ -2721,7 +2815,7 @@ HWTEST_F(ScreenSessionTest, GetIsPhysicalMirrorSwitch02, TestSize.Level1)
 HWTEST_F(ScreenSessionTest, GetDisplaySourceMode01, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetSourceMode start";
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     session->screenId_ = session->defaultScreenId_;
     DisplaySourceMode mode = session->GetDisplaySourceMode();
     ASSERT_EQ(mode, DisplaySourceMode::MAIN);
@@ -2730,7 +2824,8 @@ HWTEST_F(ScreenSessionTest, GetDisplaySourceMode01, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     mode = screenSession->GetDisplaySourceMode();
     ASSERT_EQ(mode, DisplaySourceMode::NONE);
     screenSession->SetScreenCombination(ScreenCombination::SCREEN_EXPAND);
@@ -2744,7 +2839,7 @@ HWTEST_F(ScreenSessionTest, GetDisplaySourceMode01, TestSize.Level1)
     ASSERT_EQ(mode, DisplaySourceMode::ALONE);
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetDisplaySourceMode01 end";
 }
- 
+
 /**
 * @tc.name: GetDisplaySourceMode02
 * @tc.desc: normal function
@@ -2753,7 +2848,7 @@ HWTEST_F(ScreenSessionTest, GetDisplaySourceMode01, TestSize.Level1)
 HWTEST_F(ScreenSessionTest, GetDisplaySourceMode02, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetDisplaySourceMode02 start";
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     session->screenId_ = session->defaultScreenId_;
     DisplaySourceMode mode = session->GetDisplaySourceMode();
     ASSERT_EQ(mode, DisplaySourceMode::MAIN);
@@ -2762,7 +2857,8 @@ HWTEST_F(ScreenSessionTest, GetDisplaySourceMode02, TestSize.Level1)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
 
     screenSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
     mode = screenSession->GetDisplaySourceMode();
@@ -2782,12 +2878,12 @@ HWTEST_F(ScreenSessionTest, SetPointerActiveWidth, Function | SmallTest | Level2
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetPointerActiveWidth start";
     uint32_t pointerActiveWidth = 123;
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     session->SetPointerActiveWidth(pointerActiveWidth);
     ASSERT_EQ(pointerActiveWidth, session->property_.GetPointerActiveWidth());
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetPointerActiveWidth end";
 }
- 
+
 /**
  * @tc.name: GetPointerActiveWidth
  * @tc.desc: normal function
@@ -2797,12 +2893,12 @@ HWTEST_F(ScreenSessionTest, GetPointerActiveWidth, Function | SmallTest | Level2
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetPointerActiveWidth start";
     uint32_t pointerActiveWidth = 123;
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     session->SetPointerActiveWidth(pointerActiveWidth);
     ASSERT_EQ(pointerActiveWidth, session->GetPointerActiveWidth());
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetPointerActiveWidth end";
 }
- 
+
 /**
  * @tc.name: SetPointerActiveHeight
  * @tc.desc: normal function
@@ -2812,14 +2908,14 @@ HWTEST_F(ScreenSessionTest, SetPointerActiveHeight, Function | SmallTest | Level
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetPointerActiveHeight start";
     uint32_t pointerActiveHeight = 321;
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     session->SetPointerActiveHeight(pointerActiveHeight);
     ASSERT_EQ(pointerActiveHeight, session->property_.GetPointerActiveHeight());
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetPointerActiveHeight end";
 }
- 
+
 /**
- * @tc.name: GetPointerActiveHeighth
+ * @tc.name: GetPointerActiveHeight
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
@@ -2827,24 +2923,10 @@ HWTEST_F(ScreenSessionTest, GetPointerActiveHeight, Function | SmallTest | Level
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetPointerActiveHeight start";
     uint32_t pointerActiveHeight = 321;
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
     session->SetPointerActiveHeight(pointerActiveHeight);
     ASSERT_EQ(pointerActiveHeight, session->GetPointerActiveHeight());
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetPointerActiveHeight end";
-}
-
-/**
- * @tc.name: SetShareProtect
- * @tc.desc: SetShareProtect test
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionTest, SetShareProtect, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "ScreenSessionTest: SetShareProtect start";
-    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
-    session->SetShareProtect(false);
-    ASSERT_EQ(session->GetShareProtect(), false);
-    GTEST_LOG_(INFO) << "ScreenSessionTest: SetShareProtect end";
 }
 
 /**
@@ -2860,7 +2942,8 @@ HWTEST_F(ScreenSessionTest, UpdateExpandAvailableArea, Function | SmallTest | Le
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     ASSERT_NE(screenSession, nullptr);
     DMRect area = screenSession->GetExpandAvailableArea();
     auto res = screenSession->UpdateExpandAvailableArea(area);
@@ -2891,6 +2974,1345 @@ HWTEST_F(ScreenSessionTest, UpdateDisplayNodeRotation, Function | SmallTest | Le
     screenSession->UpdateDisplayNodeRotation(1);
     ASSERT_EQ(screenSession->isExtended_, false);
     GTEST_LOG_(INFO) << "ScreenSessionTest: UpdateDisplayNodeRotation end";
+}
+
+/**
+ * @tc.name: UpdateExpandAvailableArea01
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, UpdateExpandAvailableArea01, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "UpdateExpandAvailableArea start";
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    EXPECT_NE(nullptr, screenSession);
+    DMRect area = screenSession->GetAvailableArea();
+    auto res = screenSession->UpdateExpandAvailableArea(area);
+    ASSERT_EQ(res, false);
+    area = {2, 2, 2, 2};
+    res = screenSession->UpdateExpandAvailableArea(area);
+    ASSERT_EQ(res, true);
+    GTEST_LOG_(INFO) << "UpdateExpandAvailableArea end";
+}
+
+/**
+ * @tc.name: ScreenExtendChange01
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, ScreenExtendChange01, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenExtendChange start";
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    EXPECT_NE(nullptr, screenSession);
+    ScreenId mainScreenId = 0;
+    ScreenId extendScreenId = 1;
+    screenSession->ScreenExtendChange(mainScreenId, extendScreenId);
+    GTEST_LOG_(INFO) << "UpdateExpandAvailableArea end";
+}
+
+/**
+ * @tc.name: ScreenExtendChange02
+ * @tc.desc: run in for
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, ScreenExtendChange02, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    IScreenChangeListener* screenChangeListener = new MockScreenChangeListener();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    EXPECT_NE(nullptr, session);
+    session->RegisterScreenChangeListener(screenChangeListener);
+    ScreenId mainScreenId = 0;
+    ScreenId extendScreenId = 1;
+    session->ScreenExtendChange(mainScreenId, extendScreenId);
+    EXPECT_FALSE(g_errLog.find("screenChangeListener is null.") != std::string::npos);
+}
+
+/**
+ * @tc.name: SuperFoldStatusChange01
+ * @tc.desc: run in for
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SuperFoldStatusChange01, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    EXPECT_NE(nullptr, session);
+    ScreenId mainScreenId = 0;
+    SuperFoldStatus superFoldStatus = SuperFoldStatus::UNKNOWN;
+    session->SuperFoldStatusChange(mainScreenId, superFoldStatus);
+    EXPECT_EQ(true, session->screenChangeListenerList_.empty());
+    EXPECT_TRUE(g_errLog.find("screenChangeListenerList is empty.") != std::string::npos);
+}
+
+/**
+ * @tc.name: ExtendScreenConnectStatusChange
+ * @tc.desc: run in for
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, ExtendScreenConnectStatusChange, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    EXPECT_NE(nullptr, session);
+    ScreenId mainScreenId = 0;
+    ExtendScreenConnectStatus extendScreenConnectStatus = ExtendScreenConnectStatus::UNKNOWN;
+    session->ExtendScreenConnectStatusChange(mainScreenId, extendScreenConnectStatus);
+    EXPECT_EQ(true, session->screenChangeListenerList_.empty());
+    EXPECT_TRUE(g_errLog.find("screenChangeListenerList is empty.") != std::string::npos);
+}
+
+/**
+ * @tc.name: SecondaryReflexionChange
+ * @tc.desc: run in for
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SecondaryReflexionChange, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    EXPECT_NE(nullptr, session);
+    ScreenId mainScreenId = 0;
+    bool isSecondaryReflexion = true;
+    session->SecondaryReflexionChange(mainScreenId, isSecondaryReflexion);
+    EXPECT_EQ(true, session->screenChangeListenerList_.empty());
+    EXPECT_TRUE(g_errLog.find("screenChangeListenerList is empty.") != std::string::npos);
+}
+
+/**
+ * @tc.name: SetFrameGravity
+ * @tc.desc: run in for
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetFrameGravity, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    EXPECT_NE(nullptr, session);
+    session->displayNode_  = nullptr;
+    Gravity gravity = Rosen::Gravity::RESIZE;
+    session->SetFrameGravity(gravity);
+    EXPECT_TRUE(g_errLog.find("displayNode_ is null, setFrameGravity failed") != std::string::npos);
+}
+
+/**
+ * @tc.name: UpdatePropertyOnly
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, UpdatePropertyOnly, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "UpdatePropertyOnly start";
+    LOG_SetCallback(MyLogCallback);
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    EXPECT_NE(nullptr, screenSession);
+    RRect bounds;
+    bounds.rect_.width_ = 1344;
+    bounds.rect_.height_ = 2772;
+    int rotation = 90;
+    FoldDisplayMode foldDisplayMode = FoldDisplayMode::MAIN;
+    screenSession->UpdatePropertyOnly(bounds, rotation, foldDisplayMode);
+    EXPECT_FALSE(g_errLog.find("bounds:[%{public}f %{public}f %{public}f %{public}f],\
+        rotation:%{public}d, displayOrientation:%{public}u") != std::string::npos);
+    GTEST_LOG_(INFO) << "UpdatePropertyOnly end";
+}
+
+/**
+ * @tc.name: ReuseDisplayNode
+ * @tc.desc: ReuseDisplayNode test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, ReuseDisplayNode, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: ReuseDisplayNode start";
+    Rosen::RSDisplayNodeConfig rsConfig;
+    rsConfig.isMirrored = true;
+    rsConfig.screenId = 101;
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
+    screenSession->displayNode_ = nullptr;
+    screenSession->ReuseDisplayNode(rsConfig);
+    GTEST_LOG_(INFO) << "ScreenSessionTest: ReuseDisplayNode end";
+}
+
+/**
+ * @tc.name: ConvertToRealDisplayInfo
+ * @tc.desc: ConvertToRealDisplayInfo test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, ConvertToRealDisplayInfo, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: ConvertToRealDisplayInfo start";
+    sptr<DisplayInfo> displayInfo = sptr<DisplayInfo>::MakeSptr();
+    ASSERT_NE(displayInfo, nullptr);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(screenSession->ConvertToRealDisplayInfo(), nullptr);
+    GTEST_LOG_(INFO) << "ScreenSessionTest: ConvertToRealDisplayInfo end";
+}
+
+/**
+ * @tc.name: UpdateVirtualPixelRatio
+ * @tc.desc: UpdateVirtualPixelRatio test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, UpdateVirtualPixelRatio, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: UpdateVirtualPixelRatio start";
+    ScreenSessionConfig config = {
+        .screenId = 0,
+        .rsId = 0,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    EXPECT_NE(nullptr, screenSession);
+    RRect bounds;
+    bounds.rect_.width_ = 1344;
+    bounds.rect_.height_ = 2772;
+    screenSession->UpdateVirtualPixelRatio(bounds);
+    float curVirtualPixelRatio = screenSession->property_.GetVirtualPixelRatio();
+    ASSERT_EQ(curVirtualPixelRatio, 3.5f);
+    GTEST_LOG_(INFO) << "ScreenSessionTest: UpdateVirtualPixelRatio end";
+}
+
+/**
+ * @tc.name: SetInnerName
+ * @tc.desc: SetInnerName test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetInnerName, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetInnerName start";
+    ScreenSessionConfig config = {
+        .screenId = 0,
+        .rsId = 0,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    EXPECT_NE(nullptr, screenSession);
+    std::string innerName = "OpenHarmony";
+    screenSession->SetInnerName(innerName);
+    EXPECT_EQ(innerName, screenSession->GetInnerName());
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetInnerName end";
+}
+
+/**
+ * @tc.name: SetFakeScreenSession
+ * @tc.desc: SetFakeScreenSession test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetFakeScreenSession, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetFakeScreenSession start";
+    ScreenSessionConfig config = {
+        .screenId = 0,
+        .rsId = 0,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    ScreenSessionConfig fakeConfig = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> fakeScreenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    screenSession->SetFakeScreenSession(fakeScreenSession);
+    ASSERT_EQ(screenSession->GetFakeScreenSession(), fakeScreenSession);
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetFakeScreenSession end";
+}
+
+/**
+ * @tc.name: GetScreenShape
+ * @tc.desc: GetScreenShape test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, GetScreenShape, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: GetScreenShape start";
+    ScreenSessionConfig config = {
+        .screenId = 0,
+        .rsId = 0,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    screenSession->property_.SetScreenShape(ScreenShape::RECTANGLE);
+    ASSERT_EQ(screenSession->GetScreenShape(), ScreenShape::RECTANGLE);
+    screenSession->property_.SetScreenShape(ScreenShape::ROUND);
+    ASSERT_EQ(screenSession->GetScreenShape(), ScreenShape::ROUND);
+    GTEST_LOG_(INFO) << "ScreenSessionTest: GetScreenShape end";
+}
+
+/**
+ * @tc.name: SetSerialNumber
+ * @tc.desc: SetSerialNumber test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetSerialNumber, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetSerialNumber start";
+    ScreenSessionConfig config = {
+        .screenId = 0,
+        .rsId = 0,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    std::string serialNumber = "OpenHarmony";
+    screenSession->SetSerialNumber(serialNumber);
+    ASSERT_EQ(screenSession->GetSerialNumber(), serialNumber);
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetSerialNumber end";
+}
+
+/**
+ * @tc.name: UpdatePropertyByFakeBounds
+ * @tc.desc: UpdatePropertyByFakeBounds test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, UpdatePropertyByFakeBounds, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: UpdatePropertyByFakeBounds start";
+    ScreenSessionConfig config = {
+        .screenId = 0,
+        .rsId = 0,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    EXPECT_NE(nullptr, screenSession);
+    uint32_t width = 1000;
+    uint32_t height = 1500;
+    screenSession->UpdatePropertyByFakeBounds(width, height);
+    auto screenFakeBounds = screenSession->property_.GetFakeBounds();
+    ASSERT_EQ(screenFakeBounds.rect_.width_, width);
+    ASSERT_EQ(screenFakeBounds.rect_.height_, height);
+    GTEST_LOG_(INFO) << "ScreenSessionTest: UpdatePropertyByFakeBounds end";
+}
+
+/**
+ * @tc.name: GetValidSensorRotation
+ * @tc.desc: GetValidSensorRotation test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, GetValidSensorRotation, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: GetValidSensorRotation start";
+    ScreenSessionConfig config = {
+        .screenId = 0,
+        .rsId = 0,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    EXPECT_NE(nullptr, screenSession);
+    Rotation sensorRotation = Rotation::ROTATION_0;
+    screenSession->SensorRotationChange(sensorRotation);
+    ASSERT_EQ(0, screenSession->GetValidSensorRotation());
+    GTEST_LOG_(INFO) << "ScreenSessionTest: GetValidSensorRotation end";
+}
+
+/**
+ * @tc.name: EnableMirrorScreenRegion
+ * @tc.desc: EnableMirrorScreenRegion test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, EnableMirrorScreenRegion, TestSize.Level1)
+{
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(nullptr, screenSession);
+    screenSession->SetIsEnableRegionRotation(true);
+    screenSession->EnableMirrorScreenRegion();
+    EXPECT_EQ(screenSession->GetIsEnableRegionRotation(), true);
+    screenSession->SetIsPhysicalMirrorSwitch(true);
+    screenSession->EnableMirrorScreenRegion();
+    EXPECT_EQ(screenSession->GetIsPhysicalMirrorSwitch(), true);
+}
+
+/**
+ * @tc.name: SetIsExtend
+ * @tc.desc: SetIsExtend
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetIsExtend01, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    session->SetIsExtend(true);
+    EXPECT_EQ(session->GetIsExtend(), true);
+}
+
+/**
+ * @tc.name: SetIsExtend
+ * @tc.desc: SetIsExtend
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetIsExtend02, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    session->SetIsExtend(false);
+    EXPECT_EQ(session->GetIsExtend(), false);
+}
+
+/**
+ * @tc.name: SetIsCurrentInUse
+ * @tc.desc: SetIsCurrentInUse
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetIsCurrentInUse01, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    session->SetIsCurrentInUse(true);
+    EXPECT_EQ(session->GetIsCurrentInUse(), true);
+}
+
+/**
+ * @tc.name: SetIsCurrentInUse
+ * @tc.desc: SetIsCurrentInUse
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetIsCurrentInUse02, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    session->SetIsCurrentInUse(false);
+    EXPECT_EQ(session->GetIsCurrentInUse(), false);
+}
+
+/**
+ * @tc.name: SetValidHeight
+ * @tc.desc: SetValidHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetValidHeight, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    uint32_t validHeight = 100;
+    session->SetValidHeight(validHeight);
+    EXPECT_EQ(session->GetValidHeight(), validHeight);
+}
+
+/**
+ * @tc.name: SetValidWidth
+ * @tc.desc: SetValidWidth
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetValidWidth, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    uint32_t validWidth = 100;
+    session->SetValidWidth(validWidth);
+    EXPECT_EQ(session->GetValidWidth(), validWidth);
+}
+
+/**
+ * @tc.name: UpdateRotationOrientation
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, UpdateRotationOrientation, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    int rotation = 0;
+    FoldDisplayMode foldDisplayMode = FoldDisplayMode::MAIN;
+    session->UpdateRotationOrientation(rotation, foldDisplayMode);
+    ScreenProperty screenProperty = session->GetScreenProperty();
+    EXPECT_EQ(screenProperty.deviceRotation_, Rotation::ROTATION_0);
+}
+
+/**
+ * @tc.name: UpdatePropertyByFakeInUse
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, UpdatePropertyByFakeInUse01, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    session->UpdatePropertyByFakeInUse(false);
+    EXPECT_EQ(session->property_.GetIsFakeInUse(), false);
+}
+
+/**
+ * @tc.name: UpdatePropertyByFakeInUse
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, UpdatePropertyByFakeInUse02, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    session->UpdatePropertyByFakeInUse(true);
+    EXPECT_EQ(session->property_.GetIsFakeInUse(), true);
+}
+
+/**
+ * @tc.name: SetRotationAndScreenRotationOnly
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetRotationAndScreenRotationOnly, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    bool enableRotation = (system::GetParameter("persist.window.rotation.enabled", "1") == "1");
+    if (enableRotation) {
+        session->SetRotationAndScreenRotationOnly(Rotation::ROTATION_0);
+        EXPECT_EQ(session->property_.GetRotation(), 0.0f);
+        session->SetRotationAndScreenRotationOnly(Rotation::ROTATION_90);
+        EXPECT_EQ(session->property_.GetRotation(), 90.0f);
+        session->SetRotationAndScreenRotationOnly(Rotation::ROTATION_180);
+        EXPECT_EQ(session->property_.GetRotation(), 180.0f);
+        session->SetRotationAndScreenRotationOnly(Rotation::ROTATION_270);
+        EXPECT_EQ(session->property_.GetRotation(), 270.0f);
+    }
+}
+
+/**
+ * @tc.name: SetTouchEnabledFromJs
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetTouchEnabledFromJs01, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    session->SetTouchEnabledFromJs(false);
+    EXPECT_EQ(session->IsTouchEnabled(), false);
+}
+
+/**
+ * @tc.name: SetTouchEnabledFromJs
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetTouchEnabledFromJs02, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    session->SetTouchEnabledFromJs(true);
+    EXPECT_EQ(session->IsTouchEnabled(), true);
+}
+
+/**
+ * @tc.name: SetIsEnableCanvasRotation
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetIsEnableCanvasRotation, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    session->SetIsEnableCanvasRotation(false);
+    EXPECT_EQ(session->GetIsEnableCanvasRotation(), false);
+}
+
+/**
+ * @tc.name: GetIsEnableCanvasRotation
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, GetIsEnableCanvasRotation, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    session->SetIsEnableCanvasRotation(true);
+    EXPECT_EQ(session->GetIsEnableCanvasRotation(), true);
+}
+
+/**
+ * @tc.name: GetIsExtend
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, GetIsExtend, TestSize.Level0)
+{
+    GTEST_LOG_(INFO) << "GetIsExtend start";
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    ASSERT_NE(screenSession, nullptr);
+
+    screenSession->SetIsExtend(true);
+    EXPECT_EQ(screenSession->GetIsExtend(), true);
+    GTEST_LOG_(INFO) << "GetIsExtend end";
+}
+
+/**
+ * @tc.name: SetIsInternal
+ * @tc.desc: Test when isInternal is true, GetIsInternal should return true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetIsInternal, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SetIsInternal start";
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+
+    session->SetIsInternal(true);
+    EXPECT_EQ(session->GetIsInternal(), true);
+    GTEST_LOG_(INFO) << "SetIsInternal end";
+}
+
+/**
+ * @tc.name: GetIsCurrentInUse
+ * @tc.desc: GetIsCurrentInUse
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, GetIsCurrentInUse, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "GetIsCurrentInUse start";
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+
+    session->SetIsCurrentInUse(true);
+    EXPECT_EQ(session->GetIsCurrentInUse(), true);
+    GTEST_LOG_(INFO) << "GetIsCurrentInUse end";
+}
+
+/**
+ * @tc.name: SetIsFakeInUse
+ * @tc.desc: Test when isFakeInUse is true, GetIsFakeInUse should return true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetIsFakeInUse, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SetIsFakeInUse start";
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+
+    session->SetIsFakeInUse(true);
+    EXPECT_EQ(session->GetIsFakeInUse(), true);
+    GTEST_LOG_(INFO) << "SetIsFakeInUse end";
+}
+
+/**
+ * @tc.name: SetIsRealScreen
+ * @tc.desc: Test when isReal is true, GetIsRealScreen should return true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetIsRealScreen, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SetIsRealScreen start";
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+
+    session->SetIsRealScreen(true);
+    EXPECT_EQ(session->GetIsRealScreen(), true);
+    GTEST_LOG_(INFO) << "SetIsRealScreen end";
+}
+
+/**
+ * @tc.name: SetIsPcUse
+ * @tc.desc: Test when isPcUse is true, GetIsPcUse should return true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetIsPcUse, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SetIsRealScreen start";
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+
+    session->SetIsPcUse(true);
+    EXPECT_EQ(session->GetIsPcUse(), true);
+    GTEST_LOG_(INFO) << "SetIsRealScreen end";
+}
+
+/**
+ * @tc.name: GetValidHeight
+ * @tc.desc: GetValidHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, GetValidHeight, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "GetValidHeight start";
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+
+    uint32_t validHeight = 100;
+    session->SetValidHeight(validHeight);
+    EXPECT_EQ(session->GetValidHeight(), validHeight);
+    GTEST_LOG_(INFO) << "GetValidHeight end";
+}
+
+/**
+ * @tc.name: GetValidWidth
+ * @tc.desc: GetValidWidth
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, GetValidWidth, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "GetValidWidth start";
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+
+    uint32_t validWidth = 100;
+    session->SetValidWidth(validWidth);
+    EXPECT_EQ(session->GetValidWidth(), validWidth);
+    GTEST_LOG_(INFO) << "GetValidWidth end";
+}
+
+/**
+ * @tc.name: GetInnerName
+ * @tc.desc: GetInnerName test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, GetInnerName, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: GetInnerName start";
+    ScreenSessionConfig config = {
+        .screenId = 0,
+        .rsId = 0,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    ASSERT_NE(nullptr, screenSession);
+
+    std::string innerName = "OpenHarmony";
+    screenSession->SetInnerName(innerName);
+    EXPECT_EQ(innerName, screenSession->GetInnerName());
+    GTEST_LOG_(INFO) << "ScreenSessionTest: GetInnerName end";
+}
+
+
+/**
+ * @tc.name: screen_session_test002
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, GetScreenId, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: GetScreenId start";
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+
+    ScreenId res = session->GetScreenId();
+    EXPECT_EQ(res, session->screenId_);
+    GTEST_LOG_(INFO) << "ScreenSessionTest: GetScreenId end";
+}
+
+/**
+ * @tc.name: SetUpdateScreenPivotCallback
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetUpdateScreenPivotCallback, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetUpdateScreenPivotCallback start";
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+
+    auto func = [session](float x, float y) {
+        session->GetScreenSnapshot(x, y);
+    };
+
+    session->SetUpdateScreenPivotCallback(func);
+    EXPECT_NE(nullptr, session->updateScreenPivotCallback_);
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetUpdateScreenPivotCallback end";
+}
+
+
+/**
+ * @tc.name: UpdateTouchBoundsAndOffset
+ * @tc.desc: UpdateTouchBoundsAndOffset test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, UpdateTouchBoundsAndOffset, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: UpdateTouchBoundsAndOffset start";
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    ASSERT_NE(screenSession, nullptr);
+
+    screenSession->UpdateTouchBoundsAndOffset();
+    EXPECT_EQ(0, screenSession->property_.GetInputOffsetY());
+    GTEST_LOG_(INFO) << "ScreenSessionTest: UpdateTouchBoundsAndOffset end";
+}
+
+/**
+ * @tc.name: GetOrientation
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, GetOrientation, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: GetOrientation start";
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+
+    Orientation orientation = Orientation::UNSPECIFIED;
+    session->SetOrientation(orientation);
+    Orientation res = session->GetOrientation();
+    ASSERT_EQ(res, orientation);
+    GTEST_LOG_(INFO) << "ScreenSessionTest: GetOrientation end";
+}
+
+/**
+ * @tc.name: GetOrientation
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, GetDensityInCurResolution, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: GetDensityInCurResolution start";
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    ASSERT_NE(screenSession, nullptr);
+
+    float density = 1.5f;
+    screenSession->SetDensityInCurResolution(density);
+    float res = screenSession->GetDensityInCurResolution();
+    EXPECT_EQ(1.5f, res);
+    GTEST_LOG_(INFO) << "ScreenSessionTest: GetDensityInCurResolution end";
+}
+
+/**
+ * @tc.name: SetDefaultDensity
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetDefaultDensity, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetDefaultDensity start";
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    ASSERT_NE(screenSession, nullptr);
+
+    float density = 1.5f;
+    screenSession->SetDefaultDensity(density);
+    float res = screenSession->property_.GetDefaultDensity();
+    EXPECT_EQ(1.5f, res);
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetDefaultDensity end";
+}
+
+/**
+ * @tc.name: GetChildrenPosition
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, GetChildrenPosition, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: GetChildrenPosition start";
+    ScreenSessionGroup sessionGroup(1, 1, "create", ScreenCombination::SCREEN_ALONE);
+    sptr<ScreenSession> session0 = nullptr;
+    Point startPoint(0, 0);
+    sptr<ScreenSession> defaultScreenSession;
+    bool res = sessionGroup.AddChild(session0, startPoint, defaultScreenSession);
+    EXPECT_EQ(res, false);
+
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+
+    res = sessionGroup.AddChild(session, startPoint, defaultScreenSession);
+    EXPECT_EQ(res, true);
+    EXPECT_NE(0, sessionGroup.GetChildrenPosition().size());
+    GTEST_LOG_(INFO) << "ScreenSessionTest: GetChildrenPosition end";
+}
+
+/**
+ * @tc.name: GetChildCount
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, GetChildCount, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: GetChildCount start";
+    ScreenSessionGroup sessionGroup(1, 1, "create", ScreenCombination::SCREEN_ALONE);
+    sptr<ScreenSession> session0 = nullptr;
+    Point startPoint(0, 0);
+    sptr<ScreenSession> defaultScreenSession;
+    bool res = sessionGroup.AddChild(session0, startPoint, defaultScreenSession);
+    EXPECT_EQ(res, false);
+
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+
+    res = sessionGroup.AddChild(session, startPoint, defaultScreenSession);
+    EXPECT_EQ(res, true);
+    EXPECT_NE(0, sessionGroup.GetChildCount());
+    GTEST_LOG_(INFO) << "ScreenSessionTest: GetChildCount end";
+}
+
+/**
+ * @tc.name: IsWidthHeightMatch01
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, IsWidthHeightMatch01, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: IsWidthHeightMatch01 start";
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    ASSERT_NE(screenSession, nullptr);
+
+    float width = 1.5f;
+    float height = 1.5f;
+    float targetWidth = 1.5f;
+    float targetHeight = 1.5f;
+    EXPECT_EQ(true, screenSession->IsWidthHeightMatch(width, height, targetWidth, targetHeight));
+    GTEST_LOG_(INFO) << "ScreenSessionTest: IsWidthHeightMatch01 end";
+}
+
+/**
+ * @tc.name: IsWidthHeightMatch02
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, IsWidthHeightMatch02, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: IsWidthHeightMatch02 start";
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    ASSERT_NE(screenSession, nullptr);
+
+    float width = 1.0f;
+    float height = 2.0f;
+    float targetWidth = 3.0f;
+    float targetHeight = 4.0f;
+    EXPECT_EQ(false, screenSession->IsWidthHeightMatch(width, height, targetWidth, targetHeight));
+    GTEST_LOG_(INFO) << "ScreenSessionTest: IsWidthHeightMatch02 end";
+}
+
+/**
+ * @tc.name: SetScreenSnapshotRect
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetScreenSnapshotRect, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetScreenSnapshotRect start";
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    ASSERT_NE(screenSession, nullptr);
+
+    float scaleX = 1.0f;
+    float scaleY = 1.0f;
+    RSSurfaceCaptureConfig config1 = {
+        .scaleX = scaleX,
+        .scaleY = scaleY,
+        .useDma = true,
+    };
+    screenSession->SetScreenSnapshotRect(config1);
+    EXPECT_TRUE(g_errLog.find("no need to set screen snapshot rect") != std::string::npos);
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetScreenSnapshotRect end";
+}
+
+/**
+ * @tc.name: SetStartPosition
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetStartPosition, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetStartPosition start";
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    ASSERT_NE(screenSession, nullptr);
+
+    float scaleX = 1.0f;
+    float scaleY = 1.0f;
+    screenSession->SetStartPosition(scaleX, scaleY);
+    EXPECT_EQ(scaleX, screenSession->property_.scaleX_);
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetStartPosition end";
+}
+
+/**
+ * @tc.name: ScreenModeChange
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, ScreenModeChange, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: ScreenModeChange start";
+    LOG_SetCallback(MyLogCallback);
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    EXPECT_NE(nullptr, session);
+
+    session->screenChangeListenerList_.clear();
+    session->ScreenModeChange(ScreenModeChangeEvent::UNKNOWN);
+    EXPECT_TRUE(g_errLog.find("screenChangeListenerList is empty.") != std::string::npos);
+    GTEST_LOG_(INFO) << "ScreenSessionTest: ScreenModeChange end";
+}
+
+/**
+ * @tc.name: GetSensorRotation
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, GetSensorRotation, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: GetSensorRotation start";
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    ASSERT_NE(screenSession, nullptr);
+
+    Rotation sensorRotation = Rotation::ROTATION_0;
+    screenSession->SensorRotationChange(sensorRotation);
+    EXPECT_EQ(0, screenSession->GetSensorRotation());
+    GTEST_LOG_(INFO) << "ScreenSessionTest: GetSensorRotation end";
+}
+
+/**
+ * @tc.name: GetDisplayId
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, GetDisplayId, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: GetDisplayId start";
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    ASSERT_NE(screenSession, nullptr);
+
+    screenSession->SetScreenId(1);
+    EXPECT_EQ(1, screenSession->GetDisplayId());
+    GTEST_LOG_(INFO) << "ScreenSessionTest: GetDisplayId end";
+}
+
+/**
+ * @tc.name: SetDisplayNode
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetDisplayNode, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetDisplayNode start";
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    ASSERT_NE(screenSession, nullptr);
+
+    RSDisplayNodeConfig displayNodeConfig;
+    std::shared_ptr<RSDisplayNode> displayNode = RSDisplayNode::Create(displayNodeConfig);
+    EXPECT_NE(nullptr, displayNode);
+
+    screenSession->SetDisplayNode(displayNode);
+    EXPECT_NE(nullptr, screenSession->GetDisplayNode());
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetDisplayNode end";
+}
+
+/**
+ * @tc.name: SetRSScreenId
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetRSScreenId, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetRSScreenId start";
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    ASSERT_NE(screenSession, nullptr);
+
+    screenSession->SetRSScreenId(1);
+    EXPECT_EQ(1, screenSession->GetRSScreenId());
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetRSScreenId end";
+}
+
+/**
+ * @tc.name: SetActiveId
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetActiveId, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetActiveId start";
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    ASSERT_NE(screenSession, nullptr);
+
+    screenSession->SetActiveId(1);
+    EXPECT_EQ(1, screenSession->GetActiveId());
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetActiveId end";
+}
+
+/**
+ * @tc.name: SetIsAvailableAreaNeedNotify01
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetIsAvailableAreaNeedNotify01, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetIsAvailableAreaNeedNotify01 start";
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    ASSERT_NE(screenSession, nullptr);
+
+    screenSession->SetIsAvailableAreaNeedNotify(false);
+    EXPECT_EQ(false, screenSession->GetIsAvailableAreaNeedNotify());
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetIsAvailableAreaNeedNotify01 end";
+}
+
+
+/**
+ * @tc.name: SetIsAvailableAreaNeedNotify02
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetIsAvailableAreaNeedNotify02, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetIsAvailableAreaNeedNotify02 start";
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    ASSERT_NE(screenSession, nullptr);
+
+    screenSession->SetIsAvailableAreaNeedNotify(true);
+    EXPECT_EQ(true, screenSession->GetIsAvailableAreaNeedNotify());
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetIsAvailableAreaNeedNotify02 end";
+}
+
+/**
+ * @tc.name: SetIsEnableCanvasRotation01
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetIsEnableCanvasRotation01, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetIsEnableCanvasRotation01 start";
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    ASSERT_NE(screenSession, nullptr);
+
+    screenSession->SetIsEnableCanvasRotation(false);
+    EXPECT_EQ(false, screenSession->GetIsEnableCanvasRotation());
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetIsEnableCanvasRotation01 end";
+}
+
+/**
+ * @tc.name: SetIsEnableCanvasRotation01
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetIsEnableCanvasRotation02, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetIsEnableCanvasRotation02 start";
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    ASSERT_NE(screenSession, nullptr);
+
+    screenSession->SetIsEnableCanvasRotation(true);
+    EXPECT_EQ(true, screenSession->GetIsEnableCanvasRotation());
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetIsEnableCanvasRotation02 end";
+}
+
+/**
+ * @tc.name: SetSecurity01
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetSecurity01, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    session->SetSecurity(true);
+    EXPECT_EQ(session->isSecurity_, true);
+}
+
+/**
+ * @tc.name: SetSecurity02
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetSecurity02, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    session->SetSecurity(false);
+    EXPECT_EQ(session->isSecurity_, false);
+}
+
+/**
+ * @tc.name: SetHorizontalRotation01
+ * @tc.desc: SetHorizontalRotation01
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetHorizontalRotation01, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    EXPECT_NE(nullptr, session);
+
+    session->displayNode_ = nullptr;
+    session->SetHorizontalRotation();
+    EXPECT_EQ(session->property_.GetDeviceRotation(), Rotation::ROTATION_270);
+    EXPECT_TRUE(g_errLog.find("displayNode is null, no need to set displayNode.") != std::string::npos);
+}
+
+/**
+ * @tc.name: SetHorizontalRotation02
+ * @tc.desc: SetHorizontalRotation02
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetHorizontalRotation02, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+
+    RSDisplayNodeConfig displayNodeConfig;
+    std::shared_ptr<RSDisplayNode> displayNode = RSDisplayNode::Create(displayNodeConfig);
+    EXPECT_NE(nullptr, displayNode);
+
+    session->SetDisplayNode(displayNode);
+    session->SetHorizontalRotation();
+    EXPECT_EQ(session->property_.GetDeviceRotation(), Rotation::ROTATION_270);
+    EXPECT_FALSE(g_errLog.find("displayNode is null, no need to set displayNode.") != std::string::npos);
+}
+
+/**
+ * @tc.name: SetDisplayGroupId
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetDisplayGroupId, TestSize.Level1)
+{
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    ASSERT_NE(screenSession, nullptr);
+
+    screenSession->SetDisplayGroupId(0);
+    EXPECT_EQ(0, screenSession->GetDisplayGroupId());
+    screenSession->SetMainDisplayIdOfGroup(0);
+    EXPECT_EQ(0, screenSession->GetMainDisplayIdOfGroup());
+}
+
+/**
+ * @tc.name: SetScreenArea
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetScreenArea, TestSize.Level1)
+{
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    ASSERT_NE(screenSession, nullptr);
+
+    screenSession->SetScreenAreaOffsetX(100);
+    screenSession->SetScreenAreaOffsetY(200);
+    screenSession->SetScreenAreaWidth(300);
+    screenSession->SetScreenAreaHeight(400);
+    EXPECT_EQ(100, screenSession->GetScreenAreaOffsetX());
+    EXPECT_EQ(200, screenSession->GetScreenAreaOffsetY());
+    EXPECT_EQ(300, screenSession->GetScreenAreaWidth());
+    EXPECT_EQ(400, screenSession->GetScreenAreaHeight());
 }
 } // namespace
 } // namespace Rosen

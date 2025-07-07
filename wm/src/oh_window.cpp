@@ -26,6 +26,7 @@
 #include <event_handler.h>
 #include <event_runner.h>
 
+#include "oh_input_manager.h"
 #include "oh_window_comm.h"
 #include "singleton_container.h"
 #include "window.h"
@@ -545,6 +546,51 @@ int32_t OH_WindowManager_SetWindowFocusable(int32_t windowId, bool isFocusable)
             return;
         }
         errCode = OH_WINDOW_TO_ERROR_CODE_MAP.at(window->SetFocusable(isFocusable));
+    }, __func__);
+    return errCode;
+}
+
+int32_t OH_WindowManager_InjectTouchEvent(
+    int32_t windowId, Input_TouchEvent* touchEvent, int32_t windowX, int32_t windowY)
+{
+    if (touchEvent == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "touchEvent is null, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
+    }
+    if (windowId <= 0) {
+        TLOGE(WmsLogTag::WMS_EVENT, "windowId is invalid, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
+    }
+    if (OH_Input_GetTouchEventWindowId(touchEvent) == -1) { // -1: invalid window id
+        OH_Input_SetTouchEventWindowId(touchEvent, windowId);
+        TLOGI(WmsLogTag::WMS_EVENT, "windowId is default");
+    }
+    if (OH_Input_GetTouchEventWindowId(touchEvent) != windowId) {
+        TLOGE(WmsLogTag::WMS_EVENT, "windowIds are not equal, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
+    }
+    auto eventHandler = GetMainEventHandler();
+    if (eventHandler == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "eventHandler is null, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
+    }
+    WindowManager_ErrorCode errCode = WindowManager_ErrorCode::OK;
+    eventHandler->PostSyncTask([windowId, touchEvent, windowX, windowY, &errCode, where = __func__] {
+        auto window = Window::GetWindowWithId(windowId);
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_EVENT, "%{public}s window is null, windowId:%{public}d", where, windowId);
+            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
+            return;
+        }
+        std::shared_ptr<OHOS::MMI::PointerEvent> pointerEvent =
+            OH_Input_TouchEventToPointerEvent(touchEvent, windowX, windowY);
+        if (pointerEvent == nullptr) {
+            TLOGNE(WmsLogTag::WMS_EVENT, "%{public}s pointerEvent is null, windowId:%{public}d", where, windowId);
+            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
+            return;
+        }
+        TLOGND(WmsLogTag::WMS_EVENT, "%{public}s, windowId:%{public}d", where, windowId);
+        errCode = OH_WINDOW_TO_ERROR_CODE_MAP.at(window->InjectTouchEvent(pointerEvent));
     }, __func__);
     return errCode;
 }

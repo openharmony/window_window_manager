@@ -38,6 +38,7 @@ class WindowAdapter {
 WM_DECLARE_SINGLE_INSTANCE(WindowAdapter);
 public:
     using SessionRecoverCallbackFunc = std::function<WMError()>;
+    using UIEffectRecoverCallbackFunc = std::function<WMError()>;
     using WMSConnectionChangedCallbackFunc = std::function<void(int32_t, int32_t, bool)>;
     virtual WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& windowProperty,
         std::shared_ptr<RSSurfaceNode> surfaceNode, uint32_t& windowId, const sptr<IRemoteObject>& token);
@@ -66,6 +67,10 @@ public:
         const sptr<IWindowManagerAgent>& windowManagerAgent);
     virtual WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent);
+    WMError RegisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey, uint32_t interestInfo,
+        const sptr<IWindowManagerAgent>& windowManagerAgent);
+    WMError UnregisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey, uint32_t interestInfo,
+        const sptr<IWindowManagerAgent>& windowManagerAgent);
     virtual WMError CheckWindowId(int32_t windowId, int32_t& pid);
 
     virtual WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller);
@@ -77,6 +82,8 @@ public:
     virtual WMError GetUnreliableWindowInfo(int32_t windowId, std::vector<sptr<UnreliableWindowInfo>>& infos);
     virtual WMError ListWindowInfo(const WindowInfoOption& windowInfoOption, std::vector<sptr<WindowInfo>>& infos);
     virtual WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos);
+    virtual WMError GetGlobalWindowMode(DisplayId displayId, GlobalWindowMode& globalWinMode);
+    virtual WMError GetTopNavDestinationName(int32_t windowId, std::string& topNavDestName);
     virtual WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos);
     virtual void MinimizeWindowsByLauncher(std::vector<uint32_t> windowIds, bool isAnimated,
         sptr<RSIWindowAnimationFinishedCallback>& finishCallback);
@@ -126,6 +133,7 @@ public:
     virtual WMError UpdateExtWindowFlags(const sptr<IRemoteObject>& token, uint32_t extWindowFlags,
         uint32_t extWindowActions);
     virtual WMError GetHostWindowRect(int32_t hostWindowId, Rect& rect);
+    virtual WMError GetHostGlobalScaledRect(int32_t hostWindowId, Rect& globalScaledRect);
     virtual WMError GetFreeMultiWindowEnableState(bool& enable);
     virtual WMError GetCallingWindowWindowStatus(int32_t persistentId, WindowStatus& windowStatus);
     virtual WMError GetCallingWindowRect(int32_t persistentId, Rect& rect);
@@ -139,7 +147,9 @@ public:
     virtual WMError NotifyWatchGestureConsumeResult(int32_t keyCode, bool isConsumed);
     virtual WMError NotifyWatchFocusActiveChange(bool isActive);
     virtual WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds);
-    virtual WMError SetForegroundWindowNum(int32_t windowNum);
+    virtual WMError SetForegroundWindowNum(uint32_t windowNum);
+    virtual WMError SetStartWindowBackgroundColor(
+        const std::string& moduleName, const std::string& abilityName, uint32_t color, int32_t uid);
 
     /*
      * Window Recover
@@ -152,14 +162,19 @@ public:
     virtual void RecoverAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
         sptr<WindowSessionProperty> property, sptr<ISession>& session, sptr<IRemoteObject> token = nullptr);
+    virtual void RegisterUIEffectRecoverCallbackFunc(int32_t id,
+        const UIEffectRecoverCallbackFunc& callbackFunc);
+    virtual void UnregisterUIEffectRecoverCallbackFunc(int32_t id);
 
     /*
      * PC Window
      */
     virtual WMError IsPcWindow(bool& isPcWindow);
+    virtual WMError IsFreeMultiWindowMode(bool& isFreeMultiWindow);
     virtual WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode);
     virtual WMError IsWindowRectAutoSave(const std::string& key, bool& enabled, int persistentId);
-    virtual WMError ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_t targetWindowId);
+    virtual WMError ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_t targetWindowId, int32_t fingerId);
+    virtual WMError UseImplicitAnimation(int32_t hostWindowId, bool useImplicit);
 
     /*
      * Sub Window
@@ -173,6 +188,23 @@ public:
     virtual WMError SetAppDragResizeType(const std::string& bundleName, DragResizeType dragResizeType);
     virtual WMError GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType);
     virtual WMError SetAppKeyFramePolicy(const std::string& bundleName, const KeyFramePolicy& keyFramePolicy);
+    /*
+     * Window Pattern
+     */
+    virtual WMError SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit, int32_t persistentId);
+
+    /*
+     * Window Animation
+     */
+    virtual WMError AnimateTo(int32_t windowId, const WindowAnimationProperty& animationProperty,
+        const WindowAnimationOption& animationOption);
+    
+    /*
+     * Window Property
+     */
+    virtual WMError NotifyScreenshotEvent(ScreenshotEventType type);
+    virtual WMError CreateUIEffectController(const sptr<IUIEffectControllerClient>& controllerClient,
+        sptr<IUIEffectController>& controller, int32_t& controllerId);
 
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;
@@ -199,6 +231,8 @@ private:
     bool isRegisteredUserSwitchListener_ = false;
     std::map<WindowManagerAgentType, std::set<sptr<IWindowManagerAgent>>> windowManagerAgentMap_;
     std::map<int32_t, SessionRecoverCallbackFunc> sessionRecoverCallbackFuncMap_;
+    std::mutex effectMutex_;
+    std::map<int32_t, UIEffectRecoverCallbackFunc> uiEffectRecoverCallbackFuncMap_;
     bool recoverInitialized_ = false;
     // above guarded by mutex_
 };

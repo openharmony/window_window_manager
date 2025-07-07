@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,8 @@
 
 #include <iremote_broker.h>
 #include <want.h>
+#include "pixel_map.h"
+#include "wm_animation_common.h"
 
 namespace OHOS::AAFwk {
 class AbilityStartSetting;
@@ -310,6 +312,11 @@ enum class FocusChangeReason {
     SYSTEM_KEYBOARD,
 
     /**
+     * focus change when pressing alt+tab or dock click
+     */
+    REQUEST_WITH_CHECK_SUB_WINDOW,
+
+    /**
      * focus change max.
      */
     MAX,
@@ -345,6 +352,12 @@ struct WindowSizeLimits {
     }
 };
 
+enum class StartWindowType : uint32_t {
+    DEFAULT = 0,
+    RETAIN_AND_INVISIBLE,
+    REMOVE_NODE_INVISIBLE,
+};
+
 struct SessionInfo {
     std::string bundleName_ = "";
     std::string moduleName_ = "";
@@ -360,6 +373,7 @@ struct SessionInfo {
     bool isFromIcon_ = false;
 
     mutable std::shared_ptr<AAFwk::Want> want = nullptr; // want for ability start
+    std::shared_ptr<std::mutex> wantMutex_ = std::make_shared<std::mutex>();
     std::shared_ptr<AAFwk::Want> closeAbilityWant = nullptr;
     std::shared_ptr<AAFwk::AbilityStartSetting> startSetting = nullptr;
     std::shared_ptr<AAFwk::ProcessOptions> processOptions = nullptr;
@@ -405,6 +419,17 @@ struct SessionInfo {
     std::string specifiedFlag_ = "";
     bool disableDelegator = false;
     bool reuseDelegatorWindow = false;
+    bool isAbilityHook_ = false;
+    StartWindowType startWindowType_ = StartWindowType::DEFAULT;
+    bool isSetStartWindowType_ = false;
+
+    /*
+     * Keyboard
+     */
+    bool isKeyboardWillShowRegistered_ { false };
+    bool isKeyboardWillHideRegistered_ { false };
+    bool isKeyboardDidShowRegistered_ { false };
+    bool isKeyboardDidHideRegistered_ { false };
 
     /*
      * App Use Control
@@ -437,6 +462,28 @@ struct SessionInfo {
      * Window Rotation
      */
     int32_t currentRotation_ = 0;
+
+    AAFwk::Want GetWantSafely() const
+    {
+        std::lock_guard<std::mutex> lock(*wantMutex_);
+        if (want != nullptr) {
+            return *(want);
+        } else {
+            return AAFwk::Want();
+        }
+    }
+
+    void SetWantSafely(const AAFwk::Want& newWant) const
+    {
+        std::lock_guard<std::mutex> lock(*wantMutex_);
+        if (want == nullptr) {
+            want = std::make_shared<AAFwk::Want>();
+        }
+        *want = newWant;
+    }
+
+    std::shared_ptr<StartAnimationOptions> startAnimationOptions = nullptr;
+    std::shared_ptr<StartAnimationSystemOptions> startAnimationSystemOptions = nullptr;
 };
 
 enum class SessionFlag : uint32_t {
@@ -481,6 +528,11 @@ enum class SizeChangeReason : uint32_t {
     SPLIT_DRAG_START,
     SPLIT_DRAG,
     SPLIT_DRAG_END,
+    RESIZE_BY_LIMIT,
+    MAXIMIZE_IN_IMPLICT = 32,
+    RECOVER_IN_IMPLICIT = 33,
+    OCCUPIED_AREA_CHANGE = 34,
+    SCREEN_RELATIVE_POSITION_CHANGE,
     END,
 };
 
@@ -507,6 +559,8 @@ enum class SessionEvent : uint32_t {
     EVENT_MAXIMIZE_WITHOUT_ANIMATION,
     EVENT_MAXIMIZE_WATERFALL,
     EVENT_WATERFALL_TO_MAXIMIZE,
+    EVENT_COMPATIBLE_TO_MAXIMIZE,
+    EVENT_COMPATIBLE_TO_RECOVER,
     EVENT_END
 };
 
@@ -544,6 +598,11 @@ inline bool NearEqual(const int32_t& left, const int32_t& right)
     return left == right;
 }
 
+inline bool NearEqual(const int32_t& left, const int32_t& right, const int32_t threshold)
+{
+    return std::abs(left - right) <= threshold;
+}
+
 inline bool NearZero(const double left)
 {
     constexpr double epsilon = 0.001f;
@@ -566,6 +625,12 @@ struct WSRectT {
     bool operator!=(const WSRectT<T>& a) const
     {
         return !this->operator==(a);
+    }
+
+    inline bool isNearEqual(const WSRectT<T>& rect, const T threshold) const
+    {
+        return (NearEqual(posX_, rect.posX_, threshold) && NearEqual(posY_, rect.posY_, threshold) &&
+                NearEqual(width_, rect.width_, threshold) && NearEqual(height_, rect.height_, threshold));
     }
 
     bool IsEmpty() const
@@ -598,6 +663,28 @@ struct WSRectT {
         return IsEmpty() || LessOrEqual(width_, 0) || LessOrEqual(height_, 0);
     }
 
+    /**
+     * @brief Compute the intersection area with another rectangle.
+     *
+     * @tparam F The result type for intersection area calculation.
+     *           Allows returning higher precision or larger integer to avoid overflow.
+     *           By default, F = T.
+     *
+     * @param other The other rectangle to intersect with.
+     * @return The intersection area as type F.
+     */
+    template<typename F = T>
+    F IntersectionArea(const WSRectT<T>& other) const
+    {
+        const T left = std::max(posX_, other.posX_);
+        const T top = std::max(posY_, other.posY_);
+        const T right = std::min(posX_ + width_, other.posX_ + other.width_);
+        const T bottom = std::min(posY_ + height_, other.posY_ + other.height_);
+        const T interWidth = std::max(static_cast<T>(0), right - left);
+        const T interHeight = std::max(static_cast<T>(0), bottom - top);
+        return static_cast<F>(interWidth) * static_cast<F>(interHeight);
+    }
+
     inline std::string ToString() const
     {
         constexpr int precision = 2;
@@ -615,6 +702,33 @@ inline constexpr WSRectT<T> WSRectT<T>::EMPTY_RECT { 0, 0, 0, 0 };
 using WSRect = WSRectT<int32_t>;
 using WSRectF = WSRectT<float>;
 
+/**
+ * @struct WSRelativeDisplayRect
+ *
+ * @brief Represent the rectangle of a window relative to a specific display.
+ */
+struct WSRelativeDisplayRect {
+    // The ID of the associated display.
+    uint64_t displayId = UINT64_MAX;
+    // The window rectangle relative to the specified display.
+    WSRect rect = WSRect::EMPTY_RECT;
+
+    inline std::string ToString() const
+    {
+        std::ostringstream oss;
+        oss << displayId << ", " << rect.ToString();
+        return oss.str();
+    }
+};
+
+struct WindowAnimationInfo {
+    WSRect beginRect { 0, 0, 0, 0 };
+    WSRect endRect { 0, 0, 0, 0 };
+    bool animated { false };
+    uint32_t callingId { 0 };
+    bool isGravityChanged { false };
+};
+
 struct WindowShadowConfig {
     float offsetX_ = 0.0f;
     float offsetY_ = 0.0f;
@@ -624,12 +738,12 @@ struct WindowShadowConfig {
 };
 
 struct KeyboardSceneAnimationConfig {
-    std::string curveType_ = "default";
-    float ctrlX1_ = 0.2f;
+    std::string curveType_;
+    float ctrlX1_ = 0.0f;
     float ctrlY1_ = 0.0f;
-    float ctrlX2_ = 0.2f;
-    float ctrlY2_ = 1.0f;
-    uint32_t duration_ = 150;
+    float ctrlX2_ = 0.0f;
+    float ctrlY2_ = 0.0f;
+    uint32_t duration_ = 0;
 };
 
 struct WindowAnimationConfig {
@@ -660,6 +774,16 @@ struct StartingWindowInfo {
     std::string brandingPath_;
     std::string backgroundImagePath_;
     std::string backgroundImageFit_;
+    std::string startWindowType_;
+};
+
+struct StartingWindowPageDrawInfo {
+    std::shared_ptr<Media::PixelMap> appIconPixelMap = nullptr;
+    std::shared_ptr<Media::PixelMap> illustrationPixelMap = nullptr;
+    std::shared_ptr<Media::PixelMap> bgImagePixelMap = nullptr;
+    std::shared_ptr<Media::PixelMap> brandingPixelMap = nullptr;
+    uint32_t bgColor = 0;
+    std::string startWindowBackgroundImageFit = "";
 };
 
 struct StartingWindowAnimationConfig {
@@ -740,6 +864,18 @@ struct SessionEventParam {
     int32_t sessionWidth_ = 0;
     int32_t sessionHeight_ = 0;
     uint32_t dragResizeType = 0;
+    uint32_t gravity = 0;
+};
+
+struct BackgroundParams {
+    bool shouldBackToCaller = true;
+    AAFwk::WantParams wantParams {};
+};
+
+struct TransferSessionInfo {
+    int32_t persistentId = -1;
+    int32_t toScreenId = -1;
+    AAFwk::WantParams wantParams {};
 };
 
 /**
@@ -816,6 +952,17 @@ enum class SessionUIDirtyFlag {
     AVOID_AREA = 1 << 6,
     DRAG_RECT = 1 << 7,
     GLOBAL_RECT = 1 << 8,
+};
+
+enum class SessionPropertyFlag {
+    NONE = 0,
+    WINDOW_ID = 1,
+    BUNDLE_NAME = 1 << 1,
+    ABILITY_NAME = 1 << 2,
+    APP_INDEX = 1 << 3,
+    VISIBILITY_STATE = 1 << 4,
+    DISPLAY_ID = 1 << 5,
+    WINDOW_RECT = 1 << 6,
 };
 
 /**

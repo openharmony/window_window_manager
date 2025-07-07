@@ -58,13 +58,9 @@ private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 500000;
 };
 
-void WindowSessionTest3::SetUpTestCase()
-{
-}
+void WindowSessionTest3::SetUpTestCase() {}
 
-void WindowSessionTest3::TearDownTestCase()
-{
-}
+void WindowSessionTest3::TearDownTestCase() {}
 
 void WindowSessionTest3::SetUp()
 {
@@ -77,9 +73,7 @@ void WindowSessionTest3::SetUp()
     session_->surfaceNode_ = CreateRSSurfaceNode();
     ssm_ = sptr<SceneSessionManager>::MakeSptr();
     session_->SetEventHandler(ssm_->taskScheduler_->GetEventHandler(), ssm_->eventHandler_);
-    auto isScreenLockedCallback = [this]() {
-        return ssm_->IsScreenLocked();
-    };
+    auto isScreenLockedCallback = [this]() { return ssm_->IsScreenLocked(); };
     session_->RegisterIsScreenLockedCallback(isScreenLockedCallback);
 }
 
@@ -483,6 +477,35 @@ HWTEST_F(WindowSessionTest3, TransferPointerEvent11, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandlePointerEventForFocus_NullPtr
+ * @tc.desc: HandlePointerEventForFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, HandlePointerEventForFocus_NullPtr, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
+    WSError ret = session_->HandlePointerEventForFocus(pointerEvent);
+    EXPECT_EQ(ret, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: HandlePointerEventForFocus_Hover
+ * @tc.desc: HandlePointerEventForFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, HandlePointerEventForFocus_Hover, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    pointerEvent->pointerAction_ = MMI::PointerEvent::POINTER_ACTION_HOVER_ENTER;
+    pointerEvent->sourceType_ = MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN;
+    session_->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    WSError ret = session_->HandlePointerEventForFocus(pointerEvent);
+    EXPECT_EQ(ret, WSError::WS_OK);
+}
+
+/**
  * @tc.name: TransferFocusStateEvent03
  * @tc.desc: TransferFocusStateEvent Test
  * @tc.type: FUNC
@@ -536,9 +559,8 @@ HWTEST_F(WindowSessionTest3, SetBufferAvailableChangeListener, TestSize.Level1)
     session_->SetBufferAvailableChangeListener(nullptr);
 
     int resultValue = 0;
-    NotifyBufferAvailableChangeFunc func = [&resultValue](const bool isAvailable) {
-        resultValue += 1;
-    };
+    NotifyBufferAvailableChangeFunc func =
+        [&resultValue](const bool isAvailable, bool startWindowInvisible) { resultValue += 1; };
     session_->SetBufferAvailableChangeListener(func);
     ASSERT_EQ(resultValue, 1);
 }
@@ -551,9 +573,7 @@ HWTEST_F(WindowSessionTest3, SetBufferAvailableChangeListener, TestSize.Level1)
 HWTEST_F(WindowSessionTest3, NotifySessionFocusableChange, TestSize.Level1)
 {
     int resultValue = 0;
-    NotifySessionFocusableChangeFunc func = [&resultValue](const bool isFocusable) {
-        resultValue += 1;
-    };
+    NotifySessionFocusableChangeFunc func = [&resultValue](const bool isFocusable) { resultValue += 1; };
     session_->SetSessionFocusableChangeListener(func);
     session_->NotifySessionFocusableChange(true);
     ASSERT_EQ(resultValue, 2);
@@ -566,10 +586,8 @@ HWTEST_F(WindowSessionTest3, NotifySessionFocusableChange, TestSize.Level1)
  */
 HWTEST_F(WindowSessionTest3, GetStateFromManager, TestSize.Level1)
 {
-    ManagerState key = ManagerState{0};
-    GetStateFromManagerFunc func = [](const ManagerState key) {
-        return true;
-    };
+    ManagerState key = ManagerState{ 0 };
+    GetStateFromManagerFunc func = [](const ManagerState key) { return true; };
     session_->getStateFromManagerFunc_ = func;
     session_->GetStateFromManager(key);
 
@@ -577,7 +595,7 @@ HWTEST_F(WindowSessionTest3, GetStateFromManager, TestSize.Level1)
     ASSERT_EQ(false, session_->GetStateFromManager(key));
 
     // 覆盖default分支
-    key = ManagerState{-1};
+    key = ManagerState{ -1 };
     ASSERT_EQ(false, session_->GetStateFromManager(key));
 }
 
@@ -595,23 +613,6 @@ HWTEST_F(WindowSessionTest3, NotifyUIRequestFocus, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetCompatibleModeInPc
- * @tc.desc: SetCompatibleModeInPc Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest3, SetCompatibleModeInPc, TestSize.Level1)
-{
-    auto enable = true;
-    auto isSupportDragInPcCompatibleMode = true;
-    ASSERT_EQ(WSError::WS_OK, session_->SetCompatibleModeInPc(enable, isSupportDragInPcCompatibleMode));
-
-    ASSERT_EQ(WSError::WS_OK, session_->SetCompatibleModeInPc(enable, isSupportDragInPcCompatibleMode));
-
-    enable = false;
-    ASSERT_EQ(WSError::WS_OK, session_->SetCompatibleModeInPc(enable, isSupportDragInPcCompatibleMode));
-}
-
-/**
  * @tc.name: NotifySessionTouchableChange
  * @tc.desc: NotifySessionTouchableChange Test
  * @tc.type: FUNC
@@ -619,9 +620,7 @@ HWTEST_F(WindowSessionTest3, SetCompatibleModeInPc, TestSize.Level1)
 HWTEST_F(WindowSessionTest3, NotifySessionTouchableChange, TestSize.Level1)
 {
     int resultValue = 0;
-    NotifySessionTouchableChangeFunc func = [&resultValue](const bool touchable) {
-        resultValue += 1;
-    };
+    NotifySessionTouchableChangeFunc func = [&resultValue](const bool touchable) { resultValue += 1; };
     session_->SetSessionTouchableChangeListener(func);
     session_->NotifySessionTouchableChange(true);
     ASSERT_EQ(resultValue, 2);
@@ -658,10 +657,10 @@ HWTEST_F(WindowSessionTest3, NotifyClick, TestSize.Level1)
 HWTEST_F(WindowSessionTest3, NotifyRequestFocusStatusNotifyManager, TestSize.Level1)
 {
     int resultValue = 0;
-    NotifyRequestFocusStatusNotifyManagerFunc func = [&resultValue](int32_t persistentId,
-        const bool isFocused, const bool byForeground, FocusChangeReason reason) {
-        resultValue += 1;
-    };
+    NotifyRequestFocusStatusNotifyManagerFunc func =
+        [&resultValue](int32_t persistentId, const bool isFocused, const bool byForeground, FocusChangeReason reason) {
+            resultValue += 1;
+        };
     session_->SetRequestFocusStatusNotifyManagerListener(func);
     FocusChangeReason reason = FocusChangeReason::SCB_SESSION_REQUEST;
     session_->NotifyRequestFocusStatusNotifyManager(true, false, reason);
@@ -669,22 +668,70 @@ HWTEST_F(WindowSessionTest3, NotifyRequestFocusStatusNotifyManager, TestSize.Lev
 }
 
 /**
- * @tc.name: PresentFoucusIfNeed
- * @tc.desc: PresentFoucusIfNeed Test
+ * @tc.name: PresentFocusIfNeed01
+ * @tc.desc: PresentFocusIfNeed Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest3, PresentFoucusIfNeed, TestSize.Level1)
+HWTEST_F(WindowSessionTest3, PresentFocusIfNeed01, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
-    int32_t pointerAction = MMI::PointerEvent::POINTER_ACTION_DOWN;
-    session_->PresentFoucusIfNeed(pointerAction);
-    pointerAction = MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN;
-    session_->PresentFoucusIfNeed(pointerAction);
-    session_->property_->focusable_ = false;
-    session_->PresentFoucusIfNeed(pointerAction);
+    bool hasNotifyManagerToRequestFocus = false;
     session_->isFocused_ = true;
-    session_->PresentFoucusIfNeed(pointerAction);
-    EXPECT_EQ(true, session_->CheckPointerEventDispatch(nullptr));
+    session_->property_->focusable_ = false;
+    session_->SetRequestFocusStatusNotifyManagerListener(
+        [&hasNotifyManagerToRequestFocus](int32_t persistentId, const bool isFocused, const bool byForeground,
+            FocusChangeReason reason) {
+            hasNotifyManagerToRequestFocus = true;
+        });
+
+    int32_t pointerAction = MMI::PointerEvent::POINTER_ACTION_MOVE;
+    int32_t sourceType = MMI::PointerEvent::SOURCE_TYPE_UNKNOWN;
+    session_->PresentFocusIfNeed(pointerAction, sourceType);
+    EXPECT_EQ(hasNotifyManagerToRequestFocus, false);
+
+    pointerAction = MMI::PointerEvent::POINTER_ACTION_DOWN;
+    session_->PresentFocusIfNeed(pointerAction, sourceType);
+    EXPECT_EQ(hasNotifyManagerToRequestFocus, false);
+
+    session_->isFocused_ = false;
+    session_->PresentFocusIfNeed(pointerAction, sourceType);
+    EXPECT_EQ(hasNotifyManagerToRequestFocus, false);
+}
+
+/**
+ * @tc.name: PresentFocusIfNeed02
+ * @tc.desc: PresentFocusIfNeed Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, PresentFocusIfNeed02, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    bool hasNotifyManagerToRequestFocus = false;
+    session_->isFocused_ = false;
+    session_->property_->focusable_ = false;
+    session_->SetRequestFocusStatusNotifyManagerListener(
+        [&hasNotifyManagerToRequestFocus](int32_t persistentId, const bool isFocused, const bool byForeground,
+            FocusChangeReason reason) {
+            hasNotifyManagerToRequestFocus = true;
+        });
+
+    hasNotifyManagerToRequestFocus = false;
+    int32_t pointerAction = MMI::PointerEvent::POINTER_ACTION_DOWN;
+    int32_t sourceType = MMI::PointerEvent::SOURCE_TYPE_UNKNOWN;
+    session_->property_->focusable_ = true;
+    session_->PresentFocusIfNeed(pointerAction, sourceType);
+    EXPECT_EQ(hasNotifyManagerToRequestFocus, true);
+
+    hasNotifyManagerToRequestFocus = false;
+    pointerAction = MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN;
+    session_->PresentFocusIfNeed(pointerAction, sourceType);
+    EXPECT_EQ(hasNotifyManagerToRequestFocus, true);
+
+    hasNotifyManagerToRequestFocus = false;
+    pointerAction = MMI::PointerEvent::POINTER_ACTION_HOVER_ENTER;
+    sourceType = MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN;
+    session_->PresentFocusIfNeed(pointerAction, sourceType);
+    EXPECT_EQ(hasNotifyManagerToRequestFocus, true);
 }
 
 /**
@@ -833,7 +880,7 @@ HWTEST_F(WindowSessionTest3, RectCheckProcess01, TestSize.Level1)
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert(std::make_pair(0, screenSession));
     session_->RectCheckProcess();
 
-    WSRect rect = {0, 0, 0, 0};
+    WSRect rect = { 0, 0, 0, 0 };
     session_->winRect_ = rect;
     session_->RectCheckProcess();
 
@@ -868,9 +915,7 @@ HWTEST_F(WindowSessionTest3, SetAcquireRotateAnimationConfigFunc, TestSize.Level
     int32_t duration = session_->GetRotateAnimationDuration();
     ASSERT_EQ(duration, ROTATE_ANIMATION_DURATION);
 
-    AcquireRotateAnimationConfigFunc func = [](RotateAnimationConfig& config) {
-        config.duration_ = 800;
-    };
+    AcquireRotateAnimationConfigFunc func = [](RotateAnimationConfig& config) { config.duration_ = 800; };
     session_->SetAcquireRotateAnimationConfigFunc(func);
     ASSERT_NE(session_->acquireRotateAnimationConfigFunc_, nullptr);
     duration = session_->GetRotateAnimationDuration();
@@ -898,9 +943,8 @@ HWTEST_F(WindowSessionTest3, SetIsPcAppInPad, TestSize.Level1)
 HWTEST_F(WindowSessionTest3, SetBufferAvailable, TestSize.Level1)
 {
     int resultValue = 0;
-    NotifyBufferAvailableChangeFunc func = [&resultValue](const bool isAvailable) {
-        resultValue = 1;
-    };
+    NotifyBufferAvailableChangeFunc func =
+        [&resultValue](const bool isAvailable, bool startWindowInvisible) { resultValue = 1; };
     session_->SetBufferAvailableChangeListener(func);
     session_->SetBufferAvailable(true);
     ASSERT_EQ(session_->bufferAvailable_, true);
@@ -914,34 +958,10 @@ HWTEST_F(WindowSessionTest3, SetBufferAvailable, TestSize.Level1)
 HWTEST_F(WindowSessionTest3, NotifySessionInfoChange, TestSize.Level1)
 {
     int resultValue = 0;
-    NotifyBufferAvailableChangeFunc func = [&resultValue](const bool isAvailable) {
-        resultValue = 1;
-    };
+    NotifySessionInfoChangeNotifyManagerFunc func = [&resultValue](int32_t persistentid) { resultValue = 1; };
     session_->SetSessionInfoChangeNotifyManagerListener(func);
     session_->NotifySessionInfoChange();
     ASSERT_EQ(resultValue, 1);
-}
-
-/**
- * @tc.name: SetCompatibleModeEnableInPad
- * @tc.desc: SetCompatibleModeEnableInPad Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest3, SetCompatibleModeEnableInPad, TestSize.Level1)
-{
-    ASSERT_NE(session_, nullptr);
-    session_->state_ = SessionState::STATE_FOREGROUND;
-    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
-    bool enable = true;
-    session_->sessionStage_ = nullptr;
-    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, session_->SetCompatibleModeEnableInPad(enable));
-
-    ASSERT_NE(nullptr, mockSessionStage);
-    session_->sessionStage_ = mockSessionStage;
-    ASSERT_EQ(WSError::WS_OK, session_->SetCompatibleModeEnableInPad(enable));
-
-    enable = false;
-    ASSERT_EQ(WSError::WS_OK, session_->SetCompatibleModeEnableInPad(enable));
 }
 
 /**
@@ -956,69 +976,6 @@ HWTEST_F(WindowSessionTest3, GetSurfaceNodeForMoveDrag, TestSize.Level1)
     session_->surfaceNode_ = nullptr;
     std::shared_ptr<RSSurfaceNode> res = session_->GetSurfaceNodeForMoveDrag();
     ASSERT_EQ(res, nullptr);
-}
-
-/**
- * @tc.name: CompatibleFullScreenRecover
- * @tc.desc: CompatibleFullScreenRecover Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest3, CompatibleFullScreenRecover, TestSize.Level1)
-{
-    ASSERT_NE(session_, nullptr);
-    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
-    ASSERT_NE(nullptr, mockSessionStage);
-    session_->sessionStage_ = mockSessionStage;
-    session_->sessionInfo_.isSystem_ = true;
-    auto result = session_->CompatibleFullScreenRecover();
-    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_SESSION);
-
-    session_->sessionInfo_.isSystem_ = false;
-    session_->SetSessionState(SessionState::STATE_FOREGROUND);
-    result = session_->CompatibleFullScreenRecover();
-    ASSERT_EQ(result, WSError::WS_OK);
-}
-
-/**
- * @tc.name: CompatibleFullScreenMinimize
- * @tc.desc: CompatibleFullScreenMinimize Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest3, CompatibleFullScreenMinimize, TestSize.Level1)
-{
-    ASSERT_NE(session_, nullptr);
-    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
-    ASSERT_NE(nullptr, mockSessionStage);
-    session_->sessionStage_ = mockSessionStage;
-    session_->sessionInfo_.isSystem_ = true;
-    auto result = session_->CompatibleFullScreenMinimize();
-    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_SESSION);
-
-    session_->sessionInfo_.isSystem_ = false;
-    session_->SetSessionState(SessionState::STATE_FOREGROUND);
-    result = session_->CompatibleFullScreenMinimize();
-    ASSERT_EQ(result, WSError::WS_OK);
-}
-
-/**
- * @tc.name: CompatibleFullScreenClose
- * @tc.desc: CompatibleFullScreenClose Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest3, CompatibleFullScreenClose, TestSize.Level1)
-{
-    ASSERT_NE(session_, nullptr);
-    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
-    ASSERT_NE(nullptr, mockSessionStage);
-    session_->sessionStage_ = mockSessionStage;
-    session_->sessionInfo_.isSystem_ = true;
-    auto result = session_->CompatibleFullScreenClose();
-    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_SESSION);
-
-    session_->sessionInfo_.isSystem_ = false;
-    session_->SetSessionState(SessionState::STATE_FOREGROUND);
-    result = session_->CompatibleFullScreenClose();
-    ASSERT_EQ(result, WSError::WS_OK);
 }
 
 /**
@@ -1044,22 +1001,6 @@ HWTEST_F(WindowSessionTest3, PcAppInPadNormalClose, TestSize.Level1)
     session_->sessionStage_ = mockSessionStage;
     result = session_->PcAppInPadNormalClose();
     ASSERT_EQ(result, WSError::WS_OK);
-}
-
-/**
- * @tc.name: GetSnapshotPixelMap
- * @tc.desc: GetSnapshotPixelMap Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest3, GetSnapshotPixelMap, TestSize.Level1)
-{
-    session_->scenePersistence_ = nullptr;
-    EXPECT_EQ(nullptr, session_->GetSnapshotPixelMap(6.6f, 8.8f));
-    session_->scenePersistence_ = sptr<ScenePersistence>::MakeSptr("GetSnapshotPixelMap", 2024);
-    EXPECT_NE(nullptr, session_->scenePersistence_);
-    session_->scenePersistence_->isSavingSnapshot_.store(true);
-    session_->snapshot_ = nullptr;
-    EXPECT_EQ(nullptr, session_->GetSnapshotPixelMap(6.6f, 8.8f));
 }
 
 /**
@@ -1174,6 +1115,6 @@ HWTEST_F(WindowSessionTest3, GetIsHighlighted, Function | SmallTest | Level2)
     ASSERT_EQ(session_->GetIsHighlighted(isHighlighted), WSError::WS_OK);
     ASSERT_EQ(isHighlighted, false);
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

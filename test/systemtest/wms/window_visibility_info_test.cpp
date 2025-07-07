@@ -23,6 +23,7 @@
 
 #include <transaction/rs_transaction.h>
 #include "display_manager.h"
+#include "rs_adapter.h"
 #include "surface_draw.h"
 #include "window_manager.h"
 #include "window_test_utils.h"
@@ -35,9 +36,9 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr uint32_t COLOR_RED = 0xffff0000;
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowVisibilityInfoTest"};
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowVisibilityInfoTest" };
 constexpr uint8_t ALPHA = 255;
-}
+} // namespace
 
 using Utils = WindowTestUtils;
 constexpr int WAIT_ASYNC_MS_TIME_OUT = 5000; // 5000ms, filling color is slow
@@ -47,7 +48,8 @@ public:
     VisibilityChangedListenerImpl(std::mutex& mutex, std::condition_variable& cv) : mutex_(mutex), cv_(cv) {}
     void OnWindowVisibilityChanged(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfo) override;
     std::vector<sptr<WindowVisibilityInfo>> windowVisibilityInfos_;
-    bool isCallbackCalled_ { false };
+    bool isCallbackCalled_{ false };
+
 private:
     std::mutex& mutex_;
     std::condition_variable& cv_;
@@ -61,8 +63,11 @@ void VisibilityChangedListenerImpl::OnWindowVisibilityChanged(
     windowVisibilityInfos_ = std::move(windowVisibilityInfo);
     for (auto& info : windowVisibilityInfos_) {
         WLOGI("windowId:%{public}u, visibleState:%{public}d, pid:%{public}d, uid:%{public}d, windowType:%{public}u",
-            info->windowId_, static_cast<uint32_t>(info->visibilityState_), info->pid_, info->uid_,
-            static_cast<uint32_t>(info->windowType_));
+              info->windowId_,
+              static_cast<uint32_t>(info->visibilityState_),
+              info->pid_,
+              info->uid_,
+              static_cast<uint32_t>(info->windowType_));
     }
     isCallbackCalled_ = true;
     cv_.notify_all();
@@ -109,7 +114,7 @@ bool WindowVisibilityInfoTest::FillColor(sptr<Window> window)
     Rect rect = window->GetRect();
     bool isDrawSuccess = SurfaceDraw::DrawColor(surfaceNode, rect.width_, rect.height_, COLOR_RED);
     surfaceNode->SetAbilityBGAlpha(ALPHA);
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(surfaceNode);
     return isDrawSuccess;
 }
 
@@ -117,10 +122,14 @@ void WindowVisibilityInfoTest::SetUpTestCase()
 {
     auto display = DisplayManager::GetInstance().GetDisplayById(0);
     ASSERT_TRUE((display != nullptr));
-    WLOGI("GetDefaultDisplay: id %{public}" PRIu64", w %{public}d, h %{public}d, fps %{public}u",
-        display->GetId(), display->GetWidth(), display->GetHeight(), display->GetRefreshRate());
-    Rect displayRect = {0, 0,
-                        static_cast<uint32_t>(display->GetWidth()), static_cast<uint32_t>(display->GetHeight())};
+    WLOGI("GetDefaultDisplay: id %{public}" PRIu64 ", w %{public}d, h %{public}d, fps %{public}u",
+          display->GetId(),
+          display->GetWidth(),
+          display->GetHeight(),
+          display->GetRefreshRate());
+    Rect displayRect = {
+        0, 0, static_cast<uint32_t>(display->GetWidth()), static_cast<uint32_t>(display->GetHeight())
+    };
     Utils::InitByDisplayRect(displayRect);
     WindowManager::GetInstance().RegisterVisibilityChangedListener(visibilityChangedListener_);
     auto displayId = DisplayManager::GetInstance().GetDefaultDisplayId();
@@ -166,9 +175,7 @@ void WindowVisibilityInfoTest::SetUp()
     };
 }
 
-void WindowVisibilityInfoTest::TearDown()
-{
-}
+void WindowVisibilityInfoTest::TearDown() {}
 
 void WindowVisibilityInfoTest::WaitForCallback()
 {
@@ -176,8 +183,9 @@ void WindowVisibilityInfoTest::WaitForCallback()
     visibilityChangedListener_->isCallbackCalled_ = false;
     visibilityChangedListener_->windowVisibilityInfos_.clear();
     auto now = std::chrono::system_clock::now();
-    if (!cv_.wait_until(lock, now + std::chrono::milliseconds(WAIT_ASYNC_MS_TIME_OUT),
-        []() { return visibilityChangedListener_->isCallbackCalled_; })) {
+    if (!cv_.wait_until(lock, now + std::chrono::milliseconds(WAIT_ASYNC_MS_TIME_OUT), []() {
+            return visibilityChangedListener_->isCallbackCalled_;
+        })) {
         WLOGI("wait_until time out");
     }
 }
@@ -192,14 +200,14 @@ namespace {
 HWTEST_F(WindowVisibilityInfoTest, WindowVisibilityInfoTest01, TestSize.Level1)
 {
     floatAppInfo_.name = "window1";
-    floatAppInfo_.rect = {0, 0, 300, 100};
+    floatAppInfo_.rect = { 0, 0, 300, 100 };
     sptr<Window> window1 = Utils::CreateTestWindow(floatAppInfo_);
     if (window1 == nullptr) {
         return;
     }
 
     subAppInfo_.name = "subWindow1";
-    subAppInfo_.rect = {0, 600, 300, 100};
+    subAppInfo_.rect = { 0, 600, 300, 100 };
     subAppInfo_.parentId = window1->GetWindowId();
     sptr<Window> subWindow1 = Utils::CreateTestWindow(subAppInfo_);
     ASSERT_NE(nullptr, subWindow1);
@@ -233,7 +241,6 @@ HWTEST_F(WindowVisibilityInfoTest, WindowVisibilityInfoTest01, TestSize.Level1)
     subWindow1->Destroy();
     sleep(2);
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS
-

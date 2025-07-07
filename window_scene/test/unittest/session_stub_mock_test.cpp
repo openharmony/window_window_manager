@@ -26,7 +26,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionStubMockTest"};
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionStubMockTest" };
 }
 
 namespace OHOS::Accessibility {
@@ -43,13 +43,9 @@ private:
     sptr<SessionStub> session_ = nullptr;
 };
 
-void SessionStubMockTest::SetUpTestCase()
-{
-}
+void SessionStubMockTest::SetUpTestCase() {}
 
-void SessionStubMockTest::TearDownTestCase()
-{
-}
+void SessionStubMockTest::TearDownTestCase() {}
 
 void SessionStubMockTest::SetUp()
 {
@@ -108,6 +104,6 @@ HWTEST_F(SessionStubMockTest, HandleTransferAccessibilityEvent01, TestSize.Level
     ASSERT_EQ(ERR_INVALID_DATA, session_->HandleTransferAccessibilityEvent(data, reply));
     WLOGI("HandleTransferAccessibilityEvent01 end");
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

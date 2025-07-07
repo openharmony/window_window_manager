@@ -21,9 +21,9 @@
 #include "display_manager_proxy.h"
 #include "future.h"
 #include "screen_manager.h"
-#include "window_manager.h"
 #include "window_accessibility_controller.h"
 #include "window_impl.h"
+#include "window_manager.h"
 #include "wm_common.h"
 
 using namespace testing;
@@ -58,57 +58,46 @@ public:
     Utils::TestWindowInfo fullInfo_;
     sptr<DisplayListener> displayListener_;
     sptr<ScreenListener> screenListener_;
+
 private:
     static constexpr uint32_t SPLIT_TEST_SLEEP_S = 1;
     static constexpr long FUTURE_GET_RESULT_TIMEOUT = 1000;
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
 
-void DisplayListener::OnCreate(DisplayId displayId)
-{
-}
+void DisplayListener::OnCreate(DisplayId displayId) {}
 
-void DisplayListener::OnDestroy(DisplayId displayId)
-{
-}
+void DisplayListener::OnDestroy(DisplayId displayId) {}
 
 void DisplayListener::OnChange(DisplayId displayId)
 {
     changeFuture_.SetValue(displayId);
 }
 
-void ScreenListener::OnConnect(ScreenId screenId)
-{
-}
+void ScreenListener::OnConnect(ScreenId screenId) {}
 
-void ScreenListener::OnDisconnect(ScreenId screenId)
-{
-}
+void ScreenListener::OnDisconnect(ScreenId screenId) {}
 
 void ScreenListener::OnChange(ScreenId screenId)
 {
     changeFuture_.SetValue(screenId);
 }
 
-void WindowRotationTest::SetUpTestCase()
-{
-}
+void WindowRotationTest::SetUpTestCase() {}
 
-void WindowRotationTest::TearDownTestCase()
-{
-}
+void WindowRotationTest::TearDownTestCase() {}
 
 void WindowRotationTest::SetUp()
 {
     fullInfo_ = {
-            .name = "",
-            .rect = Utils::customAppRect_,
-            .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
-            .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
-            .needAvoid = true,
-            .parentLimit = false,
-            .showWhenLocked = true,
-            .parentId = INVALID_WINDOW_ID,
+        .name = "",
+        .rect = Utils::customAppRect_,
+        .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
+        .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
+        .needAvoid = true,
+        .parentLimit = false,
+        .showWhenLocked = true,
+        .parentId = INVALID_WINDOW_ID,
     };
 
     activeWindows_.clear();
@@ -137,7 +126,7 @@ namespace {
  */
 HWTEST_F(WindowRotationTest, WindowRotationTest1, TestSize.Level1)
 {
-    fullInfo_.name  = "fullscreen.1";
+    fullInfo_.name = "fullscreen.1";
     fullInfo_.orientation_ = Orientation::UNSPECIFIED;
     const sptr<Window>& fullWindow = Utils::CreateTestWindow(fullInfo_);
     if (fullWindow == nullptr) {
@@ -173,7 +162,7 @@ HWTEST_F(WindowRotationTest, WindowRotationTest1, TestSize.Level1)
  */
 HWTEST_F(WindowRotationTest, WindowRotationTest2, TestSize.Level1)
 {
-    fullInfo_.name  = "fullscreen.2";
+    fullInfo_.name = "fullscreen.2";
     fullInfo_.orientation_ = Orientation::REVERSE_HORIZONTAL;
     const sptr<Window>& fullWindow = Utils::CreateTestWindow(fullInfo_);
     if (fullWindow == nullptr) {
@@ -214,7 +203,7 @@ HWTEST_F(WindowRotationTest, WindowRotationTest3, TestSize.Level1)
     ASSERT_NE(display, nullptr);
     auto curDisplayOrientation = display->GetOrientation();
 
-    fullInfo_.name  = "fullscreen.3";
+    fullInfo_.name = "fullscreen.3";
     fullInfo_.orientation_ = Orientation::REVERSE_HORIZONTAL;
     fullInfo_.mode = WindowMode::WINDOW_MODE_FLOATING;
     const sptr<Window>& fullWindow = Utils::CreateTestWindow(fullInfo_);
@@ -252,7 +241,7 @@ HWTEST_F(WindowRotationTest, WindowRotationTest4, TestSize.Level1)
     defaultScreen->SetOrientation(Orientation::REVERSE_HORIZONTAL);
     sleep(SPLIT_TEST_SLEEP_S);
 
-    fullInfo_.name  = "fullscreen.4";
+    fullInfo_.name = "fullscreen.4";
     fullInfo_.orientation_ = Orientation::HORIZONTAL;
     const sptr<Window>& fullWindow = Utils::CreateTestWindow(fullInfo_);
     if (fullWindow == nullptr) {
@@ -295,7 +284,7 @@ HWTEST_F(WindowRotationTest, WindowRotationTest5, TestSize.Level1)
     defaultScreen->SetOrientation(Orientation::REVERSE_HORIZONTAL);
     sleep(SPLIT_TEST_SLEEP_S);
 
-    fullInfo_.name  = "fullscreen.5";
+    fullInfo_.name = "fullscreen.5";
     fullInfo_.orientation_ = Orientation::HORIZONTAL;
     const sptr<Window>& fullWindow = Utils::CreateTestWindow(fullInfo_);
     if (fullWindow == nullptr) {
@@ -329,6 +318,6 @@ HWTEST_F(WindowRotationTest, WindowRotationTest5, TestSize.Level1)
     defaultScreen->SetOrientation(Orientation::UNSPECIFIED);
     sleep(SPLIT_TEST_SLEEP_S);
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

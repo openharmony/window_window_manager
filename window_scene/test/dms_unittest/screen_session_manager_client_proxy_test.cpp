@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "iremote_object_mocker.h"
+#include "mock/mock_message_parcel.h"
 #include "zidl/screen_session_manager_client_proxy.h"
 
 using namespace testing;
@@ -326,6 +327,147 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, ScreenCaptureNotify, TestSize.Leve
 
     ASSERT_TRUE(screenSessionManagerClientProxy_ != nullptr);
     screenSessionManagerClientProxy_->ScreenCaptureNotify(screenId, uid, clientName);
+}
+
+/**
+ * @tc.name: OnCreateScreenSessionOnly
+ * @tc.desc: OnCreateScreenSessionOnly test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientProxyTest, OnCreateScreenSessionOnly, TestSize.Level1)
+{
+    ScreenId screenId = 0;
+    ScreenId rsId = 0;
+    std::string name = "test";
+    bool isExtend = false;
+
+    ASSERT_TRUE(screenSessionManagerClientProxy_ != nullptr);
+    screenSessionManagerClientProxy_->OnCreateScreenSessionOnly(screenId, rsId, name, isExtend);
+}
+
+/**
+ * @tc.name: OnExtendDisplayNodeChange
+ * @tc.desc: OnExtendDisplayNodeChange test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientProxyTest, OnExtendDisplayNodeChange, TestSize.Level1)
+{
+    ScreenId firstId = 0;
+    ScreenId secondId = 12;
+
+    ASSERT_TRUE(screenSessionManagerClientProxy_ != nullptr);
+    screenSessionManagerClientProxy_->OnExtendDisplayNodeChange(firstId, secondId);
+}
+
+/**
+ * @tc.name: OnMainDisplayNodeChange
+ * @tc.desc: OnMainDisplayNodeChange test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientProxyTest, OnMainDisplayNodeChange, TestSize.Level1)
+{
+    ScreenId mainScreenId = 0;
+    ScreenId extendScreenId = 12;
+    ScreenId extendRSId = 12;
+
+    ASSERT_TRUE(screenSessionManagerClientProxy_ != nullptr);
+    screenSessionManagerClientProxy_->OnMainDisplayNodeChange(mainScreenId, extendScreenId, extendRSId);
+}
+
+/**
+ * @tc.name: SetScreenCombination
+ * @tc.desc: SetScreenCombination test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientProxyTest, SetScreenCombination, TestSize.Level1)
+{
+    ScreenId mainScreenId = 0;
+    ScreenId extendScreenId = 12;
+    ScreenCombination combination = ScreenCombination::SCREEN_ALONE;
+
+    ASSERT_TRUE(screenSessionManagerClientProxy_ != nullptr);
+    screenSessionManagerClientProxy_->SetScreenCombination(mainScreenId, extendScreenId, combination);
+}
+
+/**
+ * @tc.name: OnDumperClientScreenSessions
+ * @tc.desc: OnDumperClientScreenSessions test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientProxyTest, OnDumperClientScreenSessions, TestSize.Level1)
+{
+    ASSERT_TRUE(screenSessionManagerClientProxy_ != nullptr);
+    screenSessionManagerClientProxy_->OnDumperClientScreenSessions();
+}
+
+/**
+ * @tc.name: OnBeforeScreenPropertyChanged
+ * @tc.desc: OnBeforeScreenPropertyChanged test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientProxyTest, OnBeforeScreenPropertyChanged, TestSize.Level1)
+{
+    screenSessionManagerClientProxy_->OnBeforeScreenPropertyChanged(FoldStatus::UNKNOWN);
+    ASSERT_TRUE(screenSessionManagerClientProxy_ != nullptr);
+}
+
+/**
+ * @tc.name: OnSetSurfaceNodeIdsChanged
+ * @tc.desc: OnSetSurfaceNodeIdsChanged test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientProxyTest, OnSetSurfaceNodeIdsChanged, TestSize.Level1)
+{
+    MockMessageParcel::ClearAllErrorFlag();
+    DisplayId displayId = 10;
+    std::vector<uint64_t> surfaceNodeIds = { 100, 101 };
+    auto ssmProxy = sptr<ScreenSessionManagerClientProxy>::MakeSptr(nullptr);
+    ssmProxy->OnSetSurfaceNodeIdsChanged(displayId, surfaceNodeIds);
+
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    ssmProxy = sptr<ScreenSessionManagerClientProxy>::MakeSptr(remoteMocker);
+    ASSERT_NE(nullptr, ssmProxy);
+    ssmProxy->OnSetSurfaceNodeIdsChanged(displayId, surfaceNodeIds);
+
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    ssmProxy->OnSetSurfaceNodeIdsChanged(displayId, surfaceNodeIds);
+    remoteMocker->SetRequestResult(ERR_NONE);
+
+    MockMessageParcel::SetWriteUint64ErrorFlag(true);
+    ssmProxy->OnSetSurfaceNodeIdsChanged(displayId, surfaceNodeIds);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ssmProxy->OnSetSurfaceNodeIdsChanged(displayId, surfaceNodeIds);
+    MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
+ * @tc.name: OnVirtualScreenDisconnected
+ * @tc.desc: OnVirtualScreenDisconnected test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientProxyTest, OnVirtualScreenDisconnected, TestSize.Level1)
+{
+    MockMessageParcel::ClearAllErrorFlag();
+    DisplayId displayId = 10;
+    auto ssmProxy = sptr<ScreenSessionManagerClientProxy>::MakeSptr(nullptr);
+    ssmProxy->OnVirtualScreenDisconnected(displayId);
+
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    ssmProxy = sptr<ScreenSessionManagerClientProxy>::MakeSptr(remoteMocker);
+    ASSERT_NE(nullptr, ssmProxy);
+    ssmProxy->OnVirtualScreenDisconnected(displayId);
+
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    ssmProxy->OnVirtualScreenDisconnected(displayId);
+    remoteMocker->SetRequestResult(ERR_NONE);
+
+    MockMessageParcel::SetWriteUint64ErrorFlag(true);
+    ssmProxy->OnVirtualScreenDisconnected(displayId);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ssmProxy->OnVirtualScreenDisconnected(displayId);
+    MockMessageParcel::ClearAllErrorFlag();
 }
 } // namespace Rosen
 } // namespace OHOS

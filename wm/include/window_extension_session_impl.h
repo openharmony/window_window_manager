@@ -38,7 +38,8 @@ public:
     ~WindowExtensionSessionImpl();
 
     WMError Create(const std::shared_ptr<AbilityRuntime::Context>& context,
-        const sptr<Rosen::ISession>& iSession, const std::string& identityToken = "") override;
+        const sptr<Rosen::ISession>& iSession, const std::string& identityToken = "",
+        bool isModuleAbilityHookEnd = false) override;
     WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false,
         MoveConfiguration moveConfiguration = {}) override;
     WMError Resize(uint32_t width, uint32_t height, const RectAnimationConfig& rectAnimationConfig = {}) override;
@@ -50,6 +51,12 @@ public:
         const AAFwk::WantParams& wantParams, AAFwk::WantParams& reWantParams) override;
     void RegisterTransferComponentDataForResultListener(
         const NotifyTransferComponentDataForResultFunc& func) override;
+    WMError RegisterHostWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener) override;
+    WMError UnregisterHostWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener) override;
+    WMError RegisterKeyboardDidShowListener(const sptr<IKeyboardDidShowListener>& listener) override;
+    WMError UnregisterKeyboardDidShowListener(const sptr<IKeyboardDidShowListener>& listener) override;
+    WMError RegisterKeyboardDidHideListener(const sptr<IKeyboardDidHideListener>& listener) override;
+    WMError UnregisterKeyboardDidHideListener(const sptr<IKeyboardDidHideListener>& listener) override;
     void TriggerBindModalUIExtension() override;
     std::shared_ptr<IDataHandler> GetExtensionDataHandler() const override;
     WSError SendExtensionData(MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
@@ -62,6 +69,11 @@ public:
     WMError SetPrivacyMode(bool isPrivacyMode) override;
     WMError HidePrivacyContentForHost(bool needHide) override;
 
+    std::unique_ptr<Ace::UIContent> UIContentCreate(AppExecFwk::Ability* ability, void* env, int isAni);
+    WMError NapiSetUIContentInner(const std::string& contentInfo, void* env, void* storage,
+        BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability, int isAni);
+    WMError NapiSetUIContent(const std::string& contentInfo, ani_env* env, ani_object storage,
+        BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
     WMError NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
         BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
     WMError NapiSetUIContentByName(const std::string& contentName, napi_env env, napi_value storage,
@@ -82,11 +94,15 @@ public:
         const std::vector<std::string>& params, std::vector<std::string>& info) override;
     WMError TransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         int64_t uiExtensionIdLevel) override;
-    WMError Destroy(bool needNotifyServer, bool needClearListener = true) override;
+    WMError Destroy(bool needNotifyServer, bool needClearListener = true,
+        uint32_t reason = static_cast<uint32_t>(WindowStateChangeReason::NORMAL)) override;
 
     WMError RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener) override;
     WMError UnregisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener) override;
     void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
+    void NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
+    void ProcessPointerEventWithHostWindowDelayRaise(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+        bool isHitTargetDraggable) const;
 
     void NotifyFocusActiveEvent(bool isFocusActive) override;
     void NotifyFocusStateEvent(bool focusState) override;
@@ -96,7 +112,11 @@ public:
     void NotifySessionForeground(uint32_t reason, bool withAnimation) override;
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
     void NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info,
-                                      const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
+        const std::shared_ptr<RSTransaction>& rsTransaction, const Rect& callingSessionRect,
+        const std::map<AvoidAreaType, AvoidArea>& avoidAreas) override;
+    void NotifyKeyboardDidShow(const KeyboardPanelInfo& keyboardPanelInfo) override;
+    void NotifyKeyboardDidHide(const KeyboardPanelInfo& keyboardPanelInfo) override;
+    void NotifyOccupiedAreaChange(sptr<OccupiedAreaChangeInfo> info);
     WMError RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
     WMError UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
     void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
@@ -108,9 +128,28 @@ public:
     WMError Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
     WSError NotifyDensityFollowHost(bool isFollowHost, float densityValue) override;
     float GetVirtualPixelRatio(const sptr<DisplayInfo>& displayInfo) override;
+    float GetDefaultDensity(const sptr<DisplayInfo>& displayInfo);
     WMError HideNonSecureWindows(bool shouldHide) override;
     WMError SetWaterMarkFlag(bool isEnable) override;
     Rect GetHostWindowRect(int32_t hostWindowId) override;
+    WMError GetGlobalScaledRect(Rect& globalScaledRect) override;
+    bool IsComponentFocused() const override;
+
+    /*
+     * Gesture Back
+     */
+    WMError GetGestureBackEnabled(bool& enable) const override;
+    WMError SetGestureBackEnabled(bool enable) override;
+
+    /*
+     * Immersive
+     */
+    WMError SetLayoutFullScreen(bool status) override;
+    WMError SetImmersiveModeEnabledState(bool enable) override;
+    bool GetImmersiveModeEnabledState() const override;
+    WMError UpdateSystemBarProperties(const std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
+        const std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags) override;
+    WMError UpdateHostSpecificSystemBarEnabled(const std::string& name, bool enable, bool enableAnimation) override;
 
     /*
      * Free Multi Window
@@ -131,6 +170,7 @@ public:
      */
     bool IsPcWindow() const override;
     bool IsPcOrPadFreeMultiWindowMode() const override;
+    WMError UseImplicitAnimation(bool useImplicit) override;
 
     /*
      * Window Property
@@ -138,7 +178,17 @@ public:
     static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
     void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
     CrossAxisState GetCrossAxisState() override;
+    WMError ExtensionSetKeepScreenOn(bool keepScreenOn) override;
+    WMError ExtensionSetBrightness(float brightness) override;
     void UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want) override;
+    WMError SendExtensionMessageToHost(uint32_t code, const AAFwk::Want& data) const;
+    WMError OnExtensionMessage(uint32_t code, int32_t persistentId, const AAFwk::Want& data) override;
+    WMError HandleHostWindowRaise(uint32_t code, int32_t persistentId, const AAFwk::Want& data) override;
+    WMError HandleRegisterHostWindowRectChangeListener(uint32_t code, int32_t persistentId,
+        const AAFwk::Want& data) override;
+    WMError HandleUnregisterHostWindowRectChangeListener(uint32_t code, int32_t persistentId,
+        const AAFwk::Want& data) override;
+    uint32_t GetHostStatusBarContentColor() const override;
 
 protected:
     NotifyTransferComponentDataFunc notifyTransferComponentDataFunc_;
@@ -166,20 +216,34 @@ private:
     void ArkUIFrameworkSupport();
     WMError CheckHideNonSecureWindowsPermission(bool shouldHide);
     void ReportModalUIExtensionMayBeCovered(bool byLoadContent) const;
-    WMError SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
-        sptr<IRemoteObject> token, AppExecFwk::Ability* ability, bool initByName = false);
+    WMError SetUIContentInner(const std::string& contentInfo, void* env, void* storage,
+        sptr<IRemoteObject> token, AppExecFwk::Ability* ability, bool initByName = false, int isAni = 0);
     void RegisterDataConsumer();
     void RegisterConsumer(Extension::Businesscode code,
         const std::function<WMError(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)>& func);
     WMError OnCrossAxisStateChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
     WMError OnResyncExtensionConfig(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+    WMError OnGestureBackEnabledChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+    WMError OnImmersiveModeEnabledChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+    WMError OnHostWindowDelayRaiseStateChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+    WMError OnHostWindowRectChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+    WMError OnScreenshot(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+    WMError OnExtensionSecureLimitChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+    WMError OnKeyboardDidShow(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+    WMError OnKeyboardDidHide(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+    WMError OnHostStatusBarContentColorChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+
+    /*
+     * Compatible Mode
+     */
+    WMError OnHostWindowCompatInfoChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+    WMError SetCompatInfo(const AAFwk::WantParams& configParam);
 
     std::shared_ptr<Extension::DataHandler> dataHandler_;
     std::unordered_map<uint32_t, DataConsumeCallback> dataConsumers_;  // Read only after init
     sptr<IRemoteObject> abilityToken_ { nullptr };
     std::atomic<bool> isDensityFollowHost_ { false };
     std::optional<std::atomic<float>> hostDensityValue_ = std::nullopt;
-    sptr<IOccupiedAreaChangeListener> occupiedAreaChangeListener_;
     std::optional<std::atomic<bool>> focusState_ = std::nullopt;
     std::optional<AccessibilityChildTreeInfo> accessibilityChildTreeInfo_ = std::nullopt;
     ExtensionWindowFlags extensionWindowFlags_ { 0 };
@@ -187,7 +251,19 @@ private:
     bool modalUIExtensionSelfLoadContent_ { false };
     float lastDensity_ { 0.0f };
     int32_t lastOrientation_ { 0 };
+    uint64_t lastDisplayId_ { 0 };
     AAFwk::WantParams extensionConfig_ {};
+    bool hostGestureBackEnabled_ { true };
+    bool hostImmersiveModeEnabled_ { false };
+    std::mutex hostWindowRectChangeListenerMutex_;
+    std::mutex keyboardDidShowListenerMutex_;
+    std::mutex keyboardDidHideListenerMutex_;
+    std::mutex occupiedAreaChangeListenerMutex_;
+    std::vector<sptr<IWindowRectChangeListener>> hostWindowRectChangeListener_;
+    std::vector<sptr<IKeyboardDidShowListener>> keyboardDidShowListenerList_;
+    std::vector<sptr<IKeyboardDidHideListener>> keyboardDidHideListenerList_;
+    std::vector<sptr<IOccupiedAreaChangeListener>> occupiedAreaChangeListenerList_;
+    uint32_t hostStatusBarContentColor_;
 
     /*
      * PC Fold Screen

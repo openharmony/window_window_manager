@@ -64,7 +64,11 @@ ohos_shared_library("screen_session_manager") {
     "src/connection/screen_cast_connection.cpp",
     "src/connection/screen_session_ability_connection.cpp",
     "src/connection/screen_snapshot_picker_connection.cpp",
+    "src/multi_screen_change_utils.cpp",
+    "src/multi_screen_mode_change_manager.cpp",
+    "src/multi_screen_power_change_manager.cpp",
     "src/publish/screen_session_publish.cpp",
+    "src/screen_aod_plugin.cpp",
     "src/screen_cutout_controller.cpp",
     "src/screen_edid_parse.cpp",
     "src/screen_power_utils.cpp",
@@ -150,6 +154,12 @@ ohos_shared_library("screen_session_manager") {
       defined(global_parts_info.powermgr_power_manager)) {
     external_deps += [ "power_manager:powermgr_client" ]
     defines += [ "POWER_MANAGER_ENABLE" ]
+  }
+
+  if (defined(global_parts_info) &&
+      defined(global_parts_info.powermgr_display_manager)) {
+    external_deps += [ "display_manager:displaymgr" ]
+    defines += [ "POWERMGR_DISPLAY_MANAGER_ENABLE" ]
   }
 
   if (window_manager_feature_tp_enable) {

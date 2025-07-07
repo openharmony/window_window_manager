@@ -45,6 +45,8 @@ public:
     void SetDisplayNodeScreenId(ScreenId screenId, ScreenId displayNodeScreenId) override;
     void OnGetSurfaceNodeIdsFromMissionIdsChanged(std::vector<uint64_t>& missionIds,
         std::vector<uint64_t>& surfaceNodeIds, bool isBlackList = false) override;
+    void OnSetSurfaceNodeIdsChanged(DisplayId displayId, const std::vector<uint64_t>& surfaceNodeIds) override;
+    void OnVirtualScreenDisconnected(DisplayId displayId) override;
     void OnUpdateFoldDisplayMode(FoldDisplayMode displayMode) override;
     void SetVirtualPixelRatioSystem(ScreenId screenId, float virtualPixelRatio) override;
     void OnFoldStatusChangedReportUE(const std::vector<std::string>& screenFoldInfo) override;
@@ -54,7 +56,15 @@ public:
     void OnSecondaryReflexionChanged(ScreenId screenId, bool isSecondaryReflexion) override;
     void OnExtendScreenConnectStatusChanged(ScreenId screenId,
         ExtendScreenConnectStatus extendScreenConnectStatus) override;
-
+    bool OnExtendDisplayNodeChange(ScreenId firstId, ScreenId secondId) override;
+    bool OnCreateScreenSessionOnly(ScreenId screenId, ScreenId rsId, const std::string& name,
+        bool isExtend) override;
+    bool OnMainDisplayNodeChange(ScreenId mainScreenId, ScreenId extendScreenId, ScreenId extendRSId) override;
+    void SetScreenCombination(ScreenId mainScreenId, ScreenId extendScreenId,
+        ScreenCombination extendCombination) override;
+    std::string OnDumperClientScreenSessions() override;
+    void OnBeforeScreenPropertyChanged(FoldStatus foldStatus) override;
+    void OnScreenModeChanged(ScreenModeChangeEvent screenModeChangeEvent) override;
 private:
     static inline BrokerDelegator<ScreenSessionManagerClientProxy> delegator_;
 };

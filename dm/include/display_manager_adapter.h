@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,17 +16,18 @@
 #ifndef FOUNDATION_DM_DISPLAY_MANAGER_ADAPTER_H
 #define FOUNDATION_DM_DISPLAY_MANAGER_ADAPTER_H
 
-#include <map>
 #include <mutex>
 #include <surface.h>
 
 #include "display.h"
+#include "dm_common.h"
+#include "fold_screen_info.h"
+#include "idisplay_manager.h"
 #include "screen.h"
 #include "screen_group.h"
-#include "dm_common.h"
-#include "display_manager_interface.h"
-#include "fold_screen_info.h"
 #include "singleton_delegator.h"
+#include "zidl/idisplay_manager_agent.h"
+#include "zidl/screen_session_manager_interface.h"
 
 namespace OHOS::Rosen {
 class BaseAdapter {
@@ -40,9 +41,11 @@ public:
 protected:
     bool InitDMSProxy();
     std::recursive_mutex mutex_;
+    sptr<IScreenSessionManager> screenSessionManagerServiceProxy_ = nullptr;
     sptr<IDisplayManager> displayManagerServiceProxy_ = nullptr;
     sptr<IRemoteObject::DeathRecipient> dmsDeath_ = nullptr;
-    bool isProxyValid_ { false };
+    bool isProxyValid_ = false;
+    static inline DMError ConvertToDMError(ErrCode errCode, int32_t dmError);
 };
 
 class DMSDeathRecipient : public IRemoteObject::DeathRecipient {
@@ -60,7 +63,9 @@ public:
     virtual sptr<DisplayInfo> GetDisplayInfoByScreenId(ScreenId screenId);
     virtual std::vector<DisplayId> GetAllDisplayIds();
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId,
-        DmErrorCode* errorCode = nullptr, bool isUseDma = false);
+        DmErrorCode* errorCode = nullptr, bool isUseDma = false, bool isCaptureFullOfScreen = false);
+    virtual std::vector<std::shared_ptr<Media::PixelMap>> GetDisplayHDRSnapshot(DisplayId displayId,
+        DmErrorCode* errorCode = nullptr, bool isUseDma = false, bool isCaptureFullOfScreen = false);
     virtual std::shared_ptr<Media::PixelMap> GetSnapshotByPicker(Media::Rect &rect, DmErrorCode* errorCode = nullptr);
     virtual DMError HasImmersiveWindow(ScreenId screenId, bool& immersive);
     virtual DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow);
@@ -96,7 +101,7 @@ public:
     virtual DMError SetFoldStatusLockedFromJs(bool locked);
     virtual sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
     virtual void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
-        std::vector<uint64_t> surfaceIdList = {});
+        std::vector<uint64_t> surfaceIdList = {}, std::vector<uint8_t> typeBlackList = {});
     virtual void SetVirtualDisplayMuteFlag(ScreenId screenId, bool muteFlag);
     virtual void DisablePowerOffRenderControl(ScreenId screenId);
     virtual DMError ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy);
@@ -109,7 +114,11 @@ public:
         DmErrorCode* errorCode = nullptr);
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshotWithOption(const CaptureOption& captureOption,
         DmErrorCode* errorCode = nullptr);
+    virtual std::vector<std::shared_ptr<Media::PixelMap>> GetDisplayHDRSnapshotWithOption(
+        const CaptureOption& captureOption, DmErrorCode* errorCode = nullptr);
     virtual sptr<DisplayInfo> GetPrimaryDisplayInfo();
+    virtual DMError GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
+        ScreenId& screenId, DMRect& screenArea);
 
 private:
     static inline SingletonDelegator<DisplayManagerAdapter> delegator;
@@ -185,7 +194,9 @@ public:
     virtual DMError SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refreshRate,
         uint32_t& actualRefreshRate);
     virtual ScreenPowerState GetScreenPower();
+    virtual void SetFoldStatusExpandAndLocked(bool locked);
     virtual DMError SetScreenSkipProtectedWindow(const std::vector<ScreenId>& screenIds, bool isEnable);
+    virtual DMError SetVirtualScreenAutoRotation(ScreenId screenId, bool enable);
 private:
     static inline SingletonDelegator<ScreenManagerAdapter> delegator;
 };

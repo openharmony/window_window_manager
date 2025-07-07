@@ -19,11 +19,11 @@
 
 #include <accesstoken_kit.h>
 #include <bundle_constants.h>
-#include <ipc_skeleton.h>
-#include <bundle_mgr_proxy.h>
 #include <bundle_mgr_interface.h>
-#include <system_ability_definition.h>
+#include <bundle_mgr_proxy.h>
+#include <ipc_skeleton.h>
 #include <iservice_registry.h>
+#include <system_ability_definition.h>
 #include <tokenid_kit.h>
 
 #include "window_manager_hilog.h"
@@ -41,21 +41,13 @@ public:
     void TearDown() override;
 };
 
-void PermissionTest::SetUpTestCase()
-{
-}
+void PermissionTest::SetUpTestCase() {}
 
-void PermissionTest::TearDownTestCase()
-{
-}
+void PermissionTest::TearDownTestCase() {}
 
-void PermissionTest::SetUp()
-{
-}
+void PermissionTest::SetUp() {}
 
-void PermissionTest::TearDown()
-{
-}
+void PermissionTest::TearDown() {}
 
 namespace {
 /**
@@ -103,6 +95,6 @@ HWTEST_F(PermissionTest, CheckIsCallingBundleName, TestSize.Level1)
     bool result = Permission::CheckIsCallingBundleName("err");
     ASSERT_EQ(false, result);
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

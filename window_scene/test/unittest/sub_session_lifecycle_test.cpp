@@ -41,20 +41,17 @@ public:
     void SetUp() override;
     void TearDown() override;
     SessionInfo info;
-    sptr <SubSession::SpecificSessionCallback> specificCallback = nullptr;
+    sptr<SubSession::SpecificSessionCallback> specificCallback = nullptr;
+
 private:
     RSSurfaceNode::SharedPtr CreateRSSurfaceNode();
-    sptr <SubSession> subSession_;
+    sptr<SubSession> subSession_;
     SystemSessionConfig systemConfig_;
 };
 
-void SessionStubLifecycleTest::SetUpTestCase()
-{
-}
+void SessionStubLifecycleTest::SetUpTestCase() {}
 
-void SessionStubLifecycleTest::TearDownTestCase()
-{
-}
+void SessionStubLifecycleTest::TearDownTestCase() {}
 
 void SessionStubLifecycleTest::SetUp()
 {
@@ -141,7 +138,7 @@ HWTEST_F(SessionStubLifecycleTest, Hide01, TestSize.Level1)
 {
     subSession_->Hide();
     subSession_->GetMissionId();
-    
+
     subSession_->isActive_ = true;
     ASSERT_EQ(WSError::WS_OK, subSession_->Hide());
     subSession_->isActive_ = false;
@@ -154,7 +151,7 @@ HWTEST_F(SessionStubLifecycleTest, Hide01, TestSize.Level1)
     subSession_->sessionStage_ = nullptr;
     ASSERT_EQ(WSError::WS_OK, subSession_->Hide());
     subSession_->sessionStage_ = tempStage_;
-    
+
     WSRect rect;
     subSession_->UpdatePointerArea(rect);
     subSession_->RectCheck(50, 100);
@@ -303,6 +300,6 @@ HWTEST_F(SessionStubLifecycleTest, ProcessPointDownSession02, TestSize.Level1)
     ASSERT_FALSE(subSession_->GetSessionProperty()->GetRaiseEnabled());
     ASSERT_EQ(subSession_->ProcessPointDownSession(50, 100), WSError::WS_OK);
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

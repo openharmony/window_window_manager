@@ -117,6 +117,14 @@ public:
 
     void SetZOrder(uint32_t zOrder) { zOrder_ = zOrder; }
 
+    void SetGlobalDisplayRect(const Rect& globalDisplayRect) { globalDisplayRect_ = globalDisplayRect; }
+
+    Rect GetGlobalDisplayRect() const { return globalDisplayRect_; }
+
+    int32_t GetCallingPid() const { return callingPid_; }
+
+    void SetCallingPid(int32_t callingPid) { callingPid_ = callingPid; }
+
     uint32_t windowId_ { INVALID_WINDOW_ID };
     int32_t pid_ { 0 };
     int32_t uid_ { 0 };
@@ -124,12 +132,14 @@ public:
     WindowType windowType_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW };
     WindowStatus windowStatus_ = WindowStatus::WINDOW_STATUS_UNDEFINED;
     Rect rect_ = {0, 0, 0, 0};
+    Rect globalDisplayRect_ { 0, 0, 0, 0 };
     std::string bundleName_;
     std::string abilityName_;
     bool isFocused_ = false;
     int32_t appIndex_ { 0 };
     bool isSystem_ = false;
     uint32_t zOrder_ { 0 };
+    int32_t callingPid_ { -1 };
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_VISIBILITY_INFO_H

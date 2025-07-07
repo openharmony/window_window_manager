@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -24,7 +24,50 @@ config("libwmutil_private_config") {
 }
 
 config("libwmutil_public_config") {
-  include_dirs = [ "include" ]
+  include_dirs = [
+    "include",
+    "${window_base_path}/window_scene/interfaces/include",
+    "../interfaces/innerkits/dm",
+    "../interfaces/innerkits/wm",
+  ]
+}
+
+ohos_source_set("ui_effect_controller_common") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+  }
+
+  sources = [
+    "src/ui_effect_controller_common.cpp",
+  ]
+
+  public_configs = [
+    ":libwmutil_public_config",
+  ]
+
+  external_deps = [
+    "hilog:libhilog",
+  ]
+
+  public_deps = [
+    ":libwmutil_base",
+  ]
+  
+  public_external_deps = [
+    "c_utils:utils",
+    "graphic_2d:librender_service_client",
+    "ability_runtime:runtime",
+    "napi:ace_napi",
+  ]
+  part_name = "window_manager"
+  subsystem_name = "window"
 }
 
 ## build libwmutil_static.a
@@ -46,6 +89,7 @@ ohos_static_library("libwmutil_static") {
     "src/cutout_info.cpp",
     "src/display_change_info.cpp",
     "src/display_info.cpp",
+    "src/dm_virtual_screen_option.cpp",
     "src/dms_reporter.cpp",
     "src/perform_reporter.cpp",
     "src/permission.cpp",
@@ -160,12 +204,14 @@ ohos_shared_library("libwmutil_base") {
 ohos_shared_library("libwmutil") {
   branch_protector_ret = "pac_ret"
   sources = [
+    "src/dm_virtual_screen_option.cpp",
     "src/dms_reporter.cpp",
     "src/dms_xcollie.cpp",
     "src/perform_reporter.cpp",
     "src/permission.cpp",
     "src/persistent_storage.cpp",
     "src/pip_report.cpp",
+    "src/rs_adapter.cpp",
     "src/screen_fold_data.cpp",
     "src/screen_group_info.cpp",
     "src/screen_info.cpp",
@@ -207,6 +253,7 @@ ohos_shared_library("libwmutil") {
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
     "image_framework:image_native",
+    "init:libbegetutil",
     "input:libmmi-client",
     "ipc:ipc_single",
     "samgr:samgr_proxy",

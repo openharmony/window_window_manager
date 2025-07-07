@@ -18,10 +18,8 @@
 #include "mock_message_parcel.h"
 #include "session_manager_service_recover_proxy.h"
 
-
 using namespace testing;
 using namespace testing::ext;
-
 
 namespace OHOS {
 namespace Rosen {
@@ -226,6 +224,6 @@ HWTEST_F(SessionManagerServiceRecoverProxyTest, OnWMSConnectionChanged07, TestSi
     ASSERT_NE(sessionManagerService, nullptr);
     sessionManagerServiceRecoverProxy_->OnWMSConnectionChanged(1, 1, true, sessionManagerService);
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

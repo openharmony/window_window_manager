@@ -81,8 +81,12 @@
           "security_component_manager",
           "libjpeg-turbo",
           "libxml2",
+          "selinux_adapter",
+          "cJSON",
           "bounds_checking_function",
-          "device_status"
+          "device_status",
+          "runtime_core",
+          "zlib"
         ],
         "third_party": [
         ]
@@ -96,6 +100,8 @@
             "//foundation/window/window_manager/interfaces/kits/napi/extension_window:extensionwindow",
             "//foundation/window/window_manager/interfaces/kits/napi/window_runtime/window_stage_napi:windowstage",
             "//foundation/window/window_manager/interfaces/kits/napi:napi_packages",
+            "//foundation/window/window_manager/interfaces/kits/ani:ani_packages",
+            "//foundation/window/window_manager/window_scene/interfaces/kits/ani:window_scene_ani_packages",
             "//foundation/window/window_manager/interfaces/kits/cj:ffi_packages",
             "//foundation/window/window_manager/resources:window_resources",
             "//foundation/window/window_manager/window_scene/interfaces/kits/napi:window_scene_napi_packages"
@@ -114,7 +120,9 @@
             "//foundation/window/window_manager/wm:libwm_ndk",
             "//foundation/window/window_manager/utils:libwmutil",
             "//foundation/window/window_manager/utils:libwmutil_base",
-            "//foundation/window/window_manager/window_scene/common:window_scene_common"
+            "//foundation/window/window_manager/window_scene/common:window_scene_common",
+            "//foundation/window/window_manager/wm:libpip_web",
+            "//foundation/window/window_manager/wm:libpip_ndk"
           ],
           "service_group": [
             "//foundation/window/window_manager/sa_profile:wms_sa_profile",
@@ -379,6 +387,33 @@
           },
           {
             "type": "so",
+            "name": "//foundation/window/window_manager/interfaces/kits/ani/embeddable_window_stage:embeddablewindowstageani_kit",
+            "header": {
+              "header_files": [
+              ],
+              "header_base": "//foundation/window/window_manager/interfaces/kits/ani/embeddable_window_stage/embeddable_window_stage_ani"
+            }
+          },
+          {
+            "type": "so",
+            "name": "//foundation/window/window_manager/interfaces/kits/ani/window_runtime:windowstageani_kit",
+            "header": {
+              "header_files": [
+              ],
+              "header_base": "//foundation/window/window_manager/interfaces/kits/ani/window_runtime/window_stage_ani"
+            }
+          },
+          {
+            "type": "so",
+            "name": "//foundation/window/window_manager/window_scene/interfaces/kits/ani/scene_session_manager:scenesessionmanagerani_kit",
+            "header": {
+              "header_files": [
+              ],
+              "header_base": "//foundation/window/window_manager/window_scene/interfaces/kits/ani/scene_session_manager/scene_session_manager_ani"
+            }
+          },
+          {
+            "type": "so",
             "name": "//foundation/window/window_manager/interfaces/kits/napi/extension_window:extensionwindow_napi",
             "header": {
               "header_files": [
@@ -440,6 +475,36 @@
                 "window_stage_impl.h"
               ],
               "header_base": "//foundation/window/window_manager/interfaces/kits/cj/window_runtime"
+            }
+          },
+          {
+            "type": "so",
+            "name": "//foundation/window/window_manager/wm:libpip_web",
+            "header": {
+              "header_files": [
+                "web_picture_in_picture_controller_interface.h"
+              ],
+              "header_base": "//foundation/window/window_manager/interfaces/innerkits/wm"
+            }
+          },
+          {
+            "type": "so",
+            "name": "//foundation/window/window_manager/wm:libpip_ndk",
+            "header": {
+              "header_files": [
+                "oh_window_pip.h"
+              ],
+              "header_base": "//foundation/window/window_manager/interfaces/kits/ndk/wm"
+            }
+          },
+          {
+            "type": "so",
+            "name": "//foundation/window/window_manager/interfaces/kits/napi/window_animation:window_animation_utils",
+            "header": {
+              "header_files": [
+                "wm_animation_common.h"
+              ],
+              "header_base": "//foundation/window/window_manager/interfaces/innerkits/wm"
             }
           }
         ],

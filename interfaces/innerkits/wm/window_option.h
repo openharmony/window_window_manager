@@ -295,6 +295,26 @@ public:
     void SetSubWindowZLevel(int32_t zLevel);
 
     /**
+     * @brief Set zIndex of specific window.
+     *
+     * @param zIndex zIndex of specific window
+     */
+    void SetZIndex(int32_t zIndex);
+
+    /**
+     * @brief Set sub window outline enabled
+     *
+     * @param outlineEnabled whether show sub window outline
+     */
+    void SetSubWindowOutlineEnabled(bool outlineEnabled);
+
+    /**
+     * @brief Get sub window outline enabled
+     *
+     */
+    bool IsSubWindowOutlineEnabled() const;
+
+    /**
      * @brief Set real parent id of UIExtension
      *
      * @param realParentId real parent id of UIExtension
@@ -498,6 +518,13 @@ public:
     int32_t GetSubWindowZLevel() const;
 
     /**
+     * @brief Get zIndex of specific window.
+     *
+     * @return Return zIndex of specific window
+     */
+    int32_t GetZIndex() const;
+
+    /**
      * @brief Get subwindow maximizeSupported
      *
      * @return true means subwindow support maximize, otherwise not.
@@ -577,6 +604,20 @@ public:
     bool GetIsDensityFollowHost() const;
 
     /**
+     * @brief Set default density for subwindow or system window.
+     *
+     * @param defaultDensityEnabled Whether default density enabled.
+     */
+    void SetDefaultDensityEnabled(bool defaultDensityEnabled);
+
+    /**
+     * @brief Check whether default density enabled.
+     *
+     * @return true - default density is enabled.
+     */
+    bool IsDefaultDensityEnabled() const;
+
+    /**
      * @brief Set whether this modal UIExt is a constrained modal UIExtension.
      *
      * @param isConstrainedModal true - is a constrained modal UIExtension,
@@ -620,12 +661,15 @@ private:
     std::string subWindowTitle_ = { "" };
     bool subWindowDecorEnable_ = false;
     bool subWindowMaximizeSupported_ = false;
+    bool subWindowOutlineEnabled_ = false;
     bool onlySupportSceneBoard_ = false;
     bool dialogDecorEnable_ = false;
     std::string dialogTitle_ = { "" };
     bool isTopmost_ = false;
     int32_t zLevel_ = 0;
+    int32_t zIndex_ = SPECIFIC_ZINDEX_INVALID;
     bool isSystemKeyboard_ = false;
+    bool defaultDensityEnabled_ = false;
 
     /*
      * UIExtension

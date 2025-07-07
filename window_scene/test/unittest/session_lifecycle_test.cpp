@@ -38,7 +38,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-    const std::string UNDEFINED = "undefined";
+const std::string UNDEFINED = "undefined";
 }
 
 class WindowSessionLifecycleTest : public testing::Test {
@@ -48,14 +48,13 @@ public:
     void SetUp() override;
     void TearDown() override;
     int32_t GetTaskCount();
-    sptr <SceneSessionManager> ssm_;
+    sptr<SceneSessionManager> ssm_;
 
 private:
     RSSurfaceNode::SharedPtr CreateRSSurfaceNode();
 
-    sptr <Session> session_ = nullptr;
-    static constexpr uint32_t
-    WAIT_SYNC_IN_NS = 500000;
+    sptr<Session> session_ = nullptr;
+    static constexpr uint32_t WAIT_SYNC_IN_NS = 500000;
 
     class TLifecycleListener : public ILifecycleListener {
     public:
@@ -68,20 +67,18 @@ private:
         void OnExtensionDied() override {}
         void OnExtensionTimeout(int32_t errorCode) override {}
         void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
-            int64_t uiExtensionIdLevel) override {}
+                                  int64_t uiExtensionIdLevel) override
+        {
+        }
         void OnDrawingCompleted() override {}
         void OnAppRemoveStartingWindow() override {}
     };
     std::shared_ptr<TLifecycleListener> lifecycleListener_ = std::make_shared<TLifecycleListener>();
 };
 
-void WindowSessionLifecycleTest::SetUpTestCase()
-{
-}
+void WindowSessionLifecycleTest::SetUpTestCase() {}
 
-void WindowSessionLifecycleTest::TearDownTestCase()
-{
-}
+void WindowSessionLifecycleTest::TearDownTestCase() {}
 
 void WindowSessionLifecycleTest::SetUp()
 {
@@ -94,9 +91,7 @@ void WindowSessionLifecycleTest::SetUp()
     EXPECT_NE(nullptr, session_);
     ssm_ = sptr<SceneSessionManager>::MakeSptr();
     session_->SetEventHandler(ssm_->taskScheduler_->GetEventHandler(), ssm_->eventHandler_);
-    auto isScreenLockedCallback = [this]() {
-        return ssm_->IsScreenLocked();
-    };
+    auto isScreenLockedCallback = [this]() { return ssm_->IsScreenLocked(); };
     session_->RegisterIsScreenLockedCallback(isScreenLockedCallback);
 }
 
@@ -340,18 +335,14 @@ HWTEST_F(WindowSessionLifecycleTest, Disconnect01, TestSize.Level1)
 HWTEST_F(WindowSessionLifecycleTest, TerminateSessionNew01, TestSize.Level1)
 {
     NotifyTerminateSessionFuncNew callback =
-            [](const SessionInfo& info, bool needStartCaller, bool isFromBroker)
-            {
-            };
-
+        [](const SessionInfo& info, bool needStartCaller, bool isFromBroker, bool isForceClean) {};
     bool needStartCaller = false;
     bool isFromBroker = false;
     sptr<AAFwk::SessionInfo> info = sptr<AAFwk::SessionInfo>::MakeSptr();
     session_->terminateSessionFuncNew_ = nullptr;
     session_->TerminateSessionNew(info, needStartCaller, isFromBroker);
 
-    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION,
-            session_->TerminateSessionNew(nullptr, needStartCaller, isFromBroker));
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, session_->TerminateSessionNew(nullptr, needStartCaller, isFromBroker));
 }
 
 /**
@@ -364,7 +355,8 @@ HWTEST_F(WindowSessionLifecycleTest, TerminateSessionNew02, TestSize.Level1)
     bool needStartCaller = true;
     bool isFromBroker = true;
     sptr<AAFwk::SessionInfo> info = sptr<AAFwk::SessionInfo>::MakeSptr();
-    session_->SetTerminateSessionListenerNew([](const SessionInfo& info, bool needStartCaller, bool isFromBroker) {});
+    session_->SetTerminateSessionListenerNew(
+        [](const SessionInfo& info, bool needStartCaller, bool isFromBroker, bool isForceClean) {});
     usleep(WAIT_SYNC_IN_NS);
     auto result = session_->TerminateSessionNew(info, needStartCaller, isFromBroker);
     EXPECT_EQ(result, WSError::WS_OK);
@@ -432,6 +424,74 @@ HWTEST_F(WindowSessionLifecycleTest, IsSessionForeground, TestSize.Level1)
     ASSERT_EQ(false, session_->IsSessionForeground());
     session_->state_ = SessionState::STATE_CONNECT;
     ASSERT_EQ(false, session_->IsSessionForeground());
+}
+
+/**
+ * @tc.name: IsSessionNotBackground
+ * @tc.desc: IsSessionNotBackground, normal scene
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionLifecycleTest, IsSessionNotBackground, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->state_ = SessionState::STATE_DISCONNECT;
+    EXPECT_EQ(true, session_->IsSessionNotBackground());
+    session_->state_ = SessionState::STATE_CONNECT;
+    EXPECT_EQ(true, session_->IsSessionNotBackground());
+    session_->state_ = SessionState::STATE_FOREGROUND;
+    EXPECT_EQ(true, session_->IsSessionNotBackground());
+    session_->state_ = SessionState::STATE_ACTIVE;
+    EXPECT_EQ(true, session_->IsSessionNotBackground());
+    session_->state_ = SessionState::STATE_INACTIVE;
+    EXPECT_EQ(false, session_->IsSessionNotBackground());
+    session_->state_ = SessionState::STATE_BACKGROUND;
+    EXPECT_EQ(false, session_->IsSessionNotBackground());
+}
+
+/**
+ * @tc.name: IsVisibleNotBackground
+ * @tc.desc: IsVisibleNotBackground, normal scene
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionLifecycleTest, IsVisibleNotBackground, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->isVisible_ = false;
+    session_->state_ = SessionState::STATE_ACTIVE;
+    EXPECT_EQ(false, session_->IsVisibleNotBackground());
+    session_->isVisible_ = true;
+    EXPECT_EQ(true, session_->IsVisibleNotBackground());
+    session_->state_ = SessionState::STATE_BACKGROUND;
+    EXPECT_EQ(false, session_->IsVisibleNotBackground());
+}
+
+/**
+ * @tc.name: IsVisibleNotBackground01
+ * @tc.desc: IsVisibleNotBackground, normal scene
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionLifecycleTest, IsVisibleNotBackground01, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsVisibleNotBackground";
+    info.moduleName_ = "IsVisibleNotBackground";
+    info.bundleName_ = "IsVisibleNotBackground";
+    sptr<Session> subSession = sptr<Session>::MakeSptr(info);
+    subSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    EXPECT_EQ(subSession->IsVisibleNotBackground(), false);
+    subSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    EXPECT_EQ(subSession->IsVisibleNotBackground(), false);
+    subSession->isVisible_ = true;
+    EXPECT_EQ(subSession->IsVisibleNotBackground(), true);
+
+    sptr<Session> parentSession = sptr<Session>::MakeSptr(info);
+    parentSession->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    subSession->SetParentSession(parentSession);
+    EXPECT_EQ(subSession->IsVisibleNotBackground(), false);
+    parentSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    EXPECT_EQ(subSession->IsVisibleNotBackground(), false);
+    parentSession->isVisible_ = true;
+    EXPECT_EQ(subSession->IsVisibleNotBackground(), true);
 }
 
 /**
@@ -539,7 +599,7 @@ HWTEST_F(WindowSessionLifecycleTest, TerminateSessionTotal01, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION,
-            session_->TerminateSessionTotal(nullptr, TerminateType::CLOSE_AND_KEEP_MULTITASK));
+              session_->TerminateSessionTotal(nullptr, TerminateType::CLOSE_AND_KEEP_MULTITASK));
 }
 
 /**
@@ -553,7 +613,7 @@ HWTEST_F(WindowSessionLifecycleTest, TerminateSessionTotal02, TestSize.Level1)
     sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
     session_->isTerminating_ = true;
     ASSERT_EQ(WSError::WS_ERROR_INVALID_OPERATION,
-            session_->TerminateSessionTotal(abilitySessionInfo, TerminateType::CLOSE_AND_KEEP_MULTITASK));
+              session_->TerminateSessionTotal(abilitySessionInfo, TerminateType::CLOSE_AND_KEEP_MULTITASK));
 }
 
 /**
@@ -568,7 +628,7 @@ HWTEST_F(WindowSessionLifecycleTest, TerminateSessionTotal03, TestSize.Level1)
     session_->isTerminating_ = false;
     session_->SetTerminateSessionListenerTotal(nullptr);
     ASSERT_EQ(WSError::WS_OK,
-            session_->TerminateSessionTotal(abilitySessionInfo, TerminateType::CLOSE_AND_KEEP_MULTITASK));
+              session_->TerminateSessionTotal(abilitySessionInfo, TerminateType::CLOSE_AND_KEEP_MULTITASK));
 }
 
 /**
@@ -709,6 +769,6 @@ HWTEST_F(WindowSessionLifecycleTest, IsTerminated49, TestSize.Level1)
     res = session_->IsTerminated();
     ASSERT_EQ(false, res);
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

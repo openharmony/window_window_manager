@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,18 +13,18 @@
  * limitations under the License.
  */
 
-#include "pixel_map.h"
-#include "session_listener_controller.h"
-
 #include <gtest/gtest.h>
+#include <pixel_map.h>
 
 #include "display_manager_adapter.h"
 #include "mission_listener_stub.h"
+#include "scene_board_judgement.h"
+#include "scene_session_manager.h"
+#include "session/host/include/main_session.h"
+#include "session/host/include/scene_session.h"
+#include "session_listener_controller.h"
 #include "singleton_container.h"
 #include "zidl/session_lifecycle_listener_stub.h"
-#include "session/host/include/scene_session.h"
-#include "session/host/include/main_session.h"
-#include "scene_session_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -46,6 +46,11 @@ public:
     void OnMissionDestroyed(int32_t missionId) override
     {
         isMissionDestroyed_ = true;
+    }
+
+    void OnMissionMovedToBackground(int32_t missionId) override
+    {
+        isMissionBackground_ = true;
     }
 
     void OnMissionSnapshotChanged(int32_t missionId) override
@@ -84,6 +89,11 @@ public:
     {
         return isMissionDestroyed_;
     }
+    
+    bool IsMissionBackground() const
+    {
+        return isMissionBackground_;
+    }
 
     bool IsMissionSnapshotChanged() const
     {
@@ -118,6 +128,7 @@ private:
     bool isMissionIconUpdated_ = false;
     bool isMissionClosed_ = false;
     bool isMissionLabelUpdated_ = false;
+    bool isMissionBackground_ = false;
 };
 
 class SessionListenerControllerTest : public testing::Test {
@@ -128,6 +139,7 @@ public:
     void TearDown() override;
     std::shared_ptr<TaskScheduler> taskScheduler_ = std::make_shared<TaskScheduler>(LISTENER_CONTROLLER_TEST_THREAD);
     std::shared_ptr<SessionListenerController> slController;
+    static sptr<SceneSessionManager> ssm_;
 
 private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
@@ -141,16 +153,21 @@ public:
     {
         event_ = event;
     }
+
 private:
     ISessionLifecycleListener::SessionLifecycleEvent event_;
 };
 
+sptr<SceneSessionManager> SessionListenerControllerTest::ssm_ = nullptr;
+
 void SessionListenerControllerTest::SetUpTestCase()
 {
+    ssm_ = &SceneSessionManager::GetInstance();
 }
 
 void SessionListenerControllerTest::TearDownTestCase()
 {
+    ssm_ = nullptr;
 }
 
 void SessionListenerControllerTest::SetUp()
@@ -221,6 +238,21 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionCreated, TestSize.Level1)
 
     slController->NotifySessionCreated(persistentId);
     EXPECT_EQ(persistentId, 1);
+}
+
+/**
+ * @tc.name: NotifySessionBackground
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionListenerControllerTest, NotifySessionBackground, TestSize.Level1)
+{
+    int32_t persistentId = -1;
+    ASSERT_NE(slController, nullptr);
+    slController->NotifySessionBackground(persistentId);
+
+    persistentId = 1;
+    slController->NotifySessionBackground(persistentId);
 }
 
 /**
@@ -379,7 +411,11 @@ HWTEST_F(SessionListenerControllerTest, OnListenerDied, TestSize.Level1)
     EXPECT_EQ(nullptr, remote);
 
     if (SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy()) {
-        remote = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+        if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+            remote = SingletonContainer::Get<ScreenManagerAdapter>().screenSessionManagerServiceProxy_->AsObject();
+        } else {
+            remote = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+        }
         slController->OnListenerDied(remote);
         EXPECT_NE(nullptr, remote);
     }
@@ -437,7 +473,11 @@ HWTEST_F(SessionListenerControllerTest, ListenerDeathRecipient, TestSize.Level1)
 
     if (SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy()) {
         sptr<IRemoteObject> remote;
-        remote = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+        if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+            remote = SingletonContainer::Get<ScreenManagerAdapter>().screenSessionManagerServiceProxy_->AsObject();
+        } else {
+            remote = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+        }
         slController->listenerDeathRecipient_->OnRemoteDied(remote);
         EXPECT_NE(nullptr, remote);
     }
@@ -451,7 +491,7 @@ HWTEST_F(SessionListenerControllerTest, ListenerDeathRecipient, TestSize.Level1)
  */
 HWTEST_F(SessionListenerControllerTest, RegisterSessionLifecycleListenerByBundles, TestSize.Level1)
 {
-    std::vector<std::string> bundleNameList1 = {"bundle1", "bundle2"};
+    std::vector<std::string> bundleNameList1 = { "bundle1", "bundle2" };
     WMError res = slController->RegisterSessionLifecycleListener(nullptr, bundleNameList1);
     ASSERT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
 
@@ -472,18 +512,30 @@ HWTEST_F(SessionListenerControllerTest, RegisterSessionLifecycleListenerByBundle
  */
 HWTEST_F(SessionListenerControllerTest, RegisterSessionLifecycleListenerByIds, TestSize.Level1)
 {
-    std::vector<int32_t> persistentIdList1 = {1, 2};
+    std::vector<int32_t> persistentIdList1 = { 1, 2 };
     WMError res = slController->RegisterSessionLifecycleListener(nullptr, persistentIdList1);
-    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
 
     sptr<ISessionLifecycleListener> listener = sptr<MySessionLifecycleListener>::MakeSptr();
     ASSERT_NE(listener, nullptr);
     res = slController->RegisterSessionLifecycleListener(listener, persistentIdList1);
-    ASSERT_EQ(res, WMError::WM_OK);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
 
     std::vector<int32_t> persistentIdList2;
     res = slController->RegisterSessionLifecycleListener(listener, persistentIdList2);
-    ASSERT_EQ(res, WMError::WM_OK);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
+
+    SessionInfo info;
+    info.bundleName_ = "com.example.myapp";
+    info.abilityName_ = "MainAbility";
+    info.moduleName_ = "entry";
+    info.persistentId_ = 101;
+    info.appIndex_ = 0;
+    sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    ssm_->sceneSessionMap_.insert({ 101, sceneSession });
+    res = slController->RegisterSessionLifecycleListener(listener, persistentIdList1);
+    EXPECT_EQ(res, WMError::WM_OK);
 }
 
 /**
@@ -544,22 +596,54 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionLifecycleEvent02, Function 
     sptr<MySessionLifecycleListener> myListener = new MySessionLifecycleListener();
     sptr<ISessionLifecycleListener> listener = iface_cast<ISessionLifecycleListener>(myListener->AsObject());
     ASSERT_NE(listener, nullptr);
-    std::vector<int32_t> persistentIdList = {102};
-    
+    std::vector<int32_t> persistentIdList = { 102 };
     SessionInfo info;
     info.bundleName_ = "com.example.myapp";
     info.abilityName_ = "MainAbility";
     info.moduleName_ = "entry";
     info.persistentId_ = 102;
     info.appIndex_ = 0;
-    sptr<SceneSessionManager> ssm = sptr<SceneSessionManager>::MakeSptr();
     sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    ssm->sceneSessionMap_.insert({102, sceneSession});
-    
+    ssm_->sceneSessionMap_.insert({ 102, sceneSession });
     slController->RegisterSessionLifecycleListener(listener, persistentIdList);
     slController->NotifySessionLifecycleEvent(ISessionLifecycleListener::SessionLifecycleEvent::CREATED, info);
-    ASSERT_EQ(myListener->event_, ISessionLifecycleListener::SessionLifecycleEvent::CREATED);
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_EQ(myListener->event_, ISessionLifecycleListener::SessionLifecycleEvent::CREATED);
+}
+
+/**
+ * @tc.name: NotifySessionLifecycleEvent03
+ * @tc.desc: NotifySessionLifecycleEvent03
+ * @tc.type: CLASS
+ */
+HWTEST_F(SessionListenerControllerTest, NotifySessionLifecycleEvent03, Function | SmallTest | Level2)
+{
+    sptr<MySessionLifecycleListener> myListener = new MySessionLifecycleListener();
+    sptr<ISessionLifecycleListener> listener = iface_cast<ISessionLifecycleListener>(myListener->AsObject());
+    ASSERT_NE(listener, nullptr);
+    std::vector<int32_t> persistentIdList = { 103 };
+    SessionInfo info;
+    info.bundleName_ = "com.example.myapp";
+    info.abilityName_ = "MainAbility";
+    info.moduleName_ = "entry";
+    info.persistentId_ = 103;
+    info.appIndex_ = 0;
+    sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ssm_->sceneSessionMap_.insert({ 103, sceneSession });
+    sceneSession->SetSessionState(SessionState::STATE_CONNECT);
+    slController->RegisterSessionLifecycleListener(listener, persistentIdList);
+    ssm_->RequestSceneSessionActivation(sceneSession, true);
+    slController->NotifySessionLifecycleEvent(ISessionLifecycleListener::SessionLifecycleEvent::CREATED, info);
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_EQ(myListener->event_, ISessionLifecycleListener::SessionLifecycleEvent::CREATED);
+
+    sceneSession->SetSessionState(SessionState::STATE_ACTIVE);
+    ssm_->RequestSceneSessionActivation(sceneSession, true);
+    slController->NotifySessionLifecycleEvent(ISessionLifecycleListener::SessionLifecycleEvent::ACTIVE, info);
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_EQ(myListener->event_, ISessionLifecycleListener::SessionLifecycleEvent::ACTIVE);
 }
 } // namespace
 } // namespace Rosen

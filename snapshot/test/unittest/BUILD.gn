@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
+import("../../../windowmanager_aafwk.gni")
 
 module_out_path = "window_manager/OH-DMS/snapshot"
 
@@ -32,8 +33,10 @@ ohos_unittest("snapshot_utils_test") {
   deps = [ ":utils_unittest_common" ]
 
   external_deps = [
+    "cJSON:cjson_static",
     "c_utils:utils",
     "hilog:libhilog",
+    "selinux_adapter:librestorecon",
   ]
 }
 
@@ -45,8 +48,10 @@ ohos_unittest("snapshot_display_test") {
   deps = [ ":utils_unittest_common" ]
 
   external_deps = [
+    "cJSON:cjson_static",
     "c_utils:utils",
     "hilog:libhilog",
+    "selinux_adapter:librestorecon",
   ]
 }
 
@@ -59,6 +64,7 @@ config("utils_unittest_common_public_config") {
     "../../include",
     "../../../test/common/utils/include",
     "../../../utils/include",
+    "${dmserver_gen_path}",
   ]
 }
 

@@ -38,13 +38,9 @@ public:
     sptr<SCBSystemSession> scbSystemSession_;
 };
 
-void SCBSystemSessionTest::SetUpTestCase()
-{
-}
+void SCBSystemSessionTest::SetUpTestCase() {}
 
-void SCBSystemSessionTest::TearDownTestCase()
-{
-}
+void SCBSystemSessionTest::TearDownTestCase() {}
 
 void SCBSystemSessionTest::SetUp()
 {
@@ -62,6 +58,19 @@ void SCBSystemSessionTest::TearDown()
 }
 
 namespace {
+/**
+ * @tc.name: IsVisibleNotBackground
+ * @tc.desc: check func IsVisibleNotBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(SCBSystemSessionTest, IsVisibleNotBackground, TestSize.Level1)
+{
+    ASSERT_NE(scbSystemSession_, nullptr);
+    EXPECT_EQ(false, scbSystemSession_->IsVisibleNotBackground());
+    scbSystemSession_->isVisible_ = true;
+    EXPECT_EQ(true, scbSystemSession_->IsVisibleNotBackground());
+}
+
 /**
  * @tc.name: TransferKeyEvent01
  * @tc.desc: check func TransferKeyEvent
@@ -140,8 +149,7 @@ HWTEST_F(SCBSystemSessionTest, BindKeyboardSession02, TestSize.Level1)
     info.bundleName_ = "IntentionEventManager";
     info.moduleName_ = "InputEventListener";
     info.isSystem_ = true;
-    sptr<SceneSession::SpecificSessionCallback> callback =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession::SpecificSessionCallback> callback = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, callback);
     scbSystemSession_->BindKeyboardSession(session);
 }
@@ -204,37 +212,37 @@ HWTEST_F(SCBSystemSessionTest, PresentFocusIfPointDown02, TestSize.Level1)
     auto ret = scbSystemSession_->SetFocusable(false);
     ASSERT_EQ(WSError::WS_OK, ret);
     scbSystemSession_->PresentFocusIfPointDown();
-    scbSystemSession_->PresentFoucusIfNeed(2);
+    scbSystemSession_->PresentFocusIfNeed(2, 0);
     ASSERT_EQ(scbSystemSession_->isFocused_, true);
 
     scbSystemSession_->isFocused_ = false;
     ret = scbSystemSession_->SetFocusable(false);
     ASSERT_EQ(WSError::WS_OK, ret);
     scbSystemSession_->PresentFocusIfPointDown();
-    scbSystemSession_->PresentFoucusIfNeed(2);
+    scbSystemSession_->PresentFocusIfNeed(2, 0);
     ASSERT_EQ(scbSystemSession_->isFocused_, false);
 
     scbSystemSession_->isFocused_ = true;
     ret = scbSystemSession_->SetFocusable(true);
     ASSERT_EQ(WSError::WS_OK, ret);
     scbSystemSession_->PresentFocusIfPointDown();
-    scbSystemSession_->PresentFoucusIfNeed(2);
+    scbSystemSession_->PresentFocusIfNeed(2, 0);
     ASSERT_EQ(scbSystemSession_->isFocused_, true);
 }
 
 /**
- * @tc.name: PresentFoucusIfNeed
- * @tc.desc: check func PresentFoucusIfNeed
+ * @tc.name: PresentFocusIfNeed
+ * @tc.desc: check func PresentFocusIfNeed
  * @tc.type: FUNC
  */
-HWTEST_F(SCBSystemSessionTest, PresentFoucusIfNeed, TestSize.Level1)
+HWTEST_F(SCBSystemSessionTest, PresentFocusIfNeed, TestSize.Level1)
 {
     int32_t pointerAction = 8;
-    scbSystemSession_->PresentFoucusIfNeed(pointerAction);
+    scbSystemSession_->PresentFocusIfNeed(pointerAction, 0);
     ASSERT_EQ(pointerAction, 8);
 
     pointerAction = 100;
-    scbSystemSession_->PresentFoucusIfNeed(pointerAction);
+    scbSystemSession_->PresentFocusIfNeed(pointerAction, 0);
     ASSERT_EQ(pointerAction, 100);
 }
 
@@ -248,6 +256,6 @@ HWTEST_F(SCBSystemSessionTest, SetSkipEventOnCastPlus01, TestSize.Level1)
     scbSystemSession_->SetSkipEventOnCastPlus(false);
     ASSERT_EQ(false, scbSystemSession_->GetSessionProperty()->GetSkipEventOnCastPlus());
 }
-} //namespace
-} //namespace Rosen
-} //namespace OHOS
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

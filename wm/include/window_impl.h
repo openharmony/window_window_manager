@@ -25,6 +25,7 @@
 #include <refbase.h>
 #include <ui_content.h>
 #include <ui/rs_surface_node.h>
+#include <ui/rs_ui_director.h>
 #include <struct_multimodal.h>
 
 #include "prepare_terminate_callback_stub.h"
@@ -120,6 +121,7 @@ public:
     static std::vector<sptr<Window>> GetSubWindow(uint32_t parantId);
     static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration,
         const std::vector<std::shared_ptr<AbilityRuntime::Context>>& ignoreWindowContexts = {});
+    static WMError GetWindowTypeForArkUI(WindowType parentWindowType, WindowType& windowType);
     virtual std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const override;
     virtual Rect GetRect() const override;
     virtual Rect GetRequestRect() const override;
@@ -179,9 +181,13 @@ public:
     void UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
         SystemBarProperty& property) override;
 
+    WMError SetIntentParam(const std::string& intentParam, const std::function<void()>& loadPageCallback,
+        bool isColdStart) override;
     WMError Create(uint32_t parentId,
         const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
-    virtual WMError Destroy() override;
+    virtual WMError Destroy(uint32_t reason = 0) override;
+    void SetShowWithOptions(bool showWithOptions) override;
+    bool IsShowWithOptions() const override;
     virtual WMError Show(uint32_t reason = 0, bool withAnimation = false, bool withFocus = true) override;
     virtual WMError Hide(uint32_t reason = 0, bool withAnimation = false, bool isFromInnerkits = true) override;
     virtual WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false,
@@ -254,6 +260,8 @@ public:
         const sptr<IAnimationTransitionController>& listener) override;
     virtual WMError RegisterScreenshotListener(const sptr<IScreenshotListener>& listener) override;
     virtual WMError UnregisterScreenshotListener(const sptr<IScreenshotListener>& listener) override;
+    virtual WMError RegisterScreenshotAppEventListener(const IScreenshotAppEventListenerSptr& listener) override;
+    virtual WMError UnregisterScreenshotAppEventListener(const IScreenshotAppEventListenerSptr& listener) override;
     virtual WMError RegisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener) override;
     virtual WMError UnregisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener) override;
     virtual void RegisterDialogDeathRecipientListener(const sptr<IDialogDeathRecipientListener>& listener) override;
@@ -288,6 +296,7 @@ public:
     void UpdateActiveStatus(bool isActive);
     void NotifyTouchOutside();
     void NotifyScreenshot();
+    WMError NotifyScreenshotAppEvent(ScreenshotEventType type);
     void NotifyTouchDialogTarget(int32_t posX = 0, int32_t posY = 0) override;
     void NotifyDestroy();
     void NotifyForeground();
@@ -298,6 +307,8 @@ public:
     void NotifyForegroundInteractiveStatus(bool interactive);
     void NotifyMMIServiceOnline(uint32_t winId);
     virtual bool PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
+    virtual WMError NapiSetUIContent(const std::string& contentInfo, ani_env* env, ani_object storage,
+        BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
     virtual WMError NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
         BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
     virtual WMError SetUIContentByName(const std::string& contentInfo, napi_env env, napi_value storage,
@@ -346,7 +357,7 @@ public:
      * Gesture Back
      */
     WMError SetGestureBackEnabled(bool enable) override { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
-    WMError GetGestureBackEnabled(bool& enable) override { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    WMError GetGestureBackEnabled(bool& enable) const override { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /*
      * Window Property
@@ -355,11 +366,18 @@ public:
     void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
     void RegisterWindowInspectorCallback();
     uint32_t GetApiTargetVersion() const;
+    WMError GetWindowPropertyInfo(WindowPropertyInfo& windowPropertyInfo) override;
 
     /*
      * Keyboard
      */
-    WMError ShowKeyboard(KeyboardViewMode mode) override;
+    WMError ShowKeyboard(KeyboardEffectOption effectOption) override;
+
+    /*
+     * RS Client Multi Instance
+     */
+    std::shared_ptr<RSUIDirector> GetRSUIDirector() const override;
+    std::shared_ptr<RSUIContext> GetRSUIContext() const override;
 
 private:
     template<typename T> WMError RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
@@ -379,6 +397,8 @@ private:
     EnableIfSame<T, IAvoidAreaChangedListener, std::vector<sptr<IAvoidAreaChangedListener>>> GetListeners();
     template<typename T> EnableIfSame<T, IDisplayMoveListener, std::vector<sptr<IDisplayMoveListener>>> GetListeners();
     template<typename T> EnableIfSame<T, IScreenshotListener, std::vector<sptr<IScreenshotListener>>> GetListeners();
+    template<typename T>
+    EnableIfSame<T, IScreenshotAppEventListener, std::vector<IScreenshotAppEventListenerSptr>> GetListeners();
     template<typename T>
     EnableIfSame<T, ITouchOutsideListener, std::vector<sptr<ITouchOutsideListener>>> GetListeners();
     template<typename T>
@@ -435,7 +455,7 @@ private:
     void MapFloatingWindowToAppIfNeeded();
     void MapDialogWindowToAppIfNeeded();
     WMError UpdateProperty(PropertyChangeAction action);
-    WMError Destroy(bool needNotifyServer, bool needClearListener = true);
+    WMError Destroy(bool needNotifyServer, bool needClearListener = true, uint32_t reason = 0);
     WMError SetBackgroundColor(uint32_t color);
     uint32_t GetBackgroundColor() const;
     void InitAbilityInfo();
@@ -470,8 +490,19 @@ private:
         const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {});
     void UpdateDecorEnable(bool needNotify = false);
     WMError SetFloatingMaximize(bool isEnter);
-    WMError SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
-        WindowSetUIContentType setUIContentType, BackupAndRestoreType restoreType, AppExecFwk::Ability* ability);
+
+    std::unique_ptr<Ace::UIContent> UIContentCreate(AppExecFwk::Ability* ability, void* env, int isAni);
+    Ace::UIContentErrorCode UIContentInitByName(Ace::UIContent*, const std::string&, void* storage, int isAni);
+    template<typename T>
+    Ace::UIContentErrorCode UIContentInit(Ace::UIContent*, T contentInfo, void* storage, int isAni);
+    template<typename T>
+    Ace::UIContentErrorCode UIContentInit(Ace::UIContent*, T contentInfo, void* storage, const std::string& contentName,
+        int isAni);
+    Ace::UIContentErrorCode UIContentRestore(Ace::UIContent*, const std::string& contentInfo, void* storage,
+        Ace::ContentInfoType infoType, int isAni);
+    WMError SetUIContentInner(const std::string& contentInfo, void* env, void* storage,
+        WindowSetUIContentType setUIContentType, BackupAndRestoreType restoreType, AppExecFwk::Ability* ability,
+        int isAni = 0);
     std::shared_ptr<std::vector<uint8_t>> GetAbcContent(const std::string& abcPath);
     std::string GetRestoredRouterStack();
 
@@ -495,8 +526,10 @@ private:
     WindowState state_ { WindowState::STATE_INITIAL };
     WindowState subWindowState_ {WindowState::STATE_INITIAL};
     WindowTag windowTag_;
+    bool showWithOptions_ = false;
     sptr<IAceAbilityHandler> aceAbilityHandler_;
     static std::map<uint32_t, std::vector<sptr<IScreenshotListener>>> screenshotListeners_;
+    static std::map<uint32_t, std::vector<IScreenshotAppEventListenerSptr>> screenshotAppEventListeners_;
     static std::map<uint32_t, std::vector<sptr<ITouchOutsideListener>>> touchOutsideListeners_;
     static std::map<uint32_t, std::vector<sptr<IDialogTargetTouchListener>>> dialogTargetTouchListeners_;
     static std::map<uint32_t, std::vector<sptr<IWindowLifeCycle>>> lifecycleListeners_;
@@ -516,6 +549,7 @@ private:
     std::recursive_mutex mutex_;
     std::recursive_mutex windowStateMutex_;
     static std::recursive_mutex globalMutex_;
+    static std::shared_mutex windowMapMutex_;
     const float SYSTEM_ALARM_WINDOW_WIDTH_RATIO = 0.8;
     const float SYSTEM_ALARM_WINDOW_HEIGHT_RATIO = 0.3;
     WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
@@ -552,6 +586,18 @@ private:
     std::atomic<float> virtualPixelRatio_ = 1.0f;
 
     std::string restoredRouterStack_; // It was set and get in same thread, which is js thread.
+
+    /*
+     * RS Client Multi Instance
+     */
+    std::shared_ptr<RSUIDirector> rsUIDirector_;
+
+    /*
+     * Window Lifecycle
+     */
+    std::string intentParam_;
+    std::function<void()> loadPageCallback_;
+    bool isIntentColdStart_ = true;
 };
 } // namespace Rosen
 } // namespace OHOS

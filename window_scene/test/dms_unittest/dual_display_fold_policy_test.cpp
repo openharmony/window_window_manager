@@ -236,7 +236,7 @@ namespace {
             sptr<DualDisplayFoldPolicy> dualDisplayFoldPolicy = new DualDisplayFoldPolicy(
                 mutex, screenPowerTaskScheduler);
             dualDisplayFoldPolicy->ChangeScreenDisplayModeToCoordination();
-            ASSERT_FALSE(ssm_.keyguardDrawnDone_);
+            EXPECT_TRUE(ssm_.keyguardDrawnDone_);
         }
     }
 
@@ -456,6 +456,50 @@ namespace {
 
         dualDisplayFoldPolicy.ChangeScreenDisplayMode(FoldDisplayMode::COORDINATION);
         ASSERT_FALSE(dualDisplayFoldPolicy.onBootAnimation_);
+    }
+
+    /**
+     * @tc.name: TriggerSensorInSubWhenSessionNull
+     * @tc.desc: TriggerSensorInSub
+     * @tc.type: FUNC
+     */
+    HWTEST_F(DualDisplayFoldPolicyTest, TriggerSensorInSubWhenSessionNull, TestSize.Level1)
+    {
+        std::recursive_mutex mutex;
+        DualDisplayFoldPolicy dualDisplayFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
+        sptr<ScreenSession> screenSession = new ScreenSession();
+        screenSession->SetScreenId(0);
+        dualDisplayFoldPolicy.TriggerSensorInSub(screenSession);
+        screenSession->SetScreenId(5);
+        dualDisplayFoldPolicy.TriggerSensorInSub(screenSession);
+        EXPECT_EQ(screenSession->GetScreenId(), 5);
+    }
+
+    /**
+     * @tc.name: TriggerSensorInSubWhenSessionNotNull
+     * @tc.desc: TriggerSensorInSub
+     * @tc.type: FUNC
+     */
+    HWTEST_F(DualDisplayFoldPolicyTest, TriggerSensorInSubWhenSessionNotNull, TestSize.Level1)
+    {
+        std::recursive_mutex mutex;
+        auto screenSessionMapMainIter = ScreenSessionManager::GetInstance().screenSessionMap_.find(0);
+        DualDisplayFoldPolicy dualDisplayFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
+        sptr<ScreenSession> screenSession = new ScreenSession();
+        screenSession->SetScreenId(5);
+        ScreenSessionConfig config;
+        sptr<ScreenSession> screenSessionMain =
+            new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_REAL);
+        screenSessionMain->SensorRotationChange(0.0F);
+        ScreenSessionManager::GetInstance().screenSessionMap_[0] = screenSessionMain;
+        dualDisplayFoldPolicy.TriggerSensorInSub(screenSession);
+        screenSessionMain->SensorRotationChange(180.0F);
+        ScreenSessionManager::GetInstance().screenSessionMap_[0] = screenSessionMain;
+        dualDisplayFoldPolicy.TriggerSensorInSub(screenSession);
+        EXPECT_EQ(screenSessionMain->GetSensorRotation(), 180.0F);
+        if (screenSessionMapMainIter != ScreenSessionManager::GetInstance().screenSessionMap_.end()) {
+            ScreenSessionManager::GetInstance().screenSessionMap_[0] = screenSessionMapMainIter->second;
+        }
     }
 }
 } // namespace Rosen

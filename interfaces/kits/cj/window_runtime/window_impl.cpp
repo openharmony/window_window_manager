@@ -1610,7 +1610,7 @@ int32_t CJWindowImpl::CreateSubWindowWithOptions(std::string name,
         return static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
 
-    if (!windowToken_->IsPcOrPadCapabilityEnabled()) {
+    if (!windowToken_->IsPcOrFreeMultiWindowCapabilityEnabled()) {
         TLOGE(WmsLogTag::WMS_SUB, "Device not supported");
         return static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
     }

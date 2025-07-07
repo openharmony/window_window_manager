@@ -64,8 +64,7 @@ public:
     void HandleHallChange(float angle, int hall, sptr<FoldScreenPolicy> foldScreenPolicy) override;
     void HandleTentChange(int tentType, sptr<FoldScreenPolicy> foldScreenPolicy, int32_t hall = -1) override;
     void RegisterApplicationStateObserver() override;
-    bool IsCameraMode() override;
-
+    
 private:
     FoldStatus GetNextFoldState(float angle, int hall);
     void UpdateSwitchScreenBoundaryForLargeFoldDevice(float, int);
@@ -75,6 +74,7 @@ private:
     bool TriggerTentExit(float angle, int hall);
     void TentModeHandleSensorChange(float angle, int hall, sptr<FoldScreenPolicy> foldScreenPolicy);
     void ReportTentStatusChange(ReportTentModeStatus tentStatus);
+    void SetDeviceStatusAndParam(uint32_t deviceStatus);
     float currentAngle = -1.0F;
     int currentHall = -1;
 };

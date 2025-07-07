@@ -43,8 +43,11 @@ ohos_fuzztest("WindowExtensionStubFuzzTest") {
 
   external_deps = [
     "c_utils:utils",
+    "graphic_2d:librender_service_base",
     "hilog:libhilog",
+    "image_framework:image_native",
     "ipc:ipc_single",
+    "skia:skia_canvaskit",
   ]
 }
 

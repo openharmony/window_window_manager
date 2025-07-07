@@ -27,9 +27,6 @@
 #endif
 
 namespace OHOS::Rosen {
-namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "SensorFoldStateManager"};
-} // namespace
 
 SensorFoldStateManager::SensorFoldStateManager() = default;
 SensorFoldStateManager::~SensorFoldStateManager() = default;
@@ -43,21 +40,19 @@ void SensorFoldStateManager::HandleAngleOrHallChange(const std::vector<float> &a
 
 void SensorFoldStateManager::HandleTentChange(int tentType, sptr<FoldScreenPolicy> foldScreenPolicy, int32_t hall) {}
 
-bool SensorFoldStateManager::IsCameraMode() { return false; }
-
 void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, float angle,
     sptr<FoldScreenPolicy> foldScreenPolicy)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (nextState == FoldStatus::UNKNOWN) {
-        WLOGFW("fold state is UNKNOWN");
+        TLOGW(WmsLogTag::DMS, "fold state is UNKNOWN");
         return;
     }
     if (mState_ == nextState) {
-        WLOGFD("fold state doesn't change, foldState = %{public}d.", mState_);
+        TLOGD(WmsLogTag::DMS, "fold state doesn't change, foldState = %{public}d.", mState_);
         return;
     }
-    WLOGFI("current state: %{public}d, next state: %{public}d.", mState_, nextState);
+    TLOGI(WmsLogTag::DMS, "current state: %{public}d, next state: %{public}d.", mState_, nextState);
     ReportNotifyFoldStatusChange(static_cast<int32_t>(mState_), static_cast<int32_t>(nextState), angle);
     PowerMgr::PowerMgrClient::GetInstance().RefreshActivity();
 
@@ -78,14 +73,14 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, const std:
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (nextState == FoldStatus::UNKNOWN) {
-        WLOGFW("fold state is UNKNOWN");
+        TLOGW(WmsLogTag::DMS, "fold state is UNKNOWN");
         return;
     }
     if (mState_ == nextState) {
-        WLOGFD("fold state doesn't change, foldState = %{public}d.", mState_);
+        TLOGD(WmsLogTag::DMS, "fold state doesn't change, foldState = %{public}d.", mState_);
         return;
     }
-    WLOGFI("current state: %{public}d, next state: %{public}d.", mState_, nextState);
+    TLOGI(WmsLogTag::DMS, "current state: %{public}d, next state: %{public}d.", mState_, nextState);
     ReportNotifyFoldStatusChange(static_cast<int32_t>(mState_), static_cast<int32_t>(nextState), angles);
     PowerMgr::PowerMgrClient::GetInstance().RefreshActivity();
 
@@ -109,8 +104,8 @@ FoldStatus SensorFoldStateManager::GetCurrentState()
 void SensorFoldStateManager::ReportNotifyFoldStatusChange(int32_t currentStatus, int32_t nextStatus,
     float postureAngle)
 {
-    WLOGI("ReportNotifyFoldStatusChange currentStatus: %{public}d, nextStatus: %{public}d, postureAngle: %{public}f",
-        currentStatus, nextStatus, postureAngle);
+    TLOGI(WmsLogTag::DMS, "ReportNotifyFoldStatusChange currentStatus: %{public}d, nextStatus: %{public}d, "
+        "postureAngle: %{public}f", currentStatus, nextStatus, postureAngle);
     int32_t ret = HiSysEventWrite(
         OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
         "NOTIFY_FOLD_STATE_CHANGE",
@@ -119,7 +114,7 @@ void SensorFoldStateManager::ReportNotifyFoldStatusChange(int32_t currentStatus,
         "NEXT_FOLD_STATUS", nextStatus,
         "SENSOR_POSTURE", postureAngle);
     if (ret != 0) {
-        WLOGE("ReportNotifyFoldStatusChange Write HiSysEvent error, ret: %{public}d", ret);
+        TLOGE(WmsLogTag::DMS, "ReportNotifyFoldStatusChange Write HiSysEvent error, ret: %{public}d", ret);
     }
 }
 

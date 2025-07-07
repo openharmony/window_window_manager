@@ -82,9 +82,19 @@ public:
     }
 
     Ace::UIContent* GetUIContent() const override;
-    WMError Destroy() override;
+    WMError Destroy(uint32_t reason = 0) override;
 
     std::string GetClassType() const override { return "ScreenScene"; }
+
+    void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
+    void SetOnConfigurationUpdatedCallback(
+        const std::function<void(const std::shared_ptr<AppExecFwk::Configuration>&)>& callback);
+
+    /*
+     * RS Client Multi Instance
+     */
+    std::shared_ptr<RSUIDirector> GetRSUIDirector() const override;
+    std::shared_ptr<RSUIContext> GetRSUIContext() const override;
 
 private:
     mutable std::mutex mutex_;
@@ -97,6 +107,8 @@ private:
     std::function<void()> frameLayoutFinishCb_ = nullptr;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
     std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
+    std::function<void(const std::shared_ptr<AppExecFwk::Configuration>&)> configurationUpdateCallback_;
+    void RegisterInputEventListener();
 };
 } // namespace Rosen
 } // namespace OHOS

@@ -23,9 +23,6 @@
 namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
-namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "JsScreenListener"};
-}
 inline uint32_t SCREEN_DISCONNECT_TYPE = 0;
 inline uint32_t SCREEN_CONNECT_TYPE = 1;
 
@@ -55,14 +52,14 @@ void JsScreenListener::CleanEnv(void* obj)
 
 void JsScreenListener::AddCallback(const std::string& type, napi_value jsListenerObject)
 {
-    WLOGI("JsScreenListener::AddCallback is called");
+    TLOGI(WmsLogTag::DMS, "called");
     std::lock_guard<std::mutex> lock(mtx_);
     std::unique_ptr<NativeReference> callbackRef;
     napi_ref result = nullptr;
     napi_create_reference(env_, jsListenerObject, 1, &result);
     callbackRef.reset(reinterpret_cast<NativeReference*>(result));
     jsCallBack_[type].emplace_back(std::move(callbackRef));
-    WLOGI("JsScreenListener::AddCallback success jsCallBack_ size: %{public}u!",
+    TLOGI(WmsLogTag::DMS, "success jsCallBack_ size: %{public}u!",
         static_cast<uint32_t>(jsCallBack_[type].size()));
 }
 
@@ -77,7 +74,7 @@ void JsScreenListener::RemoveCallback(napi_env env, const std::string& type, nap
     std::lock_guard<std::mutex> lock(mtx_);
     auto it = jsCallBack_.find(type);
     if (it == jsCallBack_.end()) {
-        WLOGE("JsScreenListener::RemoveCallback no callback to remove");
+        TLOGE(WmsLogTag::DMS, "no callback to remove");
         return;
     }
     auto& listeners = it->second;
@@ -90,25 +87,25 @@ void JsScreenListener::RemoveCallback(napi_env env, const std::string& type, nap
             iter++;
         }
     }
-    WLOGI("JsScreenListener::RemoveCallback success jsCallBack_ size: %{public}u!",
+    TLOGI(WmsLogTag::DMS, "success jsCallBack_ size: %{public}u!",
         static_cast<uint32_t>(listeners.size()));
 }
 
 void JsScreenListener::CallJsMethod(const std::string& methodName, napi_value const * argv, size_t argc)
 {
     if (methodName.empty()) {
-        WLOGFE("empty method name str, call method failed");
+        TLOGE(WmsLogTag::DMS, "empty method name str, call method failed");
         return;
     }
-    WLOGD("CallJsMethod methodName = %{public}s", methodName.c_str());
+    TLOGD(WmsLogTag::DMS, "CallJsMethod methodName = %{public}s", methodName.c_str());
     if (env_ == nullptr) {
-        WLOGFE("env_ nullptr");
+        TLOGE(WmsLogTag::DMS, "env_ nullptr");
         return;
     }
     for (auto& callback : jsCallBack_[methodName]) {
         napi_value method = callback->GetNapiValue();
         if (method == nullptr) {
-            WLOGFE("Failed to get method callback from object");
+            TLOGE(WmsLogTag::DMS, "Failed to get method callback from object");
             continue;
         }
         napi_call_function(env_, NapiGetUndefined(env_), method, argc, argv, nullptr);
@@ -118,20 +115,20 @@ void JsScreenListener::CallJsMethod(const std::string& methodName, napi_value co
 void JsScreenListener::OnConnect(ScreenId id)
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    WLOGI("JsScreenListener::OnConnect is called");
+    TLOGI(WmsLogTag::DMS, "called");
     if (jsCallBack_.empty()) {
-        WLOGFE("JsScreenListener::OnConnect not register!");
+        TLOGE(WmsLogTag::DMS, "not register!");
         return;
     }
     if (jsCallBack_.find(EVENT_CONNECT) == jsCallBack_.end()) {
-        WLOGE("JsScreenListener::OnConnect not this event, return");
+        TLOGE(WmsLogTag::DMS, "not this event, return");
         return;
     }
     auto napiTask = [self = weakRef_, id, env = env_] () {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsScreenListener::OnConnect");
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
-            WLOGFE("[NAPI]this listener or env is nullptr");
+            TLOGNE(WmsLogTag::DMS, "[NAPI]this listener or env is nullptr");
             return;
         }
         napi_value argv[] = {CreateJsValue(env, static_cast<uint32_t>(id))};
@@ -139,32 +136,32 @@ void JsScreenListener::OnConnect(ScreenId id)
     };
 
     if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
+        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate, "OnConnect");
         if (ret != napi_status::napi_ok) {
-            WLOGFE("OnConnect: Failed to SendEvent.");
+            TLOGE(WmsLogTag::DMS, "Failed to SendEvent.");
         }
     } else {
-        WLOGFE("OnConnect: env is nullptr");
+        TLOGE(WmsLogTag::DMS, "env is nullptr");
     }
 }
 
 void JsScreenListener::OnDisconnect(ScreenId id)
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    WLOGI("JsScreenListener::OnDisconnect is called");
+    TLOGI(WmsLogTag::DMS, "called");
     if (jsCallBack_.empty()) {
-        WLOGFE("JsScreenListener::OnDisconnect not register!");
+        TLOGE(WmsLogTag::DMS, "not register!");
         return;
     }
     if (jsCallBack_.find(EVENT_DISCONNECT) == jsCallBack_.end()) {
-        WLOGE("JsScreenListener::OnDisconnect not this event, return");
+        TLOGE(WmsLogTag::DMS, "not this event, return");
         return;
     }
     auto napiTask = [self = weakRef_, id, env = env_] () {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsScreenListener::OnDisconnect");
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
-            WLOGFE("[NAPI]this listener or env is nullptr");
+            TLOGNE(WmsLogTag::DMS, "[NAPI]this listener or env is nullptr");
             return;
         }
         napi_value argv[] = {CreateJsValue(env, static_cast<uint32_t>(id))};
@@ -172,32 +169,32 @@ void JsScreenListener::OnDisconnect(ScreenId id)
     };
 
     if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
+        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate, "OnDisconnect");
         if (ret != napi_status::napi_ok) {
-            WLOGFE("OnDisconnect: Failed to SendEvent.");
+            TLOGE(WmsLogTag::DMS, "Failed to SendEvent.");
         }
     } else {
-        WLOGFE("OnDisconnect: env is nullptr");
+        TLOGE(WmsLogTag::DMS, "env is nullptr");
     }
 }
 
 void JsScreenListener::OnChange(ScreenId id)
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    WLOGI("JsScreenListener::OnChange is called");
+    TLOGI(WmsLogTag::DMS, "called");
     if (jsCallBack_.empty()) {
-        WLOGFE("JsScreenListener::OnChange not register!");
+        TLOGE(WmsLogTag::DMS, "not register!");
         return;
     }
     if (jsCallBack_.find(EVENT_CHANGE) == jsCallBack_.end()) {
-        WLOGE("JsScreenListener::OnChange not this event, return");
+        TLOGE(WmsLogTag::DMS, "not this event, return");
         return;
     }
     auto napiTask = [self = weakRef_, id, env = env_] () {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsScreenListener::OnChange");
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
-            WLOGFE("[NAPI]this listener or env is nullptr");
+            TLOGNE(WmsLogTag::DMS, "[NAPI]this listener or env is nullptr");
             return;
         }
         napi_value argv[] = {CreateJsValue(env, static_cast<uint32_t>(id))};
@@ -205,12 +202,12 @@ void JsScreenListener::OnChange(ScreenId id)
     };
 
     if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
+        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate, "OnChange");
         if (ret != napi_status::napi_ok) {
-            WLOGFE("OnChange: Failed to SendEvent.");
+            TLOGE(WmsLogTag::DMS, "Failed to SendEvent.");
         }
     } else {
-        WLOGFE("OnChange: env is nullptr");
+        TLOGE(WmsLogTag::DMS, "env is nullptr");
     }
 }
 
@@ -219,7 +216,7 @@ napi_value JsScreenListener::CreateScreenIdArray(napi_env env, const std::vector
     napi_value arrayValue = nullptr;
     napi_create_array_with_length(env, data.size(), &arrayValue);
     if (arrayValue == nullptr) {
-        WLOGFE("Failed to create screenid array");
+        TLOGE(WmsLogTag::DMS, "Failed to create screenid array");
         return NapiGetUndefined(env);
     }
     uint32_t index = 0;

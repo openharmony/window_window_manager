@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,30 +15,53 @@
 
 #include <functional>
 #include <gtest/gtest.h>
+
 #include "display_manager_adapter.h"
-#include "window_manager_agent.h"
+#include "scene_board_judgement.h"
+#include "iremote_object_mocker.h"
 #include "window_manager_agent_proxy.h"
+#include "test/mock/mock_message_parcel.h"
 
 using namespace testing;
 using namespace testing::ext;
+namespace {
+    std::string g_logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
+        const char* msg)
+    {
+        g_logMsg = msg;
+    }
+}
+
 namespace OHOS {
 namespace Rosen {
 class WindowManagerAgentProxyTest : public testing::Test {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
+    static void SetUpTestSuite();
     void SetUp() override;
     void TearDown() override;
+    sptr<WindowManagerAgentProxy> windowManagerAgentProxy;
 
 private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
 
-void WindowManagerAgentProxyTest::SetUpTestCase() {}
+void WindowManagerAgentProxyTest::SetUpTestSuite()
+{
+}
 
-void WindowManagerAgentProxyTest::TearDownTestCase() {}
+void WindowManagerAgentProxyTest::SetUp()
+{
+    if (windowManagerAgentProxy) {
+        return;
+    }
 
-void WindowManagerAgentProxyTest::SetUp() {}
+    sptr<IRemoteObject> impl;
+    impl = sptr<IRemoteObjectMocker>::MakeSptr();
+
+    windowManagerAgentProxy = sptr<WindowManagerAgentProxy>::MakeSptr(impl);
+    ASSERT_NE(windowManagerAgentProxy, nullptr);
+}
 
 void WindowManagerAgentProxyTest::TearDown()
 {
@@ -53,22 +76,16 @@ namespace {
  */
 HWTEST_F(WindowManagerAgentProxyTest, UpdateFocusChangeInfo01, TestSize.Level1)
 {
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    sptr<FocusChangeInfo> focusChangeInfo = new (std::nothrow) FocusChangeInfo();
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<FocusChangeInfo> focusChangeInfo = sptr<FocusChangeInfo>::MakeSptr();
     ASSERT_TRUE(focusChangeInfo != nullptr);
     bool focused = true;
 
-    sptr<WindowManagerAgentProxy> windowManagerAgentProxy = new (std::nothrow) WindowManagerAgentProxy(impl);
-    ASSERT_TRUE(windowManagerAgentProxy != nullptr);
-
-    int resultValue = 0;
-    std::function<void()> func = [&]() {
-        windowManagerAgentProxy->UpdateFocusChangeInfo(focusChangeInfo, focused);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    windowManagerAgentProxy->UpdateFocusChangeInfo(focusChangeInfo, focused);
+    EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);
 }
 
 /**
@@ -78,67 +95,70 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateFocusChangeInfo01, TestSize.Level1)
  */
 HWTEST_F(WindowManagerAgentProxyTest, UpdateFocusChangeInfo02, TestSize.Level1)
 {
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    ASSERT_TRUE(impl != nullptr);
-    sptr<WindowManagerAgentProxy> windowManagerAgentProxy = new (std::nothrow) WindowManagerAgentProxy(impl);
-    ASSERT_TRUE(windowManagerAgentProxy != nullptr);
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<FocusChangeInfo> focusChangeInfo = new(std::nothrow) FocusChangeInfo();
+    ASSERT_TRUE(focusChangeInfo != nullptr);
+    bool focused = true;
 
-    int resultValue = 0;
-    std::function<void()> func = [&]() {
-        windowManagerAgentProxy->UpdateFocusChangeInfo(nullptr, false);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteParcelableErrorFlag(true);
+    windowManagerAgentProxy->UpdateFocusChangeInfo(focusChangeInfo, focused);
+    EXPECT_TRUE(g_logMsg.find("Write displayId failed") != std::string::npos);
 }
 
 /**
- * @tc.name: UpdateWindowModeTypeInfo
+ * @tc.name: UpdateFocusChangeInfo03
  * @tc.desc: test InterfaceToken check failed
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerAgentProxyTest, UpdateWindowModeTypeInfo, TestSize.Level1)
+HWTEST_F(WindowManagerAgentProxyTest, UpdateFocusChangeInfo03, TestSize.Level1)
 {
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    ASSERT_TRUE(impl != nullptr);
-    sptr<WindowManagerAgentProxy> windowManagerAgentProxy = new (std::nothrow) WindowManagerAgentProxy(impl);
-    ASSERT_TRUE(windowManagerAgentProxy != nullptr);
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<FocusChangeInfo> focusChangeInfo = new(std::nothrow) FocusChangeInfo();
+    ASSERT_TRUE(focusChangeInfo != nullptr);
+    bool focused = true;
 
-    int resultValue = 0;
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    windowManagerAgentProxy->UpdateFocusChangeInfo(focusChangeInfo, focused);
+    EXPECT_TRUE(g_logMsg.find("Write Focus failed") != std::string::npos);
+}
+
+/**
+ * @tc.name: UpdateWindowModeTypeInfo01
+ * @tc.desc: test InterfaceToken check failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerAgentProxyTest, UpdateWindowModeTypeInfo01, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     WindowModeType type = WindowModeType::WINDOW_MODE_SPLIT_FLOATING;
-    std::function<void()> func = [&]() {
-        windowManagerAgentProxy->UpdateWindowModeTypeInfo(type);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
+    
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    windowManagerAgentProxy->UpdateWindowModeTypeInfo(type);
+    EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);
 }
 
 /**
- * @tc.name: UpdateSystemBarRegionTints
+ * @tc.name: UpdateSystemBarRegionTints01
  * @tc.desc: test InterfaceToken check failed
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerAgentProxyTest, UpdateSystemBarRegionTints, TestSize.Level1)
+HWTEST_F(WindowManagerAgentProxyTest, UpdateSystemBarRegionTints01, TestSize.Level1)
 {
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    ASSERT_TRUE(impl != nullptr);
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     DisplayId displayId = 0;
     SystemBarRegionTints tints = {};
-
-    sptr<WindowManagerAgentProxy> windowManagerAgentProxy = new (std::nothrow) WindowManagerAgentProxy(impl);
-    ASSERT_TRUE(windowManagerAgentProxy != nullptr);
-
-    int resultValue = 0;
-    std::function<void()> func = [&]() {
-        windowManagerAgentProxy->UpdateSystemBarRegionTints(displayId, tints);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
+    
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    windowManagerAgentProxy->UpdateSystemBarRegionTints(displayId, tints);
+    EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);
 }
 
 /**
@@ -148,70 +168,81 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateSystemBarRegionTints, TestSize.Level
  */
 HWTEST_F(WindowManagerAgentProxyTest, NotifyAccessibilityWindowInfo, TestSize.Level1)
 {
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    ASSERT_TRUE(impl != nullptr);
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     std::vector<sptr<AccessibilityWindowInfo>> infos = {};
     WindowUpdateType type = WindowUpdateType::WINDOW_UPDATE_REMOVED;
 
-    sptr<WindowManagerAgentProxy> windowManagerAgentProxy = new (std::nothrow) WindowManagerAgentProxy(impl);
-    ASSERT_TRUE(windowManagerAgentProxy != nullptr);
-
-    int resultValue = 0;
-    std::function<void()> func = [&]() {
-        windowManagerAgentProxy->NotifyAccessibilityWindowInfo(infos, type);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    windowManagerAgentProxy->NotifyAccessibilityWindowInfo(infos, type);
+    EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);
 }
 
 /**
- * @tc.name: UpdateWindowVisibilityInfo
+ * @tc.name: UpdateWindowVisibilityInfo01
  * @tc.desc: test InterfaceToken check failed
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerAgentProxyTest, UpdateWindowVisibilityInfo, TestSize.Level1)
+HWTEST_F(WindowManagerAgentProxyTest, UpdateWindowVisibilityInfo01, TestSize.Level1)
 {
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    ASSERT_TRUE(impl != nullptr);
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     std::vector<sptr<WindowVisibilityInfo>> visibilityInfos = {};
-
-    sptr<WindowManagerAgentProxy> windowManagerAgentProxy = new (std::nothrow) WindowManagerAgentProxy(impl);
-    ASSERT_TRUE(windowManagerAgentProxy != nullptr);
-
-    int resultValue = 0;
-    std::function<void()> func = [&]() {
-        windowManagerAgentProxy->UpdateWindowVisibilityInfo(visibilityInfos);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
+    
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    windowManagerAgentProxy->UpdateWindowVisibilityInfo(visibilityInfos);
+    EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);
 }
 
 /**
- * @tc.name: UpdateWindowDrawingContentInfo
+ * @tc.name: UpdateWindowVisibilityInfo02
  * @tc.desc: test InterfaceToken check failed
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerAgentProxyTest, UpdateWindowDrawingContentInfo, TestSize.Level1)
+HWTEST_F(WindowManagerAgentProxyTest, UpdateWindowVisibilityInfo02, TestSize.Level1)
 {
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    ASSERT_TRUE(impl != nullptr);
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    std::vector<sptr<WindowVisibilityInfo>> visibilityInfos = {};
+    
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    windowManagerAgentProxy->UpdateWindowVisibilityInfo(visibilityInfos);
+    EXPECT_TRUE(g_logMsg.find("write windowVisibilityInfos size failed") != std::string::npos);
+}
+
+/**
+ * @tc.name: UpdateWindowDrawingContentInfo01
+ * @tc.desc: test InterfaceToken check failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerAgentProxyTest, UpdateWindowDrawingContentInfo01, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     std::vector<sptr<WindowDrawingContentInfo>> windowDrawingContentInfos = {};
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    windowManagerAgentProxy->UpdateWindowDrawingContentInfo(windowDrawingContentInfos);
+    EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+}
 
-    sptr<WindowManagerAgentProxy> windowManagerAgentProxy = new (std::nothrow) WindowManagerAgentProxy(impl);
-    ASSERT_TRUE(windowManagerAgentProxy != nullptr);
-
-    int resultValue = 0;
-    std::function<void()> func = [&]() {
-        windowManagerAgentProxy->UpdateWindowDrawingContentInfo(windowDrawingContentInfos);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
+/**
+ * @tc.name: UpdateWindowDrawingContentInfo02
+ * @tc.desc: test InterfaceToken check failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerAgentProxyTest, UpdateWindowDrawingContentInfo02, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    std::vector<sptr<WindowDrawingContentInfo>> windowDrawingContentInfos = {};
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    windowManagerAgentProxy->UpdateWindowDrawingContentInfo(windowDrawingContentInfos);
+    EXPECT_TRUE(g_logMsg.find("write windowDrawingContentInfos size failed") != std::string::npos);
 }
 
 /**
@@ -221,22 +252,51 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateWindowDrawingContentInfo, TestSize.L
  */
 HWTEST_F(WindowManagerAgentProxyTest, UpdateCameraFloatWindowStatus, TestSize.Level1)
 {
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    ASSERT_TRUE(impl != nullptr);
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     uint32_t accessTokenId = 0;
     bool isShowing = true;
 
-    sptr<WindowManagerAgentProxy> windowManagerAgentProxy = new (std::nothrow) WindowManagerAgentProxy(impl);
-    ASSERT_TRUE(windowManagerAgentProxy != nullptr);
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    windowManagerAgentProxy->UpdateCameraFloatWindowStatus(accessTokenId, isShowing);
+    EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+}
 
-    int resultValue = 0;
-    std::function<void()> func = [&]() {
-        windowManagerAgentProxy->UpdateCameraFloatWindowStatus(accessTokenId, isShowing);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
+/**
+ * @tc.name: UpdateCameraFloatWindowStatus01
+ * @tc.desc: test InterfaceToken check failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerAgentProxyTest, UpdateCameraFloatWindowStatus01, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    uint32_t accessTokenId = 0;
+    bool isShowing = true;
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    windowManagerAgentProxy->UpdateCameraFloatWindowStatus(accessTokenId, isShowing);
+    EXPECT_TRUE(g_logMsg.find("Write accessTokenId failed") != std::string::npos);
+}
+
+/**
+ * @tc.name: UpdateCameraFloatWindowStatus02
+ * @tc.desc: test InterfaceToken check failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerAgentProxyTest, UpdateCameraFloatWindowStatus02, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    uint32_t accessTokenId = 0;
+    bool isShowing = true;
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    windowManagerAgentProxy->UpdateCameraFloatWindowStatus(accessTokenId, isShowing);
+    EXPECT_TRUE(g_logMsg.find("Write is showing status failed") != std::string::npos);
 }
 
 /**
@@ -246,23 +306,32 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateCameraFloatWindowStatus, TestSize.Le
  */
 HWTEST_F(WindowManagerAgentProxyTest, NotifyWaterMarkFlagChangedResult, TestSize.Level1)
 {
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    ASSERT_TRUE(impl != nullptr);
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     bool showWaterMark = true;
 
-    sptr<WindowManagerAgentProxy> windowManagerAgentProxy = new (std::nothrow) WindowManagerAgentProxy(impl);
-    ASSERT_TRUE(windowManagerAgentProxy != nullptr);
-
-    int resultValue = 0;
-    std::function<void()> func = [&]() {
-        windowManagerAgentProxy->NotifyWaterMarkFlagChangedResult(showWaterMark);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    windowManagerAgentProxy->NotifyWaterMarkFlagChangedResult(showWaterMark);
+    EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);
 }
 
+/**
+ * @tc.name: NotifyWaterMarkFlagChangedResult01
+ * @tc.desc: test InterfaceToken check failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerAgentProxyTest, NotifyWaterMarkFlagChangedResult01, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    bool showWaterMark = true;
+    
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    windowManagerAgentProxy->NotifyWaterMarkFlagChangedResult(showWaterMark);
+    EXPECT_TRUE(g_logMsg.find("Write is showing status failed") != std::string::npos);
+}
 /**
  * @tc.name: UpdateVisibleWindowNum
  * @tc.desc: test InterfaceToken check failed
@@ -270,23 +339,18 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifyWaterMarkFlagChangedResult, TestSize
  */
 HWTEST_F(WindowManagerAgentProxyTest, UpdateVisibleWindowNum, TestSize.Level1)
 {
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    ASSERT_TRUE(impl != nullptr);
-    sptr<WindowManagerAgentProxy> windowManagerAgentProxy = new (std::nothrow) WindowManagerAgentProxy(impl);
-    ASSERT_TRUE(windowManagerAgentProxy != nullptr);
-    int resultValue = 0;
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     VisibleWindowNumInfo info;
     info.displayId = 1;
     info.visibleWindowNum = 1;
     std::vector<VisibleWindowNumInfo> visibleWindowNumInfo;
     visibleWindowNumInfo.push_back(info);
-    std::function<void()> func = [&]() {
-        windowManagerAgentProxy->UpdateVisibleWindowNum(visibleWindowNumInfo);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    windowManagerAgentProxy->UpdateVisibleWindowNum(visibleWindowNumInfo);
+    EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);
 }
 
 /**
@@ -296,22 +360,33 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateVisibleWindowNum, TestSize.Level1)
  */
 HWTEST_F(WindowManagerAgentProxyTest, NotifyGestureNavigationEnabledResult, TestSize.Level1)
 {
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    ASSERT_TRUE(impl != nullptr);
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     bool enable = true;
 
-    sptr<WindowManagerAgentProxy> windowManagerAgentProxy = new (std::nothrow) WindowManagerAgentProxy(impl);
-    ASSERT_TRUE(windowManagerAgentProxy != nullptr);
-
-    int resultValue = 0;
-    std::function<void()> func = [&]() {
-        windowManagerAgentProxy->NotifyGestureNavigationEnabledResult(enable);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    windowManagerAgentProxy->NotifyGestureNavigationEnabledResult(enable);
+    EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);
 }
+
+/**
+ * @tc.name: NotifyGestureNavigationEnabledResult01
+ * @tc.desc: test InterfaceToken check failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerAgentProxyTest, NotifyGestureNavigationEnabledResult01, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    bool enable = true;
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    windowManagerAgentProxy->NotifyGestureNavigationEnabledResult(enable);
+    EXPECT_TRUE(g_logMsg.find("Write is showing status failed") != std::string::npos);
+}
+
 
 /**
  * @tc.name: UpdateCameraWindowStatus
@@ -320,22 +395,51 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifyGestureNavigationEnabledResult, Test
  */
 HWTEST_F(WindowManagerAgentProxyTest, UpdateCameraWindowStatus, TestSize.Level1)
 {
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    ASSERT_TRUE(impl != nullptr);
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     uint32_t accessTokenId = 1;
     bool isShowing = false;
 
-    sptr<WindowManagerAgentProxy> windowManagerAgentProxy = new (std::nothrow) WindowManagerAgentProxy(impl);
-    ASSERT_TRUE(windowManagerAgentProxy != nullptr);
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    windowManagerAgentProxy->UpdateCameraWindowStatus(accessTokenId, isShowing);
+    EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+}
 
-    int resultValue = 0;
-    std::function<void()> func = [&]() {
-        windowManagerAgentProxy->UpdateCameraWindowStatus(accessTokenId, isShowing);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
+/**
+ * @tc.name: UpdateCameraWindowStatus01
+ * @tc.desc: test InterfaceToken check failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerAgentProxyTest, UpdateCameraWindowStatus01, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    uint32_t accessTokenId = 1;
+    bool isShowing = false;
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    windowManagerAgentProxy->UpdateCameraWindowStatus(accessTokenId, isShowing);
+    EXPECT_TRUE(g_logMsg.find("Write accessTokenId failed") != std::string::npos);
+}
+
+/**
+ * @tc.name: UpdateCameraWindowStatus02
+ * @tc.desc: test InterfaceToken check failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerAgentProxyTest, UpdateCameraWindowStatus02, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    uint32_t accessTokenId = 1;
+    bool isShowing = false;
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    windowManagerAgentProxy->UpdateCameraWindowStatus(accessTokenId, isShowing);
+    EXPECT_TRUE(g_logMsg.find("Write isShowing status failed") != std::string::npos);
 }
 
 /**
@@ -345,21 +449,31 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateCameraWindowStatus, TestSize.Level1)
  */
 HWTEST_F(WindowManagerAgentProxyTest, NotifyWindowStyleChange, TestSize.Level1)
 {
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    ASSERT_TRUE(impl != nullptr);
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     WindowStyleType type = Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT;
 
-    sptr<WindowManagerAgentProxy> windowManagerAgentProxy = new (std::nothrow) WindowManagerAgentProxy(impl);
-    ASSERT_TRUE(windowManagerAgentProxy != nullptr);
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    windowManagerAgentProxy->NotifyWindowStyleChange(type);
+    EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+}
 
-    int resultValue = 0;
-    std::function<void()> func = [&]() {
-        windowManagerAgentProxy->NotifyWindowStyleChange(type);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
+/**
+ * @tc.name: NotifyWindowSystemBarPropertyChange
+ * @tc.desc: test NotifyWindowSystemBarPropertyChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerAgentProxyTest, NotifyWindowSystemBarPropertyChange, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    SystemBarProperty systemBarProperty;
+    windowManagerAgentProxy->NotifyWindowSystemBarPropertyChange(
+        WindowType::WINDOW_TYPE_STATUS_BAR, systemBarProperty);
+    EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);
 }
 
 /**
@@ -369,22 +483,67 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifyWindowStyleChange, TestSize.Level1)
  */
 HWTEST_F(WindowManagerAgentProxyTest, NotifyWindowPidVisibilityChanged, TestSize.Level1)
 {
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    ASSERT_TRUE(impl != nullptr);
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<WindowPidVisibilityInfo> info = sptr<WindowPidVisibilityInfo>::MakeSptr();
 
-    sptr<WindowManagerAgentProxy> windowManagerAgentProxy = new (std::nothrow) WindowManagerAgentProxy(impl);
-    ASSERT_TRUE(windowManagerAgentProxy != nullptr);
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    windowManagerAgentProxy->NotifyWindowPidVisibilityChanged(info);
+    EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+}
 
-    sptr<WindowPidVisibilityInfo> info = new WindowPidVisibilityInfo();
+/**
+ * @tc.name: NotifyWindowPidVisibilityChanged01
+ * @tc.desc: test NotifyWindowPidVisibilityChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerAgentProxyTest, NotifyWindowPidVisibilityChanged01, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<WindowPidVisibilityInfo> info = sptr<WindowPidVisibilityInfo>::MakeSptr();
 
-    int resultValue = 0;
-    std::function<void()> func = [&]() {
-        windowManagerAgentProxy->NotifyWindowPidVisibilityChanged(info);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteParcelableErrorFlag(true);
+    windowManagerAgentProxy->NotifyWindowPidVisibilityChanged(info);
+    EXPECT_TRUE(g_logMsg.find("Write windowPidVisibilityInfo failed") != std::string::npos);
+}
+
+/**
+ * @tc.name: NotifyWindowPropertyChange
+ * @tc.desc: test NotifyWindowPropertyChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerAgentProxyTest, NotifyWindowPropertyChange, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    uint32_t propertyDirtyFlags = 0;
+    std::vector<std::unordered_map<WindowInfoKey, std::any>> windowInfoList;
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    windowManagerAgentProxy->NotifyWindowPropertyChange(propertyDirtyFlags, windowInfoList);
+    EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+}
+
+/**
+ * @tc.name: NotifyWindowPropertyChange01
+ * @tc.desc: test NotifyWindowPropertyChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerAgentProxyTest, NotifyWindowPropertyChange01, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    uint32_t propertyDirtyFlags = 0;
+    std::vector<std::unordered_map<WindowInfoKey, std::any>> windowInfoList;
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    windowManagerAgentProxy->NotifyWindowPropertyChange(propertyDirtyFlags, windowInfoList);
+    EXPECT_TRUE(g_logMsg.find("Write propertyDirtyFlags failed") != std::string::npos);
 }
 
 } // namespace

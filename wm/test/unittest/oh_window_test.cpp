@@ -25,6 +25,16 @@
 #include "window_scene.h"
 #include "window_session_impl.h"
 
+struct Input_TouchEvent {
+    int32_t action;
+    int32_t id;
+    int32_t displayX;
+    int32_t displayY;
+    int64_t actionTime { -1 };
+    int32_t windowId { -1 };
+    int32_t displayId { -1 };
+};
+
 using namespace testing;
 using namespace testing::ext;
 
@@ -121,6 +131,41 @@ HWTEST_F(OHWindowTest, OH_WindowManager_GetAllWindowLayoutInfoList, TestSize.Lev
     windowLayoutInfo = NULL;
     free(windowLayoutInfoSize);
     windowLayoutInfoSize = NULL;
+}
+
+/**
+ * @tc.name: OH_WindowManager_InjectTouchEvent
+ * @tc.desc: OH_WindowManager_InjectTouchEvent test
+ * @tc.type: FUNC
+ */
+HWTEST_F(OHWindowTest, OH_WindowManager_InjectTouchEvent, TestSize.Level0)
+{
+    int32_t windowId = -1;
+    int32_t windowX = 0;
+    int32_t windowY = 0;
+    auto ret = OH_WindowManager_InjectTouchEvent(windowId, nullptr, windowX, windowY);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM), ret);
+    Input_TouchEvent* touchEvent = OH_Input_CreateTouchEvent();
+    ASSERT_NE(nullptr, touchEvent);
+    touchEvent->actionTime = 100;
+    touchEvent->id = 1;
+    touchEvent->action = static_cast<Input_TouchEventAction>(10);
+    touchEvent->displayX = 100;
+    touchEvent->displayY = 200;
+    touchEvent->windowId = -1;
+    ret = OH_WindowManager_InjectTouchEvent(windowId, touchEvent, windowX, windowY);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM), ret);
+    windowId = 1;
+    ret = OH_WindowManager_InjectTouchEvent(windowId, touchEvent, windowX, windowY);
+    EXPECT_EQ(OH_Input_GetTouchEventWindowId(touchEvent), windowId);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::OK), ret);
+    OH_Input_SetTouchEventWindowId(touchEvent, 2);
+    ret = OH_WindowManager_InjectTouchEvent(windowId, touchEvent, windowX, windowY);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM), ret);
+    OH_Input_SetTouchEventWindowId(touchEvent, windowId);
+    ret = OH_WindowManager_InjectTouchEvent(windowId, touchEvent, windowX, windowY);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::OK), ret);
+    OH_Input_DestroyTouchEvent(&touchEvent);
 }
 }
 } // namespace Rosen

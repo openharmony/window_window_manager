@@ -422,6 +422,46 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest20, TestSize.Level1)
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, static_cast<int>(ERR_INVALID_DATA));
 }
+
+/**
+ * @tc.name: OnRemoteRequest21
+ * @tc.desc: test TRANS_ID_NOTIFY_WINDOW_PROPERTY_CHANGE success
+ */
+HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest21, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInterfaceToken(WindowManagerAgentStub::GetDescriptor());
+    uint32_t propertyDirtyFlags = 0;
+    data.WriteUint32(propertyDirtyFlags);
+    data.WriteUint32(0);
+
+    uint32_t code =
+        static_cast<uint32_t>(IWindowManagerAgent::WindowManagerAgentMsg::TRANS_ID_NOTIFY_WINDOW_PROPERTY_CHANGE);
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: OnRemoteRequest22
+ * @tc.desc: test TRANS_ID_UPDATE_WINDOW_DRAWING_STATE
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest22, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInterfaceToken(WindowManagerAgentStub::GetDescriptor());
+    uint32_t code = static_cast<uint32_t>(
+        IWindowManagerAgent::WindowManagerAgentMsg::TRANS_ID_NOTIFY_WINDOW_SYSTEM_BAR_PROPERTY_CHANGE);
+    EXPECT_NE(stub_, nullptr);
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, 0);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

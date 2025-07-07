@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-//gtest
+// gtest
 #include <gtest/gtest.h>
 
 #include "ability_context_impl.h"
@@ -61,7 +61,7 @@ HWTEST_F(WindowStatusChangeTest, ChangeWindowStatus01, TestSize.Level1)
     option->SetWindowName("Window1_1");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    
+
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
@@ -86,7 +86,7 @@ HWTEST_F(WindowStatusChangeTest, ChangeWindowStatus01, TestSize.Level1)
 
     ASSERT_EQ(WMError::WM_OK, window->Maximize(MaximizePresentation::EXIT_IMMERSIVE));
     ASSERT_EQ(false, window->GetImmersiveModeEnabledState());
-    
+
     window->Destroy(true, true);
 }
 
@@ -321,7 +321,7 @@ HWTEST_F(WindowStatusChangeTest, ChangeWindowStatus06, TestSize.Level1)
 
     window->Destroy(true, true);
 }
-}
+} // namespace
 
 } // namespace Rosen
-} // namespace OHOSgit
+} // namespace OHOS

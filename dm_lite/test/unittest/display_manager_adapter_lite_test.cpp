@@ -194,6 +194,18 @@ HWTEST_F(DisplayManagerAdapterLiteTest, SetSystemKeyboardStatus02, TestSize.Leve
     auto ret = SingletonContainer::Get<DisplayManagerAdapterLite>().SetSystemKeyboardStatus(false);
     ASSERT_NE(ret, DMError::DM_OK);
 }
+
+/**
+ * @tc.name: GetPhysicalScreenIds
+ * @tc.desc: GetPhysicalScreenIds
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterLiteTest, GetPhysicalScreenIds, TestSize.Level1)
+{
+    std::vector<ScreenId> screenIds;
+    auto ret = SingletonContainer::Get<ScreenManagerAdapterLite>().GetPhysicalScreenIds(screenIds);
+    EXPECT_NE(ret, DMError::DM_OK);
+}
 }
 }
 }

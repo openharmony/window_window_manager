@@ -16,8 +16,8 @@
 #ifndef FRAMEWORKS_WM_TEST_ST_WINDOW_TEST_UTILS_H
 #define FRAMEWORKS_WM_TEST_ST_WINDOW_TEST_UTILS_H
 
-#include "pointer_event.h"
 #include "display_manager.h"
+#include "pointer_event.h"
 #include "window.h"
 #include "window_layout_policy.h"
 #include "window_option.h"
@@ -41,11 +41,11 @@ public:
         WindowMode mode;
         bool needAvoid;
         bool parentLimit;
-        bool forbidSplitMove {false};
+        bool forbidSplitMove{ false };
         bool showWhenLocked;
         uint32_t parentId;
-        bool focusable_ { true };
-        Orientation orientation_ { Orientation::UNSPECIFIED };
+        bool focusable_{ true };
+        Orientation orientation_{ Orientation::UNSPECIFIED };
     };
     static Rect displayRect_;
     static Rect limitDisplayRect_;
@@ -88,6 +88,6 @@ private:
     static AvoidPosType GetAvoidPosType(const Rect& rect);
     AvoidArea avoidArea_;
 };
-} // namespace ROSEN
+} // namespace Rosen
 } // namespace OHOS
 #endif // FRAMEWORKS_WM_TEST_ST_WINDOW_TEST_UTILS_H

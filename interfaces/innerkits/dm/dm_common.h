@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,18 +16,24 @@
 #ifndef OHOS_ROSEN_DM_COMMON_H
 #define OHOS_ROSEN_DM_COMMON_H
 
-#include <refbase.h>
-#include <string>
 #include <map>
+#include <string>
+#include <sstream>
 
-namespace OHOS {
-namespace Rosen {
+#include <parcel.h>
+
+namespace OHOS::Rosen {
 using DisplayId = uint64_t;
 using ScreenId = uint64_t;
+using NodeId = uint64_t;
+using DisplayGroupId = uint64_t;
 
 namespace {
 constexpr DisplayId DISPLAY_ID_INVALID = -1ULL;
 constexpr ScreenId SCREEN_ID_INVALID = -1ULL;
+constexpr DisplayGroupId DISPLAY_GROUP_ID_INVALID = -1ULL;
+constexpr DisplayGroupId DISPLAY_GROUP_ID_DEFAULT = 0;
+constexpr ScreenId MAIN_SCREEN_ID_DEFAULT = 0;
 constexpr ScreenId SCREEN_ID_FAKE = 999;
 constexpr DisplayId DISPLAY_ID_FAKE = 999;
 constexpr ScreenId ERROR_ID_NOT_SYSTEM_APP = -202ULL;
@@ -50,6 +56,8 @@ struct DMHookInfo {
     float_t density_;
     uint32_t rotation_;
     bool enableHookRotation_;
+    uint32_t displayOrientation_;
+    bool enableHookDisplayOrientation_;
 };
 
 /**
@@ -139,7 +147,7 @@ enum class ScreenShape : uint32_t {
 };
 
 /**
- * @brief displayed soure mode
+ * @brief displayed source mode
  */
 enum class DisplaySourceMode : uint32_t {
     NONE = 0,
@@ -197,6 +205,7 @@ enum class DMError : int32_t {
     DM_ERROR_NOT_SYSTEM_APP = 202,
     DM_ERROR_DEVICE_NOT_SUPPORT = 801,
     DM_ERROR_UNKNOWN = -1,
+    DM_ERROR_ILLEGAL_PARAM = 1400004,
 };
 
 /**
@@ -211,6 +220,7 @@ enum class DmErrorCode : int32_t {
     DM_ERROR_INVALID_SCREEN = 1400001,
     DM_ERROR_INVALID_CALLING = 1400002,
     DM_ERROR_SYSTEM_INNORMAL = 1400003,
+    DM_ERROR_ILLEGAL_PARAM = 1400004,
 };
 
 /**
@@ -234,6 +244,7 @@ const std::map<DMError, DmErrorCode> DM_JS_TO_ERROR_CODE_MAP {
     {DMError::DM_ERROR_NOT_SYSTEM_APP,                  DmErrorCode::DM_ERROR_NOT_SYSTEM_APP        },
     {DMError::DM_ERROR_UNKNOWN,                         DmErrorCode::DM_ERROR_SYSTEM_INNORMAL       },
     {DMError::DM_ERROR_DEVICE_NOT_SUPPORT,              DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT    },
+    {DMError::DM_ERROR_ILLEGAL_PARAM,                   DmErrorCode::DM_ERROR_ILLEGAL_PARAM    },
 };
 
 using DisplayStateCallback = std::function<void(DisplayState)>;
@@ -333,6 +344,11 @@ enum class Orientation : uint32_t {
     USER_ROTATION_LANDSCAPE_INVERTED = 17,
     FOLLOW_DESKTOP = 18,
     END = FOLLOW_DESKTOP,
+    USER_PAGE_ROTATION_PORTRAIT = 3000,
+    USER_PAGE_ROTATION_LANDSCAPE = 3001,
+    USER_PAGE_ROTATION_PORTRAIT_INVERTED = 3002,
+    USER_PAGE_ROTATION_LANDSCAPE_INVERTED = 3003,
+    INVALID = 3004,
 };
 
 /**
@@ -471,6 +487,12 @@ enum class ScreenCombination : uint32_t {
     SCREEN_MAIN,
 };
 
+enum class MultiScreenPowerSwitchType : uint32_t {
+    SCREEN_SWITCH_ON = 0,
+    SCREEN_SWITCH_OFF,
+    SCREEN_SWITCH_EXTERNAL,
+};
+
 enum class MultiScreenMode : uint32_t {
     SCREEN_MIRROR = 0,
     SCREEN_EXTEND = 1,
@@ -496,11 +518,39 @@ enum class VirtualScreenType: uint32_t {
     HICAR,
 };
 
-struct Point {
-    int32_t posX_;
-    int32_t posY_;
-    Point() : posX_(0), posY_(0) {};
-    Point(int32_t posX, int32_t posY) : posX_(posX), posY_(posY) {};
+/**
+ * @brief Enumerates the screen mode change events.
+ */
+enum class ScreenModeChangeEvent: uint32_t {
+    UNKNOWN = 0,
+    BEGIN,
+    END,
+};
+
+class Point : public Parcelable {
+public:
+    int32_t posX_{0};
+    int32_t posY_{0};
+
+    Point() = default;
+
+    Point(int32_t posX, int32_t posY) : posX_(posX), posY_(posY) {}
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        return parcel.WriteInt32(posX_) && parcel.WriteInt32(posY_);
+    }
+
+    static Point* Unmarshalling(Parcel& parcel)
+    {
+        int32_t posX;
+        int32_t posY;
+        if (!(parcel.ReadInt32(posX) && parcel.ReadInt32(posY))) {
+            return nullptr;
+        }
+
+        return new (std::nothrow) Point(posX, posY);
+    }
 };
 
 struct SupportedScreenModes : public RefBase {
@@ -514,6 +564,8 @@ struct CaptureOption {
     DisplayId displayId_ = DISPLAY_ID_INVALID;
     bool isNeedNotify_ = true;
     bool isNeedPointer_ = true;
+    bool isCaptureFullOfScreen_ = false;
+    std::vector<NodeId> surfaceNodesList_ = {}; // exclude surfacenodes in screenshot
 };
 
 struct ExpandOption {
@@ -537,10 +589,36 @@ struct MultiScreenPositionOptions {
 /**
  * @brief fold display physical resolution
  */
-struct DisplayPhysicalResolution {
-    FoldDisplayMode foldDisplayMode_;
-    uint32_t physicalWidth_;
-    uint32_t physicalHeight_;
+class DisplayPhysicalResolution : public Parcelable {
+public:
+    FoldDisplayMode foldDisplayMode_{FoldDisplayMode::UNKNOWN};
+    uint32_t physicalWidth_{0};
+    uint32_t physicalHeight_{0};
+
+    DisplayPhysicalResolution() = default;
+
+    DisplayPhysicalResolution(FoldDisplayMode foldDisplayMode, uint32_t physicalWidth, uint32_t physicalHeight)
+        : foldDisplayMode_(foldDisplayMode), physicalWidth_(physicalWidth), physicalHeight_(physicalHeight) {}
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        return parcel.WriteUint32(static_cast<uint32_t>(foldDisplayMode_)) &&
+               parcel.WriteUint32(physicalWidth_) && parcel.WriteUint32(physicalHeight_);
+    }
+
+    static DisplayPhysicalResolution* Unmarshalling(Parcel& parcel)
+    {
+        uint32_t foldDisplayMode;
+        uint32_t physicalWidth;
+        uint32_t physicalHeight;
+        if (!(parcel.ReadUint32(foldDisplayMode) && parcel.ReadUint32(physicalWidth) &&
+            parcel.ReadUint32(physicalHeight))) {
+            return nullptr;
+        }
+
+        return new (std::nothrow) DisplayPhysicalResolution(static_cast<FoldDisplayMode>(foldDisplayMode),
+            physicalWidth, physicalHeight);
+    }
 };
 
 /**
@@ -606,6 +684,51 @@ struct SessionOption {
     std::string innerName_;
     ScreenId screenId_;
 };
-}
+
+/**
+ * @brief Device state
+ */
+enum class DMDeviceStatus: uint32_t {
+    UNKNOWN = 0,
+    STATUS_FOLDED,
+    STATUS_TENT_HOVER,
+    STATUS_TENT,
+    STATUS_GLOBAL_FULL
+};
+
+/**
+ * @struct Position
+ *
+ * @brief Coordinate of points on the screen
+ */
+struct Position {
+    int32_t x = 0;
+    int32_t y = 0;
+
+    bool operator==(const Position& other) const
+    {
+        return x == other.x && y == other.y;
+    }
+
+    bool operator!=(const Position& other) const
+    {
+        return !(*this == other);
+    }
+
+    inline std::string ToString() const
+    {
+        std::ostringstream oss;
+        oss << "[" << x << ", " << y << "]";
+        return oss.str();
+    }
+};
+
+/**
+ * @brief Relative coordinate of points relative to the display
+ */
+struct RelativePosition {
+    DisplayId displayId = 0;
+    Position position = {0, 0};
+};
 }
 #endif // OHOS_ROSEN_DM_COMMON_H

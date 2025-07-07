@@ -19,7 +19,6 @@
 #include "session/host/include/scene_session.h"
 
 namespace OHOS::Rosen {
-using KeyboardPanelRectUpdateCallback = std::function<void()>;
 class SCBSystemSession : public SceneSession {
 public:
     SCBSystemSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback);
@@ -30,18 +29,17 @@ public:
         std::shared_ptr<RSTransaction> rsTransaction) override;
     void PresentFocusIfPointDown() override;
     WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
-    void PresentFoucusIfNeed(int32_t pointerAcrion) override;
     WSError UpdateFocus(bool isFocused) override;
     WSError UpdateWindowMode(WindowMode mode) override;
     WSError SetSystemSceneBlockingFocus(bool blocking) override;
     void BindKeyboardSession(sptr<SceneSession> session) override;
     sptr<SceneSession> GetKeyboardSession() const override;
-    void SetKeyboardPanelRectUpdateCallback(const KeyboardPanelRectUpdateCallback& func);
     void SetSkipSelfWhenShowOnVirtualScreen(bool isSkip) override;
     void SetSkipEventOnCastPlus(bool isSkip) override;
     void SyncScenePanelGlobalPosition(bool needSync) override;
     bool IsNeedSyncScenePanelGlobalPosition() override { return isNeedSyncGlobalPos_; }
     bool IsVisibleForeground() const override;
+    bool IsVisibleNotBackground() const override;
 
     /*
      * App Use Control
@@ -54,7 +52,6 @@ protected:
     void NotifyClientToUpdateAvoidArea() override;
 
 private:
-    KeyboardPanelRectUpdateCallback keyboardPanelRectUpdateCallback_;
     bool isNeedSyncGlobalPos_ = true; // can only accessed in main thread
 
     /*

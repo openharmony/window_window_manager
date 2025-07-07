@@ -32,9 +32,17 @@
 #include "zidl/window_manager_agent_interface.h"
 #include "window_manager_hilog.h"
 
-
 using namespace testing;
 using namespace testing::ext;
+
+namespace {
+    std::string logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
+        const char* msg)
+    {
+        logMsg = msg;
+    }
+}
 
 namespace OHOS {
 namespace Rosen {
@@ -47,21 +55,13 @@ public:
     sptr<SessionStageStub> sessionStageStub_ = sptr<SessionStageMocker>::MakeSptr();
 };
 
-void SessionStageStubLifecycleTest::SetUpTestCase()
-{
-}
+void SessionStageStubLifecycleTest::SetUpTestCase() {}
 
-void SessionStageStubLifecycleTest::TearDownTestCase()
-{
-}
+void SessionStageStubLifecycleTest::TearDownTestCase() {}
 
-void SessionStageStubLifecycleTest::SetUp()
-{
-}
+void SessionStageStubLifecycleTest::SetUp() {}
 
-void SessionStageStubLifecycleTest::TearDown()
-{
-}
+void SessionStageStubLifecycleTest::TearDown() {}
 
 namespace {
 /**
@@ -91,6 +91,39 @@ HWTEST_F(SessionStageStubLifecycleTest, HandleNotifyForegroundInteractiveStatus,
     data.WriteBool(true);
     ASSERT_TRUE((sessionStageStub_ != nullptr));
     ASSERT_EQ(0, sessionStageStub_->HandleNotifyForegroundInteractiveStatus(data, reply));
+}
+
+/**
+ * @tc.name: HandleNotifyPausedStatus
+ * @tc.desc: test function : HandleNotifyPausedStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubLifecycleTest, HandleNotifyPausedStatus, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    EXPECT_EQ(0, sessionStageStub_->HandleNotifyPausedStatus());
+    EXPECT_TRUE(logMsg.find("SendRequest failed") == std::string::npos);
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: HandleNotifyAppUseControlStatus
+ * @tc.desc: test function : HandleNotifyAppUseControlStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubLifecycleTest, HandleNotifyAppUseControlStatus, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteBool(true);
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    EXPECT_EQ(0, sessionStageStub_->HandleNotifyAppUseControlStatus(data, reply));
+    EXPECT_TRUE(logMsg.find("SendRequest failed") == std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -125,6 +158,6 @@ HWTEST_F(SessionStageStubLifecycleTest, HandleNotifySessionBackground, TestSize.
     ASSERT_TRUE((sessionStageStub_ != nullptr));
     ASSERT_EQ(0, sessionStageStub_->HandleNotifySessionBackground(data, reply));
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

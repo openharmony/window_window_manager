@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,138 +13,163 @@
  * limitations under the License.
  */
 
-#include "display_manager_proxy.h"
-#include "display_manager_adapter.h"
-#include "display_manager.h"
 #include <gtest/gtest.h>
-#include "hilog/log.h"
 #include <iremote_broker.h>
+#include <iremote_object_mocker.h>
 #include <iservice_registry.h>
 #include <system_ability_definition.h>
+
+#include "display_manager.h"
+#include "display_manager_adapter.h"
+#include "display_manager_proxy.h"
 #include "scene_board_judgement.h"
-#include "screen_manager.h"
-#include "window_manager_hilog.h"
 #include "window_scene.h"
 #include "zidl/display_manager_agent_proxy.h"
+#include "test/mock/mock_message_parcel.h"
 
 using namespace testing;
 using namespace testing::ext;
 
-namespace OHOS {
-namespace Rosen {
-
-class DisplayManagerAgentProxyTest : public testing::Test {
-public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
-    void SetUp() override;
-    void TearDown() override;
-};
-
-void DisplayManagerAgentProxyTest::SetUpTestCase()
-{
+namespace {
+    std::string g_logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
+        const char* msg)
+    {
+        g_logMsg = msg;
+    }
 }
 
-void DisplayManagerAgentProxyTest::TearDownTestCase()
+namespace OHOS::Rosen {
+class DisplayManagerAgentProxyTest : public testing::Test {
+public:
+    static void SetUpTestSuite();
+    void SetUp() override;
+    sptr<DisplayManagerAgentProxy> displayManagerAgentProxy;
+};
+
+void DisplayManagerAgentProxyTest::SetUpTestSuite()
 {
 }
 
 void DisplayManagerAgentProxyTest::SetUp()
 {
+    if (displayManagerAgentProxy) {
+        return;
+    }
+
+    sptr<IRemoteObject> impl;
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        impl = sptr<IRemoteObjectMocker>::MakeSptr();
+    } else {
+        impl = sptr<IRemoteObjectMocker>::MakeSptr();
+    }
+
+    displayManagerAgentProxy = sptr<DisplayManagerAgentProxy>::MakeSptr(impl);
+    ASSERT_NE(displayManagerAgentProxy, nullptr);
 }
 
-void DisplayManagerAgentProxyTest::TearDown()
-{
-}
-
-namespace {
 /**
- * @tc.name: NotifyDisplayPowerEvent
+ * @tc.name: NotifyDisplayPowerEvent02
  * @tc.desc: NotifyDisplayPowerEvent
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAgentProxyTest, NotifyDisplayPowerEvent, TestSize.Level1)
+HWTEST_F(DisplayManagerAgentProxyTest, NotifyDisplayPowerEvent02, TestSize.Level1)
 {
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     DisplayPowerEvent event = DisplayPowerEvent::DESKTOP_READY;
     EventStatus status = EventStatus::BEGIN;
-    sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
-    GTEST_LOG_(INFO) << "WindowSessionImplTest:1";
-    displayManagerAgentProxy->NotifyDisplayPowerEvent(event, status);
 
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        displayManagerAgentProxy->NotifyDisplayPowerEvent(event, status);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    displayManagerAgentProxy->NotifyDisplayPowerEvent(event, status);
+    EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);
 }
 
 /**
- * @tc.name: NotifyDisplayStateChanged
+ * @tc.name: NotifyDisplayPowerEvent03
+ * @tc.desc: NotifyDisplayPowerEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAgentProxyTest, NotifyDisplayPowerEvent03, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    DisplayPowerEvent event = DisplayPowerEvent::DESKTOP_READY;
+    EventStatus status = EventStatus::BEGIN;
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    displayManagerAgentProxy->NotifyDisplayPowerEvent(event, status);
+    EXPECT_TRUE(g_logMsg.find("Write event failed") != std::string::npos);
+}
+
+/**
+ * @tc.name: NotifyDisplayStateChanged01
  * @tc.desc: NotifyDisplayStateChanged
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAgentProxyTest, NotifyDisplayStateChanged, TestSize.Level1)
+HWTEST_F(DisplayManagerAgentProxyTest, NotifyDisplayStateChanged01, TestSize.Level1)
 {
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
-
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     DisplayId displayId = 0;
-    DisplayState state = DisplayState{1};
+    DisplayState state = DisplayState::OFF;
 
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        displayManagerAgentProxy->NotifyDisplayStateChanged(displayId, state);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    displayManagerAgentProxy->NotifyDisplayStateChanged(displayId, state);
+    EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);
 }
 
 /**
- * @tc.name: NotifyCaptureStatusChanged
- * @tc.desc: NotifyCaptureStatusChanged
+ * @tc.name: NotifyDisplayStateChanged02
+ * @tc.desc: NotifyDisplayStateChanged
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAgentProxyTest, NotifyCaptureStatusChanged, TestSize.Level1)
+HWTEST_F(DisplayManagerAgentProxyTest, NotifyDisplayStateChanged02, TestSize.Level1)
 {
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    DisplayId displayId = 0;
+    DisplayState state = DisplayState::OFF;
 
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        displayManagerAgentProxy->NotifyCaptureStatusChanged(false);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    displayManagerAgentProxy->NotifyDisplayStateChanged(displayId, state);
+    EXPECT_TRUE(g_logMsg.find("Write DisplayState failed") != std::string::npos);
 }
 
 /**
  * @tc.name: NotifyCaptureStatusChanged01
- * @tc.desc: NotifyCaptureStatusChanged01
+ * @tc.desc: NotifyCaptureStatusChanged
  * @tc.type: FUNC
  */
 HWTEST_F(DisplayManagerAgentProxyTest, NotifyCaptureStatusChanged01, TestSize.Level1)
 {
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    displayManagerAgentProxy->NotifyCaptureStatusChanged(false);
+    EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+}
 
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        displayManagerAgentProxy->NotifyCaptureStatusChanged(true);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
+/**
+ * @tc.name: NotifyCaptureStatusChanged02
+ * @tc.desc: NotifyCaptureStatusChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAgentProxyTest, NotifyCaptureStatusChanged02, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    displayManagerAgentProxy->NotifyCaptureStatusChanged(false);
+    EXPECT_TRUE(g_logMsg.find("Write isCapture failed") != std::string::npos);
 }
 
 /**
@@ -154,62 +179,47 @@ HWTEST_F(DisplayManagerAgentProxyTest, NotifyCaptureStatusChanged01, TestSize.Le
  */
 HWTEST_F(DisplayManagerAgentProxyTest, NotifyDisplayChangeInfoChanged, TestSize.Level1)
 {
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
-
-    sptr<DisplayChangeInfo> display_change_info = new DisplayChangeInfo();
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        displayManagerAgentProxy->NotifyDisplayChangeInfoChanged(display_change_info);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<DisplayChangeInfo> display_change_info = sptr<DisplayChangeInfo>::MakeSptr();
+   
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    displayManagerAgentProxy->NotifyDisplayChangeInfoChanged(display_change_info);
+    EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);
 }
 
 /**
- * @tc.name: NotifyDisplayChangeInfoChanged01
- * @tc.desc: NotifyDisplayChangeInfoChanged01
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerAgentProxyTest, NotifyDisplayChangeInfoChanged01, TestSize.Level1)
-{
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
-
-    sptr<DisplayChangeInfo> display_change_info = nullptr;
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        displayManagerAgentProxy->NotifyDisplayChangeInfoChanged(display_change_info);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
-}
-
-/**
- * @tc.name: NotifyDisplayModeChanged
+ * @tc.name: NotifyDisplayModeChanged01
  * @tc.desc: NotifyDisplayModeChanged
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAgentProxyTest, NotifyDisplayModeChanged, TestSize.Level1)
+HWTEST_F(DisplayManagerAgentProxyTest, NotifyDisplayModeChanged01, TestSize.Level1)
 {
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
-
-    FoldDisplayMode mode = FoldDisplayMode{0};
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        displayManagerAgentProxy->NotifyDisplayModeChanged(mode);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    FoldDisplayMode mode = FoldDisplayMode::UNKNOWN;
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    displayManagerAgentProxy->NotifyDisplayModeChanged(mode);
+    EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);
 }
 
+/**
+ * @tc.name: NotifyDisplayModeChanged02
+ * @tc.desc: NotifyDisplayModeChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAgentProxyTest, NotifyDisplayModeChanged02, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    FoldDisplayMode mode = FoldDisplayMode::UNKNOWN;
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    displayManagerAgentProxy->NotifyDisplayModeChanged(mode);
+    EXPECT_TRUE(g_logMsg.find("Write displayMode failed") != std::string::npos);
+}
 /**
  * @tc.name: NotifyAvailableAreaChanged
  * @tc.desc: NotifyAvailableAreaChanged
@@ -217,42 +227,17 @@ HWTEST_F(DisplayManagerAgentProxyTest, NotifyDisplayModeChanged, TestSize.Level1
  */
 HWTEST_F(DisplayManagerAgentProxyTest, NotifyAvailableAreaChanged, TestSize.Level1)
 {
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     DisplayId displayId = 0;
-
     DMRect rect = {2, 2, 2, 2};
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        displayManagerAgentProxy->NotifyAvailableAreaChanged(rect, displayId);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    displayManagerAgentProxy->NotifyAvailableAreaChanged(rect, displayId);
+    EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);
 }
 
-/**
- * @tc.name: NotifyAvailableAreaChanged01
- * @tc.desc: NotifyAvailableAreaChanged01
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerAgentProxyTest, NotifyAvailableAreaChanged01, TestSize.Level1)
-{
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
-    DisplayId displayId = 0;
-
-    DMRect rect = {1, 1, 1, 1};
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        displayManagerAgentProxy->NotifyAvailableAreaChanged(rect, displayId);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
-}
 
 /**
  * @tc.name: NotifyAvailableAreaChanged02
@@ -261,335 +246,297 @@ HWTEST_F(DisplayManagerAgentProxyTest, NotifyAvailableAreaChanged01, TestSize.Le
  */
 HWTEST_F(DisplayManagerAgentProxyTest, NotifyAvailableAreaChanged02, TestSize.Level1)
 {
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     DisplayId displayId = 0;
+    DMRect rect = {2, 2, 2, 2};
 
-    DMRect rect = {3, 3, 3, 3};
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        displayManagerAgentProxy->NotifyAvailableAreaChanged(rect, displayId);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    displayManagerAgentProxy->NotifyAvailableAreaChanged(rect, displayId);
+    EXPECT_TRUE(g_logMsg.find("Write rect failed") != std::string::npos);
 }
 
 /**
- * @tc.name: OnScreenConnect
- * @tc.desc: OnScreenConnect
+ * @tc.name: OnScreenConnect02
+ * @tc.desc: OnScreenConnect02
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAgentProxyTest, OnScreenConnect, TestSize.Level1)
+HWTEST_F(DisplayManagerAgentProxyTest, OnScreenConnect02, TestSize.Level1)
 {
-    sptr<ScreenInfo> screenInfo = nullptr;
-
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
-
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        displayManagerAgentProxy->OnScreenConnect(screenInfo);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<ScreenInfo> screenInfo = sptr<ScreenInfo>::MakeSptr();
+    
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    displayManagerAgentProxy->OnScreenConnect(screenInfo);
+    EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);
 }
 
 /**
- * @tc.name: OnScreenConnect01
- * @tc.desc: OnScreenConnect01
+ * @tc.name: OnScreenConnect03
+ * @tc.desc: OnScreenConnect03
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAgentProxyTest, OnScreenConnect01, TestSize.Level1)
+HWTEST_F(DisplayManagerAgentProxyTest, OnScreenConnect03, TestSize.Level1)
 {
-    sptr<ScreenInfo> screenInfo = new ScreenInfo();
-
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
-
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        displayManagerAgentProxy->OnScreenConnect(screenInfo);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<ScreenInfo> screenInfo = sptr<ScreenInfo>::MakeSptr();
+    
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteParcelableErrorFlag(true);
+    displayManagerAgentProxy->OnScreenConnect(screenInfo);
+    EXPECT_TRUE(g_logMsg.find("Write ScreenInfo failed") != std::string::npos);
 }
 
 /**
- * @tc.name: OnScreenDisconnect
+ * @tc.name: OnScreenDisconnect01
  * @tc.desc: OnScreenDisconnect
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAgentProxyTest, OnScreenDisconnect, TestSize.Level1)
+HWTEST_F(DisplayManagerAgentProxyTest, OnScreenDisconnect01, TestSize.Level1)
 {
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<ScreenInfo> screenInfo = sptr<ScreenInfo>::MakeSptr();
     ScreenId screenId = 0;
 
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
-
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        displayManagerAgentProxy->OnScreenDisconnect(screenId);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    displayManagerAgentProxy->OnScreenDisconnect(screenId);
+    EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);
 }
 
 /**
- * @tc.name: OnScreenChange
- * @tc.desc: OnScreenChange
+ * @tc.name: OnScreenChange02
+ * @tc.desc: OnScreenChange02
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAgentProxyTest, OnScreenChange, TestSize.Level1)
+HWTEST_F(DisplayManagerAgentProxyTest, OnScreenChange02, TestSize.Level1)
 {
-    sptr<ScreenInfo> screenInfo = new ScreenInfo();
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<ScreenInfo> screenInfo = sptr<ScreenInfo>::MakeSptr();
     ScreenChangeEvent event = ScreenChangeEvent::CHANGE_MODE;
 
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
-
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        displayManagerAgentProxy->OnScreenChange(screenInfo, event);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    displayManagerAgentProxy->OnScreenChange(screenInfo, event);
+    EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);
 }
 
 /**
- * @tc.name: OnScreenChange01
- * @tc.desc: OnScreenChange01
+ * @tc.name: OnScreenChange03
+ * @tc.desc: OnScreenChange03
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAgentProxyTest, OnScreenChange01, TestSize.Level1)
+HWTEST_F(DisplayManagerAgentProxyTest, OnScreenChange03, TestSize.Level1)
 {
-    sptr<ScreenInfo> screenInfo = nullptr;
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<ScreenInfo> screenInfo = sptr<ScreenInfo>::MakeSptr();
     ScreenChangeEvent event = ScreenChangeEvent::CHANGE_MODE;
 
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
-
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        displayManagerAgentProxy->OnScreenChange(screenInfo, event);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteParcelableErrorFlag(true);
+    displayManagerAgentProxy->OnScreenChange(screenInfo, event);
+    EXPECT_TRUE(g_logMsg.find("Write screenInfo failed") != std::string::npos);
 }
 
 /**
- * @tc.name: OnScreenGroupChange
+ * @tc.name: OnScreenChange04
+ * @tc.desc: OnScreenChange04
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAgentProxyTest, OnScreenChange04, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<ScreenInfo> screenInfo = sptr<ScreenInfo>::MakeSptr();
+    ScreenChangeEvent event = ScreenChangeEvent::CHANGE_MODE;
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    displayManagerAgentProxy->OnScreenChange(screenInfo, event);
+    EXPECT_TRUE(g_logMsg.find("Write ScreenChangeEvent failed") != std::string::npos);
+}
+
+/**
+ * @tc.name: OnScreenGroupChange02
  * @tc.desc: OnScreenGroupChange
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAgentProxyTest, OnScreenGroupChange, TestSize.Level1)
+HWTEST_F(DisplayManagerAgentProxyTest, OnScreenGroupChange02, TestSize.Level1)
 {
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     std::string trigger = " ";
     std::vector<sptr<ScreenInfo>> screenInfos = {};
     ScreenGroupChangeEvent event = ScreenGroupChangeEvent::CHANGE_GROUP;
-
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
-
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        displayManagerAgentProxy->OnScreenGroupChange(trigger, screenInfos, event);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
+    
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    displayManagerAgentProxy->OnScreenGroupChange(trigger, screenInfos, event);
+    EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);
 }
 
 /**
- * @tc.name: OnDisplayCreate
- * @tc.desc: OnDisplayCreate
+ * @tc.name: OnScreenGroupChange03
+ * @tc.desc: OnScreenGroupChange
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayCreate, TestSize.Level1)
+HWTEST_F(DisplayManagerAgentProxyTest, OnScreenGroupChange03, TestSize.Level1)
 {
-    sptr<DisplayInfo> displayInfo = new DisplayInfo();
-
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
-
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        displayManagerAgentProxy->OnDisplayCreate(displayInfo);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    std::string trigger = " ";
+    std::vector<sptr<ScreenInfo>> screenInfos = {};
+    ScreenGroupChangeEvent event = ScreenGroupChangeEvent::CHANGE_GROUP;
+    
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    displayManagerAgentProxy->OnScreenGroupChange(trigger, screenInfos, event);
+    EXPECT_TRUE(g_logMsg.find("Write ScreenGroupChangeEvent failed") != std::string::npos);
 }
 
 /**
- * @tc.name: OnDisplayCreate01
- * @tc.desc: OnDisplayCreate01
+ * @tc.name: OnDisplayCreate02
+ * @tc.desc: OnDisplayCreate02
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayCreate01, TestSize.Level1)
+HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayCreate02, TestSize.Level1)
 {
-    sptr<DisplayInfo> displayInfo = nullptr;
-
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
-
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        displayManagerAgentProxy->OnDisplayCreate(displayInfo);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<DisplayInfo> displayInfo = sptr<DisplayInfo>::MakeSptr();
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    displayManagerAgentProxy->OnDisplayCreate(displayInfo);
+    EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);
 }
 
 /**
- * @tc.name: OnDisplayDestroy
+ * @tc.name: OnDisplayCreate03
+ * @tc.desc: OnDisplayCreate03
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayCreate03, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<DisplayInfo> displayInfo = sptr<DisplayInfo>::MakeSptr();
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteParcelableErrorFlag(true);
+    displayManagerAgentProxy->OnDisplayCreate(displayInfo);
+    EXPECT_TRUE(g_logMsg.find("Write DisplayInfo failed") != std::string::npos);
+}
+
+/**
+ * @tc.name: OnDisplayDestroy01
  * @tc.desc: OnDisplayDestroy
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayDestroy, TestSize.Level1)
+HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayDestroy01, TestSize.Level1)
 {
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     DisplayId displayId = 0;
-
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
-
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        displayManagerAgentProxy->OnDisplayDestroy(displayId);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
+    
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    displayManagerAgentProxy->OnDisplayDestroy(displayId);
+    EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);
 }
 
 /**
- * @tc.name: OnDisplayChange
- * @tc.desc: OnDisplayChange
+ * @tc.name: OnDisplayChange02
+ * @tc.desc: OnDisplayChange02
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayChange, TestSize.Level1)
+HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayChange02, TestSize.Level1)
 {
-    sptr<DisplayInfo> displayInfo = new DisplayInfo();
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<DisplayInfo> displayInfo = sptr<DisplayInfo>::MakeSptr();
     DisplayChangeEvent event = DisplayChangeEvent::DISPLAY_FREEZED;
-
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
-
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        displayManagerAgentProxy->OnDisplayChange(displayInfo, event);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
+    
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    displayManagerAgentProxy->OnDisplayChange(displayInfo, event);
+    EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);
 }
 
 /**
- * @tc.name: OnDisplayChange01
- * @tc.desc: OnDisplayChange01
+ * @tc.name: OnDisplayChange03
+ * @tc.desc: OnDisplayChange03
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayChange01, TestSize.Level1)
+HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayChange03, TestSize.Level1)
 {
-    sptr<DisplayInfo> displayInfo = nullptr;
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<DisplayInfo> displayInfo = sptr<DisplayInfo>::MakeSptr();
     DisplayChangeEvent event = DisplayChangeEvent::DISPLAY_FREEZED;
-
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
-
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        displayManagerAgentProxy->OnDisplayChange(displayInfo, event);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
+    
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteParcelableErrorFlag(true);
+    displayManagerAgentProxy->OnDisplayChange(displayInfo, event);
+    EXPECT_TRUE(g_logMsg.find("Write DisplayInfo failed") != std::string::npos);
 }
 
 /**
- * @tc.name: OnScreenshot
- * @tc.desc: OnScreenshot
+ * @tc.name: OnDisplayChange04
+ * @tc.desc: OnDisplayChange04
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAgentProxyTest, OnScreenshot, TestSize.Level1)
+HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayChange04, TestSize.Level1)
 {
-    sptr<ScreenshotInfo> snapshotInfo = new ScreenshotInfo();
-
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
-
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        displayManagerAgentProxy->OnScreenshot(snapshotInfo);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<DisplayInfo> displayInfo = sptr<DisplayInfo>::MakeSptr();
+    DisplayChangeEvent event = DisplayChangeEvent::DISPLAY_FREEZED;
+    
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    displayManagerAgentProxy->OnDisplayChange(displayInfo, event);
+    EXPECT_TRUE(g_logMsg.find("Write DisplayChangeEvent failed") != std::string::npos);
 }
 
 /**
  * @tc.name: OnScreenshot01
- * @tc.desc: OnScreenshot01
+ * @tc.desc: OnScreenshot
  * @tc.type: FUNC
  */
 HWTEST_F(DisplayManagerAgentProxyTest, OnScreenshot01, TestSize.Level1)
 {
-    sptr<ScreenshotInfo> snapshotInfo = nullptr;
-
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
-
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        displayManagerAgentProxy->OnScreenshot(snapshotInfo);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<ScreenshotInfo> snapshotInfo = sptr<ScreenshotInfo>::MakeSptr();
+       
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    displayManagerAgentProxy->OnScreenshot(snapshotInfo);
+    EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);
 }
 
 /**
- * @tc.name: NotifyPrivateWindowStateChanged
- * @tc.desc: NotifyPrivateWindowStateChanged
+ * @tc.name: OnScreenshot02
+ * @tc.desc: OnScreenshot
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAgentProxyTest, NotifyPrivateWindowStateChanged, TestSize.Level1)
+HWTEST_F(DisplayManagerAgentProxyTest, OnScreenshot02, TestSize.Level1)
 {
-    bool hasPrivate = false;
-
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
-
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        displayManagerAgentProxy->NotifyPrivateWindowStateChanged(hasPrivate);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<ScreenshotInfo> snapshotInfo = sptr<ScreenshotInfo>::MakeSptr();
+       
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteParcelableErrorFlag(true);
+    displayManagerAgentProxy->OnScreenshot(snapshotInfo);
+    EXPECT_TRUE(g_logMsg.find("Write ScreenshotInfo failed") != std::string::npos);
 }
 
 /**
@@ -599,43 +546,49 @@ HWTEST_F(DisplayManagerAgentProxyTest, NotifyPrivateWindowStateChanged, TestSize
  */
 HWTEST_F(DisplayManagerAgentProxyTest, NotifyPrivateWindowStateChanged01, TestSize.Level1)
 {
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     bool hasPrivate = true;
 
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
-
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        displayManagerAgentProxy->NotifyPrivateWindowStateChanged(hasPrivate);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    displayManagerAgentProxy->NotifyPrivateWindowStateChanged(hasPrivate);
+    EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);
 }
 
 /**
- * @tc.name: NotifyPrivateStateWindowListChanged
+ * @tc.name: NotifyPrivateWindowStateChanged02
+ * @tc.desc: NotifyPrivateWindowStateChanged02
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAgentProxyTest, NotifyPrivateWindowStateChanged02, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    bool hasPrivate = true;
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    displayManagerAgentProxy->NotifyPrivateWindowStateChanged(hasPrivate);
+    EXPECT_TRUE(g_logMsg.find("Write private info failed") != std::string::npos);
+}
+
+/**
+ * @tc.name: NotifyPrivateStateWindowListChanged01
  * @tc.desc: NotifyPrivateStateWindowListChanged
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAgentProxyTest, NotifyPrivateStateWindowListChanged, TestSize.Level1)
+HWTEST_F(DisplayManagerAgentProxyTest, NotifyPrivateStateWindowListChanged01, TestSize.Level1)
 {
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     DisplayId id = 0;
     std::vector<std::string> privacyWindowList{"win0", "win1"};
     
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
-
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        displayManagerAgentProxy->NotifyPrivateStateWindowListChanged(id, privacyWindowList);
-        resultValue = 1;
-    };
-    func();
-    ASSERT_EQ(resultValue, 1);
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    displayManagerAgentProxy->NotifyPrivateStateWindowListChanged(id, privacyWindowList);
+    EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);
 }
 
 /**
@@ -645,19 +598,28 @@ HWTEST_F(DisplayManagerAgentProxyTest, NotifyPrivateStateWindowListChanged, Test
  */
 HWTEST_F(DisplayManagerAgentProxyTest, NotifyFoldStatusChanged, TestSize.Level1)
 {
-    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    sptr<DisplayManagerAgentProxy> displayManagerAgentProxy = new DisplayManagerAgentProxy(impl);
-
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        displayManagerAgentProxy->NotifyFoldStatusChanged(FoldStatus::EXPAND);
-        resultValue = 1;
-    };
-    func();
-
-    ASSERT_EQ(resultValue, 1);
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    displayManagerAgentProxy->NotifyFoldStatusChanged(FoldStatus::EXPAND);
+    EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);
 }
-}
+
+/**
+ * @tc.name: NotifyFoldStatusChanged01
+ * @tc.desc: NotifyFoldStatusChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAgentProxyTest, NotifyFoldStatusChanged01, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    displayManagerAgentProxy->NotifyFoldStatusChanged(FoldStatus::EXPAND);
+    EXPECT_TRUE(g_logMsg.find("Write foldStatus failed") != std::string::npos);
 }
 }

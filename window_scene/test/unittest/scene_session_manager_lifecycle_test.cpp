@@ -55,23 +55,16 @@ public:
     static void SetVisibleForAccessibility(sptr<SceneSession>& sceneSession);
     int32_t GetTaskCount(sptr<SceneSession>& session);
     static sptr<SceneSessionManager> ssm_;
+
 private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
 
 sptr<SceneSessionManager> SceneSessionManagerLifecycleTest::ssm_ = nullptr;
 
-void WindowChangedFuncTest(int32_t persistentId, WindowUpdateType type)
-{
-}
+void WindowChangedFuncTest(int32_t persistentId, WindowUpdateType type) {}
 
-void ProcessStatusBarEnabledChangeFuncTest(bool enable)
-{
-}
-
-void DumpRootSceneElementInfoFuncTest(const std::vector<std::string>& params, std::vector<std::string>& infos)
-{
-}
+void ProcessStatusBarEnabledChangeFuncTest(bool enable) {}
 
 void SceneSessionManagerLifecycleTest::SetUpTestCase()
 {
@@ -166,7 +159,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, NotifySessionMovedToFront, TestSize.L
     info.abilityName_ = "BackgroundTask02";
     info.bundleName_ = "BackgroundTask02";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ssm_->sceneSessionMap_.insert({100, sceneSession});
+    ssm_->sceneSessionMap_.insert({ 100, sceneSession });
     ssm_->NotifySessionMovedToFront(100);
 }
 
@@ -185,7 +178,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, PendingSessionToBackgroundForDelegato
     info.abilityName_ = "BackgroundTask02";
     info.bundleName_ = "BackgroundTask02";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ssm_->sceneSessionMap_.insert({100, sceneSession});
+    ssm_->sceneSessionMap_.insert({ 100, sceneSession });
     ret = ssm_->PendingSessionToBackgroundForDelegator(nullptr, true);
     ASSERT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
 }
@@ -204,7 +197,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, OnSessionStateChange, TestSize.Level1
     info.bundleName_ = "BackgroundTask02";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
-    ssm_->sceneSessionMap_.insert({100, sceneSession});
+    ssm_->sceneSessionMap_.insert({ 100, sceneSession });
     ssm_->OnSessionStateChange(100, SessionState::STATE_END);
     ssm_->OnSessionStateChange(100, SessionState::STATE_FOREGROUND);
     ssm_->OnSessionStateChange(0, SessionState::STATE_FOREGROUND);
@@ -255,7 +248,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RecoverAndReconnectSceneSession02, Te
     sptr<ISession> session;
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
-    std::vector<int32_t> recoveredPersistentIds = {0, 1, 2};
+    std::vector<int32_t> recoveredPersistentIds = { 0, 1, 2 };
     ssm_->SetAlivePersistentIds(recoveredPersistentIds);
     property->SetPersistentId(1);
     ProcessShiftFocusFunc shiftFocusFunc_;
@@ -309,7 +302,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, CreateSceneSession, TestSize.Level1)
     ssm_->UpdateSceneSessionWant(info);
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
-    ssm_->sceneSessionMap_.insert({1, sceneSession});
+    ssm_->sceneSessionMap_.insert({ 1, sceneSession });
     ssm_->UpdateSceneSessionWant(info);
     std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
     ASSERT_NE(nullptr, want);
@@ -364,7 +357,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionBackground, TestSi
     ssm_->SetAbilitySessionInfo(sceneSession);
     ssm_->RequestSceneSessionActivation(sceneSession, true);
     ssm_->RequestInputMethodCloseKeyboard(1);
-    ssm_->sceneSessionMap_.insert({1, nullptr});
+    ssm_->sceneSessionMap_.insert({ 1, nullptr });
     ssm_->RequestInputMethodCloseKeyboard(1);
     ssm_->RequestSceneSessionActivation(sceneSession, true);
     ssm_->RequestSceneSessionActivation(sceneSession, false);
@@ -398,7 +391,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionDestruction, TestS
     ssm_->AddClientDeathRecipient(sessionStage, sceneSession);
     ssm_->RequestSceneSessionDestruction(sceneSession, true);
     ssm_->RequestSceneSessionDestruction(sceneSession, false);
-    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
     ssm_->RequestSceneSessionDestruction(sceneSession, true);
     ssm_->RequestSceneSessionDestruction(sceneSession, false);
     ssm_->sceneSessionMap_.erase(sceneSession->GetPersistentId());
@@ -406,8 +399,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionDestruction, TestS
     ASSERT_NE(nullptr, sceneSessionInfo);
     ssm_->RequestSceneSessionDestructionInner(sceneSession, sceneSessionInfo, true);
     ssm_->RequestSceneSessionDestructionInner(sceneSession, sceneSessionInfo, false);
-    std::shared_ptr<SessionListenerController> listenerController =
-        std::make_shared<SessionListenerController>();
+    std::shared_ptr<SessionListenerController> listenerController = std::make_shared<SessionListenerController>();
     ASSERT_NE(nullptr, listenerController);
     ssm_->listenerController_ = listenerController;
     ssm_->RequestSceneSessionDestructionInner(sceneSession, sceneSessionInfo, true);
@@ -493,8 +485,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, NotifySessionCreate, TestSize.Level1)
     EXPECT_NE(info.want, nullptr);
     AppExecFwk::AbilityInfo aInfo;
     sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
-    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo =
-        std::make_shared<AppExecFwk::AbilityInfo>(aInfo);
+    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>(aInfo);
     ASSERT_NE(nullptr, abilityInfo);
     int32_t collaboratorType = CollaboratorType::RESERVE_TYPE;
     ssm_->NotifyLoadAbility(collaboratorType, abilitySessionInfo, abilityInfo);
@@ -518,7 +509,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, UpdateRecoveredSessionInfo02, TestSiz
     sptr<KeyboardSession::SpecificSessionCallback> specificCallback;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback);
     ASSERT_NE(sceneSession, nullptr);
-    ssm_->sceneSessionMap_.insert({0, sceneSession});
+    ssm_->sceneSessionMap_.insert({ 0, sceneSession });
     ssm_->UpdateRecoveredSessionInfo(recoveredPersistentIds);
     constexpr uint32_t WAIT_SYNC_IN_NS = 50000;
     usleep(WAIT_SYNC_IN_NS);
@@ -560,7 +551,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSession02, TestSize.Level
     info2.persistentId_ = 1;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info1, nullptr);
     ASSERT_NE(nullptr, sceneSession);
-    ssm_->sceneSessionMap_.insert({1, sceneSession});
+    ssm_->sceneSessionMap_.insert({ 1, sceneSession });
     sptr<SceneSession> getSceneSession = ssm_->RequestSceneSession(info2, windowSessionProperty);
     ASSERT_NE(getSceneSession->GetSessionInfo().bundleName_, info2.bundleName_);
 }
@@ -580,7 +571,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSession03, TestSize.Level
     auto windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
     auto sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
-    ssm_->sceneSessionMap_.insert({1, sceneSession});
+    ssm_->sceneSessionMap_.insert({ 1, sceneSession });
 
     sptr<SceneSession> getSceneSession = ssm_->RequestSceneSession(info, windowSessionProperty);
     ASSERT_EQ(getSceneSession, nullptr);
@@ -620,8 +611,8 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionBackground01, Test
     info.persistentId_ = 1;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
-    ASSERT_EQ(ssm_->RequestSceneSessionBackground(
-        sceneSession, isDelegator, isToDesktop, isSaveSnapshot), WSError::WS_OK);
+    ASSERT_EQ(ssm_->RequestSceneSessionBackground(sceneSession, isDelegator, isToDesktop, isSaveSnapshot),
+              WSError::WS_OK);
 }
 
 /**
@@ -640,9 +631,9 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionBackground02, Test
     info.persistentId_ = 1;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
-    ssm_->sceneSessionMap_.insert({1, sceneSession});
-    ASSERT_EQ(ssm_->RequestSceneSessionBackground(
-        sceneSession, isDelegator, isToDesktop, isSaveSnapshot), WSError::WS_OK);
+    ssm_->sceneSessionMap_.insert({ 1, sceneSession });
+    ASSERT_EQ(ssm_->RequestSceneSessionBackground(sceneSession, isDelegator, isToDesktop, isSaveSnapshot),
+              WSError::WS_OK);
 }
 
 /**
@@ -661,10 +652,10 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionBackground03, Test
     info.persistentId_ = 1;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
-    ssm_->sceneSessionMap_.insert({1, sceneSession});
+    ssm_->sceneSessionMap_.insert({ 1, sceneSession });
     ssm_->SetBrightness(sceneSession, 0.5);
-    ASSERT_EQ(ssm_->RequestSceneSessionBackground(
-        sceneSession, isDelegator, isToDesktop, isSaveSnapshot), WSError::WS_OK);
+    ASSERT_EQ(ssm_->RequestSceneSessionBackground(sceneSession, isDelegator, isToDesktop, isSaveSnapshot),
+              WSError::WS_OK);
 }
 
 /**
@@ -683,9 +674,9 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionBackground04, Test
     info.persistentId_ = 1;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
-    ssm_->sceneSessionMap_.insert({1, sceneSession});
-    ASSERT_EQ(ssm_->RequestSceneSessionBackground(
-        sceneSession, isDelegator, isToDesktop, isSaveSnapshot), WSError::WS_OK);
+    ssm_->sceneSessionMap_.insert({ 1, sceneSession });
+    ASSERT_EQ(ssm_->RequestSceneSessionBackground(sceneSession, isDelegator, isToDesktop, isSaveSnapshot),
+              WSError::WS_OK);
 }
 
 /**
@@ -701,8 +692,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionDestruction01, Tes
     info.bundleName_ = "RequestSceneSessionDestruction";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
-    ASSERT_EQ(ssm_->RequestSceneSessionDestruction(
-        sceneSession, needRemoveSession), WSError::WS_OK);
+    ASSERT_EQ(ssm_->RequestSceneSessionDestruction(sceneSession, needRemoveSession), WSError::WS_OK);
 }
 
 /**
@@ -719,9 +709,8 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionDestruction02, Tes
     info.persistentId_ = 1;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
-    ssm_->sceneSessionMap_.insert({1, sceneSession});
-    ASSERT_EQ(ssm_->RequestSceneSessionDestruction(
-        sceneSession, needRemoveSession), WSError::WS_OK);
+    ssm_->sceneSessionMap_.insert({ 1, sceneSession });
+    ASSERT_EQ(ssm_->RequestSceneSessionDestruction(sceneSession, needRemoveSession), WSError::WS_OK);
 }
 
 /**
@@ -789,7 +778,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionByCall01, TestSize
     info.persistentId_ = 1;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
-    ssm_->sceneSessionMap_.insert({1, sceneSession});
+    ssm_->sceneSessionMap_.insert({ 1, sceneSession });
     ASSERT_EQ(ssm_->RequestSceneSessionByCall(sceneSession), WSError::WS_OK);
 }
 
@@ -807,7 +796,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionByCall02, TestSize
     info.callState_ = static_cast<uint32_t>(AAFwk::CallToState::BACKGROUND);
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
-    ssm_->sceneSessionMap_.insert({1, sceneSession});
+    ssm_->sceneSessionMap_.insert({ 1, sceneSession });
     ASSERT_EQ(ssm_->RequestSceneSessionByCall(sceneSession), WSError::WS_OK);
 }
 
@@ -825,7 +814,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RequestSceneSessionByCall03, TestSize
     info.callState_ = static_cast<uint32_t>(AAFwk::CallToState::FOREGROUND);
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
-    ssm_->sceneSessionMap_.insert({1, sceneSession});
+    ssm_->sceneSessionMap_.insert({ 1, sceneSession });
     ASSERT_EQ(ssm_->RequestSceneSessionByCall(sceneSession), WSError::WS_OK);
 }
 
@@ -879,12 +868,12 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RecoveryVisibilityPidCount, TestSize.
     info.abilityName_ = "VisibilityChanged";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
-    ssm_->sceneSessionMap_.insert({1, sceneSession});
+    ssm_->sceneSessionMap_.insert({ 1, sceneSession });
     sceneSession->SetCallingPid(pid);
 
     sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession2, nullptr);
-    ssm_->sceneSessionMap_.insert({2, sceneSession2});
+    ssm_->sceneSessionMap_.insert({ 2, sceneSession2 });
 
     sceneSession2->SetCallingPid(pid);
     sceneSession2->isVisible_ = true;
@@ -946,10 +935,12 @@ HWTEST_F(SceneSessionManagerLifecycleTest, StartUIAbilityBySCBTimeoutCheck, Test
     sptr<AAFwk::SessionInfo> abilitySessionInfo = ssm_->SetAbilitySessionInfo(sceneSession);
     ASSERT_NE(abilitySessionInfo, nullptr);
     bool isColdStart = true;
-    ASSERT_EQ(ssm_->StartUIAbilityBySCBTimeoutCheck(abilitySessionInfo,
-        static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL), isColdStart), 2097202);
-    ASSERT_EQ(ssm_->StartUIAbilityBySCBTimeoutCheck(abilitySessionInfo,
-        static_cast<uint32_t>(WindowStateChangeReason::USER_SWITCH), isColdStart), 2097202);
+    ASSERT_EQ(ssm_->StartUIAbilityBySCBTimeoutCheck(
+                  abilitySessionInfo, static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL), isColdStart),
+              2097202);
+    ASSERT_EQ(ssm_->StartUIAbilityBySCBTimeoutCheck(
+                  abilitySessionInfo, static_cast<uint32_t>(WindowStateChangeReason::USER_SWITCH), isColdStart),
+              2097202);
 }
 
 /**
@@ -973,6 +964,6 @@ HWTEST_F(SceneSessionManagerLifecycleTest, SubmitTaskAndWait, TestSize.Level1)
     };
     ASSERT_EQ(ffrtQueueHelper->SubmitTaskAndWait(std::move(task), timeout), false);
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

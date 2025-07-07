@@ -37,7 +37,9 @@ JsWindowListener::~JsWindowListener()
 
 void JsWindowListener::OnLastStrongRef(const void *)
 {
-    if (napi_status::napi_ok != napi_send_event(env_, [jsCallBack = std::move(jsCallBack_)] {}, napi_eprio_immediate)) {
+    napi_status status = napi_send_event(env_, [jsCallBack = std::move(jsCallBack_)] {},
+                                         napi_eprio_immediate, "OnLastStrongRef");
+    if (status != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_LIFE, "Failed to send event");
     }
 }
@@ -105,7 +107,7 @@ void JsWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason,
     };
     if (reason == WindowSizeChangeReason::ROTATION) {
         jsCallback();
-    } else if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_immediate)) {
+    } else if (napi_send_event(env_, jsCallback, napi_eprio_immediate, "OnSizeChange") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "failed to send event");
         return;
     }
@@ -114,7 +116,7 @@ void JsWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason,
 
 void JsWindowListener::OnModeChange(WindowMode mode, bool hasDeco)
 {
-    WLOGFI("[NAPI] %{public}u", mode);
+    TLOGI(WmsLogTag::DEFAULT, "%{public}u", mode);
 }
 
 void JsWindowListener::OnSystemBarPropertyChange(DisplayId displayId, const SystemBarRegionTints& tints)
@@ -140,12 +142,13 @@ void JsWindowListener::OnSystemBarPropertyChange(DisplayId displayId, const Syst
         napi_value argv[] = {propertyValue};
         thisListener->CallJsMethod(SYSTEM_BAR_TINT_CHANGE_CB.c_str(), argv, ArraySize(argv));
     };
-    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
+    if (napi_send_event(env_, jsCallback, napi_eprio_high, "OnSystemBarPropertyChange") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_IMMS, "Failed to send event");
     }
 }
 
-void JsWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type)
+void JsWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type,
+    const sptr<OccupiedAreaChangeInfo>& info)
 {
     WLOGFD("[NAPI]");
     // js callback should run in js thread
@@ -177,7 +180,7 @@ void JsWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaTy
             thisListener->CallJsMethod(AVOID_AREA_CHANGE_CB.c_str(), argv, ArraySize(argv));
         }
     };
-    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_immediate)) {
+    if (napi_send_event(env_, jsCallback, napi_eprio_immediate, "OnAvoidAreaChanged") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_IMMS, "Failed to send event");
     }
 }
@@ -203,6 +206,30 @@ void JsWindowListener::LifeCycleCallBack(LifeCycleEventType eventType)
         return;
     }
     eventHandler_->PostTask(task, "wms:JsWindowListener::LifeCycleCallBack", 0,
+        AppExecFwk::EventQueue::Priority::IMMEDIATE);
+}
+
+void JsWindowListener::WindowStageLifecycleCallback(WindowStageLifeCycleEventType eventType)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "event type: %{public}u", eventType);
+    auto task = [self = weakRef_, eventType, eng = env_] () {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsWindowListener::WindowStageLifecycleCallback");
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || eng == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "this listener or eng is nullptr");
+            return;
+        }
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(eng, &scope);
+        napi_value argv[] = {CreateJsValue(eng, static_cast<uint32_t>(eventType))};
+        thisListener->CallJsMethod(WINDOW_STAGE_LIFECYCLE_EVENT_CB.c_str(), argv, ArraySize(argv));
+        napi_close_handle_scope(eng, scope);
+    };
+    if (!eventHandler_) {
+        TLOGE(WmsLogTag::WMS_LIFE, "get main event handler failed!");
+        return;
+    }
+    eventHandler_->PostTask(task, "wms:JsWindowListener::WindowStageLifecycleCallback", 0,
         AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
@@ -257,6 +284,40 @@ void JsWindowListener::AfterDestroyed()
     }
 }
 
+void JsWindowListener::AfterLifecycleForeground()
+{
+    if (caseType_ == CaseType::CASE_STAGE) {
+        if (state_ == WindowState::STATE_INITIAL || state_ == WindowState::STATE_HIDDEN) {
+            WindowStageLifecycleCallback(WindowStageLifeCycleEventType::FOREGROUND);
+            state_ = WindowState::STATE_SHOWN;
+        }
+    }
+}
+
+void JsWindowListener::AfterLifecycleBackground()
+{
+    if (caseType_ == CaseType::CASE_STAGE) {
+        if (state_ == WindowState::STATE_INITIAL || state_ == WindowState::STATE_SHOWN) {
+            WindowStageLifecycleCallback(WindowStageLifeCycleEventType::BACKGROUND);
+            state_ = WindowState::STATE_HIDDEN;
+        }
+    }
+}
+
+void JsWindowListener::AfterLifecycleResumed()
+{
+    if (caseType_ == CaseType::CASE_STAGE) {
+        WindowStageLifecycleCallback(WindowStageLifeCycleEventType::RESUMED);
+    }
+}
+
+void JsWindowListener::AfterLifecyclePaused()
+{
+    if (caseType_ == CaseType::CASE_STAGE) {
+        WindowStageLifecycleCallback(WindowStageLifeCycleEventType::PAUSED);
+    }
+}
+
 void JsWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
@@ -274,9 +335,65 @@ void JsWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info,
         napi_value argv[] = {CreateJsValue(env, info->rect_.height_)};
         thisListener->CallJsMethod(KEYBOARD_HEIGHT_CHANGE_CB.c_str(), argv, ArraySize(argv));
     };
-    if (napi_send_event(env_, jsCallback, napi_eprio_high) != napi_status::napi_ok) {
+    if (napi_send_event(env_, jsCallback, napi_eprio_high, "OnSizeChange") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "failed to send event");
     }
+}
+
+void JsWindowListener::OnKeyboardWillShow(const KeyboardAnimationInfo& keyboardAnimationInfo,
+    const KeyboardAnimationCurve& curve)
+{
+    KeyboardWillAnimateWithName(keyboardAnimationInfo, KEYBOARD_WILL_SHOW_CB, curve);
+}
+
+void JsWindowListener::OnKeyboardWillHide(const KeyboardAnimationInfo& keyboardAnimationInfo,
+    const KeyboardAnimationCurve& curve)
+{
+    KeyboardWillAnimateWithName(keyboardAnimationInfo, KEYBOARD_WILL_HIDE_CB, curve);
+}
+
+void JsWindowListener::KeyboardWillAnimateWithName(const KeyboardAnimationInfo& keyboardAnimationInfo,
+    const std::string& callBackName, const KeyboardAnimationCurve& curve)
+{
+    auto jsCallback = [self = weakRef_, env = env_, keyboardAnimationInfo, curve, callBackName, funcName = __func__] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "%{public}s: this listener or env is nullptr", funcName);
+            return;
+        }
+        HandleScope handleScope(env);
+        napi_value objValue = nullptr;
+        napi_create_object(env, &objValue);
+        if (objValue == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s failed to create js object", funcName);
+            return;
+        }
+        napi_value beginRectObjValue = GetRectAndConvertToJsValue(env, keyboardAnimationInfo.beginRect);
+        if (beginRectObjValue == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s failed to convert begin rect to jsObject", funcName);
+            return;
+        }
+        napi_value endRectObjValue = GetRectAndConvertToJsValue(env, keyboardAnimationInfo.endRect);
+        if (endRectObjValue == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s failed to convert end rect to jsObject", funcName);
+            return;
+        }
+
+        napi_value configObjValue = CreateJsWindowAnimationConfigObject(env, curve);
+        if (configObjValue == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s failed to convert config to jsObject", funcName);
+            return;
+        }
+
+        napi_set_named_property(env, objValue, "beginRect", beginRectObjValue);
+        napi_set_named_property(env, objValue, "endRect", endRectObjValue);
+        napi_set_named_property(env, objValue, "animated", CreateJsValue(env, keyboardAnimationInfo.withAnimation));
+        napi_set_named_property(env, objValue, "config", configObjValue);
+
+        napi_value argv[] = { objValue };
+        thisListener->CallJsMethod(callBackName.c_str(), argv, ArraySize(argv));
+    };
+    jsCallback();
 }
 
 void JsWindowListener::OnKeyboardDidShow(const KeyboardPanelInfo& keyboardPanelInfo)
@@ -285,7 +402,7 @@ void JsWindowListener::OnKeyboardDidShow(const KeyboardPanelInfo& keyboardPanelI
     auto jsCallback = [self = weakRef_, env = env_, keyboardPanelInfo, funcName = __func__] {
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
-            TLOGE(WmsLogTag::WMS_KEYBOARD, "%{public}s: this listener or env is nullptr", funcName);
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s: this listener or env is nullptr", funcName);
             return;
         }
         HandleScope handleScope(env);
@@ -310,7 +427,7 @@ void JsWindowListener::OnKeyboardDidShow(const KeyboardPanelInfo& keyboardPanelI
         napi_value argv[] = { objValue };
         thisListener->CallJsMethod(KEYBOARD_DID_SHOW_CB.c_str(), argv, ArraySize(argv));
     };
-    if (napi_send_event(env_, jsCallback, napi_eprio_immediate) != napi_status::napi_ok) {
+    if (napi_send_event(env_, jsCallback, napi_eprio_immediate, "OnKeyboardDidShow") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to send event");
     }
 }
@@ -346,7 +463,7 @@ void JsWindowListener::OnKeyboardDidHide(const KeyboardPanelInfo& keyboardPanelI
         napi_value argv[] = { objValue };
         thisListener->CallJsMethod(KEYBOARD_DID_HIDE_CB.c_str(), argv, ArraySize(argv));
     };
-    if (napi_send_event(env_, jsCallback, napi_eprio_immediate) != napi_status::napi_ok) {
+    if (napi_send_event(env_, jsCallback, napi_eprio_immediate, "OnKeyboardDidHide") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to send event");
     }
 }
@@ -362,7 +479,7 @@ void JsWindowListener::OnTouchOutside() const
         }
         thisListener->CallJsMethod(TOUCH_OUTSIDE_CB.c_str(), nullptr, 0);
     };
-    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
+    if (napi_send_event(env_, jsCallback, napi_eprio_high, "OnTouchOutside") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_EVENT, "Failed to send event");
     }
 }
@@ -378,8 +495,26 @@ void JsWindowListener::OnScreenshot()
         }
         thisListener->CallJsMethod(SCREENSHOT_EVENT_CB.c_str(), nullptr, 0);
     };
-    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
+    if (napi_send_event(env_, jsCallback, napi_eprio_high, "OnScreenshot") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_IMMS, "Failed to send event");
+    }
+}
+
+void JsWindowListener::OnScreenshotAppEvent(ScreenshotEventType type)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
+    auto jsCallback = [self = weakRef_, type, env = env_, where = __func__] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s listener or env is null", where);
+            return;
+        }
+        HandleScope handleScope(env);
+        napi_value argv[] = { CreateJsValue(env, static_cast<uint32_t>(type)) };
+        thisListener->CallJsMethod(SCREENSHOT_APP_EVENT_CB.c_str(), argv, ArraySize(argv));
+    };
+    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to send event");
     }
 }
 
@@ -393,7 +528,7 @@ void JsWindowListener::OnDialogTargetTouch() const
         }
         thisListener->CallJsMethod(DIALOG_TARGET_TOUCH_CB.c_str(), nullptr, 0);
     };
-    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
+    if (napi_send_event(env_, jsCallback, napi_eprio_high, "OnDialogTargetTouch") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_EVENT, "Failed to send event");
     }
 }
@@ -409,7 +544,7 @@ void JsWindowListener::OnDialogDeathRecipient() const
             thisListener->CallJsMethod(DIALOG_DEATH_RECIPIENT_CB.c_str(), nullptr, 0);
     };
 
-    napi_send_event(env_, asyncTask, napi_eprio_immediate);
+    napi_send_event(env_, asyncTask, napi_eprio_immediate, "OnDialogDeathRecipient");
 }
 
 void JsWindowListener::OnGestureNavigationEnabledUpdate(bool enable)
@@ -423,7 +558,8 @@ void JsWindowListener::OnGestureNavigationEnabledUpdate(bool enable)
         napi_value argv[] = {CreateJsValue(eng, enable)};
         thisListener->CallJsMethod(GESTURE_NAVIGATION_ENABLED_CHANGE_CB.c_str(), argv, ArraySize(argv));
     };
-    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
+    napi_status status = napi_send_event(env_, jsCallback, napi_eprio_high, "OnGestureNavigationEnabledUpdate");
+    if (status != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_IMMS, "Failed to send event");
     }
 }
@@ -439,7 +575,7 @@ void JsWindowListener::OnWaterMarkFlagUpdate(bool showWaterMark)
         napi_value argv[] = {CreateJsValue(eng, showWaterMark)};
         thisListener->CallJsMethod(WATER_MARK_FLAG_CHANGE_CB.c_str(), argv, ArraySize(argv));
     };
-    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
+    if (napi_send_event(env_, jsCallback, napi_eprio_high, "OnWaterMarkFlagUpdate") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_IMMS, "Failed to send event");
     }
 }
@@ -464,7 +600,7 @@ void JsWindowListener::OnWindowNoInteractionCallback()
         }
         thisListener->CallJsMethod(WINDOW_NO_INTERACTION_DETECT_CB.c_str(), nullptr, 0);
     };
-    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
+    if (napi_send_event(env_, jsCallback, napi_eprio_high, "OnWindowNoInteractionCallback") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_EVENT, "Failed to send event");
     }
 }
@@ -483,7 +619,26 @@ void JsWindowListener::OnWindowStatusChange(WindowStatus windowstatus)
         napi_value argv[] = {CreateJsValue(env, static_cast<uint32_t>(windowstatus))};
         thisListener->CallJsMethod(WINDOW_STATUS_CHANGE_CB.c_str(), argv, ArraySize(argv));
     };
-    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
+    if (napi_send_event(env_, jsCallback, napi_eprio_high, "OnWindowStatusChange") != napi_status::napi_ok) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "failed to send event");
+    }
+}
+
+void JsWindowListener::OnWindowStatusDidChange(WindowStatus windowstatus)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
+    // js callback should run in js thread
+    auto jsCallback = [self = weakRef_, windowstatus, env = env_, funcName = __func__] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: this listener or env is nullptr", funcName);
+            return;
+        }
+        HandleScope handleScope(env);
+        napi_value argv[] = {CreateJsValue(env, static_cast<uint32_t>(windowstatus))};
+        thisListener->CallJsMethod(WINDOW_STATUS_DID_CHANGE_CB.c_str(), argv, ArraySize(argv));
+    };
+    if (napi_send_event(env_, jsCallback, napi_eprio_high, "OnWindowStatusDidChange") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "failed to send event");
     }
 }
@@ -502,7 +657,7 @@ void JsWindowListener::OnDisplayIdChanged(DisplayId displayId)
         napi_value argv[] = { CreateJsValue(env, static_cast<int64_t>(displayId)) };
         thisListener->CallJsMethod(WINDOW_DISPLAYID_CHANGE_CB.c_str(), argv, ArraySize(argv));
     };
-    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
+    if (napi_send_event(env_, jsCallback, napi_eprio_high, "OnDisplayIdChanged") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to send event");
     }
 }
@@ -520,6 +675,25 @@ void JsWindowListener::OnSystemDensityChanged(float density)
         napi_value argv[] = { CreateJsValue(env, density) };
         thisListener->CallJsMethod(SYSTEM_DENSITY_CHANGE_CB.c_str(), argv, ArraySize(argv));
     };
+    if (napi_send_event(env_, jsCallback, napi_eprio_high, "OnSystemDensityChanged") != napi_status::napi_ok) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to send event");
+    }
+}
+
+void JsWindowListener::OnAcrossDisplaysChanged(bool isAcrossDisplays)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
+    const char* const where = __func__;
+    auto jsCallback = [self = weakRef_, isAcrossDisplays, env = env_, where] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s listener or env is nullptr", where);
+            return;
+        }
+        HandleScope handleScope(env);
+        napi_value argv[] = { CreateJsValue(env, isAcrossDisplays) };
+        thisListener->CallJsMethod(ACROSS_DISPLAYS_CHANGE_CB.c_str(), argv, ArraySize(argv));
+    };
     if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to send event");
     }
@@ -536,7 +710,8 @@ void JsWindowListener::OnWindowVisibilityChangedCallback(const bool isVisible)
         napi_value argv[] = { CreateJsValue(eng, isVisible) };
         thisListener->CallJsMethod(WINDOW_VISIBILITY_CHANGE_CB.c_str(), argv, ArraySize(argv));
     };
-    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
+    napi_status status = napi_send_event(env_, jsCallback, napi_eprio_high, "OnWindowVisibilityChangedCallback");
+    if (status != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_IMMS, "Failed to send event");
     }
 }
@@ -558,7 +733,7 @@ void JsWindowListener::OnWindowTitleButtonRectChanged(const TitleButtonRect& tit
         napi_value argv[] = { titleButtonRectValue };
         thisListener->CallJsMethod(WINDOW_TITLE_BUTTON_RECT_CHANGE_CB.c_str(), argv, ArraySize(argv));
     };
-    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
+    if (napi_send_event(env_, jsCallback, napi_eprio_high, "OnWindowTitleButtonRectChanged") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_DECOR, "Failed to send event");
     }
 }
@@ -604,7 +779,7 @@ void JsWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
         napi_value argv[] = {objValue};
         thisListener->CallJsMethod(WINDOW_RECT_CHANGE_CB.c_str(), argv, ArraySize(argv));
     };
-    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_immediate)) {
+    if (napi_send_event(env_, jsCallback, napi_eprio_immediate, "OnRectChange") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "failed to send event");
         return;
     }
@@ -613,6 +788,55 @@ void JsWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
         TLOGD(WmsLogTag::WMS_LAYOUT, "ignore undefined reason to change last reason");
     } else {
         currentReason_ = rectChangeReason;
+    }
+}
+
+void JsWindowListener::OnRectChangeInGlobalDisplay(const Rect& rect, WindowSizeChangeReason reason)
+{
+    auto it = JS_SIZE_CHANGE_REASON.find(reason);
+    RectChangeReason rectChangeReason = (it != JS_SIZE_CHANGE_REASON.end()) ? it->second : RectChangeReason::UNDEFINED;
+    auto jsCallback = [self = weakRef_, rect, rectChangeReason, env = env_, where = __func__] {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsWindowListener::OnRectChangeInGlobalDisplay");
+        TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s: rect: %{public}s, rectChangeReason: %{public}u",
+            where, rect.ToString().c_str(), static_cast<uint32_t>(rectChangeReason));
+        if (!env) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: env is nullptr", where);
+            return;
+        }
+        auto listener = self.promote();
+        if (!listener) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: listener is nullptr", where);
+            return;
+        }
+        HandleScope handleScope(env);
+        napi_value jsRectChangeOptions = BuildJsRectChangeOptions(env, rect, rectChangeReason);
+        if (jsRectChangeOptions == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: jsRectChangeOptions is nullptr", where);
+            return;
+        }
+        napi_value argv[] = { jsRectChangeOptions };
+        listener->CallJsMethod(RECT_CHANGE_IN_GLOBAL_DISPLAY_CB.c_str(), argv, ArraySize(argv));
+    };
+    if (napi_send_event(env_, jsCallback, napi_eprio_immediate) != napi_ok) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to send event");
+    }
+}
+
+void JsWindowListener::OnSecureLimitChange(bool isLimit)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "isLimit: %{public}d", isLimit);
+    auto jsCallback = [self = weakRef_, isLimit, env = env_, where = __func__]() {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            TLOGNE(WmsLogTag::WMS_UIEXT, "%{public}s: this listener or env is nullptr", where);
+            return;
+        }
+        HandleScope handleScope(env);
+        napi_value argv[] = { CreateJsValue(env, isLimit) };
+        thisListener->CallJsMethod(EXTENSION_SECURE_LIMIT_CHANGE_CB.c_str(), argv, ArraySize(argv));
+    };
+    if (napi_send_event(env_, jsCallback, napi_eprio_immediate, "OnSecureLimitChange") != napi_status::napi_ok) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to send event");
     }
 }
 
@@ -681,7 +905,7 @@ void JsWindowListener::OnWindowHighlightChange(bool isHighlight)
         napi_value argv[] = { CreateJsValue(env, isHighlight) };
         thisListener->CallJsMethod(WINDOW_HIGHLIGHT_CHANGE_CB.c_str(), argv, ArraySize(argv));
     };
-    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_immediate)) {
+    if (napi_send_event(env_, jsCallback, napi_eprio_immediate, "OnWindowHighlightChange") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_FOCUS, "failed to send event");
     }
 }

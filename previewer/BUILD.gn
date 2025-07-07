@@ -78,6 +78,7 @@ if (!ispreview) {
       "mock",
       "../utils/include",
       "${ide_previewer_external_path}",
+      "${window_base_path}/interfaces/kits/napi/window_animation",
     ]
     public_deps = [
       "${graphic_base_path}/graphic_2d/rosen/modules/platform:ipc_core",
@@ -86,11 +87,13 @@ if (!ispreview) {
 
     external_deps = [
       "ace_engine:ace_uicontent",
+      "graphic_2d:librender_service_base",
       "graphic_2d:librender_service_client",
       "hilog:libhilog",
     ]
 
     cflags = [ "-std=c++11" ]
+    cflags_cc = [ "-std=c++17" ]
     part_name = "window_manager"
     subsystem_name = "window"
   }
@@ -111,6 +114,7 @@ if (!ispreview) {
 
     sources = [
       "${ability_runtime_path}/frameworks/simulator/ability_simulator/src/js_runtime_utils.cpp",
+      "../interfaces/kits/napi/window_animation/js_window_animation_utils.cpp",
       "../interfaces/kits/napi/window_runtime/window_napi/js_window.cpp",
       "../interfaces/kits/napi/window_runtime/window_napi/js_window_utils.cpp",
       "../interfaces/kits/napi/window_runtime/window_stage_napi/js_window_stage.cpp",
@@ -132,6 +136,7 @@ if (!ispreview) {
       "../utils/include",
       "mock",
       "${ability_runtime_path}/interfaces/inner_api/runtime/include",
+      "${window_base_path}/interfaces/kits/napi/window_animation",
     ]
 
     deps = [

@@ -25,6 +25,7 @@ namespace {
     const std::string WINDOW_WATERFALL_EVENT = "win_waterfall_window_event";
     const std::string WINDOW_RELOCATION_EVENT = "win_relocation_to_top";
     const std::string WINDOW_WATERFALL_VISIBILITY_EVENT = "win_waterfall_visibility";
+    const std::string WINDOW_GRAY_OUT_MAXIMIZE_EVENT = "win_gray_out_maximize_event";
 }
 } // Rosen
 } // OHOS

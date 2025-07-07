@@ -41,13 +41,9 @@ public:
 
 std::shared_ptr<StartingWindowRdbManager> WindowPatternStartingWindowRdbTest::startingWindowRdbMgr_ = nullptr;
 
-void WindowPatternStartingWindowRdbTest::SetUpTestCase()
-{
-}
+void WindowPatternStartingWindowRdbTest::SetUpTestCase() {}
 
-void WindowPatternStartingWindowRdbTest::TearDownTestCase()
-{
-}
+void WindowPatternStartingWindowRdbTest::TearDownTestCase() {}
 
 void WindowPatternStartingWindowRdbTest::SetUp()
 {
@@ -131,7 +127,7 @@ HWTEST_F(WindowPatternStartingWindowRdbTest, BatchInsert, TestSize.Level1)
     StartingWindowInfo firstStartingWindowInfo, secondStartingWindowInfo;
     firstItemKey.bundleName = "first";
     secondItemKey.bundleName = "second";
-    std::vector<std::pair<StartingWindowRdbItemKey, StartingWindowInfo>> inputValues {
+    std::vector<std::pair<StartingWindowRdbItemKey, StartingWindowInfo>> inputValues{
         std::make_pair(firstItemKey, firstStartingWindowInfo),
         std::make_pair(secondItemKey, secondStartingWindowInfo),
     };
@@ -153,9 +149,26 @@ HWTEST_F(WindowPatternStartingWindowRdbTest, DeleteDataByBundleName, TestSize.Le
     itemKey.bundleName = "testName";
     StartingWindowInfo startingWindowInfo;
     auto res = startingWindowRdbMgr_->InsertData(itemKey, startingWindowInfo);
-    ASSERT_EQ(res, true);
+    EXPECT_EQ(res, true);
     res = startingWindowRdbMgr_->DeleteDataByBundleName("testName");
-    ASSERT_EQ(res, true);
+    EXPECT_EQ(res, true);
+}
+
+/**
+ * @tc.name: DeleteAllData
+ * @tc.desc: DeleteAllData
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternStartingWindowRdbTest, DeleteAllData, TestSize.Level1)
+{
+    ASSERT_NE(startingWindowRdbMgr_, nullptr);
+    StartingWindowRdbItemKey itemKey;
+    itemKey.bundleName = "testName";
+    StartingWindowInfo startingWindowInfo;
+    auto res = startingWindowRdbMgr_->InsertData(itemKey, startingWindowInfo);
+    EXPECT_EQ(res, true);
+    res = startingWindowRdbMgr_->DeleteAllData();
+    EXPECT_EQ(res, true);
 }
 
 /**
@@ -180,6 +193,6 @@ HWTEST_F(WindowPatternStartingWindowRdbTest, QueryData, TestSize.Level1)
     ASSERT_EQ(res, true);
     ASSERT_EQ(inputInfo.backgroundColor_, resInfo.backgroundColor_);
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

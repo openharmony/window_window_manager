@@ -28,6 +28,7 @@
 #include "ws_common.h"
 #include "sensor_agent.h"
 #include "sensor_agent_type.h"
+#include "common/include/task_scheduler.h"
 #include "session/screen/include/screen_property.h"
 #include "dm_common.h"
  
@@ -58,6 +59,9 @@ public:
 
     void HandleScreenConnectChange();
     void HandleScreenDisconnectChange();
+    void HandleFoldStatusLockedToExpand();
+    void HandleFoldStatusUnlocked();
+    void SetTaskScheduler(std::shared_ptr<TaskScheduler> scheduler);
 
 private:
     
@@ -82,6 +86,8 @@ private:
     SuperFoldSensorManager();
  
     ~SuperFoldSensorManager();
+
+    std::shared_ptr<TaskScheduler> taskScheduler_ = nullptr;
 };
 }
 }

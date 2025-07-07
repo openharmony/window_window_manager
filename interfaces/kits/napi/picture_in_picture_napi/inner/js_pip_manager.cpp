@@ -14,6 +14,7 @@
  */
 
 #include "js_pip_manager.h"
+#include <sstream>
 #include "window_manager_hilog.h"
 #include "picture_in_picture_manager.h"
 #include "xcomponent_controller.h"
@@ -47,6 +48,34 @@ napi_value NapiGetUndefined(napi_env env)
 napi_value NapiThrowInvalidParam(napi_env env, std::string msg = "")
 {
     napi_throw(env, AbilityRuntime::CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM), msg));
+    return NapiGetUndefined(env);
+}
+
+napi_value GetSurfaceIdFromJs(napi_env env, napi_value surfaceIdNapiValue,
+    sptr<PictureInPictureControllerBase> pipController)
+{
+    if (surfaceIdNapiValue == nullptr || GetType(env, surfaceIdNapiValue) != napi_string) {
+        TLOGE(WmsLogTag::WMS_PIP, "Failed to convert parameter to surface. Invalidate params");
+        return NapiGetUndefined(env);
+    }
+    char buffer[PATH_MAX];
+    size_t length = 0;
+    uint64_t surfaceId = 0;
+    if (napi_get_value_string_utf8(env, surfaceIdNapiValue, buffer, PATH_MAX, &length) != napi_ok) {
+        TLOGE(WmsLogTag::WMS_PIP, "Failed to convert parameter to surface");
+        return NapiGetUndefined(env);
+    }
+    std::istringstream inputStream(buffer);
+    inputStream >> surfaceId;
+    pipController->SetSurfaceId(surfaceId);
+    TLOGI(WmsLogTag::WMS_PIP, "surfaceId: %{public}" PRIu64"", surfaceId);
+    for (auto& listener : pipController->GetPictureInPictureStartObserver()) {
+        if (listener == nullptr) {
+            TLOGE(WmsLogTag::WMS_PIP, "one start listener is nullptr");
+            continue;
+        }
+        listener->OnPipStart(pipController->GetControllerId(), pipController->GetWebRequestId(), surfaceId);
+    }
     return NapiGetUndefined(env);
 }
 
@@ -93,7 +122,7 @@ napi_value JsPipManager::OnInitXComponentController(napi_env env, napi_callback_
         return NapiGetUndefined(env);
     }
     int32_t windowId = static_cast<int32_t>(pipWindow->GetWindowId());
-    sptr<PictureInPictureController> pipController = PictureInPictureManager::GetPipControllerInfo(windowId);
+    sptr<PictureInPictureControllerBase> pipController = PictureInPictureManager::GetPipControllerInfo(windowId);
     if (pipController == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "Failed to get pictureInPictureController");
         return NapiGetUndefined(env);
@@ -104,6 +133,46 @@ napi_value JsPipManager::OnInitXComponentController(napi_env env, napi_callback_
         TLOGE(WmsLogTag::WMS_PIP, "Failed to set xComponentController");
     }
     return NapiGetUndefined(env);
+}
+
+napi_value JsPipManager::InitWebXComponentController(napi_env env, napi_callback_info info)
+{
+    JsPipManager* me = CheckParamsAndGetThis<JsPipManager>(env, info);
+    return (me != nullptr) ? me->OnInitWebXComponentController(env, info) : nullptr;
+}
+
+napi_value JsPipManager::OnInitWebXComponentController(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_PIP, "[NAPI]");
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != NUMBER_TWO) {
+        TLOGE(WmsLogTag::WMS_PIP, "Argc count is invalid: %{public}zu", argc);
+        return NapiThrowInvalidParam(env);
+    }
+    napi_value xComponentController = argv[0];
+    std::shared_ptr<XComponentController> xComponentControllerResult =
+        XComponentController::GetXComponentControllerFromNapiValue(env, xComponentController);
+    sptr<Window> pipWindow = Window::Find(PIP_WINDOW_NAME);
+    if (pipWindow == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "Failed to find pip window");
+        return NapiGetUndefined(env);
+    }
+    int32_t windowId = static_cast<int32_t>(pipWindow->GetWindowId());
+    sptr<PictureInPictureControllerBase> pipController = PictureInPictureManager::GetPipControllerInfo(windowId);
+    if (pipController == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "Failed to get webPictureInPictureController");
+        return NapiGetUndefined(env);
+    }
+    TLOGI(WmsLogTag::WMS_PIP, "set xComponentController to window: %{public}u", windowId);
+    WMError errCode = pipController->SetXComponentController(xComponentControllerResult);
+    if (errCode != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_PIP, "Failed to set xComponentController");
+        return NapiGetUndefined(env);
+    }
+    napi_value surfaceIdNapiValue = argv[1];
+    return GetSurfaceIdFromJs(env, surfaceIdNapiValue, pipController);
 }
 
 napi_value JsPipManager::GetCustomUIController(napi_env env, napi_callback_info info)
@@ -122,7 +191,8 @@ napi_value JsPipManager::OnGetCustomUIController(napi_env env, napi_callback_inf
     }
     int32_t windowId = static_cast<int32_t>(pipWindow->GetWindowId());
     TLOGI(WmsLogTag::WMS_PIP, "winId: %{public}u", windowId);
-    sptr<PictureInPictureController> pipController = PictureInPictureManager::GetPipControllerInfo(windowId);
+    sptr<PictureInPictureControllerBase> pipController =
+        PictureInPictureManager::GetPipControllerInfo(windowId);
     if (pipController == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "Failed to get pictureInPictureController");
         return NapiGetUndefined(env);
@@ -153,7 +223,7 @@ napi_value JsPipManager::OnGetTypeNode(napi_env env, napi_callback_info info)
     }
     int32_t windowId = static_cast<int32_t>(pipWindow->GetWindowId());
     TLOGI(WmsLogTag::WMS_PIP, "winId: %{public}u", windowId);
-    sptr<PictureInPictureController> pipController = PictureInPictureManager::GetPipControllerInfo(windowId);
+    sptr<PictureInPictureControllerBase> pipController = PictureInPictureManager::GetPipControllerInfo(windowId);
     if (pipController == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "Failed to get pictureInPictureController");
         return NapiGetUndefined(env);
@@ -184,7 +254,7 @@ napi_value JsPipManager::OnSetTypeNodeEnabled(napi_env env, napi_callback_info i
     }
     int32_t windowId = static_cast<int32_t>(pipWindow->GetWindowId());
     TLOGI(WmsLogTag::WMS_PIP, "winId: %{public}u", windowId);
-    sptr<PictureInPictureController> pipController = PictureInPictureManager::GetPipControllerInfo(windowId);
+    sptr<PictureInPictureControllerBase> pipController = PictureInPictureManager::GetPipControllerInfo(windowId);
     if (pipController == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "Failed to get pictureInPictureController");
         return NapiGetUndefined(env);
@@ -301,7 +371,7 @@ WmErrorCode JsPipManager::RegisterListener(const std::string& type,
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     int32_t windowId = static_cast<int32_t>(pipWindow->GetWindowId());
-    sptr<PictureInPictureController> pipController = PictureInPictureManager::GetPipControllerInfo(windowId);
+    sptr<PictureInPictureControllerBase> pipController = PictureInPictureManager::GetPipControllerInfo(windowId);
     if (pipController == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "Failed to get pictureInPictureController");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
@@ -419,7 +489,7 @@ WmErrorCode JsPipManager::UnRegisterListener(const std::string& type,
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     int32_t windowId = static_cast<int32_t>(pipWindow->GetWindowId());
-    sptr<PictureInPictureController> pipController = PictureInPictureManager::GetPipControllerInfo(windowId);
+    sptr<PictureInPictureControllerBase> pipController = PictureInPictureManager::GetPipControllerInfo(windowId);
     if (pipController == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "Failed to get pictureInPictureController");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
@@ -453,6 +523,8 @@ napi_value JsPipManagerInit(napi_env env, napi_value exportObj)
     napi_wrap(env, exportObj, jsPipManager.release(), JsPipManager::Finalizer, nullptr, nullptr);
     const char* moduleName = "JsPipManager";
     BindNativeFunction(env, exportObj, "initXComponentController", moduleName, JsPipManager::InitXComponentController);
+    BindNativeFunction(env, exportObj, "initWebXComponentController", moduleName,
+        JsPipManager::InitWebXComponentController);
     BindNativeFunction(env, exportObj, "getCustomUIController", moduleName, JsPipManager::GetCustomUIController);
     BindNativeFunction(env, exportObj, "getTypeNode", moduleName, JsPipManager::GetTypeNode);
     BindNativeFunction(env, exportObj, "on", moduleName, JsPipManager::RegisterCallback);

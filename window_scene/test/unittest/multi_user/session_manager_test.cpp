@@ -27,6 +27,7 @@ class SessionManagerTest : public Test {
 public:
     void SetUp() override;
     void TearDown() override;
+
 private:
     std::shared_ptr<SessionManager> sm_;
 };
@@ -150,7 +151,6 @@ HWTEST_F(SessionManagerTest, RegisterUserSwitchListener, Function | SmallTest | 
     sm_->RegisterUserSwitchListener([]() {});
     ASSERT_NE(sm_->userSwitchCallbackFunc_, nullptr);
 }
-
 
 /**
  * @tc.name: OnUserSwitch

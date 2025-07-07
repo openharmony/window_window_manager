@@ -58,7 +58,7 @@ FoldStatus FoldScreenPolicy::GetFoldStatus()
 
 void FoldScreenPolicy::SetFoldStatus(FoldStatus foldStatus)
 {
-    TLOGI(WmsLogTag::DMS, "SetFoldStatus FoldStatus: %{public}d", foldStatus);
+    TLOGI(WmsLogTag::DMS, "FoldStatus: %{public}d", foldStatus);
     currentFoldStatus_ = foldStatus;
     lastFoldStatus_ = foldStatus;
 }
@@ -136,4 +136,6 @@ Drawing::Rect FoldScreenPolicy::GetScreenSnapshotRect()
 }
 
 void FoldScreenPolicy::SetMainScreenRegion(DMRect& mainScreenRegion) {}
+
+void FoldScreenPolicy::SetIsClearingBootAnimation(bool isClearingBootAnimation) {}
 } // namespace OHOS::Rosen

@@ -27,6 +27,7 @@
 namespace OHOS {
 namespace Rosen {
 class RSFrameRateLinker;
+class RSUIContext;
 class VSyncReceiver;
 class FrameRateRange;
 
@@ -39,6 +40,7 @@ public:
         const std::shared_ptr<AppExecFwk::EventHandler>& vsyncHandler = nullptr);
     ~VsyncStation();
 
+    bool HasRequestedVsync() const { return hasRequestedVsync_; }
     bool IsVsyncReceiverCreated();
     void RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback);
     int64_t GetVSyncPeriod();
@@ -46,8 +48,9 @@ public:
     void Destroy();
 
     FrameRateLinkerId GetFrameRateLinkerId();
-    void FlushFrameRate(uint32_t rate, int32_t animatorExpectedFrameRate, uint32_t rateType = 0);
-    void SetFrameRateLinkerEnable(bool enabled);
+    void FlushFrameRate(const std::shared_ptr<RSUIContext>& rsUIContext, uint32_t rate,
+        int32_t animatorExpectedFrameRate, uint32_t rateType = 0);
+    void SetFrameRateLinkerEnable(const std::shared_ptr<RSUIContext>& rsUIContext, bool enabled);
     void SetDisplaySoloistFrameRateLinkerEnable(bool enabled);
     void SetUiDvsyncSwitch(bool dvsyncSwitch);
 

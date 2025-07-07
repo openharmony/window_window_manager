@@ -39,32 +39,23 @@ public:
     void InitTestSceneSessionForListWindowInfo();
 
     static sptr<SceneSessionManager> ssm_;
+
 private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
 
 sptr<SceneSessionManager> SceneSessionManagerAnimationTest::ssm_ = nullptr;
 
-void NotifyRecoverSceneSessionFuncTest(const sptr<SceneSession>& session, const SessionInfo& sessionInfo)
-{
-}
+void NotifyRecoverSceneSessionFuncTest(const sptr<SceneSession>& session, const SessionInfo& sessionInfo) {}
 
 bool TraverseFuncTest(const sptr<SceneSession>& session)
 {
     return true;
 }
 
-void WindowChangedFuncTest(int32_t persistentId, WindowUpdateType type)
-{
-}
+void WindowChangedFuncTest(int32_t persistentId, WindowUpdateType type) {}
 
-void ProcessStatusBarEnabledChangeFuncTest(bool enable)
-{
-}
-
-void DumpRootSceneElementInfoFuncTest(const std::vector<std::string>& params, std::vector<std::string>& infos)
-{
-}
+void ProcessStatusBarEnabledChangeFuncTest(bool enable) {}
 
 void SceneSessionManagerAnimationTest::SetUpTestCase()
 {
@@ -76,9 +67,7 @@ void SceneSessionManagerAnimationTest::TearDownTestCase()
     ssm_ = nullptr;
 }
 
-void SceneSessionManagerAnimationTest::SetUp()
-{
-}
+void SceneSessionManagerAnimationTest::SetUp() {}
 
 void SceneSessionManagerAnimationTest::TearDown()
 {
@@ -86,7 +75,10 @@ void SceneSessionManagerAnimationTest::TearDown()
 }
 
 void SceneSessionManagerAnimationTest::InitTestSceneSession(DisplayId displayId,
-    int32_t windowId, int32_t zOrder, bool visible, WSRect rect)
+                                                            int32_t windowId,
+                                                            int32_t zOrder,
+                                                            bool visible,
+                                                            WSRect rect)
 {
     SessionInfo info;
     info.bundleName_ = "root";
@@ -97,7 +89,7 @@ void SceneSessionManagerAnimationTest::InitTestSceneSession(DisplayId displayId,
     sceneSession->SetRSVisible(visible);
     sceneSession->SetSessionRect(rect);
     sceneSession->property_->SetDisplayId(displayId);
-    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
     EXPECT_EQ(windowId, sceneSession->GetPersistentId());
 }
 
@@ -177,6 +169,6 @@ HWTEST_F(SceneSessionManagerAnimationTest, TestUpdateRotateAnimationConfig_02, T
     usleep(WAIT_SYNC_IN_NS);
     ASSERT_EQ(ssm_->rotateAnimationConfig_.duration_, 600);
 }
-}  // namespace
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

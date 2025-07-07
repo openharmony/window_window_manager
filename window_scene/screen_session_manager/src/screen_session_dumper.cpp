@@ -39,6 +39,7 @@ constexpr int LINE_WIDTH = 30;
 constexpr int DUMPER_PARAM_INDEX_ONE = 1;
 constexpr int DUMPER_PARAM_INDEX_TWO = 2;
 constexpr int DUMPER_PARAM_INDEX_THREE = 3;
+constexpr int MAX_DUMPER_PARAM_NUMBER = 10;
 const std::string ARG_DUMP_HELP = "-h";
 const std::string ARG_DUMP_ALL = "-a";
 const std::string ARG_DUMP_FOLD_STATUS = "-f";
@@ -155,6 +156,7 @@ void ScreenSessionDumper::ExecuteDumpCmd()
     } else if (params_[0] == ARG_DUMP_ALL) {
         ShowAllScreenInfo();
         ShowVisibleAreaDisplayInfo();
+        ShowClientScreenInfo();
     } else if (params_[0] == ARG_DUMP_FOLD_STATUS) {
         DumpFoldStatus();
     }
@@ -164,24 +166,13 @@ void ScreenSessionDumper::ExecuteDumpCmd()
 
 void ScreenSessionDumper::ExecuteInjectCmd()
 {
-    bool isDeveloperMode = system::GetBoolParameter("const.security.developermode.state", false);
-    if (isDeveloperMode) {
-        if (params_.size() == 1 && IsValidDisplayModeCommand(params_[0])) {
-            int errCode = SetFoldDisplayMode();
-            if (errCode != 0) {
-                ShowIllegalArgsInfo();
-            }
-            return;
-        }
+    if (IsDeveloperModeCommand()) {
+        return;
     }
     bool isDebugMode = system::GetBoolParameter("dms.hidumper.supportdebug", false);
     if (!isDebugMode) {
         TLOGI(WmsLogTag::DMS, "Can't use DMS hidumper inject methods.");
         dumpInfo_.append("dms.hidumper.supportdebug false\n");
-        return;
-    }
-    if (params_[0] == ARG_CHANGE_OUTER_CMD && params_.size() == DUMPER_PARAM_INDEX_TWO) {
-        ScreenSessionManager::GetInstance().MultiScreenChangeOuter(params_[1]);
         return;
     }
     if (params_.size() == DUMPER_PARAM_INDEX_THREE) {
@@ -191,16 +182,7 @@ void ScreenSessionDumper::ExecuteInjectCmd()
             params_[DUMPER_PARAM_INDEX_TWO]);
         return;
     }
-    if (params_[0] == STATUS_FOLD_HALF || params_[0] == STATUS_EXPAND || params_[0] == STATUS_FOLD) {
-        ShowNotifyFoldStatusChangedInfo();
-        return;
-    } else if (params_[0].find(ARG_SET_ROTATION_SENSOR) != std::string::npos) {
-        SetMotionSensorValue(params_[0]);
-        return;
-    } else if (params_[0].find(ARG_SET_ROTATION_LOCK) != std::string::npos) {
-        SetRotationLockedValue(params_[0]);
-        return;
-    } else if (params_[0].find(ARG_PUBLISH_CAST_EVENT) != std::string::npos) {
+    if (params_[0].find(ARG_PUBLISH_CAST_EVENT) != std::string::npos) {
         MockSendCastPublishEvent(params_[0]);
         return;
     } else if (params_.size() == 1 && (params_[0] == ARG_LOCK_FOLD_DISPLAY_STATUS
@@ -212,6 +194,40 @@ void ScreenSessionDumper::ExecuteInjectCmd()
         return;
     }
     ExecuteInjectCmd2();
+}
+
+bool ScreenSessionDumper::IsDeveloperModeCommand()
+{
+    bool isEnd = true;
+    bool isDeveloperMode = system::GetBoolParameter("const.security.developermode.state", false);
+    if (!isDeveloperMode) {
+        return isEnd;
+    }
+    // print param
+    TLOGI(WmsLogTag::DMS, "get calling uid(%{public}zu)", params_.size());
+    if ((params_.size() < 1) || (params_.size() > MAX_DUMPER_PARAM_NUMBER)) {
+        TLOGE(WmsLogTag::DMS, "params size exceeded limit");
+        return isEnd;
+    }
+    for (const auto& param : params_) {
+        TLOGI(WmsLogTag::DMS, "params_: [%{public}s]", param.c_str());
+    }
+    // deal displayMode and motion/foldstatus
+    if (IsValidDisplayModeCommand(params_[0])) {
+        // check and set display mode
+        if (SetFoldDisplayMode() != 0) {
+            ShowIllegalArgsInfo();
+        }
+    } else if (params_[0] == STATUS_FOLD_HALF || params_[0] == STATUS_EXPAND || params_[0] == STATUS_FOLD) {
+        ShowNotifyFoldStatusChangedInfo();
+    } else if (params_[0].find(ARG_SET_ROTATION_SENSOR) != std::string::npos) {
+        SetMotionSensorValue(params_[0]);
+    } else if (params_[0].find(ARG_SET_ROTATION_LOCK) != std::string::npos) {
+        SetRotationLockedValue(params_[0]);
+    } else {
+        isEnd = false;
+    }
+    return isEnd;
 }
 
 void ScreenSessionDumper::ExecuteInjectCmd2()
@@ -285,7 +301,32 @@ void ScreenSessionDumper::ShowHelpInfo()
         .append(" -p                             ")
         .append("|switch to fold status\n")
         .append(" -f                             ")
-        .append("|get to fold status\n");
+        .append("|switch to full display mode\n")
+        .append(" -m                             ")
+        .append("|switch to main display mode\n")
+        .append(" -sub                           ")
+        .append("|switch to sub display mode\n")
+        .append(" -coor                          ")
+        .append("|switch to coor display mode\n")
+        .append(" -g                          ")
+        .append("|switch to global full display mode\n")
+        .append(" -rotationlock                  ")
+        .append("|set rotation lock, 0 to unloick, 1 to lock, "\
+            "eg. -rotationlock,0 \n")
+        .append(" -motion                        ")
+        .append("|set the sensor rotation angle clockwise, "\
+            "0 means 0 degree, 1 means 90 degree, 2 means 180 degree, 3 means 270 degree, eg. -motion,1\n");
+    if (!system::GetBoolParameter("dms.hidumper.supportdebug", false)) {
+        return;
+    }
+    dumpInfo_.append(" -ontent        ")
+        .append("|set up tent mode\n")
+        .append(" -offtent        ")
+        .append("|set exit tent mode\n")
+        .append(" -publishcastevent        ")
+        .append("|publish cast event\n")
+        .append(" -registerhall        ")
+        .append("|set hall register, 0 to unregister, 1 to register\n");
 }
 
 void ScreenSessionDumper::ShowAllScreenInfo()
@@ -304,6 +345,12 @@ void ScreenSessionDumper::ShowAllScreenInfo()
         DumpScreenPropertyById(screenId);
         DumpFoldCreaseRegion();
     }
+}
+
+void ScreenSessionDumper::ShowClientScreenInfo()
+{
+    std::string clientInfos = ScreenSessionManager::GetInstance().DumperClientScreenSessions();
+    dumpInfo_.append(clientInfos);
 }
 
 void ScreenSessionDumper::ShowVisibleAreaDisplayInfo()
@@ -373,14 +420,8 @@ void ScreenSessionDumper::DumpTentMode()
 {
     std::ostringstream oss;
     bool isTentMode = ScreenSessionManager::GetInstance().GetTentMode();
-    std::string status = "";
-    if (isTentMode) {
-        status = "TRUE";
-    } else {
-        status = "FALSE";
-    }
     oss << std::left << std::setw(LINE_WIDTH) << "TentMode: "
-        << status << std::endl;
+        << (isTentMode ? "true" : "false") << std::endl;
     dumpInfo_.append(oss.str());
 }
 
@@ -414,8 +455,20 @@ void ScreenSessionDumper::DumpScreenSessionById(ScreenId id)
     }
     oss << std::left << std::setw(LINE_WIDTH) << "Name: "
         << screenSession->GetName() << std::endl;
+    oss << std::left << std::setw(LINE_WIDTH) << "DisplayId: "
+        << screenSession->GetDisplayId() << std::endl;
     oss << std::left << std::setw(LINE_WIDTH) << "RSScreenId: "
         << screenSession->GetRSScreenId() << std::endl;
+    oss << std::left << std::setw(LINE_WIDTH) << "isInternal: "
+        <<(screenSession->GetIsInternal() ? "true" : "false") << std::endl;
+    oss << std::left << std::setw(LINE_WIDTH) << "isExtend: "
+        << (screenSession->GetIsExtend() ? "true" : "false") << std::endl;
+    if (screenSession->GetDisplayNode()) {
+        oss << std::left << std::setw(LINE_WIDTH) << "NodeId: "
+            << screenSession->GetDisplayNode()->GetId() << std::endl;
+    } else {
+        oss << std::left << std::setw(LINE_WIDTH) << "NodeId: " << "nullptr" << std::endl;
+    }
     sptr<SupportedScreenModes> activeModes = screenSession->GetActiveScreenMode();
     if (activeModes != nullptr) {
         oss << std::left << std::setw(LINE_WIDTH) << "activeModes<id, W, H, RS>: "
@@ -645,6 +698,10 @@ void ScreenSessionDumper::DumpScreenPropertyById(ScreenId id)
         << screenProperty.GetAvailableArea().height_ << ", " << std::endl;
     oss << std::left << std::setw(LINE_WIDTH) << "DefaultDeviceRotationOffset "
         << screenProperty.GetDefaultDeviceRotationOffset() << std::endl;
+    oss << std::left << std::setw(LINE_WIDTH) << "DisplayGroupId "
+        << screenProperty.GetDisplayGroupId() << std::endl;
+    oss << std::left << std::setw(LINE_WIDTH) << "MainDisplayIdOfGroup "
+        << screenProperty.GetMainDisplayIdOfGroup() << std::endl;
     dumpInfo_.append(oss.str());
 }
 
@@ -744,7 +801,7 @@ bool ScreenSessionDumper::IsValidDisplayModeCommand(std::string command)
     return false;
 }
 
-int ScreenSessionDumper::SetFoldDisplayMode()
+int32_t ScreenSessionDumper::SetFoldDisplayMode()
 {
     std::string modeParam = params_[0];
     if (modeParam.empty()) {
@@ -759,6 +816,8 @@ int ScreenSessionDumper::SetFoldDisplayMode()
         displayMode = FoldDisplayMode::SUB;
     } else if (modeParam == ARG_FOLD_DISPLAY_COOR) {
         displayMode = FoldDisplayMode::COORDINATION;
+    } else if (modeParam == ARG_FOLD_DISPLAY_GLOBALL_FULL) {
+        displayMode = FoldDisplayMode::GLOBAL_FULL;
     } else {
         TLOGW(WmsLogTag::DMS, "SetFoldDisplayMode mode not support");
         return -1;
@@ -1000,7 +1059,6 @@ void ScreenSessionDumper::SetLandscapeLock(std::string input)
 #endif
 }
 
-
 #ifdef FOLD_ABILITY_ENABLE
 bool ScreenSessionDumper::IsAllCharDigit(const std::string &firstPostureStr)
 {
@@ -1097,7 +1155,7 @@ void ScreenSessionDumper::TriggerSecondarySensor(const std::string &valueStr)
     SecondaryFoldSensorManager::GetInstance().HandleHallDataExt(&hallEvent);
     SecondaryFoldSensorManager::GetInstance().HandlePostureData(&postureEvent);
 }
- 
+
 void ScreenSessionDumper::TriggerSecondaryFoldStatus(const std::string &valueStr)
 {
     std::vector<std::string> strVec = WindowHelper::Split(valueStr, "=");

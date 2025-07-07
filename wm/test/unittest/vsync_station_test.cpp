@@ -100,12 +100,12 @@ HWTEST_F(VsyncStationTest, FlushFrameRate, TestSize.Level1)
     ASSERT_NE(vsyncStation0, nullptr);
     uint32_t rate0 = 60;
     int32_t animatorExpectedFrameRate = -1;
-    vsyncStation0->FlushFrameRate(rate0, animatorExpectedFrameRate);
+    vsyncStation0->FlushFrameRate(nullptr, rate0, animatorExpectedFrameRate);
     NodeId nodeId1 = 1;
     std::shared_ptr<VsyncStation> vsyncStation1 = std::make_shared<VsyncStation>(nodeId1);
     ASSERT_NE(vsyncStation1, nullptr);
     uint32_t rate1 = 120;
-    vsyncStation1->FlushFrameRate(rate1, animatorExpectedFrameRate);
+    vsyncStation1->FlushFrameRate(nullptr, rate1, animatorExpectedFrameRate);
 }
 
 /**
@@ -119,12 +119,12 @@ HWTEST_F(VsyncStationTest, SetFrameRateLinkerEnable, TestSize.Level1)
     std::shared_ptr<VsyncStation> vsyncStation0 = std::make_shared<VsyncStation>(nodeId0);
     ASSERT_NE(vsyncStation0, nullptr);
     bool enable0 = false;
-    vsyncStation0->SetFrameRateLinkerEnable(enable0);
+    vsyncStation0->SetFrameRateLinkerEnable(nullptr, enable0);
     NodeId nodeId1 = 1;
     std::shared_ptr<VsyncStation> vsyncStation1 = std::make_shared<VsyncStation>(nodeId1);
     ASSERT_NE(vsyncStation1, nullptr);
     bool enable1 = true;
-    vsyncStation1->SetFrameRateLinkerEnable(enable1);
+    vsyncStation1->SetFrameRateLinkerEnable(nullptr, enable1);
 }
 
 /**

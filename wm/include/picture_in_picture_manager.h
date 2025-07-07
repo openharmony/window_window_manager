@@ -28,16 +28,16 @@ public:
     ~PictureInPictureManager();
     static bool ShouldAbortPipStart();
     static bool IsSupportPiP();
-    static void PutPipControllerInfo(int32_t windowId, sptr<PictureInPictureController> pipController);
+    static void PutPipControllerInfo(int32_t windowId, sptr<PictureInPictureControllerBase> pipController);
     static void RemovePipControllerInfo(int32_t windowId);
-    static void AttachActivePipController(sptr<PictureInPictureController> pipController);
-    static void DetachActivePipController(sptr<PictureInPictureController> pipController);
-    static sptr<PictureInPictureController> GetPipControllerInfo(int32_t windowId);
+    static void AttachActivePipController(sptr<PictureInPictureControllerBase> pipController);
+    static void DetachActivePipController(sptr<PictureInPictureControllerBase> pipController);
+    static sptr<PictureInPictureControllerBase> GetPipControllerInfo(int32_t windowId);
 
     static bool HasActiveController();
-    static bool IsActiveController(wptr<PictureInPictureController> pipController);
-    static void SetActiveController(sptr<PictureInPictureController> pipController);
-    static void RemoveActiveController(wptr<PictureInPictureController> pipController);
+    static bool IsActiveController(wptr<PictureInPictureControllerBase> pipController);
+    static void SetActiveController(sptr<PictureInPictureControllerBase> pipController);
+    static void RemoveActiveController(wptr<PictureInPictureControllerBase> pipController);
     static void AttachAutoStartController(int32_t handleId, wptr<PictureInPictureController> pipController);
     static void DetachAutoStartController(int32_t handleId, wptr<PictureInPictureController> pipController);
     static bool IsAttachedToSameWindow(uint32_t windowId);
@@ -54,18 +54,19 @@ public:
     static void PipSizeChange(double width, double height, double scale);
     static void AutoStartPipWindow();
     static void DoDestroy();
+    static bool GetPipEnabled();
     static std::shared_ptr<NativeReference> innerCallbackRef_;
 
 private:
-    static sptr<PictureInPictureController> GetActiveController() { return activeController_; }
-    
+    static sptr<PictureInPictureControllerBase> GetActiveController() { return activeController_; }
+
     // controller in use
-    static sptr<PictureInPictureController> activeController_;
+    static sptr<PictureInPictureControllerBase> activeController_;
     static wptr<PictureInPictureController> autoStartController_;
     // controllers enable auto start
     static std::map<int32_t, wptr<PictureInPictureController>> autoStartControllerMap_;
 
-    static std::map<int32_t, sptr<PictureInPictureController>> windowToControllerMap_;
+    static std::map<int32_t, sptr<PictureInPictureControllerBase>> windowToControllerMap_;
 };
 } // namespace Rosen
 } // namespace OHOS

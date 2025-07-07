@@ -89,7 +89,7 @@ static std::unique_ptr<CPickInfo> CreatePickerObject(const std::unique_ptr<Param
     return pickInfo;
 }
 
-static RetStruct Resolve(std::unique_ptr<Param>& param, RetStruct ret)
+static bool CheckWretParam(std::unique_ptr<Param>& param, RetStruct ret)
 {
     bool isThrowError = true;
     switch (param->wret) {
@@ -113,7 +113,13 @@ static RetStruct Resolve(std::unique_ptr<Param>& param, RetStruct ret)
             ret.code = static_cast<int32_t>(DmErrorCode::DM_OK);
             break;
     }
+    return isThrowError;
+}
+
+static RetStruct Resolve(std::unique_ptr<Param>& param, RetStruct ret)
+{
     TLOGI(WmsLogTag::WMS_SCB, "screen shot ret=%{public}d.", param->wret);
+    bool isThrowError = CheckWretParam(param, ret);
     if (isThrowError) {
         return ret;
     }
@@ -124,8 +130,12 @@ static RetStruct Resolve(std::unique_ptr<Param>& param, RetStruct ret)
     }
     if (param->isPick) {
         TLOGI(WmsLogTag::WMS_SCB, "Resolve Screenshot by picker");
-        std::unique_ptr<CPickInfo> pickInfoPtr(CreatePickerObject(param));
-        ret.data = static_cast<void*>(pickInfoPtr.get());
+        auto pickInfo = CreatePickerObject(param);
+        if (pickInfo == nullptr) {
+            ret.code = static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM);
+            return ret;
+        }
+        ret.data = pickInfo.release();
         return ret;
     }
     TLOGI(WmsLogTag::WMS_SCB, "Screenshot image Width %{public}d, Height %{public}d",

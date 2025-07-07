@@ -31,6 +31,16 @@ namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenSessionManagerClientTest"};
 }
+
+namespace {
+    std::string logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
+        const char* msg)
+    {
+        logMsg = msg;
+    }
+}
+
 class DmPrivateWindowListener : public DisplayManager::IPrivateWindowListener {
 public:
     void OnPrivateWindow(bool hasPrivate) {WLOGFI("IPrivateWindowListener hasPrivatewindow: %{public}u", hasPrivate);}
@@ -56,6 +66,14 @@ public:
 private:
     std::function<void(std::vector<std::string>)> callback_;
 };
+
+class MockDisplayChangeListener : public IDisplayChangeListener {
+public:
+    virtual void OnDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> info,
+        const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type) { return; }
+    virtual void OnScreenshot(DisplayId displayId) { return; }
+};
+
 class ScreenSessionManagerClientTest : public testing::Test {
 public:
     void SetUp() override;
@@ -779,6 +797,45 @@ HWTEST_F(ScreenSessionManagerClientTest, OnGetSurfaceNodeIdsFromMissionIdsChange
 }
 
 /**
+ * @tc.name: OnSetSurfaceNodeIdsChanged01
+ * @tc.desc: OnSetSurfaceNodeIdsChanged test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, OnSetSurfaceNodeIdsChanged01, TestSize.Level1)
+{
+    sptr<ScreenSessionManagerClient> client = sptr<ScreenSessionManagerClient>::MakeSptr();
+    ASSERT_NE(nullptr, client);
+
+    DisplayId displayId = 0;
+    std::vector<uint64_t> surfaceNodeIds = { 100, 101 };
+    sptr<MockDisplayChangeListener> listener = sptr<MockDisplayChangeListener>::MakeSptr();
+    client->displayChangeListener_ = listener;
+    client->OnSetSurfaceNodeIdsChanged(displayId, surfaceNodeIds);
+
+    client->displayChangeListener_ = nullptr;
+    client->OnSetSurfaceNodeIdsChanged(displayId, surfaceNodeIds);
+}
+
+/**
+ * @tc.name: OnVirtualScreenDisconnected01
+ * @tc.desc: OnVirtualScreenDisconnected test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, OnVirtualScreenDisconnected01, TestSize.Level1)
+{
+    sptr<ScreenSessionManagerClient> client = sptr<ScreenSessionManagerClient>::MakeSptr();
+    ASSERT_NE(nullptr, client);
+
+    DisplayId displayId = 0;
+    sptr<MockDisplayChangeListener> listener = sptr<MockDisplayChangeListener>::MakeSptr();
+    client->displayChangeListener_ = listener;
+    client->OnVirtualScreenDisconnected(displayId);
+
+    client->displayChangeListener_ = nullptr;
+    client->OnVirtualScreenDisconnected(displayId);
+}
+
+/**
  * @tc.name: OnScreenshot01
  * @tc.desc: OnScreenshot test
  * @tc.type: FUNC
@@ -1407,6 +1464,303 @@ HWTEST_F(ScreenSessionManagerClientTest, ScreenCaptureNotify, TestSize.Level1)
     std::string clientName = "test";
     ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
     screenSessionManagerClient_->ScreenCaptureNotify(screenId, uid, clientName);
+}
+
+/**
+ * @tc.name: HandleScreenConnection
+ * @tc.desc: HandleScreenConnection test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, HandleScreenConnection, TestSize.Level2)
+{
+    SessionOption option1 = {
+        .rsId_ = -1ULL,
+    };
+    screenSessionManagerClient_->HandleScreenConnection(option1);
+
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    auto screenId = screenSessionManagerClient_->screenSessionManager_->
+        CreateVirtualScreen(virtualOption, nullptr);
+    SessionOption option2 = {
+        .name_ = "HiCar",
+        .screenId_ = screenId,
+    };
+    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+    screenSessionManagerClient_->HandleScreenConnection(option2);
+}
+
+/**
+ * @tc.name: HandleScreenDisconnection
+ * @tc.desc: HandleScreenDisconnection test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, HandleScreenDisconnection, TestSize.Level2)
+{
+    sptr<ScreenSessionManagerClient> client = new ScreenSessionManagerClient();
+    ASSERT_TRUE(client != nullptr);
+
+    sptr<ScreenSession> screenSession1 = new ScreenSession(50, ScreenProperty(), 0);
+    ASSERT_NE(nullptr, screenSession1);
+    client->screenSessionMap_[50] = screenSession1;
+
+    SessionOption option = {
+        .screenId_ = 50,
+    };
+    client->HandleScreenDisconnection(option);
+    SessionOption option1 = {
+        .screenId_ = 51,
+    };
+    ASSERT_TRUE(client != nullptr);
+    client->HandleScreenDisconnection(option1);
+}
+
+/**
+ * @tc.name: OnCreateScreenSessionOnly
+ * @tc.desc: OnCreateScreenSessionOnly test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, OnCreateScreenSessionOnly, TestSize.Level2)
+{
+    sptr<ScreenSessionManagerClient> client = new ScreenSessionManagerClient();
+    ASSERT_TRUE(client != nullptr);
+    client->ConnectToServer();
+
+    sptr<ScreenSession> screenSession1 = new ScreenSession(50, ScreenProperty(), 0);
+    ASSERT_NE(nullptr, screenSession1);
+    client->screenSessionMap_[50] = screenSession1;
+
+    sptr<ScreenSession> screenSession2 = nullptr;
+    client->screenSessionMap_[51] = screenSession2;
+
+    auto ret = client->OnCreateScreenSessionOnly(50, 50, "test1", true);
+    EXPECT_EQ(ret, true);
+
+    ret = client->OnCreateScreenSessionOnly(51, 51, "test2", true);
+    EXPECT_EQ(ret, true);
+
+    ret = client->OnCreateScreenSessionOnly(52, 52, "test3", true);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: OnExtendDisplayNodeChange
+ * @tc.desc: OnExtendDisplayNodeChange test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, OnExtendDisplayNodeChange, TestSize.Level2)
+{
+    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+    screenSessionManagerClient_->ConnectToServer();
+
+    RSDisplayNodeConfig config;
+    std::shared_ptr<RSDisplayNode> node = std::make_shared<RSDisplayNode>(config);
+    sptr<ScreenSession> screenSession1 = new ScreenSession(50, 50, "test1", ScreenProperty(), node);
+    ASSERT_NE(nullptr, screenSession1);
+    screenSessionManagerClient_->screenSessionMap_[50] = screenSession1;
+
+    sptr<ScreenSession> screenSession2 = new ScreenSession(51, 51, "test1", ScreenProperty(), node);
+    ASSERT_NE(nullptr, screenSession2);
+    screenSessionManagerClient_->screenSessionMap_[51] = screenSession2;
+
+    sptr<ScreenSession> screenSession3 = new ScreenSession(52, 52, "test1", ScreenProperty(), nullptr);
+    ASSERT_NE(nullptr, screenSession3);
+    screenSessionManagerClient_->screenSessionMap_[52] = screenSession3;
+
+    sptr<ScreenSession> screenSession4 = nullptr;
+    screenSessionManagerClient_->screenSessionMap_[53] = screenSession4;
+
+    auto ret = screenSessionManagerClient_->OnExtendDisplayNodeChange(50, 53);
+    EXPECT_EQ(ret, false);
+
+    ret = screenSessionManagerClient_->OnExtendDisplayNodeChange(53, 50);
+    EXPECT_EQ(ret, false);
+
+    ret = screenSessionManagerClient_->OnExtendDisplayNodeChange(50, 52);
+    EXPECT_EQ(ret, false);
+
+    ret = screenSessionManagerClient_->OnExtendDisplayNodeChange(52, 52);
+    EXPECT_EQ(ret, false);
+
+    ret = screenSessionManagerClient_->OnExtendDisplayNodeChange(52, 50);
+    EXPECT_EQ(ret, false);
+
+    ret = screenSessionManagerClient_->OnExtendDisplayNodeChange(51, 50);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: OnMainDisplayNodeChange
+ * @tc.desc: OnMainDisplayNodeChange test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, OnMainDisplayNodeChange, TestSize.Level2)
+{
+    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+    screenSessionManagerClient_->ConnectToServer();
+
+    RSDisplayNodeConfig config;
+    std::shared_ptr<RSDisplayNode> node1 = std::make_shared<RSDisplayNode>(config);
+    std::shared_ptr<RSDisplayNode> node2 = std::make_shared<RSDisplayNode>(config);
+    sptr<ScreenSession> screenSession1 = new ScreenSession(50, 50, "test1", ScreenProperty(), node1);
+    ASSERT_NE(nullptr, screenSession1);
+    screenSessionManagerClient_->screenSessionMap_[50] = screenSession1;
+
+    sptr<ScreenSession> screenSession2 = new ScreenSession(51, 51, "test1", ScreenProperty(), node2);
+    ASSERT_NE(nullptr, screenSession2);
+    screenSessionManagerClient_->screenSessionMap_[51] = screenSession2;
+
+    sptr<ScreenSession> screenSession3 = new ScreenSession(52, 52, "test1", ScreenProperty(), nullptr);
+    ASSERT_NE(nullptr, screenSession3);
+    screenSessionManagerClient_->screenSessionMap_[52] = screenSession3;
+
+    sptr<ScreenSession> screenSession4 = nullptr;
+    screenSessionManagerClient_->screenSessionMap_[53] = screenSession4;
+
+    auto ret = screenSessionManagerClient_->OnMainDisplayNodeChange(53, 50, 50);
+    EXPECT_EQ(ret, false);
+
+    ret = screenSessionManagerClient_->OnMainDisplayNodeChange(50, 52, 52);
+    EXPECT_EQ(ret, false);
+
+    ret = screenSessionManagerClient_->OnMainDisplayNodeChange(52, 50, 50);
+    EXPECT_EQ(ret, false);
+
+    ret = screenSessionManagerClient_->OnMainDisplayNodeChange(52, 52, 52);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: SetScreenCombination
+ * @tc.desc: SetScreenCombination test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, SetScreenCombination, TestSize.Level2)
+{
+    sptr<ScreenSessionManagerClient> client = new ScreenSessionManagerClient();
+    ASSERT_TRUE(client != nullptr);
+    client->ConnectToServer();
+
+    sptr<ScreenSession> screenSession1 = new ScreenSession(50, ScreenProperty(), 0);
+    ASSERT_NE(nullptr, screenSession1);
+    client->screenSessionMap_[50] = screenSession1;
+
+    sptr<ScreenSession> screenSession2 = nullptr;
+    client->screenSessionMap_[51] = screenSession2;
+
+    ScreenCombination combination = ScreenCombination::SCREEN_EXPAND;
+
+    client->SetScreenCombination(51, 50, combination);
+    client->SetScreenCombination(50, 51, combination);
+    client->SetScreenCombination(50, 50, combination);
+    EXPECT_NE(client, nullptr);
+}
+
+/**
+ * @tc.name: ExtraDestroyScreen
+ * @tc.desc: ExtraDestroyScreen test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, ExtraDestroyScreen, TestSize.Level2)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    sptr<ScreenSessionManagerClient> client = new ScreenSessionManagerClient();
+    ASSERT_TRUE(client != nullptr);
+    client->ConnectToServer();
+
+    ScreenId screenId = 1;
+    sptr<ScreenSession> screenSession1 = new ScreenSession(screenId, ScreenProperty(), 0);
+    ASSERT_NE(nullptr, screenSession1);
+    client->extraScreenSessionMap_.emplace(screenId, screenSession1);
+
+    ScreenId screenId11 = 11;
+    client->extraScreenSessionMap_.emplace(screenId11, nullptr);
+    client->ExtraDestroyScreen(screenId11);
+    EXPECT_TRUE(logMsg.find("extra screenSession is null") != std::string::npos);
+}
+
+/**
+ * @tc.name: OnDumperClientScreenSessions
+ * @tc.desc: OnDumperClientScreenSessions test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, OnDumperClientScreenSessions, TestSize.Level2)
+{
+    sptr<ScreenSessionManagerClient> client = new ScreenSessionManagerClient();
+    ASSERT_TRUE(client != nullptr);
+    client->ConnectToServer();
+
+    RSDisplayNodeConfig config;
+    std::shared_ptr<RSDisplayNode> node = std::make_shared<RSDisplayNode>(config);
+    sptr<ScreenSession> screenSession1 = new ScreenSession(50, 50, "test1", ScreenProperty(), node);
+    ASSERT_NE(nullptr, screenSession1);
+    client->screenSessionMap_[50] = screenSession1;
+
+    sptr<ScreenSession> screenSession3 = new ScreenSession(52, 52, "test1", ScreenProperty(), nullptr);
+    ASSERT_NE(nullptr, screenSession3);
+    client->screenSessionMap_[52] = screenSession3;
+
+    sptr<ScreenSession> screenSession4 = nullptr;
+    client->screenSessionMap_[53] = screenSession4;
+
+    auto ret = client->OnDumperClientScreenSessions();
+    EXPECT_EQ(ret.empty(), false);
+}
+
+/**
+ * @tc.name: OnBeforeScreenPropertyChanged
+ * @tc.desc: OnBeforeScreenPropertyChanged test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, OnBeforeScreenPropertyChanged, TestSize.Level2)
+{
+    sptr<ScreenSessionManagerClient> client = new ScreenSessionManagerClient();
+    client->ConnectToServer();
+    ASSERT_TRUE(client != nullptr);
+
+    RSDisplayNodeConfig config;
+    std::shared_ptr<RSDisplayNode> node = std::make_shared<RSDisplayNode>(config);
+    sptr<ScreenSession> screenSession1 = new ScreenSession(50, 50, "test1", ScreenProperty(), node);
+    ASSERT_NE(nullptr, screenSession1);
+    client->screenSessionMap_[50] = screenSession1;
+
+    sptr<ScreenSession> screenSession3 = new ScreenSession(52, 52, "test1", ScreenProperty(), nullptr);
+    ASSERT_NE(nullptr, screenSession3);
+    client->screenSessionMap_[52] = screenSession3;
+
+    sptr<ScreenSession> screenSession4 = nullptr;
+    client->screenSessionMap_[53] = screenSession4;
+
+    FoldStatus foldStatus = FoldStatus::UNKNOWN;
+    client->OnBeforeScreenPropertyChanged(foldStatus);
+    EXPECT_NE(client, nullptr);
+}
+
+/**
+ * @tc.name: SetPrimaryDisplaySystemDpi
+ * @tc.desc: SetPrimaryDisplaySystemDpi test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, SetPrimaryDisplaySystemDpi, TestSize.Level2)
+{
+    sptr<ScreenSessionManagerClient> client = new ScreenSessionManagerClient();
+    ASSERT_TRUE(client != nullptr);
+    client->ConnectToServer();
+
+    RSDisplayNodeConfig config;
+    std::shared_ptr<RSDisplayNode> node = std::make_shared<RSDisplayNode>(config);
+    sptr<ScreenSession> screenSession = new ScreenSession(50, 50, "SetPrimaryDisplaySystemDpi", ScreenProperty(), node);
+    ASSERT_NE(nullptr, screenSession);
+    float dpi = 2.125f;
+    screenSession->SetDensityInCurResolution(dpi);
+    screenSession->SetIsExtend(false);
+    client->screenSessionMap_[0] = screenSession;
+    EXPECT_EQ(screenSession->GetDensityInCurResolution(), 2.125f);
+    dpi = 2.2f;
+    client->SetPrimaryDisplaySystemDpi(dpi);
+    EXPECT_EQ(DisplayManager::GetInstance().GetPrimaryDisplaySystemDpi(), 2.2f);
 }
 } // namespace Rosen
 } // namespace OHOS

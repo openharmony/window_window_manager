@@ -43,17 +43,14 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+
 private:
     std::shared_ptr<DistributedClient> distributedClient_;
 };
 
-void DistributedClientTest::SetUpTestCase()
-{
-}
+void DistributedClientTest::SetUpTestCase() {}
 
-void DistributedClientTest::TearDownTestCase()
-{
-}
+void DistributedClientTest::TearDownTestCase() {}
 
 void DistributedClientTest::SetUp()
 {
@@ -119,7 +116,7 @@ HWTEST_F(DistributedClientTest, GetMissionInfos03, TestSize.Level1)
     MockMessageParcel::ClearAllErrorFlag();
     GTEST_LOG_(INFO) << "DistributedClientTest GetMissionInfos03 end.";
 }
-}
+} // namespace
 
 /**
  * @tc.name: GetRemoteMissionSnapshotInfo
@@ -237,5 +234,5 @@ HWTEST_F(DistributedClientTest, SetMissionContinueState03, TestSize.Level1)
     MockMessageParcel::ClearAllErrorFlag();
     GTEST_LOG_(INFO) << "DistributedClientTest SetMissionContinueState03 end.";
 }
-}
-}
+} // namespace Rosen
+} // namespace OHOS

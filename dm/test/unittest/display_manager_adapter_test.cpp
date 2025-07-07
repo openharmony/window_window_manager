@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,18 +14,18 @@
  */
 
 #include <gtest/gtest.h>
-#include "display_manager_adapter.h"
+
 #include "display_manager.h"
-#include "screen_manager.h"
+#include "display_manager_adapter.h"
 #include "display_manager_proxy.h"
-#include "window_scene.h"
 #include "scene_board_judgement.h"
+#include "screen_manager.h"
+#include "window_scene.h"
 
 using namespace testing;
 using namespace testing::ext;
 
-namespace OHOS {
-namespace Rosen {
+namespace OHOS::Rosen {
 class DisplayManagerAdapterTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -51,6 +51,10 @@ void DisplayManagerAdapterTest::TearDown()
 }
 
 namespace {
+static constexpr DisplayId DEFAULT_DISPLAY = 1ULL;
+static const int32_t PIXELMAP_SIZE = 2;
+static const int32_t SDR_PIXELMAP = 0;
+static const int32_t HDR_PIXELMAP = 1;
 /**
  * @tc.name: GetDisplayInfo
  * @tc.desc: test nullptr
@@ -109,7 +113,6 @@ HWTEST_F(DisplayManagerAdapterTest, GetScreenSupportedColorGamuts, TestSize.Leve
  */
 HWTEST_F(DisplayManagerAdapterTest, SetScreenColorGamut, TestSize.Level1)
 {
-    std::vector<ScreenColorGamut> colorGamuts;
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetScreenColorGamut(0, -1);
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(err, DMError::DM_ERROR_RENDER_SERVICE_FAILED);
@@ -143,11 +146,7 @@ HWTEST_F(DisplayManagerAdapterTest, GetScreenGamutMap, TestSize.Level1)
 {
     ScreenGamutMap gamutMap;
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().GetScreenGamutMap(0, gamutMap);
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(err, DMError::DM_ERROR_RENDER_SERVICE_FAILED);
-    } else {
-        ASSERT_EQ(err, DMError::DM_ERROR_RENDER_SERVICE_FAILED);
-    }
+    ASSERT_EQ(err, DMError::DM_ERROR_RENDER_SERVICE_FAILED);
 }
 
 /**
@@ -158,11 +157,7 @@ HWTEST_F(DisplayManagerAdapterTest, GetScreenGamutMap, TestSize.Level1)
 HWTEST_F(DisplayManagerAdapterTest, SetScreenGamutMap, TestSize.Level1)
 {
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetScreenGamutMap(0, GAMUT_MAP_CONSTANT);
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(err, DMError::DM_ERROR_RENDER_SERVICE_FAILED);
-    } else {
-        ASSERT_EQ(err, DMError::DM_ERROR_RENDER_SERVICE_FAILED);
-    }
+    ASSERT_EQ(err, DMError::DM_ERROR_RENDER_SERVICE_FAILED);
 }
 
 /**
@@ -173,11 +168,7 @@ HWTEST_F(DisplayManagerAdapterTest, SetScreenGamutMap, TestSize.Level1)
 HWTEST_F(DisplayManagerAdapterTest, SetScreenColorTransform, TestSize.Level1)
 {
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetScreenColorTransform(0);
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(err, DMError::DM_OK);
-    } else {
-        ASSERT_EQ(err, DMError::DM_OK);
-    }
+    ASSERT_EQ(err, DMError::DM_OK);
 }
 
 /**
@@ -238,13 +229,18 @@ HWTEST_F(DisplayManagerAdapterTest, OnRemoteDied, TestSize.Level1)
  */
 HWTEST_F(DisplayManagerAdapterTest, OnRemoteDied01, TestSize.Level1)
 {
-    sptr<IRemoteObject::DeathRecipient> dmsDeath_ = nullptr;
-    dmsDeath_ = new(std::nothrow) DMSDeathRecipient(SingletonContainer::Get<ScreenManagerAdapter>());
+    sptr<IRemoteObject::DeathRecipient> dmsDeath =
+        new (std::nothrow) DMSDeathRecipient(SingletonContainer::Get<ScreenManagerAdapter>());
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    sptr<IRemoteObject> obj = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
-    wptr<IRemoteObject> wptrDeath = obj;
-    dmsDeath_->OnRemoteDied(wptrDeath);
-    EXPECT_NE(nullptr, dmsDeath_);
+    sptr<IRemoteObject> remoteObject;
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        remoteObject = SingletonContainer::Get<ScreenManagerAdapter>().screenSessionManagerServiceProxy_->AsObject();
+    } else {
+        remoteObject = SingletonContainer::Get<DisplayManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    }
+    wptr<IRemoteObject> wptrDeath = remoteObject;
+    dmsDeath->OnRemoteDied(wptrDeath);
+    EXPECT_NE(nullptr, dmsDeath);
 }
 
 /**
@@ -254,9 +250,15 @@ HWTEST_F(DisplayManagerAdapterTest, OnRemoteDied01, TestSize.Level1)
  */
 HWTEST_F(DisplayManagerAdapterTest, Clear, TestSize.Level1)
 {
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    SingletonContainer::Get<ScreenManagerAdapter>().Clear();
-    ASSERT_FALSE(SingletonContainer::Get<ScreenManagerAdapter>().isProxyValid_);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+        SingletonContainer::Get<ScreenManagerAdapter>().Clear();
+        ASSERT_FALSE(SingletonContainer::Get<ScreenManagerAdapter>().isProxyValid_);
+    } else {
+        SingletonContainer::Get<DisplayManagerAdapter>().InitDMSProxy();
+        SingletonContainer::Get<DisplayManagerAdapter>().Clear();
+        ASSERT_FALSE(SingletonContainer::Get<DisplayManagerAdapter>().isProxyValid_);
+    }
 }
 
 /**
@@ -266,10 +268,17 @@ HWTEST_F(DisplayManagerAdapterTest, Clear, TestSize.Level1)
  */
 HWTEST_F(DisplayManagerAdapterTest, Clear01, TestSize.Level1)
 {
-    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
-    SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_ = nullptr;
-    SingletonContainer::Get<ScreenManagerAdapter>().Clear();
-    ASSERT_FALSE(SingletonContainer::Get<ScreenManagerAdapter>().isProxyValid_);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+        SingletonContainer::Get<ScreenManagerAdapter>().screenSessionManagerServiceProxy_ = nullptr;
+        SingletonContainer::Get<ScreenManagerAdapter>().Clear();
+        ASSERT_FALSE(SingletonContainer::Get<ScreenManagerAdapter>().isProxyValid_);
+    } else {
+        SingletonContainer::Get<DisplayManagerAdapter>().InitDMSProxy();
+        SingletonContainer::Get<DisplayManagerAdapter>().displayManagerServiceProxy_ = nullptr;
+        SingletonContainer::Get<DisplayManagerAdapter>().Clear();
+        ASSERT_FALSE(SingletonContainer::Get<DisplayManagerAdapter>().isProxyValid_);
+    }
 }
 
 /**
@@ -280,10 +289,10 @@ HWTEST_F(DisplayManagerAdapterTest, Clear01, TestSize.Level1)
 HWTEST_F(DisplayManagerAdapterTest, DisableMirror, TestSize.Level1)
 {
     DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().DisableMirror(false);
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(DMError::DM_OK, ret);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(ret, DMError::DM_ERROR_INVALID_PERMISSION);
     } else {
-        ASSERT_NE(DMError::DM_OK, ret);
+        ASSERT_EQ(ret, DMError::DM_OK);
     }
 }
 
@@ -310,10 +319,10 @@ HWTEST_F(DisplayManagerAdapterTest, HasImmersiveWindow, TestSize.Level1)
  */
 HWTEST_F(DisplayManagerAdapterTest, GetPixelFormat, TestSize.Level1)
 {
-    GraphicPixelFormat pixelFormat = GraphicPixelFormat{GRAPHIC_PIXEL_FMT_CLUT8};
+    GraphicPixelFormat pixelFormat = GraphicPixelFormat::GRAPHIC_PIXEL_FMT_CLUT8;
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().GetPixelFormat(0, pixelFormat);
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
+        ASSERT_EQ(err, DMError::DM_ERROR_DEVICE_NOT_SUPPORT);
     } else {
         ASSERT_EQ(err, DMError::DM_OK);
     }
@@ -326,10 +335,10 @@ HWTEST_F(DisplayManagerAdapterTest, GetPixelFormat, TestSize.Level1)
  */
 HWTEST_F(DisplayManagerAdapterTest, SetPixelFormat, TestSize.Level1)
 {
-    GraphicPixelFormat pixelFormat = GraphicPixelFormat{GRAPHIC_PIXEL_FMT_CLUT8};
+    GraphicPixelFormat pixelFormat = GraphicPixelFormat::GRAPHIC_PIXEL_FMT_CLUT8;
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetPixelFormat(0, pixelFormat);
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
+        ASSERT_EQ(err, DMError::DM_ERROR_DEVICE_NOT_SUPPORT);
     } else {
         ASSERT_EQ(err, DMError::DM_OK);
     }
@@ -345,7 +354,7 @@ HWTEST_F(DisplayManagerAdapterTest, GetSupportedHDRFormats, TestSize.Level1)
     std::vector<ScreenHDRFormat> hdrFormats;
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().GetSupportedHDRFormats(0, hdrFormats);
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
+        ASSERT_EQ(err, DMError::DM_ERROR_DEVICE_NOT_SUPPORT);
     } else {
         ASSERT_EQ(err, DMError::DM_OK);
     }
@@ -358,10 +367,10 @@ HWTEST_F(DisplayManagerAdapterTest, GetSupportedHDRFormats, TestSize.Level1)
  */
 HWTEST_F(DisplayManagerAdapterTest, GetScreenHDRFormat, TestSize.Level1)
 {
-    ScreenHDRFormat hdrFormat = ScreenHDRFormat{NOT_SUPPORT_HDR};
+    ScreenHDRFormat hdrFormat = ScreenHDRFormat::NOT_SUPPORT_HDR;
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().GetScreenHDRFormat(0, hdrFormat);
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
+        ASSERT_EQ(err, DMError::DM_ERROR_DEVICE_NOT_SUPPORT);
     } else {
         ASSERT_EQ(err, DMError::DM_OK);
     }
@@ -376,7 +385,7 @@ HWTEST_F(DisplayManagerAdapterTest, SetScreenHDRFormat, TestSize.Level1)
 {
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetScreenHDRFormat(0, 0);
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
+        ASSERT_EQ(err, DMError::DM_ERROR_DEVICE_NOT_SUPPORT);
     } else {
         ASSERT_EQ(err, DMError::DM_OK);
     }
@@ -392,7 +401,7 @@ HWTEST_F(DisplayManagerAdapterTest, GetSupportedColorSpaces, TestSize.Level1)
     std::vector<GraphicCM_ColorSpaceType> colorSpaces;
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().GetSupportedColorSpaces(0, colorSpaces);
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
+        ASSERT_EQ(err, DMError::DM_ERROR_DEVICE_NOT_SUPPORT);
     } else {
         ASSERT_EQ(err, DMError::DM_OK);
     }
@@ -405,10 +414,10 @@ HWTEST_F(DisplayManagerAdapterTest, GetSupportedColorSpaces, TestSize.Level1)
  */
 HWTEST_F(DisplayManagerAdapterTest, GetScreenColorSpace, TestSize.Level1)
 {
-    GraphicCM_ColorSpaceType colorSpace = GraphicCM_ColorSpaceType{GRAPHIC_CM_COLORSPACE_NONE};
+    GraphicCM_ColorSpaceType colorSpace = GraphicCM_ColorSpaceType::GRAPHIC_CM_COLORSPACE_NONE;
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().GetScreenColorSpace(0, colorSpace);
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
+        ASSERT_EQ(err, DMError::DM_ERROR_DEVICE_NOT_SUPPORT);
     } else {
         ASSERT_EQ(err, DMError::DM_OK);
     }
@@ -421,10 +430,10 @@ HWTEST_F(DisplayManagerAdapterTest, GetScreenColorSpace, TestSize.Level1)
  */
 HWTEST_F(DisplayManagerAdapterTest, SetScreenColorSpace, TestSize.Level1)
 {
-    GraphicCM_ColorSpaceType colorSpace = GraphicCM_ColorSpaceType{GRAPHIC_CM_COLORSPACE_NONE};
+    GraphicCM_ColorSpaceType colorSpace = GraphicCM_ColorSpaceType::GRAPHIC_CM_COLORSPACE_NONE;
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetScreenColorSpace(0, colorSpace);
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
+        ASSERT_EQ(err, DMError::DM_ERROR_DEVICE_NOT_SUPPORT);
     } else {
         ASSERT_EQ(err, DMError::DM_ERROR_RENDER_SERVICE_FAILED);
     }
@@ -437,7 +446,7 @@ HWTEST_F(DisplayManagerAdapterTest, SetScreenColorSpace, TestSize.Level1)
  */
 HWTEST_F(DisplayManagerAdapterTest, DestroyVirtualScreen, TestSize.Level1)
 {
-    VirtualScreenOption defaultOption = {"virtualScreen01", 480, 320, 2.0, nullptr, 0};
+    VirtualScreenOption defaultOption = { "virtualScreen01", 480, 320, 2.0, nullptr, 0 };
     ScreenId id = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption);
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().DestroyVirtualScreen(id);
     ASSERT_EQ(err, DMError::DM_OK);
@@ -452,7 +461,7 @@ HWTEST_F(DisplayManagerAdapterTest, SetVirtualMirrorScreenCanvasRotation, TestSi
 {
     bool canvasRotation = false;
     DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().
-                    SetVirtualMirrorScreenCanvasRotation(0, canvasRotation);
+        SetVirtualMirrorScreenCanvasRotation(0, canvasRotation);
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(ret, DMError::DM_OK);
     } else {
@@ -499,8 +508,8 @@ HWTEST_F(DisplayManagerAdapterTest, IsScreenRotationLocked, TestSize.Level1)
  */
 HWTEST_F(DisplayManagerAdapterTest, SetSpecifiedScreenPower, TestSize.Level1)
 {
-    ScreenPowerState state = ScreenPowerState{0};
-    PowerStateChangeReason reason = PowerStateChangeReason{0};
+    ScreenPowerState state = ScreenPowerState::POWER_ON;
+    PowerStateChangeReason reason = PowerStateChangeReason::POWER_BUTTON;
     bool ret = SingletonContainer::Get<ScreenManagerAdapter>().SetSpecifiedScreenPower(0, state, reason);
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_TRUE(ret);
@@ -516,13 +525,9 @@ HWTEST_F(DisplayManagerAdapterTest, SetSpecifiedScreenPower, TestSize.Level1)
  */
 HWTEST_F(DisplayManagerAdapterTest, SetOrientation, TestSize.Level1)
 {
-    Orientation orientation = Orientation{0};
+    Orientation orientation = Orientation::BEGIN;
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetOrientation(0, orientation);
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(err, DMError::DM_OK);
-    } else {
-        ASSERT_EQ(err, DMError::DM_OK);
-    }
+    ASSERT_EQ(err, DMError::DM_OK);
 }
 
 /**
@@ -532,13 +537,9 @@ HWTEST_F(DisplayManagerAdapterTest, SetOrientation, TestSize.Level1)
  */
 HWTEST_F(DisplayManagerAdapterTest, WakeUpBegin, TestSize.Level1)
 {
-    PowerStateChangeReason reason = PowerStateChangeReason{0};
+    PowerStateChangeReason reason = PowerStateChangeReason::POWER_BUTTON;
     bool ret = SingletonContainer::Get<DisplayManagerAdapter>().WakeUpBegin(reason);
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_TRUE(ret);
-    } else {
-        ASSERT_TRUE(ret);
-    }
+    ASSERT_TRUE(ret);
 }
 
 /**
@@ -549,11 +550,7 @@ HWTEST_F(DisplayManagerAdapterTest, WakeUpBegin, TestSize.Level1)
 HWTEST_F(DisplayManagerAdapterTest, WakeUpEnd, TestSize.Level1)
 {
     bool ret = SingletonContainer::Get<DisplayManagerAdapter>().WakeUpEnd();
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_TRUE(ret);
-    } else {
-        ASSERT_TRUE(ret);
-    }
+    ASSERT_TRUE(ret);
 }
 
 /**
@@ -563,13 +560,9 @@ HWTEST_F(DisplayManagerAdapterTest, WakeUpEnd, TestSize.Level1)
  */
 HWTEST_F(DisplayManagerAdapterTest, SuspendBegin, TestSize.Level1)
 {
-    PowerStateChangeReason reason = PowerStateChangeReason{0};
+    PowerStateChangeReason reason = PowerStateChangeReason::POWER_BUTTON;
     bool ret = SingletonContainer::Get<DisplayManagerAdapter>().SuspendBegin(reason);
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_TRUE(ret);
-    } else {
-        ASSERT_TRUE(ret);
-    }
+    ASSERT_TRUE(ret);
 }
 
 /**
@@ -580,11 +573,7 @@ HWTEST_F(DisplayManagerAdapterTest, SuspendBegin, TestSize.Level1)
 HWTEST_F(DisplayManagerAdapterTest, SuspendEnd, TestSize.Level1)
 {
     bool ret = SingletonContainer::Get<DisplayManagerAdapter>().SuspendEnd();
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_TRUE(ret);
-    } else {
-        ASSERT_TRUE(ret);
-    }
+    ASSERT_TRUE(ret);
 }
 
 /**
@@ -594,7 +583,7 @@ HWTEST_F(DisplayManagerAdapterTest, SuspendEnd, TestSize.Level1)
  */
 HWTEST_F(DisplayManagerAdapterTest, SetDisplayState, TestSize.Level1)
 {
-    DisplayState state = DisplayState{1};
+    DisplayState state = DisplayState::OFF;
     bool ret = SingletonContainer::Get<DisplayManagerAdapter>().SetDisplayState(state);
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_TRUE(ret);
@@ -610,8 +599,7 @@ HWTEST_F(DisplayManagerAdapterTest, MakeMirror, TestSize.Level1)
 {
     std::vector<ScreenId> mirrorScreenId;
     ScreenId screenGroupId;
-    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().MakeMirror(0,
-        mirrorScreenId, screenGroupId);
+    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().MakeMirror(0, mirrorScreenId, screenGroupId);
     ASSERT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
 }
 
@@ -635,13 +623,8 @@ HWTEST_F(DisplayManagerAdapterTest, StopMirror, TestSize.Level1)
 HWTEST_F(DisplayManagerAdapterTest, HasPrivateWindow, TestSize.Level1)
 {
     bool hasPrivateWindow = false;
-    DMError err = SingletonContainer::Get<DisplayManagerAdapter>().HasPrivateWindow(0,
-        hasPrivateWindow);
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(DMError::DM_OK, err);
-    } else {
-        ASSERT_EQ(DMError::DM_OK, err);
-    }
+    DMError err = SingletonContainer::Get<DisplayManagerAdapter>().HasPrivateWindow(0, hasPrivateWindow);
+    ASSERT_EQ(DMError::DM_OK, err);
 }
 
 /**
@@ -651,11 +634,11 @@ HWTEST_F(DisplayManagerAdapterTest, HasPrivateWindow, TestSize.Level1)
  */
 HWTEST_F(DisplayManagerAdapterTest, AddSurfaceNodeToDisplay, TestSize.Level1)
 {
-    std::shared_ptr<class RSSurfaceNode> surfaceNode;
-    DMError err = SingletonContainer::Get<DisplayManagerAdapter>().AddSurfaceNodeToDisplay(0,
-        surfaceNode);
+    RSSurfaceNodeConfig rsSurfaceNodeConfig;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = std::make_shared<RSSurfaceNode>(rsSurfaceNodeConfig, true, 0);
+    DMError err = SingletonContainer::Get<DisplayManagerAdapter>().AddSurfaceNodeToDisplay(0, surfaceNode);
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(DMError::DM_ERROR_IPC_FAILED, err);
+        ASSERT_EQ(DMError::DM_ERROR_NULLPTR, err);
     } else {
         ASSERT_EQ(DMError::DM_OK, err);
     }
@@ -668,11 +651,11 @@ HWTEST_F(DisplayManagerAdapterTest, AddSurfaceNodeToDisplay, TestSize.Level1)
  */
 HWTEST_F(DisplayManagerAdapterTest, RemoveSurfaceNodeFromDisplay, TestSize.Level1)
 {
-    std::shared_ptr<class RSSurfaceNode> surfaceNode;
-    DMError err = SingletonContainer::Get<DisplayManagerAdapter>().RemoveSurfaceNodeFromDisplay(0,
-        surfaceNode);
+    RSSurfaceNodeConfig rsSurfaceNodeConfig;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = std::make_shared<RSSurfaceNode>(rsSurfaceNodeConfig, true, 0);
+    DMError err = SingletonContainer::Get<DisplayManagerAdapter>().RemoveSurfaceNodeFromDisplay(0, surfaceNode);
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(DMError::DM_ERROR_IPC_FAILED, err);
+        ASSERT_EQ(DMError::DM_ERROR_NULLPTR, err);
     } else {
         ASSERT_EQ(DMError::DM_OK, err);
     }
@@ -688,8 +671,7 @@ HWTEST_F(DisplayManagerAdapterTest, MakeExpand, TestSize.Level1)
     std::vector<ScreenId> screenId;
     std::vector<Point> startPoint;
     ScreenId screenGroupId;
-    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().MakeExpand(screenId,
-        startPoint, screenGroupId);
+    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().MakeExpand(screenId, startPoint, screenGroupId);
     ASSERT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
 }
 
@@ -760,11 +742,7 @@ HWTEST_F(DisplayManagerAdapterTest, SetResolution, TestSize.Level1)
     VirtualScreenOption defaultOption = {"virtualScreen04", 480, 320, 2.0, nullptr, 0};
     ScreenId id = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption);
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetResolution(id, 70, 100, 1);
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(err, DMError::DM_ERROR_IPC_FAILED);
-    } else {
-        ASSERT_EQ(err, DMError::DM_OK);
-    }
+    ASSERT_EQ(err, DMError::DM_OK);
     SingletonContainer::Get<ScreenManagerAdapter>().DestroyVirtualScreen(id);
 }
 
@@ -776,11 +754,7 @@ HWTEST_F(DisplayManagerAdapterTest, SetResolution, TestSize.Level1)
 HWTEST_F(DisplayManagerAdapterTest, ResizeVirtualScreen, TestSize.Level1)
 {
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().ResizeVirtualScreen(0, 70, 100);
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(err, DMError::DM_OK);
-    } else {
-        ASSERT_EQ(err, DMError::DM_OK);
-    }
+    ASSERT_EQ(err, DMError::DM_OK);
 }
 
 /**
@@ -794,7 +768,7 @@ HWTEST_F(DisplayManagerAdapterTest, MakeUniqueScreen, TestSize.Level1)
     std::vector<DisplayId> displayIds;
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().MakeUniqueScreen(screenIds, displayIds);
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(err, DMError::DM_OK);
+        ASSERT_EQ(err, DMError::DM_ERROR_DEVICE_NOT_SUPPORT);
     } else {
         ASSERT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
     }
@@ -807,7 +781,7 @@ HWTEST_F(DisplayManagerAdapterTest, MakeUniqueScreen, TestSize.Level1)
  */
 HWTEST_F(DisplayManagerAdapterTest, GetAvailableArea, TestSize.Level1)
 {
-    DMRect area;
+    DMRect area{};
     DMError err = SingletonContainer::Get<DisplayManagerAdapter>().GetAvailableArea(0, area);
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(err, DMError::DM_ERROR_DEVICE_NOT_SUPPORT);
@@ -825,7 +799,7 @@ HWTEST_F(DisplayManagerAdapterTest, GetAllDisplayPhysicalResolution, TestSize.Le
 {
     std::vector<DisplayPhysicalResolution> allSize =
         SingletonContainer::Get<DisplayManagerAdapter>().GetAllDisplayPhysicalResolution();
-    ASSERT_TRUE(!allSize.empty());
+    ASSERT_FALSE(allSize.empty());
 }
 
 /**
@@ -835,11 +809,11 @@ HWTEST_F(DisplayManagerAdapterTest, GetAllDisplayPhysicalResolution, TestSize.Le
  */
 HWTEST_F(DisplayManagerAdapterTest, SetDisplayScale, TestSize.Level1)
 {
-    DisplayManagerAdapter& displayManagerAdapter = SingletonContainer::Get<DisplayManagerAdapter>();
-    const float scaleX = 1.0f;
-    const float scaleY = 1.0f;
-    const float pivotX = 0.5f;
-    const float pivotY = 0.5f;
+    auto& displayManagerAdapter = SingletonContainer::Get<DisplayManagerAdapter>();
+    constexpr float scaleX = 1.0f;
+    constexpr float scaleY = 1.0f;
+    constexpr float pivotX = 0.5f;
+    constexpr float pivotY = 0.5f;
     sptr<DisplayInfo> displayInfo = displayManagerAdapter.GetDefaultDisplayInfo();
     ASSERT_NE(displayInfo, nullptr);
     ScreenId screenId = displayInfo->GetScreenId();
@@ -853,8 +827,7 @@ HWTEST_F(DisplayManagerAdapterTest, SetDisplayScale, TestSize.Level1)
  */
 HWTEST_F(DisplayManagerAdapterTest, GetPrimaryDisplayInfo, TestSize.Level1)
 {
-    DisplayManagerAdapter& displayManagerAdapter = SingletonContainer::Get<DisplayManagerAdapter>();
-    sptr<DisplayInfo> displayInfo = displayManagerAdapter.GetPrimaryDisplayInfo();
+    sptr<DisplayInfo> displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetPrimaryDisplayInfo();
     ASSERT_NE(displayInfo, nullptr);
 }
 
@@ -886,6 +859,132 @@ HWTEST_F(DisplayManagerAdapterTest, GetDisplayCapability, TestSize.Level1)
         ASSERT_EQ(result, DMError::DM_OK);
     }
 }
+
+/**
+ * @tc.name: GetVisibleAreaDisplayInfoById
+ * @tc.desc: Test GetVisibleAreaDisplayInfoById function with invalid displayId.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, GetVisibleAreaDisplayInfoById, TestSize.Level1)
+{
+    sptr<DisplayInfo> info =
+        SingletonContainer::Get<DisplayManagerAdapter>().GetVisibleAreaDisplayInfoById(DISPLAY_ID_INVALID);
+    EXPECT_EQ(info, nullptr);
+}
+
+/**
+ * @tc.name: GetExpandAvailableArea
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, GetExpandAvailableArea, TestSize.Level1)
+{
+    DMRect area;
+    DMError err = SingletonContainer::Get<DisplayManagerAdapter>().GetExpandAvailableArea(0, area);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(err, DMError::DM_ERROR_DEVICE_NOT_SUPPORT);
+    } else {
+        EXPECT_EQ(err, DMError::DM_OK);
+    }
+}
+
+/**
+ * @tc.name: GetDisplayHDRSnapshotWithOption001
+ * @tc.desc: GetDisplayHDRSnapshotWithOption test
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, GetDisplayHDRSnapshotWithOption001, TestSize.Level1)
+{
+    CaptureOption captureOption;
+    DmErrorCode errorCode;
+ 
+    sptr<IScreenSessionManager> screenSessionManagerServiceProxyTmp =
+        SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_;
+    SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_ = nullptr;
+    std::vector<std::shared_ptr<Media::PixelMap>> result =
+        SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayHDRSnapshotWithOption(captureOption, &errorCode);
+    SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_ =
+        screenSessionManagerServiceProxyTmp;
+    EXPECT_EQ(result.size(), PIXELMAP_SIZE);
+    EXPECT_EQ(result[SDR_PIXELMAP], nullptr);
+    EXPECT_EQ(result[HDR_PIXELMAP], nullptr);
+}
+ 
+/**
+ * @tc.name: GetDisplayHDRSnapshotWithOption002
+ * @tc.desc: GetDisplayHDRSnapshotWithOption test
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, GetDisplayHDRSnapshotWithOption002, TestSize.Level1)
+{
+    CaptureOption captureOption;
+    DmErrorCode *errorCode = nullptr;
+ 
+    sptr<IScreenSessionManager> screenSessionManagerServiceProxyTmp =
+        SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_;
+    SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_ = nullptr;
+    std::vector<std::shared_ptr<Media::PixelMap>> result =
+        SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayHDRSnapshotWithOption(captureOption, errorCode);
+    SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_ =
+        screenSessionManagerServiceProxyTmp;
+    EXPECT_EQ(result.size(), PIXELMAP_SIZE);
+    EXPECT_EQ(result[SDR_PIXELMAP], nullptr);
+    EXPECT_EQ(result[HDR_PIXELMAP], nullptr);
+}
+ 
+/**
+ * @tc.name: GetDisplayHDRSnapshot001
+ * @tc.desc: GetDisplayHDRSnapshot test
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, GetDisplayHDRSnapshot001, TestSize.Level1)
+{
+    DisplayId validDisplayId = DEFAULT_DISPLAY;
+    DmErrorCode errorCode;
+    bool isUseDma = false;
+    bool isCaptureFullOfScreen = false;
+ 
+    std::vector<std::shared_ptr<Media::PixelMap>> result =
+        SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayHDRSnapshot(
+            validDisplayId, &errorCode, isUseDma, isCaptureFullOfScreen);
+ 
+    EXPECT_EQ(result.size(), PIXELMAP_SIZE);
+    EXPECT_EQ(result[SDR_PIXELMAP], nullptr);
+    EXPECT_EQ(result[HDR_PIXELMAP], nullptr);
+}
+ 
+/**
+ * @tc.name: GetDisplayHDRSnapshot002
+ * @tc.desc: GetDisplayHDRSnapshot test
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, GetDisplayHDRSnapshot002, TestSize.Level1)
+{
+    DisplayId validDisplayId = DEFAULT_DISPLAY;
+    DmErrorCode *errorCode = nullptr;
+    bool isUseDma = false;
+    bool isCaptureFullOfScreen = false;
+ 
+    std::vector<std::shared_ptr<Media::PixelMap>> result =
+        SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayHDRSnapshot(
+            validDisplayId, errorCode, isUseDma, isCaptureFullOfScreen);
+ 
+    EXPECT_EQ(result.size(), PIXELMAP_SIZE);
+    EXPECT_EQ(result[SDR_PIXELMAP], nullptr);
+    EXPECT_EQ(result[HDR_PIXELMAP], nullptr);
+}
+
+/**
+ * @tc.name: SetVirtualScreenAutoRotation
+ * @tc.desc: SetVirtualScreenAutoRotation test
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, SetVirtualScreenAutoRotation, TestSize.Level1)
+{
+    ScreenId screenId = 1111;
+    bool enable = false;
+    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualScreenAutoRotation(screenId, enable);
+    EXPECT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
 }
 }
 }

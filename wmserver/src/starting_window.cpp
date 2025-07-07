@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,15 +13,17 @@
  * limitations under the License.
  */
 
-#include "starting_window.h"
 #include <ability_manager_client.h>
 #include <common/rs_common_def.h>
 #include <display_manager_service_inner.h>
 #include <hitrace_meter.h>
+#include <res_config.h>
 #include <transaction/rs_transaction.h>
 
 #include "display_group_info.h"
 #include "remote_animation.h"
+#include "rs_adapter.h"
+#include "starting_window.h"
 #include "window_helper.h"
 #include "window_inner_manager.h"
 #include "window_manager_hilog.h"
@@ -58,6 +60,7 @@ WindowMode StartingWindow::defaultMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
 bool StartingWindow::transAnimateEnable_ = true;
 WindowUIType StartingWindow::windowUIType_ = WindowUIType::INVALID_WINDOW;
 AnimationConfig StartingWindow::animationConfig_;
+std::shared_ptr<Rosen::StartingWindowPageDrawInfo> StartingWindow::startingWindowPageDrawInfo_ = nullptr;
 
 sptr<WindowNode> StartingWindow::CreateWindowNode(const sptr<WindowTransitionInfo>& info, uint32_t winId)
 {
@@ -153,19 +156,30 @@ WMError StartingWindow::CreateLeashAndStartingSurfaceNode(sptr<WindowNode>& node
 {
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
     rsSurfaceNodeConfig.SurfaceNodeName = "leashWindow" + std::to_string(node->GetWindowId());
-    node->leashWinSurfaceNode_ = RSSurfaceNode::Create(rsSurfaceNodeConfig, RSSurfaceNodeType::LEASH_WINDOW_NODE);
+    auto rsUIContext = node->GetRSUIContext();
+    node->leashWinSurfaceNode_ = RSSurfaceNode::Create(
+        rsSurfaceNodeConfig, RSSurfaceNodeType::LEASH_WINDOW_NODE, true, false, rsUIContext);
     if (node->leashWinSurfaceNode_ == nullptr) {
         TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "create leashWinSurfaceNode failed");
         return WMError::WM_ERROR_NULLPTR;
     }
+    RSAdapterUtil::SetSkipCheckInMultiInstance(node->leashWinSurfaceNode_, true);
+    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "Create RSSurfaceNode: %{public}s, name: %{public}s",
+          RSAdapterUtil::RSNodeToStr(node->leashWinSurfaceNode_).c_str(),
+          rsSurfaceNodeConfig.SurfaceNodeName.c_str());
 
     rsSurfaceNodeConfig.SurfaceNodeName = "startingWindow" + std::to_string(node->GetWindowId());
-    node->startingWinSurfaceNode_ = RSSurfaceNode::Create(rsSurfaceNodeConfig, RSSurfaceNodeType::STARTING_WINDOW_NODE);
+    node->startingWinSurfaceNode_ = RSSurfaceNode::Create(
+        rsSurfaceNodeConfig, RSSurfaceNodeType::STARTING_WINDOW_NODE, true, false, rsUIContext);
     if (node->startingWinSurfaceNode_ == nullptr) {
         TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "create startingWinSurfaceNode failed");
         node->leashWinSurfaceNode_ = nullptr;
         return WMError::WM_ERROR_NULLPTR;
     }
+    RSAdapterUtil::SetSkipCheckInMultiInstance(node->startingWinSurfaceNode_, true);
+    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "Create RSSurfaceNode: %{public}s, name: %{public}s",
+          RSAdapterUtil::RSNodeToStr(node->startingWinSurfaceNode_).c_str(),
+          rsSurfaceNodeConfig.SurfaceNodeName.c_str());
     TLOGI(WmsLogTag::WMS_STARTUP_PAGE,
         "Create leashWinSurfaceNode and startingWinSurfaceNode success with id:%{public}u!",
         node->GetWindowId());
@@ -191,6 +205,11 @@ WMError StartingWindow::DrawStartingWindow(sptr<WindowNode>& node,
     if (node->startingWinSurfaceNode_ == nullptr) {
         TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "no starting Window SurfaceNode!");
         return WMError::WM_ERROR_NULLPTR;
+    }
+    if (LoadCustomStartingWindowInfo(node, GetBundleManager())) {
+        if (DrawStartingWindow(node, rect)  ==  WMError::WM_OK) {
+            return WMError::WM_OK;
+        }
     }
     // set window effect
     WindowSystemEffect::SetWindowEffect(node);
@@ -237,13 +256,14 @@ WMError StartingWindow::SetStartingWindowAnimation(wptr<WindowNode> weak)
             weakNode->GetWindowId());
         weakNode->leashWinSurfaceNode_->RemoveChild(weakNode->startingWinSurfaceNode_);
         weakNode->startingWinSurfaceNode_ = nullptr;
-        RSTransaction::FlushImplicitTransaction();
+        RSTransactionAdapter::FlushImplicitTransaction(weakNode->leashWinSurfaceNode_);
         FinishAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::START_WINDOW_ANIMATION),
             "StartingWindowAnimate(%u)", weakNode->GetWindowId());
     };
-    RSNode::Animate(animationConfig_.startWinAnimationConfig_.timingProtocol_,
-        animationConfig_.startWinAnimationConfig_.timingCurve_, execute, finish);
-    RSTransaction::FlushImplicitTransaction();
+    auto rsUIContext = weakNode->startingWinSurfaceNode_->GetRSUIContext();
+    RSNode::Animate(rsUIContext, animationConfig_.startWinAnimationConfig_.timingProtocol_,
+                    animationConfig_.startWinAnimationConfig_.timingCurve_, execute, finish);
+    RSTransactionAdapter::FlushImplicitTransaction(rsUIContext);
     FinishTrace(HITRACE_TAG_WINDOW_MANAGER);
     return WMError::WM_OK;
 }
@@ -286,7 +306,7 @@ void StartingWindow::HandleClientWindowCreate(sptr<WindowNode>& node, sptr<IWind
             } else {
                 weakNode->leashWinSurfaceNode_->RemoveChild(weakNode->startingWinSurfaceNode_);
                 weakNode->startingWinSurfaceNode_ = nullptr;
-                RSTransaction::FlushImplicitTransaction();
+                RSTransactionAdapter::FlushImplicitTransaction(weakNode->leashWinSurfaceNode_);
                 TLOGNI(WmsLogTag::WMS_STARTUP_PAGE, "StartingWindow::Replace surfaceNode, id: %{public}u",
                     weakNode->GetWindowId());
             }
@@ -296,7 +316,7 @@ void StartingWindow::HandleClientWindowCreate(sptr<WindowNode>& node, sptr<IWind
         WindowManagerService::GetInstance().PostAsyncTask(task, "firstFrameCompleteCallback");
     };
     node->surfaceNode_->SetBufferAvailableCallback(firstFrameCompleteCallback);
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(node->surfaceNode_);
 }
 
 void StartingWindow::ReleaseStartWinSurfaceNode(sptr<WindowNode>& node)
@@ -310,6 +330,7 @@ void StartingWindow::ReleaseStartWinSurfaceNode(sptr<WindowNode>& node)
     node->leashWinSurfaceNode_->RemoveChild(node->startingWinSurfaceNode_);
     node->leashWinSurfaceNode_->RemoveChild(node->closeWinSurfaceNode_);
     node->leashWinSurfaceNode_->RemoveChild(node->surfaceNode_);
+    RSTransactionAdapter::FlushImplicitTransaction(node->leashWinSurfaceNode_);
     node->leashWinSurfaceNode_ = nullptr;
     node->startingWinSurfaceNode_ = nullptr;
     node->closeWinSurfaceNode_ = nullptr;
@@ -317,7 +338,6 @@ void StartingWindow::ReleaseStartWinSurfaceNode(sptr<WindowNode>& node)
         "[leashWinSurface]: use_count: %{public}ld, [startWinSurface]: use_count: %{public}ld ",
         node->GetWindowId(), node->leashWinSurfaceNode_.use_count(),
         node->startingWinSurfaceNode_.use_count());
-    RSTransaction::FlushImplicitTransaction();
 }
 
 bool StartingWindow::IsWindowFollowParent(WindowType type)
@@ -347,12 +367,16 @@ void StartingWindow::AddNodeOnRSTree(sptr<WindowNode>& node, bool isMultiDisplay
             weak->leashWinSurfaceNode_->SetBounds(winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
             weak->leashWinSurfaceNode_->SetAnimationFinished();
         }
-        RSTransaction::FlushImplicitTransaction();
+        RSTransactionAdapter::FlushImplicitTransaction(weak->leashWinSurfaceNode_);
     };
     if (!RemoteAnimation::CheckAnimationController()) {
-        RSNode::Animate(animationConfig_.windowAnimationConfig_.animationTiming_.timingProtocol_,
-            animationConfig_.windowAnimationConfig_.animationTiming_.timingCurve_,
-            updateRSTreeFunc, finishCallBack);
+        std::shared_ptr<RSUIContext> rsUIContext;
+        if (node->leashWinSurfaceNode_) {
+            rsUIContext = node->leashWinSurfaceNode_->GetRSUIContext();
+        }
+        RSNode::Animate(rsUIContext, animationConfig_.windowAnimationConfig_.animationTiming_.timingProtocol_,
+                        animationConfig_.windowAnimationConfig_.animationTiming_.timingCurve_,
+                        updateRSTreeFunc, finishCallBack);
     } else {
         // add or remove window without animation
         updateRSTreeFunc();
@@ -401,6 +425,169 @@ void StartingWindow::SetDefaultWindowMode(WindowMode defaultMode)
 void StartingWindow::SetAnimationConfig(AnimationConfig config)
 {
     animationConfig_ = config;
+}
+
+sptr<AppExecFwk::IBundleMgr> StartingWindow::GetBundleManager()
+{
+    auto systemAbilityMgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (systemAbilityMgr == nullptr) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Failed to get SystemAbilityManager.");
+        return nullptr;
+    }
+    auto bmsProxy = systemAbilityMgr->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    if (bmsProxy == nullptr) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Failed to get BundleManagerService.");
+        return nullptr;
+    }
+    return iface_cast<AppExecFwk::IBundleMgr>(bmsProxy);
+}
+
+std::shared_ptr<AppExecFwk::AbilityInfo> StartingWindow::GetAbilityInfoFromBMS(const sptr<WindowNode>& node,
+    const sptr<AppExecFwk::IBundleMgr>& bundleMgr)
+{
+    if (node == nullptr || bundleMgr == nullptr) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "node or bundleMgr is nullptr.");
+        return nullptr;
+    }
+    AAFwk::Want want;
+    AppExecFwk::AbilityInfo abilityInfo;
+    want.SetElementName("", node->abilityInfo_.bundleName_, node->abilityInfo_.abilityName_, "");
+    if (!bundleMgr->QueryAbilityInfo(
+        want, AppExecFwk::GET_ABILITY_INFO_DEFAULT, AppExecFwk::Constants::ANY_USERID, abilityInfo)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Get ability info from BMS failed!");
+        return nullptr;
+    }
+    return std::make_shared<AppExecFwk::AbilityInfo>(std::move(abilityInfo));
+}
+
+std::shared_ptr<Global::Resource::ResourceManager> StartingWindow::CreateResourceManager(
+    const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo)
+{
+    if (abilityInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "abilityInfo is nullptr.");
+        return nullptr;
+    }
+    std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
+    if (resConfig == nullptr) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "resConfig is nullptr.");
+        return nullptr;
+    }
+    std::shared_ptr<Global::Resource::ResourceManager> resourceMgr(Global::Resource::CreateResourceManager(
+        abilityInfo->bundleName, abilityInfo->moduleName, "", {}, *resConfig));
+    if (resourceMgr == nullptr) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "resourceMgr is nullptr.");
+        return nullptr;
+    }
+
+    std::string loadPath = abilityInfo->hapPath.empty() ? abilityInfo->resourcePath : abilityInfo->hapPath;
+    if (!resourceMgr->AddResource(loadPath.c_str(), Global::Resource::SELECT_COLOR | Global::Resource::SELECT_MEDIA)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Add resource %{private}s failed.", loadPath.c_str());
+    }
+    return resourceMgr;
+}
+
+std::shared_ptr<Media::PixelMap> StartingWindow::GetPixelMap(uint32_t mediaDataId,
+    const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr,
+    const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo)
+{
+    if (mediaDataId <= 0 || resourceMgr == nullptr || abilityInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "invalid mediaDataId or null resourceMgr and abilityInfo.");
+        return nullptr;
+    }
+    Media::SourceOptions opts;
+    uint32_t errorCode = 0;
+    std::unique_ptr<Media::ImageSource> imageSource;
+    if (!abilityInfo->hapPath.empty()) {
+        size_t len = 0;
+        std::unique_ptr<uint8_t[]> dataOut;
+        if (resourceMgr->GetMediaDataById(mediaDataId, len, dataOut) != Global::Resource::RState::SUCCESS) {
+            return nullptr;
+        }
+        imageSource = Media::ImageSource::CreateImageSource(dataOut.get(), len, opts, errorCode);
+    } else {
+        std::string dataPath;
+        if (resourceMgr->GetMediaById(mediaDataId, dataPath) != Global::Resource::RState::SUCCESS) {
+            return nullptr;
+        }
+        imageSource = Media::ImageSource::CreateImageSource(dataPath, opts, errorCode);
+    }
+    if (errorCode != 0 || imageSource == nullptr) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "failed, id %{private}u err %{public}u", mediaDataId, errorCode);
+        return nullptr;
+    }
+    Media::DecodeOptions decodeOpts;
+    auto pixelMapPtr = imageSource->CreatePixelMap(decodeOpts, errorCode);
+    if (errorCode != 0) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "failed, id %{private}u err %{public}u", mediaDataId, errorCode);
+        return nullptr;
+    }
+    return std::shared_ptr<Media::PixelMap>(std::move(pixelMapPtr));
+}
+
+bool StartingWindow::LoadCustomStartingWindowInfo(const sptr<WindowNode>& node,
+    const sptr<AppExecFwk::IBundleMgr>& bundleMgr)
+{
+    if (node == nullptr || bundleMgr == nullptr) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "node or bundleMgr is nullptr.");
+        return false;
+    }
+    auto abilityInfo = GetAbilityInfoFromBMS(node, bundleMgr);
+    if (abilityInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Failed to retrieve abilityinfo from BMS");
+        return false;
+    }
+    auto resourceMgr = CreateResourceManager(abilityInfo);
+    if (resourceMgr == nullptr) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Failed to create resource manager");
+        return false;
+    }
+    return DoLoadCustomStartingWindowInfo(abilityInfo, resourceMgr);
+}
+
+bool StartingWindow::DoLoadCustomStartingWindowInfo(const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo,
+    const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr)
+{
+    if (resourceMgr == nullptr || abilityInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "resourMgr or abilityInfo is nullptr.");
+        return false;
+    }
+
+    auto info = std::make_shared<Rosen::StartingWindowPageDrawInfo>();
+    const auto& startWindowRes = abilityInfo->startWindowResource;
+    auto loadPixelMap = [&](uint32_t resId) {
+        return GetPixelMap(resId, resourceMgr, abilityInfo);
+    };
+
+    if (resourceMgr->GetColorById(startWindowRes.startWindowBackgroundColorId, info->bgColor) ==
+        Global::Resource::RState::SUCCESS) {
+        info->bgImagePixelMap = loadPixelMap(startWindowRes.startWindowBackgroundImageId);
+        info->brandingPixelMap = loadPixelMap(startWindowRes.startWindowBrandingImageId);
+        info->startWindowBackgroundImageFit = startWindowRes.startWindowBackgroundImageFit;
+        info->appIconPixelMap = loadPixelMap(startWindowRes.startWindowAppIconId);
+        if (info->appIconPixelMap == nullptr) {
+            info->illustrationPixelMap = loadPixelMap(startWindowRes.startWindowIllustrationId);
+        }
+        startingWindowPageDrawInfo_ = std::move(info);
+        return true;
+    }
+    TLOGE(WmsLogTag::WMS_PATTERN, "Failed to load custom startingwindow color.");
+    return false;
+}
+
+WMError StartingWindow::DrawStartingWindow(const sptr<WindowNode>& node, const Rect& rect)
+{
+    if (startingWindowPageDrawInfo_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "startingWindowPageDrawInfo_ is nullptr.");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    const float vpRatio = DisplayGroupInfo::GetInstance().GetDisplayVirtualPixelRatio(node->GetDisplayId());
+    if (!SurfaceDraw::DrawCustomStartingWindow(node->startingWinSurfaceNode_,
+        rect, startingWindowPageDrawInfo_, vpRatio)) {
+            TLOGE(WmsLogTag::WMS_PATTERN, "Draw Custom startingWindowPage failed.");
+            return WMError::WM_ERROR_INVALID_PARAM;
+        }
+    return WMError::WM_OK;
 }
 } // Rosen
 } // OHOS

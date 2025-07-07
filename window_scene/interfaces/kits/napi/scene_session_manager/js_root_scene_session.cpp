@@ -195,7 +195,7 @@ napi_value JsRootSceneSession::OnLoadContent(napi_env env, napi_callback_info in
         napi_value nativeStorage = contentStorage ? contentStorage->GetNapiValue() : nullptr;
         rootSceneSession->LoadContent(contentUrl, env, nativeStorage, contextLockPtr);
     };
-    if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnLoadContent") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_LIFE, "napi send event failed, window state is abnormal");
     }
     return result;

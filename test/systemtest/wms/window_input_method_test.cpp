@@ -15,16 +15,20 @@
 
 // gtest
 #include <gtest/gtest.h>
+#include "scene_board_judgement.h"
 #include "window_test_utils.h"
 #include "wm_common.h"
-#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+namespace {
 using Utils = WindowTestUtils;
+constexpr uint32_t MAX_INT = -1;
+}
+
 class WindowInputMethodTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -41,17 +45,13 @@ void WindowInputMethodTest::SetUpTestCase()
 {
     auto display = DisplayManager::GetInstance().GetDisplayById(0);
     ASSERT_TRUE((display != nullptr));
-    Rect displayRect = {0, 0, display->GetWidth(), display->GetHeight()};
+    Rect displayRect = { 0, 0, display->GetWidth(), display->GetHeight() };
     Utils::InitByDisplayRect(displayRect);
 }
 
-void WindowInputMethodTest::TearDownTestCase()
-{
-}
+void WindowInputMethodTest::TearDownTestCase() {}
 
-void WindowInputMethodTest::SetUp()
-{
-}
+void WindowInputMethodTest::SetUp() {}
 
 void WindowInputMethodTest::TearDown()
 {
@@ -80,30 +80,34 @@ HWTEST_F(WindowInputMethodTest, ShowKeyboard01, TestSize.Level1)
     if (fullWindow == nullptr) {
         return;
     }
+    KeyboardEffectOption effectOption;
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         sleep(TEST_SLEEP_SECOND);
-        ASSERT_EQ(WMError::WM_OK, fullWindow->ShowKeyboard(KeyboardViewMode::NON_IMMERSIVE_MODE));
+        ASSERT_EQ(WMError::WM_OK, fullWindow->ShowKeyboard(effectOption));
         sleep(TEST_SLEEP_SECOND);
-        ASSERT_EQ(WMError::WM_OK, fullWindow->ChangeKeyboardViewMode(KeyboardViewMode::NON_IMMERSIVE_MODE));
+        ASSERT_EQ(WMError::WM_OK, fullWindow->ChangeKeyboardEffectOption(effectOption));
         sleep(TEST_SLEEP_SECOND);
         fullWindow->Destroy();
         return;
     }
-    ASSERT_EQ(WMError::WM_OK, fullWindow->ShowKeyboard(KeyboardViewMode::DARK_IMMERSIVE_MODE));
+    effectOption.viewMode_ = KeyboardViewMode::DARK_IMMERSIVE_MODE;
+    ASSERT_EQ(WMError::WM_OK, fullWindow->ShowKeyboard(effectOption));
     sleep(TEST_SLEEP_SECOND);
 
-    ASSERT_EQ(WMError::WM_OK, fullWindow->ChangeKeyboardViewMode(KeyboardViewMode::LIGHT_IMMERSIVE_MODE));
+    effectOption.viewMode_ = KeyboardViewMode::LIGHT_IMMERSIVE_MODE;
+    ASSERT_EQ(WMError::WM_OK, fullWindow->ChangeKeyboardEffectOption(effectOption));
     sleep(TEST_SLEEP_SECOND);
 
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM,
-        fullWindow->ChangeKeyboardViewMode(static_cast<KeyboardViewMode>(-1)));
+    effectOption.viewMode_ = static_cast<KeyboardViewMode>(MAX_INT);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, fullWindow->ChangeKeyboardEffectOption(effectOption));
     sleep(TEST_SLEEP_SECOND);
 
     ASSERT_EQ(WMError::WM_OK, fullWindow->Hide());
     sleep(TEST_SLEEP_SECOND);
 
+    effectOption.viewMode_ = KeyboardViewMode::DARK_IMMERSIVE_MODE;
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW,
-        fullWindow->ChangeKeyboardViewMode(KeyboardViewMode::DARK_IMMERSIVE_MODE));
+              fullWindow->ChangeKeyboardEffectOption(effectOption));
     sleep(TEST_SLEEP_SECOND);
     fullWindow->Destroy();
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,18 +13,14 @@
  * limitations under the License.
  */
 
-#include <cstddef>
-#include <cstdint>
-#include <parcel.h>
-#include <securec.h>
+#include "screensessionmgrstubwakeup_fuzzer.h"
 
 #include <iremote_stub.h>
+#include <parcel.h>
+
 #include "message_option.h"
 #include "message_parcel.h"
-#include "marshalling_helper.h"
-#include "display_manager_interface.h"
 #include "screen_session_manager_stub.h"
-#include "screensessionmgrstubwakeup_fuzzer.h"
 
 using namespace OHOS::Rosen;
 
@@ -38,7 +34,7 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     if (data == nullptr || size < DATA_MIN_SIZE) {
         return false;
     }
-    
+
     MessageParcel parcel;
     MessageParcel reply;
     MessageOption option;

@@ -21,9 +21,6 @@
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
-namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenManagerLite"};
-}
 
 /*
  * used by powermgr
@@ -75,11 +72,11 @@ public:
     void OnScreenConnect(sptr<ScreenInfo> screenInfo)
     {
         if (screenInfo == nullptr || screenInfo->GetScreenId() == SCREEN_ID_INVALID) {
-            WLOGFE("OnScreenConnect, screenInfo is invalid.");
+            TLOGE(WmsLogTag::DMS, "screenInfo is invalid.");
             return;
         }
         if (pImpl_ == nullptr) {
-            WLOGFE("OnScreenConnect, impl is nullptr.");
+            TLOGE(WmsLogTag::DMS, "impl is nullptr.");
             return;
         }
         std::lock_guard<std::mutex> lock(pImpl_->mutex_);
@@ -91,11 +88,11 @@ public:
     void OnScreenDisconnect(ScreenId screenId)
     {
         if (screenId == SCREEN_ID_INVALID) {
-            WLOGFE("OnScreenDisconnect, screenId is invalid.");
+            TLOGE(WmsLogTag::DMS, "screenId is invalid.");
             return;
         }
         if (pImpl_ == nullptr) {
-            WLOGFE("OnScreenDisconnect, impl is nullptr.");
+            TLOGE(WmsLogTag::DMS, "impl is nullptr.");
             return;
         }
         std::lock_guard<std::mutex> lock(pImpl_->mutex_);
@@ -107,14 +104,14 @@ public:
     void OnScreenChange(const sptr<ScreenInfo>& screenInfo, ScreenChangeEvent event)
     {
         if (screenInfo == nullptr) {
-            WLOGFE("OnScreenChange, screenInfo is null.");
+            TLOGE(WmsLogTag::DMS, "screenInfo is null.");
             return;
         }
         if (pImpl_ == nullptr) {
-            WLOGFE("OnScreenChange, impl is nullptr.");
+            TLOGE(WmsLogTag::DMS, "impl is nullptr.");
             return;
         }
-        WLOGFD("OnScreenChange. event %{public}u", event);
+        TLOGD(WmsLogTag::DMS, "event %{public}u", event);
         std::lock_guard<std::mutex> lock(pImpl_->mutex_);
         for (auto listener: pImpl_->screenListeners_) {
             listener->OnChange(screenInfo->GetScreenId());
@@ -165,12 +162,12 @@ WM_IMPLEMENT_SINGLE_INSTANCE(ScreenManagerLite)
 ScreenManagerLite::ScreenManagerLite()
 {
     pImpl_ = new Impl();
-    WLOGFD("Create ScreenManagerLite instance");
+    TLOGD(WmsLogTag::DMS, "Create ScreenManagerLite instance");
 }
 
 ScreenManagerLite::~ScreenManagerLite()
 {
-    WLOGFD("Destroy ScreenManagerLite instance");
+    TLOGD(WmsLogTag::DMS, "Destroy ScreenManagerLite instance");
 }
 
 ScreenManagerLite::Impl::~Impl()
@@ -188,7 +185,7 @@ DMError ScreenManagerLite::Impl::RegisterDisplayManagerAgent()
             screenManagerListener_, DisplayManagerAgentType::SCREEN_EVENT_LISTENER);
         if (regSucc != DMError::DM_OK) {
             screenManagerListener_ = nullptr;
-            WLOGFW("RegisterDisplayManagerAgent failed !");
+            TLOGW(WmsLogTag::DMS, "RegisterDisplayManagerAgent failed !");
         }
     }
     return regSucc;
@@ -202,7 +199,7 @@ DMError ScreenManagerLite::Impl::UnregisterDisplayManagerAgent()
             screenManagerListener_, DisplayManagerAgentType::SCREEN_EVENT_LISTENER);
         screenManagerListener_ = nullptr;
         if (unRegSucc != DMError::DM_OK) {
-            WLOGFW("UnregisterDisplayManagerAgent failed!");
+            TLOGW(WmsLogTag::DMS, "UnregisterDisplayManagerAgent failed!");
         }
     }
     return unRegSucc;
@@ -221,7 +218,7 @@ DMError ScreenManagerLite::Impl::RegisterScreenListener(sptr<IScreenListener> li
 DMError ScreenManagerLite::RegisterScreenListener(sptr<IScreenListener> listener)
 {
     if (listener == nullptr) {
-        WLOGFE("RegisterScreenListener listener is nullptr.");
+        TLOGE(WmsLogTag::DMS, "listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->RegisterScreenListener(listener);
@@ -232,7 +229,7 @@ DMError ScreenManagerLite::Impl::UnregisterScreenListener(sptr<IScreenListener> 
     std::lock_guard<std::mutex> lock(mutex_);
     auto iter = std::find(screenListeners_.begin(), screenListeners_.end(), listener);
     if (iter == screenListeners_.end()) {
-        WLOGFE("could not find this listener");
+        TLOGE(WmsLogTag::DMS, "could not find this listener");
         return DMError::DM_ERROR_NULLPTR;
     }
     screenListeners_.erase(iter);
@@ -242,7 +239,7 @@ DMError ScreenManagerLite::Impl::UnregisterScreenListener(sptr<IScreenListener> 
 DMError ScreenManagerLite::UnregisterScreenListener(sptr<IScreenListener> listener)
 {
     if (listener == nullptr) {
-        WLOGFE("UnregisterScreenListener listener is nullptr.");
+        TLOGE(WmsLogTag::DMS, "listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->UnregisterScreenListener(listener);
@@ -257,7 +254,7 @@ DMError ScreenManagerLite::Impl::RegisterScreenModeChangeManagerAgent()
             screenModeChangeListenerAgent_, DisplayManagerAgentType::SCREEN_MODE_CHANGE_EVENT_LISTENER);
         if (regSucc != DMError::DM_OK) {
             screenModeChangeListenerAgent_ = nullptr;
-            WLOGFW("RegisterDisplayManagerAgent failed !");
+            TLOGW(WmsLogTag::DMS, "RegisterDisplayManagerAgent failed !");
         }
     }
     return regSucc;
@@ -271,7 +268,7 @@ DMError ScreenManagerLite::Impl::UnregisterScreenModeChangeManagerAgent()
             screenModeChangeListenerAgent_, DisplayManagerAgentType::SCREEN_MODE_CHANGE_EVENT_LISTENER);
         screenModeChangeListenerAgent_ = nullptr;
         if (unRegSucc != DMError::DM_OK) {
-            WLOGFW("UnregisterDisplayManagerAgent failed!");
+            TLOGW(WmsLogTag::DMS, "UnregisterDisplayManagerAgent failed!");
         }
     }
     return unRegSucc;
@@ -287,7 +284,7 @@ DMError ScreenManagerLite::Impl::RegisterScreenModeChangeListener(sptr<IScreenMo
     std::vector<sptr<ScreenInfo>> screenInfos;
     DMError ret = GetPhysicalScreenInfos(screenInfos);
     if (ret == DMError::DM_OK) {
-        WLOGFI("RegisterScreenListener notify");
+        TLOGI(WmsLogTag::DMS, "RegisterScreenListener notify");
         listener->NotifyScreenModeChange(screenInfos);
     }
     return regSucc;
@@ -296,7 +293,7 @@ DMError ScreenManagerLite::Impl::RegisterScreenModeChangeListener(sptr<IScreenMo
 DMError ScreenManagerLite::RegisterScreenModeChangeListener(sptr<IScreenModeChangeListener> listener)
 {
     if (listener == nullptr) {
-        WLOGFE("RegisterScreenListener listener is nullptr.");
+        TLOGE(WmsLogTag::DMS, "listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->RegisterScreenModeChangeListener(listener);
@@ -307,7 +304,7 @@ DMError ScreenManagerLite::Impl::UnregisterScreenModeChangeListener(sptr<IScreen
     std::lock_guard<std::mutex> lock(mutex_);
     auto iter = std::find(screenModeChangeListeners_.begin(), screenModeChangeListeners_.end(), listener);
     if (iter == screenModeChangeListeners_.end()) {
-        WLOGFE("could not find this listener");
+        TLOGE(WmsLogTag::DMS, "could not find this listener");
         return DMError::DM_ERROR_NULLPTR;
     }
     screenModeChangeListeners_.erase(iter);
@@ -317,7 +314,7 @@ DMError ScreenManagerLite::Impl::UnregisterScreenModeChangeListener(sptr<IScreen
 DMError ScreenManagerLite::UnregisterScreenModeChangeListener(sptr<IScreenModeChangeListener> listener)
 {
     if (listener == nullptr) {
-        WLOGFE("UnregisterScreenListener listener is nullptr.");
+        TLOGE(WmsLogTag::DMS, "listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->UnregisterScreenModeChangeListener(listener);
@@ -327,7 +324,7 @@ DMError ScreenManagerLite::RegisterAbnormalScreenConnectChangeListener(
     sptr<IAbnormalScreenConnectChangeListener> listener)
 {
     if (listener == nullptr) {
-        WLOGFE("listener is nullptr.");
+        TLOGE(WmsLogTag::DMS, "listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->RegisterAbnormalScreenConnectChangeListener(listener);
@@ -346,7 +343,7 @@ DMError ScreenManagerLite::Impl::RegisterAbnormalScreenConnectChangeListener(
             DisplayManagerAgentType::ABNORMAL_SCREEN_CONNECT_CHANGE_LISTENER);
         if (regSucc != DMError::DM_OK) {
             abnormalScreenConnectChangeListenerAgent_ = nullptr;
-            WLOGFW("RegisterDisplayManagerAgent failed !");
+            TLOGW(WmsLogTag::DMS, "RegisterDisplayManagerAgent failed !");
         }
     }
     if (regSucc == DMError::DM_OK) {
@@ -359,7 +356,7 @@ DMError ScreenManagerLite::UnregisterAbnormalScreenConnectChangeListener(
     sptr<IAbnormalScreenConnectChangeListener> listener)
 {
     if (listener == nullptr) {
-        WLOGFE("listener is nullptr.");
+        TLOGE(WmsLogTag::DMS, "listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
     return pImpl_->UnregisterAbnormalScreenConnectChangeListener(listener);
@@ -372,7 +369,7 @@ DMError ScreenManagerLite::Impl::UnregisterAbnormalScreenConnectChangeListener(
     auto iter = std::find(abnormalScreenConnectChangeListeners_.begin(),
         abnormalScreenConnectChangeListeners_.end(), listener);
     if (iter == abnormalScreenConnectChangeListeners_.end()) {
-        WLOGFE("could not find this listener");
+        TLOGE(WmsLogTag::DMS, "could not find this listener");
         return DMError::DM_ERROR_NULLPTR;
     }
     abnormalScreenConnectChangeListeners_.erase(iter);
@@ -383,7 +380,7 @@ DMError ScreenManagerLite::Impl::UnregisterAbnormalScreenConnectChangeListener(
             DisplayManagerAgentType::ABNORMAL_SCREEN_CONNECT_CHANGE_LISTENER);
         abnormalScreenConnectChangeListenerAgent_ = nullptr;
         if (unregSucc != DMError::DM_OK) {
-            WLOGFW("UnregisterDisplayManagerAgent failed !");
+            TLOGW(WmsLogTag::DMS, "UnregisterDisplayManagerAgent failed !");
         }
     }
     return unregSucc;
@@ -392,13 +389,13 @@ DMError ScreenManagerLite::Impl::UnregisterAbnormalScreenConnectChangeListener(
 bool ScreenManagerLite::SetSpecifiedScreenPower(ScreenId screenId,
     ScreenPowerState state, PowerStateChangeReason reason)
 {
-    WLOGFI("screenId:%{public}" PRIu64 ", state:%{public}u, reason:%{public}u", screenId, state, reason);
+    TLOGI(WmsLogTag::DMS, "screenId:%{public}" PRIu64 ", state:%{public}u, reason:%{public}u", screenId, state, reason);
     return SingletonContainer::Get<ScreenManagerAdapterLite>().SetSpecifiedScreenPower(screenId, state, reason);
 }
 
 bool ScreenManagerLite::SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason)
 {
-    WLOGFI("state:%{public}u, reason:%{public}u", state, reason);
+    TLOGI(WmsLogTag::DMS, "state:%{public}u, reason:%{public}u", state, reason);
     return SingletonContainer::Get<ScreenManagerAdapterLite>().SetScreenPowerForAll(state, reason);
 }
 
@@ -412,19 +409,13 @@ ScreenPowerState ScreenManagerLite::GetScreenPower()
     return SingletonContainer::Get<ScreenManagerAdapterLite>().GetScreenPower();
 }
 
-DMError ScreenManagerLite::GetPhysicalScreenIds(std::vector<uint64_t>& screenIds)
+DMError ScreenManagerLite::GetPhysicalScreenIds(std::vector<ScreenId>& screenIds)
 {
-    std::vector<sptr<ScreenInfo>> screenInfos;
-    DMError ret = SingletonContainer::Get<ScreenManagerAdapterLite>().GetAllScreenInfos(screenInfos);
+    TLOGI(WmsLogTag::DMS, "enter");
+    DMError ret = SingletonContainer::Get<ScreenManagerAdapterLite>().GetPhysicalScreenIds(screenIds);
     if (ret != DMError::DM_OK) {
+        TLOGE(WmsLogTag::DMS, "failed");
         return ret;
-    }
-
-    for (const auto& screenInfo : screenInfos) {
-        auto id = screenInfo->GetScreenId();
-        if (screenInfo->GetType() == ScreenType::REAL && id != SCREEN_ID_INVALID) {
-            screenIds.push_back(id);
-        }
     }
     return DMError::DM_OK;
 }
@@ -434,7 +425,7 @@ DMError ScreenManagerLite::Impl::GetPhysicalScreenInfos(std::vector<sptr<ScreenI
     std::vector<sptr<ScreenInfo>> allScreenInfos;
     DMError ret = SingletonContainer::Get<ScreenManagerAdapterLite>().GetAllScreenInfos(allScreenInfos);
     if (ret != DMError::DM_OK) {
-        WLOGFE("GetPhysicalScreenInfos failed");
+        TLOGE(WmsLogTag::DMS, "GetPhysicalScreenInfos failed");
         return ret;
     }
     for (const auto& screenInfo : allScreenInfos) {
@@ -445,9 +436,14 @@ DMError ScreenManagerLite::Impl::GetPhysicalScreenInfos(std::vector<sptr<ScreenI
     return DMError::DM_OK;
 }
 
+sptr<ScreenInfo> ScreenManagerLite::GetScreenInfoById(ScreenId screenId)
+{
+    return SingletonContainer::Get<ScreenManagerAdapterLite>().GetScreenInfo(screenId);
+}
+
 void ScreenManagerLite::Impl::OnRemoteDied()
 {
-    WLOGFD("dms is died");
+    TLOGD(WmsLogTag::DMS, "dms is died");
     std::lock_guard<std::mutex> lock(mutex_);
     screenManagerListener_ = nullptr;
     screenModeChangeListenerAgent_ = nullptr;

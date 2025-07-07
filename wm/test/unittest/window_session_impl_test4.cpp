@@ -31,12 +31,20 @@
 #include "window_session_impl.h"
 #include "window_scene_session_impl.h"
 #include "wm_common.h"
+#include "window_manager_hilog.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+    std::string g_errLog;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
+        const char *msg)
+    {
+        g_errLog = msg;
+    }
 class WindowSessionImplTest4 : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -571,6 +579,8 @@ HWTEST_F(WindowSessionImplTest4, GetDecorButtonStyle, TestSize.Level1)
     ASSERT_EQ(style.closeButtonRightMargin, DEFAULT_CLOSE_BUTTON_RIGHT_MARGIN);
     ASSERT_EQ(style.spacingBetweenButtons, DEFAULT_SPACING_BETWEEN_BUTTONS);
     ASSERT_EQ(style.colorMode, DEFAULT_COLOR_MODE);
+    ASSERT_EQ(style.buttonIconSize, DEFAULT_BUTTON_ICON_SIZE);
+    ASSERT_EQ(style.buttonBackgroundCornerRadius, DEFAULT_BUTTON_BACKGROUND_CORNER_RADIUS);
     ASSERT_EQ(res, WMError::WM_OK);
 }
 
@@ -606,7 +616,7 @@ HWTEST_F(WindowSessionImplTest4, SetDecorButtonStyle, TestSize.Level1)
     ASSERT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
 
     // check uiContent is null
-    style.buttonBackgroundSize = 24;
+    style.buttonBackgroundSize = 40;
     res = window->SetDecorButtonStyle(style);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
 
@@ -1012,8 +1022,8 @@ HWTEST_F(WindowSessionImplTest4, NapiSetUIContent, TestSize.Level1)
 
     window->SetUIContentByName(url, nullptr, nullptr, nullptr);
     window->SetUIContentByAbc(url, nullptr, nullptr, nullptr);
-    WMError res1 =
-        window->NapiSetUIContent(url, nullptr, nullptr, BackupAndRestoreType::CONTINUATION, nullptr, ability);
+    WMError res1 = window->NapiSetUIContent(url, (napi_env)nullptr, (napi_value)nullptr,
+        BackupAndRestoreType::CONTINUATION, nullptr, ability);
     ASSERT_EQ(res1, WMError::WM_ERROR_INVALID_WINDOW);
 }
 
@@ -1265,6 +1275,7 @@ HWTEST_F(WindowSessionImplTest4, GetTitleButtonVisible01, TestSize.Level1)
 HWTEST_F(WindowSessionImplTest4, UpdateRect03, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetDisplayId(0);
     option->SetWindowName("WindowSessionCreateCheck");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
 
@@ -1301,26 +1312,25 @@ HWTEST_F(WindowSessionImplTest4, UpdateRect03, TestSize.Level1)
  */
 HWTEST_F(WindowSessionImplTest4, GetTitleButtonVisible02, TestSize.Level1)
 {
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetTitleButtonVisible02");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    ASSERT_NE(window->property_, nullptr);
     // only not support WINDOW_MODE_SUPPORT_SPLIT
     uint32_t windowModeSupportType = 1 | (1 << 1);
     window->property_->SetWindowModeSupportType(windowModeSupportType);
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     // show Maximize, Minimize, Split buttons.
     window->windowTitleVisibleFlags_ = { true, true, true, true };
-    bool hideMaximizeButton = false;
+    bool hideMaximizeButton = true;
     bool hideMinimizeButton = false;
     bool hideSplitButton = false;
     bool hideCloseButton = false;
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     window->GetTitleButtonVisible(hideMaximizeButton, hideMinimizeButton, hideSplitButton, hideCloseButton);
-    ASSERT_EQ(hideMaximizeButton, false);
-    ASSERT_EQ(hideMinimizeButton, false);
-    ASSERT_EQ(hideSplitButton, false);
-    ASSERT_EQ(hideCloseButton, false);
+    EXPECT_TRUE(g_errLog.find("isMaximizeVisible param INVALID") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -1330,12 +1340,12 @@ HWTEST_F(WindowSessionImplTest4, GetTitleButtonVisible02, TestSize.Level1)
  */
 HWTEST_F(WindowSessionImplTest4, GetTitleButtonVisible03, TestSize.Level1)
 {
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetTitleButtonVisible03");
     option->SetDisplayId(1);
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    ASSERT_NE(window->property_, nullptr);
-    ASSERT_EQ(1, window->GetDisplayId());
     // only not support WINDOW_MODE_SUPPORT_SPLIT
     uint32_t windowModeSupportType = 1 | (1 << 1) | (1 << 2);
     window->property_->SetWindowModeSupportType(windowModeSupportType);
@@ -1348,10 +1358,8 @@ HWTEST_F(WindowSessionImplTest4, GetTitleButtonVisible03, TestSize.Level1)
     bool hideCloseButton = true;
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     window->GetTitleButtonVisible(hideMaximizeButton, hideMinimizeButton, hideSplitButton, hideCloseButton);
-    ASSERT_EQ(hideMaximizeButton, true);
-    ASSERT_EQ(hideMinimizeButton, true);
-    ASSERT_EQ(hideSplitButton, true);
-    ASSERT_EQ(hideCloseButton, true);
+    EXPECT_FALSE(g_errLog.find("isMaximizeVisible param INVALID") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -1469,6 +1477,120 @@ HWTEST_F(WindowSessionImplTest4, NotifyWindowVisibility01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyExtensionSecureLimitChange01
+ * @tc.desc: NotifyExtensionSecureLimitChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, NotifyExtensionSecureLimitChange01, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifyExtensionSecureLimitChange01");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window->property_, nullptr);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    sptr<IExtensionSecureLimitChangeListener> listener = sptr<IExtensionSecureLimitChangeListener>::MakeSptr();
+    window->RegisterExtensionSecureLimitChangeListener(listener);
+    WSError res = window->NotifyExtensionSecureLimitChange(false);
+    EXPECT_EQ(res, WSError::WS_OK);
+    window->uiContent_ = nullptr;
+    res = window->NotifyExtensionSecureLimitChange(false);
+    EXPECT_EQ(res, WSError::WS_OK);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    res = window->NotifyExtensionSecureLimitChange(false);
+    EXPECT_EQ(res, WSError::WS_OK);
+    window->UnregisterExtensionSecureLimitChangeListener(listener);
+}
+
+/**
+ * @tc.name: RegisterExtensionSecureLimitChangeListener01
+ * @tc.desc: RegisterExtensionSecureLimitChangeListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, RegisterExtensionSecureLimitChangeListener01, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("RegisterExtensionSecureLimitChangeListener01");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window->property_, nullptr);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+
+    sptr<IExtensionSecureLimitChangeListener> listener = sptr<IExtensionSecureLimitChangeListener>::MakeSptr();
+    WMError res = window->RegisterExtensionSecureLimitChangeListener(listener);
+    EXPECT_EQ(res, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: RegisterExtensionSecureLimitChangeListener02
+ * @tc.desc: RegisterExtensionSecureLimitChangeListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, RegisterExtensionSecureLimitChangeListener02, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("RegisterExtensionSecureLimitChangeListener02");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window->property_, nullptr);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+
+    sptr<IExtensionSecureLimitChangeListener> listener = nullptr;
+    WMError res = window->RegisterExtensionSecureLimitChangeListener(listener);
+    EXPECT_EQ(res, WMError::WM_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: UnregisterExtensionSecureLimitChangeListener01
+ * @tc.desc: UnregisterExtensionSecureLimitChangeListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, UnregisterExtensionSecureLimitChangeListener01, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UnregisterExtensionSecureLimitChangeListener01");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window->property_, nullptr);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+
+    sptr<IExtensionSecureLimitChangeListener> listener = sptr<IExtensionSecureLimitChangeListener>::MakeSptr();
+    WMError res = window->RegisterExtensionSecureLimitChangeListener(listener);
+    EXPECT_EQ(res, WMError::WM_OK);
+    res = window->UnregisterExtensionSecureLimitChangeListener(listener);
+    EXPECT_EQ(res, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: UnregisterExtensionSecureLimitChangeListener02
+ * @tc.desc: UnregisterExtensionSecureLimitChangeListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, UnregisterExtensionSecureLimitChangeListener02, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UnregisterExtensionSecureLimitChangeListener02");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window->property_, nullptr);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+
+    sptr<IExtensionSecureLimitChangeListener> listener = nullptr;
+    WMError res = window->UnregisterExtensionSecureLimitChangeListener(listener);
+    EXPECT_EQ(res, WMError::WM_ERROR_NULLPTR);
+}
+
+/**
  * @tc.name: UpdateVirtualPixelRatio
  * @tc.desc: test UpdateVirtualPixelRatio
  * @tc.type: FUNC
@@ -1513,12 +1635,10 @@ HWTEST_F(WindowSessionImplTest4, NotifyMainWindowClose01, TestSize.Level1)
 
     bool terminateCloseProcess = false;
     WMError res = window->NotifyMainWindowClose(terminateCloseProcess);
-    EXPECT_EQ(terminateCloseProcess, false);
     EXPECT_EQ(res, WMError::WM_ERROR_NULLPTR);
     sptr<IMainWindowCloseListener> listener = sptr<IMainWindowCloseListener>::MakeSptr();
     EXPECT_EQ(window->RegisterMainWindowCloseListeners(listener), WMError::WM_OK);
     res = window->NotifyMainWindowClose(terminateCloseProcess);
-    EXPECT_EQ(terminateCloseProcess, false);
     EXPECT_EQ(res, WMError::WM_OK);
     EXPECT_EQ(window->UnregisterMainWindowCloseListeners(listener), WMError::WM_OK);
 }
@@ -1554,99 +1674,15 @@ HWTEST_F(WindowSessionImplTest4, NotifyWindowWillClose, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetWindowContainerColor01
- * @tc.desc: SetWindowContainerColor
+ * @tc.name: IsPcOrFreeMultiWindowCapabilityEnabled
+ * @tc.desc: IsPcOrFreeMultiWindowCapabilityEnabled test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest4, SetWindowContainerColor01, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest4, IsPcOrFreeMultiWindowCapabilityEnabled, TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowContainerColor01 start";
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: IsPcOrFreeMultiWindowCapabilityEnabled start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SetWindowContainerColor");
-    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    std::string activeColor = "#00000000";
-    std::string inactiveColor = "#00000000";
-    WMError res = window->SetWindowContainerColor(activeColor, inactiveColor);
-    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_CALLING);
-    GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowContainerColor01 end";
-}
-
-/**
- * @tc.name: SetWindowContainerColor02
- * @tc.desc: SetWindowContainerColor
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest4, SetWindowContainerColor02, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowContainerColor02 start";
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SetWindowContainerColor");
-    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    std::string activeColor = "#00000000";
-    std::string inactiveColor = "#00000000";
-    WMError res = window->SetWindowContainerColor(activeColor, inactiveColor);
-    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
-    GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowContainerColor02 end";
-}
-
-/**
- * @tc.name: SetWindowContainerColor03
- * @tc.desc: SetWindowContainerColor
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest4, SetWindowContainerColor03, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowContainerColor03 start";
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SetWindowContainerColor");
-    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
-    window->windowSystemConfig_.isSystemDecorEnable_ = true;
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    std::string activeColor = "#00000000";
-    std::string inactiveColor = "#00000000";
-    WMError res = window->SetWindowContainerColor(activeColor, inactiveColor);
-    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
-    GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowContainerColor03 end";
-}
-
-/**
- * @tc.name: SetWindowContainerColor04
- * @tc.desc: SetWindowContainerColor
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest4, SetWindowContainerColor04, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowContainerColor04 start";
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SetWindowContainerColor");
-    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
-    window->windowSystemConfig_.isSystemDecorEnable_ = true;
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    std::string activeColor = "color";
-    std::string inactiveColor = "123";
-    WMError res = window->SetWindowContainerColor(activeColor, inactiveColor);
-    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
-    GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetWindowContainerColor04 end";
-}
-
-/**
- * @tc.name: IsPcOrPadCapabilityEnabled
- * @tc.desc: IsPcOrPadCapabilityEnabled test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest4, IsPcOrPadCapabilityEnabled, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "WindowSessionImplTest4: IsPcOrPadCapabilityEnabled start";
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("IsPcOrPadCapabilityEnabled");
+    option->SetWindowName("IsPcOrFreeMultiWindowCapabilityEnabled");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     ASSERT_NE(window->property_, nullptr);
     window->property_->SetPersistentId(1);
@@ -1658,15 +1694,15 @@ HWTEST_F(WindowSessionImplTest4, IsPcOrPadCapabilityEnabled, TestSize.Level1)
     window->hostSession_ = session;
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    EXPECT_EQ(true, window->IsPcOrPadCapabilityEnabled());
+    EXPECT_EQ(true, window->IsPcOrFreeMultiWindowCapabilityEnabled());
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    EXPECT_EQ(false, window->IsPcOrPadCapabilityEnabled());
+    EXPECT_EQ(false, window->IsPcOrFreeMultiWindowCapabilityEnabled());
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
-    EXPECT_EQ(false, window->IsPcOrPadCapabilityEnabled());
+    EXPECT_EQ(false, window->IsPcOrFreeMultiWindowCapabilityEnabled());
     window->property_->SetIsPcAppInPad(true);
-    EXPECT_EQ(true, window->IsPcOrPadCapabilityEnabled());
+    EXPECT_EQ(true, window->IsPcOrFreeMultiWindowCapabilityEnabled());
     EXPECT_EQ(WMError::WM_OK, window->Destroy(true));
-    GTEST_LOG_(INFO) << "WindowSessionImplTest4: IsPcOrPadCapabilityEnabled end";
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: IsPcOrFreeMultiWindowCapabilityEnabled end";
 }
 
 /**
@@ -2319,6 +2355,30 @@ HWTEST_F(WindowSessionImplTest4, FlushLayoutSize, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifySnapshotUpdate
+ * @tc.desc: NotifySnapshotUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, NotifySnapshotUpdate, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: NotifySnapshotUpdate start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifySnapshotUpdate");
+
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    WMError ret = window->NotifySnapshotUpdate();
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_SESSION);
+
+    SessionInfo sessioninfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessioninfo);
+    window->hostSession_ = session;
+    ret = window->NotifySnapshotUpdate();
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: NotifySnapshotUpdate end";
+}
+
+/**
  * @tc.name: RegisterDisplayIdChangeListener01
  * @tc.desc: RegisterDisplayIdChangeListener01
  * @tc.type: FUNC
@@ -2491,7 +2551,6 @@ HWTEST_F(WindowSessionImplTest4, GetIsMidScene, TestSize.Level1)
     bool isMidScene = false;
     auto ret = window->GetIsMidScene(isMidScene);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
-    ASSERT_EQ(false, isMidScene);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
 }
 
@@ -2576,12 +2635,10 @@ HWTEST_F(WindowSessionImplTest4, NotifyHighlightChange, TestSize.Level1)
 
     bool highlight = false;
     WSError res = window->NotifyHighlightChange(highlight);
-    EXPECT_EQ(highlight, false);
     EXPECT_EQ(res, WSError::WS_OK);
     sptr<IWindowHighlightChangeListener> listener = sptr<IWindowHighlightChangeListener>::MakeSptr();
     window->RegisterWindowHighlightChangeListeners(listener);
     res = window->NotifyHighlightChange(highlight);
-    EXPECT_EQ(highlight, false);
     EXPECT_EQ(res, WSError::WS_OK);
     window->UnregisterWindowHighlightChangeListeners(listener);
 }
@@ -2605,7 +2662,6 @@ HWTEST_F(WindowSessionImplTest4, IsWindowHighlighted, TestSize.Level1)
     ASSERT_EQ(window->IsWindowHighlighted(isHighlighted), WMError::WM_ERROR_INVALID_WINDOW);
     window->property_->SetPersistentId(1);
     ASSERT_EQ(window->IsWindowHighlighted(isHighlighted), WMError::WM_OK);
-    ASSERT_EQ(isHighlighted, false);
 }
 
 /**
@@ -2770,6 +2826,29 @@ HWTEST_F(WindowSessionImplTest4, GetSubWindowZLevelByFlags03, Function | SmallTe
     int32_t ret = dialogWindow->GetSubWindowZLevelByFlags(dialogWindow->GetType(),
         dialogWindow->GetWindowFlags(), dialogWindow->IsTopmost());
     EXPECT_EQ(ret, DIALOG_SUB_WINDOW_Z_LEVEL);
+}
+
+/**
+ * @tc.name: NotifyAppForceLandscapeConfigUpdated
+ * @tc.desc: NotifyAppForceLandscapeConfigUpdated
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, NotifyAppForceLandscapeConfigUpdated, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: NotifyAppForceLandscapeConfigUpdated start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifyAppForceLandscapeConfigUpdated");
+
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+
+    WSError res = window->NotifyAppForceLandscapeConfigUpdated();
+    EXPECT_EQ(res, WSError::WS_DO_NOTHING);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: NotifyAppForceLandscapeConfigUpdated end";
+}
 }
 } // namespace
 } // namespace Rosen

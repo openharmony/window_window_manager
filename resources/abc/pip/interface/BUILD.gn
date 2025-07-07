@@ -30,6 +30,25 @@ ohos_prebuilt_etc("file_pip_content_abc") {
   relative_install_dir = "window/resources"
 }
 
+es2abc_gen_abc("gen_web_pip_content_abc") {
+  src_js = rebase_path("WebPiPContent.js")
+  dst_file = rebase_path(target_out_dir + "/web_pip_content.abc")
+  in_puts = [ "WebPiPContent.js" ]
+  out_puts = [ target_out_dir + "/web_pip_content.abc" ]
+  extra_args = [ "--module" ]
+}
+
+ohos_prebuilt_etc("file_web_pip_content_abc") {
+  source = rebase_path(target_out_dir + "/web_pip_content.abc")
+  deps = [ ":gen_web_pip_content_abc" ]
+  part_name = "window_manager"
+  subsystem_name = "window"
+  relative_install_dir = "window/resources"
+}
+
 group("window_resources_abc_pip") {
-  deps = [ ":file_pip_content_abc" ]
+  deps = [
+    ":file_pip_content_abc",
+    ":file_web_pip_content_abc",
+  ]
 }

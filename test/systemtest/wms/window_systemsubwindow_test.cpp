@@ -14,13 +14,13 @@
  */
 
 // gtest
-#include <gtest/gtest.h>
 #include <ability_context.h>
+#include <gtest/gtest.h>
 #include "common_test_utils.h"
-#include "window_test_utils.h"
 #include "window.h"
 #include "window_option.h"
 #include "window_scene.h"
+#include "window_test_utils.h"
 #include "wm_common.h"
 
 using namespace testing;
@@ -62,21 +62,13 @@ public:
     };
 };
 
-void WindowSystemSubWindowTest::SetUpTestCase()
-{
-}
+void WindowSystemSubWindowTest::SetUpTestCase() {}
 
-void WindowSystemSubWindowTest::TearDownTestCase()
-{
-}
+void WindowSystemSubWindowTest::TearDownTestCase() {}
 
-void WindowSystemSubWindowTest::SetUp()
-{
-}
+void WindowSystemSubWindowTest::SetUp() {}
 
-void WindowSystemSubWindowTest::TearDown()
-{
-}
+void WindowSystemSubWindowTest::TearDown() {}
 
 static sptr<Window> CreateBaseWindow(WindowType type, struct Rect rect, uint32_t flags)
 {
@@ -92,8 +84,11 @@ static sptr<Window> CreateBaseWindow(WindowType type, struct Rect rect, uint32_t
     return window;
 }
 
-static sptr<Window> CreateAppSubWindow(sptr<Window> parentWindow, WindowType type, struct Rect rect,
-    uint32_t flags, std::string name = "")
+static sptr<Window> CreateAppSubWindow(sptr<Window> parentWindow,
+                                       WindowType type,
+                                       struct Rect rect,
+                                       uint32_t flags,
+                                       std::string name = "")
 {
     sptr<WindowOption> subOp = new WindowOption();
     subOp->SetWindowType(type);
@@ -136,13 +131,13 @@ HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow01, TestSize.Level1)
         WindowType::WINDOW_TYPE_DESKTOP,
     };
     for (auto itor = windowTypes.begin(); itor != windowTypes.end(); itor++) {
-        struct Rect baseRect = {0, 0, 100, 200};
+        struct Rect baseRect = { 0, 0, 100, 200 };
         uint32_t baseFlags = 0;
         sptr<Window> baseWindow = CreateBaseWindow(static_cast<WindowType>(*itor), baseRect, baseFlags);
         if (baseWindow == nullptr) {
             continue;
         }
-        struct Rect rect = {0, 0, 100, 200};
+        struct Rect rect = { 0, 0, 100, 200 };
         uint32_t flags = 0;
         sptr<Window> subWindow = CreateSystemSubWindow(baseWindow, rect, flags);
         if (subWindow == nullptr) {
@@ -173,14 +168,14 @@ HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow02, TestSize.Level1)
         if (static_cast<WindowType>(*itor) == WindowType::WINDOW_TYPE_FLOAT) {
             CommonTestUtils::GuaranteeFloatWindowPermission("wms_window_systemsubwindow_test");
         }
-        struct Rect baseRect = {0, 0, 100, 200};
+        struct Rect baseRect = { 0, 0, 100, 200 };
         uint32_t baseFlags = 0;
         sptr<Window> baseWindow = CreateBaseWindow(static_cast<WindowType>(*itor), baseRect, baseFlags);
         if (baseWindow == nullptr) {
             continue;
         }
 
-        struct Rect rect = {0, 0, 100, 200};
+        struct Rect rect = { 0, 0, 100, 200 };
         uint32_t flags = 0;
         sptr<Window> subWindow = CreateSystemSubWindow(baseWindow, rect, flags);
         if (subWindow == nullptr) {
@@ -209,7 +204,7 @@ HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow03, TestSize.Level1)
 
     std::vector<WindowType> windowTypes = { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW };
     for (auto itor = windowTypes.begin(); itor != windowTypes.end(); itor++) {
-        struct Rect baseRect = {0, 0, 100, 200};
+        struct Rect baseRect = { 0, 0, 100, 200 };
         uint32_t baseFlags = 0;
         sptr<Window> baseWindow = CreateBaseWindow(static_cast<WindowType>(*itor), baseRect, baseFlags);
         if (baseWindow == nullptr) {
@@ -217,7 +212,7 @@ HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow03, TestSize.Level1)
         }
         ASSERT_NE(nullptr, baseWindow);
 
-        struct Rect rect = {0, 0, 100, 200};
+        struct Rect rect = { 0, 0, 100, 200 };
         uint32_t flags = 0;
         sptr<Window> subWindow = CreateSystemSubWindow(baseWindow, rect, flags);
         if (subWindow == nullptr) {
@@ -240,7 +235,7 @@ HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow04, TestSize.Level1)
         WindowType::WINDOW_TYPE_APP_COMPONENT,
     };
     for (auto itor = windowTypes.begin(); itor != windowTypes.end(); itor++) {
-        struct Rect baseRect = {0, 0, 100, 200};
+        struct Rect baseRect = { 0, 0, 100, 200 };
         uint32_t baseFlags = 0;
         sptr<Window> baseWindow = CreateBaseWindow(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, baseRect, baseFlags);
         if (baseWindow == nullptr) {
@@ -254,7 +249,7 @@ HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow04, TestSize.Level1)
         }
         ASSERT_NE(nullptr, appSubWindow);
 
-        struct Rect rect = {0, 0, 100, 200};
+        struct Rect rect = { 0, 0, 100, 200 };
         uint32_t flags = 0;
         sptr<Window> subWindow = CreateSystemSubWindow(appSubWindow, rect, flags);
         ASSERT_EQ(nullptr, subWindow);
@@ -270,7 +265,7 @@ HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow04, TestSize.Level1)
  */
 HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow05, TestSize.Level1)
 {
-    struct Rect baseRect = {0, 0, 100, 200};
+    struct Rect baseRect = { 0, 0, 100, 200 };
     uint32_t baseFlags = 0;
     sptr<Window> baseWindow = CreateBaseWindow(WindowType::WINDOW_TYPE_DOCK_SLICE, baseRect, baseFlags);
     if (baseWindow == nullptr) {
@@ -284,7 +279,7 @@ HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow05, TestSize.Level1)
     }
     ASSERT_NE(nullptr, systemSubWindow);
 
-    struct Rect rect = {0, 0, 100, 200};
+    struct Rect rect = { 0, 0, 100, 200 };
     uint32_t flags = 0;
     sptr<Window> subWindow = CreateSystemSubWindow(systemSubWindow, rect, flags);
     if (subWindow == nullptr) {
@@ -309,7 +304,7 @@ HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow05, TestSize.Level1)
  */
 HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow06, TestSize.Level1)
 {
-    struct Rect baseRect = {0, 0, 100, 200};
+    struct Rect baseRect = { 0, 0, 100, 200 };
     uint32_t baseFlags = 0;
     sptr<Window> baseWindow = CreateBaseWindow(WindowType::WINDOW_TYPE_DOCK_SLICE, baseRect, baseFlags);
     if (baseWindow == nullptr) {
@@ -317,7 +312,7 @@ HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow06, TestSize.Level1)
     }
     ASSERT_NE(nullptr, baseWindow);
 
-    struct Rect rect = {0, 0, 100, 200};
+    struct Rect rect = { 0, 0, 100, 200 };
     uint32_t flags = 0;
     sptr<Window> subWindow = CreateSystemSubWindow(baseWindow, rect, flags);
     if (subWindow == nullptr) {
@@ -351,7 +346,7 @@ HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow06, TestSize.Level1)
  */
 HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow07, TestSize.Level1)
 {
-    struct Rect baseRect = {0, 0, 100, 200};
+    struct Rect baseRect = { 0, 0, 100, 200 };
     uint32_t baseFlags = 0;
     sptr<Window> baseWindow = CreateBaseWindow(WindowType::WINDOW_TYPE_DIALOG, baseRect, baseFlags);
     if (baseWindow == nullptr) {
@@ -359,7 +354,7 @@ HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow07, TestSize.Level1)
     }
     ASSERT_NE(nullptr, baseWindow);
 
-    struct Rect rect = {0, 0, 100, 200};
+    struct Rect rect = { 0, 0, 100, 200 };
     uint32_t flags = 0;
     sptr<Window> subWindow = CreateSystemSubWindow(baseWindow, rect, flags);
     if (subWindow == nullptr) {

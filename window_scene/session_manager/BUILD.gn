@@ -32,6 +32,7 @@ config("session_manager_public_config") {
     # for session_manager
     "${window_base_path}/wmserver/include",
     "${window_base_path}/wmserver/include/zidl",
+    "${target_gen_dir}/../../wmserver",
 
     # for screen_session_manager
     "${window_base_path}/utils/include",
@@ -72,6 +73,7 @@ ohos_shared_library("scene_session_manager") {
     "src/rdb/wms_rdb_open_callback.cpp",
     "src/scb_session_handler.cpp",
     "src/scene_input_manager.cpp",
+    "src/scene_screen_change_listener.cpp",
     "src/scene_session_converter.cpp",
     "src/scene_session_dirty_manager.cpp",
     "src/scene_session_manager.cpp",
@@ -79,6 +81,7 @@ ohos_shared_library("scene_session_manager") {
     "src/scene_system_ability_listener.cpp",
     "src/session_listener_controller.cpp",
     "src/session_manager_agent_controller.cpp",
+    "src/ui_effect_manager.cpp",
     "src/user_switch_reporter.cpp",
     "src/window_focus_controller.cpp",
     "src/window_manager_lru.cpp",
@@ -86,6 +89,8 @@ ohos_shared_library("scene_session_manager") {
     "src/zidl/scene_session_manager_lite_stub.cpp",
     "src/zidl/scene_session_manager_stub.cpp",
     "src/zidl/session_lifecycle_listener_stub.cpp",
+    "src/zidl/session_router_stack_listener_proxy.cpp",
+    "src/zidl/session_router_stack_listener_stub.cpp",
   ]
 
   public_configs = [ ":session_manager_public_config" ]
@@ -99,6 +104,7 @@ ohos_shared_library("scene_session_manager") {
     "${window_base_path}/window_scene/screen_session_manager_client:screen_session_manager_client",
     "${window_base_path}/window_scene/session:scene_session",
     "${window_base_path}/window_scene/session:screen_session",
+    "${window_base_path}/window_scene/session:ui_effect_controller",
   ]
   public_external_deps = [
     "ability_runtime:session_handler",
@@ -134,6 +140,7 @@ ohos_shared_library("scene_session_manager") {
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
+    "hitrace:libhitracechain",
     "image_framework:image_native",
     "init:libbegetutil",
     "input:libmmi-client",
@@ -207,7 +214,6 @@ ohos_shared_library("session_manager") {
     debug = false
   }
   sources = [
-    "../../wmserver/src/zidl/mock_session_manager_service_proxy.cpp",
     "../session_manager_service/src/session_manager_service_proxy.cpp",
     "src/session_manager.cpp",
     "src/zidl/scene_session_manager_proxy.cpp",
@@ -223,6 +229,8 @@ ohos_shared_library("session_manager") {
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/utils:libwmutil_base",
     "${window_base_path}/window_scene/common:window_scene_common",
+    "${window_base_path}/window_scene/session:ui_effect_controller_client",
+    "${window_base_path}/wmserver:mock_session_manager_service_proxy",
   ]
   public_external_deps = [
     "ability_runtime:session_handler",
@@ -267,7 +275,6 @@ ohos_shared_library("session_manager_lite") {
     debug = false
   }
   sources = [
-    "../../wmserver/src/zidl/mock_session_manager_service_proxy.cpp",
     "../session_manager_service/src/session_manager_service_proxy.cpp",
     "src/session_manager_lite.cpp",
     "src/zidl/scene_session_manager_lite_proxy.cpp",
@@ -280,11 +287,13 @@ ohos_shared_library("session_manager_lite") {
   deps = [
     "${window_base_path}/utils:libwmutil_base",
     "${window_base_path}/window_scene/common:window_scene_common",
+    "${window_base_path}/wmserver:mock_session_manager_service_proxy",
   ]
 
   public_external_deps = [
     "ability_runtime:session_handler",
     "accessibility:accessibility_common",
+    "input:libmmi-client",
     "input:libmmi-napi",
   ]
 
@@ -294,6 +303,7 @@ ohos_shared_library("session_manager_lite") {
     "ability_runtime:mission_info",
     "c_utils:utils",
     "hilog:libhilog",
+    "image_framework:image_native",
     "ipc:ipc_single",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",

@@ -28,11 +28,11 @@ ohos_ndk_library("native_display_manager") {
   output_name = "native_display_manager"
   output_extension = "so"
   ndk_description_file = "./libdm.ndk.json"
-  system_capability = "SystemCapability.Window.SessionManager"
+  system_capability = "SystemCapability.WindowManager.WindowManager.Core"
   system_capability_headers = [
-    "oh_display_capture.h",
-    "oh_display_info.h",
-    "oh_display_manager.h",
+    "window_manager/oh_display_capture.h",
+    "window_manager/oh_display_info.h",
+    "window_manager/oh_display_manager.h",
   ]
   min_compact_version = "12"
 }

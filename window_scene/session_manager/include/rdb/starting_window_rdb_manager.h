@@ -25,6 +25,17 @@
 #include "interfaces/include/ws_common.h"
 #include "wms_rdb_open_callback.h"
 
+namespace OHOS::AppExecFwk {
+class IBundleMgr;
+struct AbilityInfo;
+struct BundleInfo;
+class LauncherService;
+} // namespace OHOS::AppExecFwk
+
+namespace OHOS::Global::Resource {
+class ResourceManager;
+} // namespace OHOS::Global::Resource
+
 namespace OHOS {
 namespace Rosen {
 struct StartingWindowRdbItemKey {
@@ -44,8 +55,12 @@ public:
     bool BatchInsert(int64_t& outInsertNum,
         const std::vector<std::pair<StartingWindowRdbItemKey, StartingWindowInfo>>& inputValues);
     bool DeleteDataByBundleName(const std::string& bundleName);
+    bool DeleteAllData();
     bool QueryData(const StartingWindowRdbItemKey& key, StartingWindowInfo& value);
-    
+    std::string GetStartWindowValFromProfile(const AppExecFwk::AbilityInfo& abilityInfo,
+        const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr,
+        const std::string& key, const std::string& defaultVal);
+
 private:
     std::shared_ptr<NativeRdb::RdbStore> GetRdbStore();
     

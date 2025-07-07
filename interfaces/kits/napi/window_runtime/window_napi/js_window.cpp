@@ -23,6 +23,7 @@
 #endif
 
 #include "js_err_utils.h"
+#include "js_window_animation_utils.h"
 #include "js_window_utils.h"
 #include "window.h"
 #include "window_helper.h"
@@ -72,33 +73,32 @@ JsWindow::JsWindow(const sptr<Window>& window)
         {
             std::lock_guard<std::mutex> lock(g_mutex);
             if (windowName.empty() || g_jsWindowMap.count(windowName) == 0) {
-                WLOGFE("Can not find window %{public}s ", windowName.c_str());
+                TLOGE(WmsLogTag::WMS_LIFE, "Can not find window %{public}s ", windowName.c_str());
                 return;
             }
             g_jsWindowMap.erase(windowName);
+            TLOGI(WmsLogTag::WMS_LIFE, "Remove window %{public}s", windowName.c_str());
         }
         windowToken_ = nullptr;
-        WLOGI("Destroy window %{public}s in js window", windowName.c_str());
+        TLOGI(WmsLogTag::WMS_LIFE, "Destroy window %{public}s in js window", windowName.c_str());
     };
     windowToken_->RegisterWindowDestroyedListener(func);
-    WLOGI(" constructorCnt: %{public}d", ++g_ctorCnt);
+    windowName_ = windowToken_->GetWindowName();
+    TLOGI(WmsLogTag::WMS_LIFE, "window: %{public}s, ctorCnt: %{public}d", windowName_.c_str(), ++g_ctorCnt);
 }
 
 JsWindow::~JsWindow()
 {
-    WLOGI(" deConstructorCnt:%{public}d", ++g_dtorCnt);
+    TLOGI(WmsLogTag::WMS_LIFE, "window: %{public}s, dtorCnt: %{public}d", windowName_.c_str(), ++g_dtorCnt);
     if (windowToken_ != nullptr) {
         windowToken_->UnregisterWindowDestroyedListener();
     }
     windowToken_ = nullptr;
 }
 
-std::string JsWindow::GetWindowName()
+const std::string& JsWindow::GetWindowName() const
 {
-    if (windowToken_ == nullptr) {
-        return "";
-    }
-    return windowToken_->GetWindowName();
+    return windowName_;
 }
 
 void JsWindow::Finalizer(napi_env env, void* data, void* hint)
@@ -112,54 +112,54 @@ void JsWindow::Finalizer(napi_env env, void* data, void* hint)
     std::string windowName = jsWin->GetWindowName();
     std::lock_guard<std::mutex> lock(g_mutex);
     g_jsWindowMap.erase(windowName);
-    WLOGI("Remove window %{public}s from g_jsWindowMap", windowName.c_str());
+    TLOGI(WmsLogTag::WMS_LIFE, "Remove window %{public}s", windowName.c_str());
 }
 
 napi_value JsWindow::Show(napi_env env, napi_callback_info info)
 {
-    WLOGI("Show");
+    TLOGD(WmsLogTag::DEFAULT, "Show");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnShow(env, info) : nullptr;
 }
 
 napi_value JsWindow::ShowWindow(napi_env env, napi_callback_info info)
 {
-    WLOGI("Show");
+    TLOGD(WmsLogTag::DEFAULT, "Show");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnShowWindow(env, info) : nullptr;
 }
 
 napi_value JsWindow::ShowWithAnimation(napi_env env, napi_callback_info info)
 {
-    WLOGI("ShowWithAnimation");
+    TLOGD(WmsLogTag::DEFAULT, "ShowWithAnimation");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnShowWithAnimation(env, info) : nullptr;
 }
 
 napi_value JsWindow::Destroy(napi_env env, napi_callback_info info)
 {
-    WLOGI("Destroy");
+    TLOGD(WmsLogTag::DEFAULT, "Destroy");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnDestroy(env, info) : nullptr;
 }
 
 napi_value JsWindow::DestroyWindow(napi_env env, napi_callback_info info)
 {
-    WLOGI("Destroy");
+    TLOGD(WmsLogTag::DEFAULT, "Destroy");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnDestroyWindow(env, info) : nullptr;
 }
 
 napi_value JsWindow::Hide(napi_env env, napi_callback_info info)
 {
-    WLOGD("Hide");
+    TLOGD(WmsLogTag::DEFAULT, "Hide");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnHide(env, info) : nullptr;
 }
 
 napi_value JsWindow::HideWithAnimation(napi_env env, napi_callback_info info)
 {
-    WLOGI("HideWithAnimation");
+    TLOGD(WmsLogTag::DEFAULT, "HideWithAnimation");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnHideWithAnimation(env, info) : nullptr;
 }
@@ -180,7 +180,7 @@ napi_value JsWindow::Restore(napi_env env, napi_callback_info info)
 /** @note @window.layout */
 napi_value JsWindow::MoveTo(napi_env env, napi_callback_info info)
 {
-    WLOGD("MoveTo");
+    TLOGD(WmsLogTag::DEFAULT, "MoveTo");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnMoveTo(env, info) : nullptr;
 }
@@ -188,7 +188,7 @@ napi_value JsWindow::MoveTo(napi_env env, napi_callback_info info)
 /** @note @window.layout */
 napi_value JsWindow::MoveWindowTo(napi_env env, napi_callback_info info)
 {
-    WLOGD("MoveTo");
+    TLOGD(WmsLogTag::DEFAULT, "MoveTo");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnMoveWindowTo(env, info) : nullptr;
 }
@@ -210,6 +210,14 @@ napi_value JsWindow::MoveWindowToGlobal(napi_env env, napi_callback_info info)
 }
 
 /** @note @window.layout */
+napi_value JsWindow::MoveWindowToGlobalDisplay(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnMoveWindowToGlobalDisplay(env, info) : nullptr;
+}
+
+/** @note @window.layout */
 napi_value JsWindow::GetGlobalScaledRect(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
@@ -220,7 +228,7 @@ napi_value JsWindow::GetGlobalScaledRect(napi_env env, napi_callback_info info)
 /** @note @window.layout */
 napi_value JsWindow::Resize(napi_env env, napi_callback_info info)
 {
-    WLOGD("Resize");
+    TLOGD(WmsLogTag::DEFAULT, "Resize");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnResize(env, info) : nullptr;
 }
@@ -228,7 +236,7 @@ napi_value JsWindow::Resize(napi_env env, napi_callback_info info)
 /** @note @window.layout */
 napi_value JsWindow::ResizeWindow(napi_env env, napi_callback_info info)
 {
-    WLOGI("Resize");
+    TLOGD(WmsLogTag::DEFAULT, "Resize");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnResizeWindow(env, info) : nullptr;
 }
@@ -248,9 +256,25 @@ napi_value JsWindow::ResizeWindowWithAnimation(napi_env env, napi_callback_info 
     return (me != nullptr) ? me->OnResizeWindowWithAnimation(env, info) : nullptr;
 }
 
+/** @note @window.layout */
+napi_value JsWindow::ClientToGlobalDisplay(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnClientToGlobalDisplay(env, info) : nullptr;
+}
+
+/** @note @window.layout */
+napi_value JsWindow::GlobalDisplayToClient(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnGlobalDisplayToClient(env, info) : nullptr;
+}
+
 napi_value JsWindow::SetWindowType(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetWindowType");
+    TLOGD(WmsLogTag::DEFAULT, "SetWindowType");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowType(env, info) : nullptr;
 }
@@ -258,21 +282,21 @@ napi_value JsWindow::SetWindowType(napi_env env, napi_callback_info info)
 /** @note @window.layout */
 napi_value JsWindow::SetWindowMode(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetWindowMode");
+    TLOGD(WmsLogTag::DEFAULT, "SetWindowMode");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowMode(env, info) : nullptr;
 }
 
 napi_value JsWindow::GetProperties(napi_env env, napi_callback_info info)
 {
-    WLOGD("GetProperties");
+    TLOGD(WmsLogTag::DEFAULT, "GetProperties");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnGetProperties(env, info) : nullptr;
 }
 
 napi_value JsWindow::GetWindowPropertiesSync(napi_env env, napi_callback_info info)
 {
-    WLOGD("GetProperties");
+    TLOGD(WmsLogTag::DEFAULT, "GetProperties");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnGetWindowPropertiesSync(env, info) : nullptr;
 }
@@ -293,7 +317,7 @@ napi_value JsWindow::UnregisterWindowCallback(napi_env env, napi_callback_info i
 
 napi_value JsWindow::BindDialogTarget(napi_env env, napi_callback_info info)
 {
-    WLOGI("BindDialogTarget");
+    TLOGD(WmsLogTag::DEFAULT, "BindDialogTarget");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnBindDialogTarget(env, info) : nullptr;
 }
@@ -306,28 +330,28 @@ napi_value JsWindow::SetDialogBackGestureEnabled(napi_env env, napi_callback_inf
 
 napi_value JsWindow::LoadContent(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    TLOGD(WmsLogTag::DEFAULT, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnLoadContent(env, info, false) : nullptr;
 }
 
 napi_value JsWindow::LoadContentByName(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    TLOGD(WmsLogTag::DEFAULT, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnLoadContent(env, info, true) : nullptr;
 }
 
 napi_value JsWindow::GetUIContext(napi_env env, napi_callback_info info)
 {
-    WLOGD("GetUIContext");
+    TLOGD(WmsLogTag::DEFAULT, "GetUIContext");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnGetUIContext(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetUIContent(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    TLOGD(WmsLogTag::DEFAULT, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetUIContent(env, info) : nullptr;
 }
@@ -383,14 +407,14 @@ napi_value JsWindow::SetSpecificSystemBarEnabled(napi_env env, napi_callback_inf
 
 napi_value JsWindow::EnableLandscapeMultiWindow(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "EnableLandscapeMultiWindow");
+    TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "EnableLandscapeMultiWindow");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnEnableLandscapeMultiWindow(env, info) : nullptr;
 }
 
 napi_value JsWindow::DisableLandscapeMultiWindow(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "DisableLandscapeMultiWindow");
+    TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "DisableLandscapeMultiWindow");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnDisableLandscapeMultiWindow(env, info) : nullptr;
 }
@@ -446,77 +470,77 @@ napi_value JsWindow::GetWindowAvoidAreaSync(napi_env env, napi_callback_info inf
 
 napi_value JsWindow::IsShowing(napi_env env, napi_callback_info info)
 {
-    WLOGD("IsShowing");
+    TLOGD(WmsLogTag::DEFAULT, "IsShowing");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnIsShowing(env, info) : nullptr;
 }
 
 napi_value JsWindow::IsWindowShowingSync(napi_env env, napi_callback_info info)
 {
-    WLOGD("IsShowing");
+    TLOGD(WmsLogTag::DEFAULT, "IsShowing");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnIsWindowShowingSync(env, info) : nullptr;
 }
 
 napi_value JsWindow::IsSupportWideGamut(napi_env env, napi_callback_info info)
 {
-    WLOGI("IsSupportWideGamut");
+    TLOGD(WmsLogTag::DEFAULT, "IsSupportWideGamut");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnIsSupportWideGamut(env, info) : nullptr;
 }
 
 napi_value JsWindow::IsWindowSupportWideGamut(napi_env env, napi_callback_info info)
 {
-    WLOGI("IsSupportWideGamut");
+    TLOGD(WmsLogTag::DEFAULT, "IsSupportWideGamut");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnIsWindowSupportWideGamut(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetBackgroundColor(napi_env env, napi_callback_info info)
 {
-    WLOGFD("SetBackgroundColor");
+    TLOGD(WmsLogTag::DEFAULT, "SetBackgroundColor");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetBackgroundColor(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetWindowBackgroundColorSync(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetBackgroundColor");
+    TLOGD(WmsLogTag::DEFAULT, "SetBackgroundColor");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowBackgroundColorSync(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetBrightness(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetBrightness");
+    TLOGD(WmsLogTag::DEFAULT, "SetBrightness");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetBrightness(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetWindowBrightness(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetBrightness");
+    TLOGD(WmsLogTag::DEFAULT, "SetBrightness");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowBrightness(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetDimBehind(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetDimBehind");
+    TLOGD(WmsLogTag::DEFAULT, "SetDimBehind");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetDimBehind(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetFocusable(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_FOCUS, "SetFocusable");
+    TLOGD(WmsLogTag::WMS_FOCUS, "SetFocusable");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetFocusable(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetWindowFocusable(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetFocusable");
+    TLOGD(WmsLogTag::DEFAULT, "SetFocusable");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowFocusable(env, info) : nullptr;
 }
@@ -524,7 +548,7 @@ napi_value JsWindow::SetWindowFocusable(napi_env env, napi_callback_info info)
 /** @note @window.hierarchy */
 napi_value JsWindow::SetTopmost(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_HIERARCHY, "SetTopmost");
+    TLOGD(WmsLogTag::WMS_HIERARCHY, "SetTopmost");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetTopmost(env, info) : nullptr;
 }
@@ -540,7 +564,7 @@ napi_value JsWindow::SetWindowTopmost(napi_env env, napi_callback_info info)
 /** @note @window.hierarchy */
 napi_value JsWindow::SetSubWindowZLevel(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_HIERARCHY, "[NAPI]");
+    TLOGD(WmsLogTag::WMS_HIERARCHY, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetSubWindowZLevel(env, info) : nullptr;
 }
@@ -548,7 +572,7 @@ napi_value JsWindow::SetSubWindowZLevel(napi_env env, napi_callback_info info)
 /** @note @window.hierarchy */
 napi_value JsWindow::GetSubWindowZLevel(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_HIERARCHY, "[NAPI]");
+    TLOGD(WmsLogTag::WMS_HIERARCHY, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnGetSubWindowZLevel(env, info) : nullptr;
 }
@@ -562,42 +586,42 @@ napi_value JsWindow::SetWindowDelayRaiseOnDrag(napi_env env, napi_callback_info 
 
 napi_value JsWindow::SetKeepScreenOn(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetKeepScreenOn");
+    TLOGD(WmsLogTag::DEFAULT, "SetKeepScreenOn");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetKeepScreenOn(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetWindowKeepScreenOn(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetKeepScreenOn");
+    TLOGD(WmsLogTag::DEFAULT, "SetKeepScreenOn");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowKeepScreenOn(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetWakeUpScreen(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetWakeUpScreen");
+    TLOGD(WmsLogTag::DEFAULT, "SetWakeUpScreen");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWakeUpScreen(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetOutsideTouchable(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetOutsideTouchable");
+    TLOGD(WmsLogTag::DEFAULT, "SetOutsideTouchable");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetOutsideTouchable(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetPrivacyMode(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetPrivacyMode");
+    TLOGD(WmsLogTag::DEFAULT, "SetPrivacyMode");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetPrivacyMode(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetWindowPrivacyMode(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetPrivacyMode");
+    TLOGD(WmsLogTag::DEFAULT, "SetPrivacyMode");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowPrivacyMode(env, info) : nullptr;
 }
@@ -626,7 +650,7 @@ napi_value JsWindow::SetResizeByDragEnabled(napi_env env, napi_callback_info inf
 /** @note @window.hierarchy */
 napi_value JsWindow::SetRaiseByClickEnabled(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetRaiseByClickEnabled");
+    TLOGD(WmsLogTag::DEFAULT, "SetRaiseByClickEnabled");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetRaiseByClickEnabled(env, info) : nullptr;
 }
@@ -647,42 +671,42 @@ napi_value JsWindow::SetWindowTouchable(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::SetTransparent(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetTransparent");
+    TLOGD(WmsLogTag::DEFAULT, "SetTransparent");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetTransparent(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetCallingWindow(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetCallingWindow");
+    TLOGD(WmsLogTag::DEFAULT, "SetCallingWindow");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetCallingWindow(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetPreferredOrientation(napi_env env, napi_callback_info info)
 {
-    WLOGD("SetPreferredOrientation");
+    TLOGD(WmsLogTag::DEFAULT, "SetPreferredOrientation");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetPreferredOrientation(env, info) : nullptr;
 }
 
 napi_value JsWindow::GetPreferredOrientation(napi_env env, napi_callback_info info)
 {
-    WLOGD("GetPreferredOrientation");
+    TLOGD(WmsLogTag::DEFAULT, "GetPreferredOrientation");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnGetPreferredOrientation(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetSnapshotSkip(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetSnapshotSkip");
+    TLOGD(WmsLogTag::DEFAULT, "SetSnapshotSkip");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetSnapshotSkip(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetSingleFrameComposerEnabled(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetSingleFrameComposerEnabled");
+    TLOGD(WmsLogTag::DEFAULT, "SetSingleFrameComposerEnabled");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetSingleFrameComposerEnabled(env, info) : nullptr;
 }
@@ -690,7 +714,7 @@ napi_value JsWindow::SetSingleFrameComposerEnabled(napi_env env, napi_callback_i
 /** @note @window.hierarchy */
 napi_value JsWindow::RaiseToAppTop(napi_env env, napi_callback_info info)
 {
-    WLOGI("RaiseToAppTop");
+    TLOGD(WmsLogTag::DEFAULT, "RaiseToAppTop");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnRaiseToAppTop(env, info) : nullptr;
 }
@@ -704,84 +728,84 @@ napi_value JsWindow::DisableWindowDecor(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::SetColorSpace(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetColorSpace");
+    TLOGD(WmsLogTag::DEFAULT, "SetColorSpace");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetColorSpace(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetWindowColorSpace(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetColorSpace");
+    TLOGD(WmsLogTag::DEFAULT, "SetColorSpace");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowColorSpace(env, info) : nullptr;
 }
 
 napi_value JsWindow::GetColorSpace(napi_env env, napi_callback_info info)
 {
-    WLOGI("GetColorSpace");
+    TLOGD(WmsLogTag::DEFAULT, "GetColorSpace");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnGetColorSpace(env, info) : nullptr;
 }
 
 napi_value JsWindow::GetWindowColorSpaceSync(napi_env env, napi_callback_info info)
 {
-    WLOGI("GetColorSpace");
+    TLOGD(WmsLogTag::DEFAULT, "GetColorSpace");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnGetWindowColorSpaceSync(env, info) : nullptr;
 }
 
 napi_value JsWindow::Dump(napi_env env, napi_callback_info info)
 {
-    WLOGI("Dump");
+    TLOGD(WmsLogTag::DEFAULT, "Dump");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnDump(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetForbidSplitMove(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetForbidSplitMove");
+    TLOGD(WmsLogTag::DEFAULT, "SetForbidSplitMove");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetForbidSplitMove(env, info) : nullptr;
 }
 
 napi_value JsWindow::Opacity(napi_env env, napi_callback_info info)
 {
-    WLOGI("Opacity");
+    TLOGD(WmsLogTag::DEFAULT, "Opacity");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnOpacity(env, info) : nullptr;
 }
 
 napi_value JsWindow::Scale(napi_env env, napi_callback_info info)
 {
-    WLOGI("Scale");
+    TLOGD(WmsLogTag::DEFAULT, "Scale");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnScale(env, info) : nullptr;
 }
 
 napi_value JsWindow::Rotate(napi_env env, napi_callback_info info)
 {
-    WLOGI("Rotate");
+    TLOGD(WmsLogTag::DEFAULT, "Rotate");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnRotate(env, info) : nullptr;
 }
 
 napi_value JsWindow::Translate(napi_env env, napi_callback_info info)
 {
-    WLOGI("Translate");
+    TLOGD(WmsLogTag::DEFAULT, "Translate");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnTranslate(env, info) : nullptr;
 }
 
 napi_value JsWindow::GetTransitionController(napi_env env, napi_callback_info info)
 {
-    WLOGI("GetTransitionController");
+    TLOGD(WmsLogTag::DEFAULT, "GetTransitionController");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnGetTransitionController(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetCornerRadius(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetCornerRadius");
+    TLOGD(WmsLogTag::DEFAULT, "SetCornerRadius");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetCornerRadius(env, info) : nullptr;
 }
@@ -802,7 +826,7 @@ napi_value JsWindow::GetWindowCornerRadius(napi_env env, napi_callback_info info
 
 napi_value JsWindow::SetShadow(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetShadow");
+    TLOGD(WmsLogTag::DEFAULT, "SetShadow");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetShadow(env, info) : nullptr;
 }
@@ -816,28 +840,28 @@ napi_value JsWindow::SetWindowShadowRadius(napi_env env, napi_callback_info info
 
 napi_value JsWindow::SetBlur(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetBlur");
+    TLOGD(WmsLogTag::DEFAULT, "SetBlur");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetBlur(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetBackdropBlur(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetBackdropBlur");
+    TLOGD(WmsLogTag::DEFAULT, "SetBackdropBlur");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetBackdropBlur(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetBackdropBlurStyle(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetBackdropBlurStyle");
+    TLOGD(WmsLogTag::DEFAULT, "SetBackdropBlurStyle");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetBackdropBlurStyle(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetWaterMarkFlag(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetWaterMarkFlag");
+    TLOGD(WmsLogTag::DEFAULT, "SetWaterMarkFlag");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWaterMarkFlag(env, info) : nullptr;
 }
@@ -851,14 +875,14 @@ napi_value JsWindow::SetHandwritingFlag(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::SetAspectRatio(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    TLOGD(WmsLogTag::DEFAULT, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetAspectRatio(env, info) : nullptr;
 }
 
 napi_value JsWindow::ResetAspectRatio(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    TLOGD(WmsLogTag::DEFAULT, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnResetAspectRatio(env, info) : nullptr;
 }
@@ -880,14 +904,14 @@ napi_value JsWindow::Maximize(napi_env env, napi_callback_info info)
 /** @note @window.hierarchy */
 napi_value JsWindow::RaiseAboveTarget(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    TLOGD(WmsLogTag::DEFAULT, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnRaiseAboveTarget(env, info) : nullptr;
 }
 
 napi_value JsWindow::KeepKeyboardOnFocus(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    TLOGD(WmsLogTag::DEFAULT, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnKeepKeyboardOnFocus(env, info) : nullptr;
 }
@@ -902,7 +926,7 @@ napi_value JsWindow::EnableDrag(napi_env env, napi_callback_info info)
 /** @note @window.layout */
 napi_value JsWindow::GetWindowLimits(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    TLOGD(WmsLogTag::DEFAULT, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnGetWindowLimits(env, info) : nullptr;
 }
@@ -910,7 +934,7 @@ napi_value JsWindow::GetWindowLimits(napi_env env, napi_callback_info info)
 /** @note @window.layout */
 napi_value JsWindow::SetWindowLimits(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    TLOGD(WmsLogTag::DEFAULT, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowLimits(env, info) : nullptr;
 }
@@ -950,6 +974,20 @@ napi_value JsWindow::SetFollowParentMultiScreenPolicy(napi_env env, napi_callbac
     return (me != nullptr) ? me->OnSetFollowParentMultiScreenPolicy(env, info) : nullptr;
 }
 
+napi_value JsWindow::SetWindowTransitionAnimation(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_ANIMATION, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetWindowTransitionAnimation(env, info) : nullptr;
+}
+
+napi_value JsWindow::GetWindowTransitionAnimation(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_ANIMATION, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnGetWindowTransitionAnimation(env, info) : nullptr;
+}
+
 napi_value JsWindow::SetWindowDecorHeight(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_DECOR, "[NAPI]");
@@ -987,9 +1025,16 @@ napi_value JsWindow::GetTitleButtonRect(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::SetWindowContainerColor(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_DECOR, "[NAPI]");
+    TLOGD(WmsLogTag::WMS_DECOR, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowContainerColor(env, info) : nullptr;
+}
+
+napi_value JsWindow::SetWindowContainerModalColor(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_DECOR, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetWindowContainerModalColor(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetWindowMask(napi_env env, napi_callback_info info)
@@ -1022,7 +1067,7 @@ napi_value JsWindow::SetWindowTitle(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::SetWindowGrayScale(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    TLOGD(WmsLogTag::DEFAULT, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowGrayScale(env, info) : nullptr;
 }
@@ -1039,6 +1084,13 @@ napi_value JsWindow::GetImmersiveModeEnabledState(napi_env env, napi_callback_in
     TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnGetImmersiveModeEnabledState(env, info) : nullptr;
+}
+
+napi_value JsWindow::IsImmersiveLayout(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnIsImmersiveLayout(env, info) : nullptr;
 }
 
 napi_value JsWindow::GetWindowStatus(napi_env env, napi_callback_info info)
@@ -1118,6 +1170,13 @@ napi_value JsWindow::GetWindowDensityInfo(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnGetWindowDensityInfo(env, info) : nullptr;
 }
 
+napi_value JsWindow::IsMainWindowFullScreenAcrossDisplays(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnIsMainWindowFullScreenAcrossDisplays(env, info) : nullptr;
+}
+
 napi_value JsWindow::SetSystemAvoidAreaEnabled(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
@@ -1146,11 +1205,32 @@ napi_value JsWindow::IsWindowHighlighted(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnIsWindowHighlighted(env, info) : nullptr;
 }
 
+napi_value JsWindow::SetDragKeyFramePolicy(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetDragKeyFramePolicy(env, info) : nullptr;
+}
+
+napi_value JsWindow::SetRelativePositionToParentWindowEnabled(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_SUB, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetRelativePositionToParentWindowEnabled(env, info) : nullptr;
+}
+
 napi_value JsWindow::SetFollowParentWindowLayoutEnabled(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_SUB, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetFollowParentWindowLayoutEnabled(env, info) : nullptr;
+}
+
+napi_value JsWindow::SetWindowShadowEnabled(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetWindowShadowEnabled(env, info) : nullptr;
 }
 
 WMError UpdateStatusBarProperty(const sptr<Window>& window, const uint32_t contentColor)
@@ -1228,7 +1308,7 @@ napi_value JsWindow::OnShow(napi_env env, napi_callback_info info)
         }
         TLOGNI(WmsLogTag::WMS_LIFE, "Window [%{public}u] show end, ret=%{public}d", weakWindow->GetWindowId(), ret);
     };
-    if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnShow") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_LIFE, "napi send event failed, window state is abnormal");
     }
     return result;
@@ -1243,8 +1323,19 @@ napi_value JsWindow::OnShowWindow(napi_env env, napi_callback_info info)
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     napi_value lastParam = (argc == 0) ? nullptr :
         ((argv[0] != nullptr && GetType(env, argv[0]) == napi_function) ? argv[0] : nullptr);
+    napi_value showWindowOptions = (argc == 0) ? nullptr :
+        ((argv[0] != nullptr && GetType(env, argv[0]) == napi_object) ? argv[0] : nullptr);
+    bool focusOnShow = true;
+    bool isShowWithOptions = false;
+    if (showWindowOptions != nullptr) {
+        isShowWithOptions = true;
+        WmErrorCode parseRet = ParseShowWindowOptions(env, showWindowOptions, focusOnShow);
+        if (parseRet != WmErrorCode::WM_OK) {
+            return NapiThrowError(env, parseRet);
+        }
+    }
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-    auto asyncTask = [weakToken, env, task = napiAsyncTask] {
+    auto asyncTask = [weakToken, env, task = napiAsyncTask, focusOnShow, isShowWithOptions] {
         auto weakWindow = weakToken.promote();
         if (weakWindow == nullptr) {
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
@@ -1259,7 +1350,15 @@ napi_value JsWindow::OnShowWindow(napi_env env, napi_callback_info info)
             task->Resolve(env, NapiGetUndefined(env));
             return;
         }
-        WMError ret = weakWindow->Show(0, false, true);
+        if (focusOnShow == false &&
+            (WindowHelper::IsModalSubWindow(weakWindow->GetType(), weakWindow->GetWindowFlags()) ||
+             WindowHelper::IsDialogWindow(weakWindow->GetType()))) {
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_CALLING));
+            TLOGNE(WmsLogTag::WMS_FOCUS, "only normal sub window supports setting focusOnShow");
+            return;
+        }
+        weakWindow->SetShowWithOptions(isShowWithOptions);
+        WMError ret = weakWindow->Show(0, false, focusOnShow);
         TLOGNI(WmsLogTag::WMS_LIFE, "Window [%{public}u, %{public}s] show with ret=%{public}d",
             weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
         if (ret == WMError::WM_OK) {
@@ -1271,7 +1370,7 @@ napi_value JsWindow::OnShowWindow(napi_env env, napi_callback_info info)
         TLOGNI(WmsLogTag::WMS_LIFE, "Window [%{public}u, %{public}s] show end, ret=%{public}d",
             weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
     };
-    if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnShowWindow") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_LIFE, "napi send event failed, window state is abnormal");
     }
     return result;
@@ -1322,7 +1421,7 @@ napi_value JsWindow::OnShowWithAnimation(napi_env env, napi_callback_info info)
         TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s Window [%{public}u, %{public}s] end, ret=%{public}d",
             where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
     };
-    if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnShowWithAnimation") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_LIFE, "napi send event failed, window state is abnormal");
     }
     return result;
@@ -1372,7 +1471,7 @@ napi_value JsWindow::OnDestroy(napi_env env, napi_callback_info info)
         windowToken_ = nullptr; // ensure window dtor when finalizer invalid
         task->Resolve(env, NapiGetUndefined(env));
     };
-    if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnDestroy") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_LIFE, "napi send event failed, window state is abnormal");
     }
     return result;
@@ -1413,7 +1512,7 @@ napi_value JsWindow::OnDestroyWindow(napi_env env, napi_callback_info info)
         windowToken_ = nullptr; // ensure window dtor when finalizer invalid
         task->Resolve(env, NapiGetUndefined(env));
     };
-    if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnDestroyWindow") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_LIFE, "napi send event failed, window state is abnormal");
     }
     return result;
@@ -1464,7 +1563,7 @@ napi_value JsWindow::HideWindowFunction(napi_env env, napi_callback_info info, W
         TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s end, window [%{public}u] ret=%{public}d", where,
             weakWindow->GetWindowId(), ret);
     };
-    if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "HideWindowFunction") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_LIFE, "napi send event failed, window state is abnormal");
     }
     return result;
@@ -1515,7 +1614,7 @@ napi_value JsWindow::OnHideWithAnimation(napi_env env, napi_callback_info info)
         TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s end, window [%{public}u, %{public}s] ret=%{public}d",
             where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
     };
-    if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnHideWithAnimation") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_LIFE, "napi send event failed, window state is abnormal");
     }
     return result;
@@ -1547,7 +1646,7 @@ napi_value JsWindow::OnRecover(napi_env env, napi_callback_info info)
         TLOGNI(WmsLogTag::WMS_LAYOUT_PC, "%{public}s end, window [%{public}u] ret=%{public}d",
             where, window->GetWindowId(), ret);
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_immediate, "OnRecover") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env, CreateJsError(env,
             static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
     }
@@ -1584,7 +1683,7 @@ napi_value JsWindow::OnRestore(napi_env env, napi_callback_info info)
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "Window restore failed"));
         }
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_immediate, "OnRestore") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env, CreateJsError(env,
             static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
     }
@@ -1639,7 +1738,7 @@ napi_value JsWindow::OnMoveTo(napi_env env, napi_callback_info info)
         TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s: end, window [%{public}u, %{public}s] ret=%{public}d",
                where, window->GetWindowId(), window->GetWindowName().c_str(), ret);
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnMoveTo") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
     }
@@ -1692,7 +1791,7 @@ napi_value JsWindow::OnMoveWindowTo(napi_env env, napi_callback_info info)
         TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s: end, window [%{public}u, %{public}s] ret=%{public}d",
                where, window->GetWindowId(), window->GetWindowName().c_str(), ret);
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnMoveWindowTo") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
     }
@@ -1718,7 +1817,7 @@ static void SetMoveWindowToAsyncTask(NapiAsyncTask::ExecuteCallback& execute, Na
             return;
         }
         *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->MoveToAsync(x, y, moveConfiguration));
-        TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s end, window [%{public}u, %{public}s] err=%{public}d",
+        TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s end, window [%{public}u, %{public}s] err=%{public}d",
             where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), *errCodePtr);
     };
     complete = [weakToken, errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
@@ -1796,7 +1895,7 @@ static void SetMoveWindowToGlobalAsyncTask(NapiAsyncTask::ExecuteCallback& execu
             return;
         }
         *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->MoveWindowToGlobal(x, y, moveConfiguration));
-        TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s end, window [%{public}u, %{public}s] err=%{public}d",
+        TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s end, window [%{public}u, %{public}s] err=%{public}d",
             where, window->GetWindowId(), window->GetWindowName().c_str(), *errCodePtr);
     };
     complete = [weakToken, errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
@@ -1852,6 +1951,56 @@ napi_value JsWindow::OnMoveWindowToGlobal(napi_env env, napi_callback_info info)
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JsWindow::OnMoveWindowToGlobal",
         env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
+    return result;
+}
+
+/** @note @window.layout */
+napi_value JsWindow::OnMoveWindowToGlobalDisplay(napi_env env, napi_callback_info info)
+{
+    size_t argc = TWO_PARAMS_SIZE;
+    napi_value argv[TWO_PARAMS_SIZE] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != TWO_PARAMS_SIZE) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid argc: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+
+    int32_t x = 0;
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], x)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to x");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    int32_t y = 0;
+    if (!ConvertFromJsValue(env, argv[INDEX_ONE], y)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to y");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [windowToken = wptr<Window>(windowToken_), x, y, env, napiAsyncTask, where = __func__] {
+        auto window = windowToken.promote();
+        if (!window) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: window is nullptr", where);
+            napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+            return;
+        }
+        auto moveResult = window->MoveWindowToGlobalDisplay(x, y);
+        auto it = WM_JS_TO_ERROR_CODE_MAP.find(moveResult);
+        WmErrorCode ret = (it != WM_JS_TO_ERROR_CODE_MAP.end()) ? it->second : WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+        if (ret == WmErrorCode::WM_OK) {
+            napiAsyncTask->Resolve(env, NapiGetUndefined(env));
+        } else {
+            napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, ret, "Failed to move window"));
+        }
+        TLOGNI(WmsLogTag::WMS_LAYOUT,
+            "%{public}s: window: [%{public}u, %{public}s], x: %{public}d, y: %{public}d, ret: %{public}d",
+            where, window->GetWindowId(), window->GetWindowName().c_str(), x, y, static_cast<int32_t>(ret));
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+        napiAsyncTask->Reject(env,
+            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "Failed to send event"));
+    }
     return result;
 }
 
@@ -1928,7 +2077,7 @@ napi_value JsWindow::OnResize(napi_env env, napi_callback_info info)
         TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s: end, window [%{public}u, %{public}s] ret=%{public}d",
                where, window->GetWindowId(), window->GetWindowName().c_str(), ret);
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnResize") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
     }
@@ -1986,7 +2135,7 @@ napi_value JsWindow::OnResizeWindow(napi_env env, napi_callback_info info)
         TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s: end, window [%{public}u, %{public}s] ret=%{public}d",
                where, window->GetWindowId(), window->GetWindowName().c_str(), ret);
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnResizeWindow") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
     }
@@ -2013,7 +2162,7 @@ static void SetResizeWindowAsyncTask(NapiAsyncTask::ExecuteCallback& execute, Na
         }
         *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(
             weakWindow->ResizeAsync(static_cast<uint32_t>(width), static_cast<uint32_t>(height)));
-        TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s end, window [%{public}u, %{public}s] err=%{public}d",
+        TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s end, window [%{public}u, %{public}s] err=%{public}d",
             where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), *errCodePtr);
     };
     complete = [weakToken, errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
@@ -2089,7 +2238,7 @@ static void SetResizeWindowWithAnimationAsyncTask(NapiAsyncTask::ExecuteCallback
             return;
         }
         *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->ResizeAsync(rect.width_, rect.height_, rectAnimationConfig));
-        TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s end, window [%{public}u, %{public}s] err=%{public}d",
+        TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s end, window [%{public}u, %{public}s] err=%{public}d",
             where, window->GetWindowId(), window->GetWindowName().c_str(), *errCodePtr);
     };
     complete = [errCodePtr, where](napi_env env, NapiAsyncTask& task, int32_t status) {
@@ -2150,6 +2299,70 @@ napi_value JsWindow::OnResizeWindowWithAnimation(napi_env env, napi_callback_inf
     NapiAsyncTask::Schedule("JsWindow::OnResizeWindowWithAnimation",
         env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
     return result;
+}
+
+/** @note @window.layout */
+template <typename PositionTransformFunc>
+napi_value JsWindow::HandlePositionTransform(
+    napi_env env, napi_callback_info info, PositionTransformFunc transformFunc, const char* caller)
+{
+    size_t argc = TWO_PARAMS_SIZE;
+    napi_value argv[TWO_PARAMS_SIZE] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != TWO_PARAMS_SIZE) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "%{public}s: Invalid argc: %{public}zu", caller, argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+
+    int32_t x = 0;
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], x)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "%{public}s: Failed to convert parameter to x", caller);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    int32_t y = 0;
+    if (!ConvertFromJsValue(env, argv[INDEX_ONE], y)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "%{public}s: Failed to convert parameter to y", caller);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+
+    if (!windowToken_) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "%{public}s: window is nullptr", caller);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+
+    Position inputPos { x, y };
+    Position resultPos = transformFunc(windowToken_, inputPos);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "%{public}s: inputPos: %{public}s, resultPos: %{public}s",
+        caller, inputPos.ToString().c_str(), resultPos.ToString().c_str());
+
+    auto jsPosition = BuildJsPosition(env, resultPos);
+    if (!jsPosition) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "%{public}s: Failed to build JS position object", caller);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    return jsPosition;
+}
+
+/** @note @window.layout */
+napi_value JsWindow::OnClientToGlobalDisplay(napi_env env, napi_callback_info info)
+{
+    return HandlePositionTransform(
+        env, info,
+        [](const sptr<Window>& window, const Position& pos) {
+            return window->ClientToGlobalDisplay(pos);
+        },
+        __func__);
+}
+
+/** @note @window.layout */
+napi_value JsWindow::OnGlobalDisplayToClient(napi_env env, napi_callback_info info)
+{
+    return HandlePositionTransform(
+        env, info,
+        [](const sptr<Window>& window, const Position& pos) {
+            return window->GlobalDisplayToClient(pos);
+        },
+        __func__);
 }
 
 napi_value JsWindow::OnSetWindowType(napi_env env, napi_callback_info info)
@@ -2267,7 +2480,7 @@ napi_value JsWindow::OnSetWindowMode(napi_env env, napi_callback_info info)
         TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s: end, window [%{public}u, %{public}s] ret=%{public}d",
                where, window->GetWindowId(), window->GetWindowName().c_str(), ret);
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetWindowMode") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
     }
@@ -2288,8 +2501,8 @@ napi_value JsWindow::OnGetProperties(napi_env env, napi_callback_info info)
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
     auto asyncTask = [weakToken = wptr<Window>(windowToken_), errCode, env, task = napiAsyncTask] {
-        auto weakWindow = weakToken.promote();
-        if (weakWindow == nullptr) {
+        auto window = weakToken.promote();
+        if (window == nullptr) {
             WLOGFE("window is nullptr");
             task->Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_NULLPTR));
             return;
@@ -2299,14 +2512,13 @@ napi_value JsWindow::OnGetProperties(napi_env env, napi_callback_info info)
             WLOGFE("window is nullptr or get invalid param");
             return;
         }
-        Rect drawableRect = g_emptyRect;
-        auto uicontent = weakWindow->GetUIContent();
-        if (uicontent == nullptr) {
-            WLOGFW("uicontent is nullptr");
-        } else {
-            uicontent->GetAppPaintSize(drawableRect);
+        WindowPropertyInfo windowPropertyInfo;
+        WMError ret = window->GetWindowPropertyInfo(windowPropertyInfo);
+        if (ret != WMError::WM_OK) {
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+            return;
         }
-        auto objValue = CreateJsWindowPropertiesObject(env, weakWindow, drawableRect);
+        auto objValue = CreateJsWindowPropertiesObject(env, windowPropertyInfo);
         if (objValue != nullptr) {
             task->Resolve(env, objValue);
         } else {
@@ -2314,9 +2526,9 @@ napi_value JsWindow::OnGetProperties(napi_env env, napi_callback_info info)
                 "Window get properties failed"));
         }
         WLOGFD("Window [%{public}u, %{public}s] get properties end",
-            weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
+            window->GetWindowId(), window->GetWindowName().c_str());
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnGetProperties") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_IMMS, "napi_send_event failed");
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
@@ -2330,16 +2542,14 @@ napi_value JsWindow::OnGetWindowPropertiesSync(napi_env env, napi_callback_info 
         WLOGFW("window is nullptr or get invalid param");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    Rect drawableRect = g_emptyRect;
-    auto uicontent = windowToken_->GetUIContent();
-    if (uicontent == nullptr) {
-        WLOGFW("uicontent is nullptr");
-    } else {
-        uicontent->GetWindowPaintSize(drawableRect);
+    WindowPropertyInfo windowPropertyInfo;
+    WMError ret = windowToken_->GetWindowPropertyInfo(windowPropertyInfo);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "get window properties failed");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    auto objValue = CreateJsWindowPropertiesObject(env, windowToken_, drawableRect);
-    WLOGI("Window [%{public}u, %{public}s] get properties end",
-        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
+    auto objValue = CreateJsWindowPropertiesObject(env, windowPropertyInfo);
+    TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "Get Prop, wid: %{public}u", windowToken_->GetWindowId());
     if (objValue != nullptr) {
         return objValue;
     } else {
@@ -2392,8 +2602,12 @@ napi_value JsWindow::OnRegisterWindowCallback(napi_env env, napi_callback_info i
     if (ret != WmErrorCode::WM_OK) {
         return NapiThrowError(env, ret);
     }
-    WLOGFI("Register end, window [%{public}u, %{public}s], type=%{public}s",
-        windowToken->GetWindowId(), windowToken->GetWindowName().c_str(), cbType.c_str());
+    TLOGI(WmsLogTag::DEFAULT, "Id=%{public}u, type=%{public}s", windowToken->GetWindowId(), cbType.c_str());
+    // if comptible mode app adpt to immersive, avoid area change will be called when regist
+    if (cbType == AVOID_AREA_CHANGE_CB && windowToken->IsAdaptToCompatibleImmersive()) {
+        TLOGI(WmsLogTag::WMS_COMPAT, "notify avoid area change for compatible mode app when regist callback");
+        windowToken->HookCompatibleModeAvoidAreaNotify();
+    }
     return NapiGetUndefined(env);
 }
 
@@ -2501,7 +2715,7 @@ napi_value JsWindow::OnBindDialogTarget(napi_env env, napi_callback_info info)
         TLOGI(WmsLogTag::WMS_SYSTEM, "BindDialogTarget end, window [%{public}u, %{public}s]",
             weakToken->GetWindowId(), weakToken->GetWindowName().c_str());
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_immediate, "OnBindDialogTarget") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env, CreateJsError(env,
             static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
     }
@@ -2611,7 +2825,7 @@ napi_value JsWindow::LoadContentScheduleOld(napi_env env, napi_callback_info inf
         auto weakWindow = weakToken.promote();
         if (weakWindow == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "window is nullptr");
-            task->Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_NULLPTR));
+            task->Reject(env, JsErrUtils::CreateJsError(env, WM_JS_TO_ERROR_CODE_MAP.at(WMError::WM_ERROR_NULLPTR)));
             return;
         }
         if (errCode != WMError::WM_OK) {
@@ -2621,7 +2835,7 @@ napi_value JsWindow::LoadContentScheduleOld(napi_env env, napi_callback_info inf
         }
         LoadContentTask(contentStorage, contextUrl, weakWindow, env, *task, isLoadedByName);
     };
-    if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "LoadContentScheduleOld") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_LIFE, "napi send event failed, window state is abnormal");
     }
     return result;
@@ -2673,7 +2887,7 @@ napi_value JsWindow::LoadContentScheduleNew(napi_env env, napi_callback_info inf
         }
         LoadContentTask(contentStorage, contextUrl, weakWindow, env, *task, isLoadedByName);
     };
-    if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "LoadContentScheduleNew") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_LIFE, "napi send event failed, window state is abnormal");
     }
     return result;
@@ -2768,7 +2982,7 @@ napi_value JsWindow::OnSetUIContent(napi_env env, napi_callback_info info)
         }
         LoadContentTask(contentStorage, contextUrl, weakWindow, env, *task, false);
     };
-    if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetUIContent") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_LIFE, "napi send event failed, window state is abnormal");
     }
     return result;
@@ -2821,7 +3035,7 @@ napi_value JsWindow::OnSetFullScreen(napi_env env, napi_callback_info info)
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "Window SetFullScreen failed."));
         }
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetFullScreen") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_IMMS, "napi_send_event failed");
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
@@ -2875,7 +3089,7 @@ napi_value JsWindow::OnSetLayoutFullScreen(napi_env env, napi_callback_info info
                 ret, "Window OnSetLayoutFullScreen failed."));
         }
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetLayoutFullScreen") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_IMMS, "napi_send_event failed");
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
@@ -2924,7 +3138,7 @@ napi_value JsWindow::OnSetTitleAndDockHoverShown(napi_env env, napi_callback_inf
             where, window->GetWindowId(), window->GetWindowName().c_str(),
             isTitleHoverShown, isDockHoverShown);
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetTitleAndDockHoverShown") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env, CreateJsError(env,
             static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
     }
@@ -2966,8 +3180,8 @@ napi_value JsWindow::OnSetWindowLayoutFullScreen(napi_env env, napi_callback_inf
                     "Invalidate params."));
                 return;
             }
-            // compatibleModeInPc need apply avoidArea method
-            if (window->IsPcOrPadFreeMultiWindowMode() && !window->GetCompatibleModeInPc()) {
+            // compatibleMode app adapt to immersive need apply avoidArea method
+            if (window->IsPcOrPadFreeMultiWindowMode() && !window->IsAdaptToCompatibleImmersive()) {
                 TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s device not support", where);
                 task.Resolve(env, NapiGetUndefined(env));
                 return;
@@ -3028,7 +3242,7 @@ napi_value JsWindow::OnSetSystemBarEnable(napi_env env, napi_callback_info info)
             task->Reject(env, JsErrUtils::CreateJsError(env, errCode, "JsWindow::OnSetSystemBarEnable failed"));
         }
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetSystemBarEnable") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_IMMS, "napi_send_event failed");
     }
     return result;
@@ -3071,7 +3285,7 @@ napi_value JsWindow::OnSetWindowSystemBarEnable(napi_env env, napi_callback_info
             task->Reject(env, JsErrUtils::CreateJsError(env, errCode, "JsWindow::OnSetWindowSystemBarEnable failed"));
         }
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetWindowSystemBarEnable") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_IMMS, "napi_send_event failed");
         napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
             "JsWindow::OnSetWindowSystemBarEnable failed"));
@@ -3123,7 +3337,7 @@ napi_value JsWindow::OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_i
                 "JsWindow::OnSetSpecificSystemBarEnabled failed"));
         }
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetSpecificSystemBarEnabled") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_IMMS, "napi_send_event failed");
         napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
             "JsWindow::OnSetSpecificSystemBarEnabled failed"));
@@ -3165,7 +3379,7 @@ napi_value JsWindow::OnSetSystemBarProperties(napi_env env, napi_callback_info i
             task->Reject(env, JsErrUtils::CreateJsError(env, errCode, "JsWindow::OnSetSystemBarProperties failed"));
         }
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetSystemBarProperties") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_IMMS, "napi_send_event failed");
     }
     return result;
@@ -3206,7 +3420,7 @@ napi_value JsWindow::OnSetWindowSystemBarProperties(napi_env env, napi_callback_
                 "JsWindow::OnSetWindowSystemBarProperties failed"));
         }
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetWindowSystemBarProperties") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_IMMS, "napi_send_event failed");
         napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
             "JsWindow::OnSetWindowSystemBarProperties failed"));
@@ -3267,7 +3481,7 @@ napi_value JsWindow::OnSetStatusBarColor(napi_env env, napi_callback_info info)
                 "JsWindow::OnSetStatusBarProperty failed"));
         }
     };
-    if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetStatusBarColor") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_IMMS, "napi_send_event failed");
         napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY,
             "JsWindow::OnSetStatusBarProperty failed"));
@@ -3295,7 +3509,7 @@ napi_value JsWindow::OnGetStatusBarPropertySync(napi_env env, napi_callback_info
 
 napi_value JsWindow::OnEnableLandscapeMultiWindow(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "OnEnableLandscapeMultiWindow");
+    TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "In");
     WmErrorCode err = (windowToken_ == nullptr) ? WmErrorCode::WM_ERROR_STATE_ABNORMALLY : WmErrorCode::WM_OK;
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
@@ -3317,7 +3531,7 @@ napi_value JsWindow::OnEnableLandscapeMultiWindow(napi_env env, napi_callback_in
                 "JsWindow::OnEnableLandscapeMultiWindow failed"));
         }
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnEnableLandscapeMultiWindow") != napi_status::napi_ok) {
         napiAsyncTask->Reject(
             env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
     }
@@ -3326,7 +3540,7 @@ napi_value JsWindow::OnEnableLandscapeMultiWindow(napi_env env, napi_callback_in
 
 napi_value JsWindow::OnDisableLandscapeMultiWindow(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "OnDisableLandscapeMultiWindow");
+    TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "In");
     WmErrorCode err = (windowToken_ == nullptr) ? WmErrorCode::WM_ERROR_STATE_ABNORMALLY : WmErrorCode::WM_OK;
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
@@ -3349,7 +3563,7 @@ napi_value JsWindow::OnDisableLandscapeMultiWindow(napi_env env, napi_callback_i
                 "JsWindow::OnDisableLandscapeMultiWindow failed"));
         }
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnDisableLandscapeMultiWindow") != napi_status::napi_ok) {
         napiAsyncTask->Reject(
             env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
     }
@@ -3426,7 +3640,7 @@ napi_value JsWindow::OnGetAvoidArea(napi_env env, napi_callback_info info)
                 "JsWindow::OnGetAvoidArea failed"));
         }
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnGetAvoidArea") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_IMMS, "napi_send_event failed");
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
@@ -3516,7 +3730,7 @@ napi_value JsWindow::OnIsShowing(napi_env env, napi_callback_info info)
         TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s end, window [%{public}u, %{public}s] state=%{public}u",
             where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), state);
     };
-    if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnIsShowing") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_LIFE, "napi send event failed, window state is abnormal");
     }
     return result;
@@ -3529,8 +3743,7 @@ napi_value JsWindow::OnIsWindowShowingSync(napi_env env, napi_callback_info info
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     bool state = (windowToken_->GetWindowState() == WindowState::STATE_SHOWN);
-    WLOGFI("end, window [%{public}u, %{public}s] state=%{public}u",
-        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), state);
+    TLOGI(WmsLogTag::DEFAULT, "Id=%{public}u, state=%{public}u", windowToken_->GetWindowId(), state);
     return CreateJsValue(env, state);
 }
 
@@ -3586,14 +3799,18 @@ napi_value JsWindow::OnSetPreferredOrientation(napi_env env, napi_callback_info 
                     "OnSetPreferredOrientation failed"));
             return;
         }
+        if (requestedOrientation == Orientation::INVALID) {
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+                    "Invalid param"));
+            return;
+        }
         weakWindow->SetRequestedOrientation(requestedOrientation);
-        weakWindow->NotifyPreferredOrientationChange(requestedOrientation);
         task->Resolve(env, NapiGetUndefined(env));
         TLOGNI(WmsLogTag::WMS_ROTATION, "%{public}s end, window [%{public}u, %{public}s] orientation=%{public}u",
             where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(),
             static_cast<uint32_t>(requestedOrientation));
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetPreferredOrientation") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "send event failed"));
     }
@@ -3658,7 +3875,7 @@ napi_value JsWindow::OnIsSupportWideGamut(napi_env env, napi_callback_info info)
         WLOGI("%{public}s end, window [%{public}u, %{public}s] ret=%{public}u",
             where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), flag);
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnIsSupportWideGamut") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_IMMS, "napi_send_event failed");
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
@@ -3690,7 +3907,7 @@ napi_value JsWindow::OnIsWindowSupportWideGamut(napi_env env, napi_callback_info
         WLOGI("%{public}s end, window [%{public}u, %{public}s] ret=%{public}u",
             where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), flag);
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnIsWindowSupportWideGamut") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_IMMS, "napi_send_event failed");
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
@@ -3739,7 +3956,7 @@ napi_value JsWindow::OnSetBackgroundColor(napi_env env, napi_callback_info info)
         WLOGD("%{public}s window [%{public}u, %{public}s] end",
             where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetBackgroundColor") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_IMMS, "napi_send_event failed");
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
@@ -3770,10 +3987,11 @@ napi_value JsWindow::OnSetWindowBackgroundColorSync(napi_env env, napi_callback_
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is null");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetBackgroundColor(color));
+    auto retErr = windowToken_->SetBackgroundColor(color);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "win=%{public}u, color=%{public}s, retErr=%{public}d",
+        windowToken_->GetWindowId(), color.c_str(), static_cast<int32_t>(retErr));
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(retErr);
     if (ret == WmErrorCode::WM_OK) {
-        WLOGFI("Window [%{public}u, %{public}s] end",
-               windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
         return NapiGetUndefined(env);
     } else {
         return NapiThrowError(env, ret);
@@ -3826,7 +4044,7 @@ napi_value JsWindow::OnSetBrightness(napi_env env, napi_callback_info info)
         WLOGI("Window [%{public}u, %{public}s] set brightness end",
             weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetBrightness") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_IMMS, "napi_send_event failed");
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
@@ -3879,7 +4097,7 @@ napi_value JsWindow::OnSetWindowBrightness(napi_env env, napi_callback_info info
         TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u, %{public}s] set brightness end, result: %{public}d",
             weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetWindowBrightness") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_IMMS, "napi_send_event failed");
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
@@ -3943,7 +4161,7 @@ napi_value JsWindow::OnSetFocusable(napi_env env, napi_callback_info info)
             TLOGNI(WmsLogTag::WMS_FOCUS, "%{public}s: Window [%{public}u, %{public}s] set focusable end",
                 where, window->GetWindowId(), window->GetWindowName().c_str());
         };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetFocusable") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_FOCUS, "window state is abnormal!");
     }
     return result;
@@ -3985,7 +4203,7 @@ napi_value JsWindow::OnSetWindowFocusable(napi_env env, napi_callback_info info)
             TLOGNI(WmsLogTag::WMS_FOCUS, "%{public}s: Window [%{public}u, %{public}s] set focusable end",
                 where, window->GetWindowId(), window->GetWindowName().c_str());
         };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetWindowFocusable") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
     }
@@ -4094,7 +4312,7 @@ napi_value JsWindow::OnSetWindowTopmost(napi_env env, napi_callback_info info)
             "%{public}s id: %{public}u, name: %{public}s, isMainWindowTopmost: %{public}d",
             where, window->GetWindowId(), window->GetWindowName().c_str(), isMainWindowTopmost);
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetWindowTopmost") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
     }
@@ -4145,7 +4363,7 @@ napi_value JsWindow::OnSetSubWindowZLevel(napi_env env, napi_callback_info info)
         TLOGNI(WmsLogTag::WMS_HIERARCHY, "window [%{public}u, %{public}s], zLevel = %{public}d, ret = %{public}d",
             window->GetWindowId(), window->GetWindowName().c_str(), zLevel, ret);
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetSubWindowZLevel") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "send event failed"));
     }
@@ -4254,7 +4472,7 @@ napi_value JsWindow::OnSetKeepScreenOn(napi_env env, napi_callback_info info)
         WLOGI("Window [%{public}u, %{public}s] set keep screen on end",
             weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetKeepScreenOn") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_IMMS, "napi_send_event failed");
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
@@ -4370,7 +4588,7 @@ napi_value JsWindow::OnSetOutsideTouchable(napi_env env, napi_callback_info info
     auto asyncTask = [env, task = napiAsyncTask] {
         task->Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_DEVICE_NOT_SUPPORT));
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetOutsideTouchable") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_EVENT, "napi_send_event failed");
     }
     return result;
@@ -4418,7 +4636,7 @@ napi_value JsWindow::OnSetPrivacyMode(napi_env env, napi_callback_info info)
         WLOGI("Window [%{public}u, %{public}s] set privacy mode end, mode=%{public}u",
             weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), isPrivacyMode);
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetPrivacyMode") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_IMMS, "napi_send_event failed");
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
@@ -4473,7 +4691,7 @@ napi_value JsWindow::OnSetWindowPrivacyMode(napi_env env, napi_callback_info inf
         WLOGI("%{public}s succeed, window [%{public}u, %{public}s] mode=%{public}u",
             where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), isPrivacyMode);
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetWindowPrivacyMode") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_IMMS, "napi_send_event failed");
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
@@ -4529,7 +4747,7 @@ napi_value JsWindow::OnSetTouchable(napi_env env, napi_callback_info info)
         WLOGI("%{public}s end, window [%{public}u, %{public}s]",
             where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetTouchable") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_EVENT, "napi_send_event failed");
     }
     return result;
@@ -4572,7 +4790,7 @@ napi_value JsWindow::OnSetTouchableAreas(napi_env env, napi_callback_info info)
         TLOGNI(WmsLogTag::WMS_EVENT, "%{public}s Window [%{public}u, %{public}s] end",
             where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetTouchableAreas") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
     }
@@ -4613,7 +4831,7 @@ napi_value JsWindow::OnSetResizeByDragEnabled(napi_env env, napi_callback_info i
         TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: Window [%{public}u, %{public}s] set dragEnabled end",
                where, window->GetWindowId(), window->GetWindowName().c_str());
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetResizeByDragEnabled") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
     }
@@ -4661,7 +4879,7 @@ napi_value JsWindow::OnSetRaiseByClickEnabled(napi_env env, napi_callback_info i
             TLOGNI(WmsLogTag::WMS_HIERARCHY, "%{public}s: Window [%{public}u, %{public}s] set raiseEnabled end",
                 where, window->GetWindowId(), window->GetWindowName().c_str());
         };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetRaiseByClickEnabled") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
     }
@@ -4713,7 +4931,7 @@ napi_value JsWindow::OnHideNonSystemFloatingWindows(napi_env env, napi_callback_
             "%{public}s end. Window [%{public}u, %{public}s]",
             where, window->GetWindowId(), window->GetWindowName().c_str());
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnHideNonSystemFloatingWindows") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "send event failed"));
     }
@@ -4781,7 +4999,7 @@ napi_value JsWindow::OnSetSingleFrameComposerEnabled(napi_env env, napi_callback
         WLOGI("%{public}s end, window [%{public}u, %{public}s] enabled flag=%{public}d",
             where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), enabled);
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetSingleFrameComposerEnabled") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_IMMS, "napi_send_event failed");
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
@@ -4845,7 +5063,7 @@ napi_value JsWindow::OnRaiseAboveTarget(napi_env env, napi_callback_info info)
                 task->Reject(env, JsErrUtils::CreateJsError(env, ret, "Window set raiseAboveTarget failed"));
             }
         };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnRaiseAboveTarget") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
     }
@@ -4943,7 +5161,7 @@ napi_value JsWindow::OnSetWindowTouchable(napi_env env, napi_callback_info info)
         WLOGI("Window [%{public}u, %{public}s] set touchable end",
             weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetWindowTouchable") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
     }
@@ -4996,7 +5214,7 @@ napi_value JsWindow::OnSetTransparent(napi_env env, napi_callback_info info)
         WLOGI("Window [%{public}u, %{public}s] set transparent end",
             weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetTransparent") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
     }
@@ -5048,7 +5266,7 @@ napi_value JsWindow::OnSetCallingWindow(napi_env env, napi_callback_info info)
         TLOGNI(WmsLogTag::WMS_LIFE, "Window [%{public}u, %{public}s] set calling window end",
             weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
     };
-    if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetCallingWindow") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_LIFE, "napi send event failed, window state is abnormal");
     }
     return result;
@@ -5117,7 +5335,7 @@ napi_value JsWindow::OnSetColorSpace(napi_env env, napi_callback_info info)
         WLOGI("Window [%{public}u, %{public}s] OnSetColorSpace end, colorSpace=%{public}u",
             weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), static_cast<uint32_t>(colorSpace));
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetColorSpace") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_IMMS, "napi_send_event failed");
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
@@ -5174,7 +5392,7 @@ napi_value JsWindow::OnSetWindowColorSpace(napi_env env, napi_callback_info info
             where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(),
             static_cast<uint32_t>(colorSpace));
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetWindowColorSpace") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_IMMS, "napi_send_event failed");
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
@@ -5216,7 +5434,7 @@ napi_value JsWindow::OnGetColorSpace(napi_env env, napi_callback_info info)
             where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(),
             static_cast<uint32_t>(colorSpace));
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnGetColorSpace") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_IMMS, "napi_send_event failed");
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
@@ -5271,9 +5489,16 @@ napi_value JsWindow::Snapshot(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnSnapshot(env, info) : nullptr;
 }
 
+napi_value JsWindow::SnapshotSync(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSnapshotSync(env, info) : nullptr;
+}
+
 napi_value JsWindow::SnapshotIgnorePrivacy(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "SnapshotIgnorePrivacy");
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "SnapshotIgnorePrivacy");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSnapshotIgnorePrivacy(env, info) : nullptr;
 }
@@ -5324,7 +5549,7 @@ napi_value JsWindow::OnSetForbidSplitMove(napi_env env, napi_callback_info info)
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "Window OnSetForbidSplitMove failed."));
         }
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetForbidSplitMove") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
     }
@@ -5364,12 +5589,34 @@ napi_value JsWindow::OnSnapshot(napi_env env, napi_callback_info info)
             weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(),
             pixelMap->GetWidth(), pixelMap->GetHeight());
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSnapshot") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_IMMS, "napi_send_event failed");
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
     }
     return result;
+}
+
+napi_value JsWindow::OnSnapshotSync(napi_env env, napi_callback_info info)
+{
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowToken is null");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->Snapshot(pixelMap));
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u snapshot end, result: %{public}d",
+        windowToken_->GetWindowId(), ret);
+    if (ret != WmErrorCode::WM_OK) {
+        return NapiThrowError(env, ret);
+    }
+    auto nativePixelMap = Media::PixelMapNapi::CreatePixelMap(env, pixelMap);
+    if (nativePixelMap == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u get nativePixelMap is null",
+            windowToken_->GetWindowId());
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    return nativePixelMap;
 }
 
 napi_value JsWindow::OnSnapshotIgnorePrivacy(napi_env env, napi_callback_info info)
@@ -5408,7 +5655,7 @@ napi_value JsWindow::OnSnapshotIgnorePrivacy(napi_env env, napi_callback_info in
             TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "windowId:%{public}u, WxH=%{public}dx%{public}d",
                 weakWindow->GetWindowId(), pixelMap->GetWidth(), pixelMap->GetHeight());
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSnapshotIgnorePrivacy") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "napi_send_event failed");
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
@@ -5483,7 +5730,7 @@ napi_value JsWindow::OnRaiseToAppTop(napi_env env, napi_callback_info info)
             TLOGNI(WmsLogTag::WMS_HIERARCHY, "%{public}s: Window [%{public}u, %{public}s] zorder raise success",
                 where, window->GetWindowId(), window->GetWindowName().c_str());
         };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnRaiseToAppTop") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
     }
@@ -5909,7 +6156,8 @@ napi_value JsWindow::OnSetWindowCornerRadius(napi_env env, napi_callback_info in
             task->Resolve(env, NapiGetUndefined(env));
         }
     };
-    if (napi_status::napi_ok != napi_send_event(env, std::move(asyncTask), napi_eprio_high)) {
+    napi_status status = napi_send_event(env, std::move(asyncTask), napi_eprio_high, "OnSetWindowCornerRadius");
+    if (status != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
     }
@@ -5953,10 +6201,12 @@ napi_value JsWindow::OnGetWindowCornerRadius(napi_env env, napi_callback_info in
 napi_value JsWindow::OnSetShadow(napi_env env, napi_callback_info info)
 {
     WmErrorCode ret = WmErrorCode::WM_OK;
-    double result = 0.0;
+    double radius;
+    std::shared_ptr<ShadowsInfo> shadowsInfo = std::make_shared<ShadowsInfo>();
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+
     if (argc < 1) { // 1: min param num
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
@@ -5971,40 +6221,59 @@ napi_value JsWindow::OnSetShadow(napi_env env, napi_callback_info info)
     if (argv[0] == nullptr) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    napi_status statusCode = napi_get_value_double(env, argv[0], &result);
+    napi_status statusCode = napi_get_value_double(env, argv[0], &radius);
     if (statusCode != napi_ok) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    if (MathHelper::LessNotEqual(result, 0.0)) {
+    if (MathHelper::LessNotEqual(radius, 0.0)) {
         return NapiThrowError(env,  WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetShadowRadius(result));
-    if ((ret == WmErrorCode::WM_OK) && (argc >= 2)) { // parse the 2nd param: color
-        std::string color;
-        if (ConvertFromJsValue(env, argv[1], color)) {
-            ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetShadowColor(color));
-        }
-    }
+    ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetShadowRadius(radius));
+    shadowsInfo->radius_ = radius;
+    shadowsInfo->hasRadiusValue_ = true;
 
-    if ((ret == WmErrorCode::WM_OK) && argc >= 3) { // parse the 3rd param: offsetX
-        if (argv[2] != nullptr) { // 2: the 3rd param
-            napi_get_value_double(env, argv[2], &result);
-            ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetShadowOffsetX(result));
-        }
-    }
-
-    if ((ret == WmErrorCode::WM_OK) && argc >= 4) { // parse the 4th param: offsetY
-        if (argv[3] != nullptr) {  // 3: the 4th param
-            napi_get_value_double(env, argv[3], &result);
-            ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetShadowOffsetY(result));
-        }
-    }
-
+    ParseShadowOptionalParameters(ret, shadowsInfo, env, argv, argc);
     if (ret != WmErrorCode::WM_OK) {
         napi_throw(env, JsErrUtils::CreateJsError(env, ret));
     }
 
+    WmErrorCode syncShadowsRet = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SyncShadowsToComponent(*shadowsInfo));
+    if (syncShadowsRet != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Sync shadows to component fail! ret:  %{public}u",
+            static_cast<int32_t>(syncShadowsRet));
+    }
     return NapiGetUndefined(env);
+}
+  
+void JsWindow::ParseShadowOptionalParameters(WmErrorCode& ret, std::shared_ptr<ShadowsInfo>& shadowsInfo,
+    napi_env env, const napi_value* argv, size_t argc)
+{
+    std::string color;
+    double offsetX;
+    double offsetY;
+    if ((ret == WmErrorCode::WM_OK) && (argc >= 2)) { // parse the 2nd param: color
+        if (ConvertFromJsValue(env, argv[1], color)) {
+            ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetShadowColor(color));
+            shadowsInfo->color_ = color;
+            shadowsInfo->hasColorValue_ = true;
+        }
+    }
+    if ((ret == WmErrorCode::WM_OK) && argc >= 3) { // parse the 3rd param: offsetX
+        if (argv[2] != nullptr) { // 2: the 3rd param
+            napi_get_value_double(env, argv[2], &offsetX);
+            ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetShadowOffsetX(offsetX));
+            shadowsInfo->offsetX_ = offsetX;
+            shadowsInfo->hasOffsetXValue_ = true;
+        }
+    }
+    if ((ret == WmErrorCode::WM_OK) && argc >= 4) { // parse the 4th param: offsetY
+        if (argv[3] != nullptr) {  // 3: the 4th param
+            napi_get_value_double(env, argv[3], &offsetY);
+            ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetShadowOffsetY(offsetY));
+            shadowsInfo->offsetY_ = offsetY;
+            shadowsInfo->hasOffsetYValue_ = true;
+        }
+    }
 }
 
 napi_value JsWindow::OnSetWindowShadowRadius(napi_env env, napi_callback_info info)
@@ -6035,10 +6304,19 @@ napi_value JsWindow::OnSetWindowShadowRadius(napi_env env, napi_callback_info in
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "The shadow radius is less than zero.");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
+    std::shared_ptr<ShadowsInfo> shadowsInfo = std::make_shared<ShadowsInfo>();
+    shadowsInfo->radius_ = result;
+    shadowsInfo->hasRadiusValue_ = true;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetWindowShadowRadius(radius));
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Set failed, radius: %{public}f.", radius);
         return NapiThrowError(env, ret);
+    }
+    WmErrorCode syncShadowsRet = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SyncShadowsToComponent(*shadowsInfo));
+    if (syncShadowsRet != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Sync shadows to component fail! ret:  %{public}u",
+            static_cast<int32_t>(syncShadowsRet));
+        return NapiThrowError(env, syncShadowsRet);
     }
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u, %{public}s] set success, radius=%{public}f.",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), radius);
@@ -6222,7 +6500,7 @@ napi_value JsWindow::OnSetWaterMarkFlag(napi_env env, napi_callback_info info)
         WLOGI("%{public}s end, window [%{public}u, %{public}s] ret=%{public}d",
             where, window->GetWindowId(), window->GetWindowName().c_str(), ret);
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetWaterMarkFlag") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_IMMS, "napi_send_event failed");
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
@@ -6342,7 +6620,7 @@ napi_value JsWindow::OnSetAspectRatio(napi_env env, napi_callback_info info)
             TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s: end, window [%{public}u, %{public}s] ret=%{public}d",
                 where, window->GetWindowId(), window->GetWindowName().c_str(), ret);
         };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetAspectRatio") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
     }
@@ -6386,10 +6664,10 @@ napi_value JsWindow::OnResetAspectRatio(napi_env env, napi_callback_info info)
         } else {
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "ResetAspectRatio failed."));
         }
-        TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s end, window [%{public}u, %{public}s] ret=%{public}d",
+        TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s end, window [%{public}u, %{public}s] ret=%{public}d",
             where, window->GetWindowId(), window->GetWindowName().c_str(), ret);
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnResetAspectRatio") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
     }
@@ -6407,6 +6685,9 @@ napi_value JsWindow::OnMinimize(napi_env env, napi_callback_info info)
     }
 
     if (windowToken_ != nullptr && WindowHelper::IsFloatOrSubWindow(windowToken_->GetType())) {
+        if (!windowToken_->IsSceneBoardEnabled()) {
+            return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
+        }
         TLOGI(WmsLogTag::WMS_LAYOUT, "subWindow or float window use hide");
         return HideWindowFunction(env, info, WmErrorCode::WM_OK);
     }
@@ -6434,7 +6715,7 @@ napi_value JsWindow::OnMinimize(napi_env env, napi_callback_info info)
         TLOGNI(WmsLogTag::WMS_PC, "%{public}s Window [%{public}u, %{public}s] minimize end, ret=%{public}d",
             where, window->GetWindowId(), window->GetWindowName().c_str(), ret);
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_immediate, "OnMinimize") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env, CreateJsError(env,
             static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
     }
@@ -6486,7 +6767,7 @@ napi_value JsWindow::OnMaximize(napi_env env, napi_callback_info info)
             task->Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode, "Maximize failed."));
         }
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_immediate, "OnMaximize") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env, CreateJsError(env,
             static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
     }
@@ -6529,6 +6810,7 @@ __attribute__((no_sanitize("cfi")))
     jsWindowRef.reset(reinterpret_cast<NativeReference*>(result));
     std::lock_guard<std::mutex> lock(g_mutex);
     g_jsWindowMap[windowName] = jsWindowRef;
+    TLOGI(WmsLogTag::WMS_LIFE, "Add window %{public}s", windowName.c_str());
     return objValue;
 }
 
@@ -6594,6 +6876,11 @@ static NapiAsyncTask::ExecuteCallback GetEnableDragExecuteCallback(bool enableDr
             *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             return;
         }
+        if (WindowHelper::IsInputWindow(window->GetType())) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "is not allowed since input window");
+            *errCodePtr = WmErrorCode::WM_ERROR_INVALID_CALLING;
+            return;
+        }
         *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->EnableDrag(enableDrag));
         TLOGNI(WmsLogTag::WMS_LAYOUT, "Window [%{public}u, %{public}s] set enable drag end",
             window->GetWindowId(), window->GetWindowName().c_str());
@@ -6628,18 +6915,6 @@ napi_value JsWindow::OnEnableDrag(napi_env env, napi_callback_info info)
     if (argc < 1 || argv[INDEX_ZERO] == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
-    }
-    if (windowToken_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "window is nullptr!");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-    }
-    if (!Permission::IsSystemCalling()) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "permission denied!");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
-    }
-    if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "is not allowed since window is not system window");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
 
     bool enableDrag = false;
@@ -6686,7 +6961,7 @@ napi_value JsWindow::OnSetWindowLimits(napi_env env, napi_callback_info info)
             TLOGE(WmsLogTag::WMS_LAYOUT, "window is nullptr");
             return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         }
-        if (!windowToken_->IsPcWindow()) {
+        if (!windowToken_->IsPcOrFreeMultiWindowCapabilityEnabled()) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "device not support");
             return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
         }
@@ -6720,7 +6995,7 @@ napi_value JsWindow::OnSetWindowLimits(napi_env env, napi_callback_info info)
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "Window set window limits failed"));
         }
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetWindowLimits") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
     }
@@ -6892,7 +7167,7 @@ napi_value JsWindow::OnSetSubWindowModal(napi_env env, napi_callback_info info)
             "%{public}s id:%{public}u, name:%{public}s, isModal:%{public}d, modalityType:%{public}hhu",
             where, window->GetWindowId(), window->GetWindowName().c_str(), isModal, modalityType);
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetSubWindowModal") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
     }
@@ -6948,11 +7223,109 @@ napi_value JsWindow::OnSetFollowParentMultiScreenPolicy(napi_env env, napi_callb
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
     auto asyncTask = GetFollowParentMultiScreenPolicyTask(wptr<Window>(windowToken_), enabled, env, napiAsyncTask);
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    napi_status status = napi_send_event(env, asyncTask, napi_eprio_high, "OnSetFollowParentMultiScreenPolicy");
+    if (status != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
     }
     return result;
+}
+
+static bool IsTransitionAnimationEnable(napi_env env, sptr<Window> windowToken, WmErrorCode& enableResult)
+{
+    if (!windowToken) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Window instance not exist");
+        enableResult = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+        return false;
+    }
+    if (!windowToken->IsPcWindow() && !windowToken->IsPadWindow()) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Device is invalid");
+        enableResult = WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
+        return false;
+    }
+    if (!WindowHelper::IsMainWindow(windowToken->GetType())) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Window type is invalid");
+        enableResult = WmErrorCode::WM_ERROR_INVALID_CALLING;
+        return false;
+    }
+    return true;
+}
+
+napi_value JsWindow::OnSetWindowTransitionAnimation(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_ANIMATION, "[NAPI]");
+    WmErrorCode enableResult = WmErrorCode::WM_OK;
+    if (!IsTransitionAnimationEnable(env, windowToken_, enableResult)) {
+        return NapiThrowError(env, enableResult);
+    }
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARG_COUNT_TWO) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    uint32_t type = 0;
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], type) || type >= static_cast<uint32_t>(WindowTransitionType::END)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to convert parameter to type");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
+    }
+    TransitionAnimation animation;
+    WmErrorCode convertResult = WmErrorCode::WM_OK;
+    if (!ConvertTransitionAnimationFromJsValue(env, argv[INDEX_ONE], animation, convertResult)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to convert parameter to animation");
+        return NapiThrowError(env, convertResult);
+    }
+    const char* const where = __func__;
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [weakToken = wptr<Window>(windowToken_), task = napiAsyncTask, env, type, animation, where] {
+        auto window = weakToken.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ANIMATION, "%{public}s window is nullptr", where);
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+            return;
+        }
+        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetWindowTransitionAnimation(
+            static_cast<WindowTransitionType>(type), animation));
+        if (ret == WmErrorCode::WM_OK) {
+            task->Resolve(env, NapiGetUndefined(env));
+        } else {
+            TLOGNE(WmsLogTag::WMS_ANIMATION, "%{public}s set failed, ret is %{public}d", where, ret);
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "Set window transition animation failed"));
+        }
+    };
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetWindowTransitionAnimation") != napi_status::napi_ok) {
+        napiAsyncTask->Reject(env, CreateJsError(env,
+            static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
+    }
+    return result;
+}
+
+napi_value JsWindow::OnGetWindowTransitionAnimation(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_ANIMATION, "[NAPI]");
+    WmErrorCode enableResult = WmErrorCode::WM_OK;
+    if (!IsTransitionAnimationEnable(env, windowToken_, enableResult)) {
+        return NapiThrowError(env, enableResult);
+    }
+    size_t argc = ONE_PARAMS_SIZE;
+    napi_value argv[ONE_PARAMS_SIZE] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARG_COUNT_ONE) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    WindowTransitionType type = WindowTransitionType::DESTROY;
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], type) || type >= WindowTransitionType::END) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to convert parameter to type");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    napi_value result = ConvertTransitionAnimationToJsValue(env, windowToken_->GetWindowTransitionAnimation(type));
+    if (result != nullptr) {
+        return result;
+    }
+    return NapiGetUndefined(env);
 }
 
 napi_value JsWindow::OnSetWindowDecorHeight(napi_env env, napi_callback_info info)
@@ -7114,6 +7487,43 @@ napi_value JsWindow::OnSetWindowContainerColor(napi_env env, napi_callback_info 
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     WMError errCode = windowToken_->SetWindowContainerColor(activeColor, inactiveColor);
+    TLOGI(WmsLogTag::WMS_DECOR, "winId: %{public}u set activeColor: %{public}s, inactiveColor: %{public}s"
+        ", result: %{public}d", windowToken_->GetWindowId(), activeColor.c_str(), inactiveColor.c_str(), errCode);
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(errCode);
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_DECOR, "set window container color failed!");
+        return NapiThrowError(env, ret);
+    }
+    return NapiGetUndefined(env);
+}
+
+napi_value JsWindow::OnSetWindowContainerModalColor(napi_env env, napi_callback_info info)
+{
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARG_COUNT_TWO) {
+        TLOGE(WmsLogTag::WMS_DECOR, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_DECOR, "WindowToken_ is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    std::string activeColor;
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], activeColor)) {
+        TLOGE(WmsLogTag::WMS_DECOR, "Failed to convert parameter to window container activeColor");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    std::string inactiveColor;
+    if (!ConvertFromJsValue(env, argv[INDEX_ONE], inactiveColor)) {
+        TLOGE(WmsLogTag::WMS_DECOR, "Failed to convert parameter to window container inactiveColor");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    WMError errCode = windowToken_->SetWindowContainerModalColor(activeColor, inactiveColor);
+    TLOGI(WmsLogTag::WMS_DECOR, "Window [%{public}u, %{public}s] set activeColor: %{public}s,"
+        " inactiveColor: %{public}s, result: %{public}d", windowToken_->GetWindowId(),
+        windowToken_->GetWindowName().c_str(), activeColor.c_str(), inactiveColor.c_str(), errCode);
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(errCode);
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_DECOR, "set window container color failed!");
@@ -7246,7 +7656,7 @@ napi_value JsWindow::OnSetWindowTitle(napi_env env, napi_callback_info info)
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "Window set title failed"));
         }
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetWindowTitle") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env, CreateJsError(env,
             static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
     }
@@ -7299,7 +7709,7 @@ napi_value JsWindow::OnSetWindowMask(napi_env env, napi_callback_info info)
         TLOGNI(WmsLogTag::WMS_PC, "%{public}s Window [%{public}u, %{public}s] end",
             where, window->GetWindowId(), window->GetWindowName().c_str());
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetWindowMask") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
     }
@@ -7459,6 +7869,23 @@ napi_value JsWindow::OnGetImmersiveModeEnabledState(napi_env env, napi_callback_
     return CreateJsValue(env, isEnabled);
 }
 
+napi_value JsWindow::OnIsImmersiveLayout(napi_env env, napi_callback_info info)
+{
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "windowToken_ is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    bool isImmersiveLayout = false;
+    auto ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->IsImmersiveLayout(isImmersiveLayout));
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_IMMS, "failed, ret %{public}d", ret);
+        return NapiThrowError(env, ret);
+    }
+    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u isImmersiveLayout %{public}u end",
+        windowToken_->GetWindowId(), isImmersiveLayout);
+    return CreateJsValue(env, isImmersiveLayout);
+}
+
 napi_value JsWindow::OnGetWindowStatus(napi_env env, napi_callback_info info)
 {
     auto window = windowToken_;
@@ -7474,8 +7901,7 @@ napi_value JsWindow::OnGetWindowStatus(napi_env env, napi_callback_info info)
     }
     auto objValue = CreateJsValue(env, windowStatus);
     if (objValue != nullptr) {
-        TLOGI(WmsLogTag::WMS_PC, "window [%{public}u, %{public}s] end",
-            window->GetWindowId(), window->GetWindowName().c_str());
+        TLOGI(WmsLogTag::WMS_PC, "id:[%{public}u] end", window->GetWindowId());
         return objValue;
     } else {
         TLOGE(WmsLogTag::WMS_PC, "create js value windowStatus failed");
@@ -7578,6 +8004,10 @@ napi_value JsWindow::OnStartMoving(napi_env env, napi_callback_info info)
     if (argc > ARG_COUNT_ZERO) {
         return OnStartMoveWindowWithCoordinate(env, argc, argv);
     }
+    if (WindowHelper::IsInputWindow(windowToken_->GetType())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "is not allowed since input window");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
+    }
     std::shared_ptr<WmErrorCode> err = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
     const char* const funcName = __func__;
     NapiAsyncTask::ExecuteCallback execute = [this, weakToken = wptr<Window>(windowToken_), err, funcName] {
@@ -7589,13 +8019,6 @@ napi_value JsWindow::OnStartMoving(napi_env env, napi_callback_info info)
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: This window is nullptr.", funcName);
             *err = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
-            return;
-        }
-        if (!WindowHelper::IsSystemWindow(windowToken_->GetType()) &&
-            !WindowHelper::IsMainWindow(windowToken_->GetType()) &&
-            !WindowHelper::IsSubWindow(windowToken_->GetType())) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: This is not valid window.", funcName);
-            *err = WmErrorCode::WM_ERROR_INVALID_CALLING;
             return;
         }
         *err = window->StartMoveWindow();
@@ -7649,12 +8072,6 @@ napi_value JsWindow::OnStartMoveWindowWithCoordinate(napi_env env, size_t argc, 
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
             return;
         }
-        WindowType windowType = window->GetType();
-        if (!WindowHelper::IsSystemWindow(windowType) && !WindowHelper::IsAppWindow(windowType)) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s invalid window type:%{public}u", where, windowType);
-            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_CALLING));
-            return;
-        }
         WmErrorCode ret = window->StartMoveWindowWithCoordinate(offsetX, offsetY);
         if (ret == WmErrorCode::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
@@ -7662,7 +8079,9 @@ napi_value JsWindow::OnStartMoveWindowWithCoordinate(napi_env env, size_t argc, 
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "move window failed"));
         }
     };
-    if (napi_status::napi_ok != napi_send_event(env, std::move(asyncTask), napi_eprio_high)) {
+    napi_status status = napi_send_event(env, std::move(asyncTask),
+                                         napi_eprio_high, "OnStartMoveWindowWithCoordinate");
+    if (status != napi_status::napi_ok) {
         napiAsyncTask->Reject(env, CreateJsError(env,
             static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
     }
@@ -7685,13 +8104,6 @@ napi_value JsWindow::OnStopMoving(napi_env env, napi_callback_info info)
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
             return;
         }
-        if (!WindowHelper::IsSystemWindow(window->GetType()) &&
-            !WindowHelper::IsMainWindow(window->GetType()) &&
-            !WindowHelper::IsSubWindow(window->GetType())) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s This is not valid window.", where);
-            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_CALLING));
-            return;
-        }
         WmErrorCode ret = window->StopMoveWindow();
         if (ret == WmErrorCode::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
@@ -7699,7 +8111,7 @@ napi_value JsWindow::OnStopMoving(napi_env env, napi_callback_info info)
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "Stop moving window failed"));
         }
     };
-    if (napi_status::napi_ok != napi_send_event(env, std::move(asyncTask), napi_eprio_high)) {
+    if (napi_send_event(env, std::move(asyncTask), napi_eprio_high, "OnStopMoving") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env, CreateJsError(env,
             static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
     }
@@ -7781,7 +8193,7 @@ napi_value JsWindow::OnCreateSubWindowWithOptions(napi_env env, napi_callback_in
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
         return NapiGetUndefined(env);
     }
-    if (!windowToken_->IsPcOrPadCapabilityEnabled()) {
+    if (!windowToken_->IsPcOrFreeMultiWindowCapabilityEnabled()) {
         TLOGE(WmsLogTag::WMS_SUB, "device not support");
         return NapiGetUndefined(env);
     }
@@ -7851,7 +8263,7 @@ napi_value JsWindow::OnCreateSubWindowWithOptions(napi_env env, napi_callback_in
         task->Resolve(env, CreateJsWindowObject(env, subWindow));
         TLOGNI(WmsLogTag::WMS_SUB, "%{public}s create sub window %{public}s end", where, windowName.c_str());
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_vip)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_vip, "OnCreateSubWindowWithOptions") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env, CreateJsError(env,
             static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
     }
@@ -7892,7 +8304,7 @@ napi_value JsWindow::OnSetParentWindow(napi_env env, napi_callback_info info)
         TLOGNI(WmsLogTag::WMS_SUB, "%{public}s window id: %{public}u set parent window id: %{public}u end",
             where, window->GetWindowId(), newParentWindowId);
     };
-    if (napi_status::napi_ok != napi_send_event(env, std::move(asyncTask), napi_eprio_high)) {
+    if (napi_send_event(env, std::move(asyncTask), napi_eprio_high, "OnSetParentWindow") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env, CreateJsError(env,
             static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
     }
@@ -7939,13 +8351,53 @@ napi_value JsWindow::OnGetWindowDensityInfo(napi_env env, napi_callback_info inf
     }
     auto objValue = ConvertWindowDensityInfoToJsValue(env, densityInfo);
     if (objValue != nullptr) {
-        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "win [%{public}u, %{public}s] get density: %{public}s",
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "win [%{public}u, %{public}s] get density: %{public}s",
             windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), densityInfo.ToString().c_str());
         return objValue;
     } else {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "create js windowDensityInfo failed");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
+}
+
+napi_value JsWindow::OnIsMainWindowFullScreenAcrossDisplays(napi_env env, napi_callback_info info)
+{
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowToken is null");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    std::shared_ptr<bool> isAcrossDisplaysPtr = std::make_shared<bool>(false);
+    std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
+    const char* const where = __func__;
+    auto execute = [weakToken = wptr<Window>(windowToken_), isAcrossDisplaysPtr, errCodePtr, where] {
+        auto window = weakToken.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is null", where);
+            *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+            return;
+        }
+        *errCodePtr =
+            WM_JS_TO_ERROR_CODE_MAP.at(window->IsMainWindowFullScreenAcrossDisplays(*isAcrossDisplaysPtr));
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s winId: %{public}u, isAcrossDisplays: %{public}u, "
+            "result: %{public}d", where, window->GetWindowId(), *isAcrossDisplaysPtr, *errCodePtr);
+    };
+    auto complete = [isAcrossDisplaysPtr, errCodePtr, where](napi_env env, NapiAsyncTask& task, int32_t status) {
+        if (*errCodePtr == WmErrorCode::WM_OK) {
+            auto objValue = CreateJsValue(env, *isAcrossDisplaysPtr);
+            if (objValue != nullptr) {
+                task.Resolve(env, objValue);
+            } else {
+                TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s convert to js value failed", where);
+                task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+            }
+        } else {
+            task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr));
+        }
+    };
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindow::OnIsMainWindowFullScreenAcrossDisplays",
+        env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
+    return result;
 }
 
 napi_value JsWindow::OnSetSystemAvoidAreaEnabled(napi_env env, napi_callback_info info)
@@ -8062,7 +8514,7 @@ napi_value JsWindow::OnSetExclusivelyHighlighted(napi_env env, napi_callback_inf
         TLOGNI(WmsLogTag::WMS_FOCUS, "%{public}s: end, window: [%{public}u, %{public}s]",
             where, window->GetWindowId(), window->GetWindowName().c_str());
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetExclusivelyHighlighted") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env, CreateJsError(env,
             static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
     }
@@ -8083,6 +8535,138 @@ napi_value JsWindow::OnIsWindowHighlighted(napi_env env, napi_callback_info info
     }
     TLOGI(WmsLogTag::WMS_FOCUS, "get window highlight end, isHighlighted: %{public}u", isHighlighted);
     return CreateJsValue(env, isHighlighted);
+}
+
+static void SetDragKeyFramePolicyTask(NapiAsyncTask::ExecuteCallback& execute,
+    NapiAsyncTask::CompleteCallback& complete, const wptr<Window>& weakToken, const KeyFramePolicy& keyFramePolicy)
+{
+    std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
+    const char* const where = __func__;
+    execute = [weakToken, keyFramePolicy, errCodePtr, where] {
+        if (errCodePtr == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s errCodePtr is nullptr", where);
+            return;
+        }
+        auto window = weakToken.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s window is nullptr", where);
+            *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+            return;
+        }
+        if (!window->IsPcWindow()) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s device not support", where);
+            *errCodePtr = WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
+            return;
+        }
+        if (!WindowHelper::IsMainWindow(window->GetType())) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s only main window is valid", where);
+            *errCodePtr = WmErrorCode::WM_ERROR_INVALID_CALLING;
+            return;
+        }
+        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->SetDragKeyFramePolicy(keyFramePolicy));
+    };
+    complete = [keyFramePolicy, errCodePtr, where](napi_env env, NapiAsyncTask& task, int32_t status) {
+        if (errCodePtr == nullptr) {
+            task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+            return;
+        }
+        if (*errCodePtr == WmErrorCode::WM_OK) {
+            auto objValue = ConvertKeyFramePolicyToJsValue(env, keyFramePolicy);
+            if (objValue != nullptr) {
+                task.Resolve(env, objValue);
+            } else {
+                TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s convert to js value failed", where);
+                task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+            }
+        } else {
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s failed, ret %{public}d", where, *errCodePtr);
+            task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr, "set key frame policy failed"));
+        }
+    };
+}
+
+napi_value JsWindow::OnSetDragKeyFramePolicy(napi_env env, napi_callback_info info)
+{
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != INDEX_ONE || argv[INDEX_ZERO] == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    KeyFramePolicy keyFramePolicy;
+    if (!ParseKeyFramePolicy(env, argv[INDEX_ZERO], keyFramePolicy)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Failed to convert parameter to keyFramePolicy");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    wptr<Window> weakToken(windowToken_);
+    NapiAsyncTask::ExecuteCallback execute;
+    NapiAsyncTask::CompleteCallback complete;
+    SetDragKeyFramePolicyTask(execute, complete, weakToken, keyFramePolicy);
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindow::OnSetDragKeyFramePolicy",
+        env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
+    return result;
+}
+
+napi_value JsWindow::OnSetRelativePositionToParentWindowEnabled(napi_env env, napi_callback_info info)
+{
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < INDEX_ONE) {
+        TLOGE(WmsLogTag::WMS_SUB, "argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    bool enabled = false;
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], enabled)) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to enable");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    WindowAnchor anchor = WindowAnchor::TOP_START;
+    if (argc > INDEX_ONE && !ConvertFromJsValue(env, argv[INDEX_ONE], anchor)) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to anchor");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    int32_t offsetX = 0;
+    if (argc > INDEX_TWO && !ConvertFromJsValue(env, argv[INDEX_TWO], offsetX)) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to offsetX");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    int32_t offsetY = 0;
+    if (argc > INDEX_THREE && !ConvertFromJsValue(env, argv[INDEX_THREE], offsetY)) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to offsetY");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    const char* const where = __func__;
+    napi_value result = nullptr;
+    std::shared_ptr napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    WindowAnchorInfo windowAnchorInfo = { enabled, anchor, offsetX, offsetY };
+    auto asyncTask = [weakToken = wptr(windowToken_), task = napiAsyncTask, env, windowAnchorInfo, where] {
+        auto window = weakToken.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s window is nullptr", where);
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+            return;
+        }
+        if (!WindowHelper::IsSubWindow(window->GetType())) {
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s only sub window is valid", where);
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING)));
+            return;
+        }
+        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetWindowAnchorInfo(windowAnchorInfo));
+        if (ret == WmErrorCode::WM_OK) {
+            task->Resolve(env, NapiGetUndefined(env));
+        } else {
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s failed, ret %{public}d", where, ret);
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "set window anchor info failed."));
+        }
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+        napiAsyncTask->Reject(env, CreateJsError(env,
+            static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
+    }
+    return result;
 }
 
 napi_value JsWindow::OnSetFollowParentWindowLayoutEnabled(napi_env env, napi_callback_info info)
@@ -8123,10 +8707,52 @@ napi_value JsWindow::OnSetFollowParentWindowLayoutEnabled(napi_env env, napi_cal
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "set follow parent layout failed."));
         }
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    napi_status status = napi_send_event(env, asyncTask, napi_eprio_high, "SetFollowParentWindowLayoutEnabled");
+    if (status != napi_status::napi_ok) {
         napiAsyncTask->Reject(env, CreateJsError(env,
             static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
     }
+    return result;
+}
+
+napi_value JsWindow::OnSetWindowShadowEnabled(napi_env env, napi_callback_info info)
+{
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != INDEX_ONE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    bool enabled = true;
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], enabled)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to convert parameter to enable");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
+    const char* const where = __func__;
+    auto execute = [weakToken = wptr<Window>(windowToken_), errCodePtr, enabled, where] {
+        auto window = weakToken.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is null", where);
+            *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+            return;
+        }
+        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->SetWindowShadowEnabled(enabled));
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s winId: %{public}u, set enable: %{public}u",
+            where, window->GetWindowId(), enabled);
+    };
+    auto complete = [errCodePtr, where](napi_env env, NapiAsyncTask& task, int32_t status) {
+        if (*errCodePtr == WmErrorCode::WM_OK) {
+            task.Resolve(env, NapiGetUndefined(env));
+        } else {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s set failed, result: %{public}d", where, *errCodePtr);
+            task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr, "set window shadow failed."));
+        }
+    };
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindow::OnSetWindowShadowEnabled",
+        env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
     return result;
 }
 
@@ -8147,12 +8773,15 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "moveWindowTo", moduleName, JsWindow::MoveWindowTo);
     BindNativeFunction(env, object, "moveWindowToAsync", moduleName, JsWindow::MoveWindowToAsync);
     BindNativeFunction(env, object, "moveWindowToGlobal", moduleName, JsWindow::MoveWindowToGlobal);
+    BindNativeFunction(env, object, "moveWindowToGlobalDisplay", moduleName, JsWindow::MoveWindowToGlobalDisplay);
     BindNativeFunction(env, object, "getGlobalRect", moduleName, JsWindow::GetGlobalScaledRect);
     BindNativeFunction(env, object, "resetSize", moduleName, JsWindow::Resize);
     BindNativeFunction(env, object, "resize", moduleName, JsWindow::ResizeWindow);
     BindNativeFunction(env, object, "resizeAsync", moduleName, JsWindow::ResizeWindowAsync);
     BindNativeFunction(env, object, "resizeWindowWithAnimation",
         moduleName, JsWindow::ResizeWindowWithAnimation);
+    BindNativeFunction(env, object, "clientToGlobalDisplay", moduleName, JsWindow::ClientToGlobalDisplay);
+    BindNativeFunction(env, object, "globalDisplayToClient", moduleName, JsWindow::GlobalDisplayToClient);
     BindNativeFunction(env, object, "setWindowType", moduleName, JsWindow::SetWindowType);
     BindNativeFunction(env, object, "setWindowMode", moduleName, JsWindow::SetWindowMode);
     BindNativeFunction(env, object, "getProperties", moduleName, JsWindow::GetProperties);
@@ -8225,6 +8854,7 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "translate", moduleName, JsWindow::Translate);
     BindNativeFunction(env, object, "getTransitionController", moduleName, JsWindow::GetTransitionController);
     BindNativeFunction(env, object, "snapshot", moduleName, JsWindow::Snapshot);
+    BindNativeFunction(env, object, "snapshotSync", moduleName, JsWindow::SnapshotSync);
     BindNativeFunction(env, object, "snapshotIgnorePrivacy", moduleName, JsWindow::SnapshotIgnorePrivacy);
     BindNativeFunction(env, object, "setCornerRadius", moduleName, JsWindow::SetCornerRadius);
     BindNativeFunction(env, object, "setWindowCornerRadius", moduleName, JsWindow::SetWindowCornerRadius);
@@ -8260,6 +8890,10 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "setSubWindowModal", moduleName, JsWindow::SetSubWindowModal);
     BindNativeFunction(env, object, "setFollowParentMultiScreenPolicy",
         moduleName, JsWindow::SetFollowParentMultiScreenPolicy);
+    BindNativeFunction(env, object, "setWindowTransitionAnimation",
+        moduleName, JsWindow::SetWindowTransitionAnimation);
+    BindNativeFunction(env, object, "getWindowTransitionAnimation",
+        moduleName, JsWindow::GetWindowTransitionAnimation);
     BindNativeFunction(env, object, "enableDrag", moduleName, JsWindow::EnableDrag);
     BindNativeFunction(env, object, "setWindowDecorHeight", moduleName, JsWindow::SetWindowDecorHeight);
     BindNativeFunction(env, object, "getWindowDecorHeight", moduleName, JsWindow::GetWindowDecorHeight);
@@ -8269,6 +8903,7 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "setTitleButtonVisible", moduleName, JsWindow::SetTitleButtonVisible);
     BindNativeFunction(env, object, "setWindowTitleButtonVisible", moduleName, JsWindow::SetWindowTitleButtonVisible);
     BindNativeFunction(env, object, "setWindowContainerColor", moduleName, JsWindow::SetWindowContainerColor);
+    BindNativeFunction(env, object, "setWindowContainerModalColor", moduleName, JsWindow::SetWindowContainerModalColor);
     BindNativeFunction(env, object, "setWindowMask", moduleName, JsWindow::SetWindowMask);
     BindNativeFunction(env, object, "setWindowGrayScale", moduleName, JsWindow::SetWindowGrayScale);
     BindNativeFunction(env, object, "setImmersiveModeEnabledState", moduleName, JsWindow::SetImmersiveModeEnabledState);
@@ -8282,12 +8917,19 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "setGestureBackEnabled", moduleName, JsWindow::SetGestureBackEnabled);
     BindNativeFunction(env, object, "isGestureBackEnabled", moduleName, JsWindow::GetGestureBackEnabled);
     BindNativeFunction(env, object, "getWindowDensityInfo", moduleName, JsWindow::GetWindowDensityInfo);
+    BindNativeFunction(env, object, "isMainWindowFullScreenAcrossDisplays", moduleName,
+        JsWindow::IsMainWindowFullScreenAcrossDisplays);
     BindNativeFunction(env, object, "setSystemAvoidAreaEnabled", moduleName, JsWindow::SetSystemAvoidAreaEnabled);
     BindNativeFunction(env, object, "isSystemAvoidAreaEnabled", moduleName, JsWindow::IsSystemAvoidAreaEnabled);
     BindNativeFunction(env, object, "setExclusivelyHighlighted", moduleName, JsWindow::SetExclusivelyHighlighted);
     BindNativeFunction(env, object, "isWindowHighlighted", moduleName, JsWindow::IsWindowHighlighted);
+    BindNativeFunction(env, object, "setDragKeyFramePolicy", moduleName, JsWindow::SetDragKeyFramePolicy);
+    BindNativeFunction(env, object, "setRelativePositionToParentWindowEnabled", moduleName,
+        JsWindow::SetRelativePositionToParentWindowEnabled);
     BindNativeFunction(env, object, "setFollowParentWindowLayoutEnabled", moduleName,
         JsWindow::SetFollowParentWindowLayoutEnabled);
+    BindNativeFunction(env, object, "setWindowShadowEnabled", moduleName, JsWindow::SetWindowShadowEnabled);
+    BindNativeFunction(env, object, "isImmersiveLayout", moduleName, JsWindow::IsImmersiveLayout);
 }
 }  // namespace Rosen
 }  // namespace OHOS

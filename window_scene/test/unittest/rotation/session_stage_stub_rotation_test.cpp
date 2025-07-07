@@ -43,21 +43,13 @@ public:
     sptr<SessionStageStub> sessionStageStub_ = sptr<SessionStageMocker>::MakeSptr();
 };
 
-void SessionStageStubRotationTest::SetUpTestCase()
-{
-}
+void SessionStageStubRotationTest::SetUpTestCase() {}
 
-void SessionStageStubRotationTest::TearDownTestCase()
-{
-}
+void SessionStageStubRotationTest::TearDownTestCase() {}
 
-void SessionStageStubRotationTest::SetUp()
-{
-}
+void SessionStageStubRotationTest::SetUp() {}
 
-void SessionStageStubRotationTest::TearDown()
-{
-}
+void SessionStageStubRotationTest::TearDown() {}
 
 namespace {
 /**
@@ -81,6 +73,6 @@ HWTEST_F(SessionStageStubRotationTest, HandleSetCurrentRotation, TestSize.Level1
     data.WriteInt32(ONE_FOURTH_FULL_CIRCLE_DEGREE);
     EXPECT_EQ(ERR_NONE, sessionStageStub_->HandleSetCurrentRotation(data, reply));
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

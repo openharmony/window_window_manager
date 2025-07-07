@@ -28,13 +28,9 @@ public:
     static void TearDownTestCase();
 };
 
-void WindowSessionPropertyRotationTest::SetUpTestCase()
-{
-}
+void WindowSessionPropertyRotationTest::SetUpTestCase() {}
 
-void WindowSessionPropertyRotationTest::TearDownTestCase()
-{
-}
+void WindowSessionPropertyRotationTest::TearDownTestCase() {}
 
 namespace {
 /**

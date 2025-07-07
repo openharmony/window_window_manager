@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at,
@@ -20,10 +20,10 @@
 #include <mutex>
 
 #include "display_lite.h"
+#include "display_manager_lite_proxy.h"
 #include "dm_common.h"
 #include "singleton_delegator.h"
-#include "display_manager_lite_proxy.h"
-#include "zidl/display_manager_agent_interface.h"
+#include "zidl/idisplay_manager_agent.h"
 
 namespace OHOS::Rosen {
 class BaseAdapterLite {
@@ -62,6 +62,7 @@ public:
     virtual sptr<DisplayInfo> GetDisplayInfo(DisplayId displayId);
     virtual sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId);
     virtual VirtualScreenFlag GetVirtualScreenFlag(ScreenId screenId);
+    virtual bool GetKeyboardState();
     /*
      * used by powermgr
      */
@@ -87,15 +88,16 @@ public:
     /*
      * used by powermgr
      */
+    virtual DMError GetPhysicalScreenIds(std::vector<ScreenId>& screenIds);
     virtual bool SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason);
     virtual bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason);
     virtual ScreenPowerState GetScreenPower(ScreenId dmsScreenId);
     virtual ScreenPowerState GetScreenPower();
+    virtual sptr<ScreenInfo> GetScreenInfo(ScreenId screenId);
     virtual DMError GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos);
 private:
     static inline SingletonDelegator<ScreenManagerAdapterLite> delegator;
 };
-
 
 } // namespace OHOS::Rosen
 #endif // FOUNDATION_DM_DISPLAY_MANAGER_ADAPTER_LITE_H

@@ -37,6 +37,7 @@ public:
 private:
     int HandleSetActive(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateRect(MessageParcel& data, MessageParcel& reply);
+    int HandleUpdateGlobalDisplayRectFromServer(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateDensity(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateOrientation(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateSessionViewportConfig(MessageParcel& data, MessageParcel& reply);
@@ -48,10 +49,17 @@ private:
     int HandleNotifyOccupiedAreaChange(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateAvoidArea(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyScreenshot(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyScreenshotAppEvent(MessageParcel& data, MessageParcel& reply);
     int HandleDumpSessionElementInfo(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyTouchOutside(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifySecureLimitChange(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateWindowMode(MessageParcel& data, MessageParcel& reply);
+    int HandleGetTopNavDestinationName(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyLayoutFinishAfterWindowModeChange(MessageParcel& data, MessageParcel& reply);
+    int HandleUpdateWindowModeForUITest(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyForegroundInteractiveStatus(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyPausedStatus();
+    int HandleNotifyAppUseControlStatus(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateMaximizeMode(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyCloseExistPipWindow(MessageParcel& data, MessageParcel& reply);
     int HandleNotifySessionForeground(MessageParcel& data, MessageParcel& reply);
@@ -69,11 +77,8 @@ private:
     int HandleSwitchFreeMultiWindow(MessageParcel& data, MessageParcel& reply);
     int HandleGetUIContentRemoteObj(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyKeyboardPanelInfoChange(MessageParcel& data, MessageParcel& reply);
-    int HandleCompatibleFullScreenRecover(MessageParcel& data, MessageParcel& reply);
-    int HandleCompatibleFullScreenMinimize(MessageParcel& data, MessageParcel& reply);
-    int HandleCompatibleFullScreenClose(MessageParcel& data, MessageParcel& reply);
     int HandlePcAppInPadNormalClose(MessageParcel& data, MessageParcel& reply);
-    int HandleNotifyCompatibleModeEnableInPad(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyCompatibleModePropertyChange(MessageParcel& data, MessageParcel& reply);
     int HandleSetUniqueVirtualPixelRatio(MessageParcel& data, MessageParcel& reply);
     int HandleNotifySessionFullScreen(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyDumpInfo(MessageParcel& data, MessageParcel& reply);
@@ -92,8 +97,13 @@ private:
     int HandleNotifyRotationProperty(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyWindowAttachStateChange(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyKeyboardAnimationCompleted(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyKeyboardAnimationWillBegin(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyRotationChange(MessageParcel& data, MessageParcel& reply);
     int HandleSetCurrentRotation(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyAppForceLandscapeConfigUpdated(MessageParcel& data, MessageParcel& reply);
+    int HandleGetRouterStackInfo(MessageParcel& data, MessageParcel& reply);
+    int HandleCloseSpecificScene(MessageParcel& data, MessageParcel& reply);
+    int HandleSendFbActionEvent(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_STUB_H

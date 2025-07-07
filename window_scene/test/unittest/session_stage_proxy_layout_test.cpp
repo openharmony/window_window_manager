@@ -58,6 +58,77 @@ HWTEST_F(SessionStageProxyLayoutTest, NotifySingleHandTransformChange, TestSize.
     ASSERT_TRUE((sessionStage_ != nullptr));
     GTEST_LOG_(INFO) << "SessionStageProxyLayoutTest: NotifySingleHandTransformChange end";
 }
+
+/**
+ * @tc.name: NotifyLayoutFinishAfterWindowModeChange
+ * @tc.desc: test function : NotifyLayoutFinishAfterWindowModeChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyLayoutTest, NotifyLayoutFinishAfterWindowModeChange, TestSize.Level1)
+{
+    ASSERT_TRUE((sessionStage_ != nullptr));
+    GTEST_LOG_(INFO) << "SessionStageProxyLayoutTest: NotifyLayoutFinishAfterWindowModeChange start";
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    auto ret = sessionStage_->NotifyLayoutFinishAfterWindowModeChange(WindowMode::WINDOW_MODE_FULLSCREEN);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, ret);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    ret = sessionStage_->NotifyLayoutFinishAfterWindowModeChange(WindowMode::WINDOW_MODE_FULLSCREEN);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, ret);
+    MockMessageParcel::SetWriteUint32ErrorFlag(false);
+
+    sptr<SessionStageProxy> sessionStage = sptr<SessionStageProxy>::MakeSptr(nullptr);
+    ret = sessionStage->NotifyLayoutFinishAfterWindowModeChange(WindowMode::WINDOW_MODE_FULLSCREEN);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, ret);
+
+    ret = sessionStage_->NotifyLayoutFinishAfterWindowModeChange(WindowMode::WINDOW_MODE_FULLSCREEN);
+    EXPECT_EQ(WSError::WS_OK, ret);
+    MockMessageParcel::ClearAllErrorFlag();
+    GTEST_LOG_(INFO) << "SessionStageProxyLayoutTest: NotifyLayoutFinishAfterWindowModeChange end";
 }
+
+/**
+ * @tc.name: UpdateWindowModeForUITest01
+ * @tc.desc: test function : UpdateWindowModeForUITest
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyLayoutTest, UpdateWindowModeForUITest01, TestSize.Level1)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "SessionStageProxyLayoutTest: UpdateWindowModeForUITest01 start");
+    GTEST_LOG_(INFO) << "SessionStageProxyLayoutTest: UpdateWindowModeForUITest01 start";
+    const int32_t updateMode = 1;
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    sptr<SessionStageProxy> sessionStageProxy = sptr<SessionStageProxy>::MakeSptr(remoteMocker);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    WMError errCode = sessionStageProxy->UpdateWindowModeForUITest(updateMode);
+    EXPECT_EQ(errCode, WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    errCode = sessionStageProxy->UpdateWindowModeForUITest(updateMode);
+    EXPECT_EQ(errCode, WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteInt32ErrorFlag(false);
+
+    remoteMocker->SetRequestResult(1);
+    errCode = sessionStageProxy->UpdateWindowModeForUITest(updateMode);
+    EXPECT_EQ(errCode, WMError::WM_ERROR_IPC_FAILED);
+    remoteMocker->SetRequestResult(0);
+
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    errCode = sessionStageProxy->UpdateWindowModeForUITest(updateMode);
+    MockMessageParcel::SetReadInt32ErrorFlag(false);
+    EXPECT_EQ(errCode, WMError::WM_OK);
+
+    sptr<SessionStageProxy> sessionStageProxy2 = sptr<SessionStageProxy>::MakeSptr(nullptr);
+    errCode = sessionStageProxy2->UpdateWindowModeForUITest(updateMode);
+    EXPECT_EQ(errCode, WMError::WM_ERROR_IPC_FAILED);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    TLOGI(WmsLogTag::WMS_LAYOUT, "SessionStageProxyLayoutTest: UpdateWindowModeForUITest01 end");
+}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

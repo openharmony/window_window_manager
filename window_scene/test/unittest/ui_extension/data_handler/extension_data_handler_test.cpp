@@ -97,8 +97,8 @@ HWTEST_F(ExtensionDataHandlerTest, DataTransferConfigUnmarshalling02, TestSize.L
 HWTEST_F(ExtensionDataHandlerTest, RegisterDataConsumer01, TestSize.Level1)
 {
     MockDataHandler handler;
-    auto callback = [](SubSystemId id, uint32_t customId, AAFwk::Want&& data,
-                       std::optional<AAFwk::Want>& reply) -> int32_t {
+    auto callback =
+        [](SubSystemId id, uint32_t customId, AAFwk::Want&& data, std::optional<AAFwk::Want>& reply) -> int32_t {
         return 0;
     };
 
@@ -114,8 +114,8 @@ HWTEST_F(ExtensionDataHandlerTest, RegisterDataConsumer01, TestSize.Level1)
 HWTEST_F(ExtensionDataHandlerTest, RegisterDataConsumer02, TestSize.Level1)
 {
     MockDataHandler handler;
-    auto callback = [](SubSystemId id, uint32_t customId, AAFwk::Want&& data,
-                       std::optional<AAFwk::Want>& reply) -> int32_t {
+    auto callback =
+        [](SubSystemId id, uint32_t customId, AAFwk::Want&& data, std::optional<AAFwk::Want>& reply) -> int32_t {
         return 0;
     };
     auto callback1 = callback;
@@ -134,8 +134,8 @@ HWTEST_F(ExtensionDataHandlerTest, RegisterDataConsumer02, TestSize.Level1)
 HWTEST_F(ExtensionDataHandlerTest, UnregisterDataConsumer01, TestSize.Level1)
 {
     MockDataHandler handler;
-    auto callback = [](SubSystemId id, uint32_t customId, AAFwk::Want&& data,
-                       std::optional<AAFwk::Want>& reply) -> int32_t {
+    auto callback =
+        [](SubSystemId id, uint32_t customId, AAFwk::Want&& data, std::optional<AAFwk::Want>& reply) -> int32_t {
         return 0;
     };
     auto callback1 = callback;
@@ -175,7 +175,9 @@ HWTEST_F(ExtensionDataHandlerTest, NotifyDataConsumer01, TestSize.Level1)
     MockDataHandler handler;
     bool callbackCalled = false;
 
-    auto callback = [&callbackCalled](SubSystemId id, uint32_t customId, AAFwk::Want&& data,
+    auto callback = [&callbackCalled](SubSystemId id,
+                                      uint32_t customId,
+                                      AAFwk::Want&& data,
                                       std::optional<AAFwk::Want>& reply) -> int32_t {
         callbackCalled = true;
         EXPECT_EQ(SubSystemId::WM_UIEXT, id);
@@ -217,7 +219,9 @@ HWTEST_F(ExtensionDataHandlerTest, NotifyDataConsumer02, TestSize.Level1)
     MockDataHandler handler;
     bool callbackCalled = false;
 
-    auto callback = [&callbackCalled](SubSystemId id, uint32_t customId, AAFwk::Want&& data,
+    auto callback = [&callbackCalled](SubSystemId id,
+                                      uint32_t customId,
+                                      AAFwk::Want&& data,
                                       std::optional<AAFwk::Want>& reply) -> int32_t {
         callbackCalled = true;
         EXPECT_EQ(SubSystemId::WM_UIEXT, id);
@@ -259,4 +263,4 @@ HWTEST_F(ExtensionDataHandlerTest, NotifyDataConsumer03, TestSize.Level1)
     auto ret = handler.NotifyDataConsumer(std::move(data), reply, config);
     ASSERT_EQ(DataHandlerErr::NO_CONSUME_CALLBACK, ret);
 }
-}  // namespace OHOS::Rosen::Extension
+} // namespace OHOS::Rosen::Extension

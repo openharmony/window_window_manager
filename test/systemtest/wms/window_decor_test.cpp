@@ -433,8 +433,6 @@ HWTEST_F(WindowDecorTest, DisableAppWindowDecor03, TestSize.Level1)
 
     window->Destroy(true, true);
 }
-
-}
-
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

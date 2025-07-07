@@ -45,9 +45,23 @@ public:
     MOCK_METHOD0(AfterDidBackground, void(void));
 };
 
+class MockWindowStageLifeCycleListener : public IWindowStageLifeCycle {
+public:
+    MOCK_METHOD0(AfterLifecycleForeground, void(void));
+    MOCK_METHOD0(AfterLifecycleBackground, void(void));
+    MOCK_METHOD0(AfterLifecycleResumed, void(void));
+    MOCK_METHOD0(AfterLifecyclePaused, void(void));
+};
+
 class MockAvoidAreaChangedListener : public IAvoidAreaChangedListener {
 public:
-    MOCK_METHOD2(OnAvoidAreaChanged, void(const AvoidArea avoidArea, AvoidAreaType type));
+    MOCK_METHOD3(OnAvoidAreaChanged, void(const AvoidArea avoidArea, AvoidAreaType type,
+        const sptr<OccupiedAreaChangeInfo>& info));
+};
+
+class MockAcrossDisplaysChangeListener : public IAcrossDisplaysChangeListener {
+public:
+    MOCK_METHOD1(OnAvoidAreaChanged, void(bool isAcrossDisplays));
 };
 
 class MockTouchOutsideListener : public ITouchOutsideListener {
@@ -60,10 +74,27 @@ public:
     MOCK_METHOD1(OnWindowStatusChange, void(WindowStatus status));
 };
 
+class MockWindowStatusDidChangeListener : public IWindowStatusDidChangeListener {
+public:
+    MOCK_METHOD1(OnWindowStatusDidChange, void(WindowStatus status));
+};
+
 class MockIOccupiedAreaChangeListener : public IOccupiedAreaChangeListener {
 public:
     MOCK_METHOD2(OnSizeChange, void(const sptr<OccupiedAreaChangeInfo>& info,
         const std::shared_ptr<RSTransaction>& rsTransaction));
+};
+
+class MockIKeyboardWillShowListener : public IKeyboardWillShowListener {
+public:
+    MOCK_METHOD2(OnKeyboardWillShow, void(const KeyboardAnimationInfo& keyboardAnimationInfo,
+        const KeyboardAnimationCurve& curve));
+};
+        
+class MockIKeyboardWillHideListener : public IKeyboardWillHideListener {
+public:
+    MOCK_METHOD2(OnKeyboardWillHide, void(const KeyboardAnimationInfo& keyboardAnimationInfo,
+        const KeyboardAnimationCurve& curve));
 };
 
 class MockIKeyboardDidShowListener : public IKeyboardDidShowListener {
@@ -159,6 +190,11 @@ public:
 class MockIWaterfallModeChangeListener : public IWaterfallModeChangeListener {
 public:
     MOCK_METHOD1(OnWaterfallModeChange, void(bool isWaterfallMode));
+};
+
+class MockRectChangeInGlobalDisplayListener : public IRectChangeInGlobalDisplayListener {
+public:
+    MOCK_METHOD(void, OnRectChangeInGlobalDisplay, (const Rect& rect, WindowSizeChangeReason reason), (override));
 };
 } // Rosen
 } // OHOS

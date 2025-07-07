@@ -15,10 +15,10 @@
 
 // gtest
 #include <gtest/gtest.h>
-#include "display_manager_proxy.h"
 #include "common_test_utils.h"
-#include "window_test_utils.h"
+#include "display_manager_proxy.h"
 #include "window_accessibility_controller.h"
+#include "window_test_utils.h"
 #include "wm_common.h"
 using namespace testing;
 using namespace testing::ext;
@@ -33,29 +33,26 @@ public:
     virtual void SetUp() override;
     virtual void TearDown() override;
     Utils::TestWindowInfo windowInfo_;
+
 private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
 
-void WindowEffectTest::SetUpTestCase()
-{
-}
+void WindowEffectTest::SetUpTestCase() {}
 
-void WindowEffectTest::TearDownTestCase()
-{
-}
+void WindowEffectTest::TearDownTestCase() {}
 
 void WindowEffectTest::SetUp()
 {
     CommonTestUtils::GuaranteeFloatWindowPermission("wms_window_effect_test");
     windowInfo_ = {
-            .name = "TestWindow",
-            .rect = {0, 0, 100, 200},
-            .type = WindowType::WINDOW_TYPE_FLOAT,
-            .mode = WindowMode::WINDOW_MODE_FLOATING,
-            .needAvoid = false,
-            .parentLimit = false,
-            .parentId = INVALID_WINDOW_ID,
+        .name = "TestWindow",
+        .rect = { 0, 0, 100, 200 },
+        .type = WindowType::WINDOW_TYPE_FLOAT,
+        .mode = WindowMode::WINDOW_MODE_FLOATING,
+        .needAvoid = false,
+        .parentLimit = false,
+        .parentId = INVALID_WINDOW_ID,
     };
 }
 
@@ -202,7 +199,6 @@ HWTEST_F(WindowEffectTest, WindowEffect07, TestSize.Level1)
     WindowAccessibilityController::GetInstance().SetAnchorOffset(-100, -100);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
-
 
 } // namespace
 } // namespace Rosen

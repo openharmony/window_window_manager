@@ -153,7 +153,6 @@ enum class ApiWindowType : uint32_t {
     TYPE_SYSTEM_TOAST,
     TYPE_DIVIDER,
     TYPE_GLOBAL_SEARCH,
-    TYPE_MAIN = 32,
     TYPE_END
 };
 
@@ -204,7 +203,6 @@ const std::map<ApiWindowType, WindowType> CJ_TO_NATIVE_WINDOW_TYPE_MAP {
     { ApiWindowType::TYPE_SYSTEM_TOAST,        WindowType::WINDOW_TYPE_SYSTEM_TOAST        },
     { ApiWindowType::TYPE_DIVIDER,             WindowType::WINDOW_TYPE_DOCK_SLICE          },
     { ApiWindowType::TYPE_GLOBAL_SEARCH,       WindowType::WINDOW_TYPE_GLOBAL_SEARCH       },
-    { ApiWindowType::TYPE_MAIN,                WindowType::WINDOW_TYPE_APP_MAIN_WINDOW     },
 };
 
 enum class ApiWindowMode : uint32_t {
@@ -246,7 +244,6 @@ const std::map<WindowType, ApiWindowType> CJ_TO_WINDOW_TYPE_MAP {
     { WindowType::WINDOW_TYPE_SYSTEM_TOAST,        ApiWindowType::TYPE_SYSTEM_TOAST      },
     { WindowType::WINDOW_TYPE_DOCK_SLICE,          ApiWindowType::TYPE_DIVIDER           },
     { WindowType::WINDOW_TYPE_GLOBAL_SEARCH,       ApiWindowType::TYPE_GLOBAL_SEARCH     },
-    { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,     ApiWindowType::TYPE_MAIN              },
 };
 
 const std::map<WindowSizeChangeReason, RectChangeReason> CJ_SIZE_CHANGE_REASON {

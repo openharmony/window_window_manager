@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#include "surface_draw.h"
 #include <algorithm>
 #include <hitrace_meter.h>
 #include <surface.h>
+#include "surface_draw.h"
 #include <transaction/rs_interfaces.h>
 #include <ui/rs_surface_extractor.h>
 
@@ -33,7 +33,149 @@ namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SurfaceDraw"};
 constexpr uint32_t IMAGE_BYTES_STRIDE = 4;
+constexpr float CENTER_IN_RECT = 0.5;                     // Multiply by 0.5 to obtain the coordinates in center
+constexpr float FIXED_BOTTOM_SAFE_AREA_HEIGHT_VP = 28.0;  // 28.0 indicates fixed bottom safe area height of windowRect
+constexpr float FIXED_TOP_SAFE_AREA_HEIGHT_VP = 36.0;     // 36.0 indicates fixed top safe srea height off windowRect
+constexpr float MAX_BRAND_CONTENT_WIDTH_VP = 400.0;       // 400.0 indicates max brand content width of windowRect
+constexpr float MIN_BRAND_CONTENT_HEIGHT_VP = 80.0;       // 80.0 indicates min brand content height of windowRect
+constexpr float MIN_RECT_HEIGHT_VP = 100.0;               // 100.0 indicates min rect height of windowRect
+constexpr float SIDE_DISTANCE_VP = 16.0;                  // 16.0 indicates side distance of windowRect
+constexpr float EIGHTY_PERCENT = 0.8;                     // 0.8 indicates eighty percent
+constexpr float FORTY_PERCENT = 0.4;                      // 0.4 indicates forty percent
+constexpr float SEVENTY_PERCENT = 0.7;                    // 0.7 indicates seventy percent
+constexpr float THIRTY_PERCENT = 0.3;                     // 0.3 indicates thirty percent
 } // namespace
+
+bool IsValidPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap)
+{
+    if (pixelMap == nullptr) {
+        TLOGD(WmsLogTag::WMS_PATTERN, "pixelMap is nullptr.");
+        return false;
+    }
+    return pixelMap->GetHeight() > 0 && pixelMap->GetWidth() > 0;
+}
+
+bool IsValidRect(const Rect& targetRect, const Rect& winRect)
+{
+    bool valid = targetRect.posX_ > 0
+              && targetRect.posY_ > 0
+              && targetRect.width_ > 0
+              && targetRect.height_ > 0
+              && (targetRect.posX_ + targetRect.width_) < winRect.width_
+              && (targetRect.posY_ + targetRect.height_) < winRect.height_;
+    return valid;
+}
+
+Rect GetAboveRect(const Rect& winRect, const float ratio)
+{
+    float width  = static_cast<float>(winRect.width_);
+    float height = static_cast<float>(winRect.height_);
+
+    float axis = (height * CENTER_IN_RECT) / width;
+    float sideLen = MathHelper::GreatNotEqual(axis, 1.0f) ?
+        width * EIGHTY_PERCENT : (height * CENTER_IN_RECT) * EIGHTY_PERCENT;
+
+    float posX = (width - sideLen) * CENTER_IN_RECT;
+    float posY = (SEVENTY_PERCENT * height - FIXED_TOP_SAFE_AREA_HEIGHT_VP * ratio - sideLen) *
+        CENTER_IN_RECT + FIXED_TOP_SAFE_AREA_HEIGHT_VP * ratio;
+    Rosen::Rect aboveRect {
+        static_cast<int32_t>(posX),
+        static_cast<int32_t>(posY),
+        static_cast<uint32_t>(sideLen),
+        static_cast<uint32_t>(sideLen)
+    };
+    return aboveRect;
+}
+
+Rect GetBelowRect(const Rect& winRect, const float ratio)
+{
+    float width  = static_cast<float>(winRect.width_);
+    float height = static_cast<float>(winRect.height_);
+
+    float rectWidth = width - 2 * SIDE_DISTANCE_VP * ratio; // 2 indicates double
+    float rectHeight = (height * THIRTY_PERCENT) * FORTY_PERCENT; // 40% height based on 30% of winRect height
+
+    Rosen::Rect belowRect { 0, 0,
+        static_cast<uint32_t>(MathHelper::Min(rectWidth, MAX_BRAND_CONTENT_WIDTH_VP * ratio)),
+        static_cast<uint32_t>(MathHelper::Max(rectHeight, MIN_BRAND_CONTENT_HEIGHT_VP * ratio))
+    };
+    belowRect.posX_ = static_cast<int32_t>((width - belowRect.width_) * CENTER_IN_RECT);
+    belowRect.posY_ = static_cast<int32_t>((height * THIRTY_PERCENT - FIXED_BOTTOM_SAFE_AREA_HEIGHT_VP * ratio -
+        belowRect.height_) * CENTER_IN_RECT + height * SEVENTY_PERCENT);
+    return belowRect;
+}
+
+void FitAndDraw(const std::shared_ptr<Media::PixelMap>& pixelMap, const Rect& targetRect,
+    const std::shared_ptr<Drawing::Canvas>& canvas, ImageFit fit)
+{
+    auto rsImage = std::make_shared<Rosen::RSImage>();
+    if (rsImage == nullptr) {
+        TLOGD(WmsLogTag::WMS_PATTERN, "rsImage is nullptr.");
+        return;
+    }
+    rsImage->SetPixelMap(pixelMap);
+    rsImage->SetImageFit(int(fit));
+    canvas->Save();
+    canvas->Translate(targetRect.posX_, targetRect.posY_);
+    rsImage->CanvasDrawImage(
+        *canvas,
+        Drawing::Rect(
+            targetRect.posX_,
+            targetRect.posY_,
+            targetRect.posX_ + targetRect.width_,
+            targetRect.posY_ + targetRect.height_),
+        Drawing::SamplingOptions());
+    canvas->Restore();
+}
+
+bool DoDrawAppIconOrIllustration(const std::shared_ptr<Media::PixelMap>& pixelMap, const Rect& winRect,
+    const std::shared_ptr<Drawing::Canvas>& canvas, const float ratio, ImageFit fit)
+{
+    auto aboveRect = GetAboveRect(winRect, ratio);
+    if (!IsValidRect(aboveRect, winRect)) {
+        TLOGD(WmsLogTag::WMS_PATTERN, "aboveRect is invalid.");
+        return false;
+    }
+    FitAndDraw(pixelMap, aboveRect, canvas, fit);
+    return true;
+}
+
+bool DoDrawBranding(const std::shared_ptr<Media::PixelMap>& pixelMap, const Rect& winRect,
+    const std::shared_ptr<Drawing::Canvas>& canvas, const float ratio, ImageFit fit)
+{
+    if ((winRect.height_ * THIRTY_PERCENT) < MIN_RECT_HEIGHT_VP * ratio) {
+        TLOGD(WmsLogTag::WMS_PATTERN, "rect is invalid.");
+        return false;
+    }
+    auto belowRect = GetBelowRect(winRect, ratio);
+    if (!IsValidRect(belowRect, winRect)) {
+        TLOGD(WmsLogTag::WMS_PATTERN, "belowRect is invalid.");
+        return false;
+    }
+    FitAndDraw(pixelMap, belowRect, canvas, fit);
+    return true;
+}
+
+bool DoDrawBackgroundImage(const std::shared_ptr<Media::PixelMap>& pixelMap, const Rect& winRect,
+    const std::shared_ptr<Drawing::Canvas>& canvas, const std::string &fit)
+{
+    const std::unordered_map<std::string, ImageFit> drawStrategies = {
+        { "Fill", ImageFit::FILL },
+        { "None", ImageFit::NONE },
+        { "Cover", ImageFit::COVER },
+        { "Auto", ImageFit::FIT_WIDTH },
+        { "Contain", ImageFit::CONTAIN },
+        { "ScaleDown", ImageFit::SCALE_DOWN },
+    };
+    std::string effectiveFit = fit.empty() ? "Cover" : fit;
+    auto it = drawStrategies.find(effectiveFit);
+    if (it == drawStrategies.end()) {
+        TLOGD(WmsLogTag::WMS_PATTERN, "Unsupported fit type: %{public}s", effectiveFit.c_str());
+        return false;
+    }
+    FitAndDraw(pixelMap, winRect, canvas, it->second);
+    return true;
+}
 
 bool SurfaceDraw::DrawImage(std::shared_ptr<RSSurfaceNode> surfaceNode, int32_t bufferWidth,
     int32_t bufferHeight, const std::string& imagePath)
@@ -420,6 +562,89 @@ bool SurfaceDraw::DrawMasking(std::shared_ptr<RSSurfaceNode> surfaceNode, Rect s
     OHOS::SurfaceError surfaceRet = layer->FlushBuffer(buffer, -1, flushConfig);
     if (surfaceRet != OHOS::SurfaceError::SURFACE_ERROR_OK) {
         WLOGFE("draw masking FlushBuffer ret:%{public}s", SurfaceErrorStr(surfaceRet).c_str());
+        return false;
+    }
+    return true;
+}
+
+bool SurfaceDraw::DrawCustomStartingWindow(const std::shared_ptr<RSSurfaceNode>& surfaceNode,
+    const Rect& rect, const std::shared_ptr<Rosen::StartingWindowPageDrawInfo>& info, const float ratio)
+{
+    int32_t winHeight = static_cast<int32_t>(rect.height_);
+    int32_t winWidth = static_cast<int32_t>(rect.width_);
+    sptr<OHOS::Surface> layer = GetLayer(surfaceNode);
+    if (layer == nullptr) {
+        TLOGD(WmsLogTag::WMS_PATTERN, "layer is nullptr");
+        return false;
+    }
+    sptr<OHOS::SurfaceBuffer> buffer = GetSurfaceBuffer(layer, winWidth, winHeight);
+    if (buffer == nullptr || buffer->GetVirAddr() == nullptr) {
+        TLOGD(WmsLogTag::WMS_PATTERN, "buffer or virAddr is nullptr");
+        return false;
+    }
+    if (!DoDrawCustomStartingWindow(buffer, rect, info, ratio)) {
+        TLOGD(WmsLogTag::WMS_PATTERN, "draw background image failed");
+        return false;
+    }
+    OHOS::BufferFlushConfig flushConfig = {
+        .damage = {
+            .w = buffer->GetWidth(),
+            .h = buffer->GetHeight(),
+        },
+    };
+    OHOS::SurfaceError surfaceRet = layer->FlushBuffer(buffer, -1, flushConfig);
+    if (surfaceRet != OHOS::SurfaceError::SURFACE_ERROR_OK) {
+        TLOGD(WmsLogTag::WMS_PATTERN, "draw pointer FlushBuffer ret:%{public}s", SurfaceErrorStr(surfaceRet).c_str());
+        return false;
+    }
+    return true;
+}
+
+bool SurfaceDraw::DoDrawCustomStartingWindow(const sptr<OHOS::SurfaceBuffer>& buffer, const Rect& rect,
+    const std::shared_ptr<Rosen::StartingWindowPageDrawInfo>& info, const float ratio)
+{
+    if (info == nullptr || rect.width_ <= 0 || rect.height_ <= 0 || ratio  <= 0) {
+        TLOGD(WmsLogTag::WMS_PATTERN, "info is nullptr or invalid rect and ratio");
+        return false;
+    }
+    auto bufferStride = buffer->GetStride();
+    int32_t alignWidth = bufferStride / static_cast<int32_t>(IMAGE_BYTES_STRIDE);
+    Drawing::Bitmap customDrawBitmap;
+    Drawing::BitmapFormat format { Drawing::ColorType::COLORTYPE_RGBA_8888, Drawing::AlphaType::ALPHATYPE_OPAQUE };
+    customDrawBitmap.Build(alignWidth, rect.height_, format);
+    auto canvas = std::make_shared<Drawing::Canvas>();
+    if (canvas == nullptr) {
+        TLOGD(WmsLogTag::WMS_PATTERN, "canvas is nullptr");
+        return false;
+    }
+    canvas->Bind(customDrawBitmap);
+    canvas->Clear(info->bgColor);
+
+    if (IsValidPixelMap(info->bgImagePixelMap)) {
+        if (!DoDrawBackgroundImage(info->bgImagePixelMap, rect, canvas, info->startWindowBackgroundImageFit)) {
+            TLOGD(WmsLogTag::WMS_PATTERN, "draw background image failed");
+        }
+    }
+    if (IsValidPixelMap(info->brandingPixelMap)) {
+        if (!DoDrawBranding(info->brandingPixelMap, rect, canvas, ratio, ImageFit::SCALE_DOWN)) {
+            TLOGD(WmsLogTag::WMS_PATTERN, "draw branding image failed");
+        }
+    }
+    if (IsValidPixelMap(info->appIconPixelMap)) {
+        if (!DoDrawAppIconOrIllustration(info->appIconPixelMap, rect, canvas, ratio, ImageFit::CONTAIN)) {
+            TLOGD(WmsLogTag::WMS_PATTERN, "draw appIcon image failed");
+        }
+    }
+    if (IsValidPixelMap(info->illustrationPixelMap)) {
+        if (!DoDrawAppIconOrIllustration(info->illustrationPixelMap, rect, canvas, ratio, ImageFit::SCALE_DOWN))
+            TLOGD(WmsLogTag::WMS_PATTERN, "draw illustraction image failed");
+    }
+    int32_t bufferSize = bufferStride * rect.height_;
+    uint8_t* bitmapAddr = static_cast<uint8_t*>(customDrawBitmap.GetPixels());
+    auto addr = static_cast<uint8_t *>(buffer->GetVirAddr());
+    errno_t ret = memcpy_s(addr, bufferSize, bitmapAddr, bufferSize);
+    if (ret != EOK) {
+        TLOGD(WmsLogTag::WMS_PATTERN, "draw image failed, because copy customDrawBitmap to buffer failed.");
         return false;
     }
     return true;

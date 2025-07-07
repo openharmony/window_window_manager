@@ -21,7 +21,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 class TaskSchedulerTest : public testing::Test {
-  public:
+public:
     TaskSchedulerTest() {}
     ~TaskSchedulerTest() {}
 };
@@ -37,7 +37,7 @@ HWTEST_F(TaskSchedulerTest, task_scheduler_test001, TestSize.Level1)
     GTEST_LOG_(INFO) << "TaskSchedulerTest: task_scheduler_test001 start";
     std::string threadName = "threadName";
     std::string name = "name";
-    TaskScheduler* taskScheduler = new(std::nothrow) TaskScheduler(threadName);
+    TaskScheduler* taskScheduler = new (std::nothrow) TaskScheduler(threadName);
     int res = 0;
     taskScheduler->RemoveTask(name);
     ASSERT_EQ(res, 0);
@@ -98,7 +98,6 @@ HWTEST_F(TaskSchedulerTest, AddExportTask1, TestSize.Level1)
     ASSERT_EQ(taskTid, gettid());
     ASSERT_EQ(taskScheduler->exportFuncMap_.size(), 0);
 }
-
 
 HWTEST_F(TaskSchedulerTest, AddExportTask2, TestSize.Level1)
 {

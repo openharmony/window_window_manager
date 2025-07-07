@@ -13,16 +13,16 @@
  * limitations under the License.
  */
 
-#include "surface_reader.h"
 #include <gtest/gtest.h>
 #include <unistd.h>
+#include "surface_reader.h"
 
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 class SurfaceReaderTest : public testing::Test {
-  public:
+public:
     SurfaceReaderTest() {}
     ~SurfaceReaderTest() {}
 };
@@ -36,7 +36,7 @@ namespace {
 HWTEST_F(SurfaceReaderTest, Init, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SurfaceReaderTest: Init start";
-    SurfaceReader* reader = new(std::nothrow) SurfaceReader();
+    SurfaceReader* reader = new (std::nothrow) SurfaceReader();
     bool res = reader->Init();
     ASSERT_EQ(res, true);
     delete reader;
@@ -50,7 +50,7 @@ HWTEST_F(SurfaceReaderTest, Init, TestSize.Level1)
  */
 HWTEST_F(SurfaceReaderTest, OnVsync, TestSize.Level1)
 {
-    SurfaceReader* reader = new(std::nothrow) SurfaceReader();
+    SurfaceReader* reader = new (std::nothrow) SurfaceReader();
     bool res = reader->Init();
     reader->OnVsync();
     delete reader;
@@ -64,7 +64,7 @@ HWTEST_F(SurfaceReaderTest, OnVsync, TestSize.Level1)
  */
 HWTEST_F(SurfaceReaderTest, GetSurface, TestSize.Level1)
 {
-    SurfaceReader* reader = new(std::nothrow) SurfaceReader();
+    SurfaceReader* reader = new (std::nothrow) SurfaceReader();
     reader->Init();
     sptr<Surface> surface = reader->GetSurface();
     ASSERT_NE(surface, nullptr);
@@ -78,11 +78,11 @@ HWTEST_F(SurfaceReaderTest, GetSurface, TestSize.Level1)
  */
 HWTEST_F(SurfaceReaderTest, SetHandler, TestSize.Level1)
 {
-    SurfaceReader* reader = new(std::nothrow) SurfaceReader();
+    SurfaceReader* reader = new (std::nothrow) SurfaceReader();
     reader->SetHandler(nullptr);
     ASSERT_TRUE(true);
     delete reader;
 }
 } // namespace
-}
-}
+} // namespace Rosen
+} // namespace OHOS

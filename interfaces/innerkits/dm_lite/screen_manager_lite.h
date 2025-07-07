@@ -153,6 +153,14 @@ public:
      * @return DM_OK means getting ids success, others means getting ids failed.
      */
     DMError GetPhysicalScreenIds(std::vector<uint64_t>& screenIds);
+
+    /**
+     * @brief Get the screen info object by screen id.
+     *
+     * @param screenId Screen id.
+     * @return ScreenInfo object.
+     */
+    sptr<ScreenInfo> GetScreenInfoById(ScreenId screenId);
 private:
     ScreenManagerLite();
     ~ScreenManagerLite();

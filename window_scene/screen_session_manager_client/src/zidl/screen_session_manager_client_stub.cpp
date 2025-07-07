@@ -18,14 +18,11 @@
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
-namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenSessionManagerClientStub" };
-}  // namespace
 
 void ScreenSessionManagerClientStub::InitScreenChangeMap()
 {
     if (HandleScreenChangeMap_.size() != 0) {
-        WLOGFI("screen change map has init!");
+        TLOGI(WmsLogTag::DMS, "screen change map has init!");
         return;
     }
     HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_ON_SCREEN_CONNECTION_CHANGED] =
@@ -80,6 +77,14 @@ void ScreenSessionManagerClientStub::InitScreenChangeMap()
         [this](MessageParcel& data, MessageParcel& reply) {
         return HandleOnGetSurfaceNodeIdsFromMissionIdsChanged(data, reply);
     };
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_SET_SURFACENODEIDS] =
+        [this](MessageParcel& data, MessageParcel& reply) {
+        return HandleOnSetSurfaceNodeIdsChanged(data, reply);
+    };
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_ON_VIRTUAL_SCREEN_DISCONNECTED] =
+        [this](MessageParcel& data, MessageParcel& reply) {
+        return HandleOnVirtualScreenDisconnected(data, reply);
+    };
     HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_SET_FOLD_DISPLAY_MODE] =
         [this](MessageParcel& data, MessageParcel& reply) {
         return HandleOnUpdateFoldDisplayMode(data, reply);
@@ -116,6 +121,34 @@ void ScreenSessionManagerClientStub::InitScreenChangeMap()
         [this](MessageParcel& data, MessageParcel& reply) {
         return HandleOnExtendScreenConnectStatusChanged(data, reply);
     };
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_ON_EXTEND_CHANGED] =
+        [this](MessageParcel& data, MessageParcel& reply) {
+        return HandleOnExtendDisplayNodeChange(data, reply);
+    };
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_ON_CREATE_SCREEN_SESSION_ONLY] =
+        [this](MessageParcel& data, MessageParcel& reply) {
+        return HandleOnCreateScreenSessionOnly(data, reply);
+    };
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_ON_MAIN_CHANGED] =
+        [this](MessageParcel& data, MessageParcel& reply) {
+        return HandleOnMainDisplayNodeChange(data, reply);
+    };
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_SET_SCREEN_COMBINATION] =
+        [this](MessageParcel& data, MessageParcel& reply) {
+        return HandleSyncScreenCombination(data, reply);
+    };
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_ON_DUMP_SCREEN_SESSION] =
+        [this](MessageParcel& data, MessageParcel& reply) {
+        return HandleOnDumperClientScreenSessions(data, reply);
+    };
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_ON_BEFORE_PROPERTY_CHANGED] =
+        [this](MessageParcel& data, MessageParcel& reply) {
+        return HandleOnBeforeScreenPropertyChange(data, reply);
+    };
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_ON_SCREEN_MODE_CHANGED] =
+        [this](MessageParcel& data, MessageParcel& reply) {
+        return HandleOnScreenModeChanged(data, reply);
+    };
 }
 
 ScreenSessionManagerClientStub::ScreenSessionManagerClientStub()
@@ -128,7 +161,7 @@ int ScreenSessionManagerClientStub::OnRemoteRequest(uint32_t code, MessageParcel
 {
     int handleRet = ERR_INVALID_STATE;
     if (data.ReadInterfaceToken() != GetDescriptor()) {
-        WLOGFE("Failed to check interface token!");
+        TLOGE(WmsLogTag::DMS, "Failed to check interface token!");
         return handleRet;
     }
     ScreenSessionManagerClientMessage msgId = static_cast<ScreenSessionManagerClientMessage>(code);
@@ -137,7 +170,7 @@ int ScreenSessionManagerClientStub::OnRemoteRequest(uint32_t code, MessageParcel
         auto handleFunc = handleCall->second;
         handleRet = handleFunc(data, reply);
     } else {
-        WLOGFE("Failed to find function handler!");
+        TLOGE(WmsLogTag::DMS, "Failed to find function handler!");
         handleRet = IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
     return handleRet;
@@ -145,7 +178,7 @@ int ScreenSessionManagerClientStub::OnRemoteRequest(uint32_t code, MessageParcel
 
 int ScreenSessionManagerClientStub::HandleSwitchUserCallback(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGD("HandleSwitchUserCallback");
+    TLOGD(WmsLogTag::DMS, "enter");
     std::vector<int32_t> oldScbPids;
     data.ReadInt32Vector(&oldScbPids);
     int32_t currentScbPid = data.ReadInt32();
@@ -155,7 +188,7 @@ int ScreenSessionManagerClientStub::HandleSwitchUserCallback(MessageParcel& data
 
 int ScreenSessionManagerClientStub::HandleOnScreenConnectionChanged(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGD("HandleOnScreenConnectionChanged");
+    TLOGD(WmsLogTag::DMS, "enter");
     auto rsId = static_cast<ScreenId>(data.ReadUint64());
     auto name = data.ReadString();
     bool isExtend = data.ReadBool();
@@ -175,11 +208,11 @@ int ScreenSessionManagerClientStub::HandleOnScreenConnectionChanged(MessageParce
 
 int ScreenSessionManagerClientStub::HandleOnPropertyChanged(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGD("HandleOnPropertyChanged");
+    TLOGD(WmsLogTag::DMS, "enter");
     auto screenId = static_cast<ScreenId>(data.ReadUint64());
     ScreenProperty property;
     if (!RSMarshallingHelper::Unmarshalling(data, property)) {
-        WLOGFE("Read property failed");
+        TLOGE(WmsLogTag::DMS, "Read property failed");
         return ERR_INVALID_DATA;
     }
     auto reason = static_cast<ScreenPropertyChangeReason>(data.ReadUint32());
@@ -189,7 +222,7 @@ int ScreenSessionManagerClientStub::HandleOnPropertyChanged(MessageParcel& data,
 
 int ScreenSessionManagerClientStub::HandleOnPowerStatusChanged(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGD("HandleOnPowerStatusChanged");
+    TLOGD(WmsLogTag::DMS, "enter");
     auto event = static_cast<DisplayPowerEvent>(data.ReadUint32());
     auto status = static_cast<EventStatus>(data.ReadUint32());
     auto reason = static_cast<PowerStateChangeReason>(data.ReadUint32());
@@ -199,7 +232,7 @@ int ScreenSessionManagerClientStub::HandleOnPowerStatusChanged(MessageParcel& da
 
 int ScreenSessionManagerClientStub::HandleOnSensorRotationChanged(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGD("HandleOnSensorRotationChanged");
+    TLOGD(WmsLogTag::DMS, "enter");
     auto screenId = static_cast<ScreenId>(data.ReadUint64());
     auto sensorRotation = data.ReadFloat();
     OnSensorRotationChanged(screenId, sensorRotation);
@@ -210,14 +243,15 @@ int ScreenSessionManagerClientStub::HandleOnScreenExtendChanged(MessageParcel& d
 {
     auto mainScreenId = static_cast<ScreenId>(data.ReadUint64());
     auto extendScreenId = static_cast<ScreenId>(data.ReadUint64());
-    WLOGI("mainScreenId=%{public}" PRIu64" extendScreenId=%{public}" PRIu64, mainScreenId, extendScreenId);
+    TLOGI(WmsLogTag::DMS, "mainScreenId=%{public}" PRIu64" extendScreenId=%{public}" PRIu64, mainScreenId,
+        extendScreenId);
     OnScreenExtendChanged(mainScreenId, extendScreenId);
     return ERR_NONE;
 }
 
 int ScreenSessionManagerClientStub::HandleOnScreenOrientationChanged(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGD("HandleOnScreenOrientationChanged");
+    TLOGD(WmsLogTag::DMS, "enter");
     auto screenId = static_cast<ScreenId>(data.ReadUint64());
     auto screenOrientation = data.ReadFloat();
     OnScreenOrientationChanged(screenId, screenOrientation);
@@ -226,7 +260,7 @@ int ScreenSessionManagerClientStub::HandleOnScreenOrientationChanged(MessageParc
 
 int ScreenSessionManagerClientStub::HandleOnScreenRotationLockedChanged(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGD("HandleOnScreenRotationLockedChanged");
+    TLOGD(WmsLogTag::DMS, "enter");
     auto screenId = static_cast<ScreenId>(data.ReadUint64());
     auto isLocked = data.ReadBool();
     OnScreenRotationLockedChanged(screenId, isLocked);
@@ -235,7 +269,7 @@ int ScreenSessionManagerClientStub::HandleOnScreenRotationLockedChanged(MessageP
 
 int ScreenSessionManagerClientStub::HandleOnDisplayStateChanged(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGD("HandleOnDisplayStateChanged");
+    TLOGD(WmsLogTag::DMS, "enter");
     auto defaultDisplayId = static_cast<DisplayId>(data.ReadUint64());
     auto displayInfo = data.ReadStrongParcelable<DisplayInfo>();
     auto mapSize = data.ReadUint32();
@@ -252,7 +286,7 @@ int ScreenSessionManagerClientStub::HandleOnDisplayStateChanged(MessageParcel& d
 
 int ScreenSessionManagerClientStub::HandleOnUpdateFoldDisplayMode(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGD("HandleOnUpdateFoldDisplayMode");
+    TLOGD(WmsLogTag::DMS, "enter");
     auto foldDisplayMode = static_cast<FoldDisplayMode>(data.ReadUint32());
     OnUpdateFoldDisplayMode(foldDisplayMode);
     return ERR_NONE;
@@ -268,15 +302,31 @@ int ScreenSessionManagerClientStub::HandleOnGetSurfaceNodeIdsFromMissionIdsChang
     bool isBlackList = data.ReadBool();
     OnGetSurfaceNodeIdsFromMissionIdsChanged(missionIds, surfaceNodeIds, isBlackList);
     if (!reply.WriteUInt64Vector(surfaceNodeIds)) {
-        WLOGFE("Write surfaceNodeIds failed");
+        TLOGE(WmsLogTag::DMS, "Write surfaceNodeIds failed");
         return ERR_TRANSACTION_FAILED;
     }
     return ERR_NONE;
 }
 
+int ScreenSessionManagerClientStub::HandleOnSetSurfaceNodeIdsChanged(MessageParcel& data, MessageParcel& reply)
+{
+    auto displayId = static_cast<DisplayId>(data.ReadUint64());
+    std::vector<uint64_t> surfaceNodeIds;
+    data.ReadUInt64Vector(&surfaceNodeIds);
+    OnSetSurfaceNodeIdsChanged(displayId, surfaceNodeIds);
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerClientStub::HandleOnVirtualScreenDisconnected(MessageParcel& data, MessageParcel& reply)
+{
+    auto displayId = static_cast<DisplayId>(data.ReadUint64());
+    OnVirtualScreenDisconnected(displayId);
+    return ERR_NONE;
+}
+
 int ScreenSessionManagerClientStub::HandleOnScreenshot(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGD("HandleOnScreenshot");
+    TLOGD(WmsLogTag::DMS, "enter");
     auto displayId = static_cast<DisplayId>(data.ReadUint64());
     OnScreenshot(displayId);
     return ERR_NONE;
@@ -284,12 +334,12 @@ int ScreenSessionManagerClientStub::HandleOnScreenshot(MessageParcel& data, Mess
 
 int ScreenSessionManagerClientStub::HandleOnImmersiveStateChanged(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGD("HandleOnImmersiveStateChanged");
+    TLOGD(WmsLogTag::DMS, "enter");
     auto screenId = static_cast<ScreenId>(data.ReadUint64());
     bool immersive = false;
     OnImmersiveStateChanged(screenId, immersive);
     if (!reply.WriteBool(immersive)) {
-        WLOGFE("Write immersive failed");
+        TLOGE(WmsLogTag::DMS, "Write immersive failed");
         return ERR_TRANSACTION_FAILED;
     }
     return ERR_NONE;
@@ -297,7 +347,7 @@ int ScreenSessionManagerClientStub::HandleOnImmersiveStateChanged(MessageParcel&
 
 int ScreenSessionManagerClientStub::HandleOnSetDisplayNodeScreenId(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGD("HandleOnSetDisplayNodeScreenId");
+    TLOGD(WmsLogTag::DMS, "enter");
     auto screenId = static_cast<ScreenId>(data.ReadUint64());
     auto displayNodeScreenId = static_cast<ScreenId>(data.ReadUint64());
     SetDisplayNodeScreenId(screenId, displayNodeScreenId);
@@ -306,7 +356,7 @@ int ScreenSessionManagerClientStub::HandleOnSetDisplayNodeScreenId(MessageParcel
 
 int ScreenSessionManagerClientStub::HandleSetVirtualPixelRatioSystem(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGD("HandleSetVirtualPixelRatioSystem");
+    TLOGD(WmsLogTag::DMS, "enter");
     auto screenId = static_cast<ScreenId>(data.ReadUint64());
     float virtualPixelRatio = data.ReadFloat();
     SetVirtualPixelRatioSystem(screenId, virtualPixelRatio);
@@ -323,7 +373,7 @@ int ScreenSessionManagerClientStub::HandleOnFoldStatusChangedReportUE(MessagePar
 
 int ScreenSessionManagerClientStub::HandleOnHoverStatusChanged(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGD("HandleOnHoverStatusChanged");
+    TLOGD(WmsLogTag::DMS, "enter");
     auto screenId = static_cast<ScreenId>(data.ReadUint64());
     auto hoverStatus = data.ReadInt32();
     auto needRotate = data.ReadBool();
@@ -336,14 +386,14 @@ int ScreenSessionManagerClientStub::HandleScreenCaptureNotify(MessageParcel& dat
     auto screenId = static_cast<ScreenId>(data.ReadUint64());
     auto uid = data.ReadInt32();
     auto clientName = data.ReadString();
-    WLOGI("notify scb capture screenId=%{public}" PRIu64", uid=%{public}d.", screenId, uid);
+    TLOGI(WmsLogTag::DMS, "notify scb capture screenId=%{public}" PRIu64", uid=%{public}d.", screenId, uid);
     ScreenCaptureNotify(screenId, uid, clientName);
     return ERR_NONE;
 }
 
 int ScreenSessionManagerClientStub::HandleOnCameraBackSelfieChanged(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGD("HandleOnCameraBackSelfieChanged");
+    TLOGD(WmsLogTag::DMS, "enter");
     auto screenId = static_cast<ScreenId>(data.ReadUint64());
     bool isCameraBackSelfie = data.ReadBool();
     OnCameraBackSelfieChanged(screenId, isCameraBackSelfie);
@@ -354,7 +404,7 @@ int ScreenSessionManagerClientStub::HandleOnSuperFoldStatusChanged(MessageParcel
 {
     auto screenId = static_cast<ScreenId>(data.ReadUint64());
     auto superFoldStatus = static_cast<SuperFoldStatus>(data.ReadUint32());
-    WLOGI("super fold status screenId=%{public}" PRIu64", superFoldStatus=%{public}d.",
+    TLOGI(WmsLogTag::DMS, "super fold status screenId=%{public}" PRIu64", superFoldStatus=%{public}d.",
         screenId, static_cast<uint32_t>(superFoldStatus));
     OnSuperFoldStatusChanged(screenId, superFoldStatus);
     return ERR_NONE;
@@ -364,7 +414,7 @@ int ScreenSessionManagerClientStub::HandleOnSecondaryReflexionChanged(MessagePar
 {
     auto screenId = static_cast<ScreenId>(data.ReadUint64());
     auto isSecondaryReflexion = static_cast<bool>(data.ReadUint32());
-    WLOGI("secondary reflexion screenId=%{public}" PRIu64", isSecondaryReflexion=%{public}d.",
+    TLOGI(WmsLogTag::DMS, "secondary reflexion screenId=%{public}" PRIu64", isSecondaryReflexion=%{public}d.",
         screenId, static_cast<uint32_t>(isSecondaryReflexion));
     OnSecondaryReflexionChanged(screenId, isSecondaryReflexion);
     return ERR_NONE;
@@ -374,9 +424,78 @@ int ScreenSessionManagerClientStub::HandleOnExtendScreenConnectStatusChanged(Mes
 {
     auto screenId = static_cast<ScreenId>(data.ReadUint64());
     auto extendScreenConnectStatus = static_cast<ExtendScreenConnectStatus>(data.ReadUint32());
-    WLOGI("extendScreenConnectStatus screenId=%{public}" PRIu64", extendScreenConnectStatus=%{public}d.",
-        screenId, static_cast<uint32_t>(extendScreenConnectStatus));
+    TLOGI(WmsLogTag::DMS, "extendScreenConnectStatus screenId=%{public}" PRIu64", extendScreenConnectStatus"
+        "=%{public}d.", screenId, static_cast<uint32_t>(extendScreenConnectStatus));
     OnExtendScreenConnectStatusChanged(screenId, extendScreenConnectStatus);
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerClientStub::HandleOnExtendDisplayNodeChange(MessageParcel& data, MessageParcel& reply)
+{
+    ScreenId mainScreenId = static_cast<ScreenId>(data.ReadUint64());
+    ScreenId extendScreenId = static_cast<ScreenId>(data.ReadUint64());
+    bool changeStatus = OnExtendDisplayNodeChange(mainScreenId, extendScreenId);
+    reply.WriteBool(changeStatus);
+    TLOGI(WmsLogTag::DMS, "extend display change status=%{public}d", changeStatus);
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerClientStub::HandleOnCreateScreenSessionOnly(MessageParcel& data, MessageParcel& reply)
+{
+    auto screenId = static_cast<ScreenId>(data.ReadUint64());
+    auto rsId = static_cast<ScreenId>(data.ReadUint64());
+    auto name = data.ReadString();
+    bool isExtend = data.ReadBool();
+    bool refreshStatus = OnCreateScreenSessionOnly(screenId, rsId, name, isExtend);
+    reply.WriteBool(refreshStatus);
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerClientStub::HandleOnMainDisplayNodeChange(MessageParcel& data, MessageParcel& reply)
+{
+    ScreenId mainScreenId = static_cast<ScreenId>(data.ReadUint64());
+    ScreenId extendScreenId = static_cast<ScreenId>(data.ReadUint64());
+    ScreenId extendRSId = static_cast<ScreenId>(data.ReadUint64());
+    bool changeStatus = OnMainDisplayNodeChange(mainScreenId, extendScreenId, extendRSId);
+    reply.WriteBool(changeStatus);
+    TLOGI(WmsLogTag::DMS, "main node change status=%{public}d", changeStatus);
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerClientStub::HandleOnDumperClientScreenSessions(MessageParcel& data, MessageParcel& reply)
+{
+    std::string screenInfos = OnDumperClientScreenSessions();
+    reply.WriteString(screenInfos);
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerClientStub::HandleSyncScreenCombination(MessageParcel& data, MessageParcel& reply)
+{
+    auto mainScreenId = static_cast<ScreenId>(data.ReadUint64());
+    auto extendScreenId = static_cast<ScreenId>(data.ReadUint64());
+    auto extendCombination = static_cast<ScreenCombination>(data.ReadUint32());
+    SetScreenCombination(mainScreenId, extendScreenId, extendCombination);
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerClientStub::HandleOnBeforeScreenPropertyChange(MessageParcel& data, MessageParcel& reply)
+{
+    uint32_t status = data.ReadUint32();
+    FoldStatus foldStatus = FoldStatus::UNKNOWN;
+    if (status > static_cast<uint32_t>(FoldStatus::HALF_FOLD)) {
+        return ERR_INVALID_VALUE;
+    }
+    foldStatus = static_cast<FoldStatus>(status);
+    TLOGI(WmsLogTag::DMS, "fold status %{public}d", foldStatus);
+    OnBeforeScreenPropertyChanged(foldStatus);
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerClientStub::HandleOnScreenModeChanged(MessageParcel& data, MessageParcel& reply)
+{
+    auto screenModeChangeEvent = static_cast<ScreenModeChangeEvent>(data.ReadUint32());
+    TLOGI(WmsLogTag::DMS, "screenModeChangeEvent: %{public}d", screenModeChangeEvent);
+    OnScreenModeChanged(screenModeChangeEvent);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

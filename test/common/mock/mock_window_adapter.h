@@ -64,6 +64,12 @@ public:
         sptr<WindowSessionProperty> property, sptr<ISession>& session, sptr<IRemoteObject> token));
     MOCK_METHOD2(SetParentWindow, WMError(int32_t subWindowId, int32_t newParentWindowId));
     MOCK_METHOD3(IsWindowRectAutoSave, WMError(const std::string& key, bool& enabled, int persistentId));
+    MOCK_METHOD2(GetHostWindowCompatiblityInfo, WMError(const sptr<IRemoteObject>& token,
+        const sptr<CompatibleModeProperty>& property));
+    MOCK_METHOD3(AnimateTo, WMError(int32_t windowId, const WindowAnimationProperty& animationProperty,
+        const WindowAnimationOption& animationOption));
+    MOCK_METHOD1(IsFreeMultiWindowMode, WMError(bool& isFreeMultiWindow));
+    MOCK_METHOD1(IsPcOrPadFreeMultiWindowMode, WMError(bool& IsPcOrPadFreeMultiWindowMode));
 };
 }
 } // namespace OHOS

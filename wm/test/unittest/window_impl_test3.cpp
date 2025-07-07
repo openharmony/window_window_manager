@@ -49,6 +49,11 @@ public:
     MOCK_METHOD0(OnScreenshot, void());
 };
 
+class MockScreenshotAppEventListener : public IScreenshotAppEventListener {
+public:
+    MOCK_METHOD1(OnScreenshotAppEvent, void(ScreenshotEventType type));
+};
+
 class MockDialogTargetTouchListener : public IDialogTargetTouchListener {
 public:
     MOCK_CONST_METHOD0(OnDialogTargetTouch, void());
@@ -64,7 +69,8 @@ public:
 
 class MockAvoidAreaChangedListener : public IAvoidAreaChangedListener {
 public:
-    MOCK_METHOD2(OnAvoidAreaChanged, void(const AvoidArea avoidArea, AvoidAreaType type));
+    MOCK_METHOD3(OnAvoidAreaChanged, void(const AvoidArea avoidArea, AvoidAreaType type,
+        const sptr<OccupiedAreaChangeInfo>& info));
 };
 
 class MockDisplayMoveListener : public IDisplayMoveListener {
@@ -179,6 +185,27 @@ HWTEST_F(WindowImplTest3, NotifyScreenshot, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyScreenshotAppEvent
+ * @tc.desc: NotifyScreenshotAppEvent test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest3, NotifyScreenshotAppEvent, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
+    ScreenshotEventType type = ScreenshotEventType::SCROLL_SHOT_START;
+
+    sptr<MockScreenshotAppEventListener> listener;
+    window->screenshotAppEventListeners_[window->GetWindowId()].push_back(sptr<IScreenshotAppEventListener>(listener));
+    listener = sptr<MockScreenshotAppEventListener>::MakeSptr();
+    window->screenshotAppEventListeners_[window->GetWindowId()].push_back(sptr<IScreenshotAppEventListener>(listener));
+    EXPECT_CALL(*listener, OnScreenshotAppEvent(_)).Times(1);
+    auto ret = window->NotifyScreenshotAppEvent(type);
+    EXPECT_EQ(ret, WMError::WM_OK);
+    window->screenshotAppEventListeners_[window->GetWindowId()].clear();
+}
+
+/**
  * @tc.name: NotifyTouchDialogTarget
  * @tc.desc: NotifyTouchDialogTarget test
  * @tc.type: FUNC
@@ -251,7 +278,7 @@ HWTEST_F(WindowImplTest3, NotifyAvoidAreaChange, TestSize.Level1)
     window->avoidAreaChangeListeners_[window->GetWindowId()].push_back(sptr<IAvoidAreaChangedListener>(listener));
     listener = sptr<MockAvoidAreaChangedListener>::MakeSptr();
     window->avoidAreaChangeListeners_[window->GetWindowId()].push_back(sptr<IAvoidAreaChangedListener>(listener));
-    EXPECT_CALL(*listener, OnAvoidAreaChanged(_, _));
+    EXPECT_CALL(*listener, OnAvoidAreaChanged(_, _, _));
     sptr<AvoidArea> avoidArea = sptr<AvoidArea>::MakeSptr();
     window->NotifyAvoidAreaChange(avoidArea, AvoidAreaType::TYPE_CUTOUT);
     window->avoidAreaChangeListeners_[window->GetWindowId()].clear();
@@ -507,33 +534,24 @@ HWTEST_F(WindowImplTest3, UpdateConfiguration, TestSize.Level1)
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
-    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    window->RestoreSplitWindowMode(0u);
-    EXPECT_CALL(m->Mock(), GetSystemConfig(_)).WillOnce(Return(WMError::WM_OK));
-    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
+    window->subWindowMap_.clear();
+    std::shared_ptr<AppExecFwk::Configuration> configuration;
+    window->UpdateConfiguration(configuration);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    window->UpdateConfiguration(configuration);
+
+    window->subWindowMap_[window->GetWindowId()].push_back(nullptr);
+    window->UpdateConfiguration(configuration);
 
     option = sptr<WindowOption>::MakeSptr();
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     option->SetWindowName("subwindow");
     sptr<WindowImpl> subWindow = sptr<WindowImpl>::MakeSptr(option);
-    EXPECT_CALL(m->Mock(), GetSystemConfig(_)).WillOnce(Return(WMError::WM_OK));
-    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, subWindow->Create(window->GetWindowId()));
-    std::shared_ptr<AppExecFwk::Configuration> configuration;
+    ASSERT_NE(subWindow, nullptr);
+    subWindow->property_->SetWindowId(8);
+    window->subWindowMap_[window->GetWindowId()].push_back(subWindow);
     window->UpdateConfiguration(configuration);
-
-    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    Ace::UIContentMocker* content = reinterpret_cast<Ace::UIContentMocker*>(window->uiContent_.get());
-    subWindow->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    Ace::UIContentMocker* subContent = reinterpret_cast<Ace::UIContentMocker*>(subWindow->uiContent_.get());
-    EXPECT_CALL(*content, UpdateConfiguration(_));
-    EXPECT_CALL(*subContent, UpdateConfiguration(_));
-    window->UpdateConfiguration(configuration);
-    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
-    EXPECT_CALL(*content, Destroy());
-    EXPECT_CALL(*subContent, Destroy());
-    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+    window->subWindowMap_.clear();
 }
 
 /**
@@ -543,39 +561,30 @@ HWTEST_F(WindowImplTest3, UpdateConfiguration, TestSize.Level1)
  */
 HWTEST_F(WindowImplTest3, UpdateConfigurationForSpecified, TestSize.Level1)
 {
+    std::shared_ptr<Global::Resource::ResourceManager> resourceManager;
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("UpdateConfigurationForSpecified");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
-    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    window->RestoreSplitWindowMode(0u);
-    EXPECT_CALL(m->Mock(), GetSystemConfig(_)).WillOnce(Return(WMError::WM_OK));
-    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
+    window->subWindowMap_.clear();
+    std::shared_ptr<AppExecFwk::Configuration> configuration;
+    window->UpdateConfigurationForSpecified(configuration, resourceManager);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    window->UpdateConfigurationForSpecified(configuration, resourceManager);
+
+    window->subWindowMap_[window->GetWindowId()].push_back(nullptr);
+    window->UpdateConfigurationForSpecified(configuration, resourceManager);
 
     option = sptr<WindowOption>::MakeSptr();
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     option->SetWindowName("subwindow");
     sptr<WindowImpl> subWindow = sptr<WindowImpl>::MakeSptr(option);
-    EXPECT_CALL(m->Mock(), GetSystemConfig(_)).WillOnce(Return(WMError::WM_OK));
-    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, subWindow->Create(window->GetWindowId()));
-    std::shared_ptr<AppExecFwk::Configuration> configuration;
-    std::shared_ptr<Global::Resource::ResourceManager> resourceManager;
+    ASSERT_NE(subWindow, nullptr);
+    subWindow->property_->SetWindowId(8);
+    window->subWindowMap_[window->GetWindowId()].push_back(subWindow);
     window->UpdateConfigurationForSpecified(configuration, resourceManager);
-
-    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    Ace::UIContentMocker* content = reinterpret_cast<Ace::UIContentMocker*>(window->uiContent_.get());
-    subWindow->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    Ace::UIContentMocker* subContent = reinterpret_cast<Ace::UIContentMocker*>(subWindow->uiContent_.get());
-    EXPECT_CALL(*content, UpdateConfiguration(_, _));
-    EXPECT_CALL(*subContent, UpdateConfiguration(_, _));
-    window->UpdateConfigurationForSpecified(configuration, resourceManager);
-    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
-    EXPECT_CALL(*content, Destroy());
-    EXPECT_CALL(*subContent, Destroy());
-    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+    window->subWindowMap_.clear();
 }
 
 /**
@@ -927,19 +936,30 @@ HWTEST_F(WindowImplTest3, UpdateConfigurationForAll01, TestSize.Level1)
  */
 HWTEST_F(WindowImplTest3, UpdateConfigurationForAll02, TestSize.Level1)
 {
+    std::vector<std::shared_ptr<AbilityRuntime::Context>> ignoreWindowContexts;
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
-    EXPECT_CALL(m->Mock(), GetSystemConfig(_)).WillOnce(Return(WMError::WM_OK));
-    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    auto abilityContext = std::make_shared<AbilityRuntime::AbilityContextImpl>();
-    ASSERT_NE(nullptr, abilityContext);
-    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID, abilityContext));
-    std::vector<std::shared_ptr<AbilityRuntime::Context>> ignoreWindowContexts;
-    ignoreWindowContexts.push_back(abilityContext);
     std::shared_ptr<AppExecFwk::Configuration> configuration;
     window->UpdateConfigurationForAll(configuration, ignoreWindowContexts);
-    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
-    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+
+    sptr<WindowOption> subWindowOption = sptr<WindowOption>::MakeSptr();
+    subWindowOption->SetWindowName("UpdateConfigurationForAll02");
+    sptr<WindowImpl> subWindow = sptr<WindowImpl>::MakeSptr(subWindowOption);
+    uint32_t windowId = 1001;
+    string winName = "test";
+    subWindow = nullptr;
+    WindowImpl::windowMap_.insert(std::make_pair(winName, std::pair<uint32_t, sptr<Window>>(windowId, subWindow)));
+    window->UpdateConfigurationForAll(configuration, ignoreWindowContexts);
+
+    subWindow = sptr<WindowImpl>::MakeSptr(subWindowOption);
+    window->UpdateConfigurationForAll(configuration, ignoreWindowContexts);
+
+    auto abilityContext = std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    ASSERT_NE(nullptr, abilityContext);
+    ignoreWindowContexts.push_back(abilityContext);
+    window->context_ = abilityContext;
+    window->UpdateConfigurationForAll(configuration, ignoreWindowContexts);
+    WindowImpl::windowMap_.erase(winName);
 }
 
 /**
@@ -1445,13 +1465,8 @@ HWTEST_F(WindowImplTest3, GetTopWindowWithContext02, TestSize.Level1)
     option->SetWindowName("GetTopWindowWithContext02");
     sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
     std::shared_ptr<AbilityRuntime::Context> context;
-    uint32_t mainWinId = INVALID_WINDOW_ID;
 
-    WMError ret = WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
-    ASSERT_NE(WMError::WM_OK, ret);
-    ASSERT_EQ(INVALID_WINDOW_ID, mainWinId);
     ASSERT_EQ(nullptr, window->GetTopWindowWithContext(context));
-    ret = WMError::WM_OK;
     uint32_t topWinId = INVALID_WINDOW_ID;
     ASSERT_EQ(WindowImpl::FindWindowById(topWinId), window->GetTopWindowWithContext(context));
 }

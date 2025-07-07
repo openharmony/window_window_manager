@@ -50,9 +50,9 @@ public:
 
     static bool IsPointInRect(int32_t pointPosX, int32_t pointPosY, const Rect& rect)
     {
-        if ((pointPosX > rect.posX_) &&
+        if ((pointPosX >= rect.posX_) &&
             (pointPosX < (rect.posX_ + static_cast<int32_t>(rect.width_)) - 1) &&
-            (pointPosY > rect.posY_) &&
+            (pointPosY >= rect.posY_) &&
             (pointPosY < (rect.posY_ + static_cast<int32_t>(rect.height_)) - 1)) {
             return true;
         }
@@ -114,6 +114,17 @@ public:
         return IsSubWindow(type) || type == WindowType::WINDOW_TYPE_DIALOG;
     }
 
+    static inline bool IsSecureUIExtension(UIExtensionUsage usage)
+    {
+        return usage == UIExtensionUsage::CONSTRAINED_EMBEDDED || usage == UIExtensionUsage::PREVIEW_EMBEDDED;
+    }
+
+    static inline bool IsNeedSACalling(WindowType type)
+    {
+        return type == WindowType::WINDOW_TYPE_MAGNIFICATION || type == WindowType::WINDOW_TYPE_MAGNIFICATION_MENU ||
+            type == WindowType::WINDOW_TYPE_SELECTION;
+    }
+
     static AreaType GetAreaType(int32_t pointWinX, int32_t pointWinY,
         int32_t sourceType, int outside, float vpr, const WSRect& rect)
     {
@@ -155,6 +166,54 @@ public:
             type = AreaType::UNDEFINED;
         }
         return type;
+    }
+
+    static AreaType GetAreaTypeForScaleResize(int32_t pointWinX, int32_t pointWinY, int outside, const WSRect& rect)
+    {
+        constexpr uint32_t HALF = 2;
+        int32_t leftOut = -outside;
+        int32_t rightOut = rect.width_ + outside;
+        int32_t topOut = -outside;
+        int32_t bottomOut = rect.height_ + outside;
+
+        auto isInRange = [](int32_t min, int32_t max, int32_t value) { return min <= value && value <= max; };
+
+        AreaType type;
+        if (isInRange(leftOut, rightOut / HALF, pointWinX) &&
+            isInRange(topOut, bottomOut / HALF, pointWinY)) {
+            type = AreaType::LEFT_TOP;
+        } else if (isInRange(rightOut / HALF, rightOut, pointWinX) &&
+            isInRange(topOut, bottomOut / HALF, pointWinY)) {
+            type = AreaType::RIGHT_TOP;
+        } else if (isInRange(rightOut / HALF, rightOut, pointWinX) &&
+            isInRange(bottomOut / HALF, bottomOut, pointWinY)) {
+            type = AreaType::RIGHT_BOTTOM;
+        } else if (isInRange(leftOut, rightOut / HALF, pointWinX) &&
+            isInRange(bottomOut / HALF, bottomOut, pointWinY)) {
+            type = AreaType::LEFT_BOTTOM;
+        } else {
+            type = AreaType::UNDEFINED;
+        }
+        return type;
+    }
+
+    static float ConvertDisplayOrientationToFloat(DisplayOrientation sensorOrientation)
+    {
+        float rotation = 0.f;
+        switch (sensorOrientation) {
+            case DisplayOrientation::LANDSCAPE:
+                rotation = 90.f; // degree 90
+                break;
+            case DisplayOrientation::PORTRAIT_INVERTED:
+                rotation = 180.f; // degree 180
+                break;
+            case DisplayOrientation::LANDSCAPE_INVERTED:
+                rotation = 270.f; // degree 270
+                break;
+            default:
+                break;
+        }
+        return rotation;
     }
 };
 } // Rosen

@@ -43,6 +43,13 @@ private:
         AVOID_AREA_CHANGE_CB,
         WINDOW_EVENT_CB,
         WINDOW_STAGE_EVENT_CB,
+        WINDOW_DISPLAYID_CHANGE_CB,
+        SYSTEM_DENSITY_CHANGE_CB,
+        SCREENSHOT_EVENT_CB,
+        EXTENSION_SECURE_LIMIT_CHANGE_CB,
+        KEYBOARD_DID_SHOW_CB,
+        KEYBOARD_DID_HIDE_CB,
+        KEYBOARD_HEIGHT_CHANGE_CB,
     };
 
     bool IsCallbackRegistered(napi_env env, std::string type, napi_value jsListenerObject);
@@ -54,6 +61,20 @@ private:
         sptr<Window> window, bool isRegister);
     WmErrorCode ProcessLifeCycleEventRegister(sptr<JsExtensionWindowListener> listener,
         sptr<Window> window, bool isRegister);
+    WmErrorCode ProcessDisplayIdChangeRegister(const sptr<JsExtensionWindowListener>& listener,
+        const sptr<Window>& window, bool isRegister);
+    WmErrorCode ProcessSystemDensityChangeRegister(const sptr<JsExtensionWindowListener>& listener,
+        const sptr<Window>& window, bool isRegister);
+    WmErrorCode ProcessScreenshotRegister(const sptr<JsExtensionWindowListener>& listener,
+        const sptr<Window>& window, bool isRegister);
+    WmErrorCode ProcessExtensionSecureLimitChangeRegister(const sptr<JsExtensionWindowListener>& listener,
+        const sptr<Window>& window, bool isRegister);
+    WmErrorCode ProcessKeyboardDidShowRegister(const sptr<JsExtensionWindowListener>& listener,
+        const sptr<Window>& window, bool isRegister);
+    WmErrorCode ProcessKeyboardDidHideRegister(const sptr<JsExtensionWindowListener>& listener,
+        const sptr<Window>& window, bool isRegister);
+    WmErrorCode ProcessOccupiedAreaChangeRegister(const sptr<JsExtensionWindowListener>& listener,
+        const sptr<Window>& window, bool isRegister);
     WmErrorCode ProcessRegister(CaseType caseType, const sptr<JsExtensionWindowListener>& listener,
         const sptr<Window>& window, const std::string& type, bool isRegister);
     std::map<std::string, std::map<std::shared_ptr<NativeReference>, sptr<JsExtensionWindowListener>>> jsCbMap_;
