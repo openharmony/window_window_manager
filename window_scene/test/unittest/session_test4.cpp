@@ -1375,10 +1375,31 @@ HWTEST_F(WindowSessionTest4, TestUpdateGlobalDisplayRect, TestSize.Level1)
     auto result = session_->UpdateGlobalDisplayRect(rect, SizeChangeReason::RESIZE);
     EXPECT_EQ(result, WSError::WS_DO_NOTHING);
 
-    session_->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
     WSRect updated = { 30, 40, 200, 100 };
     result = session_->UpdateGlobalDisplayRect(updated, SizeChangeReason::MOVE);
     EXPECT_EQ(result, WSError::WS_OK);
+}
+
+HWTEST_F(WindowSessionTest4, TestNotifyClientToUpdateGlobalDisplayRect, TestSize.Level1)
+{
+    WSRect rect = { 10, 20, 200, 100 };
+    auto originalState = session_->state_.load();
+    auto originalSessionStage = session_->sessionStage_;
+
+    session_->sessionStage_ = nullptr;
+    auto result = session_->NotifyClientToUpdateGlobalDisplayRect(rect, SizeChangeReason::UNDEFINED);
+    EXPECT_EQ(result, WSError::WS_DO_NOTHING);
+
+    session_->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
+    session_->state_ = SessionState::STATE_BACKGROUND;
+    result = session_->NotifyClientToUpdateGlobalDisplayRect(rect, SizeChangeReason::UNDEFINED);
+    EXPECT_EQ(result, WSError::WS_DO_NOTHING);
+
+    session_->state_ = SessionState::STATE_FOREGROUND;
+    result = session_->NotifyClientToUpdateGlobalDisplayRect(rect, SizeChangeReason::UNDEFINED);
+    EXPECT_EQ(result, WSError::WS_OK);
+    session_->state_ = originalState;
+    session_->sessionStage_ = originalSessionStage;
 }
 } // namespace
 } // namespace Rosen
