@@ -72,6 +72,10 @@ void SessionStubTestUpdateCode(sptr<Session> sessionStub, MessageParcel& parcel)
     sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_RAISE_ABOVE_TARGET),
         parcel, reply, option);
     parcel.RewindRead(0);
+    sessionStub->OnRemoteRequest(
+        static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_RAISE_MAIN_WINDOW_ABOVE_TARGET),
+        parcel, reply, option);
+    parcel.RewindRead(0);
     sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_RAISE_APP_MAIN_WINDOW),
         parcel, reply, option);
     parcel.RewindRead(0);

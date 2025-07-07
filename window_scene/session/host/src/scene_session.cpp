@@ -93,6 +93,7 @@ constexpr uint32_t ROTATION_DEGREE = 90;
 constexpr int32_t HALF_VALUE = 2;
 const int32_t ROTATE_POLICY_WINDOW = 0;
 const int32_t ROTATE_POLICY_SCREEN = 1;
+const int32_t SCREEN_LOCK_Z_ORDER = 2000;
 const std::string OPTIONAL_SHOW = "OPTIONAL_SHOW"; // startWindowType can be changed by startAbility option.
 
 bool CheckIfRectElementIsTooLarge(const WSRect& rect)
@@ -1974,6 +1975,18 @@ void SceneSession::RegisterRaiseAboveTargetCallback(NotifyRaiseAboveTargetFunc&&
     }, __func__);
 }
 
+void SceneSession::RegisterRaiseMainWindowAboveTargetCallback(NotifyRaiseMainWindowAboveTargetFunc&& callback)
+{
+    PostTask([weakThis = wptr(this), callback = std::move(callback), where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
+            return;
+        }
+        session->onRaiseMainWindowAboveTarget_ = std::move(callback);
+    }, __func__);
+}
+
 void SceneSession::RegisterSessionTopmostChangeCallback(NotifySessionTopmostChangeFunc&& callback)
 {
     PostTask([weakThis = wptr(this), callback = std::move(callback), where = __func__] {
@@ -2043,6 +2056,50 @@ WSError SceneSession::RaiseAboveTarget(int32_t subWindowId)
         }
         if (session->onRaiseAboveTarget_) {
             session->onRaiseAboveTarget_(subWindowId);
+        }
+        return WSError::WS_OK;
+    }, __func__);
+}
+
+/** @note @window.hierarchy */
+WSError SceneSession::RaiseMainWindowAboveTarget(int32_t targetId)
+{
+    TLOGI(WmsLogTag::WMS_HIERARCHY, "[SceneSession] source id: %{public}u, target id: %{public}u ",
+        GetWindowId(), targetId);
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "server permission denied, require system application");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
+    auto targetSession = GetSceneSessionById(targetId);
+    if (targetSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "target session is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    if (GetCallingPid() != targetSession->GetCallingPid()) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "calling pid inconsistecy");
+        return WSError::WS_ERROR_INVALID_CALLING;
+    }
+    if ((GetSessionProperty()->GetDisplayId() != targetSession->GetSessionProperty()->GetDisplayId()) &&
+        !(PcFoldScreenManager::GetInstance().IsHalfFoldedOnMainDisplay(GetSessionProperty()->GetDisplayId()) &&
+          PcFoldScreenManager::GetInstance().IsHalfFoldedOnMainDisplay(targetSession->
+                                                                       GetSessionProperty()->GetDisplayId()))) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "source window and target window are not on the same screen");
+        return WSError::WS_ERROR_INVALID_CALLING;
+    }
+    if (GetZOrder() > SCREEN_LOCK_Z_ORDER || targetSession->GetZOrder() > SCREEN_LOCK_Z_ORDER) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "window above screenlock is not supported");
+        return WSError::WS_ERROR_INVALID_CALLING;
+    }
+    return PostSyncTask([weakThis = wptr(this), targetId, where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_HIERARCHY, "%{public}s session is null", where);
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        if (session->onRaiseMainWindowAboveTarget_) {
+            TLOGNI(WmsLogTag::WMS_HIERARCHY, "id: %{public}d, raise main window above target: %{public}d",
+                session->GetPersistentId(), targetId);
+            session->onRaiseMainWindowAboveTarget_(targetId);
         }
         return WSError::WS_OK;
     }, __func__);
@@ -8893,7 +8950,7 @@ WSError SceneSession::UseImplicitAnimation(bool useImplicit)
         return WSError::WS_OK;
     }, __func__);
 }
- 
+
 void SceneSession::RegisterUseImplicitAnimationChangeCallback(NotifyUseImplicitAnimationChangeFunc&& func)
 {
     PostTask([weakThis = wptr(this), func = std::move(func), where = __func__] {

@@ -2554,6 +2554,55 @@ WMError WindowSceneSessionImpl::RaiseAboveTarget(int32_t subWindowId)
 }
 
 /** @note @window.hierarchy */
+WMError WindowSceneSessionImpl::RaiseMainWindowAboveTarget(int32_t targetId)
+{
+    TLOGI(WmsLogTag::WMS_HIERARCHY, "source id: %{public}u, target id: %{public}u", GetWindowId(), targetId);
+    if (!IsPcOrPadFreeMultiWindowMode()) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "device type not supported");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
+    auto targetIter = std::find_if(windowSessionMap_.begin(), windowSessionMap_.end(),
+        [targetId](const auto& windowInfoPair) {return windowInfoPair.second.first == targetId;});
+    if (targetIter == windowSessionMap_.end()) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "target id invalid or pid inconsistent with source window pid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    auto targetSessionImpl = targetIter->second.second;
+    if (IsWindowSessionInvalid() || targetSessionImpl == nullptr || targetSessionImpl->GetHostSession() == nullptr ||
+        targetSessionImpl->state_ == WindowState::STATE_DESTROYED) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "source window or target window is null or destroyed");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (state_ != WindowState::STATE_SHOWN || targetSessionImpl->state_ != WindowState::STATE_SHOWN) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "both source window and target window must be shown");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!WindowHelper::IsMainWindow(GetType()) || !WindowHelper::IsMainWindow(targetSessionImpl->GetType())) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "window type not supported");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    if (WindowHelper::IsModalMainWindow(GetType(), GetWindowFlags()) ||
+        WindowHelper::IsModalMainWindow(targetSessionImpl->GetType(), targetSessionImpl->GetWindowFlags())) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "both source window and target window must be not modal");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    if (IsApplicationModalSubWindowShowing(GetWindowId()) || IsApplicationModalSubWindowShowing(targetId)) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "application sub window is not allowed");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    if (IsMainWindowTopmost() || targetSessionImpl->IsMainWindowTopmost() || IsTopmost() ||
+        targetSessionImpl->IsTopmost()) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "both source window and target window must be not topmost");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+    WSError ret = hostSession->RaiseMainWindowAboveTarget(targetId);
+    return static_cast<WMError>(ret);
+}
+
+/** @note @window.hierarchy */
 WMError WindowSceneSessionImpl::SetSubWindowZLevel(int32_t zLevel)
 {
     TLOGD(WmsLogTag::WMS_HIERARCHY, "%{public}d", zLevel);
