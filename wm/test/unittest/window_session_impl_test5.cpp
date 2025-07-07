@@ -1592,6 +1592,7 @@ HWTEST_F(WindowSessionImplTest5, TestClientToGlobalDisplay, TestSize.Level1)
     Position expectedGlobalPos { 110, 220 };
 
     auto result = window->ClientToGlobalDisplay(clientPos);
+    EXPECT_NE(result, clientPos);
     EXPECT_EQ(result, expectedGlobalPos);
 }
 
@@ -1612,6 +1613,7 @@ HWTEST_F(WindowSessionImplTest5, TestGlobalDisplayToClient, TestSize.Level1)
     Position expectedClientPos { 10, 20 };
 
     auto result = window->GlobalDisplayToClient(globalPos);
+    EXPECT_NE(result, globalPos);
     EXPECT_EQ(result, expectedClientPos);
 }
 
