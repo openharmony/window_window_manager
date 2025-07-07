@@ -616,7 +616,7 @@ HWTEST_F(WindowSceneSessionImplTest5, SwitchFreeMultiWindow03, Function | SmallT
     EXPECT_EQ(WindowHelper::IsWindowModeSupported(mainWindow->property_->GetWindowModeSupportType(),
         WindowMode::WINDOW_MODE_FULLSCREEN), false);
     EXPECT_EQ(mainWindow->windowSystemConfig_.freeMultiWindowEnable_, false);
-    WindowSceneSessionImpl::windowSessionMap_.clear();
+    WindowSceneSessionImpl::windowSessionMap_.erase(mainWindow->property_->GetWindowName());
 }
 
 /**
