@@ -5131,7 +5131,7 @@ napi_value JsWindow::OnRaiseMainWindowAboveTarget(napi_env env, napi_callback_in
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "raise main window above target failed"));
         }
         TLOGNI(WmsLogTag::WMS_HIERARCHY,
-               "source window: %{public}u, target window: %{public}u, ret =  %{public}d",
+               "source window: %{public}u, target window: %{public}u, ret = %{public}d",
                window->GetWindowId(), targetId, ret);
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnRaiseMainWindowAboveTarget") != napi_status::napi_ok) {
