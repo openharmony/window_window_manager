@@ -30,7 +30,6 @@
 namespace OHOS::Rosen {
 namespace {
 constexpr int LINE_WIDTH = 30;
-constexpr int CV_WAIT_SCREENEVENT_MS = 200;
 std::mutex g_instanceMutex;
 } // namespace
 
