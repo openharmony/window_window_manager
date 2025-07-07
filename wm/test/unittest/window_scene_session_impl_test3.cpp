@@ -1292,11 +1292,29 @@ HWTEST_F(WindowSceneSessionImplTest3, UpdateMaximizeMode, TestSize.Level1)
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("UpdateMaximizeMode");
     sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
 
+    windowSceneSessionImpl->hostSession_ = session;
+    windowSceneSessionImpl->enableImmersiveMode_ = true;
     windowSceneSessionImpl->uiContent_ = nullptr;
     auto ret = windowSceneSessionImpl->UpdateMaximizeMode(MaximizeMode::MODE_RECOVER);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
+
     windowSceneSessionImpl->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    ret = windowSceneSessionImpl->UpdateMaximizeMode(MaximizeMode::MODE_FULL_FILL);
+    EXPECT_EQ(WSError::WS_OK, ret);
+    EXPECT_TRUE(windowSceneSessionImpl->enableImmersiveMode_);
+
+    ret = windowSceneSessionImpl->UpdateMaximizeMode(MaximizeMode::MODE_RECOVER);
+    EXPECT_EQ(WSError::WS_OK, ret);
+    EXPECT_FALSE(windowSceneSessionImpl->enableImmersiveMode_);
+
+    ret = windowSceneSessionImpl->UpdateMaximizeMode(MaximizeMode::MODE_RECOVER);
+    EXPECT_EQ(WSError::WS_OK, ret);
+
+    windowSceneSessionImpl->enableImmersiveMode_ = true;
+    windowSceneSessionImpl->hostSession_ = nullptr;
     ret = windowSceneSessionImpl->UpdateMaximizeMode(MaximizeMode::MODE_RECOVER);
     EXPECT_EQ(WSError::WS_OK, ret);
 }
