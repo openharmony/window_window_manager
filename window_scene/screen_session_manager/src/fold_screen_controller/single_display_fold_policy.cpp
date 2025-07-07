@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#include "fold_screen_state_internel.h"
 #include <hisysevent.h>
 #include <hitrace_meter.h>
 #include <transaction/rs_interfaces.h>
 #include "fold_screen_controller/single_display_fold_policy.h"
+#include "fold_screen_state_internel.h"
 #include "session/screen/include/screen_session.h"
 #include "screen_session_manager.h"
 
