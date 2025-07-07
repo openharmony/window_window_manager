@@ -46,8 +46,9 @@ uint32_t WSSnapshotHelper::GetScreenStatus(FoldStatus foldStatus)
 
 DisplayOrientation WSSnapshotHelper::GetDisplayOrientation(int32_t rotation)
 {
-    if (ROTATION_TO_DISPLAYORIENTATION_MAP.count(rotation)) {
-        return ROTATION_TO_DISPLAYORIENTATION_MAP.at(rotation);
+    auto it = ROTATION_TO_DISPLAYORIENTATION_MAP.find(rotation);
+    if (it != ROTATION_TO_DISPLAYORIENTATION_MAP.end()) {
+        return it->second();
     }
     return DisplayOrientation::PORTRAIT;
 }
