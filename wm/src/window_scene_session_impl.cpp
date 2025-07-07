@@ -3222,7 +3222,7 @@ WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation)
     hostSession->OnTitleAndDockHoverShowChange(titleHoverShowEnabled_, dockHoverShowEnabled_);
     SetLayoutFullScreenByApiVersion(enableImmersiveMode_);
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "present: %{public}d, enableImmersiveMode_:%{public}d!",
-        presentation, enableImmersiveMode_);
+        presentation, enableImmersiveMode_.load());
     hostSession->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
     return SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
 }
@@ -5183,6 +5183,13 @@ WSError WindowSceneSessionImpl::UpdateMaximizeMode(MaximizeMode mode)
     }
     uiContent->UpdateMaximizeMode(mode);
     property_->SetMaximizeMode(mode);
+    if (mode == MaximizeMode::MODE_RECOVER && enableImmersiveMode_.load()) {
+        enableImmersiveMode_.store(false);
+        property_->SetIsLayoutFullScreen(false);
+        if (auto hostSession = GetHostSession()) {
+            hostSession->OnLayoutFullScreenChange(false);
+        }
+    }
     return WSError::WS_OK;
 }
 
@@ -5940,7 +5947,7 @@ WMError WindowSceneSessionImpl::SetImmersiveModeEnabledState(bool enable)
 bool WindowSceneSessionImpl::GetImmersiveModeEnabledState() const
 {
     TLOGD(WmsLogTag::WMS_IMMS, "id: %{public}u, enableImmersiveMode=%{public}u",
-        GetWindowId(), enableImmersiveMode_);
+        GetWindowId(), enableImmersiveMode_.load());
     if (IsWindowSessionInvalid()) {
         return false;
     }
