@@ -566,17 +566,17 @@ std::shared_ptr<RSUIDirector> RootScene::GetRSUIDirector() const
     sptr<Display> display;
     if (displayId_ == DISPLAY_ID_INVALID) {
         display = DisplayManager::GetInstance().GetDefaultDisplay();
-        TLOGE(WmsLogTag::WMS_RS_CLI_MULTI_INST, "displayId is invalid, use default display");
+        TLOGE(WmsLogTag::WMS_SCB, "displayId is invalid, use default display");
     } else {
         display = DisplayManager::GetInstance().GetDisplayById(displayId_);
     }
     if (!display) {
-        TLOGE(WmsLogTag::WMS_RS_CLI_MULTI_INST, "display is null, displayId: %{public}" PRIu64, displayId_);
+        TLOGE(WmsLogTag::WMS_SCB, "display is null, displayId: %{public}" PRIu64, displayId_);
         return nullptr;
     }
     auto screenId = display->GetScreenId();
     auto rsUIDirector = ScreenSessionManagerClient::GetInstance().GetRSUIDirector(screenId);
-    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "%{public}s, screenId: %{public}" PRIu64 ", windowId: %{public}d",
+    TLOGD(WmsLogTag::WMS_SCB, "%{public}s, screenId: %{public}" PRIu64 ", windowId: %{public}d",
           RSAdapterUtil::RSUIDirectorToStr(rsUIDirector).c_str(), screenId, GetWindowId());
     return rsUIDirector;
 }
@@ -586,7 +586,7 @@ std::shared_ptr<RSUIContext> RootScene::GetRSUIContext() const
     RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
     auto rsUIDirector = GetRSUIDirector();
     auto rsUIContext = rsUIDirector ? rsUIDirector->GetRSUIContext() : nullptr;
-    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "%{public}s, windowId: %{public}d",
+    TLOGD(WmsLogTag::WMS_SCB, "%{public}s, windowId: %{public}d",
           RSAdapterUtil::RSUIContextToStr(rsUIContext).c_str(), GetWindowId());
     return rsUIContext;
 }
