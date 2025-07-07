@@ -760,8 +760,12 @@ HWTEST_F(WindowSceneSessionImplTest4, NotifyWindowAttachStateChange, TestSize.Le
     EXPECT_EQ(WMError::WM_OK, ret2);
     ret = windowSceneSessionImpl->NotifyWindowAttachStateChange(true);
     EXPECT_EQ(WSError::WS_OK, ret);
+    ret = windowSceneSessionImpl->NotifyWindowAttachStateChange(true);
+    EXPECT_EQ(WSError::WS_OK, ret);
 
     // case3: listener is not nullptr, then attach is false
+    ret = windowSceneSessionImpl->NotifyWindowAttachStateChange(false);
+    EXPECT_EQ(WSError::WS_OK, ret);
     ret = windowSceneSessionImpl->NotifyWindowAttachStateChange(false);
     EXPECT_EQ(WSError::WS_OK, ret);
 }

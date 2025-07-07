@@ -4604,20 +4604,7 @@ void WindowSessionImpl::NotifyAfterForeground(bool needNotifyListeners, bool nee
             CALL_LIFECYCLE_LISTENER(AfterForeground, lifecycleListeners);
         }
     }
-    if (waitAttach && lifecycleCallback_ &&
-        (WindowHelper::IsSubWindow(GetType()) || WindowHelper::IsSystemWindow(GetType())) &&
-        SysCapUtil::GetBundleName() != AppExecFwk::Constants::SCENE_BOARD_BUNDLE_NAME) {
-        auto startTime = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now().time_since_epoch()).count();
-        lifecycleCallback_->GetAttachSyncResult(WINDOW_LIFECYCLE_TIMEOUT);
-        auto endTime = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now().time_since_epoch()).count();
-        auto waitTime = endTime - startTime;
-        if (waitTime >= WINDOW_LIFECYCLE_TIMEOUT) {
-            TLOGW(WmsLogTag::WMS_LIFE, "window attach timeout, persistentId:%{public}d", GetPersistentId());
-        }
-        TLOGI(WmsLogTag::WMS_LIFE, "get attach async result, id:%{public}d", GetPersistentId());
-    }
+    GetAttachStateSyncResult(waitAttach, true);
     if (needNotifyUiContent) {
         CALL_UI_CONTENT(Foreground);
     }
@@ -4650,6 +4637,33 @@ void WindowSessionImpl::NotifyAfterForeground(bool needNotifyListeners, bool nee
         } else {
             TLOGE(WmsLogTag::WMS_LIFE, "uiContent is nullptr.");
         }
+    }
+}
+
+void WindowSessionImpl::GetAttachStateSyncResult(bool waitAttachState, bool afterForeground) const
+{
+    if (!lifecycleCallback_) {
+        TLOGW(WmsLogTag::WMS_LIFE, "lifecycleCallback is null");
+        return;
+    }
+    if (waitAttachState && WindowHelper::IsNeedWaitAttachStateWindow(GetType()) &&
+        SysCapUtil::GetBundleName() != AppExecFwk::Constants::SCENE_BOARD_BUNDLE_NAME) {
+        auto startTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count();
+        if (afterForeground) {
+            lifecycleCallback_->GetAttachSyncResult(WINDOW_LIFECYCLE_TIMEOUT);
+        } else {
+            lifecycleCallback_->GetDetachSyncResult(WINDOW_LIFECYCLE_TIMEOUT);
+        }
+        auto endTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count();
+        auto waitTime = endTime - startTime;
+        if (waitTime >= WINDOW_LIFECYCLE_TIMEOUT) {
+            TLOGW(WmsLogTag::WMS_LIFE, "window attach state timeout, persistentId:%{public}d, "
+                "afterForeground:%{public}d", GetPersistentId(), afterForeground);
+        }
+        TLOGI(WmsLogTag::WMS_LIFE, "get attach state sync result, id:%{public}d, afterForeground:%{public}d",
+            GetPersistentId(), afterForeground);
     }
 }
 
@@ -4688,20 +4702,7 @@ void WindowSessionImpl::NotifyAfterBackground(bool needNotifyListeners, bool nee
         }
         NotifyAfterLifecycleBackground();
     }
-    if (waitDetach && lifecycleCallback_ &&
-        (WindowHelper::IsSubWindow(GetType()) || WindowHelper::IsSystemWindow(GetType())) &&
-        SysCapUtil::GetBundleName() != AppExecFwk::Constants::SCENE_BOARD_BUNDLE_NAME) {
-        auto startTime = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now().time_since_epoch()).count();
-        lifecycleCallback_->GetDetachSyncResult(WINDOW_LIFECYCLE_TIMEOUT);
-        auto endTime = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now().time_since_epoch()).count();
-        auto waitTime = endTime - startTime;
-        if (waitTime >= WINDOW_LIFECYCLE_TIMEOUT) {
-            TLOGW(WmsLogTag::WMS_LIFE, "window detach timeout, persistentId:%{public}d", GetPersistentId());
-        }
-        TLOGI(WmsLogTag::WMS_LIFE, "get detach async result, id:%{public}d", GetPersistentId());
-    }
+    GetAttachStateSyncResult(waitDetach, false);
     if (needNotifyUiContent) {
         CALL_UI_CONTENT(Background);
     }

@@ -44,7 +44,7 @@ const std::string UNDEFINED = "undefined";
     void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
         const char *msg)
     {
-        g_logMsg = msg;
+        g_logMsg += msg;
     }
 }
 
@@ -1417,6 +1417,23 @@ HWTEST_F(WindowSessionTest2, SetAttachState02, TestSize.Level1)
     session_->SetAttachState(false);
     usleep(WAIT_SYNC_IN_NS);
     Mock::VerifyAndClearExpectations(&detachCallback);
+}
+
+/**
+ * @tc.name: SetAttachState03
+ * @tc.desc: SetAttachState Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest2, SetAttachState03, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_NE(session_, nullptr);
+    int32_t persistentId = 123;
+    session_->persistentId_ = persistentId;
+
+    session_->SetAttachState(true);
+    EXPECT_TRUE(g_logMsg.find("NotifyWindowAttachStateChange, persistentId") == std::string::npos);
 }
 
 /**

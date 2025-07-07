@@ -78,6 +78,9 @@ void SessionStageChangeTest(sptr<WindowSessionImpl> stageStub, MessageParcel& pa
     parcel.RewindRead(0);
     stageStub->OnRemoteRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_KEYBOARD_INFO_CHANGE),
         parcel, reply, option);
+    parcel.RewindRead(0);
+    stageStub->OnRemoteRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_WINDOW_ATTACH_STATE_CHANGE),
+        parcel, reply, option);
 }
 
 bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
