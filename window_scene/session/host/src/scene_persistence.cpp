@@ -253,26 +253,51 @@ std::string ScenePersistence::GetSnapshotFilePath(SnapshotStatus& key, bool useK
     if (useKey || hasSnapshot_[key.first][key.second]) {
         return snapshotPath_[key.first][key.second];
     }
+    if (FindNearestSnapshot(key)) {
+        return snapshotPath_[key.first][key.second];
+    }
+    return snapshotPath_[SCREEN_UNKNOWN][SNAPSHOT_PORTRAIT];
+}
+
+bool ScenePersistence::FindNearestSnapshot(SnapshotStatus& key)
+{
     for (uint32_t orientation = SNAPSHOT_PORTRAIT; orientation < capacity_.second; orientation++) {
         if (hasSnapshot_[key.first][orientation]) {
             key.second = orientation;
-            return snapshotPath_[key.first][orientation];
+            return true;
         }
+    }
+    bool isFolded = (key.first == SCREEN_FOLDED);
+    if (isFolded) {
+        for (uint32_t screen = SCREEN_EXPAND; screen < capacity_.first; screen--) {
+            if (hasSnapshot_[screen][key.second]) {
+                key.first = screen;
+                return true;
+            }
+        }
+        uint32_t orientation = key.second == SNAPSHOT_PORTRAIT ? SNAPSHOT_LANDSCAPE : SNAPSHOT_PORTRAIT;
+        for (uint32_t screen = SCREEN_EXPAND; screen < capacity_.first; screen--) {
+            if (hasSnapshot_[screen][orientation]) {
+                key = { screen, orientation };
+                return true;
+            }
+        }
+        return false;
     }
     for (uint32_t screen = SCREEN_UNKNOWN; screen < capacity_.first; screen++) {
         if (hasSnapshot_[screen][key.second]) {
             key.first = screen;
-            return snapshotPath_[screen][key.second];
+            return true;
         }
     }
     uint32_t orientation = key.second == SNAPSHOT_PORTRAIT ? SNAPSHOT_LANDSCAPE : SNAPSHOT_PORTRAIT;
     for (uint32_t screen = SCREEN_UNKNOWN; screen < capacity_.first; screen++) {
         if (hasSnapshot_[screen][orientation]) {
             key = { screen, orientation };
-            return snapshotPath_[screen][orientation];
+            return true;
         }
     }
-    return snapshotPath_[SCREEN_UNKNOWN][SNAPSHOT_PORTRAIT];
+    return false;
 }
 
 void ScenePersistence::SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap>& pixelMap)
@@ -378,8 +403,11 @@ bool ScenePersistence::IsSnapshotExisted(SnapshotStatus key)
             snapshotPath_[key.first][key.second].c_str());
         return false;
     }
+    if (!S_ISREG(buf.st_mode)) {
+        return false;
+    }
     hasSnapshot_[key.first][key.second] = true;
-    return S_ISREG(buf.st_mode);
+    return true;
 }
 
 std::shared_ptr<Media::PixelMap> ScenePersistence::GetLocalSnapshotPixelMap(const float oriScale,
