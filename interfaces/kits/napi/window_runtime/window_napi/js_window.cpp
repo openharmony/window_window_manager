@@ -5079,7 +5079,7 @@ napi_value JsWindow::OnRaiseAboveTarget(napi_env env, napi_callback_info info)
 }
 
 WmErrorCode JsWindow::CheckRaiseMainWindowParams(napi_env env, size_t argc, napi_value argv[],
-                                                 int32_t sourceId, int32_t &targetId)
+                                                 int32_t sourceId, int32_t& targetId)
 {
     if (argc != ONE_PARAMS_SIZE || argv[0] == nullptr) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "argc is invalid: %{public}zu", argc);
