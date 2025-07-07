@@ -564,16 +564,17 @@ void ScreenSessionManagerClient::SwitchUserCallback(std::vector<int32_t> oldScbP
         screenSessionMapCopy = screenSessionMap_;
     }
     for (const auto& iter : screenSessionMapCopy) {
+        ScreenId screenId = iter.first;
         {
-            auto displayNode = screenSessionManager_->GetDisplayNode(iter.first);
+            auto displayNode = screenSessionManager_->GetDisplayNode(screenId);
             if (displayNode == nullptr) {
                 TLOGE(WmsLogTag::DMS, "display node is null");
                 continue;
             }
+            RSAdapterUtil::SetRSUIContext(displayNode, GetRSUIContext(screenId), true);
             displayNode->SetScbNodePid(oldScbPids, currentScbPid);
             RSTransactionAdapter::FlushImplicitTransaction(displayNode);
         }
-        ScreenId screenId = iter.first;
         sptr<ScreenSession> screenSession = iter.second;
         if (screenSession == nullptr) {
             TLOGE(WmsLogTag::DMS, "screenSession is null");
