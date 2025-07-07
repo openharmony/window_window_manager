@@ -17,6 +17,7 @@
 #define OHOS_ROSEN_DM_COMMON_H
 
 #include <refbase.h>
+#include <sstream>
 #include <string>
 #include <map>
 
@@ -258,6 +259,11 @@ enum class Orientation : uint32_t {
     USER_ROTATION_LANDSCAPE_INVERTED = 17,
     FOLLOW_DESKTOP = 18,
     END = FOLLOW_DESKTOP,
+    USER_PAGE_ROTATION_PORTRAIT = 3000,
+    USER_PAGE_ROTATION_LANDSCAPE = 3001,
+    USER_PAGE_ROTATION_PORTRAIT_INVERTED = 3002,
+    USER_PAGE_ROTATION_LANDSCAPE_INVERTED = 3003,
+    INVALID = 3004,
 };
 
 /**
@@ -350,6 +356,33 @@ struct DMRect {
     static DMRect NONE()
     {
         return {0, 0, 0, 0};
+    }
+};
+
+/**
+ * @struct Position
+ *
+ * @brief Coordinate of points on the screen
+ */
+struct Position {
+    int32_t x = 0;
+    int32_t y = 0;
+
+    bool operator==(const Position& other) const
+    {
+        return x == other.x && y == other.y;
+    }
+
+    bool operator!=(const Position& other) const
+    {
+        return !(*this == other);
+    }
+
+    inline std::string ToString() const
+    {
+        std::ostringstream oss;
+        oss << "[" << x << ", " << y << "]";
+        return oss.str();
     }
 };
 }

@@ -164,22 +164,26 @@ class PiPContent extends ViewPU {
         pip.on('stateChange', this.stateChangeListener);
     }
     aboutToAppear() {
-        this.nodeController = pip.getCustomUIController();
-        this.registerUpdateNodeListener();
-        this.xComponent = pip.getTypeNode();
-        if (!this.validateNode(this.xComponent)) {
-            return;
+        try {
+            this.nodeController = pip.getCustomUIController();
+            this.registerUpdateNodeListener();
+            this.xComponent = pip.getTypeNode();
+            if (!this.validateNode(this.xComponent)) {
+                return;
+            }
+            if (this.xComponent === null) {
+                console.error(TAG, `validateNode node is null`);
+                return;
+            }
+            this.useNode = true;
+            this.updatePipNodeType(this.xComponent);
+            pip.setTypeNodeEnabled();
+            this.mXCNodeController = new XCNodeController(this.xComponent);
+            console.info(TAG, 'use Node Controller');
+            this.registerStateChangeListener();
+        } catch (b) {
+            console.log(`aboutToAppear failed`);
         }
-        if (this.xComponent === null) {
-            console.error(TAG, `validateNode node is null`);
-            return;
-        }
-        this.useNode = true;
-        this.updatePipNodeType(this.xComponent);
-        pip.setTypeNodeEnabled();
-        this.mXCNodeController = new XCNodeController(this.xComponent);
-        console.info(TAG, 'use Node Controller');
-        this.registerStateChangeListener();
     }
 
     updatePipNodeType(a2) {
@@ -194,8 +198,12 @@ class PiPContent extends ViewPU {
 
 
     aboutToDisappear() {
-        pip.off('stateChange', this.stateChangeListener);
-        pip.off('nodeUpdate', this.nodeUpdateListener);
+        try {
+            pip.off('stateChange', this.stateChangeListener);
+            pip.off('nodeUpdate', this.nodeUpdateListener);
+        } catch (a) {
+            console.log(`aboutToDisappear failed`);
+        }
     }
 
     initialRender() {

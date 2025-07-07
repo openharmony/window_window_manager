@@ -25,12 +25,6 @@ ohos_fuzztest("WindowSceneFuzzTest") {
     "../../../../wmserver/include",
     "../../../../interfaces/innerkits/dm",
     "../../../../interfaces/innerkits/wm",
-    "//commonlibrary/c_utils/base/include",
-
-    # for abilityContext
-    "//third_party/node/deps/icu-small/source/common",
-
-    # abilityContext end
   ]
 
   configs = [
@@ -55,8 +49,10 @@ ohos_fuzztest("WindowSceneFuzzTest") {
     "c_utils:utils",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
+    "image_framework:image_native",
     "ipc:ipc_single",
     "napi:ace_napi",
+    "node:node_header_notice",
   ]
 }
 

@@ -27,9 +27,6 @@
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
-namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "Display"};
-}
 class Display::Impl : public RefBase {
 public:
     Impl(const std::string& name, sptr<DisplayInfo> info)
@@ -68,7 +65,7 @@ Display::~Display()
 DisplayId Display::GetId() const
 {
     if (pImpl_ == nullptr || pImpl_->GetDisplayInfo() == nullptr) {
-        WLOGFE("pImpl_ or pImpl_->GetDisplayInfo is nullptr");
+        TLOGE(WmsLogTag::DMS, "pImpl_ or pImpl_->GetDisplayInfo is nullptr");
         return DisplayId(0);
     }
     return pImpl_->GetDisplayInfo()->GetDisplayId();
@@ -77,7 +74,7 @@ DisplayId Display::GetId() const
 std::string Display::GetName() const
 {
     if (pImpl_ == nullptr || pImpl_->GetDisplayInfo() == nullptr) {
-        WLOGFE("pImpl_ or pImpl_->GetDisplayInfo is nullptr");
+        TLOGE(WmsLogTag::DMS, "pImpl_ or pImpl_->GetDisplayInfo is nullptr");
         return std::string();
     }
     return pImpl_->GetDisplayInfo()->GetName();
@@ -87,7 +84,7 @@ int32_t Display::GetWidth() const
 {
     UpdateDisplayInfo();
     if (pImpl_ == nullptr || pImpl_->GetDisplayInfo() == nullptr) {
-        WLOGFE("pImpl_ or pImpl_->GetDisplayInfo is nullptr");
+        TLOGE(WmsLogTag::DMS, "pImpl_ or pImpl_->GetDisplayInfo is nullptr");
         return 0;
     }
     return pImpl_->GetDisplayInfo()->GetWidth();
@@ -97,7 +94,7 @@ int32_t Display::GetHeight() const
 {
     UpdateDisplayInfo();
     if (pImpl_ == nullptr || pImpl_->GetDisplayInfo() == nullptr) {
-        WLOGFE("pImpl_ or pImpl_->GetDisplayInfo is nullptr");
+        TLOGE(WmsLogTag::DMS, "pImpl_ or pImpl_->GetDisplayInfo is nullptr");
         return 0;
     }
     return pImpl_->GetDisplayInfo()->GetHeight();
@@ -107,7 +104,7 @@ int32_t Display::GetPhysicalWidth() const
 {
     UpdateDisplayInfo();
     if (pImpl_ == nullptr || pImpl_->GetDisplayInfo() == nullptr) {
-        WLOGFE("pImpl_ or pImpl_->GetDisplayInfo is nullptr");
+        TLOGE(WmsLogTag::DMS, "pImpl_ or pImpl_->GetDisplayInfo is nullptr");
         return 0;
     }
     return pImpl_->GetDisplayInfo()->GetPhysicalWidth();
@@ -117,7 +114,7 @@ int32_t Display::GetPhysicalHeight() const
 {
     UpdateDisplayInfo();
     if (pImpl_ == nullptr || pImpl_->GetDisplayInfo() == nullptr) {
-        WLOGFE("pImpl_ or pImpl_->GetDisplayInfo is nullptr");
+        TLOGE(WmsLogTag::DMS, "pImpl_ or pImpl_->GetDisplayInfo is nullptr");
         return 0;
     }
     return pImpl_->GetDisplayInfo()->GetPhysicalHeight();
@@ -127,7 +124,7 @@ uint32_t Display::GetRefreshRate() const
 {
     UpdateDisplayInfo();
     if (pImpl_ == nullptr || pImpl_->GetDisplayInfo() == nullptr) {
-        WLOGFE("pImpl_ or pImpl_->GetDisplayInfo is nullptr");
+        TLOGE(WmsLogTag::DMS, "pImpl_ or pImpl_->GetDisplayInfo is nullptr");
         return 0;
     }
     return pImpl_->GetDisplayInfo()->GetRefreshRate();
@@ -137,7 +134,7 @@ ScreenId Display::GetScreenId() const
 {
     UpdateDisplayInfo();
     if (pImpl_ == nullptr || pImpl_->GetDisplayInfo() == nullptr) {
-        WLOGFE("pImpl_ or pImpl_->GetDisplayInfo is nullptr");
+        TLOGE(WmsLogTag::DMS, "pImpl_ or pImpl_->GetDisplayInfo is nullptr");
         return SCREEN_ID_INVALID;
     }
     return pImpl_->GetDisplayInfo()->GetScreenId();
@@ -147,7 +144,7 @@ Rotation Display::GetRotation() const
 {
     UpdateDisplayInfo();
     if (pImpl_ == nullptr || pImpl_->GetDisplayInfo() == nullptr) {
-        WLOGFE("pImpl_ or pImpl_->GetDisplayInfo is nullptr");
+        TLOGE(WmsLogTag::DMS, "pImpl_ or pImpl_->GetDisplayInfo is nullptr");
         return Rotation::ROTATION_0;
     }
     return pImpl_->GetDisplayInfo()->GetRotation();
@@ -157,7 +154,7 @@ Orientation Display::GetOrientation() const
 {
     UpdateDisplayInfo();
     if (pImpl_ == nullptr || pImpl_->GetDisplayInfo() == nullptr) {
-        WLOGFE("pImpl_ or pImpl_->GetDisplayInfo is nullptr");
+        TLOGE(WmsLogTag::DMS, "pImpl_ or pImpl_->GetDisplayInfo is nullptr");
         return Orientation::UNSPECIFIED;
     }
     return pImpl_->GetDisplayInfo()->GetOrientation();
@@ -166,11 +163,11 @@ Orientation Display::GetOrientation() const
 void Display::UpdateDisplayInfo(sptr<DisplayInfo> displayInfo) const
 {
     if (displayInfo == nullptr) {
-        WLOGFE("displayInfo is invalid");
+        TLOGE(WmsLogTag::DMS, "displayInfo is invalid");
         return;
     }
     if (pImpl_ == nullptr) {
-        WLOGFE("pImpl_ is nullptr");
+        TLOGE(WmsLogTag::DMS, "pImpl_ is nullptr");
         return;
     }
     pImpl_->SetDisplayInfo(displayInfo);
@@ -186,7 +183,7 @@ float Display::GetVirtualPixelRatio() const
 {
     UpdateDisplayInfo();
     if (pImpl_ == nullptr || pImpl_->GetDisplayInfo() == nullptr) {
-        WLOGFE("pImpl_ or pImpl_->GetDisplayInfo is nullptr");
+        TLOGE(WmsLogTag::DMS, "pImpl_ or pImpl_->GetDisplayInfo is nullptr");
         return 0;
     }
     return pImpl_->GetDisplayInfo()->GetVirtualPixelRatio();
@@ -201,7 +198,7 @@ sptr<DisplayInfo> Display::GetDisplayInfo() const
 {
     UpdateDisplayInfo();
     if (pImpl_ == nullptr || pImpl_->GetDisplayInfo() == nullptr) {
-        WLOGFE("pImpl_ or pImpl_->GetDisplayInfo is nullptr");
+        TLOGE(WmsLogTag::DMS, "pImpl_ or pImpl_->GetDisplayInfo is nullptr");
         return nullptr;
     }
     return pImpl_->GetDisplayInfo();
@@ -210,7 +207,7 @@ sptr<DisplayInfo> Display::GetDisplayInfo() const
 sptr<DisplayInfo> Display::GetDisplayInfoWithCache() const
 {
     if (pImpl_ == nullptr || pImpl_->GetDisplayInfo() == nullptr) {
-        WLOGFE("pImpl_ or pImpl_->GetDisplayInfo is nullptr");
+        TLOGE(WmsLogTag::DMS, "pImpl_ or pImpl_->GetDisplayInfo is nullptr");
         return nullptr;
     }
     return pImpl_->GetDisplayInfo();

@@ -40,24 +40,21 @@ public:
     void SetUp() override;
     void TearDown() override;
     SessionInfo mainSessionInfo;
-    sptr <MainSession::SpecificSessionCallback> specificCallback = nullptr;
-    sptr <MainSession> mainSession_;
+    sptr<MainSession::SpecificSessionCallback> specificCallback = nullptr;
+    sptr<MainSession> mainSession_;
     SessionInfo sceneSessionInfo;
-    sptr <SceneSession> sceneSession_;
+    sptr<SceneSession> sceneSession_;
     sptr<SceneSessionManager> ssm_;
     std::shared_ptr<SessionManager> sm_;
+
 private:
     RSSurfaceNode::SharedPtr CreateRSSurfaceNode();
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
 
-void WindowRecoverSessionTest::SetUpTestCase()
-{
-}
+void WindowRecoverSessionTest::SetUpTestCase() {}
 
-void WindowRecoverSessionTest::TearDownTestCase()
-{
-}
+void WindowRecoverSessionTest::TearDownTestCase() {}
 
 void WindowRecoverSessionTest::SetUp()
 {
@@ -99,9 +96,7 @@ RSSurfaceNode::SharedPtr WindowRecoverSessionTest::CreateRSSurfaceNode()
     return surfaceNode;
 }
 
-void NotifyRecoverSceneSessionFuncTest(const sptr<SceneSession>& session, const SessionInfo& sessionInfo)
-{
-}
+void NotifyRecoverSceneSessionFuncTest(const sptr<SceneSession>& session, const SessionInfo& sessionInfo) {}
 
 namespace {
 
@@ -239,7 +234,7 @@ HWTEST_F(WindowRecoverSessionTest, CheckSessionPropertyOnRecovery, TestSize.Leve
     sptr<WindowSessionProperty> property = nullptr;
     WSError result = ssm_->CheckSessionPropertyOnRecovery(property, false);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
-    
+
     property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
     property->SetWindowFlags(123);
@@ -253,7 +248,7 @@ HWTEST_F(WindowRecoverSessionTest, CheckSessionPropertyOnRecovery, TestSize.Leve
     ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
 
     // 主窗，需要恢复
-    ssm_->SetAlivePersistentIds({100});
+    ssm_->SetAlivePersistentIds({ 100 });
     result = ssm_->CheckSessionPropertyOnRecovery(property, false);
     ASSERT_EQ(result, WSError::WS_OK);
 
@@ -264,7 +259,7 @@ HWTEST_F(WindowRecoverSessionTest, CheckSessionPropertyOnRecovery, TestSize.Leve
     ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
 
     // 特殊窗，需要恢复
-    ssm_->SetAlivePersistentIds({111});
+    ssm_->SetAlivePersistentIds({ 111 });
     result = ssm_->CheckSessionPropertyOnRecovery(property, true);
     ASSERT_EQ(result, WSError::WS_OK);
 }
@@ -284,18 +279,17 @@ HWTEST_F(WindowRecoverSessionTest, RecoverAndReconnectSceneSession, TestSize.Lev
     sptr<ISession> session = nullptr;
     sptr<IRemoteObject> token = nullptr;
     // 0.property 为空
-    auto result = ssm_->RecoverAndReconnectSceneSession(sessionStage, eventChannel,
-        surfaceNode, session, property, token);
+    auto result =
+        ssm_->RecoverAndReconnectSceneSession(sessionStage, eventChannel, surfaceNode, session, property, token);
     EXPECT_EQ(result, WSError::WS_ERROR_NULLPTR);
 
     property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     property->SetPersistentId(100);
-    ssm_->SetAlivePersistentIds({15, 16, 100});
+    ssm_->SetAlivePersistentIds({ 15, 16, 100 });
     // 1.已经恢复结束
     ssm_->recoveringFinished_ = true;
-    result = ssm_->RecoverAndReconnectSceneSession(sessionStage, eventChannel,
-        surfaceNode, session, property, token);
+    result = ssm_->RecoverAndReconnectSceneSession(sessionStage, eventChannel, surfaceNode, session, property, token);
     EXPECT_EQ(result, WSError::WS_ERROR_INVALID_OPERATION);
 
     ssm_->recoveringFinished_ = false;
@@ -306,15 +300,13 @@ HWTEST_F(WindowRecoverSessionTest, RecoverAndReconnectSceneSession, TestSize.Lev
     property->SetSessionInfo(sessionInfo);
 
     // 2.recoverSceneSessionFunc_ 为空
-    result = ssm_->RecoverAndReconnectSceneSession(sessionStage, eventChannel,
-        surfaceNode, session, property, token);
+    result = ssm_->RecoverAndReconnectSceneSession(sessionStage, eventChannel, surfaceNode, session, property, token);
     EXPECT_EQ(result, WSError::WS_ERROR_NULLPTR);
-    
+
     // 3. sessionStage为空
     property->SetPersistentId(15);
     ssm_->recoverSceneSessionFunc_ = NotifyRecoverSceneSessionFuncTest;
-    result = ssm_->RecoverAndReconnectSceneSession(sessionStage, eventChannel,
-        surfaceNode, session, property, token);
+    result = ssm_->RecoverAndReconnectSceneSession(sessionStage, eventChannel, surfaceNode, session, property, token);
     EXPECT_EQ(result, WSError::WS_ERROR_NULLPTR);
 
     // 4.重连
@@ -325,8 +317,7 @@ HWTEST_F(WindowRecoverSessionTest, RecoverAndReconnectSceneSession, TestSize.Lev
     surfaceNode = CreateRSSurfaceNode();
     property->SetPersistentId(16);
     property->SetWindowState(WindowState::STATE_SHOWN);
-    result = ssm_->RecoverAndReconnectSceneSession(sessionStage, eventChannel,
-        surfaceNode, session, property, token);
+    result = ssm_->RecoverAndReconnectSceneSession(sessionStage, eventChannel, surfaceNode, session, property, token);
     EXPECT_EQ(result, WSError::WS_OK);
 }
 
@@ -345,18 +336,17 @@ HWTEST_F(WindowRecoverSessionTest, RecoverAndConnectSpecificSession, TestSize.Le
     sptr<ISession> session = nullptr;
     sptr<IRemoteObject> token = nullptr;
     // 0. property 为空
-    auto result = ssm_->RecoverAndConnectSpecificSession(sessionStage, eventChannel,
-        surfaceNode, property, session, token);
+    auto result =
+        ssm_->RecoverAndConnectSpecificSession(sessionStage, eventChannel, surfaceNode, property, session, token);
     EXPECT_EQ(result, WSError::WS_ERROR_NULLPTR);
 
     property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     property->SetParentPersistentId(111);
-    ssm_->SetAlivePersistentIds({111});
+    ssm_->SetAlivePersistentIds({ 111 });
     // 1.已经恢复结束
     ssm_->recoveringFinished_ = true;
-    result = ssm_->RecoverAndConnectSpecificSession(sessionStage, eventChannel,
-        surfaceNode, property, session, token);
+    result = ssm_->RecoverAndConnectSpecificSession(sessionStage, eventChannel, surfaceNode, property, session, token);
     EXPECT_EQ(result, WSError::WS_ERROR_INVALID_OPERATION);
 
     ssm_->recoveringFinished_ = false;
@@ -367,14 +357,12 @@ HWTEST_F(WindowRecoverSessionTest, RecoverAndConnectSpecificSession, TestSize.Le
     property->SetSessionInfo(sessionInfo);
 
     // 2.info persistentId 无效
-    result = ssm_->RecoverAndConnectSpecificSession(sessionStage, eventChannel,
-        surfaceNode, property, session, token);
+    result = ssm_->RecoverAndConnectSpecificSession(sessionStage, eventChannel, surfaceNode, property, session, token);
     EXPECT_EQ(result, WSError::WS_ERROR_INVALID_SESSION);
 
     // 3. sessionStage 为空
     property->SetPersistentId(20);
-    result = ssm_->RecoverAndConnectSpecificSession(sessionStage, eventChannel,
-        surfaceNode, property, session, token);
+    result = ssm_->RecoverAndConnectSpecificSession(sessionStage, eventChannel, surfaceNode, property, session, token);
     EXPECT_EQ(result, WSError::WS_ERROR_NULLPTR);
 
     // 4.重连 窗口id：21，在前台
@@ -385,8 +373,7 @@ HWTEST_F(WindowRecoverSessionTest, RecoverAndConnectSpecificSession, TestSize.Le
     surfaceNode = CreateRSSurfaceNode();
     property->SetPersistentId(21);
     property->SetWindowState(WindowState::STATE_SHOWN);
-    result = ssm_->RecoverAndConnectSpecificSession(sessionStage, eventChannel,
-        surfaceNode, property, session, token);
+    result = ssm_->RecoverAndConnectSpecificSession(sessionStage, eventChannel, surfaceNode, property, session, token);
     EXPECT_EQ(result, WSError::WS_OK);
 }
 
@@ -465,7 +452,7 @@ HWTEST_F(WindowRecoverSessionTest, GetBatchAbilityInfos04, TestSize.Level1)
  */
 HWTEST_F(WindowRecoverSessionTest, IsWindowSupportCacheForRecovering, TestSize.Level1)
 {
-    std::vector<int32_t> recoveredPersistentIds = {1};
+    std::vector<int32_t> recoveredPersistentIds = { 1 };
     ssm_->alivePersistentIds_.clear();
     ssm_->alivePersistentIds_.push_back(1);
     ssm_->alivePersistentIds_.push_back(2);
@@ -499,7 +486,7 @@ HWTEST_F(WindowRecoverSessionTest, IsWindowSupportCacheForRecovering, TestSize.L
  */
 HWTEST_F(WindowRecoverSessionTest, IsWindowSupportCacheForRecovering01, TestSize.Level1)
 {
-    std::vector<int32_t> windowIds = {0, 1};
+    std::vector<int32_t> windowIds = { 0, 1 };
     sptr<SceneSession> sceneSession = nullptr;
     ssm_->sceneSessionMap_.clear();
     ssm_->sceneSessionMap_.insert(std::make_pair(0, sceneSession));
@@ -699,8 +686,9 @@ HWTEST_F(WindowRecoverSessionTest, RecoverSessionInfo, TestSize.Level1)
 HWTEST_F(WindowRecoverSessionTest, UpdateRecoverPropertyForSuperFold, TestSize.Level1)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    Rect rect = {static_cast<int32_t>(10), static_cast<int32_t>(10),
-                static_cast<uint32_t>(100), static_cast<uint32_t>(100)};
+    Rect rect = {
+        static_cast<int32_t>(10), static_cast<int32_t>(10), static_cast<uint32_t>(100), static_cast<uint32_t>(100)
+    };
     property->SetWindowRect(rect);
     property->SetRequestRect(rect);
     property->SetDisplayId(0);
@@ -758,6 +746,6 @@ HWTEST_F(WindowRecoverSessionTest, RegisterSMSRecoverListener2, TestSize.Level1)
     ASSERT_EQ(sm_->isRecoverListenerRegistered_, true);
 }
 
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

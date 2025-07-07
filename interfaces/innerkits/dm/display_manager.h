@@ -38,6 +38,7 @@ struct SnapShotConfig {
     Media::Size imageSize_;
     Media::Rect imageRect_;
     int rotation_;
+    bool isCaptureFullOfScreen_ = false;
 };
 
 class DisplayManager {
@@ -256,10 +257,24 @@ public:
      *
      * @param displayId Display id.
      * @param errorCode error code.
+     * @param isUseDma Whether to use DMA, not used by default.
+     * @param isCaptureFullOfScreen Whether to take screenshots of all displays on this screen.
      * @return PixelMap object of screenshot.
      */
     std::shared_ptr<Media::PixelMap> GetScreenshot(DisplayId displayId,
-        DmErrorCode* errorCode = nullptr, bool isUseDma = false);
+        DmErrorCode* errorCode = nullptr, bool isUseDma = false, bool isCaptureFullOfScreen = false);
+    
+    /**
+     * @brief Get SDR and HDR screenshots of the specified display.
+     *
+     * @param displayId Display id.
+     * @param errorCode Error code.
+     * @param isUseDma Whether to use DMA, not used by default.
+     * @param isCaptureFullOfScreen Whether to take screenshots of all displays on this screen.
+     * @return std::vector<std::shared_ptr<Media::PixelMap>> Vector of screenshot pixel maps.
+     */
+    std::vector<std::shared_ptr<Media::PixelMap>> GetScreenHDRshot(DisplayId displayId,
+        DmErrorCode* errorCode = nullptr, bool isUseDma = false, bool isCaptureFullOfScreen = false);
 
     /**
      * @brief Get screenshot by user select area.
@@ -731,9 +746,10 @@ public:
      * @param screenId ScreenId used in virtual screen.
      * @param windowIdList The windowId list to shield on cast screen.
      * @param surfaceIdList The surfaceId list to shield on cast screen.
+     * @param typeBlackList The surface type list to shield on cast screen.
     */
     void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
-        std::vector<uint64_t> surfaceIdList = {});
+        std::vector<uint64_t> surfaceIdList = {}, std::vector<uint8_t> typeBlackList = {});
 
     /**
      * @brief Set virtual display mute flag to RS.
@@ -836,7 +852,16 @@ public:
      */
     std::shared_ptr<Media::PixelMap> GetScreenshotWithOption(const CaptureOption& captureOption,
         const Media::Rect &rect, const Media::Size &size, int rotation, DmErrorCode* errorCode = nullptr);
-    
+
+    /**
+     * @brief Get SDR and HDR screenshot with capture option.
+     * @param captureOption  Screen capture option.
+     * @param errorCode Error code.
+     * @return std::vector<std::shared_ptr<Media::PixelMap>> Vector of screenshot pixel maps.
+     */
+    std::vector<std::shared_ptr<Media::PixelMap>> GetScreenHDRshotWithOption(
+        const CaptureOption& captureOption, DmErrorCode* errorCode = nullptr);
+
     /**
      * @brief Get CutoutInfo with rotation
      *
@@ -844,7 +869,55 @@ public:
      * @return CutoutInfo object of default screen.
      */
     sptr<CutoutInfo> GetCutoutInfoWithRotation(Rotation rotation);
+
+    /**
+     * @brief Get screenInfo of display area
+     *
+     * @param DisplayId displayId.
+     * @param DMRect displayArea.
+     * @param ScreenId screenId.
+     * @param DMRect screenArea.
+     * @return DM_OK means process get screenArea success.
+     */
+    DMError GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
+        ScreenId& screenId, DMRect& screenArea);
+
+    /**
+     * @brief Get primary display system dpi.
+     *
+     * @return primary display system dpi.
+     */
+    float GetPrimaryDisplaySystemDpi() const;
+
+    /**
+     * @brief Convert a relative position to a global position
+     *
+     * @param relativePosition Position relative to current display
+     * @param position Global position convert from  relativePosition
+     * @return DM_OK means process convert position success, others means convert failed.
+     */
+    DMError ConvertRelativeCoordinateToGlobal(const RelativePosition& relativePosition, Position& position);
     
+    /**
+     * @brief Convert a global position to a relative position
+     *
+     * @param globalPosition Global position
+     * @param relativePosition Relative position convert from globalPosition
+     * @return DM_OK means process convert position success, others means convert failed.
+     */
+    DMError ConvertGlobalCoordinateToRelative(const Position& globalPosition, RelativePosition& relativePosition);
+
+    /**
+     * @brief Convert a global position to a relative position
+     *
+     * @param globalPosition Global position
+     * @param displayId DisplayId of current display
+     * @param relativePosition Relative position convert from globalPosition
+     * @return DM_OK means process convert position success, others means convert failed.
+     */
+    DMError ConvertGlobalCoordinateToRelativeWithDisplayId(const Position& globalPosition, DisplayId displayId,
+        RelativePosition& relativePosition);
+
 private:
     DisplayManager();
     ~DisplayManager();

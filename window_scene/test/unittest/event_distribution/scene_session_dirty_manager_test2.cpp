@@ -72,21 +72,9 @@ namespace {
 
 void InitSessionInfo(MMI::DisplayInfo& displayedInfo, MMI::WindowInfo& windowInfo)
 {
-    displayedInfo = {
-        .id = 42,
-        .x = 0,
-        .y = 0,
-        .width = 1270,
-        .height = 2240
-    };
+    displayedInfo = { .id = 42, .x = 0, .y = 0, .width = 1270, .height = 2240 };
 
-    windowInfo = {
-        .id = 43,
-        .pid = 433,
-        .displayId = 42,
-        .zOrder = 30.0,
-        .area = {0, 0, 1000, 1200}
-    };
+    windowInfo = { .id = 43, .pid = 433, .displayId = 42, .zOrder = 30.0, .area = { 0, 0, 1000, 1200 } };
 }
 
 /**
@@ -94,7 +82,7 @@ void InitSessionInfo(MMI::DisplayInfo& displayedInfo, MMI::WindowInfo& windowInf
  * @tc.desc: Init sceneSession
  * @tc.type: FUNC
  */
-void InitSceneSession(sptr<SceneSession> &sceneSession, int32_t pid, int windowId, WindowType propertyType)
+void InitSceneSession(sptr<SceneSession>& sceneSession, int32_t pid, int windowId, WindowType propertyType)
 {
     sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(windowSessionProperty, nullptr);
@@ -107,11 +95,9 @@ void InitSceneSession(sptr<SceneSession> &sceneSession, int32_t pid, int windowI
     windowSessionProperty->SetPersistentId(windowId);
     sceneSession->SetSessionProperty(windowSessionProperty);
 
-    WSRect windowRect = {0, 0, 1270, 2700};
+    WSRect windowRect = { 0, 0, 1270, 2700 };
     sceneSession->SetSessionRect(windowRect);
-    sceneSession->SetVisibilityChangedDetectFunc([](int32_t pid, bool isVisible, bool newIsVisible) {
-        return;
-    });
+    sceneSession->SetVisibilityChangedDetectFunc([](int32_t pid, bool isVisible, bool newIsVisible) { return; });
     sceneSession->SetCallingPid(pid);
     int32_t uid = 1315;
     sceneSession->SetCallingUid(uid);
@@ -373,8 +359,9 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithSameInfo, TestSize.Leve
     auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
     focusGroup->SetFocusedSessionId(focusedSession);
     bool checkNeedUpdateFlag = true;
+    std::vector<MMI::ScreenInfo> screenInfos;
     // check the same information
-    checkNeedUpdateFlag = sim_->CheckNeedUpdate(currDisplayInfos, currWindowInfoList);
+    checkNeedUpdateFlag = sim_->CheckNeedUpdate(screenInfos, currDisplayInfos, currWindowInfoList);
     ASSERT_EQ(checkNeedUpdateFlag, false);
 }
 
@@ -410,7 +397,8 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithPidDiff, TestSize.Level
     auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
     focusGroup->SetFocusedSessionId(focusedSession);
     bool checkNeedUpdateFlag = false;
-    checkNeedUpdateFlag = sim_->CheckNeedUpdate(currDisplayInfos, currWindowInfoList);
+    std::vector<MMI::ScreenInfo> screenInfos;
+    checkNeedUpdateFlag = sim_->CheckNeedUpdate(screenInfos, currDisplayInfos, currWindowInfoList);
     ASSERT_EQ(checkNeedUpdateFlag, true);
 }
 
@@ -438,7 +426,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithAreaDiff, TestSize.Leve
     MMI::WindowInfo currWindowInfo;
     InitSessionInfo(currDisplayedInfo, currWindowInfo);
     // set different area number
-    currWindowInfo.area = {0, 0, 500, 600};
+    currWindowInfo.area = { 0, 0, 500, 600 };
     std::vector<MMI::DisplayInfo> currDisplayInfos;
     std::vector<MMI::WindowInfo> currWindowInfoList;
     currDisplayInfos.emplace_back(currDisplayedInfo);
@@ -446,7 +434,8 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithAreaDiff, TestSize.Leve
     auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
     focusGroup->SetFocusedSessionId(focusedSession);
     bool checkNeedUpdateFlag = false;
-    checkNeedUpdateFlag = sim_->CheckNeedUpdate(currDisplayInfos, currWindowInfoList);
+    std::vector<MMI::ScreenInfo> screenInfos;
+    checkNeedUpdateFlag = sim_->CheckNeedUpdate(screenInfos, currDisplayInfos, currWindowInfoList);
     ASSERT_EQ(checkNeedUpdateFlag, true);
 }
 
@@ -482,7 +471,8 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithzOrderDiff, TestSize.Le
     auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
     focusGroup->SetFocusedSessionId(focusedSession);
     bool checkNeedUpdateFlag = false;
-    checkNeedUpdateFlag = sim_->CheckNeedUpdate(currDisplayInfos, currWindowInfoList);
+    std::vector<MMI::ScreenInfo> screenInfos;
+    checkNeedUpdateFlag = sim_->CheckNeedUpdate(screenInfos, currDisplayInfos, currWindowInfoList);
     ASSERT_EQ(checkNeedUpdateFlag, true);
 }
 
@@ -502,15 +492,15 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithoutHotArea, TestSize.Le
     ASSERT_NE(windowSessionProperty, nullptr);
     windowSessionProperty->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
     sceneSession->InitSessionPropertyWhenConnect(windowSessionProperty);
-    WSRect windowRect = {0, 0, 1270, 2700};
+    WSRect windowRect = { 0, 0, 1270, 2700 };
     sceneSession->SetSessionRect(windowRect);
     sceneSession->globalRect_ = windowRect;
     // set hotArea without info
     std::vector<MMI::Rect> touchHotAreas;
     std::vector<MMI::Rect> pointerHotAreas;
     manager_->UpdateHotAreas(sceneSession, touchHotAreas, pointerHotAreas);
-    bool touchHotResult = touchHotAreas[0].x == 0 && touchHotAreas[0].y == 0 &&
-                          touchHotAreas[0].width == 1270 && touchHotAreas[0].height == 2700;
+    bool touchHotResult = touchHotAreas[0].x == 0 && touchHotAreas[0].y == 0 && touchHotAreas[0].width == 1270 &&
+                          touchHotAreas[0].height == 2700;
     ASSERT_EQ(touchHotResult, true);
     bool pointerHotResult = pointerHotAreas[0].x == 0 && pointerHotAreas[0].y == 0 &&
                             pointerHotAreas[0].width == 1270 && pointerHotAreas[0].height == 2700;
@@ -532,22 +522,22 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithHotArea, TestSize.Level
     sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(windowSessionProperty, nullptr);
     windowSessionProperty->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
-    Rect rect = {0, 0, 300, 500};
+    Rect rect = { 0, 0, 300, 500 };
     std::vector<Rect> rects;
     rects.emplace_back(rect);
     // set touchHotArea and pointerHotArea info
     windowSessionProperty->SetTouchHotAreas(rects);
     sceneSession->InitSessionPropertyWhenConnect(windowSessionProperty);
-    WSRect windowRect = {0, 0, 1270, 2700};
+    WSRect windowRect = { 0, 0, 1270, 2700 };
     sceneSession->SetSessionRect(windowRect);
     std::vector<MMI::Rect> touchHotAreas;
     std::vector<MMI::Rect> pointerHotAreas;
     manager_->UpdateHotAreas(sceneSession, touchHotAreas, pointerHotAreas);
-    bool touchHotResult = touchHotAreas[0].x == 0 && touchHotAreas[0].y == 0 &&
-                          touchHotAreas[0].width == 300 && touchHotAreas[0].height == 500;
+    bool touchHotResult = touchHotAreas[0].x == 0 && touchHotAreas[0].y == 0 && touchHotAreas[0].width == 300 &&
+                          touchHotAreas[0].height == 500;
     ASSERT_EQ(touchHotResult, true);
-    bool pointerHotResult = pointerHotAreas[0].x == 0 && pointerHotAreas[0].y == 0 &&
-                            pointerHotAreas[0].width == 300 && pointerHotAreas[0].height == 500;
+    bool pointerHotResult = pointerHotAreas[0].x == 0 && pointerHotAreas[0].y == 0 && pointerHotAreas[0].width == 300 &&
+                            pointerHotAreas[0].height == 500;
     ASSERT_EQ(pointerHotResult, true);
 }
 

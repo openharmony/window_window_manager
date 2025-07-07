@@ -13,32 +13,32 @@
  * limitations under the License.
  */
 
-#include "display_manager_proxy.h"
 #include "window_test_utils.h"
 #include <ability_context.h>
+#include "display_manager_proxy.h"
 #include "window_helper.h"
-#include "wm_common_inner.h"
 #include "wm_common.h"
+#include "wm_common_inner.h"
 namespace OHOS {
 namespace Rosen {
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowTestUtils"};
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowTestUtils" };
 constexpr uint32_t EDGE_INTERVAL = 48;
 constexpr uint32_t MID_INTERVAL = 24;
-}
+} // namespace
 
-Rect WindowTestUtils::displayRect_        = {0, 0, 0, 0};
-Rect WindowTestUtils::statusBarRect_      = {0, 0, 0, 0};
-Rect WindowTestUtils::naviBarRect_        = {0, 0, 0, 0};
-Rect WindowTestUtils::customAppRect_      = {0, 0, 0, 0};
-Rect WindowTestUtils::limitDisplayRect_   = {0, 0, 0, 0};
-Rect WindowTestUtils::dockWindowRect_     = {0, 0, 0, 0};
-SplitRects WindowTestUtils::splitRects_   = {
-    .primaryRect   = {0, 0, 0, 0},
-    .secondaryRect = {0, 0, 0, 0},
-    .dividerRect   = {0, 0, 0, 0},
+Rect WindowTestUtils::displayRect_ = { 0, 0, 0, 0 };
+Rect WindowTestUtils::statusBarRect_ = { 0, 0, 0, 0 };
+Rect WindowTestUtils::naviBarRect_ = { 0, 0, 0, 0 };
+Rect WindowTestUtils::customAppRect_ = { 0, 0, 0, 0 };
+Rect WindowTestUtils::limitDisplayRect_ = { 0, 0, 0, 0 };
+Rect WindowTestUtils::dockWindowRect_ = { 0, 0, 0, 0 };
+SplitRects WindowTestUtils::splitRects_ = {
+    .primaryRect = { 0, 0, 0, 0 },
+    .secondaryRect = { 0, 0, 0, 0 },
+    .dividerRect = { 0, 0, 0, 0 },
 };
-Rect WindowTestUtils::singleTileRect_     = {0, 0, 0, 0};
+Rect WindowTestUtils::singleTileRect_ = { 0, 0, 0, 0 };
 std::vector<Rect> WindowTestUtils::doubleTileRects_ = std::vector<Rect>(2);
 std::vector<Rect> WindowTestUtils::tripleTileRects_ = std::vector<Rect>(3);
 AvoidArea WindowTestUtils::systemAvoidArea_ = {};
@@ -139,19 +139,19 @@ Rect WindowTestUtils::GetDefaultFloatingRect(const sptr<Window>& window, bool av
         UpdateSplitRects(window);
     }
     constexpr uint32_t half = 2;
-    constexpr float ratio = DEFAULT_ASPECT_RATIO;  // 0.67: default height/width ratio
+    constexpr float ratio = DEFAULT_ASPECT_RATIO; // 0.67: default height/width ratio
     float vpr = GetVirtualPixelRatio(0);
 
     /*
      * Calculate default width and height, if width or height is
      * smaller than minWidth or minHeight, use the minimum limits
      */
-    uint32_t defaultW = std::max(static_cast<uint32_t>(displayRect_.width_ * ratio),
-                                 static_cast<uint32_t>(MIN_FLOATING_WIDTH * vpr));
-    uint32_t defaultH = std::max(static_cast<uint32_t>(displayRect_.height_ * ratio),
-                                 static_cast<uint32_t>(MIN_FLOATING_HEIGHT * vpr));
+    uint32_t defaultW =
+        std::max(static_cast<uint32_t>(displayRect_.width_ * ratio), static_cast<uint32_t>(MIN_FLOATING_WIDTH * vpr));
+    uint32_t defaultH =
+        std::max(static_cast<uint32_t>(displayRect_.height_ * ratio), static_cast<uint32_t>(MIN_FLOATING_HEIGHT * vpr));
     // calculate default x and y
-    Rect resRect = {0, 0, defaultW, defaultH};
+    Rect resRect = { 0, 0, defaultW, defaultH };
     if (defaultW <= limitDisplayRect_.width_ && defaultH <= limitDisplayRect_.height_) {
         resRect.posX_ = limitDisplayRect_.posX_ + static_cast<int32_t>((limitDisplayRect_.width_ - defaultW) / half);
         resRect.posY_ = limitDisplayRect_.posY_ + static_cast<int32_t>((limitDisplayRect_.height_ - defaultH) / half);
@@ -168,7 +168,7 @@ Rect WindowTestUtils::CalcLimitedRect(const Rect& rect, float virtualPixelRatio)
     uint32_t minFloatingH = static_cast<uint32_t>(MIN_FLOATING_HEIGHT * virtualPixelRatio);
     Rect resRect = {
         std::min(std::max(rect.posX_, maxPosRemain - static_cast<int32_t>(rect.width_)),
-            static_cast<int32_t>(displayRect_.width_) - maxPosRemain),
+                 static_cast<int32_t>(displayRect_.width_) - maxPosRemain),
         std::min(std::max(rect.posY_, maxPosRemain), static_cast<int32_t>(displayRect_.height_) - maxPosRemain),
         std::min(std::max(minFloatingW, rect.width_), maxLimitLen),
         std::min(std::max(minFloatingH, rect.height_), maxLimitLen),
@@ -211,15 +211,15 @@ void WindowTestUtils::InitByDisplayRect(const Rect& displayRect)
     if (displayRect_.width_ < displayRect_.height_) {
         isVerticalDisplay_ = true;
     }
-    statusBarRect_ = {0, 0, displayRect_.width_, displayRect_.height_ * barRatio};
-    naviBarRect_ = {0, displayRect_.height_ * (1 - barRatio), displayRect_.width_, displayRect_.height_ * barRatio};
-    dockWindowRect_ = {0, displayRect_.height_ * (1 - barRatio), displayRect_.width_, displayRect_.height_ * barRatio};
-    customAppRect_ = {
-        displayRect_.width_ * spaceRation,
-        displayRect_.height_ * spaceRation,
-        displayRect_.width_ * DEFAULT_ASPECT_RATIO,
-        displayRect_.height_ * DEFAULT_ASPECT_RATIO
+    statusBarRect_ = { 0, 0, displayRect_.width_, displayRect_.height_ * barRatio };
+    naviBarRect_ = { 0, displayRect_.height_ * (1 - barRatio), displayRect_.width_, displayRect_.height_ * barRatio };
+    dockWindowRect_ = {
+        0, displayRect_.height_ * (1 - barRatio), displayRect_.width_, displayRect_.height_ * barRatio
     };
+    customAppRect_ = { displayRect_.width_ * spaceRation,
+                       displayRect_.height_ * spaceRation,
+                       displayRect_.width_ * DEFAULT_ASPECT_RATIO,
+                       displayRect_.height_ * DEFAULT_ASPECT_RATIO };
 }
 
 std::shared_ptr<MMI::PointerEvent> WindowTestUtils::CreatePointerEvent(int32_t posX, int32_t posY, uint32_t pointerId,
@@ -255,7 +255,7 @@ void WindowTestUtils::InitTileWindowRects(const sptr<Window>& window, bool avoid
 {
     float virtualPixelRatio = GetVirtualPixelRatio(0);
     uint32_t edgeInterval = static_cast<uint32_t>(EDGE_INTERVAL * virtualPixelRatio); // 48 is edge interval
-    uint32_t midInterval = static_cast<uint32_t>(MID_INTERVAL * virtualPixelRatio); // 24 is mid interval
+    uint32_t midInterval = static_cast<uint32_t>(MID_INTERVAL * virtualPixelRatio);   // 24 is mid interval
     constexpr float ratio = DEFAULT_ASPECT_RATIO;
     constexpr int half = 2;
     limitDisplayRect_ = displayRect_;
@@ -276,14 +276,14 @@ void WindowTestUtils::InitTileWindowRects(const sptr<Window>& window, bool avoid
     x = edgeInterval;
     w = (limitDisplayRect_.width_ - edgeInterval * half - midInterval) / half;
     // calc doubleRect
-    doubleTileRects_[0] = {x, y, w, h};
-    doubleTileRects_[1] = {x + w + midInterval, y, w, h};
+    doubleTileRects_[0] = { x, y, w, h };
+    doubleTileRects_[1] = { x + w + midInterval, y, w, h };
     WLOGI("doubleRects_: %{public}d %{public}d %{public}d %{public}d", x, y, w, h);
     // calc tripleRect
     w = (limitDisplayRect_.width_ - edgeInterval * half - midInterval * half) / 3; // 3 is triple rects num
-    tripleTileRects_[0] = {x, y, w, h};
-    tripleTileRects_[1] = {x + w + midInterval, y, w, h};
-    tripleTileRects_[2] = {x + w * half + midInterval * half, y, w, h}; // 2 is third index
+    tripleTileRects_[0] = { x, y, w, h };
+    tripleTileRects_[1] = { x + w + midInterval, y, w, h };
+    tripleTileRects_[2] = { x + w * half + midInterval * half, y, w, h }; // 2 is third index
     WLOGI("tripleRects_: %{public}d %{public}d %{public}d %{public}d", x, y, w, h);
 }
 
@@ -293,9 +293,17 @@ bool WindowTestUtils::RectEqualTo(const sptr<Window>& window, const Rect& r)
     Rect l = window->GetRect();
     bool res = ((l.posX_ == r.posX_) && (l.posY_ == r.posY_) && (l.width_ == r.width_) && (l.height_ == r.height_));
     if (!res) {
-        WLOGFE("GetLayoutRect: %{public}d %{public}d %{public}d %{public}d, " \
-            "Expect: %{public}d %{public}d %{public}d %{public}d", l.posX_, l.posY_, l.width_, l.height_,
-            r.posX_, r.posY_, r.width_, r.height_);
+        WLOGFE(
+            "GetLayoutRect: %{public}d %{public}d %{public}d %{public}d, "
+            "Expect: %{public}d %{public}d %{public}d %{public}d",
+            l.posX_,
+            l.posY_,
+            l.width_,
+            l.height_,
+            r.posX_,
+            r.posY_,
+            r.width_,
+            r.height_);
     }
     return res;
 }
@@ -304,9 +312,17 @@ bool WindowTestUtils::RectEqualToRect(const Rect& l, const Rect& r)
 {
     bool res = ((l.posX_ == r.posX_) && (l.posY_ == r.posY_) && (l.width_ == r.width_) && (l.height_ == r.height_));
     if (!res) {
-        WLOGFE("GetLayoutRect: %{public}d %{public}d %{public}d %{public}d, " \
-            "Expect: %{public}d %{public}d %{public}d %{public}d", l.posX_, l.posY_, l.width_, l.height_,
-            r.posX_, r.posY_, r.width_, r.height_);
+        WLOGFE(
+            "GetLayoutRect: %{public}d %{public}d %{public}d %{public}d, "
+            "Expect: %{public}d %{public}d %{public}d %{public}d",
+            l.posX_,
+            l.posY_,
+            l.width_,
+            l.height_,
+            r.posX_,
+            r.posY_,
+            r.width_,
+            r.height_);
     }
     return res;
 }
@@ -319,8 +335,9 @@ AvoidPosType WindowTestUtils::GetAvoidPosType(const Rect& rect)
         return AvoidPosType::AVOID_POS_UNKNOWN;
     }
     auto displayInfo = display->GetDisplayInfo();
-    Rect displayRect = {displayInfo->GetOffsetX(), displayInfo->GetOffsetY(), displayInfo->GetWidth(),
-        displayInfo->GetHeight()};
+    Rect displayRect = {
+        displayInfo->GetOffsetX(), displayInfo->GetOffsetY(), displayInfo->GetWidth(), displayInfo->GetHeight()
+    };
     return WindowHelper::GetAvoidPosType(rect, displayRect);
 }
 
@@ -331,10 +348,13 @@ bool WindowTestUtils::InitSplitRects()
         WLOGFE("GetDefaultDisplay: failed!");
         return false;
     }
-    WLOGI("GetDefaultDisplay: id %{public}" PRIu64", w %{public}d, h %{public}d, fps %{public}u",
-        display->GetId(), display->GetWidth(), display->GetHeight(), display->GetRefreshRate());
+    WLOGI("GetDefaultDisplay: id %{public}" PRIu64 ", w %{public}d, h %{public}d, fps %{public}u",
+          display->GetId(),
+          display->GetWidth(),
+          display->GetHeight(),
+          display->GetRefreshRate());
 
-    Rect displayRect = {0, 0, display->GetWidth(), display->GetHeight()};
+    Rect displayRect = { 0, 0, display->GetWidth(), display->GetHeight() };
     displayRect_ = displayRect;
     limitDisplayRect_ = displayRect;
 
@@ -345,10 +365,12 @@ bool WindowTestUtils::InitSplitRects()
         isVerticalDisplay_ = true;
     }
     if (isVerticalDisplay_) {
-        splitRects_.dividerRect = { 0,
-                                    static_cast<uint32_t>((displayRect_.height_ - dividerWidth) * DEFAULT_SPLIT_RATIO),
-                                    displayRect_.width_,
-                                    dividerWidth, };
+        splitRects_.dividerRect = {
+            0,
+            static_cast<uint32_t>((displayRect_.height_ - dividerWidth) * DEFAULT_SPLIT_RATIO),
+            displayRect_.width_,
+            dividerWidth,
+        };
     } else {
         splitRects_.dividerRect = { static_cast<uint32_t>((displayRect_.width_ - dividerWidth) * DEFAULT_SPLIT_RATIO),
                                     0,
@@ -368,11 +390,13 @@ void WindowTestUtils::UpdateSplitRects(const sptr<Window>& window)
     testUtils->UpdateLimitDisplayRect(testUtils->avoidArea_.bottomRect_);
 
     if (isVerticalDisplay_) {
-        splitRects_.dividerRect.posY_ = limitDisplayRect_.posY_ +
+        splitRects_.dividerRect.posY_ =
+            limitDisplayRect_.posY_ +
             static_cast<uint32_t>((limitDisplayRect_.height_ - splitRects_.dividerRect.height_) * DEFAULT_SPLIT_RATIO);
         testUtils->UpdateLimitSplitRects(splitRects_.dividerRect.posY_);
     } else {
-        splitRects_.dividerRect.posX_ = limitDisplayRect_.posX_ +
+        splitRects_.dividerRect.posX_ =
+            limitDisplayRect_.posX_ +
             static_cast<uint32_t>((limitDisplayRect_.width_ - splitRects_.dividerRect.width_) * DEFAULT_SPLIT_RATIO);
         testUtils->UpdateLimitSplitRects(splitRects_.dividerRect.posX_);
     }
@@ -380,8 +404,7 @@ void WindowTestUtils::UpdateSplitRects(const sptr<Window>& window)
 
 void WindowTestUtils::UpdateLimitDisplayRect(const Rect& avoidRect)
 {
-    if (((avoidRect.posX_ == 0) && (avoidRect.posY_ == 0) &&
-        (avoidRect.width_ == 0) && (avoidRect.height_ == 0))) {
+    if (((avoidRect.posX_ == 0) && (avoidRect.posY_ == 0) && (avoidRect.width_ == 0) && (avoidRect.height_ == 0))) {
         return;
     }
     auto avoidPosType = GetAvoidPosType(avoidRect);
@@ -449,30 +472,30 @@ void WindowTestUtils::UpdateLimitSplitRect(Rect& limitSplitRect)
     Rect curLimitRect = limitSplitRect;
     limitSplitRect.posX_ = std::max(limitDisplayRect_.posX_, curLimitRect.posX_);
     limitSplitRect.posY_ = std::max(limitDisplayRect_.posY_, curLimitRect.posY_);
-    limitSplitRect.width_ = std::min(limitDisplayRect_.posX_ + limitDisplayRect_.width_,
-                                     curLimitRect.posX_ + curLimitRect.width_) -
-                                     limitSplitRect.posX_;
-    limitSplitRect.height_ = std::min(limitDisplayRect_.posY_ + limitDisplayRect_.height_,
-                                      curLimitRect.posY_ + curLimitRect.height_) -
-                                      limitSplitRect.posY_;
+    limitSplitRect.width_ =
+        std::min(limitDisplayRect_.posX_ + limitDisplayRect_.width_, curLimitRect.posX_ + curLimitRect.width_) -
+        limitSplitRect.posX_;
+    limitSplitRect.height_ =
+        std::min(limitDisplayRect_.posY_ + limitDisplayRect_.height_, curLimitRect.posY_ + curLimitRect.height_) -
+        limitSplitRect.posY_;
 }
 
 float WindowTestUtils::GetVirtualPixelRatio(DisplayId displayId)
 {
     auto display = DisplayManager::GetInstance().GetDisplayById(displayId);
     if (display == nullptr) {
-        WLOGFE("GetVirtualPixel fail. Get display fail. displayId:%{public}" PRIu64", use Default vpr:1.0", displayId);
-        return 1.0;  // Use DefaultVPR 1.0
+        WLOGFE("GetVirtualPixel fail. Get display fail. displayId:%{public}" PRIu64 ", use Default vpr:1.0", displayId);
+        return 1.0; // Use DefaultVPR 1.0
     }
 
     float virtualPixelRatio = display->GetVirtualPixelRatio();
     if (virtualPixelRatio == 0.0) {
-        WLOGFE("GetVirtualPixel fail. vpr is 0.0. displayId:%{public}" PRIu64", use Default vpr:1.0", displayId);
-        return 1.0;  // Use DefaultVPR 1.0
+        WLOGFE("GetVirtualPixel fail. vpr is 0.0. displayId:%{public}" PRIu64 ", use Default vpr:1.0", displayId);
+        return 1.0; // Use DefaultVPR 1.0
     }
 
-    WLOGI("GetVirtualPixel success. displayId:%{public}" PRIu64", vpr:%{public}f", displayId, virtualPixelRatio);
+    WLOGI("GetVirtualPixel success. displayId:%{public}" PRIu64 ", vpr:%{public}f", displayId, virtualPixelRatio);
     return virtualPixelRatio;
 }
-} // namespace ROSEN
+} // namespace Rosen
 } // namespace OHOS

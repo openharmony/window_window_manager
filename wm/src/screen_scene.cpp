@@ -16,6 +16,7 @@
 #include "screen_scene.h"
 
 #include <event_handler.h>
+#include <transaction/rs_interfaces.h>
 #include <ui_content.h>
 #include <viewport_config.h>
 
@@ -24,6 +25,11 @@
 #include "singleton_container.h"
 
 #include "dm_common.h"
+#include "display_manager.h"
+#include "rs_adapter.h"
+#include "screen_session_manager_client.h"
+#include "intention_event_manager.h"
+#include "input_transfer_station.h"
 #include "window_manager_hilog.h"
 #include "root_scene.h"
 
@@ -32,6 +38,7 @@ namespace Rosen {
 namespace {
 constexpr float MIN_DPI = 1e-6;
 std::atomic<bool> g_ssIsDestroyed = false;
+const std::string INPUT_AND_VSYNC_THREAD = "InputAndVsyncThread";
 } // namespace
 
 ScreenScene::ScreenScene(std::string name) : name_(name)
@@ -50,7 +57,7 @@ ScreenScene::~ScreenScene()
     Destroy();
 }
 
-WMError ScreenScene::Destroy()
+WMError ScreenScene::Destroy(uint32_t reason)
 {
     std::function<void()> task; //延长task的生命周期
     {
@@ -101,6 +108,28 @@ void ScreenScene::LoadContent(const std::string& contentUrl, napi_env env, napi_
     uiContent_->SetFrameLayoutFinishCallback(std::move(frameLayoutFinishCb_));
     wptr<Window> weakWindow(this);
     RootScene::staticRootScene_->AddRootScene(DEFAULT_DISPLAY_ID, weakWindow);
+    RegisterInputEventListener();
+}
+
+void ScreenScene::RegisterInputEventListener()
+{
+    auto mainEventRunner = AppExecFwk::EventRunner::GetMainEventRunner();
+    if (mainEventRunner) {
+        TLOGI(WmsLogTag::DMS, "MainEventRunner is available");
+        handler_ = std::make_shared<AppExecFwk::EventHandler>(mainEventRunner);
+    } else {
+        TLOGI(WmsLogTag::DMS, "MainEventRunner is not available");
+        handler_ = AppExecFwk::EventHandler::Current();
+        if (!handler_) {
+            handler_ =
+                std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::Create(INPUT_AND_VSYNC_THREAD));
+        }
+    }
+    if (!(DelayedSingleton<IntentionEventManager>::GetInstance()->EnableInputEventListener(uiContent_.get(),
+        handler_))) {
+        TLOGI(WmsLogTag::DMS, "EnableInputEventListener fail");
+    }
+    InputTransferStation::GetInstance().MarkRegisterToMMI();
 }
 
 void ScreenScene::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason)
@@ -133,7 +162,31 @@ void ScreenScene::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configur
     if (uiContent_) {
         TLOGD(WmsLogTag::DMS, "notify root scene ace");
         uiContent_->UpdateConfiguration(configuration);
+        if (configuration == nullptr) {
+            return;
+        }
+        std::string colorMode = configuration->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+        bool isDark = (colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_DARK);
+        bool ret = RSInterfaces::GetInstance().SetGlobalDarkColorMode(isDark);
+        if (!ret) {
+            TLOGI(WmsLogTag::DMS, "SetGlobalDarkColorMode fail with colorMode : %{public}s", colorMode.c_str());
+        }
     }
+}
+
+void ScreenScene::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    TLOGI(WmsLogTag::DMS, "update configuration.");
+    UpdateConfiguration(configuration);
+    if (configurationUpdateCallback_) {
+        configurationUpdateCallback_(configuration);
+    }
+}
+
+void ScreenScene::SetOnConfigurationUpdatedCallback(
+    const std::function<void(const std::shared_ptr<AppExecFwk::Configuration>&)>& callback)
+{
+    configurationUpdateCallback_ = callback;
 }
 
 void ScreenScene::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback)
@@ -148,7 +201,7 @@ int64_t ScreenScene::GetVSyncPeriod()
 
 void ScreenScene::FlushFrameRate(uint32_t rate, int32_t animatorExpectedFrameRate, uint32_t rateType)
 {
-    vsyncStation_->FlushFrameRate(rate, animatorExpectedFrameRate, rateType);
+    vsyncStation_->FlushFrameRate(GetRSUIContext(), rate, animatorExpectedFrameRate, rateType);
 }
 
 void ScreenScene::OnBundleUpdated(const std::string& bundleName)
@@ -217,6 +270,37 @@ Ace::UIContent* ScreenScene::GetUIContent() const
         TLOGE(WmsLogTag::DMS, "uiContent_ is nullptr!");
         return nullptr;
     }
+}
+
+std::shared_ptr<RSUIDirector> ScreenScene::GetRSUIDirector() const
+{
+    RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
+    sptr<Display> display;
+    if (displayId_ == DISPLAY_ID_INVALID) {
+        display = DisplayManager::GetInstance().GetDefaultDisplay();
+        TLOGE(WmsLogTag::WMS_RS_CLI_MULTI_INST, "displayId is invalid, use default display");
+    } else {
+        display = DisplayManager::GetInstance().GetDisplayById(displayId_);
+    }
+    if (!display) {
+        TLOGE(WmsLogTag::WMS_RS_CLI_MULTI_INST, "display is null, displayId: %{public}" PRIu64, displayId_);
+        return nullptr;
+    }
+    auto screenId = display->GetScreenId();
+    auto rsUIDirector = ScreenSessionManagerClient::GetInstance().GetRSUIDirector(screenId);
+    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "%{public}s, screenId: %{public}" PRIu64 ", windowId: %{public}d",
+          RSAdapterUtil::RSUIDirectorToStr(rsUIDirector).c_str(), screenId, GetWindowId());
+    return rsUIDirector;
+}
+
+std::shared_ptr<RSUIContext> ScreenScene::GetRSUIContext() const
+{
+    RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
+    auto rsUIDirector = GetRSUIDirector();
+    auto rsUIContext = rsUIDirector ? rsUIDirector->GetRSUIContext() : nullptr;
+    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "%{public}s, windowId: %{public}d",
+          RSAdapterUtil::RSUIContextToStr(rsUIContext).c_str(), GetWindowId());
+    return rsUIContext;
 }
 } // namespace Rosen
 } // namespace OHOS

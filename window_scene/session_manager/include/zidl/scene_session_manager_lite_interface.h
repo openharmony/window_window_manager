@@ -27,6 +27,8 @@
 #include "session_info.h"
 #include "zidl/window_manager_lite_interface.h"
 #include "session_lifecycle_listener_interface.h"
+#include "session_router_stack_listener.h"
+
 namespace OHOS::Media {
 class PixelMap;
 } // namespace OHOS::Media
@@ -92,12 +94,30 @@ public:
         TRANS_ID_REGISTER_SESSION_LIFECYCLE_LISTENER_BY_IDS,
         TRANS_ID_REGISTER_SESSION_LIFECYCLE_LISTENER_BY_BUNDLES,
         TRANS_ID_UNREGISTER_SESSION_LIFECYCLE_LISTENER,
+        TRANS_ID_GET_RECENT_MAIN_SESSION_INFO_LIST,
+        TRANS_ID_PENDING_SESSION_TO_BACKGROUND_BY_PERSISTENTID,
+        TRANS_ID_CREATE_NEW_INSTANCE_KEY,
+        TRANS_ID_GET_ROUTER_STACK_INFO,
+        TRANS_ID_REMOVE_INSTANCE_KEY,
+        TRANS_ID_TRANSFER_SESSION_TO_TARGET_SCREEN,
+        TRANS_ID_PENDING_SESSION_TO_BACKGROUND,
+        TRANS_ID_UPDATE_KIOSK_APP_LIST,
+        TRANS_ID_ENTER_KIOSK_MODE,
+        TRANS_ID_EXIT_KIOSK_MODE,
+        TRANS_ID_UPDATE_WINDOW_MODE_BY_ID_FOR_UI_TEST,
+        TRANS_ID_SEND_POINTER_EVENT_FOR_HOVER,
     };
+
+    /*
+     * Window Layout
+     */
+    virtual WMError UpdateWindowModeByIdForUITest(int32_t windowId, int32_t updateMode) { return WMError::WM_OK; }
 
     /*
      * Window Lifecycle
      */
     virtual WSError PendingSessionToForeground(const sptr<IRemoteObject>& token) = 0;
+    virtual WSError PendingSessionToBackground(const sptr<IRemoteObject>& token, const BackgroundParams& params) = 0;
     virtual WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token,
         bool shouldBackToCaller = true) = 0;
     virtual WSError MoveSessionsToForeground(const std::vector<std::int32_t>& sessionIds, int32_t topSessionId) = 0;
@@ -246,6 +266,143 @@ public:
      * @return Successful call returns WMError: WS-OK, otherwise it indicates failure
      */
     virtual WMError UnregisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener) = 0;
+
+    /**
+     * @brief Get an ordered recent main session info list
+     *
+     * This function is used to get an ordered recent main session info list
+     *
+     * @caller SA or SystemApp
+     * @permission SA permission or SystemApp permission
+     *
+     * @param recentSessionInfoList the sessionInfo list of recent main sessions
+     * @return Successful call returns WSError: WS-OK, otherwise it indicates failure
+     */
+    virtual WSError GetRecentMainSessionInfoList(std::vector<RecentSessionInfo>& recentSessionInfoList) = 0;
+
+    /**
+     * @brief pending session to background
+     *
+     * This function is used to request session to background by persistentid
+     *
+     * @caller SA or SystemApp
+     * @permission application requires ohos.permission.MANAGE_MISSIONS permission and
+     * SA permission or SystemApp permission
+     *
+     * @param persistentId the session of persistentId
+     * @param shouldBackToCaller should back to caller
+     * @return Successful call returns WSError: WS-OK, otherwise it indicates failure
+     */
+    virtual WSError PendingSessionToBackgroundByPersistentId(const int32_t persistentId,
+        bool shouldBackToCaller = true) { return WSError::WS_OK; };
+
+    /**
+     * @brief Create a new instanceKey of a specific bundle
+     *
+     * This function is used to create a new instanceKey
+     * If the number of instanceKey reaches max limit, then return the last created instanceKey
+     *
+     * @caller SA or SystemApp
+     * @permission SA permission or SystemApp permission
+     *
+     * @param bundleName the bundleName of the new instanceKey needs to be created
+     * @param instanceKey will be assigned the instanceKey just created
+     * @return Successful call returns WSError: WM-OK, otherwise it indicates failure
+     */
+    virtual WMError CreateNewInstanceKey(const std::string& bundleName, std::string& instanceKey) = 0;
+
+    /**
+     * @brief Get the router stack by persistentId
+     *
+     * This function is used to get the router stack by persistentId from arkui
+     *
+     * @caller SA or SystemApp
+     * @permission SA permission or SystemApp permission
+     *
+     * @param persistentId the id of session
+     * @param listener the callback when get router stack from arkui
+     * @return Successful call returns WSError: WM-OK, otherwise it indicates failure
+     */
+    virtual WMError GetRouterStackInfo(int32_t persistentId, const sptr<ISessionRouterStackListener>& listener) = 0;
+
+    /**
+     * @brief Remove a instanceKey of a specific bundle
+     *
+     * This function is used to remove a instanceKey of a specific bundle
+     *
+     * @caller SA or SystemApp
+     * @permission SA permission or SystemApp permission
+     *
+     * @param bundleName the bundleName of the instanceKey to be removed
+     * @param instanceKey the instanceKey that needs to be removed
+     * @return Successful call returns WSError: WM-OK, otherwise it indicates failure
+     */
+    virtual WMError RemoveInstanceKey(const std::string& bundleName, const std::string& instanceKey) = 0;
+
+    /**
+     * @brief Transfer a session to the target screen
+     *
+     * This function is used to transfer a session to the target screen
+     *
+     * @caller SA or SystemApp
+     * @permission SA permission or SystemApp permission
+     *
+     * @param info The session infomation to be transferred
+     * @return Successful call returns WMError: WM-OK, otherwise it indicates failure
+     */
+    virtual WMError TransferSessionToTargetScreen(const TransferSessionInfo& info) = 0;
+    
+    /**
+     * @brief Update the list of apps which can be used in kiosk mode
+     *
+     * This function is used to update the list of apps which can be used in kiosk mode
+     *
+     * @caller SA or SystemApp
+     * @permission SA permission or SystemApp permission
+     *
+     * @param kioskAppList the list of apps which can be used in kiosk mode
+     * @return Successful call returns WMError: WM-OK, otherwise it indicates failure
+     */
+    virtual WMError UpdateKioskAppList(const std::vector<std::string>& kioskAppList) { return WMError::WM_OK; }
+
+    /**
+     * @brief Notify that mission enters kiosk mode
+     *
+     * This function is used to notify that mission enters kiosk mode
+     *
+     * @caller SA or SystemApp
+     * @permission SA permission or SystemApp permission
+     *
+     * @param token the abilitytoken of the mission entered kiosk mode
+     * @return Successful call returns WMError: WM-OK, otherwise it indicates failure
+     */
+    virtual WMError EnterKioskMode(const sptr<IRemoteObject>& token) { return WMError::WM_OK; }
+
+    /**
+     * @brief Notify exit kiosk mode
+     *
+     * This function is used to notify exit kiosk mode
+     *
+     * @caller SA or SystemApp
+     * @permission SA permission or SystemApp permission
+     *
+     * @return Successful call returns WMError: WM-OK, otherwise it indicates failure
+     */
+    virtual WMError ExitKioskMode(const sptr<IRemoteObject>& token) { return WMError::WM_OK; }
+
+    /**
+     * @brief Send pointer event for hover.
+     *
+     * This function is used to send pointer event for hover
+     *
+     * @caller SA
+     * @permission SA permission
+     *
+     * @param pointerEvent The pointer event for hover
+     * @return Successful call returns WSError: WS-OK, otherwise it indicates failure
+     */
+    virtual WSError SendPointerEventForHover(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+        { return WSError::WS_OK; }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_LITE_INTERFACE_H

@@ -27,8 +27,8 @@ class SecondaryDisplaySensorFoldStateManager : public SensorFoldStateManager {
 public:
     SecondaryDisplaySensorFoldStateManager();
     virtual ~SecondaryDisplaySensorFoldStateManager();
-    void HandleAngleOrHallChange(const std::vector<float> &angles,
-        const std::vector<uint16_t> &halls, sptr<FoldScreenPolicy> foldScreenPolicy) override;
+    void HandleAngleOrHallChange(const std::vector<float>& angles,
+        const std::vector<uint16_t>& halls, sptr<FoldScreenPolicy> foldScreenPolicy) override;
 private:
     FoldStatus GetNextFoldState(const std::vector<float> &angles, const std::vector<uint16_t> &halls);
     FoldStatus GetNextFoldStateHalf(float angle, uint16_t hall, FoldStatus myNextStatus,
@@ -44,6 +44,11 @@ private:
     bool isHasReflexioned = false;
     FoldStatus mNextStateAB = FoldStatus::UNKNOWN;
     FoldStatus mNextStateBC = FoldStatus::UNKNOWN;
+    // used to record the current hall value between the A and B screens.
+    uint16_t curHallAB_ = 2;
+    // used to record the current hall value between the B and C screens.
+    uint16_t curHallBC_ = 2;
+    std::mutex secondaryFoldStatusMutex_;
 };
 } // namespace Rosen
 } // namespace OHOS

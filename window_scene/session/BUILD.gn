@@ -33,6 +33,56 @@ config("session_public_config") {
   ]
 }
 
+config("ui_effect_public_config") {
+  include_dirs = [
+    "${window_base_path}/window_scene/session/host/include",
+  ]
+}
+
+ohos_source_set("ui_effect_controller_client") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+  sources = [
+    "host/src/ui_effect_controller_proxy.cpp",
+    "host/src/ui_effect_controller_client_stub.cpp",
+    "host/src/ui_effect_controller_client.cpp",
+  ]
+  public_configs = [":ui_effect_public_config"]
+  public_deps = [
+    "${window_base_path}/utils:ui_effect_controller_common",
+  ]
+  part_name = "window_manager"
+  subsystem_name = "window"
+}
+
+ohos_source_set("ui_effect_controller") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+  sources = [
+    "host/src/ui_effect_controller_stub.cpp",
+    "host/src/ui_effect_controller.cpp",
+    "host/src/ui_effect_controller_client_proxy.cpp",
+  ]
+  public_configs = [":ui_effect_public_config"]
+  public_deps = ["${window_base_path}/utils:ui_effect_controller_common"]
+
+  deps = [
+    "${window_base_path}/window_scene/common:window_scene_common",
+  ]
+  part_name = "window_manager"
+  subsystem_name = "window"
+}
+
 ohos_shared_library("scene_session") {
   branch_protector_ret = "pac_ret"
   sanitize = {
@@ -61,10 +111,13 @@ ohos_shared_library("scene_session") {
     "host/src/scene_persistent_storage.cpp",
     "host/src/scene_session.cpp",
     "host/src/session.cpp",
+    "host/src/session_change_recorder.cpp",
+    "host/src/session_coordinate_helper.cpp",
     "host/src/sub_session.cpp",
     "host/src/system_session.cpp",
     "host/src/ui_extension/host_data_handler.cpp",
     "host/src/ws_ffrt_helper.cpp",
+    "host/src/ws_snapshot_helper.cpp",
     "host/src/zidl/session_proxy.cpp",
     "host/src/zidl/session_stub.cpp",
   ]
@@ -83,6 +136,7 @@ ohos_shared_library("scene_session") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_runtime:ability_manager",
     "ability_runtime:ability_start_setting",
     "ability_runtime:app_context",
@@ -100,11 +154,13 @@ ohos_shared_library("scene_session") {
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
+    "hitrace:libhitracechain",
     "image_framework:image_native",
     "init:libbegetutil",
     "input:libmmi-client",
     "ipc:ipc_single",
     "samgr:samgr_proxy",
+    "zlib:shared_libz",
   ]
   if (!(host_os == "linux" && host_cpu == "arm64")) {
     external_deps += [ "preferences:native_preferences" ]
@@ -118,6 +174,7 @@ ohos_shared_library("scene_session") {
     "input:libmmi-napi",
   ]
   defines = []
+  defines += [ "MODIFIER_NG" ]
 
   if (defined(global_parts_info) &&
       defined(global_parts_info.barrierfree_accessibility)) {
@@ -205,6 +262,7 @@ ohos_shared_library("screen_session") {
   ]
 
   defines = []
+  defines += [ "MODIFIER_NG" ]
   if (window_manager_feature_screen_color_gamut) {
     defines += [ "WM_SCREEN_COLOR_GAMUT_ENABLE" ]
   }

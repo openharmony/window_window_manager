@@ -22,10 +22,19 @@
 #include "window_manager.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
-
+#include "mock_message_parcel.h"
 
 using namespace testing;
 using namespace testing::ext;
+
+namespace {
+    std::string logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
+        const char* msg)
+    {
+        logMsg = msg;
+    }
+}
 
 namespace OHOS {
 namespace Rosen {
@@ -39,21 +48,13 @@ public:
     sptr<SessionStageProxy> sessionStage_ = sptr<SessionStageProxy>::MakeSptr(iRemoteObjectMocker);
 };
 
-void SessionStageProxyLifecycleTest::SetUpTestCase()
-{
-}
+void SessionStageProxyLifecycleTest::SetUpTestCase() {}
 
-void SessionStageProxyLifecycleTest::TearDownTestCase()
-{
-}
+void SessionStageProxyLifecycleTest::TearDownTestCase() {}
 
-void SessionStageProxyLifecycleTest::SetUp()
-{
-}
+void SessionStageProxyLifecycleTest::SetUp() {}
 
-void SessionStageProxyLifecycleTest::TearDown()
-{
-}
+void SessionStageProxyLifecycleTest::TearDown() {}
 
 namespace {
 /**
@@ -111,6 +112,49 @@ HWTEST_F(SessionStageProxyLifecycleTest, NotifySessionForeground, TestSize.Level
 }
 
 /**
+ * @tc.name: NotifyLifecyclePausedStatus
+ * @tc.desc: test function : NotifyLifecyclePausedStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyLifecycleTest, NotifyLifecyclePausedStatus, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_TRUE((sessionStage_ != nullptr));
+    sessionStage_->NotifyLifecyclePausedStatus();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    sessionStage_->NotifyLifecyclePausedStatus();
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+    sessionStage_->NotifyLifecyclePausedStatus();
+    EXPECT_TRUE(logMsg.find("SendRequest failed") == std::string::npos);
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: NotifyAppUseControlStatus
+ * @tc.desc: test function : NotifyAppUseControlStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyLifecycleTest, NotifyAppUseControlStatus, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_TRUE((sessionStage_ != nullptr));
+    bool appControl = true;
+    sessionStage_->NotifyAppUseControlStatus(appControl);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    sessionStage_->NotifyAppUseControlStatus(appControl);
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+    sessionStage_->NotifyAppUseControlStatus(appControl);
+    EXPECT_TRUE(logMsg.find("SendRequest failed") == std::string::npos);
+    LOG_SetCallback(nullptr);
+}
+
+/**
  * @tc.name: NotifySessionBackground
  * @tc.desc: test function : NotifySessionBackground
  * @tc.type: FUNC
@@ -134,6 +178,6 @@ HWTEST_F(SessionStageProxyLifecycleTest, NotifyWindowVisibility, TestSize.Level1
     ASSERT_TRUE((sessionStage_ != nullptr));
     sessionStage_->NotifyWindowVisibility(true);
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

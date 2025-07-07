@@ -34,12 +34,20 @@ void RootSceneSession::LoadContent(
 void RootSceneSession::GetSystemAvoidAreaForRoot(const WSRect& rect, AvoidArea& avoidArea)
 {
     std::vector<sptr<SceneSession>> statusBarVector;
+    DisplayId displayId = GetSessionProperty()->GetDisplayId();
     if (specificCallback_ != nullptr && specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_) {
         statusBarVector = specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_(
-            WindowType::WINDOW_TYPE_STATUS_BAR, GetSessionProperty()->GetDisplayId());
+            WindowType::WINDOW_TYPE_STATUS_BAR, displayId);
     }
     for (auto& statusBar : statusBarVector) {
-        if (!statusBar->IsVisible()) {
+        bool isVisible = statusBar->IsVisible();
+        if (onGetStatusBarConstantlyShowFunc_) {
+            onGetStatusBarConstantlyShowFunc_(displayId, isVisible);
+            TLOGD(WmsLogTag::WMS_IMMS, "displayId %{public}" PRIu64 " constantly isVisible %{public}d",
+                displayId, isVisible);
+        }
+        if (!isVisible) {
+            TLOGI(WmsLogTag::WMS_IMMS, "root scene status bar not visible");
             continue;
         }
         WSRect statusBarRect = statusBar->GetSessionRect();
@@ -61,7 +69,8 @@ void RootSceneSession::GetKeyboardAvoidAreaForRoot(const WSRect& rect, AvoidArea
             WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     }
     for (auto& inputMethod : inputMethodVector) {
-        if (!inputMethod->IsVisible()) {
+        if (inputMethod == nullptr || (inputMethod->GetSessionState() != SessionState::STATE_FOREGROUND &&
+                inputMethod->GetSessionState() != SessionState::STATE_ACTIVE)) {
             continue;
         }
         SessionGravity gravity = inputMethod->GetKeyboardGravity();

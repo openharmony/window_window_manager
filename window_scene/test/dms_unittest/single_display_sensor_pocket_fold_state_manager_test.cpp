@@ -15,7 +15,10 @@
 
 #include <gtest/gtest.h>
 
+#include <parameter.h>
+#include <parameters.h>
 #include "screen_session_manager/include/fold_screen_controller/sensor_fold_state_manager/single_display_sensor_pocket_fold_state_manager.h"
+#include "screen_session_manager/include/fold_screen_controller/single_display_pocket_fold_policy.h"
 #include "fold_screen_state_internel.h"
 
 using namespace testing;
@@ -25,6 +28,9 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
+std::recursive_mutex g_displayInfoMutex;
+std::shared_ptr<TaskScheduler> screenPowerTaskScheduler_ = std::make_shared<TaskScheduler>("test");
+sptr<SingleDisplayPocketFoldPolicy> g_policy;
 }
 
 class SingleDisplaySensorPocketFoldStateManagerTest : public testing::Test {
@@ -37,6 +43,7 @@ public:
 
 void SingleDisplaySensorPocketFoldStateManagerTest::SetUpTestCase()
 {
+    g_policy = new SingleDisplayPocketFoldPolicy(g_displayInfoMutex, screenPowerTaskScheduler_);
 }
 
 void SingleDisplaySensorPocketFoldStateManagerTest::TearDownTestCase()
@@ -249,6 +256,20 @@ HWTEST_F(SingleDisplaySensorPocketFoldStateManagerTest, HandleTentChange, TestSi
 
     mgr.HandleTentChange(false, nullptr);
     ASSERT_EQ(mgr.IsTentMode(), false);
+
+    mgr.HandleTentChange(1, g_policy);
+    EXPECT_EQ(OHOS::system::GetParameter("persist.dms.device.status", "0"), "3");
+
+    mgr.HandleTentChange(0, g_policy);
+    EXPECT_EQ(OHOS::system::GetParameter("persist.dms.device.status", "0"), "1");
+
+    mgr.HandleTentChange(2, g_policy);
+    EXPECT_EQ(OHOS::system::GetParameter("persist.dms.device.status", "0"), "2");
+
+    mgr.allowUserSensorForLargeFoldDevice = 0;
+    mgr.currentAngle = 140.0F + 0.1;
+    mgr.HandleTentChange(0, g_policy, 1);
+    EXPECT_EQ(OHOS::system::GetParameter("persist.dms.device.status", "0"), "0");
 }
 
 /**

@@ -29,21 +29,13 @@ public:
     void TearDown() override;
 };
 
-void PersistentStorageTest::SetUpTestCase()
-{
-}
+void PersistentStorageTest::SetUpTestCase() {}
 
-void PersistentStorageTest::TearDownTestCase()
-{
-}
+void PersistentStorageTest::TearDownTestCase() {}
 
-void PersistentStorageTest::SetUp()
-{
-}
+void PersistentStorageTest::SetUp() {}
 
-void PersistentStorageTest::TearDown()
-{
-}
+void PersistentStorageTest::TearDown() {}
 
 namespace {
 /**
@@ -103,6 +95,6 @@ HWTEST_F(PersistentStorageTest, StorageOperate, TestSize.Level1)
     EXPECT_EQ(false, result4);
 }
 
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

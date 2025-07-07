@@ -67,7 +67,9 @@ private:
         void OnExtensionDied() override {}
         void OnExtensionTimeout(int32_t errorCode) override {}
         void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
-            int64_t uiExtensionIdLevel) override {}
+                                  int64_t uiExtensionIdLevel) override
+        {
+        }
         void OnDrawingCompleted() override {}
         void OnAppRemoveStartingWindow() override {}
     };
@@ -77,13 +79,9 @@ private:
     sptr<WindowEventChannelMocker> mockEventChannel_ = nullptr;
 };
 
-void WindowSessionTest::SetUpTestCase()
-{
-}
+void WindowSessionTest::SetUpTestCase() {}
 
-void WindowSessionTest::TearDownTestCase()
-{
-}
+void WindowSessionTest::TearDownTestCase() {}
 
 void WindowSessionTest::SetUp()
 {
@@ -96,9 +94,7 @@ void WindowSessionTest::SetUp()
     EXPECT_NE(nullptr, session_);
     ssm_ = sptr<SceneSessionManager>::MakeSptr();
     session_->SetEventHandler(ssm_->taskScheduler_->GetEventHandler(), ssm_->eventHandler_);
-    auto isScreenLockedCallback = [this]() {
-        return ssm_->IsScreenLocked();
-    };
+    auto isScreenLockedCallback = [this]() { return ssm_->IsScreenLocked(); };
     session_->RegisterIsScreenLockedCallback(isScreenLockedCallback);
 
     mockSessionStage_ = sptr<SessionStageMocker>::MakeSptr();
@@ -174,8 +170,8 @@ HWTEST_F(WindowSessionTest, SetActive01, TestSize.Level1)
     SystemSessionConfig sessionConfig;
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
-    ASSERT_EQ(WSError::WS_OK, session_->Connect(mockSessionStage,
-            mockEventChannel, surfaceNode, sessionConfig, property));
+    ASSERT_EQ(WSError::WS_OK,
+              session_->Connect(mockSessionStage, mockEventChannel, surfaceNode, sessionConfig, property));
     ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, session_->SetActive(true));
     ASSERT_EQ(false, session_->isActive_);
 
@@ -185,17 +181,14 @@ HWTEST_F(WindowSessionTest, SetActive01, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetCompatibleModeEnableInPad
- * @tc.desc: SetCompatibleModeEnableInPad test
+ * @tc.name: SetCompatibleModeProperty
+ * @tc.desc: SetCompatibleModeProperty
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest, SetCompatibleModeEnableInPad, TestSize.Level1)
+HWTEST_F(WindowSessionTest, SetCompatibleModeProperty, TestSize.Level1)
 {
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
-    bool enable = true;
-    property->SetCompatibleModeEnableInPad(enable);
-    ASSERT_EQ(property->GetCompatibleModeEnableInPad(), true);
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    ASSERT_EQ(WSError::WS_OK, session_->SetCompatibleModeProperty(compatibleModeProperty));
 }
 
 /**
@@ -226,12 +219,15 @@ HWTEST_F(WindowSessionTest, UpdateClientDisplayId02, TestSize.Level1)
     ASSERT_NE(session_, nullptr);
     ASSERT_NE(mockSessionStage_, nullptr);
     session_->sessionStage_ = mockSessionStage_;
+    session_->SetPropertyDirtyFlags(0);
     session_->clientDisplayId_ = 0;
     DisplayId updatedDisplayId = 0;
     EXPECT_EQ(session_->UpdateClientDisplayId(updatedDisplayId), WSError::WS_OK);
+    EXPECT_EQ(session_->GetPropertyDirtyFlags(), 0);
     EXPECT_EQ(updatedDisplayId, session_->clientDisplayId_);
     updatedDisplayId = 100;
     EXPECT_EQ(session_->UpdateClientDisplayId(updatedDisplayId), WSError::WS_OK);
+    EXPECT_EQ(session_->GetPropertyDirtyFlags(), static_cast<uint32_t>(SessionPropertyFlag::DISPLAY_ID));
     EXPECT_EQ(updatedDisplayId, session_->clientDisplayId_);
 }
 
@@ -246,25 +242,25 @@ HWTEST_F(WindowSessionTest, UpdateClientRectPosYAndDisplayId01, TestSize.Level1)
     session_->sessionInfo_.screenId_ = 0;
     EXPECT_EQ(session_->GetScreenId(), 0);
     session_->GetSessionProperty()->SetIsSystemKeyboard(false);
-    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::EXPANDED,
-        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
-    WSRect rect = {0, 0, 0, 0};
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(
+        0, SuperFoldStatus::EXPANDED, { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
+    WSRect rect = { 0, 0, 0, 0 };
     session_->UpdateClientRectPosYAndDisplayId(rect);
     EXPECT_EQ(rect.posY_, 0);
-    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::KEYBOARD,
-        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
-    rect = {0, 100, 0, 0};
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(
+        0, SuperFoldStatus::KEYBOARD, { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
+    rect = { 0, 100, 0, 0 };
     session_->UpdateClientRectPosYAndDisplayId(rect);
     EXPECT_EQ(rect.posY_, 100);
 
-    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::HALF_FOLDED,
-        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1649, 2472, 40 });
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(
+        0, SuperFoldStatus::HALF_FOLDED, { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1649, 2472, 40 });
     const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
         PcFoldScreenManager::GetInstance().GetDisplayRects();
-    rect = {0, 1000, 100, 100};
+    rect = { 0, 1000, 100, 100 };
     session_->UpdateClientRectPosYAndDisplayId(rect);
     EXPECT_EQ(rect.posY_, 1000);
-    rect = {0, 2000, 100, 100};
+    rect = { 0, 2000, 100, 100 };
     auto rect2 = rect;
     session_->UpdateClientRectPosYAndDisplayId(rect);
     EXPECT_EQ(rect.posY_, rect2.posY_ - defaultDisplayRect.height_ - foldCreaseRect.height_);
@@ -299,22 +295,23 @@ HWTEST_F(WindowSessionTest, ConnectInner, TestSize.Level1)
     property->SetIsNeedUpdateWindowMode(true);
     session_->SetScreenId(233);
     session_->SetSessionProperty(property);
-    auto res = session_->ConnectInner(mockSessionStage_, mockEventChannel_,
-        nullptr, sessionConfig, property, nullptr, 1, 1, "");
+    auto res = session_->ConnectInner(
+        mockSessionStage_, mockEventChannel_, nullptr, sessionConfig, property, nullptr, 1, 1, "");
     ASSERT_EQ(res, WSError::WS_ERROR_INVALID_SESSION);
 
     session_->isTerminating_ = true;
-    auto res2 = session_->ConnectInner(mockSessionStage_, mockEventChannel_,
-        nullptr, sessionConfig, property, nullptr, 1, 1, "");
+    auto res2 = session_->ConnectInner(
+        mockSessionStage_, mockEventChannel_, nullptr, sessionConfig, property, nullptr, 1, 1, "");
     ASSERT_EQ(res2, WSError::WS_OK);
 
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
     property->SetIsNeedUpdateWindowMode(true);
     session_->SetScreenId(SCREEN_ID_INVALID);
     session_->SetSessionProperty(property);
-    auto res3 = session_->ConnectInner(mockSessionStage_, mockEventChannel_,
-        nullptr, sessionConfig, property, nullptr, 1, 1, "");
+    auto res3 = session_->ConnectInner(
+        mockSessionStage_, mockEventChannel_, nullptr, sessionConfig, property, nullptr, 1, 1, "");
     ASSERT_EQ(res3, WSError::WS_OK);
+    ASSERT_EQ(false, session_->GetSessionProperty()->GetIsNeedUpdateWindowMode());
 }
 
 /**
@@ -332,7 +329,7 @@ HWTEST_F(WindowSessionTest, LifeCycleTask, TestSize.Level1)
     session_->PostLifeCycleTask(task2, "task2", LifeCycleTaskType::START);
     ASSERT_EQ(session_->lifeCycleTaskQueue_.size(), 2);
 
-    LifeCycleTaskType taskType = LifeCycleTaskType{0};
+    LifeCycleTaskType taskType = LifeCycleTaskType{ 0 };
 
     session_->RemoveLifeCycleTask(taskType);
     ASSERT_EQ(session_->lifeCycleTaskQueue_.size(), 1);
@@ -364,7 +361,7 @@ HWTEST_F(WindowSessionTest, SetSessionProperty01, TestSize.Level1)
 HWTEST_F(WindowSessionTest, SetSessionRect, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
-    WSRect rect = { 0, 0, 320, 240}; // width: 320, height: 240
+    WSRect rect = { 0, 0, 320, 240 }; // width: 320, height: 240
     session_->SetSessionRect(rect);
     ASSERT_EQ(rect, session_->winRect_);
 }
@@ -377,7 +374,7 @@ HWTEST_F(WindowSessionTest, SetSessionRect, TestSize.Level1)
 HWTEST_F(WindowSessionTest, GetSessionRect, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
-    WSRect rect = { 0, 0, 320, 240}; // width: 320, height: 240
+    WSRect rect = { 0, 0, 320, 240 }; // width: 320, height: 240
     session_->SetSessionRect(rect);
     ASSERT_EQ(rect, session_->GetSessionRect());
 }
@@ -407,7 +404,7 @@ HWTEST_F(WindowSessionTest, GetGlobalScaledRect, TestSize.Level1)
     SessionInfo info;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     Rect globalScaledRect;
-    sceneSession->globalRect_ = {100, 100, 50, 40};
+    sceneSession->globalRect_ = { 100, 100, 50, 40 };
     sceneSession->isScbCoreEnabled_ = true;
     sceneSession->scaleX_ = 0.5f;
     sceneSession->scaleY_ = 0.5f;
@@ -472,8 +469,9 @@ HWTEST_F(WindowSessionTest, OnSessionEvent01, TestSize.Level1)
     ASSERT_EQ(result, WSError::WS_OK);
 
     int resultValue = 0;
-    NotifySessionEventFunc onSessionEvent_ = [&resultValue](int32_t eventId, SessionEventParam param)
-    { resultValue = 1; };
+    NotifySessionEventFunc onSessionEvent_ = [&resultValue](int32_t eventId, SessionEventParam param) {
+        resultValue = 1;
+    };
     sceneSession->onSessionEvent_ = onSessionEvent_;
     result = sceneSession->OnSessionEvent(SessionEvent::EVENT_MINIMIZE);
     ASSERT_EQ(result, WSError::WS_OK);
@@ -608,8 +606,8 @@ HWTEST_F(WindowSessionTest, ConsumeDragEvent01, TestSize.Level1)
 
     std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
     sptr<WindowSessionProperty> property = nullptr;
-    auto result = sceneSession->moveDragController_->ConsumeDragEvent(pointerEvent, originalRect, property,
-        sessionConfig);
+    auto result =
+        sceneSession->moveDragController_->ConsumeDragEvent(pointerEvent, originalRect, property, sessionConfig);
     ASSERT_EQ(result, false);
 
     pointerEvent = MMI::PointerEvent::Create();
@@ -669,8 +667,8 @@ HWTEST_F(WindowSessionTest, ConsumeDragEvent02, TestSize.Level1)
     pointerItem.SetDisplayY(100);
     pointerItem.SetWindowX(0);
     pointerItem.SetWindowY(0);
-    auto result = sceneSession->moveDragController_->ConsumeDragEvent(pointerEvent, originalRect, property,
-        sessionConfig);
+    auto result =
+        sceneSession->moveDragController_->ConsumeDragEvent(pointerEvent, originalRect, property, sessionConfig);
     ASSERT_EQ(result, true);
 
     sceneSession->moveDragController_->aspectRatio_ = 0.0f;
@@ -732,8 +730,8 @@ HWTEST_F(WindowSessionTest, ConsumeDragEvent03, TestSize.Level1)
     // LEFT_TOP
     pointerItem.SetWindowX(0);
     pointerItem.SetWindowY(0);
-    auto result = sceneSession->moveDragController_->ConsumeDragEvent(pointerEvent, originalRect, property,
-        sessionConfig);
+    auto result =
+        sceneSession->moveDragController_->ConsumeDragEvent(pointerEvent, originalRect, property, sessionConfig);
     ASSERT_EQ(result, true);
 
     // RIGHT_TOP
@@ -793,8 +791,8 @@ HWTEST_F(WindowSessionTest, ConsumeDragEvent04, TestSize.Level1)
     // LEFT
     pointerItem.SetWindowX(0);
     pointerItem.SetWindowY(500);
-    auto result = sceneSession->moveDragController_->ConsumeDragEvent(pointerEvent, originalRect, property,
-        sessionConfig);
+    auto result =
+        sceneSession->moveDragController_->ConsumeDragEvent(pointerEvent, originalRect, property, sessionConfig);
     ASSERT_EQ(result, true);
 
     // TOP
@@ -853,6 +851,33 @@ HWTEST_F(WindowSessionTest, SetFocusable, TestSize.Level1)
     session_->state_ = SessionState::STATE_DISCONNECT;
     ASSERT_EQ(WSError::WS_OK, session_->SetFocusable(false));
     ASSERT_EQ(session_->GetFocusable(), false);
+}
+
+/**
+ * @tc.name: Snapshot
+ * @tc.desc: Snapshot Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, Snapshot, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    int32_t persistentId = 1999;
+    std::string bundleName = "test";
+    session_->scenePersistence_ = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
+    ASSERT_NE(session_->scenePersistence_, nullptr);
+    struct RSSurfaceNodeConfig config;
+    session_->surfaceNode_ = RSSurfaceNode::Create(config);
+    ASSERT_NE(session_->surfaceNode_, nullptr);
+    EXPECT_EQ(nullptr, session_->Snapshot(false, 0.0f));
+
+    session_->bufferAvailable_ = true;
+    EXPECT_EQ(nullptr, session_->Snapshot(false, 0.0f));
+
+    session_->surfaceNode_->bufferAvailable_ = true;
+    EXPECT_EQ(nullptr, session_->Snapshot(false, 0.0f));
+
+    session_->surfaceNode_ = nullptr;
+    EXPECT_EQ(nullptr, session_->Snapshot(false, 0.0f));
 }
 
 /**
@@ -1251,6 +1276,24 @@ HWTEST_F(WindowSessionTest, NotifyScreenshot, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyScreenshotAppEvent
+ * @tc.desc: NotifyScreenshotAppEvent Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, NotifyScreenshotAppEvent, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    ScreenshotEventType type = ScreenshotEventType::SCROLL_SHOT_START;
+    session_->sessionStage_ = nullptr;
+    auto ret = session_->NotifyScreenshotAppEvent(type);
+    EXPECT_EQ(ret, WSError::WS_ERROR_NULLPTR);
+
+    session_->sessionStage_ = mockSessionStage_;
+    ret = session_->NotifyScreenshotAppEvent(type);
+    EXPECT_EQ(ret, WSError::WS_OK);
+}
+
+/**
  * @tc.name: TransferBackPressedEventForConsumed02
  * @tc.desc: windowEventChannel_ is not nullptr
  * @tc.type: FUNC
@@ -1325,7 +1368,7 @@ HWTEST_F(WindowSessionTest, CreateDetectStateTask002, TestSize.Level1)
 {
     session_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     std::string taskName = "wms:WindowStateDetect" + std::to_string(session_->persistentId_);
-    auto task = [](){};
+    auto task = []() {};
     int64_t delayTime = 3000;
     session_->handler_->PostTask(task, taskName, delayTime);
     int32_t beforeTaskNum = GetTaskCount();
@@ -1450,23 +1493,6 @@ HWTEST_F(WindowSessionTest, TransferKeyEventForConsumed03, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetCompatibleModeInPc
- * @tc.desc: SetCompatibleModeInPc test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, SetCompatibleModeInPc, TestSize.Level1)
-{
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
-    bool enable = true;
-    bool isSupportDragInPcCompatibleMode = true;
-    property->SetCompatibleModeInPc(enable);
-    ASSERT_EQ(property->GetCompatibleModeInPc(), true);
-    property->SetIsSupportDragInPcCompatibleMode(isSupportDragInPcCompatibleMode);
-    ASSERT_EQ(property->GetIsSupportDragInPcCompatibleMode(), true);
-}
-
-/**
  * @tc.name: UpdateMaximizeMode
  * @tc.desc: UpdateMaximizeMode test
  * @tc.type: FUNC
@@ -1520,13 +1546,35 @@ HWTEST_F(WindowSessionTest, SwitchFreeMultiWindow, TestSize.Level1)
 
     session_->sessionInfo_.isSystem_ = false;
     session_->state_ = SessionState::STATE_FOREGROUND;
-    auto ret = session_->SwitchFreeMultiWindow(true);
+    SystemSessionConfig sessionConfig;
+    sessionConfig.freeMultiWindowEnable_ = true;
+    sessionConfig.defaultWindowMode_ = WindowMode::WINDOW_MODE_FLOATING;
+    auto ret = session_->SwitchFreeMultiWindow(sessionConfig);
     ASSERT_NE(ret, WSError::WS_ERROR_INVALID_SESSION);
 
     session_->sessionInfo_.isSystem_ = true;
-    ret = session_->SwitchFreeMultiWindow(true);
+    ret = session_->SwitchFreeMultiWindow(sessionConfig);
     ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_SESSION);
 }
+
+/**
+ * @tc.name: InitSessionPropertyWhenConnect
+ * @tc.desc: InitSessionPropertyWhenConnect test
+ * @tc.type: FUNC
+ */
+ HWTEST_F(WindowSessionTest, InitSessionPropertyWhenConnect, TestSize.Level1)
+ {
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    property->isSystemCalling_ = false;
+    session_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    session_->InitSessionPropertyWhenConnect(property);
+    ASSERT_EQ(true, property->dragEnabled_);
+
+    session_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    session_->InitSessionPropertyWhenConnect(property);
+    ASSERT_EQ(false, property->dragEnabled_);
+ }
 
 /**
  * @tc.name: SetTouchHotAreas
@@ -1578,7 +1626,7 @@ HWTEST_F(WindowSessionTest, ProcessBackEvent, TestSize.Level1)
  */
 HWTEST_F(WindowSessionTest, GetAndSetSessionRequestRect, TestSize.Level1)
 {
-    WSRect rect = {0, 0, 0, 0};
+    WSRect rect = { 0, 0, 0, 0 };
     session_->SetSessionRequestRect(rect);
     ASSERT_EQ(session_->GetSessionRequestRect(), rect);
 }
@@ -1606,14 +1654,14 @@ HWTEST_F(WindowSessionTest, UpdateClientRectPosYAndDisplayId02, TestSize.Level1)
     session_->sessionInfo_.screenId_ = 0;
     EXPECT_EQ(session_->GetScreenId(), 0);
     session_->GetSessionProperty()->SetIsSystemKeyboard(false);
-    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::UNKNOWN,
-        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
-    WSRect rect = {0, 0, 0, 0};
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(
+        0, SuperFoldStatus::UNKNOWN, { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
+    WSRect rect = { 0, 0, 0, 0 };
     session_->UpdateClientRectPosYAndDisplayId(rect);
     EXPECT_EQ(rect.posY_, 0);
-    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::FOLDED,
-        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
-    rect = {0, 100, 0, 0};
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(
+        0, SuperFoldStatus::FOLDED, { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
+    rect = { 0, 100, 0, 0 };
     session_->UpdateClientRectPosYAndDisplayId(rect);
     EXPECT_EQ(rect.posY_, 100);
 }
@@ -1629,9 +1677,9 @@ HWTEST_F(WindowSessionTest, UpdateClientRectPosYAndDisplayId03, TestSize.Level1)
     session_->sessionInfo_.screenId_ = 0;
     EXPECT_EQ(session_->GetScreenId(), 0);
     session_->GetSessionProperty()->SetIsSystemKeyboard(true);
-    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::HALF_FOLDED,
-        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1649, 2472, 40 });
-    WSRect rect = {0, 1000, 100, 100};
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(
+        0, SuperFoldStatus::HALF_FOLDED, { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1649, 2472, 40 });
+    WSRect rect = { 0, 1000, 100, 100 };
     session_->UpdateClientRectPosYAndDisplayId(rect);
     EXPECT_EQ(rect.posY_, 1000);
 }
@@ -1651,7 +1699,7 @@ HWTEST_F(WindowSessionTest, SetExclusivelyHighlighted, TestSize.Level1)
     isExclusivelyHighlighted = session_->GetSessionProperty()->GetExclusivelyHighlighted();
     ASSERT_EQ(isExclusivelyHighlighted, true);
 }
- 
+
 /**
  * @tc.name: UpdateHighlightStatus
  * @tc.desc: UpdateHighlightStatus Test
@@ -1661,12 +1709,12 @@ HWTEST_F(WindowSessionTest, UpdateHighlightStatus, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     EXPECT_EQ(session_->UpdateHighlightStatus(false, false), WSError::WS_DO_NOTHING);
- 
+
     EXPECT_EQ(session_->UpdateHighlightStatus(true, false), WSError::WS_OK);
     session_->isHighlighted_ = false;
     EXPECT_EQ(session_->UpdateHighlightStatus(true, true), WSError::WS_OK);
 }
- 
+
 /**
  * @tc.name: NotifyHighlightChange
  * @tc.desc: NotifyHighlightChange Test
@@ -1698,9 +1746,9 @@ HWTEST_F(WindowSessionTest, TransformRelativeRectToGlobalRect, TestSize.Level1)
     sessionInfo.bundleName_ = "bundleName";
     sessionInfo.abilityName_ = "abilityName";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::HALF_FOLDED,
-        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
-    WSRect rect { 0, 100, 100, 100 };
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(
+        0, SuperFoldStatus::HALF_FOLDED, { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
+    WSRect rect{ 0, 100, 100, 100 };
     sceneSession->globalRect_ = { 0, 0, 2472, 1648 };
     sceneSession->winRect_ = { 0, 0, 2472, 1648 };
     sceneSession->TransformRelativeRectToGlobalRect(rect);
@@ -1710,6 +1758,6 @@ HWTEST_F(WindowSessionTest, TransformRelativeRectToGlobalRect, TestSize.Level1)
     sceneSession->TransformRelativeRectToGlobalRect(rect);
     EXPECT_NE(rect.posY_, 100);
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

@@ -23,13 +23,13 @@
 
 #include <transaction/rs_transaction.h>
 #include "display_manager.h"
-#include "window_manager.h"
-#include "window_test_utils.h"
-#include "pointer_event.h"
 #include "key_event.h"
-#include "wm_common.h"
+#include "pointer_event.h"
+#include "window_manager.h"
 #include "window_scene_session_impl.h"
 #include "window_session_impl.h"
+#include "window_test_utils.h"
+#include "wm_common.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -37,7 +37,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowNoInteractionTest"};
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowNoInteractionTest" };
 }
 
 using Utils = WindowTestUtils;
@@ -53,12 +53,12 @@ public:
     void OnWindowNoInteractionCallback() override;
     void SetTimeout(int64_t timeout) override;
     int64_t GetTimeout() const override;
-    bool isCallbackCalled_ { false };
+    bool isCallbackCalled_{ false };
 
 private:
     std::mutex& mutex_;
     std::condition_variable& cv_;
-    int64_t timeout_ { 0 }; // ms
+    int64_t timeout_{ 0 }; // ms
 };
 
 void NoInteractionTesterListener::OnWindowNoInteractionCallback()
@@ -100,30 +100,23 @@ public:
     static void WaitForCallback(sptr<NoInteractionTesterListener>& listener);
 };
 
-void WindowNoInteractionTest::SetUpTestCase()
-{
-}
+void WindowNoInteractionTest::SetUpTestCase() {}
 
-void WindowNoInteractionTest::TearDownTestCase()
-{
-}
+void WindowNoInteractionTest::TearDownTestCase() {}
 
-void WindowNoInteractionTest::SetUp()
-{
-}
+void WindowNoInteractionTest::SetUp() {}
 
-void WindowNoInteractionTest::TearDown()
-{
-}
+void WindowNoInteractionTest::TearDown() {}
 
 void WindowNoInteractionTest::WaitForCallback(sptr<NoInteractionTesterListener>& listener)
 {
     std::unique_lock<std::mutex> lock(mutex_);
     if (listener->isCallbackCalled_ == false) {
         auto now = std::chrono::system_clock::now();
-        if (!cv_.wait_until(lock, now + std::chrono::milliseconds(NO_INTERACTION_LISTENER_TEST_WATCHER_TIMEOUT),
-            [&listener]() { return listener->isCallbackCalled_; })) {
-                WLOGI("wait_until time out");
+        if (!cv_.wait_until(lock,
+                            now + std::chrono::milliseconds(NO_INTERACTION_LISTENER_TEST_WATCHER_TIMEOUT),
+                            [&listener]() { return listener->isCallbackCalled_; })) {
+            WLOGI("wait_until time out");
         }
     }
 }
@@ -144,7 +137,7 @@ HWTEST_F(WindowNoInteractionTest, RegisterUnregisterNormal, TestSize.Level1)
     sptr<NoInteractionTesterListener> noInteractionTesterListener = new NoInteractionTesterListener(mutex_, cv_);
     WMError result = window->RegisterWindowNoInteractionListener(noInteractionTesterListener);
     ASSERT_EQ(WMError::WM_OK, result);
-    
+
     // unregister listener
     result = window->UnregisterWindowNoInteractionListener(noInteractionTesterListener);
     ASSERT_EQ(WMError::WM_OK, result);
@@ -208,7 +201,7 @@ HWTEST_F(WindowNoInteractionTest, KeyEventDownWindowShow, TestSize.Level1)
     WaitForCallback(noInteractionTesterListener);
     ASSERT_EQ(false, noInteractionTesterListener->isCallbackCalled_);
     ResetCallbackCalledFLag(noInteractionTesterListener);
-    
+
     // unregister listener
     result = window->UnregisterWindowNoInteractionListener(noInteractionTesterListener);
     ASSERT_EQ(WMError::WM_OK, result);
@@ -240,11 +233,11 @@ HWTEST_F(WindowNoInteractionTest, KeyEventDownWindowHide, TestSize.Level1)
         window->ConsumeKeyEvent(keyEvent);
     });
     t.detach();
-    
+
     WaitForCallback(noInteractionTesterListener);
     ASSERT_EQ(false, noInteractionTesterListener->isCallbackCalled_);
     ResetCallbackCalledFLag(noInteractionTesterListener);
-    
+
     result = window->UnregisterWindowNoInteractionListener(noInteractionTesterListener);
     ASSERT_EQ(WMError::WM_OK, result);
 }
@@ -275,11 +268,11 @@ HWTEST_F(WindowNoInteractionTest, KeyEventUpWindowShow, TestSize.Level1)
         window->ConsumeKeyEvent(keyEvent);
     });
     t.detach();
-    
+
     WaitForCallback(noInteractionTesterListener);
     ASSERT_EQ(false, noInteractionTesterListener->isCallbackCalled_);
     ResetCallbackCalledFLag(noInteractionTesterListener);
-    
+
     result = window->UnregisterWindowNoInteractionListener(noInteractionTesterListener);
     ASSERT_EQ(WMError::WM_OK, result);
 }
@@ -314,7 +307,7 @@ HWTEST_F(WindowNoInteractionTest, KeyEventUpWindowHide, TestSize.Level1)
     WaitForCallback(noInteractionTesterListener);
     ASSERT_EQ(false, noInteractionTesterListener->isCallbackCalled_);
     ResetCallbackCalledFLag(noInteractionTesterListener);
-    
+
     result = window->UnregisterWindowNoInteractionListener(noInteractionTesterListener);
     ASSERT_EQ(WMError::WM_OK, result);
 }
@@ -345,11 +338,11 @@ HWTEST_F(WindowNoInteractionTest, PointerEventDown, TestSize.Level1)
         window->ConsumePointerEvent(pointerEvent);
     });
     t.detach();
-    
+
     WaitForCallback(noInteractionTesterListener);
     ASSERT_EQ(false, noInteractionTesterListener->isCallbackCalled_);
     ResetCallbackCalledFLag(noInteractionTesterListener);
-    
+
     // unregister listener
     result = window->UnregisterWindowNoInteractionListener(noInteractionTesterListener);
     ASSERT_EQ(WMError::WM_OK, result);
@@ -384,7 +377,7 @@ HWTEST_F(WindowNoInteractionTest, PointerEventUp, TestSize.Level1)
     WaitForCallback(noInteractionTesterListener);
     ASSERT_EQ(false, noInteractionTesterListener->isCallbackCalled_);
     ResetCallbackCalledFLag(noInteractionTesterListener);
-    
+
     // unregister listener
     result = window->UnregisterWindowNoInteractionListener(noInteractionTesterListener);
     ASSERT_EQ(WMError::WM_OK, result);
@@ -408,13 +401,12 @@ HWTEST_F(WindowNoInteractionTest, NoInteraction, TestSize.Level1)
     WaitForCallback(noInteractionTesterListener);
     ASSERT_EQ(true, noInteractionTesterListener->isCallbackCalled_);
     ResetCallbackCalledFLag(noInteractionTesterListener);
-    
+
     // unregister listener
     result = window->UnregisterWindowNoInteractionListener(noInteractionTesterListener);
     ASSERT_EQ(WMError::WM_OK, result);
 }
 
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS
-

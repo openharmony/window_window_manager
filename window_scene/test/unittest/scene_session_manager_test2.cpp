@@ -27,6 +27,7 @@
 #include "window_manager_agent.h"
 #include "session_manager.h"
 #include "zidl/window_manager_agent_interface.h"
+#include "mock/mock_accesstoken_kit.h"
 #include "mock/mock_session_stage.h"
 #include "mock/mock_window_event_channel.h"
 #include "context.h"
@@ -44,7 +45,7 @@ using ConfigItem = WindowSceneConfig::ConfigItem;
 ConfigItem ReadConfig(const std::string& xmlStr)
 {
     ConfigItem config;
-    xmlDocPtr docPtr = xmlParseMemory(xmlStr.c_str(), xmlStr.length() + 1);
+    xmlDocPtr docPtr = xmlParseMemory(xmlStr.c_str(), xmlStr.length());
     if (docPtr == nullptr) {
         return config;
     }
@@ -62,7 +63,7 @@ ConfigItem ReadConfig(const std::string& xmlStr)
     xmlFreeDoc(docPtr);
     return config;
 }
-}
+} // namespace
 class SceneSessionManagerTest2 : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -81,18 +82,8 @@ private:
 sptr<SceneSessionManager> SceneSessionManagerTest2::ssm_ = nullptr;
 
 bool SceneSessionManagerTest2::gestureNavigationEnabled_ = true;
-ProcessGestureNavigationEnabledChangeFunc SceneSessionManagerTest2::callbackFunc_ = [](bool enable,
-    const std::string& bundleName, GestureBackType type) {
-    gestureNavigationEnabled_ = enable;
-};
-
-void WindowChangedFuncTest(int32_t persistentId, WindowUpdateType type)
-{
-}
-
-void ProcessStatusBarEnabledChangeFuncTest(bool enable)
-{
-}
+ProcessGestureNavigationEnabledChangeFunc SceneSessionManagerTest2::callbackFunc_ =
+    [](bool enable, const std::string& bundleName, GestureBackType type) { gestureNavigationEnabled_ = enable; };
 
 void SceneSessionManagerTest2::SetUpTestCase()
 {
@@ -111,6 +102,7 @@ void SceneSessionManagerTest2::SetUp()
 
 void SceneSessionManagerTest2::TearDown()
 {
+    MockAccesstokenKit::ChangeMockStateToInit();
     usleep(WAIT_SYNC_IN_NS);
     ssm_->sceneSessionMap_.clear();
 }
@@ -145,18 +137,53 @@ HWTEST_F(SceneSessionManagerTest2, SetGestureNavigationEnabled, TestSize.Level1)
 }
 
 /**
- * @tc.name: RegisterWindowManagerAgent
+ * @tc.name: RegisterWindowManagerAgent01
  * @tc.desc: SceneSesionManager rigister window manager agent
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest2, RegisterWindowManagerAgent, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest2, RegisterWindowManagerAgent01, TestSize.Level1)
 {
     sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
     WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
 
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ssm_->RegisterWindowManagerAgent(type, windowManagerAgent));
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ssm_->UnregisterWindowManagerAgent(
-        type, windowManagerAgent));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ssm_->UnregisterWindowManagerAgent(type, windowManagerAgent));
+}
+
+/**
+ * @tc.name: RegisterWindowManagerAgent02
+ * @tc.desc: SceneSesionManager rigister window manager agent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, RegisterWindowManagerAgent02, TestSize.Level1)
+{
+    sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
+    WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_PROPERTY;
+
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ssm_->RegisterWindowManagerAgent(type, windowManagerAgent));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ssm_->UnregisterWindowManagerAgent(type, windowManagerAgent));
+}
+
+/**
+ * @tc.name: RegisterWindowPropertyChangeAgent01
+ * @tc.desc: Register and unregister window property change agent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, RegisterWindowPropertyChangeAgent01, TestSize.Level1)
+{
+    sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
+    uint32_t interestInfo = static_cast<uint32_t>(WindowInfoKey::WINDOW_ID);
+    ssm_->observedFlags_ = 0;
+    ssm_->interestedFlags_ = 0;
+
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION,
+        ssm_->RegisterWindowPropertyChangeAgent(WindowInfoKey::DISPLAY_ID, interestInfo, windowManagerAgent));
+    EXPECT_EQ(ssm_->observedFlags_, static_cast<uint32_t>(WindowInfoKey::DISPLAY_ID));
+    EXPECT_EQ(ssm_->interestedFlags_, static_cast<uint32_t>(WindowInfoKey::WINDOW_ID));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION,
+        ssm_->UnregisterWindowPropertyChangeAgent(WindowInfoKey::DISPLAY_ID, interestInfo, windowManagerAgent));
+    EXPECT_EQ(0, ssm_->observedFlags_);
+    EXPECT_EQ(0, ssm_->interestedFlags_);
 }
 
 /**
@@ -166,7 +193,8 @@ HWTEST_F(SceneSessionManagerTest2, RegisterWindowManagerAgent, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest2, ConfigWindowSizeLimits01, TestSize.Level1)
 {
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<mainWindowSizeLimits>"
         "<miniWidth>10</miniWidth>"
@@ -192,37 +220,38 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowSizeLimits01, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest2, ConfigWindowEffect01, TestSize.Level1)
 {
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
-            "<windowEffect>"
-                "<appWindows>"
-                    "<cornerRadius>"
-                        "<fullScreen>off</fullScreen>"
-                        "<split>off</split>"
-                        "<float>off</float>"
-                    "</cornerRadius>"
-                    "<shadow>"
-                        "<focused>"
-                            "<elevation>0</elevation>"
-                            "<color>#000000</color>"
-                            "<offsetX>1</offsetX>"
-                            "<offsetY>1</offsetY>"
-                            "<alpha>0</alpha>"
-                            "<radius>0.5</radius>"
-                        "</focused>"
-                    "</shadow>"
-                    "<shadowDark>"
-                        "<focused>"
-                            "<elevation>0</elevation>"
-                            "<color>#111111</color>"
-                            "<offsetX>2</offsetX>"
-                            "<offsetY>2</offsetY>"
-                            "<alpha>1</alpha>"
-                            "<radius>1</radius>"
-                        "</focused>"
-                    "</shadowDark>"
-                "</appWindows>"
-            "</windowEffect>"
+        "<windowEffect>"
+        "<appWindows>"
+        "<cornerRadius>"
+        "<fullScreen>off</fullScreen>"
+        "<split>off</split>"
+        "<float>off</float>"
+        "</cornerRadius>"
+        "<shadow>"
+        "<focused>"
+        "<elevation>0</elevation>"
+        "<color>#000000</color>"
+        "<offsetX>1</offsetX>"
+        "<offsetY>1</offsetY>"
+        "<alpha>0</alpha>"
+        "<radius>0.5</radius>"
+        "</focused>"
+        "</shadow>"
+        "<shadowDark>"
+        "<focused>"
+        "<elevation>0</elevation>"
+        "<color>#111111</color>"
+        "<offsetX>2</offsetX>"
+        "<offsetY>2</offsetY>"
+        "<alpha>1</alpha>"
+        "<radius>1</radius>"
+        "</focused>"
+        "</shadowDark>"
+        "</appWindows>"
+        "</windowEffect>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
@@ -244,25 +273,26 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowEffect01, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest2, ConfigWindowEffect02, TestSize.Level1)
 {
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
-            "<windowEffect>"
-                "<appWindows>"
-                    "<cornerRadius>"
-                        "<fullScreen>off</fullScreen>"
-                        "<split>off</split>"
-                    "</cornerRadius>"
-                    "<shadow>"
-                        "<focused>"
-                            "<elevation>0</elevation>"
-                            "<alpha>0</alpha>"
-                        "</focused>"
-                        "<unfocused>"
-                            "<elevation>0</elevation>"
-                        "</unfocused>"
-                    "</shadow>"
-                "</appWindows>"
-            "</windowEffect>"
+        "<windowEffect>"
+        "<appWindows>"
+        "<cornerRadius>"
+        "<fullScreen>off</fullScreen>"
+        "<split>off</split>"
+        "</cornerRadius>"
+        "<shadow>"
+        "<focused>"
+        "<elevation>0</elevation>"
+        "<alpha>0</alpha>"
+        "</focused>"
+        "<unfocused>"
+        "<elevation>0</elevation>"
+        "</unfocused>"
+        "</shadow>"
+        "</appWindows>"
+        "</windowEffect>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
@@ -276,32 +306,33 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowEffect02, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest2, ConfigWindowEffect03, TestSize.Level1)
 {
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
-            "<windowEffect>"
-                "<appWindows>"
-                    "<shadow>"
-                        "<unfocused>"
-                            "<elevation>0</elevation>"
-                            "<color>#000000</color>"
-                            "<offsetX>1</offsetX>"
-                            "<offsetY>1</offsetY>"
-                            "<alpha>0</alpha>"
-                            "<radius>0.5</radius>"
-                        "</unfocused>"
-                    "</shadow>"
-                    "<shadowDark>"
-                        "<unfocused>"
-                            "<elevation>0</elevation>"
-                            "<color>#111111</color>"
-                            "<offsetX>2</offsetX>"
-                            "<offsetY>2</offsetY>"
-                            "<alpha>1</alpha>"
-                            "<radius>1</radius>"
-                        "</unfocused>"
-                    "</shadowDark>"
-                "</appWindows>"
-            "</windowEffect>"
+        "<windowEffect>"
+        "<appWindows>"
+        "<shadow>"
+        "<unfocused>"
+        "<elevation>0</elevation>"
+        "<color>#000000</color>"
+        "<offsetX>1</offsetX>"
+        "<offsetY>1</offsetY>"
+        "<alpha>0</alpha>"
+        "<radius>0.5</radius>"
+        "</unfocused>"
+        "</shadow>"
+        "<shadowDark>"
+        "<unfocused>"
+        "<elevation>0</elevation>"
+        "<color>#111111</color>"
+        "<offsetX>2</offsetX>"
+        "<offsetY>2</offsetY>"
+        "<alpha>1</alpha>"
+        "<radius>1</radius>"
+        "</unfocused>"
+        "</shadowDark>"
+        "</appWindows>"
+        "</windowEffect>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
@@ -323,35 +354,36 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowEffect03, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest2, ConfigWindowEffect04, TestSize.Level1)
 {
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
-            "<windowEffect>"
-                "<appWindows>"
-                    "<cornerRadius>"
-                        "<fullScreen>off</fullScreen>"
-                        "<split>off</split>"
-                        "<float>off</float>"
-                    "</cornerRadius>"
-                    "<shadow>"
-                        "<focused>"
-                            "<elevation>0</elevation>"
-                            "<color>#000000</color>"
-                            "<offsetX>1</offsetX>"
-                            "<offsetY>1</offsetY>"
-                            "<alpha>0</alpha>"
-                            "<radius>0.5</radius>"
-                        "</focused>"
-                        "<unfocused>"
-                            "<elevation>0</elevation>"
-                            "<color>#000000</color>"
-                            "<offsetX>1</offsetX>"
-                            "<offsetY>1</offsetY>"
-                            "<alpha>0</alpha>"
-                            "<radius>0.5</radius>"
-                        "</unfocused>"
-                    "</shadow>"
-                "</appWindows>"
-            "</windowEffect>"
+        "<windowEffect>"
+        "<appWindows>"
+        "<cornerRadius>"
+        "<fullScreen>off</fullScreen>"
+        "<split>off</split>"
+        "<float>off</float>"
+        "</cornerRadius>"
+        "<shadow>"
+        "<focused>"
+        "<elevation>0</elevation>"
+        "<color>#000000</color>"
+        "<offsetX>1</offsetX>"
+        "<offsetY>1</offsetY>"
+        "<alpha>0</alpha>"
+        "<radius>0.5</radius>"
+        "</focused>"
+        "<unfocused>"
+        "<elevation>0</elevation>"
+        "<color>#000000</color>"
+        "<offsetX>1</offsetX>"
+        "<offsetY>1</offsetY>"
+        "<alpha>0</alpha>"
+        "<radius>0.5</radius>"
+        "</unfocused>"
+        "</shadow>"
+        "</appWindows>"
+        "</windowEffect>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
@@ -372,27 +404,28 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowEffect04, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest2, ConfigWindowEffect05, TestSize.Level1)
 {
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
-            "<windowEffect>"
-                "<appWindows>"
-                    "<shadow>"
-                        "<focused>"
-                            "<elevation>0</elevation>"
-                            "<offsetX>1</offsetX>"
-                            "<offsetX>2</offsetX>"
-                        "</focused>"
-                        "<unfocused>"
-                            "<elevation>0</elevation>"
-                            "<color>#000000</color>"
-                            "<offsetX>1</offsetX>"
-                            "<offsetY>1</offsetY>"
-                            "<alpha>0</alpha>"
-                            "<radius>0.5</radius>"
-                        "</unfocused>"
-                    "</shadow>"
-                "</appWindows>"
-            "</windowEffect>"
+        "<windowEffect>"
+        "<appWindows>"
+        "<shadow>"
+        "<focused>"
+        "<elevation>0</elevation>"
+        "<offsetX>1</offsetX>"
+        "<offsetX>2</offsetX>"
+        "</focused>"
+        "<unfocused>"
+        "<elevation>0</elevation>"
+        "<color>#000000</color>"
+        "<offsetX>1</offsetX>"
+        "<offsetY>1</offsetY>"
+        "<alpha>0</alpha>"
+        "<radius>0.5</radius>"
+        "</unfocused>"
+        "</shadow>"
+        "</appWindows>"
+        "</windowEffect>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
@@ -409,27 +442,28 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowEffect05, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest2, ConfigWindowEffect06, TestSize.Level1)
 {
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
-            "<windowEffect>"
-                "<appWindows>"
-                    "<shadow>"
-                        "<focused>"
-                            "<elevation>0</elevation>"
-                            "<offsetY>1</offsetY>"
-                            "<offsetY>2</offsetY>"
-                        "</focused>"
-                        "<unfocused>"
-                            "<elevation>0</elevation>"
-                            "<color>#000000</color>"
-                            "<offsetX>1</offsetX>"
-                            "<offsetY>1</offsetY>"
-                            "<alpha>0</alpha>"
-                            "<radius>0.5</radius>"
-                        "</unfocused>"
-                    "</shadow>"
-                "</appWindows>"
-            "</windowEffect>"
+        "<windowEffect>"
+        "<appWindows>"
+        "<shadow>"
+        "<focused>"
+        "<elevation>0</elevation>"
+        "<offsetY>1</offsetY>"
+        "<offsetY>2</offsetY>"
+        "</focused>"
+        "<unfocused>"
+        "<elevation>0</elevation>"
+        "<color>#000000</color>"
+        "<offsetX>1</offsetX>"
+        "<offsetY>1</offsetY>"
+        "<alpha>0</alpha>"
+        "<radius>0.5</radius>"
+        "</unfocused>"
+        "</shadow>"
+        "</appWindows>"
+        "</windowEffect>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
@@ -446,27 +480,28 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowEffect06, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest2, ConfigWindowEffect07, TestSize.Level1)
 {
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
-            "<windowEffect>"
-                "<appWindows>"
-                    "<shadow>"
-                        "<focused>"
-                            "<elevation>0</elevation>"
-                            "<alpha>1</alpha>"
-                            "<alpha>2</alpha>"
-                        "</focused>"
-                        "<unfocused>"
-                            "<elevation>0</elevation>"
-                            "<color>#000000</color>"
-                            "<offsetX>1</offsetX>"
-                            "<offsetY>1</offsetY>"
-                            "<alpha>0</alpha>"
-                            "<radius>0.5</radius>"
-                        "</unfocused>"
-                    "</shadow>"
-                "</appWindows>"
-            "</windowEffect>"
+        "<windowEffect>"
+        "<appWindows>"
+        "<shadow>"
+        "<focused>"
+        "<elevation>0</elevation>"
+        "<alpha>1</alpha>"
+        "<alpha>2</alpha>"
+        "</focused>"
+        "<unfocused>"
+        "<elevation>0</elevation>"
+        "<color>#000000</color>"
+        "<offsetX>1</offsetX>"
+        "<offsetY>1</offsetY>"
+        "<alpha>0</alpha>"
+        "<radius>0.5</radius>"
+        "</unfocused>"
+        "</shadow>"
+        "</appWindows>"
+        "</windowEffect>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
@@ -483,27 +518,28 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowEffect07, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest2, ConfigWindowEffect08, TestSize.Level1)
 {
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
-            "<windowEffect>"
-                "<appWindows>"
-                    "<shadow>"
-                        "<focused>"
-                            "<elevation>0</elevation>"
-                            "<radius>1</radius>"
-                            "<radius>2</radius>"
-                        "</focused>"
-                        "<unfocused>"
-                            "<elevation>0</elevation>"
-                            "<color>#000000</color>"
-                            "<offsetX>1</offsetX>"
-                            "<offsetY>1</offsetY>"
-                            "<alpha>0</alpha>"
-                            "<radius>0.5</radius>"
-                        "</unfocused>"
-                    "</shadow>"
-                "</appWindows>"
-            "</windowEffect>"
+        "<windowEffect>"
+        "<appWindows>"
+        "<shadow>"
+        "<focused>"
+        "<elevation>0</elevation>"
+        "<radius>1</radius>"
+        "<radius>2</radius>"
+        "</focused>"
+        "<unfocused>"
+        "<elevation>0</elevation>"
+        "<color>#000000</color>"
+        "<offsetX>1</offsetX>"
+        "<offsetY>1</offsetY>"
+        "<alpha>0</alpha>"
+        "<radius>0.5</radius>"
+        "</unfocused>"
+        "</shadow>"
+        "</appWindows>"
+        "</windowEffect>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
@@ -520,7 +556,8 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowEffect08, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest2, ConfigDecor01, TestSize.Level1)
 {
-    std::string xmlStr1 = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr1 =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<decor enable=\"111\">"
         "<supportedMode>fullscreen</supportedMode>"
@@ -529,7 +566,8 @@ HWTEST_F(SceneSessionManagerTest2, ConfigDecor01, TestSize.Level1)
     WindowSceneConfig::config_ = ReadConfig(xmlStr1);
     ssm_->ConfigWindowSceneXml();
 
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<decor enable=\"true\">"
         "<supportedMode>fullscreen</supportedMode>"
@@ -538,7 +576,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigDecor01, TestSize.Level1)
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
     ASSERT_EQ(ssm_->systemConfig_.decorWindowModeSupportType_,
-        static_cast<uint32_t>(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN));
+              static_cast<uint32_t>(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN));
 }
 
 /**
@@ -548,15 +586,15 @@ HWTEST_F(SceneSessionManagerTest2, ConfigDecor01, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest2, ConfigDecor02, TestSize.Level1)
 {
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<decor enable=\"true\">"
         "</decor>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
-    ASSERT_EQ(ssm_->systemConfig_.decorWindowModeSupportType_,
-        WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN);
+    ASSERT_EQ(ssm_->systemConfig_.decorWindowModeSupportType_, WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN);
 }
 
 /**
@@ -566,7 +604,8 @@ HWTEST_F(SceneSessionManagerTest2, ConfigDecor02, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest2, ConfigDecor03, TestSize.Level1)
 {
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<decor enable=\"true\">"
         "<supportedMode>floating</supportedMode>"
@@ -574,8 +613,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigDecor03, TestSize.Level1)
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
-    ASSERT_EQ(ssm_->systemConfig_.decorWindowModeSupportType_,
-        WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING);
+    ASSERT_EQ(ssm_->systemConfig_.decorWindowModeSupportType_, WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING);
 }
 
 /**
@@ -585,7 +623,8 @@ HWTEST_F(SceneSessionManagerTest2, ConfigDecor03, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest2, ConfigDecor04, TestSize.Level1)
 {
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<decor enable=\"true\">"
         "<supportedMode>pip</supportedMode>"
@@ -593,8 +632,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigDecor04, TestSize.Level1)
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
-    ASSERT_EQ(ssm_->systemConfig_.decorWindowModeSupportType_,
-        WindowModeSupport::WINDOW_MODE_SUPPORT_PIP);
+    ASSERT_EQ(ssm_->systemConfig_.decorWindowModeSupportType_, WindowModeSupport::WINDOW_MODE_SUPPORT_PIP);
 }
 
 /**
@@ -604,7 +642,8 @@ HWTEST_F(SceneSessionManagerTest2, ConfigDecor04, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest2, ConfigDecor05, TestSize.Level1)
 {
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<decor enable=\"true\">"
         "<supportedMode>split</supportedMode>"
@@ -613,8 +652,8 @@ HWTEST_F(SceneSessionManagerTest2, ConfigDecor05, TestSize.Level1)
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
     ASSERT_EQ(ssm_->systemConfig_.decorWindowModeSupportType_,
-        WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
-        WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY);
+              WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
+                  WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY);
 }
 
 /**
@@ -624,7 +663,8 @@ HWTEST_F(SceneSessionManagerTest2, ConfigDecor05, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest2, ConfigDecor06, TestSize.Level1)
 {
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<decor enable=\"true\">"
         "<supportedMode>111</supportedMode>"
@@ -632,8 +672,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigDecor06, TestSize.Level1)
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
-    ASSERT_EQ(ssm_->systemConfig_.decorWindowModeSupportType_,
-        WINDOW_MODE_SUPPORT_ALL);
+    ASSERT_EQ(ssm_->systemConfig_.decorWindowModeSupportType_, WINDOW_MODE_SUPPORT_ALL);
 }
 
 /**
@@ -643,21 +682,22 @@ HWTEST_F(SceneSessionManagerTest2, ConfigDecor06, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest2, ConfigWindowSceneXml01, TestSize.Level1)
 {
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<defaultWindowMode>10</defaultWindowMode>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
 
-    std::string xmlStr1 = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr1 =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<defaultWindowMode>102</defaultWindowMode>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr1);
     ssm_->ConfigWindowSceneXml();
-    ASSERT_EQ(ssm_->systemConfig_.defaultWindowMode_,
-        static_cast<WindowMode>(static_cast<uint32_t>(102)));
+    ASSERT_EQ(ssm_->systemConfig_.defaultWindowMode_, static_cast<WindowMode>(static_cast<uint32_t>(102)));
 }
 
 /**
@@ -667,7 +707,8 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowSceneXml01, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest2, ConfigWindowSceneXml02, TestSize.Level1)
 {
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<defaultWindowMode>1 1</defaultWindowMode>"
         "<uiType>phone</uiType>"
@@ -678,14 +719,14 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowSceneXml02, TestSize.Level1)
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
 
-    std::string xmlStr1 = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr1 =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<defaultWindowMode>1</defaultWindowMode>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr1);
     ssm_->ConfigWindowSceneXml();
-    ASSERT_EQ(ssm_->systemConfig_.defaultWindowMode_,
-        static_cast<WindowMode>(static_cast<uint32_t>(1)));
+    ASSERT_EQ(ssm_->systemConfig_.defaultWindowMode_, static_cast<WindowMode>(static_cast<uint32_t>(1)));
 }
 
 /**
@@ -695,21 +736,22 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowSceneXml02, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest2, ConfigWindowSceneXml03, TestSize.Level1)
 {
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<defaultMaximizeMode>1 1</defaultMaximizeMode>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
 
-    std::string xmlStr1 = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr1 =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<defaultMaximizeMode>1</defaultMaximizeMode>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr1);
     ssm_->ConfigWindowSceneXml();
-    ASSERT_EQ(SceneSession::maximizeMode_,
-        static_cast<MaximizeMode>(static_cast<uint32_t>(1)));
+    ASSERT_EQ(SceneSession::maximizeMode_, static_cast<MaximizeMode>(static_cast<uint32_t>(1)));
 }
 
 /**
@@ -719,21 +761,22 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowSceneXml03, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest2, ConfigWindowSceneXml04, TestSize.Level1)
 {
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<defaultMaximizeMode>111</defaultMaximizeMode>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
 
-    std::string xmlStr1 = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr1 =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<defaultMaximizeMode>0</defaultMaximizeMode>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr1);
     ssm_->ConfigWindowSceneXml();
-    ASSERT_EQ(SceneSession::maximizeMode_,
-        static_cast<MaximizeMode>(static_cast<uint32_t>(0)));
+    ASSERT_EQ(SceneSession::maximizeMode_, static_cast<MaximizeMode>(static_cast<uint32_t>(0)));
 }
 
 /**
@@ -743,21 +786,22 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowSceneXml04, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest2, ConfigWindowSceneXml05, TestSize.Level1)
 {
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<maxFloatingWindowSize>1</maxFloatingWindowSize>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
 
-    std::string xmlStr1 = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr1 =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<maxFloatingWindowSize>1</maxFloatingWindowSize>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr1);
     ssm_->ConfigWindowSceneXml();
-    ASSERT_EQ(ssm_->systemConfig_.maxFloatingWindowSize_,
-        static_cast<uint32_t>(1));
+    ASSERT_EQ(ssm_->systemConfig_.maxFloatingWindowSize_, static_cast<uint32_t>(1));
 }
 
 /**
@@ -767,7 +811,8 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowSceneXml05, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest2, ConfigWindowSceneXml07, TestSize.Level1)
 {
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<backgroundScreenLock enable=\"true\"></backgroundScreenLock>"
         "</Configs>";
@@ -783,7 +828,8 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowSceneXml07, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest2, ConfigWindowSceneXml08, TestSize.Level1)
 {
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<rotationMode>rotation</rotationMode>"
         "</Configs>";
@@ -799,18 +845,19 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowSceneXml08, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest2, ConfigWindowAnimation01, TestSize.Level1)
 {
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
-            "<windowAnimation>"
-                "<timing>"
-                    "<duration>350</duration>"
-                    "<curve name=\"easeOut\"></curve>"
-                "</timing>"
-                "<scale>0.7 0.7</scale>"
-                "<rotation>0 0 1 0</rotation>"
-                "<translate>0 0</translate>"
-                "<opacity>0</opacity>"
-            "</windowAnimation>"
+        "<windowAnimation>"
+        "<timing>"
+        "<duration>350</duration>"
+        "<curve name=\"easeOut\"></curve>"
+        "</timing>"
+        "<scale>0.7 0.7</scale>"
+        "<rotation>0 0 1 0</rotation>"
+        "<translate>0 0</translate>"
+        "<opacity>0</opacity>"
+        "</windowAnimation>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
@@ -833,14 +880,15 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowAnimation01, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest2, ConfigWindowAnimation02, TestSize.Level1)
 {
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
-            "<windowAnimation>"
-                "<timing>"
-                    "<duration>350</duration>"
-                    "<curve name=\"easeOut\"></curve>"
-                "</timing>"
-            "</windowAnimation>"
+        "<windowAnimation>"
+        "<timing>"
+        "<duration>350</duration>"
+        "<curve name=\"easeOut\"></curve>"
+        "</timing>"
+        "</windowAnimation>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
@@ -854,16 +902,17 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowAnimation02, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest2, ConfigWindowAnimation03, TestSize.Level1)
 {
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
-            "<windowAnimation>"
-                "<timing>"
-                "</timing>"
-                "<scale>0.7 0.7</scale>"
-                "<rotation>0 0 1 0</rotation>"
-                "<translate>0 0</translate>"
-                "<opacity>0</opacity>"
-            "</windowAnimation>"
+        "<windowAnimation>"
+        "<timing>"
+        "</timing>"
+        "<scale>0.7 0.7</scale>"
+        "<rotation>0 0 1 0</rotation>"
+        "<translate>0 0</translate>"
+        "<opacity>0</opacity>"
+        "</windowAnimation>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
@@ -885,18 +934,19 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowAnimation03, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest2, ConfigWindowAnimation04, TestSize.Level1)
 {
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
-            "<windowAnimation>"
-                "<timing>"
-                    "<duration>aaa</duration>"
-                    "<curve></curve>"
-                "</timing>"
-                "<scale>0.7 0.7</scale>"
-                "<rotation>0 0 1 0</rotation>"
-                "<translate>0 0</translate>"
-                "<opacity>0</opacity>"
-            "</windowAnimation>"
+        "<windowAnimation>"
+        "<timing>"
+        "<duration>aaa</duration>"
+        "<curve></curve>"
+        "</timing>"
+        "<scale>0.7 0.7</scale>"
+        "<rotation>0 0 1 0</rotation>"
+        "<translate>0 0</translate>"
+        "<opacity>0</opacity>"
+        "</windowAnimation>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
@@ -918,18 +968,19 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowAnimation04, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest2, ConfigWindowAnimation05, TestSize.Level1)
 {
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
-            "<windowAnimation>"
-                "<timing>"
-                    "<duration>350 350</duration>"
-                    "<curve></curve>"
-                "</timing>"
-                "<scale>0.7 0.7</scale>"
-                "<rotation>0 0 1 0</rotation>"
-                "<translate>0 0</translate>"
-                "<opacity>0</opacity>"
-            "</windowAnimation>"
+        "<windowAnimation>"
+        "<timing>"
+        "<duration>350 350</duration>"
+        "<curve></curve>"
+        "</timing>"
+        "<scale>0.7 0.7</scale>"
+        "<rotation>0 0 1 0</rotation>"
+        "<translate>0 0</translate>"
+        "<opacity>0</opacity>"
+        "</windowAnimation>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
@@ -951,18 +1002,19 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowAnimation05, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest2, ConfigWindowAnimation06, TestSize.Level1)
 {
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
-            "<windowAnimation>"
-                "<timing>"
-                    "<duration>350</duration>"
-                    "<curve name=\"easeOut\"></curve>"
-                "</timing>"
-                "<scale>a a</scale>"
-                "<rotation>a a a a</rotation>"
-                "<translate>a a</translate>"
-                "<opacity>a</opacity>"
-            "</windowAnimation>"
+        "<windowAnimation>"
+        "<timing>"
+        "<duration>350</duration>"
+        "<curve name=\"easeOut\"></curve>"
+        "</timing>"
+        "<scale>a a</scale>"
+        "<rotation>a a a a</rotation>"
+        "<translate>a a</translate>"
+        "<opacity>a</opacity>"
+        "</windowAnimation>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
@@ -976,18 +1028,19 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowAnimation06, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest2, ConfigWindowAnimation07, TestSize.Level1)
 {
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
-            "<windowAnimation>"
-                "<timing>"
-                    "<duration>350</duration>"
-                    "<curve name=\"easeOut\"></curve>"
-                "</timing>"
-                "<scale>0.7 0.7 0.7</scale>"
-                "<rotation>0 0 1 0 1</rotation>"
-                "<translate>0 0 1</translate>"
-                "<opacity>0 1</opacity>"
-            "</windowAnimation>"
+        "<windowAnimation>"
+        "<timing>"
+        "<duration>350</duration>"
+        "<curve name=\"easeOut\"></curve>"
+        "</timing>"
+        "<scale>0.7 0.7 0.7</scale>"
+        "<rotation>0 0 1 0 1</rotation>"
+        "<translate>0 0 1</translate>"
+        "<opacity>0 1</opacity>"
+        "</windowAnimation>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
@@ -1001,16 +1054,17 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowAnimation07, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest2, ConfigStartingWindowAnimation01, TestSize.Level1)
 {
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
-            "<startWindowTransitionAnimation enable=\"false\">"
-                "<timing>"
-                    "<duration>200</duration>"
-                    "<curve name=\"linear\"></curve>"
-                "</timing>"
-                "<opacityStart>1</opacityStart>"
-                "<opacityEnd>0</opacityEnd>"
-            "</startWindowTransitionAnimation>"
+        "<startWindowTransitionAnimation enable=\"false\">"
+        "<timing>"
+        "<duration>200</duration>"
+        "<curve name=\"linear\"></curve>"
+        "</timing>"
+        "<opacityStart>1</opacityStart>"
+        "<opacityEnd>0</opacityEnd>"
+        "</startWindowTransitionAnimation>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
@@ -1027,16 +1081,17 @@ HWTEST_F(SceneSessionManagerTest2, ConfigStartingWindowAnimation01, TestSize.Lev
  */
 HWTEST_F(SceneSessionManagerTest2, ConfigStartingWindowAnimation02, TestSize.Level1)
 {
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
-            "<startWindowTransitionAnimation enable=\"aaa\">"
-                "<timing>"
-                    "<duration>200</duration>"
-                    "<curve name=\"linear\"></curve>"
-                "</timing>"
-                "<opacityStart>1</opacityStart>"
-                "<opacityEnd>0</opacityEnd>"
-            "</startWindowTransitionAnimation>"
+        "<startWindowTransitionAnimation enable=\"aaa\">"
+        "<timing>"
+        "<duration>200</duration>"
+        "<curve name=\"linear\"></curve>"
+        "</timing>"
+        "<opacityStart>1</opacityStart>"
+        "<opacityEnd>0</opacityEnd>"
+        "</startWindowTransitionAnimation>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
@@ -1052,16 +1107,17 @@ HWTEST_F(SceneSessionManagerTest2, ConfigStartingWindowAnimation02, TestSize.Lev
  */
 HWTEST_F(SceneSessionManagerTest2, ConfigStartingWindowAnimation03, TestSize.Level1)
 {
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
-            "<startWindowTransitionAnimation enable=\"false\">"
-                "<timing>"
-                    "<duration>aaa</duration>"
-                    "<curve name=\"linear\"></curve>"
-                "</timing>"
-                "<opacityStart>aaa</opacityStart>"
-                "<opacityEnd>aaa</opacityEnd>"
-            "</startWindowTransitionAnimation>"
+        "<startWindowTransitionAnimation enable=\"false\">"
+        "<timing>"
+        "<duration>aaa</duration>"
+        "<curve name=\"linear\"></curve>"
+        "</timing>"
+        "<opacityStart>aaa</opacityStart>"
+        "<opacityEnd>aaa</opacityEnd>"
+        "</startWindowTransitionAnimation>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
@@ -1075,16 +1131,17 @@ HWTEST_F(SceneSessionManagerTest2, ConfigStartingWindowAnimation03, TestSize.Lev
  */
 HWTEST_F(SceneSessionManagerTest2, ConfigStartingWindowAnimation04, TestSize.Level1)
 {
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
-            "<startWindowTransitionAnimation enable=\"false\">"
-                "<timing>"
-                    "<duration>200 200</duration>"
-                    "<curve name=\"linear\"></curve>"
-                "</timing>"
-                "<opacityStart>1 1</opacityStart>"
-                "<opacityEnd>0 1</opacityEnd>"
-            "</startWindowTransitionAnimation>"
+        "<startWindowTransitionAnimation enable=\"false\">"
+        "<timing>"
+        "<duration>200 200</duration>"
+        "<curve name=\"linear\"></curve>"
+        "</timing>"
+        "<opacityStart>1 1</opacityStart>"
+        "<opacityEnd>0 1</opacityEnd>"
+        "</startWindowTransitionAnimation>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
@@ -1098,16 +1155,17 @@ HWTEST_F(SceneSessionManagerTest2, ConfigStartingWindowAnimation04, TestSize.Lev
  */
 HWTEST_F(SceneSessionManagerTest2, ConfigStartingWindowAnimation05, TestSize.Level1)
 {
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
-            "<startWindowTransitionAnimation enable=\"false\">"
-                "<timing>"
-                    "<duration>aaa aaa</duration>"
-                    "<curve name=\"linear\"></curve>"
-                "</timing>"
-                "<opacityStart>a a</opacityStart>"
-                "<opacityEnd>a a</opacityEnd>"
-            "</startWindowTransitionAnimation>"
+        "<startWindowTransitionAnimation enable=\"false\">"
+        "<timing>"
+        "<duration>aaa aaa</duration>"
+        "<curve name=\"linear\"></curve>"
+        "</timing>"
+        "<opacityStart>a a</opacityStart>"
+        "<opacityEnd>a a</opacityEnd>"
+        "</startWindowTransitionAnimation>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
@@ -1121,7 +1179,8 @@ HWTEST_F(SceneSessionManagerTest2, ConfigStartingWindowAnimation05, TestSize.Lev
  */
 HWTEST_F(SceneSessionManagerTest2, ConfigSnapshotScale01, TestSize.Level1)
 {
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<snapshotScale>0.7</snapshotScale>"
         "</Configs>";
@@ -1137,7 +1196,8 @@ HWTEST_F(SceneSessionManagerTest2, ConfigSnapshotScale01, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest2, ConfigSnapshotScale02, TestSize.Level1)
 {
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<snapshotScale>0.7 0.7</snapshotScale>"
         "</Configs>";
@@ -1153,7 +1213,8 @@ HWTEST_F(SceneSessionManagerTest2, ConfigSnapshotScale02, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest2, ConfigSnapshotScale03, TestSize.Level1)
 {
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<snapshotScale>aaa</snapshotScale>"
         "</Configs>";
@@ -1169,7 +1230,8 @@ HWTEST_F(SceneSessionManagerTest2, ConfigSnapshotScale03, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest2, ConfigSnapshotScale04, TestSize.Level1)
 {
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<snapshotScale>-0.1</snapshotScale>"
         "</Configs>";
@@ -1185,7 +1247,8 @@ HWTEST_F(SceneSessionManagerTest2, ConfigSnapshotScale04, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest2, ConfigSnapshotScale05, TestSize.Level1)
 {
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
         "<snapshotScale>1.5</snapshotScale>"
         "</Configs>";
@@ -1201,22 +1264,24 @@ HWTEST_F(SceneSessionManagerTest2, ConfigSnapshotScale05, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest2, ConfigSystemUIStatusBar01, TestSize.Level1)
 {
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
-            "<systemUIStatusBar>"
-                "<showInLandscapeMode>1</showInLandscapeMode>"
-                "<immersiveStatusBarBgColor>#4c000000</immersiveStatusBarBgColor>"
-                "<immersiveStatusBarContentColor>#ffffee</immersiveStatusBarContentColor>"
-            "</systemUIStatusBar>"
+        "<systemUIStatusBar>"
+        "<showInLandscapeMode>1</showInLandscapeMode>"
+        "<immersiveStatusBarBgColor>#4c000000</immersiveStatusBarBgColor>"
+        "<immersiveStatusBarContentColor>#ffffee</immersiveStatusBarContentColor>"
+        "</systemUIStatusBar>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     sptr<SceneSessionManager> sceneSessionManager = sptr<SceneSessionManager>::MakeSptr();
     sceneSessionManager->ConfigWindowSceneXml();
     ASSERT_EQ(sceneSessionManager->appWindowSceneConfig_.systemUIStatusBarConfig_.showInLandscapeMode_, 1);
     ASSERT_STREQ(sceneSessionManager->appWindowSceneConfig_.systemUIStatusBarConfig_.immersiveStatusBarBgColor_.c_str(),
-        "#4c000000");
-    ASSERT_STREQ(sceneSessionManager->appWindowSceneConfig_.systemUIStatusBarConfig_.
-        immersiveStatusBarContentColor_.c_str(), "#ffffee");
+                 "#4c000000");
+    ASSERT_STREQ(
+        sceneSessionManager->appWindowSceneConfig_.systemUIStatusBarConfig_.immersiveStatusBarContentColor_.c_str(),
+        "#ffffee");
 }
 
 /**
@@ -1265,7 +1330,7 @@ HWTEST_F(SceneSessionManagerTest2, UpdateRecoveredSessionInfo, TestSize.Level1)
     info.bundleName_ = "test2";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
-    ssm_->sceneSessionMap_.insert({0, sceneSession});
+    ssm_->sceneSessionMap_.insert({ 0, sceneSession });
     ssm_->UpdateRecoveredSessionInfo(recoveredPersistentIds);
     ssm_->sceneSessionMap_.erase(0);
 }
@@ -1288,7 +1353,7 @@ HWTEST_F(SceneSessionManagerTest2, UpdateRecoveredSessionInfo02, TestSize.Level1
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     ssm_->failRecoveredPersistentIdSet_.insert(0);
-    ssm_->sceneSessionMap_.insert({1, sceneSession});
+    ssm_->sceneSessionMap_.insert({ 1, sceneSession });
     ssm_->UpdateRecoveredSessionInfo(recoveredPersistentIds);
     ssm_->failRecoveredPersistentIdSet_.erase(0);
     ssm_->sceneSessionMap_.erase(1);
@@ -1310,7 +1375,7 @@ HWTEST_F(SceneSessionManagerTest2, NotifyCreateSubSession, TestSize.Level1)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     NotifyCreateSubSessionFunc func;
-    ssm_->createSubSessionFuncMap_.insert({1, func});
+    ssm_->createSubSessionFuncMap_.insert({ 1, func });
     ssm_->NotifyCreateSubSession(1, sceneSession, 256);
     ssm_->createSubSessionFuncMap_.erase(1);
     ASSERT_EQ(ret, 0);
@@ -1335,8 +1400,8 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowSceneXml, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest2, SetSessionContinueState, TestSize.Level1)
 {
-    MessageParcel *data = new MessageParcel();
-    sptr <IRemoteObject> token = data->ReadRemoteObject();
+    MessageParcel* data = new MessageParcel();
+    sptr<IRemoteObject> token = data->ReadRemoteObject();
     auto continueState = static_cast<ContinueState>(data->ReadInt32());
     WSError result02 = ssm_->SetSessionContinueState(nullptr, continueState);
     WSError result01 = ssm_->SetSessionContinueState(token, continueState);
@@ -1352,7 +1417,7 @@ HWTEST_F(SceneSessionManagerTest2, SetSessionContinueState, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest2, SetSessionContinueState002, TestSize.Level1)
 {
-    MessageParcel *data = new MessageParcel();
+    MessageParcel* data = new MessageParcel();
     sptr<IRemoteObject> token = data->ReadRemoteObject();
     auto continueState = static_cast<ContinueState>(0);
     SessionInfo info;
@@ -1363,7 +1428,7 @@ HWTEST_F(SceneSessionManagerTest2, SetSessionContinueState002, TestSize.Level1)
         delete data;
         return;
     }
-    ssm_->sceneSessionMap_.insert({1000, sceneSession});
+    ssm_->sceneSessionMap_.insert({ 1000, sceneSession });
     ssm_->SetSessionContinueState(token, continueState);
     ASSERT_NE(sceneSession, nullptr);
     delete data;
@@ -1411,7 +1476,7 @@ HWTEST_F(SceneSessionManagerTest2, GetFocusWindowInfo2, TestSize.Level1)
     info.abilityName_ = "BackgroundTask02";
     info.bundleName_ = "BackgroundTask02";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ssm_->sceneSessionMap_.insert({0, sceneSession});
+    ssm_->sceneSessionMap_.insert({ 0, sceneSession });
     ssm_->GetFocusWindowInfo(fcinfo);
 }
 
@@ -1429,7 +1494,7 @@ HWTEST_F(SceneSessionManagerTest2, SetSessionLabel, TestSize.Level1)
     info.abilityName_ = "BackgroundTask02";
     info.bundleName_ = "BackgroundTask02";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ssm_->sceneSessionMap_.insert({100, sceneSession});
+    ssm_->sceneSessionMap_.insert({ 100, sceneSession });
     ssm_->SetSessionLabel(nullptr, "test");
 }
 
@@ -1447,7 +1512,7 @@ HWTEST_F(SceneSessionManagerTest2, SetSessionIcon, TestSize.Level1)
     info.abilityName_ = "BackgroundTask02";
     info.bundleName_ = "BackgroundTask02";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ssm_->sceneSessionMap_.insert({100, sceneSession});
+    ssm_->sceneSessionMap_.insert({ 100, sceneSession });
     ssm_->SetSessionIcon(nullptr, nullptr);
 }
 
@@ -1476,7 +1541,7 @@ HWTEST_F(SceneSessionManagerTest2, PendingSessionToForeground, TestSize.Level1)
     info.abilityName_ = "BackgroundTask02";
     info.bundleName_ = "BackgroundTask02";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ssm_->sceneSessionMap_.insert({100, sceneSession});
+    ssm_->sceneSessionMap_.insert({ 100, sceneSession });
     ssm_->PendingSessionToForeground(nullptr);
 }
 
@@ -1496,7 +1561,7 @@ HWTEST_F(SceneSessionManagerTest2, GetFocusSessionToken, TestSize.Level1)
     info.abilityName_ = "BackgroundTask02";
     info.bundleName_ = "BackgroundTask02";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ssm_->sceneSessionMap_.insert({100, sceneSession});
+    ssm_->sceneSessionMap_.insert({ 100, sceneSession });
     ret = ssm_->GetFocusSessionToken(token);
     ASSERT_EQ(WSError::WS_ERROR_INVALID_PERMISSION, ret);
 }
@@ -1516,7 +1581,7 @@ HWTEST_F(SceneSessionManagerTest2, GetFocusSessionElement, TestSize.Level1)
     info.abilityName_ = "BackgroundTask02";
     info.bundleName_ = "BackgroundTask02";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ssm_->sceneSessionMap_.insert({100, sceneSession});
+    ssm_->sceneSessionMap_.insert({ 100, sceneSession });
     ssm_->GetFocusSessionElement(element);
 }
 
@@ -1573,7 +1638,7 @@ HWTEST_F(SceneSessionManagerTest2, GetIsLayoutFullScreen, TestSize.Level1)
     info.abilityName_ = "BackgroundTask02";
     info.bundleName_ = "BackgroundTask02";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ssm_->sceneSessionMap_.insert({100, sceneSession});
+    ssm_->sceneSessionMap_.insert({ 100, sceneSession });
     isLayoutFullScreen = true;
     ret = ssm_->GetIsLayoutFullScreen(isLayoutFullScreen);
     ASSERT_EQ(WSError::WS_OK, ret);
@@ -1602,7 +1667,7 @@ HWTEST_F(SceneSessionManagerTest2, UpdateSessionAvoidAreaListener, TestSize.Leve
     info.abilityName_ = "BackgroundTask02";
     info.bundleName_ = "BackgroundTask02";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ssm_->sceneSessionMap_.insert({100, sceneSession});
+    ssm_->sceneSessionMap_.insert({ 100, sceneSession });
     ssm_->UpdateSessionAvoidAreaListener(persistentId, true);
     ssm_->UpdateSessionAvoidAreaListener(persistentId, false);
 }
@@ -1626,7 +1691,7 @@ HWTEST_F(SceneSessionManagerTest2, UpdateSessionTouchOutsideListener, TestSize.L
     info.abilityName_ = "BackgroundTask02";
     info.bundleName_ = "BackgroundTask02";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ssm_->sceneSessionMap_.insert({100, sceneSession});
+    ssm_->sceneSessionMap_.insert({ 100, sceneSession });
     ssm_->UpdateSessionTouchOutsideListener(persistentId, true);
 
     ssm_->UpdateSessionTouchOutsideListener(persistentId, false);
@@ -1651,8 +1716,8 @@ HWTEST_F(SceneSessionManagerTest2, GetSessionSnapshotById, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest2, ClearSession, TestSize.Level1)
 {
-    WSError ret;
-    ret = ssm_->ClearSession(100);
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
+    auto ret = ssm_->ClearSession(100);
     ASSERT_EQ(WSError::WS_ERROR_INVALID_PERMISSION, ret);
 }
 
@@ -1663,8 +1728,8 @@ HWTEST_F(SceneSessionManagerTest2, ClearSession, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest2, ClearAllSessions, TestSize.Level1)
 {
-    WSError ret;
-    ret = ssm_->ClearAllSessions();
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
+    auto ret = ssm_->ClearAllSessions();
     ASSERT_EQ(WSError::WS_ERROR_INVALID_PERMISSION, ret);
 }
 
@@ -1689,7 +1754,7 @@ HWTEST_F(SceneSessionManagerTest2, GetTopWindowId, TestSize.Level1)
     info.abilityName_ = "BackgroundTask02";
     info.bundleName_ = "BackgroundTask02";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ssm_->sceneSessionMap_.insert({100, sceneSession});
+    ssm_->sceneSessionMap_.insert({ 100, sceneSession });
     ret = ssm_->GetTopWindowId(persistentId, topWinId);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
 }
@@ -1729,7 +1794,7 @@ HWTEST_F(SceneSessionManagerTest2, GetAccessibilityWindowInfo, TestSize.Level1)
     info.abilityName_ = "BackgroundTask02";
     info.bundleName_ = "BackgroundTask02";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ssm_->sceneSessionMap_.insert({100, sceneSession});
+    ssm_->sceneSessionMap_.insert({ 100, sceneSession });
     ret = ssm_->GetAccessibilityWindowInfo(infos);
     ASSERT_EQ(WMError::WM_OK, ret);
 }
@@ -1753,7 +1818,7 @@ HWTEST_F(SceneSessionManagerTest2, OnScreenshot, TestSize.Level1)
     info.abilityName_ = "BackgroundTask02";
     info.bundleName_ = "BackgroundTask02";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ssm_->sceneSessionMap_.insert({100, sceneSession});
+    ssm_->sceneSessionMap_.insert({ 100, sceneSession });
     ssm_->OnScreenshot(displayId);
 
     sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
@@ -1764,6 +1829,179 @@ HWTEST_F(SceneSessionManagerTest2, OnScreenshot, TestSize.Level1)
     ssm_->OnScreenshot(displayId);
     sceneSession->SetSessionState(SessionState::STATE_END);
     ssm_->OnScreenshot(displayId);
+}
+
+/**
+ * @tc.name: GetSurfaceNodeIdsFromSubSession
+ * @tc.desc: Test GetSurfaceNodeIdsFromSubSession;
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, GetSurfaceNodeIdsFromSubSession, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    std::vector<uint64_t> surfaceNodeIds;
+    auto ret = ssm_->GetSurfaceNodeIdsFromSubSession(nullptr, surfaceNodeIds);
+    EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
+
+    SessionInfo info;
+    info.abilityName_ = "GetSurfaceNodeIdsFromSubSession";
+    info.bundleName_ = "GetSurfaceNodeIdsFromSubSession";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ret = ssm_->GetSurfaceNodeIdsFromSubSession(sceneSession, surfaceNodeIds);
+    EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
+
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    ASSERT_NE(nullptr, surfaceNode);
+    sceneSession->SetSurfaceNode(surfaceNode);
+    sceneSession->SetLeashWinSurfaceNode(surfaceNode);
+
+    sptr<SceneSession> subSession1 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    subSession1->SetSurfaceNode(surfaceNode);
+    subSession1->SetLeashWinSurfaceNode(surfaceNode);
+    sptr<SceneSession> subSession2 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    subSession2->surfaceNode_ = nullptr;
+    sptr<SceneSession> subSession3 = nullptr;
+    sceneSession->subSession_.push_back(subSession1);
+    sceneSession->subSession_.push_back(subSession2);
+    sceneSession->subSession_.push_back(subSession3);
+
+    ret = ssm_->GetSurfaceNodeIdsFromSubSession(sceneSession, surfaceNodeIds);
+    EXPECT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: SetSurfaceNodeIds
+ * @tc.desc: Test SetSurfaceNodeIds;
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, SetSurfaceNodeIds, TestSize.Level1)
+{
+    sptr<IDisplayChangeListener> listener = sptr<DisplayChangeListener>::MakeSptr();
+    ASSERT_NE(nullptr, listener);
+    DisplayId displayId = 9999;
+    std::vector<uint64_t> surfaceNodeIds = { 1001, 1002 };
+    listener->OnSetSurfaceNodeIds(displayId, surfaceNodeIds);
+
+    ASSERT_NE(nullptr, ssm_);
+    displayId = 10;
+
+    SessionInfo info;
+    info.abilityName_ = "SetSurfaceNodeIds";
+    info.bundleName_ = "SetSurfaceNodeIds";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ssm_->sceneSessionMap_.insert({ 100001, sceneSession });
+    auto ret = ssm_->SetSurfaceNodeIds(displayId, surfaceNodeIds);
+    EXPECT_EQ(WMError::WM_OK, ret);
+
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    ASSERT_NE(nullptr, surfaceNode);
+    sceneSession->SetSurfaceNode(surfaceNode);
+    sceneSession->GetSurfaceNode()->SetId(1001);
+    ret = ssm_->SetSurfaceNodeIds(displayId, surfaceNodeIds);
+    EXPECT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: OnVirtualScreenDisconnected
+ * @tc.desc: Test OnVirtualScreenDisconnected;
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, OnVirtualScreenDisconnected, TestSize.Level1)
+{
+    sptr<IDisplayChangeListener> listener = sptr<DisplayChangeListener>::MakeSptr();
+    ASSERT_NE(nullptr, listener);
+    listener->OnVirtualScreenDisconnected(9999);
+
+    ASSERT_NE(nullptr, ssm_);
+
+    SessionInfo info;
+    info.abilityName_ = "OnVirtualScreenDisconnected";
+    info.bundleName_ = "OnVirtualScreenDisconnected";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto ret = ssm_->OnVirtualScreenDisconnected(1);
+    EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
+
+    ret = ssm_->OnVirtualScreenDisconnected(10);
+    EXPECT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: UpdateSubSessionBlackList
+ * @tc.desc: Test UpdateSubSessionBlackList;
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, UpdateSubSessionBlackList, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sessionBlackListInfoMap_.clear();
+    SessionInfo info;
+    info.abilityName_ = "UpdateSubSessionBlackList";
+    info.bundleName_ = "UpdateSubSessionBlackList";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->persistentId_ = 9998;
+    sceneSession->parentSession_ = nullptr;
+    auto ret = ssm_->UpdateSubSessionBlackList(sceneSession);
+    EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
+
+    sptr<SceneSession> parentSceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    parentSceneSession->persistentId_ = 100003;
+    sceneSession->SetParentSession(parentSceneSession);
+    ssm_->sessionBlackListInfoMap_[11].insert({ .windowId = 100001 });
+    ssm_->sessionBlackListInfoMap_[11].insert({ .windowId = 100002 });
+    EXPECT_EQ(2, ssm_->sessionBlackListInfoMap_[11].size());
+    ret = ssm_->UpdateSubSessionBlackList(sceneSession);
+    EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
+
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    ASSERT_NE(nullptr, surfaceNode);
+    sceneSession->SetSurfaceNode(surfaceNode);
+    sceneSession->GetSurfaceNode()->SetId(1001);
+    sceneSession->SetLeashWinSurfaceNode(surfaceNode);
+
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession2 = nullptr;
+    ssm_->sceneSessionMap_.insert({ 9998, sceneSession });
+    ssm_->sceneSessionMap_.insert({ 100001, sceneSession1 });
+    ssm_->sceneSessionMap_.insert({ 100002, sceneSession2 });
+    parentSceneSession->persistentId_ = 100002;
+    ret = ssm_->UpdateSubSessionBlackList(sceneSession);
+    EXPECT_EQ(WMError::WM_OK, ret);
+
+    sceneSession->persistentId_ = 9999;
+    ret = ssm_->UpdateSubSessionBlackList(sceneSession);
+    EXPECT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: RemoveSessionFromBlackList
+ * @tc.desc: Test RemoveSessionFromBlackList;
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, RemoveSessionFromBlackList, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sessionBlackListInfoMap_.clear();
+    SessionInfo info;
+    info.abilityName_ = "RemoveSessionFromBlackList";
+    info.bundleName_ = "RemoveSessionFromBlackList";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->persistentId_ = 9998;
+    auto ret = ssm_->RemoveSessionFromBlackList(sceneSession);
+    EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
+
+    ssm_->sessionBlackListInfoMap_[11].insert({ .windowId = 9996 });
+    ssm_->sessionBlackListInfoMap_[11].insert({ .windowId = 9997 });
+    ssm_->sessionBlackListInfoMap_[12].insert({ .windowId = 9998 });
+    ret = ssm_->RemoveSessionFromBlackList(sceneSession);
+    EXPECT_EQ(WMError::WM_OK, ret);
+
+    sceneSession->persistentId_ = 9996;
+    ret = ssm_->RemoveSessionFromBlackList(sceneSession);
+    EXPECT_EQ(WMError::WM_OK, ret);
 }
 
 /**
@@ -1811,8 +2049,8 @@ HWTEST_F(SceneSessionManagerTest2, ProcessSubSessionForeground, TestSize.Level1)
     sceneSession->subSession_ = subs;
     ssm_->ProcessSubSessionForeground(sceneSession);
 
-    ssm_->sceneSessionMap_.insert({0, sceneSession});
-    ssm_->sceneSessionMap_.insert({100, sceneSession});
+    ssm_->sceneSessionMap_.insert({ 0, sceneSession });
+    ssm_->sceneSessionMap_.insert({ 100, sceneSession });
     ssm_->ProcessSubSessionForeground(sceneSession);
     ssm_->needBlockNotifyFocusStatusUntilForeground_ = true;
     ssm_->ProcessSubSessionForeground(sceneSession);
@@ -1826,10 +2064,11 @@ HWTEST_F(SceneSessionManagerTest2, ProcessSubSessionForeground, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest2, ConfigSystemUIStatusBar02, TestSize.Level1)
 {
-    std::string xmlStr = "<?xml version='1.0' encoding=\"utf-8\"?>"
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
         "<Configs>"
-            "<systemUIStatusBar>"
-            "</systemUIStatusBar>"
+        "<systemUIStatusBar>"
+        "</systemUIStatusBar>"
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     sptr<SceneSessionManager> sceneSessionManager = sptr<SceneSessionManager>::MakeSptr();
@@ -1849,7 +2088,7 @@ HWTEST_F(SceneSessionManagerTest2, ClosePipWindowIfExist, TestSize.Level1)
     ssm_->ClosePipWindowIfExist(WindowType::WINDOW_TYPE_PIP);
 
     SessionInfo info;
-    info.sessionState_ = {1};
+    info.sessionState_ = { 1 };
     Rect reqRect = { 0, 0, 10, 10 };
     property->SetRequestRect(reqRect);
     property->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
@@ -1871,8 +2110,8 @@ HWTEST_F(SceneSessionManagerTest2, RecoverAndConnectSpecificSession, TestSize.Le
     std::shared_ptr<RSSurfaceNode> surfaceNode;
     sptr<ISession> session;
     sptr<IRemoteObject> token;
-    auto result = ssm_->RecoverAndConnectSpecificSession(sessionStage, eventChannel,
-        surfaceNode, property, session, token);
+    auto result =
+        ssm_->RecoverAndConnectSpecificSession(sessionStage, eventChannel, surfaceNode, property, session, token);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 }
 
@@ -1898,8 +2137,8 @@ HWTEST_F(SceneSessionManagerTest2, RecoverAndConnectSpecificSession02, TestSize.
     sptr<ISession> session;
     sptr<IRemoteObject> token;
     ASSERT_NE(ssm_, nullptr);
-    auto result = ssm_->RecoverAndConnectSpecificSession(sessionStage, eventChannel,
-        surfaceNode, property, session, token);
+    auto result =
+        ssm_->RecoverAndConnectSpecificSession(sessionStage, eventChannel, surfaceNode, property, session, token);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 }
 
@@ -1911,7 +2150,7 @@ HWTEST_F(SceneSessionManagerTest2, RecoverAndConnectSpecificSession02, TestSize.
 HWTEST_F(SceneSessionManagerTest2, SetAlivePersistentIds, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
-    std::vector<int32_t> recoveredPersistentIds = {0, 1, 2};
+    std::vector<int32_t> recoveredPersistentIds = { 0, 1, 2 };
     ssm_->SetAlivePersistentIds(recoveredPersistentIds);
     ASSERT_EQ(ssm_->alivePersistentIds_, recoveredPersistentIds);
 }
@@ -2008,11 +2247,11 @@ HWTEST_F(SceneSessionManagerTest2, ParseWindowModeFromMetaData, Function | Small
     sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, property);
     ASSERT_NE(sceneSession, nullptr);
 
-    std::vector<AppExecFwk::SupportWindowMode> updateWindowModes =
-        {AppExecFwk::SupportWindowMode::FULLSCREEN, AppExecFwk::SupportWindowMode::SPLIT,
-        AppExecFwk::SupportWindowMode::FLOATING};
+    std::vector<AppExecFwk::SupportWindowMode> updateWindowModes = { AppExecFwk::SupportWindowMode::FULLSCREEN,
+                                                                     AppExecFwk::SupportWindowMode::SPLIT,
+                                                                     AppExecFwk::SupportWindowMode::FLOATING };
     ASSERT_EQ(updateWindowModes, ssm_->ParseWindowModeFromMetaData("fullscreen,split,floating"));
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

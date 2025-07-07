@@ -733,6 +733,55 @@ namespace {
         //Assert
         EXPECT_TRUE(g_errLog.find("foldScreenPolicy_ is null") == std::string::npos);
     }
+
+    /**
+     * @tc.name: GetTentMode_ShouldReturnFalse_WhenSensorFoldStateManagerIsNull
+     * @tc.desc: Test GetTentMode function when sensorFoldStateManager_ is null
+     * @tc.type: FUNC
+     */
+    HWTEST_F(FoldScreenControllerTest, GetTentMode_ShouldReturnFalse_WhenSensorFoldStateManagerIsNull,
+        TestSize.Level1)
+    {
+        std::recursive_mutex displayInfoMutex;
+        std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = std::shared_ptr<TaskScheduler>();
+        FoldScreenController foldScreenController(displayInfoMutex, screenPowerTaskScheduler);
+        foldScreenController.sensorFoldStateManager_ = nullptr;
+        EXPECT_FALSE(foldScreenController.GetTentMode());
+    }
+
+    /**
+     * @tc.name: GetTentMode_ShouldReturnFalse_WhenSensorFoldStateManagerIsNotNull
+     * @tc.desc: Test GetTentMode function when sensorFoldStateManager_ is not null
+     * @tc.type: FUNC
+     */
+    HWTEST_F(FoldScreenControllerTest, GetTentMode_ShouldReturnFalse_WhenSensorFoldStateManagerIsNotNull,
+        TestSize.Level1)
+    {
+        std::recursive_mutex displayInfoMutex;
+        std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = std::shared_ptr<TaskScheduler>();
+        FoldScreenController foldScreenController(displayInfoMutex, screenPowerTaskScheduler);
+        foldScreenController.sensorFoldStateManager_ = new SensorFoldStateManager();
+        foldScreenController.sensorFoldStateManager_->SetTentMode(1);
+        EXPECT_TRUE(foldScreenController.GetTentMode());
+    }
+
+    /**
+     * @tc.name: SetIsClearingBootAnimation
+     * @tc.desc: test function :SetIsClearingBootAnimation
+     * @tc.type: FUNC
+     */
+    HWTEST_F(FoldScreenControllerTest, SetIsClearingBootAnimation, TestSize.Level1)
+    {
+        std::recursive_mutex mutex;
+        auto fsc_ = sptr<FoldScreenController>::MakeSptr(mutex, std::shared_ptr<TaskScheduler>());
+        fsc_->foldScreenPolicy_ = nullptr;
+        fsc_->SetIsClearingBootAnimation(false);
+        fsc_->foldScreenPolicy_ = fsc_->GetFoldScreenPolicy(DisplayDeviceType::SINGLE_DISPLAY_DEVICE);
+        fsc_->SetIsClearingBootAnimation(false);
+        EXPECT_FALSE(fsc_->foldScreenPolicy_->isClearingBootAnimation_);
+        fsc_->SetIsClearingBootAnimation(true);
+        EXPECT_TRUE(fsc_->foldScreenPolicy_->isClearingBootAnimation_);
+    }
 }
 } // namespace Rosen
 } // namespace OHOS

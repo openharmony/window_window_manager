@@ -19,6 +19,7 @@
 #include "input_manager.h"
 #include "perform_reporter.h"
 #include "window_manager_hilog.h"
+#include "wm_common.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -26,7 +27,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "PerformReporterTest"};
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "PerformReporterTest" };
 }
 class PerformReporterTest : public testing::Test {
 public:
@@ -38,21 +39,13 @@ public:
     bool PerformDataCmp(const PerformReporter& pr, const uint32_t totalCount, const std::vector<uint32_t>& splitCount);
 };
 
-void PerformReporterTest::SetUpTestCase()
-{
-}
+void PerformReporterTest::SetUpTestCase() {}
 
-void PerformReporterTest::TearDownTestCase()
-{
-}
+void PerformReporterTest::TearDownTestCase() {}
 
-void PerformReporterTest::SetUp()
-{
-}
+void PerformReporterTest::SetUp() {}
 
-void PerformReporterTest::TearDown()
-{
-}
+void PerformReporterTest::TearDown() {}
 
 void PerformReporterTest::SimuReportProcess(PerformReporter& pr, const std::vector<uint32_t>& durations)
 {
@@ -64,7 +57,8 @@ void PerformReporterTest::SimuReportProcess(PerformReporter& pr, const std::vect
 }
 
 bool PerformReporterTest::PerformDataCmp(const PerformReporter& pr,
-    const uint32_t totalCount, const std::vector<uint32_t>& splitCount)
+                                         const uint32_t totalCount,
+                                         const std::vector<uint32_t>& splitCount)
 {
     if (pr.totalCount_ != totalCount) {
         WLOGFE("pr.totalCount_=%{public}u, expect=%{public}u", pr.totalCount_.load(), totalCount);
@@ -72,7 +66,7 @@ bool PerformReporterTest::PerformDataCmp(const PerformReporter& pr,
     }
 
     size_t i = 0;
-    for (auto& iter: pr.timeSplitCount_) {
+    for (auto& iter : pr.timeSplitCount_) {
         if (iter.second != splitCount[i]) {
             std::ostringstream oss;
             oss << "pr.timeSplitCount_[" << iter.first << "]=" << iter.second << ", but expect=" << splitCount[i];
@@ -93,9 +87,9 @@ namespace {
  */
 HWTEST_F(PerformReporterTest, StartEnd, TestSize.Level1)
 {
-    PerformReporter pr = PerformReporter("TestTag", {100, 200, 300}, 10);
-    SimuReportProcess(pr, {50, 150, 250, 350, 450});
-    ASSERT_EQ(true, PerformDataCmp(pr, 5, {1, 1, 1, 2}));
+    PerformReporter pr = PerformReporter("TestTag", { 100, 200, 300 }, 10);
+    SimuReportProcess(pr, { 50, 150, 250, 350, 450 });
+    ASSERT_EQ(true, PerformDataCmp(pr, 5, { 1, 1, 1, 2 }));
 }
 
 /**
@@ -105,9 +99,9 @@ HWTEST_F(PerformReporterTest, StartEnd, TestSize.Level1)
  */
 HWTEST_F(PerformReporterTest, StartEndClear, TestSize.Level1)
 {
-    PerformReporter pr = PerformReporter("TestTag", {100, 200, 300}, 3);
-    SimuReportProcess(pr, {50, 150, 250});
-    ASSERT_EQ(true, PerformDataCmp(pr, 0, {0, 0, 0, 0}));
+    PerformReporter pr = PerformReporter("TestTag", { 100, 200, 300 }, 3);
+    SimuReportProcess(pr, { 50, 150, 250 });
+    ASSERT_EQ(true, PerformDataCmp(pr, 0, { 0, 0, 0, 0 }));
 }
 
 /**
@@ -117,9 +111,9 @@ HWTEST_F(PerformReporterTest, StartEndClear, TestSize.Level1)
  */
 HWTEST_F(PerformReporterTest, StartEndInvSeq, TestSize.Level1)
 {
-    PerformReporter pr = PerformReporter("TestTag", {100, 200, 300}, 4);
-    SimuReportProcess(pr, {250, 150, 50});
-    ASSERT_EQ(true, PerformDataCmp(pr, 3, {1, 1, 1, 0}));
+    PerformReporter pr = PerformReporter("TestTag", { 100, 200, 300 }, 4);
+    SimuReportProcess(pr, { 250, 150, 50 });
+    ASSERT_EQ(true, PerformDataCmp(pr, 3, { 1, 1, 1, 0 }));
 }
 
 /**
@@ -129,12 +123,12 @@ HWTEST_F(PerformReporterTest, StartEndInvSeq, TestSize.Level1)
  */
 HWTEST_F(PerformReporterTest, PrivateClear, TestSize.Level1)
 {
-    PerformReporter pr = PerformReporter("TestTag", {100, 200, 300}, 10);
-    SimuReportProcess(pr, {50, 150, 250, 350, 450});
-    ASSERT_EQ(true, PerformDataCmp(pr, 5, {1, 1, 1, 2}));
+    PerformReporter pr = PerformReporter("TestTag", { 100, 200, 300 }, 10);
+    SimuReportProcess(pr, { 50, 150, 250, 350, 450 });
+    ASSERT_EQ(true, PerformDataCmp(pr, 5, { 1, 1, 1, 2 }));
 
     pr.clear();
-    ASSERT_EQ(true, PerformDataCmp(pr, 0, {0, 0, 0, 0}));
+    ASSERT_EQ(true, PerformDataCmp(pr, 0, { 0, 0, 0, 0 }));
 }
 
 /**
@@ -427,9 +421,8 @@ HWTEST_F(PerformReporterTest, ReportUIExtensionException, TestSize.Level1)
     oss << " provider bundleName: " << "testProviderBundleName1" << ",";
     oss << " provider windowName: " << "testWindowName1" << ",";
     oss << " errorCode: " << errorCode << ";";
-    res = windowInfoReporter.ReportUIExtensionException(static_cast<int32_t>(exceptionType), pid, persistentId,
-        oss.str()
-    );
+    res = windowInfoReporter.ReportUIExtensionException(
+        static_cast<int32_t>(exceptionType), pid, persistentId, oss.str());
     ASSERT_EQ(res, 0);
 
     exceptionType = WindowDFXHelperType::WINDOW_UIEXTENSION_START_ABILITY_FAIL;
@@ -441,9 +434,8 @@ HWTEST_F(PerformReporterTest, ReportUIExtensionException, TestSize.Level1)
     oss << "Start UIExtensionAbility failed" << ",";
     oss << " provider windowName: " << "testWindowName2" << ",";
     oss << " errorCode: " << errorCode << ";";
-    res = windowInfoReporter.ReportUIExtensionException(static_cast<int32_t>(exceptionType), pid, persistentId,
-        oss.str()
-    );
+    res = windowInfoReporter.ReportUIExtensionException(
+        static_cast<int32_t>(exceptionType), pid, persistentId, oss.str());
     ASSERT_EQ(res, 0);
 }
 
@@ -464,15 +456,6 @@ HWTEST_F(PerformReporterTest, ReportEventDispatchException, TestSize.Level1)
     oss << "displayInfos flush to MMI is empty!";
     res = windowInfoReporter.ReportEventDispatchException(static_cast<int32_t>(exceptionType), pid, oss.str());
     ASSERT_EQ(res, 0);
-
-    std::vector<MMI::WindowInfo> windowInfoList;
-    ASSERT_EQ(windowInfoList.empty(), true);
-    exceptionType = WindowDFXHelperType::WINDOW_FLUSH_EMPTY_WINDOW_INFO_TO_MMI_EXCEPTION;
-    pid = 2222;
-    oss.str("");
-    oss << "windowInfoList flush to MMI is empty!";
-    res = windowInfoReporter.ReportEventDispatchException(static_cast<int32_t>(exceptionType), pid, oss.str());
-    ASSERT_EQ(res, 0);
 }
 
 /**
@@ -488,10 +471,61 @@ HWTEST_F(PerformReporterTest, ReportWindowProfileInfo017, TestSize.Level1)
     windowProfileInfo.windowLocatedScreen = 0;
     windowProfileInfo.windowSceneMode = 102;
     windowProfileInfo.windowVisibleState = 2;
+    windowProfileInfo.rect = "[0 0 60 90]";
+    windowProfileInfo.zorder = 110;
     WindowInfoReporter windowInfoReporter;
     res = windowInfoReporter.ReportWindowProfileInfo(windowProfileInfo);
     ASSERT_EQ(res, 0);
 }
+
+/**
+ * @tc.name: ReportWindowProfileInfo018
+ * @tc.desc: ReportKeyboardLifeCycleException test
+ * @tc.type: FUNC
+ */
+HWTEST_F(PerformReporterTest, ReportKeyboardLifeCycleException18, Function | SmallTest | Level2)
+{
+    KeyboardLifeCycleException subEventType = KeyboardLifeCycleException::ANIM_SYNC_EXCEPTION;
+    int32_t windowId = 198;
+    std::string msg = "ReportKeyboardLifeCycleExceptionTestMSG";
+    WindowInfoReporter windowInfoReporter;
+    int32_t res = windowInfoReporter.ReportKeyboardLifeCycleException(windowId, subEventType, msg);
+    ASSERT_EQ(res, 0);
 }
+
+/**
+ * @tc.name: ReportWindowProfileInfo019
+ * @tc.desc: ReportKeyboardLifeCycleException test
+ * @tc.type: FUNC
+ */
+HWTEST_F(PerformReporterTest, ReportKeyboardLifeCycleException19, Function | SmallTest | Level2)
+{
+    KeyboardLifeCycleException subEventType = KeyboardLifeCycleException::CREATE_EXCEPTION;
+    int32_t windowId = 198;
+    std::string msg = "ReportKeyboardLifeCycleExceptionTestMSG";
+    WindowInfoReporter windowInfoReporter;
+    int32_t res = windowInfoReporter.ReportKeyboardLifeCycleException(windowId, subEventType, msg);
+    ASSERT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: ReportWindowProfileInfo018
+ * @tc.desc: ReportSpecWindowLifeCycleChange test
+ * @tc.type: FUNC
+ */
+HWTEST_F(PerformReporterTest, ReportSpecWindowLifeCycleChange, Function | SmallTest | Level2)
+{
+    int32_t windowId = 198;
+    std::string stage = "attach";
+    WindowLifeCycleReportInfo reportInfo = { "bundleName", windowId,
+        static_cast<int32_t>(WindowType::WINDOW_TYPE_APP_SUB_WINDOW),
+        static_cast<int32_t>(WindowMode::WINDOW_MODE_FULLSCREEN),
+        static_cast<int32_t>(WindowFlag::WINDOW_FLAG_IS_TEXT_MENU),
+        stage};
+    WindowInfoReporter windowInfoReporter;
+    int32_t res = windowInfoReporter.ReportSpecWindowLifeCycleChange(reportInfo);
+    ASSERT_EQ(res, 0);
+}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

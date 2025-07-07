@@ -16,13 +16,13 @@
 // gtest
 #include <gtest/gtest.h>
 #include "ability_context_impl.h"
+#include "common_test_utils.h"
 #include "ipc_skeleton.h"
 #include "scene_board_judgement.h"
 #include "window.h"
 #include "window_manager.h"
 #include "window_option.h"
 #include "window_scene.h"
-#include "common_test_utils.h"
 #include "window_test_utils.h"
 #include "wm_common.h"
 
@@ -32,7 +32,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowAppFloatingWindowTest"};
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowAppFloatingWindowTest" };
 }
 
 class TestCameraFloatWindowChangedListener : public ICameraFloatWindowChangedListener {
@@ -50,7 +50,7 @@ public:
     void TearDown() override;
 
     static inline float virtualPixelRatio_ = 1.0;
-    static inline Rect displayRect_ {0, 0, 0, 0};
+    static inline Rect displayRect_{ 0, 0, 0, 0 };
     static inline std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_ = nullptr;
     static sptr<TestCameraFloatWindowChangedListener> testCameraFloatWindowChangedListener_;
 };
@@ -75,18 +75,14 @@ void WindowAppFloatingWindowTest::SetUpTestCase()
     virtualPixelRatio_ = WindowTestUtils::GetVirtualPixelRatio(0);
 }
 
-void WindowAppFloatingWindowTest::TearDownTestCase()
-{
-}
+void WindowAppFloatingWindowTest::TearDownTestCase() {}
 
 void WindowAppFloatingWindowTest::SetUp()
 {
     CommonTestUtils::GuaranteeFloatWindowPermission("wms_window_app_floating_window_test");
 }
 
-void WindowAppFloatingWindowTest::TearDown()
-{
-}
+void WindowAppFloatingWindowTest::TearDown() {}
 
 static sptr<WindowScene> CreateWindowScene()
 {
@@ -113,7 +109,7 @@ static sptr<Window> CreateAppFloatingWindow(WindowType type, Rect rect, std::str
 static inline Rect GetRectWithVpr(int32_t x, int32_t y, uint32_t w, uint32_t h)
 {
     auto vpr = WindowAppFloatingWindowTest::virtualPixelRatio_;
-    return {x, y, static_cast<uint32_t>(w * vpr), static_cast<uint32_t>(h * vpr)};
+    return { x, y, static_cast<uint32_t>(w * vpr), static_cast<uint32_t>(h * vpr) };
 }
 
 /**
@@ -319,12 +315,12 @@ HWTEST_F(WindowAppFloatingWindowTest, AppFloatingWindow09, TestSize.Level1)
     ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
     ASSERT_EQ(WMError::WM_OK, fltWin->Show());
 
-    Rect exceptRect = {10, 20, 0, 0};
+    Rect exceptRect = { 10, 20, 0, 0 };
     uint32_t smallWidth = displayRect_.height_ <= displayRect_.width_ ? displayRect_.height_ : displayRect_.width_;
     float hwRatio = static_cast<float>(displayRect_.height_) / static_cast<float>(displayRect_.width_);
     if (smallWidth <= static_cast<uint32_t>(600 * virtualPixelRatio_)) { // sw <= 600dp
         if (displayRect_.width_ <= displayRect_.height_) {
-            exceptRect.width_= static_cast<uint32_t>(smallWidth * 0.3);
+            exceptRect.width_ = static_cast<uint32_t>(smallWidth * 0.3);
         } else {
             exceptRect.width_ = static_cast<uint32_t>(smallWidth * 0.5);
         }

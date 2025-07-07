@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,8 +20,8 @@
 #include <securec.h>
 #include <system_ability_definition.h>
 
-#include "display_manager_interface.h"
-#include "display_manager_proxy.h"
+#include "display_manager_interface_code.h"
+#include "idisplay_manager.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS ::Rosen {
@@ -83,67 +83,23 @@ bool IPCFuzzTest(const uint8_t* data, size_t size)
     return true;
 }
 
-void IPCSpecificInterfaceFuzzTest1(sptr<IRemoteObject> proxy, MessageParcel& sendData, MessageParcel& reply,
+void IPCSpecificInterfaceFuzzTest1(const sptr<IRemoteObject>& proxy, MessageParcel& sendData, MessageParcel& reply,
     MessageOption& option)
 {
-    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DEFAULT_DISPLAY_INFO),
-        sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DISPLAY_BY_ID),
-        sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DISPLAY_BY_SCREEN),
-        sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DISPLAY_SNAPSHOT),
-        sendData, reply, option);
-    proxy->SendRequest(
-        static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_REGISTER_DISPLAY_MANAGER_AGENT),
-        sendData, reply, option);
-    proxy->SendRequest(
-        static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_UNREGISTER_DISPLAY_MANAGER_AGENT),
-        sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_WAKE_UP_BEGIN),
-        sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_WAKE_UP_END),
-        sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SUSPEND_BEGIN),
-        sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SUSPEND_END),
-        sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREEN_POWER_FOR_ALL),
-        sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_DISPLAY_STATE),
-        sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DISPLAY_STATE),
-        sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_ALL_DISPLAYIDS),
-        sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_SCREEN_POWER),
-        sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_DISPLAY_STATE),
-        sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DISPLAY_STATE),
-        sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_ALL_DISPLAYIDS),
-        sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_NOTIFY_DISPLAY_EVENT),
-        sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_NOTIFY_DISPLAY_EVENT),
-        sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_ALL_DISPLAYIDS),
-        sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_NOTIFY_DISPLAY_EVENT),
-        sendData, reply, option);
-    proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_FREEZE_EVENT),
-        sendData, reply, option);
+    for (uint32_t i = 0; i <= static_cast<uint32_t>(IDisplayManagerIpcCode::COMMAND_GET_SCREEN_BRIGHTNESS); i++) {
+        proxy->SendRequest(i, sendData, reply, option);
+    }
 }
 
-void IPCSpecificInterfaceFuzzTest2(sptr<IRemoteObject> proxy, MessageParcel& sendData, MessageParcel& reply,
-    MessageOption& option, sptr<IDisplayManager> manager)
+void IPCSpecificInterfaceFuzzTest2(const sptr<IRemoteObject>& proxy, MessageParcel& sendData, MessageParcel& reply,
+    MessageOption& option, const sptr<IDisplayManager>& manager)
 {
     int flags = option.GetFlags();
     option.SetFlags(MessageOption::TF_SYNC);
     proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_CREATE_VIRTUAL_SCREEN),
         sendData, reply, option);
-    manager->DestroyVirtualScreen(static_cast<ScreenId>(reply.ReadUint64()));
+    int32_t dmError;
+    manager->DestroyVirtualScreen(reply.ReadUint64(), dmError);
     option.SetFlags(flags);
     proxy->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_DESTROY_VIRTUAL_SCREEN),
         sendData, reply, option);
@@ -202,7 +158,7 @@ bool IPCInterfaceFuzzTest(const uint8_t* data, size_t size)
     MessageParcel sendData;
     MessageParcel reply;
     MessageOption option(flags, waitTime);
-    sendData.WriteInterfaceToken(proxy.first->GetDescriptor());
+    sendData.WriteInterfaceToken(IDisplayManager::GetDescriptor());
     uint32_t dataSize = (size - startPos) > 1024 * 1024 ? 1024 * 1024 : (size - startPos);
     sendData.WriteBuffer(data + startPos, dataSize);
     IPCSpecificInterfaceFuzzTest1(proxy.second, sendData, reply, option);

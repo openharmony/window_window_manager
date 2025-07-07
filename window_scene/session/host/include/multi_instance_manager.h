@@ -41,6 +41,8 @@ public:
     void Init(const sptr<AppExecFwk::IBundleMgr>& bundleMgr, const std::shared_ptr<TaskScheduler>& taskScheduler);
     void IncreaseInstanceKeyRefCount(const sptr<SceneSession>& sceneSession);
     void DecreaseInstanceKeyRefCount(const sptr<SceneSession>& sceneSession);
+    void DecreaseInstanceKeyRefCountByBundleNameAndInstanceKey(const std::string& bundleName,
+        const std::string& instanceKey);
 
     // Locks appInfoMutex_
     void SetCurrentUserId(int32_t userId);
@@ -53,15 +55,16 @@ public:
     void FillInstanceKeyIfNeed(const sptr<SceneSession>& sceneSession);
     bool MultiInstancePendingSessionActivation(SessionInfo& sessionInfo);
     std::string CreateNewInstanceKey(const std::string& bundleName, const std::string& instanceKey = "");
+    void RemoveInstanceKey(const std::string& bundleName, const std::string& instanceKey);
 
     // Locks mutex_
     uint32_t GetInstanceCount(const std::string& bundleName);
     std::string GetLastInstanceKey(const std::string& bundleName);
     bool IsInstanceKeyExist(const std::string& bundleName, const std::string& instanceKey);
+    AppExecFwk::ApplicationInfo GetApplicationInfo(const std::string& bundleName) const;
 
 private:
     uint32_t FindMinimumAvailableInstanceId(const std::string& bundleName, uint32_t maxInstanceCount);
-    void RemoveInstanceKey(const std::string& bundleName, const std::string& instanceKey);
     void AddInstanceId(const std::string& bundleName, uint32_t instanceId);
     void RemoveInstanceId(const std::string& bundleName, uint32_t instanceId);
     bool ConvertInstanceKeyToInstanceId(const std::string& instanceKey, uint32_t& instanceId) const;
@@ -71,7 +74,7 @@ private:
     std::unordered_map<std::string, std::bitset<MAX_INSTANCE_COUNT>> bundleInstanceUsageMap_;
     // Above guarded by mutex_
 
-    std::shared_mutex appInfoMutex_;
+    mutable std::shared_mutex appInfoMutex_;
     std::unordered_map<std::string, AppExecFwk::ApplicationInfo> appInfoMap_;
     // Above guarded by appInfoMutex_
 

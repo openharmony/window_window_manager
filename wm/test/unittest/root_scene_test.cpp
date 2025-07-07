@@ -20,6 +20,7 @@
 #include "mock_uicontent.h"
 #include <viewport_config.h>
 #include "root_scene.h"
+#include "screen_scene.h"
 
 #include "app_mgr_client.h"
 #include "mock_uicontent.h"
@@ -102,6 +103,10 @@ HWTEST_F(RootSceneTest, UpdateViewportConfig01, TestSize.Level1)
 HWTEST_F(RootSceneTest, UpdateConfiguration, TestSize.Level1)
 {
     RootScene rootScene;
+    sptr<RootScene> staticRootScene = sptr<RootScene>::MakeSptr();
+    wptr<Window> weakWindow(staticRootScene);
+    rootScene.AddRootScene(DEFAULT_DISPLAY_ID, weakWindow);
+    rootScene.AddRootScene(100, nullptr);
     std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();
     rootScene.uiContent_ = nullptr;
     rootScene.UpdateConfiguration(configuration);
@@ -423,9 +428,15 @@ HWTEST_F(RootSceneTest, GetAvoidAreaByTypeTest001, TestSize.Level1)
 HWTEST_F(RootSceneTest, UpdateConfigurationSync, TestSize.Level1)
 {
     RootScene rootScene;
+    sptr<RootScene> staticRootScene = sptr<RootScene>::MakeSptr();
+    wptr<Window> weakWindow(staticRootScene);
+    rootScene.AddRootScene(DEFAULT_DISPLAY_ID, weakWindow);
+    rootScene.AddRootScene(100, nullptr);
     std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();
 
     rootScene.uiContent_ = nullptr;
+    rootScene.UpdateConfigurationSync(configuration);
+    rootScene.uiContent_ = std::make_unique<Ace::UIContentMocker>();
     rootScene.UpdateConfigurationSync(configuration);
     ASSERT_EQ(1, rootScene.GetWindowId());
 }
@@ -558,6 +569,60 @@ HWTEST_F(RootSceneTest, GetRSNodeByStringIDTest001, TestSize.Level1)
 
     auto res = rootScene->GetRSNodeByStringID(stringId);
     ASSERT_EQ(res, nullptr);
+}
+
+/**
+ * @tc.name: GetStatusBarHeight
+ * @tc.desc: GetStatusBarHeight test
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, GetStatusBarHeight, TestSize.Level1)
+{
+    RootScene rootScene;
+    auto height = rootScene.GetStatusBarHeight();
+    EXPECT_EQ(0, height);
+    rootScene.getStatusBarHeightCallback_ = []() -> uint32_t { return 100; };
+    height = rootScene.GetStatusBarHeight();
+    EXPECT_EQ(100, height);
+}
+
+/**
+ * @tc.name: AddRootScene
+ * @tc.desc: For AddRootScene Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, AddRootScene, TestSize.Level1)
+{
+    sptr<RootScene> rootScene = sptr<RootScene>::MakeSptr();
+    sptr<ScreenScene> screenScene = sptr<ScreenScene>::MakeSptr("AddRootScene");
+    rootScene->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    wptr<Window> weakWindow(rootScene);
+    wptr<Window> weakWindow1(screenScene);
+    rootScene->AddRootScene(1, weakWindow);
+    rootScene->AddRootScene(12, weakWindow1);
+
+    auto res = rootScene->GetUIContentByDisplayId(1);
+    ASSERT_EQ(res.second, true);
+    res = rootScene->GetUIContentByDisplayId(12);
+}
+
+/**
+ * @tc.name: RemoveRootScene
+ * @tc.desc: For RemoveRootScene Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, RemoveRootScene, TestSize.Level1)
+{
+    sptr<RootScene> rootScene = sptr<RootScene>::MakeSptr();
+    rootScene->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    wptr<Window> weakWindow(rootScene);
+    rootScene->AddRootScene(0, weakWindow);
+
+    auto res = rootScene->GetUIContentByDisplayId(0);
+    ASSERT_EQ(res.second, true);
+    rootScene->RemoveRootScene(0);
+    res = rootScene->GetUIContentByDisplayId(0);
+    ASSERT_EQ(res.second, false);
 }
 
 } // namespace

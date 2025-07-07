@@ -59,7 +59,7 @@ sptr<AAFwk::SessionInfo> ExtensionSessionManager::SetAbilitySessionInfo(const sp
     abilitySessionInfo->orientation = sessionInfo.config_.orientation_;
     abilitySessionInfo->isDensityFollowHost = sessionInfo.config_.isDensityFollowHost_;
     if (sessionInfo.want != nullptr) {
-        abilitySessionInfo->want = *sessionInfo.want;
+        abilitySessionInfo->want = sessionInfo.GetWantSafely();
     }
     return abilitySessionInfo;
 }
@@ -118,7 +118,7 @@ WSError ExtensionSessionManager::RequestExtensionSessionActivation(const sptr<Ex
             return WSError::WS_ERROR_NULLPTR;
         }
         auto persistentId = extSession->GetPersistentId();
-        TLOGNI(WmsLogTag::WMS_UIEXT, "Activate session with persistentId: %{public}d", persistentId);
+        TLOGNI(WmsLogTag::WMS_UIEXT, "Activate session, id=%{public}d", persistentId);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "esm:RequestExtensionSessionActivation");
         if (IsExtensionSessionInvalid(persistentId)) {
             TLOGNE(WmsLogTag::WMS_UIEXT, "%{public}s Session is invalid! persistentId:%{public}d",
@@ -132,7 +132,8 @@ WSError ExtensionSessionManager::RequestExtensionSessionActivation(const sptr<Ex
         if (errorCode != ERR_OK) {
             std::ostringstream oss;
             oss << "Start UIExtensionAbility failed" << ",";
-            oss << " provider windowName: " << extSession->GetWindowName() << ",";
+            oss << " provider bundleName: " << extSession->GetSessionInfo().bundleName_ << ",";
+            oss << " provider abilityName: " << extSession->GetSessionInfo().abilityName_ << ",";
             oss << " errorCode: " << errorCode << ";";
             int32_t ret = WindowInfoReporter::GetInstance().ReportUIExtensionException(
                 static_cast<int32_t>(WindowDFXHelperType::WINDOW_UIEXTENSION_START_ABILITY_FAIL),
@@ -166,7 +167,7 @@ WSError ExtensionSessionManager::RequestExtensionSessionBackground(const sptr<Ex
             return WSError::WS_ERROR_NULLPTR;
         }
         auto persistentId = extSession->GetPersistentId();
-        WLOGFI("Background session with persistentId: %{public}d", persistentId);
+        TLOGNI(WmsLogTag::WMS_UIEXT, "Background session, id=%{public}d", persistentId);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "esm:RequestExtensionSessionBackground");
         extSession->SetActive(false);
         extSession->Background();

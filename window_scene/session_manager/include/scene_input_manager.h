@@ -22,6 +22,7 @@
 #include <ui_content.h>
 #include "input_manager.h"
 #include "session/host/include/scene_session.h"
+#include "session/screen/include/screen_property.h"
 #include "wm_common.h"
 #include "wm_single_instance.h"
 
@@ -61,19 +62,30 @@ protected:
 
 private:
     void UpdateFocusedSessionId(int32_t focusedSessionId);
-    void FlushFullInfoToMMI(const std::vector<MMI::DisplayInfo>& displayInfos,
-        const std::vector<MMI::WindowInfo>& windowInfoList);
+    void FlushFullInfoToMMI(const std::vector<MMI::ScreenInfo>& screenInfos,
+        std::map<DisplayGroupId, MMI::DisplayGroupInfo>& displayGroupMap,
+        const std::vector<MMI::WindowInfo>& windowInfoList, bool isOverBatchSize = false);
     void FlushChangeInfoToMMI(const std::map<uint64_t, std::vector<MMI::WindowInfo>>& screenId2Windows);
-    void ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& displayInfos);
-    bool CheckNeedUpdate(const std::vector<MMI::DisplayInfo>& displayInfos,
-        const std::vector<MMI::WindowInfo>& windowInfoList);
+    std::vector<MMI::ScreenInfo> ConstructScreenInfos(std::map<ScreenId, ScreenProperty>& screensProperties);
+    void ConstructDisplayGroupInfos(std::map<ScreenId, ScreenProperty>& screensProperties,
+        std::map<DisplayGroupId, MMI::DisplayGroupInfo>& displayGroupMap);
+    bool CheckNeedUpdate(const std::vector<MMI::ScreenInfo>& screenInfos,
+        const std::vector<MMI::DisplayInfo>& displayInfos, const std::vector<MMI::WindowInfo>& windowInfoList);
+    void PrintScreenInfo(const std::vector<MMI::ScreenInfo>& screenInfos);
     void PrintDisplayInfo(const std::vector<MMI::DisplayInfo>& displayInfos);
     void PrintWindowInfo(const std::vector<MMI::WindowInfo>& windowInfoList);
-    void UpdateDisplayAndWindowInfo(const std::vector<MMI::DisplayInfo>& displayInfos,
+    void UpdateDisplayAndWindowInfo(const std::vector<MMI::ScreenInfo>& screenInfos,
+        std::map<DisplayGroupId, MMI::DisplayGroupInfo>& displayGroupMap,
         std::vector<MMI::WindowInfo> windowInfoList);
+    void ConstructDumpDisplayInfo(const MMI::DisplayInfo& displayInfo,
+        std::ostringstream& dumpDisplayListStream);
+    void ConstructDumpWindowInfo(const MMI::WindowInfo& windowInfo,
+        std::ostringstream& dumpWindowListStream);
+    std::unordered_map<DisplayId, int32_t> GetFocusedSessionMap() const;
     std::shared_ptr<SceneSessionDirtyManager> sceneSessionDirty_;
     std::shared_ptr<AppExecFwk::EventRunner> eventLoop_;
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_;
+    std::vector<MMI::ScreenInfo> lastScreenInfos_;
     std::vector<MMI::DisplayInfo> lastDisplayInfos_;
     std::vector<MMI::WindowInfo> lastWindowInfoList_;
     int32_t lastFocusId_ { -1 };

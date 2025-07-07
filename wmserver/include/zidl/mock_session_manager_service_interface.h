@@ -16,42 +16,5 @@
 #ifndef OHOS_MOCK_SESSION_MANAGER_INTERFACE_H
 #define OHOS_MOCK_SESSION_MANAGER_INTERFACE_H
 
-#include <iremote_broker.h>
-#include <refbase.h>
-#include <parcel.h>
-
-namespace OHOS {
-namespace Rosen {
-
-class IMockSessionManagerInterface : public IRemoteBroker {
-public:
-    DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.IMockSessionManager");
-    enum class MockSessionManagerServiceMessage : uint32_t {
-        TRANS_ID_GET_SESSION_MANAGER_SERVICE = 0,
-        TRANS_ID_GET_SCREEN_SESSION_MANAGER,
-        TRANS_ID_NOTIFY_SCENE_BOARD_AVAILABLE,
-        TRANS_ID_REGISTER_SMS_RECOVER_LISTENER,
-        TRANS_ID_UNREGISTER_SMS_RECOVER_LISTENER,
-        TRANS_ID_REGISTER_SMS_LITE_RECOVER_LISTENER,
-        TRANS_ID_UNREGISTER_SMS_LITE_RECOVER_LISTENER,
-        TRANS_ID_SET_SNAPSHOT_SKIP_BY_USERID_AND_BUNDLENAMES,
-        TRANS_ID_SET_SNAPSHOT_SKIP_BY_MAP,
-    };
-
-    virtual sptr<IRemoteObject> GetSessionManagerService() = 0;
-    virtual sptr<IRemoteObject> GetScreenSessionManagerLite() = 0;
-
-    virtual void NotifySceneBoardAvailable() = 0;
-
-    virtual void RegisterSMSRecoverListener(const sptr<IRemoteObject>& listener) = 0;
-    virtual void UnregisterSMSRecoverListener() = 0;
-    virtual void RegisterSMSLiteRecoverListener(const sptr<IRemoteObject>& listener) = 0;
-    virtual void UnregisterSMSLiteRecoverListener() = 0;
-    virtual int32_t SetSnapshotSkipByUserIdAndBundleNames(int32_t userId,
-        const std::vector<std::string>& bundleNameList) = 0;
-    virtual int32_t SetSnapshotSkipByIdNamesMap(const std::unordered_map<int32_t,
-        std::vector<std::string>>& userIdAndBunldeNames) = 0;
-};
-}
-}
+#include "imock_session_manager_interface.h"
 #endif // OHOS_MOCK_SESSION_MANAGER_INTERFACE_H

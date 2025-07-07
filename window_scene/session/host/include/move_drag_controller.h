@@ -86,6 +86,7 @@ public:
     bool ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& originalRect);
     bool ConsumeDragEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& originalRect,
         const sptr<WindowSessionProperty> property, const SystemSessionConfig& sysConfig);
+    void ModifyWindowCoordinatesWhenMoveEnd(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void CalcFirstMoveTargetRect(const WSRect& windowRect, bool useWindowRect);
     WSRect GetFullScreenToFloatingRect(const WSRect& originalRect, const WSRect& windowRect);
     int32_t GetOriginalPointerPosX();
@@ -98,6 +99,9 @@ public:
         const std::shared_ptr<RSSurfaceNode>& surfaceNode);
     void OnLostFocus();
     AreaType GetAreaType() const { return type_; };
+    void SetScale(float scalex, float scaley);
+    void SetParentRect(const Rect& parentRect);
+    Gravity GetGravity() const;
 
     /*
      * Cross Display Move Drag
@@ -120,7 +124,7 @@ public:
     void SetOriginalDisplayOffset(int32_t offsetX, int32_t offsetY);
     void SetOriginalPositionZ(float originalPositionZ) { originalPositionZ_ = originalPositionZ; }
     float GetOriginalPositionZ() const { return originalPositionZ_; }
-    bool isSupportWindowDragCrossDisplay();
+    bool IsSupportWindowDragCrossDisplay();
 
     /*
      * Monitor screen connection status
@@ -132,13 +136,19 @@ public:
     /*
      * PC Window Layout
      */
-    void HandleStartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
-        int32_t pointerPosX, int32_t pointerPosY, const WSRect& winRect);
+    struct MoveCoordinateProperty {
+        int32_t pointerWindowX = 0;
+        int32_t pointerWindowY = 0;
+        int32_t pointerPosX = 0;
+        int32_t pointerPosY = 0;
+        DisplayId displayId = DISPLAY_ID_INVALID;
+        WSRect winRect = { 0, 0, 0, 0 };
+    };
+    void HandleStartMovingWithCoordinate(const MoveCoordinateProperty& property);
+    void SetSpecifyMoveStartDisplay(DisplayId displayId);
+    void ClearSpecifyMoveStartDisplay();
+    WSRect GetTargetDisplayRectRelatedToStartDisplay(WSRect rect, DisplayId displayId) const;
     void StopMoving();
-    int32_t GetLastMovePointerPosX() const;
-    void SetLastMovePointerPosX(int32_t lastMovePointerPosX);
-    bool IsMoveDragHotAreaCrossDisplay() const;
-    void SetMoveDragHotAreaCrossDisplay(bool isMoveDragHotAreaCrossDisplay);
 
 private:
     struct MoveDragProperty {
@@ -150,6 +160,10 @@ private:
         int32_t originalPointerWindowX_ = -1;
         // the y coordinate of the pointer related to the active window
         int32_t originalPointerWindowY_ = -1;
+        // the x coordinate scale of the active window
+        float scaleX_ = 1.0f;
+        // the y coordinate scale of the active window
+        float scaleY_ = 1.0f;
         WSRect originalRect_ = { 0, 0, 0, 0 };
         WSRect targetRect_ = { 0, 0, 0, 0 };
 
@@ -204,7 +218,7 @@ private:
             if (IsEmpty()) {
                 return "empty";
             }
-            
+
             std::ostringstream ss;
             ss << "currentDisplayStartX: " << currentDisplayStartX << ","
                << "currentDisplayStartY: " << currentDisplayStartY << ","
@@ -280,6 +294,7 @@ private:
     int32_t maxTranX_ = INT32_MAX;
     int32_t maxTranY_ = INT32_MAX;
     AreaType type_ = AreaType::UNDEFINED;
+    AreaType dragAreaType_ = AreaType::UNDEFINED;
     AxisType mainMoveAxis_ = AxisType::UNDEFINED;
     WindowLimits limits_;
     MoveDragProperty moveDragProperty_;
@@ -303,6 +318,7 @@ private:
     };
     Rect rectExceptFrame_ { 0, 0, 0, 0 };
     Rect rectExceptCorner_ { 0, 0, 0, 0 };
+    Rect parentRect_ { 0, 0, 0, 0};
     uint32_t mouseStyleID_ = 0;
     DragType dragType_ = DragType::DRAG_UNDEFINED;
     MoveTempProperty moveTempProperty_;
@@ -340,9 +356,12 @@ private:
     DMRect moveAvailableArea_ = {0, 0, 0, 0};
     DisplayId moveInputBarStartDisplayId_ = DISPLAY_ID_INVALID;
     ScreenSizeProperty screenSizeProperty_;
-    int32_t lastMovePointerPosX_ = -1;
-    bool isMoveDragHotAreaCrossDisplay_ = false;
     // Above guarded by displayIdSetDuringMoveDragMutex_
+    std::mutex specifyMoveStartMutex_;
+    DisplayId specifyMoveStartDisplayId_ = DISPLAY_ID_INVALID;
+    bool isSpecifyMoveStart_ = false;
+    bool isAdaptToProportionalScale_ = false;
+    // Above guarded by specifyMoveStartMutex_
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_MOVE_DRAG_CONTROLLER_H

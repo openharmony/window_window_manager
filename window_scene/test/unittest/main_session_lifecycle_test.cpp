@@ -30,19 +30,16 @@ public:
     void SetUp() override;
     void TearDown() override;
     SessionInfo info;
-    sptr <MainSession::SpecificSessionCallback> specificCallback = nullptr;
-    sptr <MainSession> mainSession_;
+    sptr<MainSession::SpecificSessionCallback> specificCallback = nullptr;
+    sptr<MainSession> mainSession_;
+
 private:
     RSSurfaceNode::SharedPtr CreateRSSurfaceNode();
 };
 
-void MainSessionLifecycleTest::SetUpTestCase()
-{
-}
+void MainSessionLifecycleTest::SetUpTestCase() {}
 
-void MainSessionLifecycleTest::TearDownTestCase()
-{
-}
+void MainSessionLifecycleTest::TearDownTestCase() {}
 
 void MainSessionLifecycleTest::SetUp()
 {
@@ -170,6 +167,6 @@ HWTEST_F(MainSessionLifecycleTest, NotifyForegroundInteractiveStatus02, TestSize
     mainSession_->NotifyForegroundInteractiveStatus(true);
     ASSERT_EQ(WSError::WS_OK, mainSession_->SetFocusable(false));
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

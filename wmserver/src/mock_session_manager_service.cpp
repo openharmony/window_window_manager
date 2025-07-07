@@ -49,7 +49,6 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "MockSessionManagerService" };
 
 const std::u16string DEFAULT_USTRING = u"error";
 const char DEFAULT_STRING[] = "error";
@@ -270,19 +269,20 @@ void MockSessionManagerService::RemoveSMSDeathRecipientByUserId(int32_t userId)
     }
 }
 
-sptr<IRemoteObject> MockSessionManagerService::GetSessionManagerService()
+ErrCode MockSessionManagerService::GetSessionManagerService(sptr<IRemoteObject>& sessionManagerService)
 {
     int32_t clientUserId = GetUserIdByCallingUid();
     if (clientUserId <= INVALID_USER_ID) {
         TLOGE(WmsLogTag::WMS_MULTI_USER, "userId is illegal: %{public}d", clientUserId);
-        return nullptr;
+        return ERR_INVALID_VALUE;
     }
     if (clientUserId == SYSTEM_USERID) {
         TLOGD(WmsLogTag::WMS_MULTI_USER, "System user, return current sessionManagerService with %{public}d",
               currentWMSUserId_);
         clientUserId = currentWMSUserId_;
     }
-    return GetSessionManagerServiceByUserId(clientUserId);
+    sessionManagerService = GetSessionManagerServiceByUserId(clientUserId);
+    return ERR_OK;
 }
 
 sptr<IRemoteObject> MockSessionManagerService::GetSessionManagerServiceByUserId(int32_t userId)
@@ -308,16 +308,16 @@ void MockSessionManagerService::RemoveSessionManagerServiceByUserId(int32_t user
     }
 }
 
-void MockSessionManagerService::NotifySceneBoardAvailable()
+ErrCode MockSessionManagerService::NotifySceneBoardAvailable()
 {
     if (!SessionPermission::IsSystemCalling()) {
         TLOGE(WmsLogTag::WMS_RECOVER, "permission denied");
-        return;
+        return ERR_PERMISSION_DENIED;
     }
     int32_t userId = GetUserIdByCallingUid();
     if (userId <= INVALID_USER_ID) {
         TLOGE(WmsLogTag::WMS_RECOVER, "userId is illegal: %{public}d", userId);
-        return;
+        return ERR_INVALID_VALUE;
     }
     TLOGI(WmsLogTag::WMS_RECOVER, "scene board is available with userId=%{public}d", userId);
 
@@ -326,19 +326,20 @@ void MockSessionManagerService::NotifySceneBoardAvailable()
 
     NotifySceneBoardAvailableToClient(SYSTEM_USERID);
     NotifySceneBoardAvailableToClient(userId);
+    return ERR_OK;
 }
 
-void MockSessionManagerService::RegisterSMSRecoverListener(const sptr<IRemoteObject>& listener)
+ErrCode MockSessionManagerService::RegisterSMSRecoverListener(const sptr<IRemoteObject>& listener)
 {
     if (listener == nullptr) {
         TLOGE(WmsLogTag::WMS_RECOVER, "listener is nullptr");
-        return;
+        return ERR_INVALID_VALUE;
     }
 
     int32_t clientUserId = GetUserIdByCallingUid();
     if (clientUserId <= INVALID_USER_ID) {
         TLOGE(WmsLogTag::WMS_RECOVER, "userId is illegal: %{public}d", clientUserId);
-        return;
+        return ERR_INVALID_VALUE;
     }
     int32_t pid = IPCSkeleton::GetCallingRealPid();
     TLOGI(WmsLogTag::WMS_RECOVER, "clientUserId = %{public}d, pid = %{public}d", clientUserId, pid);
@@ -351,7 +352,7 @@ void MockSessionManagerService::RegisterSMSRecoverListener(const sptr<IRemoteObj
         smsRecoverListenerMap_[clientUserId][pid] = smsListener;
     }
     if (clientUserId != SYSTEM_USERID) {
-        return;
+        return ERR_WOULD_BLOCK;
     }
     bool isWMSConnected = false;
     {
@@ -364,11 +365,12 @@ void MockSessionManagerService::RegisterSMSRecoverListener(const sptr<IRemoteObj
         auto sessionManagerService = GetSessionManagerServiceByUserId(currentWMSUserId_);
         if (sessionManagerService == nullptr) {
             TLOGE(WmsLogTag::WMS_RECOVER, "SessionManagerService is null");
-            return;
+            return ERR_DEAD_OBJECT;
         }
         TLOGI(WmsLogTag::WMS_RECOVER, "WMS ready,notify client");
         smsListener->OnWMSConnectionChanged(currentWMSUserId_, currentScreenId_, true, sessionManagerService);
     }
+    return ERR_OK;
 }
 
 std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>* MockSessionManagerService::GetSMSRecoverListenerMap(
@@ -381,16 +383,17 @@ std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>* MockSessionManag
     return nullptr;
 }
 
-void MockSessionManagerService::UnregisterSMSRecoverListener()
+ErrCode MockSessionManagerService::UnregisterSMSRecoverListener()
 {
     int32_t clientUserId = GetUserIdByCallingUid();
     if (clientUserId <= INVALID_USER_ID) {
         TLOGE(WmsLogTag::WMS_RECOVER, "userId is illegal: %{public}d", clientUserId);
-        return;
+        return ERR_INVALID_VALUE;
     }
     int32_t pid = IPCSkeleton::GetCallingRealPid();
     TLOGD(WmsLogTag::WMS_RECOVER, "clientUserId = %{public}d, pid = %{public}d", clientUserId, pid);
     UnregisterSMSRecoverListener(clientUserId, pid);
+    return ERR_OK;
 }
 
 void MockSessionManagerService::UnregisterSMSRecoverListener(int32_t userId, int32_t pid)
@@ -433,16 +436,16 @@ void MockSessionManagerService::NotifySceneBoardAvailableToClient(int32_t userId
     }
 }
 
-void MockSessionManagerService::RegisterSMSLiteRecoverListener(const sptr<IRemoteObject>& listener)
+ErrCode MockSessionManagerService::RegisterSMSLiteRecoverListener(const sptr<IRemoteObject>& listener)
 {
     if (listener == nullptr) {
         TLOGE(WmsLogTag::WMS_RECOVER, "Lite listener is nullptr");
-        return;
+        return ERR_INVALID_VALUE;
     }
     int32_t clientUserId = GetUserIdByCallingUid();
     if (clientUserId <= INVALID_USER_ID) {
         TLOGE(WmsLogTag::WMS_RECOVER, "userId is illegal: %{public}d", clientUserId);
-        return;
+        return ERR_INVALID_VALUE;
     }
     int32_t pid = IPCSkeleton::GetCallingRealPid();
     TLOGI(WmsLogTag::WMS_RECOVER, "clientUserId = %{public}d, pid = %{public}d", clientUserId, pid);
@@ -455,7 +458,7 @@ void MockSessionManagerService::RegisterSMSLiteRecoverListener(const sptr<IRemot
         smsLiteRecoverListenerMap_[clientUserId][pid] = smsListener;
     }
     if (clientUserId != SYSTEM_USERID) {
-        return;
+        return ERR_WOULD_BLOCK;
     }
     bool isWMSConnected = false;
     {
@@ -468,11 +471,12 @@ void MockSessionManagerService::RegisterSMSLiteRecoverListener(const sptr<IRemot
         auto sessionManagerService = GetSessionManagerServiceByUserId(currentWMSUserId_);
         if (sessionManagerService == nullptr) {
             TLOGE(WmsLogTag::WMS_RECOVER, "SessionManagerService is null");
-            return;
+            return ERR_DEAD_OBJECT;
         }
         TLOGD(WmsLogTag::WMS_MULTI_USER, "Lite wms is already connected, notify client");
         smsListener->OnWMSConnectionChanged(currentWMSUserId_, currentScreenId_, true, sessionManagerService);
     }
+    return ERR_OK;
 }
 
 std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>* MockSessionManagerService::GetSMSLiteRecoverListenerMap(
@@ -485,16 +489,17 @@ std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>* MockSessionManag
     return nullptr;
 }
 
-void MockSessionManagerService::UnregisterSMSLiteRecoverListener()
+ErrCode MockSessionManagerService::UnregisterSMSLiteRecoverListener()
 {
     int32_t clientUserId = GetUserIdByCallingUid();
     if (clientUserId <= INVALID_USER_ID) {
         TLOGE(WmsLogTag::WMS_RECOVER, "userId is illegal: %{public}d", clientUserId);
-        return;
+        return ERR_INVALID_VALUE;
     }
     int32_t pid = IPCSkeleton::GetCallingRealPid();
     TLOGD(WmsLogTag::WMS_RECOVER, "clientUserId = %{public}d, pid = %{public}d", clientUserId, pid);
     UnregisterSMSLiteRecoverListener(clientUserId, pid);
+    return ERR_OK;
 }
 
 void MockSessionManagerService::UnregisterSMSLiteRecoverListener(int32_t userId, int32_t pid)
@@ -616,13 +621,15 @@ void MockSessionManagerService::NotifyWMSConnectionChangedToLiteClient(
     }
 }
 
-sptr<IRemoteObject> MockSessionManagerService::GetScreenSessionManagerLite()
+ErrCode MockSessionManagerService::GetScreenSessionManagerLite(sptr<IRemoteObject>& screenSessionManagerLite)
 {
     if (screenSessionManager_) {
-        return screenSessionManager_;
+        screenSessionManagerLite = screenSessionManager_;
+        return ERR_OK;
     }
     screenSessionManager_ = ScreenSessionManagerLite::GetInstance().AsObject();
-    return screenSessionManager_;
+    screenSessionManagerLite = screenSessionManager_;
+    return ERR_OK;
 }
 
 void MockSessionManagerService::ShowIllegalArgsInfo(std::string& dumpInfo)
@@ -741,24 +748,6 @@ bool MockSessionManagerService::SMSDeathRecipient::IsSceneBoardTestMode()
     return false;
 }
 
-void MockSessionManagerService::WriteStringToFile(int32_t pid, const char* str)
-{
-    char file[PATH_LEN] = {0};
-    if (snprintf_s(file, PATH_LEN, PATH_LEN - 1, "/proc/%d/unexpected_die_catch", pid) == -1) {
-        WLOGFI("failed to build path for %d.", pid);
-    }
-    int fd = open(file, O_RDWR);
-    if (fd == -1) {
-        return;
-    }
-    if (write(fd, str, strlen(str)) < 0) {
-        WLOGFI("failed to write 0 for %s", file);
-        close(fd);
-        return;
-    }
-    close(fd);
-}
-
 void MockSessionManagerService::GetProcessSurfaceNodeIdByPersistentId(const int32_t pid,
     const std::vector<uint64_t>& windowIdList, std::vector<uint64_t>& surfaceNodeIds)
 {
@@ -861,7 +850,7 @@ sptr<IRemoteObject> MockSessionManagerService::GetSceneSessionManagerByUserId(in
     return remoteObject;
 }
 
-int32_t MockSessionManagerService::RecoverSCBSnapshotSkipByUserId(int32_t userId)
+ErrCode MockSessionManagerService::RecoverSCBSnapshotSkipByUserId(int32_t userId)
 {
     std::unique_lock<std::mutex> lock(userIdBundleNamesMapLock_);
     auto iter = userIdBundleNamesMap_.find(userId);
@@ -870,38 +859,38 @@ int32_t MockSessionManagerService::RecoverSCBSnapshotSkipByUserId(int32_t userId
     }
     sptr<IRemoteObject> remoteObject = GetSceneSessionManagerByUserId(userId);
     if (!remoteObject) {
-        return ERR_NULL_OBJECT;
+        return ERR_DEAD_OBJECT;
     }
     return NotifySCBSnapshotSkipByUserIdAndBundleNames(userId, iter->second, remoteObject);
 }
 
-int32_t MockSessionManagerService::NotifySCBSnapshotSkipByUserIdAndBundleNames(int32_t userId,
+ErrCode MockSessionManagerService::NotifySCBSnapshotSkipByUserIdAndBundleNames(int32_t userId,
     const std::vector<std::string>& bundleNameList, const sptr<IRemoteObject>& remoteObject)
 {
     sptr<ISceneSessionManager> sceneSessionManagerProxy = iface_cast<ISceneSessionManager>(remoteObject);
     WMError ret = sceneSessionManagerProxy->SkipSnapshotByUserIdAndBundleNames(userId, bundleNameList);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "failed!");
-        return ERR_TRANSACTION_FAILED;
+        return ERR_INVALID_OPERATION;
     }
-    return ERR_NONE;
+    return ERR_OK;
 }
 
-int32_t MockSessionManagerService::SetSnapshotSkipByUserIdAndBundleNames(int32_t userId,
+ErrCode MockSessionManagerService::SetSnapshotSkipByUserIdAndBundleNames(int32_t userId,
     const std::vector<std::string>& bundleNameList)
 {
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         TLOGE(WmsLogTag::WMS_MULTI_USER, "service not supported!");
-        return ERR_INVALID_STATE;
+        return ERR_WOULD_BLOCK;
     }
     if (!SessionPermission::VerifyCallingPermission("ohos.permission.MANAGE_EDM_POLICY")) {
         TLOGE(WmsLogTag::WMS_MULTI_USER, "permission denied!");
-        return ERR_UNKNOWN_TRANSACTION;
+        return ERR_PERMISSION_DENIED;
     }
     return SetSnapshotSkipByUserIdAndBundleNamesInner(userId, bundleNameList);
 }
 
-int32_t MockSessionManagerService::SetSnapshotSkipByUserIdAndBundleNamesInner(int32_t userId,
+ErrCode MockSessionManagerService::SetSnapshotSkipByUserIdAndBundleNamesInner(int32_t userId,
     const std::vector<std::string>& bundleNameList)
 {
     {
@@ -911,26 +900,26 @@ int32_t MockSessionManagerService::SetSnapshotSkipByUserIdAndBundleNamesInner(in
     sptr<IRemoteObject> remoteObject = GetSceneSessionManagerByUserId(userId);
     if (!remoteObject) {
         TLOGW(WmsLogTag::WMS_MULTI_USER, "user:%{public}d isn't active.", userId);
-        return ERR_NONE;
+        return ERR_OK;
     }
     return NotifySCBSnapshotSkipByUserIdAndBundleNames(userId, bundleNameList, remoteObject);
 }
 
-int32_t MockSessionManagerService::SetSnapshotSkipByIdNamesMap(
+ErrCode MockSessionManagerService::SetSnapshotSkipByIdNamesMap(
     const std::unordered_map<int32_t, std::vector<std::string>>& userIdAndBunldeNames)
 {
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         TLOGE(WmsLogTag::WMS_MULTI_USER, "service not supported!");
-        return ERR_INVALID_STATE;
+        return ERR_WOULD_BLOCK;
     }
     if (!SessionPermission::VerifyCallingPermission("ohos.permission.MANAGE_EDM_POLICY")) {
         TLOGE(WmsLogTag::WMS_MULTI_USER, "permission denied");
-        return ERR_UNKNOWN_TRANSACTION;
+        return ERR_PERMISSION_DENIED;
     }
     return SetSnapshotSkipByIdNamesMapInner(userIdAndBunldeNames);
 }
 
-int32_t MockSessionManagerService::SetSnapshotSkipByIdNamesMapInner(
+ErrCode MockSessionManagerService::SetSnapshotSkipByIdNamesMapInner(
     const std::unordered_map<int32_t, std::vector<std::string>>& userIdAndBunldeNames)
 {
     std::unique_lock<std::mutex> lock(userIdBundleNamesMapLock_);
@@ -941,13 +930,13 @@ int32_t MockSessionManagerService::SetSnapshotSkipByIdNamesMapInner(
             TLOGW(WmsLogTag::WMS_MULTI_USER, "user:%{public}d isn't active", userId);
             continue;
         }
-        int32_t err = NotifySCBSnapshotSkipByUserIdAndBundleNames(userId, bundleNameList, remoteObject);
-        if (err != ERR_NONE) {
+        ErrCode err = NotifySCBSnapshotSkipByUserIdAndBundleNames(userId, bundleNameList, remoteObject);
+        if (err != ERR_OK) {
             TLOGE(WmsLogTag::DEFAULT, "failed");
             return err;
         }
     }
-    return ERR_NONE;
+    return ERR_OK;
 }
 } // namespace Rosen
 } // namespace OHOS

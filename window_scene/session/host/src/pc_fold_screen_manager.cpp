@@ -154,6 +154,12 @@ float PcFoldScreenManager::GetVpr() const
     return vpr_;
 }
 
+int32_t PcFoldScreenManager::GetVirtualDisplayPosY() const
+{
+    std::shared_lock<std::shared_mutex> lock(rectsMutex_);
+    return defaultDisplayRect_.height_ + foldCreaseRect_.height_;
+}
+
 std::tuple<WSRect, WSRect, WSRect> PcFoldScreenManager::GetDisplayRects() const
 {
     std::shared_lock<std::shared_mutex> lock(rectsMutex_);
@@ -186,6 +192,12 @@ ScreenSide PcFoldScreenManager::CalculateScreenSide(const WSRect& rect)
     const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] = GetDisplayRects();
     return midPosY <= (foldCreaseRect.posY_ + foldCreaseRect.height_ / 2) ? // 2: center
         ScreenSide::FOLD_B : ScreenSide::FOLD_C;
+}
+
+ScreenSide PcFoldScreenManager::CalculateScreenSide(int32_t posY)
+{
+    const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] = GetDisplayRects();
+    return posY < foldCreaseRect.posY_ ? ScreenSide::FOLD_B : ScreenSide::FOLD_C;
 }
 
 bool PcFoldScreenManager::IsCrossFoldCrease(const WSRect& rect)
@@ -401,8 +413,14 @@ bool PcFoldScreenManager::ThrowSlipToOppositeSide(ScreenSide startSide, WSRect& 
         rect.posY_ > startLimitRect.posY_) {
         float ratio = static_cast<float>(endLimitRect.height_ - rect.height_) /
             static_cast<float>(startLimitRect.height_ - rect.height_);
-        rect.posY_ = MathHelper::Floor(ratio * static_cast<float>(rect.posY_ - startLimitRect.posY_)) +
-            endLimitRect.posY_;
+        // after mutiple throw-slip, posY converges
+        if (MathHelper::GreatNotEqual(ratio, 1.0f)) {
+            rect.posY_ = MathHelper::Floor(ratio * static_cast<float>(rect.posY_ - startLimitRect.posY_)) +
+                endLimitRect.posY_;
+        } else {
+            rect.posY_ = MathHelper::Ceil(ratio * static_cast<float>(rect.posY_ - startLimitRect.posY_)) +
+                endLimitRect.posY_;
+        }
     } else {
         rect.posY_ = rect.posY_ + endLimitRect.posY_ - startLimitRect.posY_;
     }
@@ -560,15 +578,25 @@ void PcFoldScreenManager::UnregisterFoldScreenStatusChangeCallback(int32_t persi
 void PcFoldScreenManager::ExecuteFoldScreenStatusChangeCallbacks(DisplayId displayId,
     SuperFoldStatus status, SuperFoldStatus prevStatus)
 {
-    std::unique_lock<std::mutex> lock(callbackMutex_);
-    for (auto iter = foldScreenStatusChangeCallbacks_.begin(); iter != foldScreenStatusChangeCallbacks_.end();) {
-        auto callback = iter->second.lock();
-        if (callback == nullptr) {
-            TLOGW(WmsLogTag::WMS_LAYOUT_PC, "callback invalid, id: %{public}d", iter->first);
-            iter = foldScreenStatusChangeCallbacks_.erase(iter);
-            continue;
+    std::unordered_map<int32_t, std::weak_ptr<FoldScreenStatusChangeCallback>> foldScreenStatusChangeCallbacksCopy;
+    {
+        std::unique_lock<std::mutex> lock(callbackMutex_);
+        for (auto iter = foldScreenStatusChangeCallbacks_.begin(); iter != foldScreenStatusChangeCallbacks_.end();) {
+            auto callback = iter->second.lock();
+            if (callback == nullptr) {
+                TLOGW(WmsLogTag::WMS_LAYOUT_PC, "callback invalid, id: %{public}d", iter->first);
+                iter = foldScreenStatusChangeCallbacks_.erase(iter);
+                continue;
+            }
+            iter++;
         }
-        (*callback)(displayId, status, prevStatus);
+        foldScreenStatusChangeCallbacksCopy = foldScreenStatusChangeCallbacks_;
+    }
+    for (auto iter = foldScreenStatusChangeCallbacksCopy.begin(); iter != foldScreenStatusChangeCallbacksCopy.end();) {
+        auto callback = iter->second.lock();
+        if (callback != nullptr) {
+            (*callback)(displayId, status, prevStatus);
+        }
         iter++;
     }
 }
@@ -598,16 +626,28 @@ void PcFoldScreenManager::UnregisterSystemKeyboardStatusChangeCallback(int32_t p
 
 void PcFoldScreenManager::ExecuteSystemKeyboardStatusChangeCallbacks(DisplayId displayId, bool hasSystemKeyboard)
 {
-    std::unique_lock<std::mutex> lock(callbackMutex_);
-    for (auto iter = systemKeyboardStatusChangeCallbacks_.begin();
-        iter != systemKeyboardStatusChangeCallbacks_.end();) {
-        auto callback = iter->second.lock();
-        if (callback == nullptr) {
-            TLOGW(WmsLogTag::WMS_LAYOUT_PC, "callback invalid, id: %{public}d", iter->first);
-            iter = systemKeyboardStatusChangeCallbacks_.erase(iter);
-            continue;
+    std::unordered_map<int32_t, std::weak_ptr<SystemKeyboardStatusChangeCallback>>
+        systemKeyboardStatusChangeCallbacksCopy;
+    {
+        std::unique_lock<std::mutex> lock(callbackMutex_);
+        for (auto iter = systemKeyboardStatusChangeCallbacks_.begin();
+            iter != systemKeyboardStatusChangeCallbacks_.end();) {
+            auto callback = iter->second.lock();
+            if (callback == nullptr) {
+                TLOGW(WmsLogTag::WMS_LAYOUT_PC, "callback invalid, id: %{public}d", iter->first);
+                iter = systemKeyboardStatusChangeCallbacks_.erase(iter);
+                continue;
+            }
+            iter++;
         }
-        (*callback)(displayId, hasSystemKeyboard);
+        systemKeyboardStatusChangeCallbacksCopy = systemKeyboardStatusChangeCallbacks_;
+    }
+    for (auto iter = systemKeyboardStatusChangeCallbacksCopy.begin();
+        iter != systemKeyboardStatusChangeCallbacksCopy.end();) {
+        auto callback = iter->second.lock();
+        if (callback != nullptr) {
+            (*callback)(displayId, hasSystemKeyboard);
+        }
         iter++;
     }
 }

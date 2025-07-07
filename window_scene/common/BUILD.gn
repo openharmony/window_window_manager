@@ -16,6 +16,7 @@ import("../../windowmanager_aafwk.gni")
 
 config("window_scene_common_public_config") {
   include_dirs = [
+    "include",
     "${window_base_path}/window_scene",
     "${window_base_path}/interfaces/include",
 
@@ -58,7 +59,6 @@ ohos_shared_library("window_scene_common") {
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "image_framework:image_native",
-    "imf:inputmethod_client",
     "init:libbegetutil",
     "input:libmmi-client",
     "ipc:ipc_core",
@@ -66,11 +66,21 @@ ohos_shared_library("window_scene_common") {
     "samgr:samgr_proxy",
   ]
 
+  defines = []
+  imf_enable = true
+  if (defined(global_parts_info) && !defined(global_parts_info.inputmethod_imf)) {
+    imf_enable = false
+  }
+  print("window_scene_common imf_enable: ", imf_enable)
+  if (imf_enable) {
+    external_deps += [ "imf:inputmethod_client" ]
+    defines += [ "IMF_ENABLE" ]
+  }
+
   innerapi_tags = [ "platformsdk_indirect" ]
   part_name = "window_manager"
   subsystem_name = "window"
 
-  defines = []
   if (build_variant == "user") {
     defines += [ "IS_RELEASE_VERSION" ]
   }

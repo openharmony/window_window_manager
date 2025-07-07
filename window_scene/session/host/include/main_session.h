@@ -71,6 +71,8 @@ public:
     bool GetSessionLockState() const;
     WSError SetSessionLabelAndIcon(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon) override;
     void SetUpdateSessionLabelAndIconListener(NofitySessionLabelAndIconUpdatedFunc&& func) override;
+    WMError GetRouterStackInfo(std::string& routerStackInfo) const override;
+    void SetRecentSessionState(RecentSessionInfo& info, const SessionState& state) override;
 
 protected:
     void UpdatePointerArea(const WSRect& rect) override;
@@ -90,6 +92,11 @@ private:
      * Window Layout
      */
     void NotifySubAndDialogFollowRectChange(const WSRect& rect, bool isGlobal, bool needFlush) override;
+    void SetSubWindowBoundsDuringCross(const WSRect& parentRect, bool isGlobal, bool needFlush) override;
+    void NotifySubSessionRectChangeByAnchor(const WSRect& parentRect,
+        SizeChangeReason reason = SizeChangeReason::UNDEFINED, DisplayId displayId = DISPLAY_ID_INVALID) override;
+    void HandleSubSessionSurfaceNodeByWindowAnchor(SizeChangeReason reason,
+        const sptr<ScreenSession>& screenSession) override;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_MAIN_SESSION_H

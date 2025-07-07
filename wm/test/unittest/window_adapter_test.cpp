@@ -24,6 +24,8 @@
 #include "window_agent.h"
 #include "window_property.h"
 #include "window_transition_info.h"
+#include "ui_effect_controller_interface.h"
+#include "ui_effect_controller_client.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -276,20 +278,29 @@ HWTEST_F(WindowAdapterTest, WindowManagerAndSessionRecover, TestSize.Level1)
     int32_t persistentId = 1;
     int32_t ret = 0;
     auto testFunc = [&ret] {
-        ret = 1;
+        ret += 1;
         return WMError::WM_DO_NOTHING;
     };
 
     auto testFunc2 = [&ret] {
-        ret = 2;
+        ret += 1;
         return WMError::WM_OK;
     };
+
+    auto testFunc3 = [] {
+        return WMError::WM_OK;
+    };
+    auto testFunc4 = [] {
+        return WMError::WM_DO_NOTHING;
+    };
     windowAdapter.RegisterSessionRecoverCallbackFunc(persistentId, testFunc);
+    windowAdapter.RegisterUIEffectRecoverCallbackFunc(persistentId, testFunc3);
     windowAdapter.WindowManagerAndSessionRecover();
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(ret, 1);
     }
     windowAdapter.RegisterSessionRecoverCallbackFunc(persistentId, testFunc2);
+    windowAdapter.RegisterUIEffectRecoverCallbackFunc(persistentId, testFunc4);
     windowAdapter.WindowManagerAndSessionRecover();
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(ret, 2);
@@ -652,6 +663,20 @@ HWTEST_F(WindowAdapterTest, GetHostWindowRect, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetHostGlobalScaledRect
+ * @tc.desc: WindowAdapter/GetHostGlobalScaledRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, GetHostGlobalScaledRect, TestSize.Level1)
+{
+    WindowAdapter windowAdapter;
+    int32_t hostWindowId = 0;
+    Rect rect = { 0, 0, 0, 0 };
+    auto ret = windowAdapter.GetHostGlobalScaledRect(hostWindowId, rect);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_SESSION, ret);
+}
+
+/**
  * @tc.name: GetWindowStyleType
  * @tc.desc: WindowAdapter/GetWindowStyleType
  * @tc.type: FUNC
@@ -660,8 +685,7 @@ HWTEST_F(WindowAdapterTest, GetWindowStyleType, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
     WindowStyleType windowStyleType = Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT;
-    windowAdapter.GetWindowStyleType(windowStyleType);
-    ASSERT_EQ(Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT, windowStyleType);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, windowAdapter.GetWindowStyleType(windowStyleType));
 }
 
 /**
@@ -678,6 +702,21 @@ HWTEST_F(WindowAdapterTest, SetProcessWatermark, TestSize.Level1)
     windowAdapter.SetProcessWatermark(pid, watermarkName, isEnabled);
     auto ret = windowAdapter.InitWMSProxy();
     ASSERT_EQ(true, ret);
+}
+
+/**
+ * @tc.name: NotifyScreenshotEvent
+ * @tc.desc: NotifyScreenshotEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, NotifyScreenshotEvent, TestSize.Level1)
+{
+    ScreenshotEventType type = ScreenshotEventType::SCROLL_SHOT_START;
+    WindowAdapter windowAdapter;
+    auto err = windowAdapter.NotifyScreenshotEvent(type);
+    EXPECT_EQ(err, WMError::WM_OK);
+    auto ret = windowAdapter.InitWMSProxy();
+    EXPECT_EQ(ret, true);
 }
 
 /**
@@ -728,6 +767,30 @@ HWTEST_F(WindowAdapterTest, IsPcWindow, TestSize.Level1)
     WindowAdapter windowAdapter;
     bool isPcWindow = false;
     auto err = windowAdapter.IsPcWindow(isPcWindow);
+    ASSERT_EQ(err, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: IsFreeMultiWindowMode
+ * @tc.desc: WindowAdapter/IsFreeMultiWindowMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, IsFreeMultiWindowMode, TestSize.Level1)
+{
+    WindowAdapter windowAdapter;
+    auto ret = windowAdapter.InitWMSProxy();
+    ASSERT_EQ(ret, true);
+
+    auto proxy = windowAdapter.GetWindowManagerServiceProxy();
+    ASSERT_NE(proxy, nullptr);
+    bool proxyIsFreeMultWindow = false;
+    auto proxyRet = proxy->IsFreeMultiWindow(proxyIsFreeMultWindow);
+    ASSERT_EQ(proxyRet, WMError::WM_OK);
+
+    bool isFreeMultiWindow = false;
+    auto err = windowAdapter.IsFreeMultiWindowMode(isFreeMultiWindow);
+
+    ASSERT_EQ(isFreeMultiWindow, proxyIsFreeMultWindow);
     ASSERT_EQ(err, WMError::WM_OK);
 }
 
@@ -876,19 +939,6 @@ HWTEST_F(WindowAdapterTest, MinimizeByWindowId, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetForegroundWindowNum
- * @tc.desc: WindowAdapter/SetForegroundWindowNum
- * @tc.type: FUNC
- */
-HWTEST_F(WindowAdapterTest, SetForegroundWindowNum, Function | SmallTest | Level2)
-{
-    WindowAdapter windowAdapter;
-    int32_t windowNum = 1;
-    auto err = windowAdapter.SetForegroundWindowNum(windowNum);
-    ASSERT_EQ(err, WMError::WM_OK);
-}
-
-/**
  * @tc.name: ListWindowInfo01
  * @tc.desc: WindowAdapter/ListWindowInfo
  * @tc.type: FUNC
@@ -902,6 +952,60 @@ HWTEST_F(WindowAdapterTest, ListWindowInfo01, Function | SmallTest | Level2)
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, err);
     auto ret = windowAdapter.InitWMSProxy();
     ASSERT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: RegisterWindowPropertyChangeAgent01
+ * @tc.desc: WindowAdapter/RegisterWindowPropertyChangeAgent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, RegisterWindowPropertyChangeAgent01, Function | SmallTest | Level2)
+{
+    WindowAdapter windowAdapter;
+    WindowInfoOption windowInfoOption;
+    WindowInfoKey windowInfoKey = WindowInfoKey::NONE;
+    uint32_t interestInfo = 0;
+    sptr<IWindowManagerAgent> windowManagerAgent;
+    auto err = windowAdapter.RegisterWindowPropertyChangeAgent(windowInfoKey, interestInfo, windowManagerAgent);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, err);
+    auto ret = windowAdapter.InitWMSProxy();
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: UnregisterWindowPropertyChangeAgent01
+ * @tc.desc: WindowAdapter/UnregisterWindowPropertyChangeAgent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, UnregisterWindowPropertyChangeAgent01, Function | SmallTest | Level2)
+{
+    WindowAdapter windowAdapter;
+    WindowInfoOption windowInfoOption;
+    WindowInfoKey windowInfoKey = WindowInfoKey::NONE;
+    uint32_t interestInfo = 0;
+    sptr<IWindowManagerAgent> windowManagerAgent;
+    auto err = windowAdapter.UnregisterWindowPropertyChangeAgent(windowInfoKey, interestInfo, windowManagerAgent);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, err);
+    auto ret = windowAdapter.InitWMSProxy();
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: UnregisterWindowPropertyChangeAgent01
+ * @tc.desc: WindowAdapter/UnregisterWindowPropertyChangeAgent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, CreateUIEffectController, Function | SmallTest | Level2)
+{
+    WindowAdapter windowAdapter;
+    sptr<UIEffectControllerClient> client = sptr<UIEffectControllerClient>::MakeSptr();
+    sptr<IUIEffectController> controller;
+    int32_t controllerId = 0;
+    auto err = windowAdapter.CreateUIEffectController(client, controller, controllerId);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, err);
+    auto ret = windowAdapter.InitWMSProxy();
+    EXPECT_EQ(ret, true);
+    windowAdapter.CreateUIEffectController(client, controller, controllerId);
 }
 } // namespace
 } // namespace Rosen

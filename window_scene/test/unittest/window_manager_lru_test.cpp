@@ -29,25 +29,18 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+
 private:
     std::unique_ptr<LruCache> testLruCache_;
 };
 
-void LruCacheTest::SetUpTestCase()
-{
-}
+void LruCacheTest::SetUpTestCase() {}
 
-void LruCacheTest::TearDownTestCase()
-{
-}
+void LruCacheTest::TearDownTestCase() {}
 
-void LruCacheTest::SetUp()
-{
-}
+void LruCacheTest::SetUp() {}
 
-void LruCacheTest::TearDown()
-{
-}
+void LruCacheTest::TearDown() {}
 
 /**
  * @tc.name: Visit
@@ -99,5 +92,5 @@ HWTEST_F(LruCacheTest, Remove, TestSize.Level1)
     res = testLruCache_->Put(33);
     ASSERT_EQ(res, -1);
 }
-}
-}
+} // namespace Rosen
+} // namespace OHOS

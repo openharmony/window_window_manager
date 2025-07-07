@@ -29,21 +29,13 @@ public:
     void TearDown() override;
 };
 
-void WindowFocusSceneSessionTest::SetUpTestCase()
-{
-}
+void WindowFocusSceneSessionTest::SetUpTestCase() {}
 
-void WindowFocusSceneSessionTest::TearDownTestCase()
-{
-}
+void WindowFocusSceneSessionTest::TearDownTestCase() {}
 
-void WindowFocusSceneSessionTest::SetUp()
-{
-}
+void WindowFocusSceneSessionTest::SetUp() {}
 
-void WindowFocusSceneSessionTest::TearDown()
-{
-}
+void WindowFocusSceneSessionTest::TearDown() {}
 
 namespace {
 
@@ -217,5 +209,5 @@ HWTEST_F(WindowFocusSceneSessionTest, IsSystemSessionAboveApp02, TestSize.Level1
     ASSERT_EQ(false, sceneSession->IsSystemSessionAboveApp());
 }
 } // namespace
-} // Rosen
-} // OHOS
+} // namespace Rosen
+} // namespace OHOS

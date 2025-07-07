@@ -50,6 +50,7 @@ ohos_fuzztest("WindowStubUpdateFuzzTest") {
     "ability_runtime:app_manager",
     "ace_engine:ace_uicontent",
     "c_utils:utils",
+    "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "input:libmmi-client",

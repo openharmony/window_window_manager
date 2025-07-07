@@ -54,9 +54,13 @@ private:
     void SendKeyEventConsumedResultToSCB(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool isConsumed) const;
     void SetPointerEventStatus(
         int32_t fingerId, int32_t action, int32_t sourceType, const sptr<SceneSession>& sceneSession) const;
+    void ProcessInjectionEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const;
     Ace::UIContent* uiContent_ = nullptr;
     std::weak_ptr<AppExecFwk::EventHandler> weakEventConsumer_;
 };
+    bool GetAddMonitor();
+    void SetAddMonitor(bool isAddMonitor);
+    bool isAddMonitor_ = false;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_INTENTION_EVENT_MANAGER_H

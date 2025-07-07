@@ -17,14 +17,20 @@
 #include <gmock/gmock.h>
 #include <ipc_types.h>
 #include <pointer_event.h>
-#include "iremote_object_mocker.h"
-#include "mock/mock_session_stub.h"
-#include "session/host/include/zidl/session_stub.h"
+#include <ui/rs_surface_node.h>
 #include "ability_start_setting.h"
+#include "iremote_object_mocker.h"
+#include "mock/mock_session_stage.h"
+#include "mock/mock_session_stub.h"
+#include "mock/mock_window_event_channel.h"
 #include "parcel/accessibility_event_info_parcel.h"
 #include "session/host/include/zidl/session_ipc_interface_code.h"
+#include "session/host/include/zidl/session_stub.h"
+#include "transaction/rs_transaction.h"
 #include "want.h"
+#include "wm_common.h"
 #include "ws_common.h"
+#include "ui/rs_canvas_node.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -33,6 +39,7 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 const std::string UNDEFINED = "undefined";
+const uint32_t MAX_INT = -1;
 }
 
 namespace OHOS::Accessibility {
@@ -49,13 +56,9 @@ private:
     sptr<SessionStub> session_ = nullptr;
 };
 
-void SessionStubTest::SetUpTestCase()
-{
-}
+void SessionStubTest::SetUpTestCase() {}
 
-void SessionStubTest::TearDownTestCase()
-{
-}
+void SessionStubTest::TearDownTestCase() {}
 
 void SessionStubTest::SetUp()
 {
@@ -80,7 +83,7 @@ HWTEST_F(SessionStubTest, OnRemoteRequest01, TestSize.Level1)
     uint32_t code = 1;
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
+    MessageOption option = { MessageOption::TF_SYNC };
     auto res = session_->OnRemoteRequest(code, data, reply, option);
     ASSERT_EQ(ERR_NONE, res);
     data.WriteInterfaceToken(u"OHOS.ISession");
@@ -98,7 +101,7 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest01, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
+    MessageOption option = { MessageOption::TF_SYNC };
     data.WriteBool(true);
     auto res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_WINDOW_ANIMATION_FLAG), data, reply, option);
@@ -157,7 +160,7 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest02, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
+    MessageOption option = { MessageOption::TF_SYNC };
     data.WriteBool(true);
     auto res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_WINDOW_ANIMATION_FLAG), data, reply, option);
@@ -212,7 +215,7 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest03, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
+    MessageOption option = { MessageOption::TF_SYNC };
     data.WriteBool(true);
     sptr<IRemoteObjectMocker> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     EXPECT_NE(data.WriteRemoteObject(iRemoteObjectMocker), false);
@@ -221,11 +224,11 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest03, TestSize.Level1)
     EXPECT_NE(data.WriteString("HandleSessionException"), false);
     EXPECT_NE(data.WriteParcelable(&options), false);
     ASSERT_EQ(data.WriteUint64(2), true);
-    auto res = session_->ProcessRemoteRequest(
-        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SHOW), data, reply, option);
+    auto res =
+        session_->ProcessRemoteRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SHOW), data, reply, option);
     ASSERT_EQ(ERR_INVALID_DATA, res);
-    res = session_->ProcessRemoteRequest(
-        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_HIDE), data, reply, option);
+    res =
+        session_->ProcessRemoteRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_HIDE), data, reply, option);
     ASSERT_EQ(ERR_NONE, res);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_DRAWING_COMPLETED), data, reply, option);
@@ -262,7 +265,7 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest04, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
+    MessageOption option = { MessageOption::TF_SYNC };
     ASSERT_EQ(data.WriteInt32(1), true);
     ASSERT_EQ(data.WriteInt32(2), true);
     auto res = session_->ProcessRemoteRequest(
@@ -301,7 +304,7 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest05, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
+    MessageOption option = { MessageOption::TF_SYNC };
     data.WriteBool(true);
     sptr<IRemoteObjectMocker> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     EXPECT_NE(data.WriteRemoteObject(iRemoteObjectMocker), false);
@@ -337,7 +340,7 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest06, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
+    MessageOption option = { MessageOption::TF_SYNC };
     AAFwk::Want want;
     data.WriteParcelable(&want);
     data.WriteBool(true);
@@ -373,7 +376,7 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest07, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
+    MessageOption option = { MessageOption::TF_SYNC };
     ASSERT_EQ(data.WriteInt32(1), true);
     ASSERT_EQ(data.WriteInt32(1), true);
     ASSERT_EQ(data.WriteUint32(1), true);
@@ -412,8 +415,50 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest07, TestSize.Level1)
     ASSERT_EQ(data.WriteBool(true), true);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_FOLLOW_PARENT_MULTI_SCREEN_POLICY),
-        data, reply, option);
+        data,
+        reply,
+        option);
     ASSERT_EQ(ERR_NONE, res);
+    ShadowsInfo shadowsInfo =
+        { 20.0, "#FF0000", 0.0, 0.0, true, true, true, true }; // 20.0 is shadow radius, 0.0 is shadow offset
+    ASSERT_EQ(data.WriteParcelable(&shadowsInfo), true);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_SHADOWS), data, reply, option);
+    ASSERT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: ProcessRemoteRequestTest08
+ * @tc.desc: sessionStub ProcessRemoteRequestTest08
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionStubTest, ProcessRemoteRequestTest08, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_SYNC };
+    FloatingBallTemplateInfo fbTemplateInfo {{1, "fb", "fb_content", "red"}, nullptr};
+    data.WriteParcelable(&fbTemplateInfo);
+    auto res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_FLOATING_BALL), data, reply, option);
+    ASSERT_EQ(ERR_NONE, res);
+    data.WriteParcelable(nullptr);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_FLOATING_BALL_PREPARE_CLOSE), data, reply, option);
+    ASSERT_EQ(ERR_NONE, res);
+    data.WriteParcelable(nullptr);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_START_FLOATING_BALL_MAIN_WINDOW), data, reply, option);
+    ASSERT_EQ(ERR_INVALID_DATA, res);
+    data.WriteParcelable(nullptr);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_FLOATING_BALL_WINDOW_ID), data, reply, option);
+    ASSERT_EQ(ERR_NONE, res);
+    data.WriteParcelable(nullptr);
+    res = session_->ProcessRemoteRequest(
+    static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_ANCHOR_INFO), data, reply, option);
+    ASSERT_EQ(ERR_INVALID_DATA, res);
 }
 
 /**
@@ -673,6 +718,29 @@ HWTEST_F(SessionStubTest, HandleUpdatePiPTemplateInfo, Function | SmallTest | Le
 }
 
 /**
+ * @tc.name: HandleSetWindowTransitionAnimation
+ * @tc.desc: sessionStub sessionStubTest
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionStubTest, HandleSetWindowTransitionAnimation, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+
+    ASSERT_EQ(ERR_INVALID_DATA, session_->HandleSetWindowTransitionAnimation(data, reply));
+    
+    data.WriteInt32(10);
+    ASSERT_EQ(ERR_INVALID_DATA, session_->HandleSetWindowTransitionAnimation(data, reply));
+    
+    TransitionAnimation animation;
+    data.WriteUint32(static_cast<uint32_t>(WindowTransitionType::DESTROY));
+    data.WriteParcelable(&animation);
+    ASSERT_EQ(ERR_NONE, session_->HandleSetWindowTransitionAnimation(data, reply));
+}
+
+/**
  * @tc.name: HandleProcessPointDownSession006
  * @tc.desc: sessionStub sessionStubTest
  * @tc.type: FUNC
@@ -858,6 +926,20 @@ HWTEST_F(SessionStubTest, HandleNotifyFrameLayoutFinish, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleSnapshotUpdate
+ * @tc.desc: sessionStub HandleSnapshotUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleSnapshotUpdate, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    auto result = session_->HandleSnapshotUpdate(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
+}
+
+/**
  * @tc.name: HandleSyncSessionEvent
  * @tc.desc: sessionStub HandleSyncSessionEvent
  * @tc.type: FUNC
@@ -972,7 +1054,7 @@ HWTEST_F(SessionStubTest, HandleSetSessionLabelAndIcon03, TestSize.Level1)
     MessageParcel reply;
     std::string label = "demo label";
     data.WriteString(label);
-    const uint32_t color[] = {0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80};
+    const uint32_t color[] = { 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80 };
     uint32_t len = sizeof(color) / sizeof(color[0]);
     Media::InitializationOptions opts;
     opts.size.width = 2;
@@ -996,8 +1078,8 @@ HWTEST_F(SessionStubTest, HandleGetCrossAxisState, TestSize.Level1)
     MessageParcel data;
     MessageParcel reply;
     sptr<SessionStubMocker> session = sptr<SessionStubMocker>::MakeSptr();
-    EXPECT_CALL(*session, GetCrossAxisState(_)).
-        WillOnce(DoAll(SetArgReferee<0>(CrossAxisState::STATE_CROSS), Return(WSError::WS_OK)));
+    EXPECT_CALL(*session, GetCrossAxisState(_))
+        .WillOnce(DoAll(SetArgReferee<0>(CrossAxisState::STATE_CROSS), Return(WSError::WS_OK)));
     session->HandleGetCrossAxisState(data, reply);
     uint32_t state = 0;
     reply.ReadUint32(state);
@@ -1036,6 +1118,104 @@ HWTEST_F(SessionStubTest, HandleUpdateRotationChangeListenerRegistered, Function
     ASSERT_EQ(result, ERR_NONE);
     result = session_->HandleUpdateRotationChangeListenerRegistered(data, reply);
     ASSERT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandleUpdateScreenshotAppEventRegistered
+ * @tc.desc: sessionStub HandleUpdateScreenshotAppEventRegistered
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleUpdateScreenshotAppEventRegistered, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInt32(0);
+    data.WriteBool(false);
+    auto result = session_->HandleUpdateScreenshotAppEventRegistered(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
+
+    data.WriteInterfaceToken(u"OHOS.ISession");
+    uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_SCREEN_SHOT_APP_EVENT_REGISTERED);
+    EXPECT_EQ(0, session_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleUpdateAcrossDisplaysChangeRegistered
+ * @tc.desc: sessionStub HandleUpdateAcrossDisplaysChangeRegistered
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleUpdateAcrossDisplaysChangeRegistered, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInt32(0);
+    data.WriteBool(false);
+    sptr<SessionStub> sessionStub = sptr<SessionStubMocker>::MakeSptr();
+    ASSERT_NE(nullptr, sessionStub);
+    auto result = sessionStub->HandleUpdateAcrossDisplaysChangeRegistered(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
+
+    data.WriteInterfaceToken(SessionStub::GetDescriptor());
+    uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_ACROSS_DISPLAYS_REGISTERED);
+    EXPECT_EQ(0, sessionStub->ProcessRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleIsMainWindowFullScreenAcrossDisplays
+ * @tc.desc: sessionStub HandleIsMainWindowFullScreenAcrossDisplays
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleIsMainWindowFullScreenAcrossDisplays, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInt32(0);
+    data.WriteBool(false);
+    sptr<SessionStub> sessionStub = sptr<SessionStubMocker>::MakeSptr();
+    ASSERT_NE(nullptr, sessionStub);
+    auto result = sessionStub->HandleIsMainWindowFullScreenAcrossDisplays(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
+
+    data.WriteInterfaceToken(SessionStub::GetDescriptor());
+    uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_MAIN_WINDOW_FULL_SCREEN_ACROSS_DISPLAYS);
+    EXPECT_EQ(0, sessionStub->ProcessRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleNotifyKeyboardWillShowRegistered
+ * @tc.desc: sessionStub HandleNotifyKeyboardWillShowRegistered
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleNotifyKeyboardWillShowRegistered, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto result = session_->HandleNotifyKeyboardWillShowRegistered(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+
+    data.WriteBool(true);
+    auto result1 = session_->HandleNotifyKeyboardWillShowRegistered(data, reply);
+    ASSERT_EQ(result1, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleNotifyKeyboardWillHideRegistered
+ * @tc.desc: sessionStub HandleNotifyKeyboardWillHideRegistered
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleNotifyKeyboardWillHideRegistered, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto result = session_->HandleNotifyKeyboardWillHideRegistered(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+ 
+    data.WriteBool(true);
+    auto result1 = session_->HandleNotifyKeyboardWillHideRegistered(data, reply);
+    ASSERT_EQ(result1, ERR_NONE);
 }
 
 /**
@@ -1081,6 +1261,727 @@ HWTEST_F(SessionStubTest, GetIsHighlighted, Function | SmallTest | Level2)
     auto result = session_->HandleGetIsHighlighted(data, reply);
     ASSERT_EQ(result, ERR_NONE);
 }
+
+/**
+ * @tc.name: HandleDefaultDensityEnabled
+ * @tc.desc: sessionStub HandleDefaultDensityEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleDefaultDensityEnabled, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto result = session_->HandleDefaultDensityEnabled(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+    data.WriteBool(true);
+    result = session_->HandleDefaultDensityEnabled(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
 }
+
+/**
+ * @tc.name: HandleForeground
+ * @tc.desc: sessionStub HandleForeground
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleForeground, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto result = session_->HandleForeground(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+    data.WriteBool(true);
+    sptr<WindowSessionProperty> propertyTest = nullptr;
+    data.WriteParcelable(propertyTest);
+    result = session_->HandleForeground(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+    propertyTest = sptr<WindowSessionProperty>::MakeSptr();
+    data.WriteBool(true);
+    data.WriteParcelable(propertyTest);
+    data.WriteBool(true);
+    result = session_->HandleForeground(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+    data.WriteBool(true);
+    data.WriteParcelable(propertyTest);
+    data.WriteBool(true);
+    data.WriteString("HandleForegroundTest");
+    result = session_->HandleForeground(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+    data.WriteBool(false);
+    data.WriteBool(true);
+    data.WriteString("HandleForegroundTest");
+    result = session_->HandleForeground(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleGetWaterfallMode
+ * @tc.desc: sessionStub HandleGetWaterfallMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleGetWaterfallMode, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto result = session_->HandleGetWaterfallMode(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleKeyFrameAnimateEnd
+ * @tc.desc: sessionStub HandleKeyFrameAnimateEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleKeyFrameAnimateEnd, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto result = session_->HandleKeyFrameAnimateEnd(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleUpdateKeyFrameCloneNode
+ * @tc.desc: sessionStub HandleUpdateKeyFrameCloneNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleUpdateKeyFrameCloneNode, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto rsCanvasNode = RSCanvasNode::Create();
+    ASSERT_NE(rsCanvasNode, nullptr);
+    ASSERT_EQ(rsCanvasNode->Marshalling(data), true);
+    auto rsTransaction = std::make_shared<RSTransaction>();
+    ASSERT_NE(rsTransaction, nullptr);
+    ASSERT_EQ(data.WriteParcelable(rsTransaction.get()), true);
+    auto result = session_->HandleUpdateKeyFrameCloneNode(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+    int32_t ret = 0;
+    ASSERT_EQ(reply.ReadInt32(ret), true);
+    ASSERT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: HandleNotifyDisableDelegatorChange
+ * @tc.desc: sessionStub HandleNotifyDisableDelegatorChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleNotifyDisableDelegatorChange, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto result = session_->HandleNotifyDisableDelegatorChange(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleNotifyKeyboardDidHideRegistered
+ * @tc.desc: sessionStub HandleNotifyKeyboardDidHideRegistered
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleNotifyKeyboardDidHideRegistered, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto result = session_->HandleNotifyKeyboardDidHideRegistered(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+    data.WriteBool(true);
+    result = session_->HandleNotifyKeyboardDidHideRegistered(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleNotifyKeyboardDidShowRegistered
+ * @tc.desc: sessionStub HandleNotifyKeyboardDidShowRegistered
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleNotifyKeyboardDidShowRegistered, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto result = session_->HandleNotifyKeyboardDidShowRegistered(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+    data.WriteBool(true);
+    result = session_->HandleNotifyKeyboardDidShowRegistered(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleNotifyMainModalTypeChange
+ * @tc.desc: sessionStub HandleNotifyMainModalTypeChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleNotifyMainModalTypeChange, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto result = session_->HandleNotifyMainModalTypeChange(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+    data.WriteBool(true);
+    result = session_->HandleNotifyMainModalTypeChange(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleNotifySubModalTypeChange
+ * @tc.desc: sessionStub HandleNotifySubModalTypeChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleNotifySubModalTypeChange, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto result = session_->HandleNotifySubModalTypeChange(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+    data.WriteUint32(static_cast<uint32_t>(SubWindowModalType::TYPE_UNDEFINED));
+    result = session_->HandleNotifySubModalTypeChange(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+    data.WriteUint32(static_cast<uint32_t>(SubWindowModalType::TYPE_TEXT_MENU) + 1);
+    result = session_->HandleNotifySubModalTypeChange(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandleSetFollowParentWindowLayoutEnabled
+ * @tc.desc: sessionStub HandleSetFollowParentWindowLayoutEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleSetFollowParentWindowLayoutEnabled, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto result = session_->HandleSetFollowParentWindowLayoutEnabled(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+    data.WriteBool(true);
+    result = session_->HandleSetFollowParentWindowLayoutEnabled(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleSetWindowAnchorInfo
+ * @tc.desc: sessionStub HandleSetWindowAnchorInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleSetWindowAnchorInfo, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto result = session_->HandleSetWindowAnchorInfo(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+
+    WindowAnchorInfo windowAnchor;
+    data.WriteParcelable(&windowAnchor);
+    result = session_->HandleSetWindowAnchorInfo(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleSetGestureBackEnabled
+ * @tc.desc: sessionStub HandleSetGestureBackEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleSetGestureBackEnabled, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto result = session_->HandleSetGestureBackEnabled(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+    data.WriteBool(true);
+    result = session_->HandleSetGestureBackEnabled(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleSetSupportedWindowModes
+ * @tc.desc: sessionStub HandleSetSupportedWindowModes
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleSetSupportedWindowModes, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    std::vector<AppExecFwk::SupportWindowMode> supportedWindowModes = { AppExecFwk::SupportWindowMode::FULLSCREEN,
+                                                                        AppExecFwk::SupportWindowMode::SPLIT,
+                                                                        AppExecFwk::SupportWindowMode::FLOATING };
+    auto result = session_->HandleSetSupportedWindowModes(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+    uint32_t size = supportedWindowModes.size();
+    data.WriteUint32(size);
+    for (int i = 0; i < size; i++) {
+        data.WriteInt32(static_cast<int32_t>(supportedWindowModes[i]));
+    }
+    result = session_->HandleSetSupportedWindowModes(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleStartMovingWithCoordinate
+ * @tc.desc: sessionStub HandleStartMovingWithCoordinate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleStartMovingWithCoordinate, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto result = session_->HandleStartMovingWithCoordinate(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+    data.WriteInt32(0);
+    result = session_->HandleStartMovingWithCoordinate(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    result = session_->HandleStartMovingWithCoordinate(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    data.WriteInt32(1);
+    result = session_->HandleStartMovingWithCoordinate(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    data.WriteInt32(1);
+    data.WriteInt32(1);
+    result = session_->HandleStartMovingWithCoordinate(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    data.WriteInt32(1);
+    data.WriteInt32(1);
+    data.WriteUint64(0);
+    result = session_->HandleStartMovingWithCoordinate(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
+}
+
+/**q
+ * @tc.name: HandleTransferAccessibilityEvent
+ * @tc.desc: sessionStub HandleTransferAccessibilityEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleTransferAccessibilityEvent, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteParcelable(nullptr);
+    auto result = session_->HandleTransferAccessibilityEvent(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+    Accessibility::AccessibilityEventInfo info;
+    Accessibility::AccessibilityEventInfoParcel infoParcel(info);
+    data.WriteParcelable(&infoParcel);
+    result = session_->HandleTransferAccessibilityEvent(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+    data.WriteParcelable(&infoParcel);
+    data.WriteInt64(1);
+    result = session_->HandleTransferAccessibilityEvent(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleSetSubWindowSource
+ * @tc.desc: test function : HandleSetSubWindowSource
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleSetSubWindowSource, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    Accessibility::AccessibilityEventInfo info;
+    Accessibility::AccessibilityEventInfoParcel infoParcel(info);
+    auto result = session_->HandleSetSubWindowSource(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+    data.WriteParcelable(&infoParcel);
+    data.WriteUint32(1);
+    result = session_->HandleSetSubWindowSource(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleChangeKeyboardEffectOption01
+ * @tc.desc: test function : HandleChangeKeyboardEffectOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleChangeKeyboardEffectOption01, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto result = session_->HandleChangeKeyboardEffectOption(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+
+    KeyboardEffectOption effectOption;
+    data.WriteParcelable(&effectOption);
+    result = session_->HandleChangeKeyboardEffectOption(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleChangeKeyboardEffectOption02
+ * @tc.desc: test function : HandleChangeKeyboardEffectOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleChangeKeyboardEffectOption02, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    KeyboardEffectOption effectOption;
+    effectOption.viewMode_ = static_cast<KeyboardViewMode>(MAX_INT);
+    data.WriteParcelable(&effectOption);
+    auto result = session_->HandleChangeKeyboardEffectOption(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandleChangeKeyboardEffectOption03
+ * @tc.desc: test function : HandleChangeKeyboardEffectOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleChangeKeyboardEffectOption03, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    KeyboardEffectOption effectOption;
+    effectOption.flowLightMode_ = static_cast<KeyboardFlowLightMode>(MAX_INT);
+    data.WriteParcelable(&effectOption);
+    auto result = session_->HandleChangeKeyboardEffectOption(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandleChangeKeyboardEffectOption04
+ * @tc.desc: test function : HandleChangeKeyboardEffectOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleChangeKeyboardEffectOption04, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    KeyboardEffectOption effectOption;
+    effectOption.gradientMode_ = static_cast<KeyboardGradientMode>(MAX_INT);
+    data.WriteParcelable(&effectOption);
+    auto result = session_->HandleChangeKeyboardEffectOption(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandleSetFrameRectForPartialZoomIn
+ * @tc.desc: sessionStub sessionStubTest
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionStubTest, HandleSetFrameRectForPartialZoomIn, Function | SmallTest | Level2)
+{
+    EXPECT_NE(session_, nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+
+    EXPECT_EQ(session_->HandleSetFrameRectForPartialZoomIn(data, reply), ERR_INVALID_DATA);
+    
+    bool res = data.WriteUint32(0);
+    EXPECT_EQ(res, true);
+    EXPECT_EQ(session_->HandleSetFrameRectForPartialZoomIn(data, reply), ERR_INVALID_DATA);
+
+    res = data.WriteInt32(0) && data.WriteUint32(0);
+    EXPECT_EQ(res, true);
+    EXPECT_EQ(session_->HandleSetFrameRectForPartialZoomIn(data, reply), ERR_INVALID_DATA);
+
+    res = data.WriteInt32(0) && data.WriteInt32(0) && data.WriteInt32(0);
+    EXPECT_EQ(res, true);
+    EXPECT_EQ(session_->HandleSetFrameRectForPartialZoomIn(data, reply), ERR_INVALID_DATA);
+    
+    res = data.WriteInt32(0) && data.WriteInt32(0) && data.WriteUint32(0) && data.WriteUint32(0);
+    EXPECT_EQ(res, true);
+    EXPECT_EQ(session_->HandleSetFrameRectForPartialZoomIn(data, reply), ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleUpdateFloatingBall
+ * @tc.desc: sessionStub HandleUpdateFloatingBall
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleUpdateFloatingBall, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteParcelable(nullptr);
+    auto result = session_->HandleUpdateFloatingBall(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+ 
+    FloatingBallTemplateInfo fbTemplateInfo {{1, "fb", "fb_content", "red"}, nullptr};
+    data.WriteParcelable(&fbTemplateInfo);
+    result = session_->HandleUpdateFloatingBall(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleStopFloatingBall
+ * @tc.desc: sessionStub HandleStopFloatingBall
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleStopFloatingBall, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteParcelable(nullptr);
+    auto result = session_->HandleStopFloatingBall(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleStartFloatingBallMainWindow
+ * @tc.desc: sessionStub HandleStartFloatingBallMainWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleStartFloatingBallMainWindow, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    
+    data.WriteParcelable(nullptr);
+    auto result = session_->HandleStartFloatingBallMainWindow(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+ 
+    std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
+    data.WriteParcelable(want.get());
+    result = session_->HandleStartFloatingBallMainWindow(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleGetFloatingBallWindowId
+ * @tc.desc: sessionStub HandleGetFloatingBallWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleGetFloatingBallWindowId, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteParcelable(nullptr);
+    auto result = session_->HandleGetFloatingBallWindowId(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleUpdateGlobalDisplayRectFromClientWithInvalidRect
+ * @tc.desc: Verify HandleUpdateGlobalDisplayRectFromClient with invalid rect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleUpdateGlobalDisplayRectFromClientWithInvalidRect, TestSize.Level1)
+{
+    uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_GLOBAL_DISPLAY_RECT);
+    MessageParcel reply;
+    MessageOption option;
+    MessageParcel data;
+    data.WriteInt32(100); // posX
+    data.WriteInt32(200); // posY
+    data.WriteInt32(300); // width
+    // missing height
+    EXPECT_EQ(ERR_INVALID_DATA, session_->ProcessRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleUpdateGlobalDisplayRectFromClientWithInvalidReason
+ * @tc.desc: Verify that ProcessRemoteRequest rejects missing or invalid reason values
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleUpdateGlobalDisplayRectFromClientWithInvalidReason, TestSize.Level1)
+{
+    constexpr uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_GLOBAL_DISPLAY_RECT);
+    MessageOption option;
+
+    auto writeRect = [](MessageParcel& data) {
+        data.WriteInt32(10); // posX
+        data.WriteInt32(20); // posY
+        data.WriteInt32(300); // width
+        data.WriteInt32(400); // height
+    };
+
+    // Case 1: Missing reason field
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        writeRect(data);
+        EXPECT_EQ(session_->ProcessRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
+    }
+
+    // Case 2: reason < SizeChangeReason::UNDEFINED
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        writeRect(data);
+        data.WriteUint32(static_cast<uint32_t>(SizeChangeReason::UNDEFINED) - 1);
+        EXPECT_EQ(session_->ProcessRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
+    }
+
+    // Case 3: reason == SizeChangeReason::END (boundary overflow)
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        writeRect(data);
+        data.WriteUint32(static_cast<uint32_t>(SizeChangeReason::END));
+        EXPECT_EQ(session_->ProcessRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
+    }
+
+    // Case 4: reason > SizeChangeReason::END
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        writeRect(data);
+        data.WriteUint32(static_cast<uint32_t>(SizeChangeReason::END) + 1);
+        EXPECT_EQ(session_->ProcessRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
+    }
+}
+
+/**
+ * @tc.name: HandleUpdateGlobalDisplayRectFromClientSuccess
+ * @tc.desc: Verify that ProcessRemoteRequest accepts valid rect and reason data
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleUpdateGlobalDisplayRectFromClientSuccess, TestSize.Level1)
+{
+    constexpr int32_t posX = 100;
+    constexpr int32_t posY = 200;
+    constexpr int32_t width = 300;
+    constexpr int32_t height = 400;
+    constexpr SizeChangeReason reason = SizeChangeReason::RESIZE;
+    constexpr uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_GLOBAL_DISPLAY_RECT);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInt32(posX);
+    data.WriteInt32(posY);
+    data.WriteInt32(width);
+    data.WriteInt32(height);
+    data.WriteUint32(static_cast<uint32_t>(reason));
+
+    EXPECT_EQ(session_->ProcessRemoteRequest(code, data, reply, option), ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleConnect001
+ * @tc.desc: sessionStub HandleConnect001
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleConnect001, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    auto result = session_->HandleConnect(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+
+    sptr<ISessionStage> sessionStage = sptr<SessionStageMocker>::MakeSptr();
+    data.WriteRemoteObject(sessionStage->AsObject());
+    result = session_->HandleConnect(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+
+    sptr<IWindowEventChannel> eventChannel = sptr<WindowEventChannelMocker>::MakeSptr(sessionStage);
+    data.WriteRemoteObject(sessionStage->AsObject());
+    data.WriteRemoteObject(eventChannel->AsObject());
+    result = session_->HandleConnect(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+
+    std::string surfaceNodeName = "HandleConnectTest";
+    Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = surfaceNodeName};
+    std::shared_ptr<Rosen::RSSurfaceNode> rsSurfaceNode;
+    rsSurfaceNode = std::make_shared<Rosen::RSSurfaceNode>(surfaceNodeConfig, true);
+    data.WriteRemoteObject(sessionStage->AsObject());
+    data.WriteRemoteObject(eventChannel->AsObject());
+    rsSurfaceNode->Marshalling(data);
+    result = session_->HandleConnect(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+
+    data.WriteRemoteObject(sessionStage->AsObject());
+    data.WriteRemoteObject(eventChannel->AsObject());
+    rsSurfaceNode->Marshalling(data);
+    data.WriteBool(false);
+    result = session_->HandleConnect(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandleConnect002
+ * @tc.desc: sessionStub HandleConnect002
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleConnect002, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    sptr<ISessionStage> sessionStage = sptr<SessionStageMocker>::MakeSptr();
+    sptr<IWindowEventChannel> eventChannel = sptr<WindowEventChannelMocker>::MakeSptr(sessionStage);
+    Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = "HandleConnectTest"};
+    std::shared_ptr<Rosen::RSSurfaceNode> rsSurfaceNode;
+    rsSurfaceNode = std::make_shared<Rosen::RSSurfaceNode>(surfaceNodeConfig, true);
+
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    EXPECT_NE(property, nullptr);
+    property->SetTokenState(true);
+    data.WriteRemoteObject(sessionStage->AsObject());
+    data.WriteRemoteObject(eventChannel->AsObject());
+    rsSurfaceNode->Marshalling(data);
+    data.WriteBool(true);
+    auto result = session_->HandleConnect(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+
+    data.WriteRemoteObject(sessionStage->AsObject());
+    data.WriteRemoteObject(eventChannel->AsObject());
+    rsSurfaceNode->Marshalling(data);
+    data.WriteBool(true);
+    data.WriteParcelable(property.GetRefPtr());
+    result = session_->HandleConnect(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+
+    sptr<IRemoteObject> token = nullptr;
+    data.WriteRemoteObject(sessionStage->AsObject());
+    data.WriteRemoteObject(eventChannel->AsObject());
+    rsSurfaceNode->Marshalling(data);
+    data.WriteBool(true);
+    data.WriteParcelable(property.GetRefPtr());
+    data.WriteRemoteObject(token);
+    result = session_->HandleConnect(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandleConnect003
+ * @tc.desc: sessionStub HandleConnect003
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleConnect003, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    sptr<ISessionStage> sessionStage = sptr<SessionStageMocker>::MakeSptr();
+    sptr<IWindowEventChannel> eventChannel = sptr<WindowEventChannelMocker>::MakeSptr(sessionStage);
+    Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = "HandleConnectTest"};
+    std::shared_ptr<Rosen::RSSurfaceNode> rsSurfaceNode;
+    rsSurfaceNode = std::make_shared<Rosen::RSSurfaceNode>(surfaceNodeConfig, true);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetTokenState(true);
+
+    sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
+    data.WriteRemoteObject(sessionStage->AsObject());
+    data.WriteRemoteObject(eventChannel->AsObject());
+    rsSurfaceNode->Marshalling(data);
+    data.WriteBool(true);
+    data.WriteParcelable(property.GetRefPtr());
+    data.WriteRemoteObject(token);
+    auto result = session_->HandleConnect(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+
+    std::string identityToken = "HandleConnectTest";
+    data.WriteRemoteObject(sessionStage->AsObject());
+    data.WriteRemoteObject(eventChannel->AsObject());
+    rsSurfaceNode->Marshalling(data);
+    data.WriteBool(true);
+    data.WriteParcelable(property.GetRefPtr());
+    data.WriteRemoteObject(token);
+    data.WriteString(identityToken);
+    result = session_->HandleConnect(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
+}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

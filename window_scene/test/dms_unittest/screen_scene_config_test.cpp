@@ -467,14 +467,105 @@ HWTEST_F(ScreenSceneConfigTest, GetCurvedCompressionAreaInLandscape, TestSize.Le
 }
 
 /**
- * @tc.name: Split
- * @tc.desc: Split func
+ * @tc.name: Split01
+ * @tc.desc: Split01 func
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSceneConfigTest, Split, TestSize.Level1)
+HWTEST_F(ScreenSceneConfigTest, Split01, TestSize.Level1)
 {
     auto result = ScreenSceneConfig::Split("oo", "+9");
     ASSERT_NE(0, result.size());
+}
+
+/**
+ * @tc.name: Split02
+ * @tc.desc: Test Split function when no pattern is found in the string
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, Split02, TestSize.Level1)
+{
+    std::string str = "HelloWorld";
+    std::string pattern = "::";
+    std::vector<std::string> result = ScreenSceneConfig::Split(str, pattern);
+    EXPECT_EQ(result.size(), 1);
+    EXPECT_EQ(result[0], str);
+}
+
+/**
+ * @tc.name: Split03
+ * @tc.desc: Test Split function when one pattern is found in the string
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, Split03, TestSize.Level1)
+{
+    std::string str = "Hello::World";
+    std::string pattern = "::";
+    std::vector<std::string> result = ScreenSceneConfig::Split(str, pattern);
+    EXPECT_EQ(result.size(), 2);
+    EXPECT_EQ(result[0], "Hello");
+    EXPECT_EQ(result[1], "World");
+}
+
+/**
+ * @tc.name: Split04
+ * @tc.desc: Test Split function when multiple patterns are found in the string
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, Split04, TestSize.Level1)
+{
+    std::string str = "Hello::World::This::Is::A::Test";
+    std::string pattern = "::";
+    std::vector<std::string> result = ScreenSceneConfig::Split(str, pattern);
+    EXPECT_EQ(result.size(), 6);
+    EXPECT_EQ(result[0], "Hello");
+    EXPECT_EQ(result[1], "World");
+    EXPECT_EQ(result[2], "This");
+    EXPECT_EQ(result[3], "Is");
+    EXPECT_EQ(result[4], "A");
+    EXPECT_EQ(result[5], "Test");
+}
+
+/**
+ * @tc.name: Split05
+ * @tc.desc: Test Split function when the string ends with the pattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, Split05, TestSize.Level1)
+{
+    std::string str = "Hello::World::";
+    std::string pattern = "::";
+    std::vector<std::string> result = ScreenSceneConfig::Split(str, pattern);
+    EXPECT_EQ(result.size(), 3);
+    EXPECT_EQ(result[0], "Hello");
+    EXPECT_EQ(result[1], "World");
+    EXPECT_EQ(result[2], "");
+}
+
+/**
+ * @tc.name: Split06
+ * @tc.desc: Test Split function when the input string is the same as the pattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, Split06, TestSize.Level1)
+{
+    std::string str = "::";
+    std::string pattern = "::";
+    std::vector<std::string> result = ScreenSceneConfig::Split(str, pattern);
+    EXPECT_EQ(result.size(), 2);
+    EXPECT_EQ(result[0], "");
+    EXPECT_EQ(result[1], "");
+}
+
+/**
+ * @tc.name: GetAllDisplayPhysicalConfig01
+ * @tc.desc: GetAllDisplayPhysicalConfig01 func
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, GetAllDisplayPhysicalConfig01, TestSize.Level1)
+{
+    ScreenSceneConfig::displayPhysicalResolution_.clear();
+    std::vector<DisplayPhysicalResolution> actual = ScreenSceneConfig::GetAllDisplayPhysicalConfig();
+    EXPECT_TRUE(actual.empty());
 }
 
 /**
@@ -729,6 +820,8 @@ HWTEST_F(ScreenSceneConfigTest, ReadStringListConfigInfo04, TestSize.Level1)
     ASSERT_NE(rootNode, nullptr);
     xmlNodePtr curNode = xmlNewNode(nullptr, BAD_CAST "invalidNode");
     rootNode->children = curNode;
+    curNode->parent = rootNode;
+    curNode->next = nullptr;
     std::string name = "testName";
     ScreenSceneConfig::ReadStringListConfigInfo(rootNode, name);
     xmlFreeNode(rootNode);
@@ -746,6 +839,8 @@ HWTEST_F(ScreenSceneConfigTest, ReadStringListConfigInfo05, TestSize.Level1)
     xmlNodePtr curNode = xmlNewNode(nullptr, BAD_CAST "invalidNode");
     xmlNodeSetContent(curNode, BAD_CAST "validContent");
     rootNode->children = curNode;
+    curNode->parent = rootNode;
+    curNode->next = nullptr;
     std::string name = "testName";
     ScreenSceneConfig::ReadStringListConfigInfo(rootNode, name);
     xmlFreeNode(rootNode);
@@ -1076,6 +1171,53 @@ HWTEST_F(ScreenSceneConfigTest, ParseNodeConfig07, TestSize.Level1)
     ASSERT_NE(currNode, nullptr);
     ScreenSceneConfig::ParseNodeConfig(currNode);
     xmlFreeNode(currNode);
+}
+
+/**
+ * @tc.name: GetOffScreenPPIThreshold01
+ * @tc.desc: Test GetOffScreenPPIThreshold when the array is not empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, GetOffScreenPPIThreshold01, TestSize.Level1)
+{
+    uint32_t result = ScreenSceneConfig::GetOffScreenPPIThreshold();
+    EXPECT_EQ(result, 0);
+}
+
+/**
+ * @tc.name: GetOffScreenPPIThreshold02
+ * @tc.desc: Test GetOffScreenPPIThreshold when the array is empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, GetOffScreenPPIThreshold02, TestSize.Level1)
+{
+    ScreenSceneConfig::xmlNodeMap_.clear();
+    uint32_t result = ScreenSceneConfig::GetOffScreenPPIThreshold();
+    EXPECT_EQ(result, ScreenSceneConfig::offScreenPPIThreshold_);
+}
+
+/**
+ * @tc.name: IsSupportOffScreenRendering01
+ * @tc.desc: IsSupportOffScreenRendering01
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, IsSupportOffScreenRendering01, TestSize.Level1)
+{
+    ScreenSceneConfig::enableConfig_["isSupportOffScreenRendering"] = true;
+    bool res = ScreenSceneConfig::IsSupportOffScreenRendering();
+    EXPECT_EQ(true, res);
+}
+
+/**
+ * @tc.name: IsSupportOffScreenRendering02
+ * @tc.desc: IsSupportOffScreenRendering02
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, IsSupportOffScreenRendering02, TestSize.Level1)
+{
+    ScreenSceneConfig::enableConfig_.erase("isSupportOffScreenRendering");
+    bool res = ScreenSceneConfig::IsSupportOffScreenRendering();
+    EXPECT_EQ(false, res);
 }
 }
 } // namespace Rosen

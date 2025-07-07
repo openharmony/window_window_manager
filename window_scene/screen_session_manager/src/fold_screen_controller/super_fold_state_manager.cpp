@@ -239,8 +239,22 @@ void SuperFoldStateManager::ReportNotifySuperFoldStatusChange(int32_t currentSta
     }
 }
 
+void SuperFoldStateManager::HandleScreenConnectChange()
+{
+    std::unique_lock<std::mutex> lock(superStatusMutex_);
+    SuperFoldStatus curFoldState = curState_.load();
+    lock.unlock();
+    if (curFoldState == SuperFoldStatus::KEYBOARD) {
+        HandleSuperFoldStatusChange(SuperFoldStatusChangeEvents::KEYBOARD_OFF);
+        HandleSuperFoldStatusChange(SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED);
+    } else {
+        HandleSuperFoldStatusChange(SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED);
+    }
+}
+
 void SuperFoldStateManager::HandleSuperFoldStatusChange(SuperFoldStatusChangeEvents event)
 {
+    std::unique_lock<std::mutex> lock(superStatusMutex_);
     SuperFoldStatus curState = curState_.load();
     SuperFoldStatus nextState = SuperFoldStatus::UNKNOWN;
     bool isTransfer = false;
@@ -257,9 +271,10 @@ void SuperFoldStateManager::HandleSuperFoldStatusChange(SuperFoldStatusChangeEve
     TLOGD(WmsLogTag::DMS, "curAngle: %{public}f", curAngle);
     if (isTransfer && action) {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:HandleSuperFoldStatusChange");
-        ReportNotifySuperFoldStatusChange(static_cast<int32_t>(curState), static_cast<int32_t>(nextState), curAngle);
         action(event);
         TransferState(nextState);
+        lock.unlock();
+        ReportNotifySuperFoldStatusChange(static_cast<int32_t>(curState), static_cast<int32_t>(nextState), curAngle);
         HandleDisplayNotify(event);
         // notify
         auto screenSession = ScreenSessionManager::GetInstance().GetDefaultScreenSession();
@@ -281,6 +296,7 @@ SuperFoldStatus SuperFoldStateManager::GetCurrentStatus()
 
 void SuperFoldStateManager::SetCurrentStatus(SuperFoldStatus curState)
 {
+    std::unique_lock<std::mutex> lock(superStatusMutex_);
     curState_.store(curState);
 }
 
@@ -403,6 +419,7 @@ void SuperFoldStateManager::HandleKeyboardOffDisplayNotify(sptr<ScreenSession> s
     auto screeBounds = screenSession->GetScreenProperty().GetBounds();
     screenSession->UpdatePropertyByFakeInUse(true);
     screenSession->SetIsBScreenHalf(true);
+    screenSession->SetValidWidth(screeBounds.rect_.GetWidth());
     screenSession->SetValidHeight(screeBounds.rect_.GetHeight());
     sptr<ScreenSession> fakeScreenSession = screenSession->GetFakeScreenSession();
     ScreenSessionManager::GetInstance().NotifyDisplayCreate(
@@ -435,6 +452,7 @@ void SuperFoldStateManager::HandleSystemKeyboardStatusDisplayNotify(
     TLOGD(WmsLogTag::DMS, "curFoldState: %{public}u", curFoldState);
     if (!isKeyboardOn_ && curFoldState == SuperFoldStatus::HALF_FOLDED) {
         screenSession->UpdatePropertyByFakeInUse(!isTpKeyboardOn);
+        screenSession->SetIsFakeInUse(!isTpKeyboardOn);
         screenSession->SetIsBScreenHalf(true);
     }
     sptr<ScreenSession> fakeScreenSession = screenSession->GetFakeScreenSession();
@@ -499,7 +517,8 @@ bool SuperFoldStateManager::ChangeScreenState(bool toHalf)
         TLOGE(WmsLogTag::DMS, "screen session is null!");
         return false;
     }
-    auto screenProperty = screenSession->GetScreenProperty();
+    auto screenProperty = ScreenSessionManager::GetInstance().
+        GetPhyScreenProperty(screenSession->GetScreenId());
     auto screenWidth = screenProperty.GetPhyBounds().rect_.GetWidth();
     auto screenHeight = screenProperty.GetPhyBounds().rect_.GetHeight();
     if (toHalf) {
@@ -521,6 +540,12 @@ bool SuperFoldStateManager::ChangeScreenState(bool toHalf)
     TLOGI(WmsLogTag::DMS, "rect [%{public}f , %{public}f], rs response is %{public}ld",
         screenWidth, screenHeight, static_cast<long>(response));
     return true;
+}
+
+bool SuperFoldStateManager::GetKeyboardState()
+{
+    TLOGI(WmsLogTag::DMS, "GetKeyboardState isKeyboardOn_ : %{public}d", isKeyboardOn_);
+    return isKeyboardOn_;
 }
 } // Rosen
 } // OHOS

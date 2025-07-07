@@ -24,13 +24,18 @@ group("unittest") {
 
 ohos_unittest("window_focus_scene_session_test") {
   module_out_path = module_out_path
-  sources = [ "window_focus_scene_session_test.cpp" ]
+  sources = [ "window_focus_scene_session_test.cpp", "window_focus_controller_test.cpp", "scene_session_manager_focus_test.cpp" ]
   cflags_cc = [ "-Wno-thread-safety" ]
   deps = [ ws_unittest_common ]
   external_deps = [
     "ability_base:session_info",
+    "ability_runtime:ability_manager",
     "ability_runtime:app_context",
     "c_utils:utils",
+    "graphic_2d:librender_service_client",
+    "graphic_2d:window_animation",
     "hilog:libhilog",
+    "image_framework:image_native",
+    "input:libmmi-napi",
   ]
 }

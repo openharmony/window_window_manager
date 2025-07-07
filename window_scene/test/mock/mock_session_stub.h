@@ -73,6 +73,7 @@ public:
     MOCK_METHOD2(HandleNotifyExtensionTimeout, int(MessageParcel& data, MessageParcel& reply));
     MOCK_METHOD2(HandleGetStatusBarHeight, int(MessageParcel& data, MessageParcel& reply));
     MOCK_METHOD2(HandleGetAppForceLandscapeConfig, int(MessageParcel& data, MessageParcel& reply));
+    MOCK_METHOD2(HandleNotifySecureLimitChange, int(MessageParcel& data, MessageParcel& reply));
     MOCK_METHOD2(HandleGetAllAvoidAreas, int(MessageParcel& data, MessageParcel& reply));
     MOCK_METHOD3(GetAvoidAreaByType, AvoidArea(AvoidAreaType type, const WSRect& rect, int32_t apiVersion));
     MOCK_METHOD1(GetAllAvoidAreas, WSError(std::map<AvoidAreaType, AvoidArea>& avoidAreas));
@@ -80,6 +81,10 @@ public:
         WSPropertyChangeAction action));
     MOCK_METHOD1(GetCrossAxisState, WSError(CrossAxisState& state));
     MOCK_METHOD1(GetWaterfallMode, WSError(bool& isWaterfallMode));
+    MOCK_METHOD1(IsMainWindowFullScreenAcrossDisplays, WMError(bool& isAcrossDisplays));
+    MOCK_METHOD1(GetFloatingBallWindowId, WMError(uint32_t& windowId));
+    MOCK_METHOD1(SendFbActionEvent, WSError(const std::string& action));
+    MOCK_METHOD1(RestoreFbMainWindow, WMError(const std::shared_ptr<AAFwk::Want>& want));
 };
 } // namespace Rosen
 } // namespace OHOS

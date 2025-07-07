@@ -30,21 +30,13 @@ public:
     virtual void TearDown() override;
 };
 
-void StringUtilTest::SetUpTestCase()
-{
-}
+void StringUtilTest::SetUpTestCase() {}
 
-void StringUtilTest::TearDownTestCase()
-{
-}
+void StringUtilTest::TearDownTestCase() {}
 
-void StringUtilTest::SetUp()
-{
-}
+void StringUtilTest::SetUp() {}
 
-void StringUtilTest::TearDown()
-{
-}
+void StringUtilTest::TearDown() {}
 
 namespace {
 /**
@@ -60,6 +52,6 @@ HWTEST_F(StringUtilTest, Trim, TestSize.Level1)
     ASSERT_EQ("123", StringUtil::Trim(" 123 "));
     ASSERT_EQ("12 3", StringUtil::Trim(" 12 3 "));
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

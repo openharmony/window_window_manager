@@ -22,16 +22,13 @@
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
-namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayManagerServiceInner"};
-}
 WM_IMPLEMENT_SINGLE_INSTANCE(DisplayManagerServiceInner)
 
 DisplayId DisplayManagerServiceInner::GetDefaultDisplayId() const
 {
     auto defaultDisplayInfo = DisplayManagerService::GetInstance().GetDefaultDisplayInfo();
     if (defaultDisplayInfo == nullptr) {
-        WLOGFE("GetDefaultDisplayId, defaultDisplayInfo is nullptr.");
+        TLOGE(WmsLogTag::DMS, "defaultDisplayInfo is nullptr.");
         return DISPLAY_ID_INVALID;
     }
     return defaultDisplayInfo->GetDisplayId();
@@ -41,7 +38,7 @@ sptr<DisplayInfo> DisplayManagerServiceInner::GetDisplayById(DisplayId displayId
 {
     sptr<DisplayInfo> display = DisplayManagerService::GetInstance().GetDisplayInfoById(displayId);
     if (display == nullptr) {
-        WLOGFE("GetDisplayById can not find corresponding display!\n");
+        TLOGE(WmsLogTag::DMS, "GetDisplayById can not find corresponding display!\n");
     }
     return display;
 }
@@ -70,7 +67,7 @@ std::vector<sptr<DisplayInfo>> DisplayManagerServiceInner::GetAllDisplays() cons
         if (display != nullptr) {
             res.emplace_back(display);
         } else {
-            WLOGFE("GetAllDisplays display %" PRIu64" nullptr!", displayId);
+            TLOGE(WmsLogTag::DMS, "GetAllDisplays display %" PRIu64" nullptr!", displayId);
         }
     }
     return res;
@@ -86,7 +83,7 @@ sptr<ScreenInfo> DisplayManagerServiceInner::GetScreenInfoByDisplayId(DisplayId 
 {
     auto displayInfo = DisplayManagerService::GetInstance().GetDisplayInfoById(displayId);
     if (displayInfo == nullptr) {
-        WLOGFE("can not get display.");
+        TLOGE(WmsLogTag::DMS, "can not get display.");
         return nullptr;
     }
     return DisplayManagerService::GetInstance().GetScreenInfoById(displayInfo->GetScreenId());
@@ -96,7 +93,7 @@ ScreenId DisplayManagerServiceInner::GetScreenGroupIdByDisplayId(DisplayId displ
 {
     auto displayInfo = DisplayManagerService::GetInstance().GetDisplayInfoById(displayId);
     if (displayInfo == nullptr) {
-        WLOGFE("can not get display.");
+        TLOGE(WmsLogTag::DMS, "can not get display.");
         return INVALID_SCREEN_ID;
     }
     return DisplayManagerService::GetInstance().GetScreenGroupIdByScreenId(displayInfo->GetScreenId());
@@ -106,22 +103,23 @@ sptr<SupportedScreenModes> DisplayManagerServiceInner::GetScreenModesByDisplayId
 {
     const sptr<ScreenInfo> screenInfo = GetScreenInfoByDisplayId(displayId);
     if (screenInfo == nullptr) {
-        WLOGFE("can not get display.");
+        TLOGE(WmsLogTag::DMS, "can not get display.");
         return nullptr;
     }
     auto modes = screenInfo->GetModes();
     auto id = screenInfo->GetModeId();
     if (id >= modes.size()) {
-        WLOGFE("can not get screenMode.");
+        TLOGE(WmsLogTag::DMS, "can not get screenMode.");
         return nullptr;
     }
     return modes[id];
 }
 
 std::shared_ptr<Media::PixelMap> DisplayManagerServiceInner::GetDisplaySnapshot(DisplayId displayId,
-    DmErrorCode* errorCode, bool isUseDma) const
+    DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen) const
 {
-    return DisplayManagerService::GetInstance().GetDisplaySnapshot(displayId, errorCode, isUseDma);
+    return DisplayManagerService::GetInstance().GetDisplaySnapshot(displayId, errorCode, isUseDma,
+        isCaptureFullOfScreen);
 }
 
 void DisplayManagerServiceInner::RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener)

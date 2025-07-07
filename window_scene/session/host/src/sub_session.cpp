@@ -15,6 +15,7 @@
 
 #include "session/host/include/sub_session.h"
 
+#include "rs_adapter.h"
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session/screen/include/screen_session.h"
 #include <transaction/rs_sync_transaction_controller.h>
@@ -125,6 +126,18 @@ void SubSession::UpdateSessionRectInner(const WSRect& rect, SizeChangeReason rea
         HandleCrossMoveTo(globaleRect);
         return;
     }
+
+    if (IsSessionForeground() && (reason == SizeChangeReason::MOVE || reason == SizeChangeReason::RESIZE)) {
+        SetOriPosYBeforeRaisedByKeyboard(0);
+        const WSRect& winRect = GetSessionRect();
+        if (reason == SizeChangeReason::MOVE && (rect.posX_ != winRect.posX_ || rect.posY_ != winRect.posY_)) {
+            isSubWindowResizingOrMoving_ = true;
+        }
+        if (reason == SizeChangeReason::RESIZE && (rect.width_ != winRect.width_ || rect.height_ != winRect.height_)) {
+            isSubWindowResizingOrMoving_ = true;
+        }
+    }
+
     SceneSession::UpdateSessionRectInner(rect, reason, moveConfiguration, rectAnimationConfig);
 }
 
@@ -149,6 +162,7 @@ WSError SubSession::Hide(bool needSyncHide)
             TLOGNE(WmsLogTag::WMS_SUB, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
+        session->isSubWindowResizingOrMoving_ = false;
         TLOGNI(WmsLogTag::WMS_LIFE, "Hide session, id: %{public}d", session->GetPersistentId());
         auto ret = session->SetActive(false);
         if (ret != WSError::WS_OK) {
@@ -284,6 +298,15 @@ bool SubSession::IsVisibleForeground() const
     return Session::IsVisibleForeground();
 }
 
+bool SubSession::IsVisibleNotBackground() const
+{
+    const auto& mainOrFloatSession = GetMainOrFloatSession();
+    if (mainOrFloatSession) {
+        return mainOrFloatSession->IsVisibleNotBackground() && Session::IsVisibleNotBackground();
+    }
+    return Session::IsVisibleNotBackground();
+}
+
 WSError SubSession::NotifyFollowParentMultiScreenPolicy(bool enabled)
 {
     PostTask([weakThis = wptr(this), enabled, funcName = __func__] {
@@ -334,6 +357,36 @@ WMError SubSession::NotifySetParentSession(int32_t oldParentWindowId, int32_t ne
         }
         return WMError::WM_OK;
     }, __func__);
+}
+
+void SubSession::HandleCrossSurfaceNodeByWindowAnchor(SizeChangeReason reason, const sptr<ScreenSession>& screenSession)
+{
+    if (!screenSession) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, ScreenSession is null", GetPersistentId());
+        return;
+    }
+    auto surfaceNode = GetSurfaceNodeForMoveDrag();
+    if (!surfaceNode) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, SurfaceNode is null", GetPersistentId());
+        return;
+    }
+    DisplayId displayId = screenSession->GetDisplayId();
+    if (reason == SizeChangeReason::DRAG || reason == SizeChangeReason::DRAG_MOVE) {
+        AutoRSTransaction trans(GetRSUIContext());
+        surfaceNode->SetPositionZ(GetZOrder());
+        screenSession->GetDisplayNode()->AddCrossScreenChild(surfaceNode, SUFFIX_INDEX, true);
+        surfaceNode->SetIsCrossNode(true);
+        cloneNodeCountDuringCross_.fetch_add(1);
+        TLOGI(WmsLogTag::WMS_LAYOUT, "Add sub window to display:%{public}" PRIu64 " persistentId:%{public}d, "
+            "cloneNodeCountDuringCross:%{public}d", displayId, GetPersistentId(), cloneNodeCountDuringCross_.load());
+    } else if (reason == SizeChangeReason::DRAG_END) {
+        surfaceNode->SetPositionZ(moveDragController_->GetOriginalPositionZ());
+        screenSession->GetDisplayNode()->RemoveCrossScreenChild(surfaceNode);
+        surfaceNode->SetIsCrossNode(false);
+        cloneNodeCountDuringCross_.fetch_sub(1);
+        TLOGI(WmsLogTag::WMS_LAYOUT, "Remove sub window from display:%{public}" PRIu64 " persistentId:%{public}d, "
+            "cloneNodeCountDuringCross:%{public}d", displayId, GetPersistentId(), cloneNodeCountDuringCross_.load());
+    }
 }
 
 WSError SubSession::SetSubWindowZLevel(int32_t zLevel)
@@ -398,7 +451,7 @@ void SubSession::HandleCrossMoveToSurfaceNode(WSRect& globalRect)
         TLOGI(WmsLogTag::WMS_LAYOUT, "Add sub window to display:%{public}" PRIu64 " persistentId:%{public}d",
             displayId, GetPersistentId());
     }
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(GetRSUIContext());
 }
 
 std::set<uint64_t> SubSession::GetNewDisplayIdsDuringMoveTo(WSRect& newRect)
@@ -435,18 +488,10 @@ void SubSession::AddSurfaceNodeToScreen(DisplayId draggingOrMovingParentDisplayI
         TLOGE(WmsLogTag::WMS_LAYOUT, "SurfaceNode is null");
         return;
     }
-    float originalPositionZ = currSurfacedNode->GetStagingProperties().GetPositionZ();
-    moveDragController_->SetOriginalPositionZ(originalPositionZ);
-
-    DisplayId originDisplayId = Session::GetOriginDisplayId();
-    if (originDisplayId == DISPLAY_ID_INVALID) {
-        originDisplayId = GetScreenId();
-        Session::SetOriginDisplayId(originDisplayId);
-    }
-    WSRect targetRect = ConvertRelativeRectToGlobal(winRect_, GetScreenId());
-    TLOGI(WmsLogTag::WMS_LAYOUT, "originDisplayId:%{public}" PRIu64 ", originalPositionZ:%{public}f, "
-        "winRect:%{public}s", GetOriginDisplayId(), originalPositionZ, winRect_.ToString().c_str());
     DisplayId currDisplayId = GetDisplayId();
+    WSRect targetRect = ConvertRelativeRectToGlobal(winRect_, currDisplayId);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, currDisplayId:%{public}" PRIu64 ", winRect:%{public}s",
+        GetPersistentId(), currDisplayId, winRect_.ToString().c_str());
     for (const auto displayId : GetNewDisplayIdsDuringMoveTo(targetRect)) {
         if (displayId == currDisplayId && currDisplayId == draggingOrMovingParentDisplayId) {
             continue;
@@ -471,7 +516,7 @@ void SubSession::AddSurfaceNodeToScreen(DisplayId draggingOrMovingParentDisplayI
         TLOGI(WmsLogTag::WMS_LAYOUT, "Add sub window to display:%{public}" PRIu64 " persistentId:%{public}d, "
             "cloneNodeCount:%{public}d", displayId, GetPersistentId(), cloneNodeCount_);
     }
-    RSTransaction::FlushImplicitTransaction();
+    RSTransactionAdapter::FlushImplicitTransaction(GetRSUIContext());
 }
 
 void SubSession::RemoveSurfaceNodeFromScreen()
@@ -481,7 +526,6 @@ void SubSession::RemoveSurfaceNodeFromScreen()
         TLOGE(WmsLogTag::WMS_LAYOUT, "SurfaceNode is null");
         return;
     }
-    DisplayId originDisplayId = Session::GetOriginDisplayId();
     std::lock_guard<std::mutex> lock(displayIdSetDuringMoveToMutex_);
     for (const auto displayId : displayIdSetDuringMoveTo_) {
         auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSessionById(displayId);
@@ -504,6 +548,5 @@ void SubSession::RemoveSurfaceNodeFromScreen()
         TLOGI(WmsLogTag::WMS_LAYOUT, "Remove sub window from display:%{public}" PRIu64 " persistentId:%{public}d, "
             "cloneNodeCount:%{public}d", displayId, GetPersistentId(), cloneNodeCount_);
     }
-    Session::SetOriginDisplayId(DISPLAY_ID_INVALID);
 }
 } // namespace OHOS::Rosen

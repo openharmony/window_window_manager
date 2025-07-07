@@ -145,7 +145,7 @@ void WindowManagerConfigTest::TearDown()
 ConfigItem WindowManagerConfigTest::ReadConfig(const std::string& xmlStr)
 {
     ConfigItem config;
-    xmlDocPtr docPtr = xmlParseMemory(xmlStr.c_str(), xmlStr.length() + 1);
+    xmlDocPtr docPtr = xmlParseMemory(xmlStr.c_str(), xmlStr.length());
     if (docPtr == nullptr) {
         return config;
     }

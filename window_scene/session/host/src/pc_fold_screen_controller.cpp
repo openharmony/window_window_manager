@@ -329,7 +329,7 @@ void PcFoldScreenController::ThrowSlipFloatingRectDirectly(WSRect& rect, const W
         rect.ToString().c_str(), floatingRect.ToString().c_str());
     auto& manager = PcFoldScreenManager::GetInstance();
     const ScreenSide side = manager.CalculateScreenSide(rect);
-    const ScreenSide floatingSide = manager.CalculateScreenSide(floatingRect);
+    const ScreenSide floatingSide = manager.CalculateScreenSide(floatingRect.posY_);
     rect = floatingRect;
     if (side == floatingSide) {
         return;
@@ -411,6 +411,11 @@ void PcFoldScreenController::UpdateFullScreenWaterfallMode(bool isWaterfallMode)
     }, __func__);
 }
 
+void PcFoldScreenController::SetFullScreenWaterfallMode(bool isFullScreenWaterfallMode)
+{
+    isFullScreenWaterfallMode_ = isFullScreenWaterfallMode;
+}
+
 void PcFoldScreenController::RegisterFullScreenWaterfallModeChangeCallback(
     std::function<void(bool isWaterfallMode)>&& func)
 {
@@ -467,6 +472,10 @@ void PcFoldScreenController::ExecuteFullScreenWaterfallModeChangeCallback()
         return;
     }
     sceneSession->sessionStage_->SetFullScreenWaterfallMode(isFullScreenWaterfallMode_);
+
+    // notify subSession client
+    sceneSession->NotifySubSessionAcrossDisplaysChange(isFullScreenWaterfallMode_);
+    sceneSession->NotifyFollowedParentWindowAcrossDisplaysChange(isFullScreenWaterfallMode_);
 }
 
 int32_t PcFoldScreenController::GetPersistentId() const

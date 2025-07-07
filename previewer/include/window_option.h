@@ -260,6 +260,33 @@ public:
     int32_t GetSubWindowZLevel() const;
 
     /**
+     * @brief Set zIndex of specific window.
+     *
+     * @param zIndex zIndex of specific window
+     */
+    void SetZIndex(int32_t zIndex);
+
+    /**
+     * @brief Get zIndex of specific window.
+     *
+     * @return Return zIndex of specific window
+     */
+    int32_t GetZIndex() const;
+
+    /**
+     * @brief Set sub window outline enabled
+     *
+     * @param outlineEnabled whether show sub window outline
+     */
+    void SetSubWindowOutlineEnabled(bool outlineEnabled);
+
+    /**
+     * @brief Get sub window outline enabled
+     *
+     */
+    bool IsSubWindowOutlineEnabled() const;
+
+    /**
      * @brief Get window mode.
      *
      * @return The mode of window.
@@ -442,6 +469,7 @@ private:
     std::string bundleName_ { "" };
     std::string subWindowTitle_ = { "" };
     bool subWindowMaximizeSupported_ = false;
+    bool subWindowOutlineEnabled_ = false;
     WindowType type_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW };
     WindowMode mode_ { WindowMode::WINDOW_MODE_UNDEFINED };
     bool focusable_ { true };
@@ -461,6 +489,7 @@ private:
     WindowSessionType sessionType_ { WindowSessionType::SCENE_SESSION };
     float brightness_ = UNDEFINED_BRIGHTNESS;
     int32_t zLevel_ = 0;
+    int32_t zIndex_ = SPECIFIC_ZINDEX_INVALID;
 
     Orientation requestedOrientation_ { Orientation::UNSPECIFIED };
     std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap_ {

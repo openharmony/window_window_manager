@@ -147,6 +147,31 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleRegisterSessionLifecycleListenerByBundles(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UNREGISTER_SESSION_LIFECYCLE_LISTENER):
             return HandleUnregisterSessionLifecycleListener(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_RECENT_MAIN_SESSION_INFO_LIST):
+            return HandleGetRecentMainSessionInfoList(data, reply);
+        case static_cast<uint32_t>(
+            SceneSessionManagerLiteMessage::TRANS_ID_PENDING_SESSION_TO_BACKGROUND_BY_PERSISTENTID):
+            return HandlePendingSessionToBackgroundByPersistentId(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_CREATE_NEW_INSTANCE_KEY):
+            return HandleCreateNewInstanceKey(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_ROUTER_STACK_INFO):
+            return HandleGetRouterStackInfo(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_REMOVE_INSTANCE_KEY):
+            return HandleRemoveInstanceKey(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_TRANSFER_SESSION_TO_TARGET_SCREEN):
+            return HandleTransferSessionToTargetScreen(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_PENDING_SESSION_TO_BACKGROUND):
+            return HandlePendingSessionToBackground(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UPDATE_KIOSK_APP_LIST):
+            return HandleUpdateKioskAppList(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_ENTER_KIOSK_MODE):
+            return HandleEnterKioskMode(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_EXIT_KIOSK_MODE):
+            return HandleExitKioskMode(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_SEND_POINTER_EVENT_FOR_HOVER):
+            return HandleSendPointerEventForHover(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UPDATE_WINDOW_MODE_BY_ID_FOR_UI_TEST):
+            return HandleUpdateWindowModeByIdForUITest(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -203,6 +228,30 @@ int SceneSessionManagerLiteStub::HandlePendingSessionToForeground(MessageParcel&
     }
     WSError errCode = PendingSessionToForeground(token);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandlePendingSessionToBackground(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "run");
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    if (token == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "token is nullptr");
+        return ERR_INVALID_DATA;
+    }
+    BackgroundParams params;
+    if (!data.ReadBool(params.shouldBackToCaller)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read shouldBackToCaller failed");
+        return ERR_INVALID_DATA;
+    }
+    std::shared_ptr<AAFwk::WantParams> wantParams(data.ReadParcelable<AAFwk::WantParams>());
+    if (wantParams == nullptr) {
+        TLOGI(WmsLogTag::WMS_LIFE, "wantParams is nullptr");
+    } else {
+        params.wantParams = *wantParams;
+    }
+    WSError errCode = PendingSessionToBackground(token, params);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 
@@ -561,6 +610,32 @@ int SceneSessionManagerLiteStub::HandleCheckWindowId(MessageParcel& data, Messag
     }
     if (!reply.WriteInt32(pid)) {
         WLOGE("Failed to WriteInt32 pid");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleUpdateWindowModeByIdForUITest(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    int32_t windowId = INVALID_WINDOW_ID;
+    int32_t updateMode = 0;
+    if (!data.ReadInt32(windowId)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to read windowId");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.ReadInt32(updateMode)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to read updateMode");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = UpdateWindowModeByIdForUITest(windowId, updateMode);
+    if (errCode != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to UpdateWindowModeByIdForUITest, "
+            "windowId:%{public}d, updateMode:%{public}d", windowId, updateMode);
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to UpdateWindowModeByIdForUITest, errCode:%{public}d", errCode);
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;
@@ -1124,6 +1199,200 @@ int SceneSessionManagerLiteStub::HandleUnregisterSessionLifecycleListener(Messag
     }
     WMError ret = UnregisterSessionLifecycleListener(listener);
     if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleGetRecentMainSessionInfoList(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    std::vector<RecentSessionInfo> recentSessionInfoList;
+    WSError errCode = GetRecentMainSessionInfoList(recentSessionInfoList);
+    if (!reply.WriteInt32(recentSessionInfoList.size())) {
+        TLOGE(WmsLogTag::WMS_LIFE, "write recent main session info list failed");
+        return ERR_INVALID_DATA;
+    }
+    for (auto& sessionInfo : recentSessionInfoList) {
+        if (!reply.WriteParcelable(&sessionInfo)) {
+            TLOGE(WmsLogTag::WMS_LIFE, "write recent main session info failed");
+            return ERR_INVALID_DATA;
+        }
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleGetRouterStackInfo(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    int32_t persistentId = INVALID_WINDOW_ID;
+    if (!data.ReadInt32(persistentId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to readInt32 persistentId.");
+        return ERR_INVALID_DATA;
+    }
+    sptr<IRemoteObject> listenerObject = data.ReadRemoteObject();
+    if (listenerObject == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "remote object is nullptr.");
+        return ERR_INVALID_DATA;
+    }
+    sptr<ISessionRouterStackListener> listener = iface_cast<ISessionRouterStackListener>(listenerObject);
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "listener is null");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = GetRouterStackInfo(persistentId, listener);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandlePendingSessionToBackgroundByPersistentId(MessageParcel& data,
+    MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    int32_t persistentId;
+    if (!data.ReadInt32(persistentId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "read persistentId failed");
+        return ERR_INVALID_DATA;
+    }
+    bool shouldBackToCaller = true;
+    if (!data.ReadBool(shouldBackToCaller)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read shouldBackToCaller failed");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = PendingSessionToBackgroundByPersistentId(persistentId, shouldBackToCaller);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleCreateNewInstanceKey(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    std::string bundleName;
+    if (!data.ReadString(bundleName)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read bundleName");
+        return ERR_INVALID_DATA;
+    }
+    std::string instanceKey;
+    WMError ret = CreateNewInstanceKey(bundleName, instanceKey);
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write ret failed");
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteString(instanceKey)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to write instanceKey");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleRemoveInstanceKey(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    std::string bundleName;
+    if (!data.ReadString(bundleName)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read bundleName");
+        return ERR_INVALID_DATA;
+    }
+    std::string instanceKey;
+    if (!reply.ReadString(instanceKey)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read instanceKey");
+        return ERR_INVALID_DATA;
+    }
+    WMError ret = RemoveInstanceKey(bundleName, instanceKey);
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write ret failed");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleTransferSessionToTargetScreen(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    TransferSessionInfo info;
+    if (!data.ReadInt32(info.persistentId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read persistentId failed");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.ReadInt32(info.toScreenId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read toScreenId failed");
+        return ERR_INVALID_DATA;
+    }
+    std::shared_ptr<AAFwk::WantParams> wantParams(data.ReadParcelable<AAFwk::WantParams>());
+    if (wantParams == nullptr) {
+        TLOGI(WmsLogTag::WMS_LIFE, "wantParams is nullptr");
+    } else {
+        info.wantParams = *wantParams;
+    }
+    WMError ret = TransferSessionToTargetScreen(info);
+    reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleUpdateKioskAppList(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    std::vector<std::string> kioskAppList;
+    if (!data.ReadStringVector(&kioskAppList)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read kioskAppList");
+        return ERR_INVALID_DATA;
+    }
+    WMError ret = UpdateKioskAppList(kioskAppList);
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write ret failed");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleEnterKioskMode(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    if (token == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read token");
+        return ERR_INVALID_DATA;
+    }
+    WMError ret = EnterKioskMode(token);
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write ret failed");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleExitKioskMode(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    sptr<IRemoteObject> token = nullptr;
+    WMError ret = ExitKioskMode(token);
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write ret failed");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleSendPointerEventForHover(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_EVENT, "in");
+    auto pointerEvent = MMI::PointerEvent::Create();
+    if (pointerEvent == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Failed to create pointer event");
+        return ERR_INVALID_DATA;
+    }
+    if (!pointerEvent->ReadFromParcel(data)) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Read pointer event failed");
+        return ERR_INVALID_DATA;
+    }
+    WSError ret = SendPointerEventForHover(pointerEvent);
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Write ret failed");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;

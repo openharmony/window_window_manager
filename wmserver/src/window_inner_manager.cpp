@@ -17,6 +17,7 @@
 
 #include "ability_manager_client.h"
 #include "memory_guard.h"
+#include "rs_adapter.h"
 #include "window.h"
 #include "window_manager_hilog.h"
 #include "xcollie/watchdog.h"
@@ -340,6 +341,28 @@ void WindowInnerManager::SetWindowRoot(const sptr<WindowRoot>& windowRoot)
     if (moveDragController_ != nullptr) {
         moveDragController_->SetWindowRoot(windowRoot);
     }
+}
+
+void WindowInnerManager::SetRSUIDirector(std::shared_ptr<RSUIDirector>& rsUIDirector)
+{
+    RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED();
+    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "%{public}s", RSAdapterUtil::RSUIDirectorToStr(rsUIDirector).c_str());
+    rsUIDirector_ = rsUIDirector;
+}
+
+std::shared_ptr<RSUIDirector> WindowInnerManager::GetRSUIDirector() const
+{
+    RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
+    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "%{public}s", RSAdapterUtil::RSUIDirectorToStr(rsUIDirector_).c_str());
+    return rsUIDirector_;
+}
+
+std::shared_ptr<RSUIContext> WindowInnerManager::GetRSUIContext() const
+{
+    RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
+    auto rsUIContext = rsUIDirector_ ? rsUIDirector_->GetRSUIContext() : nullptr;
+    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "%{public}s", RSAdapterUtil::RSUIContextToStr(rsUIContext).c_str());
+    return rsUIContext;
 }
 } // Rosen
 } // OHOS

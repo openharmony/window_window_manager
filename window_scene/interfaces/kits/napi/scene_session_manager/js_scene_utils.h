@@ -28,6 +28,33 @@
 #include "hitrace_meter.h"
 
 namespace OHOS::Rosen {
+
+#define CHECK_NAPI_ENV_RETURN_IF_NULL(env)               \
+    do {                                                 \
+        if ((env) == nullptr) {                          \
+            TLOGE(WmsLogTag::DEFAULT, "env is invalid"); \
+            return nullptr;                              \
+        }                                                \
+    } while (0)
+
+#define CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue) \
+    do {                                                       \
+        napi_create_object((env), &(objValue));                \
+        if ((objValue) == nullptr) {                           \
+            TLOGE(WmsLogTag::DEFAULT, "Failed to get object"); \
+            return nullptr;                                    \
+        }                                                      \
+    } while (0)
+
+#define NAPI_CHECK_RETURN_IF_NULL(func, msg)                                                            \
+    do {                                                                                                \
+        napi_status status = func;                                                                      \
+        if (status != napi_ok) {                                                                        \
+            TLOGE(WmsLogTag::DEFAULT, "Failed with reason %{public}s, code: %{public}d", msg, status);  \
+            return nullptr;                                                                             \
+        }                                                                                               \
+    } while (0)
+
 enum class JsSessionType : uint32_t {
     TYPE_UNDEFINED = 0,
     TYPE_APP,
@@ -68,7 +95,13 @@ enum class JsSessionType : uint32_t {
     TYPE_TRANSPARENT_VIEW,
     TYPE_WALLET_SWIPE_CARD,
     TYPE_SCREEN_CONTROL,
-    TYPE_FLOAT_NAVIGATION
+    TYPE_FLOAT_NAVIGATION,
+    TYPE_MUTISCREEN_COLLABORATION,
+    TYPE_DYNAMIC = 41,
+    TYPE_MAGNIFICATION = 42,
+    TYPE_MAGNIFICATION_MENU = 43,
+    TYPE_SELECTION = 44,
+    TYPE_FLOATING_BALL = 45,
 };
 
 const std::map<WindowType, JsSessionType> WINDOW_TO_JS_SESSION_TYPE_MAP {
@@ -111,6 +144,12 @@ const std::map<WindowType, JsSessionType> WINDOW_TO_JS_SESSION_TYPE_MAP {
     { WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD,        JsSessionType::TYPE_WALLET_SWIPE_CARD       },
     { WindowType::WINDOW_TYPE_SCREEN_CONTROL,           JsSessionType::TYPE_SCREEN_CONTROL          },
     { WindowType::WINDOW_TYPE_FLOAT_NAVIGATION,         JsSessionType::TYPE_FLOAT_NAVIGATION        },
+    { WindowType::WINDOW_TYPE_MUTISCREEN_COLLABORATION, JsSessionType::TYPE_MUTISCREEN_COLLABORATION},
+    { WindowType::WINDOW_TYPE_DYNAMIC,                  JsSessionType::TYPE_DYNAMIC                 },
+    { WindowType::WINDOW_TYPE_MAGNIFICATION,            JsSessionType::TYPE_MAGNIFICATION           },
+    { WindowType::WINDOW_TYPE_MAGNIFICATION_MENU,       JsSessionType::TYPE_MAGNIFICATION_MENU      },
+    { WindowType::WINDOW_TYPE_SELECTION,                JsSessionType::TYPE_SELECTION               },
+    { WindowType::WINDOW_TYPE_FB,                       JsSessionType::TYPE_FLOATING_BALL           },
 };
 
 const std::map<JsSessionType, WindowType> JS_SESSION_TO_WINDOW_TYPE_MAP {
@@ -153,6 +192,12 @@ const std::map<JsSessionType, WindowType> JS_SESSION_TO_WINDOW_TYPE_MAP {
     { JsSessionType::TYPE_WALLET_SWIPE_CARD,        WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD       },
     { JsSessionType::TYPE_SCREEN_CONTROL,           WindowType::WINDOW_TYPE_SCREEN_CONTROL          },
     { JsSessionType::TYPE_FLOAT_NAVIGATION,         WindowType::WINDOW_TYPE_FLOAT_NAVIGATION        },
+    { JsSessionType::TYPE_MUTISCREEN_COLLABORATION, WindowType::WINDOW_TYPE_MUTISCREEN_COLLABORATION},
+    { JsSessionType::TYPE_DYNAMIC,                  WindowType::WINDOW_TYPE_DYNAMIC                 },
+    { JsSessionType::TYPE_MAGNIFICATION,            WindowType::WINDOW_TYPE_MAGNIFICATION           },
+    { JsSessionType::TYPE_MAGNIFICATION_MENU,       WindowType::WINDOW_TYPE_MAGNIFICATION_MENU      },
+    { JsSessionType::TYPE_SELECTION,                WindowType::WINDOW_TYPE_SELECTION               },
+    { JsSessionType::TYPE_FLOATING_BALL,            WindowType::WINDOW_TYPE_FB                      },
 };
 
 enum class ThrowSlipMode;
@@ -193,14 +238,23 @@ napi_value CreateJsRectAnimationConfig(napi_env env, const RectAnimationConfig& 
 napi_value CreateJsSessionEventParam(napi_env env, const SessionEventParam& param);
 napi_value CreateRotationChangeType(napi_env env);
 napi_value CreateRectType(napi_env env);
+napi_value CreateWindowAnchorType(napi_env env);
+napi_value CreateJsWindowAnchorInfo(napi_env env, const WindowAnchorInfo& windowAnchorInfo);
+napi_value CreateSupportType(napi_env env);
 napi_value SubWindowModalTypeInit(napi_env env);
 napi_value CreateJsSystemBarPropertyArrayObject(
     napi_env env, const std::unordered_map<WindowType, SystemBarProperty>& propertyMap);
 napi_value CreateJsKeyboardLayoutParams(napi_env env, const KeyboardLayoutParams& params);
+napi_value CreateJsShadowsInfo(napi_env env, const ShadowsInfo& shadowsInfo);
 napi_value SessionTypeInit(napi_env env);
 napi_value SceneTypeInit(napi_env env);
 napi_value KeyboardGravityInit(napi_env env);
 napi_value KeyboardViewModeInit(napi_env env);
+napi_value KeyboardFlowLightModeInit(napi_env env);
+napi_value KeyboardGradientModeInit(napi_env env);
+napi_value AnimationTypeInit(napi_env env);
+napi_value WindowTransitionTypeInit(napi_env env);
+napi_value WindowAnimationCurveInit(napi_env env);
 napi_value CreateResultMapToJsValue(napi_env env,
     const std::unordered_map<int32_t, RotationChangeResult>& rotationChangeResultMap);
 napi_value CreateJsRotationChangeResultMapObject(napi_env env, const int32_t persistentId,
@@ -208,6 +262,13 @@ napi_value CreateJsRotationChangeResultMapObject(napi_env env, const int32_t per
 napi_value ConvertResultToJsValue(napi_env env, RotationChangeResult& rotationChangeResult);
 napi_value NapiGetUndefined(napi_env env);
 napi_valuetype GetType(napi_env env, napi_value value);
+napi_value ConvertWindowAnimationOptionToJsValue(napi_env env,
+    const WindowAnimationOption& animationConfig);
+napi_value ConvertTransitionAnimationToJsValue(napi_env env,
+    std::shared_ptr<TransitionAnimation> transitionAnimation);
+napi_value ConvertWindowAnimationPropertyToJsValue(napi_env env,
+    const WindowAnimationProperty& animationProperty);
+napi_value ConvertKeyboardEffectOptionToJsValue(napi_env env, const KeyboardEffectOption& effectOption);
 bool NapiIsCallable(napi_env env, napi_value value);
 bool ConvertRectInfoFromJs(napi_env env, napi_value jsObject, WSRect& rect);
 bool ConvertSessionRectInfoFromJs(napi_env env, napi_value jsObject, WSRect& rect);
@@ -219,6 +280,19 @@ bool ConvertDragResizeTypeFromJs(napi_env env, napi_value value, DragResizeType&
 bool ConvertRectFromJsValue(napi_env env, napi_value jsObject, Rect& displayRect);
 bool ConvertInfoFromJsValue(napi_env env, napi_value jsObject, RotationChangeInfo& rotationChangeInfo);
 bool ConvertThrowSlipModeFromJs(napi_env env, napi_value value, ThrowSlipMode& throwSlipMode);
+template<class T>
+bool ParseJsValue(napi_env env, napi_value jsObject, const std::string& name, T& data)
+{
+    napi_value value = nullptr;
+    napi_get_named_property(env, jsObject, name.c_str(), &value);
+    napi_valuetype type = napi_undefined;
+    napi_typeof(env, value, &type);
+    if (type != napi_undefined) {
+        return AbilityRuntime::ConvertFromJsValue(env, value, data);
+    }
+    return false;
+}
+bool ConvertCompatibleModePropertyFromJs(napi_env env, napi_value value, CompatibleModeProperty& property);
 WSError GetIntValueFromString(const std::string& str, uint32_t& value);
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;

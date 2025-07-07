@@ -30,7 +30,7 @@ class AccessibilityElementInfo;
 namespace OHOS {
 namespace Rosen {
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowEventChannelProxyMockTest"};
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowEventChannelProxyMockTest" };
 }
 class WindowEventChannelProxyMockTest : public testing::Test {
 public:
@@ -43,21 +43,13 @@ public:
         sptr<WindowEventChannelProxy>::MakeSptr(iRemoteObjectMocker);
 };
 
-void WindowEventChannelProxyMockTest::SetUpTestCase()
-{
-}
+void WindowEventChannelProxyMockTest::SetUpTestCase() {}
 
-void WindowEventChannelProxyMockTest::TearDownTestCase()
-{
-}
+void WindowEventChannelProxyMockTest::TearDownTestCase() {}
 
-void WindowEventChannelProxyMockTest::SetUp()
-{
-}
+void WindowEventChannelProxyMockTest::SetUp() {}
 
-void WindowEventChannelProxyMockTest::TearDown()
-{
-}
+void WindowEventChannelProxyMockTest::TearDown() {}
 
 namespace {
 /**
@@ -74,8 +66,8 @@ HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityHoverEvent, TestS
     int32_t sourceType = 0;
     int32_t eventType = 0;
     int64_t timeMs = 0;
-    WSError res = windowEventChannelProxy_->TransferAccessibilityHoverEvent(
-        pointX, pointY, sourceType, eventType, timeMs);
+    WSError res =
+        windowEventChannelProxy_->TransferAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
     ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
     MockMessageParcel::ClearAllErrorFlag();
     WLOGI("TransferAccessibilityHoverEvent end");
@@ -94,8 +86,8 @@ HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityHoverEvent1, Test
     int32_t sourceType = 0;
     int32_t eventType = 0;
     int64_t timeMs = 0;
-    WSError res = windowEventChannelProxy_->TransferAccessibilityHoverEvent(
-        pointX, pointY, sourceType, eventType, timeMs);
+    WSError res =
+        windowEventChannelProxy_->TransferAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
     ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
     MockMessageParcel::ClearAllErrorFlag();
     WLOGI("TransferAccessibilityHoverEvent1 end");
@@ -114,8 +106,8 @@ HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityHoverEvent2, Test
     int32_t sourceType = 0;
     int32_t eventType = 0;
     int64_t timeMs = 0;
-    WSError res = windowEventChannelProxy_->TransferAccessibilityHoverEvent(
-        pointX, pointY, sourceType, eventType, timeMs);
+    WSError res =
+        windowEventChannelProxy_->TransferAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
     ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
     MockMessageParcel::ClearAllErrorFlag();
     WLOGI("TransferAccessibilityHoverEvent2 end");
@@ -134,8 +126,8 @@ HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityHoverEvent3, Test
     int32_t sourceType = -1;
     int32_t eventType = 0;
     int64_t timeMs = 0;
-    WSError res = windowEventChannelProxy_->TransferAccessibilityHoverEvent(
-        pointX, pointY, sourceType, eventType, timeMs);
+    WSError res =
+        windowEventChannelProxy_->TransferAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
     ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
     MockMessageParcel::ClearAllErrorFlag();
     WLOGI("TransferAccessibilityHoverEvent3 end");
@@ -154,8 +146,8 @@ HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityHoverEvent4, Test
     int32_t sourceType = 0;
     int32_t eventType = -1;
     int64_t timeMs = 0;
-    WSError res = windowEventChannelProxy_->TransferAccessibilityHoverEvent(
-        pointX, pointY, sourceType, eventType, timeMs);
+    WSError res =
+        windowEventChannelProxy_->TransferAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
     ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
     MockMessageParcel::ClearAllErrorFlag();
     WLOGI("TransferAccessibilityHoverEvent4 end");
@@ -174,8 +166,8 @@ HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityHoverEvent5, Test
     int32_t sourceType = 0;
     int32_t eventType = 0;
     int64_t timeMs = -1;
-    WSError res = windowEventChannelProxy_->TransferAccessibilityHoverEvent(
-        pointX, pointY, sourceType, eventType, timeMs);
+    WSError res =
+        windowEventChannelProxy_->TransferAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
     ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
     MockMessageParcel::ClearAllErrorFlag();
     WLOGI("TransferAccessibilityHoverEvent5 end");
@@ -324,6 +316,6 @@ HWTEST_F(WindowEventChannelProxyMockTest, TransferAccessibilityDumpChildInfo2, T
     ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
     WLOGI("TransferAccessibilityDumpChildInfo2 end");
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

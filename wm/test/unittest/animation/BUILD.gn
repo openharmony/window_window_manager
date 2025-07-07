@@ -35,6 +35,7 @@ ohos_unittest("wm_window_scene_session_impl_animation_test") {
 
   external_deps = [
     "c_utils:utils",
+    "graphic_2d:librender_service_base",
     "hilog:libhilog",
     "init:libbegetutil",
   ]

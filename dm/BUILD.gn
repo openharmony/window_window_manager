@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -25,6 +25,7 @@ config("libdm_private_config") {
     "${window_base_path}/window_scene/session_manager/include",
     "${window_base_path}/window_scene/session_manager_service/include",
     "${window_base_path}/window_scene/interfaces/innerkits/include",
+    "${dmserver_gen_path}",
   ]
 }
 
@@ -34,11 +35,6 @@ config("libdm_public_config") {
     "../interfaces/innerkits/dm",
     "../utils/include",
   ]
-}
-
-config("for_libdm_public_config") {
-  include_dirs =
-      [ "../../../multimedia/image_framework/interfaces/innerkits/include" ]
 }
 
 ## Build libdm_static.a
@@ -54,7 +50,6 @@ ohos_static_library("libdm_static") {
     boundary_sanitize = true
   }
   sources = [
-    "../dmserver/src/display_manager_proxy.cpp",
     "../window_scene/screen_session_manager/src/zidl/screen_session_manager_proxy.cpp",
     "src/display.cpp",
     "src/display_manager.cpp",
@@ -73,6 +68,7 @@ ohos_static_library("libdm_static") {
   public_configs = [ ":libdm_public_config" ]
 
   deps = [
+    "${window_base_path}/dmserver:display_manager_interface_source_set_proxy",
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/utils:libwmutil_base",
     "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
@@ -101,8 +97,13 @@ ohos_static_library("libdm_static") {
 ## Build libdm.so
 ohos_shared_library("libdm") {
   branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
   sources = [
-    "../dmserver/src/display_manager_proxy.cpp",
     "../window_scene/screen_session_manager/src/zidl/screen_session_manager_proxy.cpp",
     "src/display.cpp",
     "src/display_manager.cpp",
@@ -118,18 +119,19 @@ ohos_shared_library("libdm") {
     "../resources/config/build:coverage_flags",
   ]
 
-  public_configs = [
-    ":for_libdm_public_config",
-    ":libdm_public_config",
-  ]
+  public_configs = [ ":libdm_public_config" ]
 
   deps = [
+    "${window_base_path}/dmserver:display_manager_interface_source_set_proxy",
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/utils:libwmutil_base",
     "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
   ]
 
-  public_external_deps = [ "graphic_2d:color_manager" ]
+  public_external_deps = [
+    "graphic_2d:color_manager",
+    "image_framework:pixelconvertadapter",
+  ]
 
   external_deps = [
     "ability_runtime:ability_manager",

@@ -38,16 +38,12 @@ public:
     void TearDown() override;
 
 private:
-    sptr <SessionStub> session_ = nullptr;
+    sptr<SessionStub> session_ = nullptr;
 };
 
-void SessionStubLifecycleTest::SetUpTestCase()
-{
-}
+void SessionStubLifecycleTest::SetUpTestCase() {}
 
-void SessionStubLifecycleTest::TearDownTestCase()
-{
-}
+void SessionStubLifecycleTest::TearDownTestCase() {}
 
 void SessionStubLifecycleTest::SetUp()
 {
@@ -125,6 +121,6 @@ HWTEST_F(SessionStubLifecycleTest, HandlePendingSessionActivation011, TestSize.L
     auto res = session_->HandlePendingSessionActivation(data, reply);
     ASSERT_EQ(5, res);
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

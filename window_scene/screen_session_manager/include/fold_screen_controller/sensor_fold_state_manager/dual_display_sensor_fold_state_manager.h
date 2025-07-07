@@ -20,6 +20,7 @@
 #include "ability_state_data.h"
 #include "process_data.h"
 
+#include "common/include/task_scheduler.h"
 #include "dm_common.h"
 #include "fold_screen_controller/fold_screen_policy.h"
 #include "fold_screen_controller/sensor_fold_state_manager/sensor_fold_state_manager.h"
@@ -29,6 +30,12 @@ namespace OHOS {
 namespace Rosen {
 using OHOS::AppExecFwk::AppStateData;
 using OHOS::AppExecFwk::IApplicationStateObserver;
+enum class ReportDualTentModeStatus : int32_t {
+    NORMAL_EXIT_TENT_MODE = 0,
+    NORMAL_ENTER_TENT_MODE = 1,
+    ABNORMAL_EXIT_TENT_MODE_DUE_TO_ANGLE = 2,
+    ABNORMAL_EXIT_TENT_MODE_DUE_TO_HALL = 3,
+};
 class ApplicationStateObserver : public IApplicationStateObserver {
 public:
     ApplicationStateObserver();
@@ -48,19 +55,32 @@ private:
 
 class DualDisplaySensorFoldStateManager : public SensorFoldStateManager {
 public:
-    DualDisplaySensorFoldStateManager();
+    explicit DualDisplaySensorFoldStateManager(const std::shared_ptr<TaskScheduler>& screenPowerTaskScheduler);
     virtual ~DualDisplaySensorFoldStateManager();
 
     void HandleAngleChange(float angle, int hall, sptr<FoldScreenPolicy> foldScreenPolicy) override;
     void HandleHallChange(float angle, int hall, sptr<FoldScreenPolicy> foldScreenPolicy) override;
     void RegisterApplicationStateObserver() override;
+    void HandleTentChange(int tentType, sptr<FoldScreenPolicy> foldScreenPolicy, int hall = -1) override;
+    bool TriggerTentExit(float angle, int hall);
+    void TentModeHandleSensorChange(float angle, int hall, sptr<FoldScreenPolicy> foldScreenPolicy);
+    void ReportTentStatusChange(ReportDualTentModeStatus tentStatus);
 
 private:
     FoldStatus GetNextFoldState(float angle, int hall);
     void UpdateHallSwitchAppInfo(FoldStatus foldStatus);
+    void HandleHallChangeInner(float angle, int hall, const sptr<FoldScreenPolicy>& foldScreenPolicy);
+    void SensorReportTimeOutPro(float angle, int hall, const sptr<FoldScreenPolicy>& foldScreenPolicy);
+    bool CheckUpdateAngle(float& angle, int hall);
+    void HandleAngleChangeInTask(float angle, int hall, const sptr<FoldScreenPolicy>& foldScreenPolicy);
     sptr<ApplicationStateObserver> applicationStateObserver_;
     bool isHallSwitchApp_ = true;
     std::vector<std::string> packageNames_;
+    int tentModeType_ = 0;
+    float currentAngle_ = -1.0F;
+    int32_t currentHall_ = -1;
+    std::atomic_bool isInTask_ = false;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler_;
 };
 } // namespace Rosen
 } // namespace OHOS

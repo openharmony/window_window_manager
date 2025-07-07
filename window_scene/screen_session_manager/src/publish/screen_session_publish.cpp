@@ -26,6 +26,7 @@ const std::string COMMON_EVENT_DISPLAY_ROTATION_CHANGED = "usual.event.dms.rotat
 const std::string COMMON_EVENT_CAST_PLUGGED_CHANGED = "usual.event.dms.cast_plugged_changed";
 const std::string COMMON_EVENT_SMART_NOTIFICATION = "hicare.event.SMART_NOTIFICATION";
 const std::string COMMON_EVENT_LOW_TEMP_WARNING = "usual.event.thermal.LOW_TEMP_WARNING";
+const std::string COMMON_EVENT_USER_SWITCHED = "usual.event.USER_SWITCHED";
 constexpr int32_t PUBLISH_SUCCESS = 0;
 constexpr int32_t PUBLISH_FAILURE = -1;
 constexpr int32_t TRANS_CODE_CAST_PLUGGED_CHANGED = 0;
@@ -43,6 +44,7 @@ ScreenSessionPublish::~ScreenSessionPublish()
 {
     TLOGI(WmsLogTag::DMS, "destory");
     UnRegisterLowTempSubscriber();
+    UnRegisterUserSwitchedSubscriber();
 }
 
 ScreenSessionPublish &ScreenSessionPublish::GetInstance()
@@ -131,8 +133,7 @@ void ScreenSessionPublish::PublishCastPlugOutEvent()
 void ScreenSessionPublish::PublishDisplayRotationEvent(
     const ScreenId& screenId, const Rotation& displayRotation)
 {
-    TLOGI(WmsLogTag::DMS,
-        "start to publish display rotation event, screenId: %{public}d, displayRotation: %{public}d",
+    TLOGI(WmsLogTag::DMS, "start event, screenId: %{public}d, displayRotation: %{public}d",
         static_cast<int32_t>(screenId), static_cast<int32_t>(displayRotation));
     EventFwk::CommonEventData eventData;
     eventData.SetCode(TRANS_CODE_ROTATION_CHANGED);
@@ -149,7 +150,7 @@ void ScreenSessionPublish::PublishDisplayRotationEvent(
         TLOGE(WmsLogTag::DMS, "PublishEvents failed");
         return;
     }
-    TLOGI(WmsLogTag::DMS, "end of publish display rotation event");
+    TLOGI(WmsLogTag::DMS, "end event");
 }
 
 void ScreenSessionPublish::PublishSmartNotificationEvent(const std::string& faultDesc, const std::string& faultSuggest)
@@ -208,6 +209,39 @@ bool ScreenSessionPublish::UnRegisterLowTempSubscriber()
     return true;
 }
 
+bool ScreenSessionPublish::RegisterUserSwitchedSubscriber()
+{
+    if (userSwitchedSubscriber_ != nullptr) {
+        TLOGE(WmsLogTag::DMS, "user switched is registered");
+        return false;
+    }
+    EventFwk::MatchingSkills userSwitchedSkills = EventFwk::MatchingSkills();
+    userSwitchedSkills.AddEvent(COMMON_EVENT_USER_SWITCHED);
+    EventFwk::CommonEventSubscribeInfo userSwitchedInfo(userSwitchedSkills);
+    userSwitchedInfo.SetThreadMode(EventFwk::CommonEventSubscribeInfo::COMMON);
+    userSwitchedSubscriber_ = std::make_shared<EventSubscriber>(userSwitchedInfo);
+    if (!EventFwk::CommonEventManager::SubscribeCommonEvent(userSwitchedSubscriber_)) {
+        TLOGE(WmsLogTag::DMS, "subscribe common event:%{public}s failed!", COMMON_EVENT_USER_SWITCHED.c_str());
+        return false;
+    }
+    TLOGI(WmsLogTag::DMS, "subscribe common event:%{public}s success.", COMMON_EVENT_USER_SWITCHED.c_str());
+    return true;
+}
+
+bool ScreenSessionPublish::UnRegisterUserSwitchedSubscriber()
+{
+    if (userSwitchedSubscriber_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "userSwitchedSubscriber_ is nullptr");
+        return false;
+    }
+    if (!EventFwk::CommonEventManager::UnSubscribeCommonEvent(userSwitchedSubscriber_)) {
+        TLOGE(WmsLogTag::DMS, "unsubscribe common event:%{public}s failed!", COMMON_EVENT_USER_SWITCHED.c_str());
+        return false;
+    }
+    TLOGI(WmsLogTag::DMS, "unsubscribe common event:%{public}s success.", COMMON_EVENT_USER_SWITCHED.c_str());
+    return true;
+}
+
 void ScreenSessionPublish::EventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData& data)
 {
     std::string action = data.GetWant().GetAction();
@@ -216,6 +250,9 @@ void ScreenSessionPublish::EventSubscriber::OnReceiveEvent(const EventFwk::Commo
         ScreenSessionManager::GetInstance().SetLowTemp(static_cast<LowTempMode>(lowTemp));
         TLOGI(WmsLogTag::DMS, "receive common event:%{public}s sucess, lowTempWarning is:%{public}d",
             COMMON_EVENT_LOW_TEMP_WARNING.c_str(), lowTemp);
+    } else if (action == COMMON_EVENT_USER_SWITCHED) {
+        TLOGI(WmsLogTag::DMS, "receive common event:%{public}s sucess", COMMON_EVENT_USER_SWITCHED.c_str());
+        ScreenSessionManager::GetInstance().NotifyCastWhenSwitchScbNode();
     }
 }
 } // namespace OHOS::Rosen

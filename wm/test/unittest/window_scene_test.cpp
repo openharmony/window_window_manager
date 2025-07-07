@@ -509,6 +509,25 @@ HWTEST_F(WindowSceneTest, GoResume02, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GoPause
+ * @tc.desc: GoPause with mainWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, GoPause, TestSize.Level1)
+{
+    sptr<WindowScene> winScene = new WindowScene();
+    ASSERT_NE(nullptr, winScene);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, winScene->GoPause());
+    std::unique_ptr<Mocker> mocker = std::make_unique<Mocker>();
+    sptr<WindowOption> optionTest = new WindowOption();
+    EXPECT_CALL(mocker->Mock(), CreateWindow(_, _, _)).Times(1).WillOnce(Return(new WindowImpl(optionTest)));
+    DisplayId displayId = 0;
+    sptr<IWindowLifeCycle> listener = nullptr;
+    EXPECT_EQ(WMError::WM_OK, winScene->Init(displayId, abilityContext_, listener));
+    EXPECT_EQ(WMError::WM_OK, winScene->GoPause());
+}
+
+/**
  * @tc.name: RequestFocus01
  * @tc.desc: RequestFocus01 without mainWindow
  * @tc.type: FUNC
@@ -585,6 +604,67 @@ HWTEST_F(WindowSceneTest, NotifyMemoryLevel03, TestSize.Level1)
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->NotifyMemoryLevel(0)); // ui content is null
 }
 
+/**
+ * @tc.name: GoDestroyHookWindow
+ * @tc.desc: Destroy hook window
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, GoDestroyHookWindow, TestSize.Level1)
+{
+    DisplayId displayId = 0;
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    sptr<IWindowLifeCycle> listener = nullptr;
+    sptr<WindowScene> scene = sptr<WindowScene>::MakeSptr();
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _)).Times(1).WillOnce(Return(new WindowSceneSessionImpl(option)));
+    ASSERT_EQ(WMError::WM_OK, scene->Init(displayId, abilityContext_, listener));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, scene->GoDestroyHookWindow());
+}
+
+/**
+ * @tc.name: SetHookedWindowElementInfo
+ * @tc.desc: SetHookedWindowElementInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, SetHookedWindowElementInfo, TestSize.Level1)
+{
+    DisplayId displayId = 0;
+    AppExecFwk::ElementName elementName;
+    sptr<WindowScene> scene = sptr<WindowScene>::MakeSptr();
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->SetHookedWindowElementInfo(elementName));
+
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    sptr<IWindowLifeCycle> listener = nullptr;
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _)).Times(1).WillOnce(Return(new WindowSceneSessionImpl(option)));
+    ASSERT_EQ(WMError::WM_OK, scene->Init(displayId, abilityContext_, listener));
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->SetHookedWindowElementInfo(elementName));
+}
+
+/**
+ * @tc.name: SetNavDestinationInfo01
+ * @tc.desc: SetNavDestinationInfo01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, SetNavDestinationInfo01, TestSize.Level1)
+{
+    std::string navInfo = "testInfo";
+    auto ret = scene_->SetNavDestinationInfo(navInfo);
+    EXPECT_EQ(ret, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: SetNavDestinationInfo02
+ * @tc.desc: SetNavDestinationInfo02
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, SetNavDestinationInfo02, TestSize.Level1)
+{
+    sptr<WindowScene> scene = new WindowScene();
+    std::string navInfo = "testInfo";
+    auto ret = scene->SetNavDestinationInfo(navInfo);
+    EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

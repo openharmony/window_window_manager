@@ -78,10 +78,21 @@ void WindowManagerAgent::NotifyWindowStyleChange(WindowStyleType type)
     SingletonContainer::Get<WindowManager>().NotifyWindowStyleChange(type);
 }
 
+void WindowManagerAgent::NotifyWindowSystemBarPropertyChange(
+    WindowType type, const SystemBarProperty& systemBarProperty)
+{
+    SingletonContainer::Get<WindowManager>().NotifyWindowSystemBarPropertyChange(type, systemBarProperty);
+}
+
 void WindowManagerAgent::NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info)
 {
     SingletonContainer::Get<WindowManager>().NotifyWindowPidVisibilityChanged(info);
 }
 
+void WindowManagerAgent::NotifyWindowPropertyChange(uint32_t propertyDirtyFlags,
+    const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList)
+{
+    SingletonContainer::Get<WindowManager>().NotifyWindowPropertyChange(propertyDirtyFlags, windowInfoList);
+}
 } // namespace Rosen
 } // namespace OHOS

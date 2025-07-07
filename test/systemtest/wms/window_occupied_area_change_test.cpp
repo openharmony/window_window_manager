@@ -16,26 +16,26 @@
 // gtest
 #include <gtest/gtest.h>
 #include "display_manager_proxy.h"
-#include "wm_common.h"
 #include "window_test_utils.h"
+#include "wm_common.h"
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
 namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowOccupiedAreaChangeTest"};
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowOccupiedAreaChangeTest" };
 }
 
 using Utils = WindowTestUtils;
-const int WAIT_ASYNC_US = 100000;  // 100000us
+const int WAIT_ASYNC_US = 100000; // 100000us
 
 class TestOccupiedAreaChangeListener : public IOccupiedAreaChangeListener {
 public:
     OccupiedAreaType type_ = OccupiedAreaType::TYPE_INPUT;
     Rect rect_ = { 0, 0, 0, 0 };
     void OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info,
-        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
+                      const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
 };
 
 class WindowOccupiedAreaChangeTest : public testing::Test {
@@ -53,10 +53,12 @@ sptr<TestOccupiedAreaChangeListener> WindowOccupiedAreaChangeTest::testOccupiedA
     new TestOccupiedAreaChangeListener();
 
 void TestOccupiedAreaChangeListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info,
-    const std::shared_ptr<RSTransaction>& rsTransaction)
+                                                  const std::shared_ptr<RSTransaction>& rsTransaction)
 {
     WLOGI("OccupiedAreaChangeInfo: [%{public}u, {%{public}u, %{public}u}]",
-        info->type_, info->rect_.width_, info->rect_.height_);
+          info->type_,
+          info->rect_.width_,
+          info->rect_.height_);
     type_ = info->type_;
     rect_ = info->rect_;
 }
@@ -65,38 +67,37 @@ void WindowOccupiedAreaChangeTest::SetUpTestCase()
 {
     auto display = DisplayManager::GetInstance().GetDisplayById(0);
     ASSERT_TRUE((display != nullptr));
-    WLOGI("GetDefaultDisplay: id %{public}" PRIu64", w %{public}d, h %{public}d, fps %{public}u",
-        display->GetId(), display->GetWidth(), display->GetHeight(), display->GetRefreshRate());
-    Rect displayRect = {0, 0, display->GetWidth(), display->GetHeight()};
+    WLOGI("GetDefaultDisplay: id %{public}" PRIu64 ", w %{public}d, h %{public}d, fps %{public}u",
+          display->GetId(),
+          display->GetWidth(),
+          display->GetHeight(),
+          display->GetRefreshRate());
+    Rect displayRect = { 0, 0, display->GetWidth(), display->GetHeight() };
     Utils::InitByDisplayRect(displayRect);
 }
 
-void WindowOccupiedAreaChangeTest::TearDownTestCase()
-{
-}
+void WindowOccupiedAreaChangeTest::TearDownTestCase() {}
 
 void WindowOccupiedAreaChangeTest::SetUp()
 {
     fullScreenAppInfo_ = {
-            .name = "FullWindow",
-            .rect = Utils::customAppRect_,
-            .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
-            .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
-            .needAvoid = false,
-            .parentLimit = false,
-            .parentId = INVALID_WINDOW_ID,
+        .name = "FullWindow",
+        .rect = Utils::customAppRect_,
+        .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
+        .mode = WindowMode::WINDOW_MODE_FULLSCREEN,
+        .needAvoid = false,
+        .parentLimit = false,
+        .parentId = INVALID_WINDOW_ID,
     };
     imeAppInfo_ = {
-            .name = "ImeWindow",
-            .rect = Utils::customAppRect_,
-            .type = WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT,
-            .mode = WindowMode::WINDOW_MODE_FLOATING,
+        .name = "ImeWindow",
+        .rect = Utils::customAppRect_,
+        .type = WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT,
+        .mode = WindowMode::WINDOW_MODE_FLOATING,
     };
 }
 
-void WindowOccupiedAreaChangeTest::TearDown()
-{
-}
+void WindowOccupiedAreaChangeTest::TearDown() {}
 
 namespace {
 /**
@@ -194,6 +195,6 @@ HWTEST_F(WindowOccupiedAreaChangeTest, KeyboardHeightChangeTest03, TestSize.Leve
     ASSERT_EQ(testOccupiedAreaChangeListener_->rect_.width_, 0);
     ASSERT_EQ(testOccupiedAreaChangeListener_->rect_.height_, 0);
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

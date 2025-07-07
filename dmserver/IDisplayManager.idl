@@ -1,0 +1,95 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+sequenceable OHOS.IRemoteObject;
+sequenceable OHOS.Media.PixelMap;
+sequenceable OHOS.Rosen.DisplayInfo;
+sequenceable OHOS.Rosen.DmVirtualScreenOption;
+sequenceable OHOS.Rosen.CutoutInfo;
+sequenceable OHOS.Rosen.DmRsSurfaceNode;
+sequenceable OHOS.Rosen.ScreenInfo;
+sequenceable OHOS.Rosen.ScreenGroupInfo;
+sequenceable dm_common..OHOS.Rosen.Point;
+sequenceable dm_common..OHOS.Rosen.DisplayPhysicalResolution;
+interface OHOS.IBufferProducer;
+interface zidl..OHOS.Rosen.IDisplayManagerAgent;
+
+interface OHOS.Rosen.IDisplayManager {
+    void GetDefaultDisplayInfo([out] sptr<DisplayInfo> displayInfo);
+    void GetDisplayInfoById([in] unsigned long displayId, [out] sptr<DisplayInfo> displayInfo);
+    void GetVisibleAreaDisplayInfoById([in] unsigned long displayId, [out] sptr<DisplayInfo> displayInfo);
+    void GetDisplayInfoByScreen([in] unsigned long screenId, [out] sptr<DisplayInfo> displayInfo);
+    void CreateVirtualScreen([in] DmVirtualScreenOption virtualOption, [in] IRemoteObject displayManagerAgent,
+        [out] unsigned long screenId);
+    void CreateVirtualScreen([in] DmVirtualScreenOption virtualOption, [in] IRemoteObject displayManagerAgent,
+        [out] unsigned long screenId, [in] IBufferProducer surface);
+    void DestroyVirtualScreen([in] unsigned long screenId, [out] int dmError);
+    void SetVirtualScreenSurface([in] unsigned long screenId, [in] IBufferProducer surface, [out] int dmError);
+    void SetOrientation([in] unsigned long screenId, [in] unsigned int orientation, [out] int dmError);
+    void GetDisplaySnapshot([in] unsigned long displayId, [out] int errorCode, [in] boolean isUseDma,
+        [in] boolean isCaptureFullOfScreen, [out] sharedptr<PixelMap> pixelMap);
+    void GetScreenSupportedColorGamuts([in] unsigned long screenId, [out] unsigned int[] colorGamuts,
+        [out] int dmError);
+    void GetScreenColorGamut([in] unsigned long screenId, [out] unsigned int colorGamut, [out] int dmError);
+    void SetScreenColorGamut([in] unsigned long screenId, [in] int colorGamutIdx, [out] int dmError);
+    void GetScreenGamutMap([in] unsigned long screenId, [out] unsigned int gamutMap, [out] int dmError);
+    void SetScreenGamutMap([in] unsigned long screenId, [in] unsigned int gamutMap, [out] int dmError);
+    void SetScreenColorTransform([in] unsigned long screenId);
+    void RegisterDisplayManagerAgent([in] IDisplayManagerAgent displayManagerAgent, [in] unsigned int type,
+        [out] int dmError);
+    void UnregisterDisplayManagerAgent([in] IDisplayManagerAgent displayManagerAgent, [in] unsigned int type,
+        [out] int dmError);
+    void WakeUpBegin([in] unsigned int reason, [out] boolean isSucc);
+    void WakeUpEnd([out] boolean isSucc);
+    void SuspendBegin([in] unsigned int reason, [out] boolean isSucc);
+    void SuspendEnd([out] boolean isSucc);
+    void SetScreenPowerForAll([in] unsigned int screenPowerState, [in] unsigned int reason, [out] boolean isSucc);
+    void SetSpecifiedScreenPower([in] unsigned long screenId, [in] unsigned int screenPowerState,
+        [in] unsigned int reason, [out] boolean isSucc);
+    void GetScreenPower([in] unsigned long dmsScreenId, [out] unsigned int screenPowerState);
+    void SetDisplayState([in] unsigned int displayState, [out] boolean isSucc);
+    void GetDisplayState([in] unsigned long displayId, [out] unsigned int displayState);
+    void TryToCancelScreenOff([out] boolean isSucc);
+    void GetAllDisplayIds([out] unsigned long[] displayIds);
+    void GetCutoutInfo([in] unsigned long displayId, [out] sptr<CutoutInfo> cutoutInfo);
+    void AddSurfaceNodeToDisplay([in] unsigned long displayId, [in] sharedptr<DmRsSurfaceNode> dmRsSurfaceNode,
+        [out] int dmError);
+    void RemoveSurfaceNodeFromDisplay([in] unsigned long displayId, [in] sharedptr<DmRsSurfaceNode> dmRsSurfaceNode,
+        [out] int dmError);
+    void HasPrivateWindow([in] unsigned long displayId, [out] boolean hasPrivateWindow, [out] int dmError);
+    void NotifyDisplayEvent([in] unsigned int displayEvent);
+    void SetFreeze([in] unsigned long[] displayIds, [in] boolean isFreeze, [out] boolean isSucc);
+    void MakeMirror([in] unsigned long mainScreenId, [in] unsigned long[] mirrorScreenId,
+        [out] unsigned long screenGroupId, [out] int dmError);
+    void StopMirror([in] unsigned long[] mirrorScreenIds, [out] int dmError);
+    void GetScreenInfoById([in] unsigned long screenId, [out] sptr<ScreenInfo> screenInfo);
+    void GetScreenGroupInfoById([in] unsigned long screenId, [out] sptr<ScreenGroupInfo> screenGroupInfo);
+    void GetAllScreenInfos([out] sptr<ScreenInfo>[] screenInfos, [out] int dmError);
+    void MakeExpand([in] unsigned long[] screenId, [in] Point[] startPoint, [out] unsigned long screenGroupId,
+        [out] int dmError);
+    void StopExpand([in] unsigned long[] expandScreenIds, [out] int dmError);
+    void RemoveVirtualScreenFromGroup([in] unsigned long[] screens);
+    void SetScreenActiveMode([in] unsigned long screenId, [in] unsigned int modeId, [out] int dmError);
+    void SetVirtualPixelRatio([in] unsigned long screenId, [in] float virtualPixelRatio, [out] int dmError);
+    void SetResolution([in] unsigned long screenId, [in] unsigned int width, [in] unsigned int height,
+        [in] float virtualPixelRatio, [out] int dmError);
+    void GetDensityInCurResolution([in] unsigned long screenId, [out] float virtualPixelRatio, [out] int dmError);
+    void IsScreenRotationLocked([out] boolean isLocked, [out] int dmError);
+    void SetScreenRotationLocked([in] boolean isLocked, [out] int dmError);
+    void SetScreenRotationLockedFromJs([in] boolean isLocked, [out] int dmError);
+    void GetAllDisplayPhysicalResolution([out] DisplayPhysicalResolution[] displayPhysicalResolutions);
+    void SetScreenBrightness([in] unsigned long screenId, [in] unsigned int level, [out] boolean isSucc);
+    void GetScreenBrightness([in] unsigned long screenId, [out] unsigned int level);
+}

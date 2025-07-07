@@ -1601,6 +1601,34 @@ HWTEST_F(WindowControllerTest, ToggleShownStateForAllAppWindows, TestSize.Level1
 }
 
 /**
+ * @tc.name: NotifyScreenshotEvent
+ * @tc.desc: Window controller NotifyScreenshotEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowControllerTest, NotifyScreenshotEvent, TestSize.Level1)
+{
+    windowRoot_->windowNodeMap_.clear();
+    sptr<IWindow> window;
+    sptr<WindowProperty> property = new WindowProperty();
+    std::shared_ptr<RSSurfaceNode> surfaceNode = nullptr;
+    sptr<WindowNode> windowNode = new WindowNode(property);
+    property->SetParentId(INVALID_WINDOW_ID);
+    property->SetWindowType(WindowType::APP_WINDOW_BASE);
+    windowRoot_->windowNodeMap_.insert(std::make_pair(1, windowNode));
+
+    uint32_t windowId = windowNode->GetWindowId();
+    struct RSSurfaceNodeConfig surfaceNodeConfig;
+    surfaceNodeConfig.SurfaceNodeName = "NotifyScreenshotEvent";
+    surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+    EXPECT_EQ(WMError::WM_OK,
+        windowController_->CreateWindow(window, property, surfaceNode, windowId, nullptr, 0, 0));
+        
+    ScreenshotEventType type = ScreenshotEventType::SCROLL_SHOT_START;
+    WMError res = windowController_->NotifyScreenshotEvent(type);
+    EXPECT_EQ(WMError::WM_OK, res);
+}
+
+/**
  * @tc.name: GetUnreliableWindowInfo
  * @tc.desc: Window controller window is unreliable window
  * @tc.type: FUNC

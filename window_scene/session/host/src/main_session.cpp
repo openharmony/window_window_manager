@@ -32,7 +32,7 @@ constexpr int32_t MAX_LABEL_SIZE = 1024;
 MainSession::MainSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
     : SceneSession(info, specificCallback)
 {
-    scenePersistence_ = sptr<ScenePersistence>::MakeSptr(info.bundleName_, GetPersistentId());
+    scenePersistence_ = sptr<ScenePersistence>::MakeSptr(info.bundleName_, GetPersistentId(), capacity_);
     if (info.persistentId_ != 0 && info.persistentId_ != GetPersistentId()) {
         // persistentId changed due to id conflicts. Need to rename the old snapshot if exists
         scenePersistence_->RenameSnapshotFromOldPersistentId(info.persistentId_);
@@ -51,6 +51,11 @@ MainSession::MainSession(const SessionInfo& info, const sptr<SpecificSessionCall
             WLOGFD("init aspectRatio, key %{public}s, value: %{public}f", key.c_str(), aspectRatio_);
             moveDragController_->SetAspectRatio(aspectRatio_);
         }
+    }
+    auto isPersistentImageFit = ScenePersistentStorage::HasKey(
+        "SetImageForRecent_" + std::to_string(GetPersistentId()), ScenePersistentStorageType::MAXIMIZE_STATE);
+    if (isPersistentImageFit) {
+        scenePersistence_->SetHasSnapshot(true);
     }
 
     WLOGFD("Create MainSession");
@@ -83,9 +88,6 @@ WSError MainSession::Reconnect(const sptr<ISessionStage>& sessionStage, const sp
         } else {
             session->isActive_ = false;
             session->UpdateSessionState(SessionState::STATE_BACKGROUND);
-            if (session->scenePersistence_) {
-                session->scenePersistence_->SetHasSnapshot(true);
-            }
         }
         if (session->pcFoldScreenController_) {
             session->pcFoldScreenController_->OnConnect();
@@ -234,8 +236,9 @@ void MainSession::NotifyClientToUpdateInteractive(bool interactive)
         return;
     }
     const auto state = GetSessionState();
+    TLOGI(WmsLogTag::WMS_LIFE, "state: %{public}d", state);
     if (state == SessionState::STATE_ACTIVE || state == SessionState::STATE_FOREGROUND) {
-        WLOGFI("%{public}d", interactive);
+        TLOGI(WmsLogTag::WMS_LIFE, "interactive: %{public}d", interactive);
         sessionStage_->NotifyForegroundInteractiveStatus(interactive);
         isClientInteractive_ = interactive;
     }
@@ -370,10 +373,48 @@ void MainSession::NotifySubAndDialogFollowRectChange(const WSRect& rect, bool is
         std::lock_guard lock(registerNotifySurfaceBoundsChangeMutex_);
         funcMap = notifySurfaceBoundsChangeFuncMap_;
     }
+    WSRect newRect;
     for (const auto& [sessionId, func] : funcMap) {
         auto subSession = GetSceneSessionById(sessionId);
         if (subSession && subSession->GetIsFollowParentLayout() && func) {
-            func(rect, isGlobal, needFlush);
+            if (newRect.IsEmpty()) {
+                HookStartMoveRect(newRect, rect);
+            }
+            func(newRect, isGlobal, needFlush);
+        }
+    }
+}
+
+void MainSession::SetSubWindowBoundsDuringCross(const WSRect& parentRect, bool isGlobal, bool needFlush)
+{
+    for (const auto& subSession : GetSubSession()) {
+        if (subSession && subSession->GetWindowAnchorInfo().isAnchorEnabled_ && subSession->IsSessionForeground()) {
+            WSRect subRect = subSession->GetSessionRect();
+            subSession->CalcSubWindowRectByAnchor(parentRect, subRect);
+            subSession->UpdateSizeChangeReason(SizeChangeReason::UNDEFINED);
+            subSession->SetSurfaceBounds(subRect, isGlobal, needFlush);
+        }
+    }
+}
+
+void MainSession::NotifySubSessionRectChangeByAnchor(const WSRect& parentRect,
+    SizeChangeReason reason, DisplayId displayId)
+{
+    for (const auto& subSession : GetSubSession()) {
+        if (subSession && subSession->GetWindowAnchorInfo().isAnchorEnabled_) {
+            WSRect subRect = subSession->GetSessionRect();
+            subSession->CalcSubWindowRectByAnchor(parentRect, subRect);
+            subSession->NotifySessionRectChange(subRect, reason, displayId);
+        }
+    }
+}
+
+void MainSession::HandleSubSessionSurfaceNodeByWindowAnchor(SizeChangeReason reason,
+    const sptr<ScreenSession>& screenSession)
+{
+    for (const auto& subSession : GetSubSession()) {
+        if (subSession && subSession->GetWindowAnchorInfo().isAnchorEnabled_ && subSession->IsSessionForeground()) {
+            subSession->HandleCrossSurfaceNodeByWindowAnchor(reason, screenSession);
         }
     }
 }
@@ -481,5 +522,48 @@ WSError MainSession::UpdateFlag(const std::string& flag)
         }
     }, __func__);
     return WSError::WS_OK;
+}
+
+WMError MainSession::GetRouterStackInfo(std::string& routerStackInfo) const
+{
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_LIFE, "sessionStage is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    return sessionStage_->GetRouterStackInfo(routerStackInfo);
+}
+
+void MainSession::SetRecentSessionState(RecentSessionInfo& info, const SessionState& state)
+{
+    switch (state) {
+        case SessionState::STATE_DISCONNECT: {
+            info.sessionState = RecentSessionState::DISCONNECT;
+            break;
+        }
+        case SessionState::STATE_CONNECT: {
+            info.sessionState = RecentSessionState::CONNECT;
+            break;
+        }
+        case SessionState::STATE_FOREGROUND: {
+            info.sessionState = RecentSessionState::FOREGROUND;
+            break;
+        }
+        case SessionState::STATE_BACKGROUND: {
+            info.sessionState = RecentSessionState::BACKGROUND;
+            break;
+        }
+        case SessionState::STATE_ACTIVE: {
+            info.sessionState = RecentSessionState::ACTIVE;
+            break;
+        }
+        case SessionState::STATE_INACTIVE: {
+            info.sessionState = RecentSessionState::INACTIVE;
+            break;
+        }
+        default: {
+            info.sessionState = RecentSessionState::END;
+            break;
+        }
+    }
 }
 } // namespace OHOS::Rosen

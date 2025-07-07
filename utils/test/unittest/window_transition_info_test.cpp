@@ -17,8 +17,8 @@
 
 #include <iremote_broker.h>
 #include <iremote_object.h>
-#include "window_transition_info.h"
 #include "iremote_object_mocker.h"
+#include "window_transition_info.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -36,21 +36,13 @@ public:
     void SetTransitionInfo(sptr<WindowTransitionInfo> info);
 };
 
-void WindowTransitionInfoTest::SetUpTestCase()
-{
-}
+void WindowTransitionInfoTest::SetUpTestCase() {}
 
-void WindowTransitionInfoTest::TearDownTestCase()
-{
-}
+void WindowTransitionInfoTest::TearDownTestCase() {}
 
-void WindowTransitionInfoTest::SetUp()
-{
-}
+void WindowTransitionInfoTest::SetUp() {}
 
-void WindowTransitionInfoTest::TearDown()
-{
-}
+void WindowTransitionInfoTest::TearDown() {}
 
 void WindowTransitionInfoTest::SetTransitionInfo(sptr<WindowTransitionInfo> info)
 {
@@ -69,10 +61,10 @@ namespace {
  */
 HWTEST_F(WindowTransitionInfoTest, WindowTransitionInfo01, TestSize.Level1)
 {
-    sptr<AAFwk::AbilityTransitionInfo> info = new(std::nothrow) AAFwk::AbilityTransitionInfo();
+    sptr<AAFwk::AbilityTransitionInfo> info = new (std::nothrow) AAFwk::AbilityTransitionInfo();
     ASSERT_NE(nullptr, info);
     info->bundleName_ = "TestAbilityTransitionInfo1";
-    sptr<WindowTransitionInfo> winTransitionInfo1 = new(std::nothrow) WindowTransitionInfo(info);
+    sptr<WindowTransitionInfo> winTransitionInfo1 = new (std::nothrow) WindowTransitionInfo(info);
     ASSERT_NE(nullptr, winTransitionInfo1);
     ASSERT_EQ(info->bundleName_, winTransitionInfo1->bundleName_);
     ASSERT_EQ(3, winTransitionInfo1->supportWindowModes_.size());
@@ -82,7 +74,7 @@ HWTEST_F(WindowTransitionInfoTest, WindowTransitionInfo01, TestSize.Level1)
 
     info->bundleName_ = "TestAbilityTransitionInfo2";
     info->windowModes_.emplace_back(AppExecFwk::SupportWindowMode::SPLIT);
-    sptr<WindowTransitionInfo> winTransitionInfo2 = new(std::nothrow) WindowTransitionInfo(info);
+    sptr<WindowTransitionInfo> winTransitionInfo2 = new (std::nothrow) WindowTransitionInfo(info);
     ASSERT_NE(nullptr, winTransitionInfo2);
     ASSERT_EQ(info->bundleName_, winTransitionInfo2->bundleName_);
     ASSERT_EQ(1, winTransitionInfo2->supportWindowModes_.size());
@@ -96,11 +88,11 @@ HWTEST_F(WindowTransitionInfoTest, WindowTransitionInfo01, TestSize.Level1)
  */
 HWTEST_F(WindowTransitionInfoTest, Marshalling01, TestSize.Level1)
 {
-    sptr<AAFwk::AbilityTransitionInfo> info = new(std::nothrow) AAFwk::AbilityTransitionInfo();
+    sptr<AAFwk::AbilityTransitionInfo> info = new (std::nothrow) AAFwk::AbilityTransitionInfo();
     ASSERT_NE(nullptr, info);
 
     Parcel parcel;
-    sptr<WindowTransitionInfo> winTransitionInfo = new(std::nothrow) WindowTransitionInfo(info);
+    sptr<WindowTransitionInfo> winTransitionInfo = new (std::nothrow) WindowTransitionInfo(info);
     ASSERT_NE(nullptr, winTransitionInfo);
 
     winTransitionInfo->bundleName_ = "bundleNameValue";
@@ -109,7 +101,7 @@ HWTEST_F(WindowTransitionInfoTest, Marshalling01, TestSize.Level1)
     bool result = winTransitionInfo->Marshalling(parcel);
     ASSERT_EQ(true, result);
 
-    sptr<IRemoteObject> remote = new(std::nothrow) RemoteMocker();
+    sptr<IRemoteObject> remote = new (std::nothrow) RemoteMocker();
     winTransitionInfo->abilityToken_ = remote;
     result = winTransitionInfo->Marshalling(parcel);
     ASSERT_EQ(true, result);
@@ -122,17 +114,17 @@ HWTEST_F(WindowTransitionInfoTest, Marshalling01, TestSize.Level1)
  */
 HWTEST_F(WindowTransitionInfoTest, Unmarshalling, TestSize.Level1)
 {
-    sptr<AAFwk::AbilityTransitionInfo> info = new(std::nothrow) AAFwk::AbilityTransitionInfo();
+    sptr<AAFwk::AbilityTransitionInfo> info = new (std::nothrow) AAFwk::AbilityTransitionInfo();
     ASSERT_NE(nullptr, info);
 
     Parcel parcel;
-    sptr<WindowTransitionInfo> winTransitionInfo = new(std::nothrow) WindowTransitionInfo(info);
+    sptr<WindowTransitionInfo> winTransitionInfo = new (std::nothrow) WindowTransitionInfo(info);
     ASSERT_NE(nullptr, winTransitionInfo);
 
     winTransitionInfo->bundleName_ = "bundleNameValue";
     winTransitionInfo->abilityName_ = "abilityNameValue";
 
-    sptr<IRemoteObject> remote = new(std::nothrow) RemoteMocker();
+    sptr<IRemoteObject> remote = new (std::nothrow) RemoteMocker();
     winTransitionInfo->abilityToken_ = remote;
     auto result = winTransitionInfo->Marshalling(parcel);
     ASSERT_EQ(true, result);
@@ -151,11 +143,11 @@ HWTEST_F(WindowTransitionInfoTest, Unmarshalling, TestSize.Level1)
  */
 HWTEST_F(WindowTransitionInfoTest, GetBundleName, TestSize.Level1)
 {
-    sptr<AAFwk::AbilityTransitionInfo> info = new(std::nothrow) AAFwk::AbilityTransitionInfo();
+    sptr<AAFwk::AbilityTransitionInfo> info = new (std::nothrow) AAFwk::AbilityTransitionInfo();
     ASSERT_NE(nullptr, info);
 
     Parcel parcel;
-    sptr<WindowTransitionInfo> winTransitionInfo = new(std::nothrow) WindowTransitionInfo(info);
+    sptr<WindowTransitionInfo> winTransitionInfo = new (std::nothrow) WindowTransitionInfo(info);
     ASSERT_NE(nullptr, winTransitionInfo);
     std::string name = "bundleNameValue";
     winTransitionInfo->SetBundleName(name);
@@ -170,11 +162,11 @@ HWTEST_F(WindowTransitionInfoTest, GetBundleName, TestSize.Level1)
  */
 HWTEST_F(WindowTransitionInfoTest, GetAbilityName, TestSize.Level1)
 {
-    sptr<AAFwk::AbilityTransitionInfo> info = new(std::nothrow) AAFwk::AbilityTransitionInfo();
+    sptr<AAFwk::AbilityTransitionInfo> info = new (std::nothrow) AAFwk::AbilityTransitionInfo();
     ASSERT_NE(nullptr, info);
 
     Parcel parcel;
-    sptr<WindowTransitionInfo> winTransitionInfo = new(std::nothrow) WindowTransitionInfo(info);
+    sptr<WindowTransitionInfo> winTransitionInfo = new (std::nothrow) WindowTransitionInfo(info);
     ASSERT_NE(nullptr, winTransitionInfo);
     std::string name = "abilityNameValue";
     winTransitionInfo->SetAbilityName(name);
@@ -189,13 +181,13 @@ HWTEST_F(WindowTransitionInfoTest, GetAbilityName, TestSize.Level1)
  */
 HWTEST_F(WindowTransitionInfoTest, GetWindowMode, TestSize.Level1)
 {
-    sptr<AAFwk::AbilityTransitionInfo> info = new(std::nothrow) AAFwk::AbilityTransitionInfo();
+    sptr<AAFwk::AbilityTransitionInfo> info = new (std::nothrow) AAFwk::AbilityTransitionInfo();
     ASSERT_NE(nullptr, info);
 
     Parcel parcel;
-    sptr<WindowTransitionInfo> winTransitionInfo = new(std::nothrow) WindowTransitionInfo(info);
+    sptr<WindowTransitionInfo> winTransitionInfo = new (std::nothrow) WindowTransitionInfo(info);
     ASSERT_NE(nullptr, winTransitionInfo);
-    WindowMode mode = WindowMode{1};
+    WindowMode mode = WindowMode{ 1 };
     winTransitionInfo->SetWindowMode(mode);
     auto ret = winTransitionInfo->GetWindowMode();
     ASSERT_EQ(ret, mode);
@@ -208,13 +200,13 @@ HWTEST_F(WindowTransitionInfoTest, GetWindowMode, TestSize.Level1)
  */
 HWTEST_F(WindowTransitionInfoTest, GetWindowRect, TestSize.Level1)
 {
-    sptr<AAFwk::AbilityTransitionInfo> info = new(std::nothrow) AAFwk::AbilityTransitionInfo();
+    sptr<AAFwk::AbilityTransitionInfo> info = new (std::nothrow) AAFwk::AbilityTransitionInfo();
     ASSERT_NE(nullptr, info);
 
     Parcel parcel;
-    sptr<WindowTransitionInfo> winTransitionInfo = new(std::nothrow) WindowTransitionInfo(info);
+    sptr<WindowTransitionInfo> winTransitionInfo = new (std::nothrow) WindowTransitionInfo(info);
     ASSERT_NE(nullptr, winTransitionInfo);
-    Rect rect = {0, 0, 50, 100};
+    Rect rect = { 0, 0, 50, 100 };
     winTransitionInfo->SetWindowRect(rect);
     auto ret = winTransitionInfo->GetWindowRect();
     ASSERT_EQ(ret, rect);
@@ -227,11 +219,11 @@ HWTEST_F(WindowTransitionInfoTest, GetWindowRect, TestSize.Level1)
  */
 HWTEST_F(WindowTransitionInfoTest, GetAbilityToken, TestSize.Level1)
 {
-    sptr<AAFwk::AbilityTransitionInfo> info = new(std::nothrow) AAFwk::AbilityTransitionInfo();
+    sptr<AAFwk::AbilityTransitionInfo> info = new (std::nothrow) AAFwk::AbilityTransitionInfo();
     ASSERT_NE(nullptr, info);
 
     Parcel parcel;
-    sptr<WindowTransitionInfo> winTransitionInfo = new(std::nothrow) WindowTransitionInfo(info);
+    sptr<WindowTransitionInfo> winTransitionInfo = new (std::nothrow) WindowTransitionInfo(info);
     ASSERT_NE(nullptr, winTransitionInfo);
     sptr<IRemoteObject> abilityToken;
     winTransitionInfo->SetAbilityToken(abilityToken);
@@ -246,11 +238,11 @@ HWTEST_F(WindowTransitionInfoTest, GetAbilityToken, TestSize.Level1)
  */
 HWTEST_F(WindowTransitionInfoTest, GetDisplayId, TestSize.Level1)
 {
-    sptr<AAFwk::AbilityTransitionInfo> info = new(std::nothrow) AAFwk::AbilityTransitionInfo();
+    sptr<AAFwk::AbilityTransitionInfo> info = new (std::nothrow) AAFwk::AbilityTransitionInfo();
     ASSERT_NE(nullptr, info);
 
     Parcel parcel;
-    sptr<WindowTransitionInfo> winTransitionInfo = new(std::nothrow) WindowTransitionInfo(info);
+    sptr<WindowTransitionInfo> winTransitionInfo = new (std::nothrow) WindowTransitionInfo(info);
     ASSERT_NE(nullptr, winTransitionInfo);
     winTransitionInfo->SetDisplayId(0);
     auto ret = winTransitionInfo->GetDisplayId();
@@ -264,13 +256,13 @@ HWTEST_F(WindowTransitionInfoTest, GetDisplayId, TestSize.Level1)
  */
 HWTEST_F(WindowTransitionInfoTest, GetWindowType, TestSize.Level1)
 {
-    sptr<AAFwk::AbilityTransitionInfo> info = new(std::nothrow) AAFwk::AbilityTransitionInfo();
+    sptr<AAFwk::AbilityTransitionInfo> info = new (std::nothrow) AAFwk::AbilityTransitionInfo();
     ASSERT_NE(nullptr, info);
 
     Parcel parcel;
-    sptr<WindowTransitionInfo> winTransitionInfo = new(std::nothrow) WindowTransitionInfo(info);
+    sptr<WindowTransitionInfo> winTransitionInfo = new (std::nothrow) WindowTransitionInfo(info);
     ASSERT_NE(nullptr, winTransitionInfo);
-    WindowType windowType = WindowType{1};
+    WindowType windowType = WindowType{ 1 };
     winTransitionInfo->SetWindowType(windowType);
     auto ret = winTransitionInfo->GetWindowType();
     ASSERT_EQ(ret, windowType);
@@ -283,11 +275,11 @@ HWTEST_F(WindowTransitionInfoTest, GetWindowType, TestSize.Level1)
  */
 HWTEST_F(WindowTransitionInfoTest, GetShowFlagWhenLocked, TestSize.Level1)
 {
-    sptr<AAFwk::AbilityTransitionInfo> info = new(std::nothrow) AAFwk::AbilityTransitionInfo();
+    sptr<AAFwk::AbilityTransitionInfo> info = new (std::nothrow) AAFwk::AbilityTransitionInfo();
     ASSERT_NE(nullptr, info);
 
     Parcel parcel;
-    sptr<WindowTransitionInfo> winTransitionInfo = new(std::nothrow) WindowTransitionInfo(info);
+    sptr<WindowTransitionInfo> winTransitionInfo = new (std::nothrow) WindowTransitionInfo(info);
     ASSERT_NE(nullptr, winTransitionInfo);
     winTransitionInfo->SetShowFlagWhenLocked(false);
     auto ret = winTransitionInfo->GetShowFlagWhenLocked();
@@ -301,15 +293,13 @@ HWTEST_F(WindowTransitionInfoTest, GetShowFlagWhenLocked, TestSize.Level1)
  */
 HWTEST_F(WindowTransitionInfoTest, GetWindowSupportModes, TestSize.Level1)
 {
-    sptr<AAFwk::AbilityTransitionInfo> info = new(std::nothrow) AAFwk::AbilityTransitionInfo();
+    sptr<AAFwk::AbilityTransitionInfo> info = new (std::nothrow) AAFwk::AbilityTransitionInfo();
     ASSERT_NE(nullptr, info);
-    sptr<WindowTransitionInfo> winTransitionInfo = new(std::nothrow) WindowTransitionInfo(info);
+    sptr<WindowTransitionInfo> winTransitionInfo = new (std::nothrow) WindowTransitionInfo(info);
     ASSERT_NE(nullptr, winTransitionInfo);
-    std::vector<AppExecFwk::SupportWindowMode> supportModesIn = {
-        AppExecFwk::SupportWindowMode::FULLSCREEN,
-        AppExecFwk::SupportWindowMode::SPLIT,
-        AppExecFwk::SupportWindowMode::FLOATING
-    };
+    std::vector<AppExecFwk::SupportWindowMode> supportModesIn = { AppExecFwk::SupportWindowMode::FULLSCREEN,
+                                                                  AppExecFwk::SupportWindowMode::SPLIT,
+                                                                  AppExecFwk::SupportWindowMode::FLOATING };
     winTransitionInfo->SetWindowSupportModes(supportModesIn);
     auto supportModesOut = winTransitionInfo->GetWindowSupportModes();
     ASSERT_EQ(supportModesOut.size(), 3);
@@ -325,7 +315,7 @@ HWTEST_F(WindowTransitionInfoTest, GetWindowSupportModes, TestSize.Level1)
  */
 HWTEST_F(WindowTransitionInfoTest, GetWindowSizeLimits, TestSize.Level1)
 {
-    sptr<AAFwk::AbilityTransitionInfo> info = new(std::nothrow) AAFwk::AbilityTransitionInfo();
+    sptr<AAFwk::AbilityTransitionInfo> info = new (std::nothrow) AAFwk::AbilityTransitionInfo();
     ASSERT_NE(nullptr, info);
     info->maxWindowRatio_ = 2.0f;
     info->minWindowRatio_ = 1.0f;
@@ -333,7 +323,7 @@ HWTEST_F(WindowTransitionInfoTest, GetWindowSizeLimits, TestSize.Level1)
     info->minWindowWidth_ = 512;
     info->maxWindowHeight_ = 2048;
     info->minWindowHeight_ = 512;
-    sptr<WindowTransitionInfo> winTransitionInfo = new(std::nothrow) WindowTransitionInfo(info);
+    sptr<WindowTransitionInfo> winTransitionInfo = new (std::nothrow) WindowTransitionInfo(info);
     ASSERT_NE(nullptr, winTransitionInfo);
     auto windowSizeLimits = winTransitionInfo->GetWindowSizeLimits();
     ASSERT_FLOAT_EQ(windowSizeLimits.maxRatio_, 2.0f);
@@ -351,9 +341,9 @@ HWTEST_F(WindowTransitionInfoTest, GetWindowSizeLimits, TestSize.Level1)
  */
 HWTEST_F(WindowTransitionInfoTest, GetTransitionReason, TestSize.Level1)
 {
-    sptr<AAFwk::AbilityTransitionInfo> info = new(std::nothrow) AAFwk::AbilityTransitionInfo();
+    sptr<AAFwk::AbilityTransitionInfo> info = new (std::nothrow) AAFwk::AbilityTransitionInfo();
     ASSERT_NE(nullptr, info);
-    sptr<WindowTransitionInfo> winTransitionInfo = new(std::nothrow) WindowTransitionInfo(info);
+    sptr<WindowTransitionInfo> winTransitionInfo = new (std::nothrow) WindowTransitionInfo(info);
     ASSERT_NE(nullptr, winTransitionInfo);
 
     auto reasonIn = TransitionReason::MINIMIZE;
@@ -394,9 +384,9 @@ HWTEST_F(WindowTransitionInfoTest, GetTransitionReason, TestSize.Level1)
  */
 HWTEST_F(WindowTransitionInfoTest, GetOrientation01, TestSize.Level1)
 {
-    sptr<AAFwk::AbilityTransitionInfo> info = new(std::nothrow) AAFwk::AbilityTransitionInfo();
+    sptr<AAFwk::AbilityTransitionInfo> info = new (std::nothrow) AAFwk::AbilityTransitionInfo();
     ASSERT_NE(nullptr, info);
-    sptr<WindowTransitionInfo> winTransitionInfo = new(std::nothrow) WindowTransitionInfo(info);
+    sptr<WindowTransitionInfo> winTransitionInfo = new (std::nothrow) WindowTransitionInfo(info);
     ASSERT_NE(nullptr, winTransitionInfo);
 
     auto orientationIn = AppExecFwk::DisplayOrientation::UNSPECIFIED;
@@ -442,9 +432,9 @@ HWTEST_F(WindowTransitionInfoTest, GetOrientation01, TestSize.Level1)
  */
 HWTEST_F(WindowTransitionInfoTest, GetOrientation02, TestSize.Level1)
 {
-    sptr<AAFwk::AbilityTransitionInfo> info = new(std::nothrow) AAFwk::AbilityTransitionInfo();
+    sptr<AAFwk::AbilityTransitionInfo> info = new (std::nothrow) AAFwk::AbilityTransitionInfo();
     ASSERT_NE(nullptr, info);
-    sptr<WindowTransitionInfo> winTransitionInfo = new(std::nothrow) WindowTransitionInfo(info);
+    sptr<WindowTransitionInfo> winTransitionInfo = new (std::nothrow) WindowTransitionInfo(info);
     ASSERT_NE(nullptr, winTransitionInfo);
 
     auto orientationIn = AppExecFwk::DisplayOrientation::AUTO_ROTATION_LANDSCAPE;
@@ -485,11 +475,11 @@ HWTEST_F(WindowTransitionInfoTest, GetOrientation02, TestSize.Level1)
  */
 HWTEST_F(WindowTransitionInfoTest, GetIsRecent, TestSize.Level1)
 {
-    sptr<AAFwk::AbilityTransitionInfo> info = new(std::nothrow) AAFwk::AbilityTransitionInfo();
+    sptr<AAFwk::AbilityTransitionInfo> info = new (std::nothrow) AAFwk::AbilityTransitionInfo();
     ASSERT_NE(nullptr, info);
 
     Parcel parcel;
-    sptr<WindowTransitionInfo> winTransitionInfo = new(std::nothrow) WindowTransitionInfo(info);
+    sptr<WindowTransitionInfo> winTransitionInfo = new (std::nothrow) WindowTransitionInfo(info);
     ASSERT_NE(nullptr, winTransitionInfo);
     winTransitionInfo->SetIsRecent(false);
     auto ret = winTransitionInfo->GetIsRecent();
@@ -503,11 +493,11 @@ HWTEST_F(WindowTransitionInfoTest, GetIsRecent, TestSize.Level1)
  */
 HWTEST_F(WindowTransitionInfoTest, GetApiCompatibleVersion, TestSize.Level1)
 {
-    sptr<AAFwk::AbilityTransitionInfo> info = new(std::nothrow) AAFwk::AbilityTransitionInfo();
+    sptr<AAFwk::AbilityTransitionInfo> info = new (std::nothrow) AAFwk::AbilityTransitionInfo();
     ASSERT_NE(nullptr, info);
 
     Parcel parcel;
-    sptr<WindowTransitionInfo> winTransitionInfo = new(std::nothrow) WindowTransitionInfo(info);
+    sptr<WindowTransitionInfo> winTransitionInfo = new (std::nothrow) WindowTransitionInfo(info);
     ASSERT_NE(nullptr, winTransitionInfo);
     winTransitionInfo->SetApiCompatibleVersion(100);
     auto ret = winTransitionInfo->GetApiCompatibleVersion();
@@ -521,16 +511,16 @@ HWTEST_F(WindowTransitionInfoTest, GetApiCompatibleVersion, TestSize.Level1)
  */
 HWTEST_F(WindowTransitionInfoTest, GetMissionId, TestSize.Level1)
 {
-    sptr<AAFwk::AbilityTransitionInfo> info = new(std::nothrow) AAFwk::AbilityTransitionInfo();
+    sptr<AAFwk::AbilityTransitionInfo> info = new (std::nothrow) AAFwk::AbilityTransitionInfo();
     ASSERT_NE(nullptr, info);
 
     Parcel parcel;
-    sptr<WindowTransitionInfo> winTransitionInfo = new(std::nothrow) WindowTransitionInfo(info);
+    sptr<WindowTransitionInfo> winTransitionInfo = new (std::nothrow) WindowTransitionInfo(info);
     ASSERT_NE(nullptr, winTransitionInfo);
     winTransitionInfo->SetMissionId(0);
     auto ret = winTransitionInfo->GetMissionId();
     ASSERT_EQ(ret, 0);
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

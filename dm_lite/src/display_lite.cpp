@@ -27,9 +27,6 @@
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
-namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayLite"};
-}
 class DisplayLite::Impl : public RefBase {
 public:
     Impl(const std::string& name, sptr<DisplayInfo> info)
@@ -54,7 +51,7 @@ DisplayLite::~DisplayLite()
 DisplayId DisplayLite::GetId() const
 {
     if (pImpl_ == nullptr || pImpl_->GetDisplayInfo() == nullptr) {
-        WLOGFE("pImpl_ or pImpl_->GetDisplayInfo is nullptr");
+        TLOGE(WmsLogTag::DMS, "pImpl_ or pImpl_->GetDisplayInfo is nullptr");
         return DisplayId(0);
     }
     return pImpl_->GetDisplayInfo()->GetDisplayId();
@@ -64,7 +61,7 @@ sptr<DisplayInfo> DisplayLite::GetDisplayInfo() const
 {
     UpdateDisplayInfo();
     if (pImpl_ == nullptr || pImpl_->GetDisplayInfo() == nullptr) {
-        WLOGFE("pImpl_ or pImpl_->GetDisplayInfo is nullptr");
+        TLOGE(WmsLogTag::DMS, "pImpl_ or pImpl_->GetDisplayInfo is nullptr");
         return nullptr;
     }
     return pImpl_->GetDisplayInfo();
@@ -74,7 +71,7 @@ int32_t DisplayLite::GetWidth() const
 {
     UpdateDisplayInfo();
     if (pImpl_ == nullptr || pImpl_->GetDisplayInfo() == nullptr) {
-        WLOGFE("pImpl_ or pImpl_->GetDisplayInfo is nullptr");
+        TLOGE(WmsLogTag::DMS, "pImpl_ or pImpl_->GetDisplayInfo is nullptr");
         return 0;
     }
     return pImpl_->GetDisplayInfo()->GetWidth();
@@ -84,7 +81,7 @@ int32_t DisplayLite::GetHeight() const
 {
     UpdateDisplayInfo();
     if (pImpl_ == nullptr || pImpl_->GetDisplayInfo() == nullptr) {
-        WLOGFE("pImpl_ or pImpl_->GetDisplayInfo is nullptr");
+        TLOGE(WmsLogTag::DMS, "pImpl_ or pImpl_->GetDisplayInfo is nullptr");
         return 0;
     }
     return pImpl_->GetDisplayInfo()->GetHeight();
@@ -104,11 +101,11 @@ void DisplayLite::UpdateDisplayInfo() const
 void DisplayLite::UpdateDisplayInfo(sptr<DisplayInfo> displayInfo) const
 {
     if (displayInfo == nullptr) {
-        WLOGFE("displayInfo is nullptr");
+        TLOGE(WmsLogTag::DMS, "displayInfo is nullptr");
         return;
     }
     if (pImpl_ == nullptr) {
-        WLOGFE("pImpl_ is nullptr");
+        TLOGE(WmsLogTag::DMS, "pImpl_ is nullptr");
         return;
     }
     pImpl_->SetDisplayInfo(displayInfo);
@@ -118,7 +115,7 @@ Rotation DisplayLite::GetRotation() const
 {
     UpdateDisplayInfo();
     if (pImpl_ == nullptr || pImpl_->GetDisplayInfo() == nullptr) {
-        WLOGFE("pImpl_ or pImpl_->GetDisplayInfo is nullptr");
+        TLOGE(WmsLogTag::DMS, "pImpl_ or pImpl_->GetDisplayInfo is nullptr");
         return Rotation::ROTATION_0;
     }
     return pImpl_->GetDisplayInfo()->GetRotation();

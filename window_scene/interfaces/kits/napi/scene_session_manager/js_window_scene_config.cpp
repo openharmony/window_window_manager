@@ -213,6 +213,26 @@ napi_value JsWindowSceneConfig::CreateFreeMultiWindowConfig(napi_env env, const 
     return objValue;
 }
 
+napi_value JsWindowSceneConfig::CreateWindowLimits(napi_env env, const WindowLimits& windowLimits)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "in");
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "Object is null!");
+        return NapiGetUndefined(env);
+    }
+    napi_set_named_property(env, objValue, "maxWidth", CreateJsValue(env,
+        windowLimits.maxWidth_));
+    napi_set_named_property(env, objValue, "maxHeight", CreateJsValue(env,
+        windowLimits.maxHeight_));
+    napi_set_named_property(env, objValue, "minWidth", CreateJsValue(env,
+        windowLimits.minWidth_));
+    napi_set_named_property(env, objValue, "minHeight", CreateJsValue(env,
+        windowLimits.minHeight_));
+    return objValue;
+}
+
 napi_value JsWindowSceneConfig::CreateSingleHandCompatibleConfig(napi_env env,
                                                                  const SingleHandCompatibleModeConfig& config)
 {
@@ -228,6 +248,23 @@ napi_value JsWindowSceneConfig::CreateSingleHandCompatibleConfig(napi_env env,
     napi_set_named_property(env, objValue, "singleHandScale", CreateJsValue(env, config.singleHandScale));
     napi_set_named_property(env, objValue, "heightChangeRatio", CreateJsValue(env, config.heightChangeRatio));
     napi_set_named_property(env, objValue, "widthChangeRatio", CreateJsValue(env, config.widthChangeRatio));
+    return objValue;
+}
+
+napi_value JsWindowSceneConfig::CreateSystemConfig(napi_env env, const SystemSessionConfig& config)
+{
+    TLOGI(WmsLogTag::DEFAULT, "in");
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "Object is null!");
+        return NapiGetUndefined(env);
+    }
+
+    napi_set_named_property(env, objValue, "maxMidSceneNum", CreateJsValue(env,
+        config.maxMidSceneNum_));
+    napi_set_named_property(env, objValue, "maxFloatingWindowSize", CreateJsValue(env,
+        config.maxFloatingWindowSize_));
     return objValue;
 }
 } // namespace OHOS::Rosen

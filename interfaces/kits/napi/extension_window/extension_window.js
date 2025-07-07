@@ -57,8 +57,8 @@ class ExtensionWindow {
     return this.__extension_window__.hidePrivacyContentForHost(type, callback);
   }
 
-  occupyEvents(eventFlags) {
-    return this.__extension_window__.occupyEvents(eventFlags);
+  occupyEvents(eventFlags, callback) {
+    return this.__extension_window__.occupyEvents(eventFlags, callback);
   }
 }
 

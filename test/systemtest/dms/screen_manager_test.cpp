@@ -326,6 +326,25 @@ void ScreenManagerTest::CheckScreenGroupStateForMirror(ScreenGroupChangeEvent ev
     }
 
 namespace {
+
+/**
+ * @tc.name: CreateVirtualScreenTenTimes
+ * @tc.desc: Create VirtualScreen for 10 times but do not destroy it
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenManagerTest, CreateVirtualScreenTenTimes, TestSize.Level1)
+{
+    DisplayTestUtils utils;
+    defaultOption_.isForShot_ = false;
+    for (uint32_t i = 0; i < execTimes_; i++) {
+        EXPECT_TRUE(utils.CreateSurface());
+        defaultOption_.surface_ = utils.psurface_;
+        ScreenId virtualScreenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption_);
+        sleep(TEST_SLEEP_S);
+        EXPECT_NE(SCREEN_ID_INVALID, virtualScreenId);
+    }
+}
+
 /**
  * @tc.name: ScreenManager01
  * @tc.desc: Create a virtual screen and destroy it
@@ -960,24 +979,6 @@ HWTEST_F(ScreenManagerTest, ScreenManager16, TestSize.Level1)
     ASSERT_EQ(static_cast<uint32_t>(screens[0]->GetOrientation()), static_cast<uint32_t>(Orientation::UNSPECIFIED));
     ASSERT_EQ(static_cast<uint32_t>(display->GetOrientation()), static_cast<uint32_t>(Orientation::UNSPECIFIED));
     ScreenManager::GetInstance().UnregisterScreenListener(screenListener);
-}
-
-/**
- * @tc.name: ScreenManager17
- * @tc.desc: Create VirtualScreen for 10 times but do not destroy it
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenManagerTest, ScreenManager17, TestSize.Level1)
-{
-    DisplayTestUtils utils;
-    defaultOption_.isForShot_ = false;
-    for (uint32_t i = 0; i < execTimes_; i++) {
-        ASSERT_TRUE(utils.CreateSurface());
-        defaultOption_.surface_ = utils.psurface_;
-        ScreenId virtualScreenId = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption_);
-        sleep(TEST_SLEEP_S);
-        ASSERT_NE(SCREEN_ID_INVALID, virtualScreenId);
-    }
 }
 
 /**

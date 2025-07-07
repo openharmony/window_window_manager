@@ -72,7 +72,7 @@ HWTEST_F(WindowPCTest, setHandwritingFlag01, TestSize.Level1)
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     ASSERT_EQ(WMError::WM_OK, window->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_HANDWRITING)));
-    
+
     window->Destroy(true, true);
 }
 
@@ -98,7 +98,7 @@ HWTEST_F(WindowPCTest, setHandwritingFlag02, TestSize.Level1)
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
     ASSERT_EQ(WMError::WM_OK, window->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_HANDWRITING)));
- 
+
     window->Destroy(true, true);
 }
 
@@ -348,7 +348,7 @@ HWTEST_F(WindowPCTest, StartMoveWindow01, TestSize.Level1)
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window7_1");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
 
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
@@ -359,14 +359,14 @@ HWTEST_F(WindowPCTest, StartMoveWindow01, TestSize.Level1)
     window->property_->SetPersistentId(10071);
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
 
-    ASSERT_EQ(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT, window->StartMoveWindow());
+    ASSERT_EQ(WmErrorCode::WM_ERROR_INVALID_CALLING, window->StartMoveWindow());
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    ASSERT_EQ(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT, window->StartMoveWindow());
+    ASSERT_EQ(WmErrorCode::WM_ERROR_INVALID_CALLING, window->StartMoveWindow());
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     ASSERT_EQ(WmErrorCode::WM_OK, window->StartMoveWindow());
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
-    ASSERT_EQ(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT, window->StartMoveWindow());
+    ASSERT_EQ(WmErrorCode::WM_ERROR_INVALID_CALLING, window->StartMoveWindow());
 
     window->Destroy(true, true);
 }
@@ -381,7 +381,7 @@ HWTEST_F(WindowPCTest, StartMoveWindow02, TestSize.Level1)
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window7_2");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
 
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
@@ -392,7 +392,7 @@ HWTEST_F(WindowPCTest, StartMoveWindow02, TestSize.Level1)
     window->property_->SetPersistentId(10072);
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
 
-    ASSERT_EQ(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT, window->StartMoveWindow());
+    ASSERT_EQ(WmErrorCode::WM_ERROR_INVALID_CALLING, window->StartMoveWindow());
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     ASSERT_EQ(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT, window->StartMoveWindow());
@@ -414,7 +414,7 @@ HWTEST_F(WindowPCTest, StartMoveWindow03, TestSize.Level1)
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Window7_3");
     option->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
-    option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
 
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
@@ -425,7 +425,7 @@ HWTEST_F(WindowPCTest, StartMoveWindow03, TestSize.Level1)
     window->property_->SetPersistentId(10073);
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
 
-    ASSERT_EQ(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT, window->StartMoveWindow());
+    ASSERT_EQ(WmErrorCode::WM_ERROR_INVALID_CALLING, window->StartMoveWindow());
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     ASSERT_EQ(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT, window->StartMoveWindow());
@@ -530,6 +530,6 @@ HWTEST_F(WindowPCTest, SetMainWindowTopmost03, TestSize.Level1)
     window->Destroy(true, true);
 }
 
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

@@ -24,11 +24,11 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 using Utils = WindowTestUtils;
-const int WAIT_CALLBACK_US = 1;  // 1s
+const int WAIT_CALLBACK_US = 1; // 1s
 
 class TestDragListener : public IWindowDragListener {
 public:
-    PointInfo point_ { 0, 0 };
+    PointInfo point_{ 0, 0 };
     DragEvent event_ = DragEvent::DRAG_EVENT_END;
     void OnDrag(int32_t x, int32_t y, DragEvent event) override;
 };
@@ -55,10 +55,8 @@ public:
     std::vector<sptr<Window>> activeWindows_;
 };
 
-sptr<TestDragListener> WindowDragTest::firstWindowDragListener_ =
-    new TestDragListener();
-sptr<TestDragListener> WindowDragTest::secondWindowDragListener_ =
-    new TestDragListener();
+sptr<TestDragListener> WindowDragTest::firstWindowDragListener_ = new TestDragListener();
+sptr<TestDragListener> WindowDragTest::secondWindowDragListener_ = new TestDragListener();
 
 void WindowDragTest::SetUpTestCase() {}
 
@@ -68,7 +66,7 @@ void WindowDragTest::SetUp()
 {
     dragWindowInfo_ = {
         .name = "dragWindow",
-        .rect = {200, 200, 380, 380},
+        .rect = { 200, 200, 380, 380 },
         .type = WindowType::WINDOW_TYPE_DRAGGING_EFFECT,
         .mode = WindowMode::WINDOW_MODE_FLOATING,
         .needAvoid = false,
@@ -101,7 +99,8 @@ void WindowDragTest::SetUp()
     activeWindows_.clear();
 }
 
-void WindowDragTest::TearDown() {
+void WindowDragTest::TearDown()
+{
     while (!activeWindows_.empty()) {
         ASSERT_EQ(WMError::WM_OK, activeWindows_.back()->Destroy());
         activeWindows_.pop_back();
@@ -114,15 +113,16 @@ namespace {
  * @tc.desc: Drag a window to another window
  * @tc.type: FUNC
  */
-HWTEST_F(WindowDragTest, DragIn, TestSize.Level1) {
-    const sptr<Window> &firstWindow = Utils::CreateTestWindow(firstWindowInfo_);
+HWTEST_F(WindowDragTest, DragIn, TestSize.Level1)
+{
+    const sptr<Window>& firstWindow = Utils::CreateTestWindow(firstWindowInfo_);
     ASSERT_NE(firstWindow, nullptr);
     activeWindows_.push_back(firstWindow);
     firstWindow->RegisterDragListener(firstWindowDragListener_);
     firstWindow->SetTurnScreenOn(true);
     firstWindow->Show();
 
-    const sptr<Window> &dragWindow = Utils::CreateTestWindow(dragWindowInfo_);
+    const sptr<Window>& dragWindow = Utils::CreateTestWindow(dragWindowInfo_);
     ASSERT_NE(dragWindow, nullptr);
     activeWindows_.push_back(dragWindow);
     dragWindow->Show();
@@ -141,15 +141,16 @@ HWTEST_F(WindowDragTest, DragIn, TestSize.Level1) {
  * @tc.desc: Window Move
  * @tc.type: FUNC
  */
-HWTEST_F(WindowDragTest, DragMove, TestSize.Level1) {
-    const sptr<Window> &firstWindow = Utils::CreateTestWindow(firstWindowInfo_);
+HWTEST_F(WindowDragTest, DragMove, TestSize.Level1)
+{
+    const sptr<Window>& firstWindow = Utils::CreateTestWindow(firstWindowInfo_);
     ASSERT_NE(firstWindow, nullptr);
     activeWindows_.push_back(firstWindow);
     firstWindow->RegisterDragListener(firstWindowDragListener_);
     firstWindow->SetTurnScreenOn(true);
     firstWindow->Show();
 
-    const sptr<Window> &dragWindow = Utils::CreateTestWindow(dragWindowInfo_);
+    const sptr<Window>& dragWindow = Utils::CreateTestWindow(dragWindowInfo_);
     ASSERT_NE(dragWindow, nullptr);
     activeWindows_.push_back(dragWindow);
     dragWindow->Show();
@@ -174,22 +175,23 @@ HWTEST_F(WindowDragTest, DragMove, TestSize.Level1) {
  * @tc.desc: Drag the drag window out of the current window
  * @tc.type: FUNC
  */
-HWTEST_F(WindowDragTest, DragOut, TestSize.Level1) {
-    const sptr<Window> &firstWindow = Utils::CreateTestWindow(firstWindowInfo_);
+HWTEST_F(WindowDragTest, DragOut, TestSize.Level1)
+{
+    const sptr<Window>& firstWindow = Utils::CreateTestWindow(firstWindowInfo_);
     ASSERT_NE(firstWindow, nullptr);
     activeWindows_.push_back(firstWindow);
     firstWindow->RegisterDragListener(firstWindowDragListener_);
     firstWindow->SetTurnScreenOn(true);
     firstWindow->Show();
 
-    secondWindowInfo_.rect = {500, 500, 500, 500};
-    const sptr<Window> &secondWindow = Utils::CreateTestWindow(secondWindowInfo_);
+    secondWindowInfo_.rect = { 500, 500, 500, 500 };
+    const sptr<Window>& secondWindow = Utils::CreateTestWindow(secondWindowInfo_);
     ASSERT_NE(secondWindow, nullptr);
     activeWindows_.push_back(secondWindow);
     secondWindow->RegisterDragListener(secondWindowDragListener_);
     secondWindow->Show();
 
-    const sptr<Window> &dragWindow = Utils::CreateTestWindow(dragWindowInfo_);
+    const sptr<Window>& dragWindow = Utils::CreateTestWindow(dragWindowInfo_);
     ASSERT_NE(secondWindow, nullptr);
     activeWindows_.push_back(dragWindow);
     dragWindow->Show();
@@ -222,7 +224,8 @@ HWTEST_F(WindowDragTest, DragOut, TestSize.Level1) {
  * @tc.desc: End window drag
  * @tc.type: FUNC
  */
-HWTEST_F(WindowDragTest, DragEnd, TestSize.Level1) {
+HWTEST_F(WindowDragTest, DragEnd, TestSize.Level1)
+{
     const sptr<Window> firstWindow = Utils::CreateTestWindow(firstWindowInfo_);
     ASSERT_NE(nullptr, firstWindow);
     firstWindow->RegisterDragListener(firstWindowDragListener_);

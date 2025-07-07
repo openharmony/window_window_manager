@@ -57,8 +57,8 @@ void MultiInstanceManager::SetCurrentUserId(int32_t userId)
     const char* const where = __func__;
     auto task = [this, where] {
         std::vector<AppExecFwk::ApplicationInfo> appInfos;
-        if (!bundleMgr_ || !bundleMgr_->GetApplicationInfos(
-            AppExecFwk::ApplicationFlag::GET_BASIC_APPLICATION_INFO, userId_, appInfos)) {
+        auto flag = static_cast<int32_t>(AppExecFwk::GetApplicationFlag::GET_APPLICATION_INFO_DEFAULT);
+        if (!bundleMgr_ || bundleMgr_->GetApplicationInfosV9(flag, userId_, appInfos)) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s:get application infos fail", where);
             return;
         }
@@ -91,19 +91,12 @@ bool MultiInstanceManager::IsMultiInstance(const std::string& bundleName)
 
 uint32_t MultiInstanceManager::GetMaxInstanceCount(const std::string& bundleName)
 {
-    std::unique_lock<std::shared_mutex> lock(appInfoMutex_);
-    auto iter = appInfoMap_.find(bundleName);
-    if (iter == appInfoMap_.end()) {
-        AppExecFwk::ApplicationInfo appInfo;
-        if (bundleMgr_ && bundleMgr_->GetApplicationInfo(
-            bundleName, AppExecFwk::ApplicationFlag::GET_BASIC_APPLICATION_INFO, userId_, appInfo)) {
-            appInfoMap_[bundleName] = appInfo;
-            return appInfo.multiAppMode.maxCount;
-        }
-        TLOGE(WmsLogTag::WMS_LIFE, "App info not found, bundleName:%{public}s", bundleName.c_str());
+    if (!IsMultiInstance(bundleName)) {
         return 0u;
     }
-    if (iter->second.multiAppMode.multiAppModeType == AppExecFwk::MultiAppModeType::MULTI_INSTANCE) {
+    std::shared_lock<std::shared_mutex> lock(appInfoMutex_);
+    auto iter = appInfoMap_.find(bundleName);
+    if (iter != appInfoMap_.end()) {
         return iter->second.multiAppMode.maxCount;
     }
     return 0u;
@@ -270,6 +263,12 @@ void MultiInstanceManager::DecreaseInstanceKeyRefCount(const sptr<SceneSession>&
         return;
     }
     const auto& bundleName = sceneSession->GetSessionInfo().bundleName_;
+    DecreaseInstanceKeyRefCountByBundleNameAndInstanceKey(bundleName, instanceKey);
+}
+
+void MultiInstanceManager::DecreaseInstanceKeyRefCountByBundleNameAndInstanceKey(const std::string& bundleName,
+    const std::string& instanceKey)
+{
     const auto bundleInstanceKey = bundleName + instanceKey;
     auto iter = instanceKeyRefCountMap_.find(bundleInstanceKey);
     if (iter == instanceKeyRefCountMap_.end()) {
@@ -412,5 +411,15 @@ bool MultiInstanceManager::ConvertInstanceKeyToInstanceId(const std::string& ins
     }
     instanceId = static_cast<uint32_t>(instanceIdNum);
     return true;
+}
+
+AppExecFwk::ApplicationInfo MultiInstanceManager::GetApplicationInfo(const std::string& bundleName) const
+{
+    std::shared_lock<std::shared_mutex> lock(appInfoMutex_);
+    AppExecFwk::ApplicationInfo applicationInfo;
+    if (appInfoMap_.count(bundleName)) {
+        applicationInfo = appInfoMap_.at(bundleName);
+    }
+    return applicationInfo;
 }
 } // namespace OHOS::Rosen

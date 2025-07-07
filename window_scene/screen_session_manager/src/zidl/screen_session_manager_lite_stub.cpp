@@ -21,16 +21,13 @@
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
-namespace {
-constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenSessionManagerLiteStub"};
-}
 
 int32_t ScreenSessionManagerLiteStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
     MessageOption& option)
 {
-    WLOGFD("OnRemoteRequest code is %{public}u", code);
+    TLOGD(WmsLogTag::DMS, "OnRemoteRequest code is %{public}u", code);
     if (data.ReadInterfaceToken() != GetDescriptor()) {
-        WLOGFE("InterfaceToken check failed");
+        TLOGE(WmsLogTag::DMS, "InterfaceToken check failed");
         return ERR_TRANSACTION_FAILED;
     }
     ScreenManagerLiteMessage msgId = static_cast<ScreenManagerLiteMessage>(code);
@@ -72,7 +69,7 @@ int32_t ScreenSessionManagerLiteStub::OnRemoteRequest(uint32_t code, MessageParc
             break;
         }
         default:
-            WLOGFW("unknown transaction code");
+            TLOGW(WmsLogTag::DMS, "unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
     return 0;
@@ -80,7 +77,7 @@ int32_t ScreenSessionManagerLiteStub::OnRemoteRequest(uint32_t code, MessageParc
 
 int ScreenSessionManagerLiteStub::HandleRegisterDisplayManagerAgent(MessageParcel &data, MessageParcel &reply)
 {
-    WLOGFD("run HandleRegisterDisplayManagerAgent!");
+    TLOGD(WmsLogTag::DMS, "run!");
     auto agent = iface_cast<IDisplayManagerAgent>(data.ReadRemoteObject());
     if (agent == nullptr) {
         return ERR_INVALID_DATA;
@@ -93,7 +90,7 @@ int ScreenSessionManagerLiteStub::HandleRegisterDisplayManagerAgent(MessageParce
 
 int ScreenSessionManagerLiteStub::HandleUnRegisterDisplayManagerAgent(MessageParcel &data, MessageParcel &reply)
 {
-    WLOGFD("run HandleUnRegisterDisplayManagerAgent!");
+    TLOGD(WmsLogTag::DMS, "run!");
     auto agent = iface_cast<IDisplayManagerAgent>(data.ReadRemoteObject());
     if (agent == nullptr) {
         return ERR_INVALID_DATA;
@@ -106,7 +103,7 @@ int ScreenSessionManagerLiteStub::HandleUnRegisterDisplayManagerAgent(MessagePar
 
 int ScreenSessionManagerLiteStub::HandleGetFoldDisplayMode(MessageParcel &data, MessageParcel &reply)
 {
-    WLOGFD("run HandleGetFoldDisplayMode!");
+    TLOGD(WmsLogTag::DMS, "run!");
     FoldDisplayMode displayMode = GetFoldDisplayMode();
     reply.WriteUint32(static_cast<uint32_t>(displayMode));
     return ERR_NONE;
@@ -114,7 +111,7 @@ int ScreenSessionManagerLiteStub::HandleGetFoldDisplayMode(MessageParcel &data, 
 
 int ScreenSessionManagerLiteStub::HandleSetFoldDisplayMode(MessageParcel &data, MessageParcel &reply)
 {
-    WLOGFD("run HandleSetFoldDisplayMode!");
+    TLOGD(WmsLogTag::DMS, "run!");
     FoldDisplayMode displayMode = static_cast<FoldDisplayMode>(data.ReadUint32());
     SetFoldDisplayMode(displayMode);
     return ERR_NONE;
@@ -122,21 +119,21 @@ int ScreenSessionManagerLiteStub::HandleSetFoldDisplayMode(MessageParcel &data, 
 
 int ScreenSessionManagerLiteStub::HandleIsFoldable(MessageParcel &data, MessageParcel &reply)
 {
-    WLOGFD("run HandleIsFoldable!");
+    TLOGD(WmsLogTag::DMS, "run!");
     reply.WriteBool(IsFoldable());
     return ERR_NONE;
 }
 
 int ScreenSessionManagerLiteStub::HandleGetFoldStatus(MessageParcel &data, MessageParcel &reply)
 {
-    WLOGFD("run HandleGetFoldStatus!");
+    TLOGD(WmsLogTag::DMS, "run!");
     reply.WriteUint32(static_cast<uint32_t>(GetFoldStatus()));
     return ERR_NONE;
 }
 
 int ScreenSessionManagerLiteStub::HandleGetDefaultDisplayInfo(MessageParcel &data, MessageParcel &reply)
 {
-    WLOGFD("run HandleGetDefaultDisplayInfo!");
+    TLOGD(WmsLogTag::DMS, "run!");
     auto info = GetDefaultDisplayInfo();
     reply.WriteParcelable(info);
     return ERR_NONE;
@@ -144,7 +141,7 @@ int ScreenSessionManagerLiteStub::HandleGetDefaultDisplayInfo(MessageParcel &dat
 
 int ScreenSessionManagerLiteStub::HandleGetDisplayById(MessageParcel &data, MessageParcel &reply)
 {
-    WLOGFD("run HandleGetDisplayById!");
+    TLOGD(WmsLogTag::DMS, "run!");
     DisplayId displayId = data.ReadUint64();
     auto info = GetDisplayInfoById(displayId);
     reply.WriteParcelable(info);
@@ -153,7 +150,7 @@ int ScreenSessionManagerLiteStub::HandleGetDisplayById(MessageParcel &data, Mess
 
 int ScreenSessionManagerLiteStub::HandleGetCutoutInfo(MessageParcel &data, MessageParcel &reply)
 {
-    WLOGFD("run HandleGetCutoutInfo!");
+    TLOGD(WmsLogTag::DMS, "run!");
     DisplayId displayId = static_cast<DisplayId>(data.ReadUint64());
     sptr<CutoutInfo> cutoutInfo = GetCutoutInfo(displayId);
     reply.WriteParcelable(cutoutInfo);

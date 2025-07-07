@@ -15,9 +15,9 @@
 
 // gtest
 #include <gtest/gtest.h>
-#include "window_test_utils.h"
 #include "window_accessibility_controller.h"
 #include "window_impl.h"
+#include "window_test_utils.h"
 #include "wm_common.h"
 using namespace testing;
 using namespace testing::ext;
@@ -34,19 +34,15 @@ public:
     Utils::TestWindowInfo windowInfo_;
 };
 
-void WindowDisplayZoomTest::SetUpTestCase()
-{
-}
+void WindowDisplayZoomTest::SetUpTestCase() {}
 
-void WindowDisplayZoomTest::TearDownTestCase()
-{
-}
+void WindowDisplayZoomTest::TearDownTestCase() {}
 
 void WindowDisplayZoomTest::SetUp()
 {
     windowInfo_ = {
         .name = "zoomWindow",
-        .rect = {0, 0, 300, 100},
+        .rect = { 0, 0, 300, 100 },
         .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
         .mode = WindowMode::WINDOW_MODE_FLOATING,
         .needAvoid = false,
@@ -56,9 +52,7 @@ void WindowDisplayZoomTest::SetUp()
     };
 }
 
-void WindowDisplayZoomTest::TearDown()
-{
-}
+void WindowDisplayZoomTest::TearDown() {}
 
 namespace {
 /**
@@ -135,8 +129,8 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom02, TestSize.Level1)
     Rect rect = window->GetRect();
     expect.pivotX_ = (0 - rect.posX_) * 1.0 / rect.width_;
     expect.pivotY_ = (0 - rect.posY_) * 1.0 / rect.height_;
-    expect.scaleX_ = expect.scaleY_ = 2; // scale value
-    expect.translateX_ = expect.translateY_ = -100;  // translate value
+    expect.scaleX_ = expect.scaleY_ = 2;            // scale value
+    expect.translateX_ = expect.translateY_ = -100; // translate value
 
     WindowAccessibilityController::GetInstance().SetAnchorOffset(200, 200);
     sleep(1);
@@ -231,7 +225,7 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom05, TestSize.Level1)
 
     Transform animate;
     animate.translateX_ = -100; // translate x value
-    animate.translateZ_ = 100; // translate z value
+    animate.translateZ_ = 100;  // translate z value
     window->SetTransform(animate);
     sleep(1);
 
@@ -242,9 +236,7 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom05, TestSize.Level1)
     expect.scaleX_ = expect.scaleY_ = 1.7; // scale value
     Transform actual = implPtr->GetWindowProperty()->GetZoomTransform();
 
-    auto isExpec = [](float a, float b) -> bool {
-        return abs(a - b) < 0.1;
-    };
+    auto isExpec = [](float a, float b) -> bool { return abs(a - b) < 0.1; };
     ASSERT_EQ(true, isExpec(actual.pivotX_, expect.pivotX_));
     ASSERT_EQ(true, isExpec(actual.pivotY_, expect.pivotY_));
     ASSERT_EQ(true, isExpec(actual.scaleX_, expect.scaleX_));
@@ -254,6 +246,6 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom05, TestSize.Level1)
     window->Destroy();
 }
 
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

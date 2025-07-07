@@ -38,17 +38,14 @@ public:
     void SetUp() override;
     void TearDown() override;
     sptr<SceneSessionManagerStub> stub_;
+
 private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
 
-void SceneSessionManagerStubLifecycleTest::SetUpTestCase()
-{
-}
+void SceneSessionManagerStubLifecycleTest::SetUpTestCase() {}
 
-void SceneSessionManagerStubLifecycleTest::TearDownTestCase()
-{
-}
+void SceneSessionManagerStubLifecycleTest::TearDownTestCase() {}
 
 void SceneSessionManagerStubLifecycleTest::SetUp()
 {
@@ -129,11 +126,7 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandlePendingSessionToForeground,
  * @tc.desc: test HandlePendingSessionToBackgroundForDelegator
  * @tc.type: FUNC
  */
-HWTEST_F(
-    SceneSessionManagerStubLifecycleTest,
-    HandlePendingSessionToBackgroundForDelegator,
-    TestSize.Level1
-)
+HWTEST_F(SceneSessionManagerStubLifecycleTest, HandlePendingSessionToBackgroundForDelegator, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -283,7 +276,7 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleMoveSessionsToForeground, T
     auto res = stub_->HandleMoveSessionsToForeground(data, reply);
     EXPECT_EQ(res, ERR_INVALID_DATA);
 
-    std::vector<int32_t> sessionIds = {1, 2, 3, 15, 1423};
+    std::vector<int32_t> sessionIds = { 1, 2, 3, 15, 1423 };
     data.WriteInt32Vector(sessionIds);
     int32_t topSessionId = 1;
     data.WriteInt32(topSessionId);
@@ -305,9 +298,9 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleMoveSessionsToBackground, T
     MessageParcel data;
     MessageParcel reply;
 
-    std::vector<int32_t> sessionIds = {1, 2, 3, 15, 1423};
+    std::vector<int32_t> sessionIds = { 1, 2, 3, 15, 1423 };
     data.WriteInt32Vector(sessionIds);
-    std::vector<int32_t> result = {1, 2, 3, 15, 1423};
+    std::vector<int32_t> result = { 1, 2, 3, 15, 1423 };
     data.WriteInt32Vector(result);
 
     int res = stub_->HandleMoveSessionsToBackground(data, reply);
@@ -319,11 +312,7 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleMoveSessionsToBackground, T
  * @tc.desc: test HandleUpdateSessionWindowVisibilityListener
  * @tc.type: FUNC
  */
-HWTEST_F(
-    SceneSessionManagerStubLifecycleTest,
-    HandleUpdateSessionWindowVisibilityListener,
-    TestSize.Level1
-)
+HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleUpdateSessionWindowVisibilityListener, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -352,6 +341,6 @@ HWTEST_F(SceneSessionManagerStubLifecycleTest, HandleGetVisibilityWindowInfo, Te
     int res = stub_->HandleGetVisibilityWindowInfo(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

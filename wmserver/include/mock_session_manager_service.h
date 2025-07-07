@@ -19,17 +19,17 @@
 #include <shared_mutex>
 #include <system_ability.h>
 
+#include "mock_session_manager_interface_stub.h"
 #include "wm_single_instance.h"
-#include "zidl/mock_session_manager_service_stub.h"
 #include "zidl/session_manager_service_recover_interface.h"
 
 namespace OHOS {
 namespace Rosen {
-class MockSessionManagerService : public SystemAbility, public MockSessionManagerServiceStub {
+class MockSessionManagerService : public SystemAbility, public MockSessionManagerInterfaceStub {
 DECLARE_SYSTEM_ABILITY(MockSessionManagerService);
 WM_DECLARE_SINGLE_INSTANCE_BASE(MockSessionManagerService);
 public:
-    sptr<IRemoteObject> GetScreenSessionManagerLite() override;
+    ErrCode GetScreenSessionManagerLite(sptr<IRemoteObject>& screenSessionManagerLite) override;
     sptr<IRemoteObject> GetSceneSessionManager();
     void OnStart() override;
     int Dump(int fd, const std::vector<std::u16string>& args) override;
@@ -42,27 +42,27 @@ public:
      * Multi User
      */
     bool SetSessionManagerService(const sptr<IRemoteObject>& sessionManagerService);
-    sptr<IRemoteObject> GetSessionManagerService() override;
+    ErrCode GetSessionManagerService(sptr<IRemoteObject>& sessionManagerService) override;
     void NotifyWMSConnected(int32_t userId, int32_t screenId, bool isColdStart);
     void NotifyNotKillService() {}
 
     /*
      * Window Recover
      */
-    void NotifySceneBoardAvailable() override;
-    void RegisterSMSRecoverListener(const sptr<IRemoteObject>& listener) override;
-    void UnregisterSMSRecoverListener() override;
+    ErrCode NotifySceneBoardAvailable() override;
+    ErrCode RegisterSMSRecoverListener(const sptr<IRemoteObject>& listener) override;
+    ErrCode UnregisterSMSRecoverListener() override;
     void UnregisterSMSRecoverListener(int32_t userId, int32_t pid);
-    void RegisterSMSLiteRecoverListener(const sptr<IRemoteObject>& listener) override;
-    void UnregisterSMSLiteRecoverListener() override;
+    ErrCode RegisterSMSLiteRecoverListener(const sptr<IRemoteObject>& listener) override;
+    ErrCode UnregisterSMSLiteRecoverListener() override;
     void UnregisterSMSLiteRecoverListener(int32_t userId, int32_t pid);
 
     /*
      * Window Snapshot
      */
-    int32_t SetSnapshotSkipByUserIdAndBundleNames(int32_t userId,
+    ErrCode SetSnapshotSkipByUserIdAndBundleNames(int32_t userId,
         const std::vector<std::string>& bundleNameList) override;
-    int32_t SetSnapshotSkipByIdNamesMap(const std::unordered_map<int32_t,
+    ErrCode SetSnapshotSkipByIdNamesMap(const std::unordered_map<int32_t,
         std::vector<std::string>>& userIdAndBunldeNames) override;
 
 protected:
@@ -107,15 +107,13 @@ private:
      * Window Snapshot
      */
     virtual sptr<IRemoteObject> GetSceneSessionManagerByUserId(int32_t userId);
-    int32_t RecoverSCBSnapshotSkipByUserId(int32_t userId);
-    virtual int32_t NotifySCBSnapshotSkipByUserIdAndBundleNames(int32_t userId,
+    ErrCode RecoverSCBSnapshotSkipByUserId(int32_t userId);
+    virtual ErrCode NotifySCBSnapshotSkipByUserIdAndBundleNames(int32_t userId,
         const std::vector<std::string>& bundleNameList, const sptr<IRemoteObject>& remoteObject);
-    int32_t SetSnapshotSkipByUserIdAndBundleNamesInner(int32_t userId,
+    ErrCode SetSnapshotSkipByUserIdAndBundleNamesInner(int32_t userId,
         const std::vector<std::string>& bundleNameList);
-    int32_t SetSnapshotSkipByIdNamesMapInner(const std::unordered_map<int32_t,
+    ErrCode SetSnapshotSkipByIdNamesMapInner(const std::unordered_map<int32_t,
         std::vector<std::string>>& userIdAndBunldeNames);
-
-    static void WriteStringToFile(int32_t pid, const char* str);
 
     sptr<IRemoteObject> screenSessionManager_;
     sptr<IRemoteObject> sceneSessionManager_;

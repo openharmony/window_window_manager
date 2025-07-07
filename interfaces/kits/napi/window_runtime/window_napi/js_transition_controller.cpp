@@ -184,7 +184,7 @@ void JsTransitionController::AnimationForShown()
         // add to rs tree before animation
         window->UpdateSurfaceNodeAfterCustomAnimation(true);
     };
-    if (napi_status::napi_ok != napi_send_event(env_, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env_, asyncTask, napi_eprio_high, "AnimationForShown") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to run napiAsyncTask for animationForShown");
     }
 }
@@ -222,7 +222,7 @@ void JsTransitionController::AnimationForHidden()
         napi_value argv[] = { jsTransContextObj };
         thisController->CallJsMethod("animationForHidden", argv, ArraySize(argv));
     };
-    if (napi_status::napi_ok != napi_send_event(env_, asyncTask, napi_eprio_high)) {
+    if (napi_send_event(env_, asyncTask, napi_eprio_high, "AnimationForHidden") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to run napiAsyncTask for animationForHidden");
     }
 }

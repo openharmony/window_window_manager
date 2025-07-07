@@ -33,7 +33,7 @@ bool SuperFoldPolicy::IsNeedSetSnapshotRect(DisplayId displayId)
     return (displayId == DEFAULT_DISPLAY_ID) || (displayId == DISPLAY_ID_FAKE);
 }
 
-Drawing::Rect SuperFoldPolicy::GetSnapshotRect(DisplayId displayId)
+Drawing::Rect SuperFoldPolicy::GetSnapshotRect(DisplayId displayId, bool isCaptureFullOfScreen)
 {
     Drawing::Rect snapshotRect = {0, 0, 0, 0};
     auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession(SCREEN_ID_DEFAULT);
@@ -47,7 +47,7 @@ Drawing::Rect SuperFoldPolicy::GetSnapshotRect(DisplayId displayId)
     auto screenHeight = screenProperty.GetPhyBounds().rect_.GetHeight();
     DMRect creaseRect = screenProperty.GetCreaseRect();
     auto fakeInfo =  ScreenSessionManager::GetInstance().GetDisplayInfoById(DISPLAY_ID_FAKE);
-    if (displayId == DISPLAY_ID_FAKE) {
+    if (displayId == DISPLAY_ID_FAKE && !isCaptureFullOfScreen) {
         if (fakeInfo != nullptr) {
             snapshotRect = {0, defaultInfo->GetHeight() + static_cast<int32_t>(creaseRect.height_),
                 screenWidth, screenHeight};
@@ -55,7 +55,8 @@ Drawing::Rect SuperFoldPolicy::GetSnapshotRect(DisplayId displayId)
     } else {
         SuperFoldStatus status = SuperFoldStateManager::GetInstance().GetCurrentStatus();
         bool isSystemKeyboardOn = SuperFoldStateManager::GetInstance().GetSystemKeyboardStatus();
-        if (status == SuperFoldStatus::KEYBOARD || fakeInfo != nullptr || isSystemKeyboardOn) {
+        if (status == SuperFoldStatus::KEYBOARD ||
+            (fakeInfo != nullptr && !isCaptureFullOfScreen)|| isSystemKeyboardOn) {
             snapshotRect = {0, 0, defaultInfo->GetWidth(), defaultInfo->GetHeight()};
         } else {
             snapshotRect = {0, 0, screenWidth, screenHeight};
@@ -66,7 +67,8 @@ Drawing::Rect SuperFoldPolicy::GetSnapshotRect(DisplayId displayId)
         << " left: 0"
         << " top:" << snapshotRect.top_
         << " right:" << snapshotRect.right_
-        << " bottom:" << snapshotRect.bottom_;
+        << " bottom:" << snapshotRect.bottom_
+        << " isCaptureFullOfScreen:" << isCaptureFullOfScreen;
     TLOGW(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
     return snapshotRect;
 }
@@ -81,8 +83,6 @@ DMRect SuperFoldPolicy::GetRecordRect(DisplayId displayId)
         return recordRect;
     }
     ScreenProperty screenProperty = screenSession->GetScreenProperty();
-    auto screenWidth = screenProperty.GetPhyBounds().rect_.GetWidth();
-    auto screenHeight = screenProperty.GetPhyBounds().rect_.GetHeight();
     DMRect creaseRect = screenProperty.GetCreaseRect();
     auto fakeInfo =  ScreenSessionManager::GetInstance().GetDisplayInfoById(DISPLAY_ID_FAKE);
     if (displayId == DISPLAY_ID_FAKE) {
@@ -96,7 +96,7 @@ DMRect SuperFoldPolicy::GetRecordRect(DisplayId displayId)
         if (status == SuperFoldStatus::KEYBOARD || fakeInfo != nullptr || isSystemKeyboardOn) {
             recordRect = {0, 0, defaultInfo->GetWidth(), defaultInfo->GetHeight()};
         } else {
-            recordRect = {0, 0, screenWidth, screenHeight};
+            recordRect = {0, 0, 0, 0};
         }
     }
     std::ostringstream oss;

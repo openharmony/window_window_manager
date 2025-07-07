@@ -191,6 +191,6 @@ HWTEST_F(SessionProxyLifecycleTest, NotifySessionException, TestSize.Level1)
     ASSERT_EQ(res, WSError::WS_OK);
     GTEST_LOG_(INFO) << "SessionProxyLifecycleTest: NotifySessionException end";
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

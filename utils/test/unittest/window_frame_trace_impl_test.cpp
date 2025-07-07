@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-#include "window_frame_trace.h"
 #include <gtest/gtest.h>
 #include <unistd.h>
+#include "window_frame_trace.h"
 
 using namespace testing;
 using namespace testing::ext;
 namespace FRAME_TRACE {
 class WindowFrameTraceImplTest : public testing::Test {
-  public:
+public:
     WindowFrameTraceImplTest() {}
     ~WindowFrameTraceImplTest() {}
 };
@@ -41,7 +41,7 @@ HWTEST_F(WindowFrameTraceImplTest, AccessFrameTrace01, TestSize.Level1)
     ASSERT_EQ(res, true);
     bool res1 = trace.AccessFrameTrace();
     ASSERT_EQ(res1, true);
-    WindowFrameTraceImpl *trace_ = WindowFrameTraceImpl::GetInstance();
+    WindowFrameTraceImpl* trace_ = WindowFrameTraceImpl::GetInstance();
     bool res2 = trace_->AccessFrameTrace();
     ASSERT_EQ(res2, true);
     GTEST_LOG_(INFO) << "WindowFrameTraceImplTest: AccessFrameTrace01 end";
@@ -59,7 +59,7 @@ HWTEST_F(WindowFrameTraceImplTest, VsyncStartFrameTrace01, TestSize.Level1)
     int32_t res = 0;
     trace.VsyncStartFrameTrace();
     ASSERT_EQ(res, 0);
-    WindowFrameTraceImpl *trace_ = WindowFrameTraceImpl::GetInstance();
+    WindowFrameTraceImpl* trace_ = WindowFrameTraceImpl::GetInstance();
     bool res2 = trace_->AccessFrameTrace();
     trace_->VsyncStartFrameTrace();
     ASSERT_EQ(res2, true);
@@ -78,7 +78,7 @@ HWTEST_F(WindowFrameTraceImplTest, VsyncStopFrameTrace01, TestSize.Level1)
     int32_t res = 0;
     trace.VsyncStopFrameTrace();
     ASSERT_EQ(res, 0);
-    WindowFrameTraceImpl *trace_ = WindowFrameTraceImpl::GetInstance();
+    WindowFrameTraceImpl* trace_ = WindowFrameTraceImpl::GetInstance();
     bool res2 = trace_->AccessFrameTrace();
     trace_->VsyncStartFrameTrace();
     trace_->VsyncStopFrameTrace();

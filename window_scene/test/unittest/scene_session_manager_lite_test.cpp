@@ -31,21 +31,13 @@ public:
     void TearDown() override;
 };
 
-void SceneSessionManagerLiteTest::SetUpTestCase()
-{
-}
+void SceneSessionManagerLiteTest::SetUpTestCase() {}
 
-void SceneSessionManagerLiteTest::TearDownTestCase()
-{
-}
+void SceneSessionManagerLiteTest::TearDownTestCase() {}
 
-void SceneSessionManagerLiteTest::SetUp()
-{
-}
+void SceneSessionManagerLiteTest::SetUp() {}
 
-void SceneSessionManagerLiteTest::TearDown()
-{
-}
+void SceneSessionManagerLiteTest::TearDown() {}
 
 namespace {
 /**
@@ -60,6 +52,18 @@ HWTEST_F(SceneSessionManagerLiteTest, GetInstance, TestSize.Level1)
     SceneSessionManagerLite& instance2 = SceneSessionManagerLite::GetInstance();
     EXPECT_EQ(&instance1, &instance2);
 }
+
+/**
+ * @tc.name: SendPointerEventForHover
+ * @tc.desc: test function : SendPointerEventForHover
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteTest, SendPointerEventForHover, TestSize.Level1)
+{
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    EXPECT_EQ(SceneSessionManagerLite::GetInstance().SendPointerEventForHover(pointerEvent),
+        WSError::WS_ERROR_INVALID_PERMISSION);
 }
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

@@ -31,6 +31,7 @@ namespace OHOS::Rosen {
 class RSSurfaceNode;
 class RSCanvasNode;
 class RSTransaction;
+enum class ImageFit;
 class ISession : public IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISession");
@@ -134,6 +135,22 @@ public:
         bool isFromMoveToGlobal = false, const MoveConfiguration& moveConfiguration = {},
         const RectAnimationConfig& rectAnimationConfig = {}) { return WSError::WS_OK; }
     virtual WSError UpdateClientRect(const WSRect& rect) { return WSError::WS_OK; }
+
+    /**
+     * @brief Updates the window's rectangle in global coordinates from client-side state.
+     *
+     * This method is called internally to synchronize the window's position and size in global coordinates
+     * based on the client-side changes (e.g., from the client application or user interactions).
+     *
+     * @param rect The updated rectangle (position and size) in global coordinates.
+     * @param reason The reason for the size or position change.
+     * @return WSError::WS_OK if the update is successful; otherwise, returns the corresponding error code.
+     */
+    virtual WSError UpdateGlobalDisplayRectFromClient(const WSRect& rect, SizeChangeReason reason)
+    {
+        return WSError::WS_DO_NOTHING;
+    }
+
     virtual WMError GetGlobalScaledRect(Rect& globalScaledRect) { return WMError::WM_OK; }
     virtual WSError OnNeedAvoid(bool status) { return WSError::WS_OK; }
     virtual AvoidArea GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect = WSRect::EMPTY_RECT,
@@ -196,6 +213,14 @@ public:
     virtual WSError RaiseAppMainWindowToTop() { return WSError::WS_OK; }
     virtual WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
         { return WSError::WS_OK; }
+ 
+    /**
+     * @brief Pending session active batch
+     *
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError BatchPendingSessionsActivation(const std::vector<sptr<AAFwk::SessionInfo>>& abilitySessionInfos)
+        { return WSError::WS_OK; }
     virtual WSError TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionInfo) { return WSError::WS_OK; }
     virtual WSError SetLandscapeMultiWindow(bool isLandscapeMultiWindow) { return WSError::WS_OK; }
     virtual WSError GetIsMidScene(bool& isMidScene) { return WSError::WS_OK; }
@@ -220,11 +245,13 @@ public:
     virtual WSError KeyFrameAnimateEnd() { return WSError::WS_OK; }
     virtual WSError UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode,
         std::shared_ptr<RSTransaction>& rsTransaction) { return WSError::WS_OK; }
+    virtual WSError SetDragKeyFramePolicy(const KeyFramePolicy& keyFramePolicy) { return WSError::WS_OK; }
 
     virtual WSError NotifyFrameLayoutFinishFromApp(bool notifyListener, const WSRect& rect)
     {
         return WSError::WS_OK;
     }
+    virtual WMError NotifySnapshotUpdate() { return WMError::WM_OK; }
     virtual void NotifyExtensionDied() {}
     virtual void NotifyExtensionTimeout(int32_t errorCode) {}
     virtual void TriggerBindModalUIExtension() {}
@@ -316,8 +343,10 @@ public:
         return WSError::WS_OK;
     }
     virtual void SetCallingSessionId(uint32_t callingSessionId) {};
-    virtual void NotifyKeyboardDidShowRegistered(bool registered) { };
-    virtual void NotifyKeyboardDidHideRegistered(bool registered) { };
+    virtual void NotifyKeyboardWillShowRegistered(bool registered) {};
+    virtual void NotifyKeyboardWillHideRegistered(bool registered) {};
+    virtual void NotifyKeyboardDidShowRegistered(bool registered) {};
+    virtual void NotifyKeyboardDidHideRegistered(bool registered) {};
     virtual void SetCustomDecorHeight(int32_t height) {};
     virtual WMError UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action) { return WMError::WM_OK; }
@@ -367,12 +396,29 @@ public:
     virtual WSError OnSetWindowRectAutoSave(bool enabled, bool isSaveBySpecifiedFlag) { return WSError::WS_OK; }
 
     /**
+     * @brief Callback for set image for recent.
+     *
+     * @param imgResourceId resourceId of static image.
+     * @param imageFit imageFit.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError OnSetImageForRecent(uint32_t imgResourceId, ImageFit ImageFit) { return WSError::WS_OK; }
+    
+    /**
      * @brief Callback for setting to radius of window.
      *
      * @param cornerRadius corner radius of window.
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError SetWindowCornerRadius(float cornerRadius) { return WSError::WS_OK; }
+
+    /**
+     * @brief Callback for setting to shadows of window.
+     *
+     * @param shadowsInfo shadows of window.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError SetWindowShadows(const ShadowsInfo& shadowsInfo) { return WSError::WS_OK; }
 
     /**
      *  Gesture Back
@@ -408,7 +454,7 @@ public:
     virtual WSError SetSessionLabelAndIcon(const std::string& label,
         const std::shared_ptr<Media::PixelMap>& icon) { return WSError::WS_OK; }
 
-    virtual WSError ChangeKeyboardViewMode(KeyboardViewMode mode) { return WSError::WS_OK; };
+    virtual WSError ChangeKeyboardEffectOption(const KeyboardEffectOption& effectOption) { return WSError::WS_OK; };
 
     /**
      * @brief Start Moving window with coordinate.
@@ -417,10 +463,11 @@ public:
      * @param offsetY expected pointer position y-axis offset in window when start moving.
      * @param pointerPosX current pointer position x-axis offset in screen.
      * @param pointerPosY current pointer position y-axis offset in screen.
+     * @param displayId current pointer display id.
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError StartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
-        int32_t pointerPosX, int32_t pointerPosY) { return WSError::WS_OK; }
+        int32_t pointerPosX, int32_t pointerPosY, DisplayId displayId) { return WSError::WS_OK; }
     virtual WSError GetCrossAxisState(CrossAxisState& state) { return WSError::WS_OK; };
 
     /**
@@ -430,8 +477,12 @@ public:
      */
     virtual void NotifyWindowAttachStateListenerRegistered(bool registered) { }
     virtual WSError SetFollowParentWindowLayoutEnabled(bool isFollow) { return WSError::WS_OK; };
+    virtual WSError SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo) { return WSError::WS_OK; };
     virtual WSError UpdateFlag(const std::string& flag) { return WSError::WS_OK; };
     virtual WSError UpdateRotationChangeRegistered(int32_t persistentId, bool isRegister) { return WSError::WS_OK; }
+    virtual WMError UpdateScreenshotAppEventRegistered(int32_t persistentId, bool isRegister) { return WMError::WM_OK; }
+    virtual WMError UpdateAcrossDisplaysChangeRegistered(bool isRegister) { return WMError::WM_OK; }
+    virtual WMError IsMainWindowFullScreenAcrossDisplays(bool& isAcrossDisplays) { return WMError::WM_OK; }
     virtual WSError GetIsHighlighted(bool& isHighlighted) { return WSError::WS_OK; }
 
     /**
@@ -445,6 +496,78 @@ public:
      * @return Successful call returns WMError::WS_OK, otherwise it indicates failure
      */
     virtual WMError NotifyDisableDelegatorChange() { return WMError::WM_OK; }
+
+    /**
+     * @brief Use implict animation
+     *
+     * @param used used
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError UseImplicitAnimation(bool useImplicit) { return WSError::WS_OK; }
+
+    /**
+     * @brief Set the transition animation.
+     *
+     * @param transitionType window transition type.
+     * @param animation window transition animation.
+     * @return WM_OK means set success.
+     */
+    virtual WSError SetWindowTransitionAnimation(WindowTransitionType transitionType,
+        const TransitionAnimation& animation)
+    {
+        return WSError::WS_OK;
+    }
+   
+    /**
+    * @brief Set sub window source
+    *
+    * @param source source
+    * @return Returns WSError::WS_OK if called success, otherwise failed.
+    */
+    virtual WSError SetSubWindowSource(SubWindowSource source) { return WSError::WS_OK; }
+
+    /**
+     * @brief Set the frameRect in a partial zoom-in scene.
+     *
+     * @param frameRect The original rect of frameBuffer before partial zoom-in.
+     * @return WSError::WS_OK means set success, otherwise failed.
+     */
+    virtual WSError SetFrameRectForPartialZoomIn(const Rect& frameRect) { return WSError::WS_OK; }
+
+    /**
+     * @brief update the floating-ball window instance.
+     *
+     * @param fbTemplateInfo the template info of the floating-ball.
+     */
+    virtual WMError UpdateFloatingBall(const FloatingBallTemplateInfo& fbTemplateInfo)
+    {
+        return WMError::WM_OK;
+    }
+ 
+    virtual WMError GetFloatingBallWindowId(uint32_t& windowId)
+    {
+        return WMError::WM_OK;
+    }
+ 
+    /**
+     * @brief Close flating ball window while stopFb is called.
+     *
+     * Notify system that flating ball window is stopping and execute animation.
+     */
+    virtual void NotifyFloatingBallPrepareClose() {}
+ 
+    /**
+     * @brief Notify prepare to close window
+     */
+    virtual WSError StopFloatingBall()
+    {
+        return WSError::WS_OK;
+    }
+ 
+    virtual WMError RestoreFbMainWindow(const std::shared_ptr<AAFwk::Want>& want)
+    {
+        return WMError::WM_OK;
+    }
 };
 } // namespace OHOS::Rosen
 

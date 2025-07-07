@@ -153,6 +153,10 @@ public:
 
     double GetTextFieldPositionY() const;
     double GetTextFieldHeight() const;
+
+    void SetFollowScreenChange(bool isFollowScreenChange);
+    bool GetFollowScreenChange() const;
+
 private:
     bool MapMarshalling(Parcel& parcel) const;
     static void MapUnmarshalling(Parcel& parcel, WindowProperty* property);
@@ -184,6 +188,7 @@ private:
     float brightness_ = UNDEFINED_BRIGHTNESS;
     bool turnScreenOn_ = false;
     bool keepScreenOn_ = false;
+    bool isFollowScreenChange_ = false;
     uint32_t callingWindow_ = INVALID_WINDOW_ID;
     DisplayId displayId_ { 0 };
     uint32_t windowId_ = INVALID_WINDOW_ID;

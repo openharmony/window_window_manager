@@ -48,21 +48,13 @@ public:
     sptr<WindowEventChannel> windowEventChannel_ = sptr<WindowEventChannelMocker>::MakeSptr(sessionStage);
 };
 
-void WindowEventChannelTest::SetUpTestCase()
-{
-}
+void WindowEventChannelTest::SetUpTestCase() {}
 
-void WindowEventChannelTest::TearDownTestCase()
-{
-}
+void WindowEventChannelTest::TearDownTestCase() {}
 
-void WindowEventChannelTest::SetUp()
-{
-}
+void WindowEventChannelTest::SetUp() {}
 
-void WindowEventChannelTest::TearDown()
-{
-}
+void WindowEventChannelTest::TearDown() {}
 
 WSError WindowEventChannelTest::TransferAccessibilityHoverEvent(bool isChannelNull)
 {
@@ -150,6 +142,10 @@ HWTEST_F(WindowEventChannelTest, TransferPointerEvent, TestSize.Level1)
     EXPECT_EQ(res, WSError::WS_OK);
 
     windowEventChannel->SetUIExtensionUsage(UIExtensionUsage::CONSTRAINED_EMBEDDED);
+    res = windowEventChannel->TransferPointerEvent(pointerEvent);
+    EXPECT_EQ(res, WSError::WS_OK);
+
+    windowEventChannel->SetUIExtensionUsage(UIExtensionUsage::PREVIEW_EMBEDDED);
     res = windowEventChannel->TransferPointerEvent(pointerEvent);
     EXPECT_EQ(res, WSError::WS_OK);
 
@@ -539,5 +535,5 @@ HWTEST_F(WindowEventChannelTest, PrintInfoPointerEvent, TestSize.Level1)
 
     windowEventChannel_->PrintPointerEvent(pointerEvent);
 }
-}
-}
+} // namespace
+} // namespace OHOS::Rosen

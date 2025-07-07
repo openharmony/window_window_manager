@@ -209,6 +209,103 @@ HWTEST_F(FoldScreenSensorManagerTest, TriggerDisplaySwitch, TestSize.Level1)
     }
     usleep(SLEEP_TIME_US);
 }
+
+/**
+ * @tc.name: GetGlobalAngle
+ * @tc.desc: test function : GetGlobalAngle
+ * @tc.type: FUNC
+ */
+HWTEST_F(FoldScreenSensorManagerTest, GetGlobalAngle, TestSize.Level1)
+{
+    FoldScreenSensorManager mgr = FoldScreenSensorManager();
+    mgr.SetSensorFoldStateManager(new SensorFoldStateManager());
+    mgr.registerPosture_ = false;
+    float angle = 150.0F;
+    mgr.SetGlobalAngle(angle);
+    ASSERT_NO_FATAL_FAILURE({mgr.GetGlobalAngle();});
+    EXPECT_EQ(mgr.GetGlobalAngle(), angle);
+}
+
+/**
+ * @tc.name: SetGlobalAngle
+ * @tc.desc: test function : SetGlobalAngle
+ * @tc.type: FUNC
+ */
+HWTEST_F(FoldScreenSensorManagerTest, SetGlobalAngle, TestSize.Level1)
+{
+    FoldScreenSensorManager mgr = FoldScreenSensorManager();
+    mgr.SetSensorFoldStateManager(new SensorFoldStateManager());
+    ASSERT_NO_FATAL_FAILURE({mgr.SetGlobalAngle(-10.0f);});
+    EXPECT_NE(mgr.GetGlobalAngle(), -10.0f);
+    ASSERT_NO_FATAL_FAILURE({mgr.SetGlobalAngle(190.0f);});
+    EXPECT_NE(mgr.GetGlobalAngle(), 190.0f);
+    ASSERT_NO_FATAL_FAILURE({mgr.SetGlobalAngle(180.0f);});
+    EXPECT_EQ(mgr.GetGlobalAngle(), 180.0f);
+    ASSERT_NO_FATAL_FAILURE({mgr.SetGlobalAngle(150.0f);});
+    EXPECT_EQ(mgr.GetGlobalAngle(), 150.0f);
+}
+
+/**
+ * @tc.name: SetGlobalAngleWhenParamInValid
+ * @tc.desc: test function : SetGlobalAngle
+ * @tc.type: FUNC
+ */
+HWTEST_F(FoldScreenSensorManagerTest, SetGlobalAngleWhenParamInValid, TestSize.Level1)
+{
+    FoldScreenSensorManager mgr = FoldScreenSensorManager();
+    mgr.SetSensorFoldStateManager(new SensorFoldStateManager());
+    ASSERT_NO_FATAL_FAILURE({mgr.SetGlobalAngle(150.0f);});
+    ASSERT_NO_FATAL_FAILURE({mgr.SetGlobalAngle(-10.0f);});
+    EXPECT_NE(mgr.GetGlobalAngle(), -10.0f);
+    ASSERT_NO_FATAL_FAILURE({mgr.SetGlobalAngle(190.0f);});
+    EXPECT_NE(mgr.GetGlobalAngle(), 190.0f);
+}
+
+/**
+ * @tc.name: GetGlobalHall
+ * @tc.desc: test function : GetGlobalHall
+ * @tc.type: FUNC
+ */
+HWTEST_F(FoldScreenSensorManagerTest, GetGlobalHall, TestSize.Level1)
+{
+    FoldScreenSensorManager mgr = FoldScreenSensorManager();
+    mgr.SetSensorFoldStateManager(new SensorFoldStateManager());
+    ASSERT_NO_FATAL_FAILURE({mgr.SetGlobalHall(0);});
+    ASSERT_NO_FATAL_FAILURE({mgr.SetGlobalHall(1);});
+    ASSERT_NO_FATAL_FAILURE({mgr.GetGlobalHall();});
+    EXPECT_EQ(mgr.GetGlobalHall(), 1);
+}
+
+/**
+ * @tc.name: SetGlobalHall
+ * @tc.desc: test function : SetGlobalHall
+ * @tc.type: FUNC
+ */
+HWTEST_F(FoldScreenSensorManagerTest, SetGlobalHall, TestSize.Level1)
+{
+    FoldScreenSensorManager mgr = FoldScreenSensorManager();
+    mgr.SetSensorFoldStateManager(new SensorFoldStateManager());
+    ASSERT_NO_FATAL_FAILURE({mgr.SetGlobalHall(0);});
+    ASSERT_NO_FATAL_FAILURE({mgr.SetGlobalHall(1);});
+    ASSERT_NO_FATAL_FAILURE({mgr.SetGlobalHall(USHRT_MAX);});
+    ASSERT_NO_FATAL_FAILURE({mgr.GetGlobalHall();});
+    EXPECT_EQ(mgr.GetGlobalHall(), 1);
+}
+
+/**
+ * @tc.name: SetGlobalHallWhenParamInValid
+ * @tc.desc: test function : SetGlobalHall
+ * @tc.type: FUNC
+ */
+HWTEST_F(FoldScreenSensorManagerTest, SetGlobalHallWhenParamInValid, TestSize.Level1)
+{
+    FoldScreenSensorManager mgr = FoldScreenSensorManager();
+    mgr.SetSensorFoldStateManager(new SensorFoldStateManager());
+    ASSERT_NO_FATAL_FAILURE({mgr.SetGlobalHall(1);});
+    ASSERT_NO_FATAL_FAILURE({mgr.SetGlobalHall(USHRT_MAX);});
+    ASSERT_NO_FATAL_FAILURE({mgr.GetGlobalHall();});
+    EXPECT_NE(mgr.GetGlobalHall(), USHRT_MAX);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

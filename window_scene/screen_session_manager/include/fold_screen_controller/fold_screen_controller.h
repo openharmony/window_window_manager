@@ -57,7 +57,6 @@ public:
     void ExitCoordination();
     Drawing::Rect GetScreenSnapshotRect();
     void SetMainScreenRegion(DMRect& mainScreenRegion);
-    bool GetCameraMode();
     std::chrono::steady_clock::time_point GetStartTimePoint();
     bool GetIsFirstFrameCommitReported();
     void SetIsFirstFrameCommitReported(bool isFirstFrameCommitReported);
@@ -69,6 +68,7 @@ public:
     bool GetdisplayModeRunningStatus();
     FoldDisplayMode GetLastCacheDisplayMode();
     void AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32_t command);
+    void SetIsClearingBootAnimation(bool isClearingBootAnimation);
 private:
     sptr<FoldScreenPolicy> GetFoldScreenPolicy(DisplayDeviceType productType);
     sptr<FoldScreenPolicy> foldScreenPolicy_;

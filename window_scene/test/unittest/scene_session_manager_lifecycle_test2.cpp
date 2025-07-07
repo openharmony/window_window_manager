@@ -53,23 +53,16 @@ public:
     static void SetVisibleForAccessibility(sptr<SceneSession>& sceneSession);
     int32_t GetTaskCount(sptr<SceneSession>& session);
     static sptr<SceneSessionManager> ssm_;
+
 private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
 
 sptr<SceneSessionManager> SceneSessionManagerLifecycleTest2::ssm_ = nullptr;
 
-void WindowChangedFuncTest(int32_t persistentId, WindowUpdateType type)
-{
-}
+void WindowChangedFuncTest(int32_t persistentId, WindowUpdateType type) {}
 
-void ProcessStatusBarEnabledChangeFuncTest(bool enable)
-{
-}
-
-void DumpRootSceneElementInfoFuncTest(const std::vector<std::string>& params, std::vector<std::string>& infos)
-{
-}
+void ProcessStatusBarEnabledChangeFuncTest(bool enable) {}
 
 void SceneSessionManagerLifecycleTest2::SetUpTestCase()
 {
@@ -249,14 +242,14 @@ HWTEST_F(SceneSessionManagerLifecycleTest2, NotifyWindowStateErrorFromMMI, TestS
     sceneSession2->property_ = property2;
     sceneSession2->SetCallingPid(100);
 
-    ssm_->sceneSessionMap_.insert({10086, sceneSession});
-    ssm_->sceneSessionMap_.insert({10087, sceneSession1});
-    ssm_->sceneSessionMap_.insert({10088, sceneSession2});
-    ssm_->sceneSessionMap_.insert({10089, nullptr});
+    ssm_->sceneSessionMap_.insert({ 10086, sceneSession });
+    ssm_->sceneSessionMap_.insert({ 10087, sceneSession1 });
+    ssm_->sceneSessionMap_.insert({ 10088, sceneSession2 });
+    ssm_->sceneSessionMap_.insert({ 10089, nullptr });
     ssm_->NotifyWindowStateErrorFromMMI(-1, 10086);
     ssm_->NotifyWindowStateErrorFromMMI(100, 10086);
     ASSERT_EQ(ret, 0);
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

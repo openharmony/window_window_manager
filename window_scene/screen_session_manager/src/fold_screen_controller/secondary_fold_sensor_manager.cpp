@@ -33,7 +33,8 @@ namespace {
 constexpr float ANGLE_MIN_VAL = 0.0F;
 constexpr float ANGLE_MAX_VAL = 180.0F;
 constexpr int32_t SENSOR_SUCCESS = 0;
-constexpr int32_t POSTURE_INTERVAL = 100000000;
+// 10ms = 1000 * 1000 * 10 ns
+constexpr int32_t POSTURE_INTERVAL = 10000000;
 constexpr uint16_t SENSOR_EVENT_FIRST_DATA = 0;
 constexpr uint16_t HALL_B_C_COLUMN_ORDER = 1;
 constexpr uint16_t HALL_A_B_COLUMN_ORDER = 4;
@@ -274,6 +275,10 @@ bool SecondaryFoldSensorManager::GetHallInner(const SensorEvent * const event, u
 
 void SecondaryFoldSensorManager::PowerKeySetScreenActiveRect()
 {
+    if (foldScreenPolicy_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "fold screen policy is not initialized.");
+        return;
+    }
     if (foldScreenPolicy_->GetScreenParams().size() != PARAMS_VECTOR_SIZE) {
         return;
     }
@@ -281,16 +286,19 @@ void SecondaryFoldSensorManager::PowerKeySetScreenActiveRect()
     uint32_t y = 0;
     uint32_t width = foldScreenPolicy_->GetScreenParams()[SCREEN_HEIGHT];
     uint32_t height = 0;
-    if (foldScreenPolicy_->currentDisplayMode_ == FoldDisplayMode::FULL) {
-        y = foldScreenPolicy_->GetScreenParams()[FULL_STATUS_OFFSET_X];
-        height = foldScreenPolicy_->GetScreenParams()[FULL_STATUS_WIDTH];
-    } else if (foldScreenPolicy_->currentDisplayMode_ == FoldDisplayMode::MAIN) {
-        height = foldScreenPolicy_->GetScreenParams()[MAIN_STATUS_WIDTH];
-    } else if (foldScreenPolicy_->currentDisplayMode_ == FoldDisplayMode::GLOBAL_FULL) {
-        height = foldScreenPolicy_->GetScreenParams()[GLOBAL_FULL_STATUS_WIDTH];
-    } else {
-        TLOGW(WmsLogTag::DMS, "displayMode[%{public}u] unknown.", foldScreenPolicy_->currentDisplayMode_);
-        return;
+    {
+        std::lock_guard<std::recursive_mutex> lock_mode(foldScreenPolicy_->displayModeMutex_);
+        if (foldScreenPolicy_->lastDisplayMode_ == FoldDisplayMode::FULL) {
+            y = foldScreenPolicy_->GetScreenParams()[FULL_STATUS_OFFSET_X];
+            height = foldScreenPolicy_->GetScreenParams()[FULL_STATUS_WIDTH];
+        } else if (foldScreenPolicy_->lastDisplayMode_ == FoldDisplayMode::MAIN) {
+            height = foldScreenPolicy_->GetScreenParams()[MAIN_STATUS_WIDTH];
+        } else if (foldScreenPolicy_->lastDisplayMode_ == FoldDisplayMode::GLOBAL_FULL) {
+            height = foldScreenPolicy_->GetScreenParams()[GLOBAL_FULL_STATUS_WIDTH];
+        } else {
+            TLOGW(WmsLogTag::DMS, "displayMode[%{public}u] unknown.", foldScreenPolicy_->lastDisplayMode_);
+            return;
+        }
     }
     OHOS::Rect rectCur {
         .x = x,

@@ -51,15 +51,23 @@ public:
     static napi_value DestroyWindow(napi_env env, napi_callback_info info);
     static napi_value Hide(napi_env env, napi_callback_info info);
     static napi_value HideWithAnimation(napi_env env, napi_callback_info info);
+
+    /*
+     * Window Layout
+     */
     static napi_value MoveTo(napi_env env, napi_callback_info info);
     static napi_value MoveWindowTo(napi_env env, napi_callback_info info);
     static napi_value MoveWindowToAsync(napi_env env, napi_callback_info info);
     static napi_value MoveWindowToGlobal(napi_env env, napi_callback_info info);
+    static napi_value MoveWindowToGlobalDisplay(napi_env env, napi_callback_info info);
     static napi_value GetGlobalScaledRect(napi_env env, napi_callback_info info);
     static napi_value Resize(napi_env env, napi_callback_info info);
     static napi_value ResizeWindow(napi_env env, napi_callback_info info);
     static napi_value ResizeWindowAsync(napi_env env, napi_callback_info info);
     static napi_value ResizeWindowWithAnimation(napi_env env, napi_callback_info info);
+    static napi_value ClientToGlobalDisplay(napi_env env, napi_callback_info info);
+    static napi_value GlobalDisplayToClient(napi_env env, napi_callback_info info);
+
     static napi_value SetWindowType(napi_env env, napi_callback_info info);
     static napi_value SetWindowMode(napi_env env, napi_callback_info info);
     static napi_value GetProperties(napi_env env, napi_callback_info info);
@@ -119,6 +127,7 @@ public:
     static napi_value StartMoving(napi_env env, napi_callback_info info);
     static napi_value StopMoving(napi_env env, napi_callback_info info);
     static napi_value GetWindowDensityInfo(napi_env env, napi_callback_info info);
+    static napi_value IsMainWindowFullScreenAcrossDisplays(napi_env env, napi_callback_info info);
     static napi_value EnableDrag(napi_env env, napi_callback_info info);
     static napi_value SetExclusivelyHighlighted(napi_env env, napi_callback_info info);
     static napi_value IsWindowHighlighted(napi_env env, napi_callback_info info);
@@ -133,6 +142,7 @@ public:
     static napi_value Dump(napi_env env, napi_callback_info info);
     static napi_value SetForbidSplitMove(napi_env env, napi_callback_info info);
     static napi_value Snapshot(napi_env env, napi_callback_info info);
+    static napi_value SnapshotSync(napi_env env, napi_callback_info info);
     static napi_value SnapshotIgnorePrivacy(napi_env env, napi_callback_info info);
 
     // animation config
@@ -179,6 +189,12 @@ public:
     static napi_value SetFollowParentMultiScreenPolicy(napi_env env, napi_callback_info info);
 
     /*
+     * Window Transition Animation For PC
+     */
+    static napi_value SetWindowTransitionAnimation(napi_env env, napi_callback_info info);
+    static napi_value GetWindowTransitionAnimation(napi_env env, napi_callback_info info);
+
+    /*
      * Window Decor
      */
     static napi_value DisableWindowDecor(napi_env env, napi_callback_info info);
@@ -191,6 +207,7 @@ public:
     static napi_value SetTitleButtonVisible(napi_env env, napi_callback_info info);
     static napi_value SetWindowTitleButtonVisible(napi_env env, napi_callback_info info);
     static napi_value SetWindowContainerColor(napi_env env, napi_callback_info info);
+    static napi_value SetWindowContainerModalColor(napi_env env, napi_callback_info info);
     static napi_value SetDecorButtonStyle(napi_env env, napi_callback_info info);
     static napi_value GetDecorButtonStyle(napi_env env, napi_callback_info info);
     static napi_value SetWindowTitle(napi_env env, napi_callback_info info);
@@ -202,6 +219,7 @@ public:
     static napi_value Maximize(napi_env env, napi_callback_info info);
     static napi_value SetTitleAndDockHoverShown(napi_env env, napi_callback_info info);
     static napi_value Restore(napi_env env, napi_callback_info info);
+    static napi_value SetDragKeyFramePolicy(napi_env env, napi_callback_info info);
 
     /*
      * Window Immersive
@@ -223,14 +241,19 @@ public:
     static napi_value IsSystemAvoidAreaEnabled(napi_env env, napi_callback_info info);
     static napi_value SetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
     static napi_value GetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
+    static napi_value IsImmersiveLayout(napi_env env, napi_callback_info info);
+    static napi_value SetRelativePositionToParentWindowEnabled(napi_env env, napi_callback_info info);
     static napi_value SetFollowParentWindowLayoutEnabled(napi_env env, napi_callback_info info);
+    static napi_value SetWindowShadowEnabled(napi_env env, napi_callback_info info);
 
 private:
-    std::string GetWindowName();
+    const std::string& GetWindowName() const;
     static bool ParseScaleOption(napi_env env, napi_value jsObject, Transform& trans);
     static bool ParseRotateOption(napi_env env, napi_value jsObject, Transform& trans);
     static bool ParseTranslateOption(napi_env env, napi_value jsObject, Transform& trans);
     static bool ParseWindowLimits(napi_env env, napi_value jsObject, WindowLimits& windowLimits);
+    void ParseShadowOptionalParameters(WmErrorCode& ret, std::shared_ptr<ShadowsInfo>& shadowsInfo,
+        napi_env env, const napi_value* argv, size_t argc);
     bool CheckWindowMaskParams(napi_env env, napi_value jsObject);
     napi_value LoadContentScheduleOld(napi_env env, napi_callback_info info, bool isLoadedByName);
     napi_value LoadContentScheduleNew(napi_env env, napi_callback_info info, bool isLoadedByName);
@@ -242,15 +265,26 @@ private:
     napi_value OnDestroyWindow(napi_env env, napi_callback_info info);
     napi_value OnHide(napi_env env, napi_callback_info info);
     napi_value OnHideWithAnimation(napi_env env, napi_callback_info info);
+
+    /*
+     * Window Layout
+     */
     napi_value OnMoveTo(napi_env env, napi_callback_info info);
     napi_value OnMoveWindowTo(napi_env env, napi_callback_info info);
     napi_value OnMoveWindowToAsync(napi_env env, napi_callback_info info);
     napi_value OnMoveWindowToGlobal(napi_env env, napi_callback_info info);
+    napi_value OnMoveWindowToGlobalDisplay(napi_env env, napi_callback_info info);
     napi_value OnGetGlobalScaledRect(napi_env env, napi_callback_info info);
     napi_value OnResize(napi_env env, napi_callback_info info);
     napi_value OnResizeWindow(napi_env env, napi_callback_info info);
     napi_value OnResizeWindowAsync(napi_env env, napi_callback_info info);
     napi_value OnResizeWindowWithAnimation(napi_env env, napi_callback_info info);
+    template <typename PositionTransformFunc>
+    napi_value HandlePositionTransform(
+        napi_env env, napi_callback_info info, PositionTransformFunc transformFunc, const char* caller);
+    napi_value OnClientToGlobalDisplay(napi_env env, napi_callback_info info);
+    napi_value OnGlobalDisplayToClient(napi_env env, napi_callback_info info);
+
     napi_value OnSetWindowType(napi_env env, napi_callback_info info);
     napi_value OnSetWindowMode(napi_env env, napi_callback_info info);
     napi_value OnGetProperties(napi_env env, napi_callback_info info);
@@ -278,6 +312,7 @@ private:
     napi_value OnIsFocused(napi_env env, napi_callback_info info);
     napi_value OnRequestFocus(napi_env env, napi_callback_info info);
     napi_value OnGetWindowDensityInfo(napi_env env, napi_callback_info info);
+    napi_value OnIsMainWindowFullScreenAcrossDisplays(napi_env env, napi_callback_info info);
     napi_value OnSetExclusivelyHighlighted(napi_env env, napi_callback_info info);
     napi_value OnIsWindowHighlighted(napi_env env, napi_callback_info info);
 
@@ -317,6 +352,7 @@ private:
     napi_value OnDump(napi_env env, napi_callback_info info);
     napi_value OnSetForbidSplitMove(napi_env env, napi_callback_info info);
     napi_value OnSnapshot(napi_env env, napi_callback_info info);
+    napi_value OnSnapshotSync(napi_env env, napi_callback_info info);
     napi_value OnSnapshotIgnorePrivacy(napi_env env, napi_callback_info info);
     napi_value OnSetSnapshotSkip(napi_env env, napi_callback_info info);
     napi_value OnSetSingleFrameComposerEnabled(napi_env env, napi_callback_info info);
@@ -371,6 +407,12 @@ private:
     napi_value OnSetFollowParentMultiScreenPolicy(napi_env env, napi_callback_info info);
 
     /*
+     * Window Transition Animation For PC
+     */
+    napi_value OnSetWindowTransitionAnimation(napi_env env, napi_callback_info info);
+    napi_value OnGetWindowTransitionAnimation(napi_env env, napi_callback_info info);
+
+    /*
      * Window Decor
      */
     napi_value OnDisableWindowDecor(napi_env env, napi_callback_info info);
@@ -383,6 +425,7 @@ private:
     napi_value OnSetTitleButtonVisible(napi_env env, napi_callback_info info);
     napi_value OnSetWindowTitleButtonVisible(napi_env env, napi_callback_info info);
     napi_value OnSetWindowContainerColor(napi_env env, napi_callback_info info);
+    napi_value OnSetWindowContainerModalColor(napi_env env, napi_callback_info info);
     napi_value OnSetDecorButtonStyle(napi_env env, napi_callback_info info);
     napi_value OnGetDecorButtonStyle(napi_env env, napi_callback_info info);
     napi_value OnSetWindowTitle(napi_env env, napi_callback_info info);
@@ -395,7 +438,9 @@ private:
     napi_value OnSetTitleAndDockHoverShown(napi_env env, napi_callback_info info);
     napi_value OnRestore(napi_env env, napi_callback_info info);
     napi_value OnStartMoveWindowWithCoordinate(napi_env env, size_t argc, napi_value* argv);
+    napi_value OnSetDragKeyFramePolicy(napi_env env, napi_callback_info info);
 
+    std::string windowName_;
     sptr<Window> windowToken_ = nullptr;
     std::unique_ptr<JsWindowRegisterManager> registerManager_ = nullptr;
     std::shared_ptr<NativeReference> jsTransControllerObj_ = nullptr;
@@ -418,9 +463,12 @@ private:
     napi_value OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_info info);
     napi_value OnSetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
     napi_value OnGetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
+    napi_value OnIsImmersiveLayout(napi_env env, napi_callback_info info);
     napi_value OnSetSystemAvoidAreaEnabled(napi_env env, napi_callback_info info);
     napi_value OnIsSystemAvoidAreaEnabled(napi_env env, napi_callback_info info);
     napi_value OnSetFollowParentWindowLayoutEnabled(napi_env env, napi_callback_info info);
+    napi_value OnSetRelativePositionToParentWindowEnabled(napi_env env, napi_callback_info info);
+    napi_value OnSetWindowShadowEnabled(napi_env env, napi_callback_info info);
 };
 }  // namespace Rosen
 }  // namespace OHOS

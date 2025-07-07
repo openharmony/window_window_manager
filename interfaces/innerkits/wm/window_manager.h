@@ -42,6 +42,7 @@ struct SystemBarRegionTint {
         : type_(type), prop_(prop), region_(region) {}
 };
 using SystemBarRegionTints = std::vector<SystemBarRegionTint>;
+using GetJSWindowObjFunc = std::function<void*(const std::string& windowName)>;
 
 struct VisibleWindowNumInfo {
     uint32_t displayId;
@@ -51,6 +52,29 @@ struct VisibleWindowNumInfo {
 struct WindowSnapshotDataPack {
     std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
     WMError result = WMError::WM_OK;
+};
+
+struct WindowLifeCycleInfo {
+    int32_t windowId;
+    WindowType windowType;
+    std::string windowName;
+};
+
+/**
+ * @class IWMSConnectionChangedListener
+ *
+ * @brief Listener to observe window lifecycle status.
+ */
+class IWindowLifeCycleListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when window is destroyed
+     *
+     * @param lifeCycleInfo window lifecycle info.
+     * @param jsWindowNapiValue js window object napi value.
+     *
+     */
+    virtual void OnWindowDestroyed(const WindowLifeCycleInfo& lifeCycleInfo, void* jsWindowNapiValue) = 0;
 };
 
 /**
@@ -245,9 +269,31 @@ public:
     void SetInterestInfo(const std::unordered_set<WindowInfoKey>& interestInfo) { interestInfo_ = interestInfo; }
     const std::unordered_set<WindowInfoKey>& GetInterestInfo() const { return interestInfo_; }
     void AddInterestInfo(WindowInfoKey interestValue) { interestInfo_.insert(interestValue); }
+    void SetInterestWindowIds(const std::unordered_set<int32_t>& interestWindowIds)
+        { interestWindowIds_ = interestWindowIds; }
+    const std::unordered_set<int32_t>& GetInterestWindowIds() const { return interestWindowIds_; }
+    void AddInterestWindowId(int32_t interestWindowId) { interestWindowIds_.insert(interestWindowId); }
+    void RemoveInterestWindowId(int32_t interestWindowId) { interestWindowIds_.erase(interestWindowId); }
 
 private:
     std::unordered_set<WindowInfoKey> interestInfo_;
+    std::unordered_set<int32_t> interestWindowIds_;
+};
+
+/*
+ * @class IWindowSystemBarPropertyChangedListener
+ *
+ * @brief Observe the property change of System Bar.
+ */
+class IWindowSystemBarPropertyChangedListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when System Bar property changed.
+     *
+     * @param type Type of System Bar
+     * @param systemBarProperty Property of System Bar
+     */
+    virtual void OnWindowSystemBarPropertyChanged(WindowType type, const SystemBarProperty& systemBarProperty) = 0;
 };
 
 /**
@@ -778,6 +824,32 @@ public:
      */
     WMError UnregisterWindowPidVisibilityChangedListener(const sptr<IWindowPidVisibilityChangedListener>& listener);
 
+    /*
+     * @brief Register window System Bar property changed Listener.
+     *
+     * @param listener IWindowSystemBarPropertyChangedListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    WMError RegisterWindowSystemBarPropertyChangedListener(
+        const sptr<IWindowSystemBarPropertyChangedListener>& listener);
+
+    /*
+     * @brief Unregister window System Bar property changed Listener.
+     *
+     * @param listener IWindowSystemBarPropertyChangedListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    WMError UnregisterWindowSystemBarPropertyChangedListener(
+        const sptr<IWindowSystemBarPropertyChangedListener>& listener);
+
+    /*
+     * @brief Notify window System Bar property changed.
+     *
+     * @param type Type of System Bar
+     * @param systemBarProperty Property of System Bar
+     */
+    void NotifyWindowSystemBarPropertyChange(WindowType type, const SystemBarProperty& systemBarProperty);
+
     /**
      * @brief notify display information change.
      *
@@ -789,6 +861,16 @@ public:
     */
     WMError NotifyDisplayInfoChange(const sptr<IRemoteObject>& token, DisplayId displayId,
         float density, DisplayOrientation orientation);
+
+    /**
+     * @brief notify window info change.
+     *
+     * @param flags mark the changed value.
+     * @param windowInfoList the changed window info list.
+     * @return WM_OK means notify success, others means notify failed.
+     */
+    void NotifyWindowPropertyChange(uint32_t propertyDirtyFlags,
+        const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList);
 
     /**
      * @brief Minimize all app window.
@@ -847,6 +929,24 @@ public:
      * @return WM_OK means get success, others means get failed.
      */
     WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos) const;
+
+    /**
+     * @brief Get global window mode.
+     *
+     * @param displayId DisplayId of which display to get window mode, DISPLAY_ID_INVALID means all displays.
+     * @param globalWinMode Global window mode flag of specified display or all displays.
+     * @return WM_OK means get success, others means get failed.
+     */
+    WMError GetGlobalWindowMode(DisplayId displayId, GlobalWindowMode& globalWinMode) const;
+
+    /**
+     * @brief Get the name of the top page.
+     *
+     * @param windowId Window id which want to get.
+     * @param topNavDestName The top page name of specified window.
+     * @return WM_OK means get success, others means get failed.
+     */
+    WMError GetTopNavDestinationName(int32_t windowId, std::string& topNavDestName) const;
 
     /**
      * @brief Get visibility window info.
@@ -923,6 +1023,17 @@ public:
      * @return WM_OK means shift window focus success, others means failed.
      */
     WMError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId);
+
+    /**
+     * @brief Set start window background color.
+     *
+     * @param moduleName Module name that needs to be set
+     * @param abilityName Ability name that needs to be set
+     * @param color Color metrics
+     * @return WM_OK means set start window background color success, others means failed.
+     */
+    WMError SetStartWindowBackgroundColor(
+        const std::string& moduleName, const std::string& abilityName, uint32_t color);
 
     /**
      * @brief Get snapshot by window id.
@@ -1107,9 +1218,18 @@ public:
      *
      * @param sourceWindowId Window id which the pointer event shift from
      * @param targetWindowId Window id which the pointer event shift to
+     * @param fingerId finger id of the event to be shift
      * @return WM_OK means shift window pointer event success, others means failed.
      */
-    WMError ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_t targetWindowId);
+    WMError ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_t targetWindowId, int32_t fingerId = -1);
+
+    /**
+     * @brief Notify screenshot event.
+     *
+     * @param type screenshot event type.
+     * @return WM_OK means set success, others means set failed.
+     */
+    WMError NotifyScreenshotEvent(ScreenshotEventType type);
 
     /**
      * @brief Request focus.
@@ -1137,7 +1257,7 @@ public:
      * @param windowNum foreground window number
      * @return WM_OK means set success, others means failed.
      */
-    WMError SetForegroundWindowNum(int32_t windowNum);
+    WMError SetForegroundWindowNum(uint32_t windowNum);
 
     /**
      * @brief Register window info change callback.
@@ -1158,6 +1278,52 @@ public:
      */
     WMError UnregisterWindowInfoChangeCallback(const std::unordered_set<WindowInfoKey>& observedInfo,
         const sptr<IWindowInfoChangedListener>& listener);
+    
+    /**
+     * @brief Whether new requested window needs hook.
+     *
+     * @param isModuleAbilityHookEnd Whether this module finished ability hook.
+     * @param moduleName Indicates the hooked moduleName.
+     * @return bool means the module finished ability hook or not.
+     */
+    bool IsModuleHookOff(bool isModuleAbilityHookEnd, const std::string& moduleName);
+
+    /**
+     * @brief set the animation property and parameter to the corresponding window.
+     *
+     * @param windowId target window id.
+     * @param animationProperty the property of animation.
+     * @param animationOption the option of animation.
+     * @return WM_OK means set success, others means failed.
+     */
+    WMError AnimateTo(int32_t windowId, WindowAnimationProperty animationProperty,
+        WindowAnimationOption animationOption);
+
+    /**
+     * @brief Register window lifecycle status changed callback.
+     * @param listener IWindowLifeCycleListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    WMError RegisterWindowLifeCycleCallback(const sptr<IWindowLifeCycleListener>& listener);
+
+    /**
+     * @brief Unregister window lifecycle status changed callback.
+     * @param listener IWindowLifeCycleListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    WMError UnregisterWindowLifeCycleCallback(const sptr<IWindowLifeCycleListener>& listener);
+
+    /**
+     * @brief Register get js window callback.
+     * @param getJSWindowFunc get js window obj callback.
+     */
+    void RegisterGetJSWindowCallback(GetJSWindowObjFunc&& getJSWindowFunc);
+
+    /**
+     * @brief notify window destroyed.
+     * @param lifeCycleInfo window lifecycle info.
+     */
+    void NotifyWMSWindowDestroyed(const WindowLifeCycleInfo& lifeCycleInfo);
 
 private:
     WindowManager();
@@ -1166,6 +1332,9 @@ private:
     class Impl;
     std::unique_ptr<Impl> pImpl_;
     bool destroyed_ = false;
+    std::unordered_set<std::string> isModuleHookOffSet_;
+    std::unordered_map<WindowInfoKey, uint32_t> interestInfoMap_;
+    GetJSWindowObjFunc getJSWindowObjFunc_;
 
     void OnWMSConnectionChanged(int32_t userId, int32_t screenId, bool isConnected) const;
     void UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObject>& abilityToken, WindowType windowType,
@@ -1191,6 +1360,12 @@ private:
         const sptr<IWindowInfoChangedListener>& listener);
     WMError RegisterVisibilityStateChangedListener(const sptr<IWindowInfoChangedListener>& listener);
     WMError UnregisterVisibilityStateChangedListener(const sptr<IWindowInfoChangedListener>& listener);
+    WMError RegisterDisplayIdChangedListener(const sptr<IWindowInfoChangedListener>& listener);
+    WMError UnregisterDisplayIdChangedListener(const sptr<IWindowInfoChangedListener>& listener);
+    WMError RegisterRectChangedListener(const sptr<IWindowInfoChangedListener>& listener);
+    WMError UnregisterRectChangedListener(const sptr<IWindowInfoChangedListener>& listener);
+    void SetIsModuleHookOffToSet(const std::string& moduleName);
+    bool GetIsModuleHookOffFromSet(const std::string& moduleName);
 };
 } // namespace Rosen
 } // namespace OHOS

@@ -43,51 +43,56 @@ class DispatchInputEventListener : public IDispatchInputEventListener {
 public:
     void OnDispatchPointerEvent(std::shared_ptr<MMI::PointerEvent>& inputEvent) override
     {
-        WLOGI("called");
+        TLOGI(WmsLogTag::WMS_UIEXT, "called");
     }
     void OnDispatchKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent) override
     {
-        WLOGI("called");
+        TLOGI(WmsLogTag::WMS_UIEXT, "called");
     }
 };
 
 napi_value AttachWindowExtensionContext(napi_env env, void* value, void *)
 {
-    WLOGI("AttachWindowExtensionContext");
+    TLOGI(WmsLogTag::WMS_UIEXT, "AttachWindowExtensionContext");
     if (value == nullptr) {
-        WLOGFE("invalid parameter.");
+        TLOGE(WmsLogTag::WMS_UIEXT, "invalid parameter.");
         return nullptr;
     }
     auto ptr = reinterpret_cast<std::weak_ptr<WindowExtensionContext> *>(value)->lock();
     if (ptr == nullptr) {
-        WLOGFE("invalid context.");
+        TLOGE(WmsLogTag::WMS_UIEXT, "invalid context.");
         return nullptr;
     }
     napi_value object = CreateJsWindowExtensionContext(env, ptr);
     if (object == nullptr) {
-        WLOGFE("Failed to get js window extension context");
+        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to get js window extension context");
         return nullptr;
     }
-    auto contextObj = AbilityRuntime::JsRuntime::LoadSystemModuleByEngine(env,
-        "application.WindowExtensionContext", &object, 1)->GetNapiValue();
+    auto contextObjRef = AbilityRuntime::JsRuntime::LoadSystemModuleByEngine(env,
+        "application.WindowExtensionContext", &object, 1);
+    if (contextObjRef == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to get contextObjRef");
+        return nullptr;
+    }
+    auto contextObj = contextObjRef->GetNapiValue();
     if (contextObj == nullptr) {
-        WLOGFE("Failed to get context native object");
+        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to get context native object");
         return nullptr;
     }
     napi_coerce_to_native_binding_object(env, contextObj,
         AbilityRuntime::DetachCallbackFunc, AttachWindowExtensionContext, value, nullptr);
     auto workContext = new (std::nothrow) std::weak_ptr<WindowExtensionContext>(ptr);
     if (workContext == nullptr) {
-        WLOGFE("Failed to get window extension context");
+        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to get window extension context");
         return nullptr;
     }
     napi_status status = napi_wrap(env, contextObj, workContext,
         [](napi_env, void* data, void *) {
-            WLOGI("Finalizer for weak_ptr service extension context is called");
+            TLOGI(WmsLogTag::WMS_UIEXT, "Finalizer for weak_ptr service extension context is called");
             delete static_cast<std::weak_ptr<WindowExtensionContext> *>(data);
         }, nullptr, nullptr);
     if (status != napi_ok) {
-        WLOGFE("Failed to call napi_wrap");
+        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to call napi_wrap");
         delete workContext;
         return nullptr;
     }
@@ -96,14 +101,14 @@ napi_value AttachWindowExtensionContext(napi_env env, void* value, void *)
 
 JsWindowExtension* JsWindowExtension::Create(const std::unique_ptr<AbilityRuntime::Runtime>& runtime)
 {
-    WLOGFD("Create runtime");
+    TLOGD(WmsLogTag::WMS_UIEXT, "Create runtime");
     return new JsWindowExtension(static_cast<AbilityRuntime::JsRuntime&>(*runtime));
 }
 
 JsWindowExtension::JsWindowExtension(AbilityRuntime::JsRuntime& jsRuntime) : jsRuntime_(jsRuntime) {}
 JsWindowExtension::~JsWindowExtension()
 {
-    WLOGFD("Called");
+    TLOGD(WmsLogTag::WMS_UIEXT, "Called");
     auto context = GetContext();
     if (context) {
         context->Unbind();
@@ -121,26 +126,34 @@ void JsWindowExtension::Init(const std::shared_ptr<AbilityRuntime::AbilityLocalR
     std::string srcPath;
     GetSrcPath(srcPath);
     if (srcPath.empty()) {
-        WLOGFE("Failed to get srcPath");
+        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to get srcPath");
         return;
     }
-
+    if (Extension::abilityInfo_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to get abilityInfo");
+        return;
+    }
+    if (abilityInfo_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to get abilityInfo_");
+        return;
+    }
     std::string moduleName(Extension::abilityInfo_->moduleName);
     moduleName.append("::").append(abilityInfo_->name);
-    WLOGI("JsWindowExtension::Init module:%{public}s,srcPath:%{public}s.", moduleName.c_str(), srcPath.c_str());
+    TLOGI(WmsLogTag::WMS_UIEXT, "JsWindowExtension::Init module:%{public}s,srcPath:%{public}s.",
+        moduleName.c_str(), srcPath.c_str());
     AbilityRuntime::HandleScope handleScope(jsRuntime_);
 
     jsObj_ = jsRuntime_.LoadModule(moduleName, srcPath, abilityInfo_->hapPath,
         abilityInfo_->compileMode == AbilityRuntime::CompileMode::ES_MODULE);
     if (jsObj_ == nullptr) {
-        WLOGFE("Failed to get jsObj_");
+        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to get jsObj_");
         return;
     }
-    WLOGI("JsWindowExtension::Init ConvertNativeValueTo.");
+    TLOGI(WmsLogTag::WMS_UIEXT, "JsWindowExtension::Init ConvertNativeValueTo.");
     napi_env env = jsRuntime_.GetNapiEnv();
     napi_value obj = jsObj_->GetNapiValue();
     if (obj == nullptr) {
-        WLOGFE("Failed to get JsWindowExtension object");
+        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to get JsWindowExtension object");
         return;
     }
 
@@ -151,54 +164,54 @@ void JsWindowExtension::BindContext(napi_env env, napi_value obj)
 {
     auto context = GetContext();
     if (context == nullptr) {
-        WLOGFE("Failed to get context");
+        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to get context");
         return;
     }
 
     napi_value contextObj = CreateJsWindowExtensionContext(jsRuntime_.GetNapiEnv(), context);
     if (contextObj == nullptr) {
-        WLOGFE("Failed to get js window extension context");
+        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to get js window extension context");
         return;
     }
     auto shellContextRef = jsRuntime_.LoadSystemModule("application.WindowExtensionContext", &contextObj, 1);
     if (shellContextRef == nullptr) {
-        WLOGFE("Failed to get shell context");
+        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to get shell context");
         return;
     }
     contextObj = shellContextRef->GetNapiValue();
     if (contextObj == nullptr) {
-        WLOGFE("Failed to get context native object");
+        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to get context native object");
         return;
     }
     auto workContext = new (std::nothrow) std::weak_ptr<WindowExtensionContext>(context);
     if (workContext == nullptr) {
-        WLOGFE("Failed to get window extension context");
+        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to get window extension context");
         return;
     }
     napi_coerce_to_native_binding_object(env, contextObj,
         AbilityRuntime::DetachCallbackFunc, AttachWindowExtensionContext, workContext, nullptr);
-    WLOGI("JsWindowExtension::Init Bind.");
+    TLOGI(WmsLogTag::WMS_UIEXT, "JsWindowExtension::Init Bind.");
     context->Bind(jsRuntime_, shellContextRef.release());
-    WLOGI("JsWindowExtension::SetProperty.");
+    TLOGI(WmsLogTag::WMS_UIEXT, "JsWindowExtension::SetProperty.");
     napi_set_named_property(env, obj, "context", contextObj);
 
     napi_status status = napi_wrap(env, contextObj, workContext,
         [](napi_env, void* data, void *) {
-            WLOGI("Finalizer for weak_ptr extension context is called");
+            TLOGI(WmsLogTag::WMS_UIEXT, "Finalizer for weak_ptr extension context is called");
             delete static_cast<std::weak_ptr<WindowExtensionContext>*>(data);
         }, nullptr, nullptr);
     if (status != napi_ok) {
-        WLOGFE("Failed to call napi_wrap");
+        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to call napi_wrap");
         delete workContext;
         return;
     }
-    WLOGI("JsWindowExtension::Init end.");
+    TLOGI(WmsLogTag::WMS_UIEXT, "JsWindowExtension::Init end.");
 }
 
 void JsWindowExtension::GetSrcPath(std::string& srcPath) const
 {
     if (!Extension::abilityInfo_) {
-        WLOGFE("abilityInfo_ is nullptr");
+        TLOGE(WmsLogTag::WMS_UIEXT, "abilityInfo_ is nullptr");
         return;
     }
 
@@ -224,11 +237,11 @@ sptr<IRemoteObject> JsWindowExtension::OnConnect(const AAFwk::Want& want)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "WindowExtension OnConnect %s-%s",
         want.GetElement().GetAbilityName().c_str(), want.GetElement().GetAbilityName().c_str());
-    WLOGI("called.");
+    TLOGI(WmsLogTag::WMS_UIEXT, "called.");
     Extension::OnConnect(want);
     napi_env env = jsRuntime_.GetNapiEnv();
     if (!jsObj_) {
-        WLOGFW("Not found WindowExtension.js");
+        TLOGW(WmsLogTag::WMS_UIEXT, "Not found WindowExtension.js");
         return nullptr;
     }
     napi_value value = jsObj_->GetNapiValue();
@@ -237,18 +250,27 @@ sptr<IRemoteObject> JsWindowExtension::OnConnect(const AAFwk::Want& want)
         napi_value argv[] = { napiWant };
         CallJsMethod("onConnect", argv, AbilityRuntime::ArraySize(argv), env, value);
     };
-    if (napi_status::napi_ok != napi_send_event(env, jsCallback, napi_eprio_high)) {
+    if (napi_send_event(env, jsCallback, napi_eprio_high, "OnConnect") != napi_status::napi_ok) {
         WLOGE("send event failed");
     }
 
     if (!stub_) {
-        WLOGFE("stub is nullptr.");
+        TLOGE(WmsLogTag::WMS_UIEXT, "stub is nullptr.");
         return nullptr;
     }
-    WLOGFD("Create stub successfully!");
+    TLOGD(WmsLogTag::WMS_UIEXT, "Create stub successfully!");
     WindowManager::GetInstance().NotifyWindowExtensionVisibilityChange(getprocpid(), getuid(), true);
     auto context = GetContext();
-    AAFwk::AbilityManagerClient::GetInstance()->ScheduleCommandAbilityWindowDone(
+    if (context == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "context is nullptr.");
+        return nullptr;
+    }
+    auto client = AAFwk::AbilityManagerClient::GetInstance();
+    if (client == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "client is nullptr.");
+        return nullptr;
+    }
+    client->ScheduleCommandAbilityWindowDone(
         context->GetToken(), sessionInfo_, AAFwk::WIN_CMD_FOREGROUND, AAFwk::ABILITY_CMD_FOREGROUND);
     return stub_->AsObject();
 }
@@ -258,7 +280,7 @@ void JsWindowExtension::OnDisconnect(const AAFwk::Want& want)
     Extension::OnDisconnect(want);
     napi_env env = jsRuntime_.GetNapiEnv();
     if (!jsObj_) {
-        WLOGFW("Not found WindowExtension.js");
+        TLOGW(WmsLogTag::WMS_UIEXT, "Not found WindowExtension.js");
         return;
     }
     napi_value value = jsObj_->GetNapiValue();
@@ -268,18 +290,27 @@ void JsWindowExtension::OnDisconnect(const AAFwk::Want& want)
     auto window = stub_ != nullptr ? stub_->GetWindow() : nullptr;
     if (window != nullptr) {
         window->Destroy();
-        WLOGI("Destroy window.");
+        TLOGI(WmsLogTag::WMS_UIEXT, "Destroy window.");
     }
-    WLOGI("called.");
+    TLOGI(WmsLogTag::WMS_UIEXT, "called.");
     WindowManager::GetInstance().NotifyWindowExtensionVisibilityChange(getprocpid(), getuid(), false);
     auto context = GetContext();
-    AAFwk::AbilityManagerClient::GetInstance()->ScheduleCommandAbilityWindowDone(
+    if (context == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "context is nullptr.");
+        return;
+    }
+    auto client = AAFwk::AbilityManagerClient::GetInstance();
+    if (client == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "client is nullptr.");
+        return;
+    }
+    client->ScheduleCommandAbilityWindowDone(
         context->GetToken(), sessionInfo_, AAFwk::WIN_CMD_DESTROY, AAFwk::ABILITY_CMD_DESTROY);
 }
 
 void JsWindowExtension::OnStart(const AAFwk::Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
 {
-    WLOGI("OnStart");
+    TLOGI(WmsLogTag::WMS_UIEXT, "OnStart");
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "WindowExtension OnStart %s-%s",
         want.GetElement().GetAbilityName().c_str(), want.GetElement().GetAbilityName().c_str());
     sessionInfo_ = sessionInfo;
@@ -291,7 +322,7 @@ void JsWindowExtension::OnStart(const AAFwk::Want& want, sptr<AAFwk::SessionInfo
     extensionCnt_++;
 
     stub_ = new(std::nothrow) WindowExtensionStubImpl(windowName);
-    WLOGI("JsWindowExtension OnStart begin..");
+    TLOGI(WmsLogTag::WMS_UIEXT, "JsWindowExtension OnStart begin..");
     Rect rect { want.GetIntParam(RECT_FORM_KEY_POS_X, 0),
     want.GetIntParam(RECT_FORM_KEY_POS_Y, 0),
     want.GetIntParam(RECT_FORM_KEY_WIDTH, 0),
@@ -300,17 +331,18 @@ void JsWindowExtension::OnStart(const AAFwk::Want& want, sptr<AAFwk::SessionInfo
     if (stub_ != nullptr) {
         auto context = GetContext();
         if (context == nullptr) {
-            WLOGFE("get context failed");
+            TLOGE(WmsLogTag::WMS_UIEXT, "get context failed");
             return;
         }
         sptr<Window> window = stub_->CreateWindow(rect, windowId, context,
             sessionInfo == nullptr ? nullptr : sessionInfo->sessionToken);
         if (window == nullptr) {
-            WLOGFE("create window failed");
+            TLOGE(WmsLogTag::WMS_UIEXT, "create window failed");
             return;
         }
         OnWindowCreated();
-        WLOGI("ability context onWindowReady rect x =%{public}d y=%{public}d w=%{public}d h=%{public}d ",
+        TLOGI(WmsLogTag::WMS_UIEXT,
+            "ability context onWindowReady rect x =%{public}d y=%{public}d w=%{public}d h=%{public}d ",
             rect.posX_, rect.posY_, rect.width_, rect.height_);
     }
 }
@@ -336,7 +368,7 @@ void JsWindowExtension::OnWindowCreated() const
         napi_value argv[] = { value };
         CallJsMethod("onWindowReady", argv, AbilityRuntime::ArraySize(argv), env, value);
     };
-    if (napi_status::napi_ok != napi_send_event(env, jsCallback, napi_eprio_high)) {
+    if (napi_send_event(env, jsCallback, napi_eprio_high, "OnWindowCreated") != napi_status::napi_ok) {
         WLOGE("send event failed");
     }
 }
@@ -351,19 +383,19 @@ napi_valuetype GetType(napi_env env, napi_value value)
 napi_value CallJsMethod(const char* name, napi_value const * argv, size_t argc,
     napi_env env, napi_value value)
 {
-    WLOGI("called (%{public}s), begin", name);
+    TLOGI(WmsLogTag::WMS_UIEXT, "called (%{public}s), begin", name);
     if (value == nullptr) {
-        WLOGFE("Failed to get WindowExtension object");
+        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to get WindowExtension object");
         return nullptr;
     }
 
     napi_value method = nullptr;
     napi_get_named_property(env, value, name, &method);
     if (method == nullptr || GetType(env, method) != napi_function) {
-        WLOGFE("Failed to get '%{public}s' from WindowExtension object", name);
+        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to get '%{public}s' from WindowExtension object", name);
         return nullptr;
     }
-    WLOGI("(%{public}s), success", name);
+    TLOGI(WmsLogTag::WMS_UIEXT, "(%{public}s), success", name);
     napi_value result = nullptr;
     napi_call_function(env, value, method, argc, argv, &result);
     return result;

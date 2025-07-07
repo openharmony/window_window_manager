@@ -22,6 +22,7 @@
 
 #include "common/include/task_scheduler.h"
 #include "session/host/include/ws_ffrt_helper.h"
+#include "session/host/include/ws_snapshot_helper.h"
 
 namespace OHOS::Media {
 class PixelMap;
@@ -30,43 +31,61 @@ class PixelMap;
 namespace OHOS::Rosen {
 class ScenePersistence : public RefBase {
 public:
-    ScenePersistence(const std::string& bundleName, int32_t persistentId);
+    ScenePersistence(const std::string& bundleName, int32_t persistentId, SnapshotStatus capacity = defaultCapacity);
     virtual ~ScenePersistence();
 
     static bool CreateSnapshotDir(const std::string& directory);
     static bool CreateUpdatedIconDir(const std::string& directory);
 
+    void SetSnapshotCapacity(SnapshotStatus capacity);
+    static void InitAstcEnabled();
     static bool IsAstcEnabled();
-    void SetHasSnapshot(bool hasSnapshot);
+    void SetHasSnapshot(bool hasSnapshot, SnapshotStatus key = defaultStatus);
+    void SetHasSnapshotFreeMultiWindow(bool hasSnapshot);
     bool HasSnapshot() const;
-    bool IsSnapshotExisted() const;
-    std::string GetSnapshotFilePath();
-    std::pair<uint32_t, uint32_t> GetSnapshotSize() const;
+    bool HasSnapshot(SnapshotStatus key, bool freeMultiWindow = false) const;
+    void ClearSnapshot(SnapshotStatus key);
+    bool IsSnapshotExisted(SnapshotStatus key = defaultStatus);
+    std::string GetSnapshotFilePath(SnapshotStatus& key, bool useKey = false, bool freeMultiWindow = false);
+    std::pair<uint32_t, uint32_t> GetSnapshotSize(SnapshotStatus key = defaultStatus,
+        bool freeMultiWindow = false) const;
+    void SetSnapshotSize(SnapshotStatus key, bool freeMultiWindow, std::pair<uint32_t, uint32_t> size);
     std::shared_ptr<WSFFRTHelper> GetSnapshotFfrtHelper() const;
 
     void SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixelMap,
-        const std::function<void()> resetSnapshotCallback = [](){});
-    bool IsSavingSnapshot();
+        const std::function<void()> resetSnapshotCallback = []() {}, SnapshotStatus key = defaultStatus,
+        DisplayOrientation rotate = DisplayOrientation::PORTRAIT, bool freeMultiWindow = false);
+    bool IsSavingSnapshot(SnapshotStatus key = defaultStatus, bool freeMultiWindow = false);
+    void SetIsSavingSnapshot(SnapshotStatus key, bool freeMultiWindow, bool isSavingSnapshot);
     void ResetSnapshotCache();
     void RenameSnapshotFromOldPersistentId(const int32_t& oldPersistentId);
+    void RenameSnapshotFromOldPersistentId(const int32_t& oldPersistentId, SnapshotStatus key);
 
     void SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap>& pixelMap);
     std::string GetUpdatedIconPath() const;
-    std::shared_ptr<Media::PixelMap> GetLocalSnapshotPixelMap(const float oriScale, const float newScale) const;
+    std::shared_ptr<Media::PixelMap> GetLocalSnapshotPixelMap(const float oriScale, const float newScale,
+        SnapshotStatus key = defaultStatus, bool freeMultiWindow = false);
+    DisplayOrientation rotate_[SCREEN_COUNT][ORIENTATION_COUNT] = {};
 
 private:
     static std::string snapshotDirectory_;
     std::string bundleName_;
     int32_t persistentId_;
-    std::string snapshotPath_;
-    std::pair<uint32_t, uint32_t> snapshotSize_;
-    bool hasSnapshot_ = false;
+    SnapshotStatus capacity_;
+    std::string snapshotPath_[SCREEN_COUNT][ORIENTATION_COUNT];
+    std::string snapshotFreeMultiWindowPath_;
+    std::pair<uint32_t, uint32_t> snapshotSize_[SCREEN_COUNT][ORIENTATION_COUNT];
+    std::pair<uint32_t, uint32_t> snapshotFreeMultiWindowSize_;
+    bool hasSnapshot_[SCREEN_COUNT][ORIENTATION_COUNT] = {};
+    bool hasSnapshotFreeMultiWindow_;
 
     static std::string updatedIconDirectory_;
     std::string updatedIconPath_;
+    static bool isAstcEnabled_;
 
     std::atomic<int> savingSnapshotSum_ { 0 };
-    std::atomic<bool> isSavingSnapshot_ { false };
+    std::atomic<bool> isSavingSnapshot_[SCREEN_COUNT][ORIENTATION_COUNT] = {};
+    std::atomic<bool> isSavingSnapshotFreeMultiWindow_ { false };
 
     static std::shared_ptr<WSFFRTHelper> snapshotFfrtHelper_;
     mutable std::mutex savingSnapshotMutex_;

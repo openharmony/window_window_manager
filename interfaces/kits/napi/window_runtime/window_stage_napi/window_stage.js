@@ -15,87 +15,94 @@
 
 class WindowStage {
   constructor(obj) {
-    this.__window_stage__ = obj;
+    this.windowStage_ = obj;
   }
 
   setUIContent(context, url, storage) {
-    return this.__window_stage__.setUIContent(context, url, storage);
+    return this.windowStage_.setUIContent(context, url, storage);
   }
 
   loadContent(url, storage, asyncCallback) {
-    return this.__window_stage__.loadContent(url, storage, asyncCallback);
+    return this.windowStage_.loadContent(url, storage, asyncCallback);
   }
 
   loadContentByName(name, storage, asyncCallback) {
-    return this.__window_stage__.loadContentByName(name, storage, asyncCallback);
+    return this.windowStage_.loadContentByName(name, storage, asyncCallback);
   }
 
   getWindowMode(asyncCallback) {
-    return this.__window_stage__.getWindowMode(asyncCallback);
+    return this.windowStage_.getWindowMode(asyncCallback);
   }
 
   getMainWindow(asyncCallback) {
-    return this.__window_stage__.getMainWindow(asyncCallback);
+    return this.windowStage_.getMainWindow(asyncCallback);
   }
 
   getMainWindowSync() {
-    return this.__window_stage__.getMainWindowSync();
+    return this.windowStage_.getMainWindowSync();
   }
 
   createSubWindow(windowName, asyncCallback) {
-    return this.__window_stage__.createSubWindow(windowName, asyncCallback);
+    return this.windowStage_.createSubWindow(windowName, asyncCallback);
   }
 
   createSubWindowWithOptions(windowName, options, asyncCallback) {
-    return this.__window_stage__.createSubWindowWithOptions(windowName, options, asyncCallback);
+    return this.windowStage_.createSubWindowWithOptions(windowName, options, asyncCallback);
   }
 
   getSubWindow(asyncCallback) {
-    return this.__window_stage__.getSubWindow(asyncCallback);
+    return this.windowStage_.getSubWindow(asyncCallback);
   }
 
   setWindowModal(isModal) {
-    return this.__window_stage__.setWindowModal(isModal);
+    return this.windowStage_.setWindowModal(isModal);
   }
 
   on(type, callback) {
-    return this.__window_stage__.on(type, callback);
+    return this.windowStage_.on(type, callback);
   }
 
   off(type, callback) {
-    return this.__window_stage__.off(type, callback);
+    return this.windowStage_.off(type, callback);
   }
 
   setShowOnLockScreen(showOnLockScreen) {
-    return this.__window_stage__.setShowOnLockScreen(showOnLockScreen);
+    return this.windowStage_.setShowOnLockScreen(showOnLockScreen);
   }
 
   disableWindowDecor() {
-    return this.__window_stage__.disableWindowDecor();
+    return this.windowStage_.disableWindowDecor();
   }
 
   setDefaultDensityEnabled(enabled) {
-    return this.__window_stage__.setDefaultDensityEnabled(enabled);
+    return this.windowStage_.setDefaultDensityEnabled(enabled);
   }
 
-  setCustomDensity(density) {
-    return this.__window_stage__.setCustomDensity(density);
+  setCustomDensity(density, applyToSubWindow) {
+    return this.windowStage_.setCustomDensity(density, applyToSubWindow);
   }
 
   removeStartingWindow() {
-    return this.__window_stage__.removeStartingWindow();
+    return this.windowStage_.removeStartingWindow();
   }
 
   setWindowRectAutoSave(enabled, isSaveBySpecifiedFlag) {
-    return this.__window_stage__.setWindowRectAutoSave(enabled, isSaveBySpecifiedFlag);
+    return this.windowStage_.setWindowRectAutoSave(enabled, isSaveBySpecifiedFlag);
   }
 
   isWindowRectAutoSave() {
-    return this.__window_stage__.isWindowRectAutoSave();
+    return this.windowStage_.isWindowRectAutoSave();
   }
 
-  setSupportedWindowModes(supportedWindowModes) {
-    return this.__window_stage__.setSupportedWindowModes(supportedWindowModes);
+  setSupportedWindowModes(supportedWindowModes, grayOutMaximizeButton) {
+    if (grayOutMaximizeButton === undefined) {
+      return this.windowStage_.setSupportedWindowModes(supportedWindowModes);
+    }
+    return this.windowStage_.setSupportedWindowModes(supportedWindowModes, grayOutMaximizeButton);
+  }
+
+  setImageForRecent(imgResourceId, value) {
+    return this.windowStage_.setImageForRecent(imgResourceId, value);
   }
 }
 

@@ -67,6 +67,7 @@ public:
     void UpdateSystemKeyboardStatus(bool hasSystemKeyboard);
     bool HasSystemKeyboard() const;
 
+    int32_t GetVirtualDisplayPosY() const;
     std::tuple<WSRect, WSRect, WSRect> GetDisplayRects() const;
 
     // animation parameters
@@ -76,6 +77,7 @@ public:
     RSAnimationTimingCurve GetThrowSlipTimingCurve();
 
     ScreenSide CalculateScreenSide(const WSRect& rect);
+    ScreenSide CalculateScreenSide(int32_t posY);
     bool IsCrossFoldCrease(const WSRect& rect);
 
     void ResetArrangeRule();

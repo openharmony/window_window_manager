@@ -41,17 +41,14 @@ public:
     SessionInfo info;
     sptr<MainSession::SpecificSessionCallback> specificCallback = nullptr;
     sptr<MainSession> mainSession_;
+
 private:
     RSSurfaceNode::SharedPtr CreateRSSurfaceNode();
 };
 
-void MainSessionTest::SetUpTestCase()
-{
-}
+void MainSessionTest::SetUpTestCase() {}
 
-void MainSessionTest::TearDownTestCase()
-{
-}
+void MainSessionTest::TearDownTestCase() {}
 
 void MainSessionTest::SetUp()
 {
@@ -104,13 +101,35 @@ HWTEST_F(MainSessionTest, MainSession01, TestSize.Level1)
     info.abilityName_ = "MainSession01";
     info.moduleName_ = "MainSession02";
     info.bundleName_ = "MainSession03";
-    pSpecificCallback = new(std::nothrow) MainSession::SpecificSessionCallback;
+    pSpecificCallback = new (std::nothrow) MainSession::SpecificSessionCallback;
     pMainSession = sptr<MainSession>::MakeSptr(info, pSpecificCallback);
     EXPECT_NE(nullptr, pMainSession);
 
     info.persistentId_ = 0;
     pMainSession = sptr<MainSession>::MakeSptr(info, pSpecificCallback);
     EXPECT_NE(nullptr, pMainSession);
+}
+
+/**
+ * @tc.name: MainSession02
+ * @tc.desc: check func MainSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, MainSession02, TestSize.Level1)
+{
+    MainSession* pMainSession = nullptr;
+    sptr<MainSession::SpecificSessionCallback> pSpecificCallback = nullptr;
+
+    SessionInfo info;
+    info.persistentId_ = 1999;
+    info.abilityName_ = "test";
+    info.moduleName_ = "test";
+    info.bundleName_ = "test";
+    pMainSession = sptr<MainSession>::MakeSptr(info, pSpecificCallback);
+    EXPECT_NE(nullptr, pMainSession);
+
+    auto hasSnapshot = pMainSession->scenePersistence_->HasSnapshot();
+    ASSERT_EQ(hasSnapshot, false);
 }
 
 /**
@@ -213,7 +232,7 @@ HWTEST_F(MainSessionTest, SetTopmost02, TestSize.Level1)
  */
 HWTEST_F(MainSessionTest, UpdatePointerArea, TestSize.Level1)
 {
-    WSRect Rect={0, 0, 50, 50};
+    WSRect Rect = { 0, 0, 50, 50 };
     mainSession_->UpdateWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
     mainSession_->UpdatePointerArea(Rect);
     mainSession_->UpdateWindowMode(WindowMode::WINDOW_MODE_FLOATING);
@@ -363,9 +382,7 @@ HWTEST_F(MainSessionTest, OnTitleAndDockHoverShowChange, TestSize.Level1)
     info.abilityName_ = "OnTitleAndDockHoverShowChange";
     info.bundleName_ = "OnTitleAndDockHoverShowChange";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSession->SetTitleAndDockHoverShowChangeCallback([](bool isTitleHoverShown, bool isDockHoverShown) {
-        return;
-    });
+    sceneSession->SetTitleAndDockHoverShowChangeCallback([](bool isTitleHoverShown, bool isDockHoverShown) { return; });
     EXPECT_NE(sceneSession->onTitleAndDockHoverShowChangeFunc_, nullptr);
     EXPECT_EQ(sceneSession->OnTitleAndDockHoverShowChange(true, true), WSError::WS_OK);
 }
@@ -384,7 +401,7 @@ HWTEST_F(MainSessionTest, OnTitleAndDockHoverShowChange02, TestSize.Level1)
     ASSERT_NE(testSession, nullptr);
 
     auto callbackFlag = 1;
-    testSession->onTitleAndDockHoverShowChangeFunc_ = [&callbackFlag] (bool isTitleHoverShown, bool isDockHoverShown) {
+    testSession->onTitleAndDockHoverShowChangeFunc_ = [&callbackFlag](bool isTitleHoverShown, bool isDockHoverShown) {
         callbackFlag += 1;
     };
     testSession->OnTitleAndDockHoverShowChange(true, true);
@@ -408,9 +425,7 @@ HWTEST_F(MainSessionTest, OnRestoreMainWindow, TestSize.Level1)
     session->onRestoreMainWindowFunc_ = nullptr;
     EXPECT_EQ(WSError::WS_OK, session->OnRestoreMainWindow());
 
-    NotifyRestoreMainWindowFunc func = [] {
-        return;
-    };
+    NotifyRestoreMainWindowFunc func = [] { return; };
     session->onRestoreMainWindowFunc_ = func;
     EXPECT_EQ(WSError::WS_OK, session->OnRestoreMainWindow());
 }
@@ -430,11 +445,9 @@ HWTEST_F(MainSessionTest, OnRestoreMainWindow02, TestSize.Level1)
 
     testSession->onRestoreMainWindowFunc_ = nullptr;
     EXPECT_EQ(testSession->OnRestoreMainWindow(), WSError::WS_OK);
-    
+
     auto callbackFlag = 1;
-    testSession->onRestoreMainWindowFunc_ = [&callbackFlag] () {
-        callbackFlag += 1;
-    };
+    testSession->onRestoreMainWindowFunc_ = [&callbackFlag]() { callbackFlag += 1; };
     testSession->OnRestoreMainWindow();
     EXPECT_EQ(callbackFlag, 2);
 }
@@ -454,9 +467,7 @@ HWTEST_F(MainSessionTest, OnSetWindowRectAutoSave, TestSize.Level1)
     session->onSetWindowRectAutoSaveFunc_ = nullptr;
     EXPECT_EQ(nullptr, session->onSetWindowRectAutoSaveFunc_);
 
-    NotifySetWindowRectAutoSaveFunc func = [](bool enabled, bool isSaveBySpecifiedFlag) {
-        return;
-    };
+    NotifySetWindowRectAutoSaveFunc func = [](bool enabled, bool isSaveBySpecifiedFlag) { return; };
     session->onSetWindowRectAutoSaveFunc_ = func;
     EXPECT_NE(nullptr, session->onSetWindowRectAutoSaveFunc_);
 }
@@ -478,7 +489,7 @@ HWTEST_F(MainSessionTest, OnSetWindowRectAutoSave02, TestSize.Level1)
     EXPECT_EQ(testSession->OnSetWindowRectAutoSave(true, true), WSError::WS_OK);
 
     auto callbackFlag = 1;
-    testSession->onSetWindowRectAutoSaveFunc_ = [&callbackFlag] (bool enabled, bool isSaveBySpecifiedFlag) {
+    testSession->onSetWindowRectAutoSaveFunc_ = [&callbackFlag](bool enabled, bool isSaveBySpecifiedFlag) {
         callbackFlag += 1;
     };
     testSession->OnSetWindowRectAutoSave(true, true);
@@ -497,9 +508,7 @@ HWTEST_F(MainSessionTest, NotifyMainModalTypeChange, TestSize.Level1)
     info.bundleName_ = "NotifyMainModalTypeChange";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    sceneSession->RegisterMainModalTypeChangeCallback([](bool isModal) {
-        return;
-    });
+    sceneSession->RegisterMainModalTypeChangeCallback([](bool isModal) { return; });
     EXPECT_NE(sceneSession->onMainModalTypeChange_, nullptr);
     EXPECT_EQ(WSError::WS_OK, sceneSession->NotifyMainModalTypeChange(true));
 }
@@ -521,9 +530,7 @@ HWTEST_F(MainSessionTest, NotifyMainModalTypeChange02, TestSize.Level1)
     EXPECT_EQ(testSession->NotifyMainModalTypeChange(true), WSError::WS_OK);
 
     auto callbackFlag = 1;
-    testSession->onMainModalTypeChange_ = [&callbackFlag] (bool isModal) {
-        callbackFlag += 1;
-    };
+    testSession->onMainModalTypeChange_ = [&callbackFlag](bool isModal) { callbackFlag += 1; };
     testSession->NotifyMainModalTypeChange(true);
     EXPECT_EQ(callbackFlag, 2);
 }
@@ -580,19 +587,16 @@ HWTEST_F(MainSessionTest, NotifySupportWindowModesChange, TestSize.Level1)
     info.bundleName_ = "NotifySupportWindowModesChange";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
 
-    std::vector<AppExecFwk::SupportWindowMode> supportedWindowModes = {
-        AppExecFwk::SupportWindowMode::FULLSCREEN,
-        AppExecFwk::SupportWindowMode::SPLIT,
-        AppExecFwk::SupportWindowMode::FLOATING
-    };
+    std::vector<AppExecFwk::SupportWindowMode> supportedWindowModes = { AppExecFwk::SupportWindowMode::FULLSCREEN,
+                                                                        AppExecFwk::SupportWindowMode::SPLIT,
+                                                                        AppExecFwk::SupportWindowMode::FLOATING };
 
     EXPECT_EQ(WSError::WS_OK, session->NotifySupportWindowModesChange(supportedWindowModes));
 
     session->onSetSupportedWindowModesFunc_ = nullptr;
     EXPECT_EQ(WSError::WS_OK, session->NotifySupportWindowModesChange(supportedWindowModes));
 
-    session->onSetSupportedWindowModesFunc_ = [](
-        std::vector<AppExecFwk::SupportWindowMode>&& supportedWindowModes) {
+    session->onSetSupportedWindowModesFunc_ = [](std::vector<AppExecFwk::SupportWindowMode>&& supportedWindowModes) {
         return;
     };
 
@@ -611,20 +615,16 @@ HWTEST_F(MainSessionTest, NotifySupportWindowModesChange02, TestSize.Level1)
     info.bundleName_ = "NotifySupportWindowModesChange02";
     sptr<MainSession> testSession = sptr<MainSession>::MakeSptr(info, nullptr);
     ASSERT_NE(testSession, nullptr);
-    std::vector<AppExecFwk::SupportWindowMode> supportedWindowModes = {
-        AppExecFwk::SupportWindowMode::FULLSCREEN,
-        AppExecFwk::SupportWindowMode::SPLIT,
-        AppExecFwk::SupportWindowMode::FLOATING
-    };
+    std::vector<AppExecFwk::SupportWindowMode> supportedWindowModes = { AppExecFwk::SupportWindowMode::FULLSCREEN,
+                                                                        AppExecFwk::SupportWindowMode::SPLIT,
+                                                                        AppExecFwk::SupportWindowMode::FLOATING };
 
     testSession->onSetSupportedWindowModesFunc_ = nullptr;
     EXPECT_EQ(testSession->NotifySupportWindowModesChange(supportedWindowModes), WSError::WS_OK);
 
     auto callbackFlag = 1;
-    testSession->onSetSupportedWindowModesFunc_ = [&callbackFlag] (
-        std::vector<AppExecFwk::SupportWindowMode>&& supportedWindowModes) {
-        callbackFlag += 1;
-    };
+    testSession->onSetSupportedWindowModesFunc_ =
+        [&callbackFlag](std::vector<AppExecFwk::SupportWindowMode>&& supportedWindowModes) { callbackFlag += 1; };
     testSession->NotifySupportWindowModesChange(supportedWindowModes);
     EXPECT_EQ(callbackFlag, 2);
 }
@@ -663,9 +663,7 @@ HWTEST_F(MainSessionTest, UpdateFlag, TestSize.Level1)
     session->onUpdateFlagFunc_ = nullptr;
     EXPECT_EQ(nullptr, session->onUpdateFlagFunc_);
 
-    NotifyUpdateFlagFunc func = [](const std::string& flag) {
-        return;
-    };
+    NotifyUpdateFlagFunc func = [](const std::string& flag) { return; };
     session->onUpdateFlagFunc_ = func;
     EXPECT_NE(nullptr, session->onUpdateFlagFunc_);
 }
@@ -680,11 +678,9 @@ HWTEST_F(MainSessionTest, NotifySubAndDialogFollowRectChange01, TestSize.Level1)
     SessionInfo info;
     sptr<SceneSession> subSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sptr<MainSession> mainSession = sptr<MainSession>::MakeSptr(info, nullptr);
-    
+
     bool isCall = false;
-    auto task = [&isCall](const WSRect& rect, bool isGlobal, bool needFlush) {
-        isCall = true;
-    };
+    auto task = [&isCall](const WSRect& rect, bool isGlobal, bool needFlush) { isCall = true; };
     mainSession->RegisterNotifySurfaceBoundsChangeFunc(subSession->GetPersistentId(), std::move(task));
     ASSERT_NE(nullptr, mainSession->notifySurfaceBoundsChangeFuncMap_[subSession->GetPersistentId()]);
 
@@ -696,13 +692,83 @@ HWTEST_F(MainSessionTest, NotifySubAndDialogFollowRectChange01, TestSize.Level1)
     subSession->isFollowParentLayout_ = true;
     sptr<SceneSession::SpecificSessionCallback> callBack = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     mainSession->specificCallback_ = callBack;
-    auto getSessionCallBack = [&subSession](int32_t persistentId) {
-        return subSession;
-    };
+    auto getSessionCallBack = [&subSession](int32_t persistentId) { return subSession; };
     callBack->onGetSceneSessionByIdCallback_ = getSessionCallBack;
     mainSession->NotifySubAndDialogFollowRectChange(rect, false, false);
     ASSERT_EQ(true, isCall);
 }
+
+/**
+ * @tc.name: GetRouterStackInfo
+ * @tc.desc: GetRouterStackInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, GetRouterStackInfo, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetRouterStackInfo";
+    info.bundleName_ = "GetRouterStackInfo";
+    sptr<MainSession> testSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    testSession->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
+
+    std::string routerInfo;
+    auto res = testSession->GetRouterStackInfo(routerInfo);
+    EXPECT_EQ(res, WMError::WM_OK);
+
+    testSession->sessionStage_ = nullptr;
+    res = testSession->GetRouterStackInfo(routerInfo);
+    EXPECT_EQ(res, WMError::WM_ERROR_NULLPTR);
 }
+
+/**
+ * @tc.name: NotifySubAndDialogFollowRectChange_scaleMode
+ * @tc.desc: NotifySubAndDialogFollowRectChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, NotifySubAndDialogFollowRectChange_scaleMode, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifySubAndDialogFollowRectChange_scaleMode";
+    info.bundleName_ = "NotifySubAndDialogFollowRectChange_scaleMode";
+    sptr<MainSession> mainSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> subSession1 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> subSession2 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> subSession3 = nullptr;
+
+    WSRect updateRect1;
+    auto task1 = [&updateRect1](const WSRect& rect, bool isGlobal, bool needFlush) { updateRect1 = rect; };
+    mainSession->RegisterNotifySurfaceBoundsChangeFunc(subSession1->GetPersistentId(), std::move(task1));
+    WSRect updateRect2;
+    auto task2 = [&updateRect2](const WSRect& rect, bool isGlobal, bool needFlush) { updateRect2 = rect; };
+    mainSession->RegisterNotifySurfaceBoundsChangeFunc(subSession2->GetPersistentId(), std::move(task2));
+    EXPECT_NE(nullptr, mainSession->notifySurfaceBoundsChangeFuncMap_[subSession1->GetPersistentId()]);
+    WSRect rect = { 100, 100, 400, 400 };
+    WSRect resultRect = { 200, 200, 200, 200 };
+    float scaleX = 0.5f;
+    float scaleY = 0.5f;
+    mainSession->SetScale(scaleX, scaleY, 0.5f, 0.5f);
+    mainSession->SetSessionRect(rect);
+    EXPECT_EQ(rect, mainSession->GetSessionRect());
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToProportionalScale(true);
+    mainSession->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    subSession1->isFollowParentLayout_ = true;
+    subSession2->isFollowParentLayout_ = true;
+    sptr<SceneSession::SpecificSessionCallback> callBack = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    mainSession->specificCallback_ = callBack;
+    auto getSessionCallBack = [&subSession1, &subSession2, &subSession3](int32_t persistentId) {
+        if (subSession1->GetPersistentId() == persistentId) {
+            return subSession1;
+        } else if (subSession2->GetPersistentId() == persistentId) {
+            return subSession2;
+        }
+        return subSession3;
+    };
+    callBack->onGetSceneSessionByIdCallback_ = getSessionCallBack;
+    mainSession->NotifySubAndDialogFollowRectChange(rect, false, false);
+    EXPECT_EQ(resultRect, updateRect1);
+    EXPECT_EQ(resultRect, updateRect2);
 }
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS
