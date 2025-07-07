@@ -22,6 +22,7 @@
 #include "interfaces/include/ws_common.h"
 #include "session_manager/include/rdb/starting_window_rdb_manager.h"
 #include "session_manager/include/scene_session_manager.h"
+#include "window_manager_hilog.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -32,6 +33,13 @@ namespace {
 const std::string TEST_RDB_PATH = "/data/test/";
 const std::string TEST_INVALID_PATH = "";
 const std::string TEST_RDB_NAME = "starting_window_config_test.db";
+const uint32_t WAIT_SLEEP_TIME = 200000;
+std::string g_logMsg;
+void RdbLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
+    const char* msg)
+{
+    g_logMsg = msg;
+}
 } // namespace
 
 class WindowPatternStartingWindowTest : public testing::Test {
@@ -437,6 +445,7 @@ HWTEST_F(WindowPatternStartingWindowTest, PreLoadStartingWindow, TestSize.Level1
     ASSERT_NE(nullptr, sceneSession);
     ssm_->PreLoadStartingWindow(sceneSession);
     ASSERT_NE(nullptr, sceneSession);
+    EXPECT_EQ(false, ssm_->needUpdateRdb_);
 }
 
 /**
@@ -466,6 +475,21 @@ HWTEST_F(WindowPatternStartingWindowTest, GetIsDarkFromConfiguration, TestSize.L
     ASSERT_NE(ssm_, nullptr);
     bool isDark = ssm_->GetIsDarkFromConfiguration();
     EXPECT_EQ(false, isDark);
+}
+
+/**
+ * @tc.name: UpdateAllStartingWindowRdb
+ * @tc.desc: UpdateAllStartingWindowRdb
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternStartingWindowTest, UpdateAllStartingWindowRdb, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(RdbLogCallback);
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->UpdateAllStartingWindowRdb();
+    usleep(WAIT_SLEEP_TIME);
+    EXPECT_TRUE(g_logMsg.find("GetBundleInfosV9 error") != std::string::npos);
 }
 } // namespace
 } // namespace Rosen
