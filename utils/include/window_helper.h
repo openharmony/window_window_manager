@@ -188,6 +188,21 @@ public:
                 type == WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR);
     }
 
+    static inline bool IsKeyboardWindow(WindowType type)
+    {
+        return type == WindowType::WINDOW_TYPE_KEYBOARD_PANEL || type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT;
+    }
+
+    static inline bool IsSystemOrSubWindow(WindowType type)
+    {
+        return IsSubWindow(type) || IsSystemWindow(type);
+    }
+
+    static inline bool IsNeedWaitAttachStateWindow(WindowType type)
+    {
+        return !IsKeyboardWindow(type) && IsSystemOrSubWindow(type);
+    }
+
     static inline bool IsDynamicWindow(WindowType type)
     {
         return type == WindowType::WINDOW_TYPE_DYNAMIC;

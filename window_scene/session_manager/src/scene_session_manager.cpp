@@ -2870,17 +2870,18 @@ void SceneSessionManager::ResetSceneMissionInfo(const sptr<AAFwk::SessionInfo>& 
     abilitySessionInfo->scenarios = 0; // 0 after app started, scenarios reset to initial value
 }
 
-int32_t SceneSessionManager::StartUIAbilityBySCBTimeoutCheck(const sptr<AAFwk::SessionInfo>& abilitySessionInfo,
-    const uint32_t& windowStateChangeReason, bool& isColdStart)
+int32_t SceneSessionManager::StartUIAbilityBySCBTimeoutCheck(const sptr<SceneSession>& sceneSession,
+    const sptr<AAFwk::SessionInfo>& abilitySessionInfo, const uint32_t& windowStateChangeReason, bool& isColdStart)
 {
     std::shared_ptr<int32_t> retCode = std::make_shared<int32_t>(0);
     std::shared_ptr<bool> coldStartFlag = std::make_shared<bool>(false);
-    bool isTimeout = ffrtQueueHelper_->SubmitTaskAndWait([abilitySessionInfo, coldStartFlag, retCode,
-        windowStateChangeReason] {
+    bool isTimeout = ffrtQueueHelper_->SubmitTaskAndWait([this, sceneSession, abilitySessionInfo,
+        coldStartFlag, retCode, windowStateChangeReason] {
         int timerId = HiviewDFX::XCollie::GetInstance().SetTimer("WMS:SSM:StartUIAbilityBySCB",
             START_UI_ABILITY_TIMEOUT/1000, nullptr, nullptr, HiviewDFX::XCOLLIE_FLAG_LOG);
         auto result = AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(abilitySessionInfo,
             *coldStartFlag, windowStateChangeReason);
+        CloseAllFd(sceneSession->GetSessionInfo().want);
         HiviewDFX::XCollie::GetInstance().CancelTimer(timerId);
         *retCode = static_cast<int32_t>(result);
         TLOGNI(WmsLogTag::WMS_LIFE, "start ui ability retCode: %{public}d", *retCode);
@@ -2895,16 +2896,24 @@ int32_t SceneSessionManager::StartUIAbilityBySCBTimeoutCheck(const sptr<AAFwk::S
     return *retCode;
 }
 
+void SceneSessionManager::CloseAllFd(std::shared_ptr<AAFwk::Want>& want)
+{
+    if (want) {
+        want->CloseAllFd();
+    }
+}
+
 int32_t SceneSessionManager::StartUIAbilityBySCB(sptr<SceneSession>& sceneSession)
 {
     auto abilitySessionInfo = SetAbilitySessionInfo(sceneSession);
-    return StartUIAbilityBySCB(abilitySessionInfo);
+    return StartUIAbilityBySCB(abilitySessionInfo, sceneSession);
 }
 
-int32_t SceneSessionManager::StartUIAbilityBySCB(sptr<AAFwk::SessionInfo>& abilitySessionInfo)
+int32_t SceneSessionManager::StartUIAbilityBySCB(sptr<AAFwk::SessionInfo>& abilitySessionInfo,
+    sptr<SceneSession>& sceneSession)
 {
     bool isColdStart = false;
-    return StartUIAbilityBySCBTimeoutCheck(abilitySessionInfo,
+    return StartUIAbilityBySCBTimeoutCheck(sceneSession, abilitySessionInfo,
         static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL), isColdStart);
 }
 
@@ -2979,7 +2988,7 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
     if (!systemConfig_.backgroundswitch || sceneSession->GetSessionProperty()->GetIsAppSupportPhoneInPc()) {
         TLOGI(WmsLogTag::WMS_MAIN, "[id: %{public}d] Begin StartUIAbility, system: %{public}u", persistentId,
             static_cast<uint32_t>(sceneSession->GetSessionInfo().isSystem_));
-        errCode = StartUIAbilityBySCBTimeoutCheck(sceneSessionInfo,
+        errCode = StartUIAbilityBySCBTimeoutCheck(sceneSession, sceneSessionInfo,
             static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL), isColdStart);
     } else {
         TLOGI(WmsLogTag::WMS_MAIN, "[id: %{public}d] Background switch on, isNewActive %{public}d state %{public}u "
@@ -2990,7 +2999,7 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
             sceneSession->GetSessionInfo().reuseDelegatorWindow) {
             TLOGI(WmsLogTag::WMS_MAIN, "Call StartUIAbility: %{public}d system: %{public}u", persistentId,
                 static_cast<uint32_t>(sceneSession->GetSessionInfo().isSystem_));
-            errCode = StartUIAbilityBySCBTimeoutCheck(sceneSessionInfo,
+            errCode = StartUIAbilityBySCBTimeoutCheck(sceneSession, sceneSessionInfo,
                 static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL), isColdStart);
         } else {
             TLOGI(WmsLogTag::WMS_MAIN, "NotifySessionForeground: %{public}d", persistentId);
@@ -4847,7 +4856,7 @@ WSError SceneSessionManager::StartOrMinimizeUIAbilityBySCB(const sptr<SceneSessi
         sceneSession->SetMinimizedFlagByUserSwitch(false);
         bool isColdStart = false;
         abilitySessionInfo->isNewWant = false;
-        int32_t errCode = StartUIAbilityBySCBTimeoutCheck(
+        int32_t errCode = StartUIAbilityBySCBTimeoutCheck(sceneSession,
             abilitySessionInfo, static_cast<uint32_t>(WindowStateChangeReason::USER_SWITCH), isColdStart);
         if (errCode != ERR_OK) {
             TLOGE(WmsLogTag::WMS_MULTI_USER, "start failed! errCode: %{public}d", errCode);
@@ -9803,6 +9812,7 @@ WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>&
         auto abilitySessionInfo = SetAbilitySessionInfo(sceneSession);
         bool isColdStart = false;
         AAFwk::AbilityManagerClient::GetInstance()->CallUIAbilityBySCB(abilitySessionInfo, isColdStart);
+        CloseAllFd(sessionInfo.want);
         if (isColdStart) {
             TLOGNI(WmsLogTag::WMS_MAIN, "Cold start, identityToken:%{public}s, bundleName:%{public}s",
                 abilitySessionInfo->identityToken.c_str(), sessionInfo.bundleName_.c_str());
@@ -9831,6 +9841,7 @@ void SceneSessionManager::StartAbilityBySpecified(const SessionInfo& sessionInfo
             want.SetParam(AAFwk::Want::PARAM_RESV_DISPLAY_ID, static_cast<int>(sessionInfo.screenId_));
         }
         auto result = AAFwk::AbilityManagerClient::GetInstance()->StartSpecifiedAbilityBySCB(want);
+        CloseAllFd(sessionInfo.want);
         TLOGNI(WmsLogTag::WMS_LIFE, "start specified ability by SCB result: %{public}d", result);
         if (result == ERR_OK) {
             return;

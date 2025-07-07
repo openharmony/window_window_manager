@@ -642,7 +642,7 @@ HWTEST_F(SceneSessionManagerTest3, CheckAppIsInDisplay, TestSize.Level1)
     ssm_->sceneSessionMap_.erase(1);
     sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
     ASSERT_NE(nullptr, abilitySessionInfo);
-    ssm_->StartUIAbilityBySCB(abilitySessionInfo);
+    ssm_->StartUIAbilityBySCB(abilitySessionInfo, sceneSession);
     ssm_->DestroySubSession(sceneSession);
     ssm_->EraseSceneSessionMapById(2);
     ASSERT_EQ(ret, 1);

@@ -703,7 +703,7 @@ public:
     WSError ClearAllSessions() override;
     WSError MoveSessionsToForeground(const std::vector<int32_t>& sessionIds, int32_t topSessionId) override;
     WSError MoveSessionsToBackground(const std::vector<int32_t>& sessionIds, std::vector<int32_t>& result) override;
-    int32_t StartUIAbilityBySCB(sptr<AAFwk::SessionInfo>& abilitySessionInfo);
+    int32_t StartUIAbilityBySCB(sptr<AAFwk::SessionInfo>& abilitySessionInfo, sptr<SceneSession>& sceneSession);
     int32_t StartUIAbilityBySCB(sptr<SceneSession>& sceneSessions);
     WMError GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo);
     WMError GetCallingWindowInfo(CallingWindowInfo& callingWindowInfo);
@@ -865,7 +865,8 @@ private:
     sptr<AAFwk::SessionInfo> SetAbilitySessionInfo(const sptr<SceneSession>& sceneSession);
     void ResetWantInfo(const sptr<SceneSession>& sceneSession);
     void ResetSceneSessionInfoWant(const sptr<AAFwk::SessionInfo>& sceneSessionInfo);
-    int32_t StartUIAbilityBySCBTimeoutCheck(const sptr<AAFwk::SessionInfo>& abilitySessionInfo,
+    int32_t StartUIAbilityBySCBTimeoutCheck(const sptr<SceneSession>& sceneSession,
+        const sptr<AAFwk::SessionInfo>& abilitySessionInfo,
         const uint32_t& windowStateChangeReason, bool& isColdStart);
     sptr<SceneSession> GetHookedSessionByModuleName(const SessionInfo& sessionInfo);
     void RegisterHookSceneSessionActivationFunc(const sptr<SceneSession>& sceneSession);
@@ -873,6 +874,7 @@ private:
     void RegisterSceneSessionDestructNotifyManagerFunc(const sptr<SceneSession>& sceneSession);
     void ResetSceneMissionInfo(const sptr<AAFwk::SessionInfo>& abilitySessionInfo);
     void UpdateAbilityHookState(sptr<SceneSession>& sceneSession, bool isAbilityHook);
+    void CloseAllFd(std::shared_ptr<AAFwk::Want>& want);
 
     /*
      * Window Focus
