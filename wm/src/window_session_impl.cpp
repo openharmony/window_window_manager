@@ -796,6 +796,17 @@ void WindowSessionImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent
     NotifyKeyEvent(keyEvent, isConsumed, false);
 }
 
+void WindowSessionImpl::ConsumeBackEvent()
+{
+    TLOGI(WmsLogTag::WMS_EVENT, "in");
+    HandleBackEvent();
+}
+
+bool WindowSessionImpl::IsDialogSessionBackGestureEnabled()
+{
+    return dialogSessionBackGestureEnabled_;
+}
+
 bool WindowSessionImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
     TLOGI(WmsLogTag::WMS_EVENT, "id: %{public}d", keyEvent->GetId());
