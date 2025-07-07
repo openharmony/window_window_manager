@@ -4789,10 +4789,7 @@ WSError SceneSessionManager::InitUserInfo(int32_t userId, std::string& fileDir)
         return WSError::WS_DO_NOTHING;
     }
     TLOGI(WmsLogTag::WMS_MAIN, "userId: %{public}d, path: %{public}s", userId, fileDir.c_str());
-    ffrtQueueHelper_->SubmitTask([this, userId, rdbDir = fileDir] {
-        TLOGNI(WmsLogTag::WMS_MAIN, "init starting window rdb");
-        InitStartingWindowRdb(rdbDir + "/StartingWindowRdb/");
-    });
+    InitStartingWindowRdb(fileDir + "/StartingWindowRdb/");
     return taskScheduler_->PostSyncTask([this, userId, &fileDir]() {
         if (!ScenePersistence::CreateSnapshotDir(fileDir)) {
             TLOGND(WmsLogTag::WMS_MAIN, "Create snapshot directory failed");
@@ -5147,30 +5144,39 @@ void SceneSessionManager::InitStartingWindowRdb(const std::string& rdbPath)
     }
     bool deleteAllDataRes = startingWindowRdbMgr_->DeleteAllData();
     TLOGI(WmsLogTag::WMS_PATTERN, "delete all data res: %{public}d", deleteAllDataRes);
-    if (bundleMgr_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_PATTERN, "bundleMgr is nullptr");
-        return;
-    }
-    std::vector<AppExecFwk::BundleInfo> bundleInfos;
-    int32_t ret = static_cast<int32_t>(bundleMgr_->GetBundleInfosV9(
-        static_cast<uint32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_DISABLE) |
-        static_cast<uint32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE) |
-        static_cast<uint32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_ABILITY) |
-        static_cast<uint32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_ONLY_WITH_LAUNCHER_ABILITY),
-        bundleInfos, currentUserId_));
-    if (ret != 0) {
-        TLOGE(WmsLogTag::WMS_PATTERN, "GetBundleInfosV9 error:%{public}d", ret);
-        return;
-    }
-    std::vector<std::pair<StartingWindowRdbItemKey, StartingWindowInfo>> inputValues;
-    bool isDark = GetIsDarkFromConfiguration();
-    for (const auto& bundleInfo : bundleInfos) {
-        GetBundleStartingWindowInfos(isDark, bundleInfo, inputValues);
-    }
-    int64_t outInsertNum = -1;
-    auto batchInsertRes = startingWindowRdbMgr_->BatchInsert(outInsertNum, inputValues);
-    TLOGI(WmsLogTag::WMS_PATTERN, "res: %{public}d, bundles: %{public}zu, insert: %{public}" PRId64,
-        batchInsertRes, bundleInfos.size(), outInsertNum);
+}
+
+void SceneSessionManager::UpdateAllStartingWindowRdb()
+{
+    const char* const where = __func__;
+    auto loadTask = [this, where]() {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:UpdateAllStartingWindowRdb");
+        if (bundleMgr_ == nullptr) {
+            TLOGNE(WmsLogTag::WMS_PATTERN, "bundleMgr is nullptr");
+            return;
+        }
+        std::vector<AppExecFwk::BundleInfo> bundleInfos;
+        int32_t ret = static_cast<int32_t>(bundleMgr_->GetBundleInfosV9(
+            static_cast<uint32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_DISABLE) |
+            static_cast<uint32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE) |
+            static_cast<uint32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_ABILITY) |
+            static_cast<uint32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_ONLY_WITH_LAUNCHER_ABILITY),
+            bundleInfos, currentUserId_));
+        if (ret != 0) {
+            TLOGNE(WmsLogTag::WMS_PATTERN, "GetBundleInfosV9 error:%{public}d", ret);
+            return;
+        }
+        std::vector<std::pair<StartingWindowRdbItemKey, StartingWindowInfo>> inputValues;
+        bool isDark = GetIsDarkFromConfiguration();
+        for (const auto& bundleInfo : bundleInfos) {
+            GetBundleStartingWindowInfos(isDark, bundleInfo, inputValues);
+        }
+        int64_t outInsertNum = -1;
+        auto batchInsertRes = startingWindowRdbMgr_->BatchInsert(outInsertNum, inputValues);
+        TLOGNI(WmsLogTag::WMS_PATTERN, "res: %{public}d, bundles: %{public}zu, insert: %{public}" PRId64,
+            batchInsertRes, bundleInfos.size(), outInsertNum);
+        };
+    ffrtQueueHelper_->SubmitTask(loadTask);
 }
 
 void SceneSessionManager::GetStartupPage(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo)
@@ -5396,6 +5402,10 @@ void SceneSessionManager::PreLoadStartingWindow(sptr<SceneSession> sceneSession)
         sceneSession->NotifyPreLoadStartingWindowFinished();
     };
     ffrtQueueHelper_->SubmitTask(loadTask);
+    if (needUpdateRdb_) {
+        UpdateAllStartingWindowRdb();
+        needUpdateRdb_ = false;
+    }
 }
 
 bool SceneSessionManager::CheckAndGetPreLoadResourceId(const StartingWindowInfo& startingWindowInfo, uint32_t& resId)
