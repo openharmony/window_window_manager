@@ -602,7 +602,7 @@ HWTEST_F(WindowSceneSessionImplTest5, SwitchFreeMultiWindow03, Function | SmallT
     sptr<WindowSceneSessionImpl> mainWindow = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     mainWindow->property_->SetPersistentId(1);
     mainWindow->hostSession_ = session;
-    mainWindow->property_->SetWindowName("SwitchFreeMultiWindow02_mainWindow");
+    mainWindow->property_->SetWindowName("SwitchFreeMultiWindow03_mainWindow");
     mainWindow->windowSystemConfig_.freeMultiWindowEnable_ = true;
     mainWindow->windowSystemConfig_.freeMultiWindowSupport_ = true;
     mainWindow->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
@@ -616,6 +616,7 @@ HWTEST_F(WindowSceneSessionImplTest5, SwitchFreeMultiWindow03, Function | SmallT
     EXPECT_EQ(WindowHelper::IsWindowModeSupported(mainWindow->property_->GetWindowModeSupportType(),
         WindowMode::WINDOW_MODE_FULLSCREEN), false);
     EXPECT_EQ(mainWindow->windowSystemConfig_.freeMultiWindowEnable_, false);
+    WindowSceneSessionImpl::windowSessionMap_.clear();
 }
 
 /**
