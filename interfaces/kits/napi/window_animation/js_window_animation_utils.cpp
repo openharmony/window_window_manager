@@ -327,6 +327,11 @@ bool CheckWindowAnimationOption(napi_env env, WindowAnimationOption& animationCo
             break;
         }
         case WindowAnimationCurve::CUBIC_BEZIER: {
+            if (animationConfig.duration > ANIMATION_MAX_DURATION) {
+                TLOGE(WmsLogTag::WMS_ANIMATION, "Duration is invalid: %{public}u", animationConfig.duration);
+                result = WmErrorCode::WM_ERROR_ILLEGAL_PARAM;
+                return false;
+            }
             break;
         }
         default:
