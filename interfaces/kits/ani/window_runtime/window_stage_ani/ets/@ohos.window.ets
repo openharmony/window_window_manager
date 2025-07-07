@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import ConfigurationConstant from '@ohos.app.ability.ConfigurationConstant';
 import { AsyncCallback, BusinessError, Callback } from '@ohos.base';
 import { LocalStorage } from '@ohos.arkui.stateManagement';
 import { UIContext } from '@ohos.arkui.UIContext';
@@ -1127,6 +1128,63 @@ export interface WindowLimits {
     minHeight: number;
 }
 
+/**
+ * The decor button style of the window.
+ * 
+ * @interface DecorButtonStyle
+ * @syscap SystemCapability.Window.SessionManager
+ * @atomicservice
+ * @since 14
+ * @arkts 1.1&1.2
+ */
+export interface DecorButtonStyle {
+  /**
+   * color mode.
+   * 
+   * @type { ?colorMode }
+   * @syscap SystemCapability.Window.SessionManager
+   * @atomicservice
+   * @since 14
+   */
+  colorMode?: ConfigurationConstant.ColorMode;
+
+  /**
+   * button background size when hover.
+   * 
+   * @type { ?number }
+   * @syscap SystemCapability.Window.SessionManager
+   * @atomicservice
+   * @since 14
+   */
+  buttonBackgroundSize?: number;
+
+  /**
+   * button spacing.
+   * 
+   * @type { ?number }
+   * @syscap SystemCapability.Window.SessionManager
+   * @atomicservice
+   * @since 14
+   */
+  spacingBetweenButtons?: number;
+
+  /**
+   * close button right margin.
+   * 
+   * @type { ?number }
+   * @syscap SystemCapability.Window.SessionManager
+   * @atomicservice
+   * @since 14
+   */
+  closeButtonRightMargin?: number;
+}
+
+export interface WindowTitleButtonVisibleParam {
+  isMaximizeButtonVisible: boolean;
+  isMinimizeButtonVisible: boolean;
+  isCloseButtonVisible: boolean;
+}
+
 export class WindowStageInternal implements WindowStage {
     static { loadLibrary('windowstageani_kit.z') }
 
@@ -1214,6 +1272,13 @@ export class WindowInternal implements Window {
         this.nativeObj = nativeObj;
     }
 
+    private native startMoving(nativeObj: long): void;
+    private native startMoveWindowWithCoordinate(nativeObj: long, offsetX: double, offsetY: double): void;
+    private native setWindowTitleButtonVisible(nativeObj: long, visibleParam: WindowTitleButtonVisibleParam): void;
+    private native setDecorButtonStyle(nativeObj: long, decorStyle: DecorButtonStyle): void;
+    private native getWindowStatus(nativeObj: long): int;
+    private native minimize(nativeObj: long): void;
+    private native maximize(nativeObj: long, presentation: int): void;
     private native getWindowDecorHeight(nativeObj:long): double;
     private native setWindowBackgroundColor(nativeObj: long, color: string): int;
     private native setImmersiveModeEnabledState(nativeObj: long, enable: boolean): int;
@@ -1240,6 +1305,90 @@ export class WindowInternal implements Window {
     private native setWaterMarkFlagSync(nativeObj: long, enable: boolean): void;
     private native onSync(nativeObj: long, type: string, callback: object): void;
     private native offSync(nativeObj: long, type: string, callback?: object): void;
+
+    public startMoving(): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) :void => {
+        taskpool.execute((): void => {
+          this.startMoving(this.nativeObj);
+        }).then((ret: NullishType) :void => {
+            resolve(undefined);
+        }).catch((err: NullishType) :void => {
+            reject(err as BusinessError);
+        });
+      });
+    }
+
+    public startMoving(offsetX: double, offsetY: double): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) :void => {
+        taskpool.execute((): void => {
+          this.startMoveWindowWithCoordinate(this.nativeObj, offsetX, offsetY);
+        }).then((ret: NullishType) :void => {
+            resolve(undefined);
+        }).catch((err: NullishType) :void => {
+            reject(err as BusinessError);
+        });
+      });
+    }
+
+    public setWindowTitleButtonVisible(isMaximizeButtonVisible: boolean, isMinimizeButtonVisible: boolean,
+                                       isCloseButtonVisible?: boolean): void {
+      let visibleParam: window.WindowTitleButtonVisibleParam = {
+        isMaximizeButtonVisible: isMaximizeButtonVisible,
+        isMinimizeButtonVisible: isMinimizeButtonVisible,
+        isCloseButtonVisible: true
+      };
+      if (isCloseButtonVisible != undefined) {
+        visibleParam.isCloseButtonVisible = isCloseButtonVisible;
+      }
+      this.setWindowTitleButtonVisible(this.nativeObj, visibleParam);
+    }
+
+    public setDecorButtonStyle(decorStyle: DecorButtonStyle): void {
+      this.setDecorButtonStyle(this.nativeObj, decorStyle);
+    }
+
+    public getWindowStatus(): WindowStatusType {
+      return this.getWindowStatus(this.nativeObj) as WindowStatusType;
+    }
+
+    public minimize(): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) :void => {
+        taskpool.execute((): void => {
+          this.minimize(this.nativeObj);
+        }).then((ret: NullishType) :void => {
+            resolve(undefined);
+        }).catch((err: NullishType) :void => {
+            reject(err as BusinessError);
+        });
+      });
+    }
+
+    public minimize(callback: AsyncCallback<void>): void {
+      taskpool.execute((): void => {
+          this.minimize(this.nativeObj);
+      }).then((ret: NullishType) => {
+          callback(new BusinessError(), undefined);
+      }).catch((err: NullishType) => {
+          callback(err as BusinessError, undefined);
+      });
+    }
+
+    public maximize(presentation?: MaximizePresentation): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) :void => {
+        taskpool.execute((): void => {
+          if (presentation == undefined) {
+            this.maximize(this.nativeObj, MaximizePresentation.ENTER_IMMERSIVE as int);
+          }
+          else {
+            this.maximize(this.nativeObj, presentation as int);
+          }
+        }).then((ret: NullishType) :void => {
+            resolve(undefined);
+        }).catch((err: NullishType) :void => {
+            reject(err as BusinessError);
+        });
+      });
+    }
 
     public getWindowDecorHeight(): number {
        let ret = this.getWindowDecorHeight(this.nativeObj);
@@ -1624,6 +1773,15 @@ export class WindowInternal implements Window {
 }
 
 export interface Window {
+    startMoving(): Promise<void>;
+    startMoving(offsetX: double, offsetY: double): Promise<void>;
+    setWindowTitleButtonVisible(isMaximizeButtonVisible: boolean, isMinimizeButtonVisible: boolean,
+        isCloseButtonVisible?: boolean): void;
+    setDecorButtonStyle(dectorStyle: DecorButtonStyle): void;
+    getWindowStatus(): WindowStatusType;
+    minimize(callback: AsyncCallback<void>): void;
+    minimize(): Promise<void>;
+    maximize(presentation?: MaximizePresentation): Promise<void>;
     getWindowDecorHeight(): double;
     setWindowBackgroundColor(color: string | ColorMetrics): void;
     setBackgroundColor(color: string): Promise<void>;

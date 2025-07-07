@@ -566,6 +566,35 @@ bool AniWindowUtils::SetWindowNavigationBarContentColor(ani_env* env,
     return true;
 }
 
+bool AniWindowUtils::SetDecorButtonStyleFromAni(ani_env* env, DecorButtonStyle& decorButtonStyle,
+                                                const ani_object& decorStyle)
+{
+    int32_t colorMode;
+    bool emptyParam = true;
+    ani_ref colorModeRef;
+    if (ANI_OK == env->Object_GetPropertyByName_Ref(decorStyle, "colorMode", &colorModeRef) &&
+        ANI_OK == env->EnumItem_GetValue_Int(static_cast<ani_enum_item>(colorModeRef), &colorMode)) {
+        decorButtonStyle.colorMode = colorMode;
+        emptyParam = false;
+    }
+    ani_double buttonBackgroundSize;
+    if (ANI_OK == env->Object_GetPropertyByName_Double(decorStyle, "buttonBackgroundSize", &buttonBackgroundSize)) {
+        decorButtonStyle.buttonBackgroundSize = static_cast<uint32_t>(buttonBackgroundSize);
+        emptyParam = false;
+    }
+    ani_double spacingBetweenButtons;
+    if (ANI_OK == env->Object_GetPropertyByName_Double(decorStyle, "spacingBetweenButtons", &spacingBetweenButtons)) {
+        decorButtonStyle.spacingBetweenButtons = static_cast<uint32_t>(spacingBetweenButtons);
+        emptyParam = false;
+    }
+    ani_double closeButtonRightMargin;
+    if (ANI_OK == env->Object_GetPropertyByName_Double(decorStyle, "closeButtonRightMargin", &closeButtonRightMargin)) {
+        decorButtonStyle.closeButtonRightMargin = static_cast<uint32_t>(closeButtonRightMargin);
+        emptyParam = false;
+    }
+    return !emptyParam;
+}
+
 bool AniWindowUtils::SetSystemBarPropertiesFromAni(ani_env* env,
                                                    std::map<WindowType, SystemBarProperty>& windowBarProperties,
                                                    std::map<WindowType, SystemBarPropertyFlag>& windowPropertyFlags,
