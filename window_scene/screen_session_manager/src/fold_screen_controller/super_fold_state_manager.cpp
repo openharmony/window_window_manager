@@ -186,7 +186,7 @@ void SuperFoldStateManager::InitSuperFoldCreaseRegionParams()
     currentSuperFoldCreaseRegion_ = new FoldCreaseRegion(screenIdFull, rect);
 }
 
-FoldCreaseRegion SuperFoldStateManager::GetFoldCreaseRegion(bool isVertical)
+FoldCreaseRegion SuperFoldStateManager::GetFoldCreaseRegion(bool isVertical) const
 {
     std::vector<int32_t> foldRect = FoldScreenStateInternel::StringFoldRectSplitToInt(g_LiveCreaseRegion,
         FOLD_CREASE_DELIMITER);
@@ -197,12 +197,12 @@ FoldCreaseRegion SuperFoldStateManager::GetFoldCreaseRegion(bool isVertical)
 
     ScreenId screenIdFull = 0;
     std::vector<DMRect> foldCreaseRect;
-    GetFoldCreaseRect(isVertical, foldCreaseRect, foldRect);
+    GetFoldCreaseRect(isVertical, foldRect, foldCreaseRect);
     return FoldCreaseRegion(screenIdFull, foldCreaseRect);
 }
 
 void SuperFoldStateManager::GetFoldCreaseRect(bool isVertical,
-    std::vector<DMRect>& foldCreaseRect, const std::vector<int32_t>& foldRect)
+    const std::vector<int32_t>& foldRect, std::vector<DMRect>& foldCreaseRect)
 {
     int32_t liveCreaseRegionPosX; // live Crease Region PosX
     int32_t liveCreaseRegionPosY; // live Crease Region PosY

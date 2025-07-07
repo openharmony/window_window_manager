@@ -71,7 +71,7 @@ DualDisplayFoldPolicy::DualDisplayFoldPolicy(std::recursive_mutex& displayInfoMu
     currentFoldCreaseRegion_ = new FoldCreaseRegion(screenIdMain, rect);
 }
 
-FoldCreaseRegion DualDisplayFoldPolicy::GetFoldCreaseRegion(bool isVertical)
+FoldCreaseRegion DualDisplayFoldPolicy::GetFoldCreaseRegion(bool isVertical) const
 {
     std::vector<int32_t> foldRect = FoldScreenStateInternel::StringFoldRectSplitToInt(g_FoldScreenRect,
         FOLD_CREASE_DELIMITER);
@@ -82,12 +82,12 @@ FoldCreaseRegion DualDisplayFoldPolicy::GetFoldCreaseRegion(bool isVertical)
 
     ScreenId screenIdFull = 0;
     std::vector<DMRect> foldCreaseRect;
-    GetFoldCreaseRect(isVertical, foldCreaseRect, foldRect);
+    GetFoldCreaseRect(isVertical, foldRect, foldCreaseRect);
     return FoldCreaseRegion(screenIdFull, foldCreaseRect);
 }
 
 void DualDisplayFoldPolicy::GetFoldCreaseRect(bool isVertical,
-    std::vector<DMRect>& foldCreaseRect, const std::vector<int32_t>& foldRect)
+    const std::vector<int32_t>& foldRect, std::vector<DMRect>& foldCreaseRect)
 {
     int32_t liveCreaseRegionPosX; // live Crease Region PosX
     int32_t liveCreaseRegionPosY; // live Crease Region PosY

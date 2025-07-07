@@ -74,7 +74,7 @@ SingleDisplayPocketFoldPolicy::SingleDisplayPocketFoldPolicy(std::recursive_mute
     currentFoldCreaseRegion_ = new FoldCreaseRegion(screenIdFull, rect);
 }
 
-FoldCreaseRegion SingleDisplayPocketFoldPolicy::GetFoldCreaseRegion(bool isVertical)
+FoldCreaseRegion SingleDisplayPocketFoldPolicy::GetFoldCreaseRegion(bool isVertical) const
 {
     std::vector<int32_t> foldRect = FoldScreenStateInternel::StringFoldRectSplitToInt(g_FoldScreenRect,
         FOLD_CREASE_DELIMITER);
@@ -85,12 +85,12 @@ FoldCreaseRegion SingleDisplayPocketFoldPolicy::GetFoldCreaseRegion(bool isVerti
 
     ScreenId screenIdFull = 0;
     std::vector<DMRect> foldCreaseRect;
-    GetFoldCreaseRect(isVertical, foldCreaseRect, foldRect);
+    GetFoldCreaseRect(isVertical, foldRect, foldCreaseRect);
     return FoldCreaseRegion(screenIdFull, foldCreaseRect);
 }
 
 void SingleDisplayPocketFoldPolicy::GetFoldCreaseRect(bool isVertical,
-    std::vector<DMRect>& foldCreaseRect, const std::vector<int32_t>& foldRect)
+    const std::vector<int32_t>& foldRect, std::vector<DMRect>& foldCreaseRect)
 {
     int32_t liveCreaseRegionPosX; // live Crease Region PosX
     int32_t liveCreaseRegionPosY; // live Crease Region PosY

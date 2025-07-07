@@ -67,8 +67,8 @@ private:
     void ChangeOffTentMode() override;
     void CloseCoordinationScreen();
     void NotifyRefreshRateEvent(bool isEventStatus);
-    FoldCreaseRegion GetFoldCreaseRegion(bool isVertical);
-    void GetFoldCreaseRect(bool isVertical, std::vector<DMRect>& foldCreaseRect, const std::vector<int32_t>& foldRect);
+    FoldCreaseRegion GetFoldCreaseRegion(bool isVertical) const;
+    void GetFoldCreaseRect(bool isVertical, const std::vector<int32_t>& foldRect, std::vector<DMRect>& foldCreaseRect) const;
     std::recursive_mutex& displayInfoMutex_;
     std::mutex coordinationMutex_;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler_;
