@@ -2739,9 +2739,9 @@ void Session::SetFreeMultiWindow()
 
 void Session::DeleteHasSnapshot()
 {
-    for (uint32_t screen = SCREEN_UNKNOWN; screen < SCREEN_COUNT; screen++) {
+    for (uint32_t screenStatus = SCREEN_UNKNOWN; screenStatus < SCREEN_COUNT; screenStatus++) {
         for (uint32_t orientation = SNAPSHOT_PORTRAIT; orientation < ORIENTATION_COUNT; orientation++) {
-            DeleteHasSnapshot({ screen, orientation });
+            DeleteHasSnapshot({ screenStatus, orientation });
         }
     }
     DeleteHasSnapshotFreeMultiWindow();
@@ -2792,9 +2792,9 @@ bool Session::HasSnapshotFreeMultiWindow()
 
 bool Session::HasSnapshot()
 {
-    for (uint32_t screen = SCREEN_UNKNOWN; screen < SCREEN_COUNT; screen++) {
+    for (uint32_t screenStatus = SCREEN_UNKNOWN; screenStatus < SCREEN_COUNT; screenStatus++) {
         for (uint32_t orientation = SNAPSHOT_PORTRAIT; orientation < ORIENTATION_COUNT; orientation++) {
-            if (HasSnapshot({ screen, orientation })) {
+            if (HasSnapshot({ screenStatus, orientation })) {
                 return true;
             }
         }
