@@ -1742,6 +1742,31 @@ HWTEST_F(WindowSessionImplTest5, GetPiPSettingSwitchStatus, Function | SmallTest
     window->state_ = WindowState::STATE_CREATED;
     window->GetPiPSettingSwitchStatus(switchStatus);
 }
+
+/**
+ * @tc.name: OnPointDown
+ * @tc.desc: OnPointDown
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, OnPointDown, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("OnPointDown");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    window->property_->SetCollaboratorType(static_cast<int32_t>(CollaboratorType::RESERVE_TYPE));
+    EXPECT_TRUE(window->IsAnco());
+
+    EXPECT_EQ(window->GetHostSession(), nullptr);
+    EXPECT_FALSE(window->OnPointDown(0, 0, 0));
+
+    SessionInfo sessionInfo = {"OnPointDown", "OnPointDown", "OnPointDown"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession = session;
+
+    EXPECT_CALL(*(session), ProcessPointDownSession(_, _)).Time(1).WillOnce(WSError::WS_OK);
+    EXPECT_TRUE(window->OnPointDown(0, 0, 0));
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

@@ -24,6 +24,14 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+class MockWindow : public Window {
+public:
+    MockWindow() {};
+    ~MockWindow() {};
+    MOCK_METHOD(bool, IsAnco, (), (const, override));
+    MOCK_METHOD(bool, OnPointDown, (int32_t eventId, int32_t posX, int32_t posY), (override));
+};
+
 using WindowMocker = SingletonMocker<WindowAdapter, MockWindowAdapter>;
 class WindowInputChannelTest : public testing::Test {
 public:
@@ -107,6 +115,35 @@ HWTEST_F(WindowInputChannelTest, HandlePointerEvent, TestSize.Level1)
     window_->GetWindowProperty()->SetWindowRect({ 0, 0, 8, 8 });
     inputChannel->HandlePointerEvent(pointerEvent);
     inputChannel->Destroy();
+}
+
+/**
+ * @tc.name: HandlePointEvent
+ * @tc.desc: consume key event when receive callback from input
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowInputChannelTest, HandlePointEvent01, TestSize.Level1)
+{
+    auto pointerEvent = MMI::PointerEvent::Create();
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("window");
+    auto window = sptr<MockWindow>::MakeSptr();
+    sptr<WindowInputChannel> inputChannel = sptr<WindowInputChannel>::MakeSptr(window);
+
+    EXPECT_CALL(*(window), IsAnco()).Time(1).WillOnce(Return(true));
+    EXPECT_CALL(*(window), OnPointDown(_, _, _)).Time(0);
+    inputChannel->HandlePointEvent(pointerEvent);
+    testing::Mock::VerifyAndClearExpectations(window);
+
+    MMI::PointerEvent::PointerItem item;
+    inputChannel->HandlePointEvent(pointerEvent);
+
+    pointerEvent->AddPointerItem(item);
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_DOWN);
+    EXPECT_CALL(*(window), IsAnco()).Time(1).WillOnce(Return(true));
+    EXPECT_CALL(*(window), OnPointDown(_, _, _)).Time(1);
+    inputChannel->HandlePointEvent(pointerEvent);
+    testing::Mock::VerifyAndClearExpectations(window);
 }
 
 /**
