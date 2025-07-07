@@ -2104,6 +2104,7 @@ HWTEST_F(WindowSceneSessionImplTest5, TestMoveWindowToGlobalDisplay, TestSize.Le
     EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
 
     // Case 2: Illegal position
+    window->hostSession_ = mockHostSession;
     ret = window->MoveWindowToGlobalDisplay(INT32_MAX, INT32_MAX);
     EXPECT_EQ(ret, WMError::WM_ERROR_ILLEGAL_PARAM);
 

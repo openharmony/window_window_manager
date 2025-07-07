@@ -2514,6 +2514,7 @@ HWTEST_F(SceneSessionManagerTest12, TestGetSceneSessions, TestSize.Level1)
         sessionMap.emplace(1, session1);
         sessionMap.emplace(2, session2);
         sessionMap.emplace(3, session3);
+        sessionMap.emplace(4, nullptr);
     }
 
     auto result = ssm_->GetSceneSessions(screenId);
