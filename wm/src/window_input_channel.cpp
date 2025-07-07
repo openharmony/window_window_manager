@@ -106,7 +106,7 @@ __attribute__((no_sanitize("cfi"))) void WindowInputChannel::HandleKeyEvent(
     window_->ConsumeKeyEvent(keyEvent);
 }
 
-void WindowIputChannel::ProcAncoEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+void WindowInputChannel::ProcAncoEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     auto action = pointerEvent->GetPointerAction();
     bool isPointDown = ((action == MMI::PointerEvent::POINTER_ACTION_DOWN) ||
