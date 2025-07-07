@@ -7675,7 +7675,7 @@ DMError ScreenSessionManager::GetLiveCreaseRegion(FoldCreaseRegion& region)
 {
 #ifdef FOLD_ABILITY_ENABLE
     if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
-        region = screenSession->GetLiveCreaseRegion();
+        region = SuperFoldStateManager::GetInstance().GetLiveCreaseRegion();
         return DMError::DM_OK;
     }
     if (!g_foldScreenFlag) {
