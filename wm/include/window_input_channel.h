@@ -36,7 +36,7 @@ public:
 private:
     bool IsKeyboardEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
     void DispatchKeyEventCallback(std::shared_ptr<MMI::KeyEvent>& keyEvent, bool consumed);
-    void ProcAncoEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    void ProcAncoEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     std::mutex mtx_;
     sptr<Window> window_;
     bool isAvailable_;
