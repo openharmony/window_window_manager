@@ -21,6 +21,7 @@
 #include "screen_session_manager.h"
 #include "fold_screen_state_internel.h"
 
+
 #include "window_manager_hilog.h"
 
 #ifdef POWER_MANAGER_ENABLE
@@ -69,7 +70,7 @@ SingleDisplayFoldPolicy::SingleDisplayFoldPolicy(std::recursive_mutex& displayIn
     currentFoldCreaseRegion_ = new FoldCreaseRegion(screenIdFull, rect);
 }
 
-FoldCreaseRegion SingleDisplayFoldPolicy::GetFoldCreaseRegion(bool isVertical)
+FoldCreaseRegion SingleDisplayFoldPolicy::GetFoldCreaseRegion(bool isVertical) const
 {
     std::vector<int32_t> foldRect = FoldScreenStateInternel::StringFoldRectSplitToInt(g_FoldScreenRect,
         FOLD_CREASE_DELIMITER);
@@ -80,12 +81,12 @@ FoldCreaseRegion SingleDisplayFoldPolicy::GetFoldCreaseRegion(bool isVertical)
 
     ScreenId screenIdFull = 0;
     std::vector<DMRect> foldCreaseRect;
-    GetFoldCreaseRect(isVertical, foldCreaseRect, foldRect);
+    GetFoldCreaseRect(isVertical, foldRect, foldCreaseRect);
     return FoldCreaseRegion(screenIdFull, foldCreaseRect);
 }
 
 void SingleDisplayFoldPolicy::GetFoldCreaseRect(bool isVertical,
-    std::vector<DMRect>& foldCreaseRect, const std::vector<int32_t>& foldRect)
+    const std::vector<int32_t>& foldRect, std::vector<DMRect>& foldCreaseRect)
 {
     int32_t liveCreaseRegionPosX; // live Crease Region PosX
     int32_t liveCreaseRegionPosY; // live Crease Region PosY

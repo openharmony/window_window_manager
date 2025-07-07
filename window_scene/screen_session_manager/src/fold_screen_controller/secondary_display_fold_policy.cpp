@@ -46,7 +46,7 @@ constexpr uint32_t HALF_DIVIDER = 2;
 constexpr float MAIN_DISPLAY_ROTATION_DEGREE = 180;
 constexpr float ROTATION_TRANSLATE_X = 612;
 constexpr float ROTATION_TRANSLATE_Y = -612;
-constexpr int32_t FOLD_CREASE_RECT_SIZE = 8; //numbers of parameter on the current device is 8
+constexpr int32_t FOLD_CREASE_RECT_SIZE = 8; // numbers of parameter on the current device is 8
 const std::string g_FoldScreenRect = system::GetParameter("const.display.foldscreen.crease_region", "");
 const std::string FOLD_CREASE_DELIMITER = ",;";
 #ifdef TP_FEATURE_ENABLE
@@ -99,7 +99,7 @@ SecondaryDisplayFoldPolicy::SecondaryDisplayFoldPolicy(std::recursive_mutex& dis
     currentFoldCreaseRegion_ = new FoldCreaseRegion(screenIdFull, rect);
 }
 
-FoldCreaseRegion SecondaryDisplayFoldPolicy::GetStatusFullFoldCreaseRegion(bool isVertical)
+FoldCreaseRegion SecondaryDisplayFoldPolicy::GetStatusFullFoldCreaseRegion(bool isVertical) const
 {
     std::vector<int32_t> foldRect = FoldScreenStateInternel::StringFoldRectSplitToInt(g_FoldScreenRect,
         FOLD_CREASE_DELIMITER);
@@ -110,12 +110,12 @@ FoldCreaseRegion SecondaryDisplayFoldPolicy::GetStatusFullFoldCreaseRegion(bool 
 
     ScreenId screenIdFull = 0;
     std::vector<DMRect> foldCreaseRect;
-    GetStatusFullFoldCreaseRect(isVertical, foldCreaseRect, foldRect);
+    GetStatusFullFoldCreaseRect(isVertical, foldRect, foldCreaseRect);
     return FoldCreaseRegion(screenIdFull, foldCreaseRect);
 }
 
 void SecondaryDisplayFoldPolicy::GetStatusFullFoldCreaseRect(bool isVertical,
-    std::vector<DMRect>& foldCreaseRect, const std::vector<int32_t>& foldRect)
+    const std::vector<int32_t>& foldRect, std::vector<DMRect>& foldCreaseRect) const
 {
     int32_t liveCreaseRegionPosX; // live Crease Region PosX
     int32_t liveCreaseRegionPosY; // live Crease Region PosY
@@ -143,7 +143,7 @@ void SecondaryDisplayFoldPolicy::GetStatusFullFoldCreaseRect(bool isVertical,
     return;
 }
 
-FoldCreaseRegion SecondaryDisplayFoldPolicy::GetStatusGlobalFullFoldCreaseRegion(bool isVertical)
+FoldCreaseRegion SecondaryDisplayFoldPolicy::GetStatusGlobalFullFoldCreaseRegion(bool isVertical) const
 {
     std::vector<int32_t> foldRect = FoldScreenStateInternel::StringFoldRectSplitToInt(g_FoldScreenRect,
         FOLD_CREASE_DELIMITER);
@@ -154,12 +154,12 @@ FoldCreaseRegion SecondaryDisplayFoldPolicy::GetStatusGlobalFullFoldCreaseRegion
 
     ScreenId screenIdFull = 0;
     std::vector<DMRect> foldCreaseRect;
-    GetStatusGlobalFullFoldCreaseRect(isVertical, foldCreaseRect, foldRect);
+    GetStatusGlobalFullFoldCreaseRect(isVertical, foldRect, foldCreaseRect);
     return FoldCreaseRegion(screenIdFull, foldCreaseRect);
 }
 
 void SecondaryDisplayFoldPolicy::GetStatusGlobalFullFoldCreaseRect(bool isVertical,
-    std::vector<DMRect>& foldCreaseRect, const std::vector<int32_t>& foldRect)
+    const std::vector<int32_t>& foldRect, std::vector<DMRect>& foldCreaseRect) const
 {
     int32_t liveCreaseRegionABPosX; // live Crease Region ABPosX
     int32_t liveCreaseRegionABPosY; // live Crease Region ABPosY
