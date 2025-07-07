@@ -172,7 +172,7 @@ void ScreenSessionManagerClient::OnScreenConnectionChanged(SessionOption option,
     }
     if (screenEvent == ScreenEvent::DISCONNECTED) {
         if (HandleScreenDisconnection(option)) {
-            screenEventProcessMap_.erase(option.screenId_);
+            connectedScreenSet_.erase(option.screenId_);
             TLOGI(WmsLogTag::DMS,
                 "screen event wait disconnecting, sId: %{public}" PRIu64 " sEvent: %{public}d rsId: %{public}" PRIu64,
                 option.screenId_, static_cast<int>(screenEvent), option.rsId_);
