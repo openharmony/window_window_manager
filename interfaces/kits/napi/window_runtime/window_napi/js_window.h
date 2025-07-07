@@ -305,6 +305,8 @@ private:
     napi_value OnSetAspectRatio(napi_env env, napi_callback_info info);
     napi_value OnResetAspectRatio(napi_env env, napi_callback_info info);
     napi_value OnMinimize(napi_env env, napi_callback_info info);
+    WmErrorCode CheckRaiseMainWindowParams(napi_env env, size_t argc, napi_value argv[],
+                                           int32_t sourceId, int32_t& targetId);
     napi_value OnRaiseAboveTarget(napi_env env, napi_callback_info info);
     napi_value OnRaiseMainWindowAboveTarget(napi_env env, napi_callback_info info);
     napi_value OnKeepKeyboardOnFocus(napi_env env, napi_callback_info info);
