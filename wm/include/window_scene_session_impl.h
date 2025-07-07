@@ -72,6 +72,7 @@ public:
     WMError RaiseAboveTarget(int32_t subWindowId) override;
     WMError SetSubWindowZLevel(int32_t zLevel) override;
     WMError GetSubWindowZLevel(int32_t& zLevel) override;
+    WMError RaiseMainWindowAboveTarget(int32_t targetId) override;
 
     void PerformBack() override;
     WMError SetAspectRatio(float ratio) override;

@@ -77,6 +77,7 @@ public:
     WSError GetIsMidScene(bool& isMidScene) override;
     WSError UpdateWindowSceneAfterCustomAnimation(bool isAdd) override;
     WSError RaiseAboveTarget(int32_t subWindowId) override;
+    WSError RaiseMainWindowAboveTarget(int32_t targetId) override;
     WSError RaiseAppMainWindowToTop() override;
     WSError SetSessionLabelAndIcon(const std::string& label,
         const std::shared_ptr<Media::PixelMap>& icon) override;

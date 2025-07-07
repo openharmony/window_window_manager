@@ -124,6 +124,7 @@ public:
     void SetSubWindowZLevelToProperty();
     int32_t GetSubWindowZLevelByFlags(WindowType type, uint32_t windowFlags, bool isTopmost);
     WMError RaiseToAppTopOnDrag();
+    bool IsApplicationModalSubWindowShowing(int32_t parentId);
 
     WMError SetResizeByDragEnabled(bool dragEnabled) override;
     WMError SetRaiseByClickEnabled(bool raiseEnabled) override;

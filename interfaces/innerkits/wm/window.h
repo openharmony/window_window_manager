@@ -2781,6 +2781,17 @@ public:
     virtual WMError RaiseAboveTarget(int32_t subWindowId) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
+     * @brief Raise main window above another.
+     *
+     * @param targetId Indicates the id of the target main window.
+     * @return WM_OK means raise success, others means raise failed.
+     */
+    virtual WMError RaiseMainWindowAboveTarget(int32_t targetId)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
      * @brief Hide non-system floating windows.
      *
      * @param shouldHide true means the non-system windows should be hidden, otherwise means the opposite.

@@ -60,6 +60,7 @@ private:
     int HandleSetWindowAnimationFlag(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateWindowSceneAfterCustomAnimation(MessageParcel& data, MessageParcel& reply);
     int HandleRaiseAboveTarget(MessageParcel& data, MessageParcel& reply);
+    int HandleRaiseMainWindowAboveTarget(MessageParcel& data, MessageParcel& reply);
     int HandleRaiseAppMainWindowToTop(MessageParcel& data, MessageParcel& reply);
     int HandleChangeSessionVisibilityWithStatusBar(MessageParcel& data, MessageParcel& reply);
     int HandlePendingSessionActivation(MessageParcel& data, MessageParcel& reply);
@@ -164,7 +165,7 @@ private:
     int HandleSetWindowAnchorInfo(MessageParcel& data, MessageParcel& reply);
 
     int HandleSetFollowParentWindowLayoutEnabled(MessageParcel& data, MessageParcel& reply);
-    
+
     // Window Transition Animation For PC
     int HandleSetWindowTransitionAnimation(MessageParcel& data, MessageParcel& reply);
 
