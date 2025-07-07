@@ -1178,7 +1178,7 @@ HWTEST_F(SceneSessionManagerTest11, SetStatusBarAvoidHeight, TestSize.Level1)
     int32_t height = 10;
     int32_t height2 = -1;
     ssm_->SetStatusBarAvoidHeight(0, height);
-    ssm_->SetStatusBarAvoidHeight(1, height);
+    ssm_->SetStatusBarAvoidHeight(1, height2);
     WSRect barArea = { 0, 0, 100, 100 };
     WSRect barArea2 = { 0, 0, 100, 100 };
     WSRect barArea3 = { 0, 0, 100, 100 };
