@@ -1411,7 +1411,14 @@ HWTEST_F(SceneSessionManagerTest11, AddSkipSelfWhenShowOnVirtualScreenList, Func
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
     std::vector<int32_t> persistentIds{ sceneSession->GetPersistentId() };
+    MockAccesstokenKit::MockIsSACalling(false);
+    MockAccesstokenKit::MockIsSystemApp(false);
     auto ret = ssm_->AddSkipSelfWhenShowOnVirtualScreenList(persistentIds);
+    EXPECT_EQ(ret, WMError::WM_ERROR_NOT_SYSTEM_APP);
+
+    MockAccesstokenKit::MockIsSACalling(true);
+    MockAccesstokenKit::MockIsSystemApp(true);
+    ret = ssm_->AddSkipSelfWhenShowOnVirtualScreenList(persistentIds);
     usleep(WAIT_SYNC_IN_NS);
     EXPECT_EQ(ret, WMError::WM_OK);
 }
@@ -1429,7 +1436,14 @@ HWTEST_F(SceneSessionManagerTest11, RemoveSkipSelfWhenShowOnVirtualScreenList, F
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
     std::vector<int32_t> persistentIds{ sceneSession->GetPersistentId() };
+    MockAccesstokenKit::MockIsSACalling(false);
+    MockAccesstokenKit::MockIsSystemApp(false);
     auto ret = ssm_->RemoveSkipSelfWhenShowOnVirtualScreenList(persistentIds);
+    EXPECT_EQ(ret, WMError::WM_ERROR_NOT_SYSTEM_APP);
+
+    MockAccesstokenKit::MockIsSACalling(true);
+    MockAccesstokenKit::MockIsSystemApp(true);
+    ret = ssm_->RemoveSkipSelfWhenShowOnVirtualScreenList(persistentIds);
     usleep(WAIT_SYNC_IN_NS);
     EXPECT_EQ(ret, WMError::WM_OK);
 }
