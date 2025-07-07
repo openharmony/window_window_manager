@@ -1403,7 +1403,7 @@ napi_value CreateJsSessionRecoverInfo(
         TLOGE(WmsLogTag::WMS_IMMS, "jsPropertyArrayObject is nullptr");
         return nullptr;
     }
-    napi_set_named_property(env, objValue, "systemBarPropertyArray", jsPropertyArrayObject);
+    napi_set_named_property(env, objValue, "systemBarProperties", jsPropertyArrayObject);
 
     return objValue;
 }
