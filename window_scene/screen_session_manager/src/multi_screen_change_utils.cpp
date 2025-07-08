@@ -136,6 +136,10 @@ void MultiScreenChangeUtils::ScreenMainPositionChange(sptr<ScreenSession>& inner
     }
     RSTransactionAdapter::FlushImplicitTransaction(
         {innerScreen->GetRSUIContext(), externalScreen->GetRSUIContext()});
+    ScreenSessionManager::GetInstance().NotifyDisplayChanged(innerScreen->ConvertToDisplayInfo(),
+        DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
+    ScreenSessionManager::GetInstance().NotifyDisplayChanged(externalScreen->ConvertToDisplayInfo(),
+        DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
 }
 
 void MultiScreenChangeUtils::SetExternalScreenOffScreenRendering(sptr<ScreenSession>& innerScreen,
@@ -212,7 +216,7 @@ void MultiScreenChangeUtils::ScreenRSIdChange(sptr<ScreenSession>& innerScreen,
         TLOGE(WmsLogTag::DMS, "screen sessions null.");
         return;
     }
-    
+
     ScreenSessionManager::GetInstance().UpdateScreenIdManager(innerScreen, externalScreen);
 
     ScreenId innerScreenId = innerScreen->GetRSScreenId();
