@@ -2715,7 +2715,7 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
             TLOGNE(WmsLogTag::WMS_PATTERN, "scenePersistence_ is null");
             return;
         }
-        if (session->freeMultiWindow_) {
+        if (session->freeMultiWindow_.load()) {
             session->scenePersistence_->SetHasSnapshotFreeMultiWindow(true);
             ScenePersistentStorage::Insert("Snapshot_" + std::to_string(session->persistentId_), true,
                 ScenePersistentStorageType::MAXIMIZE_STATE);
@@ -2732,7 +2732,7 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
             removeSnapshotCallback = session->removeSnapshotCallback_;
         }
         session->scenePersistence_->SaveSnapshot(pixelMap, removeSnapshotCallback, key, rotate,
-            session->freeMultiWindow_);
+            session->freeMultiWindow_.load());
         if (updateSnapshot) {
             session->SetExitSplitOnBackground(false);
             session->scenePersistence_->ClearSnapshot(key);
@@ -2752,17 +2752,17 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
 void Session::SetFreeMultiWindow()
 {
     if (GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
-        freeMultiWindow_ = false;
+        freeMultiWindow_.store(false);
     } else {
-        freeMultiWindow_ = true;
+        freeMultiWindow_.store(true);
     }
 }
 
 void Session::DeleteHasSnapshot()
 {
-    for (uint32_t screen = SCREEN_UNKNOWN; screen < SCREEN_COUNT; screen++) {
+    for (uint32_t screenStatus = SCREEN_UNKNOWN; screenStatus < SCREEN_COUNT; screenStatus++) {
         for (uint32_t orientation = SNAPSHOT_PORTRAIT; orientation < ORIENTATION_COUNT; orientation++) {
-            DeleteHasSnapshot({ screen, orientation });
+            DeleteHasSnapshot({ screenStatus, orientation });
         }
     }
     DeleteHasSnapshotFreeMultiWindow();
@@ -2813,9 +2813,9 @@ bool Session::HasSnapshotFreeMultiWindow()
 
 bool Session::HasSnapshot()
 {
-    for (uint32_t screen = SCREEN_UNKNOWN; screen < SCREEN_COUNT; screen++) {
+    for (uint32_t screenStatus = SCREEN_UNKNOWN; screenStatus < SCREEN_COUNT; screenStatus++) {
         for (uint32_t orientation = SNAPSHOT_PORTRAIT; orientation < ORIENTATION_COUNT; orientation++) {
-            if (HasSnapshot({ screen, orientation })) {
+            if (HasSnapshot({ screenStatus, orientation })) {
                 return true;
             }
         }
@@ -4373,8 +4373,8 @@ std::shared_ptr<Media::PixelMap> Session::GetSnapshotPixelMap(const float oriSca
         return nullptr;
     }
     auto key = GetWindowStatus();
-    return scenePersistence_->IsSavingSnapshot(key, freeMultiWindow_) ? GetSnapshot() :
-        scenePersistence_->GetLocalSnapshotPixelMap(oriScale, newScale, key, freeMultiWindow_);
+    return scenePersistence_->IsSavingSnapshot(key, freeMultiWindow_.load()) ? GetSnapshot() :
+        scenePersistence_->GetLocalSnapshotPixelMap(oriScale, newScale, key, freeMultiWindow_.load());
 }
 
 bool Session::IsVisibleForeground() const
