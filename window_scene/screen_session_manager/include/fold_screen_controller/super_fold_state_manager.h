@@ -69,7 +69,8 @@ private:
     sptr<FoldCreaseRegion> currentSuperFoldCreaseRegion_ = nullptr;
     FoldCreaseRegion liveCreaseRegion_ = FoldCreaseRegion(0, {});
     FoldCreaseRegion GetFoldCreaseRegion(bool isVertical) const;
-    void GetFoldCreaseRect(bool isVertical, const std::vector<int32_t>& foldRect, std::vector<DMRect>& foldCreaseRect) const;
+    void GetFoldCreaseRect(bool isVertical, const std::vector<int32_t>& foldRect,
+        std::vector<DMRect>& foldCreaseRect) const;
     std::mutex superStatusMutex_;
     struct Transition {
         SuperFoldStatus nextState;
