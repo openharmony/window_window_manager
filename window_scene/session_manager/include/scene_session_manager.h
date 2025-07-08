@@ -1121,7 +1121,6 @@ private:
     void OnSessionRecoverStateChange(const SessionRecoverState& state,
         const sptr<WindowSessionProperty>& property);
     void OnRecoverStateChange(const RecoverState& state);
-    void UpdateStartRecoverProperty(const sptr<WindowSessionProperty>& property);
     NotifySessionRecoverStateChangeFunc sessionRecoverStateChangeFunc_;
     NotifyRecoverStateChangeFunc recoverStateChangeFunc_;
 

@@ -1001,7 +1001,7 @@ enum class AsyncTraceTaskId: int32_t {
  * @brief Recover state
  */
 enum class RecoverState : uint32_t {
-    RECOVER_INITIAL = 0;
+    RECOVER_INITIAL = 0,
     RECOVER_ENABLE_INPUT,
     RECOVER_END,
 };
@@ -1010,7 +1010,7 @@ enum class RecoverState : uint32_t {
  * @brief Client window recover state
  */
 enum class WindowRecoverState : uint32_t {
-    WINDOW_DIS_RECONNECT = 0;
+    WINDOW_DIS_RECONNECT = 0,
     WINDOW_START_RECONNECT,
     WINDOW_DOING_RECONNECT,
     WINDOW_FINISH_RECONNECT,
@@ -1021,7 +1021,7 @@ enum class WindowRecoverState : uint32_t {
  * @brief Server session recover state
  */
 enum class SessionRecoverState : uint32_t {
-    SESSION_DIS_RECONNECT = 0;
+    SESSION_DIS_RECONNECT = 0,
     SESSION_START_RECONNECT,
     SESSION_DOING_RECONNECT,
     SESSION_FINISH_RECONNECT,

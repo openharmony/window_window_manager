@@ -472,44 +472,39 @@ void SceneSessionManager::OnSessionRecoverStateChange(const SessionRecoverState&
         const sptr<WindowSessionProperty>& property)
 {
     switch (state) {
-    case SessionRecoverState::SESSION_START_RECONNECT:
-        // The server session has not request yet.
-        UpdateStartRecoverProperty(property);
-        break;
-    case SessionRecoverState::SESSION_FINISH_RECONNECT:
-        // The server session has been request.
-        auto sessionInfo = property->GetSessionInfo();
-        auto persistentId = sessionInfo.persistentId_;
-        auto sceneSession = GetSceneSession(persistentId);
-        if (SessionHelper::IsMainWindow(sceneSession->GetWindowType())) {
-            sceneSession->SetRecovered(true);
-            recoverSceneSessionFunc_(sceneSession, sessionInfo);
-            sceneSession->SetWindowShadowEnabled(property->GetWindowShadowEnabled());
-        } else {
-            sceneSession->NotifyFollowParentMultiScreenPolicy(info.isFollowParentMultiScreenPolicy);
-            NotifyCreateSpecificSession(sceneSession, property, property->GetWindowType());
-            CacheSpecificSessionForRecovering(sceneSession, property);
-            sceneSession->SetWindowAnchorInfo(property->GetWindowAnchorInfo());
+        case SessionRecoverState::SESSION_START_RECONNECT:
+            // The server session has not request yet.
+            UpdateRecoverPropertyForSuperFold(property);
+            RecoverSessionInfo(property);
+            break;
+        case SessionRecoverState::SESSION_FINISH_RECONNECT: {
+            // The server session has been request.
+            auto sessionInfo = property->GetSessionInfo();
+            auto persistentId = sessionInfo.persistentId_;
+            auto sceneSession = GetSceneSession(persistentId);
+            if (SessionHelper::IsMainWindow(sceneSession->GetWindowType())) {
+                sceneSession->SetRecovered(true);
+                recoverSceneSessionFunc_(sceneSession, sessionInfo);
+                sceneSession->SetWindowShadowEnabled(property->GetWindowShadowEnabled());
+            } else {
+                sceneSession->NotifyFollowParentMultiScreenPolicy(sessionInfo.isFollowParentMultiScreenPolicy);
+                NotifyCreateSpecificSession(sceneSession, property, property->GetWindowType());
+                CacheSpecificSessionForRecovering(sceneSession, property);
+                sceneSession->SetWindowAnchorInfo(property->GetWindowAnchorInfo());
+            }
+            NotifySessionUnfocusedToClient(persistentId);
+            break;
         }
-        NotifySessionUnfocusedToClient(persistentId);
-        break;
-    default:
-        break;
+        default:
+            break;
     }
-}
-
-void SceneSessionManager::UpdateStartRecoverProperty(const sptr<WindowSessionProperty>& property)
-{
-    UpdateRecoverPropertyForSuperFold(property);
-    RecoverSessionInfo(property);
 }
 
 void SceneSessionManager::RegisterRecoverStateChangeListener()
 {
-    recoverStateChangeFunc_ = [this](const RecoverState& state) THREAD_SAFETY_GUARD(SCENE_GUARD)
-    {
+    recoverStateChangeFunc_ = [this](const RecoverState& state) THREAD_SAFETY_GUARD(SCENE_GUARD) {
         this->OnRecoverStateChange(state);
-    }
+    };
 }
 
 void SceneSessionManager::OnRecoverStateChange(const RecoverState& state)

@@ -238,6 +238,57 @@ HWTEST_F(WindowRecoverManagerTest, RegisterSessionRecoverListenerSuccess02, Test
     SingletonContainer::Get<WindowAdapter>().sessionRecoverCallbackFuncMap_.clear();
 }
 
+/**
+ * @tc.name: RegisterWindowRecoverStateChangeListener
+ * @tc.desc: Register Window Recover State Change Listener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRecoverManagerTest, RegisterWindowRecoverStateChangeListener, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->property_->SetCollaboratorType(CollaboratorType::DEFAULT_TYPE);
+    window->RegisterWindowRecoverStateChangeListener();
+    EXPECT_NE(window->windowRecoverStateChangeFunc_, nullptr);
+}
+
+/**
+ * @tc.name: OnWindowRecoverStateChange
+ * @tc.desc: On Window Recover State Change
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRecoverManagerTest, OnWindowRecoverStateChange, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->property_->SetCollaboratorType(CollaboratorType::DEFAULT_TYPE);
+    window->OnWindowRecoverStateChange(false, WindowRecoverState::WINDOW_START_RECONNECT);
+    EXPECT_EQ(window->property_->GetWindowState(), window->state_);
+
+    window->OnWindowRecoverStateChange(false, WindowRecoverState::WINDOW_FINISH_RECONNECT);
+    EXPECT_EQ(window->property_->GetWindowState(), window->state_);
+}
+
+/**
+ * @tc.name: UpdateStartRecoverProperty
+ * @tc.desc: Update Start Recover Property
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRecoverManagerTest, UpdateStartRecoverProperty, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->property_->SetCollaboratorType(CollaboratorType::DEFAULT_TYPE);
+    window->UpdateStartRecoverProperty(false);
+    EXPECT_EQ(window->property_->GetWindowState(), window->state_);
+
+    window->UpdateStartRecoverProperty(true);
+    EXPECT_EQ(window->property_->GetWindowState(), window->requestState_);
+}
+
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
