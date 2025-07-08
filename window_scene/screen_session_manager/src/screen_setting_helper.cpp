@@ -600,5 +600,14 @@ bool ScreenSettingHelper::GetSettingExtendScreenDpi(float& coef, const std::stri
     }
     return true;
 }
+
+bool ScreenSettingHelper::ConvertStrToInt32(const std::string& str, int32_t& num)
+{
+    auto res = std::from_chars(str.data(), str.data() + str.size(), num);
+    if (res.ec != std::errc()) {
+        return false;
+    }
+    return true;
+}
 } // namespace Rosen
 } // namespace OHOS
