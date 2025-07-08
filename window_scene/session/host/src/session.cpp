@@ -4735,7 +4735,7 @@ WSRect Session::ComputeGlobalDisplayRect() const
     // The method GetSessionGlobalRectInMultiScreen abstracts this difference and always
     // returns the window's rect relative to its screen, regardless of the scenario.
     WSRect relativeRect = GetSessionGlobalRectInMultiScreen();
-    return SessionCoordinateHelper::RelativeToGlobalDisplayRect(GetDisplayId(), relativeRect);
+    return SessionCoordinateHelper::RelativeToGlobalDisplayRect(GetScreenId(), relativeRect);
 }
 
 WSError Session::UpdateGlobalDisplayRect(const WSRect& rect, SizeChangeReason reason)

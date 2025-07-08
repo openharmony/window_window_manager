@@ -42,11 +42,11 @@ public:
      * This function converts a rectangle defined relative to a specific display's origin
      * into global coordinates based on the display's global position.
      *
-     * @param displayId The display ID associated with the relative coordinates.
-     * @param relativeRect The rectangle relative to the given display.
+     * @param screenId The screen ID associated with the relative coordinates.
+     * @param relativeRect The rectangle relative to the given screen.
      * @return The rectangle represented in global coordinates.
      */
-    static WSRect RelativeToGlobalDisplayRect(DisplayId displayId, const WSRect& relativeRect);
+    static WSRect RelativeToGlobalDisplayRect(ScreenId screenId, const WSRect& relativeRect);
 
     /**
      * @brief Convert global coordinates to relative display coordinates.
@@ -55,23 +55,11 @@ public:
      * The best-matching display is determined based on the rectangle's top-left position,
      * overlap area, or maximum intersection area.
      *
-     * @param originalDisplayId The original display ID where the window was created or originally located.
+     * @param originalScreenId The original screen ID where the window was created or originally located.
      * @param globalRect The rectangle in global coordinates.
      * @return The rectangle relative to a selected display, along with its associated display ID.
      */
-    static WSRelativeDisplayRect GlobalToRelativeDisplayRect(DisplayId originalDisplayId, const WSRect& globalRect);
-
-private:
-    static WSRect ToRelative(const WSRect& globalRect, const WSRect& screenRect);
-
-    static std::unordered_map<uint64_t, WSRect> BuildScreenRectMap();
-
-    static std::optional<WSRelativeDisplayRect> MatchBestIntersectionScreen(
-        const std::unordered_map<uint64_t, WSRect>& screenRectMap, const WSRect& globalRect);
-
-    static WSRelativeDisplayRect FallbackToOriginalOrPrimaryScreen(
-        const std::unordered_map<uint64_t, WSRect>& screenRectMap, const WSRect& globalRect,
-        DisplayId originalDisplayId);
+    static WSRelativeDisplayRect GlobalToRelativeDisplayRect(ScreenId originalScreenId, const WSRect& globalRect);
 };
 } // namespace OHOS::Rosen
 
