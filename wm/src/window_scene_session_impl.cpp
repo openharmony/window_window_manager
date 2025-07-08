@@ -2099,6 +2099,12 @@ WMError WindowSceneSessionImpl::MoveWindowToGlobalDisplay(
         TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid session");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    auto mode = GetWindowMode();
+    if (mode != WindowMode::WINDOW_MODE_FLOATING) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "window should not move, windowId: %{public}u, mode: %{public}u",
+            GetWindowId(), mode);
+        return WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS;
+    }
     auto winId = GetPersistentId();
     // Use RequestRect to quickly get width and height from Resize method.
     const auto requestRect = GetRequestRect();

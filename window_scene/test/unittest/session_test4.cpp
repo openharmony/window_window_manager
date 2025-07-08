@@ -1380,6 +1380,11 @@ HWTEST_F(WindowSessionTest4, TestUpdateGlobalDisplayRect, TestSize.Level1)
     EXPECT_EQ(result, WSError::WS_OK);
 }
 
+/**
+ * @tc.name: TestNotifyClientToUpdateGlobalDisplayRect
+ * @tc.desc: Verify that notifying client to update global display rect works as expected
+ * @tc.type: FUNC
+ */
 HWTEST_F(WindowSessionTest4, TestNotifyClientToUpdateGlobalDisplayRect, TestSize.Level1)
 {
     WSRect rect = { 10, 20, 200, 100 };
@@ -1390,12 +1395,15 @@ HWTEST_F(WindowSessionTest4, TestNotifyClientToUpdateGlobalDisplayRect, TestSize
     auto result = session_->NotifyClientToUpdateGlobalDisplayRect(rect, SizeChangeReason::UNDEFINED);
     EXPECT_EQ(result, WSError::WS_DO_NOTHING);
 
-    session_->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
+    auto mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
+    session_->sessionStage_ = mockSessionStage;
     session_->state_ = SessionState::STATE_BACKGROUND;
     result = session_->NotifyClientToUpdateGlobalDisplayRect(rect, SizeChangeReason::UNDEFINED);
     EXPECT_EQ(result, WSError::WS_DO_NOTHING);
 
     session_->state_ = SessionState::STATE_FOREGROUND;
+    EXPECT_CALL(*mockSessionStage, UpdateGlobalDisplayRectFromServer(rect, SizeChangeReason::UNDEFINED))
+        .WillOnce(Return(WSError::WS_OK));
     result = session_->NotifyClientToUpdateGlobalDisplayRect(rect, SizeChangeReason::UNDEFINED);
     EXPECT_EQ(result, WSError::WS_OK);
     session_->state_ = originalState;
