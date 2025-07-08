@@ -58,9 +58,6 @@ private:
     Ace::UIContent* uiContent_ = nullptr;
     std::weak_ptr<AppExecFwk::EventHandler> weakEventConsumer_;
 };
-    bool GetAddMonitor();
-    void SetAddMonitor(bool isAddMonitor);
-    bool isAddMonitor_ = false;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_INTENTION_EVENT_MANAGER_H

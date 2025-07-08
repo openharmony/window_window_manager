@@ -7781,6 +7781,24 @@ std::shared_ptr<RSUIContext> WindowSessionImpl::GetRSUIContext() const
     return rsUIContext;
 }
 
+bool WindowSessionImpl::IsAnco() const
+{
+    return property_->GetCollaboratorType() == static_cast<int32_t>(CollaboratorType::RESERVE_TYPE);
+}
+
+bool WindowSessionImpl::OnPointDown(int32_t eventId, int32_t posX, int32_t posY)
+{
+    auto hostSession = GetHostSession();
+    if (!hostSession) {
+        TLOGE(WmsLogTag::WMS_EVENT, "windowId:%{public}u,%{public}d", GetWindowId(), eventId);
+        return false;
+    }
+
+    auto ret = hostSession->ProcessPointDownSession(posX, posY);
+    TLOGD(WmsLogTag::WMS_EVENT, "windowId:%{public}u,%{public}d,%{public}d", GetWindowId(), eventId, ret);
+    return ret == WSError::WS_OK;
+}
+
 void WindowSessionImpl::SetNavDestinationInfo(const std::string& navDestinationInfo)
 {
     navDestinationInfo_ = navDestinationInfo;
