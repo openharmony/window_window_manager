@@ -55,6 +55,7 @@ public:
         ani_ref callback);
     static void UnregisterWindowCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
         ani_ref callback);
+    static void KeepKeyboardOnFocus(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean keepKeyboardFlag);
 
     void StartMoving(ani_env* env);
     void StartMoveWindowWithCoordinate(ani_env* env, ani_double offsetX, ani_double offsetY);
@@ -91,6 +92,7 @@ private:
     ani_object OnGetWindowAvoidArea(ani_env* env, ani_int type);
     void OnRegisterWindowCallback(ani_env* env, ani_string type, ani_ref callback);
     void OnUnregisterWindowCallback(ani_env* env, ani_string type, ani_ref callback);
+    void OnKeepKeyboardOnFocus(ani_env* env, ani_boolean keepKeyboardFlag);
     bool GetSystemBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProperties,
         std::map<WindowType, SystemBarPropertyFlag>& systemBarpropertyFlags,
         const std::vector<std::string>& names, sptr<Window>& window);
