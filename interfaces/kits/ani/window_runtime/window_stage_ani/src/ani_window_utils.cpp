@@ -67,6 +67,96 @@ ani_status AniWindowUtils::GetStdStringVector(ani_env* env, ani_object ary, std:
     return ANI_OK;
 }
 
+ani_status AniWindowUtils::GetPropertyIntObject(ani_env* env, const char* propertyName,
+    ani_object object, int32_t& result)
+{
+    ani_ref int_ref;
+    ani_status ret = env->Object_GetPropertyByName_Ref(object, propertyName, &int_ref);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref %{public}s Failed, ret : %{public}u",
+            propertyName, static_cast<int32_t>(ret));
+        return ret;
+    }
+
+    ani_boolean isUndefined;
+    if (ANI_OK != env->Reference_IsUndefined(int_ref, &isUndefined)) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref %{public}s Failed", propertyName);
+        return ret;
+    }
+
+    if (isUndefined) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] %{public}s is Undefined Now", propertyName);
+        return ret;
+    }
+
+    ani_int int_value;
+    if (ANI_OK != env->Object_CallMethodByName_Int(static_cast<ani_object>(int_ref), "intValue", nullptr, &int_value)) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref %{public}s Failed", propertyName);
+        return ret;
+    }
+    result = static_cast<int32_t>(int_value);
+    TLOGI(WmsLogTag::DEFAULT, "[ANI] %{public}s is: %{public}u", propertyName, result);
+    return ret;
+}
+
+ani_status AniWindowUtils::GetPropertyDoubleObject(ani_env* env, const char* propertyName,
+    ani_object object, double& result)
+{
+    ani_ref double_ref;
+    ani_status ret = env->Object_GetPropertyByName_Ref(object, propertyName, &double_ref);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref %{public}s Failed, ret : %{public}u",
+            propertyName, static_cast<int32_t>(ret));
+        return ret;
+    }
+
+    ani_boolean isUndefined;
+    if (ANI_OK != env->Reference_IsUndefined(double_ref, &isUndefined)) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref %{public}s Failed", propertyName);
+        return ret;
+    }
+
+    if (isUndefined) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] %{public}s is Undefined Now", propertyName);
+        return ret;
+    }
+
+    ani_double double_value;
+    if (ANI_OK != env->Object_CallMethodByName_Double(static_cast<ani_object>(double_ref),
+        "doubleValue", nullptr, &double_value)) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref %{public}s Failed", propertyName);
+        return ret;
+    }
+    result = static_cast<double>(double_value);
+    TLOGI(WmsLogTag::DEFAULT, "[ANI] %{public}s is: %{public}f", propertyName, result);
+    return ret;
+}
+
+ani_status AniWindowUtils::GetDoubleObject(ani_env* env, ani_object double_object, double& result)
+{
+    ani_boolean isUndefined;
+    ani_status isUndefinedRet = env->Reference_IsUndefined(double_object, &isUndefined);
+    if (ANI_OK != isUndefinedRet) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Check double_object isUndefined fail");
+        return isUndefinedRet;
+    }
+
+    if (isUndefined) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] CallMeWithOptionalDouble Not Pass Value");
+        return ANI_INVALID_ARGS;
+    }
+
+    ani_double double_value;
+    ani_status ret = env->Object_CallMethodByName_Double(double_object, "doubleValue", nullptr, &double_value);
+    if (ANI_OK != ret) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_CallMethodByName_Double Failed!");
+        return ret;
+    }
+    result = static_cast<double>(double_value);
+    TLOGI(WmsLogTag::DEFAULT, "[ANI] double result is: %{public}f", result);
+    return ret;
+}
+
 ani_status AniWindowUtils::NewAniObjectNoParams(ani_env* env, const char* cls, ani_object* object)
 {
     ani_class aniClass;
