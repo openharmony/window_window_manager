@@ -1188,6 +1188,177 @@ export interface WindowTitleButtonVisibleParam {
 }
 
 /**
+  * Describes the scale Transition Options of window
+  *
+  * @interface ScaleOptions
+  * @syscap SystemCapability.WindowManager.WindowManager.Core
+  * @systemapi
+  * @since 9
+  */
+export interface ScaleOptions {
+  /**
+    * The scale param of x direction. Default is 1.f
+    *
+    * @type { ?number }
+    * @syscap SystemCapability.WindowManager.WindowManager.Core
+    * @systemapi
+    * @since 9
+    */
+  x?: number;
+
+  /**
+    * The scale param of y direction. Default is 1.f
+    *
+    * @type { ?number }
+    * @syscap SystemCapability.WindowManager.WindowManager.Core
+    * @systemapi
+    * @since 9
+    */
+  y?: number;
+
+  /**
+    * The scale param of pivot point of x. Default is 0.5f, Interval is 0.f - 1.f
+    *
+    * @type { ?number }
+    * @syscap SystemCapability.WindowManager.WindowManager.Core
+    * @systemapi
+    * @since 9
+    */
+  pivotX?: number;
+
+  /**
+    * The scale param of pivot point of y. Default is 0.5f, Interval is 0.f - 1.f
+    *
+    * @type { ?number }
+    * @syscap SystemCapability.WindowManager.WindowManager.Core
+    * @systemapi
+    * @since 9
+    */
+  pivotY?: number;
+}
+
+export class ScaleOptionsInternal implements ScaleOptions {
+  x?: number;
+  y?: number;
+  pivotX?: number;
+  pivotY?: number;
+}
+
+/**
+  * Describes the rotate Transition Options of window
+  *
+  * @interface RotateOptions
+  * @syscap SystemCapability.WindowManager.WindowManager.Core
+  * @systemapi
+  * @since 9
+  */
+export interface RotateOptions {
+  /**
+    * The rotate degree of x direction. Default value is 0.f
+    *
+    * @type { ?number }
+    * @syscap SystemCapability.WindowManager.WindowManager.Core
+    * @systemapi
+    * @since 9
+    */
+  x?: number;
+
+  /**
+    * The rotate degree of y direction. Default value is 0.f
+    *
+    * @type { ?number }
+    * @syscap SystemCapability.WindowManager.WindowManager.Core
+    * @systemapi
+    * @since 9
+    */
+  y?: number;
+
+  /**
+    * The rotate degree of z direction. Default value is 0.f
+    *
+    * @type { ?number }
+    * @syscap SystemCapability.WindowManager.WindowManager.Core
+    * @systemapi
+    * @since 9
+    */
+  z?: number;
+
+  /**
+    * The param of pivot point of x. Default is 0.5f, Interval is 0.f - 1.f
+    *
+    * @type { ?number }
+    * @syscap SystemCapability.WindowManager.WindowManager.Core
+    * @systemapi
+    * @since 9
+    */
+  pivotX?: number;
+
+  /**
+    * The param of pivot point of y. Default is 0.5f, Interval is 0.f - 1.f
+    *
+    * @type { ?number }
+    * @syscap SystemCapability.WindowManager.WindowManager.Core
+    * @systemapi
+    * @since 9
+    */
+  pivotY?: number;
+}
+
+export class RotateOptionsInternal implements RotateOptions {
+  x?: number;
+  y?: number;
+  z?: number;
+  pivotX?: number;
+  pivotY?: number;
+}
+
+/**
+  * Describes the translate Transition Options of window
+  *
+  * @interface TranslateOptions
+  * @syscap SystemCapability.WindowManager.WindowManager.Core
+  * @systemapi
+  * @since 9
+  */
+export interface TranslateOptions {
+  /**
+    * The translate pixel param of x direction. Default is 0.f
+    *
+    * @type { ?number }
+    * @syscap SystemCapability.WindowManager.WindowManager.Core
+    * @systemapi
+    * @since 9
+    */
+  x?: number;
+
+  /**
+    * The translate pixel param of y direction. Default is 0.f
+    *
+    * @type { ?number }
+    * @syscap SystemCapability.WindowManager.WindowManager.Core
+    * @systemapi
+    * @since 9
+    */
+  y?: number;
+
+  /**
+    * The translate pixel param of z direction. Default is 0.f
+    *
+    * @type { ?number }
+    * @syscap SystemCapability.WindowManager.WindowManager.Core
+    * @systemapi
+    * @since 9
+    */
+  z?: number;
+}
+
+export class TranslateOptionsInternal implements TranslateOptions {
+  x?: number;
+  y?: number;
+  z?: number;
+}
+
+/**
  * The information of keyboard
  *
  * @interface KeyboardInfo
@@ -1332,6 +1503,12 @@ export class WindowInternal implements Window {
     private native keepKeyboardOnFocusSync(nativeObj: long, enable: boolean): void;
     private native onSync(nativeObj: long, type: string, callback: object): void;
     private native offSync(nativeObj: long, type: string, callback?: object): void;
+    private native opacity(nativeObj: long, opacity: number): void;
+    private native scale(nativeObj: long, scaleOptions: ScaleOptions): void;
+    private native translate(nativeObj: long, translateOptions: TranslateOptions): void;
+    private native rotate(nativeObj: long, rotateOptions: RotateOptions): void;
+    private native setShadow(nativeObj: long, radius: number, color?: string,
+      offsetX?: number, offsetY?: number): void;
 
     public startMoving(): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) :void => {
@@ -1800,6 +1977,26 @@ export class WindowInternal implements Window {
     public off<T>(type: string, callback?: Callback<T>): void {
       this.offSync(this.nativeObj, type, callback);
     }
+
+    public opacity(opacity: number): void {
+      this.opacity(this.nativeObj, opacity);
+    }
+
+    public scale(scaleOptions: ScaleOptions): void {
+      this.scale(this.nativeObj, scaleOptions);
+    }
+
+    public translate(translateOptions: TranslateOptions): void {
+      this.translate(this.nativeObj, translateOptions);
+    }
+
+    public rotate(rotateOptions: RotateOptions): void {
+      this.rotate(this.nativeObj, rotateOptions);
+    }
+
+    public setShadow(radius: number, color?: string, offsetX?: number, offsetY?: number): void {
+      this.setShadow(this.nativeObj, radius, color, offsetX, offsetY);
+    }
 }
 
 export interface Window {
@@ -1853,6 +2050,11 @@ export interface Window {
     keepKeyboardOnFocus(enable: boolean): void;
     on<T>(type: string, callback: Callback<T>): void;
     off<T>(type: string, callback?: Callback<T>): void;
+    opacity(opacity: number): void;
+    scale(scaleOptions: ScaleOptions): void;
+    translate(translateOptions: TranslateOptions): void;
+    rotate(rotateOptions: RotateOptions): void;
+    setShadow(radius: number, color?: string, offsetX?: number, offsetY?: number): void;
 }
 
 export native function CreateWindowStage(scene: long): WindowStageInternal;
