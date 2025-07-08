@@ -1214,6 +1214,10 @@ export class WindowInternal implements Window {
         this.nativeObj = nativeObj;
     }
 
+    private native resize(nativeObj: long, width: double, height: double): int;
+    private native moveWindowTo(nativeObj: long, x: double, y: double): int;
+    private native getGlobalRect(nativeObj:long): Rect;
+
     private native getWindowDecorHeight(nativeObj:long): double;
     private native setWindowBackgroundColor(nativeObj: long, color: string): int;
     private native setImmersiveModeEnabledState(nativeObj: long, enable: boolean): int;
@@ -1241,6 +1245,54 @@ export class WindowInternal implements Window {
     private native onSync(nativeObj: long, type: string, callback: object): void;
     private native offSync(nativeObj: long, type: string, callback?: object): void;
 
+    public resize(width: double, height: double): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) :void => {
+        taskpool.execute((): void => {
+          this.resize(this.nativeObj, width, height);
+        }).then((ret: NullishType) :void => {
+            resolve(undefined);
+        }).catch((err: NullishType) :void => {
+            reject(err as BusinessError);
+        });
+      });
+    }
+
+    public moveWindowTo(x: double, y: double): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) :void => {
+        taskpool.execute((): void => {
+          this.moveWindowTo(this.nativeObj, x, y);
+        }).then((ret: NullishType) :void => {
+            resolve(undefined);
+        }).catch((err: NullishType) :void => {
+            reject(err as BusinessError);
+        });
+      });
+    }
+
+    public resize(width: double, height: double, callback: AsyncCallback<void>): void {
+      taskpool.execute((): void => {
+        this.resize(this.nativeObj, width, height);
+        }).then((ret: NullishType) => {
+            callback(new BusinessError(), undefined);
+        }).catch((err: NullishType) => {
+            callback(err as BusinessError, undefined);
+        });
+    }
+
+    public moveWindowTo(x: double, y: double, callback: AsyncCallback<void>): void {
+      taskpool.execute((): void => {
+        this.moveWindowTo(this.nativeObj, x, y);
+        }).then((ret: NullishType) => {
+            callback(new BusinessError(), undefined);
+        }).catch((err: NullishType) => {
+            callback(err as BusinessError, undefined);
+        });
+    }
+
+    public getGlobalRect(): Rect {
+      let ret = this.getGlobalRect(this.nativeObj);
+      return ret;
+    }
     public getWindowDecorHeight(): number {
        let ret = this.getWindowDecorHeight(this.nativeObj);
        return ret;
@@ -1624,6 +1676,11 @@ export class WindowInternal implements Window {
 }
 
 export interface Window {
+    resize(width: double, height: double): Promise<void>;
+    moveWindowTo(x: double, y: double): Promise<void>;
+    resize(width: double, height: double, callback: AsyncCallback<void>): void;
+    moveWindowTo(x: double, y: double, callback: AsyncCallback<void>): void;
+    getGlobalRect(): Rect;
     getWindowDecorHeight(): double;
     setWindowBackgroundColor(color: string | ColorMetrics): void;
     setBackgroundColor(color: string): Promise<void>;
