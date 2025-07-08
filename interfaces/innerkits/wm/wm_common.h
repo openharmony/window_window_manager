@@ -1275,6 +1275,17 @@ struct WindowAnchorInfo : public Parcelable {
         int32_t offsetY) : isAnchorEnabled_(isAnchorEnabled),  windowAnchor_(windowAnchor),
         offsetX_(offsetX), offsetY_(offsetY) {}
 
+    bool operator==(const WindowAnchorInfo& other) const
+    {
+        return isAnchorEnabled_ == other.isAnchorEnabled_ && windowAnchor_ == other.windowAnchor_ &&
+            offsetX_ == other.offsetX_ && offsetY_ == other.offsetY_;
+    }
+
+    bool operator!=(const WindowAnchorInfo& other) const
+    {
+        return !(*this == other);
+    }
+
     bool Marshalling(Parcel& parcel) const override
     {
         return parcel.WriteBool(isAnchorEnabled_) && parcel.WriteUint32(static_cast<uint32_t>(windowAnchor_)) &&
