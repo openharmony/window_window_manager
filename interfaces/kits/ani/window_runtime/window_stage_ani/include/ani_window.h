@@ -57,6 +57,14 @@ public:
         ani_ref callback);
     static void KeepKeyboardOnFocus(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean keepKeyboardFlag);
 
+    void StartMoving(ani_env* env);
+    void StartMoveWindowWithCoordinate(ani_env* env, ani_double offsetX, ani_double offsetY);
+    void SetWindowTitleButtonVisible(ani_env* env, ani_object visibleParam);
+    void SetDecorButtonStyle(ani_env* env, ani_object decorStyle);
+    ani_int GetWindowStatus(ani_env* env);
+    void Minimize(ani_env* env);
+    void HideWindowFunction(ani_env* env, WmErrorCode errCode);
+    void Maximize(ani_env* env, ani_int presentation);
     ani_double GetWindowDecorHeight(ani_env* env);
     ani_object SetWindowBackgroundColor(ani_env* env, const std::string& color);
     ani_object SetImmersiveModeEnabledState(ani_env* env, bool enable);

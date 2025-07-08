@@ -296,6 +296,8 @@ public:
         std::map<WindowType, SystemBarPropertyFlag>& windowPropertyFlags,
         const ani_object& aniProperties,
         const sptr<Window>& window);
+    static bool SetDecorButtonStyleFromAni(ani_env* env, DecorButtonStyle& decorButtonStyle,
+        const ani_object& decorStyle);
     static void GetSystemBarPropertiesFromAni(sptr<Window>& window,
         std::map<WindowType, SystemBarProperty>& newProperties,
         std::map<WindowType, SystemBarPropertyFlag>& newPropertyFlags,
