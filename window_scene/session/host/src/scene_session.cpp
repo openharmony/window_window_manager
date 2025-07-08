@@ -6141,6 +6141,14 @@ WMError SceneSession::HandleActionUpdateTouchHotArea(const sptr<WindowSessionPro
     std::vector<Rect> touchHotAreas;
     property->GetTouchHotAreas(touchHotAreas);
     GetSessionProperty()->SetTouchHotAreas(touchHotAreas);
+    std::string rectStr;
+    for (const auto& rect : touchHotAreas) {
+        rectStr = rectStr + " " + rect.ToString();
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "id=%{public}d, hotAreas=[%{public}s]", GetPersistentId(), rectStr.c_str());
+    if (specificCallback_ != nullptr && specificCallback_->onWindowInfoUpdate_ != nullptr) {
+        specificCallback_->onWindowInfoUpdate_(GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
+    }
     return WMError::WM_OK;
 }
 
