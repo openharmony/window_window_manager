@@ -68,6 +68,12 @@ public:
     void SetSystemBarProperties(ani_env* env, ani_object aniSystemBarProperties);
     ani_object SetSpecificSystemBarEnabled(ani_env* env, ani_string, ani_boolean enable,
         ani_boolean enableAnimation);
+    static void Opacity(ani_env* env, ani_object obj, ani_long nativeObj, ani_double opacity);
+    static void Scale(ani_env* env, ani_object obj, ani_long nativeObj, ani_object scaleOptions);
+    static void Translate(ani_env* env, ani_object obj, ani_long nativeObj, ani_object translateOptions);
+    static void Rotate(ani_env* env, ani_object obj, ani_long nativeObj, ani_object rotateOptions);
+    static void SetShadow(ani_env* env, ani_object obj, ani_long nativeObj, ani_double radius,
+        ani_string color, ani_object offsetX, ani_object offsetY);
 
 private:
     void OnSetWindowColorSpace(ani_env* env, ani_int colorSpace);
@@ -92,6 +98,14 @@ private:
         const std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags, sptr<Window> windowToken);
     WMError SetSystemBarPropertiesByFlags(std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags,
         std::map<WindowType, SystemBarProperty>& systemBarProperties, sptr<Window> windowToken);
+    void OnOpacity(ani_env* env, ani_double opacity);
+    void OnScale(ani_env* env, ani_object scaleOptions);
+    void OnTranslate(ani_env* env, ani_object translateOptions);
+    void OnRotate(ani_env* env, ani_object rotateOptions);
+    void OnSetShadow(ani_env* env, ani_double radius, ani_string color, ani_object offsetX, ani_object offsetY);
+    static bool ParseScaleOption(ani_env* env, ani_object scaleOptions, Transform& trans);
+    static bool ParseTranslateOption(ani_env* env, ani_object translateOptions, Transform& trans);
+    static bool ParseRotateOption(ani_env* env, ani_object rotateOptions, Transform& trans);
 
     sptr<Window> windowToken_ = nullptr;
     std::unique_ptr<AniWindowRegisterManager> registerManager_ = nullptr;
