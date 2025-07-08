@@ -110,8 +110,6 @@ ScreenSession::ScreenSession(const ScreenSessionConfig& config, ScreenSessionRea
     }
 }
 
-std::atomic<uint64_t> ScreenSession::sessionIdGenerator_ = 0;
-
 void ScreenSession::CreateDisplayNode(const Rosen::RSDisplayNodeConfig& config)
 {
     TLOGI(WmsLogTag::DMS,

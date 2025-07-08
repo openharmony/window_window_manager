@@ -388,7 +388,7 @@ napi_value JsScreenSession::OnDestroyContent(napi_env env, napi_callback_info in
     screenScene_->Destroy();
     TLOGI(WmsLogTag::DMS, "destroy screen scene finish");
     if (screenSession_ != nullptr) {
-        TLOGW(WmsLogTag::DMS, "destroy screen scene, screenId:%{public}" PRIu64 "sessionId:%{public}" PRIu64,
+        TLOGW(WmsLogTag::DMS, "destroy screen scene, screenId:%{public}" PRIu64 ", sessionId:%{public}" PRIu64,
             screenSession_->GetScreenId(), screenSession_->GetSessionId());
     }
     return NapiGetUndefined(env);
