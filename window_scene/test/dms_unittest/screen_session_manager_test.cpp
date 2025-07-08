@@ -3195,6 +3195,46 @@ HWTEST_F(ScreenSessionManagerTest, GetCurrentScreenPhyBounds01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetCurrentScreenPhyBounds
+ * @tc.desc: GetCurrentScreenPhyBounds
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetCurrentScreenPhyBounds02, TestSize.Level1)
+{
+#ifdef FOLD_ABILITY_ENABLE
+    float phyWidth = 0.0f;
+    float phyHeight = 0.0f;
+    bool isReset = true;
+    ScreenId screenId = 1050;
+    ssm_->GetCurrentScreenPhyBounds(phyWidth, phyHeight, isReset, screenId);
+    auto foldController = sptr<FoldScreenController>::MakeSptr(ssm_->displayInfoMutex_,
+        ssm_->screenPowerTaskScheduler_);
+    ASSERT_NE(foldController, nullptr);
+    auto foldPolicy = fsc->GetFoldScreenPolicy(DisplayDeviceType::SECONDARY_DISPLAY_DEVICE);
+    ASSERT_NE(foldPolicy, nullptr);
+    foldPolicy->lastDisplayMode_ = displayMode == FoldDisplayMode::GLOBAL_FULL;
+    fsc->foldScreenPolicy_ = foldPolicy;
+    ssm_->foldScreenController_ = fsc;
+    ScreenProperty property;
+    screenBounds = RRect({ 0, 0, 100, 200 }, 0.0f, 0.0f);
+    property.SetPhyBounds(screenBounds);
+    ssm_->phyScreenPropMap_[screenId] = property;
+    ssm_->GetCurrentScreenPhyBounds(phyWidth, phyHeight, isReset, screenId);
+    int32_t screenRotationOffSet = system::GetIntParameter<int32_t>("const.fold.screen_rotation.offset", 0);
+    if (FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
+        EXPECT_EQ(phyWidth, 100);
+        EXPECT_EQ(phyHeight, 200);
+    } else if (g_screenRotationOffSet == ROTATION_90 || g_screenRotationOffSet == ROTATION_270) {
+        EXPECT_EQ(phyHeight, 100);
+        EXPECT_EQ(phyWidth, 200);
+    } else {
+        EXPECT_EQ(phyWidth, 100);
+        EXPECT_EQ(phyHeight, 200);
+    }
+#endif
+}
+
+/**
  * @tc.name: PhyMirrorConnectWakeupScreen
  * @tc.desc: PhyMirrorConnectWakeupScreen test
  * @tc.type: FUNC
