@@ -26,15 +26,17 @@
 namespace OHOS::Rosen {
 class JsScreenSession : public IScreenChangeListener {
 public:
-    JsScreenSession(napi_env env, const sptr<ScreenSession>& screenSession, const ScreenEvent screenEvent);
+    JsScreenSession(napi_env env, const sptr<ScreenSession>& screenSession);
     virtual ~JsScreenSession();
 
-    static napi_value Create(napi_env env, const sptr<ScreenSession>& screenSession, const ScreenEvent screenEvent);
+    static napi_value Create(napi_env env, const sptr<ScreenSession>& screenSession);
     static void Finalizer(napi_env env, void* data, void* hint);
 
 private:
     static napi_value LoadContent(napi_env env, napi_callback_info info);
     napi_value OnLoadContent(napi_env env, napi_callback_info info);
+    static napi_value DestroyContent(napi_env env, napi_callback_info info);
+    napi_value OnDestroyContent(napi_env env, napi_callback_info info);
     napi_value ScheduleLoadContentTask(napi_env env, const std::string& contentUrl,
         std::weak_ptr<AbilityRuntime::Context> contextWeakPtr, std::shared_ptr<NativeReference> contentStorage);
     static napi_value RegisterCallback(napi_env env, napi_callback_info info);
