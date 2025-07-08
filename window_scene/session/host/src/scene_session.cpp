@@ -4154,7 +4154,6 @@ void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
         return;
     }
     if (reason == SizeChangeReason::DRAG || reason == SizeChangeReason::DRAG_MOVE) {
-        AutoRSTransaction trans(GetRSUIContext());
         for (const auto displayId : moveDragController_->GetNewAddedDisplayIdsDuringMoveDrag()) {
             if (displayId == moveDragController_->GetMoveDragStartDisplayId()) {
                 continue;
@@ -4174,10 +4173,18 @@ void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
                     "DisplayId: %{public}" PRIu64, displayId);
                 continue;
             }
-            movedSurfaceNode->SetPositionZ(MOVE_DRAG_POSITION_Z);
-            screenSession->GetDisplayNode()->AddCrossScreenChild(movedSurfaceNode, -1, true);
-            movedSurfaceNode->SetIsCrossNode(true);
-            TLOGD(WmsLogTag::WMS_LAYOUT, "Add window to display: %{public}" PRIu64, displayId);
+
+            {
+                AutoRSTransaction trans(movedSurfaceNode->GetRSUIContext());
+                movedSurfaceNode->SetPositionZ(MOVE_DRAG_POSITION_Z);
+                movedSurfaceNode->SetIsCrossNode(true);
+            }
+
+            {
+                AutoRSTransaction trans(screenSession->GetRSUIContext());
+                TLOGI(WmsLogTag::WMS_LAYOUT, "Add window to display: %{public}" PRIu64, displayId);
+                screenSession->GetDisplayNode()->AddCrossScreenChild(movedSurfaceNode, -1, true);
+            }
             HandleSubSessionSurfaceNodeByWindowAnchor(reason, screenSession);
         }
     } else if (reason == SizeChangeReason::DRAG_END) {
@@ -4203,7 +4210,7 @@ void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
             movedSurfaceNode->SetPositionZ(moveDragController_->GetOriginalPositionZ());
             screenSession->GetDisplayNode()->RemoveCrossScreenChild(movedSurfaceNode);
             movedSurfaceNode->SetIsCrossNode(false);
-            TLOGD(WmsLogTag::WMS_LAYOUT, "Remove window from display: %{public}" PRIu64, displayId);
+            TLOGI(WmsLogTag::WMS_LAYOUT, "Remove window from display: %{public}" PRIu64, displayId);
             HandleSubSessionSurfaceNodeByWindowAnchor(reason, screenSession);
         }
     }
