@@ -785,7 +785,7 @@ HWTEST_F(WindowRecoverSessionTest, OnSessionRecoverStateChange, TestSize.Level1)
     EXPECT_EQ(ssm_->GetSceneSession(160)->IsRecovered(), true);
 
     // specifc window
-    ssm_->GetSceneSession(160)->SetRecovered(false);    
+    ssm_->GetSceneSession(160)->SetRecovered(false);
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     sceneSession->SetSessionProperty(property);
     ssm_->OnSessionRecoverStateChange(SessionRecoverState::SESSION_FINISH_RECONNECT, property);

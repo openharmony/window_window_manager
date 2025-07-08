@@ -911,15 +911,15 @@ void WindowSceneSessionImpl::RegisterWindowRecoverStateChangeListener()
 void WindowSceneSessionImpl::OnWindowRecoverStateChange(bool isSpecificSession, const WindowRecoverState& state)
 {
     switch (state) {
-    case WindowRecoverState::WINDOW_START_RECONNECT:
-        UpdateStartRecoverProperty(isSpecificSession);
-        break;
-    case WindowRecoverState::WINDOW_FINISH_RECONNECT:
-        UpdateFinishRecoverProperty(isSpecificSession);
-        RecoverSessionListener();
-        break;
-    default:
-        break;
+        case WindowRecoverState::WINDOW_START_RECONNECT:
+            UpdateStartRecoverProperty(isSpecificSession);
+            break;
+        case WindowRecoverState::WINDOW_FINISH_RECONNECT:
+            UpdateFinishRecoverProperty(isSpecificSession);
+            RecoverSessionListener();
+            break;
+        default:
+            break;
     }
 }
 
