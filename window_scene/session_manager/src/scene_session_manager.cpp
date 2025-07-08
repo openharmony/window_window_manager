@@ -11131,13 +11131,25 @@ WSError SceneSessionManager::PendingSessionToForeground(const sptr<IRemoteObject
 WSError SceneSessionManager::PendingSessionToBackground(const sptr<IRemoteObject>& token,
     const BackgroundParams& params)
 {
+    TLOGI(WmsLogTag::WMS_LIFE, "in");
+    if (!SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::DEFAULT, "Permission denied for going to background!");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
     return taskScheduler_->PostSyncTask([this, &token, params] {
-        auto session = FindSessionByToken(token);
-        if (session != nullptr) {
-            return session->PendingSessionToBackground(params);
+        sptr<SceneSession> session = nullptr;
+        if (params.persistentId > INVALID_SESSION_ID) {
+            TLOGNI(WmsLogTag::WMS_LIFE, "Find scene sesion by persistentId: %{public}d", params.persistentId);
+            session = GetSceneSession(params.persistentId);
+        } else if (token != nullptr) {
+            TLOGNI(WmsLogTag::WMS_LIFE, "Find scene sesion by token");
+            session = FindSessionByToken(token);
         }
-        TLOGNE(WmsLogTag::WMS_LIFE, "fail to find token");
-        return WSError::WS_ERROR_INVALID_PARAM;
+        if (session == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "fail to find session");
+            return WSError::WS_ERROR_INVALID_PARAM;
+        }
+        return session->PendingSessionToBackground(params);
     }, __func__);
 }
 
