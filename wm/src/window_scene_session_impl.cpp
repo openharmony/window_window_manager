@@ -905,7 +905,7 @@ void WindowSceneSessionImpl::RegisterWindowRecoverStateChangeListener()
         const WindowRecoverState& state) THREAD_SAFETY_GUARD(SCENE_GUARD) {
         auto window = weakThis.promote();
         window->OnWindowRecoverStateChange(isSpecificSession, state);
-    }
+    };
 }
 
 void WindowSceneSessionImpl::OnWindowRecoverStateChange(bool isSpecificSession, const WindowRecoverState& state)
@@ -932,7 +932,7 @@ void WindowSceneSessionImpl::UpdateStartRecoverProperty(bool isSpecificSession)
         }
     } else {
         property_->SetWindowState(state_);
-        property_->SetFullScreenWaterfallMode(isFullScreenWaterfallMode_.load());
+        property_->SetIsFullScreenWaterfallMode(isFullScreenWaterfallMode_.load());
     }
 }
 
