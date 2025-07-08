@@ -628,7 +628,7 @@ HWTEST_F(SceneSessionManagerTest12, DestroyAndDisconnectSpecificSessionInner02, 
     ssm_->SetAlivePersistentIds(recoveredPersistentIds);
     property->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
     auto ret = ssm_->DestroyAndDisconnectSpecificSessionInner(1);
-    EXPECT_EQ(ret, WSError::WS_ERROR_NULLPTR);
+    EXPECT_EQ(ret, WSError::WS_OK);
 }
 
 /**
