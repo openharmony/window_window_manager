@@ -198,6 +198,8 @@ public:
     static bool UnmarshallingTransitionAnimationMap(Parcel& parcel, WindowSessionProperty* property);
     bool MarshallingShadowsInfo(Parcel& parcel) const;
     static void UnmarshallingShadowsInfo(Parcel& parcel, WindowSessionProperty* property);
+    bool MarshallingWindowAnchorInfo(Parcel& parcel) const;
+    static void UnmarshallingWindowAnchorInfo(Parcel& parcel, WindowSessionProperty* property);
 
     void SetTextFieldPositionY(double textFieldPositionY);
     void SetTextFieldHeight(double textFieldHeight);
@@ -236,6 +238,8 @@ public:
     uint32_t GetSubWindowLevel() const;
     void SetSubWindowOutlineEnabled(bool subWindowOutlineEnabled);
     bool IsSubWindowOutlineEnabled() const;
+    void SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo);
+    WindowAnchorInfo GetWindowAnchorInfo() const;
 
     /*
      * Window Hierarchy
@@ -500,6 +504,7 @@ private:
      */
     uint32_t subWindowLevel_ = 0;
     bool subWindowOutlineEnabled_ = false;
+    WindowAnchorInfo windowAnchorInfo_;
 
     /*
      * Window Hierarchy
