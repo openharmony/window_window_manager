@@ -961,6 +961,24 @@ HWTEST_F(SessionStubTest, HandlePendingSessionActivation, TestSize.Level1)
 }
 
 /**
+ * @tc.name: WindowCreateParams
+ * @tc.desc: sessionStub WindowCreateParams
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, WindowCreateParams, TestSize.Level1)
+{
+    MessageParcel data;
+    auto windowCreateParams = std::make_shared<WindowCreateParams>();
+    windowCreateParams->animationParams = std::make_shared<StartAnimationOptions>();
+    windowCreateParams->animationParams->animationType = AnimationType::FADE_IN;
+    windowCreateParams->animationSystemParams = std::make_shared<StartAnimationSystemOptions>();
+    data.WriteParcelable(windowCreateParams.get());
+    auto windowCreateParamsRead = std::make_shared<WindowCreateParams>();
+    windowCreateParamsRead.reset(data.ReadParcelable<WindowCreateParams>());
+    EXPECT_EQ(windowCreateParamsRead->animationParams->animationType, AnimationType::FADE_IN);
+}
+
+/**
  * @tc.name: HandleGetGlobalScaledRect
  * @tc.desc: sessionStub HandleGetGlobalScaledRect
  * @tc.type: FUNC
