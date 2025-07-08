@@ -373,10 +373,10 @@ void JsScreenSessionManager::OnScreenConnected(const sptr<ScreenSession>& screen
             return;
         }
         napi_value jsScreenSession = JsScreenSession::Create(env_, screenSession);
-        napi_ref ref;
+        napi_ref ref = nullptr;
         napi_create_reference(env_, jsScreenSession, 1, &ref);
         jsScreenSessionMap_[screenSession->GetSessionId()] = ref;
-        TLOGW(WmsLogTag::DMS, "screen connection, screenId: %{public}" PRIu64 " sessionId:%{public}" PRIu64,
+        TLOGNI(WmsLogTag::DMS, "screen connection, screenId: %{public}" PRIu64 " sessionId:%{public}" PRIu64,
             screenSession->GetScreenId(), screenSession->GetSessionId());
         napi_set_named_property(env, objValue, "screenSession", jsScreenSession);
         napi_set_named_property(env, objValue, "screenConnectChangeType", CreateJsValue(env, 0));

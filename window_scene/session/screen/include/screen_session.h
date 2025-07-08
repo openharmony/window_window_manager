@@ -419,7 +419,7 @@ private:
      */
     std::shared_ptr<RSUIDirector> rsUIDirector_;
 
-    static std::atomic<uint64_t> sessionIdGenerator_;
+    inline static std::atomic<uint64_t> sessionIdGenerator_ { 0 };
 };
 
 class ScreenSessionGroup : public ScreenSession {

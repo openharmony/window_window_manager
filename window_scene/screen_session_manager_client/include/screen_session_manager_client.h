@@ -17,8 +17,8 @@
 #define OHOS_ROSEN_SCREEN_SESSION_MANAGER_CLIENT_H
 
 #include <map>
-#include <set>
 #include <mutex>
+#include <set>
 
 #include <common/rs_rect.h>
 
@@ -177,7 +177,7 @@ private:
     SuperFoldStatus currentstate_ = SuperFoldStatus::UNKNOWN;
 
     std::mutex screenEventMutex_;
-    std::set<ScreenId> connectedScreenSet_;
+    std::unordered_set<ScreenId> connectedScreenSet_;
 };
 } // namespace OHOS::Rosen
 
