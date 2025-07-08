@@ -927,7 +927,7 @@ void WindowSceneSessionImpl::UpdateStartRecoverProperty(bool isSpecificSession)
 {
     if (isSpecificSession) {
         property_->SetWindowState(requestState_);
-        if (GetContext()->GetToken()) {
+        if (GetContext() && GetContext()->GetToken()) {
             property_->SetTokenState(true);
         }
     } else {

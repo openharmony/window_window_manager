@@ -98,9 +98,6 @@ RSSurfaceNode::SharedPtr WindowRecoverSessionTest::CreateRSSurfaceNode()
 
 void NotifyRecoverSceneSessionFuncTest(const sptr<SceneSession>& session, const SessionInfo& sessionInfo) {}
 
-void NotifySessionRecoverStateChangeFuncTest(const SessionRecoverState& state,
-    const sptr<WindowSessionProperty>& property) {}
-
 namespace {
 
 /**
@@ -756,9 +753,9 @@ HWTEST_F(WindowRecoverSessionTest, RegisterSMSRecoverListener2, TestSize.Level1)
  */
 HWTEST_F(WindowRecoverSessionTest, RegisterSessionRecoverStateChangeListener, TestSize.Level1)
 {
-    EXPECT_NE(nullptr, sm_);
-    sm_->RegisterSessionRecoverStateChangeListener();
-    EXPECT_NE(sm_->sessionRecoverStateChangeFunc_, nullptr);
+    EXPECT_NE(nullptr, ssm_);
+    ssm_->RegisterSessionRecoverStateChangeListener();
+    EXPECT_NE(ssm_->sessionRecoverStateChangeFunc_, nullptr);
 }
 
 /**
@@ -768,13 +765,13 @@ HWTEST_F(WindowRecoverSessionTest, RegisterSessionRecoverStateChangeListener, Te
  */
 HWTEST_F(WindowRecoverSessionTest, OnSessionRecoverStateChange, TestSize.Level1)
 {
-    EXPECT_NE(nullptr, sm_);
+    EXPECT_NE(nullptr, ssm_);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetPersistentId(160);
-    sm_->OnSessionRecoverStateChange(SessionRecoverState::SESSION_START_RECONNECT, property);
-    EXPECT_NE(property->GetSessionInfo().persistentId_, 160);
+    ssm_->OnSessionRecoverStateChange(SessionRecoverState::SESSION_START_RECONNECT, property);
+    EXPECT_EQ(property->GetSessionInfo().persistentId_, 160);
 
-    sm_->sceneSessionMap_.clear();
+    ssm_->sceneSessionMap_.clear();
     // main window
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     SessionInfo info;
@@ -783,19 +780,19 @@ HWTEST_F(WindowRecoverSessionTest, OnSessionRecoverStateChange, TestSize.Level1)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->SetSessionProperty(property);
     ASSERT_NE(nullptr, sceneSession);
-    sm_->sceneSessionMap_.insert({ 160, sceneSession });
-    sm_->OnSessionRecoverStateChange(SessionRecoverState::SESSION_FINISH_RECONNECT, property);
-    EXPECT_EQ(sm_->GetSceneSession(160)->IsRecovered(), true);
+    ssm_->sceneSessionMap_.insert({ 160, sceneSession });
+    ssm_->OnSessionRecoverStateChange(SessionRecoverState::SESSION_FINISH_RECONNECT, property);
+    EXPECT_EQ(ssm_->GetSceneSession(160)->IsRecovered(), true);
 
     // specifc window
-    sm_->GetSceneSession(160)->SetRecovered(false);    
+    ssm_->GetSceneSession(160)->SetRecovered(false);    
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     sceneSession->SetSessionProperty(property);
-    sm_->OnSessionRecoverStateChange(SessionRecoverState::SESSION_FINISH_RECONNECT, property);
-    EXPECT_EQ(sm_->GetSceneSession(160)->IsRecovered(), false);
+    ssm_->OnSessionRecoverStateChange(SessionRecoverState::SESSION_FINISH_RECONNECT, property);
+    EXPECT_EQ(ssm_->GetSceneSession(160)->IsRecovered(), false);
 
-    sm_->OnSessionRecoverStateChange(SessionRecoverState::SESSION_DIS_RECONNECT, property);
-    EXPECT_EQ(sm_->GetSceneSession(160)->IsRecovered(), false);
+    ssm_->OnSessionRecoverStateChange(SessionRecoverState::SESSION_DIS_RECONNECT, property);
+    EXPECT_EQ(ssm_->GetSceneSession(160)->IsRecovered(), false);
 }
 
 /**
@@ -805,9 +802,9 @@ HWTEST_F(WindowRecoverSessionTest, OnSessionRecoverStateChange, TestSize.Level1)
  */
 HWTEST_F(WindowRecoverSessionTest, RegisterRecoverStateChangeListener, TestSize.Level1)
 {
-    EXPECT_NE(nullptr, sm_);
-    sm_->RegisterRecoverStateChangeListener();
-    EXPECT_NE(sm_->recoverStateChangeFunc_, nullptr);
+    EXPECT_NE(nullptr, ssm_);
+    ssm_->RegisterRecoverStateChangeListener();
+    EXPECT_NE(ssm_->recoverStateChangeFunc_, nullptr);
 }
 
 /**
@@ -817,14 +814,14 @@ HWTEST_F(WindowRecoverSessionTest, RegisterRecoverStateChangeListener, TestSize.
  */
 HWTEST_F(WindowRecoverSessionTest, OnRecoverStateChange, TestSize.Level1)
 {
-    EXPECT_NE(nullptr, sm_);
-    sm_->displayBrightness_ = UNDEFINED_BRIGHTNESS;
-    sm_->OnRecoverStateChange(RecoverState::RECOVER_INITIAL);
-    EXPECT_EQ(sm_->displayBrightness_, UNDEFINED_BRIGHTNESS);
-    sm_->OnRecoverStateChange(RecoverState::RECOVER_END);
-    EXPECT_EQ(sm_->displayBrightness_, UNDEFINED_BRIGHTNESS);
-    sm_->OnRecoverStateChange(RecoverState::RECOVER_ENABLE_INPUT);
-    EXPECT_EQ(sm_->displayBrightness_, INVALID_BRIGHTNESS);
+    EXPECT_NE(nullptr, ssm_);
+    ssm_->displayBrightness_ = UNDEFINED_BRIGHTNESS;
+    ssm_->OnRecoverStateChange(RecoverState::RECOVER_INITIAL);
+    EXPECT_EQ(ssm_->displayBrightness_, UNDEFINED_BRIGHTNESS);
+    ssm_->OnRecoverStateChange(RecoverState::RECOVER_END);
+    EXPECT_EQ(ssm_->displayBrightness_, UNDEFINED_BRIGHTNESS);
+    ssm_->OnRecoverStateChange(RecoverState::RECOVER_ENABLE_INPUT);
+    EXPECT_EQ(ssm_->displayBrightness_, INVALID_BRIGHTNESS);
 }
 
 /**
@@ -834,12 +831,12 @@ HWTEST_F(WindowRecoverSessionTest, OnRecoverStateChange, TestSize.Level1)
  */
 HWTEST_F(WindowRecoverSessionTest, SetEnableInputEvent, TestSize.Level1)
 {
-    EXPECT_NE(nullptr, sm_);
-    sm_->displayBrightness_ = UNDEFINED_BRIGHTNESS;
-    sm_->SetEnableInputEvent(false);
-    EXPECT_EQ(sm_->displayBrightness_, UNDEFINED_BRIGHTNESS);
-    sm_->SetEnableInputEvent(true);
-    EXPECT_EQ(sm_->displayBrightness_, INVALID_BRIGHTNESS);
+    EXPECT_NE(nullptr, ssm_);
+    ssm_->displayBrightness_ = UNDEFINED_BRIGHTNESS;
+    ssm_->SetEnableInputEvent(false);
+    EXPECT_EQ(ssm_->displayBrightness_, UNDEFINED_BRIGHTNESS);
+    ssm_->SetEnableInputEvent(true);
+    EXPECT_EQ(ssm_->displayBrightness_, INVALID_BRIGHTNESS);
 }
 
 } // namespace

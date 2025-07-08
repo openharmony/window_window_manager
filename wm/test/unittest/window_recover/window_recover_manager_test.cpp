@@ -285,8 +285,12 @@ HWTEST_F(WindowRecoverManagerTest, UpdateStartRecoverProperty, TestSize.Level1)
     window->UpdateStartRecoverProperty(false);
     EXPECT_EQ(window->property_->GetWindowState(), window->state_);
 
-    window->UpdateStartRecoverProperty(true);
-    EXPECT_EQ(window->property_->GetWindowState(), window->requestState_);
+    sptr<WindowOption> option2 = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window2 = sptr<WindowSceneSessionImpl>::MakeSptr(option2);
+    window2->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window2->property_->SetCollaboratorType(CollaboratorType::DEFAULT_TYPE);
+    window2->UpdateStartRecoverProperty(true);
+    EXPECT_EQ(window2->property_->GetWindowState(), window2->requestState_);
 }
 
 } // namespace
