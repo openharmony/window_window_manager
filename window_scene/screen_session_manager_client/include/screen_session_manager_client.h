@@ -162,6 +162,9 @@ private:
     void NotifyScreenDisconnect(const sptr<ScreenSession>& screenSession);
     void UpdatePropertyWhenSwitchUser(const sptr <ScreenSession>& screenSession,
         float rotation, RRect bounds, ScreenId screenId);
+    sptr<ScreenSession> CreateTempScreenSession(
+        ScreenId screenId, ScreenId rsId, const std::shared_ptr<RSDisplayNode>& displayNode);
+
     mutable std::mutex screenSessionMapMutex_;
     std::map<ScreenId, sptr<ScreenSession>> screenSessionMap_;
     std::map<ScreenId, sptr<ScreenSession>> extraScreenSessionMap_;
