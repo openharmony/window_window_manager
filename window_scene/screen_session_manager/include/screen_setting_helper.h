@@ -16,6 +16,7 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_SCREEN_SETTING_HELPER_H
 #define OHOS_ROSEN_WINDOW_SCENE_SCREEN_SETTING_HELPER_H
 
+#include <charconv>
 #include <cstdint>
 #include <string>
 #include <sstream>
@@ -61,6 +62,7 @@ public:
     static void UnRegisterSettingExtendScreenDpiObserver();
     static bool GetSettingExtendScreenDpi(float& coef, const std::string& key = SETTING_EXTEND_DPI_KEY);
     static bool ConvertStrToUint64(const std::string& str, uint64_t& num);
+    static bool ConvertStrToInt32(const std::string& str, int32_t& num);
 
 private:
     static const constexpr char* SETTING_DPI_KEY {"user_set_dpi_value"};
