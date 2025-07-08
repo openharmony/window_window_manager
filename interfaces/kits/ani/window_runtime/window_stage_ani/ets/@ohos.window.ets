@@ -1405,8 +1405,7 @@ export class WindowInternal implements Window {
         taskpool.execute((): void => {
           if (presentation == undefined) {
             this.maximize(this.nativeObj, MaximizePresentation.ENTER_IMMERSIVE as int);
-          }
-          else {
+          } else {
             this.maximize(this.nativeObj, presentation as int);
           }
         }).then((ret: NullishType) :void => {
