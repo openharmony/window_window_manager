@@ -1078,8 +1078,7 @@ sptr<ScreenSession> ScreenSessionManagerClient::CreateTempScreenSession(
     config.property = screenSessionManager_->GetScreenProperty(screenId);
     TLOGW(WmsLogTag::DMS, "CreateTempScreenSession width:%{public}f, height=%{public}f",
         config.property.GetBounds().rect_.GetWidth(), config.property.GetBounds().rect_.GetHeight());
-    screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
-    return screenSession;
+    return sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
 }
 
 bool ScreenSessionManagerClient::OnMainDisplayNodeChange(ScreenId mainScreenId, ScreenId extendScreenId,
