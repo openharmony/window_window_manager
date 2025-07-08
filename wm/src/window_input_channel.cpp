@@ -106,6 +106,27 @@ __attribute__((no_sanitize("cfi"))) void WindowInputChannel::HandleKeyEvent(
     window_->ConsumeKeyEvent(keyEvent);
 }
 
+void WindowInputChannel::ProcAncoEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    auto action = pointerEvent->GetPointerAction();
+    bool isPointDown = ((action == MMI::PointerEvent::POINTER_ACTION_DOWN) ||
+        (action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN));
+    if (!isPointDown) {
+        return;
+    }
+
+    MMI::PointerEvent::PointerItem pointerItem;
+    bool ret = pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
+    if (!ret) {
+        TLOGE(WmsLogTag::WMS_EVENT, "get item failed, %{public}d", pointerEvent->GetId());
+        return;
+    }
+    
+    auto x = pointerItem.GetDisplayX();
+    auto y = pointerItem.GetDisplayY();
+    window_->OnPointDown(pointerEvent->GetId(), x, y);
+}
+
 void WindowInputChannel::HandlePointerEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     if (pointerEvent == nullptr) {
@@ -116,6 +137,13 @@ void WindowInputChannel::HandlePointerEvent(std::shared_ptr<MMI::PointerEvent>& 
         TLOGE(WmsLogTag::WMS_EVENT, "window_ is nullptr, id:%{public}d", pointerEvent->GetId());
         return;
     }
+
+    if (window_->IsAnco()) {
+        ProcAncoEvent(pointerEvent);
+        pointerEvent->MarkProcessed();
+        return;
+    }
+    
     auto action = pointerEvent->GetPointerAction();
     TLOGD(WmsLogTag::WMS_EVENT, "Receive pointer event, Id: %{public}u, action: %{public}d",
         window_->GetWindowId(), action);
