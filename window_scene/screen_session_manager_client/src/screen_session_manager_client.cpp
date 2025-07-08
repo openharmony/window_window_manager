@@ -153,7 +153,8 @@ void ScreenSessionManagerClient::OnScreenConnectionChanged(SessionOption option,
         }
     } else {
         if (screenEvent == ScreenEvent::CONNECTED) {
-            TLOGE(WmsLogTag::DMS, "discard repeat task, sid:%{public}" PRIu64" sEvent:%{public}d rsId: %{public}" PRIu64,
+            TLOGE(WmsLogTag::DMS,
+                "discard connect task, sid:%{public}" PRIu64" sEvent:%{public}d rsId: %{public}" PRIu64,
                 option.screenId_, static_cast<int>(screenEvent), option.rsId_);
             return;
         }
