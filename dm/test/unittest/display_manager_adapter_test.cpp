@@ -73,20 +73,8 @@ HWTEST_F(DisplayManagerAdapterTest, GetDisplayInfo, TestSize.Level1)
  */
 HWTEST_F(DisplayManagerAdapterTest, GetCutoutInfo, TestSize.Level1)
 {
-    sptr<CutoutInfo> info = SingletonContainer::Get<DisplayManagerAdapter>().GetCutoutInfo(DISPLAY_ID_INVALID);
-    ASSERT_EQ(info, nullptr);
-}
-
-/**
- * @tc.name: GetCutoutInfoWithRotation
- * @tc.desc: test nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerAdapterTest, GetCutoutInfoWithRotation, Function | SmallTest | Level2)
-{
-    int32_t rotation = 0;
-    sptr<CutoutInfo> info = SingletonContainer::Get<DisplayManagerAdapter>().
-        GetCutoutInfoWithRotation(DISPLAY_ID_INVALID, rotation);
+    sptr<CutoutInfo> info = SingletonContainer::Get<DisplayManagerAdapter>().GetCutoutInfo(DISPLAY_ID_INVALID, 0, 0,
+                                                                                           Rotation::ROTATION_0);
     ASSERT_EQ(info, nullptr);
 }
 

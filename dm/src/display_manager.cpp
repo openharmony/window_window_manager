@@ -2557,13 +2557,12 @@ sptr<CutoutInfo> DisplayManager::GetCutoutInfoWithRotation(Rotation rotation)
 
 sptr<CutoutInfo> DisplayManager::Impl::GetCutoutInfoWithRotation(Rotation rotation)
 {
-    int32_t rotationNum = static_cast<int32_t>(rotation);
     auto displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetDefaultDisplayInfo();
     if (displayInfo == nullptr) {
         return nullptr;
     }
-    auto displayId = displayInfo->GetDisplayId();
-    return SingletonContainer::Get<DisplayManagerAdapter>().GetCutoutInfoWithRotation(displayId, rotationNum);
+    return SingletonContainer::Get<DisplayManagerAdapter>().GetCutoutInfo(displayInfo->GetDisplayId(),
+        displayInfo->GetWidth(), displayInfo->GetHeight(), rotation);
 }
 
 DMError DisplayManager::GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
