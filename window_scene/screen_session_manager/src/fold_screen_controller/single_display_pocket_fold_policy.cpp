@@ -90,7 +90,7 @@ FoldCreaseRegion SingleDisplayPocketFoldPolicy::GetFoldCreaseRegion(bool isVerti
 }
 
 void SingleDisplayPocketFoldPolicy::GetFoldCreaseRect(bool isVertical,
-    const std::vector<int32_t>& foldRect, std::vector<DMRect>& foldCreaseRect)
+    const std::vector<int32_t>& foldRect, std::vector<DMRect>& foldCreaseRect) const
 {
     int32_t liveCreaseRegionPosX; // live Crease Region PosX
     int32_t liveCreaseRegionPosY; // live Crease Region PosY
