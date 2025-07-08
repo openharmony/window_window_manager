@@ -17,6 +17,7 @@
 #define OHOS_ANI_WINDOW_STAGE_H
 
 #include "ani.h"
+#include "ani_window_register_manager.h"
 #include "window_scene.h"
 
 namespace OHOS {
@@ -33,15 +34,29 @@ class AniWindowStage {
     ~AniWindowStage();
     static void DisableWindowDecor(ani_env* env, ani_object obj, ani_long nativeObj);
     static void SetShowOnLockScreen(ani_env* env, ani_class cls, ani_long nativeObj, ani_boolean showOnLockScreen);
+    static void RegisterWindowCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
+        ani_ref callback);
+    static void UnregisterWindowCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
+        ani_ref callback);
+    static void LoadContent(ani_env* env, ani_object obj, ani_long nativeObj,
+        ani_string path);
+    static void LoadContentWithStorage(ani_env* env, ani_object obj, ani_long nativeObj,
+        ani_string path, ani_object storage);
 
-    void LoadContent(ani_env* env, const std::string& content);
+    void SetWindowRectAutoSave(ani_env* env, ani_boolean enabled, ani_boolean isSaveBySpecifiedFlag);
+    ani_boolean IsWindowRectAutoSave(ani_env* env);
+    void RemoveStartingWindow(ani_env* env);
     std::weak_ptr<WindowScene> GetWindowScene() { return windowScene_; }
-    ani_object GetMainWindow(ani_env* env);
+    ani_ref GetMainWindow(ani_env* env);
     ani_boolean WindowIsWindowSupportWideGamut(ani_env* env, ani_class cls, ani_object obj);
 private:
     void OnDisableWindowDecor(ani_env* env);
     void OnSetShowOnLockScreen(ani_env* env, ani_boolean showOnLockScreen);
+    void OnRegisterWindowCallback(ani_env* env, ani_string type, ani_ref callback);
+    void OnUnregisterWindowCallback(ani_env* env, ani_string type, ani_ref callback);
+    void OnLoadContentWithStorage(ani_env* env, ani_string path, ani_object storage);
     std::weak_ptr<WindowScene> windowScene_;
+    std::unique_ptr<AniWindowRegisterManager> registerManager_ = nullptr;
 };
 
 ani_object CreateAniWindowStage(ani_env* env, std::shared_ptr<Rosen::WindowScene>& windowScene);
