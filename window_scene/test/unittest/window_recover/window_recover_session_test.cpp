@@ -668,13 +668,13 @@ HWTEST_F(WindowRecoverSessionTest, ClearUnrecoveredSessions, TestSize.Level1)
  */
 HWTEST_F(WindowRecoverSessionTest, RecoverSessionInfo, TestSize.Level1)
 {
-    SessionInfo info = ssm_->RecoverSessionInfo(nullptr);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
     SessionInfo sessionInfo;
     sessionInfo.abilityName_ = "RecoverSessionInfo";
     property->SetSessionInfo(sessionInfo);
-    info = ssm_->RecoverSessionInfo(property);
+    ssm_->RecoverSessionInfo(property);
+    SessionInfo info = property->GetSessionInfo();
     ASSERT_EQ(info.abilityName_, sessionInfo.abilityName_);
 }
 

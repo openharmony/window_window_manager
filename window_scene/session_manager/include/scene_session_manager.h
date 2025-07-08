@@ -163,6 +163,9 @@ using RequestVsyncByRootSceneWhenModeChangeFunc =
     std::function<void(const std::shared_ptr<VsyncCallback>& vsyncCallback)>;
 using UpdateKioskAppListFunc = std::function<void(const std::vector<std::string>& kioskAppList)>;
 using KioskModeChangeFunc = std::function<void(bool isKioskMode, int32_t persistentId)>;
+using NotifySessionRecoverStateChangeFunc = std::function<void(const SessionRecoverState& state,
+    const sptr<WindowSessionProperty>& property)>;
+using NotifyRecoverStateChangeFunc = std::function<void(const RecoverState& state)>;
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
@@ -1109,10 +1112,18 @@ private:
     void RecoverCachedDialogSession(int32_t persistentId);
     void RemoveFailRecoveredSession();
     void ClearUnrecoveredSessions(const std::vector<int32_t>& recoveredPersistentIds) REQUIRES(SCENE_GUARD);
-    SessionInfo RecoverSessionInfo(const sptr<WindowSessionProperty>& property);
+    void RecoverSessionInfo(const sptr<WindowSessionProperty>& property);
     bool IsNeedRecover(const int32_t persistentId);
     WSError CheckSessionPropertyOnRecovery(const sptr<WindowSessionProperty>& property, bool isSpecificSession);
     void UpdateRecoverPropertyForSuperFold(const sptr<WindowSessionProperty>& property);
+    void RegisterSessionRecoverStateChangeListener();
+    void RegisterRecoverStateChangeListener();
+    void OnSessionRecoverStateChange(const SessionRecoverState& state,
+        const sptr<WindowSessionProperty>& property);
+    void OnRecoverStateChange(const RecoverState& state);
+    void UpdateStartRecoverProperty(const sptr<WindowSessionProperty>& property);
+    NotifySessionRecoverStateChangeFunc sessionRecoverStateChangeFunc_;
+    NotifyRecoverStateChangeFunc recoverStateChangeFunc_;
 
     /*
      * Gesture Back
