@@ -18,6 +18,7 @@
 
 #include <map>
 #include <mutex>
+#include <set>
 
 #include <common/rs_rect.h>
 
@@ -135,8 +136,8 @@ private:
     void ConnectToServer();
     bool CheckIfNeedConnectScreen(SessionOption option);
     void OnScreenConnectionChanged(SessionOption option, ScreenEvent screenEvent) override;
-    void HandleScreenConnection(SessionOption option);
-    void HandleScreenDisconnection(SessionOption option);
+    bool HandleScreenConnection(SessionOption option);
+    bool HandleScreenDisconnection(SessionOption option);
     void NotifyClientScreenConnect(sptr<ScreenSession>& screenSession);
     void OnPropertyChanged(ScreenId screenId,
         const ScreenProperty& property, ScreenPropertyChangeReason reason) override;
@@ -177,6 +178,9 @@ private:
     sptr<IDisplayChangeListener> displayChangeListener_;
     FoldDisplayMode displayMode_ = FoldDisplayMode::UNKNOWN;
     SuperFoldStatus currentstate_ = SuperFoldStatus::UNKNOWN;
+
+    std::mutex screenEventMutex_;
+    std::unordered_set<ScreenId> connectedScreenSet_;
 };
 } // namespace OHOS::Rosen
 
