@@ -47,6 +47,7 @@ public:
     void ClearSnapshot(SnapshotStatus key);
     bool IsSnapshotExisted(SnapshotStatus key = defaultStatus);
     std::string GetSnapshotFilePath(SnapshotStatus& key, bool useKey = false, bool freeMultiWindow = false);
+    bool FindClosestFormSnapshot(SnapshotStatus& key);
     std::pair<uint32_t, uint32_t> GetSnapshotSize(SnapshotStatus key = defaultStatus,
         bool freeMultiWindow = false) const;
     void SetSnapshotSize(SnapshotStatus key, bool freeMultiWindow, std::pair<uint32_t, uint32_t> size);
