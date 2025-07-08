@@ -2778,7 +2778,7 @@ public:
      *
      * @return True means pc window or pad free multi-window, false means the opposite.
      */
-    virtual bool IsPcOrPadFreeMultiWindowMode() const;
+    virtual bool IsPcOrPadFreeMultiWindowMode() const { return false; };
 
     /**
      * @brief Judge whether SceneBoard is enabled.
@@ -3773,7 +3773,7 @@ public:
      *
      * @return true means the free multi-window mode is enabled, and false means the opposite.
      */
-    virtual bool GetFreeMultiWindowModeEnabledState();
+    virtual bool GetFreeMultiWindowModeEnabledState() { return false; }
 
     /**
      * @brief Get the window status of current window.
