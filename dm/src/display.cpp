@@ -243,4 +243,8 @@ DMError Display::GetDisplayCapability(std::string& capabilitInfo) const
     return SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayCapability(capabilitInfo);
 }
 
+DMError Display::GetLiveCreaseRegion(FoldCreaseRegion& region) const
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().GetLiveCreaseRegion(region);
+}
 } // namespace OHOS::Rosen
