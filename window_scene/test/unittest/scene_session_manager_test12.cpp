@@ -2562,6 +2562,78 @@ HWTEST_F(SceneSessionManagerTest12, CreateUIEffectController, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PendingSessionToBackground
+ * @tc.desc: test function : PendingSessionToBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, PendingSessionToBackground01, Function | SmallTest | Level2)
+{
+    //准备测试数据
+    sptr<IRemoteObject> token = nullptr;
+    BackgroundParams params;
+    MockAccesstokenKit::MockIsSACalling(false);
+    WSError result = ssm_->PendingSessionToBackground(token, params);
+    EXPECT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
+
+    MockAccesstokenKit::MockIsSACalling(true);
+    result = ssm_->PendingSessionToBackground(token, params);
+    EXPECT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: PendingSessionToBackground
+ * @tc.desc: test function : PendingSessionToBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, PendingSessionToBackground02, Function | SmallTest | Level2)
+{
+    // 准备测试数据
+    sptr<IRemoteObject> token = nullptr;
+    BackgroundParams params;
+    params.persistentId = 1;
+    MockAccesstokenKit::MockIsSACalling(true);
+    WSError result = ssm_->PendingSessionToBackground(token, params);
+    EXPECT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
+
+    params.persistentId = -1;
+    token = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(token, nullptr);
+    MockAccesstokenKit::MockIsSACalling(true);
+    result = ssm_->PendingSessionToBackground(token, params);
+    EXPECT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: PendingSessionToBackground
+ * @tc.desc: test function : PendingSessionToBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, PendingSessionToBackground03, Function | SmallTest | Level2)
+{
+    // 准备测试数据
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test2";
+    info.persistentId_ = 123;
+    sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(token, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->abilityToken_ = token;
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->sceneSessionMap_.insert({ 123, sceneSession });
+    BackgroundParams params;
+    params.persistentId = info.persistentId_;
+    MockAccesstokenKit::MockIsSACalling(true);
+    WSError result = ssm_->PendingSessionToBackground(nullptr, params);
+    EXPECT_EQ(result, WSError::WS_OK);
+
+    params.persistentId = -1;
+    result = ssm_->PendingSessionToBackground(token, params);
+    EXPECT_EQ(result, WSError::WS_OK);
+}
+
+/**
  * @tc.name: SetPiPSettingSwitchStatus
  * @tc.desc: test function : SetPiPSettingSwitchStatus
  * @tc.type: FUNC

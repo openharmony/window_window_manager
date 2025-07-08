@@ -55,6 +55,71 @@ void sceneSessionManagerLiteProxyTest::TearDown()
  
 namespace {
 /**
+ * @tc.name: PendingSessionToBackground
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerLiteProxyTest, PendingSessionToBackground, TestSize.Level1)
+{
+    BackgroundParams params;
+    sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SceneSessionManagerLiteProxy> sceneSessionManagerLiteProxy =
+        sptr<SceneSessionManagerLiteProxy>::MakeSptr(token);
+    ASSERT_NE(sceneSessionManagerLiteProxy, nullptr);
+    MockMessageParcel::ClearAllErrorFlag();
+    WSError errCode = sceneSessionManagerLiteProxy->PendingSessionToBackground(token, params);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    errCode = sceneSessionManagerLiteProxy->PendingSessionToBackground(token, params);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+    MockMessageParcel::SetWriteRemoteObjectErrorFlag(true);
+    errCode = sceneSessionManagerLiteProxy->PendingSessionToBackground(token, params);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+    MockMessageParcel::SetWriteRemoteObjectErrorFlag(false);
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    errCode = sceneSessionManagerLiteProxy->PendingSessionToBackground(token, params);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+    MockMessageParcel::SetWriteRemoteObjectErrorFlag(false);
+    MockMessageParcel::SetWriteInt32ErrorFlag(false);
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    errCode = sceneSessionManagerLiteProxy->PendingSessionToBackground(token, params);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+    MockMessageParcel::SetWriteRemoteObjectErrorFlag(false);
+    MockMessageParcel::SetWriteInt32ErrorFlag(false);
+    MockMessageParcel::SetWriteBoolErrorFlag(false);
+    MockMessageParcel::SetWriteParcelableErrorFlag(true);
+    errCode = sceneSessionManagerLiteProxy->PendingSessionToBackground(token, params);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+    MockMessageParcel::SetWriteRemoteObjectErrorFlag(false);
+    MockMessageParcel::SetWriteInt32ErrorFlag(false);
+    MockMessageParcel::SetWriteBoolErrorFlag(false);
+    MockMessageParcel::SetWriteParcelableErrorFlag(false);
+    errCode = sceneSessionManagerLiteProxy->PendingSessionToBackground(token, params);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+    MockMessageParcel::SetWriteRemoteObjectErrorFlag(false);
+    MockMessageParcel::SetWriteInt32ErrorFlag(false);
+    MockMessageParcel::SetWriteBoolErrorFlag(false);
+    MockMessageParcel::SetWriteParcelableErrorFlag(false);
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    errCode = sceneSessionManagerLiteProxy->PendingSessionToBackground(token, params);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
  * @tc.name: PendingSessionToBackgroundByPersistentId
  * @tc.desc: normal function
  * @tc.type: FUNC
