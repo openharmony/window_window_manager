@@ -21,6 +21,8 @@
 
 namespace OHOS {
 namespace Rosen {
+using NotifyWindowRecoverStateChangeFunc = std::function<void(bool isSpecificSession,
+    const WindowRecoverState& state)>;
 
 class WindowSceneSessionImpl : public WindowSessionImpl {
 public:
@@ -346,6 +348,7 @@ protected:
      */
     WMError RecoverAndConnectSpecificSession();
     WMError RecoverAndReconnectSceneSession();
+    void RegisterWindowRecoverStateChangeListener();
 
 private:
     WMError DestroyInner(bool needNotifyServer);
@@ -396,6 +399,10 @@ private:
      * Window Recover
      */
     void RegisterSessionRecoverListener(bool isSpecificSession);
+    void OnWindowRecoverStateChange(bool isSpecificSession, const WindowRecoverState& state);
+    void UpdateStartRecoverProperty(bool isSpecificSession);
+    void UpdateFinishRecoverProperty(bool isSpecificSession);
+    NotifyWindowRecoverStateChangeFunc windowRecoverStateChangeFunc_;
 
     /*
      * Window Layout
