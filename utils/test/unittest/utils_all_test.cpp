@@ -224,7 +224,7 @@ HWTEST_F(UtilsAllTest, ConvertErrorToCode, TestSize.Level1)
     EXPECT_EQ(ConvertErrorToCode(WMError::WM_OK), WmErrorCode::WM_OK);
     EXPECT_EQ(ConvertErrorToCode(WMError::WM_ERROR_FB_RESTORE_MAIN_WINDOW_FAILED),
         WmErrorCode::WM_ERROR_FB_RESTORE_MAIN_WINDOW_FAILED);
-    WMError error = static_cast<WMError>(static_cast<int>(WMError::WM_ERROR_FB_RESTORE_MAIN_WINDOW_FAILED) + 1);
+    WMError error = static_cast<WMError>(-1);
     EXPECT_EQ(ConvertErrorToCode(error), WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
 }
 
