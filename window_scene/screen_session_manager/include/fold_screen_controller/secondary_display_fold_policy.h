@@ -33,6 +33,7 @@ public:
         DisplayModeChangeReason reason = DisplayModeChangeReason::DEFAULT) override;
     void SendSensorResult(FoldStatus foldStatus) override;
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() override;
+    FoldCreaseRegion GetLiveCreaseRegion() override;
     void SetOnBootAnimation(bool onBootAnimation) override;
     FoldDisplayMode GetModeMatchStatus() override;
     std::vector<uint32_t> GetScreenParams() override;
@@ -58,6 +59,12 @@ private:
     void SetStatusMainActiveRectAndTpFeature();
     void SetStatusGlobalFullActiveRectAndTpFeature();
     void InitScreenParams();
+    FoldCreaseRegion GetStatusFullFoldCreaseRegion(bool isVertical) const;
+    void GetStatusFullFoldCreaseRect(bool isVertical, const std::vector<int32_t>& foldRect,
+        std::vector<DMRect>& foldCreaseRect) const;
+    FoldCreaseRegion GetStatusGlobalFullFoldCreaseRegion(bool isVertical) const;
+    void GetStatusGlobalFullFoldCreaseRect(bool isVertical, const std::vector<int32_t>& foldRect,
+        std::vector<DMRect>& foldCreaseRect) const;
     std::recursive_mutex& displayInfoMutex_;
     std::mutex coordinationMutex_;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler_;

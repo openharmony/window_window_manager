@@ -256,6 +256,10 @@ public:
     virtual void SetForceCloseHdr(ScreenId screenid, bool isForceCloseHdr) {}
 
     virtual sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() { return nullptr; }
+    virtual DMError GetLiveCreaseRegion(FoldCreaseRegion& region)
+    {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 
     virtual DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds,
         std::vector<DisplayId>& displayIds) { return DMError::DM_OK; }

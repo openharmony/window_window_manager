@@ -7680,6 +7680,29 @@ sptr<FoldCreaseRegion> ScreenSessionManager::GetCurrentFoldCreaseRegion()
 #endif
 }
 
+DMError ScreenSessionManager::GetLiveCreaseRegion(FoldCreaseRegion& region)
+{
+#ifdef FOLD_ABILITY_ENABLE
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        region = SuperFoldStateManager::GetInstance().GetLiveCreaseRegion();
+        return DMError::DM_OK;
+    }
+    if (!g_foldScreenFlag) {
+        region = FoldCreaseRegion(0, {});
+        return DMError::DM_OK;
+    }
+    if (foldScreenController_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "foldScreenController_ is null");
+        return DMError::DM_ERROR_INVALID_MODE_ID;
+    }
+    region = foldScreenController_->GetLiveCreaseRegion();
+    return DMError::DM_OK;
+#else
+    region = FoldCreaseRegion(0, {});
+    return DMError::DM_OK;
+#endif
+}
+
 uint32_t ScreenSessionManager::GetCurvedCompressionArea()
 {
     return ScreenSceneConfig::GetCurvedCompressionAreaInLandscape();

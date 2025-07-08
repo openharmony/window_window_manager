@@ -310,6 +310,7 @@ public:
     void SetKeyguardDrawnDoneFlag(bool flag);
 
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() override;
+    DMError GetLiveCreaseRegion(FoldCreaseRegion& region) override;
 
     void TriggerFoldStatusChange(FoldStatus foldStatus);
     void NotifyFoldStatusChanged(FoldStatus foldStatus);
