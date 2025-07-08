@@ -22,6 +22,8 @@ export type AsyncCallbackVoid = (err: BusinessError) => void;
 export type WindowEventCallback = (data: window.WindowEventType) => void;
 export type WindowSizeCallback = (data: window.Size) => void;
 export type WindowStatusCallback = (data: window.WindowStatusType) => void;
+export type KeyboardHeightChangeCallback = (data: number) => void;
+export type KeyboardDidShowOrHideCallback = (data: window.KeyboardInfo) => void;
 
 namespace window {
   export interface Size {
@@ -1127,6 +1129,30 @@ export interface WindowLimits {
     minHeight: number;
 }
 
+/**
+ * The information of keyboard
+ *
+ * @interface KeyboardInfo
+ * @syscap SystemCapability.Window.SessionManager
+ * @atomicservice
+ * @since 18
+ */
+export interface KeyboardInfo {
+  /**
+   * The position and size of the keyboard
+   *
+   * @type { Rect }
+   * @syscap SystemCapability.Window.SessionManager
+   * @atomicservice
+   * @since 18
+   */
+  rect: Rect;
+}
+
+export class KeyboardInfoInternal implements KeyboardInfo {
+  rect: Rect;
+}
+
 export class WindowStageInternal implements WindowStage {
     static { loadLibrary('windowstageani_kit.z') }
 
@@ -1238,6 +1264,7 @@ export class WindowInternal implements Window {
     private native getUIContextSync(nativeObj: long): UIContext;
     private native getWindowAvoidAreaSync(nativeObj: long, type: int): AvoidArea;
     private native setWaterMarkFlagSync(nativeObj: long, enable: boolean): void;
+    private native keepKeyboardOnFocusSync(nativeObj: long, enable: boolean): void;
     private native onSync(nativeObj: long, type: string, callback: object): void;
     private native offSync(nativeObj: long, type: string, callback?: object): void;
 
@@ -1614,6 +1641,10 @@ export class WindowInternal implements Window {
       });
     }
 
+    public keepKeyboardOnFocus(keepKeyboardFlag: boolean): void {
+      this.keepKeyboardOnFocusSync(this.nativeObj, keepKeyboardFlag);
+    }
+
     public on<T>(type: string, callback: Callback<T>): void {
       this.onSync(this.nativeObj, type, callback);
     }
@@ -1662,6 +1693,7 @@ export interface Window {
     getWindowAvoidArea(type: AvoidAreaType): AvoidArea;
     setWaterMarkFlag(enable: boolean): Promise<void>;
     setWaterMarkFlag(enable: boolean, callback: AsyncCallback<void>): void;
+    keepKeyboardOnFocus(enable: boolean): void;
     on<T>(type: string, callback: Callback<T>): void;
     off<T>(type: string, callback?: Callback<T>): void;
 }
@@ -1707,6 +1739,21 @@ function runWindowEventCallBack(cb: object, cbArg: int): void {
 function runWindowSizeCallBack(cb: object, cbArg: object): void {
     const func = cb as (cbArg: Size) => void;
     func(cbArg as Size);
+}
+
+function runKeyboardHeightChangeCallBack(cb: object, cbArg: number): void {
+    const func = cb as (cbArg: number) => void;
+    func(cbArg as number);
+}
+
+function runKeyboardDidShowCallBack(cb: object, cbArg: object): void {
+    const func = cb as (cbArg: KeyboardInfo) => void;
+    func(cbArg as KeyboardInfo);
+}
+
+function runKeyboardDidHideCallBack(cb: object, cbArg: object): void {
+    const func = cb as (cbArg: KeyboardInfo) => void;
+    func(cbArg as KeyboardInfo);
 }
 
 function runWindowStatusCallBack(cb: object, cbArg: int): void {
