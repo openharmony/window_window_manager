@@ -90,7 +90,7 @@ void ScreenManagerAni::onRegisterCallback(ani_env* env, ani_string type, ani_ref
     if (ret != DmErrorCode::DM_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] register screen listener with type, errcode: %{public}d", ret);
         std::string errMsg = "Failed to register screen listener with type";
-        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, errMsg);
+        AniErrUtils::ThrowBusinessError(env, ret, errMsg);
         return;
     }
     // add listener to map
@@ -168,7 +168,7 @@ DMError ScreenManagerAni::UnRegisterScreenListenerWithType(std::string type, ani
         TLOGE(WmsLogTag::DMS, "[ANI]create global ref fail");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
-    for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end(); it++) {
+    for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
         ani_boolean isEquals = 0;
         env->Reference_StrictEquals(cbRef, it->first, &isEquals);
         if (isEquals) {
@@ -179,7 +179,14 @@ DMError ScreenManagerAni::UnRegisterScreenListenerWithType(std::string type, ani
                 sptr<ScreenManager::IScreenListener> thisListener(it->second);
                 ret = SingletonContainer::Get<ScreenManager>().UnregisterScreenListener(thisListener);
             }
+            jsCbMap_[type].erase(it);
+            break;
+        } else {
+            it++;
         }
+    }
+    if (jsCbMap_[type].empty()) {
+        jsCbMap_.erase(type);
     }
     return ret;
 }
