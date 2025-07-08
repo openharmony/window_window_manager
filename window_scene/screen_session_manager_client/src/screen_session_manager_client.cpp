@@ -1061,6 +1061,27 @@ bool ScreenSessionManagerClient::OnExtendDisplayNodeChange(ScreenId mainScreenId
     return true;
 }
 
+sptr<ScreenSession> ScreenSessionManagerClient::CreateTempScreenSession(
+    ScreenId screenId, ScreenId rsId, const std::shared_ptr<RSDisplayNode>& displayNode)
+{
+    sptr<ScreenSession> screenSession = GetScreenSession(screenId);
+    if (screenSession != nullptr) {
+        TLOGW(WmsLogTag::DMS, "screen session has exist.");
+        return screenSession;
+    }
+
+    ScreenSessionConfig config = {
+        .screenId = screenId,
+        .rsId = rsId,
+        .displayNode = displayNode,
+    };
+    config.property = screenSessionManager_->GetScreenProperty(screenId);
+    TLOGW(WmsLogTag::DMS, "CreateTempScreenSession width:%{public}f, height=%{public}f",
+        config.property.GetBounds().rect_.GetWidth(), config.property.GetBounds().rect_.GetHeight());
+    screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    return screenSession;
+}
+
 bool ScreenSessionManagerClient::OnMainDisplayNodeChange(ScreenId mainScreenId, ScreenId extendScreenId,
     ScreenId extendRSId)
 {
@@ -1090,6 +1111,7 @@ bool ScreenSessionManagerClient::OnMainDisplayNodeChange(ScreenId mainScreenId, 
         << ", extendNodeId: " << extendNode->GetId();
     oss << std::endl;
     TLOGW(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
+    auto tempScreenSession = CreateTempScreenSession(extendScreenId, innerRSId, extendNode);
     mainNode->SetScreenId(extendRSId);
     extendNode->SetScreenId(innerRSId);
 
