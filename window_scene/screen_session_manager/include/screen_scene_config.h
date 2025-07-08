@@ -46,6 +46,7 @@ public:
     static bool IsSupportRotateWithSensor();
     static std::string GetExternalScreenDefaultMode();
     static std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalConfig();
+    static FoldDisplayMode GetFoldDisplayMode(uint32_t width, uint32_t height);
     static std::map<FoldDisplayMode, ScrollableParam> GetAllScrollableParam();
     static bool IsSupportCapture();
     static bool IsSupportOffScreenRendering();

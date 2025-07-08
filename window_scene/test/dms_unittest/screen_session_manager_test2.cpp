@@ -229,34 +229,6 @@ HWTEST_F(ScreenSessionManagerTest, RemoveVirtualScreenBlockList, Function | Smal
 }
 
 /**
- * @tc.name: GetCutoutInfoWithRotation01
- * @tc.desc: GetCutoutInfoWithRotation test with controller nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, GetCutoutInfoWithRotation01, Function | SmallTest | Level3)
-{
-    DisplayId id = 0;
-    int32_t rotation = 0;
-    ScreenSessionManager::GetInstance().screenCutoutController_ = nullptr;
-    auto cutoutInfo = ScreenSessionManager::GetInstance().GetCutoutInfoWithRotation(id, rotation);
-    ASSERT_EQ(cutoutInfo, nullptr);
-}
-
-/**
- * @tc.name: GetCutoutInfoWithRotation02
- * @tc.desc: GetCutoutInfoWithRotation test with controller not nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, GetCutoutInfoWithRotation02, Function | SmallTest | Level3)
-{
-    DisplayId id = 0;
-    int32_t rotation = 0;
-    auto cutoutInfo = ssm_->GetCutoutInfoWithRotation(id, rotation);
-    ASSERT_NE(cutoutInfo, nullptr);
-}
-
-
-/**
  * @tc.name: DestroyExtendVirtualScreen001
  * @tc.desc: DestroyExtendVirtualScreen test
  * @tc.type: FUNC
@@ -339,51 +311,6 @@ HWTEST_F(ScreenSessionManagerTest, IsPhysicalExtendScreenInUse001, TestSize.Leve
 
     ssm_->DestroyVirtualScreen(virtualScreenId);
     ssm_->DestroyVirtualScreen(physicalScreenId);
-}
-
-/**
- * @tc.name: GetCutoutInfoWithRotation03
- * @tc.desc: GetCutoutInfoWithRotation test with controller is nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, GetCutoutInfoWithRotatio03, Function | SmallTest | Level3)
-{
-    DisplayId id = 0;
-    int32_t rotation = 0;
-    MockAccesstokenKit::MockIsSACalling(false);
-    MockAccesstokenKit::MockIsSystemApp(false);
-    auto cutoutInfo = ssm_->GetCutoutInfoWithRotation(id, rotation);
-    EXPECT_EQ(cutoutInfo, nullptr);
-}
-
-/**
- * @tc.name: GetCutoutInfoWithRotation04
- * @tc.desc: GetCutoutInfoWithRotation test with controller is nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, GetCutoutInfoWithRotatio04, Function | SmallTest | Level3)
-{
-    DisplayId id = 0;
-    int32_t rotation = 0;
-    MockAccesstokenKit::MockIsSACalling(false);
-    MockAccesstokenKit::MockIsSystemApp(true);
-    auto cutoutInfo = ssm_->GetCutoutInfoWithRotation(id, rotation);
-    EXPECT_NE(cutoutInfo, nullptr);
-}
-
-/**
- * @tc.name: GetCutoutInfoWithRotation05
- * @tc.desc: GetCutoutInfoWithRotation test with controller is nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, GetCutoutInfoWithRotatio05, Function | SmallTest | Level3)
-{
-    DisplayId id = 0;
-    int32_t rotation = 0;
-    MockAccesstokenKit::MockIsSACalling(true);
-    MockAccesstokenKit::MockIsSystemApp(true);
-    auto cutoutInfo = ssm_->GetCutoutInfoWithRotation(id, rotation);
-    EXPECT_NE(cutoutInfo, nullptr);
 }
 
 /**

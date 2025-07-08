@@ -2284,7 +2284,8 @@ sptr<CutoutInfo> ScreenSessionManagerProxy::GetCutoutInfo(DisplayId displayId)
     return info;
 }
 
-sptr<CutoutInfo> ScreenSessionManagerProxy::GetCutoutInfoWithRotation(DisplayId displayId, int32_t rotation)
+sptr<CutoutInfo> ScreenSessionManagerProxy::GetCutoutInfo(DisplayId displayId, int32_t width,
+                                                          int32_t height, Rotation rotation)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -2302,7 +2303,15 @@ sptr<CutoutInfo> ScreenSessionManagerProxy::GetCutoutInfoWithRotation(DisplayId 
         TLOGE(WmsLogTag::DMS, "write displayId failed!");
         return nullptr;
     }
-    if (!data.WriteInt32(rotation)) {
+    if (!data.WriteInt32(width)) {
+        TLOGE(WmsLogTag::DMS, "write width failed!");
+        return nullptr;
+    }
+    if (!data.WriteInt32(height)) {
+        TLOGE(WmsLogTag::DMS, "write height failed!");
+        return nullptr;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(rotation))) {
         TLOGE(WmsLogTag::DMS, "write rotation failed!");
         return nullptr;
     }

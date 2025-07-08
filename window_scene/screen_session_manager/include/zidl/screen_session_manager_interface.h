@@ -175,10 +175,8 @@ public:
     virtual uint32_t GetScreenBrightness(uint64_t screenId) { return 0; }
     virtual std::vector<DisplayId> GetAllDisplayIds() { return std::vector<DisplayId>{}; }
     virtual sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) { return nullptr; }
-    virtual sptr<CutoutInfo> GetCutoutInfoWithRotation(DisplayId displayId, int32_t rotation)
-    {
-        return nullptr;
-    }
+    virtual sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId, int32_t width, int32_t height,
+                                           Rotation rotation) { return nullptr; }
     virtual DMError HasImmersiveWindow(ScreenId screenId, bool &immersive)
     {
         return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;

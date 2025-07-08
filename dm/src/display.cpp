@@ -215,7 +215,8 @@ sptr<DisplayInfo> Display::GetDisplayInfoWithCache() const
 
 sptr<CutoutInfo> Display::GetCutoutInfo() const
 {
-    return SingletonContainer::Get<DisplayManagerAdapter>().GetCutoutInfo(GetId());
+    return SingletonContainer::Get<DisplayManagerAdapter>().GetCutoutInfo(GetId(), GetWidth(),
+                                                                          GetHeight(), GetRotation());
 }
 
 DMError Display::HasImmersiveWindow(bool& immersive)
