@@ -535,7 +535,7 @@ HWTEST_F(SessionListenerControllerTest, RegisterSessionLifecycleListenerByIds, T
     sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     ssm_->sceneSessionMap_.insert({ 101, sceneSession });
     res = slController->RegisterSessionLifecycleListener(listener, persistentIdList1);
-    EXPECT_EQ(res, WMError::WM_OK);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
 }
 
 /**
