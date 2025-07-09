@@ -3957,6 +3957,7 @@ std::vector<AppExecFwk::SupportWindowMode> Session::ExtractSupportWindowModeFrom
         for (const auto& item : metadata) {
             if (item.name == "ohos.ability.window.supportWindowModeInFreeMultiWindow") {
                 updateWindowModes = ParseWindowModeFromMetaData(item.value);
+                return updateWindowModes;
             }
         }
     }
@@ -3969,18 +3970,15 @@ std::vector<AppExecFwk::SupportWindowMode> Session::ExtractSupportWindowModeFrom
 std::vector<AppExecFwk::SupportWindowMode> Session::ParseWindowModeFromMetaData(
     const std::string& supportModesInFreeMultiWindow)
 {
+    static const std::unordered_map<std::string, AppExecFwk::SupportWindowMode> modeMap = {
+        {"fullscreen", AppExecFwk::SupportWindowMode::FULLSCREEN},
+        {"split", AppExecFwk::SupportWindowMode::SPLIT},
+        {"floating", AppExecFwk::SupportWindowMode::FLOATING}
+    };
     std::vector<AppExecFwk::SupportWindowMode> updateWindowModes = {};
-    std::stringstream supportModes(supportModesInFreeMultiWindow);
-    std::string supportWindowMode;
-    while (getline(supportModes, supportWindowMode, ',')) {
-        if (supportWindowMode == "fullscreen") {
-            updateWindowModes.push_back(AppExecFwk::SupportWindowMode::FULLSCREEN);
-        } else if (supportWindowMode == "split") {
-            updateWindowModes.push_back(AppExecFwk::SupportWindowMode::SPLIT);
-        } else if (supportWindowMode == "floating") {
-            updateWindowModes.push_back(AppExecFwk::SupportWindowMode::FLOATING);
-        } else {
-            TLOGW(WmsLogTag::WMS_LAYOUT, "invalid input");
+    for (auto iter : modeMap) {
+        if (supportModesInFreeMultiWindow.find(iter.first) != std::string::npos) {
+            updateWindowModes.push_back(iter.second);
         }
     }
     return updateWindowModes;
