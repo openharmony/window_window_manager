@@ -13766,7 +13766,7 @@ WSError SceneSessionManager::UpdateExtWindowFlags(const sptr<IRemoteObject>& tok
 {
     ExtensionWindowFlags actions(extWindowActions);
     auto ret = CheckExtWindowFlagsPermission(actions);
-    if (actions.bitData == 0) {
+    if (ret != WSError::WS_OK) {
         return ret;
     }
 
