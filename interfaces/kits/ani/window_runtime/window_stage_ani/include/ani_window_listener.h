@@ -51,6 +51,7 @@ const std::string WINDOW_TITLE_BUTTON_RECT_CHANGE_CB = "windowTitleButtonRectCha
 const std::string WINDOW_NO_INTERACTION_DETECT_CB = "noInteractionDetected";
 const std::string WINDOW_RECT_CHANGE_CB = "windowRectChange";
 const std::string SUB_WINDOW_CLOSE_CB = "subWindowClose";
+const std::string WINDOW_HIGHLIGHT_CHANGE_CB = "windowHighlightChange";
 const std::string WINDOW_STAGE_CLOSE_CB = "windowStageClose";
 
 class AniWindowListener : public IWindowChangeListener,
@@ -72,12 +73,14 @@ class AniWindowListener : public IWindowChangeListener,
                         public IWindowNoInteractionListener,
                         public IWindowRectChangeListener,
                         public IMainWindowCloseListener,
-                        public ISubWindowCloseListener {
+                        public ISubWindowCloseListener,
+                        public IWindowHighlightChangeListener {
 public:
     AniWindowListener(ani_env* env, ani_ref callback, CaseType caseType)
         : env_(env), aniCallBack_(callback), caseType_(caseType),
         weakRef_(wptr<AniWindowListener> (this)) {}
     ~AniWindowListener();
+    ani_ref GetAniCallBack() const { return aniCallBack_; }
     void OnSystemBarPropertyChange(DisplayId displayId, const SystemBarRegionTints& tints) override;
     void OnSizeChange(Rect rect, WindowSizeChangeReason reason,
     const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
@@ -109,6 +112,7 @@ public:
     void OnWindowTitleButtonRectChanged(const TitleButtonRect& titleButtonRect) override;
     void OnRectChange(Rect rect, WindowSizeChangeReason reason) override;
     void OnSubWindowClose(bool& terminateCloseProcess) override;
+    void OnWindowHighlightChange(bool isHighlight) override;
     void OnMainWindowClose(bool& terminateCloseProcess) override;
 
 private:

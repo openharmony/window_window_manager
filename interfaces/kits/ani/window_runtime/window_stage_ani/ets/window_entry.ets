@@ -119,6 +119,24 @@ function main() {
     w.on('windowStatusChange', cb3);
     w.off('windowStatusChange', cb3);
 
+    let cb4 = (): void => {
+      console.println(`dialogTargetTouch event`);
+    };
+    w.on('dialogTargetTouch', cb4);
+    w.off('dialogTargetTouch', cb4);
+
+    let cb5 = (): void => {
+      console.println(`touchOutside event`);
+    };
+    w.on('touchOutside', cb5);
+    w.off('touchOutside', cb5);
+
+    let cb6 = (): void => {
+      console.println(`noInteractionDetected event`);
+    };
+    w.on('noInteractionDetected', cb6);
+    w.off('noInteractionDetected', cb6);
+
     w.setImmersiveModeEnabledState(false);
     w.setWindowDecorVisible(false);
     w.setWindowDecorHeight(100);

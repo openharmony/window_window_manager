@@ -46,6 +46,7 @@ enum class RegisterListenerType : uint32_t {
     WINDOW_NO_INTERACTION_DETECT_CB,
     WINDOW_RECT_CHANGE_CB,
     SUB_WINDOW_CLOSE_CB,
+    WINDOW_HIGHLIGHT_CHANGE_CB,
     WINDOW_STAGE_EVENT_CB,
     WINDOW_STAGE_CLOSE_CB,
 };
@@ -55,7 +56,7 @@ public:
     AniWindowRegisterManager();
     ~AniWindowRegisterManager();
     WmErrorCode RegisterListener(sptr<Window> window, std::string type,
-    CaseType caseType, ani_env* env, ani_ref callback);
+    CaseType caseType, ani_env* env, ani_ref callback, ani_double timeout);
     WmErrorCode UnregisterListener(sptr<Window> window, std::string type,
     CaseType caseType, ani_env* env, ani_ref callback);
 private:
@@ -91,7 +92,7 @@ private:
     WmErrorCode ProcessWindowVisibilityChangeRegister(sptr<AniWindowListener> listener, sptr<Window> window,
         bool isRegister, ani_env* env);
     WmErrorCode ProcessWindowNoInteractionRegister(sptr<AniWindowListener> listener, sptr<Window> window,
-        bool isRegister, ani_env* env);
+        bool isRegister, ani_env* env, ani_double timeout);
     WmErrorCode ProcessWindowStatusChangeRegister(sptr<AniWindowListener> listener, sptr<Window> window,
         bool isRegister, ani_env* env);
     WmErrorCode ProcessWindowTitleButtonRectChangeRegister(sptr<AniWindowListener> listener, sptr<Window> window,
@@ -100,20 +101,13 @@ private:
         bool isRegister, ani_env* env);
     WmErrorCode ProcessSubWindowCloseRegister(sptr<AniWindowListener> listener, sptr<Window> window,
         bool isRegister, ani_env* env);
+    WmErrorCode ProcessWindowHighlightChangeRegister(sptr<AniWindowListener> listener, sptr<Window> window,
+        bool isRegister, ani_env* env);
     WmErrorCode ProcessMainWindowCloseRegister(const sptr<AniWindowListener>& listener, const sptr<Window>& window,
         bool isRegister, ani_env* env);
-    WmErrorCode ProcessWindowStageListener(RegisterListenerType registerListenerType,
-        const sptr<AniWindowListener>& windowManagerListener, const sptr<Window>& window, bool isRegister,
-        ani_env* env);
-    WmErrorCode ProcessWindowListener(RegisterListenerType registerListenerType,
-        const sptr<AniWindowListener>& windowManagerListener, const sptr<Window>& window, bool isRegister,
-        ani_env* env);
-    WmErrorCode ProcessWindowManagerListener(RegisterListenerType registerListenerType,
-        const sptr<AniWindowListener>& windowManagerListener, const sptr<Window>& window, bool isRegister,
-        ani_env* env);
     WmErrorCode ProcessListener(RegisterListenerType registerListenerType, CaseType caseType,
         const sptr<AniWindowListener>& windowManagerListener, const sptr<Window>& window, bool isRegister,
-        ani_env* env);
+        ani_env* env, ani_double timeout);
     std::map<std::string, std::map<ani_ref, sptr<AniWindowListener>>> jsCbMap_;
     std::mutex mtx_;
 };
