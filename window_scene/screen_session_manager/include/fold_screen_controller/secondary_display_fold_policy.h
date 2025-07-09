@@ -50,14 +50,11 @@ private:
     void ReportFoldDisplayModeChange(FoldDisplayMode displayMode);
     void SendPropertyChangeResult(sptr<ScreenSession> screenSession, ScreenId screenId,
         ScreenPropertyChangeReason reason, FoldDisplayMode displayMode);
-    void HandleScreenOnFullOn(sptr<ScreenSession> screenSession, ScreenId screenId,
-        ScreenPropertyChangeReason reason, FoldDisplayMode displayMode);
-    void SendCoordinationPropertyChangeResultSync(sptr<ScreenSession> screenSession, ScreenId screenId,
-        ScreenPropertyChangeReason reason, FoldDisplayMode displayMode);
     void SetStatusConditionalActiveRectAndTpFeature(ScreenProperty &screenProperty);
-    void SetStatusFullActiveRectAndTpFeature();
-    void SetStatusMainActiveRectAndTpFeature();
-    void SetStatusGlobalFullActiveRectAndTpFeature();
+    void SetStatusFullActiveRectAndTpFeature(const sptr<ScreenSession>& screenSession, ScreenProperty &screenProperty);
+    void SetStatusMainActiveRectAndTpFeature(const sptr<ScreenSession>& screenSession, ScreenProperty &screenProperty);
+    void SetStatusGlobalFullActiveRectAndTpFeature(const sptr<ScreenSession>& screenSession,
+        ScreenProperty &screenProperty);
     void InitScreenParams();
     FoldCreaseRegion GetStatusFullFoldCreaseRegion(bool isVertical) const;
     void GetStatusFullFoldCreaseRect(bool isVertical, const std::vector<int32_t>& foldRect,
