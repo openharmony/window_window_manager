@@ -7095,7 +7095,7 @@ HWTEST_F(ScreenSessionManagerTest, SwitchExternalScreenToMirror, TestSize.Level1
     ASSERT_NE(screenSession, nullptr);
     ssm_->SwitchExternalScreenToMirror();
     EXPECT_NE(screenSession->GetScreenCombination(), ScreenCombination::SCREEN_MIRROR);
-    screenSession->SetMirrorScreenType(MirrorScreenType::PHYSICAL_MIRROR);
+    screenSession->SetIsRealScreen(true);
     ssm_->screenSessionMap_.insert(std::make_pair(777, nullptr));
     sptr<IDisplayManagerAgent> displayManagerAgent1 = sptr<DisplayManagerAgentDefault>::MakeSptr();
     ASSERT_NE(displayManagerAgent1, nullptr);
