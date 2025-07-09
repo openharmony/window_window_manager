@@ -37,6 +37,7 @@ class AccessibilityEventInfo;
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionStub" };
+constexpr int32_t MAX_ABILITY_SESSION_INFOS = 4;
 
 int ReadBasicAbilitySessionInfo(MessageParcel& data, sptr<AAFwk::SessionInfo> abilitySessionInfo)
 {
@@ -152,12 +153,16 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleGetIsMidScene(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RAISE_ABOVE_TARGET):
             return HandleRaiseAboveTarget(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RAISE_MAIN_WINDOW_ABOVE_TARGET):
+            return HandleRaiseMainWindowAboveTarget(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RAISE_APP_MAIN_WINDOW):
             return HandleRaiseAppMainWindowToTop(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CHANGE_SESSION_VISIBILITY_WITH_STATUS_BAR):
             return HandleChangeSessionVisibilityWithStatusBar(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_ACTIVE_PENDING_SESSION):
             return HandlePendingSessionActivation(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_BATCH_ACTIVE_PENDING_SESSION):
+            return HandleBatchPendingSessionsActivation(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RESTORE_MAIN_WINDOW):
             return HandleRestoreMainWindow(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TERMINATE):
@@ -799,8 +804,111 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
         TLOGE(WmsLogTag::WMS_LIFE, "Read hideStartWindow failed.");
         return ERR_INVALID_DATA;
     }
+    if (!data.ReadInt32(abilitySessionInfo->scenarios)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read scenarios failed.");
+        return ERR_INVALID_DATA;
+    }
+    abilitySessionInfo->windowCreateParams.reset(data.ReadParcelable<WindowCreateParams>());
     WSError errCode = PendingSessionActivation(abilitySessionInfo);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleBatchPendingSessionsActivation(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "In!");
+    int32_t size = 0;
+    if (!data.ReadInt32(size) || size < 0 || size > MAX_ABILITY_SESSION_INFOS) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read ability session info size failed");
+        return ERR_INVALID_DATA;
+    }
+    std::vector<sptr<AAFwk::SessionInfo>> abilitySessionInfos;
+    for (int32_t i = 0; i < size; i++) {
+        sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
+        int readRet = ReadOneAbilitySessionInfo(data, abilitySessionInfo);
+        if (readRet != ERR_NONE) {
+            return readRet;
+        }
+        abilitySessionInfos.emplace_back(abilitySessionInfo);
+    }
+    WSError errCode = BatchPendingSessionsActivation(abilitySessionInfos);
+    if (!reply.WriteUint32(static_cast<uint32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write errCode failed");
+    }
+    return ERR_NONE;
+}
+
+int SessionStub::ReadOneAbilitySessionInfo(MessageParcel& data, sptr<AAFwk::SessionInfo> abilitySessionInfo)
+{
+    int32_t readResult = ReadBasicAbilitySessionInfo(data, abilitySessionInfo);
+    if (readResult == ERR_INVALID_DATA) {
+        return ERR_INVALID_DATA;
+    }
+    if (!data.ReadBool(abilitySessionInfo->canStartAbilityFromBackground)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read canStartAbilityFromBackground failed.");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.ReadBool(abilitySessionInfo->isAtomicService)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read isAtomicService failed.");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.ReadBool(abilitySessionInfo->isBackTransition)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read isBackTransition failed.");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.ReadBool(abilitySessionInfo->needClearInNotShowRecent)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read needClearInNotShowRecent failed.");
+        return ERR_INVALID_DATA;
+    }
+    bool hasCallerToken = false;
+    if (!data.ReadBool(hasCallerToken)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read hasCallerToken failed.");
+        return ERR_INVALID_DATA;
+    }
+    if (hasCallerToken) {
+        abilitySessionInfo->callerToken = data.ReadRemoteObject();
+    }
+    bool hasStartSetting = false;
+    if (!data.ReadBool(hasStartSetting)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read hasStartSetting failed.");
+        return ERR_INVALID_DATA;
+    }
+    if (hasStartSetting) {
+        abilitySessionInfo->startSetting.reset(data.ReadParcelable<AAFwk::AbilityStartSetting>());
+    }
+    bool hasStartWindowOption = false;
+    if (!data.ReadBool(hasStartWindowOption)) {
+        TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "Read hasStartWindowOption failed.");
+        return ERR_INVALID_DATA;
+    }
+    if (hasStartWindowOption) {
+        auto startWindowOption = data.ReadParcelable<AAFwk::StartWindowOption>();
+        abilitySessionInfo->startWindowOption.reset(startWindowOption);
+    }
+    if (!data.ReadString(abilitySessionInfo->instanceKey)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read instanceKey failed.");
+        return ERR_INVALID_VALUE;
+    }
+    if (!data.ReadBool(abilitySessionInfo->isFromIcon)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read isFromIcon failed.");
+        return ERR_INVALID_DATA;
+    }
+    uint32_t size = data.ReadUint32();
+    if (size > 0 && size <= WINDOW_SUPPORT_MODE_MAX_SIZE) {
+        abilitySessionInfo->supportWindowModes.reserve(size);
+        for (uint32_t i = 0; i < size; i++) {
+            abilitySessionInfo->supportWindowModes.push_back(
+                static_cast<AppExecFwk::SupportWindowMode>(data.ReadInt32()));
+        }
+    }
+    if (!data.ReadString(abilitySessionInfo->specifiedFlag)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read specifiedFlag failed.");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.ReadBool(abilitySessionInfo->reuseDelegatorWindow)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read reuseDelegatorWindow failed.");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 
@@ -919,6 +1027,19 @@ int SessionStub::HandleRaiseAboveTarget(MessageParcel& data, MessageParcel& repl
     }
     WSError errCode = RaiseAboveTarget(subWindowId);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleRaiseMainWindowAboveTarget(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_HIERARCHY, "In");
+    int32_t targetId = 0;
+    if (!data.ReadInt32(targetId)) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "read targetId failed");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = RaiseMainWindowAboveTarget(targetId);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 

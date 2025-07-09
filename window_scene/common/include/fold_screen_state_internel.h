@@ -166,6 +166,53 @@ public:
         return std::regex_match(foldTypeStr, reg);
     }
 
+    static std::vector<int32_t> StringFoldRectSplitToInt(const std::string& str, const std::string& delims)
+    {
+        if (str.empty()) {
+            return {};
+        }
+        std::vector<int32_t> numbers;
+        std::vector<std::string> tokens;
+        if (delims.empty()) {
+            tokens.push_back(str);
+        } else {
+            std::size_t previous = 0;
+            std::size_t current = str.find_first_of(delims);
+            while (current != std::string::npos) {
+                if (current > previous) {
+                    tokens.push_back(str.substr(previous, current - previous));
+                }
+                previous = current + 1;
+                current = str.find_first_of(delims, previous);
+            }
+            if (previous < str.size()) {
+                tokens.push_back(str.substr(previous));
+            }
+        }
+        if (!IsParamsDigitsOnly(tokens)) {
+            return {};
+        }
+        for (const auto& token : tokens) {
+            numbers.push_back(std::stoi(token));
+        }
+        return numbers;
+    }
+
+    static bool IsParamsDigitsOnly(const std::vector<std::string>& params)
+    {
+        for (const auto& param : params) {
+            if (param.size() == 0) {
+                return false;
+            }
+            for (size_t i = 0; i < param.size(); ++i) {
+                if (param.at(i) < '0' || param.at(i) > '9') {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     template<typename T>
     static std::string TransVec2Str(const std::vector<T> &vec, const std::string &name)
     {

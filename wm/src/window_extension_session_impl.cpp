@@ -480,6 +480,78 @@ WMError WindowExtensionSessionImpl::UnregisterHostWindowRectChangeListener(
     return ret;
 }
 
+WMError WindowExtensionSessionImpl::RegisterKeyboardDidShowListener(const sptr<IKeyboardDidShowListener>& listener)
+{
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "in");
+    AAFwk::Want want;
+    auto ret = SendExtensionMessageToHost(
+        static_cast<uint32_t>(Extension::Businesscode::REGISTER_KEYBOARD_DID_SHOW_LISTENER), want);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Send register listener message failed, errCode: %{public}d", ret);
+        return ret;
+    }
+    std::lock_guard<std::mutex> lockListener(keyboardDidShowListenerMutex_);
+    ret = RegisterListener(keyboardDidShowListenerList_, listener);
+    return ret;
+}
+
+WMError WindowExtensionSessionImpl::UnregisterKeyboardDidShowListener(const sptr<IKeyboardDidShowListener>& listener)
+{
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "in");
+    WMError ret = WMError::WM_OK;
+    bool needNotifyHost = false;
+    {
+        std::lock_guard<std::mutex> lockListener(keyboardDidShowListenerMutex_);
+        ret = UnregisterListener(keyboardDidShowListenerList_, listener);
+        if (ret != WMError::WM_OK) {
+            return ret;
+        }
+        needNotifyHost = keyboardDidShowListenerList_.empty() && keyboardDidShowUIExtListeners_.empty();
+    }
+    if (needNotifyHost) {
+        AAFwk::Want want;
+        ret = SendExtensionMessageToHost(
+            static_cast<uint32_t>(Extension::Businesscode::UNREGISTER_KEYBOARD_DID_SHOW_LISTENER), want);
+    }
+    return ret;
+}
+
+WMError WindowExtensionSessionImpl::RegisterKeyboardDidHideListener(const sptr<IKeyboardDidHideListener>& listener)
+{
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "in");
+    AAFwk::Want want;
+    auto ret = SendExtensionMessageToHost(
+        static_cast<uint32_t>(Extension::Businesscode::REGISTER_KEYBOARD_DID_HIDE_LISTENER), want);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Send register listener message failed, errCode: %{public}d", ret);
+        return ret;
+    }
+    std::lock_guard<std::mutex> lockListener(keyboardDidHideListenerMutex_);
+    ret = RegisterListener(keyboardDidHideListenerList_, listener);
+    return ret;
+}
+
+WMError WindowExtensionSessionImpl::UnregisterKeyboardDidHideListener(const sptr<IKeyboardDidHideListener>& listener)
+{
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "in");
+    WMError ret = WMError::WM_OK;
+    bool needNotifyHost = false;
+    {
+        std::lock_guard<std::mutex> lockListener(keyboardDidHideListenerMutex_);
+        ret = UnregisterListener(keyboardDidHideListenerList_, listener);
+        if (ret != WMError::WM_OK) {
+            return ret;
+        }
+        needNotifyHost = keyboardDidHideListenerList_.empty() && keyboardDidHideUIExtListeners_.empty();
+    }
+    if (needNotifyHost) {
+        AAFwk::Want want;
+        ret = SendExtensionMessageToHost(
+            static_cast<uint32_t>(Extension::Businesscode::UNREGISTER_KEYBOARD_DID_HIDE_LISTENER), want);
+    }
+    return ret;
+}
+
 void WindowExtensionSessionImpl::TriggerBindModalUIExtension()
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "id: %{public}d", GetPersistentId());
@@ -1011,6 +1083,15 @@ void WindowExtensionSessionImpl::UpdateExtensionDensity(SessionViewportConfig& c
 
 void WindowExtensionSessionImpl::NotifyDisplayInfoChange(const SessionViewportConfig& config)
 {
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(config.displayId_);
+    if (display != nullptr) {
+        auto displayInfo = display->GetDisplayInfo();
+        if (displayInfo != nullptr && !MathHelper::NearZero(lastSystemDensity_ - displayInfo->GetVirtualPixelRatio())) {
+            auto density = displayInfo->GetVirtualPixelRatio();
+            lastSystemDensity_ = density;
+            NotifySystemDensityChange(density);
+        }
+    }
     if (context_ == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "get token of window:%{public}d failed because of context is null.",
             GetPersistentId());
@@ -1103,6 +1184,7 @@ void WindowExtensionSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaC
             TLOGNE(WmsLogTag::WMS_KEYBOARD, "window is nullptr, notify occupied area info failed");
             return;
         }
+        window->NotifyOccupiedAreaChange(info);
         window->occupiedAreaInfo_ = info;
         window->UpdateViewportConfig(
             window->GetRect(), WindowSizeChangeReason::OCCUPIED_AREA_CHANGE, rsTransaction, nullptr, avoidAreas);
@@ -1113,15 +1195,15 @@ void WindowExtensionSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaC
 WMError WindowExtensionSessionImpl::RegisterOccupiedAreaChangeListener(
     const sptr<IOccupiedAreaChangeListener>& listener)
 {
-    occupiedAreaChangeListener_ = listener;
-    return WMError::WM_OK;
+    std::lock_guard<std::mutex> lockListener(occupiedAreaChangeListenerMutex_);
+    return RegisterListener(occupiedAreaChangeListenerList_, listener);
 }
 
 WMError WindowExtensionSessionImpl::UnregisterOccupiedAreaChangeListener(
     const sptr<IOccupiedAreaChangeListener>& listener)
 {
-    occupiedAreaChangeListener_ = nullptr;
-    return WMError::WM_OK;
+    std::lock_guard<std::mutex> lockListener(occupiedAreaChangeListenerMutex_);
+    return UnregisterListener(occupiedAreaChangeListenerList_, listener);
 }
 
 WMError WindowExtensionSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea,
@@ -1150,12 +1232,22 @@ WMError WindowExtensionSessionImpl::UnregisterAvoidAreaChangeListener(const sptr
 
 WMError WindowExtensionSessionImpl::Show(uint32_t reason, bool withAnimation, bool withFocus)
 {
+    return Show(reason, withAnimation, withFocus, false);
+}
+
+WMError WindowExtensionSessionImpl::Show(uint32_t reason, bool withAnimation, bool withFocus, bool waitAttach)
+{
     CheckAndAddExtWindowFlags();
     UpdateSystemViewportConfig();
-    return WindowSessionImpl::Show(reason, withAnimation, withFocus);
+    return WindowSessionImpl::Show(reason, withAnimation, withFocus, waitAttach);
 }
 
 WMError WindowExtensionSessionImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits)
+{
+    return Hide(reason, withAnimation, isFromInnerkits, false);
+}
+
+WMError WindowExtensionSessionImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits, bool waitDetach)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d Hide, reason:%{public}u, state:%{public}u",
         GetPersistentId(), reason, state_);
@@ -1509,6 +1601,30 @@ WMError WindowExtensionSessionImpl::SetImmersiveModeEnabledState(bool enable)
     return WMError::WM_OK;
 }
 
+WMError WindowExtensionSessionImpl::ExtensionSetKeepScreenOn(bool keepScreenOn)
+{
+    AAFwk::WantParams want;
+    want.SetParam(Extension::ATOMICSERVICE_KEY_FUNCTION, AAFwk::String::Box("setWindowKeepScreenOn"));
+    want.SetParam(Extension::ATOMICSERVICE_KEY_PARAM_ISKEEPSCREENON, AAFwk::Boolean::Box(keepScreenOn));
+    if (TransferExtensionData(want) != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "send failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return WMError::WM_OK;
+}
+
+WMError WindowExtensionSessionImpl::ExtensionSetBrightness(float brightness)
+{
+    AAFwk::WantParams want;
+    want.SetParam(Extension::ATOMICSERVICE_KEY_FUNCTION, AAFwk::String::Box("setWindowBrightness"));
+    want.SetParam(Extension::ATOMICSERVICE_KEY_PARAM_BRIGHTNESS, AAFwk::Float::Box(brightness));
+    if (TransferExtensionData(want) != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "send failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return WMError::WM_OK;
+}
+
 void WindowExtensionSessionImpl::ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     if (pointerEvent == nullptr) {
@@ -1754,7 +1870,7 @@ bool WindowExtensionSessionImpl::IsPcOrPadFreeMultiWindowMode() const
 WSError WindowExtensionSessionImpl::SendExtensionData(MessageParcel& data, MessageParcel& reply,
                                                       [[maybe_unused]] MessageOption& option)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "id=%{public}d", GetPersistentId());
+    TLOGD(WmsLogTag::WMS_UIEXT, "id=%{public}d", GetPersistentId());
     dataHandler_->NotifyDataConsumer(data, reply);
     return WSError::WS_OK;
 }
@@ -1827,6 +1943,22 @@ WMError WindowExtensionSessionImpl::OnExtensionMessage(uint32_t code, int32_t pe
         }
         case static_cast<uint32_t>(Extension::Businesscode::UNREGISTER_HOST_WINDOW_RECT_CHANGE_LISTENER): {
             return HandleUnregisterHostWindowRectChangeListener(code, persistentId, data);
+            break;
+        }
+        case static_cast<uint32_t>(Extension::Businesscode::REGISTER_KEYBOARD_DID_SHOW_LISTENER): {
+            return HandleUIExtRegisterKeyboardDidShowListener(code, persistentId, data);
+            break;
+        }
+        case static_cast<uint32_t>(Extension::Businesscode::UNREGISTER_KEYBOARD_DID_SHOW_LISTENER): {
+            return HandleUIExtUnregisterKeyboardDidShowListener(code, persistentId, data);
+            break;
+        }
+        case static_cast<uint32_t>(Extension::Businesscode::REGISTER_KEYBOARD_DID_HIDE_LISTENER): {
+            return HandleUIExtRegisterKeyboardDidHideListener(code, persistentId, data);
+            break;
+        }
+        case static_cast<uint32_t>(Extension::Businesscode::UNREGISTER_KEYBOARD_DID_HIDE_LISTENER): {
+            return HandleUIExtUnregisterKeyboardDidHideListener(code, persistentId, data);
             break;
         }
         default: {
@@ -2039,6 +2171,39 @@ WMError WindowExtensionSessionImpl::OnHostWindowRectChange(AAFwk::Want&& data, s
     return WMError::WM_OK;
 }
 
+WMError WindowExtensionSessionImpl::OnScreenshot(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "in");
+    NotifyScreenshot();
+    return WMError::WM_OK;
+}
+
+WMError WindowExtensionSessionImpl::OnExtensionSecureLimitChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)
+{
+    bool limit = data.GetBoolParam(Extension::EXTENSION_SECURE_LIMIT_CHANGE, false);
+    TLOGD(WmsLogTag::WMS_UIEXT, "limit: %{public}d", limit);
+    NotifyExtensionSecureLimitChange(limit);
+    return WMError::WM_OK;
+}
+
+WMError WindowExtensionSessionImpl::OnKeyboardDidShow(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "in");
+    KeyboardPanelInfo info;
+    ReadKeyboardInfoFromWant(data, info);
+    NotifyKeyboardDidShow(info);
+    return WMError::WM_OK;
+}
+
+WMError WindowExtensionSessionImpl::OnKeyboardDidHide(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "in");
+    KeyboardPanelInfo info;
+    ReadKeyboardInfoFromWant(data, info);
+    NotifyKeyboardDidHide(info);
+    return WMError::WM_OK;
+}
+
 void WindowExtensionSessionImpl::RegisterConsumer(Extension::Businesscode code,
     const std::function<WMError(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)>& func)
 {
@@ -2088,6 +2253,21 @@ void WindowExtensionSessionImpl::RegisterDataConsumer()
         this, std::placeholders::_1, std::placeholders::_2));
     RegisterConsumer(Extension::Businesscode::NOTIFY_HOST_WINDOW_RECT_CHANGE,
         std::bind(&WindowExtensionSessionImpl::OnHostWindowRectChange,
+        this, std::placeholders::_1, std::placeholders::_2));
+    RegisterConsumer(Extension::Businesscode::NOTIFY_SCREENSHOT,
+        std::bind(&WindowExtensionSessionImpl::OnScreenshot,
+        this, std::placeholders::_1, std::placeholders::_2));
+    RegisterConsumer(Extension::Businesscode::NOTIFY_EXTENSION_SECURE_LIMIT_CHANGE,
+        std::bind(&WindowExtensionSessionImpl::OnExtensionSecureLimitChange,
+        this, std::placeholders::_1, std::placeholders::_2));
+    RegisterConsumer(Extension::Businesscode::NOTIFY_KEYBOARD_DID_SHOW,
+        std::bind(&WindowExtensionSessionImpl::OnKeyboardDidShow,
+        this, std::placeholders::_1, std::placeholders::_2));
+    RegisterConsumer(Extension::Businesscode::NOTIFY_KEYBOARD_DID_HIDE,
+        std::bind(&WindowExtensionSessionImpl::OnKeyboardDidHide,
+            this, std::placeholders::_1, std::placeholders::_2));
+    RegisterConsumer(Extension::Businesscode::SYNC_HOST_STATUS_BAR_CONTENT_COLOR,
+        std::bind(&WindowExtensionSessionImpl::OnHostStatusBarContentColorChange,
         this, std::placeholders::_1, std::placeholders::_2));
 
     auto consumersEntry = [weakThis = wptr(this)](SubSystemId id, uint32_t customId, AAFwk::Want&& data,
@@ -2173,6 +2353,64 @@ WMError WindowExtensionSessionImpl::OnHostWindowCompatInfoChange(AAFwk::Want&& d
             data, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
     }
     return WMError::WM_OK;
+}
+
+void WindowExtensionSessionImpl::NotifyKeyboardDidShow(const KeyboardPanelInfo& keyboardPanelInfo)
+{
+    std::lock_guard<std::mutex> lockListener(keyboardDidShowListenerMutex_);
+    for (const auto& listener : keyboardDidShowListenerList_) {
+        if (listener != nullptr) {
+            listener->OnKeyboardDidShow(keyboardPanelInfo);
+        }
+    }
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        AAFwk::Want want;
+        WriteKeyboardInfoToWant(want, keyboardPanelInfo);
+        uiContent->SendUIExtProprtyByPersistentId(
+            static_cast<uint32_t>(Extension::Businesscode::NOTIFY_KEYBOARD_DID_SHOW), want,
+            keyboardDidShowUIExtListenerIds_, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
+    }
+}
+
+void WindowExtensionSessionImpl::NotifyKeyboardDidHide(const KeyboardPanelInfo& keyboardPanelInfo)
+{
+    std::lock_guard<std::mutex> lockListener(keyboardDidHideListenerMutex_);
+    for (const auto& listener : keyboardDidHideListenerList_) {
+        if (listener != nullptr) {
+            listener->OnKeyboardDidHide(keyboardPanelInfo);
+        }
+    }
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        AAFwk::Want want;
+        WriteKeyboardInfoToWant(want, keyboardPanelInfo);
+        uiContent->SendUIExtProprtyByPersistentId(
+            static_cast<uint32_t>(Extension::Businesscode::NOTIFY_KEYBOARD_DID_HIDE), want,
+            keyboardDidHideUIExtListenerIds_, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
+    }
+}
+
+WMError WindowExtensionSessionImpl::OnHostStatusBarContentColorChange(AAFwk::Want&& data,
+    std::optional<AAFwk::Want>& reply)
+{
+    auto contentColor = data.GetIntParam(Extension::HOST_STATUS_BAR_CONTENT_COLOR, 0);
+    TLOGI(WmsLogTag::WMS_UIEXT, "contentColor: %{public}u", contentColor);
+    hostStatusBarContentColor_ = contentColor;
+    return WMError::WM_OK;
+}
+
+uint32_t WindowExtensionSessionImpl::GetHostStatusBarContentColor() const
+{
+    return hostStatusBarContentColor_;
+}
+
+void WindowExtensionSessionImpl::NotifyOccupiedAreaChange(sptr<OccupiedAreaChangeInfo> info)
+{
+    std::lock_guard<std::mutex> lockListener(occupiedAreaChangeListenerMutex_);
+    for (auto& listener : occupiedAreaChangeListenerList_) {
+        if (listener != nullptr) {
+            listener->OnSizeChange(info);
+        }
+    }
 }
 } // namespace Rosen
 } // namespace OHOS

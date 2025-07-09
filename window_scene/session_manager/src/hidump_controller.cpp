@@ -220,7 +220,7 @@ void HidumpController::DumpLayoutParam(
     oss << "Layout:"
         << std::endl
         << static_cast<uint32_t>(session->GetRotation()) << "|"
-        << static_cast<uint32_t>(session->reason_) << "|"
+        << static_cast<uint32_t>(session->GetSizeChangeReason()) << "|"
         << session->GetZOrder() << "|"
         << std::setprecision(precision) << session->GetAspectRatio() << "|"
         << std::setprecision(precision) << session->GetFloatingScale() << "|"

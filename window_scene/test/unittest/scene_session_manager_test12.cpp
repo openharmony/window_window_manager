@@ -37,6 +37,8 @@
 #include "mock/mock_window_manager_agent_lite.h"
 #include "session_manager/include/session_manager_agent_controller.h"
 #include "session_manager/include/zidl/session_router_stack_listener_stub.h"
+#include "ui_effect_manager.h"
+#include "ui_effect_controller_client_proxy.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -626,7 +628,7 @@ HWTEST_F(SceneSessionManagerTest12, DestroyAndDisconnectSpecificSessionInner02, 
     ssm_->SetAlivePersistentIds(recoveredPersistentIds);
     property->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
     auto ret = ssm_->DestroyAndDisconnectSpecificSessionInner(1);
-    EXPECT_EQ(ret, WSError::WS_ERROR_NULLPTR);
+    EXPECT_EQ(ret, WSError::WS_OK);
 }
 
 /**
@@ -2524,6 +2526,71 @@ HWTEST_F(SceneSessionManagerTest12, TestGetSceneSessions, TestSize.Level1)
         std::unique_lock<std::shared_mutex> lock(ssm_->sceneSessionMapMutex_);
         ssm_->sceneSessionMap_.clear();
     }
+}
+
+/**
+ * @tc.name: CreateUIEffectController
+ * @tc.desc: test function : CreateUIEffectController
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, CreateUIEffectController, TestSize.Level1)
+{
+    sptr<MockIRemoteObject> mocker = sptr<MockIRemoteObject>::MakeSptr();
+    sptr<UIEffectControllerClientProxy> controllerClient = sptr<UIEffectControllerClientProxy>::MakeSptr(mocker);
+    sptr<IUIEffectController> controller = sptr<UIEffectController>::MakeSptr(0, nullptr, nullptr);
+    int32_t controllerId = 10;
+    MockAccesstokenKit::MockIsSystemApp(false);
+    MockAccesstokenKit::MockIsSACalling(false);
+    EXPECT_EQ(ssm_->CreateUIEffectController(controllerClient, controller, controllerId),
+        WMError::WM_ERROR_NOT_SYSTEM_APP);
+    MockAccesstokenKit::MockIsSystemApp(true);
+    MockAccesstokenKit::MockIsSACalling(true);
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    EXPECT_NE(ssm_->CreateUIEffectController(controllerClient, controller, controllerId),
+        WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    EXPECT_EQ(ssm_->CreateUIEffectController(controllerClient, controller, controllerId),
+        WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    ssm_->systemConfig_.freeMultiWindowEnable_ = true;
+    ssm_->systemConfig_.freeMultiWindowSupport_ = true;
+    EXPECT_EQ(ssm_->CreateUIEffectController(controllerClient, controller, controllerId),
+        WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+    ssm_->systemConfig_.freeMultiWindowSupport_ = false;
+    EXPECT_NE(ssm_->CreateUIEffectController(controllerClient, controller, controllerId),
+        WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+}
+
+/**
+ * @tc.name: SetPiPSettingSwitchStatus
+ * @tc.desc: test function : SetPiPSettingSwitchStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, SetPiPSettingSwitchStatus, Function | SmallTest | Level2)
+{
+    ssm_->SetPiPSettingSwitchStatus(true);
+    EXPECT_EQ(ssm_->pipSwitchStatus_, true);
+    ssm_->SetPiPSettingSwitchStatus(false);
+    EXPECT_EQ(ssm_->pipSwitchStatus_, false);
+}
+
+/**
+ * @tc.name: GetPiPSettingSwitchStatus
+ * @tc.desc: test function : GetPiPSettingSwitchStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetPiPSettingSwitchStatus, Function | SmallTest | Level2)
+{
+    bool switchStatus = false;
+    ssm_->SetPiPSettingSwitchStatus(true);
+    WMError ret = ssm_->GetPiPSettingSwitchStatus(switchStatus);
+    EXPECT_EQ(switchStatus, true);
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    ssm_->SetPiPSettingSwitchStatus(false);
+    ret = ssm_->GetPiPSettingSwitchStatus(switchStatus);
+    EXPECT_EQ(switchStatus, false);
+    EXPECT_EQ(ret, WMError::WM_OK);
 }
 } // namespace
 } // namespace Rosen

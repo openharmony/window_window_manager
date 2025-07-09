@@ -36,6 +36,9 @@ const ScreenId SCREEN_ID_MAIN = 0;
 const ScreenId SCREEN_ID_SUB = 5;
 const bool IS_COORDINATION_SUPPORT =
     OHOS::system::GetBoolParameter("const.window.foldabledevice.is_coordination_support", false);
+const std::string g_FoldScreenRect = system::GetParameter("const.display.foldscreen.crease_region", "");
+const std::string FOLD_CREASE_DELIMITER = ",;";
+constexpr int32_t FOLD_CREASE_RECT_SIZE = 4; //numbers of parameter on the current device is 4
 #ifdef TP_FEATURE_ENABLE
 const int32_t TP_TYPE = 12;
 #endif
@@ -66,6 +69,50 @@ DualDisplayFoldPolicy::DualDisplayFoldPolicy(std::recursive_mutex& displayInfoMu
         }
     };
     currentFoldCreaseRegion_ = new FoldCreaseRegion(screenIdMain, rect);
+}
+
+FoldCreaseRegion DualDisplayFoldPolicy::GetFoldCreaseRegion(bool isVertical) const
+{
+    std::vector<int32_t> foldRect = FoldScreenStateInternel::StringFoldRectSplitToInt(g_FoldScreenRect,
+        FOLD_CREASE_DELIMITER);
+    if (foldRect.size() != FOLD_CREASE_RECT_SIZE) {
+        TLOGE(WmsLogTag::DMS, "foldRect is invalid");
+        return FoldCreaseRegion(0, {});
+    }
+
+    ScreenId screenIdFull = 0;
+    std::vector<DMRect> foldCreaseRect;
+    GetFoldCreaseRect(isVertical, foldRect, foldCreaseRect);
+    return FoldCreaseRegion(screenIdFull, foldCreaseRect);
+}
+
+void DualDisplayFoldPolicy::GetFoldCreaseRect(bool isVertical,
+    const std::vector<int32_t>& foldRect, std::vector<DMRect>& foldCreaseRect) const
+{
+    int32_t liveCreaseRegionPosX; // live Crease Region PosX
+    int32_t liveCreaseRegionPosY; // live Crease Region PosY
+    uint32_t liveCreaseRegionPosWidth; // live Crease Region PosWidth
+    uint32_t liveCreaseRegionPosHeight; // live Crease Region PosHeight
+    if (isVertical) {
+        TLOGI(WmsLogTag::DMS, "the current FoldCreaseRect is vertical");
+        liveCreaseRegionPosX = foldRect[1];
+        liveCreaseRegionPosY = foldRect[0];
+        liveCreaseRegionPosWidth = static_cast<uint32_t>(foldRect[3]);
+        liveCreaseRegionPosHeight = static_cast<uint32_t>(foldRect[2]);
+    } else {
+        TLOGI(WmsLogTag::DMS, "the current FoldCreaseRect is horizontal");
+        liveCreaseRegionPosX = foldRect[0];
+        liveCreaseRegionPosY = foldRect[1];
+        liveCreaseRegionPosWidth = static_cast<uint32_t>(foldRect[2]);
+        liveCreaseRegionPosHeight = static_cast<uint32_t>(foldRect[3]);
+    }
+    foldCreaseRect = {
+        {
+            liveCreaseRegionPosX, liveCreaseRegionPosY,
+            liveCreaseRegionPosWidth, liveCreaseRegionPosHeight
+        }
+    };
+    return;
 }
 
 void DualDisplayFoldPolicy::SetdisplayModeChangeStatus(bool status, bool isOnBootAnimation)
@@ -187,6 +234,40 @@ sptr<FoldCreaseRegion> DualDisplayFoldPolicy::GetCurrentFoldCreaseRegion()
 {
     TLOGI(WmsLogTag::DMS, "GetCurrentFoldCreaseRegion");
     return currentFoldCreaseRegion_;
+}
+
+FoldCreaseRegion DualDisplayFoldPolicy::GetLiveCreaseRegion()
+{
+    TLOGI(WmsLogTag::DMS, "enter");
+    std::lock_guard<std::mutex> lock_mode(liveCreaseRegionMutex_);
+    FoldDisplayMode displayMode = GetScreenDisplayMode();
+    if (displayMode == FoldDisplayMode::UNKNOWN || displayMode == FoldDisplayMode::SUB) {
+        return FoldCreaseRegion(0, {});
+    }
+    sptr<ScreenSession> screenSession = ScreenSessionManager::GetInstance().GetScreenSession(SCREEN_ID_MAIN);
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "default screenSession is null");
+        return FoldCreaseRegion(0, {});
+    }
+    DisplayOrientation displayOrientation = screenSession->GetScreenProperty().GetDisplayOrientation();
+    if (displayMode == FoldDisplayMode::MAIN || displayMode == FoldDisplayMode::COORDINATION) {
+        switch (displayOrientation) {
+            case DisplayOrientation::PORTRAIT:
+            case DisplayOrientation::PORTRAIT_INVERTED: {
+                liveCreaseRegion_ = GetFoldCreaseRegion(false);
+                break;
+            }
+            case DisplayOrientation::LANDSCAPE:
+            case DisplayOrientation::LANDSCAPE_INVERTED: {
+                liveCreaseRegion_ = GetFoldCreaseRegion(true);
+                break;
+            }
+            default: {
+                TLOGE(WmsLogTag::DMS, "displayOrientation is invalid");
+            }
+        }
+    }
+    return liveCreaseRegion_;
 }
 
 void DualDisplayFoldPolicy::LockDisplayStatus(bool locked)

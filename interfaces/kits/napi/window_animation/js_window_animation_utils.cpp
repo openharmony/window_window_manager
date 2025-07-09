@@ -53,7 +53,7 @@ napi_value CreateJsValue(napi_env env, const T& value)
         napi_create_string_utf8(env, value.c_str(), value.length(), &result);
         return result;
     } else if constexpr (std::is_enum_v<ValueType>) {
-        return CreateJsNumber(env, static_cast<std::make_signed_t<ValueType>>(value));
+        return CreateJsNumber(env, static_cast<std::make_signed_t<std::underlying_type_t<ValueType>>>(value));
     } else if constexpr (std::is_same_v<ValueType, const char*>) {
         (value != nullptr) ? napi_create_string_utf8(env, value, strlen(value), &result) :
             napi_get_undefined(env, &result);
@@ -193,7 +193,7 @@ napi_value ConvertWindowAnimationOptionToJsValue(napi_env env,
             break;
         }
         case WindowAnimationCurve::INTERPOLATION_SPRING:
-        case WindowAnimationCurve::CUBIC_BEZIER_CURVE: {
+        case WindowAnimationCurve::CUBIC_BEZIER: {
             napi_value params = nullptr;
             napi_create_array(env, &params);
             for (uint32_t i = 0; i < ANIMATION_PARAM_SIZE; ++i) {
@@ -263,14 +263,44 @@ bool ConvertStartAnimationSystemOptionsFromJsValue(napi_env env, napi_value jsOb
         return false;
     }
     startAnimationSystemOptions.animationType = static_cast<AnimationType>(animationType);
-    napi_value jsAnimationConfig = nullptr;
-    napi_get_named_property(env, jsObject, "config", &jsAnimationConfig);
-    if (jsAnimationConfig == nullptr) {
+    bool hasAnimationConfig = false;
+    napi_has_named_property(env, jsObject, "animationConfig", &hasAnimationConfig);
+    if (!hasAnimationConfig) {
         return true;
     }
+    napi_value jsAnimationConfig = nullptr;
+    napi_get_named_property(env, jsObject, "animationConfig", &jsAnimationConfig);
+    startAnimationSystemOptions.animationConfig = std::make_shared<WindowAnimationOption>();
     if (!ConvertWindowAnimationOptionFromJsValue(env, jsAnimationConfig, *(startAnimationSystemOptions.animationConfig),
-        result) ||!CheckWindowAnimationOption(env, *(startAnimationSystemOptions.animationConfig), result)) {
-        return false;
+        result) || !CheckWindowAnimationOption(env, *(startAnimationSystemOptions.animationConfig), result)) {
+        startAnimationSystemOptions.animationConfig = nullptr;
+    }
+    return true;
+}
+
+bool ConvertWindowCreateParamsFromJsValue(napi_env env, napi_value jsObject,
+    WindowCreateParams& windowCreateParams)
+{
+    bool hasAnimationParams = false;
+    napi_has_named_property(env, jsObject, "animationParams", &hasAnimationParams);
+    if (hasAnimationParams) {
+        napi_value jsAnimationParams = nullptr;
+        napi_get_named_property(env, jsObject, "animationParams", &jsAnimationParams);
+        windowCreateParams.animationParams = std::make_shared<StartAnimationOptions>();
+        if (!ConvertStartAnimationOptionsFromJsValue(env, jsAnimationParams, *(windowCreateParams.animationParams))) {
+            windowCreateParams.animationParams = nullptr;
+        }
+    }
+    bool hasAnimationSystemParams = false;
+    napi_has_named_property(env, jsObject, "systemAnimationParams", &hasAnimationSystemParams);
+    if (hasAnimationSystemParams) {
+        napi_value jsAnimationSystemParams = nullptr;
+        napi_get_named_property(env, jsObject, "systemAnimationParams", &jsAnimationSystemParams);
+        windowCreateParams.animationSystemParams = std::make_shared<StartAnimationSystemOptions>();
+        if (!ConvertStartAnimationSystemOptionsFromJsValue(env, jsAnimationSystemParams,
+            *(windowCreateParams.animationSystemParams))) {
+            windowCreateParams.animationSystemParams = nullptr;
+        }
     }
     return true;
 }
@@ -296,7 +326,12 @@ bool CheckWindowAnimationOption(napi_env env, WindowAnimationOption& animationCo
             }
             break;
         }
-        case WindowAnimationCurve::CUBIC_BEZIER_CURVE: {
+        case WindowAnimationCurve::CUBIC_BEZIER: {
+            if (animationConfig.duration > ANIMATION_MAX_DURATION) {
+                TLOGE(WmsLogTag::WMS_ANIMATION, "Duration is invalid: %{public}u", animationConfig.duration);
+                result = WmErrorCode::WM_ERROR_ILLEGAL_PARAM;
+                return false;
+            }
             break;
         }
         default:
@@ -331,7 +366,7 @@ bool ConvertWindowAnimationOptionFromJsValue(napi_env env, napi_value jsAnimatio
             break;
         }
         case static_cast<uint32_t>(WindowAnimationCurve::INTERPOLATION_SPRING):
-        case static_cast<uint32_t>(WindowAnimationCurve::CUBIC_BEZIER_CURVE): {
+        case static_cast<uint32_t>(WindowAnimationCurve::CUBIC_BEZIER): {
             napi_value paramsValue = nullptr;
             napi_get_named_property(env, jsAnimationConfig, "param", &paramsValue);
             for (uint32_t i = 0; i < ANIMATION_PARAM_SIZE; ++i) {

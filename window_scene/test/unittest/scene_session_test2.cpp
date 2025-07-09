@@ -93,6 +93,65 @@ HWTEST_F(SceneSessionTest2, RaiseAboveTarget, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RaiseMainWindowAboveTarget
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, RaiseMainWindowAboveTarget, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "RaiseMainWindowAboveTarget";
+    info.bundleName_ = "RaiseMainWindowAboveTarget";
+    sptr<Rosen::ISession> session_;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    EXPECT_NE(specificCallback_, nullptr);
+
+    sptr<SceneSession> sourceSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sourceSession, nullptr);
+
+    sourceSession->isActive_ = true;
+    sourceSession->callingPid_ = 1;
+    sourceSession->zOrder_ = 2001;
+    sptr<WindowSessionProperty> property1 = sptr<WindowSessionProperty>::MakeSptr();
+    property1->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    property1->SetDisplayId(0);
+    sourceSession->SetSessionProperty(property1);
+
+    auto result = sourceSession->RaiseMainWindowAboveTarget(0);
+    EXPECT_EQ(result, WSError::WS_ERROR_NULLPTR);
+
+    sptr<SceneSession> targetSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(targetSession, nullptr);
+
+    targetSession->isActive_ = true;
+    targetSession->callingPid_ = 2;
+    targetSession->zOrder_ = 102;
+    sptr<WindowSessionProperty> property2 = sptr<WindowSessionProperty>::MakeSptr();
+    property2->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    property2->SetDisplayId(1);
+    targetSession->SetSessionProperty(property2);
+
+    sptr<SceneSession::SpecificSessionCallback> callBack =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    EXPECT_NE(nullptr, callBack);
+    sourceSession->specificCallback_ = callBack;
+    auto task = [&targetSession](int32_t persistentId) { return targetSession; };
+    callBack->onGetSceneSessionByIdCallback_ = task;
+    result = sourceSession->RaiseMainWindowAboveTarget(0);
+    EXPECT_EQ(result, WSError::WS_ERROR_INVALID_CALLING);
+
+    targetSession->callingPid_ = 1;
+    result = sourceSession->RaiseMainWindowAboveTarget(0);
+    EXPECT_EQ(result, WSError::WS_ERROR_INVALID_CALLING);
+
+    property2->SetDisplayId(0);
+    targetSession->SetSessionProperty(property2);
+    result = sourceSession->RaiseMainWindowAboveTarget(0);
+    EXPECT_EQ(result, WSError::WS_ERROR_INVALID_CALLING);
+}
+
+/**
  * @tc.name: NotifyPropertyWhenConnect1
  * @tc.desc: NotifyPropertyWhenConnect1
  * @tc.type: FUNC
@@ -356,7 +415,7 @@ HWTEST_F(SceneSessionTest2, UpdateSizeChangeReason01, TestSize.Level1)
     sceneSession->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
     sceneSession->sessionStage_ = mockSessionStage;
     sceneSession->UpdateSizeChangeReason(SizeChangeReason::ROTATION);
-    ASSERT_EQ(sceneSession->reason_, SizeChangeReason::ROTATION);
+    ASSERT_EQ(sceneSession->GetSizeChangeReason(), SizeChangeReason::ROTATION);
     ASSERT_EQ(WSError::WS_OK, sceneSession->UpdateSizeChangeReason(SizeChangeReason::UNDEFINED));
 }
 
@@ -1284,7 +1343,7 @@ HWTEST_F(SceneSessionTest2, TransferPointerEvent03, TestSize.Level1)
     float ratio = 0.0;
     bool isDecor = true;
     float vpr = 0.0;
-    sceneSession->AdjustRectByLimits(limits, ratio, isDecor, vpr, rect);
+    sceneSession->GetLayoutController()->AdjustRectByLimits(limits, ratio, isDecor, vpr, rect);
     sceneSession->SetPipActionEvent("pointerEvent", 0);
 
     auto property = sptr<WindowSessionProperty>::MakeSptr();
@@ -1297,7 +1356,7 @@ HWTEST_F(SceneSessionTest2, TransferPointerEvent03, TestSize.Level1)
     property->SetWindowType(WindowType::WINDOW_TYPE_PIP);
     property->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
     sceneSession->SetSessionProperty(property);
-    sceneSession->AdjustRectByLimits(limits, ratio, false, vpr, rect);
+    sceneSession->GetLayoutController()->AdjustRectByLimits(limits, ratio, false, vpr, rect);
     ASSERT_EQ(WSError::WS_OK, sceneSession->SetPipActionEvent("pointerEvent", 0));
 }
 

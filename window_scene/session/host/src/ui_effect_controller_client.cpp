@@ -20,9 +20,9 @@ UIEffectControllerClient::UIEffectControllerClient(): id_(UIEFFECT_INVALID_ID)
 {
 }
 
-WMError UIEffectControllerClient::SetParams(const sptr<UIEffectParams>& param)
+WMError UIEffectControllerClient::SetParams(const sptr<UIEffectParams>& params)
 {
-    param_ = param;
+    params_ = params;
     return WMError::WM_OK;
 }
 }

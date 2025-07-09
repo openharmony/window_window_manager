@@ -236,7 +236,9 @@ public:
     virtual void SetShowWithOptions(bool showWithOptions) {}
     virtual bool IsShowWithOptions() const { return false; }
     virtual WMError Show(uint32_t reason = 0, bool withAnimation = false, bool withFocus = true) = 0;
+    virtual WMError Show(uint32_t reason, bool withAnimation, bool withFocus, bool waitAttach) = 0;
     virtual WMError Hide(uint32_t reason = 0, bool withAnimation = false, bool isFromInnerkits = true) = 0;
+    virtual WMError Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits, bool waitDetach) = 0;
     virtual WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false,
         MoveConfiguration moveConfiguration = {}) = 0;
     virtual WMError MoveToAsync(int32_t x, int32_t y,
@@ -300,7 +302,9 @@ public:
     virtual WMError UpdateSurfaceNodeAfterCustomAnimation(bool isAdd) = 0;
     virtual void SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer>& inputEventConsumer) = 0;
     virtual void ConsumeKeyEvent(const std::shared_ptr<MMI::KeyEvent>& inputEvent) = 0;
+    virtual void ConsumeBackEvent() {}
     virtual void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& inputEvent) = 0;
+    virtual bool IsDialogSessionBackGestureEnabled() { return false; }
     virtual void RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback) = 0;
     virtual int64_t GetVSyncPeriod() = 0;
     virtual void FlushFrameRate(uint32_t rate, int32_t animatorExpectedFrameRate, uint32_t rateType) {}
@@ -805,6 +809,18 @@ public:
      * @return WM_OK means set success.
      */
     virtual WMError SetSubWindowSource(SubWindowSource source) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Raise main window above another.
+     *
+     * @param targetId Indicates the id of the target main window.
+     * @return WM_OK means raise success, others means raise failed.
+     */
+    virtual WMError RaiseMainWindowAboveTarget(int32_t targetId)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
 };
 }
 }

@@ -558,6 +558,11 @@ bool WindowImpl::IsShowWithOptions() const
 
 WMError WindowImpl::Show(uint32_t reason, bool withAnimation, bool withFocus)
 {
+    return Show(reason, withAnimation, withFocus, false);
+}
+
+WMError WindowImpl::Show(uint32_t reason, bool withAnimation, bool withFocus, bool waitAttach)
+{
     if (IsShowWithOptions()) {
         SetShowWithOptions(false);
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
@@ -566,6 +571,11 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation, bool withFocus)
 }
 
 WMError WindowImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits)
+{
+    return Hide(reason, withAnimation, isFromInnerkits, false);
+}
+
+WMError WindowImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits, bool waitDetach)
 {
     return WMError::WM_OK;
 }
@@ -893,6 +903,21 @@ void WindowImpl::ConsumeKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
         return;
     }
     uiContent_->ProcessKeyEvent(keyEvent);
+}
+
+void WindowImpl::ConsumeBackEvent()
+{
+    if (uiContent_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "ConsumeBackEvent to uiContent failed, uiContent_ is null");
+        return;
+    }
+    auto isConsumed = uiContent_->ProcessBackPressed();
+    TLOGI(WmsLogTag::WMS_EVENT, "ConsumeBackEvent to uiContent, %{public}d", isConsumed);
+}
+
+bool WindowImpl::IsDialogSessionBackGestureEnabled()
+{
+    return false;
 }
 
 void WindowImpl::ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)

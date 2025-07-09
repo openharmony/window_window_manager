@@ -919,6 +919,54 @@ HWTEST_F(WindowSceneSessionImplTest2, RaiseAboveTarget01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RaiseMainWindowAboveTarget_DeviceTypeTest
+ * @tc.desc: Test raising main window above target on different devices
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest2, RaiseMainWindowAboveTarget_DeviceTypeTest, TestSize.Level1)
+{
+    sptr<WindowOption> option1 = sptr<WindowOption>::MakeSptr();
+    option1->SetWindowName("RaiseMainWindowAboveTarget_DeviceTypeTest_SourceWindow");
+    option1->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<WindowSceneSessionImpl> sourceSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option1);
+
+    sourceSceneSession->state_ = WindowState::STATE_SHOWN;
+    sourceSceneSession->property_->SetDisplayId(0);
+    sourceSceneSession->property_->SetPersistentId(101);
+    sourceSceneSession->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+
+    sptr<WindowOption> option2 = sptr<WindowOption>::MakeSptr();
+    option2->SetWindowName("RaiseMainWindowAboveTarget_DeviceTypeTest_TargetWindow");
+    option2->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<WindowSceneSessionImpl> targetSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option2);
+
+    targetSceneSession->state_ = WindowState::STATE_SHOWN;
+    targetSceneSession->property_->SetDisplayId(0);
+    targetSceneSession->property_->SetPersistentId(102);
+    targetSceneSession->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+
+    WMError ret = sourceSceneSession->RaiseMainWindowAboveTarget(102);
+    EXPECT_NE(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+
+    sourceSceneSession->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    sourceSceneSession->windowSystemConfig_.freeMultiWindowEnable_ = false;
+    sourceSceneSession->windowSystemConfig_.freeMultiWindowSupport_ = false;
+    ret = sourceSceneSession->RaiseMainWindowAboveTarget(102);
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+
+    sourceSceneSession->windowSystemConfig_.freeMultiWindowEnable_ = false;
+    sourceSceneSession->windowSystemConfig_.freeMultiWindowSupport_ = false;
+    ret = sourceSceneSession->RaiseMainWindowAboveTarget(102);
+    EXPECT_NE(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+
+    sourceSceneSession->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    sourceSceneSession->windowSystemConfig_.freeMultiWindowEnable_ = false;
+    sourceSceneSession->windowSystemConfig_.freeMultiWindowSupport_ = false;
+    ret = sourceSceneSession->RaiseMainWindowAboveTarget(102);
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+}
+
+/**
  * @tc.name: SetSubWindowZLevel
  * @tc.desc: SetSubWindowZLevel
  * @tc.type: FUNC

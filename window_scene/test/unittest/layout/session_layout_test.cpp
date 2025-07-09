@@ -153,17 +153,17 @@ HWTEST_F(SessionLayoutTest, UpdateRect01, TestSize.Level1)
     rect = { 0, 0, 100, 100 };
     ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION,
               session_->UpdateRect(rect, SizeChangeReason::UNDEFINED, "SessionLayoutTest"));
-    ASSERT_EQ(rect, session_->winRect_);
+    ASSERT_EQ(rect, session_->GetSessionRect());
 
     rect = { 0, 0, 200, 200 };
     session_->UpdateSessionState(SessionState::STATE_ACTIVE);
     ASSERT_EQ(WSError::WS_OK, session_->UpdateRect(rect, SizeChangeReason::UNDEFINED, "SessionLayoutTest"));
-    ASSERT_EQ(rect, session_->winRect_);
+    ASSERT_EQ(rect, session_->GetSessionRect());
 
     rect = { 0, 0, 300, 300 };
     session_->sessionStage_ = nullptr;
     ASSERT_EQ(WSError::WS_OK, session_->UpdateRect(rect, SizeChangeReason::UNDEFINED, "SessionLayoutTest"));
-    ASSERT_EQ(rect, session_->winRect_);
+    ASSERT_EQ(rect, session_->GetSessionRect());
     Session::SetBackgroundUpdateRectNotifyEnabled(preBackgroundUpdateRectNotifyEnabled);
 }
 

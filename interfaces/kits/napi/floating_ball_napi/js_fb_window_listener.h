@@ -36,7 +36,7 @@ public:
     void OnClickEvent() override;
 
 private:
-    void OnFbListenerCallback(const FloatingBallState& state, const int32_t& errorCode);
+    void OnFbListenerCallback(const FloatingBallState& state);
     napi_env env_ = nullptr;
     std::shared_ptr<NativeReference> jsCallBack_ = nullptr;
 };

@@ -25,6 +25,7 @@
 #include "display_manager.h"
 #include "dm_common.h"
 #include "wm_common.h"
+#include "js_ui_effect_controller.h"
 #include "js_window.h"
 #include "js_window_utils.h"
 #include "window_helper.h"
@@ -225,6 +226,12 @@ napi_value JsWindowManager::NotifyScreenshotEvent(napi_env env, napi_callback_in
 {
     JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(env, info);
     return (me != nullptr) ? me->OnNotifyScreenshotEvent(env, info) : nullptr;
+}
+
+napi_value JsWindowManager::CreateUIEffectController(napi_env env, napi_callback_info info)
+{
+    JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(env, info);
+    return (me != nullptr) ? me->OnCreateUIEffectController(env, info) : nullptr;
 }
 
 static void GetNativeContext(napi_env env, napi_value nativeContext, void*& contextPtr, WMError& errCode)
@@ -1413,25 +1420,31 @@ napi_value JsWindowManager::OnGetTopNavDestinationName(napi_env env, napi_callba
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "invalid windowId value: %{public}d", windowId);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
     }
-    std::string topNavDestName;
-    WMError retErrCode = WMError::WM_OK;
-    NapiAsyncTask::ExecuteCallback execute = [windowId, &topNavDestName, &retErrCode, where = __func__]() {
-        retErrCode = SingletonContainer::Get<WindowManager>().GetTopNavDestinationName(windowId, topNavDestName);
+    std::shared_ptr<std::string> topNavDestNamePtr = std::make_shared<std::string>();
+    std::shared_ptr<WMError> errCodePtr = std::make_shared<WMError>(WMError::WM_OK);
+    NapiAsyncTask::ExecuteCallback execute = [windowId, topNavDestNamePtr, errCodePtr, where = __func__]() {
+        std::string topNavDestName;
+        *errCodePtr = SingletonContainer::Get<WindowManager>().GetTopNavDestinationName(windowId, topNavDestName);
+        *topNavDestNamePtr = topNavDestName;
         TLOGND(WmsLogTag::WMS_ATTRIBUTE,
             "%{public}s: topNavDestName: %{public}s, windowId: %{public}d, errCode: %{public}d",
-            where, topNavDestName.c_str(), windowId, static_cast<int32_t>(retErrCode));
+            where, topNavDestNamePtr->c_str(), windowId, static_cast<int32_t>(*errCodePtr));
     };
-    NapiAsyncTask::CompleteCallback complete = [windowId, &topNavDestName, &retErrCode, where = __func__](
+    NapiAsyncTask::CompleteCallback complete = [windowId, topNavDestNamePtr, errCodePtr, where = __func__](
         napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (retErrCode != WMError::WM_OK) {
+            if (*errCodePtr != WMError::WM_OK) {
                 TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s failed, errCode: %{public}d, windowId: %{public}d",
-                    where, static_cast<int32_t>(retErrCode), windowId);
-                task.Reject(env, JsErrUtils::CreateJsError(env, WM_JS_TO_ERROR_CODE_MAP.at(retErrCode)));
+                    where, static_cast<int32_t>(*errCodePtr), windowId);
+                auto retErrCode = WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY;
+                if (WM_JS_TO_ERROR_CODE_MAP.count(*errCodePtr) > 0) {
+                    retErrCode = WM_JS_TO_ERROR_CODE_MAP.at(*errCodePtr);
+                }
+                task.Reject(env, JsErrUtils::CreateJsError(env, retErrCode));
                 return;
             }
             TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s ok, topNavDestName: %{public}s, windowId: %{public}d",
-                where, topNavDestName.c_str(), windowId);
-            task.Resolve(env, CreateJsValue(env, topNavDestName));
+                where, topNavDestNamePtr->c_str(), windowId);
+            task.Resolve(env, CreateJsValue(env, *topNavDestNamePtr));
         };
     napi_value result = nullptr;
     auto asyncTask = CreateAsyncTask(env, nullptr,
@@ -1667,6 +1680,57 @@ napi_value JsWindowManager::OnNotifyScreenshotEvent(napi_env env, napi_callback_
     return result;
 }
 
+napi_value JsWindowManager::OnCreateUIEffectController(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc > 0) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    struct ControllerParam {
+        std::unique_ptr<JsUIEffectController> controller;
+        WMError errCode;
+    };
+    std::shared_ptr<ControllerParam> param = std::make_shared<ControllerParam>();
+    NapiAsyncTask::ExecuteCallback execute = [param]() {
+        if (param == nullptr) {
+            return;
+        }
+        param->controller = std::make_unique<JsUIEffectController>();
+        param->errCode = param->controller->Init();
+    };
+    NapiAsyncTask::CompleteCallback complete =
+        [param](napi_env env, NapiAsyncTask& task, int32_t status) {
+            if (param == nullptr) {
+                task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY,
+                    "param is nullptr, system abnormal"));
+                return;
+            }
+            if (param->errCode != WMError::WM_OK) {
+                task.Reject(env, JsErrUtils::CreateJsError(env, WM_JS_TO_ERROR_CODE_MAP.at(param->errCode)));
+                return;
+            }
+            if (param->controller == nullptr) {
+                task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                    "get nullptr controller"));
+                return;
+            }
+            napi_value object = nullptr;
+            napi_status ret = JsUIEffectController::CreateJsObject(env, param->controller.release(), object);
+            if (ret == napi_status::napi_ok) {
+                task.Resolve(env, object);
+            } else {
+                task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+            }
+        };
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindowManager::OnCreateUIEffectController",
+        env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
+    return result;
+}
+
 napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
 {
     WLOGFD("[NAPI]");
@@ -1700,6 +1764,7 @@ napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
     napi_set_named_property(env, exportObj, "ModalityType", ModalityTypeInit(env));
     napi_set_named_property(env, exportObj, "RotationChangeType", RotationChangeTypeInit(env));
     napi_set_named_property(env, exportObj, "RectType", RectTypeInit(env));
+    napi_set_named_property(env, exportObj, "AnimationType", AnimationTypeInit(env));
     napi_set_named_property(env, exportObj, "WindowTransitionType", WindowTransitionTypeInit(env));
     napi_set_named_property(env, exportObj, "WindowAnimationCurve", WindowAnimationCurveInit(env));
     
@@ -1735,6 +1800,8 @@ napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
         JsWindowManager::ShiftAppWindowTouchEvent);
     BindNativeFunction(env, exportObj, "notifyScreenshotEvent", moduleName,
         JsWindowManager::NotifyScreenshotEvent);
+    BindNativeFunction(env, exportObj, "createUIEffectController", moduleName,
+        JsWindowManager::CreateUIEffectController);
     return NapiGetUndefined(env);
 }
 }  // namespace Rosen

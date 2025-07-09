@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,17 +42,29 @@ size_t GetObject(T& object, const uint8_t* data, size_t size)
     return memcpy_s(&object, objectSize, data, objectSize) == EOK ? objectSize : 0;
 }
 
+class MockFbListener : public IFbLifeCycle,
+                       public IFbClickObserver {
+public:
+    MockFbListener() = default;
+    virtual ~MockFbListener() = default;
+
+    void OnFloatingBallStart() override {};
+    void OnFloatingBallStop() override {};
+
+    void OnClickEvent() override {};
+};
+
 void CheckFbControllerFunctionsPart(sptr<FloatingBallController> controller, const uint8_t* data, size_t size)
 {
     if (data == nullptr || (size < DATA_MIN_SIZE || size > DATA_MAX_SIZE)) {
         return;
     }
 
-    auto fbLifeCycleListener = sptr<IFbLifeCycle>::MakeSptr();
+    auto fbLifeCycleListener = sptr<MockFbListener>::MakeSptr();
     controller->RegisterFbLifecycle(fbLifeCycleListener);
     controller->UnRegisterFbLifecycle(fbLifeCycleListener);
 
-    auto fbClickObserverListener = sptr<IFbClickObserver>::MakeSptr();
+    auto fbClickObserverListener = sptr<MockFbListener>::MakeSptr();
     controller->RegisterFbClickObserver(fbClickObserverListener);
     controller->UnRegisterFbClickObserver(fbClickObserverListener);
 
@@ -77,13 +89,13 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 
     uint32_t windowId;
     startPos += GetObject(windowId, data + startPos, size - startPos);
-    sptr<Window> window = new Window();
+    sptr<Window> window = sptr<Window>::MakeSptr();
     sptr<FloatingBallController> controller = sptr<FloatingBallController>::MakeSptr(window, windowId, nullptr);
     if (controller == nullptr) {
         return false;
     }
 
-    sptr<FbOption> option = new FbOption();
+    sptr<FbOption> option = sptr<FbOption>::MakeSptr();
     
     std::string title = "";
     std::string content = "";
@@ -117,7 +129,7 @@ void FloatingBallManagerFuzzTest(const uint8_t* data, size_t size)
     uint32_t windowId;
     startPos += GetObject(windowId, data + startPos, size - startPos);
 
-    sptr<Window> window = new Window();
+    sptr<Window> window = sptr<Window>::MakeSptr();
     sptr<FloatingBallController> controller = sptr<FloatingBallController>::MakeSptr(window, windowId, nullptr);
 
     FloatingBallManager::IsActiveController(controller);
@@ -125,7 +137,7 @@ void FloatingBallManagerFuzzTest(const uint8_t* data, size_t size)
     FloatingBallManager::RemoveActiveController(controller);
 }
 
-} // namespace.OHOS
+} // namespace OHOS
 
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)

@@ -59,7 +59,7 @@ public:
         std::shared_ptr<RSSurfaceNode>& surfaceNode, std::shared_ptr<RSDisplayNode>& parentNode, bool isAdd);
     void InitRSDisplayNode(const RSDisplayNodeConfig& config, const Point& startPoint);
     void InitRSDefaultDisplayNode(const RSDisplayNodeConfig& config, const Point& startPoint);
-    void UpdateRSDisplayNode(Point startPoint, sptr<AbstractScreen> absScreen);
+    void UpdateRSDisplayNode(Point startPoint, const sptr<AbstractScreen>& absScreen);
     ScreenId GetScreenGroupId() const;
 
     // colorspace, gamut
@@ -146,6 +146,7 @@ private:
     bool GetRSDisplayNodeConfig(sptr<AbstractScreen>& dmsScreen, struct RSDisplayNodeConfig& config);
 
     std::map<ScreenId, sptr<AbstractScreen>> screenMap_;
+    mutable std::mutex screenMapMutex_;
 };
 } // namespace OHOS::Rosen
 #endif // FOUNDATION_DMSERVER_ABSTRACT_SCREEN_H

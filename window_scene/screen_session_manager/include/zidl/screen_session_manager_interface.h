@@ -81,6 +81,9 @@ public:
     virtual DMError SetOrientation(ScreenId screenId, Orientation orientation) { return DMError::DM_OK; }
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId, DmErrorCode* errorCode = nullptr,
         bool isUseDma = false, bool isCaptureFullOfScreen = false) { return nullptr; }
+    virtual std::vector<std::shared_ptr<Media::PixelMap>> GetDisplayHDRSnapshot(
+        DisplayId displayId, DmErrorCode* errorCode = nullptr, bool isUseDma = false,
+        bool isCaptureFullOfScreen = false) { return { nullptr, nullptr }; }
     virtual std::shared_ptr<Media::PixelMap> GetSnapshotByPicker(Media::Rect &rect,
         DmErrorCode* errorCode = nullptr)
     {
@@ -253,6 +256,10 @@ public:
     virtual void SetForceCloseHdr(ScreenId screenid, bool isForceCloseHdr) {}
 
     virtual sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() { return nullptr; }
+    virtual DMError GetLiveCreaseRegion(FoldCreaseRegion& region)
+    {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 
     virtual DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds,
         std::vector<DisplayId>& displayIds) { return DMError::DM_OK; }
@@ -342,6 +349,15 @@ public:
     {
         *errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
         return nullptr;
+    }
+    virtual std::vector<std::shared_ptr<Media::PixelMap>> GetDisplayHDRSnapshotWithOption(
+        const CaptureOption& captureOption, DmErrorCode* errorCode = nullptr)
+    {
+        if (errorCode == nullptr) {
+            return { nullptr, nullptr };
+        }
+        *errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
+        return { nullptr, nullptr };
     }
     virtual DMError SetScreenSkipProtectedWindow(const std::vector<ScreenId> &screenIds, bool isEnable)
     {

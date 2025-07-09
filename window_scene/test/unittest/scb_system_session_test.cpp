@@ -256,6 +256,86 @@ HWTEST_F(SCBSystemSessionTest, SetSkipEventOnCastPlus01, TestSize.Level1)
     scbSystemSession_->SetSkipEventOnCastPlus(false);
     ASSERT_EQ(false, scbSystemSession_->GetSessionProperty()->GetSkipEventOnCastPlus());
 }
+
+/**
+ * @tc.name: SCBSystemSession
+ * @tc.desc: check func SCBSystemSession Construction method
+ * @tc.type: FUNC
+ */
+HWTEST_F(SCBSystemSessionTest, SCBSystemSessionConstruction001, TestSize.Level1)
+{
+    SessionInfo info1;
+    info1.abilityName_ = "testSCBSystemSession1";
+    info1.moduleName_ = "testSCBSystemSession2";
+    info1.bundleName_ = "SCBDesktop";
+    info1.isSystem_ = true;
+    auto scbSystemSession1 = sptr<SCBSystemSession>::MakeSptr(info1, specificCallback);
+    EXPECT_NE(nullptr, scbSystemSession1);
+
+    SessionInfo info2;
+    info2.abilityName_ = "testSCBSystemSession1";
+    info2.moduleName_ = "testSCBSystemSession2";
+    info2.bundleName_ = "SCBWallpaper";
+    info2.isSystem_ = true;
+    auto scbSystemSession2 = sptr<SCBSystemSession>::MakeSptr(info2, specificCallback);
+    EXPECT_NE(nullptr, scbSystemSession2);
+
+    SessionInfo info3;
+    info3.abilityName_ = "testSCBSystemSession1";
+    info3.moduleName_ = "testSCBSystemSession2";
+    info3.bundleName_ = "SCBScreenLock";
+    info3.isSystem_ = true;
+    auto scbSystemSession3 = sptr<SCBSystemSession>::MakeSptr(info3, specificCallback);
+    EXPECT_NE(nullptr, scbSystemSession3);
+
+    SessionInfo info4;
+    info4.abilityName_ = "testSCBSystemSession1";
+    info4.moduleName_ = "testSCBSystemSession2";
+    info4.bundleName_ = "SCBNegativeScreen";
+    info4.isSystem_ = true;
+    auto scbSystemSession4 = sptr<SCBSystemSession>::MakeSptr(info4, specificCallback);
+    EXPECT_NE(nullptr, scbSystemSession4);
+
+    SessionInfo info5;
+    info5.abilityName_ = "testSCBSystemSession1";
+    info5.moduleName_ = "testSCBSystemSession2";
+    info5.bundleName_ = "SCBDropdownPanel";
+    info5.isSystem_ = true;
+    auto scbSystemSession5 = sptr<SCBSystemSession>::MakeSptr(info5, specificCallback);
+    EXPECT_NE(nullptr, scbSystemSession5);
+}
+
+/**
+ * @tc.name: SCBSystemSession
+ * @tc.desc: check func SCBSystemSession Construction method
+ * @tc.type: FUNC
+ */
+HWTEST_F(SCBSystemSessionTest, SCBSystemSessionConstruction002, TestSize.Level1)
+{
+    SessionInfo info6;
+    info6.abilityName_ = "testSCBSystemSession1";
+    info6.moduleName_ = "testSCBSystemSession2";
+    info6.bundleName_ = "SCBVolumePanel";
+    info6.isSystem_ = true;
+    auto scbSystemSession6 = sptr<SCBSystemSession>::MakeSptr(info6, specificCallback);
+    EXPECT_NE(nullptr, scbSystemSession6);
+
+    SessionInfo info7;
+    info7.abilityName_ = "testSCBSystemSession1";
+    info7.moduleName_ = "testSCBSystemSession2";
+    info7.bundleName_ = "SCBBannerNotification";
+    info7.isSystem_ = true;
+    auto scbSystemSession7 = sptr<SCBSystemSession>::MakeSptr(info7, specificCallback);
+    EXPECT_NE(nullptr, scbSystemSession7);
+
+    SessionInfo info8;
+    info8.abilityName_ = "testSCBSystemSession1";
+    info8.moduleName_ = "testSCBSystemSession2";
+    info8.bundleName_ = "SCBGestureBack";
+    info8.isSystem_ = true;
+    auto scbSystemSession8 = sptr<SCBSystemSession>::MakeSptr(info8, specificCallback);
+    EXPECT_NE(nullptr, scbSystemSession8);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

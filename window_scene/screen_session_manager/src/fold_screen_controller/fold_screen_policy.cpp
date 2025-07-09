@@ -38,6 +38,12 @@ sptr<FoldCreaseRegion> FoldScreenPolicy::GetCurrentFoldCreaseRegion()
     return currentFoldCreaseRegion_;
 }
 
+FoldCreaseRegion FoldScreenPolicy::GetLiveCreaseRegion()
+{
+    std::lock_guard<std::mutex> lock_mode(liveCreaseRegionMutex_);
+    return liveCreaseRegion_;
+}
+
 void FoldScreenPolicy::SetOnBootAnimation(bool onBootAnimation)
 {
     onBootAnimation_ = onBootAnimation;
@@ -136,4 +142,6 @@ Drawing::Rect FoldScreenPolicy::GetScreenSnapshotRect()
 }
 
 void FoldScreenPolicy::SetMainScreenRegion(DMRect& mainScreenRegion) {}
+
+void FoldScreenPolicy::SetIsClearingBootAnimation(bool isClearingBootAnimation) {}
 } // namespace OHOS::Rosen

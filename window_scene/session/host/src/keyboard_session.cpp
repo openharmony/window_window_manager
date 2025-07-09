@@ -99,7 +99,6 @@ WSError KeyboardSession::Show(sptr<WindowSessionProperty> property)
             "Show keyboard session, id: %{public}d, calling id: %{public}d, effectOption: %{public}s",
             session->GetPersistentId(), session->GetCallingSessionId(),
             property->GetKeyboardEffectOption().ToString().c_str());
-        session->MoveAndResizeKeyboard(property->GetKeyboardLayoutParams(), property, true);
         return session->SceneSession::Foreground(property);
     }, "Show");
     return WSError::WS_OK;
@@ -250,7 +249,6 @@ WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params
         auto sessionProperty = session->GetSessionProperty();
         const KeyboardLayoutParams lastParams = sessionProperty->GetKeyboardLayoutParams();
         sessionProperty->SetKeyboardLayoutParams(params);
-        session->MoveAndResizeKeyboard(params, sessionProperty, false);
         // handle keyboard gravity change
         if (params.gravity_ == WindowGravity::WINDOW_GRAVITY_FLOAT) {
             session->NotifySystemKeyboardAvoidChange(SystemKeyboardAvoidChangeReason::KEYBOARD_GRAVITY_FLOAT);
@@ -763,26 +761,6 @@ std::string KeyboardSession::GetSessionScreenName()
     return "";
 }
 
-void KeyboardSession::MoveAndResizeKeyboard(const KeyboardLayoutParams& params,
-    const sptr<WindowSessionProperty>& sessionProperty, bool isShow)
-{
-    uint32_t screenWidth = 0;
-    uint32_t screenHeight = 0;
-    bool ret = (isShow) ? GetScreenWidthAndHeightFromServer(sessionProperty, screenWidth, screenHeight) :
-        GetScreenWidthAndHeightFromClient(sessionProperty, screenWidth, screenHeight);
-    if (!ret) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "Get screen width and height failed, isShow: %{public}d", isShow);
-        return;
-    }
-    bool isLandscape = screenWidth > screenHeight ? true : false;
-    WSRect rect = isLandscape ? SessionHelper::TransferToWSRect(params.LandscapeKeyboardRect_) :
-        SessionHelper::TransferToWSRect(params.PortraitKeyboardRect_);
-    SetSessionRequestRect(rect);
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "Id: %{public}d, rect: %{public}s, isLandscape: %{public}d"
-        ", screenSize: [%{public}d, %{public}d]", GetPersistentId(),
-        rect.ToString().c_str(), isLandscape, screenWidth, screenHeight);
-}
-
 bool KeyboardSession::IsVisibleForeground() const
 {
     return isVisible_;
@@ -950,7 +928,7 @@ void KeyboardSession::SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool n
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
         "KeyboardSession::SetSurfaceBounds id:%d [%d, %d, %d, %d] reason:%u",
-        GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_, reason_);
+        GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_, GetSizeChangeReason());
     TLOGD(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, rect: %{public}s isGlobal: %{public}d needFlush: %{public}d",
         GetPersistentId(), rect.ToString().c_str(), isGlobal, needFlush);
     {

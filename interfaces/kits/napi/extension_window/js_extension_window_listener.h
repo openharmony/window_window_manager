@@ -35,7 +35,13 @@ class JsExtensionWindowListener : public IWindowChangeListener,
                                   public IWindowRectChangeListener,
                                   public IAvoidAreaChangedListener,
                                   public IWindowLifeCycle,
-                                  public IOccupiedAreaChangeListener {
+                                  public IOccupiedAreaChangeListener,
+                                  public IDisplayIdChangeListener,
+                                  public ISystemDensityChangeListener,
+                                  public IScreenshotListener,
+                                  public IExtensionSecureLimitChangeListener,
+                                  public IKeyboardDidShowListener,
+                                  public IKeyboardDidHideListener {
 public:
     JsExtensionWindowListener(napi_env env, std::shared_ptr<NativeReference> callback)
         : env_(env), jsCallBack_(callback), weakRef_(wptr<JsExtensionWindowListener> (this)) {
@@ -47,6 +53,12 @@ public:
     void OnModeChange(WindowMode mode, bool hasDeco) override;
     void OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type,
         const sptr<OccupiedAreaChangeInfo>& info = nullptr) override;
+    void OnDisplayIdChanged(DisplayId displayId) override;
+    void OnSystemDensityChanged(float density) override;
+    void OnScreenshot() override;
+    void OnSecureLimitChange(bool isLimit) override;
+    void OnKeyboardDidShow(const KeyboardPanelInfo& keyboardPanelInfo) override;
+    void OnKeyboardDidHide(const KeyboardPanelInfo& keyboardPanelInfo) override;
     void AfterForeground() override;
     void AfterBackground() override;
     void AfterFocused() override;

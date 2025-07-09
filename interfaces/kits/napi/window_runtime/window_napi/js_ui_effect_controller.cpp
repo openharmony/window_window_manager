@@ -117,24 +117,24 @@ napi_value JsUIEffectController::OnSetParams(napi_env env, napi_callback_info in
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    sptr<UIEffectParams> param = sptr<UIEffectParams>::MakeSptr();
-    if (param->ConvertFromJsValue(env, argv[INDEX_ZERO]) != napi_status::napi_ok) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "parse ui effect param failed");
+    sptr<UIEffectParams> params = sptr<UIEffectParams>::MakeSptr();
+    if (params->ConvertFromJsValue(env, argv[INDEX_ZERO]) != napi_status::napi_ok) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "parse ui effect params failed");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    if (param->IsEmpty()) {
+    if (params->IsEmpty()) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "do not have any parameters");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
     }
     std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
-    NapiAsyncTask::ExecuteCallback execute = [param, client = client_, server = server_, errCodePtr] {
-        if (errCodePtr == nullptr || client == nullptr || server == nullptr || param == nullptr) {
+    NapiAsyncTask::ExecuteCallback execute = [params, client = client_, server = server_, errCodePtr] {
+        if (errCodePtr == nullptr || client == nullptr || server == nullptr || params == nullptr) {
             return;
         }
-        client->SetParams(param);
-        WMError ret = server->SetParams(param);
+        client->SetParams(params);
+        WMError ret = server->SetParams(params);
         *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(ret);
-        TLOGI(WmsLogTag::WMS_ANIMATION, "ui effect %{public}d set filter param exec end with err code %{public}d",
+        TLOGI(WmsLogTag::WMS_ANIMATION, "ui effect %{public}d set filter params exec end with err code %{public}d",
             client->GetId(), ret);
     };
     NapiAsyncTask::CompleteCallback complete =
@@ -166,7 +166,7 @@ napi_value JsUIEffectController::OnAnimateTo(napi_env env, napi_callback_info in
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     struct AnimationInfoList {
-        sptr<UIEffectParams> param = sptr<UIEffectParams>::MakeSptr();
+        sptr<UIEffectParams> params = sptr<UIEffectParams>::MakeSptr();
         sptr<WindowAnimationOption> option = sptr<WindowAnimationOption>::MakeSptr();
         sptr<WindowAnimationOption> interruptOption = nullptr;
         WmErrorCode errCode = WmErrorCode::WM_OK;
@@ -175,13 +175,17 @@ napi_value JsUIEffectController::OnAnimateTo(napi_env env, napi_callback_info in
     WmErrorCode err = WmErrorCode::WM_OK;
     if (!ConvertWindowAnimationOptionFromJsValue(env, argv[INDEX_ZERO], *lists->option, err)) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "parse window animation config failed");
+        return NapiThrowError(env, err);
+    }
+    if (!CheckWindowAnimationOption(env, *lists->option, err)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "check window animation config failed");
+        return NapiThrowError(env, err);
+    }
+    if (lists->params->ConvertFromJsValue(env, argv[INDEX_ONE]) != napi_status::napi_ok) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "parse ui effect params failed");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    if (lists->param->ConvertFromJsValue(env, argv[INDEX_ONE]) != napi_status::napi_ok) {
-        TLOGE(WmsLogTag::WMS_ANIMATION, "parse ui effect param failed");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
-    }
-    if (lists->param->IsEmpty()) {
+    if (lists->params->IsEmpty()) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "do not have any parameters");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
     }
@@ -189,15 +193,19 @@ napi_value JsUIEffectController::OnAnimateTo(napi_env env, napi_callback_info in
         lists->interruptOption = sptr<WindowAnimationOption>::MakeSptr();
         if (!ConvertWindowAnimationOptionFromJsValue(env, argv[INDEX_TWO], *lists->interruptOption, err)) {
             TLOGE(WmsLogTag::WMS_ANIMATION, "parse window animation config failed");
-            return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+            return NapiThrowError(env, err);
+        }
+        if (!CheckWindowAnimationOption(env, *lists->interruptOption, err)) {
+            TLOGE(WmsLogTag::WMS_ANIMATION, "check window animation config failed");
+            return NapiThrowError(env, err);
         }
     }
     NapiAsyncTask::ExecuteCallback execute = [lists, client = client_, server = server_] {
         if (lists == nullptr) {
             return;
         }
-        client->SetParams(lists->param);
-        WMError ret = server->AnimateTo(lists->param, lists->option, lists->interruptOption);
+        client->SetParams(lists->params);
+        WMError ret = server->AnimateTo(lists->params, lists->option, lists->interruptOption);
         lists->errCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
         TLOGI(WmsLogTag::WMS_ANIMATION, "ui effect %{public}d animateTo, err code %{public}d",
             client->GetId(), ret);

@@ -27,6 +27,7 @@
 #include "ability_info.h"
 #include "task_scheduler.h"
 #include "session_manager/include/scene_session_manager.h"
+#include "session_manager/include/ui_effect_manager.h"
 
 namespace OHOS::Rosen {
 enum class ListenerFunctionType : uint32_t {
@@ -50,7 +51,9 @@ enum class ListenerFunctionType : uint32_t {
     SCENE_SESSION_DESTRUCT_CB,
     SCENE_SESSION_TRANSFER_TO_TARGET_SCREEN_CB,
     UPDATE_KIOSK_APP_LIST_CB,
-    KIOSK_MODE_CHANGE_CB
+    KIOSK_MODE_CHANGE_CB,
+    UI_EFFECT_SET_PARAMS_CB,
+    UI_EFFECT_ANIMATE_TO_CB,
 };
 
 class JsSceneSessionManager final {
@@ -129,6 +132,7 @@ public:
     static napi_value SupportZLevel(napi_env env, napi_callback_info info);
     static napi_value SetSupportFunctionType(napi_env env, napi_callback_info info);
     static napi_value GetApplicationInfo(napi_env env, napi_callback_info info);
+    static napi_value SetUIEffectControllerAliveInUI(napi_env env, napi_callback_info info);
 
     /*
      * PC Window
@@ -164,6 +168,11 @@ public:
      * Window Pattern
      */
     static napi_value SupportSnapshotAllSessionStatus(napi_env env, napi_callback_info info);
+
+    /*
+     * PiP Window
+     */
+    static napi_value SetPiPSettingSwitchStatus(napi_env env, napi_callback_info info);
 
 private:
     napi_value OnSetBehindWindowFilterEnabled(napi_env env, napi_callback_info info);
@@ -327,6 +336,17 @@ private:
      */
     void OnStartPiPFailed(DisplayId displayId);
     void ProcessStartPiPFailedRegister();
+    napi_value OnSetPiPSettingSwitchStatus(napi_env env, napi_callback_info info);
+
+    /*
+     * Window Animation
+     */
+    void RegisterUIEffectSetParamsCallback();
+    void OnUIEffectSetParams(int32_t id, sptr<UIEffectParams> param);
+    void RegisterUIEffectAnimateToCallback();
+    void OnUIEffectAnimateTo(int32_t id, sptr<UIEffectParams> param, sptr<WindowAnimationOption> option,
+        sptr<WindowAnimationOption> interruptOption);
+    napi_value OnSetUIEffectControllerAliveInUI(napi_env env, napi_callback_info info);
 
     /*
      * Window Input Event

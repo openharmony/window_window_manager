@@ -38,6 +38,7 @@ class WindowAdapter {
 WM_DECLARE_SINGLE_INSTANCE(WindowAdapter);
 public:
     using SessionRecoverCallbackFunc = std::function<WMError()>;
+    using UIEffectRecoverCallbackFunc = std::function<WMError()>;
     using WMSConnectionChangedCallbackFunc = std::function<void(int32_t, int32_t, bool)>;
     virtual WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& windowProperty,
         std::shared_ptr<RSSurfaceNode> surfaceNode, uint32_t& windowId, const sptr<IRemoteObject>& token);
@@ -161,6 +162,9 @@ public:
     virtual void RecoverAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
         sptr<WindowSessionProperty> property, sptr<ISession>& session, sptr<IRemoteObject> token = nullptr);
+    virtual void RegisterUIEffectRecoverCallbackFunc(int32_t id,
+        const UIEffectRecoverCallbackFunc& callbackFunc);
+    virtual void UnregisterUIEffectRecoverCallbackFunc(int32_t id);
 
     /*
      * PC Window
@@ -199,6 +203,13 @@ public:
      * Window Property
      */
     virtual WMError NotifyScreenshotEvent(ScreenshotEventType type);
+    virtual WMError CreateUIEffectController(const sptr<IUIEffectControllerClient>& controllerClient,
+        sptr<IUIEffectController>& controller, int32_t& controllerId);
+
+     /*
+     * PiP Window
+     */
+    WMError GetPiPSettingSwitchStatus(bool& switchStatus);
 
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;
@@ -225,6 +236,8 @@ private:
     bool isRegisteredUserSwitchListener_ = false;
     std::map<WindowManagerAgentType, std::set<sptr<IWindowManagerAgent>>> windowManagerAgentMap_;
     std::map<int32_t, SessionRecoverCallbackFunc> sessionRecoverCallbackFuncMap_;
+    std::mutex effectMutex_;
+    std::map<int32_t, UIEffectRecoverCallbackFunc> uiEffectRecoverCallbackFuncMap_;
     bool recoverInitialized_ = false;
     // above guarded by mutex_
 };

@@ -148,6 +148,8 @@ public:
         TRANS_ID_UNREGISTER_WINDOW_PROPERTY_CHANGE_AGENT,
         TRANS_ID_GET_HOST_GLOBAL_SCALE_RECT,
         TRANS_ID_ANIMATE_TO_WINDOW,
+        TRANS_ID_CREATE_UI_EFFECT_CONTROLLER,
+        TRANS_ID_GET_PIP_SWITCH_STATUS,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
@@ -419,6 +421,9 @@ public:
     WSError UseImplicitAnimation(int32_t hostWindowId, bool useImplicit) override { return WSError::WS_OK; };
     WMError AnimateTo(int32_t windowId, const WindowAnimationProperty& animationProperty,
         const WindowAnimationOption& animationOption) override { return WMError::WM_OK; }
+    WMError CreateUIEffectController(const sptr<IUIEffectControllerClient>& controllerClient,
+        sptr<IUIEffectController>& controller, int32_t& controllerId) override { return WMError::WM_OK; };
+    WMError GetPiPSettingSwitchStatus(bool& switchStatus) override { return WMError::WM_OK; }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_INTERFACE_H

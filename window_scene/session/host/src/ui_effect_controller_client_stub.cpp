@@ -34,12 +34,12 @@ int32_t UIEffectControllerClientStub::OnRemoteRequest(uint32_t code, MessageParc
 
 int32_t UIEffectControllerClientStub::HandleSetParams(MessageParcel& data, MessageParcel& reply)
 {
-    sptr<UIEffectParams> param = data.ReadStrongParcelable<UIEffectParams>();
-    if (param == nullptr) {
-        TLOGE(WmsLogTag::WMS_ANIMATION, "read ui effect param failed");
+    sptr<UIEffectParams> params = data.ReadStrongParcelable<UIEffectParams>();
+    if (params == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "read ui effect params failed");
         return ERR_INVALID_DATA;
     }
-    SetParams(param);
+    SetParams(params);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

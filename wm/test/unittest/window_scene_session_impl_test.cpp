@@ -32,6 +32,14 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+    std::string g_logMsg;
+    void LogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
+        const char* msg)
+    {
+        g_logMsg += msg;
+    }
+}
 using Mocker = SingletonMocker<WindowAdapter, MockWindowAdapter>;
 
 class MockWindowChangeListener : public IWindowChangeListener {
@@ -1269,6 +1277,63 @@ HWTEST_F(WindowSceneSessionImplTest, Hide01, TestSize.Level0)
 }
 
 /**
+ * @tc.name: Hide02
+ * @tc.desc: Hide session
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, Hide02, TestSize.Level0)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("Hide02");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+
+    window->property_->SetPersistentId(1);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    // show with null session
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Hide(2, false, false));
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+
+    window->hostSession_ = session;
+    ASSERT_EQ(WMError::WM_OK, window->Hide(0, false, false, true));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy(false));
+}
+
+/**
+ * @tc.name: Hide03
+ * @tc.desc: Hide session
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, Hide03, TestSize.Level0)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(LogCallback);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("Hide03");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+
+    window->property_->SetPersistentId(1);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->lifecycleCallback_ = sptr<LifecycleFutureCallback>::MakeSptr();
+
+    EXPECT_EQ(WMError::WM_OK, window->Hide(0, false, false, true));
+    EXPECT_TRUE(g_logMsg.find("init lifecycleCallback") == std::string::npos);
+    EXPECT_EQ(WMError::WM_OK, window->Show(0, false, true, true));
+
+    window->NotifyWindowAttachStateChange(false);
+    window->lifecycleCallback_ = nullptr;
+    EXPECT_EQ(WMError::WM_OK, window->Hide(0, false, false, true));
+    EXPECT_TRUE(g_logMsg.find("Window hide") != std::string::npos);
+    EXPECT_TRUE(g_logMsg.find("init lifecycleCallback") != std::string::npos);
+    EXPECT_TRUE(g_logMsg.find("get detach async result") != std::string::npos);
+    EXPECT_EQ(WMError::WM_OK, window->Destroy(false));
+}
+
+/**
  * @tc.name: Show01
  * @tc.desc: Show session
  * @tc.type: FUNC
@@ -1290,6 +1355,63 @@ HWTEST_F(WindowSceneSessionImplTest, Show01, TestSize.Level0)
     window->state_ = WindowState::STATE_CREATED;
     ASSERT_EQ(WMError::WM_OK, window->Show(2, false));
     ASSERT_EQ(WMError::WM_OK, window->Destroy(false));
+}
+
+/**
+ * @tc.name: Show02
+ * @tc.desc: Show session
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, Show02, TestSize.Level0)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("Show02");
+    option->SetDisplayId(0);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+
+    window->hostSession_ = session;
+    ASSERT_EQ(WMError::WM_OK, window->Show(0, false, true, true));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy(false));
+}
+
+/**
+ * @tc.name: Show03
+ * @tc.desc: Show session
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, Show03, TestSize.Level0)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(LogCallback);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("Show03");
+    option->SetDisplayId(0);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+
+    window->hostSession_ = session;
+    window->lifecycleCallback_ = sptr<LifecycleFutureCallback>::MakeSptr();
+    EXPECT_EQ(WMError::WM_OK, window->Show(0, false, true, true));
+    EXPECT_TRUE(g_logMsg.find("init lifecycleCallback") == std::string::npos);
+    EXPECT_EQ(WMError::WM_OK, window->Hide(0, false, false, true));
+
+    window->NotifyWindowAttachStateChange(true);
+    window->lifecycleCallback_ = nullptr;
+    EXPECT_EQ(WMError::WM_OK, window->Show(0, false, true, true));
+    
+    EXPECT_TRUE(g_logMsg.find("Window show") != std::string::npos);
+    EXPECT_TRUE(g_logMsg.find("init lifecycleCallback") != std::string::npos);
+    EXPECT_TRUE(g_logMsg.find("get attach async result") != std::string::npos);
+    EXPECT_EQ(WMError::WM_OK, window->Destroy(false));
 }
 
 /**
@@ -1943,10 +2065,6 @@ HWTEST_F(WindowSceneSessionImplTest, SetWindowShadowEnabled01, TestSize.Level1)
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, window->SetWindowShadowEnabled(false));
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, window->SetWindowShadowEnabled(true));
-
-    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     EXPECT_EQ(WMError::WM_OK, window->SetWindowShadowEnabled(true));
     EXPECT_EQ(true, window->GetWindowShadowEnabled());
     EXPECT_EQ(WMError::WM_OK, window->SetWindowShadowEnabled(false));

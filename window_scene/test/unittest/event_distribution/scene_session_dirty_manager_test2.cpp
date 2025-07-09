@@ -494,7 +494,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithoutHotArea, TestSize.Le
     sceneSession->InitSessionPropertyWhenConnect(windowSessionProperty);
     WSRect windowRect = { 0, 0, 1270, 2700 };
     sceneSession->SetSessionRect(windowRect);
-    sceneSession->globalRect_ = windowRect;
+    sceneSession->SetSessionGlobalRect(windowRect);
     // set hotArea without info
     std::vector<MMI::Rect> touchHotAreas;
     std::vector<MMI::Rect> pointerHotAreas;

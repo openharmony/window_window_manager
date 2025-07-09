@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_FLOATING_BALL_TEMPALTE_INFO_H
-#define OHOS_FLOATING_BALL_TEMPALTE_INFO_H
+#ifndef OHOS_FLOATING_BALL_TEMPLATE_INFO_H
+#define OHOS_FLOATING_BALL_TEMPLATE_INFO_H
 
 #include <pixel_map.h>
 
@@ -73,4 +73,4 @@ public:
     }
 };
 } // namespace OHOS::Rosen
-#endif // OHOS_FLOATING_BALL_TEMPALTE_INFO_H
+#endif // OHOS_FLOATING_BALL_TEMPLATE_INFO_H

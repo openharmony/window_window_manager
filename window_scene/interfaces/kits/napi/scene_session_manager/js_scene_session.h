@@ -66,6 +66,7 @@ enum class ListenerFuncType : uint32_t {
     SHOW_WHEN_LOCKED_CB,
     REQUESTED_ORIENTATION_CHANGE_CB,
     RAISE_ABOVE_TARGET_CB,
+    RAISE_MAIN_WINDOW_ABOVE_TARGET_CB,
     FORCE_HIDE_CHANGE_CB,
     WINDOW_DRAG_HOT_AREA_CB,
     TOUCH_OUTSIDE_CB,
@@ -106,6 +107,7 @@ enum class ListenerFuncType : uint32_t {
     SET_SUB_WINDOW_SOURCE_CB,
     ANIMATE_TO_CB,
     PENDING_SESSION_TO_BACKGROUND_CB,
+    BATCH_PENDING_SCENE_ACTIVE_CB,
     FLOATING_BALL_UPDATE_CB,
     FLOATING_BALL_STOP_CB,
     FLOATING_BALL_RESTORE_MAIN_WINDOW_CB,
@@ -127,6 +129,7 @@ private:
      * Window Lifecycle
      */
     void ProcessPendingSceneSessionActivationRegister();
+    void ProcessBatchPendingSceneSessionsActivationRegister();
     void ProcessSessionStateChangeRegister();
     void ProcessUpdateTransitionAnimationRegister();
     void ProcessSessionEventRegister();
@@ -143,6 +146,8 @@ private:
     sptr<SceneSession> GenSceneSession(SessionInfo& info);
     void PendingSessionActivation(SessionInfo& info);
     void PendingSessionActivationInner(std::shared_ptr<SessionInfo> sessionInfo);
+    void BatchPendingSessionsActivation(const std::vector<std::shared_ptr<SessionInfo>>& sessionInfos);
+    void BatchPendingSessionsActivationInner(const std::vector<std::shared_ptr<SessionInfo>>& sessionInfos);
     void OnSessionStateChange(const SessionState& state);
     void OnUpdateTransitionAnimation(const WindowTransitionType& type, const TransitionAnimation& animation);
     void OnSessionEvent(uint32_t eventId, const SessionEventParam& param);
@@ -243,6 +248,8 @@ private:
     static napi_value SetSidebarBlurMaximize(napi_env env, napi_callback_info info);
     static napi_value RequestSpecificSessionClose(napi_env env, napi_callback_info info);
     static napi_value SendFbActionEvent(napi_env env, napi_callback_info info);
+    static napi_value CreateSessionInfosNapiValue(
+        napi_env env, const std::vector<std::shared_ptr<SessionInfo>>& sessionInfos);
 
     /*
      * PC Window
@@ -332,7 +339,7 @@ private:
     static napi_value GetJsPanelSessionObj(napi_env env, const sptr<SceneSession>& session);
     napi_value OnRequestSpecificSessionClose(napi_env env, napi_callback_info info);
     napi_value OnSendFbActionEvent(napi_env env, napi_callback_info info);
-    
+
     /*
      * PC Window
      */
@@ -373,6 +380,7 @@ private:
     void ProcessShowWhenLockedRegister();
     void ProcessRequestedOrientationChange();
     void ProcessRaiseAboveTargetRegister();
+    void ProcessRaiseMainWindowAboveTargetRegister();
     void ProcessForceHideChangeRegister();
     void ProcessWindowDragHotAreaRegister();
     void ProcessTouchOutsideRegister();
@@ -439,6 +447,7 @@ private:
     void OnRaiseToTopForPointDown();
     void OnClickModalWindowOutside();
     void OnRaiseAboveTarget(int32_t subWindowId);
+    void OnRaiseMainWindowAboveTarget(int32_t targetId);
     void OnBackPressed(bool needMoveToBackground);
     void OnSessionFocusableChange(bool isFocusable);
     void OnSessionTouchableChange(bool touchable);

@@ -13,27 +13,27 @@
  * limitations under the License.
  */
 
-#include "session_permission.h"
-#include "mock_session_permission.h"
+#ifndef OHOS_ROSEN_LIFECYCLE_FUTURE_CALLBACK_H
+#define OHOS_ROSEN_LIFECYCLE_FUTURE_CALLBACK_H
+
+#include <future.h>
+#include "interfaces/include/ws_common.h"
+#include "wm_common.h"
 
 namespace OHOS {
-namespace {
-bool g_isStartedByUIExtensionFlag = false;
-}
 namespace Rosen {
-void MockSessionPermission::ClearAllFlag()
-{
-    g_isStartedByUIExtensionFlag = false;
-}
+class LifecycleFutureCallback : public RefBase {
+public:
+    void OnNotifyAttachState(bool isAttach);
+    void GetAttachSyncResult(long timeOut); // unit: ms
+    void GetDetachSyncResult(long timeOut); // unit: ms
+    void ResetAttachLock();
+    void ResetDetachLock();
 
-void MockSessionPermission::SetIsStartedByUIExtensionFlag(const bool isStartedByUIExtensionFlag)
-{
-    g_isStartedByUIExtensionFlag = isStartedByUIExtensionFlag;
-}
-
-bool SessionPermission::IsStartedByUIExtension()
-{
-    return g_isStartedByUIExtensionFlag;
-}
-}
-}
+private:
+    RunnableFuture<bool> attachFuture_{};
+    RunnableFuture<bool> detachFuture_{};
+};
+} // namespace Rosen
+} // namespace OHOS
+#endif // OHOS_ROSEN_LIFECYCLE_FUTURE_CALLBACK_H

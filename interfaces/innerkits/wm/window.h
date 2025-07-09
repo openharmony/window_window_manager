@@ -1419,6 +1419,18 @@ public:
                          bool withFocus = true) { return WMError::WM_OK; }
 
     /**
+     * @brief Show window
+     *
+     * @param reason Reason for window state change.
+     * @param withAnimation True means window show with animation, false means window show without animation.
+     * @param withFocus True means window can get focus when it shows to foreground, false means the opposite;
+     * @param waitAttach True means window need waiting for attach when it, false means the opposite;
+     * @return WM_OK means window show success, others means failed.
+     */
+    virtual WMError Show(uint32_t reason, bool withAnimation,
+                         bool withFocus, bool waitAttach) { return WMError::WM_OK; }
+
+    /**
      * @brief Resume window
      */
     virtual void Resume() {}
@@ -1437,6 +1449,21 @@ public:
      * @return WM_OK means window hide success, others means failed.
      */
     virtual WMError Hide(uint32_t reason = 0, bool withAnimation = false, bool isFromInnerkits = true)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Hide window
+     *
+     * @param reason Reason for window state change.
+     * @param withAnimation True means window show with animation, false means window show without animation.
+     * @param isFromInnerkits True means remove command is from inner kits.
+     * @param waitDetach True means window need waiting for detach, false means the opposite;
+     * @return WM_OK means window hide success, others means failed.
+     */
+    virtual WMError Hide(uint32_t reason, bool withAnimation,
+        bool isFromInnerkits, bool waitDetach)
     {
         return WMError::WM_OK;
     }
@@ -1548,6 +1575,14 @@ public:
     virtual WMError SetKeepScreenOn(bool keepScreenOn) { return WMError::WM_OK; }
 
     /**
+     * @brief Extension told host to set the screen always on, only for NAPI call.
+     *
+     * @param keepScreenOn
+     * @return WMError
+     */
+    virtual WMError ExtensionSetKeepScreenOn(bool keepScreenOn) { return WMError::WM_OK; }
+
+    /**
      * @brief Get the screen is always on or not.
      *
      * @return True means screen is always on, false means the opposite.
@@ -1614,6 +1649,14 @@ public:
      * @return WM_OK means set success, others means set failed.
      */
     virtual WMError SetBrightness(float brightness) { return WMError::WM_OK; }
+
+    /**
+     * @brief Extension told host to set brightness value of window, only for NAPI call.
+     *
+     * @param brightness Brightness of window.
+     * @return WM_OK means set success, others means set failed.
+     */
+    virtual WMError ExtensionSetBrightness(float brightness) { return WMError::WM_OK; }
 
     /**
      * @brief Get brightness value of window.
@@ -1836,6 +1879,19 @@ public:
      * @param inputEvent Keyboard input event.
      */
     virtual void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& inputEvent) {}
+
+    /**
+     * @brief Consume BackEvent by keyEvent with keyCode_back.
+     */
+    virtual void ConsumeBackEvent() {}
+
+    /**
+     * @brief Determine whether the dialog session back gesture is enabled.
+     */
+    virtual bool IsDialogSessionBackGestureEnabled()
+    {
+        return false;
+    }
 
     /**
      * @brief Notify KeyEvent to arkui.
@@ -2736,6 +2792,17 @@ public:
      * @return WM_OK means raise success, others means raise failed.
      */
     virtual WMError RaiseAboveTarget(int32_t subWindowId) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Raise main window above another.
+     *
+     * @param targetId Indicates the id of the target main window.
+     * @return WM_OK means raise success, others means raise failed.
+     */
+    virtual WMError RaiseMainWindowAboveTarget(int32_t targetId)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 
     /**
      * @brief Hide non-system floating windows.
@@ -4420,7 +4487,7 @@ public:
     /**
      * @brief update the floating ball window instance.
      *
-     * @param fbTemplateInfo the tempalte info of the floating-ball.
+     * @param fbTemplateInfo the template info of the floating-ball.
      * @param icon the icon of the floating-ball.
      */
     virtual WMError UpdateFloatingBall(const FloatingBallTemplateBaseInfo& fbTemplateBaseInfo,
@@ -4452,6 +4519,37 @@ public:
     virtual WMError GetFloatingBallWindowId(uint32_t& windowId)
     {
         return WMError::WM_OK;
+    }
+
+    /**
+     * @brief UIExtension get host status bar content color, only for NAPI Call.
+     *
+     * @return content color
+     */
+    virtual uint32_t GetHostStatusBarContentColor() const { return 0; }
+
+    /**
+     * @brief Get autoStart picture-in-picture switch status of system setting.
+     *
+     * @param switchStatus autoStart picture-in-picture switch status.
+     * @return WM_OK means get success.
+     */
+    virtual WMError GetPiPSettingSwitchStatus(bool& switchStatus) const { return WMError::WM_OK; }
+
+    /**
+     * @brief return true if current window is anco, otherwise return false
+     */
+    virtual bool IsAnco() const
+    {
+        return false;
+    }
+
+    /**
+     * @brief special process on point down event
+     */
+    virtual bool OnPointDown(int32_t eventId, int32_t posX, int32_t posY)
+    {
+        return false;
     }
 };
 }

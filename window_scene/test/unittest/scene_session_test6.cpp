@@ -598,6 +598,13 @@ HWTEST_F(SceneSessionTest6, GetSystemAvoidArea, Function | SmallTest | Level1)
     session->GetSystemAvoidArea(rect, avoidArea);
     int32_t height = session->GetStatusBarHeight();
     EXPECT_EQ(height, avoidArea.topRect_.height_);
+
+    auto task = [](DisplayId displayId, WSRect& barArea) {
+        barArea.height_ = 100;
+    };
+    session->RegisterGetStatusBarAvoidHeightFunc(std::move(task));
+    session->GetSystemAvoidArea(rect, avoidArea);
+    EXPECT_EQ(0, avoidArea.topRect_.height_);
 }
 
 /**
@@ -1002,33 +1009,6 @@ HWTEST_F(SceneSessionTest6, RegisterUpdateAppUseControlCallback, Function | Smal
     allAppUseMap[key][ControlAppType::APP_LOCK] = controlInfo;
     sceneSession->RegisterUpdateAppUseControlCallback(callback);
     ASSERT_NE(nullptr, sceneSession->onUpdateAppUseControlFunc_);
-}
-
-/**
- * @tc.name: GetScreenWidthAndHeightFromServer
- * @tc.desc: GetScreenWidthAndHeightFromServer
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest6, GetScreenWidthAndHeightFromServer, Function | SmallTest | Level3)
-{
-    SessionInfo info;
-    info.bundleName_ = "GetScreenWidthAndHeightFromServer";
-    info.abilityName_ = "GetScreenWidthAndHeightFromServer";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    uint32_t screenWidth = 0;
-    uint32_t screenHeight = 0;
-    EXPECT_EQ(sceneSession->GetScreenWidthAndHeightFromServer(nullptr, screenWidth, screenHeight), true);
-
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    EXPECT_EQ(sceneSession->GetScreenWidthAndHeightFromServer(property, screenWidth, screenHeight), true);
-
-    property->SetDisplayId(DISPLAY_ID_INVALID);
-    EXPECT_EQ(property->GetDisplayId(), DISPLAY_ID_INVALID);
-    EXPECT_EQ(sceneSession->GetScreenWidthAndHeightFromServer(property, screenWidth, screenHeight), true);
-
-    sceneSession->SetIsSystemKeyboard(true);
-    EXPECT_EQ(sceneSession->IsSystemKeyboard(), true);
-    EXPECT_EQ(sceneSession->GetScreenWidthAndHeightFromServer(property, screenWidth, screenHeight), true);
 }
 
 /**

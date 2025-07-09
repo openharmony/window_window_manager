@@ -35,6 +35,8 @@ namespace OHOS {
 namespace Rosen {
 class RSIWindowAnimationController;
 class RSSurfaceNode;
+class IUIEffectController;
+class IUIEffectControllerClient;
 
 class IWindowManager : public IRemoteBroker {
 public:
@@ -314,6 +316,17 @@ public:
      * Sub Window
      */
     virtual WMError SetParentWindow(int32_t subWindowId, int32_t newParentWindowId) { return WMError::WM_OK; }
+
+    /*
+     * Window Animation
+     */
+    virtual WMError CreateUIEffectController(const sptr<IUIEffectControllerClient>& controllerClient,
+        sptr<IUIEffectController>& controller, int32_t& controllerId) { return WMError::WM_OK; };
+
+    /*
+     * PiP Window
+     */
+    virtual WMError GetPiPSettingSwitchStatus(bool& switchStatus) { return WMError::WM_OK; }
 };
 }
 }

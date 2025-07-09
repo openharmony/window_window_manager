@@ -22,6 +22,7 @@
 #include "singleton_container.h"
 #include "window_adapter.h"
 #include "window_manager_hilog.h"
+#include "window_session_impl.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -590,6 +591,29 @@ bool PictureInPictureControllerBase::GetPipEnabled()
     const std::string multiWindowUIType = system::GetParameter("const.window.multiWindowUIType", "");
     return multiWindowUIType == "HandsetSmartWindow" || multiWindowUIType == "FreeFormMultiWindow" ||
         multiWindowUIType == "TabletSmartWindow";
+}
+
+bool PictureInPictureControllerBase::GetPipSettingSwitchStatusEnabled()
+{
+    const std::string multiWindowUIType = system::GetParameter("const.window.multiWindowUIType", "");
+    return multiWindowUIType == "HandsetSmartWindow" || multiWindowUIType == "TabletSmartWindow";
+}
+
+bool PictureInPictureControllerBase::GetPiPSettingSwitchStatus()
+{
+    sptr<WindowSessionImpl> windowSessionImpl = WindowSessionImpl::GetWindowWithId(mainWindowId_);
+    if (windowSessionImpl == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "windowId not found.");
+        return false;
+    }
+    bool switchStatus = false;
+    WMError errcode = windowSessionImpl->GetPiPSettingSwitchStatus(switchStatus);
+    if (errcode != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_PIP, "get switch error.");
+        return false;
+    }
+    TLOGI(WmsLogTag::WMS_PIP, "switchStatus: %{public}d", switchStatus);
+    return switchStatus;
 }
 } // namespace Rosen
 } // namespace OHOS

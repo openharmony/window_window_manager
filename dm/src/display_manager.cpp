@@ -35,6 +35,7 @@ const static uint32_t MAX_DISPLAY_SIZE = 32;
 const static uint32_t SCB_GET_DISPLAY_INTERVAL_US = 5000;
 const static uint32_t APP_GET_DISPLAY_INTERVAL_US = 25000;
 const static float INVALID_DEFAULT_DENSITY = 1.0f;
+const static uint32_t PIXMAP_VECTOR_SIZE = 2;
 std::atomic<bool> g_dmIsDestroyed = false;
 std::mutex snapBypickerMutex;
 
@@ -807,6 +808,23 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId display
     }
 
     return screenShot;
+}
+
+std::vector<std::shared_ptr<Media::PixelMap>> DisplayManager::GetScreenHDRshot(DisplayId displayId,
+    DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen)
+{
+    if (displayId == DISPLAY_ID_INVALID) {
+        TLOGE(WmsLogTag::DMS, "displayId invalid!");
+        return { nullptr, nullptr };
+    }
+    const std::vector<std::shared_ptr<Media::PixelMap>>& screenShotVec =
+        SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayHDRSnapshot(displayId, errorCode,
+            isUseDma, isCaptureFullOfScreen);
+    if (screenShotVec.size() != PIXMAP_VECTOR_SIZE) {
+        TLOGE(WmsLogTag::DMS, "failed!");
+        return { nullptr, nullptr };
+    }
+    return screenShotVec;
 }
 
 std::shared_ptr<Media::PixelMap> DisplayManager::GetSnapshotByPicker(Media::Rect &rect, DmErrorCode* errorCode)
@@ -2504,6 +2522,23 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshotWithOption(const C
     }
     std::shared_ptr<Media::PixelMap> dstScreenshot(pixelMap.release());
     return dstScreenshot;
+}
+
+std::vector<std::shared_ptr<Media::PixelMap>> DisplayManager::GetScreenHDRshotWithOption(
+    const CaptureOption& captureOption, DmErrorCode* errorCode)
+{
+    TLOGI(WmsLogTag::DMS, "start!");
+    if (captureOption.displayId_ == DISPLAY_ID_INVALID) {
+        TLOGE(WmsLogTag::DMS, "displayId invalid!");
+        return { nullptr, nullptr };
+    }
+    const std::vector<std::shared_ptr<Media::PixelMap>>& screenShotVec =
+        SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayHDRSnapshotWithOption(captureOption, errorCode);
+    if (screenShotVec.size() != PIXMAP_VECTOR_SIZE) {
+        TLOGE(WmsLogTag::DMS, "get snapshot with option failed!");
+        return { nullptr, nullptr };
+    }
+    return screenShotVec;
 }
 
 float DisplayManager::GetPrimaryDisplaySystemDpi() const

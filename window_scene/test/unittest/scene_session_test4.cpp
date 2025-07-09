@@ -849,22 +849,22 @@ HWTEST_F(SceneSessionTest4, NotifyServerToUpdateRect01, TestSize.Level1)
     uiParam.needSync_ = true;
     uiParam.rect_ = {0, 0, 1, 1};
 
-    sceneSession->winRect_ = {0, 0, 1, 1};
-    sceneSession->clientRect_ = {0, 0, 1, 1};
+    sceneSession->GetLayoutController()->SetSessionRect({0, 0, 1, 1});
+    sceneSession->SetClientRect({0, 0, 1, 1});
     ASSERT_FALSE(sceneSession->NotifyServerToUpdateRect(uiParam, reason));
 
-    sceneSession->winRect_ = {1, 1, 1, 1};
+    sceneSession->GetLayoutController()->SetSessionRect({1, 1, 1, 1});
     ASSERT_TRUE(sceneSession->NotifyServerToUpdateRect(uiParam, reason));
 
-    sceneSession->winRect_ = {0, 0, 1, 1};
-    sceneSession->clientRect_ = {1, 1, 1, 1};
+    sceneSession->GetLayoutController()->SetSessionRect({0, 0, 1, 1});
+    sceneSession->SetClientRect({1, 1, 1, 1});
     ASSERT_FALSE(sceneSession->NotifyServerToUpdateRect(uiParam, reason));
 
     sceneSession->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
     ASSERT_TRUE(sceneSession->NotifyServerToUpdateRect(uiParam, reason));
 
-    sceneSession->winRect_ = {1, 1, 1, 1};
-    sceneSession->clientRect_ = {1, 1, 1, 1};
+    sceneSession->GetLayoutController()->SetSessionRect({1, 1, 1, 1});
+    sceneSession->SetClientRect({1, 1, 1, 1});
     ASSERT_TRUE(sceneSession->NotifyServerToUpdateRect(uiParam, reason));
 
     uiParam.rect_ = {0, 0, 1, 0};
@@ -1959,8 +1959,8 @@ HWTEST_F(SceneSessionTest4, SetWinRectWhenUpdateRectTest, TestSize.Level1)
     WSRect rect = { 10, 10, 200, 200 };
     sceneSession->isMidScene_ = false;
     sceneSession->SetWinRectWhenUpdateRect(rect);
-    ASSERT_EQ(sceneSession->winRect_.posX_, rect.posX_);
-    ASSERT_EQ(sceneSession->winRect_.posY_, rect.posY_);
+    EXPECT_EQ(sceneSession->GetSessionRect().posX_, rect.posX_);
+    EXPECT_EQ(sceneSession->GetSessionRect().posY_, rect.posY_);
 }
 
 /**
@@ -1977,8 +1977,8 @@ HWTEST_F(SceneSessionTest4, SetWinRectWhenUpdateRectTest001, TestSize.Level1)
     WSRect rect = { 10, 10, 200, 200 };
     sceneSession->isMidScene_ = true;
     sceneSession->SetWinRectWhenUpdateRect(rect);
-    ASSERT_EQ(sceneSession->winRect_.posX_, rect.posX_);
-    ASSERT_EQ(sceneSession->winRect_.posY_, rect.posY_);
+    EXPECT_EQ(sceneSession->GetSessionRect().posX_, rect.posX_);
+    EXPECT_EQ(sceneSession->GetSessionRect().posY_, rect.posY_);
 }
 
 /**
@@ -1995,8 +1995,8 @@ HWTEST_F(SceneSessionTest4, SetWinRectWhenUpdateRectTest002, TestSize.Level1)
     WSRect rect = { 0, 10, 200, 200 };
     sceneSession->isMidScene_ = true;
     sceneSession->SetWinRectWhenUpdateRect(rect);
-    ASSERT_EQ(sceneSession->winRect_.posX_, rect.posX_);
-    ASSERT_EQ(sceneSession->winRect_.posY_, rect.posY_);
+    EXPECT_EQ(sceneSession->GetSessionRect().posX_, rect.posX_);
+    EXPECT_EQ(sceneSession->GetSessionRect().posY_, rect.posY_);
 }
 
 /**
@@ -2013,8 +2013,8 @@ HWTEST_F(SceneSessionTest4, SetWinRectWhenUpdateRectTest003, TestSize.Level1)
     WSRect rect = { 0, 0, 200, 200 };
     sceneSession->isMidScene_ = true;
     sceneSession->SetWinRectWhenUpdateRect(rect);
-    ASSERT_EQ(sceneSession->winRect_.width_, rect.width_);
-    ASSERT_EQ(sceneSession->winRect_.height_, rect.height_);
+    EXPECT_EQ(sceneSession->GetSessionRect().width_, rect.width_);
+    EXPECT_EQ(sceneSession->GetSessionRect().height_, rect.height_);
 }
 
 /**
