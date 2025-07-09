@@ -13823,7 +13823,7 @@ WSError SceneSessionManager::GetHostWindowRect(int32_t hostWindowId, Rect& rect)
             TLOGNE(WmsLogTag::WMS_UIEXT, "Session with persistentId %{public}d not found", hostWindowId);
             return WSError::WS_ERROR_INVALID_SESSION;
         }
-        WSRect hostRect = sceneSession->GetSessionRect();
+        WSRect hostRect = sceneSession->GetSessionScreenRelativeRect();
         auto currScreenFoldStatus = PcFoldScreenManager::GetInstance().GetScreenFoldStatus();
         auto needTransRect = currScreenFoldStatus != SuperFoldStatus::UNKNOWN &&
             currScreenFoldStatus != SuperFoldStatus::FOLDED && currScreenFoldStatus != SuperFoldStatus::EXPANDED;
