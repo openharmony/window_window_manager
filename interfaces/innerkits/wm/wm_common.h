@@ -825,6 +825,7 @@ constexpr uint32_t INVALID_WINDOW_ID = 0;
 constexpr float UNDEFINED_BRIGHTNESS = -1.0f;
 constexpr float MINIMUM_BRIGHTNESS = 0.0f;
 constexpr float MAXIMUM_BRIGHTNESS = 1.0f;
+constexpr float INVALID_BRIGHTNESS = 999.0f;
 constexpr int32_t INVALID_PID = -1;
 constexpr int32_t INVALID_UID = -1;
 constexpr int32_t INVALID_USER_ID = -1;

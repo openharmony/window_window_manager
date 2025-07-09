@@ -29,6 +29,7 @@ public:
     MOCK_METHOD1(SetActive, WSError(bool active));
     MOCK_METHOD4(UpdateRect, WSError(const WSRect& rect, SizeChangeReason reason,
         const SceneAnimationConfig& config, const std::map<AvoidAreaType, AvoidArea>& avoidAreas));
+    MOCK_METHOD(WSError, UpdateGlobalDisplayRectFromServer, (const WSRect& rect, SizeChangeReason reason), (override));
     MOCK_METHOD0(UpdateDensity, void(void));
     MOCK_METHOD0(UpdateOrientation, WSError(void));
     MOCK_METHOD1(UpdateSessionViewportConfig, WSError(const SessionViewportConfig& config));

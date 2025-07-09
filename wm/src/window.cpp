@@ -302,27 +302,5 @@ void Window::UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Con
         WindowImpl::UpdateConfigurationSyncForAll(configuration);
     }
 }
-
-bool Window::IsPcOrPadFreeMultiWindowMode() const
-{
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        bool isPcOrFreeMultiWindow = false;
-        SingletonContainer::Get<WindowAdapter>().IsPcOrPadFreeMultiWindowMode(isPcOrFreeMultiWindow);
-        return isPcOrFreeMultiWindow;
-    } else {
-        return false;
-    }
-}
-
-bool Window::GetFreeMultiWindowModeEnabledState()
-{
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        bool isFreeMultiWindow = false;
-        SingletonContainer::Get<WindowAdapter>().IsFreeMultiWindowMode(isFreeMultiWindow);
-        return isFreeMultiWindow;
-    } else {
-        return false;
-    }
-}
 } // namespace Rosen
 } // namespace OHOS
