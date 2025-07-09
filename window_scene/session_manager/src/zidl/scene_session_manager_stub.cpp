@@ -264,7 +264,7 @@ int SceneSessionManagerStub::HandleCreateAndConnectSpecificSession(MessageParcel
     sptr<IRemoteObject> eventChannelObject = data.ReadRemoteObject();
     sptr<IWindowEventChannel> eventChannel = iface_cast<IWindowEventChannel>(eventChannelObject);
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Unmarshalling(data);
-    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "Unmarshalling RSSurfaceNode: %{public}s",
+    TLOGD(WmsLogTag::WMS_SCB, "Unmarshalling RSSurfaceNode: %{public}s",
           RSAdapterUtil::RSNodeToStr(surfaceNode).c_str());
     if (sessionStage == nullptr || eventChannel == nullptr || surfaceNode == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "Failed to read scene session stage object or event channel object!");

@@ -200,7 +200,7 @@ static void GetAndDrawSnapShot(const sptr<WindowNode>& srcNode)
         srcNode->closeWinSurfaceNode_ = RSSurfaceNode::Create(rsSurfaceNodeConfig,
             RSSurfaceNodeType::STARTING_WINDOW_NODE, true, false, rsTransAdapter.GetRSUIContext());
         RSAdapterUtil::SetSkipCheckInMultiInstance(srcNode->closeWinSurfaceNode_, true);
-        TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST,
+        TLOGD(WmsLogTag::WMS_SCB,
               "Create RSSurfaceNode: %{public}s", RSAdapterUtil::RSNodeToStr(srcNode->closeWinSurfaceNode_).c_str());
         auto rect = srcNode->GetWindowRect();
         srcNode->closeWinSurfaceNode_->SetBounds(0, 0, rect.width_, rect.height_);
