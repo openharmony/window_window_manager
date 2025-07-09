@@ -424,6 +424,10 @@ void SceneSessionManager::Init()
     openDebugTrace_ = std::atoi((system::GetParameter("persist.sys.graphic.openDebugTrace", "0")).c_str()) != 0;
     isKeyboardPanelEnabled_ = system::GetParameter("persist.sceneboard.keyboardPanel.enabled", "1")  == "1";
 
+    // window recover
+    RegisterSessionRecoverStateChangeListener();
+    RegisterRecoverStateChangeListener();
+
     // Input init.
     SceneInputManager::GetInstance().Init();
     RegisterFlushWindowInfoCallback();
@@ -454,6 +458,70 @@ void SceneSessionManager::Init()
     PcFoldScreenManager::GetInstance().RegisterFoldScreenStatusChangeCallback(0, foldChangeCallback_);
 
     InitSnapshotCache();
+}
+
+void SceneSessionManager::RegisterSessionRecoverStateChangeListener()
+{
+    sessionRecoverStateChangeFunc_ = [this](const SessionRecoverState& state,
+        const sptr<WindowSessionProperty>& property) THREAD_SAFETY_GUARD(SCENE_GUARD) {
+            this->OnSessionRecoverStateChange(state, property);
+        };
+}
+
+void SceneSessionManager::OnSessionRecoverStateChange(const SessionRecoverState& state,
+        const sptr<WindowSessionProperty>& property)
+{
+    TLOGI(WmsLogTag::WMS_RECOVER, "id: %{public}d, state:%{public}u", property->GetPersistentId(), state);
+    switch (state) {
+        case SessionRecoverState::SESSION_START_RECONNECT:
+            // The server session has not request yet.
+            UpdateRecoverPropertyForSuperFold(property);
+            RecoverSessionInfo(property);
+            break;
+        case SessionRecoverState::SESSION_FINISH_RECONNECT: {
+            // The server session has been request.
+            auto sessionInfo = property->GetSessionInfo();
+            auto persistentId = sessionInfo.persistentId_;
+            auto sceneSession = GetSceneSession(persistentId);
+            if (sceneSession == nullptr) {
+                break;
+            }
+            if (SessionHelper::IsMainWindow(sceneSession->GetWindowType())) {
+                sceneSession->SetRecovered(true);
+                recoverSceneSessionFunc_(sceneSession, sessionInfo);
+                sceneSession->SetWindowShadowEnabled(property->GetWindowShadowEnabled());
+            } else {
+                sceneSession->NotifyFollowParentMultiScreenPolicy(sessionInfo.isFollowParentMultiScreenPolicy);
+                NotifyCreateSpecificSession(sceneSession, property, property->GetWindowType());
+                CacheSpecificSessionForRecovering(sceneSession, property);
+                sceneSession->SetWindowAnchorInfo(property->GetWindowAnchorInfo());
+            }
+            NotifySessionUnfocusedToClient(persistentId);
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+void SceneSessionManager::RegisterRecoverStateChangeListener()
+{
+    recoverStateChangeFunc_ = [this](const RecoverState& state) THREAD_SAFETY_GUARD(SCENE_GUARD) {
+        OnRecoverStateChange(state);
+    };
+}
+
+void SceneSessionManager::OnRecoverStateChange(const RecoverState& state)
+{
+    switch(state) {
+        case RecoverState::RECOVER_INITIAL:
+            break;
+        case RecoverState::RECOVER_ENABLE_INPUT:
+            SetDisplayBrightness(INVALID_BRIGHTNESS);
+            break;
+        default:
+            break;
+    }
 }
 
 void SceneSessionManager::RegisterFlushWindowInfoCallback()
@@ -987,6 +1055,12 @@ void SceneSessionManager::SetEnableInputEvent(bool enabled)
 {
     TLOGI(WmsLogTag::WMS_RECOVER, "enabled: %{public}u", enabled);
     enableInputEvent_ = enabled;
+    if (enabled) {
+        recoverStateChangeFunc_(RecoverState::RECOVER_ENABLE_INPUT);
+    } else {
+        recoverStateChangeFunc_(RecoverState::RECOVER_INITIAL);
+    }
+    
 }
 
 bool SceneSessionManager::IsInputEventEnabled() const
@@ -3988,13 +4062,13 @@ bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionPr
     return false;
 }
 
-SessionInfo SceneSessionManager::RecoverSessionInfo(const sptr<WindowSessionProperty>& property)
+void SceneSessionManager::RecoverSessionInfo(const sptr<WindowSessionProperty>& property)
 {
     if (property == nullptr) {
         TLOGE(WmsLogTag::WMS_RECOVER, "property is nullptr");
-        return {};
+        return;
     }
-    SessionInfo sessionInfo = property->GetSessionInfo();
+    SessionInfo& sessionInfo = property->EditSessionInfo();
     sessionInfo.persistentId_ = property->GetPersistentId();
     sessionInfo.windowMode = static_cast<int32_t>(property->GetWindowMode());
     sessionInfo.windowType_ = static_cast<uint32_t>(property->GetWindowType());
@@ -4017,7 +4091,6 @@ SessionInfo SceneSessionManager::RecoverSessionInfo(const sptr<WindowSessionProp
         sessionInfo.windowMode, sessionInfo.windowType_, sessionInfo.persistentId_, sessionInfo.sessionState_,
         sessionInfo.appInstanceKey_.c_str(), sessionInfo.isFollowParentMultiScreenPolicy,
         sessionInfo.screenId_, sessionInfo.isAbilityHook_);
-    return sessionInfo;
 }
 
 void SceneSessionManager::SetAlivePersistentIds(const std::vector<int32_t>& alivePersistentIds)
@@ -4077,14 +4150,14 @@ WSError SceneSessionManager::RecoverAndConnectSpecificSession(const sptr<ISessio
             TLOGNW(WmsLogTag::WMS_RECOVER, "Recover finished, not recovery anymore");
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
-        UpdateRecoverPropertyForSuperFold(property);
-        // recover specific session
-        SessionInfo info = RecoverSessionInfo(property);
+        sessionRecoverStateChangeFunc_(SessionRecoverState::SESSION_START_RECONNECT, property);
+        SessionInfo info = property->GetSessionInfo();
         TLOGNI(WmsLogTag::WMS_RECOVER, "callingWindowId=%{public}" PRIu32, property->GetCallingSessionId());
         ClosePipWindowIfExist(property->GetWindowType());
         sptr<SceneSession> sceneSession = RequestSceneSession(info, property);
         if (sceneSession == nullptr) {
             TLOGNE(WmsLogTag::WMS_RECOVER, "RequestSceneSession failed");
+            sessionRecoverStateChangeFunc_(SessionRecoverState::SESSION_NOT_RECONNECT, property);
             return WSError::WS_ERROR_NULLPTR;
         }
 
@@ -4095,6 +4168,7 @@ WSError SceneSessionManager::RecoverAndConnectSpecificSession(const sptr<ISessio
                 info.persistentId_, persistentId, property->GetParentPersistentId());
             failRecoveredPersistentIdSet_.insert(property->GetParentPersistentId());
             EraseSceneSessionMapById(persistentId);
+            sessionRecoverStateChangeFunc_(SessionRecoverState::SESSION_NOT_RECONNECT, property);
             return WSError::WS_ERROR_INVALID_SESSION;
         }
 
@@ -4102,14 +4176,11 @@ WSError SceneSessionManager::RecoverAndConnectSpecificSession(const sptr<ISessio
         if (errCode != WSError::WS_OK) {
             TLOGNE(WmsLogTag::WMS_RECOVER, "SceneSession reconnect failed");
             EraseSceneSessionMapById(persistentId);
+            sessionRecoverStateChangeFunc_(SessionRecoverState::SESSION_NOT_RECONNECT, property);
             return errCode;
         }
-        sceneSession->NotifyFollowParentMultiScreenPolicy(info.isFollowParentMultiScreenPolicy);
-        NotifyCreateSpecificSession(sceneSession, property, property->GetWindowType());
-        CacheSpecificSessionForRecovering(sceneSession, property);
-        NotifySessionUnfocusedToClient(persistentId);
-        sceneSession->SetWindowAnchorInfo(property->GetWindowAnchorInfo());
-        AddClientDeathRecipient(sessionStage, sceneSession);
+        sessionRecoverStateChangeFunc_(SessionRecoverState::SESSION_FINISH_RECONNECT, property);
+        AddClientDeathRecipient(sessionStage, sceneSession);    
         session = sceneSession;
         return errCode;
     };
@@ -4225,11 +4296,12 @@ WSError SceneSessionManager::RecoverAndReconnectSceneSession(const sptr<ISession
             TLOGNE(WmsLogTag::WMS_RECOVER, "recoverSceneSessionFunc_ is null");
             return WSError::WS_ERROR_NULLPTR;
         }
-        UpdateRecoverPropertyForSuperFold(property);
-        SessionInfo sessionInfo = RecoverSessionInfo(property);
+        sessionRecoverStateChangeFunc_(SessionRecoverState::SESSION_START_RECONNECT, property);
+        SessionInfo sessionInfo = property->GetSessionInfo();
         sptr<SceneSession> sceneSession = RequestSceneSession(sessionInfo, nullptr);
         if (sceneSession == nullptr) {
             TLOGNE(WmsLogTag::WMS_RECOVER, "Request sceneSession failed");
+            sessionRecoverStateChangeFunc_(SessionRecoverState::SESSION_NOT_RECONNECT, property);
             return WSError::WS_ERROR_NULLPTR;
         }
         int32_t persistentId = sceneSession->GetPersistentId();
@@ -4237,18 +4309,17 @@ WSError SceneSessionManager::RecoverAndReconnectSceneSession(const sptr<ISession
             TLOGNE(WmsLogTag::WMS_RECOVER, "SceneSession PersistentId changed, from %{public}d to %{public}d",
                 sessionInfo.persistentId_, persistentId);
             EraseSceneSessionMapById(persistentId);
+            sessionRecoverStateChangeFunc_(SessionRecoverState::SESSION_NOT_RECONNECT, property);
             return WSError::WS_ERROR_INVALID_SESSION;
         }
         auto ret = sceneSession->Reconnect(sessionStage, eventChannel, surfaceNode, property, token, pid, uid);
         if (ret != WSError::WS_OK) {
             TLOGNE(WmsLogTag::WMS_RECOVER, "Reconnect failed");
             EraseSceneSessionMapById(sessionInfo.persistentId_);
+            sessionRecoverStateChangeFunc_(SessionRecoverState::SESSION_NOT_RECONNECT, property);
             return ret;
         }
-        sceneSession->SetRecovered(true);
-        recoverSceneSessionFunc_(sceneSession, sessionInfo);
-        NotifySessionUnfocusedToClient(persistentId);
-        sceneSession->SetWindowShadowEnabled(property->GetWindowShadowEnabled());
+        sessionRecoverStateChangeFunc_(SessionRecoverState::SESSION_FINISH_RECONNECT, property);
         session = sceneSession;
         return WSError::WS_OK;
     };
@@ -13774,7 +13845,7 @@ WSError SceneSessionManager::UpdateExtWindowFlags(const sptr<IRemoteObject>& tok
 {
     ExtensionWindowFlags actions(extWindowActions);
     auto ret = CheckExtWindowFlagsPermission(actions);
-    if (actions.bitData == 0) {
+    if (ret != WSError::WS_OK) {
         return ret;
     }
 
@@ -16520,7 +16591,7 @@ std::vector<sptr<SceneSession>> SceneSessionManager::GetSceneSessions(ScreenId s
     std::vector<sptr<SceneSession>> sceneSessions;
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto& [_, sceneSession] : sceneSessionMap_) {
-        if (sceneSession->GetScreenId() == screenId) {
+        if (sceneSession != nullptr && sceneSession->GetScreenId() == screenId) {
             sceneSessions.emplace_back(sceneSession);
         }
     }

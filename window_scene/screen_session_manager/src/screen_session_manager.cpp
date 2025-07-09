@@ -121,7 +121,7 @@ constexpr int32_t CAST_WIRED_PROJECTION_START = 1005;
 constexpr int32_t CAST_WIRED_PROJECTION_STOP = 1007;
 constexpr int32_t RES_FAILURE_FOR_PRIVACY_WINDOW = -2;
 constexpr int32_t IRREGULAR_REFRESH_RATE_SKIP_THRETHOLD = 10;
-constexpr float EXTEND_SCREEN_DPI_DEFAULT_PARAMETER = 0.85f;
+constexpr float EXTEND_SCREEN_DPI_DEFAULT_PARAMETER = 1.0f;
 static const int32_t AUTO_ROTATE_OFF = 0;
 static const int NOTIFY_EVENT_FOR_DUAL_FAILED = 0;
 static const int NOTIFY_EVENT_FOR_DUAL_SUCESS = 1;
@@ -2465,6 +2465,7 @@ sptr<ScreenSession> ScreenSessionManager::GetScreenSessionInner(ScreenId screenI
     }
     ScreenSessionConfig config = {
         .screenId = screenId,
+        .rsId = screenId,
         .defaultScreenId = defScreenId,
         .name = screenName,
         .property = property,
@@ -10553,9 +10554,15 @@ void ScreenSessionManager::CalculateRotatedDisplay(Rotation rotation, const DMRe
     int32_t phyOffset = 0;
     if (phyOffsets.size() > 1 &&
         (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice() || GetFoldStatus() != FoldStatus::FOLDED)) {
-        phyOffset = static_cast<int32_t>(std::stoi(phyOffsets[1]));
-    } else {
-        phyOffset = static_cast<int32_t>(std::stoi(phyOffsets[0]));
+        if (!ScreenSettingHelper::ConvertStrToInt32(phyOffsets[1], phyOffset)) {
+            TLOGE(WmsLogTag::DMS, "transfer phyOffset1 failed.");
+            return;
+        }
+    } else if (phyOffsets.size() > 0) {
+        if (!ScreenSettingHelper::ConvertStrToInt32(phyOffsets[0], phyOffset)) {
+            TLOGE(WmsLogTag::DMS, "transfer phyOffset0 failed.");
+            return;
+        }
     }
     Rotation phyOffsetRotation = ConvertIntToRotation(phyOffset);
     uint32_t correctedRotation = (static_cast<uint32_t>(rotation) + static_cast<uint32_t>(phyOffsetRotation)) %
@@ -10569,24 +10576,32 @@ void ScreenSessionManager::CalculateRotatedDisplay(Rotation rotation, const DMRe
             displayArea.width_ = displayAreaCopy.height_;
             displayArea.height_ = displayAreaCopy.width_;
             displayRegion.posX_ = displayRegionCopy.posY_;
-            displayRegion.posY_ = screenRegion.width_ - (displayRegionCopy.posX_ + displayRegionCopy.width_);
+            displayRegion.posY_ = static_cast<int32_t>(screenRegion.width_) -
+                (displayRegionCopy.posX_ + static_cast<int32_t>(displayRegionCopy.width_));
             displayArea.posX_ = displayAreaCopy.posY_;
-            displayArea.posY_ = screenRegion.width_ - (displayAreaCopy.posX_ + displayAreaCopy.width_);
+            displayArea.posY_ = static_cast<int32_t>(screenRegion.width_) -
+                (displayAreaCopy.posX_ + static_cast<int32_t>(displayAreaCopy.width_));
             break;
         case Rotation::ROTATION_180:
-            displayRegion.posX_ = screenRegion.width_ - (displayRegionCopy.posX_ + displayRegionCopy.width_);
-            displayRegion.posY_ = screenRegion.height_ - (displayRegionCopy.posY_ + displayRegionCopy.height_);
-            displayArea.posX_ = screenRegion.width_ - (displayAreaCopy.posX_ + displayAreaCopy.width_);
-            displayArea.posY_ = screenRegion.height_ - (displayAreaCopy.posY_ + displayAreaCopy.height_);
+            displayRegion.posX_ = static_cast<int32_t>(screenRegion.width_) -
+                (displayRegionCopy.posX_ + static_cast<int32_t>(displayRegionCopy.width_));
+            displayRegion.posY_ = static_cast<int32_t>(screenRegion.height_) -
+                (displayRegionCopy.posY_ + static_cast<int32_t>(displayRegionCopy.height_));
+            displayArea.posX_ = static_cast<int32_t>(screenRegion.width_) -
+                (displayAreaCopy.posX_ + static_cast<int32_t>(displayAreaCopy.width_));
+            displayArea.posY_ = static_cast<int32_t>(screenRegion.height_) -
+                (displayAreaCopy.posY_ + static_cast<int32_t>(displayAreaCopy.height_));
             break;
         case Rotation::ROTATION_270:
             displayRegion.width_ = displayRegionCopy.height_;
             displayRegion.height_ = displayRegionCopy.width_;
             displayArea.width_ = displayAreaCopy.height_;
             displayArea.height_ = displayAreaCopy.width_;
-            displayRegion.posX_ = screenRegion.height_ - (displayRegionCopy.posY_ + displayRegionCopy.height_);
+            displayRegion.posX_ = static_cast<int32_t>(screenRegion.height_) -
+                (displayRegionCopy.posY_ + static_cast<int32_t>(displayRegionCopy.height_));
             displayRegion.posY_ = displayRegionCopy.posX_;
-            displayArea.posX_ = screenRegion.height_ - (displayAreaCopy.posY_ + displayAreaCopy.height_);
+            displayArea.posX_ = static_cast<int32_t>(screenRegion.height_) -
+                (displayAreaCopy.posY_ + static_cast<int32_t>(displayAreaCopy.height_));
             displayArea.posY_ = displayAreaCopy.posX_;
             break;
         default:
@@ -10613,8 +10628,8 @@ void ScreenSessionManager::CalculateScreenArea(const DMRect& displayRegion, cons
     float ratioHeight = static_cast<float>(displayArea.height_) / static_cast<float>(displayRegion.height_);
     screenArea.posX_ = screenRegion.posX_ + static_cast<int32_t>(ratioX * screenRegion.width_);
     screenArea.posY_ = screenRegion.posY_ + static_cast<int32_t>(ratioY * screenRegion.height_);
-    screenArea.width_ = static_cast<int32_t>(ratioWidth * screenRegion.width_);
-    screenArea.height_ = static_cast<int32_t>(ratioHeight * screenRegion.height_);
+    screenArea.width_ = static_cast<uint32_t>(ratioWidth * screenRegion.width_);
+    screenArea.height_ = static_cast<uint32_t>(ratioHeight * screenRegion.height_);
 }
 
 DMError ScreenSessionManager::SetPrimaryDisplaySystemDpi(float virtualPixelRatio)
