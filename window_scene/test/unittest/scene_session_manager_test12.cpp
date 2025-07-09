@@ -1763,7 +1763,7 @@ HWTEST_F(SceneSessionManagerTest12, UpdateSessionWithFoldStateChange, TestSize.L
     sptr<SceneSessionMocker> sceneSession = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
     ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
     EXPECT_CALL(*sceneSession, UpdateCrossAxis()).Times(1);
-    ssm_->UpdateSessionWithFoldStateChange(10, SuperFoldStatus::EXPANDED, SuperFoldStatus::FOLDED);
+    ssm_->UpdateSessionWithFoldStateChange(10, SuperFoldStatus::HALF_FOLDED, SuperFoldStatus::FOLDED);
 }
 
 /**
