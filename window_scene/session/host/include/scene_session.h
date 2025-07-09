@@ -1213,7 +1213,6 @@ private:
      * UIExtension
      */
     std::atomic_bool shouldHideNonSecureWindows_ { false };
-    std::shared_mutex combinedExtWindowFlagsMutex_;
     ExtensionWindowFlags combinedExtWindowFlags_ { 0 };
     std::map<int32_t, ExtensionWindowFlags> extWindowFlagsMap_;
     std::vector<UIExtensionTokenInfo> extensionTokenInfos_;
