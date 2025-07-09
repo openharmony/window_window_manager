@@ -15,7 +15,6 @@
 
 #include "display_manager.h"
 
-
 #include <chrono>
 #include <cinttypes>
 #include <transaction/rs_interfaces.h>
