@@ -16512,7 +16512,7 @@ std::vector<sptr<SceneSession>> SceneSessionManager::GetSceneSessions(ScreenId s
     std::vector<sptr<SceneSession>> sceneSessions;
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto& [_, sceneSession] : sceneSessionMap_) {
-        if (sceneSession->GetScreenId() == screenId) {
+        if (sceneSession != nullptr && sceneSession->GetScreenId() == screenId) {
             sceneSessions.emplace_back(sceneSession);
         }
     }

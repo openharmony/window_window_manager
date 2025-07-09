@@ -1423,6 +1423,11 @@ WSError Session::Foreground(sptr<WindowSessionProperty> property, bool isFromCli
 
     isTerminating_ = false;
     PostSpecificSessionLifeCycleTimeoutTask(ATTACH_EVENT_NAME);
+
+    // Window Layout Global Coordinate System
+    // When the window enters foreground, notify the client to update GlobalDisplayRect once,
+    // since background windows skip this notification to avoid IPC wake-up and power issues.
+    NotifyClientToUpdateGlobalDisplayRect(GetGlobalDisplayRect(), SizeChangeReason::UNDEFINED);
     return WSError::WS_OK;
 }
 
@@ -4678,11 +4683,18 @@ WSError Session::UpdateGlobalDisplayRect(const WSRect& rect, SizeChangeReason re
         return WSError::WS_DO_NOTHING;
     }
     SetGlobalDisplayRect(rect);
-    // Notify client if necessary
-    if (sessionStage_ != nullptr) {
-        sessionStage_->UpdateGlobalDisplayRectFromServer(rect, reason);
-    }
+    NotifyClientToUpdateGlobalDisplayRect(rect, reason);
     return WSError::WS_OK;
+}
+
+WSError Session::NotifyClientToUpdateGlobalDisplayRect(const WSRect& rect, SizeChangeReason reason)
+{
+    // Skip notifying client when the window is not in the foreground to avoid waking up
+    // the application via IPC, which may cause unnecessary power consumption.
+    if (!sessionStage_ || !IsSessionForeground()) {
+        return WSError::WS_DO_NOTHING;
+    }
+    return sessionStage_->UpdateGlobalDisplayRectFromServer(rect, reason);
 }
 
 std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller)
