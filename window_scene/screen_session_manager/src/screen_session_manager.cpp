@@ -8227,7 +8227,7 @@ void ScreenSessionManager::SwitchExternalScreenToMirror()
             continue;
         }
         if (IsDefaultMirrorMode(screenSession->GetScreenId()) &&
-            screenSession->GetMirrorScreenType() == MirrorScreenType::PHYSICAL_MIRROR) {
+            screenSession->GetIsRealScreen()) {
             externalScreenIds.emplace_back(screenSession->GetScreenId());
             hasExternalScreen = true;
             oss << screenSession->GetScreenId() << ",";
