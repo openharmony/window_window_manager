@@ -398,16 +398,6 @@ WMError WindowSceneSessionImpl::RecoverAndConnectSpecificSession()
         GetWindowName().c_str(), property_->GetWindowMode(), property_->GetWindowType(), GetPersistentId(), state_,
         requestState_, property_->GetParentId());
 
-    property_->SetWindowState(requestState_);
-
-    sptr<ISessionStage> iSessionStage(this);
-    sptr<IWindowEventChannel> eventChannel = sptr<WindowEventChannel>::MakeSptr(iSessionStage);
-    sptr<Rosen::ISession> session = nullptr;
-    auto context = GetContext();
-    sptr<IRemoteObject> token = context ? context->GetToken() : nullptr;
-    if (token) {
-        property_->SetTokenState(true);
-    }
     const WindowType type = GetType();
     if (WindowHelper::IsSubWindow(type) && !property_->GetIsUIExtFirstSubWindow()) { // sub window
         TLOGD(WmsLogTag::WMS_RECOVER, "SubWindow");
@@ -422,20 +412,26 @@ WMError WindowSceneSessionImpl::RecoverAndConnectSpecificSession()
         PictureInPictureManager::DoClose(true, true);
         return WMError::WM_OK;
     }
+    windowRecoverStateChangeFunc_(false, WindowRecoverState::WINDOW_START_RECONNECT);
+    sptr<ISessionStage> iSessionStage(this);
+    sptr<IWindowEventChannel> eventChannel = sptr<WindowEventChannel>::MakeSptr(iSessionStage);
+    sptr<Rosen::ISession> session = nullptr;
+    auto context = GetContext();
+    sptr<IRemoteObject> token = context ? context->GetToken() : nullptr;
+    windowRecoverStateChangeFunc_(false, WindowRecoverState::WINDOW_DOING_RECONNECT);
     SingletonContainer::Get<WindowAdapter>().RecoverAndConnectSpecificSession(
         iSessionStage, eventChannel, surfaceNode_, property_, session, token);
 
-    property_->SetWindowState(state_);
-
     if (session == nullptr) {
         TLOGE(WmsLogTag::WMS_RECOVER, "Recover failed, session is nullptr");
+        windowRecoverStateChangeFunc_(false, WindowRecoverState::WINDOW_NOT_RECONNECT);
         return WMError::WM_ERROR_NULLPTR;
     }
     {
         std::lock_guard<std::mutex> lock(hostSessionMutex_);
         hostSession_ = session;
     }
-    RecoverSessionListener();
+    windowRecoverStateChangeFunc_(true, WindowRecoverState::WINDOW_FINISH_RECONNECT);
     TLOGI(WmsLogTag::WMS_RECOVER,
         "over, windowName=%{public}s, persistentId=%{public}d",
         GetWindowName().c_str(), GetPersistentId());
@@ -468,24 +464,25 @@ WMError WindowSceneSessionImpl::RecoverAndReconnectSceneSession()
     } else {
         TLOGE(WmsLogTag::WMS_RECOVER, "want is nullptr!");
     }
-    property_->SetWindowState(state_);
-    property_->SetIsFullScreenWaterfallMode(isFullScreenWaterfallMode_.load());
+    windowRecoverStateChangeFunc_(false, WindowRecoverState::WINDOW_START_RECONNECT);
     sptr<ISessionStage> iSessionStage(this);
     sptr<IWindowEventChannel> iWindowEventChannel = sptr<WindowEventChannel>::MakeSptr(iSessionStage);
     sptr<IRemoteObject> token = context ? context->GetToken() : nullptr;
     sptr<Rosen::ISession> session = nullptr;
+    windowRecoverStateChangeFunc_(false, WindowRecoverState::WINDOW_DOING_RECONNECT);
     auto ret = SingletonContainer::Get<WindowAdapter>().RecoverAndReconnectSceneSession(
         iSessionStage, iWindowEventChannel, surfaceNode_, session, property_, token);
     if (session == nullptr) {
         TLOGE(WmsLogTag::WMS_RECOVER, "session is null, recovered session failed");
+        windowRecoverStateChangeFunc_(false, WindowRecoverState::WINDOW_NOT_RECONNECT);
         return WMError::WM_ERROR_NULLPTR;
     }
-    TLOGI(WmsLogTag::WMS_RECOVER, "Recover and reconnect sceneSession successful");
     {
         std::lock_guard<std::mutex> lock(hostSessionMutex_);
         hostSession_ = session;
     }
-    RecoverSessionListener();
+    windowRecoverStateChangeFunc_(false, WindowRecoverState::WINDOW_FINISH_RECONNECT);
+    TLOGI(WmsLogTag::WMS_RECOVER, "Successful, persistentId=%{public}d", GetPersistentId());
     return static_cast<WMError>(ret);
 }
 
@@ -634,6 +631,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
     if (ret == WMError::WM_OK) {
         MakeSubOrDialogWindowDragableAndMoveble();
         UpdateWindowState();
+        RegisterWindowRecoverStateChangeListener();
         RegisterSessionRecoverListener(isSpecificSession);
         UpdateDefaultStatusBarColor();
         AddSetUIContentTimeoutCheck();
@@ -899,6 +897,53 @@ void WindowSceneSessionImpl::RegisterSessionRecoverListener(bool isSpecificSessi
         return ret;
     };
     SingletonContainer::Get<WindowAdapter>().RegisterSessionRecoverCallbackFunc(GetPersistentId(), callbackFunc);
+}
+
+void WindowSceneSessionImpl::RegisterWindowRecoverStateChangeListener()
+{
+    windowRecoverStateChangeFunc_ = [weakThis = wptr(this)](bool isSpecificSession,
+        const WindowRecoverState& state) THREAD_SAFETY_GUARD(SCENE_GUARD) {
+        auto window = weakThis.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_RECOVER, "window is null");
+            return;
+        }
+        window->OnWindowRecoverStateChange(isSpecificSession, state);
+    };
+}
+
+void WindowSceneSessionImpl::OnWindowRecoverStateChange(bool isSpecificSession, const WindowRecoverState& state)
+{
+    TLOGI(WmsLogTag::WMS_RECOVER, "id: %{public}d, state:%{public}u", GetPersistentId(), state);
+    switch (state) {
+        case WindowRecoverState::WINDOW_START_RECONNECT:
+            UpdateStartRecoverProperty(isSpecificSession);
+            break;
+        case WindowRecoverState::WINDOW_FINISH_RECONNECT:
+            UpdateFinishRecoverProperty(isSpecificSession);
+            RecoverSessionListener();
+            break;
+        default:
+            break;
+    }
+}
+
+void WindowSceneSessionImpl::UpdateStartRecoverProperty(bool isSpecificSession)
+{
+    if (isSpecificSession) {
+        property_->SetWindowState(requestState_);
+        if (GetContext() && GetContext()->GetToken()) {
+            property_->SetTokenState(true);
+        }
+    } else {
+        property_->SetWindowState(state_);
+        property_->SetIsFullScreenWaterfallMode(isFullScreenWaterfallMode_.load());
+    }
+}
+
+void WindowSceneSessionImpl::UpdateFinishRecoverProperty(bool isSpecificSession)
+{
+    property_->SetWindowState(state_);
 }
 
 bool WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,

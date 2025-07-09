@@ -668,13 +668,13 @@ HWTEST_F(WindowRecoverSessionTest, ClearUnrecoveredSessions, TestSize.Level1)
  */
 HWTEST_F(WindowRecoverSessionTest, RecoverSessionInfo, TestSize.Level1)
 {
-    SessionInfo info = ssm_->RecoverSessionInfo(nullptr);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
     SessionInfo sessionInfo;
     sessionInfo.abilityName_ = "RecoverSessionInfo";
     property->SetSessionInfo(sessionInfo);
-    info = ssm_->RecoverSessionInfo(property);
+    ssm_->RecoverSessionInfo(property);
+    SessionInfo info = property->GetSessionInfo();
     ASSERT_EQ(info.abilityName_, sessionInfo.abilityName_);
 }
 
@@ -744,6 +744,99 @@ HWTEST_F(WindowRecoverSessionTest, RegisterSMSRecoverListener2, TestSize.Level1)
     sm_->InitMockSMSProxy();
     sm_->RegisterSMSRecoverListener();
     ASSERT_EQ(sm_->isRecoverListenerRegistered_, true);
+}
+
+/**
+ * @tc.name: RegisterSessionRecoverStateChangeListener
+ * @tc.desc: normal test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRecoverSessionTest, RegisterSessionRecoverStateChangeListener, TestSize.Level1)
+{
+    EXPECT_NE(nullptr, ssm_);
+    ssm_->RegisterSessionRecoverStateChangeListener();
+    EXPECT_NE(ssm_->sessionRecoverStateChangeFunc_, nullptr);
+}
+
+/**
+ * @tc.name: OnSessionRecoverStateChange
+ * @tc.desc: normal test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRecoverSessionTest, OnSessionRecoverStateChange, TestSize.Level1)
+{
+    EXPECT_NE(nullptr, ssm_);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetPersistentId(160);
+    ssm_->OnSessionRecoverStateChange(SessionRecoverState::SESSION_START_RECONNECT, property);
+    EXPECT_EQ(property->GetSessionInfo().persistentId_, 160);
+
+    ssm_->sceneSessionMap_.clear();
+    // main window
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    SessionInfo info;
+    info.abilityName_ = "OnSessionRecoverStateChange";
+    info.bundleName_ = "OnSessionRecoverStateChange";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->SetSessionProperty(property);
+    ASSERT_NE(nullptr, sceneSession);
+    ssm_->sceneSessionMap_.insert({ 160, sceneSession });
+    ssm_->OnSessionRecoverStateChange(SessionRecoverState::SESSION_FINISH_RECONNECT, property);
+    EXPECT_EQ(ssm_->GetSceneSession(160)->IsRecovered(), true);
+
+    // specifc window
+    ssm_->GetSceneSession(160)->SetRecovered(false);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sceneSession->SetSessionProperty(property);
+    ssm_->OnSessionRecoverStateChange(SessionRecoverState::SESSION_FINISH_RECONNECT, property);
+    EXPECT_EQ(ssm_->GetSceneSession(160)->IsRecovered(), false);
+
+    ssm_->OnSessionRecoverStateChange(SessionRecoverState::SESSION_NOT_RECONNECT, property);
+    EXPECT_EQ(ssm_->GetSceneSession(160)->IsRecovered(), false);
+}
+
+/**
+ * @tc.name: RegisterRecoverStateChangeListener
+ * @tc.desc: normal test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRecoverSessionTest, RegisterRecoverStateChangeListener, TestSize.Level1)
+{
+    EXPECT_NE(nullptr, ssm_);
+    ssm_->RegisterRecoverStateChangeListener();
+    EXPECT_NE(ssm_->recoverStateChangeFunc_, nullptr);
+}
+
+/**
+ * @tc.name: OnRecoverStateChange
+ * @tc.desc: normal test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRecoverSessionTest, OnRecoverStateChange, TestSize.Level1)
+{
+    EXPECT_NE(nullptr, ssm_);
+    ssm_->displayBrightness_ = UNDEFINED_BRIGHTNESS;
+    ssm_->OnRecoverStateChange(RecoverState::RECOVER_INITIAL);
+    EXPECT_EQ(ssm_->displayBrightness_, UNDEFINED_BRIGHTNESS);
+    ssm_->OnRecoverStateChange(RecoverState::RECOVER_END);
+    EXPECT_EQ(ssm_->displayBrightness_, UNDEFINED_BRIGHTNESS);
+    ssm_->OnRecoverStateChange(RecoverState::RECOVER_ENABLE_INPUT);
+    EXPECT_EQ(ssm_->displayBrightness_, INVALID_BRIGHTNESS);
+}
+
+/**
+ * @tc.name: SetEnableInputEvent
+ * @tc.desc: normal test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRecoverSessionTest, SetEnableInputEvent, TestSize.Level1)
+{
+    EXPECT_NE(nullptr, ssm_);
+    ssm_->displayBrightness_ = UNDEFINED_BRIGHTNESS;
+    ssm_->SetEnableInputEvent(false);
+    EXPECT_EQ(ssm_->displayBrightness_, UNDEFINED_BRIGHTNESS);
+    ssm_->SetEnableInputEvent(true);
+    EXPECT_EQ(ssm_->displayBrightness_, INVALID_BRIGHTNESS);
 }
 
 } // namespace
