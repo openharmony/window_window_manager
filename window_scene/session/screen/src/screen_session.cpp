@@ -2095,16 +2095,31 @@ std::vector<uint32_t> ScreenSession::GetSupportedRefreshRate() const
 
 void ScreenSession::SetForceCloseHdr(bool isForceCloseHdr)
 {
-    std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
+    std::unique_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
     if (displayNode_ == nullptr) {
         TLOGE(WmsLogTag::DMS, "displayNode_ is null");
         return;
+    }
+    if (lastCloseHdrStatus_ == isForceCloseHdr) {
+        TLOGD(WmsLogTag::DMS, "lastCloseHdrStatus_ and isForceCloseHdr are the same.");
+        return;
+    }
+    lastCloseHdrStatus_ = isForceCloseHdr;
+    int hdrDuration = DURATION_1000MS;
+    if (isForceCloseHdr == false) {
+        DmsXcollie dmsXcollie("DMS:SetForceCloseHdr:GetScreenHDRStatus", XCOLLIE_TIMEOUT_5S);
+        HdrStatus hdrStatus = HdrStatus::NO_HDR;
+        TLOGI(WmsLogTag::DMS, "Start get screen status.");
+        auto ret = RSInterfaces::GetInstance().GetScreenHDRStatus(rsId_, hdrStatus);
+        if (ret == StatusCode::SUCCESS && hdrStatus == HdrStatus::NO_HDR) {
+            hdrDuration = DURATION_0MS;
+        }
     }
     TLOGI(WmsLogTag::DMS, "ForceCloseHdr is %{public}d", isForceCloseHdr);
     auto rsUIContext = GetRSUIContext();
     RSAnimationTimingProtocol timingProtocol;
     // Duration of the animation
-    timingProtocol.SetDuration(isForceCloseHdr ? DURATION_0MS : DURATION_1000MS);
+    timingProtocol.SetDuration(isForceCloseHdr ? DURATION_0MS : hdrDuration);
     // Increase animation when HDR luminance changes abruptly
     RSNode::OpenImplicitAnimation(rsUIContext, timingProtocol, Rosen::RSAnimationTimingCurve::LINEAR, nullptr);
     displayNode_->SetHDRBrightnessFactor(isForceCloseHdr ? BRIGHTNESS_FACTOR_0 : BRIGHTNESS_FACTOR_1);
