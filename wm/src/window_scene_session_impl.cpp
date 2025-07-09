@@ -424,7 +424,7 @@ WMError WindowSceneSessionImpl::RecoverAndConnectSpecificSession()
 
     if (session == nullptr) {
         TLOGE(WmsLogTag::WMS_RECOVER, "Recover failed, session is nullptr");
-        windowRecoverStateChangeFunc_(false, WindowRecoverState::WINDOW_DIS_RECONNECT);
+        windowRecoverStateChangeFunc_(false, WindowRecoverState::WINDOW_NOT_RECONNECT);
         return WMError::WM_ERROR_NULLPTR;
     }
     {
@@ -474,7 +474,7 @@ WMError WindowSceneSessionImpl::RecoverAndReconnectSceneSession()
         iSessionStage, iWindowEventChannel, surfaceNode_, session, property_, token);
     if (session == nullptr) {
         TLOGE(WmsLogTag::WMS_RECOVER, "session is null, recovered session failed");
-        windowRecoverStateChangeFunc_(false, WindowRecoverState::WINDOW_DIS_RECONNECT);
+        windowRecoverStateChangeFunc_(false, WindowRecoverState::WINDOW_NOT_RECONNECT);
         return WMError::WM_ERROR_NULLPTR;
     }
     {
@@ -904,12 +904,17 @@ void WindowSceneSessionImpl::RegisterWindowRecoverStateChangeListener()
     windowRecoverStateChangeFunc_ = [weakThis = wptr(this)](bool isSpecificSession,
         const WindowRecoverState& state) THREAD_SAFETY_GUARD(SCENE_GUARD) {
         auto window = weakThis.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_RECOVER, "window is null");
+            return;
+        }
         window->OnWindowRecoverStateChange(isSpecificSession, state);
     };
 }
 
 void WindowSceneSessionImpl::OnWindowRecoverStateChange(bool isSpecificSession, const WindowRecoverState& state)
 {
+    TLOGI(WmsLogTag::WMS_RECOVER, "id: %{public}d, state:%{public}u", property->GetPersistentId(), state);
     switch (state) {
         case WindowRecoverState::WINDOW_START_RECONNECT:
             UpdateStartRecoverProperty(isSpecificSession);
