@@ -471,6 +471,7 @@ void SceneSessionManager::RegisterSessionRecoverStateChangeListener()
 void SceneSessionManager::OnSessionRecoverStateChange(const SessionRecoverState& state,
         const sptr<WindowSessionProperty>& property)
 {
+    TLOGI(WmsLogTag::WMS_RECOVER, "id: %{public}d, state:%{public}u", GetPersistentId(), state);
     switch (state) {
         case SessionRecoverState::SESSION_START_RECONNECT:
             // The server session has not request yet.
@@ -482,6 +483,9 @@ void SceneSessionManager::OnSessionRecoverStateChange(const SessionRecoverState&
             auto sessionInfo = property->GetSessionInfo();
             auto persistentId = sessionInfo.persistentId_;
             auto sceneSession = GetSceneSession(persistentId);
+            if (sceneSession == nullptr) {
+                break;
+            }
             if (SessionHelper::IsMainWindow(sceneSession->GetWindowType())) {
                 sceneSession->SetRecovered(true);
                 recoverSceneSessionFunc_(sceneSession, sessionInfo);
@@ -503,7 +507,7 @@ void SceneSessionManager::OnSessionRecoverStateChange(const SessionRecoverState&
 void SceneSessionManager::RegisterRecoverStateChangeListener()
 {
     recoverStateChangeFunc_ = [this](const RecoverState& state) THREAD_SAFETY_GUARD(SCENE_GUARD) {
-        this->OnRecoverStateChange(state);
+        OnRecoverStateChange(state);
     };
 }
 
@@ -4145,7 +4149,7 @@ WSError SceneSessionManager::RecoverAndConnectSpecificSession(const sptr<ISessio
         sptr<SceneSession> sceneSession = RequestSceneSession(info, property);
         if (sceneSession == nullptr) {
             TLOGNE(WmsLogTag::WMS_RECOVER, "RequestSceneSession failed");
-            sessionRecoverStateChangeFunc_(SessionRecoverState::SESSION_DIS_RECONNECT, property);
+            sessionRecoverStateChangeFunc_(SessionRecoverState::SESSION_NOT_RECONNECT, property);
             return WSError::WS_ERROR_NULLPTR;
         }
 
@@ -4156,7 +4160,7 @@ WSError SceneSessionManager::RecoverAndConnectSpecificSession(const sptr<ISessio
                 info.persistentId_, persistentId, property->GetParentPersistentId());
             failRecoveredPersistentIdSet_.insert(property->GetParentPersistentId());
             EraseSceneSessionMapById(persistentId);
-            sessionRecoverStateChangeFunc_(SessionRecoverState::SESSION_DIS_RECONNECT, property);
+            sessionRecoverStateChangeFunc_(SessionRecoverState::SESSION_NOT_RECONNECT, property);
             return WSError::WS_ERROR_INVALID_SESSION;
         }
 
@@ -4164,7 +4168,7 @@ WSError SceneSessionManager::RecoverAndConnectSpecificSession(const sptr<ISessio
         if (errCode != WSError::WS_OK) {
             TLOGNE(WmsLogTag::WMS_RECOVER, "SceneSession reconnect failed");
             EraseSceneSessionMapById(persistentId);
-            sessionRecoverStateChangeFunc_(SessionRecoverState::SESSION_DIS_RECONNECT, property);
+            sessionRecoverStateChangeFunc_(SessionRecoverState::SESSION_NOT_RECONNECT, property);
             return errCode;
         }
         sessionRecoverStateChangeFunc_(SessionRecoverState::SESSION_FINISH_RECONNECT, property);
@@ -4289,7 +4293,7 @@ WSError SceneSessionManager::RecoverAndReconnectSceneSession(const sptr<ISession
         sptr<SceneSession> sceneSession = RequestSceneSession(sessionInfo, nullptr);
         if (sceneSession == nullptr) {
             TLOGNE(WmsLogTag::WMS_RECOVER, "Request sceneSession failed");
-            sessionRecoverStateChangeFunc_(SessionRecoverState::SESSION_DIS_RECONNECT, property);
+            sessionRecoverStateChangeFunc_(SessionRecoverState::SESSION_NOT_RECONNECT, property);
             return WSError::WS_ERROR_NULLPTR;
         }
         int32_t persistentId = sceneSession->GetPersistentId();
@@ -4297,14 +4301,14 @@ WSError SceneSessionManager::RecoverAndReconnectSceneSession(const sptr<ISession
             TLOGNE(WmsLogTag::WMS_RECOVER, "SceneSession PersistentId changed, from %{public}d to %{public}d",
                 sessionInfo.persistentId_, persistentId);
             EraseSceneSessionMapById(persistentId);
-            sessionRecoverStateChangeFunc_(SessionRecoverState::SESSION_DIS_RECONNECT, property);
+            sessionRecoverStateChangeFunc_(SessionRecoverState::SESSION_NOT_RECONNECT, property);
             return WSError::WS_ERROR_INVALID_SESSION;
         }
         auto ret = sceneSession->Reconnect(sessionStage, eventChannel, surfaceNode, property, token, pid, uid);
         if (ret != WSError::WS_OK) {
             TLOGNE(WmsLogTag::WMS_RECOVER, "Reconnect failed");
             EraseSceneSessionMapById(sessionInfo.persistentId_);
-            sessionRecoverStateChangeFunc_(SessionRecoverState::SESSION_DIS_RECONNECT, property);
+            sessionRecoverStateChangeFunc_(SessionRecoverState::SESSION_NOT_RECONNECT, property);
             return ret;
         }
         sessionRecoverStateChangeFunc_(SessionRecoverState::SESSION_FINISH_RECONNECT, property);
