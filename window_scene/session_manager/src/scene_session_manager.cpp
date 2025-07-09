@@ -471,7 +471,7 @@ void SceneSessionManager::RegisterSessionRecoverStateChangeListener()
 void SceneSessionManager::OnSessionRecoverStateChange(const SessionRecoverState& state,
         const sptr<WindowSessionProperty>& property)
 {
-    TLOGI(WmsLogTag::WMS_RECOVER, "id: %{public}d, state:%{public}u", GetPersistentId(), state);
+    TLOGI(WmsLogTag::WMS_RECOVER, "id: %{public}d, state:%{public}u", property->GetPersistentId(), state);
     switch (state) {
         case SessionRecoverState::SESSION_START_RECONNECT:
             // The server session has not request yet.
