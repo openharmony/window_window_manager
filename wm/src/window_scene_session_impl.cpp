@@ -914,7 +914,7 @@ void WindowSceneSessionImpl::RegisterWindowRecoverStateChangeListener()
 
 void WindowSceneSessionImpl::OnWindowRecoverStateChange(bool isSpecificSession, const WindowRecoverState& state)
 {
-    TLOGI(WmsLogTag::WMS_RECOVER, "id: %{public}d, state:%{public}u", property->GetPersistentId(), state);
+    TLOGI(WmsLogTag::WMS_RECOVER, "id: %{public}d, state:%{public}u", GetPersistentId(), state);
     switch (state) {
         case WindowRecoverState::WINDOW_START_RECONNECT:
             UpdateStartRecoverProperty(isSpecificSession);
