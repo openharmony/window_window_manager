@@ -50,6 +50,7 @@ public:
     void SetFoldStatus(FoldStatus foldStatus);
     void OnTentModeChanged(int tentType, int32_t hall = -1);
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
+    FoldCreaseRegion GetLiveCreaseRegion() const;
     ScreenId GetCurrentScreenId();
     void LockDisplayStatus(bool locked);
     void SetOnBootAnimation(bool onBootAnimation);
@@ -68,6 +69,7 @@ public:
     bool GetdisplayModeRunningStatus();
     FoldDisplayMode GetLastCacheDisplayMode();
     void AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32_t command);
+    void SetIsClearingBootAnimation(bool isClearingBootAnimation);
 private:
     sptr<FoldScreenPolicy> GetFoldScreenPolicy(DisplayDeviceType productType);
     sptr<FoldScreenPolicy> foldScreenPolicy_;

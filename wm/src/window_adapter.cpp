@@ -411,6 +411,18 @@ void WindowAdapter::RegisterSessionRecoverCallbackFunc(
     sessionRecoverCallbackFuncMap_[persistentId] = callbackFunc;
 }
 
+void WindowAdapter::RegisterUIEffectRecoverCallbackFunc(int32_t id,
+    const UIEffectRecoverCallbackFunc& callbackFunc)
+{
+    std::lock_guard<std::mutex> lock(effectMutex_);
+    uiEffectRecoverCallbackFuncMap_[id] = callbackFunc;
+}
+void WindowAdapter::UnregisterUIEffectRecoverCallbackFunc(int32_t id)
+{
+    std::lock_guard<std::mutex> lock(effectMutex_);
+    uiEffectRecoverCallbackFuncMap_.erase(id);
+}
+
 WMError WindowAdapter::GetSnapshotByWindowId(int32_t windowId, std::shared_ptr<Media::PixelMap>& pixelMap)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_IPC_FAILED);
@@ -456,6 +468,18 @@ void WindowAdapter::WindowManagerAndSessionRecover()
         if (ret != WMError::WM_OK) {
             TLOGE(WmsLogTag::WMS_RECOVER, "Session recover callback, persistentId=%{public}" PRId32 " is error",
                 it.first);
+        }
+    }
+    std::map<int32_t, UIEffectRecoverCallbackFunc> uiEffectRecoverCallbackFuncMap;
+    {
+        std::lock_guard<std::mutex> lock(effectMutex_);
+        uiEffectRecoverCallbackFuncMap = uiEffectRecoverCallbackFuncMap_;
+    }
+    for (const auto& it : uiEffectRecoverCallbackFuncMap) {
+        TLOGD(WmsLogTag::WMS_RECOVER, "ui effect recover callback, id: %{public}d", it.first);
+        auto ret = it.second();
+        if (ret != WMError::WM_OK) {
+            TLOGE(WmsLogTag::WMS_RECOVER, "ui effect create failed, id: %{public}d, reason %{public}d", it.first, ret);
         }
     }
 }
@@ -1256,6 +1280,23 @@ WMError WindowAdapter::AnimateTo(int32_t windowId, const WindowAnimationProperty
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
     return wmsProxy->AnimateTo(windowId, animationProperty, animationOption);
+}
+
+WMError WindowAdapter::CreateUIEffectController(const sptr<IUIEffectControllerClient>& controllerClient,
+    sptr<IUIEffectController>& controller, int32_t& controllerId)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->CreateUIEffectController(controllerClient, controller, controllerId);
+}
+
+WMError WindowAdapter::GetPiPSettingSwitchStatus(bool& switchStatus)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->GetPiPSettingSwitchStatus(switchStatus);
 }
 } // namespace Rosen
 } // namespace OHOS

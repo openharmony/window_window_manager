@@ -1034,6 +1034,7 @@ bool MoveDragController::EventDownInit(const std::shared_ptr<MMI::PointerEvent>&
     }
     InitDecorValue(property, sysConfig);
     limits_ = property->GetWindowLimits();
+    isAdaptToDragScale_ = property->IsAdaptToDragScale();
     moveDragProperty_.pointerId_ = pointerEvent->GetPointerId();
     moveDragProperty_.pointerType_ = sourceType;
     moveDragProperty_.originalPointerPosX_ = pointerItem.GetDisplayX();
@@ -1069,6 +1070,9 @@ WSRect MoveDragController::CalcFreeformTargetRect(AreaType type, int32_t tranX, 
     }
     // check current ratio limits
     if (targetRect.height_ == 0) {
+        return targetRect;
+    }
+    if (isAdaptToDragScale_) {
         return targetRect;
     }
     float curRatio = static_cast<float>(targetRect.width_) / static_cast<float>(targetRect.height_);

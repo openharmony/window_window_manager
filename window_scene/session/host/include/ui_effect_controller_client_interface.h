@@ -26,7 +26,7 @@ public:
     enum class UIEffectControllerClientMessage : uint32_t {
         TRANS_ID_UIEFFECT_SET_PARAM,
     };
-    virtual WMError SetParams(const sptr<UIEffectParams>& param) = 0;
+    virtual WMError SetParams(const sptr<UIEffectParams>& params) = 0;
 };
 }
 #endif

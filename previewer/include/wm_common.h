@@ -260,7 +260,7 @@ enum class WMError : int32_t {
     WM_ERROR_PIP_INTERNAL_ERROR,
     WM_ERROR_PIP_REPEAT_OPERATION,
     WM_ERROR_ILLEGAL_PARAM,
-    WM_ERROR_FILTER_ERROR,
+    WM_ERROR_UI_EFFECT_ERROR,
     WM_ERROR_TIMEOUT,
     WM_ERROR_FB_PARAM_INVALID,
     WM_ERROR_FB_CREATE_FAILED,
@@ -270,6 +270,8 @@ enum class WMError : int32_t {
     WM_ERROR_FB_STATE_ABNORMALLY,
     WM_ERROR_FB_INVALID_STATE,
     WM_ERROR_FB_RESTORE_MAIN_WINDOW_FAILED,
+    WM_ERROR_FB_UPDATE_TEMPLATE_TYPE_DENIED,
+    WM_ERROR_FB_UPDATE_STATIC_TEMPLATE_DENIED,
 };
 
 /**
@@ -298,7 +300,7 @@ enum class WmErrorCode : int32_t {
     WM_ERROR_PIP_INTERNAL_ERROR = 1300014,
     WM_ERROR_PIP_REPEAT_OPERATION = 1300015,
     WM_ERROR_ILLEGAL_PARAM = 1300016,
-    WM_ERROR_FILTER_ERROR = 1300017,
+    WM_ERROR_UI_EFFECT_ERROR = 1300017,
     WM_ERROR_TIMEOUT = 1300018,
     WM_ERROR_FB_PARAM_INVALID = 1300019,
     WM_ERROR_FB_CREATE_FAILED = 1300020,
@@ -308,6 +310,8 @@ enum class WmErrorCode : int32_t {
     WM_ERROR_FB_STATE_ABNORMALLY = 1300024,
     WM_ERROR_FB_INVALID_STATE = 1300025,
     WM_ERROR_FB_RESTORE_MAIN_WINDOW_FAILED = 1300026,
+    WM_ERROR_FB_UPDATE_TEMPLATE_TYPE_DENIED = 1300027,
+    WM_ERROR_FB_UPDATE_STATIC_TEMPLATE_DENIED = 1300028,
 };
 
 /**
@@ -400,6 +404,9 @@ const std::map<WMError, WmErrorCode> WM_JS_TO_ERROR_CODE_MAP {
     {WMError::WM_ERROR_FB_STATE_ABNORMALLY,            WmErrorCode::WM_ERROR_FB_STATE_ABNORMALLY      },
     {WMError::WM_ERROR_FB_INVALID_STATE,               WmErrorCode::WM_ERROR_FB_INVALID_STATE         },
     {WMError::WM_ERROR_FB_RESTORE_MAIN_WINDOW_FAILED,  WmErrorCode::WM_ERROR_FB_RESTORE_MAIN_WINDOW_FAILED  },
+    {WMError::WM_ERROR_FB_UPDATE_TEMPLATE_TYPE_DENIED, WmErrorCode::WM_ERROR_FB_UPDATE_TEMPLATE_TYPE_DENIED  },
+    {WMError::WM_ERROR_FB_UPDATE_STATIC_TEMPLATE_DENIED,  WmErrorCode::WM_ERROR_FB_UPDATE_STATIC_TEMPLATE_DENIED  },
+    {WMError::WM_ERROR_UI_EFFECT_ERROR,                WmErrorCode::WM_ERROR_UI_EFFECT_ERROR          },
 };
 
 /**
@@ -916,6 +923,17 @@ struct WindowAnchorInfo : public Parcelable {
     WindowAnchorInfo(bool isAnchorEnabled, WindowAnchor windowAnchor, int32_t offsetX,
         int32_t offsetY) : isAnchorEnabled_(isAnchorEnabled),  windowAnchor_(windowAnchor),
         offsetX_(offsetX), offsetY_(offsetY) {}
+
+    bool operator==(const WindowAnchorInfo& other) const
+    {
+        return isAnchorEnabled_ == other.isAnchorEnabled_ && windowAnchor_ == other.windowAnchor_ &&
+            offsetX_ == other.offsetX_ && offsetY_ == other.offsetY_;
+    }
+
+    bool operator!=(const WindowAnchorInfo& other) const
+    {
+        return !(*this == other);
+    }
 
     bool Marshalling(Parcel& parcel) const override
     {

@@ -149,7 +149,7 @@ void SecondaryFoldSensorManager::HandlePostureData(const SensorEvent * const eve
     if (sensorFoldStateManager_ == nullptr) {
         return;
     }
-    sensorFoldStateManager_->HandleAngleOrHallChange(globalAngle_, globalHall_, foldScreenPolicy_);
+    sensorFoldStateManager_->HandleAngleOrHallChange(globalAngle_, globalHall_, foldScreenPolicy_, true);
     NotifyFoldAngleChanged(globalAngle_);
 }
 
@@ -192,7 +192,7 @@ void SecondaryFoldSensorManager::HandleHallDataExt(const SensorEvent * const eve
     if (sensorFoldStateManager_ == nullptr) {
         return;
     }
-    sensorFoldStateManager_->HandleAngleOrHallChange(globalAngle_, globalHall_, foldScreenPolicy_);
+    sensorFoldStateManager_->HandleAngleOrHallChange(globalAngle_, globalHall_, foldScreenPolicy_, registerPosture_);
     return;
 }
 

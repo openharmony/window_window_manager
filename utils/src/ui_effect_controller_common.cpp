@@ -62,18 +62,18 @@ bool UIEffectParams::Marshalling(Parcel& parcel) const
 
 UIEffectParams* UIEffectParams::Unmarshalling(Parcel& parcel)
 {
-    UIEffectParams* param = new UIEffectParams();
-    if (!g_readParcelableForEffect(param->backgroundFilter_, parcel)) {
+    UIEffectParams* params = new UIEffectParams();
+    if (!g_readParcelableForEffect(params->backgroundFilter_, parcel)) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "read background filter failed");
-        delete param;
+        delete params;
         return nullptr;
     }
-    if (!g_readParcelableForEffect(param->effect_, parcel)) {
+    if (!g_readParcelableForEffect(params->effect_, parcel)) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "read visual effect failed");
-        delete param;
+        delete params;
         return nullptr;
     }
-    return param;
+    return params;
 }
 
 napi_status UIEffectParams::ConvertToJsValue(napi_env env, napi_value& final_value)

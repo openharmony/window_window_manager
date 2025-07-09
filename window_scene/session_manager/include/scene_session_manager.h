@@ -112,6 +112,8 @@ class UnreliableWindowInfo;
 class ScbDumpSubscriber;
 class StartingWindowRdbManager;
 struct StartingWindowRdbItemKey;
+class IUIEffectController;
+class IUIEffectControllerClient;
 
 using NotifyCreateSystemSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 using NotifyCreateKeyboardSessionFunc = std::function<void(const sptr<SceneSession>& keyboardSession,
@@ -467,8 +469,8 @@ public:
     void SetIsRootSceneLastFrameLayoutFinishedFunc(IsRootSceneLastFrameLayoutFinishedFunc&& func);
     void SetStatusBarDefaultVisibilityPerDisplay(DisplayId displayId, bool visible);
     bool GetStatusBarDefaultVisibilityByDisplayId(DisplayId displayId);
-    void SetStatusBarAvoidHeight(int32_t height);
-    void GetStatusBarAvoidHeight(WSRect& barArea);
+    void SetStatusBarAvoidHeight(DisplayId displayId, int32_t height);
+    void GetStatusBarAvoidHeight(DisplayId displayId, WSRect& barArea);
 
     WSError NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible) override;
     void DealwithVisibilityChange(const std::vector<std::pair<uint64_t, WindowVisibilityState>>& visibilityChangeInfos,
@@ -622,6 +624,8 @@ public:
      */
     WMError CloseTargetPiPWindow(const std::string& bundleName);
     WMError GetCurrentPiPWindowInfo(std::string& bundleName);
+    WMError GetPiPSettingSwitchStatus(bool& switchStatus) override;
+    void SetPiPSettingSwitchStatus(bool switchStatus);
     void SetStartPiPFailedListener(NotifyStartPiPFailedFunc&& func);
 
      /*
@@ -867,6 +871,7 @@ private:
     void RegisterHookSceneSessionActivationFunc(const sptr<SceneSession>& sceneSession);
     void SetSessionInfoStartWindowType(const sptr<SceneSession>& sceneSession);
     void RegisterSceneSessionDestructNotifyManagerFunc(const sptr<SceneSession>& sceneSession);
+    void ResetSceneMissionInfo(const sptr<AAFwk::SessionInfo>& abilitySessionInfo);
     void UpdateAbilityHookState(sptr<SceneSession>& sceneSession, bool isAbilityHook);
 
     /*
@@ -951,6 +956,12 @@ private:
      */
     WMError ShiftAppWindowPointerEventInner(
         int32_t sourceWindowId, int32_t targetWindowId, DisplayId targetDisplayId, int32_t fingerId);
+
+    /*
+     * Window Animation
+     */
+    WMError CreateUIEffectController(const sptr<IUIEffectControllerClient>& controllerClient,
+        sptr<IUIEffectController>& controller, int32_t& controllerId) override;
 
     /*
      * Sub Window
@@ -1295,7 +1306,9 @@ private:
     /*
      * PiP Window
      */
+    std::mutex pipSettingSwitchMutex_;
     uint64_t pipWindowSurfaceId_ = 0;
+    bool pipSwitchStatus_ = true;
     bool CheckPiPPriority(const PiPTemplateInfo& pipTemplateInfo, DisplayId displayId = 0);
     bool IsEnablePiPCreate(const sptr<WindowSessionProperty>& property);
     bool IsPiPForbidden(const sptr<WindowSessionProperty>& property, const WindowType& type);
@@ -1457,7 +1470,7 @@ private:
     std::unordered_map<DisplayId, bool> statusBarDefaultVisibilityPerDisplay_;
     std::set<int32_t> avoidAreaListenerSessionSet_;
     static constexpr int32_t INVALID_STATUS_BAR_AVOID_HEIGHT = -1;
-    int32_t statusBarAvoidHeight_ = INVALID_STATUS_BAR_AVOID_HEIGHT;
+    std::unordered_map<DisplayId, int32_t> statusBarAvoidHeight_;
     std::unordered_map<DisplayId, bool> statusBarConstantlyShowMap_;
     std::mutex lastSystemBarPropertyMapMutex_;
     std::unordered_map<WindowType, SystemBarProperty> lastSystemBarPropertyMap_;
@@ -1589,6 +1602,8 @@ private:
     bool needCloseSync_ = false;
     std::function<void()> closeSyncFunc_ = nullptr;
     WMError SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit, int32_t persistentId) override;
+    void UpdateAllStartingWindowRdb();
+    bool needUpdateRdb_ = true;
 };
 } // namespace OHOS::Rosen
 

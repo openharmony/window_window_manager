@@ -52,12 +52,12 @@ void RootSceneSession::GetSystemAvoidAreaForRoot(const WSRect& rect, AvoidArea& 
         }
         WSRect statusBarRect = statusBar->GetSessionRect();
         if (onGetStatusBarAvoidHeightFunc_) {
-            onGetStatusBarAvoidHeightFunc_(statusBarRect);
-            TLOGD(WmsLogTag::WMS_IMMS, "status bar height %{public}d", statusBarRect.height_);
+            onGetStatusBarAvoidHeightFunc_(displayId, statusBarRect);
         }
         CalculateAvoidAreaRect(rect, statusBarRect, avoidArea);
-        TLOGI(WmsLogTag::WMS_IMMS, "root scene %{public}s status bar %{public}s area %{public}s",
-              rect.ToString().c_str(), statusBarRect.ToString().c_str(), avoidArea.ToString().c_str());
+        TLOGI(WmsLogTag::WMS_IMMS, "displayId %{public}" PRIu64 " root scene %{public}s "
+              "status bar %{public}s area %{public}s",
+              displayId, rect.ToString().c_str(), statusBarRect.ToString().c_str(), avoidArea.ToString().c_str());
     }
 }
 
@@ -177,9 +177,9 @@ AvoidArea RootSceneSession::GetAvoidAreaByType(AvoidAreaType type, const WSRect&
 
 void RootSceneSession::SetRootSessionRect(const WSRect& rect)
 {
-    if (!rect.IsInvalid() && winRect_ != rect) {
-        winRect_ = rect;
-        TLOGI(WmsLogTag::WMS_IMMS, "root session update rect: %{public}s", winRect_.ToString().c_str());
+    if (!rect.IsInvalid() && GetSessionRect() != rect) {
+        layoutController_->SetSessionRect(rect);
+        TLOGI(WmsLogTag::WMS_IMMS, "root session update rect: %{public}s", GetSessionRect().ToString().c_str());
         if (specificCallback_ != nullptr && specificCallback_->onUpdateAvoidArea_) {
             specificCallback_->onUpdateAvoidArea_(GetPersistentId());
         }

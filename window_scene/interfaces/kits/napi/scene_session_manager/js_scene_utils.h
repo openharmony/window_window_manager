@@ -252,6 +252,7 @@ napi_value KeyboardGravityInit(napi_env env);
 napi_value KeyboardViewModeInit(napi_env env);
 napi_value KeyboardFlowLightModeInit(napi_env env);
 napi_value KeyboardGradientModeInit(napi_env env);
+napi_value AnimationTypeInit(napi_env env);
 napi_value WindowTransitionTypeInit(napi_env env);
 napi_value WindowAnimationCurveInit(napi_env env);
 napi_value CreateResultMapToJsValue(napi_env env,

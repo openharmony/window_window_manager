@@ -17,6 +17,8 @@
 #define FRAMEWORKS_WM_TEST_UT_MOCK_DISPLAY_MANAGER_ADAPTER_H
 #include <gmock/gmock.h>
 
+
+#include "display_manager.h"
 #include "display_manager_adapter.h"
 
 namespace OHOS {
@@ -45,6 +47,10 @@ public:
     MOCK_METHOD2(GetAvailableArea, DMError(ScreenId screenId, DMRect& area));
     MOCK_METHOD2(HasImmersiveWindow, DMError(ScreenId screenId, bool& immersive));
     MOCK_METHOD0(GetAllDisplayIds, std::vector<DisplayId>());
+    MOCK_METHOD4(GetDisplayHDRSnapshot, std::vector<std::shared_ptr<Media::PixelMap>>(DisplayId displayId,
+        DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen));
+    MOCK_METHOD2(GetDisplayHDRSnapshotWithOption, std::vector<std::shared_ptr<Media::PixelMap>>(
+        const CaptureOption& captureOption, DmErrorCode* errorCode));
 };
 
 class MockScreenManagerAdapter : public ScreenManagerAdapter {
@@ -91,6 +97,14 @@ public:
     MOCK_METHOD1(SetScreenRotationLocked, DMError(bool isLocked));
     MOCK_METHOD1(IsScreenRotationLocked, DMError(bool& isLocked));
     MOCK_METHOD4(SetResolution, DMError(ScreenId screenId, uint32_t width, uint32_t height, float virtualPixelRatio));
+};
+
+class MockDisplayManger : public DisplayManager {
+    public:
+        MOCK_METHOD4(GetScreenHDRshot, std::vector<std::shared_ptr<Media::PixelMap>>(DisplayId displayId,
+            DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen));
+        MOCK_METHOD2(GetDisplayHDRSnapshotWithOption, std::vector<std::shared_ptr<Media::PixelMap>>(
+            const CaptureOption& captureOption, DmErrorCode* errorCode));
 };
 } // namespace Rosen
 } // namespace OHOS

@@ -251,6 +251,8 @@ public:
     void SetValidWidth(uint32_t validWidth);
     uint32_t GetValidHeight() const;
     uint32_t GetValidWidth() const;
+    void SetRealHeight(uint32_t realHeight) { property_.SetScreenRealHeight(realHeight); }
+    void SetRealWidth(uint32_t realWidth) { property_.SetScreenRealWidth(realWidth); }
 
     void SetPointerActiveWidth(uint32_t pointerActiveWidth);
     uint32_t GetPointerActiveWidth();
@@ -344,6 +346,7 @@ public:
 
     void SetIsAvailableAreaNeedNotify(bool isAvailableAreaNeedNotify);
     bool GetIsAvailableAreaNeedNotify() const;
+    uint64_t GetSessionId() const;
 
     /*
      * RS Client Multi Instance
@@ -411,11 +414,14 @@ private:
     std::mutex isEnableCanvasRotationMutex_;
     bool isAvailableAreaNeedNotify_ = false;
     bool isSecurity_ = true;
+    uint64_t sessionId_;
 
     /*
      * RS Client Multi Instance
      */
     std::shared_ptr<RSUIDirector> rsUIDirector_;
+
+    inline static std::atomic<uint64_t> sessionIdGenerator_ { 0 };
 };
 
 class ScreenSessionGroup : public ScreenSession {

@@ -74,9 +74,13 @@ HWTEST_F(FloatingBallOptionTest, TestParamSetAndGet, TestSize.Level1)
     EXPECT_EQ(content, option->GetContent());
     EXPECT_EQ(nullptr, option->GetIcon());
     EXPECT_EQ(color, option->GetBackgroundColor());
+
     FloatingBallTemplateBaseInfo fbTemplateBaseInfo;
     option->GetFbTemplateBaseInfo(fbTemplateBaseInfo);
     EXPECT_EQ(title, fbTemplateBaseInfo.title_);
+    EXPECT_EQ(templateType, fbTemplateBaseInfo.template_);
+    EXPECT_EQ(content, fbTemplateBaseInfo.content_);
+    EXPECT_EQ(color, fbTemplateBaseInfo.backgroundColor_);
 }
 }
 }

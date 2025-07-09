@@ -447,6 +447,35 @@ HWTEST_F(SceneSessionTest, IsViewKeepScreenOn02, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleActionUpdateWindowShadowEnabled01
+ * @tc.desc: HandleActionUpdateWindowShadowEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, HandleActionUpdateWindowShadowEnabled01, TestSize.Level1)
+{
+    WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_WINDOW_SHADOW_ENABLED;
+    SessionInfo info;
+    info.abilityName_ = "HandleActionUpdateWindowShadowEnabled";
+    info.bundleName_ = "HandleActionUpdateWindowShadowEnabled";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    sceneSession->containerColorList_.insert("abc");
+
+    auto ret = sceneSession->HandleActionUpdateWindowShadowEnabled(property, action);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
+
+    sceneSession->containerColorList_.insert("HandleActionUpdateWindowShadowEnabled");
+    ret = sceneSession->HandleActionUpdateWindowShadowEnabled(property, action);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
+
+    sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    ret = sceneSession->HandleActionUpdateWindowShadowEnabled(property, action);
+    EXPECT_EQ(WMError::WM_OK, ret);
+}
+
+/**
  * @tc.name: SetWindowShadowEnabled01
  * @tc.desc: SetWindowShadowEnabled
  * @tc.type: FUNC
@@ -1496,7 +1525,7 @@ HWTEST_F(SceneSessionTest, CalcRectForStatusBar, TestSize.Level1)
     ASSERT_EQ(statusBarRect.height_, 0);
 
     WSRect rect({0, 0, 1, 1});
-    sceneSession->winRect_ = rect;
+    sceneSession->GetLayoutController()->SetSessionRect(rect);
     sceneSession->specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ =
         [&](WindowType type, uint64_t displayId) -> std::vector<sptr<SceneSession>> {
         std::vector<sptr<SceneSession>> vec;
@@ -1848,7 +1877,7 @@ HWTEST_F(SceneSessionTest, GetStatusBarHeight, TestSize.Level1)
     height = sceneSession->GetStatusBarHeight();
     ASSERT_EQ(height, 0);
     WSRect rect({ 0, 0, 0, 1 });
-    sceneSession->winRect_ = rect;
+    sceneSession->GetLayoutController()->SetSessionRect(rect);
     specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ =
         [&](WindowType type, uint64_t displayId) -> std::vector<sptr<SceneSession>> {
         std::vector<sptr<SceneSession>> vec;
@@ -1883,7 +1912,7 @@ HWTEST_F(SceneSessionTest, GetDockHeight, TestSize.Level1)
     sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback_);
     ASSERT_EQ(sceneSession->GetDockHeight(), 0);
     WSRect rect({ 0, 0, 0, 112 });
-    sceneSession->winRect_ = rect;
+    sceneSession->GetLayoutController()->SetSessionRect(rect);
     specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ =
         [&](WindowType type, uint64_t displayId) -> std::vector<sptr<SceneSession>> {
         std::vector<sptr<SceneSession>> vec;
@@ -1938,36 +1967,6 @@ HWTEST_F(SceneSessionTest, SetMoveDragCallback, TestSize.Level1)
 
     sceneSession->moveDragController_ = nullptr;
     sceneSession->SetMoveDragCallback();
-}
-
-/**
- * @tc.name: GetScreenWidthAndHeightFromServer
- * @tc.desc: GetScreenWidthAndHeightFromServer
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest, GetScreenWidthAndHeightFromServer, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "GetScreenWidthAndHeightFromServer";
-    info.bundleName_ = "GetScreenWidthAndHeightFromServer";
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-    sceneSession->isActive_ = true;
-
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    EXPECT_NE(property, nullptr);
-    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
-    sceneSession->SetSessionProperty(property);
-
-    uint32_t screenWidth = 0;
-    uint32_t screenHeight = 0;
-    bool result = sceneSession->GetScreenWidthAndHeightFromServer(property, screenWidth, screenHeight);
-    ASSERT_EQ(result, true);
 }
 
 /**
@@ -2160,8 +2159,8 @@ HWTEST_F(SceneSessionTest, GetGlobalOrWinRect, Function | SmallTest | Level2)
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback);
-    sceneSession->winRect_ = {1, 1, 1, 1};
-    sceneSession->globalRect_ = {2, 2, 1, 1};
+    sceneSession->GetLayoutController()->SetSessionRect({1, 1, 1, 1});
+    sceneSession->SetSessionGlobalRect({2, 2, 1, 1});
     sceneSession->isScbCoreEnabled_ = true;
     sceneSession->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     auto rect = sceneSession->GetGlobalOrWinRect();

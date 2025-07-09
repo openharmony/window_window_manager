@@ -83,3 +83,101 @@ ohos_unittest("ws_scene_session_animation_test") {
     "input:libmmi-napi",
   ]
 }
+
+ohos_unittest("ws_ui_effect_controller_test") {
+  module_out_path = module_out_path
+
+  include_dirs = [
+    "${window_base_path}/window_scene/session/host/include",
+    "${window_base_path}/utils/include",
+  ]
+
+  sources = [ 
+    "ui_effect_controller_test.cpp",
+    "${window_base_path}/window_scene/test/mock/mock_accesstoken_kit.cpp",
+  ]
+
+  cflags_cc = [ "-Wno-thread-safety" ]
+
+  deps = [ ws_unittest_common ]
+
+  external_deps = [
+    "ability_base:session_info",
+    "ability_runtime:app_context",
+    "ability_runtime:runtime",
+    "access_token:libaccesstoken_sdk",
+    "access_token:libtokenid_sdk",
+    "napi:ace_napi",
+    "c_utils:utils",
+    "ipc:ipc_single",
+    "googletest:gmock",
+    "googletest:gtest",
+    "googletest:gtest_main",
+    "graphic_2d:librender_service_client",
+    "hilog:libhilog",
+    "image_framework:image_native",
+  ]
+}
+
+ohos_unittest("ws_ui_effect_controller_proxy_test") {
+  module_out_path = module_out_path
+
+  include_dirs = [
+    "${window_base_path}/window_scene/session/host/include",
+    "${window_base_path}/utils/include",
+  ]
+
+  sources = [ 
+    "ui_effect_controller_proxy_test.cpp",
+    "../../mock/mock_message_parcel.cpp",
+  ]
+
+  cflags_cc = [ "-Wno-thread-safety" ]
+
+  deps = [ ws_unittest_common ]
+
+  external_deps = [
+    "ability_base:session_info",
+    "ability_runtime:app_context",
+    "ability_runtime:runtime",
+    "napi:ace_napi",
+    "c_utils:utils",
+    "googletest:gmock",
+    "googletest:gtest",
+    "googletest:gtest_main",
+    "graphic_2d:librender_service_client",
+    "hilog:libhilog",
+    "image_framework:image_native",
+  ]
+}
+
+ohos_unittest("ws_ui_effect_controller_stub_test") {
+  module_out_path = module_out_path
+
+  include_dirs = [
+    "${window_base_path}/window_scene/session/host/include",
+    "${window_base_path}/utils/include",
+  ]
+
+  sources = [ 
+    "ui_effect_controller_stub_test.cpp",
+  ]
+
+  cflags_cc = [ "-Wno-thread-safety" ]
+
+  deps = [ ws_unittest_common ]
+
+  external_deps = [
+    "ability_base:session_info",
+    "ability_runtime:app_context",
+    "ability_runtime:runtime",
+    "napi:ace_napi",
+    "c_utils:utils",
+    "googletest:gmock",
+    "googletest:gtest",
+    "googletest:gtest_main",
+    "graphic_2d:librender_service_client",
+    "hilog:libhilog",
+    "image_framework:image_native",
+  ]
+}

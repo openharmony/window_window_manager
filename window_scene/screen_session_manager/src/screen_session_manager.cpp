@@ -173,12 +173,21 @@ const bool IS_COORDINATION_SUPPORT =
 const std::string FAULT_DESCRIPTION = "842003014";
 const std::string FAULT_SUGGESTION = "542003014";
 constexpr uint32_t COMMON_EVENT_SERVICE_ID = 3299;
+const long GET_HDR_PIXELMAP_TIMEOUT = 2000;
+
+const static uint32_t PIXMAP_VECTOR_SIZE = 2;
+static const uint32_t SDR_PIXMAP = 0;
 const bool IS_SUPPORT_PC_MODE = system::GetBoolParameter("const.window.support_window_pcmode_switch", false);
 const ScreenId SCREEN_GROUP_ID_DEFAULT = 1;
 const std::set<std::string> INDIVIDUAL_SCREEN_GROUP_SET = {"CeliaView", "DevEcoViewer"};
 
-constexpr uint32_t MAIN_STATUS_WIDTH = 1008;
-constexpr uint32_t SCREEN_HEIGHT = 2232;
+constexpr int32_t MAIN_STATUS_WIDTH_INDEX = 0;
+constexpr int32_t FULL_STATUS_WIDTH_INDEX = 1;
+constexpr int32_t GLOBAL_FULL_STATUS_WIDTH_INDEX = 2;
+constexpr int32_t SCREEN_HEIGHT_INDEX = 3;
+constexpr int32_t STATUS_PARAM_VALID_INDEX = 4;
+constexpr uint32_t MAIN_STATUS_DEFAULT_WIDTH = 1008;
+constexpr uint32_t SCREEN_DEFAULT_HEIGHT = 2232;
 
 // based on the bundle_util
 inline int32_t GetUserIdByCallingUid()
@@ -220,6 +229,9 @@ ScreenSessionManager::ScreenSessionManager()
     }
     if (g_foldScreenFlag) {
         HandleFoldScreenPowerInit();
+    }
+    if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        InitSecondaryDisplayPhysicalParams();
     }
     WatchParameter(BOOTEVENT_BOOT_COMPLETED.c_str(), BootFinishedCallback, this);
 }
@@ -312,6 +324,7 @@ void ScreenSessionManager::FoldScreenPowerInit()
             TLOGE(WmsLogTag::DMS, "foldScreenController_ is nullptr");
             return;
         }
+        foldScreenController_->SetIsClearingBootAnimation(true);
         ScreenId currentScreenId = foldScreenController_->GetCurrentScreenId();
         if (currentScreenId == SCREEN_ID_FULL) {
             TLOGI(WmsLogTag::DMS, "ScreenSessionManager Fold Screen Power Full animation Init 1.");
@@ -349,6 +362,7 @@ void ScreenSessionManager::FoldScreenPowerInit()
             TLOGI(WmsLogTag::DMS, "ScreenSessionManager Fold Screen Power Init, invalid active screen id");
         }
         FixPowerStatus();
+        foldScreenController_->SetIsClearingBootAnimation(false);
         foldScreenController_->SetOnBootAnimation(false);
         RegisterApplicationStateObserver();
     });
@@ -730,14 +744,18 @@ void ScreenSessionManager::OnVirtualScreenChange(ScreenId screenId, ScreenEvent 
         TLOGE(WmsLogTag::DMS, "screenSession is nullptr");
         return;
     }
-    auto clientProxy = GetClientProxy();
     if (screenEvent == ScreenEvent::CONNECTED) {
+        auto clientProxy = GetClientProxy();
         TLOGI(WmsLogTag::DMS, "screenCombination:%{public}d, screenName:%{public}s",
             screenSession->GetScreenCombination(), screenSession->GetName().c_str());
         if(screenSession->GetScreenCombination() == ScreenCombination::SCREEN_UNIQUE &&
             INDIVIDUAL_SCREEN_GROUP_SET.find(screenSession->GetName()) != INDIVIDUAL_SCREEN_GROUP_SET.end()) {
             screenSession->SetDisplayGroupId(displayGroupNum_++);
             screenSession->SetMainDisplayIdOfGroup(screenId);
+        } else {
+            // Unique screens outside of INDIVIDUAL_SCREEN_GROUP_SET are placed in the default group.
+            screenSession->SetDisplayGroupId(DISPLAY_GROUP_ID_DEFAULT);
+            screenSession->SetMainDisplayIdOfGroup(MAIN_SCREEN_ID_DEFAULT);
         }
         if (clientProxy) {
             clientProxy->OnScreenConnectionChanged(GetSessionOption(screenSession, screenId),
@@ -746,9 +764,16 @@ void ScreenSessionManager::OnVirtualScreenChange(ScreenId screenId, ScreenEvent 
         return;
     }
     if (screenEvent == ScreenEvent::DISCONNECTED) {
-        if (clientProxy) {
-            clientProxy->OnScreenConnectionChanged(GetSessionOption(screenSession, screenId),
-                ScreenEvent::DISCONNECTED);
+        std::map<int32_t, sptr<IScreenSessionManagerClient>> clientProxyMap;
+        {
+            std::lock_guard<std::mutex> lock(clientProxyMutex_);
+            clientProxyMap = clientProxyMap_;
+        }
+        for (const auto& [userId, clientProxy] : clientProxyMap) {
+            if (clientProxy) {
+                clientProxy->OnScreenConnectionChanged(GetSessionOption(screenSession, screenId),
+                    ScreenEvent::DISCONNECTED);
+            }
         }
     }
 }
@@ -1452,6 +1477,7 @@ void ScreenSessionManager::HandlePhysicalMirrorDisconnect(sptr<ScreenSession> sc
     if (phyMirrorEnable) {
         NotifyCastWhenScreenConnectChange(false);
         FreeDisplayMirrorNodeInner(screenSession);
+        isPhyScreenConnected_ = false;
         if (!g_isPcDevice) {
             std::vector<ScreenId> screenIdsToExclude = { screenId };
             if (!HasCastEngineOrPhyMirror(screenIdsToExclude)) {
@@ -2547,7 +2573,11 @@ void ScreenSessionManager::InitScreenProperty(ScreenId screenId, RSScreenModeInf
 RRect ScreenSessionManager::GetScreenBounds(ScreenId screenId, RSScreenModeInfo& screenMode)
 {
     if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice() && screenId == SCREEN_ID_MAIN) {
-        return RRect({ 0, 0, MAIN_STATUS_WIDTH, SCREEN_HEIGHT }, 0.0f, 0.0f);
+        if (screenParams_.size() < STATUS_PARAM_VALID_INDEX) {
+            TLOGE(WmsLogTag::DMS, "invalid param num, use default");
+            return RRect({ 0, 0, MAIN_STATUS_DEFAULT_WIDTH, SCREEN_DEFAULT_HEIGHT }, 0.0f, 0.0f);
+        }
+        return RRect({ 0, 0, screenParams_[MAIN_STATUS_WIDTH_INDEX], screenParams_[SCREEN_HEIGHT_INDEX] }, 0.0f, 0.0f);
     }
     return RRect({ 0, 0, screenMode.GetScreenWidth(), screenMode.GetScreenHeight() }, 0.0f, 0.0f);
 }
@@ -5417,7 +5447,6 @@ DMError ScreenSessionManager::MakeExpand(std::vector<ScreenId> screenId,
         rsDisplayNode = GetRSDisplayNodeByScreenId(expandScreenId);
         if (rsDisplayNode != nullptr) {
             SetScreenOffset(expandScreenId, pointsMap[expandScreenId].posX_, pointsMap[expandScreenId].posY_);
- 
         }
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:MakeExpand");
@@ -5595,6 +5624,12 @@ sptr<ScreenSession> ScreenSessionManager::InitVirtualScreen(ScreenId smsScreenId
     screenSession->SetIsPcUse(g_isPcDevice ? true : false);
     screenSession->SetDisplayBoundary(RectF(0, 0, option.width_, option.height_), 0);
     screenSession->RegisterScreenChangeListener(this);
+    screenSession->SetValidWidth(option.width_);
+    screenSession->SetValidHeight(option.height_);
+    screenSession->SetRealWidth(option.width_);
+    screenSession->SetRealHeight(option.height_);
+    screenSession->SetScreenAreaWidth(option.width_);
+    screenSession->SetScreenAreaHeight(option.height_);
     return screenSession;
 }
 
@@ -6070,7 +6105,7 @@ bool ScreenSessionManager::IsFakeDisplayExist()
 }
 
 std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenSnapshot(DisplayId displayId, bool isUseDma,
-    bool isCaptureFullOfScreen, const std::vector<NodeId>& blackList)
+    bool isCaptureFullOfScreen, const std::vector<NodeId>& surfaceNodesList)
 {
     DisplayId realDisplayId = displayId;
     if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && displayId == DISPLAY_ID_FAKE) {
@@ -6088,6 +6123,7 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenSnapshot(Display
     }
     std::shared_ptr<SurfaceCaptureFuture> callback = std::make_shared<SurfaceCaptureFuture>();
     RSSurfaceCaptureConfig config;
+    config.isHdrCapture = false;
     config.useDma = isUseDma;
 #ifdef FOLD_ABILITY_ENABLE
     if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() &&
@@ -6095,16 +6131,17 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenSnapshot(Display
         config.mainScreenRect = SuperFoldPolicy::GetInstance().GetSnapshotRect(displayId, isCaptureFullOfScreen);
     }
 #endif
-    config.blackList = blackList;
-    if (blackList.size() > 0) {
-        TLOGI(WmsLogTag::DMS, "Snapshot filtering blackList surfaceNodes, size:%{public}ud", static_cast<uint32_t>(blackList.size()));
+    config.blackList = surfaceNodesList;
+    if (surfaceNodesList.size() > 0) {
+        TLOGI(WmsLogTag::DMS, "Snapshot filtering surfaceNodesList surfaceNodes, size:%{public}ud",
+            static_cast<uint32_t>(surfaceNodesList.size()));
     }
     bool ret = rsInterface_.TakeSurfaceCapture(displayNode, callback, config);
     if (!ret) {
         TLOGE(WmsLogTag::DMS, "TakeSurfaceCapture failed");
         return nullptr;
     }
-    std::shared_ptr<Media::PixelMap> screenshot = callback->GetResult(2000);  // wait for <= 2000ms
+    std::shared_ptr<Media::PixelMap> screenshot = callback->GetResult(GET_HDR_PIXELMAP_TIMEOUT);  // wait for <= 2000ms
     if (screenshot == nullptr) {
         TLOGE(WmsLogTag::DMS, "Failed to get pixelmap from RS, return nullptr!");
     } else {
@@ -6116,6 +6153,61 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenSnapshot(Display
     snapshotInfo->SetDisplayId(displayId);
     OnScreenshot(snapshotInfo);
     return screenshot;
+}
+
+std::vector<std::shared_ptr<Media::PixelMap>> ScreenSessionManager::GetScreenHDRSnapshot(
+    DisplayId displayId, bool isUseDma, bool isCaptureFullOfScreen, const std::vector<NodeId>& surfaceNodesList)
+{
+    DisplayId realDisplayId = displayId;
+#ifdef FOLD_ABILITY_ENABLE
+    static bool isSuperFoldDisplayDevice = FoldScreenStateInternel::IsSuperFoldDisplayDevice();
+    if (isSuperFoldDisplayDevice && displayId == DISPLAY_ID_FAKE) {
+        if (!SuperFoldPolicy::GetInstance().IsFakeDisplayExist()) {
+            TLOGE(WmsLogTag::DMS, "fake display is not exist!");
+            return {nullptr, nullptr};
+        }
+        realDisplayId = 0;
+    }
+#endif
+    std::shared_ptr<RSDisplayNode> displayNode = GetDisplayNodeByDisplayId(realDisplayId);
+    if (displayNode == nullptr) {
+        TLOGE(WmsLogTag::DMS, "displayNode is null!");
+        return {nullptr, nullptr};
+    }
+    std::shared_ptr<SurfaceCaptureFuture> callback = std::make_shared<SurfaceCaptureFuture>();
+    RSSurfaceCaptureConfig config;
+    config.isHdrCapture = true;
+    config.useDma = isUseDma;
+    TLOGI(WmsLogTag::DMS, "take surface capture with dma=%{public}d", isUseDma);
+#ifdef FOLD_ABILITY_ENABLE
+    if (foldScreenController_ != nullptr && FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        config.mainScreenRect = foldScreenController_->GetScreenSnapshotRect();
+    }
+    if (isSuperFoldDisplayDevice && SuperFoldPolicy::GetInstance().IsNeedSetSnapshotRect(displayId)) {
+        config.mainScreenRect = SuperFoldPolicy::GetInstance().GetSnapshotRect(displayId, isCaptureFullOfScreen);
+    }
+#endif
+    config.blackList = surfaceNodesList;
+    if (surfaceNodesList.size() > 0) {
+        TLOGI(WmsLogTag::DMS, "Snapshot filter, size:%{public}ud", static_cast<uint32_t>(surfaceNodesList.size()));
+    }
+    bool ret = rsInterface_.TakeSurfaceCapture(displayNode, callback, config);
+    if (!ret) {
+        TLOGE(WmsLogTag::DMS, "TakeSurfaceCapture failed");
+        return {nullptr, nullptr};
+    }
+    // wait for <= 2000ms
+    std::vector<std::shared_ptr<Media::PixelMap>> screenshotVec = callback->GetHDRResult(GET_HDR_PIXELMAP_TIMEOUT);
+    if (screenshotVec.size() != PIXMAP_VECTOR_SIZE || screenshotVec[0] == nullptr) {
+        TLOGE(WmsLogTag::DMS, "Failed to get pixelmap vector from RS, return nullptr!");
+        return {nullptr, nullptr};
+    }
+    // notify dm listener
+    sptr<ScreenshotInfo> snapshotInfo = new ScreenshotInfo();
+    snapshotInfo->SetTrigger(SysCapUtil::GetClientName());
+    snapshotInfo->SetDisplayId(displayId);
+    OnScreenshot(snapshotInfo);
+    return screenshotVec;
 }
 
 std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshot(DisplayId displayId,
@@ -6155,6 +6247,52 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshot(Displa
     return nullptr;
 }
 
+std::vector<std::shared_ptr<Media::PixelMap>> ScreenSessionManager::GetDisplayHDRSnapshot(DisplayId displayId,
+    DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen)
+{
+    TLOGI(WmsLogTag::DMS, "enter!");
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsShellCall()) {
+        if (errorCode != nullptr) {
+            *errorCode = DmErrorCode::DM_ERROR_NOT_SYSTEM_APP;
+        }
+        return {nullptr, nullptr};
+    }
+    if (system::GetBoolParameter("persist.edm.disallow_screenshot", false)) {
+        TLOGE(WmsLogTag::DMS, "snapshot disabled by edm!");
+        if (errorCode != nullptr) {
+            *errorCode = DmErrorCode::DM_ERROR_NO_PERMISSION;
+        }
+        return {nullptr, nullptr};
+    }
+    if (displayId == DISPLAY_ID_FAKE && !IsFakeDisplayExist()) {
+        TLOGE(WmsLogTag::DMS, "fake display not exist!");
+        if (errorCode != nullptr) {
+            *errorCode = DmErrorCode::DM_ERROR_INVALID_SCREEN;
+        }
+        return {nullptr, nullptr};
+    }
+    if ((Permission::IsSystemCalling() && Permission::CheckCallingPermission(SCREEN_CAPTURE_PERMISSION)) ||
+        SessionPermission::IsShellCall()) {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetDisplayHDRSnapshot(%" PRIu64")", displayId);
+        std::vector<std::shared_ptr<Media::PixelMap>> res = GetScreenHDRSnapshot(
+            displayId, isUseDma, isCaptureFullOfScreen);
+        if (res.size() == PIXMAP_VECTOR_SIZE && res[SDR_PIXMAP] != nullptr) {
+            NotifyScreenshot(displayId);
+            if (SessionPermission::IsBetaVersion()) {
+                CheckAndSendHiSysEvent("GET_DISPLAY_SNAPSHOT", "hmos.screenshot");
+            }
+        } else {
+            TLOGE(WmsLogTag::DMS, "GetScreenHDRSnapshot get PixelMap vector failed");
+        }
+        isScreenShot_ = true;
+        NotifyCaptureStatusChanged();
+        return res;
+    } else if (errorCode) {
+        *errorCode = DmErrorCode::DM_ERROR_NO_PERMISSION;
+    }
+    return {nullptr, nullptr};
+}
+
 std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshotWithOption(const CaptureOption& option,
     DmErrorCode* errorCode)
 {
@@ -6178,7 +6316,7 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshotWithOpt
     if ((Permission::IsSystemCalling() && Permission::CheckCallingPermission(SCREEN_CAPTURE_PERMISSION)) ||
         SessionPermission::IsShellCall()) {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetDisplaySnapshot(%" PRIu64")", option.displayId_);
-        auto res = GetScreenSnapshot(option.displayId_, true, option.isCaptureFullOfScreen_, option.blackList_);
+        auto res = GetScreenSnapshot(option.displayId_, true, option.isCaptureFullOfScreen_, option.surfaceNodesList_);
         if (res != nullptr) {
             if (SessionPermission::IsBetaVersion()) {
                 CheckAndSendHiSysEvent("GET_DISPLAY_SNAPSHOT", "hmos.screenshot");
@@ -6195,6 +6333,51 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshotWithOpt
         *errorCode = DmErrorCode::DM_ERROR_NO_PERMISSION;
     }
     return nullptr;
+}
+
+std::vector<std::shared_ptr<Media::PixelMap>> ScreenSessionManager::GetDisplayHDRSnapshotWithOption(
+    const CaptureOption& option, DmErrorCode* errorCode)
+{
+    TLOGD(WmsLogTag::DMS, "enter!");
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsShellCall() &&
+        !SessionPermission::IsSACalling()) {
+        if (errorCode != nullptr) {
+            *errorCode = DmErrorCode::DM_ERROR_NOT_SYSTEM_APP;
+        }
+        return {nullptr, nullptr};
+    }
+    if (system::GetBoolParameter("persist.edm.disallow_screenshot", false)) {
+        TLOGE(WmsLogTag::DMS, "snapshot was disabled by edm!");
+        return {nullptr, nullptr};
+    }
+    if (option.displayId_ == DISPLAY_ID_FAKE && !IsFakeDisplayExist()) {
+        TLOGE(WmsLogTag::DMS, "fake display not exist!");
+        if (errorCode != nullptr) {
+            *errorCode = DmErrorCode::DM_ERROR_INVALID_SCREEN;
+        }
+        return {nullptr, nullptr};
+    }
+    if ((Permission::IsSystemCalling() && Permission::CheckCallingPermission(SCREEN_CAPTURE_PERMISSION)) ||
+        SessionPermission::IsShellCall()) {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetDisplayHDRSnapshot(%" PRIu64")", option.displayId_);
+        std::vector<std::shared_ptr<Media::PixelMap>> res = GetScreenHDRSnapshot(
+            option.displayId_, true, option.isCaptureFullOfScreen_, option.surfaceNodesList_);
+        if (res.size() == PIXMAP_VECTOR_SIZE && res[SDR_PIXMAP] != nullptr) {
+            if (SessionPermission::IsBetaVersion()) {
+                CheckAndSendHiSysEvent("GET_DISPLAY_SNAPSHOT", "hmos.screenshot");
+            }
+            TLOGI(WmsLogTag::DMS, "isNeedNotify_:%{public}d", option.isNeedNotify_);
+            if (option.isNeedNotify_) {
+                isScreenShot_ = true;
+                NotifyScreenshot(option.displayId_);
+                NotifyCaptureStatusChanged();
+            }
+        }
+        return res;
+    } else if (errorCode) {
+        *errorCode = DmErrorCode::DM_ERROR_NO_PERMISSION;
+    }
+    return {nullptr, nullptr};
 }
 
 std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetSnapshotByPicker(Media::Rect &rect, DmErrorCode* errorCode)
@@ -7497,6 +7680,29 @@ sptr<FoldCreaseRegion> ScreenSessionManager::GetCurrentFoldCreaseRegion()
 #endif
 }
 
+DMError ScreenSessionManager::GetLiveCreaseRegion(FoldCreaseRegion& region)
+{
+#ifdef FOLD_ABILITY_ENABLE
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        region = SuperFoldStateManager::GetInstance().GetLiveCreaseRegion();
+        return DMError::DM_OK;
+    }
+    if (!g_foldScreenFlag) {
+        region = FoldCreaseRegion(0, {});
+        return DMError::DM_OK;
+    }
+    if (foldScreenController_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "foldScreenController_ is null");
+        return DMError::DM_ERROR_INVALID_MODE_ID;
+    }
+    region = foldScreenController_->GetLiveCreaseRegion();
+    return DMError::DM_OK;
+#else
+    region = FoldCreaseRegion(0, {});
+    return DMError::DM_OK;
+#endif
+}
+
 uint32_t ScreenSessionManager::GetCurvedCompressionArea()
 {
     return ScreenSceneConfig::GetCurvedCompressionAreaInLandscape();
@@ -8518,7 +8724,11 @@ void ScreenSessionManager::UpdateAvailableArea(ScreenId screenId, DMRect area)
         TLOGE(WmsLogTag::DMS, "update available area permission denied!");
         return;
     }
-
+    if (GetUserIdByCallingUid() != currentUserId_) {
+        TLOGE(WmsLogTag::DMS, "not currentuser, callingUid:%{pubilc}d, currentUserId:%{public}d",
+            GetUserIdByCallingUid(), currentUserId_);
+        return;
+    }
     auto screenSession = GetScreenSession(screenId);
     if (screenSession == nullptr) {
         TLOGE(WmsLogTag::DMS, "can not get default screen now");
@@ -8912,6 +9122,33 @@ std::vector<DisplayPhysicalResolution> ScreenSessionManager::GetAllDisplayPhysic
         }
     }
     return allDisplayPhysicalResolution_;
+}
+
+void ScreenSessionManager::InitSecondaryDisplayPhysicalParams()
+{
+    std::vector<DisplayPhysicalResolution> resolutions = ScreenSceneConfig::GetAllDisplayPhysicalConfig();
+    for (auto &resolution : resolutions) {
+        if (FoldDisplayMode::MAIN == resolution.foldDisplayMode_) {
+            screenParams_.push_back(resolution.physicalWidth_);
+        } else if (FoldDisplayMode::FULL == resolution.foldDisplayMode_) {
+            screenParams_.push_back(resolution.physicalWidth_);
+        } else if (FoldDisplayMode::GLOBAL_FULL == resolution.foldDisplayMode_) {
+            screenParams_.push_back(resolution.physicalWidth_);
+            screenParams_.push_back(resolution.physicalHeight_);
+        } else {
+            TLOGW(WmsLogTag::DMS, "unKnown displayMode");
+        }
+    }
+    if (screenParams_.size() < STATUS_PARAM_VALID_INDEX) {
+        TLOGE(WmsLogTag::DMS, "invalid param num");
+        return;
+    }
+    screenParams_.push_back(screenParams_[GLOBAL_FULL_STATUS_WIDTH_INDEX] - screenParams_[FULL_STATUS_WIDTH_INDEX]);
+    TLOGI(WmsLogTag::DMS,
+        "PhysicalResolution : mainStatusWidth_= %{public}d, fullStatusWidth_= %{public}d, gloablFullStatusWidth_="
+        "%{public}d, screenHeight_= %{public}d",
+          screenParams_[MAIN_STATUS_WIDTH_INDEX], screenParams_[FULL_STATUS_WIDTH_INDEX],
+          screenParams_[GLOBAL_FULL_STATUS_WIDTH_INDEX], screenParams_[SCREEN_HEIGHT_INDEX]);
 }
 
 nlohmann::ordered_json ScreenSessionManager::GetCapabilityJson(FoldStatus foldStatus, FoldDisplayMode displayMode,

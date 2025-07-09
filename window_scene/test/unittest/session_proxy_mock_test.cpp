@@ -137,6 +137,41 @@ HWTEST_F(SessionProxyMockTest, UpdateSessionPropertyByAction, TestSize.Level1)
         sessionProxy->UpdateSessionPropertyByAction(nullptr, WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
     MockMessageParcel::ClearAllErrorFlag();
 }
+
+/**
+ * @tc.name: HandlePendingSessionActivation01
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyMockTest, PendingSessionActivation01, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SessionProxyMockTest::PendingSessionActivation01 start";
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
+    ASSERT_NE(abilitySessionInfo, nullptr);
+    AAFwk::Want want;
+    abilitySessionInfo->want = want;
+    abilitySessionInfo->requestCode = 0;
+    abilitySessionInfo->persistentId = 12;
+    abilitySessionInfo->uiAbilityId = 9;
+    abilitySessionInfo->callingTokenId = 1;
+    abilitySessionInfo->requestId = 2;
+    abilitySessionInfo->reuse = false;
+    abilitySessionInfo->canStartAbilityFromBackground = true;
+    abilitySessionInfo->isAtomicService = true;
+    abilitySessionInfo->isBackTransition = false;
+    abilitySessionInfo->needClearInNotShowRecent = false;
+    abilitySessionInfo->callerToken = sptr<MockIRemoteObject>::MakeSptr();
+    abilitySessionInfo->instanceKey = "PendingSessionActivation01";
+    abilitySessionInfo->isFromIcon = false;
+    abilitySessionInfo->specifiedFlag = "specifiedFlag";
+    abilitySessionInfo->reuseDelegatorWindow = true;
+    abilitySessionInfo->scenarios = 1;
+    auto res = sProxy->PendingSessionActivation(abilitySessionInfo);
+    EXPECT_EQ(res, WSError::WS_OK);
+    GTEST_LOG_(INFO) << "SessionProxyMockTest::PendingSessionActivation01 end";
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

@@ -30,8 +30,10 @@ public:
         const sptr<Rosen::ISession>& iSession, const std::string& identityToken = "",
         bool isModuleAbilityHookEnd = false) override;
     WMError Show(uint32_t reason = 0, bool withAnimation = false, bool withFocus = true) override;
+    WMError Show(uint32_t reason, bool withAnimation, bool withFocus, bool waitAttach) override;
     WMError ShowKeyboard(KeyboardEffectOption effectOption) override;
     WMError Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
+    WMError Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits, bool waitDetach) override;
     WMError Destroy(bool needNotifyServer, bool needClearListener = true, uint32_t reason = 0) override;
     WMError DestroyHookWindow();
     WMError NotifyDrawingCompleted() override;
@@ -70,6 +72,7 @@ public:
     WMError RaiseAboveTarget(int32_t subWindowId) override;
     WMError SetSubWindowZLevel(int32_t zLevel) override;
     WMError GetSubWindowZLevel(int32_t& zLevel) override;
+    WMError RaiseMainWindowAboveTarget(int32_t targetId) override;
 
     void PerformBack() override;
     WMError SetAspectRatio(float ratio) override;
@@ -139,7 +142,7 @@ public:
     void NotifySessionForeground(uint32_t reason, bool withAnimation) override;
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
     WMError NotifyPrepareClosePiPWindow() override;
-    void UpdateSubWindowState(const WindowType& type);
+    void UpdateSubWindowState(const WindowType& type, bool waitDetach = false);
     WMError SetSystemBarProperties(const std::map<WindowType, SystemBarProperty>& properties,
         const std::map<WindowType, SystemBarPropertyFlag>& propertyFlags) override;
     WMError GetSystemBarProperties(std::map<WindowType, SystemBarProperty>& properties) override;
@@ -382,6 +385,7 @@ private:
     void CalculateNewLimitsByRatio(WindowLimits& newLimits, WindowLimits& customizedLimits);
     void NotifyDisplayInfoChange(const sptr<DisplayInfo>& info = nullptr);
     void UpdateDensityInner(const sptr<DisplayInfo>& info = nullptr);
+    sptr<DisplayInfo> GetDisplayInfo() const;
 
     /*
      * Window Input Event
@@ -418,7 +422,7 @@ private:
     uint32_t setSameSystembarPropertyCnt_ = 0;
     std::atomic<bool> isDefaultDensityEnabled_ = false;
     std::atomic<uint32_t> getAvoidAreaCnt_ = 0;
-    bool enableImmersiveMode_ = false;
+    std::atomic<bool> enableImmersiveMode_ = false;
     bool titleHoverShowEnabled_ = true;
     bool dockHoverShowEnabled_ = true;
     void PreLayoutOnShow(WindowType type, const sptr<DisplayInfo>& info = nullptr);

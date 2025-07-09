@@ -1258,6 +1258,16 @@ int32_t WindowSessionProperty::GetSubWindowZLevel() const
     return zLevel_;
 }
 
+void WindowSessionProperty::SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo)
+{
+    windowAnchorInfo_ = windowAnchorInfo;
+}
+
+WindowAnchorInfo WindowSessionProperty::GetWindowAnchorInfo() const
+{
+    return windowAnchorInfo_;
+}
+
 void WindowSessionProperty::SetZIndex(int32_t zIndex)
 {
     zIndex_ = zIndex;
@@ -1351,7 +1361,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteParcelable(compatibleModeProperty_) && parcel.WriteBool(subWindowOutlineEnabled_) &&
         parcel.WriteUint32(windowModeSupportType_) &&
         MarshallingShadowsInfo(parcel) &&
-        MarshallingFbTemplateInfo(parcel);
+        MarshallingFbTemplateInfo(parcel) &&
+        MarshallingWindowAnchorInfo(parcel);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1462,6 +1473,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetWindowModeSupportType(parcel.ReadUint32());
     UnmarshallingShadowsInfo(parcel, property);
     UnmarshallingFbTemplateInfo(parcel, property);
+    UnmarshallingWindowAnchorInfo(parcel, property);
     return property;
 }
 
@@ -1564,6 +1576,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     isFollowScreenChange_ = property->isFollowScreenChange_;
     subWindowOutlineEnabled_ = property->subWindowOutlineEnabled_;
     shadowsInfo_ = property->shadowsInfo_;
+    windowAnchorInfo_ = property->windowAnchorInfo_;
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)
@@ -2453,6 +2466,21 @@ void CompatibleModeProperty::CopyFrom(const sptr<CompatibleModeProperty>& proper
     disableFullScreen_ = property->disableFullScreen_;
     disableWindowLimit_ = property->disableWindowLimit_;
     isAdaptToSimulationScale_= property->isAdaptToSimulationScale_;
+}
+
+bool WindowSessionProperty::MarshallingWindowAnchorInfo(Parcel& parcel) const
+{
+    return parcel.WriteParcelable(&windowAnchorInfo_);
+}
+
+void WindowSessionProperty::UnmarshallingWindowAnchorInfo(Parcel& parcel, WindowSessionProperty* property)
+{
+    sptr<WindowAnchorInfo> windowAnchorInfo = parcel.ReadParcelable<WindowAnchorInfo>();
+    if (windowAnchorInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "windowAnchorInfo is null");
+        return;
+    }
+    property->SetWindowAnchorInfo(*windowAnchorInfo);
 }
 
 bool WindowSessionProperty::MarshallingShadowsInfo(Parcel& parcel) const

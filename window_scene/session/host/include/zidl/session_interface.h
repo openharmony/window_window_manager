@@ -206,12 +206,29 @@ public:
     virtual WSError RaiseAboveTarget(int32_t subWindowId) { return WSError::WS_OK; }
 
     /**
+     * @brief Raise main window above another.
+     *
+     * @param targetId Indicates the {@link int32_t} id of the target main window.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     * @permission Make sure the caller has system permission.
+     */
+    virtual WSError RaiseMainWindowAboveTarget(int32_t targetId) { return WSError::WS_OK; }
+
+    /**
      * @brief Raise the application main window to the top layer of the application.
      *
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError RaiseAppMainWindowToTop() { return WSError::WS_OK; }
     virtual WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> abilitySessionInfo)
+        { return WSError::WS_OK; }
+
+    /**
+     * @brief Pending session active batch
+     *
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError BatchPendingSessionsActivation(const std::vector<sptr<AAFwk::SessionInfo>>& abilitySessionInfos)
         { return WSError::WS_OK; }
     virtual WSError TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionInfo) { return WSError::WS_OK; }
     virtual WSError SetLandscapeMultiWindow(bool isLandscapeMultiWindow) { return WSError::WS_OK; }
@@ -395,7 +412,7 @@ public:
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError OnSetImageForRecent(uint32_t imgResourceId, ImageFit ImageFit) { return WSError::WS_OK; }
-    
+
     /**
      * @brief Callback for setting to radius of window.
      *
@@ -509,7 +526,7 @@ public:
     {
         return WSError::WS_OK;
     }
-   
+
     /**
     * @brief Set sub window source
     *
@@ -535,19 +552,19 @@ public:
     {
         return WMError::WM_OK;
     }
- 
+
     virtual WMError GetFloatingBallWindowId(uint32_t& windowId)
     {
         return WMError::WM_OK;
     }
- 
+
     /**
      * @brief Close flating ball window while stopFb is called.
      *
      * Notify system that flating ball window is stopping and execute animation.
      */
     virtual void NotifyFloatingBallPrepareClose() {}
- 
+
     /**
      * @brief Notify prepare to close window
      */
@@ -555,7 +572,7 @@ public:
     {
         return WSError::WS_OK;
     }
- 
+
     virtual WMError RestoreFbMainWindow(const std::shared_ptr<AAFwk::Want>& want)
     {
         return WMError::WM_OK;

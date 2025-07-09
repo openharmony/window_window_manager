@@ -33,15 +33,29 @@ constexpr const char* const ATOMICSERVICE_KEY_PARAM_STATUS = "ohos.atomicService
 constexpr const char* const ATOMICSERVICE_KEY_PARAM_NAVIGATION = "ohos.atomicService.window.param.navigation";
 constexpr const char* const ATOMICSERVICE_KEY_PARAM_NAME = "ohos.atomicService.window.param.name";
 constexpr const char* const ATOMICSERVICE_KEY_PARAM_ENABLEANIMATION = "ohos.atomicService.window.param.enableAnimation";
+constexpr const char* const ATOMICSERVICE_KEY_PARAM_ISKEEPSCREENON = "ohos.atomicService.window.param.isKeepScreenOn";
+constexpr const char* const ATOMICSERVICE_KEY_PARAM_BRIGHTNESS = "ohos.atomicService.window.param.brightness";
 constexpr const char* const RECT_X = "rectX";
 constexpr const char* const RECT_Y = "rectY";
 constexpr const char* const RECT_WIDTH = "rectWidth";
 constexpr const char* const RECT_HEIGHT = "rectHeight";
+constexpr const char* const BEGIN_X = "beginX";
+constexpr const char* const BEGIN_Y = "beginY";
+constexpr const char* const BEGIN_WIDTH = "beginWidth";
+constexpr const char* const BEGIN_HEIGHT = "beginHeight";
+constexpr const char* const END_X = "endX";
+constexpr const char* const END_Y = "endY";
+constexpr const char* const END_WIDTH = "endWidth";
+constexpr const char* const END_HEIGHT = "endHeight";
 constexpr const char* const RECT_CHANGE_REASON = "rectChangeReason";
 constexpr const char* const COMPAT_IS_SIMULATION_SCALE_FIELD = "compat.isSimulationScale";
 constexpr const char* const COMPAT_IS_PROPORTION_SCALE_FIELD = "compat.isProportionScale";
 constexpr const char* const COMPAT_SCALE_X_FIELD = "compat.scaleX";
 constexpr const char* const COMPAT_SCALE_Y_FIELD = "compat.scaleY";
+constexpr const char* const EXTENSION_SECURE_LIMIT_CHANGE = "extensionSecureLimitChange";
+constexpr const char* const HOST_STATUS_BAR_CONTENT_COLOR = "hostStatusBarContentColor";
+constexpr const char* const GRAVITY = "gravity";
+constexpr const char* const ISSHOWING = "isShowing";
 
 enum class Businesscode : uint32_t {
     SYNC_HOST_WINDOW_MODE = 0,  // Synchronize the host's window mode
@@ -53,6 +67,11 @@ enum class Businesscode : uint32_t {
     SYNC_HOST_WINDOW_DELAY_RAISE_STATE,
     NOTIFY_HOST_WINDOW_RECT_CHANGE,
     SYNC_COMPAT_INFO,
+    NOTIFY_SCREENSHOT,
+    NOTIFY_EXTENSION_SECURE_LIMIT_CHANGE,
+    NOTIFY_KEYBOARD_DID_HIDE,
+    NOTIFY_KEYBOARD_DID_SHOW,
+    SYNC_HOST_STATUS_BAR_CONTENT_COLOR,
 
     // IPC messages corresponding to the Businesscode between 10000 and 20000
     // will be forwarded to the host window by the UEC
@@ -60,6 +79,10 @@ enum class Businesscode : uint32_t {
     NOTIFY_HOST_WINDOW_TO_RAISE = 10001,
     REGISTER_HOST_WINDOW_RECT_CHANGE_LISTENER,
     UNREGISTER_HOST_WINDOW_RECT_CHANGE_LISTENER,
+    REGISTER_KEYBOARD_DID_SHOW_LISTENER,
+    UNREGISTER_KEYBOARD_DID_SHOW_LISTENER,
+    REGISTER_KEYBOARD_DID_HIDE_LISTENER,
+    UNREGISTER_KEYBOARD_DID_HIDE_LISTENER,
     TRANSPARENT_TRANSMISSION_TO_HOST_WINDOW_CODE_END = 20000,
 };
 }  // namespace OHOS::Rosen::Extension

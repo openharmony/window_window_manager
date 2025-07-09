@@ -27,6 +27,8 @@
 #include "permission.h"
 #include "window_manager.h"
 #include "window_manager_hilog.h"
+#include "ui_effect_controller_interface.h"
+#include "ui_effect_controller_client_interface.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -3579,5 +3581,76 @@ WMError SceneSessionManagerProxy::AnimateTo(int32_t windowId, const WindowAnimat
         return WMError::WM_ERROR_IPC_FAILED;
     }
     return static_cast<WMError>(reply.ReadInt32());
+}
+
+WMError SceneSessionManagerProxy::CreateUIEffectController(const sptr<IUIEffectControllerClient>& controllerClient,
+    sptr<IUIEffectController>& controller, int32_t& controllerId)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Write interfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteRemoteObject(controllerClient->AsObject())) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Write controller client failed!");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_CREATE_UI_EFFECT_CONTROLLER),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    WMError err = static_cast<WMError>(reply.ReadInt32());
+    if (err != WMError::WM_OK) {
+        return err;
+    }
+    controllerId = reply.ReadInt32();
+    sptr<IRemoteObject> controllerObject = reply.ReadRemoteObject();
+    if (controllerObject == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "receive filter failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    controller = iface_cast<IUIEffectController>(controllerObject);
+    return err;
+}
+
+WMError SceneSessionManagerProxy::GetPiPSettingSwitchStatus(bool& switchStatus)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_PIP, "Write interfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "Remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_PIP_SWITCH_STATUS),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_PIP, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    bool status = false;
+    if (!reply.ReadBool(status)) {
+        TLOGE(WmsLogTag::WMS_PIP, "Read status failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_PIP, "Read ret failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    switchStatus = status;
+    return static_cast<WMError>(ret);
 }
 } // namespace OHOS::Rosen

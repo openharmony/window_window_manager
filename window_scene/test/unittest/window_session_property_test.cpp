@@ -1432,6 +1432,49 @@ HWTEST_F(WindowSessionPropertyTest, SetSubWindowZLevel, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetWindowAnchorInfo
+ * @tc.desc: GetWindowAnchorInfo Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, GetWindowAnchorInfo, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    WindowAnchorInfo anchorInfo = { true, WindowAnchor::TOP_START, 0, 0 };
+    property->windowAnchorInfo_ = anchorInfo;
+    EXPECT_EQ(anchorInfo, property->GetWindowAnchorInfo());
+}
+
+/**
+ * @tc.name: SetWindowAnchorInfo
+ * @tc.desc: SetWindowAnchorInfo Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetWindowAnchorInfo, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    WindowAnchorInfo anchorInfo = { true, WindowAnchor::TOP_START, 0, 0 };
+    property->SetWindowAnchorInfo(anchorInfo);
+    EXPECT_EQ(anchorInfo, property->windowAnchorInfo_);
+}
+
+/**
+ * @tc.name: UnmarshallingWindowAnchorInfo
+ * @tc.desc: UnmarshallingWindowAnchorInfo Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, UnmarshallingWindowAnchorInfo, TestSize.Level1)
+{
+    Parcel parcel = Parcel();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    WindowSessionProperty windowSessionProperty;
+    windowSessionProperty.UnmarshallingWindowAnchorInfo(parcel, property);
+    EXPECT_EQ(property->GetTokenState(), false);
+}
+
+/**
  * @tc.name: GetZIndex
  * @tc.desc: GetZIndex Test
  * @tc.type: FUNC
@@ -1552,13 +1595,22 @@ HWTEST_F(WindowSessionPropertyTest, UnmarshallingFbTemplateInfoTest, TestSize.Le
     property->SetWindowType(WindowType::WINDOW_TYPE_FB);
 
     Parcel parcel;
-    FloatingBallTemplateInfo fbTemplateInfo {{1, "fb", "fb_content", "red"}, nullptr};
+    std::shared_ptr<Media::PixelMap> icon;
+    FloatingBallTemplateInfo fbTemplateInfo {{1, "fb", "fb_content", "red"}, icon};
     property->UnmarshallingFbTemplateInfo(parcel, property);
     ASSERT_NE(property->GetFbTemplateInfo().template_, fbTemplateInfo.template_);
+    ASSERT_NE(property->GetFbTemplateInfo().title_, fbTemplateInfo.title_);
+    ASSERT_NE(property->GetFbTemplateInfo().content_, fbTemplateInfo.content_);
+    ASSERT_NE(property->GetFbTemplateInfo().backgroundColor_, fbTemplateInfo.backgroundColor_);
+    ASSERT_EQ(property->GetFbTemplateInfo().icon_, fbTemplateInfo.icon_);
 
     parcel.WriteParcelable(&fbTemplateInfo);
     property->UnmarshallingFbTemplateInfo(parcel, property);
     ASSERT_EQ(property->GetFbTemplateInfo().template_, fbTemplateInfo.template_);
+    ASSERT_EQ(property->GetFbTemplateInfo().title_, fbTemplateInfo.title_);
+    ASSERT_EQ(property->GetFbTemplateInfo().content_, fbTemplateInfo.content_);
+    ASSERT_EQ(property->GetFbTemplateInfo().backgroundColor_, fbTemplateInfo.backgroundColor_);
+    ASSERT_EQ(property->GetFbTemplateInfo().icon_, fbTemplateInfo.icon_);
 }
 } // namespace
 } // namespace Rosen

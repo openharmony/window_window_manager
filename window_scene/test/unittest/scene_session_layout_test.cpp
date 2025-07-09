@@ -101,11 +101,11 @@ HWTEST_F(SceneSessionLayoutTest, UpdateRect02, TestSize.Level0)
     WSError result = sceneSession->UpdateRect(rect, reason, "SceneSessionLayoutTest");
     ASSERT_EQ(result, WSError::WS_OK);
 
-    sceneSession->winRect_ = rect;
+    sceneSession->GetLayoutController()->SetSessionRect(rect);
     result = sceneSession->UpdateRect(rect, reason, "SceneSessionLayoutTest");
     ASSERT_EQ(result, WSError::WS_OK);
 
-    sceneSession->reason_ = SizeChangeReason::DRAG_END;
+    sceneSession->Session::UpdateSizeChangeReason(SizeChangeReason::DRAG_END);
     result = sceneSession->UpdateRect(rect, reason, "SceneSessionLayoutTest");
     ASSERT_EQ(result, WSError::WS_OK);
 
@@ -129,7 +129,7 @@ HWTEST_F(SceneSessionLayoutTest, UpdateRect03, TestSize.Level0)
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;
 
     WSRect rect = { 200, 200, 200, 200 };
-    session->winRect_ = rect;
+    session->GetLayoutController()->SetSessionRect(rect);
     session->SetClientRect(rect);
     EXPECT_EQ(session->UpdateRect(rect, reason, "SceneSessionLayoutTest"), WSError::WS_OK);
 
@@ -137,7 +137,7 @@ HWTEST_F(SceneSessionLayoutTest, UpdateRect03, TestSize.Level0)
     rect.posY_ = 100;
     rect.width_ = 800;
     rect.height_ = 800;
-    session->winRect_ = rect;
+    session->GetLayoutController()->SetSessionRect(rect);
     EXPECT_EQ(session->UpdateRect(rect, reason, "SceneSessionLayoutTest"), WSError::WS_OK);
 }
 
@@ -179,7 +179,7 @@ HWTEST_F(SceneSessionLayoutTest, UpdateRectInner01, TestSize.Level0)
     uiParam.needSync_ = true;
     uiParam.rect_ = { 0, 0, 1, 1 };
 
-    sceneSession->winRect_ = { 1, 1, 1, 1 };
+    sceneSession->GetLayoutController()->SetSessionRect({ 1, 1, 1, 1 });
     sceneSession->isVisible_ = true;
     ASSERT_EQ(false, sceneSession->UpdateRectInner(uiParam, reason));
 }
@@ -198,17 +198,17 @@ HWTEST_F(SceneSessionLayoutTest, NotifyClientToUpdateRect, TestSize.Level1)
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     session->moveDragController_ = nullptr;
     session->isKeyboardPanelEnabled_ = false;
-    session->reason_ = SizeChangeReason::UNDEFINED;
+    session->Session::UpdateSizeChangeReason(SizeChangeReason::UNDEFINED);
     session->Session::SetSessionState(SessionState::STATE_CONNECT);
     session->specificCallback_ = nullptr;
-    session->reason_ = SizeChangeReason::DRAG;
+    session->Session::UpdateSizeChangeReason(SizeChangeReason::DRAG);
     EXPECT_EQ(WSError::WS_OK, session->NotifyClientToUpdateRect("SceneSessionLayoutTest", nullptr));
 
     UpdateAvoidAreaCallback func = [](const int32_t& persistentId) { return; };
     auto specificCallback = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     specificCallback->onUpdateAvoidArea_ = func;
     session->specificCallback_ = specificCallback;
-    session->reason_ = SizeChangeReason::RECOVER;
+    session->Session::UpdateSizeChangeReason(SizeChangeReason::RECOVER);
     EXPECT_EQ(WSError::WS_OK, session->NotifyClientToUpdateRect("SceneSessionLayoutTest", nullptr));
 }
 
@@ -332,7 +332,7 @@ HWTEST_F(SceneSessionLayoutTest, NotifyClientToUpdateRectTask, TestSize.Level0)
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION,
               session->NotifyClientToUpdateRectTask("SceneSessionLayoutTest", nullptr));
     session->Session::UpdateSizeChangeReason(SizeChangeReason::RECOVER);
-    EXPECT_EQ(session->reason_, SizeChangeReason::RECOVER);
+    EXPECT_EQ(session->GetSizeChangeReason(), SizeChangeReason::RECOVER);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION,
               session->NotifyClientToUpdateRectTask("SceneSessionLayoutTest", nullptr));
 
@@ -768,52 +768,6 @@ HWTEST_F(SceneSessionLayoutTest, IsNeedConvertToRelativeRect, TestSize.Level1)
 }
 
 /**
- * @tc.name: ConvertRelativeRectToGlobal
- * @tc.desc: ConvertRelativeRectToGlobal
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionLayoutTest, ConvertRelativeRectToGlobal, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "ConvertRelativeRectToGlobal";
-    info.bundleName_ = "ConvertRelativeRectToGlobal";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-
-    DisplayId defaultDisplayId = 0;
-    DisplayId invalidDisplayId = -1ULL;
-    WSRect relativeRect = { 500, 500, 800, 800 };
-    sceneSession->GetSessionProperty()->SetDisplayId(invalidDisplayId);
-    ASSERT_EQ(sceneSession->ConvertRelativeRectToGlobal(relativeRect, invalidDisplayId), relativeRect);
-
-    sceneSession->GetSessionProperty()->SetDisplayId(defaultDisplayId);
-    ASSERT_EQ(sceneSession->ConvertRelativeRectToGlobal(relativeRect, invalidDisplayId), relativeRect);
-    ASSERT_EQ(sceneSession->ConvertRelativeRectToGlobal(relativeRect, defaultDisplayId), relativeRect);
-}
-
-/**
- * @tc.name: ConvertGlobalRectToRelative
- * @tc.desc: ConvertGlobalRectToRelative
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionLayoutTest, ConvertGlobalRectToRelative, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "ConvertGlobalRectToRelative";
-    info.bundleName_ = "ConvertGlobalRectToRelative";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-
-    DisplayId defaultDisplayId = 0;
-    DisplayId invalidDisplayId = -1ULL;
-    WSRect globalRect = { 500, 500, 800, 800 };
-    sceneSession->GetSessionProperty()->SetDisplayId(invalidDisplayId);
-    ASSERT_EQ(sceneSession->ConvertGlobalRectToRelative(globalRect, invalidDisplayId), globalRect);
-
-    sceneSession->GetSessionProperty()->SetDisplayId(defaultDisplayId);
-    ASSERT_EQ(sceneSession->ConvertGlobalRectToRelative(globalRect, invalidDisplayId), globalRect);
-    ASSERT_EQ(sceneSession->ConvertGlobalRectToRelative(globalRect, defaultDisplayId), globalRect);
-}
-
-/**
  * @tc.name: IsAnyParentSessionDragMoving
  * @tc.desc: IsAnyParentSessionDragMoving
  * @tc.type: FUNC
@@ -997,7 +951,7 @@ HWTEST_F(SceneSessionLayoutTest, SetMoveAvailableArea02, TestSize.Level1)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback_);
 
     WSRect rect({0, 0, 50, 50});
-    sceneSession->winRect_ = rect;
+    sceneSession->GetLayoutController()->SetSessionRect(rect);
     sceneSession->specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ =
         [](WindowType type, uint64_t displayId) -> std::vector<sptr<SceneSession>> {
         std::vector<sptr<SceneSession>> vec;

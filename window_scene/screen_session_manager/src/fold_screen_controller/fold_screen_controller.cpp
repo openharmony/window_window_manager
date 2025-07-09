@@ -208,6 +208,15 @@ sptr<FoldCreaseRegion> FoldScreenController::GetCurrentFoldCreaseRegion()
     return foldScreenPolicy_->GetCurrentFoldCreaseRegion();
 }
 
+FoldCreaseRegion FoldScreenController::GetLiveCreaseRegion() const
+{
+    if (foldScreenPolicy_ == nullptr) {
+        TLOGW(WmsLogTag::DMS, "GetLiveCreaseRegion: foldScreenPolicy_ is null");
+        return FoldCreaseRegion(0, {});
+    }
+    return foldScreenPolicy_->GetLiveCreaseRegion();
+}
+
 ScreenId FoldScreenController::GetCurrentScreenId()
 {
     if (foldScreenPolicy_ == nullptr) {
@@ -319,5 +328,14 @@ bool FoldScreenController::GetIsFirstFrameCommitReported()
 void FoldScreenController::SetIsFirstFrameCommitReported(bool isFirstFrameCommitReported)
 {
     foldScreenPolicy_->SetIsFirstFrameCommitReported(isFirstFrameCommitReported);
+}
+
+void FoldScreenController::SetIsClearingBootAnimation(bool isClearingBootAnimation)
+{
+    if (foldScreenPolicy_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "foldScreenPolicy_ is null");
+        return;
+    }
+    foldScreenPolicy_->SetIsClearingBootAnimation(isClearingBootAnimation);
 }
 } // namespace OHOS::Rosen

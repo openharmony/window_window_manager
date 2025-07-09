@@ -1477,7 +1477,7 @@ HWTEST_F(WindowSessionImplTest5, SendFbActionEvent, TestSize.Level1)
 HWTEST_F(WindowSessionImplTest5, UpdateFloatingBall, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SendFbActionEvent");
+    option->SetWindowName("UpdateFloatingBall");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->hostSession_ = nullptr;
     FloatingBallTemplateBaseInfo fbTemplateInfo;
@@ -1490,6 +1490,18 @@ HWTEST_F(WindowSessionImplTest5, UpdateFloatingBall, TestSize.Level1)
     auto session = sptr<SessionStubMocker>::MakeSptr();
     window->hostSession_ = session;
     window->property_->persistentId_ = 1234;
+
+    FloatingBallTemplateInfo windowFbTemplateInfo;
+    windowFbTemplateInfo.template_ = static_cast<uint32_t>(FloatingBallTemplate::STATIC);
+    window->GetProperty()->SetFbTemplateInfo(windowFbTemplateInfo);
+    EXPECT_EQ(WMError::WM_ERROR_FB_UPDATE_STATIC_TEMPLATE_DENIED, window->UpdateFloatingBall(fbTemplateInfo, icon));
+
+    windowFbTemplateInfo.template_ = static_cast<uint32_t>(FloatingBallTemplate::NORMAL);
+    window->GetProperty()->SetFbTemplateInfo(windowFbTemplateInfo);
+    fbTemplateInfo.template_ = static_cast<uint32_t>(FloatingBallTemplate::STATIC);
+    EXPECT_EQ(WMError::WM_ERROR_FB_UPDATE_TEMPLATE_TYPE_DENIED, window->UpdateFloatingBall(fbTemplateInfo, icon));
+
+    fbTemplateInfo.template_ = static_cast<uint32_t>(FloatingBallTemplate::NORMAL);
     EXPECT_FALSE(window->IsWindowSessionInvalid());
     error = window->UpdateFloatingBall(fbTemplateInfo, icon);
     EXPECT_EQ(WMError::WM_OK, error);
@@ -1503,7 +1515,7 @@ HWTEST_F(WindowSessionImplTest5, UpdateFloatingBall, TestSize.Level1)
 HWTEST_F(WindowSessionImplTest5, NotifyPrepareCloseFloatingBall, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SendFbActionEvent");
+    option->SetWindowName("NotifyPrepareCloseFloatingBall");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->hostSession_ = nullptr;
 
@@ -1528,7 +1540,7 @@ HWTEST_F(WindowSessionImplTest5, NotifyPrepareCloseFloatingBall, TestSize.Level1
 HWTEST_F(WindowSessionImplTest5, RestoreFbMainWindow, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SendFbActionEvent");
+    option->SetWindowName("RestoreFbMainWindow");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->hostSession_ = nullptr;
 
@@ -1580,6 +1592,7 @@ HWTEST_F(WindowSessionImplTest5, TestClientToGlobalDisplay, TestSize.Level1)
     Position expectedGlobalPos { 110, 220 };
 
     auto result = window->ClientToGlobalDisplay(clientPos);
+    EXPECT_NE(result, clientPos);
     EXPECT_EQ(result, expectedGlobalPos);
 }
 
@@ -1600,6 +1613,7 @@ HWTEST_F(WindowSessionImplTest5, TestGlobalDisplayToClient, TestSize.Level1)
     Position expectedClientPos { 10, 20 };
 
     auto result = window->GlobalDisplayToClient(globalPos);
+    EXPECT_NE(result, globalPos);
     EXPECT_EQ(result, expectedClientPos);
 }
 
@@ -1706,6 +1720,52 @@ HWTEST_F(WindowSessionImplTest5, TestNotifyGlobalDisplayRectChange, TestSize.Lev
         std::lock_guard<std::mutex> lock(window->rectChangeInGlobalDisplayListenerMutex_);
         window->rectChangeInGlobalDisplayListeners_.clear();
     }
+}
+
+/**
+ * @tc.name: GetPiPSettingSwitchStatus
+ * @tc.desc: GetPiPSettingSwitchStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, GetPiPSettingSwitchStatus, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetPiPSettingSwitchStatus");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    bool switchStatus = false;
+    WMError retCode = window->GetPiPSettingSwitchStatus(switchStatus);
+    ASSERT_EQ(retCode, WMError::WM_ERROR_INVALID_WINDOW);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_CREATED;
+    window->GetPiPSettingSwitchStatus(switchStatus);
+}
+
+/**
+ * @tc.name: OnPointDown
+ * @tc.desc: OnPointDown
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, OnPointDown, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("OnPointDown");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    window->property_->SetCollaboratorType(static_cast<int32_t>(CollaboratorType::RESERVE_TYPE));
+    EXPECT_TRUE(window->IsAnco());
+
+    EXPECT_EQ(window->GetHostSession(), nullptr);
+    EXPECT_FALSE(window->OnPointDown(0, 0, 0));
+
+    SessionInfo sessionInfo = {"OnPointDown", "OnPointDown", "OnPointDown"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+
+    EXPECT_CALL(*(session), ProcessPointDownSession(_, _)).Times(1).WillOnce(Return(WSError::WS_OK));
+    EXPECT_TRUE(window->OnPointDown(0, 0, 0));
 }
 } // namespace
 } // namespace Rosen

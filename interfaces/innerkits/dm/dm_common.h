@@ -565,7 +565,7 @@ struct CaptureOption {
     bool isNeedNotify_ = true;
     bool isNeedPointer_ = true;
     bool isCaptureFullOfScreen_ = false;
-    std::vector<NodeId> blackList_ = {}; // exclude surfacenodes in screenshot
+    std::vector<NodeId> surfaceNodesList_ = {}; // exclude surfacenodes in screenshot
 };
 
 struct ExpandOption {

@@ -493,6 +493,12 @@ HWTEST_F(MoveDragControllerTest, CalcFreeformTargetRect, TestSize.Level1)
     moveDragController->limits_ = { 3, 3, 3, 3, 2.0, 2.0 };
     ASSERT_TRUE((moveDragController != nullptr));
     moveDragController->CalcFreeformTargetRect(type, tranX, tranY, originalRect);
+    moveDragController->isAdaptToDragScale_ = true;
+    originalRect = { 100, 100, 500, 100 };
+    moveDragController->limits_ = { 3, 3, 3, 3, 2.0, 2.0 };
+    ASSERT_TRUE((moveDragController != nullptr));
+    moveDragController->CalcFreeformTargetRect(type, tranX, tranY, originalRect);
+    moveDragController->isAdaptToDragScale_ = false;
     type = AreaType::RIGHT;
     originalRect = { 100, 100, 500, 0 };
     ASSERT_TRUE((moveDragController != nullptr));
@@ -1646,7 +1652,7 @@ HWTEST_F(MoveDragControllerTest, UpdateSubWindowGravityWhenFollow01, TestSize.Le
     followController->type_ = AreaType::TOP;
     moveDragController->UpdateSubWindowGravityWhenFollow(followController, surfaceNode);
     gravityIter = surfaceNode->propertyModifiers_.find(RSModifierType::FRAME_GRAVITY);
-    ASSERT_NE(gravityIter, surfaceNode->propertyModifiers_.end());
+    ASSERT_EQ(gravityIter, surfaceNode->propertyModifiers_.end());
 }
 } // namespace
 } // namespace Rosen

@@ -43,6 +43,7 @@
 #include "wm_common.h"
 #include "wm_common_inner.h"
 #include "floating_ball_template_info.h"
+#include "lifecycle_future_callback.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -85,7 +86,9 @@ public:
      * inherits from window
      */
     WMError Show(uint32_t reason = 0, bool withAnimation = false, bool withFocus = true) override;
+    WMError Show(uint32_t reason, bool withAnimation, bool withFocus, bool waitAttach) override;
     WMError Hide(uint32_t reason = 0, bool withAnimation = false, bool isFromInnerkits = true) override;
+    WMError Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits, bool waitDetach) override;
     WMError Destroy(uint32_t reason = 0) override;
     virtual WMError Destroy(bool needNotifyServer, bool needClearListener = true, uint32_t reason = 0);
     WMError NapiSetUIContent(const std::string& contentInfo, ani_env* env, ani_object storage,
@@ -121,6 +124,7 @@ public:
     void SetSubWindowZLevelToProperty();
     int32_t GetSubWindowZLevelByFlags(WindowType type, uint32_t windowFlags, bool isTopmost);
     WMError RaiseToAppTopOnDrag();
+    bool IsApplicationModalSubWindowShowing(int32_t parentId);
 
     WMError SetResizeByDragEnabled(bool dragEnabled) override;
     WMError SetRaiseByClickEnabled(bool raiseEnabled) override;
@@ -192,7 +196,10 @@ public:
     void FlushFrameRate(uint32_t rate, int32_t animatorExpectedFrameRate, uint32_t rateType = 0) override;
     void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& inputEvent) override;
+    void ConsumeBackEvent() override;
+    bool IsDialogSessionBackGestureEnabled() override;
     bool PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
+    bool OnPointDown(int32_t eventId, int32_t posX, int32_t posY) override;
     WMError SetIntentParam(const std::string& intentParam, const std::function<void()>& loadPageCallback,
         bool isColdStart) override;
     void SetForceSplitEnable(AppForceLandscapeConfig& config);
@@ -226,8 +233,8 @@ public:
         const std::map<AvoidAreaType, AvoidArea>& avoidAreas) override;
     void NotifyKeyboardWillShow(const KeyboardAnimationInfo& keyboardAnimationInfo);
     void NotifyKeyboardWillHide(const KeyboardAnimationInfo& keyboardAnimationInfo);
-    void NotifyKeyboardDidShow(const KeyboardPanelInfo& keyboardPanelInfo);
-    void NotifyKeyboardDidHide(const KeyboardPanelInfo& keyboardPanelInfo);
+    virtual void NotifyKeyboardDidShow(const KeyboardPanelInfo& keyboardPanelInfo);
+    virtual void NotifyKeyboardDidHide(const KeyboardPanelInfo& keyboardPanelInfo);
     void NotifyKeyboardAnimationCompleted(const KeyboardPanelInfo& keyboardPanelInfo) override;
     void NotifyKeyboardAnimationWillBegin(const KeyboardAnimationInfo& keyboardAnimationInfo,
         const std::shared_ptr<RSTransaction>& rsTransaction) override;
@@ -289,6 +296,14 @@ public:
         const AAFwk::Want& data);
     virtual WMError HandleUnregisterHostWindowRectChangeListener(uint32_t code, int32_t persistentId,
         const AAFwk::Want& data);
+    virtual WMError HandleUIExtRegisterKeyboardDidShowListener(uint32_t code, int32_t persistentId,
+        const AAFwk::Want& data);
+    virtual WMError HandleUIExtUnregisterKeyboardDidShowListener(uint32_t code, int32_t persistentId,
+        const AAFwk::Want& data);
+    virtual WMError HandleUIExtRegisterKeyboardDidHideListener(uint32_t code, int32_t persistentId,
+        const AAFwk::Want& data);
+    virtual WMError HandleUIExtUnregisterKeyboardDidHideListener(uint32_t code, int32_t persistentId,
+        const AAFwk::Want& data);
 
     WMError SetBackgroundColor(const std::string& color) override;
     virtual Orientation GetRequestedOrientation() override;
@@ -299,8 +314,10 @@ public:
     SystemSessionConfig GetSystemSessionConfig() const;
     sptr<ISession> GetHostSession() const;
     int32_t GetFloatingWindowParentId();
-    void NotifyAfterForeground(bool needNotifyListeners = true, bool needNotifyUiContent = true);
-    void NotifyAfterBackground(bool needNotifyListeners = true, bool needNotifyUiContent = true);
+    void NotifyAfterForeground(bool needNotifyListeners = true,
+        bool needNotifyUiContent = true, bool waitAttach = false);
+    void NotifyAfterBackground(bool needNotifyListeners = true,
+        bool needNotifyUiContent = true, bool waitDetach = false);
     void NotifyAfterDidForeground(uint32_t reason = static_cast<uint32_t>(WindowStateChangeReason::NORMAL));
     void NotifyAfterDidBackground(uint32_t reason = static_cast<uint32_t>(WindowStateChangeReason::NORMAL));
     void NotifyForegroundFailed(WMError ret);
@@ -346,13 +363,14 @@ public:
     void UpdatePiPControlStatus(PiPControlType controlType, PiPControlStatus status) override;
     void SetAutoStartPiP(bool isAutoStart, uint32_t priority, uint32_t width, uint32_t height) override;
     void UpdatePiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo) override;
+    WMError GetPiPSettingSwitchStatus(bool& switchStatus) const override;
 
     WMError UpdateFloatingBall(const FloatingBallTemplateBaseInfo& fbTemplateBaseInfo,
         const std::shared_ptr<Media::PixelMap>& icon) override;
     void NotifyPrepareCloseFloatingBall() override;
     WSError SendFbActionEvent(const std::string& action) override;
     WMError RestoreFbMainWindow(const std::shared_ptr<AAFwk::Want>& want) override;
-    
+
     WMError GetFloatingBallWindowId(uint32_t& windowId) override;
 
     void SetDrawingContentState(bool drawingContentState);
@@ -479,6 +497,7 @@ public:
     WSError NotifyScreenshotAppEvent(ScreenshotEventType type) override;
     bool IsDeviceFeatureCapableFor(const std::string& feature) const override;
     bool IsDeviceFeatureCapableForFreeMultiWindow() const override;
+    bool IsAnco() const override;
 
     /*
      * Window Input Event
@@ -615,6 +634,12 @@ protected:
      * UIExtension
      */
     std::unordered_set<int32_t> rectChangeUIExtListenerIds_;
+    std::unordered_set<int32_t> keyboardDidShowUIExtListenerIds_;
+    std::unordered_set<int32_t> keyboardDidHideUIExtListenerIds_;
+    std::unordered_map<int32_t, sptr<IKeyboardDidShowListener>> keyboardDidShowUIExtListeners_;
+    std::unordered_map<int32_t, sptr<IKeyboardDidHideListener>> keyboardDidHideUIExtListeners_;
+    void WriteKeyboardInfoToWant(AAFwk::Want& want, const KeyboardPanelInfo& keyboardPanelInfo) const;
+    void ReadKeyboardInfoFromWant(const AAFwk::Want& want, KeyboardPanelInfo& keyboardPanelInfo) const;
 
     /*
      * Sub Window
@@ -712,6 +737,7 @@ protected:
     bool isColdStart_ = true;
     bool isIntentColdStart_ = true;
     std::string navDestinationInfo_;
+    sptr<LifecycleFutureCallback> lifecycleCallback_ = nullptr;
 
     /*
      * Window Layout
@@ -775,6 +801,7 @@ protected:
      */
     bool GetWatchGestureConsumed() const;
     void SetWatchGestureConsumed(bool isWatchGestureConsumed);
+    bool dialogSessionBackGestureEnabled_ = false;
 
     /*
      * Window Rotation

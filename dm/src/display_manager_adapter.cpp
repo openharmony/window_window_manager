@@ -108,6 +108,21 @@ std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetDisplaySnapshot(Displ
     return pixelMap;
 }
 
+std::vector<std::shared_ptr<Media::PixelMap>> DisplayManagerAdapter::GetDisplayHDRSnapshot(DisplayId displayId,
+    DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen)
+{
+    INIT_PROXY_CHECK_RETURN({});
+ 
+    if (screenSessionManagerServiceProxy_) {
+        return screenSessionManagerServiceProxy_->GetDisplayHDRSnapshot(displayId, errorCode, isUseDma,
+            isCaptureFullOfScreen);
+    }
+    if (errorCode != nullptr) {
+        *errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    return { nullptr, nullptr };
+}
+
 std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetSnapshotByPicker(Media::Rect& rect, DmErrorCode* errorCode)
 {
     INIT_PROXY_CHECK_RETURN(nullptr);
@@ -1221,6 +1236,17 @@ sptr<FoldCreaseRegion> DisplayManagerAdapter::GetCurrentFoldCreaseRegion()
     return nullptr;
 }
 
+DMError DisplayManagerAdapter::GetLiveCreaseRegion(FoldCreaseRegion& region)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+
+    TLOGI(WmsLogTag::DMS, "enter");
+    if (screenSessionManagerServiceProxy_) {
+        return screenSessionManagerServiceProxy_->GetLiveCreaseRegion(region);
+    }
+    return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+}
+
 sptr<ScreenGroupInfo> ScreenManagerAdapter::GetScreenGroupInfoById(ScreenId screenId)
 {
     if (screenId == SCREEN_ID_INVALID) {
@@ -1608,6 +1634,21 @@ std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetDisplaySnapshotWithOp
         *errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
     }
     return nullptr;
+}
+
+std::vector<std::shared_ptr<Media::PixelMap>> DisplayManagerAdapter::GetDisplayHDRSnapshotWithOption(
+    const CaptureOption& captureOption, DmErrorCode* errorCode)
+{
+    std::vector<std::shared_ptr<Media::PixelMap>> ret = { nullptr, nullptr };
+    INIT_PROXY_CHECK_RETURN(ret);
+    if (screenSessionManagerServiceProxy_) {
+        return screenSessionManagerServiceProxy_->GetDisplayHDRSnapshotWithOption(captureOption, errorCode);
+    }
+ 
+    if (errorCode != nullptr) {
+        *errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    return ret;
 }
 
 void ScreenManagerAdapter::SetFoldStatusExpandAndLocked(bool locked)

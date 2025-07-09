@@ -36,8 +36,8 @@ public:
     using AnimateToFunc = std::function<void(int32_t, sptr<UIEffectParams>, sptr<WindowAnimationOption>,
         sptr<WindowAnimationOption>)>;
     UIEffectController(int32_t id, const SetParamsFunc& paramCallback, const AnimateToFunc& animateCallback);
-    WMError SetParams(const sptr<UIEffectParams>& param) override;
-    WMError AnimateTo(const sptr<UIEffectParams>& param, const sptr<WindowAnimationOption>& config,
+    WMError SetParams(const sptr<UIEffectParams>& params) override;
+    WMError AnimateTo(const sptr<UIEffectParams>& params, const sptr<WindowAnimationOption>& config,
         const sptr<WindowAnimationOption>& interruptOption) override;
     void SetIsAliveInUI(bool state) { isAliveInUI_ = state; }
 
@@ -46,7 +46,7 @@ private:
     AnimateToFunc animateToCallback_ = nullptr;
     // unique id of ui effect controller
     int32_t id_;
-    bool isAliveInUI_ = false;
+    std::atomic<bool> isAliveInUI_ = false;
 };
 } // namespace OHOS::Rosen
 #endif

@@ -106,7 +106,9 @@ public:
     void SetShowWithOptions(bool showWithOptions) override;
     bool IsShowWithOptions() const override;
     virtual WMError Show(uint32_t reason = 0, bool withAnimation = false, bool withFocus = true) override;
+    virtual WMError Show(uint32_t reason, bool withAnimation, bool withFocus, bool waitAttach) override;
     virtual WMError Hide(uint32_t reason = 0, bool withAnimation = false, bool isFromInnerkits = true) override;
+    virtual WMError Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits, bool waitDetach) override;
     virtual WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false,
         MoveConfiguration moveConfiguration = {}) override;
     virtual WMError Resize(uint32_t width, uint32_t height,
@@ -176,7 +178,9 @@ public:
     virtual void SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler) override;
     virtual void SetRequestWindowModeSupportType(uint32_t windowModeSupportType) override;
     virtual void ConsumeKeyEvent(const std::shared_ptr<MMI::KeyEvent>& inputEvent) override;
+    virtual void ConsumeBackEvent() override;
     virtual void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& inputEvent) override;
+    virtual bool IsDialogSessionBackGestureEnabled() override;
     virtual void RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback) override;
     virtual int64_t GetVSyncPeriod() override;
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;

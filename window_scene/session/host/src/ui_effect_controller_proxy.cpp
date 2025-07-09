@@ -17,7 +17,7 @@
 #include "ui_effect_controller_common.h"
 
 namespace OHOS::Rosen {
-WMError UIEffectControllerProxy::SetParams(const sptr<UIEffectParams>& param)
+WMError UIEffectControllerProxy::SetParams(const sptr<UIEffectParams>& params)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -26,8 +26,8 @@ WMError UIEffectControllerProxy::SetParams(const sptr<UIEffectParams>& param)
         TLOGE(WmsLogTag::WMS_ANIMATION, "Write interfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (!data.WriteStrongParcelable(param)) {
-        TLOGE(WmsLogTag::WMS_ANIMATION, "Write ui effect param failed");
+    if (!data.WriteStrongParcelable(params)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Write ui effect params failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();
@@ -47,7 +47,7 @@ WMError UIEffectControllerProxy::SetParams(const sptr<UIEffectParams>& param)
     }
     return static_cast<WMError>(ret);
 }
-WMError UIEffectControllerProxy::AnimateTo(const sptr<UIEffectParams>& param,
+WMError UIEffectControllerProxy::AnimateTo(const sptr<UIEffectParams>& params,
     const sptr<WindowAnimationOption>& config, const sptr<WindowAnimationOption>& interruptedOption)
 {
     MessageParcel data;
@@ -57,8 +57,8 @@ WMError UIEffectControllerProxy::AnimateTo(const sptr<UIEffectParams>& param,
         TLOGE(WmsLogTag::WMS_ANIMATION, "Write interfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (!data.WriteStrongParcelable(param)) {
-        TLOGE(WmsLogTag::WMS_ANIMATION, "Write ui effect param failed");
+    if (!data.WriteStrongParcelable(params)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Write ui effect params failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (!data.WriteStrongParcelable(config)) {

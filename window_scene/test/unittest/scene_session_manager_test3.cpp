@@ -1593,7 +1593,7 @@ HWTEST_F(SceneSessionManagerTest3, ConfigWindowImmersive01, TestSize.Level1)
     ASSERT_NE(ssm_, nullptr);
     ssm_->ConfigWindowImmersive(immersiveConfig);
 
-    ASSERT_EQ(ssm_->SwitchFreeMultiWindow(false), WSError::WS_ERROR_DEVICE_NOT_SUPPORT);
+    ASSERT_EQ(ssm_->SwitchFreeMultiWindow(false), WSError::WS_OK);
     SystemSessionConfig systemConfig;
     systemConfig.freeMultiWindowSupport_ = true;
     ssm_->SwitchFreeMultiWindow(false);

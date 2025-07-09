@@ -30,6 +30,11 @@ using namespace AbilityRuntime;
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsRootSceneSession" };
 const std::string PENDING_SCENE_CB = "pendingSceneSessionActivation";
+const std::string BATCH_PENDING_SCENE_ACTIVE_CB = "batchPendingSceneSessionsActivation";
+const std::unordered_map<std::string, RootListenerFuncType> ListenerFuncMap {
+    {PENDING_SCENE_CB,                      RootListenerFuncType::PENDING_SCENE_CB},
+    {BATCH_PENDING_SCENE_ACTIVE_CB,         RootListenerFuncType::BATCH_PENDING_SCENE_ACTIVE_CB},
+};
 } // namespace
 
 JsRootSceneSession::JsRootSceneSession(napi_env env, const sptr<RootSceneSession>& rootSceneSession)
@@ -108,6 +113,12 @@ napi_value JsRootSceneSession::OnRegisterCallback(napi_env env, napi_callback_in
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
+    auto iterFunctionType = ListenerFuncMap.find(cbType);
+    if (iterFunctionType == ListenerFuncMap.end()) {
+        TLOGE(WmsLogTag::WMS_MAIN, "callback type is not supported, type=%{public}s", cbType.c_str());
+        return NapiGetUndefined(env);
+    }
+    RootListenerFuncType rootlistenerFuncType = iterFunctionType->second;
     if (IsCallbackRegistered(env, cbType, value)) {
         return NapiGetUndefined(env);
     }
@@ -117,10 +128,6 @@ napi_value JsRootSceneSession::OnRegisterCallback(napi_env env, napi_callback_in
             env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM), "Root scene session is null!"));
         return NapiGetUndefined(env);
     }
-
-    rootSceneSession_->SetPendingSessionActivationEventListener([this](SessionInfo& info) {
-        this->PendingSessionActivation(info);
-    });
     std::shared_ptr<NativeReference> callbackRef;
     napi_ref result = nullptr;
     napi_create_reference(env, value, 1, &result);
@@ -130,8 +137,39 @@ napi_value JsRootSceneSession::OnRegisterCallback(napi_env env, napi_callback_in
         std::unique_lock<std::shared_mutex> lock(jsCbMapMutex_);
         jsCbMap_[cbType] = callbackRef;
     }
+    ProcessRegisterCallback(rootlistenerFuncType);
     WLOGFD("End, type=%{public}s", cbType.c_str());
     return NapiGetUndefined(env);
+}
+
+void JsRootSceneSession::ProcessRegisterCallback(RootListenerFuncType rootlistenerFuncType)
+{
+    switch (static_cast<uint32_t>(rootlistenerFuncType)) {
+        case static_cast<uint32_t>(RootListenerFuncType::PENDING_SCENE_CB):
+            ProcessPendingSceneSessionActivationRegister();
+            break;
+        case static_cast<uint32_t>(RootListenerFuncType::BATCH_PENDING_SCENE_ACTIVE_CB):
+            ProcessBatchPendingSceneSessionsActivationRegister();
+            break;
+        default:
+            break;
+    }
+}
+ 
+void JsRootSceneSession::ProcessPendingSceneSessionActivationRegister()
+{
+    rootSceneSession_->SetPendingSessionActivationEventListener([this](SessionInfo& info) {
+        this->PendingSessionActivation(info);
+    });
+}
+ 
+void JsRootSceneSession::ProcessBatchPendingSceneSessionsActivationRegister()
+{
+    rootSceneSession_->SetBatchPendingSessionsActivationEventListener([this]
+        (const std::vector<std::shared_ptr<SessionInfo>>& sessionInfos) {
+        this->BatchPendingSessionsActivation(sessionInfos);
+    });
+    TLOGD(WmsLogTag::WMS_LIFE, "success");
 }
 
 napi_value JsRootSceneSession::OnLoadContent(napi_env env, napi_callback_info info)
@@ -265,6 +303,53 @@ void JsRootSceneSession::PendingSessionActivationInner(std::shared_ptr<SessionIn
     taskScheduler_->PostMainThreadTask(task, "PendingSessionActivationInner");
 }
 
+napi_value JsRootSceneSession::CreateSessionInfosNapiValue(
+    napi_env env, const std::vector<std::shared_ptr<SessionInfo>>& sessionInfos)
+{
+    napi_value arrayValue = nullptr;
+    napi_create_array_with_length(env, sessionInfos.size(), &arrayValue);
+ 
+    if (arrayValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to create napi array");
+        return NapiGetUndefined(env);
+    }
+ 
+    int32_t index = 0;
+    for (const auto& sessionInfo : sessionInfos) {
+        napi_value objValue = nullptr;
+        napi_create_object(env, &objValue);
+        if (objValue == nullptr) {
+            TLOGE(WmsLogTag::WMS_LIFE, "failed to create napi object");
+            return NapiGetUndefined(env);
+        }
+        napi_set_element(env, arrayValue, index++, CreateJsSessionInfo(env, *sessionInfo));
+    }
+    return arrayValue;
+}
+ 
+void JsRootSceneSession::BatchPendingSessionsActivationInner(
+    const std::vector<std::shared_ptr<SessionInfo>>& sessionInfos)
+{
+    const char* const where = __func__;
+    auto task = [jsCallBack = GetJSCallback(BATCH_PENDING_SCENE_ACTIVE_CB), sessionInfos, env = env_, where] {
+        if (!jsCallBack) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s jsCallBack is nullptr", where);
+            return;
+        }
+ 
+        napi_value jsSessionInfos = CreateSessionInfosNapiValue(env, sessionInfos);
+        if (jsSessionInfos == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s target session info is nullptr", where);
+            return;
+        }
+        napi_value argv[] = {jsSessionInfos};
+        TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s task success", where);
+        napi_call_function(env, NapiGetUndefined(env),
+            jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, "BatchPendingSessionsActivationInner");
+}
+
 static int32_t GetRealCallerSessionId(const sptr<SceneSession>& sceneSession)
 {
     int32_t realCallerSessionId = SceneSessionManager::GetInstance().GetFocusedSessionId();
@@ -327,6 +412,66 @@ void JsRootSceneSession::PendingSessionActivation(SessionInfo& info)
     if (info.fullScreenStart_) {
         sceneSession->NotifySessionFullScreen(true);
     }
+}
+
+void JsRootSceneSession::BatchPendingSessionsActivation(const std::vector<std::shared_ptr<SessionInfo>>& sessionInfos)
+{
+    std::vector<sptr<SceneSession>> sceneSessions;
+    for (auto& info : sessionInfos) {
+        if (info == nullptr) {
+            TLOGE(WmsLogTag::WMS_LIFE, "sessionInfo is null");
+            return;
+        }
+        TLOGI(WmsLogTag::WMS_LIFE, "bundleName %{public}s, moduleName %{public}s, abilityName %{public}s, "
+            "appIndex %{public}d, reuse %{public}d, requestId %{public}d, specifiedFlag %{public}s",
+            info->bundleName_.c_str(), info->moduleName_.c_str(),
+            info->abilityName_.c_str(), info->appIndex_, info->reuse, info->requestId, info->specifiedFlag_.c_str());
+        auto sceneSession = GenSceneSession(*info);
+        if (sceneSession == nullptr) {
+            TLOGE(WmsLogTag::WMS_LIFE, "GenSceneSession failed");
+            return;
+        }
+ 
+        if (info->want != nullptr) {
+            bool isNeedBackToOther = info->want->GetBoolParam(AAFwk::Want::PARAM_BACK_TO_OTHER_MISSION_STACK, false);
+            TLOGI(WmsLogTag::WMS_LIFE, "session: %{public}d isNeedBackToOther: %{public}d",
+                  sceneSession->GetPersistentId(), isNeedBackToOther);
+            if (isNeedBackToOther) {
+                info->callerPersistentId_ = GetRealCallerSessionId(sceneSession);
+                VerifyCallerToken(*info);
+            } else {
+                info->callerPersistentId_ = INVALID_SESSION_ID;
+            }
+ 
+            auto focusedOnShow = info->want->GetBoolParam(AAFwk::Want::PARAM_RESV_WINDOW_FOCUSED, true);
+            sceneSession->SetFocusedOnShow(focusedOnShow);
+ 
+            std::string continueSessionId =
+                info->want->GetStringParam(Rosen::PARAM_KEY::PARAM_DMS_CONTINUE_SESSION_ID_KEY);
+            if (!continueSessionId.empty()) {
+                info->continueSessionId_ = continueSessionId;
+                TLOGI(WmsLogTag::WMS_LIFE, "continueSessionId from ability manager: %{public}s",
+                      continueSessionId.c_str());
+            }
+ 
+            // app continue report for distributed scheduled service
+            if (info->want->GetIntParam(Rosen::PARAM_KEY::PARAM_DMS_PERSISTENT_ID_KEY, 0) > 0) {
+                TLOGI(WmsLogTag::WMS_LIFE, "Continue app with persistentId: %{public}d", info->persistentId_);
+                SingletonContainer::Get<DmsReporter>().ReportContinueApp(true, static_cast<int32_t>(WSError::WS_OK));
+            }
+        } else {
+            TLOGI(WmsLogTag::WMS_LIFE, "session: %{public}d want is empty", sceneSession->GetPersistentId());
+            sceneSession->SetFocusedOnShow(true);
+        }
+ 
+        sceneSession->SetSessionInfo(*info);
+        std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(*info);
+        if (info->fullScreenStart_) {
+            sceneSession->NotifySessionFullScreen(true);
+        }
+        sceneSessions.emplace_back(sceneSession);
+    }
+    BatchPendingSessionsActivationInner(sessionInfos);
 }
 
 void JsRootSceneSession::VerifyCallerToken(SessionInfo& info)

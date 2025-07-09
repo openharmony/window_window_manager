@@ -90,7 +90,7 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateFocusChangeInfo01, TestSize.Level1)
 
 /**
  * @tc.name: UpdateFocusChangeInfo02
- * @tc.desc: test InterfaceToken check failed
+ * @tc.desc: test write focusChangeInfo failed
  * @tc.type: FUNC
  */
 HWTEST_F(WindowManagerAgentProxyTest, UpdateFocusChangeInfo02, TestSize.Level1)
@@ -109,7 +109,7 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateFocusChangeInfo02, TestSize.Level1)
 
 /**
  * @tc.name: UpdateFocusChangeInfo03
- * @tc.desc: test InterfaceToken check failed
+ * @tc.desc: test write focused failed
  * @tc.type: FUNC
  */
 HWTEST_F(WindowManagerAgentProxyTest, UpdateFocusChangeInfo03, TestSize.Level1)
@@ -124,6 +124,22 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateFocusChangeInfo03, TestSize.Level1)
     MockMessageParcel::SetWriteBoolErrorFlag(true);
     windowManagerAgentProxy->UpdateFocusChangeInfo(focusChangeInfo, focused);
     EXPECT_TRUE(g_logMsg.find("Write Focus failed") != std::string::npos);
+}
+
+/**
+ * @tc.name: UpdateFocusChangeInfo04
+ * @tc.desc: test focusChangeInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerAgentProxyTest, UpdateFocusChangeInfo04, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    bool focused = true;
+
+    MockMessageParcel::ClearAllErrorFlag();
+    windowManagerAgentProxy->UpdateFocusChangeInfo(nullptr, focused);
+    EXPECT_TRUE(g_logMsg.find("Invalid focus change info") != std::string::npos);
 }
 
 /**
@@ -162,6 +178,29 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateSystemBarRegionTints01, TestSize.Lev
 }
 
 /**
+ * @tc.name: UpdateSystemBarRegionTints02
+ * @tc.desc: test write tints and displayId failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerAgentProxyTest, UpdateSystemBarRegionTints02, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    DisplayId displayId = 0;
+    SystemBarRegionTints tints = {};
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint64ErrorFlag(true);
+    windowManagerAgentProxy->UpdateSystemBarRegionTints(displayId, tints);
+    EXPECT_TRUE(g_logMsg.find("Write displayId failed") != std::string::npos);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    windowManagerAgentProxy->UpdateSystemBarRegionTints(displayId, tints);
+    EXPECT_TRUE(g_logMsg.find("Write SystemBarRegionTint failed") != std::string::npos);
+}
+
+/**
  * @tc.name: NotifyAccessibilityWindowInfo
  * @tc.desc: test InterfaceToken check failed
  * @tc.type: FUNC
@@ -177,6 +216,26 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifyAccessibilityWindowInfo, TestSize.Le
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     windowManagerAgentProxy->NotifyAccessibilityWindowInfo(infos, type);
     EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+}
+
+/**
+ * @tc.name: NotifyAccessibilityWindowInfo01
+ * @tc.desc: test write infos failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerAgentProxyTest, NotifyAccessibilityWindowInfo01, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    std::vector<sptr<AccessibilityWindowInfo>> infos;
+    sptr<AccessibilityWindowInfo> info = sptr<AccessibilityWindowInfo>::MakeSptr();
+    infos.push_back(info);
+    WindowUpdateType type = WindowUpdateType::WINDOW_UPDATE_REMOVED;
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteParcelableErrorFlag(true);
+    windowManagerAgentProxy->NotifyAccessibilityWindowInfo(infos, type);
+    EXPECT_TRUE(g_logMsg.find("Write accessibility window infos failed") != std::string::npos);
 }
 
 /**
@@ -198,7 +257,7 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateWindowVisibilityInfo01, TestSize.Lev
 
 /**
  * @tc.name: UpdateWindowVisibilityInfo02
- * @tc.desc: test InterfaceToken check failed
+ * @tc.desc: test write visibilityInfos failed
  * @tc.type: FUNC
  */
 HWTEST_F(WindowManagerAgentProxyTest, UpdateWindowVisibilityInfo02, TestSize.Level1)
@@ -211,6 +270,25 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateWindowVisibilityInfo02, TestSize.Lev
     MockMessageParcel::SetWriteUint32ErrorFlag(true);
     windowManagerAgentProxy->UpdateWindowVisibilityInfo(visibilityInfos);
     EXPECT_TRUE(g_logMsg.find("write windowVisibilityInfos size failed") != std::string::npos);
+}
+
+/**
+ * @tc.name: UpdateWindowVisibilityInfo03
+ * @tc.desc: test write visibilityInfos failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerAgentProxyTest, UpdateWindowVisibilityInfo03, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    std::vector<sptr<WindowVisibilityInfo>> visibilityInfos = {};
+    sptr<WindowVisibilityInfo> visibilityInfo = sptr<WindowVisibilityInfo>::MakeSptr();
+    visibilityInfos.push_back(visibilityInfo);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteParcelableErrorFlag(true);
+    windowManagerAgentProxy->UpdateWindowVisibilityInfo(visibilityInfos);
+    EXPECT_TRUE(g_logMsg.find("Write windowVisibilityInfo failed") != std::string::npos);
 }
 
 /**
@@ -243,6 +321,25 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateWindowDrawingContentInfo02, TestSize
     MockMessageParcel::SetWriteUint32ErrorFlag(true);
     windowManagerAgentProxy->UpdateWindowDrawingContentInfo(windowDrawingContentInfos);
     EXPECT_TRUE(g_logMsg.find("write windowDrawingContentInfos size failed") != std::string::npos);
+}
+
+/**
+ * @tc.name: UpdateWindowDrawingContentInfo03
+ * @tc.desc: test wirte windowDrawingContentInfos failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerAgentProxyTest, UpdateWindowDrawingContentInfo03, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    std::vector<sptr<WindowDrawingContentInfo>> windowDrawingContentInfos = {};
+    sptr<WindowDrawingContentInfo> windowDrawingContentInfo = sptr<WindowDrawingContentInfo>::MakeSptr();
+    windowDrawingContentInfos.push_back(windowDrawingContentInfo);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteParcelableErrorFlag(true);
+    windowManagerAgentProxy->UpdateWindowDrawingContentInfo(windowDrawingContentInfos);
+    EXPECT_TRUE(g_logMsg.find("Write windowDrawingContentInfos failed") != std::string::npos);
 }
 
 /**
@@ -332,6 +429,7 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifyWaterMarkFlagChangedResult01, TestSi
     windowManagerAgentProxy->NotifyWaterMarkFlagChangedResult(showWaterMark);
     EXPECT_TRUE(g_logMsg.find("Write is showing status failed") != std::string::npos);
 }
+
 /**
  * @tc.name: UpdateVisibleWindowNum
  * @tc.desc: test InterfaceToken check failed
@@ -351,6 +449,27 @@ HWTEST_F(WindowManagerAgentProxyTest, UpdateVisibleWindowNum, TestSize.Level1)
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     windowManagerAgentProxy->UpdateVisibleWindowNum(visibleWindowNumInfo);
     EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+}
+
+/**
+ * @tc.name: UpdateVisibleWindowNum01
+ * @tc.desc: test InterfaceToken check failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerAgentProxyTest, UpdateVisibleWindowNum01, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    VisibleWindowNumInfo info;
+    info.displayId = 1;
+    info.visibleWindowNum = 1;
+    std::vector<VisibleWindowNumInfo> visibleWindowNumInfo;
+    visibleWindowNumInfo.push_back(info);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    windowManagerAgentProxy->UpdateVisibleWindowNum(visibleWindowNumInfo);
+    EXPECT_TRUE(g_logMsg.find("Write VisibleWindowNumInfo failed") != std::string::npos);
 }
 
 /**
@@ -460,6 +579,40 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifyWindowStyleChange, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyCallingWindowDisplayChanged01
+ * @tc.desc: test InterfaceToken check failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerAgentProxyTest, NotifyCallingWindowDisplayChanged01, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    CallingWindowInfo windowInfo;
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    windowManagerAgentProxy->NotifyCallingWindowDisplayChanged(windowInfo);
+    EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+}
+
+/**
+ * @tc.name: NotifyCallingWindowDisplayChanged02
+ * @tc.desc: test InterfaceToken check failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerAgentProxyTest, NotifyCallingWindowDisplayChanged02, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    CallingWindowInfo windowInfo;
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteParcelableErrorFlag(true);
+    windowManagerAgentProxy->NotifyCallingWindowDisplayChanged(windowInfo);
+    EXPECT_TRUE(g_logMsg.find("Write callingWindowInfo failed") != std::string::npos);
+}
+
+/**
  * @tc.name: NotifyWindowSystemBarPropertyChange
  * @tc.desc: test NotifyWindowSystemBarPropertyChange
  * @tc.type: FUNC
@@ -511,6 +664,40 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifyWindowPidVisibilityChanged01, TestSi
 }
 
 /**
+ * @tc.name: NotifyWindowPidVisibilityChanged02
+ * @tc.desc: test NotifyWindowPidVisibilityChanged02
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerAgentProxyTest, NotifyWindowPidVisibilityChanged02, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteParcelableErrorFlag(true);
+    windowManagerAgentProxy->NotifyWindowPidVisibilityChanged(nullptr);
+    EXPECT_TRUE(g_logMsg.find("Invalid window pid visibility info") != std::string::npos);
+}
+
+/**
+ * @tc.name: UpdatePiPWindowStateChanged
+ * @tc.desc: test UpdatePiPWindowStateChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerAgentProxyTest, UpdatePiPWindowStateChanged, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    std::string bundleName = "test";
+    bool isForeground = false;
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    windowManagerAgentProxy->UpdatePiPWindowStateChanged(bundleName, isForeground);
+    EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+}
+
+/**
  * @tc.name: NotifyWindowPropertyChange
  * @tc.desc: test NotifyWindowPropertyChange
  * @tc.type: FUNC
@@ -546,6 +733,98 @@ HWTEST_F(WindowManagerAgentProxyTest, NotifyWindowPropertyChange01, TestSize.Lev
     EXPECT_TRUE(g_logMsg.find("Write propertyDirtyFlags failed") != std::string::npos);
 }
 
+/**
+ * @tc.name: NotifyWindowPropertyChange02
+ * @tc.desc: test NotifyWindowPropertyChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerAgentProxyTest, NotifyWindowPropertyChange02, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    uint32_t propertyDirtyFlags = 0;
+    std::vector<std::unordered_map<WindowInfoKey, std::any>> windowInfoList;
+    std::unordered_map<WindowInfoKey, std::any> info = {
+        { WindowInfoKey::APP_INDEX, 0 },
+    };
+    windowInfoList.push_back(info);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    windowManagerAgentProxy->NotifyWindowPropertyChange(propertyDirtyFlags, windowInfoList);
+    EXPECT_TRUE(g_logMsg.find("Write window change info value failed") != std::string::npos);
+}
+
+/**
+ * @tc.name: WriteWindowChangeInfoValue
+ * @tc.desc: test WriteWindowChangeInfoValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerAgentProxyTest, WriteWindowChangeInfoValue, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    MessageParcel data;
+    std::pair<WindowInfoKey, std::any> windowInfoPair;
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    windowManagerAgentProxy->WriteWindowChangeInfoValue(data, windowInfoPair);
+    EXPECT_TRUE(g_logMsg.find("Write windowInfoKey failed") != std::string::npos);
+}
+
+/**
+ * @tc.name: WriteWindowChangeInfoValue01
+ * @tc.desc: test WriteWindowChangeInfoValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerAgentProxyTest, WriteWindowChangeInfoValue01, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    MockMessageParcel::ClearAllErrorFlag();
+    MessageParcel data;
+    std::pair<WindowInfoKey, std::any> windowInfoPair;
+
+    std::any windowInfo = 0;
+    windowInfoPair = std::make_pair(WindowInfoKey::WINDOW_ID, windowInfo);
+    bool ret = windowManagerAgentProxy->WriteWindowChangeInfoValue(data, windowInfoPair);
+    ASSERT_EQ(ret, true);
+
+    windowInfo = std::string("test");
+    windowInfoPair = std::make_pair(WindowInfoKey::BUNDLE_NAME, windowInfo);
+    ret = windowManagerAgentProxy->WriteWindowChangeInfoValue(data, windowInfoPair);
+    ASSERT_EQ(ret, true);
+
+    windowInfoPair = std::make_pair(WindowInfoKey::ABILITY_NAME, windowInfo);
+    ret = windowManagerAgentProxy->WriteWindowChangeInfoValue(data, windowInfoPair);
+    ASSERT_EQ(ret, true);
+
+    windowInfo = 0;
+    windowInfoPair = std::make_pair(WindowInfoKey::APP_INDEX, windowInfo);
+    ret = windowManagerAgentProxy->WriteWindowChangeInfoValue(data, windowInfoPair);
+    ASSERT_EQ(ret, true);
+
+    windowInfo = WindowVisibilityState::START;
+    windowInfoPair = std::make_pair(WindowInfoKey::VISIBILITY_STATE, windowInfo);
+    ret = windowManagerAgentProxy->WriteWindowChangeInfoValue(data, windowInfoPair);
+    ASSERT_EQ(ret, true);
+
+    windowInfo = static_cast<uint64_t>(0);
+    windowInfoPair = std::make_pair(WindowInfoKey::DISPLAY_ID, windowInfo);
+    ret = windowManagerAgentProxy->WriteWindowChangeInfoValue(data, windowInfoPair);
+    ASSERT_EQ(ret, true);
+
+    windowInfo = Rect({0, 0, 0, 0});
+    windowInfoPair = std::make_pair(WindowInfoKey::WINDOW_RECT, windowInfo);
+    ret = windowManagerAgentProxy->WriteWindowChangeInfoValue(data, windowInfoPair);
+    ASSERT_EQ(ret, true);
+
+    windowInfo = 0;
+    windowInfoPair = std::make_pair(WindowInfoKey::NONE, windowInfo);
+    ret = windowManagerAgentProxy->WriteWindowChangeInfoValue(data, windowInfoPair);
+    ASSERT_EQ(ret, false);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

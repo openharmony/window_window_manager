@@ -602,7 +602,7 @@ HWTEST_F(WindowSceneSessionImplTest5, SwitchFreeMultiWindow03, Function | SmallT
     sptr<WindowSceneSessionImpl> mainWindow = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     mainWindow->property_->SetPersistentId(1);
     mainWindow->hostSession_ = session;
-    mainWindow->property_->SetWindowName("SwitchFreeMultiWindow02_mainWindow");
+    mainWindow->property_->SetWindowName("SwitchFreeMultiWindow03_mainWindow");
     mainWindow->windowSystemConfig_.freeMultiWindowEnable_ = true;
     mainWindow->windowSystemConfig_.freeMultiWindowSupport_ = true;
     mainWindow->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
@@ -616,6 +616,7 @@ HWTEST_F(WindowSceneSessionImplTest5, SwitchFreeMultiWindow03, Function | SmallT
     EXPECT_EQ(WindowHelper::IsWindowModeSupported(mainWindow->property_->GetWindowModeSupportType(),
         WindowMode::WINDOW_MODE_FULLSCREEN), false);
     EXPECT_EQ(mainWindow->windowSystemConfig_.freeMultiWindowEnable_, false);
+    WindowSceneSessionImpl::windowSessionMap_.erase(mainWindow->property_->GetWindowName());
 }
 
 /**
@@ -1464,8 +1465,13 @@ HWTEST_F(WindowSceneSessionImplTest5, SetWindowAnchorInfo01, Function | SmallTes
     ret = window->SetWindowAnchorInfo(windowAnchorInfo);
     EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
 
-    property->subWindowLevel_ = 100;
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    ret = window->SetWindowAnchorInfo(windowAnchorInfo);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
+
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    property->subWindowLevel_ = 100;
     ret = window->SetWindowAnchorInfo(windowAnchorInfo);
     EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
 
@@ -2040,6 +2046,13 @@ HWTEST_F(WindowSceneSessionImplTest5, UpdateEnableDragWhenSwitchMultiWindow, Fun
     EXPECT_EQ(false, window->property_->dragEnabled_);
 
     window->property_->type_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+    sptr<CompatibleModeProperty> property = sptr<CompatibleModeProperty>::MakeSptr();
+    property->disableDragResize_ = true;
+    window->property_->compatibleModeProperty_ = property;
+    window->UpdateEnableDragWhenSwitchMultiWindow(true);
+    EXPECT_EQ(false, window->property_->dragEnabled_);
+
+    property->disableDragResize_ = false;
     window->UpdateEnableDragWhenSwitchMultiWindow(true);
     EXPECT_EQ(true, window->property_->dragEnabled_);
 }
@@ -2090,16 +2103,11 @@ HWTEST_F(WindowSceneSessionImplTest5, TestMoveWindowToGlobalDisplay, TestSize.Le
     auto ret = window->MoveWindowToGlobalDisplay(100, 100);
     EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
 
-    // Case 2: Same position
-    window->hostSession_ = mockHostSession;
-    ret = window->MoveWindowToGlobalDisplay(100, 100);
-    EXPECT_EQ(ret, WMError::WM_DO_NOTHING);
-
-    // Case 3: Illegal position
+    // Case 2: Illegal position
     ret = window->MoveWindowToGlobalDisplay(INT32_MAX, INT32_MAX);
     EXPECT_EQ(ret, WMError::WM_ERROR_ILLEGAL_PARAM);
 
-    // Case 4: Move to new position
+    // Case 3: Move to new position
     EXPECT_CALL(*mockHostSession, UpdateGlobalDisplayRectFromClient(_, _)).Times(1).WillOnce(Return(WSError::WS_OK));
     ret = window->MoveWindowToGlobalDisplay(200, 300);
     EXPECT_EQ(ret, WMError::WM_OK);
