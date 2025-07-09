@@ -475,7 +475,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         ani_native_function {"loadContent", "JLstd/core/String;:I",
             reinterpret_cast<void *>(AniWindowStage::LoadContent)},
         ani_native_function {"loadContentSync",
-            "JLstd/core/String;Larkui/stateManagement/storage/localStorage/LocalStorage;:V",
+            "JLstd/core/String;Larkui/stateManagement/storages/localStorage/LocalStorage;:V",
             reinterpret_cast<void *>(AniWindowStage::LoadContentWithStorage)},
         ani_native_function {"disableWindowDecorSync", nullptr,
             reinterpret_cast<void *>(AniWindowStage::DisableWindowDecor)},
@@ -488,9 +488,12 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         ani_native_function {"offSync", nullptr,
             reinterpret_cast<void *>(AniWindowStage::UnregisterWindowCallback)},
     };
-    if ((ret = env->Class_BindNativeMethods(cls, methods.data(), methods.size())) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] bind fail %{public}u", ret);
-        return ANI_NOT_FOUND;
+    for (auto method : methods) {
+        if ((ret = env->Class_BindNativeMethods(cls, &method, 1u)) != ANI_OK) {
+            TLOGE(WmsLogTag::DEFAULT, "[ANI] bind window method fail %{public}u, %{public}s, %{public}s",
+                ret, method.name, method.signature);
+            return ANI_NOT_FOUND;
+        }
     }
     *result = ANI_VERSION_1;
 
