@@ -3879,6 +3879,38 @@ HWTEST_F(ScreenSessionTest, GetChildCount, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetForceCloseHdr
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetForceCloseHdr, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetForceCloseHdr start";
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    session->SetForceCloseHdr(true);
+    session->SetForceCloseHdr(false);
+    EXPECT_TRUE(g_errLog.find("Start get screen status.") != std::string::npos);
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetForceCloseHdr end";
+}
+
+/**
+ * @tc.name: SetForceCloseHdr01
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetForceCloseHdr01, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetForceCloseHdr start";
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    session->SetForceCloseHdr(false);
+    session->SetForceCloseHdr(false);
+    EXPECT_TRUE(g_errLog.find("Start get screen status.") != std::string::npos);
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetForceCloseHdr end";
+}
+
+/**
  * @tc.name: IsWidthHeightMatch01
  * @tc.desc: normal function
  * @tc.type: FUNC
