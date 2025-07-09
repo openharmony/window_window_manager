@@ -996,5 +996,36 @@ enum class SnapshotNodeType : uint32_t {
 enum class AsyncTraceTaskId: int32_t {
     THROW_SLIP_ANIMATION = 0,
 };
+
+/**
+ * @brief Recover state
+ */
+enum class RecoverState : uint32_t {
+    RECOVER_INITIAL = 0,
+    RECOVER_ENABLE_INPUT,
+    RECOVER_END,
+};
+
+/**
+ * @brief Client window recover state
+ */
+enum class WindowRecoverState : uint32_t {
+    WINDOW_NOT_RECONNECT = 0,
+    WINDOW_START_RECONNECT,
+    WINDOW_DOING_RECONNECT,
+    WINDOW_FINISH_RECONNECT,
+    WINDOW_RECOVER_STATE_END,
+};
+
+/**
+ * @brief Server session recover state
+ */
+enum class SessionRecoverState : uint32_t {
+    SESSION_NOT_RECONNECT = 0,
+    SESSION_START_RECONNECT,
+    SESSION_DOING_RECONNECT,
+    SESSION_FINISH_RECONNECT,
+    SESSION_RECOVER_STATE_END,
+};
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H
