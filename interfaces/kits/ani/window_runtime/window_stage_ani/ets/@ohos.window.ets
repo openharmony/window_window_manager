@@ -1290,9 +1290,9 @@ export class WindowInternal implements Window {
     }
 
     public getGlobalRect(): Rect {
-      let ret = this.getGlobalRect(this.nativeObj);
-      return ret;
+      return this.getGlobalRect(this.nativeObj);
     }
+
     public getWindowDecorHeight(): number {
        let ret = this.getWindowDecorHeight(this.nativeObj);
        return ret;
