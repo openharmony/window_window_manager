@@ -1274,6 +1274,29 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             ProcSetVirtualScreenAutoRotation(data, reply);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SET_SCREEN_PRIVACY_WINDOW_TAG_SWITCH: {
+            ScreenId screenId = SCREEN_ID_INVALID;
+            if (!data.ReadUint64(screenId)) {
+                TLOGE(WmsLogTag::DMS, "Read screenId failed");
+                return ERR_INVALID_DATA;
+            }
+            std::vector<std::string> privacyWindowTag;
+            if (!data.ReadStringVector(&privacyWindowTag)) {
+                TLOGE(WmsLogTag::DMS, "Read privacyWindowTag failed");
+                return ERR_INVALID_DATA;
+            }
+            bool enable = false;
+            if (!data.ReadBool(enable)) {
+                TLOGE(WmsLogTag::DMS, "Read enable failed");
+                return ERR_INVALID_DATA;
+            }
+            DMError ret = SetScreenPrivacyWindowTagSwitch(screenId, privacyWindowTag, enable);
+            if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+                TLOGE(WmsLogTag::DMS, "Write reault failed");
+                return ERR_INVALID_DATA;
+            }
+            break;
+        }
         default:
             TLOGW(WmsLogTag::DMS, "unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
