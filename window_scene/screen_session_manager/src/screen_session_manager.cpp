@@ -1123,11 +1123,6 @@ void ScreenSessionManager::SetMultiScreenDefaultRelativePosition()
     if (extendSession != nullptr && mainSession != nullptr) {
         ScreenProperty mainProperty = mainSession->GetScreenProperty();
         int32_t mainWidth = mainProperty.GetBounds().rect_.GetWidth();
-        int32_t mainHeight = mainProperty.GetBounds().rect_.GetHeight();
-        if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && GetIsExtendScreenConnected() &&
-            mainHeight > mainWidth) {
-            mainWidth = mainHeight;
-        }
         if (g_isPcDevice) {
             mainOptions = { mainSession->GetRSScreenId(), 0, 0 };
             extendOptions = { extendSession->GetRSScreenId(), mainWidth, 0 };
@@ -7561,7 +7556,6 @@ void ScreenSessionManager::HandleExtendScreenConnect(ScreenId screenId)
     }
     SetIsExtendScreenConnected(true);
     extendScreenConnectStatus_.store(ExtendScreenConnectStatus::CONNECT);
-    SuperFoldSensorManager::GetInstance().HandleScreenConnectChange();
     OnExtendScreenConnectStatusChange(screenId, ExtendScreenConnectStatus::CONNECT);
 #endif
 }
