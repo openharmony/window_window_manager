@@ -3210,13 +3210,28 @@ HWTEST_F(ScreenSessionManagerTest, GetCurrentScreenPhyBounds02, TestSize.Level1)
     auto foldController = sptr<FoldScreenController>::MakeSptr(ssm_->displayInfoMutex_,
         ssm_->screenPowerTaskScheduler_);
     ASSERT_NE(foldController, nullptr);
-    auto foldPolicy = fsc->GetFoldScreenPolicy(DisplayDeviceType::SECONDARY_DISPLAY_DEVICE);
+    DisplayPhysicalResolution physicalSize_full;
+    physicalSize_full.foldDisplayMode_ = FoldDisplayMode::FULL;
+    physicalSize_full.physicalWidth_ = 2048;
+    physicalSize_full.physicalHeight_ = 2232;
+    DisplayPhysicalResolution physicalSize_main;
+    physicalSize_main.foldDisplayMode_ = FoldDisplayMode::MAIN;
+    physicalSize_main.physicalWidth_ = 1008;
+    physicalSize_main.physicalHeight_ = 2232;
+    DisplayPhysicalResolution physicalSize_global_full;
+    physicalSize_global_full.foldDisplayMode_ = FoldDisplayMode::GLOBAL_FULL;
+    physicalSize_global_full.physicalWidth_ = 3184;
+    physicalSize_global_full.physicalHeight_ = 2232;
+    ScreenSceneConfig::displayPhysicalResolution_.emplace_back(physicalSize_full);
+    ScreenSceneConfig::displayPhysicalResolution_.emplace_back(physicalSize_main);
+    ScreenSceneConfig::displayPhysicalResolution_.emplace_back(physicalSize_global_full);
+    auto foldPolicy = foldController->GetFoldScreenPolicy(DisplayDeviceType::SECONDARY_DISPLAY_DEVICE);
     ASSERT_NE(foldPolicy, nullptr);
-    foldPolicy->lastDisplayMode_ = displayMode == FoldDisplayMode::GLOBAL_FULL;
-    fsc->foldScreenPolicy_ = foldPolicy;
-    ssm_->foldScreenController_ = fsc;
+    foldPolicy->lastDisplayMode_ = FoldDisplayMode::GLOBAL_FULL;
+    foldController->foldScreenPolicy_ = foldPolicy;
+    ssm_->foldScreenController_ = foldController;
     ScreenProperty property;
-    screenBounds = RRect({ 0, 0, 100, 200 }, 0.0f, 0.0f);
+    RRect screenBounds = RRect({ 0, 0, 100, 200 }, 0.0f, 0.0f);
     property.SetPhyBounds(screenBounds);
     ssm_->phyScreenPropMap_[screenId] = property;
     ssm_->GetCurrentScreenPhyBounds(phyWidth, phyHeight, isReset, screenId);
@@ -3224,7 +3239,7 @@ HWTEST_F(ScreenSessionManagerTest, GetCurrentScreenPhyBounds02, TestSize.Level1)
     if (FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
         EXPECT_EQ(phyWidth, 100);
         EXPECT_EQ(phyHeight, 200);
-    } else if (g_screenRotationOffSet == ROTATION_90 || g_screenRotationOffSet == ROTATION_270) {
+    } else if (screenRotationOffSet == 1 || screenRotationOffSet == 3) {
         EXPECT_EQ(phyHeight, 100);
         EXPECT_EQ(phyWidth, 200);
     } else {
