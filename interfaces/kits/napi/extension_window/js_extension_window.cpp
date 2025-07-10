@@ -1098,15 +1098,13 @@ napi_value JsExtensionWindow::OnUnRegisterExtensionWindowCallback(napi_env env, 
 
     napi_value value = nullptr;
     WmErrorCode ret = WmErrorCode::WM_OK;
-    if (argc > ARG_COUNT_ONE && argv[INDEX_ONE] != nullptr && NapiIsCallable(env, argv[INDEX_ONE]))
-    {
+    if (argc > ARG_COUNT_ONE && argv[INDEX_ONE] != nullptr && NapiIsCallable(env, argv[INDEX_ONE])) {
         value = argv[INDEX_ONE];
     }
     if (atomicService) {
         ret = extensionRegisterManager_->AtomicServiceUnregisterListener(windowImpl, cbType,
             CaseType::CASE_WINDOW, env, value);
     } else {
-
         ret = extensionRegisterManager_->UnregisterListener(windowImpl, cbType, CaseType::CASE_WINDOW, env, value);
     }
 
