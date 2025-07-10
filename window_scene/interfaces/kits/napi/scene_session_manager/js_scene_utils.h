@@ -216,6 +216,7 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo);
 napi_value CreateJsExceptionInfo(napi_env env, const ExceptionInfo& exceptionInfo);
 napi_value CreateSupportWindowModes(napi_env env,
     const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes);
+napi_value CreateJsAtomicServiceInfo(napi_env env, const AtomicServiceInfo& atomicServiceInfo);
 napi_value CreateJsSessionRecoverInfo(
     napi_env env, const SessionInfo& sessionInfo, const sptr<WindowSessionProperty> property);
 void SetJsSessionInfoByWant(napi_env env, const SessionInfo& sessionInfo, napi_value objValue);
