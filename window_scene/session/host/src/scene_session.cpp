@@ -6150,6 +6150,10 @@ WMError SceneSession::HandleActionUpdateTouchHotArea(const sptr<WindowSessionPro
     std::vector<Rect> touchHotAreas;
     property->GetTouchHotAreas(touchHotAreas);
     GetSessionProperty()->SetTouchHotAreas(touchHotAreas);
+    if (specificCallback_ != nullptr && specificCallback_->onWindowInfoUpdate_ != nullptr) {
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "id=%{public}d", GetPersistentId());
+        specificCallback_->onWindowInfoUpdate_(GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
+    }
     return WMError::WM_OK;
 }
 
