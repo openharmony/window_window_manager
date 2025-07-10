@@ -24,6 +24,7 @@
 #include "session/host/include/scene_session.h"
 #include "session_listener_controller.h"
 #include "singleton_container.h"
+#include "window_manager_hilog.h"
 #include "zidl/session_lifecycle_listener_stub.h"
 
 using namespace testing;
@@ -31,6 +32,14 @@ using namespace testing::ext;
 using namespace OHOS::Media;
 namespace OHOS {
 namespace Rosen {
+namespace {
+    std::string g_logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
+        const char *msg)
+    {
+        g_logMsg = msg;
+    }
+}
 static const std::string LISTENER_CONTROLLER_TEST_THREAD = "OS_ListenerControllerTest";
 
 class MyMissionListener : public AAFwk::MissionListenerStub {
@@ -210,16 +219,21 @@ HWTEST_F(SessionListenerControllerTest, AddSessionListener, TestSize.Level1)
  */
 HWTEST_F(SessionListenerControllerTest, DelSessionListener, TestSize.Level1)
 {
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     sptr<ISessionListener> listener;
     ASSERT_EQ(listener, nullptr);
     slController->DelSessionListener(listener);
+    EXPECT_TRUE(g_logMsg.find("listener is invalid") != std::string::npos);
     int32_t persistentId = 1;
     slController->NotifySessionLabelUpdated(persistentId);
-    ASSERT_EQ(persistentId, 1);
+    EXPECT_TRUE(g_logMsg.find("1") != std::string::npos);
 
     listener = sptr<MyMissionListener>::MakeSptr();
     slController->DelSessionListener(listener);
     EXPECT_NE(nullptr, listener);
+    EXPECT_FALSE(g_logMsg.find("success") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -292,13 +306,16 @@ HWTEST_F(SessionListenerControllerTest, HandleUnInstallApp1, TestSize.Level1)
  */
 HWTEST_F(SessionListenerControllerTest, HandleUnInstallApp2, TestSize.Level1)
 {
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     std::list<int32_t> sessions;
     sessions.push_front(1);
     slController->HandleUnInstallApp(sessions);
     EXPECT_NE(0, sessions.size());
     int32_t persistentId = 1;
     slController->NotifySessionLabelUpdated(persistentId);
-    ASSERT_EQ(persistentId, 1);
+    EXPECT_TRUE(g_logMsg.find("1") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -368,6 +385,8 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionUnfocused, TestSize.Level1)
  */
 HWTEST_F(SessionListenerControllerTest, NotifySessionClosed, TestSize.Level1)
 {
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     SessionInfo info;
     info.bundleName_ = "bundleName";
     info.moduleName_ = "moduleName";
@@ -375,10 +394,12 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionClosed, TestSize.Level1)
     info.appIndex_ = 0;
     info.persistentId_ = -1;
     slController->NotifySessionClosed(info);
+    EXPECT_FALSE(g_logMsg.find("-1") != std::string::npos);
 
     info.persistentId_ = 1;
     slController->NotifySessionClosed(info);
-    ASSERT_EQ(info.persistentId_, 1);
+    EXPECT_TRUE(g_logMsg.find("1") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -404,9 +425,7 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionLabelUpdated, TestSize.Leve
 HWTEST_F(SessionListenerControllerTest, OnListenerDied, TestSize.Level1)
 {
     sptr<IRemoteObject> remote;
-    if (slController == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, slController);
     slController->OnListenerDied(remote);
     EXPECT_EQ(nullptr, remote);
 

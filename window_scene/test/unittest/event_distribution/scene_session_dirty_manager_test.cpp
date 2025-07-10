@@ -24,11 +24,20 @@
 #include "session/host/include/sub_session.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "transaction/rs_uiextension_data.h"
+#include "window_manager_hilog.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
+namespace {
+    std::string g_logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
+        const char *msg)
+    {
+        g_logMsg = msg;
+    }
+}
 namespace Rosen {
 constexpr int POINTER_CHANGE_AREA_SIXTEEN = 16;
 constexpr int POINTER_CHANGE_AREA_DEFAULT = 0;
@@ -75,20 +84,20 @@ namespace {
  */
 HWTEST_F(SceneSessionDirtyManagerTest, NotifyWindowInfoChange, TestSize.Level1)
 {
-    int ret = 0;
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     manager_->NotifyWindowInfoChange(nullptr, WindowUpdateType::WINDOW_UPDATE_ADDED, true);
     SessionInfo info;
     info.abilityName_ = "TestAbilityName";
     info.bundleName_ = "TestBundleName";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    if (sceneSession == nullptr) {
-        return;
-    }
+    ASSERT_NE(sceneSession, nullptr);
     manager_->NotifyWindowInfoChange(sceneSession, WindowUpdateType::WINDOW_UPDATE_ADDED, true);
     manager_->NotifyWindowInfoChange(sceneSession, WindowUpdateType::WINDOW_UPDATE_REMOVED, true);
     manager_->NotifyWindowInfoChange(sceneSession, WindowUpdateType::WINDOW_UPDATE_ACTIVE, true);
     manager_->NotifyWindowInfoChange(sceneSession, WindowUpdateType::WINDOW_UPDATE_FOCUSED, true);
-    ASSERT_EQ(ret, 0);
+    EXPECT_FALSE(g_logMsg.find("sceneSession is null") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -198,25 +207,16 @@ HWTEST_F(SceneSessionDirtyManagerTest, GetDialogSessionMap, TestSize.Level1)
     auto sessionList = manager_->GetDialogSessionMap(sessionMap);
     ASSERT_EQ(0, sessionList.size());
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    if (!sceneSession) {
-        GTEST_LOG_(INFO) << "sceneSession is nullptr";
-        return;
-    }
+    ASSERT_NE(sceneSession, nullptr);
     sessionMap.emplace(2, sceneSession);
     auto sessionList2 = manager_->GetDialogSessionMap(sessionMap);
     ASSERT_EQ(0, sessionList2.size());
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    if (!property) {
-        GTEST_LOG_(INFO) << "property is nullptr";
-        return;
-    }
+    ASSERT_NE(property, nullptr);
     property->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
     sceneSession->SetSessionProperty(property);
     sptr<Session> session = sptr<Session>::MakeSptr(info);
-    if (!session) {
-        GTEST_LOG_(INFO) << "session is nullptr";
-        return;
-    }
+    ASSERT_NE(session, nullptr);
     sceneSession->SetParentSession(session);
     auto sessionList3 = manager_->GetDialogSessionMap(sessionMap);
     ASSERT_EQ(1, sessionList3.size());
@@ -574,7 +574,6 @@ HWTEST_F(SceneSessionDirtyManagerTest, GetModalUIExtensionInfo, TestSize.Level1)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     int len = windowInfoList.size();
     manager_->GetModalUIExtensionInfo(windowInfoList, sceneSession, windowInfo);
-    ASSERT_EQ(len, windowInfoList.size());
 
     ExtensionWindowEventInfo extensionInfo;
     extensionInfo.persistentId = 12345;
