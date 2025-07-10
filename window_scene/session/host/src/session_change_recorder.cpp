@@ -271,6 +271,7 @@ void SessionChangeRecorder::RecordDump(RecordType recordType, SceneSessionChange
 {
     TLOGD(WmsLogTag::DEFAULT, "In");
     uint32_t maxRecordTypeSize = MAX_RECORD_TYPE_SIZE;
+    uint32_t currentRecordTypeSize = MAX_RECORD_TYPE_SIZE;
     {
         std::lock_guard<std::mutex> lock(sessionChangeRecorderMutex_);
         if (sceneSessionChangeNeedDumpMap_.find(recordType) == sceneSessionChangeNeedDumpMap_.end()) {
@@ -282,9 +283,10 @@ void SessionChangeRecorder::RecordDump(RecordType recordType, SceneSessionChange
         }
         maxRecordTypeSize = recordSizeMap_.find(recordType) != recordSizeMap_.end() ?
             recordSizeMap_[recordType] : MAX_RECORD_TYPE_SIZE;
+        currentRecordTypeSize = sceneSessionChangeNeedDumpMap_[recordType].size();
     }
 
-    if (sceneSessionChangeNeedDumpMap_[recordType].size() > maxRecordTypeSize) {
+    if (currentRecordTypeSize > maxRecordTypeSize) {
         std::lock_guard<std::mutex> lock(sessionChangeRecorderMutex_);
         uint32_t diff = sceneSessionChangeNeedDumpMap_[recordType].size() - maxRecordTypeSize;
         while (diff > 0) {
@@ -298,6 +300,7 @@ void SessionChangeRecorder::RecordLog(RecordType recordType, SceneSessionChangeI
 {
     TLOGD(WmsLogTag::DEFAULT, "In");
     uint32_t maxRecordTypeSize = MAX_RECORD_TYPE_SIZE;
+    uint32_t currentRecordTypeSize = MAX_RECORD_TYPE_SIZE;
     {
         std::lock_guard<std::mutex> lock(sessionChangeRecorderMutex_);
         if (sceneSessionChangeNeedLogMap_.find(recordType) == sceneSessionChangeNeedLogMap_.end()) {
@@ -310,9 +313,9 @@ void SessionChangeRecorder::RecordLog(RecordType recordType, SceneSessionChangeI
         currentLogSize_ += changeInfo.changeInfo_.size();
         maxRecordTypeSize = recordSizeMap_.find(recordType) != recordSizeMap_.end() ?
             recordSizeMap_[recordType] : MAX_RECORD_TYPE_SIZE;
+        currentRecordTypeSize = sceneSessionChangeNeedLogMap_[recordType].size();
     }
-    if (currentLogSize_ >= MAX_RECORD_LOG_SIZE ||
-        sceneSessionChangeNeedLogMap_[recordType].size() > maxRecordTypeSize) {
+    if (currentLogSize_ >= MAX_RECORD_LOG_SIZE || currentRecordTypeSize > maxRecordTypeSize) {
         TLOGD(WmsLogTag::DEFAULT, "currentLogSize: %{public}d", currentLogSize_);
         std::unordered_map<RecordType, std::queue<SceneSessionChangeInfo>> sceneSessionChangeNeedLogMapCopy;
         {
