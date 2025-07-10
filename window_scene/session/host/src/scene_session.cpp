@@ -3931,6 +3931,7 @@ WSError SceneSession::UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsC
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "get nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
+    RSAdapterUtil::SetRSUIContext(rsCanvasNode, GetRSUIContext(), true);
     if (rsTransaction != nullptr) {
         rsTransaction->Begin();
         TLOGD(WmsLogTag::WMS_LAYOUT_PC, "begin rsTransaction");
