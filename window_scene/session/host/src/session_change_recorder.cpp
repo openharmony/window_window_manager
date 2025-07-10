@@ -153,7 +153,7 @@ void SessionChangeRecorder::GetSceneSessionNeedDumpInfo(
         dumpInfo.append(oss.str());
         return;
     }
-    uint32_t specifiedRecordType = RecordType::RECORD_TYPE_BEGIN;
+    uint32_t specifiedRecordType = static_cast<uint32_t>(RecordType::RECORD_TYPE_BEGIN);
     if (params.size() >= 2 && WindowHelper::IsNumber(params[1])) { // 2: params num
         const std::string& str = params[1];
         uint32_t value;
