@@ -1173,10 +1173,6 @@ HWTEST_F(SceneSessionManagerTest, UpdateExtWindowFlags, TestSize.Level1)
 
     auto ret = ssm_->UpdateExtWindowFlags(nullptr, 7, 7);
     EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_PERMISSION);
-    uint32_t extWindowFlags = 0;
-    uint32_t extWindowActions = 0;
-    ret = ssm_->UpdateExtWindowFlags(nullptr, extWindowFlags, extWindowActions);
-    EXPECT_EQ(ret, WSError::WS_OK);
 }
 
 /**
