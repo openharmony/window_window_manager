@@ -869,6 +869,7 @@ struct SessionEventParam {
 };
 
 struct BackgroundParams {
+    int32_t persistentId = INVALID_SESSION_ID;
     bool shouldBackToCaller = true;
     AAFwk::WantParams wantParams {};
 };
