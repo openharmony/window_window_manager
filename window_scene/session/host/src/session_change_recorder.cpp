@@ -139,14 +139,31 @@ void SessionChangeRecorder::GetSceneSessionNeedDumpInfo(
     if (params.size() >= 1 && params[0] == "all") {
         specifiedWindowId = INVALID_SESSION_ID;
     } else if (params.size() >= 1 && WindowHelper::IsNumber(params[0])) {
-        specifiedWindowId = std::stoi(params[0]);
+        const std::string& str = params[0];
+        int32_t value;
+        auto res = std::from_chars(str.data(), str.data() + str.size(), value);
+        if (res.ec == std::errc()) {
+            specifiedWindowId = value;
+        } else {
+            oss << "Available args: '-v all/[specified window id]'" << std::endl;
+            dumpInfo.append(oss.str());
+            return;
+        }
     } else {
         oss << "Available args: '-v all/[specified window id]'" << std::endl;
         dumpInfo.append(oss.str());
         return;
     }
-    uint32_t specifiedRecordType = params.size() >= 2 && WindowHelper::IsNumber(params[1]) ?
-        std::stoul(params[1]) : 0;
+
+    uint32_t specifiedRecordType = INVALID_SESSION_ID;
+    if (params.size() >= 2 && WindowHelper::IsNumber(params[1])) {
+        const std::string& str = params[1];
+        uint32_t value;
+        auto res = std::from_chars(str.data(), str.data() + str.size(), value);
+        if (res.ec == std::errc()) {
+            specifiedRecordType = value;
+        }
+    }
 
     std::unordered_map<RecordType, std::queue<SceneSessionChangeInfo>> sceneSessionChangeNeedDumpMapCopy;
     {
@@ -254,7 +271,6 @@ void SessionChangeRecorder::RecordDump(RecordType recordType, SceneSessionChange
 {
     TLOGD(WmsLogTag::DEFAULT, "In");
     uint32_t maxRecordTypeSize = MAX_RECORD_TYPE_SIZE;
-    uint32_t currentRecordTypeSize = MAX_RECORD_TYPE_SIZE;
     {
         std::lock_guard<std::mutex> lock(sessionChangeRecorderMutex_);
         if (sceneSessionChangeNeedDumpMap_.find(recordType) == sceneSessionChangeNeedDumpMap_.end()) {
@@ -266,10 +282,9 @@ void SessionChangeRecorder::RecordDump(RecordType recordType, SceneSessionChange
         }
         maxRecordTypeSize = recordSizeMap_.find(recordType) != recordSizeMap_.end() ?
             recordSizeMap_[recordType] : MAX_RECORD_TYPE_SIZE;
-        currentRecordTypeSize = sceneSessionChangeNeedDumpMap_[recordType].size();
     }
 
-    if (currentRecordTypeSize > maxRecordTypeSize) {
+    if (sceneSessionChangeNeedDumpMap_[recordType].size() > maxRecordTypeSize) {
         std::lock_guard<std::mutex> lock(sessionChangeRecorderMutex_);
         uint32_t diff = sceneSessionChangeNeedDumpMap_[recordType].size() - maxRecordTypeSize;
         while (diff > 0) {
@@ -283,7 +298,6 @@ void SessionChangeRecorder::RecordLog(RecordType recordType, SceneSessionChangeI
 {
     TLOGD(WmsLogTag::DEFAULT, "In");
     uint32_t maxRecordTypeSize = MAX_RECORD_TYPE_SIZE;
-    uint32_t currentRecordTypeSize = MAX_RECORD_TYPE_SIZE;
     {
         std::lock_guard<std::mutex> lock(sessionChangeRecorderMutex_);
         if (sceneSessionChangeNeedLogMap_.find(recordType) == sceneSessionChangeNeedLogMap_.end()) {
@@ -296,9 +310,9 @@ void SessionChangeRecorder::RecordLog(RecordType recordType, SceneSessionChangeI
         currentLogSize_ += changeInfo.changeInfo_.size();
         maxRecordTypeSize = recordSizeMap_.find(recordType) != recordSizeMap_.end() ?
             recordSizeMap_[recordType] : MAX_RECORD_TYPE_SIZE;
-        currentRecordTypeSize = sceneSessionChangeNeedLogMap_[recordType].size();
     }
-    if (currentLogSize_ >= MAX_RECORD_LOG_SIZE || currentRecordTypeSize > maxRecordTypeSize) {
+    if (currentLogSize_ >= MAX_RECORD_LOG_SIZE ||
+        sceneSessionChangeNeedLogMap_[recordType].size() > maxRecordTypeSize) {
         TLOGD(WmsLogTag::DEFAULT, "currentLogSize: %{public}d", currentLogSize_);
         std::unordered_map<RecordType, std::queue<SceneSessionChangeInfo>> sceneSessionChangeNeedLogMapCopy;
         {
