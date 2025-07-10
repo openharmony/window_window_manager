@@ -268,7 +268,7 @@ WmErrorCode JsExtensionWindowRegisterManager::AtomicServiceRegisterListener(sptr
     if (IsCallbackRegistered(env, type, value)) {
         return WmErrorCode::WM_OK;
     }
-    RegisterListenerInner(window, type, caseType, env, value);
+    return RegisterListenerInner(window, type, caseType, env, value);
 }
 
 WmErrorCode JsExtensionWindowRegisterManager::RegisterListener(sptr<Window> window, std::string type,
@@ -278,7 +278,7 @@ WmErrorCode JsExtensionWindowRegisterManager::RegisterListener(sptr<Window> wind
     if (IsCallbackRegistered(env, type, value)) {
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
-    RegisterListenerInner(window, type, caseType, env, value);
+    return RegisterListenerInner(window, type, caseType, env, value);
 }
 
 WmErrorCode JsExtensionWindowRegisterManager::RegisterListenerInner(sptr<Window> window, std::string type,
@@ -310,7 +310,7 @@ WmErrorCode JsExtensionWindowRegisterManager::RegisterListenerInner(sptr<Window>
 }
 
 
-WmErrorCode AtomicServiceUnregisterListener(sptr<Window> window, std::string type,
+WmErrorCode JsExtensionWindowRegisterManager::AtomicServiceUnregisterListener(sptr<Window> window, std::string type,
     CaseType caseType, napi_env env, napi_value value)
 {
     std::lock_guard<std::mutex> lock(mtx_);
@@ -318,7 +318,7 @@ WmErrorCode AtomicServiceUnregisterListener(sptr<Window> window, std::string typ
         TLOGE(WmsLogTag::WMS_UIEXT, "Type %{public}s was not registered", type.c_str());
         return WmErrorCode::WM_OK;
     }
-    UnregisterListenerInner(window, type, caseType, env, value);
+    return UnregisterListenerInner(window, type, caseType, env, value);
 }
 
 WmErrorCode JsExtensionWindowRegisterManager::UnregisterListener(sptr<Window> window, std::string type,
@@ -329,7 +329,7 @@ WmErrorCode JsExtensionWindowRegisterManager::UnregisterListener(sptr<Window> wi
         TLOGE(WmsLogTag::WMS_UIEXT, "Type %{public}s was not registered", type.c_str());
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
-    UnregisterListenerInner(window, type, caseType, env, value);
+    return UnregisterListenerInner(window, type, caseType, env, value);
 }
 
 WmErrorCode JsExtensionWindowRegisterManager::UnregisterListenerInner(sptr<Window> window, std::string type,
