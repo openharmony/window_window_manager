@@ -305,9 +305,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow07, TestSize.Level1)
 {
     // statusBar window
     sptr<Window> statBar = Utils::CreateStatusBarWindow();
-    if (statBar == nullptr) {
-        return;
-    }
+    ASSERT_NE(statBar, nullptr);
     activeWindows_.push_back(statBar);
 
     // naviBar window
@@ -399,9 +397,7 @@ HWTEST_F(WindowLayoutTest, LayoutWindow09, TestSize.Level1)
         .parentId = INVALID_WINDOW_ID,
     };
     const sptr<Window>& window = Utils::CreateTestWindow(info);
-    if (window == nullptr) {
-        return;
-    }
+    ASSERT_NE(window, nullptr);
     activeWindows_.push_back(window);
     Rect expect = Utils::GetDefaultFloatingRect(window, true);
 
@@ -472,9 +468,7 @@ HWTEST_F(WindowLayoutTest, LayoutTile01, TestSize.Level1)
     // init tile window rects and get max tile window num
     Utils::InitTileWindowRects(window, false);
     uint32_t maxTileNum = Utils::GetMaxTileWinNum();
-    if (maxTileNum < 1) {
-        return;
-    }
+    ASSERT_FALSE(maxTileNum < 1);
     usleep(WAIT_SYANC_US);
     ASSERT_TRUE(Utils::RectEqualTo(window, expect));
     WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::TILE);
@@ -487,11 +481,7 @@ HWTEST_F(WindowLayoutTest, LayoutTile01, TestSize.Level1)
     activeWindows_.push_back(test1);
     ASSERT_EQ(WMError::WM_OK, test1->Show());
     usleep(WAIT_SYANC_US);
-    if (maxTileNum == 1) {
-        ASSERT_TRUE(Utils::RectEqualTo(test1, Utils::singleTileRect_));
-        WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
-        return;
-    }
+    ASSERT_NE(maxTileNum, 1);
     ASSERT_TRUE(Utils::RectEqualTo(window, Utils::doubleTileRects_[0]));
     ASSERT_TRUE(Utils::RectEqualTo(test1, Utils::doubleTileRects_[1]));
 
@@ -534,9 +524,7 @@ HWTEST_F(WindowLayoutTest, LayoutTileNegative01, TestSize.Level1)
     // init tile window rects and get max tile window num
     Utils::InitTileWindowRects(window, false);
     uint32_t maxTileNum = Utils::GetMaxTileWinNum();
-    if (maxTileNum < 1) {
-        return;
-    }
+    ASSERT_FALSE(maxTileNum < 1);
 
     usleep(WAIT_SYANC_US);
     WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::TILE);
@@ -549,11 +537,7 @@ HWTEST_F(WindowLayoutTest, LayoutTileNegative01, TestSize.Level1)
     activeWindows_.push_back(test1);
     ASSERT_EQ(WMError::WM_OK, test1->Show());
     usleep(WAIT_SYANC_US);
-    if (maxTileNum == 1) {
-        ASSERT_TRUE(Utils::RectEqualTo(test1, Utils::singleTileRect_));
-        WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
-        return;
-    }
+    ASSERT_NE(maxTileNum, 1);
     ASSERT_TRUE(Utils::RectEqualTo(window, Utils::doubleTileRects_[0]));
     ASSERT_TRUE(Utils::RectEqualTo(test1, Utils::doubleTileRects_[1]));
 

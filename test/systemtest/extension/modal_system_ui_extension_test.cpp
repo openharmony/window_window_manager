@@ -50,9 +50,7 @@ namespace {
 HWTEST_F(ModalSystemUiExtensionTest, ModalSystemUiExtensionConnection01, TestSize.Level1)
 {
     auto connection = new (std::nothrow) ModalSystemUiExtension();
-    if (connection == nullptr) {
-        return;
-    }
+    ASSERT_NE(connection, nullptr);
     OHOS::AAFwk::Want want;
     ASSERT_FALSE(connection->CreateModalUIExtension(want));
     delete connection;

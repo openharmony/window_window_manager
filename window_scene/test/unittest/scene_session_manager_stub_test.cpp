@@ -1156,9 +1156,7 @@ HWTEST_F(SceneSessionManagerStubTest, OnRemoteRequest04, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerStubTest, HandleCreateAndConnectSpecificSession, TestSize.Level1)
 {
-    if (stub_ == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, stub_);
 
     MessageParcel data;
     MessageParcel reply;
@@ -1201,9 +1199,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleCreateAndConnectSpecificSession, Tes
  */
 HWTEST_F(SceneSessionManagerStubTest, HandleRecoverAndConnectSpecificSession, TestSize.Level1)
 {
-    if (stub_ == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, stub_);
 
     MessageParcel data;
     MessageParcel reply;
@@ -1283,9 +1279,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleDestroyAndDisconnectSpcificSessionWi
  */
 HWTEST_F(SceneSessionManagerStubTest, HandleRequestFocusStatus, TestSize.Level1)
 {
-    if (stub_ == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, stub_);
 
     MessageParcel data;
     MessageParcel reply;
@@ -1306,9 +1300,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleRequestFocusStatus, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerStubTest, HandleRequestFocusStatusBySA, TestSize.Level1)
 {
-    if (stub_ == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, stub_);
 
     MessageParcel data;
     MessageParcel reply;
@@ -1498,9 +1490,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetSessionLabel, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerStubTest, HandleSetSessionIcon, TestSize.Level1)
 {
-    if (stub_ == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, stub_);
 
     MessageParcel data;
     MessageParcel reply;
@@ -1535,9 +1525,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleIsValidSessionIds, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionInfos, TestSize.Level1)
 {
-    if (stub_ == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, stub_);
 
     MessageParcel data;
     MessageParcel reply;
@@ -1554,9 +1542,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionInfos, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionInfo, TestSize.Level1)
 {
-    if (stub_ == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, stub_);
 
     MessageParcel data;
     MessageParcel reply;
@@ -1654,9 +1640,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetFocusSessionToken1, TestSize.Leve
  */
 HWTEST_F(SceneSessionManagerStubTest, HandleCheckWindowId, TestSize.Level1)
 {
-    if (stub_ == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, stub_);
 
     MessageParcel data;
     MessageParcel reply;
@@ -1749,9 +1733,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetSessionContinueState1, TestSize.L
  */
 HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionDump, TestSize.Level1)
 {
-    if (stub_ == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, stub_);
 
     MessageParcel data;
     MessageParcel reply;
@@ -1780,9 +1762,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionDump, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerStubTest, HandleUpdateSessionAvoidAreaListener, TestSize.Level1)
 {
-    if (stub_ == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, stub_);
 
     MessageParcel data;
     MessageParcel reply;
@@ -1803,9 +1783,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleUpdateSessionAvoidAreaListener, Test
  */
 HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionSnapshot, TestSize.Level1)
 {
-    if (stub_ == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, stub_);
 
     MessageParcel data;
     MessageParcel reply;
@@ -1827,9 +1805,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionSnapshot, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionSnapshotById, TestSize.Level1)
 {
-    if (stub_ == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, stub_);
     MessageParcel data;
     MessageParcel reply;
     int32_t persistentId = -1;
@@ -1845,9 +1821,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetSessionSnapshotById, TestSize.Lev
  */
 HWTEST_F(SceneSessionManagerStubTest, HandleBindDialogTarget, TestSize.Level1)
 {
-    if (stub_ == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, stub_);
 
     MessageParcel data;
     MessageParcel reply;
@@ -1868,9 +1842,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleBindDialogTarget, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerStubTest, HandleNotifyDumpInfoResult, TestSize.Level1)
 {
-    if (stub_ == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, stub_);
 
     MessageParcel data;
     MessageParcel reply;
@@ -1903,9 +1875,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleNotifyDumpInfoResult, TestSize.Level
  */
 HWTEST_F(SceneSessionManagerStubTest, HandleUnregisterCollaborator, TestSize.Level1)
 {
-    if (stub_ == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, stub_);
 
     MessageParcel data;
     MessageParcel reply;
@@ -1926,9 +1896,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleUnregisterCollaborator, TestSize.Lev
  */
 HWTEST_F(SceneSessionManagerStubTest, HandleUpdateSessionTouchOutsideListener, TestSize.Level1)
 {
-    if (stub_ == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, stub_);
 
     MessageParcel data;
     MessageParcel reply;
@@ -1949,9 +1917,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleUpdateSessionTouchOutsideListener, T
  */
 HWTEST_F(SceneSessionManagerStubTest, HandleRaiseWindowToTop, TestSize.Level1)
 {
-    if (stub_ == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, stub_);
 
     MessageParcel data;
     MessageParcel reply;
@@ -1970,9 +1936,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleRaiseWindowToTop, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerStubTest, HandleNotifyWindowExtensionVisibilityChange, TestSize.Level1)
 {
-    if (stub_ == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, stub_);
 
     MessageParcel data;
     MessageParcel reply;
@@ -2006,9 +1970,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleNotifyWindowExtensionVisibilityChang
  */
 HWTEST_F(SceneSessionManagerStubTest, HandleGetTopWindowId, TestSize.Level1)
 {
-    if (stub_ == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, stub_);
 
     MessageParcel data;
     MessageParcel reply;
@@ -2027,9 +1989,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetTopWindowId, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerStubTest, HandleShiftAppWindowFocus, TestSize.Level1)
 {
-    if (stub_ == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, stub_);
 
     MessageParcel data;
     MessageParcel reply;
@@ -2277,9 +2237,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetUIContentRemoteObj, TestSize.Leve
  */
 HWTEST_F(SceneSessionManagerStubTest, HandleGetHostWindowRect, TestSize.Level1)
 {
-    if (stub_ == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, stub_);
 
     MessageParcel data;
     MessageParcel reply;
@@ -2298,9 +2256,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetHostWindowRect, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerStubTest, HandleGetHostGlobalScaledRect, TestSize.Level1)
 {
-    if (stub_ == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, stub_);
     MessageParcel data;
     MessageParcel reply;
     int32_t hostWindowId = 65535;
@@ -2316,9 +2272,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetHostGlobalScaledRect, TestSize.Le
  */
 HWTEST_F(SceneSessionManagerStubTest, HandleGetCallingWindowWindowStatus, TestSize.Level1)
 {
-    if (stub_ == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, stub_);
 
     MessageParcel data;
     MessageParcel reply;
@@ -2337,9 +2291,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetCallingWindowWindowStatus, TestSi
  */
 HWTEST_F(SceneSessionManagerStubTest, HandleGetCallingWindowRect, TestSize.Level1)
 {
-    if (stub_ == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, stub_);
 
     MessageParcel data;
     MessageParcel reply;
