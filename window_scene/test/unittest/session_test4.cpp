@@ -1427,7 +1427,7 @@ HWTEST_F(WindowSessionTest4, TestGetSessionScreenRelativeRect_001, TestSize.Leve
 }
 
 class LayoutControllerMocker : public LayoutController {
-pubilc:
+public:
     explicit LayoutControllerMocker(const sptr<WindowSessionProperty>& property) : LayoutController(property) {};
     ~LayoutControllerMocker() {};
     MOCK_METHOD2(ConvertGlobalRectToRelative, WSRect(const WSRect& globalRect, DisplayId targetDisplayId));
