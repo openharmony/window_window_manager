@@ -66,6 +66,7 @@
 #include "fold_screen_state_internel.h"
 #include "fold_screen_common.h"
 #include "session/host/include/ability_info_manager.h"
+#include "session/host/include/atomicservice_basic_engine_plugin.h"
 #include "session/host/include/multi_instance_manager.h"
 #include "session/host/include/pc_fold_screen_controller.h"
 
@@ -5282,6 +5283,23 @@ WSError SceneSession::ChangeSessionVisibilityWithStatusBar(
     return WSError::WS_OK;
 }
 
+static void SetAtomicServiceInfo(SessionInfo& sessionInfo)
+{
+#ifdef ACE_ENGINE_PLUGIN_PATH
+    AtomicServiceInfo* atomicServiceInfo = AtomicServiceBasicEnginePlugin::GetInstance().
+        GetParamsFromAtomicServiceBasicEngine(sessionInfo.bundleName_);
+    if (atomicServiceInfo != nullptr) {
+        sessionInfo.atomicServiceInfo_.appNameInfo_ = atomicServiceInfo->GetAppName();
+        sessionInfo.atomicServiceInfo_.circleIcon_ = atomicServiceInfo->GetCircleIcon();
+        sessionInfo.atomicServiceInfo_.eyelashRingIcon_ = atomicServiceInfo->GetEyelashRingIcon();
+        sessionInfo.atomicServiceInfo_.deviceTypes_ = atomicServiceInfo->GetDeviceTypes();
+        sessionInfo.atomicServiceInfo_.resizable_ = atomicServiceInfo->GetResizable();
+        sessionInfo.atomicServiceInfo_.supportWindowMode_ = atomicServiceInfo->GetSupportWindowMode();
+    }
+    AtomicServiceBasicEnginePlugin::GetInstance().ReleaseData();
+#endif
+}
+
 static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::SessionInfo>& abilitySessionInfo,
     const sptr<SceneSession>& session, bool isFoundationCall)
 {
@@ -5329,6 +5347,10 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
             info.supportedWindowModes.assign(abilitySessionInfo->supportWindowModes.begin(),
                 abilitySessionInfo->supportWindowModes.end());
         }
+    }
+    if (info.isAtomicService_ && info.want != nullptr &&
+        (info.want->GetFlags() & AAFwk::Want::FLAG_INSTALL_ON_DEMAND) == AAFwk::Want::FLAG_INSTALL_ON_DEMAND) {
+        SetAtomicServiceInfo(info);
     }
     if (info.want != nullptr) {
         info.windowMode = info.want->GetIntParam(AAFwk::Want::PARAM_RESV_WINDOW_MODE, 0);

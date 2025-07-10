@@ -358,6 +358,15 @@ enum class StartWindowType : uint32_t {
     REMOVE_NODE_INVISIBLE,
 };
 
+struct AtomicServiceInfo {
+    std::string appNameInfo_ = "";
+    std::string eyelashRingIcon_ = "";
+    std::string circleIcon_ = "";
+    int32_t resizable_ = 0;
+    std::vector<std::string> deviceTypes_;
+    std::vector<std::string> supportWindowMode_;
+};
+
 struct SessionInfo {
     std::string bundleName_ = "";
     std::string moduleName_ = "";
@@ -371,6 +380,7 @@ struct SessionInfo {
     uint64_t screenId_ = -1;
     bool isPersistentRecover_ = false;
     bool isFromIcon_ = false;
+    AtomicServiceInfo atomicServiceInfo_;
 
     mutable std::shared_ptr<AAFwk::Want> want = nullptr; // want for ability start
     std::shared_ptr<std::mutex> wantMutex_ = std::make_shared<std::mutex>();

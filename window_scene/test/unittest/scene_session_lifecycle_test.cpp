@@ -1095,6 +1095,37 @@ HWTEST_F(SceneSessionLifecycleTest, NotifySessionBackground, TestSize.Level0)
 }
 
 /**
+ * @tc.name: BatchPendingSessionsActivation
+ * @tc.desc: BatchPendingSessionsActivation, with atomicService
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLifecycleTest, BatchPendingSessionsActivation, TestSize.Level0)
+{
+    SessionInfo info;
+    info.abilityName_ = "BatchPendingSessionsActivation";
+    info.bundleName_ = "BatchPendingSessionsActivation";
+    sptr<SceneSession> sceneSession;
+    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->isActive_ = true;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    sceneSession->SetSessionProperty(property);
+    
+    sptr<AAFwk::SessionInfo> sessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
+    std::vector<sptr<AAFwk::SessionInfo>> abilitySessionInfos;
+    unsigned int flags = 11111111;
+    AAFwk::Want want;
+    sessionInfo->want = want;
+    sessionInfo->want.SetFlags(flags);
+    sessionInfo->isAtomicService = true;
+    abilitySessionInfos.emplace_back(sessionInfo);
+    WSError result = sceneSession->BatchPendingSessionsActivation(abilitySessionInfos);
+
+    EXPECT_EQ(result, WSError::WS_OK);
+}
+
+/**
  * @tc.name: CalculatedStartWindowType01
  * @tc.desc: CalculatedStartWindowType when getStartWindowConfigFunc_ is null.
  * @tc.type: FUNC
