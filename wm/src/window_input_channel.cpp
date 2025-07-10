@@ -64,7 +64,7 @@ __attribute__((no_sanitize("cfi"))) void WindowInputChannel::HandleKeyEvent(
     }
 
     if (window_ == nullptr) {
-        WLOGFE("window_ is nullptr");
+        TLOGE(WmsLogTag::WMS_EVENT, "window_ is nullptr");
         return;
     }
     WLOGFD("Receive key event, Id: %{public}u, keyCode: %{public}d",
