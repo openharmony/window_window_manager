@@ -587,7 +587,7 @@ void SceneSessionManager::UpdateSessionWithFoldStateChange(DisplayId displayId, 
     SuperFoldStatus prevStatus)
 {
     auto task = [this, displayId, status, where = __func__]() {
-        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: status=%{public}u, display=%{public}" PRIu64,
+        TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: status=%{public}u, display=%{public}" PRIu64,
             where, static_cast<uint32_t>(status), displayId);
         if (status == SuperFoldStatus::HALF_FOLDED) {
             auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(displayId);
