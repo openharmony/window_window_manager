@@ -58,7 +58,6 @@ constexpr uint32_t SECONDARY_ROTATION_270 = 3;
 constexpr uint32_t SECONDARY_ROTATION_MOD = 4;
 constexpr ScreenId SCREEN_ID_DEFAULT = 0;
 constexpr float HORIZONTAL = 270.f;
-
 ScreenCache<int32_t, int32_t> g_uidVersionMap(MAP_SIZE, NO_EXIST_UID_VERSION);
 }
 
