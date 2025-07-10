@@ -10668,4 +10668,26 @@ bool ScreenSessionManager::SetScreenOffset(ScreenId screenId, float offsetX, flo
     RSInterfaces::GetInstance().SetScreenOffset(screenSession->rsId_, offsetX, offsetY);
     return true;
 }
+
+DMError ScreenSessionManager::SetScreenPrivacyWindowTagSwitch(ScreenId screenId,
+    const std::vector<std::string>& privacyWindowTag, bool enable)
+{
+    if (!SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::DMS, "Permission Denied! calling: %{public}s, pid: %{public}d",
+            SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+    auto screenSession = GetScreenSession(screenId);
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "cannot find screenInfo: %{public}" PRIu64, screenId);
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    std::ostringstream oss;
+    for (auto tag : privacyWindowTag) {
+        oss << tag << ",";
+    }
+    TLOGI(WmsLogTag::DMS, "screenId:%{public}" PRIu64 " privacyWindowTag:%{public}s, enable:%{public}d", screenId,
+        oss.str().c_str(), enable);
+    return DMError::DM_OK;
+}
 } // namespace OHOS::Rosen
