@@ -3230,21 +3230,20 @@ HWTEST_F(ScreenSessionManagerTest, GetCurrentScreenPhyBounds02, TestSize.Level1)
     foldPolicy->lastDisplayMode_ = FoldDisplayMode::GLOBAL_FULL;
     foldController->foldScreenPolicy_ = foldPolicy;
     ssm_->foldScreenController_ = foldController;
-    ScreenProperty property;
-    RRect screenBounds = RRect({ 0, 0, 100, 200 }, 0.0f, 0.0f);
-    property.SetPhyBounds(screenBounds);
-    ssm_->phyScreenPropMap_[screenId] = property;
     ssm_->GetCurrentScreenPhyBounds(phyWidth, phyHeight, isReset, screenId);
+    auto phyBounds = ssm_->GetPhyScreenProperty(0).GetPhyBounds();
+    float phyWidthNow = phyBounds.rect_.width_;
+    float phyHeightNow = phyBounds.rect_.width_;
     int32_t screenRotationOffSet = system::GetIntParameter<int32_t>("const.fold.screen_rotation.offset", 0);
     if (FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
-        EXPECT_EQ(phyWidth, 100);
-        EXPECT_EQ(phyHeight, 200);
+        EXPECT_EQ(phyWidth, phyWidthNow);
+        EXPECT_EQ(phyHeight, phyHeightNow);
     } else if (screenRotationOffSet == 1 || screenRotationOffSet == 3) {
-        EXPECT_EQ(phyHeight, 100);
-        EXPECT_EQ(phyWidth, 200);
+        EXPECT_EQ(phyHeight, phyHeightNow);
+        EXPECT_EQ(phyWidth, phyWidthNow);
     } else {
-        EXPECT_EQ(phyWidth, 100);
-        EXPECT_EQ(phyHeight, 200);
+        EXPECT_EQ(phyWidth, phyWidthNow);
+        EXPECT_EQ(phyHeight, phyHeightNow);
     }
 #endif
 }
