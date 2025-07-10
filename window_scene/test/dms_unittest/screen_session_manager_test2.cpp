@@ -1003,6 +1003,39 @@ HWTEST_F(ScreenSessionManagerTest, GetOrCreateScreenSession, Function | SmallTes
         EXPECT_NE(session, nullptr);
     }
 }
+
+/**
+ * @tc.name: SetScreenPrivacyWindowTagSwitch001
+ * @tc.desc: SetScreenPrivacyWindowTagSwitch test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetScreenPrivacyWindowTagSwitch001, TestSize.Level1)
+{
+    MockAccesstokenKit::MockIsSACalling(false);
+    MockAccesstokenKit::MockIsSystemApp(false);
+    ScreenId mainScreenId = 0;
+    std::vector<std::string> privacyWindowTag{"test1", "test2"};
+    auto ret = ssm_->SetScreenPrivacyWindowTagSwitch(mainScreenId, privacyWindowTag, true);
+    EXPECT_EQ(ret, DMError::DM_ERROR_NOT_SYSTEM_APP);
+}
+
+/**
+ * @tc.name: SetScreenPrivacyWindowTagSwitch002
+ * @tc.desc: SetScreenPrivacyWindowTagSwitch test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetScreenPrivacyWindowTagSwitch002, TestSize.Level1)
+{
+    MockAccesstokenKit::MockIsSACalling(true);
+    MockAccesstokenKit::MockIsSystemApp(true);
+    ScreenId mainScreenId = 0;
+    ScreenId invalidScreenId = -1;
+    std::vector<std::string> privacyWindowTag{"test1", "test2"};
+    auto ret = ssm_->SetScreenPrivacyWindowTagSwitch(invalidScreenId, privacyWindowTag, true);
+    EXPECT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+    auto ret = ssm_->SetScreenPrivacyWindowTagSwitch(mainScreenId, privacyWindowTag, true);
+    EXPECT_EQ(ret, DMError::DM_OK);
+}
 }
 }
 }

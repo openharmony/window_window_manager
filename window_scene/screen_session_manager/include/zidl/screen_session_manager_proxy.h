@@ -236,6 +236,8 @@ public:
         ScreenId& screenId, DMRect& screenArea) override;
     DMError SetPrimaryDisplaySystemDpi(float dpi) override;
     DMError SetVirtualScreenAutoRotation(ScreenId screenId, bool enable) override;
+    DMError SetScreenPrivacyWindowTagSwitch(ScreenId screenId, const std::vector<std::string>& privacyWindowTag,
+        bool enable) override;
 
 private:
     static inline BrokerDelegator<ScreenSessionManagerProxy> delegator_;
