@@ -586,7 +586,15 @@ void SceneSessionManager::InitScheduleUtils()
 void SceneSessionManager::UpdateSessionWithFoldStateChange(DisplayId displayId, SuperFoldStatus status,
     SuperFoldStatus prevStatus)
 {
-    auto task = [this]() {
+    auto task = [this, displayId, status, where = __func__]() {
+        TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: status=%{public}u, display=%{public}" PRIu64,
+            where, static_cast<uint32_t>(status), displayId);
+        if (status == SuperFoldStatus::HALF_FOLDED) {
+            auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(displayId);
+            if (display != nullptr) {
+                UpdateDisplayRegion(display->GetDisplayInfo());
+            }
+        }
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (const auto& [_, sceneSession] : sceneSessionMap_) {
             if (sceneSession == nullptr) {
