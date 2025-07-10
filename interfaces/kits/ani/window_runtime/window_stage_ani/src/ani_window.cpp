@@ -531,7 +531,7 @@ ani_object AniWindow::Resize(ani_env* env, ani_double width, ani_double height)
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
 
-    WMError ret = windowToken_->Resize(static_cast<int>(width), static_cast<int>(height));
+    WMError ret = windowToken_->Resize(static_cast<uint32_t>(width), static_cast<uint32_t>(height));
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] Resize set error, ret:%{public}d", ret);
         return AniWindowUtils::AniThrowError(env, ret);
@@ -545,7 +545,7 @@ ani_object AniWindow::MoveWindowTo(ani_env* env, ani_double x, ani_double y)
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
 
-    WMError ret = windowToken_->MoveTo(static_cast<int>(x), static_cast<int>(y));
+    WMError ret = windowToken_->MoveTo(static_cast<int32_t>(x), static_cast<int32_t>(y));
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] MoveWindowTo set error, ret:%{public}d", ret);
         return AniWindowUtils::AniThrowError(env, ret);
@@ -569,7 +569,7 @@ ani_object AniWindow::GetGlobalRect(ani_env* env)
         }
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    TLOGI(WmsLogTag::WMS_LAYOUT, "[ANI] Window [%{public}u, %{public}s] globalScaleRect: %{public}s",
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[ANI] Window [%{public}u, %{public}s] globalScaleRect: %{public}s",
         window->GetWindowId(), window->GetWindowName().c_str(), globalScaleRect.ToString().c_str());
     return AniWindowUtils::CreateAniRect(env, globalScaleRect);
 }
@@ -849,7 +849,7 @@ static ani_object WindowResize(ani_env* env, ani_object obj, ani_long nativeObj,
     using namespace OHOS::Rosen;
     TLOGI(WmsLogTag::WMS_LAYOUT, "[ANI]");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
-    if (aniWindow == nullptr || aniWindow->GetWindow() == nullptr) {
+    if (!aniWindow || !aniWindow->GetWindow()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] windowToken is nullptr");
         return AniWindowUtils::CreateAniUndefined(env);
     }
@@ -861,7 +861,7 @@ static ani_object WindowMoveWindowTo(ani_env* env, ani_object obj, ani_long nati
     using namespace OHOS::Rosen;
     TLOGI(WmsLogTag::WMS_LAYOUT, "[ANI]");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
-    if (aniWindow == nullptr || aniWindow->GetWindow() == nullptr) {
+    if (!aniWindow || !aniWindow->GetWindow()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] windowToken is nullptr");
         return AniWindowUtils::CreateAniUndefined(env);
     }
@@ -873,7 +873,7 @@ static ani_object WindowGetGlobalRect(ani_env* env, ani_object obj, ani_long nat
     using namespace OHOS::Rosen;
     TLOGI(WmsLogTag::WMS_LAYOUT, "[ANI]");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
-    if (aniWindow == nullptr || aniWindow->GetWindow() == nullptr) {
+    if (!aniWindow || !aniWindow->GetWindow()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] windowToken is nullptr");
         return AniWindowUtils::CreateAniUndefined(env);
     }
