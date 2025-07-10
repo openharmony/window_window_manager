@@ -1245,7 +1245,7 @@ export class WindowInternal implements Window {
     private native onSync(nativeObj: long, type: string, callback: object): void;
     private native offSync(nativeObj: long, type: string, callback?: object): void;
 
-    public resize(width: double, height: double): Promise<void> {
+    public resize(width: number, height: number): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) :void => {
         taskpool.execute((): void => {
           this.resize(this.nativeObj, width, height);
@@ -1257,7 +1257,7 @@ export class WindowInternal implements Window {
       });
     }
 
-    public moveWindowTo(x: double, y: double): Promise<void> {
+    public moveWindowTo(x: number, y: number): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) :void => {
         taskpool.execute((): void => {
           this.moveWindowTo(this.nativeObj, x, y);
@@ -1269,7 +1269,7 @@ export class WindowInternal implements Window {
       });
     }
 
-    public resize(width: double, height: double, callback: AsyncCallback<void>): void {
+    public resize(width: number, height: number, callback: AsyncCallback<void>): void {
       taskpool.execute((): void => {
         this.resize(this.nativeObj, width, height);
         }).then((ret: NullishType) => {
@@ -1279,7 +1279,7 @@ export class WindowInternal implements Window {
         });
     }
 
-    public moveWindowTo(x: double, y: double, callback: AsyncCallback<void>): void {
+    public moveWindowTo(x: number, y: number, callback: AsyncCallback<void>): void {
       taskpool.execute((): void => {
         this.moveWindowTo(this.nativeObj, x, y);
         }).then((ret: NullishType) => {
@@ -1676,10 +1676,10 @@ export class WindowInternal implements Window {
 }
 
 export interface Window {
-    resize(width: double, height: double): Promise<void>;
-    moveWindowTo(x: double, y: double): Promise<void>;
-    resize(width: double, height: double, callback: AsyncCallback<void>): void;
-    moveWindowTo(x: double, y: double, callback: AsyncCallback<void>): void;
+    resize(width: number, height: number): Promise<void>;
+    moveWindowTo(x: number, y: number): Promise<void>;
+    resize(width: number, height: number, callback: AsyncCallback<void>): void;
+    moveWindowTo(x: number, y: number, callback: AsyncCallback<void>): void;
     getGlobalRect(): Rect;
     getWindowDecorHeight(): double;
     setWindowBackgroundColor(color: string | ColorMetrics): void;
