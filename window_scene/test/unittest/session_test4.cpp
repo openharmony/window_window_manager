@@ -1437,7 +1437,7 @@ class LayoutControllerMocker : public LayoutController {
  * @tc.desc: get relative rect when reason is not drag move
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest4, TestGetSessionScreenRelativeRect_001, TestSize.Level1)
+HWTEST_F(WindowSessionTest4, TestGetSessionScreenRelativeRect_002, TestSize.Level1)
 {
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
