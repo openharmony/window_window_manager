@@ -67,7 +67,8 @@ public:
         WSPropertyChangeAction action));
     MOCK_METHOD1(TransferExtensionData, int32_t(const AAFwk::WantParams& wantParams));
     MOCK_METHOD(WSError, ProcessPointDownSession, (int32_t x, int32_t y), (override));
-    void SetMockLayoutController(sptr<LayoutController> &layoutController) {
+    void SetMockLayoutController(const sptr<LayoutController>& layoutController)
+    {
         layoutController_ = layoutController;
     }
 };
