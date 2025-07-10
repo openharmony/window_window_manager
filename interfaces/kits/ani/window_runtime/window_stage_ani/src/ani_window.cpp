@@ -525,6 +525,53 @@ __attribute__((no_sanitize("cfi")))
     return obj;
 }
 
+ani_object AniWindow::Resize(ani_env* env, ani_double width, ani_double height)
+{
+    if (windowToken_ == nullptr) {
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+
+    WMError ret = windowToken_->Resize(static_cast<uint32_t>(width), static_cast<uint32_t>(height));
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] Resize set error, ret:%{public}d", ret);
+        return AniWindowUtils::AniThrowError(env, ret);
+    }
+    return AniWindowUtils::CreateAniUndefined(env);
+}
+
+ani_object AniWindow::MoveWindowTo(ani_env* env, ani_double x, ani_double y)
+{
+    if (windowToken_ == nullptr) {
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+
+    WMError ret = windowToken_->MoveTo(static_cast<int32_t>(x), static_cast<int32_t>(y));
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] MoveWindowTo set error, ret:%{public}d", ret);
+        return AniWindowUtils::AniThrowError(env, ret);
+    }
+    return AniWindowUtils::CreateAniUndefined(env);
+}
+
+ani_object AniWindow::GetGlobalRect(ani_env* env)
+{
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] window is nullptr");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    Rect globalScaleRect{0, 0, 0, 0};
+    WMError ret = windowToken_->GetGlobalScaledRect(globalScaleRect);
+    if (ret != WMError::WM_OK) {
+        if (ret == WMError::WM_ERROR_DEVICE_NOT_SUPPORT) {
+            return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
+        }
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[ANI] Window [%{public}u, %{public}s] globalScaleRect: %{public}s",
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), globalScaleRect.ToString().c_str());
+    return AniWindowUtils::CreateAniRect(env, globalScaleRect);
+}
+
 ani_double AniWindow::GetWindowDecorHeight(ani_env* env)
 {
     int32_t height { 0 };
@@ -795,6 +842,42 @@ ani_object AniWindow::SetSpecificSystemBarEnabled(ani_env* env, ani_string name,
 }  // namespace Rosen
 }  // namespace OHOS
 
+static void WindowResize(ani_env* env, ani_object obj, ani_long nativeObj, ani_double width, ani_double height)
+{
+    using namespace OHOS::Rosen;
+    TLOGI(WmsLogTag::WMS_LAYOUT, "[ANI]");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (!aniWindow || !aniWindow->GetWindow()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] windowToken is nullptr");
+        return;
+    }
+    aniWindow->Resize(env, width, height);
+}
+
+static void WindowMoveWindowTo(ani_env* env, ani_object obj, ani_long nativeObj, ani_double x, ani_double y)
+{
+    using namespace OHOS::Rosen;
+    TLOGI(WmsLogTag::WMS_LAYOUT, "[ANI]");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (!aniWindow || !aniWindow->GetWindow()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] windowToken is nullptr");
+        return;
+    }
+    aniWindow->MoveWindowTo(env, x, y);
+}
+
+static ani_object WindowGetGlobalRect(ani_env* env, ani_object obj, ani_long nativeObj)
+{
+    using namespace OHOS::Rosen;
+    TLOGI(WmsLogTag::WMS_LAYOUT, "[ANI]");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (!aniWindow || !aniWindow->GetWindow()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] windowToken is nullptr");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    return aniWindow->GetGlobalRect(env);
+}
+
 static ani_double WindowGetWindowDecorHeight(ani_env* env, ani_object obj, ani_long nativeObj)
 {
     using namespace OHOS::Rosen;
@@ -1012,6 +1095,12 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_NOT_FOUND;
     }
     std::array methods = {
+        ani_native_function {"resize", "JDD:V",
+            reinterpret_cast<void *>(WindowResize)},
+        ani_native_function {"moveWindowTo", "JDD:V",
+            reinterpret_cast<void *>(WindowMoveWindowTo)},
+        ani_native_function {"getGlobalRect", "J:L@ohos/window/window/Rect;",
+            reinterpret_cast<void *>(WindowGetGlobalRect)},
         ani_native_function {"getWindowDecorHeight", "J:D",
             reinterpret_cast<void *>(WindowGetWindowDecorHeight)},
         ani_native_function {"setWindowBackgroundColor", "JLstd/core/String;:I",
