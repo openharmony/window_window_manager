@@ -8539,7 +8539,7 @@ void ScreenSessionManager::GetCurrentScreenPhyBounds(float& phyWidth, float& phy
             auto phyBounds = GetPhyScreenProperty(SCREEN_ID_MAIN).GetPhyBounds();
             phyWidth = phyBounds.rect_.width_;
             phyHeight = phyBounds.rect_.height_;
-        } else if (displayMode == FoldDisplayMode::FULL) {
+        } else if (displayMode == FoldDisplayMode::FULL || displayMode == FoldDisplayMode::GLOBAL_FULL) {
             auto phyBounds = GetPhyScreenProperty(SCREEN_ID_FULL).GetPhyBounds();
             phyWidth = phyBounds.rect_.width_;
             phyHeight = phyBounds.rect_.height_;
