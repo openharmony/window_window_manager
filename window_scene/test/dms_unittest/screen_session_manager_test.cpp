@@ -3782,9 +3782,9 @@ HWTEST_F(ScreenSessionManagerTest, UpdateScreenDirectionInfo01, Function | Small
     sptr<ScreenSession> screenSession = nullptr;
     ASSERT_EQ(screenSession, nullptr);
     ScreenDirectionInfo directionInfo;
-    directionInfo.screenRotation_ = 1.0f;
-    directionInfo.rotation_ = 1.0f;
-    directionInfo.phyRotation_ = 1.0f;
+    directionInfo.screenRotation_ = 0.0f;
+    directionInfo.rotation_ = 0.0f;
+    directionInfo.phyRotation_ = 0.0f;
     RRect bounds;
     bounds.rect_.width_ = 1344;
     bounds.rect_.height_ = 2772;
@@ -3807,9 +3807,9 @@ HWTEST_F(ScreenSessionManagerTest, UpdateScreenDirectionInfo02, Function | Small
     sptr<ScreenSession> screenSession = nullptr;
     ASSERT_EQ(screenSession, nullptr);
     ScreenDirectionInfo directionInfo;
-    directionInfo.screenRotation_ = 1.0f;
-    directionInfo.rotation_ = 1.0f;
-    directionInfo.phyRotation_ = 1.0f;
+    directionInfo.screenRotation_ = 0.0f;
+    directionInfo.rotation_ = 0.0f;
+    directionInfo.phyRotation_ = 0.0f;
     RRect bounds;
     bounds.rect_.width_ = 1344;
     bounds.rect_.height_ = 2772;
@@ -3832,9 +3832,9 @@ HWTEST_F(ScreenSessionManagerTest, UpdateScreenDirectionInfo03, Function | Small
     sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession);
     ScreenDirectionInfo directionInfo;
-    directionInfo.screenRotation_ = 1.0f;
-    directionInfo.rotation_ = 1.0f;
-    directionInfo.phyRotation_ = 1.0f;
+    directionInfo.screenRotation_ = 0.0f;
+    directionInfo.rotation_ = 0.0f;
+    directionInfo.phyRotation_ = 0.0f;
     RRect bounds;
     bounds.rect_.width_ = 1344;
     bounds.rect_.height_ = 2772;
