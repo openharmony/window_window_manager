@@ -19,6 +19,7 @@
 #include <ui/rs_surface_node.h>
 
 #include "key_event.h"
+#include "mock/mock_session.h"
 #include "mock/mock_session_stage.h"
 #include "mock/mock_window_event_channel.h"
 #include "mock/mock_pattern_detach_callback.h"
@@ -1408,6 +1409,51 @@ HWTEST_F(WindowSessionTest4, TestNotifyClientToUpdateGlobalDisplayRect, TestSize
     EXPECT_EQ(result, WSError::WS_OK);
     session_->state_ = originalState;
     session_->sessionStage_ = originalSessionStage;
+}
+
+/**
+ * @tc.name: TestGetSessionScreenRelativeRect_001
+ * @tc.desc: get relative rect when reason is not drag move
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, TestGetSessionScreenRelativeRect_001, TestSize.Level1)
+{
+    session_->UpdateSizeChangeReason(SizeChangeReason::RESIZE);
+    WSRect expectedRect = { 0, 0, 100, 100};
+    session_->SetSessionRect(expectedRect);
+
+    WSRect result = session_->GetSessionScreenRelativeRect();
+    EXPECT_EQ(result, expectedRect);
+}
+
+class LayoutControllerMocker : public LayoutController {
+public:
+    explicit LayoutControllerMocker(const sptr<WindowSessionProperty>& property) : LayoutController(property) {};
+    ~LayoutControllerMocker() {};
+    MOCK_METHOD2(ConvertGlobalRectToRelative, WSRect(const WSRect& globalRect, DisplayId targetDisplayId));
+};
+
+/**
+ * @tc.name: TestGetSessionScreenRelativeRect_001
+ * @tc.desc: get relative rect when reason is not drag move
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, TestGetSessionScreenRelativeRect_002, TestSize.Level1)
+{
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sptr<LayoutControllerMocker> layoutController = sptr<LayoutControllerMocker>::MakeSptr(property);
+
+    session->SetMockLayoutController(layoutController);
+    session_->UpdateSizeChangeReason(SizeChangeReason::DRAG_MOVE);
+    WSRect expectedRect = { 0, 0, 50, 50};
+    WSRect winRect = { 0, 0, 100, 100};
+    session->SetSessionRect(winRect);
+
+    EXPECT_CALL(*layoutController, ConvertGlobalRectToRelative(_, _)).Times(1).WillOnce(Return(expectedRect));
+    WSRect result = session_->GetSessionScreenRelativeRect();
+    EXPECT_EQ(result, expectedRect);
 }
 } // namespace
 } // namespace Rosen
