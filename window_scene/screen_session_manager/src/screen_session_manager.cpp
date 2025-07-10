@@ -85,6 +85,7 @@ const std::string SCREEN_CAPTURE_PERMISSION = "ohos.permission.CAPTURE_SCREEN";
 const std::string CUSTOM_SCREEN_CAPTURE_PERMISSION = "ohos.permission.CUSTOM_SCREEN_CAPTURE";
 const std::string BOOTEVENT_BOOT_COMPLETED = "bootevent.boot.completed";
 const std::string ACCESS_VIRTUAL_SCREEN_PERMISSION = "ohos.permission.ACCESS_VIRTUAL_SCREEN";
+const std::string IS_PC_MODE_KEY = "persist.sceneboard.ispcmode";
 const int32_t CV_WAIT_SCREENON_MS = 300;
 const int32_t CV_WAIT_SCREENOFF_MS = 1500;
 const int32_t CV_WAIT_SCREENOFF_MS_MAX = 3000;
@@ -379,7 +380,8 @@ void ScreenSessionManager::FixPowerStatus()
 
 void ScreenSessionManager::Init()
 {
-    if (ScreenSceneConfig::GetExternalScreenDefaultMode() == "none") {
+    if (ScreenSceneConfig::GetExternalScreenDefaultMode() == "none" ||
+        system::GetBoolParameter(IS_PC_MODE_KEY, false)) {
         g_isPcDevice = true;
     }
     if (system::GetParameter("soc.boot.mode", "") != "rescue") {
@@ -8225,13 +8227,21 @@ bool ScreenSessionManager::SwitchPcMode()
         return g_isPcDevice;
     }
     std::lock_guard<std::mutex> lock(pcModeSwitchMutex_);
-    if (system::GetBoolParameter("persist.sceneboard.ispcmode", false)) {
+    if (system::GetBoolParameter(IS_PC_MODE_KEY, false)) {
         TLOGI(WmsLogTag::DMS, "PcMode change isPcDevice true");
         g_isPcDevice = true;
+#ifdef WM_MULTI_SCREEN_CTL_ABILITY_ENABLE
+        SetMultiScreenFrameControl();
+#endif
     } else {
         TLOGI(WmsLogTag::DMS, "PadMode change isPcDevice false");
         g_isPcDevice = false;
         SwitchExternalScreenToMirror();
+#ifdef WM_MULTI_SCREEN_CTL_ABILITY_ENABLE
+        TLOGI(WmsLogTag::DMS, "Disable frame rate control");
+        EventInfo event = { "VOTER_MUTIPHYSICALSCREEN", REMOVE_VOTE };
+        rsInterface_.NotifyRefreshRateEvent(event);
+#endif
     }
     return g_isPcDevice;
 }
@@ -8248,7 +8258,7 @@ void ScreenSessionManager::SwitchExternalScreenToMirror()
             continue;
         }
         if (IsDefaultMirrorMode(screenSession->GetScreenId()) &&
-            screenSession->GetMirrorScreenType() == MirrorScreenType::PHYSICAL_MIRROR) {
+            screenSession->GetIsRealScreen()) {
             externalScreenIds.emplace_back(screenSession->GetScreenId());
             hasExternalScreen = true;
             oss << screenSession->GetScreenId() << ",";
