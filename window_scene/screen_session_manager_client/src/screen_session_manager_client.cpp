@@ -410,8 +410,7 @@ void ScreenSessionManagerClient::UpdateScreenRotationProperty(ScreenId screenId,
         TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
         return;
     }
-    screenSessionManager_->UpdateScreenDirectionInfo(screenId, directionInfo.screenRotation_, directionInfo.rotation_,
-        directionInfo.phyRotation_, screenPropertyChangeType);
+    screenSessionManager_->UpdateScreenDirectionInfo(screenId, directionInfo, screenPropertyChangeType, bounds);
     screenSessionManager_->UpdateScreenRotationProperty(screenId, bounds, directionInfo.notifyRotation_,
         screenPropertyChangeType);
 
@@ -918,8 +917,12 @@ void ScreenSessionManagerClient::UpdatePropertyWhenSwitchUser(const sptr <Screen
         FoldDisplayMode::UNKNOWN);
     screenSession->SetPhysicalRotation(rotation);
     screenSession->SetScreenComponentRotation(rotation);
-    screenSessionManager_->UpdateScreenDirectionInfo(screenId, rotation, rotation, rotation,
-        ScreenPropertyChangeType::UNSPECIFIED);
+    ScreenDirectionInfo directionInfo;
+    directionInfo.screenRotation_ = static_cast<int32_t>(rotation);
+    directionInfo.rotation_ = static_cast<int32_t>(rotation);
+    directionInfo.phyRotation_ = static_cast<int32_t>(rotation);
+    screenSessionManager_->UpdateScreenDirectionInfo(screenId, directionInfo,
+        ScreenPropertyChangeType::UNSPECIFIED, bounds);
     screenSessionManager_->UpdateScreenRotationProperty(screenId, bounds, rotation,
         ScreenPropertyChangeType::UNSPECIFIED, true);
     ScreenProperty property = screenSessionManager_->GetScreenProperty(screenId);
