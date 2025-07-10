@@ -155,7 +155,7 @@ void SessionChangeRecorder::GetSceneSessionNeedDumpInfo(
         return;
     }
 
-    uint32_t specifiedRecordType = INVALID_SESSION_ID;
+    uint32_t specifiedRecordType = RecordType::RECORD_TYPE_BEGIN;
     if (params.size() >= 2 && WindowHelper::IsNumber(params[1])) {
         const std::string& str = params[1];
         uint32_t value;
