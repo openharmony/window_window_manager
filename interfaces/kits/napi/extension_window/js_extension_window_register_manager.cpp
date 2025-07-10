@@ -261,17 +261,29 @@ bool JsExtensionWindowRegisterManager::IsCallbackRegistered(napi_env env, std::s
     return false;
 }
 
-WmErrorCode JsExtensionWindowRegisterManager::RegisterListener(sptr<Window> window, std::string type,
-    CaseType caseType, napi_env env, napi_value value, bool atomicService)
+WmErrorCode JsExtensionWindowRegisterManager::AtomicServiceRegisterListener(sptr<Window> window, std::string type,
+    CaseType caseType, napi_env env, napi_value value)
 {
     std::lock_guard<std::mutex> lock(mtx_);
     if (IsCallbackRegistered(env, type, value)) {
-        if (atomicService) {
-            return WmErrorCode::WM_OK;
-        } else {
-            return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
-        }
+        return WmErrorCode::WM_OK;
     }
+    RegisterListenerInner(window, type, caseType, env, value);
+}
+
+WmErrorCode JsExtensionWindowRegisterManager::RegisterListener(sptr<Window> window, std::string type,
+    CaseType caseType, napi_env env, napi_value value)
+{
+    std::lock_guard<std::mutex> lock(mtx_);
+    if (IsCallbackRegistered(env, type, value)) {
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    RegisterListenerInner(window, type, caseType, env, value);
+}
+
+WmErrorCode JsExtensionWindowRegisterManager::RegisterListenerInner(sptr<Window> window, std::string type,
+    CaseType caseType, napi_env env, napi_value value)
+{
     if (listenerCodeMap_[caseType].count(type) == 0) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Type %{public}s is not supported", type.c_str());
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
@@ -297,18 +309,32 @@ WmErrorCode JsExtensionWindowRegisterManager::RegisterListener(sptr<Window> wind
     return WmErrorCode::WM_OK;
 }
 
-WmErrorCode JsExtensionWindowRegisterManager::UnregisterListener(sptr<Window> window, std::string type,
-    CaseType caseType, napi_env env, napi_value value, bool atomicService)
+
+WmErrorCode AtomicServiceUnregisterListener(sptr<Window> window, std::string type,
+    CaseType caseType, napi_env env, napi_value value)
 {
     std::lock_guard<std::mutex> lock(mtx_);
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Type %{public}s was not registered", type.c_str());
-        if (atomicService) {
-            return WmErrorCode::WM_OK;
-        } else {
-            return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
-        }
+        return WmErrorCode::WM_OK;
     }
+    UnregisterListenerInner(window, type, caseType, env, value);
+}
+
+WmErrorCode JsExtensionWindowRegisterManager::UnregisterListener(sptr<Window> window, std::string type,
+    CaseType caseType, napi_env env, napi_value value)
+{
+    std::lock_guard<std::mutex> lock(mtx_);
+    if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Type %{public}s was not registered", type.c_str());
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    UnregisterListenerInner(window, type, caseType, env, value);
+}
+
+WmErrorCode JsExtensionWindowRegisterManager::UnregisterListenerInner(sptr<Window> window, std::string type,
+    CaseType caseType, napi_env env, napi_value value)
+{
     if (listenerCodeMap_[caseType].count(type) == 0) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Type %{public}s is not supported", type.c_str());
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
