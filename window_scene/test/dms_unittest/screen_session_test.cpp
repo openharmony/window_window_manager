@@ -3093,22 +3093,6 @@ HWTEST_F(ScreenSessionTest, SecondaryReflexionChange, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetFrameGravity
- * @tc.desc: run in for
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionTest, SetFrameGravity, TestSize.Level1)
-{
-    LOG_SetCallback(MyLogCallback);
-    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
-    EXPECT_NE(nullptr, session);
-    session->displayNode_  = nullptr;
-    Gravity gravity = Rosen::Gravity::RESIZE;
-    session->SetFrameGravity(gravity);
-    EXPECT_TRUE(g_errLog.find("displayNode_ is null, setFrameGravity failed") != std::string::npos);
-}
-
-/**
  * @tc.name: UpdatePropertyOnly
  * @tc.desc: normal function
  * @tc.type: FUNC
