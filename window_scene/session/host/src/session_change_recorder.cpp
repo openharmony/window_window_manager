@@ -16,6 +16,7 @@
 #include "session/host/include/session_change_recorder.h"
 
 #include <algorithm>
+#include <charconv>
 #include <chrono>
 
 #include "window_helper.h"
