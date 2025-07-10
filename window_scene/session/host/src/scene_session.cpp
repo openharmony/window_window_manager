@@ -1147,6 +1147,7 @@ void SceneSession::RegisterUpdateAppUseControlCallback(UpdateAppUseControlFunc&&
             return;
         }
         session->onUpdateAppUseControlFunc_ = std::move(callback);
+        session->UpdatePrivacyModeControlInfo();
         if (!session->onGetAllAppUseControlMapFunc_) {
             TLOGNE(WmsLogTag::WMS_LIFE,
                 "id: %{public}d session GetAllAppUseControlMapFunc is null", session->GetPersistentId());
@@ -1185,8 +1186,8 @@ void SceneSession::NotifyUpdateAppUseControl(ControlAppType type, const ControlI
             bool isAppUseControl = (controlInfo.isNeedControl && !controlInfo.isControlRecentOnly);
             session->isAppUseControl_ = isAppUseControl;
             session->onUpdateAppUseControlFunc_(type, controlInfo.isNeedControl, controlInfo.isControlRecentOnly);
-            if (session->sessionStage_ == nullptr) {
-                TLOGNE(WmsLogTag::WMS_LIFE, "sessionStage is nullptr");
+            if (session->sessionStage_ == nullptr || type == ControlAppType::PRIVACY_WINDOW) {
+                TLOGNW(WmsLogTag::WMS_LIFE, "%{public}s sessionStage is nullptr or privacy mode control", where);
                 return;
             }
             session->sessionStage_->NotifyAppUseControlStatus(isAppUseControl);
@@ -1199,6 +1200,39 @@ void SceneSession::NotifyUpdateAppUseControl(ControlAppType type, const ControlI
             }
         }
     }, __func__);
+}
+
+void SceneSession::UpdatePrivacyModeControlInfo()
+{
+    bool isPrivacyMode = false;
+    auto property = GetSessionProperty();
+    if ((property && property->GetPrivacyMode()) || HasSubSessionInPrivacyMode()) {
+        isPrivacyMode = true;
+    }
+    if (!isPrivacyMode && appUseControlMap_.find(ControlAppType::PRIVACY_WINDOW) == appUseControlMap_.end()) {
+        TLOGI(WmsLogTag::WMS_LIFE, "no need to update privacy mode control info");
+        return;
+    }
+    ControlInfo controlInfo = { .isNeedControl = isPrivacyMode, .isControlRecentOnly = true };
+    NotifyUpdateAppUseControl(ControlAppType::PRIVACY_WINDOW, controlInfo);
+}
+
+bool SceneSession::HasSubSessionInPrivacyMode()
+{
+    for (const auto& subSession : GetSubSession()) {
+        if (subSession == nullptr) {
+            TLOGW(WmsLogTag::WMS_LIFE, "subSession is nullptr");
+            continue;
+        }
+        auto property = subSession->GetSessionProperty();
+        if (property && property->GetPrivacyMode()) {
+            return true;
+        }
+        if (subSession->HasSubSessionInPrivacyMode()) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void SceneSession::RegisterDefaultAnimationFlagChangeCallback(NotifyWindowAnimationFlagChangeFunc&& callback)
