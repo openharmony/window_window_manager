@@ -3205,7 +3205,7 @@ HWTEST_F(ScreenSessionManagerTest, GetCurrentScreenPhyBounds02, TestSize.Level1)
     float phyWidth = 0.0f;
     float phyHeight = 0.0f;
     bool isReset = true;
-    ScreenId screenId = 1050;
+    ScreenId screenId = 0;
     ssm_->GetCurrentScreenPhyBounds(phyWidth, phyHeight, isReset, screenId);
     auto foldController = sptr<FoldScreenController>::MakeSptr(ssm_->displayInfoMutex_,
         ssm_->screenPowerTaskScheduler_);
