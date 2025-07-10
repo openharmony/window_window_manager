@@ -842,28 +842,28 @@ ani_object AniWindow::SetSpecificSystemBarEnabled(ani_env* env, ani_string name,
 }  // namespace Rosen
 }  // namespace OHOS
 
-static ani_object WindowResize(ani_env* env, ani_object obj, ani_long nativeObj, ani_double width, ani_double height)
+static void WindowResize(ani_env* env, ani_object obj, ani_long nativeObj, ani_double width, ani_double height)
 {
     using namespace OHOS::Rosen;
     TLOGI(WmsLogTag::WMS_LAYOUT, "[ANI]");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (!aniWindow || !aniWindow->GetWindow()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] windowToken is nullptr");
-        return AniWindowUtils::CreateAniUndefined(env);
+        return;
     }
-    return aniWindow->Resize(env, width, height);
+    aniWindow->Resize(env, width, height);
 }
 
-static ani_object WindowMoveWindowTo(ani_env* env, ani_object obj, ani_long nativeObj, ani_double x, ani_double y)
+static void WindowMoveWindowTo(ani_env* env, ani_object obj, ani_long nativeObj, ani_double x, ani_double y)
 {
     using namespace OHOS::Rosen;
     TLOGI(WmsLogTag::WMS_LAYOUT, "[ANI]");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (!aniWindow || !aniWindow->GetWindow()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] windowToken is nullptr");
-        return AniWindowUtils::CreateAniUndefined(env);
+        return;
     }
-    return aniWindow->MoveWindowTo(env, x, y);
+    aniWindow->MoveWindowTo(env, x, y);
 }
 
 static ani_object WindowGetGlobalRect(ani_env* env, ani_object obj, ani_long nativeObj)
@@ -1095,9 +1095,9 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_NOT_FOUND;
     }
     std::array methods = {
-        ani_native_function {"resize", "JDD:I",
+        ani_native_function {"resize", "JDD:V",
             reinterpret_cast<void *>(WindowResize)},
-        ani_native_function {"moveWindowTo", "JDD:I",
+        ani_native_function {"moveWindowTo", "JDD:V",
             reinterpret_cast<void *>(WindowMoveWindowTo)},
         ani_native_function {"getGlobalRect", "J:L@ohos/window/window/Rect;",
             reinterpret_cast<void *>(WindowGetGlobalRect)},
