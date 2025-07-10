@@ -3551,6 +3551,15 @@ WSRect Session::GetSessionRect() const
 }
 
 /** @note @window.layout */
+WSRect Session::GetSessionScreenRelativeRect() const
+{
+    if (layoutController_->GetSizeChangeReason() == SizeChangeReason::DRAG_MOVE) {
+        return layoutController_->ConvertGlobalRectToRelative(layoutController_->GetSessionRect(), GetDisplayId());
+    }
+    return layoutController_->GetSessionRect();
+}
+
+/** @note @window.layout */
 WMError Session::GetGlobalScaledRect(Rect& globalScaledRect)
 {
     auto task = [weakThis = wptr(this), &globalScaledRect] {
