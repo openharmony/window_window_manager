@@ -8730,7 +8730,7 @@ void ScreenSessionManager::UpdateAvailableArea(ScreenId screenId, DMRect area)
         return;
     }
     if (GetUserIdByCallingUid() != currentUserId_) {
-        TLOGE(WmsLogTag::DMS, "not currentuser, callingUid:%{pubilc}d, currentUserId:%{public}d",
+        TLOGE(WmsLogTag::DMS, "not currentuser, calling uid:%{public}d, current uid:%{public}d",
             GetUserIdByCallingUid(), currentUserId_);
         return;
     }
