@@ -3088,8 +3088,8 @@ ScreenCombination ScreenSessionManagerProxy::GetScreenCombination(ScreenId scree
     return static_cast<ScreenCombination>(reply.ReadUint32());
 }
 
-void ScreenSessionManagerProxy::UpdateScreenDirectionInfo(ScreenId screenId, float screenComponentRotation,
-    float rotation, float phyRotation, ScreenPropertyChangeType screenPropertyChangeType)
+void ScreenSessionManagerProxy::UpdateScreenDirectionInfo(ScreenId screenId, const ScreenDirectionInfo& directionInfo,
+    ScreenPropertyChangeType screenPropertyChangeType, const RRect& bounds)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -3108,20 +3108,24 @@ void ScreenSessionManagerProxy::UpdateScreenDirectionInfo(ScreenId screenId, flo
         TLOGE(WmsLogTag::DMS, "Write screenId failed");
         return;
     }
-    if (!data.WriteFloat(screenComponentRotation)) {
+    if (!data.WriteFloat(directionInfo.screenRotation_)) {
         TLOGE(WmsLogTag::DMS, "Write screenComponentRotation failed");
         return;
     }
-    if (!data.WriteFloat(rotation)) {
+    if (!data.WriteFloat(directionInfo.rotation_)) {
         TLOGE(WmsLogTag::DMS, "Write rotation failed");
         return;
     }
-    if (!data.WriteFloat(phyRotation)) {
+    if (!data.WriteFloat(directionInfo.phyRotation_)) {
         TLOGE(WmsLogTag::DMS, "Write phyRotation failed");
         return;
     }
     if (!data.WriteUint32(static_cast<uint32_t>(screenPropertyChangeType))) {
         TLOGE(WmsLogTag::DMS, "Write screenPropertyChangeType failed");
+        return;
+    }
+    if (!RSMarshallingHelper::Marshalling(data, bounds)) {
+        TLOGE(WmsLogTag::DMS, "Write bounds failed");
         return;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_UPDATE_SCREEN_DIRECTION_INFO),

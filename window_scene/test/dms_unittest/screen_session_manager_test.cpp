@@ -3781,12 +3781,16 @@ HWTEST_F(ScreenSessionManagerTest, UpdateScreenDirectionInfo01, Function | Small
     ScreenId id = 50;
     sptr<ScreenSession> screenSession = nullptr;
     ASSERT_EQ(screenSession, nullptr);
-    float screenComponentRotation = 0.0f;
-    float rotation = 0.0f;
-    float phyRotation = 0.0f;
+    ScreenDirectionInfo directionInfo;
+    directionInfo.screenRotation_ = 1.0f;
+    directionInfo.rotation_ = 1.0f;
+    directionInfo.phyRotation_ = 1.0f;
+    RRect bounds;
+    bounds.rect_.width_ = 1344;
+    bounds.rect_.height_ = 2772;
     ScreenPropertyChangeType screenPropertyChangeType = ScreenPropertyChangeType::ROTATION_END;
     ssm->screenSessionMap_.insert(std::make_pair(id, screenSession));
-    ssm->UpdateScreenDirectionInfo(id, screenComponentRotation, rotation, phyRotation, screenPropertyChangeType);
+    ssm->UpdateScreenDirectionInfo(id, directionInfo, screenPropertyChangeType, bounds);
     ssm->screenSessionMap_.erase(50);
 }
 
@@ -3802,12 +3806,16 @@ HWTEST_F(ScreenSessionManagerTest, UpdateScreenDirectionInfo02, Function | Small
     ScreenId id = 50;
     sptr<ScreenSession> screenSession = nullptr;
     ASSERT_EQ(screenSession, nullptr);
-    float screenComponentRotation = 0.0f;
-    float rotation = 0.0f;
-    float phyRotation = 0.0f;
+    ScreenDirectionInfo directionInfo;
+    directionInfo.screenRotation_ = 1.0f;
+    directionInfo.rotation_ = 1.0f;
+    directionInfo.phyRotation_ = 1.0f;
+    RRect bounds;
+    bounds.rect_.width_ = 1344;
+    bounds.rect_.height_ = 2772;
     ScreenPropertyChangeType screenPropertyChangeType = ScreenPropertyChangeType::UNSPECIFIED;
     ssm->screenSessionMap_.insert(std::make_pair(id, screenSession));
-    ssm->UpdateScreenDirectionInfo(id, screenComponentRotation, rotation, phyRotation, screenPropertyChangeType);
+    ssm->UpdateScreenDirectionInfo(id, directionInfo, screenPropertyChangeType, bounds);
     ssm->screenSessionMap_.erase(50);
 }
 
@@ -3823,12 +3831,16 @@ HWTEST_F(ScreenSessionManagerTest, UpdateScreenDirectionInfo03, Function | Small
     ScreenId id = 50;
     sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession);
-    float screenComponentRotation = 0.0f;
-    float rotation = 0.0f;
-    float phyRotation = 0.0f;
+    ScreenDirectionInfo directionInfo;
+    directionInfo.screenRotation_ = 1.0f;
+    directionInfo.rotation_ = 1.0f;
+    directionInfo.phyRotation_ = 1.0f;
+    RRect bounds;
+    bounds.rect_.width_ = 1344;
+    bounds.rect_.height_ = 2772;
     ScreenPropertyChangeType screenPropertyChangeType = ScreenPropertyChangeType::UNSPECIFIED;
     ssm->screenSessionMap_.insert(std::make_pair(id, screenSession));
-    ssm->UpdateScreenDirectionInfo(id, screenComponentRotation, rotation, phyRotation, screenPropertyChangeType);
+    ssm->UpdateScreenDirectionInfo(id, directionInfo, screenPropertyChangeType, bounds);
     ssm->screenSessionMap_.erase(50);
 }
 
