@@ -1690,4 +1690,14 @@ DMError ScreenManagerAdapter::SetVirtualScreenAutoRotation(ScreenId screenId, bo
     }
     return DMError::DM_OK;
 }
+
+DMError ScreenManagerAdapter::SetScreenPrivacyWindowTagSwitch(ScreenId screenId,
+    const std::vector<std::string>& privacyWindowTag, bool enable)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+    if (screenSessionManagerServiceProxy_) {
+        return screenSessionManagerServiceProxy_->SetScreenPrivacyWindowTagSwitch(screenId, privacyWindowTag, enable);
+    }
+    return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+}
 } // namespace OHOS::Rosen

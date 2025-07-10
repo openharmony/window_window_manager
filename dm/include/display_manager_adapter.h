@@ -198,6 +198,8 @@ public:
     virtual void SetFoldStatusExpandAndLocked(bool locked);
     virtual DMError SetScreenSkipProtectedWindow(const std::vector<ScreenId>& screenIds, bool isEnable);
     virtual DMError SetVirtualScreenAutoRotation(ScreenId screenId, bool enable);
+    virtual DMError SetScreenPrivacyWindowTagSwitch(ScreenId screenId, const std::vector<std::string>& privacyWindowTag,
+        bool enable);
 private:
     static inline SingletonDelegator<ScreenManagerAdapter> delegator;
 };
