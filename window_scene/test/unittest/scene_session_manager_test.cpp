@@ -528,7 +528,7 @@ HWTEST_F(SceneSessionManagerTest, StartAbilityBySpecified, TestSize.Level1)
     want->SetParams(wantParams);
     info.want = want;
     ssm_->StartAbilityBySpecified(info);
-    EXPECT_FALSE(g_logMsg.find("ERR_OK") != std::string::npos);
+    EXPECT_FALSE(g_logMsg.find("start specified ability by SCB result") != std::string::npos);
     LOG_SetCallback(nullptr);
 }
 
