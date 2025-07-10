@@ -29,6 +29,8 @@ WM_IMPLEMENT_SINGLE_INSTANCE(SuperFoldStateManager)
 
 namespace {
 const std::string g_FoldScreenRect = system::GetParameter("const.window.foldscreen.config_rect", "");
+constexpr uint32_t DEFAULT_FOLD_REGION_HEIGHT = 82; // default height of pivot area
+constexpr float CROSSOVER_MIN = 0.14f;  // Minium ratio of the border between the two screens
 const int32_t PARAM_NUMBER_MIN = 10;
 const int32_t HEIGHT_HALF = 2;
 #ifdef TP_FEATURE_ENABLE
@@ -440,6 +442,201 @@ void SuperFoldStateManager::HandleExtendToHalfFoldDisplayNotify(sptr<ScreenSessi
         fakeScreenSession->ConvertToDisplayInfo());
     screenSession->PropertyChange(screenSession->GetScreenProperty(),
         ScreenPropertyChangeReason::SUPER_FOLD_STATUS_CHANGE);
+    RefreshExternalRegion();
+}
+
+uint32_t SuperFoldStateManager::GetFoldCreaseHeight() const
+{
+    if (currentSuperFoldCreaseRegion_ == nullptr) {
+        return DEFAULT_FOLD_REGION_HEIGHT;
+    }
+    std::vector<DMRect> creaseRects = currentSuperFoldCreaseRegion_->GetCreaseRects();
+    if (!creaseRects.empty()) {
+        return creaseRects[0].height_;
+    }
+    return DEFAULT_FOLD_REGION_HEIGHT;
+}
+
+ScreenDirectionType SuperFoldStateManager::GetOuterScreenDirection(const Drawing::Rect& innerScreenRect,
+    const Drawing::Rect& outerScreenRect)
+{
+    if (outerScreenRect.left_ >= innerScreenRect.right_) {
+        return ScreenDirectionType::RIGHT;
+    } else if (outerScreenRect.right_ <= innerScreenRect.left_) {
+        return ScreenDirectionType::LEFT;
+    } else if (outerScreenRect.bottom_ <= innerScreenRect.top_) {
+        return ScreenDirectionType::TOP;
+    } else if (outerScreenRect.top_ >= innerScreenRect.bottom_) {
+        return ScreenDirectionType::BOTTOM;
+    }
+    return ScreenDirectionType::RIGHT;
+}
+
+void SuperFoldStateManager::CalculateScreenRelativePosition(const Drawing::Rect& innerScreenRect,
+    const Drawing::Rect& outerScreenRect, const MultiScreenPositionOptions& mainScreenOptions,
+    int32_t& secondStartX, int32_t& secondStartY)
+{
+    bool isToExpanded = GetCurrentStatus() == SuperFoldStatus::EXPANDED;
+    int32_t p1Width = innerScreenRect.right_ - innerScreenRect.left_;
+    int32_t p1Height = innerScreenRect.bottom_ - innerScreenRect.top_;
+    if (isToExpanded != (p1Width > p1Height)) {
+        std::swap(p1Width, p1Height);
+    }
+    int32_t p2Width = outerScreenRect.right_ - outerScreenRect.left_;
+    int32_t p2Height = outerScreenRect.bottom_ - outerScreenRect.top_;
+    int32_t mainStartX = static_cast<int32_t>(mainScreenOptions.startX_);
+    int32_t mainStartY = static_cast<int32_t>(mainScreenOptions.startY_);
+    ScreenDirectionType p2Direction = GetOuterScreenDirection(innerScreenRect, outerScreenRect);
+    if (p2Direction == ScreenDirectionType::LEFT) {
+        secondStartX = mainStartX - p2Width;
+        secondStartY = mainStartY + (outerScreenRect.top_ - innerScreenRect.top_);
+    } else if (p2Direction == ScreenDirectionType::RIGHT) {
+        secondStartX = mainStartX + p1Width;
+        secondStartY = mainStartY + (outerScreenRect.top_ - innerScreenRect.top_);
+    } else if (p2Direction == ScreenDirectionType::TOP) {
+        secondStartX = mainStartX + (outerScreenRect.left_ - innerScreenRect.left_);
+        secondStartY = mainStartY - p2Height;
+    } else if (p2Direction == ScreenDirectionType::BOTTOM) {
+        secondStartX = mainStartX + (outerScreenRect.left_ - innerScreenRect.left_);
+        secondStartY = mainStartY + p1Height;
+    }
+    int32_t crossoverWidthMin = static_cast<int32_t>(p1Width * CROSSOVER_MIN);
+    int32_t crossoverWidthMax = p1Width - crossoverWidthMin;
+    int32_t crossoverHeightMin = static_cast<int32_t>(p1Width * CROSSOVER_MIN);
+    int32_t crossoverHeightMax = p1Width - crossoverHeightMin;
+    if (p2Direction == ScreenDirectionType::LEFT || p2Direction == ScreenDirectionType::RIGHT) {
+        if (secondStartY + p2Height < mainStartY + crossoverHeightMin) {
+            secondStartY = mainStartY + crossoverHeightMin;
+        } else if (secondStartY > mainStartY + crossoverHeightMax) {
+            secondStartY = mainStartY + crossoverHeightMax;
+        }
+        return;
+    }
+
+    if (secondStartX + p2Width < mainStartX + crossoverWidthMin) {
+        secondStartX = mainStartX + crossoverWidthMin;
+    } else if (secondStartX > mainStartX + crossoverWidthMax) {
+        secondStartX = mainStartX + crossoverWidthMax;
+    }
+}
+
+void SuperFoldStateManager::RefreshScreenRelativePositionInner(const Drawing::Rect& innerScreenRect,
+    const Drawing::Rect& outerScreenRect, MultiScreenPositionOptions& mainScreenOptions,
+    MultiScreenPositionOptions& secondScreenOption)
+{
+    int32_t secondStartX = static_cast<int32_t>(secondScreenOption.startX_);
+    int32_t secondStartY = static_cast<int32_t>(secondScreenOption.startY_);
+    CalculateScreenRelativePosition(innerScreenRect, outerScreenRect, mainScreenOptions, secondStartX,
+        secondStartY);
+    if (secondStartX < 0) {
+        mainScreenOptions.startX_ += static_cast<uint32_t>(-secondStartX);
+        secondStartX = 0;
+    }
+    if (secondStartY < 0) {
+        mainScreenOptions.startY_ += static_cast<uint32_t>(-secondStartY);
+        secondStartY = 0;
+    }
+    secondScreenOption.startX_ = static_cast<uint32_t>(secondStartX);
+    secondScreenOption.startY_ = static_cast<uint32_t>(secondStartY);
+    ScreenSessionManager::GetInstance().SetMultiScreenRelativePosition(mainScreenOptions, secondScreenOption);
+}
+
+DMError SuperFoldStateManager::RefreshScreenRelativePosition(
+    sptr<ScreenSession>& mainScreenSession, sptr<ScreenSession>& externalSession)
+{
+    if (mainScreenSession == nullptr || externalSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "mainScreenSession or externalSession is null");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    auto mainScreenProperty = mainScreenSession->GetScreenProperty();
+    auto externScreenProperty = externalSession->GetScreenProperty();
+    MultiScreenPositionOptions mainScreenOptions;
+    mainScreenOptions.screenId_ = mainScreenSession->GetRSScreenId();
+    MultiScreenPositionOptions secondScreenOption;
+    secondScreenOption.screenId_ = externalSession->GetRSScreenId();
+    mainScreenOptions.startX_ = 0;
+    mainScreenOptions.startY_ = 0;
+    Drawing::Rect mainScreenRect = {
+        mainScreenProperty.GetStartX(),
+        mainScreenProperty.GetStartY(),
+        mainScreenProperty.GetStartX() + mainScreenProperty.GetBounds().rect_.GetWidth(),
+        mainScreenProperty.GetStartY() + mainScreenProperty.GetBounds().rect_.GetHeight(),
+    };
+    Drawing::Rect externScreenRect = {
+        externScreenProperty.GetStartX(),
+        externScreenProperty.GetStartY(),
+        externScreenProperty.GetStartX() + externScreenProperty.GetBounds().rect_.GetWidth(),
+        externScreenProperty.GetStartY() + externScreenProperty.GetBounds().rect_.GetHeight(),
+    };
+    secondScreenOption.startX_ = externScreenRect.left_;
+    secondScreenOption.startY_ = externScreenRect.top_;
+    mainScreenOptions.startX_ = mainScreenRect.left_;
+    mainScreenOptions.startY_ = mainScreenRect.top_;
+    RefreshScreenRelativePositionInner(mainScreenRect, externScreenRect, mainScreenOptions, secondScreenOption);
+    return DMError::DM_OK;
+}
+
+DMError SuperFoldStateManager::RefreshMirrorRegionInner(
+    sptr<ScreenSession>& mainScreenSession, sptr<ScreenSession>& secondarySession)
+{
+    if (mainScreenSession == nullptr || secondarySession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "mainScreenSession or secondarySession is null");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    auto mainScreenProperty = mainScreenSession->GetScreenProperty();
+    auto screenProperty = secondarySession->GetScreenProperty();
+    std::shared_ptr<RSDisplayNode> displayNode = mainScreenSession->GetDisplayNode();
+    if (displayNode == nullptr) {
+        TLOGE(WmsLogTag::DMS, "displayNode is null.");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    DMRect mirrorRegion = DMRect::NONE();
+    if (GetCurrentStatus() != SuperFoldStatus::EXPANDED) {
+        mirrorRegion.posX_ = 0;
+        mirrorRegion.posY_ = 0;
+        mirrorRegion.width_ = mainScreenProperty.GetScreenRealWidth();
+        mirrorRegion.height_ = (mainScreenProperty.GetScreenRealHeight() - GetFoldCreaseHeight()) / HEIGHT_HALF;
+        if (mirrorRegion.width_ == 0 || mirrorRegion.height_ == 0) {
+            TLOGE(WmsLogTag::DMS, "mirrorRegion.width_:%{public}d mirrorRegion.height_:%{public}d",
+                mirrorRegion.width_, mirrorRegion.height_);
+            return DMError::DM_ERROR_INVALID_PARAM;
+        }
+    }
+    secondarySession->SetMirrorScreenRegion(secondarySession->GetScreenId(), mirrorRegion);
+    secondarySession->SetIsPhysicalMirrorSwitch(true);
+    secondarySession->EnableMirrorScreenRegion();
+    RSDisplayNodeConfig config = { secondarySession->rsId_, true, displayNode->GetId() };
+    secondarySession->ReuseDisplayNode(config);
+    return DMError::DM_OK;
+}
+
+DMError SuperFoldStateManager::RefreshExternalRegion()
+{
+    if (!ScreenSessionManager::GetInstance().GetIsExtendScreenConnected()) {
+        TLOGW(WmsLogTag::DMS, "extend screen not connect");
+        return DMError::DM_OK;
+    }
+    sptr<ScreenSession> mainScreenSession = ScreenSessionManager::GetInstance().GetDefaultScreenSession();
+    if (mainScreenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "GetScreenSession null");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    std::vector<ScreenId> screenIds = ScreenSessionManager::GetInstance().GetAllScreenIds();
+    for (auto screenId : screenIds) {
+        if (screenId != mainScreenSession->GetScreenId()) {
+            sptr<ScreenSession> secondarySession = ScreenSessionManager::GetInstance().GetScreenSession(screenId);
+            if (secondarySession == nullptr) {
+                TLOGE(WmsLogTag::DMS, "get mainScreenSession failed secondarySession null");
+                return DMError::DM_ERROR_NULLPTR;
+            }
+            if (secondarySession->GetScreenCombination() == ScreenCombination::SCREEN_MIRROR) {
+                RefreshMirrorRegionInner(mainScreenSession, secondarySession);
+            } else if (secondarySession->GetScreenCombination() == ScreenCombination::SCREEN_EXTEND) {
+                RefreshScreenRelativePosition(mainScreenSession, secondarySession);
+            }
+        }
+    }
+    return DMError::DM_OK;
 }
 
 void SuperFoldStateManager::HandleHalfFoldToExtendDisplayNotify(sptr<ScreenSession> screenSession)
@@ -459,6 +656,7 @@ void SuperFoldStateManager::HandleHalfFoldToExtendDisplayNotify(sptr<ScreenSessi
         DisplayChangeEvent::SUPER_FOLD_RESOLUTION_CHANGED);
     screenSession->PropertyChange(screenSession->GetScreenProperty(),
         ScreenPropertyChangeReason::SUPER_FOLD_STATUS_CHANGE);
+    RefreshExternalRegion();
 }
 
 void SuperFoldStateManager::HandleKeyboardOnDisplayNotify(sptr<ScreenSession> screenSession)

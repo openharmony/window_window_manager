@@ -32,6 +32,12 @@
 namespace OHOS {
 
 namespace Rosen {
+enum class ScreenDirectionType : uint32_t {
+    LEFT,
+    TOP,
+    RIGHT,
+    BOTTOM
+};
 
 class RSInterfaces;
 
@@ -64,6 +70,9 @@ public:
     bool GetSystemKeyboardStatus();
 
     bool GetKeyboardState();
+
+    DMError RefreshExternalRegion();
+
 private:
     std::atomic<SuperFoldStatus> curState_ = SuperFoldStatus::UNKNOWN;
     sptr<FoldCreaseRegion> currentSuperFoldCreaseRegion_ = nullptr;
@@ -110,6 +119,18 @@ private:
 
     static bool ChangeScreenState(bool toHalf);
     int32_t GetCurrentValidHeight(sptr<ScreenSession> screenSession);
+
+    uint32_t GetFoldCreaseHeight() const;
+    DMError RefreshMirrorRegionInner(sptr<ScreenSession>& mainScreenSession, sptr<ScreenSession>& secondarySession);
+    DMError RefreshScreenRelativePosition(sptr<ScreenSession>& mainScreenSession,
+        sptr<ScreenSession>& secondarySession);
+    void RefreshScreenRelativePositionInner(const Drawing::Rect& innerScreenRect,
+        const Drawing::Rect& outerScreenRect, MultiScreenPositionOptions& mainScreenOptions,
+        MultiScreenPositionOptions& secondScreenOption);
+    ScreenDirectionType GetOuterScreenDirection(const Drawing::Rect& innerScreenRect,
+        const Drawing::Rect& outerScreenRect);
+    void CalculateScreenRelativePosition(const Drawing::Rect& innerScreenRect, const Drawing::Rect& outerScreenRect,
+        const MultiScreenPositionOptions& mainScreenOptions, int32_t& secondStartX, int32_t& secondStartY);
 };
 } // Rosen
 } // OHOS
