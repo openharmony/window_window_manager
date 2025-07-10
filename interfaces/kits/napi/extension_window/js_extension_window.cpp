@@ -1106,7 +1106,7 @@ napi_value JsExtensionWindow::OnUnRegisterExtensionWindowCallback(napi_env env, 
             value = argv[INDEX_ONE];
             if (value == nullptr || !NapiIsCallable(env, value)) {
                 ret = extensionRegisterManager_->AtomicServiceUnregisterListener(windowImpl, cbType,
-                    CaseType::CASE_WINDOW, env, nullptr, atomicService);
+                    CaseType::CASE_WINDOW, env, nullptr);
             } else {
                 ret = extensionRegisterManager_->AtomicServiceUnregisterListener(windowImpl, cbType,
                     CaseType::CASE_WINDOW, env, value);
@@ -1119,7 +1119,7 @@ napi_value JsExtensionWindow::OnUnRegisterExtensionWindowCallback(napi_env env, 
             value = argv[INDEX_ONE];
             if (value == nullptr || !NapiIsCallable(env, value)) {
                 ret = extensionRegisterManager_->UnregisterListener(windowImpl, cbType, CaseType::CASE_WINDOW,
-                    env, nullptr, atomicService);
+                    env, nullptr);
             } else {
                 ret = extensionRegisterManager_->UnregisterListener(windowImpl, cbType, CaseType::CASE_WINDOW, env,
                     value);
