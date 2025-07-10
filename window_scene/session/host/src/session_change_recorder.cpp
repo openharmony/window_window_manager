@@ -126,7 +126,6 @@ void SessionChangeRecorder::GetSceneSessionNeedDumpInfo(
 {
     std::ostringstream oss;
     oss << "Record session change: " << std::endl;
-
     bool simplifyFlag = false;
     std::vector<std::string> params = dumpParams;
     auto it = std::find(params.begin(), params.end(), "-simplify");
@@ -134,7 +133,6 @@ void SessionChangeRecorder::GetSceneSessionNeedDumpInfo(
         simplifyFlag = true;
         params.erase(it);
     }
-
     int32_t specifiedWindowId = INVALID_SESSION_ID;
     if (params.size() >= 1 && params[0] == "all") {
         specifiedWindowId = INVALID_SESSION_ID;
@@ -154,9 +152,8 @@ void SessionChangeRecorder::GetSceneSessionNeedDumpInfo(
         dumpInfo.append(oss.str());
         return;
     }
-
     uint32_t specifiedRecordType = RecordType::RECORD_TYPE_BEGIN;
-    if (params.size() >= 2 && WindowHelper::IsNumber(params[1])) {
+    if (params.size() >= 2 && WindowHelper::IsNumber(params[1])) { // 2: params num
         const std::string& str = params[1];
         uint32_t value;
         auto res = std::from_chars(str.data(), str.data() + str.size(), value);
@@ -164,13 +161,11 @@ void SessionChangeRecorder::GetSceneSessionNeedDumpInfo(
             specifiedRecordType = value;
         }
     }
-
     std::unordered_map<RecordType, std::queue<SceneSessionChangeInfo>> sceneSessionChangeNeedDumpMapCopy;
     {
         std::lock_guard<std::mutex> lock(sessionChangeRecorderMutex_);
         sceneSessionChangeNeedDumpMapCopy = sceneSessionChangeNeedDumpMap_;
     }
-
     std::string dumpInfoJsonString = FormatDumpInfoToJsonString(specifiedRecordType, specifiedWindowId,
         sceneSessionChangeNeedDumpMapCopy);
     oss << dumpInfoJsonString;
