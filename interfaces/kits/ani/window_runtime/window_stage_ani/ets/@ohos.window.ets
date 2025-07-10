@@ -1214,8 +1214,8 @@ export class WindowInternal implements Window {
         this.nativeObj = nativeObj;
     }
 
-    private native resize(nativeObj: long, width: double, height: double): int;
-    private native moveWindowTo(nativeObj: long, x: double, y: double): int;
+    private native resize(nativeObj: long, width: number, height: number): void;
+    private native moveWindowTo(nativeObj: long, x: number, y: number): void;
     private native getGlobalRect(nativeObj:long): Rect;
 
     private native getWindowDecorHeight(nativeObj:long): double;
