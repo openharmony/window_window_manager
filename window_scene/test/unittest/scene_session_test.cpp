@@ -640,7 +640,83 @@ HWTEST_F(SceneSessionTest, SetPrivacyMode03, TestSize.Level0)
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
     sceneSession->surfaceNode_ = surfaceNode;
     sceneSession->SetPrivacyMode(true);
-    ASSERT_EQ(true, sceneSession->appUseControlMap_.size() == 0);
+    EXPECT_EQ(sceneSession->appUseControlMap_.size(), 0);
+}
+
+/**
+ * @tc.name: UpdatePrivacyModeControlInfo01
+ * @tc.desc: UpdatePrivacyModeControlInfo01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, UpdatePrivacyModeControlInfo01, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.bundleName_ = "testBundleName";
+    info.abilityName_ = "testAbilityName";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetPrivacyMode(true);
+    sceneSession->property_ = property;
+    sceneSession->UpdatePrivacyModeControlInfo();
+    EXPECT_EQ(sceneSession->appUseControlMap_.size(), 1);
+    EXPECT_EQ(sceneSession->appUseControlMap_[ControlAppType::PRIVACY_WINDOW].isNeedControl, true);
+}
+
+/**
+ * @tc.name: UpdatePrivacyModeControlInfo02
+ * @tc.desc: UpdatePrivacyModeControlInfo02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, UpdatePrivacyModeControlInfo02, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.bundleName_ = "testBundleName";
+    info.abilityName_ = "testAbilityName";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->property_ = nullptr;
+    sptr<SceneSession::SpecificSessionCallback> specificSessionCb =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> subSession = sptr<SceneSession>::MakeSptr(info, specificSessionCb);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetPrivacyMode(true);
+    subSession->property_ = property;
+    sceneSession->AddSubSession(subSession);
+    sceneSession->UpdatePrivacyModeControlInfo();
+    EXPECT_EQ(sceneSession->appUseControlMap_.size(), 1);
+    EXPECT_EQ(sceneSession->appUseControlMap_[ControlAppType::PRIVACY_WINDOW].isNeedControl, true);
+}
+
+/**
+ * @tc.name: HasSubSessionInPrivacyMode
+ * @tc.desc: HasSubSessionInPrivacyMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, HasSubSessionInPrivacyMode, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.bundleName_ = "testBundleName";
+    info.abilityName_ = "testAbilityName";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->property_ = nullptr;
+    sptr<SceneSession::SpecificSessionCallback> specificSessionCb =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> subSession = sptr<SceneSession>::MakeSptr(info, specificSessionCb);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetPrivacyMode(false);
+    subSession->property_ = property;
+
+    subSession->subSession_.push_back(nullptr);
+    subSession->AddSubSession(sptr<SceneSession>::MakeSptr(info, specificSessionCb));
+    sptr<SceneSession::SpecificSessionCallback> specificSessionCb2 =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> subSession2 = sptr<SceneSession>::MakeSptr(info, specificSessionCb2);
+    sptr<WindowSessionProperty> property2 = sptr<WindowSessionProperty>::MakeSptr();
+    property2->SetPrivacyMode(true);
+    subSession2->property_ = property2;
+    subSession->AddSubSession(subSession2);
+
+    sceneSession->AddSubSession(subSession);
+    EXPECT_EQ(sceneSession->HasSubSessionInPrivacyMode(), true);
 }
 
 /**
