@@ -3022,7 +3022,7 @@ WMError SceneSessionManagerProxy::SetScreenPrivacyWindowTagSwitch(
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
-    uint32_t ret = 0;
+    int32_t ret = 0;
     if (!reply.ReadInt32(ret)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read ret failed");
         return WMError::WM_ERROR_IPC_FAILED;
@@ -3711,7 +3711,7 @@ WMError SceneSessionManagerProxy::AddSessionBlackList(
         TLOGE(WmsLogTag::WMS_ANIMATION, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    uint32_t ret = 0;
+    int32_t ret = 0;
     if (!reply.ReadInt32(ret)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read ret failed");
         return WMError::WM_ERROR_IPC_FAILED;
@@ -3760,7 +3760,7 @@ WMError SceneSessionManagerProxy::RemoveSessionBlackList(
         TLOGE(WmsLogTag::WMS_ANIMATION, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    uint32_t ret = 0;
+    int32_t ret = 0;
     if (!reply.ReadInt32(ret)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read ret failed");
         return WMError::WM_ERROR_IPC_FAILED;
