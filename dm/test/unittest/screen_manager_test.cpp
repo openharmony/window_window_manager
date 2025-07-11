@@ -819,8 +819,8 @@ HWTEST_F(ScreenManagerTest, SetScreenPrivacyWindowTagSwitch, TestSize.Level1)
 {
     ScreenId mainScreenId = 1;
     std::vector<std::string> privacyWindowTag{"test1", "test2"};
-    DMError res = ScreenManager::GetInstance().SetScreenPrivacyWindowTagSwitch(mainScreenId, privacyWindowTag, enable);
-    EXPECT_EQ(res, DMError::DMDM_ERROR_NULLPTR);
+    DMError res = ScreenManager::GetInstance().SetScreenPrivacyWindowTagSwitch(mainScreenId, privacyWindowTag, true);
+    EXPECT_EQ(res, DMError::DM_ERROR_NULLPTR);
 }
 } // namespace
 } // namespace Rosen

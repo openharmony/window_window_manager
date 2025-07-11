@@ -26,6 +26,7 @@
 #include <vector>
 
 #include "config_policy_utils.h"
+#include "fold_screen_state_internel.h"
 #include "include/core/SkMatrix.h"
 #include "include/core/SkPath.h"
 #include "include/core/SkPathMeasure.h"
@@ -313,6 +314,22 @@ std::vector<DisplayPhysicalResolution> ScreenSceneConfig::GetAllDisplayPhysicalC
     return displayPhysicalResolution_;
 }
 
+FoldDisplayMode ScreenSceneConfig::GetFoldDisplayMode(uint32_t width, uint32_t height)
+{
+    // Due to incorrect configuration files, custom processing is required.
+    if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
+        return (width == height) ? FoldDisplayMode::MAIN : FoldDisplayMode::FULL;
+    }
+
+    for (const DisplayPhysicalResolution& resolution : displayPhysicalResolution_) {
+        if ((resolution.physicalWidth_ == width && resolution.physicalHeight_ == height) ||
+            (resolution.physicalWidth_ == height && resolution.physicalHeight_ == width)) {
+            return resolution.foldDisplayMode_;
+        }
+    }
+    return FoldDisplayMode::UNKNOWN;
+}
+
 void ScreenSceneConfig::ReadScrollableParam(const xmlNodePtr& currNode)
 {
     xmlChar* displayModeXml = xmlGetProp(currNode, reinterpret_cast<const xmlChar*>("displayMode"));
@@ -468,12 +485,18 @@ void ScreenSceneConfig::DumpConfig()
 
 void ScreenSceneConfig::SetCutoutSvgPath(uint64_t displayId, const std::string& svgPath)
 {
+    if (svgPath.empty()) {
+        return;
+    }
     cutoutBoundaryRectMap_.clear();
     cutoutBoundaryRectMap_[displayId].emplace_back(CalcCutoutBoundaryRect(svgPath));
 }
 
 void ScreenSceneConfig::SetSubCutoutSvgPath(const std::string& svgPath)
 {
+    if (svgPath.empty()) {
+        return;
+    }
     subCutoutBoundaryRect_.clear();
     subCutoutBoundaryRect_.emplace_back(CalcCutoutBoundaryRect(svgPath));
 }

@@ -1056,7 +1056,8 @@ sptr<DisplayInfo> DisplayManagerAdapter::GetVisibleAreaDisplayInfoById(DisplayId
     return displayInfo;
 }
 
-sptr<CutoutInfo> DisplayManagerAdapter::GetCutoutInfo(DisplayId displayId)
+sptr<CutoutInfo> DisplayManagerAdapter::GetCutoutInfo(DisplayId displayId, int32_t width,
+                                                      int32_t height, Rotation rotation)
 {
     TLOGD(WmsLogTag::DMS, "DisplayManagerAdapter::GetCutoutInfo");
     if (displayId == DISPLAY_ID_INVALID) {
@@ -1065,7 +1066,7 @@ sptr<CutoutInfo> DisplayManagerAdapter::GetCutoutInfo(DisplayId displayId)
     }
     INIT_PROXY_CHECK_RETURN(nullptr);
     if (screenSessionManagerServiceProxy_) {
-        return screenSessionManagerServiceProxy_->GetCutoutInfo(displayId);
+        return screenSessionManagerServiceProxy_->GetCutoutInfo(displayId, width, height, rotation);
     }
 
     sptr<CutoutInfo> cutoutInfo;
@@ -1076,22 +1077,6 @@ sptr<CutoutInfo> DisplayManagerAdapter::GetCutoutInfo(DisplayId displayId)
         return nullptr;
     }
     return cutoutInfo;
-}
-
-sptr<CutoutInfo> DisplayManagerAdapter::GetCutoutInfoWithRotation(DisplayId displayId, int32_t rotation)
-{
-    TLOGD(WmsLogTag::DMS, "GetCutoutInfoWithRotation enter, rotation: %{public}d, displayId: %{public}" PRIu64,
-        rotation, displayId);
-    if (displayId == DISPLAY_ID_INVALID) {
-        TLOGE(WmsLogTag::DMS, "display id is invalid");
-        return nullptr;
-    }
-    INIT_PROXY_CHECK_RETURN(nullptr);
-    if (screenSessionManagerServiceProxy_) {
-        return screenSessionManagerServiceProxy_->GetCutoutInfoWithRotation(displayId, rotation);
-    }
-
-    return nullptr;
 }
 
 DMError DisplayManagerAdapter::AddSurfaceNodeToDisplay(DisplayId displayId,
