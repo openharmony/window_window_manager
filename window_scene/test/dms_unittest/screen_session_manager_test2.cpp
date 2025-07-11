@@ -1033,7 +1033,7 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenPrivacyWindowTagSwitch002, TestSize.
     std::vector<std::string> privacyWindowTag{"test1", "test2"};
     auto ret = ssm_->SetScreenPrivacyWindowTagSwitch(invalidScreenId, privacyWindowTag, true);
     EXPECT_EQ(ret, DMError::DM_ERROR_NULLPTR);
-    auto ret = ssm_->SetScreenPrivacyWindowTagSwitch(mainScreenId, privacyWindowTag, true);
+    ret = ssm_->SetScreenPrivacyWindowTagSwitch(mainScreenId, privacyWindowTag, true);
     EXPECT_EQ(ret, DMError::DM_OK);
 }
 }
