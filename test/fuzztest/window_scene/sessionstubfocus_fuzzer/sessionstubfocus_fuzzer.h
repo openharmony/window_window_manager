@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,6 @@
 #ifndef TEST_FUZZTEST_SESSION_STUB_BASE_FUZZER_H
 #define TEST_FUZZTEST_SESSION_STUB_BASE_FUZZER_H
 
-#define FUZZ_PROJECT_NAME "scenesessionmgrstub_multiuser_fuzzer"
+#define FUZZ_PROJECT_NAME "sessionstubfocus_fuzzer"
 
 #endif

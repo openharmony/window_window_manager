@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-#include "scenesessionmgrlstub_hierarchy_fuzzer.h"
-
 #include <cstddef>
 #include <cstdint>
 #include <parcel.h>
@@ -24,9 +22,10 @@
 #include "message_option.h"
 #include "message_parcel.h"
 #include "marshalling_helper.h"
-#include "scene_session_manager_lite.h"
-#include "scene_session_manager_lite_stub.h"
-#include "scene_session_manager_lite_interface.h"
+#include "scene_session_manager.h"
+#include "scene_session_manager_stub.h"
+#include "scene_session_manager_interface.h"
+#include "scenesessionmgrstubmultiuser_fuzzer.h"
 
 using namespace OHOS::Rosen;
 
@@ -35,13 +34,17 @@ namespace {
 constexpr size_t DATA_MIN_SIZE = 2;
 }
 
-void SceneSessionMgrLsHierarchyTest(MessageParcel& parcel)
+void SceneSessionMgrStubMultiUserTest(MessageParcel& parcel)
 {
     MessageParcel reply;
     MessageOption option;
     parcel.RewindRead(0);
-    SceneSessionManagerLite::GetInstance().OnRemoteRequest(
-        static_cast<uint32_t>(ISceneSessionManagerLite::SceneSessionManagerLiteMessage::TRANS_ID_RAISE_WINDOW_TO_TOP),
+    SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
+        SceneSessionManagerMessage::TRANS_ID_SET_PROCESS_SNAPSHOT_SKIP),
+        parcel, reply, option);
+    parcel.RewindRead(0);
+    SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
+        SceneSessionManagerMessage::TRANS_ID_SET_SNAPSHOT_SKIP_BY_USERID_AND_BUNDLENAMES),
         parcel, reply, option);
 }
 
@@ -53,14 +56,14 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 
     MessageParcel parcel;
 
-    parcel.WriteInterfaceToken(SceneSessionManagerLiteStub::GetDescriptor());
+    parcel.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
     parcel.WriteBuffer(data, size);
 
-    SceneSessionMgrLsHierarchyTest(parcel);
+    SceneSessionMgrStubMultiUserTest(parcel);
 
     return true;
 }
-} // namespace OHOS
+} // namespace.OHOS
 
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)

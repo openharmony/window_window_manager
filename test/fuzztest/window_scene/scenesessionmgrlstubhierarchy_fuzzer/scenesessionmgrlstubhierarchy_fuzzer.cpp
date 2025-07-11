@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "scenesessionmgrlstubhierarchy_fuzzer.h"
+
 #include <cstddef>
 #include <cstdint>
 #include <parcel.h>
@@ -22,10 +24,9 @@
 #include "message_option.h"
 #include "message_parcel.h"
 #include "marshalling_helper.h"
-#include "scene_session_manager.h"
-#include "scene_session_manager_stub.h"
-#include "scene_session_manager_interface.h"
-#include "scenesessionmgrstub_focus_fuzzer.h"
+#include "scene_session_manager_lite.h"
+#include "scene_session_manager_lite_stub.h"
+#include "scene_session_manager_lite_interface.h"
 
 using namespace OHOS::Rosen;
 
@@ -34,13 +35,13 @@ namespace {
 constexpr size_t DATA_MIN_SIZE = 2;
 }
 
-void SceneSessionMgrStubFocusTest(MessageParcel& parcel)
+void SceneSessionMgrLsHierarchyTest(MessageParcel& parcel)
 {
     MessageParcel reply;
     MessageOption option;
     parcel.RewindRead(0);
-    SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
-        SceneSessionManagerMessage::TRANS_ID_REQUEST_FOCUS_STATUS_BY_SA),
+    SceneSessionManagerLite::GetInstance().OnRemoteRequest(
+        static_cast<uint32_t>(ISceneSessionManagerLite::SceneSessionManagerLiteMessage::TRANS_ID_RAISE_WINDOW_TO_TOP),
         parcel, reply, option);
 }
 
@@ -52,14 +53,14 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 
     MessageParcel parcel;
 
-    parcel.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
+    parcel.WriteInterfaceToken(SceneSessionManagerLiteStub::GetDescriptor());
     parcel.WriteBuffer(data, size);
 
-    SceneSessionMgrStubFocusTest(parcel);
+    SceneSessionMgrLsHierarchyTest(parcel);
 
     return true;
 }
-} // namespace.OHOS
+} // namespace OHOS
 
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)

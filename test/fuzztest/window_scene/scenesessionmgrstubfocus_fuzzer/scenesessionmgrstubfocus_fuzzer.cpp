@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,10 +22,10 @@
 #include "message_option.h"
 #include "message_parcel.h"
 #include "marshalling_helper.h"
-#include "session/host/include/zidl/session_ipc_interface_code.h"
-#include "session/host/include/zidl/session_stub.h"
-#include "session/host/include/session.h"
-#include "sessionstub_focus_fuzzer.h"
+#include "scene_session_manager.h"
+#include "scene_session_manager_stub.h"
+#include "scene_session_manager_interface.h"
+#include "scenesessionmgrstubfocus_fuzzer.h"
 
 using namespace OHOS::Rosen;
 
@@ -34,13 +34,14 @@ namespace {
 constexpr size_t DATA_MIN_SIZE = 2;
 }
 
-void SessionStubFocusTest(sptr<Session> sessionStub, MessageParcel& parcel)
+void SceneSessionMgrStubFocusTest(MessageParcel& parcel)
 {
     MessageParcel reply;
     MessageOption option;
     parcel.RewindRead(0);
-    sessionStub->OnRemoteRequest(static_cast<uint32_t>
-        (Rosen::SessionInterfaceCode::TRANS_ID_GET_IS_HIGHLIGHTED), parcel, reply, option);
+    SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
+        SceneSessionManagerMessage::TRANS_ID_REQUEST_FOCUS_STATUS_BY_SA),
+        parcel, reply, option);
 }
 
 bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
@@ -51,18 +52,10 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 
     MessageParcel parcel;
 
-    parcel.WriteInterfaceToken(SessionStub::GetDescriptor());
+    parcel.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
     parcel.WriteBuffer(data, size);
 
-    SessionInfo info;
-    info.abilityName_ = "stubFocusFuzzTest";
-    info.bundleName_ = "stubFocusFuzzTest";
-    sptr<Session> sessionStub = new (std::nothrow) Session(info);
-    if (sessionStub == nullptr) {
-        return false;
-    }
-
-    SessionStubFocusTest(sessionStub, parcel);
+    SceneSessionMgrStubFocusTest(parcel);
 
     return true;
 }
