@@ -1720,6 +1720,16 @@ struct WindowLimits {
     {
         return (maxWidth_ == 0 || minWidth_ == 0 || maxHeight_ == 0 || minHeight_ == 0);
     }
+
+    std::string ToString() const
+    {
+        constexpr int precision = 6;
+        std::ostringstream oss;
+        oss << "[" << maxWidth_ << " " << maxHeight_ << " " << minWidth_ << " " << minHeight_
+            << " " << std::fixed << std::setprecision(precision) << maxRatio_ << " " << minRatio_
+            << " " << vpRatio_ << "]";
+        return oss.str();
+    }
 };
 
 /**
