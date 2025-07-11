@@ -7204,6 +7204,46 @@ HWTEST_F(ScreenSessionManagerTest, InitSecondaryDisplayPhysicalParams, TestSize.
     ssm_->InitSecondaryDisplayPhysicalParams();
     EXPECT_FALSE(ssm_->screenParams_.empty());
 }
+
+/**
+ * @tc.name: GetPhyScreenId
+ * @tc.desc: test function : GetPhyScreenId
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetPhyScreenId, TestSize.Level1)
+{
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        GTEST_SKIP();
+    }
+ 
+    ScreenId screenId = 0;
+    ssm_->SetCoordinationFlag(true);
+    ASSERT_EQ(ssm_->GetPhyScreenId(screenId), screenId);
+ 
+    screenId = 5;
+    ASSERT_EQ(ssm_->GetPhyScreenId(screenId), 0);
+}
+ 
+/**
+ * @tc.name: UpdateCoordinationRefreshRate
+ * @tc.desc: test function : UpdateCoordinationRefreshRate
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, UpdateCoordinationRefreshRate, TestSize.Level1)
+{
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        GTEST_SKIP();
+    }
+    uint32_t refreshRate = 60;
+    ssm_->SetCoordinationFlag(false);
+    ssm_->UpdateCoordinationRefreshRate(refreshRate);
+    EXPECT_FALSE(ssm_->GetScreenSession(5));
+ 
+    refreshRate = 90;
+    ssm_->SetCoordinationFlag(true);
+    ssm_->UpdateCoordinationRefreshRate(refreshRate);
+    EXPECT_TRUE(ssm_->GetScreenSession(0));
+}
 }
 } // namespace Rosen
 } // namespace OHOS
