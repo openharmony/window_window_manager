@@ -1156,6 +1156,30 @@ HWTEST_F(SceneSessionManagerTest8, GetFbPanelWindowId, TestSize.Level1)
     EXPECT_EQ(sceneSession->GetWindowId(), windowId);
     MockAccesstokenKit::MockAccessTokenKitRet(-1);
 }
+
+/**
+ * @tc.name: SetScreenPrivacyWindowTagSwitch01
+ * @tc.desc: test function : SetScreenPrivacyWindowTagSwitch
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, SetScreenPrivacyWindowTagSwitch01, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo sessionInfo;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+
+    ssm_->InitFbWindow(sceneSession, nullptr);
+
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    property->SetWindowType(WindowType::WINDOW_TYPE_PIP);
+    ssm_->InitFbWindow(sceneSession, property);
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_FB);
+    ssm_->InitFbWindow(sceneSession, property);
+    EXPECT_EQ(0, sceneSession->GetFbTemplateInfo().template_);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

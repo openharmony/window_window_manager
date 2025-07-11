@@ -1803,23 +1803,23 @@ HWTEST_F(sceneSessionManagerProxyTest, SetScreenPrivacyWindowTagSwitch02, TestSi
     auto proxy = sptr<SceneSessionManagerProxy>::MakeSptr(remoteMocker);
 
     // ReadBool failed
-    MockMessageParcel::SetReadBoolErrorFlag(true);
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
     auto ret = proxy->SetScreenPrivacyWindowTagSwitch(screenId, privacyWindowTags, enable);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
-    MockMessageParcel::SetReadBoolErrorFlag(false);
+    MockMessageParcel::SetWriteBoolErrorFlag(false);
 
     // ReadUint64 failed
-    MockMessageParcel::SetReadUint64ErrorFlag(true);
+    MockMessageParcel::SetWriteUint64ErrorFlag(true);
     ret = proxy->SetScreenPrivacyWindowTagSwitch(screenId, privacyWindowTags, enable);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
-    MockMessageParcel::SetReadUint64ErrorFlag(false);
+    MockMessageParcel::SetWriteUint64ErrorFlag(false);
     MockMessageParcel::ClearAllErrorFlag();
 
     // ReadString failed
-    MockMessageParcel::SetReadStringErrorFlag(true);
+    MockMessageParcel::SetWriteStringErrorFlag(true);
     ret = proxy->SetScreenPrivacyWindowTagSwitch(screenId, privacyWindowTags, enable);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
-    MockMessageParcel::SetReadStringErrorFlag(false);
+    MockMessageParcel::SetWriteStringErrorFlag(false);
     MockMessageParcel::ClearAllErrorFlag();
 
     // interface success
@@ -1880,17 +1880,17 @@ HWTEST_F(sceneSessionManagerProxyTest, AddSessionBlackList02, TestSize.Level1)
     MockMessageParcel::SetReadBoolErrorFlag(false);
 
     // ReadUint64 failed
-    MockMessageParcel::SetReadUint64ErrorFlag(true);
+    MockMessageParcel::SetWriteUint64ErrorFlag(true);
     ret = proxy->AddSessionBlackList(bundleNames, privacyWindowTags);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
-    MockMessageParcel::SetReadUint64ErrorFlag(false);
+    MockMessageParcel::SetWriteUint64ErrorFlag(false);
     MockMessageParcel::ClearAllErrorFlag();
 
     // ReadString failed
-    MockMessageParcel::SetReadStringErrorFlag(true);
+    MockMessageParcel::SetWriteStringErrorFlag(true);
     ret = proxy->AddSessionBlackList(bundleNames, privacyWindowTags);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
-    MockMessageParcel::SetReadStringErrorFlag(false);
+    MockMessageParcel::SetWriteStringErrorFlag(false);
     MockMessageParcel::ClearAllErrorFlag();
 
     // interface success
@@ -1945,23 +1945,23 @@ HWTEST_F(sceneSessionManagerProxyTest, RemoveSessionBlackList02, TestSize.Level1
     auto proxy = sptr<SceneSessionManagerProxy>::MakeSptr(remoteMocker);
 
     // ReadBool failed
-    MockMessageParcel::SetReadBoolErrorFlag(true);
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
     auto ret = proxy->RemoveSessionBlackList(bundleNames, privacyWindowTags);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
-    MockMessageParcel::SetReadBoolErrorFlag(false);
+    MockMessageParcel::SetWriteBoolErrorFlag(false);
 
     // ReadUint64 failed
-    MockMessageParcel::SetReadUint64ErrorFlag(true);
+    MockMessageParcel::SetWriteUint64ErrorFlag(true);
     ret = proxy->RemoveSessionBlackList(bundleNames, privacyWindowTags);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
-    MockMessageParcel::SetReadUint64ErrorFlag(false);
+    MockMessageParcel::SetWriteUint64ErrorFlag(false);
     MockMessageParcel::ClearAllErrorFlag();
 
     // ReadString failed
-    MockMessageParcel::SetReadStringErrorFlag(true);
+    MockMessageParcel::SetWriteStringErrorFlag(true);
     ret = proxy->RemoveSessionBlackList(bundleNames, privacyWindowTags);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
-    MockMessageParcel::SetReadStringErrorFlag(false);
+    MockMessageParcel::SetWriteStringErrorFlag(false);
     MockMessageParcel::ClearAllErrorFlag();
 
     // interface success
