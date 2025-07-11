@@ -373,8 +373,8 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     displayInfo->SetOrientation(property_.GetOrientation());
     displayInfo->SetOffsetX(property_.GetOffsetX());
     displayInfo->SetOffsetY(property_.GetOffsetY());
-    displayInfo->SetHdrFormats(hdrFormats_);
-    displayInfo->SetColorSpaces(colorSpaces_);
+    displayInfo->SetHdrFormats(GetHdrFormats());
+    displayInfo->SetColorSpaces(GetColorSpaces());
     displayInfo->SetDisplayState(property_.GetDisplayState());
     displayInfo->SetDefaultDeviceRotationOffset(property_.GetDefaultDeviceRotationOffset());
     displayInfo->SetAvailableWidth(property_.GetAvailableArea().width_);
@@ -387,7 +387,7 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     displayInfo->SetTranslateY(property_.GetTranslateY());
     displayInfo->SetScreenShape(property_.GetScreenShape());
     displayInfo->SetOriginRotation(property_.GetScreenRotation());
-    displayInfo->SetSupportedRefreshRate(supportedRefreshRate_);
+    displayInfo->SetSupportedRefreshRate(GetSupportedRefreshRate());
     return displayInfo;
 }
 
@@ -424,8 +424,8 @@ sptr<DisplayInfo> ScreenSession::ConvertToRealDisplayInfo()
     displayInfo->SetOrientation(property_.GetOrientation());
     displayInfo->SetOffsetX(property_.GetOffsetX());
     displayInfo->SetOffsetY(property_.GetOffsetY());
-    displayInfo->SetHdrFormats(hdrFormats_);
-    displayInfo->SetColorSpaces(colorSpaces_);
+    displayInfo->SetHdrFormats(GetHdrFormats());
+    displayInfo->SetColorSpaces(GetColorSpaces());
     displayInfo->SetDisplayState(property_.GetDisplayState());
     displayInfo->SetDefaultDeviceRotationOffset(property_.GetDefaultDeviceRotationOffset());
     displayInfo->SetAvailableWidth(property_.GetAvailableArea().width_);
@@ -436,7 +436,7 @@ sptr<DisplayInfo> ScreenSession::ConvertToRealDisplayInfo()
     displayInfo->SetPivotY(property_.GetPivotY());
     displayInfo->SetTranslateX(property_.GetTranslateX());
     displayInfo->SetTranslateY(property_.GetTranslateY());
-    displayInfo->SetSupportedRefreshRate(supportedRefreshRate_);
+    displayInfo->SetSupportedRefreshRate(GetSupportedRefreshRate());
     return displayInfo;
 }
 
@@ -2121,23 +2121,39 @@ void ScreenSession::SetFoldScreen(bool isFold)
     isFold_ = isFold;
 }
 
+std::vector<uint32_t> ScreenSession::GetHdrFormats()
+{
+    std::shared_lock<std::shared_mutex> lock(hdrFormatsMutex_);
+    return hdrFormats_;
+}
+
 void ScreenSession::SetHdrFormats(std::vector<uint32_t>&& hdrFormats)
 {
+    std::unique_lock<std::shared_mutex> lock(hdrFormatsMutex_);
     hdrFormats_ = std::move(hdrFormats);
 }
 
 void ScreenSession::SetColorSpaces(std::vector<uint32_t>&& colorSpaces)
 {
+    std::unique_lock<std::shared_mutex> lock(colorSpacesMutex_);
     colorSpaces_ = std::move(colorSpaces);
+}
+
+std::vector<uint32_t> ScreenSession::GetColorSpaces()
+{
+    std::unique_lock<std::shared_mutex> lock(colorSpacesMutex_);
+    return colorSpaces_;
 }
 
 void ScreenSession::SetSupportedRefreshRate(std::vector<uint32_t>&& supportedRefreshRate)
 {
+    std::unique_lock<std::shared_mutex> lock(supportedRefreshRateMutex_);
     supportedRefreshRate_ = std::move(supportedRefreshRate);
 }
 
 std::vector<uint32_t> ScreenSession::GetSupportedRefreshRate() const
 {
+    std::unique_lock<std::shared_mutex> lock(supportedRefreshRateMutex_);
     return supportedRefreshRate_;
 }
 
