@@ -681,28 +681,28 @@ void AniWindow::OnSetWindowFocusable(ani_env* env, ani_boolean isFocusable)
     }
 }
 
-void AniWindow::setWindowTouchable(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isKeepScreenOn)
+void AniWindow::SetWindowTouchable(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isTouchable)
 {
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    TLOGI(WmsLogTag::WMS_EVENT, "[ANI] in");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] aniWindow is nullptr");
+        TLOGE(WmsLogTag::WMS_EVENT, "[ANI] aniWindow is nullptr");
         return;
     }
-    aniWindow->OnSetWindowKeepScreenOn(env, isKeepScreenOn);
-    TLOGI(WmsLogTag::DEFAULT, "[ANI] setWindowTouchable end");
+    aniWindow->OnSetWindowTouchable(env, isTouchable);
+    TLOGI(WmsLogTag::WMS_EVENT, "[ANI] end");
 }
 
-void AniWindow::OnSetWindowTouchable(ani_env* env, ani_boolean isKeepScreenOn)
+void AniWindow::OnSetWindowTouchable(ani_env* env, ani_boolean isTouchable)
 {
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    TLOGI(WmsLogTag::WMS_EVENT, "[ANI] in");
     auto window = GetWindow();
     if (window == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] window is nullptr");
+        TLOGE(WmsLogTag::WMS_EVENT, "[ANI] window is nullptr");
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
-    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetTouchable(static_cast<bool>(isKeepScreenOn)));
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetTouchable(static_cast<bool>(isTouchable)));
     if (ret != WmErrorCode::WM_OK) {
         AniWindowUtils::AniThrowError(env, ret, "Window set touchable on failed");
     }
@@ -2758,7 +2758,7 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
         ani_native_function {"keepKeyboardOnFocusSync", "JZ:V",
             reinterpret_cast<void *>(AniWindow::KeepKeyboardOnFocus)},
         ani_native_function {"setWindowTouchableSync", "JZ:V",
-            reinterpret_cast<void *>(AniWindow::setWindowTouchable)},
+            reinterpret_cast<void *>(AniWindow::SetWindowTouchable)},
         ani_native_function {"onNoInteractionDetected", nullptr,
             reinterpret_cast<void *>(AniWindow::RegisterNoInteractionDetectedCallback)},
         ani_native_function {"opacity", "JD:V",

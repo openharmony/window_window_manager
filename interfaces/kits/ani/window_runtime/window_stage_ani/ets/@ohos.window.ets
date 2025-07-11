@@ -1836,7 +1836,7 @@ export class WindowInternal implements Window {
     private native showWithAnimationSync(nativeObj: long): void;
     private native setWindowFocusableSync(nativeObj: long, isFocusable: boolean): void;
 
-    private native setWindowTouchableSync(nativeObj: long, enable: boolean): void;
+    private native setWindowTouchableSync(nativeObj: long, isTouchable: boolean): void;
     private native onNoInteractionDetected(nativeObj: long, type: string, timeout: number, callback: Object): void;
     private native keepKeyboardOnFocusSync(nativeObj: long, enable: boolean): void;
     private native onSync(nativeObj: long, type: string, callback: object): void;
@@ -2545,10 +2545,10 @@ export class WindowInternal implements Window {
       this.keepKeyboardOnFocusSync(this.nativeObj, keepKeyboardFlag);
     }
 
-    public setWindowTouchable(enable: boolean): Promise<void> {
+    public setWindowTouchable(isTouchable: boolean): Promise<void> {
        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
          taskpool.execute((): void => {
-           this.setWindowTouchableSync(this.nativeObj, enable);
+           this.setWindowTouchableSync(this.nativeObj, isTouchable);
          }).then((ret: NullishType) => {
            resolve(undefined);
          }).catch((err: NullishType) => {
@@ -2557,9 +2557,9 @@ export class WindowInternal implements Window {
        });
      }
 
-    public setWindowTouchable(enable: boolean, callback: AsyncCallback<void>): void {
+    public setWindowTouchable(isTouchable: boolean, callback: AsyncCallback<void>): void {
       taskpool.execute((): void => {
-        this.setWindowTouchableSync(this.nativeObj, enable);
+        this.setWindowTouchableSync(this.nativeObj, isTouchable);
       }).then((ret: NullishType) => {
         callback(new BusinessError(), undefined);
       }).catch((err: NullishType) => {
