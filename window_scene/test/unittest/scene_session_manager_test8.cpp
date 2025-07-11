@@ -1294,7 +1294,8 @@ HWTEST_F(SceneSessionManagerTest8, FlushSessionBlackListInfoMapWhenAdd01, TestSi
     ssm_->sessionRSBlackListConfigSet_.clear();
     ssm_->sessionBlackListInfoMap_.clear();
 
-    ssm_->screenRSBlackListConfigMap_.insert({ 0, { .privacyWindowTag = "test" }});
+    ssm_->screenRSBlackListConfigMap_.insert({ 0,
+        SceneSessionManager::ScreenBlackListInfoSet{ .privacyWindowTag = "test" }});
     ssm_->sessionRSBlackListConfigSet_.insert({ 0, "test" });
 
     auto ret = ssm_->FlushSessionBlackListInfoMapWhenAdd();
@@ -1317,7 +1318,8 @@ HWTEST_F(SceneSessionManagerTest8, FlushSessionBlackListInfoMapWhenAdd02, TestSi
     ssm_->sessionRSBlackListConfigSet_.clear();
     ssm_->sessionBlackListInfoMap_.clear();
 
-    ssm_->screenRSBlackListConfigMap_.insert({ 0, { .privacyWindowTag = "test" }});
+    ssm_->screenRSBlackListConfigMap_.insert({ 0,
+        SceneSessionManager::ScreenBlackListInfoSet{ .privacyWindowTag = "test" }});
     ssm_->sessionRSBlackListConfigSet_.insert({ 0, "test" });
 
     auto ret = ssm_->FlushSessionBlackListInfoMapWhenAdd();
@@ -1340,7 +1342,8 @@ HWTEST_F(SceneSessionManagerTest8, FlushSessionBlackListInfoMapWhenRemove01, Tes
     ssm_->sessionRSBlackListConfigSet_.clear();
     ssm_->sessionBlackListInfoMap_.clear();
 
-    ssm_->screenRSBlackListConfigMap_.insert({ 0, { .privacyWindowTag = "test" }});
+    ssm_->screenRSBlackListConfigMap_.insert({ 0,
+        SceneSessionManager::ScreenBlackListInfoSet{ .privacyWindowTag = "test" }});
     ssm_->sessionRSBlackListConfigSet_.insert({ 0, "test" });
     ssm_->sessionBlackListInfoMap_[0].insert({ .windowId = 0, .privacyWindowTag = "test1" });
     ssm_->sessionBlackListInfoMap_[0].insert({ .windowId = 1, .privacyWindowTag = "WMS_DEFAULT" });
@@ -1365,7 +1368,8 @@ HWTEST_F(SceneSessionManagerTest8, FlushSessionBlackListInfoMapWhenRemove02, Tes
     ssm_->sessionRSBlackListConfigSet_.clear();
     ssm_->sessionBlackListInfoMap_.clear();
 
-    ssm_->screenRSBlackListConfigMap_.insert({ 0, { .privacyWindowTag = "test" }});
+    ssm_->screenRSBlackListConfigMap_.insert({ 0,
+        SceneSessionManager::ScreenBlackListInfoSet{ .privacyWindowTag = "test" }});
     ssm_->sessionRSBlackListConfigSet_.insert({ 0, "test" });
     ssm_->sessionBlackListInfoMap_[0].insert({ .windowId = 0, .privacyWindowTag = "test1" });
     ssm_->sessionBlackListInfoMap_[0].insert({ .windowId = 1, .privacyWindowTag = "WMS_DEFAULT" });
@@ -1390,14 +1394,14 @@ HWTEST_F(SceneSessionManagerTest8, AddskipSurfaceNodeIdSet01, TestSize.Level1)
     std::unordered_set<uint64_t> skipSurfaceNodeIdSet;
 
     ssm_->sceneSessionMap_.insert({1, nullptr });
-    auto ret = ssm_->AddskipSurfaceNodeIdSet(1, skipSurfaceNodeIdSet);
+    ssm_->AddskipSurfaceNodeIdSet(1, skipSurfaceNodeIdSet);
     EXPECT_EQ(skipSurfaceNodeIdSet.size(), 0);
     skipSurfaceNodeIdSet.clear();
 
     SessionInfo sessionInfo1;
     sessionInfo1.bundleName_ = "test";
     sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo1, nullptr);
-    sceneSession1->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sceneSession1->GetSessionProperty()->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
     ASSERT_NE(nullptr, surfaceNode);
@@ -1405,7 +1409,7 @@ HWTEST_F(SceneSessionManagerTest8, AddskipSurfaceNodeIdSet01, TestSize.Level1)
     sceneSession1->GetSurfaceNode()->SetId(1001);
     sceneSession1->SetLeashWinSurfaceNode(surfaceNode);
     ssm_->sceneSessionMap_.insert({2, sceneSession1 });
-    auto ret = ssm_->AddskipSurfaceNodeIdSet(2, skipSurfaceNodeIdSet);
+    ssm_->AddskipSurfaceNodeIdSet(2, skipSurfaceNodeIdSet);
     EXPECT_EQ(skipSurfaceNodeIdSet.size(), 2);
     skipSurfaceNodeIdSet.clear();
 
@@ -1426,12 +1430,12 @@ HWTEST_F(SceneSessionManagerTest8, RemoveSessionFromBlackListInfoSet01, TestSize
 
     SessionInfo sessionInfo1;
     sessionInfo1.bundleName_ = "test";
+    sessionInfo1.persistentId_ = 0;
     sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo1, nullptr);
-    sceneSession1->SetWindowId(1);
-    SessionBlackListInfoSet sessionBlackListInfoSet;
-    sessionBlackListInfoSet.insert({ 1, { .privacyWindowTag = "test" } });
+    SceneSessionManager::SessionBlackListInfoSet sessionBlackListInfoSet;
+    sessionBlackListInfoSet.insert({ .windowId = 0, .privacyWindowTag = "test" });
 
-    auto ret = ssm_->RemoveSessionFromBlackListInfoSet(sceneSession1, sessionBlackListInfoSet);
+    ssm_->RemoveSessionFromBlackListInfoSet(sceneSession1, sessionBlackListInfoSet);
     EXPECT_EQ(sessionBlackListInfoSet.size(), 0);
 
     ssm_->screenRSBlackListConfigMap_.clear();
