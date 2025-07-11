@@ -1541,6 +1541,10 @@ private:
     WMError FlushSessionBlackListInfoMapWhenAdd(ScreenId screenId);
     WMError FlushSessionBlackListInfoMapWhenRemove();
     WMError FlushSessionBlackListInfoMapWhenRemove(ScreenId screenId);
+    WMError FlushSessionBlackListInfoMapWhenAdd();
+    WMError FlushSessionBlackListInfoMapWhenAdd(ScreenId screenId);
+    WMError FlushSessionBlackListInfoMapWhenRemove();
+    WMError FlushSessionBlackListInfoMapWhenRemove(ScreenId screenId);
     void UpdateVirtualScreenBlackList(ScreenId screenId);
     std::unordered_map<std::string, std::unordered_set<std::string>> bundleRSBlackListConfigMap_;
     inline static const std::string WMS_DEFAULT = "WMS_DEFAULT";
@@ -1564,6 +1568,7 @@ private:
     using SessionBlackListInfoSet =
         std::unordered_set<SessionBlackListInfo, SessionBlackListHasher, SessionBlackListEqual>;
     SessionBlackListInfoSet sessionRSBlackListConfigSet_;
+    SessionBlackListInfoSet sessionRSBlackListConfigSet_;
     std::unordered_map<DisplayId, SessionBlackListInfoSet> sessionBlackListInfoMap_;
 
     void RemoveSessionFromBlackListInfoSet(
@@ -1586,6 +1591,7 @@ private:
     };
     using ScreenBlackListInfoSet =
         std::unordered_set<ScreenBlackListInfo, ScreenBlackListHasher, ScreenBlackListEqual>;
+    std::unordered_map<ScreenId, ScreenBlackListInfoSet> screenRSBlackListConfigMap_;
     std::unordered_map<ScreenId, ScreenBlackListInfoSet> screenRSBlackListConfigMap_;
 
     /*
