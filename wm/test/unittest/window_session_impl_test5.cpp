@@ -1587,13 +1587,24 @@ HWTEST_F(WindowSessionImplTest5, TestClientToGlobalDisplay, TestSize.Level1)
 
     Rect globalRect { 100, 200, 300, 400 };
     window->property_->SetGlobalDisplayRect(globalRect);
+    Transform layoutTransform;
+    layoutTransform.scaleX_ = 1.0f;
+    layoutTransform.scaleY_ = 1.0f;
+    window->SetLayoutTransform(layoutTransform);
 
-    Position clientPos { 10, 20 };
-    Position expectedGlobalPos { 110, 220 };
+    Position inPosition { 10, 20 };
+    Position outPosition;
+    Position expectedPosition { 110, 220 };
 
-    auto result = window->ClientToGlobalDisplay(clientPos);
-    EXPECT_NE(result, clientPos);
-    EXPECT_EQ(result, expectedGlobalPos);
+    auto ret = window->ClientToGlobalDisplay(inPosition, outPosition);
+    EXPECT_EQ(ret, WMError::WM_OK);
+    EXPECT_NE(outPosition, inPosition);
+    EXPECT_EQ(outPosition, expectedPosition);
+
+    layoutTransform.scaleX_ = 0.5f;
+    window->SetLayoutTransform(layoutTransform);
+    ret = window->ClientToGlobalDisplay(inPosition, outPosition);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS);
 }
 
 /**
@@ -1608,13 +1619,24 @@ HWTEST_F(WindowSessionImplTest5, TestGlobalDisplayToClient, TestSize.Level1)
 
     Rect globalRect { 100, 200, 300, 400 };
     window->property_->SetGlobalDisplayRect(globalRect);
+    Transform layoutTransform;
+    layoutTransform.scaleX_ = 1.0f;
+    layoutTransform.scaleY_ = 1.0f;
+    window->SetLayoutTransform(layoutTransform);
 
-    Position globalPos { 110, 220 };
-    Position expectedClientPos { 10, 20 };
+    Position inPosition { 110, 220 };
+    Position outPosition;
+    Position expectedPosition { 10, 20 };
 
-    auto result = window->GlobalDisplayToClient(globalPos);
-    EXPECT_NE(result, globalPos);
-    EXPECT_EQ(result, expectedClientPos);
+    auto ret = window->GlobalDisplayToClient(inPosition, outPosition);
+    EXPECT_EQ(ret, WMError::WM_OK);
+    EXPECT_NE(outPosition, inPosition);
+    EXPECT_EQ(outPosition, expectedPosition);
+
+    layoutTransform.scaleX_ = 0.5f;
+    window->SetLayoutTransform(layoutTransform);
+    ret = window->GlobalDisplayToClient(inPosition, outPosition);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS);
 }
 
 /**

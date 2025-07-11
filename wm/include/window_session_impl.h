@@ -104,8 +104,8 @@ public:
     void SetContext(const std::shared_ptr<AbilityRuntime::Context>& context);
     Rect GetRequestRect() const override;
     Rect GetGlobalDisplayRect() const override;
-    Position ClientToGlobalDisplay(const Position& position) const override;
-    Position GlobalDisplayToClient(const Position& position) const override;
+    WMError ClientToGlobalDisplay(const Position& inPosition, Position& outPosition) const override;
+    WMError GlobalDisplayToClient(const Position& inPosition, Position& outPosition) const override;
     WSError UpdateGlobalDisplayRectFromServer(const WSRect& rect, SizeChangeReason reason) override;
     WindowType GetType() const override;
     const std::string& GetWindowName() const override;
