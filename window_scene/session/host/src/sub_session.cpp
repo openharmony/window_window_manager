@@ -18,6 +18,7 @@
 #include "rs_adapter.h"
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session/screen/include/screen_session.h"
+#include "session_coordinate_helper.h"
 #include <transaction/rs_sync_transaction_controller.h>
 #include <transaction/rs_transaction.h>
 #include <ui/rs_surface_node.h>
@@ -388,6 +389,37 @@ void SubSession::HandleCrossSurfaceNodeByWindowAnchor(SizeChangeReason reason, c
         TLOGI(WmsLogTag::WMS_LAYOUT, "Remove sub window from display:%{public}" PRIu64 " persistentId:%{public}d, "
             "cloneNodeCountDuringCross:%{public}d", displayId, GetPersistentId(), cloneNodeCountDuringCross_.load());
     }
+}
+
+/** @note @window.layout */
+void SubSession::SetWinRectWhenUpdateRect(const WSRect& rect)
+{
+    // In mid-scene mode, a rect with position (0, 0) may cause incorrect avoid-area calculations.
+    // To prevent this, retain the current window position and update only the width and height.
+    if (GetIsMidScene() && rect.posX_ == 0 && rect.posY_ == 0) {
+        const WSRect curRect = GetSessionRect();
+        layoutController_->SetSessionRect({ curRect.posX_, curRect.posY_, rect.width_, rect.height_ });
+        return;
+    }
+
+    // When dragging a child window (sub session), the input rect is relative to the parent.
+    // Need to manually add the parent position since it's not applied automatically.
+    const auto reason = GetSizeChangeReason();
+    const bool isDragging = (IsDragMoving() || IsDragZooming()) &&
+        (reason == SizeChangeReason::DRAG || reason == SizeChangeReason::DRAG_MOVE);
+    const auto parentSession = GetParentSession();
+    if (isDragging && parentSession) {
+        const WSRect parentRect = parentSession->GetSessionRect();
+        layoutController_->SetSessionRect(
+            { rect.posX_ + parentRect.posX_, rect.posY_ + parentRect.posY_, rect.width_, rect.height_ });
+        return;
+    }
+
+    layoutController_->SetSessionRect(rect);
+
+    // Window Layout Global Coordinate System
+    auto globalDisplayRect = SessionCoordinateHelper::RelativeToGlobalDisplayRect(GetScreenId(), rect);
+    UpdateGlobalDisplayRect(globalDisplayRect, reason);
 }
 
 WSError SubSession::SetSubWindowZLevel(int32_t zLevel)

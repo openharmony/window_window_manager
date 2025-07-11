@@ -699,10 +699,10 @@ public:
      * @param transform The layout transform of the window.
      * @return true if the window is scaled, false otherwise.
      */
-    bool IsScaled(const Transform& transform)
+    static bool IsScaled(const Transform& transform)
     {
-        constexpr float EPSILON = 1e-6f;
-        auto IsApproximatelyOne = [EPSILON](float value) {
+        auto IsApproximatelyOne = [](float value) {
+            constexpr float EPSILON = 1e-6f;
             return std::fabs(value - 1.0f) < EPSILON;
         };
         return !IsApproximatelyOne(transform.scaleX_) || !IsApproximatelyOne(transform.scaleY_);
