@@ -594,8 +594,15 @@ public:
     void SetSkipSelfWhenShowOnVirtualScreen(uint64_t surfaceNodeId, bool isSkip);
     WMError AddSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds) override;
     WMError RemoveSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds) override;
+    WMError SetScreenPrivacyWindowTagSwitch(
+        uint64_t screenId, const std::vector<std::string>& privacyWindowTags, bool enable) override;
+    void OnAttachToFrameNode(int32_t windowId);
     WMError NotifyScreenshotEvent(ScreenshotEventType type) override;
     WMError UpdateSessionScreenshotAppEventListener(int32_t persistentId, bool haveListener);
+    WMError AddSessionBlackList(const std::unordered_set<std::string>& bundleNames,
+        const std::unordered_set<std::string>& privacyWindowTags) override;
+    WMError RemoveSessionBlackList(const std::unordered_set<std::string>& bundleNames,
+        const std::unordered_set<std::string>& privacyWindowTags) override;
 
     /*
      * Multi Window
@@ -1525,24 +1532,61 @@ private:
         uint32_t interestInfo, const sptr<IWindowManagerAgent>& windowManagerAgent) override;
     void PackWindowPropertyChangeInfo(const sptr<SceneSession>& sceneSession,
         std::unordered_map<WindowInfoKey, std::any>& windowPropertyChangeInfo);
+    WMError AddSessionBlackList(const std::vector<sptr<SceneSession>>& sceneSessionList,
+        const std::unordered_set<std::string>& privacyWindowTags);
+    WMError RemoveSessionBlackList(const std::vector<sptr<SceneSession>>& sceneSessionList,
+        const std::unordered_set<std::string>& privacyWindowTags);
+    void AddskipSurfaceNodeIdSet(int32_t windowId, std::unordered_set<uint64_t>& skipSurfaceNodeIdSet);
+    WMError AddVirtualScreenBlackList();
+    WMError AddVirtualScreenBlackList(ScreenId screenId);
+    WMError RemoveVirtualScreenBlackList();
+    WMError RemoveVirtualScreenBlackList(ScreenId screenId);
+    void UpdateVirtualScreenBlackList(ScreenId screenId);
+    std::unordered_map<std::string, std::unordered_set<std::string>> privacyBundleTagMap_;
+    static constexpr std::string WMS_DEFAULT = "WMS_DEFAULT";
 
     struct SessionBlackListInfo {
         int32_t windowId = INVALID_SESSION_ID;
+        std::string privacyWindowTag = WMS_DEFAULT;
     };
-    struct BlackListEqual {
+    struct SessionBlackListEqual  {
         bool operator()(const SessionBlackListInfo& left, const SessionBlackListInfo& right) const
         {
-            return left.windowId == right.windowId;
+            return left.windowId == right.windowId && left.privacyWindowTag == right.privacyWindowTag;
         }
     };
-    struct BlackListHasher {
+    struct SessionBlackListHasher  {
         size_t operator()(const SessionBlackListInfo& info) const
         {
-            return std::hash<int32_t>()(info.windowId);
+            return std::hash<int32_t>()(info.windowId) + std::hash<std::string>()(info.privacyWindowTag);
         }
     };
-    using SessionBlackListInfoSet = std::unordered_set<SessionBlackListInfo, BlackListHasher, BlackListEqual>;
+    using SessionBlackListInfoSet =
+        std::unordered_set<SessionBlackListInfo, SessionBlackListHasher, SessionBlackListEqual>;
+    SessionBlackListInfoSet sessionBlackListInfoSet_;
     std::unordered_map<DisplayId, SessionBlackListInfoSet> sessionBlackListInfoMap_;
+
+    void RemoveSessionFromBlackListInfoSet(
+        const sptr<SceneSession>& sceneSession, SessionBlackListInfoSet& sessionBlackListInfoSet);
+
+    struct ScreenBlackListInfo {
+        std::string privacyWindowTag = "";
+    };
+    struct ScreenBlackListEqual {
+        bool operator()(const ScreenBlackListInfo& left, const ScreenBlackListInfo& right) const
+        {
+            return left.privacyWindowTag == right.privacyWindowTag;
+        }
+    };
+    struct ScreenBlackListHasher {
+        size_t operator()(const ScreenBlackListInfo& info) const
+        {
+            return std::hash<std::string>()(info.privacyWindowTag);
+        }
+    };
+    using ScreenBlackListInfoSet =
+        std::unordered_set<ScreenBlackListInfo, ScreenBlackListHasher, ScreenBlackListEqual>;
+    std::unordered_map<ScreenId, ScreenBlackListInfoSet> ScreenBlackListInfoMap_;
 
     /*
      * Move Drag

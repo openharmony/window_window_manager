@@ -2981,6 +2981,55 @@ WMError SceneSessionManagerProxy::RemoveSkipSelfWhenShowOnVirtualScreenList(cons
     return static_cast<WMError>(reply.ReadInt32());
 }
 
+WMError SceneSessionManagerProxy::SetScreenPrivacyWindowTagSwitch(
+    uint64_t screenId, std::vector<std::string> privacyWindowTags, bool enable)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write token failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint64(screenId)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write screenId failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint64(privacyWindowTags.size())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write size failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    for (const auto privacyWidnowTag: privacyWindowTags) {
+        if (!data.WriteString(privacyWidnowTag)) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write privacyWidnowTag failed");
+            return WMError::WM_ERROR_IPC_FAILED;
+        }
+    }
+    if (!data.WriteBool(enable)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write enable failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(
+        static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_SCREEN_PRIVACY_WINDOW_TAG_SWITCH),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+
+    uint32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read ret failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(ret);
+}
+
 WMError SceneSessionManagerProxy::IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode)
 {
     MessageParcel data;
@@ -3619,6 +3668,104 @@ WMError SceneSessionManagerProxy::CreateUIEffectController(const sptr<IUIEffectC
     }
     controller = iface_cast<IUIEffectController>(controllerObject);
     return err;
+}
+
+WMError SceneSessionManagerProxy::AddSessionBlackList(
+    const std::unordered_set<std::string>& bundleNames, const std::unordered_set<std::string>& privacyWindowTags)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write interfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint64(bundleNames.size())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write size failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    for (auto bundleName : bundleNames) {
+        if (!data.WriteString(bundleName)) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write bundleName failed");
+            return WMError::WM_ERROR_IPC_FAILED;
+        }
+    }
+    if (!data.WriteUint64(privacyWindowTags.size())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write size failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    for (auto privacyWindowTag : privacyWindowTags) {
+        if (!data.WriteString(privacyWindowTag)) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write privacyWindowTag failed");
+            return WMError::WM_ERROR_IPC_FAILED;
+        }
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(
+        static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_ADD_SESSION_BLACK_LIST),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    uint32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read ret failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(ret);
+}
+
+WMError SceneSessionManagerProxy::RemoveSessionBlackList(
+    const std::unordered_set<std::string>& bundleNames, const std::unordered_set<std::string>& privacyWindowTags)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write interfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint64(bundleNames.size())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write size failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    for (auto bundleName : bundleNames) {
+        if (!data.WriteString(bundleName)) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write bundleName failed");
+            return WMError::WM_ERROR_IPC_FAILED;
+        }
+    }
+    if (!data.WriteUint64(privacyWindowTags.size())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write size failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    for (auto privacyWindowTag : privacyWindowTags) {
+        if (!data.WriteString(privacyWindowTag)) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write privacyWindowTag failed");
+            return WMError::WM_ERROR_IPC_FAILED;
+        }
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(
+        static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REMOVE_SESSION_BLACK_LIST),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    uint32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read ret failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(ret);
 }
 
 WMError SceneSessionManagerProxy::GetPiPSettingSwitchStatus(bool& switchStatus)

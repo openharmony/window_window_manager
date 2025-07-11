@@ -32,8 +32,10 @@ bool g_setWriteRemoteObjectErrorFlag = false;
 bool g_setReadBoolErrorFlag = false;
 bool g_setReadUint32ErrorFlag = false;
 bool g_setReadInt32ErrorFlag = false;
+bool g_setReadUint64ErrorFlag = false;
 bool g_setReadInt64ErrorFlag = false;
 bool g_setReadStringVectorErrorFlag = false;
+bool g_setReadStringErrorFlag = false;
 #ifdef ENABLE_MOCK_WRITE_STRING
 const static std::string ERROR_FLAG = "error";
 #endif
@@ -60,8 +62,10 @@ void MockMessageParcel::ClearAllErrorFlag()
     g_setReadBoolErrorFlag = false;
     g_setReadUint32ErrorFlag = false;
     g_setReadInt32ErrorFlag = false;
+    g_setReadUint64ErrorFlag = false;
     g_setReadInt64ErrorFlag = false;
     g_setReadStringVectorErrorFlag = false;
+    g_setReadStringErrorFlag = false;
 }
 
 void MockMessageParcel::SetWriteBoolErrorFlag(bool flag)
@@ -129,6 +133,11 @@ void MockMessageParcel::SetReadBoolErrorFlag(bool flag)
     g_setReadBoolErrorFlag = flag;
 }
 
+void MockMessageParcel::SetReadUint64ErrorFlag(bool flag)
+{
+    g_setReadUint64ErrorFlag = flag;
+}
+
 void MockMessageParcel::SetReadInt64ErrorFlag(bool flag)
 {
     g_setReadInt64ErrorFlag = flag;
@@ -137,6 +146,11 @@ void MockMessageParcel::SetReadInt64ErrorFlag(bool flag)
 void MockMessageParcel::SetReadStringVectorErrorFlag(bool flag)
 {
     g_setReadStringVectorErrorFlag = flag;
+}
+
+void MockMessageParcel::SetReadStringErrorFlag(bool flag)
+{
+    g_setReadStringErrorFlag = flag;
 }
 }
 
@@ -261,6 +275,14 @@ bool Parcel::ReadInt32(int32_t& value)
 }
 #endif
 
+bool Parcel::ReadUint64(uint64_t& value)
+{
+    if (g_setReadUint64ErrorFlag) {
+        return false;
+    }
+    return true;
+}
+
 #ifdef ENABLE_MOCK_READ_INT64
 bool Parcel::ReadInt64(int64_t& value)
 {
@@ -285,6 +307,14 @@ bool Parcel::WriteStringVector(const std::vector<std::string>& val)
 bool Parcel::ReadStringVector(std::vector<std::string>* val)
 {
     if (g_setReadStringVectorErrorFlag) {
+        return false;
+    }
+    return true;
+}
+
+bool Parcel::ReadString(std::string val)
+{
+    if (g_setReadStringErrorFlag) {
         return false;
     }
     return true;

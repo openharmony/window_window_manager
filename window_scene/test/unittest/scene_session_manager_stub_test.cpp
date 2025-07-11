@@ -2743,6 +2743,88 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetPiPSettingSwitchStatus, Function 
     int res = stub_->HandleGetPiPSettingSwitchStatus(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
+
+/**
+ * @tc.name: HandleSetScreenPrivacyWindowTagSwitch01
+ * @tc.desc: test HandleSetScreenPrivacyWindowTagSwitch
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleSetScreenPrivacyWindowTagSwitch01, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    std::vector<std::string> privacyWindowTags = { "test" };
+    uint64_t screenId = INVALID_SCREEN_ID;
+    data.WriteUint64(screenId);
+
+    uint64_t size = privacyWindowTags.size();
+    data.WriteUint64(size);
+    for (auto privacyWindowTag : privacyWindowTags) {
+        data.WriteString(privacyWindowTag);
+    }
+
+    bool enable = false;
+    data.WriteBool(enable);
+
+    int res = stub_->HandleSetScreenPrivacyWindowTagSwitch(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleAddSessionBlackList01
+ * @tc.desc: test HandleAddSessionBlackList
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleAddSessionBlackList01, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    std::unordered_set<std::string> bundleNames = { "test" };
+    std::vector<std::string> privacyWindowTags = { "test" };
+
+    uint64_t size = bundleNames.size();
+    data.WriteUint64(size);
+    for (auto bundleName : bundleNames) {
+        data.WriteString(bundleName);
+    }
+
+    size = privacyWindowTags.size();
+    data.WriteUint64(size);
+    for (auto privacyWindowTag : privacyWindowTags) {
+        data.WriteString(privacyWindowTag);
+    }
+
+    int res = stub_->HandleAddSessionBlackList(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleRemoveSessionBlackList01
+ * @tc.desc: test HandleRemoveSessionBlackList
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleRemoveSessionBlackList01, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    std::unordered_set<std::string> bundleNames = { "test" };
+    std::vector<std::string> privacyWindowTags = { "test" };
+
+    uint64_t size = bundleNames.size();
+    data.WriteUint64(size);
+    for (auto bundleName : bundleNames) {
+        data.WriteString(bundleName);
+    }
+
+    size = privacyWindowTags.size();
+    data.WriteUint64(size);
+    for (auto privacyWindowTag : privacyWindowTags) {
+        data.WriteString(privacyWindowTag);
+    }
+
+    int res = stub_->HandleRemoveSessionBlackList(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

@@ -204,6 +204,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleAddSkipSelfWhenShowOnVirtualScreenList(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REMOVE_SKIP_SELF_ON_VIRTUAL_SCREEN):
             return HandleRemoveSkipSelfWhenShowOnVirtualScreenList(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_SCREEN_PRIVACY_WINDOW_TAG_SWITCH):
+            return HandleSetScreenPrivacyWindowTagSwitch(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_IS_PC_WINDOW):
             return HandleIsPcWindow(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_IS_FREE_MULTI_WINDOW):
@@ -248,6 +250,10 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleAnimateTo(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_CREATE_UI_EFFECT_CONTROLLER):
             return HandleCreateUIEffectController(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_ADD_SESSION_BLACK_LIST):
+            return HandleAddSessionBlackList(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REMOVE_SESSION_BLACK_LIST):
+            return HandleRemoveSessionBlackList(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_PIP_SWITCH_STATUS):
             return HandleGetPiPSettingSwitchStatus(data, reply);
         default:
@@ -1845,6 +1851,44 @@ int SceneSessionManagerStub::HandleRemoveSkipSelfWhenShowOnVirtualScreenList(Mes
     return ERR_NONE;
 }
 
+int SceneSessionManagerStub::HandleSetScreenPrivacyWindowTagSwitch(MessageParcel& data, MessageParcel& reply)
+{
+    uint64_t screenId = INVALID_SCREEN_ID;
+    if (!data.ReadUint64(screenId)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read screenId failed.");
+        return ERR_INVALID_DATA;
+    }
+
+    uint64_t size = 0;
+    if (!data.ReadUint64(size)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read size failed.");
+        return ERR_INVALID_DATA;
+    }
+
+    std::vector<std::string> privacyWindowTags;
+    for (uint64_t i = 0; i < size; i++) {
+        std::string privacyWidnowTag;
+        if (!data.ReadString(privacyWidnowTag)) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read privacyWidnowTag failed.");
+            return ERR_INVALID_DATA;
+        }
+        privacyWindowTags.push_back(privacyWidnowTag);
+    }
+
+    bool enable;
+    if (!data.ReadBool(enable)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read enable failed.");
+        return ERR_INVALID_DATA;
+    }
+
+    WMError errCode = SetScreenPrivacyWindowTagSwitch(screenId, privacyWindowTags, enable);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
 int SceneSessionManagerStub::HandleIsPcWindow(MessageParcel& data, MessageParcel& reply)
 {
     bool isPcWindow = false;
@@ -2235,6 +2279,84 @@ int SceneSessionManagerStub::HandleCreateUIEffectController(MessageParcel& data,
     }
     if (!reply.WriteRemoteObject(controller->AsObject())) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Write controller failed.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleAddSessionBlackList(MessageParcel& data, MessageParcel& reply)
+{
+    uint64_t size = 0;
+    if (!data.ReadUint64(size)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read size failed");
+        return ERR_INVALID_DATA;
+    }
+    std::unordered_set<std::string> bundleNames;
+    for (int64_t i = 0; i < size; i++) {
+        std::string bundleName;
+        if (!data.ReadString(bundleName)) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read windowId failed");
+            return ERR_INVALID_DATA;
+        }
+        bundleNames.insert(bundleName);
+    }
+
+    size = 0;
+    if (!data.ReadUint64(size)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read size failed");
+        return ERR_INVALID_DATA;
+    }
+    std::unordered_set<std::string> privacyWindowTags;
+    for (int64_t i = 0; i < size; i++) {
+        std::string privacyWindowTag = 0;
+        if (!data.ReadString(privacyWindowTag)) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read privacyWindowTag failed");
+            return ERR_INVALID_DATA;
+        }
+        privacyWindowTags.insert(privacyWindowTag);
+    }
+    WMError errCode = AddSessionBlackList(bundleNames, privacyWindowTags);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write errCode failed");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleRemoveSessionBlackList(MessageParcel& data, MessageParcel& reply)
+{
+    uint64_t size = 0;
+    if (!data.ReadUint64(size)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read size failed");
+        return ERR_INVALID_DATA;
+    }
+    std::unordered_set<std::string> bundleNames;
+    for (int64_t i = 0; i < size; i++) {
+        std::string bundleName;
+        if (!data.ReadString(bundleName)) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read bundleName failed");
+            return ERR_INVALID_DATA;
+        }
+        bundleNames.insert(bundleName);
+    }
+
+    size = 0;
+    if (!data.ReadUint64(size)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read size failed");
+        return ERR_INVALID_DATA;
+    }
+    std::unordered_set<std::string> privacyWindowTags;
+    for (int64_t i = 0; i < size; i++) {
+        std::string privacyWindowTag = 0;
+        if (!data.ReadString(privacyWindowTag)) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read privacyWindowTag failed");
+            return ERR_INVALID_DATA;
+        }
+        privacyWindowTags.insert(privacyWindowTag);
+    }
+    WMError errCode = RemoveSessionBlackList(bundleNames, privacyWindowTags);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write errCode failed");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;
