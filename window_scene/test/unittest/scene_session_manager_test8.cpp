@@ -1430,13 +1430,13 @@ HWTEST_F(SceneSessionManagerTest8, RemoveSessionFromBlackListInfoSet01, TestSize
 
     SessionInfo sessionInfo1;
     sessionInfo1.bundleName_ = "test";
-    sessionInfo1.persistentId_ = 0;
+    sessionInfo1.persistentId_ = 1;
     sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo1, nullptr);
     SceneSessionManager::SessionBlackListInfoSet sessionBlackListInfoSet;
     sessionBlackListInfoSet.insert({ .windowId = 0, .privacyWindowTag = "test" });
 
     ssm_->RemoveSessionFromBlackListInfoSet(sceneSession1, sessionBlackListInfoSet);
-    EXPECT_EQ(sessionBlackListInfoSet.size(), 0);
+    EXPECT_EQ(sessionBlackListInfoSet.size(), 1);
 
     ssm_->screenRSBlackListConfigMap_.clear();
     ssm_->sessionRSBlackListConfigSet_.clear();
