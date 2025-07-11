@@ -1165,21 +1165,47 @@ HWTEST_F(SceneSessionManagerTest8, GetFbPanelWindowId, TestSize.Level1)
 HWTEST_F(SceneSessionManagerTest8, SetScreenPrivacyWindowTagSwitch01, TestSize.Level1)
 {
     ASSERT_NE(nullptr, ssm_);
-    SessionInfo sessionInfo;
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
+    MockAccesstokenKit::MockIsSACalling(false);
+    uint64_t screenId = 0;
+    std::vector<std::string> privacyWindowTags;
+    bool enable = false;
+    auto ret = ssm_->SetScreenPrivacyWindowTagSwitch(screenId, privacyWindowTags, enable);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
 
-    ssm_->InitFbWindow(sceneSession, nullptr);
+    MockAccesstokenKit::MockIsSACalling(true);
+    ret = ssm_->SetScreenPrivacyWindowTagSwitch(screenId, privacyWindowTags, enable);
+    EXPECT_EQ(WMError::WM_OK, ret);
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
-    property->SetWindowType(WindowType::WINDOW_TYPE_PIP);
-    ssm_->InitFbWindow(sceneSession, property);
-
-    property->SetWindowType(WindowType::WINDOW_TYPE_FB);
-    ssm_->InitFbWindow(sceneSession, property);
-    EXPECT_EQ(0, sceneSession->GetFbTemplateInfo().template_);
+    enable = true;
+    ret = ssm_->SetScreenPrivacyWindowTagSwitch(screenId, privacyWindowTags, enable);
+    EXPECT_EQ(WMError::WM_OK, ret);
 }
+
+/**
+ * @tc.name: SetScreenPrivacyWindowTagSwitch01
+ * @tc.desc: test function : SetScreenPrivacyWindowTagSwitch
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, SetScreenPrivacyWindowTagSwitch01, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    MockAccesstokenKit::MockIsSACalling(false);
+    uint64_t screenId = 0;
+    std::vector<std::string> privacyWindowTags;
+    bool enable = false;
+    auto ret = ssm_->SetScreenPrivacyWindowTagSwitch(screenId, privacyWindowTags, enable);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
+
+    MockAccesstokenKit::MockIsSACalling(true);
+    ret = ssm_->SetScreenPrivacyWindowTagSwitch(screenId, privacyWindowTags, enable);
+    EXPECT_EQ(WMError::WM_OK, ret);
+
+    enable = true;
+    ret = ssm_->SetScreenPrivacyWindowTagSwitch(screenId, privacyWindowTags, enable);
+    EXPECT_EQ(WMError::WM_OK, ret);
+}
+
+
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

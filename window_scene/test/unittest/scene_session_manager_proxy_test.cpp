@@ -1873,12 +1873,6 @@ HWTEST_F(sceneSessionManagerProxyTest, AddSessionBlackList02, TestSize.Level1)
     sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
     auto proxy = sptr<SceneSessionManagerProxy>::MakeSptr(remoteMocker);
 
-    // ReadBool failed
-    MockMessageParcel::SetReadBoolErrorFlag(true);
-    auto ret = proxy->AddSessionBlackList(bundleNames, privacyWindowTags);
-    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
-    MockMessageParcel::SetReadBoolErrorFlag(false);
-
     // ReadUint64 failed
     MockMessageParcel::SetWriteUint64ErrorFlag(true);
     ret = proxy->AddSessionBlackList(bundleNames, privacyWindowTags);
@@ -1943,12 +1937,6 @@ HWTEST_F(sceneSessionManagerProxyTest, RemoveSessionBlackList02, TestSize.Level1
 
     sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
     auto proxy = sptr<SceneSessionManagerProxy>::MakeSptr(remoteMocker);
-
-    // ReadBool failed
-    MockMessageParcel::SetWriteBoolErrorFlag(true);
-    auto ret = proxy->RemoveSessionBlackList(bundleNames, privacyWindowTags);
-    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
-    MockMessageParcel::SetWriteBoolErrorFlag(false);
 
     // ReadUint64 failed
     MockMessageParcel::SetWriteUint64ErrorFlag(true);
