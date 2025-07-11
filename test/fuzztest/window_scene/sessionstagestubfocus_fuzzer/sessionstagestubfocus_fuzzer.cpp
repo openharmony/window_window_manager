@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "sessionstagestub_focus_fuzzer.h"
+#include "sessionstagestubfocus_fuzzer.h"
 
 #include <cstddef>
 #include <cstdint>

@@ -16,6 +16,6 @@
 #ifndef TEST_FUZZTEST_SESSION_STAGE_STUB_UPDATE_FUZZER_H
 #define TEST_FUZZTEST_SESSION_STAGE_STUB_UPDATE_FUZZER_H
 
-#define FUZZ_PROJECT_NAME "sessionstagestub_focus_fuzzer"
+#define FUZZ_PROJECT_NAME "sessionstagestubfocus_fuzzer"
 
 #endif
