@@ -2001,22 +2001,16 @@ WMError SceneSessionManager::SetScreenPrivacyWindowTagSwitch(
     if (enable) {
         for (const auto& privacyWindowTag : privacyWindowTags) {
             screenRSBlackListConfigMap_[screenId].insert({ .privacyWindowTag = privacyWindowTag });
-            screenRSBlackListConfigMap_[screenId].insert({ .privacyWindowTag = privacyWindowTag });
         }
-        FlushSessionBlackListInfoMapWhenAdd(screenId);
         FlushSessionBlackListInfoMapWhenAdd(screenId);
     } else {
         for (const auto& privacyWindowTag : privacyWindowTags) {
             screenRSBlackListConfigMap_[screenId].erase({ .privacyWindowTag = privacyWindowTag });
             if (screenRSBlackListConfigMap_[screenId].empty()) {
                 screenRSBlackListConfigMap_.erase(screenId);
-            screenRSBlackListConfigMap_[screenId].erase({ .privacyWindowTag = privacyWindowTag });
-            if (screenRSBlackListConfigMap_[screenId].empty()) {
-                screenRSBlackListConfigMap_.erase(screenId);
                 break;
             }
         }
-        FlushSessionBlackListInfoMapWhenRemove(screenId);
         FlushSessionBlackListInfoMapWhenRemove(screenId);
     }
     return WMError::WM_OK;
@@ -10243,19 +10237,14 @@ WMError SceneSessionManager::RemoveSessionBlackList(const std::vector<sptr<Scene
     for (const auto& sceneSession : sceneSessionList) {
         for (const auto& privacyWindowTag : privacyWindowTags) {
             sessionRSBlackListConfigSet_.erase(
-            sessionRSBlackListConfigSet_.erase(
                 { .windowId = sceneSession->GetPersistentId(), .privacyWindowTag = privacyWindowTag });
         }
     }
     return FlushSessionBlackListInfoMapWhenRemove();
-    return FlushSessionBlackListInfoMapWhenRemove();
 }
 
 WMError SceneSessionManager::FlushSessionBlackListInfoMapWhenAdd()
-WMError SceneSessionManager::FlushSessionBlackListInfoMapWhenAdd()
 {
-    for (const auto& [screenId, screenBlackListInfo] : screenRSBlackListConfigMap_) {
-        for (const auto& info : sessionRSBlackListConfigSet_) {
     for (const auto& [screenId, screenBlackListInfo] : screenRSBlackListConfigMap_) {
         for (const auto& info : sessionRSBlackListConfigSet_) {
             if (screenBlackListInfo.find({ .privacyWindowTag = info.privacyWindowTag }) != screenBlackListInfo.end()) {
@@ -10267,7 +10256,6 @@ WMError SceneSessionManager::FlushSessionBlackListInfoMapWhenAdd()
     return WMError::WM_OK;
 }
 
-WMError SceneSessionManager::FlushSessionBlackListInfoMapWhenAdd(ScreenId screenId)
 WMError SceneSessionManager::FlushSessionBlackListInfoMapWhenAdd(ScreenId screenId)
 {
     auto screenBlackListInfo = screenRSBlackListConfigMap_[screenId];
@@ -10283,16 +10271,12 @@ WMError SceneSessionManager::FlushSessionBlackListInfoMapWhenAdd(ScreenId screen
 }
 
 WMError SceneSessionManager::FlushSessionBlackListInfoMapWhenRemove()
-WMError SceneSessionManager::FlushSessionBlackListInfoMapWhenRemove()
 {
     for (const auto& [screenId, sessionBlackListInfoSet] : sessionBlackListInfoMap_) {
         for (const auto& info : sessionBlackListInfoSet) {
             if (info.privacyWindowTag == WMS_DEFAULT) {
                 continue;
             }
-            if (screenRSBlackListConfigMap_[screenId].find({ .privacyWindowTag = info.privacyWindowTag }) ==
-                    screenRSBlackListConfigMap_[screenId].end() ||
-                sessionRSBlackListConfigSet_.find(info) == sessionRSBlackListConfigSet_.end()) {
             if (screenRSBlackListConfigMap_[screenId].find({ .privacyWindowTag = info.privacyWindowTag }) ==
                     screenRSBlackListConfigMap_[screenId].end() ||
                 sessionRSBlackListConfigSet_.find(info) == sessionRSBlackListConfigSet_.end()) {
@@ -10305,7 +10289,6 @@ WMError SceneSessionManager::FlushSessionBlackListInfoMapWhenRemove()
 }
 
 WMError SceneSessionManager::FlushSessionBlackListInfoMapWhenRemove(ScreenId screenId)
-WMError SceneSessionManager::FlushSessionBlackListInfoMapWhenRemove(ScreenId screenId)
 {
     if (sessionBlackListInfoMap_.find(screenId) == sessionBlackListInfoMap_.end()) {
         std::vector<uint64_t> emptyList;
@@ -10317,9 +10300,6 @@ WMError SceneSessionManager::FlushSessionBlackListInfoMapWhenRemove(ScreenId scr
         if (info.privacyWindowTag == WMS_DEFAULT) {
             continue;
         }
-        if (screenRSBlackListConfigMap_[screenId].find({ .privacyWindowTag = info.privacyWindowTag }) ==
-                screenRSBlackListConfigMap_[screenId].end() ||
-            sessionRSBlackListConfigSet_.find(info) == sessionRSBlackListConfigSet_.end()) {
         if (screenRSBlackListConfigMap_[screenId].find({ .privacyWindowTag = info.privacyWindowTag }) ==
                 screenRSBlackListConfigMap_[screenId].end() ||
             sessionRSBlackListConfigSet_.find(info) == sessionRSBlackListConfigSet_.end()) {
