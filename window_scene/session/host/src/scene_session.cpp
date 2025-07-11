@@ -1497,6 +1497,10 @@ void SceneSession::SetWinRectWhenUpdateRect(const WSRect& rect)
         newRect = rect;
     }
     layoutController_->SetSessionRect(newRect);
+
+    // Window Layout Global Coordinate System
+    auto globalDisplayRect = SessionCoordinateHelper::RelativeToGlobalDisplayRect(GetScreenId(), newRect);
+    UpdateGlobalDisplayRect(globalDisplayRect, GetSizeChangeReason());
 }
 
 WSError SceneSession::NotifyClientToUpdateRectTask(const std::string& updateReason,
@@ -3508,16 +3512,6 @@ void SceneSession::HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect,
             needSetBoundsNextVsync = true;
         }
     }
-
-    // Window Layout Global Coordinate System
-    // During drag (except DRAG_END), the rect is relative to the original display and can be
-    // converted to global. At DRAG_END, the rect is relative to the new display, but displayId
-    // may not be updated yet, so skip updating GlobalDisplayRect to avoid incorrect conversion.
-    if (reason != SizeChangeReason::DRAG_END) {
-        auto globalDisplayRect = SessionCoordinateHelper::RelativeToGlobalDisplayRect(GetScreenId(), rect);
-        UpdateGlobalDisplayRect(globalDisplayRect, reason);
-    }
-
     if (reason != SizeChangeReason::DRAG_MOVE && !KeyFrameNotifyFilter(rect, reason)) {
         UpdateRectForDrag(rect);
         std::shared_ptr<VsyncCallback> nextVsyncDragCallback = std::make_shared<VsyncCallback>();
@@ -7927,9 +7921,6 @@ bool SceneSession::NotifyServerToUpdateRect(const SessionUIParam& uiParam, SizeC
     SetSessionGlobalRect(uiParam.rect_);
     if (globalRect != uiParam.rect_) {
         UpdateAllModalUIExtensions(uiParam.rect_);
-        // Window Layout Global Coordinate System
-        auto globalDisplayRect = ComputeGlobalDisplayRect();
-        UpdateGlobalDisplayRect(globalDisplayRect, reason);
     }
     if (!uiParam.needSync_ || !isNeedSyncSessionRect_) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "id:%{public}d, scenePanelNeedSync:%{public}u needSyncSessionRect:%{public}u "
@@ -7955,6 +7946,11 @@ bool SceneSession::NotifyServerToUpdateRect(const SessionUIParam& uiParam, SizeC
         "preGlobalRect:%{public}s clientRect:%{public}s", GetPersistentId(), rect.ToString().c_str(),
         GetSessionRect().ToString().c_str(), globalRect.ToString().c_str(), GetClientRect().ToString().c_str());
     layoutController_->SetSessionRect(rect);
+
+    // Window Layout Global Coordinate System
+    auto globalDisplayRect = SessionCoordinateHelper::RelativeToGlobalDisplayRect(GetScreenId(), rect);
+    UpdateGlobalDisplayRect(globalDisplayRect, reason);
+
     RectCheckProcess();
     return true;
 }

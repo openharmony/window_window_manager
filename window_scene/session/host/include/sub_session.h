@@ -43,6 +43,11 @@ public:
     void SetParentSessionCallback(NotifySetParentSessionFunc&& func) override;
     WMError NotifySetParentSession(int32_t oldParentWindowId, int32_t newParentWindowId) override;
 
+    /*
+     * Window Layout
+     */
+    void SetWinRectWhenUpdateRect(const WSRect& rect) override;
+
 protected:
     void UpdatePointerArea(const WSRect& rect) override;
     bool CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const override;

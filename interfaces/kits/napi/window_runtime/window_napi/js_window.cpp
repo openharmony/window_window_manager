@@ -2363,7 +2363,7 @@ napi_value JsWindow::OnClientToGlobalDisplay(napi_env env, napi_callback_info in
 {
     return HandlePositionTransform(
         env, info,
-        [](const sptr<Window>& window, const Position& inPosition, const Position& outPosition) {
+        [](const sptr<Window>& window, const Position& inPosition, Position& outPosition) {
             return window->ClientToGlobalDisplay(inPosition, outPosition);
         },
         __func__);
@@ -2374,7 +2374,7 @@ napi_value JsWindow::OnGlobalDisplayToClient(napi_env env, napi_callback_info in
 {
     return HandlePositionTransform(
         env, info,
-        [](const sptr<Window>& window, const Position& inPosition, const Position& outPosition) {
+        [](const sptr<Window>& window, const Position& inPosition, Position& outPosition) {
             return window->GlobalDisplayToClient(inPosition, outPosition);
         },
         __func__);
