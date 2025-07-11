@@ -713,6 +713,7 @@ HWTEST_F(SystemSessionTest, NotifyClientToUpdateRect03, TestSize.Level1)
     ASSERT_NE(specificCallback, nullptr);
     sysSession->specificCallback_ = specificCallback;
     sysSession->specificCallback_->onUpdateAvoidArea_ = nullptr;
+    sysSession->GetLayoutController()->SetSessionRect({ 0, 0, 800, 800 });
     sysSession->NotifyClientToUpdateRect("SystemSessionTest", nullptr);
     usleep(WAIT_ASYNC_US);
     EXPECT_EQ(sysSession->dirtyFlags_, 0);

@@ -346,6 +346,7 @@ HWTEST_F(SceneSessionLayoutTest, NotifyClientToUpdateRectTask, TestSize.Level0)
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     session->moveDragController_ = nullptr;
     session->isKeyboardPanelEnabled_ = false;
+    session->SetSessionRect({ 0, 0, 800, 800 });
 
     session->Session::UpdateSizeChangeReason(SizeChangeReason::UNDEFINED);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION,
@@ -781,6 +782,31 @@ HWTEST_F(SceneSessionLayoutTest, IsNeedConvertToRelativeRect, TestSize.Level1)
     sceneSession->moveDragController_->isStartMove_ = true;
     sceneSession->moveDragController_->isStartDrag_ = false;
     EXPECT_EQ(subSceneSession->IsNeedConvertToRelativeRect(SizeChangeReason::MAXIMIZE), true);
+}
+
+/**
+ * @tc.name: IsDraggable
+ * @tc.desc: IsDraggable when moveDragController_ is nullptr or not.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLayoutTest, IsDraggable, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsDraggable";
+    info.bundleName_ = "IsDraggable";
+    info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    sceneSession->GetSessionProperty()->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    sceneSession->GetSessionProperty()->SetDragEnabled(true);
+    sceneSession->SetDragActivated(true);
+
+    sceneSession->moveDragController_ = nullptr;
+    EXPECT_EQ(sceneSession->IsDraggable(), false);
+
+    sceneSession->moveDragController_ =
+        sptr<MoveDragController>::MakeSptr(sceneSession->GetPersistentId(), sceneSession->GetWindowType());
+    EXPECT_EQ(sceneSession->IsDraggable(), true);
 }
 
 /**

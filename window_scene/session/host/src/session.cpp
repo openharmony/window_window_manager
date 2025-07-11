@@ -3513,7 +3513,7 @@ void Session::RectCheckProcess()
         float curHeight = GetSessionRect().height_ / density;
         float ratio = GetAspectRatio();
         float actRatio = curWidth / curHeight;
-        if ((ratio != 0) && !NearEqual(ratio, actRatio)) {
+        if (!NearZero(ratio) && !NearEqual(ratio, actRatio)) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "RectCheck err ratio %{public}f != actRatio: %{public}f", ratio, actRatio);
             std::ostringstream oss;
             oss << " RectCheck err ratio ";
