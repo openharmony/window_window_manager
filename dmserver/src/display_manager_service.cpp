@@ -851,4 +851,10 @@ std::vector<DisplayPhysicalResolution> DisplayManagerService::GetAllDisplayPhysi
     }
     return allDisplayPhysicalResolution_;
 }
+
+bool DisplayManagerService::SetVirtualScreenAsDefault(ScreenId screenId)
+{
+    TLOGI(WmsLogTag::DMS, "Enter, screenId: %{public}llu", screenId);
+    return abstractScreenController_->SetVirtualScreenAsDefault(screenId);
+}
 } // namespace OHOS::Rosen

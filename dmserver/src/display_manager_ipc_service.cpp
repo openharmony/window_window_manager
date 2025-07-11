@@ -437,4 +437,10 @@ ErrCode DisplayManagerIpcService::GetScreenBrightness(uint64_t screenId, uint32_
     level = displayManagerService_.GetScreenBrightness(screenId);
     return ERR_OK;
 }
+
+ErrCode DisplayManagerIpcService::SetVirtualScreenAsDefault(uint64_t screenId, bool& isSucc)
+{
+    isSucc = displayManagerService_.SetVirtualScreenAsDefault(screenId);
+    return ERR_OK;
+}
 } // namespace OHOS::Rosen

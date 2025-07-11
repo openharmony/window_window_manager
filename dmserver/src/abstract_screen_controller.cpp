@@ -710,6 +710,9 @@ DMError AbstractScreenController::DestroyVirtualScreen(ScreenId screenId)
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     rsInterface_.RemoveVirtualScreen(rsScreenId);
+    if (defaultRsScreenId_ == rsScreenId) {
+        defaultRsScreenId_ = SCREEN_ID_INVALID;
+    }
     return DMError::DM_OK;
 }
 
@@ -1523,5 +1526,31 @@ DMError AbstractScreenController::SetVirtualPixelRatio(ScreenId screenId, float 
     }
     NotifyScreenChanged(screen->ConvertToScreenInfo(), ScreenChangeEvent::VIRTUAL_PIXEL_RATIO_CHANGED);
     return DMError::DM_OK;
+}
+
+bool AbstractScreenController::SetVirtualScreenAsDefault(ScreenId screenId)
+{
+    // Lock the process of configuring default screen
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    auto rsScreenId = screenIdManager_.ConvertToRsScreenId(screenId);
+    auto absScreen = GetAbstractScreen(screenId);
+    if (rsScreenId == SCREEN_ID_INVALID || absScreen == nullptr || absScreen->type_ == ScreenType::REAL) {
+        TLOGE(WmsLogTag::DMS, "Invalid screenId or screen not exist: %{public}llu", screenId);
+        return false;
+    }
+    // Create screen group and notify
+    sptr<AbstractScreenGroup> screenGroup = AddToGroupLocked(absScreen);
+    if (screenGroup == nullptr) {
+        return false;
+    }
+    NotifyScreenConnected(absScreen->ConvertToScreenInfo());
+    NotifyScreenGroupChanged(absScreen->ConvertToScreenInfo(), ScreenGroupChangeEvent::ADD_TO_GROUP);
+    if (abstractScreenCallback_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "abstractScreenCallback_ is null");
+        return false;
+    }
+    abstractScreenCallback_->onConnect_(absScreen);
+    defaultRsScreenId_ = rsScreenId;
+    return true;
 }
 } // namespace OHOS::Rosen

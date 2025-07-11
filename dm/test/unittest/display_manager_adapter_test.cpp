@@ -997,5 +997,17 @@ HWTEST_F(DisplayManagerAdapterTest, SetScreenPrivacyWindowTagSwitch, TestSize.Le
         screenSessionManagerServiceProxyTmp;
     EXPECT_EQ(res, DMError::DM_ERROR_DEVICE_NOT_SUPPORT);
 }
+
+/**
+ * @tc.name: SetVirtualScreenAsDefault
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, SetVirtualScreenAsDefault, TestSize.Level1)
+{
+    ScreenId screenId = 0;
+    bool res = SingletonContainer::Get<DisplayManagerAdapter>().SetVirtualScreenAsDefault(screenId);
+    EXPECT_FALSE(res);
+}
 }
 }
