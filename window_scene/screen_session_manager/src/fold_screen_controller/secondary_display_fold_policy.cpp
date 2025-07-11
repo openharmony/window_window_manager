@@ -516,10 +516,10 @@ void SecondaryDisplayFoldPolicy::HandleScreenOnFullOn(sptr<ScreenSession> screen
         TLOGW(WmsLogTag::DMS, "unKnown displayMode");
     }
     screenSession->UpdatePropertyByFoldControl(screenProperty_, displayMode);
-    screenSession->PropertyChange(screenSession->GetScreenProperty(), reason);
     if (displayMode == FoldDisplayMode::MAIN) {
         screenSession->SetRotationAndScreenRotationOnly(Rotation::ROTATION_0);
     }
+    screenSession->PropertyChange(screenSession->GetScreenProperty(), reason);
     TLOGI(WmsLogTag::DMS, "screenBounds : width= %{public}f, height= %{public}f",
         screenSession->GetScreenProperty().GetBounds().rect_.width_,
         screenSession->GetScreenProperty().GetBounds().rect_.height_);
