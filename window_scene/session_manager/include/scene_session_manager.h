@@ -1537,12 +1537,12 @@ private:
     WMError RemoveSessionBlackList(const std::vector<sptr<SceneSession>>& sceneSessionList,
         const std::unordered_set<std::string>& privacyWindowTags);
     void AddskipSurfaceNodeIdSet(int32_t windowId, std::unordered_set<uint64_t>& skipSurfaceNodeIdSet);
-    WMError AddVirtualScreenBlackList();
-    WMError AddVirtualScreenBlackList(ScreenId screenId);
-    WMError RemoveVirtualScreenBlackList();
-    WMError RemoveVirtualScreenBlackList(ScreenId screenId);
+    WMError FlushSessionBlackListInfoMapWhenAdd();
+    WMError FlushSessionBlackListInfoMapWhenAdd(ScreenId screenId);
+    WMError FlushSessionBlackListInfoMapWhenRemove();
+    WMError FlushSessionBlackListInfoMapWhenRemove(ScreenId screenId);
     void UpdateVirtualScreenBlackList(ScreenId screenId);
-    std::unordered_map<std::string, std::unordered_set<std::string>> privacyBundleTagMap_;
+    std::unordered_map<std::string, std::unordered_set<std::string>> bundleRSBlackListConfigMap_;
     static constexpr std::string WMS_DEFAULT = "WMS_DEFAULT";
 
     struct SessionBlackListInfo {
@@ -1563,7 +1563,7 @@ private:
     };
     using SessionBlackListInfoSet =
         std::unordered_set<SessionBlackListInfo, SessionBlackListHasher, SessionBlackListEqual>;
-    SessionBlackListInfoSet sessionBlackListInfoSet_;
+    SessionBlackListInfoSet sessionRSBlackListConfigSet_;
     std::unordered_map<DisplayId, SessionBlackListInfoSet> sessionBlackListInfoMap_;
 
     void RemoveSessionFromBlackListInfoSet(
@@ -1586,7 +1586,7 @@ private:
     };
     using ScreenBlackListInfoSet =
         std::unordered_set<ScreenBlackListInfo, ScreenBlackListHasher, ScreenBlackListEqual>;
-    std::unordered_map<ScreenId, ScreenBlackListInfoSet> ScreenBlackListInfoMap_;
+    std::unordered_map<ScreenId, ScreenBlackListInfoSet> screenRSBlackListConfigMap_;
 
     /*
      * Move Drag

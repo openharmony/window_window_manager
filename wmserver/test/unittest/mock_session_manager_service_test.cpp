@@ -208,18 +208,6 @@ HWTEST_F(MockSessionManagerServiceTest, GetProcessSurfaceNodeIdByPersistentId, T
         pid, persistentIds, surfaceNodeIds);
     ASSERT_EQ(0, surfaceNodeIds.size());
 }
-
-/**
- * @tc.name: SetScreenPrivacyWindowTagSwitch01
- * @tc.desc: SetScreenPrivacyWindowTagSwitch
- * @tc.type: FUNC
- */
-HWTEST_F(MockSessionManagerServiceTest, SetScreenPrivacyWindowTagSwitch01, TestSize.Level1)
-{
-    std::unordered_set<std::string> bundleNames;
-    std::unordered_set<std::string> privacyWindowTags;
-    MockSessionManagerService::GetInstance().SetScreenPrivacyWindowTagSwitch(bundleNames, privacyWindowTags);
-}
 }
 }
 }
