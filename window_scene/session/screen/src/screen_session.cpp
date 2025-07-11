@@ -38,6 +38,9 @@ static const int32_t g_screenScanType = system::GetIntParameter<int32_t>("const.
 static const int32_t SCAN_TYPE_VERTICAL = 1;
 static const int32_t ROTATION_90 = 1;
 static const int32_t ROTATION_270 = 3;
+static const int32_t LANDSCAPE_ROTATION_MOD = 2;
+static const int32_t IS_PORTRAIT = 0;
+static const int32_t IS_LANDSCAPE = 1;
 const unsigned int XCOLLIE_TIMEOUT_5S = 5;
 const static uint32_t MAX_INTERVAL_US = 1800000000; //30分钟
 const int32_t MAP_SIZE = 300;
@@ -998,7 +1001,7 @@ void ScreenSession::UpdateToInputManager(RRect bounds, int rotation, int deviceR
     property_.SetDisplayOrientation(displayOrientation);
     UpdateTouchBoundsAndOffset();
     Rotation targetDeviceRotation = ConvertIntToRotation(deviceRotation);
-    DisplayOrientation deviceOrientation = CalcDeviceOrientation(targetDeviceRotation, foldDisplayMode);
+    auto deviceOrientation = CalcDeviceOrientationWithBounds(targetDeviceRotation, foldDisplayMode, bounds);
     property_.UpdateDeviceRotation(targetDeviceRotation);
     property_.SetDeviceOrientation(deviceOrientation);
     if (needUpdateToInputManager && updateToInputManagerCallback_ != nullptr
@@ -1087,10 +1090,10 @@ void ScreenSession::UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMo
         rotation, displayOrientation);
 }
 
-void ScreenSession::UpdateRotationOrientation(int rotation, FoldDisplayMode foldDisplayMode)
+void ScreenSession::UpdateRotationOrientation(int rotation, FoldDisplayMode foldDisplayMode, const RRect& bounds)
 {
     Rotation targetRotation = ConvertIntToRotation(rotation);
-    DisplayOrientation deviceOrientation = CalcDeviceOrientation(targetRotation, foldDisplayMode);
+    DisplayOrientation deviceOrientation = CalcDeviceOrientationWithBounds(targetRotation, foldDisplayMode, bounds);
     property_.UpdateDeviceRotation(targetRotation);
     property_.SetDeviceOrientation(deviceOrientation);
     TLOGI(WmsLogTag::DMS, "rotation:%{public}d, orientation:%{public}u", rotation, deviceOrientation);
@@ -1381,6 +1384,51 @@ DisplayOrientation ScreenSession::CalcDeviceOrientation(Rotation rotation,
     if (foldDisplayMode == FoldDisplayMode::GLOBAL_FULL) {
         uint32_t temp = (static_cast<uint32_t>(rotation) + SECONDARY_ROTATION_270) % SECONDARY_ROTATION_MOD;
         rotation = static_cast<Rotation>(temp);
+    }
+    DisplayOrientation displayRotation = DisplayOrientation::UNKNOWN;
+    switch (rotation) {
+        case Rotation::ROTATION_0: {
+            displayRotation = DisplayOrientation::PORTRAIT;
+            break;
+        }
+        case Rotation::ROTATION_90: {
+            displayRotation = DisplayOrientation::LANDSCAPE;
+            break;
+        }
+        case Rotation::ROTATION_180: {
+            displayRotation = DisplayOrientation::PORTRAIT_INVERTED;
+            break;
+        }
+        case Rotation::ROTATION_270: {
+            displayRotation = DisplayOrientation::LANDSCAPE_INVERTED;
+            break;
+        }
+        default: {
+            TLOGE(WmsLogTag::DMS, "unknown rotation %{public}u", rotation);
+        }
+    }
+    return displayRotation;
+}
+
+DisplayOrientation ScreenSession::CalcDeviceOrientationWithBounds(Rotation rotation,
+    FoldDisplayMode foldDisplayMode, const RRect& bounds) const
+{
+    if (foldDisplayMode == FoldDisplayMode::GLOBAL_FULL) {
+        uint32_t temp = (static_cast<uint32_t>(rotation) + SECONDARY_ROTATION_270) % SECONDARY_ROTATION_MOD;
+        rotation = static_cast<Rotation>(temp);
+    } else if (foldDisplayMode == FoldDisplayMode::UNKNOWN) {
+        // deal vision and extend screen orientation
+        bool isLandscapeScreen = bounds.rect_.GetWidth() > bounds.rect_.GetHeight();
+        bool isPortraitScreen = bounds.rect_.GetWidth() < bounds.rect_.GetHeight();
+        uint32_t rotationDirection = static_cast<uint32_t>(rotation) % LANDSCAPE_ROTATION_MOD;
+        TLOGI(WmsLogTag::DMS, "isLandscapeScreen: %{public}d, rotationDirection: %{public}d",
+            isLandscapeScreen, rotationDirection);
+        if ((isLandscapeScreen && rotationDirection == IS_PORTRAIT) ||
+            (isPortraitScreen && rotationDirection == IS_LANDSCAPE)) {
+            uint32_t temp = (static_cast<uint32_t>(rotation) + ROTATION_90) % SECONDARY_ROTATION_MOD;
+            TLOGI(WmsLogTag::DMS, "before: %{public}d, after: %{public}d", rotation, temp);
+            rotation = static_cast<Rotation>(temp);
+        }
     }
     DisplayOrientation displayRotation = DisplayOrientation::UNKNOWN;
     switch (rotation) {

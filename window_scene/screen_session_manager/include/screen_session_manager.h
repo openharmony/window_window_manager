@@ -344,8 +344,8 @@ public:
         ScreenPropertyChangeType screenPropertyChangeType, bool isSwitchUser = false) override;
     void UpdateScreenRotationPropertyForRs(sptr<ScreenSession>& screenSession,
         ScreenPropertyChangeType screenPropertyChangeType, const RRect& bounds, float rotation, bool isSwitchUser);
-    void UpdateScreenDirectionInfo(ScreenId screenId, float screenComponentRotation, float rotation,
-        float phyRotation, ScreenPropertyChangeType screenPropertyChangeType) override;
+    void UpdateScreenDirectionInfo(ScreenId screenId, const ScreenDirectionInfo& directionInfo,
+        ScreenPropertyChangeType screenPropertyChangeType, const RRect& bounds) override;
     uint32_t GetCurvedCompressionArea() override;
     ScreenProperty GetPhyScreenProperty(ScreenId screenId) override;
     void SetScreenPrivacyState(bool hasPrivate) override;

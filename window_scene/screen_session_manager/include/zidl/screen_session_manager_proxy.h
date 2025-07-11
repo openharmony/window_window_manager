@@ -183,8 +183,8 @@ public:
     std::shared_ptr<RSDisplayNode> GetDisplayNode(ScreenId screenId) override;
     void UpdateScreenRotationProperty(ScreenId screenId, const RRectT<float>& bounds, float rotation,
         ScreenPropertyChangeType screenPropertyChangeType, bool isSwitchUser) override;
-    void UpdateScreenDirectionInfo(ScreenId screenId, float screenComponentRotation, float rotation,
-        float phyRotation, ScreenPropertyChangeType screenPropertyChangeType) override;
+    void UpdateScreenDirectionInfo(ScreenId screenId, const ScreenDirectionInfo& directionInfo,
+        ScreenPropertyChangeType screenPropertyChangeType, const RRect& bounds) override;
     void UpdateAvailableArea(ScreenId ScreenId, DMRect area) override;
     void UpdateSuperFoldAvailableArea(ScreenId screenId, DMRect bArea, DMRect cArea) override;
     void UpdateSuperFoldExpandAvailableArea(ScreenId screenId, DMRect area) override;
