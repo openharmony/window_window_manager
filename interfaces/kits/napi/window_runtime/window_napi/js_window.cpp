@@ -2338,17 +2338,24 @@ napi_value JsWindow::HandlePositionTransform(
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
 
-    Position inputPos { x, y };
-    Position resultPos = transformFunc(windowToken_, inputPos);
-    TLOGI(WmsLogTag::WMS_LAYOUT, "%{public}s: inputPos: %{public}s, resultPos: %{public}s",
-        caller, inputPos.ToString().c_str(), resultPos.ToString().c_str());
+    Position inPosition { x, y };
+    Position outPosition;
+    auto transformRet = transformFunc(windowToken_, inPosition, outPosition);
+    auto it = WM_JS_TO_ERROR_CODE_MAP.find(transformRet);
+    WmErrorCode errCode = (it != WM_JS_TO_ERROR_CODE_MAP.end()) ? it->second : WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    if (errCode != WmErrorCode::WM_OK) {
+        return NapiThrowError(env, errCode);
+    }
 
-    auto jsPosition = BuildJsPosition(env, resultPos);
-    if (!jsPosition) {
+    TLOGI(WmsLogTag::WMS_LAYOUT, "%{public}s: inputPos: %{public}s, resultPos: %{public}s",
+        caller, inPosition.ToString().c_str(), outPosition.ToString().c_str());
+
+    auto jsOutPosition = BuildJsPosition(env, outPosition);
+    if (!jsOutPosition) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "%{public}s: Failed to build JS position object", caller);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    return jsPosition;
+    return jsOutPosition;
 }
 
 /** @note @window.layout */
@@ -2356,8 +2363,8 @@ napi_value JsWindow::OnClientToGlobalDisplay(napi_env env, napi_callback_info in
 {
     return HandlePositionTransform(
         env, info,
-        [](const sptr<Window>& window, const Position& pos) {
-            return window->ClientToGlobalDisplay(pos);
+        [](const sptr<Window>& window, const Position& inPosition, const Position& outPosition) {
+            return window->ClientToGlobalDisplay(inPosition, outPosition);
         },
         __func__);
 }
@@ -2367,8 +2374,8 @@ napi_value JsWindow::OnGlobalDisplayToClient(napi_env env, napi_callback_info in
 {
     return HandlePositionTransform(
         env, info,
-        [](const sptr<Window>& window, const Position& pos) {
-            return window->GlobalDisplayToClient(pos);
+        [](const sptr<Window>& window, const Position& inPosition, const Position& outPosition) {
+            return window->GlobalDisplayToClient(inPosition, outPosition);
         },
         __func__);
 }
