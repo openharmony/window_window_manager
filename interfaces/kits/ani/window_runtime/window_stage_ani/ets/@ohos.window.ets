@@ -1125,6 +1125,137 @@ export class WindowPropertiesInternal implements WindowProperties {
     typeInternal: int;
 }
 
+/**
+ * Configuration parameters for window creation.
+ *
+ * @interface Configuration
+ * @syscap SystemCapability.WindowManager.WindowManager.Core
+ * @since 9
+ */
+/**
+ * Configuration parameters for window creation.
+ *
+ * @interface Configuration
+ * @syscap SystemCapability.WindowManager.WindowManager.Core
+ * @atomicservice
+ * @since 12
+ */
+export interface Configuration {
+    /**
+     * Indicates window id.
+     *
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @since 9
+     */
+    /**
+     * Indicates window id.
+     *
+     * @type { string }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @atomicservice
+     * @since 12
+     */
+    name: string;
+
+    /**
+     * Indicates window type
+     *
+     * @type { WindowType }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @since 9
+     */
+    /**
+     * Indicates window type
+     *
+     * @type { WindowType }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @atomicservice
+     * @since 12
+     */
+    windowType: WindowType;
+
+    /**
+     * Indicates window context.
+     *
+     * @type { ?BaseContext }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @since 9
+     */
+    /**
+     * Indicates window context.
+     *
+     * @type { ?BaseContext }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @atomicservice
+     * @since 12
+     */
+    ctx?: BaseContext;
+
+    /**
+     * Indicates display ID.
+     *
+     * @type { ?number }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @since 9
+     */
+    /**
+     * Indicates display ID.
+     *
+     * @type { ?number }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @atomicservice
+     * @since 12
+     */
+    displayId?: number;
+
+    /**
+     * Indicates Parent window id
+     *
+     * @type { ?number }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @since 9
+     */
+    /**
+     * Indicates Parent window id
+     *
+     * @type { ?number }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @atomicservice
+     * @since 12
+     */
+    parentId?: number;
+
+    /**
+     * Indicates whether enable window decor, only support dialog, The default value is false.
+     *
+     * @type { ?boolean }
+     * @syscap SystemCapability.Window.SessionManager
+     * @atomicservice
+     * @since 12
+     */
+    decorEnabled?: boolean;
+
+    /**
+     * Indicates dialog window title when decor enabled.
+     *
+     * @type { ?string }
+     * @syscap SystemCapability.Window.SessionManager
+     * @atomicservice
+     * @since 12
+     */
+    title?: string;
+}
+
+export class ConfigurationInternal implements Configuration {
+    name: string;
+    windowType: WindowType;
+    ctx?: BaseContext;
+    displayId?: number;
+    parentId?: number;
+    decorEnabled?: boolean;
+    title?: string;
+}
+
 export interface MoveConfiguration {
     displayId: number;
 }
@@ -1610,6 +1741,7 @@ export class WindowStageInternal implements WindowStage {
     public native disableWindowDecorSync(nativeObj:long): void;
     public native setShowOnLockScreenSync(nativeObj:long, showOnLockScreen: boolean): void;
     public native getMainWindowSync(nativeObj: long): Window;
+    public native createSubWindowSync(nativeObj: long, name: String): Window;
     native onSync(nativeObj: long, eventType: 'windowStageEvent', callback: Object): void;
     native offSync(nativeObj: long, eventType: 'windowStageEvent', callback?: Object): void;
 
@@ -1735,6 +1867,29 @@ export class WindowStageInternal implements WindowStage {
         });
     }
 
+    public createSubWindow(name: string): Promise<Window> {
+        return new Promise<Window>((resolve: (value: Window) => void, reject: (error: BusinessError) => void) => {
+            taskpool.execute((): Window => {
+                let window = this.createSubWindowSync(this.nativeObj, name);
+                return window;
+            }).then((ret: NullishType) => {
+                resolve(ret as Window);
+            }).catch((err: NullishType) => {
+                reject(err as BusinessError);
+            });
+        });
+    }
+
+    public createSubWindow(name: string, callback: AsyncCallback<Window>): void {
+        taskpool.execute((): Window => {
+            let res = this.createSubWindowSync(this.nativeObj, name);
+            return res;
+        }).then((ret: NullishType) => {
+            callback(new BusinessError(), ret as Window);
+        }).catch((err: NullishType) => {
+        });
+    }
+
     public on(eventType: 'windowStageEvent', callback: Callback<WindowStageEventType>): void {
       this.onSync(this.nativeObj, eventType, callback);
     }
@@ -1756,6 +1911,8 @@ export interface WindowStage {
     getMainWindowSync(): Window;
     getMainWindow(): Promise<Window>;
     getMainWindow(callback: AsyncCallback<Window>): void;
+    createSubWindow(name: string): Promise<Window>;
+    createSubWindow(name: string, callback: AsyncCallback<Window>): void;
     disableWindowDecor(): void;
     setShowOnLockScreen(showOnLockScreen: boolean): void;
     on(eventType: 'windowStageEvent', callback: Callback<WindowStageEventType>): void;
@@ -2805,6 +2962,7 @@ native function findWindowSync(nativeObj: long, name: string): Window;
 native function onSync(nativeObj: long, type: string, callback: object): void;
 native function offSync(nativeObj: long, type: string, callback?: object): void;
 native function shiftAppWindowFocusSync(nativeObj: long, sourceWindowId: number, targetWindowId: number): void;
+native function createWindowSync(nativeObj: long, config: Configuration): Window;
 
 export function getLastWindow(ctx: BaseContext): Promise<Window> {
   return new Promise<Window>((resolve: (value: Window) => void, reject: (error: BusinessError) => void) => {
@@ -2823,6 +2981,28 @@ export function getLastWindow(ctx: BaseContext, callback: AsyncCallback<Window>)
     taskpool.execute((): Window => {
         hilog.info(DOMAIN, TAG, 'getLastWindow, ctx:' + ctx);
         return getLastWindowSync(nativeObj, ctx);
+    }).then((ret: NullishType) => {
+        callback(new BusinessError(), ret as Window);
+    }).catch((err: NullishType) => {
+        callback(err as BusinessError, new WindowInternal());
+    });
+}
+
+export function createWindow(config: Configuration): Promise<Window> {
+  return new Promise<Window>((resolve: (value: Window) => void, reject: (error: BusinessError) => void ) => {
+      taskpool.execute((): Window => {
+          return createWindowSync(nativeObj, config);
+      }).then((ret: NullishType) => {
+          resolve(ret as Window);
+      }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+      });
+  });
+}
+
+export function createWindow(config: Configuration, callback: AsyncCallback<Window>): void {
+    taskpool.execute((): Window => {
+        return createWindowSync(nativeObj, config);
     }).then((ret: NullishType) => {
         callback(new BusinessError(), ret as Window);
     }).catch((err: NullishType) => {

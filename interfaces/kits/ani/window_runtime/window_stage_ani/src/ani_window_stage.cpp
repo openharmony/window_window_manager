@@ -394,6 +394,30 @@ void AniWindowStage::OnLoadContentWithStorage(ani_env* env, ani_string path, ani
         AniWindowUtils::AniThrowError(env, ret, "Window load content failed");
     }
 }
+
+ani_ref AniWindowStage::OnCreateSubWindow(ani_env* env, ani_string name)
+{
+    std::string windowName;
+    ani_status ret = AniWindowUtils::GetStdString(env, name, windowName);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] invalid param of name");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+
+    auto weakScene = windowScene_.lock();
+    if (weakScene == nullptr) {
+        TLOGI(WmsLogTag::DEFAULT, "[ANI] WindowScene is nullptr");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    sptr<Rosen::WindowOption> windowOption = new Rosen::WindowOption();
+    windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
+    auto window = weakScene->CreateWindow(windowName, windowOption);
+    if (window == nullptr) {
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    return CreateAniWindowObject(env, window);
+}
 }  // namespace Rosen
 }  // namespace OHOS
 
@@ -449,6 +473,18 @@ static ani_ref WindowGetMainWindow(ani_env* env, ani_object obj, ani_long native
     return windowStage->GetMainWindow(env);
 }
 
+static ani_ref CreateSubWindow(ani_env* env, ani_object obj, ani_long nativeObj, ani_string name)
+{
+    using namespace OHOS::Rosen;
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    AniWindowStage* windowStage = reinterpret_cast<AniWindowStage*>(nativeObj);
+    if (windowStage == nullptr || windowStage->GetWindowScene().lock() == nullptr) {
+        TLOGD(WmsLogTag::DEFAULT, "[ANI] windowStage is nullptr");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    return windowStage->OnCreateSubWindow(env, name);
+}
+
 extern "C" {
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
@@ -483,6 +519,8 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
             nullptr, reinterpret_cast<void *>(AniWindowStage::SetShowOnLockScreen)},
         ani_native_function {"getMainWindowSync", "J:L@ohos/window/window/Window;",
             reinterpret_cast<void *>(WindowGetMainWindow)},
+        ani_native_function {"createSubWindowSync", "JLstd/core/String;:L@ohos/window/window/Window;",
+            reinterpret_cast<void *>(CreateSubWindow)},
         ani_native_function {"onSync", nullptr,
             reinterpret_cast<void *>(AniWindowStage::RegisterWindowCallback)},
         ani_native_function {"offSync", nullptr,
