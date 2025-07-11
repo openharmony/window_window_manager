@@ -7505,6 +7505,10 @@ void ScreenSessionManager::SetIsLandscapeLockStatus(bool isLandscapeLockStatus)
 void ScreenSessionManager::SetLandscapeLockStatus(bool isLocked)
 {
 #ifdef FOLD_ABILITY_ENABLE
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "permission denied! pid: %{public}d", IPCSkeleton::GetCallingPid());
+        return;
+    }    
     if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         TLOGI(WmsLogTag::DMS, "not super fold display device.");
         return;
@@ -9097,6 +9101,7 @@ void ScreenSessionManager::ReportFoldStatusToScb(std::vector<std::string>& scree
 
 std::vector<DisplayPhysicalResolution> ScreenSessionManager::GetAllDisplayPhysicalResolution()
 {
+    std::lock_guard<std::mutex> lock(allDisplayPhysicalResolutionMutex_);
     if (allDisplayPhysicalResolution_.empty()) {
         sptr<ScreenSession> defaultScreen = GetDefaultScreenSession();
         if (defaultScreen == nullptr) {
