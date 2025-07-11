@@ -547,6 +547,7 @@ void AbstractDisplayController::ProcessVirtualPixelRatioChange(sptr<AbstractScre
 
 void AbstractDisplayController::BindAloneScreenLocked(sptr<AbstractScreen> realAbsScreen)
 {
+    TLOGE(WmsLogTag::DMS, "BindAloneScreenLocked enter");
     if (realAbsScreen == nullptr) {
         TLOGE(WmsLogTag::DMS, "BindAloneScreenLocked failed, realAbsScreen is nullptr");
         return;

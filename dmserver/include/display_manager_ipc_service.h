@@ -270,6 +270,10 @@ public:
         uint64_t screenId,
         uint32_t& level) override;
 
+    ErrCode SetVirtualScreenAsDefault(
+        uint64_t screenId,
+        bool& isSucc) override;
+
 private:
     DisplayManagerIpcService();
 

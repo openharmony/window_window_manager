@@ -65,6 +65,16 @@ sptr<DisplayInfo> DisplayManagerAdapter::GetDefaultDisplayInfo()
     return displayInfo;
 }
 
+bool DisplayManagerAdapter::SetVirtualScreenAsDefault(ScreenId screenId)
+{
+    INIT_PROXY_CHECK_RETURN(false);
+    bool res = false;
+    if (displayManagerServiceProxy_) {
+        displayManagerServiceProxy_->SetVirtualScreenAsDefault(screenId, res);
+    }
+    return res;
+}
+
 sptr<DisplayInfo> DisplayManagerAdapter::GetDisplayInfoByScreenId(ScreenId screenId)
 {
     INIT_PROXY_CHECK_RETURN(nullptr);
@@ -544,6 +554,7 @@ bool ScreenManagerAdapter::SetScreenPowerForAll(ScreenPowerState state, PowerSta
 ScreenPowerState ScreenManagerAdapter::GetScreenPower(ScreenId dmsScreenId)
 {
     INIT_PROXY_CHECK_RETURN(ScreenPowerState::INVALID_STATE);
+
     if (screenSessionManagerServiceProxy_) {
         return screenSessionManagerServiceProxy_->GetScreenPower(dmsScreenId);
     }

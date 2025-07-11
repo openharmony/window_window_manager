@@ -975,7 +975,7 @@ HWTEST_F(ScreenSessionManagerTest, SetLandscapeLockStatus01, TestSize.Level1)
     MockAccesstokenKit::MockIsSACalling(false);
     MockAccesstokenKit::MockIsSystemApp(false);
     ssm_->SetLandscapeLockStatus(true);
-    EXPECT_TRUE(g_errLog.find("permission denied!") != std::string::nops);
+    EXPECT_TRUE(g_errLog.find("permission denied!") != std::string::npos);
 }
 }
 }
