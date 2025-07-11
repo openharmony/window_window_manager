@@ -26,6 +26,7 @@ bool g_setWriteUint32ErrorFlag = false;
 bool g_setWriteUint64ErrorFlag = false;
 bool g_setWriteFloatErrorFlag = false;
 bool g_setWriteString16ErrorFlag = false;
+bool g_setWriteStringErrorFlag = false;
 bool g_setWriteParcelableErrorFlag = false;
 bool g_setWriteInterfaceTokenErrorFlag = false;
 bool g_setWriteRemoteObjectErrorFlag = false;
@@ -56,6 +57,7 @@ void MockMessageParcel::ClearAllErrorFlag()
     g_setWriteUint64ErrorFlag = false;
     g_setWriteFloatErrorFlag = false;
     g_setWriteString16ErrorFlag = false;
+    g_setWriteStringErrorFlag = false;
     g_setWriteParcelableErrorFlag = false;
     g_setWriteInterfaceTokenErrorFlag = false;
     g_setWriteRemoteObjectErrorFlag = false;
@@ -101,6 +103,11 @@ void MockMessageParcel::SetWriteFloatErrorFlag(bool flag)
 void MockMessageParcel::SetWriteString16ErrorFlag(bool flag)
 {
     g_setWriteString16ErrorFlag = flag;
+}
+
+void MockMessageParcel::SetWriteStringErrorFlag(bool flag)
+{
+    g_setWriteStringErrorFlag = flag;
 }
 
 void MockMessageParcel::SetWriteParcelableErrorFlag(bool flag)
@@ -245,6 +252,12 @@ bool Parcel::WriteString16(const std::u16string& value)
 {
     (void)value;
     return !g_setWriteString16ErrorFlag;
+}
+
+bool Parcel::WriteString(const std::string& value)
+{
+    (void)value;
+    return !g_setWriteStringErrorFlag;
 }
 
 bool Parcel::ReadBool(bool& value)
