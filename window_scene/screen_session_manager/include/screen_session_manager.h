@@ -231,9 +231,8 @@ public:
     bool HasCastEngineOrPhyMirror(const std::vector<ScreenId>& screenIdsToExclude);
     void HandlePhysicalMirrorConnect(sptr<ScreenSession> screenSession, bool phyMirrorEnable);
     sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) override;
-    sptr<CutoutInfo> GetCutoutInfoWithRotation(DisplayId displayId, int32_t rotation) override;
+    sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId, int32_t width, int32_t height, Rotation rotation) override;
     DMError HasImmersiveWindow(ScreenId screenId, bool& immersive) override;
-    void SetDisplayBoundary(const sptr<ScreenSession> screenSession);
     void SetLowTemp(LowTempMode lowTemp);
 
     /**

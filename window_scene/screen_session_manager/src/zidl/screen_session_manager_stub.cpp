@@ -736,8 +736,18 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         }
         case DisplayManagerMessage::TRANS_ID_GET_CUTOUT_INFO_WITH_ROTATION: {
             DisplayId displayId = static_cast<DisplayId>(data.ReadUint64());
-            int32_t rotation = data.ReadInt32();
-            sptr<CutoutInfo> cutoutInfo = GetCutoutInfoWithRotation(displayId, rotation);
+            int32_t width = 0;
+            if (!data.ReadInt32(width)) {
+                TLOGE(WmsLogTag::DMS, "Read width failed");
+                return ERR_INVALID_DATA;
+            }
+            int32_t height = 0;
+            if (!data.ReadInt32(height)) {
+                TLOGE(WmsLogTag::DMS, "Read height failed");
+                return ERR_INVALID_DATA;
+            }
+            Rotation rotation = static_cast<Rotation>(data.ReadUint32());
+            sptr<CutoutInfo> cutoutInfo = GetCutoutInfo(displayId, width, height, rotation);
             reply.WriteParcelable(cutoutInfo);
             break;
         }

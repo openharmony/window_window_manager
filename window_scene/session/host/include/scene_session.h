@@ -612,6 +612,8 @@ public:
     virtual WSError HideSync() { return WSError::WS_DO_NOTHING; }
     void RegisterUpdateAppUseControlCallback(UpdateAppUseControlFunc&& func);
     void NotifyUpdateAppUseControl(ControlAppType type, const ControlInfo& controlInfo) override;
+    void UpdatePrivacyModeControlInfo();
+    bool HasSubSessionInPrivacyMode();
     void SetVisibilityChangedDetectFunc(VisibilityChangedDetectFunc&& func);
     virtual void RegisterSessionLockStateChangeCallback(NotifySessionLockStateChangeCallback&& callback) {}
     virtual void NotifySessionLockStateChange(bool isLockedState) {}
@@ -1049,7 +1051,7 @@ private:
     bool CheckIdentityTokenIfMatched(const std::string& identityToken);
     bool CheckPidIfMatched();
     GetStartWindowTypeFunc getStartWindowConfigFunc_;
-    StartWindowType startWindowType_;
+    StartWindowType startWindowType_ = StartWindowType::DEFAULT;
 
     // session lifecycle funcs
     WSError ForegroundTask(const sptr<WindowSessionProperty>& property);
