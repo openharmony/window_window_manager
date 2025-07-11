@@ -3563,7 +3563,10 @@ HWTEST_F(ScreenSessionTest, UpdateRotationOrientation, TestSize.Level1)
     ASSERT_NE(session, nullptr);
     int rotation = 0;
     FoldDisplayMode foldDisplayMode = FoldDisplayMode::MAIN;
-    session->UpdateRotationOrientation(rotation, foldDisplayMode);
+    RRect bounds;
+    bounds.rect_.width_ = 1344;
+    bounds.rect_.height_ = 2772;
+    session->UpdateRotationOrientation(rotation, foldDisplayMode, bounds);
     ScreenProperty screenProperty = session->GetScreenProperty();
     EXPECT_EQ(screenProperty.deviceRotation_, Rotation::ROTATION_0);
 }
