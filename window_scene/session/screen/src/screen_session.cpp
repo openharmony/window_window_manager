@@ -1420,10 +1420,13 @@ DisplayOrientation ScreenSession::CalcDeviceOrientationWithBounds(Rotation rotat
         // deal vision and extend screen orientation
         bool isLandscapeScreen = bounds.rect_.GetWidth() > bounds.rect_.GetHeight();
         bool isPortraitScreen = bounds.rect_.GetWidth() < bounds.rect_.GetHeight();
-        uint32_t temp = static_cast<uint32_t>(rotation) % LANDSCAPE_ROTATION_MOD;
-        TLOGI(WmsLogTag::DMS, "isLandscapeScreen: %{public}d", isLandscapeScreen);
-        if ((isLandscapeScreen && temp == IS_PORTRAIT) || (isPortraitScreen && temp == IS_LANDSCAPE)) {
+        uint32_t rotationDirection = static_cast<uint32_t>(rotation) % LANDSCAPE_ROTATION_MOD;
+        TLOGI(WmsLogTag::DMS, "isLandscapeScreen: %{public}d, rotationDirection: %{public}d",
+            isLandscapeScreen, rotationDirection);
+        if ((isLandscapeScreen && rotationDirection == IS_PORTRAIT) ||
+            (isPortraitScreen && rotationDirection == IS_LANDSCAPE)) {
             uint32_t temp = (static_cast<uint32_t>(rotation) + ROTATION_90) % SECONDARY_ROTATION_MOD;
+            TLOGI(WmsLogTag::DMS, "before: %{public}d, after: %{public}d", rotation, temp);
             rotation = static_cast<Rotation>(temp);
         }
     }
