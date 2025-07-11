@@ -2135,6 +2135,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetScreenPrivacyWindowTagSwitch, Functio
     proxy = sptr<ScreenSessionManagerProxy>::MakeSptr(remoteMocker);
     proxy->SetScreenPrivacyWindowTagSwitch(mainScreenId, privacyWindowTag, true);
     EXPECT_TRUE(logMsg.find("remote is null") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 }
 }
