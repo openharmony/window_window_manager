@@ -213,7 +213,9 @@ public:
     void SetFrameGravity(Gravity gravity);
 
     void SetHdrFormats(std::vector<uint32_t>&& hdrFormats);
+    std::vector<uint32_t> GetHdrFormats();
     void SetColorSpaces(std::vector<uint32_t>&& colorSpaces);
+    std::vector<uint32_t> GetColorSpaces();
     void SetSupportedRefreshRate(std::vector<uint32_t>&& supportedRefreshRate);
     std::vector<uint32_t> GetSupportedRefreshRate() const;
     void SetForceCloseHdr(bool isForceCloseHdr);
@@ -393,8 +395,11 @@ private:
     bool isFold_ = false;
     float currentSensorRotation_ { -1.0f };
     float currentValidSensorRotation_ { -1.0f };
+    mutable std::shared_mutex hdrFormatsMutex_;
     std::vector<uint32_t> hdrFormats_;
+    mutable std::shared_mutex colorSpacesMutex_;
     std::vector<uint32_t> colorSpaces_;
+    mutable std::shared_mutex supportedRefreshRateMutex_;
     std::vector<uint32_t> supportedRefreshRate_;
     MirrorScreenType mirrorScreenType_ { MirrorScreenType::VIRTUAL_MIRROR };
     std::string serialNumber_;

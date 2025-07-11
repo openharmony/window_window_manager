@@ -661,6 +661,7 @@ private:
     std::mutex clientProxyMutex_; // above guarded by clientProxyMutex_
     ClientAgentContainer<IDisplayManagerAgent, DisplayManagerAgentType> dmAgentContainer_;
     DeviceScreenConfig deviceScreenConfig_;
+    std::mutex allDisplayPhysicalResolutionMutex_;
     std::vector<DisplayPhysicalResolution> allDisplayPhysicalResolution_ {};
     std::vector<uint32_t> screenParams_ {};
     std::map<int32_t, std::set<DisplayManagerAgentType>> pidAgentTypeMap_;

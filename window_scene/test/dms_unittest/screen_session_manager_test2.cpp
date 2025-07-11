@@ -963,6 +963,20 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenPrivacyWindowTagSwitch002, TestSize.
     ret = ssm_->SetScreenPrivacyWindowTagSwitch(mainScreenId, privacyWindowTag, true);
     EXPECT_EQ(ret, DMError::DM_OK);
 }
+
+/**
+ * @tc.name: SetLandscapeLockStatus01
+ * @tc.desc: SetLandscapeLockStatus01 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetLandscapeLockStatus01, TestSize.Level1)
+{
+    g_errLog.clear();
+    MockAccesstokenKit::MockIsSACalling(false);
+    MockAccesstokenKit::MockIsSystemApp(false);
+    ssm_->SetLandscapeLockStatus(true);
+    EXPECT_TRUE(g_errLog.find("permission denied!") != std::string::nops);
+}
 }
 }
 }
