@@ -1041,8 +1041,14 @@ napi_value JsExtensionWindow::OnRegisterExtensionWindowCallback(napi_env env, na
         TLOGE(WmsLogTag::WMS_UIEXT, "Callback(info->argv[1]) is not callable");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    WmErrorCode ret = extensionRegisterManager_->RegisterListener(windowImpl, cbType, CaseType::CASE_WINDOW,
-        env, value);
+    WmErrorCode ret = WmErrorCode::WM_OK;
+    if (atomicService) {
+        ret = extensionRegisterManager_->AtomicServiceRegisterListener(windowImpl, cbType, CaseType::CASE_WINDOW,
+            env, value);
+    } else {
+        ret = extensionRegisterManager_->RegisterListener(windowImpl, cbType, CaseType::CASE_WINDOW,
+            env, value);
+    }
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Callback(info->argv[1]) is not callable");
         return NapiThrowError(env, ret);
@@ -1092,16 +1098,14 @@ napi_value JsExtensionWindow::OnUnRegisterExtensionWindowCallback(napi_env env, 
 
     napi_value value = nullptr;
     WmErrorCode ret = WmErrorCode::WM_OK;
-    if (argc == ARG_COUNT_ONE) {
-        ret = extensionRegisterManager_->UnregisterListener(windowImpl, cbType, CaseType::CASE_WINDOW, env, value);
-    } else {
+    if (argc > ARG_COUNT_ONE && argv[INDEX_ONE] != nullptr && NapiIsCallable(env, argv[INDEX_ONE])) {
         value = argv[INDEX_ONE];
-        if (value == nullptr || !NapiIsCallable(env, value)) {
-            ret = extensionRegisterManager_->UnregisterListener(windowImpl, cbType, CaseType::CASE_WINDOW,
-                env, nullptr);
-        } else {
-            ret = extensionRegisterManager_->UnregisterListener(windowImpl, cbType, CaseType::CASE_WINDOW, env, value);
-        }
+    }
+    if (atomicService) {
+        ret = extensionRegisterManager_->AtomicServiceUnregisterListener(windowImpl, cbType,
+            CaseType::CASE_WINDOW, env, value);
+    } else {
+        ret = extensionRegisterManager_->UnregisterListener(windowImpl, cbType, CaseType::CASE_WINDOW, env, value);
     }
 
     if (ret != WmErrorCode::WM_OK) {
