@@ -193,7 +193,7 @@ HWTEST_F(ScreenshotTest, ScreenShotValid05, TestSize.Level1)
     Media::Size screenSize = {screenshot->GetWidth(), screenshot->GetHeight()};
     ASSERT_TRUE(Utils::SizeEqual(defaultImage, screenSize));
 
-    Media::Size halfDefault_ = {defaultImage.width / 2, defaultImage.height / 2};
+    Media::Size halfDefault = {defaultImage.width / 2, defaultImage.height / 2};
     Media::Rect halfRect = {defaultScreen.left, defaultScreen.top, halfDefault.width, halfDefault.height};
     EXPECT_CALL(m->Mock(), GetDisplaySnapshot(_, _, _, _)).Times(1).WillOnce(Return(pixelMap));
     screenshot = dm.GetScreenshot(0, halfRect, defaultImage, 0);
