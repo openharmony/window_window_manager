@@ -7309,7 +7309,7 @@ static bool IsTransitionAnimationEnable(napi_env env, sptr<Window> windowToken, 
         enableResult = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
         return false;
     }
-    if (!windowToken->IsPcWindow() && !windowToken->IsPadWindow()) {
+    if (!windowToken->IsPcOrPadFreeMultiWindowMode()) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Device is invalid");
         enableResult = WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
         return false;
