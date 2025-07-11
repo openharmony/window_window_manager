@@ -10270,15 +10270,20 @@ WMError SceneSessionManager::FlushSessionBlackListInfoMapWhenAdd(ScreenId screen
 
 WMError SceneSessionManager::FlushSessionBlackListInfoMapWhenRemove()
 {
-    for (const auto& [screenId, sessionBlackListInfoSet] : sessionBlackListInfoMap_) {
-        for (const auto& info : sessionBlackListInfoSet) {
+    for (auto& [screenId, InfoSet] : sessionBlackListInfoMap_) {
+        for (auto it = infoSet.begin(); it != infoSet.end(); ) {
+            const auto& info = *it;
             if (info.privacyWindowTag == WMS_DEFAULT) {
+                ++it;
                 continue;
             }
-            if (screenRSBlackListConfigMap_[screenId].find({ .privacyWindowTag = info.privacyWindowTag }) ==
-                    screenRSBlackListConfigMap_[screenId].end() ||
-                sessionRSBlackListConfigSet_.find(info) == sessionRSBlackListConfigSet_.end()) {
+            bool notInScreenConfigMap = screenRSBlackListConfigMap_[screenId].find(
+                { .privacyWindowTag = info.privacyWindowTag }) == screenRSBlackListConfigMap_[screenId].end();
+            bool notInSessionConfigSet = sessionRSBlackListConfigSet_.find(info) == sessionRSBlackListConfigSet_.end();
+            if (notInScreenConfigMap || notInSessionConfigSet) {
                 sessionBlackListInfoMap_[screenId].erase(info);   
+            } else {
+                ++it;
             }
         }
         UpdateVirtualScreenBlackList(screenId);
@@ -10293,15 +10298,20 @@ WMError SceneSessionManager::FlushSessionBlackListInfoMapWhenRemove(ScreenId scr
         rsInterface_.SetVirtualScreenBlackList(screenId, emptyList);
         return WMError::WM_OK;
     }
-    auto sessionBlackListInfoSet = sessionBlackListInfoMap_[screenId];
-    for (const auto& info : sessionBlackListInfoSet) {
+    auto& infoSet = sessionBlackListInfoMap_[screenId];
+    for (auto it = infoSet.begin(); it != infoSet.end(); ) {
+        const auto& info = *it;
         if (info.privacyWindowTag == WMS_DEFAULT) {
+            ++it;
             continue;
         }
-        if (screenRSBlackListConfigMap_[screenId].find({ .privacyWindowTag = info.privacyWindowTag }) ==
-                screenRSBlackListConfigMap_[screenId].end() ||
-            sessionRSBlackListConfigSet_.find(info) == sessionRSBlackListConfigSet_.end()) {
+        bool notInScreenConfigMap = screenRSBlackListConfigMap_[screenId].find(
+            { .privacyWindowTag = info.privacyWindowTag }) == screenRSBlackListConfigMap_[screenId].end();
+        bool notInSessionConfigSet = sessionRSBlackListConfigSet_.find(info) == sessionRSBlackListConfigSet_.end();
+        if (notInScreenConfigMap || notInSessionConfigSet) {
             sessionBlackListInfoMap_[screenId].erase(info);   
+        } else {
+            ++it;
         }
     }
     UpdateVirtualScreenBlackList(screenId);
