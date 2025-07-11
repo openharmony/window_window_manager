@@ -2982,7 +2982,7 @@ WMError SceneSessionManagerProxy::RemoveSkipSelfWhenShowOnVirtualScreenList(cons
 }
 
 WMError SceneSessionManagerProxy::SetScreenPrivacyWindowTagSwitch(
-    uint64_t screenId, std::vector<std::string> privacyWindowTags, bool enable)
+    uint64_t screenId, const std::vector<std::string>& privacyWindowTags, bool enable)
 {
     MessageParcel data;
     MessageParcel reply;

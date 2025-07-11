@@ -2011,6 +2011,9 @@ HWTEST_F(SceneSessionManagerTest2, RemoveSessionFromBlackList, TestSize.Level1)
     sceneSession->persistentId_ = 9996;
     ret = ssm_->RemoveSessionFromBlackList(sceneSession);
     EXPECT_EQ(WMError::WM_OK, ret);
+
+    ret = ssm_->RemoveSessionFromBlackList(nullptr);
+    EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
 }
 
 /**
