@@ -1875,7 +1875,7 @@ HWTEST_F(sceneSessionManagerProxyTest, AddSessionBlackList02, TestSize.Level1)
 
     // ReadUint64 failed
     MockMessageParcel::SetWriteUint64ErrorFlag(true);
-    ret = proxy->AddSessionBlackList(bundleNames, privacyWindowTags);
+    auto ret = proxy->AddSessionBlackList(bundleNames, privacyWindowTags);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
     MockMessageParcel::SetWriteUint64ErrorFlag(false);
     MockMessageParcel::ClearAllErrorFlag();
@@ -1940,7 +1940,7 @@ HWTEST_F(sceneSessionManagerProxyTest, RemoveSessionBlackList02, TestSize.Level1
 
     // ReadUint64 failed
     MockMessageParcel::SetWriteUint64ErrorFlag(true);
-    ret = proxy->RemoveSessionBlackList(bundleNames, privacyWindowTags);
+    auto ret = proxy->RemoveSessionBlackList(bundleNames, privacyWindowTags);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
     MockMessageParcel::SetWriteUint64ErrorFlag(false);
     MockMessageParcel::ClearAllErrorFlag();
