@@ -362,7 +362,7 @@ WmErrorCode AniWindowRegisterManager::RegisterListener(sptr<Window> window, std:
         TLOGE(WmsLogTag::DEFAULT, "[ANI]Register type %{public}s failed", type.c_str());
         return ret;
     }
-    jsCbMap_[type][callback] = windowManagerListener;
+    jsCbMap_[type][cbRef] = windowManagerListener;
     TLOGI(WmsLogTag::DEFAULT, "[ANI]Register type %{public}s success! callback map size: %{public}zu",
         type.c_str(), jsCbMap_[type].size());
     return WmErrorCode::WM_OK;

@@ -3107,6 +3107,7 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
         sceneSession->SetClientIdentityToken(sceneSessionInfo->identityToken);
         sceneSession->ResetSessionConnectState();
         sceneSession->ResetIsActive();
+        sceneSession->UpdatePrivacyModeControlInfo();
     }
     return WSError::WS_OK;
 }
@@ -3253,6 +3254,7 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
         TLOGNI(WmsLogTag::WMS_LIFE, "Notify scene session id: %{public}d paused", sceneSession->GetPersistentId());
         sceneSession->UpdateLifecyclePausedInner();
         sceneSession->SetActive(false);
+        sceneSession->UpdatePrivacyModeControlInfo();
 
         if (isToDesktop) {
             sceneSession->EditSessionInfo().callerToken_ = nullptr;
@@ -9896,6 +9898,7 @@ WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>&
                 abilitySessionInfo->identityToken.c_str(), sessionInfo.bundleName_.c_str());
             sceneSession->SetClientIdentityToken(abilitySessionInfo->identityToken);
             sceneSession->ResetSessionConnectState();
+            sceneSession->UpdatePrivacyModeControlInfo();
         }
         return WSError::WS_OK;
     };
