@@ -25,6 +25,7 @@
 #include "js_display_listener.h"
 #include "js_display.h"
 #include "js_display_manager.h"
+#include "scene_board_judgement.h"
 #include "screen.h"
 #include "screen_manager.h"
 #include "surface_utils.h"
@@ -942,6 +943,9 @@ napi_value CreateJsCreaseRectsArrayObject(napi_env env, std::vector<DMRect> crea
 napi_value OnCreateVirtualScreen(napi_env env, napi_callback_info info)
 {
     WLOGI("JsDisplayManager::OnCreateVirtualScreen is called");
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT, "Device not support.");
+    }
     DmErrorCode errCode = DmErrorCode::DM_OK;
     VirtualScreenOption option;
     size_t argc = 4;
