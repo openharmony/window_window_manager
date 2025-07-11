@@ -4295,7 +4295,6 @@ bool ScreenSessionManager::SetRotation(ScreenId screenId, Rotation rotationAfter
         return false;
     }
     TLOGI(WmsLogTag::DMS, "set orientation. rotation %{public}u", rotationAfter);
-    SetDisplayBoundary(screenSession);
     screenSession->SetRotation(rotationAfter);
     screenSession->PropertyChange(screenSession->GetScreenProperty(), ScreenPropertyChangeReason::ROTATION);
     NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::UPDATE_ROTATION);
@@ -6793,14 +6792,12 @@ sptr<CutoutInfo> ScreenSessionManager::GetCutoutInfo(DisplayId displayId)
     return screenCutoutController_ ? screenCutoutController_->GetScreenCutoutInfo(displayId) : nullptr;
 }
 
-sptr<CutoutInfo> ScreenSessionManager::GetCutoutInfoWithRotation(DisplayId displayId, int32_t rotation)
+sptr<CutoutInfo> ScreenSessionManager::GetCutoutInfo(DisplayId displayId, int32_t width,
+                                                    int32_t height, Rotation rotation)
 {
-    if (!SessionPermission::IsSystemCalling()) {
-        TLOGE(WmsLogTag::DMS, "permission denied!");
-        return nullptr;
-    }
-    DmsXcollie dmsXcollie("DMS:GetCutoutInfoWithRotation", XCOLLIE_TIMEOUT_10S);
-    return screenCutoutController_ ? screenCutoutController_->GetCutoutInfoWithRotation(displayId, rotation) : nullptr;
+    DmsXcollie dmsXcollie("DMS:GetCutoutInfo", XCOLLIE_TIMEOUT_10S);
+    return screenCutoutController_ ? screenCutoutController_->GetScreenCutoutInfo(displayId, width, height, rotation) :
+            nullptr;
 }
 
 DMError ScreenSessionManager::HasImmersiveWindow(ScreenId screenId, bool& immersive)
@@ -6816,19 +6813,6 @@ DMError ScreenSessionManager::HasImmersiveWindow(ScreenId screenId, bool& immers
     }
     clientProxy->OnImmersiveStateChanged(screenId, immersive);
     return DMError::DM_OK;
-}
-
-void ScreenSessionManager::SetDisplayBoundary(const sptr<ScreenSession> screenSession)
-{
-    if (screenSession && screenCutoutController_) {
-        RectF rect =
-            screenCutoutController_->CalculateCurvedCompression(screenSession->GetScreenProperty());
-        if (!rect.IsEmpty()) {
-            screenSession->SetDisplayBoundary(rect, screenCutoutController_->GetOffsetY());
-        }
-    } else {
-        TLOGW(WmsLogTag::DMS, "screenSession or screenCutoutController_ is null");
-    }
 }
 
 std::string ScreenSessionManager::TransferTypeToString(ScreenType type) const

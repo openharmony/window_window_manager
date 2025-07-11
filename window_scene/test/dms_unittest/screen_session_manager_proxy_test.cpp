@@ -1295,6 +1295,34 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetCutoutInfo, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetCutoutInfo2
+ * @tc.desc: GetCutoutInfo2
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, GetCutoutInfo2, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<CutoutInfo> expectation = nullptr;
+    DisplayId displayId = 0;
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint64ErrorFlag(true);
+    auto res = screenSessionManagerProxy->GetCutoutInfo(displayId, 0, 0, Rotation::ROTATION_0);
+    EXPECT_EQ(res, expectation);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    res = screenSessionManagerProxy->GetCutoutInfo(displayId, 0, 0, Rotation::ROTATION_0);
+    EXPECT_EQ(res, expectation);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    res = screenSessionManagerProxy->GetCutoutInfo(displayId, 0, 0, Rotation::ROTATION_0);
+    EXPECT_EQ(res, expectation);
+}
+
+/**
  * @tc.name: HasImmersiveWindow
  * @tc.desc: HasImmersiveWindow
  * @tc.type: FUNC

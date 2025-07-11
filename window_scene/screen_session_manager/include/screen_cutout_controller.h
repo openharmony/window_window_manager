@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,47 +22,24 @@
 #include "session/screen/include/screen_property.h"
 
 namespace OHOS::Rosen {
-enum class DeviceRotationValue: int32_t {
-    INVALID = -1,
-    ROTATION_PORTRAIT = 0,
-    ROTATION_LANDSCAPE,
-    ROTATION_PORTRAIT_INVERTED,
-    ROTATION_LANDSCAPE_INVERTED,
-};
+
 class ScreenCutoutController : public RefBase {
 public:
-    ScreenCutoutController() {};
-    sptr<CutoutInfo> GetScreenCutoutInfo(DisplayId displayId);
-    sptr<CutoutInfo> GetCutoutInfoWithRotation(DisplayId displayId, int32_t rotation);
-    RectF CalculateCurvedCompression(const ScreenProperty& screenProperty);
-    uint32_t GetOffsetY();
+    ScreenCutoutController() = default;
+    sptr<CutoutInfo> GetScreenCutoutInfo(DisplayId displayId) const;
+    sptr<CutoutInfo> GetScreenCutoutInfo(DisplayId displayId, uint32_t width,
+                                         uint32_t height, Rotation rotation) const;
+    void GetCutoutArea(DisplayId displayId, uint32_t width, uint32_t height, Rotation rotation,
+                       std::vector<DMRect>& cutoutArea) const;
+    void GetWaterfallArea(uint32_t width, uint32_t height, Rotation rotation,
+                          WaterfallDisplayAreaRects& waterfallArea) const;
 
 private:
-    void CalcWaterfallRects(DisplayId displayId, int32_t transRotation = -1);
-    void ProcessRotationMapping();
-    void CalcWaterfallRectsByRotation(Rotation rotation, uint32_t displayHeight, uint32_t displayWidth,
-        std::vector<uint32_t> realNumVec);
-    void CheckBoundaryRects(std::vector<DMRect>& boundaryRects, ScreenProperty screenProperty);
-    void ConvertBoundaryRectsByRotation(DisplayId displayId, std::vector<DMRect>& boundaryRects,
-        int32_t transRotation = -1);
-    void ConvertBoundaryRectsByRotationInner(Rotation currentRotation, uint32_t screenWidth, uint32_t screenHeight,
-        const std::vector<DMRect>& displayBoundaryRects, std::vector<DMRect>& finalVector);
-    void CurrentRotation90(const std::vector<DMRect>& displayBoundaryRects, std::vector<DMRect>& finalVector,
-        uint32_t displayWidth);
-    void CurrentRotation180(const std::vector<DMRect>& displayBoundaryRects, std::vector<DMRect>& finalVector,
-        uint32_t displayWidth, uint32_t displayHeight);
-    void CurrentRotation270(const std::vector<DMRect>& displayBoundaryRects, std::vector<DMRect>& finalVector,
-        uint32_t displayHeight);
-    bool IsDisplayRotationHorizontal(Rotation rotation);
-    DMRect CreateWaterfallRect(uint32_t left, uint32_t top, uint32_t width, uint32_t height);
-    Rotation ConvertDeviceToDisplayRotation(DeviceRotationValue deviceRotation);
-    Rotation GetCurrentDisplayRotation(DisplayId displayId);
-    DEFINE_VAR_DEFAULT_FUNC_GET_SET(bool, WaterfallDisplayCompressionStatus, waterfallDisplayCompressionStatus, false);
-
-    static uint32_t defaultDeviceRotation_;
-    static std::map<DeviceRotationValue, Rotation> deviceToDisplayRotationMap_;
-    uint32_t offsetY_ {};
-    WaterfallDisplayAreaRects waterfallDisplayAreaRects_ = {};
+    void CalcWaterfallRects(const std::vector<int>& numberVec, uint32_t displayWidth, uint32_t displayHeight,
+                            Rotation rotation, WaterfallDisplayAreaRects& waterfallArea) const;
+    void CalcCutoutRects(const std::vector<DMRect>& boundaryRects, uint32_t width, uint32_t height,
+                         Rotation rotation, std::vector<DMRect>& cutoutRects) const;
+    void InitRect(uint32_t left, uint32_t top, uint32_t width, uint32_t height, DMRect& rect) const;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCREEN_CUTOUT_CONTROLLER_H
