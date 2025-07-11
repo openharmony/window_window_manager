@@ -941,8 +941,16 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             auto rotation = data.ReadFloat();
             auto phyRotation = data.ReadFloat();
             auto screenPropertyChangeType = static_cast<ScreenPropertyChangeType>(data.ReadUint32());
-            UpdateScreenDirectionInfo(screenId, screenComponentRotation, rotation, phyRotation,
-                screenPropertyChangeType);
+            RRect bounds;
+            if (!RSMarshallingHelper::Unmarshalling(data, bounds)) {
+                TLOGE(WmsLogTag::DMS, "Read bounds failed");
+                break;
+            }
+            ScreenDirectionInfo directionInfo;
+            directionInfo.screenRotation_ = screenComponentRotation;
+            directionInfo.rotation_ = rotation;
+            directionInfo.phyRotation_ = phyRotation;
+            UpdateScreenDirectionInfo(screenId, directionInfo, screenPropertyChangeType, bounds);
             break;
         }
         case DisplayManagerMessage::TRANS_ID_UPDATE_SCREEN_ROTATION_PROPERTY: {

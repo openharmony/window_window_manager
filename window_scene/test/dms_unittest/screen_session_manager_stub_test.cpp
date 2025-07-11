@@ -2889,6 +2889,10 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest135, TestSize.Level1)
     data.WriteUint64(0);
     data.WriteFloat(0);
     data.WriteFloat(0);
+    data.WriteFloat(0);
+    data.WriteUint32(2);
+    RRect bounds;
+    RSMarshallingHelper::Marshalling(data, bounds);
     uint32_t code = static_cast<uint32_t>(
         DisplayManagerMessage::TRANS_ID_UPDATE_SCREEN_DIRECTION_INFO);
     int res = stub_->OnRemoteRequest(code, data, reply, option);
