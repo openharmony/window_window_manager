@@ -5010,11 +5010,11 @@ void SceneSessionManager::HandleUserSwitching(bool isUserActive)
         ScreenSessionManagerClient::GetInstance().SwitchingCurrentUser();
         FlushWindowInfoToMMI(true);
         NotifyAllAccessibilityInfo();
-        rsInterface_.FlushSessionBlackListInfoMapWhenAdd(INVALID_SCREEN_ID, skipSurfaceNodeIds_);
+        rsInterface_.AddVirtualScreenBlackList(INVALID_SCREEN_ID, skipSurfaceNodeIds_);
         UpdatePrivateStateAndNotifyForAllScreens();
     } else { // switch to another user
         SceneInputManager::GetInstance().FlushEmptyInfoToMMI();
-        rsInterface_.FlushSessionBlackListInfoMapWhenRemove(INVALID_SCREEN_ID, skipSurfaceNodeIds_);
+        rsInterface_.RemoveVirtualScreenBlackList(INVALID_SCREEN_ID, skipSurfaceNodeIds_);
         // minimized UI abilities when the user is switching and inactive
         ProcessUIAbilityOnUserSwitch(isUserActive);
     }
@@ -10195,11 +10195,9 @@ WMError SceneSessionManager::AddSessionBlackList(const std::vector<sptr<SceneSes
     for (const auto& sceneSession : sceneSessionList) {
         for (const auto& privacyWindowTag : privacyWindowTags) {
             sessionRSBlackListConfigSet_.insert(
-            sessionRSBlackListConfigSet_.insert(
                 { .windowId = sceneSession->GetPersistentId(), .privacyWindowTag = privacyWindowTag });
         }
     }
-    return FlushSessionBlackListInfoMapWhenAdd();
     return FlushSessionBlackListInfoMapWhenAdd();
 }
 
