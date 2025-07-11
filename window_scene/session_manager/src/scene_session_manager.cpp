@@ -15892,7 +15892,7 @@ WMError SceneSessionManager::GetFbPanelWindowId(uint32_t& windowId)
         auto& session = iter.second;
         if (session && session->GetWindowType() == WindowType::WINDOW_TYPE_FB &&
             session->GetWindowName().find(FB_PANEL_NAME) != std::string::npos) {
-            windowId = session->GetWindowId();
+            windowId = static_cast<uint32_t>(session->GetWindowId());
             return WMError::WM_OK;
         }
     }
