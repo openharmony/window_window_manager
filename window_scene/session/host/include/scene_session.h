@@ -1049,7 +1049,7 @@ private:
     bool CheckIdentityTokenIfMatched(const std::string& identityToken);
     bool CheckPidIfMatched();
     GetStartWindowTypeFunc getStartWindowConfigFunc_;
-    StartWindowType startWindowType_;
+    StartWindowType startWindowType_ = StartWindowType::DEFAULT;
 
     // session lifecycle funcs
     WSError ForegroundTask(const sptr<WindowSessionProperty>& property);
