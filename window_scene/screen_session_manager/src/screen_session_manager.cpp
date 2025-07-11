@@ -1939,10 +1939,12 @@ void ScreenSessionManager::CalculateXYPosition(sptr<ScreenSession> firstScreenSe
     if (firstScreenSession != nullptr &&
         firstScreenSession->GetScreenCombination() == ScreenCombination::SCREEN_MAIN) {
         firstScreenSession->SetXYPosition(0, 0);
+        NotifyDisplayChanged(firstScreenSession->ConvertToDisplayInfo(), DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
         CalculateSecondryXYPosition(firstScreenSession, secondaryScreenSession);
     } else if (secondaryScreenSession != nullptr &&
         secondaryScreenSession->GetScreenCombination() == ScreenCombination::SCREEN_MAIN) {
         secondaryScreenSession->SetXYPosition(0, 0);
+        NotifyDisplayChanged(secondaryScreenSession->ConvertToDisplayInfo(), DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
         CalculateSecondryXYPosition(secondaryScreenSession, firstScreenSession);
     } else {
         TLOGE(WmsLogTag::DMS, "CalculateXYPosition error!");
@@ -1965,6 +1967,7 @@ void ScreenSessionManager::CalculateSecondryXYPosition(sptr<ScreenSession> first
     int32_t secondaryX = -firstStartX + secondaryStartX;
     int32_t secondaryY = -firstStartY + secondaryStartY;
     secondaryScreenSession->SetXYPosition(secondaryX, secondaryY);
+    NotifyDisplayChanged(secondaryScreenSession->ConvertToDisplayInfo(), DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
 }
 
 sptr<ScreenInfo> ScreenSessionManager::GetScreenInfoById(ScreenId screenId)
@@ -9629,11 +9632,15 @@ void ScreenSessionManager::MultiScreenModeChange(ScreenId mainScreenId, ScreenId
             operateMode == SCREEN_EXTEND) {
             MultiScreenManager::GetInstance().MultiScreenReportDataToRss(SCREEN_MIRROR, MULTI_SCREEN_EXIT_STR);
             MultiScreenManager::GetInstance().MultiScreenReportDataToRss(SCREEN_EXTEND, MULTI_SCREEN_ENTER_STR);
+            NotifyDisplayChanged(secondarySession->ConvertToDisplayInfo(),
+                DisplayChangeEvent::SOURCE_MODE_CHANGED);
         } else if ((firstCombination == ScreenCombination::SCREEN_EXTEND ||
             secondaryCombination == ScreenCombination::SCREEN_EXTEND) &&
             operateMode == SCREEN_MIRROR) {
             MultiScreenManager::GetInstance().MultiScreenReportDataToRss(SCREEN_EXTEND, MULTI_SCREEN_EXIT_STR);
             MultiScreenManager::GetInstance().MultiScreenReportDataToRss(SCREEN_MIRROR, MULTI_SCREEN_ENTER_STR);
+            NotifyDisplayChanged(secondarySession->ConvertToDisplayInfo(),
+                DisplayChangeEvent::SOURCE_MODE_CHANGED);
         }
     } else {
         TLOGE(WmsLogTag::DMS, "params error");
