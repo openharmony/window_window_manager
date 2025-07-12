@@ -68,11 +68,11 @@ sptr<DisplayInfo> DisplayManagerAdapter::GetDefaultDisplayInfo()
 bool DisplayManagerAdapter::SetVirtualScreenAsDefault(ScreenId screenId)
 {
     INIT_PROXY_CHECK_RETURN(false);
-    bool res = false;
+    bool isSuccess = false;
     if (displayManagerServiceProxy_) {
-        displayManagerServiceProxy_->SetVirtualScreenAsDefault(screenId, res);
+        displayManagerServiceProxy_->SetVirtualScreenAsDefault(screenId, isSuccess);
     }
-    return res;
+    return isSuccess;
 }
 
 sptr<DisplayInfo> DisplayManagerAdapter::GetDisplayInfoByScreenId(ScreenId screenId)
