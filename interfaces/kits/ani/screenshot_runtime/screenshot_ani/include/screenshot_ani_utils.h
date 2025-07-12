@@ -15,35 +15,32 @@
 #ifndef OHOS_ANI_SCREEN_UTILS_H
 #define OHOS_ANI_SCREEN_UTILS_H
 #include <hitrace_meter.h>
-
+ 
 #include "ani.h"
-#include "screen.h"
+#include "pixel_map.h"
 #include "singleton_container.h"
-
-namespace OHOS {
-namespace Rosen {
-
-class ScreenAniUtils {
+#include "screenshot_ani_manager.h"
+ 
+namespace OHOS::Rosen {
+ 
+class ScreenshotAniUtils {
 public:
 static ani_status GetStdString(ani_env *env, ani_string ani_str, std::string &result);
-
+ 
 static ani_object CreateAniUndefined(ani_env* env);
-
+ 
 static ani_status GetAniString(ani_env* env, const std::string& str, ani_string* result);
-
+ 
 static ani_status CallAniFunctionVoid(ani_env *env, const char* ns,
     const char* fn, const char* signature, ...);
-
-static ani_status ConvertScreen(ani_env *env, sptr<Screen> screen, ani_object screenAni);
-
-static void ConvertScreenMode(ani_env* env, sptr<SupportedScreenModes> mode, ani_object obj);
-
-static ani_status ConvertScreens(ani_env *env, std::vector<sptr<Screen>> screen, ani_object& screensAni);
-
-static ani_object NewNativeObject(ani_env* env, const std::string& objName);
-
-static ani_array_ref NewNativeArray(ani_env* env, const std::string& objName, uint32_t size);
+ 
+static void ConvertScreenshot(ani_env *env, std::shared_ptr<Media::PixelMap> image, ani_object obj);
+ 
+static void GetScreenshotParam(ani_env *env, std::unique_ptr<Param> &param, ani_object options);
+ 
+static void GetScreenshotSize(ani_env *env, std::unique_ptr<Param> &param, ani_object options);
+ 
+static void GetScreenshotRect(ani_env *env, std::unique_ptr<Param> &param, ani_object options);
 };
-}
 }
 #endif

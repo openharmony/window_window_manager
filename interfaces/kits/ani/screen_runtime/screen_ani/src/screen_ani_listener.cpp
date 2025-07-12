@@ -69,9 +69,93 @@ void ScreenAniListener::RemoveCallback(ani_env* env, const std::string& type, an
 }
 void ScreenAniListener::OnConnect(ScreenId id)
 {
+    TLOGI(WmsLogTag::DMS, "[ANI] OnConnect begin");
+    std::lock_guard<std::mutex> lock(mtx_);
+    auto thisListener = weakRef_.promote();
+    if (thisListener == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] this listener is nullptr");
+        return;
+    }
+    TLOGI(WmsLogTag::DMS, "[ANI] OnConnect is called, displayId: %{public}d", static_cast<uint32_t>(id));
+    if (aniCallBack_.empty()) {
+        TLOGE(WmsLogTag::DMS, "[ANI] OnConnect not register!");
+        return;
+    }
+    auto it = aniCallBack_.find(EVENT_CONNECT);
+    if (it == aniCallBack_.end()) {
+        TLOGE(WmsLogTag::DMS, "[ANI] OnConnect not this event, return");
+        return;
+    }
+    std::vector<ani_ref> vec = it->second;
+    TLOGI(WmsLogTag::DMS, "vec_callback size: %{public}d", (int)vec.size());
+    // find callbacks in vector
+    for (auto oneAniCallback : vec) {
+        if (env_ == nullptr) {
+            TLOGI(WmsLogTag::DMS, "OnDestroy: null env_");
+            return;
+        }
+        ani_boolean undefRes;
+        ani_boolean nullRes;
+        env_->Reference_IsUndefined(oneAniCallback, &undefRes);
+        env_->Reference_IsNull(oneAniCallback, &nullRes);
+        // judge is null or undefined
+        if (undefRes == 1) {
+            TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback undefRes, return");
+            return;
+        }
+        if (nullRes == 1) {
+            TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback null, return");
+            return;
+        }
+        
+        ScreenAniUtils::CallAniFunctionVoid(env_, "L@ohos/screen/screen;", "screenEventCallBack",
+            "Lstd/core/Object;D:V", oneAniCallback, static_cast<ani_double>(id));
+    }
 }
 void ScreenAniListener::OnDisconnect(ScreenId id)
 {
+    TLOGI(WmsLogTag::DMS, "[ANI] OnDisconnect begin");
+    std::lock_guard<std::mutex> lock(mtx_);
+    auto thisListener = weakRef_.promote();
+    if (thisListener == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] this listener is nullptr");
+        return;
+    }
+    TLOGI(WmsLogTag::DMS, "[ANI] OnDisconnect is called, displayId: %{public}d", static_cast<uint32_t>(id));
+    if (aniCallBack_.empty()) {
+        TLOGE(WmsLogTag::DMS, "[ANI] OnDisconnect not register!");
+        return;
+    }
+    auto it = aniCallBack_.find(EVENT_DISCONNECT);
+    if (it == aniCallBack_.end()) {
+        TLOGE(WmsLogTag::DMS, "[ANI] OnDisconnect not this event, return");
+        return;
+    }
+    std::vector<ani_ref> vec = it->second;
+    TLOGI(WmsLogTag::DMS, "vec_callback size: %{public}d", (int)vec.size());
+    // find callbacks in vector
+    for (auto oneAniCallback : vec) {
+        if (env_ == nullptr) {
+            TLOGI(WmsLogTag::DMS, "OnDestroy: null env_");
+            return;
+        }
+        ani_boolean undefRes;
+        ani_boolean nullRes;
+        env_->Reference_IsUndefined(oneAniCallback, &undefRes);
+        env_->Reference_IsNull(oneAniCallback, &nullRes);
+        // judge is null or undefined
+        if (undefRes == 1) {
+            TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback undefRes, return");
+            return;
+        }
+        if (nullRes == 1) {
+            TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback null, return");
+            return;
+        }
+        
+        ScreenAniUtils::CallAniFunctionVoid(env_, "L@ohos/screen/screen;", "screenEventCallBack",
+            "Lstd/core/Object;D:V", oneAniCallback, static_cast<ani_double>(id));
+    }
 }
  
 // need to implement
@@ -95,7 +179,7 @@ void ScreenAniListener::OnChange(ScreenId id)
         return;
     }
     std::vector<ani_ref> vec = it->second;
-    TLOGI(WmsLogTag::DMS, "vec_callback size: %{public}u", vec.size());
+    TLOGI(WmsLogTag::DMS, "vec_callback size: %{public}d", (int)vec.size());
     // find callbacks in vector
     for (auto oneAniCallback : vec) {
         if (env_ == nullptr) {
