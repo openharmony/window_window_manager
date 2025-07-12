@@ -26,8 +26,8 @@ class DisplayAni {
 public:
     explicit DisplayAni(const sptr<Display>& display);
 
-    static void getCutoutInfo(ani_env* env, ani_object obj, ani_object cutoutInfoObj);
-    static void getAvailableArea(ani_env* env, ani_object obj, ani_object availableAreaObj);
+    static void GetCutoutInfo(ani_env* env, ani_object obj, ani_object cutoutInfoObj);
+    static void GetAvailableArea(ani_env* env, ani_object obj, ani_object availableAreaObj);
     static ani_boolean HasImmersiveWindow(ani_env* env, ani_object obj);
     static void RegisterCallback(ani_env* env, ani_object obj, ani_string type, ani_ref aniCallback);
     static void UnRegisterCallback(ani_env* env, ani_object obj, ani_string type, ani_ref aniCallback);
@@ -37,7 +37,7 @@ public:
 private:
     DMError UnregisterAllDisplayListenerWithType(std::string type);
     DMError UnregisterDisplayListenerWithType(std::string type, ani_env *env, ani_ref aniCallback);
-    bool IsCallbackRegistered(ani_env* env, ani_string& type, ani_ref callback);
+    bool IsCallbackRegistered(ani_env* env, const std::string& type, ani_ref callback);
     sptr<Display> display_ = nullptr;
     std::map<std::string, std::map<ani_ref, sptr<DisplayAniListener>>> jsCbMap_;
     std::mutex mtx_;

@@ -374,7 +374,7 @@ void DisplayAniListener::OnAvailableAreaChanged(DMRect area)
         auto it = aniCallBack_.find(EVENT_AVAILABLE_AREA_CHANGED);
         for (auto oneAniCallback : it->second) {
             ani_object rectObj = nullptr;
-            DisplayAniUtils::convertRect(area, rectObj, env_);
+            DisplayAniUtils::ConvertRect(area, rectObj, env_);
             auto task = [env = env_, oneAniCallback, rectObj] () {
                 DisplayAniUtils::CallAniFunctionVoid(env, "L@ohos/display/display;", "availableAreaChangedCallback",
                     nullptr, oneAniCallback, rectObj);

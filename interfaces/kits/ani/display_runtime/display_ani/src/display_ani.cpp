@@ -35,10 +35,10 @@ DisplayAni::DisplayAni(const sptr<Display>& display) : display_(display)
 {
 }
 
-void DisplayAni::getCutoutInfo(ani_env* env, ani_object obj, ani_object cutoutInfoObj)
+void DisplayAni::GetCutoutInfo(ani_env* env, ani_object obj, ani_object cutoutInfoObj)
 {
     auto display = SingletonContainer::Get<DisplayManager>().GetDefaultDisplay();
-    TLOGI(WmsLogTag::DMS, "[ANI] getCutoutInfo begin");
+    TLOGI(WmsLogTag::DMS, "[ANI] GetCutoutInfo begin");
     sptr<CutoutInfo> cutoutInfo = display->GetCutoutInfo();
     if (cutoutInfo == nullptr) {
         AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_SCREEN, "");
@@ -61,16 +61,16 @@ void DisplayAni::getCutoutInfo(ani_env* env, ani_object obj, ani_object cutoutIn
             TLOGE(WmsLogTag::DMS, "[ANI] get ani_array index %{public}u fail", (ani_int)i);
         }
         TLOGI(WmsLogTag::DMS, "current i: %{public}d", i);
-        DisplayAniUtils::convertRect(rects[i], static_cast<ani_object>(currentCutoutInfo), env);
+        DisplayAniUtils::ConvertRect(rects[i], static_cast<ani_object>(currentCutoutInfo), env);
     }
     // waterfall area
     ani_ref waterfallObj = nullptr;
     env->Object_GetFieldByName_Ref(cutoutInfoObj, "<property>waterfallDisplayAreaRects", &waterfallObj);
     auto waterfallDisplayAreaRects = cutoutInfo->GetWaterfallDisplayAreaRects();
-    DisplayAniUtils::convertWaterArea(waterfallDisplayAreaRects, static_cast<ani_object>(waterfallObj), env);
+    DisplayAniUtils::ConvertWaterArea(waterfallDisplayAreaRects, static_cast<ani_object>(waterfallObj), env);
 }
 
-void DisplayAni::getAvailableArea(ani_env* env, ani_object obj, ani_object availableAreaObj)
+void DisplayAni::GetAvailableArea(ani_env* env, ani_object obj, ani_object availableAreaObj)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] begin");
     ani_double id;
@@ -88,7 +88,7 @@ void DisplayAni::getAvailableArea(ani_env* env, ani_object obj, ani_object avail
             "JsDisplay::GetAvailableArea failed.");
         return;
     }
-    DisplayAniUtils::convertRect(area, availableAreaObj, env);
+    DisplayAniUtils::ConvertRect(area, availableAreaObj, env);
 }
 
 ani_boolean DisplayAni::HasImmersiveWindow(ani_env* env, ani_object obj)
@@ -111,7 +111,7 @@ ani_boolean DisplayAni::HasImmersiveWindow(ani_env* env, ani_object obj)
     return immersive;
 }
 
-bool DisplayAni::IsCallbackRegistered(ani_env* env, ani_string& type, ani_ref callback)
+bool DisplayAni::IsCallbackRegistered(ani_env* env, const std::string& type, ani_ref callback)
 {
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
         TLOGI(WmsLogTag::DMS, "method %{public}s not registered.", type.c_str());
@@ -119,14 +119,13 @@ bool DisplayAni::IsCallbackRegistered(ani_env* env, ani_string& type, ani_ref ca
     }
     for (const auto& iter : jsCbMap_[type]) {
         ani_boolean isEquals = false;
-        env->Reference_StrictEquals(callback, iter.first, $isEquals);
+        env->Reference_StrictEquals(callback, iter.first, &isEquals);
         if (isEquals) {
             TLOGE(WmsLogTag::DMS, "callback is already registered!");
             return true;
         }
     }
     return false;
-
 }
 
 void DisplayAni::RegisterCallback(ani_env* env, ani_object obj, ani_string type, ani_ref callback)
@@ -156,7 +155,7 @@ void DisplayAni::OnRegisterCallback(ani_env* env, ani_object obj, ani_string typ
         AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, errMsg);
         return;
     }
-    if (IsCallbackRegistered(env, type, callback)) {
+    if (IsCallbackRegistered(env, typeString, callback)) {
         TLOGI(WmsLogTag::DMS, "Callback has already been registered!");
         return;
     }
@@ -211,10 +210,10 @@ void DisplayAni::OnUnRegisterCallback(ani_env* env, ani_object obj, ani_string t
     env->Reference_IsUndefined(callback, &callbackNull);
     DmErrorCode ret;
     if (callbackNull) {
-        TLOGI(WmsLogTag::DMS, "[ANI] onUnRegisterCallback for all");
+        TLOGI(WmsLogTag::DMS, "[ANI] OnUnRegisterCallback for all");
         ret = DM_JS_TO_ERROR_CODE_MAP.at(UnregisterAllDisplayListenerWithType(typeString));
     } else {
-        TLOGI(WmsLogTag::DMS, "[ANI] onUnRegisterCallback with type");
+        TLOGI(WmsLogTag::DMS, "[ANI] OnUnRegisterCallback with type");
         ret = DM_JS_TO_ERROR_CODE_MAP.at(UnregisterDisplayListenerWithType(typeString, env, callback));
     }
 
@@ -260,15 +259,15 @@ DMError DisplayAni::UnregisterDisplayListenerWithType(std::string type, ani_env*
     }
     DMError ret = DMError::DM_OK;
     for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
-        bool isEquals = it->second->IsAniCallBackExist(env, type, callback);
+        ani_boolean isEquals = 0;
+        env->Reference_StrictEquals(callback, it->first, &isEquals);
         if (isEquals) {
-            TLOGI(WmsLogTag::DMS, "[ANI] isEquals check begin");
             it->second->RemoveCallback(env, type, callback);
             if (type == EVENT_AVAILABLE_AREA_CHANGED) {
                 TLOGI(WmsLogTag::DMS, "[ANI] start to unregis display event listener! event = %{public}s",
                     type.c_str());
                 auto displayId = display_->GetId();
-                sptr<DisplayManager::IDisplayListener> thisListener(it->second);
+                sptr<DisplayManager::IAvailableAreaListener> thisListener(it->second);
                 ret = SingletonContainer::Get<DisplayManager>().UnregisterAvailableAreaListener(thisListener,
                     displayId);
             } else {
@@ -312,26 +311,26 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         TLOGE(WmsLogTag::DMS, "[ANI] null env %{public}u", ret);
         return ANI_NOT_FOUND;
     }
-    DisplayManagerAni::initDisplayManagerAni(nsp, env);
+    DisplayManagerAni::InitDisplayManagerAni(nsp, env);
     std::array funcs = {
-        ani_native_function {"isFoldable", ":Z", reinterpret_cast<void *>(DisplayManagerAni::isFoldableAni)},
+        ani_native_function {"isFoldable", ":Z", reinterpret_cast<void *>(DisplayManagerAni::IsFoldableAni)},
         ani_native_function {"getFoldDisplayModeNative", ":I",
-            reinterpret_cast<void *>(DisplayManagerAni::getFoldDisplayModeAni)},
-        ani_native_function {"getFoldStatusNative", ":I", reinterpret_cast<void *>(DisplayManagerAni::getFoldStatus)},
+            reinterpret_cast<void *>(DisplayManagerAni::GetFoldDisplayModeAni)},
+        ani_native_function {"getFoldStatusNative", ":I", reinterpret_cast<void *>(DisplayManagerAni::GetFoldStatus)},
         ani_native_function {"getCurrentFoldCreaseRegionNative", "Lstd/core/Object;J:V",
-            reinterpret_cast<void *>(DisplayManagerAni::getCurrentFoldCreaseRegion)},
+            reinterpret_cast<void *>(DisplayManagerAni::GetCurrentFoldCreaseRegion)},
         ani_native_function {"getDisplayByIdSyncNative", "Lstd/core/Object;D:V",
-            reinterpret_cast<void *>(DisplayManagerAni::getDisplayByIdSyncAni)},
+            reinterpret_cast<void *>(DisplayManagerAni::GetDisplayByIdSyncAni)},
         ani_native_function {"getDefaultDisplaySyncNative", "Lstd/core/Object;:V",
-            reinterpret_cast<void *>(DisplayManagerAni::getDefaultDisplaySyncAni)},
+            reinterpret_cast<void *>(DisplayManagerAni::GetDefaultDisplaySyncAni)},
         ani_native_function {"getAllDisplaysSyncNative", "Lescompat/Array;:V",
-            reinterpret_cast<void *>(DisplayManagerAni::getAllDisplaysAni)},
+            reinterpret_cast<void *>(DisplayManagerAni::GetAllDisplaysAni)},
         ani_native_function {"syncOn", nullptr,
-            reinterpret_cast<void *>(DisplayManagerAni::registerCallback)},
+            reinterpret_cast<void *>(DisplayManagerAni::RegisterCallback)},
         ani_native_function {"syncOff", nullptr,
-            reinterpret_cast<void *>(DisplayManagerAni::unRegisterCallback)},
+            reinterpret_cast<void *>(DisplayManagerAni::UnRegisterCallback)},
         ani_native_function {"hasPrivateWindow", nullptr,
-            reinterpret_cast<void *>(DisplayManagerAni::hasPrivateWindow)},
+            reinterpret_cast<void *>(DisplayManagerAni::HasPrivateWindow)},
         ani_native_function {"getAllDisplayPhysicalResolutionNative", nullptr,
             reinterpret_cast<void *>(DisplayManagerAni::GetAllDisplayPhysicalResolution)},
         ani_native_function {"isCaptured", nullptr, reinterpret_cast<void *>(DisplayManagerAni::IsCaptured)},
@@ -348,9 +347,9 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     }
     std::array methods = {
         ani_native_function {"getCutoutInfoInternal", "L@ohos/display/display/CutoutInfo;:V",
-            reinterpret_cast<void *>(DisplayAni::getCutoutInfo)},
+            reinterpret_cast<void *>(DisplayAni::GetCutoutInfo)},
         ani_native_function {"getAvailableAreaInternal", "L@ohos/display/display/Rect;:V",
-            reinterpret_cast<void *>(DisplayAni::getAvailableArea)},
+            reinterpret_cast<void *>(DisplayAni::GetAvailableArea)},
         ani_native_function {"hasImmersiveWindowInternal", ":Z",
             reinterpret_cast<void *>(DisplayAni::HasImmersiveWindow)},
         ani_native_function {"syncOn", nullptr,

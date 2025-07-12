@@ -34,31 +34,31 @@ ScreenManagerAni::ScreenManagerAni()
 {
 }
 
-void ScreenManagerAni::registerCallback(ani_env* env, ani_string type, ani_ref callback, ani_long nativeObj)
+void ScreenManagerAni::RegisterCallback(ani_env* env, ani_string type, ani_ref callback, ani_long nativeObj)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] start to register screen callback: %{public}ld", (long)nativeObj);
     ScreenManagerAni* screenManagerAni = reinterpret_cast<ScreenManagerAni*>(nativeObj);
     if (screenManagerAni != nullptr) {
-        screenManagerAni->onRegisterCallback(env, type, callback);
+        screenManagerAni->OnRegisterCallback(env, type, callback);
     } else {
         TLOGE(WmsLogTag::DMS, "[ANI] screenManagerAni null ptr");
     }
 }
 
-void ScreenManagerAni::unRegisterCallback(ani_env* env, ani_string type, ani_long nativeObj, ani_ref callback)
+void ScreenManagerAni::UnRegisterCallback(ani_env* env, ani_string type, ani_long nativeObj, ani_ref callback)
 {
-    TLOGI(WmsLogTag::DMS, "[ANI] unRegisterCallback begin");
+    TLOGI(WmsLogTag::DMS, "[ANI] UnRegisterCallback begin");
     ScreenManagerAni* screenManagerAni = reinterpret_cast<ScreenManagerAni*>(nativeObj);
     if (screenManagerAni != nullptr) {
-        screenManagerAni->onUnRegisterCallback(env, type, callback);
+        screenManagerAni->OnUnRegisterCallback(env, type, callback);
     } else {
         TLOGI(WmsLogTag::DMS, "[ANI] null ptr");
     }
 }
 
-void ScreenManagerAni::onRegisterCallback(ani_env* env, ani_string type, ani_ref callback)
+void ScreenManagerAni::OnRegisterCallback(ani_env* env, ani_string type, ani_ref callback)
 {
-    TLOGI(WmsLogTag::DMS, "[ANI] onRegisterCallback begin");
+    TLOGI(WmsLogTag::DMS, "[ANI] OnRegisterCallback begin");
     std::lock_guard<std::mutex> lock(mtx_);
     std::string typeString;
     ScreenAniUtils::GetStdString(env, type, typeString);
@@ -85,7 +85,7 @@ void ScreenManagerAni::onRegisterCallback(ani_env* env, ani_string type, ani_ref
         return;
     }
     screenAniListener->AddCallback(typeString, cbRef);
-    ret = processRegisterCallback(env, typeString, screenAniListener);
+    ret = ProcessRegisterCallback(env, typeString, screenAniListener);
     if (ret != DmErrorCode::DM_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] register screen listener with type, errcode: %{public}d", ret);
         std::string errMsg = "Failed to register screen listener with type";
@@ -96,21 +96,21 @@ void ScreenManagerAni::onRegisterCallback(ani_env* env, ani_string type, ani_ref
     jsCbMap_[typeString][callback] = screenAniListener;
 }
 
-DmErrorCode ScreenManagerAni::processRegisterCallback(ani_env* env, std::string& typeStr,
+DmErrorCode ScreenManagerAni::ProcessRegisterCallback(ani_env* env, std::string& typeStr,
     sptr<ScreenAniListener> screenAniListener)
 {
     DmErrorCode ret = DmErrorCode::DM_ERROR_INVALID_PARAM;
     if (typeStr == EVENT_CHANGE || typeStr == EVENT_CONNECT || typeStr == EVENT_DISCONNECT) {
-        TLOGI(WmsLogTag::DMS, "processRegisterCallback %{public}s", typeStr.c_str());
+        TLOGI(WmsLogTag::DMS, "ProcessRegisterCallback %{public}s", typeStr.c_str());
         ret = DM_JS_TO_ERROR_CODE_MAP.at(
             SingletonContainer::Get<ScreenManager>().RegisterScreenListener(screenAniListener));
     }
     return ret;
 }
 
-void ScreenManagerAni::onUnRegisterCallback(ani_env* env, ani_string type, ani_ref callback)
+void ScreenManagerAni::OnUnRegisterCallback(ani_env* env, ani_string type, ani_ref callback)
 {
-    TLOGI(WmsLogTag::DMS, "[ANI] onUnRegisterCallback begin");
+    TLOGI(WmsLogTag::DMS, "[ANI] OnUnRegisterCallback begin");
     std::string typeString;
     ScreenAniUtils::GetStdString(env, type, typeString);
     std::lock_guard<std::mutex> lock(mtx_);
@@ -118,10 +118,10 @@ void ScreenManagerAni::onUnRegisterCallback(ani_env* env, ani_string type, ani_r
     env->Reference_IsUndefined(callback, &callbackNull);
     DmErrorCode ret;
     if (callbackNull) {
-        TLOGI(WmsLogTag::DMS, "[ANI] onUnRegisterCallback for all");
+        TLOGI(WmsLogTag::DMS, "[ANI] OnUnRegisterCallback for all");
         ret = DM_JS_TO_ERROR_CODE_MAP.at(UnRegisterAllScreenListenerWithType(typeString));
     } else {
-        TLOGI(WmsLogTag::DMS, "[ANI] onUnRegisterCallback with type");
+        TLOGI(WmsLogTag::DMS, "[ANI] OnUnRegisterCallback with type");
         ret = DM_JS_TO_ERROR_CODE_MAP.at(UnRegisterScreenListenerWithType(typeString, env, callback));
     }
 
@@ -179,7 +179,7 @@ DMError ScreenManagerAni::UnRegisterAllScreenListenerWithType(std::string type)
     return ret;
 }
 
-ani_double ScreenManagerAni::makeMirror(ani_env* env, ani_double mainScreen, ani_object mirrorScreen)
+ani_double ScreenManagerAni::MakeMirror(ani_env* env, ani_double mainScreen, ani_object mirrorScreen)
 {
     ani_double length = 0;
     std::vector<ScreenId> screenIds;
@@ -204,7 +204,7 @@ ani_double ScreenManagerAni::makeMirror(ani_env* env, ani_double mainScreen, ani
     return static_cast<ani_double>(screenGroupId);
 }
 
-ani_status ScreenManagerAni::initScreenManagerAni(ani_namespace screenNameSpace, ani_env* env)
+ani_status ScreenManagerAni::InitScreenManagerAni(ani_namespace screenNameSpace, ani_env* env)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     ani_function setObjFunc = nullptr;
@@ -222,10 +222,10 @@ ani_status ScreenManagerAni::initScreenManagerAni(ani_namespace screenNameSpace,
     return ret;
 }
 
-void ScreenManagerAni::getAllScreens(ani_env* env, ani_object screensAni)
+void ScreenManagerAni::GetAllScreens(ani_env* env, ani_object screensAni)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsScreenManager::OnGetAllScreens");
-    TLOGI(WmsLogTag::DMS, "[ANI] getAllScreens start");
+    TLOGI(WmsLogTag::DMS, "[ANI] GetAllScreens start");
     std::vector<sptr<Screen>> screens;
     auto res = DM_JS_TO_ERROR_CODE_MAP.at(SingletonContainer::Get<ScreenManager>().GetAllScreens(screens));
     if (res != DmErrorCode::DM_OK) {
@@ -260,16 +260,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         TLOGE(WmsLogTag::DMS, "[ANI] null env %{public}u", ret);
         return ANI_NOT_FOUND;
     }
-    ScreenManagerAni::initScreenManagerAni(nsp, env);
+    ScreenManagerAni::InitScreenManagerAni(nsp, env);
     std::array funcs = {
         ani_native_function {"syncOn", nullptr,
-            reinterpret_cast<void *>(ScreenManagerAni::registerCallback)},
+            reinterpret_cast<void *>(ScreenManagerAni::RegisterCallback)},
         ani_native_function {"syncOff", nullptr,
-            reinterpret_cast<void *>(ScreenManagerAni::unRegisterCallback)},
+            reinterpret_cast<void *>(ScreenManagerAni::UnRegisterCallback)},
         ani_native_function {"makeMirrorInternal", nullptr,
-            reinterpret_cast<void *>(ScreenManagerAni::makeMirror)},
+            reinterpret_cast<void *>(ScreenManagerAni::MakeMirror)},
         ani_native_function {"getAllScreensInternal", nullptr,
-            reinterpret_cast<void *>(ScreenManagerAni::getAllScreens)}
+            reinterpret_cast<void *>(ScreenManagerAni::GetAllScreens)}
     };
     if ((ret = env->Namespace_BindNativeFunctions(nsp, funcs.data(), funcs.size()))) {
         TLOGE(WmsLogTag::DMS, "[ANI] bind namespace fail %{public}u", ret);

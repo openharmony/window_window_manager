@@ -29,18 +29,18 @@ namespace Rosen {
 class ScreenManagerAni {
 public:
     explicit ScreenManagerAni();
-    static void registerCallback(ani_env* env, ani_string type,
+    static void RegisterCallback(ani_env* env, ani_string type,
         ani_ref callback, ani_long nativeObj);
-    static void unRegisterCallback(ani_env* env, ani_string type,
+    static void UnRegisterCallback(ani_env* env, ani_string type,
         ani_long nativeObj, ani_ref callback);
-    static ani_status initScreenManagerAni(ani_namespace screenNameSpace, ani_env* env);
-    DmErrorCode processRegisterCallback(ani_env* env, std::string& typeStr,
+    static ani_status InitScreenManagerAni(ani_namespace screenNameSpace, ani_env* env);
+    DmErrorCode ProcessRegisterCallback(ani_env* env, std::string& typeStr,
         sptr<ScreenAniListener> screenAniListener);
-    static ani_double makeMirror(ani_env* env, ani_double mainScreen, ani_object mirrorScreen);
-    static void getAllScreens(ani_env* env, ani_object screensAni);
+    static ani_double MakeMirror(ani_env* env, ani_double mainScreen, ani_object mirrorScreen);
+    static void GetAllScreens(ani_env* env, ani_object screensAni);
 private:
-    void onRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
-    void onUnRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
+    void OnRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
+    void OnUnRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
     DMError UnRegisterScreenListenerWithType(std::string type, ani_env* env, ani_ref callback);
     DMError UnRegisterAllScreenListenerWithType(std::string type);
     std::mutex mtx_;
