@@ -568,6 +568,32 @@ HWTEST_F(SceneSessionTest6, IsInCompatScaleStatus, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsInCompatScaleMode
+ * @tc.desc: IsInCompatScaleMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, IsInCompatScaleMode, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsInCompatScaleMode";
+    info.bundleName_ = "IsInCompatScaleMode";
+    info.screenId_ = 0;
+    sptr<SceneSession> session = sptr<MainSession>::MakeSptr(info, nullptr);
+    EXPECT_FALSE(session->IsInCompatScaleMode());
+
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToProportionalScale(true);
+    session->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    EXPECT_TRUE(session->IsInCompatScaleMode());
+
+    compatibleModeProperty->SetIsAdaptToProportionalScale(false);
+    compatibleModeProperty->SetIsAdaptToSimulationScale(true);
+    EXPECT_TRUE(session->IsInCompatScaleMode());
+    compatibleModeProperty->SetIsAdaptToProportionalScale(true);
+    EXPECT_TRUE(session->IsInCompatScaleMode());
+}
+
+/**
  * @tc.name: GetSystemAvoidArea
  * @tc.desc: GetSystemAvoidArea function
  * @tc.type: FUNC
