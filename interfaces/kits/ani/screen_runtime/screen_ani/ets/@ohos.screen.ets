@@ -182,7 +182,7 @@ class ScreenImpl implements Screen {
 
     setDensityDpi(densityDpi: number, callback: AsyncCallback<void>): void {
         taskpool.execute((): void => {
-            this.setDensityDpiInternal(number);
+            this.setDensityDpiInternal(densityDpi);
         }).then(() => {
             callback(new BusinessError(), undefined);
         }).catch((err: NullishType) => {
@@ -193,7 +193,7 @@ class ScreenImpl implements Screen {
     setDensityDpi(densityDpi: number): Promise<void> {
         return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
             taskpool.execute((): void => {
-                this.setDensityDpiInternal(number);
+                this.setDensityDpiInternal(densityDpi);
             }).then(() => {
                 resolve(undefined);
             }).catch((err: NullishType) => {
