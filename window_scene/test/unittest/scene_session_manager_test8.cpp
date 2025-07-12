@@ -1296,7 +1296,7 @@ HWTEST_F(SceneSessionManagerTest8, FlushSessionBlackListInfoMapWhenAdd01, TestSi
 
     SceneSessionManager::ScreenBlackListInfoSet info;
     info.insert({ .privacyWindowTag = "test" });
-    ssm_->screenRSBlackListConfigMap_[0].insert(info);
+    ssm_->screenRSBlackListConfigMap_[0].insert(*info.begin());
     ssm_->sessionRSBlackListConfigSet_.insert({ .windowId = 0, .privacyWindowTag = "test" });
 
     auto ret = ssm_->FlushSessionBlackListInfoMapWhenAdd();
@@ -1321,7 +1321,7 @@ HWTEST_F(SceneSessionManagerTest8, FlushSessionBlackListInfoMapWhenAdd02, TestSi
 
     SceneSessionManager::ScreenBlackListInfoSet info;
     info.insert({ .privacyWindowTag = "test" });
-    ssm_->screenRSBlackListConfigMap_[0].insert(info);
+    ssm_->screenRSBlackListConfigMap_[0].insert(*info.begin());
     ssm_->sessionRSBlackListConfigSet_.insert({ .windowId = 0, .privacyWindowTag = "test" });
 
     auto ret = ssm_->FlushSessionBlackListInfoMapWhenAdd();
@@ -1346,7 +1346,7 @@ HWTEST_F(SceneSessionManagerTest8, FlushSessionBlackListInfoMapWhenRemove01, Tes
 
     SceneSessionManager::ScreenBlackListInfoSet info;
     info.insert({ .privacyWindowTag = "test" });
-    ssm_->screenRSBlackListConfigMap_[0].insert(info);
+    ssm_->screenRSBlackListConfigMap_[0].insert(*info.begin());
     ssm_->sessionRSBlackListConfigSet_.insert({ .windowId = 0, .privacyWindowTag = "test" });
     ssm_->sessionBlackListInfoMap_[0].insert({ .windowId = 0, .privacyWindowTag = "test1" });
     ssm_->sessionBlackListInfoMap_[0].insert({ .windowId = 1, .privacyWindowTag = "WMS_DEFAULT" });
@@ -1373,7 +1373,7 @@ HWTEST_F(SceneSessionManagerTest8, FlushSessionBlackListInfoMapWhenRemove02, Tes
 
     SceneSessionManager::ScreenBlackListInfoSet info;
     info.insert({ .privacyWindowTag = "test" });
-    ssm_->screenRSBlackListConfigMap_[0].insert(info);
+    ssm_->screenRSBlackListConfigMap_[0].insert(*info.begin());
     ssm_->sessionRSBlackListConfigSet_.insert({ .windowId = 0, .privacyWindowTag = "test" });
     ssm_->sessionBlackListInfoMap_[0].insert({ .windowId = 0, .privacyWindowTag = "test1" });
     ssm_->sessionBlackListInfoMap_[0].insert({ .windowId = 1, .privacyWindowTag = "WMS_DEFAULT" });
