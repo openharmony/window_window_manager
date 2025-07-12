@@ -750,6 +750,18 @@ HWTEST_F(DisplayManagerServiceTest, GetAllDisplayPhysicalResolution03, TestSize.
     auto result = dms_->GetAllDisplayPhysicalResolution();
     EXPECT_FALSE(result.empty());
 }
+
+/**
+ * @tc.name: SetVirtualScreenAsDefault
+ * @tc.desc: Test GetAllDisplayPhysicalResolution function when default display info is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerServiceTest, SetVirtualScreenAsDefault, TestSize.Level1)
+{
+    ScreenId screenId = 0;
+    auto res = dms_->SetVirtualScreenAsDefault(screenId);
+    EXPECT_FALSE(res);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

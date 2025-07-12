@@ -83,6 +83,9 @@ ohos_shared_library("libdm_lite") {
   if (window_manager_use_sceneboard) {
     defines += [ "SCENE_BOARD_ENABLED" ]
   }
+  if (window_manager_feature_screenless) {
+    defines += [ "SCREENLESS_ENABLE" ]
+  }
 }
 
 group("test") {
