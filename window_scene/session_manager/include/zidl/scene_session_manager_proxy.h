@@ -143,6 +143,8 @@ public:
     WMError UpdateScreenLockStatusForApp(const std::string& bundleName, bool isRelease) override;
     WMError AddSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds) override;
     WMError RemoveSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds) override;
+    WMError SetScreenPrivacyWindowTagSwitch(
+        uint64_t screenId, const std::vector<std::string>& privacyWindowTags, bool enable) override;
     WMError IsPcWindow(bool& isPcWindow) override;
     WMError IsFreeMultiWindow(bool& isPcWindow) override;
     WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) override;
@@ -171,6 +173,10 @@ public:
         const WindowAnimationOption& animationOption) override;
     WMError CreateUIEffectController(const sptr<IUIEffectControllerClient>& controllerClient,
         sptr<IUIEffectController>& controller, int32_t& controllerId) override;
+    WMError AddSessionBlackList(const std::unordered_set<std::string>& bundleNames,
+        const std::unordered_set<std::string>& privacyWindowTags) override;
+    WMError RemoveSessionBlackList(const std::unordered_set<std::string>& bundleNames,
+        const std::unordered_set<std::string>& privacyWindowTags) override;
     WMError GetPiPSettingSwitchStatus(bool& switchStatus) override;
 
 private:

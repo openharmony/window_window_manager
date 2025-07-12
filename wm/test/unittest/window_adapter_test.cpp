@@ -1161,6 +1161,40 @@ HWTEST_F(WindowAdapterTest, CreateUIEffectController, Function | SmallTest | Lev
 }
 
 /**
+ * @tc.name: AddSessionBlackList01
+ * @tc.desc: WindowAdapter/AddSessionBlackList
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, AddSessionBlackList01, Function | SmallTest | Level2)
+{
+    WindowAdapter windowAdapter;
+    std::unordered_set<std::string> bundleNames;
+    std::unordered_set<std::string> privacyWindowTags;
+    sptr<IWindowManagerAgent> windowManagerAgent;
+    auto err = windowAdapter.AddSessionBlackList(bundleNames, privacyWindowTags);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, err);
+    auto ret = windowAdapter.InitWMSProxy();
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: RemoveSessionBlackList01
+ * @tc.desc: WindowAdapter/RemoveSessionBlackList
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, RemoveSessionBlackList01, Function | SmallTest | Level2)
+{
+    WindowAdapter windowAdapter;
+    std::unordered_set<std::string> bundleNames;
+    std::unordered_set<std::string> privacyWindowTags;
+    sptr<IWindowManagerAgent> windowManagerAgent;
+    auto err = windowAdapter.RemoveSessionBlackList(bundleNames, privacyWindowTags);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, err);
+    auto ret = windowAdapter.InitWMSProxy();
+    EXPECT_EQ(ret, true);
+}
+
+/**
  * @tc.name: GetPiPSettingSwitchStatus
  * @tc.desc: WindowAdapter/GetPiPSettingSwitchStatus
  * @tc.type: FUNC

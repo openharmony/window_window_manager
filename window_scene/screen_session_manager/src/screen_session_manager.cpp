@@ -9012,15 +9012,15 @@ void ScreenSessionManager::SetVirtualScreenBlackList(ScreenId screenId, std::vec
         TLOGE(WmsLogTag::DMS, "No corresponding rsId");
         return;
     }
-    if (windowIdList.empty()) {
-        TLOGI(WmsLogTag::DMS, "WindowIdList is empty");
-        rsInterface_.SetVirtualScreenBlackList(rsScreenId, surfaceIdList);
-        rsInterface_.SetVirtualScreenTypeBlackList(rsScreenId, typeBlackList);
-        return;
-    }
     auto clientProxy = GetClientProxy();
     if (!clientProxy) {
         TLOGE(WmsLogTag::DMS, "clientProxy_ is nullptr");
+        return;
+    }
+    if (windowIdList.empty()) {
+        TLOGI(WmsLogTag::DMS, "WindowIdList is empty");
+        clientProxy->OnSetSurfaceNodeIdsChanged(rsScreenId, surfaceIdList);
+        rsInterface_.SetVirtualScreenTypeBlackList(rsScreenId, typeBlackList);
         return;
     }
     std::vector<uint64_t> surfaceNodeIdsToRS;
@@ -9040,7 +9040,6 @@ void ScreenSessionManager::SetVirtualScreenBlackList(ScreenId screenId, std::vec
         oss << val << " ";
     }
     TLOGW(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
-    rsInterface_.SetVirtualScreenBlackList(rsScreenId, surfaceNodeIdsToRS);
     rsInterface_.SetVirtualScreenTypeBlackList(rsScreenId, typeBlackList);
     clientProxy->OnSetSurfaceNodeIdsChanged(rsScreenId, surfaceNodeIdsToRS);
 }
@@ -10680,6 +10679,8 @@ DMError ScreenSessionManager::SetScreenPrivacyWindowTagSwitch(ScreenId screenId,
         TLOGE(WmsLogTag::DMS, "cannot find screenInfo: %{public}" PRIu64, screenId);
         return DMError::DM_ERROR_NULLPTR;
     }
+    MockSessionManagerService::GetInstance().SetScreenPrivacyWindowTagSwitch(
+        screenIdManager_.ConvertToRsScreenId(screenId), privacyWindowTag, enable);
     std::ostringstream oss;
     for (auto tag : privacyWindowTag) {
         oss << tag << ",";
