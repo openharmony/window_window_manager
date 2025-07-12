@@ -186,17 +186,6 @@ bool Parcel::WriteParcelable(const Parcelable* object)
     return true;
 }
 
-#ifdef ENABLE_MOCK_WRITE_STRING
-bool Parcel::WriteString(const std::string& value)
-{
-    (void)value;
-    if (value == ERROR_FLAG) {
-        return false;
-    }
-    return true;
-}
-#endif
-
 bool Parcel::WriteBool(bool value)
 {
     (void)value;
