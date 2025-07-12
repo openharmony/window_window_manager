@@ -1991,6 +1991,31 @@ WMError SceneSessionManager::RemoveSkipSelfWhenShowOnVirtualScreenList(const std
     return taskScheduler_->PostSyncTask(task, __func__);
 }
 
+WMError SceneSessionManager::SetScreenPrivacyWindowTagSwitch(
+    uint64_t screenId, const std::vector<std::string>& privacyWindowTags, bool enable)
+{
+    if (!SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    if (enable) {
+        for (const auto& privacyWindowTag : privacyWindowTags) {
+            screenRSBlackListConfigMap_[screenId].insert({ .privacyWindowTag = privacyWindowTag });
+        }
+        FlushSessionBlackListInfoMapWhenAdd(screenId);
+    } else {
+        for (const auto& privacyWindowTag : privacyWindowTags) {
+            screenRSBlackListConfigMap_[screenId].erase({ .privacyWindowTag = privacyWindowTag });
+            if (screenRSBlackListConfigMap_[screenId].empty()) {
+                screenRSBlackListConfigMap_.erase(screenId);
+                break;
+            }
+        }
+        FlushSessionBlackListInfoMapWhenRemove(screenId);
+    }
+    return WMError::WM_OK;
+}
+
 void SceneSessionManager::SetSkipEventOnCastPlusInner(int32_t windowId, bool isSkip)
 {
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Wid: %{public}d, isSkip: %{public}d", windowId, isSkip);
@@ -10120,6 +10145,7 @@ WMError SceneSessionManager::SetSurfaceNodeIds(DisplayId displayId, const std::v
             funSet.insert({ .windowId = sceneSession->GetPersistentId() });
         }
         sessionBlackListInfoMap_[displayId] = std::move(funSet);
+        UpdateVirtualScreenBlackList(displayId);
         return WMError::WM_OK;
     };
     return taskScheduler_->PostSyncTask(task, __func__);
@@ -10141,6 +10167,207 @@ WMError SceneSessionManager::OnVirtualScreenDisconnected(DisplayId displayId)
         return WMError::WM_DO_NOTHING;
     };
     return taskScheduler_->PostSyncTask(task, __func__);
+}
+
+WMError SceneSessionManager::AddSessionBlackList(
+    const std::unordered_set<std::string>& bundleNames, const std::unordered_set<std::string>& privacyWindowTags)
+{
+    if (!SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    for (const auto& bundleName : bundleNames) {
+        bundleRSBlackListConfigMap_.insert({ bundleName, {} });
+        bundleRSBlackListConfigMap_[bundleName].insert(privacyWindowTags.begin(), privacyWindowTags.end());
+    }
+    std::vector<sptr<SceneSession>> sceneSessionList;
+    {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (const auto& [_, sceneSession] : sceneSessionMap_) {
+            if (sceneSession && bundleNames.find(sceneSession->GetSessionInfo().bundleName_) != bundleNames.end()) {
+                sceneSessionList.emplace_back(sceneSession);
+            }
+        }
+    }
+    return AddSessionBlackList(sceneSessionList, privacyWindowTags);
+}
+
+WMError SceneSessionManager::AddSessionBlackList(const std::vector<sptr<SceneSession>>& sceneSessionList,
+    const std::unordered_set<std::string>& privacyWindowTags)
+{
+    for (const auto& sceneSession : sceneSessionList) {
+        for (const auto& privacyWindowTag : privacyWindowTags) {
+            sessionRSBlackListConfigSet_.insert(
+                { .windowId = sceneSession->GetPersistentId(), .privacyWindowTag = privacyWindowTag });
+        }
+    }
+    return FlushSessionBlackListInfoMapWhenAdd();
+}
+
+WMError SceneSessionManager::RemoveSessionBlackList(
+    const std::unordered_set<std::string>& bundleNames, const std::unordered_set<std::string>& privacyWindowTags)
+{
+    if (!SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    for (const auto& bundleName : bundleNames) {
+        bundleRSBlackListConfigMap_.insert({ bundleName, {} });
+        for(const auto& privacyWindowTag : privacyWindowTags) {
+            bundleRSBlackListConfigMap_[bundleName].erase(privacyWindowTag);
+        }
+        if (bundleRSBlackListConfigMap_[bundleName].empty()) {
+            bundleRSBlackListConfigMap_.erase(bundleName);
+        }
+    }
+    std::vector<sptr<SceneSession>> sceneSessionList;
+    {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (const auto& [_, sceneSession] : sceneSessionMap_) {
+            if (sceneSession && bundleNames.find(sceneSession->GetSessionInfo().bundleName_) != bundleNames.end()) {
+                sceneSessionList.emplace_back(sceneSession);
+            }
+        }
+    }
+    return RemoveSessionBlackList(sceneSessionList, privacyWindowTags);
+}
+
+WMError SceneSessionManager::RemoveSessionBlackList(const std::vector<sptr<SceneSession>>& sceneSessionList,
+    const std::unordered_set<std::string>& privacyWindowTags)
+{
+    for (const auto& sceneSession : sceneSessionList) {
+        for (const auto& privacyWindowTag : privacyWindowTags) {
+            sessionRSBlackListConfigSet_.erase(
+                { .windowId = sceneSession->GetPersistentId(), .privacyWindowTag = privacyWindowTag });
+        }
+    }
+    return FlushSessionBlackListInfoMapWhenRemove();
+}
+
+WMError SceneSessionManager::FlushSessionBlackListInfoMapWhenAdd()
+{
+    for (const auto& [screenId, screenBlackListInfo] : screenRSBlackListConfigMap_) {
+        for (const auto& info : sessionRSBlackListConfigSet_) {
+            if (screenBlackListInfo.find({ .privacyWindowTag = info.privacyWindowTag }) != screenBlackListInfo.end()) {
+                sessionBlackListInfoMap_[screenId].insert(info);   
+            }
+        }
+        UpdateVirtualScreenBlackList(screenId);
+    }
+    return WMError::WM_OK;
+}
+
+WMError SceneSessionManager::FlushSessionBlackListInfoMapWhenAdd(ScreenId screenId)
+{
+    auto screenBlackListInfo = screenRSBlackListConfigMap_[screenId];
+    for (const auto& info : sessionRSBlackListConfigSet_) {
+        if (screenBlackListInfo.find({ .privacyWindowTag = info.privacyWindowTag }) != screenBlackListInfo.end()) {
+            sessionBlackListInfoMap_[screenId].insert(info);   
+        }
+    }
+    UpdateVirtualScreenBlackList(screenId);
+    return WMError::WM_OK;
+}
+
+WMError SceneSessionManager::FlushSessionBlackListInfoMapWhenRemove()
+{
+    for (auto& [screenId, infoSet] : sessionBlackListInfoMap_) {
+        for (auto it = infoSet.begin(); it != infoSet.end(); ) {
+            const auto& info = *it;
+            if (info.privacyWindowTag == WMS_DEFAULT) {
+                ++it;
+                continue;
+            }
+            bool notInScreenConfigMap = screenRSBlackListConfigMap_[screenId].find(
+                { .privacyWindowTag = info.privacyWindowTag }) == screenRSBlackListConfigMap_[screenId].end();
+            bool notInSessionConfigSet = sessionRSBlackListConfigSet_.find(info) == sessionRSBlackListConfigSet_.end();
+            if (notInScreenConfigMap || notInSessionConfigSet) {
+                sessionBlackListInfoMap_[screenId].erase(info);   
+            } else {
+                ++it;
+            }
+        }
+        UpdateVirtualScreenBlackList(screenId);
+    }
+    return WMError::WM_OK;
+}
+
+WMError SceneSessionManager::FlushSessionBlackListInfoMapWhenRemove(ScreenId screenId)
+{
+    if (sessionBlackListInfoMap_.find(screenId) == sessionBlackListInfoMap_.end()) {
+        std::vector<uint64_t> emptyList;
+        rsInterface_.SetVirtualScreenBlackList(screenId, emptyList);
+        return WMError::WM_OK;
+    }
+    auto& infoSet = sessionBlackListInfoMap_[screenId];
+    for (auto it = infoSet.begin(); it != infoSet.end(); ) {
+        const auto& info = *it;
+        if (info.privacyWindowTag == WMS_DEFAULT) {
+            ++it;
+            continue;
+        }
+        bool notInScreenConfigMap = screenRSBlackListConfigMap_[screenId].find(
+            { .privacyWindowTag = info.privacyWindowTag }) == screenRSBlackListConfigMap_[screenId].end();
+        bool notInSessionConfigSet = sessionRSBlackListConfigSet_.find(info) == sessionRSBlackListConfigSet_.end();
+        if (notInScreenConfigMap || notInSessionConfigSet) {
+            sessionBlackListInfoMap_[screenId].erase(info);   
+        } else {
+            ++it;
+        }
+    }
+    UpdateVirtualScreenBlackList(screenId);
+    return WMError::WM_OK;
+}
+
+void SceneSessionManager::UpdateVirtualScreenBlackList(ScreenId screenId)
+{
+    std::unordered_set<uint64_t> skipSurfaceNodeIdSet;
+    for (const auto& info : sessionBlackListInfoMap_[screenId]) {
+        AddskipSurfaceNodeIdSet(info.windowId, skipSurfaceNodeIdSet);
+    }
+    std::vector<uint64_t> skipSurfaceNodeIds(skipSurfaceNodeIdSet.begin(), skipSurfaceNodeIdSet.end());
+    std::ostringstream oss;
+    oss << "surfaceNodeIds[" << screenId << "]: ";
+    for (auto id : skipSurfaceNodeIds) {
+        oss << id << " ";
+    }
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "%{public}s", oss.str().c_str());
+    rsInterface_.SetVirtualScreenBlackList(screenId, skipSurfaceNodeIds);
+}
+
+void SceneSessionManager::OnAttachToFrameNode(int32_t windowId)
+{
+    auto where = __func__;
+    auto task = [this, windowId, where] {
+        auto sceneSession = GetSceneSession(windowId);
+        if (sceneSession == nullptr) {
+            return;
+        }
+        if (bundleRSBlackListConfigMap_.find(sceneSession->GetSessionInfo().bundleName_) !=
+            bundleRSBlackListConfigMap_.end()) {
+            AddSessionBlackList(
+                { sceneSession }, bundleRSBlackListConfigMap_[sceneSession->GetSessionInfo().bundleName_]);
+        }
+    };
+    taskScheduler_->PostAsyncTask(task, where);
+}
+
+void SceneSessionManager::AddskipSurfaceNodeIdSet(int32_t windowId, std::unordered_set<uint64_t>& skipSurfaceNodeIdSet)
+{
+    auto sceneSession = GetSceneSession(windowId);
+    if (sceneSession == nullptr) {
+        return;
+    }
+    if (SessionHelper::IsMainWindow(static_cast<WindowType>(sceneSession->GetWindowType()))) {
+        auto leashWinSurfaceNode = sceneSession->GetLeashWinSurfaceNode();
+        if (leashWinSurfaceNode != nullptr) {
+            skipSurfaceNodeIdSet.insert(static_cast<uint64_t>(sceneSession->GetPersistentId()));
+        }
+    }
+    auto surfaceNode = sceneSession->GetSurfaceNode();
+    if (surfaceNode != nullptr) {
+        skipSurfaceNodeIdSet.insert(surfaceNode->GetId());
+    }
 }
 
 WMError SceneSessionManager::UpdateSubSessionBlackList(const sptr<SceneSession>& sceneSession)
@@ -10195,16 +10422,15 @@ WMError SceneSessionManager::UpdateSubSessionBlackList(const sptr<SceneSession>&
 WMError SceneSessionManager::RemoveSessionFromBlackList(const sptr<SceneSession>& sceneSession)
 {
     WMError ret = WMError::WM_DO_NOTHING;
-    SessionBlackListInfo sessionBlackListInfo = { .windowId = sceneSession->GetPersistentId() };
+    if (sceneSession == nullptr) {
+        return ret;
+    }
+    RemoveSessionFromBlackListInfoSet(sceneSession, sessionRSBlackListConfigSet_);
     for (auto it = sessionBlackListInfoMap_.begin(); it != sessionBlackListInfoMap_.end();) {
         auto& sessionBlackListInfoSet = it->second;
-        if (sessionBlackListInfoSet.find(sessionBlackListInfo) == sessionBlackListInfoSet.end()) {
-            ++it;
-            continue;
-        }
-        sessionBlackListInfoSet.erase(sessionBlackListInfo);
+        RemoveSessionFromBlackListInfoSet(sceneSession, sessionBlackListInfoSet);
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, displayId: %{public}" PRIu64,
-            sessionBlackListInfo.windowId, it->first);
+            sceneSession->GetPersistentId(), it->first);
         ret = WMError::WM_OK;
         if (sessionBlackListInfoSet.empty()) {
             it = sessionBlackListInfoMap_.erase(it);
@@ -10213,6 +10439,18 @@ WMError SceneSessionManager::RemoveSessionFromBlackList(const sptr<SceneSession>
         }
     }
     return ret;
+}
+
+void SceneSessionManager::RemoveSessionFromBlackListInfoSet(
+    const sptr<SceneSession>& sceneSession, SessionBlackListInfoSet& sessionBlackListInfoSet)
+{
+    for (auto it = sessionBlackListInfoSet.begin(); it != sessionBlackListInfoSet.end();) {
+        if (it->windowId == sceneSession->GetPersistentId()) {
+            it = sessionBlackListInfoSet.erase(it);
+        } else {
+            ++it;
+        }
+    }
 }
 
 WMError SceneSessionManager::RegisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey,
