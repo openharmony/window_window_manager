@@ -1331,7 +1331,7 @@ public:
      * @param privacyWindowTags Tags of privacy window.
      * @return WM_OK means add success, others means add failed.
      */
-     WMError AddSessionBlackList(
+    WMError AddSessionBlackList(
         const std::unordered_set<std::string>& bundleNames, const std::unordered_set<std::string>& privacyWindowTags);
 
     /**
