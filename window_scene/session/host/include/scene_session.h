@@ -395,6 +395,7 @@ public:
      * Compatible Mode
      */
     bool IsInCompatScaleStatus() const;
+    bool IsInCompatScaleMode() const;
 
     /*
      * PC Window

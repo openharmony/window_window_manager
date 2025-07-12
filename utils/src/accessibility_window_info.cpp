@@ -30,7 +30,7 @@ bool AccessibilityWindowInfo::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(windowRect_.height_) && parcel.WriteInt32(windowRect_.posX_) &&
         parcel.WriteInt32(windowRect_.posY_) && parcel.WriteBool(focused_) && parcel.WriteBool(isDecorEnable_) &&
         parcel.WriteUint64(displayId_) && parcel.WriteUint32(layer_) && parcel.WriteFloat(scaleVal_) &&
-        parcel.WriteFloat(scaleX_) && parcel.WriteFloat(scaleY_) &&
+        parcel.WriteFloat(scaleX_) && parcel.WriteFloat(scaleY_) && parcel.WriteBool(isCompatScaleMode_) &&
         parcel.WriteUint32(static_cast<uint32_t>(mode_)) && parcel.WriteUint32(static_cast<uint32_t>(type_)) &&
         parcel.WriteString(bundleName_) && parcel.WriteUint32(touchHotAreas.size());
     if (!res) {
@@ -59,7 +59,8 @@ AccessibilityWindowInfo* AccessibilityWindowInfo::Unmarshalling(Parcel& parcel)
         parcel.ReadInt32(info->windowRect_.posY_) && parcel.ReadBool(info->focused_) &&
         parcel.ReadBool(info->isDecorEnable_) && parcel.ReadUint64(info->displayId_) &&
         parcel.ReadUint32(info->layer_) && parcel.ReadFloat(info->scaleVal_) &&
-        parcel.ReadFloat(info->scaleX_) && parcel.ReadFloat(info->scaleY_);
+        parcel.ReadFloat(info->scaleX_) && parcel.ReadFloat(info->scaleY_) &&
+        parcel.ReadBool(info->isCompatScaleMode_);
     if (!res) {
         delete info;
         return nullptr;

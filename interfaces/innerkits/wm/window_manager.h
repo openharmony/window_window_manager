@@ -342,6 +342,7 @@ public:
     float scaleVal_;
     float scaleX_;
     float scaleY_;
+    bool isCompatScaleMode_ { false };
     std::string bundleName_;
     std::vector<Rect> touchHotAreas_;
 };
