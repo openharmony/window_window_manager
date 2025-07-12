@@ -325,7 +325,7 @@ bool Parcel::ReadStringVector(std::vector<std::string>* val)
     return true;
 }
 
-bool Parcel::ReadString(std::string val)
+bool Parcel::ReadString(std::string& val)
 {
     if (g_setReadStringErrorFlag) {
         return false;
