@@ -10268,7 +10268,7 @@ WMError SceneSessionManager::FlushSessionBlackListInfoMapWhenAdd(ScreenId screen
 
 WMError SceneSessionManager::FlushSessionBlackListInfoMapWhenRemove()
 {
-    for (auto& [screenId, InfoSet] : sessionBlackListInfoMap_) {
+    for (auto& [screenId, infoSet] : sessionBlackListInfoMap_) {
         for (auto it = infoSet.begin(); it != infoSet.end(); ) {
             const auto& info = *it;
             if (info.privacyWindowTag == WMS_DEFAULT) {
