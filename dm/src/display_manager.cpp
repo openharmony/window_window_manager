@@ -1045,7 +1045,7 @@ sptr<Display> DisplayManager::GetDefaultDisplaySync(bool isFromNapi)
 bool DisplayManager::SetVirtualScreenAsDefault(ScreenId screenId)
 {
     if (pImpl_ == nullptr) {
-        TLOGI(WmsLogTag::DMS, "pImpl_ is null");
+        TLOGE(WmsLogTag::DMS, "pImpl_ is null");
         return false;
     }
     return pImpl_->SetVirtualScreenAsDefault(screenId);

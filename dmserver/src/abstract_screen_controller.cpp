@@ -1533,20 +1533,25 @@ bool AbstractScreenController::SetVirtualScreenAsDefault(ScreenId screenId)
     // Lock the process of configuring default screen
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto rsScreenId = screenIdManager_.ConvertToRsScreenId(screenId);
+    if (rsScreenId == SCREEN_ID_INVALID) {
+        TLOGE(WmsLogTag::DMS, "Invalid screenId");
+        return false;
+    }
     auto absScreen = GetAbstractScreen(screenId);
-    if (rsScreenId == SCREEN_ID_INVALID || absScreen == nullptr || absScreen->type_ == ScreenType::REAL) {
-        TLOGE(WmsLogTag::DMS, "Invalid screenId or screen not exist: %{public}llu", screenId);
+    if (absScreen == nullptr || absScreen->type_ == ScreenType::REAL) {
+        TLOGE(WmsLogTag::DMS, "Screen not exist or not virtual screen");
         return false;
     }
     // Create screen group and notify
     sptr<AbstractScreenGroup> screenGroup = AddToGroupLocked(absScreen);
     if (screenGroup == nullptr) {
+        TLOGE(WmsLogTag::DMS, "ScreenGroup nullptr");
         return false;
     }
     NotifyScreenConnected(absScreen->ConvertToScreenInfo());
     NotifyScreenGroupChanged(absScreen->ConvertToScreenInfo(), ScreenGroupChangeEvent::ADD_TO_GROUP);
     if (abstractScreenCallback_ == nullptr) {
-        TLOGE(WmsLogTag::DMS, "abstractScreenCallback_ is null");
+        TLOGE(WmsLogTag::DMS, "abstractScreenCallback_ nullptr");
         return false;
     }
     abstractScreenCallback_->onConnect_(absScreen);
