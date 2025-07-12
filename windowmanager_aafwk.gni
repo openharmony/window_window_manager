@@ -43,6 +43,7 @@ declare_args() {
   window_manager_feature_multi_screen_frame_ctl = true
   window_manager_feature_cam_mode = true
   window_manager_feature_multi_usr = true
+  window_manager_feature_screenless = false
 
   if (defined(global_parts_info) &&
       !defined(global_parts_info.msdp_device_status)) {
