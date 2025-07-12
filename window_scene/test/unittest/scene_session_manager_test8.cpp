@@ -1294,7 +1294,8 @@ HWTEST_F(SceneSessionManagerTest8, FlushSessionBlackListInfoMapWhenAdd01, TestSi
     ssm_->sessionRSBlackListConfigSet_.clear();
     ssm_->sessionBlackListInfoMap_.clear();
 
-    SceneSessionManager::ScreenBlackListInfoSet info = { .privacyWindowTag = "test" };
+    SceneSessionManager::ScreenBlackListInfoSet info;
+    info.insert({ .privacyWindowTag = "test" });
     ssm_->screenRSBlackListConfigMap_[0].insert(info);
     ssm_->sessionRSBlackListConfigSet_.insert({ .windowId = 0, .privacyWindowTag = "test" });
 
@@ -1318,7 +1319,8 @@ HWTEST_F(SceneSessionManagerTest8, FlushSessionBlackListInfoMapWhenAdd02, TestSi
     ssm_->sessionRSBlackListConfigSet_.clear();
     ssm_->sessionBlackListInfoMap_.clear();
 
-    SceneSessionManager::ScreenBlackListInfoSet info = { .privacyWindowTag = "test" };
+    SceneSessionManager::ScreenBlackListInfoSet info;
+    info.insert({ .privacyWindowTag = "test" });
     ssm_->screenRSBlackListConfigMap_[0].insert(info);
     ssm_->sessionRSBlackListConfigSet_.insert({ .windowId = 0, .privacyWindowTag = "test" });
 
@@ -1342,7 +1344,8 @@ HWTEST_F(SceneSessionManagerTest8, FlushSessionBlackListInfoMapWhenRemove01, Tes
     ssm_->sessionRSBlackListConfigSet_.clear();
     ssm_->sessionBlackListInfoMap_.clear();
 
-    SceneSessionManager::ScreenBlackListInfoSet info = { .privacyWindowTag = "test" };
+    SceneSessionManager::ScreenBlackListInfoSet info;
+    info.insert({ .privacyWindowTag = "test" });
     ssm_->screenRSBlackListConfigMap_[0].insert(info);
     ssm_->sessionRSBlackListConfigSet_.insert({ .windowId = 0, .privacyWindowTag = "test" });
     ssm_->sessionBlackListInfoMap_[0].insert({ .windowId = 0, .privacyWindowTag = "test1" });
@@ -1368,7 +1371,8 @@ HWTEST_F(SceneSessionManagerTest8, FlushSessionBlackListInfoMapWhenRemove02, Tes
     ssm_->sessionRSBlackListConfigSet_.clear();
     ssm_->sessionBlackListInfoMap_.clear();
 
-    SceneSessionManager::ScreenBlackListInfoSet info = { .privacyWindowTag = "test" };
+    SceneSessionManager::ScreenBlackListInfoSet info;
+    info.insert({ .privacyWindowTag = "test" });
     ssm_->screenRSBlackListConfigMap_[0].insert(info);
     ssm_->sessionRSBlackListConfigSet_.insert({ .windowId = 0, .privacyWindowTag = "test" });
     ssm_->sessionBlackListInfoMap_[0].insert({ .windowId = 0, .privacyWindowTag = "test1" });
