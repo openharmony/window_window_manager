@@ -10258,8 +10258,6 @@ WMError SceneSessionManager::FlushSessionBlackListInfoMapWhenAdd(ScreenId screen
 {
     auto screenBlackListInfo = screenRSBlackListConfigMap_[screenId];
     for (const auto& info : sessionRSBlackListConfigSet_) {
-    auto screenBlackListInfo = screenRSBlackListConfigMap_[screenId];
-    for (const auto& info : sessionRSBlackListConfigSet_) {
         if (screenBlackListInfo.find({ .privacyWindowTag = info.privacyWindowTag }) != screenBlackListInfo.end()) {
             sessionBlackListInfoMap_[screenId].insert(info);   
         }
@@ -10423,9 +10421,7 @@ WMError SceneSessionManager::RemoveSessionFromBlackList(const sptr<SceneSession>
     WMError ret = WMError::WM_DO_NOTHING;
     if (sceneSession == nullptr) {
         return ret;
-        return ret;
     }
-    RemoveSessionFromBlackListInfoSet(sceneSession, sessionRSBlackListConfigSet_);
     RemoveSessionFromBlackListInfoSet(sceneSession, sessionRSBlackListConfigSet_);
     for (auto it = sessionBlackListInfoMap_.begin(); it != sessionBlackListInfoMap_.end();) {
         auto& sessionBlackListInfoSet = it->second;
