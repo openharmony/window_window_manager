@@ -36,6 +36,8 @@ group("fuzztest") {
     "sessionstagestubactive_fuzzer:fuzztest",
     "sessionstagestubchange_fuzzer:fuzztest",
     "sessionstagestubupdate_fuzzer:fuzztest",
+    "sessionstagestublayout_fuzzer:fuzztest",
+    "sessionstublayout_fuzzer:fuzztest",
     "sessionstubanimation_fuzzer:fuzztest",
     "sessionstub_event_fuzzer:fuzztest",
     "sessionstub_uec_fuzzer:fuzztest",
