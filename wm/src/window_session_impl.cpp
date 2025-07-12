@@ -6037,7 +6037,7 @@ void WindowSessionImpl::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEve
         }
         TLOGD(WmsLogTag::WMS_EVENT, "Start to process pointerEvent, id: %{public}d", pointerEvent->GetId());
         if (!uiContent->ProcessPointerEvent(pointerEvent)) {
-            TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "UI content dose not consume");
+            TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "UI content does not consume");
             pointerEvent->MarkProcessed();
         }
     } else {
@@ -6061,7 +6061,7 @@ WMError WindowSessionImpl::InjectTouchEvent(const std::shared_ptr<MMI::PointerEv
     if (auto uiContent = GetUIContentSharedPtr()) {
         TLOGD(WmsLogTag::WMS_EVENT, "Start to process pointerEvent, id: %{public}d", pointerEvent->GetId());
         if (!uiContent->ProcessPointerEvent(pointerEvent)) {
-            TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "UI content dose not consume");
+            TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "UI content does not consume");
             pointerEvent->MarkProcessed();
         }
     } else {
