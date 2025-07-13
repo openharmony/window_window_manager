@@ -1995,7 +1995,7 @@ WMError SceneSessionManager::SetScreenPrivacyWindowTagSwitch(
     uint64_t screenId, const std::vector<std::string>& privacyWindowTags, bool enable)
 {
     TLOGD(WmsLogTag::WMS_ATTRIBUTE, "screenId: %{public}" PRIu64 ", tagsize: %{public}zu, enable: %{public}d",
-        screenId, privacyWindowTags, enable);
+        screenId, privacyWindowTags.size(), enable);
     if (!SessionPermission::IsSACalling()) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
@@ -10323,6 +10323,8 @@ WMError SceneSessionManager::FlushSessionBlackListInfoMapWhenRemove(ScreenId scr
 
 void SceneSessionManager::UpdateVirtualScreenBlackList(ScreenId screenId)
 {
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "Configsize: [%{public}zu, %{public}zu], %{public}zu",
+        sessionRSBlackListConfigSet_.size(), screenRSBlackListConfigMap_.size(), sessionBlackListInfoMap_.size());
     std::unordered_set<uint64_t> skipSurfaceNodeIdSet;
     for (const auto& info : sessionBlackListInfoMap_[screenId]) {
         AddskipSurfaceNodeIdSet(info.windowId, skipSurfaceNodeIdSet);
