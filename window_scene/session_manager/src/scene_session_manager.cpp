@@ -10353,7 +10353,7 @@ void SceneSessionManager::AddSkipSurfaceNodeWhenAttach(
         for (const auto& tag : bundleRSBlackListConfigMap_[bundleName]) {
             sessionRSBlackListConfigSet_.insert({ .windowId = windowId, .privacyWindowTag = tag });
             for (const auto& [screenId, infoSet] : screenRSBlackListConfigMap_) {
-                if (info.find({ .privacyWindowTag = tag }) != info.end()) {
+                if (infoSet.find({ .privacyWindowTag = tag }) != infoSet.end()) {
                     sessionBlackListInfoMap_[screenId].insert({ .windowId = windowId, .privacyWindowTag = tag });
                     std::vector<uint64_t> skipSurfaceNodeIds = { surfaceNodeId };
                     rsInterface_.AddVirtualScreenBlackList(screenId, skipSurfaceNodeIds);
