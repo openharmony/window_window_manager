@@ -41,14 +41,17 @@ protected:
 
 /**
  * @tc.name: TestRelativeToGlobalDisplayRect
- * @tc.desc: Convert relative rect to global rect using screen property
+ * @tc.desc: Verify RelativeToGlobalDisplayRect correctly converts relative rect to global rect
  * @tc.type: FUNC
  */
 HWTEST_F(SessionCoordinateHelperTest, TestRelativeToGlobalDisplayRect, TestSize.Level1)
 {
-    constexpr ScreenId screenId = 1001;
+    constexpr ScreenId invalidScreenId = 9999;
     WSRect relativeRect { 50, 60, 300, 200 };
+    WSRect result = SessionCoordinateHelper::RelativeToGlobalDisplayRect(invalidScreenId, relativeRect);
+    EXPECT_EQ(result, relativeRect);
 
+    constexpr ScreenId screenId = 1001;
     auto screenProperty = ScreenProperty();
     screenProperty.SetX(500);
     screenProperty.SetY(600);
@@ -57,19 +60,24 @@ HWTEST_F(SessionCoordinateHelperTest, TestRelativeToGlobalDisplayRect, TestSize.
         std::lock_guard<std::mutex> lock(ssmClient_.screenSessionMapMutex_);
         ssmClient_.screenSessionMap_[screenId] = screenSession;
     }
-
-    WSRect result = SessionCoordinateHelper::RelativeToGlobalDisplayRect(screenId, relativeRect);
+    result = SessionCoordinateHelper::RelativeToGlobalDisplayRect(screenId, relativeRect);
     WSRect expectedRect { 550, 660, 300, 200 };
     EXPECT_EQ(result, expectedRect);
 }
 
 /**
- * @tc.name: TestGlobalToRelativeDisplayRect
- * @tc.desc: Match top-left of global rect with display area and convert correctly
+ * @tc.name: TestGlobalToScreenRelativeRect
+ * @tc.desc: Verify GlobalToScreenRelativeRect correctly converts global rect to relative rect
  * @tc.type: FUNC
  */
-HWTEST_F(SessionCoordinateHelperTest, TestGlobalToRelativeDisplayRect, TestSize.Level1)
+HWTEST_F(SessionCoordinateHelperTest, TestGlobalToScreenRelativeRect, TestSize.Level1)
 {
+    constexpr ScreenId invalidScreenId = 9999;
+    WSRect globalRect { 600, 600, 100, 100 };
+    auto result = SessionCoordinateHelper::GlobalToScreenRelativeRect(invalidScreenId, globalRect);
+    EXPECT_EQ(result.screenId, MAIN_SCREEN_ID_DEFAULT);
+    EXPECT_EQ(result.rect, globalRect);
+
     ScreenProperty propA;
     propA.SetX(0);
     propA.SetY(0);
@@ -87,16 +95,13 @@ HWTEST_F(SessionCoordinateHelperTest, TestGlobalToRelativeDisplayRect, TestSize.
     propB.SetBounds(boundsB);
     constexpr ScreenId screenIdOfB = 2;
     auto screenB = sptr<ScreenSession>::MakeSptr(screenIdOfB, propB, screenIdOfB);
-
     {
         std::lock_guard<std::mutex> lock(ssmClient_.screenSessionMapMutex_);
         ssmClient_.screenSessionMap_[screenIdOfA] = screenA;
         ssmClient_.screenSessionMap_[screenIdOfB] = screenB;
     }
-
-    WSRect globalRect { 600, 600, 100, 100 };
-    WSRelativeDisplayRect result = SessionCoordinateHelper::GlobalToRelativeDisplayRect(screenIdOfA, globalRect);
-    EXPECT_EQ(result.displayId, screenIdOfB);
+    result = SessionCoordinateHelper::GlobalToScreenRelativeRect(screenIdOfA, globalRect);
+    EXPECT_EQ(result.screenId, screenIdOfB);
     WSRect expectedRect { 0, 0, 100, 100 }; // relative to display B
     EXPECT_EQ(result.rect, expectedRect);
 }

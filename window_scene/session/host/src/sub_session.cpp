@@ -18,7 +18,6 @@
 #include "rs_adapter.h"
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session/screen/include/screen_session.h"
-#include "session_coordinate_helper.h"
 #include <transaction/rs_sync_transaction_controller.h>
 #include <transaction/rs_transaction.h>
 #include <ui/rs_surface_node.h>

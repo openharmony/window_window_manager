@@ -2375,7 +2375,6 @@ WMError WindowSessionImpl::ClientToGlobalDisplay(const Position& inPosition, Pos
         globalDisplayRect.posX_ + inPosition.x,
         globalDisplayRect.posY_ + inPosition.y
     };
-
     TLOGD(WmsLogTag::WMS_LAYOUT,
         "windowId: %{public}u, globalDisplayRect: %{public}s, inPosition: %{public}s, outPosition: %{public}s",
         windowId, globalDisplayRect.ToString().c_str(),
@@ -2399,7 +2398,6 @@ WMError WindowSessionImpl::GlobalDisplayToClient(const Position& inPosition, Pos
         inPosition.x - globalDisplayRect.posX_,
         inPosition.y - globalDisplayRect.posY_
     };
-
     TLOGD(WmsLogTag::WMS_LAYOUT,
         "windowId: %{public}u, globalDisplayRect: %{public}s, inPosition: %{public}s, outPosition: %{public}s",
         windowId, globalDisplayRect.ToString().c_str(),

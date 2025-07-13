@@ -1899,12 +1899,12 @@ WSError SceneSession::UpdateGlobalDisplayRectFromClient(const WSRect& rect, Size
         }
         // Convert global coordinates to screen-relative coordinates to be
         // compatible with the original logic of UpdateSessionRectInner.
-        const auto& [displayId, relativeDisplayRect] =
-            SessionCoordinateHelper::GlobalToRelativeDisplayRect(session->GetScreenId(), rect);
+        const auto& [screenId, screenRelativeRect] =
+            SessionCoordinateHelper::GlobalToScreenRelativeRect(session->GetScreenId(), rect);
         RectAnimationConfig animConfig;
-        MoveConfiguration moveConfig = { displayId, animConfig };
+        MoveConfiguration moveConfig = { screenId, animConfig };
         session->SetRequestMoveConfiguration(moveConfig);
-        session->UpdateSessionRectInner(relativeDisplayRect, reason, moveConfig, animConfig);
+        session->UpdateSessionRectInner(screenRelativeRect, reason, moveConfig, animConfig);
     }, __func__ + GetRectInfo(rect));
     return WSError::WS_OK;
 }
@@ -3528,8 +3528,8 @@ void SceneSession::HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect,
     }
 
     // Window Layout Global Coordinate System
-    // During drag (except DRAG_END), the rect is relative to the original display and can be
-    // converted to global. At DRAG_END, the rect is relative to the new display, but displayId
+    // During drag (except DRAG_END), the rect is relative to the original screen(display) and can be
+    // converted to global. At DRAG_END, the rect is relative to the new screen(display), but screenId
     // may not be updated yet, so skip updating GlobalDisplayRect to avoid incorrect conversion.
     if (reason != SizeChangeReason::DRAG_END) {
         auto globalDisplayRect = SessionCoordinateHelper::RelativeToGlobalDisplayRect(GetScreenId(), rect);

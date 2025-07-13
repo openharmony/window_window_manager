@@ -182,7 +182,7 @@ public:
      */
     virtual WMError ClientToGlobalDisplay(const Position& inPosition, Position& outPosition) const
     {
-        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;;
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
 
     /**

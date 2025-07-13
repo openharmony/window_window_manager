@@ -28,38 +28,38 @@ namespace OHOS::Rosen {
 /**
  * @class SessionCoordinateHelper
  *
- * @brief Utility class for coordinate conversions between global coordinates and relative display coordinates.
+ * @brief Helper class for converting between global and screen-relative coordinates.
  *
- * This class provides helper methods to convert window rectangles between:
- * - Global coordinates: a unified space where (0,0) is the top-left corner of the primary display.
- * - Relative display coordinates: coordinates relative to the top-left corner of a specific display.
+ * Provides utility methods to convert window rectangles between:
+ * - Global coordinates: a unified coordinate space where (0, 0) is the top-left of the primary screen.
+ * - Screen-relative coordinates: coordinates relative to the top-left corner of a specific screen.
  */
 class SessionCoordinateHelper {
 public:
     /**
-     * @brief Convert relative display coordinates to global coordinates.
+     * @brief Convert screen-relative coordinates to global coordinates.
      *
-     * This function converts a rectangle defined relative to a specific display's origin
-     * into global coordinates based on the display's global position.
+     * This function converts a rectangle defined relative to a specific screen's origin
+     * into global coordinates based on the screen’s global position.
      *
      * @param screenId The screen ID associated with the relative coordinates.
      * @param relativeRect The rectangle relative to the given screen.
-     * @return The rectangle represented in global coordinates.
+     * @return The rectangle in global coordinates.
      */
     static WSRect RelativeToGlobalDisplayRect(ScreenId screenId, const WSRect& relativeRect);
 
     /**
-     * @brief Convert global coordinates to relative display coordinates.
+     * @brief Convert global coordinates to screen-relative coordinates.
      *
-     * This function maps a global rectangle into a display-relative coordinate space.
-     * The best-matching display is determined based on the rectangle's top-left position,
-     * overlap area, or maximum intersection area.
+     * This function maps a global rectangle into the coordinate space of a specific screen.
+     * It selects the screen that has the largest intersection area with the given global rectangle.
+     * If no screen overlaps, the original screen is used as a fallback.
      *
-     * @param originalScreenId The original screen ID where the window was created or originally located.
+     * @param originalScreenId The original screen ID where the window was originally located.
      * @param globalRect The rectangle in global coordinates.
-     * @return The rectangle relative to a selected display, along with its associated display ID.
+     * @return The rectangle relative to the selected screen, along with its screen ID.
      */
-    static WSRelativeDisplayRect GlobalToRelativeDisplayRect(ScreenId originalScreenId, const WSRect& globalRect);
+    static WSScreenRelativeRect GlobalToScreenRelativeRect(ScreenId originalScreenId, const WSRect& globalRect);
 };
 } // namespace OHOS::Rosen
 
