@@ -10335,13 +10335,19 @@ void SceneSessionManager::UpdateVirtualScreenBlackList(ScreenId screenId)
     rsInterface_.SetVirtualScreenBlackList(screenId, skipSurfaceNodeIds);
 }
 
-void SceneSessionManager::NotifyOnAttachToFrameNode(
-    int32_t windowId, const std::string& bundleName, uint64_t surfaceNodeId)
+void SceneSessionManager::NotifyOnAttachToFrameNode(const sptr<Session>& session)
 {
+    if (session == nullptr) {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "session is nullptr");
+        return;
+    }
     auto where = __func__;
-    auto task = [this, windowId, bundleName, surfaceNodeId, where] {
+    auto task = [this, session, where] {
         TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s, wid: %{public}d", where.c_str(), windowId);
-        AddSkipSurfaceNodeWhenAttach(windowId, bundleName, surfaceNodeId);
+        uint64_t skipSurfaceNodeId = WindowHelper::IsMainWindow(session->GetWindowType()) ?
+            static_cast<uint64_t>session->GetPersistentId() : session->GetSurfaceNode()->GetId();
+        AddSkipSurfaceNodeWhenAttach(session->GetPersistentId(),
+            session->GetSessionInfo().bundleName_, skipSurfaceNodeId);
     };
     taskScheduler_->PostAsyncTask(task, where);
 }
