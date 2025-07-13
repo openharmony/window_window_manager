@@ -1497,10 +1497,6 @@ void SceneSession::SetWinRectWhenUpdateRect(const WSRect& rect)
         newRect = rect;
     }
     layoutController_->SetSessionRect(newRect);
-
-    // Window Layout Global Coordinate System
-    auto globalDisplayRect = SessionCoordinateHelper::RelativeToGlobalDisplayRect(GetScreenId(), newRect);
-    UpdateGlobalDisplayRect(globalDisplayRect, GetSizeChangeReason());
 }
 
 WSError SceneSession::NotifyClientToUpdateRectTask(const std::string& updateReason,
@@ -3529,6 +3525,15 @@ void SceneSession::HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect,
         } else {
             TLOGNE(WmsLogTag::WMS_LAYOUT, "Func is null, could not request vsync");
         }
+    }
+
+    // Window Layout Global Coordinate System
+    // During drag (except DRAG_END), the rect is relative to the original display and can be
+    // converted to global. At DRAG_END, the rect is relative to the new display, but displayId
+    // may not be updated yet, so skip updating GlobalDisplayRect to avoid incorrect conversion.
+    if (reason != SizeChangeReason::DRAG_END) {
+        auto globalDisplayRect = SessionCoordinateHelper::RelativeToGlobalDisplayRect(GetScreenId(), rect);
+        UpdateGlobalDisplayRect(globalDisplayRect, reason);
     }
 }
 
