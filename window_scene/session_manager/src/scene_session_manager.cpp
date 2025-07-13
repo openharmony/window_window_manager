@@ -10282,7 +10282,7 @@ WMError SceneSessionManager::FlushSessionBlackListInfoMapWhenRemove()
                 { .privacyWindowTag = info.privacyWindowTag }) == screenRSBlackListConfigMap_[screenId].end();
             bool notInSessionConfigSet = sessionRSBlackListConfigSet_.find(info) == sessionRSBlackListConfigSet_.end();
             if (notInScreenConfigMap || notInSessionConfigSet) {
-                sessionBlackListInfoMap_[screenId].erase(info);   
+                it = infoSet.erase(it);
             } else {
                 ++it;
             }
@@ -10310,7 +10310,7 @@ WMError SceneSessionManager::FlushSessionBlackListInfoMapWhenRemove(ScreenId scr
             { .privacyWindowTag = info.privacyWindowTag }) == screenRSBlackListConfigMap_[screenId].end();
         bool notInSessionConfigSet = sessionRSBlackListConfigSet_.find(info) == sessionRSBlackListConfigSet_.end();
         if (notInScreenConfigMap || notInSessionConfigSet) {
-            sessionBlackListInfoMap_[screenId].erase(info);   
+            it = infoSet.erase(it);
         } else {
             ++it;
         }

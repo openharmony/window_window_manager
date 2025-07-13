@@ -1435,8 +1435,8 @@ HWTEST_F(SceneSessionManagerTest8, NotifyOnAttachToFrameNode01, TestSize.Level1)
 
     sptr<Session> session = nullptr;
     ssm_->NotifyOnAttachToFrameNode(session);
-    EXPECT_EQ(sessionBlackListInfoSet.size(), 0);
-    EXPECT_EQ(sessionRSBlackListConfigSet_.size(), 0);
+    EXPECT_EQ(ssm_->sessionBlackListInfoMap_.size(), 0);
+    EXPECT_EQ(ssm_->sessionRSBlackListConfigSet_.size(), 0);
 
     ssm_->screenRSBlackListConfigMap_.clear();
     ssm_->sessionRSBlackListConfigSet_.clear();
@@ -1461,9 +1461,9 @@ HWTEST_F(SceneSessionManagerTest8, AddSkipSurfaceNodeWhenAttach01, TestSize.Leve
     ssm_->bundleRSBlackListConfigMap_["test"].insert({ "test" });
     ssm_->screenRSBlackListConfigMap_[0].insert({ .privacyWindowTag = "test" });
 
-    ssm_->AddSkipSurfaceNodeWhenAttach(persistentId, "test", static_cast<uint64_t(persistentId));
-    EXPECT_EQ(sessionBlackListInfoSet.size(), 1);
-    EXPECT_EQ(sessionRSBlackListConfigSet_.size(), 1);
+    ssm_->AddSkipSurfaceNodeWhenAttach(persistentId, "test", static_cast<uint64_t>(persistentId));
+    EXPECT_EQ(ssm_->sessionBlackListInfoMap_.size(), 1);
+    EXPECT_EQ(ssm_->sessionRSBlackListConfigSet_.size(), 1);
 
     ssm_->screenRSBlackListConfigMap_.clear();
     ssm_->sessionRSBlackListConfigSet_.clear();
