@@ -10343,7 +10343,7 @@ void SceneSessionManager::NotifyOnAttachToFrameNode(const sptr<Session>& session
     }
     auto where = __func__;
     auto task = [this, session, where] {
-        TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s, wid: %{public}d", where.c_str(), windowId);
+        TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s, wid: %{public}d", where.c_str(), session->GetPersistentId());
         uint64_t skipSurfaceNodeId = WindowHelper::IsMainWindow(session->GetWindowType()) ?
             static_cast<uint64_t>session->GetPersistentId() : session->GetSurfaceNode()->GetId();
         AddSkipSurfaceNodeWhenAttach(session->GetPersistentId(),
