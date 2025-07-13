@@ -1994,6 +1994,8 @@ WMError SceneSessionManager::RemoveSkipSelfWhenShowOnVirtualScreenList(const std
 WMError SceneSessionManager::SetScreenPrivacyWindowTagSwitch(
     uint64_t screenId, const std::vector<std::string>& privacyWindowTags, bool enable)
 {
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "screenId: %{public}" PRIu64 ", tagsize: %{public}zu, enable: %{public}d",
+        screenId, privacyWindowTags, enable);
     if (!SessionPermission::IsSACalling()) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
