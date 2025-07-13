@@ -393,7 +393,7 @@ void JsWindowListener::KeyboardWillAnimateWithName(const KeyboardAnimationInfo& 
         napi_value argv[] = { objValue };
         thisListener->CallJsMethod(callBackName.c_str(), argv, ArraySize(argv));
     };
-    if (napi_send_event(env_, jsCallback, 
+    if (napi_send_event(env_, jsCallback,
         napi_eprio_immediate, "KeyboardWillAnimateWithName") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to send event");
     }
