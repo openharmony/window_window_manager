@@ -10335,21 +10335,32 @@ void SceneSessionManager::UpdateVirtualScreenBlackList(ScreenId screenId)
     rsInterface_.SetVirtualScreenBlackList(screenId, skipSurfaceNodeIds);
 }
 
-void SceneSessionManager::OnAttachToFrameNode(int32_t windowId)
+void SceneSessionManager::NotifyOnAttachToFrameNode(
+    int32_t windowId, const std::string& bundleName, uint64_t surfaceNodeId)
 {
     auto where = __func__;
-    auto task = [this, windowId, where] {
-        auto sceneSession = GetSceneSession(windowId);
-        if (sceneSession == nullptr) {
-            return;
-        }
-        if (bundleRSBlackListConfigMap_.find(sceneSession->GetSessionInfo().bundleName_) !=
-            bundleRSBlackListConfigMap_.end()) {
-            AddSessionBlackList(
-                { sceneSession }, bundleRSBlackListConfigMap_[sceneSession->GetSessionInfo().bundleName_]);
-        }
+    auto task = [this, windowId, bundleName, surfaceNodeId, where] {
+        TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s, wid: %{public}d", where.c_str(), windowId);
+        AddSkipSurfaceNodeWhenAttach(windowId, bundleName, surfaceNodeId);
     };
     taskScheduler_->PostAsyncTask(task, where);
+}
+
+void SceneSessionManager::AddSkipSurfaceNodeWhenAttach(
+    int32_t windowId, const std::string& bundleName, uint64_t surfaceNodeId)
+{
+    if (bundleRSBlackListConfigMap_.find(bundleName) != bundleRSBlackListConfigMap_.end()) {
+        for (const auto& tag : bundleRSBlackListConfigMap_[bundleName]) {
+            sessionRSBlackListConfigSet_.insert({ .windowId = windowId, .privacyWindowTag = tag });
+            for (const auto& [screenId, infoSet] : screenRSBlackListConfigMap_) {
+                if (info.find({ .privacyWindowTag = tag }) != info.end()) {
+                    sessionBlackListInfoMap_[screenId].insert({ .windowId = windowId, .privacyWindowTag = tag });
+                    std::vector<uint64_t> skipSurfaceNodeIds = { surfaceNodeId };
+                    rsInterface_.AddVirtualScreenBlackList(screenId, skipSurfaceNodeIds);
+                }
+            }
+        }
+    }
 }
 
 void SceneSessionManager::AddskipSurfaceNodeIdSet(int32_t windowId, std::unordered_set<uint64_t>& skipSurfaceNodeIdSet)
