@@ -443,6 +443,11 @@ public:
     bool NeedCheckContextTransparent() const;
 
     /*
+     * Window Layout
+     */
+    bool UpdateWindowModeSupportType(const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo);
+
+    /*
      * Window Rotate Animation
      */
     void SetAcquireRotateAnimationConfigFunc(const AcquireRotateAnimationConfigFunc& func);
@@ -891,6 +896,10 @@ protected:
         SizeChangeReason reason = SizeChangeReason::UNDEFINED) const { return false; }
     bool IsDragStart() const { return isDragStart_; }
     void SetDragStart(bool isDragStart);
+    std::vector<AppExecFwk::SupportWindowMode> ExtractSupportWindowModeFromMetaData(
+        const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo);
+    std::vector<AppExecFwk::SupportWindowMode> ParseWindowModeFromMetaData(
+        const std::string& supportModesInFreeMultiWindow);
     HasRequestedVsyncFunc hasRequestedVsyncFunc_;
     RequestNextVsyncWhenModeChangeFunc requestNextVsyncWhenModeChangeFunc_;
     WSError RequestNextVsyncWhenModeChange();
