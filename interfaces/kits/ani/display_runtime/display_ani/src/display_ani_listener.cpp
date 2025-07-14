@@ -82,7 +82,7 @@ void DisplayAniListener::RemoveAllCallback()
 
 void DisplayAniListener::OnCreate(DisplayId id)
 {
-    TLOGI(WmsLogTag::DMS, "[ANI] OnCreate begin");
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
     auto thisListener = weakRef_.promote();
     if (thisListener == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] this listener is nullptr");
@@ -130,7 +130,7 @@ void DisplayAniListener::OnDestroy(DisplayId id)
 }
 void DisplayAniListener::OnChange(DisplayId id)
 {
-    TLOGI(WmsLogTag::DMS, "[ANI] OnChange begin");
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
     auto thisListener = weakRef_.promote();
     if (thisListener == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] this listener is nullptr");
@@ -175,7 +175,7 @@ void DisplayAniListener::OnChange(DisplayId id)
 }
 void DisplayAniListener::OnPrivateWindow(bool hasPrivate)
 {
-    TLOGI(WmsLogTag::DMS, "[ANI] OnPrivateWindow is called, hasPrivate: %{public}u",
+    TLOGI(WmsLogTag::DMS, "[ANI] called, hasPrivate: %{public}u",
         static_cast<uint32_t>(hasPrivate));
     auto thisListener = weakRef_.promote();
     if (thisListener == nullptr || env_ == nullptr) {
@@ -191,27 +191,28 @@ void DisplayAniListener::OnPrivateWindow(bool hasPrivate)
         TLOGE(WmsLogTag::DMS, "[ANI] OnPrivateWindow not this event, return");
         return;
     }
-    if (env_ != nullptr) {
-        auto it = aniCallBack_.find(EVENT_PRIVATE_MODE_CHANGE);
-        for (auto oneAniCallback : it->second) {
-            auto task = [env = env_, oneAniCallback, hasPrivate] () {
-                DisplayAniUtils::CallAniFunctionVoid(env, "L@ohos/display/display;", "captureStatusChangedCallback",
-                    nullptr, oneAniCallback, hasPrivate);
-            };
-            if (!eventHandler_) {
-                TLOGE(WmsLogTag::DEFAULT, "get main event handler failed!");
-                return;
-            }
-            eventHandler_->PostTask(task, "dms:AniDisplayListener::PrivateWindowCallback", 0,
-                AppExecFwk::EventQueue::Priority::IMMEDIATE);
-        }
-    } else {
+    if (env_ == nullptr) {
         TLOGE(WmsLogTag::DMS, "[ANI] OnPrivateWindow: env is nullptr");
+        return;
+    }
+
+    auto it = aniCallBack_.find(EVENT_PRIVATE_MODE_CHANGE);
+    for (auto oneAniCallback : it->second) {
+        auto task = [env = env_, oneAniCallback, hasPrivate] () {
+            DisplayAniUtils::CallAniFunctionVoid(env, "L@ohos/display/display;", "captureStatusChangedCallback",
+                nullptr, oneAniCallback, hasPrivate);
+        };
+        if (!eventHandler_) {
+            TLOGE(WmsLogTag::DEFAULT, "get main event handler failed!");
+            return;
+        }
+        eventHandler_->PostTask(task, "dms:AniDisplayListener::PrivateWindowCallback", 0,
+            AppExecFwk::EventQueue::Priority::IMMEDIATE);
     }
 }
 void DisplayAniListener::OnFoldStatusChanged(FoldStatus foldStatus)
 {
-    TLOGI(WmsLogTag::DMS, "[ANI] OnFoldStatusChanged is called, foldStatus: %{public}u",
+    TLOGI(WmsLogTag::DMS, "[ANI] called, foldStatus: %{public}u",
         static_cast<uint32_t>(foldStatus));
     auto thisListener = weakRef_.promote();
     if (thisListener == nullptr || env_ == nullptr) {
@@ -227,27 +228,27 @@ void DisplayAniListener::OnFoldStatusChanged(FoldStatus foldStatus)
         TLOGE(WmsLogTag::DMS, "[ANI] OnFoldStatusChanged not this event, return");
         return;
     }
-    if (env_ != nullptr) {
-        auto it = aniCallBack_.find(EVENT_FOLD_STATUS_CHANGED);
-        for (auto oneAniCallback : it->second) {
-            auto task = [env = env_, oneAniCallback, foldStatus] () {
-                DisplayAniUtils::CallAniFunctionVoid(env, "L@ohos/display/display;", "foldStatusCallback",
-                    nullptr, oneAniCallback, static_cast<ani_int>(foldStatus));
-            };
-            if (!eventHandler_) {
-                TLOGE(WmsLogTag::DEFAULT, "get main event handler failed!");
-                return;
-            }
-            eventHandler_->PostTask(task, "dms:AniDisplayListener::FoldStatusChangedCallback", 0,
-                AppExecFwk::EventQueue::Priority::IMMEDIATE);
-        }
-    } else {
+    if (env_ == nullptr) {
         TLOGE(WmsLogTag::DMS, "[ANI] OnCreate: env is nullptr");
+        return;
+    }
+    auto it = aniCallBack_.find(EVENT_FOLD_STATUS_CHANGED);
+    for (auto oneAniCallback : it->second) {
+        auto task = [env = env_, oneAniCallback, foldStatus] () {
+            DisplayAniUtils::CallAniFunctionVoid(env, "L@ohos/display/display;", "foldStatusCallback",
+                nullptr, oneAniCallback, static_cast<ani_int>(foldStatus));
+        };
+        if (!eventHandler_) {
+            TLOGE(WmsLogTag::DEFAULT, "get main event handler failed!");
+            return;
+        }
+        eventHandler_->PostTask(task, "dms:AniDisplayListener::FoldStatusChangedCallback", 0,
+            AppExecFwk::EventQueue::Priority::IMMEDIATE);
     }
 }
 void DisplayAniListener::OnFoldAngleChanged(std::vector<float> foldAngles)
 {
-    TLOGI(WmsLogTag::DMS, "[ANI] OnFoldAngleChanged is called");
+    TLOGI(WmsLogTag::DMS, "[ANI] called");
     auto thisListener = weakRef_.promote();
     if (thisListener == nullptr || env_ == nullptr) {
         TLOGE(WmsLogTag::DMS, "[ANI] this listener or env is nullptr");
@@ -284,7 +285,7 @@ void DisplayAniListener::OnFoldAngleChanged(std::vector<float> foldAngles)
 }
 void DisplayAniListener::OnCaptureStatusChanged(bool isCapture)
 {
-    TLOGI(WmsLogTag::DMS, "[ANI] OnCaptureStatusChanged is called");
+    TLOGI(WmsLogTag::DMS, "[ANI] called");
     auto thisListener = weakRef_.promote();
     if (thisListener == nullptr || env_ == nullptr) {
         TLOGE(WmsLogTag::DMS, "[ANI] this listener or env is nullptr");
@@ -319,7 +320,7 @@ void DisplayAniListener::OnCaptureStatusChanged(bool isCapture)
 }
 void DisplayAniListener::OnDisplayModeChanged(FoldDisplayMode foldDisplayMode)
 {
-    TLOGI(WmsLogTag::DMS, "[ANI] OnDisplayModeChanged is called, foldDisplayMode: %{public}u",
+    TLOGI(WmsLogTag::DMS, "[ANI] called, foldDisplayMode: %{public}u",
         static_cast<uint32_t>(foldDisplayMode));
     auto thisListener = weakRef_.promote();
     if (thisListener == nullptr || env_ == nullptr) {
@@ -355,7 +356,7 @@ void DisplayAniListener::OnDisplayModeChanged(FoldDisplayMode foldDisplayMode)
 }
 void DisplayAniListener::OnAvailableAreaChanged(DMRect area)
 {
-    TLOGI(WmsLogTag::DMS, "[ANI] OnAvailableAreaChanged is called");
+    TLOGI(WmsLogTag::DMS, "[ANI] called");
     auto thisListener = weakRef_.promote();
     if (thisListener == nullptr || env_ == nullptr) {
         TLOGE(WmsLogTag::DMS, "[ANI] this listener or env is nullptr");

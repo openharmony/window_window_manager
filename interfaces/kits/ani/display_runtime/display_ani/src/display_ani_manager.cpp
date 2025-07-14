@@ -94,7 +94,7 @@ void DisplayManagerAni::GetCurrentFoldCreaseRegion(ani_env* env, ani_object obj,
 
 void DisplayManagerAni::OnGetCurrentFoldCreaseRegion(ani_env* env, ani_object obj)
 {
-    TLOGI(WmsLogTag::DMS, "[ANI] GetCurrentFoldCreaseRegion begin instance");
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
     sptr<FoldCreaseRegion> region = SingletonContainer::Get<DisplayManager>().GetCurrentFoldCreaseRegion();
     if (region == nullptr) {
         return;
@@ -131,7 +131,7 @@ void DisplayManagerAni::OnGetCurrentFoldCreaseRegion(ani_env* env, ani_object ob
 
 void DisplayManagerAni::GetAllDisplaysAni(ani_env* env, ani_object arrayObj)
 {
-    TLOGI(WmsLogTag::DMS, "[ANI] GetAllDisplaysAni start");
+    TLOGI(WmsLogTag::DMS, "[ANI] start");
     std::vector<sptr<Display>> displays = SingletonContainer::Get<DisplayManager>().GetAllDisplays();
     if (displays.empty()) {
         AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_SCREEN, "");
@@ -156,7 +156,7 @@ void DisplayManagerAni::GetAllDisplaysAni(ani_env* env, ani_object arrayObj)
 
 void DisplayManagerAni::GetDisplayByIdSyncAni(ani_env* env, ani_object obj, ani_double displayId)
 {
-    TLOGE(WmsLogTag::DMS, "[ANI] GetDisplayByIdSyncAni begin");
+    TLOGE(WmsLogTag::DMS, "[ANI] begin");
     if (displayId < 0) {
         TLOGE(WmsLogTag::DMS, "[ANI] Invalid displayId, less than 0");
         return;
@@ -199,7 +199,7 @@ void DisplayManagerAni::RegisterCallback(ani_env* env, ani_string type,
 
 void DisplayManagerAni::OnRegisterCallback(ani_env* env, ani_string type, ani_ref callback)
 {
-    TLOGI(WmsLogTag::DMS, "[ANI] OnRegisterCallback");
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
     std::lock_guard<std::mutex> lock(mtx_);
     std::string typeString;
     DisplayAniUtils::GetStdString(env, type, typeString);
@@ -272,7 +272,7 @@ DmErrorCode DisplayManagerAni::ProcessRegisterCallback(ani_env* env, std::string
 void DisplayManagerAni::UnRegisterCallback(ani_env* env, ani_string type,
     ani_long nativeObj, ani_ref callback)
 {
-    TLOGI(WmsLogTag::DMS, "[ANI] UnRegisterCallback begin");
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
     DisplayManagerAni* displayManagerAni = reinterpret_cast<DisplayManagerAni*>(nativeObj);
     if (displayManagerAni != nullptr) {
         displayManagerAni->OnUnRegisterCallback(env, type, callback);
@@ -283,7 +283,7 @@ void DisplayManagerAni::UnRegisterCallback(ani_env* env, ani_string type,
 
 void DisplayManagerAni::OnUnRegisterCallback(ani_env* env, ani_string type, ani_ref callback)
 {
-    TLOGI(WmsLogTag::DMS, "[ANI] OnUnRegisterCallback begin");
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
     std::string typeString;
     DisplayAniUtils::GetStdString(env, type, typeString);
     std::lock_guard<std::mutex> lock(mtx_);
@@ -311,7 +311,7 @@ void DisplayManagerAni::OnUnRegisterCallback(ani_env* env, ani_string type, ani_
 
 DMError DisplayManagerAni::UnRegisterDisplayListenerWithType(std::string type, ani_env* env, ani_ref callback)
 {
-    TLOGI(WmsLogTag::DMS, "[ANI] UnRegisterDisplayListenerWithType begin");
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
         TLOGI(WmsLogTag::DMS, "[ANI] methodName %{public}s not registered!", type.c_str());
         return DMError::DM_OK;
@@ -358,7 +358,7 @@ DMError DisplayManagerAni::UnRegisterDisplayListenerWithType(std::string type, a
 
 DMError DisplayManagerAni::UnregisterAllDisplayListenerWithType(std::string type)
 {
-    TLOGI(WmsLogTag::DMS, "[ANI] UnregisterAllDisplayListenerWithType begin");
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
         TLOGI(WmsLogTag::DMS, "[ANI] UnregisterAllDisplayListenerWithType methodName %{public}s not registered!",
             type.c_str());
@@ -398,7 +398,7 @@ DMError DisplayManagerAni::UnregisterAllDisplayListenerWithType(std::string type
 
 ani_boolean DisplayManagerAni::HasPrivateWindow(ani_env* env, ani_double displayId)
 {
-    TLOGI(WmsLogTag::DMS, "[ANI] DMS HasPrivateWindow begin");
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
     bool hasPrivateWindow = false;
     if (displayId < 0) {
         std::string errMsg = "Invalid args count, need one arg";
@@ -417,14 +417,14 @@ ani_boolean DisplayManagerAni::HasPrivateWindow(ani_env* env, ani_double display
 
 void DisplayManagerAni::GetAllDisplayPhysicalResolution(ani_env* env, ani_object arrayObj, ani_long nativeObj)
 {
-    TLOGI(WmsLogTag::DMS, "[ANI] DMS GetAllDisplayPhysicalResolution begin");
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
     DisplayManagerAni* displayManagerAni = reinterpret_cast<DisplayManagerAni*>(nativeObj);
     displayManagerAni->OnGetAllDisplayPhysicalResolution(env, arrayObj);
 }
 
 void DisplayManagerAni::OnGetAllDisplayPhysicalResolution(ani_env* env, ani_object arrayObj)
 {
-    TLOGI(WmsLogTag::DMS, "[ANI] DMS OnGetAllDisplayPhysicalResolution begin");
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
     std::vector<DisplayPhysicalResolution> displayPhysicalArray =
             SingletonContainer::Get<DisplayManager>().GetAllDisplayPhysicalResolution();
     if (displayPhysicalArray.empty()) {

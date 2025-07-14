@@ -38,7 +38,7 @@ DisplayAni::DisplayAni(const sptr<Display>& display) : display_(display)
 void DisplayAni::GetCutoutInfo(ani_env* env, ani_object obj, ani_object cutoutInfoObj)
 {
     auto display = SingletonContainer::Get<DisplayManager>().GetDefaultDisplay();
-    TLOGI(WmsLogTag::DMS, "[ANI] GetCutoutInfo begin");
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
     sptr<CutoutInfo> cutoutInfo = display->GetCutoutInfo();
     if (cutoutInfo == nullptr) {
         AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_SCREEN, "");
@@ -77,6 +77,7 @@ void DisplayAni::GetAvailableArea(ani_env* env, ani_object obj, ani_object avail
     env->Object_GetFieldByName_Double(obj, "<property>id", &id);
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(id);
     if (display == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] can not find display.");
         AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_SCREEN,
             "JsDisplay::GetAvailableArea failed, can not find display.");
         return;
@@ -84,6 +85,7 @@ void DisplayAni::GetAvailableArea(ani_env* env, ani_object obj, ani_object avail
     DMRect area;
     DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(display->GetAvailableArea(area));
     if (ret != DmErrorCode::DM_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Display get available area failed.");
         AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_SCREEN,
             "JsDisplay::GetAvailableArea failed.");
         return;
@@ -98,13 +100,15 @@ ani_boolean DisplayAni::HasImmersiveWindow(ani_env* env, ani_object obj)
     env->Object_GetFieldByName_Double(obj, "<property>id", &id);
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(id);
     if (display == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI]can not find display.");
         AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_SCREEN,
-            "JsDisplay::HasImmersiveWindow failed, can not find display.");
+            "can not find display.");
         return false;
     }
     bool immersive = false;
     DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(display->HasImmersiveWindow(immersive));
     if (ret != DmErrorCode::DM_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] get display has immersive window failed.");
         AniErrUtils::ThrowBusinessError(env, ret, "JsDisplay::HasImmersiveWindow failed.");
         return false;
     }
@@ -170,7 +174,7 @@ void DisplayAni::OnRegisterCallback(ani_env* env, ani_object obj, ani_string typ
     std::lock_guard<std::mutex> lock(mtx_);
     if (typeString == EVENT_AVAILABLE_AREA_CHANGED) {
         auto displayId = display_->GetId();
-        TLOGI(WmsLogTag::DMS, "[ANI] OnRegisterCallback availableAreaChange begin");
+        TLOGI(WmsLogTag::DMS, "[ANI] availableAreaChange begin");
         ret = SingletonContainer::Get<DisplayManager>().RegisterAvailableAreaListener(displayAniListener, displayId);
     } else {
         ret = DMError::DM_ERROR_INVALID_PARAM;
@@ -183,7 +187,10 @@ void DisplayAni::OnRegisterCallback(ani_env* env, ani_object obj, ani_string typ
         return;
     }
     ani_ref cbRef{};
-    env->GlobalReference_Create(callback, &cbRef);
+    if (ANI_OK != env->GlobalReference_Create(callback, &cbRef)) {
+        TLOGE(WmsLogTag::DMS, "[ANI]create global ref fail");
+        return;
+    }
     displayAniListener->AddCallback(typeString, cbRef);
     jsCbMap_[typeString][callback] = displayAniListener;
 }
@@ -210,10 +217,10 @@ void DisplayAni::OnUnRegisterCallback(ani_env* env, ani_object obj, ani_string t
     env->Reference_IsUndefined(callback, &callbackNull);
     DmErrorCode ret;
     if (callbackNull) {
-        TLOGI(WmsLogTag::DMS, "[ANI] OnUnRegisterCallback for all");
+        TLOGI(WmsLogTag::DMS, "[ANI] for all");
         ret = DM_JS_TO_ERROR_CODE_MAP.at(UnregisterAllDisplayListenerWithType(typeString));
     } else {
-        TLOGI(WmsLogTag::DMS, "[ANI] OnUnRegisterCallback with type");
+        TLOGI(WmsLogTag::DMS, "[ANI] with type");
         ret = DM_JS_TO_ERROR_CODE_MAP.at(UnregisterDisplayListenerWithType(typeString, env, callback));
     }
 
@@ -229,12 +236,16 @@ DMError DisplayAni::UnregisterAllDisplayListenerWithType(std::string type)
     TLOGI(WmsLogTag::DMS, "[ANI] begin");
     std::lock_guard<std::mutex> lock(mtx_);
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
-        TLOGI(WmsLogTag::DMS, "[ANI] UnregisterAllDisplayListenerWithType methodName %{public}s not registered!",
+        TLOGI(WmsLogTag::DMS, "[ANI] methodName %{public}s not registered!",
             type.c_str());
         return DMError::DM_OK;
     }
     DMError ret = DMError::DM_OK;
     for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
+        if (it->second == nullptr) {
+            TLOGE(WmsLogTag::DMS, "listener is null");
+            continue;
+        }
         it->second->RemoveAllCallback();
         if (type == EVENT_AVAILABLE_AREA_CHANGED) {
             auto displayId = display_->GetId();
@@ -262,6 +273,10 @@ DMError DisplayAni::UnregisterDisplayListenerWithType(std::string type, ani_env*
         ani_boolean isEquals = 0;
         env->Reference_StrictEquals(callback, it->first, &isEquals);
         if (isEquals) {
+            if (it->second == nullptr) {
+                TLOGE(WmsLogTag::DMS, "listener is null");
+                continue;
+            }
             it->second->RemoveCallback(env, type, callback);
             if (type == EVENT_AVAILABLE_AREA_CHANGED) {
                 TLOGI(WmsLogTag::DMS, "[ANI] start to unregis display event listener! event = %{public}s",

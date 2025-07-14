@@ -69,7 +69,7 @@ void ScreenAniListener::RemoveCallback(ani_env* env, const std::string& type, an
 }
 void ScreenAniListener::OnConnect(ScreenId id)
 {
-    TLOGI(WmsLogTag::DMS, "[ANI] OnConnect begin");
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
     std::lock_guard<std::mutex> lock(mtx_);
     auto thisListener = weakRef_.promote();
     if (thisListener == nullptr) {
@@ -114,7 +114,7 @@ void ScreenAniListener::OnConnect(ScreenId id)
 }
 void ScreenAniListener::OnDisconnect(ScreenId id)
 {
-    TLOGI(WmsLogTag::DMS, "[ANI] OnDisconnect begin");
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
     std::lock_guard<std::mutex> lock(mtx_);
     auto thisListener = weakRef_.promote();
     if (thisListener == nullptr) {
@@ -161,7 +161,7 @@ void ScreenAniListener::OnDisconnect(ScreenId id)
 // need to implement
 void ScreenAniListener::OnChange(ScreenId id)
 {
-    TLOGI(WmsLogTag::DMS, "[ANI] OnChange begin");
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
     std::lock_guard<std::mutex> lock(mtx_);
     auto thisListener = weakRef_.promote();
     if (thisListener == nullptr) {
