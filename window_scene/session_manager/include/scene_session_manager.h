@@ -596,7 +596,7 @@ public:
     WMError RemoveSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds) override;
     WMError SetScreenPrivacyWindowTagSwitch(
         uint64_t screenId, const std::vector<std::string>& privacyWindowTags, bool enable) override;
-    void OnAttachToFrameNode(int32_t windowId);
+    void NotifyOnAttachToFrameNode(const sptr<Session>& session);
     WMError NotifyScreenshotEvent(ScreenshotEventType type) override;
     WMError UpdateSessionScreenshotAppEventListener(int32_t persistentId, bool haveListener);
     WMError AddSessionBlackList(const std::unordered_set<std::string>& bundleNames,
@@ -1542,6 +1542,7 @@ private:
     WMError FlushSessionBlackListInfoMapWhenRemove();
     WMError FlushSessionBlackListInfoMapWhenRemove(ScreenId screenId);
     void UpdateVirtualScreenBlackList(ScreenId screenId);
+    void AddSkipSurfaceNodeWhenAttach(int32_t windowId, const std::string& bundleName, uint64_t surfaceNodeId);
     std::unordered_map<std::string, std::unordered_set<std::string>> bundleRSBlackListConfigMap_;
     inline static const std::string WMS_DEFAULT = "WMS_DEFAULT";
 
