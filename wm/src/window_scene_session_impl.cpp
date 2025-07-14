@@ -6486,7 +6486,7 @@ WMError WindowSceneSessionImpl::SetWindowTransitionAnimation(WindowTransitionTyp
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (!IsPcWindow() && !IsPadWindow()) {
+    if (!IsPcOrPadFreeMultiWindowMode()) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     if (!WindowHelper::IsMainWindow(GetType())) {
@@ -6512,7 +6512,7 @@ std::shared_ptr<TransitionAnimation> WindowSceneSessionImpl::GetWindowTransition
     if (IsWindowSessionInvalid()) {
         return nullptr;
     }
-    if (!IsPcWindow() && !IsPadWindow()) {
+    if (!IsPcOrPadFreeMultiWindowMode()) {
         return nullptr;
     }
     if (!WindowHelper::IsMainWindow(GetType())) {
