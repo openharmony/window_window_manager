@@ -77,6 +77,7 @@ public:
     DMError SetSystemKeyboardStatus(bool isTpKeyboardOn = false);
     sptr<ScreenInfo> GetScreenInfoById(ScreenId screenId);
     bool GetKeyboardState();
+    bool SynchronizePowerStatus(ScreenPowerState state);
 private:
     static inline DMError ConvertToDMError(ErrCode errCode, int32_t dmError);
     sptr<IRemoteObject> Remote()
