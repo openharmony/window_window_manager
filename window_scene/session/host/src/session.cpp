@@ -4730,11 +4730,10 @@ WSRect Session::GetGlobalDisplayRect() const
 WSError Session::UpdateGlobalDisplayRect(const WSRect& rect, SizeChangeReason reason)
 {
     const int32_t windowId = GetWindowId();
-    const WSRect curGlobalDisplayRect = GetGlobalDisplayRect();
     TLOGD(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, rect: %{public}s, reason: %{public}u",
         windowId, rect.ToString().c_str(), reason);
-    if (rect == curGlobalDisplayRect && reason == globalDisplayRectSizeChangeReason_) {
-        TLOGW(WmsLogTag::WMS_LAYOUT,
+    if (rect == GetGlobalDisplayRect() && reason == globalDisplayRectSizeChangeReason_) {
+        TLOGD(WmsLogTag::WMS_LAYOUT,
             "No change in rect or reason, windowId: %{public}d, rect: %{public}s, reason: %{public}u",
             windowId, rect.ToString().c_str(), reason);
         return WSError::WS_DO_NOTHING;

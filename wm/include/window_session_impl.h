@@ -1061,6 +1061,7 @@ private:
     std::atomic<WindowStatus> lastWindowStatus_ = WindowStatus::WINDOW_STATUS_UNDEFINED;
     std::atomic<WindowStatus> lastStatusWhenNotifyWindowStatusDidChange_ = WindowStatus::WINDOW_STATUS_UNDEFINED;
     std::atomic<bool> isFirstValidLayoutUpdate_ = true;
+    SizeChangeReason globalDisplayRectSizeChangeReason_ = SizeChangeReason::END;
 
     /*
      * Window Decor

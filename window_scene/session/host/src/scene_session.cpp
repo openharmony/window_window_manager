@@ -3528,13 +3528,12 @@ void SceneSession::HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect,
     }
 
     // Window Layout Global Coordinate System
-    // During drag (except DRAG_END), the rect is relative to the original screen(display) and can be
-    // converted to global. At DRAG_END, the rect is relative to the new screen(display), but screenId
-    // may not be updated yet, so skip updating GlobalDisplayRect to avoid incorrect conversion.
-    if (reason != SizeChangeReason::DRAG_END) {
-        auto globalDisplayRect = SessionCoordinateHelper::RelativeToGlobalDisplayRect(GetScreenId(), rect);
-        UpdateGlobalDisplayRect(globalDisplayRect, reason);
-    }
+    // During drag (except DRAG_END), the rect is relative to the start display(screen).
+    // At DRAG_END, the rect is relative to the end display(screen).
+    auto relativeDisplayId = reason == SizeChangeReason::DRAG_END ?
+        moveDragController_->GetMoveDragEndDisplayId() : moveDragController_->GetMoveDragStartDisplayId();
+    auto globalDisplayRect = SessionCoordinateHelper::RelativeToGlobalDisplayRect(relativeDisplayId, rect);
+    UpdateGlobalDisplayRect(globalDisplayRect, reason);
 }
 
 void SceneSession::OnNextVsyncReceivedWhenDrag(const WSRect& globalRect,
@@ -7936,6 +7935,11 @@ bool SceneSession::NotifyServerToUpdateRect(const SessionUIParam& uiParam, SizeC
     }
     WSRect rect = { uiParam.rect_.posX_ - uiParam.transX_, uiParam.rect_.posY_ - uiParam.transY_,
         uiParam.rect_.width_, uiParam.rect_.height_ };
+
+    // Window Layout Global Coordinate System
+    auto globalDisplayRect = SessionCoordinateHelper::RelativeToGlobalDisplayRect(GetScreenId(), rect);
+    UpdateGlobalDisplayRect(globalDisplayRect, reason);
+
     if (GetSessionRect() == rect && (!sessionStage_ || GetClientRect() == rect) &&
         reason != SizeChangeReason::SPLIT_DRAG_END) {
         TLOGD(WmsLogTag::WMS_PIPELINE, "skip same rect update id:%{public}d rect:%{public}s preGlobalRect:%{public}s!",
@@ -7951,11 +7955,6 @@ bool SceneSession::NotifyServerToUpdateRect(const SessionUIParam& uiParam, SizeC
         "preGlobalRect:%{public}s clientRect:%{public}s", GetPersistentId(), rect.ToString().c_str(),
         GetSessionRect().ToString().c_str(), globalRect.ToString().c_str(), GetClientRect().ToString().c_str());
     layoutController_->SetSessionRect(rect);
-
-    // Window Layout Global Coordinate System
-    auto globalDisplayRect = SessionCoordinateHelper::RelativeToGlobalDisplayRect(GetScreenId(), rect);
-    UpdateGlobalDisplayRect(globalDisplayRect, reason);
-
     RectCheckProcess();
     return true;
 }
