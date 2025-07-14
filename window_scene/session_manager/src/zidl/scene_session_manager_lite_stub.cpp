@@ -240,6 +240,10 @@ int SceneSessionManagerLiteStub::HandlePendingSessionToBackground(MessageParcel&
         return ERR_INVALID_DATA;
     }
     BackgroundParams params;
+    if (!data.ReadInt32(params.persistentId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read persistentId failed");
+        return ERR_INVALID_DATA;
+    }
     if (!data.ReadBool(params.shouldBackToCaller)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read shouldBackToCaller failed");
         return ERR_INVALID_DATA;
@@ -250,8 +254,11 @@ int SceneSessionManagerLiteStub::HandlePendingSessionToBackground(MessageParcel&
     } else {
         params.wantParams = *wantParams;
     }
-    WSError errCode = PendingSessionToBackground(token, params);
-    reply.WriteInt32(static_cast<int32_t>(errCode));
+    WSError ret = PendingSessionToBackground(token, params);
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write ret failed");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 

@@ -99,6 +99,7 @@ public:
     DMError UnregisterDisplayListener(sptr<IDisplayListener> listener);
     bool SetDisplayState(DisplayState state, DisplayStateCallback callback);
     void SetVirtualDisplayMuteFlag(ScreenId screenId, bool muteFlag);
+    bool SetVirtualScreenAsDefault(ScreenId screenId);
     DMError RegisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener);
     DMError UnregisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener);
     DMError RegisterScreenshotListener(sptr<IScreenshotListener> listener);
@@ -677,6 +678,11 @@ sptr<Display> DisplayManager::Impl::GetDefaultDisplaySync()
     defaultDisplayId_ = displayId;
     return displayMap_[displayId];
 }
+ 
+bool DisplayManager::Impl::SetVirtualScreenAsDefault(ScreenId screenId)
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().SetVirtualScreenAsDefault(screenId);
+}
 
 sptr<Display> DisplayManager::Impl::GetDisplayById(DisplayId displayId)
 {
@@ -1034,6 +1040,15 @@ sptr<Display> DisplayManager::GetDefaultDisplaySync(bool isFromNapi)
         }
     }
     return pImpl_->GetDefaultDisplaySync();
+}
+
+bool DisplayManager::SetVirtualScreenAsDefault(ScreenId screenId)
+{
+    if (pImpl_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "pImpl_ is null");
+        return false;
+    }
+    return pImpl_->SetVirtualScreenAsDefault(screenId);
 }
 
 std::vector<DisplayId> DisplayManager::GetAllDisplayIds()
@@ -2557,13 +2572,12 @@ sptr<CutoutInfo> DisplayManager::GetCutoutInfoWithRotation(Rotation rotation)
 
 sptr<CutoutInfo> DisplayManager::Impl::GetCutoutInfoWithRotation(Rotation rotation)
 {
-    int32_t rotationNum = static_cast<int32_t>(rotation);
     auto displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetDefaultDisplayInfo();
     if (displayInfo == nullptr) {
         return nullptr;
     }
-    auto displayId = displayInfo->GetDisplayId();
-    return SingletonContainer::Get<DisplayManagerAdapter>().GetCutoutInfoWithRotation(displayId, rotationNum);
+    return SingletonContainer::Get<DisplayManagerAdapter>().GetCutoutInfo(displayInfo->GetDisplayId(),
+        displayInfo->GetWidth(), displayInfo->GetHeight(), rotation);
 }
 
 DMError DisplayManager::GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,

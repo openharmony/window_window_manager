@@ -2083,6 +2083,7 @@ WSError WindowSessionImpl::LinkKeyFrameCanvasNode(std::shared_ptr<RSCanvasNode>&
         TLOGE(WmsLogTag::WMS_EVENT, "uiContent or session is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
+    RSAdapterUtil::SetRSUIContext(rsCanvasNode, GetRSUIContext(), true);
     uiContent->LinkKeyFrameCanvasNode(rsCanvasNode);
     return WSError::WS_OK;
 }

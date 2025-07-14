@@ -704,5 +704,20 @@ HWTEST_F(DisplayManagerIpcServiceTest, GetAllDisplayPhysicalResolution02, TestSi
     ASSERT_EQ(ERR_OK, dms_->GetAllDisplayPhysicalResolution(displayPhysicalResolutions));
     EXPECT_FALSE(displayPhysicalResolutions.empty());
 }
+
+/**
+ * @tc.name  : SetVirtualScreenAsDefault
+ * @tc.number: SetVirtualScreenAsDefault test
+ * @tc.desc  : FUNC
+ */
+HWTEST_F(DisplayManagerIpcServiceTest, SetVirtualScreenAsDefault, TestSize.Level1) {
+    bool isSucc = false;
+    uint64_t screenId = SCREEN_ID_INVALID;
+ 
+    ErrCode result = dms_->SetVirtualScreenAsDefault(screenId, isSucc);
+ 
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_FALSE(isSucc);
+}
 } // namespace
 } // namespace OHOS::Rosen

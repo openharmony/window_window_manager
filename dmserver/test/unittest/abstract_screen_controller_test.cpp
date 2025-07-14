@@ -1290,6 +1290,23 @@ HWTEST_F(AbstractScreenControllerTest, MakeMirror06, TestSize.Level1)
     ASSERT_TRUE(DMError::DM_OK != absController_->MakeMirror(2, screens));
     ASSERT_EQ(DMError::DM_OK, absController_->StopScreens(screens, ScreenCombination::SCREEN_MIRROR));
 }
+
+/**
+ * @tc.name: SetVirtualScreenAsDefault
+ * @tc.desc: SetVirtualScreenAsDefault test
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenControllerTest, SetVirtualScreenAsDefault, TestSize.Level1)
+{
+    ScreenId screenId = 0;
+    auto res = absController_->SetVirtualScreenAsDefault(screenId);
+    EXPECT_FALSE(res);
+    VirtualScreenOption option;
+    sptr<IRemoteObject> displayManagerAgent = new IRemoteObjectMocker();
+    auto virtualScreenId = absController_->CreateVirtualScreen(option, displayManagerAgent);
+    res = absController_->SetVirtualScreenAsDefault(virtualScreenId);
+    EXPECT_FALSE(res);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

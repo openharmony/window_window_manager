@@ -37,6 +37,8 @@ public:
         const std::vector<uint64_t>& windowIdList, std::vector<uint64_t>& surfaceNodeIds);
     void AddSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds);
     void RemoveSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds);
+    void SetScreenPrivacyWindowTagSwitch(
+        uint64_t screenId, const std::vector<std::string>& privacyWindowTags, bool enable);
 
     /*
      * Multi User

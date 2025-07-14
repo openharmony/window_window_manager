@@ -1753,6 +1753,209 @@ HWTEST_F(sceneSessionManagerProxyTest, GetPiPSettingSwitchStatus, TestSize.Level
     ret = proxy->GetPiPSettingSwitchStatus(switchStatus);
     EXPECT_EQ(ret, WMError::WM_OK);
 }
+
+/**
+ * @tc.name: SetScreenPrivacyWindowTagSwitch01
+ * @tc.desc: SetScreenPrivacyWindowTagSwitch
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, SetScreenPrivacyWindowTagSwitch01, TestSize.Level1)
+{
+    auto tempProxy = sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
+    uint64_t screenId = 0;
+    std::vector<std::string> privacyWindowTags;
+    bool enable = false;
+
+    // remote == nullptr
+    auto ret = tempProxy->SetScreenPrivacyWindowTagSwitch(screenId, privacyWindowTags, enable);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+
+    // WriteInterfaceToken failed
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    auto proxy = sptr<SceneSessionManagerProxy>::MakeSptr(remoteMocker);
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ASSERT_NE(proxy, nullptr);
+    ret = proxy->SetScreenPrivacyWindowTagSwitch(screenId, privacyWindowTags, enable);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    // SendRequest failed
+    ASSERT_NE(proxy, nullptr);
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    ret = proxy->SetScreenPrivacyWindowTagSwitch(screenId, privacyWindowTags, enable);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    remoteMocker->SetRequestResult(ERR_NONE);
+}
+
+/**
+ * @tc.name: SetScreenPrivacyWindowTagSwitch02
+ * @tc.desc: SetScreenPrivacyWindowTagSwitch
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, SetScreenPrivacyWindowTagSwitch02, TestSize.Level1)
+{
+    uint64_t screenId = 0;
+    std::vector<std::string> privacyWindowTags;
+    bool enable = false;
+
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    auto proxy = sptr<SceneSessionManagerProxy>::MakeSptr(remoteMocker);
+
+    // ReadBool failed
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    auto ret = proxy->SetScreenPrivacyWindowTagSwitch(screenId, privacyWindowTags, enable);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteBoolErrorFlag(false);
+
+    // ReadUint64 failed
+    MockMessageParcel::SetWriteUint64ErrorFlag(true);
+    ret = proxy->SetScreenPrivacyWindowTagSwitch(screenId, privacyWindowTags, enable);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteUint64ErrorFlag(false);
+    MockMessageParcel::ClearAllErrorFlag();
+
+    // ReadString failed
+    MockMessageParcel::SetWriteStringErrorFlag(true);
+    ret = proxy->SetScreenPrivacyWindowTagSwitch(screenId, privacyWindowTags, enable);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteStringErrorFlag(false);
+    MockMessageParcel::ClearAllErrorFlag();
+
+    // interface success
+    ret = proxy->SetScreenPrivacyWindowTagSwitch(screenId, privacyWindowTags, enable);
+    EXPECT_EQ(ret, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: AddSessionBlackList01
+ * @tc.desc: AddSessionBlackList
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, AddSessionBlackList01, TestSize.Level1)
+{
+    auto tempProxy = sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
+    std::unordered_set<std::string> bundleNames;
+    std::unordered_set<std::string> privacyWindowTags;
+
+    // remote == nullptr
+    auto ret = tempProxy->AddSessionBlackList(bundleNames, privacyWindowTags);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+
+    // WriteInterfaceToken failed
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    auto proxy = sptr<SceneSessionManagerProxy>::MakeSptr(remoteMocker);
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ASSERT_NE(proxy, nullptr);
+    ret = proxy->AddSessionBlackList(bundleNames, privacyWindowTags);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    // SendRequest failed
+    ASSERT_NE(proxy, nullptr);
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    ret = proxy->AddSessionBlackList(bundleNames, privacyWindowTags);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    remoteMocker->SetRequestResult(ERR_NONE);
+}
+
+/**
+ * @tc.name: AddSessionBlackList02
+ * @tc.desc: AddSessionBlackList
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, AddSessionBlackList02, TestSize.Level1)
+{
+    std::unordered_set<std::string> bundleNames;
+    std::unordered_set<std::string> privacyWindowTags;
+
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    auto proxy = sptr<SceneSessionManagerProxy>::MakeSptr(remoteMocker);
+
+    // ReadUint64 failed
+    MockMessageParcel::SetWriteUint64ErrorFlag(true);
+    auto ret = proxy->AddSessionBlackList(bundleNames, privacyWindowTags);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteUint64ErrorFlag(false);
+    MockMessageParcel::ClearAllErrorFlag();
+
+    // ReadString failed
+    MockMessageParcel::SetWriteStringErrorFlag(true);
+    ret = proxy->AddSessionBlackList(bundleNames, privacyWindowTags);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteStringErrorFlag(false);
+    MockMessageParcel::ClearAllErrorFlag();
+
+    // interface success
+    ret = proxy->AddSessionBlackList(bundleNames, privacyWindowTags);
+    EXPECT_EQ(ret, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: RemoveSessionBlackList01
+ * @tc.desc: RemoveSessionBlackList
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, RemoveSessionBlackList01, TestSize.Level1)
+{
+    auto tempProxy = sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
+    std::unordered_set<std::string> bundleNames;
+    std::unordered_set<std::string> privacyWindowTags;
+
+    // remote == nullptr
+    auto ret = tempProxy->RemoveSessionBlackList(bundleNames, privacyWindowTags);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+
+    // WriteInterfaceToken failed
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    auto proxy = sptr<SceneSessionManagerProxy>::MakeSptr(remoteMocker);
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ASSERT_NE(proxy, nullptr);
+    ret = proxy->RemoveSessionBlackList(bundleNames, privacyWindowTags);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    // SendRequest failed
+    ASSERT_NE(proxy, nullptr);
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    ret = proxy->RemoveSessionBlackList(bundleNames, privacyWindowTags);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    remoteMocker->SetRequestResult(ERR_NONE);
+}
+
+/**
+ * @tc.name: RemoveSessionBlackList02
+ * @tc.desc: RemoveSessionBlackList
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, RemoveSessionBlackList02, TestSize.Level1)
+{
+    std::unordered_set<std::string> bundleNames;
+    std::unordered_set<std::string> privacyWindowTags;
+
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    auto proxy = sptr<SceneSessionManagerProxy>::MakeSptr(remoteMocker);
+
+    // ReadUint64 failed
+    MockMessageParcel::SetWriteUint64ErrorFlag(true);
+    auto ret = proxy->RemoveSessionBlackList(bundleNames, privacyWindowTags);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteUint64ErrorFlag(false);
+    MockMessageParcel::ClearAllErrorFlag();
+
+    // ReadString failed
+    MockMessageParcel::SetWriteStringErrorFlag(true);
+    ret = proxy->RemoveSessionBlackList(bundleNames, privacyWindowTags);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteStringErrorFlag(false);
+    MockMessageParcel::ClearAllErrorFlag();
+
+    // interface success
+    ret = proxy->RemoveSessionBlackList(bundleNames, privacyWindowTags);
+    EXPECT_EQ(ret, WMError::WM_OK);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
