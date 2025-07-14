@@ -478,6 +478,8 @@ HWTEST_F(WindowOptionTest, SetUIExtensionUsage, TestSize.Level1)
     EXPECT_EQ(0, option->GetUIExtensionUsage());
     option->SetUIExtensionUsage(1);
     EXPECT_EQ(1, option->GetUIExtensionUsage());
+    option->SetUIExtensionUsage(static_cast<uint32_t>(UIExtensionUsage::UIEXTENSION_USAGE_END));
+    EXPECT_EQ(static_cast<uint32_t>(UIExtensionUsage::EMBEDDED), option->GetUIExtensionUsage());
 }
 
 /**
@@ -602,6 +604,18 @@ HWTEST_F(WindowOptionTest, GetSubWindowZLevel, TestSize.Level1)
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->zLevel_ = 1;
     ASSERT_EQ(1, option->GetSubWindowZLevel());
+}
+
+/**
+ * @tc.name: SetZIndex
+ * @tc.desc: test SetZIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowOptionTest, SetZIndex, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetZIndex(0);
+    ASSERT_EQ(0, option->GetZIndex());
 }
 
 /**
