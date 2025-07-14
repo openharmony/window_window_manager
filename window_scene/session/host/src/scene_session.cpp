@@ -7152,6 +7152,25 @@ WSError SceneSession::OnDefaultDensityEnabled(bool isDefaultDensityEnabled)
     return WSError::WS_OK;
 }
 
+WMError SceneSession::OnUpdateAbilityColorMode(const std::string& colorMode, bool hasDarkRes)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, colorMode: %{public}s, hasDarkRes: %{public}u",
+          GetPersistentId(), colorMode.c_str(), hasDarkRes);
+    colorMode_ = colorMode;
+    hasDarkRes_ = hasDarkRes;
+    return WMError::WM_OK;
+}
+
+std::string SceneSession::GetAbilityColorMode() const
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, colorMode: %{public}s, hasDarkRes: %{public}u",
+          GetPersistentId(), colorMode_.c_str(), hasDarkRes_);
+    if (colorMode_ == AppExecFwk::ConfigurationInner::COLOR_MODE_DARK && !hasDarkRes_) {
+        return AppExecFwk::ConfigurationInner::COLOR_MODE_AUTO;
+    }
+    return colorMode_;
+}
+
 /** @note @Window.Layout */
 WMError SceneSession::UpdateWindowModeForUITest(int32_t updateMode)
 {
