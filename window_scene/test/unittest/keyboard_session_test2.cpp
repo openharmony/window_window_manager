@@ -859,6 +859,60 @@ HWTEST_F(KeyboardSessionTest2, RaiseCallingSession08, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RaiseCallingSession09
+ * @tc.desc: RaiseCallingSession09
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest2, RaiseCallingSession09, TestSize.Level1)
+{
+    sptr<SceneSession> callingSession = nullptr;
+    sptr<KeyboardSession> keyboardSession = nullptr;
+    sptr<SceneSession> statusBarSession = nullptr;
+    sptr<OccupiedAreaChangeInfo> occupiedAreaInfo = nullptr;
+    ConstructKeyboardCallingWindowTestData(callingSession, keyboardSession, statusBarSession);
+    sptr<SceneSession> panelSession = keyboardSession->GetKeyboardPanelSession();
+    keyboardSession->property_->SetIsSystemKeyboard(false);
+    keyboardSession->SetSessionState(SessionState::STATE_FOREGROUND);
+
+    callingSession->layoutController_->SetScale(1.0, 1.0, 0.5, 0.5);
+    callingSession->layoutController_->SetSessionRect({500, 0, 2000, 2000});
+    callingSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    callingSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+
+    callingSession->SetLastSafeRect({0, 0, 0, 0});
+    panelSession->layoutController_->SetSessionRect({0, 1990, 3000, 1000});
+    auto ret = keyboardSession->RaiseCallingSession(callingSession, occupiedAreaInfo);
+    EXPECT_EQ(ret, true);
+    ASSERT_NE(nullptr, occupiedAreaInfo);
+    EXPECT_EQ(10, occupiedAreaInfo->safeHeight_);
+
+    callingSession->SetLastSafeRect({0, 0, 0, 0});
+    callingSession->layoutController_->SetSessionRect({500, 30, 2000, 2000});
+    panelSession->layoutController_->SetSessionRect({0, 1980, 3000, 1000});
+    ret = keyboardSession->RaiseCallingSession(callingSession, occupiedAreaInfo);
+    EXPECT_EQ(ret, true);
+    ASSERT_NE(nullptr, occupiedAreaInfo);
+    EXPECT_EQ(20, occupiedAreaInfo->safeHeight_);
+
+    callingSession->layoutController_->SetScale(1.5, 1.5, 0.5, 0.5);
+    callingSession->layoutController_->SetSessionRect({500, 500, 2000, 2000});
+    panelSession->layoutController_->SetSessionRect({0, 3000, 4000, 1000});
+    callingSession->SetOriPosYBeforeRaisedByKeyboard(0);
+    ret = keyboardSession->RaiseCallingSession(callingSession, occupiedAreaInfo);
+    EXPECT_EQ(ret, true);
+    ASSERT_NE(nullptr, occupiedAreaInfo);
+    EXPECT_EQ(0, occupiedAreaInfo->safeHeight_);
+
+    callingSession->layoutController_->SetSessionRect({500, 550, 2000, 2000});
+    panelSession->layoutController_->SetSessionRect({0, 2990, 4000, 1000});
+    callingSession->SetOriPosYBeforeRaisedByKeyboard(0);
+    ret = keyboardSession->RaiseCallingSession(callingSession, occupiedAreaInfo);
+    EXPECT_EQ(ret, true);
+    ASSERT_NE(nullptr, occupiedAreaInfo);
+    EXPECT_EQ(60, occupiedAreaInfo->safeHeight_);
+}
+
+/**
  * @tc.name: OpenKeyboardSyncTransaction01
  * @tc.desc: OpenKeyboardSyncTransaction
  * @tc.type: FUNC
@@ -1101,6 +1155,35 @@ HWTEST_F(KeyboardSessionTest2, EnableCallingSessionAvoidArea01, TestSize.Level1)
     };
     keyboardSession->EnableCallingSessionAvoidArea();
     EXPECT_TRUE(g_logMsg.find("Calling session is null") != std::string::npos);
+}
+
+/**
+ * @tc.name: CalculateScaledRect01
+ * @tc.desc: test function: CalculateScaledRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest2, CalculateScaledRect01, TestSize.Level1)
+{
+    std::string abilityName = "CalculateScaledRect01";
+    std::string bundleName = "CalculateScaledRect01";
+    sptr<KeyboardSession> keyboardSession = GetKeyboardSession(abilityName, bundleName);
+
+    WSRect rect = {500, 500, 2000, 2000};
+    WSRect scaledRect = keyboardSession->CalculateScaledRect(rect, 1, 1);
+    EXPECT_TRUE(scaledRect == rect);
+
+    scaledRect = keyboardSession->CalculateScaledRect(rect, 1, 1.5);
+    WSRect result = {500, 0, 2000, 3000};
+    EXPECT_TRUE(scaledRect == result);
+
+    scaledRect = keyboardSession->CalculateScaledRect(rect, 1.5, 1);
+    result = {0, 500, 3000, 2000};
+    EXPECT_TRUE(scaledRect == result);
+
+    rect = {922, 277, 1274, 1387};
+    scaledRect = keyboardSession->CalculateScaledRect(rect, 1.399529, 1.399423);
+    result = {667, 0, 1783, 1941};
+    EXPECT_TRUE(scaledRect == result);
 }
 } // namespace
 } // namespace Rosen
