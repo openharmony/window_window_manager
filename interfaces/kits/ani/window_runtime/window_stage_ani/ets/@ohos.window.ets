@@ -1956,12 +1956,12 @@ export class WindowInternal implements Window {
     private native setSpecificSystemBarEnabled(nativeObj: long, name: String, enable: boolean, enableAnimation: boolean): int;
     private native snapshot(nativeObj: long): image.PixelMap;
     private native hideNonSystemFloatingWindows(nativeObj: long, shouldHide: boolean): void;
-    private native opacity(nativeObj: long, opacity: number): void;
+    private native opacity(nativeObj: long, opacity: double): void;
     private native scale(nativeObj: long, scaleOptions: ScaleOptions): void;
     private native translate(nativeObj: long, translateOptions: TranslateOptions): void;
     private native rotate(nativeObj: long, rotateOptions: RotateOptions): void;
-    private native setShadow(nativeObj: long, radius: number, color?: string,
-      offsetX?: number, offsetY?: number): void;
+    private native setShadow(nativeObj: long, radius: double, color?: string,
+      offsetX?: double, offsetY?: double): void;
 
     private native setWindowColorSpaceSync(nativeObj: long, colorSpace: int): void;
     private native setPreferredOrientationSync(nativeObj: long, orientation: int): void;
@@ -2712,7 +2712,7 @@ export class WindowInternal implements Window {
       });
     }
 
-    public opacity(opacity: number): void {
+    public opacity(opacity: double): void {
       this.opacity(this.nativeObj, opacity);
     }
 
@@ -2728,7 +2728,7 @@ export class WindowInternal implements Window {
       this.rotate(this.nativeObj, rotateOptions);
     }
 
-    public setShadow(radius: number, color?: string, offsetX?: number, offsetY?: number): void {
+    public setShadow(radius: double, color?: string, offsetX?: double, offsetY?: double): void {
       this.setShadow(this.nativeObj, radius, color, offsetX, offsetY);
     }
 
@@ -2923,11 +2923,11 @@ export interface Window {
     keepKeyboardOnFocus(enable: boolean): void;
     setWindowTouchable(isTouchable: boolean): Promise<void>
     setWindowTouchable(isTouchable: boolean, callback: AsyncCallback<void>): void
-    opacity(opacity: number): void;
+    opacity(opacity: double): void;
     scale(scaleOptions: ScaleOptions): void;
     translate(translateOptions: TranslateOptions): void;
     rotate(rotateOptions: RotateOptions): void;
-    setShadow(radius: number, color?: string, offsetX?: number, offsetY?: number): void;
+    setShadow(radius: double, color?: string, offsetX?: double, offsetY?: double): void;
     on<T>(type: string, callback: Callback<T>): void;
     on<T>(type: 'noInteractionDetected', timeout: number, callback: Callback<T>): void;
     off<T>(type: string, callback?: Callback<T>): void;
