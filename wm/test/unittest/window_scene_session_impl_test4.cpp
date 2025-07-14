@@ -1049,7 +1049,7 @@ HWTEST_F(WindowSceneSessionImplTest4, AddSubWindowMapForExtensionWindow, TestSiz
     windowSession->property_->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
     windowSession->context_ = abilityContext_;
     windowSession->property_->SetPersistentId(2);
-    WindowSessionImpl::windowExtensionSessionSet_.insert(windowSession);
+    WindowSessionImpl::GetWindowExtensionSessionSet().insert(windowSession);
     window->AddSubWindowMapForExtensionWindow();
     EXPECT_EQ(WindowSceneSessionImpl::subWindowSessionMap_.size(), 1);
     EXPECT_EQ(WMError::WM_OK, window->Destroy(true));

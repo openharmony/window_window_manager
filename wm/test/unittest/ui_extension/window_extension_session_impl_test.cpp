@@ -315,9 +315,9 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateConfigurationForAll02, TestSize.L
 {
     std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();
     ASSERT_NE(nullptr, window_);
-    window_->windowExtensionSessionSet_.insert(window_);
+    window_->GetWindowExtensionSessionSet().insert(window_);
     window_->UpdateConfigurationForAll(configuration);
-    window_->windowExtensionSessionSet_.erase(window_);
+    window_->GetWindowExtensionSessionSet().erase(window_);
 }
 
 /**
@@ -337,11 +337,11 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateConfigurationForAll03, TestSize.L
     window_->property_->SetPersistentId(1);
     ASSERT_EQ(WMError::WM_OK, window_->Create(abilityContext, session));
     ASSERT_NE(nullptr, window_);
-    window_->windowExtensionSessionSet_.insert(window_);
+    window_->GetWindowExtensionSessionSet().insert(window_);
     std::vector<std::shared_ptr<AbilityRuntime::Context>> ignoreWindowContexts;
     ignoreWindowContexts.push_back(abilityContext);
     window_->UpdateConfigurationForAll(configuration, ignoreWindowContexts);
-    window_->windowExtensionSessionSet_.erase(window_);
+    window_->GetWindowExtensionSessionSet().erase(window_);
 }
 
 /**
@@ -2540,9 +2540,9 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateConfigurationSyncForAll, TestSize
 {
     std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();
     ASSERT_NE(nullptr, window_);
-    window_->windowExtensionSessionSet_.insert(window_);
+    window_->GetWindowExtensionSessionSet().insert(window_);
     window_->UpdateConfigurationSyncForAll(configuration);
-    window_->windowExtensionSessionSet_.erase(window_);
+    window_->GetWindowExtensionSessionSet().erase(window_);
 }
 
 /**
