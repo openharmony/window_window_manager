@@ -474,6 +474,7 @@ public:
     DMError GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
         ScreenId& screenId, DMRect& screenArea) override;
     bool SetScreenOffset(ScreenId screenId, float offsetX, float offsetY);
+    bool SynchronizePowerStatus(ScreenPowerState state) override;
 
 protected:
     ScreenSessionManager();
