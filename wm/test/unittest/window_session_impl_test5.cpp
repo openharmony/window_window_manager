@@ -752,8 +752,8 @@ HWTEST_F(WindowSessionImplTest5, GetScaleWindow, Function | SmallTest | Level2)
     sptr<WindowOption> option2 = sptr<WindowOption>::MakeSptr();
     option2->SetWindowName("GetScaleWindow_extensionWindow");
     sptr<WindowSessionImpl> extensionWindow = sptr<WindowSessionImpl>::MakeSptr(option2);
-    WindowSessionImpl::windowExtensionSessionSet_.clear();
-    WindowSessionImpl::windowExtensionSessionSet_.insert(extensionWindow);
+    WindowSessionImpl::GetWindowExtensionSessionSet().clear();
+    WindowSessionImpl::GetWindowExtensionSessionSet().insert(extensionWindow);
     extensionWindow->property_->SetPersistentId(2);
     extensionWindow->isUIExtensionAbilityProcess_ = true;
     int32_t testId = 3;
@@ -774,7 +774,7 @@ HWTEST_F(WindowSessionImplTest5, GetScaleWindow, Function | SmallTest | Level2)
     res = mainWindow->GetScaleWindow(testId);
     EXPECT_EQ(res, nullptr);
     WindowSessionImpl::windowSessionMap_.clear();
-    WindowSessionImpl::windowExtensionSessionSet_.clear();
+    WindowSessionImpl::GetWindowExtensionSessionSet().clear();
 }
 
 /**
@@ -840,8 +840,8 @@ HWTEST_F(WindowSessionImplTest5, GetWindowScaleCoordinate02, Function | SmallTes
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetWindowScaleCoordinate02_extensionWindow");
     sptr<WindowSessionImpl> extensionWindow = sptr<WindowSessionImpl>::MakeSptr(option);
-    WindowSessionImpl::windowExtensionSessionSet_.clear();
-    WindowSessionImpl::windowExtensionSessionSet_.insert(extensionWindow);
+    WindowSessionImpl::GetWindowExtensionSessionSet().clear();
+    WindowSessionImpl::GetWindowExtensionSessionSet().insert(extensionWindow);
     extensionWindow->property_->SetPersistentId(2);
     extensionWindow->isUIExtensionAbilityProcess_ = true;
     extensionWindow->property_->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
@@ -862,7 +862,7 @@ HWTEST_F(WindowSessionImplTest5, GetWindowScaleCoordinate02, Function | SmallTes
     extensionWindow->compatScaleX_ = 0.5;
     res = extensionWindow->GetWindowScaleCoordinate(x, y, id);
     EXPECT_EQ(res, WMError::WM_OK);
-    WindowSessionImpl::windowExtensionSessionSet_.clear();
+    WindowSessionImpl::GetWindowExtensionSessionSet().clear();
 }
 
 /**
@@ -1041,7 +1041,7 @@ HWTEST_F(WindowSessionImplTest5, GetPropertyByContext, Function | SmallTest | Le
     mainWindow->property_->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
     property = window->GetPropertyByContext();
     EXPECT_EQ(property->GetPersistentId(), persistentId);
-    window->windowExtensionSessionSet_.insert(mainWindow);
+    window->GetWindowExtensionSessionSet().insert(mainWindow);
     property = window->GetPropertyByContext();
     EXPECT_EQ(property->GetPersistentId(), mainPersistentId);
 }
