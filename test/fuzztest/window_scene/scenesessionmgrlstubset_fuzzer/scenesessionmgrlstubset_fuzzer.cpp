@@ -79,6 +79,10 @@ void SceneSessionMgrLsSetTestCode(MessageParcel& parcel)
     SceneSessionManagerLite::GetInstance().OnRemoteRequest(
         static_cast<uint32_t>(ISceneSessionManagerLite::SceneSessionManagerLiteMessage::TRANS_ID_TERMINATE_SESSION_NEW),
         parcel, reply, option);
+    parcel.RewindRead(0);
+    SceneSessionManagerLite::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManagerLite::
+            SceneSessionManagerLiteMessage::TRANS_ID_GET_CALLING_WINDOW_INFO),
+        parcel, reply, option);
 }
 
 bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
