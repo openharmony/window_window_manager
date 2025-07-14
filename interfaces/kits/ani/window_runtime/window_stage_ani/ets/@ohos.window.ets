@@ -1211,19 +1211,19 @@ export interface Configuration {
     /**
      * Indicates Parent window id
      *
-     * @type { ?number }
+     * @type { ?int }
      * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @since 9
      */
     /**
      * Indicates Parent window id
      *
-     * @type { ?number }
+     * @type { ?int }
      * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @atomicservice
      * @since 12
      */
-    parentId?: number;
+    parentId?: int;
 
     /**
      * Indicates whether enable window decor, only support dialog, The default value is false.
@@ -1251,7 +1251,7 @@ export class ConfigurationInternal implements Configuration {
     windowType: WindowType;
     ctx?: BaseContext;
     displayId?: number;
-    parentId?: number;
+    parentId?: int;
     decorEnabled?: boolean;
     title?: string;
 }
@@ -2945,7 +2945,7 @@ export function setNativeObj(nativeObject: long):void {
 
 native function getWindowsByCoordinate(nativeObj: long, param: window.GetWindowsByCoordinateParam): Array<Window>;
 native function getLastWindowSync(nativeObj: long, ctx: BaseContext): Window;
-native function minimizeAllSync(nativeObj: long, id: number): void;
+native function minimizeAllSync(nativeObj: long, id: int): void;
 native function findWindowSync(nativeObj: long, name: string): Window;
 native function onSync(nativeObj: long, type: string, callback: object): void;
 native function offSync(nativeObj: long, type: string, callback?: object): void;
@@ -2998,7 +2998,7 @@ export function createWindow(config: Configuration, callback: AsyncCallback<Wind
     });
 }
 
-export function minimizeAll(id: number): Promise<void> {
+export function minimizeAll(id: int): Promise<void> {
   return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
       taskpool.execute((): void => {
           minimizeAllSync(nativeObj, id);
@@ -3010,7 +3010,7 @@ export function minimizeAll(id: number): Promise<void> {
   }); 
 }
 
-export function minimizeAll(id: number, callback: AsyncCallback<void>): void {
+export function minimizeAll(id: int, callback: AsyncCallback<void>): void {
     taskpool.execute((): void => {
         minimizeAllSync(nativeObj, id);
     }).then((ret: NullishType) => {

@@ -65,7 +65,7 @@ ani_status AniWindowManager::AniWindowManagerInit(ani_env* env)
         ani_native_function {"findWindowSync",
             "JLstd/core/String;:L@ohos/window/window/Window;",
             reinterpret_cast<void *>(AniWindowManager::FindWindow)},
-        ani_native_function {"minimizeAllSync", "JD:V", reinterpret_cast<void *>(AniWindowManager::MinimizeAll)},
+        ani_native_function {"minimizeAllSync", "JI:V", reinterpret_cast<void *>(AniWindowManager::MinimizeAll)},
         ani_native_function {"shiftAppWindowFocusSync", "JDD:V",
             reinterpret_cast<void *>(AniWindowManager::ShiftAppWindowFocus)},
         ani_native_function {"onSync", nullptr,
