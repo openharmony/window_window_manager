@@ -10342,7 +10342,7 @@ void SceneSessionManager::UpdateVirtualScreenBlackList(ScreenId screenId)
 void SceneSessionManager::NotifyOnAttachToFrameNode(const sptr<Session>& session)
 {
     if (session == nullptr) {
-        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "session is nullptr");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "session is nullptr");
         return;
     }
     auto where = __func__;
