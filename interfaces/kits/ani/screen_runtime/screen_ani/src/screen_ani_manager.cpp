@@ -47,7 +47,7 @@ void ScreenManagerAni::RegisterCallback(ani_env* env, ani_string type, ani_ref c
 
 void ScreenManagerAni::UnRegisterCallback(ani_env* env, ani_string type, ani_long nativeObj, ani_ref callback)
 {
-    TLOGI(WmsLogTag::DMS, "[ANI] UnRegisterCallback begin");
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
     ScreenManagerAni* screenManagerAni = reinterpret_cast<ScreenManagerAni*>(nativeObj);
     if (screenManagerAni != nullptr) {
         screenManagerAni->OnUnRegisterCallback(env, type, callback);
@@ -58,7 +58,7 @@ void ScreenManagerAni::UnRegisterCallback(ani_env* env, ani_string type, ani_lon
 
 void ScreenManagerAni::OnRegisterCallback(ani_env* env, ani_string type, ani_ref callback)
 {
-    TLOGI(WmsLogTag::DMS, "[ANI] OnRegisterCallback begin");
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
     std::lock_guard<std::mutex> lock(mtx_);
     std::string typeString;
     ScreenAniUtils::GetStdString(env, type, typeString);
@@ -110,7 +110,7 @@ DmErrorCode ScreenManagerAni::ProcessRegisterCallback(ani_env* env, std::string&
 
 void ScreenManagerAni::OnUnRegisterCallback(ani_env* env, ani_string type, ani_ref callback)
 {
-    TLOGI(WmsLogTag::DMS, "[ANI] OnUnRegisterCallback begin");
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
     std::string typeString;
     ScreenAniUtils::GetStdString(env, type, typeString);
     std::lock_guard<std::mutex> lock(mtx_);
@@ -138,7 +138,7 @@ void ScreenManagerAni::OnUnRegisterCallback(ani_env* env, ani_string type, ani_r
 
 DMError ScreenManagerAni::UnRegisterScreenListenerWithType(std::string type, ani_env* env, ani_ref callback)
 {
-    TLOGI(WmsLogTag::DMS, "[ANI] UnRegisterScreenListenerWithType begin");
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
         TLOGI(WmsLogTag::DMS, "[ANI] methodName %{public}s not registered!", type.c_str());
         return DMError::DM_OK;
@@ -162,7 +162,7 @@ DMError ScreenManagerAni::UnRegisterScreenListenerWithType(std::string type, ani
 
 DMError ScreenManagerAni::UnRegisterAllScreenListenerWithType(std::string type)
 {
-    TLOGI(WmsLogTag::DMS, "[ANI] UnregisterAllScreenListenerWithType begin");
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
         TLOGI(WmsLogTag::DMS, "[ANI] UnregisterAllScreenListenerWithType methodName %{public}s not registered!",
             type.c_str());
@@ -206,7 +206,7 @@ ani_double ScreenManagerAni::MakeMirror(ani_env* env, ani_double mainScreen, ani
 
 ani_status ScreenManagerAni::InitScreenManagerAni(ani_namespace screenNameSpace, ani_env* env)
 {
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    TLOGI(WmsLogTag::DEFAULT, "[ANI] begin");
     ani_function setObjFunc = nullptr;
     ani_status ret = env->Namespace_FindFunction(screenNameSpace, "setScreenMgrRef", "J:V", &setObjFunc);
     if (ret != ANI_OK) {
@@ -225,7 +225,7 @@ ani_status ScreenManagerAni::InitScreenManagerAni(ani_namespace screenNameSpace,
 void ScreenManagerAni::GetAllScreens(ani_env* env, ani_object screensAni)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsScreenManager::OnGetAllScreens");
-    TLOGI(WmsLogTag::DMS, "[ANI] GetAllScreens start");
+    TLOGI(WmsLogTag::DMS, "[ANI] start");
     std::vector<sptr<Screen>> screens;
     auto res = DM_JS_TO_ERROR_CODE_MAP.at(SingletonContainer::Get<ScreenManager>().GetAllScreens(screens));
     if (res != DmErrorCode::DM_OK) {

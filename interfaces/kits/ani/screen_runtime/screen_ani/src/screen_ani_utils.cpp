@@ -158,7 +158,7 @@ ani_status ScreenAniUtils::ConvertScreens(ani_env *env, std::vector<sptr<Screen>
 ani_status ScreenAniUtils::CallAniFunctionVoid(ani_env *env, const char* ns,
     const char* fn, const char* signature, ...)
 {
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]CallAniFunctionVoid begin");
+    TLOGI(WmsLogTag::DEFAULT, "[ANI] begin");
     ani_status ret = ANI_OK;
     ani_namespace aniNamespace{};
     if ((ret = env->FindNamespace(ns, &aniNamespace)) != ANI_OK) {

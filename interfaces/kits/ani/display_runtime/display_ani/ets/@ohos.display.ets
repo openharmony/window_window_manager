@@ -114,7 +114,6 @@ export class FoldCreaseRegionImpl implements FoldCreaseRegion {
 }
 
 export enum FoldDisplayMode {
-
     FOLD_DISPLAY_MODE_UNKNOWN = 0,
 
     FOLD_DISPLAY_MODE_FULL,
@@ -127,7 +126,6 @@ export enum FoldDisplayMode {
 }
 
 export enum Orientation {
-
     PORTRAIT = 0,
 
     LANDSCAPE = 1,
@@ -148,7 +146,6 @@ export enum FoldStatus {
   }
 
 enum DisplayState {
-
     STATE_UNKNOWN = 0,
 
     STATE_OFF,
@@ -212,6 +209,7 @@ export interface Display {
     hasImmersiveWindow(): Promise<boolean>;
 
     on(type: string, callback: Callback<Rect>): void;
+
     off(type: string, callback?: Callback<Rect>): void;
 }
 
@@ -334,13 +332,13 @@ export class DisplayImpl implements Display {
     on(type: string, callback: Callback<Rect>): void {
         this.syncOn(type, callback as object);
     }
+
     off(type: string, callback?: Callback<Rect>): void {
         this.syncOff(type, callback as object);
     }
 
     native syncOn(type: string, callback: object): void;
     native syncOff(type: string, callback?: object): void;
-
     native getAvailableAreaInternal(rect: Rect): void;
     native getCutoutInfoInternal(cutoutInfo: CutoutInfo): void;
     native hasImmersiveWindowInternal(): boolean;
@@ -534,21 +532,20 @@ export function getAllDisplayPhysicalResolution(): Promise<Array<DisplayPhysical
 }
 
 function minusResolutionArray(resolutions: Array<DisplayPhysicalResolution>): void {
-    let i = 0;
-    for (; i < resolutions.length; i++) {
-        if (resolutions[i].physicalWidth == 0) {
+    let index = 0;
+    for (; index < resolutions.length; index++) {
+        if (resolutions[index].physicalWidth == 0) {
             break;
         }
-        let resolution = resolutions[i] as DisplayPhysicalResolutionImpl;
+        let resolution = resolutions[index] as DisplayPhysicalResolutionImpl;
         resolution.foldDisplayMode = resolution.foldDisplayMode_ as FoldDisplayMode;
     }
-    resolutions.splice(i);
+    resolutions.splice(index);
 }
 
 export native function getAllDisplayPhysicalResolutionNative(PhysicalResolutions: Array<DisplayPhysicalResolution>, nativeObj: long): void;
 
 export interface DisplayPhysicalResolution {
-
     foldDisplayMode: FoldDisplayMode;
 
     physicalWidth: number;
@@ -557,7 +554,6 @@ export interface DisplayPhysicalResolution {
 }
 
 export class DisplayPhysicalResolutionImpl implements DisplayPhysicalResolution{
-
     foldDisplayMode: FoldDisplayMode;
     foldDisplayMode_: int;
 
