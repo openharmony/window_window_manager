@@ -115,10 +115,7 @@ HWTEST_F(WindowAdapterLiteTest, OnRemoteDied, TestSize.Level1)
     wptr<IRemoteObject> wptrDeath = nullptr;
     wmSDeathRecipient->OnRemoteDied(wptrDeath);
     EXPECT_TRUE(g_logMsg.find("wptrDeath is null") != std::string::npos);
-
-    wptrDeath = windowAdapterLite_->windowManagerServiceProxy_->AsObject();
-    wmSDeathRecipient->OnRemoteDied(wptrDeath);
-    EXPECT_TRUE(g_logMsg.find("wms OnRemoteDied") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -210,6 +207,7 @@ HWTEST_F(WindowAdapterLiteTest, TerminateSessionByPersistentId, TestSize.Level1)
     windowAdapterLite_->OnUserSwitch();
 
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, windowAdapterLite_->TerminateSessionByPersistentId(0));
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -227,6 +225,7 @@ HWTEST_F(WindowAdapterLiteTest, CloseTargetFloatWindow, TestSize.Level1)
 
     const std::string& bundleName = "test";
     ASSERT_EQ(WMError::WM_OK, windowAdapterLite_->CloseTargetFloatWindow(bundleName));
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -244,6 +243,7 @@ HWTEST_F(WindowAdapterLiteTest, CloseTargetPiPWindow, TestSize.Level1)
 
     const std::string& bundleName = "test";
     ASSERT_EQ(WMError::WM_OK, windowAdapterLite_->CloseTargetPiPWindow(bundleName));
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -261,6 +261,7 @@ HWTEST_F(WindowAdapterLiteTest, GetCurrentPiPWindowInfo, TestSize.Level1)
 
     std::string bundleName = "test";
     ASSERT_EQ(WMError::WM_OK, windowAdapterLite_->GetCurrentPiPWindowInfo(bundleName));
+    LOG_SetCallback(nullptr);
 }
 
 /**

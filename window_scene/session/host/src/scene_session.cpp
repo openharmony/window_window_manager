@@ -9043,6 +9043,16 @@ bool SceneSession::IsSubWindowOutlineEnabled() const
 WSError SceneSession::SetWindowTransitionAnimation(WindowTransitionType transitionType,
     const TransitionAnimation& animation)
 {
+    if (!IsPcWindow() && !systemConfig_.IsPadWindow()) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Not pc or pad device");
+        return WSError::WS_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    if (!WindowHelper::IsMainWindow(GetWindowType())) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Scene session is not main window");
+        return WSError::WS_ERROR_INVALID_CALLING;
+    }
+
     if (updateTransitionAnimationFunc_) {
         updateTransitionAnimationFunc_(transitionType, animation);
     }

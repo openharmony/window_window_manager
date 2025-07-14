@@ -1116,6 +1116,36 @@ HWTEST_F(SceneSessionTest6, TestUpdateGlobalDisplayRectFromClient, Function | Sm
         EXPECT_EQ(result, WSError::WS_OK);
     }
 }
+
+/**
+ * @tc.name: SetWindowTransitionAnimation
+ * @tc.desc: SetWindowTransitionAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, SetWindowTransitionAnimation, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    WindowTransitionType transitionType = WindowTransitionType::DESTROY;
+    TransitionAnimation animation;
+
+    session->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    auto ret = session->SetWindowTransitionAnimation(transitionType, animation);
+    ASSERT_EQ(ret, WSError::WS_ERROR_DEVICE_NOT_SUPPORT);
+
+    session->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    session->systemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    ret = session->SetWindowTransitionAnimation(transitionType, animation);
+    ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_CALLING);
+
+    session->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ret = session->SetWindowTransitionAnimation(transitionType, animation);
+    ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_CALLING);
+
+    session->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ret = session->SetWindowTransitionAnimation(transitionType, animation);
+    ASSERT_EQ(ret, WSError::WS_OK);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
