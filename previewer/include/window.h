@@ -565,6 +565,14 @@ public:
      */
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) {}
 
+    /**
+     * @brief Set touch event
+     *
+     * @param touchType int32_t.
+     * @return * void
+     */
+    virtual void SetTouchEvent(int32_t touchType) {}
+
     virtual WMError SetImmersiveModeEnabledState(bool enable) { return WMError::WM_OK; }
 
     virtual bool GetImmersiveModeEnabledState() const { return true; }
