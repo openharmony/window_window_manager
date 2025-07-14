@@ -17,11 +17,8 @@
 #define OHOS_ROSEN_WINDOW_SESSION_COORDINATE_HELPER_H
 
 #include <optional>
-#include <unordered_map>
 
-#include "dm_common.h"
 #include "interfaces/include/ws_common.h"
-#include "screen_session_manager_client/include/screen_session_manager_client.h"
 
 namespace OHOS::Rosen {
 

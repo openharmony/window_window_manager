@@ -15,6 +15,8 @@
 
 #include "session_coordinate_helper.h"
 
+#include "dm_common.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "window_manager_hilog.h"
 #include "wm_math.h"
 
@@ -45,14 +47,11 @@ WSScreenRelativeRect SessionCoordinateHelper::GlobalToScreenRelativeRect(
 {
     auto originalScreen = ScreenSessionManagerClient::GetInstance().GetScreenSession(originalScreenId);
     if (!originalScreen) {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "Original screen not found, screenId: %{public}" PRIu64, originalScreenId);
         return { MAIN_SCREEN_ID_DEFAULT, globalRect };
     }
 
     const float originalScreenVpr = originalScreen->GetScreenProperty().GetVirtualPixelRatio();
     if (MathHelper::NearZero(originalScreenVpr)) {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "Invalid VPR (%{public}f) for screenId: %{public}" PRIu64,
-              originalScreenVpr, originalScreenId);
         return { MAIN_SCREEN_ID_DEFAULT, globalRect };
     }
 
@@ -106,6 +105,6 @@ WSScreenRelativeRect SessionCoordinateHelper::GlobalToScreenRelativeRect(
     };
     TLOGD(WmsLogTag::WMS_LAYOUT, "matchedScreenId: %{public}" PRIu64 ", relativeRect: %{public}s",
         matchedScreenId, relativeRect.ToString().c_str());
-    return WSScreenRelativeRect{ matchedScreenId , relativeRect };
+    return { matchedScreenId, relativeRect };
 }
 } // namespace OHOS::Rosen
