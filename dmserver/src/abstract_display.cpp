@@ -25,7 +25,7 @@ namespace {
 constexpr int32_t PAD_SCREEN_WIDTH = 2560;
 constexpr int32_t PHONE_SCREEN_WIDTH = 2160;
 constexpr float INCH_2_MM = 25.4f;
-const ScreenId DEFAULT_DISPLAY_ID = 0;
+constexpr ScreenId DEFAULT_DISPLAY_ID = 0;
 }
 
 AbstractDisplay::AbstractDisplay(DisplayId id, sptr<SupportedScreenModes>& info, sptr<AbstractScreen>& absScreen)
