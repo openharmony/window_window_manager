@@ -950,8 +950,7 @@ napi_value OnCreateVirtualScreen(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::DMS, "called");
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        errMsg = "Device not support.";
-        return NapiThrowError(env, DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT, errMsg);
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT, "Device not support.");
     }
     DmErrorCode errCode = DmErrorCode::DM_OK;
     VirtualScreenOption option;
