@@ -7164,7 +7164,7 @@ WMError SceneSession::OnUpdateAbilityColorMode(const std::string& colorMode, boo
 std::string SceneSession::GetAbilityColorMode() const
 {
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, colorMode: %{public}s, hasDarkRes: %{public}u",
-          GetPersistentId(), colorMode_.c_str(), hasDarkRes_);
+        GetPersistentId(), colorMode_.c_str(), hasDarkRes_);
     if (colorMode_ == AppExecFwk::ConfigurationInner::COLOR_MODE_DARK && !hasDarkRes_) {
         return AppExecFwk::ConfigurationInner::COLOR_MODE_AUTO;
     }
