@@ -16,6 +16,7 @@
 #include "session_coordinate_helper.h"
 
 #include "window_manager_hilog.h"
+#include "wm_math.h"
 
 namespace OHOS::Rosen {
 WSRect SessionCoordinateHelper::RelativeToGlobalDisplayRect(ScreenId screenId, const WSRect& relativeRect)
@@ -48,9 +49,15 @@ WSScreenRelativeRect SessionCoordinateHelper::GlobalToScreenRelativeRect(
         return { MAIN_SCREEN_ID_DEFAULT, globalRect };
     }
 
+    const float originalScreenVpr = originalScreen->GetScreenProperty().GetVirtualPixelRatio();
+    if (MathHelper::NearZero(originalScreenVpr)) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Invalid VPR (%{public}f) for screenId: %{public}" PRIu64,
+              originalScreenVpr, originalScreenId);
+        return { MAIN_SCREEN_ID_DEFAULT, globalRect };
+    }
+
     // Convert globalRect's size (width/height) to virtual pixel units using original screen's VPR.
     // Keep posX/posY unchanged, only adjust width and height to match how large it would appear on different screens.
-    const float originalScreenVpr = originalScreen->GetScreenProperty().GetVirtualPixelRatio();
     const float widthInVp = globalRect.width_ / originalScreenVpr;
     const float heightInVp = globalRect.height_ / originalScreenVpr;
 
