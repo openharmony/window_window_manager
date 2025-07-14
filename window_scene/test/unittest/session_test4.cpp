@@ -1375,19 +1375,27 @@ HWTEST_F(WindowSessionTest4, TestUpdateGlobalDisplayRect, TestSize.Level1)
     session_->SetGlobalDisplayRect(rect);
     session_->globalDisplayRectSizeChangeReason_ = SizeChangeReason::RESIZE;
 
-    auto result = session_->UpdateGlobalDisplayRect(rect, SizeChangeReason::RESIZE);
-    EXPECT_EQ(result, WSError::WS_DO_NOTHING);
+    auto ret = session_->UpdateGlobalDisplayRect(rect, SizeChangeReason::RESIZE);
+    EXPECT_EQ(ret, WSError::WS_DO_NOTHING);
+    EXPECT_EQ(session_->GetGlobalDisplayRect(), rect);
+    EXPECT_EQ(session_->globalDisplayRectSizeChangeReason_, SizeChangeReason::RESIZE);
 
-    result = session_->UpdateGlobalDisplayRect(rect, SizeChangeReason::MOVE);
-    EXPECT_EQ(result, WSError::WS_OK);
+    ret = session_->UpdateGlobalDisplayRect(rect, SizeChangeReason::MOVE);
+    EXPECT_EQ(ret, WSError::WS_OK);
+    EXPECT_EQ(session_->GetGlobalDisplayRect(), rect);
+    EXPECT_EQ(session_->globalDisplayRectSizeChangeReason_, SizeChangeReason::MOVE);
 
     WSRect updated = { 30, 40, 200, 100 };
-    result = session_->UpdateGlobalDisplayRect(updated, SizeChangeReason::MOVE);
-    EXPECT_EQ(result, WSError::WS_OK);
+    ret = session_->UpdateGlobalDisplayRect(updated, SizeChangeReason::MOVE);
+    EXPECT_EQ(ret, WSError::WS_OK);
+    EXPECT_EQ(session_->GetGlobalDisplayRect(), updated);
+    EXPECT_EQ(session_->globalDisplayRectSizeChangeReason_, SizeChangeReason::MOVE);
 
     updated = { 0, 0, 200, 100 };
-    result = session_->UpdateGlobalDisplayRect(updated, SizeChangeReason::DRAG);
-    EXPECT_EQ(result, WSError::WS_OK);
+    ret = session_->UpdateGlobalDisplayRect(updated, SizeChangeReason::DRAG);
+    EXPECT_EQ(ret, WSError::WS_OK);
+    EXPECT_EQ(session_->GetGlobalDisplayRect(), updated);
+    EXPECT_EQ(session_->globalDisplayRectSizeChangeReason_, SizeChangeReason::DRAG);
 }
 
 /**

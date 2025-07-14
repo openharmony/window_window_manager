@@ -2407,13 +2407,18 @@ WMError WindowSessionImpl::GlobalDisplayToClient(const Position& inPosition, Pos
 
 WSError WindowSessionImpl::UpdateGlobalDisplayRectFromServer(const WSRect& rect, SizeChangeReason reason)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, rect: %{public}s, reason: %{public}d",
-        GetPersistentId(), rect.ToString().c_str(), static_cast<int32_t>(reason));
+    const uint32_t windowId = GetWindowId();
+    TLOGD(WmsLogTag::WMS_LAYOUT, "windowId: %{public}u, rect: %{public}s, reason: %{public}u",
+        windowId, rect.ToString().c_str(), reason);
     Rect newRect = { rect.posX_, rect.posY_, rect.width_, rect.height_ };
-    if (newRect == GetGlobalDisplayRect()) {
+    if (newRect == GetGlobalDisplayRect() && reason == globalDisplayRectSizeChangeReason_) {
+        TLOGD(WmsLogTag::WMS_LAYOUT,
+            "No change in rect or reason, windowId: %{public}d, rect: %{public}s, reason: %{public}u",
+            windowId, rect.ToString().c_str(), reason);
         return WSError::WS_DO_NOTHING;
     }
     property_->SetGlobalDisplayRect(newRect);
+    globalDisplayRectSizeChangeReason_ = reason;
     NotifyGlobalDisplayRectChange(newRect, static_cast<WindowSizeChangeReason>(reason));
     return WSError::WS_OK;
 }

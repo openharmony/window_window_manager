@@ -2346,8 +2346,8 @@ napi_value JsWindow::HandlePositionTransform(
     if (errCode != WmErrorCode::WM_OK) {
         return NapiThrowError(env, errCode);
     }
-    TLOGI(WmsLogTag::WMS_LAYOUT, "%{public}s: inPosition: %{public}s, outPosition: %{public}s",
-        caller, inPosition.ToString().c_str(), outPosition.ToString().c_str());
+    TLOGI(WmsLogTag::WMS_LAYOUT, "%{public}s: windowId: %{public}u, inPosition: %{public}s, outPosition: %{public}s",
+        caller, windowToken_->GetWindowId(), inPosition.ToString().c_str(), outPosition.ToString().c_str());
 
     auto jsOutPosition = BuildJsPosition(env, outPosition);
     if (!jsOutPosition) {
