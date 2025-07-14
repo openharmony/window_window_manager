@@ -17,16 +17,16 @@
 #include <cstdint>
 #include <parcel.h>
 #include <securec.h>
-
 #include <iremote_stub.h>
+
+#include "marshalling_helper.h"
 #include "message_option.h"
 #include "message_parcel.h"
-#include "marshalling_helper.h"
 #include "session_stage_stub.h"
 #include "session_stage_ipc_interface_code.h"
+#include "sessionstagestublayout_fuzzer.h"
 #include "window_session_impl.h"
 #include "window_option.h"
-#include "sessionstagestublayout_fuzzer.h"
 
 using namespace OHOS::Rosen;
 
