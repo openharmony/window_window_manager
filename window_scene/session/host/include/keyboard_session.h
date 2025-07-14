@@ -117,6 +117,7 @@ private:
     void CloseRSTransaction();
     bool stateChanged_ = false;
     void CalculateOccupiedAreaAfterUIRefresh() override;
+    WSRect CalculateScaledRect(WSRect sessionRect, float scaleX, float scaleY);
 
     sptr<KeyboardSessionCallback> keyboardCallback_ = nullptr;
     bool isKeyboardSyncTransactionOpen_ = false;

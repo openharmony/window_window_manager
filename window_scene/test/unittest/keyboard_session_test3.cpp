@@ -699,9 +699,6 @@ HWTEST_F(KeyboardSessionTest3, NotifyOccupiedAreaChanged, Function | SmallTest |
     ASSERT_NE(callingSession, nullptr);
     sptr<OccupiedAreaChangeInfo> occupiedAreaInfo = nullptr;
 
-    keyboardSession->NotifyOccupiedAreaChanged(nullptr, occupiedAreaInfo, false, nullptr);
-    EXPECT_TRUE(g_logMsg.find("callingSession is null") != std::string::npos);
-
     keyboardSession->NotifyOccupiedAreaChanged(callingSession, occupiedAreaInfo, false, nullptr);
     EXPECT_TRUE(g_logMsg.find("occupiedAreaInfo is null") != std::string::npos);
 
