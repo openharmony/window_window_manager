@@ -1128,23 +1128,30 @@ HWTEST_F(SceneSessionTest6, SetWindowTransitionAnimation, Function | SmallTest |
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     WindowTransitionType transitionType = WindowTransitionType::DESTROY;
     TransitionAnimation animation;
+    session->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
 
     session->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     auto ret = session->SetWindowTransitionAnimation(transitionType, animation);
     ASSERT_EQ(ret, WSError::WS_ERROR_DEVICE_NOT_SUPPORT);
 
-    session->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
-    session->systemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
-    ret = session->SetWindowTransitionAnimation(transitionType, animation);
-    ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_CALLING);
-
     session->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     ret = session->SetWindowTransitionAnimation(transitionType, animation);
-    ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_CALLING);
+    ASSERT_EQ(ret, WSError::WS_OK);
 
-    session->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    session->systemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    session->systemConfig_.freeMultiWindowEnable_ = false;
+    session->systemConfig_.freeMultiWindowSupport_ = false;
+    ret = session->SetWindowTransitionAnimation(transitionType, animation);
+    ASSERT_EQ(ret, WSError::WS_ERROR_DEVICE_NOT_SUPPORT);
+
+    session->systemConfig_.freeMultiWindowEnable_ = true;
+    session->systemConfig_.freeMultiWindowSupport_ = true;
     ret = session->SetWindowTransitionAnimation(transitionType, animation);
     ASSERT_EQ(ret, WSError::WS_OK);
+
+    session->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    ret = session->SetWindowTransitionAnimation(transitionType, animation);
+    ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_CALLING);
 }
 } // namespace
 } // namespace Rosen
