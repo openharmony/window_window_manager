@@ -949,16 +949,16 @@ napi_value CreateJsCreaseRectsArrayObject(napi_env env, std::vector<DMRect> crea
 napi_value OnCreateVirtualScreen(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::DMS, "called");
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        errMsg = "Device not support.";
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT, errMsg);
+    }
     DmErrorCode errCode = DmErrorCode::DM_OK;
     VirtualScreenOption option;
     size_t argc = 4;
     std::string errMsg = "";
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        errMsg = "Device not support.";
-        return NapiThrowError(env, DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT, errMsg);
-    }
     if (argc < ARGC_ONE) {
         errMsg = "Invalid args count, need one arg at least!";
         errCode = DmErrorCode::DM_ERROR_INVALID_PARAM;
