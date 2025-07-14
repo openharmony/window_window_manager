@@ -1091,6 +1091,7 @@ private:
     bool isDragStart_ = { false };
     std::atomic_bool isWindowModeDirty_ = false;
     std::atomic<int32_t> timesToWaitForVsync_ = 0;
+    SizeChangeReason globalDisplayRectSizeChangeReason_;
 
     /*
      * Screen Lock

@@ -4729,14 +4729,18 @@ WSRect Session::GetGlobalDisplayRect() const
 
 WSError Session::UpdateGlobalDisplayRect(const WSRect& rect, SizeChangeReason reason)
 {
-    WSRect curGlobalDisplayRect = GetGlobalDisplayRect();
-    TLOGD(WmsLogTag::WMS_LAYOUT,
-        "windowId: %{public}d, rect: %{public}s, reason: %{public}u, curGlobalDisplayRect: %{public}s",
-        GetPersistentId(), rect.ToString().c_str(), reason, curGlobalDisplayRect.ToString().c_str());
-    if (rect == curGlobalDisplayRect) {
+    const int32_t windowId = GetWindowId();
+    const WSRect curGlobalDisplayRect = GetGlobalDisplayRect();
+    TLOGD(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, rect: %{public}s, reason: %{public}u",
+        windowId, rect.ToString().c_str(), reason);
+    if (rect == curGlobalDisplayRect && reason == globalDisplayRectSizeChangeReason_) {
+        TLOGW(WmsLogTag::WMS_LAYOUT,
+            "No change in rect or reason, windowId: %{public}d, rect: %{public}s, reason: %{public}u",
+            windowId, rect.ToString().c_str(), reason);
         return WSError::WS_DO_NOTHING;
     }
     SetGlobalDisplayRect(rect);
+    globalDisplayRectSizeChangeReason_ = reason;
     NotifyClientToUpdateGlobalDisplayRect(rect, reason);
     return WSError::WS_OK;
 }
