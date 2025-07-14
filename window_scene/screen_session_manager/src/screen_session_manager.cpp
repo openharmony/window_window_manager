@@ -10654,6 +10654,30 @@ DMError ScreenSessionManager::SetPrimaryDisplaySystemDpi(float virtualPixelRatio
     return DMError::DM_OK;
 }
 
+DMError ScreenSessionManager::SetVirtualScreenAutoRotation(ScreenId screenId, bool enable)
+{
+    TLOGI(WmsLogTag::DMS, "enter");
+    if (!SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::DMS, "permission denied!");
+        return DMError::DM_ERROR_INVALID_PERMISSION;
+    }
+
+    ScreenId rsScreenId = SCREEN_ID_INVALID;
+    bool res = ConvertScreenIdToRsScreenId(screenId, rsScreenId);
+    if (!res) {
+        TLOGE(WmsLogTag::DMS, "convert screenId to rsScreenId failed");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    TLOGI(WmsLogTag::DMS, "unique screenId: %{public}" PRIu64 " rsScreenId: %{public}" PRIu64, screenId, rsScreenId);
+
+    auto ret = rsInterface_.SetVirtualScreenAutoRotation(rsScreenId, enable);
+    if (ret != StatusCode::SUCCESS) {
+        TLOGE(WmsLogTag::DMS, "rsInterface error: %{public}d", ret);
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    return DMError::DM_OK;
+}
+
 bool ScreenSessionManager::SetScreenOffset(ScreenId screenId, float offsetX, float offsetY)
 {
     sptr<ScreenSession> screenSession = GetScreenSession(screenId);
