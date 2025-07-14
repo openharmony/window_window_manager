@@ -205,6 +205,10 @@ public:
     virtual WMError NotifyScreenshotEvent(ScreenshotEventType type);
     virtual WMError CreateUIEffectController(const sptr<IUIEffectControllerClient>& controllerClient,
         sptr<IUIEffectController>& controller, int32_t& controllerId);
+    virtual WMError AddSessionBlackList(
+        const std::unordered_set<std::string>& bundleNames, const std::unordered_set<std::string>& privacyWindowTags);
+    virtual WMError RemoveSessionBlackList(
+        const std::unordered_set<std::string>& bundleNames, const std::unordered_set<std::string>& privacyWindowTags);
 
      /*
      * PiP Window

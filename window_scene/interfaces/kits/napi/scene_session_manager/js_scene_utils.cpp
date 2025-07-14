@@ -157,6 +157,10 @@ napi_value ConvertWindowAnimationOptionToJsValue(napi_env env,
             napi_set_named_property(env, configJsValue, "duration", CreateJsValue(env, animationConfig.duration));
             break;
         }
+        case WindowAnimationCurve::CUBIC_BEZIER: {
+            napi_set_named_property(env, configJsValue, "duration", CreateJsValue(env, animationConfig.duration));
+            [[fallthrough]];
+        }
         case WindowAnimationCurve::INTERPOLATION_SPRING: {
             napi_value params = nullptr;
             napi_create_array(env, &params);

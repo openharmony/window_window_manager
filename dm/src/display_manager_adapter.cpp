@@ -65,6 +65,16 @@ sptr<DisplayInfo> DisplayManagerAdapter::GetDefaultDisplayInfo()
     return displayInfo;
 }
 
+bool DisplayManagerAdapter::SetVirtualScreenAsDefault(ScreenId screenId)
+{
+    INIT_PROXY_CHECK_RETURN(false);
+    bool isSuccess = false;
+    if (displayManagerServiceProxy_) {
+        displayManagerServiceProxy_->SetVirtualScreenAsDefault(screenId, isSuccess);
+    }
+    return isSuccess;
+}
+
 sptr<DisplayInfo> DisplayManagerAdapter::GetDisplayInfoByScreenId(ScreenId screenId)
 {
     INIT_PROXY_CHECK_RETURN(nullptr);
@@ -544,6 +554,7 @@ bool ScreenManagerAdapter::SetScreenPowerForAll(ScreenPowerState state, PowerSta
 ScreenPowerState ScreenManagerAdapter::GetScreenPower(ScreenId dmsScreenId)
 {
     INIT_PROXY_CHECK_RETURN(ScreenPowerState::INVALID_STATE);
+
     if (screenSessionManagerServiceProxy_) {
         return screenSessionManagerServiceProxy_->GetScreenPower(dmsScreenId);
     }
@@ -1056,7 +1067,8 @@ sptr<DisplayInfo> DisplayManagerAdapter::GetVisibleAreaDisplayInfoById(DisplayId
     return displayInfo;
 }
 
-sptr<CutoutInfo> DisplayManagerAdapter::GetCutoutInfo(DisplayId displayId)
+sptr<CutoutInfo> DisplayManagerAdapter::GetCutoutInfo(DisplayId displayId, int32_t width,
+                                                      int32_t height, Rotation rotation)
 {
     TLOGD(WmsLogTag::DMS, "DisplayManagerAdapter::GetCutoutInfo");
     if (displayId == DISPLAY_ID_INVALID) {
@@ -1065,7 +1077,7 @@ sptr<CutoutInfo> DisplayManagerAdapter::GetCutoutInfo(DisplayId displayId)
     }
     INIT_PROXY_CHECK_RETURN(nullptr);
     if (screenSessionManagerServiceProxy_) {
-        return screenSessionManagerServiceProxy_->GetCutoutInfo(displayId);
+        return screenSessionManagerServiceProxy_->GetCutoutInfo(displayId, width, height, rotation);
     }
 
     sptr<CutoutInfo> cutoutInfo;
@@ -1076,22 +1088,6 @@ sptr<CutoutInfo> DisplayManagerAdapter::GetCutoutInfo(DisplayId displayId)
         return nullptr;
     }
     return cutoutInfo;
-}
-
-sptr<CutoutInfo> DisplayManagerAdapter::GetCutoutInfoWithRotation(DisplayId displayId, int32_t rotation)
-{
-    TLOGD(WmsLogTag::DMS, "GetCutoutInfoWithRotation enter, rotation: %{public}d, displayId: %{public}" PRIu64,
-        rotation, displayId);
-    if (displayId == DISPLAY_ID_INVALID) {
-        TLOGE(WmsLogTag::DMS, "display id is invalid");
-        return nullptr;
-    }
-    INIT_PROXY_CHECK_RETURN(nullptr);
-    if (screenSessionManagerServiceProxy_) {
-        return screenSessionManagerServiceProxy_->GetCutoutInfoWithRotation(displayId, rotation);
-    }
-
-    return nullptr;
 }
 
 DMError DisplayManagerAdapter::AddSurfaceNodeToDisplay(DisplayId displayId,
@@ -1689,5 +1685,15 @@ DMError ScreenManagerAdapter::SetVirtualScreenAutoRotation(ScreenId screenId, bo
         return screenSessionManagerServiceProxy_->SetVirtualScreenAutoRotation(screenId, enable);
     }
     return DMError::DM_OK;
+}
+
+DMError ScreenManagerAdapter::SetScreenPrivacyWindowTagSwitch(ScreenId screenId,
+    const std::vector<std::string>& privacyWindowTag, bool enable)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+    if (screenSessionManagerServiceProxy_) {
+        return screenSessionManagerServiceProxy_->SetScreenPrivacyWindowTagSwitch(screenId, privacyWindowTag, enable);
+    }
+    return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
 }
 } // namespace OHOS::Rosen

@@ -825,4 +825,11 @@ DMError ScreenManager::Impl::SetVirtualScreenAutoRotation(ScreenId screenId, boo
 {
     return SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualScreenAutoRotation(screenId, enable);
 }
+
+DMError ScreenManager::SetScreenPrivacyWindowTagSwitch(ScreenId screenId,
+    const std::vector<std::string>& privacyWindowTag, bool enable)
+{
+    return SingletonContainer::Get<ScreenManagerAdapter>().SetScreenPrivacyWindowTagSwitch(screenId,
+        privacyWindowTag, enable);
+}
 } // namespace OHOS::Rosen

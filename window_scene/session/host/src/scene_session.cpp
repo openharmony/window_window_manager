@@ -1147,6 +1147,7 @@ void SceneSession::RegisterUpdateAppUseControlCallback(UpdateAppUseControlFunc&&
             return;
         }
         session->onUpdateAppUseControlFunc_ = std::move(callback);
+        session->UpdatePrivacyModeControlInfo();
         if (!session->onGetAllAppUseControlMapFunc_) {
             TLOGNE(WmsLogTag::WMS_LIFE,
                 "id: %{public}d session GetAllAppUseControlMapFunc is null", session->GetPersistentId());
@@ -1185,8 +1186,8 @@ void SceneSession::NotifyUpdateAppUseControl(ControlAppType type, const ControlI
             bool isAppUseControl = (controlInfo.isNeedControl && !controlInfo.isControlRecentOnly);
             session->isAppUseControl_ = isAppUseControl;
             session->onUpdateAppUseControlFunc_(type, controlInfo.isNeedControl, controlInfo.isControlRecentOnly);
-            if (session->sessionStage_ == nullptr) {
-                TLOGNE(WmsLogTag::WMS_LIFE, "sessionStage is nullptr");
+            if (session->sessionStage_ == nullptr || type == ControlAppType::PRIVACY_WINDOW) {
+                TLOGNW(WmsLogTag::WMS_LIFE, "%{public}s sessionStage is nullptr or privacy mode control", where);
                 return;
             }
             session->sessionStage_->NotifyAppUseControlStatus(isAppUseControl);
@@ -1199,6 +1200,39 @@ void SceneSession::NotifyUpdateAppUseControl(ControlAppType type, const ControlI
             }
         }
     }, __func__);
+}
+
+void SceneSession::UpdatePrivacyModeControlInfo()
+{
+    bool isPrivacyMode = false;
+    auto property = GetSessionProperty();
+    if ((property && property->GetPrivacyMode()) || HasSubSessionInPrivacyMode()) {
+        isPrivacyMode = true;
+    }
+    if (!isPrivacyMode && appUseControlMap_.find(ControlAppType::PRIVACY_WINDOW) == appUseControlMap_.end()) {
+        TLOGI(WmsLogTag::WMS_LIFE, "no need to update privacy mode control info");
+        return;
+    }
+    ControlInfo controlInfo = { .isNeedControl = isPrivacyMode, .isControlRecentOnly = true };
+    NotifyUpdateAppUseControl(ControlAppType::PRIVACY_WINDOW, controlInfo);
+}
+
+bool SceneSession::HasSubSessionInPrivacyMode()
+{
+    for (const auto& subSession : GetSubSession()) {
+        if (subSession == nullptr) {
+            TLOGW(WmsLogTag::WMS_LIFE, "subSession is nullptr");
+            continue;
+        }
+        auto property = subSession->GetSessionProperty();
+        if (property && property->GetPrivacyMode()) {
+            return true;
+        }
+        if (subSession->HasSubSessionInPrivacyMode()) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void SceneSession::RegisterDefaultAnimationFlagChangeCallback(NotifyWindowAnimationFlagChangeFunc&& callback)
@@ -1490,6 +1524,11 @@ WSError SceneSession::NotifyClientToUpdateRectTask(const std::string& updateReas
         GetAllAvoidAreas(avoidAreas);
     } else {
         TLOGD(WmsLogTag::WMS_IMMS, "win [%{public}d] avoid area update rejected by recent", GetPersistentId());
+    }
+    if (winRect.IsInvalid()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "id:%{public}d rect:%{public}s is invalid",
+            GetPersistentId(), winRect.ToString().c_str());
+        return WSError::WS_ERROR_INVALID_WINDOW_MODE_OR_SIZE;
     }
     WSError ret = WSError::WS_OK;
     // once reason is undefined, not use rsTransaction
@@ -1830,7 +1869,6 @@ WSError SceneSession::UpdateSessionRect(
             newRect.posY_ = (newRect.posY_ - mainGlobalRect.posY_) / mainSession->GetFloatingScale();
         }
     }
-    Session::RectCheckProcess();
     PostTask([weakThis = wptr(this), newRect, reason, newMoveConfiguration, rectAnimationConfig, where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
@@ -3131,16 +3169,9 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
             TLOGD(WmsLogTag::WMS_LAYOUT, "moveDragController_ is null");
             return Session::TransferPointerEvent(pointerEvent, needNotifyClient, isExecuteDelayRaise);
         }
-        bool isFloatingDragAccessible =
-            property->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && IsDragAccessible();
-        bool isPcOrFreeMultiWindowCanDrag = (isFloatingDragAccessible || isDragAccessibleSystemWindow) &&
-            (systemConfig_.IsPcWindow() || IsFreeMultiWindowMode() || (property->GetIsPcAppInPad() && !isMainWindow));
-        bool isPhoneWindowCanDrag = isFloatingDragAccessible &&
-            (WindowHelper::IsSystemWindow(windowType) || WindowHelper::IsSubWindow(windowType)) &&
-            (systemConfig_.IsPhoneWindow() || (systemConfig_.IsPadWindow() && !IsFreeMultiWindowMode()));
         moveDragController_->SetScale(GetScaleX(), GetScaleY()); // need scale ratio to calculate translate
         SetParentRect();
-        if ((isPcOrFreeMultiWindowCanDrag || isPhoneWindowCanDrag) &&
+        if (IsDraggable() &&
             moveDragController_->ConsumeDragEvent(pointerEvent, GetGlobalOrWinRect(), property, systemConfig_)) {
             auto surfaceNode = GetSurfaceNode();
             moveDragController_->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
@@ -3224,7 +3255,7 @@ void SceneSession::SetTransitionAnimationCallback(UpdateTransitionAnimationFunc&
     }, __func__);
 }
 
-bool SceneSession::IsMovableWindowType()
+bool SceneSession::IsMovableWindowType() const
 {
     auto property = GetSessionProperty();
     if (property == nullptr) {
@@ -3238,7 +3269,7 @@ bool SceneSession::IsMovableWindowType()
         IsFullScreenMovable();
 }
 
-bool SceneSession::IsFullScreenMovable()
+bool SceneSession::IsFullScreenMovable() const
 {
     auto property = GetSessionProperty();
     if (property == nullptr) {
@@ -3249,7 +3280,7 @@ bool SceneSession::IsFullScreenMovable()
         WindowHelper::IsWindowModeSupported(property->GetWindowModeSupportType(), WindowMode::WINDOW_MODE_FLOATING);
 }
 
-bool SceneSession::IsMovable()
+bool SceneSession::IsMovable() const
 {
     if (!moveDragController_) {
         TLOGW(WmsLogTag::WMS_LAYOUT, "moveDragController_ is null, id: %{public}d", GetPersistentId());
@@ -3272,6 +3303,28 @@ bool SceneSession::IsMovable()
         return false;
     }
     return true;
+}
+
+bool SceneSession::IsDraggable() const
+{
+    if (!moveDragController_) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "moveDragController is null, id:%{public}d", GetPersistentId());
+        return false;
+    }
+    auto windowType = GetWindowType();
+    bool isMainWindow = WindowHelper::IsMainWindow(windowType);
+    bool isSubWindow = WindowHelper::IsSubWindow(windowType);
+    bool isSystemWindow = WindowHelper::IsSystemWindow(windowType);
+    bool isDialog = WindowHelper::IsDialogWindow(windowType);
+    bool isDragAccessibleSystemWindow = isSystemWindow && IsDragAccessible() && !isDialog;
+    bool isFloatingDragAccessible = GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && IsDragAccessible();
+
+    bool isPcOrFreeMultiWindowCanDrag = (isFloatingDragAccessible || isDragAccessibleSystemWindow) &&
+        (systemConfig_.IsPcWindow() || IsFreeMultiWindowMode() ||
+        (GetSessionProperty()->GetIsPcAppInPad() && !isMainWindow));
+    bool isPhoneWindowCanDrag = isFloatingDragAccessible && (isSystemWindow || isSubWindow) &&
+        (systemConfig_.IsPhoneWindow() || (systemConfig_.IsPadWindow() && !IsFreeMultiWindowMode()));
+    return isPcOrFreeMultiWindowCanDrag || isPhoneWindowCanDrag;
 }
 
 WSError SceneSession::RequestSessionBack(bool needMoveToBackground)
@@ -3931,6 +3984,7 @@ WSError SceneSession::UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsC
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "get nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
+    RSAdapterUtil::SetRSUIContext(rsCanvasNode, GetRSUIContext(), true);
     if (rsTransaction != nullptr) {
         rsTransaction->Begin();
         TLOGD(WmsLogTag::WMS_LAYOUT_PC, "begin rsTransaction");
@@ -6150,6 +6204,10 @@ WMError SceneSession::HandleActionUpdateTouchHotArea(const sptr<WindowSessionPro
     std::vector<Rect> touchHotAreas;
     property->GetTouchHotAreas(touchHotAreas);
     GetSessionProperty()->SetTouchHotAreas(touchHotAreas);
+    if (specificCallback_ != nullptr && specificCallback_->onWindowInfoUpdate_ != nullptr) {
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "id=%{public}d", GetPersistentId());
+        specificCallback_->onWindowInfoUpdate_(GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
+    }
     return WMError::WM_OK;
 }
 

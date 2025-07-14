@@ -3513,7 +3513,7 @@ void Session::RectCheckProcess()
         float curHeight = GetSessionRect().height_ / density;
         float ratio = GetAspectRatio();
         float actRatio = curWidth / curHeight;
-        if ((ratio != 0) && !NearEqual(ratio, actRatio)) {
+        if (!NearZero(ratio) && !NearEqual(ratio, actRatio)) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "RectCheck err ratio %{public}f != actRatio: %{public}f", ratio, actRatio);
             std::ostringstream oss;
             oss << " RectCheck err ratio ";
@@ -3547,6 +3547,15 @@ void Session::SetSessionRect(const WSRect& rect)
 /** @note @window.layout */
 WSRect Session::GetSessionRect() const
 {
+    return layoutController_->GetSessionRect();
+}
+
+/** @note @window.layout */
+WSRect Session::GetSessionScreenRelativeRect() const
+{
+    if (layoutController_->GetSizeChangeReason() == SizeChangeReason::DRAG_MOVE) {
+        return layoutController_->ConvertGlobalRectToRelative(layoutController_->GetSessionRect(), GetDisplayId());
+    }
     return layoutController_->GetSessionRect();
 }
 

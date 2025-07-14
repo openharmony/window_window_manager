@@ -204,6 +204,13 @@ public:
     sptr<Display> GetDefaultDisplaySync(bool isFromNapi = false);
 
     /**
+     * @brief Provide ability of setting virtual screen as primary for no-screen device.
+     *
+     * @param screenId ScreenId used in virtual screen.
+    */
+    bool SetVirtualScreenAsDefault(ScreenId screenId);
+
+    /**
      * @brief Get the display object by id.
      *
      * @param displayId Id of the target display.

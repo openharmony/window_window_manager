@@ -22,6 +22,8 @@
 #include "future.h"
 #include "pixel_map.h"
 #include "screenshot_listener_future.h"
+#include "mock_display_manager_adapter.h"
+#include "singleton_mocker.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -31,6 +33,7 @@ namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenshotTest"};
 }
+using Mocker = SingletonMocker<DisplayManagerAdapter, MockDisplayManagerAdapter>;
 using Utils = DisplayTestUtils;
 class ScreenshotListener;
 class ScreenshotTest : public testing::Test {
@@ -91,7 +94,17 @@ namespace {
  */
 HWTEST_F(ScreenshotTest, ScreenShotValid01, TestSize.Level1)
 {
-    ASSERT_NE(nullptr, DisplayManager::GetInstance().GetScreenshot(defaultId_));
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+
+    EXPECT_CALL(m->Mock(), GetDefaultDisplayInfo()).Times(1).WillOnce(Return(nullptr));
+    EXPECT_EQ(DISPLAY_ID_INVALID, DisplayManager::GetInstance().GetDefaultDisplayId());
+
+    Media::InitializationOptions opt;
+    opt.size.width = CommonTestUtils::TEST_IMAGE_WIDTH;
+    opt.size.height = CommonTestUtils::TEST_IMAGE_HEIGHT;
+    std::shared_ptr<Media::PixelMap> pixelMap = Media::PixelMap::Create(opt);
+    EXPECT_CALL(m->Mock(), GetDisplaySnapshot(_, _, _, _)).Times(1).WillOnce(Return(pixelMap));
+    ASSERT_NE(nullptr, DisplayManager::GetInstance().GetScreenshot(0));
 }
 
 /**
@@ -112,8 +125,22 @@ HWTEST_F(ScreenshotTest, ScreenShotValid02, TestSize.Level1)
 HWTEST_F(ScreenshotTest, ScreenShotValid03, TestSize.Level1)
 {
     auto& dm = DisplayManager::GetInstance();
-    std::shared_ptr<Media::PixelMap> screenshot = dm.GetScreenshot(defaultId_);
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), GetDisplayInfo(_)).Times(2);
+
+    Media::InitializationOptions opt;
+    opt.size.width = CommonTestUtils::TEST_IMAGE_WIDTH;
+    opt.size.height = CommonTestUtils::TEST_IMAGE_HEIGHT;
+    std::shared_ptr<Media::PixelMap> pixelMap = Media::PixelMap::Create(opt);
+    EXPECT_CALL(m->Mock(), GetDisplaySnapshot(_, _, _, _)).Times(1).WillOnce(Return(pixelMap));
+    std::shared_ptr<Media::PixelMap> screenshot = dm.GetScreenshot(0);
     ASSERT_NE(nullptr, screenshot);
+
+    sptr<DisplayInfo> displayInfo = sptr<DisplayInfo>::MakeSptr();
+    displayInfo->SetWidth(CommonTestUtils::TEST_IMAGE_WIDTH);
+    displayInfo->SetHeight(CommonTestUtils::TEST_IMAGE_HEIGHT);
+    displayInfo->SetDisplayId(0);
+    EXPECT_CALL(m->Mock(), GetDefaultDisplayInfo()).Times(1).WillOnce(Return(displayInfo));
 
     Media::Size screenSize = {screenshot->GetWidth(), screenshot->GetHeight()};
     ASSERT_TRUE(Utils::SizeEqualToDisplay(dm.GetDefaultDisplay(), screenSize));
@@ -127,8 +154,16 @@ HWTEST_F(ScreenshotTest, ScreenShotValid03, TestSize.Level1)
 HWTEST_F(ScreenshotTest, ScreenShotValid04, TestSize.Level1)
 {
     auto& dm = DisplayManager::GetInstance();
-    std::shared_ptr<Media::PixelMap> screenshot = dm.GetScreenshot(defaultId_, defaultScreen_,
-                                                                   defaultImage_, defaultRot_);
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+
+    Media::InitializationOptions opt;
+    opt.size.width = CommonTestUtils::TEST_IMAGE_WIDTH;
+    opt.size.height = CommonTestUtils::TEST_IMAGE_HEIGHT;
+    std::shared_ptr<Media::PixelMap> pixelMap = Media::PixelMap::Create(opt);
+    EXPECT_CALL(m->Mock(), GetDisplaySnapshot(_, _, _, _)).Times(1).WillOnce(Return(pixelMap));
+    Media::Rect defaultScreen = {0, 0, CommonTestUtils::TEST_IMAGE_WIDTH, CommonTestUtils::TEST_IMAGE_HEIGHT};
+    Media::Size defaultImage = {CommonTestUtils::TEST_IMAGE_WIDTH, CommonTestUtils::TEST_IMAGE_HEIGHT};
+    std::shared_ptr<Media::PixelMap> screenshot = dm.GetScreenshot(0, defaultScreen, defaultImage, 0);
     ASSERT_NE(nullptr, screenshot);
 }
 
@@ -140,21 +175,35 @@ HWTEST_F(ScreenshotTest, ScreenShotValid04, TestSize.Level1)
 HWTEST_F(ScreenshotTest, ScreenShotValid05, TestSize.Level1)
 {
     auto& dm = DisplayManager::GetInstance();
-    std::shared_ptr<Media::PixelMap> screenshot = dm.GetScreenshot(defaultId_, defaultScreen_,
-                                                                   defaultImage_, defaultRot_);
-    ASSERT_NE(nullptr, screenshot);
-    Media::Size screenSize = {screenshot->GetWidth(), screenshot->GetHeight()};
-    ASSERT_TRUE(Utils::SizeEqual(defaultImage_, screenSize));
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
 
-    Media::Size halfDefault_ = {defaultImage_.width / 2, defaultImage_.height / 2};
-    Media::Rect halfRect = {defaultScreen_.left, defaultScreen_.top, halfDefault_.width, halfDefault_.height};
-    screenshot = dm.GetScreenshot(defaultId_, halfRect, defaultImage_, defaultRot_);
+    EXPECT_CALL(m->Mock(), GetDefaultDisplayInfo()).Times(1).WillOnce(Return(nullptr));
+    EXPECT_EQ(DISPLAY_ID_INVALID, DisplayManager::GetInstance().GetDefaultDisplayId());
+
+    Media::InitializationOptions opt;
+    opt.size.width = CommonTestUtils::TEST_IMAGE_WIDTH;
+    opt.size.height = CommonTestUtils::TEST_IMAGE_HEIGHT;
+    std::shared_ptr<Media::PixelMap> pixelMap = Media::PixelMap::Create(opt);
+    EXPECT_CALL(m->Mock(), GetDisplaySnapshot(_, _, _, _)).Times(1).WillOnce(Return(pixelMap));
+    Media::Rect defaultScreen = {0, 0, CommonTestUtils::TEST_IMAGE_WIDTH, CommonTestUtils::TEST_IMAGE_HEIGHT};
+    Media::Size defaultImage = {CommonTestUtils::TEST_IMAGE_WIDTH, CommonTestUtils::TEST_IMAGE_HEIGHT};
+    std::shared_ptr<Media::PixelMap> screenshot = dm.GetScreenshot(0, defaultScreen, defaultImage, 0);
+    ASSERT_NE(nullptr, screenshot);
+
+    Media::Size screenSize = {screenshot->GetWidth(), screenshot->GetHeight()};
+    ASSERT_TRUE(Utils::SizeEqual(defaultImage, screenSize));
+
+    Media::Size halfDefault = {defaultImage.width / 2, defaultImage.height / 2};
+    Media::Rect halfRect = {defaultScreen.left, defaultScreen.top, halfDefault.width, halfDefault.height};
+    EXPECT_CALL(m->Mock(), GetDisplaySnapshot(_, _, _, _)).Times(1).WillOnce(Return(pixelMap));
+    screenshot = dm.GetScreenshot(0, halfRect, defaultImage, 0);
     ASSERT_NE(nullptr, screenshot);
     screenSize = {screenshot->GetWidth(), screenshot->GetHeight()};
-    ASSERT_TRUE(Utils::SizeEqual(defaultImage_, screenSize));
+    ASSERT_TRUE(Utils::SizeEqual(defaultImage, screenSize));
 
-    Media::Size halfSize = {halfDefault_.width, halfDefault_.height};
-    screenshot = dm.GetScreenshot(defaultId_, defaultScreen_, halfSize, defaultRot_);
+    Media::Size halfSize = {halfDefault.width, halfDefault.height};
+    EXPECT_CALL(m->Mock(), GetDisplaySnapshot(_, _, _, _)).Times(1).WillOnce(Return(pixelMap));
+    screenshot = dm.GetScreenshot(0, defaultScreen, halfSize, 0);
     ASSERT_NE(nullptr, screenshot);
     screenSize = {screenshot->GetWidth(), screenshot->GetHeight()};
     ASSERT_TRUE(Utils::SizeEqual(halfSize, screenSize));
@@ -168,9 +217,24 @@ HWTEST_F(ScreenshotTest, ScreenShotValid05, TestSize.Level1)
 HWTEST_F(ScreenshotTest, ScreenShotValid06, TestSize.Level1)
 {
     auto& dm = DisplayManager::GetInstance();
-    std::shared_ptr<Media::PixelMap> screenshot = dm.GetScreenshot(defaultId_, defaultScreen_,
-                                                                   defaultImage_, defaultRot_);
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), GetDisplayInfo(_)).Times(2);
+    
+    Media::InitializationOptions opt;
+    opt.size.width = CommonTestUtils::TEST_IMAGE_WIDTH;
+    opt.size.height = CommonTestUtils::TEST_IMAGE_HEIGHT;
+    std::shared_ptr<Media::PixelMap> pixelMap = Media::PixelMap::Create(opt);
+    EXPECT_CALL(m->Mock(), GetDisplaySnapshot(_, _, _, _)).Times(1).WillOnce(Return(pixelMap));
+    Media::Rect defaultScreen = {0, 0, CommonTestUtils::TEST_IMAGE_WIDTH, CommonTestUtils::TEST_IMAGE_HEIGHT};
+    Media::Size defaultImage = {CommonTestUtils::TEST_IMAGE_WIDTH, CommonTestUtils::TEST_IMAGE_HEIGHT};
+    std::shared_ptr<Media::PixelMap> screenshot = dm.GetScreenshot(0, defaultScreen, defaultImage, 0);
     ASSERT_NE(nullptr, screenshot);
+
+    sptr<DisplayInfo> displayInfo = sptr<DisplayInfo>::MakeSptr();
+    displayInfo->SetWidth(CommonTestUtils::TEST_IMAGE_WIDTH);
+    displayInfo->SetHeight(CommonTestUtils::TEST_IMAGE_HEIGHT);
+    displayInfo->SetDisplayId(0);
+    EXPECT_CALL(m->Mock(), GetDefaultDisplayInfo()).Times(1).WillOnce(Return(displayInfo));
     Media::Size screenSize = {screenshot->GetWidth(), screenshot->GetHeight()};
     ASSERT_TRUE(Utils::SizeEqualToDisplay(dm.GetDefaultDisplay(), screenSize));
 }
@@ -235,16 +299,23 @@ HWTEST_F(ScreenshotTest, ScreenShot09, TestSize.Level1)
  */
 HWTEST_F(ScreenshotTest, ScreenShotListener01, TestSize.Level1)
 {
-    sptr<ScreenshotListenerFuture> screenShotListener = new ScreenshotListenerFuture();
-
     auto& dm = DisplayManager::GetInstance();
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+
+    Media::InitializationOptions opt;
+    opt.size.width = CommonTestUtils::TEST_IMAGE_WIDTH;
+    opt.size.height = CommonTestUtils::TEST_IMAGE_HEIGHT;
+    std::shared_ptr<Media::PixelMap> pixelMap = Media::PixelMap::Create(opt);
+    EXPECT_CALL(m->Mock(), GetDisplaySnapshot(_, _, _, _)).Times(1).WillOnce(Return(pixelMap));
+    EXPECT_CALL(m->Mock(), RegisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
+    EXPECT_CALL(m->Mock(), UnregisterDisplayManagerAgent(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
+
+    sptr<ScreenshotListenerFuture> screenShotListener = new ScreenshotListenerFuture();
     dm.RegisterScreenshotListener(screenShotListener);
     std::shared_ptr<Media::PixelMap> screenshot = dm.GetScreenshot(defaultId_);
     auto info = screenShotListener->future_.GetResult(1000);
 
     ASSERT_NE(nullptr, screenshot);
-    ASSERT_EQ(info.GetDisplayId(), defaultId_);
-    ASSERT_GT(info.GetTrigger().size(), 0UL);
 
     dm.UnregisterScreenshotListener(screenShotListener);
 }

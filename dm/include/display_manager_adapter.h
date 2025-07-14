@@ -84,8 +84,7 @@ public:
     virtual sptr<DisplayInfo> GetVisibleAreaDisplayInfoById(DisplayId displayId);
     virtual DMError GetExpandAvailableArea(DisplayId displayId, DMRect& area);
     virtual DMError GetAvailableArea(DisplayId displayId, DMRect& area);
-    virtual sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId);
-    virtual sptr<CutoutInfo> GetCutoutInfoWithRotation(DisplayId displayId, int32_t rotation);
+    virtual sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId, int32_t width, int32_t height, Rotation rotation);
     virtual DMError AddSurfaceNodeToDisplay(DisplayId displayId, std::shared_ptr<class RSSurfaceNode>& surfaceNode);
     virtual DMError RemoveSurfaceNodeFromDisplay(DisplayId displayId,
         std::shared_ptr<class RSSurfaceNode>& surfaceNode);
@@ -120,6 +119,7 @@ public:
     virtual sptr<DisplayInfo> GetPrimaryDisplayInfo();
     virtual DMError GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
         ScreenId& screenId, DMRect& screenArea);
+    virtual bool SetVirtualScreenAsDefault(ScreenId screenId);
 
 private:
     static inline SingletonDelegator<DisplayManagerAdapter> delegator;
@@ -198,6 +198,8 @@ public:
     virtual void SetFoldStatusExpandAndLocked(bool locked);
     virtual DMError SetScreenSkipProtectedWindow(const std::vector<ScreenId>& screenIds, bool isEnable);
     virtual DMError SetVirtualScreenAutoRotation(ScreenId screenId, bool enable);
+    virtual DMError SetScreenPrivacyWindowTagSwitch(ScreenId screenId, const std::vector<std::string>& privacyWindowTag,
+        bool enable);
 private:
     static inline SingletonDelegator<ScreenManagerAdapter> delegator;
 };

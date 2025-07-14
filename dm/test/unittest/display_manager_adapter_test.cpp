@@ -73,20 +73,8 @@ HWTEST_F(DisplayManagerAdapterTest, GetDisplayInfo, TestSize.Level1)
  */
 HWTEST_F(DisplayManagerAdapterTest, GetCutoutInfo, TestSize.Level1)
 {
-    sptr<CutoutInfo> info = SingletonContainer::Get<DisplayManagerAdapter>().GetCutoutInfo(DISPLAY_ID_INVALID);
-    ASSERT_EQ(info, nullptr);
-}
-
-/**
- * @tc.name: GetCutoutInfoWithRotation
- * @tc.desc: test nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerAdapterTest, GetCutoutInfoWithRotation, Function | SmallTest | Level2)
-{
-    int32_t rotation = 0;
-    sptr<CutoutInfo> info = SingletonContainer::Get<DisplayManagerAdapter>().
-        GetCutoutInfoWithRotation(DISPLAY_ID_INVALID, rotation);
+    sptr<CutoutInfo> info = SingletonContainer::Get<DisplayManagerAdapter>().GetCutoutInfo(DISPLAY_ID_INVALID, 0, 0,
+                                                                                           Rotation::ROTATION_0);
     ASSERT_EQ(info, nullptr);
 }
 
@@ -985,6 +973,41 @@ HWTEST_F(DisplayManagerAdapterTest, SetVirtualScreenAutoRotation, TestSize.Level
     bool enable = false;
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualScreenAutoRotation(screenId, enable);
     EXPECT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: SetScreenPrivacyWindowTagSwitch
+ * @tc.desc: SetScreenPrivacyWindowTagSwitch test
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, SetScreenPrivacyWindowTagSwitch, TestSize.Level1)
+{
+    ScreenId screenId = 0;
+    std::vector<std::string> privacyWindowTag{"test1", "test2"};
+    DMError res = SingletonContainer::Get<ScreenManagerAdapter>().SetScreenPrivacyWindowTagSwitch(screenId,
+        privacyWindowTag, true);
+    EXPECT_EQ(res, DMError::DM_OK);
+
+    sptr<IScreenSessionManager> screenSessionManagerServiceProxyTmp =
+        SingletonContainer::Get<ScreenManagerAdapter>().screenSessionManagerServiceProxy_;
+    SingletonContainer::Get<ScreenManagerAdapter>().screenSessionManagerServiceProxy_ = nullptr;
+    res = SingletonContainer::Get<ScreenManagerAdapter>().SetScreenPrivacyWindowTagSwitch(screenId,
+        privacyWindowTag, true);
+    SingletonContainer::Get<ScreenManagerAdapter>().screenSessionManagerServiceProxy_ =
+        screenSessionManagerServiceProxyTmp;
+    EXPECT_EQ(res, DMError::DM_ERROR_DEVICE_NOT_SUPPORT);
+}
+
+/**
+ * @tc.name: SetVirtualScreenAsDefault
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, SetVirtualScreenAsDefault, TestSize.Level1)
+{
+    ScreenId screenId = 0;
+    bool res = SingletonContainer::Get<DisplayManagerAdapter>().SetVirtualScreenAsDefault(screenId);
+    EXPECT_FALSE(res);
 }
 }
 }

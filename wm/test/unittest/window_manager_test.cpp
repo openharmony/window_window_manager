@@ -2290,6 +2290,34 @@ HWTEST_F(WindowManagerTest, NotifyWMSWindowDestroyed02, TestSize.Level1)
     EXPECT_NE(lifeCycleInfo.windowType, listener->listenerLifeCycleInfo.windowType);
     EXPECT_NE(lifeCycleInfo.windowName, listener->listenerLifeCycleInfo.windowName);
 }
+
+/**
+ * @tc.name: AddSessionBlackList01
+ * @tc.desc: check AddSessionBlackList
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, AddSessionBlackList01, TestSize.Level1)
+{
+    WMError ret;
+    std::unordered_set<std::string> bundleNames;
+    std::unordered_set<std::string> privacyWindowTags;
+    ret = WindowManager::GetInstance().AddSessionBlackList(bundleNames, privacyWindowTags);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
+}
+
+/**
+ * @tc.name: RemoveSessionBlackList01
+ * @tc.desc: check RemoveSessionBlackList
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, RemoveSessionBlackList01, TestSize.Level1)
+{
+    WMError ret;
+    std::unordered_set<std::string> bundleNames;
+    std::unordered_set<std::string> privacyWindowTags;
+    ret = WindowManager::GetInstance().RemoveSessionBlackList(bundleNames, privacyWindowTags);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
+}
 }
 } // namespace
 } // namespace Rosen

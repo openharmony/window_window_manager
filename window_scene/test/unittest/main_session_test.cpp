@@ -44,6 +44,7 @@ public:
 
 private:
     RSSurfaceNode::SharedPtr CreateRSSurfaceNode();
+    SystemSessionConfig systemConfig_;
 };
 
 void MainSessionTest::SetUpTestCase() {}
@@ -180,6 +181,20 @@ HWTEST_F(MainSessionTest, TransferKeyEvent03, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TransferKeyEvent04
+ * @tc.desc: check func TransferKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, TransferKeyEvent04, TestSize.Level1)
+{
+    mainSession_->state_ = SessionState::STATE_CONNECT;
+    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
+    ASSERT_NE(keyEvent, nullptr);
+    mainSession_->windowEventChannel_ = nullptr;
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, mainSession_->TransferKeyEvent(keyEvent));
+}
+
+/**
  * @tc.name: ProcessPointDownSession01
  * @tc.desc: check func ProcessPointDownSession
  * @tc.type: FUNC
@@ -203,6 +218,29 @@ HWTEST_F(MainSessionTest, ProcessPointDownSession02, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ProcessPointDownSession03
+ * @tc.desc: check func ProcessPointDownSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, ProcessPointDownSession03, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    SessionInfo info;
+    info.abilityName_ = "dialogAbilityName";
+    info.moduleName_ = "dialogModuleName";
+    info.bundleName_ = "dialogBundleName";
+    sptr<Session> dialogSession = sptr<Session>::MakeSptr(info);
+    dialogSession->state_ = SessionState::STATE_INACTIVE;
+    mainSession_->dialogVec_.push_back(dialogSession);
+    EXPECT_EQ(WSError::WS_OK, mainSession_->ProcessPointDownSession(0, 0));
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    property->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL);
+    mainSession_->SetSessionProperty(property);
+    EXPECT_EQ(WSError::WS_OK, mainSession_->ProcessPointDownSession(0, 0));
+}
+
+/**
  * @tc.name: SetTopmost01
  * @tc.desc: check func SetTopmost
  * @tc.type: FUNC
@@ -223,7 +261,22 @@ HWTEST_F(MainSessionTest, SetTopmost02, TestSize.Level1)
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     mainSession_->SetSessionProperty(property);
     ASSERT_TRUE(mainSession_->GetSessionProperty() != nullptr);
+    mainSession_->RegisterSessionTopmostChangeCallback([](bool topmost) {});
     EXPECT_EQ(WSError::WS_OK, mainSession_->SetTopmost(true));
+}
+
+/**
+ * @tc.name: SetMainWindowTopmost
+ * @tc.desc: check func SetMainWindowTopmost
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, SetMainWindowTopmost, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    mainSession_->SetSessionProperty(property);
+    ASSERT_TRUE(mainSession_->GetSessionProperty() != nullptr);
+    mainSession_->SetMainWindowTopmostChangeCallback([](bool topmost) {});
+    EXPECT_EQ(WSError::WS_OK, mainSession_->SetMainWindowTopmost(true));
 }
 
 /**
@@ -330,6 +383,10 @@ HWTEST_F(MainSessionTest, NotifyClientToUpdateInteractive, TestSize.Level1)
     ASSERT_EQ(testSession->isClientInteractive_, interactive);
     interactive = !interactive;
     testSession->SetSessionState(SessionState::STATE_BACKGROUND);
+    testSession->NotifyClientToUpdateInteractive(interactive);
+    ASSERT_NE(testSession->isClientInteractive_, interactive);
+
+    testSession->sessionStage_ = nullptr;
     testSession->NotifyClientToUpdateInteractive(interactive);
     ASSERT_NE(testSession->isClientInteractive_, interactive);
 }
@@ -577,6 +634,54 @@ HWTEST_F(MainSessionTest, IsApplicationModal, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetSessionLabelAndIcon
+ * @tc.desc: SetSessionLabelAndIcon
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, SetSessionLabelAndIcon, TestSize.Level1)
+{
+    std::string label = "";
+    std::shared_ptr<Media::PixelMap> icon;
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_PERMISSION, mainSession_->SetSessionLabelAndIcon(label, icon));
+}
+
+/**
+ * @tc.name: SetSessionLabelAndIconInner
+ * @tc.desc: SetSessionLabelAndIconInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, SetSessionLabelAndIconInner, TestSize.Level1)
+{
+    std::string label = "test";
+    std::shared_ptr<Media::PixelMap> icon;
+
+    ASSERT_EQ(WSError::WS_OK, mainSession_->SetSessionLabelAndIconInner(label, icon));
+
+    mainSession_->updateSessionLabelAndIconFunc_=nullptr;
+    ASSERT_EQ(WSError::WS_OK, mainSession_->SetSessionLabelAndIconInner(label, icon));
+
+    mainSession_->SetUpdateSessionLabelAndIconListener(
+        [](const std::string& label, const std::shared_ptr<Media::PixelMap>& icon) {
+    });
+    ASSERT_EQ(WSError::WS_OK, mainSession_->SetSessionLabelAndIconInner(label, icon));
+}
+
+/**
+ * @tc.name: SetUpdateSessionLabelAndIconListener
+ * @tc.desc: SetUpdateSessionLabelAndIconListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, SetUpdateSessionLabelAndIconListener, TestSize.Level1)
+{
+    std::string label = "test";
+    std::shared_ptr<Media::PixelMap> icon;
+    mainSession_->SetUpdateSessionLabelAndIconListener(
+        [](const std::string& label, const std::shared_ptr<Media::PixelMap>& icon) {
+    });
+    ASSERT_NE(nullptr, mainSession_->updateSessionLabelAndIconFunc_);
+}
+
+/**
  * @tc.name: NotifySupportWindowModesChange
  * @tc.desc: NotifySupportWindowModesChange
  * @tc.type: FUNC
@@ -644,9 +749,103 @@ HWTEST_F(MainSessionTest, NotifySessionLockStateChange, TestSize.Level1)
     info.appIndex_ = 0;
 
     sptr<MainSession> session = sptr<MainSession>::MakeSptr(info, nullptr);
+    bool isLockedState = session->GetSessionLockState();
+    session->NotifySessionLockStateChange(isLockedState);
+    EXPECT_EQ(session->GetSessionLockState(), isLockedState);
 
-    session->NotifySessionLockStateChange(true);
-    EXPECT_EQ(session->GetSessionLockState(), true);
+    isLockedState = !session->GetSessionLockState();
+    session->NotifySessionLockStateChange(isLockedState);
+    EXPECT_EQ(session->GetSessionLockState(), isLockedState);
+
+    isLockedState = true;
+    session->SetSessionLockState(isLockedState);
+    session->RegisterSessionLockStateChangeCallback([](bool isLockedState) {});
+    session->NotifySessionLockStateChange(isLockedState);
+    EXPECT_EQ(session->GetSessionLockState(), isLockedState);
+}
+
+/**
+ * @tc.name: SessionLockState
+ * @tc.desc: SetSessionLockState setter and getter test
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, SetSessionLockState, TestSize.Level1)
+{
+    SessionInfo info;
+    info.bundleName_ = "SetSessionLockStateBundle";
+    info.moduleName_ = "SetSessionLockStateModule";
+    info.abilityName_ = "SetSessionLockStateAbility";
+    info.appIndex_ = 0;
+
+    sptr<MainSession> session = sptr<MainSession>::MakeSptr(info, nullptr);
+    EXPECT_EQ(session->GetSessionLockState(), false);
+
+    bool isLockedState = true;
+    session->SetSessionLockState(isLockedState);
+    EXPECT_EQ(session->GetSessionLockState(), isLockedState);
+
+    isLockedState = false;
+    session->SetSessionLockState(isLockedState);
+    EXPECT_EQ(session->GetSessionLockState(), isLockedState);
+}
+
+/**
+ * @tc.name: RegisterSessionLockStateChangeCallback
+ * @tc.desc: RegisterSessionLockStateChangeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, RegisterSessionLockStateChangeCallback, TestSize.Level1)
+{
+    SessionInfo info;
+    info.bundleName_ = "RegisterSessionLockStateChangeCallbackBundle";
+    info.moduleName_ = "RegisterSessionLockStateChangeCallbackModule";
+    info.abilityName_ = "RegisterSessionLockStateChangeCallbackAbility";
+    info.appIndex_ = 0;
+
+    sptr<MainSession> session = sptr<MainSession>::MakeSptr(info, nullptr);
+    
+    bool isLockedState = true;
+    session->SetSessionLockState(isLockedState);
+    session->RegisterSessionLockStateChangeCallback([](bool isLockedState) {});
+    EXPECT_NE(session->onSessionLockStateChangeCallback_, nullptr);
+    EXPECT_EQ(session->GetSessionLockState(), isLockedState);
+}
+
+/**
+ * @tc.name: SetRecentSessionState
+ * @tc.desc: check func SetRecentSessionState
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, SetRecentSessionState, TestSize.Level1)
+{
+    RecentSessionInfo info;
+    SessionState state = SessionState::STATE_DISCONNECT;
+    mainSession_->SetRecentSessionState(info, state);
+    ASSERT_EQ(info.sessionState, RecentSessionState::DISCONNECT);
+
+    state = SessionState::STATE_CONNECT;
+    mainSession_->SetRecentSessionState(info, state);
+    ASSERT_EQ(info.sessionState, RecentSessionState::CONNECT);
+
+    state = SessionState::STATE_FOREGROUND;
+    mainSession_->SetRecentSessionState(info, state);
+    ASSERT_EQ(info.sessionState, RecentSessionState::FOREGROUND);
+
+    state = SessionState::STATE_BACKGROUND;
+    mainSession_->SetRecentSessionState(info, state);
+    ASSERT_EQ(info.sessionState, RecentSessionState::BACKGROUND);
+
+    state = SessionState::STATE_ACTIVE;
+    mainSession_->SetRecentSessionState(info, state);
+    ASSERT_EQ(info.sessionState, RecentSessionState::ACTIVE);
+
+    state = SessionState::STATE_INACTIVE;
+    mainSession_->SetRecentSessionState(info, state);
+    ASSERT_EQ(info.sessionState, RecentSessionState::INACTIVE);
+
+    state = SessionState::STATE_END;
+    mainSession_->SetRecentSessionState(info, state);
+    ASSERT_EQ(info.sessionState, RecentSessionState::END);
 }
 
 /**
@@ -660,13 +859,18 @@ HWTEST_F(MainSessionTest, UpdateFlag, TestSize.Level1)
     info.abilityName_ = "UpdateFlag";
     info.bundleName_ = "UpdateFlag";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(nullptr, session);
 
     session->onUpdateFlagFunc_ = nullptr;
     EXPECT_EQ(nullptr, session->onUpdateFlagFunc_);
 
+    std::string flag = "test";
+    EXPECT_EQ(WSError::WS_OK, session->UpdateFlag(flag));
+
     NotifyUpdateFlagFunc func = [](const std::string& flag) { return; };
     session->onUpdateFlagFunc_ = func;
     EXPECT_NE(nullptr, session->onUpdateFlagFunc_);
+    EXPECT_EQ(WSError::WS_OK, session->UpdateFlag(flag));
 }
 
 /**

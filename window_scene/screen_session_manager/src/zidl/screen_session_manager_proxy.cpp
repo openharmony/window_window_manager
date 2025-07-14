@@ -2287,7 +2287,8 @@ sptr<CutoutInfo> ScreenSessionManagerProxy::GetCutoutInfo(DisplayId displayId)
     return info;
 }
 
-sptr<CutoutInfo> ScreenSessionManagerProxy::GetCutoutInfoWithRotation(DisplayId displayId, int32_t rotation)
+sptr<CutoutInfo> ScreenSessionManagerProxy::GetCutoutInfo(DisplayId displayId, int32_t width,
+                                                          int32_t height, Rotation rotation)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -2305,7 +2306,15 @@ sptr<CutoutInfo> ScreenSessionManagerProxy::GetCutoutInfoWithRotation(DisplayId 
         TLOGE(WmsLogTag::DMS, "write displayId failed!");
         return nullptr;
     }
-    if (!data.WriteInt32(rotation)) {
+    if (!data.WriteInt32(width)) {
+        TLOGE(WmsLogTag::DMS, "write width failed!");
+        return nullptr;
+    }
+    if (!data.WriteInt32(height)) {
+        TLOGE(WmsLogTag::DMS, "write height failed!");
+        return nullptr;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(rotation))) {
         TLOGE(WmsLogTag::DMS, "write rotation failed!");
         return nullptr;
     }
@@ -3088,8 +3097,8 @@ ScreenCombination ScreenSessionManagerProxy::GetScreenCombination(ScreenId scree
     return static_cast<ScreenCombination>(reply.ReadUint32());
 }
 
-void ScreenSessionManagerProxy::UpdateScreenDirectionInfo(ScreenId screenId, float screenComponentRotation,
-    float rotation, float phyRotation, ScreenPropertyChangeType screenPropertyChangeType)
+void ScreenSessionManagerProxy::UpdateScreenDirectionInfo(ScreenId screenId, const ScreenDirectionInfo& directionInfo,
+    ScreenPropertyChangeType screenPropertyChangeType, const RRect& bounds)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -3108,20 +3117,24 @@ void ScreenSessionManagerProxy::UpdateScreenDirectionInfo(ScreenId screenId, flo
         TLOGE(WmsLogTag::DMS, "Write screenId failed");
         return;
     }
-    if (!data.WriteFloat(screenComponentRotation)) {
+    if (!data.WriteFloat(directionInfo.screenRotation_)) {
         TLOGE(WmsLogTag::DMS, "Write screenComponentRotation failed");
         return;
     }
-    if (!data.WriteFloat(rotation)) {
+    if (!data.WriteFloat(directionInfo.rotation_)) {
         TLOGE(WmsLogTag::DMS, "Write rotation failed");
         return;
     }
-    if (!data.WriteFloat(phyRotation)) {
+    if (!data.WriteFloat(directionInfo.phyRotation_)) {
         TLOGE(WmsLogTag::DMS, "Write phyRotation failed");
         return;
     }
     if (!data.WriteUint32(static_cast<uint32_t>(screenPropertyChangeType))) {
         TLOGE(WmsLogTag::DMS, "Write screenPropertyChangeType failed");
+        return;
+    }
+    if (!RSMarshallingHelper::Marshalling(data, bounds)) {
+        TLOGE(WmsLogTag::DMS, "Write bounds failed");
         return;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_UPDATE_SCREEN_DIRECTION_INFO),
@@ -4545,6 +4558,42 @@ DMError ScreenSessionManagerProxy::SetVirtualScreenAutoRotation(ScreenId screenI
         return DMError::DM_ERROR_WRITE_DATA_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_AUTO_ROTATION),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    return static_cast<DMError>(reply.ReadInt32());
+}
+
+DMError ScreenSessionManagerProxy::SetScreenPrivacyWindowTagSwitch(ScreenId screenId,
+    const std::vector<std::string>& privacyWindowTag, bool enable)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DMS, "remote is null");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageParcel data;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (!data.WriteUint64(static_cast<uint64_t>(screenId))) {
+        TLOGE(WmsLogTag::DMS, "Write screenId failed");
+        return DMError::DM_ERROR_WRITE_DATA_FAILED;
+    }
+    if (!data.WriteStringVector(privacyWindowTag)) {
+        TLOGE(WmsLogTag::DMS, "Write privacyWindowTag failed");
+        return DMError::DM_ERROR_WRITE_DATA_FAILED;
+    }
+    if (!data.WriteBool(enable)) {
+        TLOGE(WmsLogTag::DMS, "Write enable failed");
+        return DMError::DM_ERROR_WRITE_DATA_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREEN_PRIVACY_WINDOW_TAG_SWITCH),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;

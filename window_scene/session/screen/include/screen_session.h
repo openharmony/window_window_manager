@@ -158,6 +158,8 @@ public:
     Rotation CalcRotation(Orientation orientation, FoldDisplayMode foldDisplayMode) const;
     DisplayOrientation CalcDisplayOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode) const;
     DisplayOrientation CalcDeviceOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode) const;
+    DisplayOrientation CalcDeviceOrientationWithBounds(Rotation rotation,
+        FoldDisplayMode foldDisplayMode, const RRect& bounds) const;
     void FillScreenInfo(sptr<ScreenInfo> info) const;
     void InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint, bool isExtend = false,
         float positionX = 0, float positionY = 0);
@@ -198,7 +200,7 @@ public:
     void UpdateToInputManager(RRect bounds, int rotation, int deviceRotation, FoldDisplayMode foldDisplayMode);
     void UpdatePropertyAfterRotation(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
     void UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
-    void UpdateRotationOrientation(int rotation, FoldDisplayMode foldDisplayMode);
+    void UpdateRotationOrientation(int rotation, FoldDisplayMode foldDisplayMode, const RRect& bounds);
     void UpdatePropertyByFakeInUse(bool isFakeInUse);
     ScreenProperty UpdatePropertyByFoldControl(const ScreenProperty& updatedProperty,
         FoldDisplayMode foldDisplayMode = FoldDisplayMode::UNKNOWN);
@@ -213,7 +215,9 @@ public:
     void SetFrameGravity(Gravity gravity);
 
     void SetHdrFormats(std::vector<uint32_t>&& hdrFormats);
+    std::vector<uint32_t> GetHdrFormats();
     void SetColorSpaces(std::vector<uint32_t>&& colorSpaces);
+    std::vector<uint32_t> GetColorSpaces();
     void SetSupportedRefreshRate(std::vector<uint32_t>&& supportedRefreshRate);
     std::vector<uint32_t> GetSupportedRefreshRate() const;
     void SetForceCloseHdr(bool isForceCloseHdr);
@@ -393,8 +397,11 @@ private:
     bool isFold_ = false;
     float currentSensorRotation_ { -1.0f };
     float currentValidSensorRotation_ { -1.0f };
+    mutable std::shared_mutex hdrFormatsMutex_;
     std::vector<uint32_t> hdrFormats_;
+    mutable std::shared_mutex colorSpacesMutex_;
     std::vector<uint32_t> colorSpaces_;
+    mutable std::shared_mutex supportedRefreshRateMutex_;
     std::vector<uint32_t> supportedRefreshRate_;
     MirrorScreenType mirrorScreenType_ { MirrorScreenType::VIRTUAL_MIRROR };
     std::string serialNumber_;

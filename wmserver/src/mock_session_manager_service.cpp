@@ -830,6 +830,36 @@ void MockSessionManagerService::RemoveSkipSelfWhenShowOnVirtualScreenList(const 
     }
 }
 
+void MockSessionManagerService::SetScreenPrivacyWindowTagSwitch(
+    uint64_t screenId, const std::vector<std::string>& privacyWindowTags, bool enable)
+{
+    if (privacyWindowTags.empty()) {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "PrivacyWindowTags is empty");
+        return;
+    }
+    auto sessionManagerService = GetSessionManagerServiceByUserId(currentWMSUserId_);
+    if (sessionManagerService == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sessionManagerService is nullptr");
+        return;
+    }
+    if (!sceneSessionManager_) {
+        GetSceneSessionManager();
+        if (!sceneSessionManager_) {
+            TLOGW(WmsLogTag::WMS_ATTRIBUTE, "get scene session manager proxy failed, nullptr");
+            return;
+        }
+    }
+    sptr<ISceneSessionManager> sceneSessionManagerProxy = iface_cast<ISceneSessionManager>(sceneSessionManager_);
+    if (sceneSessionManagerProxy == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sessionManagerServiceProxy is nullptr");
+        return;
+    }
+    WMError ret = sceneSessionManagerProxy->SetScreenPrivacyWindowTagSwitch(screenId, privacyWindowTags, enable);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "remove virtual screen black list failed!");
+    }
+}
+
 sptr<IRemoteObject> MockSessionManagerService::GetSceneSessionManagerByUserId(int32_t userId)
 {
     auto sessionManagerService = GetSessionManagerServiceByUserId(userId);

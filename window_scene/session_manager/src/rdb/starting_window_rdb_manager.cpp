@@ -268,6 +268,10 @@ std::string StartingWindowRdbManager::GetStartWindowValFromProfile(const AppExec
         return defaultVal;
     }
     std::string rawData(fileContentPtr.get(), fileContentPtr.get() + len);
+    if (!nlohmann::json::accept(rawData)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "rawData failed");
+        return defaultVal;
+    }
     nlohmann::json profileJson = nlohmann::json::parse(rawData);
     if (profileJson.is_discarded()) {
         TLOGE(WmsLogTag::WMS_PATTERN, "bad profile file");

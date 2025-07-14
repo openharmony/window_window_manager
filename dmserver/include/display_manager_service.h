@@ -119,6 +119,7 @@ public:
     void RegisterWindowInfoQueriedListener(const sptr<IWindowInfoQueriedListener>& listener);
     void NotifyPrivateWindowStateChanged(bool hasPrivate);
     std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution();
+    bool SetVirtualScreenAsDefault(ScreenId screenId);
 
 private:
     void NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,

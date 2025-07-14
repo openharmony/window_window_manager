@@ -163,6 +163,9 @@ config("dms_systemtest_common_public_config") {
     "../../common/utils/include",
     "../../../utils/include",
     "${dmserver_gen_path}",
+    "../../common/mock",
+    "../../../window_scene/screen_session_manager/include",
+    "../../../window_scene/screen_session_manager_client/include",
   ]
 }
 

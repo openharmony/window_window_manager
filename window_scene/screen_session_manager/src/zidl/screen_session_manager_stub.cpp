@@ -736,8 +736,18 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         }
         case DisplayManagerMessage::TRANS_ID_GET_CUTOUT_INFO_WITH_ROTATION: {
             DisplayId displayId = static_cast<DisplayId>(data.ReadUint64());
-            int32_t rotation = data.ReadInt32();
-            sptr<CutoutInfo> cutoutInfo = GetCutoutInfoWithRotation(displayId, rotation);
+            int32_t width = 0;
+            if (!data.ReadInt32(width)) {
+                TLOGE(WmsLogTag::DMS, "Read width failed");
+                return ERR_INVALID_DATA;
+            }
+            int32_t height = 0;
+            if (!data.ReadInt32(height)) {
+                TLOGE(WmsLogTag::DMS, "Read height failed");
+                return ERR_INVALID_DATA;
+            }
+            Rotation rotation = static_cast<Rotation>(data.ReadUint32());
+            sptr<CutoutInfo> cutoutInfo = GetCutoutInfo(displayId, width, height, rotation);
             reply.WriteParcelable(cutoutInfo);
             break;
         }
@@ -931,8 +941,16 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             auto rotation = data.ReadFloat();
             auto phyRotation = data.ReadFloat();
             auto screenPropertyChangeType = static_cast<ScreenPropertyChangeType>(data.ReadUint32());
-            UpdateScreenDirectionInfo(screenId, screenComponentRotation, rotation, phyRotation,
-                screenPropertyChangeType);
+            RRect bounds;
+            if (!RSMarshallingHelper::Unmarshalling(data, bounds)) {
+                TLOGE(WmsLogTag::DMS, "Read bounds failed");
+                break;
+            }
+            ScreenDirectionInfo directionInfo;
+            directionInfo.screenRotation_ = screenComponentRotation;
+            directionInfo.rotation_ = rotation;
+            directionInfo.phyRotation_ = phyRotation;
+            UpdateScreenDirectionInfo(screenId, directionInfo, screenPropertyChangeType, bounds);
             break;
         }
         case DisplayManagerMessage::TRANS_ID_UPDATE_SCREEN_ROTATION_PROPERTY: {
@@ -1272,6 +1290,29 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         }
         case DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_AUTO_ROTATION: {
             ProcSetVirtualScreenAutoRotation(data, reply);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SET_SCREEN_PRIVACY_WINDOW_TAG_SWITCH: {
+            ScreenId screenId = SCREEN_ID_INVALID;
+            if (!data.ReadUint64(screenId)) {
+                TLOGE(WmsLogTag::DMS, "Read screenId failed");
+                return ERR_INVALID_DATA;
+            }
+            std::vector<std::string> privacyWindowTag;
+            if (!data.ReadStringVector(&privacyWindowTag)) {
+                TLOGE(WmsLogTag::DMS, "Read privacyWindowTag failed");
+                return ERR_INVALID_DATA;
+            }
+            bool enable = false;
+            if (!data.ReadBool(enable)) {
+                TLOGE(WmsLogTag::DMS, "Read enable failed");
+                return ERR_INVALID_DATA;
+            }
+            DMError ret = SetScreenPrivacyWindowTagSwitch(screenId, privacyWindowTag, enable);
+            if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+                TLOGE(WmsLogTag::DMS, "Write reault failed");
+                return ERR_INVALID_DATA;
+            }
             break;
         }
         default:

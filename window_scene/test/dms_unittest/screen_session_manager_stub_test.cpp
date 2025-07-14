@@ -2889,6 +2889,10 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest135, TestSize.Level1)
     data.WriteUint64(0);
     data.WriteFloat(0);
     data.WriteFloat(0);
+    data.WriteFloat(0);
+    data.WriteUint32(2);
+    RRect bounds;
+    RSMarshallingHelper::Marshalling(data, bounds);
     uint32_t code = static_cast<uint32_t>(
         DisplayManagerMessage::TRANS_ID_UPDATE_SCREEN_DIRECTION_INFO);
     int res = stub_->OnRemoteRequest(code, data, reply, option);
@@ -3305,6 +3309,28 @@ HWTEST_F(ScreenSessionManagerStubTest, GetPhysicalScreenIds, Function | SmallTes
     uint32_t code = static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_PHYSICAL_SCREEN_IDS);
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: SetScreenPrivacyWindowTagSwitch
+ * @tc.desc: normal function, TRANS_ID_SET_SCREEN_PRIVACY_WINDOW_TAG_SWITCH test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerStubTest, SetScreenPrivacyWindowTagSwitch, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    ScreenId mainScreenId = 0;
+    std::vector<std::string> privacyWindowTag{"test1", "test2"};
+    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
+    data.WriteUint64(mainScreenId);
+    data.WriteStringVector(privacyWindowTag);
+    data.WriteBool(true);
+    uint32_t code = static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREEN_PRIVACY_WINDOW_TAG_SWITCH);
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, ERR_NONE);
 }
 }
 }

@@ -25,6 +25,7 @@
 #include "session/host/include/scene_session.h"
 #include "session/host/include/main_session.h"
 #include "window_manager_agent.h"
+#include "window_manager_hilog.h"
 #include "session_manager.h"
 #include "zidl/window_manager_agent_interface.h"
 #include "mock/mock_accesstoken_kit.h"
@@ -38,6 +39,14 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+    std::string g_logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
+        const char *msg)
+    {
+        g_logMsg = msg;
+    }
+}
 namespace {
 const std::string EMPTY_DEVICE_ID = "";
 constexpr int WAIT_SLEEP_TIME = 1;
@@ -1417,6 +1426,8 @@ HWTEST_F(SceneSessionManagerTest2, SetSessionContinueState, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest2, SetSessionContinueState002, TestSize.Level1)
 {
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     MessageParcel* data = new MessageParcel();
     sptr<IRemoteObject> token = data->ReadRemoteObject();
     auto continueState = static_cast<ContinueState>(0);
@@ -1424,13 +1435,11 @@ HWTEST_F(SceneSessionManagerTest2, SetSessionContinueState002, TestSize.Level1)
     info.abilityName_ = "test1";
     info.bundleName_ = "test2";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    if (sceneSession == nullptr) {
-        delete data;
-        return;
-    }
+    ASSERT_NE(sceneSession, nullptr);
     ssm_->sceneSessionMap_.insert({ 1000, sceneSession });
     ssm_->SetSessionContinueState(token, continueState);
-    ASSERT_NE(sceneSession, nullptr);
+    EXPECT_TRUE(g_logMsg.find("in") != std::string::npos);
+    LOG_SetCallback(nullptr);
     delete data;
 }
 
@@ -2002,6 +2011,9 @@ HWTEST_F(SceneSessionManagerTest2, RemoveSessionFromBlackList, TestSize.Level1)
     sceneSession->persistentId_ = 9996;
     ret = ssm_->RemoveSessionFromBlackList(sceneSession);
     EXPECT_EQ(WMError::WM_OK, ret);
+
+    ret = ssm_->RemoveSessionFromBlackList(nullptr);
+    EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
 }
 
 /**
