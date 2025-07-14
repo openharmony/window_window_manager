@@ -1373,11 +1373,20 @@ HWTEST_F(WindowSessionTest4, TestUpdateGlobalDisplayRect, TestSize.Level1)
 {
     WSRect rect = { 10, 20, 200, 100 };
     session_->SetGlobalDisplayRect(rect);
+    session_->globalDisplayRectSizeChangeReason_ = SizeChangeReason::RESIZE;
+
     auto result = session_->UpdateGlobalDisplayRect(rect, SizeChangeReason::RESIZE);
     EXPECT_EQ(result, WSError::WS_DO_NOTHING);
 
+    result = session_->UpdateGlobalDisplayRect(rect, SizeChangeReason::MOVE);
+    EXPECT_EQ(result, WSError::WS_OK);
+
     WSRect updated = { 30, 40, 200, 100 };
     result = session_->UpdateGlobalDisplayRect(updated, SizeChangeReason::MOVE);
+    EXPECT_EQ(result, WSError::WS_OK);
+
+    updated = { 0, 0, 200, 100 };
+    result = session_->UpdateGlobalDisplayRect(updated, SizeChangeReason::DRAG);
     EXPECT_EQ(result, WSError::WS_OK);
 }
 
