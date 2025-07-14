@@ -1421,6 +1421,57 @@ HWTEST_F(SceneSessionManagerTest8, AddskipSurfaceNodeIdSet01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyOnAttachToFrameNode01
+ * @tc.desc: test function : NotifyOnAttachToFrameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, NotifyOnAttachToFrameNode01, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->screenRSBlackListConfigMap_.clear();
+    ssm_->sessionRSBlackListConfigSet_.clear();
+    ssm_->sessionBlackListInfoMap_.clear();
+    ssm_->bundleRSBlackListConfigMap_.clear();
+
+    sptr<Session> session = nullptr;
+    ssm_->NotifyOnAttachToFrameNode(session);
+    EXPECT_EQ(ssm_->sessionBlackListInfoMap_.size(), 0);
+    EXPECT_EQ(ssm_->sessionRSBlackListConfigSet_.size(), 0);
+
+    ssm_->screenRSBlackListConfigMap_.clear();
+    ssm_->sessionRSBlackListConfigSet_.clear();
+    ssm_->sessionBlackListInfoMap_.clear();
+    ssm_->bundleRSBlackListConfigMap_.clear();
+}
+
+/**
+ * @tc.name: AddSkipSurfaceNodeWhenAttach01
+ * @tc.desc: test function : AddSkipSurfaceNodeWhenAttach
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, AddSkipSurfaceNodeWhenAttach01, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->screenRSBlackListConfigMap_.clear();
+    ssm_->sessionRSBlackListConfigSet_.clear();
+    ssm_->sessionBlackListInfoMap_.clear();
+    ssm_->bundleRSBlackListConfigMap_.clear();
+
+    int32_t persistentId = 1;
+    ssm_->bundleRSBlackListConfigMap_["test"].insert({ "test" });
+    ssm_->screenRSBlackListConfigMap_[0].insert({ .privacyWindowTag = "test" });
+
+    ssm_->AddSkipSurfaceNodeWhenAttach(persistentId, "test", static_cast<uint64_t>(persistentId));
+    EXPECT_EQ(ssm_->sessionBlackListInfoMap_.size(), 1);
+    EXPECT_EQ(ssm_->sessionRSBlackListConfigSet_.size(), 1);
+
+    ssm_->screenRSBlackListConfigMap_.clear();
+    ssm_->sessionRSBlackListConfigSet_.clear();
+    ssm_->sessionBlackListInfoMap_.clear();
+    ssm_->bundleRSBlackListConfigMap_.clear();
+}
+
+/**
  * @tc.name: RemoveSessionFromBlackListInfoSet
  * @tc.desc: test function : RemoveSessionFromBlackListInfoSet
  * @tc.type: FUNC
