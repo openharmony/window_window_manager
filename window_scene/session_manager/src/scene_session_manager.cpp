@@ -10341,17 +10341,18 @@ void SceneSessionManager::UpdateVirtualScreenBlackList(ScreenId screenId)
 
 void SceneSessionManager::NotifyOnAttachToFrameNode(const sptr<Session>& session)
 {
-    if (session == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "session is nullptr");
-        return;
-    }
     auto where = __func__;
-    auto task = [this, session, where] {
-        TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s, wid: %{public}d", where, session->GetPersistentId());
-        uint64_t skipSurfaceNodeId = WindowHelper::IsMainWindow(session->GetWindowType()) ?
-            static_cast<uint64_t>(session->GetPersistentId()) : session->GetSurfaceNode()->GetId();
-        AddSkipSurfaceNodeWhenAttach(session->GetPersistentId(),
-            session->GetSessionInfo().bundleName_, skipSurfaceNodeId);
+    wptr<Session> weakSession(session);
+    auto task = [this, weakSession, where] {
+        if (weakSession == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s, session is nullptr", where);
+            return;
+        }
+        TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s, wid: %{public}d", where, weakSession->GetPersistentId());
+        uint64_t skipSurfaceNodeId = WindowHelper::IsMainWindow(weakSession->GetWindowType()) ?
+            static_cast<uint64_t>(weakSession->GetPersistentId()) : weakSession->GetSurfaceNode()->GetId();
+        AddSkipSurfaceNodeWhenAttach(weakSession->GetPersistentId(),
+            weakSession->GetSessionInfo().bundleName_, skipSurfaceNodeId);
     };
     taskScheduler_->PostAsyncTask(task, where);
 }
@@ -10365,8 +10366,7 @@ void SceneSessionManager::AddSkipSurfaceNodeWhenAttach(
             for (const auto& [screenId, infoSet] : screenRSBlackListConfigMap_) {
                 if (infoSet.find({ .privacyWindowTag = tag }) != infoSet.end()) {
                     sessionBlackListInfoMap_[screenId].insert({ .windowId = windowId, .privacyWindowTag = tag });
-                    std::vector<uint64_t> skipSurfaceNodeIds = { surfaceNodeId };
-                    rsInterface_.AddVirtualScreenBlackList(screenId, skipSurfaceNodeIds);
+                    rsInterface_.AddVirtualScreenBlackList(screenId, { surfaceNodeId });
                 }
             }
         }
