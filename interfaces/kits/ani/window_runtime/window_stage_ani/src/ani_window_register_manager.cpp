@@ -382,7 +382,7 @@ bool AniWindowRegisterManager::IsCallbackRegistered(ani_env* env, std::string ty
     return false;
 }
 
-WmErrorCode AniWindowRegisterManager::RegisterListener(sptr<Window> window, std::string type,
+WmErrorCode AniWindowRegisterManager::RegisterListener(sptr<Window> window, const std::string& type,
     CaseType caseType, ani_env* env, ani_ref callback, ani_double timeout)
 {
     std::lock_guard<std::mutex> lock(mtx_);
@@ -416,7 +416,7 @@ WmErrorCode AniWindowRegisterManager::RegisterListener(sptr<Window> window, std:
         TLOGE(WmsLogTag::DEFAULT, "[ANI]Register type %{public}s failed", type.c_str());
         return ret;
     }
-    jsCbMap_[type][callback] = windowManagerListener;
+    jsCbMap_[type][cbRef] = windowManagerListener;
     TLOGI(WmsLogTag::DEFAULT, "[ANI]Register type %{public}s success! callback map size: %{public}zu",
         type.c_str(), jsCbMap_[type].size());
     return WmErrorCode::WM_OK;
@@ -500,7 +500,7 @@ WmErrorCode AniWindowRegisterManager::ProcessListener(RegisterListenerType regis
     return WmErrorCode::WM_OK;
 }
 
-WmErrorCode AniWindowRegisterManager::UnregisterListener(sptr<Window> window, std::string type,
+WmErrorCode AniWindowRegisterManager::UnregisterListener(sptr<Window> window, const std::string& type,
     CaseType caseType, ani_env* env, ani_ref callback)
 {
     std::lock_guard<std::mutex> lock(mtx_);
@@ -522,7 +522,7 @@ WmErrorCode AniWindowRegisterManager::UnregisterListener(sptr<Window> window, st
     ani_boolean isUndef = ANI_FALSE;
     env->Reference_IsUndefined(callback, &isUndef);
     if (isUndef == ANI_TRUE) {
-        TLOGD(WmsLogTag::DEFAULT, "[ANI]Unregister all callback, type:%{public}s", type.c_str());
+        TLOGI(WmsLogTag::DEFAULT, "[ANI]Unregister all callback, type:%{public}s", type.c_str());
         for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
             WmErrorCode ret = ProcessListener(listenerType, caseType, it->second, window, false, env, 0);
             if (ret != WmErrorCode::WM_OK) {
@@ -536,8 +536,8 @@ WmErrorCode AniWindowRegisterManager::UnregisterListener(sptr<Window> window, st
         bool findFlag = false;
         for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end(); ++it) {
             ani_boolean isEquals = 0;
-            env->Reference_StrictEquals(callback, it->second->GetAniCallBack(), &isEquals);
-            TLOGD(WmsLogTag::DEFAULT, "[ANI]callback isEquals:%{public}d", static_cast<int32_t>(isEquals));
+            env->Reference_StrictEquals(callback, it->first, &isEquals);
+            TLOGI(WmsLogTag::DEFAULT, "[ANI]callback isEquals:%{public}d", static_cast<int32_t>(isEquals));
             if (!isEquals) {
                 continue;
             }
