@@ -247,9 +247,6 @@ void ScreenSession::SetDisplayNodeScreenId(ScreenId screenId)
     if (displayNode_ != nullptr) {
         TLOGI(WmsLogTag::DMS, "SetDisplayNodeScreenId %{public}" PRIu64"", screenId);
         displayNode_->SetScreenId(screenId);
-        RunIfRSClientMultiInstanceEnabled([&] {
-            RSTransactionAdapter::FlushImplicitTransaction(displayNode_);
-        });
     }
 }
 
