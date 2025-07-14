@@ -2940,6 +2940,19 @@ void Session::SetBufferAvailableChangeListener(const NotifyBufferAvailableChange
     WLOGFD("SetBufferAvailableChangeListener, id: %{public}d", GetPersistentId());
 }
 
+bool Session::UpdateWindowModeSupportType(const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo)
+{
+    std::vector<AppExecFwk::SupportWindowMode> updateWindowModes =
+        ExtractSupportWindowModeFromMetaData(abilityInfo);
+    auto windowModeSupportType = WindowHelper::ConvertSupportModesToSupportType(updateWindowModes);
+    const uint32_t noType = 0;
+    if (windowModeSupportType != noType) {
+        GetSessionProperty()->SetWindowModeSupportType(windowModeSupportType);
+        return true;
+    }
+    return false;
+}
+
 void Session::SetAcquireRotateAnimationConfigFunc(const AcquireRotateAnimationConfigFunc& func)
 {
     if (func == nullptr) {
@@ -4239,6 +4252,46 @@ void Session::NotifySessionInfoLockedStateChange(bool lockedState)
     }
 }
 
+std::vector<AppExecFwk::SupportWindowMode> Session::ExtractSupportWindowModeFromMetaData(
+    const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo)
+{
+    std::vector<AppExecFwk::SupportWindowMode> updateWindowModes = {};
+    if (abilityInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "id: %{public}d, abilityInfo is nullptr", GetPersistentId());
+        return updateWindowModes;
+    }
+    if (IsPcWindow() || systemConfig_.IsFreeMultiWindowMode()) {
+        auto metadata = abilityInfo->metadata;
+        for (const auto& item : metadata) {
+            if (item.name == "ohos.ability.window.supportWindowModeInFreeMultiWindow") {
+                updateWindowModes = ParseWindowModeFromMetaData(item.value);
+                return updateWindowModes;
+            }
+        }
+    }
+    if (updateWindowModes.empty()) {
+        updateWindowModes = abilityInfo->windowModes;
+    }
+    return updateWindowModes;
+}
+
+std::vector<AppExecFwk::SupportWindowMode> Session::ParseWindowModeFromMetaData(
+    const std::string& supportModesInFreeMultiWindow)
+{
+    static const std::unordered_map<std::string, AppExecFwk::SupportWindowMode> modeMap = {
+        {"fullscreen", AppExecFwk::SupportWindowMode::FULLSCREEN},
+        {"split", AppExecFwk::SupportWindowMode::SPLIT},
+        {"floating", AppExecFwk::SupportWindowMode::FLOATING}
+    };
+    std::vector<AppExecFwk::SupportWindowMode> updateWindowModes = {};
+    for (auto iter : modeMap) {
+        if (supportModesInFreeMultiWindow.find(iter.first) != std::string::npos) {
+            updateWindowModes.push_back(iter.second);
+        }
+    }
+    return updateWindowModes;
+}
+
 WSError Session::SwitchFreeMultiWindow(const SystemSessionConfig& config)
 {
     bool enable = config.freeMultiWindowEnable_;
@@ -4252,6 +4305,9 @@ WSError Session::SwitchFreeMultiWindow(const SystemSessionConfig& config)
     if (!sessionStage_) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "sessionStage_ is null");
         return WSError::WS_ERROR_NULLPTR;
+    }
+    if (!UpdateWindowModeSupportType(sessionInfo_.abilityInfo)) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "not update WindowModeSupportType");
     }
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "windowId: %{public}d enable: %{public}d defaultWindowMode: %{public}d",
         GetPersistentId(), enable, systemConfig_.defaultWindowMode_);
