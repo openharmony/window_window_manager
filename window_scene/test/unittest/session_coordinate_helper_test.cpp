@@ -100,9 +100,17 @@ HWTEST_F(SessionCoordinateHelperTest, TestGlobalToScreenRelativeRect, TestSize.L
         ssmClient_.screenSessionMap_[screenIdOfA] = screenA;
         ssmClient_.screenSessionMap_[screenIdOfB] = screenB;
     }
+
+    screenA->property_.SetVirtualPixelRatio(0.0f);
+    result = SessionCoordinateHelper::GlobalToScreenRelativeRect(screenIdOfA, globalRect);
+    EXPECT_EQ(result.screenId, MAIN_SCREEN_ID_DEFAULT);
+    EXPECT_EQ(result.rect, globalRect);
+
+    screenA->property_.SetVirtualPixelRatio(1.0f);
+    screenB->property_.SetVirtualPixelRatio(1.0f);
     result = SessionCoordinateHelper::GlobalToScreenRelativeRect(screenIdOfA, globalRect);
     EXPECT_EQ(result.screenId, screenIdOfB);
-    WSRect expectedRect { 0, 0, 100, 100 }; // relative to display B
+    WSRect expectedRect { 0, 0, 100, 100 }; // relative to screen B
     EXPECT_EQ(result.rect, expectedRect);
 }
 } // namespace Rosen
