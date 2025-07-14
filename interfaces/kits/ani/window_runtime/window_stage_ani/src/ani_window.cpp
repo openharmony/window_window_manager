@@ -708,38 +708,7 @@ void AniWindow::OnSetWindowTouchable(ani_env* env, ani_boolean isKeepScreenOn)
     }
 }
 
-void AniWindow::LoadContent(ani_env* env, ani_object obj, ani_long nativeObj, ani_string path)
-{
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
-    if (aniWindow != nullptr) {
-        aniWindow->OnLoadContent(env, path);
-    } else {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] aniWindow is nullptr");
-    }
-}
-
-void AniWindow::OnLoadContent(ani_env* env, ani_string path)
-{
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    auto window = GetWindow();
-    if (window == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] window is nullptr");
-        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-        return;
-    }
-    std::string contentPath;
-    AniWindowUtils::GetStdString(env, path, contentPath);
-    TLOGI(WmsLogTag::DEFAULT, "[ANI] contentPath:%{public}s", contentPath.c_str());
-    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->NapiSetUIContent(contentPath, env, nullptr));
-    TLOGI(WmsLogTag::WMS_LIFE, "[ANI] Window [%{public}u, %{public}s] load content end, ret=%{public}d",
-        window->GetWindowId(), window->GetWindowName().c_str(), ret);
-    if (ret != WmErrorCode::WM_OK) {
-        AniWindowUtils::AniThrowError(env, ret, "Window load content failed");
-    }
-}
-
-void AniWindow::LoadContentNew(ani_env* env, ani_object obj, ani_long nativeObj, ani_string path,
+void AniWindow::LoadContent(ani_env* env, ani_object obj, ani_long nativeObj, ani_string path,
     ani_object storage)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
@@ -2738,11 +2707,9 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindow::Recover)},
         ani_native_function {"setUIContentSync", "JLstd/core/String;:V",
             reinterpret_cast<void *>(AniWindow::SetUIContent)},
-        ani_native_function {"loadContentSync", "JLstd/core/String;:V",
-            reinterpret_cast<void *>(AniWindow::LoadContent)},
         ani_native_function {"loadContentSync",
             "JLstd/core/String;Larkui/stateManagement/storages/localStorage/LocalStorage;:V",
-            reinterpret_cast<void *>(AniWindow::LoadContentNew)},
+            reinterpret_cast<void *>(AniWindow::LoadContent)},
         ani_native_function {"setWindowKeepScreenOnSync", "JZ:V",
             reinterpret_cast<void *>(AniWindow::SetWindowKeepScreenOn)},
         ani_native_function {"setWindowSystemBarEnableSync", "JLescompat/Array;:V",

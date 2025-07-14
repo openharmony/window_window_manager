@@ -45,6 +45,43 @@ AniWindowStage::~AniWindowStage()
     TLOGE(WmsLogTag::DEFAULT, "[ANI] Ani WindowStage died");
 }
 
+void AniWindowStage::LoadContent(ani_env* env, ani_object obj, ani_long nativeObj, ani_string path,
+    ani_object storage)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "[ANI]");
+    AniWindowStage* aniWindowStage = reinterpret_cast<AniWindowStage*>(nativeObj);
+    if (aniWindowStage != nullptr) {
+        aniWindowStage->OnLoadContent(env, path, storage);
+    } else {
+        TLOGE(WmsLogTag::WMS_LIFE, "[ANI] aniWindowStage is nullptr");
+    }
+}
+
+void AniWindowStage::OnLoadContent(ani_env* env, ani_string path, ani_object storage)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "[ANI]");
+    auto windowScene = GetWindowScene().lock();
+    if (windowScene == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[ANI]windowScene is nullptr!");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    auto mainWindow = windowScene->GetMainWindow();
+    if (mainWindow == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[ANI] mainWindow is nullptr!");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    std::string contentPath;
+    AniWindowUtils::GetStdString(env, path, contentPath);
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(mainWindow->NapiSetUIContent(contentPath, env, storage));
+    TLOGI(WmsLogTag::WMS_LIFE, "[ANI] Window [%{public}u, %{public}s] load content end, ret=%{public}d",
+        mainWindow->GetWindowId(), mainWindow->GetWindowName().c_str(), ret);
+    if (ret != WmErrorCode::WM_OK) {
+        AniWindowUtils::AniThrowError(env, ret, "Window load content failed");
+    }
+}
+
 ani_ref AniWindowStage::GetMainWindow(ani_env* env)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI] Get main window");
@@ -353,48 +390,6 @@ void AniWindowStage::RemoveStartingWindow(ani_env* env)
     }
 }
 
-void AniWindowStage::LoadContent(ani_env* env, ani_object obj, ani_long nativeObj, ani_string path)
-{
-    AniWindowStage::LoadContentWithStorage(env, obj, nativeObj, path, nullptr);
-}
-
-void AniWindowStage::LoadContentWithStorage(ani_env* env, ani_object obj, ani_long nativeObj, ani_string path,
-    ani_object storage)
-{
-    TLOGI(WmsLogTag::WMS_LIFE, "[ANI]");
-    AniWindowStage* aniWindowStage = reinterpret_cast<AniWindowStage*>(nativeObj);
-    if (aniWindowStage != nullptr) {
-        aniWindowStage->OnLoadContentWithStorage(env, path, storage);
-    } else {
-        TLOGE(WmsLogTag::WMS_LIFE, "[ANI] aniWindowStage is nullptr");
-    }
-}
-
-void AniWindowStage::OnLoadContentWithStorage(ani_env* env, ani_string path, ani_object storage)
-{
-    TLOGI(WmsLogTag::WMS_LIFE, "[ANI]");
-    auto windowScene = GetWindowScene().lock();
-    if (windowScene == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "[ANI]windowScene is nullptr!");
-        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-        return;
-    }
-    auto mainWindow = windowScene->GetMainWindow();
-    if (mainWindow == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "[ANI] mainWindow is nullptr!");
-        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-        return;
-    }
-    std::string contentPath;
-    AniWindowUtils::GetStdString(env, path, contentPath);
-    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(mainWindow->NapiSetUIContent(contentPath, env, storage));
-    TLOGI(WmsLogTag::WMS_LIFE, "[ANI] Window [%{public}u, %{public}s] load content end, ret=%{public}d",
-        mainWindow->GetWindowId(), mainWindow->GetWindowName().c_str(), ret);
-    if (ret != WmErrorCode::WM_OK) {
-        AniWindowUtils::AniThrowError(env, ret, "Window load content failed");
-    }
-}
-
 ani_ref AniWindowStage::OnCreateSubWindow(ani_env* env, ani_string name)
 {
     std::string windowName;
@@ -508,11 +503,9 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(IsWindowRectAutoSave)},
         ani_native_function {"removeStartingWindow", "J:V",
             reinterpret_cast<void *>(RemoveStartingWindow)},
-        ani_native_function {"loadContent", "JLstd/core/String;:I",
-            reinterpret_cast<void *>(AniWindowStage::LoadContent)},
         ani_native_function {"loadContentSync",
             "JLstd/core/String;Larkui/stateManagement/storages/localStorage/LocalStorage;:V",
-            reinterpret_cast<void *>(AniWindowStage::LoadContentWithStorage)},
+            reinterpret_cast<void *>(AniWindowStage::LoadContent)},
         ani_native_function {"disableWindowDecorSync", nullptr,
             reinterpret_cast<void *>(AniWindowStage::DisableWindowDecor)},
         ani_native_function {"setShowOnLockScreenSync",
