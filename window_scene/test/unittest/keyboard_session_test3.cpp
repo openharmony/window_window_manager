@@ -664,7 +664,7 @@ HWTEST_F(KeyboardSessionTest3, ProcessKeyboardOccupiedAreaInfo, Function | Small
     bool needCheckRSTransaction = true;
     keyboardSession->isKeyboardSyncTransactionOpen_ = true;
     keyboardSession->ProcessKeyboardOccupiedAreaInfo(0, needRecalculateAvoidAreas, needCheckRSTransaction);
-    ASSERT_EQ(keyboardSession->isKeyboardSyncTransactionOpen_, true);
+    ASSERT_EQ(keyboardSession->isKeyboardSyncTransactionOpen_, false);
 
     keyboardSession->keyboardCallback_->onGetSceneSession =
         [sceneSession](uint32_t callingSessionId) -> sptr<SceneSession> {
@@ -682,6 +682,14 @@ HWTEST_F(KeyboardSessionTest3, ProcessKeyboardOccupiedAreaInfo, Function | Small
     needCheckRSTransaction = false;
     keyboardSession->ProcessKeyboardOccupiedAreaInfo(0, needRecalculateAvoidAreas, needCheckRSTransaction);
     ASSERT_EQ(keyboardSession->isKeyboardSyncTransactionOpen_, true);
+
+    keyboardSession->keyboardCallback_->onGetSceneSession = [&](uint32_t persistentId) {
+        return sceneSession;
+    };
+    keyboardSession->isKeyboardSyncTransactionOpen_ = true;
+    needCheckRSTransaction = true;
+    keyboardSession->ProcessKeyboardOccupiedAreaInfo(0, needRecalculateAvoidAreas, needCheckRSTransaction);
+    ASSERT_EQ(keyboardSession->isKeyboardSyncTransactionOpen_, false);
 }
 
 /**
