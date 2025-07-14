@@ -9038,12 +9038,12 @@ bool SceneSession::IsSubWindowOutlineEnabled() const
 }
 
 /**
- * Window Transition Animation For PC
+ * Window Transition Animation For PC and FreeMultiWindow device
  */
 WSError SceneSession::SetWindowTransitionAnimation(WindowTransitionType transitionType,
     const TransitionAnimation& animation)
 {
-    if (!IsPcWindow() && !systemConfig_.IsPadWindow()) {
+    if (!(IsPcWindow() || IsFreeMultiWindowMode())) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Not pc or pad device");
         return WSError::WS_ERROR_DEVICE_NOT_SUPPORT;
     }
