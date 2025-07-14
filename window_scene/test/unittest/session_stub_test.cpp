@@ -1203,6 +1203,28 @@ HWTEST_F(SessionStubTest, HandleIsMainWindowFullScreenAcrossDisplays, Function |
 }
 
 /**
+ * @tc.name: HandleUpdateAbilityColorMode
+ * @tc.desc: sessionStub HandleUpdateAbilityColorMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleUpdateAbilityColorMode, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteString("DARK");
+    data.WriteBool(true);
+    sptr<SessionStub> sessionStub = sptr<SessionStubMocker>::MakeSptr();
+    ASSERT_NE(nullptr, sessionStub);
+    auto result = sessionStub->HandleUpdateAbilityColorMode(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
+
+    data.WriteInterfaceToken(SessionStub::GetDescriptor());
+    uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_ABILITY_COLOR_MODE);
+    EXPECT_EQ(0, sessionStub->ProcessRemoteRequest(code, data, reply, option));
+}
+
+/**
  * @tc.name: HandleNotifyKeyboardWillShowRegistered
  * @tc.desc: sessionStub HandleNotifyKeyboardWillShowRegistered
  * @tc.type: FUNC
