@@ -17,6 +17,8 @@
 
 #include "session/host/include/session_coordinate_helper.h"
 
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
+
 using namespace testing;
 using namespace testing::ext;
 
