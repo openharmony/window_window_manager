@@ -209,7 +209,7 @@ std::unordered_map<int32_t, std::vector<sptr<IWaterfallModeChangeListener>>>
 std::mutex WindowSessionImpl::windowRotationChangeListenerMutex_;
 std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>> WindowSessionImpl::windowSessionMap_;
 std::shared_mutex WindowSessionImpl::windowSessionMutex_;
-std::set<sptr<WindowSessionImpl>> WindowSessionImpl::windowExtensionSessionSet_;
+std::set<sptr<WindowSessionImpl>> g_windowExtensionSessionSet_;
 std::shared_mutex WindowSessionImpl::windowExtensionSessionMutex_;
 std::recursive_mutex WindowSessionImpl::subWindowSessionMutex_;
 std::map<int32_t, std::vector<sptr<WindowSessionImpl>>> WindowSessionImpl::subWindowSessionMap_;
@@ -709,7 +709,7 @@ sptr<WindowSessionImpl> WindowSessionImpl::GetScaleWindow(uint32_t windowId)
     }
     if (isUIExtensionAbilityProcess_) {
         std::shared_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
-        for (const auto& window : windowExtensionSessionSet_) {
+        for (const auto& window : GetWindowExtensionSessionSet()) {
             if (window && static_cast<uint32_t>(window->GetProperty()->GetParentId()) == windowId) {
                 TLOGD(WmsLogTag::WMS_COMPAT, "find extension window id:%{public}d", window->GetPersistentId());
                 return window;
@@ -1497,7 +1497,7 @@ sptr<WindowSessionImpl> WindowSessionImpl::FindExtensionWindowWithContext() cons
         return nullptr;
     }
     std::shared_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
-    for (const auto& window : windowExtensionSessionSet_) {
+    for (const auto& window : GetWindowExtensionSessionSet()) {
         if (window && context.get() == window->GetContext().get()) {
             return window;
         }
@@ -6646,6 +6646,11 @@ void WindowSessionImpl::ReadKeyboardInfoFromWant(const AAFwk::Want& want, Keyboa
     };
     keyboardPanelInfo.gravity_ = static_cast<WindowGravity>(want.GetIntParam(Extension::GRAVITY, 0));
     keyboardPanelInfo.isShowing_ = want.GetBoolParam(Extension::ISSHOWING, false);
+}
+
+std::set<sptr<WindowSessionImpl>>& WindowSessionImpl::GetWindowExtensionSessionSet()
+{
+    return g_windowExtensionSessionSet_;
 }
 
 void WindowSessionImpl::NotifyKeyboardAnimationCompleted(const KeyboardPanelInfo& keyboardPanelInfo)
