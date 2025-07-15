@@ -493,6 +493,9 @@ public:
     /*
      * Window Property
      */
+    WMError SetWindowDefaultDensityEnabled(bool enabled) override;
+    bool IsWindowDefaultDensityEnabled() const;
+    WMError ResetWindowDefaultDensityEnabled();
     WSError NotifyDisplayIdChange(DisplayId displayId);
     WSError NotifyScreenshotAppEvent(ScreenshotEventType type) override;
     bool IsDeviceFeatureCapableFor(const std::string& feature) const override;
@@ -793,9 +796,6 @@ protected:
     std::unordered_set<std::string> containerColorList_;
     float lastSystemDensity_ = UNDEFINED_DENSITY;
     std::atomic<bool> isWindowDefaultDensityEnabled_ = false;
-    WMError SetWindowDefaultDensityEnabled(bool enabled);
-    bool IsWindowDefaultDensityEnabled() const;
-    WMError ResetWindowDefaultDensityEnabled();
     WSError NotifySystemDensityChange(float density);
     void RegisterWindowInspectorCallback();
     uint32_t GetTargetAPIVersionByApplicationInfo() const;
