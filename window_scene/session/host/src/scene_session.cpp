@@ -110,7 +110,6 @@ bool CheckIfRectElementIsTooLarge(const WSRect& rect)
 MaximizeMode SceneSession::maximizeMode_ = MaximizeMode::MODE_RECOVER;
 std::shared_mutex SceneSession::windowDragHotAreaMutex_;
 std::map<uint64_t, std::map<uint32_t, WSRect>> SceneSession::windowDragHotAreaMap_;
-static bool g_enableForceUIFirst = system::GetParameter("window.forceUIFirst.enabled", "1") == "1";
 GetConstrainedModalExtWindowInfoFunc SceneSession::onGetConstrainedModalExtWindowInfoFunc_;
 
 SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
@@ -3285,18 +3284,6 @@ WSError SceneSession::RequestSessionBack(bool needMoveToBackground)
         if (!session->backPressedFunc_) {
             TLOGNW(WmsLogTag::WMS_EVENT, "%{public}s Session didn't register back event consumer!", where);
             return WSError::WS_DO_NOTHING;
-        }
-        if (g_enableForceUIFirst) {
-            AutoRSTransaction trans(session->GetRSUIContext());
-            auto leashWinSurfaceNode = session->GetLeashWinSurfaceNode();
-            if (leashWinSurfaceNode) {
-                leashWinSurfaceNode->SetForceUIFirst(true);
-                TLOGNI(WmsLogTag::WMS_EVENT, "%{public}s leashWinSurfaceNode_ SetForceUIFirst id:%{public}u!",
-                    where, session->GetPersistentId());
-            } else {
-                TLOGNI(WmsLogTag::WMS_EVENT, "%{public}s failed, leashWinSurfaceNode_ null id:%{public}u",
-                    where, session->GetPersistentId());
-            }
         }
         session->backPressedFunc_(needMoveToBackground);
         return WSError::WS_OK;
