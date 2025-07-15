@@ -5912,6 +5912,37 @@ WSError WindowSessionImpl::NotifySystemDensityChange(float density)
     return WSError::WS_OK;
 }
 
+WMError WindowSessionImpl::SetWindowDefaultDensityEnabled(bool enabled)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
+    if (display == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "display is null, winId=%{public}u", GetWindowId());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    auto displayInfo = display->GetDisplayInfo();
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "displayInfo is null, winId=%{public}u", GetWindowId());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    isWindowDefaultDensityEnabled_.store(enable);
+    UpdateDensity();
+    return WMError::WM_OK;
+}
+
+bool WindowSessionImpl::IsWindowDefaultDensityEnabled()
+{
+    return isWindowDefaultDensityEnabled_.load();
+}
+
+WMError WindowSessionImpl::ResetWindowDefaultDensityEnabled()
+{
+    WindowDefaultDensityEnabled_.store(false);
+    return WMError::WM_OK;
+}
+
 WSError WindowSessionImpl::NotifyWindowVisibility(bool isVisible)
 {
     TLOGD(WmsLogTag::WMS_ATTRIBUTE, "window: name=%{public}s, id=%{public}u, isVisible=%{public}d",

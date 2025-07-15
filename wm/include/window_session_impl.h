@@ -792,6 +792,10 @@ protected:
      */
     std::unordered_set<std::string> containerColorList_;
     float lastSystemDensity_ = UNDEFINED_DENSITY;
+    std::atomic<bool> isWindowDefaultDensityEnabled_ = false;
+    WMError SetWindowDefaultDensityEnabled(bool enabled);
+    bool IsWindowDefaultDensityEnabled() const;
+    WMError ResetWindowDefaultDensityEnabled();
     WSError NotifySystemDensityChange(float density);
     void RegisterWindowInspectorCallback();
     uint32_t GetTargetAPIVersionByApplicationInfo() const;
