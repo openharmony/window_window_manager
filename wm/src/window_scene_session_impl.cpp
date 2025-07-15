@@ -4538,7 +4538,7 @@ WMError WindowSceneSessionImpl::SetShadowRadius(float radius)
         return WMError::WM_ERROR_INVALID_PARAM;
     }
 
-    surfaceNode_->SetShadowRadius(radius);
+    surfaceNode_->SetShadowRadius(ConvertRadiusToSigma(radius));
     RSTransactionAdapter::FlushImplicitTransaction(surfaceNode_);
     return WMError::WM_OK;
 }
@@ -4588,7 +4588,7 @@ WMError WindowSceneSessionImpl::SetWindowShadowRadius(float radius)
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "RSSurface node is nullptr.");
         return WMError::WM_ERROR_NULLPTR;
     }
-    surfaceNode_->SetShadowRadius(radius);
+    surfaceNode_->SetShadowRadius(ConvertRadiusToSigma(radius));
     RSTransactionAdapter::FlushImplicitTransaction(surfaceNode_);
     return WMError::WM_OK;
 }
