@@ -459,9 +459,11 @@ HWTEST_F(SceneSessionLifecycleTest, BackgroundTask04, TestSize.Level0)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->isActive_ = true;
-    sceneSession->SeWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    sceneSession->state_ = SessionState::STATE_INACTIVE;
+    sceneSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     EXPECT_EQ(sceneSession->BackgroundTask(), WSError::WS_OK);
-    sceneSession->SeWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     EXPECT_EQ(sceneSession->BackgroundTask(), WSError::WS_OK);
 }
 
