@@ -128,15 +128,14 @@ HWTEST_F(FloatingBallControllerTest, CreateFloatingBallWindow01, TestSize.Level1
     std::unique_ptr<AbilityRuntime::AbilityContextImpl> contextPtr =
         std::make_unique<AbilityRuntime::AbilityContextImpl>();
     fbController_->contextPtr_ = contextPtr.get();
-    fbController_->fbOption_ = nullptr;
-    EXPECT_EQ(WMError::WM_ERROR_FB_STATE_ABNORMALLY, fbController_->CreateFloatingBallWindow());
-    fbController_->fbOption_ = option_;
+    sptr<FbOption> nullOption = nullptr;
+    EXPECT_EQ(WMError::WM_ERROR_FB_STATE_ABNORMALLY, fbController_->CreateFloatingBallWindow(nullOption));
     mw_->SetWindowState(WindowState::STATE_INITIAL);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, fbController_->CreateFloatingBallWindow());
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, fbController_->CreateFloatingBallWindow(option_));
     mw_->SetWindowState(WindowState::STATE_SHOWN);
-    EXPECT_EQ(WMError::WM_ERROR_FB_CREATE_FAILED, fbController_->CreateFloatingBallWindow());
+    EXPECT_EQ(WMError::WM_ERROR_FB_CREATE_FAILED, fbController_->CreateFloatingBallWindow(option_));
 
-    fbController_->CreateFloatingBallWindow();
+    fbController_->CreateFloatingBallWindow(option_);
     fbController_->UpdateMainWindow(nullptr);
     EXPECT_EQ(100, fbController_->mainWindowId_);
     fbController_->UpdateMainWindow(mw_);
