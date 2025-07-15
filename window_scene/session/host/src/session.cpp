@@ -1273,7 +1273,7 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
         NotifyClientToUpdateRect("Connect", nullptr);
 
     // Window Layout Global Coordinate System
-    auto globalDisplayRect = ComputeGlobalDisplayRect();
+    auto globalDisplayRect = SessionCoordinateHelper::RelativeToGlobalDisplayRect(GetScreenId(), GetSessionRect());
     UpdateGlobalDisplayRect(globalDisplayRect, SizeChangeReason::UNDEFINED);
 
     EditSessionInfo().disableDelegator = property->GetIsAbilityHookOff();
@@ -4727,27 +4727,19 @@ WSRect Session::GetGlobalDisplayRect() const
     return rect;
 }
 
-WSRect Session::ComputeGlobalDisplayRect() const
-{
-    // In multi-screen drag-and-move scenarios, the global rect is relative to the top-left
-    // corner of the bounding rectangle of all screens. In other cases, it is relative to
-    // the top-left corner of its associated screen.
-    // The method GetSessionGlobalRectInMultiScreen abstracts this difference and always
-    // returns the window's rect relative to its screen, regardless of the scenario.
-    WSRect relativeRect = GetSessionGlobalRectInMultiScreen();
-    return SessionCoordinateHelper::RelativeToGlobalDisplayRect(GetDisplayId(), relativeRect);
-}
-
 WSError Session::UpdateGlobalDisplayRect(const WSRect& rect, SizeChangeReason reason)
 {
-    WSRect curGlobalDisplayRect = GetGlobalDisplayRect();
-    TLOGD(WmsLogTag::WMS_LAYOUT,
-        "windowId: %{public}d, rect: %{public}s, reason: %{public}u, curGlobalDisplayRect: %{public}s",
-        GetPersistentId(), rect.ToString().c_str(), reason, curGlobalDisplayRect.ToString().c_str());
-    if (rect == curGlobalDisplayRect) {
+    const int32_t windowId = GetWindowId();
+    TLOGD(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, rect: %{public}s, reason: %{public}u",
+        windowId, rect.ToString().c_str(), reason);
+    if (rect == GetGlobalDisplayRect() && reason == globalDisplayRectSizeChangeReason_) {
+        TLOGD(WmsLogTag::WMS_LAYOUT,
+            "No change in rect or reason, windowId: %{public}d, rect: %{public}s, reason: %{public}u",
+            windowId, rect.ToString().c_str(), reason);
         return WSError::WS_DO_NOTHING;
     }
     SetGlobalDisplayRect(rect);
+    globalDisplayRectSizeChangeReason_ = reason;
     NotifyClientToUpdateGlobalDisplayRect(rect, reason);
     return WSError::WS_OK;
 }

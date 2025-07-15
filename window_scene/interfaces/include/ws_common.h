@@ -39,6 +39,10 @@ enum class SupportWindowMode;
 
 namespace OHOS::Rosen {
 class RSTransaction;
+
+// Type alias for screen identifier, consistent with ScreenId defined in dm_common.h.
+using ScreenId = uint64_t;
+
 constexpr int32_t ROTATE_ANIMATION_DURATION = 400;
 constexpr int32_t INVALID_SESSION_ID = 0;
 constexpr int32_t WINDOW_SUPPORT_MODE_MAX_SIZE = 4;
@@ -704,20 +708,20 @@ using WSRect = WSRectT<int32_t>;
 using WSRectF = WSRectT<float>;
 
 /**
- * @struct WSRelativeDisplayRect
+ * @struct WSScreenRelativeRect
  *
- * @brief Represent the rectangle of a window relative to a specific display.
+ * @brief Represent a window rectangle defined relative to a specific screen.
  */
-struct WSRelativeDisplayRect {
-    // The ID of the associated display.
-    uint64_t displayId = UINT64_MAX;
-    // The window rectangle relative to the specified display.
-    WSRect rect = WSRect::EMPTY_RECT;
+struct WSScreenRelativeRect {
+    // The ID of the screen this rectangle is relative to.
+    ScreenId screenId;
+    // The window rectangle relative to the specified screen.
+    WSRect rect;
 
     inline std::string ToString() const
     {
         std::ostringstream oss;
-        oss << displayId << ", " << rect.ToString();
+        oss << screenId << ", " << rect.ToString();
         return oss.str();
     }
 };
