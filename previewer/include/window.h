@@ -426,6 +426,7 @@ public:
     virtual float GetCustomDensity() const { return UNDEFINED_DENSITY; }
     virtual WMError SetWindowShadowEnabled(bool isEnabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual bool GetWindowShadowEnabled() const { return true; }
+    virtual WMError SetWindowDefaultDensityEnabled(bool enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError GetWindowDensityInfo(
         WindowDensityInfo& densityInfo) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError IsMainWindowFullScreenAcrossDisplays(

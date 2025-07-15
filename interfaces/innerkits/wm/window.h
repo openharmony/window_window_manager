@@ -3370,6 +3370,14 @@ public:
     virtual WMError GetWindowDensityInfo(WindowDensityInfo& densityInfo) { return WMError::WM_OK; }
 
     /**
+     * @brief Set window whether to use default density.
+     *
+     * @param density the custom density of window.
+     * @return WM_OK means set success, others means failed.
+     */
+    virtual WMError SetWindowDefaultDensityEnabled(bool enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
      * @brief Get virtual pixel ratio.
      *
      * @return Value of PixelRatio obtained from displayInfo.
