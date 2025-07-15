@@ -5927,19 +5927,19 @@ WMError WindowSessionImpl::SetWindowDefaultDensityEnabled(bool enabled)
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "displayInfo is null, winId=%{public}u", GetWindowId());
         return WMError::WM_ERROR_NULLPTR;
     }
-    isWindowDefaultDensityEnabled_.store(enable);
+    isWindowDefaultDensityEnabled_.store(enabled);
     UpdateDensity();
     return WMError::WM_OK;
 }
 
-bool WindowSessionImpl::IsWindowDefaultDensityEnabled()
+bool WindowSessionImpl::IsWindowDefaultDensityEnabled() const
 {
     return isWindowDefaultDensityEnabled_.load();
 }
 
 WMError WindowSessionImpl::ResetWindowDefaultDensityEnabled()
 {
-    WindowDefaultDensityEnabled_.store(false);
+    isWindowDefaultDensityEnabled_.store(false);
     return WMError::WM_OK;
 }
 
