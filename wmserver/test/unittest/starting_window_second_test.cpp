@@ -96,7 +96,7 @@ void StartingWindowTest::TearDown()
 HWTEST_F(StartingWindowTest, GetBundleManager01, TestSize.Level1)
 {
     auto bundleMgr = StartingWindow::GetBundleManager();
-    EXPECT_NE(bundleMgr, nullptr);
+    ASSERT_NE(bundleMgr, nullptr);
 }
 
 /**
@@ -108,7 +108,7 @@ HWTEST_F(StartingWindowTest, CreateResourceManager01, TestSize.Level1)
 {
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = nullptr;
     auto ref = StartingWindow::CreateResourceManager(abilityInfo);
-    EXPECT_EQ(ref, nullptr);
+    ASSERT_EQ(ref, nullptr);
 
     abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
     abilityInfo->bundleName = "com.ohos.test.bundleName";
@@ -116,7 +116,7 @@ HWTEST_F(StartingWindowTest, CreateResourceManager01, TestSize.Level1)
     abilityInfo->hapPath = "data/resource/testHapPath";
 
     ref = StartingWindow::CreateResourceManager(abilityInfo);
-    EXPECT_NE(ref, nullptr);
+    ASSERT_NE(ref, nullptr);
     EXPECT_EQ(ref->bundleInfo.first, abilityInfo->bundleName);
     EXPECT_EQ(ref->bundleInfo.second, abilityInfo->moduleName);
 }
@@ -129,7 +129,7 @@ HWTEST_F(StartingWindowTest, CreateResourceManager01, TestSize.Level1)
 HWTEST_F(StartingWindowTest, GetAbilityInfoFromBMS01, TestSize.Level1)
 {
     auto ref = StartingWindow::GetAbilityInfoFromBMS(nullptr, nullptr);
-    EXPECT_EQ(ref, nullptr);
+    ASSERT_EQ(ref, nullptr);
 
     sptr<WindowTransitionInfo> winInfo = sptr<WindowTransitionInfo>::MakeSptr();
     sptr<WindowNode> node = StartingWindow::CreateWindowNode(winInfo, 1);
@@ -137,13 +137,13 @@ HWTEST_F(StartingWindowTest, GetAbilityInfoFromBMS01, TestSize.Level1)
     node->abilityInfo_.bundleName_ = "com.ohos.test.bundleName";
     ASSERT_NE(node, nullptr);
     ref = StartingWindow::GetAbilityInfoFromBMS(node, nullptr);
-    EXPECT_EQ(ref, nullptr);
+    ASSERT_EQ(ref, nullptr);
 
     auto mockBundleMgr = sptr<AppExecFwk::MockIBundleMgr>::MakeSptr();
     EXPECT_CALL(*mockBundleMgr, QueryAbilityInfo(_, _, _, _))
         .Times(1).WillOnce(Return(false));
     ref = StartingWindow::GetAbilityInfoFromBMS(node, mockBundleMgr);
-    EXPECT_EQ(ref, nullptr);
+    ASSERT_EQ(ref, nullptr);
 
     AppExecFwk::AbilityInfo abilityInfo;
     abilityInfo.name = node->abilityInfo_.abilityName_;
@@ -152,7 +152,7 @@ HWTEST_F(StartingWindowTest, GetAbilityInfoFromBMS01, TestSize.Level1)
             SetArgReferee<3>(abilityInfo),
             Return(true)));
     ref = StartingWindow::GetAbilityInfoFromBMS(node, mockBundleMgr);
-    EXPECT_NE(ref, nullptr);
+    ASSERT_NE(ref, nullptr);
     EXPECT_EQ(ref->name, node->abilityInfo_.abilityName_);
 }
 
@@ -166,21 +166,21 @@ HWTEST_F(StartingWindowTest, GetPixelMapListInfo01, TestSize.Level1)
     std::shared_ptr<Global::Resource::ResourceManager> resourceMgr = nullptr;
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = nullptr;
     auto ref = StartingWindow::GetPixelMapListInfo(1, resourceMgr, abilityInfo);
-    EXPECT_EQ(ref, nullptr);
+    ASSERT_EQ(ref, nullptr);
 
     abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
     ref = StartingWindow::GetPixelMapListInfo(1, resourceMgr, abilityInfo);
-    EXPECT_EQ(ref, nullptr);
+    ASSERT_EQ(ref, nullptr);
 
     resourceMgr = StartingWindow::CreateResourceManager(abilityInfo);
     ref = StartingWindow::GetPixelMapListInfo(1, resourceMgr, abilityInfo);
-    EXPECT_EQ(ref, nullptr);
+    ASSERT_EQ(ref, nullptr);
 
     ref = StartingWindow::GetPixelMapListInfo(std::numeric_limits<uint32_t>::min(), resourceMgr, abilityInfo);
-    EXPECT_EQ(ref, nullptr);
+    ASSERT_EQ(ref, nullptr);
 
     ref = StartingWindow::GetPixelMapListInfo(-1, resourceMgr, abilityInfo);
-    EXPECT_EQ(ref, nullptr);
+    ASSERT_EQ(ref, nullptr);
 }
 
 /**
@@ -198,23 +198,23 @@ HWTEST_F(StartingWindowTest, GetPixelMapListInfo02, TestSize.Level1)
     EXPECT_CALL(*mockResourceManager, GetMediaById(_, _, _))
         .Times(1).WillOnce(Return(Global::Resource::RState::NOT_FOUND));
     auto ref = StartingWindow::GetPixelMapListInfo(mediaDataId, mockResourceManager, abilityInfo);
-    EXPECT_EQ(ref, nullptr);
+    ASSERT_EQ(ref, nullptr);
 
     EXPECT_CALL(*mockResourceManager, GetMediaById(_, _, _))
         .Times(1).WillOnce(Return(Global::Resource::RState::SUCCESS));
     ref = StartingWindow::GetPixelMapListInfo(mediaDataId, mockResourceManager, abilityInfo);
-    EXPECT_EQ(ref, nullptr);
+    ASSERT_EQ(ref, nullptr);
 
     abilityInfo->hapPath = "/home/somepath/somefile";
     EXPECT_CALL(*mockResourceManager, GetMediaDataById(_, _, _, _))
         .Times(1).WillOnce(Return(Global::Resource::RState::NOT_FOUND));
     ref = StartingWindow::GetPixelMapListInfo(mediaDataId, mockResourceManager, abilityInfo);
-    EXPECT_EQ(ref, nullptr);
+    ASSERT_EQ(ref, nullptr);
 
     EXPECT_CALL(*mockResourceManager, GetMediaDataById(_, _, _, _))
         .Times(1).WillOnce(Return(Global::Resource::RState::SUCCESS));
     ref = StartingWindow::GetPixelMapListInfo(mediaDataId, mockResourceManager, abilityInfo);
-    EXPECT_EQ(ref, nullptr);
+    ASSERT_EQ(ref, nullptr);
 }
 
 /**
@@ -244,7 +244,7 @@ HWTEST_F(StartingWindowTest, GetPixelMapListInfo03, TestSize.Level1)
         Return(Global::Resource::RState::SUCCESS)
     ));
     auto ref = StartingWindow::GetPixelMapListInfo(mediaDataId, mockResourceManager, abilityInfo);
-    EXPECT_NE(ref, nullptr);
+    ASSERT_NE(ref, nullptr);
 
     //SOURCE_SIZE is bigger than MAX_SOURCE_SIZE
     EXPECT_CALL(*mockResourceManager, GetMediaDataById(_, _, _, _))
@@ -256,7 +256,7 @@ HWTEST_F(StartingWindowTest, GetPixelMapListInfo03, TestSize.Level1)
         Return(Global::Resource::RState::SUCCESS)
     ));
     ref = StartingWindow::GetPixelMapListInfo(mediaDataId, mockResourceManager, abilityInfo);
-    EXPECT_EQ(ref, nullptr);
+    ASSERT_EQ(ref, nullptr);
 }
 
 
@@ -287,9 +287,9 @@ HWTEST_F(StartingWindowTest, GetPixelMapListInfo04, TestSize.Level1)
         Return(Global::Resource::RState::SUCCESS)
     ));
     auto ref = StartingWindow::GetPixelMapListInfo(mediaDataId, mockResourceManager, abilityInfo);
+    ASSERT_NE(ref, nullptr);
     EXPECT_EQ(ref->pixelMaps.size(), 2);
     EXPECT_EQ(ref->delayTimes.size(), 2);
-    EXPECT_NE(ref, nullptr);
 
     const size_t invalidGifDataSize = sizeof(RAW_INVALID_GIF_DATA);
     auto testInvalidGifData = std::make_unique<uint8_t[]>(invalidGifDataSize);
@@ -306,7 +306,7 @@ HWTEST_F(StartingWindowTest, GetPixelMapListInfo04, TestSize.Level1)
         Return(Global::Resource::RState::SUCCESS)
     ));
     ref = StartingWindow::GetPixelMapListInfo(mediaDataId, mockResourceManager, abilityInfo);
-    EXPECT_EQ(ref, nullptr);
+    ASSERT_EQ(ref, nullptr);
 }
 
 /**
@@ -329,7 +329,7 @@ HWTEST_F(StartingWindowTest, GetPixelMapListInfo05, TestSize.Level1)
             Return(Global::Resource::RState::SUCCESS)
     ));
     auto ref = StartingWindow::GetPixelMapListInfo(mediaDataId, mockResourceManager, abilityInfo);
-    EXPECT_EQ(ref, nullptr);
+    ASSERT_EQ(ref, nullptr);
 
     std::filesystem::path tmpDir = std::filesystem::temp_directory_path();
     std::filesystem::path tmpFile = tmpDir / "wms_test_XXXXXX.png";
@@ -345,7 +345,7 @@ HWTEST_F(StartingWindowTest, GetPixelMapListInfo05, TestSize.Level1)
             Return(Global::Resource::RState::SUCCESS)
         ));
     ref = StartingWindow::GetPixelMapListInfo(mediaDataId, mockResourceManager, abilityInfo);
-    EXPECT_NE(ref, nullptr);
+    ASSERT_NE(ref, nullptr);
     std::filesystem::remove(tmpPath2);
 }
 
@@ -374,7 +374,7 @@ HWTEST_F(StartingWindowTest, GetPixelMapListInfo06, TestSize.Level1)
             Return(Global::Resource::RState::SUCCESS)
         ));
     auto ref = StartingWindow::GetPixelMapListInfo(mediaDataId, mockResourceManager, abilityInfo);
-    EXPECT_NE(ref, nullptr);
+    ASSERT_NE(ref, nullptr);
     EXPECT_EQ(ref->pixelMaps.size(), 2);
     EXPECT_EQ(ref->delayTimes.size(), 2);
     std::filesystem::remove(tmpPath1);
@@ -392,7 +392,7 @@ HWTEST_F(StartingWindowTest, GetPixelMapListInfo06, TestSize.Level1)
             Return(Global::Resource::RState::SUCCESS)
         ));
     ref = StartingWindow::GetPixelMapListInfo(mediaDataId, mockResourceManager, abilityInfo);
-    EXPECT_EQ(ref, nullptr);
+    ASSERT_EQ(ref, nullptr);
     std::filesystem::remove(tmpPath2);
 }
 
@@ -404,22 +404,22 @@ HWTEST_F(StartingWindowTest, GetPixelMapListInfo06, TestSize.Level1)
 HWTEST_F(StartingWindowTest, GetCustomStartingWindowInfo01, TestSize.Level1)
 {
     auto ref = StartingWindow::GetCustomStartingWindowInfo(nullptr, nullptr);
-    EXPECT_EQ(ref, nullptr);
+    ASSERT_EQ(ref, nullptr);
 
     sptr<WindowTransitionInfo> winInfo = sptr<WindowTransitionInfo>::MakeSptr();
     sptr<WindowNode> node = StartingWindow::CreateWindowNode(winInfo, 1);
     ref = StartingWindow::GetCustomStartingWindowInfo(node, nullptr);
-    EXPECT_EQ(ref, nullptr);
+    ASSERT_EQ(ref, nullptr);
 
     auto bundleMgr = StartingWindow::GetBundleManager();
     ref = StartingWindow::GetCustomStartingWindowInfo(node, bundleMgr);
-    EXPECT_EQ(ref, nullptr);
+    ASSERT_EQ(ref, nullptr);
 
     auto mockBundleMgr = sptr<AppExecFwk::MockIBundleMgr>::MakeSptr();
     EXPECT_CALL(*mockBundleMgr, QueryAbilityInfo(_, _, _, _))
         .Times(1).WillOnce(Return(true));
     ref = StartingWindow::GetCustomStartingWindowInfo(node, mockBundleMgr);
-    EXPECT_EQ(ref, nullptr);
+    ASSERT_EQ(ref, nullptr);
 }
 
 /**
@@ -430,18 +430,18 @@ HWTEST_F(StartingWindowTest, GetCustomStartingWindowInfo01, TestSize.Level1)
 HWTEST_F(StartingWindowTest, DoGetCustomStartingWindowInfo01, TestSize.Level1)
 {
     auto ref = StartingWindow::DoGetCustomStartingWindowInfo(nullptr, nullptr);
-    EXPECT_EQ(ref, nullptr);
+    ASSERT_EQ(ref, nullptr);
 
     auto abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
     abilityInfo->startWindowResource.startWindowBackgroundColorId = 0;
     ref = StartingWindow::DoGetCustomStartingWindowInfo(abilityInfo, nullptr);
-    EXPECT_EQ(ref, nullptr);
+    ASSERT_EQ(ref, nullptr);
 
     auto mockResourceManager = std::make_shared<OHOS::Global::Resource::MockResourceManager>();
     EXPECT_CALL(*mockResourceManager, GetColorById(_, _))
         .Times(1).WillOnce(Return(Global::Resource::RState::NOT_FOUND));
     ref = StartingWindow::DoGetCustomStartingWindowInfo(abilityInfo, mockResourceManager);
-    EXPECT_EQ(ref, nullptr);
+    ASSERT_EQ(ref, nullptr);
 
     abilityInfo->startWindowResource.startWindowBackgroundColorId = 1;
     abilityInfo->startWindowResource.startWindowAppIconId = 1;
@@ -457,7 +457,7 @@ HWTEST_F(StartingWindowTest, DoGetCustomStartingWindowInfo01, TestSize.Level1)
     EXPECT_CALL(*mockResourceManager, GetMediaDataById(_, _, _, _))
     .WillOnce(DoAll(Return(Global::Resource::RState::NOT_FOUND)));
     ref = StartingWindow::DoGetCustomStartingWindowInfo(abilityInfo, mockResourceManager);
-    EXPECT_NE(ref, nullptr);
+    ASSERT_NE(ref, nullptr);
 
     EXPECT_CALL(*mockResourceManager, GetColorById(_, _))
         .Times(1).WillOnce(Return(Global::Resource::RState::SUCCESS));
@@ -470,7 +470,7 @@ HWTEST_F(StartingWindowTest, DoGetCustomStartingWindowInfo01, TestSize.Level1)
         Return(Global::Resource::RState::SUCCESS)
     ));
     ref = StartingWindow::DoGetCustomStartingWindowInfo(abilityInfo, mockResourceManager);
-    EXPECT_NE(ref, nullptr);
+    ASSERT_NE(ref, nullptr);
 }
 
 /**
@@ -570,7 +570,7 @@ HWTEST_F(StartingWindowTest, RegisterStartingWindowShowInfo01, TestSize.Level1)
     float vpRatio = 1.5;
 
     StartingWindow::RegisterStartingWindowShowInfo(node, rect, info, vpRatio);
-    EXPECT_NE(StartingWindow::startingWindowShowInfo_.info, nullptr);
+    ASSERT_NE(StartingWindow::startingWindowShowInfo_.info, nullptr);
 }
 
 /**
@@ -585,7 +585,7 @@ HWTEST_F(StartingWindowTest, UnRegisterStartingWindowShowInfo01, TestSize.Level1
     std::shared_ptr<Media::PixelMap> pixelMap = SurfaceDraw::DecodeImageToPixelMap(IMAGE_PLACE_HOLDER_PNG_PATH);
     StartingWindow::startingWindowShowInfo_.info->appIcon->pixelMaps.push_back(pixelMap);
     StartingWindow::UnRegisterStartingWindowShowInfo();
-    EXPECT_EQ(StartingWindow::startingWindowShowInfo_.info, nullptr);
+    ASSERT_EQ(StartingWindow::startingWindowShowInfo_.info, nullptr);
 }
 
 /**

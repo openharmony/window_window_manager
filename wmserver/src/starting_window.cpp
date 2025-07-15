@@ -656,7 +656,7 @@ std::shared_ptr<Rosen::ResourceInfo> StartingWindow::GetPixelMapListInfo(uint32_
     auto info = std::make_shared<Rosen::ResourceInfo>();
     std::transform(pixelMapList->begin(), pixelMapList->end(), std::back_inserter(info->pixelMaps),
                    [](auto& ptr) { return std::move(ptr); });
-    if (info->pixelMaps.size() > 1) {     //multi frames
+    if (info->pixelMaps.size() > 1) {     // multi frames
         auto delaytimes = imageSource->GetDelayTime(errorCode);
         if (errorCode != 0) {
             TLOGE(WmsLogTag::WMS_PATTERN, "delaytimes failed, id %{public}u err %{public}u", mediaDataId, errorCode);
@@ -737,7 +737,7 @@ WMError StartingWindow::DrawStartingWindow(const std::shared_ptr<Rosen::Starting
     const float vpRatio = DisplayGroupInfo::GetInstance().GetDisplayVirtualPixelRatio(node->GetDisplayId());
     RegisterStartingWindowShowInfo(node, rect, info, vpRatio);
     const auto& resInfo = startingWindowShowInfo_.info;
-    if (!resInfo->appIcon && !resInfo->bgImage && !resInfo->branding && !resInfo->illustration) {
+    if (resInfo && !resInfo->appIcon && !resInfo->bgImage && !resInfo->branding && !resInfo->illustration) {
         if (!(SurfaceDraw::DrawCustomStartingWindow(node->startingWinSurfaceNode_, rect, resInfo, vpRatio,
             startingWindowShowInfo_.frameIndex))) {
             TLOGE(WmsLogTag::WMS_PATTERN, "Failed to draw Custom starting window.");
