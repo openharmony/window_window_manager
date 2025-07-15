@@ -681,7 +681,6 @@ public:
     void SetRequestNextVsyncWhenModeChangeFunc(RequestNextVsyncWhenModeChangeFunc&& func);
     void SetGlobalDisplayRect(const WSRect& rect);
     WSRect GetGlobalDisplayRect() const;
-    WSRect ComputeGlobalDisplayRect() const;
     virtual WSError UpdateGlobalDisplayRect(const WSRect& rect, SizeChangeReason reason);
     WSError NotifyClientToUpdateGlobalDisplayRect(const WSRect& rect, SizeChangeReason reason);
     const sptr<LayoutController>& GetLayoutController() const { return layoutController_; }
@@ -1092,6 +1091,7 @@ private:
     bool isDragStart_ = { false };
     std::atomic_bool isWindowModeDirty_ = false;
     std::atomic<int32_t> timesToWaitForVsync_ = 0;
+    SizeChangeReason globalDisplayRectSizeChangeReason_ = SizeChangeReason::END;
 
     /*
      * Screen Lock
