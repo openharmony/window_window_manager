@@ -3370,9 +3370,9 @@ public:
     virtual WMError GetWindowDensityInfo(WindowDensityInfo& densityInfo) { return WMError::WM_OK; }
 
     /**
-     * @brief Set window whether to use default density.
+     * @brief Set whether the current window follows the default density of its screen.
      *
-     * @param density the custom density of window.
+     * @param enabled bool.
      * @return WM_OK means set success, others means failed.
      */
     virtual WMError SetWindowDefaultDensityEnabled(bool enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
