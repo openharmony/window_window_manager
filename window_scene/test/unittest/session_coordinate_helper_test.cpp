@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 
+#include "modifier_render_thread/rs_modifiers_draw_thread.h"
 #include "session/host/include/session_coordinate_helper.h"
 
 using namespace testing;
@@ -27,8 +28,9 @@ class SessionCoordinateHelperTest : public Test {
 public:
     SessionCoordinateHelperTest() : ssmClient_(ScreenSessionManagerClient::GetInstance()) {}
 
+    static void SetUpTestCase();
+    static void TearDownTestCase();
     void SetUp() override {}
-
     void TearDown() override
     {
         std::lock_guard<std::mutex> lock(ssmClient_.screenSessionMapMutex_);
@@ -38,6 +40,15 @@ public:
 protected:
     ScreenSessionManagerClient& ssmClient_;
 };
+
+void SessionCoordinateHelperTest::SetUpTestCase() {}
+
+void SessionCoordinateHelperTest::TearDownTestCase()
+{
+#ifdef RS_ENABLE_VK
+    RSModifiersDrawThread::Destroy();
+#endif
+}
 
 /**
  * @tc.name: TestRelativeToGlobalDisplayRect
