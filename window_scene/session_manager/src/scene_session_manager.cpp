@@ -10349,8 +10349,13 @@ void SceneSessionManager::NotifyOnAttachToFrameNode(const sptr<Session>& session
             return;
         }
         TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s, wid: %{public}d", where, weakSession->GetPersistentId());
+        auto surfaceNode = weakSession->GetSurfaceNode();
+        if (surfaceNode == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s, surfaceNode is nullptr", where);
+            return;
+        }
         uint64_t skipSurfaceNodeId = WindowHelper::IsMainWindow(weakSession->GetWindowType()) ?
-            static_cast<uint64_t>(weakSession->GetPersistentId()) : weakSession->GetSurfaceNode()->GetId();
+            static_cast<uint64_t>(weakSession->GetPersistentId()) : surfaceNode->GetId();
         AddSkipSurfaceNodeWhenAttach(weakSession->GetPersistentId(),
             weakSession->GetSessionInfo().bundleName_, skipSurfaceNodeId);
     };
