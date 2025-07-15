@@ -10733,4 +10733,31 @@ void ScreenSessionManager::UpdateCoordinationRefreshRate(uint32_t refreshRate)
     screenSession->UpdateRefreshRate(refreshRate);
     NotifyDisplayChanged(screenSession->ConvertToDisplayInfo(), DisplayChangeEvent::UPDATE_REFRESHRATE);
 }
+
+bool ScreenSessionManager::SynchronizePowerStatus(ScreenPowerState state)
+{
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "permission denied! calling: %{public}s, pid: %{public}d",
+            SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
+        return false;
+    }
+    TLOGI(WmsLogTag::DMS, "[UL_POWER] Synchronize power state: %{public}u", static_cast<uint32_t>(state));
+#ifdef FOLD_ABILITY_ENABLE
+    ScreenPowerStatus status = ScreenPowerStatus::INVALID_POWER_STATUS;
+    if (!GetPowerStatus(state, PowerStateChangeReason::STATE_CHANGE_REASON_SYNCHRONIZE_POWER_STATE, status)) {
+        TLOGE(WmsLogTag::DMS, "GetPowerStatus failed");
+        return false;
+    }
+    if (foldScreenController_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "foldScreenController_ is null");
+        return false;
+    }
+    ScreenId screenId = foldScreenController_->GetCurrentScreenId();
+    auto rsSetScreenPowerStatusTask = [this, screenId, status] {
+        SetRSScreenPowerStatus(screenId, status);
+    };
+    screenPowerTaskScheduler_->PostVoidSyncTask(rsSetScreenPowerStatusTask, "rsInterface_.SetScreenPowerStatus task");
+#endif
+    return true;
+}
 } // namespace OHOS::Rosen

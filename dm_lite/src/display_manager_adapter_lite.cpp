@@ -420,4 +420,11 @@ bool DisplayManagerAdapterLite::GetKeyboardState()
 
     return displayManagerServiceProxy_->GetKeyboardState();
 }
+
+bool ScreenManagerAdapterLite::SynchronizePowerStatus(ScreenPowerState state)
+{
+    INIT_PROXY_CHECK_RETURN(false);
+
+    return displayManagerServiceProxy_->SynchronizePowerStatus(state);
+}
 } // namespace OHOS::Rosen
