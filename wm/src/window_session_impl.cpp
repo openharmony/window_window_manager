@@ -5932,9 +5932,9 @@ WMError WindowSessionImpl::SetWindowDefaultDensityEnabled(bool enabled)
     return WMError::WM_OK;
 }
 
-bool WindowSessionImpl::SetDefaultDensityEnabledValue(bool enabled)
+void WindowSessionImpl::SetDefaultDensityEnabledValue(bool enabled)
 {
-    return isDefaultDensityEnabled_.store(enabled);
+    isDefaultDensityEnabled_.store(enabled);
 }
 
 WSError WindowSessionImpl::NotifyWindowVisibility(bool isVisible)
