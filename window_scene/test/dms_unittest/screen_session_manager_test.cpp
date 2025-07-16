@@ -3116,6 +3116,7 @@ HWTEST_F(ScreenSessionManagerTest, Dump, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerTest, GetDisplayNode01, TestSize.Level1)
 {
+    MockAccesstokenKit::MockIsSystemApp(true);
     ScreenId screenId = 1051;
     auto ret = ssm_->GetDisplayNode(screenId);
     ASSERT_EQ(ret, nullptr);
@@ -3128,6 +3129,7 @@ HWTEST_F(ScreenSessionManagerTest, GetDisplayNode01, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerTest, GetDisplayNode02, TestSize.Level1)
 {
+    MockAccesstokenKit::MockIsSystemApp(true);
     ScreenId screenId = 1050;
     sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(screenId, ScreenProperty(), 0);
     ASSERT_NE(screenSession, nullptr);
@@ -3137,12 +3139,28 @@ HWTEST_F(ScreenSessionManagerTest, GetDisplayNode02, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetDisplayNode
+ * @tc.desc: SystemCalling false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetDisplayNode03, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    MockAccesstokenKit::MockIsSystemApp(false);
+    ScreenId screenId = 1050;
+    ssm_->GetDisplayNode(screenId);
+    EXPECT_TRUE(g_errLog.find("Permission Denied") != std::string::npos);
+}
+
+/**
  * @tc.name: GetScreenProperty
  * @tc.desc: GetScreenProperty
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenSessionManagerTest, GetScreenProperty01, TestSize.Level0)
 {
+    MockAccesstokenKit::MockIsSystemApp(true);
     ScreenId screenId = 2000;
     ASSERT_EQ(ssm_->GetScreenSession(screenId), nullptr);
     auto ret = ssm_->GetScreenProperty(screenId);
@@ -3156,12 +3174,28 @@ HWTEST_F(ScreenSessionManagerTest, GetScreenProperty01, TestSize.Level0)
  */
 HWTEST_F(ScreenSessionManagerTest, GetScreenProperty02, TestSize.Level0)
 {
+    MockAccesstokenKit::MockIsSystemApp(true);
     ScreenId screenId = 1050;
     sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(screenId, ScreenProperty(), 0);
     ASSERT_NE(screenSession, nullptr);
     ssm_->screenSessionMap_[screenId] = screenSession;
     ScreenProperty property = ssm_->GetScreenProperty(screenId);
     ASSERT_EQ(sizeof(property), sizeof(screenSession->property_));
+}
+
+/**
+ * @tc.name: GetScreenProperty
+ * @tc.desc: SystemCalling false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetScreenProperty03, TestSize.Level0)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    MockAccesstokenKit::MockIsSystemApp(false);
+    ScreenId screenId = 1050;
+    ssm_->GetScreenProperty(screenId);
+    EXPECT_TRUE(g_errLog.find("Permission Denied") != std::string::npos);
 }
 
 /**
