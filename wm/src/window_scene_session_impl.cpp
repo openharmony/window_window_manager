@@ -896,7 +896,7 @@ void WindowSceneSessionImpl::RegisterSessionRecoverListener(bool isSpecificSessi
 }
 
 bool WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-    const MMI::PointerEvent::PointerItem& pointerItem, float vpr)
+    const MMI::PointerEvent::PointerItem& pointerItem)
 {
     bool needNotifyEvent = true;
     WindowType windowType = property_->GetWindowType();
@@ -1008,7 +1008,7 @@ void WindowSceneSessionImpl::ConsumePointerEventInner(const std::shared_ptr<MMI:
         if (IsWindowDelayRaiseEnabled() && isHitTargetDraggable) {
             isExecuteDelayRaise_ = true;
         }
-        needNotifyEvent = HandlePointDownEvent(pointerEvent, pointerItem, vpr);
+        needNotifyEvent = HandlePointDownEvent(pointerEvent, pointerItem);
         RefreshNoInteractionTimeoutMonitor();
     }
     bool isPointUp = (action == MMI::PointerEvent::POINTER_ACTION_UP ||
