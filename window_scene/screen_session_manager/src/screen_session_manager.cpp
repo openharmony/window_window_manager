@@ -8912,11 +8912,6 @@ void ScreenSessionManager::NotifyUnfreezedAgents(const int32_t& pid, const std::
     const std::set<DisplayManagerAgentType>& pidAgentTypes, const sptr<ScreenSession>& screenSession)
 {
     bool isAgentTypeNotify = false;
-    std::ostringstream oss;
-    for (auto type : pidAgentTypes) {
-        oss << static_cast<int32_t>(type) << ",";
-    }
-    TLOGW(WmsLogTag::DMS, "pid:%{public}d, agentTypes:%{public}s", pid, oss.str().c_str());
     for (auto agentType : pidAgentTypes) {
         auto agents = dmAgentContainer_.GetAgentsByType(agentType);
         for (auto agent : agents) {
@@ -8964,6 +8959,8 @@ void ScreenSessionManager::NotifyUnfreezed(const std::set<int32_t>& unfreezedPid
     const sptr<ScreenSession>& screenSession)
 {
     std::lock_guard<std::mutex> lock(freezedPidListMutex_);
+    std::ostringstream oss;
+    oss << "pid,type:";
     for (auto iter = pidAgentTypeMap_.begin(); iter != pidAgentTypeMap_.end();) {
         int32_t pid = iter->first;
         auto pidAgentTypes = iter->second;
@@ -8973,7 +8970,13 @@ void ScreenSessionManager::NotifyUnfreezed(const std::set<int32_t>& unfreezedPid
         } else {
             iter++;
         }
+        oss << pid << ",";
+        for (auto type : pidAgentTypes) {
+            oss << static_cast<int32_t>(type) << " ";
+        }
+        oss << "|";
     }
+    TLOGW(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
 }
 
 DMError ScreenSessionManager::ResetAllFreezeStatus()

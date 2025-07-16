@@ -93,6 +93,7 @@ ScreenSession::ScreenSession(const ScreenSessionConfig& config, ScreenSessionRea
         }
         case ScreenSessionReason::CREATE_SESSION_FOR_REAL: {
             rsConfig.screenId = screenId_;
+            rsConfig.isSync = true;
             break;
         }
         case ScreenSessionReason::CREATE_SESSION_WITHOUT_DISPLAY_NODE: {
