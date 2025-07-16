@@ -25,6 +25,7 @@
 #include "fold_screen_state_internel.h"
 #include "common_test_utils.h"
 #include "iremote_object_mocker.h"
+#include "mock/mock_accesstoken_kit.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -3145,12 +3146,12 @@ HWTEST_F(ScreenSessionManagerTest, GetDisplayNode02, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerTest, GetDisplayNode03, TestSize.Level1)
 {
-    g_errLog.clear();
+    logMsg.clear();
     LOG_SetCallback(MyLogCallback);
     MockAccesstokenKit::MockIsSystemApp(false);
     ScreenId screenId = 1050;
     ssm_->GetDisplayNode(screenId);
-    EXPECT_TRUE(g_errLog.find("Permission Denied") != std::string::npos);
+    EXPECT_TRUE(logMsg.find("Permission Denied") != std::string::npos);
 }
 
 /**
@@ -3190,12 +3191,12 @@ HWTEST_F(ScreenSessionManagerTest, GetScreenProperty02, TestSize.Level0)
  */
 HWTEST_F(ScreenSessionManagerTest, GetScreenProperty03, TestSize.Level1)
 {
-    g_errLog.clear();
+    logMsg.clear();
     LOG_SetCallback(MyLogCallback);
     MockAccesstokenKit::MockIsSystemApp(false);
     ScreenId screenId = 1050;
     ssm_->GetScreenProperty(screenId);
-    EXPECT_TRUE(g_errLog.find("Permission Denied") != std::string::npos);
+    EXPECT_TRUE(logMsg.find("Permission Denied") != std::string::npos);
 }
 
 /**
