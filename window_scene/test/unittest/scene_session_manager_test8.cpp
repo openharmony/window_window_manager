@@ -1438,6 +1438,17 @@ HWTEST_F(SceneSessionManagerTest8, NotifyOnAttachToFrameNode01, TestSize.Level1)
     EXPECT_EQ(ssm_->sessionBlackListInfoMap_.size(), 0);
     EXPECT_EQ(ssm_->sessionRSBlackListConfigSet_.size(), 0);
 
+    sptr<Session> session = sptr<Session>::MakeSptr();
+    ssm_->NotifyOnAttachToFrameNode(session);
+    EXPECT_EQ(ssm_->sessionBlackListInfoMap_.size(), 0);
+    EXPECT_EQ(ssm_->sessionRSBlackListConfigSet_.size(), 0);
+
+    sptr<Session> session = sptr<Session>::MakeSptr();
+    Session
+    ssm_->NotifyOnAttachToFrameNode(session);
+    EXPECT_EQ(ssm_->sessionBlackListInfoMap_.size(), 0);
+    EXPECT_EQ(ssm_->sessionRSBlackListConfigSet_.size(), 0);
+
     ssm_->screenRSBlackListConfigMap_.clear();
     ssm_->sessionRSBlackListConfigSet_.clear();
     ssm_->sessionBlackListInfoMap_.clear();
