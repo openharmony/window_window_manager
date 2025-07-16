@@ -3188,7 +3188,7 @@ HWTEST_F(ScreenSessionManagerTest, GetScreenProperty02, TestSize.Level0)
  * @tc.desc: SystemCalling false
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerTest, GetScreenProperty03, TestSize.Level0)
+HWTEST_F(ScreenSessionManagerTest, GetScreenProperty03, TestSize.Level1)
 {
     g_errLog.clear();
     LOG_SetCallback(MyLogCallback);
