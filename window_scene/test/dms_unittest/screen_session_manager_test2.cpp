@@ -1035,7 +1035,7 @@ HWTEST_F(ScreenSessionManagerTest, SynchronizePowerStatusOk, Function | SmallTes
  * @tc.desc: GetSuperFoldStatus test SystemCalling false.
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerTest, GetSuperFoldStatus01, Function | SmallTest | Level3)
+HWTEST_F(ScreenSessionManagerTest, GetSuperFoldStatus01, TestSize.Level1)
 {
     g_errLog.clear();
     LOG_SetCallback(MyLogCallback);
@@ -1050,7 +1050,7 @@ HWTEST_F(ScreenSessionManagerTest, GetSuperFoldStatus01, Function | SmallTest | 
  * @tc.desc: GetSuperFoldStatus test SystemCalling true.
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerTest, GetSuperFoldStatus02, Function | SmallTest | Level3)
+HWTEST_F(ScreenSessionManagerTest, GetSuperFoldStatus02, TestSize.Level1)
 {
     MockAccesstokenKit::MockIsSystemApp(true);
 #define FOLD_ABILITY_ENABLE
@@ -1069,7 +1069,7 @@ HWTEST_F(ScreenSessionManagerTest, GetSuperFoldStatus02, Function | SmallTest | 
  * @tc.desc: ConvertScreenIdToRsScreenId test SystemCalling false.
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerTest, ConvertScreenIdToRsScreenId01, Function | SmallTest | Level3)
+HWTEST_F(ScreenSessionManagerTest, ConvertScreenIdToRsScreenId01, TestSize.Level1)
 {
     g_errLog.clear();
     LOG_SetCallback(MyLogCallback);
@@ -1085,7 +1085,7 @@ HWTEST_F(ScreenSessionManagerTest, ConvertScreenIdToRsScreenId01, Function | Sma
  * @tc.desc: ConvertScreenIdToRsScreenId test SystemCalling true.
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerTest, ConvertScreenIdToRsScreenId02, Function | SmallTest | Level3)
+HWTEST_F(ScreenSessionManagerTest, ConvertScreenIdToRsScreenId02, TestSize.Level1)
 {
     MockAccesstokenKit::MockIsSystemApp(true);
     ScreenId screenId = 666;
@@ -1101,7 +1101,7 @@ HWTEST_F(ScreenSessionManagerTest, ConvertScreenIdToRsScreenId02, Function | Sma
  * @tc.desc: NotifyScreenMaskAppear test SystemCalling false.
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerTest, NotifyScreenMaskAppear01, Function | SmallTest | Level3)
+HWTEST_F(ScreenSessionManagerTest, NotifyScreenMaskAppear01, TestSize.Level1)
 {
     g_errLog.clear();
     LOG_SetCallback(MyLogCallback);
@@ -1115,7 +1115,7 @@ HWTEST_F(ScreenSessionManagerTest, NotifyScreenMaskAppear01, Function | SmallTes
  * @tc.desc: NotifyScreenMaskAppear test SystemCalling true.
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerTest, NotifyScreenMaskAppear02, Function | SmallTest | Level3)
+HWTEST_F(ScreenSessionManagerTest, NotifyScreenMaskAppear02, TestSize.Level1)
 {
     g_errLog.clear();
     LOG_SetCallback(MyLogCallback);
