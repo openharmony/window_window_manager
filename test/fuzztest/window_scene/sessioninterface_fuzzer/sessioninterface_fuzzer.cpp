@@ -169,6 +169,10 @@ void IPCSpecificInterfaceFuzzTest2(sptr<IRemoteObject> proxy, MessageParcel& sen
         sendData, reply, option);
     proxy->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_RECT_AUTO_SAVE),
         sendData, reply, option);
+    proxy->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_START_WINDOW_BACKGROUND_COLOR),
+        sendData, reply, option);
+    proxy->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_IS_SET_IMAGE_FOR_RECENT),
+        sendData, reply, option);
 }
 
 void IPCInterfaceFuzzTest(const uint8_t* data, size_t size)

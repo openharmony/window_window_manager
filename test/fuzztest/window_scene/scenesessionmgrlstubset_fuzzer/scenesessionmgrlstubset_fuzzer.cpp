@@ -83,6 +83,14 @@ void SceneSessionMgrLsSetTestCode(MessageParcel& parcel)
     SceneSessionManagerLite::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManagerLite::
             SceneSessionManagerLiteMessage::TRANS_ID_GET_CALLING_WINDOW_INFO),
         parcel, reply, option);
+    parcel.RewindRead(0);
+    SceneSessionManagerLite::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManagerLite::
+            SceneSessionManagerLiteMessage::TRANS_ID_SET_START_WINDOW_BACKGROUND_COLOR),
+        parcel, reply, option);
+    parcel.RewindRead(0);
+    SceneSessionManagerLite::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManagerLite::
+            SceneSessionManagerLiteMessage::TRANS_IS_SET_IMAGE_FOR_RECENT),
+        parcel, reply, option);
 }
 
 bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
