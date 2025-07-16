@@ -234,40 +234,40 @@ HWTEST_F(WindowSceneSessionImplTest4, HandlePointDownEvent, TestSize.Level1)
     windowSceneSessionImpl->property_->SetDragEnabled(false);
     windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     windowSceneSessionImpl->property_->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
-    auto ret = windowSceneSessionImpl->HandlePointDownEvent(pointerEvent, pointerItem, vpr);
+    auto ret = windowSceneSessionImpl->HandlePointDownEvent(pointerEvent, pointerItem);
     EXPECT_EQ(true, ret);
 
     windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     windowSceneSessionImpl->property_->SetDragEnabled(false);
-    ret = windowSceneSessionImpl->HandlePointDownEvent(pointerEvent, pointerItem, vpr);
+    ret = windowSceneSessionImpl->HandlePointDownEvent(pointerEvent, pointerItem);
     EXPECT_EQ(true, ret);
     windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
 
-    ret = windowSceneSessionImpl->HandlePointDownEvent(pointerEvent, pointerItem, vpr);
+    ret = windowSceneSessionImpl->HandlePointDownEvent(pointerEvent, pointerItem);
     EXPECT_EQ(true, ret);
 
     pointerItem.SetWindowX(100);
     pointerItem.SetWindowY(100);
     Rect rect = {1, 1, 1, 1};
     windowSceneSessionImpl->property_->SetWindowRect(rect);
-    ret = windowSceneSessionImpl->HandlePointDownEvent(pointerEvent, pointerItem, vpr);
+    ret = windowSceneSessionImpl->HandlePointDownEvent(pointerEvent, pointerItem);
     EXPECT_EQ(true, ret);
     pointerItem.SetWindowX(1);
-    ret = windowSceneSessionImpl->HandlePointDownEvent(pointerEvent, pointerItem, vpr);
+    ret = windowSceneSessionImpl->HandlePointDownEvent(pointerEvent, pointerItem);
     EXPECT_EQ(true, ret);
 
     windowSceneSessionImpl->property_->SetDragEnabled(true);
-    ret = windowSceneSessionImpl->HandlePointDownEvent(pointerEvent, pointerItem, vpr);
+    ret = windowSceneSessionImpl->HandlePointDownEvent(pointerEvent, pointerItem);
     EXPECT_EQ(false, ret);
 
     pointerItem.SetWindowX(100);
-    ret = windowSceneSessionImpl->HandlePointDownEvent(pointerEvent, pointerItem, vpr);
+    ret = windowSceneSessionImpl->HandlePointDownEvent(pointerEvent, pointerItem);
     EXPECT_EQ(true, ret);
 
     windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
     pointerItem.SetDisplayX(100);
     pointerItem.SetDisplayY(100);
-    ret = windowSceneSessionImpl->HandlePointDownEvent(pointerEvent, pointerItem, vpr);
+    ret = windowSceneSessionImpl->HandlePointDownEvent(pointerEvent, pointerItem);
     EXPECT_EQ(true, ret);
 }
 
