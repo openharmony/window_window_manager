@@ -8457,7 +8457,8 @@ napi_value JsWindow::OnSetDefaultDensityEnabled(napi_env env, napi_callback_info
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetWindowDefaultDensityEnabled(enabled));
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "set enabled=%{public}u result=%{public}d", enabled, ret);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u set enabled=%{public}u result=%{public}d",
+        windowToken_->GetWindowId(), enabled, ret);
     if (ret != WmErrorCode::WM_OK) {
         return NapiThrowError(env, ret);
     }
