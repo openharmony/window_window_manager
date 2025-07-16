@@ -240,6 +240,30 @@ HWTEST_F(SceneSessionLifecycleTest, Foreground06, TestSize.Level0)
 }
 
 /**
+ * @tc.name: ForegroundTask01
+ * @tc.desc: ForegroundTask function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLifecycleTest, ForegroundTask01, TestSize.Level0)
+{
+    SessionInfo info;
+    info.abilityName_ = "ForegroundTask01";
+    info.bundleName_ = "ForegroundTask01";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    session->SetSessionState(SessionState::STATE_CONNECT);
+    EXPECT_EQ(SessionState::STATE_CONNECT, session->GetSessionState());
+
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    EXPECT_EQ(false, session->isUIFirstEnabled_);
+    EXPECT_EQ(WSError::WS_OK, session->ForegroundTask(property));
+
+    session->isUIFirstEnabled_ = true;
+    EXPECT_EQ(true, session->isUIFirstEnabled_);
+    session->SetSessionState(SessionState::STATE_CONNECT);
+    EXPECT_EQ(WSError::WS_OK, session->ForegroundTask(property));
+}
+
+/**
  * @tc.name: Background01
  * @tc.desc: normal function
  * @tc.type: FUNC
