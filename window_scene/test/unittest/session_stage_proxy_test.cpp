@@ -965,7 +965,9 @@ HWTEST_F(SessionStageProxyTest, SendFbActionEvent, TestSize.Level1)
     sptr<SessionStageProxy> sessionStage = sptr<SessionStageProxy>::MakeSptr(remoteMocker);
     ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionStage->SendFbActionEvent("click"));
 
+    MockMessageParcel::SetWriteStringErrorFlag(true);
     ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionStage_->SendFbActionEvent("error"));
+    MockMessageParcel::SetWriteStringErrorFlag(false);
     MockMessageParcel::ClearAllErrorFlag();
 }
 
