@@ -121,6 +121,7 @@ void ScenePersistence::SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixe
 {
     savingSnapshotSum_.fetch_add(1);
     SetIsSavingSnapshot(key, freeMultiWindow, true);
+    TLOGI(WmsLogTag::WMS_PATTERN, "isSavingSnapshot_%{public}d", isSavingSnapshot_[key.first][key.second].load());
     std::string path = freeMultiWindow ? snapshotFreeMultiWindowPath_ : snapshotPath_[key.first][key.second];
     auto task = [weakThis = wptr(this), pixelMap, resetSnapshotCallback,
         savingSnapshotSum = savingSnapshotSum_.load(), key, rotate, path, freeMultiWindow]() {
