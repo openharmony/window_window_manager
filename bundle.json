@@ -86,7 +86,8 @@
           "bounds_checking_function",
           "device_status",
           "runtime_core",
-          "zlib"
+          "zlib",
+          "screenlock_mgr"
         ],
         "third_party": [
         ]
