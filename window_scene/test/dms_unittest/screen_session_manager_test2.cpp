@@ -1029,6 +1029,102 @@ HWTEST_F(ScreenSessionManagerTest, SynchronizePowerStatusOk, Function | SmallTes
 #undef FOLD_ABILITY_ENABLE
     EXPECT_TRUE(g_errLog.find("notify brightness") != std::string::npos);
 }
+
+/**
+ * @tc.name: GetSuperFoldStatus
+ * @tc.desc: GetSuperFoldStatus test SystemCalling false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetSuperFoldStatus01, Function | SmallTest | Level3)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    MockAccesstokenKit::MockIsSystemApp(false);
+    SuperFoldStatus superFoldStatus = ssm_->GetSuperFoldStatus();
+    EXPECT_TRUE(g_errLog.find("Permission Denied") != std::string::npos);
+    EXPECT_EQ(superFoldStatus, SuperFoldStatus::UNKNOWN);
+}
+
+/**
+ * @tc.name: GetSuperFoldStatus
+ * @tc.desc: GetSuperFoldStatus test SystemCalling true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetSuperFoldStatus02, Function | SmallTest | Level3)
+{
+    MockAccesstokenKit::MockIsSystemApp(true);
+#define FOLD_ABILITY_ENABLE
+    SuperFoldStatus superFoldStatus = ssm_->GetSuperFoldStatus();
+    SuperFoldStatus status = SuperFoldStateManager::GetInstance().GetCurrentStatus();
+#undef FOLD_ABILITY_ENABLE
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        EXPECT_EQ(superFoldStatus, SuperFoldStatus::UNKNOWN);
+    } else {
+        EXPECT_EQ(superFoldStatus, status);
+    }
+}
+
+/**
+ * @tc.name: ConvertScreenIdToRsScreenId
+ * @tc.desc: ConvertScreenIdToRsScreenId test SystemCalling false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, ConvertScreenIdToRsScreenId01, Function | SmallTest | Level3)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    MockAccesstokenKit::MockIsSystemApp(false);
+    ScreenId screenId = 666;
+    ScreenId rsScreenId;
+    ssm_->ConvertScreenIdToRsScreenId(screenId, rsScreenId);
+    EXPECT_TRUE(g_errLog.find("Permission Denied") != std::string::npos);
+}
+
+/**
+ * @tc.name: ConvertScreenIdToRsScreenId
+ * @tc.desc: ConvertScreenIdToRsScreenId test SystemCalling true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, ConvertScreenIdToRsScreenId02, Function | SmallTest | Level3)
+{
+    MockAccesstokenKit::MockIsSystemApp(true);
+    ScreenId screenId = 666;
+    ScreenId rsScreenId = SCREEN_ID_INVALID;
+    ScreenId rsScreenIdTemp = 12345;
+    ssm_->sms2RsScreenIdMap_.insert({screenId, rsScreenIdTemp})
+    ssm_->ConvertScreenIdToRsScreenId(screenId, rsScreenId);
+    EXPECT_EQ(rsScreenId, rsScreenIdTemp);
+}
+
+/**
+ * @tc.name: NotifyScreenMaskAppear
+ * @tc.desc: NotifyScreenMaskAppear test SystemCalling false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, NotifyScreenMaskAppear01, Function | SmallTest | Level3)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    MockAccesstokenKit::MockIsSystemApp(false);
+    ssm_->NotifyScreenMaskAppear();
+    EXPECT_TRUE(g_errLog.find("Permission Denied") != std::string::npos);
+}
+
+/**
+ * @tc.name: NotifyScreenMaskAppear
+ * @tc.desc: NotifyScreenMaskAppear test SystemCalling true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, NotifyScreenMaskAppear02, Function | SmallTest | Level3)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    MockAccesstokenKit::MockIsSystemApp(true);
+    ssm_->NotifyScreenMaskAppear();
+    bool hasLog = g_errLog.find("not pc device") != std::string::npos ||
+        g_errLog.find("screen mask appeared") != std::string::npos;
+    EXPECT_TRUE(hasLog);
+}
 }
 }
 }
