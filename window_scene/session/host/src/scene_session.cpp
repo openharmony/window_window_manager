@@ -3636,6 +3636,12 @@ bool SceneSession::IsInCompatScaleStatus() const
     return false;
 }
 
+bool SceneSession::IsInCompatScaleMode() const
+{
+    auto property = GetSessionProperty();
+    return property->IsAdaptToProportionalScale() || property->IsAdaptToSimulationScale();
+}
+
 /**
  * throw slip to full screen
  */

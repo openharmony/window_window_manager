@@ -10798,6 +10798,7 @@ bool SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInf
     info->scaleVal_ = sceneSession->GetFloatingScale();
     info->scaleX_ = sceneSession->GetScaleX();
     info->scaleY_ = sceneSession->GetScaleY();
+    info->isCompatScaleMode_ = sceneSession->IsInCompatScaleMode();
     info->bundleName_ = sceneSession->GetSessionInfo().bundleName_;
     info->touchHotAreas_ = sceneSession->GetTouchHotAreas();
     info->isDecorEnable_ = sceneSession->GetSessionProperty()->IsDecorEnable();
