@@ -10350,15 +10350,17 @@ void SceneSessionManager::NotifyOnAttachToFrameNode(const sptr<Session>& session
             return;
         }
         TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s, wid: %{public}d", where, session->GetPersistentId());
-        auto surfaceNode = session->GetSurfaceNode();
-        if (surfaceNode == nullptr) {
-            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s, surfaceNode is nullptr", where);
-            return;
+        if (WindowHelper::IsMainWindow(session->GetWindowType())) {
+            AddSkipSurfaceNodeWhenAttach(session->GetPersistentId(),
+                session->GetSessionInfo().bundleName_, static_cast<uint64_t>(session->GetPersistentId()));
+        } else {
+            if (surfaceNode == nullptr) {
+                TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s, surfaceNode is nullptr", where);
+                return;
+            }
+            AddSkipSurfaceNodeWhenAttach(session->GetPersistentId(),
+                session->GetSessionInfo().bundleName_, surfaceNode->GetId());
         }
-        uint64_t skipSurfaceNodeId = WindowHelper::IsMainWindow(session->GetWindowType()) ?
-            static_cast<uint64_t>(session->GetPersistentId()) : surfaceNode->GetId();
-        AddSkipSurfaceNodeWhenAttach(session->GetPersistentId(),
-            session->GetSessionInfo().bundleName_, skipSurfaceNodeId);
     };
     taskScheduler_->PostAsyncTask(task, where);
 }
