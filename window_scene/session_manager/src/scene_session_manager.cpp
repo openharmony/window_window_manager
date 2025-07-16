@@ -513,6 +513,7 @@ void SceneSessionManager::RegisterRecoverStateChangeListener()
 
 void SceneSessionManager::OnRecoverStateChange(const RecoverState& state)
 {
+    TLOGI(WmsLogTag::WMS_RECOVER, "state: %{public}u", state);
     switch(state) {
         case RecoverState::RECOVER_INITIAL:
             break;
@@ -1055,6 +1056,11 @@ void SceneSessionManager::SetEnableInputEvent(bool enabled)
 {
     TLOGI(WmsLogTag::WMS_RECOVER, "enabled: %{public}u", enabled);
     enableInputEvent_ = enabled;
+
+    if (recoverStateChangeFunc_ == nullptr) {
+        return;
+    }
+    
     if (enabled) {
         recoverStateChangeFunc_(RecoverState::RECOVER_ENABLE_INPUT);
     } else {
@@ -4175,7 +4181,7 @@ WSError SceneSessionManager::RecoverAndConnectSpecificSession(const sptr<ISessio
     auto pid = IPCSkeleton::GetCallingRealPid();
     auto uid = IPCSkeleton::GetCallingUid();
     auto task = [this, sessionStage, eventChannel, surfaceNode, property, &session, token, pid, uid]() {
-        if (recoveringFinished_) {
+        if (recoveringFinished_ || sessionRecoverStateChangeFunc_ == nullptr) {
             TLOGNW(WmsLogTag::WMS_RECOVER, "Recover finished, not recovery anymore");
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
@@ -4317,7 +4323,7 @@ WSError SceneSessionManager::RecoverAndReconnectSceneSession(const sptr<ISession
     auto pid = IPCSkeleton::GetCallingRealPid();
     auto uid = IPCSkeleton::GetCallingUid();
     auto task = [this, sessionStage, eventChannel, surfaceNode, &session, property, token, pid, uid]() {
-        if (recoveringFinished_) {
+        if (recoveringFinished_ || sessionRecoverStateChangeFunc_ == nullptr) {
             TLOGNW(WmsLogTag::WMS_RECOVER, "Recover finished, not recovery anymore");
             return WSError::WS_ERROR_INVALID_OPERATION;
         }

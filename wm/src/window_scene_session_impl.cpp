@@ -412,19 +412,19 @@ WMError WindowSceneSessionImpl::RecoverAndConnectSpecificSession()
         PictureInPictureManager::DoClose(true, true);
         return WMError::WM_OK;
     }
-    windowRecoverStateChangeFunc_(false, WindowRecoverState::WINDOW_START_RECONNECT);
+    windowRecoverStateChangeFunc_(true, WindowRecoverState::WINDOW_START_RECONNECT);
     sptr<ISessionStage> iSessionStage(this);
     sptr<IWindowEventChannel> eventChannel = sptr<WindowEventChannel>::MakeSptr(iSessionStage);
     sptr<Rosen::ISession> session = nullptr;
     auto context = GetContext();
     sptr<IRemoteObject> token = context ? context->GetToken() : nullptr;
-    windowRecoverStateChangeFunc_(false, WindowRecoverState::WINDOW_DOING_RECONNECT);
+    windowRecoverStateChangeFunc_(true, WindowRecoverState::WINDOW_DOING_RECONNECT);
     SingletonContainer::Get<WindowAdapter>().RecoverAndConnectSpecificSession(
         iSessionStage, eventChannel, surfaceNode_, property_, session, token);
 
     if (session == nullptr) {
         TLOGE(WmsLogTag::WMS_RECOVER, "Recover failed, session is nullptr");
-        windowRecoverStateChangeFunc_(false, WindowRecoverState::WINDOW_NOT_RECONNECT);
+        windowRecoverStateChangeFunc_(true, WindowRecoverState::WINDOW_NOT_RECONNECT);
         return WMError::WM_ERROR_NULLPTR;
     }
     {
@@ -888,6 +888,10 @@ void WindowSceneSessionImpl::RegisterSessionRecoverListener(bool isSpecificSessi
         if (promoteThis->state_ == WindowState::STATE_DESTROYED) {
             TLOGW(WmsLogTag::WMS_RECOVER, "windowState is STATE_DESTROYED, no need to recover");
             return WMError::WM_ERROR_DESTROYED_OBJECT;
+        }
+        if (promoteThis->windowRecoverStateChangeFunc_ == nullptr) {
+            TLOGW(WmsLogTag::WMS_RECOVER, "windowRecoverStateChangeFunc_ is nullptr");
+            return WMError::WM_ERROR_NULLPTR;
         }
 
         auto ret = isSpecificSession ? promoteThis->RecoverAndConnectSpecificSession() :
