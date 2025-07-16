@@ -19,6 +19,7 @@
 #include "display_info.h"
 #include "display_manager.h"
 #include "display_manager_proxy.h"
+#include "modifier_render_thread/rs_modifiers_draw_thread.h"
 #include "surface_draw.h"
 #include "window_impl.h"
 
@@ -69,7 +70,12 @@ void SurfaceDrawTest::SetUpTestCase()
     displayHeight_ = display->GetHeight();
 }
 
-void SurfaceDrawTest::TearDownTestCase() {}
+void SurfaceDrawTest::TearDownTestCase()
+{
+#ifdef RS_ENABLE_VK
+    RSModifiersDrawThread::Destroy();
+#endif
+}
 
 void SurfaceDrawTest::SetUp()
 {
