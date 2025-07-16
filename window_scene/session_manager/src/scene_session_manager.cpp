@@ -10354,6 +10354,7 @@ void SceneSessionManager::NotifyOnAttachToFrameNode(const sptr<Session>& session
             AddSkipSurfaceNodeWhenAttach(session->GetPersistentId(),
                 session->GetSessionInfo().bundleName_, static_cast<uint64_t>(session->GetPersistentId()));
         } else {
+            auto surfaceNode = session->GetSurfaceNode();
             if (surfaceNode == nullptr) {
                 TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s, surfaceNode is nullptr", where);
                 return;
