@@ -5914,18 +5914,9 @@ WSError WindowSessionImpl::NotifySystemDensityChange(float density)
 
 WMError WindowSessionImpl::SetWindowDefaultDensityEnabled(bool enabled)
 {
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "WinId: %{public}d, enabled: %{public}u", GetPersistentId(), enabled);
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
-    if (display == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "display is null, winId=%{public}u", GetWindowId());
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    auto displayInfo = display->GetDisplayInfo();
-    if (displayInfo == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "displayInfo is null, winId=%{public}u", GetWindowId());
-        return WMError::WM_ERROR_NULLPTR;
     }
     SetDefaultDensityEnabledValue(enabled);
     UpdateDensity();
