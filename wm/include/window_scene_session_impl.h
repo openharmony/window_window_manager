@@ -365,7 +365,7 @@ private:
     bool CheckTouchSlop(int32_t pointerId, int32_t x, int32_t y, int32_t threshold);
     void IgnoreClickEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     bool HandlePointDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-        const MMI::PointerEvent::PointerItem& pointerItem, float vpr);
+        const MMI::PointerEvent::PointerItem& pointerItem);
     std::unique_ptr<Media::PixelMap> HandleWindowMask(const std::vector<std::vector<uint32_t>>& windowMask);
     void CalculateNewLimitsByLimits(
         WindowLimits& newLimits, WindowLimits& customizedLimits, float& virtualPixelRatio);
