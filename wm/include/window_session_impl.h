@@ -494,7 +494,7 @@ public:
      * Window Property
      */
     WMError SetWindowDefaultDensityEnabled(bool enabled) override;
-    bool SetDefaultDensityEnabledValue() const;
+    void SetDefaultDensityEnabledValue(bool enabled);
     WSError NotifyDisplayIdChange(DisplayId displayId);
     WSError NotifyScreenshotAppEvent(ScreenshotEventType type) override;
     bool IsDeviceFeatureCapableFor(const std::string& feature) const override;
