@@ -447,6 +447,27 @@ HWTEST_F(SceneSessionLifecycleTest, BackgroundTask03, TestSize.Level0)
 }
 
 /**
+ * @tc.name: BackgroundTask04
+ * @tc.desc: BackgroundTask04 function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLifecycleTest, BackgroundTask04, TestSize.Level0)
+{
+    SessionInfo info;
+    info.abilityName_ = "BackgroundTask04";
+    info.bundleName_ = "BackgroundTask04";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->isActive_ = true;
+    sceneSession->state_ = SessionState::STATE_INACTIVE;
+    sceneSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    EXPECT_EQ(sceneSession->BackgroundTask(), WSError::WS_OK);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    EXPECT_EQ(sceneSession->BackgroundTask(), WSError::WS_OK);
+}
+
+/**
  * @tc.name: DisconnectTask01
  * @tc.desc: normal function
  * @tc.type: FUNC

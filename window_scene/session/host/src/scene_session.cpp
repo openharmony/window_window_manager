@@ -517,6 +517,9 @@ WSError SceneSession::BackgroundTask(const bool isSaveSnapshot)
             session->SetFreeMultiWindow();
             session->SaveSnapshot(true);
         }
+        if (session->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+            session->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::VISIBLE);
+        }
         session->MarkAvoidAreaAsDirty();
         if (session->specificCallback_ != nullptr) {
             session->specificCallback_->onWindowInfoUpdate_(
