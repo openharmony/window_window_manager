@@ -1919,6 +1919,31 @@ HWTEST_F(SceneSessionTest, UpdateSessionRect4, TestSize.Level1)
     WSRect newRect1 = subSession->GetSessionRect();
     EXPECT_EQ(newRect1.posX_, oldRect1.posX_ - mainRect.posX_);
     EXPECT_EQ(newRect1.posY_, oldRect1.posY_ - mainRect.posY_);
+    mainSession->systemConfig_.freeMultiWindowSupport_ = true;
+    mainSession->systemConfig_.freeMultiWindowEnable_ = true;
+    result = mainSession->UpdateSessionRect(oldRect1, reason, isGlobal);
+    mainSession->systemConfig_.freeMultiWindowEnable_ = false;
+    result = mainSession->UpdateSessionRect(oldRect1, reason, isGlobal);
+
+    mainSession->systemConfig_.freeMultiWindowSupport_ = true;
+    mainSession->systemConfig_.freeMultiWindowEnable_ = true;
+    result = mainSession->UpdateSessionRect(oldRect1, reason, isGlobal, true);
+    mainSession->systemConfig_.freeMultiWindowEnable_ = false;
+    result = mainSession->UpdateSessionRect(oldRect1, reason, isGlobal, true);
+    ASSERT_EQ(result, WSError::WS_OK);
+
+    subSubSession->systemConfig_.freeMultiWindowSupport_ = true;
+    subSubSession->systemConfig_.freeMultiWindowEnable_ = true;
+    result = subSubSession->UpdateSessionRect(oldRect1, reason, isGlobal);
+    subSubSession->systemConfig_.freeMultiWindowEnable_ = false;
+    result = subSubSession->UpdateSessionRect(oldRect1, reason, isGlobal);
+
+    subSubSession->systemConfig_.freeMultiWindowSupport_ = true;
+    subSubSession->systemConfig_.freeMultiWindowEnable_ = true;
+    result = subSubSession->UpdateSessionRect(oldRect1, reason, isGlobal, true);
+    subSubSession->systemConfig_.freeMultiWindowEnable_ = false;
+    result = subSubSession->UpdateSessionRect(oldRect1, reason, isGlobal, true);
+    ASSERT_EQ(result, WSError::WS_OK)
     // Test the changes of rect values of multi-level subWindow in the phone scenario
     WSRect oldRect2({ 30, 30, 30, 30 });
     result = subSubSession->UpdateSessionRect(oldRect2, reason, isGlobal);

@@ -1847,9 +1847,8 @@ WSError SceneSession::UpdateSessionRect(
     WSRect newRect = rect;
     MoveConfiguration newMoveConfiguration = moveConfiguration;
     UpdateSessionRectPosYFromClient(reason, newMoveConfiguration.displayId, newRect);
-    if (isGlobal && WindowHelper::IsSubWindow(Session::GetWindowType()) &&
-        (systemConfig_.IsPhoneWindow() ||
-         (systemConfig_.IsPadWindow() && !IsFreeMultiWindowMode()))) {
+    bool isAvailableWindow = (systemConfig_.IsPhoneWindow() || systemConfig_.IsPadWindow()) && !IsFreeMultiWindowMode();
+    if (isGlobal && WindowHelper::IsSubWindow(Session::GetWindowType()) && isAvailableWindow) {
         if (auto mainSession = GetMainSession()) {
             auto mainRect = mainSession->GetSessionRect();
             if (!CheckIfRectElementIsTooLarge(mainRect)) {
@@ -1858,9 +1857,7 @@ WSError SceneSession::UpdateSessionRect(
             }
         }
     }
-    if (isFromMoveToGlobal && WindowHelper::IsSubWindow(Session::GetWindowType()) &&
-        (systemConfig_.IsPhoneWindow() ||
-         (systemConfig_.IsPadWindow() && !IsFreeMultiWindowMode()))) {
+    if (isFromMoveToGlobal && WindowHelper::IsSubWindow(Session::GetWindowType()) && isAvailableWindow) {
         auto mainSession = GetMainSession();
         if (mainSession && mainSession->GetFloatingScale() != 0) {
             Rect mainGlobalRect;
