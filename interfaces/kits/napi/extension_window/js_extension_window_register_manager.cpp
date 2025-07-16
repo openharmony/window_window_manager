@@ -318,7 +318,48 @@ WmErrorCode JsExtensionWindowRegisterManager::AtomicServiceUnregisterListener(sp
         TLOGE(WmsLogTag::WMS_UIEXT, "Type %{public}s was not registered", type.c_str());
         return WmErrorCode::WM_OK;
     }
-    return UnregisterListenerInner(window, type, caseType, env, value);
+    if (listenerCodeMap_[caseType].count(type) == 0) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Type %{public}s is not supported", type.c_str());
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    if (value == nullptr) {
+        for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
+            WmErrorCode ret = ProcessRegister(caseType, it->second, window, type, false);
+            if (ret != WmErrorCode::WM_OK) {
+                TLOGE(WmsLogTag::WMS_UIEXT, "Atomic Unregister type %{public}s failed, no value", type.c_str());
+                return ret;
+            }
+            jsCbMap_[type].erase(it++);
+        }
+    } else {
+        bool findFlag = false;
+        for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end(); ++it) {
+            bool isEquals = false;
+            napi_strict_equals(env, value, it->first->GetNapiValue(), &isEquals);
+            if (!isEquals) {
+                continue;
+            }
+            findFlag = true;
+            WmErrorCode ret = ProcessRegister(caseType, it->second, window, type, false);
+            if (ret != WmErrorCode::WM_OK) {
+                TLOGE(WmsLogTag::WMS_UIEXT, "Atomic Unregister type %{public}s failed", type.c_str());
+                return ret;
+            }
+            jsCbMap_[type].erase(it);
+            break;
+        }
+        if (!findFlag) {
+            TLOGW(WmsLogTag::WMS_UIEXT,
+                "Atomic Unregister type %{public}s failed because not found callback!", type.c_str());
+            return WmErrorCode::WM_OK;
+        }
+    }
+    TLOGI(WmsLogTag::WMS_UIEXT, "Atomic Unregister type %{public}s success! callback map size: %{public}zu",
+        type.c_str(), jsCbMap_[type].size());
+    if (jsCbMap_[type].empty()) {
+        jsCbMap_.erase(type);
+    }
+    return WmErrorCode::WM_OK;
 }
 
 WmErrorCode JsExtensionWindowRegisterManager::UnregisterListener(sptr<Window> window, std::string type,
@@ -329,12 +370,6 @@ WmErrorCode JsExtensionWindowRegisterManager::UnregisterListener(sptr<Window> wi
         TLOGE(WmsLogTag::WMS_UIEXT, "Type %{public}s was not registered", type.c_str());
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
-    return UnregisterListenerInner(window, type, caseType, env, value);
-}
-
-WmErrorCode JsExtensionWindowRegisterManager::UnregisterListenerInner(sptr<Window> window, std::string type,
-    CaseType caseType, napi_env env, napi_value value)
-{
     if (listenerCodeMap_[caseType].count(type) == 0) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Type %{public}s is not supported", type.c_str());
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
