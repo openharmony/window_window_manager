@@ -5634,8 +5634,7 @@ WMError WindowSceneSessionImpl::SetDefaultDensityEnabled(bool enabled)
         hostSession->OnDefaultDensityEnabled(enabled);
     }
 
-    isDefaultDensityEnabled_ = enabled;
-    ResetWindowDefaultDensityEnabled();
+    SetDefaultDensityEnabledValue(enabled);
 
     std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
     for (const auto& winPair : windowSessionMap_) {
@@ -5645,7 +5644,7 @@ WMError WindowSceneSessionImpl::SetDefaultDensityEnabled(bool enabled)
             continue;
         }
         TLOGD(WmsLogTag::WMS_ATTRIBUTE, "Id=%{public}d UpdateDensity", window->GetWindowId());
-        window->ResetWindowDefaultDensityEnabled();
+        window->SetDefaultDensityEnabledValue(enabled);
         window->UpdateDensity();
     }
     return WMError::WM_OK;
@@ -5662,7 +5661,7 @@ float WindowSceneSessionImpl::GetVirtualPixelRatio(const sptr<DisplayInfo>& disp
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "displayInfo is nullptr");
         return INVALID_DEFAULT_DENSITY;
     }
-    if (IsWindowDefaultDensityEnabled() || IsDefaultDensityEnabled()) {
+    if (IsDefaultDensityEnabled()) {
         return displayInfo->GetDefaultVirtualPixelRatio();
     }
     if (useUniqueDensity_) {
@@ -6396,9 +6395,8 @@ bool WindowSceneSessionImpl::IsDefaultDensityEnabled()
     }
     if (auto mainWindow = FindMainWindowWithContext()) {
         CopyUniqueDensityParameter(mainWindow);
-        return mainWindow->GetDefaultDensityEnabled();
     }
-    return false;
+    return GetDefaultDensityEnabled();
 }
 
 float WindowSceneSessionImpl::GetMainWindowCustomDensity()
@@ -6548,7 +6546,7 @@ WMError WindowSceneSessionImpl::SetCustomDensity(float density, bool applyToSubW
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}u set density not change", GetWindowId());
         return WMError::WM_OK;
     }
-    isDefaultDensityEnabled_ = false;
+    SetDefaultDensityEnabledValue(false);
     customDensity_ = density;
     if (applyToSubWindow) {
         std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
@@ -6559,6 +6557,7 @@ WMError WindowSceneSessionImpl::SetCustomDensity(float density, bool applyToSubW
                 continue;
             }
             TLOGD(WmsLogTag::WMS_ATTRIBUTE, "Id=%{public}d UpdateDensity", window->GetWindowId());
+            window->SetDefaultDensityEnabledValue(false);
             window->UpdateDensity();
         }
     } else {
@@ -6585,7 +6584,7 @@ WMError WindowSceneSessionImpl::GetWindowDensityInfo(WindowDensityInfo& densityI
     densityInfo.systemDensity = displayInfo->GetVirtualPixelRatio();
     densityInfo.defaultDensity = displayInfo->GetDefaultVirtualPixelRatio();
     auto customDensity = UNDEFINED_DENSITY;
-    if (IsWindowDefaultDensityEnabled() || IsDefaultDensityEnabled()) {
+    if (IsDefaultDensityEnabled()) {
         customDensity = displayInfo->GetDefaultVirtualPixelRatio();
     } else {
         customDensity = GetCustomDensity();
