@@ -2683,7 +2683,7 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
         return;
     }
     auto key = GetSessionStatus();
-    auto rotate = GetWindowOrientation();
+    auto rotate = WSSnapshotHelper::GetDisplayOrientation(currentRotation_);
     if (persistentPixelMap) {
         key = defaultStatus;
         rotate = DisplayOrientation::PORTRAIT;
@@ -2873,9 +2873,6 @@ SnapshotStatus Session::GetSessionStatus() const
         snapshotScreen = WSSnapshotHelper::GetScreenStatus();
     }
     uint32_t orientation = WSSnapshotHelper::GetOrientation(currentRotation_);
-    if (snapshotScreen == SCREEN_UNKNOWN) {
-        orientation = (orientation + 1) % ORIENTATION_COUNT;
-    }
     return std::make_pair(snapshotScreen, orientation);
 }
 
@@ -2892,7 +2889,12 @@ DisplayOrientation Session::GetWindowOrientation() const
     }
     auto screenProperty = screenSession->GetScreenProperty();
     DisplayOrientation displayOrientation = screenProperty.GetDisplayOrientation();
-    return displayOrientation;
+    auto windowOrientation = static_cast<uint32_t>(displayOrientation);
+    auto snapshotScreen = WSSnapshotHelper::GetScreenStatus();
+    if (snapshotScreen == SCREEN_UNKNOWN) {
+        windowOrientation = (windowOrientation + SECONDARY_EXPAND_OFFSET) % ROTATION_COUNT;
+    }
+    return static_cast<DisplayOrientation>(windowOrientation);
 }
 
 uint32_t Session::GetLastOrientation() const
@@ -2900,12 +2902,7 @@ uint32_t Session::GetLastOrientation() const
     if (!SupportSnapshotAllSessionStatus()) {
         return SNAPSHOT_PORTRAIT;
     }
-    auto snapshotScreen = WSSnapshotHelper::GetScreenStatus();
-    auto rotation = currentRotation_;
-    if (snapshotScreen == SCREEN_UNKNOWN) {
-        rotation = (rotation + LANDSCAPE_INVERTED_ANGLE) % ROTATION_ANGLE;
-    }
-    return static_cast<uint32_t>(WSSnapshotHelper::GetDisplayOrientation(rotation));
+    return static_cast<uint32_t>(WSSnapshotHelper::GetDisplayOrientation(currentRotation_));
 }
 
 void Session::SetSessionStateChangeListenser(const NotifySessionStateChangeFunc& func)
