@@ -65,7 +65,7 @@ ani_status AniWindowManager::AniWindowManagerInit(ani_env* env)
         ani_native_function {"findWindowSync",
             "JLstd/core/String;:L@ohos/window/window/Window;",
             reinterpret_cast<void *>(AniWindowManager::FindWindow)},
-        ani_native_function {"minimizeAllSync", "JI:V", reinterpret_cast<void *>(AniWindowManager::MinimizeAll)},
+        ani_native_function {"minimizeAllSync", "JJ:V", reinterpret_cast<void *>(AniWindowManager::MinimizeAll)},
         ani_native_function {"shiftAppWindowFocusSync", "JDD:V",
             reinterpret_cast<void *>(AniWindowManager::ShiftAppWindowFocus)},
         ani_native_function {"onSync", nullptr,
@@ -349,7 +349,7 @@ ani_ref AniWindowManager::OnCreateWindow(ani_env* env, ani_object configuration)
     }
 }
 
-void AniWindowManager::MinimizeAll(ani_env* env, ani_long nativeObj, ani_double displayId)
+void AniWindowManager::MinimizeAll(ani_env* env, ani_long nativeObj, ani_long displayId)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "[ANI]");
     AniWindowManager* aniWindowManager = reinterpret_cast<AniWindowManager*>(nativeObj);
@@ -360,7 +360,7 @@ void AniWindowManager::MinimizeAll(ani_env* env, ani_long nativeObj, ani_double 
     }
 }
 
-void AniWindowManager::OnMinimizeAll(ani_env* env, ani_double displayId)
+void AniWindowManager::OnMinimizeAll(ani_env* env, ani_long displayId)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "[ANI]");
     if (static_cast<uint64_t>(displayId) < 0 ||
