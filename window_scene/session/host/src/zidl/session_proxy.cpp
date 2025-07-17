@@ -895,7 +895,7 @@ WSError SessionProxy::OnDefaultDensityEnabled(bool isDefaultDensityEnabled)
     return static_cast<WSError>(ret);
 }
 
-WMError SessionProxy::OnUpdateAbilityColorMode(const std::string& colorMode, bool hasDarkRes)
+WMError SessionProxy::OnUpdateColorMode(const std::string& colorMode, bool hasDarkRes)
 {
     MessageParcel data;
     MessageParcel reply;

@@ -1613,40 +1613,40 @@ HWTEST_F(SessionProxyTest, IsMainWindowFullScreenAcrossDisplays, Function | Smal
 }
 
 /**
- * @tc.name: OnUpdateAbilityColorMode
- * @tc.desc: OnUpdateAbilityColorMode test
+ * @tc.name: OnUpdateColorMode
+ * @tc.desc: OnUpdateColorMode test
  * @tc.type: FUNC
  */
-HWTEST_F(SessionProxyTest, OnUpdateAbilityColorMode, Function | SmallTest | Level2)
+HWTEST_F(SessionProxyTest, OnUpdateColorMode, Function | SmallTest | Level2)
 {
     std::string colorMode = "DARK";
     bool hasDarkRes = true;
     auto sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
     ASSERT_NE(sProxy, nullptr);
-    auto ret = sProxy->OnUpdateAbilityColorMode(colorMode, hasDarkRes);
+    auto ret = sProxy->OnUpdateColorMode(colorMode, hasDarkRes);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
 
     sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
     sProxy = sptr<SessionProxy>::MakeSptr(remoteMocker);
     ASSERT_NE(sProxy, nullptr);
-    ret = sProxy->OnUpdateAbilityColorMode(colorMode, hasDarkRes);
+    ret = sProxy->OnUpdateColorMode(colorMode, hasDarkRes);
     EXPECT_EQ(ret, WMError::WM_OK);
 
     remoteMocker->SetRequestResult(ERR_INVALID_DATA);
-    ret = sProxy->OnUpdateAbilityColorMode(colorMode, hasDarkRes);
+    ret = sProxy->OnUpdateColorMode(colorMode, hasDarkRes);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
     remoteMocker->SetRequestResult(ERR_NONE);
 
     MockMessageParcel::SetWriteBoolErrorFlag(true);
-    ret = sProxy->OnUpdateAbilityColorMode(colorMode, hasDarkRes);
+    ret = sProxy->OnUpdateColorMode(colorMode, hasDarkRes);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
 
     MockMessageParcel::SetWriteStringErrorFlag(true);
-    ret = sProxy->OnUpdateAbilityColorMode(colorMode, hasDarkRes);
+    ret = sProxy->OnUpdateColorMode(colorMode, hasDarkRes);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
 
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
-    ret = sProxy->OnUpdateAbilityColorMode(colorMode, hasDarkRes);
+    ret = sProxy->OnUpdateColorMode(colorMode, hasDarkRes);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
     MockMessageParcel::SetWriteBoolErrorFlag(false);
     MockMessageParcel::SetWriteStringErrorFlag(false);

@@ -50,7 +50,7 @@ public:
     WSError SyncSessionEvent(SessionEvent event) override;
     WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) override;
     WSError OnDefaultDensityEnabled(bool isDefaultDensityEnabled) override;
-    WMError OnUpdateAbilityColorMode(const std::string& colorMode, bool hasDarkRes) override;
+    WMError OnUpdateColorMode(const std::string& colorMode, bool hasDarkRes) override;
     WSError OnTitleAndDockHoverShowChange(bool isTitleHoverShown = true,
         bool isDockHoverShown = true) override;
     WSError OnRestoreMainWindow() override;

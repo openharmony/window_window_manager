@@ -592,7 +592,7 @@ int SessionStub::HandleUpdateAbilityColorMode(MessageParcel& data, MessageParcel
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read hasDarkRes failed.");
         return ERR_INVALID_DATA;
     }
-    OnUpdateAbilityColorMode(colorMode, hasDarkRes);
+    OnUpdateColorMode(colorMode, hasDarkRes);
     return ERR_NONE;
 }
 
