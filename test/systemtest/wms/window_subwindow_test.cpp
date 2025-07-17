@@ -16,6 +16,7 @@
 // gtest
 #include <ability_context.h>
 #include <gtest/gtest.h>
+#include "modifier_render_thread/rs_modifiers_draw_thread.h"
 #include "window.h"
 #include "window_option.h"
 #include "window_scene.h"
@@ -36,7 +37,12 @@ public:
 
 void WindowSubWindowTest::SetUpTestCase() {}
 
-void WindowSubWindowTest::TearDownTestCase() {}
+void WindowSubWindowTest::TearDownTestCase()
+{
+#ifdef RS_ENABLE_VK
+    RSModifiersDrawThread::Destroy();
+#endif
+}
 
 void WindowSubWindowTest::SetUp() {}
 

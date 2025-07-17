@@ -16,6 +16,7 @@
 // gtest
 #include <gtest/gtest.h>
 #include "common_test_utils.h"
+#include "modifier_render_thread/rs_modifiers_draw_thread.h"
 #include "scene_board_judgement.h"
 #include "window.h"
 #include "window_helper.h"
@@ -43,7 +44,12 @@ public:
 
 void WindowAnimateToTest::SetUpTestCase() {}
 
-void WindowAnimateToTest::TearDownTestCase() {}
+void WindowAnimateToTest::TearDownTestCase()
+{
+#ifdef RS_ENABLE_VK
+    RSModifiersDrawThread::Destroy();
+#endif
+}
 
 void WindowAnimateToTest::SetUp()
 {

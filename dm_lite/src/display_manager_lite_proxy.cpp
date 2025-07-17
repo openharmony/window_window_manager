@@ -1077,4 +1077,43 @@ bool DisplayManagerLiteProxy::GetKeyboardState()
     return false;
 #endif
 }
+
+bool DisplayManagerLiteProxy::SynchronizePowerStatus(ScreenPowerState state)
+{
+#ifdef SCENE_BOARD_ENABLED
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DMS, "remote is null");
+        return false;
+    }
+
+    MessageParcel reply;
+    MessageParcel data;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return false;
+    }
+
+    if (!data.WriteUint32(static_cast<uint32_t>(state))) {
+        TLOGE(WmsLogTag::DMS, "Write state failed");
+        return false;
+    }
+
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SYNCHRONIZED_POWER_STATUS),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
+        return false;
+    }
+
+    bool res = false;
+    if (!reply.ReadBool(res)) {
+        TLOGE(WmsLogTag::DMS, "ReadBool failed");
+        return false;
+    }
+    return res;
+#else
+    return false;
+#endif
+}
 } // namespace OHOS::Rosen

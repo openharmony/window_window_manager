@@ -96,6 +96,7 @@ public:
     virtual ScreenPowerState GetScreenPower();
     virtual sptr<ScreenInfo> GetScreenInfo(ScreenId screenId);
     virtual DMError GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos);
+    virtual bool SynchronizePowerStatus(ScreenPowerState state);
 private:
     virtual bool IsScreenLessDevice();
     static inline SingletonDelegator<ScreenManagerAdapterLite> delegator;

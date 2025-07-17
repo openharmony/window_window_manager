@@ -15,16 +15,19 @@
 
 #include "session_coordinate_helper.h"
 
+#include "dm_common.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "window_manager_hilog.h"
+#include "wm_math.h"
 
 namespace OHOS::Rosen {
-WSRect SessionCoordinateHelper::RelativeToGlobalDisplayRect(DisplayId displayId, const WSRect& relativeRect)
+WSRect SessionCoordinateHelper::RelativeToGlobalDisplayRect(ScreenId screenId, const WSRect& relativeRect)
 {
-    auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(displayId);
+    auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(screenId);
     if (!screenSession) {
         TLOGW(WmsLogTag::WMS_LAYOUT,
-            "Screen session not found, displayId: %{public}" PRIu64 ", relativeRect: %{public}s",
-            displayId, relativeRect.ToString().c_str());
+            "Screen not found, screenId: %{public}" PRIu64 ", relativeRect: %{public}s",
+            screenId, relativeRect.ToString().c_str());
         return relativeRect;
     }
     const auto& screenProperty = screenSession->GetScreenProperty();
@@ -34,89 +37,74 @@ WSRect SessionCoordinateHelper::RelativeToGlobalDisplayRect(DisplayId displayId,
         relativeRect.width_,
         relativeRect.height_
     };
-    TLOGD(WmsLogTag::WMS_LAYOUT, "displayId: %{public}" PRIu64 ", relativeRect: %{public}s, globalRect: %{public}s",
-        displayId, relativeRect.ToString().c_str(), globalRect.ToString().c_str());
+    TLOGD(WmsLogTag::WMS_LAYOUT, "screenId: %{public}" PRIu64 ", relativeRect: %{public}s, globalRect: %{public}s",
+        screenId, relativeRect.ToString().c_str(), globalRect.ToString().c_str());
     return globalRect;
 }
 
-WSRelativeDisplayRect SessionCoordinateHelper::GlobalToRelativeDisplayRect(
-    DisplayId originalDisplayId, const WSRect& globalRect)
+WSScreenRelativeRect SessionCoordinateHelper::GlobalToScreenRelativeRect(
+    ScreenId originalScreenId, const WSRect& globalRect)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "originalDisplayId: %{public}" PRIu64 ", globalRect: %{public}s",
-        originalDisplayId, globalRect.ToString().c_str());
-    auto screenRectMap = BuildScreenRectMap();
-    // Assign to display with largest intersection area, and smallest displayId.
-    if (auto match = MatchBestIntersectionScreen(screenRectMap, globalRect)) {
-        return *match;
+    auto originalScreen = ScreenSessionManagerClient::GetInstance().GetScreenSession(originalScreenId);
+    if (!originalScreen) {
+        return { MAIN_SCREEN_ID_DEFAULT, globalRect };
     }
-    // If no intersection with any display, fallback to original or primary display.
-    return FallbackToOriginalOrPrimaryScreen(screenRectMap, globalRect, originalDisplayId);
-}
 
-WSRect SessionCoordinateHelper::ToRelative(const WSRect& globalRect, const WSRect& screenRect)
-{
-    return {
-        globalRect.posX_ - screenRect.posX_,
-        globalRect.posY_ - screenRect.posY_,
-        globalRect.width_, globalRect.height_
-    };
-}
+    const float originalScreenVpr = originalScreen->GetScreenProperty().GetVirtualPixelRatio();
+    if (MathHelper::NearZero(originalScreenVpr)) {
+        return { MAIN_SCREEN_ID_DEFAULT, globalRect };
+    }
 
-std::unordered_map<uint64_t, WSRect> SessionCoordinateHelper::BuildScreenRectMap()
-{
-    std::unordered_map<uint64_t, WSRect> screenRectMap;
-    auto screenPropertyMap = ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
-    for (const auto& [screenId, screenProperty] : screenPropertyMap) {
+    // Convert globalRect's size (width/height) to virtual pixel units using original screen's VPR.
+    // Keep posX/posY unchanged, only adjust width and height to match how large it would appear on different screens.
+    const float widthInVp = globalRect.width_ / originalScreenVpr;
+    const float heightInVp = globalRect.height_ / originalScreenVpr;
+
+    // Iterate all screens and find the one that has the largest intersection area with the scaled rect.
+    // For comparison, convert the width and height back into actual pixels using each screen's VPR.
+    ScreenId candidateScreenId = SCREEN_ID_INVALID;
+    WSRect candidateScreenRect = WSRect::EMPTY_RECT;
+    WSRect originalScreenRect = WSRect::EMPTY_RECT;
+    uint64_t maxIntersectionArea = 0;
+    const auto screenPropMap = ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
+    for (const auto& [screenId, screenProp] : screenPropMap) {
+        const float screenVpr = screenProp.GetVirtualPixelRatio();
         WSRect screenRect {
-            screenProperty.GetX(),
-            screenProperty.GetY(),
-            screenProperty.GetBounds().rect_.GetWidth(),
-            screenProperty.GetBounds().rect_.GetHeight()
+            screenProp.GetX(), screenProp.GetY(),
+            screenProp.GetBounds().rect_.GetWidth(),
+            screenProp.GetBounds().rect_.GetHeight()
         };
-        screenRectMap[screenId] = screenRect;
+        if (screenId == originalScreenId) {
+            originalScreenRect = screenRect;
+        }
 
-        TLOGD(WmsLogTag::WMS_LAYOUT, "screenId: %{public}" PRIu64 ", screenRect: %{public}s",
-            screenId, screenRect.ToString().c_str());
-    }
-    return screenRectMap;
-}
+        // Scale globalRect’s width/height to match how it would look on this screen.
+        WSRect scaledGlobalRect {
+            globalRect.posX_, globalRect.posY_,
+            static_cast<int32_t>(std::round(widthInVp * screenVpr)),
+            static_cast<int32_t>(std::round(heightInVp * screenVpr))
+        };
 
-std::optional<WSRelativeDisplayRect> SessionCoordinateHelper::MatchBestIntersectionScreen(
-    const std::unordered_map<uint64_t, WSRect>& screenRectMap, const WSRect& globalRect)
-{
-    uint64_t bestDisplayId = DISPLAY_ID_INVALID;
-    uint64_t maxArea = 0;
-    for (const auto& [displayId, screenRect] : screenRectMap) {
-        uint64_t area = globalRect.IntersectionArea<uint64_t>(screenRect);
-        if (area > maxArea || (area == maxArea && displayId < bestDisplayId)) {
-            maxArea = area;
-            bestDisplayId = displayId;
+        // Compute intersection area between this screen and the scaled globalRect.
+        uint64_t area = scaledGlobalRect.IntersectionArea<uint64_t>(screenRect);
+        if (area > maxIntersectionArea || (area == maxIntersectionArea && screenId < candidateScreenId)) {
+            maxIntersectionArea = area;
+            candidateScreenId = screenId;
+            candidateScreenRect = screenRect;
         }
     }
-    if (maxArea > 0 && bestDisplayId != DISPLAY_ID_INVALID) {
-        auto relativeRect = ToRelative(globalRect, screenRectMap.at(bestDisplayId));
-        TLOGD(WmsLogTag::WMS_LAYOUT, "Best display %{public}" PRIu64 " with area %{public}" PRIu64
-            ", globalRect: %{public}s, relativeRect: %{public}s",
-            bestDisplayId, maxArea, globalRect.ToString().c_str(), relativeRect.ToString().c_str());
-        return WSRelativeDisplayRect { bestDisplayId, relativeRect };
-    }
-    return std::nullopt;
-}
 
-WSRelativeDisplayRect SessionCoordinateHelper::FallbackToOriginalOrPrimaryScreen(
-    const std::unordered_map<uint64_t, WSRect>& screenRectMap, const WSRect& globalRect, DisplayId originalDisplayId)
-{
-    constexpr uint64_t mainDisplayId = MAIN_SCREEN_ID_DEFAULT;
-    const auto it = screenRectMap.find(originalDisplayId);
-    if (it == screenRectMap.end()) {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "Fallback to mainDisplayId: %{public}" PRIu64 ", globalRect: %{public}s",
-            mainDisplayId, globalRect.ToString().c_str());
-        return { mainDisplayId, globalRect };
-    }
-    auto relativeRect = ToRelative(globalRect, it->second);
-    TLOGD(WmsLogTag::WMS_LAYOUT, "Fallback to originalDisplayId: %{public}" PRIu64
-        ", globalRect: %{public}s, relativeRect: %{public}s",
-        originalDisplayId, globalRect.ToString().c_str(), relativeRect.ToString().c_str());
-    return { originalDisplayId, relativeRect };
+    // Determine the final matched screen and compute the relative rect to it.
+    bool hasCandidate = candidateScreenId != SCREEN_ID_INVALID;
+    const auto matchedScreenId = hasCandidate ? candidateScreenId : originalScreenId;
+    const auto& matchedScreenRect = hasCandidate ? candidateScreenRect : originalScreenRect;
+    const WSRect relativeRect {
+        globalRect.posX_ - matchedScreenRect.posX_,
+        globalRect.posY_ - matchedScreenRect.posY_,
+        globalRect.width_, globalRect.height_
+    };
+    TLOGD(WmsLogTag::WMS_LAYOUT, "matchedScreenId: %{public}" PRIu64 ", relativeRect: %{public}s",
+        matchedScreenId, relativeRect.ToString().c_str());
+    return { matchedScreenId, relativeRect };
 }
 } // namespace OHOS::Rosen

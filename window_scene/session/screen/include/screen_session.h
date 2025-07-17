@@ -422,6 +422,7 @@ private:
     bool isAvailableAreaNeedNotify_ = false;
     bool isSecurity_ = true;
     uint64_t sessionId_;
+    bool lastCloseHdrStatus_ = false;
 
     /*
      * RS Client Multi Instance
