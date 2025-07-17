@@ -168,6 +168,11 @@ HWTEST_F(WindowSceneSessionImplTest4, ConsumePointerEvent02, TestSize.Level1)
     windowSceneSessionImpl->ConsumePointerEvent(pointerEvent);
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
     windowSceneSessionImpl->ConsumePointerEvent(pointerEvent);
+    AAFwk::Want want;
+    windowSceneSessionImpl->uiContent_ = nullptr;
+    windowSceneSessionImpl->OnNewWant(want);
+    EXPECT_EQ(windowSceneSessionImpl->GetUIContentSharedPtr(), nullptr);
+    windowSceneSessionImpl->ConsumePointerEvent(pointerEvent);
 }
 
 /**
