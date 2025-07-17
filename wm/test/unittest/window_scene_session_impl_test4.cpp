@@ -146,16 +146,32 @@ HWTEST_F(WindowSceneSessionImplTest4, ConsumePointerEvent02, TestSize.Level1)
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     pointerEvent->SetPointerId(pointerId);
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
+    pointerEvent->SetSourceType(1);
     MMI::PointerEvent::PointerItem pointerItem;
     pointerItem.SetPointerId(pointerId);
     pointerEvent->AddPointerItem(pointerItem);
 
     windowSceneSessionImpl->property_->SetWindowDelayRaiseEnabled(false);
-    ASSERT_EQ(false, windowSceneSessionImpl->property_->IsWindowDelayRaiseEnabled());
+    EXPECT_EQ(false, windowSceneSessionImpl->property_->IsWindowDelayRaiseEnabled());
     windowSceneSessionImpl->ConsumePointerEvent(pointerEvent);
+
+    windowSceneSessionImpl->SetUniqueVirtualPixelRatio(true, 1.0f);
+    Rect rect = {1, 1, 1, 1};
+    windowSceneSessionImpl->property_->SetWindowRect(rect);
+    pointerItem.SetWindowX(1);
+    pointerItem.SetWindowY(1);
+    windowSceneSessionImpl->property_->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
     windowSceneSessionImpl->property_->SetWindowDelayRaiseEnabled(true);
-    ASSERT_EQ(true, windowSceneSessionImpl->property_->IsWindowDelayRaiseEnabled());
+    EXPECT_EQ(true, windowSceneSessionImpl->property_->IsWindowDelayRaiseEnabled());
+    windowSceneSessionImpl->ConsumePointerEvent(pointerEvent);
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_DOWN);
+    windowSceneSessionImpl->ConsumePointerEvent(pointerEvent);
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
+    windowSceneSessionImpl->ConsumePointerEvent(pointerEvent);
+    AAFwk::Want want;
+    windowSceneSessionImpl->uiContent_ = nullptr;
+    windowSceneSessionImpl->OnNewWant(want);
+    EXPECT_EQ(windowSceneSessionImpl->GetUIContentSharedPtr(), nullptr);
     windowSceneSessionImpl->ConsumePointerEvent(pointerEvent);
 }
 
@@ -208,46 +224,55 @@ HWTEST_F(WindowSceneSessionImplTest4, HandlePointDownEvent, TestSize.Level1)
     option->SetWindowName("HandlePointDownEvent");
     sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
-    std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(nullptr, pointerEvent);
+    pointerEvent->SetSourceType(1);
     MMI::PointerEvent::PointerItem pointerItem;
-    int32_t sourceType = 1;
     float vpr = 1.0f;
-    WSRect rect = { 1, 1, 1, 1 };
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     windowSceneSessionImpl->hostSession_ = session;
+    windowSceneSessionImpl->SetUniqueVirtualPixelRatio(true, vpr);
     windowSceneSessionImpl->property_->SetWindowType(WindowType::BELOW_APP_SYSTEM_WINDOW_BASE);
 
     windowSceneSessionImpl->property_->SetDragEnabled(false);
     windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     windowSceneSessionImpl->property_->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
-    auto ret = windowSceneSessionImpl->HandlePointDownEvent(pointerEvent, pointerItem, sourceType, vpr, rect);
+    auto ret = windowSceneSessionImpl->HandlePointDownEvent(pointerEvent, pointerItem);
     EXPECT_EQ(true, ret);
 
     windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     windowSceneSessionImpl->property_->SetDragEnabled(false);
-    ret = windowSceneSessionImpl->HandlePointDownEvent(pointerEvent, pointerItem, sourceType, vpr, rect);
+    ret = windowSceneSessionImpl->HandlePointDownEvent(pointerEvent, pointerItem);
     EXPECT_EQ(true, ret);
     windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
 
-    ret = windowSceneSessionImpl->HandlePointDownEvent(pointerEvent, pointerItem, sourceType, vpr, rect);
+    ret = windowSceneSessionImpl->HandlePointDownEvent(pointerEvent, pointerItem);
     EXPECT_EQ(true, ret);
 
     pointerItem.SetWindowX(100);
     pointerItem.SetWindowY(100);
-    ret = windowSceneSessionImpl->HandlePointDownEvent(pointerEvent, pointerItem, sourceType, vpr, rect);
+    Rect rect = {1, 1, 1, 1};
+    windowSceneSessionImpl->property_->SetWindowRect(rect);
+    ret = windowSceneSessionImpl->HandlePointDownEvent(pointerEvent, pointerItem);
     EXPECT_EQ(true, ret);
     pointerItem.SetWindowX(1);
-    ret = windowSceneSessionImpl->HandlePointDownEvent(pointerEvent, pointerItem, sourceType, vpr, rect);
+    ret = windowSceneSessionImpl->HandlePointDownEvent(pointerEvent, pointerItem);
     EXPECT_EQ(true, ret);
 
     windowSceneSessionImpl->property_->SetDragEnabled(true);
-    ret = windowSceneSessionImpl->HandlePointDownEvent(pointerEvent, pointerItem, sourceType, vpr, rect);
+    ret = windowSceneSessionImpl->HandlePointDownEvent(pointerEvent, pointerItem);
     EXPECT_EQ(false, ret);
 
     pointerItem.SetWindowX(100);
-    ret = windowSceneSessionImpl->HandlePointDownEvent(pointerEvent, pointerItem, sourceType, vpr, rect);
+    ret = windowSceneSessionImpl->HandlePointDownEvent(pointerEvent, pointerItem);
+    EXPECT_EQ(true, ret);
+
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
+    pointerItem.SetDisplayX(100);
+    pointerItem.SetDisplayY(100);
+    ret = windowSceneSessionImpl->HandlePointDownEvent(pointerEvent, pointerItem);
     EXPECT_EQ(true, ret);
 }
 
