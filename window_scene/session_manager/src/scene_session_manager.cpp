@@ -10350,15 +10350,24 @@ void SceneSessionManager::NotifyOnAttachToFrameNode(const sptr<Session>& session
     auto where = __func__;
     wptr<Session> weakSession(session);
     auto task = [this, weakSession, where] {
-        if (weakSession == nullptr) {
+        auto session = weakSession.promote();
+        if (session == nullptr) {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s, session is nullptr", where);
             return;
         }
-        TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s, wid: %{public}d", where, weakSession->GetPersistentId());
-        uint64_t skipSurfaceNodeId = WindowHelper::IsMainWindow(weakSession->GetWindowType()) ?
-            static_cast<uint64_t>(weakSession->GetPersistentId()) : weakSession->GetSurfaceNode()->GetId();
-        AddSkipSurfaceNodeWhenAttach(weakSession->GetPersistentId(),
-            weakSession->GetSessionInfo().bundleName_, skipSurfaceNodeId);
+        TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s, wid: %{public}d", where, session->GetPersistentId());
+        if (WindowHelper::IsMainWindow(session->GetWindowType())) {
+            AddSkipSurfaceNodeWhenAttach(session->GetPersistentId(),
+                session->GetSessionInfo().bundleName_, static_cast<uint64_t>(session->GetPersistentId()));
+        } else {
+            auto surfaceNode = session->GetSurfaceNode();
+            if (surfaceNode == nullptr) {
+                TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s, surfaceNode is nullptr", where);
+                return;
+            }
+            AddSkipSurfaceNodeWhenAttach(session->GetPersistentId(),
+                session->GetSessionInfo().bundleName_, surfaceNode->GetId());
+        }
     };
     taskScheduler_->PostAsyncTask(task, where);
 }
