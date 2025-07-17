@@ -4926,6 +4926,7 @@ void JsSceneSessionManager::OnTransferSessionToTargetScreen(const TransferSessio
             napi_value wantParams = OHOS::AppExecFwk::WrapWantParams(env, info.wantParams);
             napi_value argv[] = { persistentId, toScreenId, wantParams };
             napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+            SceneSessionManager::GetInstance().UpdateScreenLockState(info);
         }, __func__);
 }
 
