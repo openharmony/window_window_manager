@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "scenesessionmgrlstubuec_fuzzer.h"
+
 #include <cstddef>
 #include <cstdint>
 #include <parcel.h>
@@ -22,10 +24,9 @@
 #include "message_option.h"
 #include "message_parcel.h"
 #include "marshalling_helper.h"
-#include "scene_session_manager.h"
-#include "scene_session_manager_stub.h"
-#include "scene_session_manager_interface.h"
-#include "scenesessionmgrstub_event_fuzzer.h"
+#include "scene_session_manager_lite.h"
+#include "scene_session_manager_lite_stub.h"
+#include "scene_session_manager_lite_interface.h"
 
 using namespace OHOS::Rosen;
 
@@ -34,21 +35,14 @@ namespace {
 constexpr size_t DATA_MIN_SIZE = 2;
 }
 
-void SceneSessionMgrStubEventTest(MessageParcel& parcel)
+void SceneSessionMgrLsUecTestCode(MessageParcel& parcel)
 {
     MessageParcel reply;
     MessageOption option;
     parcel.RewindRead(0);
-    SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
-        SceneSessionManagerMessage::TRANS_ID_PROCESS_MODALEXTENSION_POINTDOWN_TO_SCB),
-        parcel, reply, option);
-    parcel.RewindRead(0);
-    SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
-        SceneSessionManagerMessage::TRANS_ID_WATCH_GESTURE_CONSUME_RESULT),
-        parcel, reply, option);
-    parcel.RewindRead(0);
-    SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
-        SceneSessionManagerMessage::TRANS_ID_WATCH_FOCUS_ACTIVE_CHANGE),
+    SceneSessionManagerLite::GetInstance().OnRemoteRequest(
+        static_cast<uint32_t>(
+            ISceneSessionManagerLite::SceneSessionManagerLiteMessage::TRANS_ID_UI_EXTENSION_CREATION_CHECK),
         parcel, reply, option);
 }
 
@@ -57,17 +51,17 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     if (data == nullptr || size < DATA_MIN_SIZE) {
         return false;
     }
-
+    
     MessageParcel parcel;
 
-    parcel.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
+    parcel.WriteInterfaceToken(SceneSessionManagerLiteStub::GetDescriptor());
     parcel.WriteBuffer(data, size);
 
-    SceneSessionMgrStubEventTest(parcel);
+    SceneSessionMgrLsUecTestCode(parcel);
 
     return true;
 }
-} // namespace.OHOS
+} // namespace OHOS
 
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
