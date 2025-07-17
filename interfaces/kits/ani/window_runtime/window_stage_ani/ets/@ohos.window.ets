@@ -2945,7 +2945,7 @@ export function setNativeObj(nativeObject: long):void {
 
 native function getWindowsByCoordinate(nativeObj: long, param: window.GetWindowsByCoordinateParam): Array<Window>;
 native function getLastWindowSync(nativeObj: long, ctx: BaseContext): Window;
-native function minimizeAllSync(nativeObj: long, id: int): void;
+native function minimizeAllSync(nativeObj: long, id: long): void;
 native function findWindowSync(nativeObj: long, name: string): Window;
 native function onSync(nativeObj: long, type: string, callback: object): void;
 native function offSync(nativeObj: long, type: string, callback?: object): void;
@@ -2998,7 +2998,7 @@ export function createWindow(config: Configuration, callback: AsyncCallback<Wind
     });
 }
 
-export function minimizeAll(id: int): Promise<void> {
+export function minimizeAll(id: long): Promise<void> {
   return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
       taskpool.execute((): void => {
           minimizeAllSync(nativeObj, id);
@@ -3010,7 +3010,7 @@ export function minimizeAll(id: int): Promise<void> {
   }); 
 }
 
-export function minimizeAll(id: int, callback: AsyncCallback<void>): void {
+export function minimizeAll(id: long, callback: AsyncCallback<void>): void {
     taskpool.execute((): void => {
         minimizeAllSync(nativeObj, id);
     }).then((ret: NullishType) => {
