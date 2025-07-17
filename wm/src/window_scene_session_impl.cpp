@@ -6547,6 +6547,7 @@ WMError WindowSceneSessionImpl::SetCustomDensity(float density, bool applyToSubW
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}u set density not change", GetWindowId());
         return WMError::WM_OK;
     }
+    defaultDensityEnabledGlobalConfig_ = false;
     SetDefaultDensityEnabledValue(false);
     customDensity_ = density;
     if (applyToSubWindow) {
