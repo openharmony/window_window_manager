@@ -5586,7 +5586,7 @@ void SceneSessionManager::RegisterGetStartWindowConfigCallback(const sptr<SceneS
             sessionInfo.persistentId_, startWindowType.c_str());
     });
 }
-    
+
 
 std::shared_ptr<AppExecFwk::AbilityInfo> SceneSessionManager::QueryAbilityInfoFromBMS(const int32_t uId,
     const std::string& bundleName, const std::string& abilityName, const std::string& moduleName,
@@ -7537,7 +7537,7 @@ bool SceneSessionManager::CheckBlockingFocus(const sptr<SceneSession>& session, 
         bool isPhoneAndPadWithoutPcMode =
             systemConfig_.IsPhoneWindow() || (systemConfig_.IsPadWindow() && !systemConfig_.IsFreeMultiWindowMode());
         if (isPhoneAndPadWithoutPcMode && session->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
-            SessionHelper::IsMainWindow(session->GetWindowType())) {
+            SessionHelper::IsMainWindow(session->GetWindowType()) && !session->GetIsMidScene()) {
             return false;
         }
         return true;
@@ -15861,7 +15861,7 @@ DisplayId SceneSessionManager::UpdateSpecificSessionClientDisplayId(const sptr<W
     //  SubWindow
     if (auto parentSession = GetSceneSession(property->GetParentPersistentId())) {
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "displayId:%{public}" PRIu64 ", parentClientDisplayId:%{public}" PRIu64
-            ", isFollowParentWindowDisplayId: %{public}u", property->GetDisplayId(), 
+            ", isFollowParentWindowDisplayId: %{public}u", property->GetDisplayId(),
             parentSession->GetClientDisplayId(), property->IsFollowParentWindowDisplayId());
         initClientDisplayId =
             property->IsFollowParentWindowDisplayId() ? parentSession->GetClientDisplayId() : property->GetDisplayId();
