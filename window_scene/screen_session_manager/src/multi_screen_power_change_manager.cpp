@@ -638,6 +638,11 @@ void MultiScreenPowerChangeManager::CallRsSetScreenPowerStatusSyncToOn(ScreenId 
         TLOGI(WmsLogTag::DMS, "power state IsScreenOn is false");
         return;
     }
+
+    if (!ScreenSessionManager::GetInstance().IsLapTopLidOpen() && screenId == SCREEN_ID_FULL) {
+        TLOGI(WmsLogTag::DMS, "laptop lid is close and build-in screen");
+        return;
+    }
     ScreenSessionManager::GetInstance().CallRsSetScreenPowerStatusSync(screenId,
         ScreenPowerStatus::POWER_STATUS_ON);
 }
