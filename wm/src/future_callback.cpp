@@ -66,29 +66,29 @@ void FutureCallback::OnUpdateRotationResult(RotationChangeResult rotationChangeR
     getRotationResultFuture_.SetValue(rotationChangeResult);
 }
 
-Rect FutureCallback::GetResizeAsyncResult(long timeOut)
+Rect FutureCallback::GetResizeAsyncResult(long timeoutMs)
 {
-    return resizeFuture_.GetResult(timeOut);
+    return resizeFuture_.GetResult(timeoutMs);
 }
 
-Rect FutureCallback::GetMoveToAsyncResult(long timeOut)
+Rect FutureCallback::GetMoveToAsyncResult(long timeoutMs)
 {
-    return moveToFuture_.GetResult(timeOut);
+    return moveToFuture_.GetResult(timeoutMs);
 }
 
-Rect FutureCallback::GetMoveWindowToGlobalDisplayAsyncResult(long timeOut)
+Rect FutureCallback::GetMoveWindowToGlobalDisplayAsyncResult(long timeoutMs)
 {
-    return moveWindowToGlobalDisplayFuture_.GetResult(timeOut);
+    return moveWindowToGlobalDisplayFuture_.GetResult(timeoutMs);
 }
 
-OrientationInfo FutureCallback::GetTargetOrientationResult(long timeOut)
+OrientationInfo FutureCallback::GetTargetOrientationResult(long timeoutMs)
 {
-    return getTargetRotationFuture_.GetResult(timeOut);
+    return getTargetRotationFuture_.GetResult(timeoutMs);
 }
 
-RotationChangeResult FutureCallback::GetRotationResult(long timeOut)
+RotationChangeResult FutureCallback::GetRotationResult(long timeoutMs)
 {
-    return getRotationResultFuture_.GetResult(timeOut);
+    return getRotationResultFuture_.GetResult(timeoutMs);
 }
 
 void FutureCallback::ResetResizeLock()
@@ -116,9 +116,9 @@ void FutureCallback::ResetRotationResultLock()
     getRotationResultFuture_.ResetLock({});
 }
 
-int32_t FutureCallback::GetUpdateRectResult(long timeOut)
+int32_t FutureCallback::GetUpdateRectResult(long timeoutMs)
 {
-    return updateRectFuture_.GetResult(timeOut);
+    return updateRectFuture_.GetResult(timeoutMs);
 }
 
 void FutureCallback::OnFirstValidRectUpdate(int32_t persistentId)

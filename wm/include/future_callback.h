@@ -28,22 +28,22 @@ public:
         const Rect& rect, WindowSizeChangeReason reason, int32_t persistenId);
     WSError OnUpdateGlobalDisplayRect(
         const Rect& rect, WindowSizeChangeReason reason, int32_t persistenId);
-    Rect GetResizeAsyncResult(long timeOut); // unit: ms
-    Rect GetMoveToAsyncResult(long timeOut); // unit: ms
-    Rect GetMoveWindowToGlobalDisplayAsyncResult(long timeOut); // unit: ms
+    Rect GetResizeAsyncResult(long timeoutMs);
+    Rect GetMoveToAsyncResult(long timeoutMs);
+    Rect GetMoveWindowToGlobalDisplayAsyncResult(long timeoutMs);
     void ResetResizeLock();
     void ResetMoveToLock();
     void ResetMoveWindowToGlobalDisplayLock();
-    int32_t GetUpdateRectResult(long timeOut);
+    int32_t GetUpdateRectResult(long timeoutMs);
     void OnFirstValidRectUpdate(int32_t persistenId);
 
     // oriention
-    OrientationInfo GetTargetOrientationResult(long timeOut); // unit: ms
+    OrientationInfo GetTargetOrientationResult(long timeoutMs);
     void ResetGetTargetRotationLock();
     WSError OnUpdateTargetOrientationInfo(OrientationInfo& info);
 
     // rotation change
-    RotationChangeResult GetRotationResult(long timeout);
+    RotationChangeResult GetRotationResult(long timeoutMs);
     void ResetRotationResultLock();
     void OnUpdateRotationResult(RotationChangeResult rotationChangeResult);
 
