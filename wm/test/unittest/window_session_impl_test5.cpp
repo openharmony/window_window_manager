@@ -1587,13 +1587,24 @@ HWTEST_F(WindowSessionImplTest5, TestClientToGlobalDisplay, TestSize.Level1)
 
     Rect globalRect { 100, 200, 300, 400 };
     window->property_->SetGlobalDisplayRect(globalRect);
+    Transform layoutTransform;
+    layoutTransform.scaleX_ = 1.0f;
+    layoutTransform.scaleY_ = 1.0f;
+    window->SetLayoutTransform(layoutTransform);
 
-    Position clientPos { 10, 20 };
-    Position expectedGlobalPos { 110, 220 };
+    Position inPosition { 10, 20 };
+    Position outPosition;
+    Position expectedPosition { 110, 220 };
 
-    auto result = window->ClientToGlobalDisplay(clientPos);
-    EXPECT_NE(result, clientPos);
-    EXPECT_EQ(result, expectedGlobalPos);
+    auto ret = window->ClientToGlobalDisplay(inPosition, outPosition);
+    EXPECT_EQ(ret, WMError::WM_OK);
+    EXPECT_NE(outPosition, inPosition);
+    EXPECT_EQ(outPosition, expectedPosition);
+
+    layoutTransform.scaleX_ = 0.5f;
+    window->SetLayoutTransform(layoutTransform);
+    ret = window->ClientToGlobalDisplay(inPosition, outPosition);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS);
 }
 
 /**
@@ -1608,13 +1619,24 @@ HWTEST_F(WindowSessionImplTest5, TestGlobalDisplayToClient, TestSize.Level1)
 
     Rect globalRect { 100, 200, 300, 400 };
     window->property_->SetGlobalDisplayRect(globalRect);
+    Transform layoutTransform;
+    layoutTransform.scaleX_ = 1.0f;
+    layoutTransform.scaleY_ = 1.0f;
+    window->SetLayoutTransform(layoutTransform);
 
-    Position globalPos { 110, 220 };
-    Position expectedClientPos { 10, 20 };
+    Position inPosition { 110, 220 };
+    Position outPosition;
+    Position expectedPosition { 10, 20 };
 
-    auto result = window->GlobalDisplayToClient(globalPos);
-    EXPECT_NE(result, globalPos);
-    EXPECT_EQ(result, expectedClientPos);
+    auto ret = window->GlobalDisplayToClient(inPosition, outPosition);
+    EXPECT_EQ(ret, WMError::WM_OK);
+    EXPECT_NE(outPosition, inPosition);
+    EXPECT_EQ(outPosition, expectedPosition);
+
+    layoutTransform.scaleX_ = 0.5f;
+    window->SetLayoutTransform(layoutTransform);
+    ret = window->GlobalDisplayToClient(inPosition, outPosition);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS);
 }
 
 /**
@@ -1628,17 +1650,34 @@ HWTEST_F(WindowSessionImplTest5, TestUpdateGlobalDisplayRectFromServer, TestSize
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->property_->SetPersistentId(1001);
 
-    WSRect oldRect { 100, 200, 300, 400 };
-    window->property_->SetGlobalDisplayRect({ 100, 200, 300, 400 });
-    auto ret = window->UpdateGlobalDisplayRectFromServer(oldRect, SizeChangeReason::UNDEFINED);
+    WSRect rect = { 10, 20, 200, 100 };
+    window->property_->SetGlobalDisplayRect({ 10, 20, 200, 100 });
+    window->globalDisplayRectSizeChangeReason_ = SizeChangeReason::RESIZE;
+
+    Rect expectedRect { 10, 20, 200, 100 };
+    auto ret = window->UpdateGlobalDisplayRectFromServer(rect, SizeChangeReason::RESIZE);
     EXPECT_EQ(ret, WSError::WS_DO_NOTHING);
-
-    WSRect newRect { 150, 250, 300, 400 };
-    ret = window->UpdateGlobalDisplayRectFromServer(newRect, SizeChangeReason::UNDEFINED);
-    EXPECT_EQ(ret, WSError::WS_OK);
-
-    Rect expectedRect { 150, 250, 300, 400 };
     EXPECT_EQ(window->GetGlobalDisplayRect(), expectedRect);
+    EXPECT_EQ(window->globalDisplayRectSizeChangeReason_, SizeChangeReason::RESIZE);
+
+    ret = window->UpdateGlobalDisplayRectFromServer(rect, SizeChangeReason::MOVE);
+    EXPECT_EQ(ret, WSError::WS_OK);
+    EXPECT_EQ(window->GetGlobalDisplayRect(), expectedRect);
+    EXPECT_EQ(window->globalDisplayRectSizeChangeReason_, SizeChangeReason::MOVE);
+
+    WSRect updated = { 30, 40, 200, 100 };
+    expectedRect = { 30, 40, 200, 100 };
+    ret = window->UpdateGlobalDisplayRectFromServer(updated, SizeChangeReason::MOVE);
+    EXPECT_EQ(ret, WSError::WS_OK);
+    EXPECT_EQ(window->GetGlobalDisplayRect(), expectedRect);
+    EXPECT_EQ(window->globalDisplayRectSizeChangeReason_, SizeChangeReason::MOVE);
+
+    updated = { 0, 0, 200, 100 };
+    expectedRect = { 0, 0, 200, 100 };
+    ret = window->UpdateGlobalDisplayRectFromServer(updated, SizeChangeReason::DRAG);
+    EXPECT_EQ(ret, WSError::WS_OK);
+    EXPECT_EQ(window->GetGlobalDisplayRect(), expectedRect);
+    EXPECT_EQ(window->globalDisplayRectSizeChangeReason_, SizeChangeReason::DRAG);
 }
 
 /**
