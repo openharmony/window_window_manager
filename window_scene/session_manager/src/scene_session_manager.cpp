@@ -16894,4 +16894,24 @@ WMError SceneSessionManager::GetPiPSettingSwitchStatus(bool& switchStatus)
     switchStatus = pipSwitchStatus_;
     return WMError::WM_OK;
 }
+
+WMError SceneSessionManager::UpdateScreenLockState(const TransferSessionInfo& info)
+{
+    if (!SessionPermission::IsSystemAppCall() && !SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller is neither a system app nor an SA.");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    if (info.persistentId < 0 || info.toScreenId < 0) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Param is invalid!");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    taskScheduler_->PostAsyncTask([this, info, where = __func__]() {
+        auto sceneSession = GetSceneSession(info.persistentId);
+        if (sceneSession != nullptr) {
+            HandleKeepScreenOn(sceneSession, sceneSession->IsKeepScreenOn(), WINDOW_SCREEN_LOCK_PREFIX,
+                            sceneSession->keepScreenLock_);
+        }
+    }, __func__);
+    return WMError::WM_OK;
+}
 } // namespace OHOS::Rosen
