@@ -2708,7 +2708,7 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
         ani_native_function {"setUIContentSync", "JLstd/core/String;:V",
             reinterpret_cast<void *>(AniWindow::SetUIContent)},
         ani_native_function {"loadContentSync",
-            "JLstd/core/String;Larkui/stateManagement/storages/localStorage/LocalStorage;:V",
+            "JLstd/core/String;Larkui/stateManagement/storage/localStorage/LocalStorage;:V",
             reinterpret_cast<void *>(AniWindow::LoadContent)},
         ani_native_function {"setWindowKeepScreenOnSync", "JZ:V",
             reinterpret_cast<void *>(AniWindow::SetWindowKeepScreenOn)},
