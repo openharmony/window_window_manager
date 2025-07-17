@@ -1220,7 +1220,7 @@ HWTEST_F(SessionStubTest, HandleUpdateAbilityColorMode, Function | SmallTest | L
     EXPECT_EQ(result, ERR_NONE);
 
     data.WriteInterfaceToken(SessionStub::GetDescriptor());
-    uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_ABILITY_COLOR_MODE);
+    uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_COLOR_MODE);
     EXPECT_EQ(0, sessionStub->ProcessRemoteRequest(code, data, reply, option));
 }
 
