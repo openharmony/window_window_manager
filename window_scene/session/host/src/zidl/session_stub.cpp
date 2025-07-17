@@ -226,7 +226,7 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_DEFAULT_DENSITY_ENABLED):
             return HandleDefaultDensityEnabled(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_COLOR_MODE):
-            return HandleUpdateAbilityColorMode(data, reply);
+            return HandleUpdateColorMode(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TITLE_AND_DOCK_HOVER_SHOW_CHANGE):
             return HandleTitleAndDockHoverShowChange(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_FORCE_LANDSCAPE_CONFIG):
@@ -580,7 +580,7 @@ int SessionStub::HandleLayoutFullScreenChange(MessageParcel& data, MessageParcel
     return ERR_NONE;
 }
 
-int SessionStub::HandleUpdateAbilityColorMode(MessageParcel& data, MessageParcel& reply)
+int SessionStub::HandleUpdateColorMode(MessageParcel& data, MessageParcel& reply)
 {
     std::string colorMode;
     if (!data.ReadString(colorMode)) {
