@@ -782,11 +782,24 @@ struct StartingWindowInfo {
     std::string startWindowType_;
 };
 
+enum class StartWindowResType {
+    AppIcon = 0,
+    Illustration,
+    Branding,
+    BgImage,
+    Count
+};
+
+struct ResourceInfo {
+    std::vector<std::shared_ptr<Media::PixelMap>> pixelMaps;
+    std::vector<int32_t> delayTimes;
+};
+
 struct StartingWindowPageDrawInfo {
-    std::shared_ptr<Media::PixelMap> appIconPixelMap = nullptr;
-    std::shared_ptr<Media::PixelMap> illustrationPixelMap = nullptr;
-    std::shared_ptr<Media::PixelMap> bgImagePixelMap = nullptr;
-    std::shared_ptr<Media::PixelMap> brandingPixelMap = nullptr;
+    std::shared_ptr<ResourceInfo> appIcon = nullptr;
+    std::shared_ptr<ResourceInfo> illustration = nullptr;
+    std::shared_ptr<ResourceInfo> bgImage = nullptr;
+    std::shared_ptr<ResourceInfo> branding = nullptr;
     uint32_t bgColor = 0;
     std::string startWindowBackgroundImageFit = "";
 };
