@@ -44,6 +44,7 @@ group("fuzztest") {
     "sessionstagestublayout_fuzzer:fuzztest",
     "sessionstublayout_fuzzer:fuzztest",
     "sessionstubanimation_fuzzer:fuzztest",
+    "sessionstubattribute_fuzzer:fuzztest",
     "sessionstub_event_fuzzer:fuzztest",
     "sessionstub_uec_fuzzer:fuzztest",
     "sessionstubfocus_fuzzer:fuzztest",
