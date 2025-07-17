@@ -106,7 +106,7 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 
     void* contextPtr = nullptr;
     controller->contextPtr_ = contextPtr;
-    controller->CreateFloatingBallWindow();
+    controller->CreateFloatingBallWindow(option);
 
     controller->StartFloatingBall(option);
 

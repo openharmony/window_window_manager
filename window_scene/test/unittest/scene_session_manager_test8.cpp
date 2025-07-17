@@ -1438,6 +1438,28 @@ HWTEST_F(SceneSessionManagerTest8, NotifyOnAttachToFrameNode01, TestSize.Level1)
     EXPECT_EQ(ssm_->sessionBlackListInfoMap_.size(), 0);
     EXPECT_EQ(ssm_->sessionRSBlackListConfigSet_.size(), 0);
 
+    SessionInfo info;
+    session = sptr<Session>::MakeSptr(info);
+    session->GetSessionProperty()->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    ssm_->NotifyOnAttachToFrameNode(session);
+    EXPECT_EQ(ssm_->sessionBlackListInfoMap_.size(), 0);
+    EXPECT_EQ(ssm_->sessionRSBlackListConfigSet_.size(), 0);
+
+    session->GetSessionProperty()->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    session->SetSurfaceNode(nullptr);
+    ssm_->NotifyOnAttachToFrameNode(session);
+    EXPECT_EQ(ssm_->sessionBlackListInfoMap_.size(), 0);
+    EXPECT_EQ(ssm_->sessionRSBlackListConfigSet_.size(), 0);
+
+    session->GetSessionProperty()->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    ASSERT_NE(nullptr, surfaceNode);
+    session->SetSurfaceNode(surfaceNode);
+    ssm_->NotifyOnAttachToFrameNode(session);
+    EXPECT_EQ(ssm_->sessionBlackListInfoMap_.size(), 0);
+    EXPECT_EQ(ssm_->sessionRSBlackListConfigSet_.size(), 0);
+
     ssm_->screenRSBlackListConfigMap_.clear();
     ssm_->sessionRSBlackListConfigSet_.clear();
     ssm_->sessionBlackListInfoMap_.clear();

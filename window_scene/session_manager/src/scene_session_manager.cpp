@@ -513,6 +513,7 @@ void SceneSessionManager::RegisterRecoverStateChangeListener()
 
 void SceneSessionManager::OnRecoverStateChange(const RecoverState& state)
 {
+    TLOGI(WmsLogTag::WMS_RECOVER, "state: %{public}u", state);
     switch(state) {
         case RecoverState::RECOVER_INITIAL:
             break;
@@ -1055,6 +1056,11 @@ void SceneSessionManager::SetEnableInputEvent(bool enabled)
 {
     TLOGI(WmsLogTag::WMS_RECOVER, "enabled: %{public}u", enabled);
     enableInputEvent_ = enabled;
+
+    if (recoverStateChangeFunc_ == nullptr) {
+        return;
+    }
+    
     if (enabled) {
         recoverStateChangeFunc_(RecoverState::RECOVER_ENABLE_INPUT);
     } else {
@@ -4175,7 +4181,7 @@ WSError SceneSessionManager::RecoverAndConnectSpecificSession(const sptr<ISessio
     auto pid = IPCSkeleton::GetCallingRealPid();
     auto uid = IPCSkeleton::GetCallingUid();
     auto task = [this, sessionStage, eventChannel, surfaceNode, property, &session, token, pid, uid]() {
-        if (recoveringFinished_) {
+        if (recoveringFinished_ || sessionRecoverStateChangeFunc_ == nullptr) {
             TLOGNW(WmsLogTag::WMS_RECOVER, "Recover finished, not recovery anymore");
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
@@ -4317,7 +4323,7 @@ WSError SceneSessionManager::RecoverAndReconnectSceneSession(const sptr<ISession
     auto pid = IPCSkeleton::GetCallingRealPid();
     auto uid = IPCSkeleton::GetCallingUid();
     auto task = [this, sessionStage, eventChannel, surfaceNode, &session, property, token, pid, uid]() {
-        if (recoveringFinished_) {
+        if (recoveringFinished_ || sessionRecoverStateChangeFunc_ == nullptr) {
             TLOGNW(WmsLogTag::WMS_RECOVER, "Recover finished, not recovery anymore");
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
@@ -10344,15 +10350,24 @@ void SceneSessionManager::NotifyOnAttachToFrameNode(const sptr<Session>& session
     auto where = __func__;
     wptr<Session> weakSession(session);
     auto task = [this, weakSession, where] {
-        if (weakSession == nullptr) {
+        auto session = weakSession.promote();
+        if (session == nullptr) {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s, session is nullptr", where);
             return;
         }
-        TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s, wid: %{public}d", where, weakSession->GetPersistentId());
-        uint64_t skipSurfaceNodeId = WindowHelper::IsMainWindow(weakSession->GetWindowType()) ?
-            static_cast<uint64_t>(weakSession->GetPersistentId()) : weakSession->GetSurfaceNode()->GetId();
-        AddSkipSurfaceNodeWhenAttach(weakSession->GetPersistentId(),
-            weakSession->GetSessionInfo().bundleName_, skipSurfaceNodeId);
+        TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s, wid: %{public}d", where, session->GetPersistentId());
+        if (WindowHelper::IsMainWindow(session->GetWindowType())) {
+            AddSkipSurfaceNodeWhenAttach(session->GetPersistentId(),
+                session->GetSessionInfo().bundleName_, static_cast<uint64_t>(session->GetPersistentId()));
+        } else {
+            auto surfaceNode = session->GetSurfaceNode();
+            if (surfaceNode == nullptr) {
+                TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s, surfaceNode is nullptr", where);
+                return;
+            }
+            AddSkipSurfaceNodeWhenAttach(session->GetPersistentId(),
+                session->GetSessionInfo().bundleName_, surfaceNode->GetId());
+        }
     };
     taskScheduler_->PostAsyncTask(task, where);
 }
@@ -10798,6 +10813,7 @@ bool SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInf
     info->scaleVal_ = sceneSession->GetFloatingScale();
     info->scaleX_ = sceneSession->GetScaleX();
     info->scaleY_ = sceneSession->GetScaleY();
+    info->isCompatScaleMode_ = sceneSession->IsInCompatScaleMode();
     info->bundleName_ = sceneSession->GetSessionInfo().bundleName_;
     info->touchHotAreas_ = sceneSession->GetTouchHotAreas();
     info->isDecorEnable_ = sceneSession->GetSessionProperty()->IsDecorEnable();

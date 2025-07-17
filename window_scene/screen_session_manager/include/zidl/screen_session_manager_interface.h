@@ -378,6 +378,7 @@ public:
     virtual DMError SetVirtualScreenAutoRotation(ScreenId screenId, bool enable) { return DMError::DM_OK; }
     virtual DMError SetScreenPrivacyWindowTagSwitch(ScreenId screenId, const std::vector<std::string>& privacyWindowTag,
         bool enable) { return DMError::DM_OK; }
+    virtual bool SynchronizePowerStatus(ScreenPowerState state) { return false; }
 };
 } // namespace Rosen
 } // namespace OHOS

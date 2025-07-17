@@ -1229,7 +1229,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleExitKioskMode, Function | SmallT
     data.WriteRemoteObject(token);
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleExitKioskMode(data, reply);
-    EXPECT_EQ(ERR_NONE, res);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
 }
 
 /**

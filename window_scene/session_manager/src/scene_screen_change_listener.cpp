@@ -16,6 +16,7 @@
 #include "scene_screen_change_listener.h"
 
 #include "scene_session_manager.h"
+#include "session_coordinate_helper.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -41,8 +42,9 @@ void SceneScreenChangeListener::HandleRelativePositionChange(const ScreenPropert
             TLOGW(WmsLogTag::WMS_LAYOUT, "session is nullptr");
             continue;
         }
-        auto rect = session->ComputeGlobalDisplayRect();
-        session->UpdateGlobalDisplayRect(rect, SizeChangeReason::SCREEN_RELATIVE_POSITION_CHANGE);
+        auto globalDisplayRect =
+            SessionCoordinateHelper::RelativeToGlobalDisplayRect(screenId, session->GetSessionRect());
+        session->UpdateGlobalDisplayRect(globalDisplayRect, SizeChangeReason::SCREEN_RELATIVE_POSITION_CHANGE);
     }
 }
 } // namespace Rosen
