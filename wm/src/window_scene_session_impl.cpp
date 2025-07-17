@@ -1083,6 +1083,9 @@ void WindowSceneSessionImpl::ConsumePointerEvent(const std::shared_ptr<MMI::Poin
                 }
                 window->ConsumePointerEventInner(pointerEvent, pointerItem, isHitTargetDraggable);
             });
+    } else {
+        TLOGE(WmsLogTag::WMS_FOCUS, "uiContent is nullptr, windowId: %{public}u", GetWindowId());
+        pointerEvent->MarkProcessed();
     }
 }
 
