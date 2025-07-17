@@ -1949,6 +1949,11 @@ HWTEST_F(SceneSessionManagerTest4, CheckBlockingFocus, TestSize.Level1)
     sceneSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     ret = ssm_->CheckBlockingFocus(sceneSession, true);
     EXPECT_EQ(ret, false);
+
+    sceneSession->isMidScene_ = true;
+    ret = ssm_->CheckBlockingFocus(sceneSession, true);
+    EXPECT_EQ(ret, true);
+    sceneSession->isMidScene_ = false;
 }
 
 /**

@@ -1596,8 +1596,16 @@ HWTEST_F(WindowSceneSessionImplTest5, SetWindowTransitionAnimation01, Function |
 
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    window->windowSystemConfig_.freeMultiWindowEnable_ = false;
+    window->windowSystemConfig_.freeMultiWindowSupport_ = false;
+    ret = window->SetWindowTransitionAnimation(type, animation);
+    ASSERT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+
+    window->windowSystemConfig_.freeMultiWindowEnable_ = true;
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
     ret = window->SetWindowTransitionAnimation(type, animation);
     ASSERT_EQ(ret, WMError::WM_OK);
+
 
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     ret = window->SetWindowTransitionAnimation(type, animation);
@@ -1633,12 +1641,14 @@ HWTEST_F(WindowSceneSessionImplTest5, GetWindowTransitionAnimation01, Function |
     ASSERT_EQ(ret, nullptr);
 
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     ret = window->GetWindowTransitionAnimation(type);
     ASSERT_EQ(ret, nullptr);
 
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    window->windowSystemConfig_.freeMultiWindowEnable_ = true;
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
     ret = window->GetWindowTransitionAnimation(type);
     ASSERT_EQ(ret, nullptr);
 

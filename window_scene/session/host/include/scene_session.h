@@ -395,6 +395,7 @@ public:
      * Compatible Mode
      */
     bool IsInCompatScaleStatus() const;
+    bool IsInCompatScaleMode() const;
 
     /*
      * PC Window
@@ -1329,6 +1330,7 @@ private:
     NotifyIsCustomAnimationPlayingCallback onIsCustomAnimationPlaying_;
     NotifyWindowAnimationFlagChangeFunc onWindowAnimationFlagChange_;
     NotifyAnimateToFunc onAnimateTo_;
+    bool isUIFirstEnabled_ = false;
 
     /*
      * Window Layout

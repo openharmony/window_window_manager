@@ -209,7 +209,7 @@ std::unordered_map<int32_t, std::vector<sptr<IWaterfallModeChangeListener>>>
 std::mutex WindowSessionImpl::windowRotationChangeListenerMutex_;
 std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>> WindowSessionImpl::windowSessionMap_;
 std::shared_mutex WindowSessionImpl::windowSessionMutex_;
-std::set<sptr<WindowSessionImpl>> WindowSessionImpl::windowExtensionSessionSet_;
+std::set<sptr<WindowSessionImpl>> g_windowExtensionSessionSet_;
 std::shared_mutex WindowSessionImpl::windowExtensionSessionMutex_;
 std::recursive_mutex WindowSessionImpl::subWindowSessionMutex_;
 std::map<int32_t, std::vector<sptr<WindowSessionImpl>>> WindowSessionImpl::subWindowSessionMap_;
@@ -709,7 +709,7 @@ sptr<WindowSessionImpl> WindowSessionImpl::GetScaleWindow(uint32_t windowId)
     }
     if (isUIExtensionAbilityProcess_) {
         std::shared_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
-        for (const auto& window : windowExtensionSessionSet_) {
+        for (const auto& window : GetWindowExtensionSessionSet()) {
             if (window && static_cast<uint32_t>(window->GetProperty()->GetParentId()) == windowId) {
                 TLOGD(WmsLogTag::WMS_COMPAT, "find extension window id:%{public}d", window->GetPersistentId());
                 return window;
@@ -1497,7 +1497,7 @@ sptr<WindowSessionImpl> WindowSessionImpl::FindExtensionWindowWithContext() cons
         return nullptr;
     }
     std::shared_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
-    for (const auto& window : windowExtensionSessionSet_) {
+    for (const auto& window : GetWindowExtensionSessionSet()) {
         if (window && context.get() == window->GetContext().get()) {
             return window;
         }
@@ -2359,35 +2359,66 @@ Rect WindowSessionImpl::GetGlobalDisplayRect() const
     return property_->GetGlobalDisplayRect();
 }
 
-Position WindowSessionImpl::ClientToGlobalDisplay(const Position& position) const
+WMError WindowSessionImpl::ClientToGlobalDisplay(const Position& inPosition, Position& outPosition) const
 {
+    const auto windowId = GetWindowId();
+    const auto layoutTransform = GetLayoutTransform();
+    if (WindowHelper::IsScaled(layoutTransform)) {
+        TLOGW(WmsLogTag::WMS_LAYOUT,
+            "Scaled window is not supported, windowId: %{public}u, scaleX: %{public}f, scaleY: %{public}f",
+            windowId, layoutTransform.scaleX_, layoutTransform.scaleY_);
+        return WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS;
+    }
+
     const auto globalDisplayRect = GetGlobalDisplayRect();
-    // Note: currently assumes no scaling is applied to the window.
-    Position globalDisplayPos = { globalDisplayRect.posX_ + position.x, globalDisplayRect.posY_ + position.y };
-    TLOGD(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, position: %{public}s, globalDisplayPos: %{public}s",
-        GetPersistentId(), position.ToString().c_str(), globalDisplayPos.ToString().c_str());
-    return globalDisplayPos;
+    outPosition = {
+        globalDisplayRect.posX_ + inPosition.x,
+        globalDisplayRect.posY_ + inPosition.y
+    };
+    TLOGD(WmsLogTag::WMS_LAYOUT,
+        "windowId: %{public}u, globalDisplayRect: %{public}s, inPosition: %{public}s, outPosition: %{public}s",
+        windowId, globalDisplayRect.ToString().c_str(),
+        inPosition.ToString().c_str(), outPosition.ToString().c_str());
+    return WMError::WM_OK;
 }
 
-Position WindowSessionImpl::GlobalDisplayToClient(const Position& position) const
+WMError WindowSessionImpl::GlobalDisplayToClient(const Position& inPosition, Position& outPosition) const
 {
+    const auto windowId = GetWindowId();
+    const auto layoutTransform = GetLayoutTransform();
+    if (WindowHelper::IsScaled(layoutTransform)) {
+        TLOGW(WmsLogTag::WMS_LAYOUT,
+            "Scaled window is not supported, windowId: %{public}u, scaleX: %{public}f, scaleY: %{public}f",
+            windowId, layoutTransform.scaleX_, layoutTransform.scaleY_);
+        return WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS;
+    }
+
     const auto globalDisplayRect = GetGlobalDisplayRect();
-    // Note: currently assumes no scaling is applied to the window.
-    Position clientPos = { position.x - globalDisplayRect.posX_, position.y - globalDisplayRect.posY_ };
-    TLOGD(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, position: %{public}s, clientPos: %{public}s",
-        GetPersistentId(), position.ToString().c_str(), clientPos.ToString().c_str());
-    return clientPos;
+    outPosition = {
+        inPosition.x - globalDisplayRect.posX_,
+        inPosition.y - globalDisplayRect.posY_
+    };
+    TLOGD(WmsLogTag::WMS_LAYOUT,
+        "windowId: %{public}u, globalDisplayRect: %{public}s, inPosition: %{public}s, outPosition: %{public}s",
+        windowId, globalDisplayRect.ToString().c_str(),
+        inPosition.ToString().c_str(), outPosition.ToString().c_str());
+    return WMError::WM_OK;
 }
 
 WSError WindowSessionImpl::UpdateGlobalDisplayRectFromServer(const WSRect& rect, SizeChangeReason reason)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, rect: %{public}s, reason: %{public}d",
-        GetPersistentId(), rect.ToString().c_str(), static_cast<int32_t>(reason));
+    const uint32_t windowId = GetWindowId();
+    TLOGD(WmsLogTag::WMS_LAYOUT, "windowId: %{public}u, rect: %{public}s, reason: %{public}u",
+        windowId, rect.ToString().c_str(), reason);
     Rect newRect = { rect.posX_, rect.posY_, rect.width_, rect.height_ };
-    if (newRect == GetGlobalDisplayRect()) {
+    if (newRect == GetGlobalDisplayRect() && reason == globalDisplayRectSizeChangeReason_) {
+        TLOGD(WmsLogTag::WMS_LAYOUT,
+            "No change in rect or reason, windowId: %{public}d, rect: %{public}s, reason: %{public}u",
+            windowId, rect.ToString().c_str(), reason);
         return WSError::WS_DO_NOTHING;
     }
     property_->SetGlobalDisplayRect(newRect);
+    globalDisplayRectSizeChangeReason_ = reason;
     NotifyGlobalDisplayRectChange(newRect, static_cast<WindowSizeChangeReason>(reason));
     return WSError::WS_OK;
 }
@@ -6648,6 +6679,11 @@ void WindowSessionImpl::ReadKeyboardInfoFromWant(const AAFwk::Want& want, Keyboa
     keyboardPanelInfo.isShowing_ = want.GetBoolParam(Extension::ISSHOWING, false);
 }
 
+std::set<sptr<WindowSessionImpl>>& WindowSessionImpl::GetWindowExtensionSessionSet()
+{
+    return g_windowExtensionSessionSet_;
+}
+
 void WindowSessionImpl::NotifyKeyboardAnimationCompleted(const KeyboardPanelInfo& keyboardPanelInfo)
 {
     TLOGI(WmsLogTag::WMS_KEYBOARD, "isShowAnimation: %{public}d, beginRect: %{public}s, endRect: %{public}s",
@@ -7244,7 +7280,7 @@ void WindowSessionImpl::AddSetUIContentTimeoutCheck()
             return;
         }
 
-        TLOGNI(WmsLogTag::WMS_LIFE, "SetUIContent timeout, persistentId=%{public}d", window->GetPersistentId());
+        TLOGNW(WmsLogTag::WMS_LIFE, "SetUIContent timeout, persistentId=%{public}d", window->GetPersistentId());
         std::ostringstream oss;
         oss << "SetUIContent timeout uid: " << getuid();
         oss << ", windowName: " << window->GetWindowName();

@@ -140,7 +140,7 @@ WSError ExtensionSessionManager::RequestExtensionSessionActivation(const sptr<Ex
                 getpid(), persistentId, oss.str()
             );
             if (ret != 0) {
-                TLOGNI(WmsLogTag::WMS_UIEXT, "ReportUIExtensionException message failed, ret: %{public}d", ret);
+                TLOGNE(WmsLogTag::WMS_UIEXT, "ReportUIExtensionException message failed, ret: %{public}d", ret);
             }
         }
         if (callback) {

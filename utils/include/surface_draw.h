@@ -43,9 +43,9 @@ public:
         std::shared_ptr<Media::PixelMap>& pixelMap, int32_t timeoutMs, float scaleW = 0.5, float scaleH = 0.5);
     static bool DrawMasking(std::shared_ptr<RSSurfaceNode> surfaceNode, Rect screenRect,
         Rect transparentRect);
-    static bool DrawCustomStartingWindow(const std::shared_ptr<RSSurfaceNode>& surfaceNode,
-        const Rect& rect, const std::shared_ptr<Rosen::StartingWindowPageDrawInfo>& info, const float ratio);
-
+    static bool DrawCustomStartingWindow(const std::shared_ptr<RSSurfaceNode>& surfaceNode, const Rect& rect,
+        const std::shared_ptr<Rosen::StartingWindowPageDrawInfo>& info, const float ratio,
+        const std::array<uint32_t, size_t(StartWindowResType::Count)>& frameIndex);
 private:
     static bool DoDraw(uint8_t* addr, uint32_t width, uint32_t height, const std::string& imagePath);
     static bool DoDraw(uint8_t* addr, uint32_t width, uint32_t height, uint32_t color);
@@ -58,7 +58,8 @@ private:
     static bool DoDrawImageRect(sptr<OHOS::SurfaceBuffer> buffer, const Rect& rect,
         std::shared_ptr<Media::PixelMap> pixelMap, uint32_t color, bool fillWindow = false);
     static bool DoDrawCustomStartingWindow(const sptr<OHOS::SurfaceBuffer>& buffer, const Rect& rect,
-        const std::shared_ptr<Rosen::StartingWindowPageDrawInfo>& info, const float ratio);
+        const std::shared_ptr<Rosen::StartingWindowPageDrawInfo>& info, const float ratio,
+        const std::array<uint32_t, size_t(StartWindowResType::Count)>& frameIndex);
 };
 } // Rosen
 } // OHOS

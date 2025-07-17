@@ -59,8 +59,6 @@ private:
     bool IsCallbackRegistered(napi_env env, std::string type, napi_value jsListenerObject);
     WmErrorCode RegisterListenerInner(sptr<Window> window, std::string type,
         CaseType caseType, napi_env env, napi_value value);
-    WmErrorCode UnregisterListenerInner(sptr<Window> window, std::string type,
-        CaseType caseType, napi_env env, napi_value value);
     WmErrorCode ProcessWindowChangeRegister(sptr<JsExtensionWindowListener> listener,
         sptr<Window> window, bool isRegister);
     WmErrorCode ProcessWindowRectChangeRegister(const sptr<JsExtensionWindowListener>& listener,

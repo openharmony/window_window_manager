@@ -52,10 +52,6 @@ ohos_source_set("ui_effect_controller_common") {
     ":libwmutil_public_config",
   ]
 
-  external_deps = [
-    "hilog:libhilog",
-  ]
-
   public_deps = [
     ":libwmutil_base",
   ]
@@ -63,6 +59,7 @@ ohos_source_set("ui_effect_controller_common") {
   public_external_deps = [
     "c_utils:utils",
     "graphic_2d:librender_service_client",
+    "hilog:libhilog",
     "ability_runtime:runtime",
     "napi:ace_napi",
   ]

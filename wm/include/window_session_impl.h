@@ -104,8 +104,8 @@ public:
     void SetContext(const std::shared_ptr<AbilityRuntime::Context>& context);
     Rect GetRequestRect() const override;
     Rect GetGlobalDisplayRect() const override;
-    Position ClientToGlobalDisplay(const Position& position) const override;
-    Position GlobalDisplayToClient(const Position& position) const override;
+    WMError ClientToGlobalDisplay(const Position& inPosition, Position& outPosition) const override;
+    WMError GlobalDisplayToClient(const Position& inPosition, Position& outPosition) const override;
     WSError UpdateGlobalDisplayRectFromServer(const WSRect& rect, SizeChangeReason reason) override;
     WindowType GetType() const override;
     const std::string& GetWindowName() const override;
@@ -641,6 +641,7 @@ protected:
     std::unordered_map<int32_t, sptr<IKeyboardDidHideListener>> keyboardDidHideUIExtListeners_;
     void WriteKeyboardInfoToWant(AAFwk::Want& want, const KeyboardPanelInfo& keyboardPanelInfo) const;
     void ReadKeyboardInfoFromWant(const AAFwk::Want& want, KeyboardPanelInfo& keyboardPanelInfo) const;
+    static std::set<sptr<WindowSessionImpl>>& GetWindowExtensionSessionSet();
 
     /*
      * Sub Window
@@ -669,8 +670,7 @@ protected:
     static std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>> windowSessionMap_;
     // protect windowSessionMap_
     static std::shared_mutex windowSessionMutex_;
-    static std::set<sptr<WindowSessionImpl>> windowExtensionSessionSet_;
-    // protect windowExtensionSessionSet_
+    // protect g_windowExtensionSessionSet_
     static std::shared_mutex windowExtensionSessionMutex_;
     bool isSystembarPropertiesSet_ = false;
     bool isIgnoreSafeAreaNeedNotify_ = false;
@@ -1062,6 +1062,7 @@ private:
     std::atomic<WindowStatus> lastWindowStatus_ = WindowStatus::WINDOW_STATUS_UNDEFINED;
     std::atomic<WindowStatus> lastStatusWhenNotifyWindowStatusDidChange_ = WindowStatus::WINDOW_STATUS_UNDEFINED;
     std::atomic<bool> isFirstValidLayoutUpdate_ = true;
+    SizeChangeReason globalDisplayRectSizeChangeReason_ = SizeChangeReason::END;
 
     /*
      * Window Decor

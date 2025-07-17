@@ -138,7 +138,7 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
     MakeSubOrDialogWindowDragableAndMoveble();
     {
         std::unique_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
-        windowExtensionSessionSet_.insert(this);
+        GetWindowExtensionSessionSet().insert(this);
     }
 
     auto usage = property_->GetUIExtensionUsage();
@@ -215,8 +215,8 @@ void WindowExtensionSessionImpl::UpdateConfigurationForAll(
         ignoreWindowContexts.begin(), ignoreWindowContexts.end());
     std::unique_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
     TLOGD(WmsLogTag::WMS_ATTRIBUTE, "extension map size: %{public}u",
-        static_cast<uint32_t>(windowExtensionSessionSet_.size()));
-    for (const auto& window : windowExtensionSessionSet_) {
+        static_cast<uint32_t>(GetWindowExtensionSessionSet().size()));
+    for (const auto& window : GetWindowExtensionSessionSet()) {
         if (window == nullptr) {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "extension window is null");
             continue;
@@ -250,8 +250,8 @@ void WindowExtensionSessionImpl::UpdateConfigurationSyncForAll(
 {
     std::unique_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
     TLOGD(WmsLogTag::WMS_ATTRIBUTE, "extension map size: %{public}u",
-        static_cast<uint32_t>(windowExtensionSessionSet_.size()));
-    for (const auto& window : windowExtensionSessionSet_) {
+        static_cast<uint32_t>(GetWindowExtensionSessionSet().size()));
+    for (const auto& window : GetWindowExtensionSessionSet()) {
         if (window == nullptr) {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "extension window is null");
             continue;
@@ -297,7 +297,7 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
     }
     {
         std::unique_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
-        windowExtensionSessionSet_.erase(this);
+        GetWindowExtensionSessionSet().erase(this);
     }
     // Notify host window to remove rect change listeners
     AAFwk::Want want;

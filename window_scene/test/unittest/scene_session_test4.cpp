@@ -358,6 +358,12 @@ HWTEST_F(SceneSessionTest4, RequestSessionBack, TestSize.Level1)
     };
     session->backPressedFunc_ = func;
     EXPECT_EQ(WSError::WS_OK, session->RequestSessionBack(true));
+
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    EXPECT_NE(nullptr, surfaceNode);
+    session->SetLeashWinSurfaceNode(surfaceNode);
+    ASSERT_EQ(WSError::WS_OK, session->RequestSessionBack(true));
 }
 
 /**
