@@ -493,6 +493,9 @@ void RSAdapterUtil::SetRSUIContext(const std::shared_ptr<RSNode>& rsNode,
         TLOGE(WmsLogTag::WMS_SCB, "RSNode is null");
         return;
     }
+    // The creation of RSUIContext and the use of RSNode may occur in different
+    // threads, so skip checks can be set.
+    rsNode->SetSkipCheckInMultiInstance(skipCheckInMultiInstance);
     if (!rsUIContext) {
         TLOGE(WmsLogTag::WMS_SCB, "RSUIContext is null, %{public}s",
               RSAdapterUtil::RSNodeToStr(rsNode).c_str());
@@ -504,9 +507,6 @@ void RSAdapterUtil::SetRSUIContext(const std::shared_ptr<RSNode>& rsNode,
               RSAdapterUtil::RSNodeToStr(rsNode).c_str());
         return;
     }
-    // The creation of RSUIContext and the use of RSNode may occur in different
-    // threads, so skip checks can be set.
-    rsNode->SetSkipCheckInMultiInstance(skipCheckInMultiInstance);
     rsNode->SetRSUIContext(rsUIContext);
     TLOGD(WmsLogTag::WMS_SCB,
           "%{public}s, skipCheckInMultiInstance = %{public}d, original %{public}s",

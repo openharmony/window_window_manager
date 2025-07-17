@@ -132,6 +132,14 @@ public:
     bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason);
 
     /**
+     * @brief Synchronize the screen state in power mansger.
+     *
+     * @param state State of the screen.
+     * @return True means set success, false means set failed.
+     */
+    bool SynchronizePowerStatus(ScreenPowerState state);
+
+    /**
      * @brief Get screen power state.
      *
      * @param screenId Screen id.

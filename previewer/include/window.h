@@ -176,18 +176,26 @@ public:
     /**
      * @brief Convert a position from client (window-relative) coordinates to global coordinates.
      *
-     * @param position The position relative to the window.
-     * @return The corresponding position in global coordinates.
+     * @param inPosition The position relative to the window.
+     * @param outPosition [out] The corresponding position in global coordinates.
+     * @return WMError::WM_OK on success, or appropriate error code on failure.
      */
-    virtual Position ClientToGlobalDisplay(const Position& position) const { return { 0, 0 }; }
+    virtual WMError ClientToGlobalDisplay(const Position& inPosition, Position& outPosition) const
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 
     /**
      * @brief Convert a position from global coordinates to client (window-relative) coordinates.
      *
-     * @param position The position in global coordinates.
-     * @return The corresponding position relative to the window.
+     * @param inPosition The position in global coordinates.
+     * @param outPosition [out] The corresponding position relative to the window.
+     * @return WMError::WM_OK on success, or appropriate error code on failure.
      */
-    virtual Position GlobalDisplayToClient(const Position& position) const { return { 0, 0 }; }
+    virtual WMError GlobalDisplayToClient(const Position& inPosition, Position& outPosition) const
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 
     virtual WindowType GetType() const = 0;
     virtual WindowMode GetWindowMode() const = 0;

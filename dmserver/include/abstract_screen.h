@@ -51,6 +51,7 @@ public:
     float GetVirtualPixelRatio() const;
     bool SetSourceMode(ScreenSourceMode sourceMode);
     ScreenSourceMode GetSourceMode() const;
+    DisplaySourceMode GetDisplaySourceMode() const;
 
     void UpdateRSTree(std::shared_ptr<RSSurfaceNode>& surfaceNode, bool isAdd, bool needToUpdate = true);
     DMError AddSurfaceNode(std::shared_ptr<RSSurfaceNode>& surfaceNode, bool onTop, bool needToRecord = true);

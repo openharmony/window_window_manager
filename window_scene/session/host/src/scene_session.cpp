@@ -439,6 +439,9 @@ WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property
             TLOGNI(WmsLogTag::WMS_LIFE,
                 "%{public}s foreground specific callback does not take effect, callback function null", where);
         }
+        if (session->isUIFirstEnabled_) {
+            session->SetSystemSceneForceUIFirst(false);
+        }
         return WSError::WS_OK;
     }, __func__);
     return WSError::WS_OK;
@@ -517,6 +520,9 @@ WSError SceneSession::BackgroundTask(const bool isSaveSnapshot)
         if (WindowHelper::IsMainWindow(session->GetWindowType()) && isSaveSnapshot && needSaveSnapshot) {
             session->SetFreeMultiWindow();
             session->SaveSnapshot(true);
+        }
+        if (session->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+            session->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::VISIBLE);
         }
         session->MarkAvoidAreaAsDirty();
         if (session->specificCallback_ != nullptr) {
@@ -1847,9 +1853,8 @@ WSError SceneSession::UpdateSessionRect(
     WSRect newRect = rect;
     MoveConfiguration newMoveConfiguration = moveConfiguration;
     UpdateSessionRectPosYFromClient(reason, newMoveConfiguration.displayId, newRect);
-    if (isGlobal && WindowHelper::IsSubWindow(Session::GetWindowType()) &&
-        (systemConfig_.IsPhoneWindow() ||
-         (systemConfig_.IsPadWindow() && !IsFreeMultiWindowMode()))) {
+    bool isAvailableWindow = (systemConfig_.IsPhoneWindow() || systemConfig_.IsPadWindow()) && !IsFreeMultiWindowMode();
+    if (isGlobal && WindowHelper::IsSubWindow(Session::GetWindowType()) && isAvailableWindow) {
         if (auto mainSession = GetMainSession()) {
             auto mainRect = mainSession->GetSessionRect();
             if (!CheckIfRectElementIsTooLarge(mainRect)) {
@@ -1858,9 +1863,7 @@ WSError SceneSession::UpdateSessionRect(
             }
         }
     }
-    if (isFromMoveToGlobal && WindowHelper::IsSubWindow(Session::GetWindowType()) &&
-        (systemConfig_.IsPhoneWindow() ||
-         (systemConfig_.IsPadWindow() && !IsFreeMultiWindowMode()))) {
+    if (isFromMoveToGlobal && WindowHelper::IsSubWindow(Session::GetWindowType()) && isAvailableWindow) {
         auto mainSession = GetMainSession();
         if (mainSession && mainSession->GetFloatingScale() != 0) {
             Rect mainGlobalRect;
@@ -1899,12 +1902,12 @@ WSError SceneSession::UpdateGlobalDisplayRectFromClient(const WSRect& rect, Size
         }
         // Convert global coordinates to screen-relative coordinates to be
         // compatible with the original logic of UpdateSessionRectInner.
-        const auto& [displayId, relativeDisplayRect] =
-            SessionCoordinateHelper::GlobalToRelativeDisplayRect(session->GetDisplayId(), rect);
+        const auto& [screenId, screenRelativeRect] =
+            SessionCoordinateHelper::GlobalToScreenRelativeRect(session->GetScreenId(), rect);
         RectAnimationConfig animConfig;
-        MoveConfiguration moveConfig = { displayId, animConfig };
+        MoveConfiguration moveConfig = { screenId, animConfig };
         session->SetRequestMoveConfiguration(moveConfig);
-        session->UpdateSessionRectInner(relativeDisplayRect, reason, moveConfig, animConfig);
+        session->UpdateSessionRectInner(screenRelativeRect, reason, moveConfig, animConfig);
     }, __func__ + GetRectInfo(rect));
     return WSError::WS_OK;
 }
@@ -3344,6 +3347,7 @@ WSError SceneSession::RequestSessionBack(bool needMoveToBackground)
             auto leashWinSurfaceNode = session->GetLeashWinSurfaceNode();
             if (leashWinSurfaceNode) {
                 leashWinSurfaceNode->SetForceUIFirst(true);
+                session->isUIFirstEnabled_ = true;
                 TLOGNI(WmsLogTag::WMS_EVENT, "%{public}s leashWinSurfaceNode_ SetForceUIFirst id:%{public}u!",
                     where, session->GetPersistentId());
             } else {
@@ -3508,16 +3512,6 @@ void SceneSession::HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect,
             needSetBoundsNextVsync = true;
         }
     }
-
-    // Window Layout Global Coordinate System
-    // During drag (except DRAG_END), the rect is relative to the original display and can be
-    // converted to global. At DRAG_END, the rect is relative to the new display, but displayId
-    // may not be updated yet, so skip updating GlobalDisplayRect to avoid incorrect conversion.
-    if (reason != SizeChangeReason::DRAG_END) {
-        auto globalDisplayRect = SessionCoordinateHelper::RelativeToGlobalDisplayRect(GetDisplayId(), rect);
-        UpdateGlobalDisplayRect(globalDisplayRect, reason);
-    }
-
     if (reason != SizeChangeReason::DRAG_MOVE && !KeyFrameNotifyFilter(rect, reason)) {
         UpdateRectForDrag(rect);
         std::shared_ptr<VsyncCallback> nextVsyncDragCallback = std::make_shared<VsyncCallback>();
@@ -3536,6 +3530,14 @@ void SceneSession::HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect,
             TLOGNE(WmsLogTag::WMS_LAYOUT, "Func is null, could not request vsync");
         }
     }
+
+    // Window Layout Global Coordinate System
+    // During drag (except DRAG_END), the rect is relative to the start display(screen).
+    // At DRAG_END, the rect is relative to the end display(screen).
+    auto relativeDisplayId = reason == SizeChangeReason::DRAG_END ?
+        moveDragController_->GetMoveDragEndDisplayId() : moveDragController_->GetMoveDragStartDisplayId();
+    auto globalDisplayRect = SessionCoordinateHelper::RelativeToGlobalDisplayRect(relativeDisplayId, rect);
+    UpdateGlobalDisplayRect(globalDisplayRect, reason);
 }
 
 void SceneSession::OnNextVsyncReceivedWhenDrag(const WSRect& globalRect,
@@ -3646,6 +3648,12 @@ bool SceneSession::IsInCompatScaleStatus() const
         return !NearEqual(GetScaleX(), COMPACT_NORMAL_SCALE) || !NearEqual(GetScaleY(), COMPACT_NORMAL_SCALE);
     }
     return false;
+}
+
+bool SceneSession::IsInCompatScaleMode() const
+{
+    auto property = GetSessionProperty();
+    return property->IsAdaptToProportionalScale() || property->IsAdaptToSimulationScale();
 }
 
 /**
@@ -7927,9 +7935,6 @@ bool SceneSession::NotifyServerToUpdateRect(const SessionUIParam& uiParam, SizeC
     SetSessionGlobalRect(uiParam.rect_);
     if (globalRect != uiParam.rect_) {
         UpdateAllModalUIExtensions(uiParam.rect_);
-        // Window Layout Global Coordinate System
-        auto globalDisplayRect = ComputeGlobalDisplayRect();
-        UpdateGlobalDisplayRect(globalDisplayRect, reason);
     }
     if (!uiParam.needSync_ || !isNeedSyncSessionRect_) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "id:%{public}d, scenePanelNeedSync:%{public}u needSyncSessionRect:%{public}u "
@@ -7940,6 +7945,11 @@ bool SceneSession::NotifyServerToUpdateRect(const SessionUIParam& uiParam, SizeC
     }
     WSRect rect = { uiParam.rect_.posX_ - uiParam.transX_, uiParam.rect_.posY_ - uiParam.transY_,
         uiParam.rect_.width_, uiParam.rect_.height_ };
+
+    // Window Layout Global Coordinate System
+    auto globalDisplayRect = SessionCoordinateHelper::RelativeToGlobalDisplayRect(GetScreenId(), rect);
+    UpdateGlobalDisplayRect(globalDisplayRect, reason);
+
     if (GetSessionRect() == rect && (!sessionStage_ || GetClientRect() == rect) &&
         reason != SizeChangeReason::SPLIT_DRAG_END) {
         TLOGD(WmsLogTag::WMS_PIPELINE, "skip same rect update id:%{public}d rect:%{public}s preGlobalRect:%{public}s!",

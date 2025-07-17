@@ -39,6 +39,10 @@ enum class SupportWindowMode;
 
 namespace OHOS::Rosen {
 class RSTransaction;
+
+// Type alias for screen identifier, consistent with ScreenId defined in dm_common.h.
+using ScreenId = uint64_t;
+
 constexpr int32_t ROTATE_ANIMATION_DURATION = 400;
 constexpr int32_t INVALID_SESSION_ID = 0;
 constexpr int32_t WINDOW_SUPPORT_MODE_MAX_SIZE = 4;
@@ -704,20 +708,20 @@ using WSRect = WSRectT<int32_t>;
 using WSRectF = WSRectT<float>;
 
 /**
- * @struct WSRelativeDisplayRect
+ * @struct WSScreenRelativeRect
  *
- * @brief Represent the rectangle of a window relative to a specific display.
+ * @brief Represent a window rectangle defined relative to a specific screen.
  */
-struct WSRelativeDisplayRect {
-    // The ID of the associated display.
-    uint64_t displayId = UINT64_MAX;
-    // The window rectangle relative to the specified display.
-    WSRect rect = WSRect::EMPTY_RECT;
+struct WSScreenRelativeRect {
+    // The ID of the screen this rectangle is relative to.
+    ScreenId screenId;
+    // The window rectangle relative to the specified screen.
+    WSRect rect;
 
     inline std::string ToString() const
     {
         std::ostringstream oss;
-        oss << displayId << ", " << rect.ToString();
+        oss << screenId << ", " << rect.ToString();
         return oss.str();
     }
 };
@@ -778,11 +782,24 @@ struct StartingWindowInfo {
     std::string startWindowType_;
 };
 
+enum class StartWindowResType {
+    AppIcon = 0,
+    Illustration,
+    Branding,
+    BgImage,
+    Count
+};
+
+struct ResourceInfo {
+    std::vector<std::shared_ptr<Media::PixelMap>> pixelMaps;
+    std::vector<int32_t> delayTimes;
+};
+
 struct StartingWindowPageDrawInfo {
-    std::shared_ptr<Media::PixelMap> appIconPixelMap = nullptr;
-    std::shared_ptr<Media::PixelMap> illustrationPixelMap = nullptr;
-    std::shared_ptr<Media::PixelMap> bgImagePixelMap = nullptr;
-    std::shared_ptr<Media::PixelMap> brandingPixelMap = nullptr;
+    std::shared_ptr<ResourceInfo> appIcon = nullptr;
+    std::shared_ptr<ResourceInfo> illustration = nullptr;
+    std::shared_ptr<ResourceInfo> bgImage = nullptr;
+    std::shared_ptr<ResourceInfo> branding = nullptr;
     uint32_t bgColor = 0;
     std::string startWindowBackgroundImageFit = "";
 };

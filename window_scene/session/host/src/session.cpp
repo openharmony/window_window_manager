@@ -1273,7 +1273,7 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
         NotifyClientToUpdateRect("Connect", nullptr);
 
     // Window Layout Global Coordinate System
-    auto globalDisplayRect = ComputeGlobalDisplayRect();
+    auto globalDisplayRect = SessionCoordinateHelper::RelativeToGlobalDisplayRect(GetScreenId(), GetSessionRect());
     UpdateGlobalDisplayRect(globalDisplayRect, SizeChangeReason::UNDEFINED);
 
     EditSessionInfo().disableDelegator = property->GetIsAbilityHookOff();
@@ -2683,7 +2683,7 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
         return;
     }
     auto key = GetSessionStatus();
-    auto rotate = GetWindowOrientation();
+    auto rotate = WSSnapshotHelper::GetDisplayOrientation(currentRotation_);
     if (persistentPixelMap) {
         key = defaultStatus;
         rotate = DisplayOrientation::PORTRAIT;
@@ -2873,9 +2873,6 @@ SnapshotStatus Session::GetSessionStatus() const
         snapshotScreen = WSSnapshotHelper::GetScreenStatus();
     }
     uint32_t orientation = WSSnapshotHelper::GetOrientation(currentRotation_);
-    if (snapshotScreen == SCREEN_UNKNOWN) {
-        orientation = (orientation + 1) % ORIENTATION_COUNT;
-    }
     return std::make_pair(snapshotScreen, orientation);
 }
 
@@ -2892,7 +2889,12 @@ DisplayOrientation Session::GetWindowOrientation() const
     }
     auto screenProperty = screenSession->GetScreenProperty();
     DisplayOrientation displayOrientation = screenProperty.GetDisplayOrientation();
-    return displayOrientation;
+    auto windowOrientation = static_cast<uint32_t>(displayOrientation);
+    auto snapshotScreen = WSSnapshotHelper::GetScreenStatus();
+    if (snapshotScreen == SCREEN_UNKNOWN) {
+        windowOrientation = (windowOrientation + SECONDARY_EXPAND_OFFSET) % ROTATION_COUNT;
+    }
+    return static_cast<DisplayOrientation>(windowOrientation);
 }
 
 uint32_t Session::GetLastOrientation() const
@@ -2900,12 +2902,7 @@ uint32_t Session::GetLastOrientation() const
     if (!SupportSnapshotAllSessionStatus()) {
         return SNAPSHOT_PORTRAIT;
     }
-    auto snapshotScreen = WSSnapshotHelper::GetScreenStatus();
-    auto rotation = currentRotation_;
-    if (snapshotScreen == SCREEN_UNKNOWN) {
-        rotation = (rotation + LANDSCAPE_INVERTED_ANGLE) % ROTATION_ANGLE;
-    }
-    return static_cast<uint32_t>(WSSnapshotHelper::GetDisplayOrientation(rotation));
+    return static_cast<uint32_t>(WSSnapshotHelper::GetDisplayOrientation(currentRotation_));
 }
 
 void Session::SetSessionStateChangeListenser(const NotifySessionStateChangeFunc& func)
@@ -4727,27 +4724,19 @@ WSRect Session::GetGlobalDisplayRect() const
     return rect;
 }
 
-WSRect Session::ComputeGlobalDisplayRect() const
-{
-    // In multi-screen drag-and-move scenarios, the global rect is relative to the top-left
-    // corner of the bounding rectangle of all screens. In other cases, it is relative to
-    // the top-left corner of its associated screen.
-    // The method GetSessionGlobalRectInMultiScreen abstracts this difference and always
-    // returns the window's rect relative to its screen, regardless of the scenario.
-    WSRect relativeRect = GetSessionGlobalRectInMultiScreen();
-    return SessionCoordinateHelper::RelativeToGlobalDisplayRect(GetDisplayId(), relativeRect);
-}
-
 WSError Session::UpdateGlobalDisplayRect(const WSRect& rect, SizeChangeReason reason)
 {
-    WSRect curGlobalDisplayRect = GetGlobalDisplayRect();
-    TLOGD(WmsLogTag::WMS_LAYOUT,
-        "windowId: %{public}d, rect: %{public}s, reason: %{public}u, curGlobalDisplayRect: %{public}s",
-        GetPersistentId(), rect.ToString().c_str(), reason, curGlobalDisplayRect.ToString().c_str());
-    if (rect == curGlobalDisplayRect) {
+    const int32_t windowId = GetWindowId();
+    TLOGD(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, rect: %{public}s, reason: %{public}u",
+        windowId, rect.ToString().c_str(), reason);
+    if (rect == GetGlobalDisplayRect() && reason == globalDisplayRectSizeChangeReason_) {
+        TLOGD(WmsLogTag::WMS_LAYOUT,
+            "No change in rect or reason, windowId: %{public}d, rect: %{public}s, reason: %{public}u",
+            windowId, rect.ToString().c_str(), reason);
         return WSError::WS_DO_NOTHING;
     }
     SetGlobalDisplayRect(rect);
+    globalDisplayRectSizeChangeReason_ = reason;
     NotifyClientToUpdateGlobalDisplayRect(rect, reason);
     return WSError::WS_OK;
 }

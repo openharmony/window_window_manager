@@ -1816,6 +1816,7 @@ HWTEST_F(sceneSessionManagerProxyTest, SetScreenPrivacyWindowTagSwitch02, TestSi
     MockMessageParcel::ClearAllErrorFlag();
 
     // ReadString failed
+    privacyWindowTags.push_back("test");
     MockMessageParcel::SetWriteStringErrorFlag(true);
     ret = proxy->SetScreenPrivacyWindowTagSwitch(screenId, privacyWindowTags, enable);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
@@ -1881,6 +1882,7 @@ HWTEST_F(sceneSessionManagerProxyTest, AddSessionBlackList02, TestSize.Level1)
     MockMessageParcel::ClearAllErrorFlag();
 
     // ReadString failed
+    bundleNames.insert("test");
     MockMessageParcel::SetWriteStringErrorFlag(true);
     ret = proxy->AddSessionBlackList(bundleNames, privacyWindowTags);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
@@ -1946,6 +1948,7 @@ HWTEST_F(sceneSessionManagerProxyTest, RemoveSessionBlackList02, TestSize.Level1
     MockMessageParcel::ClearAllErrorFlag();
 
     // ReadString failed
+    bundleNames.insert("test");
     MockMessageParcel::SetWriteStringErrorFlag(true);
     ret = proxy->RemoveSessionBlackList(bundleNames, privacyWindowTags);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
