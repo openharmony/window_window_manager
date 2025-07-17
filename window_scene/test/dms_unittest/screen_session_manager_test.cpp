@@ -25,7 +25,7 @@
 #include "fold_screen_state_internel.h"
 #include "common_test_utils.h"
 #include "iremote_object_mocker.h"
-#include "mock/mock_accesstoken_kit.h"
+#include "../mock/mock_accesstoken_kit.h"
 
 using namespace testing;
 using namespace testing::ext;
