@@ -20,6 +20,7 @@ group("fuzztest") {
     "scenesessionmgrlstubreg_fuzzer:fuzztest",
     "scenesessionmgrlstubset_fuzzer:fuzztest",
     "scenesessionmgrlstubhierarchy_fuzzer:fuzztest",
+    "scenesessionmgrstubattribute_fuzzer:fuzztest",
     "scenesessionmgrstubcreate_fuzzer:fuzztest",
     "scenesessionmgrstubinfo_fuzzer:fuzztest",
     "scenesessionmgrstubreg_fuzzer:fuzztest",
