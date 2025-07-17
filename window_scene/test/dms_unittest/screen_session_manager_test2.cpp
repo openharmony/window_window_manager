@@ -1029,6 +1029,20 @@ HWTEST_F(ScreenSessionManagerTest, SynchronizePowerStatusOk, Function | SmallTes
 #undef FOLD_ABILITY_ENABLE
     EXPECT_TRUE(g_errLog.find("notify brightness") != std::string::npos);
 }
+
+/**
+ * @tc.name: TryToCancelScreenOff01
+ * @tc.desc: TryToCancelScreenOff test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, TryToCancelScreenOff01, TestSize.Level1)
+{
+    g_errLog.clear();
+    MockAccesstokenKit::MockIsSACalling(false);
+    MockAccesstokenKit::MockIsSystemApp(false);
+    ssm_->TryToCancelScreenOff();
+    EXPECT_TRUE(g_errLog.find("permission denied!") != std::string::npos);
+}
 }
 }
 }
