@@ -16,6 +16,7 @@ group("fuzztest") {
 
   deps = [
     "patterndetachcallback_fuzzer:fuzztest",
+    "scenesessionmgrlstubattribute_fuzzer:fuzztest",
     "scenesessionmgrlstubget_fuzzer:fuzztest",
     "scenesessionmgrlstubreg_fuzzer:fuzztest",
     "scenesessionmgrlstubset_fuzzer:fuzztest",
