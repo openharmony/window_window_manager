@@ -3149,6 +3149,7 @@ HWTEST_F(ScreenSessionManagerTest, GetDisplayNode03, TestSize.Level1)
     logMsg.clear();
     LOG_SetCallback(MyLogCallback);
     MockAccesstokenKit::MockIsSystemApp(false);
+    MockAccesstokenKit::MockIsSACalling(false);
     ScreenId screenId = 1050;
     ssm_->GetDisplayNode(screenId);
     EXPECT_TRUE(logMsg.find("Permission Denied") != std::string::npos);
@@ -3194,6 +3195,7 @@ HWTEST_F(ScreenSessionManagerTest, GetScreenProperty03, TestSize.Level1)
     logMsg.clear();
     LOG_SetCallback(MyLogCallback);
     MockAccesstokenKit::MockIsSystemApp(false);
+    MockAccesstokenKit::MockIsSACalling(false);
     ScreenId screenId = 1050;
     ssm_->GetScreenProperty(screenId);
     EXPECT_TRUE(logMsg.find("Permission Denied") != std::string::npos);

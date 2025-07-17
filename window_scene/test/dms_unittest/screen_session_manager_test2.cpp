@@ -1040,6 +1040,7 @@ HWTEST_F(ScreenSessionManagerTest, GetSuperFoldStatus01, TestSize.Level1)
     g_errLog.clear();
     LOG_SetCallback(MyLogCallback);
     MockAccesstokenKit::MockIsSystemApp(false);
+    MockAccesstokenKit::MockIsSACalling(false);
     SuperFoldStatus superFoldStatus = ssm_->GetSuperFoldStatus();
     EXPECT_TRUE(g_errLog.find("Permission Denied") != std::string::npos);
     EXPECT_EQ(superFoldStatus, SuperFoldStatus::UNKNOWN);
@@ -1074,6 +1075,7 @@ HWTEST_F(ScreenSessionManagerTest, ConvertScreenIdToRsScreenId01, TestSize.Level
     g_errLog.clear();
     LOG_SetCallback(MyLogCallback);
     MockAccesstokenKit::MockIsSystemApp(false);
+    MockAccesstokenKit::MockIsSACalling(false);
     ScreenId screenId = 666;
     ScreenId rsScreenId;
     ssm_->ConvertScreenIdToRsScreenId(screenId, rsScreenId);
@@ -1106,6 +1108,7 @@ HWTEST_F(ScreenSessionManagerTest, NotifyScreenMaskAppear01, TestSize.Level1)
     g_errLog.clear();
     LOG_SetCallback(MyLogCallback);
     MockAccesstokenKit::MockIsSystemApp(false);
+    MockAccesstokenKit::MockIsSACalling(false);
     ssm_->NotifyScreenMaskAppear();
     EXPECT_TRUE(g_errLog.find("Permission Denied") != std::string::npos);
 }
