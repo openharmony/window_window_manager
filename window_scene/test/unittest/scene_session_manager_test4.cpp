@@ -1950,10 +1950,10 @@ HWTEST_F(SceneSessionManagerTest4, CheckBlockingFocus, TestSize.Level1)
     ret = ssm_->CheckBlockingFocus(sceneSession, true);
     EXPECT_EQ(ret, false);
 
-    session0->isMidScene_ = true;
+    session->isMidScene_ = true;
     ret = ssm_->CheckBlockingFocus(sceneSession, true);
     EXPECT_EQ(ret, true);
-    session0->isMidScene_ = false;
+    session->isMidScene_ = false;
 }
 
 /**
