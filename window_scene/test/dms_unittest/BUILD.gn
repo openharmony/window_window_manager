@@ -521,7 +521,10 @@ ohos_unittest("ws_screen_session_manager_test") {
     debug = false
   }
 
-  sources = [ "screen_session_manager_test.cpp" ]
+  sources = [
+    "${window_base_path}/window_scene/test/mock/mock_accesstoken_kit.cpp",
+    "screen_session_manager_test.cpp"
+  ]
 
   deps = [
     ":ws_unittest_common",
