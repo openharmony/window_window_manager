@@ -4173,6 +4173,10 @@ void WindowSceneSessionImpl::UpdateConfiguration(const std::shared_ptr<AppExecFw
 
 WMError WindowSceneSessionImpl::UpdateAbilityColorMode(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
+    if (configuration == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d configuration is null", GetPersistentId());
+        return WMError::WM_ERROR_NULLPTR;
+    }
     std::string colorMode = configuration->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
     if (colorMode.empty()) {
         colorMode = AppExecFwk::ConfigurationInner::COLOR_MODE_AUTO;
