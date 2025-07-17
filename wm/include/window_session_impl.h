@@ -794,6 +794,7 @@ protected:
      */
     std::unordered_set<std::string> containerColorList_;
     float lastSystemDensity_ = UNDEFINED_DENSITY;
+    static std::atomic<bool> defaultDensityEnabledGlobalConfig_ = false;
     std::atomic<bool> isDefaultDensityEnabled_ = false;
     WSError NotifySystemDensityChange(float density);
     void RegisterWindowInspectorCallback();
