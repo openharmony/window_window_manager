@@ -38,6 +38,7 @@ group("fuzztest") {
     "sessioninterface_fuzzer:fuzztest",
     "sessionmgrsrvstubgetmgr_fuzzer:fuzztest",
     "sessionstagestubactive_fuzzer:fuzztest",
+    "sessionstagestubattribute_fuzzer:fuzztest",
     "sessionstagestubchange_fuzzer:fuzztest",
     "sessionstagestubfocus_fuzzer:fuzztest",
     "sessionstagestubupdate_fuzzer:fuzztest",
