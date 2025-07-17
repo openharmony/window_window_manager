@@ -38,6 +38,21 @@ WSError FutureCallback::OnUpdateSessionRect(const Rect& rect, WindowSizeChangeRe
     return WSError::WS_DO_NOTHING;
 }
 
+WSError FutureCallback::OnUpdateGlobalDisplayRect(
+    const Rect& rect, WindowSizeChangeReason reason, int32_t persistentId)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, rect: %{public}s, reason: %{public}u",
+        persistentId, rect.ToString().c_str(), reason);
+    switch (reason) {
+        case WindowSizeChangeReason::MOVE:
+            moveWindowToGlobalDisplayFuture_.SetValue(rect);
+            return WSError::WS_OK;
+        default:
+            TLOGD(WmsLogTag::WMS_LAYOUT, "Unmatched reason: %{public}u", reason);
+    }
+    return WSError::WS_DO_NOTHING;
+}
+
 WSError FutureCallback::OnUpdateTargetOrientationInfo(OrientationInfo& info)
 {
     TLOGI(WmsLogTag::WMS_ROTATION, "update the target orientation info");
@@ -61,6 +76,11 @@ Rect FutureCallback::GetMoveToAsyncResult(long timeOut)
     return moveToFuture_.GetResult(timeOut);
 }
 
+Rect FutureCallback::GetMoveWindowToGlobalDisplayAsyncResult(long timeOut)
+{
+    return moveWindowToGlobalDisplayFuture_.GetResult(timeOut);
+}
+
 OrientationInfo FutureCallback::GetTargetOrientationResult(long timeOut)
 {
     return getTargetRotationFuture_.GetResult(timeOut);
@@ -79,6 +99,11 @@ void FutureCallback::ResetResizeLock()
 void FutureCallback::ResetMoveToLock()
 {
     moveToFuture_.ResetLock({});
+}
+
+void FutureCallback::ResetMoveWindowToGlobalDisplayLock()
+{
+    moveWindowToGlobalDisplayFuture_.ResetLock({});
 }
 
 void FutureCallback::ResetGetTargetRotationLock()

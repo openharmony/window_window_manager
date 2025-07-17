@@ -26,10 +26,14 @@ class FutureCallback : public RefBase {
 public:
     WSError OnUpdateSessionRect(
         const Rect& rect, WindowSizeChangeReason reason, int32_t persistenId);
+    WSError OnUpdateGlobalDisplayRect(
+        const Rect& rect, WindowSizeChangeReason reason, int32_t persistenId);
     Rect GetResizeAsyncResult(long timeOut); // unit: ms
     Rect GetMoveToAsyncResult(long timeOut); // unit: ms
+    Rect GetMoveWindowToGlobalDisplayAsyncResult(long timeOut); // unit: ms
     void ResetResizeLock();
     void ResetMoveToLock();
+    void ResetMoveWindowToGlobalDisplayLock();
     int32_t GetUpdateRectResult(long timeOut);
     void OnFirstValidRectUpdate(int32_t persistenId);
 
@@ -46,6 +50,7 @@ public:
 private:
     RunnableFuture<Rect> resizeFuture_{};
     RunnableFuture<Rect> moveToFuture_{};
+    RunnableFuture<Rect> moveWindowToGlobalDisplayFuture_{};
     RunnableFuture<OrientationInfo> getTargetRotationFuture_{};
     RunnableFuture<RotationChangeResult> getRotationResultFuture_{};
     RunnableFuture<int32_t> updateRectFuture_{};
