@@ -312,6 +312,13 @@ HWTEST_F(SceneSessionTest2, RequestSessionBack, TestSize.Level1)
 
     WSError result = sceneSession->RequestSessionBack(true);
     ASSERT_EQ(result, WSError::WS_OK);
+
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    EXPECT_NE(nullptr, surfaceNode);
+    sceneSession->SetLeashWinSurfaceNode(surfaceNode);
+    result = sceneSession->RequestSessionBack(true);
+    ASSERT_EQ(result, WSError::WS_OK);
 }
 
 /**
