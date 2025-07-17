@@ -29,11 +29,6 @@ void HidumpController::GetAllSessionDumpDetailedInfo(std::ostringstream& oss,
     oss << std::endl
         << "----------------------------------SessionDetailedInfo"
         << "-----------------------------------" << std::endl;
-    if ((allSession.size() - backgroundSession.size()) < 0) {
-        oss << std::endl
-        << "sessionList Error" << std::endl;
-        return;
-    }
     DumpSceneSessionParamList(oss);
     uint32_t count = 0;
     for (const auto& session : allSession) {

@@ -1554,8 +1554,8 @@ bool AbstractScreenController::SetVirtualScreenAsDefault(ScreenId screenId)
         TLOGE(WmsLogTag::DMS, "abstractScreenCallback_ nullptr");
         return false;
     }
-    abstractScreenCallback_->onConnect_(absScreen);
     defaultRsScreenId_ = rsScreenId;
+    abstractScreenCallback_->onConnect_(absScreen);
     return true;
 }
 } // namespace OHOS::Rosen

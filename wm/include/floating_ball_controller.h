@@ -51,8 +51,8 @@ public:
     void UpdateMainWindow(const sptr<Window>& mainWindow);
  
 private:
-    WMError CreateFloatingBallWindow();
-    WMError StartFloatingBallInner();
+    WMError CreateFloatingBallWindow(const sptr<FbOption>& option);
+    WMError StartFloatingBallInner(const sptr<FbOption>& option);
  
     template<typename T> WMError RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
     template<typename T> WMError UnRegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
@@ -61,7 +61,6 @@ private:
     void OnFloatingBallStop();
  
     wptr<FloatingBallController> weakRef_ = nullptr;
-    sptr<FbOption> fbOption_ = nullptr;
     sptr<Window> window_ = nullptr;
     sptr<Window> mainWindow_ = nullptr;
     uint32_t mainWindowId_ = 0;

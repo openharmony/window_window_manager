@@ -64,25 +64,6 @@ namespace {
  * @tc.desc: GetAllSessionDumpDetailedInfo Test
  * @tc.type: FUNC
  */
-HWTEST_F(HidumpControllerTest, GetAllSessionDumpDetailedInfo01, TestSize.Level1)
-{
-    std::vector<sptr<SceneSession>> allSession;
-    std::vector<sptr<SceneSession>> backgroundSession;
-    auto sceneSession = GetSceneSession("GetAllSessionDumpDetailedInfo01");
-    ASSERT_NE(sceneSession, nullptr);
-    backgroundSession.push_back(sceneSession);
-
-    std::ostringstream oss;
-    HidumpController::GetInstance().GetAllSessionDumpDetailedInfo(oss, allSession, backgroundSession);
-    std::string result = oss.str();
-    ASSERT_NE(result.size(), 0);
-}
-
-/**
- * @tc.name: GetAllSessionDumpDetailedInfo
- * @tc.desc: GetAllSessionDumpDetailedInfo Test
- * @tc.type: FUNC
- */
 HWTEST_F(HidumpControllerTest, GetAllSessionDumpDetailedInfo02, TestSize.Level1)
 {
     std::vector<sptr<SceneSession>> allSession;

@@ -18,6 +18,7 @@
 #include <pointer_event.h>
 #include <ui/rs_surface_node.h>
 
+#include "ability_info.h"
 #include "mock/mock_session_stage.h"
 #include "mock/mock_window_event_channel.h"
 #include "mock/mock_pattern_detach_callback.h"
@@ -255,6 +256,24 @@ HWTEST_F(SessionLayoutTest, SetDragStart, TestSize.Level1)
     ASSERT_EQ(true, session->IsDragStart());
     session->SetDragStart(false);
     ASSERT_EQ(false, session->IsDragStart());
+}
+
+/**
+ * @tc.name: UpdateWindowModeSupportType01
+ * @tc.desc: UpdateWindowModeSupportType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionLayoutTest, UpdateWindowModeSupportType01, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdateWindowModeSupportType01";
+    info.bundleName_ = "UpdateWindowModeSupportType01";
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
+
+    EXPECT_EQ(session->UpdateWindowModeSupportType(nullptr), false);
+
+    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
+    EXPECT_EQ(session->UpdateWindowModeSupportType(abilityInfo), false);
 }
 } // namespace
 } // namespace Rosen

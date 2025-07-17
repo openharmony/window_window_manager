@@ -56,6 +56,10 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     wmStub->OnRemoteRequest(
         static_cast<uint32_t>(Rosen::IWindowManagerAgent::WindowManagerAgentMsg::TRANS_ID_UPDATE_CAMERA_FLOAT),
         parcel, reply, option);
+    parcel.RewindRead(0);
+    wmStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::IWindowManagerAgent::
+            WindowManagerAgentMsg::TRANS_ID_NOTIFY_CALLING_DISPLAY_CHANGE),
+        parcel, reply, option);
     return true;
 }
 } // namespace.OHOS

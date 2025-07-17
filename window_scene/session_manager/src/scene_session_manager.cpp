@@ -513,6 +513,7 @@ void SceneSessionManager::RegisterRecoverStateChangeListener()
 
 void SceneSessionManager::OnRecoverStateChange(const RecoverState& state)
 {
+    TLOGI(WmsLogTag::WMS_RECOVER, "state: %{public}u", state);
     switch(state) {
         case RecoverState::RECOVER_INITIAL:
             break;
@@ -1055,6 +1056,11 @@ void SceneSessionManager::SetEnableInputEvent(bool enabled)
 {
     TLOGI(WmsLogTag::WMS_RECOVER, "enabled: %{public}u", enabled);
     enableInputEvent_ = enabled;
+
+    if (recoverStateChangeFunc_ == nullptr) {
+        return;
+    }
+    
     if (enabled) {
         recoverStateChangeFunc_(RecoverState::RECOVER_ENABLE_INPUT);
     } else {
@@ -1994,6 +2000,8 @@ WMError SceneSessionManager::RemoveSkipSelfWhenShowOnVirtualScreenList(const std
 WMError SceneSessionManager::SetScreenPrivacyWindowTagSwitch(
     uint64_t screenId, const std::vector<std::string>& privacyWindowTags, bool enable)
 {
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "screenId: %{public}" PRIu64 ", tagsize: %{public}zu, enable: %{public}d",
+        screenId, privacyWindowTags.size(), enable);
     if (!SessionPermission::IsSACalling()) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
@@ -4173,7 +4181,7 @@ WSError SceneSessionManager::RecoverAndConnectSpecificSession(const sptr<ISessio
     auto pid = IPCSkeleton::GetCallingRealPid();
     auto uid = IPCSkeleton::GetCallingUid();
     auto task = [this, sessionStage, eventChannel, surfaceNode, property, &session, token, pid, uid]() {
-        if (recoveringFinished_) {
+        if (recoveringFinished_ || sessionRecoverStateChangeFunc_ == nullptr) {
             TLOGNW(WmsLogTag::WMS_RECOVER, "Recover finished, not recovery anymore");
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
@@ -4315,7 +4323,7 @@ WSError SceneSessionManager::RecoverAndReconnectSceneSession(const sptr<ISession
     auto pid = IPCSkeleton::GetCallingRealPid();
     auto uid = IPCSkeleton::GetCallingUid();
     auto task = [this, sessionStage, eventChannel, surfaceNode, &session, property, token, pid, uid]() {
-        if (recoveringFinished_) {
+        if (recoveringFinished_ || sessionRecoverStateChangeFunc_ == nullptr) {
             TLOGNW(WmsLogTag::WMS_RECOVER, "Recover finished, not recovery anymore");
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
@@ -5693,7 +5701,7 @@ void SceneSessionManager::RegisterGetStartWindowConfigCallback(const sptr<SceneS
             sessionInfo.persistentId_, startWindowType.c_str());
     });
 }
-    
+
 
 std::shared_ptr<AppExecFwk::AbilityInfo> SceneSessionManager::QueryAbilityInfoFromBMS(const int32_t uId,
     const std::string& bundleName, const std::string& abilityName, const std::string& moduleName,
@@ -7644,7 +7652,7 @@ bool SceneSessionManager::CheckBlockingFocus(const sptr<SceneSession>& session, 
         bool isPhoneAndPadWithoutPcMode =
             systemConfig_.IsPhoneWindow() || (systemConfig_.IsPadWindow() && !systemConfig_.IsFreeMultiWindowMode());
         if (isPhoneAndPadWithoutPcMode && session->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
-            SessionHelper::IsMainWindow(session->GetWindowType())) {
+            SessionHelper::IsMainWindow(session->GetWindowType()) && !session->GetIsMidScene()) {
             return false;
         }
         return true;
@@ -10282,7 +10290,7 @@ WMError SceneSessionManager::FlushSessionBlackListInfoMapWhenRemove()
                 { .privacyWindowTag = info.privacyWindowTag }) == screenRSBlackListConfigMap_[screenId].end();
             bool notInSessionConfigSet = sessionRSBlackListConfigSet_.find(info) == sessionRSBlackListConfigSet_.end();
             if (notInScreenConfigMap || notInSessionConfigSet) {
-                sessionBlackListInfoMap_[screenId].erase(info);   
+                it = infoSet.erase(it);
             } else {
                 ++it;
             }
@@ -10310,7 +10318,7 @@ WMError SceneSessionManager::FlushSessionBlackListInfoMapWhenRemove(ScreenId scr
             { .privacyWindowTag = info.privacyWindowTag }) == screenRSBlackListConfigMap_[screenId].end();
         bool notInSessionConfigSet = sessionRSBlackListConfigSet_.find(info) == sessionRSBlackListConfigSet_.end();
         if (notInScreenConfigMap || notInSessionConfigSet) {
-            sessionBlackListInfoMap_[screenId].erase(info);   
+            it = infoSet.erase(it);
         } else {
             ++it;
         }
@@ -10321,6 +10329,8 @@ WMError SceneSessionManager::FlushSessionBlackListInfoMapWhenRemove(ScreenId scr
 
 void SceneSessionManager::UpdateVirtualScreenBlackList(ScreenId screenId)
 {
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "Configsize: [%{public}zu, %{public}zu], %{public}zu",
+        sessionRSBlackListConfigSet_.size(), screenRSBlackListConfigMap_.size(), sessionBlackListInfoMap_.size());
     std::unordered_set<uint64_t> skipSurfaceNodeIdSet;
     for (const auto& info : sessionBlackListInfoMap_[screenId]) {
         AddskipSurfaceNodeIdSet(info.windowId, skipSurfaceNodeIdSet);
@@ -10335,21 +10345,48 @@ void SceneSessionManager::UpdateVirtualScreenBlackList(ScreenId screenId)
     rsInterface_.SetVirtualScreenBlackList(screenId, skipSurfaceNodeIds);
 }
 
-void SceneSessionManager::OnAttachToFrameNode(int32_t windowId)
+void SceneSessionManager::NotifyOnAttachToFrameNode(const sptr<Session>& session)
 {
     auto where = __func__;
-    auto task = [this, windowId, where] {
-        auto sceneSession = GetSceneSession(windowId);
-        if (sceneSession == nullptr) {
+    wptr<Session> weakSession(session);
+    auto task = [this, weakSession, where] {
+        auto session = weakSession.promote();
+        if (session == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s, session is nullptr", where);
             return;
         }
-        if (bundleRSBlackListConfigMap_.find(sceneSession->GetSessionInfo().bundleName_) !=
-            bundleRSBlackListConfigMap_.end()) {
-            AddSessionBlackList(
-                { sceneSession }, bundleRSBlackListConfigMap_[sceneSession->GetSessionInfo().bundleName_]);
+        TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s, wid: %{public}d", where, session->GetPersistentId());
+        if (WindowHelper::IsMainWindow(session->GetWindowType())) {
+            AddSkipSurfaceNodeWhenAttach(session->GetPersistentId(),
+                session->GetSessionInfo().bundleName_, static_cast<uint64_t>(session->GetPersistentId()));
+        } else {
+            auto surfaceNode = session->GetSurfaceNode();
+            if (surfaceNode == nullptr) {
+                TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s, surfaceNode is nullptr", where);
+                return;
+            }
+            AddSkipSurfaceNodeWhenAttach(session->GetPersistentId(),
+                session->GetSessionInfo().bundleName_, surfaceNode->GetId());
         }
     };
     taskScheduler_->PostAsyncTask(task, where);
+}
+
+void SceneSessionManager::AddSkipSurfaceNodeWhenAttach(
+    int32_t windowId, const std::string& bundleName, uint64_t surfaceNodeId)
+{
+    if (bundleRSBlackListConfigMap_.find(bundleName) != bundleRSBlackListConfigMap_.end()) {
+        for (const auto& tag : bundleRSBlackListConfigMap_[bundleName]) {
+            sessionRSBlackListConfigSet_.insert({ .windowId = windowId, .privacyWindowTag = tag });
+            for (const auto& [screenId, infoSet] : screenRSBlackListConfigMap_) {
+                if (infoSet.find({ .privacyWindowTag = tag }) != infoSet.end()) {
+                    sessionBlackListInfoMap_[screenId].insert({ .windowId = windowId, .privacyWindowTag = tag });
+                    std::vector<uint64_t> skipSurfaceNodeIds = { surfaceNodeId };
+                    rsInterface_.AddVirtualScreenBlackList(screenId, skipSurfaceNodeIds);
+                }
+            }
+        }
+    }
 }
 
 void SceneSessionManager::AddskipSurfaceNodeIdSet(int32_t windowId, std::unordered_set<uint64_t>& skipSurfaceNodeIdSet)
@@ -10776,6 +10813,7 @@ bool SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInf
     info->scaleVal_ = sceneSession->GetFloatingScale();
     info->scaleX_ = sceneSession->GetScaleX();
     info->scaleY_ = sceneSession->GetScaleY();
+    info->isCompatScaleMode_ = sceneSession->IsInCompatScaleMode();
     info->bundleName_ = sceneSession->GetSessionInfo().bundleName_;
     info->touchHotAreas_ = sceneSession->GetTouchHotAreas();
     info->isDecorEnable_ = sceneSession->GetSessionProperty()->IsDecorEnable();
@@ -16194,7 +16232,7 @@ DisplayId SceneSessionManager::UpdateSpecificSessionClientDisplayId(const sptr<W
     //  SubWindow
     if (auto parentSession = GetSceneSession(property->GetParentPersistentId())) {
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "displayId:%{public}" PRIu64 ", parentClientDisplayId:%{public}" PRIu64
-            ", isFollowParentWindowDisplayId: %{public}u", property->GetDisplayId(), 
+            ", isFollowParentWindowDisplayId: %{public}u", property->GetDisplayId(),
             parentSession->GetClientDisplayId(), property->IsFollowParentWindowDisplayId());
         initClientDisplayId =
             property->IsFollowParentWindowDisplayId() ? parentSession->GetClientDisplayId() : property->GetDisplayId();

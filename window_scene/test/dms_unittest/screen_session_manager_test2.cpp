@@ -977,6 +977,58 @@ HWTEST_F(ScreenSessionManagerTest, SetLandscapeLockStatus01, TestSize.Level1)
     ssm_->SetLandscapeLockStatus(true);
     EXPECT_TRUE(g_errLog.find("permission denied!") != std::string::npos);
 }
+
+/**
+ * @tc.name: SynchronizePowerStatusPermissionDenied
+ * @tc.desc: SynchronizePowerStatus test permission denied.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SynchronizePowerStatusPermissionDenied, Function | SmallTest | Level3)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    MockAccesstokenKit::MockIsSACalling(false);
+    MockAccesstokenKit::MockIsSystemApp(false);
+    ScreenPowerState state = ScreenPowerState::POWER_ON;
+    ssm_->SynchronizePowerStatus(state);
+    EXPECT_TRUE(g_errLog.find("permission denied!") != std::string::npos);
+}
+
+/**
+ * @tc.name: SynchronizePowerStatusNotSupport
+ * @tc.desc: SynchronizePowerStatus not support state.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SynchronizePowerStatusNotSupport, Function | SmallTest | Level3)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    MockAccesstokenKit::MockIsSACalling(true);
+    MockAccesstokenKit::MockIsSystemApp(true);
+    ScreenPowerState state = ScreenPowerState::INVALID_STATE;
+    ssm_->SynchronizePowerStatus(state);
+    EXPECT_TRUE(g_errLog.find("not support!") != std::string::npos);
+}
+
+/**
+ * @tc.name: SynchronizePowerStatusOk
+ * @tc.desc: SynchronizePowerStatus test ok.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SynchronizePowerStatusOk, Function | SmallTest | Level3)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    MockAccesstokenKit::MockIsSACalling(true);
+    MockAccesstokenKit::MockIsSystemApp(true);
+    ScreenPowerState state = ScreenPowerState::POWER_ON;
+#define FOLD_ABILITY_ENABLE
+#define POWERMGR_DISPLAY_MANAGER_ENABLE
+    ssm_->SynchronizePowerStatus(state);
+#undef POWERMGR_DISPLAY_MANAGER_ENABLE
+#undef FOLD_ABILITY_ENABLE
+    EXPECT_TRUE(g_errLog.find("notify brightness") != std::string::npos);
+}
 }
 }
 }

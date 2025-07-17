@@ -49,6 +49,7 @@ ohos_shared_library("display_napi") {
     "../../../../utils:libwmutil",
     "../../../../utils:libwmutil_base",
     "../common:wm_napi_util",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
   ]
 
   external_deps = [
