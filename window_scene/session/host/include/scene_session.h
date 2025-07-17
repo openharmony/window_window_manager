@@ -851,7 +851,6 @@ public:
     WMError OnUpdateColorMode(const std::string& colorMode, bool hasDarkRes);
     std::string GetAbilityColorMode() const;
 
-
     /*
      * Window Pattern
     */
