@@ -848,7 +848,7 @@ public:
     WMError NotifySubSessionAcrossDisplaysChange(bool isAcrossDisplays);
     WMError NotifyFollowedParentWindowAcrossDisplaysChange(bool isAcrossDisplays);
     void NotifySessionAcrossDisplaysChange(const sptr<SceneSession>& sceneSession, bool isAcrossDisplays);
-    WMError OnUpdateAbilityColorMode(const std::string& colorMode, bool hasDarkRes);
+    WMError OnUpdateColorMode(const std::string& colorMode, bool hasDarkRes);
     std::string GetAbilityColorMode() const;
 
 
@@ -1383,6 +1383,7 @@ private:
     std::atomic_bool isRegisterAcrossDisplaysChanged_ = false;
     std::string colorMode_;
     bool hasDarkRes_ = false; 
+    std::mutex colorModeMutex_;
     NotifySetWindowShadowsFunc onSetWindowShadowsFunc_;
     UpdateScreenshotAppEventRegisteredFunc updateScreenshotAppEventRegisteredFunc_;
 

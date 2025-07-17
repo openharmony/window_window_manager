@@ -4172,7 +4172,7 @@ void WindowSceneSessionImpl::UpdateConfiguration(const std::shared_ptr<AppExecFw
     }
 }
 
-WMError WindowSceneSessionImpl::UpdateAbilityColorMode()
+WMError WindowSceneSessionImpl::UpdateColorMode()
 {
     auto appContext = AbilityRuntime::Context::GetApplicationContext();
     if (appContext == nullptr) {
@@ -4194,7 +4194,7 @@ WMError WindowSceneSessionImpl::UpdateAbilityColorMode()
     appContext->AppHasDarkRes(hasDarkRes);
 
     if (auto hostSession = GetHostSession()) {
-        hostSession->OnUpdateAbilityColorMode(colorMode, hasDarkRes);
+        hostSession->OnUpdateColorMode(colorMode, hasDarkRes);
     } else {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d hostSession is null", GetPersistentId());
     }
