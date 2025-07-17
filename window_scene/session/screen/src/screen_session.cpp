@@ -217,6 +217,7 @@ ScreenSession::ScreenSession(ScreenId screenId, const ScreenProperty& property,
 ScreenSession::ScreenSession(const std::string& name, ScreenId smsId, ScreenId rsId, ScreenId defaultScreenId)
     : name_(name), screenId_(smsId), rsId_(rsId), defaultScreenId_(defaultScreenId)
 {
+    sessionId_ = sessionIdGenerator_++;
     (void)rsId_;
     property_.SetRsId(rsId_);
     RSAdapterUtil::InitRSUIDirector(rsUIDirector_, true, true);
