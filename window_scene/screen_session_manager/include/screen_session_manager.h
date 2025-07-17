@@ -285,6 +285,8 @@ public:
     float GetSuperRotation() override;
     void SetLandscapeLockStatus(bool isLocked) override;
     bool GetTentMode();
+    bool IsLapTopLidOpen() const;
+    void SetLapTopLidOpen(bool isLapTopLidOpened);
     ExtendScreenConnectStatus GetExtendScreenConnectStatus() override;
     bool GetIsExtendScreenConnected();
     void SetIsExtendScreenConnected(bool isExtendScreenConnected);
@@ -469,6 +471,7 @@ public:
     void SetRSScreenPowerStatus(ScreenId screenId, ScreenPowerStatus status);
     void NotifyScreenMaskAppear() override;
     bool IsSystemSleep();
+    void SwitchSubscriberInit();
     bool GetKeyboardState() override;
     DMError GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
         ScreenId& screenId, DMRect& screenArea) override;
@@ -652,6 +655,7 @@ private:
     int32_t currentUserId_ { 0 };
     int32_t currentUserIdForSettings_ { 0 };
     int32_t currentScbPId_ { -1 };
+    int32_t switchId_ { -1 };
     std::vector<int32_t> oldScbPids_ {};
     std::map<int32_t, sptr<IScreenSessionManagerClient>> clientProxyMap_;
     FoldDisplayMode oldScbDisplayMode_ = FoldDisplayMode::UNKNOWN;
@@ -718,6 +722,7 @@ private:
     bool isOuterOnlyModeBeforePowerOff_ = false;
     std::atomic<bool> isFoldStatusLocked_ = false;
     std::atomic<bool> isLandscapeLockStatus_ = false;
+    std::atomic<bool> isLapTopLidOpened_ = true;
 
     /**
      * On/Off screen
