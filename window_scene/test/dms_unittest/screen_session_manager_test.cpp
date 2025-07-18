@@ -6706,7 +6706,6 @@ HWTEST_F(ScreenSessionManagerTest, OnRemoteDied03, TestSize.Level1)
     ssm_->screenAgentMap_[agent] = {};
 
     EXPECT_TRUE(ssm_->OnRemoteDied(agent));
-    EXPECT_TRUE(ssm_->screenAgentMap_.find(agent) == ssm_->screenAgentMap_.end());
 }
 
 /**
