@@ -44,8 +44,8 @@ public:
     void TearDown() override;
 
 private:
-    static constexpr int32_t MAIN_WINDOW_PERSISTENT_ID = 1;
-    static constexpr int32_t SUB_WINDOW_PERSISTENT_ID = 2;
+    static constexpr int32_t PERSISTENT_ID_INDEX_ONE = 1;
+    static constexpr int32_t PERSISTENT_ID_INDEX_TWO = 2;
 };
 
 void WindowSessionImplTest5::SetUpTestCase() {}
@@ -1825,7 +1825,7 @@ HWTEST_F(WindowSessionImplTest5, SwitchSubWindow, Function | SmallTest | Level1)
     sptr<WindowSessionImpl> subWindow = sptr<WindowSessionImpl>::MakeSptr(subOption);
     ASSERT_NE(subWindow, nullptr);
     ASSERT_NE(subWindow->property_, nullptr);
-    subWindow->property_->SetPersistentId(SUB_WINDOW_PERSISTENT_ID);
+    subWindow->property_->SetPersistentId(PERSISTENT_ID_INDEX_TWO);
     subWindow->property_->SetDecorEnable(true);
     subWindow->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     subWindow->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
@@ -1836,14 +1836,14 @@ HWTEST_F(WindowSessionImplTest5, SwitchSubWindow, Function | SmallTest | Level1)
     // freemultiwindowmode start
     EXPECT_EQ(subWindow->IsDecorEnable(), false);
     // cover emprty map
-    subWindow->SwitchSubWindow(MAIN_WINDOW_PERSISTENT_ID);
+    subWindow->SwitchSubWindow(PERSISTENT_ID_INDEX_ONE);
 
     std::vector<sptr<WindowSessionImpl>> vec;
     WindowSessionImpl::subWindowSessionMap_.insert(std::pair<int32_t,
-        std::vector<sptr<WindowSessionImpl>>>(MAIN_WINDOW_PERSISTENT_ID, vec));
-    WindowSessionImpl::subWindowSessionMap_[MAIN_WINDOW_PERSISTENT_ID].push_back(subWindow);
+        std::vector<sptr<WindowSessionImpl>>>(PERSISTENT_ID_INDEX_ONE, vec));
+    WindowSessionImpl::subWindowSessionMap_[PERSISTENT_ID_INDEX_ONE].push_back(subWindow);
     subWindow->windowSystemConfig_.freeMultiWindowEnable_ = true;
-    subWindow->SwitchSubWindow(MAIN_WINDOW_PERSISTENT_ID);
+    subWindow->SwitchSubWindow(PERSISTENT_ID_INDEX_ONE);
     WindowMode mode = subWindow->property_->GetWindowMode();
     bool decorVisible = mode == WindowMode::WINDOW_MODE_FLOATING ||
         mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY ||
