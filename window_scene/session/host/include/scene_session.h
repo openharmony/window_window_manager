@@ -1382,7 +1382,7 @@ private:
     std::atomic_bool isRegisterAcrossDisplaysChanged_ = false;
     std::string colorMode_;
     bool hasDarkRes_ = false;
-    std::mutex colorModeMutex_;
+    mutable std::mutex colorModeMutex_;
     NotifySetWindowShadowsFunc onSetWindowShadowsFunc_;
     UpdateScreenshotAppEventRegisteredFunc updateScreenshotAppEventRegisteredFunc_;
 
