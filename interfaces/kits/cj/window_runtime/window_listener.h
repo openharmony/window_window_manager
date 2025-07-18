@@ -69,7 +69,7 @@ class CjWindowListener : public IWindowChangeListener,
 public:
     CjWindowListener(int64_t callbackObject, CaseType caseType);
     ~CjWindowListener() override;
-    void CallCjMethod(const char* methodName, void* argv, size_t argc);
+    void CallCjMethod(const char* methodName, void* argv);
     void SetMainEventHandler();
     void OnSystemBarPropertyChange(DisplayId displayId,
         const SystemBarRegionTints& tints) override;

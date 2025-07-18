@@ -45,7 +45,7 @@ void CjWindowListener::SetMainEventHandler()
     eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(mainRunner);
 }
 
-void CjWindowListener::CallCjMethod(const char* methodName, void* argv, size_t argc)
+void CjWindowListener::CallCjMethod(const char* methodName, void* argv)
 {
     TLOGD(WmsLogTag::WMS_DIALOG, "[WindowListener]methodName=%{public}s", methodName);
     if (cjCallBack_ == nullptr) {
@@ -97,7 +97,7 @@ void CjWindowListener::OnSystemBarPropertyChange(DisplayId displayId, const Syst
         .tints = tintInfos
     };
 
-    thisListener->CallCjMethod(SYSTEM_BAR_TINT_CHANGE_CB.c_str(), &propertyInfo, sizeof(propertyInfo));
+    thisListener->CallCjMethod(SYSTEM_BAR_TINT_CHANGE_CB.c_str(), &propertyInfo);
 }
 
 void CjWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason,
@@ -119,7 +119,7 @@ void CjWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason,
         .width = rect.width_,
         .height = rect.height_
     };
-    thisListener->CallCjMethod(WINDOW_SIZE_CHANGE_CB.c_str(), &argv, sizeof(argv));
+    thisListener->CallCjMethod(WINDOW_SIZE_CHANGE_CB.c_str(), &argv);
     currRect_ = rect;
 }
 
@@ -157,7 +157,7 @@ void CjWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaTy
         }
     };
 
-    thisListener->CallCjMethod(AVOID_AREA_CHANGE_CB.c_str(), &avoidAreaInfo, sizeof(avoidAreaInfo));
+    thisListener->CallCjMethod(AVOID_AREA_CHANGE_CB.c_str(), &avoidAreaInfo);
 }
 
 void CjWindowListener::AfterForeground()
@@ -215,7 +215,7 @@ void CjWindowListener::LifeCycleCallBack(LifeCycleEventType eventType)
         return;
     }
 
-    thisListener->CallCjMethod(LIFECYCLE_EVENT_CB.c_str(), &type, sizeof(type));
+    thisListener->CallCjMethod(LIFECYCLE_EVENT_CB.c_str(), &type);
 }
 
 void CjWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info,
@@ -235,8 +235,7 @@ void CjWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info,
         return;
     }
     void* argv = &(info->rect_.height_);
-    size_t argc = 1;
-    thisListener->CallCjMethod(KEYBOARD_HEIGHT_CHANGE_CB.c_str(), argv, argc);
+    thisListener->CallCjMethod(KEYBOARD_HEIGHT_CHANGE_CB.c_str(), argv);
 }
 
 void CjWindowListener::OnTouchOutside() const
@@ -246,7 +245,7 @@ void CjWindowListener::OnTouchOutside() const
         return;
     }
 
-    thisListener->CallCjMethod(TOUCH_OUTSIDE_CB.c_str(), nullptr, 0);
+    thisListener->CallCjMethod(TOUCH_OUTSIDE_CB.c_str(), nullptr);
 }
 
 void CjWindowListener::OnScreenshot()
@@ -256,7 +255,7 @@ void CjWindowListener::OnScreenshot()
         return;
     }
 
-    thisListener->CallCjMethod(SCREENSHOT_EVENT_CB.c_str(), nullptr, 0);
+    thisListener->CallCjMethod(SCREENSHOT_EVENT_CB.c_str(), nullptr);
 }
 
 void CjWindowListener::OnDialogTargetTouch() const
@@ -266,7 +265,7 @@ void CjWindowListener::OnDialogTargetTouch() const
         return;
     }
 
-    thisListener->CallCjMethod(DIALOG_TARGET_TOUCH_CB.c_str(), nullptr, 0);
+    thisListener->CallCjMethod(DIALOG_TARGET_TOUCH_CB.c_str(), nullptr);
 }
 
 void CjWindowListener::OnDialogDeathRecipient() const
@@ -276,7 +275,7 @@ void CjWindowListener::OnDialogDeathRecipient() const
         return;
     }
 
-    thisListener->CallCjMethod(DIALOG_DEATH_RECIPIENT_CB.c_str(), nullptr, 0);
+    thisListener->CallCjMethod(DIALOG_DEATH_RECIPIENT_CB.c_str(), nullptr);
 }
 
 void CjWindowListener::OnGestureNavigationEnabledUpdate(bool enable)
@@ -287,8 +286,7 @@ void CjWindowListener::OnGestureNavigationEnabledUpdate(bool enable)
     }
 
     bool navigationEnabled = enable;
-    thisListener->CallCjMethod(GESTURE_NAVIGATION_ENABLED_CHANGE_CB.c_str(),
-        &navigationEnabled, sizeof(navigationEnabled));
+    thisListener->CallCjMethod(GESTURE_NAVIGATION_ENABLED_CHANGE_CB.c_str(), &navigationEnabled);
 }
 
 void CjWindowListener::OnWaterMarkFlagUpdate(bool showWaterMark)
@@ -299,7 +297,7 @@ void CjWindowListener::OnWaterMarkFlagUpdate(bool showWaterMark)
     }
 
     bool waterMarkFlag = showWaterMark;
-    thisListener->CallCjMethod(WATER_MARK_FLAG_CHANGE_CB.c_str(), &waterMarkFlag, sizeof(waterMarkFlag));
+    thisListener->CallCjMethod(WATER_MARK_FLAG_CHANGE_CB.c_str(), &waterMarkFlag);
 }
 
 void CjWindowListener::OnWindowVisibilityChangedCallback(const bool isVisible)
@@ -310,7 +308,7 @@ void CjWindowListener::OnWindowVisibilityChangedCallback(const bool isVisible)
     }
 
     bool visibility = isVisible;
-    thisListener->CallCjMethod(WINDOW_VISIBILITY_CHANGE_CB.c_str(), &visibility, sizeof(visibility));
+    thisListener->CallCjMethod(WINDOW_VISIBILITY_CHANGE_CB.c_str(), &visibility);
 }
 
 void CjWindowListener::OnWindowStatusChange(WindowStatus status)
@@ -321,7 +319,7 @@ void CjWindowListener::OnWindowStatusChange(WindowStatus status)
     }
 
     WindowStatus currentStatus = status;
-    thisListener->CallCjMethod(WINDOW_STATUS_CHANGE_CB.c_str(), &currentStatus, sizeof(currentStatus));
+    thisListener->CallCjMethod(WINDOW_STATUS_CHANGE_CB.c_str(), &currentStatus);
 }
 
 void CjWindowListener::SetTimeout(int64_t timeout)
@@ -340,7 +338,7 @@ void CjWindowListener::OnWindowNoInteractionCallback()
     if (thisListener == nullptr) {
         return;
     }
-    thisListener->CallCjMethod(WINDOW_NO_INTERACTION_DETECTED_CB.c_str(), nullptr, 0);
+    thisListener->CallCjMethod(WINDOW_NO_INTERACTION_DETECTED_CB.c_str(), nullptr);
 }
 
 void CjWindowListener::OnWindowTitleButtonRectChanged(const TitleButtonRect& titleButtonRect)
@@ -361,7 +359,7 @@ void CjWindowListener::OnWindowTitleButtonRectChanged(const TitleButtonRect& tit
         .width = titleButtonRect.width_,
         .height = titleButtonRect.height_
     };
-    thisListener->CallCjMethod(WINDOW_TITLE_BUTTON_RECT_CHANGE_CB.c_str(), &argv, sizeof(argv));
+    thisListener->CallCjMethod(WINDOW_TITLE_BUTTON_RECT_CHANGE_CB.c_str(), &argv);
 }
 
 void CjWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
@@ -393,7 +391,7 @@ void CjWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
         .reason = reason
     };
 
-    thisListener->CallCjMethod(WINDOW_RECT_CHANGE_CB.c_str(), &rectChangeInfo, sizeof(rectChangeInfo));
+    thisListener->CallCjMethod(WINDOW_RECT_CHANGE_CB.c_str(), &rectChangeInfo);
     currRect_ = rect;
 }
 
@@ -405,7 +403,7 @@ void CjWindowListener::OnSubWindowClose(bool& terminateCloseProcess)
     }
 
     bool value = terminateCloseProcess;
-    thisListener->CallCjMethod(WINDOW_SUB_WINDOW_CLOSE_CB.c_str(), &value, sizeof(value));
+    thisListener->CallCjMethod(WINDOW_SUB_WINDOW_CLOSE_CB.c_str(), &value);
     terminateCloseProcess = value;
 }
 
@@ -417,7 +415,7 @@ void CjWindowListener::OnMainWindowClose(bool& terminateCloseProcess)
     }
 
     bool value = terminateCloseProcess;
-    thisListener->CallCjMethod(WINDOW_STAGE_CLOSE_CB.c_str(), &value, sizeof(value));
+    thisListener->CallCjMethod(WINDOW_STAGE_CLOSE_CB.c_str(), &value);
     terminateCloseProcess = value;
 }
 
