@@ -419,7 +419,7 @@ private:
     bool isEnableCanvasRotation_ = false;
     std::mutex isEnableRegionRotationMutex_;
     std::mutex isEnableCanvasRotationMutex_;
-    mutable std::shared_mutex availableAreaMutex_;
+    std::shared_mutex availableAreaMutex_;
     bool isAvailableAreaNeedNotify_ = false;
     bool isSecurity_ = true;
     uint64_t sessionId_;
