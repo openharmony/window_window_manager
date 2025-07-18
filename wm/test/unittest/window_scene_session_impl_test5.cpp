@@ -497,16 +497,16 @@ HWTEST_F(WindowSceneSessionImplTest5, IsMainWindowFullScreenAcrossDisplays01, Te
 }
 
 /**
- * @tc.name: UpdateAbilityColorMode
- * @tc.desc: UpdateAbilityColorMode
+ * @tc.name: UpdateColorMode
+ * @tc.desc: UpdateColorMode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest5, UpdateAbilityColorMode, TestSize.Level1)
+HWTEST_F(WindowSceneSessionImplTest5, UpdateColorMode, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     window->hostSession_ = nullptr;
-    auto ret = window->UpdateAbilityColorMode();
+    auto ret = window->UpdateColorMode();
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
 
     window->property_->SetPersistentId(1);
@@ -514,7 +514,7 @@ HWTEST_F(WindowSceneSessionImplTest5, UpdateAbilityColorMode, TestSize.Level1)
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
-    ret = window->UpdateAbilityColorMode();
+    ret = window->UpdateColorMode();
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
 }
 

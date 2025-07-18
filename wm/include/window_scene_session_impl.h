@@ -442,7 +442,7 @@ private:
     /*
      * Window Property
      */
-    WMError UpdateAbilityColorMode(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
+    WMError UpdateColorMode(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
     void InitSystemSessionDragEnable();
     bool IsSystemDensityChanged(const sptr<DisplayInfo>& displayInfo);
     bool IsDefaultDensityEnabled();
