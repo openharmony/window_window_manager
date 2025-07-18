@@ -40,6 +40,7 @@
 #include "include/core/SkRegion.h"
 #include "interfaces/include/ws_common.h"
 #include "mission_snapshot.h"
+#include "res_common.h"
 #include "scb_session_handler.h"
 #include "scene_session_converter.h"
 #include "screen_fold_data.h"
@@ -72,6 +73,7 @@ class LauncherService;
 
 namespace OHOS::Global::Resource {
 class ResourceManager;
+enum ColorMode;
 } // namespace OHOS::Global::Resource
 
 namespace OHOS::Rosen {
@@ -773,6 +775,9 @@ public:
     WMError SetStartWindowBackgroundColor(const std::string& moduleName, const std::string& abilityName,
         uint32_t color, int32_t uid) override;
     void ConfigSupportSnapshotAllSessionStatus();
+    void InsertProcessMap(const SessionInfo& sessionInfo, const int32_t persistentId);
+    WSError DeleteProcessMap(const SessionInfo& sessionInfo, const int32_t persistentId);
+    WSError FindProcessMap(const SessionInfo& sessionInfo, int32_t& persistentId);
 
     /*
      * Window Animation
@@ -993,7 +998,8 @@ private:
         const sptr<SceneSession>& sceneSession);
 
     sptr<AppExecFwk::IBundleMgr> GetBundleManager();
-    std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager(const AppExecFwk::AbilityInfo& abilityInfo);
+    std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager(const AppExecFwk::AbilityInfo& abilityInfo,
+        Global::Resource::ColorMode colorMode = Global::Resource::ColorMode::COLOR_MODE_NOT_SET);
 
     bool CheckIsRemote(const std::string& deviceId);
     bool GetLocalDeviceId(std::string& localDeviceId);
@@ -1633,15 +1639,20 @@ private:
     /*
      * Window Pattern
      */
+    std::mutex processMapMutex_;
+    std::unordered_map<std::string, std::set<int32_t>> processCompareMap_;
     std::atomic<bool> delayRemoveSnapshot_ = false;
     void InitStartingWindowRdb(const std::string& rdbPath);
-    bool GetStartingWindowInfoFromCache(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo);
+    bool GetStartingWindowInfoFromCache(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo,
+        std::string& appColorMode);
     uint32_t UpdateCachedColorToAppSet(const std::string& bundleName, const std::string& moduleName,
         const std::string& abilityName, StartingWindowInfo& startingWindowInfo);
-    bool GetStartingWindowInfoFromRdb(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo);
+    bool GetStartingWindowInfoFromRdb(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo,
+        bool darkMode);
     bool GetPathInfoFromResource(const std::shared_ptr<Global::Resource::ResourceManager> resourceMgr,
         bool hapPathEmpty, uint32_t resourceId, std::string& path);
-    bool GetStartupPageFromResource(const AppExecFwk::AbilityInfo& abilityInfo, StartingWindowInfo& startingWindowInfo);
+    bool GetStartupPageFromResource(const AppExecFwk::AbilityInfo& abilityInfo, StartingWindowInfo& startingWindowInfo,
+        Global::Resource::ColorMode colorMode = Global::Resource::ColorMode::COLOR_MODE_NOT_SET);
     void GetBundleStartingWindowInfos(bool isDark, const AppExecFwk::BundleInfo& bundleInfo,
         std::vector<std::pair<StartingWindowRdbItemKey, StartingWindowInfo>>& outValues);
     void CacheStartingWindowInfo(const std::string& bundleName, const std::string& moduleName,
@@ -1652,12 +1663,13 @@ private:
     std::unique_ptr<LruCache> snapshotLruCache_;
     std::size_t snapshotCapacity_ = 0;
     bool GetIconFromDesk(const SessionInfo& sessionInfo, std::string& startupPagePath) const;
-    bool GetIsDarkFromConfiguration();
+    bool GetIsDarkFromConfiguration(const std::string& appColorMode);
     bool needCloseSync_ = false;
     std::function<void()> closeSyncFunc_ = nullptr;
     WMError SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit, int32_t persistentId) override;
     void UpdateAllStartingWindowRdb();
     bool needUpdateRdb_ = true;
+    std::string GetSessionColorMode(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo);
 };
 } // namespace OHOS::Rosen
 
