@@ -66,6 +66,7 @@ group("fuzztest") {
     "sessionstubscene_fuzzer:fuzztest",
     "sessionstubpc_fuzzer:fuzztest",
     "sessionstagestubuec_fuzzer:fuzztest",
+    "uieffectcontrollerstub_fuzzer:fuzztest",
     "scenesessionmgrlstubuec_fuzzer:fuzztest",
     "windoweventchstubfocus_fuzzer:fuzztest",
     "windoweventchstubkeyevent_fuzzer:fuzztest",

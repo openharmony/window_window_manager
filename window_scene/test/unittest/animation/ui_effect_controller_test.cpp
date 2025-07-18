@@ -18,7 +18,7 @@
 #include "ui_effect_manager.h"
 #include "mock/mock_accesstoken_kit.h"
 #include "mock/mock_ui_effect_controller_client_stub.h"
-#include "../../../test/common/mock/iremote_object_mocker.h"
+#include "iremote_object_mocker.h"
 #include "ui_effect_controller_client.h"
 #include "ui_effect_controller.h"
 #include "ui_effect_manager.h"

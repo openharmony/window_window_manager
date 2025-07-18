@@ -169,6 +169,7 @@ bool MessageParcel::WriteInterfaceToken(std::u16string name)
     return true;
 }
 
+#ifdef ENABLE_MOCK_WRITE_REMOTE_OBJECT
 bool MessageParcel::WriteRemoteObject(const sptr<IRemoteObject> &object)
 {
     if (g_setWriteRemoteObjectErrorFlag) {
@@ -176,6 +177,7 @@ bool MessageParcel::WriteRemoteObject(const sptr<IRemoteObject> &object)
     }
     return true;
 }
+#endif
 
 bool Parcel::WriteParcelable(const Parcelable* object)
 {

@@ -733,6 +733,8 @@ ohos_unittest("ws_ssmgr_specific_window_test") {
 ohos_unittest("ws_scene_session_manager_proxy_test") {
   module_out_path = module_out_path
 
+  configs = [ "${window_base_path}/window_scene/session:ui_effect_public_config" ]
+
   sources = [
     "../mock/mock_message_parcel.cpp",
     "scene_session_manager_proxy_test.cpp",
@@ -866,7 +868,11 @@ ohos_unittest("ws_scene_session_manager_stub_test2") {
     "scene_session_manager_stub_test2.cpp",
   ]
 
-  deps = [ ":ws_unittest_common" ]
+  deps = [
+    ":ws_unittest_common",
+    "${window_base_path}/window_scene/session:ui_effect_controller",
+    "${window_base_path}/window_scene/session:ui_effect_controller_client",
+  ]
 
   external_deps = test_external_deps
 }
