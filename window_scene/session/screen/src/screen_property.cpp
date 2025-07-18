@@ -494,6 +494,26 @@ int32_t ScreenProperty::GetOffsetY() const
     return offsetY_;
 }
 
+void ScreenProperty::SetMirrorWidth(uint32_t mirrorWidth)
+{
+    mirrorWidth_ = mirrorWidth;
+}
+
+uint32_t ScreenProperty::GetMirrorWidth() const
+{
+    return mirrorWidth_;
+}
+
+void ScreenProperty::SetMirrorHeight(uint32_t mirrorHeight)
+{
+    mirrorHeight_ = mirrorHeight;
+}
+
+uint32_t ScreenProperty::GetMirrorHeight() const
+{
+    return mirrorHeight_;
+}
+
 void ScreenProperty::SetOffset(int32_t offsetX, int32_t offsetY)
 {
     offsetX_ = offsetX;

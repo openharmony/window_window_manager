@@ -1567,6 +1567,8 @@ void ScreenSession::FillScreenInfo(sptr<ScreenInfo> info) const
     info->SetType(property_.GetScreenType());
     info->SetModeId(activeIdx_);
     info->SetSerialNumber(serialNumber_);
+    info->SetMirrorWidth(property_.GetMirrorWidth());
+    info->SetMirrorHeight(property_.GetMirrorHeight());
 
     info->lastParent_ = lastGroupSmsId_;
     info->parent_ = groupSmsId_;
@@ -2524,6 +2526,16 @@ void ScreenSession::SetIsAvailableAreaNeedNotify(bool isAvailableAreaNeedNotify)
 bool ScreenSession::GetIsAvailableAreaNeedNotify() const
 {
     return isAvailableAreaNeedNotify_;
+}
+
+void ScreenSession::UpdateMirrorWidth(uint32_t mirrorWidth)
+{
+    property_.SetMirrorWidth(mirrorWidth);
+}
+
+void ScreenSession::UpdateMirrorHeight(uint32_t mirrorHeight)
+{
+    property_.SetMirrorHeight(mirrorHeight);
 }
 
 std::shared_ptr<RSUIDirector> ScreenSession::GetRSUIDirector() const
