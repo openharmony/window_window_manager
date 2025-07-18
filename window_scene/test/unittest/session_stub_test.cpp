@@ -1203,11 +1203,11 @@ HWTEST_F(SessionStubTest, HandleIsMainWindowFullScreenAcrossDisplays, Function |
 }
 
 /**
- * @tc.name: HandleUpdateAbilityColorMode
- * @tc.desc: sessionStub HandleUpdateAbilityColorMode
+ * @tc.name: HandleUpdateColorMode
+ * @tc.desc: sessionStub HandleUpdateColorMode
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStubTest, HandleUpdateAbilityColorMode, Function | SmallTest | Level2)
+HWTEST_F(SessionStubTest, HandleUpdateColorMode, Function | SmallTest | Level2)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1216,7 +1216,7 @@ HWTEST_F(SessionStubTest, HandleUpdateAbilityColorMode, Function | SmallTest | L
     data.WriteBool(true);
     sptr<SessionStub> sessionStub = sptr<SessionStubMocker>::MakeSptr();
     ASSERT_NE(nullptr, sessionStub);
-    auto result = sessionStub->HandleUpdateAbilityColorMode(data, reply);
+    auto result = sessionStub->HandleUpdateColorMode(data, reply);
     EXPECT_EQ(result, ERR_NONE);
 
     data.WriteInterfaceToken(SessionStub::GetDescriptor());
