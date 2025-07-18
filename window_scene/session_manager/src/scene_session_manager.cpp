@@ -16895,21 +16895,17 @@ WMError SceneSessionManager::GetPiPSettingSwitchStatus(bool& switchStatus)
     return WMError::WM_OK;
 }
 
-WMError SceneSessionManager::UpdateScreenLockState(const TransferSessionInfo& info)
+WMError SceneSessionManager::UpdateScreenLockState(int32_t persistentId)
 {
-    if (!SessionPermission::IsSystemAppCall() && !SessionPermission::IsSACalling()) {
-        TLOGE(WmsLogTag::WMS_LIFE, "The caller is neither a system app nor an SA.");
-        return WMError::WM_ERROR_INVALID_PERMISSION;
-    }
-    if (info.persistentId < 0 || info.toScreenId < 0) {
+    if (persistentId < 0) {
         TLOGE(WmsLogTag::WMS_LIFE, "Param is invalid!");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    taskScheduler_->PostAsyncTask([this, info, where = __func__]() {
-        auto sceneSession = GetSceneSession(info.persistentId);
+    taskScheduler_->PostAsyncTask([this, persistentId, where = __func__]() {
+        auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession != nullptr) {
             HandleKeepScreenOn(sceneSession, sceneSession->IsKeepScreenOn(), WINDOW_SCREEN_LOCK_PREFIX,
-                            sceneSession->keepScreenLock_);
+                               sceneSession->keepScreenLock_);
         }
     }, __func__);
     return WMError::WM_OK;

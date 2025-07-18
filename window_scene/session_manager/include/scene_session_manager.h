@@ -781,7 +781,7 @@ public:
         const WindowAnimationOption& animationOption) override;
 
     std::vector<sptr<SceneSession>> GetSceneSessions(ScreenId screenId);
-    WMError UpdateScreenLockState(const TransferSessionInfo& info);
+    WMError UpdateScreenLockState(int32_t persistentId);
 
 protected:
     SceneSessionManager();
