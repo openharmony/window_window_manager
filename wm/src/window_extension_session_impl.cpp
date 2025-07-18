@@ -2392,7 +2392,7 @@ void WindowExtensionSessionImpl::NotifyKeyboardDidHide(const KeyboardPanelInfo& 
 WMError WindowExtensionSessionImpl::OnHostStatusBarContentColorChange(AAFwk::Want&& data,
     std::optional<AAFwk::Want>& reply)
 {
-    auto contentColor = data.GetIntParam(Extension::HOST_STATUS_BAR_CONTENT_COLOR, 0);
+    auto contentColor = static_cast<uint32_t>(data.GetIntParam(Extension::HOST_STATUS_BAR_CONTENT_COLOR, 0));
     TLOGI(WmsLogTag::WMS_UIEXT, "contentColor: %{public}u", contentColor);
     hostStatusBarContentColor_ = contentColor;
     return WMError::WM_OK;
