@@ -7877,12 +7877,12 @@ WMError WindowSessionImpl::GetPiPSettingSwitchStatus(bool& switchStatus) const
 void WindowSessionImpl::SwitchSubWindow(int32_t parentId)
 {
     if (subWindowSessionMap_.count(parentId) == 0) {
-        TLOGI(WmsLogTag::WMS_LAYOUT, "subWindowSessionMap is empty");
+        TLOGD(WmsLogTag::WMS_LAYOUT, "subWindowSessionMap is empty");
         return;
     }
     std::lock_guard<std::recursive_mutex> lock(subWindowSessionMutex_);
     for (auto& subWindowSession : subWindowSessionMap_.at(parentId)) {
-        if (subWindowSession != nullptr) {
+        if (subWindowSession != nullptr && property_->IsDecorEnable()) {
             subWindowSession->UpdateTitleButtonVisibility();
             subWindowSession->UpdateDecorEnable(true);
             subWindowSession->SwitchSubWindow(subWindowSession->GetPersistentId());
