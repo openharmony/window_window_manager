@@ -7938,7 +7938,12 @@ void SceneSessionManager::NotifyFocusStatus(const sptr<SceneSession>& sceneSessi
     }
     int32_t persistentId = sceneSession->GetPersistentId();
 
-    TLOGI(WmsLogTag::WMS_FOCUS, "[%{public}d, %{public}d]", persistentId, isFocused);
+    TLOGI(WmsLogTag::WMS_FOCUS,
+        "name: %{public}s/%{public}s/%{public}s, id: %{public}d, isFocused: %{public}d",
+        sceneSession->GetSessionInfo().bundleName_.c_str(),
+        sceneSession->GetSessionInfo().abilityName_.c_str(),
+        sceneSession->GetWindowNameAllType().c_str(),
+        persistentId, isFocused);
     if (isFocused) {
         if (IsSessionVisibleForeground(sceneSession)) {
             NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_FOCUSED);
