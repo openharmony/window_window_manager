@@ -42,6 +42,10 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+
+private:
+    static constexpr int32_t PERSISTENT_ID = 1;
+    static constexpr int32_t SUB_WINDOW_PERSISTENT_ID_ONE = 2;
 };
 
 void WindowSessionImplTest5::SetUpTestCase() {}
