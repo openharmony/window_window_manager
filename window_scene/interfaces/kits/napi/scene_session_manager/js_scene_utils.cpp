@@ -25,6 +25,7 @@
 #include "property/rs_properties_def.h"
 #include "root_scene.h"
 #include "session/host/include/pc_fold_screen_manager.h"
+#include "session_manager/include/scene_session_manager.h"
 #include "window_manager_hilog.h"
 #include "window_visibility_info.h"
 #include "process_options.h"
@@ -525,6 +526,19 @@ napi_value CreateJsAtomicServiceInfo(napi_env env, const AtomicServiceInfo& atom
     return objValue;
 }
 
+static bool IsJsRequestIdUndefind(napi_env env, napi_value jsRequestId, SessionInfo& sessionInfo)
+{
+    if (GetType(env, jsRequestId) != napi_undefined) {
+        int32_t requestId = DEFAULT_REQUEST_FROM_SCB_ID;
+        if (!ConvertFromJsValue(env, jsRequestId, requestId)) {
+            TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to requestId");
+            return false;
+        }
+        sessionInfo.requestId = requestId;
+    }
+    return true;
+}
+
 bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sessionInfo)
 {
     napi_value jsBundleName = nullptr;
@@ -549,7 +563,8 @@ bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sess
     napi_get_named_property(env, jsObject, "instanceKey", &jsInstanceKey);
     napi_value jsIsAbilityHook = nullptr;
     napi_get_named_property(env, jsObject, "isAbilityHook", &jsIsAbilityHook);
-
+    napi_value jsRequestId = nullptr;
+    napi_get_named_property(env, jsObject, "requestId", &jsRequestId);
     if (!IsJsBundleNameUndefind(env, jsBundleName, sessionInfo)) {
         return false;
     }
@@ -559,10 +574,8 @@ bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sess
     if (!IsJsAbilityUndefind(env, jsAbilityName, sessionInfo)) {
         return false;
     }
-    if (!IsJsAppIndexUndefind(env, jsAppIndex, sessionInfo)) {
-        return false;
-    }
-    if (!IsJsIsSystemUndefind(env, jsIsSystem, sessionInfo)) {
+    if (!IsJsAppIndexUndefind(env, jsAppIndex, sessionInfo) ||
+        !IsJsIsSystemUndefind(env, jsIsSystem, sessionInfo)) {
         return false;
     }
     if (!IsJsSceneTypeUndefined(env, jsSceneType, sessionInfo) ||
@@ -570,7 +583,8 @@ bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sess
         !IsJsIsNewAppInstanceUndefined(env, jsIsNewAppInstance, sessionInfo) ||
         !IsJsInstanceKeyUndefined(env, jsInstanceKey, sessionInfo) ||
         !IsJsWindowInputTypeUndefind(env, jsWindowInputType, sessionInfo) ||
-        !IsJsIsAbilityHookUndefind(env, jsIsAbilityHook, sessionInfo)) {
+        !IsJsIsAbilityHookUndefind(env, jsIsAbilityHook, sessionInfo) ||
+        !IsJsRequestIdUndefind(env, jsRequestId, sessionInfo)) {
         return false;
     }
     return true;
@@ -1391,6 +1405,8 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
         CreateJsValue(env, sessionInfo.isAtomicService_));
     napi_set_named_property(env, objValue, "isBackTransition",
         CreateJsValue(env, sessionInfo.isBackTransition_));
+    napi_set_named_property(env, objValue, "requestId",
+        CreateJsValue(env, sessionInfo.requestId));
     napi_set_named_property(env, objValue, "needClearInNotShowRecent",
         CreateJsValue(env, sessionInfo.needClearInNotShowRecent_));
     if (sessionInfo.processOptions != nullptr) {
@@ -1424,6 +1440,25 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
     napi_set_named_property(env, objValue, "atomicServiceInfo",
         CreateJsAtomicServiceInfo(env, sessionInfo.atomicServiceInfo_));
     return objValue;
+}
+
+void ProcessPendingSessionActivationResult(napi_env env, napi_value callResult,
+    const std::shared_ptr<SessionInfo>& sessionInfo)
+{
+    uint32_t resultCode = 0;
+    std::string resultMessage = "";
+    if (!ParseJsValue(env, callResult, "resultCode", resultCode) ||
+        !ParseJsValue(env, callResult, "resultMessage", resultMessage)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "JsRootSceneSession ParseJsValue resultCode fail");
+        return;
+    }
+    if (resultCode >= static_cast<uint32_t>(RequestResultCode::FAIL)) {
+        SceneSessionManager::GetInstance().NotifyAmsPendingSessionWhenFail(resultCode,
+            resultMessage, sessionInfo->requestId);
+    }
+    TLOGI(WmsLogTag::WMS_LIFE, "persistentId:%{public}d, requestId:%{public}d,"
+        "resultCode:%{public}d, resultMessage:%{public}s",
+        sessionInfo->persistentId_, sessionInfo->requestId, resultCode, resultMessage.c_str());
 }
 
 napi_value CreateJsExceptionInfo(napi_env env, const ExceptionInfo& exceptionInfo)

@@ -293,12 +293,12 @@ void JsRootSceneSession::PendingSessionActivationInner(std::shared_ptr<SessionIn
             return;
         }
         napi_value argv[] = {jsSessionInfo};
-        TLOGNI(WmsLogTag::WMS_LIFE, "pend active success, id:%{public}d",
-            sessionInfo->persistentId_);
+        napi_value callResult = nullptr;
         napi_call_function(env_ref, NapiGetUndefined(env_ref),
-            jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+            jsCallBack->GetNapiValue(), ArraySize(argv), argv, &callResult);
         SceneSessionManager::GetInstance().RemoveLifeCycleTaskByPersistentId(
             sessionInfo->persistentId_, LifeCycleTaskType::START);
+        ProcessPendingSessionActivationResult(env_ref, callResult, sessionInfo);
     };
     taskScheduler_->PostMainThreadTask(task, "PendingSessionActivationInner");
 }
