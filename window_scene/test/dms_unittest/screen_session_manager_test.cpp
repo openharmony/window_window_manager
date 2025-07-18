@@ -7125,15 +7125,15 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenOffsetFeatureTest, Function | SmallT
 }
 
 +/**
-+ * @tc.name: SetLapTopLidOpen
-+ * @tc.desc: test function : SetLapTopLidOpen
++ * @tc.name: SetLapTopLidOpenStatus
++ * @tc.desc: test function : SetLapTopLidOpenStatus
 + * @tc.type: FUNC
 + */
-HWTEST_F(ScreenSessionManagerTest, SetLapTopLidOpen, TestSize.Level1)
+HWTEST_F(ScreenSessionManagerTest, SetLapTopLidOpenStatus, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
 
-    ssm_->SetLapTopLidOpen(true);
+    ssm_->SetLapTopLidOpenStatus(true);
     bool isOpened = ssm_->IsLapTopLidOpen();
     EXPECT_EQ(true, isOpened);
 }

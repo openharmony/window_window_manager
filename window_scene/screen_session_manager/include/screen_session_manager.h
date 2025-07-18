@@ -286,7 +286,7 @@ public:
     void SetLandscapeLockStatus(bool isLocked) override;
     bool GetTentMode();
     bool IsLapTopLidOpen() const;
-    void SetLapTopLidOpen(bool isLapTopLidOpened);
+    void SetLapTopLidOpenStatus(bool isLapTopLidOpen);
     ExtendScreenConnectStatus GetExtendScreenConnectStatus() override;
     bool GetIsExtendScreenConnected();
     void SetIsExtendScreenConnected(bool isExtendScreenConnected);
@@ -722,7 +722,7 @@ private:
     bool isOuterOnlyModeBeforePowerOff_ = false;
     std::atomic<bool> isFoldStatusLocked_ = false;
     std::atomic<bool> isLandscapeLockStatus_ = false;
-    std::atomic<bool> isLapTopLidOpened_ = true;
+    std::atomic<bool> isLapTopLidOpen_ = true;
 
     /**
      * On/Off screen

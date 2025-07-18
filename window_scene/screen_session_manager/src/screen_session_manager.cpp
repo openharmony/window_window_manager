@@ -1380,9 +1380,9 @@ void ScreenSessionManager::SwitchSubscriberInit()
     switchId_ = MMI::InputManager::GetInstance()->SubscribeSwitchEvent(
         [this](std::shared_ptr<OHOS::MMI::SwitchEvent> switchEvent) {
             if (switchEvent->GetSwitchValue() == MMI::SwitchEvent::SWITCH_OFF) {
-                SetLapTopLidOpen(false);
+                SetLapTopLidOpenStatus(false);
             } else {
-                SetLapTopLidOpen(true);
+                SetLapTopLidOpenStatus(true);
             }
         }
     );
@@ -1391,13 +1391,13 @@ void ScreenSessionManager::SwitchSubscriberInit()
 
 bool ScreenSessionManager::IsLapTopLidOpen() const
 {
-    return isLapTopLidOpened_.load();
+    return isLapTopLidOpen_.load();
 }
 
-void ScreenSessionManager::SetLapTopLidOpen(bool isLapTopLidOpened)
+void ScreenSessionManager::SetLapTopLidOpenStatus(bool isLapTopLidOpen)
 {
-    isLapTopLidOpened_.store(isLapTopLidOpened);
-    TLOGI(WmsLogTag::DMS, "isLapTopLidOpened is: %{public}d", static_cast<int32_t>(isLapTopLidOpened));
+    isLapTopLidOpen_.store(isLapTopLidOpen);
+    TLOGI(WmsLogTag::DMS, "isLapTopLidOpen is: %{public}d", static_cast<int32_t>(isLapTopLidOpen));
 }
 
 void ScreenSessionManager::HandleScreenConnectEvent(sptr<ScreenSession> screenSession,
