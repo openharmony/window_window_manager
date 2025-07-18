@@ -48,6 +48,8 @@ private:
     static napi_value GetScreenUIContext(napi_env env, napi_callback_info info);
     napi_value OnGetScreenUIContext(napi_env env, napi_callback_info info);
     void CallJsCallback(const std::string& callbackType);
+    std::shared_ptr<NativeReference> GetJSCallback(const std::string& callbackType);
+    bool IsCallbackRegistered(const std::string& callbackType);
     void RegisterScreenChangeListener();
     void UnRegisterScreenChangeListener();
 
@@ -76,6 +78,7 @@ private:
     sptr<ScreenSession> screenSession_;
     sptr<ScreenScene> screenScene_ = nullptr;
     std::map<std::string, std::shared_ptr<NativeReference>> mCallback_;
+    std::shared_mutex jsCbMapMutex_;
 };
 } // namespace OHOS::Rosen
 

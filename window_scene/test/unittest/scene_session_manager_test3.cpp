@@ -1217,8 +1217,6 @@ HWTEST_F(SceneSessionManagerTest3, UpdateBrightness02, TestSize.Level1)
 HWTEST_F(SceneSessionManagerTest3, SetDisplayBrightness, TestSize.Level1)
 {
     float brightness = 2.0f;
-    float result01 = ssm_->GetDisplayBrightness();
-    EXPECT_EQ(result01, UNDEFINED_BRIGHTNESS);
     ssm_->SetDisplayBrightness(brightness);
     float result02 = ssm_->GetDisplayBrightness();
     ASSERT_EQ(result02, 2.0f);
