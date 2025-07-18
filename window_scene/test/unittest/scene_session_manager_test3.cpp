@@ -723,7 +723,6 @@ HWTEST_F(SceneSessionManagerTest3, SetAbilitySessionInfo02, TestSize.Level1)
     info.bundleName_ = "SetAbilitySessionInfo";
     sptr<SceneSession> sceneSession;
     sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
     sptr<OHOS::AAFwk::SessionInfo> ret = ssm_->SetAbilitySessionInfo(sceneSession, 2);
     EXPECT_EQ(false, ret->want.GetBoolParam(IS_CALL_BY_SCB, false));
 }
