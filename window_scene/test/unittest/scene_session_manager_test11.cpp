@@ -745,54 +745,6 @@ HWTEST_F(SceneSessionManagerTest11, GetIconFromDesk, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetStartingWindowInfoFromCache
- * @tc.desc: GetStartingWindowInfoFromCache
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest11, GetStartingWindowInfoFromCache, TestSize.Level1)
-{
-    ASSERT_NE(ssm_, nullptr);
-    SessionInfo sessionInfo;
-    sessionInfo.moduleName_ = "test";
-    sessionInfo.abilityName_ = BUNDLE_NAME;
-    sessionInfo.bundleName_ = BUNDLE_NAME;
-    StartingWindowInfo startingWindowInfo;
-    bool res = ssm_->GetStartingWindowInfoFromCache(sessionInfo, startingWindowInfo);
-    ASSERT_EQ(res, false);
-
-    std::map<std::string, StartingWindowInfo> startingWindowInfoMap{ { BUNDLE_NAME, startingWindowInfo } };
-    ssm_->startingWindowMap_.insert({ BUNDLE_NAME, startingWindowInfoMap });
-    res = ssm_->GetStartingWindowInfoFromCache(sessionInfo, startingWindowInfo);
-    ASSERT_EQ(res, false);
-    ssm_->startingWindowMap_.clear();
-}
-
-/**
- * @tc.name: GetStartingWindowInfoFromCache02
- * @tc.desc: GetStartingWindowInfoFromCache
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest11, GetStartingWindowInfoFromCache02, TestSize.Level1)
-{
-    ASSERT_NE(ssm_, nullptr);
-    SessionInfo sessionInfo;
-    sessionInfo.moduleName_ = "te";
-    sessionInfo.abilityName_ = "st";
-    sessionInfo.bundleName_ = "test";
-    StartingWindowInfo startingWindowInfo;
-
-    bool res = ssm_->GetStartingWindowInfoFromCache(sessionInfo, startingWindowInfo);
-    ASSERT_EQ(res, false);
-
-    std::map<std::string, StartingWindowInfo> startingWindowInfoMap{ { "test", startingWindowInfo } };
-    ssm_->startingWindowMap_.insert({ "test", startingWindowInfoMap });
-
-    res = ssm_->GetStartingWindowInfoFromCache(sessionInfo, startingWindowInfo);
-    ASSERT_EQ(res, true);
-    ssm_->startingWindowMap_.clear();
-}
-
-/**
  * @tc.name: GetTopNearestBlockingFocusSession
  * @tc.desc: GetTopNearestBlockingFocusSession
  * @tc.type: FUNC

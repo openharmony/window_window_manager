@@ -517,7 +517,7 @@ HWTEST_F(WindowPatternStartingWindowTest, UpdateProcessMap, TestSize.Level0)
     sessionInfo.bundleName_ = "bundleName_";
     sessionInfo.moduleName_ = "moduleName_";
     sessionInfo.abilityName_ = "abilityName_";
-    sessioninfo.appInstanceKey_ = "instanceKey";
+    sessionInfo.appInstanceKey_ = "instanceKey";
     sessionInfo.appIndex_ = 0;
     int32_t persistenId0 = 1;
     auto res = ssm_->FindProcessMap(sessionInfo, persistenId0);
@@ -570,7 +570,7 @@ HWTEST_F(WindowPatternStartingWindowTest, GetSessionColorMode, TestSize.Level0)
     ssm_->sceneSessionMap_.insert({ persistenId, sceneSession });
     ASSERT_NE(ssm_->GetSceneSession(persistenId), nullptr);
 
-    sceneSession->OnUpdateAbilityColorMode(AppExecFwk::ConfigurationInner::COLOR_MODE_DARK, true);
+    sceneSession->OnUpdateColorMode(AppExecFwk::ConfigurationInner::COLOR_MODE_DARK, true);
     res = ssm_->GetSessionColorMode(sessionInfo, startingWindowInfo);
     EXPECT_EQ(res, AppExecFwk::ConfigurationInner::COLOR_MODE_DARK);
 }
