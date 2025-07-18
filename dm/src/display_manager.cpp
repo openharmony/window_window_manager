@@ -2100,7 +2100,7 @@ void DisplayManager::Impl::NotifyDisplayPowerEvent(DisplayPowerEvent event, Even
         powerEventListeners = powerEventListeners_;
     }
     TLOGD(WmsLogTag::DMS, "[UL_POWER]NotifyDisplayPowerEvent event:%{public}u, status:%{public}u, size:%{public}zu",
-        event, status, screenshotListeners.size());
+        event, status, powerEventListeners.size());
     for (auto& listener : powerEventListeners) {
         listener->OnDisplayPowerEvent(event, status);
     }
