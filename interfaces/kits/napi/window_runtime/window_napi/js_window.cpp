@@ -1178,6 +1178,13 @@ napi_value JsWindow::GetWindowDensityInfo(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnGetWindowDensityInfo(env, info) : nullptr;
 }
 
+napi_value JsWindow::SetDefaultDensityEnabled(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetDefaultDensityEnabled(env, info) : nullptr;
+}
+
 napi_value JsWindow::IsMainWindowFullScreenAcrossDisplays(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
@@ -8437,6 +8444,33 @@ napi_value JsWindow::OnGetWindowDensityInfo(napi_env env, napi_callback_info inf
     }
 }
 
+napi_value JsWindow::OnSetDefaultDensityEnabled(napi_env env, napi_callback_info info)
+{
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != INDEX_ONE) {
+        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    bool enabled = false;
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], enabled)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to convert parameter to enable");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowToken is null");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetWindowDefaultDensityEnabled(enabled));
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u set enabled=%{public}u result=%{public}d",
+        windowToken_->GetWindowId(), enabled, ret);
+    if (ret != WmErrorCode::WM_OK) {
+        return NapiThrowError(env, ret);
+    }
+    return NapiGetUndefined(env);
+}
+
 napi_value JsWindow::OnIsMainWindowFullScreenAcrossDisplays(napi_env env, napi_callback_info info)
 {
     if (windowToken_ == nullptr) {
@@ -8995,6 +9029,7 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "setGestureBackEnabled", moduleName, JsWindow::SetGestureBackEnabled);
     BindNativeFunction(env, object, "isGestureBackEnabled", moduleName, JsWindow::GetGestureBackEnabled);
     BindNativeFunction(env, object, "getWindowDensityInfo", moduleName, JsWindow::GetWindowDensityInfo);
+    BindNativeFunction(env, object, "setDefaultDensityEnabled", moduleName, JsWindow::SetDefaultDensityEnabled);
     BindNativeFunction(env, object, "isMainWindowFullScreenAcrossDisplays", moduleName,
         JsWindow::IsMainWindowFullScreenAcrossDisplays);
     BindNativeFunction(env, object, "setSystemAvoidAreaEnabled", moduleName, JsWindow::SetSystemAvoidAreaEnabled);

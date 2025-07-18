@@ -216,6 +216,7 @@ std::map<int32_t, std::vector<sptr<WindowSessionImpl>>> WindowSessionImpl::subWi
 std::map<int32_t, std::vector<sptr<IWindowStatusChangeListener>>> WindowSessionImpl::windowStatusChangeListeners_;
 std::map<int32_t, std::vector<sptr<IWindowStatusDidChangeListener>>> WindowSessionImpl::windowStatusDidChangeListeners_;
 bool WindowSessionImpl::isUIExtensionAbilityProcess_ = false;
+std::atomic<bool> WindowSessionImpl::defaultDensityEnabledGlobalConfig_ = false;
 
 #define CALL_LIFECYCLE_LISTENER(windowLifecycleCb, listeners) \
     do {                                                      \
@@ -316,6 +317,7 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     }
     WindowHelper::SplitStringByDelimiter(
         system::GetParameter("const.window.containerColorLists", ""), ",", containerColorList_);
+    SetDefaultDensityEnabledValue(defaultDensityEnabledGlobalConfig_);
 }
 
 bool WindowSessionImpl::IsPcWindow() const
@@ -5941,6 +5943,26 @@ WSError WindowSessionImpl::NotifySystemDensityChange(float density)
         }
     }
     return WSError::WS_OK;
+}
+
+WMError WindowSessionImpl::SetWindowDefaultDensityEnabled(bool enabled)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "WinId: %{public}d, enabled: %{public}u", GetPersistentId(), enabled);
+    if (!SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "WinId: %{public}d permission denied!", GetPersistentId());
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    SetDefaultDensityEnabledValue(enabled);
+    UpdateDensity();
+    return WMError::WM_OK;
+}
+
+void WindowSessionImpl::SetDefaultDensityEnabledValue(bool enabled)
+{
+    isDefaultDensityEnabled_.store(enabled);
 }
 
 WSError WindowSessionImpl::NotifyWindowVisibility(bool isVisible)

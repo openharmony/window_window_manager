@@ -5673,8 +5673,8 @@ WMError WindowSceneSessionImpl::SetDefaultDensityEnabled(bool enabled)
         return WMError::WM_ERROR_INVALID_CALLING;
     }
 
-    if (isDefaultDensityEnabled_ == enabled) {
-        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "isDefaultDensityEnabled not change");
+    if (defaultDensityEnabledGlobalConfig_ == enabled) {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "defaultDensityEnabledGlobalConfig not change");
         return WMError::WM_OK;
     }
 
@@ -5682,7 +5682,8 @@ WMError WindowSceneSessionImpl::SetDefaultDensityEnabled(bool enabled)
         hostSession->OnDefaultDensityEnabled(enabled);
     }
 
-    isDefaultDensityEnabled_ = enabled;
+    defaultDensityEnabledGlobalConfig_ = enabled;
+    SetDefaultDensityEnabledValue(enabled);
 
     std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
     for (const auto& winPair : windowSessionMap_) {
@@ -5692,6 +5693,7 @@ WMError WindowSceneSessionImpl::SetDefaultDensityEnabled(bool enabled)
             continue;
         }
         TLOGD(WmsLogTag::WMS_ATTRIBUTE, "Id=%{public}d UpdateDensity", window->GetWindowId());
+        window->SetDefaultDensityEnabledValue(enabled);
         window->UpdateDensity();
     }
     return WMError::WM_OK;
@@ -6442,9 +6444,8 @@ bool WindowSceneSessionImpl::IsDefaultDensityEnabled()
     }
     if (auto mainWindow = FindMainWindowWithContext()) {
         CopyUniqueDensityParameter(mainWindow);
-        return mainWindow->GetDefaultDensityEnabled();
     }
-    return false;
+    return GetDefaultDensityEnabled();
 }
 
 float WindowSceneSessionImpl::GetMainWindowCustomDensity()
@@ -6594,21 +6595,22 @@ WMError WindowSceneSessionImpl::SetCustomDensity(float density, bool applyToSubW
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}u set density not change", GetWindowId());
         return WMError::WM_OK;
     }
-    isDefaultDensityEnabled_ = false;
+    defaultDensityEnabledGlobalConfig_ = false;
+    SetDefaultDensityEnabledValue(false);
     customDensity_ = density;
-    if (applyToSubWindow) {
-        std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
-        for (const auto& winPair : windowSessionMap_) {
-            auto window = winPair.second.second;
-            if (window == nullptr) {
-                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is nullptr");
-                continue;
-            }
-            TLOGD(WmsLogTag::WMS_ATTRIBUTE, "Id=%{public}d UpdateDensity", window->GetWindowId());
+    UpdateDensity();
+    std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
+    for (const auto& winPair : windowSessionMap_) {
+        auto window = winPair.second.second;
+        if (window == nullptr) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is nullptr");
+            continue;
+        }
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "Id=%{public}d UpdateDensity", window->GetWindowId());
+        window->SetDefaultDensityEnabledValue(false);
+        if (applyToSubWindow) {
             window->UpdateDensity();
         }
-    } else {
-        UpdateDensity();
     }
     return WMError::WM_OK;
 }

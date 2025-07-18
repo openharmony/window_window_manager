@@ -365,6 +365,16 @@ HWTEST_F(WindowSceneSessionImplTest5, SetCustomDensity01, TestSize.Level1)
     EXPECT_EQ(density, window->customDensity_);
     applyToSubWindow = true;
     EXPECT_EQ(WMError::WM_OK, window->SetCustomDensity(density, applyToSubWindow));
+
+    sptr<WindowSceneSessionImpl> window1;
+    WindowSceneSessionImpl::windowSessionMap_.insert(std::make_pair(window->GetWindowName(),
+        std::pair<uint64_t, sptr<WindowSessionImpl>>(1, window)));
+    WindowSceneSessionImpl::windowSessionMap_.insert(std::make_pair("winTest",
+        std::pair<uint64_t, sptr<WindowSessionImpl>>(2, window1)));
+    EXPECT_EQ(WMError::WM_OK, window->SetCustomDensity(density, applyToSubWindow));
+    EXPECT_EQ(WMError::WM_OK, window->SetCustomDensity(1.6f, false));
+    WindowSceneSessionImpl::windowSessionMap_.erase(window->GetWindowName());
+    WindowSceneSessionImpl::windowSessionMap_.erase("winTest");
 }
 
 /**
