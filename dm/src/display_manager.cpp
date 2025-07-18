@@ -2086,7 +2086,7 @@ void DisplayManager::Impl::NotifyScreenshot(sptr<ScreenshotInfo> info)
         screenshotListeners = screenshotListeners_;
     }
     TLOGI(WmsLogTag::DMS, "NotifyScreenshot trigger:[%{public}s] displayId:%{public}" PRIu64" size:%{public}zu",
-        info->GetTrigger().c_str(), info->GetDisplayId(), screenshotListeners_.size());
+        info->GetTrigger().c_str(), info->GetDisplayId(), screenshotListeners.size());
     for (auto& listener : screenshotListeners) {
         listener->OnScreenshot(*info);
     }
@@ -2100,7 +2100,7 @@ void DisplayManager::Impl::NotifyDisplayPowerEvent(DisplayPowerEvent event, Even
         powerEventListeners = powerEventListeners_;
     }
     TLOGD(WmsLogTag::DMS, "[UL_POWER]NotifyDisplayPowerEvent event:%{public}u, status:%{public}u, size:%{public}zu",
-        event, status, powerEventListeners_.size());
+        event, status, screenshotListeners.size());
     for (auto& listener : powerEventListeners) {
         listener->OnDisplayPowerEvent(event, status);
     }
