@@ -773,6 +773,39 @@ HWTEST_F(SceneSessionTest, UpdateAcrossDisplaysChangeRegistered01, TestSize.Leve
 }
 
 /**
+ * @tc.name: ColorMode01
+ * @tc.desc: Test OnUpdateColorMode And GetAbilityColorMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, ColorMode01, TestSize.Level0)
+{
+    SessionInfo info;
+    info.abilityName_ = "test";
+    info.bundleName_ = "test";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    std::string colorMode = "dark";
+    bool hasDarkRes = true;
+    auto ret = sceneSession->OnUpdateColorMode(colorMode, hasDarkRes);
+    EXPECT_NE(WMError::WM_OK, ret);
+
+    std::string resMode = sceneSession->GetAbilityColorMode();
+    EXPECT_NE("dark", resMode);
+
+    hasDarkRes = false;
+    ret = sceneSession->OnUpdateColorMode(colorMode, hasDarkRes);
+    EXPECT_NE(WMError::WM_OK, ret);
+    resMode = sceneSession->GetAbilityColorMode();
+    EXPECT_NE("auto", resMode);
+
+    colorMode = "light";
+    ret = sceneSession->OnUpdateColorMode(colorMode, hasDarkRes);
+    EXPECT_NE(WMError::WM_OK, ret);
+    resMode = sceneSession->GetAbilityColorMode();
+    EXPECT_NE("light", resMode);
+}
+
+/**
  * @tc.name: IsMainWindowFullScreenAcrossDisplays
  * @tc.desc: IsMainWindowFullScreenAcrossDisplays01
  * @tc.type: FUNC

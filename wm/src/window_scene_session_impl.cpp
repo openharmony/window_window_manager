@@ -648,6 +648,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
             Resize(initRect.width_, initRect.height_);
         }
         RegisterWindowInspectorCallback();
+        UpdateColorMode();
     }
     TLOGD(WmsLogTag::WMS_LIFE, "Window Create success [name:%{public}s, id:%{public}d], state:%{public}u, "
         "mode:%{public}u, enableDefaultDensity:%{public}d, displayId:%{public}" PRIu64,
@@ -4168,6 +4169,7 @@ void WindowSceneSessionImpl::UpdateConfiguration(const std::shared_ptr<AppExecFw
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "notify ace scene win=%{public}u, display=%{public}" PRIu64,
             GetWindowId(), GetDisplayId());
         uiContent->UpdateConfiguration(configuration);
+        UpdateColorMode();
     } else {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent null, scene win=%{public}u, display=%{public}" PRIu64,
             GetWindowId(), GetDisplayId());
@@ -4184,6 +4186,37 @@ void WindowSceneSessionImpl::UpdateConfiguration(const std::shared_ptr<AppExecFw
     }
 }
 
+WMError WindowSceneSessionImpl::UpdateColorMode()
+{
+    auto appContext = AbilityRuntime::Context::GetApplicationContext();
+    if (appContext == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d app context is null", GetPersistentId());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    std::shared_ptr<AppExecFwk::Configuration> config = appContext->GetConfiguration();
+    if (config == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "config is null, winId: %{public}d", GetPersistentId());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    std::string colorMode = config->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, colorMode: %{public}s", GetPersistentId(), colorMode.c_str());
+    if (colorMode_ == colorMode) {
+        return WMError::WM_DO_NOTHING;
+    }
+    colorMode_ = colorMode;
+    bool hasDarkRes = false;
+    appContext->AppHasDarkRes(hasDarkRes);
+
+    if (auto hostSession = GetHostSession()) {
+        hostSession->OnUpdateColorMode(colorMode, hasDarkRes);
+    } else {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d hostSession is null", GetPersistentId());
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, colorMode: %{public}s, hasDarkRes: %{public}u",
+          GetPersistentId(), colorMode.c_str(), hasDarkRes);
+    return WMError::WM_OK;
+}
+
 void WindowSceneSessionImpl::UpdateConfigurationForSpecified(
     const std::shared_ptr<AppExecFwk::Configuration>& configuration,
     const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager)
@@ -4192,6 +4225,7 @@ void WindowSceneSessionImpl::UpdateConfigurationForSpecified(
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "notify ace scene win=%{public}u, display=%{public}" PRIu64,
             GetWindowId(), GetDisplayId());
         uiContent->UpdateConfiguration(configuration, resourceManager);
+        UpdateColorMode();
     } else {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent null, scene win=%{public}u, display=%{public}" PRIu64,
             GetWindowId(), GetDisplayId());

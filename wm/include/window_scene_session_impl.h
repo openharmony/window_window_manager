@@ -442,6 +442,7 @@ private:
     /*
      * Window Property
      */
+    WMError UpdateColorMode();
     void InitSystemSessionDragEnable();
     bool IsSystemDensityChanged(const sptr<DisplayInfo>& displayInfo);
     bool IsDefaultDensityEnabled();
