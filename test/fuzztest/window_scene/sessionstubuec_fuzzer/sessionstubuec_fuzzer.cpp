@@ -25,7 +25,7 @@
 #include "session/host/include/zidl/session_ipc_interface_code.h"
 #include "session/host/include/zidl/session_stub.h"
 #include "session/host/include/session.h"
-#include "sessionstub_event_fuzzer.h"
+#include "sessionstubuec_fuzzer.h"
 
 using namespace OHOS::Rosen;
 
@@ -34,13 +34,21 @@ namespace {
 constexpr size_t DATA_MIN_SIZE = 2;
 }
 
-void SessionStubEventTest(sptr<Session> sessionStub, MessageParcel& parcel)
+void SessionStubUecTest(sptr<Session> sessionStub, MessageParcel& parcel)
 {
     MessageParcel reply;
     MessageOption option;
     parcel.RewindRead(0);
     sessionStub->OnRemoteRequest(static_cast<uint32_t>
-        (Rosen::SessionInterfaceCode::TRANS_ID_SET_DIALOG_SESSION_BACKGESTURE_ENABLE),
+        (Rosen::SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_EVENT_ASYNC),
+        parcel, reply, option);
+    parcel.RewindRead(0);
+    sessionStub->OnRemoteRequest(static_cast<uint32_t>
+        (Rosen::SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_DETACH_TO_DISPLAY),
+        parcel, reply, option);
+    parcel.RewindRead(0);
+    sessionStub->OnRemoteRequest(static_cast<uint32_t>
+        (Rosen::SessionInterfaceCode::TRANS_ID_SEND_EXTENSION_DATA),
         parcel, reply, option);
 }
 
@@ -56,14 +64,14 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     parcel.WriteBuffer(data, size);
 
     SessionInfo info;
-    info.abilityName_ = "stubEventFuzzTest";
-    info.bundleName_ = "stubEventFuzzTest";
+    info.abilityName_ = "stubUecFuzzTest";
+    info.bundleName_ = "stubUecFuzzTest";
     sptr<Session> sessionStub = new (std::nothrow) Session(info);
     if (sessionStub == nullptr) {
         return false;
     }
 
-    SessionStubEventTest(sessionStub, parcel);
+    SessionStubUecTest(sessionStub, parcel);
 
     return true;
 }

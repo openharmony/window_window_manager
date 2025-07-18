@@ -22,10 +22,11 @@
 #include "message_option.h"
 #include "message_parcel.h"
 #include "marshalling_helper.h"
-#include "session/host/include/zidl/session_ipc_interface_code.h"
-#include "session/host/include/zidl/session_stub.h"
-#include "session/host/include/session.h"
-#include "sessionstub_uec_fuzzer.h"
+#include "session_stage_stub.h"
+#include "session_stage_ipc_interface_code.h"
+#include "window_session_impl.h"
+#include "window_option.h"
+#include "sessionstagestubuec_fuzzer.h"
 
 using namespace OHOS::Rosen;
 
@@ -34,21 +35,24 @@ namespace {
 constexpr size_t DATA_MIN_SIZE = 2;
 }
 
-void SessionStubUecTest(sptr<Session> sessionStub, MessageParcel& parcel)
+void SessionStageUecTest(sptr<WindowSessionImpl> stageStub, MessageParcel& parcel)
 {
     MessageParcel reply;
     MessageOption option;
     parcel.RewindRead(0);
-    sessionStub->OnRemoteRequest(static_cast<uint32_t>
-        (Rosen::SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_EVENT_ASYNC),
+    stageStub->OnRemoteRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SECURE_LIMIT_CHANGE),
         parcel, reply, option);
     parcel.RewindRead(0);
-    sessionStub->OnRemoteRequest(static_cast<uint32_t>
-        (Rosen::SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_DETACH_TO_DISPLAY),
+    stageStub->OnRemoteRequest(
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_SESSION_VIEWPORT_CONFIG),
         parcel, reply, option);
     parcel.RewindRead(0);
-    sessionStub->OnRemoteRequest(static_cast<uint32_t>
-        (Rosen::SessionInterfaceCode::TRANS_ID_SEND_EXTENSION_DATA),
+    stageStub->OnRemoteRequest(
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DUMP_INFO),
+        parcel, reply, option);
+    parcel.RewindRead(0);
+    stageStub->OnRemoteRequest(
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SEND_EXTENSION_DATA),
         parcel, reply, option);
 }
 
@@ -57,25 +61,26 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     if (data == nullptr || size < DATA_MIN_SIZE) {
         return false;
     }
-
+    
     MessageParcel parcel;
 
-    parcel.WriteInterfaceToken(SessionStub::GetDescriptor());
+    parcel.WriteInterfaceToken(SessionStageStub::GetDescriptor());
     parcel.WriteBuffer(data, size);
 
-    SessionInfo info;
-    info.abilityName_ = "stubUecFuzzTest";
-    info.bundleName_ = "stubUecFuzzTest";
-    sptr<Session> sessionStub = new (std::nothrow) Session(info);
-    if (sessionStub == nullptr) {
+    sptr<WindowOption> windowOption = new (std::nothrow) WindowOption();
+    if (windowOption == nullptr) {
+        return false;
+    }
+    sptr<WindowSessionImpl> stageStub = new (std::nothrow) WindowSessionImpl(windowOption);
+    if (stageStub == nullptr) {
         return false;
     }
 
-    SessionStubUecTest(sessionStub, parcel);
+    SessionStageUecTest(stageStub, parcel);
 
     return true;
 }
-} // namespace.OHOS
+} // namespace OHOS
 
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
