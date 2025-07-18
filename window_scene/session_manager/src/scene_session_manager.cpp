@@ -2837,7 +2837,8 @@ void SceneSessionManager::UpdateCollaboratorSessionWant(sptr<SceneSession>& sess
     }
 }
 
-sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<SceneSession>& sceneSession)
+sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<SceneSession>& sceneSession,
+    int32_t requestId)
 {
     const auto& sessionInfo = sceneSession->GetSessionInfo();
     auto abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
@@ -2885,6 +2886,9 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
         TLOGW(WmsLogTag::WMS_LIFE, "Invalid callState:%{public}d", sessionInfo.callState_);
     }
     abilitySessionInfo->scenarios = sessionInfo.scenarios;
+    if (requestId == DEFAULT_REQUEST_FROM_SCB_ID) {
+        abilitySessionInfo->want.SetParam(IS_CALL_BY_SCB, true);
+    }
     return abilitySessionInfo;
 }
 
@@ -2909,9 +2913,11 @@ WSError SceneSessionManager::PrepareTerminate(int32_t persistentId, bool& isPrep
     return WSError::WS_OK;
 }
 
-WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSession>& sceneSession, bool isNewActive)
+WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSession>& sceneSession, bool isNewActive,
+    int32_t requestId)
 {
-    auto task = [this, weakSceneSession = wptr(sceneSession), isNewActive]() THREAD_SAFETY_GUARD(SCENE_GUARD) {
+    auto task = [this, weakSceneSession = wptr(sceneSession), isNewActive,
+        requestId]() THREAD_SAFETY_GUARD(SCENE_GUARD) {
         OHOS::HiviewDFX::HiTraceId hiTraceId = OHOS::HiviewDFX::HiTraceChain::GetId();
         bool isValid = hiTraceId.IsValid();
         if (!isValid) {
@@ -2943,7 +2949,7 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
             }
             return WSError::WS_ERROR_INVALID_SESSION;
         }
-        auto ret = RequestSceneSessionActivationInner(sceneSession, isNewActive);
+        auto ret = RequestSceneSessionActivationInner(sceneSession, isNewActive, requestId);
         if (ret == WSError::WS_OK) {
             sceneSession->SetExitSplitOnBackground(false);
         }
@@ -2957,6 +2963,15 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
         (sceneSession != nullptr ? std::to_string(sceneSession->GetPersistentId()) : "nullptr");
     taskScheduler_->PostAsyncTask(task, taskName);
     return WSError::WS_OK;
+}
+
+void SceneSessionManager::NotifyAmsPendingSessionWhenFail(uint32_t resultCode, std::string resultMessage,
+        int32_t requestId)
+{
+    TLOGE(WmsLogTag::WMS_LIFE, "failed, requestId:%{public}d", requestId);
+    ffrtQueueHelper_->SubmitTask([requestId]{
+         AAFwk::AbilityManagerClient::GetInstance()->NotifyStartupExceptionBySCB(requestId);
+    });
 }
 
 bool SceneSessionManager::IsKeyboardForeground()
@@ -3002,6 +3017,10 @@ int32_t SceneSessionManager::StartUIAbilityBySCBTimeoutCheck(const sptr<AAFwk::S
         windowStateChangeReason] {
         int timerId = HiviewDFX::XCollie::GetInstance().SetTimer("WMS:SSM:StartUIAbilityBySCB",
             START_UI_ABILITY_TIMEOUT/1000, nullptr, nullptr, HiviewDFX::XCOLLIE_FLAG_LOG);
+        if (abilitySessionInfo != nullptr) {
+            TLOGI(WmsLogTag::WMS_LIFE, "requestId:%{public}d, IS_CALL_BY_SCB: %{public}d",
+                abilitySessionInfo->requestId, abilitySessionInfo->want.GetBoolParam(IS_CALL_BY_SCB, false));
+        }
         auto result = AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(abilitySessionInfo,
             *coldStartFlag, windowStateChangeReason);
         HiviewDFX::XCollie::GetInstance().CancelTimer(timerId);
@@ -3047,7 +3066,7 @@ int32_t SceneSessionManager::ChangeUIAbilityVisibilityBySCB(const sptr<SceneSess
 }
 
 WSError SceneSessionManager::RequestSceneSessionActivationInner(
-    sptr<SceneSession>& sceneSession, bool isNewActive)
+    sptr<SceneSession>& sceneSession, bool isNewActive, int32_t requestId)
 {
     auto persistentId = sceneSession->GetPersistentId();
     RequestInputMethodCloseKeyboard(persistentId);
@@ -3075,11 +3094,13 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
             ExceptionInfo exceptionInfo;
             exceptionInfo.needRemoveSession = true;
             sceneSession->NotifySessionExceptionInner(SetAbilitySessionInfo(sceneSession), exceptionInfo);
+            NotifyAmsPendingSessionWhenFail(static_cast<uint32_t>(RequestResultCode::FAIL),
+                "", sceneSession->GetSessionInfo().requestId);
             return WSError::WS_ERROR_PRE_HANDLE_COLLABORATOR_FAILED;
         }
     }
     sceneSession->NotifyActivation();
-    auto sceneSessionInfo = SetAbilitySessionInfo(sceneSession);
+    auto sceneSessionInfo = SetAbilitySessionInfo(sceneSession, requestId);
     sceneSessionInfo->isNewWant = isNewActive;
     if (CheckCollaboratorType(sceneSession->GetCollaboratorType())) {
         sceneSessionInfo->want.SetParam(AncoConsts::ANCO_MISSION_ID, sceneSessionInfo->persistentId);
@@ -9911,10 +9932,11 @@ sptr<AAFwk::IAbilityManagerCollaborator> SceneSessionManager::GetCollaboratorByT
     return collaborator;
 }
 
-WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>& sceneSession)
+WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>& sceneSession, int32_t requestId)
 {
     const char* const where = __func__;
-    auto task = [this, weakSceneSession = wptr<SceneSession>(sceneSession), where]() THREAD_SAFETY_GUARD(SCENE_GUARD) {
+    auto task = [this, weakSceneSession = wptr<SceneSession>(sceneSession),
+        requestId, where]() THREAD_SAFETY_GUARD(SCENE_GUARD) {
         auto sceneSession = weakSceneSession.promote();
         if (sceneSession == nullptr) {
             TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s: session is nullptr", where);
@@ -9928,7 +9950,7 @@ WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>&
         const auto& sessionInfo = sceneSession->GetSessionInfo();
         TLOGNI(WmsLogTag::WMS_MAIN, "%{public}s: state:%{public}d, id:%{public}d",
             where, sessionInfo.callState_, persistentId);
-        auto abilitySessionInfo = SetAbilitySessionInfo(sceneSession);
+        auto abilitySessionInfo = SetAbilitySessionInfo(sceneSession, requestId);
         bool isColdStart = false;
         AAFwk::AbilityManagerClient::GetInstance()->CallUIAbilityBySCB(abilitySessionInfo, isColdStart);
         if (isColdStart) {

@@ -213,6 +213,8 @@ bool ParseArrayStringValue(napi_env env, napi_value array, std::vector<std::stri
 bool ConvertProcessOptionFromJs(napi_env env, napi_value jsObject,
     std::shared_ptr<AAFwk::ProcessOptions> processOptions);
 napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo);
+void ProcessPendingSessionActivationResult(napi_env env, napi_value callResult,
+    const std::shared_ptr<SessionInfo>& sessionInfo);
 napi_value CreateJsExceptionInfo(napi_env env, const ExceptionInfo& exceptionInfo);
 napi_value CreateSupportWindowModes(napi_env env,
     const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes);
