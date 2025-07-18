@@ -5562,10 +5562,6 @@ WSError SceneSession::BatchPendingSessionsActivation(const std::vector<sptr<AAFw
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s abilitySessionInfo is null", where);
             return WSError::WS_ERROR_NULLPTR;
         }
-        if (session->sessionInfo_.reuseDelegatorWindow) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s not support hook", where);
-            WSError::WS_ERROR_INVALID_PARAM;
-        }
         return session->DoBatchPendingSessionsActivation(abilitySessionInfos, session, isFoundationCall);
     }, __func__);
     return WSError::WS_OK;

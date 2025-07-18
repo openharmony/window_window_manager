@@ -2902,6 +2902,12 @@ enum class ScreenshotEventType : int32_t {
 
     END,
 };
+
+enum class RequestResultCode: uint32_t {
+    INIT = 0,
+    SUCCESS = 1,
+    FAIL,
+};
 }
 }
 #endif // OHOS_ROSEN_WM_COMMON_H
