@@ -491,6 +491,40 @@ static bool IsJsIsAbilityHookUndefind(napi_env env, napi_value jsIsAbilityHook, 
     return true;
 }
 
+static napi_value CreateJsValueFromStringArray(napi_env env, const std::vector<std::string>& stringArray)
+{
+    napi_value arrayValue = nullptr;
+    napi_create_array_with_length(env, stringArray.size(), &arrayValue);
+    if (arrayValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to create napi array");
+        return NapiGetUndefined(env);
+    }
+    int32_t index = 0;
+    for (const auto& iter : stringArray) {
+        napi_set_element(env, arrayValue, index++, CreateJsValue(env, iter));
+    }
+    return arrayValue;
+}
+
+napi_value CreateJsAtomicServiceInfo(napi_env env, const AtomicServiceInfo& atomicServiceInfo)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to get object");
+        return nullptr;
+    }
+
+    napi_set_named_property(env, objValue, "resizable",
+        CreateJsValue(env, atomicServiceInfo.resizable_));
+    napi_set_named_property(env, objValue, "deviceTypes",
+        CreateJsValueFromStringArray(env, atomicServiceInfo.deviceTypes_));
+    napi_set_named_property(env, objValue, "supportWindowMode",
+        CreateJsValueFromStringArray(env, atomicServiceInfo.supportWindowMode_));
+
+    return objValue;
+}
+
 bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sessionInfo)
 {
     napi_value jsBundleName = nullptr;
@@ -1387,6 +1421,8 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
             TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to set startAnimationSystemOptions");
         }
     }
+    napi_set_named_property(env, objValue, "atomicServiceInfo",
+        CreateJsAtomicServiceInfo(env, sessionInfo.atomicServiceInfo_));
     return objValue;
 }
 
