@@ -1806,6 +1806,13 @@ HWTEST_F(WindowSessionImplTest5, OnPointDown, TestSize.Level1)
     EXPECT_CALL(*(session), ProcessPointDownSession(_, _)).Times(1).WillOnce(Return(WSError::WS_OK));
     EXPECT_TRUE(window->OnPointDown(0, 0, 0));
 }
+
+/**
+ * @tc.name: OnPointDown1
+ * @tc.desc: OnPointDown1
+ * @tc.type: FUNC1
+ */
+ 
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
