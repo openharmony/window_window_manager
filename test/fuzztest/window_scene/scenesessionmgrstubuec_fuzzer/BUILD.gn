@@ -18,45 +18,46 @@ import("../../../../windowmanager_aafwk.gni")
 module_output_path = "window_manager/window_manager"
 
 ##############################fuzztest##########################################
-ohos_fuzztest("SessionStubEventFuzzTest") {
+ohos_fuzztest("SceneSessionMgrStubUecFuzzTest") {
   fuzz_config_file = "."
   module_out_path = module_output_path
 
   include_dirs = [
+    "${window_base_path}/window_scene",
     "${window_base_path}/window_scene/session_manager/include",
-    "${window_base_path}/window_scene/session/host/include",
-    "${window_base_path}/wmserver/include",
-    "${window_base_path}/wm/include",
+    "${window_base_path}/window_scene/session_manager/include/zidl",
     "../",
+
+    # for session_manager
+    "${window_base_path}/wmserver/include",
+    "${window_base_path}/wmserver/include/zidl",
+
+    # for window_manager
+    "${window_base_path}/utils/include",
+    "${window_base_path}/wm/include",
+    "${window_base_path}/wm/include/zidl",
   ]
   cflags = [
     "-g",
     "-O0",
-    "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
   ]
-  sources = [ "sessionstub_event_fuzzer.cpp" ]
+  sources = [ "scenesessionmgrstubuec_fuzzer.cpp" ]
   deps = [
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/utils:libwmutil_base",
     "${window_base_path}/window_scene/common:window_scene_common",
+    "${window_base_path}/window_scene/intention_event/service:intention_event_anr_manager",
     "${window_base_path}/window_scene/session:scene_session",
-    "${window_base_path}/window_scene/session_manager:session_manager",
-    "${window_base_path}/wm:libwm",
+    "${window_base_path}/window_scene/session_manager:scene_session_manager",
   ]
-
   external_deps = [
-    "ability_base:session_info",
-    "ability_base:want",
-    "ability_runtime:ability_context_native",
-    "ability_runtime:ability_manager",
-    "ace_engine:ace_uicontent",
+    "ability_runtime:app_manager",
     "c_utils:utils",
+    "ffrt:libffrt",
+    "graphic_2d:librender_service_base",
     "hilog:libhilog",
-    "image_framework:image_native",
     "ipc:ipc_single",
-    "napi:ace_napi",
-    "samgr:samgr_proxy",
   ]
 }
 
@@ -67,7 +68,7 @@ group("fuzztest") {
 
   deps += [
     # deps file
-    ":SessionStubEventFuzzTest",
+    ":SceneSessionMgrStubUecFuzzTest",
   ]
 }
 ###############################################################################
