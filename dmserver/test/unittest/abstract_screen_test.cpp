@@ -17,6 +17,7 @@
 
 #include "abstract_screen.h"
 #include "abstract_screen_controller.h"
+#include "modifier_render_thread/rs_modifiers_draw_thread.h"
 #include "scene_board_judgement.h"
 
 using namespace testing;
@@ -54,6 +55,9 @@ void AbstractScreenTest::SetUpTestCase()
 
 void AbstractScreenTest::TearDownTestCase()
 {
+#ifdef RS_ENABLE_VK
+    RSModifiersDrawThread::Destroy();
+#endif
 }
 
 void AbstractScreenTest::SetUp()
