@@ -6550,20 +6550,19 @@ WMError WindowSceneSessionImpl::SetCustomDensity(float density, bool applyToSubW
     defaultDensityEnabledGlobalConfig_ = false;
     SetDefaultDensityEnabledValue(false);
     customDensity_ = density;
-    if (applyToSubWindow) {
-        std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
-        for (const auto& winPair : windowSessionMap_) {
-            auto window = winPair.second.second;
-            if (window == nullptr) {
-                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is nullptr");
-                continue;
-            }
-            TLOGD(WmsLogTag::WMS_ATTRIBUTE, "Id=%{public}d UpdateDensity", window->GetWindowId());
-            window->SetDefaultDensityEnabledValue(false);
+    window->UpdateDensity();
+    std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
+    for (const auto& winPair : windowSessionMap_) {
+        auto window = winPair.second.second;
+        if (window == nullptr) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is nullptr");
+            continue;
+        }
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "Id=%{public}d UpdateDensity", window->GetWindowId());
+        window->SetDefaultDensityEnabledValue(false);
+        if (applyToSubWindow) {
             window->UpdateDensity();
         }
-    } else {
-        UpdateDensity();
     }
     return WMError::WM_OK;
 }
