@@ -122,15 +122,7 @@ private:
 
     uint32_t GetFoldCreaseHeight() const;
     DMError RefreshMirrorRegionInner(sptr<ScreenSession>& mainScreenSession, sptr<ScreenSession>& secondarySession);
-    DMError RefreshScreenRelativePosition(sptr<ScreenSession>& mainScreenSession,
-        sptr<ScreenSession>& secondarySession);
-    void RefreshScreenRelativePositionInner(const Drawing::Rect& innerScreenRect,
-        const Drawing::Rect& outerScreenRect, MultiScreenPositionOptions& mainScreenOptions,
-        MultiScreenPositionOptions& secondScreenOption);
-    ScreenDirectionType GetOuterScreenDirection(const Drawing::Rect& innerScreenRect,
-        const Drawing::Rect& outerScreenRect);
-    void CalculateScreenRelativePosition(const Drawing::Rect& innerScreenRect, const Drawing::Rect& outerScreenRect,
-        const MultiScreenPositionOptions& mainScreenOptions, int32_t& secondStartX, int32_t& secondStartY);
+    DMError ForceChangeMirrorMode(sptr<ScreenSession>& mainScreenSession, sptr<ScreenSession>& secondarySession);
 };
 } // Rosen
 } // OHOS
