@@ -7156,7 +7156,7 @@ WMError SceneSession::OnUpdateColorMode(const std::string& colorMode, bool hasDa
 {
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, colorMode: %{public}s, hasDarkRes: %{public}u",
           GetPersistentId(), colorMode.c_str(), hasDarkRes);
-    std::lock_guard<std::mutex> lock(colorModeMutex_);
+    std::lock_guard lock(colorModeMutex_);
     colorMode_ = colorMode;
     hasDarkRes_ = hasDarkRes;
     return WMError::WM_OK;
@@ -7164,7 +7164,7 @@ WMError SceneSession::OnUpdateColorMode(const std::string& colorMode, bool hasDa
 
 std::string SceneSession::GetAbilityColorMode() const
 {
-    std::lock_guard<std::mutex> lock(colorModeMutex_);
+    std::lock_guard lock(colorModeMutex_);
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, colorMode: %{public}s, hasDarkRes: %{public}u",
         GetPersistentId(), colorMode_.c_str(), hasDarkRes_);
     if (colorMode_ == AppExecFwk::ConfigurationInner::COLOR_MODE_DARK && !hasDarkRes_) {
