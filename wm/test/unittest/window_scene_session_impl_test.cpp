@@ -1896,6 +1896,28 @@ HWTEST_F(WindowSceneSessionImplTest, SetLayoutFullScreenByApiVersion, TestSize.L
 }
 
 /**
+ * @tc.name: SetIgnoreSafeArea
+ * @tc.desc: SetIgnoreSafeArea test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, SetIgnoreSafeArea, TestSize.Level0)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetIgnoreSafeArea");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetIgnoreSafeArea(false));
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_SHOWN;
+    window->property_->SetPersistentId(1);
+    EXPECT_EQ(WMError::WM_OK, window->SetIgnoreSafeArea(false));
+    EXPECT_FALSE(window->isIgnoreSafeArea_);
+    EXPECT_EQ(WMError::WM_OK, window->SetIgnoreSafeArea(true));
+    EXPECT_TRUE(window->isIgnoreSafeArea_);
+}
+
+/**
  * @tc.name: SetGlobalMaximizeMode
  * @tc.desc: SetGlobalMaximizeMode test
  * @tc.type: FUNC

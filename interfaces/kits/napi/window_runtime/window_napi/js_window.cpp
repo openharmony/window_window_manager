@@ -3191,6 +3191,7 @@ napi_value JsWindow::OnSetWindowLayoutFullScreen(napi_env env, napi_callback_inf
             // compatibleMode app adapt to immersive need apply avoidArea method
             if (window->IsPcOrPadFreeMultiWindowMode() && !window->IsAdaptToCompatibleImmersive()) {
                 TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s device not support", where);
+                window->SetIgnoreSafeArea(isLayoutFullScreen);
                 task.Resolve(env, NapiGetUndefined(env));
                 return;
             }
@@ -7902,10 +7903,6 @@ napi_value JsWindow::OnSetImmersiveModeEnabledState(napi_env env, napi_callback_
         TLOGE(WmsLogTag::WMS_IMMS, "not allowed since invalid window type");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
-    if (windowToken_->IsPcOrPadFreeMultiWindowMode()) {
-        TLOGE(WmsLogTag::WMS_IMMS, "device not support");
-        return NapiGetUndefined(env);
-    }
     napi_value nativeVal = argv[0];
     if (nativeVal == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to enable");
@@ -7914,6 +7911,11 @@ napi_value JsWindow::OnSetImmersiveModeEnabledState(napi_env env, napi_callback_
     bool enable = true;
     napi_get_value_bool(env, nativeVal, &enable);
     TLOGI(WmsLogTag::WMS_IMMS, "enable %{public}d", static_cast<int32_t>(enable));
+    if (windowToken_->IsPcOrPadFreeMultiWindowMode()) {
+        TLOGE(WmsLogTag::WMS_IMMS, "device not support");
+        windowToken_->SetIgnoreSafeArea(enable);
+        return NapiGetUndefined(env);
+    }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetImmersiveModeEnabledState(enable));
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_IMMS, "set failed, ret %{public}d", ret);

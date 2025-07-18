@@ -2749,6 +2749,11 @@ WMError WindowSceneSessionImpl::NotifyWindowNeedAvoid(bool status)
     return WMError::WM_OK;
 }
 
+WMError WindowSceneSessionImpl::SetIgnoreSafeArea(bool isIgnoreSafeArea)
+{
+    return SetLayoutFullScreenByApiVersion(isIgnoreSafeArea);
+}
+
 WMError WindowSceneSessionImpl::SetLayoutFullScreenByApiVersion(bool status)
 {
     if (IsWindowSessionInvalid()) {
