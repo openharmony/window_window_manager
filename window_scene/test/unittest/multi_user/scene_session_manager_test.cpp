@@ -93,7 +93,11 @@ HWTEST_F(SceneSessionManagerTest, IsPcSceneSessionLifecycle2, Function | SmallTe
     ASSERT_NE(nullptr, sceneSession);
     sceneSession->property_->SetIsAppSupportPhoneInPc(false);
     sceneSession->property_->SetIsPcAppInPad(true);
+    sceneSession->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
 
+    bool ret = ssm_->IsPcSceneSessionLifecycle(sceneSession);
+    EXPECT_EQ(ret, false);
+    sceneSession->systemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;;
     bool ret = ssm_->IsPcSceneSessionLifecycle(sceneSession);
     EXPECT_TRUE(ret);
 }
