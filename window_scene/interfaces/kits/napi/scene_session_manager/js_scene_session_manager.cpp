@@ -2107,7 +2107,9 @@ napi_value JsSceneSessionManager::OnRequestSceneSessionActivation(napi_env env, 
 
     bool isNewActive = true;
     ConvertFromJsValue(env, argv[1], isNewActive);
-    SceneSessionManager::GetInstance().RequestSceneSessionActivation(sceneSession, isNewActive);
+    int32_t requestId = DEFAULT_REQUEST_FROM_SCB_ID;
+    ConvertFromJsValue(env, argv[ARG_INDEX_TWO], requestId);
+    SceneSessionManager::GetInstance().RequestSceneSessionActivation(sceneSession, isNewActive, requestId);
     return NapiGetUndefined(env);
 }
 
@@ -2345,7 +2347,7 @@ napi_value JsSceneSessionManager::OnRequestSceneSessionByCall(napi_env env, napi
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < ARGC_ONE) {
+    if (argc < ARGC_TWO) {
         WLOGFE("Argc is invalid: %{public}zu", argc);
         errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
     }
@@ -2381,7 +2383,9 @@ napi_value JsSceneSessionManager::OnRequestSceneSessionByCall(napi_env env, napi
         return NapiGetUndefined(env);
     }
 
-    SceneSessionManager::GetInstance().RequestSceneSessionByCall(sceneSession);
+    int32_t requestId = DEFAULT_REQUEST_FROM_SCB_ID;
+    ConvertFromJsValue(env, argv[1], requestId);
+    SceneSessionManager::GetInstance().RequestSceneSessionByCall(sceneSession, requestId);
     return NapiGetUndefined(env);
 }
 
