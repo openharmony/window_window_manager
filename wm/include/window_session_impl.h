@@ -790,6 +790,7 @@ protected:
     /*
      * Window Property
      */
+    std::string colorMode_;
     std::unordered_set<std::string> containerColorList_;
     float lastSystemDensity_ = UNDEFINED_DENSITY;
     WSError NotifySystemDensityChange(float density);
