@@ -19,8 +19,10 @@
 #include "input_event.h"
 #include "key_event.h"
 #include "mock/mock_session_stage.h"
+#include "modifier_render_thread/rs_modifiers_draw_thread.h"
 #include "pointer_event.h"
 
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session/host/include/main_session.h"
 #include "session/host/include/keyboard_session.h"
 #define PRIVATE public
@@ -40,15 +42,36 @@ namespace OHOS {
 namespace Rosen {
 class SceneSessionAnimationTest : public testing::Test {
 public:
+    SceneSessionAnimationTest();
     static void SetUpTestCase();
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+
+private:
+    sptr<ScreenSession> defaultScreenSession_;
+    ScreenSessionManagerClient& ssmClient_;
 };
+
+SceneSessionAnimationTest::SceneSessionAnimationTest() : ssmClient_(ScreenSessionManagerClient::GetInstance())
+{
+    constexpr ScreenId defaultScreenId = 1001;
+    auto screenProperty = ScreenProperty();
+    defaultScreenSession_ = sptr<ScreenSession>::MakeSptr(defaultScreenId, screenProperty, defaultScreenId);
+    {
+        std::lock_guard<std::mutex> lock(ssmClient_.screenSessionMapMutex_);
+        ssmClient_.screenSessionMap_[defaultScreenId] = defaultScreenSession_;
+    }
+}
 
 void SceneSessionAnimationTest::SetUpTestCase() {}
 
-void SceneSessionAnimationTest::TearDownTestCase() {}
+void SceneSessionAnimationTest::TearDownTestCase()
+{
+#ifdef RS_ENABLE_VK
+    RSModifiersDrawThread::Destroy();
+#endif
+}
 
 void SceneSessionAnimationTest::SetUp() {}
 
@@ -103,6 +126,7 @@ HWTEST_F(SceneSessionAnimationTest, AddSidebarBlur01, TestSize.Level1)
     info.bundleName_ = "AddSidebarBlur01";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
+    session->SetScreenId(defaultScreenSession_->GetScreenId());
 
     struct RSSurfaceNodeConfig surfaceNodeConfig;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig);
@@ -114,7 +138,7 @@ HWTEST_F(SceneSessionAnimationTest, AddSidebarBlur01, TestSize.Level1)
     EXPECT_EQ(nullptr, session->blurBrightnessValue_);
     EXPECT_EQ(nullptr, session->blurMaskColorValue_);
 
-    session->surfaceNode_ = surfaceNode;
+    session->SetSurfaceNode(surfaceNode);
     EXPECT_NE(nullptr, session->GetSurfaceNode());
 
     AbilityRuntime::Context::applicationContext_ = std::make_shared<AbilityRuntime::ApplicationContext>();
@@ -148,6 +172,7 @@ HWTEST_F(SceneSessionAnimationTest, AddSidebarBlur02, TestSize.Level1)
     info.bundleName_ = "AddSidebarBlur02";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
+    session->SetScreenId(defaultScreenSession_->GetScreenId());
 
     struct RSSurfaceNodeConfig surfaceNodeConfig;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig);
@@ -159,7 +184,7 @@ HWTEST_F(SceneSessionAnimationTest, AddSidebarBlur02, TestSize.Level1)
     EXPECT_EQ(nullptr, session->blurBrightnessValue_);
     EXPECT_EQ(nullptr, session->blurMaskColorValue_);
 
-    session->surfaceNode_ = surfaceNode;
+    session->SetSurfaceNode(surfaceNode);
     EXPECT_NE(nullptr, session->GetSurfaceNode());
 
     AbilityRuntime::Context::applicationContext_ = std::make_shared<AbilityRuntime::ApplicationContext>();
@@ -193,11 +218,12 @@ HWTEST_F(SceneSessionAnimationTest, AddSidebarBlur03, TestSize.Level1)
     info.bundleName_ = "AddSidebarBlur03";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
+    session->SetScreenId(defaultScreenSession_->GetScreenId());
 
     struct RSSurfaceNodeConfig surfaceNodeConfig;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig);
     EXPECT_EQ(nullptr, session->GetSurfaceNode());
-    session->surfaceNode_ = surfaceNode;
+    session->SetSurfaceNode(surfaceNode);
     EXPECT_NE(nullptr, session->GetSurfaceNode());
 
     AbilityRuntime::Context::applicationContext_ = std::make_shared<AbilityRuntime::ApplicationContext>();
@@ -235,11 +261,12 @@ HWTEST_F(SceneSessionAnimationTest, AddSidebarBlur04, TestSize.Level1)
     info.bundleName_ = "AddSidebarBlur04";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
+    session->SetScreenId(defaultScreenSession_->GetScreenId());
 
     struct RSSurfaceNodeConfig surfaceNodeConfig;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig);
     EXPECT_EQ(nullptr, session->GetSurfaceNode());
-    session->surfaceNode_ = surfaceNode;
+    session->SetSurfaceNode(surfaceNode);
     EXPECT_NE(nullptr, session->GetSurfaceNode());
 
     AbilityRuntime::Context::applicationContext_ = std::make_shared<AbilityRuntime::ApplicationContext>();
@@ -277,6 +304,7 @@ HWTEST_F(SceneSessionAnimationTest, SetSidebarBlur01, TestSize.Level1)
     info.bundleName_ = "SetSidebarBlur01";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
+    session->SetScreenId(defaultScreenSession_->GetScreenId());
 
     struct RSSurfaceNodeConfig surfaceNodeConfig;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig);
@@ -288,7 +316,7 @@ HWTEST_F(SceneSessionAnimationTest, SetSidebarBlur01, TestSize.Level1)
     EXPECT_EQ(nullptr, session->blurBrightnessValue_);
     EXPECT_EQ(nullptr, session->blurMaskColorValue_);
 
-    session->surfaceNode_ = surfaceNode;
+    session->SetSurfaceNode(surfaceNode);
     EXPECT_NE(nullptr, session->GetSurfaceNode());
 
     AbilityRuntime::Context::applicationContext_ = std::make_shared<AbilityRuntime::ApplicationContext>();
@@ -322,6 +350,7 @@ HWTEST_F(SceneSessionAnimationTest, SetSidebarBlur02, TestSize.Level1)
     info.bundleName_ = "SetSidebarBlur02";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
+    session->SetScreenId(defaultScreenSession_->GetScreenId());
 
     struct RSSurfaceNodeConfig surfaceNodeConfig;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig);
@@ -333,7 +362,7 @@ HWTEST_F(SceneSessionAnimationTest, SetSidebarBlur02, TestSize.Level1)
     EXPECT_EQ(nullptr, session->blurBrightnessValue_);
     EXPECT_EQ(nullptr, session->blurMaskColorValue_);
 
-    session->surfaceNode_ = surfaceNode;
+    session->SetSurfaceNode(surfaceNode);
     EXPECT_NE(nullptr, session->GetSurfaceNode());
 
     AbilityRuntime::Context::applicationContext_ = std::make_shared<AbilityRuntime::ApplicationContext>();
@@ -367,11 +396,12 @@ HWTEST_F(SceneSessionAnimationTest, SetSidebarBlur03, TestSize.Level1)
     info.bundleName_ = "SetSidebarBlur03";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
+    session->SetScreenId(defaultScreenSession_->GetScreenId());
 
     struct RSSurfaceNodeConfig surfaceNodeConfig;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig);
     EXPECT_EQ(nullptr, session->GetSurfaceNode());
-    session->surfaceNode_ = surfaceNode;
+    session->SetSurfaceNode(surfaceNode);
     EXPECT_NE(nullptr, session->GetSurfaceNode());
 
     AbilityRuntime::Context::applicationContext_ = std::make_shared<AbilityRuntime::ApplicationContext>();
@@ -420,11 +450,12 @@ HWTEST_F(SceneSessionAnimationTest, SetSidebarBlur04, TestSize.Level1)
     info.bundleName_ = "SetSidebarBlur04";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
+    session->SetScreenId(defaultScreenSession_->GetScreenId());
 
     struct RSSurfaceNodeConfig surfaceNodeConfig;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig);
     EXPECT_EQ(nullptr, session->GetSurfaceNode());
-    session->surfaceNode_ = surfaceNode;
+    session->SetSurfaceNode(surfaceNode);
     EXPECT_NE(nullptr, session->GetSurfaceNode());
 
     AbilityRuntime::Context::applicationContext_ = std::make_shared<AbilityRuntime::ApplicationContext>();
@@ -473,11 +504,12 @@ HWTEST_F(SceneSessionAnimationTest, SetSidebarBlurMaximize01, TestSize.Level1)
     info.bundleName_ = "SetSidebarBlurMaximize01";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
+    session->SetScreenId(defaultScreenSession_->GetScreenId());
 
     struct RSSurfaceNodeConfig surfaceNodeConfig;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig);
     EXPECT_EQ(nullptr, session->GetSurfaceNode());
-    session->surfaceNode_ = surfaceNode;
+    session->SetSurfaceNode(surfaceNode);
     EXPECT_NE(nullptr, session->GetSurfaceNode());
 
     AbilityRuntime::Context::applicationContext_ = std::make_shared<AbilityRuntime::ApplicationContext>();
@@ -526,11 +558,12 @@ HWTEST_F(SceneSessionAnimationTest, SetSidebarBlurMaximize02, TestSize.Level1)
     info.bundleName_ = "SetSidebarBlurMaximize02";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
+    session->SetScreenId(defaultScreenSession_->GetScreenId());
 
     struct RSSurfaceNodeConfig surfaceNodeConfig;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig);
     EXPECT_EQ(nullptr, session->GetSurfaceNode());
-    session->surfaceNode_ = surfaceNode;
+    session->SetSurfaceNode(surfaceNode);
     EXPECT_NE(nullptr, session->GetSurfaceNode());
 
     AbilityRuntime::Context::applicationContext_ = std::make_shared<AbilityRuntime::ApplicationContext>();
