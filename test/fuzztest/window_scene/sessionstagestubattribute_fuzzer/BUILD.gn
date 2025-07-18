@@ -18,7 +18,7 @@ import("../../../../windowmanager_aafwk.gni")
 module_output_path = "window_manager/window_manager"
 
 ##############################fuzztest##########################################
-ohos_fuzztest("SessionStageStubAttributeFuzzTest") {La
+ohos_fuzztest("SessionStageStubAttributeFuzzTest") {
   fuzz_config_file = "."
   module_out_path = module_output_path
 
