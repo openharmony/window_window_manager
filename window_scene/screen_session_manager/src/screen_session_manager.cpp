@@ -6479,7 +6479,7 @@ bool ScreenSessionManager::OnRemoteDied(const sptr<IRemoteObject>& agent)
         }
     }
     bool ret = true;
-    for (const auto& screenId : screenVecCopy) {
+    for (const auto screenId : screenVecCopy) {
         auto screenSession = GetScreenSession(screenId);
         if (screenSession && screenSession->GetScreenCombination() == ScreenCombination::SCREEN_MIRROR) {
             TLOGI(WmsLogTag::DMS, "stop mirror in OnRemoteDied: %{public}" PRIu64, screenId);
