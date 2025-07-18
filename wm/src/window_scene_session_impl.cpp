@@ -5634,7 +5634,7 @@ WMError WindowSceneSessionImpl::SetDefaultDensityEnabled(bool enabled)
         hostSession->OnDefaultDensityEnabled(enabled);
     }
 
-    defaultDensityEnabledGlobalConfig_ = enable;
+    defaultDensityEnabledGlobalConfig_ = enabled;
     SetDefaultDensityEnabledValue(enabled);
 
     std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
@@ -6550,7 +6550,7 @@ WMError WindowSceneSessionImpl::SetCustomDensity(float density, bool applyToSubW
     defaultDensityEnabledGlobalConfig_ = false;
     SetDefaultDensityEnabledValue(false);
     customDensity_ = density;
-    window->UpdateDensity();
+    UpdateDensity();
     std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
     for (const auto& winPair : windowSessionMap_) {
         auto window = winPair.second.second;
