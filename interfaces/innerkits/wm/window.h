@@ -3824,6 +3824,13 @@ public:
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) {}
 
     /**
+     * @brief Set touch event
+     *
+     * @param touchType int32_t.
+     */
+    virtual void SetTouchEvent(int32_t touchType) {}
+
+    /**
      * @brief Set whether to enable immersive mode.
      * @param enable the value true means to enable immersive mode, and false means the opposite.
      * @return WM_OK means set success, others means set failed.
