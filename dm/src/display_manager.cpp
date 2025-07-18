@@ -2080,6 +2080,10 @@ DMError DisplayManager::Impl::UnregisterAvailableAreaListener(sptr<IAvailableAre
 
 void DisplayManager::Impl::NotifyScreenshot(sptr<ScreenshotInfo> info)
 {
+    if (info == nullptr) {
+        TLOGE(WmsLogTag::DMS, "info is null");
+        return;
+    }
     std::set<sptr<IScreenshotListener>> screenshotListeners;
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
