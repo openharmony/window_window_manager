@@ -7882,11 +7882,12 @@ void WindowSessionImpl::SwitchSubWindow(int32_t parentId)
     }
     std::lock_guard<std::recursive_mutex> lock(subWindowSessionMutex_);
     for (auto& subWindowSession : subWindowSessionMap_.at(parentId)) {
-        subWindowSession->UpdateTitleButtonVisibility();
-        subWindowSession->UpdateDecorEnable(true);
-        subWindowSession->SwitchSubWindow(subWindowSession->GetPersistentId());
+        if (subWindowSession != nullptr) {
+            subWindowSession->UpdateTitleButtonVisibility();
+            subWindowSession->UpdateDecorEnable(true);
+            subWindowSession->SwitchSubWindow(subWindowSession->GetPersistentId());
+        }
     }
-
 }
 } // namespace Rosen
 } // namespace OHOS
