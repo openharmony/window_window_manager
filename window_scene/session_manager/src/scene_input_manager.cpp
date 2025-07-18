@@ -525,13 +525,17 @@ void DumpUIExtentionWindowInfo(const MMI::WindowInfo& windowInfo)
         return;
     }
     auto surfaceId = surfaceNode->GetId();
-    TLOGI(WmsLogTag::WMS_EVENT, "wid:%{public}d sid:%{public}" PRIu64 " uiExtWindowInfo:%{public}d",
-        windowInfo.id, surfaceId, static_cast<int>(windowInfo.uiExtentionWindowInfo.size()));
+    std::ostringstream dumpUecWindowInfo;
+    dumpUecWindowInfo << "DumpUecWindowInfo:" << windowInfo.id << ";"<< surfaceId;
+    dumpUecWindowInfo << ";" << windowInfo.uiExtentionWindowInfo.size();
     for (const auto& uiExtWindowInfo : windowInfo.uiExtentionWindowInfo) {
         auto str = DumpWindowInfo(uiExtWindowInfo);
         str = "sec:" + std::to_string(uiExtWindowInfo.privacyUIFlag) + " " + str;
-        TLOGI(WmsLogTag::WMS_EVENT, "uecInfo:%{public}s", str.c_str());
+        dumpUecWindowInfo << ";{" << str << "}";
     }
+    TLOGND(WmsLogTag::WMS_EVENT, "DumpUecWindowInfo: wid;surfaceId;uecInfoSize"
+        "{wInfo:wId|pid|uid|[x,y,width,height]|agentWindowId|flags|displayId|action|zOrder,hot:[x,y,width,height]}");
+    TLOGNI(WmsLogTag::WMS_EVENT, "%{public}s", dumpUecWindowInfo.str().c_str());
 }
 
 void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& windowInfoList)
