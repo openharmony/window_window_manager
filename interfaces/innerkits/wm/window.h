@@ -3819,7 +3819,6 @@ public:
      * @brief Set touch event
      *
      * @param touchType int32_t.
-     * @return * void
      */
     virtual void SetTouchEvent(int32_t touchType) {}
 
