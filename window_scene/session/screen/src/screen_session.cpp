@@ -1876,7 +1876,7 @@ ScreenSessionGroup::ScreenSessionGroup(ScreenId screenId, ScreenId rsId,
 ScreenSessionGroup::~ScreenSessionGroup()
 {
     ReleaseDisplayNode();
-    std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
+    std::unique_lock<std::shared_mutex> lock(screenSessionMapMutex_);
     screenSessionMap_.clear();
 }
 
@@ -1931,7 +1931,7 @@ bool ScreenSessionGroup::AddChild(sptr<ScreenSession>& smsScreen, Point& startPo
     }
     ScreenId screenId = smsScreen->screenId_;
     {
-        std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
+        std::shared_lock<std::shared_mutex> lock(screenSessionMapMutex_);
         auto iter = screenSessionMap_.find(screenId);
         if (iter != screenSessionMap_.end()) {
             TLOGE(WmsLogTag::DMS, "AddChild, screenSessionMap_ has smsScreen:%{public}" PRIu64"", screenId);
@@ -1946,7 +1946,7 @@ bool ScreenSessionGroup::AddChild(sptr<ScreenSession>& smsScreen, Point& startPo
     smsScreen->lastGroupSmsId_ = smsScreen->groupSmsId_;
     smsScreen->groupSmsId_ = screenId_;
     {
-        std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
+        std::unique_lock<std::shared_mutex> lock(screenSessionMapMutex_);
         screenSessionMap_.insert(std::make_pair(screenId, std::make_pair(smsScreen, startPoint)));
     }
     return true;
@@ -1984,19 +1984,19 @@ bool ScreenSessionGroup::RemoveChild(sptr<ScreenSession>& smsScreen)
     displayNode = nullptr;
     // attention: make sure reference count 0
     RSTransactionAdapter::FlushImplicitTransaction(smsScreen->GetRSUIContext());
-    std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
+    std::unique_lock<std::shared_mutex> lock(screenSessionMapMutex_);
     return screenSessionMap_.erase(screenId);
 }
 
 bool ScreenSessionGroup::HasChild(ScreenId childScreen) const
 {
-    std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
+    std::shared_lock<std::shared_mutex> lock(screenSessionMapMutex_);
     return screenSessionMap_.find(childScreen) != screenSessionMap_.end();
 }
 
 std::vector<sptr<ScreenSession>> ScreenSessionGroup::GetChildren() const
 {
-    std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
+    std::shared_lock<std::shared_mutex> lock(screenSessionMapMutex_);
     std::vector<sptr<ScreenSession>> res;
     for (auto iter = screenSessionMap_.begin(); iter != screenSessionMap_.end(); iter++) {
         res.push_back(iter->second.first);
@@ -2006,7 +2006,7 @@ std::vector<sptr<ScreenSession>> ScreenSessionGroup::GetChildren() const
 
 std::vector<Point> ScreenSessionGroup::GetChildrenPosition() const
 {
-    std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
+    std::shared_lock<std::shared_mutex> lock(screenSessionMapMutex_);
     std::vector<Point> res;
     for (auto iter = screenSessionMap_.begin(); iter != screenSessionMap_.end(); iter++) {
         res.push_back(iter->second.second);
@@ -2016,7 +2016,7 @@ std::vector<Point> ScreenSessionGroup::GetChildrenPosition() const
 
 Point ScreenSessionGroup::GetChildPosition(ScreenId screenId) const
 {
-    std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
+    std::shared_lock<std::shared_mutex> lock(screenSessionMapMutex_);
     Point point{};
     auto iter = screenSessionMap_.find(screenId);
     if (iter != screenSessionMap_.end()) {
@@ -2027,7 +2027,7 @@ Point ScreenSessionGroup::GetChildPosition(ScreenId screenId) const
 
 size_t ScreenSessionGroup::GetChildCount() const
 {
-    std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
+    std::shared_lock<std::shared_mutex> lock(screenSessionMapMutex_);
     return screenSessionMap_.size();
 }
 
@@ -2045,7 +2045,7 @@ sptr<ScreenGroupInfo> ScreenSessionGroup::ConvertToScreenGroupInfo() const
     FillScreenInfo(screenGroupInfo);
     screenGroupInfo->combination_ = combination_;
     {
-        std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
+        std::shared_lock<std::shared_mutex> lock(screenSessionMapMutex_);
         for (auto iter = screenSessionMap_.begin(); iter != screenSessionMap_.end(); iter++) {
             screenGroupInfo->children_.push_back(iter->first);
         }
