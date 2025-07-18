@@ -286,6 +286,13 @@ void VsyncStation::SetUiDvsyncSwitch(bool dvsyncSwitch)
     }
 }
 
+void VsyncStation::SetTouchEvent(int32_t touchType)
+{
+    if (auto receiver = GetOrCreateVsyncReceiver()) {
+        receiver->SetTouchEvent(touchType);
+    }
+}
+
 void VsyncStation::DecreaseRequestVsyncTimes()
 {
     int32_t current = 0;

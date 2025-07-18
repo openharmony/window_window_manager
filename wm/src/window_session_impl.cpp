@@ -7225,6 +7225,15 @@ void WindowSessionImpl::SetUiDvsyncSwitch(bool dvsyncSwitch)
     vsyncStation_->SetUiDvsyncSwitch(dvsyncSwitch);
 }
 
+void WindowSessionImpl::SetTouchEvent(int32_t touchType)
+{
+    if (vsyncStation_ == nullptr) {
+        TLOGW(WmsLogTag::WMS_MAIN, "vsyncStation is null");
+        return;
+    }
+    vsyncStation_->SetTouchEvent(touchType);
+}
+
 WSError WindowSessionImpl::NotifyAppForceLandscapeConfigUpdated()
 {
     return WSError::WS_DO_NOTHING;
