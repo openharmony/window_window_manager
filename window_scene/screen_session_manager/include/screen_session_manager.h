@@ -675,6 +675,7 @@ private:
     std::mutex lastStatusUpdateMutex_;
 
     mutable std::recursive_mutex screenSessionMapMutex_;
+    std::mutex screenAgentMapMutex_;
     std::map<ScreenId, sptr<ScreenSession>> screenSessionMap_;
     mutable std::recursive_mutex physicalScreenSessionMapMutex_;
     std::map<ScreenId, sptr<ScreenSession>> physicalScreenSessionMap_;
@@ -748,6 +749,7 @@ private:
     int32_t screenOnDelay_ {0};
 
     std::vector<ScreenId> mirrorScreenIds_;
+    std::mutex mirrorScreenIdsMutex_;
     std::mutex snapBypickerMutex_;
     std::mutex switchUserMutex_;
     std::condition_variable switchUserCV_;

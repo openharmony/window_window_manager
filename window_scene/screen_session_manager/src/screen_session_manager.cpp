@@ -596,7 +596,10 @@ void ScreenSessionManager::ConfigureScreenScene()
         Orientation orientation = static_cast<Orientation>(numbersConfig["buildInDefaultOrientation"][0]);
         TLOGD(WmsLogTag::DMS, "orientation = %{public}d", orientation);
     }
-    allDisplayPhysicalResolution_ = ScreenSceneConfig::GetAllDisplayPhysicalConfig();
+    {
+        std::lock_guard<std::mutex> lock(allDisplayPhysicalResolutionMutex_);
+        allDisplayPhysicalResolution_ = ScreenSceneConfig::GetAllDisplayPhysicalConfig();
+    }
 }
 
 void ScreenSessionManager::ConfigureDpi()
@@ -1103,18 +1106,21 @@ void ScreenSessionManager::SetMultiScreenDefaultRelativePosition()
     MultiScreenPositionOptions extendOptions;
     sptr<ScreenSession> mainSession = nullptr;
     sptr<ScreenSession> extendSession = nullptr;
-    for (auto sessionIt : screenSessionMap_) {
-        auto screenSession = sessionIt.second;
-        if (screenSession == nullptr) {
-            TLOGI(WmsLogTag::DMS, "screenSession is nullptr, ScreenId: %{public}" PRIu64,
-                sessionIt.first);
-            continue;
-        }
-        if (screenSession->GetIsRealScreen()) {
-            if (screenSession->GetIsExtend() && extendSession == nullptr) {
-                extendSession = screenSession;
-            } else {
-                mainSession = screenSession;
+    {
+        std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+        for (auto sessionIt : screenSessionMap_) {
+            auto screenSession = sessionIt.second;
+            if (screenSession == nullptr) {
+                TLOGI(WmsLogTag::DMS, "screenSession is nullptr, ScreenId: %{public}" PRIu64,
+                    sessionIt.first);
+                continue;
+            }
+            if (screenSession->GetIsRealScreen()) {
+                if (screenSession->GetIsExtend() && extendSession == nullptr) {
+                    extendSession = screenSession;
+                } else {
+                    mainSession = screenSession;
+                }
             }
         }
     }
@@ -1339,20 +1345,23 @@ void ScreenSessionManager::UnregisterSettingWireCastObserver(ScreenId screenId)
     if (g_isPcDevice) {
         return;
     }
-    for (const auto& sessionIt : screenSessionMap_) {
-        auto screenSession = sessionIt.second;
-        if (screenSession == nullptr) {
-            TLOGE(WmsLogTag::DMS, "screenSession is nullptr, screenId:%{public}" PRIu64"", sessionIt.first);
-            continue;
-        }
-        bool phyMirrorEnable = IsDefaultMirrorMode(screenSession->GetScreenId());
-        if (screenSession->GetScreenProperty().GetScreenType() != ScreenType::REAL || !phyMirrorEnable) {
-            TLOGE(WmsLogTag::DMS, "screen is not real or external, screenId:%{public}" PRIu64"", sessionIt.first);
-            continue;
-        }
-        if (screenSession ->GetScreenCombination() == ScreenCombination::SCREEN_MIRROR &&
-            screenSession->GetScreenId() != screenId) {
-            return;
+    {
+        std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+        for (const auto& sessionIt : screenSessionMap_) {
+            auto screenSession = sessionIt.second;
+            if (screenSession == nullptr) {
+                TLOGE(WmsLogTag::DMS, "screenSession is nullptr, screenId:%{public}" PRIu64"", sessionIt.first);
+                continue;
+            }
+            bool phyMirrorEnable = IsDefaultMirrorMode(screenSession->GetScreenId());
+            if (screenSession->GetScreenProperty().GetScreenType() != ScreenType::REAL || !phyMirrorEnable) {
+                TLOGE(WmsLogTag::DMS, "screen is not real or external, screenId:%{public}" PRIu64"", sessionIt.first);
+                continue;
+            }
+            if (screenSession ->GetScreenCombination() == ScreenCombination::SCREEN_MIRROR &&
+                screenSession->GetScreenId() != screenId) {
+                return;
+            }
         }
     }
     ScreenSettingHelper::UnregisterSettingWireCastObserver();
@@ -2776,10 +2785,13 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
         return screenSession;
     }
 
-    if (g_isPcDevice && phyScreenPropMap_.size() > 1) {
-        // pc is none, pad&&phone is mirror
-        TLOGW(WmsLogTag::DMS, "Only Support one External screen.");
-        return nullptr;
+    if (g_isPcDevice) {
+        std::lock_guard<std::recursive_mutex> lock_phy(phyScreenPropMapMutex_);
+        if (phyScreenPropMap_.size() > 1) {
+            // pc is none, pad&&phone is mirror
+            TLOGW(WmsLogTag::DMS, "Only Support one External screen.");
+            return nullptr;
+        }
     }
     screenIdManager_.UpdateScreenId(screenId, screenId);
 
@@ -3290,6 +3302,10 @@ void ScreenSessionManager::BlockScreenOffByCV(void)
 bool ScreenSessionManager::TryToCancelScreenOff()
 {
     std::lock_guard<std::mutex> notifyLock(sessionDisplayPowerController_->notifyMutex_);
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "Permission denied!");
+        return false;
+    }    
     TLOGI(WmsLogTag::DMS, "[UL_POWER]about to cancel suspend, can:%{public}d, got:%{public}d, need:%{public}d",
         sessionDisplayPowerController_->canCancelSuspendNotify_, gotScreenOffNotify_, needScreenOffNotify_);
     if (sessionDisplayPowerController_->canCancelSuspendNotify_) {
@@ -4669,7 +4685,7 @@ void ScreenSessionManager::AddVirtualScreenDeathRecipient(const sptr<IRemoteObje
         deathRecipient_ =
             new(std::nothrow) AgentDeathRecipient([this](const sptr<IRemoteObject>& agent) { OnRemoteDied(agent); });
     }
-    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+    std::lock_guard<std::mutex> lock(screenAgentMapMutex_);
     if (deathRecipient_ != nullptr) {
         auto agIter = screenAgentMap_.find(displayManagerAgent);
         if (agIter == screenAgentMap_.end()) {
@@ -4943,7 +4959,7 @@ DMError ScreenSessionManager::DestroyVirtualScreen(ScreenId screenId)
     OnVirtualScreenChange(screenId, ScreenEvent::DISCONNECTED);
     ScreenId rsScreenId = SCREEN_ID_INVALID;
     {
-        std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+        std::lock_guard<std::mutex> lock(screenAgentMapMutex_);
         screenIdManager_.ConvertToRsScreenId(screenId, rsScreenId);
         for (auto &agentIter : screenAgentMap_) {
             auto iter = std::find(agentIter.second.begin(), agentIter.second.end(), screenId);
@@ -5120,7 +5136,10 @@ DMError ScreenSessionManager::MakeMirror(ScreenId mainScreenId, std::vector<Scre
 
 void ScreenSessionManager::RegisterCastObserver(std::vector<ScreenId>& mirrorScreenIds)
 {
-    mirrorScreenIds_ = mirrorScreenIds;
+    {
+        std::lock_guard<std::mutex> lock(mirrorScreenIdsMutex_);
+        mirrorScreenIds_ = mirrorScreenIds;
+    }
     TLOGI(WmsLogTag::DMS, "Register Setting cast Observer");
     SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) { SetCastFromSettingData(); };
     ScreenSettingHelper::RegisterSettingCastObserver(updateFunc);
@@ -5136,7 +5155,13 @@ void ScreenSessionManager::SetCastFromSettingData()
     } else {
         TLOGI(WmsLogTag::DMS, "get setting cast success, enable: %{public}u", enable);
     }
-    for (ScreenId screenId : mirrorScreenIds_) {
+
+    std::vector<ScreenId> mirrorScreenIdsCopy;
+    {
+        std::lock_guard<std::mutex> lock(mirrorScreenIdsMutex_);
+        mirrorScreenIdsCopy = mirrorScreenIds_;
+    }
+    for (ScreenId screenId : mirrorScreenIdsCopy) {
         ScreenId rsScreenId;
         if (!screenIdManager_.ConvertToRsScreenId(screenId, rsScreenId)) {
             TLOGE(WmsLogTag::DMS, "No corresponding rsId");
@@ -6450,27 +6475,29 @@ bool ScreenSessionManager::OnRemoteDied(const sptr<IRemoteObject>& agent)
     if (agent == nullptr) {
         return false;
     }
-    auto agentIter = screenAgentMap_.find(agent);
-    if (agentIter != screenAgentMap_.end()) {
-        while (screenAgentMap_[agent].size() > 0) {
-            auto diedId = screenAgentMap_[agent][0];
-            auto screenSession = GetScreenSession(diedId);
-            if (screenSession && screenSession->GetScreenCombination() == ScreenCombination::SCREEN_MIRROR) {
-                std::vector<ScreenId> screenIds;
-                screenIds.emplace_back(diedId);
-                TLOGI(WmsLogTag::DMS, "stop mirror in OnRemoteDied: %{public}" PRIu64, diedId);
-                StopMirror(screenIds);
-            }
-            TLOGI(WmsLogTag::DMS, "destroy screenId in OnRemoteDied: %{public}" PRIu64, diedId);
-            DMError res = DestroyVirtualScreen(diedId);
-            if (res != DMError::DM_OK) {
-                TLOGE(WmsLogTag::DMS, "destroy failed in OnRemoteDied: %{public}" PRIu64, diedId);
-                return false;
-            }
+    std::vector<ScreenId> screenVecCopy;
+    {
+        std::lock_guard<std::mutex> lock(screenAgentMapMutex_);
+        auto agentIter = screenAgentMap_.find(agent);
+        if (agentIter != screenAgentMap_.end()) {
+            screenVecCopy = agentIter->second;
         }
-        screenAgentMap_.erase(agent);
     }
-    return true;
+    bool ret = true;
+    for (const auto screenId : screenVecCopy) {
+        auto screenSession = GetScreenSession(screenId);
+        if (screenSession && screenSession->GetScreenCombination() == ScreenCombination::SCREEN_MIRROR) {
+            TLOGI(WmsLogTag::DMS, "stop mirror in OnRemoteDied: %{public}" PRIu64, screenId);
+            StopMirror(std::vector<ScreenId>(1, screenId));
+        }
+        TLOGI(WmsLogTag::DMS, "destroy screenId in OnRemoteDied: %{public}" PRIu64, screenId);
+        DMError res = DestroyVirtualScreen(screenId);
+        if (res != DMError::DM_OK) {
+            TLOGE(WmsLogTag::DMS, "destroy failed in OnRemoteDied: %{public}" PRIu64, screenId);
+            ret = false;
+        }
+    }
+    return ret;
 }
 
 std::vector<ScreenId> ScreenSessionManager::GetAllValidScreenIds(const std::vector<ScreenId>& screenIds) const
@@ -8610,9 +8637,15 @@ int ScreenSessionManager::Dump(int fd, const std::vector<std::u16string>& args)
         TLOGE(WmsLogTag::DMS, "dumper is nullptr");
         return -1;
     }
-    dumper->DumpFreezedPidList(freezedPidList_);
+    {
+        std::lock_guard<std::mutex> lock(freezedPidListMutex_);
+        dumper->DumpFreezedPidList(freezedPidList_);
+    }
     dumper->DumpEventTracker(screenEventTracker_);
-    dumper->DumpMultiUserInfo(oldScbPids_, currentUserId_, currentScbPId_);
+    {
+        std::lock_guard<std::mutex> lock(oldScbPidsMutex_);
+        dumper->DumpMultiUserInfo(oldScbPids_, currentUserId_, currentScbPId_);
+    }
     dumper->ExecuteDumpCmd();
     TLOGI(WmsLogTag::DMS, "dump end");
     return 0;
@@ -10347,10 +10380,14 @@ sptr<ScreenSession> ScreenSessionManager::GetScreenSessionByRsId(ScreenId rsScre
 
 sptr<ScreenSession> ScreenSessionManager::GetPhysicalScreenSession(ScreenId screenId) const
 {
-    std::lock_guard<std::recursive_mutex> lock(physicalScreenSessionMapMutex_);
-    if (screenSessionMap_.empty()) {
-        screenEventTracker_.LogWarningAllInfos();
+    {
+        std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+        if (screenSessionMap_.empty()) {
+            screenEventTracker_.LogWarningAllInfos();
+        }
     }
+    
+    std::lock_guard<std::recursive_mutex> lock(physicalScreenSessionMapMutex_);
     auto iter = physicalScreenSessionMap_.find(screenId);
     if (iter == physicalScreenSessionMap_.end()) {
         TLOGW(WmsLogTag::DMS, "not found screen id: %{public}" PRIu64, screenId);

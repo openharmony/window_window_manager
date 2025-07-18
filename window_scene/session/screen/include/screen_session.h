@@ -461,6 +461,7 @@ private:
         sptr<ScreenSession> defaultScreenSession);
 
     std::map<ScreenId, std::pair<sptr<ScreenSession>, Point>> screenSessionMap_;
+    mutable std::shared_mutex screenSessionMapMutex_;
 };
 
 } // namespace OHOS::Rosen
