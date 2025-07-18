@@ -2665,6 +2665,22 @@ HWTEST_F(SceneSessionManagerTest12, GetPiPSettingSwitchStatus, Function | SmallT
     EXPECT_EQ(switchStatus, false);
     EXPECT_EQ(ret, WMError::WM_OK);
 }
+
+/**
+ * @tc.name: UpdateScreenLockState
+ * @tc.desc: test function : UpdateScreenLockState
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, UpdateScreenLockState, Function | SmallTest | Level2)
+{
+    int32_t persistentId = -1;
+    auto result = ssm_->UpdateScreenLockState(persistentId);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
+
+    persistentId = 11;
+    result = ssm_->UpdateScreenLockState(persistentId);
+    EXPECT_EQ(result, WMError::WM_OK);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

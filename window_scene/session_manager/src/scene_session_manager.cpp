@@ -16903,4 +16903,20 @@ WMError SceneSessionManager::GetPiPSettingSwitchStatus(bool& switchStatus)
     switchStatus = pipSwitchStatus_;
     return WMError::WM_OK;
 }
+
+WMError SceneSessionManager::UpdateScreenLockState(int32_t persistentId)
+{
+    if (persistentId < 0) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Param is invalid!");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    taskScheduler_->PostAsyncTask([this, persistentId, where = __func__]() {
+        auto sceneSession = GetSceneSession(persistentId);
+        if (sceneSession != nullptr) {
+            HandleKeepScreenOn(sceneSession, sceneSession->IsKeepScreenOn(), WINDOW_SCREEN_LOCK_PREFIX,
+                               sceneSession->keepScreenLock_);
+        }
+    }, __func__);
+    return WMError::WM_OK;
+}
 } // namespace OHOS::Rosen
