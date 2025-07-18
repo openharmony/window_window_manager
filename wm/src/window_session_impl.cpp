@@ -7882,7 +7882,7 @@ void WindowSessionImpl::SwitchSubWindow(int32_t parentId)
     }
     std::lock_guard<std::recursive_mutex> lock(subWindowSessionMutex_);
     for (auto& subWindowSession : subWindowSessionMap_.at(parentId)) {
-        if (subWindowSession != nullptr && property_->IsDecorEnable()) {
+        if (subWindowSession && subWindowSession->property_ && subWindowSession->property_->IsDecorEnable()) {
             subWindowSession->UpdateTitleButtonVisibility();
             subWindowSession->UpdateDecorEnable(true);
             subWindowSession->SwitchSubWindow(subWindowSession->GetPersistentId());
