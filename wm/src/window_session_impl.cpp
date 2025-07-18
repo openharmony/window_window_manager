@@ -308,6 +308,9 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     windowOption_ = option;
     handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
 
+    if (WindowHelper::IsSubWindow(GetType())) {
+        property_->SetDecorEnable(option->GetSubWindowDecorEnable());
+    }
     RSAdapterUtil::InitRSUIDirector(rsUIDirector_, true, true);
 
     surfaceNode_ = CreateSurfaceNode(property_->GetWindowName(), optionWindowType);
@@ -7869,6 +7872,11 @@ WMError WindowSessionImpl::GetPiPSettingSwitchStatus(bool& switchStatus) const
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     return SingletonContainer::Get<WindowAdapter>().GetPiPSettingSwitchStatus(switchStatus);
+}
+
+void WindowSessionImpl::SwitchSubWindow(int32_t parentId)
+{
+    
 }
 } // namespace Rosen
 } // namespace OHOS
