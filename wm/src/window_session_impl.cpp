@@ -308,11 +308,10 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     windowOption_ = option;
     handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
 
+    RSAdapterUtil::InitRSUIDirector(rsUIDirector_, true, true);
     if (WindowHelper::IsSubWindow(GetType())) {
         property_->SetDecorEnable(option->GetSubWindowDecorEnable());
     }
-    RSAdapterUtil::InitRSUIDirector(rsUIDirector_, true, true);
-
     surfaceNode_ = CreateSurfaceNode(property_->GetWindowName(), optionWindowType);
     if (surfaceNode_ != nullptr) {
         vsyncStation_ = std::make_shared<VsyncStation>(surfaceNode_->GetId());
