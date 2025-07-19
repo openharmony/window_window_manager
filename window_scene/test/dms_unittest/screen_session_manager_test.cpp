@@ -7227,6 +7227,20 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenOffsetFeatureTest, Function | SmallT
 }
 
 +/**
++ * @tc.name: SetLapTopLidOpenStatus
++ * @tc.desc: test function : SetLapTopLidOpenStatus
++ * @tc.type: FUNC
++ */
+HWTEST_F(ScreenSessionManagerTest, SetLapTopLidOpenStatus, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+
+    ssm_->SetLapTopLidOpenStatus(true);
+    bool isOpened = ssm_->IsLapTopLidOpen();
+    EXPECT_EQ(true, isOpened);
+}
+
++/**
 + * @tc.name: InitSecondaryDisplayPhysicalParams
 + * @tc.desc: test function : InitSecondaryDisplayPhysicalParams
 + * @tc.type: FUNC

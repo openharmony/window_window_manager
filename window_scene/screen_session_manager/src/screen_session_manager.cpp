@@ -445,6 +445,7 @@ void ScreenSessionManager::OnStart()
     TLOGI(WmsLogTag::DMS, "DMS SA AddSystemAbilityListener");
     (void)AddSystemAbilityListener(SENSOR_SERVICE_ABILITY_ID);
     (void)AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
+    (void)AddSystemAbilityListener(MULTIMODAL_INPUT_SERVICE_ID);
     screenEventTracker_.RecordEvent("Dms AddSystemAbilityListener finished.");
     TLOGI(WmsLogTag::DMS, "end");
     screenEventTracker_.RecordEvent("Dms onstart end.");
@@ -454,6 +455,14 @@ void ScreenSessionManager::OnAddSystemAbility(int32_t systemAbilityId, const std
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "OnAddSystemAbility: %d", systemAbilityId);
     TLOGI(WmsLogTag::DMS, "receive sa add:%{public}d", systemAbilityId);
+    if (systemAbilityId == MULTIMODAL_INPUT_SERVICE_ID) {
+        if (!g_isPcDevice) {
+            TLOGI(WmsLogTag::DMS, "current device is not pc");
+            return;
+        }
+        SwitchSubscriberInit();
+        TLOGI(WmsLogTag::DMS, " SwitchSubscriber finished.");
+    }
     if (systemAbilityId == SENSOR_SERVICE_ABILITY_ID) {
 #if defined(SENSOR_ENABLE) && defined(FOLD_ABILITY_ENABLE)
         if (!g_foldScreenFlag) {
@@ -1366,6 +1375,31 @@ void ScreenSessionManager::UnregisterSettingWireCastObserver(ScreenId screenId)
     }
     ScreenSettingHelper::UnregisterSettingWireCastObserver();
     TLOGI(WmsLogTag::DMS, "unregister Setting wire cast Observer");
+}
+
+void ScreenSessionManager::SwitchSubscriberInit()
+{
+    switchId_ = MMI::InputManager::GetInstance()->SubscribeSwitchEvent(
+        [this](std::shared_ptr<OHOS::MMI::SwitchEvent> switchEvent) {
+            if (switchEvent->GetSwitchValue() == MMI::SwitchEvent::SWITCH_OFF) {
+                SetLapTopLidOpenStatus(false);
+            } else {
+                SetLapTopLidOpenStatus(true);
+            }
+        }
+    );
+    TLOGD(WmsLogTag::DMS, "switchId is: %{public}d", switchId_);
+}
+
+bool ScreenSessionManager::IsLapTopLidOpen() const
+{
+    return isLapTopLidOpen_.load();
+}
+
+void ScreenSessionManager::SetLapTopLidOpenStatus(bool isLapTopLidOpen)
+{
+    isLapTopLidOpen_.store(isLapTopLidOpen);
+    TLOGI(WmsLogTag::DMS, "isLapTopLidOpen is: %{public}d", static_cast<int32_t>(isLapTopLidOpen));
 }
 
 void ScreenSessionManager::HandleScreenConnectEvent(sptr<ScreenSession> screenSession,
