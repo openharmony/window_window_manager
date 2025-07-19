@@ -3475,6 +3475,8 @@ void SceneSessionManager::EraseSceneSessionMapById(int32_t persistentId)
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession != nullptr) {
         RemovePreLoadStartingWindowFromMap(sceneSession->GetSessionInfo());
+    } else {
+        TLOGW(WmsLogTag::WMS_PATTERN, "session is nullptr id: %{public}d", persistentId);
     }
     std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     EraseSceneSessionAndMarkDirtyLocked(persistentId);
