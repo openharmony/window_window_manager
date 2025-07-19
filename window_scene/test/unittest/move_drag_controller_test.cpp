@@ -15,6 +15,8 @@
 
 #include <gtest/gtest.h>
 #include <memory>
+
+#include "modifier_render_thread/rs_modifiers_draw_thread.h"
 #include <pointer_event.h>
 #include "session/host/include/move_drag_controller.h"
 #include "session/host/include/session.h"
@@ -44,7 +46,12 @@ public:
 
 void MoveDragControllerTest::SetUpTestCase() {}
 
-void MoveDragControllerTest::TearDownTestCase() {}
+void MoveDragControllerTest::TearDownTestCase()
+{
+#ifdef RS_ENABLE_VK
+    RSModifiersDrawThread::Destroy();
+#endif
+}
 
 void MoveDragControllerTest::SetUp()
 {
@@ -275,30 +282,44 @@ HWTEST_F(MoveDragControllerTest, UpdateGravityWhenDrag, TestSize.Level0)
         pointerEvent->SetButtonId(MMI::PointerEvent::MOUSE_BUTTON_LEFT);
         pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_MOUSE);
         pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
-        auto tempPointerEvent = pointerEvent;
-        pointerEvent = nullptr;
-        moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
-        pointerEvent = tempPointerEvent;
-        auto tempSurfaceNode = surfaceNode;
-        surfaceNode = nullptr;
-        moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
-        surfaceNode = tempSurfaceNode;
+        moveDragController->UpdateGravityWhenDrag(nullptr, surfaceNode);
+        moveDragController->UpdateGravityWhenDrag(pointerEvent, nullptr);
         moveDragController->type_ = AreaType::UNDEFINED;
         moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
         moveDragController->type_ = AreaType::RIGHT;
         moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
+        auto gravityIter = surfaceNode->propertyModifiers_.find(RSModifierType::FRAME_GRAVITY);
+        EXPECT_EQ(gravityIter, surfaceNode->propertyModifiers_.end());
 
         pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
         moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
+        gravityIter = surfaceNode->propertyModifiers_.find(RSModifierType::FRAME_GRAVITY);
+        EXPECT_EQ(gravityIter, surfaceNode->propertyModifiers_.end());
 
         pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_DOWN);
         moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
+        gravityIter = surfaceNode->propertyModifiers_.find(RSModifierType::FRAME_GRAVITY);
+        EXPECT_EQ(gravityIter, surfaceNode->propertyModifiers_.end());
 
         pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UP);
         moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
+        gravityIter = surfaceNode->propertyModifiers_.find(RSModifierType::FRAME_GRAVITY);
+        EXPECT_EQ(gravityIter, surfaceNode->propertyModifiers_.end());
+
+        pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
+        moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
+        gravityIter = surfaceNode->propertyModifiers_.find(RSModifierType::FRAME_GRAVITY);
+        EXPECT_EQ(gravityIter, surfaceNode->propertyModifiers_.end());
 
         pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_CANCEL);
         moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
+        gravityIter = surfaceNode->propertyModifiers_.find(RSModifierType::FRAME_GRAVITY);
+        EXPECT_EQ(gravityIter, surfaceNode->propertyModifiers_.end());
+
+        pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
+        moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
+        gravityIter = surfaceNode->propertyModifiers_.find(RSModifierType::FRAME_GRAVITY);
+        EXPECT_EQ(gravityIter, surfaceNode->propertyModifiers_.end());
     }
 }
 
@@ -1408,6 +1429,10 @@ HWTEST_F(MoveDragControllerTest, MoveDragInterrupted, TestSize.Level1)
     ASSERT_EQ(true, moveDragController->GetStartMoveFlag());
     ASSERT_EQ(false, moveDragController->hasPointDown_);
     moveDragController->isStartMove_ = false;
+
+    moveDragController->SetStartDragFlag(true);
+    moveDragController->MoveDragInterrupted();
+    EXPECT_EQ(false, moveDragController->GetStartDragFlag());
 }
 
 /**

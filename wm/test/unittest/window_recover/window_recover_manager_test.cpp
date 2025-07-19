@@ -22,6 +22,7 @@
 #include "singleton_mocker.h"
 #include "window_scene_session_impl.h"
 #include "window_session_impl.h"
+#include "modifier_render_thread/rs_modifiers_draw_thread.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -38,7 +39,12 @@ public:
 
 void WindowRecoverManagerTest::SetUpTestCase() {}
 
-void WindowRecoverManagerTest::TearDownTestCase() {}
+void WindowRecoverManagerTest::TearDownTestCase()
+{
+#ifdef RS_ENABLE_VK
+    RSModifiersDrawThread::Destroy();
+#endif
+}
 
 void WindowRecoverManagerTest::SetUp() {}
 
@@ -236,6 +242,61 @@ HWTEST_F(WindowRecoverManagerTest, RegisterSessionRecoverListenerSuccess02, Test
     window->RegisterSessionRecoverListener(true); // true is sub window
     ASSERT_EQ(SingletonContainer::Get<WindowAdapter>().sessionRecoverCallbackFuncMap_.size(), 1);
     SingletonContainer::Get<WindowAdapter>().sessionRecoverCallbackFuncMap_.clear();
+}
+
+/**
+ * @tc.name: RegisterWindowRecoverStateChangeListener
+ * @tc.desc: Register Window Recover State Change Listener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRecoverManagerTest, RegisterWindowRecoverStateChangeListener, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->property_->SetCollaboratorType(CollaboratorType::DEFAULT_TYPE);
+    window->RegisterWindowRecoverStateChangeListener();
+    EXPECT_NE(window->windowRecoverStateChangeFunc_, nullptr);
+}
+
+/**
+ * @tc.name: OnWindowRecoverStateChange
+ * @tc.desc: On Window Recover State Change
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRecoverManagerTest, OnWindowRecoverStateChange, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->property_->SetCollaboratorType(CollaboratorType::DEFAULT_TYPE);
+    window->OnWindowRecoverStateChange(false, WindowRecoverState::WINDOW_START_RECONNECT);
+    EXPECT_EQ(window->property_->GetWindowState(), window->state_);
+
+    window->OnWindowRecoverStateChange(false, WindowRecoverState::WINDOW_FINISH_RECONNECT);
+    EXPECT_EQ(window->property_->GetWindowState(), window->state_);
+}
+
+/**
+ * @tc.name: UpdateStartRecoverProperty
+ * @tc.desc: Update Start Recover Property
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowRecoverManagerTest, UpdateStartRecoverProperty, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->property_->SetCollaboratorType(CollaboratorType::DEFAULT_TYPE);
+    window->UpdateStartRecoverProperty(false);
+    EXPECT_EQ(window->property_->GetWindowState(), window->state_);
+
+    sptr<WindowOption> option2 = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window2 = sptr<WindowSceneSessionImpl>::MakeSptr(option2);
+    window2->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window2->property_->SetCollaboratorType(CollaboratorType::DEFAULT_TYPE);
+    window2->UpdateStartRecoverProperty(true);
+    EXPECT_EQ(window2->property_->GetWindowState(), window2->requestState_);
 }
 
 } // namespace

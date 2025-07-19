@@ -905,6 +905,21 @@ void WindowImpl::ConsumeKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
     uiContent_->ProcessKeyEvent(keyEvent);
 }
 
+void WindowImpl::ConsumeBackEvent()
+{
+    if (uiContent_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "ConsumeBackEvent to uiContent failed, uiContent_ is null");
+        return;
+    }
+    auto isConsumed = uiContent_->ProcessBackPressed();
+    TLOGI(WmsLogTag::WMS_EVENT, "ConsumeBackEvent to uiContent, %{public}d", isConsumed);
+}
+
+bool WindowImpl::IsDialogSessionBackGestureEnabled()
+{
+    return false;
+}
+
 void WindowImpl::ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     if (uiContent_ == nullptr) {
@@ -1267,6 +1282,10 @@ WMError WindowImpl::SetLandscapeMultiWindow(bool isLandscapeMultiWindow)
 }
 
 void WindowImpl::SetUiDvsyncSwitch(bool dvsyncSwitch)
+{
+}
+
+void WindowImpl::SetTouchEvent(int32_t touchType)
 {
 }
 

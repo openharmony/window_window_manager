@@ -280,6 +280,22 @@ HWTEST_F(DisplayTest, GetDisplayInfoWithCache01, TestSize.Level1)
     auto changedInfo = defaultDisplay_->GetDisplayInfoWithCache();
     EXPECT_EQ(changedInfo->GetName(), defaultName);
 }
+
+/**
+ * @tc.name: GetLiveCreaseRegion
+ * @tc.desc: test GetLiveCreaseRegion
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayTest, GetLiveCreaseRegion, TestSize.Level1)
+{
+    FoldCreaseRegion region;
+    auto res = defaultDisplay_->GetLiveCreaseRegion(region);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(res, DMError::DM_OK);
+    } else {
+        EXPECT_NE(res, DMError::DM_ERROR_DEVICE_NOT_SUPPORT);
+    }
+}
 }
 } // namespace Rosen
 } // namespace OHOS

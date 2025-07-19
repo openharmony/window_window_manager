@@ -240,6 +240,30 @@ HWTEST_F(SceneSessionLifecycleTest, Foreground06, TestSize.Level0)
 }
 
 /**
+ * @tc.name: ForegroundTask01
+ * @tc.desc: ForegroundTask function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLifecycleTest, ForegroundTask01, TestSize.Level0)
+{
+    SessionInfo info;
+    info.abilityName_ = "ForegroundTask01";
+    info.bundleName_ = "ForegroundTask01";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    session->SetSessionState(SessionState::STATE_CONNECT);
+    EXPECT_EQ(SessionState::STATE_CONNECT, session->GetSessionState());
+
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    EXPECT_EQ(false, session->isUIFirstEnabled_);
+    EXPECT_EQ(WSError::WS_OK, session->ForegroundTask(property));
+
+    session->isUIFirstEnabled_ = true;
+    EXPECT_EQ(true, session->isUIFirstEnabled_);
+    session->SetSessionState(SessionState::STATE_CONNECT);
+    EXPECT_EQ(WSError::WS_OK, session->ForegroundTask(property));
+}
+
+/**
  * @tc.name: Background01
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -444,6 +468,27 @@ HWTEST_F(SceneSessionLifecycleTest, BackgroundTask03, TestSize.Level0)
     session->SetSessionProperty(property2);
     EXPECT_EQ(WSError::WS_OK, session->BackgroundTask(false));
     EXPECT_EQ(WSError::WS_OK, session->BackgroundTask(true));
+}
+
+/**
+ * @tc.name: BackgroundTask04
+ * @tc.desc: BackgroundTask04 function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLifecycleTest, BackgroundTask04, TestSize.Level0)
+{
+    SessionInfo info;
+    info.abilityName_ = "BackgroundTask04";
+    info.bundleName_ = "BackgroundTask04";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->isActive_ = true;
+    sceneSession->state_ = SessionState::STATE_INACTIVE;
+    sceneSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    EXPECT_EQ(sceneSession->BackgroundTask(), WSError::WS_OK);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    EXPECT_EQ(sceneSession->BackgroundTask(), WSError::WS_OK);
 }
 
 /**
@@ -1092,6 +1137,37 @@ HWTEST_F(SceneSessionLifecycleTest, NotifySessionBackground, TestSize.Level0)
     sceneSession->sessionStage_ = mockSessionStage;
     sceneSession->NotifySessionBackground(reason, withAnimation, isFromInnerkits);
     ASSERT_EQ(ret, 1);
+}
+
+/**
+ * @tc.name: BatchPendingSessionsActivation
+ * @tc.desc: BatchPendingSessionsActivation, with atomicService
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLifecycleTest, BatchPendingSessionsActivation, TestSize.Level0)
+{
+    SessionInfo info;
+    info.abilityName_ = "BatchPendingSessionsActivation";
+    info.bundleName_ = "BatchPendingSessionsActivation";
+    sptr<SceneSession> sceneSession;
+    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->isActive_ = true;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    sceneSession->SetSessionProperty(property);
+    
+    sptr<AAFwk::SessionInfo> sessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
+    std::vector<sptr<AAFwk::SessionInfo>> abilitySessionInfos;
+    unsigned int flags = 11111111;
+    AAFwk::Want want;
+    sessionInfo->want = want;
+    sessionInfo->want.SetFlags(flags);
+    sessionInfo->isAtomicService = true;
+    abilitySessionInfos.emplace_back(sessionInfo);
+    WSError result = sceneSession->BatchPendingSessionsActivation(abilitySessionInfos);
+
+    EXPECT_EQ(result, WSError::WS_OK);
 }
 
 /**

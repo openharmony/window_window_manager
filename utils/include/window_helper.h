@@ -705,6 +705,24 @@ public:
         container.insert(inputStr.substr(start));
     }
 
+    /**
+     * @brief Check whether the window has scaling applied.
+     *
+     * This method returns true if scaleX or scaleY is not equal to 1,
+     * meaning the window is currently scaled.
+     *
+     * @param transform The layout transform of the window.
+     * @return true if the window is scaled, false otherwise.
+     */
+    static bool IsScaled(const Transform& transform)
+    {
+        auto IsApproximatelyOne = [](float value) {
+            constexpr float EPSILON = 1e-6f;
+            return std::fabs(value - 1.0f) < EPSILON;
+        };
+        return !IsApproximatelyOne(transform.scaleX_) || !IsApproximatelyOne(transform.scaleY_);
+    }
+
 private:
     WindowHelper() = default;
     ~WindowHelper() = default;

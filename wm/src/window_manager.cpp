@@ -2209,5 +2209,22 @@ void WindowManager::NotifyWMSWindowDestroyed(const WindowLifeCycleInfo& lifeCycl
     }
     pImpl_->NotifyWMSWindowDestroyed(lifeCycleInfo, jsWindowNapiValue);
 }
+
+WMError WindowManager::AddSessionBlackList(
+    const std::unordered_set<std::string>& bundleNames, const std::unordered_set<std::string>& privacyWindowTags)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "in");
+    auto ret = SingletonContainer::Get<WindowAdapter>().AddSessionBlackList(bundleNames, privacyWindowTags);
+    return ret;
+}
+
+WMError WindowManager::RemoveSessionBlackList(
+    const std::unordered_set<std::string>& bundleNames, const std::unordered_set<std::string>& privacyWindowTags)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "in");
+    auto ret = SingletonContainer::Get<WindowAdapter>().
+        RemoveSessionBlackList(bundleNames, privacyWindowTags);
+    return ret;
+}
 } // namespace Rosen
 } // namespace OHOS

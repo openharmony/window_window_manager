@@ -68,10 +68,9 @@ WMError FloatingBallController::UpdateFloatingBall(sptr<FbOption>& option)
         TLOGE(WmsLogTag::WMS_SYSTEM, "option or window is nullptr");
         return WMError::WM_ERROR_FB_STATE_ABNORMALLY;
     }
-    fbOption_ = option;
     FloatingBallTemplateBaseInfo fbTemplateBaseInfo;
-    fbOption_->GetFbTemplateBaseInfo(fbTemplateBaseInfo);
-    return window_->UpdateFloatingBall(fbTemplateBaseInfo, fbOption_->GetIcon());
+    option->GetFbTemplateBaseInfo(fbTemplateBaseInfo);
+    return window_->UpdateFloatingBall(fbTemplateBaseInfo, option->GetIcon());
 }
 
 WMError FloatingBallController::StartFloatingBall(sptr<FbOption>& option)
@@ -82,10 +81,9 @@ WMError FloatingBallController::StartFloatingBall(sptr<FbOption>& option)
             TLOGI(WmsLogTag::WMS_SYSTEM, "OnStartFloatingBall abort");
             return WMError::WM_ERROR_FB_REPEAT_CONTROLLER;
         }
-        fbOption_ = option;
         TLOGI(WmsLogTag::WMS_SYSTEM, "called");
-        if (fbOption_ == nullptr) {
-            TLOGE(WmsLogTag::WMS_SYSTEM, "fbOption is null or Get PictureInPictureOption failed");
+        if (option == nullptr) {
+            TLOGE(WmsLogTag::WMS_SYSTEM, "fbOption is null");
             return WMError::WM_ERROR_FB_STATE_ABNORMALLY;
         }
         if (curState_ == FbWindowState::STATE_STARTING || curState_ == FbWindowState::STATE_STARTED) {
@@ -93,10 +91,15 @@ WMError FloatingBallController::StartFloatingBall(sptr<FbOption>& option)
                 curState_, (window_ == nullptr) ? INVALID_WINDOW_ID : window_->GetWindowId(), mainWindowId_);
             return WMError::WM_ERROR_FB_REPEAT_OPERATION;
         }
+        if (curState_ == FbWindowState::STATE_STOPPING) {
+            TLOGW(WmsLogTag::WMS_SYSTEM, "fbWindow state is: %{public}u, id: %{public}u, mainWindow: %{public}u",
+                curState_, (window_ == nullptr) ? INVALID_WINDOW_ID : window_->GetWindowId(), mainWindowId_);
+            return WMError::WM_ERROR_FB_INVALID_STATE;
+        }
         curState_ = FbWindowState::STATE_STARTING;
         FloatingBallManager::SetActiveController(this);
     }
-    auto errorCode = StartFloatingBallInner();
+    auto errorCode = StartFloatingBallInner(option);
     if (errorCode != WMError::WM_OK) {
         curState_ = FbWindowState::STATE_UNDEFINED;
         FloatingBallManager::RemoveActiveController(this);
@@ -104,9 +107,9 @@ WMError FloatingBallController::StartFloatingBall(sptr<FbOption>& option)
     return errorCode;
 }
 
-WMError FloatingBallController::StartFloatingBallInner()
+WMError FloatingBallController::StartFloatingBallInner(const sptr<FbOption>& option)
 {
-    WMError errCode = CreateFloatingBallWindow();
+    WMError errCode = CreateFloatingBallWindow(option);
     if (errCode != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "Create fb window failed, err: %{public}u", errCode);
         return errCode;
@@ -130,9 +133,9 @@ void FloatingBallController::WindowLifeCycleListener::AfterDestroyed()
     FloatingBallManager::DoDestroy();
 }
 
-WMError FloatingBallController::CreateFloatingBallWindow()
+WMError FloatingBallController::CreateFloatingBallWindow(const sptr<FbOption>& option)
 {
-    if (fbOption_ == nullptr || contextPtr_ == nullptr || mainWindow_ == nullptr) {
+    if (option == nullptr || contextPtr_ == nullptr || mainWindow_ == nullptr) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "Create fb failed, invalid fbOption");
         return WMError::WM_ERROR_FB_STATE_ABNORMALLY;
     }
@@ -150,10 +153,10 @@ WMError FloatingBallController::CreateFloatingBallWindow()
     windowOption->SetWindowMode(WindowMode::WINDOW_MODE_FB);
     windowOption->SetTouchable(false);
     FloatingBallTemplateBaseInfo fbTemplateBaseInfo;
-    fbOption_->GetFbTemplateBaseInfo(fbTemplateBaseInfo);
+    option->GetFbTemplateBaseInfo(fbTemplateBaseInfo);
     WMError errCode = WMError::WM_OK;
     auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(contextPtr_);
-    sptr<Window> window = Window::CreateFb(windowOption, fbTemplateBaseInfo, fbOption_->GetIcon(),
+    sptr<Window> window = Window::CreateFb(windowOption, fbTemplateBaseInfo, option->GetIcon(),
         context->lock(), errCode);
     if (window == nullptr || errCode != WMError::WM_OK) {
         TLOGW(WmsLogTag::WMS_SYSTEM, "Window create failed, reason: %{public}d", errCode);

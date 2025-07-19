@@ -455,4 +455,10 @@ void ScreenManagerLite::OnRemoteDied()
     pImpl_->OnRemoteDied();
 }
 
+bool ScreenManagerLite::SynchronizePowerStatus(ScreenPowerState state)
+{
+    TLOGD(WmsLogTag::DMS, "state: %{public}u", state);
+    return SingletonContainer::Get<ScreenManagerAdapterLite>().SynchronizePowerStatus(state);
+}
+
 } // namespace OHOS::Rosen

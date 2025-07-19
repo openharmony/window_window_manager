@@ -126,6 +126,16 @@ void IPCSpecificInterfaceFuzzTest1(sptr<IRemoteObject> proxy, MessageParcel& sen
         sendData, reply, option);
     proxy->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_MAXIMIZE_MODE),
         sendData, reply, option);
+    proxy->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CHANGE_KEYBOARD_VIEW_MODE),
+        sendData, reply, option);
+    proxy->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_DID_SHOW_REGISTERED),
+        sendData, reply, option);
+    proxy->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_DID_HIDE_REGISTERED),
+        sendData, reply, option);
+    proxy->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_WILL_SHOW_REGISTERED),
+        sendData, reply, option);
+    proxy->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_WILL_HIDE_REGISTERED),
+        sendData, reply, option);
 }
 
 void IPCSpecificInterfaceFuzzTest2(sptr<IRemoteObject> proxy, MessageParcel& sendData, MessageParcel& reply,
@@ -158,6 +168,10 @@ void IPCSpecificInterfaceFuzzTest2(sptr<IRemoteObject> proxy, MessageParcel& sen
     proxy->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_DIED),
         sendData, reply, option);
     proxy->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_RECT_AUTO_SAVE),
+        sendData, reply, option);
+    proxy->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_START_WINDOW_BACKGROUND_COLOR),
+        sendData, reply, option);
+    proxy->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_IS_SET_IMAGE_FOR_RECENT),
         sendData, reply, option);
 }
 

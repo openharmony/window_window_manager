@@ -326,6 +326,7 @@ public:
     void SetSessionRect(const WSRect& rect);
     WSRect GetSessionRect() const;
     WSRect GetSessionGlobalRect() const;
+    WSRect GetSessionScreenRelativeRect() const;
     WSRect GetSessionGlobalRectInMultiScreen() const;
     WMError GetGlobalScaledRect(Rect& globalScaledRect) override;
     void SetSessionGlobalRect(const WSRect& rect);
@@ -440,6 +441,11 @@ public:
     void SetContextTransparentFunc(const NotifyContextTransparentFunc& func);
     void NotifyContextTransparent();
     bool NeedCheckContextTransparent() const;
+
+    /*
+     * Window Layout
+     */
+    bool UpdateWindowModeSupportType(const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo);
 
     /*
      * Window Rotate Animation
@@ -675,8 +681,8 @@ public:
     void SetRequestNextVsyncWhenModeChangeFunc(RequestNextVsyncWhenModeChangeFunc&& func);
     void SetGlobalDisplayRect(const WSRect& rect);
     WSRect GetGlobalDisplayRect() const;
-    WSRect ComputeGlobalDisplayRect() const;
     virtual WSError UpdateGlobalDisplayRect(const WSRect& rect, SizeChangeReason reason);
+    WSError NotifyClientToUpdateGlobalDisplayRect(const WSRect& rect, SizeChangeReason reason);
     const sptr<LayoutController>& GetLayoutController() const { return layoutController_; }
 
     /*
@@ -728,7 +734,7 @@ public:
     void DeleteHasSnapshot(SnapshotStatus key);
     void DeleteHasSnapshotFreeMultiWindow();
     void SetFreeMultiWindow();
-    bool freeMultiWindow_ = false;
+    std::atomic<bool> freeMultiWindow_ { false };
 
     /*
      * Specific Window
@@ -889,6 +895,10 @@ protected:
         SizeChangeReason reason = SizeChangeReason::UNDEFINED) const { return false; }
     bool IsDragStart() const { return isDragStart_; }
     void SetDragStart(bool isDragStart);
+    std::vector<AppExecFwk::SupportWindowMode> ExtractSupportWindowModeFromMetaData(
+        const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo);
+    std::vector<AppExecFwk::SupportWindowMode> ParseWindowModeFromMetaData(
+        const std::string& supportModesInFreeMultiWindow);
     HasRequestedVsyncFunc hasRequestedVsyncFunc_;
     RequestNextVsyncWhenModeChangeFunc requestNextVsyncWhenModeChangeFunc_;
     WSError RequestNextVsyncWhenModeChange();
@@ -1081,6 +1091,7 @@ private:
     bool isDragStart_ = { false };
     std::atomic_bool isWindowModeDirty_ = false;
     std::atomic<int32_t> timesToWaitForVsync_ = 0;
+    SizeChangeReason globalDisplayRectSizeChangeReason_ = SizeChangeReason::END;
 
     /*
      * Screen Lock

@@ -136,7 +136,8 @@ public:
     virtual DMError SetScreenRotationLockedFromJs(bool isLocked) override;
     virtual DMError IsScreenRotationLocked(bool& isLocked) override;
     virtual sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) override;
-    virtual sptr<CutoutInfo> GetCutoutInfoWithRotation(DisplayId displayId, int32_t rotation) override;
+    virtual sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId, int32_t width,
+                                           int32_t height, Rotation rotation) override;
     virtual DMError HasImmersiveWindow(ScreenId screenId, bool& immersive) override;
 
     virtual DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow) override;
@@ -169,6 +170,7 @@ public:
     void SetLandscapeLockStatus(bool isLocked) override;
     ExtendScreenConnectStatus GetExtendScreenConnectStatus() override;
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() override;
+    DMError GetLiveCreaseRegion(FoldCreaseRegion& region) override;
     void SetForceCloseHdr(ScreenId screenId, bool isForceCloseHdr) override;
 
     void SetCameraStatus(int32_t cameraStatus, int32_t cameraPosition) override;
@@ -181,8 +183,8 @@ public:
     std::shared_ptr<RSDisplayNode> GetDisplayNode(ScreenId screenId) override;
     void UpdateScreenRotationProperty(ScreenId screenId, const RRectT<float>& bounds, float rotation,
         ScreenPropertyChangeType screenPropertyChangeType, bool isSwitchUser) override;
-    void UpdateScreenDirectionInfo(ScreenId screenId, float screenComponentRotation, float rotation,
-        float phyRotation, ScreenPropertyChangeType screenPropertyChangeType) override;
+    void UpdateScreenDirectionInfo(ScreenId screenId, const ScreenDirectionInfo& directionInfo,
+        ScreenPropertyChangeType screenPropertyChangeType, const RRect& bounds) override;
     void UpdateAvailableArea(ScreenId ScreenId, DMRect area) override;
     void UpdateSuperFoldAvailableArea(ScreenId screenId, DMRect bArea, DMRect cArea) override;
     void UpdateSuperFoldExpandAvailableArea(ScreenId screenId, DMRect area) override;
@@ -235,6 +237,8 @@ public:
         ScreenId& screenId, DMRect& screenArea) override;
     DMError SetPrimaryDisplaySystemDpi(float dpi) override;
     DMError SetVirtualScreenAutoRotation(ScreenId screenId, bool enable) override;
+    DMError SetScreenPrivacyWindowTagSwitch(ScreenId screenId, const std::vector<std::string>& privacyWindowTag,
+        bool enable) override;
 
 private:
     static inline BrokerDelegator<ScreenSessionManagerProxy> delegator_;

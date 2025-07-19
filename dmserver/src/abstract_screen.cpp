@@ -206,7 +206,7 @@ void AbstractScreen::InitRSDisplayNode(const RSDisplayNodeConfig& config, const 
         }
         RSAdapterUtil::SetSkipCheckInMultiInstance(rsDisplayNode, true);
         rsDisplayNode_ = rsDisplayNode;
-        TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST,
+        TLOGD(WmsLogTag::WMS_SCB,
               "Create RSDisplayNode: %{public}s", RSAdapterUtil::RSNodeToStr(rsDisplayNode_).c_str());
     }
     SetPropertyForDisplayNode(rsDisplayNode_, config, startPoint);
@@ -230,7 +230,7 @@ void AbstractScreen::InitRSDefaultDisplayNode(const RSDisplayNodeConfig& config,
     }
     RSAdapterUtil::SetSkipCheckInMultiInstance(rsDisplayNode, true);
     rsDisplayNode_ = rsDisplayNode;
-    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST,
+    TLOGD(WmsLogTag::WMS_SCB,
           "Create RSDisplayNode: %{public}s", RSAdapterUtil::RSNodeToStr(rsDisplayNode_).c_str());
     SetPropertyForDisplayNode(rsDisplayNode_, config, startPoint);
 
@@ -495,7 +495,7 @@ std::shared_ptr<RSUIContext> AbstractScreen::GetRSUIContext() const
 {
     RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
     auto rsUIContext = rsUIDirector_ ? rsUIDirector_->GetRSUIContext() : nullptr;
-    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "%{public}s", RSAdapterUtil::RSUIContextToStr(rsUIContext).c_str());
+    TLOGD(WmsLogTag::WMS_SCB, "%{public}s", RSAdapterUtil::RSUIContextToStr(rsUIContext).c_str());
     return rsUIContext;
 }
 

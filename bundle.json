@@ -30,7 +30,9 @@
         "window_manager_feature_multi_screen",
         "window_manager_feature_multi_screen_frame_ctl",
         "window_manager_feature_cam_mode",
-        "window_manager_feature_multi_usr"
+        "window_manager_feature_multi_usr",
+        "window_manager_feature_screenless",
+        "window_manager_feature_asbng_path"
       ],
       "adapted_system_type": [ "standard" ],
       "rom": "8000KB",

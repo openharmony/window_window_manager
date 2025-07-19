@@ -33,7 +33,20 @@
 
 namespace OHOS {
 namespace Rosen {
-
+struct ResInfoShowState {
+    uint32_t frameIdx = 0;
+    uint32_t frameCount = 0;
+    std::vector<int32_t> delay;
+    std::chrono::steady_clock::time_point next;
+};
+struct StartingWindowShowInfo {
+    wptr<WindowNode> node;
+    Rect rect;
+    std::shared_ptr<Rosen::StartingWindowPageDrawInfo> info;
+    float vpRatio;
+    std::array<ResInfoShowState, size_t(StartWindowResType::Count)> resStates {};
+    std::array<uint32_t, size_t(StartWindowResType::Count)> frameIndex {};
+};
 class StartingWindow : public RefBase {
 public:
     StartingWindow() = delete;
@@ -68,15 +81,27 @@ private:
         const sptr<AppExecFwk::IBundleMgr>& bundleMgr);
     static std::shared_ptr<Global::Resource::ResourceManager> CreateResourceManager(
         const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo);
-    static std::shared_ptr<Media::PixelMap> GetPixelMap(uint32_t mediaDataId,
+    static std::shared_ptr<Rosen::ResourceInfo> GetPixelMapListInfo(uint32_t mediaDataId,
         const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr,
         const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo);
-    static bool LoadCustomStartingWindowInfo(const sptr<WindowNode>& node,
-        const sptr<AppExecFwk::IBundleMgr>& bundleMgr);
-    static bool DoLoadCustomStartingWindowInfo(const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo,
+    static std::shared_ptr<Rosen::StartingWindowPageDrawInfo> GetCustomStartingWindowInfo(
+        const sptr<WindowNode>& node, const sptr<AppExecFwk::IBundleMgr>& bundleMgr);
+    static std::shared_ptr<Rosen::StartingWindowPageDrawInfo> DoGetCustomStartingWindowInfo(
+        const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo,
         const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr);
-    static WMError DrawStartingWindow(const sptr<WindowNode>& node, const Rect& rect);
-    static std::shared_ptr<Rosen::StartingWindowPageDrawInfo> startingWindowPageDrawInfo_;
+    static WMError DrawStartingWindow(const std::shared_ptr<Rosen::StartingWindowPageDrawInfo>& info,
+        const sptr<WindowNode>& node, const Rect& rect);
+    static void RegisterStartingWindowShowInfo(const sptr<WindowNode>& node, const Rect& rect,
+        const std::shared_ptr<Rosen::StartingWindowPageDrawInfo>& info, float vpRatio);
+    static void UnRegisterStartingWindowShowInfo();
+    static void UpdateWindowShowInfo(StartingWindowShowInfo& startingWindowShowInfo, bool& needRedraw);
+    static void DrawStartingWindowShowInfo();
+    static StartingWindowShowInfo startingWindowShowInfo_;
+    static std::atomic<bool> startingWindowShowRunning_;
+    static std::thread startingWindowShowThread_;
+    static std::mutex firstFrameMutex_;
+    static std::condition_variable firstFrameCondition_;
+    static std::atomic<bool> firstFrameCompleted_;
 };
 } // Rosen
 } // OHOS

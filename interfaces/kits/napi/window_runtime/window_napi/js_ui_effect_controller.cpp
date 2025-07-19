@@ -177,6 +177,10 @@ napi_value JsUIEffectController::OnAnimateTo(napi_env env, napi_callback_info in
         TLOGE(WmsLogTag::WMS_ANIMATION, "parse window animation config failed");
         return NapiThrowError(env, err);
     }
+    if (!CheckWindowAnimationOption(env, *lists->option, err)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "check window animation config failed");
+        return NapiThrowError(env, err);
+    }
     if (lists->params->ConvertFromJsValue(env, argv[INDEX_ONE]) != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "parse ui effect params failed");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
@@ -189,6 +193,10 @@ napi_value JsUIEffectController::OnAnimateTo(napi_env env, napi_callback_info in
         lists->interruptOption = sptr<WindowAnimationOption>::MakeSptr();
         if (!ConvertWindowAnimationOptionFromJsValue(env, argv[INDEX_TWO], *lists->interruptOption, err)) {
             TLOGE(WmsLogTag::WMS_ANIMATION, "parse window animation config failed");
+            return NapiThrowError(env, err);
+        }
+        if (!CheckWindowAnimationOption(env, *lists->interruptOption, err)) {
+            TLOGE(WmsLogTag::WMS_ANIMATION, "check window animation config failed");
             return NapiThrowError(env, err);
         }
     }

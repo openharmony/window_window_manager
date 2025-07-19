@@ -19,6 +19,7 @@
 #include <ui/rs_surface_node.h>
 
 #include "key_event.h"
+#include "mock/mock_session.h"
 #include "mock/mock_session_stage.h"
 #include "mock/mock_window_event_channel.h"
 #include "mock/mock_pattern_detach_callback.h"
@@ -1372,13 +1373,104 @@ HWTEST_F(WindowSessionTest4, TestUpdateGlobalDisplayRect, TestSize.Level1)
 {
     WSRect rect = { 10, 20, 200, 100 };
     session_->SetGlobalDisplayRect(rect);
-    auto result = session_->UpdateGlobalDisplayRect(rect, SizeChangeReason::RESIZE);
+    session_->globalDisplayRectSizeChangeReason_ = SizeChangeReason::RESIZE;
+
+    auto ret = session_->UpdateGlobalDisplayRect(rect, SizeChangeReason::RESIZE);
+    EXPECT_EQ(ret, WSError::WS_DO_NOTHING);
+    EXPECT_EQ(session_->GetGlobalDisplayRect(), rect);
+    EXPECT_EQ(session_->globalDisplayRectSizeChangeReason_, SizeChangeReason::RESIZE);
+
+    ret = session_->UpdateGlobalDisplayRect(rect, SizeChangeReason::MOVE);
+    EXPECT_EQ(ret, WSError::WS_OK);
+    EXPECT_EQ(session_->GetGlobalDisplayRect(), rect);
+    EXPECT_EQ(session_->globalDisplayRectSizeChangeReason_, SizeChangeReason::MOVE);
+
+    WSRect updated = { 30, 40, 200, 100 };
+    ret = session_->UpdateGlobalDisplayRect(updated, SizeChangeReason::MOVE);
+    EXPECT_EQ(ret, WSError::WS_OK);
+    EXPECT_EQ(session_->GetGlobalDisplayRect(), updated);
+    EXPECT_EQ(session_->globalDisplayRectSizeChangeReason_, SizeChangeReason::MOVE);
+
+    updated = { 0, 0, 200, 100 };
+    ret = session_->UpdateGlobalDisplayRect(updated, SizeChangeReason::DRAG);
+    EXPECT_EQ(ret, WSError::WS_OK);
+    EXPECT_EQ(session_->GetGlobalDisplayRect(), updated);
+    EXPECT_EQ(session_->globalDisplayRectSizeChangeReason_, SizeChangeReason::DRAG);
+}
+
+/**
+ * @tc.name: TestNotifyClientToUpdateGlobalDisplayRect
+ * @tc.desc: Verify that notifying client to update global display rect works as expected
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, TestNotifyClientToUpdateGlobalDisplayRect, TestSize.Level1)
+{
+    WSRect rect = { 10, 20, 200, 100 };
+    auto originalState = session_->state_.load();
+    auto originalSessionStage = session_->sessionStage_;
+
+    session_->sessionStage_ = nullptr;
+    auto result = session_->NotifyClientToUpdateGlobalDisplayRect(rect, SizeChangeReason::UNDEFINED);
     EXPECT_EQ(result, WSError::WS_DO_NOTHING);
 
-    session_->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
-    WSRect updated = { 30, 40, 200, 100 };
-    result = session_->UpdateGlobalDisplayRect(updated, SizeChangeReason::MOVE);
+    auto mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
+    session_->sessionStage_ = mockSessionStage;
+    session_->state_ = SessionState::STATE_BACKGROUND;
+    result = session_->NotifyClientToUpdateGlobalDisplayRect(rect, SizeChangeReason::UNDEFINED);
+    EXPECT_EQ(result, WSError::WS_DO_NOTHING);
+
+    session_->state_ = SessionState::STATE_FOREGROUND;
+    EXPECT_CALL(*mockSessionStage, UpdateGlobalDisplayRectFromServer(rect, SizeChangeReason::UNDEFINED))
+        .WillOnce(Return(WSError::WS_OK));
+    result = session_->NotifyClientToUpdateGlobalDisplayRect(rect, SizeChangeReason::UNDEFINED);
     EXPECT_EQ(result, WSError::WS_OK);
+    session_->state_ = originalState;
+    session_->sessionStage_ = originalSessionStage;
+}
+
+/**
+ * @tc.name: TestGetSessionScreenRelativeRect_001
+ * @tc.desc: get relative rect when reason is not drag move
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, TestGetSessionScreenRelativeRect_001, TestSize.Level1)
+{
+    session_->UpdateSizeChangeReason(SizeChangeReason::RESIZE);
+    WSRect expectedRect = { 0, 0, 100, 100};
+    session_->SetSessionRect(expectedRect);
+
+    WSRect result = session_->GetSessionScreenRelativeRect();
+    EXPECT_EQ(result, expectedRect);
+}
+
+class LayoutControllerMocker : public LayoutController {
+public:
+    explicit LayoutControllerMocker(const sptr<WindowSessionProperty>& property) : LayoutController(property) {};
+    ~LayoutControllerMocker() {};
+    MOCK_METHOD2(ConvertGlobalRectToRelative, WSRect(const WSRect& globalRect, DisplayId targetDisplayId));
+};
+
+/**
+ * @tc.name: TestGetSessionScreenRelativeRect_001
+ * @tc.desc: get relative rect when reason is not drag move
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, TestGetSessionScreenRelativeRect_002, TestSize.Level1)
+{
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sptr<LayoutControllerMocker> layoutController = sptr<LayoutControllerMocker>::MakeSptr(property);
+
+    session->SetMockLayoutController(layoutController);
+    session_->UpdateSizeChangeReason(SizeChangeReason::DRAG_MOVE);
+    WSRect expectedRect = { 0, 0, 50, 50};
+    WSRect winRect = { 0, 0, 100, 100};
+    session->SetSessionRect(winRect);
+
+    EXPECT_CALL(*layoutController, ConvertGlobalRectToRelative(_, _)).Times(1).WillOnce(Return(expectedRect));
+    WSRect result = session_->GetSessionScreenRelativeRect();
+    EXPECT_EQ(result, expectedRect);
 }
 } // namespace
 } // namespace Rosen

@@ -68,6 +68,7 @@ public:
 
     void RegisterMoveDragCallback(const MoveDragCallback& callBack);
     void SetStartMoveFlag(bool flag);
+    void SetStartDragFlag(bool flag);
     bool GetStartMoveFlag() const;
     bool GetStartDragFlag() const;
     bool HasPointDown();

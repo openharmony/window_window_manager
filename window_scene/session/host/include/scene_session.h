@@ -356,6 +356,8 @@ public:
     WMError UpdateWindowModeForUITest(int32_t updateMode);
     void RegisterDefaultDensityEnabledCallback(NotifyDefaultDensityEnabledFunc&& callback);
     void SetSessionDisplayIdChangeCallback(NotifySessionDisplayIdChangeFunc&& func);
+    bool IsMovable() const;
+    bool IsDraggable() const;
 
     WSError SetKeepScreenOn(bool keepScreenOn);
     WSError SetViewKeepScreenOn(bool keepScreenOn);
@@ -393,6 +395,7 @@ public:
      * Compatible Mode
      */
     bool IsInCompatScaleStatus() const;
+    bool IsInCompatScaleMode() const;
 
     /*
      * PC Window
@@ -612,6 +615,8 @@ public:
     virtual WSError HideSync() { return WSError::WS_DO_NOTHING; }
     void RegisterUpdateAppUseControlCallback(UpdateAppUseControlFunc&& func);
     void NotifyUpdateAppUseControl(ControlAppType type, const ControlInfo& controlInfo) override;
+    void UpdatePrivacyModeControlInfo();
+    bool HasSubSessionInPrivacyMode();
     void SetVisibilityChangedDetectFunc(VisibilityChangedDetectFunc&& func);
     virtual void RegisterSessionLockStateChangeCallback(NotifySessionLockStateChangeCallback&& callback) {}
     virtual void NotifySessionLockStateChange(bool isLockedState) {}
@@ -844,6 +849,8 @@ public:
     WMError NotifySubSessionAcrossDisplaysChange(bool isAcrossDisplays);
     WMError NotifyFollowedParentWindowAcrossDisplaysChange(bool isAcrossDisplays);
     void NotifySessionAcrossDisplaysChange(const sptr<SceneSession>& sceneSession, bool isAcrossDisplays);
+    WMError OnUpdateColorMode(const std::string& colorMode, bool hasDarkRes) override;
+    std::string GetAbilityColorMode() const;
 
     /*
      * Window Pattern
@@ -1049,7 +1056,7 @@ private:
     bool CheckIdentityTokenIfMatched(const std::string& identityToken);
     bool CheckPidIfMatched();
     GetStartWindowTypeFunc getStartWindowConfigFunc_;
-    StartWindowType startWindowType_;
+    StartWindowType startWindowType_ = StartWindowType::DEFAULT;
 
     // session lifecycle funcs
     WSError ForegroundTask(const sptr<WindowSessionProperty>& property);
@@ -1101,9 +1108,8 @@ private:
     void NotifyPropertyWhenConnect();
     WSError RaiseAppMainWindowToTop() override;
     void UpdateWinRectForSystemBar(WSRect& rect);
-    bool IsMovableWindowType();
-    bool IsFullScreenMovable();
-    bool IsMovable();
+    bool IsMovableWindowType() const;
+    bool IsFullScreenMovable() const;
     void HandleCastScreenConnection(SessionInfo& info, sptr<SceneSession> session);
     WMError HandleUpdatePropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
@@ -1213,7 +1219,6 @@ private:
      * UIExtension
      */
     std::atomic_bool shouldHideNonSecureWindows_ { false };
-    std::shared_mutex combinedExtWindowFlagsMutex_;
     ExtensionWindowFlags combinedExtWindowFlags_ { 0 };
     std::map<int32_t, ExtensionWindowFlags> extWindowFlagsMap_;
     std::vector<UIExtensionTokenInfo> extensionTokenInfos_;
@@ -1327,6 +1332,7 @@ private:
     NotifyIsCustomAnimationPlayingCallback onIsCustomAnimationPlaying_;
     NotifyWindowAnimationFlagChangeFunc onWindowAnimationFlagChange_;
     NotifyAnimateToFunc onAnimateTo_;
+    bool isUIFirstEnabled_ = false;
 
     /*
      * Window Layout
@@ -1376,6 +1382,9 @@ private:
     bool isAncoForFloatingWindow_ = false;
     bool subWindowOutlineEnabled_ = false;
     std::atomic_bool isRegisterAcrossDisplaysChanged_ = false;
+    std::string colorMode_;
+    bool hasDarkRes_ = false;
+    mutable std::mutex colorModeMutex_;
     NotifySetWindowShadowsFunc onSetWindowShadowsFunc_;
     UpdateScreenshotAppEventRegisteredFunc updateScreenshotAppEventRegisteredFunc_;
 

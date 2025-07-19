@@ -825,6 +825,7 @@ constexpr uint32_t INVALID_WINDOW_ID = 0;
 constexpr float UNDEFINED_BRIGHTNESS = -1.0f;
 constexpr float MINIMUM_BRIGHTNESS = 0.0f;
 constexpr float MAXIMUM_BRIGHTNESS = 1.0f;
+constexpr float INVALID_BRIGHTNESS = 999.0f;
 constexpr int32_t INVALID_PID = -1;
 constexpr int32_t INVALID_UID = -1;
 constexpr int32_t INVALID_USER_ID = -1;
@@ -1275,6 +1276,17 @@ struct WindowAnchorInfo : public Parcelable {
         int32_t offsetY) : isAnchorEnabled_(isAnchorEnabled),  windowAnchor_(windowAnchor),
         offsetX_(offsetX), offsetY_(offsetY) {}
 
+    bool operator==(const WindowAnchorInfo& other) const
+    {
+        return isAnchorEnabled_ == other.isAnchorEnabled_ && windowAnchor_ == other.windowAnchor_ &&
+            offsetX_ == other.offsetX_ && offsetY_ == other.offsetY_;
+    }
+
+    bool operator!=(const WindowAnchorInfo& other) const
+    {
+        return !(*this == other);
+    }
+
     bool Marshalling(Parcel& parcel) const override
     {
         return parcel.WriteBool(isAnchorEnabled_) && parcel.WriteUint32(static_cast<uint32_t>(windowAnchor_)) &&
@@ -1707,6 +1719,16 @@ struct WindowLimits {
     bool IsEmpty() const
     {
         return (maxWidth_ == 0 || minWidth_ == 0 || maxHeight_ == 0 || minHeight_ == 0);
+    }
+
+    std::string ToString() const
+    {
+        constexpr int precision = 6;
+        std::ostringstream oss;
+        oss << "[" << maxWidth_ << " " << maxHeight_ << " " << minWidth_ << " " << minHeight_
+            << " " << std::fixed << std::setprecision(precision) << maxRatio_ << " " << minRatio_
+            << " " << vpRatio_ << "]";
+        return oss.str();
     }
 };
 
@@ -2879,6 +2901,12 @@ enum class ScreenshotEventType : int32_t {
     SCROLL_SHOT_ABORT = 4,
 
     END,
+};
+
+enum class RequestResultCode: uint32_t {
+    INIT = 0,
+    SUCCESS = 1,
+    FAIL,
 };
 }
 }

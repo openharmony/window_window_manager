@@ -587,6 +587,10 @@ HWTEST_F(WindowPatternSnapshotTest, SaveSnapshot02, TestSize.Level1)
     auto pixelMap = std::make_shared<Media::PixelMap>();
     session_->SaveSnapshot(false, true, pixelMap);
     ASSERT_NE(session_->snapshot_, nullptr);
+
+    session_->freeMultiWindow_.store(true);
+    session_->SaveSnapshot(false, true, pixelMap);
+    ASSERT_NE(session_->snapshot_, nullptr);
 }
 
 /**
@@ -726,7 +730,6 @@ HWTEST_F(WindowPatternSnapshotTest, GetSessionStatus, TestSize.Level1)
     sceneSession->state_ = SessionState::STATE_DISCONNECT;
     sceneSession->currentRotation_ = 0;
     sceneSession->GetSessionStatus();
-    EXPECT_EQ(ret.second, 1);
 
     sceneSession->state_ = SessionState::STATE_ACTIVE;
     ret = sceneSession->GetSessionStatus();
@@ -901,7 +904,7 @@ HWTEST_F(WindowPatternSnapshotTest, DeleteHasSnapshot, TestSize.Level1)
     ASSERT_NE(session_, nullptr);
     ASSERT_NE(scenePersistence, nullptr);
     session_->scenePersistence_ = scenePersistence;
-    session_->freeMultiWindow_ = false;
+    session_->freeMultiWindow_.store(false);
     auto pixelMap = std::make_shared<Media::PixelMap>();
     ScenePersistentStorage::InitDir("/data/Snapshot");
     session_->SaveSnapshot(false, true, pixelMap);
@@ -915,10 +918,9 @@ HWTEST_F(WindowPatternSnapshotTest, DeleteHasSnapshot, TestSize.Level1)
     session_->scenePersistence_ = nullptr;
     EXPECT_EQ(session_->HasSnapshot(key), false);
 
-    ScenePersistentStorage::Insert("Snapshot_" + std::to_string(session_->persistentId_) +
-        "_" + std::to_string(key.first) + std::to_string(key.second), true,
-        ScenePersistentStorageType::MAXIMIZE_STATE);
-    session_->freeMultiWindow_ = true;
+    ScenePersistentStorage::Insert("Snapshot_" + std::to_string(session_->persistentId_),
+        true, ScenePersistentStorageType::MAXIMIZE_STATE);
+    session_->freeMultiWindow_.store(true);
     session_->SaveSnapshot(false, true, pixelMap);
     EXPECT_EQ(session_->HasSnapshot(), true);
     session_->DeleteHasSnapshotFreeMultiWindow();
@@ -941,6 +943,41 @@ HWTEST_F(WindowPatternSnapshotTest, SetFreeMultiWindow, TestSize.Level1)
     session_->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     session_->SetFreeMultiWindow();
     EXPECT_EQ(session_->freeMultiWindow_, false);
+}
+
+/**
+ * @tc.name: FindClosestFormSnapshot
+ * @tc.desc: FindClosestFormSnapshot Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternSnapshotTest, FindClosestFormSnapshot, TestSize.Level1)
+{
+    std::string bundleName = "testBundleName";
+    int32_t persistentId = 1423;
+    sptr<ScenePersistence> scenePersistence = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
+    scenePersistence->capacity_ = maxCapacity;
+    SnapshotStatus key = defaultStatus;
+    auto ret = scenePersistence->FindClosestFormSnapshot(key);
+    EXPECT_EQ(ret, false);
+
+    scenePersistence->hasSnapshot_[SCREEN_EXPAND][SNAPSHOT_PORTRAIT] = true;
+    ret = scenePersistence->FindClosestFormSnapshot(key);
+    EXPECT_EQ(ret, true);
+
+    key.first = SCREEN_FOLDED;
+    ret = scenePersistence->FindClosestFormSnapshot(key);
+    EXPECT_EQ(ret, true);
+
+    key.first = SCREEN_FOLDED;
+    scenePersistence->hasSnapshot_[SCREEN_EXPAND][SNAPSHOT_PORTRAIT] = false;
+    scenePersistence->hasSnapshot_[SCREEN_EXPAND][SNAPSHOT_LANDSCAPE] = true;
+    ret = scenePersistence->FindClosestFormSnapshot(key);
+    EXPECT_EQ(ret, true);
+
+    key.first = SCREEN_FOLDED;
+    scenePersistence->hasSnapshot_[SCREEN_EXPAND][SNAPSHOT_LANDSCAPE] = false;
+    ret = scenePersistence->FindClosestFormSnapshot(key);
+    EXPECT_EQ(ret, false);
 }
 } // namespace
 } // namespace Rosen

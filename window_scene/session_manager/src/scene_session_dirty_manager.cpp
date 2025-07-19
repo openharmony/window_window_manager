@@ -890,8 +890,8 @@ std::string DumpRect(const std::vector<MMI::Rect>& rects)
 {
     std::string rectStr = "hot:";
     for (const auto& rect : rects) {
-        rectStr = rectStr + "[" + std::to_string(rect.x) +"," + std::to_string(rect.y) +
-        "," + std::to_string(rect.width) + "," + std::to_string(rect.height) + "]|";
+        rectStr = rectStr + std::to_string(rect.x) +"," + std::to_string(rect.y) +
+        "," + std::to_string(rect.width) + "," + std::to_string(rect.height) + "|";
     }
     return rectStr;
 }
@@ -900,9 +900,9 @@ std::string DumpWindowInfo(const MMI::WindowInfo& info)
 {
     std::string infoStr = "wInfo:";
     infoStr = infoStr + std::to_string(info.id) + "|" + std::to_string(info.pid) +
-        "|" + std::to_string(info.uid) + "|[" + std::to_string(info.area.x) + "," +
+        "|" + std::to_string(info.uid) + "|" + std::to_string(info.area.x) + "," +
         std::to_string(info.area.y) + "," + std::to_string(info.area.width) + "," +
-        std::to_string(info.area.height) + "]|" + std::to_string(info.agentWindowId) + "|" +
+        std::to_string(info.area.height) + "|" + std::to_string(info.agentWindowId) + "|" +
         std::to_string(info.flags) + "|" + std::to_string(info.displayId) +
         "|" + std::to_string(static_cast<int>(info.action)) + "|" + std::to_string(info.zOrder) + ",";
     return infoStr + DumpRect(info.defaultHotAreas);
@@ -910,7 +910,7 @@ std::string DumpWindowInfo(const MMI::WindowInfo& info)
 
 std::string DumpSecRectInfo(const SecRectInfo & secRectInfo)
 {
-    std::string infoStr = "area:[" + std::to_string(secRectInfo.relativeCoords.GetLeft()) + "," +
+    std::string infoStr = "[" + std::to_string(secRectInfo.relativeCoords.GetLeft()) + "," +
         std::to_string(secRectInfo.relativeCoords.GetTop()) +  "," +
         std::to_string(secRectInfo.relativeCoords.GetWidth()) + "," +
         std::to_string(secRectInfo.relativeCoords.GetHeight()) + "]" +
@@ -1048,24 +1048,63 @@ bool operator==(const SecSurfaceInfo& a, const SecSurfaceInfo& b)
         a.hostNodeId == b.hostNodeId && a.upperNodes == b.upperNodes);
 }
 
+static void DumpUpperNodes(std::ostringstream& dumpSecSurfaceStream, const std::vector<SecRectInfo>& upperNodes)
+{
+    if (upperNodes.size() == 0) {
+        return;
+    }
+
+    std::unordered_map<std::string, uint32_t> secRectInfoMap;
+    std::vector<std::string> secRectInfoList;
+    for (const auto& secRectInfo : upperNodes) {
+        auto infoStr = DumpSecRectInfo(secRectInfo);
+        if (secRectInfoMap.find(infoStr) != secRectInfoMap.end()) {
+            secRectInfoMap[infoStr] += 1;
+            continue;
+        }
+        secRectInfoMap.insert(std::pair<std::string, uint32_t>(infoStr, 1));
+        secRectInfoList.push_back(infoStr);
+    }
+    for (auto& info : secRectInfoList) {
+        auto it = secRectInfoMap.find(info);
+        if (it == secRectInfoMap.end()) {
+            continue;
+        }
+
+        dumpSecSurfaceStream << "," << info;
+        if (it->second != 1) {
+            dumpSecSurfaceStream << "|" << it->second;
+        }
+    }
+}
+
 void DumpSecSurfaceInfoMap(const std::map<uint64_t, std::vector<SecSurfaceInfo>>& secSurfaceInfoMap)
 {
-    TLOGNI(WmsLogTag::WMS_EVENT, "DumpSecSurface map:%{public}d", static_cast<int>(secSurfaceInfoMap.size()));
+    std::ostringstream dumpSecSurfaceStream;
+    dumpSecSurfaceStream << "DumpSecSurface map:" << secSurfaceInfoMap.size();
+    bool isStart = false;
     for (auto& e : secSurfaceInfoMap) {
+        if (isStart) {
+            dumpSecSurfaceStream << ";{";
+        } else {
+            dumpSecSurfaceStream << "{";
+        }
         auto hostNodeId = e.first;
-        TLOGNI(WmsLogTag::WMS_EVENT, "DumpSecSurface id:%{public}" PRIu64 "list:%{public}d",
-            hostNodeId, static_cast<int>(e.second.size()));
+        dumpSecSurfaceStream << "id:" << hostNodeId << ";list" << e.second.size();
         for (const auto& secSurfaceInfo : e.second) {
             auto surfaceInfoStr = DumpSecSurfaceInfo(secSurfaceInfo);
             auto rectInfoStr = DumpSecRectInfo(secSurfaceInfo.uiExtensionRectInfo);
-            TLOGNI(WmsLogTag::WMS_EVENT, "DumpSecSurface:secSurface:%{public}s secRect:%{public}s",
-                surfaceInfoStr.c_str(), rectInfoStr.c_str());
-            for (const auto& secRectInfo : secSurfaceInfo.upperNodes) {
-                auto infoStr = DumpSecRectInfo(secRectInfo);
-                TLOGNI(WmsLogTag::WMS_EVENT, "DumpSecSurface:%{public}s", infoStr.c_str());
-            }
+            dumpSecSurfaceStream << ";{" << surfaceInfoStr << ";" << rectInfoStr;
+            DumpUpperNodes(dumpSecSurfaceStream, secSurfaceInfo.upperNodes);
+            dumpSecSurfaceStream << "}";
         }
+        isStart = true;
+        dumpSecSurfaceStream << "}";
     }
+    TLOGND(WmsLogTag::WMS_EVENT, "DumpSecSurface desc:map size{id;list;{secSurfaceInfo:"
+        "hostPid|uiExtensionPid|hostNodeId|uiExtensionNodeId;secRectInfo:"
+        "[x,y,width,height]|scalex|scaley|anchorx|anchory|[repet num];[upperNodes same as secRectInfo]}}");
+    TLOGNI(WmsLogTag::WMS_EVENT, "%{public}s", dumpSecSurfaceStream.str().c_str());
 }
 
 void SceneSessionDirtyManager::UpdateSecSurfaceInfo(const std::map<uint64_t,

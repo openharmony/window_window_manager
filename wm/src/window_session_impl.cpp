@@ -209,13 +209,14 @@ std::unordered_map<int32_t, std::vector<sptr<IWaterfallModeChangeListener>>>
 std::mutex WindowSessionImpl::windowRotationChangeListenerMutex_;
 std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>> WindowSessionImpl::windowSessionMap_;
 std::shared_mutex WindowSessionImpl::windowSessionMutex_;
-std::set<sptr<WindowSessionImpl>> WindowSessionImpl::windowExtensionSessionSet_;
+std::set<sptr<WindowSessionImpl>> g_windowExtensionSessionSet_;
 std::shared_mutex WindowSessionImpl::windowExtensionSessionMutex_;
 std::recursive_mutex WindowSessionImpl::subWindowSessionMutex_;
 std::map<int32_t, std::vector<sptr<WindowSessionImpl>>> WindowSessionImpl::subWindowSessionMap_;
 std::map<int32_t, std::vector<sptr<IWindowStatusChangeListener>>> WindowSessionImpl::windowStatusChangeListeners_;
 std::map<int32_t, std::vector<sptr<IWindowStatusDidChangeListener>>> WindowSessionImpl::windowStatusDidChangeListeners_;
 bool WindowSessionImpl::isUIExtensionAbilityProcess_ = false;
+std::atomic<bool> WindowSessionImpl::defaultDensityEnabledGlobalConfig_ = false;
 
 #define CALL_LIFECYCLE_LISTENER(windowLifecycleCb, listeners) \
     do {                                                      \
@@ -316,6 +317,7 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     }
     WindowHelper::SplitStringByDelimiter(
         system::GetParameter("const.window.containerColorLists", ""), ",", containerColorList_);
+    SetDefaultDensityEnabledValue(defaultDensityEnabledGlobalConfig_);
 }
 
 bool WindowSessionImpl::IsPcWindow() const
@@ -460,7 +462,7 @@ RSSurfaceNode::SharedPtr WindowSessionImpl::CreateSurfaceNode(const std::string&
     auto surfaceNode = RSSurfaceNode::Create(
         rsSurfaceNodeConfig, rsSurfaceNodeType, true, property_->IsConstrainedModal(), GetRSUIContext());
     RSAdapterUtil::SetSkipCheckInMultiInstance(surfaceNode, true);
-    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "Create RSSurfaceNode: %{public}s, name: %{public}s",
+    TLOGD(WmsLogTag::WMS_SCB, "Create RSSurfaceNode: %{public}s, name: %{public}s",
           RSAdapterUtil::RSNodeToStr(surfaceNode).c_str(), name.c_str());
     return surfaceNode;
 }
@@ -709,7 +711,7 @@ sptr<WindowSessionImpl> WindowSessionImpl::GetScaleWindow(uint32_t windowId)
     }
     if (isUIExtensionAbilityProcess_) {
         std::shared_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
-        for (const auto& window : windowExtensionSessionSet_) {
+        for (const auto& window : GetWindowExtensionSessionSet()) {
             if (window && static_cast<uint32_t>(window->GetProperty()->GetParentId()) == windowId) {
                 TLOGD(WmsLogTag::WMS_COMPAT, "find extension window id:%{public}d", window->GetPersistentId());
                 return window;
@@ -794,6 +796,17 @@ void WindowSessionImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent
 {
     bool isConsumed = false;
     NotifyKeyEvent(keyEvent, isConsumed, false);
+}
+
+void WindowSessionImpl::ConsumeBackEvent()
+{
+    TLOGI(WmsLogTag::WMS_EVENT, "in");
+    HandleBackEvent();
+}
+
+bool WindowSessionImpl::IsDialogSessionBackGestureEnabled()
+{
+    return dialogSessionBackGestureEnabled_;
 }
 
 bool WindowSessionImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
@@ -1486,7 +1499,7 @@ sptr<WindowSessionImpl> WindowSessionImpl::FindExtensionWindowWithContext() cons
         return nullptr;
     }
     std::shared_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
-    for (const auto& window : windowExtensionSessionSet_) {
+    for (const auto& window : GetWindowExtensionSessionSet()) {
         if (window && context.get() == window->GetContext().get()) {
             return window;
         }
@@ -2072,6 +2085,7 @@ WSError WindowSessionImpl::LinkKeyFrameCanvasNode(std::shared_ptr<RSCanvasNode>&
         TLOGE(WmsLogTag::WMS_EVENT, "uiContent or session is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
+    RSAdapterUtil::SetRSUIContext(rsCanvasNode, GetRSUIContext(), true);
     uiContent->LinkKeyFrameCanvasNode(rsCanvasNode);
     return WSError::WS_OK;
 }
@@ -2347,35 +2361,66 @@ Rect WindowSessionImpl::GetGlobalDisplayRect() const
     return property_->GetGlobalDisplayRect();
 }
 
-Position WindowSessionImpl::ClientToGlobalDisplay(const Position& position) const
+WMError WindowSessionImpl::ClientToGlobalDisplay(const Position& inPosition, Position& outPosition) const
 {
+    const auto windowId = GetWindowId();
+    const auto layoutTransform = GetLayoutTransform();
+    if (WindowHelper::IsScaled(layoutTransform)) {
+        TLOGW(WmsLogTag::WMS_LAYOUT,
+            "Scaled window is not supported, windowId: %{public}u, scaleX: %{public}f, scaleY: %{public}f",
+            windowId, layoutTransform.scaleX_, layoutTransform.scaleY_);
+        return WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS;
+    }
+
     const auto globalDisplayRect = GetGlobalDisplayRect();
-    // Note: currently assumes no scaling is applied to the window.
-    Position globalDisplayPos = { globalDisplayRect.posX_ + position.x, globalDisplayRect.posY_ + position.y };
-    TLOGD(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, position: %{public}s, globalDisplayPos: %{public}s",
-        GetPersistentId(), position.ToString().c_str(), globalDisplayPos.ToString().c_str());
-    return globalDisplayPos;
+    outPosition = {
+        globalDisplayRect.posX_ + inPosition.x,
+        globalDisplayRect.posY_ + inPosition.y
+    };
+    TLOGD(WmsLogTag::WMS_LAYOUT,
+        "windowId: %{public}u, globalDisplayRect: %{public}s, inPosition: %{public}s, outPosition: %{public}s",
+        windowId, globalDisplayRect.ToString().c_str(),
+        inPosition.ToString().c_str(), outPosition.ToString().c_str());
+    return WMError::WM_OK;
 }
 
-Position WindowSessionImpl::GlobalDisplayToClient(const Position& position) const
+WMError WindowSessionImpl::GlobalDisplayToClient(const Position& inPosition, Position& outPosition) const
 {
+    const auto windowId = GetWindowId();
+    const auto layoutTransform = GetLayoutTransform();
+    if (WindowHelper::IsScaled(layoutTransform)) {
+        TLOGW(WmsLogTag::WMS_LAYOUT,
+            "Scaled window is not supported, windowId: %{public}u, scaleX: %{public}f, scaleY: %{public}f",
+            windowId, layoutTransform.scaleX_, layoutTransform.scaleY_);
+        return WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS;
+    }
+
     const auto globalDisplayRect = GetGlobalDisplayRect();
-    // Note: currently assumes no scaling is applied to the window.
-    Position clientPos = { position.x - globalDisplayRect.posX_, position.y - globalDisplayRect.posY_ };
-    TLOGD(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, position: %{public}s, clientPos: %{public}s",
-        GetPersistentId(), position.ToString().c_str(), clientPos.ToString().c_str());
-    return clientPos;
+    outPosition = {
+        inPosition.x - globalDisplayRect.posX_,
+        inPosition.y - globalDisplayRect.posY_
+    };
+    TLOGD(WmsLogTag::WMS_LAYOUT,
+        "windowId: %{public}u, globalDisplayRect: %{public}s, inPosition: %{public}s, outPosition: %{public}s",
+        windowId, globalDisplayRect.ToString().c_str(),
+        inPosition.ToString().c_str(), outPosition.ToString().c_str());
+    return WMError::WM_OK;
 }
 
 WSError WindowSessionImpl::UpdateGlobalDisplayRectFromServer(const WSRect& rect, SizeChangeReason reason)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, rect: %{public}s, reason: %{public}d",
-        GetPersistentId(), rect.ToString().c_str(), static_cast<int32_t>(reason));
+    const uint32_t windowId = GetWindowId();
+    TLOGD(WmsLogTag::WMS_LAYOUT, "windowId: %{public}u, rect: %{public}s, reason: %{public}u",
+        windowId, rect.ToString().c_str(), reason);
     Rect newRect = { rect.posX_, rect.posY_, rect.width_, rect.height_ };
-    if (newRect == GetGlobalDisplayRect()) {
+    if (newRect == GetGlobalDisplayRect() && reason == globalDisplayRectSizeChangeReason_) {
+        TLOGD(WmsLogTag::WMS_LAYOUT,
+            "No change in rect or reason, windowId: %{public}d, rect: %{public}s, reason: %{public}u",
+            windowId, rect.ToString().c_str(), reason);
         return WSError::WS_DO_NOTHING;
     }
     property_->SetGlobalDisplayRect(newRect);
+    globalDisplayRectSizeChangeReason_ = reason;
     NotifyGlobalDisplayRectChange(newRect, static_cast<WindowSizeChangeReason>(reason));
     return WSError::WS_OK;
 }
@@ -5901,6 +5946,26 @@ WSError WindowSessionImpl::NotifySystemDensityChange(float density)
     return WSError::WS_OK;
 }
 
+WMError WindowSessionImpl::SetWindowDefaultDensityEnabled(bool enabled)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "WinId: %{public}d, enabled: %{public}u", GetPersistentId(), enabled);
+    if (!SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "WinId: %{public}d permission denied!", GetPersistentId());
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    SetDefaultDensityEnabledValue(enabled);
+    UpdateDensity();
+    return WMError::WM_OK;
+}
+
+void WindowSessionImpl::SetDefaultDensityEnabledValue(bool enabled)
+{
+    isDefaultDensityEnabled_.store(enabled);
+}
+
 WSError WindowSessionImpl::NotifyWindowVisibility(bool isVisible)
 {
     TLOGD(WmsLogTag::WMS_ATTRIBUTE, "window: name=%{public}s, id=%{public}u, isVisible=%{public}d",
@@ -6637,6 +6702,11 @@ void WindowSessionImpl::ReadKeyboardInfoFromWant(const AAFwk::Want& want, Keyboa
     keyboardPanelInfo.isShowing_ = want.GetBoolParam(Extension::ISSHOWING, false);
 }
 
+std::set<sptr<WindowSessionImpl>>& WindowSessionImpl::GetWindowExtensionSessionSet()
+{
+    return g_windowExtensionSessionSet_;
+}
+
 void WindowSessionImpl::NotifyKeyboardAnimationCompleted(const KeyboardPanelInfo& keyboardPanelInfo)
 {
     TLOGI(WmsLogTag::WMS_KEYBOARD, "isShowAnimation: %{public}d, beginRect: %{public}s, endRect: %{public}s",
@@ -7156,6 +7226,15 @@ void WindowSessionImpl::SetUiDvsyncSwitch(bool dvsyncSwitch)
     vsyncStation_->SetUiDvsyncSwitch(dvsyncSwitch);
 }
 
+void WindowSessionImpl::SetTouchEvent(int32_t touchType)
+{
+    if (vsyncStation_ == nullptr) {
+        TLOGW(WmsLogTag::WMS_MAIN, "vsyncStation is null");
+        return;
+    }
+    vsyncStation_->SetTouchEvent(touchType);
+}
+
 WSError WindowSessionImpl::NotifyAppForceLandscapeConfigUpdated()
 {
     return WSError::WS_DO_NOTHING;
@@ -7224,7 +7303,7 @@ void WindowSessionImpl::AddSetUIContentTimeoutCheck()
             return;
         }
 
-        TLOGNI(WmsLogTag::WMS_LIFE, "SetUIContent timeout, persistentId=%{public}d", window->GetPersistentId());
+        TLOGNW(WmsLogTag::WMS_LIFE, "SetUIContent timeout, persistentId=%{public}d", window->GetPersistentId());
         std::ostringstream oss;
         oss << "SetUIContent timeout uid: " << getuid();
         oss << ", windowName: " << window->GetWindowName();
@@ -7768,7 +7847,7 @@ nlohmann::json WindowSessionImpl::setContainerButtonStyle(const DecorButtonStyle
 std::shared_ptr<RSUIDirector> WindowSessionImpl::GetRSUIDirector() const
 {
     RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
-    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "%{public}s, windowId: %{public}u",
+    TLOGD(WmsLogTag::WMS_SCB, "%{public}s, windowId: %{public}u",
           RSAdapterUtil::RSUIDirectorToStr(rsUIDirector_).c_str(), GetWindowId());
     return rsUIDirector_;
 }
@@ -7777,9 +7856,27 @@ std::shared_ptr<RSUIContext> WindowSessionImpl::GetRSUIContext() const
 {
     RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
     auto rsUIContext = rsUIDirector_ ? rsUIDirector_->GetRSUIContext() : nullptr;
-    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "%{public}s, windowId: %{public}u",
+    TLOGD(WmsLogTag::WMS_SCB, "%{public}s, windowId: %{public}u",
           RSAdapterUtil::RSUIContextToStr(rsUIContext).c_str(), GetWindowId());
     return rsUIContext;
+}
+
+bool WindowSessionImpl::IsAnco() const
+{
+    return property_->GetCollaboratorType() == static_cast<int32_t>(CollaboratorType::RESERVE_TYPE);
+}
+
+bool WindowSessionImpl::OnPointDown(int32_t eventId, int32_t posX, int32_t posY)
+{
+    auto hostSession = GetHostSession();
+    if (!hostSession) {
+        TLOGE(WmsLogTag::WMS_EVENT, "windowId:%{public}u,%{public}d", GetWindowId(), eventId);
+        return false;
+    }
+
+    auto ret = hostSession->ProcessPointDownSession(posX, posY);
+    TLOGD(WmsLogTag::WMS_EVENT, "windowId:%{public}u,%{public}d,%{public}d", GetWindowId(), eventId, ret);
+    return ret == WSError::WS_OK;
 }
 
 void WindowSessionImpl::SetNavDestinationInfo(const std::string& navDestinationInfo)

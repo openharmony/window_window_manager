@@ -463,6 +463,17 @@ public:
      */
     DMError SetVirtualScreenAutoRotation(ScreenId screenId, bool enable);
 
+    /**
+     * @brief Enable or disable the privacy window of a specified tag on the virtual screen.
+     *
+     * @param screenId virtual screen id.
+     * @param privacyWindowTag tag of the privacy window.
+     * @param enable True means enable, false means disable.
+     * @return DM_OK means set success, others means faild.
+     */
+    DMError SetScreenPrivacyWindowTagSwitch(ScreenId screenId, const std::vector<std::string>& privacyWindowTag,
+        bool enable);
+
 private:
     ScreenManager();
     ~ScreenManager();

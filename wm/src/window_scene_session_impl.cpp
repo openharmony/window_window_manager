@@ -398,16 +398,6 @@ WMError WindowSceneSessionImpl::RecoverAndConnectSpecificSession()
         GetWindowName().c_str(), property_->GetWindowMode(), property_->GetWindowType(), GetPersistentId(), state_,
         requestState_, property_->GetParentId());
 
-    property_->SetWindowState(requestState_);
-
-    sptr<ISessionStage> iSessionStage(this);
-    sptr<IWindowEventChannel> eventChannel = sptr<WindowEventChannel>::MakeSptr(iSessionStage);
-    sptr<Rosen::ISession> session = nullptr;
-    auto context = GetContext();
-    sptr<IRemoteObject> token = context ? context->GetToken() : nullptr;
-    if (token) {
-        property_->SetTokenState(true);
-    }
     const WindowType type = GetType();
     if (WindowHelper::IsSubWindow(type) && !property_->GetIsUIExtFirstSubWindow()) { // sub window
         TLOGD(WmsLogTag::WMS_RECOVER, "SubWindow");
@@ -422,20 +412,26 @@ WMError WindowSceneSessionImpl::RecoverAndConnectSpecificSession()
         PictureInPictureManager::DoClose(true, true);
         return WMError::WM_OK;
     }
+    windowRecoverStateChangeFunc_(true, WindowRecoverState::WINDOW_START_RECONNECT);
+    sptr<ISessionStage> iSessionStage(this);
+    sptr<IWindowEventChannel> eventChannel = sptr<WindowEventChannel>::MakeSptr(iSessionStage);
+    sptr<Rosen::ISession> session = nullptr;
+    auto context = GetContext();
+    sptr<IRemoteObject> token = context ? context->GetToken() : nullptr;
+    windowRecoverStateChangeFunc_(true, WindowRecoverState::WINDOW_DOING_RECONNECT);
     SingletonContainer::Get<WindowAdapter>().RecoverAndConnectSpecificSession(
         iSessionStage, eventChannel, surfaceNode_, property_, session, token);
 
-    property_->SetWindowState(state_);
-
     if (session == nullptr) {
         TLOGE(WmsLogTag::WMS_RECOVER, "Recover failed, session is nullptr");
+        windowRecoverStateChangeFunc_(true, WindowRecoverState::WINDOW_NOT_RECONNECT);
         return WMError::WM_ERROR_NULLPTR;
     }
     {
         std::lock_guard<std::mutex> lock(hostSessionMutex_);
         hostSession_ = session;
     }
-    RecoverSessionListener();
+    windowRecoverStateChangeFunc_(true, WindowRecoverState::WINDOW_FINISH_RECONNECT);
     TLOGI(WmsLogTag::WMS_RECOVER,
         "over, windowName=%{public}s, persistentId=%{public}d",
         GetWindowName().c_str(), GetPersistentId());
@@ -468,24 +464,25 @@ WMError WindowSceneSessionImpl::RecoverAndReconnectSceneSession()
     } else {
         TLOGE(WmsLogTag::WMS_RECOVER, "want is nullptr!");
     }
-    property_->SetWindowState(state_);
-    property_->SetIsFullScreenWaterfallMode(isFullScreenWaterfallMode_.load());
+    windowRecoverStateChangeFunc_(false, WindowRecoverState::WINDOW_START_RECONNECT);
     sptr<ISessionStage> iSessionStage(this);
     sptr<IWindowEventChannel> iWindowEventChannel = sptr<WindowEventChannel>::MakeSptr(iSessionStage);
     sptr<IRemoteObject> token = context ? context->GetToken() : nullptr;
     sptr<Rosen::ISession> session = nullptr;
+    windowRecoverStateChangeFunc_(false, WindowRecoverState::WINDOW_DOING_RECONNECT);
     auto ret = SingletonContainer::Get<WindowAdapter>().RecoverAndReconnectSceneSession(
         iSessionStage, iWindowEventChannel, surfaceNode_, session, property_, token);
     if (session == nullptr) {
         TLOGE(WmsLogTag::WMS_RECOVER, "session is null, recovered session failed");
+        windowRecoverStateChangeFunc_(false, WindowRecoverState::WINDOW_NOT_RECONNECT);
         return WMError::WM_ERROR_NULLPTR;
     }
-    TLOGI(WmsLogTag::WMS_RECOVER, "Recover and reconnect sceneSession successful");
     {
         std::lock_guard<std::mutex> lock(hostSessionMutex_);
         hostSession_ = session;
     }
-    RecoverSessionListener();
+    windowRecoverStateChangeFunc_(false, WindowRecoverState::WINDOW_FINISH_RECONNECT);
+    TLOGI(WmsLogTag::WMS_RECOVER, "Successful, persistentId=%{public}d", GetPersistentId());
     return static_cast<WMError>(ret);
 }
 
@@ -634,6 +631,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
     if (ret == WMError::WM_OK) {
         MakeSubOrDialogWindowDragableAndMoveble();
         UpdateWindowState();
+        RegisterWindowRecoverStateChangeListener();
         RegisterSessionRecoverListener(isSpecificSession);
         UpdateDefaultStatusBarColor();
         AddSetUIContentTimeoutCheck();
@@ -650,6 +648,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
             Resize(initRect.width_, initRect.height_);
         }
         RegisterWindowInspectorCallback();
+        UpdateColorMode();
     }
     TLOGD(WmsLogTag::WMS_LIFE, "Window Create success [name:%{public}s, id:%{public}d], state:%{public}u, "
         "mode:%{public}u, enableDefaultDensity:%{public}d, displayId:%{public}" PRIu64,
@@ -891,6 +890,10 @@ void WindowSceneSessionImpl::RegisterSessionRecoverListener(bool isSpecificSessi
             TLOGW(WmsLogTag::WMS_RECOVER, "windowState is STATE_DESTROYED, no need to recover");
             return WMError::WM_ERROR_DESTROYED_OBJECT;
         }
+        if (promoteThis->windowRecoverStateChangeFunc_ == nullptr) {
+            TLOGW(WmsLogTag::WMS_RECOVER, "windowRecoverStateChangeFunc_ is nullptr");
+            return WMError::WM_ERROR_NULLPTR;
+        }
 
         auto ret = isSpecificSession ? promoteThis->RecoverAndConnectSpecificSession() :
 			promoteThis->RecoverAndReconnectSceneSession();
@@ -901,27 +904,59 @@ void WindowSceneSessionImpl::RegisterSessionRecoverListener(bool isSpecificSessi
     SingletonContainer::Get<WindowAdapter>().RegisterSessionRecoverCallbackFunc(GetPersistentId(), callbackFunc);
 }
 
+void WindowSceneSessionImpl::RegisterWindowRecoverStateChangeListener()
+{
+    windowRecoverStateChangeFunc_ = [weakThis = wptr(this)](bool isSpecificSession,
+        const WindowRecoverState& state) THREAD_SAFETY_GUARD(SCENE_GUARD) {
+        auto window = weakThis.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_RECOVER, "window is null");
+            return;
+        }
+        window->OnWindowRecoverStateChange(isSpecificSession, state);
+    };
+}
+
+void WindowSceneSessionImpl::OnWindowRecoverStateChange(bool isSpecificSession, const WindowRecoverState& state)
+{
+    TLOGI(WmsLogTag::WMS_RECOVER, "id: %{public}d, state:%{public}u", GetPersistentId(), state);
+    switch (state) {
+        case WindowRecoverState::WINDOW_START_RECONNECT:
+            UpdateStartRecoverProperty(isSpecificSession);
+            break;
+        case WindowRecoverState::WINDOW_FINISH_RECONNECT:
+            UpdateFinishRecoverProperty(isSpecificSession);
+            RecoverSessionListener();
+            break;
+        default:
+            break;
+    }
+}
+
+void WindowSceneSessionImpl::UpdateStartRecoverProperty(bool isSpecificSession)
+{
+    if (isSpecificSession) {
+        property_->SetWindowState(requestState_);
+        if (GetContext() && GetContext()->GetToken()) {
+            property_->SetTokenState(true);
+        }
+    } else {
+        property_->SetWindowState(state_);
+        property_->SetIsFullScreenWaterfallMode(isFullScreenWaterfallMode_.load());
+    }
+}
+
+void WindowSceneSessionImpl::UpdateFinishRecoverProperty(bool isSpecificSession)
+{
+    property_->SetWindowState(state_);
+}
+
 bool WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-    const MMI::PointerEvent::PointerItem& pointerItem, int32_t sourceType, float vpr, const WSRect& rect)
+    const MMI::PointerEvent::PointerItem& pointerItem)
 {
     bool needNotifyEvent = true;
-    int32_t winX = pointerItem.GetWindowX();
-    int32_t winY = pointerItem.GetWindowY();
-    int32_t titleBarHeight = 0;
-    WMError ret = GetDecorHeight(titleBarHeight);
-    if (ret != WMError::WM_OK || titleBarHeight <= 0) {
-        titleBarHeight = static_cast<int32_t>(WINDOW_TITLE_BAR_HEIGHT * vpr);
-    } else {
-        titleBarHeight = static_cast<int32_t>(titleBarHeight * vpr);
-    }
-    int outside = (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) ? static_cast<int>(HOTZONE_POINTER * vpr) :
-        static_cast<int>(HOTZONE_TOUCH * vpr);
-    AreaType dragType = AreaType::UNDEFINED;
     WindowType windowType = property_->GetWindowType();
-    bool isSystemDraggableType = WindowHelper::IsSystemWindow(windowType) && IsWindowDraggable();
-    if (property_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING || isSystemDraggableType) {
-        dragType = SessionHelper::GetAreaType(winX, winY, sourceType, outside, vpr, rect);
-    }
+    AreaType dragType = GetDragAreaByDownEvent(pointerEvent, pointerItem);
     TLOGD(WmsLogTag::WMS_EVENT, "dragType: %{public}d", dragType);
     bool isDecorDialog = windowType == WindowType::WINDOW_TYPE_DIALOG && property_->IsDecorEnable();
     bool isFixedSubWin = WindowHelper::IsSubWindow(windowType) && !IsWindowDraggable();
@@ -945,6 +980,28 @@ bool WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::Poi
         }
     }
     return needNotifyEvent;
+}
+
+AreaType WindowSceneSessionImpl::GetDragAreaByDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+    const MMI::PointerEvent::PointerItem& pointerItem)
+{
+    AreaType dragType = AreaType::UNDEFINED;
+    float vpr = WindowSessionImpl::GetVirtualPixelRatio();
+    if (MathHelper::NearZero(vpr)) {
+        return dragType;
+    }
+    const auto& sourceType = pointerEvent->GetSourceType();
+    int outside = (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) ? static_cast<int>(HOTZONE_POINTER * vpr) :
+        static_cast<int>(HOTZONE_TOUCH * vpr);
+    int32_t winX = pointerItem.GetWindowX();
+    int32_t winY = pointerItem.GetWindowY();
+    WindowType windowType = property_->GetWindowType();
+    bool isSystemDraggableType = WindowHelper::IsSystemWindow(windowType) && IsWindowDraggable();
+    const auto& rect = SessionHelper::TransferToWSRect(GetRect());
+    if (property_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING || isSystemDraggableType) {
+        dragType = SessionHelper::GetAreaType(winX, winY, sourceType, outside, vpr, rect);
+    }
+    return dragType;
 }
 
 void WindowSceneSessionImpl::ResetSuperFoldDisplayY(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
@@ -1007,7 +1064,7 @@ void WindowSceneSessionImpl::ConsumePointerEventInner(const std::shared_ptr<MMI:
         if (IsWindowDelayRaiseEnabled() && isHitTargetDraggable) {
             isExecuteDelayRaise_ = true;
         }
-        needNotifyEvent = HandlePointDownEvent(pointerEvent, pointerItem, sourceType, vpr, rect);
+        needNotifyEvent = HandlePointDownEvent(pointerEvent, pointerItem);
         RefreshNoInteractionTimeoutMonitor();
     }
     bool isPointUp = (action == MMI::PointerEvent::POINTER_ACTION_UP ||
@@ -1060,26 +1117,29 @@ void WindowSceneSessionImpl::ConsumePointerEvent(const std::shared_ptr<MMI::Poin
         return;
     }
 
-    if (!IsWindowDelayRaiseEnabled()) {
+    bool isPointDown = pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN ||
+        pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_DOWN;
+    AreaType dragType = AreaType::UNDEFINED;
+    if (isPointDown) {
+        dragType = GetDragAreaByDownEvent(pointerEvent, pointerItem);
+    }
+    if (!IsWindowDelayRaiseEnabled() || dragType != AreaType::UNDEFINED) {
         ConsumePointerEventInner(pointerEvent, pointerItem, false);
         return;
     }
-    std::shared_ptr<MMI::PointerEvent> pointerEventBackup;
-    if (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
-        pointerEventBackup = std::make_shared<MMI::PointerEvent>(*pointerEvent);
-    } else {
-        pointerEventBackup = pointerEvent;
-    }
     if (auto uiContent = GetUIContentSharedPtr()) {
         uiContent->ProcessPointerEvent(pointerEvent,
-            [weakThis = wptr(this), pointerEventBackup, pointerItem](bool isHitTargetDraggable) mutable {
+            [weakThis = wptr(this), pointerEvent, pointerItem](bool isHitTargetDraggable) mutable {
                 auto window = weakThis.promote();
                 if (window == nullptr) {
                     TLOGNE(WmsLogTag::WMS_FOCUS, "window is null");
                     return;
                 }
-                window->ConsumePointerEventInner(pointerEventBackup, pointerItem, isHitTargetDraggable);
+                window->ConsumePointerEventInner(pointerEvent, pointerItem, isHitTargetDraggable);
             });
+    } else {
+        TLOGE(WmsLogTag::WMS_FOCUS, "uiContent is nullptr, windowId: %{public}u", GetWindowId());
+        pointerEvent->MarkProcessed();
     }
 }
 
@@ -2098,6 +2158,12 @@ WMError WindowSceneSessionImpl::MoveWindowToGlobalDisplay(
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid session");
         return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    auto mode = GetWindowMode();
+    if (mode != WindowMode::WINDOW_MODE_FLOATING) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "window should not move, windowId: %{public}u, mode: %{public}u",
+            GetWindowId(), mode);
+        return WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS;
     }
     auto winId = GetPersistentId();
     // Use RequestRect to quickly get width and height from Resize method.
@@ -4103,6 +4169,7 @@ void WindowSceneSessionImpl::UpdateConfiguration(const std::shared_ptr<AppExecFw
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "notify ace scene win=%{public}u, display=%{public}" PRIu64,
             GetWindowId(), GetDisplayId());
         uiContent->UpdateConfiguration(configuration);
+        UpdateColorMode();
     } else {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent null, scene win=%{public}u, display=%{public}" PRIu64,
             GetWindowId(), GetDisplayId());
@@ -4119,6 +4186,37 @@ void WindowSceneSessionImpl::UpdateConfiguration(const std::shared_ptr<AppExecFw
     }
 }
 
+WMError WindowSceneSessionImpl::UpdateColorMode()
+{
+    auto appContext = AbilityRuntime::Context::GetApplicationContext();
+    if (appContext == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d app context is null", GetPersistentId());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    std::shared_ptr<AppExecFwk::Configuration> config = appContext->GetConfiguration();
+    if (config == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "config is null, winId: %{public}d", GetPersistentId());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    std::string colorMode = config->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, colorMode: %{public}s", GetPersistentId(), colorMode.c_str());
+    if (colorMode_ == colorMode) {
+        return WMError::WM_DO_NOTHING;
+    }
+    colorMode_ = colorMode;
+    bool hasDarkRes = false;
+    appContext->AppHasDarkRes(hasDarkRes);
+
+    if (auto hostSession = GetHostSession()) {
+        hostSession->OnUpdateColorMode(colorMode, hasDarkRes);
+    } else {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d hostSession is null", GetPersistentId());
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, colorMode: %{public}s, hasDarkRes: %{public}u",
+          GetPersistentId(), colorMode.c_str(), hasDarkRes);
+    return WMError::WM_OK;
+}
+
 void WindowSceneSessionImpl::UpdateConfigurationForSpecified(
     const std::shared_ptr<AppExecFwk::Configuration>& configuration,
     const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager)
@@ -4127,6 +4225,7 @@ void WindowSceneSessionImpl::UpdateConfigurationForSpecified(
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "notify ace scene win=%{public}u, display=%{public}" PRIu64,
             GetWindowId(), GetDisplayId());
         uiContent->UpdateConfiguration(configuration, resourceManager);
+        UpdateColorMode();
     } else {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent null, scene win=%{public}u, display=%{public}" PRIu64,
             GetWindowId(), GetDisplayId());
@@ -4487,7 +4586,7 @@ WMError WindowSceneSessionImpl::SetShadowRadius(float radius)
         return WMError::WM_ERROR_INVALID_PARAM;
     }
 
-    surfaceNode_->SetShadowRadius(radius);
+    surfaceNode_->SetShadowRadius(ConvertRadiusToSigma(radius));
     RSTransactionAdapter::FlushImplicitTransaction(surfaceNode_);
     return WMError::WM_OK;
 }
@@ -4537,7 +4636,7 @@ WMError WindowSceneSessionImpl::SetWindowShadowRadius(float radius)
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "RSSurface node is nullptr.");
         return WMError::WM_ERROR_NULLPTR;
     }
-    surfaceNode_->SetShadowRadius(radius);
+    surfaceNode_->SetShadowRadius(ConvertRadiusToSigma(radius));
     RSTransactionAdapter::FlushImplicitTransaction(surfaceNode_);
     return WMError::WM_OK;
 }
@@ -5011,6 +5110,7 @@ WMError WindowSceneSessionImpl::SetDialogBackGestureEnabled(bool isEnabled)
         return WMError::WM_ERROR_NULLPTR;
     }
     WMError ret = static_cast<WMError>(hostSession->SetDialogSessionBackGestureEnabled(isEnabled));
+    dialogSessionBackGestureEnabled_ = isEnabled;
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_DIALOG, "set window failed with errCode:%{public}d", static_cast<int32_t>(ret));
     }
@@ -5573,8 +5673,8 @@ WMError WindowSceneSessionImpl::SetDefaultDensityEnabled(bool enabled)
         return WMError::WM_ERROR_INVALID_CALLING;
     }
 
-    if (isDefaultDensityEnabled_ == enabled) {
-        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "isDefaultDensityEnabled not change");
+    if (defaultDensityEnabledGlobalConfig_ == enabled) {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "defaultDensityEnabledGlobalConfig not change");
         return WMError::WM_OK;
     }
 
@@ -5582,7 +5682,8 @@ WMError WindowSceneSessionImpl::SetDefaultDensityEnabled(bool enabled)
         hostSession->OnDefaultDensityEnabled(enabled);
     }
 
-    isDefaultDensityEnabled_ = enabled;
+    defaultDensityEnabledGlobalConfig_ = enabled;
+    SetDefaultDensityEnabledValue(enabled);
 
     std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
     for (const auto& winPair : windowSessionMap_) {
@@ -5592,6 +5693,7 @@ WMError WindowSceneSessionImpl::SetDefaultDensityEnabled(bool enabled)
             continue;
         }
         TLOGD(WmsLogTag::WMS_ATTRIBUTE, "Id=%{public}d UpdateDensity", window->GetWindowId());
+        window->SetDefaultDensityEnabledValue(enabled);
         window->UpdateDensity();
     }
     return WMError::WM_OK;
@@ -6343,9 +6445,8 @@ bool WindowSceneSessionImpl::IsDefaultDensityEnabled()
     }
     if (auto mainWindow = FindMainWindowWithContext()) {
         CopyUniqueDensityParameter(mainWindow);
-        return mainWindow->GetDefaultDensityEnabled();
     }
-    return false;
+    return GetDefaultDensityEnabled();
 }
 
 float WindowSceneSessionImpl::GetMainWindowCustomDensity()
@@ -6393,6 +6494,9 @@ WMError WindowSceneSessionImpl::SetWindowAnchorInfo(const WindowAnchorInfo& wind
     if (ret == WSError::WS_ERROR_DEVICE_NOT_SUPPORT) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
+    if (ret == WSError::WS_OK) {
+        property->SetWindowAnchorInfo(windowAnchorInfo);
+    }
     return ret != WSError::WS_OK ? WMError::WM_ERROR_SYSTEM_ABNORMALLY : WMError::WM_OK;
 }
 
@@ -6432,7 +6536,7 @@ WMError WindowSceneSessionImpl::SetWindowTransitionAnimation(WindowTransitionTyp
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (!IsPcWindow() && !IsPadWindow()) {
+    if (!IsPcOrPadFreeMultiWindowMode()) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     if (!WindowHelper::IsMainWindow(GetType())) {
@@ -6458,7 +6562,7 @@ std::shared_ptr<TransitionAnimation> WindowSceneSessionImpl::GetWindowTransition
     if (IsWindowSessionInvalid()) {
         return nullptr;
     }
-    if (!IsPcWindow() && !IsPadWindow()) {
+    if (!IsPcOrPadFreeMultiWindowMode()) {
         return nullptr;
     }
     if (!WindowHelper::IsMainWindow(GetType())) {
@@ -6492,21 +6596,22 @@ WMError WindowSceneSessionImpl::SetCustomDensity(float density, bool applyToSubW
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}u set density not change", GetWindowId());
         return WMError::WM_OK;
     }
-    isDefaultDensityEnabled_ = false;
+    defaultDensityEnabledGlobalConfig_ = false;
+    SetDefaultDensityEnabledValue(false);
     customDensity_ = density;
-    if (applyToSubWindow) {
-        std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
-        for (const auto& winPair : windowSessionMap_) {
-            auto window = winPair.second.second;
-            if (window == nullptr) {
-                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is nullptr");
-                continue;
-            }
-            TLOGD(WmsLogTag::WMS_ATTRIBUTE, "Id=%{public}d UpdateDensity", window->GetWindowId());
+    UpdateDensity();
+    std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
+    for (const auto& winPair : windowSessionMap_) {
+        auto window = winPair.second.second;
+        if (window == nullptr) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is nullptr");
+            continue;
+        }
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "Id=%{public}d UpdateDensity", window->GetWindowId());
+        window->SetDefaultDensityEnabledValue(false);
+        if (applyToSubWindow) {
             window->UpdateDensity();
         }
-    } else {
-        UpdateDensity();
     }
     return WMError::WM_OK;
 }

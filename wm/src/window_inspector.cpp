@@ -131,11 +131,13 @@ bool WindowInspector::ProcessArkUIInspectorMessage(const std::string& message, s
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "json::parse err");
         return false;
     }
-    if (!jsonMessage.contains("method") || jsonMessage["method"].get<std::string>() != METHOD_NAME) {
+    if (!jsonMessage.contains("method") || !jsonMessage["method"].is_string() ||
+        jsonMessage["method"].get<std::string>() != METHOD_NAME) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "received method err");
         return false;
     }
     if (!jsonMessage.contains("params") || !jsonMessage["params"].contains("command") ||
+        !jsonMessage["params"]["command"].is_string() ||
         jsonMessage["params"]["command"].get<std::string>() != COMMAND_NAME) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "received params.command err");
         return false;

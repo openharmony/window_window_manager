@@ -231,9 +231,8 @@ public:
     bool HasCastEngineOrPhyMirror(const std::vector<ScreenId>& screenIdsToExclude);
     void HandlePhysicalMirrorConnect(sptr<ScreenSession> screenSession, bool phyMirrorEnable);
     sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) override;
-    sptr<CutoutInfo> GetCutoutInfoWithRotation(DisplayId displayId, int32_t rotation) override;
+    sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId, int32_t width, int32_t height, Rotation rotation) override;
     DMError HasImmersiveWindow(ScreenId screenId, bool& immersive) override;
-    void SetDisplayBoundary(const sptr<ScreenSession> screenSession);
     void SetLowTemp(LowTempMode lowTemp);
 
     /**
@@ -310,6 +309,7 @@ public:
     void SetKeyguardDrawnDoneFlag(bool flag);
 
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() override;
+    DMError GetLiveCreaseRegion(FoldCreaseRegion& region) override;
 
     void TriggerFoldStatusChange(FoldStatus foldStatus);
     void NotifyFoldStatusChanged(FoldStatus foldStatus);
@@ -344,8 +344,8 @@ public:
         ScreenPropertyChangeType screenPropertyChangeType, bool isSwitchUser = false) override;
     void UpdateScreenRotationPropertyForRs(sptr<ScreenSession>& screenSession,
         ScreenPropertyChangeType screenPropertyChangeType, const RRect& bounds, float rotation, bool isSwitchUser);
-    void UpdateScreenDirectionInfo(ScreenId screenId, float screenComponentRotation, float rotation,
-        float phyRotation, ScreenPropertyChangeType screenPropertyChangeType) override;
+    void UpdateScreenDirectionInfo(ScreenId screenId, const ScreenDirectionInfo& directionInfo,
+        ScreenPropertyChangeType screenPropertyChangeType, const RRect& bounds) override;
     uint32_t GetCurvedCompressionArea() override;
     ScreenProperty GetPhyScreenProperty(ScreenId screenId) override;
     void SetScreenPrivacyState(bool hasPrivate) override;
@@ -371,6 +371,8 @@ public:
     void ReportFoldDisplayTime(uint64_t screenId, int64_t rsFirstFrameTime);
     void RegisterFirstFrameCommitCallback();
     void SetForceCloseHdr(ScreenId screenId, bool isForceCloseHdr) override;
+    DMError SetScreenPrivacyWindowTagSwitch(ScreenId screenId, const std::vector<std::string>& privacyWindowTag,
+        bool enable) override;
 
     VirtualScreenFlag GetVirtualScreenFlag(ScreenId screenId) override;
     DMError SetVirtualScreenFlag(ScreenId screenId, VirtualScreenFlag screenFlag) override;
@@ -471,7 +473,9 @@ public:
     bool GetKeyboardState() override;
     DMError GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
         ScreenId& screenId, DMRect& screenArea) override;
+    DMError SetVirtualScreenAutoRotation(ScreenId screenId, bool enable) override;
     bool SetScreenOffset(ScreenId screenId, float offsetX, float offsetY);
+    bool SynchronizePowerStatus(ScreenPowerState state) override;
 
 protected:
     ScreenSessionManager();
@@ -496,6 +500,8 @@ private:
         RSScreenCapability& screenCapability, ScreenProperty& property);
     RRect GetScreenBounds(ScreenId screenId, RSScreenModeInfo& screenMode);
     void InitSecondaryDisplayPhysicalParams();
+    ScreenId GetPhyScreenId(ScreenId screenId);
+    void UpdateCoordinationRefreshRate(uint32_t refreshRate);
     void GetInternalWidth();
     void InitExtendScreenDensity(sptr<ScreenSession> session, ScreenProperty property);
     void InitExtendScreenProperty(ScreenId screenId, sptr<ScreenSession> session, ScreenProperty property);
@@ -659,6 +665,7 @@ private:
     std::mutex clientProxyMutex_; // above guarded by clientProxyMutex_
     ClientAgentContainer<IDisplayManagerAgent, DisplayManagerAgentType> dmAgentContainer_;
     DeviceScreenConfig deviceScreenConfig_;
+    std::mutex allDisplayPhysicalResolutionMutex_;
     std::vector<DisplayPhysicalResolution> allDisplayPhysicalResolution_ {};
     std::vector<uint32_t> screenParams_ {};
     std::map<int32_t, std::set<DisplayManagerAgentType>> pidAgentTypeMap_;
@@ -668,6 +675,7 @@ private:
     std::mutex lastStatusUpdateMutex_;
 
     mutable std::recursive_mutex screenSessionMapMutex_;
+    std::mutex screenAgentMapMutex_;
     std::map<ScreenId, sptr<ScreenSession>> screenSessionMap_;
     mutable std::recursive_mutex physicalScreenSessionMapMutex_;
     std::map<ScreenId, sptr<ScreenSession>> physicalScreenSessionMap_;
@@ -741,6 +749,7 @@ private:
     int32_t screenOnDelay_ {0};
 
     std::vector<ScreenId> mirrorScreenIds_;
+    std::mutex mirrorScreenIdsMutex_;
     std::mutex snapBypickerMutex_;
     std::mutex switchUserMutex_;
     std::condition_variable switchUserCV_;

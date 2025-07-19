@@ -924,6 +924,17 @@ struct WindowAnchorInfo : public Parcelable {
         int32_t offsetY) : isAnchorEnabled_(isAnchorEnabled),  windowAnchor_(windowAnchor),
         offsetX_(offsetX), offsetY_(offsetY) {}
 
+    bool operator==(const WindowAnchorInfo& other) const
+    {
+        return isAnchorEnabled_ == other.isAnchorEnabled_ && windowAnchor_ == other.windowAnchor_ &&
+            offsetX_ == other.offsetX_ && offsetY_ == other.offsetY_;
+    }
+
+    bool operator!=(const WindowAnchorInfo& other) const
+    {
+        return !(*this == other);
+    }
+
     bool Marshalling(Parcel& parcel) const override
     {
         return parcel.WriteBool(isAnchorEnabled_) && parcel.WriteUint32(static_cast<uint32_t>(windowAnchor_)) &&
@@ -1039,6 +1050,16 @@ struct WindowLimits {
     bool IsEmpty() const
     {
         return (maxHeight_ == 0 || minHeight_ == 0 || maxWidth_ == 0 || minWidth_ == 0);
+    }
+
+    std::string ToString() const
+    {
+        constexpr int precision = 6;
+        std::ostringstream oss;
+        oss << "[" << maxWidth_ << " " << maxHeight_ << " " << minWidth_ << " " << minHeight_
+            << " " << std::fixed << std::setprecision(precision) << maxRatio_ << " " << minRatio_
+            << " " << vpRatio_ << "]";
+        return oss.str();
     }
 };
 

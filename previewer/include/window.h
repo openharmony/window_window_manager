@@ -176,18 +176,26 @@ public:
     /**
      * @brief Convert a position from client (window-relative) coordinates to global coordinates.
      *
-     * @param position The position relative to the window.
-     * @return The corresponding position in global coordinates.
+     * @param inPosition The position relative to the window.
+     * @param outPosition [out] The corresponding position in global coordinates.
+     * @return WMError::WM_OK on success, or appropriate error code on failure.
      */
-    virtual Position ClientToGlobalDisplay(const Position& position) const { return { 0, 0 }; }
+    virtual WMError ClientToGlobalDisplay(const Position& inPosition, Position& outPosition) const
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 
     /**
      * @brief Convert a position from global coordinates to client (window-relative) coordinates.
      *
-     * @param position The position in global coordinates.
-     * @return The corresponding position relative to the window.
+     * @param inPosition The position in global coordinates.
+     * @param outPosition [out] The corresponding position relative to the window.
+     * @return WMError::WM_OK on success, or appropriate error code on failure.
      */
-    virtual Position GlobalDisplayToClient(const Position& position) const { return { 0, 0 }; }
+    virtual WMError GlobalDisplayToClient(const Position& inPosition, Position& outPosition) const
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 
     virtual WindowType GetType() const = 0;
     virtual WindowMode GetWindowMode() const = 0;
@@ -302,7 +310,9 @@ public:
     virtual WMError UpdateSurfaceNodeAfterCustomAnimation(bool isAdd) = 0;
     virtual void SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer>& inputEventConsumer) = 0;
     virtual void ConsumeKeyEvent(const std::shared_ptr<MMI::KeyEvent>& inputEvent) = 0;
+    virtual void ConsumeBackEvent() {}
     virtual void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& inputEvent) = 0;
+    virtual bool IsDialogSessionBackGestureEnabled() { return false; }
     virtual void RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback) = 0;
     virtual int64_t GetVSyncPeriod() = 0;
     virtual void FlushFrameRate(uint32_t rate, int32_t animatorExpectedFrameRate, uint32_t rateType) {}
@@ -424,6 +434,7 @@ public:
     virtual float GetCustomDensity() const { return UNDEFINED_DENSITY; }
     virtual WMError SetWindowShadowEnabled(bool isEnabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual bool GetWindowShadowEnabled() const { return true; }
+    virtual WMError SetWindowDefaultDensityEnabled(bool enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError GetWindowDensityInfo(
         WindowDensityInfo& densityInfo) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError IsMainWindowFullScreenAcrossDisplays(
@@ -562,6 +573,13 @@ public:
      * @return * void
      */
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) {}
+
+    /**
+     * @brief Set touch event
+     *
+     * @param touchType int32_t.
+     */
+    virtual void SetTouchEvent(int32_t touchType) {}
 
     virtual WMError SetImmersiveModeEnabledState(bool enable) { return WMError::WM_OK; }
 

@@ -26,6 +26,9 @@
 #include "session/host/include/scene_session.h"
 #include "session/host/include/sub_session.h"
 #include "session/host/include/system_session.h"
+#include "session/screen/include/screen_session.h"
+#include "screen_session_manager/include/screen_session_manager.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "window_helper.h"
 #include "wm_common.h"
 
@@ -346,6 +349,7 @@ HWTEST_F(SceneSessionLayoutTest, NotifyClientToUpdateRectTask, TestSize.Level0)
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     session->moveDragController_ = nullptr;
     session->isKeyboardPanelEnabled_ = false;
+    session->SetSessionRect({ 0, 0, 800, 800 });
 
     session->Session::UpdateSizeChangeReason(SizeChangeReason::UNDEFINED);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION,
@@ -784,6 +788,31 @@ HWTEST_F(SceneSessionLayoutTest, IsNeedConvertToRelativeRect, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsDraggable
+ * @tc.desc: IsDraggable when moveDragController_ is nullptr or not.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLayoutTest, IsDraggable, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsDraggable";
+    info.bundleName_ = "IsDraggable";
+    info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    sceneSession->GetSessionProperty()->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    sceneSession->GetSessionProperty()->SetDragEnabled(true);
+    sceneSession->SetDragActivated(true);
+
+    sceneSession->moveDragController_ = nullptr;
+    EXPECT_EQ(sceneSession->IsDraggable(), false);
+
+    sceneSession->moveDragController_ =
+        sptr<MoveDragController>::MakeSptr(sceneSession->GetPersistentId(), sceneSession->GetWindowType());
+    EXPECT_EQ(sceneSession->IsDraggable(), true);
+}
+
+/**
  * @tc.name: IsMovable
  * @tc.desc: Test IsMovable when AnchorEnabled or AnchorDisabled
  * @tc.type: FUNC
@@ -956,6 +985,96 @@ HWTEST_F(SceneSessionLayoutTest, UpdateWindowModeForUITest01, TestSize.Level1)
     sceneSession->sessionStage_ = mockSessionStage;
     errCode = sceneSession->UpdateWindowModeForUITest(updateMode);
     EXPECT_EQ(errCode, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: SetMoveAvailableArea01
+ * @tc.desc: SetMoveAvailableArea01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLayoutTest, SetMoveAvailableArea01, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetMoveAvailableArea01";
+    info.bundleName_ = "SetMoveAvailableArea01";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    WSError res = sceneSession->SetMoveAvailableArea(-1);
+    EXPECT_EQ(res, WSError::WS_ERROR_INVALID_DISPLAY);
+
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024, sceneSession->GetWindowType());
+    int32_t screenId = 0;
+    sceneSession->SetScreenId(screenId);
+    res = sceneSession->SetMoveAvailableArea(0);
+    EXPECT_EQ(res, WSError::WS_OK);
+
+    sptr<ScreenSession> currentScreenSession =
+        ScreenSessionManager::GetInstance().GetOrCreateScreenSession(0);
+    ASSERT_NE(currentScreenSession, nullptr);
+    uint32_t currentScreenHeight = currentScreenSession->GetScreenProperty().GetBounds().rect_.height_;
+    DMRect statusBarRect = sceneSession->CalcRectForStatusBar();
+    int32_t dockHeight = sceneSession->GetDockHeight();
+    if (PcFoldScreenManager::GetInstance().IsHalfFolded(screenId)) {
+        sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+        DMRect availableArea;
+        DMError ret = DisplayManager::GetInstance().GetExpandAvailableArea(
+            sceneSession->GetSessionProperty()->GetDisplayId(), availableArea);
+        if (ret != DMError::DM_OK) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to get available area, ret: %{public}d", ret);
+        }
+        EXPECT_EQ(sceneSession->moveDragController_->moveAvailableArea_, availableArea);
+        EXPECT_EQ(sceneSession->moveDragController_->moveAvailableArea_.height_,
+            currentScreenHeight - statusBarRect.height_ - dockHeight);
+    }
+}
+
+/**
+ * @tc.name: SetMoveAvailableArea02
+ * @tc.desc: SetMoveAvailableArea02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLayoutTest, SetMoveAvailableArea02, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetMoveAvailableArea02";
+    info.bundleName_ = "SetMoveAvailableArea02";
+    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    EXPECT_NE(specificCallback_, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback_);
+
+    WSRect rect({0, 0, 50, 50});
+    sceneSession->GetLayoutController()->SetSessionRect(rect);
+    sceneSession->specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ =
+        [&](WindowType type, uint64_t displayId) -> std::vector<sptr<SceneSession>> {
+        std::vector<sptr<SceneSession>> vec;
+        vec.push_back(sceneSession);
+        return vec;
+    };
+
+    SystemSessionConfig systemConfig;
+    int32_t screenId = 0;
+    sceneSession->SetScreenId(screenId);
+
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sceneSession->SetSessionProperty(property);
+    ScreenSessionConfig config;
+    sptr<ScreenSession> screenSession =
+        sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert(std::make_pair(screenId, screenSession));
+    
+    systemConfig.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    sceneSession->SetSystemConfig(systemConfig);
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024, sceneSession->GetWindowType());
+    WSError res = sceneSession->SetMoveAvailableArea(0);
+    EXPECT_EQ(res, WSError::WS_OK);
+
+    systemConfig.windowUIType_ = WindowUIType::PC_WINDOW;
+    sceneSession->SetSystemConfig(systemConfig);
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024, sceneSession->GetWindowType());
+    res = sceneSession->SetMoveAvailableArea(0);
+    EXPECT_EQ(res, WSError::WS_OK);
 }
 } // namespace
 } // namespace Rosen

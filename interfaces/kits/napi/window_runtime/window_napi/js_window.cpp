@@ -1178,6 +1178,13 @@ napi_value JsWindow::GetWindowDensityInfo(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnGetWindowDensityInfo(env, info) : nullptr;
 }
 
+napi_value JsWindow::SetDefaultDensityEnabled(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetDefaultDensityEnabled(env, info) : nullptr;
+}
+
 napi_value JsWindow::IsMainWindowFullScreenAcrossDisplays(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
@@ -2338,17 +2345,23 @@ napi_value JsWindow::HandlePositionTransform(
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
 
-    Position inputPos { x, y };
-    Position resultPos = transformFunc(windowToken_, inputPos);
-    TLOGI(WmsLogTag::WMS_LAYOUT, "%{public}s: inputPos: %{public}s, resultPos: %{public}s",
-        caller, inputPos.ToString().c_str(), resultPos.ToString().c_str());
+    Position inPosition { x, y };
+    Position outPosition;
+    auto transformRet = transformFunc(windowToken_, inPosition, outPosition);
+    auto it = WM_JS_TO_ERROR_CODE_MAP.find(transformRet);
+    WmErrorCode errCode = (it != WM_JS_TO_ERROR_CODE_MAP.end()) ? it->second : WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    if (errCode != WmErrorCode::WM_OK) {
+        return NapiThrowError(env, errCode);
+    }
+    TLOGI(WmsLogTag::WMS_LAYOUT, "%{public}s: windowId: %{public}u, inPosition: %{public}s, outPosition: %{public}s",
+        caller, windowToken_->GetWindowId(), inPosition.ToString().c_str(), outPosition.ToString().c_str());
 
-    auto jsPosition = BuildJsPosition(env, resultPos);
-    if (!jsPosition) {
+    auto jsOutPosition = BuildJsPosition(env, outPosition);
+    if (!jsOutPosition) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "%{public}s: Failed to build JS position object", caller);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    return jsPosition;
+    return jsOutPosition;
 }
 
 /** @note @window.layout */
@@ -2356,8 +2369,8 @@ napi_value JsWindow::OnClientToGlobalDisplay(napi_env env, napi_callback_info in
 {
     return HandlePositionTransform(
         env, info,
-        [](const sptr<Window>& window, const Position& pos) {
-            return window->ClientToGlobalDisplay(pos);
+        [](const sptr<Window>& window, const Position& inPosition, Position& outPosition) {
+            return window->ClientToGlobalDisplay(inPosition, outPosition);
         },
         __func__);
 }
@@ -2367,8 +2380,8 @@ napi_value JsWindow::OnGlobalDisplayToClient(napi_env env, napi_callback_info in
 {
     return HandlePositionTransform(
         env, info,
-        [](const sptr<Window>& window, const Position& pos) {
-            return window->GlobalDisplayToClient(pos);
+        [](const sptr<Window>& window, const Position& inPosition, Position& outPosition) {
+            return window->GlobalDisplayToClient(inPosition, outPosition);
         },
         __func__);
 }
@@ -7309,7 +7322,7 @@ static bool IsTransitionAnimationEnable(napi_env env, sptr<Window> windowToken, 
         enableResult = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
         return false;
     }
-    if (!windowToken->IsPcWindow() && !windowToken->IsPadWindow()) {
+    if (!windowToken->IsPcOrPadFreeMultiWindowMode()) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Device is invalid");
         enableResult = WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
         return false;
@@ -8431,6 +8444,33 @@ napi_value JsWindow::OnGetWindowDensityInfo(napi_env env, napi_callback_info inf
     }
 }
 
+napi_value JsWindow::OnSetDefaultDensityEnabled(napi_env env, napi_callback_info info)
+{
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != INDEX_ONE) {
+        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    bool enabled = false;
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], enabled)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to convert parameter to enable");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowToken is null");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetWindowDefaultDensityEnabled(enabled));
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u set enabled=%{public}u result=%{public}d",
+        windowToken_->GetWindowId(), enabled, ret);
+    if (ret != WmErrorCode::WM_OK) {
+        return NapiThrowError(env, ret);
+    }
+    return NapiGetUndefined(env);
+}
+
 napi_value JsWindow::OnIsMainWindowFullScreenAcrossDisplays(napi_env env, napi_callback_info info)
 {
     if (windowToken_ == nullptr) {
@@ -8989,6 +9029,7 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "setGestureBackEnabled", moduleName, JsWindow::SetGestureBackEnabled);
     BindNativeFunction(env, object, "isGestureBackEnabled", moduleName, JsWindow::GetGestureBackEnabled);
     BindNativeFunction(env, object, "getWindowDensityInfo", moduleName, JsWindow::GetWindowDensityInfo);
+    BindNativeFunction(env, object, "setDefaultDensityEnabled", moduleName, JsWindow::SetDefaultDensityEnabled);
     BindNativeFunction(env, object, "isMainWindowFullScreenAcrossDisplays", moduleName,
         JsWindow::IsMainWindowFullScreenAcrossDisplays);
     BindNativeFunction(env, object, "setSystemAvoidAreaEnabled", moduleName, JsWindow::SetSystemAvoidAreaEnabled);

@@ -40,6 +40,7 @@
 #include "include/core/SkRegion.h"
 #include "interfaces/include/ws_common.h"
 #include "mission_snapshot.h"
+#include "res_common.h"
 #include "scb_session_handler.h"
 #include "scene_session_converter.h"
 #include "screen_fold_data.h"
@@ -72,6 +73,7 @@ class LauncherService;
 
 namespace OHOS::Global::Resource {
 class ResourceManager;
+enum ColorMode;
 } // namespace OHOS::Global::Resource
 
 namespace OHOS::Rosen {
@@ -80,6 +82,7 @@ namespace AncoConsts {
     constexpr const char* ANCO_MISSION_ID = "ohos.anco.param.missionId";
     constexpr const char* ANCO_SESSION_ID = "ohos.anco.param.sessionId";
 }
+constexpr const char* IS_CALL_BY_SCB = "isCallBySCB";
 
 struct SCBAbilityInfo {
     AppExecFwk::AbilityInfo abilityInfo_;
@@ -163,6 +166,9 @@ using RequestVsyncByRootSceneWhenModeChangeFunc =
     std::function<void(const std::shared_ptr<VsyncCallback>& vsyncCallback)>;
 using UpdateKioskAppListFunc = std::function<void(const std::vector<std::string>& kioskAppList)>;
 using KioskModeChangeFunc = std::function<void(bool isKioskMode, int32_t persistentId)>;
+using NotifySessionRecoverStateChangeFunc = std::function<void(const SessionRecoverState& state,
+    const sptr<WindowSessionProperty>& property)>;
+using NotifyRecoverStateChangeFunc = std::function<void(const RecoverState& state)>;
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
@@ -591,8 +597,15 @@ public:
     void SetSkipSelfWhenShowOnVirtualScreen(uint64_t surfaceNodeId, bool isSkip);
     WMError AddSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds) override;
     WMError RemoveSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds) override;
+    WMError SetScreenPrivacyWindowTagSwitch(
+        uint64_t screenId, const std::vector<std::string>& privacyWindowTags, bool enable) override;
+    void NotifyOnAttachToFrameNode(const sptr<Session>& session);
     WMError NotifyScreenshotEvent(ScreenshotEventType type) override;
     WMError UpdateSessionScreenshotAppEventListener(int32_t persistentId, bool haveListener);
+    WMError AddSessionBlackList(const std::unordered_set<std::string>& bundleNames,
+        const std::unordered_set<std::string>& privacyWindowTags) override;
+    WMError RemoveSessionBlackList(const std::unordered_set<std::string>& bundleNames,
+        const std::unordered_set<std::string>& privacyWindowTags) override;
 
     /*
      * Multi Window
@@ -680,7 +693,8 @@ public:
     sptr<SceneSession> RequestSceneSession(const SessionInfo& sessionInfo,
         sptr<WindowSessionProperty> property = nullptr);
     void UpdateSceneSessionWant(const SessionInfo& sessionInfo);
-    WSError RequestSceneSessionActivation(const sptr<SceneSession>& sceneSession, bool isNewActive);
+    WSError RequestSceneSessionActivation(const sptr<SceneSession>& sceneSession, bool isNewActive,
+        int32_t requestId = DEFAULT_REQUEST_FROM_SCB_ID);
     WSError RequestSceneSessionBackground(const sptr<SceneSession>& sceneSession, const bool isDelegator = false,
         const bool isToDesktop = false, const bool isSaveSnapshot = true);
     WSError RequestSceneSessionDestruction(const sptr<SceneSession>& sceneSession, bool needRemoveSession = true,
@@ -689,7 +703,8 @@ public:
         sptr<AAFwk::SessionInfo> sceneSessionInfo, const bool needRemoveSession, const bool isForceClean = false,
         bool isUserRequestedExit = false);
     void NotifyForegroundInteractiveStatus(const sptr<SceneSession>& sceneSession, bool interactive);
-    WSError RequestSceneSessionByCall(const sptr<SceneSession>& sceneSession);
+    WSError RequestSceneSessionByCall(const sptr<SceneSession>& sceneSession,
+        int32_t requestId = DEFAULT_REQUEST_FROM_SCB_ID);
     void StartAbilityBySpecified(const SessionInfo& sessionInfo);
     void NotifyWindowStateErrorFromMMI(int32_t pid, int32_t persistentId);
     void RemoveLifeCycleTaskByPersistentId(int32_t persistentId, const LifeCycleTaskType taskType);
@@ -735,6 +750,8 @@ public:
     WMError CreateNewInstanceKey(const std::string& bundleName, std::string& instanceKey);
     WMError RemoveInstanceKey(const std::string& bundleName, const std::string& instanceKey);
     void RefreshAllAppUseControlMap(const AppUseControlInfo& appUseControlInfo, ControlAppType type);
+    void NotifyAmsPendingSessionWhenFail(uint32_t resultCode, std::string resultMessage,
+        int32_t requestId);
     WSError PendingSessionToBackgroundByPersistentId(const int32_t persistentId, bool shouldBackToCaller = true);
     WMError UpdateKioskAppList(const std::vector<std::string>& kioskAppList);
     WMError EnterKioskMode(const sptr<IRemoteObject>& token);
@@ -763,6 +780,9 @@ public:
     WMError SetStartWindowBackgroundColor(const std::string& moduleName, const std::string& abilityName,
         uint32_t color, int32_t uid) override;
     void ConfigSupportSnapshotAllSessionStatus();
+    void InsertProcessMap(const SessionInfo& sessionInfo, const int32_t persistentId);
+    WSError DeleteProcessMap(const SessionInfo& sessionInfo, const int32_t persistentId);
+    WSError FindProcessMap(const SessionInfo& sessionInfo, int32_t& persistentId);
 
     /*
      * Window Animation
@@ -771,6 +791,7 @@ public:
         const WindowAnimationOption& animationOption) override;
 
     std::vector<sptr<SceneSession>> GetSceneSessions(ScreenId screenId);
+    WMError UpdateScreenLockState(int32_t persistentId);
 
 protected:
     SceneSessionManager();
@@ -862,7 +883,8 @@ private:
     WSError ClearSession(sptr<SceneSession> sceneSession);
     bool IsSessionClearable(sptr<SceneSession> sceneSession);
     void GetAllClearableSessions(std::vector<sptr<SceneSession>>& sessionVector);
-    sptr<AAFwk::SessionInfo> SetAbilitySessionInfo(const sptr<SceneSession>& sceneSession);
+    sptr<AAFwk::SessionInfo> SetAbilitySessionInfo(const sptr<SceneSession>& sceneSession,
+        int32_t requestId = DEFAULT_REQUEST_FROM_SCB_ID);
     void ResetWantInfo(const sptr<SceneSession>& sceneSession);
     void ResetSceneSessionInfoWant(const sptr<AAFwk::SessionInfo>& sceneSessionInfo);
     int32_t StartUIAbilityBySCBTimeoutCheck(const sptr<SceneSession>& sceneSession,
@@ -985,7 +1007,8 @@ private:
         const sptr<SceneSession>& sceneSession);
 
     sptr<AppExecFwk::IBundleMgr> GetBundleManager();
-    std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager(const AppExecFwk::AbilityInfo& abilityInfo);
+    std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager(const AppExecFwk::AbilityInfo& abilityInfo,
+        Global::Resource::ColorMode colorMode = Global::Resource::ColorMode::COLOR_MODE_NOT_SET);
 
     bool CheckIsRemote(const std::string& deviceId);
     bool GetLocalDeviceId(std::string& localDeviceId);
@@ -996,8 +1019,8 @@ private:
     WSError GetTotalUITreeInfo(std::string& dumpInfo);
 
     void PerformRegisterInRequestSceneSession(sptr<SceneSession>& sceneSession);
-    WSError RequestSceneSessionActivationInner(sptr<SceneSession>& sceneSession, bool isNewActive)
-        REQUIRES(SCENE_GUARD);
+    WSError RequestSceneSessionActivationInner(sptr<SceneSession>& sceneSession, bool isNewActive,
+        int32_t requestId = DEFAULT_REQUEST_FROM_SCB_ID) REQUIRES(SCENE_GUARD);
     WSError SetBrightness(const sptr<SceneSession>& sceneSession, float brightness);
     void PostBrightnessTask(float brightness);
     WSError UpdateBrightness(int32_t persistentId);
@@ -1111,10 +1134,17 @@ private:
     void RecoverCachedDialogSession(int32_t persistentId);
     void RemoveFailRecoveredSession();
     void ClearUnrecoveredSessions(const std::vector<int32_t>& recoveredPersistentIds) REQUIRES(SCENE_GUARD);
-    SessionInfo RecoverSessionInfo(const sptr<WindowSessionProperty>& property);
+    void RecoverSessionInfo(const sptr<WindowSessionProperty>& property);
     bool IsNeedRecover(const int32_t persistentId);
     WSError CheckSessionPropertyOnRecovery(const sptr<WindowSessionProperty>& property, bool isSpecificSession);
     void UpdateRecoverPropertyForSuperFold(const sptr<WindowSessionProperty>& property);
+    void RegisterSessionRecoverStateChangeListener();
+    void RegisterRecoverStateChangeListener();
+    void OnSessionRecoverStateChange(const SessionRecoverState& state,
+        const sptr<WindowSessionProperty>& property);
+    void OnRecoverStateChange(const RecoverState& state);
+    NotifySessionRecoverStateChangeFunc sessionRecoverStateChangeFunc_;
+    NotifyRecoverStateChangeFunc recoverStateChangeFunc_;
 
     /*
      * Gesture Back
@@ -1517,24 +1547,62 @@ private:
         uint32_t interestInfo, const sptr<IWindowManagerAgent>& windowManagerAgent) override;
     void PackWindowPropertyChangeInfo(const sptr<SceneSession>& sceneSession,
         std::unordered_map<WindowInfoKey, std::any>& windowPropertyChangeInfo);
+    WMError AddSessionBlackList(const std::vector<sptr<SceneSession>>& sceneSessionList,
+        const std::unordered_set<std::string>& privacyWindowTags);
+    WMError RemoveSessionBlackList(const std::vector<sptr<SceneSession>>& sceneSessionList,
+        const std::unordered_set<std::string>& privacyWindowTags);
+    void AddskipSurfaceNodeIdSet(int32_t windowId, std::unordered_set<uint64_t>& skipSurfaceNodeIdSet);
+    WMError FlushSessionBlackListInfoMapWhenAdd();
+    WMError FlushSessionBlackListInfoMapWhenAdd(ScreenId screenId);
+    WMError FlushSessionBlackListInfoMapWhenRemove();
+    WMError FlushSessionBlackListInfoMapWhenRemove(ScreenId screenId);
+    void UpdateVirtualScreenBlackList(ScreenId screenId);
+    void AddSkipSurfaceNodeWhenAttach(int32_t windowId, const std::string& bundleName, uint64_t surfaceNodeId);
+    std::unordered_map<std::string, std::unordered_set<std::string>> bundleRSBlackListConfigMap_;
+    inline static const std::string WMS_DEFAULT = "WMS_DEFAULT";
 
     struct SessionBlackListInfo {
         int32_t windowId = INVALID_SESSION_ID;
+        std::string privacyWindowTag = WMS_DEFAULT;
     };
-    struct BlackListEqual {
+    struct SessionBlackListEqual  {
         bool operator()(const SessionBlackListInfo& left, const SessionBlackListInfo& right) const
         {
-            return left.windowId == right.windowId;
+            return left.windowId == right.windowId && left.privacyWindowTag == right.privacyWindowTag;
         }
     };
-    struct BlackListHasher {
+    struct SessionBlackListHasher  {
         size_t operator()(const SessionBlackListInfo& info) const
         {
-            return std::hash<int32_t>()(info.windowId);
+            return std::hash<int32_t>()(info.windowId) + std::hash<std::string>()(info.privacyWindowTag);
         }
     };
-    using SessionBlackListInfoSet = std::unordered_set<SessionBlackListInfo, BlackListHasher, BlackListEqual>;
+    using SessionBlackListInfoSet =
+        std::unordered_set<SessionBlackListInfo, SessionBlackListHasher, SessionBlackListEqual>;
+    SessionBlackListInfoSet sessionRSBlackListConfigSet_;
     std::unordered_map<DisplayId, SessionBlackListInfoSet> sessionBlackListInfoMap_;
+
+    void RemoveSessionFromBlackListInfoSet(
+        const sptr<SceneSession>& sceneSession, SessionBlackListInfoSet& sessionBlackListInfoSet);
+
+    struct ScreenBlackListInfo {
+        std::string privacyWindowTag = "";
+    };
+    struct ScreenBlackListEqual {
+        bool operator()(const ScreenBlackListInfo& left, const ScreenBlackListInfo& right) const
+        {
+            return left.privacyWindowTag == right.privacyWindowTag;
+        }
+    };
+    struct ScreenBlackListHasher {
+        size_t operator()(const ScreenBlackListInfo& info) const
+        {
+            return std::hash<std::string>()(info.privacyWindowTag);
+        }
+    };
+    using ScreenBlackListInfoSet =
+        std::unordered_set<ScreenBlackListInfo, ScreenBlackListHasher, ScreenBlackListEqual>;
+    std::unordered_map<ScreenId, ScreenBlackListInfoSet> screenRSBlackListConfigMap_;
 
     /*
      * Move Drag
@@ -1581,15 +1649,20 @@ private:
     /*
      * Window Pattern
      */
+    std::mutex processMapMutex_;
+    std::unordered_map<std::string, std::set<int32_t>> processCompareMap_;
     std::atomic<bool> delayRemoveSnapshot_ = false;
     void InitStartingWindowRdb(const std::string& rdbPath);
-    bool GetStartingWindowInfoFromCache(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo);
+    bool GetStartingWindowInfoFromCache(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo,
+        std::string& appColorMode);
     uint32_t UpdateCachedColorToAppSet(const std::string& bundleName, const std::string& moduleName,
         const std::string& abilityName, StartingWindowInfo& startingWindowInfo);
-    bool GetStartingWindowInfoFromRdb(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo);
+    bool GetStartingWindowInfoFromRdb(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo,
+        bool darkMode);
     bool GetPathInfoFromResource(const std::shared_ptr<Global::Resource::ResourceManager> resourceMgr,
         bool hapPathEmpty, uint32_t resourceId, std::string& path);
-    bool GetStartupPageFromResource(const AppExecFwk::AbilityInfo& abilityInfo, StartingWindowInfo& startingWindowInfo);
+    bool GetStartupPageFromResource(const AppExecFwk::AbilityInfo& abilityInfo, StartingWindowInfo& startingWindowInfo,
+        Global::Resource::ColorMode colorMode = Global::Resource::ColorMode::COLOR_MODE_NOT_SET);
     void GetBundleStartingWindowInfos(bool isDark, const AppExecFwk::BundleInfo& bundleInfo,
         std::vector<std::pair<StartingWindowRdbItemKey, StartingWindowInfo>>& outValues);
     void CacheStartingWindowInfo(const std::string& bundleName, const std::string& moduleName,
@@ -1600,12 +1673,13 @@ private:
     std::unique_ptr<LruCache> snapshotLruCache_;
     std::size_t snapshotCapacity_ = 0;
     bool GetIconFromDesk(const SessionInfo& sessionInfo, std::string& startupPagePath) const;
-    bool GetIsDarkFromConfiguration();
+    bool GetIsDarkFromConfiguration(const std::string& appColorMode);
     bool needCloseSync_ = false;
     std::function<void()> closeSyncFunc_ = nullptr;
     WMError SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit, int32_t persistentId) override;
     void UpdateAllStartingWindowRdb();
     bool needUpdateRdb_ = true;
+    std::string GetSessionColorMode(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo);
 };
 } // namespace OHOS::Rosen
 

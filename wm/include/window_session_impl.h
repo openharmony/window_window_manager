@@ -104,8 +104,8 @@ public:
     void SetContext(const std::shared_ptr<AbilityRuntime::Context>& context);
     Rect GetRequestRect() const override;
     Rect GetGlobalDisplayRect() const override;
-    Position ClientToGlobalDisplay(const Position& position) const override;
-    Position GlobalDisplayToClient(const Position& position) const override;
+    WMError ClientToGlobalDisplay(const Position& inPosition, Position& outPosition) const override;
+    WMError GlobalDisplayToClient(const Position& inPosition, Position& outPosition) const override;
     WSError UpdateGlobalDisplayRectFromServer(const WSRect& rect, SizeChangeReason reason) override;
     WindowType GetType() const override;
     const std::string& GetWindowName() const override;
@@ -196,7 +196,10 @@ public:
     void FlushFrameRate(uint32_t rate, int32_t animatorExpectedFrameRate, uint32_t rateType = 0) override;
     void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& inputEvent) override;
+    void ConsumeBackEvent() override;
+    bool IsDialogSessionBackGestureEnabled() override;
     bool PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
+    bool OnPointDown(int32_t eventId, int32_t posX, int32_t posY) override;
     WMError SetIntentParam(const std::string& intentParam, const std::function<void()>& loadPageCallback,
         bool isColdStart) override;
     void SetForceSplitEnable(AppForceLandscapeConfig& config);
@@ -429,6 +432,7 @@ public:
     virtual WMError GetCallingWindowWindowStatus(WindowStatus& windowStatus) const override;
     virtual WMError GetCallingWindowRect(Rect& rect) const override;
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
+    virtual void SetTouchEvent(int32_t touchType) override;
     WMError SetContinueState(int32_t continueState) override;
     virtual WMError CheckAndModifyWindowRect(uint32_t& width, uint32_t& height)
     {
@@ -491,10 +495,13 @@ public:
     /*
      * Window Property
      */
+    WMError SetWindowDefaultDensityEnabled(bool enabled) override;
+    void SetDefaultDensityEnabledValue(bool enabled);
     WSError NotifyDisplayIdChange(DisplayId displayId);
     WSError NotifyScreenshotAppEvent(ScreenshotEventType type) override;
     bool IsDeviceFeatureCapableFor(const std::string& feature) const override;
     bool IsDeviceFeatureCapableForFreeMultiWindow() const override;
+    bool IsAnco() const override;
 
     /*
      * Window Input Event
@@ -637,6 +644,7 @@ protected:
     std::unordered_map<int32_t, sptr<IKeyboardDidHideListener>> keyboardDidHideUIExtListeners_;
     void WriteKeyboardInfoToWant(AAFwk::Want& want, const KeyboardPanelInfo& keyboardPanelInfo) const;
     void ReadKeyboardInfoFromWant(const AAFwk::Want& want, KeyboardPanelInfo& keyboardPanelInfo) const;
+    static std::set<sptr<WindowSessionImpl>>& GetWindowExtensionSessionSet();
 
     /*
      * Sub Window
@@ -665,8 +673,7 @@ protected:
     static std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>> windowSessionMap_;
     // protect windowSessionMap_
     static std::shared_mutex windowSessionMutex_;
-    static std::set<sptr<WindowSessionImpl>> windowExtensionSessionSet_;
-    // protect windowExtensionSessionSet_
+    // protect g_windowExtensionSessionSet_
     static std::shared_mutex windowExtensionSessionMutex_;
     bool isSystembarPropertiesSet_ = false;
     bool isIgnoreSafeAreaNeedNotify_ = false;
@@ -787,8 +794,11 @@ protected:
     /*
      * Window Property
      */
+    std::string colorMode_;
     std::unordered_set<std::string> containerColorList_;
     float lastSystemDensity_ = UNDEFINED_DENSITY;
+    static std::atomic<bool> defaultDensityEnabledGlobalConfig_;
+    std::atomic<bool> isDefaultDensityEnabled_ = false;
     WSError NotifySystemDensityChange(float density);
     void RegisterWindowInspectorCallback();
     uint32_t GetTargetAPIVersionByApplicationInfo() const;
@@ -798,6 +808,7 @@ protected:
      */
     bool GetWatchGestureConsumed() const;
     void SetWatchGestureConsumed(bool isWatchGestureConsumed);
+    bool dialogSessionBackGestureEnabled_ = false;
 
     /*
      * Window Rotation
@@ -1057,6 +1068,7 @@ private:
     std::atomic<WindowStatus> lastWindowStatus_ = WindowStatus::WINDOW_STATUS_UNDEFINED;
     std::atomic<WindowStatus> lastStatusWhenNotifyWindowStatusDidChange_ = WindowStatus::WINDOW_STATUS_UNDEFINED;
     std::atomic<bool> isFirstValidLayoutUpdate_ = true;
+    SizeChangeReason globalDisplayRectSizeChangeReason_ = SizeChangeReason::END;
 
     /*
      * Window Decor
