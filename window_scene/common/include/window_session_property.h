@@ -258,6 +258,10 @@ public:
     ShadowsInfo GetWindowShadows() const;
     Rect GetGlobalDisplayRect() const;
     void SetGlobalDisplayRect(const Rect& globalDisplayRect);
+    void SetPcAppInpadSpecificSystemBarInvisible(bool isPcAppInpadSpecificSystemBarInvisible);
+    bool GetPcAppInpadSpecificSystemBarInvisible() const;
+    void SetPcAppInpadOrientationLandscape(bool isPcAppInpadOrientationLandscape);
+    bool GetPcAppInpadOrientationLandscape() const;
 
     /*
      * Window Lifecycle
@@ -570,6 +574,8 @@ private:
     mutable std::mutex shadowsInfoMutex_;
     mutable std::mutex globalDisplayRectMutex_;
     Rect globalDisplayRect_ { 0, 0, 0, 0 };
+    bool isPcAppInpadSpecificSystemBarInvisible_ = false;
+    bool isPcAppInpadOrientationLandscape_ = false;
 
     sptr<CompatibleModeProperty> compatibleModeProperty_ = nullptr;
 

@@ -496,6 +496,8 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteBool(property->GetDragEnabled());
         reply.WriteBool(property->GetIsAtomicService());
         reply.WriteBool(property->GetIsAbilityHook());
+        reply.WriteBool(property->GetPcAppInpadSpecificSystemBarInvisible());
+        reply.WriteBool(property->GetPcAppInpadOrientationLandscape());
         reply.WriteParcelable(property->GetCompatibleModeProperty());
         reply.WriteBool(property->GetUseControlStateFromProperty());
     }

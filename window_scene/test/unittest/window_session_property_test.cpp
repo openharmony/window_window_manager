@@ -1585,6 +1585,34 @@ HWTEST_F(WindowSessionPropertyTest, GetIsAtomicService, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetPcAppInpadSpecificSystemBarInvisible
+ * @tc.desc: SetPcAppInpadSpecificSystemBarInvisible
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetPcAppInpadSpecificSystemBarInvisible, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    bool isPcAppInpadSpecificSystemBarInvisible = true;
+    property->SetPcAppInpadSpecificSystemBarInvisible(isPcAppInpadSpecificSystemBarInvisible);
+    auto result = property->GetPcAppInpadSpecificSystemBarInvisible();
+    ASSERT_EQ(result, isPcAppInpadSpecificSystemBarInvisible);
+}
+
+/**
+ * @tc.name: SetPcAppInpadOrientationLandscape
+ * @tc.desc: SetPcAppInpadOrientationLandscape
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetPcAppInpadOrientationLandscape, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    bool isPcAppInpadOrientationLandscape = true;
+    property->SetPcAppInpadOrientationLandscape(isPcAppInpadOrientationLandscape);
+    auto result = property->GetPcAppInpadOrientationLandscape();
+    ASSERT_EQ(result, isPcAppInpadOrientationLandscape);
+}
+
+/**
  * @tc.name: UnmarshallingFbTemplateInfoTest
  * @tc.desc: UnmarshallingFbTemplateInfoTest
  * @tc.type: FUNC

@@ -449,6 +449,8 @@ private:
     float customDensity_ = UNDEFINED_DENSITY;
     bool isEnableDefaultDensityWhenCreate_ = false;
     std::string specifiedColorMode_;
+    WMError SetPcAppInpadSpecificSystemBarInvisible();
+    WMError SetPcAppInpadOrientationLandscape();
 
     /*
      * Sub Window
