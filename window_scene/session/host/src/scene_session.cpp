@@ -8104,11 +8104,11 @@ bool SceneSession::IsImmersiveType() const
 bool SceneSession::IsPcOrPadEnableActivation() const
 {
     auto property = GetSessionProperty();
-    bool isPcAppInPad = false;
+    bool isPcAppInLargeScreenDevice = false;
     if (property != nullptr) {
-        isPcAppInPad = property->GetIsPcAppInPad();
+        isPcAppInLargeScreenDevice = property->GetIsPcAppInPad();
     }
-    return systemConfig_.IsPcWindow() || IsFreeMultiWindowMode() || isPcAppInPad;
+    return systemConfig_.IsPcWindow() || IsFreeMultiWindowMode() || isPcAppInLargeScreenDevice;
 }
 
 void SceneSession::SetMinimizedFlagByUserSwitch(bool isMinimized)
