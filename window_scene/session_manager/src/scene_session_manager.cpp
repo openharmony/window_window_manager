@@ -3501,6 +3501,11 @@ void SceneSessionManager::SendCancelEventBeforeEraseSession(const sptr<SceneSess
 void SceneSessionManager::EraseSceneSessionMapById(int32_t persistentId)
 {
     auto sceneSession = GetSceneSession(persistentId);
+    if (sceneSession != nullptr) {
+        RemovePreLoadStartingWindowFromMap(sceneSession->GetSessionInfo());
+    } else {
+        TLOGW(WmsLogTag::WMS_PATTERN, "session is nullptr id: %{public}d", persistentId);
+    }
     std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     EraseSceneSessionAndMarkDirtyLocked(persistentId);
     systemTopSceneSessionMap_.erase(persistentId);
@@ -5570,7 +5575,7 @@ std::shared_ptr<Media::PixelMap> SceneSessionManager::GetPreLoadStartingWindow(c
     std::string key = sessionInfo.bundleName_ + '_' + sessionInfo.moduleName_ + '_' +sessionInfo.abilityName_;
     auto iter = preLoadMap.find(key);
     if (iter == preLoadMap.end()) {
-        TLOGW(WmsLogTag::WMS_PATTERN, "%{public}s not found", key.c_str());
+        TLOGI(WmsLogTag::WMS_PATTERN, "%{public}s not found", key.c_str());
         return nullptr;
     }
     return iter->second;
@@ -5583,6 +5588,7 @@ void SceneSessionManager::RemovePreLoadStartingWindowFromMap(const SessionInfo& 
     auto iter = preLoadStartingWindowMap_.find(key);
     if (iter != preLoadStartingWindowMap_.end()) {
         preLoadStartingWindowMap_.erase(iter);
+        TLOGI(WmsLogTag::WMS_PATTERN, "%{public}s", key.c_str());
     }
 }
 
@@ -5599,6 +5605,11 @@ void SceneSessionManager::PreLoadStartingWindow(sptr<SceneSession> sceneSession)
         auto sessionInfo = sceneSession->GetSessionInfo();
         if (!SessionHelper::IsMainWindow(static_cast<WindowType>(sessionInfo.windowType_))) {
             TLOGND(WmsLogTag::WMS_PATTERN, "%{public}s id: %{public}d is not main window",
+                where, sceneSession->GetPersistentId());
+            return;
+        }
+        if (sessionInfo.isPersistentRecover_) {
+            TLOGNI(WmsLogTag::WMS_PATTERN, "%{public}s skip id: %{public}d for recover",
                 where, sceneSession->GetPersistentId());
             return;
         }
