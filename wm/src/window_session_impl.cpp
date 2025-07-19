@@ -310,7 +310,9 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
 
     RSAdapterUtil::InitRSUIDirector(rsUIDirector_, true, true);
-
+    if (WindowHelper::IsSubWindow(GetType())) {
+        property_->SetDecorEnable(option->GetSubWindowDecorEnable());
+    }
     surfaceNode_ = CreateSurfaceNode(property_->GetWindowName(), optionWindowType);
     if (surfaceNode_ != nullptr) {
         vsyncStation_ = std::make_shared<VsyncStation>(surfaceNode_->GetId());
@@ -7900,6 +7902,22 @@ WMError WindowSessionImpl::GetPiPSettingSwitchStatus(bool& switchStatus) const
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     return SingletonContainer::Get<WindowAdapter>().GetPiPSettingSwitchStatus(switchStatus);
+}
+
+void WindowSessionImpl::SwitchSubWindow(int32_t parentId)
+{
+    std::lock_guard<std::recursive_mutex> lock(subWindowSessionMutex_);
+    if (subWindowSessionMap_.count(parentId) == 0) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "subWindowSessionMap is empty");
+        return;
+    }
+    for (auto& subWindowSession : subWindowSessionMap_.at(parentId)) {
+        if (subWindowSession && subWindowSession->property_ && subWindowSession->property_->IsDecorEnable()) {
+            subWindowSession->UpdateTitleButtonVisibility();
+            subWindowSession->UpdateDecorEnable(true);
+            subWindowSession->SwitchSubWindow(subWindowSession->GetPersistentId());
+        }
+    }
 }
 } // namespace Rosen
 } // namespace OHOS

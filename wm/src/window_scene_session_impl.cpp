@@ -5429,6 +5429,7 @@ WSError WindowSceneSessionImpl::SwitchFreeMultiWindow(bool enable)
         UpdateDecorEnable(true);
     }
 
+    SwitchSubWindow(GetPersistentId());
     return WSError::WS_OK;
 }
 
