@@ -396,6 +396,7 @@ public:
     WMError SetWindowContainerColor(const std::string& activeColor, const std::string& inactiveColor) override;
     WMError SetWindowContainerModalColor(const std::string& activeColor, const std::string& inactiveColor) override;
     nlohmann::json setContainerButtonStyle(const DecorButtonStyle& decorButtonStyle);
+    void UpdateDecorEnable(bool needNotify = false, WindowMode mode = WindowMode::WINDOW_MODE_UNDEFINED);
 
     /*
      * Window Decor listener
@@ -471,6 +472,7 @@ public:
     {
         windowSystemConfig_.freeMultiWindowEnable_ = enable;
     }
+    void SwitchSubWindow(int32_t parentId);
 
     /*
      * Window Immersive
@@ -589,7 +591,6 @@ protected:
     void ClearVsyncStation();
     WMError WindowSessionCreateCheck();
     void UpdateDecorEnableToAce(bool isDecorEnable);
-    void UpdateDecorEnable(bool needNotify = false, WindowMode mode = WindowMode::WINDOW_MODE_UNDEFINED);
     void NotifyModeChange(WindowMode mode, bool hasDeco = true);
     WMError UpdateProperty(WSPropertyChangeAction action);
     WMError SetBackgroundColor(uint32_t color);
