@@ -5428,7 +5428,7 @@ void SceneSessionManager::GetStartupPage(const SessionInfo& sessionInfo, Startin
         return;
     }
     auto colorMode = isDark ? Global::Resource::ColorMode::DARK : Global::Resource::ColorMode::LIGHT;
-    if (GetStartupPageFromResource(abilityInfo, startingWindowInfo)) {
+    if (GetStartupPageFromResource(abilityInfo, startingWindowInfo, colorMode)) {
         CacheStartingWindowInfo(
             sessionInfo.bundleName_, sessionInfo.moduleName_, sessionInfo.abilityName_, startingWindowInfo);
         if (startingWindowRdbMgr_ != nullptr) {
