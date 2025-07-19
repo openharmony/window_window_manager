@@ -1565,13 +1565,14 @@ bool AbstractScreenController::SetVirtualScreenAsDefault(ScreenId screenId)
         for (auto it = screenAgentMap_.begin(); it != screenAgentMap_.end(); it++) {
             auto& screenIds = it->second;
             auto iter = std::find(screenIds.begin(), screenIds.end(), screenId);
-            if (iter != screenIds.end()) {
-                screenIds.erase(iter);
-                if (screenIds.empty()) {
-                    screenAgentMap_.erase(it);
-                    break;
-                }
+            if (iter == screenIds.end()) {
+                continue;
             }
+            screenIds.erase(iter);
+            if (screenIds.empty()) {
+                screenAgentMap_.erase(it);
+            }
+            break;
         }
     }
     abstractScreenCallback_->onConnect_(absScreen);
