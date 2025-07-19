@@ -938,6 +938,32 @@ HWTEST_F(WindowSessionTest3, SetIsPcAppInPad, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetPcAppInpadSpecificSystemBarInvisible
+ * @tc.desc: SetPcAppInpadSpecificSystemBarInvisible Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, SetPcAppInpadSpecificSystemBarInvisible, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    bool isPcAppInpadSpecificSystemBarInvisible = false;
+    auto result = session_->SetPcAppInpadSpecificSystemBarInvisible(isPcAppInpadSpecificSystemBarInvisible);
+    EXPECT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: SetPcAppInpadOrientationLandscape
+ * @tc.desc: SetPcAppInpadOrientationLandscape Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, SetPcAppInpadOrientationLandscape, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    bool isPcAppInpadOrientationLandscape = false;
+    auto result = session_->SetPcAppInpadOrientationLandscape(isPcAppInpadOrientationLandscape);
+    EXPECT_EQ(result, WSError::WS_OK);
+}
+
+/**
  * @tc.name: SetBufferAvailable
  * @tc.desc: SetBufferAvailable Test
  * @tc.type: FUNC

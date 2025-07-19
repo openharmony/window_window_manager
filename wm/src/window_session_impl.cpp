@@ -342,6 +342,13 @@ bool WindowSessionImpl::IsPcOrPadFreeMultiWindowMode() const
     return windowSystemConfig_.IsPcWindow() || IsFreeMultiWindowMode();
 }
 
+bool WindowSessionImpl::IsPcAppInPadCompatibleMode() const
+{
+    return property_->GetIsPcAppInPad() &&
+        windowSystemConfig_.IsPadWindow() &&
+        !IsFreeMultiWindowMode();
+}
+
 bool WindowSessionImpl::IsSceneBoardEnabled() const
 {
     return SceneBoardJudgement::IsSceneBoardEnabled();
@@ -2634,6 +2641,10 @@ WMError WindowSessionImpl::SetWindowDelayRaiseEnabled(bool isEnabled)
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    if (IsPcAppInPadCompatibleMode()){
+        TLOGE(WmsLogTag::WMS_FOCUS, "The is PcAppInPad, not supported");
+        return WMError::WM_OK;
+    }
     if (!IsPcOrPadFreeMultiWindowMode()) {
         TLOGE(WmsLogTag::WMS_FOCUS, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
@@ -3313,6 +3324,10 @@ WMError WindowSessionImpl::SetWindowTitleMoveEnabled(bool enable)
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    if (IsPcAppInPadCompatibleMode()){
+        TLOGE(WmsLogTag::WMS_DECOR, "The is PcAppInPad, not supported");
+        return WMError::WM_OK;
+    }
     if (!IsPcOrPadFreeMultiWindowMode()) {
         TLOGE(WmsLogTag::WMS_DECOR, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
@@ -3339,6 +3354,10 @@ WMError WindowSessionImpl::SetSubWindowModal(bool isModal, ModalityType modality
     if (!WindowHelper::IsSubWindow(GetType())) {
         TLOGE(WmsLogTag::WMS_SUB, "called by invalid window type, type:%{public}d", GetType());
         return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    if (IsPcAppInPadCompatibleMode()) {
+        TLOGE(WmsLogTag::WMS_SUB, "This is PcAppInPad, not support");
+        return WMError::WM_OK;
     }
     if (modalityType == ModalityType::APPLICATION_MODALITY && !IsPcOrPadFreeMultiWindowMode()) {
         TLOGE(WmsLogTag::WMS_SUB, "device not support");
@@ -4463,6 +4482,10 @@ WMError WindowSessionImpl::SetTitleButtonVisible(bool isMaximizeVisible, bool is
     }
     if (!WindowHelper::IsMainWindow(GetType())) {
         return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    if (property_->GetIsPcAppInPad() && windowSystemConfig_.IsPadWindow() && !IsDecorEnable()) {
+        TLOGE(WmsLogTag::WMS_DECOR, "The is PcAppInPad, not supported");
+        return WMError::WM_OK;
     }
     if (!IsPcOrFreeMultiWindowCapabilityEnabled()) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;

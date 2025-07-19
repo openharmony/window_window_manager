@@ -479,18 +479,22 @@ HWTEST_F(SceneSessionManagerTest11, ShiftAppWindowPointerEvent, TestSize.Level1)
 
     int32_t fingerId = 0;
     auto res = ssm_->ShiftAppWindowPointerEvent(sourcePersistentId, targetPersistentId, fingerId);
-    ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_SESSION);
+
+    SessionInfo sourceInfo;
+    sourceInfo.windowType_ = 1;
+    sptr<SceneSession> sourceSceneSession = sptr<SceneSession>::MakeSptr(sourceInfo, nullptr);
+    ssm_->sceneSessionMap_.insert({ sourceSceneSession->GetPersistentId(), sourceSceneSession });
+    res = ssm_->ShiftAppWindowPointerEvent(sourceSceneSession->GetPersistentId(), targetPersistentId, fingerId);
+    EXPECT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
 
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     ssm_->systemConfig_.freeMultiWindowEnable_ = true;
     ssm_->systemConfig_.freeMultiWindowSupport_ = true;
-    res = ssm_->ShiftAppWindowPointerEvent(sourcePersistentId, targetPersistentId, fingerId);
+    res = ssm_->ShiftAppWindowPointerEvent(sourceSceneSession->GetPersistentId(),
+        sourceSceneSession->GetPersistentId(), fingerId);
     ASSERT_EQ(res, WMError::WM_ERROR_INVALID_CALLING);
-
-    sourcePersistentId = 1;
-    ssm_->sceneSessionMap_.clear();
-    res = ssm_->ShiftAppWindowPointerEvent(sourcePersistentId, targetPersistentId, fingerId);
-    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_SESSION);
+    ssm_->sceneSessionMap_.erase(sourceSceneSession->GetPersistentId());
 }
 
 /**

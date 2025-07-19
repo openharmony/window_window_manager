@@ -4294,6 +4294,10 @@ napi_value JsWindow::OnSetWindowTopmost(napi_env env, napi_callback_info info)
         TLOGE(WmsLogTag::WMS_HIERARCHY, "windowToken is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
+    if (windowToken_->IsPcAppInPadCompatibleMode()) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "This is PcAppInPad, not support");
+        return NapiGetUndefined(env);
+    }
     if (!windowToken_->IsPcOrPadFreeMultiWindowMode()) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "device not support");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
@@ -7471,6 +7475,10 @@ napi_value JsWindow::OnSetDecorButtonStyle(napi_env env, napi_callback_info info
         TLOGE(WmsLogTag::WMS_DECOR, "window is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
+    if (windowToken_->IsPcAppInPadCompatibleMode()) {
+        TLOGE(WmsLogTag::WMS_DECOR, "This is PcAppInPad, not support");
+        return NapiGetUndefined(env);
+    }
     if (!windowToken_->IsPcOrPadFreeMultiWindowMode()) {
         TLOGE(WmsLogTag::WMS_DECOR, "device not support");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
@@ -7508,6 +7516,10 @@ napi_value JsWindow::OnGetDecorButtonStyle(napi_env env, napi_callback_info info
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_DECOR, "window is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    if (windowToken_->IsPcAppInPadCompatibleMode()) {
+        TLOGE(WmsLogTag::WMS_DECOR, "This is PcAppInPad, not support");
+        return NapiGetUndefined(env);
     }
     if (!windowToken_->IsPcOrPadFreeMultiWindowMode()) {
         TLOGE(WmsLogTag::WMS_DECOR, "device not support");

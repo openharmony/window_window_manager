@@ -154,6 +154,50 @@ HWTEST_F(WindowSceneSessionImplTest, CreateWindowAndDestroy02, TestSize.Level0)
 }
 
 /**
+ * @tc.name: SetPcAppInpadSpecificSystemBarInvisible
+ * @tc.desc: SetPcAppInpadSpecificSystemBarInvisible
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, SetPcAppInpadSpecificSystemBarInvisible, TestSize.Level0)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetPcAppInpadSpecificSystemBarInvisible");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, window->SetPcAppInpadSpecificSystemBarInvisible());
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    window->property_->SetIsPcAppInPad(true);
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->windowSystemConfig_.freeMultiWindowEnable_ = false;
+    window->property_->SetPcAppInpadSpecificSystemBarInvisible(true);
+    EXPECT_EQ(WMError::WM_OK, window->SetPcAppInpadSpecificSystemBarInvisible());
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy(false));
+}
+
+/**
+ * @tc.name: SetPcAppInpadOrientationLandscape
+ * @tc.desc: SetPcAppInpadOrientationLandscape
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, SetPcAppInpadOrientationLandscape, TestSize.Level0)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetPcAppInpadOrientationLandscape");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, window->SetPcAppInpadOrientationLandscape());
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    window->property_->SetIsPcAppInPad(true);
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->windowSystemConfig_.freeMultiWindowEnable_ = false;
+    window->property_->SetPcAppInpadOrientationLandscape(true);
+    EXPECT_EQ(WMError::WM_OK, window->SetPcAppInpadOrientationLandscape());
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy(false));
+}
+
+/**
  * @tc.name: CreateAndConnectSpecificSession01
  * @tc.desc: CreateAndConnectSpecificSession
  * @tc.type: FUNC
@@ -2069,6 +2113,10 @@ HWTEST_F(WindowSceneSessionImplTest, SetWindowShadowEnabled01, TestSize.Level1)
     EXPECT_EQ(true, window->GetWindowShadowEnabled());
     EXPECT_EQ(WMError::WM_OK, window->SetWindowShadowEnabled(false));
     EXPECT_EQ(false, window->GetWindowShadowEnabled());
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    window->property_->SetIsPcAppInPad(true);
+    EXPECT_EQ(WMError::WM_OK, window->SetWindowShadowEnabled(true));
 }
 
 /**
@@ -2320,6 +2368,12 @@ HWTEST_F(WindowSceneSessionImplTest, SetTitleAndDockHoverShown, TestSize.Level1)
     EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, window->SetTitleAndDockHoverShown(true, true));
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     EXPECT_EQ(WMError::WM_OK, window->SetTitleAndDockHoverShown(true, true));
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    window->property_->SetIsPcAppInPad(true);
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->windowSystemConfig_.freeMultiWindowEnable_ = false;
+    EXPECT_EQ(WMError::WM_OK, window->SetTitleAndDockHoverShown(true, true));
 }
 
 /**
@@ -2561,6 +2615,11 @@ HWTEST_F(WindowSceneSessionImplTest, SetFollowParentMultiScreenPolicy, Function 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     ASSERT_EQ(WMError::WM_OK, window->SetFollowParentMultiScreenPolicy(true));
     ASSERT_EQ(WMError::WM_OK, window->SetFollowParentMultiScreenPolicy(false));
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    window->property_->SetIsPcAppInPad(true);
+    window->windowSystemConfig_.freeMultiWindowEnable_ = false;
+    EXPECT_EQ(WMError::WM_OK, window->SetFollowParentMultiScreenPolicy(false));
 }
 
 /**

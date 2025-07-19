@@ -76,6 +76,11 @@ HWTEST_F(WindowSpecialWindowTest, SetSubWindowModal01, TestSize.Level1)
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
     ASSERT_EQ(WMError::WM_OK, window->SetSubWindowModal(true));
 
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    window->property_->SetIsPcAppInPad(true);
+    window->windowSystemConfig_.freeMultiWindowEnable_ = false;
+    EXPECT_EQ(WMError::WM_OK, window->SetSubWindowModal(true, ModalityType::APPLICATION_MODALITY));
+
     window->Destroy(true, true);
 }
 
