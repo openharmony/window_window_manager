@@ -1560,11 +1560,18 @@ bool AbstractScreenController::SetVirtualScreenAsDefault(ScreenId screenId)
     }
     defaultRsScreenId_ = rsScreenId;
     // Erase default virtual screen in screenAgentMap_
-    for (auto it = screenAgentMap_.begin(); it != screenAgentMap_.end(); it++) {
-        auto& screenIds = it->second;
-        auto iter = std::find(screenIds.begin(), screenIds.end(), screenId);
-        if (iter != screenIds.end()) {
-            screenIds.erase(iter);
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        for (auto it = screenAgentMap_.begin(); it != screenAgentMap_.end(); it++) {
+            auto& screenIds = it->second;
+            auto iter = std::find(screenIds.begin(), screenIds.end(), screenId);
+            if (iter != screenIds.end()) {
+                screenIds.erase(iter);
+                if (screenIds.empty()) {
+                    screenAgentMap_.erase(it);
+                    break;
+                }
+            }
         }
     }
     abstractScreenCallback_->onConnect_(absScreen);
