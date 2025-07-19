@@ -1811,7 +1811,7 @@ HWTEST_F(SceneSessionTest5, HandleMoveDragSurfaceBounds, TestSize.Level1)
     info.abilityName_ = "HandleMoveDragSurfaceBounds";
     info.bundleName_ = "HandleMoveDragSurfaceBounds";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-
+    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(1000, session->GetWindowType());
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
 
     WSRect preRect = { 0, 0, 50, 50 };
