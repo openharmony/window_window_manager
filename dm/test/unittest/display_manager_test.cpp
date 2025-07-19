@@ -2548,6 +2548,20 @@ HWTEST_F(DisplayManagerTest, ConvertGlobalCoordinateToRelativeWithDisplayIdInRan
     EXPECT_EQ(relativePosition.position.x, 10);
     EXPECT_EQ(relativePosition.position.y, 20);
 }
+
+/**
+ * @tc.name: SetVirtualScreenAsDefault
+ * @tc.desc: Test SetVirtualScreenAsDefault
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, SetVirtualScreenAsDefault, TestSize.Level1)
+{
+#define SCREENLESS_ENABLE
+    uint64_t screenId = 0;
+    bool res = SingletonContainer::Get<DisplayManager>().SetVirtualScreenAsDefault(screenId);
+    EXPECT_FALSE(res);
+#undef SCREENLESS_ENABLE
+}
 }
 } // namespace Rosen
 } // namespace OHOS

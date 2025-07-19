@@ -2020,7 +2020,7 @@ HWTEST_F(WindowSessionImplTest, FindExtensionWindowWithContext01, TestSize.Level
     windowSession->property_->SetPersistentId(12345);
     windowSession->property_->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
     windowSession->context_ = abilityContext_;
-    WindowSessionImpl::windowExtensionSessionSet_.insert(windowSession);
+    WindowSessionImpl::GetWindowExtensionSessionSet().insert(windowSession);
     ASSERT_TRUE(nullptr != windowSession->FindExtensionWindowWithContext());
     windowSession->Destroy(true);
 }
@@ -2108,7 +2108,7 @@ HWTEST_F(WindowSessionImplTest, SetUIExtensionDestroyCompleteInSubWindow, TestSi
     windowSession->property_->SetPersistentId(12345);
     windowSession->property_->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
     windowSession->context_ = abilityContext_;
-    WindowSessionImpl::windowExtensionSessionSet_.insert(windowSession);
+    WindowSessionImpl::GetWindowExtensionSessionSet().insert(windowSession);
     ASSERT_TRUE(nullptr != windowSession->FindExtensionWindowWithContext());
     windowSession->AddSetUIExtensionDestroyTimeoutCheck();
     EXPECT_EQ(windowSession->startUIExtensionDestroyTimer_.load(), true);

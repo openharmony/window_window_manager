@@ -745,54 +745,6 @@ HWTEST_F(SceneSessionManagerTest11, GetIconFromDesk, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetStartingWindowInfoFromCache
- * @tc.desc: GetStartingWindowInfoFromCache
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest11, GetStartingWindowInfoFromCache, TestSize.Level1)
-{
-    ASSERT_NE(ssm_, nullptr);
-    SessionInfo sessionInfo;
-    sessionInfo.moduleName_ = "test";
-    sessionInfo.abilityName_ = BUNDLE_NAME;
-    sessionInfo.bundleName_ = BUNDLE_NAME;
-    StartingWindowInfo startingWindowInfo;
-    bool res = ssm_->GetStartingWindowInfoFromCache(sessionInfo, startingWindowInfo);
-    ASSERT_EQ(res, false);
-
-    std::map<std::string, StartingWindowInfo> startingWindowInfoMap{ { BUNDLE_NAME, startingWindowInfo } };
-    ssm_->startingWindowMap_.insert({ BUNDLE_NAME, startingWindowInfoMap });
-    res = ssm_->GetStartingWindowInfoFromCache(sessionInfo, startingWindowInfo);
-    ASSERT_EQ(res, false);
-    ssm_->startingWindowMap_.clear();
-}
-
-/**
- * @tc.name: GetStartingWindowInfoFromCache02
- * @tc.desc: GetStartingWindowInfoFromCache
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest11, GetStartingWindowInfoFromCache02, TestSize.Level1)
-{
-    ASSERT_NE(ssm_, nullptr);
-    SessionInfo sessionInfo;
-    sessionInfo.moduleName_ = "te";
-    sessionInfo.abilityName_ = "st";
-    sessionInfo.bundleName_ = "test";
-    StartingWindowInfo startingWindowInfo;
-
-    bool res = ssm_->GetStartingWindowInfoFromCache(sessionInfo, startingWindowInfo);
-    ASSERT_EQ(res, false);
-
-    std::map<std::string, StartingWindowInfo> startingWindowInfoMap{ { "test", startingWindowInfo } };
-    ssm_->startingWindowMap_.insert({ "test", startingWindowInfoMap });
-
-    res = ssm_->GetStartingWindowInfoFromCache(sessionInfo, startingWindowInfo);
-    ASSERT_EQ(res, true);
-    ssm_->startingWindowMap_.clear();
-}
-
-/**
  * @tc.name: GetTopNearestBlockingFocusSession
  * @tc.desc: GetTopNearestBlockingFocusSession
  * @tc.type: FUNC
@@ -1178,7 +1130,7 @@ HWTEST_F(SceneSessionManagerTest11, SetStatusBarAvoidHeight, TestSize.Level1)
     int32_t height = 10;
     int32_t height2 = -1;
     ssm_->SetStatusBarAvoidHeight(0, height);
-    ssm_->SetStatusBarAvoidHeight(1, height);
+    ssm_->SetStatusBarAvoidHeight(1, height2);
     WSRect barArea = { 0, 0, 100, 100 };
     WSRect barArea2 = { 0, 0, 100, 100 };
     WSRect barArea3 = { 0, 0, 100, 100 };
@@ -1411,7 +1363,14 @@ HWTEST_F(SceneSessionManagerTest11, AddSkipSelfWhenShowOnVirtualScreenList, Func
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
     std::vector<int32_t> persistentIds{ sceneSession->GetPersistentId() };
+    MockAccesstokenKit::MockIsSACalling(false);
+    MockAccesstokenKit::MockIsSystemApp(false);
     auto ret = ssm_->AddSkipSelfWhenShowOnVirtualScreenList(persistentIds);
+    EXPECT_EQ(ret, WMError::WM_ERROR_NOT_SYSTEM_APP);
+
+    MockAccesstokenKit::MockIsSACalling(true);
+    MockAccesstokenKit::MockIsSystemApp(true);
+    ret = ssm_->AddSkipSelfWhenShowOnVirtualScreenList(persistentIds);
     usleep(WAIT_SYNC_IN_NS);
     EXPECT_EQ(ret, WMError::WM_OK);
 }
@@ -1429,7 +1388,14 @@ HWTEST_F(SceneSessionManagerTest11, RemoveSkipSelfWhenShowOnVirtualScreenList, F
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
     std::vector<int32_t> persistentIds{ sceneSession->GetPersistentId() };
+    MockAccesstokenKit::MockIsSACalling(false);
+    MockAccesstokenKit::MockIsSystemApp(false);
     auto ret = ssm_->RemoveSkipSelfWhenShowOnVirtualScreenList(persistentIds);
+    EXPECT_EQ(ret, WMError::WM_ERROR_NOT_SYSTEM_APP);
+
+    MockAccesstokenKit::MockIsSACalling(true);
+    MockAccesstokenKit::MockIsSystemApp(true);
+    ret = ssm_->RemoveSkipSelfWhenShowOnVirtualScreenList(persistentIds);
     usleep(WAIT_SYNC_IN_NS);
     EXPECT_EQ(ret, WMError::WM_OK);
 }

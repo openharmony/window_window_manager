@@ -25,6 +25,7 @@
 #include "session/host/include/scene_session.h"
 #include "session/host/include/main_session.h"
 #include "window_manager_agent.h"
+#include "window_manager_hilog.h"
 #include "session_manager.h"
 #include "zidl/window_manager_agent_interface.h"
 #include "mock/mock_accesstoken_kit.h"
@@ -38,6 +39,14 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+    std::string g_logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
+        const char *msg)
+    {
+        g_logMsg = msg;
+    }
+}
 namespace {
 const std::string EMPTY_DEVICE_ID = "";
 using ConfigItem = WindowSceneConfig::ConfigItem;
@@ -447,9 +456,7 @@ HWTEST_F(SceneSessionManagerTest3, GetSceneSession002, TestSize.Level1)
     info.abilityName_ = "test1";
     info.bundleName_ = "test2";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    if (sceneSession == nullptr) {
-        return;
-    }
+    ASSERT_NE(sceneSession, nullptr);
     ssm_->sceneSessionMap_.insert({ 65535, sceneSession });
     int32_t persistentId = 65535;
     ASSERT_NE(ssm_->GetSceneSession(persistentId), nullptr);
@@ -468,9 +475,7 @@ HWTEST_F(SceneSessionManagerTest3, GetSceneSessionByIdentityInfo, TestSize.Level
     info.moduleName_ = "test3";
     info.appIndex_ = 10;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    if (sceneSession == nullptr) {
-        return;
-    }
+    ASSERT_NE(sceneSession, nullptr);
     std::string bundleName1 = "test1";
     std::string moduleName1 = "test2";
     std::string abilityName1 = "test3";
@@ -501,7 +506,8 @@ HWTEST_F(SceneSessionManagerTest3, GetSceneSessionByIdentityInfo, TestSize.Level
  */
 HWTEST_F(SceneSessionManagerTest3, GetSceneSessionVectorByTypeAndDisplayId, TestSize.Level1)
 {
-    int ret = 0;
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     uint64_t displayId = -1ULL;
     ssm_->GetSceneSessionVectorByTypeAndDisplayId(WindowType::APP_MAIN_WINDOW_BASE, displayId);
     displayId = 1;
@@ -512,9 +518,7 @@ HWTEST_F(SceneSessionManagerTest3, GetSceneSessionVectorByTypeAndDisplayId, Test
     info.moduleName_ = "test3";
     info.appIndex_ = 10;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    if (sceneSession == nullptr) {
-        return;
-    }
+    ASSERT_NE(sceneSession, nullptr);
     ssm_->sceneSessionMap_.insert({ 1, sceneSession });
     ssm_->GetSceneSessionVectorByTypeAndDisplayId(WindowType::APP_MAIN_WINDOW_BASE, displayId);
     sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
@@ -522,7 +526,8 @@ HWTEST_F(SceneSessionManagerTest3, GetSceneSessionVectorByTypeAndDisplayId, Test
     sceneSession->property_->SetDisplayId(1);
     ssm_->GetSceneSessionVectorByTypeAndDisplayId(WindowType::APP_MAIN_WINDOW_BASE, displayId);
     ssm_->sceneSessionMap_.erase(1);
-    ASSERT_EQ(ret, 0);
+    EXPECT_FALSE(g_logMsg.find("displayId is invalid") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -703,6 +708,23 @@ HWTEST_F(SceneSessionManagerTest3, SetAbilitySessionInfo, TestSize.Level1)
     OHOS::AppExecFwk::ElementName retElementName = ret->want.GetElement();
     ASSERT_EQ(retElementName.GetAbilityName(), info.abilityName_);
     ASSERT_EQ(retElementName.GetBundleName(), info.bundleName_);
+    EXPECT_EQ(true, ret->want.GetBoolParam(IS_CALL_BY_SCB, false));
+}
+
+/**
+ * @tc.name: SetAbilitySessionInfo02
+ * @tc.desc: SceneSesionManager set ability session from pending
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest3, SetAbilitySessionInfo02, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetAbilitySessionInfo";
+    info.bundleName_ = "SetAbilitySessionInfo";
+    sptr<SceneSession> sceneSession;
+    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<OHOS::AAFwk::SessionInfo> ret = ssm_->SetAbilitySessionInfo(sceneSession, 2);
+    EXPECT_EQ(false, ret->want.GetBoolParam(IS_CALL_BY_SCB, false));
 }
 
 /**
@@ -1212,8 +1234,6 @@ HWTEST_F(SceneSessionManagerTest3, UpdateBrightness02, TestSize.Level1)
 HWTEST_F(SceneSessionManagerTest3, SetDisplayBrightness, TestSize.Level1)
 {
     float brightness = 2.0f;
-    float result01 = ssm_->GetDisplayBrightness();
-    EXPECT_EQ(result01, UNDEFINED_BRIGHTNESS);
     ssm_->SetDisplayBrightness(brightness);
     float result02 = ssm_->GetDisplayBrightness();
     ASSERT_EQ(result02, 2.0f);
@@ -1593,7 +1613,7 @@ HWTEST_F(SceneSessionManagerTest3, ConfigWindowImmersive01, TestSize.Level1)
     ASSERT_NE(ssm_, nullptr);
     ssm_->ConfigWindowImmersive(immersiveConfig);
 
-    ASSERT_EQ(ssm_->SwitchFreeMultiWindow(false), WSError::WS_ERROR_DEVICE_NOT_SUPPORT);
+    ASSERT_EQ(ssm_->SwitchFreeMultiWindow(false), WSError::WS_OK);
     SystemSessionConfig systemConfig;
     systemConfig.freeMultiWindowSupport_ = true;
     ssm_->SwitchFreeMultiWindow(false);

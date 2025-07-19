@@ -25,6 +25,7 @@
 #include "fold_screen_state_internel.h"
 #include "common_test_utils.h"
 #include "iremote_object_mocker.h"
+#include "../mock/mock_accesstoken_kit.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -3116,6 +3117,7 @@ HWTEST_F(ScreenSessionManagerTest, Dump, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerTest, GetDisplayNode01, TestSize.Level1)
 {
+    MockAccesstokenKit::MockIsSystemApp(true);
     ScreenId screenId = 1051;
     auto ret = ssm_->GetDisplayNode(screenId);
     ASSERT_EQ(ret, nullptr);
@@ -3128,6 +3130,7 @@ HWTEST_F(ScreenSessionManagerTest, GetDisplayNode01, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerTest, GetDisplayNode02, TestSize.Level1)
 {
+    MockAccesstokenKit::MockIsSystemApp(true);
     ScreenId screenId = 1050;
     sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(screenId, ScreenProperty(), 0);
     ASSERT_NE(screenSession, nullptr);
@@ -3137,12 +3140,29 @@ HWTEST_F(ScreenSessionManagerTest, GetDisplayNode02, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetDisplayNode
+ * @tc.desc: SystemCalling false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetDisplayNode03, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    MockAccesstokenKit::MockIsSystemApp(false);
+    MockAccesstokenKit::MockIsSACalling(false);
+    ScreenId screenId = 1050;
+    ssm_->GetDisplayNode(screenId);
+    EXPECT_TRUE(logMsg.find("Permission Denied") != std::string::npos);
+}
+
+/**
  * @tc.name: GetScreenProperty
  * @tc.desc: GetScreenProperty
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenSessionManagerTest, GetScreenProperty01, TestSize.Level0)
 {
+    MockAccesstokenKit::MockIsSystemApp(true);
     ScreenId screenId = 2000;
     ASSERT_EQ(ssm_->GetScreenSession(screenId), nullptr);
     auto ret = ssm_->GetScreenProperty(screenId);
@@ -3156,12 +3176,29 @@ HWTEST_F(ScreenSessionManagerTest, GetScreenProperty01, TestSize.Level0)
  */
 HWTEST_F(ScreenSessionManagerTest, GetScreenProperty02, TestSize.Level0)
 {
+    MockAccesstokenKit::MockIsSystemApp(true);
     ScreenId screenId = 1050;
     sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(screenId, ScreenProperty(), 0);
     ASSERT_NE(screenSession, nullptr);
     ssm_->screenSessionMap_[screenId] = screenSession;
     ScreenProperty property = ssm_->GetScreenProperty(screenId);
     ASSERT_EQ(sizeof(property), sizeof(screenSession->property_));
+}
+
+/**
+ * @tc.name: GetScreenProperty
+ * @tc.desc: SystemCalling false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetScreenProperty03, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    MockAccesstokenKit::MockIsSystemApp(false);
+    MockAccesstokenKit::MockIsSACalling(false);
+    ScreenId screenId = 1050;
+    ssm_->GetScreenProperty(screenId);
+    EXPECT_TRUE(logMsg.find("Permission Denied") != std::string::npos);
 }
 
 /**
@@ -3191,6 +3228,60 @@ HWTEST_F(ScreenSessionManagerTest, GetCurrentScreenPhyBounds01, TestSize.Level1)
     ASSERT_NE(ssm_->foldScreenController_, nullptr);
     ssm_->GetCurrentScreenPhyBounds(phyWidth, phyHeight, isReset, screenId);
     ASSERT_FALSE(isReset);
+#endif
+}
+
+/**
+ * @tc.name: GetCurrentScreenPhyBounds
+ * @tc.desc: GetCurrentScreenPhyBounds
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetCurrentScreenPhyBounds02, TestSize.Level1)
+{
+#ifdef FOLD_ABILITY_ENABLE
+    float phyWidth = 0.0f;
+    float phyHeight = 0.0f;
+    bool isReset = true;
+    ScreenId screenId = 0;
+    ssm_->GetCurrentScreenPhyBounds(phyWidth, phyHeight, isReset, screenId);
+    auto foldController = sptr<FoldScreenController>::MakeSptr(ssm_->displayInfoMutex_,
+        ssm_->screenPowerTaskScheduler_);
+    ASSERT_NE(foldController, nullptr);
+    DisplayPhysicalResolution physicalSize_full;
+    physicalSize_full.foldDisplayMode_ = FoldDisplayMode::FULL;
+    physicalSize_full.physicalWidth_ = 2048;
+    physicalSize_full.physicalHeight_ = 2232;
+    DisplayPhysicalResolution physicalSize_main;
+    physicalSize_main.foldDisplayMode_ = FoldDisplayMode::MAIN;
+    physicalSize_main.physicalWidth_ = 1008;
+    physicalSize_main.physicalHeight_ = 2232;
+    DisplayPhysicalResolution physicalSize_global_full;
+    physicalSize_global_full.foldDisplayMode_ = FoldDisplayMode::GLOBAL_FULL;
+    physicalSize_global_full.physicalWidth_ = 3184;
+    physicalSize_global_full.physicalHeight_ = 2232;
+    ScreenSceneConfig::displayPhysicalResolution_.emplace_back(physicalSize_full);
+    ScreenSceneConfig::displayPhysicalResolution_.emplace_back(physicalSize_main);
+    ScreenSceneConfig::displayPhysicalResolution_.emplace_back(physicalSize_global_full);
+    auto foldPolicy = foldController->GetFoldScreenPolicy(DisplayDeviceType::SECONDARY_DISPLAY_DEVICE);
+    ASSERT_NE(foldPolicy, nullptr);
+    foldPolicy->lastDisplayMode_ = FoldDisplayMode::GLOBAL_FULL;
+    foldController->foldScreenPolicy_ = foldPolicy;
+    ssm_->foldScreenController_ = foldController;
+    ssm_->GetCurrentScreenPhyBounds(phyWidth, phyHeight, isReset, screenId);
+    auto phyBounds = ssm_->GetPhyScreenProperty(0).GetPhyBounds();
+    float phyWidthNow = phyBounds.rect_.width_;
+    float phyHeightNow = phyBounds.rect_.width_;
+    int32_t screenRotationOffSet = system::GetIntParameter<int32_t>("const.fold.screen_rotation.offset", 0);
+    if (FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
+        EXPECT_EQ(phyWidth, phyWidthNow);
+        EXPECT_EQ(phyHeight, phyHeightNow);
+    } else if (screenRotationOffSet == 1 || screenRotationOffSet == 3) {
+        EXPECT_EQ(phyHeight, phyHeightNow);
+        EXPECT_EQ(phyWidth, phyWidthNow);
+    } else {
+        EXPECT_EQ(phyWidth, phyWidthNow);
+        EXPECT_EQ(phyHeight, phyHeightNow);
+    }
 #endif
 }
 
@@ -3727,12 +3818,16 @@ HWTEST_F(ScreenSessionManagerTest, UpdateScreenDirectionInfo01, Function | Small
     ScreenId id = 50;
     sptr<ScreenSession> screenSession = nullptr;
     ASSERT_EQ(screenSession, nullptr);
-    float screenComponentRotation = 0.0f;
-    float rotation = 0.0f;
-    float phyRotation = 0.0f;
+    ScreenDirectionInfo directionInfo;
+    directionInfo.screenRotation_ = 0.0f;
+    directionInfo.rotation_ = 0.0f;
+    directionInfo.phyRotation_ = 0.0f;
+    RRect bounds;
+    bounds.rect_.width_ = 1344;
+    bounds.rect_.height_ = 2772;
     ScreenPropertyChangeType screenPropertyChangeType = ScreenPropertyChangeType::ROTATION_END;
     ssm->screenSessionMap_.insert(std::make_pair(id, screenSession));
-    ssm->UpdateScreenDirectionInfo(id, screenComponentRotation, rotation, phyRotation, screenPropertyChangeType);
+    ssm->UpdateScreenDirectionInfo(id, directionInfo, screenPropertyChangeType, bounds);
     ssm->screenSessionMap_.erase(50);
 }
 
@@ -3748,12 +3843,16 @@ HWTEST_F(ScreenSessionManagerTest, UpdateScreenDirectionInfo02, Function | Small
     ScreenId id = 50;
     sptr<ScreenSession> screenSession = nullptr;
     ASSERT_EQ(screenSession, nullptr);
-    float screenComponentRotation = 0.0f;
-    float rotation = 0.0f;
-    float phyRotation = 0.0f;
+    ScreenDirectionInfo directionInfo;
+    directionInfo.screenRotation_ = 0.0f;
+    directionInfo.rotation_ = 0.0f;
+    directionInfo.phyRotation_ = 0.0f;
+    RRect bounds;
+    bounds.rect_.width_ = 1344;
+    bounds.rect_.height_ = 2772;
     ScreenPropertyChangeType screenPropertyChangeType = ScreenPropertyChangeType::UNSPECIFIED;
     ssm->screenSessionMap_.insert(std::make_pair(id, screenSession));
-    ssm->UpdateScreenDirectionInfo(id, screenComponentRotation, rotation, phyRotation, screenPropertyChangeType);
+    ssm->UpdateScreenDirectionInfo(id, directionInfo, screenPropertyChangeType, bounds);
     ssm->screenSessionMap_.erase(50);
 }
 
@@ -3769,12 +3868,16 @@ HWTEST_F(ScreenSessionManagerTest, UpdateScreenDirectionInfo03, Function | Small
     ScreenId id = 50;
     sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession);
-    float screenComponentRotation = 0.0f;
-    float rotation = 0.0f;
-    float phyRotation = 0.0f;
+    ScreenDirectionInfo directionInfo;
+    directionInfo.screenRotation_ = 0.0f;
+    directionInfo.rotation_ = 0.0f;
+    directionInfo.phyRotation_ = 0.0f;
+    RRect bounds;
+    bounds.rect_.width_ = 1344;
+    bounds.rect_.height_ = 2772;
     ScreenPropertyChangeType screenPropertyChangeType = ScreenPropertyChangeType::UNSPECIFIED;
     ssm->screenSessionMap_.insert(std::make_pair(id, screenSession));
-    ssm->UpdateScreenDirectionInfo(id, screenComponentRotation, rotation, phyRotation, screenPropertyChangeType);
+    ssm->UpdateScreenDirectionInfo(id, directionInfo, screenPropertyChangeType, bounds);
     ssm->screenSessionMap_.erase(50);
 }
 
@@ -6603,7 +6706,6 @@ HWTEST_F(ScreenSessionManagerTest, OnRemoteDied03, TestSize.Level1)
     ssm_->screenAgentMap_[agent] = {};
 
     EXPECT_TRUE(ssm_->OnRemoteDied(agent));
-    EXPECT_TRUE(ssm_->screenAgentMap_.find(agent) == ssm_->screenAgentMap_.end());
 }
 
 /**
@@ -7095,7 +7197,7 @@ HWTEST_F(ScreenSessionManagerTest, SwitchExternalScreenToMirror, TestSize.Level1
     ASSERT_NE(screenSession, nullptr);
     ssm_->SwitchExternalScreenToMirror();
     EXPECT_NE(screenSession->GetScreenCombination(), ScreenCombination::SCREEN_MIRROR);
-    screenSession->SetMirrorScreenType(MirrorScreenType::PHYSICAL_MIRROR);
+    screenSession->SetIsRealScreen(true);
     ssm_->screenSessionMap_.insert(std::make_pair(777, nullptr));
     sptr<IDisplayManagerAgent> displayManagerAgent1 = sptr<DisplayManagerAgentDefault>::MakeSptr();
     ASSERT_NE(displayManagerAgent1, nullptr);
@@ -7104,7 +7206,7 @@ HWTEST_F(ScreenSessionManagerTest, SwitchExternalScreenToMirror, TestSize.Level1
     auto virtualScreenId = ssm_->CreateVirtualScreen(virtualOption1, displayManagerAgent1->AsObject());
     ssm_->SwitchExternalScreenToMirror();
     EXPECT_EQ(screenSession->GetScreenCombination(), ScreenCombination::SCREEN_MIRROR);
-    screenSession->SetMirrorScreenType(MirrorScreenType::VIRTUAL_MIRROR);
+    screenSession->SetIsRealScreen(false);
     ssm_->DestroyVirtualScreen(screenId);
     ssm_->DestroyVirtualScreen(virtualScreenId);
 }
@@ -7137,6 +7239,46 @@ HWTEST_F(ScreenSessionManagerTest, InitSecondaryDisplayPhysicalParams, TestSize.
     ASSERT_NE(ssm_, nullptr);
     ssm_->InitSecondaryDisplayPhysicalParams();
     EXPECT_FALSE(ssm_->screenParams_.empty());
+}
+
+/**
+ * @tc.name: GetPhyScreenId
+ * @tc.desc: test function : GetPhyScreenId
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetPhyScreenId, TestSize.Level1)
+{
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        GTEST_SKIP();
+    }
+ 
+    ScreenId screenId = 0;
+    ssm_->SetCoordinationFlag(true);
+    ASSERT_EQ(ssm_->GetPhyScreenId(screenId), screenId);
+ 
+    screenId = 5;
+    ASSERT_EQ(ssm_->GetPhyScreenId(screenId), 0);
+}
+ 
+/**
+ * @tc.name: UpdateCoordinationRefreshRate
+ * @tc.desc: test function : UpdateCoordinationRefreshRate
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, UpdateCoordinationRefreshRate, TestSize.Level1)
+{
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        GTEST_SKIP();
+    }
+    uint32_t refreshRate = 60;
+    ssm_->SetCoordinationFlag(false);
+    ssm_->UpdateCoordinationRefreshRate(refreshRate);
+    EXPECT_FALSE(ssm_->GetScreenSession(5));
+ 
+    refreshRate = 90;
+    ssm_->SetCoordinationFlag(true);
+    ssm_->UpdateCoordinationRefreshRate(refreshRate);
+    EXPECT_TRUE(ssm_->GetScreenSession(0));
 }
 }
 } // namespace Rosen

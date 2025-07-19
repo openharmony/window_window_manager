@@ -78,16 +78,6 @@ IntentionEventManager::InputEventListener::~InputEventListener()
 {
 }
 
-bool IntentionEventManager::GetAddMonitor()
-{
-    return isAddMonitor_;
-}
-
-void IntentionEventManager::SetAddMonitor(bool isAddMonitor)
-{
-    isAddMonitor_ = isAddMonitor;
-}
-
 bool IntentionEventManager::EnableInputEventListener(Ace::UIContent* uiContent,
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler)
 {
@@ -103,40 +93,6 @@ bool IntentionEventManager::EnableInputEventListener(Ace::UIContent* uiContent,
         std::make_shared<IntentionEventManager::InputEventListener>(uiContent, eventHandler);
     MMI::InputManager::GetInstance()->SetWindowInputEventConsumer(listener, eventHandler);
     TLOGI(WmsLogTag::WMS_EVENT, "SetWindowInputEventConsumer success");
-
-    const char* const where = __func__;
-    auto callback = [where](std::shared_ptr<MMI::PointerEvent> pointerEvent) {
-        if (pointerEvent == nullptr) {
-            TLOGNE(WmsLogTag::WMS_EVENT, "%{public}s pointerEvent is null", where);
-            return;
-        }
-        int32_t action = pointerEvent->GetPointerAction();
-        if (action != MMI::PointerEvent::POINTER_ACTION_DOWN &&
-            action != MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
-            return;
-        }
-        uint32_t windowId = static_cast<uint32_t>(pointerEvent->GetTargetWindowId());
-        auto sceneSession = SceneSessionManager::GetInstance().GetSceneSession(windowId);
-        if (sceneSession == nullptr) {
-            TLOGNE(WmsLogTag::WMS_EVENT, "%{public}s session is nullptr", where);
-            return;
-        }
-        if (!sceneSession->IsAnco()) {
-            TLOGNE(WmsLogTag::WMS_EVENT, "%{public}s session is not anco", where);
-            return;
-        }
-        MMI::PointerEvent::PointerItem pointerItem;
-        if (pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
-            sceneSession->ProcessPointDownSession(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
-        }
-    };
-    if (!GetAddMonitor()) {
-        auto ret = MMI::InputManager::GetInstance()->AddMonitor(callback);
-        TLOGI(WmsLogTag::WMS_EVENT, "set monitor ret : %{public}d", ret);
-        if (ret != MMI::ERROR_EXCEED_MAX_COUNT && ret != MMI::INVALID_HANDLER_ID) {
-            SetAddMonitor(true);
-        }
-    }
 
     if (IS_BETA) {
         // Xcollie's SetTimerCounter task is set with the params to record count and time of the input down event

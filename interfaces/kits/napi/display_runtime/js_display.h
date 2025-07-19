@@ -65,6 +65,8 @@ napi_value CreateJsBoundingRectsArrayObject(napi_env env, std::vector<DMRect> bo
 napi_value CreateJsDisplayPhysicalInfoObject(napi_env env, DisplayPhysicalResolution physicalInfo);
 napi_value NapiGetUndefined(napi_env env);
 napi_valuetype GetType(napi_env env, napi_value value);
+napi_value CreateJsFoldCreaseRegionObject(napi_env env, const FoldCreaseRegion& region);
+napi_value CreateJsCreaseRectsArrayObject(napi_env env, const std::vector<DMRect>& creaseRects);
 class JsDisplay final {
 public:
     explicit JsDisplay(const sptr<Display>& display);
@@ -78,6 +80,7 @@ public:
     static napi_value GetDisplayCapability(napi_env env, napi_callback_info info);
     static napi_value RegisterDisplayManagerCallback(napi_env env, napi_callback_info info);
     static napi_value UnregisterDisplayManagerCallback(napi_env env, napi_callback_info info);
+    static napi_value GetLiveCreaseRegion(napi_env env, napi_callback_info info);
 
 private:
     sptr<Display> display_ = nullptr;
@@ -97,6 +100,7 @@ private:
     DMError UnregisterAllDisplayListenerWithType(const std::string& type);
     DMError UnRegisterDisplayListenerWithType(napi_env env, const std::string& type, napi_value value);
     bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
+    napi_value OnGetLiveCreaseRegion(napi_env env, napi_callback_info info);
 };
 enum class DisplayStateMode : uint32_t {
     STATE_UNKNOWN = 0,

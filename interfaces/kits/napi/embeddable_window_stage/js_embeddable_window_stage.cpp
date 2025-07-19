@@ -207,7 +207,7 @@ napi_value JsEmbeddableWindowStage::OnEvent(napi_env env, napi_callback_info inf
         return NapiGetUndefined(env);
     }
 
-    WmErrorCode ret = extwinRegisterManager_->RegisterListener(windowImpl, eventString,
+    WmErrorCode ret = extwinRegisterManager_->AtomicServiceRegisterListener(windowImpl, eventString,
         CaseType::CASE_STAGE, env, value);
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "RegisterListener fail");
@@ -248,16 +248,19 @@ napi_value JsEmbeddableWindowStage::OffEvent(napi_env env, napi_callback_info in
     napi_value value = nullptr;
     WmErrorCode ret = WmErrorCode::WM_OK;
     if (argc == 1) {
-        ret = extwinRegisterManager_->UnregisterListener(windowImpl, eventString, CaseType::CASE_STAGE, env, nullptr);
+        ret = extwinRegisterManager_->AtomicServiceUnregisterListener(windowImpl, eventString,
+            CaseType::CASE_STAGE, env, nullptr);
     } else {
         value = argv[1];
         if (value != nullptr && GetType(env, value) == napi_function) {
-            ret = extwinRegisterManager_->UnregisterListener(windowImpl, eventString, CaseType::CASE_STAGE, env, value);
+            ret = extwinRegisterManager_->AtomicServiceUnregisterListener(windowImpl, eventString,
+                CaseType::CASE_STAGE, env, value);
         } else {
-            ret = extwinRegisterManager_->UnregisterListener(windowImpl, eventString,
+            ret = extwinRegisterManager_->AtomicServiceUnregisterListener(windowImpl, eventString,
                 CaseType::CASE_STAGE, env, nullptr);
         }
     }
+    
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "UnregisterListener fail");
         return NapiThrowError(env, ret);

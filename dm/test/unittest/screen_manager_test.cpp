@@ -809,6 +809,19 @@ HWTEST_F(ScreenManagerTest, MakeMirrorForRecord03, TestSize.Level1)
 
     EXPECT_EQ(result, DMError::DM_ERROR_NULLPTR);
 }
+
+/**
+ * @tc.name: SetScreenPrivacyWindowTagSwitch
+ * @tc.desc: SetScreenPrivacyWindowTagSwitch test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenManagerTest, SetScreenPrivacyWindowTagSwitch, TestSize.Level1)
+{
+    ScreenId mainScreenId = 1;
+    std::vector<std::string> privacyWindowTag{"test1", "test2"};
+    DMError res = ScreenManager::GetInstance().SetScreenPrivacyWindowTagSwitch(mainScreenId, privacyWindowTag, true);
+    EXPECT_EQ(res, DMError::DM_ERROR_NULLPTR);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

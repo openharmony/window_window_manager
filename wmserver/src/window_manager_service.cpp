@@ -1664,7 +1664,7 @@ void WindowManagerService::InitRSUIDirector()
 {
     rsUiDirector_ = RSUIDirector::Create();
     if (!rsUiDirector_) {
-        TLOGE(WmsLogTag::WMS_RS_CLI_MULTI_INST, "Failed to create RSUIDirector");
+        TLOGE(WmsLogTag::WMS_SCB, "Failed to create RSUIDirector");
         return;
     }
     int32_t instanceId = INSTANCE_ID_UNDEFINED;
@@ -1678,7 +1678,7 @@ void WindowManagerService::InitRSUIDirector()
             PostAsyncTask(task, "WindowManagerService:cacheGuard", delay);
         }, instanceId, useMultiInstance);
     rsUiDirector_->Init(false, useMultiInstance);
-    TLOGI(WmsLogTag::WMS_RS_CLI_MULTI_INST, "Create RSUIDirector: %{public}s",
+    TLOGI(WmsLogTag::WMS_SCB, "Create RSUIDirector: %{public}s",
           RSAdapterUtil::RSUIDirectorToStr(rsUiDirector_).c_str());
 }
 } // namespace Rosen

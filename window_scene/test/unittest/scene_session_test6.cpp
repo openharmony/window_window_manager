@@ -568,6 +568,32 @@ HWTEST_F(SceneSessionTest6, IsInCompatScaleStatus, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsInCompatScaleMode
+ * @tc.desc: IsInCompatScaleMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, IsInCompatScaleMode, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsInCompatScaleMode";
+    info.bundleName_ = "IsInCompatScaleMode";
+    info.screenId_ = 0;
+    sptr<SceneSession> session = sptr<MainSession>::MakeSptr(info, nullptr);
+    EXPECT_FALSE(session->IsInCompatScaleMode());
+
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToProportionalScale(true);
+    session->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    EXPECT_TRUE(session->IsInCompatScaleMode());
+
+    compatibleModeProperty->SetIsAdaptToProportionalScale(false);
+    compatibleModeProperty->SetIsAdaptToSimulationScale(true);
+    EXPECT_TRUE(session->IsInCompatScaleMode());
+    compatibleModeProperty->SetIsAdaptToProportionalScale(true);
+    EXPECT_TRUE(session->IsInCompatScaleMode());
+}
+
+/**
  * @tc.name: GetSystemAvoidArea
  * @tc.desc: GetSystemAvoidArea function
  * @tc.type: FUNC
@@ -1115,6 +1141,43 @@ HWTEST_F(SceneSessionTest6, TestUpdateGlobalDisplayRectFromClient, Function | Sm
         auto result = session->UpdateGlobalDisplayRectFromClient(newRect, SizeChangeReason::MOVE);
         EXPECT_EQ(result, WSError::WS_OK);
     }
+}
+
+/**
+ * @tc.name: SetWindowTransitionAnimation
+ * @tc.desc: SetWindowTransitionAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, SetWindowTransitionAnimation, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    WindowTransitionType transitionType = WindowTransitionType::DESTROY;
+    TransitionAnimation animation;
+    session->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+
+    session->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    auto ret = session->SetWindowTransitionAnimation(transitionType, animation);
+    ASSERT_EQ(ret, WSError::WS_ERROR_DEVICE_NOT_SUPPORT);
+
+    session->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ret = session->SetWindowTransitionAnimation(transitionType, animation);
+    ASSERT_EQ(ret, WSError::WS_OK);
+
+    session->systemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    session->systemConfig_.freeMultiWindowEnable_ = false;
+    session->systemConfig_.freeMultiWindowSupport_ = false;
+    ret = session->SetWindowTransitionAnimation(transitionType, animation);
+    ASSERT_EQ(ret, WSError::WS_ERROR_DEVICE_NOT_SUPPORT);
+
+    session->systemConfig_.freeMultiWindowEnable_ = true;
+    session->systemConfig_.freeMultiWindowSupport_ = true;
+    ret = session->SetWindowTransitionAnimation(transitionType, animation);
+    ASSERT_EQ(ret, WSError::WS_OK);
+
+    session->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    ret = session->SetWindowTransitionAnimation(transitionType, animation);
+    ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_CALLING);
 }
 } // namespace
 } // namespace Rosen

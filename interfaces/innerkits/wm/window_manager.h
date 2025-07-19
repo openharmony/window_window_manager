@@ -342,6 +342,7 @@ public:
     float scaleVal_;
     float scaleX_;
     float scaleY_;
+    bool isCompatScaleMode_ { false };
     std::string bundleName_;
     std::vector<Rect> touchHotAreas_;
 };
@@ -1324,6 +1325,24 @@ public:
      * @param lifeCycleInfo window lifecycle info.
      */
     void NotifyWMSWindowDestroyed(const WindowLifeCycleInfo& lifeCycleInfo);
+
+    /**
+     * @brief Add BundleNames to the list that will hide on virtual screen.
+     * @param bundleNames BundleNames that need to add.
+     * @param privacyWindowTags Tags of privacy window.
+     * @return WM_OK means add success, others means add failed.
+     */
+    WMError AddSessionBlackList(
+        const std::unordered_set<std::string>& bundleNames, const std::unordered_set<std::string>& privacyWindowTags);
+
+    /**
+     * @brief Remove BundleNames from the list that will hide on virtual screen.
+     * @param bundleNames BundleNames that need to remove.
+     * @param privacyWindowTags Tags of privacy window.
+     * @return WM_OK means remove success, others means remove failed.
+     */
+    WMError RemoveSessionBlackList(
+        const std::unordered_set<std::string>& bundleNames, const std::unordered_set<std::string>& privacyWindowTags);
 
 private:
     WindowManager();

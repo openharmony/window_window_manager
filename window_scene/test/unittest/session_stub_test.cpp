@@ -968,6 +968,24 @@ HWTEST_F(SessionStubTest, HandlePendingSessionActivation, TestSize.Level1)
 }
 
 /**
+ * @tc.name: WindowCreateParams
+ * @tc.desc: sessionStub WindowCreateParams
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, WindowCreateParams, TestSize.Level1)
+{
+    MessageParcel data;
+    auto windowCreateParams = std::make_shared<WindowCreateParams>();
+    windowCreateParams->animationParams = std::make_shared<StartAnimationOptions>();
+    windowCreateParams->animationParams->animationType = AnimationType::FADE_IN;
+    windowCreateParams->animationSystemParams = std::make_shared<StartAnimationSystemOptions>();
+    data.WriteParcelable(windowCreateParams.get());
+    auto windowCreateParamsRead = std::make_shared<WindowCreateParams>();
+    windowCreateParamsRead.reset(data.ReadParcelable<WindowCreateParams>());
+    EXPECT_EQ(windowCreateParamsRead->animationParams->animationType, AnimationType::FADE_IN);
+}
+
+/**
  * @tc.name: HandleGetGlobalScaledRect
  * @tc.desc: sessionStub HandleGetGlobalScaledRect
  * @tc.type: FUNC
@@ -1181,6 +1199,28 @@ HWTEST_F(SessionStubTest, HandleIsMainWindowFullScreenAcrossDisplays, Function |
 
     data.WriteInterfaceToken(SessionStub::GetDescriptor());
     uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_MAIN_WINDOW_FULL_SCREEN_ACROSS_DISPLAYS);
+    EXPECT_EQ(0, sessionStub->ProcessRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleUpdateColorMode
+ * @tc.desc: sessionStub HandleUpdateColorMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleUpdateColorMode, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteString("DARK");
+    data.WriteBool(true);
+    sptr<SessionStub> sessionStub = sptr<SessionStubMocker>::MakeSptr();
+    ASSERT_NE(nullptr, sessionStub);
+    auto result = sessionStub->HandleUpdateColorMode(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
+
+    data.WriteInterfaceToken(SessionStub::GetDescriptor());
+    uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_COLOR_MODE);
     EXPECT_EQ(0, sessionStub->ProcessRemoteRequest(code, data, reply, option));
 }
 

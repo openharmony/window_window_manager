@@ -867,6 +867,22 @@ namespace {
         std::map<std::string, MultiScreenInfo> multiScreenInfoMap = screenSettingHelper.GetMultiScreenInfo(key);
         ASSERT_TRUE(multiScreenInfoMap.empty());
     }
+
+    /**
+     * @tc.name: ConvertStrToInt32
+     * @tc.desc: Test ConvertStrToInt32 func
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, ConvertStrToInt32, Function | SmallTest | Level3)
+    {
+        ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
+        std::string str = "not_a_number";
+        int32_t num1 = 0;
+        EXPECT_FALSE(screenSettingHelper.ConvertStrToInt32(str, num1));
+        str = "123";
+        EXPECT_TRUE(screenSettingHelper.ConvertStrToInt32(str, num1));
+        EXPECT_EQ(123, num1);
+    }
 }
 } // namespace Rosen
 } // namespace OHOS

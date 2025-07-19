@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include "window_agent.h"
 #include "window_stub.h"
+#include "modifier_render_thread/rs_modifiers_draw_thread.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -32,7 +33,12 @@ public:
 
 void WindowStubTest::SetUpTestCase() {}
 
-void WindowStubTest::TearDownTestCase() {}
+void WindowStubTest::TearDownTestCase()
+{
+#ifdef RS_ENABLE_VK
+    RSModifiersDrawThread::Destroy();
+#endif
+}
 
 void WindowStubTest::SetUp()
 {
@@ -379,6 +385,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest14, TestSize.Level1)
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, static_cast<int>(ERR_INVALID_DATA));
 
+    data.WriteInterfaceToken(WindowStub::GetDescriptor());
     data.WriteUint32(static_cast<uint32_t>(WindowMode::WINDOW_MODE_FB) + 1);
     res = windowStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, static_cast<int>(ERR_INVALID_DATA));

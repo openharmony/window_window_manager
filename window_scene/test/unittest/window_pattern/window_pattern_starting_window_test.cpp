@@ -174,16 +174,22 @@ HWTEST_F(WindowPatternStartingWindowTest, GetStartingWindowInfoFromCache, TestSi
     sessionInfo.abilityName_ = "abilityName";
     sessionInfo.bundleName_ = "bundleName";
     StartingWindowInfo startingWindowInfo;
-    auto res = ssm_->GetStartingWindowInfoFromCache(sessionInfo, startingWindowInfo);
-    ASSERT_EQ(res, false);
+    std::string autoColorMode = AppExecFwk::ConfigurationInner::COLOR_MODE_AUTO;
+    auto res = ssm_->GetStartingWindowInfoFromCache(sessionInfo, startingWindowInfo, autoColorMode);
+    EXPECT_EQ(res, false);
     auto key = sessionInfo.moduleName_ + sessionInfo.abilityName_;
     std::map<std::string, StartingWindowInfo> startingWindowInfoMap{ { key, startingWindowInfo } };
     ssm_->startingWindowMap_.insert({ sessionInfo.bundleName_, startingWindowInfoMap });
-    res = ssm_->GetStartingWindowInfoFromCache(sessionInfo, startingWindowInfo);
-    ASSERT_EQ(res, true);
+    res = ssm_->GetStartingWindowInfoFromCache(sessionInfo, startingWindowInfo, autoColorMode);
+    EXPECT_EQ(res, true);
+
+    std::string darkColorMode = AppExecFwk::ConfigurationInner::COLOR_MODE_DARK;
+    res = ssm_->GetStartingWindowInfoFromCache(sessionInfo, startingWindowInfo, darkColorMode);
+    EXPECT_EQ(res, false);
+
     sessionInfo.moduleName_ = "invalidModuleName";
-    res = ssm_->GetStartingWindowInfoFromCache(sessionInfo, startingWindowInfo);
-    ASSERT_EQ(res, false);
+    res = ssm_->GetStartingWindowInfoFromCache(sessionInfo, startingWindowInfo, autoColorMode);
+    EXPECT_EQ(res, false);
 }
 
 /**
@@ -204,14 +210,14 @@ HWTEST_F(WindowPatternStartingWindowTest, GetStartingWindowInfoFromRdb, TestSize
     sessionInfo.abilityName_ = itemKey.abilityName = "abilityName";
     sessionInfo.bundleName_ = itemKey.bundleName = "bundleName";
     itemKey.darkMode = false;
-    auto res = ssm_->GetStartingWindowInfoFromRdb(sessionInfo, outInfo);
+    auto res = ssm_->GetStartingWindowInfoFromRdb(sessionInfo, outInfo, false);
     EXPECT_EQ(res, false);
     bool insertRes = ssm_->startingWindowRdbMgr_->InsertData(itemKey, outInfo);
     EXPECT_EQ(insertRes, true);
-    res = ssm_->GetStartingWindowInfoFromRdb(sessionInfo, outInfo);
+    res = ssm_->GetStartingWindowInfoFromRdb(sessionInfo, outInfo, false);
     EXPECT_EQ(res, true);
     ssm_->startingWindowRdbMgr_ = nullptr;
-    res = ssm_->GetStartingWindowInfoFromRdb(sessionInfo, outInfo);
+    res = ssm_->GetStartingWindowInfoFromRdb(sessionInfo, outInfo, false);
     EXPECT_EQ(res, false);
 }
 
@@ -470,10 +476,17 @@ HWTEST_F(WindowPatternStartingWindowTest, NotifyPreLoadStartingWindowFinished, T
  * @tc.desc: GetIsDarkFromConfiguration
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPatternStartingWindowTest, GetIsDarkFromConfiguration, TestSize.Level1)
+HWTEST_F(WindowPatternStartingWindowTest, GetIsDarkFromConfiguration, TestSize.Level0)
 {
     ASSERT_NE(ssm_, nullptr);
-    bool isDark = ssm_->GetIsDarkFromConfiguration();
+    std::string autoColorMode = AppExecFwk::ConfigurationInner::COLOR_MODE_AUTO;
+    bool isDark = ssm_->GetIsDarkFromConfiguration(autoColorMode);
+    EXPECT_EQ(false, isDark);
+    std::string darkColorMode = AppExecFwk::ConfigurationInner::COLOR_MODE_DARK;
+    isDark = ssm_->GetIsDarkFromConfiguration(darkColorMode);
+    EXPECT_EQ(true, isDark);
+    std::string lightColorMode = AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT;
+    isDark = ssm_->GetIsDarkFromConfiguration(lightColorMode);
     EXPECT_EQ(false, isDark);
 }
 
@@ -482,7 +495,7 @@ HWTEST_F(WindowPatternStartingWindowTest, GetIsDarkFromConfiguration, TestSize.L
  * @tc.desc: UpdateAllStartingWindowRdb
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPatternStartingWindowTest, UpdateAllStartingWindowRdb, TestSize.Level1)
+HWTEST_F(WindowPatternStartingWindowTest, UpdateAllStartingWindowRdb, TestSize.Level0)
 {
     g_logMsg.clear();
     LOG_SetCallback(RdbLogCallback);
@@ -490,6 +503,76 @@ HWTEST_F(WindowPatternStartingWindowTest, UpdateAllStartingWindowRdb, TestSize.L
     ssm_->UpdateAllStartingWindowRdb();
     usleep(WAIT_SLEEP_TIME);
     EXPECT_TRUE(g_logMsg.find("GetBundleInfosV9 error") != std::string::npos);
+}
+
+/**
+ * @tc.name: UpdateProcessMap
+ * @tc.desc: UpdateProcessMap
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternStartingWindowTest, UpdateProcessMap, TestSize.Level0)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "bundleName_";
+    sessionInfo.moduleName_ = "moduleName_";
+    sessionInfo.abilityName_ = "abilityName_";
+    sessionInfo.appInstanceKey_ = "instanceKey";
+    sessionInfo.appIndex_ = 0;
+    int32_t persistenId0 = 1;
+    auto res = ssm_->FindProcessMap(sessionInfo, persistenId0);
+    EXPECT_EQ(res, WSError::WS_DO_NOTHING);
+
+    ssm_->InsertProcessMap(sessionInfo, persistenId0);
+    int32_t persistenIdRes;
+    res = ssm_->FindProcessMap(sessionInfo, persistenIdRes);
+    EXPECT_EQ(res, WSError::WS_OK);
+    EXPECT_EQ(persistenIdRes, persistenId0);
+    int32_t persistenId1 = 2;
+    ssm_->InsertProcessMap(sessionInfo, persistenId1);
+    res = ssm_->DeleteProcessMap(sessionInfo, persistenId0);
+    EXPECT_EQ(res, WSError::WS_OK);
+    
+    res = ssm_->FindProcessMap(sessionInfo, persistenIdRes);
+    EXPECT_EQ(res, WSError::WS_OK);
+    EXPECT_EQ(persistenIdRes, persistenId1);
+
+    res = ssm_->DeleteProcessMap(sessionInfo, persistenId1);
+    EXPECT_EQ(res, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: UpdateProcessMap
+ * @tc.desc: UpdateProcessMap
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternStartingWindowTest, GetSessionColorMode, TestSize.Level0)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "bundleName_";
+    sessionInfo.moduleName_ = "moduleName_";
+    sessionInfo.abilityName_ = "abilityName_";
+    sessionInfo.appInstanceKey_ = "instanceKey";
+    sessionInfo.appIndex_ = 0;
+    int32_t persistenId = 1000;
+
+    StartingWindowInfo startingWindowInfo;
+    auto res = ssm_->GetSessionColorMode(sessionInfo, startingWindowInfo);
+    EXPECT_EQ(res, AppExecFwk::ConfigurationInner::COLOR_MODE_AUTO);
+
+    ssm_->InsertProcessMap(sessionInfo, persistenId);
+    res = ssm_->GetSessionColorMode(sessionInfo, startingWindowInfo);
+    EXPECT_EQ(res, AppExecFwk::ConfigurationInner::COLOR_MODE_AUTO);
+
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    ssm_->sceneSessionMap_.insert({ persistenId, sceneSession });
+    ASSERT_NE(ssm_->GetSceneSession(persistenId), nullptr);
+
+    sceneSession->OnUpdateColorMode(AppExecFwk::ConfigurationInner::COLOR_MODE_DARK, true);
+    res = ssm_->GetSessionColorMode(sessionInfo, startingWindowInfo);
+    EXPECT_EQ(res, AppExecFwk::ConfigurationInner::COLOR_MODE_DARK);
 }
 } // namespace
 } // namespace Rosen

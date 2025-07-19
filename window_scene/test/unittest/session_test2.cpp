@@ -667,9 +667,7 @@ HWTEST_F(WindowSessionTest2, PostTask002, TestSize.Level1)
     ASSERT_NE(session_, nullptr);
     int32_t persistentId = 0;
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    if (property == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, property);
     property->SetPersistentId(persistentId);
     int32_t res = session_->GetPersistentId();
     ASSERT_EQ(res, 0);
@@ -789,9 +787,7 @@ HWTEST_F(WindowSessionTest2, PostExportTask, TestSize.Level1)
     ASSERT_NE(session_, nullptr);
     int32_t persistentId = 0;
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    if (property == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, property);
     property->SetPersistentId(persistentId);
     int32_t ret = session_->GetPersistentId();
     ASSERT_EQ(ret, 0);
@@ -1463,24 +1459,6 @@ HWTEST_F(WindowSessionTest2, RegisterDetachCallback02, TestSize.Level1)
     sptr<IPatternDetachCallback> detachCallback2;
     session_->RegisterDetachCallback(detachCallback2);
     ASSERT_EQ(session_->detachCallback_, detachCallback2);
-}
-
-/**
- * @tc.name: RegisterDetachCallback03
- * @tc.desc: RegisterDetachCallback Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest2, RegisterDetachCallback03, TestSize.Level1)
-{
-    ASSERT_NE(session_, nullptr);
-    int32_t persistentId = 123;
-    sptr<PatternDetachCallbackMocker> detachCallback = sptr<PatternDetachCallbackMocker>::MakeSptr();
-    EXPECT_CALL(*detachCallback, OnPatternDetach(persistentId)).Times(::testing::AtLeast(1));
-    session_->persistentId_ = persistentId;
-    session_->SetAttachState(true);
-    session_->SetAttachState(false);
-    session_->RegisterDetachCallback(detachCallback);
-    Mock::VerifyAndClearExpectations(&detachCallback);
 }
 
 /**

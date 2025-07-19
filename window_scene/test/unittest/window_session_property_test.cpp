@@ -1432,6 +1432,49 @@ HWTEST_F(WindowSessionPropertyTest, SetSubWindowZLevel, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetWindowAnchorInfo
+ * @tc.desc: GetWindowAnchorInfo Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, GetWindowAnchorInfo, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    WindowAnchorInfo anchorInfo = { true, WindowAnchor::TOP_START, 0, 0 };
+    property->windowAnchorInfo_ = anchorInfo;
+    EXPECT_EQ(anchorInfo, property->GetWindowAnchorInfo());
+}
+
+/**
+ * @tc.name: SetWindowAnchorInfo
+ * @tc.desc: SetWindowAnchorInfo Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetWindowAnchorInfo, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    WindowAnchorInfo anchorInfo = { true, WindowAnchor::TOP_START, 0, 0 };
+    property->SetWindowAnchorInfo(anchorInfo);
+    EXPECT_EQ(anchorInfo, property->windowAnchorInfo_);
+}
+
+/**
+ * @tc.name: UnmarshallingWindowAnchorInfo
+ * @tc.desc: UnmarshallingWindowAnchorInfo Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, UnmarshallingWindowAnchorInfo, TestSize.Level1)
+{
+    Parcel parcel = Parcel();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    WindowSessionProperty windowSessionProperty;
+    windowSessionProperty.UnmarshallingWindowAnchorInfo(parcel, property);
+    EXPECT_EQ(property->GetTokenState(), false);
+}
+
+/**
  * @tc.name: GetZIndex
  * @tc.desc: GetZIndex Test
  * @tc.type: FUNC

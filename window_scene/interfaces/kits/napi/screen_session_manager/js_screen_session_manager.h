@@ -106,6 +106,7 @@ private:
     std::shared_ptr<NativeReference> screenConnectionCallback_;
     std::shared_ptr<NativeReference> shutdownCallback_;
     napi_env env_;
+    std::map<uint64_t, napi_ref> jsScreenSessionMap_;
 };
 } // namespace OHOS::Rosen
 

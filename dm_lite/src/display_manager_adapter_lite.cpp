@@ -97,8 +97,29 @@ sptr<DisplayInfo> DisplayManagerAdapterLite::GetDefaultDisplayInfo()
     return displayManagerServiceProxy_->GetDefaultDisplayInfo();
 }
 
+bool DisplayManagerAdapterLite::IsScreenLessDevice()
+{
+#ifdef SCREENLESS_ENABLE
+    return true;
+#else
+    return false;
+#endif
+}
+
+bool ScreenManagerAdapterLite::IsScreenLessDevice()
+{
+#ifdef SCREENLESS_ENABLE
+    return true;
+#else
+    return false;
+#endif
+}
+
 bool DisplayManagerAdapterLite::IsFoldable()
 {
+    if (IsScreenLessDevice()) {
+        return false;
+    }
     INIT_PROXY_CHECK_RETURN(false);
 
     return displayManagerServiceProxy_->IsFoldable();
@@ -151,6 +172,9 @@ sptr<CutoutInfo> DisplayManagerAdapterLite::GetCutoutInfo(DisplayId displayId)
  */
 bool DisplayManagerAdapterLite::WakeUpBegin(PowerStateChangeReason reason)
 {
+    if (IsScreenLessDevice()) {
+        return true;
+    }
     INIT_PROXY_CHECK_RETURN(false);
 
     return displayManagerServiceProxy_->WakeUpBegin(reason);
@@ -158,6 +182,9 @@ bool DisplayManagerAdapterLite::WakeUpBegin(PowerStateChangeReason reason)
 
 bool DisplayManagerAdapterLite::WakeUpEnd()
 {
+    if (IsScreenLessDevice()) {
+        return true;
+    }
     INIT_PROXY_CHECK_RETURN(false);
 
     return displayManagerServiceProxy_->WakeUpEnd();
@@ -165,6 +192,9 @@ bool DisplayManagerAdapterLite::WakeUpEnd()
 
 bool DisplayManagerAdapterLite::SuspendBegin(PowerStateChangeReason reason)
 {
+    if (IsScreenLessDevice()) {
+        return true;
+    }
     INIT_PROXY_CHECK_RETURN(false);
 
     return displayManagerServiceProxy_->SuspendBegin(reason);
@@ -172,6 +202,9 @@ bool DisplayManagerAdapterLite::SuspendBegin(PowerStateChangeReason reason)
 
 bool DisplayManagerAdapterLite::SuspendEnd()
 {
+    if (IsScreenLessDevice()) {
+        return true;
+    }
     INIT_PROXY_CHECK_RETURN(false);
 
     return displayManagerServiceProxy_->SuspendEnd();
@@ -179,6 +212,9 @@ bool DisplayManagerAdapterLite::SuspendEnd()
 
 ScreenId DisplayManagerAdapterLite::GetInternalScreenId()
 {
+    if (IsScreenLessDevice()) {
+        return 0;
+    }
     INIT_PROXY_CHECK_RETURN(false);
 
     return displayManagerServiceProxy_->GetInternalScreenId();
@@ -187,6 +223,9 @@ ScreenId DisplayManagerAdapterLite::GetInternalScreenId()
 bool DisplayManagerAdapterLite::SetScreenPowerById(ScreenId screenId, ScreenPowerState state,
     PowerStateChangeReason reason)
 {
+    if (IsScreenLessDevice()) {
+        return true;
+    }
     INIT_PROXY_CHECK_RETURN(false);
     
     return displayManagerServiceProxy_->SetScreenPowerById(screenId, state, reason);
@@ -194,6 +233,9 @@ bool DisplayManagerAdapterLite::SetScreenPowerById(ScreenId screenId, ScreenPowe
 
 bool DisplayManagerAdapterLite::SetDisplayState(DisplayState state)
 {
+    if (IsScreenLessDevice()) {
+        return true;
+    }
     INIT_PROXY_CHECK_RETURN(false);
 
     return displayManagerServiceProxy_->SetDisplayState(state);
@@ -208,6 +250,9 @@ DisplayState DisplayManagerAdapterLite::GetDisplayState(DisplayId displayId)
 
 bool DisplayManagerAdapterLite::TryToCancelScreenOff()
 {
+    if (IsScreenLessDevice()) {
+        return true;
+    }
     INIT_PROXY_CHECK_RETURN(false);
 
     return displayManagerServiceProxy_->TryToCancelScreenOff();
@@ -215,6 +260,9 @@ bool DisplayManagerAdapterLite::TryToCancelScreenOff()
 
 bool DisplayManagerAdapterLite::SetScreenBrightness(uint64_t screenId, uint32_t level)
 {
+    if (IsScreenLessDevice()) {
+        return true;
+    }
     INIT_PROXY_CHECK_RETURN(false);
 
     return displayManagerServiceProxy_->SetScreenBrightness(screenId, level);
@@ -222,6 +270,9 @@ bool DisplayManagerAdapterLite::SetScreenBrightness(uint64_t screenId, uint32_t 
 
 uint32_t DisplayManagerAdapterLite::GetScreenBrightness(uint64_t screenId)
 {
+    if (IsScreenLessDevice()) {
+        return 0;
+    }
     INIT_PROXY_CHECK_RETURN(false);
 
     return displayManagerServiceProxy_->GetScreenBrightness(screenId);
@@ -266,6 +317,9 @@ sptr<ScreenInfo> ScreenManagerAdapterLite::GetScreenInfo(ScreenId screenId)
 bool ScreenManagerAdapterLite::SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state,
     PowerStateChangeReason reason)
 {
+    if (IsScreenLessDevice()) {
+        return true;
+    }
     INIT_PROXY_CHECK_RETURN(false);
 
     return displayManagerServiceProxy_->SetSpecifiedScreenPower(screenId, state, reason);
@@ -273,6 +327,9 @@ bool ScreenManagerAdapterLite::SetSpecifiedScreenPower(ScreenId screenId, Screen
 
 bool ScreenManagerAdapterLite::SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason)
 {
+    if (IsScreenLessDevice()) {
+        return true;
+    }
     INIT_PROXY_CHECK_RETURN(false);
 
     return displayManagerServiceProxy_->SetScreenPowerForAll(state, reason);
@@ -280,6 +337,9 @@ bool ScreenManagerAdapterLite::SetScreenPowerForAll(ScreenPowerState state, Powe
 
 ScreenPowerState ScreenManagerAdapterLite::GetScreenPower(ScreenId dmsScreenId)
 {
+    if (IsScreenLessDevice()) {
+        return ScreenPowerState::POWER_STAND_BY;
+    }
     INIT_PROXY_CHECK_RETURN(ScreenPowerState::INVALID_STATE);
 
     return displayManagerServiceProxy_->GetScreenPower(dmsScreenId);
@@ -287,6 +347,9 @@ ScreenPowerState ScreenManagerAdapterLite::GetScreenPower(ScreenId dmsScreenId)
 
 ScreenPowerState ScreenManagerAdapterLite::GetScreenPower()
 {
+    if (IsScreenLessDevice()) {
+        return ScreenPowerState::POWER_STAND_BY;
+    }
     INIT_PROXY_CHECK_RETURN(ScreenPowerState::INVALID_STATE);
 
     return displayManagerServiceProxy_->GetScreenPower();
@@ -356,5 +419,12 @@ bool DisplayManagerAdapterLite::GetKeyboardState()
     INIT_PROXY_CHECK_RETURN(false);
 
     return displayManagerServiceProxy_->GetKeyboardState();
+}
+
+bool ScreenManagerAdapterLite::SynchronizePowerStatus(ScreenPowerState state)
+{
+    INIT_PROXY_CHECK_RETURN(false);
+
+    return displayManagerServiceProxy_->SynchronizePowerStatus(state);
 }
 } // namespace OHOS::Rosen

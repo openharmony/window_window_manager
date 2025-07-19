@@ -215,7 +215,8 @@ sptr<DisplayInfo> Display::GetDisplayInfoWithCache() const
 
 sptr<CutoutInfo> Display::GetCutoutInfo() const
 {
-    return SingletonContainer::Get<DisplayManagerAdapter>().GetCutoutInfo(GetId());
+    return SingletonContainer::Get<DisplayManagerAdapter>().GetCutoutInfo(GetId(), GetWidth(),
+                                                                          GetHeight(), GetRotation());
 }
 
 DMError Display::HasImmersiveWindow(bool& immersive)
@@ -243,4 +244,8 @@ DMError Display::GetDisplayCapability(std::string& capabilitInfo) const
     return SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayCapability(capabilitInfo);
 }
 
+DMError Display::GetLiveCreaseRegion(FoldCreaseRegion& region) const
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().GetLiveCreaseRegion(region);
+}
 } // namespace OHOS::Rosen

@@ -26,6 +26,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
+    constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
     std::string g_errLog;
     void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
         const char *msg)
@@ -57,9 +58,15 @@ public:
 };
 class ScreenSessionTest : public testing::Test {
   public:
+    void TearDown() override;
     ScreenSessionTest() {}
     ~ScreenSessionTest() {}
 };
+
+void ScreenSessionTest::TearDown()
+{
+    usleep(SLEEP_TIME_IN_US);
+}
 
 namespace {
 
@@ -2783,6 +2790,122 @@ HWTEST_F(ScreenSessionTest, CalcDeviceOrientation05, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CalcDeviceOrientationWithBounds01
+ * @tc.desc: Test when rotation is ROTATION_0 then CalcDeviceOrientationWithBounds returns PORTRAIT
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, CalcDeviceOrientationWithBounds01, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    RRect bounds;
+    bounds.rect_.width_ = 1344;
+    bounds.rect_.height_ = 2772;
+    auto result = session->CalcDeviceOrientationWithBounds(Rotation::ROTATION_0, FoldDisplayMode::FULL, bounds);
+    ASSERT_EQ(result, DisplayOrientation::PORTRAIT);
+}
+ 
+/**
+ * @tc.name: CalcDeviceOrientationWithBounds02
+ * @tc.desc: Test when rotation is ROTATION_90 then CalcDeviceOrientationWithBounds returns LANDSCAPE
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, CalcDeviceOrientationWithBounds02, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    RRect bounds;
+    bounds.rect_.width_ = 1344;
+    bounds.rect_.height_ = 2772;
+    auto result = session->CalcDeviceOrientationWithBounds(Rotation::ROTATION_90, FoldDisplayMode::FULL, bounds);
+    ASSERT_EQ(result, DisplayOrientation::LANDSCAPE);
+}
+ 
+/**
+ * @tc.name: CalcDeviceOrientationWithBounds03
+ * @tc.desc: Test when rotation is ROTATION_180 then CalcDeviceOrientationWithBounds returns PORTRAIT_INVERTED
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, CalcDeviceOrientationWithBounds03, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    RRect bounds;
+    bounds.rect_.width_ = 1344;
+    bounds.rect_.height_ = 2772;
+    auto result = session->CalcDeviceOrientationWithBounds(Rotation::ROTATION_180, FoldDisplayMode::FULL, bounds);
+    ASSERT_EQ(result, DisplayOrientation::PORTRAIT_INVERTED);
+}
+ 
+/**
+ * @tc.name: CalcDeviceOrientationWithBounds04
+ * @tc.desc: Test when rotation is ROTATION_270 then CalcDeviceOrientationWithBounds returns LANDSCAPE_INVERTED
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, CalcDeviceOrientationWithBounds04, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    RRect bounds;
+    bounds.rect_.width_ = 1344;
+    bounds.rect_.height_ = 2772;
+    auto result = session->CalcDeviceOrientationWithBounds(Rotation::ROTATION_270, FoldDisplayMode::FULL, bounds);
+    ASSERT_EQ(result, DisplayOrientation::LANDSCAPE_INVERTED);
+}
+ 
+/**
+ * @tc.name: CalcDeviceOrientationWithBounds05
+ * @tc.desc: Test when rotation is unknown then CalcDeviceOrientationWithBounds returns UNKNOWN
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, CalcDeviceOrientationWithBounds05, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    RRect bounds;
+    bounds.rect_.width_ = 1344;
+    bounds.rect_.height_ = 2772;
+    auto result = session->CalcDeviceOrientationWithBounds(static_cast<Rotation>(100), FoldDisplayMode::FULL, bounds);
+    ASSERT_EQ(result, DisplayOrientation::UNKNOWN);
+}
+ 
+/**
+ * @tc.name: CalcDeviceOrientationWithBounds06
+ * @tc.desc: Test when foldDisplayMode is GLOBAL_FULL
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, CalcDeviceOrientationWithBounds06, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    RRect bounds;
+    bounds.rect_.width_ = 1344;
+    bounds.rect_.height_ = 2772;
+    auto result = session->CalcDeviceOrientationWithBounds(Rotation::ROTATION_0, FoldDisplayMode::GLOBAL_FULL, bounds);
+    ASSERT_EQ(result, DisplayOrientation::LANDSCAPE_INVERTED);
+}
+ 
+/**
+ * @tc.name: CalcDeviceOrientationWithBounds07
+ * @tc.desc: Test CalcDeviceOrientationWithBounds
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, CalcDeviceOrientationWithBounds07, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    RRect bounds;
+    bounds.rect_.width_ = 2772;
+    bounds.rect_.height_ = 1344;
+    auto result = session->CalcDeviceOrientationWithBounds(Rotation::ROTATION_0, FoldDisplayMode::UNKNOWN, bounds);
+    EXPECT_EQ(result, DisplayOrientation::LANDSCAPE);
+    bounds.rect_.width_ = 1344;
+    bounds.rect_.height_ = 2772;
+    result = session->CalcDeviceOrientationWithBounds(Rotation::ROTATION_90, FoldDisplayMode::UNKNOWN, bounds);
+    EXPECT_EQ(result, DisplayOrientation::PORTRAIT_INVERTED);
+}
+
+/**
  * @tc.name: GetIsPhysicalMirrorSwitch01
  * @tc.desc: Test when isPhysicalMirrorSwitch is true, GetIsPhysicalMirrorSwitch should return true
  * @tc.type: FUNC
@@ -3090,22 +3213,6 @@ HWTEST_F(ScreenSessionTest, SecondaryReflexionChange, TestSize.Level1)
     session->SecondaryReflexionChange(mainScreenId, isSecondaryReflexion);
     EXPECT_EQ(true, session->screenChangeListenerList_.empty());
     EXPECT_TRUE(g_errLog.find("screenChangeListenerList is empty.") != std::string::npos);
-}
-
-/**
- * @tc.name: SetFrameGravity
- * @tc.desc: run in for
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionTest, SetFrameGravity, TestSize.Level1)
-{
-    LOG_SetCallback(MyLogCallback);
-    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
-    EXPECT_NE(nullptr, session);
-    session->displayNode_  = nullptr;
-    Gravity gravity = Rosen::Gravity::RESIZE;
-    session->SetFrameGravity(gravity);
-    EXPECT_TRUE(g_errLog.find("displayNode_ is null, setFrameGravity failed") != std::string::npos);
 }
 
 /**
@@ -3440,7 +3547,10 @@ HWTEST_F(ScreenSessionTest, UpdateRotationOrientation, TestSize.Level1)
     ASSERT_NE(session, nullptr);
     int rotation = 0;
     FoldDisplayMode foldDisplayMode = FoldDisplayMode::MAIN;
-    session->UpdateRotationOrientation(rotation, foldDisplayMode);
+    RRect bounds;
+    bounds.rect_.width_ = 1344;
+    bounds.rect_.height_ = 2772;
+    session->UpdateRotationOrientation(rotation, foldDisplayMode, bounds);
     ScreenProperty screenProperty = session->GetScreenProperty();
     EXPECT_EQ(screenProperty.deviceRotation_, Rotation::ROTATION_0);
 }
@@ -3876,6 +3986,38 @@ HWTEST_F(ScreenSessionTest, GetChildCount, TestSize.Level1)
     EXPECT_EQ(res, true);
     EXPECT_NE(0, sessionGroup.GetChildCount());
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetChildCount end";
+}
+
+/**
+ * @tc.name: SetForceCloseHdr
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetForceCloseHdr, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetForceCloseHdr start";
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    session->SetForceCloseHdr(true);
+    session->SetForceCloseHdr(false);
+    EXPECT_TRUE(g_errLog.find("Start get screen status.") != std::string::npos);
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetForceCloseHdr end";
+}
+
+/**
+ * @tc.name: SetForceCloseHdr01
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetForceCloseHdr01, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetForceCloseHdr start";
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    session->SetForceCloseHdr(false);
+    session->SetForceCloseHdr(false);
+    EXPECT_TRUE(g_errLog.find("Start get screen status.") != std::string::npos);
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetForceCloseHdr end";
 }
 
 /**

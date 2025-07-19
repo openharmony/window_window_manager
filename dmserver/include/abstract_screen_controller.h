@@ -76,6 +76,7 @@ public:
     bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason, bool needToNotify = true);
     ScreenPowerState GetScreenPower(ScreenId dmsScreenId) const;
     DMError SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio);
+    bool SetVirtualScreenAsDefault(ScreenId screenId);
 
     // colorspace, gamut
     DMError GetScreenSupportedColorGamuts(ScreenId screenId, std::vector<ScreenColorGamut>& colorGamuts);

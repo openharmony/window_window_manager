@@ -206,6 +206,196 @@ HWTEST_F(DisplayManagerAdapterLiteTest, GetPhysicalScreenIds, TestSize.Level1)
     auto ret = SingletonContainer::Get<ScreenManagerAdapterLite>().GetPhysicalScreenIds(screenIds);
     EXPECT_NE(ret, DMError::DM_OK);
 }
+
+/**
+ * @tc.name: SetSpecifiedScreenPowerPiling
+ * @tc.desc: test piling success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterLiteTest, SetSpecifiedScreenPowerPiling, TestSize.Level1)
+{
+#define SCREENLESS_ENABLE
+    uint64_t screenId = 0;
+    auto ret = SingletonContainer::Get<ScreenManagerAdapterLite>().SetSpecifiedScreenPower(screenId,
+        ScreenPowerState::POWER_ON, PowerStateChangeReason::POWER_BUTTON);
+    EXPECT_TRUE(ret);
+#undef SCREENLESS_ENABLE
+}
+
+/**
+ * @tc.name: GetScreenPowerPiling
+ * @tc.desc: test piling success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterLiteTest, GetScreenPowerPiling, TestSize.Level1)
+{
+#define SCREENLESS_ENABLE
+    uint64_t screenId = 0;
+    auto ret = SingletonContainer::Get<ScreenManagerAdapterLite>().GetScreenPower(screenId);
+    EXPECT_EQ(ret, ScreenPowerState::POWER_STAND_BY);
+#undef SCREENLESS_ENABLE
+}
+
+/**
+ * @tc.name: SetScreenBrightnessPiling
+ * @tc.desc: test piling success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterLiteTest, SetScreenBrightnessPiling, TestSize.Level1)
+{
+#define SCREENLESS_ENABLE
+    uint64_t screenId = 0;
+    auto ret = SingletonContainer::Get<DisplayManagerAdapterLite>().SetScreenBrightness(screenId, 0);
+    EXPECT_TRUE(ret);
+#undef SCREENLESS_ENABLE
+}
+
+/**
+ * @tc.name: SetDisplayStatePiling
+ * @tc.desc: test piling success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterLiteTest, SetDisplayStatePiling, TestSize.Level1)
+{
+#define SCREENLESS_ENABLE
+    auto ret = SingletonContainer::Get<DisplayManagerAdapterLite>().SetDisplayState(DisplayState::ON);
+    EXPECT_TRUE(ret);
+#undef SCREENLESS_ENABLE
+}
+
+/**
+ * @tc.name: SetScreenPowerForAllPiling
+ * @tc.desc: test piling success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterLiteTest, SetScreenPowerForAllPiling, TestSize.Level1)
+{
+#define SCREENLESS_ENABLE
+    auto ret = SingletonContainer::Get<ScreenManagerAdapterLite>().SetScreenPowerForAll(ScreenPowerState::POWER_ON,
+        PowerStateChangeReason::POWER_BUTTON);
+    EXPECT_TRUE(ret);
+#undef SCREENLESS_ENABLE
+}
+
+/**
+ * @tc.name: SuspendEndPiling
+ * @tc.desc: test piling success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterLiteTest, SuspendEndPiling, TestSize.Level1)
+{
+#define SCREENLESS_ENABLE
+    auto ret = SingletonContainer::Get<DisplayManagerAdapterLite>().SuspendEnd();
+    EXPECT_TRUE(ret);
+#undef SCREENLESS_ENABLE
+}
+
+/**
+ * @tc.name: SetScreenPowerByIdPiling
+ * @tc.desc: test piling success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterLiteTest, SetScreenPowerByIdPiling, TestSize.Level1)
+{
+#define SCREENLESS_ENABLE
+    uint64_t screenId = 0;
+    auto ret = SingletonContainer::Get<DisplayManagerAdapterLite>().SetScreenPowerById(screenId,
+        ScreenPowerState::POWER_ON, PowerStateChangeReason::POWER_BUTTON);
+    EXPECT_TRUE(ret);
+#undef SCREENLESS_ENABLE
+}
+
+/**
+ * @tc.name: SuspendBeginPiling
+ * @tc.desc: test piling success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterLiteTest, SuspendBeginPiling, TestSize.Level1)
+{
+#define SCREENLESS_ENABLE
+    auto ret = SingletonContainer::Get<DisplayManagerAdapterLite>().SuspendBegin(PowerStateChangeReason::POWER_BUTTON);
+    EXPECT_TRUE(ret);
+#undef SCREENLESS_ENABLE
+}
+
+/**
+ * @tc.name: WakeUpEndPiling
+ * @tc.desc: test piling success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterLiteTest, WakeUpEndPiling, TestSize.Level1)
+{
+#define SCREENLESS_ENABLE
+    auto ret = SingletonContainer::Get<DisplayManagerAdapterLite>().WakeUpEnd();
+    EXPECT_TRUE(ret);
+#undef SCREENLESS_ENABLE
+}
+
+/**
+ * @tc.name: GetScreenBrightnessPiling
+ * @tc.desc: test piling success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterLiteTest, GetScreenBrightnessPiling, TestSize.Level1)
+{
+#define SCREENLESS_ENABLE
+    auto ret = SingletonContainer::Get<DisplayManagerAdapterLite>().GetScreenBrightness(0);
+    EXPECT_EQ(ret, 0);
+#undef SCREENLESS_ENABLE
+}
+
+/**
+ * @tc.name: TryToCancelScreenOffPiling
+ * @tc.desc: test piling success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterLiteTest, TryToCancelScreenOffPiling, TestSize.Level1)
+{
+#define SCREENLESS_ENABLE
+    auto ret = SingletonContainer::Get<DisplayManagerAdapterLite>().TryToCancelScreenOff();
+    EXPECT_TRUE(ret);
+#undef SCREENLESS_ENABLE
+}
+
+/**
+ * @tc.name: IsFoldablePiling
+ * @tc.desc: test piling success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterLiteTest, IsFoldablePiling, TestSize.Level1)
+{
+#define SCREENLESS_ENABLE
+    auto ret = SingletonContainer::Get<DisplayManagerAdapterLite>().IsFoldable();
+    EXPECT_FALSE(ret);
+#undef SCREENLESS_ENABLE
+}
+
+
+/**
+ * @tc.name: GetInternalScreenIdPiling
+ * @tc.desc: test piling success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterLiteTest, GetInternalScreenIdPiling, TestSize.Level1)
+{
+#define SCREENLESS_ENABLE
+    auto ret = SingletonContainer::Get<DisplayManagerAdapterLite>().GetInternalScreenId();
+    EXPECT_EQ(ret, 0);
+#undef SCREENLESS_ENABLE
+}
+
+/**
+ * @tc.name: WakeUpBeginPiling
+ * @tc.desc: test piling success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterLiteTest, WakeUpBeginPiling, TestSize.Level1)
+{
+#define SCREENLESS_ENABLE
+    auto ret = SingletonContainer::Get<DisplayManagerAdapterLite>().WakeUpBegin(PowerStateChangeReason::POWER_BUTTON);
+    EXPECT_TRUE(ret);
+#undef SCREENLESS_ENABLE
+}
 }
 }
 }

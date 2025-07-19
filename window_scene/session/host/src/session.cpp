@@ -53,8 +53,6 @@ constexpr float INNER_BORDER_VP = 5.0f;
 constexpr float OUTSIDE_BORDER_VP = 4.0f;
 constexpr float INNER_ANGLE_VP = 16.0f;
 constexpr uint32_t MAX_LIFE_CYCLE_TASK_IN_QUEUE = 15;
-constexpr uint32_t COLOR_WHITE = 0xffffffff;
-constexpr uint32_t COLOR_BLACK = 0xff000000;
 constexpr int64_t LIFE_CYCLE_TASK_EXPIRED_TIME_LIMIT = 350;
 static bool g_enableForceUIFirst = system::GetParameter("window.forceUIFirst.enabled", "1") == "1";
 constexpr int64_t STATE_DETECT_DELAYTIME = 3 * 1000;
@@ -1273,7 +1271,7 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
         NotifyClientToUpdateRect("Connect", nullptr);
 
     // Window Layout Global Coordinate System
-    auto globalDisplayRect = ComputeGlobalDisplayRect();
+    auto globalDisplayRect = SessionCoordinateHelper::RelativeToGlobalDisplayRect(GetScreenId(), GetSessionRect());
     UpdateGlobalDisplayRect(globalDisplayRect, SizeChangeReason::UNDEFINED);
 
     EditSessionInfo().disableDelegator = property->GetIsAbilityHookOff();
@@ -1423,6 +1421,11 @@ WSError Session::Foreground(sptr<WindowSessionProperty> property, bool isFromCli
 
     isTerminating_ = false;
     PostSpecificSessionLifeCycleTimeoutTask(ATTACH_EVENT_NAME);
+
+    // Window Layout Global Coordinate System
+    // When the window enters foreground, notify the client to update GlobalDisplayRect once,
+    // since background windows skip this notification to avoid IPC wake-up and power issues.
+    NotifyClientToUpdateGlobalDisplayRect(GetGlobalDisplayRect(), SizeChangeReason::UNDEFINED);
     return WSError::WS_OK;
 }
 
@@ -2680,7 +2683,7 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
         return;
     }
     auto key = GetSessionStatus();
-    auto rotate = GetWindowOrientation();
+    auto rotate = WSSnapshotHelper::GetDisplayOrientation(currentRotation_);
     if (persistentPixelMap) {
         key = defaultStatus;
         rotate = DisplayOrientation::PORTRAIT;
@@ -2717,7 +2720,7 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
             TLOGNE(WmsLogTag::WMS_PATTERN, "scenePersistence_ is null");
             return;
         }
-        if (session->freeMultiWindow_) {
+        if (session->freeMultiWindow_.load()) {
             session->scenePersistence_->SetHasSnapshotFreeMultiWindow(true);
             ScenePersistentStorage::Insert("Snapshot_" + std::to_string(session->persistentId_), true,
                 ScenePersistentStorageType::MAXIMIZE_STATE);
@@ -2734,7 +2737,7 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
             removeSnapshotCallback = session->removeSnapshotCallback_;
         }
         session->scenePersistence_->SaveSnapshot(pixelMap, removeSnapshotCallback, key, rotate,
-            session->freeMultiWindow_);
+            session->freeMultiWindow_.load());
         if (updateSnapshot) {
             session->SetExitSplitOnBackground(false);
             session->scenePersistence_->ClearSnapshot(key);
@@ -2754,17 +2757,17 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
 void Session::SetFreeMultiWindow()
 {
     if (GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
-        freeMultiWindow_ = false;
+        freeMultiWindow_.store(false);
     } else {
-        freeMultiWindow_ = true;
+        freeMultiWindow_.store(true);
     }
 }
 
 void Session::DeleteHasSnapshot()
 {
-    for (uint32_t screen = SCREEN_UNKNOWN; screen < SCREEN_COUNT; screen++) {
+    for (uint32_t screenStatus = SCREEN_UNKNOWN; screenStatus < SCREEN_COUNT; screenStatus++) {
         for (uint32_t orientation = SNAPSHOT_PORTRAIT; orientation < ORIENTATION_COUNT; orientation++) {
-            DeleteHasSnapshot({ screen, orientation });
+            DeleteHasSnapshot({ screenStatus, orientation });
         }
     }
     DeleteHasSnapshotFreeMultiWindow();
@@ -2815,9 +2818,9 @@ bool Session::HasSnapshotFreeMultiWindow()
 
 bool Session::HasSnapshot()
 {
-    for (uint32_t screen = SCREEN_UNKNOWN; screen < SCREEN_COUNT; screen++) {
+    for (uint32_t screenStatus = SCREEN_UNKNOWN; screenStatus < SCREEN_COUNT; screenStatus++) {
         for (uint32_t orientation = SNAPSHOT_PORTRAIT; orientation < ORIENTATION_COUNT; orientation++) {
-            if (HasSnapshot({ screen, orientation })) {
+            if (HasSnapshot({ screenStatus, orientation })) {
                 return true;
             }
         }
@@ -2870,9 +2873,6 @@ SnapshotStatus Session::GetSessionStatus() const
         snapshotScreen = WSSnapshotHelper::GetScreenStatus();
     }
     uint32_t orientation = WSSnapshotHelper::GetOrientation(currentRotation_);
-    if (snapshotScreen == SCREEN_UNKNOWN) {
-        orientation = (orientation + 1) % ORIENTATION_COUNT;
-    }
     return std::make_pair(snapshotScreen, orientation);
 }
 
@@ -2889,7 +2889,12 @@ DisplayOrientation Session::GetWindowOrientation() const
     }
     auto screenProperty = screenSession->GetScreenProperty();
     DisplayOrientation displayOrientation = screenProperty.GetDisplayOrientation();
-    return displayOrientation;
+    auto windowOrientation = static_cast<uint32_t>(displayOrientation);
+    auto snapshotScreen = WSSnapshotHelper::GetScreenStatus();
+    if (snapshotScreen == SCREEN_UNKNOWN) {
+        windowOrientation = (windowOrientation + SECONDARY_EXPAND_OFFSET) % ROTATION_COUNT;
+    }
+    return static_cast<DisplayOrientation>(windowOrientation);
 }
 
 uint32_t Session::GetLastOrientation() const
@@ -2897,12 +2902,7 @@ uint32_t Session::GetLastOrientation() const
     if (!SupportSnapshotAllSessionStatus()) {
         return SNAPSHOT_PORTRAIT;
     }
-    auto snapshotScreen = WSSnapshotHelper::GetScreenStatus();
-    auto rotation = currentRotation_;
-    if (snapshotScreen == SCREEN_UNKNOWN) {
-        rotation = (rotation + LANDSCAPE_INVERTED_ANGLE) % ROTATION_ANGLE;
-    }
-    return static_cast<uint32_t>(WSSnapshotHelper::GetDisplayOrientation(rotation));
+    return static_cast<uint32_t>(WSSnapshotHelper::GetDisplayOrientation(currentRotation_));
 }
 
 void Session::SetSessionStateChangeListenser(const NotifySessionStateChangeFunc& func)
@@ -2935,6 +2935,19 @@ void Session::SetBufferAvailableChangeListener(const NotifyBufferAvailableChange
         bufferAvailableChangeFunc_(bufferAvailable_, false);
     }
     WLOGFD("SetBufferAvailableChangeListener, id: %{public}d", GetPersistentId());
+}
+
+bool Session::UpdateWindowModeSupportType(const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo)
+{
+    std::vector<AppExecFwk::SupportWindowMode> updateWindowModes =
+        ExtractSupportWindowModeFromMetaData(abilityInfo);
+    auto windowModeSupportType = WindowHelper::ConvertSupportModesToSupportType(updateWindowModes);
+    const uint32_t noType = 0;
+    if (windowModeSupportType != noType) {
+        GetSessionProperty()->SetWindowModeSupportType(windowModeSupportType);
+        return true;
+    }
+    return false;
 }
 
 void Session::SetAcquireRotateAnimationConfigFunc(const AcquireRotateAnimationConfigFunc& func)
@@ -3510,7 +3523,7 @@ void Session::RectCheckProcess()
         float curHeight = GetSessionRect().height_ / density;
         float ratio = GetAspectRatio();
         float actRatio = curWidth / curHeight;
-        if ((ratio != 0) && !NearEqual(ratio, actRatio)) {
+        if (!NearZero(ratio) && !NearEqual(ratio, actRatio)) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "RectCheck err ratio %{public}f != actRatio: %{public}f", ratio, actRatio);
             std::ostringstream oss;
             oss << " RectCheck err ratio ";
@@ -3544,6 +3557,15 @@ void Session::SetSessionRect(const WSRect& rect)
 /** @note @window.layout */
 WSRect Session::GetSessionRect() const
 {
+    return layoutController_->GetSessionRect();
+}
+
+/** @note @window.layout */
+WSRect Session::GetSessionScreenRelativeRect() const
+{
+    if (layoutController_->GetSizeChangeReason() == SizeChangeReason::DRAG_MOVE) {
+        return layoutController_->ConvertGlobalRectToRelative(layoutController_->GetSessionRect(), GetDisplayId());
+    }
     return layoutController_->GetSessionRect();
 }
 
@@ -4227,6 +4249,46 @@ void Session::NotifySessionInfoLockedStateChange(bool lockedState)
     }
 }
 
+std::vector<AppExecFwk::SupportWindowMode> Session::ExtractSupportWindowModeFromMetaData(
+    const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo)
+{
+    std::vector<AppExecFwk::SupportWindowMode> updateWindowModes = {};
+    if (abilityInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "id: %{public}d, abilityInfo is nullptr", GetPersistentId());
+        return updateWindowModes;
+    }
+    if (IsPcWindow() || systemConfig_.IsFreeMultiWindowMode()) {
+        auto metadata = abilityInfo->metadata;
+        for (const auto& item : metadata) {
+            if (item.name == "ohos.ability.window.supportWindowModeInFreeMultiWindow") {
+                updateWindowModes = ParseWindowModeFromMetaData(item.value);
+                return updateWindowModes;
+            }
+        }
+    }
+    if (updateWindowModes.empty()) {
+        updateWindowModes = abilityInfo->windowModes;
+    }
+    return updateWindowModes;
+}
+
+std::vector<AppExecFwk::SupportWindowMode> Session::ParseWindowModeFromMetaData(
+    const std::string& supportModesInFreeMultiWindow)
+{
+    static const std::unordered_map<std::string, AppExecFwk::SupportWindowMode> modeMap = {
+        {"fullscreen", AppExecFwk::SupportWindowMode::FULLSCREEN},
+        {"split", AppExecFwk::SupportWindowMode::SPLIT},
+        {"floating", AppExecFwk::SupportWindowMode::FLOATING}
+    };
+    std::vector<AppExecFwk::SupportWindowMode> updateWindowModes = {};
+    for (auto iter : modeMap) {
+        if (supportModesInFreeMultiWindow.find(iter.first) != std::string::npos) {
+            updateWindowModes.push_back(iter.second);
+        }
+    }
+    return updateWindowModes;
+}
+
 WSError Session::SwitchFreeMultiWindow(const SystemSessionConfig& config)
 {
     bool enable = config.freeMultiWindowEnable_;
@@ -4240,6 +4302,9 @@ WSError Session::SwitchFreeMultiWindow(const SystemSessionConfig& config)
     if (!sessionStage_) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "sessionStage_ is null");
         return WSError::WS_ERROR_NULLPTR;
+    }
+    if (!UpdateWindowModeSupportType(sessionInfo_.abilityInfo)) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "not update WindowModeSupportType");
     }
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "windowId: %{public}d enable: %{public}d defaultWindowMode: %{public}d",
         GetPersistentId(), enable, systemConfig_.defaultWindowMode_);
@@ -4375,8 +4440,8 @@ std::shared_ptr<Media::PixelMap> Session::GetSnapshotPixelMap(const float oriSca
         return nullptr;
     }
     auto key = GetWindowStatus();
-    return scenePersistence_->IsSavingSnapshot(key, freeMultiWindow_) ? GetSnapshot() :
-        scenePersistence_->GetLocalSnapshotPixelMap(oriScale, newScale, key, freeMultiWindow_);
+    return scenePersistence_->IsSavingSnapshot(key, freeMultiWindow_.load()) ? GetSnapshot() :
+        scenePersistence_->GetLocalSnapshotPixelMap(oriScale, newScale, key, freeMultiWindow_.load());
 }
 
 bool Session::IsVisibleForeground() const
@@ -4659,32 +4724,31 @@ WSRect Session::GetGlobalDisplayRect() const
     return rect;
 }
 
-WSRect Session::ComputeGlobalDisplayRect() const
-{
-    // In multi-screen drag-and-move scenarios, the global rect is relative to the top-left
-    // corner of the bounding rectangle of all screens. In other cases, it is relative to
-    // the top-left corner of its associated screen.
-    // The method GetSessionGlobalRectInMultiScreen abstracts this difference and always
-    // returns the window's rect relative to its screen, regardless of the scenario.
-    WSRect relativeRect = GetSessionGlobalRectInMultiScreen();
-    return SessionCoordinateHelper::RelativeToGlobalDisplayRect(GetDisplayId(), relativeRect);
-}
-
 WSError Session::UpdateGlobalDisplayRect(const WSRect& rect, SizeChangeReason reason)
 {
-    WSRect curGlobalDisplayRect = GetGlobalDisplayRect();
-    TLOGD(WmsLogTag::WMS_LAYOUT,
-        "windowId: %{public}d, rect: %{public}s, reason: %{public}u, curGlobalDisplayRect: %{public}s",
-        GetPersistentId(), rect.ToString().c_str(), reason, curGlobalDisplayRect.ToString().c_str());
-    if (rect == curGlobalDisplayRect) {
+    const int32_t windowId = GetWindowId();
+    TLOGD(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, rect: %{public}s, reason: %{public}u",
+        windowId, rect.ToString().c_str(), reason);
+    if (rect == GetGlobalDisplayRect() && reason == globalDisplayRectSizeChangeReason_) {
+        TLOGD(WmsLogTag::WMS_LAYOUT,
+            "No change in rect or reason, windowId: %{public}d, rect: %{public}s, reason: %{public}u",
+            windowId, rect.ToString().c_str(), reason);
         return WSError::WS_DO_NOTHING;
     }
     SetGlobalDisplayRect(rect);
-    // Notify client if necessary
-    if (sessionStage_ != nullptr) {
-        sessionStage_->UpdateGlobalDisplayRectFromServer(rect, reason);
-    }
+    globalDisplayRectSizeChangeReason_ = reason;
+    NotifyClientToUpdateGlobalDisplayRect(rect, reason);
     return WSError::WS_OK;
+}
+
+WSError Session::NotifyClientToUpdateGlobalDisplayRect(const WSRect& rect, SizeChangeReason reason)
+{
+    // Skip notifying client when the window is not in the foreground to avoid waking up
+    // the application via IPC, which may cause unnecessary power consumption.
+    if (!sessionStage_ || !IsSessionForeground()) {
+        return WSError::WS_DO_NOTHING;
+    }
+    return sessionStage_->UpdateGlobalDisplayRectFromServer(rect, reason);
 }
 
 std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller)
@@ -4699,7 +4763,7 @@ std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller)
         rsUIContext_ = ScreenSessionManagerClient::GetInstance().GetRSUIContext(screenId);
         screenIdOfRSUIContext_ = screenId;
     }
-    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "%{public}s: %{public}s, sessionId: %{public}d, screenId:%{public}" PRIu64,
+    TLOGD(WmsLogTag::WMS_SCB, "%{public}s: %{public}s, sessionId: %{public}d, screenId:%{public}" PRIu64,
           caller, RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId(), screenId);
     return rsUIContext_;
 }

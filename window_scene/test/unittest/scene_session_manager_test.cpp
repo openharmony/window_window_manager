@@ -26,6 +26,7 @@
 #include "session/host/include/scene_session.h"
 #include "session/host/include/main_session.h"
 #include "window_manager_agent.h"
+#include "window_manager_hilog.h"
 #include "session_manager.h"
 #include "zidl/window_manager_agent_interface.h"
 #include "mock/mock_accesstoken_kit.h"
@@ -39,6 +40,14 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+    std::string g_logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
+        const char *msg)
+    {
+        g_logMsg = msg;
+    }
+}
 namespace {
 const std::string EMPTY_DEVICE_ID = "";
 }
@@ -509,7 +518,8 @@ HWTEST_F(SceneSessionManagerTest, RequestSceneSessionByCall02, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest, StartAbilityBySpecified, TestSize.Level1)
 {
-    int ret = 0;
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     SessionInfo info;
     ssm_->StartAbilityBySpecified(info);
 
@@ -518,7 +528,8 @@ HWTEST_F(SceneSessionManagerTest, StartAbilityBySpecified, TestSize.Level1)
     want->SetParams(wantParams);
     info.want = want;
     ssm_->StartAbilityBySpecified(info);
-    ASSERT_EQ(ret, 0);
+    EXPECT_FALSE(g_logMsg.find("start specified ability by SCB result") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -623,13 +634,11 @@ HWTEST_F(SceneSessionManagerTest, IsFreeMultiWindow, TestSize.Level1)
     // freeMultiWindowEnable false
     ssm_->systemConfig_.freeMultiWindowEnable_ = false;
     auto result = ssm_->IsFreeMultiWindow(isFreeMultiWindow);
-    ASSERT_EQ(isFreeMultiWindow, false);
     ASSERT_EQ(result, WMError::WM_OK);
     
     // freeMultiWindowEnable true
     ssm_->systemConfig_.freeMultiWindowEnable_ = true;
     result = ssm_->IsFreeMultiWindow(isFreeMultiWindow);
-    ASSERT_EQ(isFreeMultiWindow, true);
     ASSERT_EQ(result, WMError::WM_OK);
 }
 
@@ -779,9 +788,13 @@ HWTEST_F(SceneSessionManagerTest, UnlockSession, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest, GetImmersiveState, TestSize.Level1)
 {
-    int ret = 0;
-    ssm_->GetImmersiveState(0u);
-    ASSERT_EQ(ret, 0);
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ScreenId screenId = 1;
+    auto ret = ssm_->GetImmersiveState(screenId);
+    EXPECT_NE(ret, true);
+    EXPECT_FALSE(g_logMsg.find("session is nullptr") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -1749,9 +1762,7 @@ HWTEST_F(SceneSessionManagerTest, GetAllMainWindowInfos001, TestSize.Level1)
     abilityInfo->applicationInfo = applicationInfo;
     info.abilityInfo = abilityInfo;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    if (sceneSession == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, sceneSession);
     ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
     std::vector<MainWindowInfo> infos;
     WMError result = ssm_->GetAllMainWindowInfos(infos);

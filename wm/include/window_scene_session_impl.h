@@ -21,6 +21,8 @@
 
 namespace OHOS {
 namespace Rosen {
+using NotifyWindowRecoverStateChangeFunc = std::function<void(bool isSpecificSession,
+    const WindowRecoverState& state)>;
 
 class WindowSceneSessionImpl : public WindowSessionImpl {
 public:
@@ -346,6 +348,7 @@ protected:
      */
     WMError RecoverAndConnectSpecificSession();
     WMError RecoverAndReconnectSceneSession();
+    void RegisterWindowRecoverStateChangeListener();
 
 private:
     WMError DestroyInner(bool needNotifyServer);
@@ -378,7 +381,7 @@ private:
     bool CheckTouchSlop(int32_t pointerId, int32_t x, int32_t y, int32_t threshold);
     void IgnoreClickEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     bool HandlePointDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-        const MMI::PointerEvent::PointerItem& pointerItem, int32_t sourceType, float vpr, const WSRect& rect);
+        const MMI::PointerEvent::PointerItem& pointerItem);
     std::unique_ptr<Media::PixelMap> HandleWindowMask(const std::vector<std::vector<uint32_t>>& windowMask);
     void CalculateNewLimitsByLimits(
         WindowLimits& newLimits, WindowLimits& customizedLimits, float& virtualPixelRatio);
@@ -396,6 +399,10 @@ private:
      * Window Recover
      */
     void RegisterSessionRecoverListener(bool isSpecificSession);
+    void OnWindowRecoverStateChange(bool isSpecificSession, const WindowRecoverState& state);
+    void UpdateStartRecoverProperty(bool isSpecificSession);
+    void UpdateFinishRecoverProperty(bool isSpecificSession);
+    NotifyWindowRecoverStateChangeFunc windowRecoverStateChangeFunc_;
 
     /*
      * Window Layout
@@ -420,7 +427,6 @@ private:
     bool enableDefaultAnimation_ = true;
     sptr<IAnimationTransitionController> animationTransitionController_;
     uint32_t setSameSystembarPropertyCnt_ = 0;
-    std::atomic<bool> isDefaultDensityEnabled_ = false;
     std::atomic<uint32_t> getAvoidAreaCnt_ = 0;
     std::atomic<bool> enableImmersiveMode_ = false;
     bool titleHoverShowEnabled_ = true;
@@ -435,6 +441,7 @@ private:
     /*
      * Window Property
      */
+    WMError UpdateColorMode();
     void InitSystemSessionDragEnable();
     bool IsSystemDensityChanged(const sptr<DisplayInfo>& displayInfo);
     bool IsDefaultDensityEnabled();
@@ -473,6 +480,8 @@ private:
     bool CheckCanMoveWindowType();
     bool CheckCanMoveWindowTypeByDevice();
     bool CheckIsPcAppInPadFullScreenOnMobileWindowMode();
+    AreaType GetDragAreaByDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+        const MMI::PointerEvent::PointerItem& pointerItem);
 
     /*
      * PC Window
