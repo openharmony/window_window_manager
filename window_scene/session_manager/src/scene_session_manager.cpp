@@ -3184,9 +3184,10 @@ void SceneSessionManager::NotifyCollaboratorAfterStart(sptr<SceneSession>& scene
 
 bool SceneSessionManager::IsPcSceneSessionLifecycle(const sptr<SceneSession>& sceneSession)
 {
-    bool isPcAppInPad = sceneSession->GetSessionProperty()->GetIsPcAppInPad();
+    bool isPcAppInLargeScreenDevice = sceneSession->GetSessionProperty()->GetIsPcAppInPad();
     bool isAppSupportPhoneInPc = sceneSession->GetSessionProperty()->GetIsAppSupportPhoneInPc();
-    return (systemConfig_.backgroundswitch && !isAppSupportPhoneInPc) || (isPcAppInPad && !IsScreenLocked());
+    return (systemConfig_.backgroundswitch && !isAppSupportPhoneInPc) ||
+             (isPcAppInLargeScreenDevice && !IsScreenLocked() && !systemConfig_.IsPhoneWindow());
 }
 
 void SceneSessionManager::InitSnapshotCache()

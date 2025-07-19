@@ -107,7 +107,7 @@ public:
     void SetWindowMask(const std::shared_ptr<Media::PixelMap>& windowMask);
     void SetIsShaped(bool isShaped);
     void SetIsAppSupportPhoneInPc(bool isSupportPhone);
-    void SetIsPcAppInPad(bool isPcAppInPad);
+    void SetIsPcAppInPad(bool isPcAppInLargeScreenDevice);
     void SetIsAtomicService(bool isAtomicService);
     
     /*
@@ -490,7 +490,7 @@ private:
     static const std::map<uint64_t, HandlWritePropertyFunc> writeFuncMap_;
     static const std::map<uint64_t, HandlReadPropertyFunc> readFuncMap_;
     bool isAppSupportPhoneInPc_ = false;
-    bool isPcAppInPad_ = false;
+    bool isPcAppInLargeScreenDevice_ = false;
     mutable std::mutex compatibleModeMutex_;
     uint8_t backgroundAlpha_ = 0xff; // default alpha is opaque.
     mutable std::mutex atomicServiceMutex_;
