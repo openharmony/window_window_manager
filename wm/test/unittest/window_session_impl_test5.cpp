@@ -44,8 +44,8 @@ public:
     void TearDown() override;
 
 private:
-    static constexpr int32_t persistentIdOne = 1;
-    static constexpr int32_t persistentIdTwo = 2;
+    static constexpr int32_t PERSISTENT_ID_ONE = 1;
+    static constexpr int32_t PERSISTENT_ID_TWO = 2;
 };
 
 void WindowSessionImplTest5::SetUpTestCase() {}
@@ -1825,7 +1825,7 @@ HWTEST_F(WindowSessionImplTest5, SwitchSubWindow, Function | SmallTest | Level1)
     sptr<WindowSessionImpl> subWindow = sptr<WindowSessionImpl>::MakeSptr(subOption);
     ASSERT_NE(subWindow, nullptr);
     ASSERT_NE(subWindow->property_, nullptr);
-    subWindow->property_->SetPersistentId(persistentIdTwo);
+    subWindow->property_->SetPersistentId(PERSISTENT_ID_TWO);
     subWindow->property_->SetDecorEnable(true);
     subWindow->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     subWindow->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
@@ -1836,14 +1836,14 @@ HWTEST_F(WindowSessionImplTest5, SwitchSubWindow, Function | SmallTest | Level1)
     // freemultiwindowmode start
     EXPECT_EQ(subWindow->IsDecorEnable(), false);
     // cover emprty map
-    subWindow->SwitchSubWindow(persistentIdOne);
+    subWindow->SwitchSubWindow(PERSISTENT_ID_ONE);
 
     std::vector<sptr<WindowSessionImpl>> vec;
     WindowSessionImpl::subWindowSessionMap_.insert(std::pair<int32_t,
-        std::vector<sptr<WindowSessionImpl>>>(persistentIdOne, vec));
-    WindowSessionImpl::subWindowSessionMap_[persistentIdOne].push_back(subWindow);
+        std::vector<sptr<WindowSessionImpl>>>(PERSISTENT_ID_ONE, vec));
+    WindowSessionImpl::subWindowSessionMap_[PERSISTENT_ID_ONE].push_back(subWindow);
     subWindow->windowSystemConfig_.freeMultiWindowEnable_ = true;
-    subWindow->SwitchSubWindow(persistentIdOne);
+    subWindow->SwitchSubWindow(PERSISTENT_ID_ONE);
     WindowMode mode = subWindow->property_->GetWindowMode();
     bool decorVisible = mode == WindowMode::WINDOW_MODE_FLOATING ||
         mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY ||
