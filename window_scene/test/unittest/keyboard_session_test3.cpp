@@ -571,6 +571,50 @@ HWTEST_F(KeyboardSessionTest3, CalculateOccupiedAreaAfterUIRefresh01, Function |
 }
 
 /**
+ * @tc.name: CalculateOccupiedAreaAfterUIRefresh02
+ * @tc.desc: check func CalculateOccupiedAreaAfterUIRefresh
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest3, CalculateOccupiedAreaAfterUIRefresh02, Function | SmallTest | Level1)
+{
+    sptr<KeyboardSession::KeyboardSessionCallback> keyboardCallback =
+        sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
+    
+    SessionInfo callingSessionInfo;
+    callingSessionInfo.abilityName_ = "CallingSession";
+    callingSessionInfo.bundleName_ = "CallingSession";
+    auto callingSession = sptr<SceneSession>::MakeSptr(callingSessionInfo, nullptr);
+    callingSession->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
+    keyboardCallback->onGetSceneSession = [&](uint32_t persistentId) {
+        callingSession->persistentId_ = persistentId;
+        return callingSession;
+    };
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    
+    SessionInfo info;
+    info.abilityName_ = "keyboardSession";
+    info.bundleName_ = "keyboardSession";
+    sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, specificCallback, keyboardCallback);
+    keyboardSession->property_->SetCallingSessionId(36);
+    keyboardSession->isVisible_ = true;
+
+    callingSession->UpdateSizeChangeReason(SizeChangeReason::DRAG);
+    callingSession->SetOriPosYBeforeRaisedByKeyboard(100);
+    keyboardSession->CalculateOccupiedAreaAfterUIRefresh();
+    EXPECT_EQ(callingSession->GetOriPosYBeforeRaisedByKeyboard(), 0);
+
+    callingSession->UpdateSizeChangeReason(SizeChangeReason::DRAG_MOVE);
+    keyboardSession->CalculateOccupiedAreaAfterUIRefresh();
+    EXPECT_EQ(callingSession->GetOriPosYBeforeRaisedByKeyboard(), 0);
+
+    callingSession->SetOriPosYBeforeRaisedByKeyboard(200);
+    callingSession->UpdateSizeChangeReason(SizeChangeReason::ROTATION);
+    EXPECT_EQ(keyboardSession->stateChanged_, false);
+    EXPECT_EQ(callingSession->GetOriPosYBeforeRaisedByKeyboard(), 200);
+}
+
+/**
  * @tc.name: SetKeyboardEffectOptionChangeListener
  * @tc.desc: check func SetKeyboardEffectOptionChangeListener
  * @tc.type: FUNC

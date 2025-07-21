@@ -1099,6 +1099,7 @@ void KeyboardSession::CalculateOccupiedAreaAfterUIRefresh()
         static_cast<uint32_t>(SessionUIDirtyFlag::NONE) ||
         (keyboardDirtyFlags & static_cast<uint32_t>(SessionUIDirtyFlag::RECT)) !=
         static_cast<uint32_t>(SessionUIDirtyFlag::NONE) || stateChanged_) {
+        TLOGD(WmsLogTag::WMS_KEYBOARD, "Keyboard panel rect has changed");
         needRecalculateOccupiedArea = true;
     }
     // Recalculate the occupied area info when calling session rect changes && keyboard is visible.
@@ -1106,7 +1107,17 @@ void KeyboardSession::CalculateOccupiedAreaAfterUIRefresh()
     sptr<SceneSession> callingSession = GetSceneSession(callingId);
     if (callingSession && (callingSession->GetDirtyFlags() & static_cast<uint32_t>(SessionUIDirtyFlag::RECT)) !=
         static_cast<uint32_t>(SessionUIDirtyFlag::NONE) && IsVisibleForeground()) {
-        needRecalculateOccupiedArea = true;
+        SizeChangeReason reason = callingSession->GetSizeChangeReason();
+        // Skip recalculation during drag operations and reset oriPosYBeforeRaisedByKeyboard_.
+        if ((reason >= SizeChangeReason::DRAG && reason <= SizeChangeReason::DRAG_END) ||
+            reason == SizeChangeReason::DRAG_MOVE) {
+            if (callingSession->GetOriPosYBeforeRaisedByKeyboard() != 0) {
+                callingSession->SetOriPosYBeforeRaisedByKeyboard(0);
+            }
+        } else {
+            TLOGD(WmsLogTag::WMS_KEYBOARD, "Calling session rect has changed");
+            needRecalculateOccupiedArea = true;
+        }
     }
     if (needRecalculateOccupiedArea) {
         ProcessKeyboardOccupiedAreaInfo(callingId, false, stateChanged_);
