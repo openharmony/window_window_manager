@@ -307,5 +307,6 @@ HWTEST_F(DisplayTest, GetLiveCreaseRegion, TestSize.Level1)
     ret = disPlay->GetLiveCreaseRegion(region);
     EXPECT_EQ(ret, DMError::DM_OK);
 }
+}
 } // namespace Rosen
 } // namespace OHOS
