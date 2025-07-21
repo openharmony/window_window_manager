@@ -2846,10 +2846,7 @@ void WindowSessionImpl::SetRequestedOrientation(Orientation orientation, bool ne
     }
     // the orientation of the invalid type is only applied to pageRotation.
     if (orientation == Orientation::INVALID) {
-        Orientation requestedOrientation = GetRequestedOrientation();
-        if (IsUserOrientation(requestedOrientation)) {
-            requestedOrientation = ConvertUserOrientationToUserPageOrientation(requestedOrientation);
-        }
+        Orientation requestedOrientation = ConvertInvalidOrientation();
         property_->SetRequestedOrientation(requestedOrientation, needAnimation);
     } else {
         property_->SetRequestedOrientation(orientation, needAnimation);
@@ -2884,6 +2881,15 @@ Orientation WindowSessionImpl::ConvertUserOrientationToUserPageOrientation(Orien
     return Orientation::UNSPECIFIED;
 }
 
+Orientation WindowSessionImpl::ConvertInvalidOrientation() {
+    Orientation requestedOrientation = GetRequestedOrientation();
+    if (IsUserOrientation(requestedOrientation)) {
+        requestedOrientation = ConvertUserOrientationToUserPageOrientation(requestedOrientation);
+    }
+    TLOGI(WmsLogTag::WMS_ROTATION, "convertInvalidOrientation:%{public}u", requestedOrientation);
+    return requestedOrientation;
+}
+
 void WindowSessionImpl::SetUserRequestedOrientation(Orientation orientation)
 {
     if (IsWindowSessionInvalid()) {
@@ -2898,6 +2904,9 @@ void WindowSessionImpl::SetUserRequestedOrientation(Orientation orientation)
 
 bool WindowSessionImpl::isNeededForciblySetOrientation(Orientation orientation)
 {
+    if (orientation == Orientation::INVALID) {
+        orientation = ConvertInvalidOrientation();
+    }
     bool isUserOrientation = IsUserOrientation(orientation);
     if (property_->GetRequestedOrientation() == orientation && !isUserOrientation) {
         return false;

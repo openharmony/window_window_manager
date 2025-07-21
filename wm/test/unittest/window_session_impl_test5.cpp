@@ -696,7 +696,33 @@ HWTEST_F(WindowSessionImplTest5, isNeededForciblySetOrientation, Function | Smal
     EXPECT_EQ(window->isNeededForciblySetOrientation(Orientation::HORIZONTAL), true);
     EXPECT_EQ(window->isNeededForciblySetOrientation(Orientation::SENSOR), true);
     EXPECT_EQ(window->isNeededForciblySetOrientation(Orientation::FOLLOW_DESKTOP), true);
+    EXPECT_EQ(window->isNeededForciblySetOrientation(Orientation::INVALID), false);
     GTEST_LOG_(INFO) << "WindowSessionImplTest5: isNeededForciblySetOrientation end";
+}
+
+/**
+ * @tc.name: ConvertInvalidOrientation()
+ * @tc.desc: ConvertInvalidOrientation()
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, ConvertInvalidOrientation, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest5: ConvertInvalidOrientation start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetDisplayId(0);
+    option->SetWindowName("ConvertInvalidOrientation");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+    window->state_ = WindowState::STATE_CREATED;
+
+    Orientation ori = Orientation::USER_ROTATION_PORTRAIT;
+    window->SetRequestedOrientation(ori);
+    window->SetRequestedOrientation(Orientation::INVALID, false);
+    EXPECT_EQ(window->ConvertInvalidOrientation(), Orientation::USER_PAGE_ROTATION_PORTRAIT);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest5: ConvertInvalidOrientation end";
 }
 
 /**
