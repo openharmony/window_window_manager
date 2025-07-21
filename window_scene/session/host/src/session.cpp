@@ -2361,9 +2361,9 @@ WSError Session::RaiseToAppTopForPointDown()
     return WSError::WS_OK;
 }
 
-void Session::PresentFocusIfPointDown()
+void Session::PresentFocusIfPointDown()::PresentFocusIfPointDown()()
 {
-    WLOGFI("id: %{public}d,type: %{public}d", GetPersistentId(), GetWindowType());
+    TLOGI(WmsLogTag::WMS_FOCUS, "id: %{public}d,type: %{public}d", GetPersistentId(), GetWindowType());
     if (!isFocused_ && GetFocusable()) {
         FocusChangeReason reason = FocusChangeReason::CLICK;
         NotifyRequestFocusStatusNotifyManager(true, false, reason);

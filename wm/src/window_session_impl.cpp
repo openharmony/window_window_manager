@@ -6388,7 +6388,7 @@ sptr<Window> WindowSessionImpl::Find(const std::string& name)
     std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
     auto iter = windowSessionMap_.find(name);
     if (iter == windowSessionMap_.end()) {
-        TLOGE(WmsLogTag::DEFAULT, "Can not find window %{public}s", name.c_str());
+        TLOGD(WmsLogTag::DEFAULT, "Can not find window %{public}s", name.c_str());
         return nullptr;
     }
     return iter->second.second;
