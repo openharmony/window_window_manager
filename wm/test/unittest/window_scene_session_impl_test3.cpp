@@ -1720,7 +1720,7 @@ HWTEST_F(WindowSceneSessionImplTest3, Recover01, TestSize.Level1)
     ret = windowSceneSessionImpl->Recover(0);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
     windowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
-    windowSceneSessionImpl->property_->SetIsPcAppInPad(true);
+    windowSceneSessionImpl->property_->SetPcAppInpadCompatibleMode(true);
     windowSceneSessionImpl->windowSystemConfig_.freeMultiWindowEnable_ = false;
     ret = windowSceneSessionImpl->Recover(0);
     EXPECT_EQ(WMError::WM_OK, ret);
@@ -1854,7 +1854,7 @@ HWTEST_F(WindowSceneSessionImplTest3, SetWindowRectAutoSave, TestSize.Level1)
     ret = windowSceneSessionImpl->SetWindowRectAutoSave(true, false);
     EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
     windowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
-    windowSceneSessionImpl->property_->SetIsPcAppInPad(true);
+    windowSceneSessionImpl->property_->SetPcAppInpadCompatibleMode(true);
     ret = windowSceneSessionImpl->SetWindowRectAutoSave(true, false);
     EXPECT_EQ(WMError::WM_OK, ret);
     GTEST_LOG_(INFO) << "WindowSceneSessionImplTest3: SetWindowRectAutoSave end";
@@ -1914,7 +1914,7 @@ HWTEST_F(WindowSceneSessionImplTest3, SetSupportedWindowModes, TestSize.Level1)
     EXPECT_EQ(WMError::WM_OK, ret);
 
     windowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
-    windowSceneSessionImpl->property_->SetIsPcAppInPad(true);
+    windowSceneSessionImpl->property_->SetPcAppInpadCompatibleMode(true);
     windowSceneSessionImpl->windowSystemConfig_.freeMultiWindowEnable_ = false;
     ret = windowSceneSessionImpl->SetSupportedWindowModes(supportedWindowModes);
     EXPECT_EQ(WMError::WM_OK, ret);

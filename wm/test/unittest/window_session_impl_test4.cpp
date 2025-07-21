@@ -325,7 +325,7 @@ HWTEST_F(WindowSessionImplTest4, SetWindowTitleMoveEnabled, TestSize.Level1)
     res = window->SetWindowTitleMoveEnabled(false);
     EXPECT_EQ(res, WMError::WM_OK);
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
-    window->property_->SetIsPcAppInPad(true);
+    window->property_->SetPcAppInpadCompatibleMode(true);
     window->windowSystemConfig_.freeMultiWindowEnable_ = false;
     res = window->SetWindowTitleMoveEnabled(true);
     EXPECT_EQ(res, WMError::WM_OK);
@@ -501,11 +501,11 @@ HWTEST_F(WindowSessionImplTest4, IsPcAppInPadCompatibleMode, TestSize.Level1)
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
-    window->property_->SetIsPcAppInPad(true);
+    window->property_->SetPcAppInpadCompatibleMode(true);
     window->windowSystemConfig_.freeMultiWindowEnable_ = false;
     EXPECT_EQ(true, window->IsPcAppInPadCompatibleMode());
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
-    window->property_->SetIsPcAppInPad(true);
+    window->property_->SetPcAppInpadCompatibleMode(true);
     window->windowSystemConfig_.freeMultiWindowEnable_ = true;
     window->windowSystemConfig_.isSystemDecorEnable_ = true;
     EXPECT_EQ(false, window->IsPcAppInPadCompatibleMode());
@@ -1226,7 +1226,7 @@ HWTEST_F(WindowSessionImplTest4, SetTitleButtonVisible01, TestSize.Level1)
     WMError res = window->SetTitleButtonVisible(false, false, false, true);
     ASSERT_EQ(res, WMError::WM_ERROR_INVALID_CALLING);
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
-    window->property_->SetIsPcAppInPad(true);
+    window->property_->SetPcAppInpadCompatibleMode(true);
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     window->windowSystemConfig_.freeMultiWindowEnable_ = false;
     window->windowSystemConfig_.freeMultiWindowSupport_ = false;

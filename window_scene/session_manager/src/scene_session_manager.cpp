@@ -16127,7 +16127,7 @@ WMError SceneSessionManager::ShiftAppWindowPointerEvent(int32_t sourcePersistent
         TLOGE(WmsLogTag::WMS_PC, "sourceSession %{public}d is nullptr", sourcePersistentId);
         return WMError::WM_ERROR_INVALID_SESSION;
     }
-    if (sourceSession->GetSessionProperty()->GetIsPcAppInPad() &&
+    if (sourceSession->GetSessionProperty()->GetPcAppInpadCompatibleMode() &&
         systemConfig_.IsPadWindow() && !systemConfig_.IsFreeMultiWindowMode()) {
         TLOGE(WmsLogTag::WMS_PC, "This is PcAppInPad, not supported");
         return WMError::WM_OK;

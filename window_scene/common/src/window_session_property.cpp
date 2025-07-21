@@ -1364,7 +1364,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         MarshallingFbTemplateInfo(parcel) &&
         MarshallingWindowAnchorInfo(parcel) &&
         parcel.WriteBool(isPcAppInpadSpecificSystemBarInvisible_) &&
-        parcel.WriteBool(isPcAppInpadOrientationLandscape_);
+        parcel.WriteBool(isPcAppInpadOrientationLandscape_) &&
+        parcel.WriteBool(isPcAppInpadCompatibleMode_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1478,6 +1479,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     UnmarshallingWindowAnchorInfo(parcel, property);
     property->SetPcAppInpadSpecificSystemBarInvisible(parcel.ReadBool());
     property->SetPcAppInpadOrientationLandscape(parcel.ReadBool());
+    property->SetPcAppInpadCompatibleMode(parcel.ReadBool());
     return property;
 }
 
@@ -1583,6 +1585,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     windowAnchorInfo_ = property->windowAnchorInfo_;
     isPcAppInpadSpecificSystemBarInvisible_ = property->isPcAppInpadSpecificSystemBarInvisible_;
     isPcAppInpadOrientationLandscape_ = property->isPcAppInpadOrientationLandscape_;
+    isPcAppInpadCompatibleMode_ = property->isPcAppInpadCompatibleMode_;
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)
@@ -2291,6 +2294,11 @@ bool WindowSessionProperty::IsAdaptToSimulationScale() const
     return compatibleModeProperty_ && compatibleModeProperty_->IsAdaptToSimulationScale();
 }
 
+void WindowSessionProperty::SetPcAppInpadCompatibleMode(bool enabled)
+{
+    isPcAppInpadCompatibleMode_ = enabled;
+}
+
 void WindowSessionProperty::SetPcAppInpadSpecificSystemBarInvisible(bool isPcAppInpadSpecificSystemBarInvisible)
 {
     isPcAppInpadSpecificSystemBarInvisible_ = isPcAppInpadSpecificSystemBarInvisible;
@@ -2299,6 +2307,11 @@ void WindowSessionProperty::SetPcAppInpadSpecificSystemBarInvisible(bool isPcApp
 void WindowSessionProperty::SetPcAppInpadOrientationLandscape(bool isPcAppInpadOrientationLandscape)
 {
     isPcAppInpadOrientationLandscape_ = isPcAppInpadOrientationLandscape;
+}
+
+bool WindowSessionProperty::GetPcAppInpadCompatibleMode() const
+{
+    return isPcAppInpadCompatibleMode_;
 }
 
 bool WindowSessionProperty::GetPcAppInpadSpecificSystemBarInvisible() const

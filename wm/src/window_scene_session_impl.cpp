@@ -313,6 +313,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         auto parentWindowId = parentSession->GetPersistentId();
         property_->SetParentPersistentId(parentWindowId);
         property_->SetIsPcAppInPad(parentSession->GetProperty()->GetIsPcAppInPad());
+        property_->SetPcAppInpadCompatibleMode(parentSession->GetProperty()->GetPcAppInpadCompatibleMode());
         // creat sub session by parent session
         SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
             surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
@@ -669,7 +670,7 @@ WMError WindowSceneSessionImpl::SetPcAppInpadSpecificSystemBarInvisible()
         UpdateSpecificSystemBarEnabled(false, false, statusProperty);
         SetSpecificBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusProperty);
 
-        SystemBarProperty NavigationIndicatorPorperty = 
+        SystemBarProperty NavigationIndicatorPorperty =
             GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR);
         UpdateSpecificSystemBarEnabled(false, false, NavigationIndicatorPorperty);
         SetSpecificBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR, NavigationIndicatorPorperty);
@@ -762,7 +763,7 @@ WMError WindowSceneSessionImpl::SetParentWindowInner(int32_t oldParentWindowId,
 WMError WindowSceneSessionImpl::SetParentWindow(int32_t newParentWindowId)
 {
     auto subWindowId = GetPersistentId();
-    if (property_->GetIsPcAppInPad() && windowSystemConfig_.IsPadWindow()) {
+    if (property_->GetPcAppInpadCompatibleMode() && windowSystemConfig_.IsPadWindow()) {
         TLOGE(WmsLogTag::WMS_SUB, "This is PcAppInPad, not Supported");
         return WMError::WM_OK;
     }
@@ -811,7 +812,7 @@ WMError WindowSceneSessionImpl::SetParentWindow(int32_t newParentWindowId)
 
 WMError WindowSceneSessionImpl::GetParentWindow(sptr<Window>& parentWindow)
 {
-    if (property_->GetIsPcAppInPad() && windowSystemConfig_.IsPadWindow()) {
+    if (property_->GetPcAppInpadCompatibleMode() && windowSystemConfig_.IsPadWindow()) {
         TLOGE(WmsLogTag::WMS_SUB, "This is PcAppInPad, not Supported");
         return WMError::WM_OK;
     }
@@ -3252,7 +3253,7 @@ WMError WindowSceneSessionImpl::SetWindowTitle(const std::string& title)
         TLOGE(WmsLogTag::WMS_DECOR, "Session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (property_->GetIsPcAppInPad() && windowSystemConfig_.IsPadWindow() && !IsDecorEnable()) {
+    if (property_->GetPcAppInpadCompatibleMode() && windowSystemConfig_.IsPadWindow() && !IsDecorEnable()) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "This is PcAppInPad, not supported");
         return WMError::WM_OK;
     }
@@ -3562,7 +3563,7 @@ WMError WindowSceneSessionImpl::SetWindowRectAutoSave(bool enabled, bool isSaveB
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
-    if (property_->GetIsPcAppInPad() && windowSystemConfig_.IsPadWindow()) {
+    if (property_->GetPcAppInpadCompatibleMode() && windowSystemConfig_.IsPadWindow()) {
         TLOGE(WmsLogTag::WMS_MAIN, "This is PcAppInPad, not supported");
         return WMError::WM_OK;
     }
@@ -3590,7 +3591,7 @@ WMError WindowSceneSessionImpl::IsWindowRectAutoSave(bool& enabled)
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
-    if (property_->GetIsPcAppInPad() && windowSystemConfig_.IsPadWindow()) {
+    if (property_->GetPcAppInpadCompatibleMode() && windowSystemConfig_.IsPadWindow()) {
         TLOGE(WmsLogTag::WMS_MAIN, "This is PcAppInPad, not supported");
         return WMError::WM_OK;
     }
@@ -4995,7 +4996,7 @@ bool WindowSceneSessionImpl::IsViewKeepScreenOn() const
 
 WMError WindowSceneSessionImpl::SetWindowShadowEnabled(bool isEnabled)
 {
-    if (property_->GetIsPcAppInPad() && windowSystemConfig_.IsPadWindow()) {
+    if (property_->GetPcAppInpadCompatibleMode() && windowSystemConfig_.IsPadWindow()) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "This is PcAppInPad, not supported");
         return WMError::WM_OK;
     }
