@@ -535,321 +535,58 @@ HWTEST_F(SuperFoldStateManagerTest, RefreshExternalRegion_ShouldReturnOk_WhenNoE
     ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId);
     ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId1);
 }
- 
+
 /**
- * @tc.name  : RefreshScreenRelativePosition_ShouldUpdatePosition_WhenNull
- * @tc.desc  : Test that the screen position is correctly updated when session is null
- * @tc.type: FUNC
+ * @tc.name  : ForceChangeMirrorMode_ShouldReturnNullptrError_WhenMainScreenSessionIsNull
+ * @tc.number: ForceChangeMirrorModeTest_001
+ * @tc.desc  : When `mainScreenSession` is `nullptr`, the function should return `DM_ERROR_NULLPTR`
  */
-HWTEST_F(SuperFoldStateManagerTest, RefreshScreenRelativePosition_ShouldUpdatePosition_WhenNull,
-    TestSize.Level1)
+HWTEST_F(SuperFoldStateManagerTest, ForceChangeMirrorMode_ShouldReturnNullptrError_WhenMainScreenSessionIsNull,
+    TestSize.Level0)
 {
-    ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
     SuperFoldStateManager manager;
     sptr<ScreenSession> mainScreenSession = nullptr;
+    sptr<ScreenSession> secondarySession = sptr<ScreenSession>::MakeSptr();
+    DMError result = manager.ForceChangeMirrorMode(mainScreenSession, secondarySession);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, result);
+}
+
+/**
+ * @tc.name  : ForceChangeMirrorMode_ShouldReturnNullptrError_WhenSecondarySessionIsNull
+ * @tc.number: ForceChangeMirrorModeTest_002
+ * @tc.desc  : When `secondarySession` is `nullptr`, the function should return `DM_ERROR_NULLPTR`.
+ */
+HWTEST_F(SuperFoldStateManagerTest, ForceChangeMirrorMode_ShouldReturnNullptrError_WhenSecondarySessionIsNull,
+    TestSize.Level0)
+{
+    SuperFoldStateManager manager;
+    sptr<ScreenSession> mainScreenSession = sptr<ScreenSession>::MakeSptr();
     sptr<ScreenSession> secondarySession = nullptr;
-    DMError result = manager.RefreshScreenRelativePosition(mainScreenSession, secondarySession);
-    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, result);
- 
-    mainScreenSession = sptr<ScreenSession>::MakeSptr();
-    result = manager.RefreshScreenRelativePosition(mainScreenSession, secondarySession);
+    DMError result = manager.ForceChangeMirrorMode(mainScreenSession, secondarySession);
     ASSERT_EQ(DMError::DM_ERROR_NULLPTR, result);
 }
- 
+
 /**
- * @tc.name  : RefreshScreenRelativePosition_ShouldUpdatePosition_Normal
- * @tc.desc  : Test that the screen position is correctly updated when session is Normal
- * @tc.type: FUNC
+ * @tc.name  : ForceChangeMirrorMode_ShouldNotSetMultiScreenMode_WhenConditionsNotMet
+ * @tc.number: ForceChangeMirrorModeTest_003
+ * @tc.desc  : When the conditions are not met, the function should not call SetMultiScreenMode and return DM_OK.
  */
-HWTEST_F(SuperFoldStateManagerTest, RefreshScreenRelativePosition_ShouldUpdatePosition_Normal,
-    TestSize.Level1)
+HWTEST_F(
+    SuperFoldStateManagerTest, ForceChangeMirrorMode_ShouldNotSetMultiScreenMode_WhenConditionsNotMet, TestSize.Level0)
 {
-    ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
+    sptr<ScreenSession> mainScreenSession = sptr<ScreenSession>::MakeSptr();
+    sptr<ScreenSession> secondarySession = sptr<ScreenSession>::MakeSptr();
+
     SuperFoldStateManager manager;
-    sptr<ScreenSession> mainScreenSession = sptr<ScreenSession>::MakeSptr();;
-    sptr<ScreenSession> secondarySession = sptr<ScreenSession>::MakeSptr();;
-    DMError result = manager.RefreshScreenRelativePosition(mainScreenSession, secondarySession);
-    EXPECT_EQ(DMError::DM_OK, result);
-}
- 
-/**
- * @tc.name: RefreshScreenRelativePositionInner
- * @tc.desc: RefreshScreenRelativePositionInner
- * @tc.type: FUNC
- */
-HWTEST_F(SuperFoldStateManagerTest, RefreshScreenRelativePositionInner, TestSize.Level0)
-{
-    ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
-    SuperFoldStateManager manager;
-    MultiScreenPositionOptions mainScreenOptions = {0, 0, 0};
-    MultiScreenPositionOptions secondScreenOption = {1, 100, 50};
-    Drawing::Rect p1 = {0, 0, 100, 200};
-    Drawing::Rect p2 = {100, 50, 200, 250};
+    manager.SetCurrentStatus(SuperFoldStatus::FOLDED);
+    DMError result = manager.ForceChangeMirrorMode(mainScreenSession, secondarySession);
+    ASSERT_EQ(DMError::DM_OK, result);
+
     manager.SetCurrentStatus(SuperFoldStatus::EXPANDED);
-    manager.RefreshScreenRelativePositionInner(p1, p2, mainScreenOptions, secondScreenOption);
-    EXPECT_EQ(mainScreenOptions.startX_, 0);
-    EXPECT_EQ(secondScreenOption.startX_, 200);
+    result = manager.ForceChangeMirrorMode(mainScreenSession, secondarySession);
+    ASSERT_EQ(DMError::DM_OK, result);
 }
-/**
- * @tc.name  : CalculateScreenRelativePosition_ShouldSetRightDirection_WhenSecondRectIsRightOfMain
- * @tc.desc  : Test when the second screen is on the right side of the main screen, the direction set to RIGHT
-* @tc.type: FUNC
- */
-HWTEST_F(SuperFoldStateManagerTest, CalculateScreenRelativePosition_ShouldSetRightDirection_WhenSecondRectIsRightOfMain,
-    TestSize.Level1)
-{
-    ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
-    SuperFoldStateManager manager;
-    int32_t mainStartX = 0, mainStartY = 0;
-    int32_t p1Width = 100, p1Height = 100;
-    int32_t p2Width = 50, p2Height = 100;
-    int32_t secondStartX = mainStartX + p1Width, secondStartY = 0;
-    ScreenDirectionType p2Direction;
-    Drawing::Rect p1 = {mainStartX, mainStartY, mainStartX + p1Width, mainStartY + p1Height};
-    Drawing::Rect p2 = {secondStartX, secondStartY, secondStartX + p2Width, secondStartX + p2Height};
-    MultiScreenPositionOptions mainScreenOptions = {0, mainStartX, mainStartY};
-    manager.CalculateScreenRelativePosition(p1, p2, mainScreenOptions, secondStartX, secondStartY);
-    EXPECT_EQ(secondStartX, 100);
-    EXPECT_EQ(secondStartY, 0);
-    
-    mainStartX = 0;
-    mainStartY = p2Height;
-    secondStartX = mainStartX + p1Width;
-    secondStartY = 0;
-    p1 = {mainStartX, mainStartY, mainStartX + p1Width, mainStartY + p1Height};
-    p2 = {secondStartX, secondStartY, secondStartX + p2Width, secondStartX + p2Height};
-    manager.CalculateScreenRelativePosition(p1, p2, mainScreenOptions, secondStartX, secondStartY);
-    EXPECT_EQ(secondStartX, 100);
-    EXPECT_EQ(secondStartY, 114);
- 
-    mainStartX = 0;
-    mainStartY = 0;
-    secondStartX = mainStartX + p1Width;
-    secondStartY = p1Height;
-    p1 = {mainStartX, mainStartY, mainStartX + p1Width, mainStartY + p1Height};
-    p2 = {secondStartX, secondStartY, secondStartX + p2Width, secondStartX + p2Height};
-    manager.CalculateScreenRelativePosition(p1, p2, mainScreenOptions, secondStartX, secondStartY);
-    EXPECT_EQ(secondStartX, 100);
-    EXPECT_EQ(secondStartY, 25);
-}
- 
-/**
- * @tc.name  : CalculateScreenRelativePosition_ShouldSetLeftDirection_WhenSecondRectIsLeftOfMain
- * @tc.desc  : Test the orientation set to LEFT when the second screen is on the left side of the main screen
- * @tc.type: FUNC
- */
-HWTEST_F(SuperFoldStateManagerTest, CalculateScreenRelativePosition_ShouldSetLeftDirection_WhenSecondRectIsLeftOfMain,
-    TestSize.Level1)
-{
-    ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
-    SuperFoldStateManager manager;
-    int32_t p1Width = 100, p1Height = 100;
-    int32_t p2Width = 50, p2Height = 100;
- 
-    int32_t secondStartX = 0, secondStartY = 0;
-    int32_t mainStartX = secondStartX + p2Width, mainStartY = secondStartY;
-    ScreenDirectionType p2Direction;
-    Drawing::Rect p1 = {mainStartX, mainStartY, mainStartX + p1Width, mainStartY + p1Height};
-    Drawing::Rect p2 = {secondStartX, secondStartY, secondStartX + p2Width, secondStartX + p2Height};
-    MultiScreenPositionOptions mainScreenOptions = {0, mainStartX, mainStartY};
-    manager.CalculateScreenRelativePosition(p1, p2, mainScreenOptions, secondStartX, secondStartY);
-    EXPECT_EQ(secondStartX, 0);
-    EXPECT_EQ(secondStartY, 0);
- 
-    mainStartX = 0;
-    mainStartY = p1Height;
-    secondStartX = mainStartX + p1Width;
-    secondStartY = 0;
-    p1 = {mainStartX, mainStartY, mainStartX + p1Width, mainStartY + p1Height};
-    p2 = {secondStartX, secondStartY, secondStartX + p2Width, secondStartX + p2Height};
-    manager.CalculateScreenRelativePosition(p1, p2, mainScreenOptions, secondStartX, secondStartY);
-    EXPECT_EQ(secondStartX, 100);
-    EXPECT_EQ(secondStartY, 0);
-    
-    mainStartX = 0;
-    mainStartY = 0;
-    secondStartX = mainStartX + p1Width;
-    secondStartY = p1Height;
-    p1 = {mainStartX, mainStartY, mainStartX + p1Width, mainStartY + p1Height};
-    p2 = {secondStartX, secondStartY, secondStartX + p2Width, secondStartX + p2Height};
-    manager.CalculateScreenRelativePosition(p1, p2, mainScreenOptions, secondStartX, secondStartY);
-    EXPECT_EQ(secondStartX, 100);
-    EXPECT_EQ(secondStartY, 25);
-}
- 
-/**
- * @tc.name  : CalculateScreenRelativePosition_ShouldSetTopDirection_WhenSecondRectIsAboveMain
- * @tc.desc  : When the second screen area is above the main screen, the orientation should be set to TOP
- * @tc.type: FUNC
- */
-HWTEST_F(SuperFoldStateManagerTest, CalculateScreenRelativePosition_ShouldSetTopDirection_WhenSecondRectIsAboveMain,
-    TestSize.Level1)
-{
-    ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
-    SuperFoldStateManager manager;
-    int32_t p1Width = 100, p1Height = 100;
-    int32_t p2Width = 50, p2Height = 100;
-    int32_t secondStartX = p1Width / 2, secondStartY = 0;
-    int32_t mainStartX = secondStartX, mainStartY = secondStartY + p2Height;
-    ScreenDirectionType p2Direction;
-    Drawing::Rect p1 = {mainStartX, mainStartY, mainStartX + p1Width, mainStartY + p1Height};
-    Drawing::Rect p2 = {secondStartX, secondStartY, secondStartX + p2Width, secondStartX + p2Height};
-    MultiScreenPositionOptions mainScreenOptions = {0, mainStartX, mainStartY};
- 
-    manager.CalculateScreenRelativePosition(p1, p2, mainScreenOptions, secondStartX, secondStartY);
-    EXPECT_EQ(secondStartX, 50);
-    EXPECT_EQ(secondStartY, 0);
-    
-    mainStartX = p2Width - 1;
-    mainStartY = p2Height;
-    secondStartX = 0;
-    secondStartY = 0;
-    p1 = {mainStartX, mainStartY, mainStartX + p1Width, mainStartY + p1Height};
-    p2 = {secondStartX, secondStartY, secondStartX + p2Width, secondStartX + p2Height};
-    manager.CalculateScreenRelativePosition(p1, p2, mainScreenOptions, secondStartX, secondStartY);
-    EXPECT_EQ(secondStartX, 63);
-    EXPECT_EQ(secondStartY, 0);
-    
-    mainStartX = 0;
-    mainStartY = p2Height;
-    secondStartX = p1Width - 1;
-    secondStartY = 0;
-    p1 = {mainStartX, mainStartY, mainStartX + p1Width, mainStartY + p1Height};
-    p2 = {secondStartX, secondStartY, secondStartX + p2Width, secondStartX + p2Height};
-    manager.CalculateScreenRelativePosition(p1, p2, mainScreenOptions, secondStartX, secondStartY);
-    EXPECT_EQ(secondStartX, 86);
-    EXPECT_EQ(secondStartY, 0);
-}
- 
-/**
- * @tc.name  : CalculateScreenRelativePosition_ShouldSetBottomDirection_WhenSecondRectIsBelowMain
- * @tc.desc  : When the second screen area is below the main screen, the orientation should be set to BOTTOM
- * @tc.type: FUNC
- */
-HWTEST_F(SuperFoldStateManagerTest, CalculateScreenRelativePosition_ShouldSetBottomDirection_WhenSecondRectIsBelowMain,
-    TestSize.Level1)
-{
-    ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
-    SuperFoldStateManager manager;
-    int32_t p1Width = 100, p1Height = 100;
-    int32_t p2Width = 50, p2Height = 100;
-    int32_t mainStartX = 0, mainStartY = 0;
-    int32_t secondStartX = p1Width / 2, secondStartY = mainStartY + p1Height;
-    ScreenDirectionType p2Direction;
-    Drawing::Rect p1 = {mainStartX, mainStartY, mainStartX + p1Width, mainStartY + p1Height};
-    Drawing::Rect p2 = {secondStartX, secondStartY, secondStartX + p2Width, secondStartX + p2Height};
-    MultiScreenPositionOptions mainScreenOptions = {0, mainStartX, mainStartY};
-    manager.CalculateScreenRelativePosition(p1, p2, mainScreenOptions, secondStartX, secondStartY);
-    EXPECT_EQ(secondStartX, 50);
-    EXPECT_EQ(secondStartY, 100);
-    
-    mainStartX = 0;
-    mainStartY = 0;
-    secondStartX = p1Width - 1;
-    secondStartY = p1Height;
-    p1 = {mainStartX, mainStartY, mainStartX + p1Width, mainStartY + p1Height};
-    p2 = {secondStartX, secondStartY, secondStartX + p2Width, secondStartX + p2Height};
-    manager.CalculateScreenRelativePosition(p1, p2, mainScreenOptions, secondStartX, secondStartY);
-    EXPECT_EQ(secondStartX, 86);
-    EXPECT_EQ(secondStartY, 50);
-    
-    mainStartX = p2Width -1;
-    mainStartY = 0;
-    secondStartX = 0;
-    secondStartY = p1Height;
-    p1 = {mainStartX, mainStartY, mainStartX + p1Width, mainStartY + p1Height};
-    p2 = {secondStartX, secondStartY, secondStartX + p2Width, secondStartX + p2Height};
-    manager.CalculateScreenRelativePosition(p1, p2, mainScreenOptions, secondStartX, secondStartY);
-    EXPECT_EQ(secondStartX, 63);
-    EXPECT_EQ(secondStartY, 25);
-}
- 
-/**
- * @tc.name  : CalculateScreenRelativePosition_ShouldSetDirectionLeft_WhenP2LeftOfP1
- * @tc.number: CalculateScreenRelativePositionTest_001
- * @tc.desc  : When p2 is to the left of p1, set p2Direction to LEFT
- */
-HWTEST_F(SuperFoldStateManagerTest, CalculateScreenRelativePosition_ShouldSetDirectionLeft_WhenP2LeftOfP1,
-    TestSize.Level0)
-{
-    ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
-    SuperFoldStateManager manager;
-    int32_t mainStartX = 0;
-    int32_t mainStartY = 0;
-    int32_t secondStartX = 0;
-    int32_t secondStartY = 0;
-    Drawing::Rect p1 = {0, 0, 100, 100};
-    Drawing::Rect p2 = {-50, 0, 50, 100};
-    ScreenDirectionType p2Direction = ScreenDirectionType::LEFT;
-    int32_t p1Width = 100;
-    int32_t p1Height = 100;
-    int32_t p2Width = 100;
-    int32_t p2Height = 100;
-    MultiScreenPositionOptions mainScreenOptions = {0, mainStartX, mainStartY};
-    manager.CalculateScreenRelativePosition(p1, p2, mainScreenOptions, secondStartX, secondStartY);
- 
-    EXPECT_EQ(p2Direction, ScreenDirectionType::LEFT);
-    EXPECT_EQ(secondStartX, mainStartX - p2Width);
-    EXPECT_EQ(secondStartY, mainStartY);
-}
- 
-/**
- * @tc.name  : CalculateScreenRelativePosition_ShouldSetDirectionRight_WhenP2RightOfP1
- * @tc.number: CalculateScreenRelativePositionTest_002
- * @tc.desc  : When p2 is to the right of p1, set p2Direction to RIGHT
- */
-HWTEST_F(SuperFoldStateManagerTest, CalculateScreenRelativePosition_ShouldSetDirectionRight_WhenP2RightOfP1,
-    TestSize.Level0)
-{
-    ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
-    SuperFoldStateManager manager;
-    int32_t mainStartX = 0;
-    int32_t mainStartY = 0;
-    int32_t secondStartX = 0;
-    int32_t secondStartY = 0;
-    Drawing::Rect p1 = {0, 0, 100, 100};
-    Drawing::Rect p2 = {150, 0, 250, 100};
-    ScreenDirectionType p2Direction = ScreenDirectionType::RIGHT;
-    int32_t p1Width = 100;
-    int32_t p1Height = 100;
-    int32_t p2Width = 100;
-    int32_t p2Height = 100;
-    MultiScreenPositionOptions mainScreenOptions = {0, mainStartX, mainStartY};
-    manager.CalculateScreenRelativePosition(p1, p2, mainScreenOptions, secondStartX, secondStartY);
- 
-    EXPECT_EQ(p2Direction, ScreenDirectionType::RIGHT);
-    EXPECT_EQ(secondStartX, mainStartX + p1Width);
-    EXPECT_EQ(secondStartY, mainStartY);
-}
- 
-/**
- * @tc.name  : CalculateScreenRelativePosition_ShouldSetDirectionTop_WhenP2AboveP1
- * @tc.number: CalculateScreenRelativePositionTest_003
- * @tc.desc  : When p2 is above p1, p2Direction should be set to TOP
- */
-HWTEST_F(SuperFoldStateManagerTest, CalculateScreenRelativePosition_ShouldSetDirectionTop_WhenP2AboveP1,
-    TestSize.Level0)
-{
-    ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
-    SuperFoldStateManager manager;
-    int32_t mainStartX = 0;
-    int32_t mainStartY = 0;
-    int32_t secondStartX = 0;
-    int32_t secondStartY = 0;
-    Drawing::Rect p1 = {0, 0, 100, 100};
-    Drawing::Rect p2 = {0, -50, 100, 50};
-    ScreenDirectionType p2Direction = ScreenDirectionType::TOP;
-    int32_t p1Width = 100;
-    int32_t p1Height = 100;
-    int32_t p2Width = 100;
-    int32_t p2Height = 100;
-    MultiScreenPositionOptions mainScreenOptions = {0, mainStartX, mainStartY};
-    manager.CalculateScreenRelativePosition(p1, p2, mainScreenOptions, secondStartX, secondStartY);
- 
-    EXPECT_EQ(p2Direction, ScreenDirectionType::TOP);
-    EXPECT_EQ(secondStartX, mainStartX);
-    EXPECT_EQ(secondStartY, mainStartY - p2Height);
-}
+
 }
 }
 }

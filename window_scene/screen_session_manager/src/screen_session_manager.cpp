@@ -2605,6 +2605,8 @@ void ScreenSessionManager::InitScreenProperty(ScreenId screenId, RSScreenModeInf
     property.SetCurrentOffScreenRendering(false);
     property.SetScreenRealWidth(property.GetBounds().rect_.GetWidth());
     property.SetScreenRealHeight(property.GetBounds().rect_.GetHeight());
+    property.SetMirrorWidth(property.GetBounds().rect_.GetWidth());
+    property.SetMirrorHeight(property.GetBounds().rect_.GetHeight());
     property.SetScreenRealPPI();
     property.SetScreenRealDPI();
     property.SetScreenAreaOffsetX(property.GetPhyBounds().rect_.GetLeft());
