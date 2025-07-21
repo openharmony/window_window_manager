@@ -294,12 +294,13 @@ void SceneInputManager::ConstructDisplayGroupInfos(std::map<ScreenId, ScreenProp
             .displayDirection = ConvertDegreeToMMIRotation(screenProperty.GetScreenComponentRotation()),
             .displayMode = static_cast<MMI::DisplayMode>(displayMode),
             .transform = transformData,
-            .oneHandX = screenOneHandX,
-            .oneHandY = screenOneHandY,
+            
             .scalePercent = scalePercent,
             .expandHeight = expandHeight,
             .isCurrentOffScreenRendering = screenProperty.GetCurrentOffScreenRendering(),
             .displaySourceMode = static_cast<MMI::DisplaySourceMode>(screenSession->GetScreenCombination()),
+            .oneHandX = screenOneHandX,
+            .oneHandY = screenOneHandY,
             .screenArea = {
                 .id = screenId,
                 .area = {screenProperty.GetScreenAreaOffsetX(), screenProperty.GetScreenAreaOffsetY(),
@@ -713,7 +714,7 @@ void SceneInputManager::FlushDisplayInfoToMMI(std::vector<MMI::WindowInfo>&& win
                                               const bool forceFlush)
 {
     eventHandler_->PostTask([this, windowInfoList = std::move(windowInfoList),
-                            pixelMapList = std::move(pixelMapList), forceFlush]() {
+                            pixelMapList = std::move(pixelMapList), forceFlush] {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "FlushDisplayInfoToMMI");
         if (isUserBackground_.load()) {
             TLOGND(WmsLogTag::WMS_MULTI_USER, "User in background, no need to flush display info");
@@ -810,16 +811,33 @@ void SceneInputManager::ConstructDumpDisplayInfo(const MMI::DisplayInfo& display
         transformStream << it << ", ";
     }
     transformStream << "]";
-    dumpDisplayListStream << "id:" << displayInfo.id << "|x:" << displayInfo.x << "|y:" << displayInfo.y
-                          << "|width:" << displayInfo.width << "|height:" << displayInfo.height << "|dpi:"
-                          << displayInfo.dpi << "|name:" << displayInfo.name << "|direction:"
-                          << static_cast<int32_t>(displayInfo.direction) << "|displayDirection:"
-                          << static_cast<int32_t>(displayInfo.displayDirection) << "|displayMode:"
-                          << static_cast<int32_t>(displayInfo.displayMode) << "|transform:" << transformStream.str()
-                          << "|offsetX:" << displayInfo.offsetX << "|offsetY:" << displayInfo.offsetY
-                          << "|scalePercent:" << displayInfo.scalePercent << "|expandHeight:"
-                          << displayInfo.expandHeight << "|isCurrentOffScreenRendering:"
-                          << displayInfo.isCurrentOffScreenRendering << ", ";
+    dumpDisplayListStream << "id:" << displayInfo.id
+                          << "|x:" << displayInfo.x
+                          << "|y:" << displayInfo.y
+                          << "|width:" << displayInfo.width
+                          << "|height:" << displayInfo.height
+                          << "|dpi:" << displayInfo.dpi
+                          << "|name:" << displayInfo.name
+                          << "|direction:" << static_cast<int32_t>(displayInfo.direction)
+                          << "|displayDirection:"<< static_cast<int32_t>(displayInfo.displayDirection)
+                          << "|displayMode:" << static_cast<int32_t>(displayInfo.displayMode)
+                          << "|transform:" << transformStream.str()
+                          << "|screenOneHandX" << displayInfo.oneHandX
+                          << "|screenOneHandY" << displayInfo.oneHandY
+                          << "|scalePercent:" << displayInfo.scalePercent
+                          << "|expandHeight:" << displayInfo.expandHeight
+                          << "|isCurrentOffScreenRendering:" << displayInfo.isCurrentOffScreenRendering
+                          << "|displaySourceMode:" << static_cast<int32_t>(displayInfo.displaySourceMode)
+                          << "|screenArea.id:" << displayInfo.screenArea.id
+                          << "|screenArea.area:[" << displayInfo.screenArea.area.x << ","
+                          << displayInfo.screenArea.area.y << ","
+                          << displayInfo.screenArea.area.width << "," 
+                          << displayInfo.screenArea.area.height << "]"
+                          << "|rsId:" << displayInfo.rsId
+                          << "|offsetX:" << displayInfo.offsetX
+                          << "|offsetY:" << displayInfo.offsetY
+                          << "|pointerActiveWidth:" << displayInfo.pointerActiveWidth
+                          << "|pointerActiveHeight:" << displayInfo.pointerActiveHeight << ", ";
 }
 
 void SceneInputManager::ConstructDumpWindowInfo(const MMI::WindowInfo& windowInfo,
