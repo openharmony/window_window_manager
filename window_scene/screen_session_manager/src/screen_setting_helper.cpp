@@ -22,6 +22,8 @@
 #include "setting_provider.h"
 #include "system_ability_definition.h"
 #include "window_manager_hilog.h"
+#include "fold_screen_state_internel.h"
+#include "fold_screen_controller/super_fold_state_manager.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -414,6 +416,12 @@ bool ScreenSettingHelper::GetScreenMode(MultiScreenInfo& info, const std::string
         return false;
     } else {
         mode = static_cast<uint32_t>(strtoll(screenMode[DATA_INDEX_ONE].c_str(), nullptr, PARAM_NUM_TEN));
+#ifdef FOLD_ABILITY_ENABLE
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() &&
+        SuperFoldStateManager::GetInstance().GetCurrentStatus() != SuperFoldStatus::EXPANDED) {
+        mode = SCREEN_MIRROR_IN_DATA;
+    }
+#endif
         TLOGW(WmsLogTag::DMS, "external screen mode: %{public}d", mode);
         if (!UpdateScreenMode(info, mode, true)) {
             return false;
