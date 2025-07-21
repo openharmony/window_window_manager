@@ -106,6 +106,7 @@ const std::map<std::string, WindowSceneConfig::ValueType> WindowSceneConfig::con
     { "contentColor",                                 WindowSceneConfig::ValueType::STRING },
     { "supportTypeFloatWindow",                       WindowSceneConfig::ValueType::STRING },
     { "maxMidSceneNum",                               WindowSceneConfig::ValueType::INTS },
+    { "defaultDragResizeType",                        WindowSceneConfig::ValueType::INTS },
 };
 
 std::vector<std::string> WindowSceneConfig::SplitNodeContent(const xmlNodePtr& node, const std::string& pattern)

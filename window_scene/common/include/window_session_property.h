@@ -664,6 +664,7 @@ struct FreeMultiWindowConfig : public Parcelable {
     uint32_t decorWindowModeSupportType_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
     WindowMode defaultWindowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
     uint32_t maxMainFloatingWindowNumber_ = 0;
+    DragResizeType defaultDragResizeType_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
@@ -673,7 +674,8 @@ struct FreeMultiWindowConfig : public Parcelable {
         }
 
         if (!parcel.WriteUint32(static_cast<uint32_t>(defaultWindowMode_)) ||
-            !parcel.WriteUint32(maxMainFloatingWindowNumber_)) {
+            !parcel.WriteUint32(maxMainFloatingWindowNumber_) ||
+            !parcel.WriteUint32(static_cast<uint32_t>(defaultDragResizeType_))) {
             return false;
         }
         return true;
@@ -689,6 +691,12 @@ struct FreeMultiWindowConfig : public Parcelable {
         config->decorWindowModeSupportType_ = parcel.ReadUint32();
         config->defaultWindowMode_ = static_cast<WindowMode>(parcel.ReadUint32());
         config->maxMainFloatingWindowNumber_ = parcel.ReadUint32();
+        uint32_t dragResizeType = parcel.ReadUint32();
+        if (dragResizeType >= static_cast<uint32_t>(DragResizeType::RESIZE_MAX_VALUE)) {
+            delete config;
+            return nullptr;
+        }
+        config->defaultDragResizeType_ = static_cast<DragResizeType>(dragResizeType);
         return config;
     }
 };

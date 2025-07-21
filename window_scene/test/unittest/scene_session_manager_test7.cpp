@@ -1992,6 +1992,35 @@ HWTEST_F(SceneSessionManagerTest7, SetAppDragResizeType, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetDefaultDragResizeType
+ * @tc.desc: test function : GetDefaultDragResizeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, GetDefaultDragResizeType, TestSize.Level1)
+{
+    DragResizeType originalDragResizeType = ssm_->systemConfig_.freeMultiWindowConfig_.defaultDragResizeType_;
+    DragResizeType defaultDragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    if (ssm_->systemConfig_.freeMultiWindowSupport_) {
+        defaultDragResizeType = DragResizeType::RESIZE_WHEN_DRAG_END;
+    } else {
+        defaultDragResizeType = DragResizeType::RESIZE_EACH_FRAME;
+    }
+    ASSERT_EQ(ssm_->SetGlobalDragResizeType(DragResizeType::RESIZE_TYPE_UNDEFINED), WMError::WM_OK);
+
+    ssm_->systemConfig_.freeMultiWindowConfig_.defaultDragResizeType_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    ssm_->GetEffectiveDragResizeType(dragResizeType);
+    ASSERT_EQ(dragResizeType, defaultDragResizeType);
+
+    ssm_->systemConfig_.freeMultiWindowConfig_.defaultDragResizeType_ = DragResizeType::RESIZE_WHEN_DRAG_END;
+    dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    ssm_->GetEffectiveDragResizeType(dragResizeType);
+    ASSERT_EQ(dragResizeType, ssm_->systemConfig_.freeMultiWindowConfig_.defaultDragResizeType_);
+
+    ssm_->systemConfig_.freeMultiWindowConfig_.defaultDragResizeType_ = originalDragResizeType;
+}
+
+/**
  * @tc.name: GetAppDragResizeType
  * @tc.desc: test function : GetAppDragResizeType
  * @tc.type: FUNC
