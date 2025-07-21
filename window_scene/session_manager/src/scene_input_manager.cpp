@@ -822,8 +822,8 @@ void SceneInputManager::ConstructDumpDisplayInfo(const MMI::DisplayInfo& display
                           << "|displayDirection:"<< static_cast<int32_t>(displayInfo.displayDirection)
                           << "|displayMode:" << static_cast<int32_t>(displayInfo.displayMode)
                           << "|transform:" << transformStream.str()
-                          << "|screenOneHandX" << displayInfo.oneHandX
-                          << "|screenOneHandY" << displayInfo.oneHandY
+                          << "|screenOneHandX:" << displayInfo.oneHandX
+                          << "|screenOneHandY:" << displayInfo.oneHandY
                           << "|scalePercent:" << displayInfo.scalePercent
                           << "|expandHeight:" << displayInfo.expandHeight
                           << "|isCurrentOffScreenRendering:" << displayInfo.isCurrentOffScreenRendering
