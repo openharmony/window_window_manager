@@ -4353,6 +4353,11 @@ WMError WindowSceneSessionImpl::SetWindowCornerRadius(float cornerRadius)
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    if (!windowSystemConfig_.IsPcWindow() && !windowSystemConfig_.IsPadWindow() &&
+        !windowSystemConfig_.IsPhoneWindow()) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "This is not pc, pad or phone, not supported.");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     if (!WindowHelper::IsFloatOrSubWindow(GetType())) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "This is not sub window or float window.");
         return WMError::WM_ERROR_INVALID_CALLING;
