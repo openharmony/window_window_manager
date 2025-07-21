@@ -897,18 +897,22 @@ void KeyboardSession::HandleCrossScreenChild(bool isMoveOrDrag)
             return;
         }
         if (isMoveOrDrag) {
-            keyboardPanelSurfaceNode->SetPositionZ(MOVE_DRAG_POSITION_Z);
-            displayNode->AddCrossScreenChild(keyboardPanelSurfaceNode, INSERT_TO_THE_END, true);
-            keyboardPanelSurfaceNode->SetIsCrossNode(true);
+            {
+                AutoRSTransaction trans(keyboardPanelSurfaceNode->GetRSUIContext());
+                keyboardPanelSurfaceNode->SetPositionZ(MOVE_DRAG_POSITION_Z);
+                keyboardPanelSurfaceNode->SetIsCrossNode(true);
+            }
+            {
+                AutoRSTransaction trans(displayNode->GetRSUIContext());
+                displayNode->AddCrossScreenChild(keyboardPanelSurfaceNode, INSERT_TO_THE_END, true);
+            }
             TLOGI(WmsLogTag::WMS_KEYBOARD, "Add window: %{public}d to display: %{public}" PRIu64,
-
                 keyboardPanelSession_->GetPersistentId(), displayId);
         } else {
             keyboardPanelSurfaceNode->SetPositionZ(moveDragController_->GetOriginalPositionZ());
             displayNode->RemoveCrossScreenChild(keyboardPanelSurfaceNode);
             keyboardPanelSurfaceNode->SetIsCrossNode(false);
             TLOGI(WmsLogTag::WMS_KEYBOARD, "Remove window: %{public}d from display: %{public}" PRIu64,
-
                 keyboardPanelSession_->GetPersistentId(), displayId);
         }
     }
@@ -916,12 +920,8 @@ void KeyboardSession::HandleCrossScreenChild(bool isMoveOrDrag)
 
 void KeyboardSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
 {
-    if (reason == SizeChangeReason::DRAG || reason == SizeChangeReason::DRAG_MOVE) {
-        AutoRSTransaction trans(GetRSUIContext());
-        HandleCrossScreenChild(true);
-    } else if (reason == SizeChangeReason::DRAG_END) {
-        HandleCrossScreenChild(false);
-    }
+    bool isMoveOrDrag = reason == SizeChangeReason::DRAG || reason == SizeChangeReason::DRAG_MOVE;
+    HandleCrossScreenChild(isMoveOrDrag);
 }
 
 void KeyboardSession::SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool needFlush)

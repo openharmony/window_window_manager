@@ -514,6 +514,19 @@ void RSAdapterUtil::SetRSUIContext(const std::shared_ptr<RSNode>& rsNode,
           RSAdapterUtil::RSUIContextToStr(originalRSUIContext).c_str());
 }
 
+void RSAdapterUtil::SetRSTransactionHandler(const std::shared_ptr<RSTransaction>& rsTransaction,
+                                            const std::shared_ptr<RSUIContext>& rsUIContext)
+{
+    RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED();
+    RETURN_IF_PARAM_IS_NULL(rsTransaction);
+    RETURN_IF_PARAM_IS_NULL(rsUIContext);
+    auto rsTransHandler = rsUIContext->GetRSTransaction();
+    RETURN_IF_PARAM_IS_NULL(rsTransHandler);
+    rsTransaction->SetTransactionHandler(rsTransHandler);
+    TLOGD(WmsLogTag::WMS_SCB, "syncId: %{public}" PRIu64 ", %{public}s",
+        rsTransaction->GetSyncId(), RSAdapterUtil::RSUIContextToStr(rsUIContext).c_str());
+}
+
 void RSAdapterUtil::SetSkipCheckInMultiInstance(const std::shared_ptr<RSNode>& rsNode,
                                                 bool skipCheckInMultiInstance)
 {
