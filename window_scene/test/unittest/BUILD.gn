@@ -900,6 +900,7 @@ ohos_unittest("ws_scene_session_test") {
   module_out_path = module_out_path
 
   sources = [
+    "${window_base_path}/window_scene/test/mock/mock_accesstoken_kit.cpp",
     "scene_session_test.cpp",
     "scene_session_test2.cpp",
     "scene_session_test3.cpp",
