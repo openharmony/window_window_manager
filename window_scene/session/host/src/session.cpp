@@ -2926,6 +2926,19 @@ void Session::SetSessionStateChangeListenser(const NotifySessionStateChangeFunc&
     }, "SetSessionStateChangeListenser");
 }
 
+void Session::SetClearSubSessionCallback(const NotifyClearSubSessionFunc& func)
+{
+    PostTask(
+        [weakThis = wptr(this), func, where = __func__]() {
+            auto session = weakThis.promote();
+            if (session == nullptr) {
+                TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
+                return;
+            }
+            session->clearSubSessionFunc_ = std::move(func);
+        }, __func__);
+}
+
 void Session::SetBufferAvailableChangeListener(const NotifyBufferAvailableChangeFunc& func)
 {
     bufferAvailableChangeFunc_ = func;
@@ -3054,6 +3067,14 @@ void Session::NotifySessionStateChange(const SessionState& state)
             session->sessionStateChangeFunc_(state);
         } else {
             TLOGNI(WmsLogTag::WMS_LIFE, "sessionStateChangeFunc is null");
+        }
+        if (!session->sessionStateChangeFunc_  && state == SessionState::STATE_DISCONNECT) {
+            auto parentSession = session->GetParentSession();
+            if (parentSession && parentSession->clearSubSessionFunc_) {
+                parentSession->clearSubSessionFunc_(session->GetPersistentId());
+                TLOGNI(WmsLogTag::WMS_LIFE, "notify clear subSession, parentId: %{public}d, "
+                    "persistentId: %{public}d", parentSession->GetPersistentId(), session->GetPersistentId());
+            }
         }
 
         if (session->sessionStateChangeNotifyManagerFunc_) {

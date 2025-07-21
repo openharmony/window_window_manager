@@ -112,6 +112,7 @@ using NotifyHighlightChangeFunc = std::function<void(bool isHighlight)>;
 using NotifySurfaceBoundsChangeFunc = std::function<void(const WSRect& rect, bool isGlobal, bool needFlush)>;
 using HasRequestedVsyncFunc = std::function<WSError(bool& hasRequestedVsync)>;
 using RequestNextVsyncWhenModeChangeFunc = std::function<WSError(const std::shared_ptr<VsyncCallback>& vsyncCallback)>;
+using NotifyClearSubSessionFunc = std::function<void(const int32_t subPersistentId)>;
 class ILifecycleListener {
 public:
     virtual void OnActivation() {}
@@ -389,6 +390,7 @@ public:
     void SetNotifyUIRequestFocusFunc(const NotifyUIRequestFocusFunc& func);
     void SetNotifyUILostFocusFunc(const NotifyUILostFocusFunc& func);
     void SetGetStateFromManagerListener(const GetStateFromManagerFunc& func);
+    void SetClearSubSessionCallback(const NotifyClearSubSessionFunc& func);
 
     void SetSystemConfig(const SystemSessionConfig& systemConfig);
     void SetSnapshotScale(const float snapshotScale);
@@ -863,6 +865,7 @@ protected:
     VisibilityChangedDetectFunc visibilityChangedDetectFunc_ GUARDED_BY(SCENE_GUARD);
     NofitySessionLabelAndIconUpdatedFunc updateSessionLabelAndIconFunc_;
     NotifySessionGetTargetOrientationConfigInfoFunc sessionGetTargetOrientationConfigInfoFunc_;
+    NotifyClearSubSessionFunc clearSubSessionFunc_;
 
     /*
      * Window Rotate Animation
