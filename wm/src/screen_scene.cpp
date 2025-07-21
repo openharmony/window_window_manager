@@ -126,7 +126,7 @@ void ScreenScene::RegisterInputEventListener()
         }
     }
     if (!(DelayedSingleton<IntentionEventManager>::GetInstance()->EnableInputEventListener(uiContent_.get(),
-        handler_))) {
+        handler_, this))) {
         TLOGI(WmsLogTag::DMS, "EnableInputEventListener fail");
     }
     InputTransferStation::GetInstance().MarkRegisterToMMI();
