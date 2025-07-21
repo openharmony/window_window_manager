@@ -331,6 +331,7 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
         property->SetDragEnabled(reply.ReadBool());
         property->SetIsAtomicService(reply.ReadBool());
         property->SetIsAbilityHook(reply.ReadBool());
+        property->SetPcAppInpadCompatibleMode(reply.ReadBool());
         property->SetPcAppInpadSpecificSystemBarInvisible(reply.ReadBool());
         property->SetPcAppInpadOrientationLandscape(reply.ReadBool());
         property->SetCompatibleModeProperty(reply.ReadParcelable<CompatibleModeProperty>());

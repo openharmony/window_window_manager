@@ -1585,6 +1585,20 @@ HWTEST_F(WindowSessionPropertyTest, GetIsAtomicService, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetPcAppInpadCompatibleMode
+ * @tc.desc: SetPcAppInpadCompatibleMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetPcAppInpadCompatibleMode, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    bool enabled = true;
+    property->SetPcAppInpadCompatibleMode(enabled);
+    auto result = property->GetPcAppInpadCompatibleMode();
+    ASSERT_EQ(result, enabled);
+}
+
+/**
  * @tc.name: SetPcAppInpadSpecificSystemBarInvisible
  * @tc.desc: SetPcAppInpadSpecificSystemBarInvisible
  * @tc.type: FUNC

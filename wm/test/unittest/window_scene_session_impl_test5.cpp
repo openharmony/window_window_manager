@@ -1077,7 +1077,7 @@ HWTEST_F(WindowSceneSessionImplTest5, GetParentWindow01, TestSize.Level1)
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     sptr<Window> parentWindow = nullptr;
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
-    window->property_->SetIsPcAppInPad(true);
+    window->property_->SetPcAppInpadCompatibleMode(true);
     auto res = window->GetParentWindow(parentWindow);
     EXPECT_EQ(res, WMError::WM_OK);
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
@@ -1289,7 +1289,7 @@ HWTEST_F(WindowSceneSessionImplTest5, SetParentWindow03, TestSize.Level1)
     EXPECT_CALL(mocker.Mock(), SetParentWindow(_, _)).WillOnce(Return(mockerResult));
     EXPECT_EQ(subWindow->SetParentWindow(newParentWindowId), mockerResult);
     subWindow->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
-    subWindow->property_->SetIsPcAppInPad(true);
+    subWindow->property_->SetPcAppInpadCompatibleMode(true);
     EXPECT_EQ(subWindow->SetParentWindow(newParentWindowId), WMError::WM_OK);
     EXPECT_EQ(WMError::WM_OK, subWindow->Destroy(true));
 }
@@ -1802,7 +1802,7 @@ HWTEST_F(WindowSceneSessionImplTest5, StopMoveWindow, Function | SmallTest | Tes
     ASSERT_EQ(WmErrorCode::WM_OK, window->StopMoveWindow());
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
-    window->property_->SetIsPcAppInPad(true);
+    window->property_->SetPcAppInpadCompatibleMode(true);
     window->windowSystemConfig_.freeMultiWindowEnable_ = false;
     EXPECT_EQ(WmErrorCode::WM_OK, window->StopMoveWindow());
 }

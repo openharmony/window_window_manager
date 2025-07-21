@@ -2115,7 +2115,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetWindowShadowEnabled01, TestSize.Level1)
     EXPECT_EQ(false, window->GetWindowShadowEnabled());
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
-    window->property_->SetIsPcAppInPad(true);
+    window->property_->SetPcAppInpadCompatibleMode(true);
     EXPECT_EQ(WMError::WM_OK, window->SetWindowShadowEnabled(true));
 }
 
@@ -2370,7 +2370,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetTitleAndDockHoverShown, TestSize.Level1)
     EXPECT_EQ(WMError::WM_OK, window->SetTitleAndDockHoverShown(true, true));
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
-    window->property_->SetIsPcAppInPad(true);
+    window->property_->SetPcAppInpadCompatibleMode(true);
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     window->windowSystemConfig_.freeMultiWindowEnable_ = false;
     EXPECT_EQ(WMError::WM_OK, window->SetTitleAndDockHoverShown(true, true));
@@ -2617,7 +2617,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetFollowParentMultiScreenPolicy, Function 
     ASSERT_EQ(WMError::WM_OK, window->SetFollowParentMultiScreenPolicy(false));
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
-    window->property_->SetIsPcAppInPad(true);
+    window->property_->SetPcAppInpadCompatibleMode(true);
     window->windowSystemConfig_.freeMultiWindowEnable_ = false;
     EXPECT_EQ(WMError::WM_OK, window->SetFollowParentMultiScreenPolicy(false));
 }

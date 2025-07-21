@@ -870,7 +870,7 @@ HWTEST_F(SceneSessionManagerTest12, ShiftAppWindowPointerEvent_01, TestSize.Leve
     result = ssm_->ShiftAppWindowPointerEvent(sourceSceneSession->GetPersistentId(), INVALID_SESSION_ID, fingerId);
     EXPECT_EQ(result, WMError::WM_ERROR_INVALID_SESSION);
 
-    sourceSceneSession->GetSessionProperty()->SetIsPcAppInPad(true);
+    sourceSceneSession->GetSessionProperty()->SetPcAppInpadCompatibleMode(true);
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
     ssm_->systemConfig_.freeMultiWindowSupport_ = false;
     result = ssm_->ShiftAppWindowPointerEvent(sourceSceneSession->GetPersistentId(), INVALID_SESSION_ID, fingerId);
