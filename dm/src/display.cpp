@@ -247,8 +247,8 @@ DMError Display::GetLiveCreaseRegion(FoldCreaseRegion& region) const
 {
     ScreenId screenId = GetScreenId();
     ScreenId rsScreenId;
-    bool res = SingletonContainer::Get<DisplayManagerAdapter>().ConvertScreenIdToRsScreenId(screenId, rsScreenId);
-    if (!res) {
+    bool ret = SingletonContainer::Get<DisplayManagerAdapter>().ConvertScreenIdToRsScreenId(screenId, rsScreenId);
+    if (!ret) {
         TLOGE(WmsLogTag::DMS, "convertScreenIdToRsScreenId falied");
         return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
     }
