@@ -831,7 +831,7 @@ void SceneInputManager::ConstructDumpDisplayInfo(const MMI::DisplayInfo& display
                           << "|screenArea.id:" << displayInfo.screenArea.id
                           << "|screenArea.area:[" << displayInfo.screenArea.area.x << ","
                           << displayInfo.screenArea.area.y << ","
-                          << displayInfo.screenArea.area.width << "," 
+                          << displayInfo.screenArea.area.width << ","
                           << displayInfo.screenArea.area.height << "]"
                           << "|rsId:" << displayInfo.rsId
                           << "|offsetX:" << displayInfo.offsetX
