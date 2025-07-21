@@ -6734,7 +6734,6 @@ void ScreenSessionManager::SetScreenPrivacyWindowList(DisplayId id, std::vector<
 
 void ScreenSessionManager::NotifyPrivateWindowListChanged(DisplayId id, std::vector<std::string> privacyWindowList)
 {
-    TLOGI(WmsLogTag::DMS, "Notify displayid: %{public}" PRIu64"", id);
     auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::PRIVATE_WINDOW_LIST_LISTENER);
     if (agents.empty()) {
         return;
@@ -8923,7 +8922,7 @@ void ScreenSessionManager::NotifyFoldToExpandCompletion(bool foldToExpand)
 
 void ScreenSessionManager::RecordEventFromScb(std::string description, bool needRecordEvent)
 {
-    TLOGW(WmsLogTag::DMS, "%{public}s", description.c_str());
+    TLOGD(WmsLogTag::DMS, "%{public}s", description.c_str());
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::DMS, "permission denied, clientName: %{public}s, pid: %{public}d",
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
@@ -9979,7 +9978,7 @@ sptr<DisplayInfo> ScreenSessionManager::GetPrimaryDisplayInfo()
                 continue;
             }
             if (!session->GetIsExtend()) {
-                TLOGE(WmsLogTag::DMS, "find primary %{public}" PRIu64, session->screenId_);
+                TLOGD(WmsLogTag::DMS, "find primary %{public}" PRIu64, session->screenId_);
                 screenSession = session;
                 break;
             }
