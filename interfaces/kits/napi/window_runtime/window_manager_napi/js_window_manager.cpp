@@ -870,24 +870,24 @@ napi_value JsWindowManager::OnToggleShownStateForAllAppWindows(napi_env env, nap
 
 napi_value JsWindowManager::OnRegisterWindowManagerCallback(napi_env env, napi_callback_info info)
 {
-    WLOGFD("[NAPI]");
+    TLOGD(WmsLogTag::DEFAULT, "[NAPI]");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 2) { // 2: params num
-        WLOGFE("Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::DEFAULT, "Argc is invalid: %{public}zu", argc);
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
         return NapiGetUndefined(env);
     }
     std::string cbType;
     if (!ConvertFromJsValue(env, argv[0], cbType)) {
-        WLOGFE("Failed to convert parameter to callbackType");
+        TLOGE(WmsLogTag::DEFAULT, "Failed to convert parameter to callbackType");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
         return NapiGetUndefined(env);
     }
     napi_value value = argv[1];
     if (!NapiIsCallable(env, value)) {
-        WLOGI("Callback(argv[1]) is not callable");
+        TLOGE(WmsLogTag::DEFAULT, "Callback(argv[1]) is not callable");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
         return NapiGetUndefined(env);
     }
@@ -897,24 +897,24 @@ napi_value JsWindowManager::OnRegisterWindowManagerCallback(napi_env env, napi_c
         napi_throw(env, JsErrUtils::CreateJsError(env, ret));
         return NapiGetUndefined(env);
     }
-    WLOGI("Register end, type=%{public}s", cbType.c_str());
+    TLOGD(WmsLogTag::DEFAULT, "Register end, type=%{public}s", cbType.c_str());
     return NapiGetUndefined(env);
 }
 
 napi_value JsWindowManager::OnUnregisterWindowManagerCallback(napi_env env, napi_callback_info info)
 {
-    WLOGFD("[NAPI]");
+    TLOGD(WmsLogTag::DEFAULT, "[NAPI]");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) {
-        WLOGFE("Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::DEFAULT, "Argc is invalid: %{public}zu", argc);
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
         return NapiGetUndefined(env);
     }
     std::string cbType;
     if (!ConvertFromJsValue(env, argv[0], cbType)) {
-        WLOGFE("Failed to convert parameter to callbackType");
+        TLOGE(WmsLogTag::DEFAULT, "Failed to convert parameter to callbackType");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
         return NapiGetUndefined(env);
     }
@@ -935,7 +935,7 @@ napi_value JsWindowManager::OnUnregisterWindowManagerCallback(napi_env env, napi
         napi_throw(env, JsErrUtils::CreateJsError(env, ret));
         return NapiGetUndefined(env);
     }
-    WLOGI("Unregister end, type=%{public}s", cbType.c_str());
+    TLOGD(WmsLogTag::DEFAULT, "Unregister end, type=%{public}s", cbType.c_str());
     return NapiGetUndefined(env);
 }
 

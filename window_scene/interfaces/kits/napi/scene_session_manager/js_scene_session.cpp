@@ -2401,7 +2401,7 @@ napi_value JsSceneSession::UpdateFullScreenWaterfallMode(napi_env env, napi_call
 
 napi_value JsSceneSession::UpdateSizeChangeReason(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::DEFAULT, "[NAPI]");
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnUpdateSizeChangeReason(env, info) : nullptr;
 }
@@ -3510,25 +3510,25 @@ napi_value JsSceneSession::OnUpdateSizeChangeReason(napi_env env, napi_callback_
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) { // 1: params num
-        WLOGFE("Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;
     if (!ConvertFromJsValue(env, argv[0], reason)) {
-        WLOGFE("Failed to convert parameter to bool");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to bool");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        WLOGFE("session is nullptr, id:%{public}d", persistentId_);
+        TLOGE(WmsLogTag::WMS_LAYOUT, "session is nullptr, id:%{public}d", persistentId_);
         return NapiGetUndefined(env);
     }
     session->UpdateSizeChangeReason(reason);
-    TLOGI(WmsLogTag::DEFAULT, "%{public}u", reason);
+    TLOGD(WmsLogTag::WMS_LAYOUT, "%{public}u", reason);
     return NapiGetUndefined(env);
 }
 
