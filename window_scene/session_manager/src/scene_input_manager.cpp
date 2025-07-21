@@ -714,7 +714,7 @@ void SceneInputManager::FlushDisplayInfoToMMI(std::vector<MMI::WindowInfo>&& win
                                               const bool forceFlush)
 {
     eventHandler_->PostTask([this, windowInfoList = std::move(windowInfoList),
-                            pixelMapList = std::move(pixelMapList), forceFlush] {
+                            pixelMapList = std::move(pixelMapList), forceFlush]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "FlushDisplayInfoToMMI");
         if (isUserBackground_.load()) {
             TLOGND(WmsLogTag::WMS_MULTI_USER, "User in background, no need to flush display info");
@@ -819,7 +819,7 @@ void SceneInputManager::ConstructDumpDisplayInfo(const MMI::DisplayInfo& display
                           << "|dpi:" << displayInfo.dpi
                           << "|name:" << displayInfo.name
                           << "|direction:" << static_cast<int32_t>(displayInfo.direction)
-                          << "|displayDirection:"<< static_cast<int32_t>(displayInfo.displayDirection)
+                          << "|displayDirection:" << static_cast<int32_t>(displayInfo.displayDirection)
                           << "|displayMode:" << static_cast<int32_t>(displayInfo.displayMode)
                           << "|transform:" << transformStream.str()
                           << "|screenOneHandX:" << displayInfo.oneHandX
