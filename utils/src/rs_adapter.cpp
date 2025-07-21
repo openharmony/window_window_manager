@@ -19,13 +19,13 @@
 
 #include "window_manager_hilog.h"
 
-#define RETURN_IF_PARAM_IS_NULL(param, ...)                                            \
-    do {                                                                               \
-        if (!param) {                                                                  \
+#define RETURN_IF_PARAM_IS_NULL(param, ...)                              \
+    do {                                                                 \
+        if (!param) {                                                    \
             TLOGE(WmsLogTag::WMS_SCB, "The %{public}s is null", #param); \
-            return __VA_ARGS__;                                                        \
-        }                                                                              \
-    } while (false)                                                                    \
+            return __VA_ARGS__;                                          \
+        }                                                                \
+    } while (false)                                                      \
 
 namespace OHOS {
 namespace Rosen {
