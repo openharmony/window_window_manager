@@ -3859,7 +3859,7 @@ napi_value JsWindow::OnGetPreferredOrientation(napi_env env, napi_callback_info 
     } else {
         TLOGE(WmsLogTag::WMS_ROTATION, "Orientation %{public}u invalid!", static_cast<uint32_t>(requestedOrientation));
     }
-    TLOGI(WmsLogTag::WMS_ROTATION, "window [%{public}u, %{public}s] orientation=%{public}u",
+    TLOGD(WmsLogTag::WMS_ROTATION, "end, window [%{public}u, %{public}s] orientation=%{public}u",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), static_cast<uint32_t>(apiOrientation));
     return CreateJsValue(env, static_cast<uint32_t>(apiOrientation));
 }
