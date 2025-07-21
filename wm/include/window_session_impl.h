@@ -541,6 +541,7 @@ public:
     void UpdateCurrentWindowOrientation(DisplayOrientation displayOrientation);
     DisplayOrientation GetCurrentWindowOrientation() const;
     Orientation ConvertUserOrientationToUserPageOrientation(Orientation orientation);
+    Orientation ConvertInvalidOrientation();
     void SetUserRequestedOrientation(Orientation orientation) override;
     bool IsUserOrientation(Orientation orientation) const;
     bool isNeededForciblySetOrientation(Orientation orientation) override;
