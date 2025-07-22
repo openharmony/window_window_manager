@@ -1090,7 +1090,7 @@ void DumpSecSurfaceInfoMap(const std::map<uint64_t, std::vector<SecSurfaceInfo>>
             dumpSecSurfaceStream << "{";
         }
         auto hostNodeId = e.first;
-        dumpSecSurfaceStream << "id:" << hostNodeId << ";list" << e.second.size();
+        dumpSecSurfaceStream << "id:" << hostNodeId << ";list:" << e.second.size();
         for (const auto& secSurfaceInfo : e.second) {
             auto surfaceInfoStr = DumpSecSurfaceInfo(secSurfaceInfo);
             auto rectInfoStr = DumpSecRectInfo(secSurfaceInfo.uiExtensionRectInfo);
