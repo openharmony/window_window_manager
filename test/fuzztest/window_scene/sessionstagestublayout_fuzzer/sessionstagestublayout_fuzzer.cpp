@@ -52,6 +52,14 @@ void SessionStageStubLayoutTest(sptr<WindowSessionImpl> stageStub, MessageParcel
     stageStub->OnRemoteRequest(
         static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_DRAG_ACTIVATED),
         parcel, reply, option);
+    parcel.RewindRead(0);
+    stageStub->OnRemoteRequest(
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_WINDOW_MODE_FOR_UI_TEST),
+        parcel, reply, option);
+    parcel.RewindRead(0);
+    stageStub->OnRemoteRequest(
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_GLOBAL_DISPLAY_RECT),
+        parcel, reply, option);
 }
 
 bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
