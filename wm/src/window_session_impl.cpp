@@ -2881,7 +2881,7 @@ Orientation WindowSessionImpl::ConvertUserOrientationToUserPageOrientation(Orien
     return Orientation::UNSPECIFIED;
 }
 
-Orientation WindowSessionImpl::ConvertInvalidOrientation() const
+Orientation WindowSessionImpl::ConvertInvalidOrientation()
 {
     Orientation requestedOrientation = GetRequestedOrientation();
     if (IsUserOrientation(requestedOrientation)) {
