@@ -170,13 +170,13 @@ ani_status ScreenAniUtils::CallAniFunctionVoid(ani_env *env, const char* ns,
         TLOGE(WmsLogTag::DEFAULT, "[ANI]canot find callBack %{public}d", ret);
         return ret;
     }
-    va_list args;
-    va_start(args, signature);
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]CallAniFunctionVoid begin %{public}s", signature);
     if (func == nullptr) {
         TLOGI(WmsLogTag::DEFAULT, "[ANI] null func ani");
         return ret;
     }
+    va_list args;
+    va_start(args, signature);
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]CallAniFunctionVoid begin %{public}s", signature);
     ret = env->Function_Call_Void_V(func, args);
     va_end(args);
     if (ret != ANI_OK) {

@@ -23,6 +23,15 @@ ScreenAniListener::~ScreenAniListener()
 {
     TLOGI(WmsLogTag::DMS, "[ANI]~ScreenAniListener");
 }
+
+void ScreenAniListener::SetMainEventHandler()
+{
+    auto mainRunner = AppExecFwk::EventRunner::GetMainEventRunner();
+    if (mainRunner == nullptr) {
+        return;
+    }
+    eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(mainRunner);
+}
  
 void ScreenAniListener::AddCallback(const std::string& type, ani_ref callback)
 {
@@ -107,9 +116,17 @@ void ScreenAniListener::OnConnect(ScreenId id)
             TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback null, return");
             return;
         }
-        
-        ScreenAniUtils::CallAniFunctionVoid(env_, "L@ohos/screen/screen;", "screenEventCallBack",
-            "Lstd/core/Object;D:V", oneAniCallback, static_cast<ani_double>(id));
+
+        auto task = [env = env_, oneAniCallback, id] () {
+            ScreenAniUtils::CallAniFunctionVoid(env, "L@ohos/screen/screen;", "screenEventCallBack",
+                "Lstd/core/Object;D:V", oneAniCallback, static_cast<ani_double>(id));
+        };
+        if (!eventHandler_) {
+            TLOGE(WmsLogTag::DEFAULT, "get main event handler failed!");
+            return;
+        }
+        eventHandler_->PostTask(task, "dms:AniScreenListener::ConnectCallBack", 0,
+            AppExecFwk::EventQueue::Priority::IMMEDIATE);
     }
 }
 void ScreenAniListener::OnDisconnect(ScreenId id)
@@ -152,9 +169,17 @@ void ScreenAniListener::OnDisconnect(ScreenId id)
             TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback null, return");
             return;
         }
-        
-        ScreenAniUtils::CallAniFunctionVoid(env_, "L@ohos/screen/screen;", "screenEventCallBack",
-            "Lstd/core/Object;D:V", oneAniCallback, static_cast<ani_double>(id));
+
+        auto task = [env = env_, oneAniCallback, id] () {
+            ScreenAniUtils::CallAniFunctionVoid(env, "L@ohos/screen/screen;", "screenEventCallBack",
+                "Lstd/core/Object;D:V", oneAniCallback, static_cast<ani_double>(id));
+        };
+        if (!eventHandler_) {
+            TLOGE(WmsLogTag::DEFAULT, "get main event handler failed!");
+            return;
+        }
+        eventHandler_->PostTask(task, "dms:AniScreenListener::DisconnectCallBack", 0,
+            AppExecFwk::EventQueue::Priority::IMMEDIATE);
     }
 }
  

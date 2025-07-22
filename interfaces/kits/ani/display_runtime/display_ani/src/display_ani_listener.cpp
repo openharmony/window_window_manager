@@ -83,6 +83,7 @@ void DisplayAniListener::RemoveAllCallback()
 void DisplayAniListener::OnCreate(DisplayId id)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] begin");
+    std::lock_guard<std::mutex> lock(aniCallBackMtx_);
     auto thisListener = weakRef_.promote();
     if (thisListener == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] this listener is nullptr");
@@ -90,13 +91,12 @@ void DisplayAniListener::OnCreate(DisplayId id)
     }
     TLOGI(WmsLogTag::DMS, "[ANI] OnCreate is called, displayId: %{public}d", static_cast<uint32_t>(id));
     if (aniCallBack_.empty()) {
-        TLOGE(WmsLogTag::DMS, "[ANI] OnCreate not register!");
+        TLOGE(WmsLogTag::DMS, "[ANI] Ani callback is empty!");
         return;
     }
-    std::lock_guard<std::mutex> lock(aniCallBackMtx_);
     auto it = aniCallBack_.find(EVENT_ADD);
     if (it == aniCallBack_.end()) {
-        TLOGE(WmsLogTag::DMS, "[ANI] OnCreate not this event, return");
+        TLOGE(WmsLogTag::DMS, "[ANI] Add callback has not been registered");
         return;
     }
     std::vector<ani_ref> vec = it->second;
@@ -104,12 +104,16 @@ void DisplayAniListener::OnCreate(DisplayId id)
     // find callbacks in vector
     for (ani_ref oneAniCallback : vec) {
         ani_boolean result;
-        if (ANI_OK != env_->Reference_IsUndefined(oneAniCallback, &result)) {
-            TLOGE(WmsLogTag::DMS, "[ANI] OnCreate Callback is undefined, return");
+        if (env_ == nullptr) {
+            TLOGE(WmsLogTag::DMS, "null env_");
             return;
         }
-        if (ANI_OK != env_->Reference_IsNull(oneAniCallback, &result)) {
-            TLOGE(WmsLogTag::DMS, "[ANI] OnCreate Callback is null, return");
+        ani_boolean undefRes;
+        ani_boolean nullRes;
+        env_->Reference_IsUndefined(oneAniCallback, &undefRes);
+        env_->Reference_IsNull(oneAniCallback, &nullRes);
+        if (undefRes || nullRes) {
+            TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback is undefRes or null");
             return;
         }
         auto task = [env = env_, oneAniCallback, id] () {
@@ -127,6 +131,51 @@ void DisplayAniListener::OnCreate(DisplayId id)
 
 void DisplayAniListener::OnDestroy(DisplayId id)
 {
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
+    std::lock_guard<std::mutex> lock(aniCallBackMtx_);
+    auto thisListener = weakRef_.promote();
+    if (thisListener == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] this listener is nullptr");
+        return;
+    }
+    TLOGI(WmsLogTag::DMS, "[ANI] OnDestroy is called, displayId: %{public}d", static_cast<uint32_t>(id));
+    if (aniCallBack_.empty()) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Ani callback is empty!");
+        return;
+    }
+    auto it = aniCallBack_.find(EVENT_REMOVE);
+    if (it == aniCallBack_.end()) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Remove callback has not been registered");
+        return;
+    }
+    std::vector<ani_ref> vec = it->second;
+    TLOGI(WmsLogTag::DMS, "vec_callback size: %{public}d", (int)vec.size());
+    // find callbacks in vector
+    for (ani_ref oneAniCallback : vec) {
+        ani_boolean result;
+        if (env_ == nullptr) {
+            TLOGE(WmsLogTag::DMS, "OnDestroy: null env_");
+            return;
+        }
+        ani_boolean undefRes;
+        ani_boolean nullRes;
+        env_->Reference_IsUndefined(oneAniCallback, &undefRes);
+        env_->Reference_IsNull(oneAniCallback, &nullRes);
+        if (undefRes || nullRes) {
+            TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback is undefRes or null");
+            return;
+        }
+        auto task = [env = env_, oneAniCallback, id] () {
+            DisplayAniUtils::CallAniFunctionVoid(env, "L@ohos/display/display;", "displayEventCallBack",
+                nullptr, oneAniCallback, static_cast<ani_double>(id));
+        };
+        if (!eventHandler_) {
+            TLOGE(WmsLogTag::DEFAULT, "get main event handler failed!");
+            return;
+        }
+        eventHandler_->PostTask(task, "dms:AniDisplayListener::CreateCallBack", 0,
+            AppExecFwk::EventQueue::Priority::IMMEDIATE);
+    }
 }
 void DisplayAniListener::OnChange(DisplayId id)
 {
