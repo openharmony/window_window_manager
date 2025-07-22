@@ -43,7 +43,7 @@ void ScreenAniListener::AddCallback(const std::string& type, ani_ref callback)
     std::lock_guard<std::mutex> lock(mtx_);
     ani_ref cbRef{};
     if (env_->GlobalReference_Create(callback, &cbRef) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI]create global ref fail");
+        TLOGE(WmsLogTag::DMS, "[ANI]create global ref fail");
         return;
     };
     aniCallBack_[type].emplace_back(cbRef);
@@ -78,14 +78,13 @@ void ScreenAniListener::RemoveCallback(ani_env* env, const std::string& type, an
 }
 void ScreenAniListener::OnConnect(ScreenId id)
 {
-    TLOGI(WmsLogTag::DMS, "[ANI] begin");
+    TLOGI(WmsLogTag::DMS, "[ANI] begin, displayId: %{public}" PRIu64, id);
     std::lock_guard<std::mutex> lock(mtx_);
     auto thisListener = weakRef_.promote();
     if (thisListener == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] this listener is nullptr");
+        TLOGE(WmsLogTag::DMS, "[ANI] this listener is nullptr");
         return;
     }
-    TLOGI(WmsLogTag::DMS, "[ANI] OnConnect is called, displayId: %{public}d", static_cast<uint32_t>(id));
     if (aniCallBack_.empty()) {
         TLOGE(WmsLogTag::DMS, "[ANI] OnConnect not register!");
         return;
@@ -108,13 +107,9 @@ void ScreenAniListener::OnConnect(ScreenId id)
         env_->Reference_IsUndefined(oneAniCallback, &undefRes);
         env_->Reference_IsNull(oneAniCallback, &nullRes);
         // judge is null or undefined
-        if (undefRes == 1) {
-            TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback undefRes, return");
-            return;
-        }
-        if (nullRes == 1) {
-            TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback null, return");
-            return;
+        if (undefRes || nullRes) {
+            TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback is undefRes or null");
+            continue;
         }
 
         auto task = [env = env_, oneAniCallback, id] () {
@@ -122,7 +117,7 @@ void ScreenAniListener::OnConnect(ScreenId id)
                 "Lstd/core/Object;D:V", oneAniCallback, static_cast<ani_double>(id));
         };
         if (!eventHandler_) {
-            TLOGE(WmsLogTag::DEFAULT, "get main event handler failed!");
+            TLOGE(WmsLogTag::DMS, "get main event handler failed!");
             return;
         }
         eventHandler_->PostTask(task, "dms:AniScreenListener::ConnectCallBack", 0,
@@ -135,10 +130,10 @@ void ScreenAniListener::OnDisconnect(ScreenId id)
     std::lock_guard<std::mutex> lock(mtx_);
     auto thisListener = weakRef_.promote();
     if (thisListener == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] this listener is nullptr");
+        TLOGE(WmsLogTag::DMS, "[ANI] this listener is nullptr");
         return;
     }
-    TLOGI(WmsLogTag::DMS, "[ANI] OnDisconnect is called, displayId: %{public}d", static_cast<uint32_t>(id));
+    TLOGI(WmsLogTag::DMS, "[ANI] OnDisconnect is called, displayId: %{public}" PRIu64, id);
     if (aniCallBack_.empty()) {
         TLOGE(WmsLogTag::DMS, "[ANI] OnDisconnect not register!");
         return;
@@ -161,13 +156,9 @@ void ScreenAniListener::OnDisconnect(ScreenId id)
         env_->Reference_IsUndefined(oneAniCallback, &undefRes);
         env_->Reference_IsNull(oneAniCallback, &nullRes);
         // judge is null or undefined
-        if (undefRes == 1) {
-            TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback undefRes, return");
-            return;
-        }
-        if (nullRes == 1) {
-            TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback null, return");
-            return;
+        if (undefRes || nullRes) {
+            TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback is undefRes or null");
+            continue;
         }
 
         auto task = [env = env_, oneAniCallback, id] () {
@@ -175,7 +166,7 @@ void ScreenAniListener::OnDisconnect(ScreenId id)
                 "Lstd/core/Object;D:V", oneAniCallback, static_cast<ani_double>(id));
         };
         if (!eventHandler_) {
-            TLOGE(WmsLogTag::DEFAULT, "get main event handler failed!");
+            TLOGE(WmsLogTag::DMS, "get main event handler failed!");
             return;
         }
         eventHandler_->PostTask(task, "dms:AniScreenListener::DisconnectCallBack", 0,
@@ -190,10 +181,10 @@ void ScreenAniListener::OnChange(ScreenId id)
     std::lock_guard<std::mutex> lock(mtx_);
     auto thisListener = weakRef_.promote();
     if (thisListener == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] this listener is nullptr");
+        TLOGE(WmsLogTag::DMS, "[ANI] this listener is nullptr");
         return;
     }
-    TLOGI(WmsLogTag::DMS, "[ANI] OnChange is called, displayId: %{public}d", static_cast<uint32_t>(id));
+    TLOGI(WmsLogTag::DMS, "[ANI] OnChange is called, displayId: %{public}" PRIu64, id);
     if (aniCallBack_.empty()) {
         TLOGE(WmsLogTag::DMS, "[ANI] OnChange not register!");
         return;
