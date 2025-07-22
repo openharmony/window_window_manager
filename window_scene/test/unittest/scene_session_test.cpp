@@ -25,6 +25,7 @@
 #include "session/host/include/main_session.h"
 #include "wm_common.h"
 #include "mock/mock_session_stage.h"
+#include "mock/mock_accesstoken_kit.h"
 #include "input_event.h"
 #include <pointer_event.h>
 #include <ui/rs_surface_node.h>
@@ -461,8 +462,8 @@ HWTEST_F(SceneSessionTest, HandleActionUpdateWindowShadowEnabled01, TestSize.Lev
     ASSERT_NE(sceneSession, nullptr);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     sceneSession->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
     sceneSession->containerColorList_.insert("abc");
-
     auto ret = sceneSession->HandleActionUpdateWindowShadowEnabled(property, action);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
 
