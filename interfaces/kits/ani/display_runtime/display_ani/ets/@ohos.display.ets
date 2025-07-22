@@ -16,6 +16,10 @@ import type { AsyncCallback, Callback} from '@ohos.base';
 import { BusinessError } from '@ohos.base';
 import colorSpaceManager from '@ohos.graphics.colorSpaceManager';
 import hdrCapability from '@ohos.graphics.hdrCapability';
+import hilog from '@ohos.hilog';
+
+const DOMAIN = 0x4201;
+const TAG = '[ANI]';
 
 export default namespace display {
 
@@ -110,7 +114,6 @@ export class FoldCreaseRegionImpl implements FoldCreaseRegion {
 }
 
 export enum FoldDisplayMode {
-
     FOLD_DISPLAY_MODE_UNKNOWN = 0,
 
     FOLD_DISPLAY_MODE_FULL,
@@ -123,7 +126,6 @@ export enum FoldDisplayMode {
 }
 
 export enum Orientation {
-
     PORTRAIT = 0,
 
     LANDSCAPE = 1,
@@ -144,7 +146,6 @@ export enum FoldStatus {
   }
 
 enum DisplayState {
-
     STATE_UNKNOWN = 0,
 
     STATE_OFF,
@@ -200,6 +201,16 @@ export interface Display {
     getCutoutInfo(callback: AsyncCallback<CutoutInfo>): void;
 
     getCutoutInfo(): Promise<CutoutInfo>;
+
+    getAvailableArea(): Promise<Rect>;
+
+    hasImmersiveWindow(callback: AsyncCallback<boolean>): void;
+
+    hasImmersiveWindow(): Promise<boolean>;
+
+    on(type: string, callback: Callback<Rect>): void;
+
+    off(type: string, callback?: Callback<Rect>): void;
 }
 
 export class DisplayImpl implements Display {
@@ -217,6 +228,7 @@ export class DisplayImpl implements Display {
     alive: boolean;
 
     state: DisplayState;
+    state_: int;
 
     refreshRate: double;
 
@@ -233,6 +245,7 @@ export class DisplayImpl implements Display {
     densityDPI: double;
 
     orientation: Orientation;
+    orientation_: int;
 
     densityPixels: double;
 
@@ -246,9 +259,15 @@ export class DisplayImpl implements Display {
 
     hdrFormats: Array<hdrCapability.HDRFormat>;
 
+    displayRef: long;
+
+    setDisplayRef(nativeObj : long) : void{
+        this.displayRef = nativeObj;
+    }
+
     getCutoutInfo(callback: AsyncCallback<CutoutInfo>): void {
         taskpool.execute((): CutoutInfo => {
-            let res: CutoutInfo = new CutoutInfoImpl()
+            let res: CutoutInfo = new CutoutInfoImpl();
             this.getCutoutInfoInternal(res);
             minusRectArray(res.boundingRects);
             return res;
@@ -274,8 +293,55 @@ export class DisplayImpl implements Display {
         });
     }
 
-    public native getCutoutInfoInternal(cutoutInfo: CutoutInfo): void;
+    hasImmersiveWindow(callback: AsyncCallback<boolean>): void {
+        taskpool.execute((): boolean => {
+            return this.hasImmersiveWindowInternal();
+        }).then((ret: NullishType) => {
+            callback(new BusinessError(), ret as boolean);
+        }).catch((err: NullishType) => {
+            callback(err as BusinessError, false);
+        });
+    }
 
+    hasImmersiveWindow(): Promise<boolean> {
+        return new Promise<boolean>((resolve: (value: boolean) => void, reject: (error: BusinessError) => void ) => {
+            taskpool.execute((): boolean => {
+                return this.hasImmersiveWindowInternal();
+            }).then((ret: NullishType) => {
+                resolve(ret as boolean);
+            }).catch((err: NullishType) => {
+                reject(err as BusinessError);
+            });
+        });
+    }
+
+    getAvailableArea(): Promise<Rect> {
+        return new Promise<Rect>((resolve: (value: Rect) => void, reject: (error: BusinessError) => void ) => {
+            taskpool.execute((): Rect => {
+                let res: Rect = new RectImpl();
+                this.getAvailableAreaInternal(res);
+                return res;
+            }).then((ret: NullishType) => {
+                resolve(ret as Rect);
+            }).catch((err: NullishType) => {
+                reject(err as BusinessError);
+            });
+        })
+    }
+
+    on(type: string, callback: Callback<Rect>): void {
+        this.syncOn(type, callback as object);
+    }
+
+    off(type: string, callback?: Callback<Rect>): void {
+        this.syncOff(type, callback as object);
+    }
+
+    native syncOn(type: string, callback: object): void;
+    native syncOff(type: string, callback?: object): void;
+    native getAvailableAreaInternal(rect: Rect): void;
+    native getCutoutInfoInternal(cutoutInfo: CutoutInfo): void;
+    native hasImmersiveWindowInternal(): boolean;
 }
 
 function minusRectArray(rectArr: Array<Rect>): void {
@@ -289,6 +355,8 @@ function minusRectArray(rectArr: Array<Rect>): void {
 }
 
 export native function isFoldable(): boolean;
+
+export native function isCaptured(): boolean;
 
 export function getFoldDisplayMode(): FoldDisplayMode {
     let res = getFoldDisplayModeNative();
@@ -328,16 +396,20 @@ export native function getCurrentFoldCreaseRegionNative(foldCreaseRegion: object
 
 // display sync interfaces
 export function getDisplayByIdSync(displayId: number): Display {
-    let display:Display = new DisplayImpl();
+    let display = new DisplayImpl();
     getDisplayByIdSyncNative(display as object, displayId);
+    display.state = display.state_ as DisplayState;
+    display.orientation = display.orientation_ as Orientation;
     return display;
 }
 
 export native function getDisplayByIdSyncNative(obj: object, displayId: number): void;
 
 export function getDefaultDisplaySync(): Display {
-    let display:Display = new DisplayImpl();
+    let display = new DisplayImpl();
     getDefaultDisplaySyncNative(display as object);
+    display.state = display.state_ as DisplayState;
+    display.orientation = display.orientation_ as Orientation;
     return display;
 }
 
@@ -346,6 +418,7 @@ export native function getDefaultDisplaySyncNative(obj: object): void;
 export native function getAllDisplaysSyncNative(displayArray: Array<Display>): void;
 
 export function getAllDisplays(callback: AsyncCallback<Array<Display>>): void {
+    hilog.info(DOMAIN, TAG, 'get all display from ani');
     let res: Array<Display> = new Array<Display>(DISPLAY_ARRAY_LENGTH);
     for (let i = 0; i < res.length; i++) {
         res[i] = new DisplayImpl();
@@ -355,6 +428,7 @@ export function getAllDisplays(callback: AsyncCallback<Array<Display>>): void {
         minusDisplayArray(res);
         callback(new BusinessError(), res);
     } catch (err: BusinessError) {
+        hilog.error(DOMAIN, TAG, 'get all display from err');
         callback(err, res);
     }
     return;
@@ -383,6 +457,9 @@ function minusDisplayArray(displayArr: Array<Display>): void {
         if (displayArr[i].width == 0) {
             break;
         }
+        let dp = displayArr[i] as DisplayImpl;
+        dp.state = dp.state_ as DisplayState;
+        dp.orientation = dp.orientation_ as Orientation;
     }
     displayArr.splice(i);
 }
@@ -416,6 +493,73 @@ export function foldStatusCallback(cb: object, cbArg: int): void {
 export function foldDisplayModeCallback(cb: object, cbArg: int): void {
     const func = cb as (cbArg: FoldDisplayMode) => void;
     func(cbArg as FoldDisplayMode);
+}
+
+export function foldAngleChangeCallback(cb: object, cbArg: object): void {
+    const func = cb as (cbArg: Array<number>) => void;
+    func(cbArg as Array<number>);
+}
+
+export function captureStatusChangedCallback(cb: object, cbArg: boolean): void {
+    const func = cb as (cbArg: boolean) => void;
+    func(cbArg as boolean);
+}
+
+export function availableAreaChangedCallback(cb: object, cbArg: object): void {
+    const func = cb as (cbArg: Rect) => void;
+    func(cbArg as Rect);
+}
+
+export native function hasPrivateWindow(displayId: number): boolean;
+
+export function getAllDisplayPhysicalResolution(): Promise<Array<DisplayPhysicalResolution>> {
+    return new Promise<Array<DisplayPhysicalResolution>>((resolve: (value: Array<DisplayPhysicalResolution>) => void,
+        reject: (error: BusinessError) => void ) => {
+            taskpool.execute((): Array<DisplayPhysicalResolution> => {
+                let res: Array<DisplayPhysicalResolution> = new Array<DisplayPhysicalResolution>(5);
+                for (let i = 0; i < res.length; i++) {
+                    res[i] = new DisplayPhysicalResolutionImpl();
+                }
+                getAllDisplayPhysicalResolutionNative(res, displayMgrRef);
+                minusResolutionArray(res);
+                return res;
+            }).then((ret: NullishType) => {
+                resolve(ret as Array<DisplayPhysicalResolution>);
+            }).catch((err: NullishType) => {
+                reject(err as BusinessError);
+            });
+        });
+}
+
+function minusResolutionArray(resolutions: Array<DisplayPhysicalResolution>): void {
+    let index = 0;
+    for (; index < resolutions.length; index++) {
+        if (resolutions[index].physicalWidth == 0) {
+            break;
+        }
+        let resolution = resolutions[index] as DisplayPhysicalResolutionImpl;
+        resolution.foldDisplayMode = resolution.foldDisplayMode_ as FoldDisplayMode;
+    }
+    resolutions.splice(index);
+}
+
+export native function getAllDisplayPhysicalResolutionNative(PhysicalResolutions: Array<DisplayPhysicalResolution>, nativeObj: long): void;
+
+export interface DisplayPhysicalResolution {
+    foldDisplayMode: FoldDisplayMode;
+
+    physicalWidth: number;
+
+    physicalHeight: number;
+}
+
+export class DisplayPhysicalResolutionImpl implements DisplayPhysicalResolution{
+    foldDisplayMode: FoldDisplayMode;
+    foldDisplayMode_: int;
+
+    physicalWidth: number;
+
+    physicalHeight: number;
 }
 
 export let displayMgrRef: long;
