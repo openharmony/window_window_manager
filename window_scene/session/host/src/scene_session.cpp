@@ -8764,7 +8764,7 @@ void SceneSession::NotifyKeyboardAnimationWillBegin(bool isKeyboardShow, const W
             return;
         }
         if (session->sessionStage_ == nullptr) {
-            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s sessionStage_ is null, id: %{public}d",
+            TLOGND(WmsLogTag::WMS_KEYBOARD, "%{public}s sessionStage_ is null, id: %{public}d",
                 where, session->GetPersistentId());
             return;
         }
