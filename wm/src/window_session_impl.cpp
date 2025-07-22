@@ -2864,7 +2864,7 @@ Orientation WindowSessionImpl::GetRequestedOrientation()
     return property_->GetUserRequestedOrientation();
 }
 
-Orientation WindowSessionImpl::ConvertUserOrientationToUserPageOrientation(Orientation Orientation)
+Orientation WindowSessionImpl::ConvertUserOrientationToUserPageOrientation(Orientation Orientation) const
 {
     switch (Orientation) {
         case Orientation::USER_ROTATION_LANDSCAPE:
@@ -2881,7 +2881,7 @@ Orientation WindowSessionImpl::ConvertUserOrientationToUserPageOrientation(Orien
     return Orientation::UNSPECIFIED;
 }
 
-Orientation WindowSessionImpl::ConvertInvalidOrientation()
+Orientation WindowSessionImpl::ConvertInvalidOrientation() const
 {
     Orientation requestedOrientation = GetRequestedOrientation();
     if (IsUserOrientation(requestedOrientation)) {
