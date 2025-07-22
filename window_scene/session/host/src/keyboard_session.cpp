@@ -1112,6 +1112,8 @@ void KeyboardSession::CalculateOccupiedAreaAfterUIRefresh()
         if ((reason >= SizeChangeReason::DRAG && reason <= SizeChangeReason::DRAG_END) ||
             reason == SizeChangeReason::DRAG_MOVE) {
             if (callingSession->GetOriPosYBeforeRaisedByKeyboard() != 0) {
+                TLOGI(WmsLogTag::WMS_KEYBOARD, "Skip recalculation and reset oriPosYBeforeRaisedByKeyboard_,"
+                    " id: %{public}d", callingId);
                 callingSession->SetOriPosYBeforeRaisedByKeyboard(0);
             }
         } else {
