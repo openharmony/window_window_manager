@@ -54,14 +54,10 @@ ohos_fuzztest("SceneSessionMgrLStubAttributeFuzzTest") {
     "${window_base_path}/window_scene/session:screen_session",
     "${window_base_path}/window_scene/session_manager:scene_session_manager",
   ]
-  public_external_deps = [
-    "ability_runtime:session_handler",
-    "accessibility:accessibility_common",
+  external_deps = [
     "graphic_2d:window_animation",
     "input:libmmi-client",
     "input:libmmi-napi",
-  ]
-  external_deps = [
     "ability_base:configuration",
     "ability_base:session_info",
     "ability_base:want",
