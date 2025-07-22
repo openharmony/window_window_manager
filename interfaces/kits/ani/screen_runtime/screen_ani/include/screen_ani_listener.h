@@ -19,6 +19,8 @@
 #include <mutex>
 #include "screen_manager.h"
 #include "ani.h"
+#include "event_handler.h"
+#include "refbase.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -35,12 +37,14 @@ public:
     void OnChange(ScreenId id) override;
     ani_status CallAniMethodVoid(ani_object object, const char* cls,
         const char* method, const char* signature, ...);
+    void SetMainEventHandler();
 
 private:
     ani_env* env_;
     std::mutex mtx_;
     std::map<std::string, std::vector<ani_ref>> aniCallBack_;
     wptr<ScreenAniListener> weakRef_;
+    std::shared_ptr<AppExecFwk::EventHandler> eventHandler_ = nullptr;
 };
 const std::string EVENT_CONNECT = "connect";
 const std::string EVENT_DISCONNECT = "disconnect";
