@@ -78,8 +78,7 @@ WindowExtensionSessionImpl::WindowExtensionSessionImpl(const sptr<WindowOption>&
     if ((isDensityFollowHost_ = option->GetIsDensityFollowHost())) {
         hostDensityValue_ = option->GetDensity();
     }
-    TLOGI(WmsLogTag::WMS_UIEXT, "UIExtension usage=%{public}u, hideNonSecureWindows=%{public}d",
-        property_->GetUIExtensionUsage(), extensionWindowFlags_.hideNonSecureWindowsFlag);
+    TLOGNI(WmsLogTag::WMS_UIEXT, "Uiext usage=%{public}u", property_->GetUIExtensionUsage());
     dataHandler_ = std::make_shared<Extension::ProviderDataHandler>();
     RegisterDataConsumer();
 }
@@ -364,7 +363,7 @@ WMError WindowExtensionSessionImpl::TransferAbilityResult(uint32_t resultCode, c
 
 WMError WindowExtensionSessionImpl::TransferExtensionData(const AAFwk::WantParams& wantParams)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "id: %{public}d", GetPersistentId());
+    TLOGD(WmsLogTag::WMS_UIEXT, "id: %{public}d", GetPersistentId());
     if (IsWindowSessionInvalid()) {
         WLOGFE("Window invalid.");
         return WMError::WM_ERROR_REPEAT_OPERATION;
@@ -386,7 +385,7 @@ WMError WindowExtensionSessionImpl::TransferExtensionData(const AAFwk::WantParam
             getpid(), GetPersistentId(), oss.str()
         );
         if (res != 0) {
-            TLOGI(WmsLogTag::WMS_UIEXT, "ReportUIExtensionException message failed, res: %{public}d", res);
+            TLOGE(WmsLogTag::WMS_UIEXT, "ReportUIExtensionException message failed, res: %{public}d", res);
         }
     }
     return WMError::WM_ERROR_IPC_FAILED;
@@ -1061,7 +1060,7 @@ WSError WindowExtensionSessionImpl::UpdateSessionViewportConfig(const SessionVie
 
 void WindowExtensionSessionImpl::UpdateExtensionDensity(SessionViewportConfig& config)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "isFollowHost:%{public}d, densityValue:%{public}f", config.isDensityFollowHost_,
+    TLOGD(WmsLogTag::WMS_UIEXT, "isFollowHost:%{public}d, densityValue:%{public}f", config.isDensityFollowHost_,
         config.density_);
     isDensityFollowHost_ = config.isDensityFollowHost_;
     if (config.isDensityFollowHost_) {
@@ -1818,7 +1817,7 @@ void WindowExtensionSessionImpl::ReportModalUIExtensionMayBeCovered(bool byLoadC
 
 void WindowExtensionSessionImpl::NotifyExtensionEventAsync(uint32_t notifyEvent)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "notifyEvent:%{public}d", notifyEvent);
+    TLOGD(WmsLogTag::WMS_UIEXT, "notifyEvent:%{public}d", notifyEvent);
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Window session invalid.");
         return;

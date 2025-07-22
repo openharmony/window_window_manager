@@ -2115,7 +2115,7 @@ uint32_t SceneSessionManager::GetLockScreenZOrder()
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto& [persistentId, session] : sceneSessionMap_) {
         if (session && session->IsScreenLockWindow()) {
-            TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: window %{public}d-%{public}d", persistentId,
+            TLOGI(WmsLogTag::WMS_UIEXT, "window %{public}d-%{public}d", persistentId,
                 session->GetZOrder());
             return session->GetZOrder() < DEFAULT_LOCK_SCREEN_ZORDER ? DEFAULT_LOCK_SCREEN_ZORDER :
                 session->GetZOrder();
@@ -3805,12 +3805,12 @@ WSError SceneSessionManager::CheckSubSessionStartedByExtensionAndSetDisplayId(co
         int32_t parentId = static_cast<int32_t>(info.hostWindowId);
         // Check the parent ids are the same in cross-process scenarios.
         if (parentId == property->GetParentPersistentId()) {
-            TLOGI(WmsLogTag::WMS_UIEXT, "parentId == property->GetParentPersistentId(parentId:%{public}d)", parentId);
+            TLOGD(WmsLogTag::WMS_UIEXT, "parentId == property->GetParentPersistentId(parentId:%{public}d)", parentId);
             result = WSError::WS_OK;
         }
     }
     if (SessionPermission::IsSystemCalling()) { // Fallback strategy.
-        TLOGI(WmsLogTag::WMS_UIEXT, "is system app");
+        TLOGD(WmsLogTag::WMS_UIEXT, "is system app");
         result = WSError::WS_OK;
     }
     if (property->GetIsUIExtensionAbilityProcess() && SessionPermission::IsStartedByUIExtension()) {
@@ -13762,7 +13762,7 @@ void SceneSessionManager::DestroyExtensionSession(const sptr<IRemoteObject>& rem
     auto task = [this, remoteExtSession, isConstrainedModal, where]() {
         auto iter = remoteExtSessionMap_.find(remoteExtSession);
         if (iter == remoteExtSessionMap_.end()) {
-            TLOGNI(WmsLogTag::WMS_UIEXT, "Invalid remoteExtSession or already destroyed");
+            TLOGNI(WmsLogTag::WMS_UIEXT, "Invalid remoteExtSession");
             return;
         }
         int32_t persistentId = INVALID_SESSION_ID;
@@ -13933,7 +13933,7 @@ void SceneSessionManager::AddExtensionWindowStageToSCB(const sptr<ISessionStage>
 void SceneSessionManager::RemoveExtensionWindowStageFromSCB(const sptr<ISessionStage>& sessionStage,
     const sptr<IRemoteObject>& token, bool isConstrainedModal)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "in");
+    TLOGD(WmsLogTag::WMS_UIEXT, "in");
     auto task = [this, sessionStage, token, isConstrainedModal]() {
         if (sessionStage == nullptr || token == nullptr) {
             TLOGNE(WmsLogTag::WMS_UIEXT, "input is nullptr");
