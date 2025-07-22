@@ -40,6 +40,11 @@ namespace uiExtensionHost {
       f(fnArg);
   }
 
+  function avoidAreaChangeCallBack(cb: object, area: object, type: int): void {
+    const func = cb as (data: window.AvoidAreaOptions) => void;
+    func({type: type as window.AvoidAreaType, area: area as window.AvoidArea});
+  }
+
   class UIESize implements window.Size {
     width: double;
     height: double;
