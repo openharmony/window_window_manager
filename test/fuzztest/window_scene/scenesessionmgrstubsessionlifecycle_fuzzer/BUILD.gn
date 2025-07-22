@@ -18,12 +18,14 @@ import("../../../../windowmanager_aafwk.gni")
 module_output_path = "window_manager/window_manager"
 
 ##############################fuzztest##########################################
-ohos_fuzztest("SceneSessionMgrStubLifecycleFuzzTest") {
+ohos_fuzztest("SceneSessionMgrStubSessionLifecycleFuzzTest") {
   fuzz_config_file = "."
   module_out_path = module_output_path
 
   include_dirs = [
     "${window_base_path}/window_scene",
+    "${window_base_path}/window_scene/session/container/include",
+    "${window_base_path}/window_scene/session/host/include",
     "${window_base_path}/window_scene/session_manager/include",
     "${window_base_path}/window_scene/session_manager/include/zidl",
     "../",
@@ -34,7 +36,7 @@ ohos_fuzztest("SceneSessionMgrStubLifecycleFuzzTest") {
     "-O0",
     "-fno-omit-frame-pointer",
   ]
-  sources = [ "scenesessionmgrstublifecycle_fuzzer.cpp" ]
+  sources = [ "scenesessionmgrstubsessionlifecycle_fuzzer.cpp" ]
   deps = [
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/utils:libwmutil_base",
@@ -60,7 +62,7 @@ group("fuzztest") {
 
   deps += [
     # deps file
-    ":SceneSessionMgrStubLifecycleFuzzTest",
+    ":SceneSessionMgrStubSessionLifecycleFuzzTest",
   ]
 }
 ###############################################################################

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "scenesessionmgrstublifecycle_fuzzer.h"
+#include "scenesessionmgrstubsessionlifecycle_fuzzer.h"
 
 #include <cstddef>
 #include <cstdint>
@@ -26,7 +26,8 @@
 #include "marshalling_helper.h"
 #include "scene_session_manager.h"
 #include "scene_session_manager_stub.h"
-#include "scene_session_manager_interface.h"
+#include "session/host/include/zidl/session_ipc_interface_code.h"
+#include "session_manager.h"
 
 using namespace OHOS::Rosen;
 
@@ -35,13 +36,18 @@ namespace {
 constexpr size_t DATA_MIN_SIZE = 2;
 }
 
-void SceneSessionMgrLifecycleIpcTest(MessageParcel& parcel)
+void SessionStubLifecycleIpcInterfaceCodeTest(sptr<Session>& sessionStub, MessageParcel& parcel)
 {
     MessageParcel reply;
     MessageOption option;
     parcel.RewindRead(0);
-    SceneSessionManager::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManager::
-        SceneSessionManagerMessage::TRANS_ID_GET_PARENT_MAIN_WINDOW_ID), parcel, reply, option);
+    sessionStub->OnRemoteRequest(
+        static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_SET_SESSION_LABEL_AND_ICON),
+        parcel, reply, option);
+    parcel.RewindRead(0);
+    sessionStub->OnRemoteRequest(
+        static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_NOTIFY_DISABLE_DELEGATOR_CHANGE),
+        parcel, reply, option);
 }
 
 bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
@@ -52,7 +58,11 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     MessageParcel parcel;
     parcel.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
     parcel.WriteBuffer(data, size);
-    SceneSessionMgrLifecycleIpcTest(parcel);
+    SessionInfo info;
+    info.abilityName_ = "lifecycleStubFuzzTest";
+    info.bundleName_ = "lifecycleStubFuzzTest";
+    sptr<Session> sessionStub = sptr<Session>::MakeSptr(info);
+    SessionStubLifecycleIpcInterfaceCodeTest(sessionStub, parcel);
     return true;
 }
 } // namespace OHOS
