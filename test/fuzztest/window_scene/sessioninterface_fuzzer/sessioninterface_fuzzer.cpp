@@ -173,6 +173,14 @@ void IPCSpecificInterfaceFuzzTest2(sptr<IRemoteObject> proxy, MessageParcel& sen
         sendData, reply, option);
     proxy->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_IS_SET_IMAGE_FOR_RECENT),
         sendData, reply, option);
+    proxy->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_FLOATING_BALL),
+        sendData, reply, option);
+    proxy->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_FLOATING_BALL_PREPARE_CLOSE),
+        sendData, reply, option);
+    proxy->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_START_FLOATING_BALL_MAIN_WINDOW),
+        sendData, reply, option);
+    proxy->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_FLOATING_BALL_WINDOW_ID),
+        sendData, reply, option);
 }
 
 void IPCInterfaceFuzzTest(const uint8_t* data, size_t size)
