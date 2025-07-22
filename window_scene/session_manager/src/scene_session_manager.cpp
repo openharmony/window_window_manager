@@ -16128,7 +16128,7 @@ WMError SceneSessionManager::ShiftAppWindowPointerEvent(int32_t sourcePersistent
         return WMError::WM_ERROR_INVALID_SESSION;
     }
     if (sourceSession->GetSessionProperty()->GetPcAppInpadCompatibleMode() &&
-        systemConfig_.IsPadWindow() && !systemConfig_.IsFreeMultiWindowMode()) {
+        !systemConfig_.IsFreeMultiWindowMode()) {
         TLOGE(WmsLogTag::WMS_PC, "This is PcAppInPad, not supported");
         return WMError::WM_OK;
     }

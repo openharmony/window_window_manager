@@ -342,10 +342,9 @@ bool WindowSessionImpl::IsPcOrPadFreeMultiWindowMode() const
     return windowSystemConfig_.IsPcWindow() || IsFreeMultiWindowMode();
 }
 
-bool WindowSessionImpl::IsPcAppInPadCompatibleMode() const
+bool WindowSessionImpl::IsPadAndNotFreeMutiWindowCompatibleMode() const
 {
     return property_->GetPcAppInpadCompatibleMode() &&
-        windowSystemConfig_.IsPadWindow() &&
         !IsFreeMultiWindowMode();
 }
 
@@ -2641,7 +2640,7 @@ WMError WindowSessionImpl::SetWindowDelayRaiseEnabled(bool isEnabled)
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (IsPcAppInPadCompatibleMode()) {
+    if (IsPadAndNotFreeMutiWindowCompatibleMode()) {
         TLOGE(WmsLogTag::WMS_FOCUS, "The is PcAppInPad, not supported");
         return WMError::WM_OK;
     }
@@ -3324,7 +3323,7 @@ WMError WindowSessionImpl::SetWindowTitleMoveEnabled(bool enable)
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (IsPcAppInPadCompatibleMode()) {
+    if (IsPadOrNotFreeMutiWindowCompatibleMode()) {
         TLOGE(WmsLogTag::WMS_DECOR, "The is PcAppInPad, not supported");
         return WMError::WM_OK;
     }
@@ -3355,7 +3354,7 @@ WMError WindowSessionImpl::SetSubWindowModal(bool isModal, ModalityType modality
         TLOGE(WmsLogTag::WMS_SUB, "called by invalid window type, type:%{public}d", GetType());
         return WMError::WM_ERROR_INVALID_CALLING;
     }
-    if (IsPcAppInPadCompatibleMode()) {
+    if (IsPadAndNotFreeMutiWindowCompatibleMode()) {
         TLOGE(WmsLogTag::WMS_SUB, "This is PcAppInPad, not support");
         return WMError::WM_OK;
     }
@@ -4483,7 +4482,7 @@ WMError WindowSessionImpl::SetTitleButtonVisible(bool isMaximizeVisible, bool is
     if (!WindowHelper::IsMainWindow(GetType())) {
         return WMError::WM_ERROR_INVALID_CALLING;
     }
-    if (property_->GetPcAppInpadCompatibleMode() && windowSystemConfig_.IsPadWindow() && !IsDecorEnable()) {
+    if (property_->GetPcAppInpadCompatibleMode() && !IsDecorEnable()) {
         TLOGE(WmsLogTag::WMS_DECOR, "The is PcAppInPad, not supported");
         return WMError::WM_OK;
     }
