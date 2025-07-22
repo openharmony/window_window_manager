@@ -817,7 +817,7 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId display
 }
 
 std::vector<std::shared_ptr<Media::PixelMap>> DisplayManager::GetScreenHDRshot(DisplayId displayId,
-    DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen)
+    DmErrorCode& errorCode, bool isUseDma, bool isCaptureFullOfScreen)
 {
     if (displayId == DISPLAY_ID_INVALID) {
         TLOGE(WmsLogTag::DMS, "displayId invalid!");
@@ -2544,7 +2544,7 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshotWithOption(const C
 }
 
 std::vector<std::shared_ptr<Media::PixelMap>> DisplayManager::GetScreenHDRshotWithOption(
-    const CaptureOption& captureOption, DmErrorCode* errorCode)
+    const CaptureOption& captureOption, DmErrorCode& errorCode)
 {
     TLOGI(WmsLogTag::DMS, "start!");
     if (captureOption.displayId_ == DISPLAY_ID_INVALID) {

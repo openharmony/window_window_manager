@@ -514,7 +514,7 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
                 return ERR_INVALID_DATA;
             }
             std::vector<std::shared_ptr<Media::PixelMap>> displaySnapshotVec = GetDisplayHDRSnapshot(
-                displayId, &errCode, isUseDma, isCaptureFullOfScreen);
+                displayId, errCode, isUseDma, isCaptureFullOfScreen);
             if (displaySnapshotVec.size() != PIXMAP_VECTOR_SIZE) {
                 TLOGE(WmsLogTag::DMS, "Dail to receive displaySnapshotVec in stub.");
                 reply.WriteParcelable(nullptr);
@@ -1482,7 +1482,7 @@ void ScreenSessionManagerStub::ProcGetDisplayHDRSnapshotWithOption(MessageParcel
         return;
     }
     DmErrorCode errCode = DmErrorCode::DM_OK;
-    std::vector<std::shared_ptr<Media::PixelMap>> captureVec = GetDisplayHDRSnapshotWithOption(option, &errCode);
+    std::vector<std::shared_ptr<Media::PixelMap>> captureVec = GetDisplayHDRSnapshotWithOption(option, errCode);
     if (captureVec.size() != PIXMAP_VECTOR_SIZE) {
         TLOGE(WmsLogTag::DMS, "captureVec size: %{public}u", captureVec.size());
         reply.WriteParcelable(nullptr);
