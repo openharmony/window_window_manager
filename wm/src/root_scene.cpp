@@ -271,7 +271,7 @@ void RootScene::RegisterInputEventListener()
         }
     }
     if (!(DelayedSingleton<IntentionEventManager>::GetInstance()->EnableInputEventListener(
-        uiContent_.get(), eventHandler_))) {
+        uiContent_.get(), eventHandler_, this))) {
         WLOGFE("EnableInputEventListener fail");
     }
     InputTransferStation::GetInstance().MarkRegisterToMMI();
