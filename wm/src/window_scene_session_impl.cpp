@@ -391,6 +391,15 @@ WMError WindowSceneSessionImpl::CreateSystemWindow(WindowType type)
     return WMError::WM_OK;
 }
 
+WMError WindowSceneSessionImpl::RecoverSessionProperty()
+{
+    // recover colorMode
+    if (auto hostSession = GetHostSession()) {
+        hostSession->OnUpdateColorMode(colorMode_, hasDarkRes_);
+    }
+    return WMError::WM_OK;
+}
+
 WMError WindowSceneSessionImpl::RecoverAndConnectSpecificSession()
 {
     TLOGI(WmsLogTag::WMS_RECOVER, "windowName=%{public}s, windowMode=%{public}u, windowType=%{public}u, "
@@ -432,6 +441,7 @@ WMError WindowSceneSessionImpl::RecoverAndConnectSpecificSession()
         hostSession_ = session;
     }
     windowRecoverStateChangeFunc_(true, WindowRecoverState::WINDOW_FINISH_RECONNECT);
+    RecoverSessionProperty();
     TLOGI(WmsLogTag::WMS_RECOVER,
         "over, windowName=%{public}s, persistentId=%{public}d",
         GetWindowName().c_str(), GetPersistentId());
@@ -482,6 +492,7 @@ WMError WindowSceneSessionImpl::RecoverAndReconnectSceneSession()
         hostSession_ = session;
     }
     windowRecoverStateChangeFunc_(false, WindowRecoverState::WINDOW_FINISH_RECONNECT);
+    RecoverSessionProperty();
     TLOGI(WmsLogTag::WMS_RECOVER, "Successful, persistentId=%{public}d", GetPersistentId());
     return static_cast<WMError>(ret);
 }
@@ -4203,6 +4214,7 @@ WMError WindowSceneSessionImpl::UpdateColorMode()
     colorMode_ = colorMode;
     bool hasDarkRes = false;
     appContext->AppHasDarkRes(hasDarkRes);
+    hasDarkRes_ = hasDarkRes;
 
     if (auto hostSession = GetHostSession()) {
         hostSession->OnUpdateColorMode(colorMode, hasDarkRes);
