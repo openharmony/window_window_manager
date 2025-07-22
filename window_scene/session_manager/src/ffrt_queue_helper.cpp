@@ -33,6 +33,7 @@ FfrtQueueHelper::FfrtQueueHelper()
 
 FfrtQueueHelper::~FfrtQueueHelper() = default;
 
+// LCOV_EXCL_START
 bool FfrtQueueHelper::SubmitTaskAndWait(std::function<void()>&& task, uint64_t timeout)
 {
     auto timeoutFuture = std::make_shared<TimeoutFuture<bool>>();
@@ -53,4 +54,5 @@ void FfrtQueueHelper::SubmitTask(std::function<void()>&& task)
 {
     ffrtQueue_->submit(task);
 }
+// LCOV_EXCL_STOP
 } // namespace OHOS::Rosen

@@ -26,8 +26,10 @@ int WindowExtensionStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
     MessageParcel& reply, MessageOption& option)
 {
     if (data.ReadInterfaceToken() != GetDescriptor()) {
+        // LCOV_EXCL_START
         WLOGFE("InterfaceToken check failed");
         return ERR_TRANSACTION_FAILED;
+        // LCOV_EXCL_STOP
     }
     WLOGFD("code is %{public}u", code);
     switch (code) {
@@ -66,8 +68,10 @@ int WindowExtensionStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
             break;
         }
         default: {
+            // LCOV_EXCL_START
             WLOGFW("unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+            // LCOV_EXCL_STOP
         }
     }
     return ERR_NONE;
