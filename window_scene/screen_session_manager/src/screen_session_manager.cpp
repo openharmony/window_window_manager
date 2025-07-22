@@ -5675,8 +5675,8 @@ sptr<ScreenSession> ScreenSessionManager::InitVirtualScreen(ScreenId smsScreenId
     info->width_ = option.width_;
     info->height_ = option.height_;
     auto defaultScreen = GetScreenSession(GetDefaultScreenId());
-    if (defaultScreen != nullptr && defaultScreen->GetActiveScreenMode() != nullptr) {
-        info->refreshRate_ = defaultScreen->GetActiveScreenMode()->refreshRate_;
+    if (defaultScreen != nullptr) {
+        info->refreshRate_ = defaultScreen->GetRefreshRate();
         screenSession->UpdateRefreshRate(info->refreshRate_);
         std::vector<uint32_t> virtualRefreshRateVec = {info->refreshRate_};
         screenSession->SetSupportedRefreshRate(std::move(virtualRefreshRateVec));
