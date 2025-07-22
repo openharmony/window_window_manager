@@ -1589,6 +1589,9 @@ HWTEST_F(WindowSceneSessionImplTest5, GetTargetOrientationConfigInfo, Function |
     window->state_ = WindowState::STATE_CREATED;
     EXPECT_EQ(WMError::WM_OK,
     window->GetTargetOrientationConfigInfo(targetOrientation, properties, config, avoidAreas));
+    targetOrientation = Orientation::INVALID;
+    EXPECT_EQ(WMError::WM_OK,
+    window->GetTargetOrientationConfigInfo(targetOrientation, properties, config, avoidAreas));
 }
 
 /**
