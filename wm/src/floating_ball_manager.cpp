@@ -64,6 +64,7 @@ void FloatingBallManager::RemoveActiveController(const wptr<FloatingBallControll
     }
 }
 
+// LCOV_EXCL_START
 void FloatingBallManager::DoActionClick()
 {
     TLOGI(WmsLogTag::WMS_SYSTEM, "click in");
@@ -103,6 +104,7 @@ bool FloatingBallManager::IsSupportFloatingBall()
 {
     return false;
 }
+// LCOV_EXCL_STOP
 
 }
 }

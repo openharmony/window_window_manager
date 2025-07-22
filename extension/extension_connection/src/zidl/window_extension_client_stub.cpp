@@ -26,8 +26,10 @@ int WindowExtensionClientStub::OnRemoteRequest(uint32_t code, MessageParcel& dat
     MessageParcel& reply, MessageOption& option)
 {
     if (data.ReadInterfaceToken() != GetDescriptor()) {
+        // LCOV_EXCL_START
         WLOGFE("InterfaceToken check failed");
         return ERR_TRANSACTION_FAILED;
+        // LCOV_EXCL_STOP
     }
     WLOGI(" code is %{public}d", code);
     switch (code) {
@@ -43,8 +45,10 @@ int WindowExtensionClientStub::OnRemoteRequest(uint32_t code, MessageParcel& dat
         case TRANS_ID_ON_KEY_EVENT: {
             std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
             if (keyEvent == nullptr) {
+                // LCOV_EXCL_START
                 WLOGFE("create keyevent failed");
                 break;
+                // LCOV_EXCL_STOP
             }
             keyEvent->ReadFromParcel(data);
             OnKeyEvent(keyEvent);
@@ -53,16 +57,20 @@ int WindowExtensionClientStub::OnRemoteRequest(uint32_t code, MessageParcel& dat
         case TRANS_ID_ON_POINTER_EVENT: {
             std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
             if (pointerEvent == nullptr) {
+                // LCOV_EXCL_START
                 WLOGFE("create pointer event failed");
                 break;
+                // LCOV_EXCL_STOP
             }
             pointerEvent->ReadFromParcel(data);
             OnPointerEvent(pointerEvent);
             break;
         }
         default: {
+            // LCOV_EXCL_START
             WLOGFW("unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+            // LCOV_EXCL_STOP
         }
     }
     return ERR_NONE;

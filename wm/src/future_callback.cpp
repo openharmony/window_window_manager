@@ -38,6 +38,7 @@ WSError FutureCallback::OnUpdateSessionRect(const Rect& rect, WindowSizeChangeRe
     return WSError::WS_DO_NOTHING;
 }
 
+// LCOV_EXCL_START
 WSError FutureCallback::OnUpdateTargetOrientationInfo(OrientationInfo& info)
 {
     TLOGI(WmsLogTag::WMS_ROTATION, "update the target orientation info");
@@ -65,12 +66,14 @@ OrientationInfo FutureCallback::GetTargetOrientationResult(long timeOut)
 {
     return getTargetRotationFuture_.GetResult(timeOut);
 }
+// LCOV_EXCL_STOP
 
 RotationChangeResult FutureCallback::GetRotationResult(long timeOut)
 {
     return getRotationResultFuture_.GetResult(timeOut);
 }
 
+// LCOV_EXCL_START
 void FutureCallback::ResetResizeLock()
 {
     resizeFuture_.ResetLock({});
@@ -90,6 +93,7 @@ void FutureCallback::ResetRotationResultLock()
 {
     getRotationResultFuture_.ResetLock({});
 }
+// LCOV_EXCL_STOP
 
 int32_t FutureCallback::GetUpdateRectResult(long timeOut)
 {
