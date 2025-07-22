@@ -2166,6 +2166,12 @@ WMError WindowSceneSessionImpl::MoveWindowToGlobalDisplay(
         return WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS;
     }
     auto winId = GetPersistentId();
+    const auto curGlobalDisplayRect = GetGlobalDisplayRect();
+    if (curGlobalDisplayRect.IsSamePosition(x, y)) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "windowId: %{public}u, request same position: [%{public}d, %{public}d]",
+            winId, x, y);
+        return WMError::WM_OK;
+    }
     // Use RequestRect to quickly get width and height from Resize method.
     const auto requestRect = GetRequestRect();
     if (!Rect::IsRightBottomValid(x, y, requestRect.width_, requestRect.height_)) {
@@ -2178,6 +2184,22 @@ WMError WindowSceneSessionImpl::MoveWindowToGlobalDisplay(
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
     auto ret = hostSession->UpdateGlobalDisplayRectFromClient(newGlobalDisplayRect, SizeChangeReason::MOVE);
+    // If the window is shown, wait for the layout result from the server, so that the
+    // caller can directly obtain the updated globalDisplayRect from the window properties.
+    if (state_ == WindowState::STATE_SHOWN) {
+        layoutCallback_->ResetMoveWindowToGlobalDisplayLock();
+        const auto now = [] {
+            return std::chrono::duration_cast<std::chrono::milliseconds>(
+                std::chrono::system_clock::now().time_since_epoch()).count();
+        };
+        const auto startTime = now();
+        layoutCallback_->GetMoveWindowToGlobalDisplayAsyncResult(WINDOW_LAYOUT_TIMEOUT);
+        const auto waitDuration = now() - startTime;
+        if (waitDuration >= WINDOW_LAYOUT_TIMEOUT) {
+            TLOGW(WmsLogTag::WMS_LAYOUT, "Window layout timeout, windowId: %{public}d", winId);
+            layoutCallback_->GetMoveWindowToGlobalDisplayAsyncResult(WINDOW_LAYOUT_TIMEOUT);
+        }
+    }
     return static_cast<WMError>(ret);
 }
 

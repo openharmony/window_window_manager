@@ -2366,11 +2366,11 @@ Rect WindowSessionImpl::GetGlobalDisplayRect() const
 WMError WindowSessionImpl::ClientToGlobalDisplay(const Position& inPosition, Position& outPosition) const
 {
     const auto windowId = GetWindowId();
-    const auto layoutTransform = GetLayoutTransform();
-    if (WindowHelper::IsScaled(layoutTransform)) {
+    const auto transform = GetCurrentTransform();
+    if (WindowHelper::IsScaled(transform)) {
         TLOGW(WmsLogTag::WMS_LAYOUT,
             "Scaled window is not supported, windowId: %{public}u, scaleX: %{public}f, scaleY: %{public}f",
-            windowId, layoutTransform.scaleX_, layoutTransform.scaleY_);
+            windowId, transform.scaleX_, transform.scaleY_);
         return WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS;
     }
 
@@ -2389,11 +2389,11 @@ WMError WindowSessionImpl::ClientToGlobalDisplay(const Position& inPosition, Pos
 WMError WindowSessionImpl::GlobalDisplayToClient(const Position& inPosition, Position& outPosition) const
 {
     const auto windowId = GetWindowId();
-    const auto layoutTransform = GetLayoutTransform();
-    if (WindowHelper::IsScaled(layoutTransform)) {
+    const auto transform = GetCurrentTransform();
+    if (WindowHelper::IsScaled(transform)) {
         TLOGW(WmsLogTag::WMS_LAYOUT,
             "Scaled window is not supported, windowId: %{public}u, scaleX: %{public}f, scaleY: %{public}f",
-            windowId, layoutTransform.scaleX_, layoutTransform.scaleY_);
+            windowId, transform.scaleX_, transform.scaleY_);
         return WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS;
     }
 
@@ -2423,7 +2423,9 @@ WSError WindowSessionImpl::UpdateGlobalDisplayRectFromServer(const WSRect& rect,
     }
     property_->SetGlobalDisplayRect(newRect);
     globalDisplayRectSizeChangeReason_ = reason;
-    NotifyGlobalDisplayRectChange(newRect, static_cast<WindowSizeChangeReason>(reason));
+    auto windowSizeChangeReason = static_cast<WindowSizeChangeReason>(reason);
+    layoutCallback_->OnUpdateGlobalDisplayRect(newRect, windowSizeChangeReason, GetPersistentId());
+    NotifyGlobalDisplayRectChange(newRect, windowSizeChangeReason);
     return WSError::WS_OK;
 }
 

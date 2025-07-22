@@ -2155,13 +2155,25 @@ HWTEST_F(WindowSceneSessionImplTest5, TestMoveWindowToGlobalDisplay, TestSize.Le
     ret = window->MoveWindowToGlobalDisplay(100, 100);
     EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS);
 
-    // Case 3: Illegal position
+    // Case 3: Same position
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    ret = window->MoveWindowToGlobalDisplay(100, 100);
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    // Case 4: Illegal position
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     ret = window->MoveWindowToGlobalDisplay(INT32_MAX, INT32_MAX);
     EXPECT_EQ(ret, WMError::WM_ERROR_ILLEGAL_PARAM);
 
-    // Case 4: Move to new position
-    EXPECT_CALL(*mockHostSession, UpdateGlobalDisplayRectFromClient(_, _)).Times(1).WillOnce(Return(WSError::WS_OK));
+    EXPECT_CALL(*mockHostSession, UpdateGlobalDisplayRectFromClient(_, _)).Times(2).WillOnce(Return(WSError::WS_OK));
+
+    // Case 5: Move to new position
+    window->state_ = WindowState::STATE_SHOWN;
+    ret = window->MoveWindowToGlobalDisplay(200, 300);
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    // Case 6: Window is not shown
+    window->state_ = WindowState::STATE_HIDDEN;
     ret = window->MoveWindowToGlobalDisplay(200, 300);
     EXPECT_EQ(ret, WMError::WM_OK);
 }
