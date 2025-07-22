@@ -34,13 +34,13 @@ class IntentionEventManager {
 public:
     DISALLOW_COPY_AND_MOVE(IntentionEventManager);
     bool EnableInputEventListener(Ace::UIContent* uiContent,
-        std::shared_ptr<AppExecFwk::EventHandler>, sptr<Window> window);
+        std::shared_ptr<AppExecFwk::EventHandler>, wptr<Window> window);
 
 private:
 class InputEventListener : public MMI::IInputEventConsumer {
 public:
     InputEventListener(Ace::UIContent* uiContent, std::shared_ptr<AppExecFwk::EventHandler>
-        eventHandler, sptr<Window> window): uiContent_(uiContent), weakEventConsumer_(eventHandler),
+        eventHandler, wptr<Window> window): uiContent_(uiContent), weakEventConsumer_(eventHandler),
         window_(window) {}
     virtual ~InputEventListener();
     void OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const override;
@@ -58,7 +58,7 @@ private:
     void ProcessInjectionEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const;
     Ace::UIContent* uiContent_ = nullptr;
     std::weak_ptr<AppExecFwk::EventHandler> weakEventConsumer_;
-    sptr<Window> window_;
+    wptr<Window> window_;
 };
 };
 } // namespace OHOS::Rosen
