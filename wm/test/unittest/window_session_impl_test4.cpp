@@ -485,15 +485,15 @@ HWTEST_F(WindowSessionImplTest4, IsPcWindow, TestSize.Level1)
 }
 
 /**
- * @tc.name: IsPcAppInPadCompatibleMode
- * @tc.desc: IsPcAppInPadCompatibleMode
+ * @tc.name: IsPadAndNotFreeMutiWindowCompatibleMode
+ * @tc.desc: IsPadAndNotFreeMutiWindowCompatibleMode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest4, IsPcAppInPadCompatibleMode, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest4, IsPadAndNotFreeMutiWindowCompatibleMode, TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "WindowSessionImplTest4: IsPcAppInPadCompatibleMode start";
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: IsPadAndNotFreeMutiWindowCompatibleMode start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("IsPcAppInPadCompatibleMode");
+    option->SetWindowName("IsPadAndNotFreeMutiWindowCompatibleMode");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->property_->SetPersistentId(1);
@@ -503,13 +503,13 @@ HWTEST_F(WindowSessionImplTest4, IsPcAppInPadCompatibleMode, TestSize.Level1)
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
     window->property_->SetPcAppInpadCompatibleMode(true);
     window->windowSystemConfig_.freeMultiWindowEnable_ = false;
-    EXPECT_EQ(true, window->IsPcAppInPadCompatibleMode());
+    EXPECT_EQ(true, window->IsPadAndNotFreeMutiWindowCompatibleMode());
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
     window->property_->SetPcAppInpadCompatibleMode(true);
     window->windowSystemConfig_.freeMultiWindowEnable_ = true;
     window->windowSystemConfig_.isSystemDecorEnable_ = true;
-    EXPECT_EQ(false, window->IsPcAppInPadCompatibleMode());
-    GTEST_LOG_(INFO) << "WindowSessionImplTest4: IsPcAppInPadCompatibleMode end";
+    EXPECT_EQ(false, window->IsPadAndNotFreeMutiWindowCompatibleMode());
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: IsPadAndNotFreeMutiWindowCompatibleMode end";
 }
 
 /**

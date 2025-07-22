@@ -2860,7 +2860,7 @@ public:
      *
      * @return True means pcAppInpad and pad window., false means the opposite.
      */
-    virtual bool IsPcAppInPadCompatibleMode() const { return false; }
+    virtual bool IsPadAndNotFreeMutiWindowCompatibleMode() const { return false; }
 
     /**
      * @brief Judge whether SceneBoard is enabled.
