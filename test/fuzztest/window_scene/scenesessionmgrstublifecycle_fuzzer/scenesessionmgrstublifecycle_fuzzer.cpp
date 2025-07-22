@@ -63,7 +63,7 @@ void SceneSessionMgrLiteLifecycleIpcTest(MessageParcel& parcel)
     parcel.RewindRead(0);
     SceneSessionManagerLite::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManagerLite::
         SceneSessionManagerLiteMessage::TRANS_ID_CLEAR_MAIN_SESSIONS), parcel, reply, option);
-    parcel.RewindRead(0); 
+    parcel.RewindRead(0);
     SceneSessionManagerLite::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManagerLite::
         SceneSessionManagerLiteMessage::TRANS_ID_REGISTER_COLLABORATOR), parcel, reply, option);
     parcel.RewindRead(0);
@@ -105,7 +105,7 @@ void SceneSessionMgrLiteLifecycleIpcSecTest(MessageParcel& parcel)
     parcel.RewindRead(0);
     SceneSessionManagerLite::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManagerLite::
         SceneSessionManagerLiteMessage::TRANS_ID_GET_RECENT_MAIN_SESSION_INFO_LIST), parcel, reply, option);
-    parcel.RewindRead(0); 
+    parcel.RewindRead(0);
     SceneSessionManagerLite::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManagerLite::
         SceneSessionManagerLiteMessage::TRANS_ID_CREATE_NEW_INSTANCE_KEY), parcel, reply, option);
     parcel.RewindRead(0);
@@ -148,7 +148,7 @@ void SessionStubLifecycleIpcInterfaceCodeTest(sptr<Session>& sessionStub, Messag
         parcel, reply, option);
 }
 
-void SessionStageLifecycleIpcInterfaceCodeTest(sptr<Session>& stageStub, MessageParcel& parcel)
+void SessionStageLifecycleIpcInterfaceCodeTest(sptr<WindowSessionImpl>& stageStub, MessageParcel& parcel)
 {
     MessageParcel reply;
     MessageOption option;
