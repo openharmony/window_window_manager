@@ -135,6 +135,30 @@ JsScreenSession::~JsScreenSession()
     TLOGI(WmsLogTag::DMS, "~JsScreenSession");
 }
 
+std::shared_ptr<NativeReference> JsScreenSession::GetJSCallback(const std::string& callbackType)
+{
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsScreenSession::GetJSCallback[%s]", callbackType.c_str());
+    std::shared_ptr<NativeReference> jsCallBack = nullptr;
+    std::shared_lock<std::shared_mutex> lock(jsCbMapMutex_);
+    auto iter = mCallback_.find(callbackType);
+    if (iter == mCallback_.end()) {
+        TLOGE(WmsLogTag::DEFAULT, "%{public}s callback not found!", callbackType.c_str());
+    } else {
+        jsCallBack = iter->second;
+    }
+    return jsCallBack;
+}
+
+bool JsScreenSession::IsCallbackRegistered(const std::string& callbackType)
+{
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsScreenSession::IsCallbackRegistered[%s]", callbackType.c_str());
+    std::shared_lock<std::shared_mutex> lock(jsCbMapMutex_);
+    if (mCallback_.count(callbackType) > 0) {
+        return true;
+    }
+    return false;
+}
+
 napi_value JsScreenSession::LoadContent(napi_env env, napi_callback_info info)
 {
     JsScreenSession* me = CheckParamsAndGetThis<JsScreenSession>(env, info);
@@ -346,7 +370,7 @@ napi_value JsScreenSession::OnRegisterCallback(napi_env env, napi_callback_info 
         return NapiGetUndefined(env);
     }
 
-    if (mCallback_.count(callbackType)) {
+    if (IsCallbackRegistered(callbackType)) {
         TLOGE(WmsLogTag::DMS, "Failed to register callback, callback is already existed!");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_REPEAT_OPERATION)));
         return NapiGetUndefined(env);
@@ -355,7 +379,10 @@ napi_value JsScreenSession::OnRegisterCallback(napi_env env, napi_callback_info 
     napi_ref result = nullptr;
     napi_create_reference(env, callback, 1, &result);
     std::shared_ptr<NativeReference> callbackRef(reinterpret_cast<NativeReference*>(result));
-    mCallback_[callbackType] = callbackRef;
+    {
+        std::unique_lock<std::shared_mutex> lock(jsCbMapMutex_);
+        mCallback_[callbackType] = callbackRef;
+    }
     RegisterScreenChangeListener();
 
     return NapiGetUndefined(env);
@@ -436,7 +463,7 @@ napi_value JsScreenSession::OnGetScreenUIContext(napi_env env, napi_callback_inf
 void JsScreenSession::CallJsCallback(const std::string& callbackType)
 {
     TLOGI(WmsLogTag::DMS, "Call js callback: %{public}s.", callbackType.c_str());
-    if (mCallback_.count(callbackType) == 0) {
+    if (!IsCallbackRegistered(callbackType)) {
         TLOGE(WmsLogTag::DMS, "Callback is unregistered!");
         return;
     }
@@ -444,7 +471,7 @@ void JsScreenSession::CallJsCallback(const std::string& callbackType)
         TLOGE(WmsLogTag::DMS, "Call js callback %{public}s start", callbackType.c_str());
         UnRegisterScreenChangeListener();
     }
-    auto jsCallbackRef = mCallback_[callbackType];
+    auto jsCallbackRef = GetJSCallback(callbackType);
     wptr<ScreenSession> screenSessionWeak(screenSession_);
     auto asyncTask = [jsCallbackRef, callbackType, screenSessionWeak, env = env_]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsScreenSession::CallJsCallback");
@@ -496,12 +523,12 @@ void JsScreenSession::OnDisconnect(ScreenId screenId)
 void JsScreenSession::OnSensorRotationChange(float sensorRotation, ScreenId screenId)
 {
     const std::string callbackType = ON_SENSOR_ROTATION_CHANGE_CALLBACK;
-    if (mCallback_.count(callbackType) == 0) {
+    if (!IsCallbackRegistered(callbackType)) {
         TLOGE(WmsLogTag::DMS, "Callback %{public}s is unregistered!", callbackType.c_str());
         return;
     }
 
-    auto jsCallbackRef = mCallback_[callbackType];
+    auto jsCallbackRef = GetJSCallback(callbackType);
     wptr<ScreenSession> screenSessionWeak(screenSession_);
     auto asyncTask = [jsCallbackRef, callbackType, screenSessionWeak, sensorRotation, env = env_]() {
         if (jsCallbackRef == nullptr) {
@@ -536,12 +563,12 @@ void JsScreenSession::OnScreenOrientationChange(float screenOrientation, ScreenI
 {
     const std::string callbackType = ON_SCREEN_ORIENTATION_CHANGE_CALLBACK;
     TLOGI(WmsLogTag::DMS, "Call js callback: %{public}s.", callbackType.c_str());
-    if (mCallback_.count(callbackType) == 0) {
+    if (!IsCallbackRegistered(callbackType)) {
         TLOGE(WmsLogTag::DMS, "Callback %{public}s is unregistered!", callbackType.c_str());
         return;
     }
 
-    auto jsCallbackRef = mCallback_[callbackType];
+    auto jsCallbackRef = GetJSCallback(callbackType);
     wptr<ScreenSession> screenSessionWeak(screenSession_);
     auto asyncTask = [jsCallbackRef, callbackType, screenSessionWeak, screenOrientation, env = env_]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "jsScreenSession::OnScreenOrientationChange");
@@ -577,7 +604,7 @@ void JsScreenSession::OnPropertyChange(const ScreenProperty& newProperty, Screen
 {
     const std::string callbackType = ON_PROPERTY_CHANGE_CALLBACK;
     TLOGD(WmsLogTag::DMS, "Call js callback: %{public}s.", callbackType.c_str());
-    if (mCallback_.count(callbackType) == 0) {
+    if (!IsCallbackRegistered(callbackType)) {
         TLOGE(WmsLogTag::DMS, "Callback %{public}s is unregistered!", callbackType.c_str());
         return;
     }
@@ -585,7 +612,7 @@ void JsScreenSession::OnPropertyChange(const ScreenProperty& newProperty, Screen
         TLOGW(WmsLogTag::DMS, "relative position change, no need call callback");
         return;
     }
-    auto jsCallbackRef = mCallback_[callbackType];
+    auto jsCallbackRef = GetJSCallback(callbackType);
     wptr<ScreenSession> screenSessionWeak(screenSession_);
     auto asyncTask = [jsCallbackRef, callbackType, screenSessionWeak, newProperty, reason, env = env_]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "jsScreenSession::OnPropertyChange");
@@ -621,12 +648,12 @@ void JsScreenSession::OnScreenDensityChange()
 {
     const std::string callbackType = ON_SCREEN_DENSITY_CHANGE;
     TLOGD(WmsLogTag::DMS, "Call js callback: %{public}s.", callbackType.c_str());
-    if (mCallback_.count(callbackType) == 0) {
+    if (!IsCallbackRegistered(callbackType)) {
         TLOGE(WmsLogTag::DMS, "Callback %{public}s is unregistered!", callbackType.c_str());
         return;
     }
 
-    auto jsCallbackRef = mCallback_[callbackType];
+    auto jsCallbackRef = GetJSCallback(callbackType);
     wptr<ScreenSession> screenSessionWeak(screenSession_);
     auto asyncTask = [jsCallbackRef, callbackType, screenSessionWeak, env = env_]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "jsScreenSession::OnScreenDensityChange");
@@ -662,11 +689,11 @@ void JsScreenSession::OnPowerStatusChange(DisplayPowerEvent event, EventStatus e
 {
     const std::string callbackType = ON_POWER_STATUS_CHANGE_CALLBACK;
     TLOGD(WmsLogTag::DMS, "[UL_POWER]%{public}s.", callbackType.c_str());
-    if (mCallback_.count(callbackType) == 0) {
+    if (!IsCallbackRegistered(callbackType)) {
         TLOGW(WmsLogTag::DMS, "[UL_POWER]%{public}s is unregistered!", callbackType.c_str());
         return;
     }
-    auto jsCallbackRef = mCallback_[callbackType];
+    auto jsCallbackRef = GetJSCallback(callbackType);
     wptr<ScreenSession> screenSessionWeak(screenSession_);
     auto asyncTask = [jsCallbackRef, callbackType, screenSessionWeak, event, eventStatus, reason, env = env_]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "jsScreenSession::OnPowerStatusChange");
@@ -706,12 +733,12 @@ void JsScreenSession::OnScreenRotationLockedChange(bool isLocked, ScreenId scree
 {
     const std::string callbackType = ON_SCREEN_ROTATION_LOCKED_CHANGE;
     TLOGD(WmsLogTag::DMS, "Call js callback: %{public}s isLocked:%{public}u.", callbackType.c_str(), isLocked);
-    if (mCallback_.count(callbackType) == 0) {
+    if (!IsCallbackRegistered(callbackType)) {
         TLOGE(WmsLogTag::DMS, "Callback %{public}s is unregistered!", callbackType.c_str());
         return;
     }
 
-    auto jsCallbackRef = mCallback_[callbackType];
+    auto jsCallbackRef = GetJSCallback(callbackType);
     auto asyncTask = [jsCallbackRef, callbackType, isLocked, env = env_]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "jsScreenSession::OnScreenRotationLockedChange");
         if (jsCallbackRef == nullptr) {
@@ -739,11 +766,11 @@ void JsScreenSession::OnScreenRotationLockedChange(bool isLocked, ScreenId scree
 void JsScreenSession::OnScreenExtendChange(ScreenId mainScreenId, ScreenId extendScreenId)
 {
     const std::string callbackType = ON_SCREEN_EXTEND_CHANGE;
-    if (mCallback_.count(callbackType) == 0) {
+    if (!IsCallbackRegistered(callbackType)) {
         TLOGW(WmsLogTag::DMS, "Callback is unregistered!");
         return;
     }
-    auto jsCallbackRef = mCallback_[callbackType];
+    auto jsCallbackRef = GetJSCallback(callbackType);
     wptr<ScreenSession> screenSessionWeak(screenSession_);
     auto asyncTask = [jsCallbackRef, callbackType, mainScreenId, extendScreenId, env = env_]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "jsScreenSession::OnScreenDensityChange");
@@ -775,12 +802,12 @@ void JsScreenSession::OnHoverStatusChange(int32_t hoverStatus, bool needRotate, 
 {
     const std::string callbackType = ON_HOVER_STATUS_CHANGE_CALLBACK;
     TLOGI(WmsLogTag::DMS, "Call js callback: %{public}s.", callbackType.c_str());
-    if (mCallback_.count(callbackType) == 0) {
+    if (!IsCallbackRegistered(callbackType)) {
         TLOGE(WmsLogTag::DMS, "Callback %{public}s is unregistered!", callbackType.c_str());
         return;
     }
 
-    auto jsCallbackRef = mCallback_[callbackType];
+    auto jsCallbackRef = GetJSCallback(callbackType);
     wptr<ScreenSession> screenSessionWeak(screenSession_);
     auto napiTask = [jsCallbackRef, callbackType, screenSessionWeak, hoverStatus, needRotate, env = env_]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "jsScreenSession::OnHoverStatusChange");
@@ -814,11 +841,11 @@ void JsScreenSession::OnHoverStatusChange(int32_t hoverStatus, bool needRotate, 
 void JsScreenSession::OnScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName)
 {
     const std::string callbackType = ON_SCREEN_CAPTURE_NOTIFY;
-    if (mCallback_.count(callbackType) == 0) {
+    if (!IsCallbackRegistered(callbackType)) {
         TLOGW(WmsLogTag::DMS, "Callback is unregistered!");
         return;
     }
-    auto jsCallbackRef = mCallback_[callbackType];
+    auto jsCallbackRef = GetJSCallback(callbackType);
     auto asyncTask = [jsCallbackRef, callbackType, mainScreenId, uid, clientName, env = env_]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "jsScreenSession::OnScreenCaptureNotify");
         if (jsCallbackRef == nullptr) {
@@ -850,12 +877,12 @@ void JsScreenSession::OnCameraBackSelfieChange(bool isCameraBackSelfie, ScreenId
 {
     const std::string callbackType = ON_CAMERA_BACKSELFIE_CHANGE_CALLBACK;
     TLOGI(WmsLogTag::DMS, "Call js callback: %{public}s.", callbackType.c_str());
-    if (mCallback_.count(callbackType) == 0) {
+    if (!IsCallbackRegistered(callbackType)) {
         TLOGE(WmsLogTag::DMS, "Callback %{public}s is unregistered!", callbackType.c_str());
         return;
     }
 
-    auto jsCallbackRef = mCallback_[callbackType];
+    auto jsCallbackRef = GetJSCallback(callbackType);
     wptr<ScreenSession> screenSessionWeak(screenSession_);
     auto napiTask = [jsCallbackRef, callbackType, screenSessionWeak, isCameraBackSelfie, env = env_]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "jsScreenSession::OnCameraBackSelfieChange");
@@ -890,11 +917,11 @@ void JsScreenSession::OnSuperFoldStatusChange(ScreenId screenId, SuperFoldStatus
 {
     const std::string callbackType = ON_SUPER_FOLD_STATUS_CHANGE_CALLBACK;
     TLOGD(WmsLogTag::DMS, "Call js callback: %{public}s.", callbackType.c_str());
-    if (mCallback_.count(callbackType) == 0) {
+    if (!IsCallbackRegistered(callbackType)) {
         TLOGE(WmsLogTag::DMS, "Callback %{public}s is unregistered!", callbackType.c_str());
         return;
     }
-    auto jsCallbackRef = mCallback_[callbackType];
+    auto jsCallbackRef = GetJSCallback(callbackType);
     auto asyncTask = [jsCallbackRef, callbackType, screenId, superFoldStatus, env = env_]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "jsScreenSession::OnSuperFoldStatusChange");
         if (jsCallbackRef == nullptr) {
@@ -925,11 +952,11 @@ void JsScreenSession::OnSecondaryReflexionChange(ScreenId screenId, bool isSecon
 {
     const std::string callbackType = ON_SECONDARY_REFLEXION_CHANGE_CALLBACK;
     TLOGD(WmsLogTag::DMS, "Call js callback: %{public}s.", callbackType.c_str());
-    if (mCallback_.count(callbackType) == 0) {
+    if (!IsCallbackRegistered(callbackType)) {
         TLOGE(WmsLogTag::DMS, "Callback %{public}s is unregistered!", callbackType.c_str());
         return;
     }
-    auto jsCallbackRef = mCallback_[callbackType];
+    auto jsCallbackRef = GetJSCallback(callbackType);
     auto asyncTask = [jsCallbackRef, callbackType, screenId, isSecondaryReflexion, env = env_]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "jsScreenSession::OnSecondaryReflexionChange");
         if (jsCallbackRef == nullptr) {
@@ -961,11 +988,11 @@ void JsScreenSession::OnExtendScreenConnectStatusChange(ScreenId screenId,
 {
     const std::string callbackType = ON_EXTEND_SCREEN_CONNECT_STATUS_CHANGE_CALLBACK;
     TLOGD(WmsLogTag::DMS, "Call js callback: %{public}s.", callbackType.c_str());
-    if (mCallback_.count(callbackType) == 0) {
+    if (!IsCallbackRegistered(callbackType)) {
         TLOGE(WmsLogTag::DMS, "Callback %{public}s is unregistered!", callbackType.c_str());
         return;
     }
-    auto jsCallbackRef = mCallback_[callbackType];
+    auto jsCallbackRef = GetJSCallback(callbackType);
     auto asyncTask = [jsCallbackRef, callbackType, screenId, extendScreenConnectStatus, env = env_]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "jsScreenSession::OnExtendScreenConnectStatusChange");
         if (jsCallbackRef == nullptr) {
@@ -996,11 +1023,11 @@ void JsScreenSession::OnBeforeScreenPropertyChange(FoldStatus foldStatus)
 {
     const std::string callbackType = ON_BEFORE_PROPERTY_CHANGE_CALLBACK;
     TLOGD(WmsLogTag::DMS, "Call js callback: %{public}s.", callbackType.c_str());
-    if (mCallback_.count(callbackType) == 0) {
+    if (!IsCallbackRegistered(callbackType)) {
         TLOGE(WmsLogTag::DMS, "Callback %{public}s is unregistered!", callbackType.c_str());
         return;
     }
-    auto jsCallbackRef = mCallback_[callbackType];
+    auto jsCallbackRef = GetJSCallback(callbackType);
     auto asyncTask = [jsCallbackRef, callbackType, foldStatus, env = env_]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "jsScreenSession::OnBeforeScreenPropertyChange");
         if (jsCallbackRef == nullptr) {
@@ -1030,11 +1057,11 @@ void JsScreenSession::OnScreenModeChange(ScreenModeChangeEvent screenModeChangeE
 {
     const std::string callbackType = ON_SCREEN_CHANGE_CALLBACK;
     TLOGD(WmsLogTag::DMS, "Call js callback: %{public}s.", callbackType.c_str());
-    if (mCallback_.count(callbackType) == 0) {
+    if (!IsCallbackRegistered(callbackType)) {
         TLOGE(WmsLogTag::DMS, "Callback %{public}s is unregistered!", callbackType.c_str());
         return;
     }
-    auto jsCallbackRef = mCallback_[callbackType];
+    auto jsCallbackRef = GetJSCallback(callbackType);
     auto asyncTask = [jsCallbackRef, callbackType, screenModeChangeEvent, env = env_]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "jsScreenSession::OnScreenModeChange");
         if (jsCallbackRef == nullptr) {

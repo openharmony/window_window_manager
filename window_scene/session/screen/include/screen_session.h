@@ -374,6 +374,9 @@ public:
     void SetScreenAreaHeight(uint32_t screenAreaHeight);
     uint32_t GetScreenAreaHeight() const;
 
+    void UpdateMirrorWidth(uint32_t mirrorWidth);
+    void UpdateMirrorHeight(uint32_t mirrorHeight);
+
 private:
     ScreenProperty property_;
     mutable std::mutex propertyMutex_; // above guarded by clientProxyMutex_
@@ -419,6 +422,7 @@ private:
     bool isEnableCanvasRotation_ = false;
     std::mutex isEnableRegionRotationMutex_;
     std::mutex isEnableCanvasRotationMutex_;
+    std::shared_mutex availableAreaMutex_;
     bool isAvailableAreaNeedNotify_ = false;
     bool isSecurity_ = true;
     uint64_t sessionId_;
@@ -460,6 +464,7 @@ private:
         sptr<ScreenSession> defaultScreenSession);
 
     std::map<ScreenId, std::pair<sptr<ScreenSession>, Point>> screenSessionMap_;
+    mutable std::shared_mutex screenSessionMapMutex_;
 };
 
 } // namespace OHOS::Rosen

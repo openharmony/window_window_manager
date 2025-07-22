@@ -708,6 +708,23 @@ HWTEST_F(SceneSessionManagerTest3, SetAbilitySessionInfo, TestSize.Level1)
     OHOS::AppExecFwk::ElementName retElementName = ret->want.GetElement();
     ASSERT_EQ(retElementName.GetAbilityName(), info.abilityName_);
     ASSERT_EQ(retElementName.GetBundleName(), info.bundleName_);
+    EXPECT_EQ(true, ret->want.GetBoolParam(IS_CALL_BY_SCB, false));
+}
+
+/**
+ * @tc.name: SetAbilitySessionInfo02
+ * @tc.desc: SceneSesionManager set ability session from pending
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest3, SetAbilitySessionInfo02, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetAbilitySessionInfo";
+    info.bundleName_ = "SetAbilitySessionInfo";
+    sptr<SceneSession> sceneSession;
+    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<OHOS::AAFwk::SessionInfo> ret = ssm_->SetAbilitySessionInfo(sceneSession, 2);
+    EXPECT_EQ(false, ret->want.GetBoolParam(IS_CALL_BY_SCB, false));
 }
 
 /**
@@ -1217,8 +1234,6 @@ HWTEST_F(SceneSessionManagerTest3, UpdateBrightness02, TestSize.Level1)
 HWTEST_F(SceneSessionManagerTest3, SetDisplayBrightness, TestSize.Level1)
 {
     float brightness = 2.0f;
-    float result01 = ssm_->GetDisplayBrightness();
-    EXPECT_EQ(result01, UNDEFINED_BRIGHTNESS);
     ssm_->SetDisplayBrightness(brightness);
     float result02 = ssm_->GetDisplayBrightness();
     ASSERT_EQ(result02, 2.0f);

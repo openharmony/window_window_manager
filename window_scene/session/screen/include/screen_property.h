@@ -214,6 +214,10 @@ public:
     int32_t GetInputOffsetY();
 
     void SetInputOffsetY();
+    void SetMirrorWidth(uint32_t mirrorWidth);
+    uint32_t GetMirrorWidth() const;
+    void SetMirrorHeight(uint32_t mirrorHeight);
+    uint32_t GetMirrorHeight() const;
 
     float CalculatePPI();
     uint32_t CalculateDPI();
@@ -341,6 +345,9 @@ private:
     uint32_t screenAreaOffsetY_ { 0 };
     uint32_t screenAreaWidth_ { 0 };
     uint32_t screenAreaHeight_ { 0 };
+
+    uint32_t mirrorWidth_ { 0 };
+    uint32_t mirrorHeight_ { 0 };
 };
 } // namespace OHOS::Rosen
 

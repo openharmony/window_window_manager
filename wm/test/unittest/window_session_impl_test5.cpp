@@ -42,6 +42,10 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+
+private:
+    static constexpr int32_t PERSISTENT_ID_ONE = 1;
+    static constexpr int32_t PERSISTENT_ID_TWO = 2;
 };
 
 void WindowSessionImplTest5::SetUpTestCase() {}
@@ -1805,6 +1809,51 @@ HWTEST_F(WindowSessionImplTest5, OnPointDown, TestSize.Level1)
 
     EXPECT_CALL(*(session), ProcessPointDownSession(_, _)).Times(1).WillOnce(Return(WSError::WS_OK));
     EXPECT_TRUE(window->OnPointDown(0, 0, 0));
+}
+
+/**
+ * @tc.name: SwitchSubWindow
+ * @tc.desc: SwitchSubWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, SwitchSubWindow, Function | SmallTest | Level1)
+{
+    sptr<WindowOption> subOption = sptr<WindowOption>::MakeSptr();
+    subOption->SetWindowName("SwitchSubWindow");
+    subOption->SetSubWindowDecorEnable(true);
+    subOption->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    sptr<WindowSessionImpl> subWindow = sptr<WindowSessionImpl>::MakeSptr(subOption);
+    ASSERT_NE(subWindow, nullptr);
+    ASSERT_NE(subWindow->property_, nullptr);
+    subWindow->property_->SetPersistentId(PERSISTENT_ID_TWO);
+    subWindow->property_->SetDecorEnable(true);
+    subWindow->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    subWindow->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    subWindow->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    subWindow->windowSystemConfig_.freeMultiWindowEnable_ = false;
+    subWindow->windowSystemConfig_.isSystemDecorEnable_ = true;
+    subWindow->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    // freemultiwindowmode start
+    EXPECT_EQ(subWindow->IsDecorEnable(), false);
+    // cover emprty map
+    subWindow->SwitchSubWindow(PERSISTENT_ID_ONE);
+
+    std::vector<sptr<WindowSessionImpl>> vec;
+    WindowSessionImpl::subWindowSessionMap_.insert(std::pair<int32_t,
+        std::vector<sptr<WindowSessionImpl>>>(PERSISTENT_ID_ONE, vec));
+    WindowSessionImpl::subWindowSessionMap_[PERSISTENT_ID_ONE].push_back(subWindow);
+    subWindow->windowSystemConfig_.freeMultiWindowEnable_ = true;
+    subWindow->SwitchSubWindow(PERSISTENT_ID_ONE);
+    WindowMode mode = subWindow->property_->GetWindowMode();
+    bool decorVisible = mode == WindowMode::WINDOW_MODE_FLOATING ||
+        mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY ||
+        (mode == WindowMode::WINDOW_MODE_FULLSCREEN && !subWindow->property_->IsLayoutFullScreen());
+    if (subWindow->windowSystemConfig_.freeMultiWindowSupport_) {
+        auto isSubWindow = WindowHelper::IsSubWindow(subWindow->GetType());
+        decorVisible = decorVisible && (subWindow->windowSystemConfig_.freeMultiWindowEnable_ ||
+            (subWindow->property_->GetIsPcAppInPad() && isSubWindow));
+    }
+    EXPECT_EQ(decorVisible, true);
 }
 } // namespace
 } // namespace Rosen
