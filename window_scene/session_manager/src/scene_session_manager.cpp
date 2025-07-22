@@ -2435,11 +2435,11 @@ void SceneSessionManager::GetEffectiveDragResizeType(DragResizeType& dragResizeT
     if (dragResizeType != DragResizeType::RESIZE_TYPE_UNDEFINED) {
         return;
     }
-    if (systemConfig_.freeMultiWindowConfig_.defaultDragResizeType_ != DragResizeType::RESIZE_TYPE_UNDEFINED) {
-        dragResizeType = systemConfig_.freeMultiWindowConfig_.defaultDragResizeType_;
-        return;
-    }
     if (systemConfig_.freeMultiWindowSupport_) {
+        if (systemConfig_.freeMultiWindowConfig_.defaultDragResizeType_ != DragResizeType::RESIZE_TYPE_UNDEFINED) {
+            dragResizeType = systemConfig_.freeMultiWindowConfig_.defaultDragResizeType_;
+            return;
+        }
         dragResizeType = DragResizeType::RESIZE_WHEN_DRAG_END;
     } else {
         dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
