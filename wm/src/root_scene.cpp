@@ -295,7 +295,7 @@ void RootScene::FlushFrameRate(uint32_t rate, int32_t animatorExpectedFrameRate,
 bool RootScene::IsLastFrameLayoutFinished()
 {
     int32_t requestTimes = vsyncStation_->GetRequestVsyncTimes();
-    TLOGI(WmsLogTag::WMS_LAYOUT, "vsync request times: %{public}d", requestTimes);
+    TLOGD(WmsLogTag::WMS_LAYOUT, "vsync request times: %{public}d", requestTimes);
     return requestTimes <= 0;
 }
 
