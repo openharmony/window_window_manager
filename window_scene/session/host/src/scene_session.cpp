@@ -1812,11 +1812,11 @@ void SceneSession::UpdateSessionRectPosYFromClient(SizeChangeReason reason, Disp
 {
     if (!PcFoldScreenManager::GetInstance().IsHalfFolded(GetScreenId()) ||
         PcFoldScreenManager::GetInstance().HasSystemKeyboard()) {
-        TLOGI(
+        TLOGD(
             WmsLogTag::WMS_LAYOUT, "winId: %{public}d, displayId: %{public}" PRIu64, GetPersistentId(), GetScreenId());
         return;
     }
-    TLOGI(WmsLogTag::WMS_LAYOUT, "winId: %{public}d, reason: %{public}u, lastRect: %{public}s, currRect: %{public}s",
+    TLOGD(WmsLogTag::WMS_LAYOUT, "winId: %{public}d, reason: %{public}u, lastRect: %{public}s, currRect: %{public}s",
         GetPersistentId(), reason, GetSessionRect().ToString().c_str(), rect.ToString().c_str());
     if (reason != SizeChangeReason::RESIZE) {
         configDisplayId_ = configDisplayId;
@@ -7147,10 +7147,10 @@ WSError SceneSession::OnLayoutFullScreenChange(bool isLayoutFullScreen)
     PostTask([weakThis = wptr(this), isLayoutFullScreen, where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s session is null", where);
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s session is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s isLayoutFullScreen: %{public}d", where, isLayoutFullScreen);
+        TLOGNI(WmsLogTag::WMS_LAYOUT_PC, "%{public}s isLayoutFullScreen: %{public}d", where, isLayoutFullScreen);
         if (session->onLayoutFullScreenChangeFunc_) {
             session->SetIsLayoutFullScreen(isLayoutFullScreen);
             session->onLayoutFullScreenChangeFunc_(isLayoutFullScreen);
