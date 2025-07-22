@@ -50,6 +50,8 @@ const std::map<std::string, RegisterListenerType> WINDOW_LISTENER_MAP {
     {WINDOW_RECT_CHANGE_CB, RegisterListenerType::WINDOW_RECT_CHANGE_CB},
     {SUB_WINDOW_CLOSE_CB, RegisterListenerType::SUB_WINDOW_CLOSE_CB},
     {WINDOW_HIGHLIGHT_CHANGE_CB, RegisterListenerType::WINDOW_HIGHLIGHT_CHANGE_CB},
+    {WINDOW_DISPLAYID_CHANGE_CB, RegisterListenerType::WINDOW_DISPLAYID_CHANGE_CB},
+    {SYSTEM_DENSITY_CHANGE_CB, RegisterListenerType::SYSTEM_DENSITY_CHANGE_CB},
 };
 const std::map<std::string, RegisterListenerType> WINDOW_STAGE_LISTENER_MAP {
     // white register list for window stage
@@ -124,6 +126,40 @@ WmErrorCode AniWindowRegisterManager::ProcessAvoidAreaChangeRegister(sptr<AniWin
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterAvoidAreaChangeListener(thisListener));
     } else {
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterAvoidAreaChangeListener(thisListener));
+    }
+    return ret;
+}
+
+WmErrorCode AniWindowRegisterManager::ProcessSystemDensityChangeRegister(sptr<AniWindowListener> listener,
+    sptr<Window> window, bool isRegister, ani_env* env)
+{
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI]Window is nullptr");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<ISystemDensityChangeListener> thisListener(listener);
+    WmErrorCode ret = WmErrorCode::WM_OK;
+    if (isRegister) {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterSystemDensityChangeListener(thisListener));
+    } else {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterSystemDensityChangeListener(thisListener));
+    }
+    return ret;
+}
+
+WmErrorCode AniWindowRegisterManager::ProcessDisplayIdChangeRegister(sptr<AniWindowListener> listener,
+    sptr<Window> window, bool isRegister, ani_env* env)
+{
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI]Window is nullptr");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IDisplayIdChangeListener> thisListener(listener);
+    WmErrorCode ret = WmErrorCode::WM_OK;
+    if (isRegister) {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterDisplayIdChangeListener(thisListener));
+    } else {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterDisplayIdChangeListener(thisListener));
     }
     return ret;
 }
@@ -480,6 +516,10 @@ WmErrorCode AniWindowRegisterManager::ProcessListener(RegisterListenerType regis
                 return ProcessSubWindowCloseRegister(windowManagerListener, window, isRegister, env);
             case static_cast<uint32_t>(RegisterListenerType::WINDOW_HIGHLIGHT_CHANGE_CB):
                 return ProcessWindowHighlightChangeRegister(windowManagerListener, window, isRegister, env);
+            case static_cast<uint32_t>(RegisterListenerType::SYSTEM_DENSITY_CHANGE_CB):
+                return ProcessSystemDensityChangeRegister(windowManagerListener, window, isRegister, env);
+            case static_cast<uint32_t>(RegisterListenerType::WINDOW_DISPLAYID_CHANGE_CB):
+                return ProcessDisplayIdChangeRegister(windowManagerListener, window, isRegister, env);
             default:
                 TLOGE(WmsLogTag::DEFAULT, "[ANI]RegisterListenerType %{public}u is not supported",
                     static_cast<uint32_t>(registerListenerType));
@@ -529,6 +569,7 @@ WmErrorCode AniWindowRegisterManager::UnregisterListener(sptr<Window> window, co
                 TLOGE(WmsLogTag::DEFAULT, "[ANI]Unregister type %{public}s failed, no value", type.c_str());
                 return ret;
             }
+            it->second->SetAniCallBack(nullptr);
             env->GlobalReference_Delete(it->second->GetAniCallBack());
             jsCbMap_[type].erase(it++);
         }
@@ -547,6 +588,7 @@ WmErrorCode AniWindowRegisterManager::UnregisterListener(sptr<Window> window, co
                 TLOGE(WmsLogTag::DEFAULT, "[ANI]Unregister type %{public}s failed", type.c_str());
                 return ret;
             }
+            it->second->SetAniCallBack(nullptr);
             env->GlobalReference_Delete(it->second->GetAniCallBack());
             jsCbMap_[type].erase(it);
             break;

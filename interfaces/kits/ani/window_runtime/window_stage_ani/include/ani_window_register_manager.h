@@ -49,6 +49,8 @@ enum class RegisterListenerType : uint32_t {
     WINDOW_HIGHLIGHT_CHANGE_CB,
     WINDOW_STAGE_EVENT_CB,
     WINDOW_STAGE_CLOSE_CB,
+    SYSTEM_DENSITY_CHANGE_CB,
+    WINDOW_DISPLAYID_CHANGE_CB,
 };
 
 class AniWindowRegisterManager {
@@ -90,6 +92,10 @@ private:
     WmErrorCode ProcessWaterMarkFlagChangeRegister(sptr<AniWindowListener> listener,
         sptr<Window> window, bool isRegister, ani_env* env);
     WmErrorCode ProcessWindowVisibilityChangeRegister(sptr<AniWindowListener> listener, sptr<Window> window,
+        bool isRegister, ani_env* env);
+    WmErrorCode ProcessSystemDensityChangeRegister(sptr<AniWindowListener> listner, sptr<Window> window,
+        bool isRegister, ani_env* env);
+    WmErrorCode ProcessDisplayIdChangeRegister(sptr<AniWindowListener> listner, sptr<Window> window,
         bool isRegister, ani_env* env);
     WmErrorCode ProcessWindowNoInteractionRegister(sptr<AniWindowListener> listener, sptr<Window> window,
         bool isRegister, ani_env* env, ani_double timeout);
