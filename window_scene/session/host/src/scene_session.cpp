@@ -1816,8 +1816,6 @@ void SceneSession::UpdateSessionRectPosYFromClient(SizeChangeReason reason, Disp
             WmsLogTag::WMS_LAYOUT, "winId: %{public}d, displayId: %{public}" PRIu64, GetPersistentId(), GetScreenId());
         return;
     }
-    TLOGD(WmsLogTag::WMS_LAYOUT, "winId: %{public}d, reason: %{public}u, lastRect: %{public}s, currRect: %{public}s",
-        GetPersistentId(), reason, GetSessionRect().ToString().c_str(), rect.ToString().c_str());
     if (reason != SizeChangeReason::RESIZE) {
         configDisplayId_ = configDisplayId;
     }
