@@ -265,7 +265,7 @@ private:
     std::vector<sptr<IKeyboardDidShowListener>> keyboardDidShowListenerList_;
     std::vector<sptr<IKeyboardDidHideListener>> keyboardDidHideListenerList_;
     std::vector<sptr<IOccupiedAreaChangeListener>> occupiedAreaChangeListenerList_;
-    uint32_t hostStatusBarContentColor_;
+    uint32_t hostStatusBarContentColor_ { 0 };
 
     /*
      * PC Fold Screen
