@@ -171,6 +171,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetPcAppInpadSpecificSystemBarInvisible, Te
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     window->windowSystemConfig_.freeMultiWindowEnable_ = false;
     window->property_->SetPcAppInpadSpecificSystemBarInvisible(true);
+    window->property_->SetPcAppInpadCompatibleMode(true);
     EXPECT_EQ(WMError::WM_OK, window->SetPcAppInpadSpecificSystemBarInvisible());
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy(false));
 }
@@ -193,6 +194,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetPcAppInpadOrientationLandscape, TestSize
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     window->windowSystemConfig_.freeMultiWindowEnable_ = false;
     window->property_->SetPcAppInpadOrientationLandscape(true);
+    window->property_->SetPcAppInpadCompatibleMode(true);
     EXPECT_EQ(WMError::WM_OK, window->SetPcAppInpadOrientationLandscape());
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy(false));
 }

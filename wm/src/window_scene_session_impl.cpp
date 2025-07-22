@@ -3591,7 +3591,7 @@ WMError WindowSceneSessionImpl::IsWindowRectAutoSave(bool& enabled)
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
-    if (property_->GetPcAppInpadCompatibleMode())) {
+    if (property_->GetPcAppInpadCompatibleMode()) {
         TLOGE(WmsLogTag::WMS_MAIN, "This is PcAppInPad, not supported");
         return WMError::WM_OK;
     }
