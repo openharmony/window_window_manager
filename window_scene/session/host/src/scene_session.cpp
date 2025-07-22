@@ -260,7 +260,7 @@ bool SceneSession::IsShowOnLockScreen(uint32_t lockScreenZOrder)
 
     // current window on lock screen jurded by zorder
     if (zOrder_ >= lockScreenZOrder) {
-        TLOGI(WmsLogTag::WMS_UIEXT, "zOrder >= lockScreenZOrder");
+        TLOGNI(WmsLogTag::WMS_UIEXT, "zOrder is bigger");
         return true;
     }
 
@@ -276,7 +276,7 @@ bool SceneSession::IsShowOnLockScreen(uint32_t lockScreenZOrder)
 void SceneSession::AddExtensionTokenInfo(const UIExtensionTokenInfo& tokenInfo)
 {
     extensionTokenInfos_.push_back(tokenInfo);
-    TLOGI(WmsLogTag::WMS_UIEXT, "can show:%{public}u, id: %{public}d",
+    TLOGD(WmsLogTag::WMS_UIEXT, "can show:%{public}u, id: %{public}d",
         tokenInfo.canShowOnLockScreen, GetPersistentId());
 }
 
@@ -286,7 +286,7 @@ void SceneSession::RemoveExtensionTokenInfo(const sptr<IRemoteObject>& abilityTo
     auto itr = std::remove_if(
         extensionTokenInfos_.begin(), extensionTokenInfos_.end(),
         [&abilityToken, persistentId, where = __func__](const auto& tokenInfo) {
-            TLOGNI(WmsLogTag::WMS_UIEXT,
+            TLOGND(WmsLogTag::WMS_UIEXT,
                 "%{public}s UIExtOnLock: need remove, token: %{public}u, persistentId: %{public}d",
                 where, tokenInfo.callingTokenId, persistentId);
             return tokenInfo.abilityToken == abilityToken;

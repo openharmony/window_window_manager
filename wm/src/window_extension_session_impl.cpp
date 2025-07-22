@@ -1977,7 +1977,7 @@ WMError WindowExtensionSessionImpl::HandleHostWindowRaise(uint32_t code, int32_t
 WMError WindowExtensionSessionImpl::HandleRegisterHostWindowRectChangeListener(uint32_t code, int32_t persistentId,
     const AAFwk::Want& data)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "businessCode: %{public}u", code);
+    TLOGD(WmsLogTag::WMS_UIEXT, "businessCode: %{public}u", code);
     auto ret = SendExtensionMessageToHost(code, data);
     if (ret != WMError::WM_OK) {
         return ret;
@@ -1989,7 +1989,7 @@ WMError WindowExtensionSessionImpl::HandleRegisterHostWindowRectChangeListener(u
 WMError WindowExtensionSessionImpl::HandleUnregisterHostWindowRectChangeListener(uint32_t code, int32_t persistentId,
     const AAFwk::Want& data)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "businessCode: %{public}u", code);
+    TLOGD(WmsLogTag::WMS_UIEXT, "businessCode: %{public}u", code);
     bool isHostWindowRectChangeListenerEmpty = false;
     size_t hostWindowRectChangeListenerSize = 0;
     rectChangeUIExtListenerIds_.erase(persistentId);
@@ -2289,7 +2289,7 @@ void WindowExtensionSessionImpl::RegisterDataConsumer()
         }
 
         auto ret = func(id, customId, std::move(data), reply);
-        TLOGNI(WmsLogTag::WMS_UIEXT, "customId:%{public}u, ret:%{public}d", customId, ret);
+        TLOGND(WmsLogTag::WMS_UIEXT, "customId:%{public}u, ret:%{public}d", customId, ret);
         return static_cast<int32_t>(DataHandlerErr::OK);
     };
     dataHandler_->RegisterDataConsumer(SubSystemId::WM_UIEXT, std::move(consumersEntry));
