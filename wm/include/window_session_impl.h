@@ -540,9 +540,11 @@ public:
     WSError SetCurrentRotation(int32_t currentRotation) override;
     void UpdateCurrentWindowOrientation(DisplayOrientation displayOrientation);
     DisplayOrientation GetCurrentWindowOrientation() const;
-    Orientation ConvertUserOrientationToUserPageOrientation(Orientation orientation);
+    Orientation ConvertUserOrientationToUserPageOrientation(Orientation orientation) const;
+    Orientation ConvertInvalidOrientation();
     void SetUserRequestedOrientation(Orientation orientation) override;
     bool IsUserOrientation(Orientation orientation) const;
+    bool IsUserPageOrientation(Orientation orientation) const;
     bool isNeededForciblySetOrientation(Orientation orientation) override;
     WMError SetFollowScreenChange(bool isFollowScreenChange) override;
 
