@@ -1105,7 +1105,7 @@ void Session::UpdateClientRectPosYAndDisplayId(WSRect& rect)
         return;
     }
     if (WindowHelper::IsUIExtensionWindow(GetWindowType())) {
-        TLOGI(WmsLogTag::WMS_LAYOUT, "skip update UIExtension: %{public}d, rect: %{public}s",
+        TLOGD(WmsLogTag::WMS_LAYOUT, "skip update UIExtension: %{public}d, rect: %{public}s",
             GetPersistentId(), rect.ToString().c_str());
         return;
     }
@@ -3598,7 +3598,7 @@ WMError Session::GetGlobalScaledRect(Rect& globalScaledRect)
             return WMError::WM_ERROR_DESTROYED_OBJECT;
         }
         session->GetLayoutController()->GetGlobalScaledRect(globalScaledRect);
-        TLOGNI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d globalScaledRect:%{public}s",
+        TLOGND(WmsLogTag::WMS_LAYOUT, "Id:%{public}d globalScaledRect:%{public}s",
             session->GetPersistentId(), globalScaledRect.ToString().c_str());
         return WMError::WM_OK;
     };

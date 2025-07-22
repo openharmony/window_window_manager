@@ -1623,9 +1623,9 @@ void MoveDragController::SetWindowDragHotAreaFunc(const NotifyWindowDragHotAreaF
 
 void MoveDragController::OnLostFocus()
 {
-    TLOGW(WmsLogTag::WMS_LAYOUT, "window id:%{public}d lost focus, should stop MoveDrag, isMove:%{public}d, "
-        "isDrag:%{public}d", persistentId_, isStartMove_, isStartDrag_);
     if (isStartMove_ || isStartDrag_) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "window id:%{public}d lost focus, should stop MoveDrag, isMove:%{public}d, "
+            "isDrag:%{public}d", persistentId_, isStartMove_, isStartDrag_);
         MoveDragInterrupted(false);
     }
 }
