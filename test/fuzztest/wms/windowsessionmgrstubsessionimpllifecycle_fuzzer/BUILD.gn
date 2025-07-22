@@ -18,12 +18,14 @@ import("../../../../windowmanager_aafwk.gni")
 module_output_path = "window_manager/window_manager"
 
 ##############################fuzztest##########################################
-ohos_fuzztest("SceneSessionMgrStubLifecycleFuzzTest") {
+ohos_fuzztest("WindowSessionMgrStubSessionImplLifecycleFuzzTest") {
   fuzz_config_file = "."
   module_out_path = module_output_path
 
   include_dirs = [
     "${window_base_path}/window_scene",
+    "${window_base_path}/window_scene/session/container/include",
+    "${window_base_path}/window_scene/session/host/include",
     "${window_base_path}/window_scene/session_manager/include",
     "${window_base_path}/window_scene/session_manager/include/zidl",
     "../",
@@ -34,7 +36,7 @@ ohos_fuzztest("SceneSessionMgrStubLifecycleFuzzTest") {
     "-O0",
     "-fno-omit-frame-pointer",
   ]
-  sources = [ "scenesessionmgrstublifecycle_fuzzer.cpp" ]
+  sources = [ "windowsessionmgrstubsessionimpllifecycle_fuzzer.cpp" ]
   deps = [
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/utils:libwmutil_base",
@@ -44,12 +46,18 @@ ohos_fuzztest("SceneSessionMgrStubLifecycleFuzzTest") {
     "${window_base_path}/wm:libwm",
   ]
   external_deps = [
+    "ability_base:base",
+    "ability_base:session_info",
+    "ability_runtime:ability_context_native",
+    "ability_runtime:ability_manager",
     "ability_runtime:app_manager",
+    "ace_engine:ace_uicontent",
     "c_utils:utils",
     "ffrt:libffrt",
     "graphic_2d:librender_service_base",
     "hilog:libhilog",
     "ipc:ipc_single",
+    "napi:ace_napi",
   ]
 }
 
@@ -60,7 +68,7 @@ group("fuzztest") {
 
   deps += [
     # deps file
-    ":SceneSessionMgrStubLifecycleFuzzTest",
+    ":WindowSessionMgrStubSessionImplLifecycleFuzzTest",
   ]
 }
 ###############################################################################
