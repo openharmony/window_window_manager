@@ -664,7 +664,7 @@ WMError WindowSceneSessionImpl::SetPcAppInpadSpecificSystemBarInvisible()
 {
     TLOGI(WmsLogTag::WMS_COMPAT, "isPcAppInpadSpecificSystemBarInvisible: %{public}d",
         property_->GetPcAppInpadSpecificSystemBarInvisible());
-    if (WindowHelper::IsMainWindow(GetType()) && property_->GetIsPcAppInPad() && !IsFreeMultiWindowMode() &&
+    if (WindowHelper::IsMainWindow(GetType()) && IsPadAndNotFreeMutiWindowCompatibleMode() &&
         property_->GetPcAppInpadSpecificSystemBarInvisible()) {
         SystemBarProperty statusProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
         UpdateSpecificSystemBarEnabled(false, false, statusProperty);
@@ -683,7 +683,7 @@ WMError WindowSceneSessionImpl::SetPcAppInpadOrientationLandscape()
 {
     TLOGI(WmsLogTag::WMS_COMPAT, "isPcAppInpadOrientationLandscape: %{public}d",
         property_->GetPcAppInpadOrientationLandscape());
-    if (WindowHelper::IsMainWindow(GetType()) && property_->GetIsPcAppInPad() && !IsFreeMultiWindowMode() &&
+    if (WindowHelper::IsMainWindow(GetType()) && IsPadAndNotFreeMutiWindowCompatibleMode() &&
         property_->GetPcAppInpadOrientationLandscape()) {
         SetRequestedOrientation(Orientation::HORIZONTAL, false);
         return WMError::WM_OK;
@@ -763,7 +763,7 @@ WMError WindowSceneSessionImpl::SetParentWindowInner(int32_t oldParentWindowId,
 WMError WindowSceneSessionImpl::SetParentWindow(int32_t newParentWindowId)
 {
     auto subWindowId = GetPersistentId();
-    if (property_->GetPcAppInpadCompatibleMode() && windowSystemConfig_.IsPadWindow()) {
+    if (property_->GetPcAppInpadCompatibleMode()) {
         TLOGE(WmsLogTag::WMS_SUB, "This is PcAppInPad, not Supported");
         return WMError::WM_OK;
     }
@@ -812,7 +812,7 @@ WMError WindowSceneSessionImpl::SetParentWindow(int32_t newParentWindowId)
 
 WMError WindowSceneSessionImpl::GetParentWindow(sptr<Window>& parentWindow)
 {
-    if (property_->GetPcAppInpadCompatibleMode() && windowSystemConfig_.IsPadWindow()) {
+    if (property_->GetPcAppInpadCompatibleMode()) {
         TLOGE(WmsLogTag::WMS_SUB, "This is PcAppInPad, not Supported");
         return WMError::WM_OK;
     }
@@ -2926,7 +2926,7 @@ WMError WindowSceneSessionImpl::SetTitleAndDockHoverShown(
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "window is not main window");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
-    if (IsPcAppInPadCompatibleMode()) {
+    if (IsPadAndNotFreeMutiWindowCompatibleMode()) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "This is PcAppInPad, not supported");
         return WMError::WM_OK;
     }
@@ -3253,7 +3253,7 @@ WMError WindowSceneSessionImpl::SetWindowTitle(const std::string& title)
         TLOGE(WmsLogTag::WMS_DECOR, "Session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (property_->GetPcAppInpadCompatibleMode() && windowSystemConfig_.IsPadWindow() && !IsDecorEnable()) {
+    if (property_->GetPcAppInpadCompatibleMode() && !IsDecorEnable()) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "This is PcAppInPad, not supported");
         return WMError::WM_OK;
     }
@@ -3513,7 +3513,7 @@ WMError WindowSceneSessionImpl::Recover(uint32_t reason)
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (IsPcAppInPadCompatibleMode()) {
+    if (IsPadAndNotFreeMutiWindowCompatibleMode()) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "The device is not supported");
         return WMError::WM_OK;
     }
@@ -3563,7 +3563,7 @@ WMError WindowSceneSessionImpl::SetWindowRectAutoSave(bool enabled, bool isSaveB
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
-    if (property_->GetPcAppInpadCompatibleMode() && windowSystemConfig_.IsPadWindow()) {
+    if (property_->GetPcAppInpadCompatibleMode()) {
         TLOGE(WmsLogTag::WMS_MAIN, "This is PcAppInPad, not supported");
         return WMError::WM_OK;
     }
@@ -3591,7 +3591,7 @@ WMError WindowSceneSessionImpl::IsWindowRectAutoSave(bool& enabled)
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
-    if (property_->GetPcAppInpadCompatibleMode() && windowSystemConfig_.IsPadWindow()) {
+    if (property_->GetPcAppInpadCompatibleMode())) {
         TLOGE(WmsLogTag::WMS_MAIN, "This is PcAppInPad, not supported");
         return WMError::WM_OK;
     }
@@ -3636,7 +3636,7 @@ WMError WindowSceneSessionImpl::SetSupportedWindowModes(
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
-    if (IsPcAppInPadCompatibleMode()) {
+    if (IsPadAndNotFreeMutiWindowCompatibleMode()) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "This is PcAppInpad, not supported");
         return WMError::WM_OK;
     }
@@ -3921,7 +3921,7 @@ WmErrorCode WindowSceneSessionImpl::StopMoveWindow()
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "invalid window type:%{public}u", GetType());
         return WmErrorCode::WM_ERROR_INVALID_CALLING;
     }
-    if (IsPcAppInPadCompatibleMode()) {
+    if (IsPadAndNotFreeMutiWindowCompatibleMode()) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "This is PcAppInpad, not supported");
         return WmErrorCode::WM_OK;
     }
@@ -4996,7 +4996,7 @@ bool WindowSceneSessionImpl::IsViewKeepScreenOn() const
 
 WMError WindowSceneSessionImpl::SetWindowShadowEnabled(bool isEnabled)
 {
-    if (property_->GetPcAppInpadCompatibleMode() && windowSystemConfig_.IsPadWindow()) {
+    if (property_->GetPcAppInpadCompatibleMode()) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "This is PcAppInPad, not supported");
         return WMError::WM_OK;
     }
@@ -5888,7 +5888,7 @@ WMError WindowSceneSessionImpl::SetFollowParentMultiScreenPolicy(bool enabled)
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (IsPcAppInPadCompatibleMode()) {
+    if (IsPadAndNotFreeMutiWindowCompatibleMode()) {
         TLOGE(WmsLogTag::WMS_SUB, "This is PcAppInpad, not Suppored");
         return WMError::WM_OK;
     }
