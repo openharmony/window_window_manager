@@ -575,10 +575,10 @@ HWTEST_F(WindowTest, SetIgnoreSafeArea, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->SetIgnoreSafeArea(true);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(WMError::WM_OK, ret);
     ret = window->SetIgnoreSafeArea(false);
-    ASSERT_EQ(WMError::WM_OK, ret);
-    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
