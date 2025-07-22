@@ -442,6 +442,7 @@ WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property
         }
         if (session->isUIFirstEnabled_) {
             session->SetSystemSceneForceUIFirst(false);
+            session->isUIFirstEnabled_ = false;
         }
         return WSError::WS_OK;
     }, __func__);
