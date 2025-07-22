@@ -49,8 +49,7 @@ public:
     static void SetWaterMarkFlag(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean enable);
     static void SetWindowFocusable(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isFocusable);
     static void SetWindowTouchable(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isTouchable);
-    static void LoadContent(ani_env* env, ani_object obj, ani_long nativeObj, ani_string path);
-    static void LoadContentNew(ani_env* env, ani_object obj, ani_long nativeObj,
+    static void LoadContent(ani_env* env, ani_object obj, ani_long nativeObj,
         ani_string path, ani_object storage);
     static void SetWindowSystemBarEnable(ani_env* env, ani_object obj, ani_long nativeObj, ani_object nameAry);
     static ani_object GetUIContext(ani_env* env, ani_object obj, ani_long nativeObj);
@@ -125,7 +124,6 @@ private:
     void OnSetWindowKeepScreenOn(ani_env* env, ani_boolean isKeepScreenOn);
     void OnSetWaterMarkFlag(ani_env* env, ani_boolean enable);
     void OnSetWindowFocusable(ani_env* env, ani_boolean isFocusable);
-    void OnLoadContent(ani_env* env, ani_string path);
     void OnLoadContent(ani_env* env, ani_string path, ani_object storage);
     void OnSetWindowSystemBarEnable(ani_env* env, ani_object nameAry);
     ani_object OnGetUIContext(ani_env* env);
@@ -162,9 +160,9 @@ private:
 /* window obj stored in ANI */
 AniWindow* GetWindowObjectFromAni(void* aniObj);
 ani_ref CreateAniWindowObject(ani_env* env, sptr<Window>& window);
+ani_ref FindAniWindowObject(const std::string& windowName);
 void DropWindowObjectByAni(ani_object obj);
 ani_status ANI_Window_Constructor(ani_vm *vm, uint32_t *result);
-ani_ref FindAniWindowObject(const std::string& windowName);
 }  // namespace Rosen
 }  // namespace OHOS
 #endif  // OHOS_ANI_WINDOW_H
