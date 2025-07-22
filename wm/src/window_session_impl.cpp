@@ -2917,7 +2917,7 @@ bool WindowSessionImpl::isNeededForciblySetOrientation(Orientation orientation)
             lastOrientation = ConvertUserOrientationToUserPageOrientation(lastOrientation);
         }
     }
-    return lastOrientation == orientation;
+    return lastOrientation != orientation;
 }
 
 std::string WindowSessionImpl::GetContentInfo(BackupAndRestoreType type)
