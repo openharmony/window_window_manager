@@ -130,6 +130,8 @@ public:
 
     void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
 
+    void SetTouchEvent(int32_t touchType) override;
+
     /*
      * Window Layout
      */

@@ -45,10 +45,19 @@ declare_args() {
   window_manager_feature_multi_usr = true
   window_manager_feature_screenless = false
 
+  # Set atomicservice basic engine so path
+  window_manager_feature_asbng_path = ""
+
   if (defined(global_parts_info) &&
       !defined(global_parts_info.msdp_device_status)) {
     device_status_enable = false
   }
+}
+
+if (window_manager_feature_asbng_path == "") {
+  window_manager_feature_asbng_path_enable = false
+} else {
+  window_manager_feature_asbng_path_enable = true
 }
 
 print(

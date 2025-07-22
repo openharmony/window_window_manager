@@ -245,6 +245,7 @@ public:
     virtual WMError SetSingleFrameComposerEnabled(bool enable) override;
     virtual WMError SetLandscapeMultiWindow(bool isLandscapeMultiWindow) override;
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
+    virtual void SetTouchEvent(int32_t touchType) override;
     virtual WMError UpdateSystemBarProperty(bool status);
     virtual WMError SetImmersiveModeEnabledState(bool enable) override;
     virtual bool GetImmersiveModeEnabledState() const override;

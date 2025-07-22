@@ -332,6 +332,11 @@ void RootScene::SetUiDvsyncSwitch(bool dvsyncSwitch)
     vsyncStation_->SetUiDvsyncSwitch(dvsyncSwitch);
 }
 
+void RootScene::SetTouchEvent(int32_t touchType)
+{
+    vsyncStation_->SetTouchEvent(touchType);
+}
+
 WMError RootScene::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect, int32_t apiVersion)
 {
     if (getSessionAvoidAreaByTypeCallback_ == nullptr) {

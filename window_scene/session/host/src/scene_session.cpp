@@ -66,6 +66,7 @@
 #include "fold_screen_state_internel.h"
 #include "fold_screen_common.h"
 #include "session/host/include/ability_info_manager.h"
+#include "session/host/include/atomicservice_basic_engine_plugin.h"
 #include "session/host/include/multi_instance_manager.h"
 #include "session/host/include/pc_fold_screen_controller.h"
 
@@ -441,6 +442,7 @@ WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property
         }
         if (session->isUIFirstEnabled_) {
             session->SetSystemSceneForceUIFirst(false);
+            session->isUIFirstEnabled_ = false;
         }
         return WSError::WS_OK;
     }, __func__);
@@ -5290,6 +5292,23 @@ WSError SceneSession::ChangeSessionVisibilityWithStatusBar(
     return WSError::WS_OK;
 }
 
+static void SetAtomicServiceInfo(SessionInfo& sessionInfo)
+{
+#ifdef ACE_ENGINE_PLUGIN_PATH
+    AtomicServiceInfo* atomicServiceInfo = AtomicServiceBasicEnginePlugin::GetInstance().
+        GetParamsFromAtomicServiceBasicEngine(sessionInfo.bundleName_);
+    if (atomicServiceInfo != nullptr) {
+        sessionInfo.atomicServiceInfo_.appNameInfo_ = atomicServiceInfo->GetAppName();
+        sessionInfo.atomicServiceInfo_.circleIcon_ = atomicServiceInfo->GetCircleIcon();
+        sessionInfo.atomicServiceInfo_.eyelashRingIcon_ = atomicServiceInfo->GetEyelashRingIcon();
+        sessionInfo.atomicServiceInfo_.deviceTypes_ = atomicServiceInfo->GetDeviceTypes();
+        sessionInfo.atomicServiceInfo_.resizable_ = atomicServiceInfo->GetResizable();
+        sessionInfo.atomicServiceInfo_.supportWindowMode_ = atomicServiceInfo->GetSupportWindowMode();
+    }
+    AtomicServiceBasicEnginePlugin::GetInstance().ReleaseData();
+#endif
+}
+
 static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::SessionInfo>& abilitySessionInfo,
     const sptr<SceneSession>& session, bool isFoundationCall)
 {
@@ -5337,6 +5356,10 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
             info.supportedWindowModes.assign(abilitySessionInfo->supportWindowModes.begin(),
                 abilitySessionInfo->supportWindowModes.end());
         }
+    }
+    if (info.isAtomicService_ && info.want != nullptr &&
+        (info.want->GetFlags() & AAFwk::Want::FLAG_INSTALL_ON_DEMAND) == AAFwk::Want::FLAG_INSTALL_ON_DEMAND) {
+        SetAtomicServiceInfo(info);
     }
     if (info.want != nullptr) {
         info.windowMode = info.want->GetIntParam(AAFwk::Want::PARAM_RESV_WINDOW_MODE, 0);
@@ -5539,10 +5562,6 @@ WSError SceneSession::BatchPendingSessionsActivation(const std::vector<sptr<AAFw
         if (abilitySessionInfos.empty()) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s abilitySessionInfo is null", where);
             return WSError::WS_ERROR_NULLPTR;
-        }
-        if (session->sessionInfo_.reuseDelegatorWindow) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s not support hook", where);
-            WSError::WS_ERROR_INVALID_PARAM;
         }
         return session->DoBatchPendingSessionsActivation(abilitySessionInfos, session, isFoundationCall);
     }, __func__);
@@ -7160,6 +7179,27 @@ WSError SceneSession::OnDefaultDensityEnabled(bool isDefaultDensityEnabled)
     return WSError::WS_OK;
 }
 
+WMError SceneSession::OnUpdateColorMode(const std::string& colorMode, bool hasDarkRes)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, colorMode: %{public}s, hasDarkRes: %{public}u",
+        GetPersistentId(), colorMode.c_str(), hasDarkRes);
+    std::lock_guard<std::mutex> lock(colorModeMutex_);
+    colorMode_ = colorMode;
+    hasDarkRes_ = hasDarkRes;
+    return WMError::WM_OK;
+}
+
+std::string SceneSession::GetAbilityColorMode() const
+{
+    std::lock_guard<std::mutex> lock(colorModeMutex_);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, colorMode: %{public}s, hasDarkRes: %{public}u",
+        GetPersistentId(), colorMode_.c_str(), hasDarkRes_);
+    if (colorMode_ == AppExecFwk::ConfigurationInner::COLOR_MODE_DARK && !hasDarkRes_) {
+        return AppExecFwk::ConfigurationInner::COLOR_MODE_AUTO;
+    }
+    return colorMode_;
+}
+
 /** @note @Window.Layout */
 WMError SceneSession::UpdateWindowModeForUITest(int32_t updateMode)
 {
@@ -8065,11 +8105,11 @@ bool SceneSession::IsImmersiveType() const
 bool SceneSession::IsPcOrPadEnableActivation() const
 {
     auto property = GetSessionProperty();
-    bool isPcAppInPad = false;
+    bool isPcAppInLargeScreenDevice = false;
     if (property != nullptr) {
-        isPcAppInPad = property->GetIsPcAppInPad();
+        isPcAppInLargeScreenDevice = property->GetIsPcAppInPad();
     }
-    return systemConfig_.IsPcWindow() || IsFreeMultiWindowMode() || isPcAppInPad;
+    return systemConfig_.IsPcWindow() || IsFreeMultiWindowMode() || isPcAppInLargeScreenDevice;
 }
 
 void SceneSession::SetMinimizedFlagByUserSwitch(bool isMinimized)

@@ -412,11 +412,6 @@ void MultiScreenChangeUtils::CreateExtendSession(sptr<ScreenSession>& screenSess
     screenSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
     RSDisplayNodeConfig config = { screenSession->rsId_, false, INVALID_NODEID };
     screenSession->ReuseDisplayNode(config);
-#ifdef FOLD_ABILITY_ENABLE
-    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
-        SuperFoldStateManager::GetInstance().RefreshExternalRegion();
-    }
-#endif
 }
 
 void MultiScreenChangeUtils::SetMultiScreenModeChangeTracker(std::string changeProc)

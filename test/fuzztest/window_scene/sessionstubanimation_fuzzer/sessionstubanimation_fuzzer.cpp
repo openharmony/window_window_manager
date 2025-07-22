@@ -48,6 +48,10 @@ void SessionStubAnimationTest(sptr<Session> sessionStub, MessageParcel& parcel)
     sessionStub->OnRemoteRequest(static_cast<uint32_t>
         (Rosen::SessionInterfaceCode::TRANS_ID_SET_WINDOW_SHADOWS),
         parcel, reply, option);
+    parcel.RewindRead(0);
+    sessionStub->OnRemoteRequest(static_cast<uint32_t>
+        (Rosen::SessionInterfaceCode::TRANS_ID_SET_FRAMERECT_FOR_PARTIAL_ZOOMIN),
+        parcel, reply, option);
 }
 
 void SessionStageStubAnimationTest(sptr<WindowSessionImpl> stageStub, MessageParcel& parcel)

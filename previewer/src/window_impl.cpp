@@ -1285,6 +1285,10 @@ void WindowImpl::SetUiDvsyncSwitch(bool dvsyncSwitch)
 {
 }
 
+void WindowImpl::SetTouchEvent(int32_t touchType)
+{
+}
+
 WMError WindowImpl::SetImmersiveModeEnabledState(bool enable)
 {
     return WMError::WM_OK;

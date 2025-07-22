@@ -142,9 +142,9 @@ void ScenePersistence::SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixe
         option.quality = IsAstcEnabled() ? ASTC_IMAGE_QUALITY : IMAGE_QUALITY;
         option.numberHint = 1;
 
+        scenePersistence->SetSnapshotSize(key, freeMultiWindow, { pixelMap->GetWidth(), pixelMap->GetHeight() });
         std::lock_guard lock(scenePersistence->savingSnapshotMutex_);
         remove(path.c_str());
-        scenePersistence->SetSnapshotSize(key, freeMultiWindow, { pixelMap->GetWidth(), pixelMap->GetHeight() });
         if (imagePacker.StartPacking(path, option)) {
             TLOGNE(WmsLogTag::WMS_PATTERN, "Save snapshot failed, starting packing error");
             resetSnapshotCallback();
@@ -251,7 +251,7 @@ std::string ScenePersistence::GetSnapshotFilePath(SnapshotStatus& key, bool useK
     if (freeMultiWindow) {
         return snapshotFreeMultiWindowPath_;
     }
-    if (useKey || hasSnapshot_[key.first][key.second]) {
+    if (useKey || HasSnapshot(key, false)) {
         return snapshotPath_[key.first][key.second];
     }
     if (FindClosestFormSnapshot(key)) {
@@ -262,6 +262,7 @@ std::string ScenePersistence::GetSnapshotFilePath(SnapshotStatus& key, bool useK
 
 bool ScenePersistence::FindClosestFormSnapshot(SnapshotStatus& key)
 {
+    std::lock_guard lock(hasSnapshotMutex_);
     for (uint32_t orientation = SNAPSHOT_PORTRAIT; orientation < capacity_.second; orientation++) {
         if (hasSnapshot_[key.first][orientation]) {
             key.second = orientation;
@@ -339,6 +340,7 @@ std::string ScenePersistence::GetUpdatedIconPath() const
 
 void ScenePersistence::SetSnapshotSize(SnapshotStatus key, bool freeMultiWindow, std::pair<uint32_t, uint32_t> size)
 {
+    std::lock_guard lock(snapshotSizeMutex_);
     if (freeMultiWindow) {
         snapshotFreeMultiWindowSize_ = size;
     } else {
@@ -348,6 +350,7 @@ void ScenePersistence::SetSnapshotSize(SnapshotStatus key, bool freeMultiWindow,
 
 std::pair<uint32_t, uint32_t> ScenePersistence::GetSnapshotSize(SnapshotStatus key, bool freeMultiWindow) const
 {
+    std::lock_guard lock(snapshotSizeMutex_);
     if (freeMultiWindow) {
         return snapshotFreeMultiWindowSize_;
     }
@@ -356,16 +359,19 @@ std::pair<uint32_t, uint32_t> ScenePersistence::GetSnapshotSize(SnapshotStatus k
 
 void ScenePersistence::SetHasSnapshot(bool hasSnapshot, SnapshotStatus key)
 {
+    std::lock_guard lock(hasSnapshotMutex_);
     hasSnapshot_[key.first][key.second] = hasSnapshot;
 }
 
 void ScenePersistence::SetHasSnapshotFreeMultiWindow(bool hasSnapshot)
 {
+    std::lock_guard lock(hasSnapshotMutex_);
     hasSnapshotFreeMultiWindow_ = hasSnapshot;
 }
 
 bool ScenePersistence::HasSnapshot() const
 {
+    std::lock_guard lock(hasSnapshotMutex_);
     for (const auto& row : hasSnapshot_) {
         for (const auto& hasSnapshot : row) {
             if (hasSnapshot) {
@@ -378,6 +384,7 @@ bool ScenePersistence::HasSnapshot() const
 
 bool ScenePersistence::HasSnapshot(SnapshotStatus key, bool freeMultiWindow) const
 {
+    std::lock_guard lock(hasSnapshotMutex_);
     if (freeMultiWindow) {
         return hasSnapshotFreeMultiWindow_;
     }
@@ -386,6 +393,7 @@ bool ScenePersistence::HasSnapshot(SnapshotStatus key, bool freeMultiWindow) con
 
 void ScenePersistence::ClearSnapshot(SnapshotStatus key)
 {
+    std::lock_guard lock(hasSnapshotMutex_);
     for (auto& row : hasSnapshot_) {
         for (auto& hasSnapshot : row) {
             hasSnapshot = false;
@@ -407,7 +415,7 @@ bool ScenePersistence::IsSnapshotExisted(SnapshotStatus key)
     if (!S_ISREG(buf.st_mode)) {
         return false;
     }
-    hasSnapshot_[key.first][key.second] = true;
+    SetHasSnapshot(true, key);
     return true;
 }
 

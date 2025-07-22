@@ -17,6 +17,7 @@
 
 #include "abstract_screen_controller.h"
 #include "iremote_object_mocker.h"
+#include "modifier_render_thread/rs_modifiers_draw_thread.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -43,6 +44,9 @@ void AbstractScreenControllerTest::SetUpTestCase()
 
 void AbstractScreenControllerTest::TearDownTestCase()
 {
+#ifdef RS_ENABLE_VK
+    RSModifiersDrawThread::Destroy();
+#endif
 }
 
 void AbstractScreenControllerTest::SetUp()
