@@ -92,7 +92,8 @@ void SceneSessionMgrLiteLifecycleIpcTest(MessageParcel& parcel)
         SceneSessionManagerLiteMessage::TRANS_ID_REGISTER_SESSION_LIFECYCLE_LISTENER_BY_IDS), parcel, reply, option);
     parcel.RewindRead(0);
     SceneSessionManagerLite::GetInstance().OnRemoteRequest(static_cast<uint32_t>(ISceneSessionManagerLite::
-        SceneSessionManagerLiteMessage::TRANS_ID_REGISTER_SESSION_LIFECYCLE_LISTENER_BY_BUNDLES), parcel, reply, option);
+        SceneSessionManagerLiteMessage::TRANS_ID_REGISTER_SESSION_LIFECYCLE_LISTENER_BY_BUNDLES),
+        parcel, reply, option);
 }
 
 void SceneSessionMgrLiteLifecycleIpcSecTest(MessageParcel& parcel)
