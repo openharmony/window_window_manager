@@ -1720,7 +1720,7 @@ export class TranslateOptionsInternal implements TranslateOptions {
 }
 
 export class WindowStageInternal implements WindowStage {
-    static { loadLibrary('windowstageani_kit.z') }
+    static { loadLibrary('windowstageani_module.z') }
 
     private nativeObj: long = 0;
     setNativeObj(nativeObj: long):void {
@@ -1907,7 +1907,7 @@ let windowDestroyRegister = new FinalizationRegistry<long>(windowDestroyCallback
 
 export class WindowInternal implements Window {
     static readonly DEFAULT_RET_VAL = 1;
-    static { loadLibrary('windowstageani_kit.z') }
+    static { loadLibrary('windowstageani_module.z') }
     private nativeObj: long;
 
     public setNativeObj(nativeObject: long): void {
