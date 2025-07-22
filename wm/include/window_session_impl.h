@@ -544,6 +544,7 @@ public:
     Orientation ConvertInvalidOrientation();
     void SetUserRequestedOrientation(Orientation orientation) override;
     bool IsUserOrientation(Orientation orientation) const;
+    bool IsUserPageOrientation(Orientation orientation) const;
     bool isNeededForciblySetOrientation(Orientation orientation) override;
     WMError SetFollowScreenChange(bool isFollowScreenChange) override;
 

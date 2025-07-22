@@ -2905,14 +2905,19 @@ void WindowSessionImpl::SetUserRequestedOrientation(Orientation orientation)
 
 bool WindowSessionImpl::isNeededForciblySetOrientation(Orientation orientation)
 {
+    TLOGI(WmsLogTag::WMS_ROTATION, "orientation:%{public}u", orientation);
+    if (IsUserOrientation(orientation)) {
+        return true;
+    }
+    Orientation lastOrientation = property_->GetRequestedOrientation();
+    TLOGI(WmsLogTag::WMS_ROTATION, "lastOrientation:%{public}u", lastOrientation);
     if (orientation == Orientation::INVALID) {
         orientation = ConvertInvalidOrientation();
+        if (IsUserPageOrientation(orientation) && IsUserOrientation(lastOrientation)) {
+            lastOrientation = ConvertUserOrientationToUserPageOrientation(lastOrientation);
+        }
     }
-    bool isUserOrientation = IsUserOrientation(orientation);
-    if (property_->GetRequestedOrientation() == orientation && !isUserOrientation) {
-        return false;
-    }
-    return true;
+    return lastOrientation == orientation;
 }
 
 std::string WindowSessionImpl::GetContentInfo(BackupAndRestoreType type)
@@ -7181,6 +7186,17 @@ bool WindowSessionImpl::IsUserOrientation(Orientation orientation) const
         orientation == Orientation::USER_ROTATION_LANDSCAPE ||
         orientation == Orientation::USER_ROTATION_PORTRAIT_INVERTED ||
         orientation == Orientation::USER_ROTATION_LANDSCAPE_INVERTED) {
+        return true;
+    }
+    return false;
+}
+
+bool WindowSessionImpl::IsUserPageOrientation(Orientation orientation) const
+{
+    if (orientation == Orientation::USER_PAGE_ROTATION_PORTRAIT ||
+        orientation == Orientation::USER_PAGE_ROTATION_LANDSCAPE ||
+        orientation == Orientation::USER_PAGE_ROTATION_PORTRAIT_INVERTED ||
+        orientation == Orientation::USER_PAGE_ROTATION_LANDSCAPE_INVERTED) {
         return true;
     }
     return false;
