@@ -126,6 +126,8 @@ constexpr int SCALE_MAX_WIDTH = 8;
 constexpr int PID_MAX_WIDTH = 8;
 constexpr int PARENT_ID_MAX_WIDTH = 6;
 constexpr int WINDOW_NAME_MAX_LENGTH = 20;
+constexpr int VISIBILITY_MAX_LENGTH = 20;
+constexpr int PRIVACY_MODE_MAX_LENGTH = 20;
 constexpr int32_t CANCEL_POINTER_ID = 99999999;
 constexpr int32_t STATUS_BAR_AVOID_AREA = 0;
 const std::string ARG_DUMP_ALL = "-a";
@@ -6703,9 +6705,9 @@ void SceneSessionManager::DumpSessionInfo(const sptr<SceneSession>& session, std
         << std::left << std::setw(SCALE_MAX_WIDTH) << GetFloatWidth(SCALE_MAX_WIDTH, session->GetScaleY())
         << std::left << std::setw(SCALE_MAX_WIDTH) << GetFloatWidth(SCALE_MAX_WIDTH, session->GetPivotX())
         << std::left << std::setw(SCALE_MAX_WIDTH) << GetFloatWidth(SCALE_MAX_WIDTH, session->GetPivotY())
-        << "]"
-        << std::left << std::setw(VALUE_MAX_WIDTH) << static_cast<uint32_t>(session->GetVisibilityState())
-        << std::left << std::setw(VALUE_MAX_WIDTH) << isPrivacyMode
+        << "] "
+        << std::left << std::setw(VISIBILITY_MAX_LENGTH) << static_cast<uint32_t>(session->GetVisibilityState())
+        << std::left << std::setw(PRIVACY_MODE_MAX_LENGTH) << isPrivacyMode
         << std::endl;
 }
 

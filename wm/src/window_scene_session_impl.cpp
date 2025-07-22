@@ -2458,10 +2458,7 @@ WMError WindowSceneSessionImpl::GetTargetOrientationConfigInfo(Orientation targe
     }
     WSError ret;
     if (targetOrientation == Orientation::INVALID) {
-        Orientation requestedOrientation = GetRequestedOrientation();
-        if (IsUserOrientation(requestedOrientation)) {
-            requestedOrientation = ConvertUserOrientationToUserPageOrientation(requestedOrientation);
-        }
+        Orientation requestedOrientation = ConvertInvalidOrientation();
         ret = hostSession->GetTargetOrientationConfigInfo(requestedOrientation, pageProperties);
     } else {
         ret = hostSession->GetTargetOrientationConfigInfo(targetOrientation, pageProperties);
@@ -4533,8 +4530,9 @@ WMError WindowSceneSessionImpl::SetWindowCornerRadius(float cornerRadius)
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (!IsPcOrFreeMultiWindowCapabilityEnabled()) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "This is not PC or Pad, not supported.");
+    if (!windowSystemConfig_.IsPcWindow() && !windowSystemConfig_.IsPadWindow() &&
+        !windowSystemConfig_.IsPhoneWindow()) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "This is not pc, pad or phone, not supported.");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     if (!WindowHelper::IsFloatOrSubWindow(GetType())) {
