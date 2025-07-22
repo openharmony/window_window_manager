@@ -79,7 +79,7 @@ IntentionEventManager::InputEventListener::~InputEventListener()
 }
 
 bool IntentionEventManager::EnableInputEventListener(Ace::UIContent* uiContent,
-    std::shared_ptr<AppExecFwk::EventHandler> eventHandler, sptr<Window> window)
+    std::shared_ptr<AppExecFwk::EventHandler> eventHandler, wptr<Window> window)
 {
     if (uiContent == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "uiContent is null");
@@ -199,9 +199,10 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
     }
     if (sceneSession->GetSessionInfo().isSystem_) {
         sceneSession->SendPointerEventToUI(pointerEvent);
-        if (window_ != nullptr) {
+        auto window = window_.promote();
+        if (window != nullptr) {
             HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SetTouchEvent, action:%d", action);
-            window_->SetTouchEvent(action);
+            window->SetTouchEvent(action);
         }
         // notify touchOutside and touchDown event
         if (action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
