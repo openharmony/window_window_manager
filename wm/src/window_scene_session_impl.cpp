@@ -2190,6 +2190,8 @@ WMError WindowSceneSessionImpl::GetGlobalScaledRect(Rect& globalScaledRect)
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
     auto ret = hostSession->GetGlobalScaledRect(globalScaledRect);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d globalScaledRect:%{public}s, ret:%{public}d",
+        GetPersistentId(), globalScaledRect.ToString().c_str(), ret);
     return static_cast<WMError>(ret);
 }
 
