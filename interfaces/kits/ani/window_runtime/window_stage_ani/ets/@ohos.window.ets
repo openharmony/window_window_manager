@@ -3071,6 +3071,16 @@ function runWindowListenerBooleanArgCallBack(cb: object, cbArg: boolean): void {
   func(cbArg);
 }
 
+function runSystemDensityChangeCallback(cb: object, density: number): void {
+  const func = cb as (density: number) => void;
+  func(density as number);
+}
+
+function runDisplayIdChangeCallback(cb: object, displayId: number): void {
+  const func = cb as (displayId: number) => void;
+  func(displayId as number);
+}
+
 function runSystemBarTintChangeCallBack(cb: object, tint: object): void {
   const func = cb as (tint: SystemBarTintState) => void;
   func(tint as SystemBarTintState);
