@@ -569,9 +569,8 @@ WmErrorCode AniWindowRegisterManager::UnregisterListener(sptr<Window> window, co
                 TLOGE(WmsLogTag::DEFAULT, "[ANI]Unregister type %{public}s failed, no value", type.c_str());
                 return ret;
             }
-            auto temp = it->second->GetAniCallBack();
+            env->GlobalReference_Delete(it->second->GetAniCallBack());
             it->second->SetAniCallBack(nullptr);
-            env->GlobalReference_Delete(temp);
             jsCbMap_[type].erase(it++);
         }
     } else {
@@ -589,9 +588,8 @@ WmErrorCode AniWindowRegisterManager::UnregisterListener(sptr<Window> window, co
                 TLOGE(WmsLogTag::DEFAULT, "[ANI]Unregister type %{public}s failed", type.c_str());
                 return ret;
             }
-            auto temp = it->second->GetAniCallBack();
+            env->GlobalReference_Delete(it->second->GetAniCallBack());
             it->second->SetAniCallBack(nullptr);
-            env->GlobalReference_Delete(temp);
             jsCbMap_[type].erase(it);
             break;
         }
