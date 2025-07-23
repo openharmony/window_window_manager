@@ -85,6 +85,8 @@ void ScreenManagerAni::OnRegisterCallback(ani_env* env, ani_string type, ani_ref
         return;
     }
     screenAniListener->AddCallback(typeString, cbRef);
+    screenAniListener->SetMainEventHandler();
+    
     ret = ProcessRegisterCallback(env, typeString, screenAniListener);
     if (ret != DmErrorCode::DM_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] register screen listener with type, errcode: %{public}d", ret);

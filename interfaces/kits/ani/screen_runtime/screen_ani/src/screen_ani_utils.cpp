@@ -100,11 +100,11 @@ ani_array_ref ScreenAniUtils::NewNativeArray(ani_env* env, const std::string& ob
     ani_array_ref array = nullptr;
     ani_class cls;
     if (env->FindClass(objName.c_str(), &cls) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] class not found");
+        TLOGE(WmsLogTag::DMS, "[ANI] class not found");
         return array;
     }
     if (env->Array_New_Ref(cls, size, CreateAniUndefined(env), &array) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] create array failed");
+        TLOGE(WmsLogTag::DMS, "[ANI] create array failed");
     }
     return array;
 }
@@ -113,17 +113,17 @@ ani_object ScreenAniUtils::NewNativeObject(ani_env* env, const std::string& objN
 {
     ani_class cls;
     if (env->FindClass(objName.c_str(), &cls) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] class not found");
+        TLOGE(WmsLogTag::DMS, "[ANI] class not found");
         return CreateAniUndefined(env);
     }
     ani_method ctor;
     if (env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] ctor not found");
+        TLOGE(WmsLogTag::DMS, "[ANI] ctor not found");
         return CreateAniUndefined(env);
     }
     ani_object obj;
     if (env->Object_New(cls, ctor, &obj) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to new obj");
+        TLOGE(WmsLogTag::DMS, "[ANI] fail to new obj");
         return CreateAniUndefined(env);
     }
     return obj;
@@ -158,29 +158,29 @@ ani_status ScreenAniUtils::ConvertScreens(ani_env *env, std::vector<sptr<Screen>
 ani_status ScreenAniUtils::CallAniFunctionVoid(ani_env *env, const char* ns,
     const char* fn, const char* signature, ...)
 {
-    TLOGI(WmsLogTag::DEFAULT, "[ANI] begin");
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
     ani_status ret = ANI_OK;
     ani_namespace aniNamespace{};
     if ((ret = env->FindNamespace(ns, &aniNamespace)) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI]canot find ns %{public}d", ret);
+        TLOGE(WmsLogTag::DMS, "[ANI]canot find ns %{public}d", ret);
         return ret;
     }
     ani_function func{};
     if ((ret = env->Namespace_FindFunction(aniNamespace, fn, signature, &func)) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI]canot find callBack %{public}d", ret);
+        TLOGE(WmsLogTag::DMS, "[ANI]canot find callBack %{public}d", ret);
+        return ret;
+    }
+    if (func == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] null func ani");
         return ret;
     }
     va_list args;
     va_start(args, signature);
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]CallAniFunctionVoid begin %{public}s", signature);
-    if (func == nullptr) {
-        TLOGI(WmsLogTag::DEFAULT, "[ANI] null func ani");
-        return ret;
-    }
+    TLOGI(WmsLogTag::DMS, "[ANI]CallAniFunctionVoid begin %{public}s", signature);
     ret = env->Function_Call_Void_V(func, args);
     va_end(args);
     if (ret != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI]canot run callBack %{public}d", ret);
+        TLOGE(WmsLogTag::DMS, "[ANI]canot run callBack %{public}d", ret);
         return ret;
     }
     return ret;
