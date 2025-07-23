@@ -16,10 +16,12 @@ group("fuzztest") {
 
   deps = [
     "patterndetachcallback_fuzzer:fuzztest",
+    "scenesessionmgrlstubattribute_fuzzer:fuzztest",
     "scenesessionmgrlstubget_fuzzer:fuzztest",
     "scenesessionmgrlstubreg_fuzzer:fuzztest",
     "scenesessionmgrlstubset_fuzzer:fuzztest",
     "scenesessionmgrlstubhierarchy_fuzzer:fuzztest",
+    "scenesessionmgrstubattribute_fuzzer:fuzztest",
     "scenesessionmgrlstublayout_fuzzer:fuzztest",
     "scenesessionmgrlstubpc_fuzzer:fuzztest",
     "scenesessionmgrstubcreate_fuzzer:fuzztest",
@@ -40,6 +42,7 @@ group("fuzztest") {
     "sessioninterface_fuzzer:fuzztest",
     "sessionmgrsrvstubgetmgr_fuzzer:fuzztest",
     "sessionstagestubactive_fuzzer:fuzztest",
+    "sessionstagestubattribute_fuzzer:fuzztest",
     "sessionstagestubchange_fuzzer:fuzztest",
     "sessionstagestubfocus_fuzzer:fuzztest",
     "sessionstagestubupdate_fuzzer:fuzztest",
@@ -47,6 +50,7 @@ group("fuzztest") {
     "sessionstagestubpc_fuzzer:fuzztest",
     "sessionstublayout_fuzzer:fuzztest",
     "sessionstubanimation_fuzzer:fuzztest",
+    "sessionstubattribute_fuzzer:fuzztest",
     "sessionstubevent_fuzzer:fuzztest",
     "sessionstubuec_fuzzer:fuzztest",
     "sessionstubfocus_fuzzer:fuzztest",
