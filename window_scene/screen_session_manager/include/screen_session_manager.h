@@ -476,6 +476,7 @@ public:
     DMError SetVirtualScreenAutoRotation(ScreenId screenId, bool enable) override;
     bool SetScreenOffset(ScreenId screenId, float offsetX, float offsetY);
     bool SynchronizePowerStatus(ScreenPowerState state) override;
+    std::shared_ptr<TaskScheduler> GetPowerTaskScheduler() const;
 
 protected:
     ScreenSessionManager();

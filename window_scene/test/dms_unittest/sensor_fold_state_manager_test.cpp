@@ -89,6 +89,69 @@ HWTEST_F(SensorFoldStateManagerTest, HandleSensorChange, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleSensorChange1
+ * @tc.desc: HandleSensorChange1
+ * @tc.type: FUNC
+ */
+HWTEST_F(SensorFoldStateManagerTest, HandleSensorChange1, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    SensorFoldStateManager mgr = SensorFoldStateManager();
+    mgr.isInOneStep_ = true;
+    mgr.mState_ = FoldStatus::FOLDED;
+    FoldStatus nextState = FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND;
+    std::vector<float> angles = {0.0f, 0.0f, 0.0f};
+    std::vector<uint16_t> halls = {0, 0};
+    sptr<FoldScreenPolicy> foldScreenPolicy = sptr<FoldScreenPolicy>::MakeSptr();
+    mgr.HandleSensorChange(nextState, angles, halls, foldScreenPolicy);
+    EXPECT_TRUE(g_errLog.find("fold state is UNKNOWN") == std::string::npos);
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: HandleSensorChange2
+ * @tc.desc: HandleSensorChange2
+ * @tc.type: FUNC
+ */
+HWTEST_F(SensorFoldStateManagerTest, HandleSensorChange2, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    SensorFoldStateManager mgr = SensorFoldStateManager();
+    mgr.isInOneStep_ = true;
+    mgr.mState_ = FoldStatus::FOLDED;
+    FoldStatus nextState = FoldStatus::FOLD_STATE_FOLDED_WITH_SECOND_EXPAND;
+    std::vector<float> angles = {0.0f, 0.0f, 0.0f};
+    std::vector<uint16_t> halls = {0, 0};
+    sptr<FoldScreenPolicy> foldScreenPolicy = sptr<FoldScreenPolicy>::MakeSptr();
+    mgr.HandleSensorChange(nextState, angles, halls, foldScreenPolicy);
+    EXPECT_TRUE(g_errLog.find("fold state is UNKNOWN") == std::string::npos);
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: HandleSensorChange3
+ * @tc.desc: HandleSensorChange3
+ * @tc.type: FUNC
+ */
+HWTEST_F(SensorFoldStateManagerTest, HandleSensorChange3, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    SensorFoldStateManager mgr = SensorFoldStateManager();
+    mgr.isInOneStep_ = false;
+    mgr.mState_ = FoldStatus::FOLDED;
+    FoldStatus nextState = FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND;
+    std::vector<float> angles = {0.0f, 0.0f, 0.0f};
+    std::vector<uint16_t> halls = {0, 0};
+    sptr<FoldScreenPolicy> foldScreenPolicy = sptr<FoldScreenPolicy>::MakeSptr();
+    mgr.HandleSensorChange(nextState, angles, halls, foldScreenPolicy);
+    EXPECT_TRUE(g_errLog.find("fold state is UNKNOWN") == std::string::npos);
+    LOG_SetCallback(nullptr);
+}
+
+/**
  * @tc.name: ReportNotifyFoldStatusChange
  * @tc.desc: ReportNotifyFoldStatusChange
  * @tc.type: FUNC
