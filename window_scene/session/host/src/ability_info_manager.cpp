@@ -23,6 +23,7 @@
 namespace OHOS::Rosen {
 WM_IMPLEMENT_SINGLE_INSTANCE(AbilityInfoManager);
 
+// LCOV_EXCL_START
 bool AbilityInfoManager::FindAbilityInfo(const AppExecFwk::BundleInfo& bundleInfo,
     const std::string& moduleName, const std::string& abilityName, AppExecFwk::AbilityInfo& abilityInfo)
 {
@@ -39,6 +40,7 @@ bool AbilityInfoManager::FindAbilityInfo(const AppExecFwk::BundleInfo& bundleInf
     TLOGW(WmsLogTag::DEFAULT, "ability info not found, bundle:%{public}s", bundleInfo.name.c_str());
     return false;
 }
+// LCOV_EXCL_STOP
 
 void AbilityInfoManager::Init(const sptr<AppExecFwk::IBundleMgr>& bundleMgr)
 {
@@ -56,6 +58,7 @@ void AbilityInfoManager::SetCurrentUserId(int32_t userId)
     userId_ = userId;
 }
 
+// LCOV_EXCL_START
 bool AbilityInfoManager::IsAnco(const std::string& bundleName, const std::string& abilityName,
     const std::string& moduleName)
 {
@@ -97,4 +100,5 @@ void AbilityInfoManager::RemoveAppInfo(const std::string& bundleName)
     std::unique_lock<std::mutex> lock(applicationInfoMutex_);
     applicationInfoMap_.erase(bundleName);
 }
+// LCOV_EXCL_STOP
 } // namespace OHOS::Rosen

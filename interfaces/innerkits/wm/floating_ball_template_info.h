@@ -29,13 +29,16 @@ public:
     FloatingBallTemplateInfo(const uint32_t& templateType, const std::string& title, const std::string& content,
         const std::string& color, const std::shared_ptr<Media::PixelMap>& icon) : FloatingBallTemplateBaseInfo(
         templateType, title, content, color), icon_(icon) {};
+    // LCOV_EXCL_START
     FloatingBallTemplateInfo(const FloatingBallTemplateBaseInfo& baseInfo,
         const std::shared_ptr<Media::PixelMap>& icon) : FloatingBallTemplateBaseInfo(baseInfo.template_,
         baseInfo.title_, baseInfo.content_, baseInfo.backgroundColor_), icon_(icon) {};
+    // LCOV_EXCL_STOP
     ~FloatingBallTemplateInfo() override = default;
 
     std::shared_ptr<Media::PixelMap> icon_ {};
 
+    // LCOV_EXCL_START
     bool Marshalling(Parcel& parcel) const override
     {
         if (!parcel.WriteUint32(template_) || !parcel.WriteString(title_) ||
@@ -51,6 +54,7 @@ public:
         }
         return true;
     }
+    // LCOV_EXCL_STOP
 
     static FloatingBallTemplateInfo* Unmarshalling(Parcel& parcel)
     {

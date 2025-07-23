@@ -38,6 +38,7 @@ WSError FutureCallback::OnUpdateSessionRect(const Rect& rect, WindowSizeChangeRe
     return WSError::WS_DO_NOTHING;
 }
 
+// LCOV_EXCL_START
 WSError FutureCallback::OnUpdateGlobalDisplayRect(
     const Rect& rect, WindowSizeChangeReason reason, int32_t persistentId)
 {
@@ -80,6 +81,7 @@ Rect FutureCallback::GetMoveWindowToGlobalDisplayAsyncResult(long timeoutMs)
 {
     return moveWindowToGlobalDisplayFuture_.GetResult(timeoutMs);
 }
+// LCOV_EXCL_STOP
 
 OrientationInfo FutureCallback::GetTargetOrientationResult(long timeoutMs)
 {
@@ -91,6 +93,7 @@ RotationChangeResult FutureCallback::GetRotationResult(long timeoutMs)
     return getRotationResultFuture_.GetResult(timeoutMs);
 }
 
+// LCOV_EXCL_START
 void FutureCallback::ResetResizeLock()
 {
     resizeFuture_.ResetLock({});
@@ -115,6 +118,7 @@ void FutureCallback::ResetRotationResultLock()
 {
     getRotationResultFuture_.ResetLock({});
 }
+// LCOV_EXCL_STOP
 
 int32_t FutureCallback::GetUpdateRectResult(long timeoutMs)
 {

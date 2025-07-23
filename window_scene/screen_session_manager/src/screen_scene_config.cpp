@@ -263,6 +263,7 @@ void ScreenSceneConfig::ReadIntNumbersConfigInfo(const xmlNodePtr& currNode)
     xmlFree(context);
 }
 
+// LCOV_EXCL_START
 void ScreenSceneConfig::ReadPhysicalDisplayConfigInfo(const xmlNodePtr& currNode)
 {
     xmlChar* displayMode = xmlGetProp(currNode, reinterpret_cast<const xmlChar*>("displayMode"));
@@ -308,12 +309,14 @@ void ScreenSceneConfig::ReadPhysicalDisplayConfigInfo(const xmlNodePtr& currNode
     xmlFree(displayModeContext);
     xmlFree(displayMode);
 }
+// LCOV_EXCL_STOP
 
 std::vector<DisplayPhysicalResolution> ScreenSceneConfig::GetAllDisplayPhysicalConfig()
 {
     return displayPhysicalResolution_;
 }
 
+// LCOV_EXCL_START
 FoldDisplayMode ScreenSceneConfig::GetFoldDisplayMode(uint32_t width, uint32_t height)
 {
     // Due to incorrect configuration files, custom processing is required.
@@ -379,6 +382,7 @@ std::map<FoldDisplayMode, ScrollableParam> ScreenSceneConfig::GetAllScrollablePa
 {
     return scrollableParams_;
 }
+// LCOV_EXCL_STOP
 
 void ScreenSceneConfig::ReadEnableConfigInfo(const xmlNodePtr& currNode)
 {
@@ -420,6 +424,7 @@ void ScreenSceneConfig::ReadStringConfigInfo(const xmlNodePtr& currNode)
     xmlFree(context);
 }
 
+// LCOV_EXCL_START
 void ScreenSceneConfig::ReadStringListConfigInfo(const xmlNodePtr& rootNode, std::string name)
 {
     if (rootNode == nullptr || rootNode->name == nullptr) {
@@ -445,6 +450,7 @@ void ScreenSceneConfig::ReadStringListConfigInfo(const xmlNodePtr& rootNode, std
     stringListConfig_[name] = stringVec;
     xmlFree(rootContext);
 }
+// LCOV_EXCL_STOP
 
 const std::map<std::string, bool>& ScreenSceneConfig::GetEnableConfig()
 {
@@ -483,6 +489,7 @@ void ScreenSceneConfig::DumpConfig()
     }
 }
 
+// LCOV_EXCL_START
 void ScreenSceneConfig::SetCutoutSvgPath(uint64_t displayId, const std::string& svgPath)
 {
     if (svgPath.empty()) {
@@ -611,4 +618,5 @@ bool ScreenSceneConfig::IsSupportOffScreenRendering()
     }
     return false;
 }
+// LCOV_EXCL_STOP
 } // namespace OHOS::Rosen

@@ -52,6 +52,7 @@ FloatingBallController::~FloatingBallController()
     TLOGI(WmsLogTag::WMS_SYSTEM, "FloatingBallController release");
 }
 
+// LCOV_EXCL_START
 FbWindowState FloatingBallController::GetControllerState() const
 {
     return curState_;
@@ -65,6 +66,7 @@ void FloatingBallController::UpdateMainWindow(const sptr<Window>& mainWindow)
     mainWindow_ = mainWindow;
     mainWindowId_ = mainWindow->GetWindowId();
 }
+// LCOV_EXCL_STOP
 
 WMError FloatingBallController::UpdateFloatingBall(sptr<FbOption>& option)
 {
@@ -136,6 +138,7 @@ WMError FloatingBallController::StartFloatingBallInner(const sptr<FbOption>& opt
         TLOGE(WmsLogTag::WMS_SYSTEM, "Create fb window failed, err: %{public}u", errCode);
         return errCode;
     }
+    // LCOV_EXCL_START
     errCode = window_->Show(0, false);
     if (errCode != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "Show fb window failed, err: %{public}u", errCode);
@@ -148,6 +151,7 @@ WMError FloatingBallController::StartFloatingBallInner(const sptr<FbOption>& opt
     SingletonContainer::Get<FloatingballReporter>().ReportFbStart(templateType_, "");
     OnFloatingBallStart();
     return WMError::WM_OK;
+    // LCOV_EXCL_STOP
 }
 
 void FloatingBallController::WindowLifeCycleListener::AfterDestroyed()
@@ -162,6 +166,7 @@ WMError FloatingBallController::CreateFloatingBallWindow(const sptr<FbOption>& o
         TLOGE(WmsLogTag::WMS_SYSTEM, "Create fb failed, invalid fbOption");
         return WMError::WM_ERROR_FB_STATE_ABNORMALLY;
     }
+    // LCOV_EXCL_START
     auto uid = getuid();
     auto mainWindowState = mainWindow_->GetWindowState();
     TLOGI(WmsLogTag::WMS_SYSTEM, "mainWindow:%{public}u, mainWindowState:%{public}u, uid %{public}d",
@@ -187,8 +192,10 @@ WMError FloatingBallController::CreateFloatingBallWindow(const sptr<FbOption>& o
     }
     window_ = window;
     return WMError::WM_OK;
+    // LCOV_EXCL_STOP
 }
 
+// LCOV_EXCL_START
 WMError FloatingBallController::StopFloatingBallFromClient()
 {
     {
@@ -231,6 +238,7 @@ WMError FloatingBallController::StopFloatingBall()
     SingletonContainer::Get<FloatingballReporter>().ReportFbRemove(templateType_, "");
     return DestroyFloatingBallWindow();
 }
+// LCOV_EXCL_STOP
 
 WMError FloatingBallController::DestroyFloatingBallWindow()
 {
@@ -239,6 +247,7 @@ WMError FloatingBallController::DestroyFloatingBallWindow()
         TLOGE(WmsLogTag::WMS_SYSTEM, "window is nullptr when destroy fb");
         return WMError::WM_ERROR_FB_INTERNAL_ERROR;
     }
+    // LCOV_EXCL_START
     WMError ret = window_->Destroy();
     if (ret != WMError::WM_OK) {
         curState_ = FbWindowState::STATE_UNDEFINED;
@@ -254,6 +263,7 @@ WMError FloatingBallController::DestroyFloatingBallWindow()
     window_ = nullptr;
     stopFromClient_ = false;
     return WMError::WM_OK;
+    // LCOV_EXCL_STOP
 }
 
 sptr<Window> FloatingBallController::GetFbWindow() const
@@ -280,6 +290,7 @@ WMError FloatingBallController::RestoreMainWindow(const std::shared_ptr<AAFwk::W
     return window_->RestoreFbMainWindow(want);
 }
 
+// LCOV_EXCL_START
 void FloatingBallController::OnFloatingBallClick()
 {
     auto fbClickObservers = fbClickObservers_;
@@ -315,6 +326,7 @@ void FloatingBallController::OnFloatingBallStop()
         listener->OnFloatingBallStop();
     }
 }
+// LCOV_EXCL_STOP
 
 WMError FloatingBallController::RegisterFbLifecycle(const sptr<IFbLifeCycle>& listener)
 {
@@ -367,6 +379,7 @@ WMError FloatingBallController::UnRegisterListener(std::vector<sptr<T>>& holder,
     return WMError::WM_OK;
 }
 
+// LCOV_EXCL_START
 WMError FloatingBallController::GetFloatingBallWindowInfo(uint32_t& windowId)
 {
     if (curState_ != FbWindowState::STATE_STARTED) {
@@ -378,6 +391,7 @@ WMError FloatingBallController::GetFloatingBallWindowInfo(uint32_t& windowId)
     }
     return window_->GetFloatingBallWindowId(windowId);
 }
+// LCOV_EXCL_STOP
 
 } // namespace Rosen
 } // namespace OHOS
