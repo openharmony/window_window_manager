@@ -95,24 +95,24 @@ void ScreenAniListener::OnConnect(ScreenId id)
         return;
     }
     std::vector<ani_ref> vec = it->second;
-    TLOGI(WmsLogTag::DMS, "vec_callback size: %{public}d", (int)vec.size());
+    TLOGI(WmsLogTag::DMS, "vec_callback size: %{public}d", vec.size());
     // find callbacks in vector
     for (auto oneAniCallback : vec) {
         if (env_ == nullptr) {
             TLOGE(WmsLogTag::DMS, "[ANI] null env");
             return;
         }
-        ani_boolean undefRes;
-        ani_boolean nullRes;
+        ani_boolean undefRes = 0;
+        ani_boolean nullRes = 0;
         env_->Reference_IsUndefined(oneAniCallback, &undefRes);
         env_->Reference_IsNull(oneAniCallback, &nullRes);
         // judge is null or undefined
-        if (undefRes || nullRes) {
+        if (undefRes != 0 || nullRes != 0) {
             TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback is undefRes or null");
             continue;
         }
 
-        auto task = [env = env_, oneAniCallback, id] () {
+        auto task = [env = env_, oneAniCallback, id] {
             ScreenAniUtils::CallAniFunctionVoid(env, "L@ohos/screen/screen;", "screenEventCallBack",
                 "Lstd/core/Object;D:V", oneAniCallback, static_cast<ani_double>(id));
         };
@@ -120,7 +120,7 @@ void ScreenAniListener::OnConnect(ScreenId id)
             TLOGE(WmsLogTag::DMS, "[ANI] get main event handler failed!");
             return;
         }
-        eventHandler_->PostTask(task, "dms:AniScreenListener::ConnectCallBack", 0,
+        eventHandler_->PostTask(std::move(task), "dms:AniScreenListener::ConnectCallBack", 0,
             AppExecFwk::EventQueue::Priority::IMMEDIATE);
     }
 }
@@ -144,24 +144,24 @@ void ScreenAniListener::OnDisconnect(ScreenId id)
         return;
     }
     std::vector<ani_ref> vec = it->second;
-    TLOGI(WmsLogTag::DMS, "vec_callback size: %{public}d", (int)vec.size());
+    TLOGI(WmsLogTag::DMS, "vec_callback size: %{public}d", vec.size());
     // find callbacks in vector
     for (auto oneAniCallback : vec) {
         if (env_ == nullptr) {
             TLOGE(WmsLogTag::DMS, "[ANI] null env");
             return;
         }
-        ani_boolean undefRes;
-        ani_boolean nullRes;
+        ani_boolean undefRes = 0;
+        ani_boolean nullRes = 0;
         env_->Reference_IsUndefined(oneAniCallback, &undefRes);
         env_->Reference_IsNull(oneAniCallback, &nullRes);
         // judge is null or undefined
-        if (undefRes || nullRes) {
+        if (undefRes != 0 || nullRes != 0) {
             TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback is undefRes or null");
             continue;
         }
 
-        auto task = [env = env_, oneAniCallback, id] () {
+        auto task = [env = env_, oneAniCallback, id] {
             ScreenAniUtils::CallAniFunctionVoid(env, "L@ohos/screen/screen;", "screenEventCallBack",
                 "Lstd/core/Object;D:V", oneAniCallback, static_cast<ani_double>(id));
         };
@@ -169,7 +169,7 @@ void ScreenAniListener::OnDisconnect(ScreenId id)
             TLOGE(WmsLogTag::DMS, "[ANI] get main event handler failed!");
             return;
         }
-        eventHandler_->PostTask(task, "dms:AniScreenListener::DisconnectCallBack", 0,
+        eventHandler_->PostTask(std::move(task), "dms:AniScreenListener::DisconnectCallBack", 0,
             AppExecFwk::EventQueue::Priority::IMMEDIATE);
     }
 }
@@ -195,15 +195,15 @@ void ScreenAniListener::OnChange(ScreenId id)
         return;
     }
     std::vector<ani_ref> vec = it->second;
-    TLOGI(WmsLogTag::DMS, "vec_callback size: %{public}d", (int)vec.size());
+    TLOGI(WmsLogTag::DMS, "vec_callback size: %{public}d", vec.size());
     // find callbacks in vector
     for (auto oneAniCallback : vec) {
         if (env_ == nullptr) {
             TLOGE(WmsLogTag::DMS, "[ANI] null env");
             return;
         }
-        ani_boolean undefRes;
-        ani_boolean nullRes;
+        ani_boolean undefRes = 0;
+        ani_boolean nullRes = 0;
         env_->Reference_IsUndefined(oneAniCallback, &undefRes);
         env_->Reference_IsNull(oneAniCallback, &nullRes);
         // judge is null or undefined
