@@ -2890,7 +2890,9 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
     }
     abilitySessionInfo->scenarios = sessionInfo.scenarios;
     if (requestId == DEFAULT_REQUEST_FROM_SCB_ID) {
-        abilitySessionInfo->want.SetParam(IS_CALL_BY_SCB, true);
+        TLOGI(WmsLogTag::WMS_LIFE, "Is SCB Call, set flag: true persistentId:%{public}d",
+            abilitySessionInfo->persistentId);
+        abilitySessionInfo->isCallBySCB = true;
     }
     return abilitySessionInfo;
 }
