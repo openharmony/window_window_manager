@@ -22,7 +22,7 @@ export default namespace screenshot {
 loadLibrary('screenshotani_kit.z');
  
 export function save(options: ScreenshotOptions, callback: AsyncCallback<image.PixelMap | undefined>): void {
-    taskpool.execute((options: ScreenshotOptions): image.PixelMap => {
+    taskpool.execute((): image.PixelMap => {
         let res: image.PixelMap = saveSync(options);
         return res;
     }).then((ret: NullishType) => {
@@ -67,9 +67,9 @@ export interface ScreenshotOptions {
  
     displayId: number;
  
-    isNotificationNeeded: number;
+    isNotificationNeeded: boolean;
  
-    isCaptureFullOfScreen: number;
+    isCaptureFullOfScreen: boolean;
 }
  
 export class ScreenshotOptionsImpl implements ScreenshotOptions{
@@ -81,9 +81,9 @@ export class ScreenshotOptionsImpl implements ScreenshotOptions{
  
     displayId: number;
  
-    isNotificationNeeded: number;
+    isNotificationNeeded: boolean;
     
-    isCaptureFullOfScreen: number;
+    isCaptureFullOfScreen: boolean;
 }
  
 export interface Size {
