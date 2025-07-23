@@ -3921,11 +3921,7 @@ WmErrorCode WindowSceneSessionImpl::StopMoveWindow()
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "invalid window type:%{public}u", GetType());
         return WmErrorCode::WM_ERROR_INVALID_CALLING;
     }
-    if (IsPadAndNotFreeMutiWindowCompatibleMode()) {
-        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "This is PcAppInpad, not supported");
-        return WmErrorCode::WM_OK;
-    }
-    if (!IsPcOrPadFreeMultiWindowMode()) {
+    if (!IsPcOrFreeMultiWindowCapabilityEnabled()) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "The device is not supported");
         return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
     }

@@ -3354,7 +3354,7 @@ WMError WindowSessionImpl::SetSubWindowModal(bool isModal, ModalityType modality
         TLOGE(WmsLogTag::WMS_SUB, "called by invalid window type, type:%{public}d", GetType());
         return WMError::WM_ERROR_INVALID_CALLING;
     }
-    if (IsPadAndNotFreeMutiWindowCompatibleMode()) {
+    if (modalityType == ModalityType::APPLICATION_MODALITY && IsPadAndNotFreeMutiWindowCompatibleMode()) {
         TLOGE(WmsLogTag::WMS_SUB, "This is PcAppInPad, not support");
         return WMError::WM_OK;
     }

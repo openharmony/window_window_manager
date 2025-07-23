@@ -1801,11 +1801,6 @@ HWTEST_F(WindowSceneSessionImplTest5, StopMoveWindow, Function | SmallTest | Tes
 
     EXPECT_CALL(*session, SyncSessionEvent(_)).Times(1).WillOnce(Return(WSError::WS_OK));
     ASSERT_EQ(WmErrorCode::WM_OK, window->StopMoveWindow());
-
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
-    window->property_->SetPcAppInpadCompatibleMode(true);
-    window->windowSystemConfig_.freeMultiWindowEnable_ = false;
-    EXPECT_EQ(WmErrorCode::WM_OK, window->StopMoveWindow());
 }
 
 /**
