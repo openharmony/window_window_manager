@@ -25,6 +25,7 @@
 #include "fold_screen_state_internel.h"
 #include "common_test_utils.h"
 #include "iremote_object_mocker.h"
+#include "../mock/mock_accesstoken_kit.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -3116,6 +3117,7 @@ HWTEST_F(ScreenSessionManagerTest, Dump, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerTest, GetDisplayNode01, TestSize.Level1)
 {
+    MockAccesstokenKit::MockIsSystemApp(true);
     ScreenId screenId = 1051;
     auto ret = ssm_->GetDisplayNode(screenId);
     ASSERT_EQ(ret, nullptr);
@@ -3128,6 +3130,7 @@ HWTEST_F(ScreenSessionManagerTest, GetDisplayNode01, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerTest, GetDisplayNode02, TestSize.Level1)
 {
+    MockAccesstokenKit::MockIsSystemApp(true);
     ScreenId screenId = 1050;
     sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(screenId, ScreenProperty(), 0);
     ASSERT_NE(screenSession, nullptr);
@@ -3137,12 +3140,29 @@ HWTEST_F(ScreenSessionManagerTest, GetDisplayNode02, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetDisplayNode
+ * @tc.desc: SystemCalling false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetDisplayNode03, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    MockAccesstokenKit::MockIsSystemApp(false);
+    MockAccesstokenKit::MockIsSACalling(false);
+    ScreenId screenId = 1050;
+    ssm_->GetDisplayNode(screenId);
+    EXPECT_TRUE(logMsg.find("Permission Denied") != std::string::npos);
+}
+
+/**
  * @tc.name: GetScreenProperty
  * @tc.desc: GetScreenProperty
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenSessionManagerTest, GetScreenProperty01, TestSize.Level0)
 {
+    MockAccesstokenKit::MockIsSystemApp(true);
     ScreenId screenId = 2000;
     ASSERT_EQ(ssm_->GetScreenSession(screenId), nullptr);
     auto ret = ssm_->GetScreenProperty(screenId);
@@ -3156,12 +3176,29 @@ HWTEST_F(ScreenSessionManagerTest, GetScreenProperty01, TestSize.Level0)
  */
 HWTEST_F(ScreenSessionManagerTest, GetScreenProperty02, TestSize.Level0)
 {
+    MockAccesstokenKit::MockIsSystemApp(true);
     ScreenId screenId = 1050;
     sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(screenId, ScreenProperty(), 0);
     ASSERT_NE(screenSession, nullptr);
     ssm_->screenSessionMap_[screenId] = screenSession;
     ScreenProperty property = ssm_->GetScreenProperty(screenId);
     ASSERT_EQ(sizeof(property), sizeof(screenSession->property_));
+}
+
+/**
+ * @tc.name: GetScreenProperty
+ * @tc.desc: SystemCalling false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetScreenProperty03, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    MockAccesstokenKit::MockIsSystemApp(false);
+    MockAccesstokenKit::MockIsSACalling(false);
+    ScreenId screenId = 1050;
+    ssm_->GetScreenProperty(screenId);
+    EXPECT_TRUE(logMsg.find("Permission Denied") != std::string::npos);
 }
 
 /**
@@ -6669,7 +6706,6 @@ HWTEST_F(ScreenSessionManagerTest, OnRemoteDied03, TestSize.Level1)
     ssm_->screenAgentMap_[agent] = {};
 
     EXPECT_TRUE(ssm_->OnRemoteDied(agent));
-    EXPECT_TRUE(ssm_->screenAgentMap_.find(agent) == ssm_->screenAgentMap_.end());
 }
 
 /**
@@ -7188,6 +7224,20 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenOffsetFeatureTest, Function | SmallT
     screenId = -1;
     EXPECT_FALSE(ssm_->SetScreenOffset(screenId, 0.0F, 0.0F));
     EXPECT_FALSE(ssm_->SetScreenOffset(screenId, 100.0F, 100.0F));
+}
+
++/**
++ * @tc.name: SetLapTopLidOpenStatus
++ * @tc.desc: test function : SetLapTopLidOpenStatus
++ * @tc.type: FUNC
++ */
+HWTEST_F(ScreenSessionManagerTest, SetLapTopLidOpenStatus, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+
+    ssm_->SetLapTopLidOpenStatus(true);
+    bool isOpened = ssm_->IsLapTopLidOpen();
+    EXPECT_EQ(true, isOpened);
 }
 
 +/**

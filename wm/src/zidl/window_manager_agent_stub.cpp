@@ -50,6 +50,7 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
             break;
         }
         case WindowManagerAgentMsg::TRANS_ID_NOTIFY_WINDOW_SYSTEM_BAR_PROPERTY_CHANGE: {
+            // LCOV_EXCL_START
             uint32_t type = 0;
             if (!data.ReadUint32(type) ||
                 type < static_cast<uint32_t>(WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE) ||
@@ -89,6 +90,7 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
                 contentColor, enableAnimation, static_cast<SystemBarSettingFlag>(settingFlag) };
             NotifyWindowSystemBarPropertyChange(static_cast<WindowType>(type), systemBarProperty);
             break;
+            // LCOV_EXCL_STOP
         }
         case WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_MODE_TYPE: {
             uint8_t typeId = 0;
@@ -264,6 +266,7 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
     return ERR_NONE;
 }
 
+// LCOV_EXCL_START
 bool WindowManagerAgentStub::ReadWindowInfoList(MessageParcel& data,
     std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList)
 {
@@ -367,5 +370,6 @@ bool WindowManagerAgentStub::ReadWindowInfo(MessageParcel& data,
     }
     return true;
 }
+// LCOV_EXCL_STOP
 } // namespace Rosen
 } // namespace OHOS

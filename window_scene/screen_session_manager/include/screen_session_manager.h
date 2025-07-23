@@ -284,6 +284,8 @@ public:
     float GetSuperRotation() override;
     void SetLandscapeLockStatus(bool isLocked) override;
     bool GetTentMode();
+    bool IsLapTopLidOpen() const;
+    void SetLapTopLidOpenStatus(bool isLapTopLidOpen);
     ExtendScreenConnectStatus GetExtendScreenConnectStatus() override;
     bool GetIsExtendScreenConnected();
     void SetIsExtendScreenConnected(bool isExtendScreenConnected);
@@ -470,6 +472,7 @@ public:
     void SetRSScreenPowerStatus(ScreenId screenId, ScreenPowerStatus status);
     void NotifyScreenMaskAppear() override;
     bool IsSystemSleep();
+    void SwitchSubscriberInit();
     bool GetKeyboardState() override;
     DMError GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
         ScreenId& screenId, DMRect& screenArea) override;
@@ -657,6 +660,7 @@ private:
     int32_t currentUserId_ { 0 };
     int32_t currentUserIdForSettings_ { 0 };
     int32_t currentScbPId_ { -1 };
+    int32_t switchId_ { -1 };
     std::vector<int32_t> oldScbPids_ {};
     std::map<int32_t, sptr<IScreenSessionManagerClient>> clientProxyMap_;
     FoldDisplayMode oldScbDisplayMode_ = FoldDisplayMode::UNKNOWN;
@@ -675,6 +679,7 @@ private:
     std::mutex lastStatusUpdateMutex_;
 
     mutable std::recursive_mutex screenSessionMapMutex_;
+    std::mutex screenAgentMapMutex_;
     std::map<ScreenId, sptr<ScreenSession>> screenSessionMap_;
     mutable std::recursive_mutex physicalScreenSessionMapMutex_;
     std::map<ScreenId, sptr<ScreenSession>> physicalScreenSessionMap_;
@@ -724,6 +729,7 @@ private:
     bool isOuterOnlyModeBeforePowerOff_ = false;
     std::atomic<bool> isFoldStatusLocked_ = false;
     std::atomic<bool> isLandscapeLockStatus_ = false;
+    std::atomic<bool> isLapTopLidOpen_ = true;
 
     /**
      * On/Off screen
@@ -748,6 +754,7 @@ private:
     int32_t screenOnDelay_ {0};
 
     std::vector<ScreenId> mirrorScreenIds_;
+    std::mutex mirrorScreenIdsMutex_;
     std::mutex snapBypickerMutex_;
     std::mutex switchUserMutex_;
     std::condition_variable switchUserCV_;

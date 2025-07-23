@@ -191,7 +191,7 @@ void JsDisplayListener::OnChange(DisplayId id)
         return;
     }
     if (jsCallBack_.find(EVENT_CHANGE) == jsCallBack_.end()) {
-        TLOGE(WmsLogTag::DMS, "not this event, return");
+        TLOGD(WmsLogTag::DMS, "not this event, return");
         return;
     }
     auto napiTask = [self = weakRef_, id, env = env_]() {

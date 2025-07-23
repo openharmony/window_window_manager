@@ -18,6 +18,7 @@
 #include "abstract_display.h"
 #include "abstract_display_controller.h"
 #include "display_cutout_controller.h"
+#include "modifier_render_thread/rs_modifiers_draw_thread.h"
 #include "screen.h"
 #include "scene_board_judgement.h"
 
@@ -53,6 +54,9 @@ void AbstractDisplayControllerTest::SetUpTestCase()
 
 void AbstractDisplayControllerTest::TearDownTestCase()
 {
+#ifdef RS_ENABLE_VK
+    RSModifiersDrawThread::Destroy();
+#endif
 }
 
 void AbstractDisplayControllerTest::SetUp()

@@ -271,7 +271,7 @@ void RootScene::RegisterInputEventListener()
         }
     }
     if (!(DelayedSingleton<IntentionEventManager>::GetInstance()->EnableInputEventListener(
-        uiContent_.get(), eventHandler_))) {
+        uiContent_.get(), eventHandler_, this))) {
         WLOGFE("EnableInputEventListener fail");
     }
     InputTransferStation::GetInstance().MarkRegisterToMMI();
@@ -295,7 +295,7 @@ void RootScene::FlushFrameRate(uint32_t rate, int32_t animatorExpectedFrameRate,
 bool RootScene::IsLastFrameLayoutFinished()
 {
     int32_t requestTimes = vsyncStation_->GetRequestVsyncTimes();
-    TLOGI(WmsLogTag::WMS_LAYOUT, "vsync request times: %{public}d", requestTimes);
+    TLOGD(WmsLogTag::WMS_LAYOUT, "vsync request times: %{public}d", requestTimes);
     return requestTimes <= 0;
 }
 
@@ -330,6 +330,11 @@ void RootScene::SetFrameLayoutFinishCallback(std::function<void()>&& callback)
 void RootScene::SetUiDvsyncSwitch(bool dvsyncSwitch)
 {
     vsyncStation_->SetUiDvsyncSwitch(dvsyncSwitch);
+}
+
+void RootScene::SetTouchEvent(int32_t touchType)
+{
+    vsyncStation_->SetTouchEvent(touchType);
 }
 
 WMError RootScene::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect, int32_t apiVersion)

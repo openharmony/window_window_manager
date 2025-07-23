@@ -53,6 +53,7 @@ public:
     void SetFrameRateLinkerEnable(const std::shared_ptr<RSUIContext>& rsUIContext, bool enabled);
     void SetDisplaySoloistFrameRateLinkerEnable(bool enabled);
     void SetUiDvsyncSwitch(bool dvsyncSwitch);
+    void SetTouchEvent(int32_t touchType);
 
     void DecreaseRequestVsyncTimes();
     int32_t GetRequestVsyncTimes() { return requestVsyncTimes_.load(); }

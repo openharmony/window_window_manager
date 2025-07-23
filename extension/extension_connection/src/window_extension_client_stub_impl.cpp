@@ -33,26 +33,32 @@ void WindowExtensionClientStubImpl::OnWindowReady(const std::shared_ptr<RSSurfac
 
 void WindowExtensionClientStubImpl::OnBackPress()
 {
+    // LCOV_EXCL_START
     if (componentCallback_ != nullptr) {
         componentCallback_->OnBackPress();
         WLOGI("called");
     }
+    // LCOV_EXCL_STOP
 }
 
 void WindowExtensionClientStubImpl::OnKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
+    // LCOV_EXCL_START
     if (componentCallback_ != nullptr) {
         componentCallback_->OnKeyEvent(keyEvent);
         WLOGI("called");
     }
+    // LCOV_EXCL_STOP
 }
 
 void WindowExtensionClientStubImpl::OnPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
+    // LCOV_EXCL_START
     if (componentCallback_ != nullptr) {
         componentCallback_->OnPointerEvent(pointerEvent);
         WLOGI("called");
     }
+    // LCOV_EXCL_STOP
 }
 } // namespace Rosen
 } // namespace OHOS

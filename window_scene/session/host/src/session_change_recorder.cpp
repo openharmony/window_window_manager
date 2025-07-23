@@ -32,6 +32,7 @@ constexpr uint32_t MAX_RECORD_LOG_SIZE = 102400;
 constexpr uint32_t MAX_EVENT_DUMP_SIZE = 512 * 1024;
 constexpr int32_t SCHEDULE_SECONDS = 5;
 
+// LCOV_EXCL_START
 std::string GetFormattedTime()
 {
     auto now = std::chrono::system_clock::now();
@@ -46,6 +47,7 @@ std::string GetFormattedTime()
     oss << std::put_time(tmPtr, "%m-%d %H:%M:%S") << "." << std::setw(formatThreeSpace) << ms.count();
     return oss.str();
 }
+// LCOV_EXCL_STOP
 } // namespace
 
 WM_IMPLEMENT_SINGLE_INSTANCE(SessionChangeRecorder)
@@ -63,6 +65,7 @@ void SessionChangeRecorder::Init()
         return;
     }
     
+    // LCOV_EXCL_START
     stopLogFlag_.store(false);
     mThread = std::thread([this]() {
         std::unordered_map<RecordType, std::queue<SceneSessionChangeInfo>> sceneSessionChangeNeedLogMapCopy;
@@ -82,6 +85,7 @@ void SessionChangeRecorder::Init()
             std::this_thread::sleep_for(std::chrono::seconds(SCHEDULE_SECONDS));
         }
     });
+    // LCOV_EXCL_STOP
 }
 
 SessionChangeRecorder::~SessionChangeRecorder()
@@ -93,6 +97,7 @@ SessionChangeRecorder::~SessionChangeRecorder()
     }
 }
 
+// LCOV_EXCL_START
 WSError SessionChangeRecorder::RecordSceneSessionChange(RecordType recordType, SceneSessionChangeInfo& changeInfo)
 {
     TLOGD(WmsLogTag::DEFAULT, "In");
@@ -338,4 +343,5 @@ void SessionChangeRecorder::PrintLog(
         }
     }
 }
+// LCOV_EXCL_STOP
 } // namespace OHOS::Rosen

@@ -16,8 +16,6 @@
 #ifndef OHOS_ROSEN_WINDOW_SESSION_COORDINATE_HELPER_H
 #define OHOS_ROSEN_WINDOW_SESSION_COORDINATE_HELPER_H
 
-#include <optional>
-
 #include "interfaces/include/ws_common.h"
 
 namespace OHOS::Rosen {

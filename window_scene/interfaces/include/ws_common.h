@@ -45,8 +45,11 @@ using ScreenId = uint64_t;
 
 constexpr int32_t ROTATE_ANIMATION_DURATION = 400;
 constexpr int32_t INVALID_SESSION_ID = 0;
+constexpr int32_t DEFAULT_REQUEST_FROM_SCB_ID = -1;
 constexpr int32_t WINDOW_SUPPORT_MODE_MAX_SIZE = 4;
 constexpr int32_t DEFAULT_SCALE_RATIO = 100;
+constexpr uint32_t COLOR_WHITE = 0xffffffff;
+constexpr uint32_t COLOR_BLACK = 0xff000000;
 const std::string WINDOW_SCREEN_LOCK_PREFIX = "windowLock_";
 const std::string VIEW_SCREEN_LOCK_PREFIX = "viewLock_";
 
@@ -362,6 +365,15 @@ enum class StartWindowType : uint32_t {
     REMOVE_NODE_INVISIBLE,
 };
 
+struct AtomicServiceInfo {
+    std::string appNameInfo_ = "";
+    std::string eyelashRingIcon_ = "";
+    std::string circleIcon_ = "";
+    int32_t resizable_ = 0;
+    std::vector<std::string> deviceTypes_;
+    std::vector<std::string> supportWindowMode_;
+};
+
 struct SessionInfo {
     std::string bundleName_ = "";
     std::string moduleName_ = "";
@@ -375,6 +387,7 @@ struct SessionInfo {
     uint64_t screenId_ = -1;
     bool isPersistentRecover_ = false;
     bool isFromIcon_ = false;
+    AtomicServiceInfo atomicServiceInfo_;
 
     mutable std::shared_ptr<AAFwk::Want> want = nullptr; // want for ability start
     std::shared_ptr<std::mutex> wantMutex_ = std::make_shared<std::mutex>();

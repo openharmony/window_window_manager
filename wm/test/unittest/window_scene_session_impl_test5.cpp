@@ -365,6 +365,16 @@ HWTEST_F(WindowSceneSessionImplTest5, SetCustomDensity01, TestSize.Level1)
     EXPECT_EQ(density, window->customDensity_);
     applyToSubWindow = true;
     EXPECT_EQ(WMError::WM_OK, window->SetCustomDensity(density, applyToSubWindow));
+
+    sptr<WindowSceneSessionImpl> window1;
+    WindowSceneSessionImpl::windowSessionMap_.insert(std::make_pair(window->GetWindowName(),
+        std::pair<uint64_t, sptr<WindowSessionImpl>>(1, window)));
+    WindowSceneSessionImpl::windowSessionMap_.insert(std::make_pair("winTest",
+        std::pair<uint64_t, sptr<WindowSessionImpl>>(2, window1)));
+    EXPECT_EQ(WMError::WM_OK, window->SetCustomDensity(density, applyToSubWindow));
+    EXPECT_EQ(WMError::WM_OK, window->SetCustomDensity(1.6f, false));
+    WindowSceneSessionImpl::windowSessionMap_.erase(window->GetWindowName());
+    WindowSceneSessionImpl::windowSessionMap_.erase("winTest");
 }
 
 /**
@@ -494,6 +504,28 @@ HWTEST_F(WindowSceneSessionImplTest5, IsMainWindowFullScreenAcrossDisplays01, Te
     window->state_ = WindowState::STATE_CREATED;
     ret = window->IsMainWindowFullScreenAcrossDisplays(isAcrossDisplays);
     EXPECT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: UpdateColorMode
+ * @tc.desc: UpdateColorMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, UpdateColorMode, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->hostSession_ = nullptr;
+    auto ret = window->UpdateColorMode();
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    ret = window->UpdateColorMode();
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
 }
 
 /**
@@ -1557,6 +1589,9 @@ HWTEST_F(WindowSceneSessionImplTest5, GetTargetOrientationConfigInfo, Function |
     window->state_ = WindowState::STATE_CREATED;
     EXPECT_EQ(WMError::WM_OK,
     window->GetTargetOrientationConfigInfo(targetOrientation, properties, config, avoidAreas));
+    targetOrientation = Orientation::INVALID;
+    EXPECT_EQ(WMError::WM_OK,
+    window->GetTargetOrientationConfigInfo(targetOrientation, properties, config, avoidAreas));
 }
 
 /**
@@ -2120,13 +2155,25 @@ HWTEST_F(WindowSceneSessionImplTest5, TestMoveWindowToGlobalDisplay, TestSize.Le
     ret = window->MoveWindowToGlobalDisplay(100, 100);
     EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS);
 
-    // Case 3: Illegal position
+    // Case 3: Same position
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    ret = window->MoveWindowToGlobalDisplay(100, 100);
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    // Case 4: Illegal position
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     ret = window->MoveWindowToGlobalDisplay(INT32_MAX, INT32_MAX);
     EXPECT_EQ(ret, WMError::WM_ERROR_ILLEGAL_PARAM);
 
-    // Case 4: Move to new position
-    EXPECT_CALL(*mockHostSession, UpdateGlobalDisplayRectFromClient(_, _)).Times(1).WillOnce(Return(WSError::WS_OK));
+    EXPECT_CALL(*mockHostSession, UpdateGlobalDisplayRectFromClient(_, _)).Times(2).WillOnce(Return(WSError::WS_OK));
+
+    // Case 5: Move to new position
+    window->state_ = WindowState::STATE_SHOWN;
+    ret = window->MoveWindowToGlobalDisplay(200, 300);
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    // Case 6: Window is not shown
+    window->state_ = WindowState::STATE_HIDDEN;
     ret = window->MoveWindowToGlobalDisplay(200, 300);
     EXPECT_EQ(ret, WMError::WM_OK);
 }

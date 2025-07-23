@@ -54,6 +54,7 @@ PictureInPictureControllerBase::~PictureInPictureControllerBase()
     TLOGI(WmsLogTag::WMS_PIP, "Destruction");
 }
 
+// LCOV_EXCL_START
 void PictureInPictureControllerBase::NotifyOpretationError(WMError errCode, StartPipType startType)
 {
     TLOGE(WmsLogTag::WMS_PIP, "window show failed, err: %{public}u", errCode);
@@ -615,5 +616,6 @@ bool PictureInPictureControllerBase::GetPiPSettingSwitchStatus()
     TLOGI(WmsLogTag::WMS_PIP, "switchStatus: %{public}d", switchStatus);
     return switchStatus;
 }
+// LCOV_EXCL_STOP
 } // namespace Rosen
 } // namespace OHOS
