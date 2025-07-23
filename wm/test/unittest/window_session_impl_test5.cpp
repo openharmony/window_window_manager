@@ -1651,10 +1651,10 @@ HWTEST_F(WindowSessionImplTest5, TestClientToGlobalDisplay, TestSize.Level1)
 
     Rect globalRect { 100, 200, 300, 400 };
     window->property_->SetGlobalDisplayRect(globalRect);
-    Transform layoutTransform;
-    layoutTransform.scaleX_ = 1.0f;
-    layoutTransform.scaleY_ = 1.0f;
-    window->SetLayoutTransform(layoutTransform);
+    Transform transform;
+    transform.scaleX_ = 1.0f;
+    transform.scaleY_ = 1.0f;
+    window->SetCurrentTransform(transform);
 
     Position inPosition { 10, 20 };
     Position outPosition;
@@ -1665,8 +1665,8 @@ HWTEST_F(WindowSessionImplTest5, TestClientToGlobalDisplay, TestSize.Level1)
     EXPECT_NE(outPosition, inPosition);
     EXPECT_EQ(outPosition, expectedPosition);
 
-    layoutTransform.scaleX_ = 0.5f;
-    window->SetLayoutTransform(layoutTransform);
+    transform.scaleX_ = 0.5f;
+    window->SetCurrentTransform(transform);
     ret = window->ClientToGlobalDisplay(inPosition, outPosition);
     EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS);
 }
@@ -1683,10 +1683,10 @@ HWTEST_F(WindowSessionImplTest5, TestGlobalDisplayToClient, TestSize.Level1)
 
     Rect globalRect { 100, 200, 300, 400 };
     window->property_->SetGlobalDisplayRect(globalRect);
-    Transform layoutTransform;
-    layoutTransform.scaleX_ = 1.0f;
-    layoutTransform.scaleY_ = 1.0f;
-    window->SetLayoutTransform(layoutTransform);
+    Transform transform;
+    transform.scaleX_ = 1.0f;
+    transform.scaleY_ = 1.0f;
+    window->SetCurrentTransform(transform);
 
     Position inPosition { 110, 220 };
     Position outPosition;
@@ -1697,8 +1697,8 @@ HWTEST_F(WindowSessionImplTest5, TestGlobalDisplayToClient, TestSize.Level1)
     EXPECT_NE(outPosition, inPosition);
     EXPECT_EQ(outPosition, expectedPosition);
 
-    layoutTransform.scaleX_ = 0.5f;
-    window->SetLayoutTransform(layoutTransform);
+    transform.scaleX_ = 0.5f;
+    window->SetCurrentTransform(transform);
     ret = window->GlobalDisplayToClient(inPosition, outPosition);
     EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS);
 }

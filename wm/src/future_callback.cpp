@@ -39,6 +39,21 @@ WSError FutureCallback::OnUpdateSessionRect(const Rect& rect, WindowSizeChangeRe
 }
 
 // LCOV_EXCL_START
+WSError FutureCallback::OnUpdateGlobalDisplayRect(
+    const Rect& rect, WindowSizeChangeReason reason, int32_t persistentId)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, rect: %{public}s, reason: %{public}u",
+        persistentId, rect.ToString().c_str(), reason);
+    switch (reason) {
+        case WindowSizeChangeReason::MOVE:
+            moveWindowToGlobalDisplayFuture_.SetValue(rect);
+            return WSError::WS_OK;
+        default:
+            TLOGD(WmsLogTag::WMS_LAYOUT, "Unmatched reason: %{public}u", reason);
+    }
+    return WSError::WS_DO_NOTHING;
+}
+
 WSError FutureCallback::OnUpdateTargetOrientationInfo(OrientationInfo& info)
 {
     TLOGI(WmsLogTag::WMS_ROTATION, "update the target orientation info");
@@ -52,25 +67,30 @@ void FutureCallback::OnUpdateRotationResult(RotationChangeResult rotationChangeR
     getRotationResultFuture_.SetValue(rotationChangeResult);
 }
 
-Rect FutureCallback::GetResizeAsyncResult(long timeOut)
+Rect FutureCallback::GetResizeAsyncResult(long timeoutMs)
 {
-    return resizeFuture_.GetResult(timeOut);
+    return resizeFuture_.GetResult(timeoutMs);
 }
 
-Rect FutureCallback::GetMoveToAsyncResult(long timeOut)
+Rect FutureCallback::GetMoveToAsyncResult(long timeoutMs)
 {
-    return moveToFuture_.GetResult(timeOut);
+    return moveToFuture_.GetResult(timeoutMs);
 }
 
-OrientationInfo FutureCallback::GetTargetOrientationResult(long timeOut)
+Rect FutureCallback::GetMoveWindowToGlobalDisplayAsyncResult(long timeoutMs)
 {
-    return getTargetRotationFuture_.GetResult(timeOut);
+    return moveWindowToGlobalDisplayFuture_.GetResult(timeoutMs);
 }
 // LCOV_EXCL_STOP
 
-RotationChangeResult FutureCallback::GetRotationResult(long timeOut)
+OrientationInfo FutureCallback::GetTargetOrientationResult(long timeoutMs)
 {
-    return getRotationResultFuture_.GetResult(timeOut);
+    return getTargetRotationFuture_.GetResult(timeoutMs);
+}
+
+RotationChangeResult FutureCallback::GetRotationResult(long timeoutMs)
+{
+    return getRotationResultFuture_.GetResult(timeoutMs);
 }
 
 // LCOV_EXCL_START
@@ -84,6 +104,11 @@ void FutureCallback::ResetMoveToLock()
     moveToFuture_.ResetLock({});
 }
 
+void FutureCallback::ResetMoveWindowToGlobalDisplayLock()
+{
+    moveWindowToGlobalDisplayFuture_.ResetLock({});
+}
+
 void FutureCallback::ResetGetTargetRotationLock()
 {
     getTargetRotationFuture_.ResetLock({});
@@ -95,9 +120,9 @@ void FutureCallback::ResetRotationResultLock()
 }
 // LCOV_EXCL_STOP
 
-int32_t FutureCallback::GetUpdateRectResult(long timeOut)
+int32_t FutureCallback::GetUpdateRectResult(long timeoutMs)
 {
-    return updateRectFuture_.GetResult(timeOut);
+    return updateRectFuture_.GetResult(timeoutMs);
 }
 
 void FutureCallback::OnFirstValidRectUpdate(int32_t persistentId)

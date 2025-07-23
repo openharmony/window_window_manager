@@ -1803,7 +1803,7 @@ napi_value JsWindow::OnMoveWindowTo(napi_env env, napi_callback_info info)
         } else {
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "Window move failed"));
         }
-        TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s: end, window [%{public}u, %{public}s] ret=%{public}d",
+        TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s: window [%{public}u, %{public}s] ret=%{public}d",
                where, window->GetWindowId(), window->GetWindowName().c_str(), ret);
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnMoveWindowTo") != napi_status::napi_ok) {
@@ -2147,7 +2147,7 @@ napi_value JsWindow::OnResizeWindow(napi_env env, napi_callback_info info)
         } else {
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "Window resize failed"));
         }
-        TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s: end, window [%{public}u, %{public}s] ret=%{public}d",
+        TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s: window [%{public}u, %{public}s] ret=%{public}d",
                where, window->GetWindowId(), window->GetWindowName().c_str(), ret);
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnResizeWindow") != napi_status::napi_ok) {

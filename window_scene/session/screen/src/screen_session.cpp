@@ -2447,8 +2447,9 @@ void ScreenSession::SetScreenId(ScreenId screenId)
 
 void ScreenSession::SetDisplayNode(std::shared_ptr<RSDisplayNode> displayNode)
 {
-    std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
+    std::unique_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
     displayNode_ = displayNode;
+    RSAdapterUtil::SetRSUIContext(displayNode_, GetRSUIContext(), true);
 }
 
 void ScreenSession::SetScreenAvailableStatus(bool isScreenAvailable)
