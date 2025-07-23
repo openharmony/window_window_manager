@@ -46,20 +46,20 @@ void ScreenAniListener::AddCallback(const std::string& type, ani_ref callback)
         TLOGE(WmsLogTag::DMS, "[ANI]create global ref fail");
         return;
     };
-    aniCallBack_[type].emplace_back(cbRef);
-    TLOGI(WmsLogTag::DMS, "[ANI] AddCallback success aniCallBack_ size: %{public}u!",
-        static_cast<uint32_t>(aniCallBack_[type].size()));
+    aniCallback_[type].emplace_back(cbRef);
+    TLOGI(WmsLogTag::DMS, "[ANI] AddCallback success aniCallback_ size: %{public}u!",
+        static_cast<uint32_t>(aniCallback_[type].size()));
 }
 void ScreenAniListener::RemoveAllCallback()
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    aniCallBack_.clear();
+    aniCallback_.clear();
 }
 void ScreenAniListener::RemoveCallback(ani_env* env, const std::string& type, ani_ref callback)
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    auto it = aniCallBack_.find(type);
-    if (it == aniCallBack_.end()) {
+    auto it = aniCallback_.find(type);
+    if (it == aniCallback_.end()) {
         TLOGE(WmsLogTag::DMS, "[ANI] Listener no callback to remove");
         return;
     }
@@ -85,12 +85,12 @@ void ScreenAniListener::OnConnect(ScreenId id)
         TLOGE(WmsLogTag::DMS, "[ANI] this listener is nullptr");
         return;
     }
-    if (aniCallBack_.empty()) {
+    if (aniCallback_.empty()) {
         TLOGE(WmsLogTag::DMS, "[ANI] OnConnect not register!");
         return;
     }
-    auto it = aniCallBack_.find(EVENT_CONNECT);
-    if (it == aniCallBack_.end()) {
+    auto it = aniCallback_.find(EVENT_CONNECT);
+    if (it == aniCallback_.end()) {
         TLOGE(WmsLogTag::DMS, "[ANI] OnConnect not this event, return");
         return;
     }
@@ -134,12 +134,12 @@ void ScreenAniListener::OnDisconnect(ScreenId id)
         return;
     }
     TLOGI(WmsLogTag::DMS, "[ANI] OnDisconnect is called, displayId: %{public}" PRIu64, id);
-    if (aniCallBack_.empty()) {
+    if (aniCallback_.empty()) {
         TLOGE(WmsLogTag::DMS, "[ANI] OnDisconnect not register!");
         return;
     }
-    auto it = aniCallBack_.find(EVENT_DISCONNECT);
-    if (it == aniCallBack_.end()) {
+    auto it = aniCallback_.find(EVENT_DISCONNECT);
+    if (it == aniCallback_.end()) {
         TLOGE(WmsLogTag::DMS, "[ANI] OnDisconnect not this event, return");
         return;
     }
@@ -185,12 +185,12 @@ void ScreenAniListener::OnChange(ScreenId id)
         return;
     }
     TLOGI(WmsLogTag::DMS, "[ANI] OnChange is called, displayId: %{public}" PRIu64, id);
-    if (aniCallBack_.empty()) {
+    if (aniCallback_.empty()) {
         TLOGE(WmsLogTag::DMS, "[ANI] OnChange not register!");
         return;
     }
-    auto it = aniCallBack_.find(EVENT_CHANGE);
-    if (it == aniCallBack_.end()) {
+    auto it = aniCallback_.find(EVENT_CHANGE);
+    if (it == aniCallback_.end()) {
         TLOGE(WmsLogTag::DMS, "[ANI] OnChange not this event, return");
         return;
     }
