@@ -234,7 +234,7 @@ ani_status AniErrUtils::CreateBusinessError(ani_env* env, int32_t error, std::st
         TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to new err, status:%{public}d", static_cast<int32_t>(status));
         return status;
     }
-    status = env->Object_SetFieldByName_Double(*err, "code", static_cast<ani_double>(error));
+    status = env->Object_SetFieldByName_Int(*err, "code", static_cast<ani_int>(error));
     if (status != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to set code, status:%{public}d", static_cast<int32_t>(status));
         return status;

@@ -3103,6 +3103,11 @@ function runWindowEventCallBack(cb: object, cbArg: int): void {
     func(cbArg as WindowEventType);
 }
 
+function runWindowStageEventCallBack(cb: object, cbArg: int): void {
+    const func = cb as (cbArg: WindowStageEventType) => void;
+    func(cbArg as WindowStageEventType);
+}
+
 function runWindowTouchOutCallback(cb: object): void {
     const func = cb as () => void;
     func();
