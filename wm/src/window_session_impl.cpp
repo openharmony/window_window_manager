@@ -7486,8 +7486,8 @@ bool WindowSessionImpl::IsDeviceFeatureCapableFor(const std::string& feature) co
 
 bool WindowSessionImpl::IsDeviceFeatureCapableForFreeMultiWindow() const
 {
-    static const std::string DEVICE_FEATURE_FREE_MULTI_WINDOW = "free_multi_window";
-    return IsDeviceFeatureCapableFor(DEVICE_FEATURE_FREE_MULTI_WINDOW)
+    static const std::string DEVICE_FEATURE_LARGE_SCREEN = "large_screen";
+    return IsDeviceFeatureCapableFor(DEVICE_FEATURE_LARGE_SCREEN)
         && system::GetParameter("const.window.device_feature_support_type", "0") == "1";
 }
 
