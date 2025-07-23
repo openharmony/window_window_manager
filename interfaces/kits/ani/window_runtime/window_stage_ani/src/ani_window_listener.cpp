@@ -129,7 +129,7 @@ void AniWindowListener::OnSystemDensityChanged(float density)
             return;
         }
         AniWindowUtils::CallAniFunctionVoid(eng, "L@ohos/window/window;", "runSystemDensityChangeCallback",
-            nullptr, thisListener->aniCallBack_, static_cast<ani_number>(density));
+            nullptr, thisListener->aniCallBack_, static_cast<ani_float>(density));
     };
     if (!eventHandler_) {
         TLOGE(WmsLogTag::DEFAULT, "get main event handler failed!");
@@ -149,7 +149,7 @@ void AniWindowListener::OnDisplayIdChanged(DisplayId displayId)
             return;
         }
         AniWindowUtils::CallAniFunctionVoid(eng, "L@ohos/window/window;", "runDisplayIdChangeCallback",
-            nullptr, thisListener->aniCallBack_, static_cast<ani_number>(displayId));
+            nullptr, thisListener->aniCallBack_, static_cast<ani_long>(displayId));
     };
     if (!eventHandler_) {
         TLOGE(WmsLogTag::DEFAULT, "get main event handler failed!");
