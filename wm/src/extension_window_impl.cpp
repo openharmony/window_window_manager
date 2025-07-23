@@ -45,13 +45,13 @@ sptr<Window> ExtensionWindowImpl::GetWindow()
 
 WMError ExtensionWindowImpl::HideNonSecureWindows(bool shouldHide)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "HideNonSecureWindows is called");
+    TLOGD(WmsLogTag::WMS_UIEXT, "HideNonSecureWindows is called");
     return windowExtensionSessionImpl_->HideNonSecureWindows(shouldHide);
 }
 
 WMError ExtensionWindowImpl::SetWaterMarkFlag(bool isEnable)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "SetWaterMarkFlag is called");
+    TLOGD(WmsLogTag::WMS_UIEXT, "SetWaterMarkFlag is called");
     return windowExtensionSessionImpl_->SetWaterMarkFlag(isEnable);
 }
 

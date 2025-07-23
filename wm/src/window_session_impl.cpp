@@ -216,6 +216,7 @@ std::map<int32_t, std::vector<sptr<WindowSessionImpl>>> WindowSessionImpl::subWi
 std::map<int32_t, std::vector<sptr<IWindowStatusChangeListener>>> WindowSessionImpl::windowStatusChangeListeners_;
 std::map<int32_t, std::vector<sptr<IWindowStatusDidChangeListener>>> WindowSessionImpl::windowStatusDidChangeListeners_;
 bool WindowSessionImpl::isUIExtensionAbilityProcess_ = false;
+std::atomic<bool> WindowSessionImpl::defaultDensityEnabledGlobalConfig_ = false;
 
 #define CALL_LIFECYCLE_LISTENER(windowLifecycleCb, listeners) \
     do {                                                      \
@@ -309,13 +310,16 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
 
     RSAdapterUtil::InitRSUIDirector(rsUIDirector_, true, true);
-
+    if (WindowHelper::IsSubWindow(GetType())) {
+        property_->SetDecorEnable(option->GetSubWindowDecorEnable());
+    }
     surfaceNode_ = CreateSurfaceNode(property_->GetWindowName(), optionWindowType);
     if (surfaceNode_ != nullptr) {
         vsyncStation_ = std::make_shared<VsyncStation>(surfaceNode_->GetId());
     }
     WindowHelper::SplitStringByDelimiter(
         system::GetParameter("const.window.containerColorLists", ""), ",", containerColorList_);
+    SetDefaultDensityEnabledValue(defaultDensityEnabledGlobalConfig_);
 }
 
 bool WindowSessionImpl::IsPcWindow() const
@@ -440,7 +444,7 @@ RSSurfaceNode::SharedPtr WindowSessionImpl::CreateSurfaceNode(const std::string&
             rsSurfaceNodeType = RSSurfaceNodeType::APP_WINDOW_NODE;
             break;
         case WindowType::WINDOW_TYPE_UI_EXTENSION:
-            TLOGI(WmsLogTag::WMS_UIEXT, "uiExtensionUsage=%{public}u", property_->GetUIExtensionUsage());
+            TLOGD(WmsLogTag::WMS_UIEXT, "uiExtensionUsage=%{public}u", property_->GetUIExtensionUsage());
             if (SessionHelper::IsSecureUIExtension(property_->GetUIExtensionUsage())) {
                 rsSurfaceNodeType = RSSurfaceNodeType::UI_EXTENSION_SECURE_NODE;
             } else {
@@ -2362,11 +2366,11 @@ Rect WindowSessionImpl::GetGlobalDisplayRect() const
 WMError WindowSessionImpl::ClientToGlobalDisplay(const Position& inPosition, Position& outPosition) const
 {
     const auto windowId = GetWindowId();
-    const auto layoutTransform = GetLayoutTransform();
-    if (WindowHelper::IsScaled(layoutTransform)) {
+    const auto transform = GetCurrentTransform();
+    if (WindowHelper::IsScaled(transform)) {
         TLOGW(WmsLogTag::WMS_LAYOUT,
             "Scaled window is not supported, windowId: %{public}u, scaleX: %{public}f, scaleY: %{public}f",
-            windowId, layoutTransform.scaleX_, layoutTransform.scaleY_);
+            windowId, transform.scaleX_, transform.scaleY_);
         return WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS;
     }
 
@@ -2385,11 +2389,11 @@ WMError WindowSessionImpl::ClientToGlobalDisplay(const Position& inPosition, Pos
 WMError WindowSessionImpl::GlobalDisplayToClient(const Position& inPosition, Position& outPosition) const
 {
     const auto windowId = GetWindowId();
-    const auto layoutTransform = GetLayoutTransform();
-    if (WindowHelper::IsScaled(layoutTransform)) {
+    const auto transform = GetCurrentTransform();
+    if (WindowHelper::IsScaled(transform)) {
         TLOGW(WmsLogTag::WMS_LAYOUT,
             "Scaled window is not supported, windowId: %{public}u, scaleX: %{public}f, scaleY: %{public}f",
-            windowId, layoutTransform.scaleX_, layoutTransform.scaleY_);
+            windowId, transform.scaleX_, transform.scaleY_);
         return WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS;
     }
 
@@ -2419,7 +2423,9 @@ WSError WindowSessionImpl::UpdateGlobalDisplayRectFromServer(const WSRect& rect,
     }
     property_->SetGlobalDisplayRect(newRect);
     globalDisplayRectSizeChangeReason_ = reason;
-    NotifyGlobalDisplayRectChange(newRect, static_cast<WindowSizeChangeReason>(reason));
+    auto windowSizeChangeReason = static_cast<WindowSizeChangeReason>(reason);
+    layoutCallback_->OnUpdateGlobalDisplayRect(newRect, windowSizeChangeReason, GetPersistentId());
+    NotifyGlobalDisplayRectChange(newRect, windowSizeChangeReason);
     return WSError::WS_OK;
 }
 
@@ -2842,10 +2848,7 @@ void WindowSessionImpl::SetRequestedOrientation(Orientation orientation, bool ne
     }
     // the orientation of the invalid type is only applied to pageRotation.
     if (orientation == Orientation::INVALID) {
-        Orientation requestedOrientation = GetRequestedOrientation();
-        if (IsUserOrientation(requestedOrientation)) {
-            requestedOrientation = ConvertUserOrientationToUserPageOrientation(requestedOrientation);
-        }
+        Orientation requestedOrientation = ConvertInvalidOrientation();
         property_->SetRequestedOrientation(requestedOrientation, needAnimation);
     } else {
         property_->SetRequestedOrientation(orientation, needAnimation);
@@ -2863,7 +2866,7 @@ Orientation WindowSessionImpl::GetRequestedOrientation()
     return property_->GetUserRequestedOrientation();
 }
 
-Orientation WindowSessionImpl::ConvertUserOrientationToUserPageOrientation(Orientation Orientation)
+Orientation WindowSessionImpl::ConvertUserOrientationToUserPageOrientation(Orientation Orientation) const
 {
     switch (Orientation) {
         case Orientation::USER_ROTATION_LANDSCAPE:
@@ -2880,6 +2883,16 @@ Orientation WindowSessionImpl::ConvertUserOrientationToUserPageOrientation(Orien
     return Orientation::UNSPECIFIED;
 }
 
+Orientation WindowSessionImpl::ConvertInvalidOrientation()
+{
+    Orientation requestedOrientation = GetRequestedOrientation();
+    if (IsUserOrientation(requestedOrientation)) {
+        requestedOrientation = ConvertUserOrientationToUserPageOrientation(requestedOrientation);
+    }
+    TLOGI(WmsLogTag::WMS_ROTATION, "convertInvalidOrientation:%{public}u", requestedOrientation);
+    return requestedOrientation;
+}
+
 void WindowSessionImpl::SetUserRequestedOrientation(Orientation orientation)
 {
     if (IsWindowSessionInvalid()) {
@@ -2894,11 +2907,19 @@ void WindowSessionImpl::SetUserRequestedOrientation(Orientation orientation)
 
 bool WindowSessionImpl::isNeededForciblySetOrientation(Orientation orientation)
 {
-    bool isUserOrientation = IsUserOrientation(orientation);
-    if (property_->GetRequestedOrientation() == orientation && !isUserOrientation) {
-        return false;
+    TLOGI(WmsLogTag::WMS_ROTATION, "orientation:%{public}u", orientation);
+    if (IsUserOrientation(orientation)) {
+        return true;
     }
-    return true;
+    Orientation lastOrientation = property_->GetRequestedOrientation();
+    TLOGI(WmsLogTag::WMS_ROTATION, "lastOrientation:%{public}u", lastOrientation);
+    if (orientation == Orientation::INVALID) {
+        orientation = ConvertInvalidOrientation();
+        if (IsUserPageOrientation(orientation) && IsUserOrientation(lastOrientation)) {
+            lastOrientation = ConvertUserOrientationToUserPageOrientation(lastOrientation);
+        }
+    }
+    return lastOrientation != orientation;
 }
 
 std::string WindowSessionImpl::GetContentInfo(BackupAndRestoreType type)
@@ -5943,6 +5964,26 @@ WSError WindowSessionImpl::NotifySystemDensityChange(float density)
     return WSError::WS_OK;
 }
 
+WMError WindowSessionImpl::SetWindowDefaultDensityEnabled(bool enabled)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "WinId: %{public}d, enabled: %{public}u", GetPersistentId(), enabled);
+    if (!SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "WinId: %{public}d permission denied!", GetPersistentId());
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    SetDefaultDensityEnabledValue(enabled);
+    UpdateDensity();
+    return WMError::WM_OK;
+}
+
+void WindowSessionImpl::SetDefaultDensityEnabledValue(bool enabled)
+{
+    isDefaultDensityEnabled_.store(enabled);
+}
+
 WSError WindowSessionImpl::NotifyWindowVisibility(bool isVisible)
 {
     TLOGD(WmsLogTag::WMS_ATTRIBUTE, "window: name=%{public}s, id=%{public}u, isVisible=%{public}d",
@@ -6013,7 +6054,7 @@ void WindowSessionImpl::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEve
         }
         TLOGD(WmsLogTag::WMS_EVENT, "Start to process pointerEvent, id: %{public}d", pointerEvent->GetId());
         if (!uiContent->ProcessPointerEvent(pointerEvent)) {
-            TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "UI content dose not consume");
+            TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "UI content does not consume");
             pointerEvent->MarkProcessed();
         }
     } else {
@@ -6037,7 +6078,7 @@ WMError WindowSessionImpl::InjectTouchEvent(const std::shared_ptr<MMI::PointerEv
     if (auto uiContent = GetUIContentSharedPtr()) {
         TLOGD(WmsLogTag::WMS_EVENT, "Start to process pointerEvent, id: %{public}d", pointerEvent->GetId());
         if (!uiContent->ProcessPointerEvent(pointerEvent)) {
-            TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "UI content dose not consume");
+            TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "UI content does not consume");
             pointerEvent->MarkProcessed();
         }
     } else {
@@ -6364,7 +6405,7 @@ sptr<Window> WindowSessionImpl::Find(const std::string& name)
     std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
     auto iter = windowSessionMap_.find(name);
     if (iter == windowSessionMap_.end()) {
-        TLOGE(WmsLogTag::DEFAULT, "Can not find window %{public}s", name.c_str());
+        TLOGD(WmsLogTag::DEFAULT, "Can not find window %{public}s", name.c_str());
         return nullptr;
     }
     return iter->second.second;
@@ -7152,6 +7193,17 @@ bool WindowSessionImpl::IsUserOrientation(Orientation orientation) const
     return false;
 }
 
+bool WindowSessionImpl::IsUserPageOrientation(Orientation orientation) const
+{
+    if (orientation == Orientation::USER_PAGE_ROTATION_PORTRAIT ||
+        orientation == Orientation::USER_PAGE_ROTATION_LANDSCAPE ||
+        orientation == Orientation::USER_PAGE_ROTATION_PORTRAIT_INVERTED ||
+        orientation == Orientation::USER_PAGE_ROTATION_LANDSCAPE_INVERTED) {
+        return true;
+    }
+    return false;
+}
+
 bool WindowSessionImpl::IsVerticalOrientation(Orientation orientation) const
 {
     if (orientation == Orientation::VERTICAL ||
@@ -7201,6 +7253,15 @@ void WindowSessionImpl::SetUiDvsyncSwitch(bool dvsyncSwitch)
         return;
     }
     vsyncStation_->SetUiDvsyncSwitch(dvsyncSwitch);
+}
+
+void WindowSessionImpl::SetTouchEvent(int32_t touchType)
+{
+    if (vsyncStation_ == nullptr) {
+        TLOGW(WmsLogTag::WMS_MAIN, "vsyncStation is null");
+        return;
+    }
+    vsyncStation_->SetTouchEvent(touchType);
 }
 
 WSError WindowSessionImpl::NotifyAppForceLandscapeConfigUpdated()
@@ -7869,6 +7930,22 @@ WMError WindowSessionImpl::GetPiPSettingSwitchStatus(bool& switchStatus) const
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     return SingletonContainer::Get<WindowAdapter>().GetPiPSettingSwitchStatus(switchStatus);
+}
+
+void WindowSessionImpl::SwitchSubWindow(int32_t parentId)
+{
+    std::lock_guard<std::recursive_mutex> lock(subWindowSessionMutex_);
+    if (subWindowSessionMap_.count(parentId) == 0) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "subWindowSessionMap is empty");
+        return;
+    }
+    for (auto& subWindowSession : subWindowSessionMap_.at(parentId)) {
+        if (subWindowSession && subWindowSession->property_ && subWindowSession->property_->IsDecorEnable()) {
+            subWindowSession->UpdateTitleButtonVisibility();
+            subWindowSession->UpdateDecorEnable(true);
+            subWindowSession->SwitchSubWindow(subWindowSession->GetPersistentId());
+        }
+    }
 }
 } // namespace Rosen
 } // namespace OHOS

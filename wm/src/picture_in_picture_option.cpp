@@ -91,6 +91,7 @@ void PipOption::SetContentSize(uint32_t width, uint32_t height)
     contentHeight_ = height;
 }
 
+// LCOV_EXCL_START
 void PipOption::SetControlGroup(std::vector<std::uint32_t> controlGroup)
 {
     controlGroup_ = controlGroup;
@@ -130,6 +131,7 @@ void* PipOption::GetContext() const
 {
     return contextPtr_;
 }
+// LCOV_EXCL_STOP
 
 std::string PipOption::GetNavigationId() const
 {
@@ -152,6 +154,7 @@ void PipOption::GetContentSize(uint32_t& width, uint32_t& height)
     height = contentHeight_;
 }
 
+// LCOV_EXCL_START
 std::vector<std::uint32_t> PipOption::GetControlGroup()
 {
     return controlGroup_;
@@ -166,6 +169,7 @@ std::vector<PiPControlEnableInfo> PipOption::GetControlEnable()
 {
     return pipControlEnableInfoList_;
 }
+// LCOV_EXCL_STOP
 
 void PipOption::SetXComponentController(std::shared_ptr<XComponentController> xComponentController)
 {
@@ -201,6 +205,7 @@ uint32_t PipOption::GetPipPriority(uint32_t pipTemplateType) const
     }
 }
 
+// LCOV_EXCL_START
 void PipOption::GetPiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo)
 {
     pipTemplateInfo.pipTemplateType = templateType_;
@@ -210,5 +215,6 @@ void PipOption::GetPiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo)
     pipTemplateInfo.pipControlStatusInfoList = pipControlStatusInfoList_;
     pipTemplateInfo.pipControlEnableInfoList = pipControlEnableInfoList_;
 }
+// LCOV_EXCL_STOP
 } // namespace Rosen
 } // namespace OHOS

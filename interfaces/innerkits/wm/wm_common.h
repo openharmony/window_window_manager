@@ -1076,8 +1076,8 @@ struct Rect {
      */
     static bool IsRightBottomValid(int32_t x, int32_t y, uint32_t width, uint32_t height)
     {
-        int64_t right = static_cast<int64_t>(x) + width;
-        int64_t bottom = static_cast<int64_t>(y) + height;
+        int64_t right = static_cast<int64_t>(x) + static_cast<int64_t>(width);
+        int64_t bottom = static_cast<int64_t>(y) + static_cast<int64_t>(height);
         return right <= INT32_MAX && bottom <= INT32_MAX;
     }
 };
@@ -2901,6 +2901,12 @@ enum class ScreenshotEventType : int32_t {
     SCROLL_SHOT_ABORT = 4,
 
     END,
+};
+
+enum class RequestResultCode: uint32_t {
+    INIT = 0,
+    SUCCESS = 1,
+    FAIL,
 };
 }
 }

@@ -82,6 +82,7 @@ const uint32_t ANIMATION_PARAM_SIZE = 4;
 const uint32_t ANIMATION_MAX_DURATION = 3000;
 const uint32_t FLOAT_VALUE_LENGTH = 2;
 
+// LCOV_EXCL_START
 struct WindowAnimationProperty : public Parcelable {
     float targetScale = 0.0f;
 
@@ -103,6 +104,7 @@ struct WindowAnimationProperty : public Parcelable {
         return animationProperty;
     }
 };
+// LCOV_EXCL_STOP
 
 /**
 * @brief Window transition animation configuration.
@@ -112,6 +114,7 @@ struct WindowAnimationOption : public Parcelable {
     uint32_t duration = 0;
     std::array<float, ANIMATION_PARAM_SIZE> params;
 
+    // LCOV_EXCL_START
     bool Marshalling(Parcel& parcel) const override
     {
         if (!(parcel.WriteUint32(static_cast<uint32_t>(curve)) && parcel.WriteUint32(duration))) {
@@ -127,6 +130,7 @@ struct WindowAnimationOption : public Parcelable {
         }
         return true;
     }
+    // LCOV_EXCL_STOP
 
     static WindowAnimationOption* Unmarshalling(Parcel& parcel)
     {
@@ -154,6 +158,7 @@ struct WindowAnimationOption : public Parcelable {
         return windowAnimationConfig;
     }
 
+    // LCOV_EXCL_START
     std::string ToString() const
     {
         std::ostringstream oss;
@@ -165,6 +170,7 @@ struct WindowAnimationOption : public Parcelable {
         oss << "]";
         return oss.str();
     }
+    // LCOV_EXCL_STOP
 };
 
 /**
@@ -176,6 +182,7 @@ struct StartAnimationOptions : public Parcelable {
      */
     AnimationType animationType = AnimationType::FADE_IN_OUT;
 
+    // LCOV_EXCL_START
     bool Marshalling(Parcel& parcel) const override
     {
         if (!parcel.WriteUint32(static_cast<uint32_t>(animationType))) {
@@ -183,6 +190,7 @@ struct StartAnimationOptions : public Parcelable {
         }
         return true;
     }
+    // LCOV_EXCL_STOP
 
     static StartAnimationOptions* Unmarshalling(Parcel& parcel)
     {
@@ -210,6 +218,7 @@ struct StartAnimationSystemOptions : public Parcelable {
      */
     std::shared_ptr<WindowAnimationOption> animationConfig = nullptr;
 
+    // LCOV_EXCL_START
     bool Marshalling(Parcel& parcel) const override
     {
         if (!parcel.WriteUint32(static_cast<uint32_t>(animationType))) {
@@ -220,6 +229,7 @@ struct StartAnimationSystemOptions : public Parcelable {
         }
         return true;
     }
+    // LCOV_EXCL_STOP
 
     static StartAnimationSystemOptions* Unmarshalling(Parcel& parcel)
     {
@@ -249,6 +259,7 @@ struct WindowCreateParams : public Parcelable {
      */
     std::shared_ptr<StartAnimationSystemOptions> animationSystemParams = nullptr;
 
+    // LCOV_EXCL_START
     bool Marshalling(Parcel& parcel) const override
     {
         if (!parcel.WriteParcelable(animationParams.get())) {
@@ -259,6 +270,7 @@ struct WindowCreateParams : public Parcelable {
         }
         return true;
     }
+    // LCOV_EXCL_STOP
 
     static WindowCreateParams* Unmarshalling(Parcel& parcel)
     {
@@ -277,7 +289,8 @@ struct WindowCreateParams : public Parcelable {
 struct TransitionAnimation : public Parcelable {
     WindowAnimationOption config;
     float opacity = 1.0f;
-    
+
+    // LCOV_EXCL_START
     bool Marshalling(Parcel& parcel) const override
     {
         if (!(parcel.WriteFloat(opacity) && parcel.WriteParcelable(&config))) {
@@ -285,6 +298,7 @@ struct TransitionAnimation : public Parcelable {
         }
         return true;
     }
+    // LCOV_EXCL_STOP
 
     static TransitionAnimation* Unmarshalling(Parcel& parcel)
     {

@@ -17,6 +17,7 @@
 
 #include <hitrace_meter.h>
 #include "ani.h"
+#include "ani_window_utils.h"
 #include "event_handler.h"
 #include "event_runner.h"
 #include "window_manager_hilog.h"
@@ -127,7 +128,22 @@ void AniExtensionWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason 
 void AniExtensionWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type,
     const sptr<OccupiedAreaChangeInfo>& info)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "[ANI]OnAvoidAreaChanged");
+    TLOGI(WmsLogTag::WMS_UIEXT, "[ANI]");
+    auto task = [self = weakRef_, eng = env_, avoidArea, type] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || eng == nullptr) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "this listener or eng is nullptr");
+            return;
+        }
+        auto nativeAvoidArea = AniWindowUtils::CreateAniAvoidArea(eng, avoidArea, type);
+        AniWindowUtils::CallAniFunctionVoid(eng, "L@ohos/uiExtensionHost/uiExtensionHost;", "avoidAreaChangeCallBack",
+            nullptr, thisListener->callBack_, nativeAvoidArea, static_cast<ani_int>(type));
+    };
+    if (!eventHandler_) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "get main event handler failed!");
+        return;
+    }
+    eventHandler_->PostTask(task, __func__, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
 void AniExtensionWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info,

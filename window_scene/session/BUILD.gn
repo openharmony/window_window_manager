@@ -31,6 +31,13 @@ config("session_public_config") {
     # for WMError Code
     "${window_base_path}/interfaces/innerkits/wm",
   ]
+
+  cflags = []
+  defines = []
+  if (window_manager_feature_asbng_path_enable) {
+    defines += [ "WINDOW_ATOMIC_SERVICE_ATTRIBUTION_ENABLE" ]
+    cflags += [ "-DACE_ENGINE_PLUGIN_PATH=\"${window_manager_feature_asbng_path}\"" ]
+  }
 }
 
 config("ui_effect_public_config") {
@@ -123,6 +130,10 @@ ohos_shared_library("scene_session") {
     "host/src/zidl/session_stub.cpp",
   ]
 
+  if (window_manager_feature_asbng_path_enable) {
+    sources += [ "host/src/atomicservice_basic_engine_plugin.cpp" ]
+  }
+
   public_configs = [ ":session_public_config" ]
 
   deps = [
@@ -175,7 +186,6 @@ ohos_shared_library("scene_session") {
     "input:libmmi-napi",
   ]
   defines = []
-  defines += [ "MODIFIER_NG" ]
 
   if (defined(global_parts_info) &&
       defined(global_parts_info.barrierfree_accessibility)) {
@@ -263,7 +273,6 @@ ohos_shared_library("screen_session") {
   ]
 
   defines = []
-  defines += [ "MODIFIER_NG" ]
   if (window_manager_feature_screen_color_gamut) {
     defines += [ "WM_SCREEN_COLOR_GAMUT_ENABLE" ]
   }

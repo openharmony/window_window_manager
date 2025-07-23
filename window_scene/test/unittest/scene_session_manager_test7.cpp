@@ -1934,7 +1934,9 @@ HWTEST_F(SceneSessionManagerTest7, SetGlobalDragResizeType01, TestSize.Level1)
     ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
 
     ASSERT_EQ(ssm_->SetGlobalDragResizeType(DragResizeType::RESIZE_TYPE_UNDEFINED), WMError::WM_OK);
+    usleep(WAIT_SYNC_IN_NS);
     ASSERT_EQ(ssm_->SetGlobalDragResizeType(dragResizeType), WMError::WM_OK);
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 /**
@@ -1954,11 +1956,14 @@ HWTEST_F(SceneSessionManagerTest7, SetGlobalDragResizeType02, TestSize.Level1)
     ASSERT_NE(nullptr, sceneSession);
     ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
     ASSERT_EQ(ssm_->SetGlobalDragResizeType(dragResizeType), WMError::WM_OK);
+    usleep(WAIT_SYNC_IN_NS);
     ssm_->sceneSessionMap_.insert({ 0, nullptr });
     ASSERT_EQ(ssm_->SetGlobalDragResizeType(dragResizeType), WMError::WM_OK);
+    usleep(WAIT_SYNC_IN_NS);
     ssm_->sceneSessionMap_.clear();
     ssm_->sceneSessionMap_.insert({ 0, nullptr });
     ASSERT_EQ(ssm_->SetGlobalDragResizeType(dragResizeType), WMError::WM_OK);
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 /**

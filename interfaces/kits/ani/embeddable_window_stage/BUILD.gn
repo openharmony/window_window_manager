@@ -32,7 +32,10 @@ config("window_common_config") {
 config("windowstage_ani_public_config") {
   visibility = [ ":*" ]
 
-  include_dirs = [ "include" ]
+  include_dirs = [
+    "include",
+    "../window_runtime/window_stage_ani/include",
+  ]
 }
 
 # lib generate
@@ -63,6 +66,7 @@ ohos_shared_library("embeddablewindowstageani_kit") {
     "../../../../utils:libwmutil",
     "../../../../utils:libwmutil_base",
     "../../../../wm:libwm",
+    "../window_runtime:windowstageani_kit",
   ]
 
   external_deps = [

@@ -246,6 +246,18 @@ DMError Display::GetDisplayCapability(std::string& capabilitInfo) const
 
 DMError Display::GetLiveCreaseRegion(FoldCreaseRegion& region) const
 {
-    return SingletonContainer::Get<DisplayManagerAdapter>().GetLiveCreaseRegion(region);
+    ScreenId screenId = GetScreenId();
+    ScreenId rsScreenId;
+    bool ret = SingletonContainer::Get<DisplayManagerAdapter>().ConvertScreenIdToRsScreenId(screenId, rsScreenId);
+    if (!ret) {
+        TLOGE(WmsLogTag::DMS, "convertScreenIdToRsScreenId falied");
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    // when rsScreenId is not 0, there is no crease region in the current screen
+    if (rsScreenId == MAIN_SCREEN_ID_DEFAULT) {
+        return SingletonContainer::Get<DisplayManagerAdapter>().GetLiveCreaseRegion(region);
+    }
+    region = FoldCreaseRegion(screenId, {});
+    return DMError::DM_OK;
 }
 } // namespace OHOS::Rosen
