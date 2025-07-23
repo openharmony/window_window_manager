@@ -567,6 +567,21 @@ HWTEST_F(WindowTest, SetLayoutFullScreen, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetIgnoreSafeArea
+ * @tc.desc: SetIgnoreSafeArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, SetIgnoreSafeArea, TestSize.Level1)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    auto ret = window->SetIgnoreSafeArea(true);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    ret = window->SetIgnoreSafeArea(false);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
  * @tc.name: SetTitleAndDockHoverShown
  * @tc.desc: get
  * @tc.type: FUNC
