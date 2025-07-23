@@ -99,22 +99,22 @@ void DisplayAniListener::OnCreate(DisplayId id)
         return;
     }
     std::vector<ani_ref> vec = it->second;
-    TLOGI(WmsLogTag::DMS, "vec_callback size: %{public}d", (int)vec.size());
+    TLOGI(WmsLogTag::DMS, "vec_callback size: %{public}d", vec.size());
     // find callbacks in vector
     for (ani_ref oneAniCallback : vec) {
         if (env_ == nullptr) {
             TLOGE(WmsLogTag::DMS, "[ANI] null env");
             return;
         }
-        ani_boolean undefRes;
-        ani_boolean nullRes;
+        ani_boolean undefRes = 0;
+        ani_boolean nullRes = 0;
         env_->Reference_IsUndefined(oneAniCallback, &undefRes);
         env_->Reference_IsNull(oneAniCallback, &nullRes);
-        if (undefRes || nullRes) {
+        if (undefRes != 0 || nullRes != 0) {
             TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback is undefRes or null");
             continue;
         }
-        auto task = [env = env_, oneAniCallback, id] () {
+        auto task = [env = env_, oneAniCallback, id] {
             DisplayAniUtils::CallAniFunctionVoid(env, "L@ohos/display/display;", "displayEventCallBack",
                 nullptr, oneAniCallback, static_cast<ani_double>(id));
         };
@@ -122,7 +122,7 @@ void DisplayAniListener::OnCreate(DisplayId id)
             TLOGE(WmsLogTag::DMS, "[ANI] get main event handler failed!");
             return;
         }
-        eventHandler_->PostTask(task, "dms:AniDisplayListener::CreateCallBack", 0,
+        eventHandler_->PostTask(std::move(task), "dms:AniDisplayListener::CreateCallBack", 0,
             AppExecFwk::EventQueue::Priority::IMMEDIATE);
     }
 }
@@ -146,22 +146,22 @@ void DisplayAniListener::OnDestroy(DisplayId id)
         return;
     }
     std::vector<ani_ref> vec = it->second;
-    TLOGI(WmsLogTag::DMS, "vec_callback size: %{public}d", (int)vec.size());
+    TLOGI(WmsLogTag::DMS, "vec_callback size: %{public}d", vec.size());
     // find callbacks in vector
     for (ani_ref oneAniCallback : vec) {
         if (env_ == nullptr) {
             TLOGE(WmsLogTag::DMS, "[ANI] null env");
             return;
         }
-        ani_boolean undefRes;
-        ani_boolean nullRes;
+        ani_boolean undefRes = 0;
+        ani_boolean nullRes = 0;
         env_->Reference_IsUndefined(oneAniCallback, &undefRes);
         env_->Reference_IsNull(oneAniCallback, &nullRes);
-        if (undefRes || nullRes) {
+        if (undefRes != 0 || nullRes != 0) {
             TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback is undefRes or null");
             continue;
         }
-        auto task = [env = env_, oneAniCallback, id] () {
+        auto task = [env = env_, oneAniCallback, id] {
             DisplayAniUtils::CallAniFunctionVoid(env, "L@ohos/display/display;", "displayEventCallBack",
                 nullptr, oneAniCallback, static_cast<ani_double>(id));
         };
@@ -169,7 +169,7 @@ void DisplayAniListener::OnDestroy(DisplayId id)
             TLOGE(WmsLogTag::DMS, "[ANI] get main event handler failed!");
             return;
         }
-        eventHandler_->PostTask(task, "dms:AniDisplayListener::CreateCallBack", 0,
+        eventHandler_->PostTask(std::move(task), "dms:AniDisplayListener::CreateCallBack", 0,
             AppExecFwk::EventQueue::Priority::IMMEDIATE);
     }
 }
@@ -197,15 +197,15 @@ void DisplayAniListener::OnChange(DisplayId id)
             TLOGE(WmsLogTag::DMS, "[ANI] null env");
             return;
         }
-        ani_boolean undefRes;
-        ani_boolean nullRes;
+        ani_boolean undefRes = 0;
+        ani_boolean nullRes = 0;
         env_->Reference_IsUndefined(oneAniCallback, &undefRes);
         env_->Reference_IsNull(oneAniCallback, &nullRes);
-        if (undefRes || nullRes) {
+        if (undefRes != 0 || nullRes != 0) {
             TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback undefRes, return");
             continue;
         }
-        auto task = [env = env_, oneAniCallback, id] () {
+        auto task = [env = env_, oneAniCallback, id] {
             DisplayAniUtils::CallAniFunctionVoid(env, "L@ohos/display/display;", "displayEventCallBack",
                 nullptr, oneAniCallback, static_cast<ani_double>(id));
         };
@@ -213,7 +213,7 @@ void DisplayAniListener::OnChange(DisplayId id)
             TLOGE(WmsLogTag::DMS, "[ANI] get main event handler failed!");
             return;
         }
-        eventHandler_->PostTask(task, "dms:AniWindowListener::SizeChangeCallBack", 0,
+        eventHandler_->PostTask(std::move(task), "dms:AniWindowListener::SizeChangeCallBack", 0,
             AppExecFwk::EventQueue::Priority::IMMEDIATE);
     }
 }
