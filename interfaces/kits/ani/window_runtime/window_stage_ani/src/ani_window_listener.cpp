@@ -121,14 +121,15 @@ void AniWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaT
 void AniWindowListener::LifeCycleCallBack(LifeCycleEventType eventType)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]LifeCycleCallBack, envent type: %{public}u", eventType);
-    auto task = [self = weakRef_, eventType, eng = env_] () {
+    auto task = [self = weakRef_, eventType, caseType = caseType_, eng = env_] () {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "AniWindowListener::LifeCycleCallBack");
         auto thisListener = self.promote();
         if (thisListener == nullptr || eng == nullptr) {
             TLOGE(WmsLogTag::DEFAULT, "[ANI]this listener or eng is nullptr");
             return;
         }
-        AniWindowUtils::CallAniFunctionVoid(eng, "L@ohos/window/window;", "runWindowEventCallBack",
+        AniWindowUtils::CallAniFunctionVoid(eng, "L@ohos/window/window;",
+            caseType == CaseType::CASE_STAGE ? "runWindowStageEventCallBack" : "runWindowEventCallBack",
             nullptr, thisListener->aniCallBack_, static_cast<ani_int>(eventType));
     };
     if (!eventHandler_) {
