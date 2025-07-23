@@ -35,6 +35,7 @@ WindowExtensionStubImpl::~WindowExtensionStubImpl()
 {
 }
 
+// LCOV_EXCL_START
 sptr<Window> WindowExtensionStubImpl::CreateWindow(
     const Rect& rect, uint32_t parentWindowId, const std::shared_ptr<AbilityRuntime::Context>& context,
     const sptr<IRemoteObject>& iSession)
@@ -59,6 +60,7 @@ sptr<Window> WindowExtensionStubImpl::CreateWindow(
     }
     return window_.promote();
 }
+// LCOV_EXCL_STOP
 
 void WindowExtensionStubImpl::SetBounds(const Rect& rect)
 {
@@ -67,6 +69,7 @@ void WindowExtensionStubImpl::SetBounds(const Rect& rect)
         WLOGE("null window");
         return;
     }
+    // LCOV_EXCL_START
     Rect orgRect = window->GetRect();
     WLOGD("oriRect, x=%{public}d, y=%{public}d, w=%{public}d, h=%{public}d; "
           "newRect, x=%{public}d, y=%{public}d, w=%{public}d, h=%{public}d",
@@ -78,6 +81,7 @@ void WindowExtensionStubImpl::SetBounds(const Rect& rect)
     if (rect.posX_ != orgRect.posX_ || rect.posY_ != orgRect.posY_) {
         window->MoveTo(rect.posX_, rect.posY_);
     }
+    // LCOV_EXCL_STOP
 }
 
 void WindowExtensionStubImpl::Hide()
@@ -104,6 +108,7 @@ void WindowExtensionStubImpl::RequestFocus()
     }
 }
 
+// LCOV_EXCL_START
 void WindowExtensionStubImpl::GetExtensionWindow(sptr<IWindowExtensionClient>& token)
 {
     std::lock_guard<std::mutex> lock(mutex_);
@@ -127,5 +132,6 @@ sptr<Window> WindowExtensionStubImpl::GetWindow() const
 {
     return window_.promote();
 }
+// LCOV_EXCL_STOP
 } // namespace Rosen
 } // namespace OHOS

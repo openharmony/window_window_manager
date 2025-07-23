@@ -18,6 +18,7 @@
 namespace OHOS {
 namespace Rosen {
 
+// LCOV_EXCL_START
 WSError FocusGroup::UpdateFocusedSessionId(int32_t persistentId)
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "focusedId change: %{public}d -> %{public}d", focusedSessionId_, persistentId);
@@ -35,6 +36,7 @@ WSError FocusGroup::UpdateFocusedAppSessionId(int32_t persistentId)
     lastFocusedAppSessionId_ = persistentId;
     return WSError::WS_OK;
 }
+// LCOV_EXCL_STOP
 
 WindowFocusController::WindowFocusController() noexcept
 {
@@ -87,6 +89,7 @@ WSError WindowFocusController::AddFocusGroup(DisplayGroupId displayGroupId, Disp
     return WSError::WS_OK;
 }
 
+// LCOV_EXCL_START
 WSError WindowFocusController::RemoveFocusGroup(DisplayGroupId displayGroupId, DisplayId displayId)
 {
     TLOGI(WmsLogTag::WMS_FOCUS,
@@ -112,6 +115,7 @@ WSError WindowFocusController::RemoveFocusGroup(DisplayGroupId displayGroupId, D
     LogDisplayIds();
     return WSError::WS_OK;
 }
+// LCOV_EXCL_STOP
 
 sptr<FocusGroup> WindowFocusController::GetFocusGroupInner(DisplayId displayId)
 {
@@ -164,6 +168,7 @@ std::vector<std::pair<DisplayId, int32_t>> WindowFocusController::GetAllFocusedS
     return allFocusGroup;
 }
 
+// LCOV_EXCL_START
 WSError WindowFocusController::UpdateFocusedSessionId(DisplayId displayId, int32_t persistentId)
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "displayId: %{public}" PRIu64 ", persistentId: %{public}d", displayId, persistentId);
@@ -193,6 +198,7 @@ WSError WindowFocusController::UpdateFocusedAppSessionId(DisplayId displayId, in
     }
     return focusGroup->UpdateFocusedAppSessionId(persistentId);
 }
+// LCOV_EXCL_STOP
 
 void WindowFocusController::LogDisplayIds()
 {

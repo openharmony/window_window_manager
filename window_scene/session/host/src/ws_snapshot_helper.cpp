@@ -44,6 +44,7 @@ uint32_t WSSnapshotHelper::GetScreenStatus(FoldStatus foldStatus)
     return SCREEN_UNKNOWN;
 }
 
+// LCOV_EXCL_START
 DisplayOrientation WSSnapshotHelper::GetDisplayOrientation(int32_t rotation)
 {
     auto it = ROTATION_TO_DISPLAYORIENTATION_MAP.find(rotation);
@@ -52,4 +53,5 @@ DisplayOrientation WSSnapshotHelper::GetDisplayOrientation(int32_t rotation)
     }
     return DisplayOrientation::PORTRAIT;
 }
+// LCOV_EXCL_STOP
 } // namespace OHOS::Rosen

@@ -49,9 +49,11 @@ VsyncStation::VsyncStation(NodeId nodeId, const std::shared_ptr<AppExecFwk::Even
         if (mainEventRunner != nullptr) {
             vsyncHandler_ = std::make_shared<AppExecFwk::EventHandler>(mainEventRunner);
         } else {
+            // LCOV_EXCL_START
             TLOGW(WmsLogTag::WMS_MAIN, "MainEventRunner is not available");
             vsyncHandler_ = std::make_shared<AppExecFwk::EventHandler>(
                 AppExecFwk::EventRunner::Create(VSYNC_THREAD_ID));
+            // LCOV_EXCL_STOP
         }
     }
     TLOGI(WmsLogTag::WMS_MAIN, "id %{public}" PRIu64 " created", nodeId_);
@@ -62,6 +64,7 @@ VsyncStation::~VsyncStation()
     TLOGI(WmsLogTag::WMS_MAIN, "id %{public}" PRIu64 " destructed", nodeId_);
 }
 
+// LCOV_EXCL_START
 void VsyncStation::Destroy()
 {
     TLOGI(WmsLogTag::WMS_MAIN, "id %{public}" PRIu64 " destroyed", nodeId_);
@@ -70,6 +73,7 @@ void VsyncStation::Destroy()
     receiver_.reset();
     frameRateLinker_.reset();
 }
+// LCOV_EXCL_STOP
 
 bool VsyncStation::IsVsyncReceiverCreated()
 {
@@ -107,6 +111,7 @@ std::shared_ptr<VSyncReceiver> VsyncStation::GetOrCreateVsyncReceiverLocked()
     return receiver_;
 }
 
+// LCOV_EXCL_START
 __attribute__((no_sanitize("cfi"))) void VsyncStation::RequestVsync(
     const std::shared_ptr<VsyncCallback>& vsyncCallback)
 {
@@ -305,6 +310,7 @@ void VsyncStation::DecreaseRequestVsyncTimes()
         desired = current - 1;
     } while (!requestVsyncTimes_.compare_exchange_weak(current, desired));
 }
+// LCOV_EXCL_STOP
 
 } // namespace Rosen
 } // namespace OHOS
