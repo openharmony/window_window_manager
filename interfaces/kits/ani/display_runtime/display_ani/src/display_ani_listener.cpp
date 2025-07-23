@@ -38,7 +38,7 @@ void DisplayAniListener::AddCallback(const std::string& type, ani_ref callback)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] AddCallback is called, type = %{public}s", type.c_str());
     if (env_ == nullptr) {
-        TLOGE(WmsLogTag::DMS, "env_ nullptr");
+        TLOGE(WmsLogTag::DMS, "[ANI] env nullptr");
         return;
     }
     std::lock_guard<std::mutex> lock(aniCallbackMtx_);
@@ -103,7 +103,7 @@ void DisplayAniListener::OnCreate(DisplayId id)
     // find callbacks in vector
     for (ani_ref oneAniCallback : vec) {
         if (env_ == nullptr) {
-            TLOGE(WmsLogTag::DMS, "null env_");
+            TLOGE(WmsLogTag::DMS, "[ANI] null env");
             return;
         }
         ani_boolean undefRes;
@@ -119,7 +119,7 @@ void DisplayAniListener::OnCreate(DisplayId id)
                 nullptr, oneAniCallback, static_cast<ani_double>(id));
         };
         if (!eventHandler_) {
-            TLOGE(WmsLogTag::DMS, "get main event handler failed!");
+            TLOGE(WmsLogTag::DMS, "[ANI] get main event handler failed!");
             return;
         }
         eventHandler_->PostTask(task, "dms:AniDisplayListener::CreateCallBack", 0,
@@ -150,7 +150,7 @@ void DisplayAniListener::OnDestroy(DisplayId id)
     // find callbacks in vector
     for (ani_ref oneAniCallback : vec) {
         if (env_ == nullptr) {
-            TLOGE(WmsLogTag::DMS, "OnDestroy: null env_");
+            TLOGE(WmsLogTag::DMS, "[ANI] null env");
             return;
         }
         ani_boolean undefRes;
@@ -166,7 +166,7 @@ void DisplayAniListener::OnDestroy(DisplayId id)
                 nullptr, oneAniCallback, static_cast<ani_double>(id));
         };
         if (!eventHandler_) {
-            TLOGE(WmsLogTag::DMS, "get main event handler failed!");
+            TLOGE(WmsLogTag::DMS, "[ANI] get main event handler failed!");
             return;
         }
         eventHandler_->PostTask(task, "dms:AniDisplayListener::CreateCallBack", 0,
@@ -194,7 +194,7 @@ void DisplayAniListener::OnChange(DisplayId id)
     std::vector<ani_ref> vec = it->second;
     for (auto oneAniCallback : vec) {
         if (env_ == nullptr) {
-            TLOGI(WmsLogTag::DMS, "OnDestroy: null env_");
+            TLOGE(WmsLogTag::DMS, "[ANI] null env");
             return;
         }
         ani_boolean undefRes;
@@ -210,7 +210,7 @@ void DisplayAniListener::OnChange(DisplayId id)
                 nullptr, oneAniCallback, static_cast<ani_double>(id));
         };
         if (!eventHandler_) {
-            TLOGE(WmsLogTag::DMS, "get main event handler failed!");
+            TLOGE(WmsLogTag::DMS, "[ANI] get main event handler failed!");
             return;
         }
         eventHandler_->PostTask(task, "dms:AniWindowListener::SizeChangeCallBack", 0,
@@ -236,7 +236,7 @@ void DisplayAniListener::OnPrivateWindow(bool hasPrivate)
         return;
     }
     if (env_ == nullptr) {
-        TLOGE(WmsLogTag::DMS, "[ANI] OnPrivateWindow: env is nullptr");
+        TLOGE(WmsLogTag::DMS, "[ANI] env is nullptr");
         return;
     }
 
@@ -247,7 +247,7 @@ void DisplayAniListener::OnPrivateWindow(bool hasPrivate)
                 nullptr, oneAniCallback, hasPrivate);
         };
         if (!eventHandler_) {
-            TLOGE(WmsLogTag::DMS, "get main event handler failed!");
+            TLOGE(WmsLogTag::DMS, "[ANI] get main event handler failed!");
             return;
         }
         eventHandler_->PostTask(task, "dms:AniDisplayListener::PrivateWindowCallback", 0,
@@ -273,7 +273,7 @@ void DisplayAniListener::OnFoldStatusChanged(FoldStatus foldStatus)
         return;
     }
     if (env_ == nullptr) {
-        TLOGE(WmsLogTag::DMS, "[ANI] OnCreate: env is nullptr");
+        TLOGE(WmsLogTag::DMS, "[ANI] env is nullptr");
         return;
     }
     auto it = aniCallback_.find(EVENT_FOLD_STATUS_CHANGED);
@@ -283,7 +283,7 @@ void DisplayAniListener::OnFoldStatusChanged(FoldStatus foldStatus)
                 nullptr, oneAniCallback, static_cast<ani_int>(foldStatus));
         };
         if (!eventHandler_) {
-            TLOGE(WmsLogTag::DMS, "get main event handler failed!");
+            TLOGE(WmsLogTag::DMS, "[ANI] get main event handler failed!");
             return;
         }
         eventHandler_->PostTask(task, "dms:AniDisplayListener::FoldStatusChangedCallback", 0,
@@ -317,14 +317,14 @@ void DisplayAniListener::OnFoldAngleChanged(std::vector<float> foldAngles)
                     nullptr, oneAniCallback, cbArray);
             };
             if (!eventHandler_) {
-                TLOGE(WmsLogTag::DMS, "get main event handler failed!");
+                TLOGE(WmsLogTag::DMS, "[ANI] get main event handler failed!");
                 return;
             }
             eventHandler_->PostTask(task, "dms:AniDisplayListener::FoldAngleChangeCallback", 0,
                 AppExecFwk::EventQueue::Priority::IMMEDIATE);
         }
     } else {
-        TLOGE(WmsLogTag::DMS, "[ANI] OnFoldAngleChanged: env is nullptr");
+        TLOGE(WmsLogTag::DMS, "[ANI] env is nullptr");
     }
 }
 void DisplayAniListener::OnCaptureStatusChanged(bool isCapture)
@@ -352,14 +352,14 @@ void DisplayAniListener::OnCaptureStatusChanged(bool isCapture)
                     nullptr, oneAniCallback, isCapture);
             };
             if (!eventHandler_) {
-                TLOGE(WmsLogTag::DMS, "get main event handler failed!");
+                TLOGE(WmsLogTag::DMS, "[ANI] get main event handler failed!");
                 return;
             }
             eventHandler_->PostTask(task, "dms:AniDisplayListener::CaptureStatusChangedCallback", 0,
                 AppExecFwk::EventQueue::Priority::IMMEDIATE);
         }
     } else {
-        TLOGE(WmsLogTag::DMS, "[ANI] OnCaptureStatusChanged: env is nullptr");
+        TLOGE(WmsLogTag::DMS, "[ANI] env is nullptr");
     }
 }
 void DisplayAniListener::OnDisplayModeChanged(FoldDisplayMode foldDisplayMode)
@@ -388,14 +388,14 @@ void DisplayAniListener::OnDisplayModeChanged(FoldDisplayMode foldDisplayMode)
                     nullptr, oneAniCallback, static_cast<ani_int>(foldDisplayMode));
             };
             if (!eventHandler_) {
-                TLOGE(WmsLogTag::DMS, "get main event handler failed!");
+                TLOGE(WmsLogTag::DMS, "[ANI] get main event handler failed!");
                 return;
             }
             eventHandler_->PostTask(task, "dms:AniDisplayListener::DisplayModeChangedCallback", 0,
                 AppExecFwk::EventQueue::Priority::IMMEDIATE);
         }
     } else {
-        TLOGE(WmsLogTag::DMS, "[ANI] OnDisplayModeChanged: env is nullptr");
+        TLOGE(WmsLogTag::DMS, "[ANI] env is nullptr");
     }
 }
 void DisplayAniListener::OnAvailableAreaChanged(DMRect area)
@@ -425,14 +425,14 @@ void DisplayAniListener::OnAvailableAreaChanged(DMRect area)
                     nullptr, oneAniCallback, rectObj);
             };
             if (!eventHandler_) {
-                TLOGE(WmsLogTag::DMS, "get main event handler failed!");
+                TLOGE(WmsLogTag::DMS, "[ANI] get main event handler failed!");
                 return;
             }
             eventHandler_->PostTask(task, "dms:AniDisplayListener::AvailableAreaChangedCallback", 0,
                 AppExecFwk::EventQueue::Priority::IMMEDIATE);
         }
     } else {
-        TLOGE(WmsLogTag::DMS, "[ANI] OnAvailableAreaChanged: env is nullptr");
+        TLOGE(WmsLogTag::DMS, "[ANI] env is nullptr");
     }
 }
 

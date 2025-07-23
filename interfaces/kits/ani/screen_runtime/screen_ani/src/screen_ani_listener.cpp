@@ -37,7 +37,7 @@ void ScreenAniListener::AddCallback(const std::string& type, ani_ref callback)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] AddCallback is called, type = %{public}s", type.c_str());
     if (env_ == nullptr) {
-        TLOGE(WmsLogTag::DMS, "env_ nullptr");
+        TLOGE(WmsLogTag::DMS, "[ANI] env nullptr");
         return;
     }
     std::lock_guard<std::mutex> lock(mtx_);
@@ -99,7 +99,7 @@ void ScreenAniListener::OnConnect(ScreenId id)
     // find callbacks in vector
     for (auto oneAniCallback : vec) {
         if (env_ == nullptr) {
-            TLOGI(WmsLogTag::DMS, "OnDestroy: null env_");
+            TLOGE(WmsLogTag::DMS, "[ANI] null env");
             return;
         }
         ani_boolean undefRes;
@@ -117,7 +117,7 @@ void ScreenAniListener::OnConnect(ScreenId id)
                 "Lstd/core/Object;D:V", oneAniCallback, static_cast<ani_double>(id));
         };
         if (!eventHandler_) {
-            TLOGE(WmsLogTag::DMS, "get main event handler failed!");
+            TLOGE(WmsLogTag::DMS, "[ANI] get main event handler failed!");
             return;
         }
         eventHandler_->PostTask(task, "dms:AniScreenListener::ConnectCallBack", 0,
@@ -148,7 +148,7 @@ void ScreenAniListener::OnDisconnect(ScreenId id)
     // find callbacks in vector
     for (auto oneAniCallback : vec) {
         if (env_ == nullptr) {
-            TLOGI(WmsLogTag::DMS, "OnDestroy: null env_");
+            TLOGE(WmsLogTag::DMS, "[ANI] null env");
             return;
         }
         ani_boolean undefRes;
@@ -166,7 +166,7 @@ void ScreenAniListener::OnDisconnect(ScreenId id)
                 "Lstd/core/Object;D:V", oneAniCallback, static_cast<ani_double>(id));
         };
         if (!eventHandler_) {
-            TLOGE(WmsLogTag::DMS, "get main event handler failed!");
+            TLOGE(WmsLogTag::DMS, "[ANI] get main event handler failed!");
             return;
         }
         eventHandler_->PostTask(task, "dms:AniScreenListener::DisconnectCallBack", 0,
@@ -199,7 +199,7 @@ void ScreenAniListener::OnChange(ScreenId id)
     // find callbacks in vector
     for (auto oneAniCallback : vec) {
         if (env_ == nullptr) {
-            TLOGI(WmsLogTag::DMS, "OnDestroy: null env_");
+            TLOGE(WmsLogTag::DMS, "[ANI] null env");
             return;
         }
         ani_boolean undefRes;
