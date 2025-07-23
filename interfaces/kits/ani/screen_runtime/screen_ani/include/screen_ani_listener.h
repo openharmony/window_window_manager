@@ -42,7 +42,7 @@ public:
 private:
     ani_env* env_;
     std::mutex mtx_;
-    std::map<std::string, std::vector<ani_ref>> aniCallBack_;
+    std::map<std::string, std::vector<ani_ref>> aniCallback_;
     wptr<ScreenAniListener> weakRef_;
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_ = nullptr;
 };
