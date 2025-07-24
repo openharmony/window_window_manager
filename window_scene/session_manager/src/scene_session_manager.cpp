@@ -16663,8 +16663,8 @@ void SceneSessionManager::RegisterSessionPropertyChangeNotifyManagerFunc(const s
 
 void SceneSessionManager::NotifySessionPropertyChangeFromSession(int32_t persistentId, WindowInfoKey windowInfoKey)
 {
-    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "persistentId: %{public}d, windowInfoKey: %{public}s",
-        persistentId, windowInfoKey.c_str());
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "persistentId: %{public}d, windowInfoKey: %{public}u",
+        persistentId, static_cast<uint32_t>(windowInfoKey));
     sptr<SceneSession> sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sceneSession nullptr");
@@ -16685,7 +16685,7 @@ void SceneSessionManager::ConfigSupportZLevel()
 void SceneSessionManager::NotifyWindowPropertyChangeByWindowInfoKey(
     const sptr<SceneSession>& sceneSession, WindowInfoKey windowInfoKey)
 {
-    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "windowInfoKey: %{public}s", windowInfoKey.c_str());
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "windowInfoKey: %{public}u", static_cast<uint32_t>(windowInfoKey));
     std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>> windowInfoList;
     std::unordered_map<WindowInfoKey, WindowChangeInfoType> windowPropertyChangeInfo;
     PackWindowPropertyChangeInfo(sceneSession, windowPropertyChangeInfo);

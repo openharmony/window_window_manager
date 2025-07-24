@@ -43,6 +43,15 @@ struct SystemBarRegionTint {
 };
 using SystemBarRegionTints = std::vector<SystemBarRegionTint>;
 using GetJSWindowObjFunc = std::function<void*(const std::string& windowName)>;
+using WindowChangeInfoType = std::variant<int32_t,
+                                          uint32_t,
+                                          int64_t,
+                                          uint64_t,
+                                          std::string,
+                                          float,
+                                          Rect,
+                                          WindowMode,
+                                          WindowVisibilityState>;
 
 struct VisibleWindowNumInfo {
     uint32_t displayId;
