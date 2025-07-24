@@ -95,6 +95,8 @@ using NotifyDisplayIdChangedNotifyManagerFunc = std::function<void(int32_t persi
 using GetStateFromManagerFunc = std::function<bool(const ManagerState key)>;
 using NotifySystemSessionPointerEventFunc = std::function<void(std::shared_ptr<MMI::PointerEvent> pointerEvent)>;
 using NotifySessionInfoChangeNotifyManagerFunc = std::function<void(int32_t persistentid)>;
+using NotifySessionPropertyChangeNotifyManagerFunc =
+    std::function<void(int32_t persistentid, WindowInfoKey windowInfoKey)>;
 using NotifySystemSessionKeyEventFunc = std::function<bool(std::shared_ptr<MMI::KeyEvent> keyEvent,
     bool isPreImeEvent)>;
 using NotifyContextTransparentFunc = std::function<void()>;
@@ -384,6 +386,7 @@ public:
     virtual void UnregisterSessionChangeListeners();
     void SetSessionStateChangeNotifyManagerListener(const NotifySessionStateChangeNotifyManagerFunc& func);
     void SetSessionInfoChangeNotifyManagerListener(const NotifySessionInfoChangeNotifyManagerFunc& func);
+    void SetSessionPropertyChangeNotifyManagerListener(const NotifySessionPropertyChangeNotifyManagerFunc& func);
     void SetDisplayIdChangedNotifyManagerListener(const NotifyDisplayIdChangedNotifyManagerFunc& func);
     void SetRequestFocusStatusNotifyManagerListener(const NotifyRequestFocusStatusNotifyManagerFunc& func);
     void SetNotifyUIRequestFocusFunc(const NotifyUIRequestFocusFunc& func);
@@ -776,6 +779,7 @@ protected:
     bool IsTopDialog() const;
     void HandlePointDownDialog(int32_t pointAction);
     void NotifySessionInfoChange();
+    void NotifySessionPropertyChange(WindowInfoKey windowInfoKey);
     void NotifyDisplayIdChanged(int32_t persistentId, uint64_t screenId);
 
     void PostTask(Task&& task, const std::string& name = "sessionTask", int64_t delayTime = 0);
@@ -825,6 +829,7 @@ protected:
     NotifySessionStateChangeFunc sessionStateChangeFunc_;
     NotifyBufferAvailableChangeFunc bufferAvailableChangeFunc_;
     NotifySessionInfoChangeNotifyManagerFunc sessionInfoChangeNotifyManagerFunc_;
+    NotifySessionPropertyChangeNotifyManagerFunc sessionPropertyChangeNotifyManagerFunc_;
     NotifyDisplayIdChangedNotifyManagerFunc displayIdChangedNotifyManagerFunc_;
     NotifySessionStateChangeNotifyManagerFunc sessionStateChangeNotifyManagerFunc_;
     NotifyRequestFocusStatusNotifyManagerFunc requestFocusStatusNotifyManagerFunc_;
