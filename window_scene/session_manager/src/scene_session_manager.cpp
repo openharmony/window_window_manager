@@ -631,9 +631,10 @@ void SceneSessionManager::RegisterAppListener()
 void SceneSessionManager::LoadWindowParameter()
 {
     const std::string multiWindowUIType = system::GetParameter("const.window.multiWindowUIType", "HandsetSmartWindow");
+    const bool isPcMode = system::GetBoolParameter("persist.sceneboard.ispcmode", false);
     if (multiWindowUIType == "HandsetSmartWindow") {
         systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    } else if (multiWindowUIType == "FreeFormMultiWindow") {
+    } else if (multiWindowUIType == "FreeFormMultiWindow" || isPcMode) {
         systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     } else if (multiWindowUIType == "TabletSmartWindow") {
         systemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
