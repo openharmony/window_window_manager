@@ -907,24 +907,28 @@ bool ConvertPointerItemFromJs(napi_env env, napi_value touchObject, MMI::Pointer
         return false;
     }
     pointerItem.SetWindowX(std::round(windowX * vpr));
+    pointerItem.SetWindowXPos(windowX * vpr);
     double windowY;
     if (!ConvertFromJsValue(env, jsWindowY, windowY)) {
         WLOGFE("Failed to convert parameter to windowY");
         return false;
     }
     pointerItem.SetWindowY(std::round(windowY * vpr));
+    pointerItem.SetWindowYPos(windowY * vpr);
     double displayX;
     if (!ConvertFromJsValue(env, jsDisplayX, displayX)) {
         WLOGFE("Failed to convert parameter to displayX");
         return false;
     }
     pointerItem.SetDisplayX(std::round(displayX * vpr));
+    pointerItem.SetDisplayXPos(displayX * vpr);
     double displayY;
     if (!ConvertFromJsValue(env, jsDisplayY, displayY)) {
         WLOGFE("Failed to convert parameter to displayY");
         return false;
     }
     pointerItem.SetDisplayY(std::round(displayY * vpr));
+    pointerItem.SetDisplayYPos(displayY * vpr);
     pointerEvent.AddPointerItem(pointerItem);
     return true;
 }
