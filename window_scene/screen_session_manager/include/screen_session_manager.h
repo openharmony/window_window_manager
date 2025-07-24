@@ -617,6 +617,8 @@ private:
         PowerStateChangeReason reason);
     bool IsExtendMode();
     bool IsScreenCasting();
+    bool GetPCStatus();
+    void SetPCStatus(bool isPC);
     const std::set<std::string> g_packageNames_ {};
 
     /**
@@ -704,6 +706,7 @@ private:
     bool isFoldScreenOuterScreenReady_ = false;
     bool isCameraBackSelfie_ = false;
     bool isDeviceShutDown_ = false;
+    bool needWaitAvailableArea_ = false;
     uint32_t hdmiScreenCount_ = 0;
     uint32_t virtualScreenCount_ = 0;
     uint32_t currentExpandScreenCount_ = 0;
@@ -762,6 +765,9 @@ private:
     std::mutex screenChangeMutex_;
     std::mutex screenMaskMutex_;
     std::condition_variable screenMaskCV_;
+    std::mutex displayAddMutex_;
+    std::condition_variable displayAddCV_;
+    std::mutex setPCStatusMutex_;
 
     std::mutex freezedPidListMutex_;
     std::set<int32_t> freezedPidList_;
@@ -825,6 +831,7 @@ private:
     void SetExtendScreenDpi();
     bool SwitchPcMode();
     void SwitchExternalScreenToMirror();
+    void WaitUpdateAvailableAreaForPC();
 
     LowTempMode lowTemp_ {LowTempMode::UNKNOWN};
     std::mutex lowTempMutex_;
