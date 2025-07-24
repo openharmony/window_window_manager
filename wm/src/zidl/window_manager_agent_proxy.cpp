@@ -562,7 +562,7 @@ bool WindowManagerAgentProxy::WriteWindowChangeInfoValue(MessageParcel& data,
     }
     switch (windowInfoPair.first) {
         case WindowInfoKey::WINDOW_ID: {
-            if (!data.WriteUint32(static_cast<uint32_t>(std::any_cast<int32_t>(windowInfoPair.second))  )) {
+            if (!data.WriteUint32(static_cast<uint32_t>(std::get<int32_t>(windowInfoPair.second))  )) {
                 TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write uint32_t failed");
                 return false;
             }
@@ -570,35 +570,42 @@ bool WindowManagerAgentProxy::WriteWindowChangeInfoValue(MessageParcel& data,
         }
         case WindowInfoKey::BUNDLE_NAME :
         case WindowInfoKey::ABILITY_NAME: {
-            if (!data.WriteString(std::any_cast<std::string>(windowInfoPair.second))) {
+            if (!data.WriteString(std::get<std::string>(windowInfoPair.second))) {
                 TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write string failed");
                 return false;
             }
             break;
         }
         case WindowInfoKey::APP_INDEX : {
-            if (!data.WriteInt32(std::any_cast<int32_t>(windowInfoPair.second))) {
+            if (!data.WriteInt32(std::get<int32_t>(windowInfoPair.second))) {
                 TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write int32_t failed");
                 return false;
             }
             break;
         }
         case WindowInfoKey::VISIBILITY_STATE : {
-            if (!data.WriteUint32(static_cast<uint32_t>(std::any_cast<WindowVisibilityState>(windowInfoPair.second)))) {
+            if (!data.WriteUint32(static_cast<uint32_t>(std::get<WindowVisibilityState>(windowInfoPair.second)))) {
                 TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write WindowVisibilityState failed");
                 return false;
             }
             break;
         }
+        case WindowInfoKey::WINDOW_MODE : {
+            if (!data.WriteUint32(static_cast<uint32_t>(std::get<WindowMode>(windowInfoPair.second)))) {
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write WindowMode failed");
+                return false;
+            }
+            break;
+        }
         case WindowInfoKey::DISPLAY_ID : {
-            if (!data.WriteUint64(std::any_cast<uint64_t>(windowInfoPair.second))) {
+            if (!data.WriteUint64(std::get<uint64_t>(windowInfoPair.second))) {
                 TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write uint64_t failed");
                 return false;
             }
             break;
         }
         case WindowInfoKey::WINDOW_RECT : {
-            Rect rect = std::any_cast<Rect>(windowInfoPair.second);
+            Rect rect = std::get<Rect>(windowInfoPair.second);
             if (!data.WriteInt32(rect.posX_)) {
                 TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write posX failed");
                 return false;
@@ -613,6 +620,13 @@ bool WindowManagerAgentProxy::WriteWindowChangeInfoValue(MessageParcel& data,
             }
             if (!data.WriteUint32(rect.height_)) {
                 TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write Height failed");
+                return false;
+            }
+            break;
+        }
+        case WindowInfoKey::FLOATING_SCALE : {
+            if (!data.WriteFloat(std::get<float>(windowInfoPair.second))) {
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write float failed");
                 return false;
             }
             break;
