@@ -2344,7 +2344,7 @@ void WindowManager::NotifyWindowPropertyChange(uint32_t propertyDirtyFlags,
         pImpl_->NotifyDisplayIdChange(windowInfoList);
     }
     if (propertyDirtyFlags & static_cast<int32_t>(WindowInfoKey::WINDOW_MODE)) {
-        pImpl_->NotifyWindowModeChange(windowInfoList);
+        pImpl_->NotifyWindowModeChangeForPropertyChange(windowInfoList);
     }
     if (propertyDirtyFlags & static_cast<int32_t>(WindowInfoKey::FLOATING_SCALE)) {
         pImpl_->NotifyFloatingScaleChange(windowInfoList);
