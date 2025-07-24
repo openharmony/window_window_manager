@@ -393,7 +393,8 @@ void HidumpController::DumpSysconfigParam(std::ostringstream& oss, sptr<SceneSes
         <<  "[" << freeMultiWindowConfig.isSystemDecorEnable_ << " "
         << freeMultiWindowConfig.decorWindowModeSupportType_ << " "
         << static_cast<uint32_t>(freeMultiWindowConfig.defaultWindowMode_) << " "
-        << freeMultiWindowConfig.maxMainFloatingWindowNumber_<< "]|"
+        << freeMultiWindowConfig.maxMainFloatingWindowNumber_ << " "
+        << static_cast<uint32_t>(freeMultiWindowConfig.defaultDragResizeType_) << "]|"
         << std::endl;
 }
 // LCOV_EXCL_STOP
