@@ -409,7 +409,6 @@ private:
      * Window Layout
      */
     void CheckMoveConfiguration(MoveConfiguration& moveConfiguration);
-    void UpdateEnableDragWhenSwitchMultiWindow(bool enable);
 
     /*
      * PC Window Layout
