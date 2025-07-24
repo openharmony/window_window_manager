@@ -70,6 +70,8 @@ public:
     void NotifyDisplayInfoChanged(const sptr<IRemoteObject>& token, DisplayId displayId,
         float density, DisplayOrientation orientation);
     void NotifyDisplayIdChange(const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList);
+    bool IsNeedToSkipForInterestWindowIds(sptr<IWindowInfoChangedListener> listener,
+        const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList)
     void NotifyWindowStyleChange(WindowStyleType type);
     void NotifyWindowSystemBarPropertyChange(WindowType type, const SystemBarProperty& systemBarProperty);
     void NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info);
@@ -401,22 +403,31 @@ void WindowManager::Impl::NotifyDisplayIdChange(
         std::unique_lock<std::shared_mutex> lock(listenerMutex_);
         windowDisplayIdChangeListeners = windowDisplayIdChangeListeners_;
     }
+
     for (auto &listener : windowDisplayIdChangeListeners) {
-        if (listener != nullptr) {
-            auto interestWindowIds = listener->GetInterestWindowIds();
-            if (!interestWindowIds.empty()) {
-                for (const auto& item : windowInfoList) {
-                    auto windowInfo = item;
-                    if (windowInfo.find(WindowInfoKey::WINDOW_ID) == windowInfo.end() ||
-                        interestWindowIds.find(std::get<uint32_t>(windowInfo[WindowInfoKey::WINDOW_ID])) ==
-                        interestWindowIds.end()) {
-                        continue;
-                    }
-                }
-            }
+        if (listener != nullptr && !IsNeedToSkipForInterestWindowIds(listener, windowInfoList)) {
             listener->OnWindowInfoChanged(windowInfoList);
         }
     }
+}
+
+bool WindowManager::Impl::IsNeedToSkipForInterestWindowIds(sptr<IWindowInfoChangedListener> listener,
+    const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList)
+{
+    auto interestWindowIds = listener->GetInterestWindowIds();
+    if (interestWindowIds.empty()) {
+        return false;
+    }
+    for (const auto& item : windowInfoList) {
+        auto windowInfo = item;
+        if (windowInfo.find(WindowInfoKey::WINDOW_ID) == windowInfo.end() ||
+            interestWindowIds.find(std::get<uint32_t>(windowInfo[WindowInfoKey::WINDOW_ID])) ==
+            interestWindowIds.end()) {
+            continue;
+        }
+        return true;
+    }
+    return false;
 }
 
 void WindowManager::Impl::NotifyWindowStyleChange(WindowStyleType type)
