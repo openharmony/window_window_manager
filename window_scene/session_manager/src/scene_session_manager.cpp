@@ -5375,7 +5375,9 @@ int32_t SceneSessionManager::FindCallerPersistentId(int32_t persistentId)
     if (session == nullptr) {
         return INVALID_SESSION_ID;
     }
-    return session->GetSessionInfo().callerPersistentId_;
+    auto callerId = session->GetSessionInfo().callerPersistentId_;
+    TLOGI(WmsLogTag::WMS_PATTERN, "id: %{public}d, CallerId: %{public}d", persistentId, callerId);
+    return callerId;
 }
 
 int32_t SceneSessionManager::GetOriginalPersistentId(const std::set<int32_t>& sessionSet, int32_t persistentId)
