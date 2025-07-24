@@ -276,6 +276,32 @@ HWTEST_F(CompatibleModePropertyTest, IsWindowLimitDisabled, TestSize.Level1)
     EXPECT_EQ(property->IsWindowLimitDisabled(), true);
 }
 
+/**
+ * @tc.name: SetDisableDecorFullscreen
+ * @tc.desc: SetDisableDecorFullscreen
+ * @tc.type: FUNC
+ */
+HWTEST_F(CompatibleModePropertyTest, SetDisableDecorFullscreen, TestSize.Level1)
+{
+    sptr<CompatibleModeProperty> property = sptr<CompatibleModeProperty>::MakeSptr();
+    property->SetDisableDecorFullscreen(true);
+    EXPECT_EQ(property->disableDecorFullscreen_, true);
+    property->SetDisableDecorFullscreen(false);
+    EXPECT_EQ(property->disableDecorFullscreen_, false);
+}
+ 
+/**
+ * @tc.name: IsDecorFullscreenDisabled
+ * @tc.desc: IsDecorFullscreenDisabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(CompatibleModePropertyTest, IsDecorFullscreenDisabled, TestSize.Level1)
+{
+    sptr<CompatibleModeProperty> property = sptr<CompatibleModeProperty>::MakeSptr();
+    EXPECT_EQ(property->IsDecorFullscreenDisabled(), false);
+    property->disableDecorFullscreen_ = true;
+    EXPECT_EQ(property->IsDecorFullscreenDisabled(), true);
+}
 
 /**
  * @tc.name: SetIsAdaptToSimulationScale
