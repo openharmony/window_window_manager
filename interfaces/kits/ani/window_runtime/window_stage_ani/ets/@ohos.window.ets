@@ -2940,7 +2940,7 @@ export interface Window {
     rotate(rotateOptions: RotateOptions): void;
     setShadow(radius: number, color?: string, offsetX?: number, offsetY?: number): void;
     on<T>(type: string, callback: Callback<T>): void;
-    on<T>(type: 'noInteractionDetected', timeout: number, callback: Callback<T>): void;
+    on<T>(type: 'noInteractionDetected', timeout: long, callback: Callback<T>): void;
     off<T>(type: string, callback?: Callback<T>): void;
 }
 
