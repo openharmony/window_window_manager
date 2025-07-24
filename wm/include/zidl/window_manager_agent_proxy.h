@@ -46,11 +46,11 @@ public:
     void NotifyWindowSystemBarPropertyChange(WindowType type, const SystemBarProperty& systemBarProperty) override;
     void UpdatePiPWindowStateChanged(const std::string& bundleName, bool isForeground) override;
     void NotifyWindowPropertyChange(uint32_t propertyDirtyFlags,
-        const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList) override;
+        const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList) override;
 
 private:
     static inline BrokerDelegator<WindowManagerAgentProxy> delegator_;
-    bool WriteWindowChangeInfoValue(MessageParcel& data, const std::pair<WindowInfoKey, std::any>& windowInfoPair);
+    bool WriteWindowChangeInfoValue(MessageParcel& data, const std::pair<WindowInfoKey, WindowChangeInfoType>& windowInfoPair);
 };
 } // namespace Rosen
 } // namespace OHOS

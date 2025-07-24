@@ -16661,7 +16661,7 @@ void SceneSessionManager::NotifyWindowPropertyChange(ScreenId screenId)
 {
     TLOGD(WmsLogTag::WMS_ATTRIBUTE, "ObservedFlags: %{public}u, interestedFlags: %{public}u",
         observedFlags_, interestedFlags_);
-    std::vector<std::unordered_map<WindowInfoKey, std::any>> windowInfoList;
+    std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>> windowInfoList;
     uint32_t propertyDirtyFlags = 0;
     {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
@@ -16677,7 +16677,7 @@ void SceneSessionManager::NotifyWindowPropertyChange(ScreenId screenId)
                 continue;
             }
             propertyDirtyFlags |= sceneSession->GetPropertyDirtyFlags();
-            std::unordered_map<WindowInfoKey, std::any> windowPropertyChangeInfo;
+            std::unordered_map<WindowInfoKey, WindowChangeInfoType> windowPropertyChangeInfo;
             PackWindowPropertyChangeInfo(sceneSession, windowPropertyChangeInfo);
             windowInfoList.emplace_back(windowPropertyChangeInfo);
             sceneSession->SetPropertyDirtyFlags(0);
@@ -16687,7 +16687,7 @@ void SceneSessionManager::NotifyWindowPropertyChange(ScreenId screenId)
 }
 
 void SceneSessionManager::PackWindowPropertyChangeInfo(const sptr<SceneSession>& sceneSession,
-    std::unordered_map<WindowInfoKey, std::any>& windowPropertyChangeInfo)
+    std::unordered_map<WindowInfoKey, WindowChangeInfoType>& windowPropertyChangeInfo)
 {
     if (interestedFlags_ & static_cast<uint32_t>(SessionPropertyFlag::WINDOW_ID)) {
         windowPropertyChangeInfo[WindowInfoKey::WINDOW_ID] = sceneSession->GetWindowId();

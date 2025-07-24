@@ -60,7 +60,7 @@ public:
     void NotifyWindowVisibilityStateChanged(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos);
     void PackWindowChangeInfo(const std::unordered_set<WindowInfoKey>& interestInfo,
         const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos,
-        std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowChangeInfos);
+        std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowChangeInfos);
     void NotifyWindowDrawingContentInfoChanged(const std::vector<sptr<WindowDrawingContentInfo>>&
         windowDrawingContentInfos);
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing);
@@ -69,11 +69,11 @@ public:
     void NotifyGestureNavigationEnabledResult(bool enable);
     void NotifyDisplayInfoChanged(const sptr<IRemoteObject>& token, DisplayId displayId,
         float density, DisplayOrientation orientation);
-    void NotifyDisplayIdChange(const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList);
+    void NotifyDisplayIdChange(const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList);
     void NotifyWindowStyleChange(WindowStyleType type);
     void NotifyWindowSystemBarPropertyChange(WindowType type, const SystemBarProperty& systemBarProperty);
     void NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info);
-    void NotifyWindowRectChange(const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList);
+    void NotifyWindowRectChange(const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList);
     void NotifyWMSWindowDestroyed(const WindowLifeCycleInfo& lifeCycleInfo, void* jsWindowNapiValue);
 
     static inline SingletonDelegator<WindowManager> delegator_;
@@ -270,7 +270,7 @@ void WindowManager::Impl::NotifyWindowVisibilityStateChanged(
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "listener is null");
             continue;
         }
-        std::vector<std::unordered_map<WindowInfoKey, std::any>> windowChangeInfos;
+        std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>> windowChangeInfos;
         PackWindowChangeInfo(listener->GetInterestInfo(), windowVisibilityInfos, windowChangeInfos);
         TLOGD(WmsLogTag::WMS_ATTRIBUTE, "Notify WindowVisibilityState to caller, info size: %{public}zu",
             windowChangeInfos.size());
@@ -280,10 +280,10 @@ void WindowManager::Impl::NotifyWindowVisibilityStateChanged(
 
 void WindowManager::Impl::PackWindowChangeInfo(const std::unordered_set<WindowInfoKey>& interestInfo,
     const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos,
-    std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowChangeInfos)
+    std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowChangeInfos)
 {
     for (const auto& info : windowVisibilityInfos) {
-        std::unordered_map<WindowInfoKey, std::any> windowChangeInfo;
+        std::unordered_map<WindowInfoKey, WindowChangeInfoType> windowChangeInfo;
         if (interestInfo.find(WindowInfoKey::WINDOW_ID) != interestInfo.end()) {
             windowChangeInfo.emplace(WindowInfoKey::WINDOW_ID, info->windowId_);
         }
@@ -394,7 +394,7 @@ void WindowManager::Impl::NotifyDisplayInfoChanged(const sptr<IRemoteObject>& to
 }
 
 void WindowManager::Impl::NotifyDisplayIdChange(
-    const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList)
+    const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList)
 {
     std::vector<sptr<IWindowInfoChangedListener>> windowDisplayIdChangeListeners;
     {
@@ -451,7 +451,7 @@ void WindowManager::Impl::NotifyWindowPidVisibilityChanged(
 }
 
 void WindowManager::Impl::NotifyWindowRectChange(
-    const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList)
+    const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList)
 {
     std::vector<sptr<IWindowInfoChangedListener>> windowRectChangeListeners;
     {
@@ -2138,7 +2138,7 @@ bool WindowManager::IsModuleHookOff(bool isModuleAbilityHookEnd, const std::stri
 }
 
 void WindowManager::NotifyWindowPropertyChange(uint32_t propertyDirtyFlags,
-    const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList)
+    const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList)
 {
     if (propertyDirtyFlags & static_cast<int32_t>(WindowInfoKey::WINDOW_RECT)) {
         pImpl_->NotifyWindowRectChange(windowInfoList);

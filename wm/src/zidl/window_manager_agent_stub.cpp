@@ -249,7 +249,7 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
                 return ERR_INVALID_DATA;
             }
 
-            std::vector<std::unordered_map<WindowInfoKey, std::any>> windowInfoList;
+            std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>> windowInfoList;
             if (!ReadWindowInfoList(data, windowInfoList)) {
                 TLOGE(WmsLogTag::WMS_ATTRIBUTE, "fail to read windowInfoList.");
                 return ERR_INVALID_DATA;
@@ -265,7 +265,7 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
 }
 
 bool WindowManagerAgentStub::ReadWindowInfoList(MessageParcel& data,
-    std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList)
+    std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList)
 {
     uint32_t windowInfoListLength = 0;
     if (!data.ReadUint32(windowInfoListLength)) {
@@ -281,7 +281,7 @@ bool WindowManagerAgentStub::ReadWindowInfoList(MessageParcel& data,
             return false;
         }
         size_t windowInfoSize = static_cast<size_t>(windowInfoLength);
-        std::unordered_map<WindowInfoKey, std::any> windowInfo;
+        std::unordered_map<WindowInfoKey, WindowChangeInfoType> windowInfo;
         for (size_t j = 0; j < windowInfoSize; j++) {
             if (!ReadWindowInfo(data, windowInfo)) {
                 TLOGE(WmsLogTag::WMS_ATTRIBUTE, "fail to read windowInfo.");
@@ -294,7 +294,7 @@ bool WindowManagerAgentStub::ReadWindowInfoList(MessageParcel& data,
 }
 
 bool WindowManagerAgentStub::ReadWindowInfo(MessageParcel& data,
-    std::unordered_map<WindowInfoKey, std::any>& windowInfo)
+    std::unordered_map<WindowInfoKey, WindowChangeInfoType>& windowInfo)
 {
     int32_t windowInfoKeyValue = 0;
     if (!data.ReadInt32(windowInfoKeyValue)) {

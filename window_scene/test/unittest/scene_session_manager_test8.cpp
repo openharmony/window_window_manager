@@ -1092,7 +1092,7 @@ HWTEST_F(SceneSessionManagerTest8, PackWindowPropertyChangeInfo01, TestSize.Leve
     sceneSession1->SetSessionState(SessionState::STATE_FOREGROUND);
     sceneSession1->GetSessionProperty()->SetDisplayId(0);
 
-    std::unordered_map<WindowInfoKey, std::any> windowPropertyChangeInfo;
+    std::unordered_map<WindowInfoKey, WindowChangeInfoType> windowPropertyChangeInfo;
     ssm_->PackWindowPropertyChangeInfo(sceneSession1, windowPropertyChangeInfo);
     EXPECT_EQ(windowPropertyChangeInfo.size(), 7);
 }
@@ -1441,7 +1441,7 @@ HWTEST_F(SceneSessionManagerTest8, NotifyOnAttachToFrameNode01, TestSize.Level1)
     SessionInfo info;
     session = sptr<Session>::MakeSptr(info);
     session->GetSessionProperty()->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    ssm_->NotifyOnAttachToFrameNode(session);
+    ssm_->NotifyOnAttachToFrameNode(session);  0
     EXPECT_EQ(ssm_->sessionBlackListInfoMap_.size(), 0);
     EXPECT_EQ(ssm_->sessionRSBlackListConfigSet_.size(), 0);
 

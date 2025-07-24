@@ -511,7 +511,7 @@ void WindowManagerAgentProxy::UpdatePiPWindowStateChanged(const std::string& bun
 }
 
 void WindowManagerAgentProxy::NotifyWindowPropertyChange(uint32_t propertyDirtyFlags,
-    const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList)
+    const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -554,7 +554,7 @@ void WindowManagerAgentProxy::NotifyWindowPropertyChange(uint32_t propertyDirtyF
 }
 
 bool WindowManagerAgentProxy::WriteWindowChangeInfoValue(MessageParcel& data,
-    const std::pair<WindowInfoKey, std::any>& windowInfoPair)
+    const std::pair<WindowInfoKey, WindowChangeInfoType>& windowInfoPair)
 {
     if (!data.WriteInt32(static_cast<int32_t>(windowInfoPair.first))) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write windowInfoKey failed");
