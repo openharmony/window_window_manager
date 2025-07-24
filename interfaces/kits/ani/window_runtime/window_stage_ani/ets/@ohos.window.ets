@@ -1131,9 +1131,9 @@ export class WindowPropertiesInternal implements WindowProperties {
     isRoundCorner: boolean;
     isTransparent: boolean;
     id: int;
-    displayId: long;
+    displayId?: long;
     typeInternal: int;
-    name: string;
+    name?: string;
 }
 
 /**
