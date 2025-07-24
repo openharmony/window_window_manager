@@ -27,6 +27,7 @@ group("fuzztest") {
     "windowmanageragentstubstatus_fuzzer:fuzztest",
     "windowmanageragentstubtype_fuzzer:fuzztest",
     "windowscene_fuzzer:fuzztest",
+    "windowsessionmgrstubsessionimpllifecycle_fuzzer:fuzztest",
     "windowstubget_fuzzer:fuzztest",
     "windowstubnotify_fuzzer:fuzztest",
     "windowstubupdate_fuzzer:fuzztest",
