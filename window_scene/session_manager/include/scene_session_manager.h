@@ -239,6 +239,8 @@ public:
     void SetDumpUITreeFunc(const DumpUITreeFunc& func);
     const AppWindowSceneConfig& GetWindowSceneConfig() const;
 
+    
+
     /*
      * Window Recover
      */
