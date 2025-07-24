@@ -1142,6 +1142,93 @@ HWTEST_F(ScreenSessionManagerTest, TryToCancelScreenOff01, TestSize.Level1)
     ssm_->TryToCancelScreenOff();
     EXPECT_TRUE(g_errLog.find("permission denied!") != std::string::npos);
 }
+
+/**
+ * @tc.name: WaitUpdateAvailableAreaForPC01
+ * @tc.desc: WaitUpdateAvailableAreaForPC test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, WaitUpdateAvailableAreaForPC01, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    bool temp = ScreenSessionManager::GetInstance().GetPCStatus();
+    ScreenSessionManager::GetInstance().SetPCStatus(true);
+    ScreenSessionManager::GetInstance().WaitUpdateAvailableAreaForPC();
+    EXPECT_TRUE(g_errLog.find("need wait update available area") == std::string::npos);
+    g_errLog.clear();
+    ScreenSessionManager::GetInstance().SetPCStatus(temp);
+}
+
+/**
+ * @tc.name: WaitUpdateAvailableAreaForPC02
+ * @tc.desc: WaitUpdateAvailableAreaForPC test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, WaitUpdateAvailableAreaForPC02, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    bool temp = ScreenSessionManager::GetInstance().GetPCStatus();
+    ScreenSessionManager::GetInstance().SetPCStatus(true);
+    ScreenSessionManager::GetInstance().needWaitAvailableArea_ = true;
+    ScreenSessionManager::GetInstance().WaitUpdateAvailableAreaForPC();
+    EXPECT_TRUE(g_errLog.find("wait update available area timeout") != std::string::npos);
+    g_errLog.clear();
+    ScreenSessionManager::GetInstance().SetPCStatus(temp);
+}
+
+/**
+ * @tc.name: UpdateAvailableAreaWhenDisplayAdd01
+ * @tc.desc: UpdateAvailableArea WhenDisplayAdd notify all
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, UpdateAvailableArea02, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    bool temp = ssm_->GetPCStatus();
+    ssm_->SetPCStatus(true);
+    ssm_->needWaitAvailableArea_ = true;
+
+    ScreenId screenId = 1050;
+    DMRect area{0, 0, 600, 900};
+    DMRect area2{0, 0, 600, 800};
+    sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(screenId, ScreenProperty(), 0);
+    ssm_->screenSessionMap_[screenId] = screenSession;
+    auto screenSession1 = ssm_->GetScreenSession(screenId);
+    EXPECT_EQ(screenSession1, screenSession);
+    EXPECT_TRUE(screenSession->UpdateAvailableArea(area));
+    ssm_->UpdateAvailableArea(screenId, area2);
+    EXPECT_FALSE(ssm_->needWaitAvailableArea_);
+    g_errLog.clear();
+    ssm_->SetPCStatus(temp);
+}
+
+/**
+ * @tc.name: UpdateAvailableAreaWhenDisplayAdd02
+ * @tc.desc: UpdateAvailableArea WhenDisplayAdd not notify all
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, UpdateAvailableArea02, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    bool temp = ssm_->GetPCStatus();
+    ssm_->SetPCStatus(true);
+    ssm_->needWaitAvailableArea_ = false;
+
+    ScreenId screenId = 1050;
+    DMRect area{0, 0, 600, 800};
+    sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(screenId, ScreenProperty(), 0);
+    ssm_->screenSessionMap_[screenId] = screenSession;
+    ssm_->UpdateAvailableArea(screenId, area);
+    auto screenSession1 = ssm_->GetScreenSession(screenId);
+    EXPECT_EQ(screenSession1->GetAvailabelArea(), area);
+    EXPECT_FALSE(ssm_->needWaitAvailableArea_);
+    g_errLog.clear();
+    ssm_->SetPCStatus(temp);
+}
 }
 }
 }
