@@ -53,6 +53,8 @@ const std::string WINDOW_RECT_CHANGE_CB = "windowRectChange";
 const std::string SUB_WINDOW_CLOSE_CB = "subWindowClose";
 const std::string WINDOW_HIGHLIGHT_CHANGE_CB = "windowHighlightChange";
 const std::string WINDOW_STAGE_CLOSE_CB = "windowStageClose";
+const std::string SYSTEM_DENSITY_CHANGE_CB = "systemDensityChange";
+const std::string WINDOW_DISPLAYID_CHANGE_CB = "displayIdChange";
 
 class AniWindowListener : public IWindowChangeListener,
                         public ISystemBarChangedListener,
@@ -74,13 +76,16 @@ class AniWindowListener : public IWindowChangeListener,
                         public IWindowRectChangeListener,
                         public IMainWindowCloseListener,
                         public ISubWindowCloseListener,
-                        public IWindowHighlightChangeListener {
+                        public IWindowHighlightChangeListener,
+                        public ISystemDensityChangeListener,
+                        public IDisplayIdChangeListener {
 public:
     AniWindowListener(ani_env* env, ani_ref callback, CaseType caseType)
         : env_(env), aniCallBack_(callback), caseType_(caseType),
         weakRef_(wptr<AniWindowListener> (this)) {}
     ~AniWindowListener();
     ani_ref GetAniCallBack() const { return aniCallBack_; }
+    void SetAniCallBack(ani_ref aniCallBack) { aniCallBack_ = aniCallBack; }
     void OnSystemBarPropertyChange(DisplayId displayId, const SystemBarRegionTints& tints) override;
     void OnSizeChange(Rect rect, WindowSizeChangeReason reason,
     const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
@@ -106,6 +111,8 @@ public:
     void OnWaterMarkFlagUpdate(bool showWaterMark) override;
     void SetMainEventHandler();
     void OnWindowVisibilityChangedCallback(const bool isVisible) override;
+    void OnSystemDensityChanged(float density) override;
+    void OnDisplayIdChanged(DisplayId displayId) override;
 
     void OnWindowStatusChange(WindowStatus status) override;
     void OnWindowNoInteractionCallback() override;

@@ -25,7 +25,7 @@
 #include "ani_window_utils.h"
 #include "permission.h"
 #include "pixel_map.h"
-#include "pixel_map_ani.h"
+#include "pixel_map_taihe_ani.h"
 #include "window_helper.h"
 #include "window_scene.h"
 #include "window_manager.h"
@@ -2035,7 +2035,7 @@ ani_object AniWindow::Snapshot(ani_env* env)
     if (pixelMap == nullptr) {
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    auto nativePixelMap = Media::PixelMapAni::CreatePixelMap(env, pixelMap);
+    auto nativePixelMap = Media::PixelMapTaiheAni::CreateEtsPixelMap(env, pixelMap);
     if (nativePixelMap == nullptr) {
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
