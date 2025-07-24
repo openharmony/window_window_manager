@@ -115,6 +115,8 @@ public:
     std::vector<sptr<IWindowInfoChangedListener>> windowDisplayIdChangeListeners_;
     sptr<WindowManagerAgent> windowPropertyChangeAgent_;
     std::vector<sptr<IWindowInfoChangedListener>> windowRectChangeListeners_;
+    std::vector<sptr<IWindowInfoChangedListener>> windowModeChangeListeners_;
+    std::vector<sptr<IWindowInfoChangedListener>> floatingScaleChangeListeners_;
     sptr<WindowManagerAgent> windowSystemBarPropertyChangeAgent_;
     std::vector<sptr<IWindowSystemBarPropertyChangedListener>> windowSystemBarPropertyChangedListeners_;
     sptr<IWindowLifeCycleListener> windowLifeCycleListener_;
@@ -982,6 +984,146 @@ WMError WindowManager::UnregisterRectChangedListener(const sptr<IWindowInfoChang
     if (pImpl_->windowRectChangeListeners_.empty() && pImpl_->windowPropertyChangeAgent_ != nullptr) {
         ret = SingletonContainer::Get<WindowAdapter>().UnregisterWindowPropertyChangeAgent(WindowInfoKey::WINDOW_RECT,
             interestInfo, pImpl_->windowPropertyChangeAgent_);
+        if (ret == WMError::WM_OK) {
+            pImpl_->windowPropertyChangeAgent_ = nullptr;
+        }
+    }
+    return ret;
+}
+
+WMError WindowManager::RegisterWindowModeChangedListener(const sptr<IWindowInfoChangedListener>& listener)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "listener is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
+    WMError ret = WMError::WM_OK;
+    if (pImpl_->windowPropertyChangeAgent_ == nullptr) {
+        pImpl_->windowPropertyChangeAgent_ = new WindowManagerAgent();
+    }
+    uint32_t interestInfo = 0;
+    for (auto windowInfoKey : listener->GetInterestInfo()) {
+        if (interestInfoMap_.find(windowInfoKey) == interestInfoMap_.end()) {
+            interestInfoMap_[windowInfoKey] = 1;
+        } else {
+            interestInfoMap_[windowInfoKey]++;
+        }
+        interestInfo |= static_cast<uint32_t>(windowInfoKey);
+    }
+    ret = SingletonContainer::Get<WindowAdapter>().RegisterWindowPropertyChangeAgent(
+        WindowInfoKey::WINDOW_MODE, interestInfo, pImpl_->windowPropertyChangeAgent_);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "RegisterWindowPropertyChangeAgent failed!");
+        pImpl_->windowPropertyChangeAgent_ = nullptr;
+    } else {
+        auto iter = std::find(pImpl_->windowModeChangeListeners_.begin(), pImpl_->windowModeChangeListeners_.end(),
+            listener);
+        if (iter != pImpl_->windowModeChangeListeners_.end()) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Listener is already registered.");
+            return WMError::WM_OK;
+        }
+        pImpl_->windowModeChangeListeners_.emplace_back(listener);
+    }
+    return ret;
+}
+
+WMError WindowManager::UnregisterWindowModeChangedListener(const sptr<IWindowInfoChangedListener>& listener)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "listener is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
+    pImpl_->windowModeChangeListeners_.erase(std::remove_if(pImpl_->windowModeChangeListeners_.begin(),
+        pImpl_->windowModeChangeListeners_.end(), [listener](sptr<IWindowInfoChangedListener> registeredListener) {
+            return registeredListener == listener;
+        }), pImpl_->windowModeChangeListeners_.end());
+    uint32_t interestInfo = 0;
+    for (auto windowInfoKey : listener->GetInterestInfo()) {
+        if (interestInfoMap_.find(windowInfoKey) == interestInfoMap_.end()) {
+            continue;
+        } else if (interestInfoMap_[windowInfoKey] == 1) {
+            interestInfoMap_.erase(windowInfoKey);
+            interestInfo |= static_cast<uint32_t>(windowInfoKey);
+        } else {
+            interestInfoMap_[windowInfoKey]--;
+        }
+    }
+    WMError ret = WMError::WM_OK;
+    if (pImpl_->windowModeChangeListeners_.empty() && pImpl_->windowPropertyChangeAgent_ != nullptr) {
+        ret = SingletonContainer::Get<WindowAdapter>().UnregisterWindowPropertyChangeAgent(WindowInfoKey::WINDOW_MODE,
+            interestInfo, pImpl_->windowPropertyChangeAgent_);
+        if (ret == WMError::WM_OK) {
+            pImpl_->windowPropertyChangeAgent_ = nullptr;
+        }
+    }
+    return ret;
+}
+
+WMError WindowManager::RegisterFloatingScaleChangedListener(const sptr<IWindowInfoChangedListener>& listener)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "listener is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
+    WMError ret = WMError::WM_OK;
+    if (pImpl_->windowPropertyChangeAgent_ == nullptr) {
+        pImpl_->windowPropertyChangeAgent_ = new WindowManagerAgent();
+    }
+    uint32_t interestInfo = 0;
+    for (auto windowInfoKey : listener->GetInterestInfo()) {
+        if (interestInfoMap_.find(windowInfoKey) == interestInfoMap_.end()) {
+            interestInfoMap_[windowInfoKey] = 1;
+        } else {
+            interestInfoMap_[windowInfoKey]++;
+        }
+        interestInfo |= static_cast<uint32_t>(windowInfoKey);
+    }
+    ret = SingletonContainer::Get<WindowAdapter>().RegisterWindowPropertyChangeAgent(
+        WindowInfoKey::FLOATING_SCALE, interestInfo, pImpl_->windowPropertyChangeAgent_);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "RegisterWindowPropertyChangeAgent failed!");
+        pImpl_->windowPropertyChangeAgent_ = nullptr;
+    } else {
+        auto iter = std::find(pImpl_->floatingScaleChangeListeners_.begin(), pImpl_->floatingScaleChangeListeners_.end(),
+            listener);
+        if (iter != pImpl_->floatingScaleChangeListeners_.end()) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Listener is already registered.");
+            return WMError::WM_OK;
+        }
+        pImpl_->floatingScaleChangeListeners_.emplace_back(listener);
+    }
+    return ret;
+}
+
+WMError WindowManager::UnregisterFloatingScaleChangedListener(const sptr<IWindowInfoChangedListener>& listener)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "listener is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
+    pImpl_->floatingScaleChangeListeners_.erase(std::remove_if(pImpl_->floatingScaleChangeListeners_.begin(),
+        pImpl_->floatingScaleChangeListeners_.end(), [listener](sptr<IWindowInfoChangedListener> registeredListener) {
+            return registeredListener == listener;
+        }), pImpl_->floatingScaleChangeListeners_.end());
+    uint32_t interestInfo = 0;
+    for (auto windowInfoKey : listener->GetInterestInfo()) {
+        if (interestInfoMap_.find(windowInfoKey) == interestInfoMap_.end()) {
+            continue;
+        } else if (interestInfoMap_[windowInfoKey] == 1) {
+            interestInfoMap_.erase(windowInfoKey);
+            interestInfo |= static_cast<uint32_t>(windowInfoKey);
+        } else {
+            interestInfoMap_[windowInfoKey]--;
+        }
+    }
+    WMError ret = WMError::WM_OK;
+    if (pImpl_->floatingScaleChangeListeners_.empty() && pImpl_->windowPropertyChangeAgent_ != nullptr) {
+        ret = SingletonContainer::Get<WindowAdapter>().UnregisterWindowPropertyChangeAgent(
+            WindowInfoKey::FLOATING_SCALE, interestInfo, pImpl_->windowPropertyChangeAgent_);
         if (ret == WMError::WM_OK) {
             pImpl_->windowPropertyChangeAgent_ = nullptr;
         }
@@ -2043,6 +2185,10 @@ WMError WindowManager::ProcessRegisterWindowInfoChangeCallback(WindowInfoKey obs
             return RegisterDisplayIdChangedListener(listener);
         case WindowInfoKey::WINDOW_RECT :
             return RegisterRectChangedListener(listener);
+        case WindowInfoKey::WINDOW_MODE :
+            return RegisterWindowModeChangedListener(listener);
+        case WindowInfoKey::FLOATING_SCALE :
+            return RegisterFloatingScaleChangedListener(listener);
         default:
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Invalid observedInfo: %{public}d", static_cast<uint32_t>(observedInfo));
             return WMError::WM_ERROR_INVALID_PARAM;
@@ -2059,6 +2205,10 @@ WMError WindowManager::ProcessUnregisterWindowInfoChangeCallback(WindowInfoKey o
             return UnregisterDisplayIdChangedListener(listener);
         case WindowInfoKey::WINDOW_RECT :
             return UnregisterRectChangedListener(listener);
+        case WindowInfoKey::WINDOW_MODE :
+            return UnregisterWindowModeChangedListener(listener);
+        case WindowInfoKey::FLOATING_SCALE :
+            return UnregisterFloatingScaleChangedListener(listener);
         default:
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Invalid observedInfo: %{public}d", static_cast<uint32_t>(observedInfo));
             return WMError::WM_ERROR_INVALID_PARAM;
