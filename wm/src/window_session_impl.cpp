@@ -7943,9 +7943,30 @@ void WindowSessionImpl::SwitchSubWindow(int32_t parentId)
         if (subWindowSession && subWindowSession->property_ && subWindowSession->property_->IsDecorEnable()) {
             subWindowSession->UpdateTitleButtonVisibility();
             subWindowSession->UpdateDecorEnable(true);
+            subWindowSession->UpdateEnableDragWhenSwitchMultiWindow(
+                subWindowSession->windowSystemConfig_.freeMultiWindowEnable_);
             subWindowSession->SwitchSubWindow(subWindowSession->GetPersistentId());
         }
     }
+}
+
+void WindowSessionImpl::UpdateEnableDragWhenSwitchMultiWindow(bool enable)
+{
+    if (hasSetEnableDrag_.load() || property_->IsDragResizeDisabled()) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "EnableDrag is already set, id: %{public}d", GetPersistentId());
+        return;
+    }
+    auto isSystemWindow = WindowHelper::IsSystemWindow(property_->GetWindowType());
+    bool isDialog = WindowHelper::IsDialogWindow(property_->GetWindowType());
+    bool isSystemCalling = property_->GetSystemCalling();
+    TLOGI(WmsLogTag::WMS_LAYOUT, "windId: %{public}d, isSystemWindow: %{public}d, isDialog: %{public}d, "
+        "isSystemCalling: %{public}d", GetPersistentId(), isSystemWindow, isDialog, isSystemCalling);
+    if (!enable || (isSystemWindow && !isDialog && !isSystemCalling)) {
+        property_->SetDragEnabled(false);
+    } else {
+        property_->SetDragEnabled(true);
+    }
+    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED);
 }
 } // namespace Rosen
 } // namespace OHOS
