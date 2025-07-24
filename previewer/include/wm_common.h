@@ -16,12 +16,12 @@
 #ifndef OHOS_ROSEN_WM_COMMON_H
 #define OHOS_ROSEN_WM_COMMON_H
 
-#include <any>
 #include <cmath>
 #include <map>
 #include <memory>
 #include <sstream>
 #include <string>
+#include <variant>
 #include <unordered_set>
 
 #include <float.h>
