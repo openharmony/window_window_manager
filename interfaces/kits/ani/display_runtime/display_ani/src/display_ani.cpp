@@ -199,7 +199,7 @@ void DisplayAni::UnRegisterCallback(ani_env* env, ani_object obj, ani_string typ
 {
     TLOGI(WmsLogTag::DMS, "[ANI] begin");
     ani_long displayRef;
-    env->Object_GetFieldByName_Long(obj, "<property>displayRef", &displayRef);
+    env->Object_GetFieldByName_Long(obj, "displayRef", &displayRef);
     DisplayAni* displayAni = reinterpret_cast<DisplayAni*>(displayRef);
     if (displayAni != nullptr) {
         displayAni->OnUnRegisterCallback(env, obj, type, callback);
