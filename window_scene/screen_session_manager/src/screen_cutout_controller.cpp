@@ -37,7 +37,7 @@ sptr<CutoutInfo> ScreenCutoutController::GetScreenCutoutInfo(DisplayId displayId
     }
     uint32_t width = static_cast<uint32_t>(displayInfo->GetWidth());
     uint32_t height = static_cast<uint32_t>(displayInfo->GetHeight());
-    Rotation rotation = displayInfo->GetRotation();
+    Rotation rotation = displayInfo->GetScreenRotation();
 
     return GetScreenCutoutInfo(displayId, width, height, rotation);
 }
@@ -172,6 +172,10 @@ void ScreenCutoutController::CalcWaterfallRects(const std::vector<int> &numberVe
 
 void ScreenCutoutController::InitRect(uint32_t left, uint32_t top, uint32_t width, uint32_t height, DMRect& rect) const
 {
+    if (width == 0 || height == 0) {
+        rect = DMRect::NONE();
+        return;
+    }
     rect.posX_ = static_cast<int32_t>(left);
     rect.posY_ = static_cast<int32_t>(top);
     rect.width_ = width;

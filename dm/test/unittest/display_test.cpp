@@ -307,6 +307,19 @@ HWTEST_F(DisplayTest, GetLiveCreaseRegion, TestSize.Level1)
     ret = disPlay->GetLiveCreaseRegion(region);
     EXPECT_EQ(ret, DMError::DM_OK);
 }
+
+/**
+ * @tc.name: GetScreenRotation
+ * @tc.desc: test GetScreenRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayTest, GetScreenRotation, TestSize.Level1)
+{
+    auto baseInfo = defaultDisplay_->GetDisplayInfo();
+    Rotation rotation = Rotation::ROTATION_90;
+    baseInfo->SetScreenRotation(rotation);
+    EXPECT_EQ(defaultDisplay_->GetScreenRotation(), rotation);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
