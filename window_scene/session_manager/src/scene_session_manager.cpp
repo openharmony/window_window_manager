@@ -17046,4 +17046,11 @@ WMError SceneSessionManager::UpdateScreenLockState(int32_t persistentId)
     }, __func__);
     return WMError::WM_OK;
 }
+
+WMError SceneSessionManager::UpdateSystemDecorEnable(bool enable)
+{
+    TLOGI(WmsLogTag::WMS_DECOR, "set system decor enable: %{public}d", enable);
+    systemConfig_.isSystemDecorEnable_ = enable;
+    return WMError::WM_OK;
+}
 } // namespace OHOS::Rosen
