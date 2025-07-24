@@ -276,6 +276,7 @@ HWTEST_F(CompatibleModePropertyTest, IsWindowLimitDisabled, TestSize.Level1)
     EXPECT_EQ(property->IsWindowLimitDisabled(), true);
 }
 
+
 /**
  * @tc.name: SetIsAdaptToSimulationScale
  * @tc.desc: SetIsAdaptToSimulationScale
