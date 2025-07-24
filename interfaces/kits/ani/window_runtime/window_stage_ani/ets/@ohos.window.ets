@@ -3072,12 +3072,12 @@ export function off<T>(type: string, callback?: Callback<T>): void {
   offSync(nativeObj, type, callback);
 }
 
-function runWindowListenerVoidArgCallBack(cb: object): void {
+function runWindowListenerVoidArgCallback(cb: object): void {
   const func = cb as () => void;
   func();
 }
 
-function runWindowListenerBooleanArgCallBack(cb: object, cbArg: boolean): void {
+function runWindowListenerBooleanArgCallback(cb: object, cbArg: boolean): void {
   const func = cb as (cbArg: boolean) => void;
   func(cbArg);
 }
@@ -3092,12 +3092,12 @@ function runDisplayIdChangeCallback(cb: object, displayId: long): void {
   func(displayId as long);
 }
 
-function runSystemBarTintChangeCallBack(cb: object, tint: object): void {
+function runSystemBarTintChangeCallback(cb: object, tint: object): void {
   const func = cb as (tint: SystemBarTintState) => void;
   func(tint as SystemBarTintState);
 }
 
-function runAvoidAreaChangeCallBack(cb: object, area: object, type: int): void {
+function runAvoidAreaChangeCallback(cb: object, area: object, type: int): void {
   const func = cb as (data: AvoidAreaOptions) => void;
   func({type: type as AvoidAreaType, area: area as AvoidArea});
 }
@@ -3119,12 +3119,12 @@ function runWindowDialogTargetCallback(cb: object): void {
     func();
 }
 
-function runWindowEventCallBack(cb: object, cbArg: int): void {
+function runWindowEventCallback(cb: object, cbArg: int): void {
     const func = cb as (cbArg: WindowEventType) => void;
     func(cbArg as WindowEventType);
 }
 
-function runWindowStageEventCallBack(cb: object, cbArg: int): void {
+function runWindowStageEventCallback(cb: object, cbArg: int): void {
     const func = cb as (cbArg: WindowStageEventType) => void;
     func(cbArg as WindowStageEventType);
 }
@@ -3139,27 +3139,27 @@ function runWindowRectCallback(cb: object, cbArg: object): void {
     func(cbArg as Rect);
 }
 
-function runWindowSizeCallBack(cb: object, cbArg: object): void {
+function runWindowSizeCallback(cb: object, cbArg: object): void {
     const func = cb as (cbArg: Size) => void;
     func(cbArg as Size);
 }
 
-function runKeyboardHeightChangeCallBack(cb: object, cbArg: number): void {
+function runKeyboardHeightChangeCallback(cb: object, cbArg: number): void {
     const func = cb as (cbArg: number) => void;
     func(cbArg as number);
 }
 
-function runKeyboardDidShowCallBack(cb: object, cbArg: object): void {
+function runKeyboardDidShowCallback(cb: object, cbArg: object): void {
     const func = cb as (cbArg: KeyboardInfo) => void;
     func(cbArg as KeyboardInfo);
 }
 
-function runKeyboardDidHideCallBack(cb: object, cbArg: object): void {
+function runKeyboardDidHideCallback(cb: object, cbArg: object): void {
     const func = cb as (cbArg: KeyboardInfo) => void;
     func(cbArg as KeyboardInfo);
 }
 
-function runWindowStatusCallBack(cb: object, cbArg: int): void {
+function runWindowStatusCallback(cb: object, cbArg: int): void {
     const func = cb as (cbArg: WindowStatusType) => void;
     func(cbArg as WindowStatusType);
 }

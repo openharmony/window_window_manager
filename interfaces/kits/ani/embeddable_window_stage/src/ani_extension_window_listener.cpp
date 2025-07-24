@@ -34,11 +34,11 @@ const std::string KEYBOARD_HEIGHT_CHANGE_CB = "keyboardHeightChange";
 
 AniExtensionWindowListener::~AniExtensionWindowListener()
 {
-    if (callBack_ != nullptr) {
-        env_->GlobalReference_Delete(callBack_);
+    if (callback_ != nullptr) {
+        env_->GlobalReference_Delete(callback_);
     }
-    if (callBackData_ != nullptr) {
-        env_->GlobalReference_Delete(callBackData_);
+    if (callbackData_ != nullptr) {
+        env_->GlobalReference_Delete(callbackData_);
     }
     TLOGI(WmsLogTag::WMS_UIEXT, "[ANI]~AniExtensionWindowListener");
 }
@@ -57,7 +57,7 @@ void AniExtensionWindowListener::SetMainEventHandler()
     eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(mainRunner);
 }
 
-void AniExtensionWindowListener::CallBack()
+void AniExtensionWindowListener::Callback()
 {
     ani_status ret {};
     ani_function fn {};
@@ -66,12 +66,12 @@ void AniExtensionWindowListener::CallBack()
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]canot find ns %{public}d", ret);
         return;
     }
-    if ((ret = env_->Namespace_FindFunction(ns, "callBack", "Lstd/core/Object;Lstd/core/Object;:V", &fn)) != ANI_OK) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]canot find callBack %{public}d", ret);
+    if ((ret = env_->Namespace_FindFunction(ns, "callback", "Lstd/core/Object;Lstd/core/Object;:V", &fn)) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]cannot find callback %{public}d", ret);
         return;
     }
-    if ((ret = env_->Function_Call_Void(fn, callBack_, callBackData_)) != ANI_OK) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]canot find callBack %{public}d", ret);
+    if ((ret = env_->Function_Call_Void(fn, callback_, callbackData_)) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]cannot find callback %{public}d", ret);
         return;
     }
 }
@@ -79,12 +79,12 @@ void AniExtensionWindowListener::CallBack()
 void AniExtensionWindowListener::SetSizeInfo(uint32_t width, uint32_t height)
 {
     ani_status ret {};
-    if ((ret = env_->Object_SetFieldByName_Double((ani_object)callBackData_, "<property>width",
+    if ((ret = env_->Object_SetFieldByName_Double((ani_object)callbackData_, "<property>width",
         (double)width)) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]canot set width %{public}d", ret);
         return;
     };
-    if ((ret = env_->Object_SetFieldByName_Double((ani_object)callBackData_, "<property>height",
+    if ((ret = env_->Object_SetFieldByName_Double((ani_object)callbackData_, "<property>height",
         (double)height)) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]canot set height %{public}d", ret);
         return;
@@ -108,7 +108,7 @@ void AniExtensionWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason 
             return;
         }
         thisListener->SetSizeInfo(rect.width_, rect.height_);
-        thisListener->CallBack();
+        thisListener->Callback();
     };
     if (reason == WindowSizeChangeReason::ROTATION) {
         aniCallback();
@@ -138,7 +138,7 @@ void AniExtensionWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>
         static_cast<uint32_t>(info->type_), info->rect_.posX_, info->rect_.posY_, info->rect_.width_,
         info->rect_.height_);
     // js callback should run in js thread
-    CallBack();
+    Callback();
 }
 
 } // namespace Rosen

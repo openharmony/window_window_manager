@@ -35,7 +35,7 @@ namespace uiExtensionHost {
   const WMS_UIEXT: int = 0xC0420D;
   const WMS_UIEXT_TAG: string = "WMSUiext";
 
-  function callBack(fn: object, fnArg: object): void {
+  function callback(fn: object, fnArg: object): void {
       let f = fn as (d: object) => void;
       f(fnArg);
   }
