@@ -776,6 +776,7 @@ ani_object AniWindowUtils::CreateWindowsProperties(ani_env* env, const sptr<Wind
     SetSystemPropertiesWindowIsRoundCorner(env, window, aniSystemProperties, clsName);
     SetSystemPropertiesWindowDimBehindValue(env, window, aniSystemProperties, clsName);
     SetSystemPropertiesDisplayId(env, window, aniSystemProperties, clsName);
+    SetSystemPropertiesWindowId(env, window, aniSystemProperties, clsName);
     SetSystemPropertiesWindowName(env, window, aniSystemProperties, clsName);
 
     TLOGI(WmsLogTag::DEFAULT, "[ANI] Window [%{public}u, %{public}s] get properties end", window->GetWindowId(),
