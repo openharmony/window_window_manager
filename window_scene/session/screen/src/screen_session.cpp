@@ -367,6 +367,7 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
         displayInfo->SetRotation(property_.GetScreenRotation());
         displayInfo->SetDisplayOrientation(property_.GetDisplayOrientation());
     }
+    displayInfo->SetScreenRotation(property_.GetScreenRotation());
     displayInfo->SetOrientation(property_.GetOrientation());
     displayInfo->SetOffsetX(property_.GetOffsetX());
     displayInfo->SetOffsetY(property_.GetOffsetY());
