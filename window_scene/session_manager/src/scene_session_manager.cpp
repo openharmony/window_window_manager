@@ -3022,10 +3022,6 @@ int32_t SceneSessionManager::StartUIAbilityBySCBTimeoutCheck(const sptr<AAFwk::S
         windowStateChangeReason] {
         int timerId = HiviewDFX::XCollie::GetInstance().SetTimer("WMS:SSM:StartUIAbilityBySCB",
             START_UI_ABILITY_TIMEOUT/1000, nullptr, nullptr, HiviewDFX::XCOLLIE_FLAG_LOG);
-        if (abilitySessionInfo != nullptr) {
-            TLOGI(WmsLogTag::WMS_LIFE, "requestId:%{public}d, IS_CALL_BY_SCB: %{public}d",
-                abilitySessionInfo->requestId, abilitySessionInfo->want.GetBoolParam(IS_CALL_BY_SCB, false));
-        }
         auto result = AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(abilitySessionInfo,
             *coldStartFlag, windowStateChangeReason);
         HiviewDFX::XCollie::GetInstance().CancelTimer(timerId);
