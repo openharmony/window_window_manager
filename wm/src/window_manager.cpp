@@ -1027,7 +1027,8 @@ WMError WindowManager::UnregisterRectChangedListener(const sptr<IWindowInfoChang
     return ret;
 }
 
-WMError WindowManager::RegisterWindowModeChangedListener(const sptr<IWindowInfoChangedListener>& listener)
+WMError WindowManager::RegisterWindowModeChangedListenerForPropertyChange(
+    const sptr<IWindowInfoChangedListener>& listener)
 {
     if (listener == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "listener is null");
@@ -1064,7 +1065,8 @@ WMError WindowManager::RegisterWindowModeChangedListener(const sptr<IWindowInfoC
     return ret;
 }
 
-WMError WindowManager::UnregisterWindowModeChangedListener(const sptr<IWindowInfoChangedListener>& listener)
+WMError WindowManager::UnregisterWindowModeChangedListenerForPropertyChange(
+    const sptr<IWindowInfoChangedListener>& listener)
 {
     if (listener == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "listener is null");
@@ -2222,7 +2224,7 @@ WMError WindowManager::ProcessRegisterWindowInfoChangeCallback(WindowInfoKey obs
         case WindowInfoKey::WINDOW_RECT :
             return RegisterRectChangedListener(listener);
         case WindowInfoKey::WINDOW_MODE :
-            return RegisterWindowModeChangedListener(listener);
+            return RegisterWindowModeChangedListenerForPropertyChange(listener);
         case WindowInfoKey::FLOATING_SCALE :
             return RegisterFloatingScaleChangedListener(listener);
         default:
@@ -2242,7 +2244,7 @@ WMError WindowManager::ProcessUnregisterWindowInfoChangeCallback(WindowInfoKey o
         case WindowInfoKey::WINDOW_RECT :
             return UnregisterRectChangedListener(listener);
         case WindowInfoKey::WINDOW_MODE :
-            return UnregisterWindowModeChangedListener(listener);
+            return UnregisterWindowModeChangedListenerForPropertyChange(listener);
         case WindowInfoKey::FLOATING_SCALE :
             return UnregisterFloatingScaleChangedListener(listener);
         default:
