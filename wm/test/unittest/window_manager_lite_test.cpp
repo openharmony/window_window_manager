@@ -111,7 +111,7 @@ private:
 class TestWindowVisibilityStateListener : public IWindowInfoChangedListener {
 public:
     void OnWindowInfoChanged(
-        const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList) override
+        const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList) override
     {
         WLOGI("TestWindowUpdateListener");
     };

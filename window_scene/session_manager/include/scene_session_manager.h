@@ -1544,7 +1544,7 @@ private:
     WMError UnregisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey,
         uint32_t interestInfo, const sptr<IWindowManagerAgent>& windowManagerAgent) override;
     void PackWindowPropertyChangeInfo(const sptr<SceneSession>& sceneSession,
-        std::unordered_map<WindowInfoKey, std::any>& windowPropertyChangeInfo);
+        std::unordered_map<WindowInfoKey, WindowChangeInfoType>& windowPropertyChangeInfo);
     WMError AddSessionBlackList(const std::vector<sptr<SceneSession>>& sceneSessionList,
         const std::unordered_set<std::string>& privacyWindowTags);
     WMError RemoveSessionBlackList(const std::vector<sptr<SceneSession>>& sceneSessionList,
