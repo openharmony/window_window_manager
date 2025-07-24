@@ -66,7 +66,7 @@ ani_status AniWindowManager::AniWindowManagerInit(ani_env* env)
             "JLstd/core/String;:L@ohos/window/window/Window;",
             reinterpret_cast<void *>(AniWindowManager::FindWindow)},
         ani_native_function {"minimizeAllSync", "JJ:V", reinterpret_cast<void *>(AniWindowManager::MinimizeAll)},
-        ani_native_function {"shiftAppWindowFocusSync", "JDD:V",
+        ani_native_function {"shiftAppWindowFocusSync", "JII:V",
             reinterpret_cast<void *>(AniWindowManager::ShiftAppWindowFocus)},
         ani_native_function {"onSync", nullptr,
             reinterpret_cast<void *>(AniWindowManager::RegisterWindowManagerCallback)},
@@ -427,14 +427,14 @@ void AniWindowManager::OnUnregisterWindowManagerCallback(ani_env* env, ani_strin
 }
 
 void AniWindowManager::ShiftAppWindowFocus(ani_env* env, ani_object obj, ani_long nativeObj,
-    ani_double sourceWindowId, ani_double targetWindowId)
+    ani_int sourceWindowId, ani_int targetWindowId)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     AniWindowManager* aniWindowManager = reinterpret_cast<AniWindowManager*>(nativeObj);
     aniWindowManager->OnShiftAppWindowFocus(env, sourceWindowId, targetWindowId);
 }
 
-void AniWindowManager::OnShiftAppWindowFocus(ani_env* env, ani_double sourceWindowId, ani_double targetWindowId)
+void AniWindowManager::OnShiftAppWindowFocus(ani_env* env, ani_int sourceWindowId, ani_int targetWindowId)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
