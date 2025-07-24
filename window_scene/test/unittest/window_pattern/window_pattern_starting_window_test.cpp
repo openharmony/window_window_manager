@@ -70,9 +70,15 @@ void WindowPatternStartingWindowTest::TearDownTestCase()
     NativeRdb::RdbHelper::DeleteRdbStore(TEST_RDB_PATH + TEST_RDB_NAME);
 }
 
-void WindowPatternStartingWindowTest::SetUp() {}
+void WindowPatternStartingWindowTest::SetUp()
+{
+    SetUpTestCase();
+}
 
-void WindowPatternStartingWindowTest::TearDown() {}
+void WindowPatternStartingWindowTest::TearDown()
+{
+    TearDownTestCase();
+}
 
 void WindowPatternStartingWindowTest::InitTestStartingWindowRdb()
 {
@@ -555,25 +561,25 @@ HWTEST_F(WindowPatternStartingWindowTest, UpdateProcessMap, TestSize.Level0)
     sessionInfo.abilityName_ = "abilityName_";
     sessionInfo.appInstanceKey_ = "instanceKey";
     sessionInfo.appIndex_ = 0;
-    int32_t persistenId0 = 1;
-    auto res = ssm_->FindProcessMap(sessionInfo, persistenId0);
+    int32_t persistentId0 = 1;
+    auto res = ssm_->FindProcessMap(sessionInfo, persistentId0);
     EXPECT_EQ(res, WSError::WS_DO_NOTHING);
 
-    ssm_->InsertProcessMap(sessionInfo, persistenId0);
-    int32_t persistenIdRes;
-    res = ssm_->FindProcessMap(sessionInfo, persistenIdRes);
+    ssm_->InsertProcessMap(sessionInfo, persistentId0);
+    int32_t persistentIdRes;
+    res = ssm_->FindProcessMap(sessionInfo, persistentIdRes);
     EXPECT_EQ(res, WSError::WS_OK);
-    EXPECT_EQ(persistenIdRes, persistenId0);
-    int32_t persistenId1 = 2;
-    ssm_->InsertProcessMap(sessionInfo, persistenId1);
-    res = ssm_->DeleteProcessMap(sessionInfo, persistenId0);
+    EXPECT_EQ(persistentIdRes, persistentId0);
+    int32_t persistentId1 = 2;
+    ssm_->InsertProcessMap(sessionInfo, persistentId1);
+    res = ssm_->DeleteProcessMap(sessionInfo, persistentId0);
     EXPECT_EQ(res, WSError::WS_OK);
     
-    res = ssm_->FindProcessMap(sessionInfo, persistenIdRes);
+    res = ssm_->FindProcessMap(sessionInfo, persistentIdRes);
     EXPECT_EQ(res, WSError::WS_OK);
-    EXPECT_EQ(persistenIdRes, persistenId1);
+    EXPECT_EQ(persistentIdRes, persistentId1);
 
-    res = ssm_->DeleteProcessMap(sessionInfo, persistenId1);
+    res = ssm_->DeleteProcessMap(sessionInfo, persistentId1);
     EXPECT_EQ(res, WSError::WS_OK);
 }
 
@@ -591,20 +597,20 @@ HWTEST_F(WindowPatternStartingWindowTest, GetSessionColorMode, TestSize.Level0)
     sessionInfo.abilityName_ = "abilityName_";
     sessionInfo.appInstanceKey_ = "instanceKey";
     sessionInfo.appIndex_ = 0;
-    int32_t persistenId = 1000;
+    int32_t persistentId = 1000;
 
     StartingWindowInfo startingWindowInfo;
     auto res = ssm_->GetSessionColorMode(sessionInfo, startingWindowInfo);
     EXPECT_EQ(res, AppExecFwk::ConfigurationInner::COLOR_MODE_AUTO);
 
-    ssm_->InsertProcessMap(sessionInfo, persistenId);
+    ssm_->InsertProcessMap(sessionInfo, persistentId);
     res = ssm_->GetSessionColorMode(sessionInfo, startingWindowInfo);
     EXPECT_EQ(res, AppExecFwk::ConfigurationInner::COLOR_MODE_AUTO);
 
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(sceneSession, nullptr);
-    ssm_->sceneSessionMap_.insert({ persistenId, sceneSession });
-    ASSERT_NE(ssm_->GetSceneSession(persistenId), nullptr);
+    ssm_->sceneSessionMap_.insert({ persistentId, sceneSession });
+    ASSERT_NE(ssm_->GetSceneSession(persistentId), nullptr);
 
     sceneSession->OnUpdateColorMode(AppExecFwk::ConfigurationInner::COLOR_MODE_DARK, true);
     res = ssm_->GetSessionColorMode(sessionInfo, startingWindowInfo);
@@ -618,8 +624,6 @@ HWTEST_F(WindowPatternStartingWindowTest, GetSessionColorMode, TestSize.Level0)
  */
 HWTEST_F(WindowPatternStartingWindowTest, GetOriginalPersistentId, TestSize.Level0)
 {
-    TearDownTestCase();
-    SetUpTestCase();
     ASSERT_NE(ssm_, nullptr);
     SessionInfo sessionInfo;
     int32_t persistentId = 1000;
