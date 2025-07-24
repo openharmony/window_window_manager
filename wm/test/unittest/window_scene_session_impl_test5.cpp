@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include <parameters.h>
+#include "application_context.h"
 #include "ability_context_impl.h"
 #include "common_test_utils.h"
 #include "display_info.h"
@@ -531,19 +532,32 @@ HWTEST_F(WindowSceneSessionImplTest5, RecoverSessionProperty, TestSize.Level1)
  */
 HWTEST_F(WindowSceneSessionImplTest5, UpdateColorMode, TestSize.Level1)
 {
+    std::shared_ptr<AppExecFwk::Configuration> configuration;
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     window->hostSession_ = nullptr;
-    auto ret = window->UpdateColorMode();
+    auto ret = window->UpdateColorMode(configuration);
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
 
+    AbilityRuntime::ApplicationContext::applicationContext_ = std::make_shared<AbilityRuntime::ApplicationContext>();
+    ret = window->UpdateColorMode(configuration);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+
+    AbilityRuntime::ApplicationContext::applicationContext_->contextImpl_ =
+        std::make_shared<AbilityRuntime::ContextImpl>();
+    ret = window->UpdateColorMode(configuration);
+    configuration = std::make_shared<AppExecFwk::Configuration>();
+    configuration->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE, "dark");
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
     ret = window->UpdateColorMode();
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+    EXPECT_EQ(WMError::WM_OK, ret);
+
+    ret = window->UpdateColorMode();
+    EXPECT_EQ(WMError::WM_OK, ret);
 }
 
 /**
