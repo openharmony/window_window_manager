@@ -2689,10 +2689,10 @@ HWTEST_F(SceneSessionManagerTest12, UpdateScreenLockState, Function | SmallTest 
  */
 HWTEST_F(SceneSessionManagerTest12, UpdateSystemDecorEnable, Function | SmallTest | Level2)
 {
-   bool enable = false;
-   auto result = ssm_->UpdateSystemDecorEnable(enable);
-   EXPECT_EQ(result, WMError::WM_OK);
-   EXPECT_EQ(ssm_->systemConfig_.isSystemDecorEnable_, enable);
+    bool enable = false;
+    auto result = ssm_->UpdateSystemDecorEnable(enable);
+    EXPECT_EQ(result, WMError::WM_OK);
+    EXPECT_EQ(ssm_->systemConfig_.isSystemDecorEnable_, enable);
 }
 } // namespace
 } // namespace Rosen
