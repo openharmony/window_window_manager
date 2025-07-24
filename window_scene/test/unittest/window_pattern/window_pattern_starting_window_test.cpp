@@ -53,6 +53,7 @@ public:
 
 private:
     void InitTestStartingWindowRdb();
+    void CreateSession(SessionInfo sessionInfo, int32_t persistentId);
 };
 
 sptr<SceneSessionManager> WindowPatternStartingWindowTest::ssm_ = nullptr;
@@ -80,6 +81,14 @@ void WindowPatternStartingWindowTest::InitTestStartingWindowRdb()
     config.dbName = TEST_RDB_NAME;
     config.dbPath = TEST_RDB_PATH;
     ssm_->startingWindowRdbMgr_ = std::make_unique<StartingWindowRdbManager>(config);
+}
+
+void WindowPatternStartingWindowTest::CreateSession(SessionInfo sessionInfo, int32_t persistentId)
+{
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    ssm_->sceneSessionMap_.insert({ persistentId, sceneSession });
+    ASSERT_NE(ssm_->GetSceneSession(persistentId), nullptr);
 }
 
 namespace {
@@ -600,6 +609,41 @@ HWTEST_F(WindowPatternStartingWindowTest, GetSessionColorMode, TestSize.Level0)
     sceneSession->OnUpdateColorMode(AppExecFwk::ConfigurationInner::COLOR_MODE_DARK, true);
     res = ssm_->GetSessionColorMode(sessionInfo, startingWindowInfo);
     EXPECT_EQ(res, AppExecFwk::ConfigurationInner::COLOR_MODE_DARK);
+}
+
+/**
+ * @tc.name: GetOriginalPersistentId
+ * @tc.desc: GetOriginalPersistentId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternStartingWindowTest, GetOriginalPersistentId, TestSize.Level0)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo sessionInfo;
+    int32_t persistentId = 1000;
+    int32_t callerIdA = 1001;
+    int32_t callerIdB = 1002;
+    sessionInfo.callerPersistentId_ = callerIdA;
+
+    std::set<int32_t> sessionSet = { persistentId };
+    auto res = ssm_->GetOriginalPersistentId(sessionSet, persistentId);
+    EXPECT_EQ(res, INVALID_SESSION_ID);
+
+    CreateSession(sessionInfo, persistentId);
+    res = ssm_->GetOriginalPersistentId(sessionSet, persistentId);
+    EXPECT_EQ(res, persistentId);
+
+    SessionInfo callerA;
+    callerA.callerPersistentId_ = callerIdB;
+    SessionInfo callerB;
+    callerB.callerPersistentId_ = callerIdA;
+    CreateSession(callerA, callerIdA);
+    CreateSession(callerB, callerIdB);
+    sessionSet.insert(callerIdA);
+    sessionSet.insert(callerIdB);
+
+    res = ssm_->GetOriginalPersistentId(sessionSet, persistentId);
+    EXPECT_EQ(res, callerIdB);
 }
 } // namespace
 } // namespace Rosen

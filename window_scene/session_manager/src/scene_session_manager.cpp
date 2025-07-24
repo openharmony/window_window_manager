@@ -5369,6 +5369,29 @@ WSError SceneSessionManager::DeleteProcessMap(const SessionInfo& sessionInfo, co
     return WSError::WS_OK;
 }
 
+int32_t SceneSessionManager::FindCallerPersistentId(int32_t persistentId)
+{
+    auto session = GetSceneSession(persistentId);
+    if (session == nullptr) {
+        return INVALID_SESSION_ID;
+    }
+    return session->GetSessionInfo().callerPersistentId_;
+}
+
+int32_t SceneSessionManager::GetOriginalPersistentId(const std::set<int32_t>& sessionSet, int32_t persistentId)
+{
+    auto resId = persistentId;
+    auto callerId = FindCallerPersistentId(persistentId);
+    std::unordered_set<int32_t> uniqueSet = { persistentId };
+    while ((callerId != INVALID_SESSION_ID) &&
+           (sessionSet.count(callerId) > 0) && (uniqueSet.count(callerId) == 0)) {
+        resId = callerId;
+        uniqueSet.insert(callerId);
+        callerId = FindCallerPersistentId(callerId);
+    }
+    return resId;
+}
+
 WSError SceneSessionManager::FindProcessMap(const SessionInfo& sessionInfo, int32_t& persistentId)
 {
     std::string compareInfo =
@@ -5376,7 +5399,7 @@ WSError SceneSessionManager::FindProcessMap(const SessionInfo& sessionInfo, int3
     std::lock_guard<std::mutex> lock(processMapMutex_);
     auto it = processCompareMap_.find(compareInfo);
     if (it != processCompareMap_.end() && !it->second.empty()) {
-        persistentId = *it->second.begin();
+        persistentId = GetOriginalPersistentId(it->second, *it->second.begin());
         TLOGI(WmsLogTag::WMS_PATTERN, "find %{public}d", persistentId);
         return WSError::WS_OK;
     }
