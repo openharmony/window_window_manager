@@ -569,7 +569,7 @@ WmErrorCode AniWindowRegisterManager::UnregisterListener(sptr<Window> window, co
                 TLOGE(WmsLogTag::DEFAULT, "[ANI]Unregister type %{public}s failed, no value", type.c_str());
                 return ret;
             }
-            env->GlobalReference_Delete(it->second->GetAniCallBack());
+            env->GlobalReference_Delete(it->second->GetAniCallback());
             it->second->SetAniCallBack(nullptr);
             jsCbMap_[type].erase(it++);
         }
