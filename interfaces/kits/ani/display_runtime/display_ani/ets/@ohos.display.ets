@@ -334,7 +334,7 @@ export class DisplayImpl implements Display {
     }
 
     off(type: string, callback?: Callback<Rect>): void {
-        this.syncOff(type, callback as object);
+        this.syncOff(type, callback);
     }
 
     native syncOn(type: string, callback: object): void;
