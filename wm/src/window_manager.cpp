@@ -397,6 +397,38 @@ void WindowManager::Impl::NotifyDisplayInfoChanged(const sptr<IRemoteObject>& to
     }
 }
 
+void WindowManager::Impl::NotifyWindowModeChange(
+    const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList)
+{
+    std::vector<sptr<IWindowInfoChangedListener>> windowModeChangeListeners;
+    {
+        std::unique_lock<std::shared_mutex> lock(listenerMutex_);
+        windowModeChangeListeners = windowModeChangeListeners_;
+    }
+
+    for (auto &listener : windowModeChangeListeners) {
+        if (listener != nullptr && !IsNeedToSkipForInterestWindowIds(listener, windowInfoList)) {
+            listener->OnWindowInfoChanged(windowInfoList);
+        }
+    }
+}
+
+void WindowManager::Impl::NotifyFloatingScaleChange(
+    const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList)
+{
+    std::vector<sptr<IWindowInfoChangedListener>> floatingScaleChangeListeners;
+    {
+        std::unique_lock<std::shared_mutex> lock(listenerMutex_);
+        floatingScaleChangeListeners = floatingScaleChangeListeners_;
+    }
+
+    for (auto &listener : floatingScaleChangeListeners) {
+        if (listener != nullptr && !IsNeedToSkipForInterestWindowIds(listener, windowInfoList)) {
+            listener->OnWindowInfoChanged(windowInfoList);
+        }
+    }
+}
+
 void WindowManager::Impl::NotifyDisplayIdChange(
     const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList)
 {
@@ -2306,6 +2338,12 @@ void WindowManager::NotifyWindowPropertyChange(uint32_t propertyDirtyFlags,
     }
     if (propertyDirtyFlags & static_cast<int32_t>(WindowInfoKey::DISPLAY_ID)) {
         pImpl_->NotifyDisplayIdChange(windowInfoList);
+    }
+    if (propertyDirtyFlags & static_cast<int32_t>(WindowInfoKey::WINDOW_MODE)) {
+        pImpl_->NotifyWindowModeChange(windowInfoList);
+    }
+    if (propertyDirtyFlags & static_cast<int32_t>(WindowInfoKey::FLOATING_SCALE)) {
+        pImpl_->NotifyFloatingScaleChange(windowInfoList);
     }
 }
 
