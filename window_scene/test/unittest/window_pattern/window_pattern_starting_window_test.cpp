@@ -618,6 +618,8 @@ HWTEST_F(WindowPatternStartingWindowTest, GetSessionColorMode, TestSize.Level0)
  */
 HWTEST_F(WindowPatternStartingWindowTest, GetOriginalPersistentId, TestSize.Level0)
 {
+    TearDownTestCase();
+    SetUpTestCase();
     ASSERT_NE(ssm_, nullptr);
     SessionInfo sessionInfo;
     int32_t persistentId = 1000;
@@ -627,7 +629,7 @@ HWTEST_F(WindowPatternStartingWindowTest, GetOriginalPersistentId, TestSize.Leve
 
     std::set<int32_t> sessionSet = { persistentId };
     auto res = ssm_->GetOriginalPersistentId(sessionSet, persistentId);
-    EXPECT_EQ(res, INVALID_SESSION_ID);
+    EXPECT_EQ(res, persistentId);
 
     CreateSession(sessionInfo, persistentId);
     res = ssm_->GetOriginalPersistentId(sessionSet, persistentId);
