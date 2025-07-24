@@ -1392,6 +1392,10 @@ private:
     WMError UnregisterDisplayIdChangedListener(const sptr<IWindowInfoChangedListener>& listener);
     WMError RegisterRectChangedListener(const sptr<IWindowInfoChangedListener>& listener);
     WMError UnregisterRectChangedListener(const sptr<IWindowInfoChangedListener>& listener);
+    WMError RegisterWindowModeChangedListener(const sptr<IWindowInfoChangedListener>& listener);
+    WMError UnregisterWindowModeChangedListener(const sptr<IWindowInfoChangedListener>& listener);
+    WMError RegisterFloatingScaleChangedListener(const sptr<IWindowInfoChangedListener>& listener);
+    WMError UnregisterFloatingScaleChangedListener(const sptr<IWindowInfoChangedListener>& listener);
     void SetIsModuleHookOffToSet(const std::string& moduleName);
     bool GetIsModuleHookOffFromSet(const std::string& moduleName);
 };
