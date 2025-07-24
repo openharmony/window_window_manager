@@ -5187,7 +5187,7 @@ napi_value JsSceneSessionManager::OnSetPiPSettingSwitchStatus(napi_env env, napi
 napi_value JsSceneSessionManager::UpdateSystemDecorEnable(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::WMS_DECOR, "in");
-    JsSceneSessionManager* me = CheckParamsAndGetThis(env, info);
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnUpdateSystemDecorEnable(env, info) : nullptr;
 }
 
