@@ -23,6 +23,15 @@ namespace Rosen {
     using OnCallback = std::function<void(int64_t, int64_t)>;
     using WindowInfoFilterOptionDataType = uint8_t;
     using WindowInfoTypeOptionDataType = uint8_t;
+    using WindowChangeInfoType = std::variant<int32_t,
+                                              uint32_t,
+                                              int64_t,
+                                              uint64_t,
+                                              std::string,
+                                              float,
+                                              Rect,
+                                              WindowMode,
+                                              WindowVisibilityState>;
 }
 }
 #endif // OHOS_ROSEN_WM_TYPE_H
