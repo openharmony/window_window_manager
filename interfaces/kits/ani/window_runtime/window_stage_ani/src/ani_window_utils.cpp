@@ -746,8 +746,7 @@ void AniWindowUtils::SetSystemPropertiesWindowName(ani_env* env, const sptr<Wind
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "get ANI string failed");
         return;
     }
-    CallAniMethodVoid(env, systemProperties, clsName, "<set>name", nullptr,
-        static_cast<ani_long>(aniWindowName));
+    CallAniMethodVoid(env, systemProperties, clsName, "<set>name", nullptr, aniWindowName);
 }
 
 ani_object AniWindowUtils::CreateWindowsProperties(ani_env* env, const sptr<Window>& window)
