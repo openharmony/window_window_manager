@@ -379,6 +379,16 @@ void AniWindowListener::OnWaterMarkFlagUpdate(bool showWaterMark)
     eventHandler_->PostTask(task, __func__, 0, AppExecFwk::EventQueue::Priority::HIGH);
 }
 
+void AniWindowListener::SetTimeout(int64_t timeout)
+{
+    noInteractionTimeout_ = timeout;
+}
+
+int64_t AniWindowListener::GetTimeout() const
+{
+    return noInteractionTimeout_;
+}
+
 void AniWindowListener::OnWindowNoInteractionCallback()
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI] diaglogtargettouch");

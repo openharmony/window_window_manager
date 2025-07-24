@@ -121,6 +121,8 @@ public:
     void OnSubWindowClose(bool& terminateCloseProcess) override;
     void OnWindowHighlightChange(bool isHighlight) override;
     void OnMainWindowClose(bool& terminateCloseProcess) override;
+    void SetTimeout(int64_t timeout) override;
+    int64_t GetTimeout() const override;
 
 private:
     void OnLastStrongRef(const void *) override;
@@ -128,6 +130,7 @@ private:
     Rect currRect_ = {0, 0, 0, 0};
     WindowState state_ {WindowState::STATE_INITIAL};
     void LifeCycleCallBack(LifeCycleEventType eventType);
+    int64_t noInteractionTimeout_ = 0;
     ani_env* env_ = nullptr;
     ani_ref aniCallBack_;
     CaseType caseType_ = CaseType::CASE_WINDOW;
