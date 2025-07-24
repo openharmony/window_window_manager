@@ -70,6 +70,10 @@ public:
     void NotifyDisplayInfoChanged(const sptr<IRemoteObject>& token, DisplayId displayId,
         float density, DisplayOrientation orientation);
     void NotifyDisplayIdChange(const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList);
+    void NotifyWindowModeChangeForPropertyChange(
+        const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList);
+    void NotifyFloatingScaleChange(
+        const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList);
     bool IsNeedToSkipForInterestWindowIds(sptr<IWindowInfoChangedListener> listener,
         const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList);
     void NotifyWindowStyleChange(WindowStyleType type);
@@ -397,7 +401,7 @@ void WindowManager::Impl::NotifyDisplayInfoChanged(const sptr<IRemoteObject>& to
     }
 }
 
-void WindowManager::Impl::NotifyWindowModeChange(
+void WindowManager::Impl::NotifyWindowModeChangeForPropertyChange(
     const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList)
 {
     std::vector<sptr<IWindowInfoChangedListener>> windowModeChangeListeners;
