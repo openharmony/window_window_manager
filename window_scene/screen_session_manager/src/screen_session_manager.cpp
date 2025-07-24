@@ -6312,27 +6312,21 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshot(Displa
 }
 
 std::vector<std::shared_ptr<Media::PixelMap>> ScreenSessionManager::GetDisplayHDRSnapshot(DisplayId displayId,
-    DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen)
+    DmErrorCode& errorCode, bool isUseDma, bool isCaptureFullOfScreen)
 {
     TLOGI(WmsLogTag::DMS, "enter!");
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsShellCall()) {
-        if (errorCode != nullptr) {
-            *errorCode = DmErrorCode::DM_ERROR_NOT_SYSTEM_APP;
-        }
+        errorCode = DmErrorCode::DM_ERROR_NOT_SYSTEM_APP;
         return {nullptr, nullptr};
     }
     if (system::GetBoolParameter("persist.edm.disallow_screenshot", false)) {
         TLOGE(WmsLogTag::DMS, "snapshot disabled by edm!");
-        if (errorCode != nullptr) {
-            *errorCode = DmErrorCode::DM_ERROR_NO_PERMISSION;
-        }
+        errorCode = DmErrorCode::DM_ERROR_NO_PERMISSION;
         return {nullptr, nullptr};
     }
     if (displayId == DISPLAY_ID_FAKE && !IsFakeDisplayExist()) {
         TLOGE(WmsLogTag::DMS, "fake display not exist!");
-        if (errorCode != nullptr) {
-            *errorCode = DmErrorCode::DM_ERROR_INVALID_SCREEN;
-        }
+        errorCode = DmErrorCode::DM_ERROR_INVALID_SCREEN;
         return {nullptr, nullptr};
     }
     if ((Permission::IsSystemCalling() && Permission::CheckCallingPermission(SCREEN_CAPTURE_PERMISSION)) ||
@@ -6351,8 +6345,8 @@ std::vector<std::shared_ptr<Media::PixelMap>> ScreenSessionManager::GetDisplayHD
         isScreenShot_ = true;
         NotifyCaptureStatusChanged();
         return res;
-    } else if (errorCode) {
-        *errorCode = DmErrorCode::DM_ERROR_NO_PERMISSION;
+    } else {
+        errorCode = DmErrorCode::DM_ERROR_NO_PERMISSION;
     }
     return {nullptr, nullptr};
 }
@@ -6400,30 +6394,28 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshotWithOpt
 }
 
 std::vector<std::shared_ptr<Media::PixelMap>> ScreenSessionManager::GetDisplayHDRSnapshotWithOption(
-    const CaptureOption& option, DmErrorCode* errorCode)
+    const CaptureOption& option, DmErrorCode& errorCode)
 {
     TLOGD(WmsLogTag::DMS, "enter!");
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsShellCall() &&
         !SessionPermission::IsSACalling()) {
-        if (errorCode != nullptr) {
-            *errorCode = DmErrorCode::DM_ERROR_NOT_SYSTEM_APP;
-        }
+        errorCode = DmErrorCode::DM_ERROR_NOT_SYSTEM_APP;
         return {nullptr, nullptr};
     }
     if (system::GetBoolParameter("persist.edm.disallow_screenshot", false)) {
         TLOGE(WmsLogTag::DMS, "snapshot was disabled by edm!");
+        errorCode = DmErrorCode::DM_ERROR_NO_PERMISSION;
         return {nullptr, nullptr};
     }
     if (option.displayId_ == DISPLAY_ID_FAKE && !IsFakeDisplayExist()) {
         TLOGE(WmsLogTag::DMS, "fake display not exist!");
-        if (errorCode != nullptr) {
-            *errorCode = DmErrorCode::DM_ERROR_INVALID_SCREEN;
-        }
+        errorCode = DmErrorCode::DM_ERROR_INVALID_SCREEN;
         return {nullptr, nullptr};
     }
     if ((Permission::IsSystemCalling() && Permission::CheckCallingPermission(SCREEN_CAPTURE_PERMISSION)) ||
         SessionPermission::IsShellCall()) {
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetDisplayHDRSnapshot(%" PRIu64")", option.displayId_);
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
+            "ssm:GetDisplayHDRSnapshotWithOption(%" PRIu64")", option.displayId_);
         std::vector<std::shared_ptr<Media::PixelMap>> res = GetScreenHDRSnapshot(
             option.displayId_, true, option.isCaptureFullOfScreen_, option.surfaceNodesList_);
         if (res.size() == PIXMAP_VECTOR_SIZE && res[SDR_PIXMAP] != nullptr) {
@@ -6438,8 +6430,8 @@ std::vector<std::shared_ptr<Media::PixelMap>> ScreenSessionManager::GetDisplayHD
             }
         }
         return res;
-    } else if (errorCode) {
-        *errorCode = DmErrorCode::DM_ERROR_NO_PERMISSION;
+    } else {
+        errorCode = DmErrorCode::DM_ERROR_NO_PERMISSION;
     }
     return {nullptr, nullptr};
 }
