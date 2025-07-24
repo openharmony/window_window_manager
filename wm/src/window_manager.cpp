@@ -71,7 +71,7 @@ public:
         float density, DisplayOrientation orientation);
     void NotifyDisplayIdChange(const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList);
     bool IsNeedToSkipForInterestWindowIds(sptr<IWindowInfoChangedListener> listener,
-        const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList)
+        const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList);
     void NotifyWindowStyleChange(WindowStyleType type);
     void NotifyWindowSystemBarPropertyChange(WindowType type, const SystemBarProperty& systemBarProperty);
     void NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info);
