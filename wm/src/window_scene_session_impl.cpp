@@ -3535,8 +3535,8 @@ WMError WindowSceneSessionImpl::SetWindowRectAutoSave(bool enabled, bool isSaveB
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
-    if (!windowSystemConfig_.IsPcWindow()) {
-        TLOGE(WmsLogTag::WMS_MAIN, "This is not PC, not supported");
+    if (!IsPcOrPadFreeMultiWindowMode()) {
+        TLOGE(WmsLogTag::WMS_MAIN, "This is not PC mode or free multi window mode, not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
 
