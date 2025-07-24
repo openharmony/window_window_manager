@@ -3010,6 +3010,11 @@ void Session::SetSessionInfoChangeNotifyManagerListener(const NotifySessionInfoC
     sessionInfoChangeNotifyManagerFunc_ = func;
 }
 
+void Session::SetSessionPropertyChangeNotifyManagerListener(const NotifySessionPropertyChangeNotifyManagerFunc& func)
+{
+    sessionPropertyChangeNotifyManagerFunc_ = func;
+}
+
 void Session::SetDisplayIdChangedNotifyManagerListener(const NotifyDisplayIdChangedNotifyManagerFunc& func)
 {
     displayIdChangedNotifyManagerFunc_ = func;
@@ -4351,6 +4356,15 @@ void Session::NotifySessionInfoChange()
         sessionInfoChangeNotifyManagerFunc_(GetPersistentId());
     } else {
         TLOGD(WmsLogTag::WMS_EVENT, "sessionInfoChangeNotifyManagerFunc is nullptr");
+    }
+}
+
+void Session::NotifySessionPropertyChange(WindowInfoKey windowInfoKey)
+{
+    if (sessionPropertyChangeNotifyManagerFunc_) {
+        sessionPropertyChangeNotifyManagerFunc_(GetPersistentId(), windowInfoKey);
+    } else {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sessionPropertyChangeNotifyManagerFunc is nullptr");
     }
 }
 
