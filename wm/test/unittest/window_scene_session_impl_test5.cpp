@@ -553,10 +553,10 @@ HWTEST_F(WindowSceneSessionImplTest5, UpdateColorMode, TestSize.Level1)
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
-    ret = window->UpdateColorMode();
+    ret = window->UpdateColorMode(configuration);
     EXPECT_EQ(WMError::WM_OK, ret);
 
-    ret = window->UpdateColorMode();
+    ret = window->UpdateColorMode(configuration);
     EXPECT_EQ(WMError::WM_OK, ret);
 }
 
