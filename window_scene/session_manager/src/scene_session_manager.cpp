@@ -821,6 +821,13 @@ void SceneSessionManager::ConfigFreeMultiWindow()
         if (GetSingleIntItem(item, param) && (param > 0)) {
             systemConfig_.freeMultiWindowConfig_.maxMainFloatingWindowNumber_ = static_cast<uint32_t>(param);
         }
+        param = -1;
+        item = freeMultiWindowConfig["defaultDragResizeType"];
+        if (GetSingleIntItem(item, param) && param >= 0 &&
+            param < static_cast<int32_t>(DragResizeType::RESIZE_MAX_VALUE)) {
+            systemConfig_.freeMultiWindowConfig_.defaultDragResizeType_ =
+                static_cast<DragResizeType>(static_cast<uint32_t>(param));
+        }
     }
 }
 
@@ -2431,6 +2438,10 @@ void SceneSessionManager::GetEffectiveDragResizeType(DragResizeType& dragResizeT
         return;
     }
     if (systemConfig_.freeMultiWindowSupport_) {
+        if (systemConfig_.freeMultiWindowConfig_.defaultDragResizeType_ != DragResizeType::RESIZE_TYPE_UNDEFINED) {
+            dragResizeType = systemConfig_.freeMultiWindowConfig_.defaultDragResizeType_;
+            return;
+        }
         dragResizeType = DragResizeType::RESIZE_WHEN_DRAG_END;
     } else {
         dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
