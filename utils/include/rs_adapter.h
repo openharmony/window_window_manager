@@ -176,6 +176,8 @@ public:
     static void SetRSUIContext(const std::shared_ptr<RSNode>& rsNode,
                                const std::shared_ptr<RSUIContext>& rsUIContext,
                                bool skipCheckInMultiInstance = false);
+    static void SetRSTransactionHandler(const std::shared_ptr<RSTransaction>& rsTransaction,
+                                        const std::shared_ptr<RSUIContext>& rsUIContext);
     static void SetSkipCheckInMultiInstance(const std::shared_ptr<RSNode>& rsNode,
                                             bool skipCheckInMultiInstance);
     static const std::shared_ptr<RSBaseNode> GetRSNode(
