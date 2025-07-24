@@ -408,7 +408,7 @@ void WindowManager::Impl::NotifyDisplayIdChange(
                 for (const auto& item : windowInfoList) {
                     auto windowInfo = item;
                     if (windowInfo.find(WindowInfoKey::WINDOW_ID) == windowInfo.end() ||
-                        interestWindowIds.find(std::any_cast<uint32_t>(windowInfo[WindowInfoKey::WINDOW_ID])) ==
+                        interestWindowIds.find(std::get<uint32_t>(windowInfo[WindowInfoKey::WINDOW_ID])) ==
                         interestWindowIds.end()) {
                         continue;
                     }
