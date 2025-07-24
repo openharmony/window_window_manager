@@ -1288,7 +1288,7 @@ void AniWindow::StartMoving(ani_env* env)
     }
 }
 
-void AniWindow::StartMoveWindowWithCoordinate(ani_env* env, ani_double offsetX, ani_double offsetY)
+void AniWindow::StartMoveWindowWithCoordinate(ani_env* env, ani_int offsetX, ani_int offsetY)
 {
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] WindowToken is null.");
@@ -1529,7 +1529,7 @@ ani_object AniWindow::GetGlobalRect(ani_env* env)
     return AniWindowUtils::CreateAniRect(env, globalScaleRect);
 }
 
-ani_double AniWindow::GetWindowDecorHeight(ani_env* env)
+ani_int AniWindow::GetWindowDecorHeight(ani_env* env)
 {
     int32_t height { 0 };
     wptr<Window> weakToken(windowToken_);
@@ -1884,7 +1884,7 @@ ani_object AniWindow::SetWindowDecorVisible(ani_env* env, bool isVisible)
     return AniWindowUtils::CreateAniUndefined(env);
 }
 
-ani_object AniWindow::SetWindowDecorHeight(ani_env* env, ani_double height)
+ani_object AniWindow::SetWindowDecorHeight(ani_env* env, ani_int height)
 {
     if (height < MIN_DECOR_HEIGHT || height > MAX_DECOR_HEIGHT) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] height should greater than 37 or smaller than 112");
@@ -2269,7 +2269,7 @@ static void StartMoving(ani_env* env, ani_object obj, ani_long nativeObj)
 }
 
 static void StartMoveWindowWithCoordinate(ani_env* env, ani_object obj, ani_long nativeObj,
-    ani_double offsetX, ani_double offsetY)
+    ani_int offsetX, ani_int offsetY)
 {
     using namespace OHOS::Rosen;
     TLOGI(WmsLogTag::WMS_LAYOUT, "[ANI] start");
@@ -2378,7 +2378,7 @@ static ani_object WindowGetGlobalRect(ani_env* env, ani_object obj, ani_long nat
     return aniWindow->GetGlobalRect(env);
 }
 
-static ani_double WindowGetWindowDecorHeight(ani_env* env, ani_object obj, ani_long nativeObj)
+static ani_int WindowGetWindowDecorHeight(ani_env* env, ani_object obj, ani_long nativeObj)
 {
     using namespace OHOS::Rosen;
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
@@ -2436,7 +2436,7 @@ static ani_int WindowSetWindowDecorVisible(ani_env* env, ani_object obj, ani_lon
     return ANI_OK;
 }
 
-static ani_int WindowSetWindowDecorHeight(ani_env* env, ani_object obj, ani_long nativeObj, ani_double height)
+static ani_int WindowSetWindowDecorHeight(ani_env* env, ani_object obj, ani_long nativeObj, ani_int height)
 {
     using namespace OHOS::Rosen;
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
@@ -2653,7 +2653,7 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(Restore)},
         ani_native_function {"startMoving", "J:V",
             reinterpret_cast<void *>(StartMoving)},
-        ani_native_function {"startMoveWindowWithCoordinate", "JDD:V",
+        ani_native_function {"startMoveWindowWithCoordinate", "JII:V",
             reinterpret_cast<void *>(StartMoveWindowWithCoordinate)},
         ani_native_function {"setWindowTitleButtonVisible", "JL@ohos/window/window/WindowTitleButtonVisibleParam;:V",
             reinterpret_cast<void *>(SetWindowTitleButtonVisible)},
@@ -2671,7 +2671,7 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(WindowMoveWindowTo)},
         ani_native_function {"getGlobalRect", "J:L@ohos/window/window/Rect;",
             reinterpret_cast<void *>(WindowGetGlobalRect)},
-        ani_native_function {"getWindowDecorHeight", "J:D",
+        ani_native_function {"getWindowDecorHeight", "J:I",
             reinterpret_cast<void *>(WindowGetWindowDecorHeight)},
         ani_native_function {"setWindowBackgroundColor", "JLstd/core/String;:I",
             reinterpret_cast<void *>(WindowSetWindowBackgroundColor)},
@@ -2679,7 +2679,7 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(WindowSetImmersiveModeEnabledState)},
         ani_native_function {"setWindowDecorVisible", "JZ:I",
             reinterpret_cast<void *>(WindowSetWindowDecorVisible)},
-        ani_native_function {"setWindowDecorHeight", "JD:I",
+        ani_native_function {"setWindowDecorHeight", "JI:I",
             reinterpret_cast<void *>(WindowSetWindowDecorHeight)},
         ani_native_function {"getWindowProperties", "J:L@ohos/window/window/WindowProperties;",
             reinterpret_cast<void *>(WindowGetWindowProperties)},
