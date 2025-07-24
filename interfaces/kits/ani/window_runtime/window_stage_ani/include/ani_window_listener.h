@@ -129,7 +129,7 @@ private:
 
     Rect currRect_ = {0, 0, 0, 0};
     WindowState state_ {WindowState::STATE_INITIAL};
-    void LifeCycleCallBack(LifeCycleEventType eventType);
+    void LifeCycleCallback(LifeCycleEventType eventType);
     int64_t noInteractionTimeout_ = 0;
     ani_env* env_ = nullptr;
     ani_ref aniCallback_;
