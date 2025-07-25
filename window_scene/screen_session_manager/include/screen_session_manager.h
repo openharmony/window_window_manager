@@ -617,8 +617,8 @@ private:
         PowerStateChangeReason reason);
     bool IsExtendMode();
     bool IsScreenCasting();
-    bool GetPCStatus();
-    void SetPCStatus(bool isPC);
+    bool GetPcStatus() const;
+    void SetPcStatus(bool isPc);
     const std::set<std::string> g_packageNames_ {};
 
     /**
@@ -831,7 +831,7 @@ private:
     void SetExtendScreenDpi();
     bool SwitchPcMode();
     void SwitchExternalScreenToMirror();
-    void WaitUpdateAvailableAreaForPC();
+    void WaitUpdateAvailableAreaForPc();
 
     LowTempMode lowTemp_ {LowTempMode::UNKNOWN};
     std::mutex lowTempMutex_;

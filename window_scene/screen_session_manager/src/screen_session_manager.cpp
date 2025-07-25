@@ -243,15 +243,15 @@ bool SortByScreenId(const ScreenId& screenIdA, const ScreenId& screenIdB)
     return static_cast<int32_t>(screenIdA) < static_cast<int32_t>(screenIdB);
 }
 
-bool ScreenSessionManager::GetPCStatus()
+bool ScreenSessionManager::GetPcStatus() const
 {
     std::lock_guard<std::mutex> lock(setPCStatusMutex_);
     return g_isPcDevice;
 }
 
-void ScreenSessionManager::SetPCStatus(bool isPC) {
+void ScreenSessionManager::SetPcStatus(bool isPc) {
     std::lock_guard<std::mutex> lock(setPCStatusMutex_);
-    g_isPcDevice = isPC;
+    g_isPcDevice = isPc;
 }
 
 ScreenRotation ScreenSessionManager::ConvertOffsetToCorrectRotation(int32_t phyOffset)
@@ -1455,21 +1455,21 @@ void ScreenSessionManager::HandleScreenConnectEvent(sptr<ScreenSession> screenSe
     }
     if (phyMirrorEnable) {
         NotifyScreenConnected(screenSession->ConvertToScreenInfo());
-        WaitUpdateAvailableAreaForPC();
+        // when display add, need wait update available area, ensure display info is accurate
+        WaitUpdateAvailableAreaForPc();
         NotifyDisplayCreate(screenSession->ConvertToDisplayInfo());
     }
     TLOGW(WmsLogTag::DMS, "connect end. ScreenId: %{public}" PRIu64, screenId);
 }
 
-// when display add, need wait update available area, ensure display info is accurate
-void ScreenSessionManager::WaitUpdateAvailableAreaForPC()
+void ScreenSessionManager::WaitUpdateAvailableAreaForPc()
 {
     std::unique_lock<std::mutex> lock(displayAddMutex_);
     TLOGI(WmsLogTag::DMS, "begin wait notify display. need wait: %{public}d", needWaitAvailableArea_);
     if (g_isPcDevice && needWaitAvailableArea_) {
         TLOGI(WmsLogTag::DMS, "need wait update available area");
-        if (displayAddCV_.wait_for(lock, 
-            std::chrono::milliseconds(CV_WAIT_UPDATE_AVAILABLE_MS)) == std::cv_status::timeout) {
+        if (displayAddCV_.wait_for(lock, std::chrono::milliseconds(CV_WAIT_UPDATE_AVAILABLE_MS)) ==
+            std::cv_status::timeout) {
             TLOGE(WmsLogTag::DMS, "wait update available area timeout");
             needWaitAvailableArea_ = false;
         }
