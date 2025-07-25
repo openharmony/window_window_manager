@@ -1461,6 +1461,7 @@ void ScreenSessionManager::HandleScreenConnectEvent(sptr<ScreenSession> screenSe
     TLOGW(WmsLogTag::DMS, "connect end. ScreenId: %{public}" PRIu64, screenId);
 }
 
+// when display add, need wait update available area, ensure display info is accurate
 void ScreenSessionManager::WaitUpdateAvailableAreaForPC()
 {
     std::unique_lock<std::mutex> lock(displayAddMutex_);
