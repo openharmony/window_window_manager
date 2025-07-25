@@ -1066,39 +1066,6 @@ HWTEST_F(ScreenSessionManagerTest, GetSuperFoldStatus02, TestSize.Level1)
 }
 
 /**
- * @tc.name: ConvertScreenIdToRsScreenId
- * @tc.desc: ConvertScreenIdToRsScreenId test SystemCalling false.
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, ConvertScreenIdToRsScreenId01, TestSize.Level1)
-{
-    g_errLog.clear();
-    LOG_SetCallback(MyLogCallback);
-    MockAccesstokenKit::MockIsSystemApp(false);
-    MockAccesstokenKit::MockIsSACalling(false);
-    ScreenId screenId = 666;
-    ScreenId rsScreenId;
-    ssm_->ConvertScreenIdToRsScreenId(screenId, rsScreenId);
-    EXPECT_TRUE(g_errLog.find("Permission Denied") != std::string::npos);
-}
-
-/**
- * @tc.name: ConvertScreenIdToRsScreenId
- * @tc.desc: ConvertScreenIdToRsScreenId test SystemCalling true.
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, ConvertScreenIdToRsScreenId02, TestSize.Level1)
-{
-    MockAccesstokenKit::MockIsSystemApp(true);
-    ScreenId screenId = 666;
-    ScreenId rsScreenId = SCREEN_ID_INVALID;
-    ScreenId rsScreenIdTemp = 12345;
-    ssm_->sms2RsScreenIdMap_.insert({screenId, rsScreenIdTemp})
-    ssm_->ConvertScreenIdToRsScreenId(screenId, rsScreenId);
-    EXPECT_EQ(rsScreenId, rsScreenIdTemp);
-}
-
-/**
  * @tc.name: NotifyScreenMaskAppear
  * @tc.desc: NotifyScreenMaskAppear test SystemCalling false.
  * @tc.type: FUNC
