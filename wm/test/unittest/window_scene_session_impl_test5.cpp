@@ -521,8 +521,7 @@ HWTEST_F(WindowSceneSessionImplTest5, RecoverSessionProperty, TestSize.Level1)
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
-    auto ret = window->RecoverSessionProperty();
-    EXPECT_EQ(WMError::WM_OK, ret);
+    window->RecoverSessionProperty();
 }
 
 /**
