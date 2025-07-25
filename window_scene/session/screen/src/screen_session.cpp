@@ -367,6 +367,7 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
         displayInfo->SetRotation(property_.GetScreenRotation());
         displayInfo->SetDisplayOrientation(property_.GetDisplayOrientation());
     }
+    displayInfo->SetScreenRotation(property_.GetScreenRotation());
     displayInfo->SetOrientation(property_.GetOrientation());
     displayInfo->SetOffsetX(property_.GetOffsetX());
     displayInfo->SetOffsetY(property_.GetOffsetY());
@@ -1567,6 +1568,8 @@ void ScreenSession::FillScreenInfo(sptr<ScreenInfo> info) const
     info->SetType(property_.GetScreenType());
     info->SetModeId(activeIdx_);
     info->SetSerialNumber(serialNumber_);
+    info->SetMirrorWidth(property_.GetMirrorWidth());
+    info->SetMirrorHeight(property_.GetMirrorHeight());
 
     info->lastParent_ = lastGroupSmsId_;
     info->parent_ = groupSmsId_;
@@ -2445,8 +2448,9 @@ void ScreenSession::SetScreenId(ScreenId screenId)
 
 void ScreenSession::SetDisplayNode(std::shared_ptr<RSDisplayNode> displayNode)
 {
-    std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
+    std::unique_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
     displayNode_ = displayNode;
+    RSAdapterUtil::SetRSUIContext(displayNode_, GetRSUIContext(), true);
 }
 
 void ScreenSession::SetScreenAvailableStatus(bool isScreenAvailable)
@@ -2540,6 +2544,16 @@ void ScreenSession::SetIsAvailableAreaNeedNotify(bool isAvailableAreaNeedNotify)
 bool ScreenSession::GetIsAvailableAreaNeedNotify() const
 {
     return isAvailableAreaNeedNotify_;
+}
+
+void ScreenSession::UpdateMirrorWidth(uint32_t mirrorWidth)
+{
+    property_.SetMirrorWidth(mirrorWidth);
+}
+
+void ScreenSession::UpdateMirrorHeight(uint32_t mirrorHeight)
+{
+    property_.SetMirrorHeight(mirrorHeight);
 }
 
 std::shared_ptr<RSUIDirector> ScreenSession::GetRSUIDirector() const

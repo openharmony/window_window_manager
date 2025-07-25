@@ -19,19 +19,20 @@
 
 #include "window_manager_hilog.h"
 
-#define RETURN_IF_PARAM_IS_NULL(param, ...)                                            \
-    do {                                                                               \
-        if (!param) {                                                                  \
+#define RETURN_IF_PARAM_IS_NULL(param, ...)                              \
+    do {                                                                 \
+        if (!param) {                                                    \
             TLOGE(WmsLogTag::WMS_SCB, "The %{public}s is null", #param); \
-            return __VA_ARGS__;                                                        \
-        }                                                                              \
-    } while (false)                                                                    \
+            return __VA_ARGS__;                                          \
+        }                                                                \
+    } while (false)                                                      \
 
 namespace OHOS {
 namespace Rosen {
 
 InvokerType RSTransactionAdapter::invokerType_ = InvokerType::NONE;
 
+// LCOV_EXCL_START
 RSTransactionAdapter::RSTransactionAdapter(const std::shared_ptr<RSUIContext>& rsUIContext)
 {
     rsUIContext_ = rsUIContext;
@@ -103,6 +104,7 @@ void RSTransactionAdapter::FlushImplicitTransaction(uint64_t timestamp, const st
             invoker->FlushImplicitTransaction(timestamp, abilityName);
         }, __func__);
 }
+// LCOV_EXCL_STOP
 
 void RSTransactionAdapter::FlushImplicitTransaction(
     const std::shared_ptr<RSUIContext>& rsUIContext, uint64_t timestamp, const std::string& abilityName)
@@ -124,6 +126,7 @@ void RSTransactionAdapter::FlushImplicitTransaction(
     }
 }
 
+// LCOV_EXCL_START
 void RSTransactionAdapter::FlushImplicitTransaction(
     const std::unordered_set<std::shared_ptr<RSUIContext>>& rsUIContexts,
     uint64_t timestamp, const std::string& abilityName)
@@ -172,6 +175,7 @@ void RSTransactionAdapter::FlushImplicitTransaction(
     }
     FlushImplicitTransaction(rsUIContexts, timestamp, abilityName);
 }
+// LCOV_EXCL_STOP
 
 void RSTransactionAdapter::FlushImplicitTransaction(
     const std::shared_ptr<RSNode>& rsNode, uint64_t timestamp, const std::string& abilityName)
@@ -180,6 +184,7 @@ void RSTransactionAdapter::FlushImplicitTransaction(
     FlushImplicitTransaction(rsNode ? rsNode->GetRSUIContext() : nullptr, timestamp, abilityName);
 }
 
+// LCOV_EXCL_START
 void RSTransactionAdapter::FlushImplicitTransaction(
     std::initializer_list<std::shared_ptr<RSNode>> rsNodes,
     uint64_t timestamp, const std::string& abilityName)
@@ -454,6 +459,7 @@ AllowInMultiThreadGuard::~AllowInMultiThreadGuard()
         rsNode_->SetSkipCheckInMultiInstance(false);
     }
 }
+// LCOV_EXCL_STOP
 
 bool RSAdapterUtil::IsClientMultiInstanceEnabled()
 {
@@ -484,6 +490,7 @@ void RSAdapterUtil::InitRSUIDirector(std::shared_ptr<RSUIDirector>& rsUIDirector
     }
 }
 
+// LCOV_EXCL_START
 void RSAdapterUtil::SetRSUIContext(const std::shared_ptr<RSNode>& rsNode,
                                    const std::shared_ptr<RSUIContext>& rsUIContext,
                                    bool skipCheckInMultiInstance)
@@ -513,6 +520,20 @@ void RSAdapterUtil::SetRSUIContext(const std::shared_ptr<RSNode>& rsNode,
           RSAdapterUtil::RSNodeToStr(rsNode).c_str(), skipCheckInMultiInstance,
           RSAdapterUtil::RSUIContextToStr(originalRSUIContext).c_str());
 }
+// LCOV_EXCL_STOP
+
+void RSAdapterUtil::SetRSTransactionHandler(const std::shared_ptr<RSTransaction>& rsTransaction,
+                                            const std::shared_ptr<RSUIContext>& rsUIContext)
+{
+    RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED();
+    RETURN_IF_PARAM_IS_NULL(rsTransaction);
+    RETURN_IF_PARAM_IS_NULL(rsUIContext);
+    auto rsTransHandler = rsUIContext->GetRSTransaction();
+    RETURN_IF_PARAM_IS_NULL(rsTransHandler);
+    rsTransaction->SetTransactionHandler(rsTransHandler);
+    TLOGD(WmsLogTag::WMS_SCB, "syncId: %{public}" PRIu64 ", %{public}s",
+        rsTransaction->GetSyncId(), RSAdapterUtil::RSUIContextToStr(rsUIContext).c_str());
+}
 
 void RSAdapterUtil::SetSkipCheckInMultiInstance(const std::shared_ptr<RSNode>& rsNode,
                                                 bool skipCheckInMultiInstance)
@@ -524,6 +545,7 @@ void RSAdapterUtil::SetSkipCheckInMultiInstance(const std::shared_ptr<RSNode>& r
           RSAdapterUtil::RSNodeToStr(rsNode).c_str(), skipCheckInMultiInstance);
 }
 
+// LCOV_EXCL_START
 const std::shared_ptr<RSBaseNode> RSAdapterUtil::GetRSNode(
     const std::shared_ptr<RSUIContext>& rsUIContext, NodeId id)
 {
@@ -533,6 +555,7 @@ const std::shared_ptr<RSBaseNode> RSAdapterUtil::GetRSNode(
     RETURN_IF_PARAM_IS_NULL(rsUIContext, nullptr);
     return rsUIContext->GetNodeMap().GetNode(id);
 }
+// LCOV_EXCL_STOP
 
 std::string RSAdapterUtil::RSUIContextToStr(const std::shared_ptr<RSUIContext>& rsUIContext)
 {

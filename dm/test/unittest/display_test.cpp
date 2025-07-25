@@ -288,13 +288,37 @@ HWTEST_F(DisplayTest, GetDisplayInfoWithCache01, TestSize.Level1)
  */
 HWTEST_F(DisplayTest, GetLiveCreaseRegion, TestSize.Level1)
 {
+    sptr<DisplayInfo> baseInfo = sptr<DisplayInfo>::MakeSptr();
+    sptr<Display> disPlay = sptr<Display>::MakeSptr("", baseInfo);
     FoldCreaseRegion region;
-    auto res = defaultDisplay_->GetLiveCreaseRegion(region);
+    DMError ret = disPlay->GetLiveCreaseRegion(region);
+    EXPECT_EQ(ret, DMError::DM_ERROR_DEVICE_NOT_SUPPORT);
+
+    ScreenId screenId = 0;
+    baseInfo->SetScreenId(screenId);
+    ret = disPlay->GetLiveCreaseRegion(region);
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(res, DMError::DM_OK);
+        EXPECT_EQ(ret, DMError::DM_OK);
     } else {
-        EXPECT_NE(res, DMError::DM_ERROR_DEVICE_NOT_SUPPORT);
+        EXPECT_EQ(ret, DMError::DM_ERROR_DEVICE_NOT_SUPPORT);
     }
+    screenId = 5;
+    baseInfo->SetScreenId(screenId);
+    ret = disPlay->GetLiveCreaseRegion(region);
+    EXPECT_EQ(ret, DMError::DM_OK);
+}
+
+/**
+ * @tc.name: GetScreenRotation
+ * @tc.desc: test GetScreenRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayTest, GetScreenRotation, TestSize.Level1)
+{
+    auto baseInfo = defaultDisplay_->GetDisplayInfo();
+    Rotation rotation = Rotation::ROTATION_90;
+    baseInfo->SetScreenRotation(rotation);
+    EXPECT_EQ(defaultDisplay_->GetScreenRotation(), rotation);
 }
 }
 } // namespace Rosen

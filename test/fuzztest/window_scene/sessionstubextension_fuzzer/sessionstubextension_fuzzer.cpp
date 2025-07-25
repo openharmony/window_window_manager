@@ -85,6 +85,28 @@ void SessionStubTestPipCode(sptr<Session> sessionStub, MessageParcel& parcel)
     return;
 }
 
+void SessionStubTestFbCode(sptr<Session> sessionStub, MessageParcel& parcel)
+{
+    MessageParcel reply;
+    MessageOption option;
+    parcel.RewindRead(0);
+    sessionStub->OnRemoteRequest(static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_UPDATE_FLOATING_BALL),
+        parcel, reply, option);
+    parcel.RewindRead(0);
+    sessionStub->OnRemoteRequest(
+        static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_NOTIFY_FLOATING_BALL_PREPARE_CLOSE),
+        parcel, reply, option);
+    parcel.RewindRead(0);
+    sessionStub->OnRemoteRequest(
+        static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_START_FLOATING_BALL_MAIN_WINDOW),
+        parcel, reply, option);
+    parcel.RewindRead(0);
+    sessionStub->OnRemoteRequest(
+        static_cast<uint32_t>(Rosen::SessionInterfaceCode::TRANS_ID_GET_FLOATING_BALL_WINDOW_ID),
+        parcel, reply, option);
+    return;
+}
+
 bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 {
     if (data == nullptr || size < DATA_MIN_SIZE) {
@@ -107,6 +129,7 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 
     SessionStubTestExtensionCode(sessionStub, parcel);
     SessionStubTestPipCode(sessionStub, parcel);
+    SessionStubTestFbCode(sessionStub, parcel);
     return true;
 }
 } // namespace.OHOS

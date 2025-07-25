@@ -260,6 +260,27 @@ HWTEST_F(ScreenCutoutControllerTest, CalcWaterfallRects2, TestSize.Level1)
     controller->CalcWaterfallRects(numberVec, width, height, static_cast<Rotation>(5), waterfallArea);
     EXPECT_EQ(waterfallArea.left, emptyRect);
 }
+
+/**
+ * @tc.name: InitRect
+ * @tc.desc: InitRect func
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenCutoutControllerTest, InitRect, TestSize.Level1)
+{
+    DMRect emptyRect = { 0, 0, 0, 0 };
+    sptr<ScreenCutoutController> controller = sptr<ScreenCutoutController>::MakeSptr();
+
+    controller->InitRect(100, 100, 0, 100, emptyRect);
+    EXPECT_EQ(emptyRect, DMRect::NONE());
+    controller->InitRect(100, 100, 100, 0, emptyRect);
+    EXPECT_EQ(emptyRect, DMRect::NONE());
+    controller->InitRect(100, 100, 100, 100, emptyRect);
+    EXPECT_EQ(emptyRect.posX_, 100);
+    EXPECT_EQ(emptyRect.posY_, 100);
+    EXPECT_EQ(emptyRect.width_, 100);
+    EXPECT_EQ(emptyRect.height_, 100);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

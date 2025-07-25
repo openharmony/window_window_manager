@@ -44,7 +44,7 @@ const std::string UNDEFINED = "undefined";
     void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
         const char *msg)
     {
-        g_logMsg = msg;
+        g_logMsg += msg;
     }
 }
 
@@ -511,6 +511,67 @@ HWTEST_F(WindowSessionTest2, SetSessionStateChangeListenser, TestSize.Level1)
 
     session_->state_ = SessionState::STATE_DISCONNECT;
     ASSERT_EQ(WSError::WS_OK, session_->SetFocusable(false));
+}
+
+/**
+ * @tc.name: SetClearSubSessionCallback
+ * @tc.desc: SetClearSubSessionCallback Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest2, SetClearSubSessionCallback, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetClearSubSessionCallback";
+    info.moduleName_ = "SetClearSubSessionCallback";
+    info.bundleName_ = "SetClearSubSessionCallback";
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
+
+    NotifyClearSubSessionFunc func = nullptr;
+    session->SetClearSubSessionCallback(func);
+    EXPECT_TRUE(session->clearSubSessionFunc_ == nullptr);
+
+    func = [](const int32_t subPersistentId) {
+    };
+    session->SetClearSubSessionCallback(func);
+    EXPECT_FALSE(session->clearSubSessionFunc_ == nullptr);
+}
+
+/**
+ * @tc.name: NotifySessionStateChange
+ * @tc.desc: NotifySessionStateChange Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest2, NotifySessionStateChange, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    SessionInfo info;
+    info.abilityName_ = "NotifySessionStateChange";
+    info.moduleName_ = "NotifySessionStateChange";
+    info.bundleName_ = "NotifySessionStateChange";
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
+
+    session->NotifySessionStateChange(SessionState::STATE_ACTIVE);
+    EXPECT_TRUE(g_logMsg.find("notify clear subSession") == std::string::npos);
+
+    info.abilityName_ = "parentSession";
+    info.moduleName_ = "parentSession";
+    info.bundleName_ = "parentSession";
+    sptr<Session> parentSession = sptr<Session>::MakeSptr(info);
+    EXPECT_NE(parentSession, nullptr);
+
+    session->SetParentSession(parentSession);
+    session->NotifySessionStateChange(SessionState::STATE_ACTIVE);
+    EXPECT_TRUE(g_logMsg.find("notify clear subSession") == std::string::npos);
+
+    parentSession->clearSubSessionFunc_ = [](const int32_t subPersistentId) {
+    };
+    session->SetParentSession(parentSession);
+    session->NotifySessionStateChange(SessionState::STATE_ACTIVE);
+    EXPECT_TRUE(g_logMsg.find("notify clear subSession") == std::string::npos);
+
+    session->NotifySessionStateChange(SessionState::STATE_DISCONNECT);
+    EXPECT_TRUE(g_logMsg.find("notify clear subSession") != std::string::npos);
 }
 
 /**
@@ -1413,6 +1474,23 @@ HWTEST_F(WindowSessionTest2, SetAttachState02, TestSize.Level1)
     session_->SetAttachState(false);
     usleep(WAIT_SYNC_IN_NS);
     Mock::VerifyAndClearExpectations(&detachCallback);
+}
+
+/**
+ * @tc.name: SetAttachState03
+ * @tc.desc: SetAttachState Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest2, SetAttachState03, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_NE(session_, nullptr);
+    int32_t persistentId = 123;
+    session_->persistentId_ = persistentId;
+
+    session_->SetAttachState(true);
+    EXPECT_TRUE(g_logMsg.find("NotifyWindowAttachStateChange, persistentId") == std::string::npos);
 }
 
 /**

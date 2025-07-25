@@ -16,12 +16,13 @@
 #include <gtest/gtest.h>
 
 #include <gmock/gmock.h>
-#include "parameters.h"
+#include "ability_context_impl.h"
 #include "floating_ball_controller.h"
 #include "floating_ball_manager.h"
+#include "modifier_render_thread/rs_modifiers_draw_thread.h"
+#include "parameters.h"
 #include "window.h"
 #include "wm_common.h"
-#include "ability_context_impl.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -97,6 +98,9 @@ void FloatingBallControllerTest::SetUpTestCase()
 
 void FloatingBallControllerTest::TearDownTestCase()
 {
+#ifdef RS_ENABLE_VK
+    RSModifiersDrawThread::Destroy();
+#endif
 }
 
 void FloatingBallControllerTest::SetUp()

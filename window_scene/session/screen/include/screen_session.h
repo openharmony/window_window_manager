@@ -374,6 +374,9 @@ public:
     void SetScreenAreaHeight(uint32_t screenAreaHeight);
     uint32_t GetScreenAreaHeight() const;
 
+    void UpdateMirrorWidth(uint32_t mirrorWidth);
+    void UpdateMirrorHeight(uint32_t mirrorHeight);
+
 private:
     ScreenProperty property_;
     mutable std::mutex propertyMutex_; // above guarded by clientProxyMutex_

@@ -43,6 +43,8 @@ public:
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(ScreenId, ScreenId, id, SCREEN_ID_INVALID);
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(uint32_t, VirtualWidth, virtualWidth, 0);
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(uint32_t, VirtualHeight, virtualHeight, 0);
+    DEFINE_VAR_DEFAULT_FUNC_GET_SET(uint32_t, MirrorWidth, mirrorWidth, 0);
+    DEFINE_VAR_DEFAULT_FUNC_GET_SET(uint32_t, MirrorHeight, mirrorHeight, 0);
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(float, VirtualPixelRatio, virtualPixelRatio, 1.0f);
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(ScreenId, LastParentId, lastParent, SCREEN_ID_INVALID);
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(ScreenId, ParentId, parent, SCREEN_ID_INVALID);
