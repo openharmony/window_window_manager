@@ -2797,7 +2797,7 @@ WMError WindowSessionImpl::SetWindowType(WindowType type)
     TLOGD(WmsLogTag::DEFAULT, "%{public}u type %{public}u", GetWindowId(), static_cast<uint32_t>(type));
     if (type != WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW && !SessionPermission::IsSystemCalling()) {
         TLOGE(WmsLogTag::DEFAULT, "permission denied!");
-        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::DEFAULT, "Session is invalid");
