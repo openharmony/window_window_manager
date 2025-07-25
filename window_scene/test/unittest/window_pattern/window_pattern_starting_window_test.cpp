@@ -72,12 +72,10 @@ void WindowPatternStartingWindowTest::TearDownTestCase()
 
 void WindowPatternStartingWindowTest::SetUp()
 {
-    SetUpTestCase();
 }
 
 void WindowPatternStartingWindowTest::TearDown()
 {
-    TearDownTestCase();
 }
 
 void WindowPatternStartingWindowTest::InitTestStartingWindowRdb()
@@ -625,6 +623,7 @@ HWTEST_F(WindowPatternStartingWindowTest, GetSessionColorMode, TestSize.Level0)
 HWTEST_F(WindowPatternStartingWindowTest, GetOriginalPersistentId, TestSize.Level0)
 {
     ASSERT_NE(ssm_, nullptr);
+    ssm_->sceneSessionMap_.clear();
     SessionInfo sessionInfo;
     int32_t persistentId = 1000;
     int32_t callerIdA = 1001;
