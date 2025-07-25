@@ -3412,10 +3412,12 @@ WSError Session::UpdateWindowMode(WindowMode mode)
         return WSError::WS_ERROR_INVALID_SESSION;
     } else if (state_ == SessionState::STATE_DISCONNECT) {
         GetSessionProperty()->SetWindowMode(mode);
+        NotifySessionPropertyChange(WindowInfoKey::WINDOW_MODE);
         GetSessionProperty()->SetIsNeedUpdateWindowMode(true);
         UpdateGestureBackEnabled();
     } else {
         GetSessionProperty()->SetWindowMode(mode);
+        NotifySessionPropertyChange(WindowInfoKey::WINDOW_MODE);
         RequestNextVsyncWhenModeChange();
         if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
             GetSessionProperty()->SetMaximizeMode(MaximizeMode::MODE_RECOVER);
