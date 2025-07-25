@@ -131,7 +131,6 @@ napi_value JsUIEffectController::OnSetParams(napi_env env, napi_callback_info in
         if (errCodePtr == nullptr || client == nullptr || server == nullptr || params == nullptr) {
             return;
         }
-        client->SetParams(params);
         WMError ret = server->SetParams(params);
         *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(ret);
         TLOGI(WmsLogTag::WMS_ANIMATION, "ui effect %{public}d set filter params exec end with err code %{public}d",
@@ -204,7 +203,6 @@ napi_value JsUIEffectController::OnAnimateTo(napi_env env, napi_callback_info in
         if (lists == nullptr) {
             return;
         }
-        client->SetParams(lists->params);
         WMError ret = server->AnimateTo(lists->params, lists->option, lists->interruptOption);
         lists->errCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
         TLOGI(WmsLogTag::WMS_ANIMATION, "ui effect %{public}d animateTo, err code %{public}d",
