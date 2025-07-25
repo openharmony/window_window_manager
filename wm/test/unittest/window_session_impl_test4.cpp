@@ -24,6 +24,7 @@
 #include "mock_session_stub.h"
 #include "mock_uicontent.h"
 #include "mock_window.h"
+#include "mock_uiext_session_permission.h"
 #include "parameters.h"
 #include "scene_board_judgement.h"
 #include "window_accessibility_controller.h"
@@ -668,6 +669,10 @@ HWTEST_F(WindowSessionImplTest4, GetUIContentRemoteObj, TestSize.Level1)
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     res = window->GetUIContentRemoteObj(remoteObj);
     ASSERT_EQ(res, WSError::WS_OK);
+    MockUIExtSessionPermission::SetIsSystemCallingFlag(false);
+    res = window->GetUIContentRemoteObj(remoteObj);
+    ASSERT_EQ(res, WSError::WM_ERROR_NOT_SYSTEM_APP);
+    MockUIExtSessionPermission::ClearAllFlag();
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: GetUIContentRemoteObj end";
 }
 
