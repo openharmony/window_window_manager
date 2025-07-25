@@ -1803,7 +1803,7 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetDisplaySnapshot(D
 }
 
 std::vector<std::shared_ptr<Media::PixelMap>> ScreenSessionManagerProxy::GetDisplayHDRSnapshot(DisplayId displayId,
-    DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen)
+    DmErrorCode& errorCode, bool isUseDma, bool isCaptureFullOfScreen)
 {
     TLOGD(WmsLogTag::DMS, "enter");
     sptr<IRemoteObject> remote = Remote();
@@ -1843,10 +1843,7 @@ std::vector<std::shared_ptr<Media::PixelMap>> ScreenSessionManagerProxy::GetDisp
     TLOGI(WmsLogTag::DMS, "reply pixelMap and hdrPixelMap");
     std::shared_ptr<Media::PixelMap> sdrpixelMap(reply.ReadParcelable<Media::PixelMap>());
     std::shared_ptr<Media::PixelMap> hdrPixelMap(reply.ReadParcelable<Media::PixelMap>());
-    DmErrorCode replyErrorCode = static_cast<DmErrorCode>(reply.ReadInt32());
-    if (errorCode) {
-        *errorCode = replyErrorCode;
-    }
+    errorCode = static_cast<DmErrorCode>(reply.ReadInt32());
     if (sdrpixelMap == nullptr) {
         TLOGW(WmsLogTag::DMS, "SendRequest sdrpixelMap is nullptr.");
         return { nullptr, nullptr };
@@ -4254,7 +4251,7 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetDisplaySnapshotWi
 }
 
 std::vector<std::shared_ptr<Media::PixelMap>> ScreenSessionManagerProxy::GetDisplayHDRSnapshotWithOption(
-    const CaptureOption& captureOption, DmErrorCode* errorCode)
+    const CaptureOption& captureOption, DmErrorCode& errorCode)
 {
     TLOGD(WmsLogTag::DMS, "enter");
     sptr<IRemoteObject> remote = Remote();
@@ -4284,10 +4281,7 @@ std::vector<std::shared_ptr<Media::PixelMap>> ScreenSessionManagerProxy::GetDisp
  
     std::shared_ptr<Media::PixelMap> sdrpixelMap(reply.ReadParcelable<Media::PixelMap>());
     std::shared_ptr<Media::PixelMap> hdrPixelMap(reply.ReadParcelable<Media::PixelMap>());
-    DmErrorCode replyErrorCode = static_cast<DmErrorCode>(reply.ReadInt32());
-    if (errorCode) {
-        *errorCode = replyErrorCode;
-    }
+    errorCode = static_cast<DmErrorCode>(reply.ReadInt32());
     if (sdrpixelMap == nullptr) {
         TLOGW(WmsLogTag::DMS, "SendRequest sdrpixelMap is nullptr.");
         return { nullptr, nullptr };

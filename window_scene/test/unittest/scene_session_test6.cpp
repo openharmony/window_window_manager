@@ -21,7 +21,7 @@
 #include "input_event.h"
 #include "key_event.h"
 #include "mock/mock_session_stage.h"
-
+#include "mock/mock_accesstoken_kit.h"
 #include "screen_manager.h"
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session/host/include/sub_session.h"
@@ -1070,6 +1070,10 @@ HWTEST_F(SceneSessionTest6, SetFrameRectForPartialZoomIn, Function | SmallTest |
     info.abilityName_ = "SetFrameRectForPartialZoomIn";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     Rect frameRect = { 10, 10, 10, 10 };  // 10 is valid frame rect param
+    MockAccesstokenKit::MockIsSACalling(true);
+    EXPECT_EQ(sceneSession->SetFrameRectForPartialZoomIn(frameRect), WSError::WS_OK);
+
+    MockAccesstokenKit::MockIsSACalling(false);
     EXPECT_EQ(sceneSession->SetFrameRectForPartialZoomIn(frameRect), WSError::WS_ERROR_INVALID_PERMISSION);
 }
 

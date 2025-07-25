@@ -500,7 +500,7 @@ void DisplayManager::Impl::ClearDisplayStateCallback()
     TLOGD(WmsLogTag::DMS, "[UL_POWER]Clear displaystatecallback enter");
     displayStateCallback_ = nullptr;
     if (displayStateAgent_ != nullptr) {
-        TLOGI(WmsLogTag::DMS, "[UL_POWER]UnregisterDisplayManagerAgent enter and displayStateAgent_ is cleared");
+        TLOGI(WmsLogTag::DMS, "[UL_POWER]UnregisterDisplayManagerAgent and clear displayStateAgent_");
         SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(displayStateAgent_,
             DisplayManagerAgentType::DISPLAY_STATE_LISTENER);
         displayStateAgent_ = nullptr;
@@ -817,7 +817,7 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId display
 }
 
 std::vector<std::shared_ptr<Media::PixelMap>> DisplayManager::GetScreenHDRshot(DisplayId displayId,
-    DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen)
+    DmErrorCode& errorCode, bool isUseDma, bool isCaptureFullOfScreen)
 {
     if (displayId == DISPLAY_ID_INVALID) {
         TLOGE(WmsLogTag::DMS, "displayId invalid!");
@@ -2544,7 +2544,7 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshotWithOption(const C
 }
 
 std::vector<std::shared_ptr<Media::PixelMap>> DisplayManager::GetScreenHDRshotWithOption(
-    const CaptureOption& captureOption, DmErrorCode* errorCode)
+    const CaptureOption& captureOption, DmErrorCode& errorCode)
 {
     TLOGI(WmsLogTag::DMS, "start!");
     if (captureOption.displayId_ == DISPLAY_ID_INVALID) {

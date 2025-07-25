@@ -647,7 +647,7 @@ HWTEST_F(SceneSessionManagerTest3, CheckAppIsInDisplay, TestSize.Level1)
     ssm_->sceneSessionMap_.erase(1);
     sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
     ASSERT_NE(nullptr, abilitySessionInfo);
-    ssm_->StartUIAbilityBySCB(abilitySessionInfo);
+    ssm_->StartUIAbilityBySCB(abilitySessionInfo, sceneSession);
     ssm_->DestroySubSession(sceneSession);
     ssm_->EraseSceneSessionMapById(2);
     ASSERT_EQ(ret, 1);
@@ -708,7 +708,7 @@ HWTEST_F(SceneSessionManagerTest3, SetAbilitySessionInfo, TestSize.Level1)
     OHOS::AppExecFwk::ElementName retElementName = ret->want.GetElement();
     ASSERT_EQ(retElementName.GetAbilityName(), info.abilityName_);
     ASSERT_EQ(retElementName.GetBundleName(), info.bundleName_);
-    EXPECT_EQ(true, ret->want.GetBoolParam(IS_CALL_BY_SCB, false));
+    EXPECT_EQ(true, ret->isCallBySCB);
 }
 
 /**
@@ -724,7 +724,7 @@ HWTEST_F(SceneSessionManagerTest3, SetAbilitySessionInfo02, TestSize.Level1)
     sptr<SceneSession> sceneSession;
     sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sptr<OHOS::AAFwk::SessionInfo> ret = ssm_->SetAbilitySessionInfo(sceneSession, 2);
-    EXPECT_EQ(false, ret->want.GetBoolParam(IS_CALL_BY_SCB, false));
+    EXPECT_EQ(false, ret->isCallBySCB);
 }
 
 /**

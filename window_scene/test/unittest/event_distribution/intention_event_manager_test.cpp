@@ -49,7 +49,8 @@ void IntentionEventManagerTest::SetUp()
     runner_ = AppExecFwk::EventRunner::Create("TestRunner");
     eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner_);
     EXPECT_NE(nullptr, eventHandler_);
-    inputEventListener_ = std::make_shared<IntentionEventManager::InputEventListener>(uIContent_.get(), eventHandler_);
+    inputEventListener_ =
+        std::make_shared<IntentionEventManager::InputEventListener>(uIContent_.get(), eventHandler_, nullptr);
     EXPECT_NE(nullptr, inputEventListener_);
     SceneSessionManager::GetInstance().sceneSessionMap_.clear();
 }
@@ -71,13 +72,14 @@ namespace {
  */
 HWTEST_F(IntentionEventManagerTest, EnableInputEventListener, TestSize.Level0)
 {
-    bool enable = DelayedSingleton<IntentionEventManager>::GetInstance()->EnableInputEventListener(nullptr, nullptr);
+    bool enable = DelayedSingleton<IntentionEventManager>::GetInstance()->
+        EnableInputEventListener(nullptr, nullptr, nullptr);
     EXPECT_EQ(false, enable);
-    enable =
-        DelayedSingleton<IntentionEventManager>::GetInstance()->EnableInputEventListener(uIContent_.get(), nullptr);
+    enable = DelayedSingleton<IntentionEventManager>::GetInstance()->
+        EnableInputEventListener(uIContent_.get(), nullptr, nullptr);
     EXPECT_EQ(false, enable);
-    enable = DelayedSingleton<IntentionEventManager>::GetInstance()->EnableInputEventListener(uIContent_.get(),
-                                                                                              eventHandler_);
+    enable = DelayedSingleton<IntentionEventManager>::GetInstance()->
+        EnableInputEventListener(uIContent_.get(), eventHandler_, nullptr);
     EXPECT_EQ(true, enable);
 }
 
@@ -103,7 +105,7 @@ HWTEST_F(IntentionEventManagerTest, DispatchKeyEventCallback, TestSize.Level0)
     EXPECT_NE(nullptr, sceneSession);
     SceneSessionManager::GetInstance().sceneSessionMap_.emplace(std::make_pair(2024, sceneSession));
     std::shared_ptr<IntentionEventManager::InputEventListener> inputEventListener =
-        std::make_shared<IntentionEventManager::InputEventListener>(nullptr, nullptr);
+        std::make_shared<IntentionEventManager::InputEventListener>(nullptr, nullptr, nullptr);
     inputEventListener->DispatchKeyEventCallback(2024, keyEvent, false);
     inputEventListener_->DispatchKeyEventCallback(2024, keyEvent, false);
 }
@@ -117,7 +119,7 @@ HWTEST_F(IntentionEventManagerTest, CheckPointerEvent, TestSize.Level0)
 {
     std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
     std::shared_ptr<IntentionEventManager::InputEventListener> inputEventListener =
-        std::make_shared<IntentionEventManager::InputEventListener>(nullptr, nullptr);
+        std::make_shared<IntentionEventManager::InputEventListener>(nullptr, nullptr, nullptr);
     EXPECT_NE(nullptr, inputEventListener);
     EXPECT_EQ(false, inputEventListener->CheckPointerEvent(pointerEvent));
     pointerEvent = MMI::PointerEvent::Create();
@@ -356,7 +358,7 @@ HWTEST_F(IntentionEventManagerTest, OnInputEvent2, TestSize.Level1)
 HWTEST_F(IntentionEventManagerTest, OnInputEvent3, TestSize.Level1)
 {
     std::shared_ptr<IntentionEventManager::InputEventListener> inputEventListener =
-        std::make_shared<IntentionEventManager::InputEventListener>(nullptr, nullptr);
+        std::make_shared<IntentionEventManager::InputEventListener>(nullptr, nullptr, nullptr);
     EXPECT_NE(nullptr, inputEventListener);
     std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     EXPECT_NE(nullptr, keyEvent);
@@ -389,7 +391,7 @@ HWTEST_F(IntentionEventManagerTest, OnInputEvent3, TestSize.Level1)
 HWTEST_F(IntentionEventManagerTest, OnInputEvent4, TestSize.Level1)
 {
     std::shared_ptr<IntentionEventManager::InputEventListener> inputEventListener =
-        std::make_shared<IntentionEventManager::InputEventListener>(nullptr, nullptr);
+        std::make_shared<IntentionEventManager::InputEventListener>(nullptr, nullptr, nullptr);
     EXPECT_EQ(nullptr, inputEventListener->uiContent_);
     std::shared_ptr<MMI::AxisEvent> axisEvent = nullptr;
     inputEventListener->OnInputEvent(axisEvent);

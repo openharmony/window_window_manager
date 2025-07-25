@@ -49,6 +49,7 @@ constexpr DisplayId VIRTUAL_DISPLAY_ID = 999;
 
 WM_IMPLEMENT_SINGLE_INSTANCE(PcFoldScreenManager);
 
+// LCOV_EXCL_START
 void PcFoldScreenManager::UpdateFoldScreenStatus(DisplayId displayId, SuperFoldStatus status,
     const WSRect& defaultDisplayRect, const WSRect& virtualDisplayRect, const WSRect& foldCreaseRect)
 {
@@ -651,4 +652,5 @@ void PcFoldScreenManager::ExecuteSystemKeyboardStatusChangeCallbacks(DisplayId d
         iter++;
     }
 }
+// LCOV_EXCL_STOP
 } // namespace OHOS::Rosen

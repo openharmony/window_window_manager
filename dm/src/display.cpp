@@ -150,6 +150,21 @@ Rotation Display::GetRotation() const
     return pImpl_->GetDisplayInfo()->GetRotation();
 }
 
+Rotation Display::GetScreenRotation() const
+{
+    UpdateDisplayInfo();
+    if (pImpl_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "pImpl_ is nullptr");
+        return Rotation::ROTATION_0;
+    }
+    auto displayInfo = pImpl_->GetDisplayInfo();
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::DMS, "displayInfo is nullptr");
+        return Rotation::ROTATION_0;
+    }
+    return displayInfo->GetScreenRotation();
+}
+
 Orientation Display::GetOrientation() const
 {
     UpdateDisplayInfo();
@@ -216,7 +231,7 @@ sptr<DisplayInfo> Display::GetDisplayInfoWithCache() const
 sptr<CutoutInfo> Display::GetCutoutInfo() const
 {
     return SingletonContainer::Get<DisplayManagerAdapter>().GetCutoutInfo(GetId(), GetWidth(),
-                                                                          GetHeight(), GetRotation());
+                                                                          GetHeight(), GetScreenRotation());
 }
 
 DMError Display::HasImmersiveWindow(bool& immersive)
@@ -246,6 +261,18 @@ DMError Display::GetDisplayCapability(std::string& capabilitInfo) const
 
 DMError Display::GetLiveCreaseRegion(FoldCreaseRegion& region) const
 {
-    return SingletonContainer::Get<DisplayManagerAdapter>().GetLiveCreaseRegion(region);
+    ScreenId screenId = GetScreenId();
+    ScreenId rsScreenId;
+    bool ret = SingletonContainer::Get<DisplayManagerAdapter>().ConvertScreenIdToRsScreenId(screenId, rsScreenId);
+    if (!ret) {
+        TLOGE(WmsLogTag::DMS, "convertScreenIdToRsScreenId falied");
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    // when rsScreenId is not 0, there is no crease region in the current screen
+    if (rsScreenId == MAIN_SCREEN_ID_DEFAULT) {
+        return SingletonContainer::Get<DisplayManagerAdapter>().GetLiveCreaseRegion(region);
+    }
+    region = FoldCreaseRegion(screenId, {});
+    return DMError::DM_OK;
 }
 } // namespace OHOS::Rosen

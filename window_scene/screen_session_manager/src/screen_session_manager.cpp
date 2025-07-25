@@ -2605,6 +2605,8 @@ void ScreenSessionManager::InitScreenProperty(ScreenId screenId, RSScreenModeInf
     property.SetCurrentOffScreenRendering(false);
     property.SetScreenRealWidth(property.GetBounds().rect_.GetWidth());
     property.SetScreenRealHeight(property.GetBounds().rect_.GetHeight());
+    property.SetMirrorWidth(property.GetBounds().rect_.GetWidth());
+    property.SetMirrorHeight(property.GetBounds().rect_.GetHeight());
     property.SetScreenRealPPI();
     property.SetScreenRealDPI();
     property.SetScreenAreaOffsetX(property.GetPhyBounds().rect_.GetLeft());
@@ -6310,27 +6312,21 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshot(Displa
 }
 
 std::vector<std::shared_ptr<Media::PixelMap>> ScreenSessionManager::GetDisplayHDRSnapshot(DisplayId displayId,
-    DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen)
+    DmErrorCode& errorCode, bool isUseDma, bool isCaptureFullOfScreen)
 {
     TLOGI(WmsLogTag::DMS, "enter!");
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsShellCall()) {
-        if (errorCode != nullptr) {
-            *errorCode = DmErrorCode::DM_ERROR_NOT_SYSTEM_APP;
-        }
+        errorCode = DmErrorCode::DM_ERROR_NOT_SYSTEM_APP;
         return {nullptr, nullptr};
     }
     if (system::GetBoolParameter("persist.edm.disallow_screenshot", false)) {
         TLOGE(WmsLogTag::DMS, "snapshot disabled by edm!");
-        if (errorCode != nullptr) {
-            *errorCode = DmErrorCode::DM_ERROR_NO_PERMISSION;
-        }
+        errorCode = DmErrorCode::DM_ERROR_NO_PERMISSION;
         return {nullptr, nullptr};
     }
     if (displayId == DISPLAY_ID_FAKE && !IsFakeDisplayExist()) {
         TLOGE(WmsLogTag::DMS, "fake display not exist!");
-        if (errorCode != nullptr) {
-            *errorCode = DmErrorCode::DM_ERROR_INVALID_SCREEN;
-        }
+        errorCode = DmErrorCode::DM_ERROR_INVALID_SCREEN;
         return {nullptr, nullptr};
     }
     if ((Permission::IsSystemCalling() && Permission::CheckCallingPermission(SCREEN_CAPTURE_PERMISSION)) ||
@@ -6349,8 +6345,8 @@ std::vector<std::shared_ptr<Media::PixelMap>> ScreenSessionManager::GetDisplayHD
         isScreenShot_ = true;
         NotifyCaptureStatusChanged();
         return res;
-    } else if (errorCode) {
-        *errorCode = DmErrorCode::DM_ERROR_NO_PERMISSION;
+    } else {
+        errorCode = DmErrorCode::DM_ERROR_NO_PERMISSION;
     }
     return {nullptr, nullptr};
 }
@@ -6398,30 +6394,28 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshotWithOpt
 }
 
 std::vector<std::shared_ptr<Media::PixelMap>> ScreenSessionManager::GetDisplayHDRSnapshotWithOption(
-    const CaptureOption& option, DmErrorCode* errorCode)
+    const CaptureOption& option, DmErrorCode& errorCode)
 {
     TLOGD(WmsLogTag::DMS, "enter!");
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsShellCall() &&
         !SessionPermission::IsSACalling()) {
-        if (errorCode != nullptr) {
-            *errorCode = DmErrorCode::DM_ERROR_NOT_SYSTEM_APP;
-        }
+        errorCode = DmErrorCode::DM_ERROR_NOT_SYSTEM_APP;
         return {nullptr, nullptr};
     }
     if (system::GetBoolParameter("persist.edm.disallow_screenshot", false)) {
         TLOGE(WmsLogTag::DMS, "snapshot was disabled by edm!");
+        errorCode = DmErrorCode::DM_ERROR_NO_PERMISSION;
         return {nullptr, nullptr};
     }
     if (option.displayId_ == DISPLAY_ID_FAKE && !IsFakeDisplayExist()) {
         TLOGE(WmsLogTag::DMS, "fake display not exist!");
-        if (errorCode != nullptr) {
-            *errorCode = DmErrorCode::DM_ERROR_INVALID_SCREEN;
-        }
+        errorCode = DmErrorCode::DM_ERROR_INVALID_SCREEN;
         return {nullptr, nullptr};
     }
     if ((Permission::IsSystemCalling() && Permission::CheckCallingPermission(SCREEN_CAPTURE_PERMISSION)) ||
         SessionPermission::IsShellCall()) {
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetDisplayHDRSnapshot(%" PRIu64")", option.displayId_);
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
+            "ssm:GetDisplayHDRSnapshotWithOption(%" PRIu64")", option.displayId_);
         std::vector<std::shared_ptr<Media::PixelMap>> res = GetScreenHDRSnapshot(
             option.displayId_, true, option.isCaptureFullOfScreen_, option.surfaceNodesList_);
         if (res.size() == PIXMAP_VECTOR_SIZE && res[SDR_PIXMAP] != nullptr) {
@@ -6436,8 +6430,8 @@ std::vector<std::shared_ptr<Media::PixelMap>> ScreenSessionManager::GetDisplayHD
             }
         }
         return res;
-    } else if (errorCode) {
-        *errorCode = DmErrorCode::DM_ERROR_NO_PERMISSION;
+    } else {
+        errorCode = DmErrorCode::DM_ERROR_NO_PERMISSION;
     }
     return {nullptr, nullptr};
 }
@@ -6734,7 +6728,6 @@ void ScreenSessionManager::SetScreenPrivacyWindowList(DisplayId id, std::vector<
 
 void ScreenSessionManager::NotifyPrivateWindowListChanged(DisplayId id, std::vector<std::string> privacyWindowList)
 {
-    TLOGI(WmsLogTag::DMS, "Notify displayid: %{public}" PRIu64"", id);
     auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::PRIVATE_WINDOW_LIST_LISTENER);
     if (agents.empty()) {
         return;
@@ -8923,7 +8916,7 @@ void ScreenSessionManager::NotifyFoldToExpandCompletion(bool foldToExpand)
 
 void ScreenSessionManager::RecordEventFromScb(std::string description, bool needRecordEvent)
 {
-    TLOGW(WmsLogTag::DMS, "%{public}s", description.c_str());
+    TLOGD(WmsLogTag::DMS, "%{public}s", description.c_str());
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::DMS, "permission denied, clientName: %{public}s, pid: %{public}d",
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
@@ -9979,7 +9972,7 @@ sptr<DisplayInfo> ScreenSessionManager::GetPrimaryDisplayInfo()
                 continue;
             }
             if (!session->GetIsExtend()) {
-                TLOGE(WmsLogTag::DMS, "find primary %{public}" PRIu64, session->screenId_);
+                TLOGD(WmsLogTag::DMS, "find primary %{public}" PRIu64, session->screenId_);
                 screenSession = session;
                 break;
             }

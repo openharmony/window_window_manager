@@ -107,7 +107,7 @@ public:
     void SetWindowMask(const std::shared_ptr<Media::PixelMap>& windowMask);
     void SetIsShaped(bool isShaped);
     void SetIsAppSupportPhoneInPc(bool isSupportPhone);
-    void SetIsPcAppInPad(bool isPcAppInPad);
+    void SetIsPcAppInPad(bool isPcAppInLargeScreenDevice);
     void SetIsAtomicService(bool isAtomicService);
     
     /*
@@ -322,6 +322,7 @@ public:
     bool IsFullScreenDisabled() const;
     bool IsSplitDisabled() const;
     bool IsWindowLimitDisabled() const;
+    bool IsDecorFullscreenDisabled() const;
     bool IsSupportRotateFullScreen() const;
     bool IsAdaptToSubWindow() const;
     bool IsAdaptToSimulationScale() const;
@@ -496,7 +497,7 @@ private:
     static const std::map<uint64_t, HandlWritePropertyFunc> writeFuncMap_;
     static const std::map<uint64_t, HandlReadPropertyFunc> readFuncMap_;
     bool isAppSupportPhoneInPc_ = false;
-    bool isPcAppInPad_ = false;
+    bool isPcAppInLargeScreenDevice_ = false;
     mutable std::mutex compatibleModeMutex_;
     uint8_t backgroundAlpha_ = 0xff; // default alpha is opaque.
     mutable std::mutex atomicServiceMutex_;
@@ -620,6 +621,9 @@ public:
     void SetDisableWindowLimit(bool disableWindowLimit);
     bool IsWindowLimitDisabled() const;
 
+    void SetDisableDecorFullscreen(bool disableDecorFullscreen);
+    bool IsDecorFullscreenDisabled() const;
+
     void SetIsSupportRotateFullScreen(bool isSupportRotateFullScreen);
     bool IsSupportRotateFullScreen() const;
 
@@ -646,6 +650,7 @@ public:
         ss << "disableResizeWithDpi_:" << disableResizeWithDpi_<< " ";
         ss << "disableFullScreen_:" << disableFullScreen_<< " ";
         ss << "disableWindowLimit_:" << disableWindowLimit_<< " ";
+        ss << "disableDecorFullscreen_:" << disableDecorFullscreen_<< " ";
         ss << "isSupportRotateFullScreen_:" << isSupportRotateFullScreen_ << " ";
         ss << "isAdaptToSubWindow_:" << isAdaptToSubWindow_ << " ";
         ss << "isAdaptToSimulationScale_:" << isAdaptToSimulationScale_ << " ";
@@ -663,6 +668,7 @@ private:
     bool disableFullScreen_ { false };
     bool disableSplit_ { false };
     bool disableWindowLimit_ { false };
+    bool disableDecorFullscreen_ { false };
     bool isSupportRotateFullScreen_ { false };
     bool isAdaptToSubWindow_ { false };
     bool isAdaptToSimulationScale_ { false };
@@ -673,6 +679,7 @@ struct FreeMultiWindowConfig : public Parcelable {
     uint32_t decorWindowModeSupportType_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
     WindowMode defaultWindowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
     uint32_t maxMainFloatingWindowNumber_ = 0;
+    DragResizeType defaultDragResizeType_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
@@ -682,7 +689,8 @@ struct FreeMultiWindowConfig : public Parcelable {
         }
 
         if (!parcel.WriteUint32(static_cast<uint32_t>(defaultWindowMode_)) ||
-            !parcel.WriteUint32(maxMainFloatingWindowNumber_)) {
+            !parcel.WriteUint32(maxMainFloatingWindowNumber_) ||
+            !parcel.WriteUint32(static_cast<uint32_t>(defaultDragResizeType_))) {
             return false;
         }
         return true;
@@ -698,6 +706,12 @@ struct FreeMultiWindowConfig : public Parcelable {
         config->decorWindowModeSupportType_ = parcel.ReadUint32();
         config->defaultWindowMode_ = static_cast<WindowMode>(parcel.ReadUint32());
         config->maxMainFloatingWindowNumber_ = parcel.ReadUint32();
+        uint32_t dragResizeType = parcel.ReadUint32();
+        if (dragResizeType >= static_cast<uint32_t>(DragResizeType::RESIZE_MAX_VALUE)) {
+            delete config;
+            return nullptr;
+        }
+        config->defaultDragResizeType_ = static_cast<DragResizeType>(dragResizeType);
         return config;
     }
 };

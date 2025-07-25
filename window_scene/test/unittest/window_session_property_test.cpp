@@ -1372,10 +1372,10 @@ HWTEST_F(WindowSessionPropertyTest, SetIsPcAppInPad, TestSize.Level1)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
-    bool isPcAppInPad = true;
-    property->SetIsPcAppInPad(isPcAppInPad);
+    bool isPcAppInLargeScreenDevice = true;
+    property->SetIsPcAppInPad(isPcAppInLargeScreenDevice);
     auto result = property->GetIsPcAppInPad();
-    ASSERT_EQ(result, isPcAppInPad);
+    ASSERT_EQ(result, isPcAppInLargeScreenDevice);
 }
 
 /**

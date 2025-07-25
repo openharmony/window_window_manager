@@ -27,11 +27,7 @@
 #include <input_method_controller.h>
 #endif // IMF_ENABLE
 #include <ipc_skeleton.h>
-#if defined(MODIFIER_NG)
 #include <modifier_ng/appearance/rs_behind_window_filter_modifier.h>
-#else
-#include <modifier/rs_property_modifier.h>
-#endif
 #include <pointer_event.h>
 #include <key_event.h>
 #include <transaction/rs_sync_transaction_controller.h>
@@ -262,7 +258,7 @@ bool SceneSession::IsShowOnLockScreen(uint32_t lockScreenZOrder)
 
     // current window on lock screen jurded by zorder
     if (zOrder_ >= lockScreenZOrder) {
-        TLOGI(WmsLogTag::WMS_UIEXT, "zOrder >= lockScreenZOrder");
+        TLOGNI(WmsLogTag::WMS_UIEXT, "zOrder is bigger");
         return true;
     }
 
@@ -278,7 +274,7 @@ bool SceneSession::IsShowOnLockScreen(uint32_t lockScreenZOrder)
 void SceneSession::AddExtensionTokenInfo(const UIExtensionTokenInfo& tokenInfo)
 {
     extensionTokenInfos_.push_back(tokenInfo);
-    TLOGI(WmsLogTag::WMS_UIEXT, "can show:%{public}u, id: %{public}d",
+    TLOGD(WmsLogTag::WMS_UIEXT, "can show:%{public}u, id: %{public}d",
         tokenInfo.canShowOnLockScreen, GetPersistentId());
 }
 
@@ -288,7 +284,7 @@ void SceneSession::RemoveExtensionTokenInfo(const sptr<IRemoteObject>& abilityTo
     auto itr = std::remove_if(
         extensionTokenInfos_.begin(), extensionTokenInfos_.end(),
         [&abilityToken, persistentId, where = __func__](const auto& tokenInfo) {
-            TLOGNI(WmsLogTag::WMS_UIEXT,
+            TLOGND(WmsLogTag::WMS_UIEXT,
                 "%{public}s UIExtOnLock: need remove, token: %{public}u, persistentId: %{public}d",
                 where, tokenInfo.callingTokenId, persistentId);
             return tokenInfo.abilityToken == abilityToken;
@@ -442,6 +438,7 @@ WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property
         }
         if (session->isUIFirstEnabled_) {
             session->SetSystemSceneForceUIFirst(false);
+            session->isUIFirstEnabled_ = false;
         }
         return WSError::WS_OK;
     }, __func__);
@@ -1812,12 +1809,10 @@ void SceneSession::UpdateSessionRectPosYFromClient(SizeChangeReason reason, Disp
 {
     if (!PcFoldScreenManager::GetInstance().IsHalfFolded(GetScreenId()) ||
         PcFoldScreenManager::GetInstance().HasSystemKeyboard()) {
-        TLOGI(
+        TLOGD(
             WmsLogTag::WMS_LAYOUT, "winId: %{public}d, displayId: %{public}" PRIu64, GetPersistentId(), GetScreenId());
         return;
     }
-    TLOGI(WmsLogTag::WMS_LAYOUT, "winId: %{public}d, reason: %{public}u, lastRect: %{public}s, currRect: %{public}s",
-        GetPersistentId(), reason, GetSessionRect().ToString().c_str(), rect.ToString().c_str());
     if (reason != SizeChangeReason::RESIZE) {
         configDisplayId_ = configDisplayId;
     }
@@ -3993,7 +3988,9 @@ WSError SceneSession::UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsC
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "get nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
-    RSAdapterUtil::SetRSUIContext(rsCanvasNode, GetRSUIContext(), true);
+    auto rsUIContext = GetRSUIContext();
+    RSAdapterUtil::SetRSUIContext(rsCanvasNode, rsUIContext, true);
+    RSAdapterUtil::SetRSTransactionHandler(rsTransaction, rsUIContext);
     if (rsTransaction != nullptr) {
         rsTransaction->Begin();
         TLOGD(WmsLogTag::WMS_LAYOUT_PC, "begin rsTransaction");
@@ -7147,10 +7144,10 @@ WSError SceneSession::OnLayoutFullScreenChange(bool isLayoutFullScreen)
     PostTask([weakThis = wptr(this), isLayoutFullScreen, where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s session is null", where);
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s session is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s isLayoutFullScreen: %{public}d", where, isLayoutFullScreen);
+        TLOGNI(WmsLogTag::WMS_LAYOUT_PC, "%{public}s isLayoutFullScreen: %{public}d", where, isLayoutFullScreen);
         if (session->onLayoutFullScreenChangeFunc_) {
             session->SetIsLayoutFullScreen(isLayoutFullScreen);
             session->onLayoutFullScreenChangeFunc_(isLayoutFullScreen);
@@ -8104,11 +8101,11 @@ bool SceneSession::IsImmersiveType() const
 bool SceneSession::IsPcOrPadEnableActivation() const
 {
     auto property = GetSessionProperty();
-    bool isPcAppInPad = false;
+    bool isPcAppInLargeScreenDevice = false;
     if (property != nullptr) {
-        isPcAppInPad = property->GetIsPcAppInPad();
+        isPcAppInLargeScreenDevice = property->GetIsPcAppInPad();
     }
-    return systemConfig_.IsPcWindow() || IsFreeMultiWindowMode() || isPcAppInPad;
+    return systemConfig_.IsPcWindow() || IsFreeMultiWindowMode() || isPcAppInLargeScreenDevice;
 }
 
 void SceneSession::SetMinimizedFlagByUserSwitch(bool isMinimized)
@@ -8621,27 +8618,12 @@ void SceneSession::AddRSNodeModifier(bool isDark, const std::shared_ptr<RSBaseNo
             Rosen::RSColor::FromArgbInt(SIDEBAR_DEFAULT_MASKCOLOR_LIGHT));
     }
 
-#if defined(MODIFIER_NG)
     auto modifier = std::make_shared<Rosen::ModifierNG::RSBehindWindowFilterModifier>();
     modifier->AttachProperty(ModifierNG::RSPropertyType::BEHIND_WINDOW_FILTER_RADIUS, blurRadiusValue_);
     modifier->AttachProperty(ModifierNG::RSPropertyType::BEHIND_WINDOW_FILTER_SATURATION, blurSaturationValue_);
     modifier->AttachProperty(ModifierNG::RSPropertyType::BEHIND_WINDOW_FILTER_BRIGHTNESS, blurBrightnessValue_);
     modifier->AttachProperty(ModifierNG::RSPropertyType::BEHIND_WINDOW_FILTER_MASK_COLOR, blurMaskColorValue_);
     rsNode->AddModifier(modifier);
-#else
-    std::shared_ptr<Rosen::RSBehindWindowFilterRadiusModifier> radius =
-        std::make_shared<Rosen::RSBehindWindowFilterRadiusModifier>(blurRadiusValue_);
-    rsNode->AddModifier(radius);
-    std::shared_ptr<Rosen::RSBehindWindowFilterSaturationModifier> saturation =
-        std::make_shared<Rosen::RSBehindWindowFilterSaturationModifier>(blurSaturationValue_);
-    rsNode->AddModifier(saturation);
-    std::shared_ptr<Rosen::RSBehindWindowFilterBrightnessModifier> brightness =
-        std::make_shared<Rosen::RSBehindWindowFilterBrightnessModifier>(blurBrightnessValue_);
-    rsNode->AddModifier(brightness);
-    std::shared_ptr<Rosen::RSBehindWindowFilterMaskColorModifier> modifier =
-        std::make_shared<Rosen::RSBehindWindowFilterMaskColorModifier>(blurMaskColorValue_);
-    rsNode->AddModifier(modifier);
-#endif
 }
 
 void SceneSession::SetSidebarBlur(bool isDefaultSidebarBlur, bool isNeedAnimation)
@@ -8763,7 +8745,7 @@ void SceneSession::NotifyKeyboardAnimationWillBegin(bool isKeyboardShow, const W
             return;
         }
         if (session->sessionStage_ == nullptr) {
-            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s sessionStage_ is null, id: %{public}d",
+            TLOGND(WmsLogTag::WMS_KEYBOARD, "%{public}s sessionStage_ is null, id: %{public}d",
                 where, session->GetPersistentId());
             return;
         }

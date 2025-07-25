@@ -60,6 +60,7 @@ void HidumpController::DumpSceneSessionParamList(std::ostringstream& oss)
     DumpVisibleParamList(oss);
 }
 
+// LCOV_EXCL_START
 void HidumpController::DumpSceneSessionParam(std::ostringstream& oss, sptr<SceneSession> session)
 {
     std::string sName = session->GetWindowNameAllType();
@@ -89,6 +90,7 @@ void HidumpController::DumpSceneSessionParam(std::ostringstream& oss, sptr<Scene
     DumpVisibleParam(oss, session);
     oss << std::endl;
 }
+// LCOV_EXCL_STOP
 
 void HidumpController::DumpSessionParamList(std::ostringstream& oss)
 {
@@ -104,6 +106,7 @@ void HidumpController::DumpSessionParamList(std::ostringstream& oss)
         << std::endl;
 }
 
+// LCOV_EXCL_START
 void HidumpController::DumpSessionParam(
     std::ostringstream& oss, sptr<SceneSession> session, sptr<WindowSessionProperty> property)
 {
@@ -138,6 +141,7 @@ void HidumpController::DumpSessionParam(
         << static_cast<uint32_t>(session->GetForceHideState()) << "|"
         << std::endl;
 }
+// LCOV_EXCL_STOP
 
 void HidumpController::DumpLayoutRectParamList(std::ostringstream& oss)
 {
@@ -151,6 +155,7 @@ void HidumpController::DumpLayoutRectParamList(std::ostringstream& oss)
         << std::endl;
 }
 
+// LCOV_EXCL_START
 void HidumpController::DumpLayoutRectParam(
     std::ostringstream& oss, sptr<SceneSession> session, sptr<WindowSessionProperty> property)
 {
@@ -196,6 +201,7 @@ void HidumpController::DumpLayoutRectParam(
         << std::setprecision(precision) << trans.translateZ_ << "]|"
         << std::endl;
 }
+// LCOV_EXCL_STOP
 
 void HidumpController::DumpLayoutParamList(std::ostringstream& oss)
 {
@@ -208,6 +214,7 @@ void HidumpController::DumpLayoutParamList(std::ostringstream& oss)
         << std::endl;
 }
 
+// LCOV_EXCL_START
 void HidumpController::DumpLayoutParam(
     std::ostringstream& oss, sptr<SceneSession> session, sptr<WindowSessionProperty> property)
 {
@@ -234,6 +241,7 @@ void HidumpController::DumpLayoutParam(
         << session->IsTemporarilyShowWhenLocked() << "|"
         << std::endl;
 }
+// LCOV_EXCL_STOP
 
 void HidumpController::DumpAbilityParamList(std::ostringstream& oss)
 {
@@ -248,6 +256,7 @@ void HidumpController::DumpAbilityParamList(std::ostringstream& oss)
         << std::endl;
 }
 
+// LCOV_EXCL_START
 void HidumpController::DumpAbilityParam(
     std::ostringstream& oss, sptr<SceneSession> session, sptr<WindowSessionProperty> property)
 {
@@ -277,6 +286,7 @@ void HidumpController::DumpAbilityParam(
         << property->GetCallingSessionId() << "|"
         << std::endl;
 }
+// LCOV_EXCL_STOP
 
 void HidumpController::DumpKeyboardParamList(std::ostringstream& oss)
 {
@@ -291,6 +301,7 @@ void HidumpController::DumpKeyboardParamList(std::ostringstream& oss)
         << std::endl;
 }
 
+// LCOV_EXCL_START
 void HidumpController::DumpKeyboardParam(
     std::ostringstream& oss, sptr<SceneSession> session, sptr<WindowSessionProperty> property)
 {
@@ -337,6 +348,7 @@ void HidumpController::DumpKeyboardParam(
         << "[" << oriPosYBeforeRaisedByKeyboard << "]|"
         << std::endl;
 }
+// LCOV_EXCL_STOP
 
 void HidumpController::DumpSysconfigParamList(std::ostringstream& oss)
 {
@@ -350,6 +362,7 @@ void HidumpController::DumpSysconfigParamList(std::ostringstream& oss)
         << std::endl;
 }
 
+// LCOV_EXCL_START
 void HidumpController::DumpSysconfigParam(std::ostringstream& oss, sptr<SceneSession> session)
 {
     SystemSessionConfig systemConfig = session->GetSystemConfig();
@@ -380,9 +393,11 @@ void HidumpController::DumpSysconfigParam(std::ostringstream& oss, sptr<SceneSes
         <<  "[" << freeMultiWindowConfig.isSystemDecorEnable_ << " "
         << freeMultiWindowConfig.decorWindowModeSupportType_ << " "
         << static_cast<uint32_t>(freeMultiWindowConfig.defaultWindowMode_) << " "
-        << freeMultiWindowConfig.maxMainFloatingWindowNumber_<< "]|"
+        << freeMultiWindowConfig.maxMainFloatingWindowNumber_ << " "
+        << static_cast<uint32_t>(freeMultiWindowConfig.defaultDragResizeType_) << "]|"
         << std::endl;
 }
+// LCOV_EXCL_STOP
 
 void HidumpController::DumpLifeParamList(std::ostringstream& oss)
 {
@@ -392,6 +407,7 @@ void HidumpController::DumpLifeParamList(std::ostringstream& oss)
         << std::endl;
 }
 
+// LCOV_EXCL_START
 void HidumpController::DumpLifeParam(std::ostringstream& oss, sptr<SceneSession> session)
 {
     oss << "Life: "
@@ -407,6 +423,7 @@ void HidumpController::DumpLifeParam(std::ostringstream& oss, sptr<SceneSession>
         << session->sessionInfo_.isPersistentRecover_ << "|"
         << std::endl;
 }
+// LCOV_EXCL_STOP
 
 void HidumpController::DumpDisplayParamList(std::ostringstream& oss)
 {
@@ -415,6 +432,7 @@ void HidumpController::DumpDisplayParamList(std::ostringstream& oss)
         << std::endl;
 }
 
+// LCOV_EXCL_START
 void HidumpController::DumpDisplayParam(
     std::ostringstream& oss, sptr<SceneSession> session, sptr<WindowSessionProperty> property)
 {
@@ -427,6 +445,7 @@ void HidumpController::DumpDisplayParam(
         << property->GetDisplayId() << "|"
         << std::endl;
 }
+// LCOV_EXCL_STOP
 
 void HidumpController::DumpFocusParamList(std::ostringstream& oss)
 {
@@ -435,6 +454,7 @@ void HidumpController::DumpFocusParamList(std::ostringstream& oss)
         << std::endl;
 }
 
+// LCOV_EXCL_START
 void HidumpController::DumpFocusParam(
     std::ostringstream& oss, sptr<SceneSession> session, sptr<WindowSessionProperty> property)
 {
@@ -445,6 +465,7 @@ void HidumpController::DumpFocusParam(
         << property->GetFocusable() << "|"
         << std::endl;
 }
+// LCOV_EXCL_STOP
 
 void HidumpController::DumpInputParamList(std::ostringstream& oss)
 {
@@ -453,6 +474,7 @@ void HidumpController::DumpInputParamList(std::ostringstream& oss)
         << std::endl;
 }
 
+// LCOV_EXCL_START
 void HidumpController::DumpInputParam(
     std::ostringstream& oss, sptr<SceneSession> session, sptr<WindowSessionProperty> property)
 {
@@ -463,6 +485,7 @@ void HidumpController::DumpInputParam(
         << property->GetTouchable() << "|"
         << std::endl;
 }
+// LCOV_EXCL_STOP
 
 void HidumpController::DumpLakeParamList(std::ostringstream& oss)
 {
@@ -471,6 +494,7 @@ void HidumpController::DumpLakeParamList(std::ostringstream& oss)
         << std::endl;
 }
 
+// LCOV_EXCL_START
 void HidumpController::DumpLakeParam(std::ostringstream& oss, sptr<SceneSession> session)
 {
     oss << "Lake: "
@@ -478,6 +502,7 @@ void HidumpController::DumpLakeParam(std::ostringstream& oss, sptr<SceneSession>
         << session->sessionInfo_.collaboratorType_ << "|"
         << std::endl;
 }
+// LCOV_EXCL_STOP
 
 void HidumpController::DumpCOMParamList(std::ostringstream& oss)
 {
@@ -486,12 +511,14 @@ void HidumpController::DumpCOMParamList(std::ostringstream& oss)
         << std::endl;
 }
 
+// LCOV_EXCL_START
 void HidumpController::DumpCOMParam(std::ostringstream& oss, sptr<SceneSession> session)
 {
     oss << "COM: "
         << session->GetDrawingContentState() << "|"
         << std::endl;
 }
+// LCOV_EXCL_STOP
 
 void HidumpController::DumpVisibleParamList(std::ostringstream& oss)
 {
@@ -500,6 +527,7 @@ void HidumpController::DumpVisibleParamList(std::ostringstream& oss)
         << std::endl;
 }
 
+// LCOV_EXCL_START
 void HidumpController::DumpVisibleParam(std::ostringstream& oss, sptr<SceneSession> session)
 {
     oss << "Visible: "
@@ -507,5 +535,6 @@ void HidumpController::DumpVisibleParam(std::ostringstream& oss, sptr<SceneSessi
         << static_cast<uint32_t>(session->GetVisibilityState()) << "|"
         << std::endl;
 }
+// LCOV_EXCL_STOP
 }
 } // namespace OHOS::Rosen

@@ -932,8 +932,8 @@ HWTEST_F(WindowSessionTest3, SetAcquireRotateAnimationConfigFunc, TestSize.Level
 HWTEST_F(WindowSessionTest3, SetIsPcAppInPad, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
-    bool isPcAppInPad = false;
-    auto result = session_->SetIsPcAppInPad(isPcAppInPad);
+    bool isPcAppInLargeScreenDevice = false;
+    auto result = session_->SetIsPcAppInPad(isPcAppInLargeScreenDevice);
     EXPECT_EQ(result, WSError::WS_OK);
 }
 
