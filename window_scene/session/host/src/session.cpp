@@ -4547,7 +4547,7 @@ std::shared_ptr<Media::PixelMap> Session::SetFreezeImmediately(float scale, bool
     auto callback = std::make_shared<SurfaceCaptureFuture>();
     auto scaleValue = (!MathHelper::GreatNotEqual(scale, 0.0f) ||
         !MathHelper::GreatNotEqual(scale, std::numeric_limits<float>::min())) ? snapshotScale_ : scale;
-    bool isNeedF16WindowShot = system::GetBoolParameter("persis.sys.graphic.scrgb.enabled", false);    
+    bool isNeedF16WindowShot = system::GetBoolParameter("persist.sys.graphic.scrgb.enabled", false);    
     RSSurfaceCaptureConfig config = {
         .scaleX = scaleValue,
         .scaleY = scaleValue,
