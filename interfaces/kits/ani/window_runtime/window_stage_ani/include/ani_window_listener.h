@@ -81,11 +81,11 @@ class AniWindowListener : public IWindowChangeListener,
                         public IDisplayIdChangeListener {
 public:
     AniWindowListener(ani_env* env, ani_ref callback, CaseType caseType)
-        : env_(env), aniCallBack_(callback), caseType_(caseType),
+        : env_(env), aniCallback_(callback), caseType_(caseType),
         weakRef_(wptr<AniWindowListener> (this)) {}
     ~AniWindowListener();
-    ani_ref GetAniCallBack() const { return aniCallBack_; }
-    void SetAniCallBack(ani_ref aniCallBack) { aniCallBack_ = aniCallBack; }
+    ani_ref GetAniCallback() const { return aniCallback_; }
+    void SetAniCallback(ani_ref aniCallback) { aniCallback_ = aniCallback; }
     void OnSystemBarPropertyChange(DisplayId displayId, const SystemBarRegionTints& tints) override;
     void OnSizeChange(Rect rect, WindowSizeChangeReason reason,
     const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
@@ -129,10 +129,10 @@ private:
 
     Rect currRect_ = {0, 0, 0, 0};
     WindowState state_ {WindowState::STATE_INITIAL};
-    void LifeCycleCallBack(LifeCycleEventType eventType);
+    void LifeCycleCallback(LifeCycleEventType eventType);
     int64_t noInteractionTimeout_ = 0;
     ani_env* env_ = nullptr;
-    ani_ref aniCallBack_;
+    ani_ref aniCallback_;
     CaseType caseType_ = CaseType::CASE_WINDOW;
     wptr<AniWindowListener> weakRef_ = nullptr;
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_ = nullptr;

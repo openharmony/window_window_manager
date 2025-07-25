@@ -404,12 +404,12 @@ namespace window {
     /**
      * Id of display
      *
-     * @type { number }
+     * @type { long }
      * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @systemapi Hide this for inner system use.
      * @since 8
      */
-    displayId: number;
+    displayId: long;
     /**
      * Region tint of systembar
      *
@@ -422,7 +422,7 @@ namespace window {
   }
 
   export class SystemBarTintStateInternal implements SystemBarTintState {
-    displayId: number;
+    displayId: long;
     regionTint: Array<SystemBarRegionTint>;
   }
 
@@ -983,7 +983,7 @@ export interface WindowProperties {
     /**
      * Brightness value of window.
      *
-     * @type { number }
+     * @type { double }
      * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @crossplatform
      * @since 10
@@ -991,13 +991,13 @@ export interface WindowProperties {
     /**
      * Brightness value of window.
      *
-     * @type { number }
+     * @type { double }
      * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @crossplatform
      * @atomicservice
      * @since 11
      */
-    brightness: number;
+    brightness: double;
 
     /**
      * The dimbehind value of window.
@@ -1081,29 +1081,39 @@ export interface WindowProperties {
     /**
      * Window id.
      *
-     * @type { number }
+     * @type { int }
      * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @since 9
      */
     /**
      * Window id.
      *
-     * @type { number }
+     * @type { int }
      * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @atomicservice
      * @since 12
      */
-    id: number;
+    id: int;
 
     /**
      * display id.
      *
-     * @type { ?number }
+     * @type { ?long }
      * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @atomicservice
      * @since 12
      */
-    displayId: number;
+    displayId?: long;
+
+    /**
+     * window name.
+     *
+     * @type { ?string }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @atomicservice
+     * @since 18
+     */
+    name?: string;
 }
 
 export class WindowPropertiesInternal implements WindowProperties {
@@ -1114,15 +1124,16 @@ export class WindowPropertiesInternal implements WindowProperties {
     isLayoutFullScreen: boolean;
     focusable: boolean;
     touchable: boolean;
-    brightness: number;
+    brightness: double;
     dimBehindValue: number;
     isKeepScreenOn: boolean;
     isPrivacyMode: boolean;
     isRoundCorner: boolean;
     isTransparent: boolean;
-    id: number;
-    displayId: number;
+    id: int;
+    displayId?: long;
     typeInternal: int;
+    name?: string;
 }
 
 /**
@@ -1201,12 +1212,12 @@ export interface Configuration {
     /**
      * Indicates display ID.
      *
-     * @type { ?number }
+     * @type { ?long }
      * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @atomicservice
      * @since 12
      */
-    displayId?: number;
+    displayId?: long;
 
     /**
      * Indicates Parent window id
@@ -1250,7 +1261,7 @@ export class ConfigurationInternal implements Configuration {
     name: string;
     windowType: WindowType;
     ctx?: BaseContext;
-    displayId?: number;
+    displayId?: long;
     parentId?: int;
     decorEnabled?: boolean;
     title?: string;
@@ -1261,9 +1272,9 @@ export interface MoveConfiguration {
 }
 
 export interface WindowDensityInfo {
-    systemDensity: number;
-    defaultDensity: number;
-    customDensity: number;
+    systemDensity: double;
+    defaultDensity: double;
+    customDensity: double;
 }
 
 export interface AvoidAreaOptions {
@@ -1982,7 +1993,7 @@ export class WindowInternal implements Window {
     private native setWindowFocusableSync(nativeObj: long, isFocusable: boolean): void;
 
     private native setWindowTouchableSync(nativeObj: long, isTouchable: boolean): void;
-    private native onNoInteractionDetected(nativeObj: long, type: string, timeout: number, callback: Object): void;
+    private native onNoInteractionDetected(nativeObj: long, type: string, timeout: long, callback: Object): void;
     private native keepKeyboardOnFocusSync(nativeObj: long, enable: boolean): void;
     private native onSync(nativeObj: long, type: string, callback: object): void;
     private native offSync(nativeObj: long, type: string, callback?: object): void;
@@ -2736,7 +2747,7 @@ export class WindowInternal implements Window {
       this.onSync(this.nativeObj, type, callback);
     }
 
-    public on<T>(type: 'noInteractionDetected', timeout: number, callback: Callback<T>): void {
+    public on<T>(type: 'noInteractionDetected', timeout: long, callback: Callback<T>): void {
       this.onNoInteractionDetected(this.nativeObj, type, timeout, callback as WindowVoidCallback);
     }
 
@@ -2929,7 +2940,7 @@ export interface Window {
     rotate(rotateOptions: RotateOptions): void;
     setShadow(radius: double, color?: string, offsetX?: double, offsetY?: double): void;
     on<T>(type: string, callback: Callback<T>): void;
-    on<T>(type: 'noInteractionDetected', timeout: number, callback: Callback<T>): void;
+    on<T>(type: 'noInteractionDetected', timeout: long, callback: Callback<T>): void;
     off<T>(type: string, callback?: Callback<T>): void;
 }
 
@@ -3061,32 +3072,32 @@ export function off<T>(type: string, callback?: Callback<T>): void {
   offSync(nativeObj, type, callback);
 }
 
-function runWindowListenerVoidArgCallBack(cb: object): void {
+function runWindowListenerVoidArgCallback(cb: object): void {
   const func = cb as () => void;
   func();
 }
 
-function runWindowListenerBooleanArgCallBack(cb: object, cbArg: boolean): void {
+function runWindowListenerBooleanArgCallback(cb: object, cbArg: boolean): void {
   const func = cb as (cbArg: boolean) => void;
   func(cbArg);
 }
 
-function runSystemDensityChangeCallback(cb: object, density: number): void {
-  const func = cb as (density: number) => void;
-  func(density as number);
+function runSystemDensityChangeCallback(cb: object, density: double): void {
+  const func = cb as (density: double) => void;
+  func(density as double);
 }
 
-function runDisplayIdChangeCallback(cb: object, displayId: number): void {
-  const func = cb as (displayId: number) => void;
-  func(displayId as number);
+function runDisplayIdChangeCallback(cb: object, displayId: long): void {
+  const func = cb as (displayId: long) => void;
+  func(displayId as long);
 }
 
-function runSystemBarTintChangeCallBack(cb: object, tint: object): void {
+function runSystemBarTintChangeCallback(cb: object, tint: object): void {
   const func = cb as (tint: SystemBarTintState) => void;
   func(tint as SystemBarTintState);
 }
 
-function runAvoidAreaChangeCallBack(cb: object, area: object, type: int): void {
+function runAvoidAreaChangeCallback(cb: object, area: object, type: int): void {
   const func = cb as (data: AvoidAreaOptions) => void;
   func({type: type as AvoidAreaType, area: area as AvoidArea});
 }
@@ -3108,12 +3119,12 @@ function runWindowDialogTargetCallback(cb: object): void {
     func();
 }
 
-function runWindowEventCallBack(cb: object, cbArg: int): void {
+function runWindowEventCallback(cb: object, cbArg: int): void {
     const func = cb as (cbArg: WindowEventType) => void;
     func(cbArg as WindowEventType);
 }
 
-function runWindowStageEventCallBack(cb: object, cbArg: int): void {
+function runWindowStageEventCallback(cb: object, cbArg: int): void {
     const func = cb as (cbArg: WindowStageEventType) => void;
     func(cbArg as WindowStageEventType);
 }
@@ -3128,27 +3139,27 @@ function runWindowRectCallback(cb: object, cbArg: object): void {
     func(cbArg as Rect);
 }
 
-function runWindowSizeCallBack(cb: object, cbArg: object): void {
+function runWindowSizeCallback(cb: object, cbArg: object): void {
     const func = cb as (cbArg: Size) => void;
     func(cbArg as Size);
 }
 
-function runKeyboardHeightChangeCallBack(cb: object, cbArg: number): void {
+function runKeyboardHeightChangeCallback(cb: object, cbArg: number): void {
     const func = cb as (cbArg: number) => void;
     func(cbArg as number);
 }
 
-function runKeyboardDidShowCallBack(cb: object, cbArg: object): void {
+function runKeyboardDidShowCallback(cb: object, cbArg: object): void {
     const func = cb as (cbArg: KeyboardInfo) => void;
     func(cbArg as KeyboardInfo);
 }
 
-function runKeyboardDidHideCallBack(cb: object, cbArg: object): void {
+function runKeyboardDidHideCallback(cb: object, cbArg: object): void {
     const func = cb as (cbArg: KeyboardInfo) => void;
     func(cbArg as KeyboardInfo);
 }
 
-function runWindowStatusCallBack(cb: object, cbArg: int): void {
+function runWindowStatusCallback(cb: object, cbArg: int): void {
     const func = cb as (cbArg: WindowStatusType) => void;
     func(cbArg as WindowStatusType);
 }
