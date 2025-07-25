@@ -671,7 +671,7 @@ HWTEST_F(WindowSessionImplTest4, GetUIContentRemoteObj, TestSize.Level1)
     ASSERT_EQ(res, WSError::WS_OK);
     MockUIExtSessionPermission::SetIsSystemCallingFlag(false);
     res = window->GetUIContentRemoteObj(remoteObj);
-    ASSERT_EQ(res, WSError::WM_ERROR_NOT_SYSTEM_APP);
+    ASSERT_EQ(res, WSError::WS_ERROR_NOT_SYSTEM_APP);
     MockUIExtSessionPermission::ClearAllFlag();
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: GetUIContentRemoteObj end";
 }
