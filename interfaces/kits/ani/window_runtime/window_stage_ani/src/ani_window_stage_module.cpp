@@ -12,27 +12,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-
-#include "ani_window_stage.h"
-
 #include <memory>
 
 #include "ani.h"
 #include "ani_window.h"
 #include "ani_window_manager.h"
+#include "ani_window_stage.h"
 #include "ani_window_utils.h"
-#include "window_manager_hilog.h"
 #include "permission.h"
+#include "window_manager_hilog.h"
 #include "window_scene.h"
 
-using OHOS::Rosen::WindowScene;
+using namespace OHOS::Rosen;
 
 
 static void SetWindowRectAutoSave(ani_env* env, ani_object obj, ani_long nativeObj,
                                   ani_boolean enabled, ani_boolean isSaveBySpecifiedFlag)
 {
-    using namespace OHOS::Rosen;
     TLOGD(WmsLogTag::WMS_LAYOUT_PC, "[ANI] start");
     AniWindowStage* windowStage = reinterpret_cast<AniWindowStage*>(nativeObj);
     if (windowStage == nullptr || windowStage->GetWindowScene().lock() == nullptr) {
@@ -45,7 +41,6 @@ static void SetWindowRectAutoSave(ani_env* env, ani_object obj, ani_long nativeO
 
 static ani_boolean IsWindowRectAutoSave(ani_env* env, ani_object obj, ani_long nativeObj)
 {
-    using namespace OHOS::Rosen;
     TLOGD(WmsLogTag::WMS_LAYOUT_PC, "[ANI] start");
     AniWindowStage* windowStage = reinterpret_cast<AniWindowStage*>(nativeObj);
     if (windowStage == nullptr || windowStage->GetWindowScene().lock() == nullptr) {
@@ -58,7 +53,6 @@ static ani_boolean IsWindowRectAutoSave(ani_env* env, ani_object obj, ani_long n
 
 static void RemoveStartingWindow(ani_env* env, ani_object obj, ani_long nativeObj)
 {
-    using namespace OHOS::Rosen;
     TLOGD(WmsLogTag::WMS_STARTUP_PAGE, "[ANI] start");
     AniWindowStage* windowStage = reinterpret_cast<AniWindowStage*>(nativeObj);
     if (windowStage == nullptr || windowStage->GetWindowScene().lock() == nullptr) {
@@ -71,7 +65,6 @@ static void RemoveStartingWindow(ani_env* env, ani_object obj, ani_long nativeOb
 
 static ani_ref WindowGetMainWindow(ani_env* env, ani_object obj, ani_long nativeObj)
 {
-    using namespace OHOS::Rosen;
     TLOGD(WmsLogTag::DEFAULT, "[ANI]");
     AniWindowStage* windowStage = reinterpret_cast<AniWindowStage*>(nativeObj);
     if (windowStage == nullptr || windowStage->GetWindowScene().lock() == nullptr) {
@@ -83,7 +76,6 @@ static ani_ref WindowGetMainWindow(ani_env* env, ani_object obj, ani_long native
 
 static ani_ref CreateSubWindow(ani_env* env, ani_object obj, ani_long nativeObj, ani_string name)
 {
-    using namespace OHOS::Rosen;
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     AniWindowStage* windowStage = reinterpret_cast<AniWindowStage*>(nativeObj);
     if (windowStage == nullptr || windowStage->GetWindowScene().lock() == nullptr) {
@@ -96,9 +88,8 @@ static ani_ref CreateSubWindow(ani_env* env, ani_object obj, ani_long nativeObj,
 extern "C" {
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
-    using namespace OHOS::Rosen;
-    ani_status ret;
-    ani_env* env;
+    ani_status ret = ANI_OK;
+    ani_env* env = nullptr;
     if ((ret = vm->GetEnv(ANI_VERSION_1, &env)) != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] null env");
         return ANI_NOT_FOUND;
