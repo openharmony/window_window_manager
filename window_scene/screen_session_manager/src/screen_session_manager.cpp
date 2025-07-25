@@ -245,12 +245,12 @@ bool SortByScreenId(const ScreenId& screenIdA, const ScreenId& screenIdB)
 
 bool ScreenSessionManager::GetPcStatus() const
 {
-    std::lock_guard<std::mutex> lock(setPCStatusMutex_);
+    std::lock_guard<std::mutex> lock(setPcStatusMutex_);
     return g_isPcDevice;
 }
 
 void ScreenSessionManager::SetPcStatus(bool isPc) {
-    std::lock_guard<std::mutex> lock(setPCStatusMutex_);
+    std::lock_guard<std::mutex> lock(setPcStatusMutex_);
     g_isPcDevice = isPc;
 }
 
