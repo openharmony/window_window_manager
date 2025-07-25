@@ -149,7 +149,7 @@ public:
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId,
         DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen) override;
     virtual std::vector<std::shared_ptr<Media::PixelMap>> GetDisplayHDRSnapshot(DisplayId displayId,
-        DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen) override;
+        DmErrorCode& errorCode, bool isUseDma, bool isCaptureFullOfScreen) override;
     virtual std::shared_ptr<Media::PixelMap> GetSnapshotByPicker(Media::Rect &rect, DmErrorCode* errorCode) override;
     virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) override;
     virtual sptr<DisplayInfo> GetVisibleAreaDisplayInfoById(DisplayId displayId) override;
@@ -284,6 +284,8 @@ public:
     float GetSuperRotation() override;
     void SetLandscapeLockStatus(bool isLocked) override;
     bool GetTentMode();
+    bool IsLapTopLidOpen() const;
+    void SetLapTopLidOpenStatus(bool isLapTopLidOpen);
     ExtendScreenConnectStatus GetExtendScreenConnectStatus() override;
     bool GetIsExtendScreenConnected();
     void SetIsExtendScreenConnected(bool isExtendScreenConnected);
@@ -448,7 +450,7 @@ public:
     std::shared_ptr<Media::PixelMap> GetDisplaySnapshotWithOption(const CaptureOption& captureOption,
         DmErrorCode* errorCode) override;
     std::vector<std::shared_ptr<Media::PixelMap>> GetDisplayHDRSnapshotWithOption(const CaptureOption& captureOption,
-        DmErrorCode* errorCode) override;
+        DmErrorCode& errorCode) override;
     ScreenCombination GetScreenCombination(ScreenId screenId) override;
     DMError SetScreenSkipProtectedWindow(const std::vector<ScreenId>& screenIds, bool isEnable) override;
     void UpdateValidArea(ScreenId screenId, uint32_t validWidth, uint32_t validHeight);
@@ -470,6 +472,7 @@ public:
     void SetRSScreenPowerStatus(ScreenId screenId, ScreenPowerStatus status);
     void NotifyScreenMaskAppear() override;
     bool IsSystemSleep();
+    void SwitchSubscriberInit();
     bool GetKeyboardState() override;
     DMError GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
         ScreenId& screenId, DMRect& screenArea) override;
@@ -614,6 +617,8 @@ private:
         PowerStateChangeReason reason);
     bool IsExtendMode();
     bool IsScreenCasting();
+    bool GetPcStatus() const;
+    void SetPcStatus(bool isPc);
     const std::set<std::string> g_packageNames_ {};
 
     /**
@@ -657,6 +662,7 @@ private:
     int32_t currentUserId_ { 0 };
     int32_t currentUserIdForSettings_ { 0 };
     int32_t currentScbPId_ { -1 };
+    int32_t switchId_ { -1 };
     std::vector<int32_t> oldScbPids_ {};
     std::map<int32_t, sptr<IScreenSessionManagerClient>> clientProxyMap_;
     FoldDisplayMode oldScbDisplayMode_ = FoldDisplayMode::UNKNOWN;
@@ -675,6 +681,7 @@ private:
     std::mutex lastStatusUpdateMutex_;
 
     mutable std::recursive_mutex screenSessionMapMutex_;
+    std::mutex screenAgentMapMutex_;
     std::map<ScreenId, sptr<ScreenSession>> screenSessionMap_;
     mutable std::recursive_mutex physicalScreenSessionMapMutex_;
     std::map<ScreenId, sptr<ScreenSession>> physicalScreenSessionMap_;
@@ -699,6 +706,7 @@ private:
     bool isFoldScreenOuterScreenReady_ = false;
     bool isCameraBackSelfie_ = false;
     bool isDeviceShutDown_ = false;
+    bool needWaitAvailableArea_ = false;
     uint32_t hdmiScreenCount_ = 0;
     uint32_t virtualScreenCount_ = 0;
     uint32_t currentExpandScreenCount_ = 0;
@@ -724,6 +732,7 @@ private:
     bool isOuterOnlyModeBeforePowerOff_ = false;
     std::atomic<bool> isFoldStatusLocked_ = false;
     std::atomic<bool> isLandscapeLockStatus_ = false;
+    std::atomic<bool> isLapTopLidOpen_ = true;
 
     /**
      * On/Off screen
@@ -748,6 +757,7 @@ private:
     int32_t screenOnDelay_ {0};
 
     std::vector<ScreenId> mirrorScreenIds_;
+    std::mutex mirrorScreenIdsMutex_;
     std::mutex snapBypickerMutex_;
     std::mutex switchUserMutex_;
     std::condition_variable switchUserCV_;
@@ -755,6 +765,9 @@ private:
     std::mutex screenChangeMutex_;
     std::mutex screenMaskMutex_;
     std::condition_variable screenMaskCV_;
+    std::mutex displayAddMutex_;
+    std::condition_variable displayAddCV_;
+    mutable std::mutex setPcStatusMutex_;
 
     std::mutex freezedPidListMutex_;
     std::set<int32_t> freezedPidList_;
@@ -818,6 +831,7 @@ private:
     void SetExtendScreenDpi();
     bool SwitchPcMode();
     void SwitchExternalScreenToMirror();
+    void WaitUpdateAvailableAreaForPc();
 
     LowTempMode lowTemp_ {LowTempMode::UNKNOWN};
     std::mutex lowTempMutex_;

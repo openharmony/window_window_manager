@@ -365,6 +365,16 @@ HWTEST_F(WindowSceneSessionImplTest5, SetCustomDensity01, TestSize.Level1)
     EXPECT_EQ(density, window->customDensity_);
     applyToSubWindow = true;
     EXPECT_EQ(WMError::WM_OK, window->SetCustomDensity(density, applyToSubWindow));
+
+    sptr<WindowSceneSessionImpl> window1;
+    WindowSceneSessionImpl::windowSessionMap_.insert(std::make_pair(window->GetWindowName(),
+        std::pair<uint64_t, sptr<WindowSessionImpl>>(1, window)));
+    WindowSceneSessionImpl::windowSessionMap_.insert(std::make_pair("winTest",
+        std::pair<uint64_t, sptr<WindowSessionImpl>>(2, window1)));
+    EXPECT_EQ(WMError::WM_OK, window->SetCustomDensity(density, applyToSubWindow));
+    EXPECT_EQ(WMError::WM_OK, window->SetCustomDensity(1.6f, false));
+    WindowSceneSessionImpl::windowSessionMap_.erase(window->GetWindowName());
+    WindowSceneSessionImpl::windowSessionMap_.erase("winTest");
 }
 
 /**
@@ -494,6 +504,28 @@ HWTEST_F(WindowSceneSessionImplTest5, IsMainWindowFullScreenAcrossDisplays01, Te
     window->state_ = WindowState::STATE_CREATED;
     ret = window->IsMainWindowFullScreenAcrossDisplays(isAcrossDisplays);
     EXPECT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: UpdateColorMode
+ * @tc.desc: UpdateColorMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, UpdateColorMode, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->hostSession_ = nullptr;
+    auto ret = window->UpdateColorMode();
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    ret = window->UpdateColorMode();
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
 }
 
 /**
@@ -1557,6 +1589,9 @@ HWTEST_F(WindowSceneSessionImplTest5, GetTargetOrientationConfigInfo, Function |
     window->state_ = WindowState::STATE_CREATED;
     EXPECT_EQ(WMError::WM_OK,
     window->GetTargetOrientationConfigInfo(targetOrientation, properties, config, avoidAreas));
+    targetOrientation = Orientation::INVALID;
+    EXPECT_EQ(WMError::WM_OK,
+    window->GetTargetOrientationConfigInfo(targetOrientation, properties, config, avoidAreas));
 }
 
 /**
@@ -2037,37 +2072,6 @@ HWTEST_F(WindowSceneSessionImplTest5, SetFrameRectForPartialZoomIn02, Function |
 }
 
 /**
- * @tc.name: UpdateEnableDragWhenSwitchMultiWindow
- * @tc.desc: UpdateEnableDragWhenSwitchMultiWindow
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest5, UpdateEnableDragWhenSwitchMultiWindow, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("UpdateEnableDragWhenSwitchMultiWindow");
-    option->SetWindowType(WindowType::WINDOW_TYPE_MAGNIFICATION);
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    window->hasSetEnableDrag_.store(true);
-    window->UpdateEnableDragWhenSwitchMultiWindow(false);
-    EXPECT_EQ(true, window->property_->dragEnabled_);
-
-    window->hasSetEnableDrag_.store(false);
-    window->UpdateEnableDragWhenSwitchMultiWindow(false);
-    EXPECT_EQ(false, window->property_->dragEnabled_);
-
-    window->property_->type_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
-    sptr<CompatibleModeProperty> property = sptr<CompatibleModeProperty>::MakeSptr();
-    property->disableDragResize_ = true;
-    window->property_->compatibleModeProperty_ = property;
-    window->UpdateEnableDragWhenSwitchMultiWindow(true);
-    EXPECT_EQ(false, window->property_->dragEnabled_);
-
-    property->disableDragResize_ = false;
-    window->UpdateEnableDragWhenSwitchMultiWindow(true);
-    EXPECT_EQ(true, window->property_->dragEnabled_);
-}
-
-/**
  * @tc.name: GetConfigurationFromAbilityInfo
  * @tc.desc: GetConfigurationFromAbilityInfo
  * @tc.type: FUNC
@@ -2120,15 +2124,120 @@ HWTEST_F(WindowSceneSessionImplTest5, TestMoveWindowToGlobalDisplay, TestSize.Le
     ret = window->MoveWindowToGlobalDisplay(100, 100);
     EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS);
 
-    // Case 3: Illegal position
+    // Case 3: Same position
+    property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    ret = window->MoveWindowToGlobalDisplay(100, 100);
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    // Case 4: Illegal position
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     ret = window->MoveWindowToGlobalDisplay(INT32_MAX, INT32_MAX);
     EXPECT_EQ(ret, WMError::WM_ERROR_ILLEGAL_PARAM);
 
-    // Case 4: Move to new position
-    EXPECT_CALL(*mockHostSession, UpdateGlobalDisplayRectFromClient(_, _)).Times(1).WillOnce(Return(WSError::WS_OK));
+    EXPECT_CALL(*mockHostSession, UpdateGlobalDisplayRectFromClient(_, _)).Times(2).WillOnce(Return(WSError::WS_OK));
+
+    // Case 5: Move to new position
+    window->state_ = WindowState::STATE_SHOWN;
     ret = window->MoveWindowToGlobalDisplay(200, 300);
     EXPECT_EQ(ret, WMError::WM_OK);
+
+    // Case 6: Window is not shown
+    window->state_ = WindowState::STATE_HIDDEN;
+    ret = window->MoveWindowToGlobalDisplay(200, 300);
+    EXPECT_EQ(ret, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: GetDragAreaByDownEvent01
+ * @tc.desc: GetDragAreaByDownEvent01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, GetDragAreaByDownEvent01, TestSize.Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetDragAreaByDownEvent01");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(nullptr, pointerEvent);
+    MMI::PointerEvent::PointerItem pointerItem;
+
+    windowSceneSessionImpl->SetUniqueVirtualPixelRatio(true, 0.0f);
+    AreaType dragType = windowSceneSessionImpl->GetDragAreaByDownEvent(pointerEvent, pointerItem);
+    EXPECT_EQ(dragType, AreaType::UNDEFINED);
+}
+
+/**
+ * @tc.name: GetDragAreaByDownEvent02
+ * @tc.desc: GetDragAreaByDownEvent02
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, GetDragAreaByDownEvent02, TestSize.Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetDragAreaByDownEvent02");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(nullptr, pointerEvent);
+    pointerEvent->SetSourceType(1);
+    MMI::PointerEvent::PointerItem pointerItem;
+
+    windowSceneSessionImpl->SetUniqueVirtualPixelRatio(true, 1.0f);
+    Rect rect = {1, 1, 1, 1};
+    windowSceneSessionImpl->property_->SetWindowRect(rect);
+    pointerItem.SetWindowX(1);
+    pointerItem.SetWindowY(1);
+    windowSceneSessionImpl->property_->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
+    AreaType dragType = windowSceneSessionImpl->GetDragAreaByDownEvent(pointerEvent, pointerItem);
+    EXPECT_EQ(dragType, AreaType::LEFT_TOP);
+}
+
+/**
+ * @tc.name: GetDragAreaByDownEvent03
+ * @tc.desc: GetDragAreaByDownEvent03
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, GetDragAreaByDownEvent03, TestSize.Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetDragAreaByDownEvent03");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(nullptr, pointerEvent);
+    pointerEvent->SetSourceType(1);
+    MMI::PointerEvent::PointerItem pointerItem;
+
+    windowSceneSessionImpl->SetUniqueVirtualPixelRatio(true, 1.0f);
+    Rect rect = {1, 1, 1, 1};
+    windowSceneSessionImpl->property_->SetWindowRect(rect);
+    pointerItem.SetWindowX(1);
+    pointerItem.SetWindowY(1);
+    windowSceneSessionImpl->property_->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FULLSCREEN);
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    windowSceneSessionImpl->property_->SetDragEnabled(true);
+    AreaType dragType = windowSceneSessionImpl->GetDragAreaByDownEvent(pointerEvent, pointerItem);
+    EXPECT_EQ(dragType, AreaType::LEFT_TOP);
+}
+
+/**
+ * @tc.name: GetDragAreaByDownEvent04
+ * @tc.desc: GetDragAreaByDownEvent04
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, GetDragAreaByDownEvent04, TestSize.Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetDragAreaByDownEvent04");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(nullptr, pointerEvent);
+    pointerEvent->SetSourceType(1);
+    MMI::PointerEvent::PointerItem pointerItem;
+    windowSceneSessionImpl->SetUniqueVirtualPixelRatio(true, 1.0f);
+    windowSceneSessionImpl->property_->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FULLSCREEN);
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    windowSceneSessionImpl->property_->SetDragEnabled(false);
+    AreaType dragType = windowSceneSessionImpl->GetDragAreaByDownEvent(pointerEvent, pointerItem);
+    EXPECT_EQ(dragType, AreaType::UNDEFINED);
 }
 }
 } // namespace Rosen

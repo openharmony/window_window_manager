@@ -25,6 +25,7 @@
 #include "session/host/include/main_session.h"
 #include "wm_common.h"
 #include "mock/mock_session_stage.h"
+#include "mock/mock_accesstoken_kit.h"
 #include "input_event.h"
 #include <pointer_event.h>
 #include <ui/rs_surface_node.h>
@@ -461,8 +462,8 @@ HWTEST_F(SceneSessionTest, HandleActionUpdateWindowShadowEnabled01, TestSize.Lev
     ASSERT_NE(sceneSession, nullptr);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     sceneSession->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
     sceneSession->containerColorList_.insert("abc");
-
     auto ret = sceneSession->HandleActionUpdateWindowShadowEnabled(property, action);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
 
@@ -770,6 +771,39 @@ HWTEST_F(SceneSessionTest, UpdateAcrossDisplaysChangeRegistered01, TestSize.Leve
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     ret = sceneSession->UpdateAcrossDisplaysChangeRegistered(true);
     EXPECT_NE(ret, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: ColorMode01
+ * @tc.desc: Test OnUpdateColorMode And GetAbilityColorMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, ColorMode01, TestSize.Level0)
+{
+    SessionInfo info;
+    info.abilityName_ = "test";
+    info.bundleName_ = "test";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    std::string colorMode = "dark";
+    bool hasDarkRes = true;
+    auto ret = sceneSession->OnUpdateColorMode(colorMode, hasDarkRes);
+    EXPECT_NE(WMError::WM_OK, ret);
+
+    std::string resMode = sceneSession->GetAbilityColorMode();
+    EXPECT_NE("dark", resMode);
+
+    hasDarkRes = false;
+    ret = sceneSession->OnUpdateColorMode(colorMode, hasDarkRes);
+    EXPECT_NE(WMError::WM_OK, ret);
+    resMode = sceneSession->GetAbilityColorMode();
+    EXPECT_NE("auto", resMode);
+
+    colorMode = "light";
+    ret = sceneSession->OnUpdateColorMode(colorMode, hasDarkRes);
+    EXPECT_NE(WMError::WM_OK, ret);
+    resMode = sceneSession->GetAbilityColorMode();
+    EXPECT_NE("light", resMode);
 }
 
 /**

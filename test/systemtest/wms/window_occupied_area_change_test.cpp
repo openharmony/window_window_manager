@@ -16,6 +16,7 @@
 // gtest
 #include <gtest/gtest.h>
 #include "display_manager_proxy.h"
+#include "modifier_render_thread/rs_modifiers_draw_thread.h"
 #include "window_test_utils.h"
 #include "wm_common.h"
 using namespace testing;
@@ -76,7 +77,12 @@ void WindowOccupiedAreaChangeTest::SetUpTestCase()
     Utils::InitByDisplayRect(displayRect);
 }
 
-void WindowOccupiedAreaChangeTest::TearDownTestCase() {}
+void WindowOccupiedAreaChangeTest::TearDownTestCase()
+{
+#ifdef RS_ENABLE_VK
+    RSModifiersDrawThread::Destroy();
+#endif
+}
 
 void WindowOccupiedAreaChangeTest::SetUp()
 {

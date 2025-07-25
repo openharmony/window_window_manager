@@ -297,6 +297,7 @@ public:
     SystemBarProperty GetSystemBarPropertyByType(WindowType type) const override;
     WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
     WMError SetLayoutFullScreen(bool status) override;
+    WMError SetIgnoreSafeArea(bool isIgnoreSafeArea) override;
     WMError SetFullScreen(bool status) override;
     WMError UpdateSystemBarProperties(const std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
         const std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags) override;
@@ -381,7 +382,7 @@ private:
     bool CheckTouchSlop(int32_t pointerId, int32_t x, int32_t y, int32_t threshold);
     void IgnoreClickEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     bool HandlePointDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-        const MMI::PointerEvent::PointerItem& pointerItem, int32_t sourceType, float vpr, const WSRect& rect);
+        const MMI::PointerEvent::PointerItem& pointerItem);
     std::unique_ptr<Media::PixelMap> HandleWindowMask(const std::vector<std::vector<uint32_t>>& windowMask);
     void CalculateNewLimitsByLimits(
         WindowLimits& newLimits, WindowLimits& customizedLimits, float& virtualPixelRatio);
@@ -408,7 +409,6 @@ private:
      * Window Layout
      */
     void CheckMoveConfiguration(MoveConfiguration& moveConfiguration);
-    void UpdateEnableDragWhenSwitchMultiWindow(bool enable);
 
     /*
      * PC Window Layout
@@ -427,7 +427,6 @@ private:
     bool enableDefaultAnimation_ = true;
     sptr<IAnimationTransitionController> animationTransitionController_;
     uint32_t setSameSystembarPropertyCnt_ = 0;
-    std::atomic<bool> isDefaultDensityEnabled_ = false;
     std::atomic<uint32_t> getAvoidAreaCnt_ = 0;
     std::atomic<bool> enableImmersiveMode_ = false;
     bool titleHoverShowEnabled_ = true;
@@ -442,6 +441,7 @@ private:
     /*
      * Window Property
      */
+    WMError UpdateColorMode();
     void InitSystemSessionDragEnable();
     bool IsSystemDensityChanged(const sptr<DisplayInfo>& displayInfo);
     bool IsDefaultDensityEnabled();
@@ -480,6 +480,8 @@ private:
     bool CheckCanMoveWindowType();
     bool CheckCanMoveWindowTypeByDevice();
     bool CheckIsPcAppInPadFullScreenOnMobileWindowMode();
+    AreaType GetDragAreaByDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+        const MMI::PointerEvent::PointerItem& pointerItem);
 
     /*
      * PC Window

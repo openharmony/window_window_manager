@@ -523,6 +523,37 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdateSecSurfaceInfo, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateSecSurfaceInfoTest
+ * @tc.desc: UpdateSecSurfaceInfo test for same upperNodes
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest, UpdateSecSurfaceInfoTest, TestSize.Level1)
+{
+    std::map<uint64_t, std::vector<SecSurfaceInfo>> secSurfaceInfoMap;
+    SecRectInfo secRectInfo1;
+    SecRectInfo secRectInfo2;
+    SecSurfaceInfo secSurfaceInfo1;
+    secSurfaceInfo1.upperNodes.emplace_back(secRectInfo1);
+    secSurfaceInfo1.uiExtensionRectInfo.scale[0] = 1;
+    SecSurfaceInfo secSurfaceInfo2;
+    secSurfaceInfo2.upperNodes.emplace_back(secRectInfo2);
+    secSurfaceInfo2.upperNodes.emplace_back(secRectInfo2);
+    SecSurfaceInfo secSurfaceInfo3;
+    std::vector<SecSurfaceInfo> secSurfaceInfoList1;
+    std::vector<SecSurfaceInfo> secSurfaceInfoList2;
+    secSurfaceInfoList1.emplace_back(secSurfaceInfo1);
+    secSurfaceInfoList2.emplace_back(secSurfaceInfo2);
+    secSurfaceInfoList2.emplace_back(secSurfaceInfo3);
+
+    secSurfaceInfoMap.emplace(1001, secSurfaceInfoList1);
+    secSurfaceInfoMap.emplace(1002, secSurfaceInfoList2);
+    manager_->secSurfaceInfoMap_.clear();
+    manager_->secSurfaceInfoMap_.emplace(1, secSurfaceInfoList1);
+    manager_->UpdateSecSurfaceInfo(secSurfaceInfoMap);
+    ASSERT_EQ(secSurfaceInfoMap.size(), manager_->secSurfaceInfoMap_.size());
+}
+
+/**
  * @tc.name: GetLastConstrainedModalUIExtInfo
  * @tc.desc: GetLastConstrainedModalUIExtInfo
  * @tc.type: FUNC
@@ -636,7 +667,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, DumpRect, TestSize.Level1)
         rects.emplace_back(rect);
     }
     std::string ret = DumpRect(rects);
-    std::string checkStr = "hot:[0,0,0,0]|[10,10,10,10]|";
+    std::string checkStr = "hot:0,0,0,0|10,10,10,10|";
     ASSERT_EQ(ret, checkStr);
 }
 

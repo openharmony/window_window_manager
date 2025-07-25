@@ -477,7 +477,7 @@ napi_value JsWindow::IsShowing(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::IsWindowShowingSync(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::DEFAULT, "IsShowing");
+    TLOGD(WmsLogTag::WMS_LIFE, "IsShowing");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnIsWindowShowingSync(env, info) : nullptr;
 }
@@ -692,7 +692,7 @@ napi_value JsWindow::SetPreferredOrientation(napi_env env, napi_callback_info in
 
 napi_value JsWindow::GetPreferredOrientation(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::DEFAULT, "GetPreferredOrientation");
+    TLOGD(WmsLogTag::WMS_ROTATION, "GetPreferredOrientation");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnGetPreferredOrientation(env, info) : nullptr;
 }
@@ -1176,6 +1176,13 @@ napi_value JsWindow::GetWindowDensityInfo(napi_env env, napi_callback_info info)
     TLOGD(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnGetWindowDensityInfo(env, info) : nullptr;
+}
+
+napi_value JsWindow::SetDefaultDensityEnabled(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetDefaultDensityEnabled(env, info) : nullptr;
 }
 
 napi_value JsWindow::IsMainWindowFullScreenAcrossDisplays(napi_env env, napi_callback_info info)
@@ -1796,7 +1803,7 @@ napi_value JsWindow::OnMoveWindowTo(napi_env env, napi_callback_info info)
         } else {
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "Window move failed"));
         }
-        TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s: end, window [%{public}u, %{public}s] ret=%{public}d",
+        TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s: window [%{public}u, %{public}s] ret=%{public}d",
                where, window->GetWindowId(), window->GetWindowName().c_str(), ret);
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnMoveWindowTo") != napi_status::napi_ok) {
@@ -2140,7 +2147,7 @@ napi_value JsWindow::OnResizeWindow(napi_env env, napi_callback_info info)
         } else {
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "Window resize failed"));
         }
-        TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s: end, window [%{public}u, %{public}s] ret=%{public}d",
+        TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s: window [%{public}u, %{public}s] ret=%{public}d",
                where, window->GetWindowId(), window->GetWindowName().c_str(), ret);
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnResizeWindow") != napi_status::napi_ok) {
@@ -3197,6 +3204,7 @@ napi_value JsWindow::OnSetWindowLayoutFullScreen(napi_env env, napi_callback_inf
             // compatibleMode app adapt to immersive need apply avoidArea method
             if (window->IsPcOrPadFreeMultiWindowMode() && !window->IsAdaptToCompatibleImmersive()) {
                 TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s device not support", where);
+                window->SetIgnoreSafeArea(isLayoutFullScreen);
                 task.Resolve(env, NapiGetUndefined(env));
                 return;
             }
@@ -3753,11 +3761,11 @@ napi_value JsWindow::OnIsShowing(napi_env env, napi_callback_info info)
 napi_value JsWindow::OnIsWindowShowingSync(napi_env env, napi_callback_info info)
 {
     if (windowToken_ == nullptr) {
-        WLOGFE("window is nullptr");
+        TLOGE(WmsLogTag::WMS_LIFE, "window is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     bool state = (windowToken_->GetWindowState() == WindowState::STATE_SHOWN);
-    TLOGI(WmsLogTag::DEFAULT, "Id=%{public}u, state=%{public}u", windowToken_->GetWindowId(), state);
+    TLOGD(WmsLogTag::WMS_LIFE, "Id=%{public}u, state=%{public}u", windowToken_->GetWindowId(), state);
     return CreateJsValue(env, state);
 }
 
@@ -3837,11 +3845,11 @@ napi_value JsWindow::OnGetPreferredOrientation(napi_env env, napi_callback_info 
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc >= 1) {
-        WLOGFE("Argc is invalid: %{public}zu, expect zero params", argc);
+        TLOGE(WmsLogTag::WMS_ROTATION, "Argc is invalid: %{public}zu, expect zero params", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     if (windowToken_ == nullptr) {
-        WLOGFE("window is nullptr");
+        TLOGE(WmsLogTag::WMS_ROTATION, "window is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     Orientation requestedOrientation = windowToken_->GetRequestedOrientation();
@@ -3850,9 +3858,9 @@ napi_value JsWindow::OnGetPreferredOrientation(napi_env env, napi_callback_info 
         requestedOrientation <= Orientation::END) {
         apiOrientation = NATIVE_TO_JS_ORIENTATION_MAP.at(requestedOrientation);
     } else {
-        WLOGFE("Orientation %{public}u invalid!", static_cast<uint32_t>(requestedOrientation));
+        TLOGE(WmsLogTag::WMS_ROTATION, "Orientation %{public}u invalid!", static_cast<uint32_t>(requestedOrientation));
     }
-    WLOGFI("end, window [%{public}u, %{public}s] orientation=%{public}u",
+    TLOGD(WmsLogTag::WMS_ROTATION, "end, window [%{public}u, %{public}s] orientation=%{public}u",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), static_cast<uint32_t>(apiOrientation));
     return CreateJsValue(env, static_cast<uint32_t>(apiOrientation));
 }
@@ -7908,19 +7916,25 @@ napi_value JsWindow::OnSetImmersiveModeEnabledState(napi_env env, napi_callback_
         TLOGE(WmsLogTag::WMS_IMMS, "not allowed since invalid window type");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
-    if (windowToken_->IsPcOrPadFreeMultiWindowMode()) {
-        TLOGE(WmsLogTag::WMS_IMMS, "device not support");
-        return NapiGetUndefined(env);
-    }
+    WmErrorCode ret = WmErrorCode::WM_OK;
     napi_value nativeVal = argv[0];
+    bool enable = true;
     if (nativeVal == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to enable");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        ret = WmErrorCode::WM_ERROR_INVALID_PARAM;
+    } else {
+        napi_get_value_bool(env, nativeVal, &enable);
     }
-    bool enable = true;
-    napi_get_value_bool(env, nativeVal, &enable);
     TLOGI(WmsLogTag::WMS_IMMS, "enable %{public}d", static_cast<int32_t>(enable));
-    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetImmersiveModeEnabledState(enable));
+    if (windowToken_->IsPcOrPadFreeMultiWindowMode()) {
+        TLOGE(WmsLogTag::WMS_IMMS, "id:%{public}u device not support", windowToken_->GetWindowId());
+        windowToken_->SetIgnoreSafeArea(enable);
+        return NapiGetUndefined(env);
+    }
+    if (ret != WmErrorCode::WM_OK) {
+        return NapiThrowError(env, ret);
+    }
+    ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetImmersiveModeEnabledState(enable));
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_IMMS, "set failed, ret %{public}d", ret);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
@@ -8435,6 +8449,33 @@ napi_value JsWindow::OnGetWindowDensityInfo(napi_env env, napi_callback_info inf
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "create js windowDensityInfo failed");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
+}
+
+napi_value JsWindow::OnSetDefaultDensityEnabled(napi_env env, napi_callback_info info)
+{
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != INDEX_ONE) {
+        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    bool enabled = false;
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], enabled)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to convert parameter to enable");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowToken is null");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetWindowDefaultDensityEnabled(enabled));
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u set enabled=%{public}u result=%{public}d",
+        windowToken_->GetWindowId(), enabled, ret);
+    if (ret != WmErrorCode::WM_OK) {
+        return NapiThrowError(env, ret);
+    }
+    return NapiGetUndefined(env);
 }
 
 napi_value JsWindow::OnIsMainWindowFullScreenAcrossDisplays(napi_env env, napi_callback_info info)
@@ -8995,6 +9036,7 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "setGestureBackEnabled", moduleName, JsWindow::SetGestureBackEnabled);
     BindNativeFunction(env, object, "isGestureBackEnabled", moduleName, JsWindow::GetGestureBackEnabled);
     BindNativeFunction(env, object, "getWindowDensityInfo", moduleName, JsWindow::GetWindowDensityInfo);
+    BindNativeFunction(env, object, "setDefaultDensityEnabled", moduleName, JsWindow::SetDefaultDensityEnabled);
     BindNativeFunction(env, object, "isMainWindowFullScreenAcrossDisplays", moduleName,
         JsWindow::IsMainWindowFullScreenAcrossDisplays);
     BindNativeFunction(env, object, "setSystemAvoidAreaEnabled", moduleName, JsWindow::SetSystemAvoidAreaEnabled);

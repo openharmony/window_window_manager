@@ -1934,7 +1934,9 @@ HWTEST_F(SceneSessionManagerTest7, SetGlobalDragResizeType01, TestSize.Level1)
     ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
 
     ASSERT_EQ(ssm_->SetGlobalDragResizeType(DragResizeType::RESIZE_TYPE_UNDEFINED), WMError::WM_OK);
+    usleep(WAIT_SYNC_IN_NS);
     ASSERT_EQ(ssm_->SetGlobalDragResizeType(dragResizeType), WMError::WM_OK);
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 /**
@@ -1954,11 +1956,14 @@ HWTEST_F(SceneSessionManagerTest7, SetGlobalDragResizeType02, TestSize.Level1)
     ASSERT_NE(nullptr, sceneSession);
     ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
     ASSERT_EQ(ssm_->SetGlobalDragResizeType(dragResizeType), WMError::WM_OK);
+    usleep(WAIT_SYNC_IN_NS);
     ssm_->sceneSessionMap_.insert({ 0, nullptr });
     ASSERT_EQ(ssm_->SetGlobalDragResizeType(dragResizeType), WMError::WM_OK);
+    usleep(WAIT_SYNC_IN_NS);
     ssm_->sceneSessionMap_.clear();
     ssm_->sceneSessionMap_.insert({ 0, nullptr });
     ASSERT_EQ(ssm_->SetGlobalDragResizeType(dragResizeType), WMError::WM_OK);
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 /**
@@ -1989,6 +1994,38 @@ HWTEST_F(SceneSessionManagerTest7, SetAppDragResizeType, TestSize.Level1)
     DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
     ASSERT_EQ(ssm_->SetAppDragResizeType("", dragResizeType), WMError::WM_ERROR_INVALID_PARAM);
     ASSERT_EQ(ssm_->SetAppDragResizeType(info.bundleName_, dragResizeType), WMError::WM_OK);
+}
+
+/**
+ * @tc.name: GetDefaultDragResizeType
+ * @tc.desc: test function : GetDefaultDragResizeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, GetDefaultDragResizeType, TestSize.Level1)
+{
+    DragResizeType originalDragResizeType = ssm_->systemConfig_.freeMultiWindowConfig_.defaultDragResizeType_;
+    bool originalFreeMultiWindowSupport = ssm_->systemConfig_.freeMultiWindowSupport_;
+    ASSERT_EQ(ssm_->SetGlobalDragResizeType(DragResizeType::RESIZE_TYPE_UNDEFINED), WMError::WM_OK);
+    // not support
+    ssm_->systemConfig_.freeMultiWindowSupport_ = false;
+    ssm_->systemConfig_.freeMultiWindowConfig_.defaultDragResizeType_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    ssm_->GetEffectiveDragResizeType(dragResizeType);
+    ASSERT_EQ(dragResizeType, DragResizeType::RESIZE_EACH_FRAME);
+    // support and default
+    ssm_->systemConfig_.freeMultiWindowSupport_ = true;
+    ssm_->systemConfig_.freeMultiWindowConfig_.defaultDragResizeType_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    ssm_->GetEffectiveDragResizeType(dragResizeType);
+    ASSERT_EQ(dragResizeType, DragResizeType::RESIZE_WHEN_DRAG_END);
+    // support and set
+    ssm_->systemConfig_.freeMultiWindowConfig_.defaultDragResizeType_ = DragResizeType::RESIZE_WHEN_DRAG_END;
+    dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    ssm_->GetEffectiveDragResizeType(dragResizeType);
+    ASSERT_EQ(dragResizeType, ssm_->systemConfig_.freeMultiWindowConfig_.defaultDragResizeType_);
+
+    ssm_->systemConfig_.freeMultiWindowConfig_.defaultDragResizeType_ = originalDragResizeType;
+    ssm_->systemConfig_.freeMultiWindowSupport_ = originalFreeMultiWindowSupport;
 }
 
 /**

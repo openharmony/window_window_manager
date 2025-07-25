@@ -25,6 +25,7 @@
 #include "property/rs_properties_def.h"
 #include "root_scene.h"
 #include "session/host/include/pc_fold_screen_manager.h"
+#include "session_manager/include/scene_session_manager.h"
 #include "window_manager_hilog.h"
 #include "window_visibility_info.h"
 #include "process_options.h"
@@ -491,6 +492,53 @@ static bool IsJsIsAbilityHookUndefind(napi_env env, napi_value jsIsAbilityHook, 
     return true;
 }
 
+static napi_value CreateJsValueFromStringArray(napi_env env, const std::vector<std::string>& stringArray)
+{
+    napi_value arrayValue = nullptr;
+    napi_create_array_with_length(env, stringArray.size(), &arrayValue);
+    if (arrayValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to create napi array");
+        return NapiGetUndefined(env);
+    }
+    int32_t index = 0;
+    for (const auto& iter : stringArray) {
+        napi_set_element(env, arrayValue, index++, CreateJsValue(env, iter));
+    }
+    return arrayValue;
+}
+
+napi_value CreateJsAtomicServiceInfo(napi_env env, const AtomicServiceInfo& atomicServiceInfo)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to get object");
+        return nullptr;
+    }
+
+    napi_set_named_property(env, objValue, "resizable",
+        CreateJsValue(env, atomicServiceInfo.resizable_));
+    napi_set_named_property(env, objValue, "deviceTypes",
+        CreateJsValueFromStringArray(env, atomicServiceInfo.deviceTypes_));
+    napi_set_named_property(env, objValue, "supportWindowMode",
+        CreateJsValueFromStringArray(env, atomicServiceInfo.supportWindowMode_));
+
+    return objValue;
+}
+
+static bool IsJsRequestIdUndefind(napi_env env, napi_value jsRequestId, SessionInfo& sessionInfo)
+{
+    if (GetType(env, jsRequestId) != napi_undefined) {
+        int32_t requestId = DEFAULT_REQUEST_FROM_SCB_ID;
+        if (!ConvertFromJsValue(env, jsRequestId, requestId)) {
+            TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to requestId");
+            return false;
+        }
+        sessionInfo.requestId = requestId;
+    }
+    return true;
+}
+
 bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sessionInfo)
 {
     napi_value jsBundleName = nullptr;
@@ -515,7 +563,8 @@ bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sess
     napi_get_named_property(env, jsObject, "instanceKey", &jsInstanceKey);
     napi_value jsIsAbilityHook = nullptr;
     napi_get_named_property(env, jsObject, "isAbilityHook", &jsIsAbilityHook);
-
+    napi_value jsRequestId = nullptr;
+    napi_get_named_property(env, jsObject, "requestId", &jsRequestId);
     if (!IsJsBundleNameUndefind(env, jsBundleName, sessionInfo)) {
         return false;
     }
@@ -525,10 +574,8 @@ bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sess
     if (!IsJsAbilityUndefind(env, jsAbilityName, sessionInfo)) {
         return false;
     }
-    if (!IsJsAppIndexUndefind(env, jsAppIndex, sessionInfo)) {
-        return false;
-    }
-    if (!IsJsIsSystemUndefind(env, jsIsSystem, sessionInfo)) {
+    if (!IsJsAppIndexUndefind(env, jsAppIndex, sessionInfo) ||
+        !IsJsIsSystemUndefind(env, jsIsSystem, sessionInfo)) {
         return false;
     }
     if (!IsJsSceneTypeUndefined(env, jsSceneType, sessionInfo) ||
@@ -536,7 +583,8 @@ bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sess
         !IsJsIsNewAppInstanceUndefined(env, jsIsNewAppInstance, sessionInfo) ||
         !IsJsInstanceKeyUndefined(env, jsInstanceKey, sessionInfo) ||
         !IsJsWindowInputTypeUndefind(env, jsWindowInputType, sessionInfo) ||
-        !IsJsIsAbilityHookUndefind(env, jsIsAbilityHook, sessionInfo)) {
+        !IsJsIsAbilityHookUndefind(env, jsIsAbilityHook, sessionInfo) ||
+        !IsJsRequestIdUndefind(env, jsRequestId, sessionInfo)) {
         return false;
     }
     return true;
@@ -859,24 +907,28 @@ bool ConvertPointerItemFromJs(napi_env env, napi_value touchObject, MMI::Pointer
         return false;
     }
     pointerItem.SetWindowX(std::round(windowX * vpr));
+    pointerItem.SetWindowXPos(windowX * vpr);
     double windowY;
     if (!ConvertFromJsValue(env, jsWindowY, windowY)) {
         WLOGFE("Failed to convert parameter to windowY");
         return false;
     }
     pointerItem.SetWindowY(std::round(windowY * vpr));
+    pointerItem.SetWindowYPos(windowY * vpr);
     double displayX;
     if (!ConvertFromJsValue(env, jsDisplayX, displayX)) {
         WLOGFE("Failed to convert parameter to displayX");
         return false;
     }
     pointerItem.SetDisplayX(std::round(displayX * vpr));
+    pointerItem.SetDisplayXPos(displayX * vpr);
     double displayY;
     if (!ConvertFromJsValue(env, jsDisplayY, displayY)) {
         WLOGFE("Failed to convert parameter to displayY");
         return false;
     }
     pointerItem.SetDisplayY(std::round(displayY * vpr));
+    pointerItem.SetDisplayYPos(displayY * vpr);
     pointerEvent.AddPointerItem(pointerItem);
     return true;
 }
@@ -1242,6 +1294,7 @@ bool ConvertCompatibleModePropertyFromJs(napi_env env, napi_value value, Compati
         {"disableFullScreen", &CompatibleModeProperty::SetDisableFullScreen},
         {"disableSplit", &CompatibleModeProperty::SetDisableSplit},
         {"disableWindowLimit", &CompatibleModeProperty::SetDisableWindowLimit},
+        {"disableDecorFullscreen", &CompatibleModeProperty::SetDisableDecorFullscreen},
         {"isSupportRotateFullScreen", &CompatibleModeProperty::SetIsSupportRotateFullScreen},
         {"isAdaptToSubWindow", &CompatibleModeProperty::SetIsAdaptToSubWindow},
         {"isAdaptToSimulationScale", &CompatibleModeProperty::SetIsAdaptToSimulationScale},
@@ -1357,6 +1410,8 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
         CreateJsValue(env, sessionInfo.isAtomicService_));
     napi_set_named_property(env, objValue, "isBackTransition",
         CreateJsValue(env, sessionInfo.isBackTransition_));
+    napi_set_named_property(env, objValue, "requestId",
+        CreateJsValue(env, sessionInfo.requestId));
     napi_set_named_property(env, objValue, "needClearInNotShowRecent",
         CreateJsValue(env, sessionInfo.needClearInNotShowRecent_));
     if (sessionInfo.processOptions != nullptr) {
@@ -1387,7 +1442,28 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
             TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to set startAnimationSystemOptions");
         }
     }
+    napi_set_named_property(env, objValue, "atomicServiceInfo",
+        CreateJsAtomicServiceInfo(env, sessionInfo.atomicServiceInfo_));
     return objValue;
+}
+
+void ProcessPendingSessionActivationResult(napi_env env, napi_value callResult,
+    const std::shared_ptr<SessionInfo>& sessionInfo)
+{
+    uint32_t resultCode = 0;
+    std::string resultMessage = "";
+    if (!ParseJsValue(env, callResult, "resultCode", resultCode) ||
+        !ParseJsValue(env, callResult, "resultMessage", resultMessage)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "JsRootSceneSession ParseJsValue resultCode fail");
+        return;
+    }
+    if (resultCode >= static_cast<uint32_t>(RequestResultCode::FAIL)) {
+        SceneSessionManager::GetInstance().NotifyAmsPendingSessionWhenFail(resultCode,
+            resultMessage, sessionInfo->requestId);
+    }
+    TLOGI(WmsLogTag::WMS_LIFE, "persistentId:%{public}d, requestId:%{public}d,"
+        "resultCode:%{public}d, resultMessage:%{public}s",
+        sessionInfo->persistentId_, sessionInfo->requestId, resultCode, resultMessage.c_str());
 }
 
 napi_value CreateJsExceptionInfo(napi_env env, const ExceptionInfo& exceptionInfo)

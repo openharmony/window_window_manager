@@ -23,6 +23,7 @@
 
 #include <transaction/rs_transaction.h>
 #include "display_manager.h"
+#include "modifier_render_thread/rs_modifiers_draw_thread.h"
 #include "rs_adapter.h"
 #include "surface_draw.h"
 #include "window_manager.h"
@@ -139,6 +140,9 @@ void WindowVisibilityInfoTest::SetUpTestCase()
 void WindowVisibilityInfoTest::TearDownTestCase()
 {
     WindowManager::GetInstance().UnregisterVisibilityChangedListener(visibilityChangedListener_);
+#ifdef RS_ENABLE_VK
+    RSModifiersDrawThread::Destroy();
+#endif
 }
 
 void WindowVisibilityInfoTest::SetUp()

@@ -238,6 +238,7 @@ public:
     virtual WMError GetSystemBarProperties(std::map<WindowType, SystemBarProperty>& properties) = 0;
     virtual WMError SetFullScreen(bool status) = 0;
     virtual WMError SetLayoutFullScreen(bool status) = 0;
+    virtual WMError SetIgnoreSafeArea(bool isIgnoreSafeArea) { return WMError::WM_OK; }
     virtual WMError SetTitleAndDockHoverShown(bool titleHoverShowEnabled = true,
         bool dockHoverShowEnabled = true) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError Destroy() = 0;
@@ -434,6 +435,7 @@ public:
     virtual float GetCustomDensity() const { return UNDEFINED_DENSITY; }
     virtual WMError SetWindowShadowEnabled(bool isEnabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual bool GetWindowShadowEnabled() const { return true; }
+    virtual WMError SetWindowDefaultDensityEnabled(bool enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError GetWindowDensityInfo(
         WindowDensityInfo& densityInfo) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError IsMainWindowFullScreenAcrossDisplays(
@@ -572,6 +574,13 @@ public:
      * @return * void
      */
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) {}
+
+    /**
+     * @brief Set touch event
+     *
+     * @param touchType int32_t.
+     */
+    virtual void SetTouchEvent(int32_t touchType) {}
 
     virtual WMError SetImmersiveModeEnabledState(bool enable) { return WMError::WM_OK; }
 

@@ -599,20 +599,20 @@ void ScreenSessionManagerClient::SwitchUserCallback(std::vector<int32_t> oldScbP
     }
     for (const auto& iter : screenSessionMapCopy) {
         ScreenId screenId = iter.first;
+        sptr<ScreenSession> screenSession = iter.second;
+        if (screenSession == nullptr) {
+            TLOGE(WmsLogTag::DMS, "screenSession is null");
+            continue;
+        }
         {
             auto displayNode = screenSessionManager_->GetDisplayNode(screenId);
             if (displayNode == nullptr) {
                 TLOGE(WmsLogTag::DMS, "display node is null");
                 continue;
             }
-            RSAdapterUtil::SetRSUIContext(displayNode, GetRSUIContext(screenId), true);
+            RSAdapterUtil::SetRSUIContext(displayNode, screenSession->GetRSUIContext(), true);
             displayNode->SetScbNodePid(oldScbPids, currentScbPid);
             RSTransactionAdapter::FlushImplicitTransaction(displayNode);
-        }
-        sptr<ScreenSession> screenSession = iter.second;
-        if (screenSession == nullptr) {
-            TLOGE(WmsLogTag::DMS, "screenSession is null");
-            return;
         }
         ScreenProperty screenProperty = screenSession->GetScreenProperty();
         RRect bounds = screenProperty.GetBounds();
@@ -1104,12 +1104,6 @@ bool ScreenSessionManagerClient::OnExtendDisplayNodeChange(ScreenId mainScreenId
 sptr<ScreenSession> ScreenSessionManagerClient::CreateTempScreenSession(
     ScreenId screenId, ScreenId rsId, const std::shared_ptr<RSDisplayNode>& displayNode)
 {
-    sptr<ScreenSession> screenSession = GetScreenSession(screenId);
-    if (screenSession != nullptr) {
-        TLOGW(WmsLogTag::DMS, "screen session has exist.");
-        return screenSession;
-    }
-
     ScreenSessionConfig config = {
         .screenId = screenId,
         .rsId = rsId,

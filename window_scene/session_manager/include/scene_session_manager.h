@@ -40,6 +40,7 @@
 #include "include/core/SkRegion.h"
 #include "interfaces/include/ws_common.h"
 #include "mission_snapshot.h"
+#include "res_common.h"
 #include "scb_session_handler.h"
 #include "scene_session_converter.h"
 #include "screen_fold_data.h"
@@ -72,6 +73,7 @@ class LauncherService;
 
 namespace OHOS::Global::Resource {
 class ResourceManager;
+enum ColorMode;
 } // namespace OHOS::Global::Resource
 
 namespace OHOS::Rosen {
@@ -80,6 +82,7 @@ namespace AncoConsts {
     constexpr const char* ANCO_MISSION_ID = "ohos.anco.param.missionId";
     constexpr const char* ANCO_SESSION_ID = "ohos.anco.param.sessionId";
 }
+constexpr const char* IS_CALL_BY_SCB = "isCallBySCB";
 
 struct SCBAbilityInfo {
     AppExecFwk::AbilityInfo abilityInfo_;
@@ -690,7 +693,8 @@ public:
     sptr<SceneSession> RequestSceneSession(const SessionInfo& sessionInfo,
         sptr<WindowSessionProperty> property = nullptr);
     void UpdateSceneSessionWant(const SessionInfo& sessionInfo);
-    WSError RequestSceneSessionActivation(const sptr<SceneSession>& sceneSession, bool isNewActive);
+    WSError RequestSceneSessionActivation(const sptr<SceneSession>& sceneSession, bool isNewActive,
+        int32_t requestId = DEFAULT_REQUEST_FROM_SCB_ID);
     WSError RequestSceneSessionBackground(const sptr<SceneSession>& sceneSession, const bool isDelegator = false,
         const bool isToDesktop = false, const bool isSaveSnapshot = true);
     WSError RequestSceneSessionDestruction(const sptr<SceneSession>& sceneSession, bool needRemoveSession = true,
@@ -699,7 +703,8 @@ public:
         sptr<AAFwk::SessionInfo> sceneSessionInfo, const bool needRemoveSession, const bool isForceClean = false,
         bool isUserRequestedExit = false);
     void NotifyForegroundInteractiveStatus(const sptr<SceneSession>& sceneSession, bool interactive);
-    WSError RequestSceneSessionByCall(const sptr<SceneSession>& sceneSession);
+    WSError RequestSceneSessionByCall(const sptr<SceneSession>& sceneSession,
+        int32_t requestId = DEFAULT_REQUEST_FROM_SCB_ID);
     void StartAbilityBySpecified(const SessionInfo& sessionInfo);
     void NotifyWindowStateErrorFromMMI(int32_t pid, int32_t persistentId);
     void RemoveLifeCycleTaskByPersistentId(int32_t persistentId, const LifeCycleTaskType taskType);
@@ -713,7 +718,7 @@ public:
     WSError ClearAllSessions() override;
     WSError MoveSessionsToForeground(const std::vector<int32_t>& sessionIds, int32_t topSessionId) override;
     WSError MoveSessionsToBackground(const std::vector<int32_t>& sessionIds, std::vector<int32_t>& result) override;
-    int32_t StartUIAbilityBySCB(sptr<AAFwk::SessionInfo>& abilitySessionInfo);
+    int32_t StartUIAbilityBySCB(sptr<AAFwk::SessionInfo>& abilitySessionInfo, sptr<SceneSession>& sceneSession);
     int32_t StartUIAbilityBySCB(sptr<SceneSession>& sceneSessions);
     WMError GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo);
     WMError GetCallingWindowInfo(CallingWindowInfo& callingWindowInfo);
@@ -745,6 +750,8 @@ public:
     WMError CreateNewInstanceKey(const std::string& bundleName, std::string& instanceKey);
     WMError RemoveInstanceKey(const std::string& bundleName, const std::string& instanceKey);
     void RefreshAllAppUseControlMap(const AppUseControlInfo& appUseControlInfo, ControlAppType type);
+    void NotifyAmsPendingSessionWhenFail(uint32_t resultCode, std::string resultMessage,
+        int32_t requestId);
     WSError PendingSessionToBackgroundByPersistentId(const int32_t persistentId, bool shouldBackToCaller = true);
     WMError UpdateKioskAppList(const std::vector<std::string>& kioskAppList);
     WMError EnterKioskMode(const sptr<IRemoteObject>& token);
@@ -773,6 +780,9 @@ public:
     WMError SetStartWindowBackgroundColor(const std::string& moduleName, const std::string& abilityName,
         uint32_t color, int32_t uid) override;
     void ConfigSupportSnapshotAllSessionStatus();
+    void InsertProcessMap(const SessionInfo& sessionInfo, const int32_t persistentId);
+    WSError DeleteProcessMap(const SessionInfo& sessionInfo, const int32_t persistentId);
+    WSError FindProcessMap(const SessionInfo& sessionInfo, int32_t& persistentId);
 
     /*
      * Window Animation
@@ -781,6 +791,8 @@ public:
         const WindowAnimationOption& animationOption) override;
 
     std::vector<sptr<SceneSession>> GetSceneSessions(ScreenId screenId);
+    WMError UpdateScreenLockState(int32_t persistentId);
+    WMError UpdateSystemDecorEnable(bool enable);
 
 protected:
     SceneSessionManager();
@@ -872,10 +884,12 @@ private:
     WSError ClearSession(sptr<SceneSession> sceneSession);
     bool IsSessionClearable(sptr<SceneSession> sceneSession);
     void GetAllClearableSessions(std::vector<sptr<SceneSession>>& sessionVector);
-    sptr<AAFwk::SessionInfo> SetAbilitySessionInfo(const sptr<SceneSession>& sceneSession);
+    sptr<AAFwk::SessionInfo> SetAbilitySessionInfo(const sptr<SceneSession>& sceneSession,
+        int32_t requestId = DEFAULT_REQUEST_FROM_SCB_ID);
     void ResetWantInfo(const sptr<SceneSession>& sceneSession);
     void ResetSceneSessionInfoWant(const sptr<AAFwk::SessionInfo>& sceneSessionInfo);
-    int32_t StartUIAbilityBySCBTimeoutCheck(const sptr<AAFwk::SessionInfo>& abilitySessionInfo,
+    int32_t StartUIAbilityBySCBTimeoutCheck(const sptr<SceneSession>& sceneSession,
+        const sptr<AAFwk::SessionInfo>& abilitySessionInfo,
         const uint32_t& windowStateChangeReason, bool& isColdStart);
     sptr<SceneSession> GetHookedSessionByModuleName(const SessionInfo& sessionInfo);
     void RegisterHookSceneSessionActivationFunc(const sptr<SceneSession>& sceneSession);
@@ -883,6 +897,7 @@ private:
     void RegisterSceneSessionDestructNotifyManagerFunc(const sptr<SceneSession>& sceneSession);
     void ResetSceneMissionInfo(const sptr<AAFwk::SessionInfo>& abilitySessionInfo);
     void UpdateAbilityHookState(sptr<SceneSession>& sceneSession, bool isAbilityHook);
+    void CloseAllFd(std::shared_ptr<AAFwk::Want>& want);
 
     /*
      * Window Focus
@@ -993,7 +1008,8 @@ private:
         const sptr<SceneSession>& sceneSession);
 
     sptr<AppExecFwk::IBundleMgr> GetBundleManager();
-    std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager(const AppExecFwk::AbilityInfo& abilityInfo);
+    std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager(const AppExecFwk::AbilityInfo& abilityInfo,
+        Global::Resource::ColorMode colorMode = Global::Resource::ColorMode::COLOR_MODE_NOT_SET);
 
     bool CheckIsRemote(const std::string& deviceId);
     bool GetLocalDeviceId(std::string& localDeviceId);
@@ -1004,8 +1020,8 @@ private:
     WSError GetTotalUITreeInfo(std::string& dumpInfo);
 
     void PerformRegisterInRequestSceneSession(sptr<SceneSession>& sceneSession);
-    WSError RequestSceneSessionActivationInner(sptr<SceneSession>& sceneSession, bool isNewActive)
-        REQUIRES(SCENE_GUARD);
+    WSError RequestSceneSessionActivationInner(sptr<SceneSession>& sceneSession, bool isNewActive,
+        int32_t requestId = DEFAULT_REQUEST_FROM_SCB_ID) REQUIRES(SCENE_GUARD);
     WSError SetBrightness(const sptr<SceneSession>& sceneSession, float brightness);
     void PostBrightnessTask(float brightness);
     WSError UpdateBrightness(int32_t persistentId);
@@ -1634,15 +1650,20 @@ private:
     /*
      * Window Pattern
      */
+    std::mutex processMapMutex_;
+    std::unordered_map<std::string, std::set<int32_t>> processCompareMap_;
     std::atomic<bool> delayRemoveSnapshot_ = false;
     void InitStartingWindowRdb(const std::string& rdbPath);
-    bool GetStartingWindowInfoFromCache(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo);
+    bool GetStartingWindowInfoFromCache(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo,
+        std::string& appColorMode);
     uint32_t UpdateCachedColorToAppSet(const std::string& bundleName, const std::string& moduleName,
         const std::string& abilityName, StartingWindowInfo& startingWindowInfo);
-    bool GetStartingWindowInfoFromRdb(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo);
+    bool GetStartingWindowInfoFromRdb(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo,
+        bool darkMode);
     bool GetPathInfoFromResource(const std::shared_ptr<Global::Resource::ResourceManager> resourceMgr,
         bool hapPathEmpty, uint32_t resourceId, std::string& path);
-    bool GetStartupPageFromResource(const AppExecFwk::AbilityInfo& abilityInfo, StartingWindowInfo& startingWindowInfo);
+    bool GetStartupPageFromResource(const AppExecFwk::AbilityInfo& abilityInfo, StartingWindowInfo& startingWindowInfo,
+        Global::Resource::ColorMode colorMode = Global::Resource::ColorMode::COLOR_MODE_NOT_SET);
     void GetBundleStartingWindowInfos(bool isDark, const AppExecFwk::BundleInfo& bundleInfo,
         std::vector<std::pair<StartingWindowRdbItemKey, StartingWindowInfo>>& outValues);
     void CacheStartingWindowInfo(const std::string& bundleName, const std::string& moduleName,
@@ -1653,12 +1674,13 @@ private:
     std::unique_ptr<LruCache> snapshotLruCache_;
     std::size_t snapshotCapacity_ = 0;
     bool GetIconFromDesk(const SessionInfo& sessionInfo, std::string& startupPagePath) const;
-    bool GetIsDarkFromConfiguration();
+    bool GetIsDarkFromConfiguration(const std::string& appColorMode);
     bool needCloseSync_ = false;
     std::function<void()> closeSyncFunc_ = nullptr;
     WMError SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit, int32_t persistentId) override;
     void UpdateAllStartingWindowRdb();
     bool needUpdateRdb_ = true;
+    std::string GetSessionColorMode(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo);
 };
 } // namespace OHOS::Rosen
 

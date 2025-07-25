@@ -53,8 +53,6 @@ constexpr float INNER_BORDER_VP = 5.0f;
 constexpr float OUTSIDE_BORDER_VP = 4.0f;
 constexpr float INNER_ANGLE_VP = 16.0f;
 constexpr uint32_t MAX_LIFE_CYCLE_TASK_IN_QUEUE = 15;
-constexpr uint32_t COLOR_WHITE = 0xffffffff;
-constexpr uint32_t COLOR_BLACK = 0xff000000;
 constexpr int64_t LIFE_CYCLE_TASK_EXPIRED_TIME_LIMIT = 350;
 static bool g_enableForceUIFirst = system::GetParameter("window.forceUIFirst.enabled", "1") == "1";
 constexpr int64_t STATE_DETECT_DELAYTIME = 3 * 1000;
@@ -1107,7 +1105,7 @@ void Session::UpdateClientRectPosYAndDisplayId(WSRect& rect)
         return;
     }
     if (WindowHelper::IsUIExtensionWindow(GetWindowType())) {
-        TLOGI(WmsLogTag::WMS_LAYOUT, "skip update UIExtension: %{public}d, rect: %{public}s",
+        TLOGD(WmsLogTag::WMS_LAYOUT, "skip update UIExtension: %{public}d, rect: %{public}s",
             GetPersistentId(), rect.ToString().c_str());
         return;
     }
@@ -1727,7 +1725,9 @@ void Session::SetAttachState(bool isAttach, WindowMode windowMode)
             TLOGND(WmsLogTag::WMS_LIFE, "session is null");
             return;
         }
-        if (session->needNotifyAttachState_.load() && session->sessionStage_) {
+        if (session->sessionStage_ && WindowHelper::IsNeedWaitAttachStateWindow(session->GetWindowType())) {
+            TLOGNI(WmsLogTag::WMS_LIFE, "NotifyWindowAttachStateChange, persistentId:%{public}d",
+                session->GetPersistentId());
             session->sessionStage_->NotifyWindowAttachStateChange(isAttach);
         }
         TLOGND(WmsLogTag::WMS_LIFE, "isAttach:%{public}d persistentId:%{public}d", isAttach,
@@ -2365,7 +2365,7 @@ WSError Session::RaiseToAppTopForPointDown()
 
 void Session::PresentFocusIfPointDown()
 {
-    WLOGFI("id: %{public}d,type: %{public}d", GetPersistentId(), GetWindowType());
+    TLOGI(WmsLogTag::WMS_FOCUS, "id: %{public}d,type: %{public}d", GetPersistentId(), GetWindowType());
     if (!isFocused_ && GetFocusable()) {
         FocusChangeReason reason = FocusChangeReason::CLICK;
         NotifyRequestFocusStatusNotifyManager(true, false, reason);
@@ -2928,6 +2928,19 @@ void Session::SetSessionStateChangeListenser(const NotifySessionStateChangeFunc&
     }, "SetSessionStateChangeListenser");
 }
 
+void Session::SetClearSubSessionCallback(const NotifyClearSubSessionFunc& func)
+{
+    PostTask(
+        [weakThis = wptr(this), func, where = __func__]() {
+            auto session = weakThis.promote();
+            if (session == nullptr) {
+                TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
+                return;
+            }
+            session->clearSubSessionFunc_ = std::move(func);
+        }, __func__);
+}
+
 void Session::SetBufferAvailableChangeListener(const NotifyBufferAvailableChangeFunc& func)
 {
     bufferAvailableChangeFunc_ = func;
@@ -3056,6 +3069,14 @@ void Session::NotifySessionStateChange(const SessionState& state)
             session->sessionStateChangeFunc_(state);
         } else {
             TLOGNI(WmsLogTag::WMS_LIFE, "sessionStateChangeFunc is null");
+        }
+        if (!session->sessionStateChangeFunc_  && state == SessionState::STATE_DISCONNECT) {
+            auto parentSession = session->GetParentSession();
+            if (parentSession && parentSession->clearSubSessionFunc_) {
+                parentSession->clearSubSessionFunc_(session->GetPersistentId());
+                TLOGNI(WmsLogTag::WMS_LIFE, "notify clear subSession, parentId: %{public}d, "
+                    "persistentId: %{public}d", parentSession->GetPersistentId(), session->GetPersistentId());
+            }
         }
 
         if (session->sessionStateChangeNotifyManagerFunc_) {
@@ -3579,7 +3600,7 @@ WMError Session::GetGlobalScaledRect(Rect& globalScaledRect)
             return WMError::WM_ERROR_DESTROYED_OBJECT;
         }
         session->GetLayoutController()->GetGlobalScaledRect(globalScaledRect);
-        TLOGNI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d globalScaledRect:%{public}s",
+        TLOGND(WmsLogTag::WMS_LAYOUT, "Id:%{public}d globalScaledRect:%{public}s",
             session->GetPersistentId(), globalScaledRect.ToString().c_str());
         return WMError::WM_OK;
     };
