@@ -3524,7 +3524,7 @@ WMError WindowSessionImpl::GetTitleButtonArea(TitleButtonRect& titleButtonRect)
 WSError WindowSessionImpl::GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj)
 {
     if (!SessionPermission::IsSystemCalling()) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "Permission denied!");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
