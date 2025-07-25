@@ -1144,38 +1144,38 @@ HWTEST_F(ScreenSessionManagerTest, TryToCancelScreenOff01, TestSize.Level1)
 }
 
 /**
- * @tc.name: WaitUpdateAvailableAreaForPC01
- * @tc.desc: WaitUpdateAvailableAreaForPC test
+ * @tc.name: WaitUpdateAvailableAreaForPc01
+ * @tc.desc: WaitUpdateAvailableAreaForPc test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerTest, WaitUpdateAvailableAreaForPC01, TestSize.Level1)
+HWTEST_F(ScreenSessionManagerTest, WaitUpdateAvailableAreaForPc01, TestSize.Level1)
 {
     g_errLog.clear();
     LOG_SetCallback(MyLogCallback);
-    bool temp = ScreenSessionManager::GetInstance().GetPCStatus();
-    ScreenSessionManager::GetInstance().SetPCStatus(true);
-    ScreenSessionManager::GetInstance().WaitUpdateAvailableAreaForPC();
+    bool temp = ScreenSessionManager::GetInstance().GetPcStatus();
+    ScreenSessionManager::GetInstance().SetPcStatus(true);
+    ScreenSessionManager::GetInstance().WaitUpdateAvailableAreaForPc();
     EXPECT_TRUE(g_errLog.find("need wait update available area") == std::string::npos);
     g_errLog.clear();
-    ScreenSessionManager::GetInstance().SetPCStatus(temp);
+    ScreenSessionManager::GetInstance().SetPcStatus(temp);
 }
 
 /**
- * @tc.name: WaitUpdateAvailableAreaForPC02
- * @tc.desc: WaitUpdateAvailableAreaForPC test
+ * @tc.name: WaitUpdateAvailableAreaForPc02
+ * @tc.desc: WaitUpdateAvailableAreaForPc test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerTest, WaitUpdateAvailableAreaForPC02, TestSize.Level1)
+HWTEST_F(ScreenSessionManagerTest, WaitUpdateAvailableAreaForPc02, TestSize.Level1)
 {
     g_errLog.clear();
     LOG_SetCallback(MyLogCallback);
-    bool temp = ScreenSessionManager::GetInstance().GetPCStatus();
-    ScreenSessionManager::GetInstance().SetPCStatus(true);
+    bool temp = ScreenSessionManager::GetInstance().GetPcStatus();
+    ScreenSessionManager::GetInstance().SetPcStatus(true);
     ScreenSessionManager::GetInstance().needWaitAvailableArea_ = true;
-    ScreenSessionManager::GetInstance().WaitUpdateAvailableAreaForPC();
+    ScreenSessionManager::GetInstance().WaitUpdateAvailableAreaForPc();
     EXPECT_TRUE(g_errLog.find("wait update available area timeout") != std::string::npos);
     g_errLog.clear();
-    ScreenSessionManager::GetInstance().SetPCStatus(temp);
+    ScreenSessionManager::GetInstance().SetPcStatus(temp);
 }
 
 /**
@@ -1187,8 +1187,8 @@ HWTEST_F(ScreenSessionManagerTest, UpdateAvailableArea02, TestSize.Level1)
 {
     g_errLog.clear();
     LOG_SetCallback(MyLogCallback);
-    bool temp = ssm_->GetPCStatus();
-    ssm_->SetPCStatus(true);
+    bool temp = ssm_->GetPcStatus();
+    ssm_->SetPcStatus(true);
     ssm_->needWaitAvailableArea_ = true;
 
     ScreenId screenId = 1050;
@@ -1202,7 +1202,7 @@ HWTEST_F(ScreenSessionManagerTest, UpdateAvailableArea02, TestSize.Level1)
     ssm_->UpdateAvailableArea(screenId, area2);
     EXPECT_FALSE(ssm_->needWaitAvailableArea_);
     g_errLog.clear();
-    ssm_->SetPCStatus(temp);
+    ssm_->SetPcStatus(temp);
 }
 
 /**
@@ -1214,8 +1214,8 @@ HWTEST_F(ScreenSessionManagerTest, UpdateAvailableArea02, TestSize.Level1)
 {
     g_errLog.clear();
     LOG_SetCallback(MyLogCallback);
-    bool temp = ssm_->GetPCStatus();
-    ssm_->SetPCStatus(true);
+    bool temp = ssm_->GetPcStatus();
+    ssm_->SetPcStatus(true);
     ssm_->needWaitAvailableArea_ = false;
 
     ScreenId screenId = 1050;
@@ -1227,7 +1227,7 @@ HWTEST_F(ScreenSessionManagerTest, UpdateAvailableArea02, TestSize.Level1)
     EXPECT_EQ(screenSession1->GetAvailabelArea(), area);
     EXPECT_FALSE(ssm_->needWaitAvailableArea_);
     g_errLog.clear();
-    ssm_->SetPCStatus(temp);
+    ssm_->SetPcStatus(temp);
 }
 }
 }
