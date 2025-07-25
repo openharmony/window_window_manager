@@ -16760,7 +16760,7 @@ void SceneSessionManager::PackWindowPropertyChangeInfo(const sptr<SceneSession>&
         windowPropertyChangeInfo[WindowInfoKey::WINDOW_MODE] = sceneSession->GetWindowMode();
     }
     if (interestedFlags_ & static_cast<uint32_t>(SessionPropertyFlag::FLOATING_SCALE)) {
-        windowPropertyChangeInfo[WindowInfoKey::FLOATING_SCALE] = sceneSession->GetWindowMode();
+        windowPropertyChangeInfo[WindowInfoKey::FLOATING_SCALE] = sceneSession->GetFloatingScale();
     }
 }
 
