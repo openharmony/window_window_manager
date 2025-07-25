@@ -4206,7 +4206,7 @@ WMError WindowSceneSessionImpl::UpdateColorMode(const std::shared_ptr<AppExecFwk
     if (colorMode.empty()) {
         std::shared_ptr<AppExecFwk::Configuration> config = appContext->GetConfiguration();
         if (config == nullptr) {
-            TLOGE(WmsLogTag::WMS_IMMS, "config is null, winId: %{public}d", GetPersistentId());
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "config is null, winId: %{public}d", GetPersistentId());
             return WMError::WM_ERROR_NULLPTR;
         }
         colorMode = config->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
