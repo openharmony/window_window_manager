@@ -373,10 +373,15 @@ void SubSession::HandleCrossSurfaceNodeByWindowAnchor(SizeChangeReason reason, c
     }
     DisplayId displayId = screenSession->GetDisplayId();
     if (reason == SizeChangeReason::DRAG || reason == SizeChangeReason::DRAG_MOVE) {
-        AutoRSTransaction trans(GetRSUIContext());
-        surfaceNode->SetPositionZ(GetZOrder());
-        screenSession->GetDisplayNode()->AddCrossScreenChild(surfaceNode, SUFFIX_INDEX, true);
-        surfaceNode->SetIsCrossNode(true);
+        {
+            AutoRSTransaction trans(surfaceNode->GetRSUIContext());
+            surfaceNode->SetPositionZ(GetZOrder());
+            surfaceNode->SetIsCrossNode(true);
+        }
+        {
+            AutoRSTransaction trans(screenSession->GetRSUIContext());
+            screenSession->GetDisplayNode()->AddCrossScreenChild(surfaceNode, SUFFIX_INDEX, true);
+        }
         cloneNodeCountDuringCross_.fetch_add(1);
         TLOGI(WmsLogTag::WMS_LAYOUT, "Add sub window to display:%{public}" PRIu64 " persistentId:%{public}d, "
             "cloneNodeCountDuringCross:%{public}d", displayId, GetPersistentId(), cloneNodeCountDuringCross_.load());
@@ -446,13 +451,16 @@ void SubSession::HandleCrossMoveToSurfaceNode(WSRect& globalRect)
             continue;
         }
         movedSurfaceNode->SetPositionZ(GetZOrder());
-        screenSession->GetDisplayNode()->AddCrossScreenChild(movedSurfaceNode, SUFFIX_INDEX, true);
+        {
+            AutoRSTransaction trans(screenSession->GetRSUIContext());
+            screenSession->GetDisplayNode()->AddCrossScreenChild(movedSurfaceNode, SUFFIX_INDEX, true);
+        }
         cloneNodeCount_++;
         movedSurfaceNode->SetIsCrossNode(true);
         TLOGI(WmsLogTag::WMS_LAYOUT, "Add sub window to display:%{public}" PRIu64 " persistentId:%{public}d",
             displayId, GetPersistentId());
     }
-    RSTransactionAdapter::FlushImplicitTransaction(GetRSUIContext());
+    RSTransactionAdapter::FlushImplicitTransaction(movedSurfaceNode->GetRSUIContext());
 }
 
 std::set<uint64_t> SubSession::GetNewDisplayIdsDuringMoveTo(WSRect& newRect)
@@ -511,13 +519,16 @@ void SubSession::AddSurfaceNodeToScreen(DisplayId draggingOrMovingParentDisplayI
             continue;
         }
         currSurfacedNode->SetPositionZ(GetZOrder());
-        screenSession->GetDisplayNode()->AddCrossScreenChild(currSurfacedNode, SUFFIX_INDEX, true);
+        {
+            AutoRSTransaction trans(screenSession->GetRSUIContext());
+            screenSession->GetDisplayNode()->AddCrossScreenChild(currSurfacedNode, SUFFIX_INDEX, true);
+        }
         cloneNodeCount_++;
         currSurfacedNode->SetIsCrossNode(true);
         TLOGI(WmsLogTag::WMS_LAYOUT, "Add sub window to display:%{public}" PRIu64 " persistentId:%{public}d, "
             "cloneNodeCount:%{public}d", displayId, GetPersistentId(), cloneNodeCount_);
     }
-    RSTransactionAdapter::FlushImplicitTransaction(GetRSUIContext());
+    RSTransactionAdapter::FlushImplicitTransaction(currSurfacedNode->GetRSUIContext());
 }
 
 void SubSession::RemoveSurfaceNodeFromScreen()

@@ -2264,6 +2264,53 @@ HWTEST_F(WindowSessionImplTest2, SetUiDvsyncSwitchErr, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetTouchEvent
+ * @tc.desc: SetTouchEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest2, SetTouchEvent, TestSize.Level1)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("SetTouchEvent");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    window->SetTouchEvent(0);
+    window->vsyncStation_ = nullptr;
+    window->SetTouchEvent(1);
+}
+
+/**
+ * @tc.name: SetTouchEventSucc
+ * @tc.desc: SetTouchEvent Test Succ
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest2, SetTouchEventSucc, TestSize.Level1)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("SetTouchEventSucc");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    window->SetTouchEvent(0);
+    window->SetTouchEvent(1);
+}
+
+/**
+ * @tc.name: SetTouchEventErr
+ * @tc.desc: SetTouchEvent Test Err
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest2, SetTouchEventErr, TestSize.Level1)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    option->SetWindowName("SetTouchEventErr");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    window->vsyncStation_ = nullptr;
+    window->SetTouchEvent(0);
+    window->SetTouchEvent(1);
+}
+/**
  * @tc.name: SetRestoredRouterStack_0100
  * @tc.desc: basic function test of set or get restored router stack.
  * @tc.type: FUNC

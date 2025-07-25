@@ -27,11 +27,7 @@
 #include <input_method_controller.h>
 #endif // IMF_ENABLE
 #include <ipc_skeleton.h>
-#if defined(MODIFIER_NG)
 #include <modifier_ng/appearance/rs_behind_window_filter_modifier.h>
-#else
-#include <modifier/rs_property_modifier.h>
-#endif
 #include <pointer_event.h>
 #include <key_event.h>
 #include <transaction/rs_sync_transaction_controller.h>
@@ -66,6 +62,7 @@
 #include "fold_screen_state_internel.h"
 #include "fold_screen_common.h"
 #include "session/host/include/ability_info_manager.h"
+#include "session/host/include/atomicservice_basic_engine_plugin.h"
 #include "session/host/include/multi_instance_manager.h"
 #include "session/host/include/pc_fold_screen_controller.h"
 
@@ -110,6 +107,7 @@ bool CheckIfRectElementIsTooLarge(const WSRect& rect)
 MaximizeMode SceneSession::maximizeMode_ = MaximizeMode::MODE_RECOVER;
 std::shared_mutex SceneSession::windowDragHotAreaMutex_;
 std::map<uint64_t, std::map<uint32_t, WSRect>> SceneSession::windowDragHotAreaMap_;
+static bool g_enableForceUIFirst = system::GetParameter("window.forceUIFirst.enabled", "1") == "1";
 GetConstrainedModalExtWindowInfoFunc SceneSession::onGetConstrainedModalExtWindowInfoFunc_;
 
 SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
@@ -437,6 +435,10 @@ WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property
         } else {
             TLOGNI(WmsLogTag::WMS_LIFE,
                 "%{public}s foreground specific callback does not take effect, callback function null", where);
+        }
+        if (session->isUIFirstEnabled_) {
+            session->SetSystemSceneForceUIFirst(false);
+            session->isUIFirstEnabled_ = false;
         }
         return WSError::WS_OK;
     }, __func__);
@@ -1807,12 +1809,10 @@ void SceneSession::UpdateSessionRectPosYFromClient(SizeChangeReason reason, Disp
 {
     if (!PcFoldScreenManager::GetInstance().IsHalfFolded(GetScreenId()) ||
         PcFoldScreenManager::GetInstance().HasSystemKeyboard()) {
-        TLOGI(
+        TLOGD(
             WmsLogTag::WMS_LAYOUT, "winId: %{public}d, displayId: %{public}" PRIu64, GetPersistentId(), GetScreenId());
         return;
     }
-    TLOGI(WmsLogTag::WMS_LAYOUT, "winId: %{public}d, reason: %{public}u, lastRect: %{public}s, currRect: %{public}s",
-        GetPersistentId(), reason, GetSessionRect().ToString().c_str(), rect.ToString().c_str());
     if (reason != SizeChangeReason::RESIZE) {
         configDisplayId_ = configDisplayId;
     }
@@ -3338,6 +3338,19 @@ WSError SceneSession::RequestSessionBack(bool needMoveToBackground)
             TLOGNW(WmsLogTag::WMS_EVENT, "%{public}s Session didn't register back event consumer!", where);
             return WSError::WS_DO_NOTHING;
         }
+        if (g_enableForceUIFirst) {
+            AutoRSTransaction trans(session->GetRSUIContext());
+            auto leashWinSurfaceNode = session->GetLeashWinSurfaceNode();
+            if (leashWinSurfaceNode) {
+                leashWinSurfaceNode->SetForceUIFirst(true);
+                session->isUIFirstEnabled_ = true;
+                TLOGNI(WmsLogTag::WMS_EVENT, "%{public}s leashWinSurfaceNode_ SetForceUIFirst id:%{public}u!",
+                    where, session->GetPersistentId());
+            } else {
+                TLOGNI(WmsLogTag::WMS_EVENT, "%{public}s failed, leashWinSurfaceNode_ null id:%{public}u",
+                    where, session->GetPersistentId());
+            }
+        }
         session->backPressedFunc_(needMoveToBackground);
         return WSError::WS_OK;
     }, std::string(__func__) + ":" + std::to_string(needMoveToBackground));
@@ -3975,7 +3988,9 @@ WSError SceneSession::UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsC
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "get nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
-    RSAdapterUtil::SetRSUIContext(rsCanvasNode, GetRSUIContext(), true);
+    auto rsUIContext = GetRSUIContext();
+    RSAdapterUtil::SetRSUIContext(rsCanvasNode, rsUIContext, true);
+    RSAdapterUtil::SetRSTransactionHandler(rsTransaction, rsUIContext);
     if (rsTransaction != nullptr) {
         rsTransaction->Begin();
         TLOGD(WmsLogTag::WMS_LAYOUT_PC, "begin rsTransaction");
@@ -5273,6 +5288,23 @@ WSError SceneSession::ChangeSessionVisibilityWithStatusBar(
     return WSError::WS_OK;
 }
 
+static void SetAtomicServiceInfo(SessionInfo& sessionInfo)
+{
+#ifdef ACE_ENGINE_PLUGIN_PATH
+    AtomicServiceInfo* atomicServiceInfo = AtomicServiceBasicEnginePlugin::GetInstance().
+        GetParamsFromAtomicServiceBasicEngine(sessionInfo.bundleName_);
+    if (atomicServiceInfo != nullptr) {
+        sessionInfo.atomicServiceInfo_.appNameInfo_ = atomicServiceInfo->GetAppName();
+        sessionInfo.atomicServiceInfo_.circleIcon_ = atomicServiceInfo->GetCircleIcon();
+        sessionInfo.atomicServiceInfo_.eyelashRingIcon_ = atomicServiceInfo->GetEyelashRingIcon();
+        sessionInfo.atomicServiceInfo_.deviceTypes_ = atomicServiceInfo->GetDeviceTypes();
+        sessionInfo.atomicServiceInfo_.resizable_ = atomicServiceInfo->GetResizable();
+        sessionInfo.atomicServiceInfo_.supportWindowMode_ = atomicServiceInfo->GetSupportWindowMode();
+    }
+    AtomicServiceBasicEnginePlugin::GetInstance().ReleaseData();
+#endif
+}
+
 static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::SessionInfo>& abilitySessionInfo,
     const sptr<SceneSession>& session, bool isFoundationCall)
 {
@@ -5320,6 +5352,10 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
             info.supportedWindowModes.assign(abilitySessionInfo->supportWindowModes.begin(),
                 abilitySessionInfo->supportWindowModes.end());
         }
+    }
+    if (info.isAtomicService_ && info.want != nullptr &&
+        (info.want->GetFlags() & AAFwk::Want::FLAG_INSTALL_ON_DEMAND) == AAFwk::Want::FLAG_INSTALL_ON_DEMAND) {
+        SetAtomicServiceInfo(info);
     }
     if (info.want != nullptr) {
         info.windowMode = info.want->GetIntParam(AAFwk::Want::PARAM_RESV_WINDOW_MODE, 0);
@@ -5522,10 +5558,6 @@ WSError SceneSession::BatchPendingSessionsActivation(const std::vector<sptr<AAFw
         if (abilitySessionInfos.empty()) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s abilitySessionInfo is null", where);
             return WSError::WS_ERROR_NULLPTR;
-        }
-        if (session->sessionInfo_.reuseDelegatorWindow) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s not support hook", where);
-            WSError::WS_ERROR_INVALID_PARAM;
         }
         return session->DoBatchPendingSessionsActivation(abilitySessionInfos, session, isFoundationCall);
     }, __func__);
@@ -7112,10 +7144,10 @@ WSError SceneSession::OnLayoutFullScreenChange(bool isLayoutFullScreen)
     PostTask([weakThis = wptr(this), isLayoutFullScreen, where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s session is null", where);
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s session is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s isLayoutFullScreen: %{public}d", where, isLayoutFullScreen);
+        TLOGNI(WmsLogTag::WMS_LAYOUT_PC, "%{public}s isLayoutFullScreen: %{public}d", where, isLayoutFullScreen);
         if (session->onLayoutFullScreenChangeFunc_) {
             session->SetIsLayoutFullScreen(isLayoutFullScreen);
             session->onLayoutFullScreenChangeFunc_(isLayoutFullScreen);
@@ -7141,6 +7173,27 @@ WSError SceneSession::OnDefaultDensityEnabled(bool isDefaultDensityEnabled)
         }
     }, __func__);
     return WSError::WS_OK;
+}
+
+WMError SceneSession::OnUpdateColorMode(const std::string& colorMode, bool hasDarkRes)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, colorMode: %{public}s, hasDarkRes: %{public}u",
+        GetPersistentId(), colorMode.c_str(), hasDarkRes);
+    std::lock_guard<std::mutex> lock(colorModeMutex_);
+    colorMode_ = colorMode;
+    hasDarkRes_ = hasDarkRes;
+    return WMError::WM_OK;
+}
+
+std::string SceneSession::GetAbilityColorMode() const
+{
+    std::lock_guard<std::mutex> lock(colorModeMutex_);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, colorMode: %{public}s, hasDarkRes: %{public}u",
+        GetPersistentId(), colorMode_.c_str(), hasDarkRes_);
+    if (colorMode_ == AppExecFwk::ConfigurationInner::COLOR_MODE_DARK && !hasDarkRes_) {
+        return AppExecFwk::ConfigurationInner::COLOR_MODE_AUTO;
+    }
+    return colorMode_;
 }
 
 /** @note @Window.Layout */
@@ -8048,11 +8101,11 @@ bool SceneSession::IsImmersiveType() const
 bool SceneSession::IsPcOrPadEnableActivation() const
 {
     auto property = GetSessionProperty();
-    bool isPcAppInPad = false;
+    bool isPcAppInLargeScreenDevice = false;
     if (property != nullptr) {
-        isPcAppInPad = property->GetIsPcAppInPad();
+        isPcAppInLargeScreenDevice = property->GetIsPcAppInPad();
     }
-    return systemConfig_.IsPcWindow() || IsFreeMultiWindowMode() || isPcAppInPad;
+    return systemConfig_.IsPcWindow() || IsFreeMultiWindowMode() || isPcAppInLargeScreenDevice;
 }
 
 void SceneSession::SetMinimizedFlagByUserSwitch(bool isMinimized)
@@ -8565,27 +8618,12 @@ void SceneSession::AddRSNodeModifier(bool isDark, const std::shared_ptr<RSBaseNo
             Rosen::RSColor::FromArgbInt(SIDEBAR_DEFAULT_MASKCOLOR_LIGHT));
     }
 
-#if defined(MODIFIER_NG)
     auto modifier = std::make_shared<Rosen::ModifierNG::RSBehindWindowFilterModifier>();
     modifier->AttachProperty(ModifierNG::RSPropertyType::BEHIND_WINDOW_FILTER_RADIUS, blurRadiusValue_);
     modifier->AttachProperty(ModifierNG::RSPropertyType::BEHIND_WINDOW_FILTER_SATURATION, blurSaturationValue_);
     modifier->AttachProperty(ModifierNG::RSPropertyType::BEHIND_WINDOW_FILTER_BRIGHTNESS, blurBrightnessValue_);
     modifier->AttachProperty(ModifierNG::RSPropertyType::BEHIND_WINDOW_FILTER_MASK_COLOR, blurMaskColorValue_);
     rsNode->AddModifier(modifier);
-#else
-    std::shared_ptr<Rosen::RSBehindWindowFilterRadiusModifier> radius =
-        std::make_shared<Rosen::RSBehindWindowFilterRadiusModifier>(blurRadiusValue_);
-    rsNode->AddModifier(radius);
-    std::shared_ptr<Rosen::RSBehindWindowFilterSaturationModifier> saturation =
-        std::make_shared<Rosen::RSBehindWindowFilterSaturationModifier>(blurSaturationValue_);
-    rsNode->AddModifier(saturation);
-    std::shared_ptr<Rosen::RSBehindWindowFilterBrightnessModifier> brightness =
-        std::make_shared<Rosen::RSBehindWindowFilterBrightnessModifier>(blurBrightnessValue_);
-    rsNode->AddModifier(brightness);
-    std::shared_ptr<Rosen::RSBehindWindowFilterMaskColorModifier> modifier =
-        std::make_shared<Rosen::RSBehindWindowFilterMaskColorModifier>(blurMaskColorValue_);
-    rsNode->AddModifier(modifier);
-#endif
 }
 
 void SceneSession::SetSidebarBlur(bool isDefaultSidebarBlur, bool isNeedAnimation)
@@ -8707,7 +8745,7 @@ void SceneSession::NotifyKeyboardAnimationWillBegin(bool isKeyboardShow, const W
             return;
         }
         if (session->sessionStage_ == nullptr) {
-            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s sessionStage_ is null, id: %{public}d",
+            TLOGND(WmsLogTag::WMS_KEYBOARD, "%{public}s sessionStage_ is null, id: %{public}d",
                 where, session->GetPersistentId());
             return;
         }

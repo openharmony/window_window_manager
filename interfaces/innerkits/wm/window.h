@@ -1374,6 +1374,14 @@ public:
     virtual WMError SetLayoutFullScreen(bool status) { return WMError::WM_OK; }
 
     /**
+     * @brief Set the immersive layout properties
+     *
+     * @param isIgnoreSafeArea
+     * @return WMError
+     */
+    virtual WMError SetIgnoreSafeArea(bool isIgnoreSafeArea) { return WMError::WM_OK; }
+
+    /**
      * @brief Set whether the title bar and dock bar will show, when the mouse hovers over hot area.
      *
      * @param isTitleHoverShown
@@ -3378,6 +3386,14 @@ public:
     virtual WMError GetWindowDensityInfo(WindowDensityInfo& densityInfo) { return WMError::WM_OK; }
 
     /**
+     * @brief Set whether the current window follows the default density of its screen.
+     *
+     * @param enabled bool.
+     * @return WM_OK means set success, others means failed.
+     */
+    virtual WMError SetWindowDefaultDensityEnabled(bool enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
      * @brief Get virtual pixel ratio.
      *
      * @return Value of PixelRatio obtained from displayInfo.
@@ -3814,6 +3830,13 @@ public:
      * @return * void
      */
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) {}
+
+    /**
+     * @brief Set touch event
+     *
+     * @param touchType int32_t.
+     */
+    virtual void SetTouchEvent(int32_t touchType) {}
 
     /**
      * @brief Set whether to enable immersive mode.

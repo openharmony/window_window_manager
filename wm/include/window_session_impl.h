@@ -316,6 +316,7 @@ public:
     int32_t GetFloatingWindowParentId();
     void NotifyAfterForeground(bool needNotifyListeners = true,
         bool needNotifyUiContent = true, bool waitAttach = false);
+    void GetAttachStateSyncResult(bool waitAttachState, bool afterForeground) const;
     void NotifyAfterBackground(bool needNotifyListeners = true,
         bool needNotifyUiContent = true, bool waitDetach = false);
     void NotifyAfterDidForeground(uint32_t reason = static_cast<uint32_t>(WindowStateChangeReason::NORMAL));
@@ -396,6 +397,7 @@ public:
     WMError SetWindowContainerColor(const std::string& activeColor, const std::string& inactiveColor) override;
     WMError SetWindowContainerModalColor(const std::string& activeColor, const std::string& inactiveColor) override;
     nlohmann::json setContainerButtonStyle(const DecorButtonStyle& decorButtonStyle);
+    void UpdateDecorEnable(bool needNotify = false, WindowMode mode = WindowMode::WINDOW_MODE_UNDEFINED);
 
     /*
      * Window Decor listener
@@ -431,6 +433,7 @@ public:
     virtual WMError GetCallingWindowWindowStatus(WindowStatus& windowStatus) const override;
     virtual WMError GetCallingWindowRect(Rect& rect) const override;
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
+    virtual void SetTouchEvent(int32_t touchType) override;
     WMError SetContinueState(int32_t continueState) override;
     virtual WMError CheckAndModifyWindowRect(uint32_t& width, uint32_t& height)
     {
@@ -461,6 +464,8 @@ public:
     WMError UnregisterWindowStatusDidChangeListener(const sptr<IWindowStatusDidChangeListener>& listener) override;
     WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) override { return WSError::WS_OK; }
     WMError UpdateWindowModeForUITest(int32_t updateMode) override { return WMError::WM_OK; }
+    void UpdateEnableDragWhenSwitchMultiWindow(bool enable);
+
     /*
      * Free Multi Window
      */
@@ -470,6 +475,7 @@ public:
     {
         windowSystemConfig_.freeMultiWindowEnable_ = enable;
     }
+    void SwitchSubWindow(int32_t parentId);
 
     /*
      * Window Immersive
@@ -493,6 +499,8 @@ public:
     /*
      * Window Property
      */
+    WMError SetWindowDefaultDensityEnabled(bool enabled) override;
+    void SetDefaultDensityEnabledValue(bool enabled);
     WSError NotifyDisplayIdChange(DisplayId displayId);
     WSError NotifyScreenshotAppEvent(ScreenshotEventType type) override;
     bool IsDeviceFeatureCapableFor(const std::string& feature) const override;
@@ -535,9 +543,11 @@ public:
     WSError SetCurrentRotation(int32_t currentRotation) override;
     void UpdateCurrentWindowOrientation(DisplayOrientation displayOrientation);
     DisplayOrientation GetCurrentWindowOrientation() const;
-    Orientation ConvertUserOrientationToUserPageOrientation(Orientation orientation);
+    Orientation ConvertUserOrientationToUserPageOrientation(Orientation orientation) const;
+    Orientation ConvertInvalidOrientation();
     void SetUserRequestedOrientation(Orientation orientation) override;
     bool IsUserOrientation(Orientation orientation) const;
+    bool IsUserPageOrientation(Orientation orientation) const;
     bool isNeededForciblySetOrientation(Orientation orientation) override;
     WMError SetFollowScreenChange(bool isFollowScreenChange) override;
 
@@ -586,7 +596,6 @@ protected:
     void ClearVsyncStation();
     WMError WindowSessionCreateCheck();
     void UpdateDecorEnableToAce(bool isDecorEnable);
-    void UpdateDecorEnable(bool needNotify = false, WindowMode mode = WindowMode::WINDOW_MODE_UNDEFINED);
     void NotifyModeChange(WindowMode mode, bool hasDeco = true);
     WMError UpdateProperty(WSPropertyChangeAction action);
     WMError SetBackgroundColor(uint32_t color);
@@ -790,8 +799,11 @@ protected:
     /*
      * Window Property
      */
+    std::string colorMode_;
     std::unordered_set<std::string> containerColorList_;
     float lastSystemDensity_ = UNDEFINED_DENSITY;
+    static std::atomic<bool> defaultDensityEnabledGlobalConfig_;
+    std::atomic<bool> isDefaultDensityEnabled_ = false;
     WSError NotifySystemDensityChange(float density);
     void RegisterWindowInspectorCallback();
     uint32_t GetTargetAPIVersionByApplicationInfo() const;

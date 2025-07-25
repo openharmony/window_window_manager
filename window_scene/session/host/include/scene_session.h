@@ -849,6 +849,8 @@ public:
     WMError NotifySubSessionAcrossDisplaysChange(bool isAcrossDisplays);
     WMError NotifyFollowedParentWindowAcrossDisplaysChange(bool isAcrossDisplays);
     void NotifySessionAcrossDisplaysChange(const sptr<SceneSession>& sceneSession, bool isAcrossDisplays);
+    WMError OnUpdateColorMode(const std::string& colorMode, bool hasDarkRes) override;
+    std::string GetAbilityColorMode() const;
 
     /*
      * Window Pattern
@@ -1330,6 +1332,7 @@ private:
     NotifyIsCustomAnimationPlayingCallback onIsCustomAnimationPlaying_;
     NotifyWindowAnimationFlagChangeFunc onWindowAnimationFlagChange_;
     NotifyAnimateToFunc onAnimateTo_;
+    bool isUIFirstEnabled_ = false;
 
     /*
      * Window Layout
@@ -1379,6 +1382,9 @@ private:
     bool isAncoForFloatingWindow_ = false;
     bool subWindowOutlineEnabled_ = false;
     std::atomic_bool isRegisterAcrossDisplaysChanged_ = false;
+    std::string colorMode_;
+    bool hasDarkRes_ = false;
+    mutable std::mutex colorModeMutex_;
     NotifySetWindowShadowsFunc onSetWindowShadowsFunc_;
     UpdateScreenshotAppEventRegisteredFunc updateScreenshotAppEventRegisteredFunc_;
 

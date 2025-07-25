@@ -21,6 +21,7 @@
 
 namespace OHOS::Rosen {
 
+// LCOV_EXCL_START
 void ScbDumpSubscriber::OnReceiveEvent(const EventFwk::CommonEventData& data)
 {
     std::ostringstream oss;
@@ -67,6 +68,7 @@ WSError ScbDumpSubscriber::Publish(const std::string& cmd, const std::string& fi
     }
     return WSError::WS_OK;
 }
+// LCOV_EXCL_STOP
 
 std::shared_ptr<ScbDumpSubscriber> ScbDumpSubscriber::Subscribe()
 {

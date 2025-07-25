@@ -1029,6 +1029,206 @@ HWTEST_F(ScreenSessionManagerTest, SynchronizePowerStatusOk, Function | SmallTes
 #undef FOLD_ABILITY_ENABLE
     EXPECT_TRUE(g_errLog.find("notify brightness") != std::string::npos);
 }
+
+/**
+ * @tc.name: GetSuperFoldStatus
+ * @tc.desc: GetSuperFoldStatus test SystemCalling false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetSuperFoldStatus01, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    MockAccesstokenKit::MockIsSystemApp(false);
+    MockAccesstokenKit::MockIsSACalling(false);
+    SuperFoldStatus superFoldStatus = ssm_->GetSuperFoldStatus();
+    EXPECT_TRUE(g_errLog.find("Permission Denied") != std::string::npos);
+    EXPECT_EQ(superFoldStatus, SuperFoldStatus::UNKNOWN);
+}
+
+/**
+ * @tc.name: GetSuperFoldStatus
+ * @tc.desc: GetSuperFoldStatus test SystemCalling true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetSuperFoldStatus02, TestSize.Level1)
+{
+    MockAccesstokenKit::MockIsSystemApp(true);
+#define FOLD_ABILITY_ENABLE
+    SuperFoldStatus superFoldStatus = ssm_->GetSuperFoldStatus();
+    SuperFoldStatus status = SuperFoldStateManager::GetInstance().GetCurrentStatus();
+#undef FOLD_ABILITY_ENABLE
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        EXPECT_EQ(superFoldStatus, SuperFoldStatus::UNKNOWN);
+    } else {
+        EXPECT_EQ(superFoldStatus, status);
+    }
+}
+
+/**
+ * @tc.name: ConvertScreenIdToRsScreenId
+ * @tc.desc: ConvertScreenIdToRsScreenId test SystemCalling false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, ConvertScreenIdToRsScreenId01, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    MockAccesstokenKit::MockIsSystemApp(false);
+    MockAccesstokenKit::MockIsSACalling(false);
+    ScreenId screenId = 666;
+    ScreenId rsScreenId;
+    ssm_->ConvertScreenIdToRsScreenId(screenId, rsScreenId);
+    EXPECT_TRUE(g_errLog.find("Permission Denied") != std::string::npos);
+}
+
+/**
+ * @tc.name: ConvertScreenIdToRsScreenId
+ * @tc.desc: ConvertScreenIdToRsScreenId test SystemCalling true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, ConvertScreenIdToRsScreenId02, TestSize.Level1)
+{
+    MockAccesstokenKit::MockIsSystemApp(true);
+    ScreenId screenId = 666;
+    ScreenId rsScreenId = SCREEN_ID_INVALID;
+    ScreenId rsScreenIdTemp = 12345;
+    ssm_->sms2RsScreenIdMap_.insert({screenId, rsScreenIdTemp})
+    ssm_->ConvertScreenIdToRsScreenId(screenId, rsScreenId);
+    EXPECT_EQ(rsScreenId, rsScreenIdTemp);
+}
+
+/**
+ * @tc.name: NotifyScreenMaskAppear
+ * @tc.desc: NotifyScreenMaskAppear test SystemCalling false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, NotifyScreenMaskAppear01, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    MockAccesstokenKit::MockIsSystemApp(false);
+    MockAccesstokenKit::MockIsSACalling(false);
+    ssm_->NotifyScreenMaskAppear();
+    EXPECT_TRUE(g_errLog.find("Permission Denied") != std::string::npos);
+}
+
+/**
+ * @tc.name: NotifyScreenMaskAppear
+ * @tc.desc: NotifyScreenMaskAppear test SystemCalling true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, NotifyScreenMaskAppear02, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    MockAccesstokenKit::MockIsSystemApp(true);
+    ssm_->NotifyScreenMaskAppear();
+    bool hasLog = g_errLog.find("not pc device") != std::string::npos ||
+        g_errLog.find("screen mask appeared") != std::string::npos;
+    EXPECT_TRUE(hasLog);
+}
+
+/**
+ * @tc.name: TryToCancelScreenOff01
+ * @tc.desc: TryToCancelScreenOff test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, TryToCancelScreenOff01, TestSize.Level1)
+{
+    g_errLog.clear();
+    MockAccesstokenKit::MockIsSACalling(false);
+    MockAccesstokenKit::MockIsSystemApp(false);
+    ssm_->TryToCancelScreenOff();
+    EXPECT_TRUE(g_errLog.find("permission denied!") != std::string::npos);
+}
+
+/**
+ * @tc.name: WaitUpdateAvailableAreaForPc01
+ * @tc.desc: WaitUpdateAvailableAreaForPc test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, WaitUpdateAvailableAreaForPc01, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    bool temp = ScreenSessionManager::GetInstance().GetPcStatus();
+    ScreenSessionManager::GetInstance().SetPcStatus(true);
+    ScreenSessionManager::GetInstance().WaitUpdateAvailableAreaForPc();
+    EXPECT_TRUE(g_errLog.find("need wait update available area") == std::string::npos);
+    g_errLog.clear();
+    ScreenSessionManager::GetInstance().SetPcStatus(temp);
+}
+
+/**
+ * @tc.name: WaitUpdateAvailableAreaForPc02
+ * @tc.desc: WaitUpdateAvailableAreaForPc test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, WaitUpdateAvailableAreaForPc02, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    bool temp = ScreenSessionManager::GetInstance().GetPcStatus();
+    ScreenSessionManager::GetInstance().SetPcStatus(true);
+    ScreenSessionManager::GetInstance().needWaitAvailableArea_ = true;
+    ScreenSessionManager::GetInstance().WaitUpdateAvailableAreaForPc();
+    EXPECT_TRUE(g_errLog.find("wait update available area timeout") != std::string::npos);
+    g_errLog.clear();
+    ScreenSessionManager::GetInstance().SetPcStatus(temp);
+}
+
+/**
+ * @tc.name: UpdateAvailableAreaWhenDisplayAdd01
+ * @tc.desc: UpdateAvailableArea WhenDisplayAdd notify all
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, UpdateAvailableArea02, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    bool temp = ssm_->GetPcStatus();
+    ssm_->SetPcStatus(true);
+    ssm_->needWaitAvailableArea_ = true;
+
+    ScreenId screenId = 1050;
+    DMRect area{0, 0, 600, 900};
+    DMRect area2{0, 0, 600, 800};
+    sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(screenId, ScreenProperty(), 0);
+    ssm_->screenSessionMap_[screenId] = screenSession;
+    auto screenSession1 = ssm_->GetScreenSession(screenId);
+    EXPECT_EQ(screenSession1, screenSession);
+    EXPECT_TRUE(screenSession->UpdateAvailableArea(area));
+    ssm_->UpdateAvailableArea(screenId, area2);
+    EXPECT_FALSE(ssm_->needWaitAvailableArea_);
+    g_errLog.clear();
+    ssm_->SetPcStatus(temp);
+}
+
+/**
+ * @tc.name: UpdateAvailableAreaWhenDisplayAdd02
+ * @tc.desc: UpdateAvailableArea WhenDisplayAdd not notify all
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, UpdateAvailableArea02, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    bool temp = ssm_->GetPcStatus();
+    ssm_->SetPcStatus(true);
+    ssm_->needWaitAvailableArea_ = false;
+
+    ScreenId screenId = 1050;
+    DMRect area{0, 0, 600, 800};
+    sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(screenId, ScreenProperty(), 0);
+    ssm_->screenSessionMap_[screenId] = screenSession;
+    ssm_->UpdateAvailableArea(screenId, area);
+    auto screenSession1 = ssm_->GetScreenSession(screenId);
+    EXPECT_EQ(screenSession1->GetAvailabelArea(), area);
+    EXPECT_FALSE(ssm_->needWaitAvailableArea_);
+    g_errLog.clear();
+    ssm_->SetPcStatus(temp);
+}
 }
 }
 }

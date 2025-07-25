@@ -1290,14 +1290,14 @@ HWTEST_F(WindowSceneSessionImplTest, Hide02, TestSize.Level0)
     window->property_->SetPersistentId(1);
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     // show with null session
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Hide(2, false, false));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Hide(2, false, false));
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
 
     window->hostSession_ = session;
-    ASSERT_EQ(WMError::WM_OK, window->Hide(0, false, false, true));
-    ASSERT_EQ(WMError::WM_OK, window->Destroy(false));
+    EXPECT_EQ(WMError::WM_OK, window->Hide(0, false, false, true));
+    EXPECT_EQ(WMError::WM_OK, window->Destroy(false));
 }
 
 /**
@@ -1318,18 +1318,40 @@ HWTEST_F(WindowSceneSessionImplTest, Hide03, TestSize.Level0)
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
-    window->lifecycleCallback_ = sptr<LifecycleFutureCallback>::MakeSptr();
 
+    window->NotifyWindowAttachStateChange(false);
+    EXPECT_TRUE(g_logMsg.find("notifyAttachState id") == std::string::npos);
+
+    EXPECT_EQ(WMError::WM_OK, window->Hide(0, false, false, false));
+    EXPECT_TRUE(g_logMsg.find("init lifecycleCallback") == std::string::npos);
+    EXPECT_EQ(WMError::WM_OK, window->Show(0, false, true, false));
+
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    EXPECT_EQ(WMError::WM_OK, window->Hide(0, false, false, true));
+    EXPECT_TRUE(g_logMsg.find("init lifecycleCallback") == std::string::npos);
+    EXPECT_EQ(WMError::WM_OK, window->Show(0, false, true, true));
+
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
+    EXPECT_EQ(WMError::WM_OK, window->Hide(0, false, false, true));
+    EXPECT_TRUE(g_logMsg.find("init lifecycleCallback") == std::string::npos);
+    EXPECT_EQ(WMError::WM_OK, window->Show(0, false, true, true));
+
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    window->lifecycleCallback_ = sptr<LifecycleFutureCallback>::MakeSptr();
     EXPECT_EQ(WMError::WM_OK, window->Hide(0, false, false, true));
     EXPECT_TRUE(g_logMsg.find("init lifecycleCallback") == std::string::npos);
     EXPECT_EQ(WMError::WM_OK, window->Show(0, false, true, true));
 
     window->NotifyWindowAttachStateChange(false);
-    window->lifecycleCallback_ = nullptr;
+    EXPECT_TRUE(g_logMsg.find("notifyAttachState id") != std::string::npos);
     EXPECT_EQ(WMError::WM_OK, window->Hide(0, false, false, true));
     EXPECT_TRUE(g_logMsg.find("Window hide") != std::string::npos);
+    EXPECT_TRUE(g_logMsg.find("get attach state sync result") != std::string::npos);
+
+    window->lifecycleCallback_ = nullptr;
+    EXPECT_EQ(WMError::WM_OK, window->Show(0, false, true, true));
+    EXPECT_EQ(WMError::WM_OK, window->Hide(0, false, false, true));
     EXPECT_TRUE(g_logMsg.find("init lifecycleCallback") != std::string::npos);
-    EXPECT_TRUE(g_logMsg.find("get detach async result") != std::string::npos);
     EXPECT_EQ(WMError::WM_OK, window->Destroy(false));
 }
 
@@ -1390,27 +1412,79 @@ HWTEST_F(WindowSceneSessionImplTest, Show03, TestSize.Level0)
     LOG_SetCallback(LogCallback);
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Show03");
-    option->SetDisplayId(0);
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+
     window->property_->SetPersistentId(1);
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-
     window->hostSession_ = session;
+
+    window->NotifyWindowAttachStateChange(true);
+    EXPECT_TRUE(g_logMsg.find("notifyAttachState id") == std::string::npos);
+
+    EXPECT_EQ(WMError::WM_OK, window->Show(0, false, true, false));
+    EXPECT_TRUE(g_logMsg.find("init lifecycleCallback") == std::string::npos);
+    EXPECT_EQ(WMError::WM_OK, window->Hide(0, false, false, false));
+
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    EXPECT_EQ(WMError::WM_OK, window->Show(0, false, true, true));
+    EXPECT_TRUE(g_logMsg.find("init lifecycleCallback") == std::string::npos);
+    EXPECT_EQ(WMError::WM_OK, window->Hide(0, false, false, true));
+
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
+    EXPECT_EQ(WMError::WM_OK, window->Show(0, false, true, true));
+    EXPECT_TRUE(g_logMsg.find("init lifecycleCallback") == std::string::npos);
+    EXPECT_EQ(WMError::WM_OK, window->Hide(0, false, false, true));
+
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     window->lifecycleCallback_ = sptr<LifecycleFutureCallback>::MakeSptr();
     EXPECT_EQ(WMError::WM_OK, window->Show(0, false, true, true));
     EXPECT_TRUE(g_logMsg.find("init lifecycleCallback") == std::string::npos);
     EXPECT_EQ(WMError::WM_OK, window->Hide(0, false, false, true));
 
     window->NotifyWindowAttachStateChange(true);
-    window->lifecycleCallback_ = nullptr;
+    EXPECT_TRUE(g_logMsg.find("notifyAttachState id") != std::string::npos);
     EXPECT_EQ(WMError::WM_OK, window->Show(0, false, true, true));
-    
     EXPECT_TRUE(g_logMsg.find("Window show") != std::string::npos);
+    EXPECT_TRUE(g_logMsg.find("get attach state sync result") != std::string::npos);
+
+    window->lifecycleCallback_ = nullptr;
+    EXPECT_EQ(WMError::WM_OK, window->Hide(0, false, false, true));
+    EXPECT_EQ(WMError::WM_OK, window->Show(0, false, true, true));
     EXPECT_TRUE(g_logMsg.find("init lifecycleCallback") != std::string::npos);
-    EXPECT_TRUE(g_logMsg.find("get attach async result") != std::string::npos);
+    EXPECT_EQ(WMError::WM_OK, window->Destroy(false));
+}
+
+/**
+ * @tc.name: GetDisplayInfo
+ * @tc.desc: get DisplayInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, GetDisplayInfo, TestSize.Level0)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(LogCallback);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetDisplayInfo");
+    option->SetDisplayId(10);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+
+    window->property_->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    EXPECT_TRUE(g_logMsg.find("use default display id") == std::string::npos);
+    EXPECT_EQ(true, window->GetDisplayInfo() == nullptr);
+    
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    EXPECT_EQ(true, window->GetDisplayInfo() != nullptr);
+    EXPECT_TRUE(g_logMsg.find("use default display id") != std::string::npos);
+    EXPECT_EQ(WSError::WS_OK, window->UpdateDisplayId(0));
+    EXPECT_EQ(true, window->GetDisplayInfo() != nullptr);
+
     EXPECT_EQ(WMError::WM_OK, window->Destroy(false));
 }
 
@@ -1893,6 +1967,28 @@ HWTEST_F(WindowSceneSessionImplTest, SetLayoutFullScreenByApiVersion, TestSize.L
     window->hostSession_ = session;
     ASSERT_EQ(WMError::WM_OK, window->SetLayoutFullScreenByApiVersion(false));
     ASSERT_EQ(false, window->property_->IsLayoutFullScreen());
+}
+
+/**
+ * @tc.name: SetIgnoreSafeArea
+ * @tc.desc: SetIgnoreSafeArea test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, SetIgnoreSafeArea, TestSize.Level0)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetIgnoreSafeArea");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetIgnoreSafeArea(false));
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_SHOWN;
+    window->property_->SetPersistentId(1);
+    EXPECT_EQ(WMError::WM_OK, window->SetIgnoreSafeArea(false));
+    EXPECT_FALSE(window->isIgnoreSafeArea_);
+    EXPECT_EQ(WMError::WM_OK, window->SetIgnoreSafeArea(true));
+    EXPECT_TRUE(window->isIgnoreSafeArea_);
 }
 
 /**

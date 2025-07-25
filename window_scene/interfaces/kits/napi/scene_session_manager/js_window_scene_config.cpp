@@ -210,6 +210,8 @@ napi_value JsWindowSceneConfig::CreateFreeMultiWindowConfig(napi_env env, const 
         config.freeMultiWindowConfig_.maxMainFloatingWindowNumber_));
     napi_set_named_property(env, objValue, "defaultWindowMode", CreateJsValue(env,
         config.freeMultiWindowConfig_.defaultWindowMode_));
+    napi_set_named_property(env, objValue, "defaultDragResizeType", CreateJsValue(env,
+        config.freeMultiWindowConfig_.defaultDragResizeType_));
     return objValue;
 }
 

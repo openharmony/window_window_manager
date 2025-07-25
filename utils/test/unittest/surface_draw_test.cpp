@@ -30,7 +30,11 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 const std::string IMAGE_PLACE_HOLDER_PNG_PATH = "/etc/window/resources/bg_place_holder.png";
-const int WAIT_FOR_SYNC_US = 1000 * 500; // 500ms
+const int WAIT_FOR_SYNC_US = 1000 * 500;                  // 500ms
+constexpr float WIDTH_THRESHOLD_SMALL_VP = 320.0;         // 320.0 indicates small width threshold
+constexpr float WIDTH_THRESHOLD_MEDIUM_VP = 600.0;        // 600.0 indicates medium width threshold
+constexpr float WIDTH_THRESHOLD_LARGE_VP = 840.0;         // 840.0 indicates large width threshold
+constexpr float VPRATIO = 1.5;                            // 1.5 indicates vpRatio
 } // namespace
 class SurfaceDrawTest : public testing::Test {
 public:
@@ -389,15 +393,16 @@ HWTEST_F(SurfaceDrawTest, DrawCustomStartingWindow01, TestSize.Level1)
     auto info = std::make_shared<Rosen::StartingWindowPageDrawInfo>();
     info->bgColor = 0x00660000;
     auto surfaceNode = window->GetSurfaceNode();
+    std::array<uint32_t, size_t(StartWindowResType::Count)> frameIndex {};
 
-    EXPECT_EQ(SurfaceDraw::DrawCustomStartingWindow(nullptr, rect, info, 1.0f), false);
-    EXPECT_EQ(SurfaceDraw::DrawCustomStartingWindow(surfaceNode, rect, nullptr, 1.0f), false);
-    EXPECT_EQ(SurfaceDraw::DrawCustomStartingWindow(surfaceNode, rect, info, -1.0f), false);
-    EXPECT_EQ(SurfaceDraw::DrawCustomStartingWindow(surfaceNode, rect, info, 0.0f), false);
+    EXPECT_EQ(SurfaceDraw::DrawCustomStartingWindow(nullptr, rect, info, 1.0f, frameIndex), false);
+    EXPECT_EQ(SurfaceDraw::DrawCustomStartingWindow(surfaceNode, rect, nullptr, 1.0f, frameIndex), false);
+    EXPECT_EQ(SurfaceDraw::DrawCustomStartingWindow(surfaceNode, rect, info, -1.0f, frameIndex), false);
+    EXPECT_EQ(SurfaceDraw::DrawCustomStartingWindow(surfaceNode, rect, info, 0.0f, frameIndex), false);
     rect.width_ = 0;
-    EXPECT_EQ(SurfaceDraw::DrawCustomStartingWindow(surfaceNode, rect, info, 1.0f), false);
+    EXPECT_EQ(SurfaceDraw::DrawCustomStartingWindow(surfaceNode, rect, info, 1.0f, frameIndex), false);
     rect.height_ = 0;
-    EXPECT_EQ(SurfaceDraw::DrawCustomStartingWindow(surfaceNode, rect, info, 1.0f), false);
+    EXPECT_EQ(SurfaceDraw::DrawCustomStartingWindow(surfaceNode, rect, info, 1.0f, frameIndex), false);
     window->Destroy();
 }
 
@@ -416,12 +421,13 @@ HWTEST_F(SurfaceDrawTest, DrawCustomStartingWindow02, TestSize.Level1)
     auto info = std::make_shared<Rosen::StartingWindowPageDrawInfo>();
     info->bgColor = 0x00660000;
     auto surfaceNode = window->GetSurfaceNode();
+    std::array<uint32_t, size_t(StartWindowResType::Count)> frameIndex {};
 
     EXPECT_EQ(SurfaceDraw::DrawCustomStartingWindow(surfaceNode,
-        rect, info, std::numeric_limits<float>::max()), true);
+        rect, info, std::numeric_limits<float>::max(), frameIndex), true);
     EXPECT_EQ(SurfaceDraw::DrawCustomStartingWindow(surfaceNode,
-        rect, info, std::numeric_limits<float>::min()), true);
-    EXPECT_EQ(SurfaceDraw::DrawCustomStartingWindow(surfaceNode, rect, info, 1.0f), true);
+        rect, info, std::numeric_limits<float>::min(), frameIndex), true);
+    EXPECT_EQ(SurfaceDraw::DrawCustomStartingWindow(surfaceNode, rect, info, 1.0f, frameIndex), true);
     window->Destroy();
 }
 
@@ -440,15 +446,21 @@ HWTEST_F(SurfaceDrawTest, DrawCustomStartingWindow03, TestSize.Level1)
     auto info = std::make_shared<Rosen::StartingWindowPageDrawInfo>();
     info->bgColor = 0x00660000;
     auto surfaceNode = window->GetSurfaceNode();
+    std::array<uint32_t, size_t(StartWindowResType::Count)> frameIndex { 0, 0, 0, 0 };
 
     std::shared_ptr<Media::PixelMap> pixelMap = SurfaceDraw::DecodeImageToPixelMap(IMAGE_PLACE_HOLDER_PNG_PATH);
-    info->appIconPixelMap = pixelMap;
-    info->brandingPixelMap = pixelMap;
-    info->illustrationPixelMap = pixelMap;
+    info->appIcon = std::make_shared<ResourceInfo>();
+    info->bgImage = std::make_shared<ResourceInfo>();
+    info->branding = std::make_shared<ResourceInfo>();
+    info->appIcon->pixelMaps.push_back(pixelMap);
+    info->bgImage->pixelMaps.push_back(pixelMap);
+    info->branding->pixelMaps.push_back(pixelMap);
 
-    EXPECT_EQ(SurfaceDraw::DrawCustomStartingWindow(surfaceNode, rect, info, std::numeric_limits<float>::max()), true);
-    EXPECT_EQ(SurfaceDraw::DrawCustomStartingWindow(surfaceNode, rect, info, std::numeric_limits<float>::min()), true);
-    EXPECT_EQ(SurfaceDraw::DrawCustomStartingWindow(surfaceNode, rect, info, 1.0f), true);
+    EXPECT_EQ(SurfaceDraw::DrawCustomStartingWindow(surfaceNode, rect, info, 1.0f, frameIndex), true);
+    EXPECT_EQ(SurfaceDraw::DrawCustomStartingWindow(surfaceNode, rect, info,
+        std::numeric_limits<float>::max(), frameIndex), true);
+    EXPECT_EQ(SurfaceDraw::DrawCustomStartingWindow(surfaceNode, rect, info,
+        std::numeric_limits<float>::min(), frameIndex), true);
     window->Destroy();
 }
 
@@ -467,12 +479,48 @@ HWTEST_F(SurfaceDrawTest, DrawCustomStartingWindow04, TestSize.Level1)
     auto info = std::make_shared<Rosen::StartingWindowPageDrawInfo>();
     info->bgColor = 0x00660000;
     auto surfaceNode = window->GetSurfaceNode();
+    std::array<uint32_t, size_t(StartWindowResType::Count)> frameIndex { 0, 0, 0, 0 };
 
     std::shared_ptr<Media::PixelMap> pixelMap = SurfaceDraw::DecodeImageToPixelMap(IMAGE_PLACE_HOLDER_PNG_PATH);
-    info->illustrationPixelMap = pixelMap;
-    info->brandingPixelMap = pixelMap;
+    info->branding = std::make_shared<ResourceInfo>();
+    info->branding->pixelMaps.push_back(pixelMap);
+    info->illustration = std::make_shared<ResourceInfo>();
+    info->illustration->pixelMaps.push_back(pixelMap);
+
     rect.height_ = 200; // height of rect
-    EXPECT_EQ(SurfaceDraw::DrawCustomStartingWindow(surfaceNode, rect, info, 1.0f), true);
+    EXPECT_EQ(SurfaceDraw::DrawCustomStartingWindow(surfaceNode, rect, info, 1.0f, frameIndex), true);
+    window->Destroy();
+}
+
+/**
+ * @tc.name: DrawCustomStartingWindow
+ * @tc.desc: SurfaceDraw::DrawCustomStartingWindow appicon
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceDrawTest, DrawCustomStartingWindow05, TestSize.Level1)
+{
+    sptr<Window> window = CreateTestWindow("DrawCustomStartingWindow test success");
+    ASSERT_NE(window, nullptr);
+    window->Show();
+    usleep(WAIT_FOR_SYNC_US / 20); // wait 25ms for rect updated
+    OHOS::Rosen::Rect rect = window->GetRect();
+    auto info = std::make_shared<Rosen::StartingWindowPageDrawInfo>();
+    info->bgColor = 0x00660000;
+    auto surfaceNode = window->GetSurfaceNode();
+    std::array<uint32_t, size_t(StartWindowResType::Count)> frameIndex { 0, 0, 0, 0 };
+
+    std::shared_ptr<Media::PixelMap> pixelMap = SurfaceDraw::DecodeImageToPixelMap(IMAGE_PLACE_HOLDER_PNG_PATH);
+    info->appIcon = std::make_shared<ResourceInfo>();
+    info->appIcon->pixelMaps.push_back(pixelMap);
+
+    rect.width_ = WIDTH_THRESHOLD_SMALL_VP * VPRATIO - 1; // shorter than small width threshold
+    EXPECT_EQ(SurfaceDraw::DrawCustomStartingWindow(surfaceNode, rect, info, VPRATIO, frameIndex), true);
+
+    rect.width_ = WIDTH_THRESHOLD_MEDIUM_VP * VPRATIO - 1; // shorter than medium width threshold
+    EXPECT_EQ(SurfaceDraw::DrawCustomStartingWindow(surfaceNode, rect, info, VPRATIO, frameIndex), true);
+
+    rect.width_ = WIDTH_THRESHOLD_LARGE_VP * VPRATIO - 1; // shorter than large width threshold
+    EXPECT_EQ(SurfaceDraw::DrawCustomStartingWindow(surfaceNode, rect, info, VPRATIO, frameIndex), true);
     window->Destroy();
 }
 
@@ -487,7 +535,8 @@ HWTEST_F(SurfaceDrawTest, DrawBackgroundImage01, TestSize.Level1)
     ASSERT_NE(pixelMap, nullptr);
     auto info = std::make_shared<Rosen::StartingWindowPageDrawInfo>();
     info->bgColor = 0x00660000;
-    info->bgImagePixelMap = pixelMap;
+    info->bgImage = std::make_shared<ResourceInfo>();
+    info->bgImage->pixelMaps.push_back(pixelMap);
     sptr<Window> window = CreateTestWindow("DrawCustomResource");
     ASSERT_NE(window, nullptr);
     window->Show();
@@ -496,23 +545,24 @@ HWTEST_F(SurfaceDrawTest, DrawBackgroundImage01, TestSize.Level1)
     auto surfaceNode = window->GetSurfaceNode();
     auto buffer = SurfaceDraw::GetSurfaceBuffer(SurfaceDraw::GetLayer(surfaceNode), rect.width_, rect.height_);
     float ratio = 1.0f;
+    std::array<uint32_t, size_t(StartWindowResType::Count)> frameIndex { 0, 0, 0, 0 };
 
     info->startWindowBackgroundImageFit = "";
-    EXPECT_EQ(SurfaceDraw::DoDrawCustomStartingWindow(buffer, rect, info, ratio), true);
+    EXPECT_EQ(SurfaceDraw::DoDrawCustomStartingWindow(buffer, rect, info, ratio, frameIndex), true);
     info->startWindowBackgroundImageFit = "Cover";
-    EXPECT_EQ(SurfaceDraw::DoDrawCustomStartingWindow(buffer, rect, info, ratio), true);
+    EXPECT_EQ(SurfaceDraw::DoDrawCustomStartingWindow(buffer, rect, info, ratio, frameIndex), true);
     info->startWindowBackgroundImageFit = "Contain";
-    EXPECT_EQ(SurfaceDraw::DoDrawCustomStartingWindow(buffer, rect, info, ratio), true);
+    EXPECT_EQ(SurfaceDraw::DoDrawCustomStartingWindow(buffer, rect, info, ratio, frameIndex), true);
     info->startWindowBackgroundImageFit = "Fill";
-    EXPECT_EQ(SurfaceDraw::DoDrawCustomStartingWindow(buffer, rect, info, ratio), true);
+    EXPECT_EQ(SurfaceDraw::DoDrawCustomStartingWindow(buffer, rect, info, ratio, frameIndex), true);
     info->startWindowBackgroundImageFit = "Auto";
-    EXPECT_EQ(SurfaceDraw::DoDrawCustomStartingWindow(buffer, rect, info, ratio), true);
+    EXPECT_EQ(SurfaceDraw::DoDrawCustomStartingWindow(buffer, rect, info, ratio, frameIndex), true);
     info->startWindowBackgroundImageFit = "ScaleDown";
-    EXPECT_EQ(SurfaceDraw::DoDrawCustomStartingWindow(buffer, rect, info, ratio), true);
+    EXPECT_EQ(SurfaceDraw::DoDrawCustomStartingWindow(buffer, rect, info, ratio, frameIndex), true);
     info->startWindowBackgroundImageFit = "xxxxx";
-    EXPECT_EQ(SurfaceDraw::DoDrawCustomStartingWindow(buffer, rect, info, ratio), true);
+    EXPECT_EQ(SurfaceDraw::DoDrawCustomStartingWindow(buffer, rect, info, ratio, frameIndex), true);
     info->startWindowBackgroundImageFit = "None";
-    EXPECT_EQ(SurfaceDraw::DoDrawCustomStartingWindow(buffer, rect, info, ratio), true);
+    EXPECT_EQ(SurfaceDraw::DoDrawCustomStartingWindow(buffer, rect, info, ratio, frameIndex), true);
     window->Destroy();
 }
 } // namespace
