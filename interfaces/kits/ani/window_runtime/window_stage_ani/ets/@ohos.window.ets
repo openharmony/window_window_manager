@@ -1571,51 +1571,51 @@ export interface ScaleOptions {
   /**
     * The scale param of x direction. Default is 1.f
     *
-    * @type { ?number }
+    * @type { ?double }
     * @syscap SystemCapability.WindowManager.WindowManager.Core
     * @systemapi
     * @since 9
     */
-  x?: number;
-  
+  x?: double;
+
   /**
     * The scale param of y direction. Default is 1.f
     *
-    * @type { ?number }
+    * @type { ?double }
     * @syscap SystemCapability.WindowManager.WindowManager.Core
     * @systemapi
     * @since 9
     */
-  y?: number;
-  
+  y?: double;
+
   /**
     * The scale param of pivot point of x. Default is 0.5f, Interval is 0.f - 1.f
     *
-    * @type { ?number }
+    * @type { ?double }
     * @syscap SystemCapability.WindowManager.WindowManager.Core
     * @systemapi
     * @since 9
     */
-  pivotX?: number;
-  
+  pivotX?: double;
+
   /**
     * The scale param of pivot point of y. Default is 0.5f, Interval is 0.f - 1.f
     *
-    * @type { ?number }
+    * @type { ?double }
     * @syscap SystemCapability.WindowManager.WindowManager.Core
     * @systemapi
     * @since 9
     */
-  pivotY?: number;
+  pivotY?: double;
 }
 
 export class ScaleOptionsInternal implements ScaleOptions {
-  x?: number;
-  y?: number;
-  pivotX?: number;
-  pivotY?: number;
+  x?: double;
+  y?: double;
+  pivotX?: double;
+  pivotY?: double;
 }
-  
+
 /**
   * Describes the rotate Transition Options of window
   *
@@ -1628,62 +1628,62 @@ export interface RotateOptions {
   /**
     * The rotate degree of x direction. Default value is 0.f
     *
-    * @type { ?number }
+    * @type { ?double }
     * @syscap SystemCapability.WindowManager.WindowManager.Core
     * @systemapi
     * @since 9
     */
-  x?: number;
-  
+  x?: double;
+
   /**
     * The rotate degree of y direction. Default value is 0.f
     *
-    * @type { ?number }
+    * @type { ?double }
     * @syscap SystemCapability.WindowManager.WindowManager.Core
     * @systemapi
     * @since 9
     */
-  y?: number;
-  
+  y?: double;
+
   /**
     * The rotate degree of z direction. Default value is 0.f
     *
-    * @type { ?number }
+    * @type { ?double }
     * @syscap SystemCapability.WindowManager.WindowManager.Core
     * @systemapi
     * @since 9
     */
-  z?: number;
-  
+  z?: double;
+
   /**
     * The param of pivot point of x. Default is 0.5f, Interval is 0.f - 1.f
     *
-    * @type { ?number }
+    * @type { ?double }
     * @syscap SystemCapability.WindowManager.WindowManager.Core
     * @systemapi
     * @since 9
     */
-  pivotX?: number;
-  
+  pivotX?: double;
+
   /**
     * The param of pivot point of y. Default is 0.5f, Interval is 0.f - 1.f
     *
-    * @type { ?number }
+    * @type { ?double }
     * @syscap SystemCapability.WindowManager.WindowManager.Core
     * @systemapi
     * @since 9
     */
-  pivotY?: number;
+  pivotY?: double;
 }
 
 export class RotateOptionsInternal implements RotateOptions {
-  x?: number;
-  y?: number;
-  z?: number;
-  pivotX?: number;
-  pivotY?: number;
+  x?: double;
+  y?: double;
+  z?: double;
+  pivotX?: double;
+  pivotY?: double;
 }
-  
+
 /**
   * Describes the translate Transition Options of window
   *
@@ -1696,38 +1696,38 @@ export interface TranslateOptions {
   /**
     * The translate pixel param of x direction. Default is 0.f
     *
-    * @type { ?number }
+    * @type { ?double }
     * @syscap SystemCapability.WindowManager.WindowManager.Core
     * @systemapi
     * @since 9
     */
-  x?: number;
-  
+  x?: double;
+
   /**
     * The translate pixel param of y direction. Default is 0.f
     *
-    * @type { ?number }
+    * @type { ?double }
     * @syscap SystemCapability.WindowManager.WindowManager.Core
     * @systemapi
     * @since 9
     */
-  y?: number;
-  
+  y?: double;
+
   /**
     * The translate pixel param of z direction. Default is 0.f
     *
-    * @type { ?number }
+    * @type { ?double }
     * @syscap SystemCapability.WindowManager.WindowManager.Core
     * @systemapi
     * @since 9
     */
-  z?: number;
+  z?: double;
 }
 
 export class TranslateOptionsInternal implements TranslateOptions {
-  x?: number;
-  y?: number;
-  z?: number;
+  x?: double;
+  y?: double;
+  z?: double;
 }
 
 export class WindowStageInternal implements WindowStage {
