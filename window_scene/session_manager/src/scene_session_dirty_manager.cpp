@@ -542,6 +542,7 @@ bool SceneSessionDirtyManager::GetLastConstrainedModalUIExtInfo(const sptr<Scene
     }
     auto surfaceNodeId = sceneSession->GetSurfaceNodeId();
     if (!surfaceNodeId) {
+        TLOGD(WmsLogTag::WMS_EVENT, "surfaceNodeId not found");
         return false;
     }
     {
@@ -1150,6 +1151,7 @@ std::vector<MMI::WindowInfo> SceneSessionDirtyManager::GetSecSurfaceWindowinfoLi
     }
     auto surfaceNodeId = sceneSession->GetSurfaceNodeId();
     if (!surfaceNodeId) {
+        TLOGD(WmsLogTag::WMS_EVENT, "surfaceNodeId not found");
         return {};
     }
     std::vector<SecSurfaceInfo> secSurfaceInfoList;
