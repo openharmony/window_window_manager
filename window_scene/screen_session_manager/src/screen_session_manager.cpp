@@ -175,6 +175,7 @@ const std::string FAULT_DESCRIPTION = "842003014";
 const std::string FAULT_SUGGESTION = "542003014";
 constexpr uint32_t COMMON_EVENT_SERVICE_ID = 3299;
 const long GET_HDR_PIXELMAP_TIMEOUT = 2000;
+const int32_t CV_WAIT_UPDATE_AVAILABLE_MS = 300;
 
 const static uint32_t PIXMAP_VECTOR_SIZE = 2;
 static const uint32_t SDR_PIXMAP = 0;
@@ -240,6 +241,17 @@ ScreenSessionManager::ScreenSessionManager()
 bool SortByScreenId(const ScreenId& screenIdA, const ScreenId& screenIdB)
 {
     return static_cast<int32_t>(screenIdA) < static_cast<int32_t>(screenIdB);
+}
+
+bool ScreenSessionManager::GetPcStatus() const
+{
+    std::lock_guard<std::mutex> lock(setPcStatusMutex_);
+    return g_isPcDevice;
+}
+
+void ScreenSessionManager::SetPcStatus(bool isPc) {
+    std::lock_guard<std::mutex> lock(setPcStatusMutex_);
+    g_isPcDevice = isPc;
 }
 
 ScreenRotation ScreenSessionManager::ConvertOffsetToCorrectRotation(int32_t phyOffset)
@@ -1419,6 +1431,10 @@ void ScreenSessionManager::HandleScreenConnectEvent(sptr<ScreenSession> screenSe
     }
 #endif
     if (clientProxy && g_isPcDevice) {
+        {
+            std::unique_lock<std::mutex> lock(displayAddMutex_);
+            needWaitAvailableArea_ = true;
+        }
         clientProxy->OnScreenConnectionChanged(GetSessionOption(screenSession, screenId), screenEvent);
         sptr<ScreenSession> internalSession = GetInternalScreenSession();
         if (!RecoverRestoredMultiScreenMode(screenSession)) {
@@ -1439,9 +1455,25 @@ void ScreenSessionManager::HandleScreenConnectEvent(sptr<ScreenSession> screenSe
     }
     if (phyMirrorEnable) {
         NotifyScreenConnected(screenSession->ConvertToScreenInfo());
+        // when display add, need wait update available area, ensure display info is accurate
+        WaitUpdateAvailableAreaForPc();
         NotifyDisplayCreate(screenSession->ConvertToDisplayInfo());
     }
     TLOGW(WmsLogTag::DMS, "connect end. ScreenId: %{public}" PRIu64, screenId);
+}
+
+void ScreenSessionManager::WaitUpdateAvailableAreaForPc()
+{
+    std::unique_lock<std::mutex> lock(displayAddMutex_);
+    TLOGI(WmsLogTag::DMS, "begin wait notify display. need wait: %{public}d", needWaitAvailableArea_);
+    if (g_isPcDevice && needWaitAvailableArea_) {
+        TLOGI(WmsLogTag::DMS, "need wait update available area");
+        if (displayAddCV_.wait_for(lock, std::chrono::milliseconds(CV_WAIT_UPDATE_AVAILABLE_MS)) ==
+            std::cv_status::timeout) {
+            TLOGE(WmsLogTag::DMS, "wait update available area timeout");
+            needWaitAvailableArea_ = false;
+        }
+    }
 }
 
 void ScreenSessionManager::HandleScreenDisconnectEvent(sptr<ScreenSession> screenSession,
@@ -8812,6 +8844,14 @@ void ScreenSessionManager::UpdateAvailableArea(ScreenId screenId, DMRect area)
         return;
     }
     if (g_isPcDevice) {
+        {
+            std::unique_lock<std::mutex> lock(displayAddMutex_);
+            if (needWaitAvailableArea_) {
+                TLOGI(WmsLogTag::DMS, "need notify add display.");
+                displayAddCV_.notify_all();
+                needWaitAvailableArea_ = false;
+            }
+        }
         sptr<ScreenSession> physicalScreen = GetPhysicalScreenSession(screenSession->GetRSScreenId());
         if (physicalScreen) {
             physicalScreen->UpdateAvailableArea(area);
