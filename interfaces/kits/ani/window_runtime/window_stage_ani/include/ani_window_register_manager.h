@@ -93,9 +93,9 @@ private:
         sptr<Window> window, bool isRegister, ani_env* env);
     WmErrorCode ProcessWindowVisibilityChangeRegister(sptr<AniWindowListener> listener, sptr<Window> window,
         bool isRegister, ani_env* env);
-    WmErrorCode ProcessSystemDensityChangeRegister(sptr<AniWindowListener> listner, sptr<Window> window,
+    WmErrorCode ProcessSystemDensityChangeRegister(sptr<AniWindowListener> listener, sptr<Window> window,
         bool isRegister, ani_env* env);
-    WmErrorCode ProcessDisplayIdChangeRegister(sptr<AniWindowListener> listner, sptr<Window> window,
+    WmErrorCode ProcessDisplayIdChangeRegister(sptr<AniWindowListener> listener, sptr<Window> window,
         bool isRegister, ani_env* env);
     WmErrorCode ProcessWindowNoInteractionRegister(sptr<AniWindowListener> listener, sptr<Window> window,
         bool isRegister, ani_env* env, ani_double timeout);

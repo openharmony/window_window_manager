@@ -342,13 +342,15 @@ private:
         ani_object& systemProperties, const char* clsName);
     static void SetSystemPropertiesWindowIsTransparent(ani_env* env, const sptr<Window>& window,
         ani_object& systemProperties, const char* clsName);
-    static void SetSystemPropertieswindowIsRoundCorner(ani_env* env, const sptr<Window>& window,
+    static void SetSystemPropertiesWindowIsRoundCorner(ani_env* env, const sptr<Window>& window,
         ani_object& systemProperties, const char* clsName);
     static void SetSystemPropertiesWindowDimBehindValue(ani_env* env, const sptr<Window>& window,
         ani_object& systemProperties, const char* clsName);
-    static void SetSystemPropertieswindowId(ani_env* env, const sptr<Window>& window,
+    static void SetSystemPropertiesWindowId(ani_env* env, const sptr<Window>& window,
         ani_object& systemProperties, const char* clsName);
-    static void SetSystemPropertiesdisplayId(ani_env* env, const sptr<Window>& window,
+    static void SetSystemPropertiesDisplayId(ani_env* env, const sptr<Window>& window,
+        ani_object& systemProperties, const char* clsName);
+    static void SetSystemPropertiesWindowName(ani_env* env, const sptr<Window>& window,
         ani_object& systemProperties, const char* clsName);
 };
 }
