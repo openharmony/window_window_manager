@@ -662,7 +662,7 @@ void AniWindowUtils::SetSystemPropertiesWindowFousable(ani_env* env, const sptr<
 void AniWindowUtils::SetSystemPropertiesWindowIsPrivacyMode(ani_env* env, const sptr<Window>& window,
     ani_object& systemProperties, const char* clsName)
 {
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
     bool windowIsPrivacyMode = window->IsPrivacyMode();
     CallAniMethodVoid(env, systemProperties, clsName, "<set>isPrivacyMode", nullptr,
         static_cast<ani_boolean>(windowIsPrivacyMode));
@@ -671,7 +671,7 @@ void AniWindowUtils::SetSystemPropertiesWindowIsPrivacyMode(ani_env* env, const 
 void AniWindowUtils::SetSystemPropertiesWindowIsKeepScreenOn(ani_env* env, const sptr<Window>& window,
     ani_object& systemProperties, const char* clsName)
 {
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
     bool windowIsKeepScreenOn = window->IsKeepScreenOn();
     CallAniMethodVoid(env, systemProperties, clsName, "<set>isKeepScreenOn", nullptr,
         static_cast<ani_boolean>(windowIsKeepScreenOn));
@@ -680,7 +680,7 @@ void AniWindowUtils::SetSystemPropertiesWindowIsKeepScreenOn(ani_env* env, const
 void AniWindowUtils::SetSystemPropertiesWindowBrightness(ani_env* env, const sptr<Window>& window,
     ani_object& systemProperties, const char* clsName)
 {
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
     float windowBrightness = window->GetBrightness();
     CallAniMethodVoid(env, systemProperties, clsName, "<set>brightness", nullptr,
         static_cast<ani_float>(windowBrightness));
@@ -690,7 +690,7 @@ void AniWindowUtils::SetSystemPropertiesWindowBrightness(ani_env* env, const spt
 void AniWindowUtils::SetSystemPropertiesWindowIsTransparent(ani_env* env, const sptr<Window>& window,
     ani_object& systemProperties, const char* clsName)
 {
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
     bool isTransparent = window->IsTransparent();
     CallAniMethodVoid(env, systemProperties, clsName, "<set>isTransparent", nullptr,
         static_cast<ani_boolean>(isTransparent));
@@ -700,7 +700,7 @@ void AniWindowUtils::SetSystemPropertiesWindowIsTransparent(ani_env* env, const 
 void AniWindowUtils::SetSystemPropertiesWindowIsRoundCorner(ani_env* env, const sptr<Window>& window,
     ani_object& systemProperties, const char* clsName)
 {
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
     bool windowIsRoundCorner {false};
     CallAniMethodVoid(env, systemProperties, clsName, "<set>isRoundCorner", nullptr,
         static_cast<ani_boolean>(windowIsRoundCorner));
@@ -710,7 +710,7 @@ void AniWindowUtils::SetSystemPropertiesWindowIsRoundCorner(ani_env* env, const 
 void AniWindowUtils::SetSystemPropertiesWindowDimBehindValue(ani_env* env, const sptr<Window>& window,
     ani_object& systemProperties, const char* clsName)
 {
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
     int windowDimBehindValue {0};
     CallAniMethodVoid(env, systemProperties, clsName, "<set>dimBehindValue", nullptr,
         static_cast<ani_int>(windowDimBehindValue));
@@ -720,7 +720,7 @@ void AniWindowUtils::SetSystemPropertiesWindowDimBehindValue(ani_env* env, const
 void AniWindowUtils::SetSystemPropertiesWindowId(ani_env* env, const sptr<Window>& window,
     ani_object& systemProperties, const char* clsName)
 {
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
     uint32_t windowId = window->GetWindowId();
     CallAniMethodVoid(env, systemProperties, clsName, "<set>id", nullptr,
         static_cast<ani_int>(windowId));
@@ -729,7 +729,7 @@ void AniWindowUtils::SetSystemPropertiesWindowId(ani_env* env, const sptr<Window
 void AniWindowUtils::SetSystemPropertiesDisplayId(ani_env* env, const sptr<Window>& window,
     ani_object& systemProperties, const char* clsName)
 {
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
     uint32_t displayId = window->GetDisplayId();
     CallAniMethodVoid(env, systemProperties, clsName, "<set>displayId", nullptr,
         static_cast<ani_long>(displayId));
@@ -738,8 +738,7 @@ void AniWindowUtils::SetSystemPropertiesDisplayId(ani_env* env, const sptr<Windo
 void AniWindowUtils::SetSystemPropertiesWindowName(ani_env* env, const sptr<Window>& window,
     ani_object& systemProperties, const char* clsName)
 {
-    WindowPropertyInfo WindowPropertyInfo;
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
     std::string windowName = window->GetWindowName();
     ani_string aniWindowName;
     if (ANI_OK != GetAniString(env, windowName, &aniWindowName)) {
