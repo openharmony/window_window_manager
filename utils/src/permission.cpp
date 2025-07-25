@@ -87,6 +87,11 @@ bool Permission::IsStartByHdcd(bool isLocalSysCalling)
         static_cast<uint32_t>(IPCSkeleton::GetSelfTokenID()) :
         IPCSkeleton::GetCallingTokenID();
     OHOS::Security::AccessToken::NativeTokenInfo info;
+    const auto flag = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
+    if (flag != Security::AccessToken::TypeTokenTypeEnum::TOKEN_NATIVE &&
+        flag != Security::AccessToken::TypeTokenTypeEnum::TOKEN_SHELL) {
+        return false;
+    }
     if (Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(tokenId, info) != 0) {
         return false;
     }
