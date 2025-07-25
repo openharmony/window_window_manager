@@ -2902,7 +2902,9 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
     }
     abilitySessionInfo->scenarios = sessionInfo.scenarios;
     if (requestId == DEFAULT_REQUEST_FROM_SCB_ID) {
-        abilitySessionInfo->want.SetParam(IS_CALL_BY_SCB, true);
+        TLOGI(WmsLogTag::WMS_LIFE, "Is SCB Call, set flag: true persistentId:%{public}d",
+            abilitySessionInfo->persistentId);
+        abilitySessionInfo->isCallBySCB = true;
     }
     return abilitySessionInfo;
 }
@@ -3032,10 +3034,6 @@ int32_t SceneSessionManager::StartUIAbilityBySCBTimeoutCheck(const sptr<SceneSes
         coldStartFlag, retCode, windowStateChangeReason] {
         int timerId = HiviewDFX::XCollie::GetInstance().SetTimer("WMS:SSM:StartUIAbilityBySCB",
             START_UI_ABILITY_TIMEOUT/1000, nullptr, nullptr, HiviewDFX::XCOLLIE_FLAG_LOG);
-        if (abilitySessionInfo != nullptr) {
-            TLOGI(WmsLogTag::WMS_LIFE, "requestId:%{public}d, IS_CALL_BY_SCB: %{public}d",
-                abilitySessionInfo->requestId, abilitySessionInfo->want.GetBoolParam(IS_CALL_BY_SCB, false));
-        }
         auto result = AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(abilitySessionInfo,
             *coldStartFlag, windowStateChangeReason);
         CloseAllFd(sceneSession->GetSessionInfo().want);
