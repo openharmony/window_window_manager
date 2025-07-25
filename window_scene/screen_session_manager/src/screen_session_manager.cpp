@@ -7599,7 +7599,7 @@ void ScreenSessionManager::SetLandscapeLockStatus(bool isLocked)
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::DMS, "permission denied! pid: %{public}d", IPCSkeleton::GetCallingPid());
         return;
-    }    
+    }
     if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         TLOGI(WmsLogTag::DMS, "not super fold display device.");
         return;
@@ -10848,7 +10848,7 @@ ScreenId ScreenSessionManager::GetPhyScreenId(ScreenId screenId)
     }
     return screenId;
 }
- 
+
 void ScreenSessionManager::UpdateCoordinationRefreshRate(uint32_t refreshRate)
 {
     if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice() || !GetCoordinationFlag()) {
@@ -10888,5 +10888,10 @@ bool ScreenSessionManager::SynchronizePowerStatus(ScreenPowerState state)
     screenPowerTaskScheduler_->PostVoidSyncTask(rsSetScreenPowerStatusTask, "rsInterface_.SetScreenPowerStatus task");
 #endif
     return true;
+}
+
+std::shared_ptr<TaskScheduler> ScreenSessionManager::GetPowerTaskScheduler() const
+{
+    return screenPowerTaskScheduler_;
 }
 } // namespace OHOS::Rosen
