@@ -4108,12 +4108,15 @@ bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionPr
         return SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_FLOATING_BALL);
     }
     if (type == WindowType::WINDOW_TYPE_FLOAT) {
-        bool isPadAndNotPcApp = systemConfig_.IsPadWindow() && !property->GetIsPcAppInPad();
+        bool isPhoneOrPad = systemConfig_.IsPadWindow() || systemConfig_.IsPhoneWindow();
         // WINDOW_TYPE_FLOAT could be created with the corresponding permission
         if (SessionPermission::VerifyCallingPermission("ohos.permission.SYSTEM_FLOAT_WINDOW") &&
             (SessionPermission::IsSystemCalling() || SessionPermission::IsStartByHdcd() ||
-            (systemConfig_.supportTypeFloatWindow_ && !isPadAndNotPcApp))) {
+                systemConfig_.supportTypeFloatWindow_)) {
             TLOGI(WmsLogTag::WMS_SYSTEM, "check float permission success.");
+            return true;
+        } else if (SessionPermission::VerifyCallingPermission("ohos.permission.SYSTEM_FLOAT_WINDOW") && isPhoneOrPad) {
+            TLOGI(WmsLogTag::WMS_SYSTEM, "check float permission success. DeviceType is phone or pad.");
             return true;
         } else {
             TLOGI(WmsLogTag::WMS_SYSTEM, "check float permission failed.");
