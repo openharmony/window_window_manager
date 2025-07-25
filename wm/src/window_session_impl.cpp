@@ -3549,7 +3549,7 @@ WSError WindowSessionImpl::GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentR
 {
     if (!SessionPermission::IsSystemCalling()) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Permission denied!");
-        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (uiContent == nullptr) {
