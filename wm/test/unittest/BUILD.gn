@@ -264,6 +264,8 @@ ohos_unittest("wm_window_session_impl_test4") {
     "${window_base_path}/window_scene/test/unittest/ui_extension/mock/mock_uiext_session_permission.cpp",
   ]
 
+  defines = [ "ENABLE_MOCK_IS_SYSTEM_CALLING" ]
+
   deps = [
     ":wm_unittest_common",
     "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
