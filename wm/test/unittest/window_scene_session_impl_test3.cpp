@@ -1854,6 +1854,7 @@ HWTEST_F(WindowSceneSessionImplTest3, SetWindowRectAutoSave, TestSize.Level1)
     ret = windowSceneSessionImpl->SetWindowRectAutoSave(true, false);
     EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
     windowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    windowSceneSessionImpl->windowSystemConfig_.freeMultiWindowEnable_ = false;
     windowSceneSessionImpl->property_->SetPcAppInpadCompatibleMode(true);
     ret = windowSceneSessionImpl->SetWindowRectAutoSave(true, false);
     EXPECT_EQ(WMError::WM_OK, ret);
