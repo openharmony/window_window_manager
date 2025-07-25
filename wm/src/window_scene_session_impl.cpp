@@ -3589,12 +3589,7 @@ WMError WindowSceneSessionImpl::SetWindowRectAutoSave(bool enabled, bool isSaveB
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
-    if (property_->GetPcAppInpadCompatibleMode()) {
-        TLOGE(WmsLogTag::WMS_MAIN, "This is PcAppInPad, not supported");
-        return WMError::WM_OK;
-    }
-
-    if (property_->GetPcAppInpadCompatibleMode()) {
+    if (IsPadAndNotFreeMutiWindowCompatibleMode()) {
         TLOGE(WmsLogTag::WMS_MAIN, "This is PcAppInPad, not supported");
         return WMError::WM_OK;
     }
