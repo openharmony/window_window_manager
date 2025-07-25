@@ -1718,17 +1718,20 @@ HWTEST_F(WindowSessionImplTest5, TestUpdateGlobalDisplayRectFromServer, TestSize
     window->property_->SetGlobalDisplayRect({ 10, 20, 200, 100 });
     window->globalDisplayRectSizeChangeReason_ = SizeChangeReason::RESIZE;
 
+    // Case 1: No change, should do nothing
     Rect expectedRect { 10, 20, 200, 100 };
     auto ret = window->UpdateGlobalDisplayRectFromServer(rect, SizeChangeReason::RESIZE);
     EXPECT_EQ(ret, WSError::WS_DO_NOTHING);
     EXPECT_EQ(window->GetGlobalDisplayRect(), expectedRect);
     EXPECT_EQ(window->globalDisplayRectSizeChangeReason_, SizeChangeReason::RESIZE);
 
+    // Case 2: Change reason, should update
     ret = window->UpdateGlobalDisplayRectFromServer(rect, SizeChangeReason::MOVE);
     EXPECT_EQ(ret, WSError::WS_OK);
     EXPECT_EQ(window->GetGlobalDisplayRect(), expectedRect);
     EXPECT_EQ(window->globalDisplayRectSizeChangeReason_, SizeChangeReason::MOVE);
 
+    // Case 3: Change rect, should update
     WSRect updated = { 30, 40, 200, 100 };
     expectedRect = { 30, 40, 200, 100 };
     ret = window->UpdateGlobalDisplayRectFromServer(updated, SizeChangeReason::MOVE);
@@ -1736,12 +1739,22 @@ HWTEST_F(WindowSessionImplTest5, TestUpdateGlobalDisplayRectFromServer, TestSize
     EXPECT_EQ(window->GetGlobalDisplayRect(), expectedRect);
     EXPECT_EQ(window->globalDisplayRectSizeChangeReason_, SizeChangeReason::MOVE);
 
+    // Case 4: Change reason and rect, should update
     updated = { 0, 0, 200, 100 };
     expectedRect = { 0, 0, 200, 100 };
     ret = window->UpdateGlobalDisplayRectFromServer(updated, SizeChangeReason::DRAG);
     EXPECT_EQ(ret, WSError::WS_OK);
     EXPECT_EQ(window->GetGlobalDisplayRect(), expectedRect);
     EXPECT_EQ(window->globalDisplayRectSizeChangeReason_, SizeChangeReason::DRAG);
+
+    // Case 5: Drag move, should update but keep reason as DRAG_MOVE
+    window->globalDisplayRectSizeChangeReason_ = SizeChangeReason::DRAG_MOVE;
+    updated = { 20, 20, 200, 100 };
+    expectedRect = { 20, 20, 200, 100 };
+    ret = window->UpdateGlobalDisplayRectFromServer(updated, SizeChangeReason::DRAG_END);
+    EXPECT_EQ(ret, WSError::WS_OK);
+    EXPECT_EQ(window->GetGlobalDisplayRect(), expectedRect);
+    EXPECT_EQ(window->globalDisplayRectSizeChangeReason_, SizeChangeReason::DRAG_MOVE);
 }
 
 /**
