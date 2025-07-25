@@ -1877,7 +1877,7 @@ HWTEST_F(DisplayManagerTest, GetScreenshotreturnsnullptr, TestSize.Level1)
 HWTEST_F(DisplayManagerTest, GetScreenHdrshot_ShouldReturnNullptrVector_WhenSnapshotFails, TestSize.Level1)
 {
     DisplayManager displayManager;
-    DisplayId validDisplayId = DEFAULT_DISPLAY ;
+    DisplayId validDisplayId = DEFAULT_DISPLAY;
     DmErrorCode errorCode;
     bool isUseDma = false;
     bool isCaptureFullOfScreen = false;
@@ -1888,7 +1888,7 @@ HWTEST_F(DisplayManagerTest, GetScreenHdrshot_ShouldReturnNullptrVector_WhenSnap
         Return(std::vector<std::shared_ptr<Media::PixelMap>> { nullptr }));
  
     std::vector<std::shared_ptr<Media::PixelMap>> result = displayManager.GetScreenHDRshot(
-        validDisplayId, &errorCode, isUseDma, isCaptureFullOfScreen);
+        validDisplayId, errorCode, isUseDma, isCaptureFullOfScreen);
  
     EXPECT_EQ(result.size(), PIXELMAP_SIZE);
     EXPECT_EQ(result[SDR_PIXELMAP], nullptr);
@@ -1915,7 +1915,7 @@ HWTEST_F(DisplayManagerTest, GetScreenHdrshot_ShouldReturnSnapshotVector_WhenSna
         Return(std::vector<std::shared_ptr<Media::PixelMap>> { nullptr, nullptr }));
  
     std::vector<std::shared_ptr<Media::PixelMap>> result =
-        displayManager.GetScreenHDRshot(validDisplayId, &errorCode, isUseDma, isCaptureFullOfScreen);
+        displayManager.GetScreenHDRshot(validDisplayId, errorCode, isUseDma, isCaptureFullOfScreen);
  
     EXPECT_EQ(result.size(), PIXELMAP_SIZE);
     EXPECT_EQ(result[SDR_PIXELMAP], nullptr);
@@ -1937,7 +1937,7 @@ HWTEST_F(DisplayManagerTest, GetScreenHdrshot_GetDisplayHDRSnapshot, TestSize.Le
     bool isCaptureFullOfScreen = false;
  
     std::vector<std::shared_ptr<Media::PixelMap>> result =
-        displayManager.GetScreenHDRshot(validDisplayId, &errorCode, isUseDma, isCaptureFullOfScreen);
+        displayManager.GetScreenHDRshot(validDisplayId, errorCode, isUseDma, isCaptureFullOfScreen);
  
     EXPECT_EQ(result.size(), PIXELMAP_SIZE);
     EXPECT_EQ(result[SDR_PIXELMAP], nullptr);
@@ -1959,7 +1959,7 @@ HWTEST_F(DisplayManagerTest, GetScreenHdrshot_GetDisplayHDRSnapshot001, TestSize
     bool isCaptureFullOfScreen = false;
  
     std::vector<std::shared_ptr<Media::PixelMap>> result =
-        displayManager.GetScreenHDRshot(validDisplayId, &errorCode, isUseDma, isCaptureFullOfScreen);
+        displayManager.GetScreenHDRshot(validDisplayId, errorCode, isUseDma, isCaptureFullOfScreen);
  
     EXPECT_EQ(result.size(), PIXELMAP_SIZE);
     EXPECT_EQ(result[SDR_PIXELMAP], nullptr);
@@ -1984,9 +1984,9 @@ HWTEST_F(DisplayManagerTest, GetScreenHdrshot_GetDisplayHDRSnapshot002, TestSize
         SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_;
     SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_ = nullptr;
     std::vector<std::shared_ptr<Media::PixelMap>> result =
-        displayManager.GetScreenHDRshot(validDisplayId, &errorCode, isUseDma, isCaptureFullOfScreen);
+        displayManager.GetScreenHDRshot(validDisplayId, errorCode, isUseDma, isCaptureFullOfScreen);
     SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_ =
-    screenSessionManagerServiceProxyTmp;
+        screenSessionManagerServiceProxyTmp;
     EXPECT_EQ(result.size(), PIXELMAP_SIZE);
     EXPECT_EQ(result[SDR_PIXELMAP], nullptr);
     EXPECT_EQ(result[HDR_PIXELMAP], nullptr);
@@ -2338,7 +2338,7 @@ HWTEST_F(DisplayManagerTest, GetScreenHDRshotWithOption_ShouldReturnNull_WhenDis
  
     std::vector<std::shared_ptr<Media::PixelMap>> pixRVec= { nullptr, nullptr };
     std::vector<std::shared_ptr<Media::PixelMap>> result =
-        DisplayManager::GetInstance().GetScreenHDRshotWithOption(captureOption, &errorCode);
+        DisplayManager::GetInstance().GetScreenHDRshotWithOption(captureOption, errorCode);
     EXPECT_EQ(result, pixRVec);
 }
  
@@ -2352,23 +2352,6 @@ HWTEST_F(DisplayManagerTest, GetScreenHDRshotWithOption_ShouldReturnNull_WhenGet
     CaptureOption captureOption;
     captureOption.displayId_ = DEFAULT_DISPLAY;
     DmErrorCode errorCode;
- 
-    std::vector<std::shared_ptr<Media::PixelMap>> pixRVec= { nullptr, nullptr };
-    std::vector<std::shared_ptr<Media::PixelMap>> result =
-        DisplayManager::GetInstance().GetScreenHDRshotWithOption(captureOption, &errorCode);
-    EXPECT_EQ(result, pixRVec);
-}
- 
-/**
- * @tc.name: GetDisplayHDRSnapshotWithOption_whenerrorCodeisnullptr
- * @tc.desc: Test ScreenHDRshot capture failure
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerTest, GetDisplayHDRSnapshotWithOption_whenerrorCodeisnullptr, TestSize.Level1)
-{
-    CaptureOption captureOption;
-    captureOption.displayId_ = DEFAULT_DISPLAY;
-    DmErrorCode *errorCode = nullptr;
  
     std::vector<std::shared_ptr<Media::PixelMap>> pixRVec= { nullptr, nullptr };
     std::vector<std::shared_ptr<Media::PixelMap>> result =
@@ -2393,7 +2376,7 @@ HWTEST_F(DisplayManagerTest, GetScreenHDRshotWithOption_WhenDisplayIdIsValidButS
         Return(std::vector<std::shared_ptr<Media::PixelMap>> { nullptr, nullptr }));
  
     std::vector<std::shared_ptr<Media::PixelMap>> result =
-        DisplayManager::GetInstance().GetScreenHDRshotWithOption(captureOption, &errorCode);
+        DisplayManager::GetInstance().GetScreenHDRshotWithOption(captureOption, errorCode);
  
     EXPECT_EQ(result.size(), PIXELMAP_SIZE);
     EXPECT_EQ(result[SDR_PIXELMAP], nullptr);

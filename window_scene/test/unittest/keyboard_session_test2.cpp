@@ -320,7 +320,7 @@ HWTEST_F(KeyboardSessionTest2, HandleMoveDragSurfaceNode01, Function | SmallTest
     WSRect rect = { 0, 0, 200, 200 };
     moveDragController->SetTargetRect(rect);
     keyboardSession->HandleMoveDragSurfaceNode(SizeChangeReason::DRAG_MOVE);
-    EXPECT_TRUE(g_logMsg.find("keyboard panel session is null") != std::string::npos);
+    EXPECT_TRUE(g_logMsg.find("keyboardPanelSession_ is null") != std::string::npos);
 
     moveDragController->ResetCrossMoveDragProperty();
     moveDragController->SetTargetRect(rect);
@@ -331,7 +331,7 @@ HWTEST_F(KeyboardSessionTest2, HandleMoveDragSurfaceNode01, Function | SmallTest
     ASSERT_NE(panelSession, nullptr);
     keyboardSession->BindKeyboardPanelSession(panelSession);
     keyboardSession->HandleMoveDragSurfaceNode(SizeChangeReason::DRAG_MOVE);
-    EXPECT_TRUE(g_logMsg.find("keyboard panel surface node is null") != std::string::npos);
+    EXPECT_TRUE(g_logMsg.find("keyboardPanelSurfaceNode is null") != std::string::npos);
 
     moveDragController->ResetCrossMoveDragProperty();
     moveDragController->SetTargetRect(rect);
