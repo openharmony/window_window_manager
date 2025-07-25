@@ -767,7 +767,7 @@ private:
     std::condition_variable screenMaskCV_;
     std::mutex displayAddMutex_;
     std::condition_variable displayAddCV_;
-    std::mutex setPCStatusMutex_;
+    mutable std::mutex setPcStatusMutex_;
 
     std::mutex freezedPidListMutex_;
     std::set<int32_t> freezedPidList_;
