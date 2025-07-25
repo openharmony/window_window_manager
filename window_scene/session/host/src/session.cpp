@@ -4554,7 +4554,7 @@ std::shared_ptr<Media::PixelMap> Session::SetFreezeImmediately(float scale, bool
         .useDma = true,
         .useCurWindow = true,
         .isHdrCapture = true,
-        .needF16WindowShot = isNeedF16WindowShot,
+        .needF16WindowCaptureForScRGB = isNeedF16WindowShot,
     };
     bool ret = RSInterfaces::GetInstance().SetWindowFreezeImmediately(surfaceNode, isFreeze, callback, config, blur);
     if (!ret) {
