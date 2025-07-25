@@ -792,6 +792,7 @@ public:
 
     std::vector<sptr<SceneSession>> GetSceneSessions(ScreenId screenId);
     WMError UpdateScreenLockState(int32_t persistentId);
+    WMError UpdateSystemDecorEnable(bool enable);
 
 protected:
     SceneSessionManager();
