@@ -316,6 +316,7 @@ public:
     int32_t GetFloatingWindowParentId();
     void NotifyAfterForeground(bool needNotifyListeners = true,
         bool needNotifyUiContent = true, bool waitAttach = false);
+    void GetAttachStateSyncResult(bool waitAttachState, bool afterForeground) const;
     void NotifyAfterBackground(bool needNotifyListeners = true,
         bool needNotifyUiContent = true, bool waitDetach = false);
     void NotifyAfterDidForeground(uint32_t reason = static_cast<uint32_t>(WindowStateChangeReason::NORMAL));
@@ -463,6 +464,8 @@ public:
     WMError UnregisterWindowStatusDidChangeListener(const sptr<IWindowStatusDidChangeListener>& listener) override;
     WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) override { return WSError::WS_OK; }
     WMError UpdateWindowModeForUITest(int32_t updateMode) override { return WMError::WM_OK; }
+    void UpdateEnableDragWhenSwitchMultiWindow(bool enable);
+
     /*
      * Free Multi Window
      */

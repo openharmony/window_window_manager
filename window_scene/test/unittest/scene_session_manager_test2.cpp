@@ -1294,6 +1294,103 @@ HWTEST_F(SceneSessionManagerTest2, ConfigSystemUIStatusBar01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ConfigFreeMultiWindowForDefaultDragResizeType01
+ * @tc.desc: call ConfigFreeMultiWindow and check the defaultDragResizeType_ default value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, ConfigFreeMultiWindowForDefaultDragResizeType01, TestSize.Level1)
+{
+    ssm_->systemConfig_.freeMultiWindowConfig_.defaultDragResizeType_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    ssm_->ConfigFreeMultiWindow();
+    ASSERT_EQ(ssm_->systemConfig_.freeMultiWindowConfig_.defaultDragResizeType_, DragResizeType::RESIZE_TYPE_UNDEFINED);
+}
+
+/**
+ * @tc.name: ConfigFreeMultiWindowForDefaultDragResizeType02
+ * @tc.desc: call ConfigFreeMultiWindow and check the defaultDragResizeType_ invalid string value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, ConfigFreeMultiWindowForDefaultDragResizeType02, TestSize.Level1)
+{
+    ssm_->systemConfig_.freeMultiWindowConfig_.defaultDragResizeType_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+        "<freeMultiWindow enable=\"true\">"
+        "<defaultDragResizeType>na</defaultDragResizeType>"
+        "</freeMultiWindow>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    ssm_->ConfigFreeMultiWindow();
+    ASSERT_EQ(ssm_->systemConfig_.freeMultiWindowConfig_.defaultDragResizeType_, DragResizeType::RESIZE_TYPE_UNDEFINED);
+}
+
+/**
+ * @tc.name: ConfigFreeMultiWindowForDefaultDragResizeType03
+ * @tc.desc: call ConfigFreeMultiWindow and check the defaultDragResizeType_ invalid int value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, ConfigFreeMultiWindowForDefaultDragResizeType03, TestSize.Level1)
+{
+    ssm_->systemConfig_.freeMultiWindowConfig_.defaultDragResizeType_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+        "<freeMultiWindow enable=\"true\">"
+        "<defaultDragResizeType>-2</defaultDragResizeType>"
+        "</freeMultiWindow>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    ssm_->ConfigFreeMultiWindow();
+    ASSERT_EQ(ssm_->systemConfig_.freeMultiWindowConfig_.defaultDragResizeType_, DragResizeType::RESIZE_TYPE_UNDEFINED);
+}
+
+/**
+ * @tc.name: ConfigFreeMultiWindowForDefaultDragResizeType04
+ * @tc.desc: call ConfigFreeMultiWindow and check the defaultDragResizeType_ exceeding the max value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, ConfigFreeMultiWindowForDefaultDragResizeType04, TestSize.Level1)
+{
+    ssm_->systemConfig_.freeMultiWindowConfig_.defaultDragResizeType_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+        "<freeMultiWindow enable=\"true\">"
+        "<defaultDragResizeType>999999</defaultDragResizeType>"
+        "</freeMultiWindow>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    ssm_->ConfigFreeMultiWindow();
+    ASSERT_EQ(ssm_->systemConfig_.freeMultiWindowConfig_.defaultDragResizeType_, DragResizeType::RESIZE_TYPE_UNDEFINED);
+}
+
+/**
+ * @tc.name: ConfigFreeMultiWindowForDefaultDragResizeType05
+ * @tc.desc: call ConfigFreeMultiWindow and check the defaultDragResizeType_ valid value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, ConfigFreeMultiWindowForDefaultDragResizeType05, TestSize.Level1)
+{
+    ssm_->systemConfig_.freeMultiWindowConfig_.defaultDragResizeType_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+        "<freeMultiWindow enable=\"true\">"
+        "<defaultDragResizeType>2</defaultDragResizeType>"
+        "</freeMultiWindow>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    ssm_->ConfigFreeMultiWindow();
+    ASSERT_EQ(ssm_->systemConfig_.freeMultiWindowConfig_.defaultDragResizeType_, DragResizeType::RESIZE_WHEN_DRAG_END);
+}
+
+/**
  * @tc.name: Init
  * @tc.desc: SceneSesionManager init
  * @tc.type: FUNC

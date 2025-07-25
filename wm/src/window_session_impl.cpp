@@ -2275,6 +2275,9 @@ void WindowSessionImpl::UpdateDecorEnableToAce(bool isDecorEnable)
             decorVisible = decorVisible && (windowSystemConfig_.freeMultiWindowEnable_ ||
                 (property_->GetIsPcAppInPad() && isSubWindow));
         }
+        if (GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN && property_->IsDecorFullscreenDisabled()) {
+            decorVisible = false;
+        }
         uiContent->UpdateDecorVisible(decorVisible, isDecorEnable);
         return;
     }
@@ -4668,20 +4671,7 @@ void WindowSessionImpl::NotifyAfterForeground(bool needNotifyListeners, bool nee
             CALL_LIFECYCLE_LISTENER(AfterForeground, lifecycleListeners);
         }
     }
-    if (waitAttach && lifecycleCallback_ &&
-        (WindowHelper::IsSubWindow(GetType()) || WindowHelper::IsSystemWindow(GetType())) &&
-        SysCapUtil::GetBundleName() != AppExecFwk::Constants::SCENE_BOARD_BUNDLE_NAME) {
-        auto startTime = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now().time_since_epoch()).count();
-        lifecycleCallback_->GetAttachSyncResult(WINDOW_LIFECYCLE_TIMEOUT);
-        auto endTime = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now().time_since_epoch()).count();
-        auto waitTime = endTime - startTime;
-        if (waitTime >= WINDOW_LIFECYCLE_TIMEOUT) {
-            TLOGW(WmsLogTag::WMS_LIFE, "window attach timeout, persistentId:%{public}d", GetPersistentId());
-        }
-        TLOGI(WmsLogTag::WMS_LIFE, "get attach async result, id:%{public}d", GetPersistentId());
-    }
+    GetAttachStateSyncResult(waitAttach, true);
     if (needNotifyUiContent) {
         CALL_UI_CONTENT(Foreground);
     }
@@ -4714,6 +4704,33 @@ void WindowSessionImpl::NotifyAfterForeground(bool needNotifyListeners, bool nee
         } else {
             TLOGE(WmsLogTag::WMS_LIFE, "uiContent is nullptr.");
         }
+    }
+}
+
+void WindowSessionImpl::GetAttachStateSyncResult(bool waitAttachState, bool afterForeground) const
+{
+    if (!lifecycleCallback_) {
+        TLOGW(WmsLogTag::WMS_LIFE, "lifecycleCallback is null");
+        return;
+    }
+    if (waitAttachState && WindowHelper::IsNeedWaitAttachStateWindow(GetType()) &&
+        SysCapUtil::GetBundleName() != AppExecFwk::Constants::SCENE_BOARD_BUNDLE_NAME) {
+        auto startTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count();
+        if (afterForeground) {
+            lifecycleCallback_->GetAttachSyncResult(WINDOW_LIFECYCLE_TIMEOUT);
+        } else {
+            lifecycleCallback_->GetDetachSyncResult(WINDOW_LIFECYCLE_TIMEOUT);
+        }
+        auto endTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count();
+        auto waitTime = endTime - startTime;
+        if (waitTime >= WINDOW_LIFECYCLE_TIMEOUT) {
+            TLOGW(WmsLogTag::WMS_LIFE, "window attach state timeout, persistentId:%{public}d, "
+                "afterForeground:%{public}d", GetPersistentId(), afterForeground);
+        }
+        TLOGI(WmsLogTag::WMS_LIFE, "get attach state sync result, id:%{public}d, afterForeground:%{public}d",
+            GetPersistentId(), afterForeground);
     }
 }
 
@@ -4752,20 +4769,7 @@ void WindowSessionImpl::NotifyAfterBackground(bool needNotifyListeners, bool nee
         }
         NotifyAfterLifecycleBackground();
     }
-    if (waitDetach && lifecycleCallback_ &&
-        (WindowHelper::IsSubWindow(GetType()) || WindowHelper::IsSystemWindow(GetType())) &&
-        SysCapUtil::GetBundleName() != AppExecFwk::Constants::SCENE_BOARD_BUNDLE_NAME) {
-        auto startTime = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now().time_since_epoch()).count();
-        lifecycleCallback_->GetDetachSyncResult(WINDOW_LIFECYCLE_TIMEOUT);
-        auto endTime = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now().time_since_epoch()).count();
-        auto waitTime = endTime - startTime;
-        if (waitTime >= WINDOW_LIFECYCLE_TIMEOUT) {
-            TLOGW(WmsLogTag::WMS_LIFE, "window detach timeout, persistentId:%{public}d", GetPersistentId());
-        }
-        TLOGI(WmsLogTag::WMS_LIFE, "get detach async result, id:%{public}d", GetPersistentId());
-    }
+    GetAttachStateSyncResult(waitDetach, false);
     if (needNotifyUiContent) {
         CALL_UI_CONTENT(Background);
     }
@@ -7486,8 +7490,8 @@ bool WindowSessionImpl::IsDeviceFeatureCapableFor(const std::string& feature) co
 
 bool WindowSessionImpl::IsDeviceFeatureCapableForFreeMultiWindow() const
 {
-    static const std::string DEVICE_FEATURE_FREE_MULTI_WINDOW = "free_multi_window";
-    return IsDeviceFeatureCapableFor(DEVICE_FEATURE_FREE_MULTI_WINDOW)
+    static const std::string DEVICE_FEATURE_LARGE_SCREEN = "large_screen";
+    return IsDeviceFeatureCapableFor(DEVICE_FEATURE_LARGE_SCREEN)
         && system::GetParameter("const.window.device_feature_support_type", "0") == "1";
 }
 
@@ -7943,9 +7947,30 @@ void WindowSessionImpl::SwitchSubWindow(int32_t parentId)
         if (subWindowSession && subWindowSession->property_ && subWindowSession->property_->IsDecorEnable()) {
             subWindowSession->UpdateTitleButtonVisibility();
             subWindowSession->UpdateDecorEnable(true);
+            subWindowSession->UpdateEnableDragWhenSwitchMultiWindow(
+                subWindowSession->windowSystemConfig_.freeMultiWindowEnable_);
             subWindowSession->SwitchSubWindow(subWindowSession->GetPersistentId());
         }
     }
+}
+
+void WindowSessionImpl::UpdateEnableDragWhenSwitchMultiWindow(bool enable)
+{
+    if (hasSetEnableDrag_.load() || property_->IsDragResizeDisabled()) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "EnableDrag is already set, id: %{public}d", GetPersistentId());
+        return;
+    }
+    auto isSystemWindow = WindowHelper::IsSystemWindow(property_->GetWindowType());
+    bool isDialog = WindowHelper::IsDialogWindow(property_->GetWindowType());
+    bool isSystemCalling = property_->GetSystemCalling();
+    TLOGI(WmsLogTag::WMS_LAYOUT, "windId: %{public}d, isSystemWindow: %{public}d, isDialog: %{public}d, "
+        "isSystemCalling: %{public}d", GetPersistentId(), isSystemWindow, isDialog, isSystemCalling);
+    if (!enable || (isSystemWindow && !isDialog && !isSystemCalling)) {
+        property_->SetDragEnabled(false);
+    } else {
+        property_->SetDragEnabled(true);
+    }
+    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED);
 }
 } // namespace Rosen
 } // namespace OHOS

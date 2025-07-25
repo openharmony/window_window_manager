@@ -1290,6 +1290,7 @@ bool ConvertCompatibleModePropertyFromJs(napi_env env, napi_value value, Compati
         {"disableFullScreen", &CompatibleModeProperty::SetDisableFullScreen},
         {"disableSplit", &CompatibleModeProperty::SetDisableSplit},
         {"disableWindowLimit", &CompatibleModeProperty::SetDisableWindowLimit},
+        {"disableDecorFullscreen", &CompatibleModeProperty::SetDisableDecorFullscreen},
         {"isSupportRotateFullScreen", &CompatibleModeProperty::SetIsSupportRotateFullScreen},
         {"isAdaptToSubWindow", &CompatibleModeProperty::SetIsAdaptToSubWindow},
         {"isAdaptToSimulationScale", &CompatibleModeProperty::SetIsAdaptToSimulationScale},

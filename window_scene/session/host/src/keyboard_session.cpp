@@ -24,6 +24,14 @@
 #include "window_helper.h"
 #include "window_manager_hilog.h"
 
+#define RETURN_IF_PARAM_IS_NULL(param, ...)                                   \
+    do {                                                                      \
+        if (!param) {                                                         \
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "The %{public}s is null", #param); \
+            return __VA_ARGS__;                                               \
+        }                                                                     \
+    } while (false)                                                           \
+
 namespace OHOS::Rosen {
 namespace {
     constexpr float MOVE_DRAG_POSITION_Z = 100.5f;
@@ -890,10 +898,7 @@ bool KeyboardSession::IsNeedRaiseSubWindow(const sptr<SceneSession>& callingSess
 
 void KeyboardSession::HandleCrossScreenChild(bool isMoveOrDrag)
 {
-    if (moveDragController_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "move drag controller is null");
-        return;
-    }
+    RETURN_IF_PARAM_IS_NULL(moveDragController_);
     auto displayIds = isMoveOrDrag ?
         moveDragController_->GetNewAddedDisplayIdsDuringMoveDrag() :
         moveDragController_->GetDisplayIdsDuringMoveDrag();
@@ -910,33 +915,28 @@ void KeyboardSession::HandleCrossScreenChild(bool isMoveOrDrag)
             TLOGI(WmsLogTag::WMS_KEYBOARD, "virtual screen, no need to add cross parent child");
             continue;
         }
-        if (keyboardPanelSession_ == nullptr) {
-            TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboard panel session is null");
-            return;
-        }
+        RETURN_IF_PARAM_IS_NULL(keyboardPanelSession_);
         auto keyboardPanelSurfaceNode = keyboardPanelSession_->GetSurfaceNode();
-        if (keyboardPanelSurfaceNode == nullptr) {
-            TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboard panel surface node is null");
-            return;
-        }
+        RETURN_IF_PARAM_IS_NULL(keyboardPanelSurfaceNode);
         auto displayNode = screenSession->GetDisplayNode();
-        if (displayNode == nullptr) {
-            TLOGE(WmsLogTag::WMS_KEYBOARD, "target display node is null");
-            return;
-        }
+        RETURN_IF_PARAM_IS_NULL(displayNode);
         if (isMoveOrDrag) {
-            keyboardPanelSurfaceNode->SetPositionZ(MOVE_DRAG_POSITION_Z);
-            displayNode->AddCrossScreenChild(keyboardPanelSurfaceNode, INSERT_TO_THE_END, true);
-            keyboardPanelSurfaceNode->SetIsCrossNode(true);
+            {
+                AutoRSTransaction trans(keyboardPanelSurfaceNode->GetRSUIContext());
+                keyboardPanelSurfaceNode->SetPositionZ(MOVE_DRAG_POSITION_Z);
+                keyboardPanelSurfaceNode->SetIsCrossNode(true);
+            }
+            {
+                AutoRSTransaction trans(displayNode->GetRSUIContext());
+                displayNode->AddCrossScreenChild(keyboardPanelSurfaceNode, INSERT_TO_THE_END, true);
+            }
             TLOGI(WmsLogTag::WMS_KEYBOARD, "Add window: %{public}d to display: %{public}" PRIu64,
-
                 keyboardPanelSession_->GetPersistentId(), displayId);
         } else {
             keyboardPanelSurfaceNode->SetPositionZ(moveDragController_->GetOriginalPositionZ());
             displayNode->RemoveCrossScreenChild(keyboardPanelSurfaceNode);
             keyboardPanelSurfaceNode->SetIsCrossNode(false);
             TLOGI(WmsLogTag::WMS_KEYBOARD, "Remove window: %{public}d from display: %{public}" PRIu64,
-
                 keyboardPanelSession_->GetPersistentId(), displayId);
         }
     }
@@ -945,7 +945,6 @@ void KeyboardSession::HandleCrossScreenChild(bool isMoveOrDrag)
 void KeyboardSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
 {
     if (reason == SizeChangeReason::DRAG || reason == SizeChangeReason::DRAG_MOVE) {
-        AutoRSTransaction trans(GetRSUIContext());
         HandleCrossScreenChild(true);
     } else if (reason == SizeChangeReason::DRAG_END) {
         HandleCrossScreenChild(false);

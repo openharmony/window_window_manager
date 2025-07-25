@@ -1556,8 +1556,8 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
     property_->SetFocusableOnShow(withFocus);
     if (WindowHelper::IsMainWindow(type)) {
         ret = static_cast<WMError>(hostSession->Foreground(property_, true, identityToken_));
-    } else if (WindowHelper::IsSubWindow(type) || WindowHelper::IsSystemWindow(type)) {
-        if (waitAttach && !lifecycleCallback_ &&
+    } else if (WindowHelper::IsSystemOrSubWindow(type)) {
+        if (waitAttach && !lifecycleCallback_ && !WindowHelper::IsKeyboardWindow(type) &&
             SysCapUtil::GetBundleName() != AppExecFwk::Constants::SCENE_BOARD_BUNDLE_NAME) {
             lifecycleCallback_ = sptr<LifecycleFutureCallback>::MakeSptr();
             TLOGI(WmsLogTag::WMS_LIFE, "init lifecycleCallback, id:%{public}d", GetPersistentId());
@@ -1716,8 +1716,8 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
             return res;
         }
         res = static_cast<WMError>(hostSession->Background(true, identityToken_));
-    } else if (WindowHelper::IsSubWindow(type) || WindowHelper::IsSystemWindow(type)) {
-        if (waitDetach && !lifecycleCallback_ &&
+    } else if (WindowHelper::IsSystemOrSubWindow(type)) {
+        if (waitDetach && !lifecycleCallback_ && !WindowHelper::IsKeyboardWindow(type) &&
             SysCapUtil::GetBundleName() != AppExecFwk::Constants::SCENE_BOARD_BUNDLE_NAME) {
             lifecycleCallback_ = sptr<LifecycleFutureCallback>::MakeSptr();
             TLOGI(WmsLogTag::WMS_LIFE, "init lifecycleCallback, id:%{public}d", GetPersistentId());
@@ -2785,6 +2785,11 @@ WMError WindowSceneSessionImpl::NotifyWindowNeedAvoid(bool status)
     return WMError::WM_OK;
 }
 
+WMError WindowSceneSessionImpl::SetIgnoreSafeArea(bool isIgnoreSafeArea)
+{
+    return SetLayoutFullScreenByApiVersion(isIgnoreSafeArea);
+}
+
 WMError WindowSceneSessionImpl::SetLayoutFullScreenByApiVersion(bool status)
 {
     if (IsWindowSessionInvalid()) {
@@ -3530,8 +3535,8 @@ WMError WindowSceneSessionImpl::SetWindowRectAutoSave(bool enabled, bool isSaveB
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
-    if (!windowSystemConfig_.IsPcWindow()) {
-        TLOGE(WmsLogTag::WMS_MAIN, "This is not PC, not supported");
+    if (!IsPcOrPadFreeMultiWindowMode()) {
+        TLOGE(WmsLogTag::WMS_MAIN, "This is not PC mode or free multi window mode, not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
 
@@ -5407,25 +5412,6 @@ void WindowSceneSessionImpl::UpdateSupportWindowModesWhenSwitchFreeMultiWindow()
     UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO);
 }
 
-void WindowSceneSessionImpl::UpdateEnableDragWhenSwitchMultiWindow(bool enable)
-{
-    if (hasSetEnableDrag_.load() || property_->IsDragResizeDisabled()) {
-        TLOGI(WmsLogTag::WMS_LAYOUT, "EnableDrag is already set, id: %{public}d", GetPersistentId());
-        return;
-    }
-    auto isSystemWindow = WindowHelper::IsSystemWindow(property_->GetWindowType());
-    bool isDialog = WindowHelper::IsDialogWindow(property_->GetWindowType());
-    bool isSystemCalling = property_->GetSystemCalling();
-    TLOGI(WmsLogTag::WMS_LAYOUT, "windId: %{public}d, isSystemWindow: %{public}d, isDialog: %{public}d, "
-        "isSystemCalling: %{public}d", GetPersistentId(), isSystemWindow, isDialog, isSystemCalling);
-    if (!enable || (isSystemWindow && !isDialog && !isSystemCalling)) {
-        property_->SetDragEnabled(false);
-    } else {
-        property_->SetDragEnabled(true);
-    }
-    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED);
-}
-
 WSError WindowSceneSessionImpl::SwitchFreeMultiWindow(bool enable)
 {
     if (IsWindowSessionInvalid()) {
@@ -5935,7 +5921,11 @@ WMError WindowSceneSessionImpl::UnregisterWindowAttachStateChangeListener()
 
 WSError WindowSceneSessionImpl::NotifyWindowAttachStateChange(bool isAttach)
 {
-    TLOGD(WmsLogTag::WMS_SUB, "id: %{public}d", GetPersistentId());
+    TLOGI(WmsLogTag::WMS_SUB, "id: %{public}d", GetPersistentId());
+    if (lifecycleCallback_) {
+        TLOGI(WmsLogTag::WMS_SUB, "notifyAttachState id: %{public}d", GetPersistentId());
+        lifecycleCallback_->OnNotifyAttachState(isAttach);
+    }
     std::lock_guard<std::mutex> lockListener(windowAttachStateChangeListenerMutex_);
     if (!windowAttachStateChangeListener_) {
         TLOGW(WmsLogTag::WMS_SUB, "listener is null");
@@ -5945,9 +5935,6 @@ WSError WindowSceneSessionImpl::NotifyWindowAttachStateChange(bool isAttach)
         windowAttachStateChangeListener_->AfterAttached();
     } else {
         windowAttachStateChangeListener_->AfterDetached();
-    }
-    if (lifecycleCallback_) {
-        lifecycleCallback_->OnNotifyAttachState(isAttach);
     }
     return WSError::WS_OK;
 }

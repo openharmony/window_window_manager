@@ -600,6 +600,10 @@ HWTEST_F(WindowSessionImplTest, UpdateDecorEnable, TestSize.Level1)
     mode = WindowMode::WINDOW_MODE_UNDEFINED;
     window->UpdateDecorEnable(false, mode);
     ASSERT_EQ(window->property_->windowMode_, mode);
+    mode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    window->property_->compatibleModeProperty_->SetDisableDecorFullscreen(true);
+    window->UpdateDecorEnable(false, mode);
+    ASSERT_EQ(window->property_->windowMode_, mode);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateDecorEnable end";
 }
 
@@ -2491,6 +2495,44 @@ HWTEST_F(WindowSessionImplTest, CreateSubWindowOutlineEnabled, TestSize.Level1)
     option3->SetSubWindowOutlineEnabled(true);
     sptr<WindowSessionImpl> window3 = sptr<WindowSessionImpl>::MakeSptr(option3);
     ASSERT_EQ(true, window3->property_->IsSubWindowOutlineEnabled());
+}
+
+/**
+ * @tc.name: GetAttachStateSyncResult
+ * @tc.desc: GetAttachStateSyncResult Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, GetAttachStateSyncResult, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetAttachStateSyncResult");
+    option->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    window->lifecycleCallback_ = sptr<LifecycleFutureCallback>::MakeSptr();
+    window->GetAttachStateSyncResult(true, true);
+    EXPECT_TRUE(g_errLog.find("get attach state sync result") == std::string::npos);
+
+    window->GetAttachStateSyncResult(true, false);
+    EXPECT_TRUE(g_errLog.find("get attach state sync result") == std::string::npos);
+
+    window->lifecycleCallback_ = nullptr;
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    window->GetAttachStateSyncResult(true, true);
+    EXPECT_TRUE(g_errLog.find("lifecycleCallback is null") != std::string::npos);
+    EXPECT_TRUE(g_errLog.find("get attach state sync result") == std::string::npos);
+
+    window->lifecycleCallback_ = sptr<LifecycleFutureCallback>::MakeSptr();
+    window->GetAttachStateSyncResult(false, true);
+    EXPECT_TRUE(g_errLog.find("get attach state sync result") == std::string::npos);
+
+    window->GetAttachStateSyncResult(true, true);
+    EXPECT_TRUE(g_errLog.find("get attach state sync result") != std::string::npos);
+
+    window->GetAttachStateSyncResult(true, false);
+    EXPECT_TRUE(g_errLog.find("get attach state sync result") != std::string::npos);
 }
 }
 } // namespace

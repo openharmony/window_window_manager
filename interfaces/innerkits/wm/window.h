@@ -1374,6 +1374,14 @@ public:
     virtual WMError SetLayoutFullScreen(bool status) { return WMError::WM_OK; }
 
     /**
+     * @brief Set the immersive layout properties
+     *
+     * @param isIgnoreSafeArea
+     * @return WMError
+     */
+    virtual WMError SetIgnoreSafeArea(bool isIgnoreSafeArea) { return WMError::WM_OK; }
+
+    /**
      * @brief Set whether the title bar and dock bar will show, when the mouse hovers over hot area.
      *
      * @param isTitleHoverShown
