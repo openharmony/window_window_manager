@@ -2960,7 +2960,7 @@ native function minimizeAllSync(nativeObj: long, id: long): void;
 native function findWindowSync(nativeObj: long, name: string): Window;
 native function onSync(nativeObj: long, type: string, callback: object): void;
 native function offSync(nativeObj: long, type: string, callback?: object): void;
-native function shiftAppWindowFocusSync(nativeObj: long, sourceWindowId: number, targetWindowId: number): void;
+native function shiftAppWindowFocusSync(nativeObj: long, sourceWindowId: int, targetWindowId: int): void;
 native function createWindowSync(nativeObj: long, config: Configuration): Window;
 
 export function getLastWindow(ctx: BaseContext): Promise<Window> {
@@ -3102,7 +3102,7 @@ function runAvoidAreaChangeCallback(cb: object, area: object, type: int): void {
   func({type: type as AvoidAreaType, area: area as AvoidArea});
 }
 
-export function shiftAppWindowFocus(sourceWindowId: number, targetWindowId: number): Promise<void> {
+export function shiftAppWindowFocus(sourceWindowId: int, targetWindowId: int): Promise<void> {
   return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) : void => {
       taskpool.execute((): void => {
           return shiftAppWindowFocusSync(nativeObj, sourceWindowId, targetWindowId);
