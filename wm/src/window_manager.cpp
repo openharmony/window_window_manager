@@ -1125,8 +1125,8 @@ WMError WindowManager::RegisterFloatingScaleChangedListener(const sptr<IWindowIn
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "RegisterWindowPropertyChangeAgent failed!");
         pImpl_->windowPropertyChangeAgent_ = nullptr;
     } else {
-        auto iter = std::find(pImpl_->floatingScaleChangeListeners_.begin(), pImpl_->floatingScaleChangeListeners_.end(),
-            listener);
+        auto iter = std::find(pImpl_->floatingScaleChangeListeners_.begin(),
+            pImpl_->floatingScaleChangeListeners_.end(), listener);
         if (iter != pImpl_->floatingScaleChangeListeners_.end()) {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Listener is already registered.");
             return WMError::WM_OK;
