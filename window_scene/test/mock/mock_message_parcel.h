@@ -36,6 +36,7 @@ public:
     static void SetReadInt32ErrorFlag(bool flag);
     static void SetReadUint64ErrorFlag(bool flag);
     static void SetReadInt64ErrorFlag(bool flag);
+    static void SetReadFloatErrorFlag(bool flag); 
     static void SetReadStringVectorErrorFlag(bool flag);
     static void SetReadStringErrorFlag(bool flag);
 };
