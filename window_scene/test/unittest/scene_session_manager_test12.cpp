@@ -907,6 +907,12 @@ HWTEST_F(SceneSessionManagerTest12, ShiftAppWindowPointerEvent_01, TestSize.Leve
     EXPECT_EQ(result, WMError::WM_ERROR_INVALID_SESSION);
     result = ssm_->ShiftAppWindowPointerEvent(sourceSceneSession->GetPersistentId(), INVALID_SESSION_ID, fingerId);
     EXPECT_EQ(result, WMError::WM_ERROR_INVALID_SESSION);
+
+    sourceSceneSession->GetSessionProperty()->SetPcAppInpadCompatibleMode(true);
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    ssm_->systemConfig_.freeMultiWindowSupport_ = false;
+    result = ssm_->ShiftAppWindowPointerEvent(sourceSceneSession->GetPersistentId(), INVALID_SESSION_ID, fingerId);
+    EXPECT_EQ(result, WMError::WM_OK);
     ssm_->sceneSessionMap_.erase(sourceSceneSession->GetPersistentId());
     ssm_->sceneSessionMap_.erase(targetSceneSession->GetPersistentId());
 }
@@ -953,7 +959,7 @@ HWTEST_F(SceneSessionManagerTest12, ShiftAppWindowPointerEvent_03, TestSize.Leve
     ssm_->sceneSessionMap_.insert({ sourceSceneSession->GetPersistentId(), sourceSceneSession });
 
     int32_t sourcePersistentId = sourceSceneSession->GetPersistentId();
-    ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     int32_t fingerId = 0;
     WMError result = ssm_->ShiftAppWindowPointerEvent(sourcePersistentId, sourcePersistentId, fingerId);
     EXPECT_EQ(result, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);

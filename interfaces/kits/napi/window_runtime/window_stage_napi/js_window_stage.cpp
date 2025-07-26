@@ -612,6 +612,10 @@ napi_value JsWindowStage::OnSetWindowModal(napi_env env, napi_callback_info info
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STAGE_ABNORMALLY));
         return NapiGetUndefined(env);
     }
+    if (window->IsPadAndNotFreeMutiWindowCompatibleMode()) {
+        TLOGE(WmsLogTag::WMS_MAIN, "This is PcAppInPad, not support");
+        return NapiGetUndefined(env);
+    }
     if (!window->IsPcOrPadFreeMultiWindowMode()) {
         TLOGE(WmsLogTag::WMS_MAIN, "device not support");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT));

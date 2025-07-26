@@ -1362,7 +1362,10 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(windowModeSupportType_) &&
         MarshallingShadowsInfo(parcel) &&
         MarshallingFbTemplateInfo(parcel) &&
-        MarshallingWindowAnchorInfo(parcel);
+        MarshallingWindowAnchorInfo(parcel) &&
+        parcel.WriteBool(isPcAppInpadSpecificSystemBarInvisible_) &&
+        parcel.WriteBool(isPcAppInpadOrientationLandscape_) &&
+        parcel.WriteBool(isPcAppInpadCompatibleMode_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1474,6 +1477,9 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     UnmarshallingShadowsInfo(parcel, property);
     UnmarshallingFbTemplateInfo(parcel, property);
     UnmarshallingWindowAnchorInfo(parcel, property);
+    property->SetPcAppInpadSpecificSystemBarInvisible(parcel.ReadBool());
+    property->SetPcAppInpadOrientationLandscape(parcel.ReadBool());
+    property->SetPcAppInpadCompatibleMode(parcel.ReadBool());
     return property;
 }
 
@@ -1577,6 +1583,9 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     subWindowOutlineEnabled_ = property->subWindowOutlineEnabled_;
     shadowsInfo_ = property->shadowsInfo_;
     windowAnchorInfo_ = property->windowAnchorInfo_;
+    isPcAppInpadSpecificSystemBarInvisible_ = property->isPcAppInpadSpecificSystemBarInvisible_;
+    isPcAppInpadOrientationLandscape_ = property->isPcAppInpadOrientationLandscape_;
+    isPcAppInpadCompatibleMode_ = property->isPcAppInpadCompatibleMode_;
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)
@@ -2288,6 +2297,36 @@ bool WindowSessionProperty::IsAdaptToSubWindow() const
 bool WindowSessionProperty::IsAdaptToSimulationScale() const
 {
     return compatibleModeProperty_ && compatibleModeProperty_->IsAdaptToSimulationScale();
+}
+
+void WindowSessionProperty::SetPcAppInpadCompatibleMode(bool enabled)
+{
+    isPcAppInpadCompatibleMode_ = enabled;
+}
+
+void WindowSessionProperty::SetPcAppInpadSpecificSystemBarInvisible(bool isPcAppInpadSpecificSystemBarInvisible)
+{
+    isPcAppInpadSpecificSystemBarInvisible_ = isPcAppInpadSpecificSystemBarInvisible;
+}
+
+void WindowSessionProperty::SetPcAppInpadOrientationLandscape(bool isPcAppInpadOrientationLandscape)
+{
+    isPcAppInpadOrientationLandscape_ = isPcAppInpadOrientationLandscape;
+}
+
+bool WindowSessionProperty::GetPcAppInpadCompatibleMode() const
+{
+    return isPcAppInpadCompatibleMode_;
+}
+
+bool WindowSessionProperty::GetPcAppInpadSpecificSystemBarInvisible() const
+{
+    return isPcAppInpadSpecificSystemBarInvisible_;
+}
+
+bool WindowSessionProperty::GetPcAppInpadOrientationLandscape() const
+{
+    return isPcAppInpadOrientationLandscape_;
 }
 
 void CompatibleModeProperty::SetIsAdaptToImmersive(bool isAdaptToImmersive)

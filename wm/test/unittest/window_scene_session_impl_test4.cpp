@@ -1050,6 +1050,12 @@ HWTEST_F(WindowSceneSessionImplTest4, SetWindowTitle, TestSize.Level1)
     EXPECT_EQ(window->SetWindowTitle(title), WMError::WM_ERROR_NULLPTR);
     EXPECT_EQ(window->Create(abilityContext_, session), WMError::WM_OK);
     EXPECT_EQ(window->SetWindowTitle(title), WMError::WM_OK);
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    window->property_->SetPcAppInpadCompatibleMode(true);
+    window->windowSystemConfig_.freeMultiWindowEnable_ = false;
+    window->windowSystemConfig_.isSystemDecorEnable_ = false;
+    EXPECT_EQ(WMError::WM_OK, window->SetWindowTitle(title));
     EXPECT_EQ(WMError::WM_OK, window->Destroy(true));
 }
 

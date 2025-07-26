@@ -16189,16 +16189,21 @@ WMError SceneSessionManager::ShiftAppWindowPointerEvent(int32_t sourcePersistent
 {
     TLOGD(WmsLogTag::WMS_PC, "sourcePersistentId %{public}d targetPersistentId %{public}d",
         sourcePersistentId, targetPersistentId);
+    sptr<SceneSession> sourceSession = GetSceneSession(sourcePersistentId);
+    if (sourceSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_PC, "sourceSession %{public}d is nullptr", sourcePersistentId);
+        return WMError::WM_ERROR_INVALID_SESSION;
+    }
+    if (sourceSession->GetSessionProperty()->GetPcAppInpadCompatibleMode() &&
+        !systemConfig_.IsFreeMultiWindowMode()) {
+        TLOGE(WmsLogTag::WMS_PC, "This is PcAppInPad, not supported");
+        return WMError::WM_OK;
+    }
     if (!(systemConfig_.IsPcWindow() || systemConfig_.IsFreeMultiWindowMode())) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     if (sourcePersistentId == targetPersistentId) {
         return WMError::WM_ERROR_INVALID_CALLING;
-    }
-    sptr<SceneSession> sourceSession = GetSceneSession(sourcePersistentId);
-    if (sourceSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_PC, "sourceSession %{public}d is nullptr", sourcePersistentId);
-        return WMError::WM_ERROR_INVALID_SESSION;
     }
     if (!WindowHelper::IsAppWindow(sourceSession->GetWindowType())) {
         TLOGE(WmsLogTag::WMS_PC, "sourceSession %{public}d is not app window", sourcePersistentId);
