@@ -1545,18 +1545,29 @@ export interface GetWindowsByCoordinateParam {
  */
 export interface KeyboardInfo {
   /**
-   * The position and size of the keyboard
+   * The position and size of keyboard before animation.
    *
    * @type { Rect }
    * @syscap SystemCapability.Window.SessionManager
    * @atomicservice
    * @since 18
    */
-  rect: Rect;
+  beginRect: Rect;
+
+  /**
+   * The position and size of keyboard after animation completed.
+   *
+   * @type { Rect }
+   * @syscap SystemCapability.Window.SessionManager
+   * @atomicservice
+   * @since 18
+   */
+  endRect: Rect;
 }
 
 export class KeyboardInfoInternal implements KeyboardInfo {
-  rect: Rect;
+  beginRect: Rect;
+  endRect: Rect;
 }
 
 /**

@@ -250,10 +250,9 @@ void AniWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info,
 
 void AniWindowListener::OnKeyboardDidShow(const KeyboardPanelInfo& keyboardPanelInfo)
 {
-    TLOGI(WmsLogTag::WMS_KEYBOARD,
-        "keyboardPanelInfo, rect: [%{public}d, %{public}d, %{public}u, %{public}u]",
-        keyboardPanelInfo.rect_.posX_, keyboardPanelInfo.rect_.posY_,
-        keyboardPanelInfo.rect_.width_, keyboardPanelInfo.rect_.height_);
+    TLOGD(WmsLogTag::WMS_KEYBOARD,
+        "keyboardPanelInfo, beginRect: %{public}s, endRect: %{public}s",
+        keyboardPanelInfo.beginRect_.ToString().c_str(), keyboardPanelInfo.endRect_.ToString().c_str());
     auto thisListener = weakRef_.promote();
     if (thisListener == nullptr || env_ == nullptr || thisListener->aniCallback_ == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI]this listener, env_ or callback is nullptr");
@@ -265,10 +264,9 @@ void AniWindowListener::OnKeyboardDidShow(const KeyboardPanelInfo& keyboardPanel
 
 void AniWindowListener::OnKeyboardDidHide(const KeyboardPanelInfo& keyboardPanelInfo)
 {
-    TLOGI(WmsLogTag::WMS_KEYBOARD,
-        "keyboardPanelInfo, rect: [%{public}d, %{public}d, %{public}u, %{public}u]",
-        keyboardPanelInfo.rect_.posX_, keyboardPanelInfo.rect_.posY_,
-        keyboardPanelInfo.rect_.width_, keyboardPanelInfo.rect_.height_);
+    TLOGD(WmsLogTag::WMS_KEYBOARD,
+        "keyboardPanelInfo, beginRect: %{public}s, endRect: %{public}s",
+        keyboardPanelInfo.beginRect_.ToString().c_str(), keyboardPanelInfo.endRect_.ToString().c_str());
     auto thisListener = weakRef_.promote();
     if (thisListener == nullptr || env_ == nullptr || thisListener->aniCallback_ == nullptr) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI]this listener, env_ or callback is nullptr");
