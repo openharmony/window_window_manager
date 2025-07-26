@@ -1076,6 +1076,104 @@ HWTEST_F(SceneSessionLayoutTest, SetMoveAvailableArea02, TestSize.Level1)
     res = sceneSession->SetMoveAvailableArea(0);
     EXPECT_EQ(res, WSError::WS_OK);
 }
+
+/**
+ * @tc.name: HandleMoveDragSurfaceNode01
+ * @tc.desc: HandleMoveDragSurfaceNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLayoutTest, HandleMoveDragSurfaceNode01, TestSize.Level1)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "HandleMoveDragSurfaceNode begin");
+
+    constexpr float MOVE_DRAG_POSITOIN_Z = 100.5F;
+    const DisplayId startDisplayId = 123;
+    sptr<ScreenSession> startScreenSession = sptr<ScreenSession>::MakeSptr(startDisplayId,
+        ScreenProperty(), startDisplayId);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_[startDisplayId] = startScreenSession;
+    startScreenSession->property_.startX_ =  100;
+    startScreenSession->property_.startY_ =  200;
+    startScreenSession->property_.bounds_.rect_={1, 2, 300, 400};
+
+    const DisplayId endDisplayId = 456;
+    sptr<ScreenSession> endScreenSession = sptr<ScreenSession>::MakeSptr(endDisplayId,
+        ScreenProperty(), endDisplayId);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_[endDisplayId] = endScreenSession;
+    startScreenSession->property_.startX_ = 150;
+    startScreenSession->property_.startY_ = 250;
+    startScreenSession->property_.bounds_.rect_={1, 2, 350, 450};
+
+    std::map<ScreenId, ScreenProperty> screenProperties =
+        ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
+    TLOGI(WmsLogTag::WMS_LAYOUT, "screenProperties.size()=%{public}lu", screenProperties.size());
+    for (const auto& [screenId, screenProperty] : screenProperties) {
+        WSRect screenRect = {
+            screenProperties.GetStartX(),
+            screenProperties.GetStartY(),
+            screenProperties.GetBounds().rect_.GetWidth(),
+            screenProperties.GetBounds().rect_.GetHeight(),
+        };
+        TLOGI(WmsLogTag::WMS_LAYOUT, "screenRect:%{public}s", screenRect.ToString().c_str());
+        TLOGI(WmsLogTag::WMS_LAYOUT, "screenProperty.GetBounds().rect_:%{public}s",
+            screenProperty.GetBounds().rect_.ToString().c_str());
+    }
+
+    SessionInfo info;
+    info.abilityName_ = "HandleMoveDragSurfaceNode";
+    info.bundleName_ = "HandleMoveDragSurfaceNode";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024, session->GetWindowType());
+
+    session->HandleMoveDragSurfaceNode(SizeChangeReason::DRAG_START);
+    session->HandleMoveDragSurfaceNode(SizeChangeReason::DRAG);
+    session->HandleMoveDragSurfaceNode(SizeChangeReason::DRAG_MOVE);
+    session->HandleMoveDragSurfaceNode(SizeChangeReason::DRAG_END);
+
+    struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
+    rsSurfaceNodeConfig.SurfaceNodeName = "HandleMoveDragSurfaceNode";
+    auto movedSurfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig);
+    session->moveDragController_->moveDragStartDisplayId_ = startDisplayId;
+    session->SetSurfaceNode(movedSurfaceNode);
+    session->moveDragController_->moveDragProperty_.targetRect_.posX_ = 130;
+    session->moveDragController_->moveDragProperty_.targetRect_.posY_ = 230;
+    session->moveDragController_->moveDragProperty_.targetRect_.width_ = 500;
+    session->moveDragController_->moveDragProperty_.targetRect_.height_ = 600;
+    WSRect windowRect = session->moveDragController_->GetTargetRect(MoveDragController::TargetRectCoordinate::GLOBAL);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "windowRect:%{public}s", windowRect.ToString().c_str());
+
+    float posZ = movedSurfaceNode->GetStagingProperties().GetPositionZ();
+
+    movedSurfaceNode->SetPositionZ(0);
+    session->moveDragController_->displayIdSetDuringMoveDrag_.clear();
+    session->HandleMoveDragSurfaceNode(SizeChangeReason::DRAG_START);
+    posZ = movedSurfaceNode->GetStagingPropertise().GetPositionZ();
+    TLOGI(WmsLogTag::WMS_LAYOUT, "posZ:%{public}f", posZ);
+    EXPECT_EQ(posZ, 0);
+
+    movedSurfaceNode->SetPositionZ(0);
+    session->moveDragController_->displayIdSetDuringMoveDrag_.clear();
+    session->HandleMoveDragSurfaceNode(SizeChangeReason::DRAG_MOVE);
+    posZ = movedSurfaceNode->GetStagingPropertise().GetPositionZ();
+    TLOGI(WmsLogTag::WMS_LAYOUT, "posZ:%{public}f", posZ);
+    EXPECT_EQ(posZ, MOVE_DRAG_POSITOIN_Z);
+
+    movedSurfaceNode->SetPositionZ(0);
+    session->moveDragController_->displayIdSetDuringMoveDrag_.clear();
+    session->HandleMoveDragSurfaceNode(SizeChangeReason::DRAG);
+    posZ = movedSurfaceNode->GetStagingPropertise().GetPositionZ();
+    TLOGI(WmsLogTag::WMS_LAYOUT, "posZ:%{public}f", posZ);
+    EXPECT_EQ(posZ, MOVE_DRAG_POSITOIN_Z);
+
+    movedSurfaceNode->SetPositionZ(0);
+    session->moveDragController_->displayIdSetDuringMoveDrag_.clear();
+    session->HandleMoveDragSurfaceNode(SizeChangeReason::DRAG_END);
+    posZ = movedSurfaceNode->GetStagingPropertise().GetPositionZ();
+    TLOGI(WmsLogTag::WMS_LAYOUT, "posZ:%{public}f", posZ);
+    EXPECT_EQ(posZ, 0);
+
+    TLOGI(WmsLogTag::WMS_LAYOUT, "HandleMoveDragSurfaceNode end");
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
