@@ -977,11 +977,11 @@ HWTEST_F(WindowSessionTest3, NotifySessionPropertyChange01, TestSize.Level1)
     NotifySessionPropertyChangeNotifyManagerFunc func =
         [&resultValue](int32_t persistentid, WindowInfoKey windowInfoKey) { resultValue = 1; };
     session_->sessionPropertyChangeNotifyManagerFunc_ = nullptr;
-    session_->NotifySessionPropertyChange();
+    session_->NotifySessionPropertyChange(WindowInfoKey::WINDOW_RECT);
     EXPECT_EQ(resultValue, 0);
 
     session_->SetSessionPropertyChangeNotifyManagerListener(func);
-    session_->NotifySessionPropertyChange();
+    session_->NotifySessionPropertyChange(WindowInfoKey::WINDOW_RECT);
     EXPECT_EQ(resultValue, 1);
 }
 
