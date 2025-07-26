@@ -460,14 +460,13 @@ bool WindowManager::Impl::IsNeedToSkipForInterestWindowIds(sptr<IWindowInfoChang
     }
     for (const auto& item : windowInfoList) {
         auto windowInfo = item;
-        if (windowInfo.find(WindowInfoKey::WINDOW_ID) == windowInfo.end() ||
-            interestWindowIds.find(std::get<uint32_t>(windowInfo[WindowInfoKey::WINDOW_ID])) ==
+        if (windowInfo.find(WindowInfoKey::WINDOW_ID) != windowInfo.end() &&
+            interestWindowIds.find(std::get<uint32_t>(windowInfo[WindowInfoKey::WINDOW_ID])) !=
             interestWindowIds.end()) {
-            continue;
+            return false;
         }
-        return true;
     }
-    return false;
+    return true;
 }
 
 void WindowManager::Impl::NotifyWindowStyleChange(WindowStyleType type)
