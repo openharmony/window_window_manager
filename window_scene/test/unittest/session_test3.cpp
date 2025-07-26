@@ -967,6 +967,25 @@ HWTEST_F(WindowSessionTest3, NotifySessionInfoChange, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifySessionPropertyChange01
+ * @tc.desc: NotifySessionPropertyChange Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, NotifySessionPropertyChange01, TestSize.Level1)
+{
+    int resultValue = 0;
+    NotifySessionPropertyChangeNotifyManagerFunc func =
+        [&resultValue](int32_t persistentid, WindowInfoKey windowInfoKey) { resultValue = 1; };
+    session_->sessionPropertyChangeNotifyManagerFunc_ = nullptr;
+    session_->NotifySessionPropertyChange();
+    EXPECT_EQ(resultValue, 0);
+
+    session_->SetSessionPropertyChangeNotifyManagerListener(func);
+    session_->NotifySessionPropertyChange();
+    EXPECT_EQ(resultValue, 1);
+}
+
+/**
  * @tc.name: GetSurfaceNodeForMoveDrag
  * @tc.desc: GetSurfaceNodeForMoveDrag Test
  * @tc.type: FUNC
