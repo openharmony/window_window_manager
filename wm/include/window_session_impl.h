@@ -173,7 +173,7 @@ public:
     void SetCompatInfoInExtensionConfig(AAFwk::WantParams& want) const;
     bool IsAdaptToSubWindow() const;
     static void RegisterWindowScaleCallback();
-    static WMError GetWindowScaleCoordinate(CursorInfo& cursorInfo, uint32_t windowId);
+    static WMError GetWindowScaleCoordinate(uint32_t windowId, CursorInfo& cursorInfo);
     static sptr<WindowSessionImpl> GetScaleWindow(uint32_t windowId);
 
     WMError SetWindowType(WindowType type) override;
