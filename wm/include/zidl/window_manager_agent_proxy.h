@@ -50,7 +50,8 @@ public:
 
 private:
     static inline BrokerDelegator<WindowManagerAgentProxy> delegator_;
-    bool WriteWindowChangeInfoValue(MessageParcel& data, const std::pair<WindowInfoKey, WindowChangeInfoType>& windowInfoPair);
+    bool WriteWindowChangeInfoValue(MessageParcel& data,
+        const std::pair<WindowInfoKey, WindowChangeInfoType>& windowInfoPair);
 };
 } // namespace Rosen
 } // namespace OHOS

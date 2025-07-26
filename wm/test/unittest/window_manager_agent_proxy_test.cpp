@@ -838,7 +838,7 @@ HWTEST_F(WindowManagerAgentProxyTest, WriteWindowChangeInfoValue01, TestSize.Lev
 
 /**
  * @tc.name: WriteWindowChangeInfoValue02
- * @tc.desc: test WriteWindowChangeInfoValue fail
+ * @tc.desc: test WriteWindowChangeInfoValue fail 1
  * @tc.type: FUNC
  */
 HWTEST_F(WindowManagerAgentProxyTest, WriteWindowChangeInfoValue02, TestSize.Level1)
@@ -880,7 +880,7 @@ HWTEST_F(WindowManagerAgentProxyTest, WriteWindowChangeInfoValue02, TestSize.Lev
 
 /**
  * @tc.name: WriteWindowChangeInfoValue03
- * @tc.desc: test WriteWindowChangeInfoValue fail2
+ * @tc.desc: test WriteWindowChangeInfoValue fail 2
  * @tc.type: FUNC
  */
 HWTEST_F(WindowManagerAgentProxyTest, WriteWindowChangeInfoValue03, TestSize.Level1)
