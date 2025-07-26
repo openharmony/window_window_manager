@@ -894,7 +894,7 @@ HWTEST_F(WindowManagerAgentProxyTest, WriteWindowChangeInfoValue03, TestSize.Lev
     MockMessageParcel::SetWriteUint64ErrorFlag(true);
     WindowChangeInfoType windowInfo = static_cast<uint64_t>(0);
     windowInfoPair = std::make_pair(WindowInfoKey::DISPLAY_ID, windowInfo);
-    ret = windowManagerAgentProxy->WriteWindowChangeInfoValue(data, windowInfoPair);
+    auto ret = windowManagerAgentProxy->WriteWindowChangeInfoValue(data, windowInfoPair);
     EXPECT_EQ(ret, false);
 
     MockMessageParcel::SetWriteUint32ErrorFlag(true);
