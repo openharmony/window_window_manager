@@ -1096,7 +1096,7 @@ HWTEST_F(SceneSessionManagerTest8, PackWindowPropertyChangeInfo01, TestSize.Leve
 
     std::unordered_map<WindowInfoKey, WindowChangeInfoType> windowPropertyChangeInfo;
     ssm_->PackWindowPropertyChangeInfo(sceneSession1, windowPropertyChangeInfo);
-    EXPECT_EQ(windowPropertyChangeInfo.size(), 9 );
+    EXPECT_EQ(windowPropertyChangeInfo.size(), 9);
 }
 
 /**
