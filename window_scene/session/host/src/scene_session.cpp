@@ -4441,7 +4441,7 @@ void SceneSession::SetFloatingScale(float floatingScale)
 {
     if (floatingScale_ != floatingScale) {
         Session::SetFloatingScale(floatingScale);
-        NotifySessionPropertyChange(WindowInfoKey::FLOATING_SCALE);  
+        NotifySessionPropertyChange(WindowInfoKey::FLOATING_SCALE);
         if (specificCallback_ != nullptr) {
             specificCallback_->onWindowInfoUpdate_(GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
         }

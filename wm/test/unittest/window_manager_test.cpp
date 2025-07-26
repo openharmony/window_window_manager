@@ -90,7 +90,8 @@ public:
 
 class TestWindowDisplayIdChangeListener : public IWindowInfoChangedListener {
 public:
-    void OnWindowInfoChanged(const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList) override
+    void OnWindowInfoChanged(
+        const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList) override
     {
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "TestWindowDisplayIdChangeListener");
     };
@@ -98,7 +99,8 @@ public:
 
 class TestWindowRectChangedListener : public IWindowInfoChangedListener {
 public:
-    void OnWindowInfoChanged(const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList) override
+    void OnWindowInfoChanged(
+        const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList) override
     {
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "TestWindowRectChangedListener");
     };
