@@ -2132,7 +2132,7 @@ HWTEST_F(WindowManagerTest, RegisterFloatingScaleChangedListener01, Function | S
     EXPECT_EQ(WMError::WM_OK, windowManager.RegisterFloatingScaleChangedListener(listener));
     EXPECT_EQ(0, windowManager.pImpl_->floatingScaleChangeListeners_.size());
  
-    windowManager.pImpl_->floatingScaleChangeListeners_ = oldWindowManagerAgent;
+    windowManager.pImpl_->windowPropertyChangeAgent_ = oldWindowManagerAgent;
     windowManager.pImpl_->floatingScaleChangeListeners_ = oldListeners;
 }
 
@@ -2227,7 +2227,7 @@ HWTEST_F(WindowManagerTest, RegisterWindowModeChangedListenerForPropertyChange01
     EXPECT_EQ(WMError::WM_OK, windowManager.RegisterWindowModeChangedListenerForPropertyChange(listener));
     EXPECT_EQ(0, windowManager.pImpl_->windowModeChangeListeners_.size());
  
-    windowManager.pImpl_->windowModeChangeListeners_ = oldWindowManagerAgent;
+    windowManager.pImpl_->windowPropertyChangeAgent_ = oldWindowManagerAgent;
     windowManager.pImpl_->windowModeChangeListeners_ = oldListeners;
 }
 
