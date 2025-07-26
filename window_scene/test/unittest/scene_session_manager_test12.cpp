@@ -545,6 +545,44 @@ HWTEST_F(SceneSessionManagerTest12, TestCheckSystemWindowPermission_014, TestSiz
 }
 
 /**
+ * @tc.name: TestCheckSystemWindowPermission_014
+ * @tc.desc: Test CheckSystemWindowPermission with windowType FLOAT in phone
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, TestCheckSystemWindowPermission_015, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+
+    MockAccesstokenKit::MockIsSACalling(false);
+    WindowUIType oldType = ssm_->systemConfig_.windowUIType_;
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    MockAccesstokenKit::MockAccessTokenKitRet(0);
+
+    EXPECT_EQ(true, ssm_->CheckSystemWindowPermission(property));
+    ssm_->systemConfig_.windowUIType_ = oldType;
+}
+
+/**
+ * @tc.name: TestCheckSystemWindowPermission_014
+ * @tc.desc: Test CheckSystemWindowPermission with windowType FLOAT in pad
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, TestCheckSystemWindowPermission_016, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+
+    MockAccesstokenKit::MockIsSACalling(false);
+    WindowUIType oldType = ssm_->systemConfig_.windowUIType_;
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    MockAccesstokenKit::MockAccessTokenKitRet(0);
+
+    EXPECT_EQ(true, ssm_->CheckSystemWindowPermission(property));
+    ssm_->systemConfig_.windowUIType_ = oldType;
+}
+
+/**
  * @tc.name: CreateAndConnectSpecificSession
  * @tc.desc: CreateAndConnectSpecificSession
  * @tc.type: FUNC
