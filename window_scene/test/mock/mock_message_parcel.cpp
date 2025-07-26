@@ -214,7 +214,7 @@ bool Parcel::WriteInt64(int64_t value)
     if (g_setWriteInt64ErrorFlag || value == ERROR_INT) {
         return false;
     }
-    return true;  
+    return true;
 }
 
 bool Parcel::WriteUint32(uint32_t value)
