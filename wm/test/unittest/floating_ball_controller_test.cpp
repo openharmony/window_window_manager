@@ -125,8 +125,9 @@ namespace {
  */
 HWTEST_F(FloatingBallControllerTest, CreateFloatingBallWindow01, TestSize.Level1)
 {
-    AbilityRuntime::AbilityContextImpl* contextPtr = new AbilityRuntime::AbilityContextImpl();
-    fbController_->contextPtr_ = contextPtr;
+    std::shared_ptr<AbilityRuntime::AbilityContextImpl> contextPtr =
+        std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    fbController_->contextPtr_ = &contextPtr;
     fbController_->fbOption_ = nullptr;
     EXPECT_EQ(WMError::WM_ERROR_FB_STATE_ABNORMALLY, fbController_->CreateFloatingBallWindow());
     fbController_->fbOption_ = option_;
@@ -140,7 +141,7 @@ HWTEST_F(FloatingBallControllerTest, CreateFloatingBallWindow01, TestSize.Level1
     EXPECT_EQ(100, fbController_->mainWindowId_);
     fbController_->UpdateMainWindow(mw_);
     EXPECT_EQ(101, fbController_->mainWindowId_);
-    delete contextPtr;
+    fbController_->contextPtr_ = nullptr;
 }
 
 /**
@@ -170,11 +171,12 @@ HWTEST_F(FloatingBallControllerTest, StartFloatingBall01, TestSize.Level1)
     EXPECT_EQ(WMError::WM_ERROR_FB_STATE_ABNORMALLY, fbController_->StartFloatingBall(option_));
     EXPECT_EQ(FbWindowState::STATE_UNDEFINED, fbController_->curState_);
 
-    AbilityRuntime::AbilityContextImpl* contextPtr = new AbilityRuntime::AbilityContextImpl();
-    fbController_->contextPtr_ = contextPtr;
+    std::shared_ptr<AbilityRuntime::AbilityContextImpl> contextPtr =
+        std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    fbController_->contextPtr_ = &contextPtr;
     EXPECT_NE(WMError::WM_OK, fbController_->StartFloatingBall(option_));
     EXPECT_EQ(FbWindowState::STATE_UNDEFINED, fbController_->GetControllerState());
-    delete contextPtr;
+    fbController_->contextPtr_ = nullptr;
 }
 
 /**
