@@ -876,9 +876,23 @@ HWTEST_F(WindowManagerAgentProxyTest, WriteWindowChangeInfoValue02, TestSize.Lev
     windowInfoPair = std::make_pair(WindowInfoKey::VISIBILITY_STATE, windowInfo);
     ret = windowManagerAgentProxy->WriteWindowChangeInfoValue(data, windowInfoPair);
     EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: WriteWindowChangeInfoValue03
+ * @tc.desc: test WriteWindowChangeInfoValue fail2
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerAgentProxyTest, WriteWindowChangeInfoValue03, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    MockMessageParcel::ClearAllErrorFlag();
+    MessageParcel data;
+    std::pair<WindowInfoKey, WindowChangeInfoType> windowInfoPair;
 
     MockMessageParcel::SetWriteUint64ErrorFlag(true);
-    windowInfo = static_cast<uint64_t>(0);
+    WindowChangeInfoType windowInfo = static_cast<uint64_t>(0);
     windowInfoPair = std::make_pair(WindowInfoKey::DISPLAY_ID, windowInfo);
     ret = windowManagerAgentProxy->WriteWindowChangeInfoValue(data, windowInfoPair);
     EXPECT_EQ(ret, false);
