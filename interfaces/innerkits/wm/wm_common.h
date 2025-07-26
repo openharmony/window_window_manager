@@ -546,6 +546,7 @@ enum class WindowSizeChangeReason : uint32_t {
     RECOVER_IN_IMPLICIT = 33,
     OCCUPIED_AREA_CHANGE = 34,
     SCREEN_RELATIVE_POSITION_CHANGE,
+    ROOT_SCENE_CHANGE,
     END,
 };
 
