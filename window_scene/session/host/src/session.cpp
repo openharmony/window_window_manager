@@ -3323,14 +3323,14 @@ WSError Session::SetIsPcAppInPad(bool enable)
 
 WSError Session::SetPcAppInpadCompatibleMode(bool enabled)
 {
-    TLOGI(WmsLogTag::WMS_COMPAT, "isPcAppInpadCompatibleMode: %{public}d", enabled);
+    TLOGD(WmsLogTag::WMS_COMPAT, "isPcAppInpadCompatibleMode: %{public}d", enabled);
     GetSessionProperty()->SetPcAppInpadCompatibleMode(enabled);
     return WSError::WS_OK;
 }
 
 WSError Session::SetPcAppInpadSpecificSystemBarInvisible(bool isPcAppInpadSpecificSystemBarInvisible)
 {
-    TLOGI(WmsLogTag::WMS_COMPAT, "isPcAppInpadSpecificSystemBarInvisible: %{public}d",
+    TLOGD(WmsLogTag::WMS_COMPAT, "isPcAppInpadSpecificSystemBarInvisible: %{public}d",
         isPcAppInpadSpecificSystemBarInvisible);
     GetSessionProperty()->SetPcAppInpadSpecificSystemBarInvisible(isPcAppInpadSpecificSystemBarInvisible);
     return WSError::WS_OK;
@@ -3338,7 +3338,7 @@ WSError Session::SetPcAppInpadSpecificSystemBarInvisible(bool isPcAppInpadSpecif
 
 WSError Session::SetPcAppInpadOrientationLandscape(bool isPcAppInpadOrientationLandscape)
 {
-    TLOGI(WmsLogTag::WMS_COMPAT, "isPcAppInpadOrientationLandscape: %{public}d",
+    TLOGD(WmsLogTag::WMS_COMPAT, "isPcAppInpadOrientationLandscape: %{public}d",
         isPcAppInpadOrientationLandscape);
     GetSessionProperty()->SetPcAppInpadOrientationLandscape(isPcAppInpadOrientationLandscape);
     return WSError::WS_OK;
