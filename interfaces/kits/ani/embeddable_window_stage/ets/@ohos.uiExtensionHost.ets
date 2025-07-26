@@ -41,14 +41,14 @@ namespace uiExtensionHost {
   }
 
   class UIESize implements window.Size {
-    width: double;
-    height: double;
+    width: int;
+    height: int;
   }
   class UIERect implements window.Rect {
-    left: double;
-    top: double;
-    width: double;
-    height: double;
+    left: int;
+    top: int;
+    width: int;
+    height: int;
   };
   class UIEAvoidArea implements window.AvoidArea {
     constructor() {
