@@ -892,7 +892,7 @@ HWTEST_F(SceneSessionManagerTest10, RegisterSessionPropertyChangeNotifyManagerFu
     info.bundleName_ = "RegisterRequestVsyncFunc01";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
-    ssm_->RegisterRequestVsyncFunc(sceneSession);
+    ssm_->RegisterSessionPropertyChangeNotifyManagerFunc(sceneSession);
     EXPECT_NE(nullptr, sceneSession->sessionPropertyChangeNotifyManagerFunc_);
 }
 
