@@ -56,6 +56,9 @@ public:
     static void UnregisterWindowCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
         ani_ref callback);
 
+    /*
+     * Window Layout
+     */
     ani_object Resize(ani_env* env, ani_double width, ani_double height);
     ani_object MoveWindowTo(ani_env* env, ani_double x, ani_double y);
     ani_object GetGlobalRect(ani_env* env);

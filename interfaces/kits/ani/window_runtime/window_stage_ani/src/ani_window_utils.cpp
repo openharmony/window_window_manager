@@ -734,5 +734,17 @@ void AniWindowUtils::GetSpecificBarStatus(sptr<Window>& window, const std::strin
     systemBarProperties[type].settingFlag_ = systemBarProperties[type].settingFlag_ |
         SystemBarSettingFlag::ENABLE_SETTING;
 }
+
+WmErrorCode AniWindowUtils::ToErrorCode(WMError error, WmErrorCode defaultCode)
+{
+    auto it = WM_JS_TO_ERROR_CODE_MAP.find(error);
+    if (it != WM_JS_TO_ERROR_CODE_MAP.end()) {
+        return it->second;
+    }
+    TLOGW(WmsLogTag::DEFAULT,
+        "[ANI] Unknown error: %{public}d, return defaultCode: %{public}d",
+        static_cast<int32_t>(error), static_cast<int32_t>(defaultCode));
+    return defaultCode;
+}
 } // namespace Rosen
 } // namespace OHOS
