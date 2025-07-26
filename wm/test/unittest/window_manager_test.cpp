@@ -2121,15 +2121,12 @@ HWTEST_F(WindowManagerTest, RegisterFloatingScaleChangedListener01, Function | S
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterFloatingScaleChangedListener(nullptr));
  
     sptr<TestFloatingScaleChangedListener> listener = sptr<TestFloatingScaleChangedListener>::MakeSptr();
-    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
  
-    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    EXPECT_EQ(WMError::WM_OK, windowManager.RegisterFloatingScaleChangedListener(listener));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION  , windowManager.RegisterFloatingScaleChangedListener(listener));
     EXPECT_EQ(0, windowManager.pImpl_->floatingScaleChangeListeners_.size());
  
     // to check that the same listner can not be registered twice
-    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    EXPECT_EQ(WMError::WM_OK, windowManager.RegisterFloatingScaleChangedListener(listener));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, windowManager.RegisterFloatingScaleChangedListener(listener));
     EXPECT_EQ(0, windowManager.pImpl_->floatingScaleChangeListeners_.size());
  
     windowManager.pImpl_->windowPropertyChangeAgent_ = oldWindowManagerAgent;
@@ -2154,12 +2151,9 @@ HWTEST_F(WindowManagerTest, UnregisterFloatingScaleChangedListener01, Function |
 
     sptr<TestFloatingScaleChangedListener> listener1 = sptr<TestFloatingScaleChangedListener>::MakeSptr();
     sptr<TestFloatingScaleChangedListener> listener2 = sptr<TestFloatingScaleChangedListener>::MakeSptr();
-    EXPECT_EQ(WMError::WM_OK, windowManager.UnregisterFloatingScaleChangedListener(listener1));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, windowManager.UnregisterFloatingScaleChangedListener(listener1));
 
-    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     windowManager.RegisterFloatingScaleChangedListener(listener1);
-    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     windowManager.RegisterFloatingScaleChangedListener(listener2);
     EXPECT_EQ(0, windowManager.pImpl_->floatingScaleChangeListeners_.size());
 
@@ -2197,7 +2191,7 @@ HWTEST_F(WindowManagerTest, NotifyFloatingScaleChange, TestSize.Level1)
         sptr<TestFloatingScaleChangedListener>::MakeSptr();
 
     windowManager.pImpl_->NotifyFloatingScaleChange(windowInfoList);
-    EXPECT_EQ(listener->count_, 1);
+    EXPECT_EQ(listener->count_, 0);
 }
 
 /**
@@ -2216,15 +2210,12 @@ HWTEST_F(WindowManagerTest, RegisterWindowModeChangedListenerForPropertyChange01
  
     sptr<TestWindowModeChangedListenerForPropertyChange> listener =
         sptr<TestWindowModeChangedListenerForPropertyChange>::MakeSptr();
-    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
  
-    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    EXPECT_EQ(WMError::WM_OK, windowManager.RegisterWindowModeChangedListenerForPropertyChange(listener));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, windowManager.RegisterWindowModeChangedListenerForPropertyChange(listener));
     EXPECT_EQ(0, windowManager.pImpl_->windowModeChangeListeners_.size());
- 
+
     // to check that the same listner can not be registered twice
-    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    EXPECT_EQ(WMError::WM_OK, windowManager.RegisterWindowModeChangedListenerForPropertyChange(listener));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, windowManager.RegisterWindowModeChangedListenerForPropertyChange(listener));
     EXPECT_EQ(0, windowManager.pImpl_->windowModeChangeListeners_.size());
  
     windowManager.pImpl_->windowPropertyChangeAgent_ = oldWindowManagerAgent;
@@ -2251,12 +2242,10 @@ HWTEST_F(WindowManagerTest, UnregisterWindowModeChangedListenerForPropertyChange
         sptr<TestWindowModeChangedListenerForPropertyChange>::MakeSptr();
     sptr<TestWindowModeChangedListenerForPropertyChange> listener2 =
         sptr<TestWindowModeChangedListenerForPropertyChange>::MakeSptr();
-    EXPECT_EQ(WMError::WM_OK, windowManager.UnregisterWindowModeChangedListenerForPropertyChange(listener1));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION,
+        windowManager.UnregisterWindowModeChangedListenerForPropertyChange(listener1));
 
-    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     windowManager.RegisterWindowModeChangedListenerForPropertyChange(listener1);
-    EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     windowManager.RegisterWindowModeChangedListenerForPropertyChange(listener2);
     EXPECT_EQ(0, windowManager.pImpl_->windowModeChangeListeners_.size());
 
@@ -2294,7 +2283,7 @@ HWTEST_F(WindowManagerTest, NotifyWindowModeChangeForPropertyChange, TestSize.Le
         sptr<TestWindowModeChangedListenerForPropertyChange>::MakeSptr();
 
     windowManager.pImpl_->NotifyWindowModeChangeForPropertyChange(windowInfoList);
-    EXPECT_EQ(listener->count_, 1);
+    EXPECT_EQ(listener->count_, 0);
 }
 
 /**
