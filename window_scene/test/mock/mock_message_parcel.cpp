@@ -302,7 +302,7 @@ bool Parcel::ReadInt64(int64_t& value)
 }
 #endif
 
-bool Parcel::ReadFloat(float value)
+bool Parcel::ReadFloat(float& value)
 {
     if (g_setReadFloatErrorFlag) {
         return false;
