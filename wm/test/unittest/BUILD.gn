@@ -477,7 +477,10 @@ ohos_unittest("wm_window_scene_session_impl_test5") {
 ohos_unittest("wm_window_manager_stub_proxy_test") {
   module_out_path = module_out_path
 
-  sources = [ "window_manager_agent_stub_test.cpp" ]
+  sources = [
+    "${window_base_path}/window_scene/test/mock/mock_message_parcel.cpp",
+    "window_manager_agent_stub_test.cpp",
+  ]
 
   deps = [ ":wm_unittest_common" ]
 
