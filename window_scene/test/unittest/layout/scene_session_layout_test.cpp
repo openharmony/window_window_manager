@@ -1082,11 +1082,11 @@ HWTEST_F(SceneSessionLayoutTest, SetMoveAvailableArea02, TestSize.Level1)
  * @tc.desc: HandleMoveDragSurfaceNode
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLayoutTest, HandleMoveDragSurfaceNode01, TestSize.Level1)
+HWTEST_F(SceneSessionLayoutTest, HandleMoveDragSurfaceNode002, TestSize.Level1)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "HandleMoveDragSurfaceNode begin");
 
-    constexpr float MOVE_DRAG_POSITOIN_Z = 100.5F;
+    constexpr float MOVE_DRAG_POSITION_Z = 100.5F;
     const DisplayId startDisplayId = 123;
     sptr<ScreenSession> startScreenSession = sptr<ScreenSession>::MakeSptr(startDisplayId,
         ScreenProperty(), startDisplayId);
@@ -1099,19 +1099,19 @@ HWTEST_F(SceneSessionLayoutTest, HandleMoveDragSurfaceNode01, TestSize.Level1)
     sptr<ScreenSession> endScreenSession = sptr<ScreenSession>::MakeSptr(endDisplayId,
         ScreenProperty(), endDisplayId);
     ScreenSessionManagerClient::GetInstance().screenSessionMap_[endDisplayId] = endScreenSession;
-    startScreenSession->property_.startX_ = 150;
-    startScreenSession->property_.startY_ = 250;
-    startScreenSession->property_.bounds_.rect_={1, 2, 350, 450};
+    endScreenSession->property_.startX_ =  150;
+    endScreenSession->property_.startY_ =  250;
+    endScreenSession->property_.bounds_.rect_={1, 2, 350, 450};
 
     std::map<ScreenId, ScreenProperty> screenProperties =
         ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
     TLOGI(WmsLogTag::WMS_LAYOUT, "screenProperties.size()=%{public}lu", screenProperties.size());
     for (const auto& [screenId, screenProperty] : screenProperties) {
         WSRect screenRect = {
-            screenProperties.GetStartX(),
-            screenProperties.GetStartY(),
-            screenProperties.GetBounds().rect_.GetWidth(),
-            screenProperties.GetBounds().rect_.GetHeight(),
+            screenProperty.GetStartX(),
+            screenProperty.GetStartY(),
+            screenProperty.GetBounds().rect_.GetWidth(),
+            screenProperty.GetBounds().rect_.GetHeight(),
         };
         TLOGI(WmsLogTag::WMS_LAYOUT, "screenRect:%{public}s", screenRect.ToString().c_str());
         TLOGI(WmsLogTag::WMS_LAYOUT, "screenProperty.GetBounds().rect_:%{public}s",
@@ -1147,28 +1147,28 @@ HWTEST_F(SceneSessionLayoutTest, HandleMoveDragSurfaceNode01, TestSize.Level1)
     movedSurfaceNode->SetPositionZ(0);
     session->moveDragController_->displayIdSetDuringMoveDrag_.clear();
     session->HandleMoveDragSurfaceNode(SizeChangeReason::DRAG_START);
-    posZ = movedSurfaceNode->GetStagingPropertise().GetPositionZ();
+    posZ = movedSurfaceNode->GetStagingProperties().GetPositionZ();
     TLOGI(WmsLogTag::WMS_LAYOUT, "posZ:%{public}f", posZ);
     EXPECT_EQ(posZ, 0);
 
     movedSurfaceNode->SetPositionZ(0);
     session->moveDragController_->displayIdSetDuringMoveDrag_.clear();
     session->HandleMoveDragSurfaceNode(SizeChangeReason::DRAG_MOVE);
-    posZ = movedSurfaceNode->GetStagingPropertise().GetPositionZ();
+    posZ = movedSurfaceNode->GetStagingProperties().GetPositionZ();
     TLOGI(WmsLogTag::WMS_LAYOUT, "posZ:%{public}f", posZ);
-    EXPECT_EQ(posZ, MOVE_DRAG_POSITOIN_Z);
+    EXPECT_EQ(posZ, MOVE_DRAG_POSITION_Z);
 
     movedSurfaceNode->SetPositionZ(0);
     session->moveDragController_->displayIdSetDuringMoveDrag_.clear();
     session->HandleMoveDragSurfaceNode(SizeChangeReason::DRAG);
-    posZ = movedSurfaceNode->GetStagingPropertise().GetPositionZ();
+    posZ = movedSurfaceNode->GetStagingProperties().GetPositionZ();
     TLOGI(WmsLogTag::WMS_LAYOUT, "posZ:%{public}f", posZ);
-    EXPECT_EQ(posZ, MOVE_DRAG_POSITOIN_Z);
+    EXPECT_EQ(posZ, MOVE_DRAG_POSITION_Z);
 
     movedSurfaceNode->SetPositionZ(0);
     session->moveDragController_->displayIdSetDuringMoveDrag_.clear();
     session->HandleMoveDragSurfaceNode(SizeChangeReason::DRAG_END);
-    posZ = movedSurfaceNode->GetStagingPropertise().GetPositionZ();
+    posZ = movedSurfaceNode->GetStagingProperties().GetPositionZ();
     TLOGI(WmsLogTag::WMS_LAYOUT, "posZ:%{public}f", posZ);
     EXPECT_EQ(posZ, 0);
 
