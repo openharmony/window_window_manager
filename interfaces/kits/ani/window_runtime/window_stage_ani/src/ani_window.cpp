@@ -1480,32 +1480,32 @@ void AniWindow::Maximize(ani_env* env, ani_int presentation)
     }
 }
 
-ani_object AniWindow::Resize(ani_env* env, ani_double width, ani_double height)
+void AniWindow::Resize(ani_env* env, ani_int width, ani_int height)
 {
     if (windowToken_ == nullptr) {
-        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
     }
 
     WMError ret = windowToken_->Resize(static_cast<int>(width), static_cast<int>(height));
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] Resize set error, ret:%{public}d", ret);
-        return AniWindowUtils::AniThrowError(env, ret);
+        AniWindowUtils::AniThrowError(env, ret);
     }
-    return AniWindowUtils::CreateAniUndefined(env);
 }
 
-ani_object AniWindow::MoveWindowTo(ani_env* env, ani_double x, ani_double y)
+void AniWindow::MoveWindowTo(ani_env* env, ani_int x, ani_int y)
 {
     if (windowToken_ == nullptr) {
-        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
     }
 
     WMError ret = windowToken_->MoveTo(static_cast<int>(x), static_cast<int>(y));
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] MoveWindowTo set error, ret:%{public}d", ret);
-        return AniWindowUtils::AniThrowError(env, ret);
+        AniWindowUtils::AniThrowError(env, ret);
     }
-    return AniWindowUtils::CreateAniUndefined(env);
 }
 
 ani_object AniWindow::GetGlobalRect(ani_env* env)
@@ -2342,28 +2342,30 @@ static void Maximize(ani_env* env, ani_object obj, ani_long nativeObj, ani_int p
     aniWindow->Maximize(env, presentation);
 }
 
-static ani_object WindowResize(ani_env* env, ani_object obj, ani_long nativeObj, ani_double width, ani_double height)
+static void WindowResize(ani_env* env, ani_object obj, ani_long nativeObj, ani_int width, ani_int height)
 {
     using namespace OHOS::Rosen;
     TLOGI(WmsLogTag::WMS_LAYOUT, "[ANI]");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow == nullptr || aniWindow->GetWindow() == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] windowToken is nullptr");
-        return AniWindowUtils::CreateAniUndefined(env);
+        AniWindowUtils::CreateAniUndefined(env);
+        return;
     }
-    return aniWindow->Resize(env, width, height);
+    aniWindow->Resize(env, width, height);
 }
 
-static ani_object WindowMoveWindowTo(ani_env* env, ani_object obj, ani_long nativeObj, ani_double x, ani_double y)
+static void WindowMoveWindowTo(ani_env* env, ani_object obj, ani_long nativeObj, ani_int x, ani_int y)
 {
     using namespace OHOS::Rosen;
     TLOGI(WmsLogTag::WMS_LAYOUT, "[ANI]");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow == nullptr || aniWindow->GetWindow() == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] windowToken is nullptr");
-        return AniWindowUtils::CreateAniUndefined(env);
+        AniWindowUtils::CreateAniUndefined(env);
+        return;
     }
-    return aniWindow->MoveWindowTo(env, x, y);
+    aniWindow->MoveWindowTo(env, x, y);
 }
 
 static ani_object WindowGetGlobalRect(ani_env* env, ani_object obj, ani_long nativeObj)
@@ -2665,9 +2667,9 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(Minimize)},
         ani_native_function {"maximize", "JI:V",
             reinterpret_cast<void *>(Maximize)},
-        ani_native_function {"resize", "JDD:I",
+        ani_native_function {"resize", "JII:V",
             reinterpret_cast<void *>(WindowResize)},
-        ani_native_function {"moveWindowTo", "JDD:I",
+        ani_native_function {"moveWindowTo", "JII:V",
             reinterpret_cast<void *>(WindowMoveWindowTo)},
         ani_native_function {"getGlobalRect", "J:L@ohos/window/window/Rect;",
             reinterpret_cast<void *>(WindowGetGlobalRect)},
