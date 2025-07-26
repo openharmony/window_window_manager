@@ -1347,6 +1347,9 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
     property->SetSkipSelfWhenShowOnVirtualScreen(GetSessionProperty()->GetSkipSelfWhenShowOnVirtualScreen());
     property->SetSkipEventOnCastPlus(GetSessionProperty()->GetSkipEventOnCastPlus());
     property->SetIsAbilityHook(GetSessionInfo().isAbilityHook_);
+    property->SetPcAppInpadCompatibleMode(GetSessionProperty()->GetPcAppInpadCompatibleMode());
+    property->SetPcAppInpadSpecificSystemBarInvisible(GetSessionProperty()->GetPcAppInpadSpecificSystemBarInvisible());
+    property->SetPcAppInpadOrientationLandscape(GetSessionProperty()->GetPcAppInpadOrientationLandscape());
     SetSessionProperty(property);
     GetSessionProperty()->SetIsNeedUpdateWindowMode(false);
 }
@@ -3315,6 +3318,29 @@ WSError Session::SetIsPcAppInPad(bool enable)
 {
     TLOGI(WmsLogTag::WMS_COMPAT, "SetIsPcAppInPad enable: %{public}d", enable);
     GetSessionProperty()->SetIsPcAppInPad(enable);
+    return WSError::WS_OK;
+}
+
+WSError Session::SetPcAppInpadCompatibleMode(bool enabled)
+{
+    TLOGD(WmsLogTag::WMS_COMPAT, "isPcAppInpadCompatibleMode: %{public}d", enabled);
+    GetSessionProperty()->SetPcAppInpadCompatibleMode(enabled);
+    return WSError::WS_OK;
+}
+
+WSError Session::SetPcAppInpadSpecificSystemBarInvisible(bool isPcAppInpadSpecificSystemBarInvisible)
+{
+    TLOGD(WmsLogTag::WMS_COMPAT, "isPcAppInpadSpecificSystemBarInvisible: %{public}d",
+        isPcAppInpadSpecificSystemBarInvisible);
+    GetSessionProperty()->SetPcAppInpadSpecificSystemBarInvisible(isPcAppInpadSpecificSystemBarInvisible);
+    return WSError::WS_OK;
+}
+
+WSError Session::SetPcAppInpadOrientationLandscape(bool isPcAppInpadOrientationLandscape)
+{
+    TLOGD(WmsLogTag::WMS_COMPAT, "isPcAppInpadOrientationLandscape: %{public}d",
+        isPcAppInpadOrientationLandscape);
+    GetSessionProperty()->SetPcAppInpadOrientationLandscape(isPcAppInpadOrientationLandscape);
     return WSError::WS_OK;
 }
 

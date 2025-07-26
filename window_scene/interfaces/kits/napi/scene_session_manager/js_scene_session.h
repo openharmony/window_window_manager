@@ -251,7 +251,9 @@ private:
     static napi_value SendFbActionEvent(napi_env env, napi_callback_info info);
     static napi_value CreateSessionInfosNapiValue(
         napi_env env, const std::vector<std::shared_ptr<SessionInfo>>& sessionInfos);
-
+    static napi_value SetPcAppInpadCompatibleMode(napi_env env, napi_callback_info info);
+    static napi_value SetPcAppInpadSpecificSystemBarInvisible(napi_env env, napi_callback_info info);
+    static napi_value SetPcAppInpadOrientationLandscape(napi_env env, napi_callback_info info);
     /*
      * PC Window
      */
@@ -340,6 +342,9 @@ private:
     static napi_value GetJsPanelSessionObj(napi_env env, const sptr<SceneSession>& session);
     napi_value OnRequestSpecificSessionClose(napi_env env, napi_callback_info info);
     napi_value OnSendFbActionEvent(napi_env env, napi_callback_info info);
+    napi_value OnSetPcAppInpadCompatibleMode(napi_env env, napi_callback_info info);
+    napi_value OnSetPcAppInpadSpecificSystemBarInvisible(napi_env env, napi_callback_info info);
+    napi_value OnSetPcAppInpadOrientationLandscape(napi_env env, napi_callback_info info);
 
     /*
      * PC Window
