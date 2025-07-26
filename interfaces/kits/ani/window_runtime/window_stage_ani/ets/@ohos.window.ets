@@ -35,14 +35,14 @@ namespace window {
     /**
      * The width of the window.
      *
-     * @type { number }
+     * @type { int }
      * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @since 7
      */
     /**
      * The width of the window.
      *
-     * @type { number }
+     * @type { int }
      * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @crossplatform
      * @since 10
@@ -50,13 +50,13 @@ namespace window {
     /**
      * The width of the window.
      *
-     * @type { number }
+     * @type { int }
      * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @crossplatform
      * @atomicservice
      * @since 11
      */
-    width: number;
+    width: int;
 
     /**
      * The height of the window.
@@ -67,7 +67,7 @@ namespace window {
     /**
      * The height of the window.
      *
-     * @type { number }
+     * @type { int }
      * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @crossplatform
      * @since 10
@@ -75,13 +75,13 @@ namespace window {
     /**
      * The height of the window.
      *
-     * @type { number }
+     * @type { int }
      * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @crossplatform
      * @atomicservice
      * @since 11
      */
-    height: number;
+    height: int;
   }
   export enum AvoidAreaType {
     /**
@@ -443,13 +443,13 @@ namespace window {
     /**
      * The left of the Rect.
      *
-     * @type { number }
+     * @type { int }
      * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @crossplatform
      * @atomicservice
      * @since 11
      */
-    left: number;
+    left: int;
 
     /**
      * The top of the Rect.
@@ -467,13 +467,13 @@ namespace window {
     /**
      * The top of the Rect.
      *
-     * @type { number }
+     * @type { int }
      * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @crossplatform
      * @atomicservice
      * @since 11
      */
-    top: number;
+    top: int;
 
     /**
      * The width of the Rect.
@@ -491,13 +491,13 @@ namespace window {
     /**
      * The width of the Rect.
      *
-     * @type { number }
+     * @type { int }
      * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @crossplatform
      * @atomicservice
      * @since 11
      */
-    width: number;
+    width: int;
 
     /**
      * The height of the Rect.
@@ -515,25 +515,25 @@ namespace window {
     /**
      * The height of the Rect.
      *
-     * @type { number }
+     * @type { int }
      * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @crossplatform
      * @atomicservice
      * @since 11
      */
-    height: number;
+    height: int;
   }
 
   export class RectInternal implements Rect {
-    left: double;
-    top: double;
-    width: double;
-    height: double;
+    left: int;
+    top: int;
+    width: int;
+    height: int;
   }
 
   export class SizeInternal implements Size {
-    width: double;
-    height: double;
+    width: int;
+    height: int;
   }
 
 //enum WMError {
@@ -1268,7 +1268,7 @@ export class ConfigurationInternal implements Configuration {
 }
 
 export interface MoveConfiguration {
-    displayId: number;
+    displayId: long;
 }
 
 export interface WindowDensityInfo {
@@ -1312,70 +1312,70 @@ export interface WindowLimits {
     /**
      * The maximum width of the window.
      *
-     * @type { ?number }
+     * @type { ?int }
      * @syscap SystemCapability.Window.SessionManager
      * @since 11
      */
     /**
      * The maximum width of the window.
      *
-     * @type { ?number }
+     * @type { ?int }
      * @syscap SystemCapability.Window.SessionManager
      * @atomicservice
      * @since 12
      */
-    maxWidth: number;
+    maxWidth: int;
 
     /**
      * The maximum height of the window.
      *
-     * @type { ?number }
+     * @type { ?int }
      * @syscap SystemCapability.Window.SessionManager
      * @since 11
      */
     /**
      * The maximum height of the window.
      *
-     * @type { ?number }
+     * @type { ?int }
      * @syscap SystemCapability.Window.SessionManager
      * @atomicservice
      * @since 12
      */
-    maxHeight: number;
+    maxHeight: int;
 
     /**
      * The minimum width of the window.
      *
-     * @type { ?number }
+     * @type { ?int }
      * @syscap SystemCapability.Window.SessionManager
      * @since 11
      */
     /**
      * The minimum width of the window.
      *
-     * @type { ?number }
+     * @type { ?int }
      * @syscap SystemCapability.Window.SessionManager
      * @atomicservice
      * @since 12
      */
-    minWidth: number;
+    minWidth: int;
 
     /**
      * The minimum height of the window.
      *
-     * @type { ?number }
+     * @type { ?int }
      * @syscap SystemCapability.Window.SessionManager
      * @since 11
      */
     /**
      * The minimum height of the window.
      *
-     * @type { ?number }
+     * @type { ?int }
      * @syscap SystemCapability.Window.SessionManager
      * @atomicservice
      * @since 12
      */
-    minHeight: number;
+    minHeight: int;
 }
 
 /**
@@ -1950,8 +1950,8 @@ export class WindowInternal implements Window {
     private native getWindowStatus(nativeObj: long): int;
     private native minimize(nativeObj: long): void;
     private native maximize(nativeObj: long, presentation: int): void;
-    private native resize(nativeObj: long, width: double, height: double): int;
-    private native moveWindowTo(nativeObj: long, x: double, y: double): int;
+    private native resize(nativeObj: long, width: int, height: int): void;
+    private native moveWindowTo(nativeObj: long, x: int, y: int): void;
     private native getGlobalRect(nativeObj:long): Rect;
 
     private native getWindowDecorHeight(nativeObj:long): double;
@@ -2209,7 +2209,7 @@ export class WindowInternal implements Window {
       });
     }
     
-    public resize(width: double, height: double): Promise<void> {
+    public resize(width: int, height: int): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) :void => {
         taskpool.execute((): void => {
           this.resize(this.nativeObj, width, height);
@@ -2221,7 +2221,7 @@ export class WindowInternal implements Window {
       });
     }
 
-    public moveWindowTo(x: double, y: double): Promise<void> {
+    public moveWindowTo(x: int, y: int): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) :void => {
         taskpool.execute((): void => {
           this.moveWindowTo(this.nativeObj, x, y);
@@ -2233,7 +2233,7 @@ export class WindowInternal implements Window {
       });
     }
 
-    public resize(width: double, height: double, callback: AsyncCallback<void>): void {
+    public resize(width: int, height: int, callback: AsyncCallback<void>): void {
       taskpool.execute((): void => {
         this.resize(this.nativeObj, width, height);
         }).then((ret: NullishType) => {
@@ -2243,7 +2243,7 @@ export class WindowInternal implements Window {
         });
     }
 
-    public moveWindowTo(x: double, y: double, callback: AsyncCallback<void>): void {
+    public moveWindowTo(x: int, y: int, callback: AsyncCallback<void>): void {
       taskpool.execute((): void => {
         this.moveWindowTo(this.nativeObj, x, y);
         }).then((ret: NullishType) => {
@@ -2873,10 +2873,10 @@ export interface Window {
     minimize(callback: AsyncCallback<void>): void;
     minimize(): Promise<void>;
     maximize(presentation?: MaximizePresentation): Promise<void>;
-    resize(width: double, height: double): Promise<void>;
-    moveWindowTo(x: double, y: double): Promise<void>;
-    resize(width: double, height: double, callback: AsyncCallback<void>): void;
-    moveWindowTo(x: double, y: double, callback: AsyncCallback<void>): void;
+    resize(width: int, height: int): Promise<void>;
+    moveWindowTo(x: int, y: int): Promise<void>;
+    resize(width: int, height: int, callback: AsyncCallback<void>): void;
+    moveWindowTo(x: int, y: int, callback: AsyncCallback<void>): void;
     getGlobalRect(): Rect;
     getWindowDecorHeight(): double;
     setWindowBackgroundColor(color: string | ColorMetrics): void;
