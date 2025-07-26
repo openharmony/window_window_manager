@@ -2177,11 +2177,11 @@ HWTEST_F(WindowManagerTest, UnregisterFloatingScaleChangedListener01, Function |
 }
 
 /**
- * @tc.name: NotifyWindowModeChangeForPropertyChange
- * @tc.desc: check NotifyWindowModeChangeForPropertyChange
+ * @tc.name: NotifyFloatingScaleChange
+ * @tc.desc: check NotifyFloatingScaleChange
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, NotifyWindowModeChangeForPropertyChange, TestSize.Level1)
+HWTEST_F(WindowManagerTest, NotifyFloatingScaleChange, TestSize.Level1)
 {
     std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>> windowInfoList;
     windowInfoList.push_back({{WindowInfoKey::DISPLAY_ID, 5}});
