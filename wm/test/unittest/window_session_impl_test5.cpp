@@ -855,18 +855,18 @@ HWTEST_F(WindowSessionImplTest5, GetWindowScaleCoordinate01, Function | SmallTes
     mainWindow->property_->SetPersistentId(id);
     mainWindow->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     CursorInfo cursorInfo;
-    auto res = mainWindow->GetWindowScaleCoordinate(cursorInfo, id);
+    auto res = mainWindow->GetWindowScaleCoordinate(id, cursorInfo);
     EXPECT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
     WindowSessionImpl::windowSessionMap_.clear();
     WindowSessionImpl::windowSessionMap_.insert(std::make_pair(mainWindow->GetWindowName(),
         std::pair<uint64_t, sptr<WindowSessionImpl>>(mainWindow->GetWindowId(), mainWindow)));
-    res = mainWindow->GetWindowScaleCoordinate(cursorInfo, id);
+    res = mainWindow->GetWindowScaleCoordinate(id, cursorInfo);
     EXPECT_EQ(res, WMError::WM_OK);
 
     sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
     compatibleModeProperty->SetIsAdaptToSimulationScale(true);
     mainWindow->property_->SetCompatibleModeProperty(compatibleModeProperty);
-    res = mainWindow->GetWindowScaleCoordinate(cursorInfo, id);
+    res = mainWindow->GetWindowScaleCoordinate(id, cursorInfo);
     EXPECT_EQ(res, WMError::WM_OK);
 
     sptr<WindowOption> subWindowOption = sptr<WindowOption>::MakeSptr();
@@ -877,18 +877,18 @@ HWTEST_F(WindowSessionImplTest5, GetWindowScaleCoordinate01, Function | SmallTes
     subWindow->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     WindowSessionImpl::windowSessionMap_.insert(std::make_pair(subWindow->GetWindowName(),
         std::pair<uint64_t, sptr<WindowSessionImpl>>(subWindow->GetWindowId(), subWindow)));
-    res = subWindow->GetWindowScaleCoordinate(cursorInfo, subWindow->GetPersistentId());
+    res = subWindow->GetWindowScaleCoordinate(subWindow->GetPersistentId(), cursorInfo);
     EXPECT_EQ(res, WMError::WM_OK);
     mainWindow->context_ = std::make_shared<AbilityRuntime::AbilityContextImpl>();
     subWindow->context_ = mainWindow->context_;
     subWindow->property_->SetIsUIExtensionAbilityProcess(true);
-    res = mainWindow->GetWindowScaleCoordinate(cursorInfo, id);
+    res = mainWindow->GetWindowScaleCoordinate(id, cursorInfo);
     EXPECT_EQ(res, WMError::WM_OK);
     subWindow->property_->SetIsUIExtensionAbilityProcess(false);
-    res = mainWindow->GetWindowScaleCoordinate(cursorInfo, id);
+    res = mainWindow->GetWindowScaleCoordinate(id, cursorInfo);
     EXPECT_EQ(res, WMError::WM_OK);
     mainWindow->compatScaleX_ = 0.5;
-    res = mainWindow->GetWindowScaleCoordinate(cursorInfo, id);
+    res = mainWindow->GetWindowScaleCoordinate(id, cursorInfo);
     EXPECT_EQ(res, WMError::WM_OK);
     WindowSessionImpl::windowSessionMap_.clear();
 }
@@ -910,19 +910,19 @@ HWTEST_F(WindowSessionImplTest5, GetWindowScaleCoordinate02, Function | SmallTes
     extensionWindow->property_->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
     int32_t id = 1;
     CursorInfo cursorInfo;
-    auto res = extensionWindow->GetWindowScaleCoordinate(cursorInfo, id);
+    auto res = extensionWindow->GetWindowScaleCoordinate(id, cursorInfo);
     EXPECT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
     extensionWindow->property_->SetParentPersistentId(id);
     extensionWindow->property_->SetParentId(id);
-    res = extensionWindow->GetWindowScaleCoordinate(cursorInfo, id);
+    res = extensionWindow->GetWindowScaleCoordinate(id, cursorInfo);
     EXPECT_EQ(res, WMError::WM_OK);
     sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
     compatibleModeProperty->SetIsAdaptToSimulationScale(true);
     extensionWindow->property_->SetCompatibleModeProperty(compatibleModeProperty);
-    res = extensionWindow->GetWindowScaleCoordinate(cursorInfo, id);
+    res = extensionWindow->GetWindowScaleCoordinate(id, cursorInfo);
     EXPECT_EQ(res, WMError::WM_OK);
     extensionWindow->compatScaleX_ = 0.5;
-    res = extensionWindow->GetWindowScaleCoordinate(cursorInfo, id);
+    res = extensionWindow->GetWindowScaleCoordinate(id, cursorInfo);
     EXPECT_EQ(res, WMError::WM_OK);
     WindowSessionImpl::GetWindowExtensionSessionSet().clear();
 }
