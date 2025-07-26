@@ -1086,7 +1086,7 @@ HWTEST_F(SceneSessionLayoutTest, HandleMoveDragSurfaceNode002, TestSize.Level1)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "HandleMoveDragSurfaceNode begin");
 
-    constexpr float MOVE_DRAG_POSITION_Z = 100.5F;
+    constexpr float MOVE_DRAG_POSITION_Z = 100.5f;
     const DisplayId startDisplayId = 123;
     sptr<ScreenSession> startScreenSession = sptr<ScreenSession>::MakeSptr(startDisplayId,
         ScreenProperty(), startDisplayId);
