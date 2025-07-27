@@ -17,7 +17,6 @@
 #include "marshalling_helper.h"
 #include "window_manager_agent.h"
 #include "window_manager_agent_stub.h"
-#include "test/mock/mock_message_parcel.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -472,21 +471,14 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest22, TestSize.Level1)
 HWTEST_F(WindowManagerAgentStubTest, ReadWindowInfoList01, TestSize.Level1)
 {
     MessageParcel data;
-
-    MockMessageParcel::ClearAllErrorFlag();
-    data.WriteUint32(1);
-    data.WriteUint32(1);
-    data.WriteInt32(static_cast<int32_t>(WindowInfoKey::WINDOW_ID));
-    data.WriteUint32(0);
     std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>> windowInfoList;
 
-    MockMessageParcel::SetReadUint32ErrorFlag(true);
+    data.WriteUint32(1);
     EXPECT_FALSE(stub_->ReadWindowInfoList(data, windowInfoList));
-
-    MockMessageParcel::SetReadUint32ErrorFlag(true);
+    data.WriteUint32(1);
+    data.WriteInt32(static_cast<int32_t>(WindowInfoKey::WINDOW_ID));
     EXPECT_FALSE(stub_->ReadWindowInfoList(data, windowInfoList));
-
-    MockMessageParcel::ClearAllErrorFlag();
+    data.WriteUint32(0);
     EXPECT_TRUE(stub_->ReadWindowInfoList(data, windowInfoList));
 }
 
@@ -498,20 +490,13 @@ HWTEST_F(WindowManagerAgentStubTest, ReadWindowInfoList01, TestSize.Level1)
 HWTEST_F(WindowManagerAgentStubTest, ReadWindowInfo01, TestSize.Level1)
 {
     MessageParcel data;
+    std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>> windowInfoList;
 
-    MockMessageParcel::ClearAllErrorFlag();
+    EXPECT_FALSE(stub_->ReadWindowInfo(data, windowInfo));
+    data.WriteInt32(static_cast<int32_t>(WindowInfoKey::WINDOW_ID));
+    EXPECT_FALSE(stub_->ReadWindowInfo(data, windowInfo));
     data.WriteInt32(static_cast<int32_t>(WindowInfoKey::WINDOW_ID));
     data.WriteUint32(0);
-    std::unordered_map<WindowInfoKey, WindowChangeInfoType> windowInfo;
-
-    MockMessageParcel::SetReadInt32ErrorFlag(true);
-    EXPECT_FALSE(stub_->ReadWindowInfo(data, windowInfo));
-
-    MockMessageParcel::ClearAllErrorFlag();
-    MockMessageParcel::SetReadUint32ErrorFlag(true);
-    EXPECT_FALSE(stub_->ReadWindowInfo(data, windowInfo));
-
-    MockMessageParcel::ClearAllErrorFlag();
     EXPECT_TRUE(stub_->ReadWindowInfo(data, windowInfo));
 }
 
@@ -523,20 +508,13 @@ HWTEST_F(WindowManagerAgentStubTest, ReadWindowInfo01, TestSize.Level1)
 HWTEST_F(WindowManagerAgentStubTest, ReadWindowInfo02, TestSize.Level1)
 {
     MessageParcel data;
+    std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>> windowInfoList;
 
-    MockMessageParcel::ClearAllErrorFlag();
+    EXPECT_FALSE(stub_->ReadWindowInfo(data, windowInfo));
+    data.WriteInt32(static_cast<int32_t>(WindowInfoKey::BUNDLE_NAME));
+    EXPECT_FALSE(stub_->ReadWindowInfo(data, windowInfo));
     data.WriteInt32(static_cast<int32_t>(WindowInfoKey::BUNDLE_NAME));
     data.WriteString("test");
-    std::unordered_map<WindowInfoKey, WindowChangeInfoType> windowInfo;
-
-    MockMessageParcel::SetReadInt32ErrorFlag(true);
-    EXPECT_FALSE(stub_->ReadWindowInfo(data, windowInfo));
-
-    MockMessageParcel::ClearAllErrorFlag();
-    MockMessageParcel::SetReadStringErrorFlag(true);
-    EXPECT_FALSE(stub_->ReadWindowInfo(data, windowInfo));
-
-    MockMessageParcel::ClearAllErrorFlag();
     EXPECT_TRUE(stub_->ReadWindowInfo(data, windowInfo));
 }
 
@@ -548,20 +526,13 @@ HWTEST_F(WindowManagerAgentStubTest, ReadWindowInfo02, TestSize.Level1)
 HWTEST_F(WindowManagerAgentStubTest, ReadWindowInfo03, TestSize.Level1)
 {
     MessageParcel data;
+    std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>> windowInfoList;
 
-    MockMessageParcel::ClearAllErrorFlag();
+    EXPECT_FALSE(stub_->ReadWindowInfo(data, windowInfo));
+    data.WriteInt32(static_cast<int32_t>(WindowInfoKey::ABILITY_NAME));
+    EXPECT_FALSE(stub_->ReadWindowInfo(data, windowInfo));
     data.WriteInt32(static_cast<int32_t>(WindowInfoKey::ABILITY_NAME));
     data.WriteString("test");
-    std::unordered_map<WindowInfoKey, WindowChangeInfoType> windowInfo;
-
-    MockMessageParcel::SetReadInt32ErrorFlag(true);
-    EXPECT_FALSE(stub_->ReadWindowInfo(data, windowInfo));
-
-    MockMessageParcel::ClearAllErrorFlag();
-    MockMessageParcel::SetReadStringErrorFlag(true);
-    EXPECT_FALSE(stub_->ReadWindowInfo(data, windowInfo));
-
-    MockMessageParcel::ClearAllErrorFlag();
     EXPECT_TRUE(stub_->ReadWindowInfo(data, windowInfo));
 }
 
@@ -573,16 +544,13 @@ HWTEST_F(WindowManagerAgentStubTest, ReadWindowInfo03, TestSize.Level1)
 HWTEST_F(WindowManagerAgentStubTest, ReadWindowInfo04, TestSize.Level1)
 {
     MessageParcel data;
+    std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>> windowInfoList;
 
-    MockMessageParcel::ClearAllErrorFlag();
+    EXPECT_FALSE(stub_->ReadWindowInfo(data, windowInfo));
+    data.WriteInt32(static_cast<int32_t>(WindowInfoKey::APP_INDEX));
+    EXPECT_FALSE(stub_->ReadWindowInfo(data, windowInfo));
     data.WriteInt32(static_cast<int32_t>(WindowInfoKey::APP_INDEX));
     data.WriteInt32(0);
-    std::unordered_map<WindowInfoKey, WindowChangeInfoType> windowInfo;
-
-    MockMessageParcel::SetReadInt32ErrorFlag(true);
-    EXPECT_FALSE(stub_->ReadWindowInfo(data, windowInfo));
-
-    MockMessageParcel::ClearAllErrorFlag();
     EXPECT_TRUE(stub_->ReadWindowInfo(data, windowInfo));
 }
 
@@ -594,20 +562,13 @@ HWTEST_F(WindowManagerAgentStubTest, ReadWindowInfo04, TestSize.Level1)
 HWTEST_F(WindowManagerAgentStubTest, ReadWindowInfo05, TestSize.Level1)
 {
     MessageParcel data;
+    std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>> windowInfoList;
 
-    MockMessageParcel::ClearAllErrorFlag();
+    EXPECT_FALSE(stub_->ReadWindowInfo(data, windowInfo));
+    data.WriteInt32(static_cast<int32_t>(WindowInfoKey::VISIBILITY_STATE));
+    EXPECT_FALSE(stub_->ReadWindowInfo(data, windowInfo));
     data.WriteInt32(static_cast<int32_t>(WindowInfoKey::VISIBILITY_STATE));
     data.WriteUint32(0);
-    std::unordered_map<WindowInfoKey, WindowChangeInfoType> windowInfo;
-
-    MockMessageParcel::SetReadInt32ErrorFlag(true);
-    EXPECT_FALSE(stub_->ReadWindowInfo(data, windowInfo));
-
-    MockMessageParcel::ClearAllErrorFlag();
-    MockMessageParcel::SetReadUint32ErrorFlag(true);
-    EXPECT_FALSE(stub_->ReadWindowInfo(data, windowInfo));
-
-    MockMessageParcel::ClearAllErrorFlag();
     EXPECT_TRUE(stub_->ReadWindowInfo(data, windowInfo));
 }
 
@@ -619,20 +580,13 @@ HWTEST_F(WindowManagerAgentStubTest, ReadWindowInfo05, TestSize.Level1)
 HWTEST_F(WindowManagerAgentStubTest, ReadWindowInfo06, TestSize.Level1)
 {
     MessageParcel data;
+    std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>> windowInfoList;
 
-    MockMessageParcel::ClearAllErrorFlag();
+    EXPECT_FALSE(stub_->ReadWindowInfo(data, windowInfo));
+    data.WriteInt32(static_cast<int32_t>(WindowInfoKey::WINDOW_MODE));
+    EXPECT_FALSE(stub_->ReadWindowInfo(data, windowInfo));
     data.WriteInt32(static_cast<int32_t>(WindowInfoKey::WINDOW_MODE));
     data.WriteUint32(0);
-    std::unordered_map<WindowInfoKey, WindowChangeInfoType> windowInfo;
-
-    MockMessageParcel::SetReadInt32ErrorFlag(true);
-    EXPECT_FALSE(stub_->ReadWindowInfo(data, windowInfo));
-
-    MockMessageParcel::ClearAllErrorFlag();
-    MockMessageParcel::SetReadUint32ErrorFlag(true);
-    EXPECT_FALSE(stub_->ReadWindowInfo(data, windowInfo));
-
-    MockMessageParcel::ClearAllErrorFlag();
     EXPECT_TRUE(stub_->ReadWindowInfo(data, windowInfo));
 }
 
@@ -644,20 +598,13 @@ HWTEST_F(WindowManagerAgentStubTest, ReadWindowInfo06, TestSize.Level1)
 HWTEST_F(WindowManagerAgentStubTest, ReadWindowInfo07, TestSize.Level1)
 {
     MessageParcel data;
+    std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>> windowInfoList;
 
-    MockMessageParcel::ClearAllErrorFlag();
+    EXPECT_FALSE(stub_->ReadWindowInfo(data, windowInfo));
+    data.WriteInt32(static_cast<int32_t>(WindowInfoKey::DISPLAY_ID));
+    EXPECT_FALSE(stub_->ReadWindowInfo(data, windowInfo));
     data.WriteInt32(static_cast<int32_t>(WindowInfoKey::DISPLAY_ID));
     data.WriteUint64(0);
-    std::unordered_map<WindowInfoKey, WindowChangeInfoType> windowInfo;
-
-    MockMessageParcel::SetReadInt32ErrorFlag(true);
-    EXPECT_FALSE(stub_->ReadWindowInfo(data, windowInfo));
-
-    MockMessageParcel::ClearAllErrorFlag();
-    MockMessageParcel::SetReadUint64ErrorFlag(true);
-    EXPECT_FALSE(stub_->ReadWindowInfo(data, windowInfo));
-
-    MockMessageParcel::ClearAllErrorFlag();
     EXPECT_TRUE(stub_->ReadWindowInfo(data, windowInfo));
 }
 
@@ -669,23 +616,16 @@ HWTEST_F(WindowManagerAgentStubTest, ReadWindowInfo07, TestSize.Level1)
 HWTEST_F(WindowManagerAgentStubTest, ReadWindowInfo08, TestSize.Level1)
 {
     MessageParcel data;
+    std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>> windowInfoList;
 
-    MockMessageParcel::ClearAllErrorFlag();
+    EXPECT_FALSE(stub_->ReadWindowInfo(data, windowInfo));
+    data.WriteInt32(static_cast<int32_t>(WindowInfoKey::WINDOW_RECT));
+    EXPECT_FALSE(stub_->ReadWindowInfo(data, windowInfo));
     data.WriteInt32(static_cast<int32_t>(WindowInfoKey::WINDOW_RECT));
     data.WriteInt32(0);
     data.WriteInt32(0);
     data.WriteUint32(0);
     data.WriteUint32(0);
-    std::unordered_map<WindowInfoKey, WindowChangeInfoType> windowInfo;
-
-    MockMessageParcel::SetReadInt32ErrorFlag(true);
-    EXPECT_FALSE(stub_->ReadWindowInfo(data, windowInfo));
-
-    MockMessageParcel::ClearAllErrorFlag();
-    MockMessageParcel::SetReadUint32ErrorFlag(true);
-    EXPECT_FALSE(stub_->ReadWindowInfo(data, windowInfo));
-
-    MockMessageParcel::ClearAllErrorFlag();
     EXPECT_TRUE(stub_->ReadWindowInfo(data, windowInfo));
 }
 
@@ -697,20 +637,13 @@ HWTEST_F(WindowManagerAgentStubTest, ReadWindowInfo08, TestSize.Level1)
 HWTEST_F(WindowManagerAgentStubTest, ReadWindowInfo09, TestSize.Level1)
 {
     MessageParcel data;
+    std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>> windowInfoList;
 
-    MockMessageParcel::ClearAllErrorFlag();
+    EXPECT_FALSE(stub_->ReadWindowInfo(data, windowInfo));
+    data.WriteInt32(static_cast<int32_t>(WindowInfoKey::FLOATING_SCALE));
+    EXPECT_FALSE(stub_->ReadWindowInfo(data, windowInfo));
     data.WriteInt32(static_cast<int32_t>(WindowInfoKey::FLOATING_SCALE));
     data.WriteFloat(0.f);
-    std::unordered_map<WindowInfoKey, WindowChangeInfoType> windowInfo;
-
-    MockMessageParcel::SetReadInt32ErrorFlag(true);
-    EXPECT_FALSE(stub_->ReadWindowInfo(data, windowInfo));
-
-    MockMessageParcel::ClearAllErrorFlag();
-    MockMessageParcel::SetReadFloatErrorFlag(true);
-    EXPECT_FALSE(stub_->ReadWindowInfo(data, windowInfo));
-
-    MockMessageParcel::ClearAllErrorFlag();
     EXPECT_TRUE(stub_->ReadWindowInfo(data, windowInfo));
 }
 } // namespace
