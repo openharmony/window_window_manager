@@ -2119,16 +2119,16 @@ HWTEST_F(WindowManagerTest, RegisterFloatingScaleChangedListener01, Function | S
     windowManager.pImpl_->windowPropertyChangeAgent_ = nullptr;
     windowManager.pImpl_->floatingScaleChangeListeners_.clear();
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterFloatingScaleChangedListener(nullptr));
- 
+
     sptr<TestFloatingScaleChangedListener> listener = sptr<TestFloatingScaleChangedListener>::MakeSptr();
- 
+
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION  , windowManager.RegisterFloatingScaleChangedListener(listener));
     EXPECT_EQ(0, windowManager.pImpl_->floatingScaleChangeListeners_.size());
- 
+
     // to check that the same listner can not be registered twice
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, windowManager.RegisterFloatingScaleChangedListener(listener));
     EXPECT_EQ(0, windowManager.pImpl_->floatingScaleChangeListeners_.size());
- 
+
     windowManager.pImpl_->windowPropertyChangeAgent_ = oldWindowManagerAgent;
     windowManager.pImpl_->floatingScaleChangeListeners_ = oldListeners;
 }
@@ -2207,10 +2207,10 @@ HWTEST_F(WindowManagerTest, RegisterWindowModeChangedListenerForPropertyChange01
     windowManager.pImpl_->windowPropertyChangeAgent_ = nullptr;
     windowManager.pImpl_->windowModeChangeListeners_.clear();
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterWindowModeChangedListenerForPropertyChange(nullptr));
- 
+
     sptr<TestWindowModeChangedListenerForPropertyChange> listener =
         sptr<TestWindowModeChangedListenerForPropertyChange>::MakeSptr();
- 
+
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION,
         windowManager.RegisterWindowModeChangedListenerForPropertyChange(listener));
     EXPECT_EQ(0, windowManager.pImpl_->windowModeChangeListeners_.size());
@@ -2219,7 +2219,7 @@ HWTEST_F(WindowManagerTest, RegisterWindowModeChangedListenerForPropertyChange01
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION,
         windowManager.RegisterWindowModeChangedListenerForPropertyChange(listener));
     EXPECT_EQ(0, windowManager.pImpl_->windowModeChangeListeners_.size());
- 
+
     windowManager.pImpl_->windowPropertyChangeAgent_ = oldWindowManagerAgent;
     windowManager.pImpl_->windowModeChangeListeners_ = oldListeners;
 }
