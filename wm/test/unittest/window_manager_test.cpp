@@ -2122,7 +2122,7 @@ HWTEST_F(WindowManagerTest, RegisterFloatingScaleChangedListener01, Function | S
 
     sptr<TestFloatingScaleChangedListener> listener = sptr<TestFloatingScaleChangedListener>::MakeSptr();
 
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION  , windowManager.RegisterFloatingScaleChangedListener(listener));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, windowManager.RegisterFloatingScaleChangedListener(listener));
     EXPECT_EQ(0, windowManager.pImpl_->floatingScaleChangeListeners_.size());
 
     // to check that the same listner can not be registered twice
