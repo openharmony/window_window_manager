@@ -544,7 +544,7 @@ HWTEST_F(WindowManagerAgentStubTest, ReadWindowInfo03, TestSize.Level1)
 HWTEST_F(WindowManagerAgentStubTest, ReadWindowInfo04, TestSize.Level1)
 {
     MessageParcel data;
-    std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>> windowInfoList;
+    std::unordered_map<WindowInfoKey, WindowChangeInfoType> windowInfo;
 
     EXPECT_FALSE(stub_->ReadWindowInfo(data, windowInfo));
     data.WriteInt32(static_cast<int32_t>(WindowInfoKey::APP_INDEX));
@@ -562,7 +562,7 @@ HWTEST_F(WindowManagerAgentStubTest, ReadWindowInfo04, TestSize.Level1)
 HWTEST_F(WindowManagerAgentStubTest, ReadWindowInfo05, TestSize.Level1)
 {
     MessageParcel data;
-    std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>> windowInfoList;
+    std::unordered_map<WindowInfoKey, WindowChangeInfoType> windowInfo;
 
     EXPECT_FALSE(stub_->ReadWindowInfo(data, windowInfo));
     data.WriteInt32(static_cast<int32_t>(WindowInfoKey::VISIBILITY_STATE));
@@ -580,7 +580,7 @@ HWTEST_F(WindowManagerAgentStubTest, ReadWindowInfo05, TestSize.Level1)
 HWTEST_F(WindowManagerAgentStubTest, ReadWindowInfo06, TestSize.Level1)
 {
     MessageParcel data;
-    std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>> windowInfoList;
+    std::unordered_map<WindowInfoKey, WindowChangeInfoType> windowInfo;
 
     EXPECT_FALSE(stub_->ReadWindowInfo(data, windowInfo));
     data.WriteInt32(static_cast<int32_t>(WindowInfoKey::WINDOW_MODE));
@@ -598,7 +598,7 @@ HWTEST_F(WindowManagerAgentStubTest, ReadWindowInfo06, TestSize.Level1)
 HWTEST_F(WindowManagerAgentStubTest, ReadWindowInfo07, TestSize.Level1)
 {
     MessageParcel data;
-    std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>> windowInfoList;
+    std::unordered_map<WindowInfoKey, WindowChangeInfoType> windowInfo;
 
     EXPECT_FALSE(stub_->ReadWindowInfo(data, windowInfo));
     data.WriteInt32(static_cast<int32_t>(WindowInfoKey::DISPLAY_ID));
@@ -616,7 +616,7 @@ HWTEST_F(WindowManagerAgentStubTest, ReadWindowInfo07, TestSize.Level1)
 HWTEST_F(WindowManagerAgentStubTest, ReadWindowInfo08, TestSize.Level1)
 {
     MessageParcel data;
-    std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>> windowInfoList;
+    std::unordered_map<WindowInfoKey, WindowChangeInfoType> windowInfo;
 
     EXPECT_FALSE(stub_->ReadWindowInfo(data, windowInfo));
     data.WriteInt32(static_cast<int32_t>(WindowInfoKey::WINDOW_RECT));
@@ -637,7 +637,7 @@ HWTEST_F(WindowManagerAgentStubTest, ReadWindowInfo08, TestSize.Level1)
 HWTEST_F(WindowManagerAgentStubTest, ReadWindowInfo09, TestSize.Level1)
 {
     MessageParcel data;
-    std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>> windowInfoList;
+    std::unordered_map<WindowInfoKey, WindowChangeInfoType> windowInfo;
 
     EXPECT_FALSE(stub_->ReadWindowInfo(data, windowInfo));
     data.WriteInt32(static_cast<int32_t>(WindowInfoKey::FLOATING_SCALE));
