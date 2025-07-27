@@ -2211,11 +2211,13 @@ HWTEST_F(WindowManagerTest, RegisterWindowModeChangedListenerForPropertyChange01
     sptr<TestWindowModeChangedListenerForPropertyChange> listener =
         sptr<TestWindowModeChangedListenerForPropertyChange>::MakeSptr();
  
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, windowManager.RegisterWindowModeChangedListenerForPropertyChange(listener));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION,
+        windowManager.RegisterWindowModeChangedListenerForPropertyChange(listener));
     EXPECT_EQ(0, windowManager.pImpl_->windowModeChangeListeners_.size());
 
     // to check that the same listner can not be registered twice
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, windowManager.RegisterWindowModeChangedListenerForPropertyChange(listener));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION,
+        windowManager.RegisterWindowModeChangedListenerForPropertyChange(listener));
     EXPECT_EQ(0, windowManager.pImpl_->windowModeChangeListeners_.size());
  
     windowManager.pImpl_->windowPropertyChangeAgent_ = oldWindowManagerAgent;
