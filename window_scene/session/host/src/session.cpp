@@ -3073,7 +3073,7 @@ void Session::NotifySessionStateChange(const SessionState& state)
         } else {
             TLOGNI(WmsLogTag::WMS_LIFE, "sessionStateChangeFunc is null");
         }
-        if (!session->sessionStateChangeFunc_  && state == SessionState::STATE_DISCONNECT) {
+        if (!session->sessionStateChangeFunc_ && state == SessionState::STATE_DISCONNECT) {
             auto parentSession = session->GetParentSession();
             if (parentSession && parentSession->clearSubSessionFunc_) {
                 parentSession->clearSubSessionFunc_(session->GetPersistentId());
