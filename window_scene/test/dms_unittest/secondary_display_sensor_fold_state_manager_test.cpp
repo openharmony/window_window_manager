@@ -436,6 +436,69 @@ HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, GetGlobalFoldState, TestSiz
     EXPECT_EQ(manager.GetGlobalFoldState(nextStatePrimary, nextStateSecondary),
     FoldStatus::FOLD_STATE_HALF_FOLDED_WITH_SECOND_HALF_FOLDED);
 }
+
+/**
+ * @tc.name: HandleSecondaryOneStep0
+ * @tc.desc: test function : HandleSecondaryOneStep
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, HandleSecondaryOneStep0,
+        TestSize.Level1)
+{
+    std::vector<float> angles = {0.0f, 0.0f, 0.0f};
+    std::vector<uint16_t> halls = {0, 0};
+    SecondaryDisplaySensorFoldStateManager manager;
+    FoldStatus previousState = FoldStatus::EXPAND;
+    FoldStatus nextState = FoldStatus::HALF_FOLD;
+    FoldStatus newState = FoldStatus::UNKNOWN;
+    newState = manager.HandleSecondaryOneStep(previousState, nextState, angles, halls);
+    EXPECT_EQ(FoldStatus::HALF_FOLD, newState);
+
+    previousState = FoldStatus::FOLDED;
+    nextState = FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND;
+    newState = manager.HandleSecondaryOneStep(previousState, nextState, angles, halls);
+    EXPECT_EQ(FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND, newState);
+}
+
+/**
+ * @tc.name: HandleSecondaryOneStep1
+ * @tc.desc: test function : HandleSecondaryOneStep
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, HandleSecondaryOneStep1,
+        TestSize.Level1)
+{
+    std::vector<float> angles = {0.0f, 0.0f, 0.0f};
+    std::vector<uint16_t> halls = {0, 0};
+    SecondaryDisplaySensorFoldStateManager manager;
+    FoldStatus previousState = FoldStatus::FOLDED;
+    FoldStatus nextState = FoldStatus::HALF_FOLD;
+    manager.HandleSecondaryOneStep(previousState, nextState, angles, halls);
+    EXPECT_FALSE(manager.isInOneStep_);
+}
+
+/**
+ * @tc.name: CalculateNewABFoldStatus
+ * @tc.desc: test function : CalculateNewABFoldStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, CalculateNewABFoldStatus,
+        TestSize.Level1)
+{
+    SecondaryDisplaySensorFoldStateManager manager;
+    FoldStatus newState = FoldStatus::UNKNOWN;
+    newState = manager.CalculateNewABFoldStatus(0.0f, 1, 0.0f, 0);
+    EXPECT_EQ(FoldStatus::FOLDED, newState);
+
+    newState = manager.CalculateNewABFoldStatus(0.0f, 0, 20.0f, 0);
+    EXPECT_EQ(FoldStatus::HALF_FOLD, newState);
+
+    newState = manager.CalculateNewABFoldStatus(40.0f, 0, 50.0f, 0);
+    EXPECT_EQ(FoldStatus::HALF_FOLD, newState);
+
+    newState = manager.CalculateNewABFoldStatus(40.0f, 0, 150.0f, 0);
+    EXPECT_EQ(FoldStatus::EXPAND, newState);
+}
 }
 }
 }

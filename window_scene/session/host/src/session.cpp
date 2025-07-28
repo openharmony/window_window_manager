@@ -1347,6 +1347,9 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
     property->SetSkipSelfWhenShowOnVirtualScreen(GetSessionProperty()->GetSkipSelfWhenShowOnVirtualScreen());
     property->SetSkipEventOnCastPlus(GetSessionProperty()->GetSkipEventOnCastPlus());
     property->SetIsAbilityHook(GetSessionInfo().isAbilityHook_);
+    property->SetPcAppInpadCompatibleMode(GetSessionProperty()->GetPcAppInpadCompatibleMode());
+    property->SetPcAppInpadSpecificSystemBarInvisible(GetSessionProperty()->GetPcAppInpadSpecificSystemBarInvisible());
+    property->SetPcAppInpadOrientationLandscape(GetSessionProperty()->GetPcAppInpadOrientationLandscape());
     SetSessionProperty(property);
     GetSessionProperty()->SetIsNeedUpdateWindowMode(false);
 }
@@ -3318,6 +3321,29 @@ WSError Session::SetIsPcAppInPad(bool enable)
     return WSError::WS_OK;
 }
 
+WSError Session::SetPcAppInpadCompatibleMode(bool enabled)
+{
+    TLOGD(WmsLogTag::WMS_COMPAT, "isPcAppInpadCompatibleMode: %{public}d", enabled);
+    GetSessionProperty()->SetPcAppInpadCompatibleMode(enabled);
+    return WSError::WS_OK;
+}
+
+WSError Session::SetPcAppInpadSpecificSystemBarInvisible(bool isPcAppInpadSpecificSystemBarInvisible)
+{
+    TLOGD(WmsLogTag::WMS_COMPAT, "isPcAppInpadSpecificSystemBarInvisible: %{public}d",
+        isPcAppInpadSpecificSystemBarInvisible);
+    GetSessionProperty()->SetPcAppInpadSpecificSystemBarInvisible(isPcAppInpadSpecificSystemBarInvisible);
+    return WSError::WS_OK;
+}
+
+WSError Session::SetPcAppInpadOrientationLandscape(bool isPcAppInpadOrientationLandscape)
+{
+    TLOGD(WmsLogTag::WMS_COMPAT, "isPcAppInpadOrientationLandscape: %{public}d",
+        isPcAppInpadOrientationLandscape);
+    GetSessionProperty()->SetPcAppInpadOrientationLandscape(isPcAppInpadOrientationLandscape);
+    return WSError::WS_OK;
+}
+
 WSError Session::PcAppInPadNormalClose()
 {
     TLOGD(WmsLogTag::WMS_COMPAT, "windowId:%{public}d", GetPersistentId());
@@ -4549,12 +4575,14 @@ std::shared_ptr<Media::PixelMap> Session::SetFreezeImmediately(float scale, bool
     auto callback = std::make_shared<SurfaceCaptureFuture>();
     auto scaleValue = (!MathHelper::GreatNotEqual(scale, 0.0f) ||
         !MathHelper::GreatNotEqual(scale, std::numeric_limits<float>::min())) ? snapshotScale_ : scale;
+    bool isNeedF16WindowShot = system::GetBoolParameter("persist.sys.graphic.scrgb.enabled", false);
     RSSurfaceCaptureConfig config = {
         .scaleX = scaleValue,
         .scaleY = scaleValue,
         .useDma = true,
         .useCurWindow = true,
         .isHdrCapture = true,
+        .needF16WindowCaptureForScRGB = isNeedF16WindowShot,
     };
     bool ret = RSInterfaces::GetInstance().SetWindowFreezeImmediately(surfaceNode, isFreeze, callback, config, blur);
     if (!ret) {

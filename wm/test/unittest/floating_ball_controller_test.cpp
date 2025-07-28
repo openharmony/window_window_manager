@@ -129,9 +129,9 @@ namespace {
  */
 HWTEST_F(FloatingBallControllerTest, CreateFloatingBallWindow01, TestSize.Level1)
 {
-    std::unique_ptr<AbilityRuntime::AbilityContextImpl> contextPtr =
-        std::make_unique<AbilityRuntime::AbilityContextImpl>();
-    fbController_->contextPtr_ = contextPtr.get();
+    std::shared_ptr<AbilityRuntime::AbilityContextImpl> contextPtr =
+        std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    fbController_->contextPtr_ = &contextPtr;
     sptr<FbOption> nullOption = nullptr;
     EXPECT_EQ(WMError::WM_ERROR_FB_STATE_ABNORMALLY, fbController_->CreateFloatingBallWindow(nullOption));
     mw_->SetWindowState(WindowState::STATE_INITIAL);

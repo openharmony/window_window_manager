@@ -559,6 +559,12 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
     BindNativeFunction(env, objValue, "requestSpecificSessionClose", moduleName,
         JsSceneSession::RequestSpecificSessionClose);
     BindNativeFunction(env, objValue, "sendFbActionEvent", moduleName, JsSceneSession::SendFbActionEvent);
+    BindNativeFunction(env, objValue, "setPcAppInpadSpecificSystemBarInvisible",
+        moduleName, JsSceneSession::SetPcAppInpadSpecificSystemBarInvisible);
+    BindNativeFunction(env, objValue, "setPcAppInpadOrientationLandscape",
+        moduleName, JsSceneSession::SetPcAppInpadOrientationLandscape);
+    BindNativeFunction(env, objValue, "setIsPcAppInpadCompatibleMode",
+        moduleName, JsSceneSession::SetPcAppInpadCompatibleMode);
 }
 
 void JsSceneSession::BindNativeMethodForKeyboard(napi_env env, napi_value objValue, const char* moduleName)
@@ -2836,6 +2842,27 @@ napi_value JsSceneSession::SendFbActionEvent(napi_env env, napi_callback_info in
     TLOGI(WmsLogTag::WMS_SYSTEM, "[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSendFbActionEvent(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::SetPcAppInpadCompatibleMode(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_PC, "[NAPI]");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSetPcAppInpadCompatibleMode(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::SetPcAppInpadSpecificSystemBarInvisible(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_PC, "[NAPI]");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSetPcAppInpadSpecificSystemBarInvisible(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::SetPcAppInpadOrientationLandscape(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_PC, "[NAPI]");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSetPcAppInpadOrientationLandscape(env, info) : nullptr;
 }
 
 bool JsSceneSession::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
@@ -6444,6 +6471,87 @@ napi_value JsSceneSession::OnSyncDefaultRequestedOrientation(napi_env env, napi_
         return NapiGetUndefined(env);
     }
     session->SetDefaultRequestedOrientation(windowOrientation);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnSetPcAppInpadCompatibleMode(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_SCB, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                                      "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool enabled = false;
+    if (!ConvertFromJsValue(env, argv[0], enabled)) {
+        TLOGE(WmsLogTag::WMS_SCB, "Failed to convert parameter to enable");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                                      "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_SCB, "session is nullptr, id:%{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+    session->SetPcAppInpadCompatibleMode(enabled);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnSetPcAppInpadSpecificSystemBarInvisible(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_SCB, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                                      "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool isPcAppInpadSpecificSystemBarInvisible = false;
+    if (!ConvertFromJsValue(env, argv[0], isPcAppInpadSpecificSystemBarInvisible)) {
+        TLOGE(WmsLogTag::WMS_SCB, "Failed to convert parameter to enable");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                                      "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_SCB, "session is nullptr, id:%{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+    session->SetPcAppInpadSpecificSystemBarInvisible(isPcAppInpadSpecificSystemBarInvisible);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnSetPcAppInpadOrientationLandscape(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_SCB, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                                      "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool isPcAppInpadOrientationLandscape = false;
+    if (!ConvertFromJsValue(env, argv[0], isPcAppInpadOrientationLandscape)) {
+        TLOGE(WmsLogTag::WMS_SCB, "Failed to convert parameter to enable");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                                      "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_SCB, "session is nullptr, id:%{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+    session->SetPcAppInpadOrientationLandscape(isPcAppInpadOrientationLandscape);
     return NapiGetUndefined(env);
 }
 

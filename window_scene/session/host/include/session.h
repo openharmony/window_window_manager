@@ -420,6 +420,9 @@ public:
     WSError SetCompatibleModeProperty(const sptr<CompatibleModeProperty> compatibleModeProperty);
     WSError PcAppInPadNormalClose();
     WSError SetIsPcAppInPad(bool enable);
+    WSError SetPcAppInpadCompatibleMode(bool enabled);
+    WSError SetPcAppInpadSpecificSystemBarInvisible(bool isPcAppInpadSpecificSystemBarInvisible);
+    WSError SetPcAppInpadOrientationLandscape(bool isPcAppInpadOrientationLandscape);
     bool NeedNotify() const;
     void SetNeedNotify(bool needNotify);
     WSError SetTouchable(bool touchable);
