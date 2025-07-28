@@ -66,6 +66,13 @@ struct WindowTitleVisibleFlags {
     bool isCloseVisible = true;
 };
 
+struct CursorInfo {
+    double left = -1.0;
+    double top = -1.0;
+    double width = -1.0;
+    double height = -1.0;
+};
+
 using IKBWillShowListener = IKeyboardWillShowListener;
 using IKBWillHideListener = IKeyboardWillHideListener;
 
@@ -167,7 +174,7 @@ public:
     void SetCompatInfoInExtensionConfig(AAFwk::WantParams& want) const;
     bool IsAdaptToSubWindow() const;
     static void RegisterWindowScaleCallback();
-    static WMError GetWindowScaleCoordinate(int32_t& x, int32_t& y, uint32_t windowId);
+    static WMError GetWindowScaleCoordinate(uint32_t windowId, CursorInfo& cursorInfo);
     static sptr<WindowSessionImpl> GetScaleWindow(uint32_t windowId);
 
     WMError SetWindowType(WindowType type) override;
