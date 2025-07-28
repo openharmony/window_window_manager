@@ -181,7 +181,8 @@ bool Permission::CheckIsCallingBundleName(const std::string name)
     return false;
 }
 
-bool Permission::IsTokenNativeOrShellType(uint32_t tokenId) {
+bool Permission::IsTokenNativeOrShellType(uint32_t tokenId)
+{
     const auto flag = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
     if (flag != Security::AccessToken::TypeATokenTypeEnum::TOKEN_NATIVE &&
         flag != Security::AccessToken::TypeATokenTypeEnum::TOKEN_SHELL) {
