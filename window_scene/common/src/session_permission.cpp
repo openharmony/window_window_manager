@@ -20,7 +20,6 @@
 #include <ipc_skeleton.h>
 #include <bundle_mgr_proxy.h>
 #include <bundle_mgr_interface.h>
-#include "permission.h"
 #include <system_ability_definition.h>
 #include <iservice_registry.h>
 #include <tokenid_kit.h>
