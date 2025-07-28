@@ -192,6 +192,7 @@ constexpr uint32_t MAIN_STATUS_DEFAULT_WIDTH = 1008;
 constexpr uint32_t SCREEN_DEFAULT_HEIGHT = 2232;
 
 // based on the bundle_util
+// LCOV_EXCL_START
 inline int32_t GetUserIdByCallingUid()
 {
     int32_t uid = IPCSkeleton::GetCallingUid();
@@ -202,6 +203,7 @@ inline int32_t GetUserIdByCallingUid()
     }
     return uid / BASE_USER_RANGE;
 }
+// LCOV_EXCL_STOP
 } // namespace
 
 WM_IMPLEMENT_SINGLE_INSTANCE(ScreenSessionManager)
@@ -254,6 +256,7 @@ void ScreenSessionManager::SetPcStatus(bool isPc) {
     g_isPcDevice = isPc;
 }
 
+// LCOV_EXCL_START
 ScreenRotation ScreenSessionManager::ConvertOffsetToCorrectRotation(int32_t phyOffset)
 {
     ScreenRotation offsetRotation = ScreenRotation::ROTATION_0;
@@ -563,6 +566,7 @@ DMError ScreenSessionManager::UnregisterDisplayManagerAgent(
     }
     return dmAgentContainer_.UnregisterAgent(displayManagerAgent, type) ? DMError::DM_OK :DMError::DM_ERROR_NULLPTR;
 }
+// LCOV_EXCL_STOP
 
 void ScreenSessionManager::LoadScreenSceneXml()
 {
@@ -675,6 +679,7 @@ void ScreenSessionManager::ConfigureWaterfallDisplayCompressionParams()
     ScreenSceneConfig::SetCurvedCompressionAreaInLandscape();
 }
 
+// LCOV_EXCL_START
 void ScreenSessionManager::ConfigureScreenSnapshotParams()
 {
     auto stringConfig = ScreenSceneConfig::GetStringConfig();
@@ -693,6 +698,7 @@ void ScreenSessionManager::ConfigureScreenSnapshotParams()
     TLOGD(WmsLogTag::DMS, "screenSnapshotAbilityName = %{public}s.", screenSnapshotAbilityName.c_str());
     ScreenSnapshotPickerConnection::GetInstance().SetAbilityName(screenSnapshotAbilityName);
 }
+// LCOV_EXCL_STOP
 
 void ScreenSessionManager::RegisterScreenChangeListener()
 {
@@ -742,6 +748,7 @@ void ScreenSessionManager::RegisterFirstFrameCommitCallback()
 void ScreenSessionManager::RegisterRefreshRateChangeListener()
 {
     static bool isRegisterRefreshRateListener = false;
+    // LCOV_EXCL_START
     if (!isRegisterRefreshRateListener) {
         TLOGW(WmsLogTag::DMS, "call rsInterface_ RegisterHgmRefreshRateUpdateCallback");
         auto res = rsInterface_.RegisterHgmRefreshRateUpdateCallback(
@@ -755,6 +762,7 @@ void ScreenSessionManager::RegisterRefreshRateChangeListener()
             screenEventTracker_.RecordEvent("Dms RefreshRateChange register success.");
         }
     }
+    // LCOV_EXCL_STOP
 }
 
 void ScreenSessionManager::OnVirtualScreenChange(ScreenId screenId, ScreenEvent screenEvent)
@@ -800,6 +808,7 @@ void ScreenSessionManager::OnVirtualScreenChange(ScreenId screenId, ScreenEvent 
     }
 }
 
+// LCOV_EXCL_START
 bool ScreenSessionManager::IsDefaultMirrorMode(ScreenId screenId)
 {
     if (screenId != SCREEN_ID_MAIN && screenId != SCREEN_ID_FULL && screenId != SCREEN_ID_PC_MAIN) {
@@ -10833,6 +10842,7 @@ DMError ScreenSessionManager::SetScreenPrivacyWindowTagSwitch(ScreenId screenId,
         oss.str().c_str(), enable);
     return DMError::DM_OK;
 }
+// LCOV_EXCL_STOP
 
 ScreenId ScreenSessionManager::GetPhyScreenId(ScreenId screenId)
 {

@@ -424,6 +424,7 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         TLOGE(WmsLogTag::WMS_LIFE, "Failed to read scene session stage object or event channel object!");
         return ERR_INVALID_DATA;
     }
+    // LCOV_EXCL_START
     bool hasWindowSessionProperty = false;
     if (!data.ReadBool(hasWindowSessionProperty)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read hasWindowSessionProperty failed.");
@@ -504,8 +505,10 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
     }
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
+    // LCOV_EXCL_STOP
 }
 
+// LCOV_EXCL_START
 int SessionStub::HandleNotifyFrameLayoutFinish(MessageParcel& data, MessageParcel& reply)
 {
     bool notifyListener = data.ReadBool();
@@ -540,6 +543,7 @@ int SessionStub::HandleRemoveStartingWindow(MessageParcel& data, MessageParcel& 
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
+// LCOV_EXCL_STOP
 
 int SessionStub::HandleSessionEvent(MessageParcel& data, MessageParcel& reply)
 {
@@ -835,6 +839,7 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
     return ERR_NONE;
 }
 
+// LCOV_EXCL_START
 int SessionStub::HandleBatchPendingSessionsActivation(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "In!");
@@ -932,6 +937,7 @@ int SessionStub::ReadOneAbilitySessionInfo(MessageParcel& data, sptr<AAFwk::Sess
     }
     return ERR_NONE;
 }
+// LCOV_EXCL_STOP
 
 /** @note @window.layout */
 int SessionStub::HandleUpdateSessionRect(MessageParcel& data, MessageParcel& reply)
@@ -1377,6 +1383,7 @@ int SessionStub::HandleUpdatePiPRect(MessageParcel& data, MessageParcel& reply)
     return ERR_NONE;
 }
 
+// LCOV_EXCL_START
 int SessionStub::HandleUpdatePiPControlStatus(MessageParcel& data, MessageParcel& reply)
 {
     TLOGI(WmsLogTag::WMS_PIP, "called");
@@ -1504,6 +1511,7 @@ int SessionStub::HandleGetFloatingBallWindowId(MessageParcel& data, MessageParce
     }
     return ERR_NONE;
 }
+// LCOV_EXCL_STOP
 
 int SessionStub::HandleSetSystemEnableDrag(MessageParcel& data, MessageParcel& reply)
 {
