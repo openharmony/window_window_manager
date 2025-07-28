@@ -1570,7 +1570,7 @@ void AniWindow::RegisterWindowCallback(ani_env* env, ani_object obj, ani_long na
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
-    ani_double timeOut = 0;
+    ani_long timeOut = 0;
     if (aniWindow != nullptr) {
         aniWindow->OnRegisterWindowCallback(env, type, callback, timeOut);
     } else {
@@ -1579,7 +1579,7 @@ void AniWindow::RegisterWindowCallback(ani_env* env, ani_object obj, ani_long na
 }
 
 void AniWindow::RegisterNoInteractionDetectedCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
-    ani_double timeOut, ani_ref callback)
+    ani_long timeOut, ani_ref callback)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
@@ -1590,7 +1590,7 @@ void AniWindow::RegisterNoInteractionDetectedCallback(ani_env* env, ani_object o
     }
 }
 
-void AniWindow::OnRegisterWindowCallback(ani_env* env, ani_string type, ani_ref callback, ani_double timeOut)
+void AniWindow::OnRegisterWindowCallback(ani_env* env, ani_string type, ani_ref callback, ani_long timeOut)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     auto window = GetWindow();
