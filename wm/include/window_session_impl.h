@@ -139,6 +139,7 @@ public:
     bool IsPadWindow() const override;
     bool IsPcOrFreeMultiWindowCapabilityEnabled() const override;
     bool IsPcOrPadFreeMultiWindowMode() const override;
+    bool IsPadAndNotFreeMutiWindowCompatibleMode() const override;
     bool IsSceneBoardEnabled() const override;
     bool GetCompatibleModeInPc() const override;
     void HookCompatibleModeAvoidAreaNotify() override;
@@ -800,6 +801,7 @@ protected:
      * Window Property
      */
     std::string colorMode_;
+    bool hasDarkRes_ = false;
     std::unordered_set<std::string> containerColorList_;
     float lastSystemDensity_ = UNDEFINED_DENSITY;
     static std::atomic<bool> defaultDensityEnabledGlobalConfig_;

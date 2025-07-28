@@ -783,6 +783,7 @@ public:
     void InsertProcessMap(const SessionInfo& sessionInfo, const int32_t persistentId);
     WSError DeleteProcessMap(const SessionInfo& sessionInfo, const int32_t persistentId);
     WSError FindProcessMap(const SessionInfo& sessionInfo, int32_t& persistentId);
+    int32_t FindCallerPersistentId(int32_t persistentId);
 
     /*
      * Window Animation
@@ -1681,6 +1682,7 @@ private:
     void UpdateAllStartingWindowRdb();
     bool needUpdateRdb_ = true;
     std::string GetSessionColorMode(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo);
+    int32_t GetOriginalPersistentId(const std::set<int32_t>& sessionSet, int32_t persistentId);
 };
 } // namespace OHOS::Rosen
 

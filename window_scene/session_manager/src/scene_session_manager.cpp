@@ -4108,12 +4108,15 @@ bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionPr
         return SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_FLOATING_BALL);
     }
     if (type == WindowType::WINDOW_TYPE_FLOAT) {
-        bool isPadAndNotPcApp = systemConfig_.IsPadWindow() && !property->GetIsPcAppInPad();
+        bool isPhoneOrPad = systemConfig_.IsPadWindow() || systemConfig_.IsPhoneWindow();
         // WINDOW_TYPE_FLOAT could be created with the corresponding permission
         if (SessionPermission::VerifyCallingPermission("ohos.permission.SYSTEM_FLOAT_WINDOW") &&
             (SessionPermission::IsSystemCalling() || SessionPermission::IsStartByHdcd() ||
-            (systemConfig_.supportTypeFloatWindow_ && !isPadAndNotPcApp))) {
+                systemConfig_.supportTypeFloatWindow_)) {
             TLOGI(WmsLogTag::WMS_SYSTEM, "check float permission success.");
+            return true;
+        } else if (SessionPermission::VerifyCallingPermission("ohos.permission.SYSTEM_FLOAT_WINDOW") && isPhoneOrPad) {
+            TLOGI(WmsLogTag::WMS_SYSTEM, "check float permission success. DeviceType is phone or pad.");
             return true;
         } else {
             TLOGI(WmsLogTag::WMS_SYSTEM, "check float permission failed.");
@@ -5390,6 +5393,31 @@ WSError SceneSessionManager::DeleteProcessMap(const SessionInfo& sessionInfo, co
     return WSError::WS_OK;
 }
 
+int32_t SceneSessionManager::FindCallerPersistentId(int32_t persistentId)
+{
+    auto session = GetSceneSession(persistentId);
+    if (session == nullptr) {
+        return INVALID_SESSION_ID;
+    }
+    auto callerId = session->GetSessionInfo().callerPersistentId_;
+    TLOGI(WmsLogTag::WMS_PATTERN, "id: %{public}d, CallerId: %{public}d", persistentId, callerId);
+    return callerId;
+}
+
+int32_t SceneSessionManager::GetOriginalPersistentId(const std::set<int32_t>& sessionSet, int32_t persistentId)
+{
+    auto resId = persistentId;
+    auto callerId = FindCallerPersistentId(persistentId);
+    std::unordered_set<int32_t> uniqueSet = { persistentId };
+    while ((callerId != INVALID_SESSION_ID) &&
+           (sessionSet.count(callerId) > 0) && (uniqueSet.count(callerId) == 0)) {
+        resId = callerId;
+        uniqueSet.insert(callerId);
+        callerId = FindCallerPersistentId(callerId);
+    }
+    return resId;
+}
+
 WSError SceneSessionManager::FindProcessMap(const SessionInfo& sessionInfo, int32_t& persistentId)
 {
     std::string compareInfo =
@@ -5397,7 +5425,7 @@ WSError SceneSessionManager::FindProcessMap(const SessionInfo& sessionInfo, int3
     std::lock_guard<std::mutex> lock(processMapMutex_);
     auto it = processCompareMap_.find(compareInfo);
     if (it != processCompareMap_.end() && !it->second.empty()) {
-        persistentId = *it->second.begin();
+        persistentId = GetOriginalPersistentId(it->second, *it->second.begin());
         TLOGI(WmsLogTag::WMS_PATTERN, "find %{public}d", persistentId);
         return WSError::WS_OK;
     }
@@ -16161,16 +16189,21 @@ WMError SceneSessionManager::ShiftAppWindowPointerEvent(int32_t sourcePersistent
 {
     TLOGD(WmsLogTag::WMS_PC, "sourcePersistentId %{public}d targetPersistentId %{public}d",
         sourcePersistentId, targetPersistentId);
+    sptr<SceneSession> sourceSession = GetSceneSession(sourcePersistentId);
+    if (sourceSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_PC, "sourceSession %{public}d is nullptr", sourcePersistentId);
+        return WMError::WM_ERROR_INVALID_SESSION;
+    }
+    if (sourceSession->GetSessionProperty()->GetPcAppInpadCompatibleMode() &&
+        !systemConfig_.IsFreeMultiWindowMode()) {
+        TLOGE(WmsLogTag::WMS_PC, "This is PcAppInPad, not supported");
+        return WMError::WM_OK;
+    }
     if (!(systemConfig_.IsPcWindow() || systemConfig_.IsFreeMultiWindowMode())) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     if (sourcePersistentId == targetPersistentId) {
         return WMError::WM_ERROR_INVALID_CALLING;
-    }
-    sptr<SceneSession> sourceSession = GetSceneSession(sourcePersistentId);
-    if (sourceSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_PC, "sourceSession %{public}d is nullptr", sourcePersistentId);
-        return WMError::WM_ERROR_INVALID_SESSION;
     }
     if (!WindowHelper::IsAppWindow(sourceSession->GetWindowType())) {
         TLOGE(WmsLogTag::WMS_PC, "sourceSession %{public}d is not app window", sourcePersistentId);

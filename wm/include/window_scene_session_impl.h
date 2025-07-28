@@ -441,7 +441,8 @@ private:
     /*
      * Window Property
      */
-    WMError UpdateColorMode();
+    void RecoverSessionProperty();
+    WMError UpdateColorMode(const std::shared_ptr<AppExecFwk::Configuration>& configuration = nullptr);
     void InitSystemSessionDragEnable();
     bool IsSystemDensityChanged(const sptr<DisplayInfo>& displayInfo);
     bool IsDefaultDensityEnabled();
@@ -449,6 +450,8 @@ private:
     float customDensity_ = UNDEFINED_DENSITY;
     bool isEnableDefaultDensityWhenCreate_ = false;
     std::string specifiedColorMode_;
+    WMError SetPcAppInpadSpecificSystemBarInvisible();
+    WMError SetPcAppInpadOrientationLandscape();
 
     /*
      * Sub Window

@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include <parameters.h>
+#include "application_context.h"
 #include "ability_context_impl.h"
 #include "common_test_utils.h"
 #include "display_info.h"
@@ -507,25 +508,55 @@ HWTEST_F(WindowSceneSessionImplTest5, IsMainWindowFullScreenAcrossDisplays01, Te
 }
 
 /**
+ * @tc.name: RecoverSessionProperty
+ * @tc.desc: RecoverSessionProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, RecoverSessionProperty, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    window->RecoverSessionProperty();
+}
+
+/**
  * @tc.name: UpdateColorMode
  * @tc.desc: UpdateColorMode
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSceneSessionImplTest5, UpdateColorMode, TestSize.Level1)
 {
+    std::shared_ptr<AppExecFwk::Configuration> configuration;
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     window->hostSession_ = nullptr;
-    auto ret = window->UpdateColorMode();
+    auto ret = window->UpdateColorMode(configuration);
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
 
+    AbilityRuntime::ApplicationContext::applicationContext_ = std::make_shared<AbilityRuntime::ApplicationContext>();
+    ret = window->UpdateColorMode(configuration);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+
+    AbilityRuntime::ApplicationContext::applicationContext_->contextImpl_ =
+        std::make_shared<AbilityRuntime::ContextImpl>();
+    ret = window->UpdateColorMode(configuration);
+    configuration = std::make_shared<AppExecFwk::Configuration>();
+    configuration->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE, "dark");
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
-    ret = window->UpdateColorMode();
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+    ret = window->UpdateColorMode(configuration);
+    EXPECT_EQ(WMError::WM_OK, ret);
+
+    ret = window->UpdateColorMode(configuration);
+    EXPECT_EQ(WMError::WM_OK, ret);
 }
 
 /**
@@ -1075,9 +1106,14 @@ HWTEST_F(WindowSceneSessionImplTest5, GetParentWindow01, TestSize.Level1)
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetParentWindow01");
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     sptr<Window> parentWindow = nullptr;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    window->property_->SetPcAppInpadCompatibleMode(true);
     auto res = window->GetParentWindow(parentWindow);
+    EXPECT_EQ(res, WMError::WM_OK);
+    window->property_->SetPcAppInpadCompatibleMode(false);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    res = window->GetParentWindow(parentWindow);
     EXPECT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
@@ -1262,10 +1298,10 @@ HWTEST_F(WindowSceneSessionImplTest5, SetParentWindow03, TestSize.Level1)
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     subWindow->hostSession_ = session;
+    int32_t newParentWindowId = 3;
     subWindow->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     subWindow->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
 
-    int32_t newParentWindowId = 3;
     EXPECT_EQ(subWindow->SetParentWindow(newParentWindowId), WMError::WM_ERROR_INVALID_PARENT);
     WindowSceneSessionImpl::windowSessionMap_.insert(std::make_pair(parentWindow1->GetWindowName(),
         std::pair<uint64_t, sptr<WindowSessionImpl>>(parentWindow1->GetWindowId(), parentWindow1)));
@@ -1284,6 +1320,9 @@ HWTEST_F(WindowSceneSessionImplTest5, SetParentWindow03, TestSize.Level1)
     WMError mockerResult = WMError::WM_ERROR_INVALID_WINDOW;
     EXPECT_CALL(mocker.Mock(), SetParentWindow(_, _)).WillOnce(Return(mockerResult));
     EXPECT_EQ(subWindow->SetParentWindow(newParentWindowId), mockerResult);
+    subWindow->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    subWindow->property_->SetPcAppInpadCompatibleMode(true);
+    EXPECT_EQ(subWindow->SetParentWindow(newParentWindowId), WMError::WM_OK);
     EXPECT_EQ(WMError::WM_OK, subWindow->Destroy(true));
 }
 

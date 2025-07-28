@@ -2864,6 +2864,13 @@ public:
     virtual bool IsPcOrPadFreeMultiWindowMode() const { return false; }
 
     /**
+     * @brief Is pcAppInpad and pad window.
+     *
+     * @return True means pcAppInpad and pad window., false means the opposite.
+     */
+    virtual bool IsPadAndNotFreeMutiWindowCompatibleMode() const { return false; }
+
+    /**
      * @brief Judge whether SceneBoard is enabled.
      *
      * @return True means SceneBoard is enabled, false means the opposite.

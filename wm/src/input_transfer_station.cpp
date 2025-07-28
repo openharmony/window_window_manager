@@ -194,7 +194,7 @@ void InputTransferStation::AddInputWindow(const sptr<Window>& window)
 
 void InputTransferStation::RemoveInputWindow(uint32_t windowId)
 {
-    TLOGD(WmsLogTag::WMS_EVENT, "Remove input window, windowId: %{public}u", windowId);
+    TLOGI(WmsLogTag::WMS_EVENT, "wid: %{public}u", windowId);
     sptr<WindowInputChannel> inputChannel = nullptr;
     {
         std::lock_guard<std::mutex> lock(mtx_);
