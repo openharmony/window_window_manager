@@ -184,9 +184,7 @@ bool SessionPermission::IsStartByHdcd()
 {
     OHOS::Security::AccessToken::NativeTokenInfo info;
     uint32_t tokenId = IPCSkeleton::GetCallingTokenID();
-    const auto flag = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
-    if (flag != Security::AccessToken::TypeATokenTypeEnum::TOKEN_NATIVE &&
-        flag != Security::AccessToken::TypeATokenTypeEnum::TOKEN_SHELL) {
+    if (!IsTokenNativeOrShellType(tokenId)) {
         return false;
     }
     if (Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(tokenId, info) != 0) {
