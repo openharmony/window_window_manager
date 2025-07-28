@@ -529,7 +529,7 @@ __attribute__((no_sanitize("cfi")))
 ani_object AniWindow::Resize(ani_env* env, ani_double width, ani_double height)
 {
     if (windowToken_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] windowToken is null");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] window is null");
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
 
@@ -541,9 +541,8 @@ ani_object AniWindow::Resize(ani_env* env, ani_double width, ani_double height)
     const uint32_t windowId = windowToken_->GetWindowId();
     if (errorCode != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_LAYOUT,
-            "[ANI] Resize failed, windowId: %{public}u, width: %{public}u, height: %{public}u, "
-            "ret: %{public}d, errorCode: %{public}d",
-            windowId, w, h, static_cast<int32_t>(ret), static_cast<int32_t>(errorCode));
+            "[ANI] Resize failed, windowId: %{public}u, width: %{public}u, height: %{public}u, ret: %{public}d",
+            windowId, w, h, static_cast<int32_t>(ret));
         return AniWindowUtils::AniThrowError(env, errorCode);
     }
 
@@ -556,7 +555,7 @@ ani_object AniWindow::Resize(ani_env* env, ani_double width, ani_double height)
 ani_object AniWindow::MoveWindowTo(ani_env* env, ani_double x, ani_double y)
 {
     if (windowToken_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] windowToken is null");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] window is null");
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
 
@@ -568,9 +567,8 @@ ani_object AniWindow::MoveWindowTo(ani_env* env, ani_double x, ani_double y)
     const uint32_t windowId = windowToken_->GetWindowId();
     if (errorCode != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_LAYOUT,
-            "[ANI] MoveWindowTo failed, windowId: %{public}u, x: %{public}d, y: %{public}d, "
-            "ret: %{public}d, errorCode: %{public}d",
-            windowId, targetX, targetY, static_cast<int32_t>(ret), static_cast<int32_t>(errorCode));
+            "[ANI] MoveWindowTo failed, windowId: %{public}u, x: %{public}d, y: %{public}d, ret: %{public}d",
+            windowId, targetX, targetY, static_cast<int32_t>(ret));
         return AniWindowUtils::AniThrowError(env, errorCode);
     }
 
@@ -583,25 +581,24 @@ ani_object AniWindow::MoveWindowTo(ani_env* env, ani_double x, ani_double y)
 ani_object AniWindow::GetGlobalRect(ani_env* env)
 {
     if (windowToken_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] windowToken is null");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] window is null");
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
 
-    Rect globalScaleRect = Rect::EMPTY_RECT;
-    const WMError ret = windowToken_->GetGlobalScaledRect(globalScaleRect);
+    Rect globalScaledRect = Rect::EMPTY_RECT;
+    const WMError ret = windowToken_->GetGlobalScaledRect(globalScaledRect);
     const WmErrorCode errorCode = AniWindowUtils::ToErrorCode(ret);
 
     const uint32_t windowId = windowToken_->GetWindowId();
     if (errorCode != WmErrorCode::WM_OK) {
-        TLOGE(WmsLogTag::WMS_LAYOUT,
-            "[ANI] GetGlobalRect failed, windowId: %{public}u, ret: %{public}d, errorCode: %{public}d",
-            windowId, static_cast<int32_t>(ret), static_cast<int32_t>(errorCode));
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] GetGlobalRect failed, windowId: %{public}u, ret: %{public}d",
+            windowId, static_cast<int32_t>(ret));
         return AniWindowUtils::AniThrowError(env, errorCode);
     }
 
-    TLOGD(WmsLogTag::WMS_LAYOUT, "[ANI] Window [%{public}u, %{public}s], globalScaleRect: %{public}s",
-        windowId, windowToken_->GetWindowName().c_str(), globalScaleRect.ToString().c_str());
-    return AniWindowUtils::CreateAniRect(env, globalScaleRect);
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[ANI] Window [%{public}u, %{public}s], globalScaledRect: %{public}s",
+        windowId, windowToken_->GetWindowName().c_str(), globalScaledRect.ToString().c_str());
+    return AniWindowUtils::CreateAniRect(env, globalScaledRect);
 }
 
 ani_double AniWindow::GetWindowDecorHeight(ani_env* env)
