@@ -2928,12 +2928,49 @@ HWTEST_F(WindowSceneSessionImplTest, GetAndVerifyWindowTypeForArkUI03, TestSize.
     ret = WindowSceneSessionImpl::GetAndVerifyWindowTypeForArkUI(101, windowName, parentWindowType, windowType);
     EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
 
+    windowSceneSession->property_->SetIsUIExtFirstSubWindow(true);
+    ret = WindowSceneSessionImpl::GetAndVerifyWindowTypeForArkUI(101, windowName, parentWindowType, windowType);
+    EXPECT_EQ(WMError::WM_OK, ret);
+
+    windowSceneSession->property_->SetIsUIExtFirstSubWindow(false);
     windowSceneSession->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     ret = WindowSceneSessionImpl::GetAndVerifyWindowTypeForArkUI(101, windowName, parentWindowType, windowType);
     EXPECT_EQ(WMError::WM_OK, ret);
-    EXPECT_EQ(windowType == WindowType::WINDOW_TYPE_APP_SUB_WINDOW, true);
+    EXPECT_EQ(windowType, WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
 
     EXPECT_EQ(WMError::WM_OK, windowSceneSession->Destroy(true));
+}
+
+/**
+ * @tc.name: VerifySubWindowLevel
+ * @tc.desc: VerifySubWindowLevel test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, VerifySubWindowLevel, TestSize.Level1)
+{
+    sptr<WindowSessionImpl> windowSceneSession = nullptr;
+    auto ret = WindowSceneSessionImpl::VerifySubWindowLevel(false, windowSceneSession);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("VerifySubWindowLevel");
+    windowSceneSession = sptr<WindowSessionImpl>::MakeSptr(option);
+    ret = WindowSceneSessionImpl::VerifySubWindowLevel(true, windowSceneSession);
+    EXPECT_EQ(WMError::WM_OK, ret);
+
+    windowSceneSession->property_->SetIsUIExtFirstSubWindow(true);
+    ret = WindowSceneSessionImpl::VerifySubWindowLevel(false, windowSceneSession);
+    EXPECT_EQ(WMError::WM_OK, ret);
+
+    windowSceneSession->property_->SetIsUIExtFirstSubWindow(false);
+    windowSceneSession->property_->SetSubWindowLevel(1);
+    windowSceneSession->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    ret = WindowSceneSessionImpl::VerifySubWindowLevel(false, windowSceneSession);
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+
+    windowSceneSession->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ret = WindowSceneSessionImpl::VerifySubWindowLevel(false, windowSceneSession);
+    EXPECT_EQ(WMError::WM_OK, ret);
 }
 } // namespace
 } // namespace Rosen
