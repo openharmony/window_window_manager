@@ -35,7 +35,6 @@
 #include "session_manager.h"
 #include "session_stage_ipc_interface_code.h"
 #include "session_stage_stub.h"
-
 #include "window_option.h"
 #include "session_proxy.h"
 
