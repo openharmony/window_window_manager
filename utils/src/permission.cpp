@@ -87,9 +87,7 @@ bool Permission::IsStartByHdcd(bool isLocalSysCalling)
         static_cast<uint32_t>(IPCSkeleton::GetSelfTokenID()) :
         IPCSkeleton::GetCallingTokenID();
     OHOS::Security::AccessToken::NativeTokenInfo info;
-    const auto flag = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
-    if (flag != Security::AccessToken::TypeATokenTypeEnum::TOKEN_NATIVE &&
-        flag != Security::AccessToken::TypeATokenTypeEnum::TOKEN_SHELL) {
+    if (!IsTokenNativeOrShellType(tokenId)) {
         return false;
     }
     if (Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(tokenId, info) != 0) {
@@ -181,6 +179,15 @@ bool Permission::CheckIsCallingBundleName(const std::string name)
         return true;
     }
     return false;
+}
+
+bool Permission::IsTokenNativeOrShellType(uint32_t tokenId) {
+    const auto flag = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
+    if (flag != Security::AccessToken::TypeATokenTypeEnum::TOKEN_NATIVE &&
+        flag != Security::AccessToken::TypeATokenTypeEnum::TOKEN_SHELL) {
+        return false;
+    }
+    return true;
 }
 } // namespace Rosen
 } // namespace OHOS

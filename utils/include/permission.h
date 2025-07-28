@@ -29,6 +29,7 @@ public:
     static bool IsSystemCallingOrStartByHdcd(bool isLocalSysCalling = false);
     static bool IsStartByInputMethod();
     static bool CheckIsCallingBundleName(const std::string name);
+    static bool IsTokenNativeOrShellType(uint32_t tokenId);
 };
 } // Rosen
 } // OHOS

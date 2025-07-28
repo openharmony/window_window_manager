@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "permission.h"
 #include "sys_cap_util.h"
 #include "string_util.h"
 #include "window_manager_hilog.h"
