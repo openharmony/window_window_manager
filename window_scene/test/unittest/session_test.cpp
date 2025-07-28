@@ -1557,6 +1557,62 @@ HWTEST_F(WindowSessionTest, SwitchFreeMultiWindow, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ExtractSupportWindowModeFromMetaData
+ * @tc.desc: ExtractSupportWindowModeFromMetaData
+ * @tc.type: FUNC
+ */
+ HWTEST_F(WindowSessionTest, ExtractSupportWindowModeFromMetaData, TestSize.Level1)
+ {
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
+    EXPECT_NE(mockSessionStage, nullptr);
+    session_->sessionStage_ = mockSessionStage;
+
+    session_->sessionInfo_.isSystem_ = false;
+    session_->state_ = SessionState::STATE_FOREGROUND;
+    SystemSessionConfig sessionConfig;
+    sessionConfig.freeMultiWindowEnable_ = true;
+    sessionConfig.defaultWindowMode_ = WindowMode::WINDOW_MODE_FLOATING;
+
+    session_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    AppExecFwk::AbilityInfo abilityInfo;
+    std::vector<AppExecFwk::SupportWindowMode> res = {};
+    std::vector<AppExecFwk::SupportWindowMode> updateWindowModes =
+        session_->ExtractSupportWindowModeFromMetaData(
+        std::make_shared<OHOS::AppExecFwk::AbilityInfo>(abilityInfo));
+    ASSERT_EQ(updateWindowModes, res);
+
+    session_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    session_->systemConfig_.freeMultiWindowEnable_ = false;
+    updateWindowModes =
+        session_->ExtractSupportWindowModeFromMetaData(
+        std::make_shared<OHOS::AppExecFwk::AbilityInfo>(abilityInfo));
+    ASSERT_EQ(updateWindowModes, res);
+ }
+
+ /**
+ * @tc.name: ParseWindowModeFromMetaData
+ * @tc.desc: ParseWindowModeFromMetaData
+ * @tc.type: FUNC
+ */
+ HWTEST_F(WindowSessionTest, ParseWindowModeFromMetaData, TestSize.Level1)
+ {
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
+    EXPECT_NE(mockSessionStage, nullptr);
+    session_->sessionStage_ = mockSessionStage;
+
+    session_->sessionInfo_.isSystem_ = false;
+    session_->state_ = SessionState::STATE_FOREGROUND;
+    SystemSessionConfig sessionConfig;
+    sessionConfig.freeMultiWindowEnable_ = true;
+    sessionConfig.defaultWindowMode_ = WindowMode::WINDOW_MODE_FLOATING;
+
+    std::vector<AppExecFwk::SupportWindowMode> updateWindowModes =
+        {AppExecFwk::SupportWindowMode::FULLSCREEN};
+    ASSERT_NE(updateWindowModes, session_->ParseWindowModeFromMetaData("split"));
+    ASSERT_EQ(updateWindowModes, session_->ParseWindowModeFromMetaData("fullscreen, "));
+ }
+
+/**
  * @tc.name: InitSessionPropertyWhenConnect
  * @tc.desc: InitSessionPropertyWhenConnect test
  * @tc.type: FUNC
