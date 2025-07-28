@@ -323,8 +323,8 @@ WmErrorCode AniWindowRegisterManager::ProcessWindowNoInteractionRegister(sptr<An
     constexpr ani_long secToMicrosecRatio = 1000;
     constexpr ani_long noInteractionMax = LLONG_MAX / secToMicrosecRatio;
     if (timeout <= 0 || (timeout > noInteractionMax)) {
-        TLOGE(WmsLogTag::DEFAULT, "invalid parameter: no-interaction-timeout %{public}lld is not in(0s~%{public}lld",
-            timeout, noInteractionMax);
+        TLOGE(WmsLogTag::DEFAULT, "invalid parameter: no-interaction-timeout %{public}" PRId64 " is not in "
+            "(0s~%{public}" PRId64, timeout, noInteractionMax);
         return WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
     thisListener->SetTimeout(timeout * secToMicrosecRatio);
