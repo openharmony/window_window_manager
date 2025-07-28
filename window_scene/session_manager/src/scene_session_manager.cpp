@@ -5215,7 +5215,7 @@ bool SceneSessionManager::GetStartupPageFromResource(const AppExecFwk::AbilityIn
     }
     bool hapPathEmpty = abilityInfo.hapPath.empty();
     if (hapPathEmpty) {
-        TLOGW(WmsLogTag::WMS_PATTERN, "hapPath empty:%{public}s", abilityInfo.bundleName.c_str());
+        TLOGD(WmsLogTag::WMS_PATTERN, "hapPath empty:%{public}s", abilityInfo.bundleName.c_str());
     }
 
     const auto startWindowType = START_WINDOW_KEY_AND_DEFAULT_MAP.find(STARTWINDOW_TYPE);
@@ -5228,7 +5228,10 @@ bool SceneSessionManager::GetStartupPageFromResource(const AppExecFwk::AbilityIn
             startingWindowInfo.backgroundColorEarlyVersion_) != Global::Resource::RState::SUCCESS ||
         !GetPathInfoFromResource(resourceMgr, hapPathEmpty,
             abilityInfo.startWindowIconId, startingWindowInfo.iconPathEarlyVersion_)) {
-        TLOGE(WmsLogTag::WMS_PATTERN, "failed:%{public}s.", abilityInfo.bundleName.c_str());
+        if (!emptyStartupResource_.count(abilityInfo.bundleName)) {
+            emptyStartupResource_.insert(abilityInfo.bundleName);
+            TLOGE(WmsLogTag::WMS_PATTERN, "failed:%{public}s.", abilityInfo.bundleName.c_str());
+        }
         return false;
     }
     // check start_window.json enabled by required field
