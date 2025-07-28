@@ -286,8 +286,6 @@ WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params
             params.LandscapeKeyboardRect_.ToString().c_str(), params.PortraitKeyboardRect_.ToString().c_str(),
             params.LandscapePanelRect_.ToString().c_str(), params.PortraitPanelRect_.ToString().c_str(),
             session->GetSessionRequestRect().ToString().c_str());
-        property_->SetKeyboardLayoutParams(params);
-        auto ret = MoveAndResizeKeyboard(params);
         return WSError::WS_OK;
     }, "AdjustKeyboardLayout");
     return WSError::WS_OK;
