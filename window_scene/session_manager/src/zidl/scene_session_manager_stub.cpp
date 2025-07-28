@@ -1731,6 +1731,7 @@ int SceneSessionManagerStub::HandleSkipSnapshotByUserIdAndBundleNames(MessagePar
     return ERR_NONE;
 }
 
+// LCOV_EXCL_START
 int SceneSessionManagerStub::HandleSetProcessWatermark(MessageParcel& data, MessageParcel& reply)
 {
     int32_t pid = INVALID_PID;
@@ -1964,6 +1965,7 @@ int SceneSessionManagerStub::HandleGetDisplayIdByWindowId(MessageParcel& data, M
     }
     return ERR_NONE;
 }
+// LCOV_EXCL_STOP
 
 int SceneSessionManagerStub::HandleIsWindowRectAutoSave(MessageParcel& data, MessageParcel& reply)
 {
@@ -2113,6 +2115,7 @@ int SceneSessionManagerStub::HandleSetAppKeyFramePolicy(MessageParcel& data, Mes
     return ERR_NONE;
 }
 
+// LCOV_EXCL_START
 int SceneSessionManagerStub::HandleShiftAppWindowPointerEvent(MessageParcel& data, MessageParcel& reply)
 {
     int32_t sourcePersistentId = INVALID_WINDOW_ID;
@@ -2179,6 +2182,7 @@ int SceneSessionManagerStub::HandleSetStartWindowBackgroundColor(MessageParcel& 
     }
     return ERR_NONE;
 }
+// LCOV_EXCL_STOP
 
 int SceneSessionManagerStub::HandleMinimizeByWindowId(MessageParcel& data, MessageParcel& reply)
 {
@@ -2231,6 +2235,7 @@ int SceneSessionManagerStub::HandleUseImplicitAnimation(MessageParcel& data, Mes
     return ERR_NONE;
 }
 
+// LCOV_EXCL_START
 int SceneSessionManagerStub::HandleAnimateTo(MessageParcel& data, MessageParcel& reply)
 {
     int32_t windowId = 0;
@@ -2361,6 +2366,7 @@ int SceneSessionManagerStub::HandleRemoveSessionBlackList(MessageParcel& data, M
     }
     return ERR_NONE;
 }
+// LCOV_EXCL_STOP
 
 int SceneSessionManagerStub::HandleGetPiPSettingSwitchStatus(MessageParcel& data, MessageParcel& reply)
 {

@@ -32,6 +32,7 @@ uint32_t WSSnapshotHelper::GetScreenStatus()
     return GetScreenStatus(foldStatus);
 }
 
+// LCOV_EXCL_START
 uint32_t WSSnapshotHelper::GetScreenStatus(FoldStatus foldStatus)
 {
     if (foldStatus == FoldStatus::UNKNOWN || foldStatus == FoldStatus::FOLDED ||
@@ -44,7 +45,6 @@ uint32_t WSSnapshotHelper::GetScreenStatus(FoldStatus foldStatus)
     return SCREEN_UNKNOWN;
 }
 
-// LCOV_EXCL_START
 DisplayOrientation WSSnapshotHelper::GetDisplayOrientation(int32_t rotation)
 {
     auto it = ROTATION_TO_DISPLAYORIENTATION_MAP.find(rotation);

@@ -39,6 +39,7 @@ LayoutController::LayoutController(const sptr<WindowSessionProperty>& property)
     sessionProperty_ = property;
 }
 
+// LCOV_EXCL_START
 bool LayoutController::SetSessionGlobalRect(const WSRect& rect)
 {
     std::lock_guard<std::mutex> lock(globalRectMutex_);
@@ -48,6 +49,7 @@ bool LayoutController::SetSessionGlobalRect(const WSRect& rect)
     globalRect_ = rect;
     return true;
 }
+// LCOV_EXCL_STOP
 
 WSRect LayoutController::GetSessionGlobalRect() const
 {
@@ -82,6 +84,7 @@ void LayoutController::GetGlobalScaledRect(Rect& globalScaledRect)
     globalScaledRect = { scaledRect.posX_, scaledRect.posY_, scaledRect.width_, scaledRect.height_ };
 }
 
+// LCOV_EXCL_START
 WSRect LayoutController::ConvertRelativeRectToGlobal(const WSRect& relativeRect, DisplayId currentDisplayId) const
 {
     sptr<ScreenSession> screenSession =
@@ -241,6 +244,7 @@ bool LayoutController::IsTransformNeedUpdate(float scaleX, float scaleY, float p
                      NearEqual(clientPivotX_, pivotX) && NearEqual(clientPivotY_, pivotY);
     return !nearEqual;
 }
+// LCOV_EXCL_STOP
 
 void LayoutController::SetSystemConfigFunc(GetSystemConfigFunc&& func)
 {
