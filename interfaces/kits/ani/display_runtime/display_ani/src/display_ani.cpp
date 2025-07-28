@@ -150,12 +150,10 @@ void DisplayAni::OnRegisterCallback(ani_env* env, ani_object obj, ani_string typ
     std::string typeString;
     DisplayAniUtils::GetStdString(env, type, typeString);
     ani_boolean callbackUndefined = 0;
-    ani_boolean callbackIsNull = 0;
     env->Reference_IsUndefined(callback, &callbackUndefined);
-    env->Reference_IsNull(callback, &callbackIsNull);
-    if (callbackUndefined || callbackIsNull) {
+    if (callbackUndefined) {
         std::string errMsg = "[ANI] failed to register display listener with type, cbk null or undefined";
-        TLOGE(WmsLogTag::DMS, "callbackNull or undefined");
+        TLOGE(WmsLogTag::DMS, "callback undef");
         AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, errMsg);
         return;
     }
@@ -213,10 +211,10 @@ void DisplayAni::OnUnRegisterCallback(ani_env* env, ani_object obj, ani_string t
     TLOGI(WmsLogTag::DMS, "[ANI] begin");
     std::string typeString;
     DisplayAniUtils::GetStdString(env, type, typeString);
-    ani_boolean callbackNull = 0;
-    env->Reference_IsUndefined(callback, &callbackNull);
+    ani_boolean callbackUndefined = 0;
+    env->Reference_IsUndefined(callback, &callbackUndefined);
     DmErrorCode ret;
-    if (callbackNull) {
+    if (callbackUndefined) {
         TLOGI(WmsLogTag::DMS, "[ANI] for all");
         ret = DM_JS_TO_ERROR_CODE_MAP.at(UnregisterAllDisplayListenerWithType(typeString));
     } else {

@@ -20,17 +20,15 @@ export default namespace screen {
 
 loadLibrary('screenani_kit.z');
 
-export function on(eventType: 'connect' | 'disconnect' | 'change', callback: Callback<number>): void{
+export function on<T>(eventType: string, callback: Callback<T>): void{
     syncOn(eventType, callback, screenMgrRef);
 }
-native function syncOn(eventType: 'connect' | 'disconnect' | 'change',
-    callback: Callback<number>, nativeObj: long): void;
+native function syncOn(eventType: string, callback: object, nativeObj: long): void;
 
-export function off(eventType: 'connect' | 'disconnect' | 'change', callback?: Callback<number>): void{
+export function off<T>(eventType: string, callback?: Callback<T>): void{
     syncOff(eventType, screenMgrRef, callback);
 }
-native function syncOff(eventType: 'connect' | 'disconnect' | 'change',
-    nativeObj: long, callback?: Callback<number>): void;
+native function syncOff(eventType: string, nativeObj: long, callback?: object): void;
 
 export function makeMirror(mainScreen: number, mirrorScreen: Array<number>, callback: AsyncCallback<number>): void {
     taskpool.execute((): number => {

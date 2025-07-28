@@ -42,12 +42,7 @@ void DisplayAniListener::AddCallback(const std::string& type, ani_ref callback)
         return;
     }
     std::lock_guard<std::mutex> lock(aniCallbackMtx_);
-    ani_ref cbRef{};
-    if (env_->GlobalReference_Create(callback, &cbRef) != ANI_OK) {
-        TLOGE(WmsLogTag::DMS, "[ANI]create global ref fail");
-        return;
-    };
-    aniCallback_[type].emplace_back(cbRef);
+    aniCallback_[type].emplace_back(callback);
     TLOGI(WmsLogTag::DMS, "[ANI] AddCallback success aniCallback_ size: %{public}u!",
         static_cast<uint32_t>(aniCallback_[type].size()));
 }
@@ -76,8 +71,15 @@ void DisplayAniListener::RemoveCallback(ani_env* env, const std::string& type, a
 
 void DisplayAniListener::RemoveAllCallback()
 {
-    std::lock_guard<std::mutex> lock(aniCallbackMtx_);
-    aniCallback_.clear();
+    std::lock_guard<std::mutex> lock(aniCallBackMtx_);
+    for (auto& [typeString, callbacks] : aniCallBack_) {
+        for (auto callback : callbacks) {
+            if (env_) {
+                env_->GlobalReference_Delete(callback);
+            }
+        }
+    }
+    aniCallBack_.clear();
 }
 
 void DisplayAniListener::OnCreate(DisplayId id)
@@ -106,12 +108,10 @@ void DisplayAniListener::OnCreate(DisplayId id)
             TLOGE(WmsLogTag::DMS, "[ANI] null env");
             return;
         }
-        ani_boolean undefRes = 0;
-        ani_boolean nullRes = 0;
+        ani_boolean undefRes;
         env_->Reference_IsUndefined(oneAniCallback, &undefRes);
-        env_->Reference_IsNull(oneAniCallback, &nullRes);
-        if (undefRes != 0 || nullRes != 0) {
-            TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback is undefRes or null");
+        if (undefRes) {
+            TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback is undef");
             continue;
         }
         auto task = [env = env_, oneAniCallback, id] {
@@ -153,12 +153,10 @@ void DisplayAniListener::OnDestroy(DisplayId id)
             TLOGE(WmsLogTag::DMS, "[ANI] null env");
             return;
         }
-        ani_boolean undefRes = 0;
-        ani_boolean nullRes = 0;
+        ani_boolean undefRes;
         env_->Reference_IsUndefined(oneAniCallback, &undefRes);
-        env_->Reference_IsNull(oneAniCallback, &nullRes);
-        if (undefRes != 0 || nullRes != 0) {
-            TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback is undefRes or null");
+        if (undefRes) {
+            TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback is undef");
             continue;
         }
         auto task = [env = env_, oneAniCallback, id] {
@@ -197,12 +195,10 @@ void DisplayAniListener::OnChange(DisplayId id)
             TLOGE(WmsLogTag::DMS, "[ANI] null env");
             return;
         }
-        ani_boolean undefRes = 0;
-        ani_boolean nullRes = 0;
+        ani_boolean undefRes;
         env_->Reference_IsUndefined(oneAniCallback, &undefRes);
-        env_->Reference_IsNull(oneAniCallback, &nullRes);
-        if (undefRes != 0 || nullRes != 0) {
-            TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback undefRes, return");
+        if (undefRes) {
+            TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback undef, return");
             continue;
         }
         auto task = [env = env_, oneAniCallback, id] {
