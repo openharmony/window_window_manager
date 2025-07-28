@@ -54,6 +54,7 @@ public:
     static bool IsSystemAppCallByCallingTokenID(uint32_t callingTokenId);
     static bool IsFoundationCall();
     static std::string GetCallingBundleName();
+    static bool IsTokenNativeOrShellType(uint32_t tokenId);
 };
 } // Rosen
 } // OHOS
