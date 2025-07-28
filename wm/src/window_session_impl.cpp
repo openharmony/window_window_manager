@@ -739,7 +739,7 @@ sptr<WindowSessionImpl> WindowSessionImpl::GetScaleWindow(uint32_t windowId)
     return nullptr;
 }
 
-WMError WindowSessionImpl::GetWindowScaleCoordinate(int32_t& x, int32_t& y, uint32_t windowId)
+WMError WindowSessionImpl::GetWindowScaleCoordinate(uint32_t windowId, CursorInfo& cursorInfo)
 {
     sptr<WindowSessionImpl> window = GetScaleWindow(windowId);
     if (!window) {
@@ -764,12 +764,14 @@ WMError WindowSessionImpl::GetWindowScaleCoordinate(int32_t& x, int32_t& y, uint
     }
     float scaleX = window->compatScaleX_;
     float scaleY = window->compatScaleY_;
-    int32_t cursorX = x - windowRect.posX_;
-    int32_t cursorY = y - windowRect.posY_;
+    int32_t cursorX = cursorInfo.left - windowRect.posX_;
+    int32_t cursorY = cursorInfo.top - windowRect.posY_;
     // 2: x scale computational formula
-    x = round(windowRect.posX_ + scaleX * cursorX + (1 - scaleX) * windowRect.width_ / 2);
+    cursorInfo.left = round(windowRect.posX_ + scaleX * cursorX + (1 - scaleX) * windowRect.width_ / 2);
     // 2: y scale computational formula
-    y = round(windowRect.posY_ + scaleY * cursorY + (1 - scaleY) * windowRect.height_ / 2);
+    cursorInfo.top = round(windowRect.posY_ + scaleY * cursorY + (1 - scaleY) * windowRect.height_ / 2);
+    cursorInfo.width *= scaleX;
+    cursorInfo.height *= scaleY;
     return WMError::WM_OK;
 }
 
@@ -786,8 +788,10 @@ void WindowSessionImpl::RegisterWindowScaleCallback()
         TLOGD(WmsLogTag::WMS_COMPAT, "get inputMethod instance failed");
         return;
     }
-    auto callback = [] (int32_t& x, int32_t& y, uint32_t windowId) {
-        WMError ret = GetWindowScaleCoordinate(x, y, windowId);
+    auto callback = [] (uint32_t windowId, MiscServices::CursorInfo& cursorInfo) {
+        CursorInfo info = { cursorInfo.left, cursorInfo.top, cursorInfo.width, cursorInfo.height };
+        WMError ret = GetWindowScaleCoordinate(windowId, info);
+        cursorInfo = { info.left, info.top, info.width, info.height };
         return static_cast<int32_t>(ret);
     };
     instance->RegisterWindowScaleCallbackHandler(std::move(callback));
