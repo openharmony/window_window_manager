@@ -286,6 +286,8 @@ WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params
             params.LandscapeKeyboardRect_.ToString().c_str(), params.PortraitKeyboardRect_.ToString().c_str(),
             params.LandscapePanelRect_.ToString().c_str(), params.PortraitPanelRect_.ToString().c_str(),
             session->GetSessionRequestRect().ToString().c_str());
+        property_->SetKeyboardLayoutParams(params);
+        auto ret = MoveAndResizeKeyboard(params);
         return WSError::WS_OK;
     }, "AdjustKeyboardLayout");
     return WSError::WS_OK;
@@ -354,18 +356,6 @@ void KeyboardSession::NotifyOccupiedAreaChanged(const sptr<SceneSession>& callin
         const WSRect& callingSessionRect = callingSession->GetSessionRect();
         callingSession->NotifyOccupiedAreaChangeInfo(occupiedAreaInfo, rsTransaction,
             SessionHelper::TransferToRect(callingSessionRect), avoidAreas);
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling id: %{public}d, callingSessionRect: %{public}s"
-            ", size of avoidAreas: %{public}d", callingSession->GetPersistentId(),
-            callingSessionRect.ToString().c_str(), static_cast<int32_t>(avoidAreas.size()));
-        for (const auto& [type, avoidArea] : avoidAreas) {
-            TLOGI(WmsLogTag::WMS_KEYBOARD, "avoidAreaType: %{public}u, avoidArea: %{public}s",
-                type, avoidArea.ToString().c_str());
-        }
-    }
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling id: %{public}d, safeRect: %{public}s"
-        ", textFieldPositionY_: %{public}f, textFieldHeight_: %{public}f", callingSession->GetPersistentId(),
-        occupiedAreaInfo->rect_.ToString().c_str(), occupiedAreaInfo->textFieldPositionY_,
-        occupiedAreaInfo->textFieldHeight_);
 }
 
 bool KeyboardSession::CalculateOccupiedArea(const sptr<SceneSession>& callingSession, const WSRect& callingSessionRect,
