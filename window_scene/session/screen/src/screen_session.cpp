@@ -142,6 +142,7 @@ void ScreenSession::CreateDisplayNode(const Rosen::RSDisplayNodeConfig& config)
 void ScreenSession::ReuseDisplayNode(const RSDisplayNodeConfig& config)
 {
     if (displayNode_) {
+        std::unique_lock<std::shared_mutex> lock(displayNodeMutex_);
         displayNode_->SetDisplayNodeMirrorConfig(config);
         RSTransactionAdapter::FlushImplicitTransaction(displayNode_);
     } else {
@@ -243,7 +244,7 @@ ScreenSession::ScreenSession(const std::string& name, ScreenId smsId, ScreenId r
 
 void ScreenSession::SetDisplayNodeScreenId(ScreenId screenId)
 {
-    std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
+    std::unique_lock<std::shared_mutex> lock(displayNodeMutex_);
     if (displayNode_ != nullptr) {
         TLOGI(WmsLogTag::DMS, "SetDisplayNodeScreenId %{public}" PRIu64"", screenId);
         displayNode_->SetScreenId(screenId);
@@ -1135,6 +1136,7 @@ void ScreenSession::UpdateValidRotationToScb()
 
 sptr<SupportedScreenModes> ScreenSession::GetActiveScreenMode() const
 {
+    std::shared_lock<std::shared_mutex> lock(modesMutex_);
     if (activeIdx_ < 0 || activeIdx_ >= static_cast<int32_t>(modes_.size())) {
         TLOGW(WmsLogTag::DMS, "SCB: active mode index is wrong: %{public}d", activeIdx_);
         return nullptr;
@@ -2475,11 +2477,13 @@ void ScreenSession::SetScreenProperty(ScreenProperty property)
 
 std::vector<sptr<SupportedScreenModes>> ScreenSession::GetScreenModes()
 {
+    std::shared_lock<std::shared_mutex> lock(modesMutex_);
     return modes_;
 }
 
-void ScreenSession::SetScreenModes(std::vector<sptr<SupportedScreenModes>> modes)
+void ScreenSession::SetScreenModes(const std::vector<sptr<SupportedScreenModes>>& modes)
 {
+    std::unique_lock<std::shared_mutex> lock(modesMutex_);
     modes_ = modes;
 }
 

@@ -3252,12 +3252,43 @@ HWTEST_F(ScreenSessionTest, ReuseDisplayNode, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: ReuseDisplayNode start";
     Rosen::RSDisplayNodeConfig rsConfig;
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
+    screenSession->SetDisplayNode(nullptr);
+    screenSession->ReuseDisplayNode(rsConfig);
+
     rsConfig.isMirrored = true;
     rsConfig.screenId = 101;
-    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
-    screenSession->displayNode_ = nullptr;
+    std::shared_ptr<RSDisplayNode> displayNode = RSDisplayNode::Create(rsConfig);
+    screenSession->SetDisplayNode(displayNode);
     screenSession->ReuseDisplayNode(rsConfig);
     GTEST_LOG_(INFO) << "ScreenSessionTest: ReuseDisplayNode end";
+}
+
+/**
+ * @tc.name: GetScreenModes
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, GetScreenModes, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: GetScreenModes start";
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    auto modes_ = session->GetScreenModes();
+    GTEST_LOG_(INFO) << "ScreenSessionTest: GetScreenModes end";
+}
+
+/**
+ * @tc.name: SetScreenModes
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetScreenModes, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetScreenModes start";
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    sptr<SupportedScreenModes> supportedScreenModes = new SupportedScreenModes();
+    session->SetScreenModes({supportedScreenModes});
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetScreenModes end";
 }
 
 /**
