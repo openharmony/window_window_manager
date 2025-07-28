@@ -51,7 +51,7 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
         return false;
     }
     MessageParcel parcel;
-    parcel.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
+    parcel.WriteInterfaceToken(SessionStageStub::GetDescriptor());
     parcel.WriteBuffer(data, size);
     sptr<WindowOption> windowOption = sptr<WindowOption>::MakeSptr();
     sptr<WindowSessionImpl> stageStub = sptr<WindowSessionImpl>::MakeSptr(windowOption);
