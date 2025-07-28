@@ -18,7 +18,7 @@ import("../../../../windowmanager_aafwk.gni")
 module_output_path = "window_manager/window_manager"
 
 ##############################fuzztest##########################################
-ohos_fuzztest("SessionStageStubUecFuzzerTest") {
+ohos_fuzztest("SessionStageStubUecFuzzTest") {
   fuzz_config_file = "."
   module_out_path = module_output_path
 
@@ -82,7 +82,7 @@ group("fuzztest") {
 
   deps += [
     # deps file
-    ":SessionStageStubUecFuzzerTest",
+    ":SessionStageStubUecFuzzTest",
   ]
 }
 ###############################################################################
