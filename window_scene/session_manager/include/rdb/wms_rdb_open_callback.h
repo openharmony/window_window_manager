@@ -24,7 +24,7 @@ namespace Rosen {
 namespace {
 constexpr static const char* STARTING_WINDOW_RDB_NAME = "/starting_window_config.db";
 constexpr static const char* STARTING_WINDOW_TABLE_NAME = "starting_window_config";
-constexpr static int32_t STARTING_WINDOW_RDB_VERSION = 1;
+constexpr static int32_t STARTING_WINDOW_RDB_VERSION = 2;
 } // namespace
 
 struct WmsRdbConfig {
