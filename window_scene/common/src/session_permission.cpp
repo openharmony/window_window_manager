@@ -66,11 +66,11 @@ bool SessionPermission::IsSystemServiceCalling(bool needPrintLog)
 {
     const auto tokenId = IPCSkeleton::GetCallingTokenID();
     if (IsTokenNativeOrShellType(tokenId)) {
-        TLOGD(WmsLogTag::DEFAULT, "system service calling, tokenId:%{private}u, flag:%{public}u", tokenId, flag);
+        TLOGD(WmsLogTag::DEFAULT, "system service calling");
         return true;
     }
     if (needPrintLog) {
-        TLOGE(WmsLogTag::DEFAULT, "Not system service calling, tokenId:%{private}u, flag:%{public}u", tokenId, flag);
+        TLOGE(WmsLogTag::DEFAULT, "Not system service calling");
     }
     return false;
 }
