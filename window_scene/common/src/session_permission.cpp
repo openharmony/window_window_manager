@@ -66,9 +66,7 @@ sptr<AppExecFwk::IBundleMgr> GetBundleManagerProxy()
 bool SessionPermission::IsSystemServiceCalling(bool needPrintLog)
 {
     const auto tokenId = IPCSkeleton::GetCallingTokenID();
-    const auto flag = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
-    if (flag == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE ||
-        flag == Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL) {
+    if (IsTokenNativeOrShellType(tokenId)) {
         TLOGD(WmsLogTag::DEFAULT, "system service calling, tokenId:%{private}u, flag:%{public}u", tokenId, flag);
         return true;
     }
@@ -81,10 +79,7 @@ bool SessionPermission::IsSystemServiceCalling(bool needPrintLog)
 bool SessionPermission::IsSystemCalling()
 {
     const auto tokenId = IPCSkeleton::GetCallingTokenID();
-    const auto flag = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
-    TLOGD(WmsLogTag::DEFAULT, "tokenId:%{private}u, flag:%{public}u", tokenId, flag);
-    if (flag == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE ||
-        flag == Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL) {
+    if (IsTokenNativeOrShellType(tokenId)) {
         return true;
     }
     return IsSystemAppCall();
@@ -184,7 +179,7 @@ bool SessionPermission::IsStartByHdcd()
 {
     OHOS::Security::AccessToken::NativeTokenInfo info;
     uint32_t tokenId = IPCSkeleton::GetCallingTokenID();
-    if (!Permission::IsTokenNativeOrShellType(tokenId)) {
+    if (!IsTokenNativeOrShellType(tokenId)) {
         return false;
     }
     if (Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(tokenId, info) != 0) {
@@ -385,6 +380,17 @@ bool SessionPermission::VerifyPermissionByBundleName(
         return false;
     }
     return VerifyPermissionByCallerToken(bundleInfo.applicationInfo.accessTokenId, permissionName);
+}
+
+bool SessionPermission::IsTokenNativeOrShellType(uint32_t tokenId)
+{
+    const auto flag = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
+    TLOGD(WmsLogTag::DEFAULT, "tokenId:%{private}u, flag:%{public}u", tokenId, flag);
+    if (flag != Security::AccessToken::TypeATokenTypeEnum::TOKEN_NATIVE &&
+        flag != Security::AccessToken::TypeATokenTypeEnum::TOKEN_SHELL) {
+        return false;
+    }
+    return true;
 }
 } // namespace Rosen
 } // namespace OHOS
