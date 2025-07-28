@@ -124,7 +124,7 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
         return false;
     }
     MessageParcel parcel;
-    parcel.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
+    parcel.WriteInterfaceToken(SceneSessionManagerLiteStub::GetDescriptor());
     parcel.WriteBuffer(data, size);
     SceneSessionMgrLiteLifecycleIpcTest(parcel);
     SceneSessionMgrLiteLifecycleIpcSecTest(parcel);

@@ -56,7 +56,7 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
         return false;
     }
     MessageParcel parcel;
-    parcel.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
+    parcel.WriteInterfaceToken(SessionStub::GetDescriptor());
     parcel.WriteBuffer(data, size);
     SessionInfo info;
     info.abilityName_ = "lifecycleStubFuzzTest";
