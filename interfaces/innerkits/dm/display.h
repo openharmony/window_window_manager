@@ -116,7 +116,7 @@ public:
      *
      * @return Rotation of the display before API 14.
      */
-    Rotation GetScreenRotation() const;
+    Rotation GetOriginRotation() const;
 
     /**
      * @brief Get the Orientation of the display.
