@@ -45,7 +45,7 @@ namespace {
 constexpr size_t DATA_MIN_SIZE = 2;
 }
 
-void PIPSceneSessionMgrStubTest(MessageParcel &parcel, MessageParcel &reply, MessageOption &option)
+void PIPSceneSessionMgrStubTest(MessageParcel& parcel, MessageParcel& reply, MessageOption& option)
 {
     parcel.RewindRead(0);
     SceneSessionManagerLite::GetInstance().OnRemoteRequest(
@@ -71,7 +71,7 @@ bool DoSomethingInterestingWithMyAPI1(const uint8_t *data, size_t size)
     return true;
 }
 
-void PIPSessionTest(sptr<Session> sessionStub, MessageParcel &parcel, MessageParcel &reply, MessageOption &option)
+void PIPSessionTest(sptr<Session> sessionStub, MessageParcel& parcel, MessageParcel& reply, MessageOption& option)
 {
     parcel.RewindRead(0);
     sessionStub->OnRemoteRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_FRAME_LAYOUT_FINISH), parcel,
@@ -116,8 +116,8 @@ bool DoSomethingInterestingWithMyAPI2(const uint8_t *data, size_t size)
     return true;
 }
 
-void PIPSessionStageTest(sptr<WindowSessionImpl> stageStub, MessageParcel &parcel, MessageParcel &reply,
-                         MessageOption &option)
+void PIPSessionStageTest(sptr<WindowSessionImpl> stageStub, MessageParcel& parcel, MessageParcel& reply,
+                         MessageOption& option)
 {
     parcel.RewindRead(0);
     stageStub->OnRemoteRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_PIPSIZE_CHANGE), parcel,
