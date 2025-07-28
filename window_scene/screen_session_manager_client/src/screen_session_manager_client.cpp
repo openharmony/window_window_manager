@@ -30,18 +30,9 @@
 namespace OHOS::Rosen {
 namespace {
 constexpr int LINE_WIDTH = 30;
-std::mutex g_instanceMutex;
 } // namespace
 
-ScreenSessionManagerClient& ScreenSessionManagerClient::GetInstance()
-{
-    std::lock_guard<std::mutex> lock(g_instanceMutex);
-    static sptr<ScreenSessionManagerClient> instance = nullptr;
-    if (instance == nullptr) {
-        instance = new ScreenSessionManagerClient();
-    }
-    return *instance;
-}
+WM_IMPLEMENT_SINGLE_INSTANCE(ScreenSessionManagerClient)
 
 void ScreenSessionManagerClient::ConnectToServer()
 {
@@ -206,9 +197,9 @@ void ScreenSessionManagerClient::ExtraDestroyScreen(ScreenId screenId)
     }
     TLOGI(WmsLogTag::DMS, "ScreenId:%{public}" PRIu64 ", rsId:%{public}" PRIu64,
         screenSession->GetScreenId(), screenSession->GetRSScreenId());
-    screenSession->DestroyScreenScene();
     {
         std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
+        screenSession->DestroyScreenScene();
         extraScreenSessionMap_.erase(screenId);
     }
     TLOGI(WmsLogTag::DMS, "end");
@@ -987,13 +978,13 @@ bool ScreenSessionManagerClient::HandleScreenConnection(SessionOption option)
         screenSession->SetDisplayNode(config.displayNode);
     }
     screenSession->SetScreenCombination(screenSessionManager_->GetScreenCombination(option.screenId_));
+    screenSession->SetIsExtend(option.isExtend_);
+    screenSession->SetIsRealScreen(screenSessionManager_->GetIsRealScreen(option.screenId_));
     {
         std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
         screenSessionMap_[option.screenId_] = screenSession;
         extraScreenSessionMap_[option.screenId_] = screenSession;
     }
-    screenSession->SetIsExtend(option.isExtend_);
-    screenSession->SetIsRealScreen(screenSessionManager_->GetIsRealScreen(option.screenId_));
     NotifyClientScreenConnect(screenSession);
     return true;
 }
@@ -1020,20 +1011,26 @@ bool ScreenSessionManagerClient::OnCreateScreenSessionOnly(ScreenId screenId, Sc
     const std::string& name, bool isExtend)
 {
     sptr<ScreenSession> screenSession = nullptr;
-    auto iter = screenSessionMap_.find(screenId);
-
-    TLOGW(WmsLogTag::DMS, "screenId=%{public}" PRIu64" screen session size:%{public}d",
-        screenId, static_cast<int>(screenSessionMap_.size()));
-
-    if (iter != screenSessionMap_.end() && iter->second != nullptr) {
-        screenSession = iter->second;
-        TLOGW(WmsLogTag::DMS, "screen session has exist.");
-    }
     ScreenSessionConfig config = {
         .screenId = screenId,
         .rsId = rsId,
         .name = name,
     };
+    {
+        std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
+        auto iter = screenSessionMap_.find(screenId);
+        TLOGW(WmsLogTag::DMS, "screenId=%{public}" PRIu64" screen session size:%{public}d",
+            screenId, static_cast<int>(screenSessionMap_.size()));
+
+        if (iter != screenSessionMap_.end() && iter->second != nullptr) {
+            screenSession = iter->second;
+            TLOGW(WmsLogTag::DMS, "screen session has exist.");
+        }
+    }
+    if (screenSessionManager_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "Failed to create screen session, screenSessionManager_ is null");
+        return false;
+    }
     config.displayNode = screenSessionManager_->GetDisplayNode(screenId);
     if (screenSession == nullptr) {
         config.property = screenSessionManager_->GetScreenProperty(screenId);
@@ -1042,13 +1039,13 @@ bool ScreenSessionManagerClient::OnCreateScreenSessionOnly(ScreenId screenId, Sc
         screenSession->SetDisplayNode(config.displayNode);
     }
     screenSession->SetScreenCombination(screenSessionManager_->GetScreenCombination(screenId));
+    screenSession->SetIsExtend(isExtend);
+    screenSession->SetIsRealScreen(true);
     {
         std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
         screenSessionMap_[screenId] = screenSession;
         extraScreenSessionMap_[screenId] = screenSession;
     }
-    screenSession->SetIsExtend(isExtend);
-    screenSession->SetIsRealScreen(true);
     return true;
 }
 
@@ -1104,6 +1101,10 @@ bool ScreenSessionManagerClient::OnExtendDisplayNodeChange(ScreenId mainScreenId
 sptr<ScreenSession> ScreenSessionManagerClient::CreateTempScreenSession(
     ScreenId screenId, ScreenId rsId, const std::shared_ptr<RSDisplayNode>& displayNode)
 {
+    if (screenSessionManager_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "Failed to create temp screen session, screenSessionManager_ is null");
+        return nullptr;
+    }
     ScreenSessionConfig config = {
         .screenId = screenId,
         .rsId = rsId,
@@ -1121,6 +1122,10 @@ bool ScreenSessionManagerClient::OnMainDisplayNodeChange(ScreenId mainScreenId, 
     auto mainScreen = GetScreenSession(mainScreenId);
     if (mainScreen == nullptr) {
         TLOGE(WmsLogTag::DMS, "mainScreen is null");
+        return false;
+    }
+    if (screenSessionManager_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
         return false;
     }
     std::ostringstream oss;
@@ -1174,9 +1179,10 @@ void ScreenSessionManagerClient::SetScreenCombination(ScreenId mainScreenId, Scr
 std::string ScreenSessionManagerClient::OnDumperClientScreenSessions()
 {
     std::ostringstream oss;
-    std::string screenInfos = "";
     oss << "-------------- Client Screen Infos --------------" << std::endl;
-    for (const auto& iter : screenSessionMap_) {
+    {
+        std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
+        for (const auto& iter : screenSessionMap_) {
         if (iter.second == nullptr) {
             oss << std::left << std::setw(LINE_WIDTH) << "session: " << "nullptr" << std::endl;
             continue;
@@ -1216,7 +1222,8 @@ std::string ScreenSessionManagerClient::OnDumperClientScreenSessions()
             << screenProperty.GetAvailableArea().height_ << ", " << std::endl;
         oss << "------------------------------------------------" << std::endl;
     }
-    screenInfos = oss.str();
+    }
+    auto screenInfos = oss.str();
     TLOGW(WmsLogTag::DMS, "%{public}s", screenInfos.c_str());
     return screenInfos;
 }
