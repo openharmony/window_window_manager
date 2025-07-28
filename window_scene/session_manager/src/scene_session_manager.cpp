@@ -16690,8 +16690,8 @@ void SceneSessionManager::NotifyWindowPropertyChangeByWindowInfoKey(
     std::unordered_map<WindowInfoKey, WindowChangeInfoType> windowPropertyChangeInfo;
     PackWindowPropertyChangeInfo(sceneSession, windowPropertyChangeInfo);
     windowInfoList.push_back(windowPropertyChangeInfo);
-    uint32_t propertyDirtyFlags = static_cast<uint32_t>(windowInfoKey);
-    SessionManagerAgentController::GetInstance().NotifyWindowPropertyChange(propertyDirtyFlags, windowInfoList);
+    SessionManagerAgentController::GetInstance().NotifyWindowPropertyChange(
+        static_cast<uint32_t>(windowInfoKey), windowInfoList);
 }
 
 void SceneSessionManager::NotifyWindowPropertyChange(ScreenId screenId)
