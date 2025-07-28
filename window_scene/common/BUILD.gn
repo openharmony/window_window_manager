@@ -46,7 +46,10 @@ ohos_shared_library("window_scene_common") {
 
   public_configs = [ ":window_scene_common_public_config" ]
 
-  deps = [ "${window_base_path}/utils:libwmutil_base" ]
+  deps = [
+    "${window_base_path}/utils:libwmutil",
+    "${window_base_path}/utils:libwmutil_base",
+  ]
 
   external_deps = [
     "ability_runtime:app_manager",

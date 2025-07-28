@@ -98,7 +98,7 @@ std::string SysCapUtil::GetProcessName()
 {
     OHOS::Security::AccessToken::NativeTokenInfo info;
     uint32_t tokenId = IPCSkeleton::GetCallingTokenID();
-    if (!IsTokenNativeOrShellType(tokenId)) {
+    if (!Permission::IsTokenNativeOrShellType(tokenId)) {
         return "";
     }
     if (Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(tokenId, info) != 0) {
