@@ -4366,7 +4366,7 @@ void Session::NotifySessionPropertyChange(WindowInfoKey windowInfoKey)
     if (sessionPropertyChangeNotifyManagerFunc_) {
         sessionPropertyChangeNotifyManagerFunc_(GetPersistentId(), windowInfoKey);
     } else {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sessionPropertyChangeNotifyManagerFunc is nullptr");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Func is invalid");
     }
 }
 
