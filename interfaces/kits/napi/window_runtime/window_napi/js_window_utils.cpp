@@ -42,8 +42,9 @@ constexpr uint32_t ANIMATION_FOUR_PARAMS_SIZE = 4;
 const std::string RESOLVED_CALLBACK = "resolvedCallback";
 const std::string REJECTED_CALLBACK = "rejectedCallback";
 const std::string INTERPOLATINGSPRING  = "interpolatingSpring";
-constexpr std::array<DefaultSpecificZIndex, 1> DefaultSpecificZIndexList = {
-    DefaultSpecificZIndex::MUTISCREEN_COLLABORATION
+constexpr std::array<DefaultSpecificZIndex, 2> DefaultSpecificZIndexList = {
+    DefaultSpecificZIndex::MUTISCREEN_COLLABORATION,
+    DefaultSpecificZIndex::SUPER_PRIVACY_ANIMATION
 };
 }
 
