@@ -1657,6 +1657,7 @@ private:
      */
     std::mutex processMapMutex_;
     std::unordered_map<std::string, std::set<int32_t>> processCompareMap_;
+    std::unordered_set<std::string> emptyStartupResource_;
     std::atomic<bool> delayRemoveSnapshot_ = false;
     void InitStartingWindowRdb(const std::string& rdbPath);
     bool GetStartingWindowInfoFromCache(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo,
