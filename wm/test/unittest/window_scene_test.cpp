@@ -42,7 +42,7 @@ public:
 };
 void WindowSceneTest::SetUpTestCase() {}
 
-void WindowSceneTest::TearDownTestCase() 
+void WindowSceneTest::TearDownTestCase()
 {
 #ifdef RS_ENABLE_VK
     RSModifiersDrawThread::Destroy();
