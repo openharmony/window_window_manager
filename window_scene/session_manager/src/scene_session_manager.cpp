@@ -2819,6 +2819,7 @@ void SceneSessionManager::PerformRegisterInRequestSceneSession(sptr<SceneSession
     RegisterAcquireRotateAnimationConfigFunc(sceneSession);
     RegisterRequestVsyncFunc(sceneSession);
     RegisterSceneSessionDestructNotifyManagerFunc(sceneSession);
+    RegisterSessionPropertyChangeNotifyManagerFunc(sceneSession);
 }
 
 void SceneSessionManager::UpdateSceneSessionWant(const SessionInfo& sessionInfo)
@@ -16708,6 +16709,30 @@ void SceneSessionManager::RegisterSceneSessionDestructNotifyManagerFunc(const sp
     });
 }
 
+void SceneSessionManager::RegisterSessionPropertyChangeNotifyManagerFunc(const sptr<SceneSession>& sceneSession)
+{
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "session is nullptr");
+        return;
+    }
+    sceneSession->SetSessionPropertyChangeNotifyManagerListener(
+        [this](int32_t persistentId, WindowInfoKey windowInfoKey) {
+        NotifySessionPropertyChangeFromSession(persistentId, windowInfoKey);
+    });
+}
+
+void SceneSessionManager::NotifySessionPropertyChangeFromSession(int32_t persistentId, WindowInfoKey windowInfoKey)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "persistentId: %{public}d, windowInfoKey: %{public}u",
+        persistentId, static_cast<uint32_t>(windowInfoKey));
+    sptr<SceneSession> sceneSession = GetSceneSession(persistentId);
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sceneSession nullptr");
+        return;
+    }
+    NotifyWindowPropertyChangeByWindowInfoKey(sceneSession, windowInfoKey);
+}
+
 void SceneSessionManager::ConfigSupportZLevel()
 {
     TLOGI(WmsLogTag::WMS_HIERARCHY, "support zLevel");
@@ -16717,11 +16742,23 @@ void SceneSessionManager::ConfigSupportZLevel()
     taskScheduler_->PostAsyncTask(task, "ConfigSupportZLevel");
 }
 
+void SceneSessionManager::NotifyWindowPropertyChangeByWindowInfoKey(
+    const sptr<SceneSession>& sceneSession, WindowInfoKey windowInfoKey)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "windowInfoKey: %{public}u", static_cast<uint32_t>(windowInfoKey));
+    std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>> windowInfoList;
+    std::unordered_map<WindowInfoKey, WindowChangeInfoType> windowPropertyChangeInfo;
+    PackWindowPropertyChangeInfo(sceneSession, windowPropertyChangeInfo);
+    windowInfoList.push_back(windowPropertyChangeInfo);
+    SessionManagerAgentController::GetInstance().NotifyWindowPropertyChange(
+        static_cast<uint32_t>(windowInfoKey), windowInfoList);
+}
+
 void SceneSessionManager::NotifyWindowPropertyChange(ScreenId screenId)
 {
     TLOGD(WmsLogTag::WMS_ATTRIBUTE, "ObservedFlags: %{public}u, interestedFlags: %{public}u",
         observedFlags_, interestedFlags_);
-    std::vector<std::unordered_map<WindowInfoKey, std::any>> windowInfoList;
+    std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>> windowInfoList;
     uint32_t propertyDirtyFlags = 0;
     {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
@@ -16737,7 +16774,7 @@ void SceneSessionManager::NotifyWindowPropertyChange(ScreenId screenId)
                 continue;
             }
             propertyDirtyFlags |= sceneSession->GetPropertyDirtyFlags();
-            std::unordered_map<WindowInfoKey, std::any> windowPropertyChangeInfo;
+            std::unordered_map<WindowInfoKey, WindowChangeInfoType> windowPropertyChangeInfo;
             PackWindowPropertyChangeInfo(sceneSession, windowPropertyChangeInfo);
             windowInfoList.emplace_back(windowPropertyChangeInfo);
             sceneSession->SetPropertyDirtyFlags(0);
@@ -16747,7 +16784,7 @@ void SceneSessionManager::NotifyWindowPropertyChange(ScreenId screenId)
 }
 
 void SceneSessionManager::PackWindowPropertyChangeInfo(const sptr<SceneSession>& sceneSession,
-    std::unordered_map<WindowInfoKey, std::any>& windowPropertyChangeInfo)
+    std::unordered_map<WindowInfoKey, WindowChangeInfoType>& windowPropertyChangeInfo)
 {
     if (interestedFlags_ & static_cast<uint32_t>(SessionPropertyFlag::WINDOW_ID)) {
         windowPropertyChangeInfo[WindowInfoKey::WINDOW_ID] = sceneSession->GetWindowId();
@@ -16778,6 +16815,12 @@ void SceneSessionManager::PackWindowPropertyChangeInfo(const sptr<SceneSession>&
         WSRect wsrect = sceneSession->GetClientRect();
         Rect rect = { wsrect.posX_, wsrect.posY_, wsrect.width_, wsrect.height_ };
         windowPropertyChangeInfo[WindowInfoKey::WINDOW_RECT] = rect;
+    }
+    if (interestedFlags_ & static_cast<uint32_t>(SessionPropertyFlag::WINDOW_MODE)) {
+        windowPropertyChangeInfo[WindowInfoKey::WINDOW_MODE] = sceneSession->GetWindowMode();
+    }
+    if (interestedFlags_ & static_cast<uint32_t>(SessionPropertyFlag::FLOATING_SCALE)) {
+        windowPropertyChangeInfo[WindowInfoKey::FLOATING_SCALE] = sceneSession->GetFloatingScale();
     }
 }
 

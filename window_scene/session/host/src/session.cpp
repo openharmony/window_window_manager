@@ -3028,6 +3028,11 @@ void Session::SetSessionInfoChangeNotifyManagerListener(const NotifySessionInfoC
     sessionInfoChangeNotifyManagerFunc_ = func;
 }
 
+void Session::SetSessionPropertyChangeNotifyManagerListener(const NotifySessionPropertyChangeNotifyManagerFunc& func)
+{
+    sessionPropertyChangeNotifyManagerFunc_ = func;
+}
+
 void Session::SetDisplayIdChangedNotifyManagerListener(const NotifyDisplayIdChangedNotifyManagerFunc& func)
 {
     displayIdChangedNotifyManagerFunc_ = func;
@@ -3456,10 +3461,12 @@ WSError Session::UpdateWindowMode(WindowMode mode)
         return WSError::WS_ERROR_INVALID_SESSION;
     } else if (state_ == SessionState::STATE_DISCONNECT) {
         GetSessionProperty()->SetWindowMode(mode);
+        NotifySessionPropertyChange(WindowInfoKey::WINDOW_MODE);
         GetSessionProperty()->SetIsNeedUpdateWindowMode(true);
         UpdateGestureBackEnabled();
     } else {
         GetSessionProperty()->SetWindowMode(mode);
+        NotifySessionPropertyChange(WindowInfoKey::WINDOW_MODE);
         RequestNextVsyncWhenModeChange();
         if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
             GetSessionProperty()->SetMaximizeMode(MaximizeMode::MODE_RECOVER);
@@ -4400,6 +4407,15 @@ void Session::NotifySessionInfoChange()
         sessionInfoChangeNotifyManagerFunc_(GetPersistentId());
     } else {
         TLOGD(WmsLogTag::WMS_EVENT, "sessionInfoChangeNotifyManagerFunc is nullptr");
+    }
+}
+
+void Session::NotifySessionPropertyChange(WindowInfoKey windowInfoKey)
+{
+    if (sessionPropertyChangeNotifyManagerFunc_) {
+        sessionPropertyChangeNotifyManagerFunc_(GetPersistentId(), windowInfoKey);
+    } else {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Func is invalid");
     }
 }
 

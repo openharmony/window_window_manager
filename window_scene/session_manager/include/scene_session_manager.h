@@ -1073,6 +1073,8 @@ private:
     void UpdateSessionDisplayIdBySessionInfo(sptr<SceneSession> sceneSession, const SessionInfo& sessionInfo);
     void CheckFloatWindowIsAnco(pid_t pid, const sptr<SceneSession>& newSession);
     bool IsNeedUpdateBrightness(int32_t persistentId, float brightness);
+    void RegisterSessionPropertyChangeNotifyManagerFunc(const sptr<SceneSession>& sceneSession);
+    void NotifySessionPropertyChangeFromSession(int32_t persistentId, WindowInfoKey windowInfoKey);
 
     /*
      * Window Rotate Animation
@@ -1542,13 +1544,15 @@ private:
     uint32_t interestedFlags_ = 0;
     std::unordered_map<uint64_t, DrawingSessionInfo> lastDrawingSessionInfoMap_;
     std::unordered_set<int32_t> screenshotAppEventListenerSessionSet_;
+    void NotifyWindowPropertyChangeByWindowInfoKey(
+        const sptr<SceneSession>& sceneSession, WindowInfoKey windowInfoKey);
     void NotifyWindowPropertyChange(ScreenId screenId);
     WMError RegisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey,
         uint32_t interestInfo, const sptr<IWindowManagerAgent>& windowManagerAgent) override;
     WMError UnregisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey,
         uint32_t interestInfo, const sptr<IWindowManagerAgent>& windowManagerAgent) override;
     void PackWindowPropertyChangeInfo(const sptr<SceneSession>& sceneSession,
-        std::unordered_map<WindowInfoKey, std::any>& windowPropertyChangeInfo);
+        std::unordered_map<WindowInfoKey, WindowChangeInfoType>& windowPropertyChangeInfo);
     WMError AddSessionBlackList(const std::vector<sptr<SceneSession>>& sceneSessionList,
         const std::unordered_set<std::string>& privacyWindowTags);
     WMError RemoveSessionBlackList(const std::vector<sptr<SceneSession>>& sceneSessionList,
