@@ -830,7 +830,7 @@ private:
     bool IsSupportCoordination();
     void RegisterSettingExtendScreenDpiObserver();
     void SetExtendScreenDpi();
-    bool SwitchPcMode();
+    bool HandleSwitchPcMode();
     void SwitchExternalScreenToMirror();
     void WaitUpdateAvailableAreaForPc();
 
