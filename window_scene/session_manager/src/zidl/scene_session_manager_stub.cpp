@@ -1866,6 +1866,11 @@ int SceneSessionManagerStub::HandleSetScreenPrivacyWindowTagSwitch(MessageParcel
         return ERR_INVALID_DATA;
     }
 
+    if (size > MAX_VECTOR_SIZE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Vector is too big, size is %{public}" PRIu64 , size);
+        return ERR_INVALID_DATA;
+    }
+
     std::vector<std::string> privacyWindowTags;
     for (uint64_t i = 0; i < size; i++) {
         std::string privacyWidnowTag;
@@ -2296,6 +2301,10 @@ int SceneSessionManagerStub::HandleAddSessionBlackList(MessageParcel& data, Mess
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read size failed");
         return ERR_INVALID_DATA;
     }
+    if (size > MAX_VECTOR_SIZE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Vector is too big, size is %{public}" PRIu64 , size);
+        return ERR_INVALID_DATA;
+    }
     std::unordered_set<std::string> bundleNames;
     for (int64_t i = 0; i < size; i++) {
         std::string bundleName;
@@ -2309,6 +2318,10 @@ int SceneSessionManagerStub::HandleAddSessionBlackList(MessageParcel& data, Mess
     size = 0;
     if (!data.ReadUint64(size)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read size failed");
+        return ERR_INVALID_DATA;
+    }
+    if (size > MAX_VECTOR_SIZE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Vector is too big, size is %{public}" PRIu64 , size);
         return ERR_INVALID_DATA;
     }
     std::unordered_set<std::string> privacyWindowTags;
@@ -2335,6 +2348,10 @@ int SceneSessionManagerStub::HandleRemoveSessionBlackList(MessageParcel& data, M
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read size failed");
         return ERR_INVALID_DATA;
     }
+    if (size > MAX_VECTOR_SIZE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Vector is too big, size is %{public}" PRIu64 , size);
+        return ERR_INVALID_DATA;
+    }
     std::unordered_set<std::string> bundleNames;
     for (int64_t i = 0; i < size; i++) {
         std::string bundleName;
@@ -2348,6 +2365,10 @@ int SceneSessionManagerStub::HandleRemoveSessionBlackList(MessageParcel& data, M
     size = 0;
     if (!data.ReadUint64(size)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read size failed");
+        return ERR_INVALID_DATA;
+    }
+    if (size > MAX_VECTOR_SIZE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Vector is too big, size is %{public}" PRIu64 , size);
         return ERR_INVALID_DATA;
     }
     std::unordered_set<std::string> privacyWindowTags;

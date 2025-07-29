@@ -12135,7 +12135,7 @@ WSError SceneSessionManager::UpdateSessionWindowVisibilityListener(int32_t persi
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr) {
             TLOGND(WmsLogTag::WMS_LIFE, "sceneSession is nullptr.");
-            return WSError::WS_DO_NOTHING;
+            return haveListener ? WSError::WS_DO_NOTHING : WSError::WS_OK;
         }
         if (callingPid != sceneSession->GetCallingPid()) {
             TLOGNE(WmsLogTag::WMS_LIFE, "Permission denied, neither register nor unreigster allowed by other process");
