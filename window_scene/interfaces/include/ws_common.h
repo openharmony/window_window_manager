@@ -16,6 +16,7 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H
 #define OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H
 
+#include <charconv>
 #include <inttypes.h>
 #include <iomanip>
 #include <map>
@@ -703,14 +704,60 @@ struct WSRectT {
         return static_cast<F>(interWidth) * static_cast<F>(interHeight);
     }
 
-    inline std::string ToString() const
+    /**
+     * @brief Returns a string in the format: [posX posY width height]
+     *
+     * @note Optimized for performance:
+     *       - Avoid std::stringstream and other formatting streams.
+     *       - Pre-allocates string capacity to minimize reallocations.
+     *       - Use std::to_chars for fast, allocation-free conversions.
+     *
+     * @return std::string A string representing the rectangle.
+     */
+    std::string ToString() const
     {
-        constexpr int precision = 2;
-        std::stringstream ss;
-        ss << "[" << std::fixed << std::setprecision(precision) << posX_ << " " << posY_ << " " <<
-            width_ << " " << height_ << "]";
-        return ss.str();
+        std::string result;
+        if constexpr (std::is_integral_v<T>) {
+            result.reserve(49); // 49: 11 digits * 4 + spaces + brackets
+        } else {
+            result.reserve(133); // 133: 32 digits * 4 + spaces + brackets
+        }
+
+        // Helper: append either value or INF/-INF when overflow occurs
+        auto appendValueOrInf = [&](char* buf, char* ptr, const std::errc ec, T value) {
+            if (ec == std::errc::value_too_large) {
+                result.append(value < 0 ? "-INF" : "INF");
+            } else {
+                result.append(buf, ptr);
+            }
+        };
+
+        // Helper: convert and append value based on type
+        auto appendValue = [&](T value) {
+            if constexpr (std::is_integral_v<T>) {
+                char buf[11]; // 11: max digits for integer
+                auto [ptr, ec] = std::to_chars(buf, buf + sizeof(buf), value);
+                appendValueOrInf(buf, ptr, ec, value);
+            } else {
+                constexpr int precision = 2;
+                char buf[32]; // 32: max digits for floating number
+                auto [ptr, ec] = std::to_chars(buf, buf + sizeof(buf), value, std::chars_format::fixed, precision);
+                appendValueOrInf(buf, ptr, ec, value);
+            }
+        };
+
+        result.push_back('[');
+        appendValue(posX_);
+        result.push_back(' ');
+        appendValue(posY_);
+        result.push_back(' ');
+        appendValue(width_);
+        result.push_back(' ');
+        appendValue(height_);
+        result.push_back(']');
+        return result;
     }
+
     static const WSRectT<T> EMPTY_RECT;
 };
 
