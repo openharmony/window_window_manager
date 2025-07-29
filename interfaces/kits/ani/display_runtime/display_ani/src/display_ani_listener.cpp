@@ -71,15 +71,15 @@ void DisplayAniListener::RemoveCallback(ani_env* env, const std::string& type, a
 
 void DisplayAniListener::RemoveAllCallback()
 {
-    std::lock_guard<std::mutex> lock(aniCallBackMtx_);
-    for (auto& [typeString, callbacks] : aniCallBack_) {
+    std::lock_guard<std::mutex> lock(aniCallbackMtx_);
+    for (auto& [typeString, callbacks] : aniCallback_) {
         for (auto callback : callbacks) {
             if (env_) {
                 env_->GlobalReference_Delete(callback);
             }
         }
     }
-    aniCallBack_.clear();
+    aniCallback_.clear();
 }
 
 void DisplayAniListener::OnCreate(DisplayId id)
@@ -108,7 +108,7 @@ void DisplayAniListener::OnCreate(DisplayId id)
             TLOGE(WmsLogTag::DMS, "[ANI] null env");
             return;
         }
-        ani_boolean undefRes;
+        ani_boolean undefRes = 0;
         env_->Reference_IsUndefined(oneAniCallback, &undefRes);
         if (undefRes) {
             TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback is undef");
@@ -153,7 +153,7 @@ void DisplayAniListener::OnDestroy(DisplayId id)
             TLOGE(WmsLogTag::DMS, "[ANI] null env");
             return;
         }
-        ani_boolean undefRes;
+        ani_boolean undefRes = 0;
         env_->Reference_IsUndefined(oneAniCallback, &undefRes);
         if (undefRes) {
             TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback is undef");
@@ -195,7 +195,7 @@ void DisplayAniListener::OnChange(DisplayId id)
             TLOGE(WmsLogTag::DMS, "[ANI] null env");
             return;
         }
-        ani_boolean undefRes;
+        ani_boolean undefRes = 0;
         env_->Reference_IsUndefined(oneAniCallback, &undefRes);
         if (undefRes) {
             TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback undef, return");

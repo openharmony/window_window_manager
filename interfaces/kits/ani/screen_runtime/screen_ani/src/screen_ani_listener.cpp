@@ -97,7 +97,7 @@ void ScreenAniListener::OnConnect(ScreenId id)
             TLOGE(WmsLogTag::DMS, "[ANI] null env");
             return;
         }
-        ani_boolean undefRes;
+        ani_boolean undefRes = 0;
         env_->Reference_IsUndefined(oneAniCallback, &undefRes);
         // judge is null or undefined
         if (undefRes) {
@@ -144,7 +144,7 @@ void ScreenAniListener::OnDisconnect(ScreenId id)
             TLOGE(WmsLogTag::DMS, "[ANI] null env");
             return;
         }
-        ani_boolean undefRes;
+        ani_boolean undefRes = 0;
         env_->Reference_IsUndefined(oneAniCallback, &undefRes);
         // judge is null or undefined
         if (undefRes) {
@@ -191,7 +191,7 @@ void ScreenAniListener::OnChange(ScreenId id)
             TLOGE(WmsLogTag::DMS, "[ANI] null env");
             return;
         }
-        ani_boolean undefRes;
+        ani_boolean undefRes = 0;
         env_->Reference_IsUndefined(oneAniCallback, &undefRes);
         if (undefRes) {
             TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback undefRes, continue");
