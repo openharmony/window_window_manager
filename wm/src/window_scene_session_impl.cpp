@@ -251,6 +251,15 @@ WMError WindowSceneSessionImpl::GetParentSessionAndVerify(bool isToast, sptr<Win
             property_->GetWindowName().c_str(), GetType());
         return WMError::WM_ERROR_NULLPTR;
     }
+    return WindowSceneSessionImpl::VerifySubWindowLevel(false, parentSession);
+}
+
+WMError WindowSceneSessionImpl::VerifySubWindowLevel(bool isToast, const sptr<WindowSessionImpl>& parentSession)
+{
+    if (parentSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "parent of sub window is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
     if (!isToast && !parentSession->GetIsUIExtFirstSubWindow() &&
         parentSession->GetProperty()->GetSubWindowLevel() >= 1 &&
         !parentSession->IsPcOrFreeMultiWindowCapabilityEnabled()) {
@@ -304,7 +313,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         }
     } else if (WindowHelper::IsSubWindow(type)) {
         sptr<WindowSessionImpl> parentSession = nullptr;
-        auto ret = GetParentSessionAndVerify(hasToastFlag, parentSession);
+        auto ret = WindowSceneSessionImpl::VerifySubWindowLevel(hasToastFlag, parentSession);
         if (ret != WMError::WM_OK) {
             return ret;
         }
@@ -4589,10 +4598,9 @@ WMError WindowSceneSessionImpl::GetAndVerifyWindowTypeForArkUI(uint32_t parentId
             TLOGE(WmsLogTag::WMS_SUB, "parentWindow does match type");
             return WMError::WM_ERROR_INVALID_WINDOW;
         }
-        if (parentWindow->GetProperty()->GetSubWindowLevel() >= 1 &&
-            !parentWindow->IsPcOrFreeMultiWindowCapabilityEnabled()) {
-            TLOGE(WmsLogTag::WMS_SUB, "device not support");
-            return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+        auto ret = WindowSceneSessionImpl::VerifySubWindowLevel(false, parentWindow);
+        if (ret != WMError::WM_OK) {
+            return ret;
         }
         windowType = WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
     }
