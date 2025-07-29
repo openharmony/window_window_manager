@@ -16,13 +16,13 @@
 #ifndef OHOS_ROSEN_WM_COMMON_H
 #define OHOS_ROSEN_WM_COMMON_H
 
-#include <any>
 #include <cmath>
 #include <map>
 #include <memory>
 #include <sstream>
 #include <string>
 #include <unordered_set>
+#include <variant>
 
 #include <float.h>
 
@@ -1516,6 +1516,8 @@ enum class WindowInfoKey : int32_t {
     VISIBILITY_STATE = 1 << 4,
     DISPLAY_ID = 1 << 5,
     WINDOW_RECT = 1 << 6,
+    WINDOW_MODE = 1 << 7,
+    FLOATING_SCALE = 1 << 8,
 };
 
 /*

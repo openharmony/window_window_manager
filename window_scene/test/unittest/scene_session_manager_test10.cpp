@@ -880,6 +880,23 @@ HWTEST_F(SceneSessionManagerTest10, RegisterRequestVsyncFunc01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RegisterSessionPropertyChangeNotifyManagerFunc
+ * @tc.desc: test RegisterSessionPropertyChangeNotifyManagerFunc01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, RegisterSessionPropertyChangeNotifyManagerFunc01, TestSize.Level1)
+{
+    ssm_->RegisterSessionPropertyChangeNotifyManagerFunc(nullptr);
+    SessionInfo info;
+    info.abilityName_ = "RegisterRequestVsyncFunc01";
+    info.bundleName_ = "RegisterRequestVsyncFunc01";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ssm_->RegisterSessionPropertyChangeNotifyManagerFunc(sceneSession);
+    EXPECT_NE(nullptr, sceneSession->sessionPropertyChangeNotifyManagerFunc_);
+}
+
+/**
  * @tc.name: TestEraseSceneSessionAndMarkDirtyLocked_01
  * @tc.desc: Test EraseSceneSessionAndMarkDirtyLocked with erase id not exist
  * @tc.type: FUNC
