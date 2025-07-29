@@ -70,6 +70,14 @@
 #include <power_mgr_client.h>
 #endif
 
+#define RETURN_IF_PARAM_IS_NULL(param, ...)                              \
+    do {                                                                 \
+        if (!param) {                                                    \
+            TLOGE(WmsLogTag::DEFAULT, "The %{public}s is null", #param); \
+            return __VA_ARGS__;                                          \
+        }                                                                \
+    } while (false)                                                      \
+
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSession" };
@@ -7453,6 +7461,12 @@ void SceneSession::RegisterForceSplitListener(const NotifyForceSplitFunc& func)
     forceSplitFunc_ = func;
 }
 
+void SceneSession::RegisterAppHookWindowInfoFunc(GetHookWindowInfoFunc&& func)
+{
+    RETURN_IF_PARAM_IS_NULL(func);
+    getHookWindowInfoFunc_ = std::move(func);
+}
+
 void SceneSession::RegisterRequestedOrientationChangeCallback(NotifyReqOrientationChangeFunc&& callback)
 {
     PostTask([weakThis = wptr(this), callback = std::move(callback), where = __func__] {
@@ -7510,6 +7524,16 @@ WMError SceneSession::GetAppForceLandscapeConfig(AppForceLandscapeConfig& config
         return WMError::WM_ERROR_NULLPTR;
     }
     config = forceSplitFunc_(sessionInfo_.bundleName_);
+    return WMError::WM_OK;
+}
+
+WMError SceneSession::GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo)
+{
+    if (!getHookWindowInfoFunc_) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, func is null", GetPersistentId());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    hookWindowInfo = getHookWindowInfoFunc_(sessionInfo_.bundleName_);
     return WMError::WM_OK;
 }
 

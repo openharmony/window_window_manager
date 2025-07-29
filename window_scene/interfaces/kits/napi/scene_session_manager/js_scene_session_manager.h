@@ -111,6 +111,7 @@ public:
     static napi_value NotifyEnterRecentTask(napi_env env, napi_callback_info info);
     static napi_value UpdateDisplayHookInfo(napi_env env, napi_callback_info info);
     static napi_value UpdateAppHookDisplayInfo(napi_env env, napi_callback_info info);
+    static napi_value UpdateAppHookWindowInfo(napi_env env, napi_callback_info info);
     static napi_value NotifyHookOrientationChange(napi_env env, napi_callback_info info);
     static napi_value InitScheduleUtils(napi_env env, napi_callback_info info);
     static napi_value SetAppForceLandscapeConfig(napi_env env, napi_callback_info info);
@@ -234,6 +235,7 @@ private:
     napi_value OnNotifyEnterRecentTask(napi_env env, napi_callback_info info);
     napi_value OnUpdateDisplayHookInfo(napi_env env, napi_callback_info info);
     napi_value OnUpdateAppHookDisplayInfo(napi_env env, napi_callback_info info);
+    napi_value OnUpdateAppHookWindowInfo(napi_env env, napi_callback_info info);
     napi_value OnNotifyHookOrientationChange(napi_env env, napi_callback_info info);
     napi_value OnInitScheduleUtils(napi_env env, napi_callback_info info);
     napi_value OnSetAppForceLandscapeConfig(napi_env env, napi_callback_info info);
