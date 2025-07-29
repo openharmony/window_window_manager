@@ -354,6 +354,7 @@ void KeyboardSession::NotifyOccupiedAreaChanged(const sptr<SceneSession>& callin
         const WSRect& callingSessionRect = callingSession->GetSessionRect();
         callingSession->NotifyOccupiedAreaChangeInfo(occupiedAreaInfo, rsTransaction,
             SessionHelper::TransferToRect(callingSessionRect), avoidAreas);
+    }   
 }
 
 bool KeyboardSession::CalculateOccupiedArea(const sptr<SceneSession>& callingSession, const WSRect& callingSessionRect,

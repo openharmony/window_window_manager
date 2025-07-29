@@ -1618,6 +1618,7 @@ sptr<DisplayInfo> WindowSceneSessionImpl::GetDisplayInfo() const
 
 WMError WindowSceneSessionImpl::ShowKeyboard(KeyboardEffectOption effectOption)
 {
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Effect option: %{public}s", effectOption.ToString().c_str());
     if (effectOption.viewMode_ >= KeyboardViewMode::VIEW_MODE_END) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid view mode: %{public}u. Use default mode",
             static_cast<uint32_t>(effectOption.viewMode_));
