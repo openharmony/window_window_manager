@@ -221,7 +221,7 @@ void DisplayManagerAni::OnRegisterCallback(ani_env* env, ani_string type, ani_re
         env->GlobalReference_Delete(cbRef);
         return;
     }
-    sptr<DisplayAniListener> displayAniListener = new(std::nothrow) DisplayAniListener(env);
+    sptr<DisplayAniListener> displayAniListener = sptr<DisplayAniListener>::MakeSptr(env);
     if (displayAniListener == nullptr) {
         TLOGE(WmsLogTag::DMS, "[ANI]displayListener is nullptr");
         env->GlobalReference_Delete(cbRef);

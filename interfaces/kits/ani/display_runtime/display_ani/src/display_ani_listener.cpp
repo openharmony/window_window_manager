@@ -72,7 +72,7 @@ void DisplayAniListener::RemoveCallback(ani_env* env, const std::string& type, a
 void DisplayAniListener::RemoveAllCallback()
 {
     std::lock_guard<std::mutex> lock(aniCallbackMtx_);
-    for (auto& [typeString, callbacks] : aniCallback_) {
+    for (const auto& [typeString, callbacks] : aniCallback_) {
         for (auto callback : callbacks) {
             if (env_) {
                 env_->GlobalReference_Delete(callback);

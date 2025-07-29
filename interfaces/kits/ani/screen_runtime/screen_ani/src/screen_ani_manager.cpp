@@ -58,6 +58,7 @@ void ScreenManagerAni::UnRegisterCallback(ani_env* env, ani_string type, ani_lon
 
 void ScreenManagerAni::OnRegisterCallback(ani_env* env, ani_string type, ani_ref callback)
 {
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
     ani_ref cbRef{};
     std::string typeString;
     ScreenAniUtils::GetStdString(env, type, typeString);
@@ -72,7 +73,6 @@ void ScreenManagerAni::OnRegisterCallback(ani_env* env, ani_string type, ani_ref
         env->GlobalReference_Delete(cbRef);
         return;
     }
-    TLOGI(WmsLogTag::DMS, "[ANI] begin");
     ani_boolean callbackUndefined = 0;
     env->Reference_IsUndefined(cbRef, &callbackUndefined);
     if (callbackUndefined) {
