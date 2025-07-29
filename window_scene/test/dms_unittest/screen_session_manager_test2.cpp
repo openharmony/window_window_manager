@@ -1108,7 +1108,7 @@ HWTEST_F(ScreenSessionManagerTest, TryToCancelScreenOff01, TestSize.Level1)
     MockAccesstokenKit::MockIsSystemApp(false);
     MockSessionPermission::MockIsStarByHdcd(false);
     ssm_->TryToCancelScreenOff();
-    EXPECT_TRUE(g_errLog.find("permission denied!") != std::string::npos);
+    EXPECT_TRUE(g_errLog.find("Permission denied!") != std::string::npos);
 }
 
 /**
