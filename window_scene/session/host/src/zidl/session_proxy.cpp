@@ -2476,6 +2476,33 @@ WMError SessionProxy::GetAppForceLandscapeConfig(AppForceLandscapeConfig& config
     return static_cast<WMError>(ret);
 }
 
+WMError SessionProxy::GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "WriteInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (!remote) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    uint32_t requestCode = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_HOOK_WINDOW_INFO);
+    if (remote->SendRequest(requestCode, data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<HookWindowInfo> replyInfo = reply.ReadParcelable<HookWindowInfo>();
+    if (replyInfo) {
+        hookWindowInfo = *replyInfo;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WMError>(ret);
+}
+
 WSError SessionProxy::SetDialogSessionBackGestureEnabled(bool isEnabled)
 {
     MessageParcel data;

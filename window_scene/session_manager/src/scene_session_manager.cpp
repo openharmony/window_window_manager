@@ -876,6 +876,7 @@ WSError SceneSessionManager::SwitchFreeMultiWindow(bool enable)
         }
         sceneSession->SwitchFreeMultiWindow(systemConfig_);
     }
+    UpdateAppHookWindowInfoWhenSwitchFreeMultiWindow(enable);
     WindowStyleType type = enable ?
             WindowStyleType::WINDOW_STYLE_FREE_MULTI_WINDOW : WindowStyleType::WINDOW_STYLE_DEFAULT;
     SessionManagerAgentController::GetInstance().NotifyWindowStyleChange(type);
@@ -2386,6 +2387,9 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         sceneSession->isKeyboardPanelEnabled_ = isKeyboardPanelEnabled_;
         sceneSession->RegisterForceSplitListener([this](const std::string& bundleName) {
             return this->GetAppForceLandscapeConfig(bundleName);
+        });
+        sceneSession->RegisterAppHookWindowInfoFunc([this](const std::string& bundleName) {
+            return this->GetAppHookWindowInfo(bundleName);
         });
         sceneSession->SetUpdatePrivateStateAndNotifyFunc([this](int32_t persistentId) {
             this->UpdatePrivateStateAndNotify(persistentId);
@@ -13697,7 +13701,7 @@ bool SceneSessionManager::FilterForListWindowInfo(const WindowInfoOption& window
 WMError SceneSessionManager::GetAllWindowLayoutInfo(DisplayId displayId,
     std::vector<sptr<WindowLayoutInfo>>& infos)
 {
-    auto task = [this, displayId, &infos]() mutable {
+    auto task = [this, displayId, &infos, funcName = __func__]() mutable {
         bool isVirtualDisplay = false;
         if (displayId == VIRTUAL_DISPLAY_ID) {
             displayId = DEFAULT_DISPLAY_ID;
@@ -13710,6 +13714,16 @@ WMError SceneSessionManager::GetAllWindowLayoutInfo(DisplayId displayId,
             session->GetGlobalScaledRect(globalScaledRect);
             if (isVirtualDisplay) {
                 globalScaledRect.posY_ -= GetFoldLowerScreenPosY();
+            }
+            HookWindowInfo hookWindowInfo = GetAppHookWindowInfo(session->GetSessionInfo().bundleName_);
+            if (hookWindowInfo.enableHookWindow &&
+                WindowHelper::IsMainWindow(session->GetWindowType()) &&
+                !MathHelper::NearEqual(hookWindowInfo.widthHookRatio, HookWindowInfo::DEFAULT_WINDOW_SIZE_HOOK_RATIO)) {
+                globalScaledRect.width_ =
+                    static_cast<uint32_t>(globalScaledRect.width_ * hookWindowInfo.widthHookRatio);
+                TLOGD(WmsLogTag::WMS_LAYOUT, "%{public}s: id:%{public}u, hook window width, hooked width:%{public}u, "
+                    "widthHookRatio:%{public}f.", funcName, session->GetPersistentId(), globalScaledRect.width_,
+                    hookWindowInfo.widthHookRatio);
             }
             auto windowLayoutInfo = sptr<WindowLayoutInfo>::MakeSptr();
             windowLayoutInfo->rect = globalScaledRect;
@@ -13896,6 +13910,19 @@ WMError SceneSessionManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisi
             windowVisibilityInfo->SetGlobalDisplayRect(globalDisplayRect);
             TLOGD(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: wid=%{public}d, globalDisplayRect=%{public}s",
                 where, static_cast<int32_t>(session->GetPersistentId()), globalDisplayRect.ToString().c_str());
+            HookWindowInfo hookWindowInfo = GetAppHookWindowInfo(session->GetSessionInfo().bundleName_);
+            if (hookWindowInfo.enableHookWindow &&
+                WindowHelper::IsMainWindow(session->GetWindowType()) &&
+                !MathHelper::NearEqual(hookWindowInfo.widthHookRatio, HookWindowInfo::DEFAULT_WINDOW_SIZE_HOOK_RATIO)) {
+                rect.width_ = static_cast<uint32_t>(rect.width_ * hookWindowInfo.widthHookRatio);
+                globalDisplayRect.width_ =
+                    static_cast<uint32_t>(globalDisplayRect.width_ * hookWindowInfo.widthHookRatio);
+                windowVisibilityInfo->rect_ = rect;
+                windowVisibilityInfo->SetGlobalDisplayRect(globalDisplayRect);
+                TLOGD(WmsLogTag::WMS_LAYOUT, "%{public}s: id:%{public}u, hook window width, hooked width:%{public}u, "
+                    "hooked globalDisplay width:%{public}u, widthHookRatio:%{public}f.", where,
+                    session->GetPersistentId(), rect.width_, globalDisplayRect.width_, hookWindowInfo.widthHookRatio);
+            }
             infos.emplace_back(windowVisibilityInfo);
         }
         return WMError::WM_OK;
@@ -15232,6 +15259,80 @@ WMError SceneSessionManager::UpdateAppHookDisplayInfo(int32_t uid, const HookInf
     return WMError::WM_OK;
 }
 
+WMError SceneSessionManager::UpdateAppHookWindowInfo(const std::string& bundleName,
+                                                     const HookWindowInfo& hookWindowInfo)
+{
+    if (bundleName.empty()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Bundle name is empty");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    if (hookWindowInfo.widthHookRatio < 0.0f) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid hook window parameters: widthHookRatio:%{public}f, "
+            "bundleName:%{public}s", hookWindowInfo.widthHookRatio, bundleName.c_str());
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    TLOGI(WmsLogTag::WMS_LAYOUT, "bundleName:%{public}s, hookWindowInfo:[%{public}s]", bundleName.c_str(),
+        hookWindowInfo.ToString().c_str());
+
+    HookWindowInfo preInfo;
+    {
+        std::unique_lock lock(appHookWindowInfoMapMutex_);
+        if (appHookWindowInfoMap_.count(bundleName)) {
+            preInfo = appHookWindowInfoMap_[bundleName];
+        } else {
+            preInfo = {};
+        }
+        appHookWindowInfoMap_[bundleName] = hookWindowInfo;
+    }
+
+    if (preInfo.enableHookWindow != hookWindowInfo.enableHookWindow ||
+        !MathHelper::NearZero(preInfo.widthHookRatio - hookWindowInfo.widthHookRatio)) {
+        //Notify the client of the info change
+        std::shared_lock lock(sceneSessionMapMutex_);
+        for (const auto& [_, session] : sceneSessionMap_) {
+            if (session && session->GetSessionInfo().bundleName_ == bundleName) {
+                session->NotifyAppHookWindowInfoUpdated();
+            }
+        }
+    }
+    return WMError::WM_OK;
+}
+
+HookWindowInfo SceneSessionManager::GetAppHookWindowInfo(const std::string& bundleName)
+{
+    if (bundleName.empty()) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Empty bundle name requested");
+        return {};
+    }
+    std::shared_lock lock(appHookWindowInfoMapMutex_);
+    const auto& it = appHookWindowInfoMap_.find(bundleName);
+    if (it == appHookWindowInfoMap_.end()) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "app: %{public}s, hookWindowInfo not find", bundleName.c_str());
+        return {};
+    }
+    return it->second;
+}
+
+void SceneSessionManager::UpdateAppHookWindowInfoWhenSwitchFreeMultiWindow(bool isOpenFreeMultiWindow)
+{
+    std::unordered_set<std::string> bundleNames;
+    {
+        std::shared_lock lock(appHookWindowInfoMapMutex_);
+        for (auto& [bundleName, hookWindowInfo] : appHookWindowInfoMap_) {
+            hookWindowInfo.enableHookWindow = !isOpenFreeMultiWindow;
+            bundleNames.insert(bundleName);
+        }
+    }
+    {
+        std::shared_lock lock(sceneSessionMapMutex_);
+        for (const auto& [_, session] : sceneSessionMap_) {
+            if (session && bundleNames.count(session->GetSessionInfo().bundleName_)) {
+                session->NotifyAppHookWindowInfoUpdated();
+            }
+        }
+    }
+}
+
 WMError SceneSessionManager::NotifyHookOrientationChange(int32_t persistentId)
 {
     auto sceneSession = GetSceneSession(persistentId);
@@ -15420,13 +15521,19 @@ WSError SceneSessionManager::SetAppForceLandscapeConfig(const std::string& bundl
         TLOGE(WmsLogTag::DEFAULT, "bundle name is empty");
         return WSError::WS_ERROR_NULLPTR;
     }
-    std::unique_lock<std::shared_mutex> lock(appForceLandscapeMutex_);
-
-    AppForceLandscapeConfig preConfig = appForceLandscapeMap_[bundleName];
-
-    appForceLandscapeMap_[bundleName] = config;
-    TLOGI(WmsLogTag::DEFAULT, "app: %{public}s, mode: %{public}d, homePage: %{public}s, supportSplit: %{public}d",
-        bundleName.c_str(), config.mode_, config.homePage_.c_str(), config.supportSplit_);
+    AppForceLandscapeConfig preConfig;
+    {
+        std::unique_lock<std::shared_mutex> lock(appForceLandscapeMutex_);
+        if (appForceLandscapeMap_.count(bundleName)) {
+            preConfig = appForceLandscapeMap_[bundleName];
+        } else {
+            preConfig = {};
+        }
+        appForceLandscapeMap_[bundleName] = config;
+    }
+    TLOGI(WmsLogTag::DEFAULT, "app: %{public}s, mode: %{public}d, homePage: %{public}s, supportSplit: %{public}d, "
+        "arkUIOptions: %{public}s", bundleName.c_str(), config.mode_, config.homePage_.c_str(), config.supportSplit_,
+        config.arkUIOptions_.c_str());
 
     if (preConfig.mode_ == FORCE_SPLIT_MODE || config.mode_ == FORCE_SPLIT_MODE ||
         preConfig.mode_ == NAV_FORCE_SPLIT_MODE || config.mode_ == NAV_FORCE_SPLIT_MODE) {

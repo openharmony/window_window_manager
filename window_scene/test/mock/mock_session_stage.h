@@ -88,6 +88,7 @@ public:
     MOCK_METHOD0(NotifyLifecyclePausedStatus, void(void));
     MOCK_METHOD1(NotifyAppUseControlStatus, void(bool isUseControl));
     MOCK_METHOD0(NotifyAppForceLandscapeConfigUpdated, WSError(void));
+    MOCK_METHOD0(NotifyAppHookWindowInfoUpdated, WSError(void));
     MOCK_METHOD1(NotifyExtensionSecureLimitChange, WSError(bool isLimit));
     MOCK_METHOD1(GetRouterStackInfo, WMError(std::string& routerStackInfo));
     MOCK_METHOD1(SendFbActionEvent, WSError(const std::string& action));

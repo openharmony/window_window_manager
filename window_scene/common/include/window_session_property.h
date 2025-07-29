@@ -718,20 +718,21 @@ struct FreeMultiWindowConfig : public Parcelable {
 
 struct AppForceLandscapeConfig : public Parcelable {
     int32_t mode_ = 0;
-    std::string homePage_;
+    std::string homePage_ = "";
     int32_t supportSplit_ = -1;
+    std::string arkUIOptions_ = "";
 
     AppForceLandscapeConfig() {}
-    AppForceLandscapeConfig(int32_t mode, const std::string& homePage, int32_t supportSplit)
-        : mode_(mode), homePage_(homePage), supportSplit_(supportSplit)
-    {
-    }
+    AppForceLandscapeConfig(int32_t mode, const std::string& homePage, int32_t supportSplit,
+        const std::string& arkUIOptions) : mode_(mode), homePage_(homePage), supportSplit_(supportSplit),
+        arkUIOptions_(arkUIOptions) {}
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
         if (!parcel.WriteInt32(mode_) ||
             !parcel.WriteString(homePage_) ||
-            !parcel.WriteInt32(supportSplit_)) {
+            !parcel.WriteInt32(supportSplit_) ||
+            !parcel.WriteString(arkUIOptions_)) {
             return false;
         }
         return true;
@@ -739,17 +740,17 @@ struct AppForceLandscapeConfig : public Parcelable {
 
     static AppForceLandscapeConfig* Unmarshalling(Parcel& parcel)
     {
-        AppForceLandscapeConfig* config = new (std::nothrow) AppForceLandscapeConfig();
+        std::unique_ptr<AppForceLandscapeConfig> config = std::make_unique<AppForceLandscapeConfig>();
         if (config == nullptr) {
             return nullptr;
         }
         if (!parcel.ReadInt32(config->mode_) ||
             !parcel.ReadString(config->homePage_) ||
-            !parcel.ReadInt32(config->supportSplit_)) {
-            delete config;
+            !parcel.ReadInt32(config->supportSplit_) ||
+            !parcel.ReadString(config->arkUIOptions_)) {
             return nullptr;
         }
-        return config;
+        return config.release();
     }
 };
 

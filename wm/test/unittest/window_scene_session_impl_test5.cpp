@@ -2008,6 +2008,7 @@ HWTEST_F(WindowSceneSessionImplTest5, GetAppForceLandscapeConfig01, TestSize.Lev
         EXPECT_EQ(config.mode_, 0);
         EXPECT_EQ(config.homePage_, "");
         EXPECT_EQ(config.supportSplit_, -1);
+        EXPECT_EQ(config.arkUIOptions_, "");
     }
 }
 
@@ -2030,6 +2031,7 @@ HWTEST_F(WindowSceneSessionImplTest5, GetAppForceLandscapeConfig02, TestSize.Lev
         EXPECT_EQ(config.mode_, 0);
         EXPECT_EQ(config.homePage_, "");
         EXPECT_EQ(config.supportSplit_, -1);
+        EXPECT_EQ(config.arkUIOptions_, "");
     }
 }
 
