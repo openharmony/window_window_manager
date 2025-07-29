@@ -8310,7 +8310,7 @@ void ScreenSessionManager::FlushDisplayNodeWhenSwtichUser(std::vector<int32_t> o
     RSTransactionAdapter::FlushImplicitTransaction(screenSession->GetRSUIContext());
 }
 
-bool ScreenSessionManager::SwitchPcMode()
+bool ScreenSessionManager::HandleSwitchPcMode()
 {
     if (!IS_SUPPORT_PC_MODE) {
         return g_isPcDevice;
@@ -8373,7 +8373,7 @@ void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& cl
         TLOGE(WmsLogTag::DMS, "SetClient client is null");
         return;
     }
-    SwitchPcMode();
+    HandleSwitchPcMode();
     if (g_isPcDevice && userSwitching_) {
         std::unique_lock<std::mutex> lock(switchUserMutex_);
         if (switchUserCV_.wait_for(lock, std::chrono::milliseconds(CV_WAIT_USERSWITCH_MS)) == std::cv_status::timeout) {

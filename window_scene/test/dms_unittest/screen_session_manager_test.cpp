@@ -7160,20 +7160,20 @@ HWTEST_F(ScreenSessionManagerTest, SetPrimaryDisplaySystemDpi, Function | SmallT
 }
 
 /**
- * @tc.name: SwitchPCMode
- * @tc.desc: SwitchPCMode
+ * @tc.name: HandleSwitchPcMode
+ * @tc.desc: HandleSwitchPcMode
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerTest, SwitchPCMode, TestSize.Level1)
+HWTEST_F(ScreenSessionManagerTest, HandleSwitchPcMode, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     if (!IS_SUPPORT_PC_MODE) {
-        bool isPcDevice = ssm_->SwitchPCMode();
+        bool isPcDevice = ssm_->HandleSwitchPcMode();
         ASSERT_EQ(isPcDevice, g_isPcDevice);
         return;
     }
     bool isPcMode = system::GetBoolParameter("persist.sceneboard.ispcmode", false);
-    bool isPcDevice = ssm_->SwitchPCMode();
+    bool isPcDevice = ssm_->HandleSwitchPcMode();
     if (isPcMode) {
         EXPECT_TRUE(isPcDevice);
     } else {
