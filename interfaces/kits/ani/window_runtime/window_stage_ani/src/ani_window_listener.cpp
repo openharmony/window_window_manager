@@ -532,5 +532,37 @@ void AniWindowListener::OnSubWindowClose(bool& terminateCloseProcess)
 void AniWindowListener::OnMainWindowClose(bool& terminateCloseProcess)
 {
 }
+
+void AniWindowListener::OnRotationChange(const RotationChangeInfo& rotationChangeInfo,
+    RotationChangeResult& rotationChangeResult)
+{
+    TLOGI(WmsLogTag::WMS_ROTATION, "[ANI]");
+    auto task = [self = weakRef_, eng = env_, rotationChangeInfo, &rotationChangeResult] {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "AniWindowListener::OnRotationChange");
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || eng == nullptr || thisListener->aniCallback_ == nullptr) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "[ANI]this listener, eng or callback is nullptr");
+            return;
+        }
+        ani_object rotationInfoObj = AniWindowUtils::CreateAniRotationChangeInfo(eng, rotationChangeInfo);
+        if (rotationInfoObj == nullptr) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "failed to create ani object");
+            return;
+        }
+        ani_ref rotationChangeResultObj;
+        AniWindowUtils::CallAniFunctionRef(eng, rotationChangeResultObj, thisListener->aniCallback_, 1,
+            rotationInfoObj);
+        if (rotationChangeResultObj != nullptr) {
+            AniWindowUtils::ParseRotationChangeResult(eng, static_cast<ani_object>(rotationChangeResultObj),
+                rotationChangeResult);
+        }
+    };
+    if (!eventHandler_ ||
+        (eventHandler_->GetEventRunner() && eventHandler_->GetEventRunner()->IsCurrentRunnerThread())) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "get main event handler failed or current is already main thread!");
+        return task();
+    }
+    eventHandler_->PostSyncTask(task, __func__, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+}
 } // namespace Rosen
 } // namespace OHOS

@@ -264,6 +264,9 @@ public:
     static ani_status GetPropertyIntObject(ani_env* env, const char* propertyName, ani_object object, int32_t& result);
     static ani_status GetPropertyDoubleObject(ani_env* env, const char* propertyName,
         ani_object object, double& result);
+    static ani_status GetPropertyRectObject(ani_env* env, const char* propertyName,
+        ani_object object, Rect& result);
+    static ani_status GetIntObject(ani_env* env, const char* propertyName, ani_object object, int32_t& result);
     static ani_status GetDoubleObject(ani_env* env, ani_object double_object, double& result);
     static ani_status NewAniObjectNoParams(ani_env* env, const char* cls, ani_object* object);
     static ani_status NewAniObject(ani_env* env, const char* cls, const char* signature, ani_object* result, ...);
@@ -279,7 +282,11 @@ public:
     static ani_object CreateAniKeyboardInfo(ani_env* env, const KeyboardPanelInfo& keyboardPanelInfo);
     static ani_object CreateAniSystemBarTintState(ani_env* env, DisplayId displayId, const SystemBarRegionTints& tints);
     static ani_object CreateAniSystemBarRegionTint(ani_env* env, const SystemBarRegionTint& tint);
+    static ani_object CreateAniRotationChangeInfo(ani_env* env, const RotationChangeInfo& info);
+    static void ParseRotationChangeResult(ani_env* env, ani_object obj, RotationChangeResult& rotationChangeResult);
     static ani_status CallAniFunctionVoid(ani_env *env, const char* ns, const char* func, const char* signature, ...);
+    static ani_status CallAniFunctionRef(ani_env *env, ani_ref& result, ani_ref ani_callback,
+        const int32_t args_num, ...);
     static ani_status CallAniMethodVoid(ani_env* env, ani_object object, const char* cls,
         const char* method, const char* signature, ...);
     static ani_status CallAniMethodVoid(ani_env* env, ani_object object, ani_class cls,

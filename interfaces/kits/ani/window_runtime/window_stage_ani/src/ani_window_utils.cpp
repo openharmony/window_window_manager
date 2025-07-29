@@ -148,6 +148,47 @@ ani_status AniWindowUtils::GetPropertyDoubleObject(ani_env* env, const char* pro
     return ret;
 }
 
+ani_status AniWindowUtils::GetPropertyRectObject(ani_env* env, const char* propertyName,
+    ani_object object, Rect& result)
+{
+    ani_ref windowRect;
+    ani_status ret = env->Object_GetPropertyByName_Ref(object, propertyName, &windowRect);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref %{public}s Failed, ret : %{public}u",
+            propertyName, static_cast<int32_t>(ret));
+        return ret;
+    }
+
+    int32_t posX;
+    int32_t posY;
+    int32_t width;
+    int32_t height;
+    GetIntObject(env, "left", static_cast<ani_object>(windowRect), posX);
+    GetIntObject(env, "top", static_cast<ani_object>(windowRect), posY);
+    GetIntObject(env, "width", static_cast<ani_object>(windowRect), width);
+    GetIntObject(env, "height", static_cast<ani_object>(windowRect), height);
+    result.posX_ = posX;
+    result.posY_ = posY;
+    result.width_ = width;
+    result.height_ = height;
+    return ret;
+}
+
+ani_status AniWindowUtils::GetIntObject(ani_env* env, const char* propertyName,
+    ani_object object, int32_t& result)
+{
+    ani_int int_value;
+    ani_status ret = env->Object_GetPropertyByName_Int(object, propertyName, &int_value);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Int %{public}s Failed, ret : %{public}u",
+            propertyName, static_cast<int32_t>(ret));
+        return ret;
+    }
+    result = static_cast<int32_t>(int_value);
+    TLOGI(WmsLogTag::DEFAULT, "[ANI] %{public}s is: %{public}u", propertyName, result);
+    return ret;
+}
+
 ani_status AniWindowUtils::GetDoubleObject(ani_env* env, ani_object double_object, double& result)
 {
     ani_boolean isUndefined;
@@ -512,6 +553,73 @@ ani_object AniWindowUtils::CreateAniSystemBarRegionTint(ani_env* env, const Syst
     return regionTint;
 }
 
+ani_object AniWindowUtils::CreateAniRotationChangeInfo(ani_env* env, const RotationChangeInfo& info)
+{
+    TLOGI(WmsLogTag::WMS_ROTATION, "[ANI]");
+    ani_class aniClass;
+    ani_status ret = env->FindClass("L@ohos/window/window/RotationChangeInfoInternal;", &aniClass);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[ANI] class not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_method aniCtor;
+    ret = env->Class_FindMethod(aniClass, "<ctor>", nullptr, &aniCtor);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[ANI] ctor not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_object RotationChangeInfo;
+    ret = env->Object_New(aniClass, aniCtor, &RotationChangeInfo);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[ANI] failed to new obj");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_enum rotationChangeType;
+    ret = env->FindEnum("L@ohos/window/window/RotationChangeType;", &rotationChangeType);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[ANI] failed to FindEnum");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_enum_item rotationChangeTypeItem;
+    std::string itemName =
+        info.type_ == RotationChangeType::WINDOW_WILL_ROTATE? "WINDOW_WILL_ROTATE" : "WINDOW_DID_ROTATE";
+    ret = env->Enum_GetEnumItemByName(rotationChangeType, itemName.c_str(), &rotationChangeTypeItem);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[ANI] Enum_GetEnumItemByName failed");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    CallAniMethodVoid(env, RotationChangeInfo, aniClass, "<set>type", nullptr,
+        rotationChangeTypeItem);
+    CallAniMethodVoid(env, RotationChangeInfo, aniClass, "<set>orientation", nullptr,
+        ani_int(info.orientation_));
+    CallAniMethodVoid(env, RotationChangeInfo, aniClass, "<set>displayId", nullptr,
+        ani_long(info.displayId_));
+    CallAniMethodVoid(env, RotationChangeInfo, aniClass, "<set>displayRect", nullptr,
+        CreateAniRect(env, info.displayRect_));
+    return RotationChangeInfo;
+}
+
+void AniWindowUtils::ParseRotationChangeResult(ani_env* env, ani_object obj, RotationChangeResult& rotationChangeResult)
+{
+    ani_ref rectTypeRef;
+    ani_status ret = env->Object_GetPropertyByName_Ref(obj, "rectType", &rectTypeRef);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[ANI] Object_GetPropertyByName_Ref failed, ret: %{public}d", ret);
+        return;
+    }
+    ani_int rectType;
+    ret = env->EnumItem_GetValue_Int(static_cast<ani_enum_item>(rectTypeRef), &rectType);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[ANI] EnumItem_GetValue_Int failed, ret: %{public}d", ret);
+        return;
+    }
+
+    Rect windowRect;
+    GetPropertyRectObject(env, "windowRect", obj, windowRect);
+    rotationChangeResult.rectType_ = static_cast<RectType>(rectType);
+    rotationChangeResult.windowRect_ = windowRect;
+}
+
 ani_status AniWindowUtils::CallAniFunctionVoid(ani_env *env, const char* ns,
     const char* fn, const char* signature, ...)
 {
@@ -530,6 +638,25 @@ ani_status AniWindowUtils::CallAniFunctionVoid(ani_env *env, const char* ns,
     va_start(args, signature);
     ret = env->Function_Call_Void_V(func, args);
     va_end(args);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI]cannot run callback %{public}d", ret);
+        return ret;
+    }
+    return ret;
+}
+
+ani_status AniWindowUtils::CallAniFunctionRef(ani_env *env, ani_ref& result,
+    ani_ref ani_callback, const int32_t args_num, ...)
+{
+    va_list args;
+    va_start(args, args_num);
+    std::vector<ani_ref> vec;
+    for (int i = 0; i < args_num; i++) {
+        vec.push_back(va_arg(args, ani_object));
+    }
+    va_end(args);
+    ani_status ret = env->FunctionalObject_Call(static_cast<ani_fn_object>(ani_callback), ani_size(args_num),
+        vec.data(), &result);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI]cannot run callback %{public}d", ret);
         return ret;
