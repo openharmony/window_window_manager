@@ -63,20 +63,22 @@ void ScreenManagerAni::OnRegisterCallback(ani_env* env, ani_string type, ani_ref
     ScreenAniUtils::GetStdString(env, type, typeString);
     if (env->GlobalReference_Create(callback, &cbRef) != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] create global ref fail");
+        env->GlobalReference_Delete(cbRef);
         return;
     }
     std::lock_guard<std::mutex> lock(mtx_);
     if (IsCallbackRegistered(env, typeString, cbRef)) {
         TLOGI(WmsLogTag::DMS, "[ANI] type %{public}s callback already registered!", typeString.c_str());
+        env->GlobalReference_Delete(cbRef);
         return;
     }
     TLOGI(WmsLogTag::DMS, "[ANI] begin");
     ani_boolean callbackUndefined = 0;
     env->Reference_IsUndefined(cbRef, &callbackUndefined);
-    DmErrorCode ret;
     if (callbackUndefined) {
-        std::string errMsg = "[ANI] failed to register screen listener with type, cbk null or undefined";
         TLOGE(WmsLogTag::DMS, "undefined");
+        env->GlobalReference_Delete(cbRef);
+        std::string errMsg = "[ANI] failed to register screen listener with type, cbk null or undefined";
         AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, errMsg);
         return;
     }
@@ -84,14 +86,16 @@ void ScreenManagerAni::OnRegisterCallback(ani_env* env, ani_string type, ani_ref
     sptr<ScreenAniListener> screenAniListener = new(std::nothrow) ScreenAniListener(env);
     if (screenAniListener == nullptr) {
         TLOGE(WmsLogTag::DMS, "[ANI] screenListener is nullptr");
+        env->GlobalReference_Delete(cbRef);
         AniErrUtils::ThrowBusinessError(env, DMError::DM_ERROR_INVALID_PARAM, "screenListener is nullptr");
         return;
     }
     screenAniListener->AddCallback(typeString, cbRef);
     screenAniListener->SetMainEventHandler();
-    ret = ProcessRegisterCallback(env, typeString, screenAniListener);
+    DmErrorCode ret = ProcessRegisterCallback(env, typeString, screenAniListener);
     if (ret != DmErrorCode::DM_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] register screen listener with type, errcode: %{public}d", ret);
+        env->GlobalReference_Delete(cbRef);
         std::string errMsg = "Failed to register screen listener with type";
         AniErrUtils::ThrowBusinessError(env, ret, errMsg);
         return;
@@ -188,6 +192,7 @@ DMError ScreenManagerAni::UnRegisterScreenListenerWithType(std::string type, ani
     if (jsCbMap_[type].empty()) {
         jsCbMap_.erase(type);
     }
+    env->GlobalReference_Delete(cbRef);
     return ret;
 }
 

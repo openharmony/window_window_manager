@@ -207,6 +207,7 @@ void DisplayManagerAni::OnRegisterCallback(ani_env* env, ani_string type, ani_re
     std::lock_guard<std::mutex> lock(mtx_);
     if (IsCallbackRegistered(env, typeString, cbRef)) {
         TLOGI(WmsLogTag::DMS, "[ANI] type %{public}s callback already registered!", typeString.c_str());
+        env->GlobalReference_Delete(cbRef);
         return;
     }
     TLOGI(WmsLogTag::DMS, "[ANI] onRegisterCallback");
@@ -217,11 +218,13 @@ void DisplayManagerAni::OnRegisterCallback(ani_env* env, ani_string type, ani_re
         std::string errMsg = "[ANI] failed to register display listener with type, cbk null or undefined";
         TLOGE(WmsLogTag::DMS, "callbackNull or undefined");
         AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, errMsg);
+        env->GlobalReference_Delete(cbRef);
         return;
     }
     sptr<DisplayAniListener> displayAniListener = new(std::nothrow) DisplayAniListener(env);
     if (displayAniListener == nullptr) {
         TLOGE(WmsLogTag::DMS, "[ANI]displayListener is nullptr");
+        env->GlobalReference_Delete(cbRef);
         AniErrUtils::ThrowBusinessError(env, DMError::DM_ERROR_INVALID_PARAM, "displayListener is nullptr");
         return;
     }
@@ -231,6 +234,7 @@ void DisplayManagerAni::OnRegisterCallback(ani_env* env, ani_string type, ani_re
     ret = ProcessRegisterCallback(env, typeString, displayAniListener);
     if (ret != DmErrorCode::DM_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] register display listener with type, errcode: %{public}d", ret);
+        env->GlobalReference_Delete(cbRef);
         std::string errMsg = "Failed to register display listener with type";
         AniErrUtils::ThrowBusinessError(env, ret, errMsg);
         return;
@@ -329,6 +333,7 @@ void DisplayManagerAni::OnUnRegisterCallback(ani_env* env, ani_string type, ani_
         TLOGE(WmsLogTag::DMS, "[ANI] failed to unregister display listener with type");
         AniErrUtils::ThrowBusinessError(env, DMError::DM_ERROR_INVALID_PARAM, errMsg);
     }
+    env->GlobalReference_Delete(cbRef);
 }
 
 DMError DisplayManagerAni::UnRegisterDisplayListenerWithType(std::string type, ani_env* env, ani_ref callback)
