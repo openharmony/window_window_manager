@@ -2427,6 +2427,17 @@ WSError WindowSessionImpl::UpdateGlobalDisplayRectFromServer(const WSRect& rect,
     const uint32_t windowId = GetWindowId();
     TLOGD(WmsLogTag::WMS_LAYOUT, "windowId: %{public}u, rect: %{public}s, reason: %{public}u",
         windowId, rect.ToString().c_str(), reason);
+
+    // According to the drag specification, in drag-move scenarios, if the final reason is DRAG_END
+    // but the last recorded reason is neither DRAG_START nor DRAG, override it to DRAG_MOVE
+    // to ensure consistent handling of drag operations (same as JsWindowListener::OnRectChange).
+    if (reason == SizeChangeReason::DRAG_END &&
+        globalDisplayRectSizeChangeReason_ != SizeChangeReason::DRAG_START &&
+        globalDisplayRectSizeChangeReason_ != SizeChangeReason::DRAG) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "Override DRAG_END to DRAG_MOVE, windowId: %{public}u", windowId);
+        reason = SizeChangeReason::DRAG_MOVE;
+    }
+
     Rect newRect = { rect.posX_, rect.posY_, rect.width_, rect.height_ };
     if (newRect == GetGlobalDisplayRect() && reason == globalDisplayRectSizeChangeReason_) {
         TLOGD(WmsLogTag::WMS_LAYOUT,
