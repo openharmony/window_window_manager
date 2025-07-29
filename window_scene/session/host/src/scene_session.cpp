@@ -3526,14 +3526,6 @@ void SceneSession::HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect,
             TLOGNE(WmsLogTag::WMS_LAYOUT, "Func is null, could not request vsync");
         }
     }
-
-    // Window Layout Global Coordinate System
-    // During drag (except DRAG_END), the rect is relative to the start display(screen).
-    // At DRAG_END, the rect is relative to the end display(screen).
-    auto relativeDisplayId = reason == SizeChangeReason::DRAG_END ?
-        moveDragController_->GetMoveDragEndDisplayId() : moveDragController_->GetMoveDragStartDisplayId();
-    auto globalDisplayRect = SessionCoordinateHelper::RelativeToGlobalDisplayRect(relativeDisplayId, rect);
-    UpdateGlobalDisplayRect(globalDisplayRect, reason);
 }
 
 void SceneSession::OnNextVsyncReceivedWhenDrag(const WSRect& globalRect,
@@ -7981,11 +7973,6 @@ bool SceneSession::NotifyServerToUpdateRect(const SessionUIParam& uiParam, SizeC
     }
     WSRect rect = { uiParam.rect_.posX_ - uiParam.transX_, uiParam.rect_.posY_ - uiParam.transY_,
         uiParam.rect_.width_, uiParam.rect_.height_ };
-
-    // Window Layout Global Coordinate System
-    auto globalDisplayRect = SessionCoordinateHelper::RelativeToGlobalDisplayRect(GetScreenId(), rect);
-    UpdateGlobalDisplayRect(globalDisplayRect, reason);
-
     if (GetSessionRect() == rect && (!sessionStage_ || GetClientRect() == rect) &&
         reason != SizeChangeReason::SPLIT_DRAG_END) {
         TLOGD(WmsLogTag::WMS_PIPELINE, "skip same rect update id:%{public}d rect:%{public}s preGlobalRect:%{public}s!",
