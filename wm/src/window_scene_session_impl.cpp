@@ -6053,7 +6053,7 @@ WMError WindowSceneSessionImpl::MoveAndResizeKeyboard(const KeyboardLayoutParams
 }
 
 WMError WindowSceneSessionImpl::AdjustKeyboardLayout(const KeyboardLayoutParams params)
-{   
+{
     property_->SetKeyboardLayoutParams(params);
     auto ret = MoveAndResizeKeyboard(params);
     if (ret != WMError::WM_OK) {

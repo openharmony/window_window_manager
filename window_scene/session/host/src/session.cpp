@@ -3881,10 +3881,10 @@ void Session::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info,
     }
     if (info != nullptr) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling id: %{public}d, callingSessionRect: %{public}s"
-        ", safeRect: %{public}s, textFieldPositionY_: %{public}f, textFieldHeight_: %{public}f"
-        ", size of avoidAreas: %{public}d", GetPersistentId(),
-        callingSessionRect.ToString().c_str(), info->rect_.ToString().c_str(), 
-        info->textFieldPositionY_, info->textFieldHeight_, static_cast<int32_t>(avoidAreas.size()));
+            ", safeRect: %{public}s, textFieldPositionY_: %{public}f, textFieldHeight_: %{public}f"
+            ", size of avoidAreas: %{public}d", GetPersistentId(),
+            callingSessionRect.ToString().c_str(), info->rect_.ToString().c_str(),
+            info->textFieldPositionY_, info->textFieldHeight_, static_cast<int32_t>(avoidAreas.size()));
         for (const auto& [type, avoidArea] : avoidAreas) {
             TLOGI(WmsLogTag::WMS_KEYBOARD, "avoidAreaType: %{public}u, avoidArea: %{public}s",
                 type, avoidArea.ToString().c_str());
