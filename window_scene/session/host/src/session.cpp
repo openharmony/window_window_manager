@@ -1184,16 +1184,20 @@ WSError Session::UpdateRectWithLayoutInfo(const WSRect& rect, SizeChangeReason r
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     GetLayoutController()->SetSessionRect(rect);
+    WSRect updateRect = IsNeedConvertToRelativeRect(reason) ?
+        GetLayoutController()->ConvertGlobalRectToRelative(rect, GetDisplayId()) : rect;
+
+    // Window Layout Global Coordinate System
+    auto globalDisplayRect = SessionCoordinateHelper::RelativeToGlobalDisplayRect(GetScreenId(), updateRect);
+    UpdateGlobalDisplayRect(globalDisplayRect, reason);
+
     if (!Session::IsBackgroundUpdateRectNotifyEnabled() && !IsSessionForeground()) {
         return WSError::WS_DO_NOTHING;
     }
     if (sessionStage_ != nullptr) {
         int32_t rotateAnimationDuration = GetRotateAnimationDuration();
         SceneAnimationConfig config { .rsTransaction_ = rsTransaction, .animationDuration_ = rotateAnimationDuration };
-        WSRect updateRect = rect;
         UpdateClientRectPosYAndDisplayId(updateRect);
-        updateRect = IsNeedConvertToRelativeRect(reason) ?
-            GetLayoutController()->ConvertGlobalRectToRelative(updateRect, GetDisplayId()) : updateRect;
         sessionStage_->UpdateRect(updateRect, reason, config, avoidAreas);
         SetClientRect(rect);
         RectCheckProcess();
@@ -1269,11 +1273,6 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
     WindowHelper::IsUIExtensionWindow(GetWindowType()) ?
         UpdateRect(GetSessionRect(), SizeChangeReason::UNDEFINED, "Connect") :
         NotifyClientToUpdateRect("Connect", nullptr);
-
-    // Window Layout Global Coordinate System
-    auto globalDisplayRect = SessionCoordinateHelper::RelativeToGlobalDisplayRect(GetScreenId(), GetSessionRect());
-    UpdateGlobalDisplayRect(globalDisplayRect, SizeChangeReason::UNDEFINED);
-
     EditSessionInfo().disableDelegator = property->GetIsAbilityHookOff();
     NotifyConnect();
     if (WindowHelper::IsSubWindow(GetWindowType()) && surfaceNode_ != nullptr) {
