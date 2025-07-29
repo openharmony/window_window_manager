@@ -51,6 +51,7 @@ enum class RegisterListenerType : uint32_t {
     WINDOW_STAGE_CLOSE_CB,
     SYSTEM_DENSITY_CHANGE_CB,
     WINDOW_DISPLAYID_CHANGE_CB,
+    WINDOW_ROTATION_CHANGE_CB,
 };
 
 class AniWindowRegisterManager {
@@ -110,6 +111,8 @@ private:
     WmErrorCode ProcessWindowHighlightChangeRegister(sptr<AniWindowListener> listener, sptr<Window> window,
         bool isRegister, ani_env* env);
     WmErrorCode ProcessMainWindowCloseRegister(const sptr<AniWindowListener>& listener, const sptr<Window>& window,
+        bool isRegister, ani_env* env);
+    WmErrorCode ProcessWindowRotationChangeRegister(const sptr<AniWindowListener>& listener, const sptr<Window>& window,
         bool isRegister, ani_env* env);
     WmErrorCode ProcessListener(RegisterListenerType registerListenerType, CaseType caseType,
         const sptr<AniWindowListener>& windowManagerListener, const sptr<Window>& window, bool isRegister,

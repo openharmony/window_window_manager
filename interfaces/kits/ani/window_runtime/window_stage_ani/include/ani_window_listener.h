@@ -55,6 +55,7 @@ const std::string WINDOW_HIGHLIGHT_CHANGE_CB = "windowHighlightChange";
 const std::string WINDOW_STAGE_CLOSE_CB = "windowStageClose";
 const std::string SYSTEM_DENSITY_CHANGE_CB = "systemDensityChange";
 const std::string WINDOW_DISPLAYID_CHANGE_CB = "displayIdChange";
+const std::string WINDOW_ROTATION_CHANGE_CB = "rotationChange";
 
 class AniWindowListener : public IWindowChangeListener,
                         public ISystemBarChangedListener,
@@ -78,7 +79,8 @@ class AniWindowListener : public IWindowChangeListener,
                         public ISubWindowCloseListener,
                         public IWindowHighlightChangeListener,
                         public ISystemDensityChangeListener,
-                        public IDisplayIdChangeListener {
+                        public IDisplayIdChangeListener,
+                        public IWindowRotationChangeListener {
 public:
     AniWindowListener(ani_env* env, ani_ref callback, CaseType caseType)
         : env_(env), aniCallback_(callback), caseType_(caseType),
@@ -123,6 +125,8 @@ public:
     void OnMainWindowClose(bool& terminateCloseProcess) override;
     void SetTimeout(int64_t timeout) override;
     int64_t GetTimeout() const override;
+    void OnRotationChange(const RotationChangeInfo& rotationChangeInfo,
+        RotationChangeResult& rotationChangeResult) override;
 
 private:
     void OnLastStrongRef(const void *) override;
