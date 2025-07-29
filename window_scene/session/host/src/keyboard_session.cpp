@@ -347,9 +347,9 @@ void KeyboardSession::NotifyOccupiedAreaChanged(const sptr<SceneSession>& callin
     if (callingSession->IsSystemSession()) {
         NotifyRootSceneOccupiedAreaChange(occupiedAreaInfo);
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling id: %{public}d, safeRect: %{public}s"
-            ", textFieldPositionY_: %{public}f, textFieldHeight_: %{public}f", 
+            ", textFieldPositionY_: %{public}f, textFieldHeight_: %{public}f",
             callingSession->GetPersistentId(), occupiedAreaInfo->rect_.ToString().c_str(),
-            occupiedAreaInfo->textFieldPositionY_, occupiedAreaInfo->textFieldHeight_);    
+            occupiedAreaInfo->textFieldPositionY_, occupiedAreaInfo->textFieldHeight_);
     } else {
         std::map<AvoidAreaType, AvoidArea> avoidAreas = {};
         if (needRecalculateAvoidAreas) {
