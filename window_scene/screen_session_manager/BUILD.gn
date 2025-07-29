@@ -136,6 +136,7 @@ ohos_shared_library("screen_session_manager") {
     "libxml2:libxml2",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "screenlock_mgr:screenlock_client",
   ]
 
   defines = []
