@@ -303,7 +303,7 @@ napi_value OnGetDisplayByIdSync(napi_env env, napi_callback_info info)
         TLOGE(WmsLogTag::DMS, "[NAPI]Display info is nullptr, js error will be happen");
         std::ostringstream oss;
         oss << "[getDisplayByIdSync]message: display is null, possible causes: display id " << displayId << " ";
-        oss << "corresponding display does not exist."
+        oss << "corresponding display does not exist.";
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_SYSTEM_INNORMAL), oss.str()));
         return NapiGetUndefined(env);
     }
