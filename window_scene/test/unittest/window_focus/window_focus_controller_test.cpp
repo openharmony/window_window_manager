@@ -105,6 +105,11 @@ HWTEST_F(WindowFocusControllerTest, GetDisplayGroupId, TestSize.Level1)
     res = ssm_->windowFocusController_->GetDisplayGroupId(1);
     EXPECT_EQ(DEFAULT_DISPLAY_ID, res);
 
+    ssm_->windowFocusController_->deletedDisplayId2GroupIdMap_.insert({ 1, 1 });
+    res = ssm_->windowFocusController_->GetDisplayGroupId(1);
+    EXPECT_EQ(DISPLAY_ID_INVALID, res);
+    ssm_->windowFocusController_->deletedDisplayId2GroupIdMap_.clear();
+    
     ssm_->windowFocusController_->displayId2GroupIdMap_.insert({ 1, 1 });
     res = ssm_->windowFocusController_->GetDisplayGroupId(1);
     EXPECT_EQ(1, res);
