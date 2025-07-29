@@ -938,7 +938,6 @@ void SceneSession::HandleSessionDragEvent(SessionEvent event)
             lastDragEndRect.width_, lastDragEndRect.height_,
             static_cast<uint32_t>(GetDragResizeTypeDuringDrag()),
             static_cast<uint32_t>(moveDragController_->GetGravity())});
-        moveDragController_->SetLastDragEndRect({ 0, 0, 0, 0 });
         SetDragResizeTypeDuringDrag(dragResizeType);
     }
 }
