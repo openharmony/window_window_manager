@@ -426,17 +426,21 @@ void AniWindowManager::OnUnregisterWindowManagerCallback(ani_env* env, ani_strin
     }
 }
 
-void AniWindowManager::ShiftAppWindowFocus(ani_env* env, ani_object obj, ani_long nativeObj,
+void AniWindowManager::ShiftAppWindowFocus(ani_env* env, ani_long nativeObj,
     ani_int sourceWindowId, ani_int targetWindowId)
 {
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     AniWindowManager* aniWindowManager = reinterpret_cast<AniWindowManager*>(nativeObj);
-    aniWindowManager->OnShiftAppWindowFocus(env, sourceWindowId, targetWindowId);
+    if (aniWindowManager != nullptr) {
+        aniWindowManager->OnShiftAppWindowFocus(env, sourceWindowId, targetWindowId);
+    } else {
+        TLOGE(WmsLogTag::WMS_FOCUS, "[ANI] aniWindowManager is nullptr");
+    }
 }
 
 void AniWindowManager::OnShiftAppWindowFocus(ani_env* env, ani_int sourceWindowId, ani_int targetWindowId)
 {
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    TLOGI(WmsLogTag::WMS_FOCUS, "[ANI] sourceWindowId: %{public}d targetWindowId: %{public}d",
+        static_cast<int32_t>(sourceWindowId), static_cast<int32_t>(targetWindowId));
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
         SingletonContainer::Get<WindowManager>().ShiftAppWindowFocus(sourceWindowId, targetWindowId));
     if (ret != WmErrorCode::WM_OK) {
