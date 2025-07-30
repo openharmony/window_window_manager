@@ -693,6 +693,8 @@ ScreenProperty ScreenSession::UpdatePropertyByFoldControl(const ScreenProperty& 
             CalcDeviceOrientation(property_.GetScreenRotation(), foldDisplayMode);
         property_.SetDisplayOrientation(deviceOrientation);
         property_.SetDeviceOrientation(deviceOrientation);
+        property_.SetScreenAreaOffsetY(updatedProperty.GetScreenAreaOffsetY());
+        property_.SetScreenAreaHeight(updatedProperty.GetScreenAreaHeight());
     }
     UpdateTouchBoundsAndOffset();
     return property_;
