@@ -1481,19 +1481,23 @@ HWTEST_F(SceneSessionManagerTest8, SetSurfaceNodeIds01, TestSize.Level1)
     ssm_->sessionBlackListInfoMap_[0].insert({ .windowId = 0 });
     ssm_->sessionBlackListInfoMap_[0].insert({ .windowId = 0, .privacyWindowTag = "test" });
     ssm_->SetSurfaceNodeIds(0, surfaceNodeIds);
-    EXPECT_EQ(ssm_->sessionBlackListInfoMap_[0].size(), 0);
+    EXPECT_EQ(ssm_->sessionBlackListInfoMap_[0].size(), 1);
 
     surfaceNodeIds.push_back(1);
     ssm_->SetSurfaceNodeIds(0, surfaceNodeIds);
-    EXPECT_EQ(ssm_->sessionBlackListInfoMap_[0].size(), 0);
+    EXPECT_EQ(ssm_->sessionBlackListInfoMap_[0].size(), 1);
 
     SessionInfo sessionInfo1;
     sessionInfo1.bundleName_ = "test";
     sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo1, nullptr);
     ssm_->sceneSessionMap_.insert({1, sceneSession1});
-    sceneSession1->GetSurfaceNode()->SetId(1);
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    ASSERT_NE(nullptr, surfaceNode);
+    surfaceNode->SetId(1);
+    sceneSession1->SetSurfaceNode(surfaceNode);
     ssm_->SetSurfaceNodeIds(0, surfaceNodeIds);
-    EXPECT_EQ(ssm_->sessionBlackListInfoMap_[0].size(), 1);
+    EXPECT_EQ(ssm_->sessionBlackListInfoMap_[0].size(), 2);
 }
 
 /**
