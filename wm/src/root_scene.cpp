@@ -426,11 +426,6 @@ void RootScene::NotifyAvoidAreaChangeForRoot(const sptr<AvoidArea>& avoidArea, A
         area= *avoidArea;
         TLOGI(WmsLogTag::WMS_IMMS, "type %{public}d area %{public}s.", type, avoidArea->ToString().c_str());
     }
-    if (info != nullptr) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "occupiedRect: %{public}s, textField PositionY_: %{public}f, "
-            "Height_: %{public}f", info->rect_.ToString().c_str(), info->textFieldPositionY_, info->textFieldHeight_);
-    }
-    
     std::lock_guard<std::mutex> lock(mutex_);
     for (auto& listener : avoidAreaChangeListeners_) {
         if (listener != nullptr) {
