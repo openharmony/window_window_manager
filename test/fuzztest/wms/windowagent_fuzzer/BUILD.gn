@@ -59,7 +59,6 @@ ohos_fuzztest("WindowAgentFuzzTest") {
     "input:libmmi-client",
     "ipc:ipc_single",
     "napi:ace_napi",
-    "node:node_header_notice",
     "resource_management:global_resmgr",
   ]
 }
