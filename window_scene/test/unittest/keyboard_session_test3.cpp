@@ -212,6 +212,46 @@ HWTEST_F(KeyboardSessionTest3, UseFocusIdIfCallingSessionIdInvalid01, TestSize.L
 }
 
 /**
+ * @tc.name: UseFocusIdIfCallingSessionIdInvalid02
+ * @tc.desc: test function: UseFocusIdIfCallingSessionIdInvalid
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest3, UseFocusIdIfCallingSessionIdInvalid02, TestSize.Level1)
+{
+    auto keyboardSession = GetKeyboardSession("UseFocusIdIfCallingSessionIdInvalid02",
+        "UseFocusIdIfCallingSessionIdInvalid02");
+    sptr<KeyboardSession::KeyboardSessionCallback> keyboardCallback =
+        new (std::nothrow) KeyboardSession::KeyboardSessionCallback();
+    keyboardSession->keyboardCallback_ = keyboardCallback;
+    sptr<SceneSession> sceneSession = GetSceneSession("TestSceneSession", "TestSceneSession");
+    sceneSession->persistentId_ = 100;
+    keyboardSession->keyboardCallback_->onGetSceneSession =
+        [sceneSession](uint32_t callingSessionId)->sptr<SceneSession> {
+            if (sceneSession->persistentId_ != callingSessionId) {
+                return nullptr;
+            }
+            return sceneSession;
+        };
+
+    keyboardSession->GetSessionProperty()->SetCallingSessionId(100);
+    keyboardSession->UseFocusIdIfCallingSessionIdInvalid();
+    auto resultId = keyboardSession->GetCallingSessionId();
+    ASSERT_EQ(resultId, 100);
+
+    keyboardSession->GetSessionProperty()->SetCallingSessionId(101);
+    keyboardSession->keyboardCallback_->onGetFocusedSessionId = []()->int32_t {
+        return 100;
+    };
+    keyboardSession->UseFocusIdIfCallingSessionIdInvalid();
+    resultId = keyboardSession->GetCallingSessionId();
+    ASSERT_EQ(resultId, 100);
+    keyboardSession->keyboardCallback_->onCallingSessionIdChange = nullptr;
+    keyboardSession->UseFocusIdIfCallingSessionIdInvalid();
+    keyboardSession->keyboardCallback_->onCallingSessionIdChange = [](int32_t callingSessionid) {};
+    keyboardSession->UseFocusIdIfCallingSessionIdInvalid();
+}
+
+/**
  * @tc.name: SetSurfaceBounds01
  * @tc.desc: test function: SetSurfaceBounds
  * @tc.type: FUNC
