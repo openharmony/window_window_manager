@@ -1086,7 +1086,7 @@ HWTEST_F(SceneSessionLayoutTest, HandleMoveDragSurfaceNode01, TestSize.Level1)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "HandleMoveDragSurfaceNode begin");
 
-    constexpr float MOVE_DRAG_POSITOIN_Z = 100.5F;
+    constexpr float MOVE_DRAG_POSITION_Z = 100.5F;
     const DisplayId startDisplayId = 123;
     sptr<ScreenSession> startScreenSession = sptr<ScreenSession>::MakeSptr(startDisplayId,
         ScreenProperty(), startDisplayId);
@@ -1147,28 +1147,28 @@ HWTEST_F(SceneSessionLayoutTest, HandleMoveDragSurfaceNode01, TestSize.Level1)
     movedSurfaceNode->SetPositionZ(0);
     session->moveDragController_->displayIdSetDuringMoveDrag_.clear();
     session->HandleMoveDragSurfaceNode(SizeChangeReason::DRAG_START);
-    posZ = movedSurfaceNode->GetStagingPropertise().GetPositionZ();
+    posZ = movedSurfaceNode->GetStagingProperties().GetPositionZ();
     TLOGI(WmsLogTag::WMS_LAYOUT, "posZ:%{public}f", posZ);
     EXPECT_EQ(posZ, 0);
 
     movedSurfaceNode->SetPositionZ(0);
     session->moveDragController_->displayIdSetDuringMoveDrag_.clear();
     session->HandleMoveDragSurfaceNode(SizeChangeReason::DRAG_MOVE);
-    posZ = movedSurfaceNode->GetStagingPropertise().GetPositionZ();
+    posZ = movedSurfaceNode->GetStagingProperties().GetPositionZ();
     TLOGI(WmsLogTag::WMS_LAYOUT, "posZ:%{public}f", posZ);
-    EXPECT_EQ(posZ, MOVE_DRAG_POSITOIN_Z);
+    EXPECT_EQ(posZ, MOVE_DRAG_POSITION_Z);
 
     movedSurfaceNode->SetPositionZ(0);
     session->moveDragController_->displayIdSetDuringMoveDrag_.clear();
     session->HandleMoveDragSurfaceNode(SizeChangeReason::DRAG);
-    posZ = movedSurfaceNode->GetStagingPropertise().GetPositionZ();
+    posZ = movedSurfaceNode->GetStagingProperties().GetPositionZ();
     TLOGI(WmsLogTag::WMS_LAYOUT, "posZ:%{public}f", posZ);
-    EXPECT_EQ(posZ, MOVE_DRAG_POSITOIN_Z);
+    EXPECT_EQ(posZ, MOVE_DRAG_POSITION_Z);
 
     movedSurfaceNode->SetPositionZ(0);
     session->moveDragController_->displayIdSetDuringMoveDrag_.clear();
     session->HandleMoveDragSurfaceNode(SizeChangeReason::DRAG_END);
-    posZ = movedSurfaceNode->GetStagingPropertise().GetPositionZ();
+    posZ = movedSurfaceNode->GetStagingProperties().GetPositionZ();
     TLOGI(WmsLogTag::WMS_LAYOUT, "posZ:%{public}f", posZ);
     EXPECT_EQ(posZ, 0);
 
