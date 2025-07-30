@@ -2034,7 +2034,7 @@ HWTEST_F(SceneSessionManagerTest2, OnVirtualScreenDisconnected, TestSize.Level1)
 
     ssm_->sessionBlackListInfoMap_[1];
     ret = ssm_->OnVirtualScreenDisconnected(1);
-    EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
+    EXPECT_EQ(WMError::WM_OK, ret);
 
     ssm_->sessionRSBlackListConfigSet_[1];
     ret = ssm_->OnVirtualScreenDisconnected(10);
