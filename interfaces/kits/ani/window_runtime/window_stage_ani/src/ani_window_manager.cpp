@@ -429,10 +429,8 @@ void AniWindowManager::OnUnregisterWindowManagerCallback(ani_env* env, ani_strin
 void AniWindowManager::ShiftAppWindowFocus(ani_env* env, ani_long nativeObj,
     ani_int sourceWindowId, ani_int targetWindowId)
 {
-    TLOGI(WmsLogTag::DEFAULT, "[ANI] sourceWindowId: %{public}d targetWindowId: %{public}d",
-        static_cast<int32_t>(sourceWindowId), static_cast<int32_t>(targetWindowId));
     AniWindowManager* aniWindowManager = reinterpret_cast<AniWindowManager*>(nativeObj);
-    if (aniWindowManager != nullptr){
+    if (aniWindowManager != nullptr) {
         aniWindowManager->OnShiftAppWindowFocus(env, sourceWindowId, targetWindowId);
     } else {
         TLOGE(WmsLogTag::WMS_LIFE, "[ANI] aniWindowManager is nullptr");
