@@ -6156,13 +6156,6 @@ WMError WindowSceneSessionImpl::MoveAndResizeKeyboard(const KeyboardLayoutParams
 
 WMError WindowSceneSessionImpl::AdjustKeyboardLayout(const KeyboardLayoutParams params)
 {
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "gravity: %{public}u, "
-        "landscapeAvoidHeight: %{public}d, portraitAvoidHeight: %{public}d, "
-        "LandscapeKeyboardRect: %{public}s, PortraitKeyboardRect: %{public}s, "
-        "LandscapePanelRect: %{public}s, PortraitPanelRect: %{public}s",
-        static_cast<uint32_t>(params.gravity_), params.landscapeAvoidHeight_, params.portraitAvoidHeight_,
-        params.LandscapeKeyboardRect_.ToString().c_str(), params.PortraitKeyboardRect_.ToString().c_str(),
-        params.LandscapePanelRect_.ToString().c_str(), params.PortraitPanelRect_.ToString().c_str());
     property_->SetKeyboardLayoutParams(params);
     auto ret = MoveAndResizeKeyboard(params);
     if (ret != WMError::WM_OK) {

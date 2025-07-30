@@ -346,6 +346,10 @@ void KeyboardSession::NotifyOccupiedAreaChanged(const sptr<SceneSession>& callin
     }
     if (callingSession->IsSystemSession()) {
         NotifyRootSceneOccupiedAreaChange(occupiedAreaInfo);
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling id: %{public}d, safeRect: %{public}s"
+            ", textFieldPositionY_: %{public}f, textFieldHeight_: %{public}f",
+            callingSession->GetPersistentId(), occupiedAreaInfo->rect_.ToString().c_str(),
+            occupiedAreaInfo->textFieldPositionY_, occupiedAreaInfo->textFieldHeight_);
     } else {
         std::map<AvoidAreaType, AvoidArea> avoidAreas = {};
         if (needRecalculateAvoidAreas) {
@@ -354,18 +358,7 @@ void KeyboardSession::NotifyOccupiedAreaChanged(const sptr<SceneSession>& callin
         const WSRect& callingSessionRect = callingSession->GetSessionRect();
         callingSession->NotifyOccupiedAreaChangeInfo(occupiedAreaInfo, rsTransaction,
             SessionHelper::TransferToRect(callingSessionRect), avoidAreas);
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling id: %{public}d, callingSessionRect: %{public}s"
-            ", size of avoidAreas: %{public}d", callingSession->GetPersistentId(),
-            callingSessionRect.ToString().c_str(), static_cast<int32_t>(avoidAreas.size()));
-        for (const auto& [type, avoidArea] : avoidAreas) {
-            TLOGI(WmsLogTag::WMS_KEYBOARD, "avoidAreaType: %{public}u, avoidArea: %{public}s",
-                type, avoidArea.ToString().c_str());
-        }
     }
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling id: %{public}d, safeRect: %{public}s"
-        ", textFieldPositionY_: %{public}f, textFieldHeight_: %{public}f", callingSession->GetPersistentId(),
-        occupiedAreaInfo->rect_.ToString().c_str(), occupiedAreaInfo->textFieldPositionY_,
-        occupiedAreaInfo->textFieldHeight_);
 }
 
 bool KeyboardSession::CalculateOccupiedArea(const sptr<SceneSession>& callingSession, const WSRect& callingSessionRect,
@@ -411,9 +404,9 @@ void KeyboardSession::ProcessKeyboardOccupiedAreaInfo(uint32_t callingId, bool n
         return;
     }
     sptr<OccupiedAreaChangeInfo> occupiedAreaInfo = nullptr;
-    std::shared_ptr<RSTransaction> rsTransaction = needCheckRSTransaction ? GetRSTransaction() : nullptr;
     bool occupiedAreaChanged = RaiseCallingSession(callingSession, occupiedAreaInfo);
     if (occupiedAreaChanged) {
+        std::shared_ptr<RSTransaction> rsTransaction = needCheckRSTransaction ? GetRSTransaction() : nullptr;
         NotifyOccupiedAreaChanged(callingSession, occupiedAreaInfo, needRecalculateAvoidAreas, rsTransaction);
     }
     TLOGD(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, needRecalculateAvoidAreas: %{public}d"
