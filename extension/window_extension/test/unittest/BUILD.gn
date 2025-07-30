@@ -170,7 +170,6 @@ ohos_static_library("window_extension_unittest_common") {
     "hilog:libhilog",
     "ipc:ipc_single",
     "napi:ace_napi",
-    "node:node_header_notice",
   ]
   subsystem_name = "window"
   part_name = "window_manager"
