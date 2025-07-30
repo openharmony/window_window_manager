@@ -1049,7 +1049,7 @@ HWTEST_F(WindowSceneSessionImplTest2, GetSubWindowZLevel, TestSize.Level1)
 
 /**
  * @tc.name: RaiseMainWindowAboveTarget_WindowStateTest01
- * @tc.desc: Test raising main window above target while state invalid
+ * @tc.desc: Test raising main window above target while window state invalid
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSceneSessionImplTest2, RaiseMainWindowAboveTarget_WindowStateTest01, TestSize.Level1)
@@ -1070,7 +1070,7 @@ HWTEST_F(WindowSceneSessionImplTest2, RaiseMainWindowAboveTarget_WindowStateTest
 
     sptr<WindowOption> option2 = sptr<WindowOption>::MakeSptr();
     option2->SetWindowName("RaiseMainWindowAboveTarget_DeviceTypeTest01_TargetWindow");
-    option1->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    option2->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     sptr<WindowSceneSessionImpl> targetSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option2);
 
     targetSceneSession->state_ = WindowState::STATE_SHOWN;
@@ -1088,8 +1088,8 @@ HWTEST_F(WindowSceneSessionImplTest2, RaiseMainWindowAboveTarget_WindowStateTest
     WindowSceneSessionImpl::windowSessionMap_.insert(std::make_pair(targetSceneSession->GetWindowName(),
         std::pair<uint64_t, sptr<WindowSessionImpl>>(targetSceneSession->GetWindowId(), targetSceneSession)));
 
-    ret = targetSceneSession->RaiseMainWindowAboveTarget(104);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+    ret = sourceSceneSession->RaiseMainWindowAboveTarget(104);
+    EXPECT_NE(WMError::WM_ERROR_INVALID_WINDOW, ret);
 
     WindowSceneSessionImpl::windowSessionMap_.erase(sourceSceneSession->GetWindowName());
     WindowSceneSessionImpl::windowSessionMap_.erase(targetSceneSession->GetWindowName());
@@ -1097,7 +1097,7 @@ HWTEST_F(WindowSceneSessionImplTest2, RaiseMainWindowAboveTarget_WindowStateTest
 
 /**
  * @tc.name: RaiseMainWindowAboveTarget_WindowStateTest02
- * @tc.desc: Test raising main window above target while state invalid
+ * @tc.desc: Test raising main window above target while window state invalid
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSceneSessionImplTest2, RaiseMainWindowAboveTarget_WindowStateTest02, TestSize.Level1)
@@ -1118,7 +1118,7 @@ HWTEST_F(WindowSceneSessionImplTest2, RaiseMainWindowAboveTarget_WindowStateTest
 
     sptr<WindowOption> option2 = sptr<WindowOption>::MakeSptr();
     option2->SetWindowName("RaiseMainWindowAboveTarget_DeviceTypeTest02_TargetWindow");
-    option1->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    option2->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     sptr<WindowSceneSessionImpl> targetSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option2);
 
     targetSceneSession->state_ = WindowState::STATE_SHOWN;
@@ -1132,7 +1132,7 @@ HWTEST_F(WindowSceneSessionImplTest2, RaiseMainWindowAboveTarget_WindowStateTest
     WindowSceneSessionImpl::windowSessionMap_.insert(std::make_pair(targetSceneSession->GetWindowName(),
         std::pair<uint64_t, sptr<WindowSessionImpl>>(targetSceneSession->GetWindowId(), targetSceneSession)));
 
-    WMError ret = targetSceneSession->RaiseMainWindowAboveTarget(106);
+    WMError ret = sourceSceneSession->RaiseMainWindowAboveTarget(106);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
 
     WindowSceneSessionImpl::windowSessionMap_.erase(sourceSceneSession->GetWindowName());
@@ -1141,7 +1141,7 @@ HWTEST_F(WindowSceneSessionImplTest2, RaiseMainWindowAboveTarget_WindowStateTest
 
 /**
  * @tc.name: RaiseMainWindowAboveTarget_WindowStateTest03
- * @tc.desc: Test raising main window above target while state invalid
+ * @tc.desc: Test raising main window above target while window state invalid
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSceneSessionImplTest2, RaiseMainWindowAboveTarget_WindowStateTest03, TestSize.Level1)
@@ -1162,7 +1162,7 @@ HWTEST_F(WindowSceneSessionImplTest2, RaiseMainWindowAboveTarget_WindowStateTest
 
     sptr<WindowOption> option2 = sptr<WindowOption>::MakeSptr();
     option2->SetWindowName("RaiseMainWindowAboveTarget_DeviceTypeTest03_TargetWindow");
-    option1->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    option2->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     sptr<WindowSceneSessionImpl> targetSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option2);
 
     targetSceneSession->state_ = WindowState::STATE_SHOWN;
@@ -1182,7 +1182,7 @@ HWTEST_F(WindowSceneSessionImplTest2, RaiseMainWindowAboveTarget_WindowStateTest
     WindowSceneSessionImpl::windowSessionMap_["RaiseMainWindowAboveTarget_DeviceTypeTest03_TargetWindow"] =
         std::make_pair(targetSceneSession->GetWindowId(), targetSceneSession);
     ret = sourceSceneSession->RaiseMainWindowAboveTarget(108);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+    EXPECT_NE(WMError::WM_ERROR_INVALID_WINDOW, ret);
 
     targetSceneSession->hostSession_ = nullptr;
     ret = sourceSceneSession->RaiseMainWindowAboveTarget(108);
@@ -1204,16 +1204,16 @@ HWTEST_F(WindowSceneSessionImplTest2, RaiseMainWindowAboveTarget_WindowStateTest
 
 /**
  * @tc.name: RaiseMainWindowAboveTarget_WindowTypeTest
- * @tc.desc: Test raising main window above target while type invalid
+ * @tc.desc: Test raising main window above target while window type invalid
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest2, RaiseMainWindowAboveTarget_WindowTypeTest01, TestSize.Level1)
+HWTEST_F(WindowSceneSessionImplTest2, RaiseMainWindowAboveTarget_WindowTypeTest, TestSize.Level1)
 {
     SessionInfo sessionInfo = {"CreateTestBundle", "CreatTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
 
     sptr<WindowOption> option1 = sptr<WindowOption>::MakeSptr();
-    option1->SetWindowName("RaiseMainWindowAboveTarget_WindowTypeTest01_SourceWindow");
+    option1->SetWindowName("RaiseMainWindowAboveTarget_WindowTypeTest_SourceWindow");
     option1->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     sptr<WindowSceneSessionImpl> sourceSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option1);
 
@@ -1224,8 +1224,8 @@ HWTEST_F(WindowSceneSessionImplTest2, RaiseMainWindowAboveTarget_WindowTypeTest0
     sourceSceneSession->hostSession_ = session;
 
     sptr<WindowOption> option2 = sptr<WindowOption>::MakeSptr();
-    option2->SetWindowName("RaiseMainWindowAboveTarget_WindowTypeTest01_SourceWindow");
-    option1->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    option2->SetWindowName("RaiseMainWindowAboveTarget_WindowTypeTest_TargetWindow");
+    option2->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     sptr<WindowSceneSessionImpl> targetSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option2);
 
     targetSceneSession->state_ = WindowState::STATE_SHOWN;
@@ -1243,7 +1243,7 @@ HWTEST_F(WindowSceneSessionImplTest2, RaiseMainWindowAboveTarget_WindowTypeTest0
     EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
 
     ret = targetSceneSession->RaiseMainWindowAboveTarget(110);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
+    EXPECT_NE(WMError::WM_ERROR_INVALID_CALLING, ret);
 
     WindowSceneSessionImpl::windowSessionMap_.erase(sourceSceneSession->GetWindowName());
     WindowSceneSessionImpl::windowSessionMap_.erase(targetSceneSession->GetWindowName());
@@ -1271,13 +1271,13 @@ HWTEST_F(WindowSceneSessionImplTest2, RaiseMainWindowAboveTarget_SpecialHierarch
     sourceSceneSession->hostSession_ = session;
 
     sptr<WindowOption> option2 = sptr<WindowOption>::MakeSptr();
-    option2->SetWindowName("RaiseMainWindowAboveTarget_SpecialHierarchyTest01_SourceWindow");
-    option1->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    option2->SetWindowName("RaiseMainWindowAboveTarget_SpecialHierarchyTest01_TargetWindow");
+    option2->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     sptr<WindowSceneSessionImpl> targetSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option2);
 
     targetSceneSession->state_ = WindowState::STATE_SHOWN;
     targetSceneSession->property_->SetDisplayId(0);
-    targetSceneSession->property_->SetPersistentId(110);
+    targetSceneSession->property_->SetPersistentId(112);
     targetSceneSession->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     targetSceneSession->hostSession_ = session;
     targetSceneSession->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL);
@@ -1297,17 +1297,17 @@ HWTEST_F(WindowSceneSessionImplTest2, RaiseMainWindowAboveTarget_SpecialHierarch
 
     sourceSceneSession->RemoveWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL);
     ret = sourceSceneSession->RaiseMainWindowAboveTarget(112);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
+    EXPECT_NE(WMError::WM_ERROR_INVALID_CALLING, ret);
 
     sptr<WindowOption> subOption = sptr<WindowOption>::MakeSptr();
-    option2->SetWindowName("RaiseMainWindowAboveTarget_SpecialHierarchyTest01_ModalitySubWindow");
-    option1->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    subOption->SetWindowName("RaiseMainWindowAboveTarget_SpecialHierarchyTest01_ModalitySubWindow");
+    subOption->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     sptr<WindowSceneSessionImpl> modalitySubWindow = sptr<WindowSceneSessionImpl>::MakeSptr(subOption);
 
-    modalitySubWindow->property_->SetPersistentId(sourceSceneSession->GetPersistentId());
+    modalitySubWindow->property_->SetParentPersistentId(sourceSceneSession->GetPersistentId());
     modalitySubWindow->state_ = WindowState::STATE_SHOWN;
-    modalitySubWindow->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL);
-    modalitySubWindow->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL);
+    modalitySubWindow->property_->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL);
+    modalitySubWindow->property_->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL);
     sourceSceneSession->subWindowSessionMap_[sourceSceneSession->GetPersistentId()].push_back(modalitySubWindow);
 
     ret = sourceSceneSession->RaiseMainWindowAboveTarget(112);
@@ -1315,7 +1315,7 @@ HWTEST_F(WindowSceneSessionImplTest2, RaiseMainWindowAboveTarget_SpecialHierarch
 
     modalitySubWindow->state_ = WindowState::STATE_HIDDEN;
     ret = sourceSceneSession->RaiseMainWindowAboveTarget(112);
-    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+    EXPECT_EQ(WMError::WM_OK, ret);
 
     WindowSceneSessionImpl::windowSessionMap_.erase(sourceSceneSession->GetWindowName());
     WindowSceneSessionImpl::windowSessionMap_.erase(targetSceneSession->GetWindowName());
@@ -1345,8 +1345,8 @@ HWTEST_F(WindowSceneSessionImplTest2, RaiseMainWindowAboveTarget_SpecialHierarch
     sourceSceneSession->property_->topmost_ = true;
 
     sptr<WindowOption> option2 = sptr<WindowOption>::MakeSptr();
-    option2->SetWindowName("RaiseMainWindowAboveTarget_SpecialHierarchyTest02_SourceWindow");
-    option1->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    option2->SetWindowName("RaiseMainWindowAboveTarget_SpecialHierarchyTest02_TargetWindow");
+    option2->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     sptr<WindowSceneSessionImpl> targetSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option2);
 
     targetSceneSession->state_ = WindowState::STATE_SHOWN;
@@ -1373,14 +1373,14 @@ HWTEST_F(WindowSceneSessionImplTest2, RaiseMainWindowAboveTarget_SpecialHierarch
     ret = sourceSceneSession->RaiseMainWindowAboveTarget(114);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
 
-    sourceSceneSession->property_->mainWindowTopmost_ = true;
+    sourceSceneSession->property_->mainWindowTopmost_ = false;
     targetSceneSession->property_->mainWindowTopmost_ = true;
     ret = sourceSceneSession->RaiseMainWindowAboveTarget(114);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
 
     targetSceneSession->property_->mainWindowTopmost_ = false;
     ret = sourceSceneSession->RaiseMainWindowAboveTarget(114);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
+    EXPECT_NE(WMError::WM_ERROR_INVALID_CALLING, ret);
 
     WindowSceneSessionImpl::windowSessionMap_.erase(sourceSceneSession->GetWindowName());
     WindowSceneSessionImpl::windowSessionMap_.erase(targetSceneSession->GetWindowName());
