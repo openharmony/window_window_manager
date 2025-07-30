@@ -2062,14 +2062,15 @@ HWTEST_F(WindowTest, WindowChangeListener01, TestSize.Level1)
 HWTEST_F(WindowTest, IOccupiedAreaChangeListener, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
-    auto ret = true;
+
     sptr<IOccupiedAreaChangeListener> listener = sptr<IOccupiedAreaChangeListener>::MakeSptr();
     Rect rect = { 0, 0, 0, 0 };
-    window->RegisterOccupiedAreaChangeListener(listener);
+    auto ret = window->RegisterOccupiedAreaChangeListener(listener);
+    EXPECT_EQ(WMError::WM_OK, ret);
     sptr<OccupiedAreaChangeInfo> info = sptr<OccupiedAreaChangeInfo>::MakeSptr(OccupiedAreaType::TYPE_INPUT, rect, 80);
     listener->OnSizeChange(info, nullptr);
-    window->UnregisterOccupiedAreaChangeListener(listener);
-    ASSERT_EQ(true, ret);
+    ret = window->UnregisterOccupiedAreaChangeListener(listener);
+    EXPECT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
