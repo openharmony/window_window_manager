@@ -1211,12 +1211,14 @@ HWTEST_F(ScreenSessionManagerTest, ConfigureDpi01, Function | SmallTest | Level3
     ScreenSceneConfig::intNumbersConfig_["pcModeDpi"].clear();
     ScreenSceneConfig::intNumbersConfig_["pcModeDpi"].emplace_back(EXCEPTION_DPI);
     ScreenSessionManager::GetInstance().ConfigureDpi();
-    EXPECT_FALSE(ScreenSessionManager::GetInstance().densityDpi_ == static_cast<float>(EXCEPTION_DPI) / BASELINE_DENSITY);
+    EXPECT_FALSE(ScreenSessionManager::GetInstance().densityDpi_ ==
+        static_cast<float>(EXCEPTION_DPI) / BASELINE_DENSITY);
 
     ScreenSceneConfig::intNumbersConfig_["pcModeDpi"].clear();
     ScreenSceneConfig::intNumbersConfig_["pcModeDpi"].emplace_back(PC_MODE_DPI);
     ScreenSessionManager::GetInstance().ConfigureDpi();
-    EXPECT_TRUE(ScreenSessionManager::GetInstance().densityDpi_ == static_cast<float>(PC_MODE_DPI) / BASELINE_DENSITY);
+    EXPECT_TRUE(ScreenSessionManager::GetInstance().densityDpi_ ==
+        static_cast<float>(PC_MODE_DPI) / BASELINE_DENSITY);
 }
 }
 }
