@@ -2759,6 +2759,9 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
 
 void Session::SetFreeMultiWindow()
 {
+    if (!SupportSnapshotAllSessionStatus()) {
+        return;
+    }
     if (GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
         freeMultiWindow_.store(false);
     } else {
@@ -2814,6 +2817,7 @@ bool Session::HasSnapshotFreeMultiWindow()
     auto hasSnapshotFreeMultiWindow = ScenePersistentStorage::HasKey("Snapshot_" + std::to_string(persistentId_),
         ScenePersistentStorageType::MAXIMIZE_STATE);
     if (hasSnapshotFreeMultiWindow && scenePersistence_) {
+        freeMultiWindow_.store(true);
         scenePersistence_->SetHasSnapshotFreeMultiWindow(true);
     }
     return hasSnapshotFreeMultiWindow;

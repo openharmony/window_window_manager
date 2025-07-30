@@ -195,6 +195,7 @@ void ScenePersistence::ResetSnapshotCache()
             isSavingSnapshot.store(false);
         }
     }
+    isSavingSnapshotFreeMultiWindow_.store(false);
 }
 
 void ScenePersistence::RenameSnapshotFromOldPersistentId(const int32_t& oldPersistentId)
@@ -257,6 +258,7 @@ std::string ScenePersistence::GetSnapshotFilePath(SnapshotStatus& key, bool useK
     if (FindClosestFormSnapshot(key)) {
         return snapshotPath_[key.first][key.second];
     }
+    TLOGW(WmsLogTag::WMS_PATTERN, "Failed");
     return snapshotPath_[SCREEN_UNKNOWN][SNAPSHOT_PORTRAIT];
 }
 
