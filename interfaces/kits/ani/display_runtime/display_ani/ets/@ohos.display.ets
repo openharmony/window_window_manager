@@ -272,7 +272,7 @@ export class DisplayImpl implements Display {
             minusRectArray(res.boundingRects);
             return res;
         }).then((ret: NullishType) => {
-            callback(new BusinessError(), ret as CutoutInfo);
+            callback(null, ret as CutoutInfo);
         }).catch((err: NullishType) => {
             callback(err as BusinessError, new CutoutInfoImpl());
         });
@@ -426,7 +426,7 @@ export function getAllDisplays(callback: AsyncCallback<Array<Display>>): void {
     try {
         getAllDisplaysSyncNative(res);
         minusDisplayArray(res);
-        callback(new BusinessError(), res);
+        callback(null, res);
     } catch (err: BusinessError) {
         hilog.error(DOMAIN, TAG, 'get all display from err');
         callback(err, res);
