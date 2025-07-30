@@ -3554,10 +3554,12 @@ void SceneSession::OnNextVsyncReceivedWhenDrag(const WSRect& globalRect,
             TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s: id:%{public}u, winRect:%{public}s",
                 where, session->GetPersistentId(), winRect.ToString().c_str());
             session->NotifyClientToUpdateRect("OnMoveDragCallback", nullptr);
-            if (!session->moveDragController_) {
+            if (session->moveDragController_) {
+                if (needSetBoundsNextVsync && session->moveDragController_->GetStartDragFlag()) {
+                    session->SetSurfaceBounds(globalRect, isGlobal, needFlush);
+                }
+            } else {
                 TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: session moveDragController is null", where);
-            } else if (needSetBoundsNextVsync && session->moveDragController_->GetStartDragFlag()) {
-                session->SetSurfaceBounds(globalRect, isGlobal, needFlush);
             }
             session->ResetDirtyDragFlags();
         }
