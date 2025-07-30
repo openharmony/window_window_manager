@@ -936,12 +936,17 @@ HWTEST_F(WindowPatternSnapshotTest, DeleteHasSnapshot, TestSize.Level1)
  */
 HWTEST_F(WindowPatternSnapshotTest, SetFreeMultiWindow, TestSize.Level1)
 {
+    session_->capacity_ = maxCapacity;
     ASSERT_NE(session_, nullptr);
     session_->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     session_->SetFreeMultiWindow();
     EXPECT_EQ(session_->freeMultiWindow_, true);
 
     session_->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    session_->SetFreeMultiWindow();
+    EXPECT_EQ(session_->freeMultiWindow_, false);
+
+    session_->capacity_ = defaultCapacity;
     session_->SetFreeMultiWindow();
     EXPECT_EQ(session_->freeMultiWindow_, false);
 }
