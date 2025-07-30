@@ -86,6 +86,7 @@ const std::string CUSTOM_SCREEN_CAPTURE_PERMISSION = "ohos.permission.CUSTOM_SCR
 const std::string BOOTEVENT_BOOT_COMPLETED = "bootevent.boot.completed";
 const std::string ACCESS_VIRTUAL_SCREEN_PERMISSION = "ohos.permission.ACCESS_VIRTUAL_SCREEN";
 const std::string IS_PC_MODE_KEY = "persist.sceneboard.ispcmode";
+const std::string PC_MODE_DPI_KEY = "pcModeDpi";
 const int32_t CV_WAIT_SCREENON_MS = 300;
 const int32_t CV_WAIT_SCREENOFF_MS = 1500;
 const int32_t CV_WAIT_SCREENOFF_MS_MAX = 3000;
@@ -648,15 +649,15 @@ void ScreenSessionManager::ConfigureDpi()
             subDensityDpi_ = static_cast<float>(subDensityDpi) / BASELINE_DENSITY;
         }
     }
-    const bool isPcMode = system::GetBoolParameter("persist.sceneboard.ispcmode", false);
-    if (isPcMode && numbersConfig.count("pcModeDpi") != 0) {
-        uint32_t pcModeDpi = static_cast<uint32_t>(numbersConfig["pcModeDpi"][0]);
+    const bool isPcMode = system::GetBoolParameter(IS_PC_MODE_KEY, false);
+    if (isPcMode && numbersConfig.count(PC_MODE_DPI_KEY) != 0) {
+        uint32_t pcModeDpi = static_cast<uint32_t>(numbersConfig[PC_MODE_DPI_KEY][0]);
         if (pcModeDpi >= DOT_PER_INCH_MINIMUM_VALUE && pcModeDpi <= DOT_PER_INCH_MAXIMUM_VALUE) {
+            pcModeDpi_ = pcModeDpi;
             isDensityDpiLoad_ = true;
-            defaultDpi = pcModeDpi;
+            defaultDpi = pcModeDpi_;
             cachedSettingDpi_ = defaultDpi;
-            densityDpi_ = static_cast<float>(pcModeDpi) / BASELINE_DENSITY;
-            SetPrimaryDisplaySystemDpi(densityDpi_);
+            densityDpi_ = static_cast<float>(pcModeDpi_) / BASELINE_DENSITY;
         }
         TLOGI(WmsLogTag::DMS, "config pcmode densityDpi: %{public}f", densityDpi_);
     }
