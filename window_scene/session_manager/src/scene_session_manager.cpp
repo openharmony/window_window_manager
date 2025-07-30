@@ -10322,7 +10322,7 @@ WMError SceneSessionManager::SetSurfaceNodeIds(DisplayId displayId, const std::v
 {
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "displayId: %{public}" PRIu64, displayId);
     auto task = [this, displayId, &surfaceNodeIds, where = __func__]() {
-        for (auto it = sessionBlackListInfoMap_[displayId].begin(); it != sessionBlackListInfoMap_[displayId].end();) {
+        for (auto it = sessionBlackListInfoMap_[displayId].begin(); it != sessionBlackListInfoMap_[displayId].end(); ) {
             if (it->privacyWindowTag == WMS_DEFAULT) {
                 it = sessionBlackListInfoMap_[displayId].erase(it);
             } else {
@@ -10336,7 +10336,7 @@ WMError SceneSessionManager::SetSurfaceNodeIds(DisplayId displayId, const std::v
             }
             TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: %{public}d, %{public}" PRIu64,
                 where, sceneSession->GetPersistentId(), surfaceNodeId);
-            sessionBlackListInfoMap_[displayId].insert({ sceneSession->GetPersistentId() });
+            sessionBlackListInfoMap_[displayId].insert({ .windowId = sceneSession->GetPersistentId() });
         }
         UpdateVirtualScreenBlackList(displayId);
         return WMError::WM_OK;
