@@ -433,7 +433,7 @@ void AniWindowManager::ShiftAppWindowFocus(ani_env* env, ani_long nativeObj,
     if (aniWindowManager != nullptr) {
         aniWindowManager->OnShiftAppWindowFocus(env, sourceWindowId, targetWindowId);
     } else {
-        TLOGE(WmsLogTag::WMS_LIFE, "[ANI] aniWindowManager is nullptr");
+        TLOGE(WmsLogTag::WMS_FOCUS, "[ANI] aniWindowManager is nullptr");
     }
 }
 
