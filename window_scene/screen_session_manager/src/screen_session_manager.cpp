@@ -648,6 +648,14 @@ void ScreenSessionManager::ConfigureDpi()
             subDensityDpi_ = static_cast<float>(subDensityDpi) / BASELINE_DENSITY;
         }
     }
+    if (numbersConfig.count("subDpi") != 0) {
+        uint32_t subDensityDpi = static_cast<uint32_t>(numbersConfig["subDpi"][0]);
+        TLOGI(WmsLogTag::DMS, "subDensityDpi = %{public}u", subDensityDpi);
+        if (subDensityDpi >= DOT_PER_INCH_MINIMUM_VALUE && subDensityDpi <= DOT_PER_INCH_MAXIMUM_VALUE) {
+            isDensityDpiLoad_ = true;
+            subDensityDpi_ = static_cast<float>(subDensityDpi) / BASELINE_DENSITY;
+        }
+    }
 }
 
 void ScreenSessionManager::ConfigureCastParams()
