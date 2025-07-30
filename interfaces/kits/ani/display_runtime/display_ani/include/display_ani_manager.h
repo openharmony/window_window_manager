@@ -52,6 +52,7 @@ private:
     void OnUnRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
     void OnGetCurrentFoldCreaseRegion(ani_env* env, ani_object obj);
     void OnGetAllDisplayPhysicalResolution(ani_env* env, ani_object arrayObj);
+    bool IsCallbackRegistered(ani_env* env, const std::string& type, ani_ref callback);
     std::mutex mtx_;
     std::map<std::string, std::map<ani_ref, sptr<DisplayAniListener>>> jsCbMap_;
 };
