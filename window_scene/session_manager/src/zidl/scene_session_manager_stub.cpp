@@ -1867,7 +1867,7 @@ int SceneSessionManagerStub::HandleSetScreenPrivacyWindowTagSwitch(MessageParcel
     }
 
     if (size > MAX_VECTOR_SIZE) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Vector is too big, size is %{public}" PRIu64 , size);
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Vector is too big, size is %{public}" PRIu64, size);
         return ERR_INVALID_DATA;
     }
 
