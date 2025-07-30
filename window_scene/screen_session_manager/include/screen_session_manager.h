@@ -723,6 +723,7 @@ private:
     float densityDpi_ { 1.0f };
     float subDensityDpi_ { 1.0f };
     std::atomic<uint32_t> cachedSettingDpi_ {0};
+    float pcModeDpi_ { 1.0f };
 
     uint32_t defaultDpi {0};
     uint32_t extendDefaultDpi_ {0};
