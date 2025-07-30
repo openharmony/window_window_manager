@@ -236,7 +236,7 @@ HWTEST_F(KeyboardSessionTest3, UseFocusIdIfCallingSessionIdInvalid02, TestSize.L
     keyboardSession->GetSessionProperty()->SetCallingSessionId(100);
     keyboardSession->UseFocusIdIfCallingSessionIdInvalid();
     auto resultId = keyboardSession->GetCallingSessionId();
-    ASSERT_EQ(resultId, 100);
+    EXPECT_EQ(resultId, 100);
 
     keyboardSession->GetSessionProperty()->SetCallingSessionId(101);
     keyboardSession->keyboardCallback_->onGetFocusedSessionId = []()->int32_t {
@@ -244,7 +244,7 @@ HWTEST_F(KeyboardSessionTest3, UseFocusIdIfCallingSessionIdInvalid02, TestSize.L
     };
     keyboardSession->UseFocusIdIfCallingSessionIdInvalid();
     resultId = keyboardSession->GetCallingSessionId();
-    ASSERT_EQ(resultId, 100);
+    EXPECT_EQ(resultId, 100);
     keyboardSession->keyboardCallback_->onCallingSessionIdChange = nullptr;
     keyboardSession->UseFocusIdIfCallingSessionIdInvalid();
     keyboardSession->keyboardCallback_->onCallingSessionIdChange = [](int32_t callingSessionid) {};
