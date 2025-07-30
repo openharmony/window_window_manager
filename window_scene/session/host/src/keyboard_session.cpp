@@ -656,6 +656,9 @@ void KeyboardSession::UseFocusIdIfCallingSessionIdInvalid()
     } else {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Using focusedSession id: %{public}d", focusedSessionId);
         GetSessionProperty()->SetCallingSessionId(focusedSessionId);
+        if (keyboardCallback_ != nullptr && keyboardCallback_->onCallingSessionIdChange != nullptr) {
+            keyboardCallback_->onCallingSessionIdChange(focusedSessionId);
+        }
     }
 }
 
