@@ -455,7 +455,7 @@ napi_value JsScreenSession::OnGetScreenUIContext(napi_env env, napi_callback_inf
     if (uiContext == nullptr) {
         TLOGE(WmsLogTag::DMS, "uiContext obtained from jsEngine is nullptr");
         errMsg = "[getScreenUIContext]message: content is null, " \
-        "possible causes: content obtained from jsEngine is nullptr.";
+            "possible causes: content obtained from jsEngine is nullptr.";
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), errMsg));
         return NapiGetUndefined(env);
     }
