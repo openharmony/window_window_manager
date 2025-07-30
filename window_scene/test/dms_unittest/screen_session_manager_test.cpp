@@ -7226,6 +7226,7 @@ HWTEST_F(ScreenSessionManagerTest, SwitchModeHandleExternalScreen02, TestSize.Le
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
     sptr<ScreenSession> screenSession = ssm_->GetScreenSession(screenId);
     ASSERT_NE(screenSession, nullptr);
+    screenSession->SetIsRealScreen(true);
     ssm_->SwitchModeHandleExternalScreen(true);
     EXPECT_NE(screenSession->GetScreenCombination(), ScreenCombination::SCREEN_MIRROR);
     ssm_->DestroyVirtualScreen(screenId);
