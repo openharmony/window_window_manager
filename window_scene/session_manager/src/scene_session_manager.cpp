@@ -10353,7 +10353,9 @@ WMError SceneSessionManager::OnVirtualScreenDisconnected(DisplayId displayId)
 {
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "displayId: %{public}" PRIu64, displayId);
     auto task = [this, displayId, where = __func__]() {
-        if (sessionBlackListInfoMap_.erase(displayId) > 0) {
+        bool isSessionBlackListErased = sessionBlackListInfoMap_.erase(displayId) > 0;
+        bool isScreenConfigErased = screenRSBlackListConfigMap_.erase(displayId) > 0;
+        if (isSessionBlackListErased || isScreenConfigErased) {
             TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: displayId %{public}" PRIu64, where, displayId);
             return WMError::WM_OK;
         }
