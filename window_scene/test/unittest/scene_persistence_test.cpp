@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <image_type.h>
 #include "scene_persistence.h"
 #include "session/host/include/scene_session.h"
 #include "session.h"
@@ -49,6 +50,31 @@ void ScenePersistenceTest::SetUp() {}
 
 void ScenePersistenceTest::TearDown() {}
 
+std::shared_ptr<Media::PixelMap> ConstructPixmap(int32_t width, int32_t height)
+{
+    std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
+    Media::ImageInfo info;
+    info.size.width = width;
+    info.size.height = height;
+    pixelMap->SetImageInfo(info);
+    int32_t bytesPerPixel = 3;
+    int32_t rowDataSize = width * bytesPerPixel;
+    uint32_t bufferSize = rowDataSize * height;
+    if (bufferSize <= 0) {
+        return nullptr;
+    }
+    void *buffer = malloc(bufferSize);
+    if (buffer == nullptr) {
+        return nullptr;
+    }
+    char *ch = static_cast<char *>(buffer);
+    for (unsigned int i = 0; i < bufferSize; i++) {
+        *(ch++) = (char)i;
+    }
+    pixelMap->SetPixelsAddr(buffer, nullptr, bufferSize, Media::AllocatorType::DEFAULT, nullptr);
+    return pixelMap;
+}
+
 namespace {
 /**
  * @tc.name: CreateSnapshotDir
@@ -74,6 +100,27 @@ HWTEST_F(ScenePersistenceTest, CreateUpdatedIconDir, TestSize.Level1)
     ASSERT_NE(nullptr, scenePersistence);
     bool result = scenePersistence->CreateUpdatedIconDir(directory);
     ASSERT_EQ(result, false);
+}
+
+/**
+ * @tc.name: SaveUpdatedIcon
+ * @tc.desc: test function : SaveUpdatedIcon
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScenePersistenceTest, SaveUpdatedIcon, TestSize.Level1)
+{
+    sptr<ScenePersistence> scenePersistenceTmp = sptr<ScenePersistence>::MakeSptr("testBundleName", 1423);
+    scenePersistenceTmp->CreateUpdatedIconDir("/tmp");
+    std::shared_ptr<Media::PixelMap> pixelMap = ConstructPixmap(1, 1);
+    scenePersistenceTmp->SaveUpdatedIcon(pixelMap);
+ 
+    std::shared_ptr<Media::PixelMap> pixelMap2 = ConstructPixmap(1025, 1);
+    scenePersistenceTmp->SaveUpdatedIcon(pixelMap2);
+    EXPECT_EQ(pixelMap2->GetHeight(), 1);
+ 
+    std::shared_ptr<Media::PixelMap> pixelMap3 = ConstructPixmap(1, 1025);
+    scenePersistenceTmp->SaveUpdatedIcon(pixelMap3);
+    EXPECT_EQ(pixelMap3->GetWidth(), 1);
 }
 } // namespace
 } // namespace Rosen
