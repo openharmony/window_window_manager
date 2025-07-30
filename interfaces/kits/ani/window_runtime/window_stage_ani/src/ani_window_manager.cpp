@@ -427,7 +427,7 @@ void AniWindowManager::OnUnregisterWindowManagerCallback(ani_env* env, ani_strin
 }
 
 void AniWindowManager::ShiftAppWindowFocus(ani_env* env, ani_long nativeObj,
-    ani_double sourceWindowId, ani_double targetWindowId)
+    ani_int sourceWindowId, ani_int targetWindowId)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI] sourceWindowId: %{public}d targetWindowId: %{public}d",
         static_cast<int32_t>(sourceWindowId), static_cast<int32_t>(targetWindowId));
@@ -439,7 +439,7 @@ void AniWindowManager::ShiftAppWindowFocus(ani_env* env, ani_long nativeObj,
     }
 }
 
-void AniWindowManager::OnShiftAppWindowFocus(ani_env* env, ani_double sourceWindowId, ani_double targetWindowId)
+void AniWindowManager::OnShiftAppWindowFocus(ani_env* env, ani_int sourceWindowId, ani_int targetWindowId)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI] sourceWindowId: %{public}d targetWindowId: %{public}d",
         static_cast<int32_t>(sourceWindowId), static_cast<int32_t>(targetWindowId));
