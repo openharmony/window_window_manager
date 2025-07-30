@@ -1469,6 +1469,32 @@ HWTEST_F(SceneSessionManagerTest8, NotifyOnAttachToFrameNode01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetSurfaceNodeIds01
+ * @tc.desc: test function : SetSurfaceNodeIds
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, SetSurfaceNodeIds01, TestSize.Level1)
+{
+    ssm_->sessionBlackListInfoMap_.clear();
+    ssm_->sceneSessionMap_.clear();
+    std::vector<uint64_t> surfaceNodeIds;
+    ssm_->sessionBlackListInfoMap_[0].insert({ .windowId = 0 });
+    ssm_->sessionBlackListInfoMap_[0].insert({ .windowId = 0, .privacyWindowTag = "test" });
+    ssm_->SetSurfaceNodeIds(0, surfaceNodeIds);
+    EXPECT_EQ(ssm_->sessionBlackListInfoMap_[0].size(), 0);
+
+    surfaceNodeIds.push_back(1);
+    ssm_->SetSurfaceNodeIds(0, surfaceNodeIds);
+    EXPECT_EQ(ssm_->sessionBlackListInfoMap_[0].size(), 0);
+
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo1, nullptr);
+    ssm_->sceneSessionMap_.insert({1, sceneSession1});
+    sceneSession1->GetSurfaceNode()->SetId(1);
+    ssm_->SetSurfaceNodeIds(0, surfaceNodeIds);
+    EXPECT_EQ(ssm_->sessionBlackListInfoMap_[0].size(), 1);
+}
+
+/**
  * @tc.name: AddSkipSurfaceNodeWhenAttach01
  * @tc.desc: test function : AddSkipSurfaceNodeWhenAttach
  * @tc.type: FUNC
