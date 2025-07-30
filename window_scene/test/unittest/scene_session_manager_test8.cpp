@@ -1487,6 +1487,8 @@ HWTEST_F(SceneSessionManagerTest8, SetSurfaceNodeIds01, TestSize.Level1)
     ssm_->SetSurfaceNodeIds(0, surfaceNodeIds);
     EXPECT_EQ(ssm_->sessionBlackListInfoMap_[0].size(), 0);
 
+    SessionInfo sessionInfo1;
+    sessionInfo1.bundleName_ = "test";
     sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo1, nullptr);
     ssm_->sceneSessionMap_.insert({1, sceneSession1});
     sceneSession1->GetSurfaceNode()->SetId(1);
