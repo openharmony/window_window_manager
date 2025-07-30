@@ -1551,11 +1551,10 @@ HWTEST_F(ScreenSessionManagerClientTest, HandleScreenDisconnection, TestSize.Lev
  */
 HWTEST_F(ScreenSessionManagerClientTest, OnCreateScreenSessionOnly, TestSize.Level2)
 {
-    sptr<ScreenSessionManagerClient> client = new ScreenSessionManagerClient();
-    ASSERT_TRUE(client != nullptr);
+    sptr<ScreenSessionManagerClient> client = sptr<ScreenSessionManagerClient>::MakeSptr();
     client->ConnectToServer();
 
-    sptr<ScreenSession> screenSession1 = new ScreenSession(50, ScreenProperty(), 0);
+    sptr<ScreenSession> screenSession1 = sptr<ScreenSession>::MakeSptr(50, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession1);
     client->screenSessionMap_[50] = screenSession1;
 
@@ -1626,8 +1625,11 @@ HWTEST_F(ScreenSessionManagerClientTest, OnExtendDisplayNodeChange, TestSize.Lev
 HWTEST_F(ScreenSessionManagerClientTest, OnMainDisplayNodeChange, TestSize.Level2)
 {
     ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
-    screenSessionManagerClient_->ConnectToServer();
+    screenSessionManagerClient_->screenSessionManager_ = nullptr;
+    auto ret = screenSessionManagerClient_->OnMainDisplayNodeChange(53, 50, 50);
+    EXPECT_EQ(ret, false);
 
+    screenSessionManagerClient_->screenSessionManager_ = sptr<ScreenSessionManagerProxyMock>::MakeSptr();
     RSDisplayNodeConfig config;
     std::shared_ptr<RSDisplayNode> node1 = std::make_shared<RSDisplayNode>(config);
     std::shared_ptr<RSDisplayNode> node2 = std::make_shared<RSDisplayNode>(config);
@@ -1646,7 +1648,7 @@ HWTEST_F(ScreenSessionManagerClientTest, OnMainDisplayNodeChange, TestSize.Level
     sptr<ScreenSession> screenSession4 = nullptr;
     screenSessionManagerClient_->screenSessionMap_[53] = screenSession4;
 
-    auto ret = screenSessionManagerClient_->OnMainDisplayNodeChange(53, 50, 50);
+    ret = screenSessionManagerClient_->OnMainDisplayNodeChange(53, 50, 50);
     EXPECT_EQ(ret, false);
 
     ret = screenSessionManagerClient_->OnMainDisplayNodeChange(50, 52, 52);

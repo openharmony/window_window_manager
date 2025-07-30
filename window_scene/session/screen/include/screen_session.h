@@ -332,7 +332,7 @@ public:
     DisplayId GetDisplayId();
 
     std::vector<sptr<SupportedScreenModes>> GetScreenModes();
-    void SetScreenModes(std::vector<sptr<SupportedScreenModes>> modes);
+    void SetScreenModes(const std::vector<sptr<SupportedScreenModes>>& modes);
 
     int32_t GetActiveId();
     void SetActiveId(int32_t activeIdx);
@@ -427,6 +427,7 @@ private:
     bool isSecurity_ = true;
     uint64_t sessionId_;
     bool lastCloseHdrStatus_ = false;
+    mutable std::shared_mutex modesMutex_;
 
     /*
      * RS Client Multi Instance
