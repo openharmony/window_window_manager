@@ -7220,8 +7220,15 @@ HWTEST_F(ScreenSessionManagerTest, SwitchModeHandleExternalScreen02, TestSize.Le
 {
     ASSERT_NE(ssm_, nullptr);
     ssm_->screenSessionMap_.clear();
+    sptr<IDisplayManagerAgent> displayManagerAgent = sptr<DisplayManagerAgentDefault>::MakeSptr();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "testVirtualOption";
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    sptr<ScreenSession> screenSession = ssm_->GetScreenSession(screenId);
+    ASSERT_NE(screenSession, nullptr);
     ssm_->SwitchModeHandleExternalScreen(true);
     EXPECT_NE(screenSession->GetScreenCombination(), ScreenCombination::SCREEN_MIRROR);
+    ssm_->DestroyVirtualScreen(screenId);
 }
 
 /**
