@@ -648,13 +648,17 @@ void ScreenSessionManager::ConfigureDpi()
             subDensityDpi_ = static_cast<float>(subDensityDpi) / BASELINE_DENSITY;
         }
     }
-    if (numbersConfig.count("subDpi") != 0) {
-        uint32_t subDensityDpi = static_cast<uint32_t>(numbersConfig["subDpi"][0]);
-        TLOGI(WmsLogTag::DMS, "subDensityDpi = %{public}u", subDensityDpi);
-        if (subDensityDpi >= DOT_PER_INCH_MINIMUM_VALUE && subDensityDpi <= DOT_PER_INCH_MAXIMUM_VALUE) {
+    const bool isPcMode = system::GetBoolParameter("persist.sceneboard.ispcmode", false);
+    if (isPcMode && numbersConfig.count("pcModeDpi") != 0) {
+        uint32_t pcModeDpi = static_cast<uint32_t>(numbersConfig["pcModeDpi"][0]);
+        if (pcModeDpi >= DOT_PER_INCH_MINIMUM_VALUE && pcModeDpi <= DOT_PER_INCH_MAXIMUM_VALUE) {
             isDensityDpiLoad_ = true;
-            subDensityDpi_ = static_cast<float>(subDensityDpi) / BASELINE_DENSITY;
+            defaultDpi = pcModeDpi;
+            cachedSettingDpi_ = defaultDpi;
+            densityDpi_ = static_cast<float>(pcModeDpi) / BASELINE_DENSITY;
+            SetPrimaryDisplaySystemDpi(densityDpi_);
         }
+        TLOGI(WmsLogTag::DMS, "config pcmode densityDpi: %{public}f", densityDpi_);
     }
 }
 
