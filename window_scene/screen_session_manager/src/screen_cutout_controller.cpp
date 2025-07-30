@@ -37,7 +37,7 @@ sptr<CutoutInfo> ScreenCutoutController::GetScreenCutoutInfo(DisplayId displayId
     }
     uint32_t width = static_cast<uint32_t>(displayInfo->GetWidth());
     uint32_t height = static_cast<uint32_t>(displayInfo->GetHeight());
-    Rotation rotation = displayInfo->GetScreenRotation();
+    Rotation rotation = displayInfo->GetOriginRotation();
 
     return GetScreenCutoutInfo(displayId, width, height, rotation);
 }
