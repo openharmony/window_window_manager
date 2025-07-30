@@ -2022,7 +2022,7 @@ HWTEST_F(SceneSessionManagerTest2, OnVirtualScreenDisconnected, TestSize.Level1)
     listener->OnVirtualScreenDisconnected(9999);
 
     ASSERT_NE(nullptr, ssm_);
-    ssm_->sessionRSBlackListConfigSet_.clear();
+    ssm_->screenRSBlackListConfigMap_.clear();
     ssm_->sessionBlackListInfoMap_.clear();
 
     SessionInfo info;
@@ -2036,11 +2036,11 @@ HWTEST_F(SceneSessionManagerTest2, OnVirtualScreenDisconnected, TestSize.Level1)
     ret = ssm_->OnVirtualScreenDisconnected(1);
     EXPECT_EQ(WMError::WM_OK, ret);
 
-    ssm_->sessionRSBlackListConfigSet_[1];
+    ssm_->screenRSBlackListConfigMap_[1];
     ret = ssm_->OnVirtualScreenDisconnected(10);
     EXPECT_EQ(WMError::WM_OK, ret);
 
-    ssm_->sessionRSBlackListConfigSet_.clear();
+    ssm_->screenRSBlackListConfigMap_.clear();
     ssm_->sessionBlackListInfoMap_.clear();
 }
 
