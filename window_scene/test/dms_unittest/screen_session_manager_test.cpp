@@ -7182,11 +7182,11 @@ HWTEST_F(ScreenSessionManagerTest, HandleSwitchPcMode, TestSize.Level1)
 }
 
 /**
- * @tc.name: SwitchExternalScreenToMirror
- * @tc.desc: SwitchExternalScreenToMirror
+ * @tc.name: SwitchModeHandleExternalScreen
+ * @tc.desc: SwitchModeHandleExternalScreen
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerTest, SwitchExternalScreenToMirror, TestSize.Level1)
+HWTEST_F(ScreenSessionManagerTest, SwitchModeHandleExternalScreen01, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     sptr<IDisplayManagerAgent> displayManagerAgent = sptr<DisplayManagerAgentDefault>::MakeSptr();
@@ -7195,7 +7195,7 @@ HWTEST_F(ScreenSessionManagerTest, SwitchExternalScreenToMirror, TestSize.Level1
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
     sptr<ScreenSession> screenSession = ssm_->GetScreenSession(screenId);
     ASSERT_NE(screenSession, nullptr);
-    ssm_->SwitchExternalScreenToMirror();
+    ssm_->SwitchModeHandleExternalScreen(false);
     EXPECT_NE(screenSession->GetScreenCombination(), ScreenCombination::SCREEN_MIRROR);
     screenSession->SetIsRealScreen(true);
     ssm_->screenSessionMap_.insert(std::make_pair(777, nullptr));
@@ -7204,11 +7204,24 @@ HWTEST_F(ScreenSessionManagerTest, SwitchExternalScreenToMirror, TestSize.Level1
     VirtualScreenOption virtualOption1;
     virtualOption1.name_ = "createVirtualOption2";
     auto virtualScreenId = ssm_->CreateVirtualScreen(virtualOption1, displayManagerAgent1->AsObject());
-    ssm_->SwitchExternalScreenToMirror();
+    ssm_->SwitchModeHandleExternalScreen(false);
     EXPECT_EQ(screenSession->GetScreenCombination(), ScreenCombination::SCREEN_MIRROR);
     screenSession->SetIsRealScreen(false);
     ssm_->DestroyVirtualScreen(screenId);
     ssm_->DestroyVirtualScreen(virtualScreenId);
+}
+
+/**
+ * @tc.name: SwitchModeHandleExternalScreen
+ * @tc.desc: SwitchModeHandleExternalScreen
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SwitchModeHandleExternalScreen02, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->screenSessionMap_.clear();
+    ssm_->SwitchModeHandleExternalScreen(true);
+    EXPECT_NE(screenSession->GetScreenCombination(), ScreenCombination::SCREEN_MIRROR);
 }
 
 /**

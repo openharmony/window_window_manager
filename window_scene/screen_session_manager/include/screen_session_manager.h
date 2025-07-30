@@ -831,7 +831,7 @@ private:
     void RegisterSettingExtendScreenDpiObserver();
     void SetExtendScreenDpi();
     bool HandleSwitchPcMode();
-    void SwitchExternalScreenToMirror();
+    void SwitchModeHandleExternalScreen(bool isSwitchToPcMode)
     void WaitUpdateAvailableAreaForPc();
 
     LowTempMode lowTemp_ {LowTempMode::UNKNOWN};

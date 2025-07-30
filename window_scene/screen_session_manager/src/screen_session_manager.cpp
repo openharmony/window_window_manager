@@ -8319,13 +8319,14 @@ bool ScreenSessionManager::HandleSwitchPcMode()
     if (system::GetBoolParameter(IS_PC_MODE_KEY, false)) {
         TLOGI(WmsLogTag::DMS, "PcMode change isPcDevice true");
         g_isPcDevice = true;
+        SwitchModeHandleExternalScreen(true);
 #ifdef WM_MULTI_SCREEN_CTL_ABILITY_ENABLE
         SetMultiScreenFrameControl();
 #endif
     } else {
         TLOGI(WmsLogTag::DMS, "PadMode change isPcDevice false");
         g_isPcDevice = false;
-        SwitchExternalScreenToMirror();
+        SwitchModeHandleExternalScreen(false);
 #ifdef WM_MULTI_SCREEN_CTL_ABILITY_ENABLE
         TLOGI(WmsLogTag::DMS, "Disable frame rate control");
         EventInfo event = { "VOTER_MUTIPHYSICALSCREEN", REMOVE_VOTE };
@@ -8335,7 +8336,7 @@ bool ScreenSessionManager::HandleSwitchPcMode()
     return g_isPcDevice;
 }
 
-void ScreenSessionManager::SwitchExternalScreenToMirror()
+void ScreenSessionManager::SwitchModeHandleExternalScreen(bool isSwitchToPcMode)
 {
     std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     std::ostringstream oss;
@@ -8350,11 +8351,14 @@ void ScreenSessionManager::SwitchExternalScreenToMirror()
             screenSession->GetIsRealScreen()) {
             externalScreenIds.emplace_back(screenSession->GetScreenId());
             hasExternalScreen = true;
+            screenSession->SetName(isSwitchToPcMode ? "ExtendedDisplay" : "CastEngine");
+            screenSession->SetVirtualScreenFlag(isSwitchToPcMode ?
+                VirtualScreenFlag::DEFAULT : VirtualScreenFlag::CAST);
             oss << screenSession->GetScreenId() << ",";
         }
     }
     TLOGI(WmsLogTag::DMS, "screenIds:%{public}s", oss.str().c_str());
-    if (hasExternalScreen) {
+    if (hasExternalScreen && !isSwitchToPcMode) {
         ScreenId screenGroupId = SCREEN_GROUP_ID_DEFAULT;
         MakeMirror(SCREEN_ID_DEFAULT, externalScreenIds, screenGroupId);
         TLOGI(WmsLogTag::DMS, "notify cast screen connect");
