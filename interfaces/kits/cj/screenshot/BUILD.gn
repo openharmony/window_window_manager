@@ -39,6 +39,7 @@ ohos_shared_library("cj_screenshot_ffi") {
       "image_framework:cj_image_ffi",
       "image_framework:image",
       "image_framework:image_native",
+      "ipc:ipc_single",
       "napi:ace_napi",
       "napi:cj_bind_ffi",
       "napi:cj_bind_native",
