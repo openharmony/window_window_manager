@@ -202,6 +202,7 @@ ohos_shared_library("windowstage_kit") {
     "ability_runtime:runtime",
     "c_utils:utils",
     "hilog:libhilog",
+    "ipc:ipc_single",
     "napi:ace_napi",
   ]
 
