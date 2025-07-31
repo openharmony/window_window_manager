@@ -404,9 +404,9 @@ void KeyboardSession::ProcessKeyboardOccupiedAreaInfo(uint32_t callingId, bool n
         return;
     }
     sptr<OccupiedAreaChangeInfo> occupiedAreaInfo = nullptr;
+    std::shared_ptr<RSTransaction> rsTransaction = needCheckRSTransaction ? GetRSTransaction() : nullptr;
     bool occupiedAreaChanged = RaiseCallingSession(callingSession, occupiedAreaInfo);
     if (occupiedAreaChanged) {
-        std::shared_ptr<RSTransaction> rsTransaction = needCheckRSTransaction ? GetRSTransaction() : nullptr;
         NotifyOccupiedAreaChanged(callingSession, occupiedAreaInfo, needRecalculateAvoidAreas, rsTransaction);
     }
     TLOGD(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, needRecalculateAvoidAreas: %{public}d"
