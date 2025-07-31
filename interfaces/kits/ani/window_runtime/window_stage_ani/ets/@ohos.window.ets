@@ -1749,6 +1749,8 @@ export class WindowStageInternal implements WindowStage {
         this.nativeObj = nativeObj;
     }
 
+    private static native nativeTransferStatic(input: ESValue): Object;
+    private static native nativeTransferDynamic(nativeObj: long): ESValue;
     public native setWindowRectAutoSave(nativeObj: long, enabled: boolean, isSaveBySpecifiedFlag: boolean): void;
     public native isWindowRectAutoSave(nativeObj: long): boolean;
     public native removeStartingWindow(nativeObj: long): void;
@@ -1759,6 +1761,25 @@ export class WindowStageInternal implements WindowStage {
     public native createSubWindowSync(nativeObj: long, name: String): Window;
     native onSync(nativeObj: long, eventType: 'windowStageEvent', callback: Object): void;
     native offSync(nativeObj: long, eventType: 'windowStageEvent', callback?: Object): void;
+
+    public static transferStatic(input: Any): Object {
+      hilog.info(DOMAIN, TAG, 'transfer static, input:' + input);
+      let windowStage: ESValue = ESValue.wrap(input).getPropertySafe('windowStage_');
+      if (windowStage !== ESValue.Undefined) {
+        return WindowStageInternal.nativeTransferStatic(windowStage);
+      } else {
+        return WindowStageInternal.nativeTransferStatic(ESValue.wrap(input));
+      }
+    }
+
+    public static transferDynamic(input: Object): Any {
+      hilog.info(DOMAIN, TAG, 'transfer dynamic, input:' + input);
+      if (input instanceof WindowStageInternal) {
+        return WindowStageInternal.nativeTransferDynamic((input as WindowStageInternal).nativeObj).unwrap();
+      } else {
+        return undefined;
+      }
+    }
 
     public setWindowRectAutoSave(enabled: boolean, isSaveBySpecifiedFlag: boolean): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
