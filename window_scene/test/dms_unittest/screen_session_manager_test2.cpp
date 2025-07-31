@@ -35,6 +35,8 @@ constexpr uint32_t M_STATUS_WIDTH = 1008;
 constexpr uint32_t F_STATUS_WIDTH = 2048;
 constexpr uint32_t G_STATUS_WIDTH = 3184;
 const ScreenId SCREENID = 1000;
+constexpr uint32_t EXCEPTION_DPI = 10;
+constexpr uint32_t PC_MODE_DPI = 304;
 }
 namespace {
     std::string g_errLog;
@@ -1196,6 +1198,27 @@ HWTEST_F(ScreenSessionManagerTest, UpdateAvailableArea02, TestSize.Level1)
     EXPECT_FALSE(ssm_->needWaitAvailableArea_);
     g_errLog.clear();
     ssm_->SetPcStatus(temp);
+}
+
+/**
+ * @tc.name: ConfigureDpi01
+ * @tc.desc: ConfigureDpi01
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, ConfigureDpi01, Function | SmallTest | Level3)
+{
+    system::SetParameter("persist.sceneboard.ispcmode", "true");
+    ScreenSceneConfig::intNumbersConfig_["pcModeDpi"].clear();
+    ScreenSceneConfig::intNumbersConfig_["pcModeDpi"].emplace_back(EXCEPTION_DPI);
+    ScreenSessionManager::GetInstance().ConfigureDpi();
+    EXPECT_FALSE(ScreenSessionManager::GetInstance().densityDpi_ ==
+        static_cast<float>(EXCEPTION_DPI) / BASELINE_DENSITY);
+
+    ScreenSceneConfig::intNumbersConfig_["pcModeDpi"].clear();
+    ScreenSceneConfig::intNumbersConfig_["pcModeDpi"].emplace_back(PC_MODE_DPI);
+    ScreenSessionManager::GetInstance().ConfigureDpi();
+    EXPECT_TRUE(ScreenSessionManager::GetInstance().densityDpi_ ==
+        static_cast<float>(PC_MODE_DPI) / BASELINE_DENSITY);
 }
 }
 }
