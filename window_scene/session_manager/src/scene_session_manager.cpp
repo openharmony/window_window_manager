@@ -10322,7 +10322,13 @@ WMError SceneSessionManager::SetSurfaceNodeIds(DisplayId displayId, const std::v
 {
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "displayId: %{public}" PRIu64, displayId);
     auto task = [this, displayId, &surfaceNodeIds, where = __func__]() {
-        SessionBlackListInfoSet funSet;
+        for (auto it = sessionBlackListInfoMap_[displayId].begin(); it != sessionBlackListInfoMap_[displayId].end(); ) {
+            if (it->privacyWindowTag == WMS_DEFAULT) {
+                it = sessionBlackListInfoMap_[displayId].erase(it);
+            } else {
+                ++it;
+            }
+        }
         for (auto surfaceNodeId : surfaceNodeIds) {
             sptr<SceneSession> sceneSession = SelectSesssionFromMap(surfaceNodeId);
             if (sceneSession == nullptr) {
@@ -10330,9 +10336,8 @@ WMError SceneSessionManager::SetSurfaceNodeIds(DisplayId displayId, const std::v
             }
             TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: %{public}d, %{public}" PRIu64,
                 where, sceneSession->GetPersistentId(), surfaceNodeId);
-            funSet.insert({ .windowId = sceneSession->GetPersistentId() });
+            sessionBlackListInfoMap_[displayId].insert({ .windowId = sceneSession->GetPersistentId() });
         }
-        sessionBlackListInfoMap_[displayId] = std::move(funSet);
         UpdateVirtualScreenBlackList(displayId);
         return WMError::WM_OK;
     };
@@ -10348,7 +10353,9 @@ WMError SceneSessionManager::OnVirtualScreenDisconnected(DisplayId displayId)
 {
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "displayId: %{public}" PRIu64, displayId);
     auto task = [this, displayId, where = __func__]() {
-        if (sessionBlackListInfoMap_.erase(displayId) > 0) {
+        bool isSessionBlackListErased = sessionBlackListInfoMap_.erase(displayId) > 0;
+        bool isScreenConfigErased = screenRSBlackListConfigMap_.erase(displayId) > 0;
+        if (isSessionBlackListErased || isScreenConfigErased) {
             TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: displayId %{public}" PRIu64, where, displayId);
             return WMError::WM_OK;
         }
