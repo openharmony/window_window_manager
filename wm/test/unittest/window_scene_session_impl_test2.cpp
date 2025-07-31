@@ -1315,7 +1315,7 @@ HWTEST_F(WindowSceneSessionImplTest2, RaiseMainWindowAboveTarget_SpecialHierarch
 
     modalitySubWindow->state_ = WindowState::STATE_HIDDEN;
     ret = sourceSceneSession->RaiseMainWindowAboveTarget(112);
-    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
 
     WindowSceneSessionImpl::windowSessionMap_.erase(sourceSceneSession->GetWindowName());
     WindowSceneSessionImpl::windowSessionMap_.erase(targetSceneSession->GetWindowName());
