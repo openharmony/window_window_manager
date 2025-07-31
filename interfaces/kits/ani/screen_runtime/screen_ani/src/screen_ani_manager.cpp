@@ -34,7 +34,7 @@ ScreenManagerAni::ScreenManagerAni()
 
 void ScreenManagerAni::registerCallback(ani_env* env, ani_string type, ani_ref callback, ani_long nativeObj)
 {
-    TLOGI(WmsLogTag::DMS, "[ANI] start to register screen callback: %{public}lld", nativeObj);
+    TLOGI(WmsLogTag::DMS, "[ANI] start to register screen callback: %{public}" PRId64, nativeObj);
     ScreenManagerAni* screenManagerAni = reinterpret_cast<ScreenManagerAni*>(nativeObj);
     if (screenManagerAni != nullptr) {
         screenManagerAni->onRegisterCallback(env, type, callback);

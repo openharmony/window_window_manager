@@ -117,7 +117,7 @@ ani_status DisplayAniUtils::cvtDisplay(sptr<Display> display, ani_env* env, ani_
     env->Object_SetFieldByName_Double(obj, "<property>yDPI", info->GetYDpi());
     auto colorSpaces = info->GetColorSpaces();
     auto hdrFormats = info->GetHdrFormats();
-    TLOGI(WmsLogTag::DMS, "[ANI] colorSpaces(0) %{public}u, %{public}u", colorSpaces.size(), colorSpaces[1]);
+    TLOGI(WmsLogTag::DMS, "[ANI] colorSpaces(0) %{public}zu, %{public}u", colorSpaces.size(), colorSpaces[1]);
     if (colorSpaces.size() != 0) {
         ani_array_int colorSpacesAni;
         CreateAniArrayInt(env, colorSpaces.size(), &colorSpacesAni, colorSpaces);
