@@ -34,6 +34,7 @@ config("scene_session_manager_kit_public_config") {
 
 # lib generate
 ohos_shared_library("scenesessionmanagerani_kit") {
+  shlib_type = "ani"
   branch_protector_ret = "pac_ret"
   sanitize = {
     cfi = true
