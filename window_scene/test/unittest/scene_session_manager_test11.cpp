@@ -1011,7 +1011,7 @@ HWTEST_F(SceneSessionManagerTest11, UpdateHighlightStatus, TestSize.Level1)
     ssm_->UpdateHighlightStatus(DEFAULT_DISPLAY_ID, nullSceneSession1, nullSceneSession2, false);
     ASSERT_EQ(ssm_->highlightIds_.size(), 0);
 
-    ssm->AddHighlightSessionIds(preSceneSession, false);
+    ssm_->AddHighlightSessionIds(preSceneSession, false);
     ASSERT_EQ(ssm_->highlightIds_.size(), 1);
     ssm_->UpdateHighlightStatus(DEFAULT_DISPLAY_ID, preSceneSession, nullSceneSession2, false);
     ASSERT_EQ(ssm_->highlightIds_.size(), 1);
