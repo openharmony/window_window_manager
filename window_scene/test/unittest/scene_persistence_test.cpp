@@ -52,27 +52,13 @@ void ScenePersistenceTest::TearDown() {}
 
 std::shared_ptr<Media::PixelMap> ConstructPixmap(int32_t width, int32_t height)
 {
-    std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
-    Media::ImageInfo info;
-    info.size.width = width;
-    info.size.height = height;
-    pixelMap->SetImageInfo(info);
-    int32_t bytesPerPixel = 3;
-    int32_t rowDataSize = width * bytesPerPixel;
-    uint32_t bufferSize = rowDataSize * height;
-    if (bufferSize <= 0) {
-        return nullptr;
-    }
-    void *buffer = malloc(bufferSize);
-    if (buffer == nullptr) {
-        return nullptr;
-    }
-    char *ch = static_cast<char *>(buffer);
-    for (unsigned int i = 0; i < bufferSize; i++) {
-        *(ch++) = (char)i;
-    }
-    pixelMap->SetPixelsAddr(buffer, nullptr, bufferSize, Media::AllocatorType::DEFAULT, nullptr);
-    return pixelMap;
+    Media::InitializationOptions opts;
+    opts.size.width = width;
+    opts.size.height = height;
+    opts.pixelFormat = Media::PixelFormat::RGB_888;
+    std::unique_ptr<Media::PixelMap> pixelMap = Media::PixelMap::Create(opts);
+    std::shared_ptr<Media::PixelMap> ret = std::move(pixelMap);
+    return ret;
 }
 
 namespace {
