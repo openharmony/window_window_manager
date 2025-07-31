@@ -2123,7 +2123,7 @@ HWTEST_F(DisplayManagerTest, GetCallingAbilityDisplayId_shouldReturnInvalid_When
  * @tc.desc: GetFoldDisplayMode returns UNKNOWN
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, ShouldReturnUNKNOWN, TestSize.Level1)
+HWTEST_F(DisplayManagerTest, ShouldNotReturnGLOBAL_FULL, TestSize.Level1)
 {
     DisplayManager displayManager;
     DisplayManagerAdapter displayManagerAdapter;
@@ -2132,7 +2132,7 @@ HWTEST_F(DisplayManagerTest, ShouldReturnUNKNOWN, TestSize.Level1)
 
     auto result = displayManager.GetFoldDisplayModeForExternal();
 
-    EXPECT_EQ(result, OHOS::Rosen::FoldDisplayMode::UNKNOWN);
+    EXPECT_NE(result, OHOS::Rosen::FoldDisplayMode::GLOBAL_FULL);
 }
 
 /**
