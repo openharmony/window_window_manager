@@ -44,6 +44,7 @@ ohos_executable("snapshot_display") {
     "c_utils:utils",
     "image_framework:image_native",
     "init:libbegetutil",
+    "ipc:ipc_single",
   ]
 
   part_name = "window_manager"
@@ -71,6 +72,7 @@ ohos_shared_library("libsnapshot_util") {
     "c_utils:utils",
     "hitrace:hitrace_meter",
     "image_framework:image_native",
+    "ipc:ipc_single",
     "libjpeg-turbo:turbojpeg",
   ]
 

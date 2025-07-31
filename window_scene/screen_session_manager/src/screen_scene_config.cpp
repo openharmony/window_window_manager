@@ -64,7 +64,8 @@ enum XmlNodeElement {
     SCROLLABLE_PARAM,
     IS_SUPPORT_CAPTURE,
     IS_SUPPORT_OFFSCREEN_RENDERING,
-    OFF_SCREEN_PPI_THRESHOLD
+    OFF_SCREEN_PPI_THRESHOLD,
+    PC_MODE_DPI
 };
 }
 
@@ -108,7 +109,8 @@ std::map<int32_t, std::string> ScreenSceneConfig::xmlNodeMap_ = {
     {SCROLLABLE_PARAM, "scrollableParam"},
     {IS_SUPPORT_CAPTURE, "isSupportCapture"},
     {IS_SUPPORT_OFFSCREEN_RENDERING, "isSupportOffScreenRendering"},
-    {OFF_SCREEN_PPI_THRESHOLD, "offScreenPPIThreshold"}
+    {OFF_SCREEN_PPI_THRESHOLD, "offScreenPPIThreshold"},
+    {PC_MODE_DPI, "pcModeDpi"}
 };
 
 
@@ -199,7 +201,8 @@ void ScreenSceneConfig::ParseNodeConfig(const xmlNodePtr& currNode)
         (xmlNodeMap_[CURVED_AREA_IN_LANDSCAPE] == nodeName) ||
         (xmlNodeMap_[BUILD_IN_DEFAULT_ORIENTATION] == nodeName) ||
         (xmlNodeMap_[DEFAULT_DEVICE_ROTATION_OFFSET] == nodeName) ||
-        (xmlNodeMap_[OFF_SCREEN_PPI_THRESHOLD] == nodeName);
+        (xmlNodeMap_[OFF_SCREEN_PPI_THRESHOLD] == nodeName) ||
+        (xmlNodeMap_[PC_MODE_DPI] == nodeName);
     bool stringConfigCheck = (xmlNodeMap_[DEFAULT_DISPLAY_CUTOUT_PATH] == nodeName) ||
         (xmlNodeMap_[SUB_DISPLAY_CUTOUT_PATH] == nodeName) ||
         (xmlNodeMap_[ROTATION_POLICY] == nodeName) ||
