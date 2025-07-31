@@ -96,18 +96,18 @@ void ScreenshotAniUtils::GetScreenshotParam(ani_env *env, std::unique_ptr<Param>
         TLOGI(WmsLogTag::DMS, "[ANI] null param");
         return;
     }
-    ani_double displayId;
+    ani_double displayId = 0;
     env->Object_GetPropertyByName_Double(options, "displayId", &displayId);
     param->option.displayId = static_cast<DisplayId>(displayId);
-    ani_double rotation;
+    ani_double rotation = 0;
     env->Object_GetPropertyByName_Double(options, "rotation", &rotation);
     param->option.rotation = static_cast<int32_t>(rotation);
-    ani_double isNeedNotify;
-    env->Object_GetPropertyByName_Double(options, "isNeedNotify", &isNeedNotify);
+    ani_boolean isNeedNotify = true;
+    env->Object_GetPropertyByName_Boolean(options, "isNotificationNeeded", &isNeedNotify);
     param->option.isNeedNotify = static_cast<bool>(isNeedNotify);
-    ani_double isNeedPointer;
-    env->Object_GetPropertyByName_Double(options, "isNeedPointer", &isNeedPointer);
-    param->option.isNeedPointer = static_cast<bool>(isNeedPointer);
+    ani_boolean isCaptureFullOfScreen = false;
+    env->Object_GetPropertyByName_Boolean(options, "isCaptureFullOfScreen", &isCaptureFullOfScreen);
+    param->option.isCaptureFullOfScreen = static_cast<bool>(isCaptureFullOfScreen);
     GetScreenshotSize(env, param, options);
     GetScreenshotRect(env, param, options);
 }
@@ -130,10 +130,10 @@ void ScreenshotAniUtils::GetScreenshotRect(ani_env *env, std::unique_ptr<Param> 
 {
     ani_ref obj;
     env->Object_GetPropertyByName_Ref(options, "screenRect", &obj);
-    ani_double left;
-    ani_double top;
-    ani_double width;
-    ani_double height;
+    ani_double left = 0;
+    ani_double top = 0;
+    ani_double width = 0;
+    ani_double height = 0;
     env->Object_GetPropertyByName_Double(static_cast<ani_object>(obj), "left", &left);
     env->Object_GetPropertyByName_Double(static_cast<ani_object>(obj), "top", &top);
     env->Object_GetPropertyByName_Double(static_cast<ani_object>(obj), "width", &width);
