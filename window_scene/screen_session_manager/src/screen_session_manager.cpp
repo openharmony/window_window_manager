@@ -650,7 +650,7 @@ void ScreenSessionManager::ConfigureDpi()
         }
     }
     const bool isPcMode = system::GetBoolParameter(IS_PC_MODE_KEY, false);
-    if (isPcMode && numbersConfig.count(PC_MODE_DPI_KEY) != 0) {
+    if (isPcMode && numbersConfig.count(PC_MODE_DPI_KEY) != 0 && numbersConfig[PC_MODE_DPI_KEY].size() > 0) {
         uint32_t pcModeDpi = static_cast<uint32_t>(numbersConfig[PC_MODE_DPI_KEY][0]);
         if (pcModeDpi >= DOT_PER_INCH_MINIMUM_VALUE && pcModeDpi <= DOT_PER_INCH_MAXIMUM_VALUE) {
             pcModeDpi_ = pcModeDpi;
