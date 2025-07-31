@@ -1831,7 +1831,7 @@ HWTEST_F(SceneSessionManagerTest12, GetRouterStackInfo02, Function | SmallTest |
     info.bundleName_ = "GetRouterStackInfo02";
     info.windowType_ = static_cast<u_int32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     sptr<SceneSessionMocker> sceneSession = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
-    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), scneSession});
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
 
     auto listener = sptr<TestRouterListener>::MakeSptr();
     MockAccesstokenKit::MockIsSystemApp(true);
@@ -1956,7 +1956,7 @@ HWTEST_F(SceneSessionManagerTest12, GetHookedSessionByModuleName, Function | Sma
     info.moduleName_ = "testModuleName1";
     info.appIndex_ = 1;
     info.appInstanceKey_ = "";
-    sptr<SceneSessionMocker> sceneSession = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     auto res = ssm_->GetHookedSessionByModuleName(info);
@@ -1996,7 +1996,7 @@ HWTEST_F(SceneSessionManagerTest12, RequestSceneSession, Function | SmallTest | 
     info.abilityName_ = "testAbilityName1";
     info.persistentId_ = 101;
     info.appIndex_ = 0;
-    sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    sptr<SceneSessionMocker> sceneSession = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     sceneSession->sessionInfo_.isAbilityHook_ = true;
@@ -2057,7 +2057,6 @@ HWTEST_F(SceneSessionManagerTest12, UpdateAbilityHookState, Function | SmallTest
 
     ssm_->UpdateAbilityHookState(sceneSession, true);
     EXPECT_EQ(true, sceneSession->GetSessionInfo().isAbilityHook_);
-
 }
 
 /**
