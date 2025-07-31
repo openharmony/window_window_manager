@@ -2037,7 +2037,7 @@ HWTEST_F(SceneSessionManagerTest2, OnVirtualScreenDisconnected, TestSize.Level1)
     EXPECT_EQ(WMError::WM_OK, ret);
 
     ssm_->screenRSBlackListConfigMap_[1];
-    ret = ssm_->OnVirtualScreenDisconnected(10);
+    ret = ssm_->OnVirtualScreenDisconnected(1);
     EXPECT_EQ(WMError::WM_OK, ret);
 
     ssm_->screenRSBlackListConfigMap_.clear();
