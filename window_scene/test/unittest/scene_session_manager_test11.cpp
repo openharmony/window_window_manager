@@ -518,6 +518,7 @@ HWTEST_F(SceneSessionManagerTest11, HasFloatingWindowForeground, TestSize.Level1
  */
 HWTEST_F(SceneSessionManagerTest11, SetParentWindow, TestSize.Level1)
 {
+    ssm_->sceneSessionMap_.clear();
     ASSERT_NE(ssm_, nullptr);
     int32_t subWindowId = 1;
     int32_t newParentWindowId = 3;
