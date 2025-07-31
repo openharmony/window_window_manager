@@ -965,9 +965,19 @@ HWTEST_F(SceneSessionManagerTest11, UpdateHighlightStatus, TestSize.Level1)
     sptr<SceneSession> nullSceneSession2;
 
     ssm_->UpdateHighlightStatus(DEFAULT_DISPLAY_ID, nullSceneSession1, nullSceneSession2, false);
+    ASSERT_EQ(ssm_->highlightIds_.size(), 0);
+
+    ssm_->AddHighlightSessionIds(preSceneSession, false);
+    ASSERT_EQ(ssm_->highlightIds_.size(), 1);
     ssm_->UpdateHighlightStatus(DEFAULT_DISPLAY_ID, preSceneSession, nullSceneSession2, false);
+    ASSERT_EQ(ssm_->highlightIds_.size(), 1);
+    ssm_->UpdateHighlightStatus(DEFAULT_DISPLAY_ID, preSceneSession, nullSceneSession2, true);
+    ASSERT_EQ(ssm_->highlightIds_.size(), 0);
+
     ssm_->UpdateHighlightStatus(DEFAULT_DISPLAY_ID, preSceneSession, currSceneSession, true);
     ssm_->UpdateHighlightStatus(DEFAULT_DISPLAY_ID, preSceneSession, currSceneSession, false);
+    ASSERT_EQ(ssm_->highlightIds_.size(), 1);
+
     currSceneSession->property_->isExclusivelyHighlighted_ = false;
     preSceneSession->property_->SetPersistentId(2);
     ssm_->UpdateHighlightStatus(DEFAULT_DISPLAY_ID, preSceneSession, currSceneSession, false);
