@@ -32,6 +32,8 @@ class AniWindowStage {
     public:
     explicit AniWindowStage(const std::shared_ptr<Rosen::WindowScene>& windowScene);
     ~AniWindowStage();
+    static ani_object NativeTransferStatic(ani_env* aniEnv, ani_class cls, ani_object input);
+    static ani_object NativeTransferDynamic(ani_env* aniEnv, ani_class cls, ani_long nativeObj);
     static void LoadContent(ani_env* env, ani_object obj, ani_long nativeObj,
         ani_string path, ani_object storage);
     static void DisableWindowDecor(ani_env* env, ani_object obj, ani_long nativeObj);
