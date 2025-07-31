@@ -22,7 +22,7 @@
 #include "window_manager_hilog.h"
 #include "display_manager.h"
 #include "dm_common.h"
-#include "pixel_map_ani.h"
+#include "pixel_map_taihe_ani.h"
 #include "refbase.h"
 #include "screenshot_ani_utils.h"
 #include "ani_err_utils.h"
@@ -52,28 +52,23 @@ ani_object ScreenshotManagerAni::Save(ani_env* env, ani_object options)
         param->useInputOption = true;
         ScreenshotAniUtils::GetScreenshotParam(env, param, options);
     }
+    param->isPick = false;
     GetScreenshot(env, param);
-    std::shared_ptr<Media::PixelMap> pixelMap = param->image;
-    if (pixelMap == nullptr) {
-        TLOGI(WmsLogTag::DMS, "snapshot save pixelMap null");
-        AniErrUtils::ThrowBusinessError(env, param->wret, param->errMessage);
+    if (param->wret != DmErrorCode::DM_OK) {
+        if (param->wret == DmErrorCode::DM_ERROR_NO_PERMISSION ||
+            param->wret == DmErrorCode::DM_ERROR_INVALID_PARAM ||
+            param->wret == DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT ||
+            param->wret == DmErrorCode::DM_ERROR_SYSTEM_INNORMAL) {
+            AniErrUtils::ThrowBusinessError(env, param->wret, param->errMessage);
+        }
         return ScreenshotAniUtils::CreateAniUndefined(env);
     }
-    TLOGI(WmsLogTag::DMS, "snapshot save pixelMap, currentId = %{public}d", static_cast<int>(pixelMap->currentId));
-    auto nativePixelMap = Media::PixelMapAni::CreatePixelMap(env, pixelMap);
-    if (nativePixelMap == nullptr) {
-        TLOGI(WmsLogTag::DMS, "snapshot save nativePixelMap null");
-        AniErrUtils::ThrowBusinessError(env, param->wret, param->errMessage);
-        return ScreenshotAniUtils::CreateAniUndefined(env);
+    if (param->image != nullptr) {
+        TLOGI(WmsLogTag::DMS, "save pixelMap, currentId = %{public}d", static_cast<int>(param->image->currentId));
     }
-    ani_double wid;
-    if (ANI_OK != env->Object_GetPropertyByName_Double(options, "isNeedNotify", &wid)) {
-        TLOGE(WmsLogTag::DMS, "[ANI] get isNeedNotify fail");
-    }
-    TLOGI(WmsLogTag::DMS, "snapshot save function exe success");
+    auto nativePixelMap = Media::PixelMapTaiheAni::CreateEtsPixelMap(env, param->image);
     return nativePixelMap;
 }
- 
  
 void ScreenshotManagerAni::GetScreenshot(ani_env *env, std::unique_ptr<Param> &param)
 {
@@ -84,8 +79,9 @@ void ScreenshotManagerAni::GetScreenshot(ani_env *env, std::unique_ptr<Param> &p
         param->errMessage = "Get Screenshot Failed: Invalid input param";
         return;
     }
-    CaptureOption option = { param->option.displayId, param->option.isNeedNotify, param->option.isNeedPointer};
-    if (!param->isPick && (!option.isNeedNotify_ || !option.isNeedPointer_)) {
+    CaptureOption option = { param->option.displayId, param->option.isNeedNotify, true,
+        param->option.isCaptureFullOfScreen };
+    if (!param->isPick && !option.isNeedNotify_) {
         if (param->useInputOption) {
             param->image = DisplayManager::GetInstance().GetScreenshotWithOption(option,
                 param->option.rect, param->option.size, param->option.rotation, &param->wret);
@@ -100,13 +96,15 @@ void ScreenshotManagerAni::GetScreenshot(ani_env *env, std::unique_ptr<Param> &p
             snapConfig.imageRect_ = param->option.rect;
             snapConfig.imageSize_ = param->option.size;
             snapConfig.rotation_ = param->option.rotation;
+            snapConfig.isCaptureFullOfScreen_ = param->option.isCaptureFullOfScreen;
             param->image = DisplayManager::GetInstance().GetScreenshotwithConfig(snapConfig, &param->wret, true);
         } else if (param->isPick) {
             TLOGI(WmsLogTag::DMS, "Get Screenshot by picker");
             param->image = DisplayManager::GetInstance().GetSnapshotByPicker(param->imageRect, &param->wret);
         } else {
             TLOGI(WmsLogTag::DMS, "Get Screenshot by default option");
-            param->image = DisplayManager::GetInstance().GetScreenshot(param->option.displayId, &param->wret, true);
+            param->image = DisplayManager::GetInstance().GetScreenshot(param->option.displayId, &param->wret, true,
+                param->option.isCaptureFullOfScreen);
         }
     }
     if (param->image == nullptr && param->wret == DmErrorCode::DM_OK) {

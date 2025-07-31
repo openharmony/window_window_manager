@@ -46,7 +46,7 @@ export function save(callback: AsyncCallback<image.PixelMap | undefined>): void 
 export function save(options?: ScreenshotOptions): Promise<image.PixelMap> {
     return new Promise<image.PixelMap>((resolve: (value: image.PixelMap) => void, reject: (error: BusinessError) => void ) => {
         taskpool.execute((): image.PixelMap => {
-            let res: image.PixelMap = saveSync();
+            let res: image.PixelMap = saveSync(options);
             return res;
         }).then((ret: NullishType) => {
             resolve(ret as image.PixelMap);
