@@ -932,7 +932,12 @@ void SceneSession::HandleSessionDragEvent(SessionEvent event)
         Gravity gravity = moveDragController_->GetGravity();
         SetSessionEventParam({rect.posX_, rect.posY_, rect.width_, rect.height_,
             static_cast<uint32_t>(dragResizeType), static_cast<uint32_t>(gravity)});
-    } else if (event == SessionEvent::EVENT_END_MOVE) {
+    } else if (moveDragController_ && event == SessionEvent::EVENT_END_MOVE) {
+        const auto& lastDragEndRect = moveDragController_->GetLastDragEndRect();
+        SetSessionEventParam({lastDragEndRect.posX_, lastDragEndRect.posY_,
+            lastDragEndRect.width_, lastDragEndRect.height_,
+            static_cast<uint32_t>(GetDragResizeTypeDuringDrag()),
+            static_cast<uint32_t>(moveDragController_->GetGravity())});
         SetDragResizeTypeDuringDrag(dragResizeType);
     }
 }
@@ -3586,6 +3591,7 @@ void SceneSession::HandleMoveDragEnd(WSRect& rect, SizeChangeReason reason)
         NotifySubSessionRectChangeByAnchor(rect, SizeChangeReason::UNDEFINED, endDisplayId);
         CheckSubSessionShouldFollowParent(endDisplayId);
     }
+    moveDragController_->SetLastDragEndRect(rect);
     moveDragController_->ResetCrossMoveDragProperty();
     OnSessionEvent(SessionEvent::EVENT_END_MOVE);
 }
