@@ -191,8 +191,9 @@ WSError SystemSession::ProcessPointDownSession(int32_t posX, int32_t posY)
         }
     }
     TLOGD(WmsLogTag::WMS_EVENT, "id:%{public}d, type:%{public}d", id, type);
+    auto ret = SceneSession::ProcessPointDownSession(posX, posY);
     PresentFocusIfPointDown();
-    return SceneSession::ProcessPointDownSession(posX, posY);
+    return ret;
 }
 
 int32_t SystemSession::GetMissionId() const

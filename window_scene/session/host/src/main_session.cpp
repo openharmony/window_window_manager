@@ -111,8 +111,9 @@ WSError MainSession::ProcessPointDownSession(int32_t posX, int32_t posY)
     if (isModal) {
         Session::ProcessClickModalWindowOutside(posX, posY);
     }
+    auto ret = SceneSession::ProcessPointDownSession(posX, posY);
     PresentFocusIfPointDown();
-    return SceneSession::ProcessPointDownSession(posX, posY);
+    return ret;
 }
 
 void MainSession::NotifyForegroundInteractiveStatus(bool interactive)
