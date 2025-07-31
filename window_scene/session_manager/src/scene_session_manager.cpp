@@ -5586,7 +5586,7 @@ void SceneSessionManager::RegisterGetStartWindowConfigCallback(const sptr<SceneS
             sessionInfo.persistentId_, startWindowType.c_str());
     });
 }
-    
+
 
 std::shared_ptr<AppExecFwk::AbilityInfo> SceneSessionManager::QueryAbilityInfoFromBMS(const int32_t uId,
     const std::string& bundleName, const std::string& abilityName, const std::string& moduleName,
@@ -7703,7 +7703,7 @@ void SceneSessionManager::UpdateFocusStatus(DisplayId displayId, const sptr<Scen
 void SceneSessionManager::UpdateHighlightStatus(DisplayId displayId, const sptr<SceneSession>& preSceneSession,
     const sptr<SceneSession>& currSceneSession, bool isProactiveUnfocus)
 {
-    if (preSceneSession == nullptr || currSceneSession == nullptr) {
+    if (preSceneSession == nullptr && currSceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_FOCUS, "sceneSession is nullptr");
         return;
     }
@@ -7716,6 +7716,10 @@ void SceneSessionManager::UpdateHighlightStatus(DisplayId displayId, const sptr<
     if(isProactiveUnfocus){
         TLOGD(WmsLogTag::WMS_FOCUS, "proactiveUnfocus");
         RemoveHighlightSessionIds(preSceneSession);
+    }
+    if (currSceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "currSceneSession is nullptr");
+        return;
     }
     if(currSceneSession->GetSessionProperty()->GetExclusivelyHighlighted()) {
         TLOGD(WmsLogTag::WMS_FOCUS, "exclusively highlighted");
@@ -15861,7 +15865,7 @@ DisplayId SceneSessionManager::UpdateSpecificSessionClientDisplayId(const sptr<W
     //  SubWindow
     if (auto parentSession = GetSceneSession(property->GetParentPersistentId())) {
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "displayId:%{public}" PRIu64 ", parentClientDisplayId:%{public}" PRIu64
-            ", isFollowParentWindowDisplayId: %{public}u", property->GetDisplayId(), 
+            ", isFollowParentWindowDisplayId: %{public}u", property->GetDisplayId(),
             parentSession->GetClientDisplayId(), property->IsFollowParentWindowDisplayId());
         initClientDisplayId =
             property->IsFollowParentWindowDisplayId() ? parentSession->GetClientDisplayId() : property->GetDisplayId();
