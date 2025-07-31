@@ -41,7 +41,7 @@ public:
     static void MinimizeAll(ani_env* env, ani_long nativeObj, ani_long displayId);
     static void RegisterWindowManagerCallback(ani_env* env, ani_long nativeObj, ani_string type, ani_ref callback);
     static void UnregisterWindowManagerCallback(ani_env* env, ani_long nativeObj, ani_string type, ani_ref callback);
-    static void ShiftAppWindowFocus(ani_env* env, ani_object obj, ani_long nativeObj,
+    static void ShiftAppWindowFocus(ani_env* env, ani_long nativeObj,
         ani_int sourceWindowId, ani_int targetWindowId);
 private:
     ani_object OnGetWindowsByCoordinate(ani_env* env, ani_object getWindowsParam);
