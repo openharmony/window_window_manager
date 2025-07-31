@@ -1197,6 +1197,58 @@ HWTEST_F(ScreenSessionManagerTest, UpdateAvailableArea02, TestSize.Level1)
     g_errLog.clear();
     ssm_->SetPcStatus(temp);
 }
+
+/**
+ * @tc.name: GetCancelSuspendStatus01
+ * @tc.desc: GetCancelSuspendStatus01_BothFalse
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetCancelSuspendStatus01, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->sessionDisplayPowerController_->needCancelNotify_ = false;
+    ssm_->sessionDisplayPowerController_->canceledSuspend_ = false;
+    EXPECT_FALSE(ssm_->GetCancelSuspendStatus());
+}
+
+/**
+ * @tc.name: GetCancelSuspendStatus02
+ * @tc.desc: GetCancelSuspendStatus02_NeedCancelNotifyTrue
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetCancelSuspendStatus02, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->sessionDisplayPowerController_->needCancelNotify_ = true;
+    ssm_->sessionDisplayPowerController_->canceledSuspend_ = false;
+    EXPECT_TRUE(ssm_->GetCancelSuspendStatus());
+}
+
+/**
+ * @tc.name: GetCancelSuspendStatus03
+ * @tc.desc: GetCancelSuspendStatus03_CanceledSuspendTrue
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetCancelSuspendStatus03, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->sessionDisplayPowerController_->needCancelNotify_ = false;
+    ssm_->sessionDisplayPowerController_->canceledSuspend_ = true;
+    EXPECT_TRUE(ssm_->GetCancelSuspendStatus());
+}
+
+/**
+ * @tc.name: GetCancelSuspendStatus04
+ * @tc.desc: GetCancelSuspendStatus04_BothTrue
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetCancelSuspendStatus04, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->sessionDisplayPowerController_->needCancelNotify_ = true;
+    ssm_->sessionDisplayPowerController_->canceledSuspend_ = true;
+    EXPECT_TRUE(ssm_->GetCancelSuspendStatus());
+}
 }
 }
 }
