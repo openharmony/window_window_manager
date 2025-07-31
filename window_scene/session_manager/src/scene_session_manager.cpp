@@ -7703,10 +7703,6 @@ void SceneSessionManager::UpdateFocusStatus(DisplayId displayId, const sptr<Scen
 void SceneSessionManager::UpdateHighlightStatus(DisplayId displayId, const sptr<SceneSession>& preSceneSession,
     const sptr<SceneSession>& currSceneSession, bool isProactiveUnfocus)
 {
-    if (preSceneSession == nullptr && currSceneSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "sceneSession is nullptr");
-        return;
-    }
     auto focusGroup = windowFocusController_->GetFocusGroup(displayId);
     if (focusGroup == nullptr) {
         TLOGE(WmsLogTag::WMS_FOCUS, "focus group is nullptr: %{public}" PRIu64, displayId);
