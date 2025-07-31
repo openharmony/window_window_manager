@@ -765,6 +765,12 @@ HWTEST_F(SceneSessionTest5, HandleSessionDragEvent, TestSize.Level1)
     compatibleModeProperty->SetIsAdaptToDragScale(true);
     session->property_->SetCompatibleModeProperty(compatibleModeProperty);
     session->HandleSessionDragEvent(event);
+
+    session->HandleSessionDragEvent(SessionEvent::EVENT_END_MOVE);
+    EXPECT_EQ(session->GetDragResizeTypeDuringDrag(), DragResizeType::RESIZE_TYPE_UNDEFINED);
+
+    session->HandleSessionDragEvent(SessionEvent::EVENT_MAXIMIZE);
+    EXPECT_EQ(session->GetDragResizeTypeDuringDrag(), DragResizeType::RESIZE_TYPE_UNDEFINED);
 }
 
 /**
