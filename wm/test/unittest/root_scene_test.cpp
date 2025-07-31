@@ -160,9 +160,9 @@ HWTEST_F(RootSceneTest, UpdateConfigurationForAll, TestSize.Level1)
  */
 HWTEST_F(RootSceneTest, RegisterInputEventListener01, TestSize.Level1)
 {
-    RootScene rootScene;
-    rootScene.RegisterInputEventListener();
-    ASSERT_EQ(1, rootScene.GetWindowId());
+    sptr<RootScene> rootScene = sptr<RootScene>::MakeSptr();
+    rootScene->RegisterInputEventListener();
+    ASSERT_EQ(1, rootScene->GetWindowId());
 }
 
 /**
