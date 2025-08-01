@@ -5521,22 +5521,21 @@ WSError WindowSceneSessionImpl::SwitchFreeMultiWindow(bool enable)
     }
     NotifySwitchFreeMultiWindow(enable);
     // Switch process finish, update system config
-    std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
-    for (const auto& winPair : windowSessionMap_) {
-        auto window = winPair.second.second;
-        if (window != nullptr) {
-            window->SetFreeMultiWindowMode(enable);
-        }
-    }
+    SetFreeMultiWindowMode(enable);
     UpdateSupportWindowModesWhenSwitchFreeMultiWindow();
     UpdateEnableDragWhenSwitchMultiWindow(enable);
     if (!enable && !WindowHelper::IsWindowModeSupported(property_->GetWindowModeSupportType(),
         WindowMode::WINDOW_MODE_FULLSCREEN)) {
         UpdateDecorEnable(true);
     }
-
-    SwitchSubWindow(GetPersistentId());
+    UpdateImmersiveBySwitchMode(enable);
+    SwitchSubWindow(enable, GetPersistentId());
     return WSError::WS_OK;
+}
+
+bool WindowSceneSessionImpl::UpdateImmersiveBySwitchMode()
+{
+    return SwitchSubWindow(enable, GetPersistentId());
 }
 
 bool WindowSceneSessionImpl::GetFreeMultiWindowModeEnabledState()
