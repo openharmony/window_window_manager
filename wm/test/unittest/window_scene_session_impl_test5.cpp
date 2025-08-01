@@ -2283,13 +2283,6 @@ HWTEST_F(WindowSceneSessionImplTest5, GetDragAreaByDownEvent04, TestSize.Level2)
 
 /**
  * @tc.name: UpdateImmersiveBySwitchMode
- * @tc.desc: UpdateImmersiveBySwitchMode
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest5, UpdateImmersiveBySwitchMode, TestSize.Level2)
-{
-/**
- * @tc.name: UpdateImmersiveBySwitchMode
  * @tc.desc: Test UpdateImmersiveBySwitchMode
  * @tc.type: FUNC
  */
