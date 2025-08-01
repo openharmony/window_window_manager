@@ -432,7 +432,8 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToMain(sptr<ScreenSes
 #ifdef TP_FEATURE_ENABLE
     RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE, MAIN_TP.c_str());
 #endif
-    if (PowerMgr::PowerMgrClient::GetInstance().IsFoldScreenOn()) {
+    if (PowerMgr::PowerMgrClient::GetInstance().IsFoldScreenOn() ||
+        ScreenSessionManager::GetInstance().GetCancelSuspendStatus()) {
         ChangeScreenDisplayModeToMainWhenFoldScreenOn(screenSession);
     } else { // When the screen is off and folded, it is not powered on
         ScreenSessionManager::GetInstance().ForceSkipScreenOffAnimation();

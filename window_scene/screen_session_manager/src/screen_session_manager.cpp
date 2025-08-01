@@ -10915,4 +10915,15 @@ std::shared_ptr<TaskScheduler> ScreenSessionManager::GetPowerTaskScheduler() con
 {
     return screenPowerTaskScheduler_;
 }
+
+bool ScreenSessionManager::GetCancelSuspendStatus() const
+{
+    if (!sessionDisplayPowerController_) {
+        TLOGE(WmsLogTag::DMS, "sessionDisplayPowerController_ is null");
+        return false;
+    }
+    std::lock_guard<std::mutex> notifyLock(sessionDisplayPowerController_->notifyMutex_);
+    return sessionDisplayPowerController_->needCancelNotify_ ||
+            sessionDisplayPowerController_->canceledSuspend_;
+}
 } // namespace OHOS::Rosen
