@@ -486,14 +486,9 @@ void MoveDragController::UpdateGravityWhenDrag(const std::shared_ptr<MMI::Pointe
             TLOGI(WmsLogTag::WMS_LAYOUT, "begin SetFrameGravity:%{public}d, type:%{public}d, id:%{public}d",
                 dragGravity, type_, persistentId_);
             surfaceNode->SetFrameGravity(dragGravity);
+            RSTransactionAdapter::FlushImplicitTransaction(surfaceNode);
         }
-    } else if (actionType == MMI::PointerEvent::POINTER_ACTION_UP ||
-        actionType == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP ||
-        actionType == MMI::PointerEvent::POINTER_ACTION_CANCEL) {
-        TLOGI(WmsLogTag::WMS_LAYOUT, "Reset frameGravity to TOP_LEFT");
-        surfaceNode->SetFrameGravity(Gravity::TOP_LEFT);
     }
-    RSTransactionAdapter::FlushImplicitTransaction(surfaceNode);
 }
 
 bool MoveDragController::IsSupportWindowDragCrossDisplay()
