@@ -12067,7 +12067,7 @@ WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSR
 WSError SceneSessionManager::NotifyNextAvoidRectInfo(AvoidAreaType type,
     const WSRect& portraitRect, const WSRect& landspaceRect, DisplayId displayId)
 {
-    TLOGI(WmsLogTag::WMS_IMMS, "type %{public}d "
+    TLOGD(WmsLogTag::WMS_IMMS, "type %{public}d "
         "portraitRect %{public}s, portraitRect %{public}s, displayId %{public}" PRIu64,
         type, portraitRect.ToString().c_str(), landspaceRect.ToString().c_str(), displayId);
     std::lock_guard<std::mutex> lock(nextAvoidRectInfoMapMutex_);
@@ -14948,7 +14948,7 @@ void SceneSessionManager::CheckSceneZOrder()
 
 WSError SceneSessionManager::NotifyEnterRecentTask(bool enterRecent)
 {
-    TLOGI(WmsLogTag::WMS_IMMS, "enterRecent %{public}u", enterRecent);
+    TLOGD(WmsLogTag::WMS_IMMS, "enterRecent %{public}u", enterRecent);
     enterRecent_.store(enterRecent);
     SetSystemAnimatedScenes(enterRecent ?
         SystemAnimatedSceneType::SCENE_ENTER_RECENTS : SystemAnimatedSceneType::SCENE_EXIT_RECENTS);
