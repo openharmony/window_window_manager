@@ -5533,7 +5533,7 @@ WSError WindowSceneSessionImpl::SwitchFreeMultiWindow(bool enable)
     return WSError::WS_OK;
 }
 
-bool WindowSceneSessionImpl::UpdateImmersiveBySwitchMode(bool enable)
+void WindowSceneSessionImpl::UpdateImmersiveBySwitchMode(bool enable)
 {
     if (enable && enableImmersiveMode_ && property_) {
         cacheEnableImmersiveMode_ = true;
