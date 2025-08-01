@@ -8338,23 +8338,24 @@ bool ScreenSessionManager::HandleSwitchPcMode()
 
 void ScreenSessionManager::SwitchModeHandleExternalScreen(bool isSwitchToPcMode)
 {
-    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     std::ostringstream oss;
     std::vector<ScreenId> externalScreenIds;
     bool hasExternalScreen = false;
-    for (const auto& iter : screenSessionMap_) {
-        auto screenSession = iter.second;
-        if (screenSession == nullptr) {
-            continue;
-        }
-        if (IsDefaultMirrorMode(screenSession->GetScreenId()) &&
-            screenSession->GetIsRealScreen()) {
-            externalScreenIds.emplace_back(screenSession->GetScreenId());
-            hasExternalScreen = true;
-            screenSession->SetName(isSwitchToPcMode ? "ExtendedDisplay" : "CastEngine");
-            screenSession->SetVirtualScreenFlag(isSwitchToPcMode ?
-                VirtualScreenFlag::DEFAULT : VirtualScreenFlag::CAST);
-            oss << screenSession->GetScreenId() << ",";
+    {
+        std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+        for (const auto& iter : screenSessionMap_) {
+            auto screenSession = iter.second;
+            if (screenSession == nullptr) {
+                continue;
+            }
+            if (IsDefaultMirrorMode(screenSession->GetScreenId()) && screenSession->GetIsRealScreen()) {
+                externalScreenIds.emplace_back(screenSession->GetScreenId());
+                hasExternalScreen = true;
+                screenSession->SetName(isSwitchToPcMode ? "ExtendedDisplay" : "CastEngine");
+                screenSession->SetVirtualScreenFlag(isSwitchToPcMode ?
+                    VirtualScreenFlag::DEFAULT : VirtualScreenFlag::CAST);
+                oss << screenSession->GetScreenId() << ",";
+            }
         }
     }
     TLOGI(WmsLogTag::DMS, "screenIds:%{public}s", oss.str().c_str());
