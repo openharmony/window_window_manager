@@ -206,8 +206,9 @@ WSError SubSession::ProcessPointDownSession(int32_t posX, int32_t posY)
     if (sessionProperty && sessionProperty->GetRaiseEnabled()) {
         RaiseToAppTopForPointDown();
     }
+    auto ret = SceneSession::ProcessPointDownSession(posX, posY);
     PresentFocusIfPointDown();
-    return SceneSession::ProcessPointDownSession(posX, posY);
+    return ret;
 }
 
 int32_t SubSession::GetMissionId() const
