@@ -632,7 +632,7 @@ void ScreenSessionManagerClient::DisconnectAllExternalScreen()
 {
     ScreenId setScreenId = SCREEN_ID_INVALID;
     {
-            std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
+        std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
         for (auto sessionIt = screenSessionMap_.rbegin(); sessionIt != screenSessionMap_.rend(); ++sessionIt) {
             auto screenSession = sessionIt->second;
             if (screenSession == nullptr) {
