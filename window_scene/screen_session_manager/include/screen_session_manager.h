@@ -480,7 +480,7 @@ public:
     bool SetScreenOffset(ScreenId screenId, float offsetX, float offsetY);
     bool SynchronizePowerStatus(ScreenPowerState state) override;
     std::shared_ptr<TaskScheduler> GetPowerTaskScheduler() const;
-    bool GetCancelSuspendStatus(void) const;
+    bool GetCancelSuspendStatus() const;
 
 protected:
     ScreenSessionManager();
