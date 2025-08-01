@@ -311,7 +311,7 @@ WmErrorCode AniWindowRegisterManager::ProcessWindowVisibilityChangeRegister(sptr
 }
 
 WmErrorCode AniWindowRegisterManager::ProcessWindowNoInteractionRegister(sptr<AniWindowListener> listener,
-    sptr<Window> window, bool isRegister, ani_env* env, ani_double timeout)
+    sptr<Window> window, bool isRegister, ani_env* env, ani_long timeout)
 {
     if (window == nullptr) {
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
@@ -320,15 +320,14 @@ WmErrorCode AniWindowRegisterManager::ProcessWindowNoInteractionRegister(sptr<An
     if (!isRegister) {
         return WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterWindowNoInteractionListener(thisListener));
     }
-    ani_long tmptimeout = static_cast<ani_long>(timeout);
     constexpr ani_long secToMicrosecRatio = 1000;
     constexpr ani_long noInteractionMax = LLONG_MAX / secToMicrosecRatio;
-    if (tmptimeout <= 0 || (tmptimeout > noInteractionMax)) {
-        TLOGE(WmsLogTag::DEFAULT, "invalid parameter: no-interaction-timeout %{public}lld is not in(0s~%{public}lld",
-            tmptimeout, noInteractionMax);
+    if (timeout <= 0 || (timeout > noInteractionMax)) {
+        TLOGE(WmsLogTag::DEFAULT, "invalid parameter: no-interaction-timeout %{public}" PRId64 " is not in "
+            "(0s~%{public}" PRId64, timeout, noInteractionMax);
         return WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
-    thisListener->SetTimeout(tmptimeout * secToMicrosecRatio);
+    thisListener->SetTimeout(timeout * secToMicrosecRatio);
     return WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterWindowNoInteractionListener(thisListener));
 }
 
@@ -419,7 +418,7 @@ bool AniWindowRegisterManager::IsCallbackRegistered(ani_env* env, std::string ty
 }
 
 WmErrorCode AniWindowRegisterManager::RegisterListener(sptr<Window> window, const std::string& type,
-    CaseType caseType, ani_env* env, ani_ref callback, ani_double timeout)
+    CaseType caseType, ani_env* env, ani_ref callback, ani_long timeout)
 {
     std::lock_guard<std::mutex> lock(mtx_);
     if (IsCallbackRegistered(env, type, callback)) {
@@ -460,7 +459,7 @@ WmErrorCode AniWindowRegisterManager::RegisterListener(sptr<Window> window, cons
 
 WmErrorCode AniWindowRegisterManager::ProcessListener(RegisterListenerType registerListenerType, CaseType caseType,
     const sptr<AniWindowListener>& windowManagerListener, const sptr<Window>& window, bool isRegister,
-    ani_env* env, ani_double timeout)
+    ani_env* env, ani_long timeout)
 {
     if (caseType == CaseType::CASE_WINDOW_MANAGER) {
         switch (static_cast<uint32_t>(registerListenerType)) {
