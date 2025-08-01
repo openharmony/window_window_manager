@@ -2288,7 +2288,50 @@ HWTEST_F(WindowSceneSessionImplTest5, GetDragAreaByDownEvent04, TestSize.Level2)
  */
 HWTEST_F(WindowSceneSessionImplTest5, UpdateImmersiveBySwitchMode, TestSize.Level2)
 {
+/**
+ * @tc.name: UpdateImmersiveBySwitchMode
+ * @tc.desc: Test UpdateImmersiveBySwitchMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, UpdateImmersiveBySwitchMode, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo;
+    sptr<SessionMocker> mockHostSession = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    auto property = window->GetProperty();
 
+    property->SetPersistentId(123);
+
+    window->hostSession_ = nullptr;
+    window->enableImmersiveMode_ = true;
+    window->UpdateImmersiveBySwitchMode(true);
+    EXPECT_EQ(window->enableImmersiveMode_, false);
+
+    window->enableImmersiveMode_ = false;
+    window->hostSession_ = nullptr;
+    window->UpdateImmersiveBySwitchMode(true);
+    EXPECT_EQ(window->enableImmersiveMode_, false);
+
+    window->enableImmersiveMode_ = false;
+    window->hostSession_ = mockHostSession;
+    window->UpdateImmersiveBySwitchMode(true);
+    EXPECT_EQ(window->enableImmersiveMode_, false);
+
+    window->cacheEnableImmersiveMode_ = false;
+    window->UpdateImmersiveBySwitchMode(false);
+    EXPECT_EQ(window->enableImmersiveMode_, false);
+
+    window->cacheEnableImmersiveMode_ = true;
+    window->hostSession_ = nullptr;
+    window->UpdateImmersiveBySwitchMode(false);
+    EXPECT_EQ(window->enableImmersiveMode_, true);
+
+    window->cacheEnableImmersiveMode_ = true;
+    window->hostSession_ = mockHostSession;
+    window->UpdateImmersiveBySwitchMode(false);
+    EXPECT_EQ(window->enableImmersiveMode_, true);
+}
 }
 }
 } // namespace Rosen
