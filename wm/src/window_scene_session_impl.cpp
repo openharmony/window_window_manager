@@ -2865,13 +2865,13 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreenByApiVersion(bool status)
     isIgnoreSafeAreaNeedNotify_ = true;
     // 10 ArkUI new framework support after API10
     if (version >= 10) {
-        TLOGI(WmsLogTag::WMS_IMMS, "ignore safe area, win %{public}u status %{public}d",
+        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u status %{public}d",
             GetWindowId(), static_cast<int32_t>(status));
         if (auto uiContent = GetUIContentSharedPtr()) {
             uiContent->SetIgnoreViewSafeArea(status);
         }
     } else {
-        TLOGI(WmsLogTag::WMS_IMMS, "need avoid flag, win %{public}u status %{public}d",
+        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u status %{public}d",
             GetWindowId(), static_cast<int32_t>(status));
         WMError ret = WMError::WM_OK;
         if (status) {
@@ -2901,7 +2901,7 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreenByApiVersion(bool status)
 
 WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
 {
-    TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u %{public}s] status %{public}d",
+    TLOGD(WmsLogTag::WMS_IMMS, "win [%{public}u %{public}s] status %{public}d",
         GetWindowId(), GetWindowName().c_str(), static_cast<int32_t>(status));
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;

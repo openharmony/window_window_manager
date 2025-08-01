@@ -2325,6 +2325,18 @@ bool SceneSession::GetShowWhenLockedFlagValue() const
     return GetSessionProperty()->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
 }
 
+void SceneSession::IsNeedPrintCalcuteInfo(AoidAreaType type, const WSRect& rect, const WSRect& avoidRect)
+{
+    auto displayId = GetSessionProperty()->GetDisplayId();
+    std::tuple<DisplayId, WSRect, WSRect> inputParamters(displayId, rect, avoidRect);
+    if (lastAvoidAreaInputParamtersMap_.find(type) == lastAvoidAreaInputParamtersMap_.end() ||
+        lastAvoidAreaInputParamtersMap_[type] != inputParamters) {
+        lastAvoidAreaInputParamtersMap_[type] = inputParamters;
+        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d dispaly %{public}" PRIu64 " rect %{public}s bar %{public}s",
+            GetPersistentId(), displayId, rect.ToString().c_str(), avoidRect.ToString().c_str());
+    }
+}
+
 void SceneSession::CalculateAvoidAreaRect(const WSRect& rect, const WSRect& avoidRect, AvoidArea& avoidArea) const
 {
     if (SessionHelper::IsEmptyRect(rect) || SessionHelper::IsEmptyRect(avoidRect)) {
@@ -2394,7 +2406,7 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
         float vpr = 3.5f; // 3.5f: default pixel ratio
         auto display = DisplayManager::GetInstance().GetDefaultDisplay();
         if (display == nullptr) {
-            WLOGFE("display is null");
+            TLOGE(WmsLogTag::WMS_IMMS, "display is null");
             return;
         }
         vpr = display->GetVirtualPixelRatio();
@@ -2429,9 +2441,7 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
         if (onGetStatusBarAvoidHeightFunc_) {
             onGetStatusBarAvoidHeightFunc_(displayId, statusBarRect);
         }
-        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d displayId %{public}" PRIu64 " rect "
-            "%{public}s status bar %{public}s",
-            GetPersistentId(), displayId, rect.ToString().c_str(), statusBarRect.ToString().c_str());
+        IsNeedPrintCalcuteInfo(AoidAreaType::TYPE_SYSTEM, rect, statusBarRect);
         CalculateAvoidAreaRect(rect, statusBarRect, avoidArea);
     }
     return;
@@ -2468,13 +2478,11 @@ void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
                 keyboardRect = inputMethod->GetKeyboardPanelSession()->GetSessionRect();
                 inputMethod->RecalculatePanelRectForAvoidArea(keyboardRect);
             }
-            TLOGI(WmsLogTag::WMS_IMMS, "win %{public}s keyboard %{public}s",
-                  rect.ToString().c_str(), keyboardRect.ToString().c_str());
+            IsNeedPrintCalcuteInfo(AoidAreaType::TYPE_KEYBOARD, rect, keyboardRect);
             CalculateAvoidAreaRect(rect, keyboardRect, avoidArea);
         } else {
             WSRect inputMethodRect = inputMethod->GetSessionRect();
-            TLOGI(WmsLogTag::WMS_IMMS, "win %{public}s input method %{public}s",
-                  rect.ToString().c_str(), inputMethodRect.ToString().c_str());
+            IsNeedPrintCalcuteInfo(AoidAreaType::TYPE_KEYBOARD, rect, inputMethodRect);
             CalculateAvoidAreaRect(rect, inputMethodRect, avoidArea);
         }
     }
@@ -2516,8 +2524,7 @@ void SceneSession::GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             cutoutArea.width_,
             cutoutArea.height_
         };
-        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}s cutout %{public}s",
-              rect.ToString().c_str(), cutoutAreaRect.ToString().c_str());
+        IsNeedPrintCalcuteInfo(AoidAreaType::TYPE_CUTOUT, rect, cutoutAreaRect);
         CalculateAvoidAreaRect(rect, cutoutAreaRect, avoidArea);
     }
 
@@ -2539,8 +2546,7 @@ void SceneSession::GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) con
     if (specificCallback_ != nullptr && specificCallback_->onGetAINavigationBarArea_) {
         barArea = specificCallback_->onGetAINavigationBarArea_(GetSessionProperty()->GetDisplayId());
     }
-    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}s AI bar %{public}s",
-          rect.ToString().c_str(), barArea.ToString().c_str());
+    IsNeedPrintCalcuteInfo(AoidAreaType::TYPE_NAVIGATION_INDICATOR, rect, barArea);
     CalculateAvoidAreaRect(rect, barArea, avoidArea);
 }
 
