@@ -900,8 +900,8 @@ protected:
     NotifySystemBarPropertyChangeFunc onSystemBarPropertyChange_;
     GetStatusBarAvoidHeightFunc onGetStatusBarAvoidHeightFunc_;
     GetStatusBarConstantlyShowFunc onGetStatusBarConstantlyShowFunc_;
-    void IsNeedPrintCalcuteInfo(AoidAreaType type, const WSRect& rect, const WSRect& avoidRect);
-    
+    void IsNeedPrintCalcuteInfo(AvoidAreaType type, const WSRect& rect, const WSRect& avoidRect);
+
 
     /*
      * Gesture Back
