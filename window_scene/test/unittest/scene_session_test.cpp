@@ -1434,7 +1434,7 @@ HWTEST_F(SceneSessionTest, IsNeedPrintCalcuteInfo, TestSize.Level1)
     sceneSession->IsNeedPrintCalcuteInfo(type, winRect, avoidRect);
     std::tuple<DisplayId, WSRect, WSRect> inputParamters1(sceneSession->property_->displayId_, winRect, avoidRect);
     EXPECT_EQ(inputParamters1, sceneSession->lastAvoidAreaInputParamtersMap_[type]);
-    std::tuple<DisplayId, WSRect, WSRect> inputParamters1(sceneSession->property_->displayId_, winRect, avoidRect);
+    sceneSession->IsNeedPrintCalcuteInfo(type, winRect, avoidRect);
     EXPECT_EQ(inputParamters1, sceneSession->lastAvoidAreaInputParamtersMap_[type]);
 }
 
