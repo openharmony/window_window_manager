@@ -643,7 +643,9 @@ HWTEST_F(WindowSceneSessionImplTest5, SwitchFreeMultiWindow02, TestSize.Level1)
     EXPECT_EQ(false, subWindow->IsPcOrPadFreeMultiWindowMode());
     EXPECT_EQ(WSError::WS_ERROR_NULLPTR, mainWindow->SwitchFreeMultiWindow(true));
     EXPECT_EQ(true, mainWindow->IsPcOrPadFreeMultiWindowMode());
+    EXPECT_EQ(WSError::WS_OK, floatWindow->SwitchFreeMultiWindow(true));
     EXPECT_EQ(true, floatWindow->IsPcOrPadFreeMultiWindowMode());
+    EXPECT_EQ(WSError::WS_OK, subWindow->SwitchFreeMultiWindow(true));
     EXPECT_EQ(true, subWindow->IsPcOrPadFreeMultiWindowMode());
 
     EXPECT_EQ(WMError::WM_OK, mainWindow->Destroy(true));
@@ -2277,6 +2279,16 @@ HWTEST_F(WindowSceneSessionImplTest5, GetDragAreaByDownEvent04, TestSize.Level2)
     windowSceneSessionImpl->property_->SetDragEnabled(false);
     AreaType dragType = windowSceneSessionImpl->GetDragAreaByDownEvent(pointerEvent, pointerItem);
     EXPECT_EQ(dragType, AreaType::UNDEFINED);
+}
+
+/**
+ * @tc.name: UpdateImmersiveBySwitchMode
+ * @tc.desc: UpdateImmersiveBySwitchMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, UpdateImmersiveBySwitchMode, TestSize.Level2)
+{
+
 }
 }
 } // namespace Rosen
