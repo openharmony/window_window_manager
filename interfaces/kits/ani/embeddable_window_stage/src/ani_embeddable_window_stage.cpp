@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -114,26 +114,3 @@ AniEmbeddableWindowStage* GetEmbeddableWindowStageFromEnv(ani_env* env, ani_clas
 }
 }  // namespace Rosen
 }  // namespace OHOS
-
-extern "C" {
-ANI_EXPORT ani_status ExtensionWindow_ANI_Constructor(ani_vm *vm, uint32_t *result);
-ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
-{
-    using namespace OHOS::Rosen;
-    ani_status ret;
-    ani_env* env;
-    if ((ret = vm->GetEnv(ANI_VERSION_1, &env)) != ANI_OK) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] null env");
-        return ANI_NOT_FOUND;
-    }
-
-    ani_class cls = nullptr;
-    if ((ret = env->FindClass("L@ohos/window/window/WindowStage;", &cls)) != ANI_OK) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] null env %{public}u", ret);
-        return ANI_NOT_FOUND;
-    }
-    *result = ANI_VERSION_1;
-
-    return ExtensionWindow_ANI_Constructor(vm, result);
-}
-}
