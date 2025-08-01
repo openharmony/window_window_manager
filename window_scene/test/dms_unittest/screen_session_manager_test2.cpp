@@ -1147,6 +1147,24 @@ HWTEST_F(ScreenSessionManagerTest, WaitUpdateAvailableAreaForPc02, TestSize.Leve
 }
 
 /**
+ * @tc.name: CreateVirtualScreen
+ * @tc.desc: CreateVirtualScreen test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CreateVirtualScreen, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "CastEngine";
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    sptr<ScreenSession> screenSession = ssm_->GetScreenSession(screenId);
+    ASSERT_NE(screenSession, nullptr);
+    EXPECT_EQ(screenSession->GetVirtualScreenFlag(), VirtualScreenFlag::CAST);
+    ssm_->DestroyVirtualScreen(screenId);
+}
+
+/**
  * @tc.name: UpdateAvailableAreaWhenDisplayAdd01
  * @tc.desc: UpdateAvailableArea WhenDisplayAdd notify all
  * @tc.type: FUNC
@@ -1196,24 +1214,6 @@ HWTEST_F(ScreenSessionManagerTest, UpdateAvailableArea02, TestSize.Level1)
     EXPECT_FALSE(ssm_->needWaitAvailableArea_);
     g_errLog.clear();
     ssm_->SetPcStatus(temp);
-}
-
-/**
- * @tc.name: CreateVirtualScreen
- * @tc.desc: CreateVirtualScreen test
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, CreateVirtualScreen, TestSize.Level1)
-{
-    ASSERT_NE(ssm_, nullptr);
-    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
-    VirtualScreenOption virtualOption;
-    virtualOption.name_ = "CastEngine";
-    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
-    sptr<ScreenSession> screenSession = ssm_->GetScreenSession(screenId);
-    ASSERT_NE(screenSession, nullptr);
-    EXPECT_EQ(screenSession->GetVirtualScreenFlag(), VirtualScreenFlag::CAST);
-    ssm_->DestroyVirtualScreen(screenId);
 }
 }
 }
