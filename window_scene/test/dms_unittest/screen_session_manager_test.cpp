@@ -7233,6 +7233,24 @@ HWTEST_F(ScreenSessionManagerTest, SwitchModeHandleExternalScreen02, TestSize.Le
 }
 
 /**
+ * @tc.name: CreateVirtualScreen
+ * @tc.desc: CreateVirtualScreen test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CreateVirtualScreen, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<IDisplayManagerAgent> displayManagerAgent = sptr<DisplayManagerAgentDefault>::MakeSptr();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "CastEngine";
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    sptr<ScreenSession> screenSession = ssm_->GetScreenSession(screenId);
+    ASSERT_NE(screenSession, nullptr);
+    EXPECT_EQ(screenSession->GetVirtualScreenFlag(), VirtualScreenFlag::CAST);
+    ssm_->DestroyVirtualScreen(screenId);
+}
+
+/**
  * @tc.name: SetScreenOffsetFeatureTest
  * @tc.desc: SetScreenOffsetInner
  * @tc.type: FUNC
