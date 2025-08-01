@@ -832,8 +832,8 @@ private:
     bool IsSupportCoordination();
     void RegisterSettingExtendScreenDpiObserver();
     void SetExtendScreenDpi();
-    bool SwitchPcMode();
-    void SwitchExternalScreenToMirror();
+    bool HandleSwitchPcMode();
+    void SwitchModeHandleExternalScreen(bool isSwitchToPcMode);
     void WaitUpdateAvailableAreaForPc();
 
     LowTempMode lowTemp_ {LowTempMode::UNKNOWN};
