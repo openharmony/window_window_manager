@@ -2332,7 +2332,7 @@ void SceneSession::IsNeedPrintCalcuteInfo(AvoidAreaType type, const WSRect& rect
     if (lastAvoidAreaInputParamtersMap_.find(type) == lastAvoidAreaInputParamtersMap_.end() ||
         lastAvoidAreaInputParamtersMap_[type] != inputParamters) {
         lastAvoidAreaInputParamtersMap_[type] = inputParamters;
-        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d dispaly %{public}" PRIu64 "" 
+        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d dispaly %{public}" PRIu64 ""
             "type %{public}d rect %{public}s bar %{public}s",
             GetPersistentId(), displayId, type, rect.ToString().c_str(), avoidRect.ToString().c_str());
     }
