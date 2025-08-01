@@ -5535,7 +5535,21 @@ WSError WindowSceneSessionImpl::SwitchFreeMultiWindow(bool enable)
 
 bool WindowSceneSessionImpl::UpdateImmersiveBySwitchMode()
 {
-    return SwitchSubWindow(enable, GetPersistentId());
+    if (enable && enableImmersiveMode_ && property_) {
+        cacheEnableImmersiveMode_ = true;
+        enableImmersiveMode_ = false;
+        property_->SetIsLayoutFullScreen(enableImmersiveMode_);
+        if (auto hostSession = GetHostSession()) {
+            hostSession->OnLayoutFullScreenChange(enableImmersiveMode_);
+        }
+    }
+    if (!enable && cacheEnableImmersiveMode_ && property_) {
+        enableImmersiveMode_ = true;
+        property_->SetIsLayoutFullScreen(enableImmersiveMode_);
+        if (auto hostSession = GetHostSession()) {
+            hostSession->OnLayoutFullScreenChange(enableImmersiveMode_);
+        }
+    }
 }
 
 bool WindowSceneSessionImpl::GetFreeMultiWindowModeEnabledState()
