@@ -7596,20 +7596,24 @@ void JsSceneSession::NotifyHighlightChange(bool isHighlight)
 
 void JsSceneSession::ProcessWindowAnchorInfoChangeRegister()
 {
-    NotifyWindowAnchorInfoChangeFunc func =
-    [weakThis = wptr(this), where = __func__](const WindowAnchorInfo& windowAnchorInfo) {
-        auto jsSceneSession = weakThis.promote();
-        if (!jsSceneSession) {
-            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s: jsSceneSession is null", where);
-            return;
-        }
-        jsSceneSession->NotifyWindowAnchorInfoChange(windowAnchorInfo);
-    };
     auto session = weakSession_.promote();
     if (session == nullptr) {
         TLOGE(WmsLogTag::WMS_SUB, "session is nullptr");
         return;
     }
+    if (!session->GetSystemConfig().supportFollowRelativePositionToParent_) {
+        TLOGD(WmsLogTag::WMS_SUB, "system config not support");
+        return;
+    }
+    NotifyWindowAnchorInfoChangeFunc func =
+        [weakThis = wptr(this), where = __func__](const WindowAnchorInfo& windowAnchorInfo) {
+            auto jsSceneSession = weakThis.promote();
+            if (!jsSceneSession) {
+                TLOGNE(WmsLogTag::WMS_SUB, "%{public}s: jsSceneSession is null", where);
+                return;
+            }
+            jsSceneSession->NotifyWindowAnchorInfoChange(windowAnchorInfo);
+        };
     session->SetWindowAnchorInfoChangeFunc(std::move(func));
 }
 
