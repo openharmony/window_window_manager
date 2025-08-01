@@ -182,6 +182,8 @@ const static uint32_t PIXMAP_VECTOR_SIZE = 2;
 static const uint32_t SDR_PIXMAP = 0;
 const bool IS_SUPPORT_PC_MODE = system::GetBoolParameter("const.window.support_window_pcmode_switch", false);
 const ScreenId SCREEN_GROUP_ID_DEFAULT = 1;
+const std::string SCREEN_NAME_EXTEND = "ExtendedDisplay";
+const std::string SCREEN_NAME_CAST = "CastEngine";
 const std::set<std::string> INDIVIDUAL_SCREEN_GROUP_SET = {"CeliaView", "DevEcoViewer"};
 
 constexpr int32_t MAIN_STATUS_WIDTH_INDEX = 0;
@@ -2516,12 +2518,12 @@ sptr<ScreenSession> ScreenSessionManager::CreatePhysicalMirrorSessionInner(Scree
     if (g_isPcDevice) {
         // pc is none, pad&&phone is mirror
         InitExtendScreenProperty(screenId, screenSession, property);
-        screenSession->SetName("ExtendedDisplay");
+        screenSession->SetName(SCREEN_NAME_EXTEND);
         screenSession->SetIsExtend(true);
         screenSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
     } else {
         screenSession->SetIsExtend(true);
-        screenSession->SetName("CastEngine");
+        screenSession->SetName(SCREEN_NAME_CAST);
         screenSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
         screenSession->SetVirtualScreenFlag(VirtualScreenFlag::CAST);
     }
@@ -4831,7 +4833,7 @@ ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
             std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
             screenSessionMap_.insert(std::make_pair(smsScreenId, screenSession));
         }
-        if (option.name_ == "CastEngine") {
+        if (option.name_ == SCREEN_NAME_CAST) {
             screenSession->SetVirtualScreenFlag(VirtualScreenFlag::CAST);
         }
         NotifyScreenConnected(screenSession->ConvertToScreenInfo());
@@ -7517,7 +7519,7 @@ bool ScreenSessionManager::HasCastEngineOrPhyMirror(const std::vector<ScreenId>&
         }
         auto screenType = screenSession->GetScreenProperty().GetScreenType();
         if (screenType == ScreenType::VIRTUAL
-            && screenSession->GetName() == "CastEngine") {
+            && screenSession->GetName() == SCREEN_NAME_CAST) {
             return true;
         }
 
@@ -8323,7 +8325,7 @@ void ScreenSessionManager::FlushDisplayNodeWhenSwtichUser(std::vector<int32_t> o
     RSTransactionAdapter::FlushImplicitTransaction(screenSession->GetRSUIContext());
 }
 
-bool ScreenSessionManager::SwitchPcMode()
+bool ScreenSessionManager::HandleSwitchPcMode()
 {
     if (!IS_SUPPORT_PC_MODE) {
         return g_isPcDevice;
@@ -8332,13 +8334,14 @@ bool ScreenSessionManager::SwitchPcMode()
     if (system::GetBoolParameter(IS_PC_MODE_KEY, false)) {
         TLOGI(WmsLogTag::DMS, "PcMode change isPcDevice true");
         g_isPcDevice = true;
+        SwitchModeHandleExternalScreen(true);
 #ifdef WM_MULTI_SCREEN_CTL_ABILITY_ENABLE
         SetMultiScreenFrameControl();
 #endif
     } else {
         TLOGI(WmsLogTag::DMS, "PadMode change isPcDevice false");
         g_isPcDevice = false;
-        SwitchExternalScreenToMirror();
+        SwitchModeHandleExternalScreen(false);
 #ifdef WM_MULTI_SCREEN_CTL_ABILITY_ENABLE
         TLOGI(WmsLogTag::DMS, "Disable frame rate control");
         EventInfo event = { "VOTER_MUTIPHYSICALSCREEN", REMOVE_VOTE };
@@ -8348,26 +8351,30 @@ bool ScreenSessionManager::SwitchPcMode()
     return g_isPcDevice;
 }
 
-void ScreenSessionManager::SwitchExternalScreenToMirror()
+void ScreenSessionManager::SwitchModeHandleExternalScreen(bool isSwitchToPcMode)
 {
-    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     std::ostringstream oss;
     std::vector<ScreenId> externalScreenIds;
     bool hasExternalScreen = false;
-    for (const auto& iter : screenSessionMap_) {
-        auto screenSession = iter.second;
-        if (screenSession == nullptr) {
-            continue;
-        }
-        if (IsDefaultMirrorMode(screenSession->GetScreenId()) &&
-            screenSession->GetIsRealScreen()) {
-            externalScreenIds.emplace_back(screenSession->GetScreenId());
-            hasExternalScreen = true;
-            oss << screenSession->GetScreenId() << ",";
+    {
+        std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+        for (const auto& iter : screenSessionMap_) {
+            auto screenSession = iter.second;
+            if (screenSession == nullptr) {
+                continue;
+            }
+            if (IsDefaultMirrorMode(screenSession->GetScreenId()) && screenSession->GetIsRealScreen()) {
+                externalScreenIds.emplace_back(screenSession->GetScreenId());
+                hasExternalScreen = true;
+                screenSession->SetName(isSwitchToPcMode ? SCREEN_NAME_EXTEND : SCREEN_NAME_CAST);
+                screenSession->SetVirtualScreenFlag(isSwitchToPcMode ?
+                    VirtualScreenFlag::DEFAULT : VirtualScreenFlag::CAST);
+                oss << screenSession->GetScreenId() << ",";
+            }
         }
     }
     TLOGI(WmsLogTag::DMS, "screenIds:%{public}s", oss.str().c_str());
-    if (hasExternalScreen) {
+    if (hasExternalScreen && !isSwitchToPcMode) {
         ScreenId screenGroupId = SCREEN_GROUP_ID_DEFAULT;
         MakeMirror(SCREEN_ID_DEFAULT, externalScreenIds, screenGroupId);
         TLOGI(WmsLogTag::DMS, "notify cast screen connect");
@@ -8386,7 +8393,7 @@ void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& cl
         TLOGE(WmsLogTag::DMS, "SetClient client is null");
         return;
     }
-    SwitchPcMode();
+    HandleSwitchPcMode();
     if (g_isPcDevice && userSwitching_) {
         std::unique_lock<std::mutex> lock(switchUserMutex_);
         if (switchUserCV_.wait_for(lock, std::chrono::milliseconds(CV_WAIT_USERSWITCH_MS)) == std::cv_status::timeout) {
@@ -10363,12 +10370,12 @@ sptr<ScreenSession> ScreenSessionManager::CreateFakePhysicalMirrorSessionInner(S
     }
     if (g_isPcDevice) {
         InitExtendScreenProperty(screenId, screenSession, property);
-        screenSession->SetName("ExtendedDisplay");
+        screenSession->SetName(SCREEN_NAME_EXTEND);
         screenSession->SetIsExtend(true);
         screenSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
     } else {
         screenSession->SetIsExtend(true);
-        screenSession->SetName("CastEngine");
+        screenSession->SetName(SCREEN_NAME_CAST);
         screenSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
         screenSession->SetVirtualScreenFlag(VirtualScreenFlag::CAST);
     }
