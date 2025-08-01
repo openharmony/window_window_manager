@@ -1855,12 +1855,12 @@ HWTEST_F(SceneSessionManagerTest12, GetRouterStackInfo03, Function | SmallTest |
 
     MockAccesstokenKit::MockIsSystemApp(false);
     MockAccesstokenKit::MockIsSACalling(true);
-    auto result = ssm_->GetRouterStackInfo(1, nullptr);
+    result = ssm_->GetRouterStackInfo(1, nullptr);
     EXPECT_EQ(result, WMError::WM_ERROR_NULLPTR);
 
     MockAccesstokenKit::MockIsSystemApp(true);
     MockAccesstokenKit::MockIsSACalling(false);
-    auto result = ssm_->GetRouterStackInfo(1, nullptr);
+    result = ssm_->GetRouterStackInfo(1, nullptr);
     EXPECT_EQ(result, WMError::WM_ERROR_NULLPTR);
 
     MockAccesstokenKit::MockIsSystemApp(true);
