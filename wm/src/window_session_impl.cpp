@@ -7977,7 +7977,7 @@ WMError WindowSessionImpl::GetPiPSettingSwitchStatus(bool& switchStatus) const
     return SingletonContainer::Get<WindowAdapter>().GetPiPSettingSwitchStatus(switchStatus);
 }
 
-void WindowSessionImpl::SwitchSubWindow(bool enable, int32_t parentId)
+void WindowSessionImpl::SwitchSubWindow(bool freeMultiWindowEnable, int32_t parentId)
 {
     std::lock_guard<std::recursive_mutex> lock(subWindowSessionMutex_);
     if (subWindowSessionMap_.count(parentId) == 0) {
@@ -7985,12 +7985,13 @@ void WindowSessionImpl::SwitchSubWindow(bool enable, int32_t parentId)
         return;
     }
     for (auto& subWindowSession : subWindowSessionMap_.at(parentId)) {
-        if (subWindowSession && subWindowSession->windowSystemConfig_.freeMultiWindowEnable_ != enable) {
-            subWindowSession->SetFreeMultiWindowMode(enable);
+        if (subWindowSession &&
+            subWindowSession->windowSystemConfig_.freeMultiWindowEnable_ != freeMultiWindowEnable) {
+            subWindowSession->SetFreeMultiWindowMode(freeMultiWindowEnable);
             subWindowSession->UpdateTitleButtonVisibility();
             subWindowSession->UpdateDecorEnable(true);
-            subWindowSession->UpdateEnableDragWhenSwitchMultiWindow(enable);
-            subWindowSession->SwitchSubWindow(enable, subWindowSession->GetPersistentId());
+            subWindowSession->UpdateEnableDragWhenSwitchMultiWindow(freeMultiWindowEnable);
+            subWindowSession->SwitchSubWindow(freeMultiWindowEnable, subWindowSession->GetPersistentId());
         }
     }
 }

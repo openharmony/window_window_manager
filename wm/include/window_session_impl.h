@@ -483,7 +483,7 @@ public:
     {
         windowSystemConfig_.freeMultiWindowEnable_ = enable;
     }
-    void SwitchSubWindow(bool enable, int32_t parentId);
+    void SwitchSubWindow(bool freeMultiWindowEnable, int32_t parentId);
 
     /*
      * Window Immersive
