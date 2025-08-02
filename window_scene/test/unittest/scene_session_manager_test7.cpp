@@ -1466,7 +1466,7 @@ HWTEST_F(SceneSessionManagerTest7, SetAppForceLandscapeConfig03, TestSize.Level1
     EXPECT_EQ(ssm_->appForceLandscapeMap_[bundleName].mode_, 5);
     EXPECT_EQ(ssm_->appForceLandscapeMap_[bundleName].homePage_, "newHomePage");
     EXPECT_EQ(ssm_->appForceLandscapeMap_[bundleName].supportSplit_, 5);
-    EXPECT_EQ(ssm_->appForceLandscapeMap_[bundleName].homePage_, "newArkUIOptions");
+    EXPECT_EQ(ssm_->appForceLandscapeMap_[bundleName].arkUIOptions_, "newArkUIOptions");
 }
 
 /**

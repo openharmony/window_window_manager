@@ -4082,7 +4082,7 @@ napi_value JsSceneSessionManager::OnUpdateAppHookWindowInfo(napi_env env, napi_c
         return NapiGetUndefined(env);
     }
 
-    HookWindowInfo hookWindowInfo;
+    HookWindowInfo hookWindowInfo{};
     if (!ConvertHookWindowInfoFromJs(env, argv[ARG_INDEX_ONE], hookWindowInfo)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to hookWindowInfo");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),

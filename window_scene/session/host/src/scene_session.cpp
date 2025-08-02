@@ -70,14 +70,6 @@
 #include <power_mgr_client.h>
 #endif
 
-#define RETURN_IF_PARAM_IS_NULL(param, ...)                              \
-    do {                                                                 \
-        if (!param) {                                                    \
-            TLOGE(WmsLogTag::DEFAULT, "The %{public}s is null", #param); \
-            return __VA_ARGS__;                                          \
-        }                                                                \
-    } while (false)                                                      \
-
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSession" };
@@ -7463,7 +7455,10 @@ void SceneSession::RegisterForceSplitListener(const NotifyForceSplitFunc& func)
 
 void SceneSession::RegisterAppHookWindowInfoFunc(GetHookWindowInfoFunc&& func)
 {
-    RETURN_IF_PARAM_IS_NULL(func);
+    if (!func) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, func is null", GetPersistentId());
+        return;
+    }
     getHookWindowInfoFunc_ = std::move(func);
 }
 
@@ -7529,12 +7524,19 @@ WMError SceneSession::GetAppForceLandscapeConfig(AppForceLandscapeConfig& config
 
 WMError SceneSession::GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo)
 {
-    if (!getHookWindowInfoFunc_) {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, func is null", GetPersistentId());
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    hookWindowInfo = getHookWindowInfoFunc_(sessionInfo_.bundleName_);
-    return WMError::WM_OK;
+    return PostSyncTask([weakThis = wptr(this), &hookWindowInfo, where = __func__]() -> WMError {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s session is null", where);
+            return WMError::WM_ERROR_INVALID_SESSION;
+        }
+        if (!session->getHookWindowInfoFunc_) {
+            TLOGW(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, func is null", session->GetPersistentId());
+            return WMError::WM_ERROR_NULLPTR;
+        }
+        hookWindowInfo = session->getHookWindowInfoFunc_(session->GetSessionInfo().bundleName_);
+        return WMError::WM_OK;
+    }, __func__);
 }
 
 void SceneSession::SetUpdatePrivateStateAndNotifyFunc(const UpdatePrivateStateAndNotifyFunc& func)
