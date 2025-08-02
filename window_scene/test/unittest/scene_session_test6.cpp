@@ -762,7 +762,9 @@ HWTEST_F(SceneSessionTest6, NotifyKeyboardAnimationWillBeginInvalidSessionStage,
     bool withAnimation = false;
     const std::shared_ptr<RSTransaction>& rsTransaction = std::make_shared<RSTransaction>();
     sceneSession->NotifyKeyboardAnimationWillBegin(isShowAnimation, beginRect, endRect, withAnimation, rsTransaction);
-    EXPECT_TRUE(g_errlog.find("sessionStage_ is null") != std::string::npos);
+    if (HiLogIsLoggable(HILOG_DOMAIN_WINDOW, g_domainContents[static_cast<uint32_t>(WmsLogTag::DEFAULT)], LOG_DEBUG)) {
+        EXPECT_TRUE(g_errlog.find("sessionStage_ is null") != std::string::npos);
+    }
 }
 
 /**
