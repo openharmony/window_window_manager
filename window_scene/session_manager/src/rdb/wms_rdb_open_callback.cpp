@@ -19,7 +19,9 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-constexpr int32_t VERSION_ADD_STARTWINDOW_TYPE_COLUMN = 2;
+constexpr int32_t RDB_VERSION_1 = 1;
+constexpr int32_t RDB_VERSION_2 = 2;
+const std::string STARTWINDOW_TYPE_COLUMN_INFO = "STARTWINDOW_TYPE TEXT";
 } // namespace
 WmsRdbOpenCallback::WmsRdbOpenCallback(const WmsRdbConfig& wmsRdbConfig)\
     : wmsRdbConfig_(wmsRdbConfig) {}
@@ -36,16 +38,33 @@ int32_t WmsRdbOpenCallback::OnCreate(NativeRdb::RdbStore& rdbStore)
 int32_t WmsRdbOpenCallback::OnUpgrade(NativeRdb::RdbStore& rdbStore, int currentVersion, int targetVersion)
 {
     TLOGI(WmsLogTag::WMS_PATTERN, "%{public}d -> %{public}d", currentVersion, targetVersion);
-    if (currentVersion > VERSION_ADD_STARTWINDOW_TYPE_COLUMN) {
-        return NativeRdb::E_OK;
+    while (currentVersion < targetVersion) {
+        UpgradeDbToNextVersion(rdbStore, ++currentVersion);
     }
+    return NativeRdb::E_OK;
+}
+
+void WmsRdbOpenCallback::UpgradeDbToNextVersion(NativeRdb::RdbStore& rdbStore, int newVersion)
+{
+    switch (newVersion) {
+        case RDB_VERSION_1:
+            // no need upgrade for first version
+            break;
+        case RDB_VERSION_2:
+            AddColumn(rdbStore, STARTWINDOW_TYPE_COLUMN_INFO);
+            break;
+        default:
+            TLOGW(WmsLogTag::WMS_PATTERN, "unknown version: %{public}d", newVersion);
+            break;
+    }
+}
+
+void WmsRdbOpenCallback::AddColumn(NativeRdb::RdbStore& rdbStore, const std::string columnInfo)
+{
     const std::string addColumnSql = "ALTER TABLE " + wmsRdbConfig_.tableName +
-        " ADD COLUMN " + "STARTWINDOW_TYPE" + " TEXT";
+        " ADD COLUMN " + columnInfo;
     int32_t sqlResult = rdbStore.ExecuteSql(addColumnSql);
-    if (sqlResult != NativeRdb::E_OK) {
-        TLOGE(WmsLogTag::WMS_PATTERN, "execute sql error: %{public}d", sqlResult);
-    }
-    return sqlResult;
+    TLOGI(WmsLogTag::WMS_PATTERN, "res: %{public}d", sqlResult);
 }
 
 int32_t WmsRdbOpenCallback::OnDowngrade(NativeRdb::RdbStore& rdbStore, int currentVersion, int targetVersion)
