@@ -643,7 +643,9 @@ HWTEST_F(WindowSceneSessionImplTest5, SwitchFreeMultiWindow02, TestSize.Level1)
     EXPECT_EQ(false, subWindow->IsPcOrPadFreeMultiWindowMode());
     EXPECT_EQ(WSError::WS_ERROR_NULLPTR, mainWindow->SwitchFreeMultiWindow(true));
     EXPECT_EQ(true, mainWindow->IsPcOrPadFreeMultiWindowMode());
+    EXPECT_EQ(WSError::WS_OK, floatWindow->SwitchFreeMultiWindow(true));
     EXPECT_EQ(true, floatWindow->IsPcOrPadFreeMultiWindowMode());
+    EXPECT_EQ(WSError::WS_OK, subWindow->SwitchFreeMultiWindow(true));
     EXPECT_EQ(true, subWindow->IsPcOrPadFreeMultiWindowMode());
 
     EXPECT_EQ(WMError::WM_OK, mainWindow->Destroy(true));
@@ -2277,6 +2279,51 @@ HWTEST_F(WindowSceneSessionImplTest5, GetDragAreaByDownEvent04, TestSize.Level2)
     windowSceneSessionImpl->property_->SetDragEnabled(false);
     AreaType dragType = windowSceneSessionImpl->GetDragAreaByDownEvent(pointerEvent, pointerItem);
     EXPECT_EQ(dragType, AreaType::UNDEFINED);
+}
+
+/**
+ * @tc.name: UpdateImmersiveBySwitchMode
+ * @tc.desc: Test UpdateImmersiveBySwitchMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, UpdateImmersiveBySwitchMode, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo;
+    sptr<SessionMocker> mockHostSession = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    auto property = window->GetProperty();
+
+    property->SetPersistentId(123);
+
+    window->hostSession_ = nullptr;
+    window->enableImmersiveMode_ = true;
+    window->UpdateImmersiveBySwitchMode(true);
+    EXPECT_EQ(window->enableImmersiveMode_, false);
+
+    window->enableImmersiveMode_ = false;
+    window->hostSession_ = nullptr;
+    window->UpdateImmersiveBySwitchMode(true);
+    EXPECT_EQ(window->enableImmersiveMode_, false);
+
+    window->enableImmersiveMode_ = false;
+    window->hostSession_ = mockHostSession;
+    window->UpdateImmersiveBySwitchMode(true);
+    EXPECT_EQ(window->enableImmersiveMode_, false);
+
+    window->cacheEnableImmersiveMode_ = false;
+    window->UpdateImmersiveBySwitchMode(false);
+    EXPECT_EQ(window->enableImmersiveMode_, false);
+
+    window->cacheEnableImmersiveMode_ = true;
+    window->hostSession_ = nullptr;
+    window->UpdateImmersiveBySwitchMode(false);
+    EXPECT_EQ(window->enableImmersiveMode_, true);
+
+    window->cacheEnableImmersiveMode_ = true;
+    window->hostSession_ = mockHostSession;
+    window->UpdateImmersiveBySwitchMode(false);
+    EXPECT_EQ(window->enableImmersiveMode_, true);
 }
 }
 } // namespace Rosen
