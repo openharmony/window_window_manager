@@ -2499,7 +2499,11 @@ WMError SessionProxy::GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowI
     if (replyInfo) {
         hookWindowInfo = *replyInfo;
     }
-    int32_t ret = reply.ReadInt32();
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read ret failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
     return static_cast<WMError>(ret);
 }
 

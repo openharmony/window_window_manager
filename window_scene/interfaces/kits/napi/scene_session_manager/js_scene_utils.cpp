@@ -886,12 +886,12 @@ bool ConvertHookWindowInfoFromJs(napi_env env, napi_value jsObject, HookWindowIn
     }
     hookWindowInfo.enableHookWindow = enableHookWindow;
 
-    double_t widthHookRatio = 1.0;
+    double widthHookRatio = 1.0;
     if (!ConvertFromJsValue(env, jsWidthHookRatio, widthHookRatio)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to widthHookRatio");
         return false;
     }
-    hookWindowInfo.widthHookRatio = static_cast<float_t>(widthHookRatio);
+    hookWindowInfo.widthHookRatio = static_cast<float>(widthHookRatio);
     return true;
 }
 

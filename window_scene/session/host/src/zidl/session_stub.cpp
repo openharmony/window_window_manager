@@ -1661,10 +1661,16 @@ int SessionStub::HandleGetAppForceLandscapeConfig(MessageParcel& data, MessagePa
 int SessionStub::HandleGetAppHookWindowInfoFromServer(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "in");
-    HookWindowInfo hookWindowInfo;
+    HookWindowInfo hookWindowInfo{};
     WMError ret = GetAppHookWindowInfoFromServer(hookWindowInfo);
-    reply.WriteParcelable(&hookWindowInfo);
-    reply.WriteInt32(static_cast<int32_t>(ret));
+    if (!reply.WriteParcelable(&hookWindowInfo)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "write hookWindowInfo failed");
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "write ret failed");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 

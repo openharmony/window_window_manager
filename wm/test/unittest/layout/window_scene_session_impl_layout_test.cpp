@@ -695,6 +695,92 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, UpdateWindowModeForUITest01, TestSize
     res = window->UpdateWindowModeForUITest(static_cast<int32_t>(WindowMode::WINDOW_MODE_FLOATING));
     EXPECT_EQ(WMError::WM_OK, res);
 }
+
+/**
+ * @tc.name: GetAppHookWindowInfoFromServer
+ * @tc.desc: GetAppHookWindowInfoFromServer
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplLayoutTest, GetAppHookWindowInfoFromServer, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetAppHookWindowInfoFromServer");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    const int32_t windowId = 2025;
+    window->property_->SetPersistentId(windowId);
+
+    // Case 1: Invalid window session
+    window->hostSession_ = nullptr;
+    HookWindowInfo hookWindowInfo;
+    WMError res = window->GetAppHookWindowInfoFromServer(hookWindowInfo);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+
+    // Case 2: success
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    res = window->GetAppHookWindowInfoFromServer(hookWindowInfo);
+    EXPECT_NE(res, WMError::WM_ERROR_INVALID_WINDOW);
+}
+
+/**
+ * @tc.name: NotifyAppHookWindowInfoUpdated
+ * @tc.desc: NotifyAppHookWindowInfoUpdated
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplLayoutTest, NotifyAppHookWindowInfoUpdated, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifyAppHookWindowInfoUpdated");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    const int32_t windowId = 2025;
+    window->property_->SetPersistentId(windowId);
+
+    // Case 1: GetAppHookWindowInfoFromServer failed
+    window->hostSession_ = nullptr;
+    WSError res = window->NotifyAppHookWindowInfoUpdated();
+    EXPECT_EQ(res, WSError::WS_DO_NOTHING);
+
+    // Case 2: success
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    res = window->NotifyAppHookWindowInfoUpdated();
+    EXPECT_EQ(res, WSError::WS_OK);
+
+    // Case 3: not mainWindow
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    res = window->NotifyAppHookWindowInfoUpdated();
+    EXPECT_EQ(res, WSError::WS_DO_NOTHING);
+}
+
+/**
+ * @tc.name: GetGlobalScaledRect
+ * @tc.desc: GetGlobalScaledRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplLayoutTest, GetGlobalScaledRect, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetGlobalScaledRect");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    const int32_t windowId = 2025;
+    window->property_->SetPersistentId(windowId);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    HookWindowInfo hookWindowInfo;
+    hookWindowInfo.enableHookWindow = true;
+    hookWindowInfo.widthHookRatio = 0.5f;
+    window->SetAppHookWindowInfo(hookWindowInfo);
+    Rect globalScaledRect = { 0, 0, 800, 800 };
+    WMError res = window->GetGlobalScaledRect(globalScaledRect);
+    EXPECT_EQ(res, WMError::WM_OK);
+    EXPECT_NE(globalScaledRect.width_, 800);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

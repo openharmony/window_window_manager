@@ -2274,7 +2274,9 @@ WMError WindowSceneSessionImpl::GetGlobalScaledRect(Rect& globalScaledRect)
     auto ret = hostSession->GetGlobalScaledRect(globalScaledRect);
     TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, globalScaledRect:%{public}s, ret:%{public}d",
         GetPersistentId(), globalScaledRect.ToString().c_str(), ret);
-    HookWindowSizeByHookWindowInfo(globalScaledRect);
+    if (WMError::WM_OK == static_cast<WMError>(ret)) {
+        HookWindowSizeByHookWindowInfo(globalScaledRect);
+    }
     return static_cast<WMError>(ret);
 }
 
@@ -6885,13 +6887,18 @@ WMError WindowSceneSessionImpl::GetAppHookWindowInfoFromServer(HookWindowInfo& h
 WSError WindowSceneSessionImpl::NotifyAppHookWindowInfoUpdated()
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "in");
-    WindowType winType = GetType();
-    HookWindowInfo hookWindowInfo = {};
-    if (WindowHelper::IsMainWindow(winType) && GetAppHookWindowInfoFromServer(hookWindowInfo) == WMError::WM_OK) {
-        SetAppHookWindowInfo(hookWindowInfo);
-        return WSError::WS_OK;
+    const WindowType windowType = GetType();
+    if (!WindowHelper::IsMainWindow(windowType)) {
+        return WSError::WS_DO_NOTHING;
     }
-    return WSError::WS_DO_NOTHING;
+
+    HookWindowInfo hookWindowInfo{};
+    if (GetAppHookWindowInfoFromServer(hookWindowInfo) != WMError::WM_OK) {
+        return WSError::WS_DO_NOTHING;
+    }
+
+    SetAppHookWindowInfo(hookWindowInfo);
+    return WSError::WS_OK;
 }
 
 WMError WindowSceneSessionImpl::SetSubWindowSource(SubWindowSource source)

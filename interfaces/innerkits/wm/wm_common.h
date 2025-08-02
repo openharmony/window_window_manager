@@ -667,6 +667,8 @@ struct HookWindowInfo : public Parcelable {
     bool enableHookWindow{ false };
     float widthHookRatio{ 1.0f };
 
+    static constexpr float DEFAULT_WINDOW_SIZE_HOOK_RATIO = 1.0f;
+
     bool Marshalling(Parcel& parcel) const override
     {
         return WriteAllFields(parcel);
@@ -683,14 +685,13 @@ struct HookWindowInfo : public Parcelable {
 
     std::string ToString() const
     {
-        constexpr int precision = 6; // Floating point number prints to 6 decimal places.
+        constexpr int precision = 6; // Print float with precision of 6 decimal places.
         std::ostringstream oss;
         oss << std::boolalpha  // For true/false instead of 1/0
             << "enableHookWindow: " << enableHookWindow
             << ", widthHookRatio: " << std::fixed << std::setprecision(precision) << widthHookRatio;
         return oss.str();
     }
-    static constexpr float DEFAULT_WINDOW_SIZE_HOOK_RATIO = 1.0f;
 
 private:
     bool WriteAllFields(Parcel& parcel) const
