@@ -5521,22 +5521,39 @@ WSError WindowSceneSessionImpl::SwitchFreeMultiWindow(bool enable)
     }
     NotifySwitchFreeMultiWindow(enable);
     // Switch process finish, update system config
-    std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
-    for (const auto& winPair : windowSessionMap_) {
-        auto window = winPair.second.second;
-        if (window != nullptr) {
-            window->SetFreeMultiWindowMode(enable);
-        }
-    }
+    SetFreeMultiWindowMode(enable);
     UpdateSupportWindowModesWhenSwitchFreeMultiWindow();
     UpdateEnableDragWhenSwitchMultiWindow(enable);
     if (!enable && !WindowHelper::IsWindowModeSupported(property_->GetWindowModeSupportType(),
         WindowMode::WINDOW_MODE_FULLSCREEN)) {
         UpdateDecorEnable(true);
     }
-
-    SwitchSubWindow(GetPersistentId());
+    UpdateImmersiveBySwitchMode(enable);
+    SwitchSubWindow(enable, GetPersistentId());
     return WSError::WS_OK;
+}
+
+void WindowSceneSessionImpl::UpdateImmersiveBySwitchMode(bool freeMultiWindowEnable)
+{
+    if (freeMultiWindowEnable && enableImmersiveMode_ && property_) {
+        cacheEnableImmersiveMode_.store(true);
+        enableImmersiveMode_.store(false);
+        property_->SetIsLayoutFullScreen(enableImmersiveMode_);
+        if (auto hostSession = GetHostSession()) {
+            hostSession->OnLayoutFullScreenChange(enableImmersiveMode_);
+        } else {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "host session is nullptr, id: %{public}d", GetPersistentId());
+        }
+    }
+    if (!freeMultiWindowEnable && cacheEnableImmersiveMode_ && property_) {
+        enableImmersiveMode_.store(true);
+        property_->SetIsLayoutFullScreen(enableImmersiveMode_);
+        if (auto hostSession = GetHostSession()) {
+            hostSession->OnLayoutFullScreenChange(enableImmersiveMode_);
+        } else {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "host session is nullptr, id: %{public}d", GetPersistentId());
+        }
+    }
 }
 
 bool WindowSceneSessionImpl::GetFreeMultiWindowModeEnabledState()

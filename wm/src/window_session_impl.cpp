@@ -2316,7 +2316,7 @@ void WindowSessionImpl::UpdateDecorEnable(bool needNotify, WindowMode mode)
                 decorVisible = decorVisible && (windowSystemConfig_.freeMultiWindowEnable_ ||
                     (property_->GetIsPcAppInPad() && isSubWindow));
             }
-            TLOGD(WmsLogTag::WMS_DECOR, "decorVisible:%{public}d", decorVisible);
+            TLOGI(WmsLogTag::WMS_DECOR, "decorVisible:%{public}d, id: %{public}d", decorVisible, GetPersistentId());
             uiContent->UpdateDecorVisible(decorVisible, IsDecorEnable());
             uiContent->NotifyWindowMode(mode);
         }
@@ -7977,7 +7977,7 @@ WMError WindowSessionImpl::GetPiPSettingSwitchStatus(bool& switchStatus) const
     return SingletonContainer::Get<WindowAdapter>().GetPiPSettingSwitchStatus(switchStatus);
 }
 
-void WindowSessionImpl::SwitchSubWindow(int32_t parentId)
+void WindowSessionImpl::SwitchSubWindow(bool freeMultiWindowEnable, int32_t parentId)
 {
     std::lock_guard<std::recursive_mutex> lock(subWindowSessionMutex_);
     if (subWindowSessionMap_.count(parentId) == 0) {
@@ -7985,12 +7985,13 @@ void WindowSessionImpl::SwitchSubWindow(int32_t parentId)
         return;
     }
     for (auto& subWindowSession : subWindowSessionMap_.at(parentId)) {
-        if (subWindowSession && subWindowSession->property_ && subWindowSession->property_->IsDecorEnable()) {
+        if (subWindowSession &&
+            subWindowSession->windowSystemConfig_.freeMultiWindowEnable_ != freeMultiWindowEnable) {
+            subWindowSession->SetFreeMultiWindowMode(freeMultiWindowEnable);
             subWindowSession->UpdateTitleButtonVisibility();
             subWindowSession->UpdateDecorEnable(true);
-            subWindowSession->UpdateEnableDragWhenSwitchMultiWindow(
-                subWindowSession->windowSystemConfig_.freeMultiWindowEnable_);
-            subWindowSession->SwitchSubWindow(subWindowSession->GetPersistentId());
+            subWindowSession->UpdateEnableDragWhenSwitchMultiWindow(freeMultiWindowEnable);
+            subWindowSession->SwitchSubWindow(freeMultiWindowEnable, subWindowSession->GetPersistentId());
         }
     }
 }
