@@ -106,7 +106,9 @@ void JsWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason,
         thisListener->CallJsMethod(WINDOW_SIZE_CHANGE_CB.c_str(), argv, ArraySize(argv));
     };
     if (reason == WindowSizeChangeReason::ROTATION) {
-        jsCallback();
+        if (napi_send_event(env_, jsCallback, napi_eprio_immediate, "OnSizeChangeRotation") != napi_status::napi_ok) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "Failed to send event");
+        }
     } else if (napi_send_event(env_, jsCallback, napi_eprio_immediate, "OnSizeChange") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "failed to send event");
         return;
