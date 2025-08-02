@@ -1954,6 +1954,7 @@ HWTEST_F(WindowSessionImplTest5, SwitchSubWindow, Function | SmallTest | Level1)
             (subWindow->property_->GetIsPcAppInPad() && isSubWindow));
     }
     EXPECT_EQ(decorVisible, true);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

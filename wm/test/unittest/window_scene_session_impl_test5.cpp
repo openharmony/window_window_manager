@@ -2326,6 +2326,5 @@ HWTEST_F(WindowSceneSessionImplTest5, UpdateImmersiveBySwitchMode, TestSize.Leve
     EXPECT_EQ(window->enableImmersiveMode_, true);
 }
 }
-}
 } // namespace Rosen
 } // namespace OHOS
