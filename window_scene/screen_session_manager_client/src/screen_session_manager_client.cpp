@@ -639,8 +639,8 @@ void ScreenSessionManagerClient::DisconnectAllExternalScreen()
                 TLOGE(WmsLogTag::DMS, "screenSession is nullptr!");
                 continue;
             }
-            if (screenSession->GetScreenProperty().GetScreenType()
-                == ScreenType::REAL && screenSession->GetIsExtend()) {
+            if (screenSession->GetScreenProperty().GetScreenType() ==
+                ScreenType::REAL && screenSession->GetIsExtend()) {
                 TLOGI(WmsLogTag::DMS, "disconnect extend screen, screenId = %{public}" PRIu64, sessionIt->first);
                 screenSession->DestroyScreenScene();
                 NotifyScreenDisconnect(screenSession);
