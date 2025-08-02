@@ -121,6 +121,8 @@ public:
     void NotifyExtendScreenDestroyFinish();
     void NotifyScreenMaskAppear();
     DMError SetPrimaryDisplaySystemDpi(float dpi);
+    std::shared_ptr<Media::PixelMap> SetScreenFreezeImmediately(ScreenId screenId, float scaleX, float scaleY,
+        bool isFreeze);
 
     /*
      * RS Client Multi Instance

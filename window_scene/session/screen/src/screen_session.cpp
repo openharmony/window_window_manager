@@ -2392,6 +2392,45 @@ void ScreenSession::ScreenModeChange(ScreenModeChangeEvent screenModeChangeEvent
     }
 }
 
+std::shared_ptr<Media::PixelMap> ScreenSession::SetScreenFreezeImmediately(float scaleX, float scaleY, bool isFreeze)
+{
+    {
+        std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
+        if (displayNode_ == nullptr) {
+            TLOGE(WmsLogTag::DMS, "get screen snapshot displayNode_ is null");
+            return nullptr;
+        }
+    }
+ 
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ss:SetScreenFreezeImmediately");
+    auto callback = std::make_shared<SurfaceCaptureFuture>();
+    RSSurfaceCaptureConfig config = {
+        .scaleX = scaleX,
+        .scaleY = scaleY,
+    };
+    SetScreenSnapshotRect(config);
+    {
+        DmsXcollie dmsXcollie("DMS:SetScreenFreezeImmediately:SetScreenFreezeImmediately", XCOLLIE_TIMEOUT_5S);
+        std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
+        bool ret = RSInterfaces::GetInstance().SetScreenFreezeImmediately(displayNode_, isFreeze, callback, config);
+        if (!ret) {
+            TLOGE(WmsLogTag::DMS, "get screen snapshot SetScreenFreezeImmediately failed");
+            return nullptr;
+        }
+    }
+    if (isFreeze) {
+        auto pixelMap = callback->GetResult(300);
+        if (pixelMap != nullptr) {
+            TLOGD(WmsLogTag::DMS, "save pixelMap WxH = %{public}dx%{public}d", pixelMap->GetWidth(),
+                pixelMap->GetHeight());
+        } else {
+            TLOGE(WmsLogTag::DMS, "failed to get pixelMap, return nullptr");
+        }
+        return pixelMap;
+    }
+    return nullptr;
+}
+
 void ScreenSession::SetIsPhysicalMirrorSwitch(bool isPhysicalMirrorSwitch)
 {
     isPhysicalMirrorSwitch_ = isPhysicalMirrorSwitch;

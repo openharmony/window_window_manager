@@ -1816,5 +1816,65 @@ HWTEST_F(ScreenSessionManagerClientTest, CreateTempScreenSession, TestSize.Level
     ASSERT_NE(nullptr, tempScreenSession);
     screenSessionManagerClient_->screenSessionManager_ = nullptr;
 }
+
+/**
+ * @tc.name: SetScreenFreezeImmediately01
+ * @tc.desc: SetScreenFreezeImmediately01 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, SetScreenFreezeImmediately01, TestSize.Level2)
+{
+    screenSessionManagerClient_->screenSessionMap_.clear();
+    ScreenId screenId = 0;
+    float scaleX = 1.0;
+    float scaleY = 1.0;
+    bool isFreeze = true;
+    std::shared_ptr<Media::PixelMap> res = nullptr;
+    res = screenSessionManagerClient_->SetScreenFreezeImmediately(screenId, scaleX, scaleY, isFreeze);
+    EXPECT_EQ(res, nullptr);
+}
+
+/**
+ * @tc.name: SetScreenFreezeImmediately02
+ * @tc.desc: SetScreenFreezeImmediately02 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, SetScreenFreezeImmediately02, TestSize.Level2)
+{
+    screenSessionManagerClient_->screenSessionMap_.clear();
+    ScreenId screenId = 0;
+    float scaleX = 1.0;
+    float scaleY = 1.0;
+    bool isFreeze = true;
+    std::shared_ptr<Media::PixelMap> res = nullptr;
+    
+    ScreenProperty screenProperty;
+    sptr<ScreenSession> screenSession = new ScreenSession(screenId, screenProperty, screenId);
+    screenSessionManagerClient_->screenSessionMap_.insert(std::make_pair(screenId, screenSession));
+    res = screenSessionManagerClient_->SetScreenFreezeImmediately(screenId, scaleX, scaleY, isFreeze);
+    screenSessionManagerClient_->screenSessionMap_.clear();
+    EXPECT_EQ(res, nullptr);
+}
+
+/**
+ * @tc.name: SetScreenFreezeImmediately03
+ * @tc.desc: SetScreenFreezeImmediately03 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, SetScreenFreezeImmediately03, TestSize.Level2)
+{
+    screenSessionManagerClient_->screenSessionMap_.clear();
+    ScreenId screenId = 0;
+    float scaleX = 1.0;
+    float scaleY = 1.0;
+    bool isFreeze = false;
+    std::shared_ptr<Media::PixelMap> res = nullptr;
+    ScreenProperty screenProperty;
+    sptr<ScreenSession> screenSession = new ScreenSession(screenId, screenProperty, screenId);
+    screenSessionManagerClient_->screenSessionMap_.insert(std::make_pair(screenId, screenSession));
+    res = screenSessionManagerClient_->SetScreenFreezeImmediately(screenId, scaleX, scaleY, isFreeze);
+    screenSessionManagerClient_->screenSessionMap_.clear();
+    EXPECT_EQ(res, nullptr);
+}
 } // namespace Rosen
 } // namespace OHOS
