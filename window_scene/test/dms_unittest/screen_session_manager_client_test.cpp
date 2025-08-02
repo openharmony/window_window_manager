@@ -1793,6 +1793,30 @@ HWTEST_F(ScreenSessionManagerClientTest, SetPrimaryDisplaySystemDpi, TestSize.Le
     client->SetPrimaryDisplaySystemDpi(dpi);
     EXPECT_EQ(DisplayManager::GetInstance().GetPrimaryDisplaySystemDpi(), 2.2f);
 }
+/**
+ * @tc.name: DisconnectAllExternalScreen
+ * @tc.desc: DisconnectAllExternalScreen test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, DisconnectAllExternalScreen, TestSize.Level2)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    ASSERT_NE(screenSessionManagerClient_, nullptr);
+    RSDisplayNodeConfig config;
+    std::shared_ptr<RSDisplayNode> node1 = std::make_shared<RSDisplayNode>(config);
+    screenSessionManagerClient_->screenSessionMap_[50] = nullptr;
+    screenSessionManagerClient_->DisconnectAllExternalScreen();
+    EXPECT_TRUE(logMsg.find("screenSession is nullptr") != std::string::npos);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(50, 50, "test1", ScreenProperty(), node1);
+    ASSERT_NE(nullptr, screenSession);
+    screenSessionManagerClient_->screenSessionMap_[50] = screenSession;
+    screenSession->SetScreenType(ScreenType::REAL);
+    screenSession->SetIsExtend(true);
+    screenSessionManagerClient_->DisconnectAllExternalScreen();
+    EXPECT_TRUE(logMsg.find("disconnect extend screen") != std::string::npos);
+}
 
 /**
  * @tc.name: CreateTempScreenSession
