@@ -45,6 +45,8 @@ public:
     int32_t onCorruption(std::string databaseFile) override;
     
 private:
+    void UpgradeDbToNextVersion(NativeRdb::RdbStore& rdbStore, int newVersion);
+    void AddColumn(NativeRdb::RdbStore& rdbStore, const std::string columnInfo);
     WmsRdbConfig wmsRdbConfig_;
 };
 } // namespace Rosen
