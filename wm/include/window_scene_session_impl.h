@@ -220,7 +220,7 @@ public:
      */
     WSError SwitchFreeMultiWindow(bool enable) override;
     virtual bool GetFreeMultiWindowModeEnabledState() override;
-    void UpdateImmersiveBySwitchMode(bool enable);
+    void UpdateImmersiveBySwitchMode(bool freeMultiWindowEnable);
 
     void NotifyKeyboardPanelInfoChange(const KeyboardPanelInfo& keyboardPanelInfo) override;
     virtual WMError SetImmersiveModeEnabledState(bool enable) override;

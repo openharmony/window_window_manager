@@ -5533,21 +5533,25 @@ WSError WindowSceneSessionImpl::SwitchFreeMultiWindow(bool enable)
     return WSError::WS_OK;
 }
 
-void WindowSceneSessionImpl::UpdateImmersiveBySwitchMode(bool enable)
+void WindowSceneSessionImpl::UpdateImmersiveBySwitchMode(bool freeMultiWindowEnable)
 {
-    if (enable && enableImmersiveMode_ && property_) {
-        cacheEnableImmersiveMode_ = true;
-        enableImmersiveMode_ = false;
+    if (freeMultiWindowEnable && enableImmersiveMode_ && property_) {
+        cacheEnableImmersiveMode_.store(true);
+        enableImmersiveMode_.store(false);
         property_->SetIsLayoutFullScreen(enableImmersiveMode_);
         if (auto hostSession = GetHostSession()) {
             hostSession->OnLayoutFullScreenChange(enableImmersiveMode_);
+        } else {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "host session is nullptr, id: %{public}d", GetPersistentId());
         }
     }
-    if (!enable && cacheEnableImmersiveMode_ && property_) {
-        enableImmersiveMode_ = true;
+    if (!freeMultiWindowEnable && cacheEnableImmersiveMode_ && property_) {
+        enableImmersiveMode_.store(true);
         property_->SetIsLayoutFullScreen(enableImmersiveMode_);
         if (auto hostSession = GetHostSession()) {
             hostSession->OnLayoutFullScreenChange(enableImmersiveMode_);
+        } else {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "host session is nullptr, id: %{public}d", GetPersistentId());
         }
     }
 }
