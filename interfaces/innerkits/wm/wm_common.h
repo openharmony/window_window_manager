@@ -547,6 +547,7 @@ enum class WindowSizeChangeReason : uint32_t {
     OCCUPIED_AREA_CHANGE = 34,
     SCREEN_RELATIVE_POSITION_CHANGE,
     ROOT_SCENE_CHANGE,
+    SNAPSHOT_ROTATION = 37,
     END,
 };
 

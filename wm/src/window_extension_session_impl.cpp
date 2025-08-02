@@ -884,7 +884,7 @@ WSError WindowExtensionSessionImpl::UpdateRect(const WSRect& rect, SizeChangeRea
         SingletonContainer::Get<WindowAdapter>().UpdateModalExtensionRect(abilityToken_, wmRect);
     }
 
-    if (wmReason == WindowSizeChangeReason::ROTATION) {
+    if (wmReason == WindowSizeChangeReason::ROTATION || wmReason == WindowSizeChangeReason::SNAPSHOT_ROTATION) {
         const std::shared_ptr<RSTransaction>& rsTransaction = config.rsTransaction_;
         UpdateRectForRotation(wmRect, preRect, wmReason, rsTransaction, avoidAreas);
     } else if (handler_ != nullptr) {
@@ -921,7 +921,12 @@ void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const
 
         auto rsUIContext = window->GetRSUIContext();
         if (needSync) {
-            duration = rsTransaction->GetDuration() ? rsTransaction->GetDuration() : duration;
+            if (wmReason == WindowSizeChangeReason::SNAPSHOT_ROTATION) {
+                duration = rsTransaction->GetDuration();
+                wmReason = WindowSizeChangeReason::ROTATION;
+            } else {
+                duration = rsTransaction->GetDuration() ? rsTransaction->GetDuration() : duration;
+            }
             RSTransactionAdapter::FlushImplicitTransaction(rsUIContext);
             rsTransaction->Begin();
         }
