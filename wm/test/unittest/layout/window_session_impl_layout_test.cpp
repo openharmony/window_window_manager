@@ -428,6 +428,51 @@ HWTEST_F(WindowSessionImplLayoutTest, NotifyFirstValidLayoutUpdate, TestSize.Lev
     EXPECT_EQ(window->isFirstValidLayoutUpdate_, false);
     GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: NotifyFirstValidLayoutUpdate end";
 }
+
+/**
+ * @tc.name: HookWindowSizeByHookWindowInfo
+ * @tc.desc: HookWindowSizeByHookWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplLayoutTest, HookWindowSizeByHookWindowInfo, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: HookWindowSizeByHookWindowInfo start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("HookWindowSizeByHookWindowInfo");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(2025);
+
+    // Case 1: not enable hookWindow
+    HookWindowInfo hookWindowInfo;
+    hookWindowInfo.enableHookWindow = false;
+    hookWindowInfo.widthHookRatio = 0.5f;
+    window->SetAppHookWindowInfo(hookWindowInfo);
+    const uint32_t defaultSize = 800;
+    Rect rect = { 0, 0, defaultSize, defaultSize };
+    window->HookWindowSizeByHookWindowInfo(rect);
+    EXPECT_EQ(rect.width_, defaultSize);
+
+    // Case 2: not main window
+    hookWindowInfo.enableHookWindow = true;
+    window->SetAppHookWindowInfo(hookWindowInfo);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    window->HookWindowSizeByHookWindowInfo(rect);
+    EXPECT_EQ(rect.width_, defaultSize);
+
+    // Case 3: default window size hook ratio
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    hookWindowInfo.widthHookRatio = HookWindowInfo::DEFAULT_WINDOW_SIZE_HOOK_RATIO;
+    window->SetAppHookWindowInfo(hookWindowInfo);
+    window->HookWindowSizeByHookWindowInfo(rect);
+    EXPECT_EQ(rect.width_, defaultSize);
+
+    // Case 4: success
+    hookWindowInfo.widthHookRatio = 0.5f;
+    window->SetAppHookWindowInfo(hookWindowInfo);
+    window->HookWindowSizeByHookWindowInfo(rect);
+    EXPECT_NE(rect.width_, defaultSize);
+    GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: HookWindowSizeByHookWindowInfo end";
+}
 }
 } // namespace Rosen
 } // namespace OHOS

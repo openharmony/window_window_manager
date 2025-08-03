@@ -1076,6 +1076,65 @@ HWTEST_F(SceneSessionLayoutTest, SetMoveAvailableArea02, TestSize.Level1)
     res = sceneSession->SetMoveAvailableArea(0);
     EXPECT_EQ(res, WSError::WS_OK);
 }
+
+/**
+ * @tc.name: GetAppHookWindowInfoFromServer
+ * @tc.desc: GetAppHookWindowInfoFromServer
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLayoutTest, GetAppHookWindowInfoFromServer, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetAppHookWindowInfoFromServer";
+    info.bundleName_ = "GetAppHookWindowInfoFromServer";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    sceneSession->getHookWindowInfoFunc_ = nullptr;
+    HookWindowInfo hookWindowInfo;
+    WMError errCode = sceneSession->GetAppHookWindowInfoFromServer(hookWindowInfo);
+    EXPECT_EQ(errCode, WMError::WM_ERROR_NULLPTR);
+    EXPECT_EQ(hookWindowInfo.enableHookWindow, false);
+
+    sceneSession->getHookWindowInfoFunc_ = [](const std::string& bundleName) -> HookWindowInfo {
+        HookWindowInfo hookInfo;
+        hookInfo.enableHookWindow = true;
+        return hookInfo;
+    };
+    HookWindowInfo hookWindowInfo2;
+    errCode = sceneSession->GetAppHookWindowInfoFromServer(hookWindowInfo2);
+    EXPECT_EQ(errCode, WMError::WM_OK);
+    EXPECT_EQ(hookWindowInfo2.enableHookWindow, true);
+}
+
+/**
+ * @tc.name: RegisterAppHookWindowInfoFunc
+ * @tc.desc: RegisterAppHookWindowInfoFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLayoutTest, RegisterAppHookWindowInfoFunc, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "RegisterAppHookWindowInfoFunc";
+    info.bundleName_ = "RegisterAppHookWindowInfoFunc";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->getHookWindowInfoFunc_ = nullptr;
+
+    // Case 1: func is not nullptr
+    sceneSession->RegisterAppHookWindowInfoFunc([](const std::string& bundleName) -> HookWindowInfo {
+        HookWindowInfo hookInfo;
+        hookInfo.enableHookWindow = true;
+        return hookInfo;
+    });
+    ASSERT_NE(sceneSession->getHookWindowInfoFunc_, nullptr);
+    HookWindowInfo hookWindowInfo;
+    WMError errCode = sceneSession->GetAppHookWindowInfoFromServer(hookWindowInfo);
+    EXPECT_EQ(errCode, WMError::WM_OK);
+    EXPECT_EQ(hookWindowInfo.enableHookWindow, true);
+
+    // Case 2: func is nullptr
+    sceneSession->RegisterAppHookWindowInfoFunc(nullptr);
+    ASSERT_NE(sceneSession->getHookWindowInfoFunc_, nullptr);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
