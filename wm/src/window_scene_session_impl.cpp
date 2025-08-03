@@ -2274,6 +2274,9 @@ WMError WindowSceneSessionImpl::GetGlobalScaledRect(Rect& globalScaledRect)
     auto ret = hostSession->GetGlobalScaledRect(globalScaledRect);
     TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, globalScaledRect:%{public}s, ret:%{public}d",
         GetPersistentId(), globalScaledRect.ToString().c_str(), ret);
+    if (WMError::WM_OK == static_cast<WMError>(ret)) {
+        HookWindowSizeByHookWindowInfo(globalScaledRect);
+    }
     return static_cast<WMError>(ret);
 }
 
@@ -6825,6 +6828,8 @@ WMError WindowSceneSessionImpl::GetWindowPropertyInfo(WindowPropertyInfo& window
     windowPropertyInfo.displayId = GetDisplayId();
     TLOGD(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}u, globalDisplayRect=%{public}s", GetWindowId(),
         windowPropertyInfo.globalDisplayRect.ToString().c_str());
+    HookWindowSizeByHookWindowInfo(windowPropertyInfo.windowRect);
+    HookWindowSizeByHookWindowInfo(windowPropertyInfo.globalDisplayRect);
     return WMError::WM_OK;
 }
 
@@ -6866,6 +6871,34 @@ WSError WindowSceneSessionImpl::NotifyAppForceLandscapeConfigUpdated()
         return WSError::WS_OK;
     }
     return WSError::WS_DO_NOTHING;
+}
+
+WMError WindowSceneSessionImpl::GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::DEFAULT, "HostSession is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+    return hostSession->GetAppHookWindowInfoFromServer(hookWindowInfo);
+}
+
+WSError WindowSceneSessionImpl::NotifyAppHookWindowInfoUpdated()
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "in");
+    const WindowType windowType = GetType();
+    if (!WindowHelper::IsMainWindow(windowType)) {
+        return WSError::WS_DO_NOTHING;
+    }
+
+    HookWindowInfo hookWindowInfo{};
+    if (GetAppHookWindowInfoFromServer(hookWindowInfo) != WMError::WM_OK) {
+        return WSError::WS_DO_NOTHING;
+    }
+
+    SetAppHookWindowInfo(hookWindowInfo);
+    return WSError::WS_OK;
 }
 
 WMError WindowSceneSessionImpl::SetSubWindowSource(SubWindowSource source)

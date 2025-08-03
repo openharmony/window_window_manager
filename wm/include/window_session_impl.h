@@ -473,6 +473,7 @@ public:
     WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) override { return WSError::WS_OK; }
     WMError UpdateWindowModeForUITest(int32_t updateMode) override { return WMError::WM_OK; }
     void UpdateEnableDragWhenSwitchMultiWindow(bool enable);
+    WSError NotifyAppHookWindowInfoUpdated() override { return WSError::WS_DO_NOTHING; }
 
     /*
      * Free Multi Window
@@ -780,6 +781,10 @@ protected:
     void NotifyWindowStatusDidChange(WindowMode mode);
     void NotifyFirstValidLayoutUpdate(const Rect& preRect, const Rect& newRect);
     std::atomic_bool hasSetEnableDrag_ = false;
+    void HookWindowSizeByHookWindowInfo(Rect& rect);
+    void SetAppHookWindowInfo(const HookWindowInfo& hookWindowInfo);
+    HookWindowInfo GetAppHookWindowInfo();
+    virtual WMError GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo) { return WMError::WM_OK; }
 
     /*
      * Window Immersive
@@ -1083,6 +1088,8 @@ private:
     std::atomic<WindowStatus> lastStatusWhenNotifyWindowStatusDidChange_ = WindowStatus::WINDOW_STATUS_UNDEFINED;
     std::atomic<bool> isFirstValidLayoutUpdate_ = true;
     SizeChangeReason globalDisplayRectSizeChangeReason_ = SizeChangeReason::END;
+    std::shared_mutex hookWindowInfoMutex_;
+    HookWindowInfo hookWindowInfo_;
 
     /*
      * Window Decor

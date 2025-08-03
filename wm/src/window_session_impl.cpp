@@ -2142,9 +2142,39 @@ void WindowSessionImpl::SetForceSplitEnable(AppForceLandscapeConfig& config)
     bool isForceSplit = (config.mode_ == FORCE_SPLIT_MODE || config.mode_ == NAV_FORCE_SPLIT_MODE);
     bool isRouter = (config.supportSplit_ == FORCE_SPLIT_MODE);
     TLOGI(WmsLogTag::DEFAULT, "windowId: %{public}u, isForceSplit: %{public}u, homePage: %{public}s, "
-        "supportSplit: %{public}d, isRouter: %{public}u",
-        GetWindowId(), isForceSplit, config.homePage_.c_str(), config.supportSplit_, isRouter);
+        "supportSplit: %{public}d, isRouter: %{public}u, arkUIOptions: %{public}s",
+        GetWindowId(), isForceSplit, config.homePage_.c_str(), config.supportSplit_, isRouter,
+        config.arkUIOptions_.c_str());
+    uiContent->SetForceSplitConfig(config.arkUIOptions_);
     uiContent->SetForceSplitEnable(isForceSplit, config.homePage_, isRouter);
+}
+
+void WindowSessionImpl::SetAppHookWindowInfo(const HookWindowInfo& hookWindowInfo)
+{
+    std::unique_lock<std::shared_mutex> lock(hookWindowInfoMutex_);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}u, preHookWindowInfo:[%{public}s], newHookWindowInfo:[%{public}s]",
+        GetWindowId(), hookWindowInfo_.ToString().c_str(), hookWindowInfo.ToString().c_str());
+    hookWindowInfo_ = hookWindowInfo;
+}
+
+HookWindowInfo WindowSessionImpl::GetAppHookWindowInfo()
+{
+    std::shared_lock<std::shared_mutex> lock(hookWindowInfoMutex_);
+    return hookWindowInfo_;
+}
+
+void WindowSessionImpl::HookWindowSizeByHookWindowInfo(Rect& rect)
+{
+    auto hookWindowInfo = GetAppHookWindowInfo();
+    if (!hookWindowInfo.enableHookWindow || !WindowHelper::IsMainWindow(GetType())) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}u, do not need hook window info.", GetWindowId());
+        return;
+    }
+    if (!MathHelper::NearEqual(hookWindowInfo.widthHookRatio, HookWindowInfo::DEFAULT_WINDOW_SIZE_HOOK_RATIO)) {
+        rect.width_ = static_cast<uint32_t>(rect.width_ * hookWindowInfo.widthHookRatio);
+        TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}u, hook window width, hooked width:%{public}u, "
+            "widthHookRatio:%{public}f.", GetWindowId(), rect.width_, hookWindowInfo.widthHookRatio);
+    }
 }
 
 WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, void* env, void* storage,
@@ -2188,6 +2218,13 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, voi
     if (WindowHelper::IsMainWindow(winType) && GetAppForceLandscapeConfig(config) == WMError::WM_OK &&
         config.supportSplit_ > 0) {
         SetForceSplitEnable(config);
+    }
+
+    HookWindowInfo hookWindowInfo{};
+    if (WindowHelper::IsMainWindow(winType)) {
+        if (GetAppHookWindowInfoFromServer(hookWindowInfo) == WMError::WM_OK) {
+            SetAppHookWindowInfo(hookWindowInfo);
+        }
     }
 
     uint32_t version = 0;
@@ -5335,6 +5372,7 @@ WSError WindowSessionImpl::NotifyScreenshotAppEvent(ScreenshotEventType type)
 /** @note @window.layout */
 void WindowSessionImpl::NotifySizeChange(Rect rect, WindowSizeChangeReason reason)
 {
+    HookWindowSizeByHookWindowInfo(rect);
     {
         std::lock_guard<std::recursive_mutex> lockListener(windowChangeListenerMutex_);
         auto windowChangeListeners = GetListeners<IWindowChangeListener>();
@@ -5366,9 +5404,11 @@ void WindowSessionImpl::NotifyGlobalDisplayRectChange(const Rect& rect, WindowSi
     TLOGD(WmsLogTag::WMS_LAYOUT,
         "windowId: %{public}d, rect: %{public}s, reason: %{public}d, listenerSize: %{public}zu",
         GetPersistentId(), rect.ToString().c_str(), static_cast<int32_t>(reason), listeners.size());
+    Rect hookedRect = rect;
+    HookWindowSizeByHookWindowInfo(hookedRect);
     for (const auto& listener : listeners) {
         if (listener) {
-            listener->OnRectChangeInGlobalDisplay(rect, reason);
+            listener->OnRectChangeInGlobalDisplay(hookedRect, reason);
         }
     }
 }

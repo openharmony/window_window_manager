@@ -2193,6 +2193,14 @@ WSError Session::NotifyAppForceLandscapeConfigUpdated()
     return sessionStage_->NotifyAppForceLandscapeConfigUpdated();
 }
 
+WSError Session::NotifyAppHookWindowInfoUpdated()
+{
+    if (!sessionStage_) {
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->NotifyAppHookWindowInfoUpdated();
+}
+
 void Session::SetParentSession(const sptr<Session>& session)
 {
     if (session == nullptr) {

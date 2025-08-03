@@ -554,6 +554,55 @@ struct KeyFramePolicy : public Parcelable {
 };
 
 /**
+ * @struct HookWindowInfo.
+ *
+ * @brief Configures window hook behavior based on window size ratios.
+ */
+struct HookWindowInfo : public Parcelable {
+    bool enableHookWindow{ false };
+    float widthHookRatio{ 1.0f };
+
+    static constexpr float DEFAULT_WINDOW_SIZE_HOOK_RATIO = 1.0f;
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        return WriteAllFields(parcel);
+    }
+
+    static HookWindowInfo* Unmarshalling(Parcel& parcel)
+    {
+        auto hookWindowInfo = std::make_unique<HookWindowInfo>();
+        if (!hookWindowInfo || !ReadAllFields(parcel, *hookWindowInfo)) {
+            return nullptr;
+        }
+        return hookWindowInfo.release();
+    }
+
+    std::string ToString() const
+    {
+        constexpr int precision = 6; // Print float with precision of 6 decimal places.
+        std::ostringstream oss;
+        oss << std::boolalpha  // For true/false instead of 1/0
+            << "enableHookWindow: " << enableHookWindow
+            << ", widthHookRatio: " << std::fixed << std::setprecision(precision) << widthHookRatio;
+        return oss.str();
+    }
+
+private:
+    bool WriteAllFields(Parcel& parcel) const
+    {
+        return parcel.WriteBool(enableHookWindow) &&
+               parcel.WriteFloat(widthHookRatio);
+    }
+
+    static bool ReadAllFields(Parcel& parcel, HookWindowInfo& info)
+    {
+        return parcel.ReadBool(info.enableHookWindow) &&
+               parcel.ReadFloat(info.widthHookRatio);
+    }
+};
+
+/**
  * @brief Enumerates layout mode of window.
  */
 enum class WindowLayoutMode : uint32_t {

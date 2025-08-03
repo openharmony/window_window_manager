@@ -2021,6 +2021,48 @@ HWTEST_F(SessionProxyTest, TestUpdateGlobalDisplayRectFromClient, Function | Sma
     sptr<SessionProxy> okProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
     EXPECT_EQ(WSError::WS_OK, okProxy->UpdateGlobalDisplayRectFromClient(rect, reason));
 }
+
+/**
+ * @tc.name: GetAppHookWindowInfoFromServer
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, GetAppHookWindowInfoFromServer, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: GetAppHookWindowInfoFromServer start";
+    auto mockRemote = sptr<MockIRemoteObject>::MakeSptr();
+    auto sProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    MockMessageParcel::ClearAllErrorFlag();
+    HookWindowInfo hookWindowInfo;
+
+    // Case 1: Failed to write interface token
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, sProxy->GetAppHookWindowInfoFromServer(hookWindowInfo));
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    // Case 2: remote is nullptr
+    sptr<SessionProxy> nullProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, nullProxy->GetAppHookWindowInfoFromServer(hookWindowInfo));
+
+    // Case 3: Failed to send request
+    mockRemote->SetRequestResult(ERR_TRANSACTION_FAILED);
+    sptr<SessionProxy> failSendRequestProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, failSendRequestProxy->GetAppHookWindowInfoFromServer(hookWindowInfo));
+    mockRemote->SetRequestResult(ERR_NONE);
+
+    // Case 4: Failed to read replyInfo and ret
+    MockMessageParcel::SetReadBoolErrorFlag(true);
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, sProxy->GetAppHookWindowInfoFromServer(hookWindowInfo));
+    MockMessageParcel::SetReadBoolErrorFlag(false);
+    MockMessageParcel::SetReadInt32ErrorFlag(false);
+
+    // Case 5: Success
+    sptr<SessionProxy> okProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    EXPECT_EQ(WMError::WM_OK, okProxy->GetAppHookWindowInfoFromServer(hookWindowInfo));
+    MockMessageParcel::ClearAllErrorFlag();
+    GTEST_LOG_(INFO) << "SessionProxyTest: GetAppHookWindowInfoFromServer end";
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

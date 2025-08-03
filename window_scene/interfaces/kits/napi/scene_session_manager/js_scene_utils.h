@@ -278,6 +278,7 @@ bool ConvertSessionRectInfoFromJs(napi_env env, napi_value jsObject, WSRect& rec
 bool ConvertSingleHandScreenInfoFromJs(napi_env env, napi_value jsObject,
     SingleHandScreenInfo& singleHandHandScreenInfo);
 bool ConvertHookInfoFromJs(napi_env env, napi_value jsObject, HookInfo& hookInfo);
+bool ConvertHookWindowInfoFromJs(napi_env env, napi_value jsObject, HookWindowInfo& hookWindowInfo);
 bool ConvertRotateAnimationConfigFromJs(napi_env env, napi_value value, RotateAnimationConfig& config);
 bool ConvertDragResizeTypeFromJs(napi_env env, napi_value value, DragResizeType& dragResizeType);
 bool ConvertRectFromJsValue(napi_env env, napi_value jsObject, Rect& displayRect);

@@ -872,6 +872,29 @@ bool ConvertHookInfoFromJs(napi_env env, napi_value jsObject, HookInfo& hookInfo
     return true;
 }
 
+bool ConvertHookWindowInfoFromJs(napi_env env, napi_value jsObject, HookWindowInfo& hookWindowInfo)
+{
+    napi_value jsEnableHookWindow = nullptr;
+    napi_get_named_property(env, jsObject, "enableHookWindow", &jsEnableHookWindow);
+    napi_value jsWidthHookRatio = nullptr;
+    napi_get_named_property(env, jsObject, "widthHookRatio", &jsWidthHookRatio);
+
+    bool enableHookWindow = false;
+    if (!ConvertFromJsValue(env, jsEnableHookWindow, enableHookWindow)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to enableHookWindow");
+        return false;
+    }
+    hookWindowInfo.enableHookWindow = enableHookWindow;
+
+    double widthHookRatio = 1.0;
+    if (!ConvertFromJsValue(env, jsWidthHookRatio, widthHookRatio)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to widthHookRatio");
+        return false;
+    }
+    hookWindowInfo.widthHookRatio = static_cast<float>(widthHookRatio);
+    return true;
+}
+
 bool ConvertPointerItemFromJs(napi_env env, napi_value touchObject, MMI::PointerEvent& pointerEvent)
 {
     auto vpr = RootScene::staticRootScene_->GetDisplayDensity();

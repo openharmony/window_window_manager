@@ -101,6 +101,7 @@ using NotifyRestoreMainWindowFunc = std::function<void()>;
 using SetSkipSelfWhenShowOnVirtualScreenCallback = std::function<void(uint64_t surfaceNodeId, bool isSkip)>;
 using SetSkipEventOnCastPlusCallback = std::function<void(int32_t persistentId, bool isSkip)>;
 using NotifyForceSplitFunc = std::function<AppForceLandscapeConfig(const std::string& bundleName)>;
+using GetHookWindowInfoFunc = std::function<HookWindowInfo(const std::string& bundleName)>;
 using UpdatePrivateStateAndNotifyFunc = std::function<void(int32_t persistentId)>;
 using UpdateScreenshotAppEventRegisteredFunc = std::function<void(int32_t persistentId, bool isRegister)>;
 using PiPStateChangeCallback = std::function<void(const std::string& bundleName, bool isForeground)>;
@@ -779,6 +780,8 @@ public:
     bool IsAnyParentSessionDragZooming() const override;
     bool IsCompatibleModeDirtyDragScaleWindow() const;
     void ResetCompatibleModeDragScaleFlags();
+    void RegisterAppHookWindowInfoFunc(GetHookWindowInfoFunc&& func);
+    WMError GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo) override;
 
     /*
      * Gesture Back
@@ -1226,6 +1229,7 @@ private:
     /*
      * Window Layout
      */
+    GetHookWindowInfoFunc getHookWindowInfoFunc_ = nullptr;
     bool SaveAspectRatio(float ratio);
     WSError UpdateRectForDrag(const WSRect& rect);
     void UpdateSessionRectPosYFromClient(SizeChangeReason reason, DisplayId& configDisplayId, WSRect& rect);
