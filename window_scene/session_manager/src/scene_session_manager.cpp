@@ -15317,7 +15317,7 @@ void SceneSessionManager::UpdateAppHookWindowInfoWhenSwitchFreeMultiWindow(bool 
 {
     std::unordered_set<std::string> bundleNames;
     {
-        std::shared_lock lock(appHookWindowInfoMapMutex_);
+        std::unique_lock lock(appHookWindowInfoMapMutex_);
         for (auto& [bundleName, hookWindowInfo] : appHookWindowInfoMap_) {
             hookWindowInfo.enableHookWindow = !isOpenFreeMultiWindow;
             bundleNames.insert(bundleName);
