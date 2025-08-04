@@ -4759,7 +4759,8 @@ napi_value JsSceneSessionManager::OnRegisterSingleHandContainerNode(napi_env env
 }
 
 std::unordered_map<int32_t, RotationChangeResult> JsSceneSessionManager::GetRotationChangeResult(
-    const std::vector<sptr<SceneSession>>& activeSceneSessionMapCopy, const RotationChangeInfo& rotationChangeInfo)
+    const std::vector<sptr<SceneSession>>& activeSceneSessionMapCopy, const RotationChangeInfo& rotationChangeInfo,
+    bool isRestrictNotify)
 {
     std::unordered_map<int32_t, RotationChangeResult> rotationChangeResultMap;
     for (const auto& curSession : activeSceneSessionMapCopy) {
@@ -4767,7 +4768,8 @@ std::unordered_map<int32_t, RotationChangeResult> JsSceneSessionManager::GetRota
             TLOGE(WmsLogTag::WMS_ROTATION, "sesison is nullptr");
             continue;
         }
-        RotationChangeResult rotationChangeResult = curSession->NotifyRotationChange(rotationChangeInfo);
+        RotationChangeResult rotationChangeResult =
+            curSession->NotifyRotationChange(rotationChangeInfo, isRestrictNotify);
         if (rotationChangeResult.windowRect_.width_ != 0 && rotationChangeResult.windowRect_.height_ != 0) {
             rotationChangeResultMap[curSession->GetPersistentId()] = rotationChangeResult;
         }
@@ -4780,7 +4782,7 @@ napi_value JsSceneSessionManager::OnNotifyRotationChange(napi_env env, napi_call
     size_t argc = ARGC_FOUR;
     napi_value argv[ARGC_FOUR] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc != ARGC_ONE) {
+    if (argc != ARGC_TWO) {
         TLOGE(WmsLogTag::WMS_ROTATION, "Argc count is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
                                       "Input parameter is missing or invalid"));
@@ -4796,10 +4798,13 @@ napi_value JsSceneSessionManager::OnNotifyRotationChange(napi_env env, napi_call
         TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to rotationChangeInfo");
         return NapiGetUndefined(env);
     }
-    TLOGI(WmsLogTag::WMS_ROTATION, "info type: %{public}d, rect: [%{public}d, %{public}d, %{public}d, %{public}d]",
+    bool isRestrictNotify = false;
+    ConvertFromJsValue(env, argv[1], isRestrictNotify);
+    TLOGI(WmsLogTag::WMS_ROTATION, "info type: %{public}d, rect: [%{public}d, %{public}d, %{public}d, %{public}d], "
+        "isRestrictNotify: %{public}d",
         static_cast<uint32_t>(rotationChangeInfo.type_), rotationChangeInfo.displayRect_.posX_,
         rotationChangeInfo.displayRect_.posY_, rotationChangeInfo.displayRect_.width_,
-        rotationChangeInfo.displayRect_.height_);
+        rotationChangeInfo.displayRect_.height_, isRestrictNotify);
 
     std::vector<sptr<SceneSession>> activeSceneSessionMapCopy =
         SceneSessionManager::GetInstance().GetActiveSceneSessionCopy();
@@ -4808,7 +4813,7 @@ napi_value JsSceneSessionManager::OnNotifyRotationChange(napi_env env, napi_call
         return NapiGetUndefined(env);
     }
     std::unordered_map<int32_t, RotationChangeResult> rotationChangeResultMap =
-        GetRotationChangeResult(activeSceneSessionMapCopy, rotationChangeInfo);
+        GetRotationChangeResult(activeSceneSessionMapCopy, rotationChangeInfo, isRestrictNotify);
     napi_value rotationChangeResultObj = CreateResultMapToJsValue(env, rotationChangeResultMap);
     if (rotationChangeResultObj == nullptr) {
         TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert rotationChangeResult to js value");

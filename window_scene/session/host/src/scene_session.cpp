@@ -8836,10 +8836,14 @@ WSError SceneSession::UpdateRotationChangeRegistered(int32_t persistentId, bool 
     return WSError::WS_OK;
 }
 
-RotationChangeResult SceneSession::NotifyRotationChange(const RotationChangeInfo& rotationChangeInfo)
+RotationChangeResult SceneSession::NotifyRotationChange(const RotationChangeInfo& rotationChangeInfo,
+    bool isRestrictNotify)
 {
+    WindowType type = Session::GetWindowType();
+    bool isSystemCalling = SessionPermission::IsSystemCalling();
     return PostSyncTask(
-        [weakThis = wptr(this), &rotationChangeInfo, where = __func__]() -> RotationChangeResult {
+        [weakThis = wptr(this), &rotationChangeInfo, isRestrictNotify, type, isSystemCalling,
+            where = __func__]() -> RotationChangeResult {
             auto session = weakThis.promote();
             if (!session) {
                 TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s session is null", where);
@@ -8847,6 +8851,11 @@ RotationChangeResult SceneSession::NotifyRotationChange(const RotationChangeInfo
             }
             if (!session->sessionStage_ || !session->isRotationChangeCallbackRegistered) {
                 TLOGE(WmsLogTag::WMS_ROTATION, "sessionStage_ is null or isRotationChangeCallbackRegistered is false");
+                return { RectType::RELATIVE_TO_SCREEN, { 0, 0, 0, 0 } };
+            }
+            if (isRestrictNotify && (!WindowHelper::IsSystemWindow(type) || !isSystemCalling)) {
+                TLOGE(WmsLogTag::WMS_ROTATION,
+                    "restrict NotifyRotationChange when not system window or not system calling");
                 return { RectType::RELATIVE_TO_SCREEN, { 0, 0, 0, 0 } };
             }
             return session->sessionStage_->NotifyRotationChange(rotationChangeInfo);
