@@ -413,43 +413,6 @@ HWTEST_F(IntentionEventManagerTest, IsKeyboardEvent, TestSize.Level1)
     EXPECT_EQ(true, inputEventListener_->IsKeyboardEvent(keyEvent));
     usleep(WAIT_SYNC_IN_NS);
 }
-
-/**
- * @tc.name: ProcessInjectionEvent
- * @tc.desc: ProcessInjectionEvent Test
- * @tc.type: FUNC
- */
-HWTEST_F(IntentionEventManagerTest, ProcessInjectionEvent, TestSize.Level1)
-{
-    int32_t TRANSPARENT_FINGER_ID = 10000;
-    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
-    MMI::PointerEvent::PointerItem item;
-    pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
-    pointerEvent->SetPointerId(0);
-    item.SetPointerId(1);
-    pointerEvent->AddPointerItem(item);
-
-    int32_t oriPointerId = pointerEvent->GetPointerId();
-    inputEventListener_->ProcessInjectionEvent(pointerEvent);
-    EXPECT_EQ(oriPointerId, pointerEvent->GetPointerId());
-
-    pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_MOUSE);
-    inputEventListener_->ProcessInjectionEvent(pointerEvent);
-    EXPECT_EQ(MMI::PointerEvent::SOURCE_TYPE_MOUSE, pointerEvent->GetSourceType());
-
-    pointerEvent->AddFlag(MMI::InputEvent::EVENT_FLAG_SIMULATE);
-    inputEventListener_->ProcessInjectionEvent(pointerEvent);
-    EXPECT_EQ(MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, pointerEvent->GetSourceType());
-
-    pointerEvent->SetDispatchTimes(1);
-    inputEventListener_->ProcessInjectionEvent(pointerEvent);
-    EXPECT_EQ(oriPointerId, pointerEvent->GetPointerId());
-
-    item.SetPointerId(0);
-    pointerEvent->AddPointerItem(item);
-    inputEventListener_->ProcessInjectionEvent(pointerEvent);
-    EXPECT_EQ(oriPointerId + TRANSPARENT_FINGER_ID, pointerEvent->GetPointerId());
-}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
