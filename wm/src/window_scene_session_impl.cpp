@@ -5538,7 +5538,7 @@ WSError WindowSceneSessionImpl::SwitchFreeMultiWindow(bool enable)
 
 void WindowSceneSessionImpl::UpdateImmersiveBySwitchMode(bool freeMultiWindowEnable)
 {
-    if (freeMultiWindowEnable && enableImmersiveMode_ && property_) {
+    if (freeMultiWindowEnable && enableImmersiveMode_) {
         cacheEnableImmersiveMode_.store(true);
         enableImmersiveMode_.store(false);
         property_->SetIsLayoutFullScreen(enableImmersiveMode_);
@@ -5548,8 +5548,9 @@ void WindowSceneSessionImpl::UpdateImmersiveBySwitchMode(bool freeMultiWindowEna
             TLOGE(WmsLogTag::WMS_LAYOUT, "host session is nullptr, id: %{public}d", GetPersistentId());
         }
     }
-    if (!freeMultiWindowEnable && cacheEnableImmersiveMode_ && property_) {
+    if (!freeMultiWindowEnable && cacheEnableImmersiveMode_) {
         enableImmersiveMode_.store(true);
+        cacheEnableImmersiveMode_.store(false);
         property_->SetIsLayoutFullScreen(enableImmersiveMode_);
         if (auto hostSession = GetHostSession()) {
             hostSession->OnLayoutFullScreenChange(enableImmersiveMode_);
