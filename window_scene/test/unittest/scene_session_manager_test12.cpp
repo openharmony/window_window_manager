@@ -1450,7 +1450,7 @@ HWTEST_F(SceneSessionManagerTest12, IsGetWindowLayoutInfoNeeded03, TestSize.Leve
 {
     SessionInfo sessionInfo;
     sessionInfo.isSystem_ = true;
-    sessionInfo.abilityName_ = "SCBSmartDock";
+    sessionInfo.abilityName_ = "SCBSmartDock021";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_EQ(true, ssm_->IsGetWindowLayoutInfoNeeded(sceneSession));
 }
