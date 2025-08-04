@@ -49,6 +49,7 @@ public:
     virtual WMError GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo);
     virtual WMError GetCallingWindowInfo(CallingWindowInfo& callingWindowInfo);
     WMError RegisterWMSConnectionChangedListener(const WMSConnectionChangedCallbackFunc& callbackFunc);
+    WMError UnregisterWMSConnectionChangedListener();
     virtual WMError GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos);
     virtual WMError ClearMainSessions(const std::vector<int32_t>& persistentIds);
     virtual WMError ClearMainSessions(const std::vector<int32_t>& persistentIds, std::vector<int32_t>& clearFailedIds);

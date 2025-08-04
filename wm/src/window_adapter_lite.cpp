@@ -282,8 +282,14 @@ WMError WindowAdapterLite::RaiseWindowToTop(int32_t persistentId)
 
 WMError WindowAdapterLite::RegisterWMSConnectionChangedListener(const WMSConnectionChangedCallbackFunc& callbackFunc)
 {
-    TLOGD(WmsLogTag::WMS_MAIN, "register listener");
+    TLOGD(WmsLogTag::WMS_MULTI_USER, "register listener");
     return SessionManagerLite::GetInstance().RegisterWMSConnectionChangedListener(callbackFunc);
+}
+
+WMError WindowAdapterLite::UnregisterWMSConnectionChangedListener()
+{
+    TLOGD(WmsLogTag::WMS_MULTI_USER, "unregister wms connection changed listener");
+    return SessionManagerLite::GetInstance().UnregisterWMSConnectionChangedListener();
 }
 
 WMError WindowAdapterLite::GetWindowStyleType(WindowStyleType& windowStyleType)

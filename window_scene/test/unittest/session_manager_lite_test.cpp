@@ -366,6 +366,25 @@ HWTEST_F(SessionManagerLiteTest, InitMockSMSProxy, Function | SmallTest | Level2
     sml_->InitMockSMSProxy();
     ASSERT_NE(sml_->foundationDeath_, nullptr);
 }
+
+/**
+ * @tc.name: UnregisterWMSConnectionChangedListener
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionManagerLiteTest, UnregisterWMSConnectionChangedListener, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, sml_);
+
+    sml_->mockSessionManagerServiceProxy_ = nullptr;
+    auto ret = sml_->UnregisterWMSConnectionChangedListener();
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    sptr<IRemoteObject> remoteObject = sptr<IRemoteObjectMocker>::MakeSptr();
+    sml_->mockSessionManagerServiceProxy_ = iface_cast<IMockSessionManagerInterface>(remoteObject);
+    ret = sml_->UnregisterWMSConnectionChangedListener();
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
 }
 }
 }
