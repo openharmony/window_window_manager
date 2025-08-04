@@ -1047,18 +1047,26 @@ public:
     /**
      * @brief Convert a position from client (window-relative) coordinates to global coordinates.
      *
-     * @param position The position relative to the window.
-     * @return The corresponding position in global coordinates.
+     * @param inPosition The position relative to the window.
+     * @param outPosition [out] The corresponding position in global coordinates.
+     * @return WMError::WM_OK on success, or appropriate error code on failure.
      */
-    virtual Position ClientToGlobalDisplay(const Position& position) const { return { 0, 0 }; }
+    virtual WMError ClientToGlobalDisplay(const Position& inPosition, Position& outPosition) const
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 
     /**
      * @brief Convert a position from global coordinates to client (window-relative) coordinates.
      *
-     * @param position The position in global coordinates.
-     * @return The corresponding position relative to the window.
+     * @param inPosition The position in global coordinates.
+     * @param outPosition [out] The corresponding position relative to the window.
+     * @return WMError::WM_OK on success, or appropriate error code on failure.
      */
-    virtual Position GlobalDisplayToClient(const Position& position) const { return { 0, 0 }; }
+    virtual WMError GlobalDisplayToClient(const Position& inPosition, Position& outPosition) const
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 
     /**
      * @brief Get the window type
@@ -1364,6 +1372,14 @@ public:
      * @return WMError
      */
     virtual WMError SetLayoutFullScreen(bool status) { return WMError::WM_OK; }
+
+    /**
+     * @brief Set the immersive layout properties
+     *
+     * @param isIgnoreSafeArea
+     * @return WMError
+     */
+    virtual WMError SetIgnoreSafeArea(bool isIgnoreSafeArea) { return WMError::WM_OK; }
 
     /**
      * @brief Set whether the title bar and dock bar will show, when the mouse hovers over hot area.
@@ -2845,7 +2861,14 @@ public:
      *
      * @return True means pc window or pad free multi-window, false means the opposite.
      */
-    virtual bool IsPcOrPadFreeMultiWindowMode() const;
+    virtual bool IsPcOrPadFreeMultiWindowMode() const { return false; }
+
+    /**
+     * @brief Is pcAppInpad and pad window.
+     *
+     * @return True means pcAppInpad and pad window., false means the opposite.
+     */
+    virtual bool IsPadAndNotFreeMutiWindowCompatibleMode() const { return false; }
 
     /**
      * @brief Judge whether SceneBoard is enabled.
@@ -3370,6 +3393,14 @@ public:
     virtual WMError GetWindowDensityInfo(WindowDensityInfo& densityInfo) { return WMError::WM_OK; }
 
     /**
+     * @brief Set whether the current window follows the default density of its screen.
+     *
+     * @param enabled bool.
+     * @return WM_OK means set success, others means failed.
+     */
+    virtual WMError SetWindowDefaultDensityEnabled(bool enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
      * @brief Get virtual pixel ratio.
      *
      * @return Value of PixelRatio obtained from displayInfo.
@@ -3808,6 +3839,13 @@ public:
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) {}
 
     /**
+     * @brief Set touch event
+     *
+     * @param touchType int32_t.
+     */
+    virtual void SetTouchEvent(int32_t touchType) {}
+
+    /**
      * @brief Set whether to enable immersive mode.
      * @param enable the value true means to enable immersive mode, and false means the opposite.
      * @return WM_OK means set success, others means set failed.
@@ -3840,7 +3878,7 @@ public:
      *
      * @return true means the free multi-window mode is enabled, and false means the opposite.
      */
-    virtual bool GetFreeMultiWindowModeEnabledState();
+    virtual bool GetFreeMultiWindowModeEnabledState() { return false; }
 
     /**
      * @brief Get the window status of current window.

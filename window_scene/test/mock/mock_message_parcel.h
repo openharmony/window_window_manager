@@ -27,13 +27,18 @@ public:
     static void SetWriteUint64ErrorFlag(bool flag);
     static void SetWriteFloatErrorFlag(bool flag);
     static void SetWriteString16ErrorFlag(bool flag);
+    static void SetWriteStringErrorFlag(bool flag);
     static void SetWriteParcelableErrorFlag(bool flag);
     static void SetWriteInterfaceTokenErrorFlag(bool flag);
+    static void SetWriteRemoteObjectErrorFlag(bool flag);
     static void SetReadBoolErrorFlag(bool flag);
     static void SetReadUint32ErrorFlag(bool flag);
     static void SetReadInt32ErrorFlag(bool flag);
+    static void SetReadUint64ErrorFlag(bool flag);
     static void SetReadInt64ErrorFlag(bool flag);
+    static void SetReadFloatErrorFlag(bool flag);
     static void SetReadStringVectorErrorFlag(bool flag);
+    static void SetReadStringErrorFlag(bool flag);
 };
 }
 }

@@ -78,8 +78,7 @@ WindowExtensionSessionImpl::WindowExtensionSessionImpl(const sptr<WindowOption>&
     if ((isDensityFollowHost_ = option->GetIsDensityFollowHost())) {
         hostDensityValue_ = option->GetDensity();
     }
-    TLOGI(WmsLogTag::WMS_UIEXT, "UIExtension usage=%{public}u, hideNonSecureWindows=%{public}d",
-        property_->GetUIExtensionUsage(), extensionWindowFlags_.hideNonSecureWindowsFlag);
+    TLOGNI(WmsLogTag::WMS_UIEXT, "Uiext usage=%{public}u", property_->GetUIExtensionUsage());
     dataHandler_ = std::make_shared<Extension::ProviderDataHandler>();
     RegisterDataConsumer();
 }
@@ -138,7 +137,7 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
     MakeSubOrDialogWindowDragableAndMoveble();
     {
         std::unique_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
-        windowExtensionSessionSet_.insert(this);
+        GetWindowExtensionSessionSet().insert(this);
     }
 
     auto usage = property_->GetUIExtensionUsage();
@@ -215,8 +214,8 @@ void WindowExtensionSessionImpl::UpdateConfigurationForAll(
         ignoreWindowContexts.begin(), ignoreWindowContexts.end());
     std::unique_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
     TLOGD(WmsLogTag::WMS_ATTRIBUTE, "extension map size: %{public}u",
-        static_cast<uint32_t>(windowExtensionSessionSet_.size()));
-    for (const auto& window : windowExtensionSessionSet_) {
+        static_cast<uint32_t>(GetWindowExtensionSessionSet().size()));
+    for (const auto& window : GetWindowExtensionSessionSet()) {
         if (window == nullptr) {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "extension window is null");
             continue;
@@ -250,8 +249,8 @@ void WindowExtensionSessionImpl::UpdateConfigurationSyncForAll(
 {
     std::unique_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
     TLOGD(WmsLogTag::WMS_ATTRIBUTE, "extension map size: %{public}u",
-        static_cast<uint32_t>(windowExtensionSessionSet_.size()));
-    for (const auto& window : windowExtensionSessionSet_) {
+        static_cast<uint32_t>(GetWindowExtensionSessionSet().size()));
+    for (const auto& window : GetWindowExtensionSessionSet()) {
         if (window == nullptr) {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "extension window is null");
             continue;
@@ -297,7 +296,7 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
     }
     {
         std::unique_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
-        windowExtensionSessionSet_.erase(this);
+        GetWindowExtensionSessionSet().erase(this);
     }
     // Notify host window to remove rect change listeners
     AAFwk::Want want;
@@ -364,7 +363,7 @@ WMError WindowExtensionSessionImpl::TransferAbilityResult(uint32_t resultCode, c
 
 WMError WindowExtensionSessionImpl::TransferExtensionData(const AAFwk::WantParams& wantParams)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "id: %{public}d", GetPersistentId());
+    TLOGD(WmsLogTag::WMS_UIEXT, "id: %{public}d", GetPersistentId());
     if (IsWindowSessionInvalid()) {
         WLOGFE("Window invalid.");
         return WMError::WM_ERROR_REPEAT_OPERATION;
@@ -386,7 +385,7 @@ WMError WindowExtensionSessionImpl::TransferExtensionData(const AAFwk::WantParam
             getpid(), GetPersistentId(), oss.str()
         );
         if (res != 0) {
-            TLOGI(WmsLogTag::WMS_UIEXT, "ReportUIExtensionException message failed, res: %{public}d", res);
+            TLOGE(WmsLogTag::WMS_UIEXT, "ReportUIExtensionException message failed, res: %{public}d", res);
         }
     }
     return WMError::WM_ERROR_IPC_FAILED;
@@ -1061,7 +1060,7 @@ WSError WindowExtensionSessionImpl::UpdateSessionViewportConfig(const SessionVie
 
 void WindowExtensionSessionImpl::UpdateExtensionDensity(SessionViewportConfig& config)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "isFollowHost:%{public}d, densityValue:%{public}f", config.isDensityFollowHost_,
+    TLOGD(WmsLogTag::WMS_UIEXT, "isFollowHost:%{public}d, densityValue:%{public}f", config.isDensityFollowHost_,
         config.density_);
     isDensityFollowHost_ = config.isDensityFollowHost_;
     if (config.isDensityFollowHost_) {
@@ -1818,7 +1817,7 @@ void WindowExtensionSessionImpl::ReportModalUIExtensionMayBeCovered(bool byLoadC
 
 void WindowExtensionSessionImpl::NotifyExtensionEventAsync(uint32_t notifyEvent)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "notifyEvent:%{public}d", notifyEvent);
+    TLOGD(WmsLogTag::WMS_UIEXT, "notifyEvent:%{public}d", notifyEvent);
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Window session invalid.");
         return;
@@ -1978,7 +1977,7 @@ WMError WindowExtensionSessionImpl::HandleHostWindowRaise(uint32_t code, int32_t
 WMError WindowExtensionSessionImpl::HandleRegisterHostWindowRectChangeListener(uint32_t code, int32_t persistentId,
     const AAFwk::Want& data)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "businessCode: %{public}u", code);
+    TLOGD(WmsLogTag::WMS_UIEXT, "businessCode: %{public}u", code);
     auto ret = SendExtensionMessageToHost(code, data);
     if (ret != WMError::WM_OK) {
         return ret;
@@ -1990,7 +1989,7 @@ WMError WindowExtensionSessionImpl::HandleRegisterHostWindowRectChangeListener(u
 WMError WindowExtensionSessionImpl::HandleUnregisterHostWindowRectChangeListener(uint32_t code, int32_t persistentId,
     const AAFwk::Want& data)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "businessCode: %{public}u", code);
+    TLOGD(WmsLogTag::WMS_UIEXT, "businessCode: %{public}u", code);
     bool isHostWindowRectChangeListenerEmpty = false;
     size_t hostWindowRectChangeListenerSize = 0;
     rectChangeUIExtListenerIds_.erase(persistentId);
@@ -2290,7 +2289,7 @@ void WindowExtensionSessionImpl::RegisterDataConsumer()
         }
 
         auto ret = func(id, customId, std::move(data), reply);
-        TLOGNI(WmsLogTag::WMS_UIEXT, "customId:%{public}u, ret:%{public}d", customId, ret);
+        TLOGND(WmsLogTag::WMS_UIEXT, "customId:%{public}u, ret:%{public}d", customId, ret);
         return static_cast<int32_t>(DataHandlerErr::OK);
     };
     dataHandler_->RegisterDataConsumer(SubSystemId::WM_UIEXT, std::move(consumersEntry));
@@ -2392,7 +2391,7 @@ void WindowExtensionSessionImpl::NotifyKeyboardDidHide(const KeyboardPanelInfo& 
 WMError WindowExtensionSessionImpl::OnHostStatusBarContentColorChange(AAFwk::Want&& data,
     std::optional<AAFwk::Want>& reply)
 {
-    auto contentColor = data.GetIntParam(Extension::HOST_STATUS_BAR_CONTENT_COLOR, 0);
+    auto contentColor = static_cast<uint32_t>(data.GetIntParam(Extension::HOST_STATUS_BAR_CONTENT_COLOR, 0));
     TLOGI(WmsLogTag::WMS_UIEXT, "contentColor: %{public}u", contentColor);
     hostStatusBarContentColor_ = contentColor;
     return WMError::WM_OK;

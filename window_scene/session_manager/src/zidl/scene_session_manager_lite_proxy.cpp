@@ -167,6 +167,10 @@ WSError SceneSessionManagerLiteProxy::PendingSessionToBackground(const sptr<IRem
         TLOGE(WmsLogTag::WMS_LIFE, "Write token failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
+    if (!data.WriteInt32(params.persistentId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write persistentId failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
     if (!data.WriteBool(params.shouldBackToCaller)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write shouldBackToCaller failed");
         return WSError::WS_ERROR_IPC_FAILED;
@@ -186,7 +190,12 @@ WSError SceneSessionManagerLiteProxy::PendingSessionToBackground(const sptr<IRem
         TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    return static_cast<WSError>(reply.ReadInt32());
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read ret failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return static_cast<WSError>(ret);
 }
 
 WSError SceneSessionManagerLiteProxy::PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token,

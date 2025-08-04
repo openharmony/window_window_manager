@@ -62,9 +62,8 @@ DisplayInfo *DisplayInfo::Unmarshalling(Parcel &parcel)
     uint32_t displayOrientation;
     uint32_t screenShape;
     uint32_t displaySourceMode;
-    bool res = parcel.ReadString(displayInfo->name_) &&
-        parcel.ReadUint64(displayInfo->id_) && parcel.ReadUint32(type) &&
-        parcel.ReadInt32(displayInfo->width_) && parcel.ReadInt32(displayInfo->height_) &&
+    bool res = parcel.ReadString(displayInfo->name_) && parcel.ReadUint64(displayInfo->id_) &&
+        parcel.ReadUint32(type) && parcel.ReadInt32(displayInfo->width_) && parcel.ReadInt32(displayInfo->height_) &&
         parcel.ReadInt32(displayInfo->physicalWidth_) && parcel.ReadInt32(displayInfo->physicalHeight_) &&
         parcel.ReadUint32(displayInfo->refreshRate_) && parcel.ReadUint64(displayInfo->screenId_) &&
         parcel.ReadFloat(displayInfo->virtualPixelRatio_) && parcel.ReadFloat(displayInfo->densityInCurResolution_) &&
@@ -74,8 +73,7 @@ DisplayInfo *DisplayInfo::Unmarshalling(Parcel &parcel)
         parcel.ReadInt32(displayInfo->offsetX_) && parcel.ReadInt32(displayInfo->offsetY_) &&
         parcel.ReadUint32(displayState) && parcel.ReadBool(displayInfo->waterfallDisplayCompressionStatus_) &&
         parcel.ReadInt32(displayInfo->dpi_) && parcel.ReadUint32(displayOrientation) &&
-        parcel.ReadUInt32Vector(&(displayInfo->colorSpaces_)) &&
-        parcel.ReadUInt32Vector(&(displayInfo->hdrFormats_)) &&
+        parcel.ReadUInt32Vector(&(displayInfo->colorSpaces_)) && parcel.ReadUInt32Vector(&(displayInfo->hdrFormats_)) &&
         parcel.ReadUint32(displayInfo->defaultDeviceRotationOffset_) &&
         parcel.ReadUint32(displayInfo->availableWidth_) &&
         parcel.ReadUint32(displayInfo->availableHeight_) && parcel.ReadFloat(displayInfo->scaleX_) &&

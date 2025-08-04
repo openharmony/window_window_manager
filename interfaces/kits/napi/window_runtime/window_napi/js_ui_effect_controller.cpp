@@ -131,7 +131,6 @@ napi_value JsUIEffectController::OnSetParams(napi_env env, napi_callback_info in
         if (errCodePtr == nullptr || client == nullptr || server == nullptr || params == nullptr) {
             return;
         }
-        client->SetParams(params);
         WMError ret = server->SetParams(params);
         *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(ret);
         TLOGI(WmsLogTag::WMS_ANIMATION, "ui effect %{public}d set filter params exec end with err code %{public}d",
@@ -177,6 +176,10 @@ napi_value JsUIEffectController::OnAnimateTo(napi_env env, napi_callback_info in
         TLOGE(WmsLogTag::WMS_ANIMATION, "parse window animation config failed");
         return NapiThrowError(env, err);
     }
+    if (!CheckWindowAnimationOption(env, *lists->option, err)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "check window animation config failed");
+        return NapiThrowError(env, err);
+    }
     if (lists->params->ConvertFromJsValue(env, argv[INDEX_ONE]) != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "parse ui effect params failed");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
@@ -191,12 +194,15 @@ napi_value JsUIEffectController::OnAnimateTo(napi_env env, napi_callback_info in
             TLOGE(WmsLogTag::WMS_ANIMATION, "parse window animation config failed");
             return NapiThrowError(env, err);
         }
+        if (!CheckWindowAnimationOption(env, *lists->interruptOption, err)) {
+            TLOGE(WmsLogTag::WMS_ANIMATION, "check window animation config failed");
+            return NapiThrowError(env, err);
+        }
     }
     NapiAsyncTask::ExecuteCallback execute = [lists, client = client_, server = server_] {
         if (lists == nullptr) {
             return;
         }
-        client->SetParams(lists->params);
         WMError ret = server->AnimateTo(lists->params, lists->option, lists->interruptOption);
         lists->errCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
         TLOGI(WmsLogTag::WMS_ANIMATION, "ui effect %{public}d animateTo, err code %{public}d",

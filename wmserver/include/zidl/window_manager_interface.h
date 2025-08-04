@@ -311,6 +311,10 @@ public:
     virtual WSError UseImplicitAnimation(int32_t hostWindowId, bool useImplicit) { return WSError::WS_OK; }
     virtual WMError AnimateTo(int32_t windowId, const WindowAnimationProperty& animationProperty,
         const WindowAnimationOption& animationOption) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError AddSessionBlackList(const std::unordered_set<std::string>& bundleNames,
+        const std::unordered_set<std::string>& privacyWindowTags) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError RemoveSessionBlackList(const std::unordered_set<std::string>& bundleNames,
+        const std::unordered_set<std::string>& privacyWindowTags) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /*
      * Sub Window

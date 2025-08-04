@@ -66,6 +66,13 @@ struct WindowTitleVisibleFlags {
     bool isCloseVisible = true;
 };
 
+struct CursorInfo {
+    double left = -1.0;
+    double top = -1.0;
+    double width = -1.0;
+    double height = -1.0;
+};
+
 using IKBWillShowListener = IKeyboardWillShowListener;
 using IKBWillHideListener = IKeyboardWillHideListener;
 
@@ -104,8 +111,8 @@ public:
     void SetContext(const std::shared_ptr<AbilityRuntime::Context>& context);
     Rect GetRequestRect() const override;
     Rect GetGlobalDisplayRect() const override;
-    Position ClientToGlobalDisplay(const Position& position) const override;
-    Position GlobalDisplayToClient(const Position& position) const override;
+    WMError ClientToGlobalDisplay(const Position& inPosition, Position& outPosition) const override;
+    WMError GlobalDisplayToClient(const Position& inPosition, Position& outPosition) const override;
     WSError UpdateGlobalDisplayRectFromServer(const WSRect& rect, SizeChangeReason reason) override;
     WindowType GetType() const override;
     const std::string& GetWindowName() const override;
@@ -139,6 +146,7 @@ public:
     bool IsPadWindow() const override;
     bool IsPcOrFreeMultiWindowCapabilityEnabled() const override;
     bool IsPcOrPadFreeMultiWindowMode() const override;
+    bool IsPadAndNotFreeMutiWindowCompatibleMode() const override;
     bool IsSceneBoardEnabled() const override;
     bool GetCompatibleModeInPc() const override;
     void HookCompatibleModeAvoidAreaNotify() override;
@@ -166,7 +174,7 @@ public:
     void SetCompatInfoInExtensionConfig(AAFwk::WantParams& want) const;
     bool IsAdaptToSubWindow() const;
     static void RegisterWindowScaleCallback();
-    static WMError GetWindowScaleCoordinate(int32_t& x, int32_t& y, uint32_t windowId);
+    static WMError GetWindowScaleCoordinate(uint32_t windowId, CursorInfo& cursorInfo);
     static sptr<WindowSessionImpl> GetScaleWindow(uint32_t windowId);
 
     WMError SetWindowType(WindowType type) override;
@@ -316,6 +324,7 @@ public:
     int32_t GetFloatingWindowParentId();
     void NotifyAfterForeground(bool needNotifyListeners = true,
         bool needNotifyUiContent = true, bool waitAttach = false);
+    void GetAttachStateSyncResult(bool waitAttachState, bool afterForeground) const;
     void NotifyAfterBackground(bool needNotifyListeners = true,
         bool needNotifyUiContent = true, bool waitDetach = false);
     void NotifyAfterDidForeground(uint32_t reason = static_cast<uint32_t>(WindowStateChangeReason::NORMAL));
@@ -396,6 +405,7 @@ public:
     WMError SetWindowContainerColor(const std::string& activeColor, const std::string& inactiveColor) override;
     WMError SetWindowContainerModalColor(const std::string& activeColor, const std::string& inactiveColor) override;
     nlohmann::json setContainerButtonStyle(const DecorButtonStyle& decorButtonStyle);
+    void UpdateDecorEnable(bool needNotify = false, WindowMode mode = WindowMode::WINDOW_MODE_UNDEFINED);
 
     /*
      * Window Decor listener
@@ -431,6 +441,7 @@ public:
     virtual WMError GetCallingWindowWindowStatus(WindowStatus& windowStatus) const override;
     virtual WMError GetCallingWindowRect(Rect& rect) const override;
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
+    virtual void SetTouchEvent(int32_t touchType) override;
     WMError SetContinueState(int32_t continueState) override;
     virtual WMError CheckAndModifyWindowRect(uint32_t& width, uint32_t& height)
     {
@@ -461,6 +472,9 @@ public:
     WMError UnregisterWindowStatusDidChangeListener(const sptr<IWindowStatusDidChangeListener>& listener) override;
     WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) override { return WSError::WS_OK; }
     WMError UpdateWindowModeForUITest(int32_t updateMode) override { return WMError::WM_OK; }
+    void UpdateEnableDragWhenSwitchMultiWindow(bool enable);
+    WSError NotifyAppHookWindowInfoUpdated() override { return WSError::WS_DO_NOTHING; }
+
     /*
      * Free Multi Window
      */
@@ -470,6 +484,7 @@ public:
     {
         windowSystemConfig_.freeMultiWindowEnable_ = enable;
     }
+    void SwitchSubWindow(bool freeMultiWindowEnable, int32_t parentId);
 
     /*
      * Window Immersive
@@ -493,6 +508,8 @@ public:
     /*
      * Window Property
      */
+    WMError SetWindowDefaultDensityEnabled(bool enabled) override;
+    void SetDefaultDensityEnabledValue(bool enabled);
     WSError NotifyDisplayIdChange(DisplayId displayId);
     WSError NotifyScreenshotAppEvent(ScreenshotEventType type) override;
     bool IsDeviceFeatureCapableFor(const std::string& feature) const override;
@@ -535,9 +552,11 @@ public:
     WSError SetCurrentRotation(int32_t currentRotation) override;
     void UpdateCurrentWindowOrientation(DisplayOrientation displayOrientation);
     DisplayOrientation GetCurrentWindowOrientation() const;
-    Orientation ConvertUserOrientationToUserPageOrientation(Orientation orientation);
+    Orientation ConvertUserOrientationToUserPageOrientation(Orientation orientation) const;
+    Orientation ConvertInvalidOrientation();
     void SetUserRequestedOrientation(Orientation orientation) override;
     bool IsUserOrientation(Orientation orientation) const;
+    bool IsUserPageOrientation(Orientation orientation) const;
     bool isNeededForciblySetOrientation(Orientation orientation) override;
     WMError SetFollowScreenChange(bool isFollowScreenChange) override;
 
@@ -586,7 +605,6 @@ protected:
     void ClearVsyncStation();
     WMError WindowSessionCreateCheck();
     void UpdateDecorEnableToAce(bool isDecorEnable);
-    void UpdateDecorEnable(bool needNotify = false, WindowMode mode = WindowMode::WINDOW_MODE_UNDEFINED);
     void NotifyModeChange(WindowMode mode, bool hasDeco = true);
     WMError UpdateProperty(WSPropertyChangeAction action);
     WMError SetBackgroundColor(uint32_t color);
@@ -640,6 +658,7 @@ protected:
     std::unordered_map<int32_t, sptr<IKeyboardDidHideListener>> keyboardDidHideUIExtListeners_;
     void WriteKeyboardInfoToWant(AAFwk::Want& want, const KeyboardPanelInfo& keyboardPanelInfo) const;
     void ReadKeyboardInfoFromWant(const AAFwk::Want& want, KeyboardPanelInfo& keyboardPanelInfo) const;
+    static std::set<sptr<WindowSessionImpl>>& GetWindowExtensionSessionSet();
 
     /*
      * Sub Window
@@ -668,8 +687,7 @@ protected:
     static std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>> windowSessionMap_;
     // protect windowSessionMap_
     static std::shared_mutex windowSessionMutex_;
-    static std::set<sptr<WindowSessionImpl>> windowExtensionSessionSet_;
-    // protect windowExtensionSessionSet_
+    // protect g_windowExtensionSessionSet_
     static std::shared_mutex windowExtensionSessionMutex_;
     bool isSystembarPropertiesSet_ = false;
     bool isIgnoreSafeAreaNeedNotify_ = false;
@@ -763,6 +781,10 @@ protected:
     void NotifyWindowStatusDidChange(WindowMode mode);
     void NotifyFirstValidLayoutUpdate(const Rect& preRect, const Rect& newRect);
     std::atomic_bool hasSetEnableDrag_ = false;
+    void HookWindowSizeByHookWindowInfo(Rect& rect);
+    void SetAppHookWindowInfo(const HookWindowInfo& hookWindowInfo);
+    HookWindowInfo GetAppHookWindowInfo();
+    virtual WMError GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo) { return WMError::WM_OK; }
 
     /*
      * Window Immersive
@@ -790,8 +812,12 @@ protected:
     /*
      * Window Property
      */
+    std::string colorMode_;
+    bool hasDarkRes_ = false;
     std::unordered_set<std::string> containerColorList_;
     float lastSystemDensity_ = UNDEFINED_DENSITY;
+    static std::atomic<bool> defaultDensityEnabledGlobalConfig_;
+    std::atomic<bool> isDefaultDensityEnabled_ = false;
     WSError NotifySystemDensityChange(float density);
     void RegisterWindowInspectorCallback();
     uint32_t GetTargetAPIVersionByApplicationInfo() const;
@@ -1061,6 +1087,9 @@ private:
     std::atomic<WindowStatus> lastWindowStatus_ = WindowStatus::WINDOW_STATUS_UNDEFINED;
     std::atomic<WindowStatus> lastStatusWhenNotifyWindowStatusDidChange_ = WindowStatus::WINDOW_STATUS_UNDEFINED;
     std::atomic<bool> isFirstValidLayoutUpdate_ = true;
+    SizeChangeReason globalDisplayRectSizeChangeReason_ = SizeChangeReason::END;
+    std::shared_mutex hookWindowInfoMutex_;
+    HookWindowInfo hookWindowInfo_;
 
     /*
      * Window Decor

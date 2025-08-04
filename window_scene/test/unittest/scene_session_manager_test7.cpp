@@ -1400,7 +1400,7 @@ HWTEST_F(SceneSessionManagerTest7, TestReportIncompleteScreenFoldStatusChangeEve
 HWTEST_F(SceneSessionManagerTest7, SetAppForceLandscapeConfig, TestSize.Level1)
 {
     std::string bundleName = "SetAppForceLandscapeConfig";
-    AppForceLandscapeConfig config = { 0, "MainPage", false };
+    AppForceLandscapeConfig config = { 0, "MainPage", false, "ArkuiOptions" };
     WSError result = ssm_->SetAppForceLandscapeConfig(bundleName, config);
     ASSERT_EQ(result, WSError::WS_OK);
 }
@@ -1430,12 +1430,14 @@ HWTEST_F(SceneSessionManagerTest7, SetAppForceLandscapeConfig02, TestSize.Level1
     config.mode_ = 5; // 5: FORCE_SPLIT_MODE
     config.homePage_ = "homePage";
     config.supportSplit_ = 5;
+    config.arkUIOptions_ = "arkUIOptions";
 
     WSError result = ssm_->SetAppForceLandscapeConfig(bundleName, config);
     EXPECT_EQ(result, WSError::WS_OK);
     EXPECT_EQ(ssm_->appForceLandscapeMap_[bundleName].mode_, 5);
     EXPECT_EQ(ssm_->appForceLandscapeMap_[bundleName].homePage_, "homePage");
     EXPECT_EQ(ssm_->appForceLandscapeMap_[bundleName].supportSplit_, 5);
+    EXPECT_EQ(ssm_->appForceLandscapeMap_[bundleName].arkUIOptions_, "arkUIOptions");
 }
 
 /**
@@ -1450,18 +1452,21 @@ HWTEST_F(SceneSessionManagerTest7, SetAppForceLandscapeConfig03, TestSize.Level1
     preConfig.mode_ = 0;
     preConfig.homePage_ = "homePage";
     preConfig.supportSplit_ = -1;
+    preConfig.arkUIOptions_ = "arkUIOptions";
     ssm_->appForceLandscapeMap_[bundleName] = preConfig;
 
     AppForceLandscapeConfig config;
     config.mode_ = 5; // 5: FORCE_SPLIT_MODE
     config.homePage_ = "newHomePage";
     config.supportSplit_ = 5;
+    config.arkUIOptions_ = "newArkUIOptions";
 
     WSError result = ssm_->SetAppForceLandscapeConfig(bundleName, config);
     EXPECT_EQ(result, WSError::WS_OK);
     EXPECT_EQ(ssm_->appForceLandscapeMap_[bundleName].mode_, 5);
     EXPECT_EQ(ssm_->appForceLandscapeMap_[bundleName].homePage_, "newHomePage");
     EXPECT_EQ(ssm_->appForceLandscapeMap_[bundleName].supportSplit_, 5);
+    EXPECT_EQ(ssm_->appForceLandscapeMap_[bundleName].arkUIOptions_, "newArkUIOptions");
 }
 
 /**
@@ -1476,6 +1481,7 @@ HWTEST_F(SceneSessionManagerTest7, GetAppForceLandscapeConfig, TestSize.Level1)
     EXPECT_EQ(config.mode_, 0);
     EXPECT_EQ(config.homePage_, "");
     EXPECT_EQ(config.supportSplit_, -1);
+    EXPECT_EQ(config.arkUIOptions_, "");
 }
 
 /**
@@ -1934,7 +1940,9 @@ HWTEST_F(SceneSessionManagerTest7, SetGlobalDragResizeType01, TestSize.Level1)
     ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
 
     ASSERT_EQ(ssm_->SetGlobalDragResizeType(DragResizeType::RESIZE_TYPE_UNDEFINED), WMError::WM_OK);
+    usleep(WAIT_SYNC_IN_NS);
     ASSERT_EQ(ssm_->SetGlobalDragResizeType(dragResizeType), WMError::WM_OK);
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 /**
@@ -1954,11 +1962,14 @@ HWTEST_F(SceneSessionManagerTest7, SetGlobalDragResizeType02, TestSize.Level1)
     ASSERT_NE(nullptr, sceneSession);
     ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
     ASSERT_EQ(ssm_->SetGlobalDragResizeType(dragResizeType), WMError::WM_OK);
+    usleep(WAIT_SYNC_IN_NS);
     ssm_->sceneSessionMap_.insert({ 0, nullptr });
     ASSERT_EQ(ssm_->SetGlobalDragResizeType(dragResizeType), WMError::WM_OK);
+    usleep(WAIT_SYNC_IN_NS);
     ssm_->sceneSessionMap_.clear();
     ssm_->sceneSessionMap_.insert({ 0, nullptr });
     ASSERT_EQ(ssm_->SetGlobalDragResizeType(dragResizeType), WMError::WM_OK);
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 /**
@@ -1989,6 +2000,38 @@ HWTEST_F(SceneSessionManagerTest7, SetAppDragResizeType, TestSize.Level1)
     DragResizeType dragResizeType = DragResizeType::RESIZE_EACH_FRAME;
     ASSERT_EQ(ssm_->SetAppDragResizeType("", dragResizeType), WMError::WM_ERROR_INVALID_PARAM);
     ASSERT_EQ(ssm_->SetAppDragResizeType(info.bundleName_, dragResizeType), WMError::WM_OK);
+}
+
+/**
+ * @tc.name: GetDefaultDragResizeType
+ * @tc.desc: test function : GetDefaultDragResizeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, GetDefaultDragResizeType, TestSize.Level1)
+{
+    DragResizeType originalDragResizeType = ssm_->systemConfig_.freeMultiWindowConfig_.defaultDragResizeType_;
+    bool originalFreeMultiWindowSupport = ssm_->systemConfig_.freeMultiWindowSupport_;
+    ASSERT_EQ(ssm_->SetGlobalDragResizeType(DragResizeType::RESIZE_TYPE_UNDEFINED), WMError::WM_OK);
+    // not support
+    ssm_->systemConfig_.freeMultiWindowSupport_ = false;
+    ssm_->systemConfig_.freeMultiWindowConfig_.defaultDragResizeType_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    ssm_->GetEffectiveDragResizeType(dragResizeType);
+    ASSERT_EQ(dragResizeType, DragResizeType::RESIZE_EACH_FRAME);
+    // support and default
+    ssm_->systemConfig_.freeMultiWindowSupport_ = true;
+    ssm_->systemConfig_.freeMultiWindowConfig_.defaultDragResizeType_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    ssm_->GetEffectiveDragResizeType(dragResizeType);
+    ASSERT_EQ(dragResizeType, DragResizeType::RESIZE_WHEN_DRAG_END);
+    // support and set
+    ssm_->systemConfig_.freeMultiWindowConfig_.defaultDragResizeType_ = DragResizeType::RESIZE_WHEN_DRAG_END;
+    dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    ssm_->GetEffectiveDragResizeType(dragResizeType);
+    ASSERT_EQ(dragResizeType, ssm_->systemConfig_.freeMultiWindowConfig_.defaultDragResizeType_);
+
+    ssm_->systemConfig_.freeMultiWindowConfig_.defaultDragResizeType_ = originalDragResizeType;
+    ssm_->systemConfig_.freeMultiWindowSupport_ = originalFreeMultiWindowSupport;
 }
 
 /**

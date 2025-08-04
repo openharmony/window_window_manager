@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "fold_screen_controller/secondary_display_fold_policy.h"
+#include "fold_screen_state_internel.h"
 #include <hisysevent.h>
 #include <hitrace_meter.h>
 #include <transaction/rs_interfaces.h>
@@ -45,6 +46,9 @@ constexpr uint32_t HALF_DIVIDER = 2;
 constexpr float MAIN_DISPLAY_ROTATION_DEGREE = 180;
 constexpr float ROTATION_TRANSLATE_X = 612;
 constexpr float ROTATION_TRANSLATE_Y = -612;
+constexpr int32_t FOLD_CREASE_RECT_SIZE = 8; // numbers of parameter on the current device is 8
+const std::string g_FoldScreenRect = system::GetParameter("const.display.foldscreen.crease_region", "");
+const std::string FOLD_CREASE_DELIMITER = ",;";
 #ifdef TP_FEATURE_ENABLE
 const int32_t TP_TYPE = 12;
 const char* STATUS_MAIN = "version:3+main";
@@ -93,6 +97,110 @@ SecondaryDisplayFoldPolicy::SecondaryDisplayFoldPolicy(std::recursive_mutex& dis
         }
     };
     currentFoldCreaseRegion_ = new FoldCreaseRegion(screenIdFull, rect);
+}
+
+FoldCreaseRegion SecondaryDisplayFoldPolicy::GetStatusFullFoldCreaseRegion(bool isVertical) const
+{
+    std::vector<int32_t> foldRect = FoldScreenStateInternel::StringFoldRectSplitToInt(g_FoldScreenRect,
+        FOLD_CREASE_DELIMITER);
+    if (foldRect.size() != FOLD_CREASE_RECT_SIZE) {
+        TLOGE(WmsLogTag::DMS, "foldRect is invalid");
+        return FoldCreaseRegion(0, {});
+    }
+
+    ScreenId screenIdFull = 0;
+    std::vector<DMRect> foldCreaseRect;
+    GetStatusFullFoldCreaseRect(isVertical, foldRect, foldCreaseRect);
+    return FoldCreaseRegion(screenIdFull, foldCreaseRect);
+}
+
+void SecondaryDisplayFoldPolicy::GetStatusFullFoldCreaseRect(bool isVertical,
+    const std::vector<int32_t>& foldRect, std::vector<DMRect>& foldCreaseRect) const
+{
+    int32_t liveCreaseRegionPosX; // live Crease Region PosX
+    int32_t liveCreaseRegionPosY; // live Crease Region PosY
+    uint32_t liveCreaseRegionPosWidth; // live Crease Region PosWidth
+    uint32_t liveCreaseRegionPosHeight; // live Crease Region PosHeight
+    if (isVertical) {
+        TLOGI(WmsLogTag::DMS, "the current FoldCreaseRect is vertical");
+        liveCreaseRegionPosX = foldRect[0];
+        liveCreaseRegionPosY = foldRect[1];
+        liveCreaseRegionPosWidth = static_cast<uint32_t>(foldRect[2]);
+        liveCreaseRegionPosHeight = static_cast<uint32_t>(foldRect[3]);
+    } else {
+        TLOGI(WmsLogTag::DMS, "the current FoldCreaseRect is horizontal");
+        liveCreaseRegionPosX = foldRect[1];
+        liveCreaseRegionPosY = foldRect[0];
+        liveCreaseRegionPosWidth = static_cast<uint32_t>(foldRect[3]);
+        liveCreaseRegionPosHeight = static_cast<uint32_t>(foldRect[2]);
+    }
+    foldCreaseRect = {
+        {
+            liveCreaseRegionPosX, liveCreaseRegionPosY,
+            liveCreaseRegionPosWidth, liveCreaseRegionPosHeight
+        }
+    };
+    return;
+}
+
+FoldCreaseRegion SecondaryDisplayFoldPolicy::GetStatusGlobalFullFoldCreaseRegion(bool isVertical) const
+{
+    std::vector<int32_t> foldRect = FoldScreenStateInternel::StringFoldRectSplitToInt(g_FoldScreenRect,
+        FOLD_CREASE_DELIMITER);
+    if (foldRect.size() != FOLD_CREASE_RECT_SIZE) {
+        TLOGE(WmsLogTag::DMS, "foldRect is invalid");
+        return FoldCreaseRegion(0, {});
+    }
+
+    ScreenId screenIdFull = 0;
+    std::vector<DMRect> foldCreaseRect;
+    GetStatusGlobalFullFoldCreaseRect(isVertical, foldRect, foldCreaseRect);
+    return FoldCreaseRegion(screenIdFull, foldCreaseRect);
+}
+
+void SecondaryDisplayFoldPolicy::GetStatusGlobalFullFoldCreaseRect(bool isVertical,
+    const std::vector<int32_t>& foldRect, std::vector<DMRect>& foldCreaseRect) const
+{
+    int32_t liveCreaseRegionABPosX; // live Crease Region ABPosX
+    int32_t liveCreaseRegionABPosY; // live Crease Region ABPosY
+    uint32_t liveCreaseRegionABPosWidth; // live Crease Region ABPosWidth
+    uint32_t liveCreaseRegionABPosHeight; // live Crease Region ABPosHeight
+    int32_t liveCreaseRegionBCPosX; // live Crease Region BCPosX
+    int32_t liveCreaseRegionBCPosY; // live Crease Region BCPosY
+    uint32_t liveCreaseRegionBCPosWidth; // live Crease Region BCPosWidth
+    uint32_t liveCreaseRegionBCPosHeight; // live Crease Region BCPosHeight
+    if (isVertical) {
+        TLOGI(WmsLogTag::DMS, "the current FoldCreaseRect is vertical");
+        liveCreaseRegionABPosX = foldRect[0];
+        liveCreaseRegionABPosY = foldRect[1];
+        liveCreaseRegionABPosWidth = static_cast<uint32_t>(foldRect[2]);
+        liveCreaseRegionABPosHeight = static_cast<uint32_t>(foldRect[3]);
+        liveCreaseRegionBCPosX = foldRect[4];
+        liveCreaseRegionBCPosY = foldRect[5];
+        liveCreaseRegionBCPosWidth = static_cast<uint32_t>(foldRect[6]);
+        liveCreaseRegionBCPosHeight = static_cast<uint32_t>(foldRect[7]);
+    } else {
+        TLOGI(WmsLogTag::DMS, "the current FoldCreaseRect is horizontal");
+        liveCreaseRegionABPosX = foldRect[1];
+        liveCreaseRegionABPosY = foldRect[0];
+        liveCreaseRegionABPosWidth = static_cast<uint32_t>(foldRect[3]);
+        liveCreaseRegionABPosHeight = static_cast<uint32_t>(foldRect[2]);
+        liveCreaseRegionBCPosX = foldRect[5];
+        liveCreaseRegionBCPosY = foldRect[4];
+        liveCreaseRegionBCPosWidth = static_cast<uint32_t>(foldRect[7]);
+        liveCreaseRegionBCPosHeight = static_cast<uint32_t>(foldRect[6]);
+    }
+    foldCreaseRect = {
+        {
+            liveCreaseRegionABPosX, liveCreaseRegionABPosY,
+            static_cast<uint32_t>(liveCreaseRegionABPosWidth), static_cast<uint32_t>(liveCreaseRegionABPosHeight)
+        },
+        {
+            liveCreaseRegionBCPosX, liveCreaseRegionBCPosY,
+            static_cast<uint32_t>(liveCreaseRegionBCPosWidth), static_cast<uint32_t>(liveCreaseRegionBCPosHeight)
+        }
+    };
+    return;
 }
 
 void SecondaryDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode, DisplayModeChangeReason reason)
@@ -187,8 +295,8 @@ void SecondaryDisplayFoldPolicy::AddOrRemoveDisplayNodeToTree(ScreenId screenId,
         return;
     }
  
-    UpdateDisplayNodeBasedOnScreenId(screenId, displayNode);
     if (command == ADD_DISPLAY_NODE) {
+        UpdateDisplayNodeBasedOnScreenId(screenId, displayNode);
         displayNode->AddDisplayNodeToTree();
     } else if (command == REMOVE_DISPLAY_NODE) {
         displayNode->RemoveDisplayNodeFromTree();
@@ -331,117 +439,66 @@ void SecondaryDisplayFoldPolicy::ChangeSuperScreenDisplayMode(sptr<ScreenSession
 void SecondaryDisplayFoldPolicy::SendPropertyChangeResult(sptr<ScreenSession> screenSession, ScreenId screenId,
     ScreenPropertyChangeReason reason, FoldDisplayMode displayMode)
 {
-    if (screenSession == nullptr) {
-        TLOGE(WmsLogTag::DMS, "screenSession is null");
-        return;
-    }
-
-    if (displayMode == FoldDisplayMode::COORDINATION && currentDisplayMode_ == FoldDisplayMode::FULL) {
-        SendCoordinationPropertyChangeResultSync(screenSession, screenId, reason, displayMode);
-        return;
-    }
-
-    if (displayMode == FoldDisplayMode::MAIN) {
-        reason = ScreenPropertyChangeReason::FOLD_SCREEN_FOLDING;
-    }
-    auto taskScreenOnFullOn = [this, displayMode] {
-        switch (displayMode) {
-            case FoldDisplayMode::FULL: {
-                if (currentDisplayMode_ == FoldDisplayMode::COORDINATION) {
-                    CloseCoordinationScreen();
-                }
-                SetStatusFullActiveRectAndTpFeature();
-                break;
+    std::lock_guard<std::recursive_mutex> lock_info(displayInfoMutex_);
+    screenProperty_ = ScreenSessionManager::GetInstance().GetPhyScreenProperty(screenId);
+    switch (displayMode) {
+        case FoldDisplayMode::FULL: {
+            if (currentDisplayMode_ == FoldDisplayMode::COORDINATION) {
+                CloseCoordinationScreen();
             }
-            case FoldDisplayMode::MAIN: {
-                if (currentDisplayMode_ == FoldDisplayMode::COORDINATION) {
-                    CloseCoordinationScreen();
-                }
-                SetStatusMainActiveRectAndTpFeature();
-                break;
-            }
-            case FoldDisplayMode::GLOBAL_FULL: {
-                if (currentDisplayMode_ == FoldDisplayMode::COORDINATION) {
-                    CloseCoordinationScreen();
-                }
-                SetStatusGlobalFullActiveRectAndTpFeature();
-                break;
-            }
-            default: {
-                TLOGW(WmsLogTag::DMS, "unKnown displayMode");
-                break;
-            }
+            SetStatusFullActiveRectAndTpFeature(screenSession, screenProperty_);
+            break;
         }
-    };
-    screenPowerTaskScheduler_->PostAsyncTask(std::move(taskScreenOnFullOn), __func__);
-    HandleScreenOnFullOn(screenSession, screenId, reason, displayMode);
-}
+        case FoldDisplayMode::MAIN: {
+            if (currentDisplayMode_ == FoldDisplayMode::COORDINATION) {
+                CloseCoordinationScreen();
+            }
+            reason = ScreenPropertyChangeReason::FOLD_SCREEN_FOLDING;
+            SetStatusMainActiveRectAndTpFeature(screenSession, screenProperty_);
+            break;
+        }
+        case FoldDisplayMode::GLOBAL_FULL: {
+            if (currentDisplayMode_ == FoldDisplayMode::COORDINATION) {
+                CloseCoordinationScreen();
+            }
+            SetStatusGlobalFullActiveRectAndTpFeature(screenSession, screenProperty_);
+            break;
+        }
+        case FoldDisplayMode::COORDINATION: {
+            if (currentDisplayMode_ == FoldDisplayMode::FULL) {
+                ChangeScreenDisplayModeToCoordination();
+                SetStatusConditionalActiveRectAndTpFeature(screenProperty_);
+            }
+            break;
+        }
+        default: {
+            TLOGW(WmsLogTag::DMS, "unKnown displayMode");
+            break;
+        }
+    }
 
-void SecondaryDisplayFoldPolicy::HandleScreenOnFullOn(sptr<ScreenSession> screenSession, ScreenId screenId,
-    ScreenPropertyChangeReason reason, FoldDisplayMode displayMode)
-{
-    if (screenSession == nullptr) {
-        TLOGE(WmsLogTag::DMS, "screenSession is null");
-        return;
-    }
-    std::lock_guard<std::recursive_mutex> lock_info(displayInfoMutex_);
-    screenProperty_ = ScreenSessionManager::GetInstance().GetPhyScreenProperty(screenId);
-    if (displayMode == FoldDisplayMode::FULL) {
-        auto fullStatusScreenBounds = RRect({ 0, screenParams_[FULL_STATUS_OFFSET_X],
-            screenParams_[FULL_STATUS_WIDTH], screenParams_[SCREEN_HEIGHT] }, 0.0f, 0.0f);
-        screenProperty_.SetBounds(fullStatusScreenBounds);
-        screenSession->SetScreenAreaOffsetY(screenParams_[FULL_STATUS_OFFSET_X]);
-        screenSession->SetScreenAreaHeight(screenParams_[FULL_STATUS_WIDTH]);
-    } else if (displayMode == FoldDisplayMode::MAIN) {
-        auto mainStatusScreenBounds =
-            RRect({ 0, 0, screenParams_[MAIN_STATUS_WIDTH], screenParams_[SCREEN_HEIGHT] }, 0.0f, 0.0f);
-        screenProperty_.SetBounds(mainStatusScreenBounds);
-        screenSession->SetScreenAreaOffsetY(0);
-        screenSession->SetScreenAreaHeight(screenParams_[MAIN_STATUS_WIDTH]);
-    } else if (displayMode == FoldDisplayMode::GLOBAL_FULL) {
-        auto globalFullStatusScreenBounds =
-            RRect({ 0, 0, screenParams_[GLOBAL_FULL_STATUS_WIDTH], screenParams_[SCREEN_HEIGHT] }, 0.0f, 0.0f);
-        screenProperty_.SetBounds(globalFullStatusScreenBounds);
-        screenSession->SetScreenAreaOffsetY(0);
-        screenSession->SetScreenAreaHeight(screenParams_[GLOBAL_FULL_STATUS_WIDTH]);
-    } else {
-        TLOGW(WmsLogTag::DMS, "unKnown displayMode");
-    }
     screenSession->UpdatePropertyByFoldControl(screenProperty_, displayMode);
-    screenSession->PropertyChange(screenSession->GetScreenProperty(), reason);
+    auto oldScreenProperty = screenSession->GetScreenProperty();
     if (displayMode == FoldDisplayMode::MAIN) {
         screenSession->SetRotationAndScreenRotationOnly(Rotation::ROTATION_0);
     }
-    TLOGI(WmsLogTag::DMS, "screenBounds : width= %{public}f, height= %{public}f",
-        screenSession->GetScreenProperty().GetBounds().rect_.width_,
-        screenSession->GetScreenProperty().GetBounds().rect_.height_);
-}
-
-void SecondaryDisplayFoldPolicy::SendCoordinationPropertyChangeResultSync(sptr<ScreenSession> screenSession,
-    ScreenId screenId, ScreenPropertyChangeReason reason, FoldDisplayMode displayMode)
-{
-    if (screenSession == nullptr) {
-        TLOGE(WmsLogTag::DMS, "screenSession is null");
-        return;
-    }
-    std::lock_guard<std::recursive_mutex> lock_info(displayInfoMutex_);
-    screenProperty_ = ScreenSessionManager::GetInstance().GetPhyScreenProperty(screenId);
-    TLOGW(WmsLogTag::DMS, "COORDINATION");
-    ChangeScreenDisplayModeToCoordination();
-    SetStatusConditionalActiveRectAndTpFeature(screenProperty_);
- 
-    screenSession->UpdatePropertyByFoldControl(screenProperty_, displayMode);
-    screenSession->PropertyChange(screenSession->GetScreenProperty(), reason);
-    if (displayMode == FoldDisplayMode::MAIN) {
-        screenSession->SetRotationAndScreenRotationOnly(Rotation::ROTATION_0);
-    }
+    screenSession->PropertyChange(oldScreenProperty, reason);
     TLOGI(WmsLogTag::DMS, "screenBounds : width_= %{public}f, height_= %{public}f",
         screenSession->GetScreenProperty().GetBounds().rect_.width_,
         screenSession->GetScreenProperty().GetBounds().rect_.height_);
 }
 
-void SecondaryDisplayFoldPolicy::SetStatusFullActiveRectAndTpFeature()
+void SecondaryDisplayFoldPolicy::SetStatusFullActiveRectAndTpFeature(const sptr<ScreenSession>& screenSession,
+    ScreenProperty &screenProperty)
 {
+    if (screenParams_.size() < FULL_STATUS_OFFSET_X + 1) {
+        return;
+    }
+    auto fullStatusScreenBounds = RRect({0, screenParams_[FULL_STATUS_OFFSET_X],
+    screenParams_[FULL_STATUS_WIDTH], screenParams_[SCREEN_HEIGHT]}, 0.0f, 0.0f);
+    screenProperty.SetBounds(fullStatusScreenBounds);
+    screenSession->SetScreenAreaOffsetY(screenParams_[FULL_STATUS_OFFSET_X]);
+    screenSession->SetScreenAreaHeight(screenParams_[FULL_STATUS_WIDTH]);
     OHOS::Rect rectCur{
         .x = 0,
         .y = screenParams_[FULL_STATUS_OFFSET_X],
@@ -459,8 +516,17 @@ void SecondaryDisplayFoldPolicy::SetStatusFullActiveRectAndTpFeature()
     SetSecondaryDisplayModeChangeStatus(false);
 }
 
-void SecondaryDisplayFoldPolicy::SetStatusMainActiveRectAndTpFeature()
+void SecondaryDisplayFoldPolicy::SetStatusMainActiveRectAndTpFeature(const sptr<ScreenSession>& screenSession,
+    ScreenProperty &screenProperty)
 {
+    if (screenParams_.size() < SCREEN_HEIGHT + 1) {
+        return;
+    }
+    auto mianStatusScreenBounds =
+        RRect({0, 0, screenParams_[MAIN_STATUS_WIDTH], screenParams_[SCREEN_HEIGHT]}, 0.0f, 0.0f);
+    screenProperty.SetBounds(mianStatusScreenBounds);
+    screenSession->SetScreenAreaOffsetY(0);
+    screenSession->SetScreenAreaHeight(screenParams_[MAIN_STATUS_WIDTH]);
     OHOS::Rect rectCur{
         .x = 0,
         .y = 0,
@@ -478,8 +544,17 @@ void SecondaryDisplayFoldPolicy::SetStatusMainActiveRectAndTpFeature()
     SetSecondaryDisplayModeChangeStatus(false);
 }
 
-void SecondaryDisplayFoldPolicy::SetStatusGlobalFullActiveRectAndTpFeature()
+void SecondaryDisplayFoldPolicy::SetStatusGlobalFullActiveRectAndTpFeature(const sptr<ScreenSession>& screenSession,
+    ScreenProperty &screenProperty)
 {
+    if (screenParams_.size() < SCREEN_HEIGHT + 1) {
+        return;
+    }
+    auto globalFullStatusScreenBounds =
+        RRect({0, 0, screenParams_[GLOBAL_FULL_STATUS_WIDTH], screenParams_[SCREEN_HEIGHT]}, 0.0f, 0.0f);
+    screenProperty.SetBounds(globalFullStatusScreenBounds);
+    screenSession->SetScreenAreaOffsetY(0);
+    screenSession->SetScreenAreaHeight(screenParams_[GLOBAL_FULL_STATUS_WIDTH]);
     OHOS::Rect rectCur{
         .x = 0,
         .y = 0,
@@ -514,7 +589,7 @@ void SecondaryDisplayFoldPolicy::SetStatusConditionalActiveRectAndTpFeature(Scre
         TLOGI(WmsLogTag::DMS, "rs response is %{public}d", static_cast<uint32_t>(response));
     }
 #ifdef TP_FEATURE_ENABLE
-    RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE, STATUS_GLOBAL_FULL, TpFeatureConfigType::AFT_TP_FEATURE);
+    RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE, STATUS_FULL, TpFeatureConfigType::AFT_TP_FEATURE);
 #endif
     SetSecondaryDisplayModeChangeStatus(false);
 }
@@ -536,6 +611,57 @@ void SecondaryDisplayFoldPolicy::ReportFoldDisplayModeChange(FoldDisplayMode dis
 sptr<FoldCreaseRegion> SecondaryDisplayFoldPolicy::GetCurrentFoldCreaseRegion()
 {
     return currentFoldCreaseRegion_;
+}
+
+FoldCreaseRegion SecondaryDisplayFoldPolicy::GetLiveCreaseRegion()
+{
+    TLOGI(WmsLogTag::DMS, "enter");
+    std::lock_guard<std::mutex> lock_mode(liveCreaseRegionMutex_);
+    FoldDisplayMode displayMode = GetScreenDisplayMode();
+    if (displayMode == FoldDisplayMode::UNKNOWN || displayMode == FoldDisplayMode::MAIN) {
+        return FoldCreaseRegion(0, {});
+    }
+    sptr<ScreenSession> screenSession = ScreenSessionManager::GetInstance().GetScreenSession(SCREEN_ID_FULL);
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "default screenSession is null");
+        return FoldCreaseRegion(0, {});
+    }
+    DisplayOrientation displayOrientation = screenSession->GetScreenProperty().GetDisplayOrientation();
+    if (displayMode == FoldDisplayMode::FULL || displayMode == FoldDisplayMode::COORDINATION) {
+        switch (displayOrientation) {
+            case DisplayOrientation::PORTRAIT:
+            case DisplayOrientation::PORTRAIT_INVERTED: {
+                liveCreaseRegion_ = GetStatusFullFoldCreaseRegion(true);
+                break;
+            }
+            case DisplayOrientation::LANDSCAPE:
+            case DisplayOrientation::LANDSCAPE_INVERTED: {
+                liveCreaseRegion_ = GetStatusFullFoldCreaseRegion(false);
+                break;
+            }
+            default: {
+                TLOGE(WmsLogTag::DMS, "displayOrientation is invalid");
+            }
+        }
+    }
+    if (displayMode == FoldDisplayMode::GLOBAL_FULL) {
+        switch (displayOrientation) {
+            case DisplayOrientation::PORTRAIT:
+            case DisplayOrientation::PORTRAIT_INVERTED: {
+                liveCreaseRegion_ = GetStatusGlobalFullFoldCreaseRegion(false);
+                break;
+            }
+            case DisplayOrientation::LANDSCAPE:
+            case DisplayOrientation::LANDSCAPE_INVERTED: {
+                liveCreaseRegion_ = GetStatusGlobalFullFoldCreaseRegion(true);
+                break;
+            }
+            default: {
+                TLOGE(WmsLogTag::DMS, "displayOrientation is invalid");
+            }
+        }
+    }
+    return liveCreaseRegion_;
 }
 
 void SecondaryDisplayFoldPolicy::InitScreenParams()

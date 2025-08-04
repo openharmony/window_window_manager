@@ -1372,10 +1372,10 @@ HWTEST_F(WindowSessionPropertyTest, SetIsPcAppInPad, TestSize.Level1)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
-    bool isPcAppInPad = true;
-    property->SetIsPcAppInPad(isPcAppInPad);
+    bool isPcAppInLargeScreenDevice = true;
+    property->SetIsPcAppInPad(isPcAppInLargeScreenDevice);
     auto result = property->GetIsPcAppInPad();
-    ASSERT_EQ(result, isPcAppInPad);
+    ASSERT_EQ(result, isPcAppInLargeScreenDevice);
 }
 
 /**
@@ -1429,6 +1429,49 @@ HWTEST_F(WindowSessionPropertyTest, SetSubWindowZLevel, TestSize.Level1)
     int32_t zLevel = 1;
     property->SetSubWindowZLevel(zLevel);
     ASSERT_EQ(zLevel, property->zLevel_);
+}
+
+/**
+ * @tc.name: GetWindowAnchorInfo
+ * @tc.desc: GetWindowAnchorInfo Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, GetWindowAnchorInfo, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    WindowAnchorInfo anchorInfo = { true, WindowAnchor::TOP_START, 0, 0 };
+    property->windowAnchorInfo_ = anchorInfo;
+    EXPECT_EQ(anchorInfo, property->GetWindowAnchorInfo());
+}
+
+/**
+ * @tc.name: SetWindowAnchorInfo
+ * @tc.desc: SetWindowAnchorInfo Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetWindowAnchorInfo, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    WindowAnchorInfo anchorInfo = { true, WindowAnchor::TOP_START, 0, 0 };
+    property->SetWindowAnchorInfo(anchorInfo);
+    EXPECT_EQ(anchorInfo, property->windowAnchorInfo_);
+}
+
+/**
+ * @tc.name: UnmarshallingWindowAnchorInfo
+ * @tc.desc: UnmarshallingWindowAnchorInfo Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, UnmarshallingWindowAnchorInfo, TestSize.Level1)
+{
+    Parcel parcel = Parcel();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    WindowSessionProperty windowSessionProperty;
+    windowSessionProperty.UnmarshallingWindowAnchorInfo(parcel, property);
+    EXPECT_EQ(property->GetTokenState(), false);
 }
 
 /**
@@ -1539,6 +1582,48 @@ HWTEST_F(WindowSessionPropertyTest, GetIsAtomicService, TestSize.Level1)
     property->SetIsAtomicService(isAtomicService);
     auto result = property->GetIsAtomicService();
     ASSERT_EQ(result, isAtomicService);
+}
+
+/**
+ * @tc.name: SetPcAppInpadCompatibleMode
+ * @tc.desc: SetPcAppInpadCompatibleMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetPcAppInpadCompatibleMode, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    bool enabled = true;
+    property->SetPcAppInpadCompatibleMode(enabled);
+    auto result = property->GetPcAppInpadCompatibleMode();
+    ASSERT_EQ(result, enabled);
+}
+
+/**
+ * @tc.name: SetPcAppInpadSpecificSystemBarInvisible
+ * @tc.desc: SetPcAppInpadSpecificSystemBarInvisible
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetPcAppInpadSpecificSystemBarInvisible, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    bool isPcAppInpadSpecificSystemBarInvisible = true;
+    property->SetPcAppInpadSpecificSystemBarInvisible(isPcAppInpadSpecificSystemBarInvisible);
+    auto result = property->GetPcAppInpadSpecificSystemBarInvisible();
+    ASSERT_EQ(result, isPcAppInpadSpecificSystemBarInvisible);
+}
+
+/**
+ * @tc.name: SetPcAppInpadOrientationLandscape
+ * @tc.desc: SetPcAppInpadOrientationLandscape
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetPcAppInpadOrientationLandscape, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    bool isPcAppInpadOrientationLandscape = true;
+    property->SetPcAppInpadOrientationLandscape(isPcAppInpadOrientationLandscape);
+    auto result = property->GetPcAppInpadOrientationLandscape();
+    ASSERT_EQ(result, isPcAppInpadOrientationLandscape);
 }
 
 /**

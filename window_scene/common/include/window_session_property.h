@@ -107,7 +107,7 @@ public:
     void SetWindowMask(const std::shared_ptr<Media::PixelMap>& windowMask);
     void SetIsShaped(bool isShaped);
     void SetIsAppSupportPhoneInPc(bool isSupportPhone);
-    void SetIsPcAppInPad(bool isPcAppInPad);
+    void SetIsPcAppInPad(bool isPcAppInLargeScreenDevice);
     void SetIsAtomicService(bool isAtomicService);
     
     /*
@@ -198,6 +198,8 @@ public:
     static bool UnmarshallingTransitionAnimationMap(Parcel& parcel, WindowSessionProperty* property);
     bool MarshallingShadowsInfo(Parcel& parcel) const;
     static void UnmarshallingShadowsInfo(Parcel& parcel, WindowSessionProperty* property);
+    bool MarshallingWindowAnchorInfo(Parcel& parcel) const;
+    static void UnmarshallingWindowAnchorInfo(Parcel& parcel, WindowSessionProperty* property);
 
     void SetTextFieldPositionY(double textFieldPositionY);
     void SetTextFieldHeight(double textFieldHeight);
@@ -236,6 +238,8 @@ public:
     uint32_t GetSubWindowLevel() const;
     void SetSubWindowOutlineEnabled(bool subWindowOutlineEnabled);
     bool IsSubWindowOutlineEnabled() const;
+    void SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo);
+    WindowAnchorInfo GetWindowAnchorInfo() const;
 
     /*
      * Window Hierarchy
@@ -254,6 +258,12 @@ public:
     ShadowsInfo GetWindowShadows() const;
     Rect GetGlobalDisplayRect() const;
     void SetGlobalDisplayRect(const Rect& globalDisplayRect);
+    void SetPcAppInpadCompatibleMode(bool enabled);
+    bool GetPcAppInpadCompatibleMode() const;
+    void SetPcAppInpadSpecificSystemBarInvisible(bool isPcAppInpadSpecificSystemBarInvisible);
+    bool GetPcAppInpadSpecificSystemBarInvisible() const;
+    void SetPcAppInpadOrientationLandscape(bool isPcAppInpadOrientationLandscape);
+    bool GetPcAppInpadOrientationLandscape() const;
 
     /*
      * Window Lifecycle
@@ -312,6 +322,7 @@ public:
     bool IsFullScreenDisabled() const;
     bool IsSplitDisabled() const;
     bool IsWindowLimitDisabled() const;
+    bool IsDecorFullscreenDisabled() const;
     bool IsSupportRotateFullScreen() const;
     bool IsAdaptToSubWindow() const;
     bool IsAdaptToSimulationScale() const;
@@ -486,7 +497,7 @@ private:
     static const std::map<uint64_t, HandlWritePropertyFunc> writeFuncMap_;
     static const std::map<uint64_t, HandlReadPropertyFunc> readFuncMap_;
     bool isAppSupportPhoneInPc_ = false;
-    bool isPcAppInPad_ = false;
+    bool isPcAppInLargeScreenDevice_ = false;
     mutable std::mutex compatibleModeMutex_;
     uint8_t backgroundAlpha_ = 0xff; // default alpha is opaque.
     mutable std::mutex atomicServiceMutex_;
@@ -500,6 +511,7 @@ private:
      */
     uint32_t subWindowLevel_ = 0;
     bool subWindowOutlineEnabled_ = false;
+    WindowAnchorInfo windowAnchorInfo_;
 
     /*
      * Window Hierarchy
@@ -565,6 +577,9 @@ private:
     mutable std::mutex shadowsInfoMutex_;
     mutable std::mutex globalDisplayRectMutex_;
     Rect globalDisplayRect_ { 0, 0, 0, 0 };
+    bool isPcAppInpadCompatibleMode_ = false;
+    bool isPcAppInpadSpecificSystemBarInvisible_ = false;
+    bool isPcAppInpadOrientationLandscape_ = false;
 
     sptr<CompatibleModeProperty> compatibleModeProperty_ = nullptr;
 
@@ -606,6 +621,9 @@ public:
     void SetDisableWindowLimit(bool disableWindowLimit);
     bool IsWindowLimitDisabled() const;
 
+    void SetDisableDecorFullscreen(bool disableDecorFullscreen);
+    bool IsDecorFullscreenDisabled() const;
+
     void SetIsSupportRotateFullScreen(bool isSupportRotateFullScreen);
     bool IsSupportRotateFullScreen() const;
 
@@ -632,6 +650,7 @@ public:
         ss << "disableResizeWithDpi_:" << disableResizeWithDpi_<< " ";
         ss << "disableFullScreen_:" << disableFullScreen_<< " ";
         ss << "disableWindowLimit_:" << disableWindowLimit_<< " ";
+        ss << "disableDecorFullscreen_:" << disableDecorFullscreen_<< " ";
         ss << "isSupportRotateFullScreen_:" << isSupportRotateFullScreen_ << " ";
         ss << "isAdaptToSubWindow_:" << isAdaptToSubWindow_ << " ";
         ss << "isAdaptToSimulationScale_:" << isAdaptToSimulationScale_ << " ";
@@ -649,6 +668,7 @@ private:
     bool disableFullScreen_ { false };
     bool disableSplit_ { false };
     bool disableWindowLimit_ { false };
+    bool disableDecorFullscreen_ { false };
     bool isSupportRotateFullScreen_ { false };
     bool isAdaptToSubWindow_ { false };
     bool isAdaptToSimulationScale_ { false };
@@ -659,6 +679,7 @@ struct FreeMultiWindowConfig : public Parcelable {
     uint32_t decorWindowModeSupportType_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
     WindowMode defaultWindowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
     uint32_t maxMainFloatingWindowNumber_ = 0;
+    DragResizeType defaultDragResizeType_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
@@ -668,7 +689,8 @@ struct FreeMultiWindowConfig : public Parcelable {
         }
 
         if (!parcel.WriteUint32(static_cast<uint32_t>(defaultWindowMode_)) ||
-            !parcel.WriteUint32(maxMainFloatingWindowNumber_)) {
+            !parcel.WriteUint32(maxMainFloatingWindowNumber_) ||
+            !parcel.WriteUint32(static_cast<uint32_t>(defaultDragResizeType_))) {
             return false;
         }
         return true;
@@ -684,26 +706,33 @@ struct FreeMultiWindowConfig : public Parcelable {
         config->decorWindowModeSupportType_ = parcel.ReadUint32();
         config->defaultWindowMode_ = static_cast<WindowMode>(parcel.ReadUint32());
         config->maxMainFloatingWindowNumber_ = parcel.ReadUint32();
+        uint32_t dragResizeType = parcel.ReadUint32();
+        if (dragResizeType >= static_cast<uint32_t>(DragResizeType::RESIZE_MAX_VALUE)) {
+            delete config;
+            return nullptr;
+        }
+        config->defaultDragResizeType_ = static_cast<DragResizeType>(dragResizeType);
         return config;
     }
 };
 
 struct AppForceLandscapeConfig : public Parcelable {
     int32_t mode_ = 0;
-    std::string homePage_;
+    std::string homePage_ = "";
     int32_t supportSplit_ = -1;
+    std::string arkUIOptions_ = "";
 
     AppForceLandscapeConfig() {}
-    AppForceLandscapeConfig(int32_t mode, const std::string& homePage, int32_t supportSplit)
-        : mode_(mode), homePage_(homePage), supportSplit_(supportSplit)
-    {
-    }
+    AppForceLandscapeConfig(int32_t mode, const std::string& homePage, int32_t supportSplit,
+        const std::string& arkUIOptions) : mode_(mode), homePage_(homePage), supportSplit_(supportSplit),
+        arkUIOptions_(arkUIOptions) {}
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
         if (!parcel.WriteInt32(mode_) ||
             !parcel.WriteString(homePage_) ||
-            !parcel.WriteInt32(supportSplit_)) {
+            !parcel.WriteInt32(supportSplit_) ||
+            !parcel.WriteString(arkUIOptions_)) {
             return false;
         }
         return true;
@@ -711,17 +740,17 @@ struct AppForceLandscapeConfig : public Parcelable {
 
     static AppForceLandscapeConfig* Unmarshalling(Parcel& parcel)
     {
-        AppForceLandscapeConfig* config = new (std::nothrow) AppForceLandscapeConfig();
+        std::unique_ptr<AppForceLandscapeConfig> config = std::make_unique<AppForceLandscapeConfig>();
         if (config == nullptr) {
             return nullptr;
         }
         if (!parcel.ReadInt32(config->mode_) ||
             !parcel.ReadString(config->homePage_) ||
-            !parcel.ReadInt32(config->supportSplit_)) {
-            delete config;
+            !parcel.ReadInt32(config->supportSplit_) ||
+            !parcel.ReadString(config->arkUIOptions_)) {
             return nullptr;
         }
-        return config;
+        return config.release();
     }
 };
 

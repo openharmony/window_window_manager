@@ -20,9 +20,13 @@ import rpc from '@ohos.rpc';
 export default class WindowExtAbility extends Extension {
   onWindowReady(window) {
     window.setUIContent('WindowExtAbility/pages/index1').then(() => {
-      let pro = window.getWindowProperties();
-      console.log("WindowExtension " + JSON.stringify(pro));
-      window.showWindow();
+      try {
+        let pro = window.getWindowProperties();
+        console.log("WindowExtension " + JSON.stringify(pro));
+        window.showWindow();
+      } catch (exception) {
+        console.error(`WindowExtension got exception. Cause code: ${exception.code}, message: ${exception.message}`);
+      }
     })
   }
 

@@ -82,7 +82,7 @@ public:
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId, DmErrorCode* errorCode = nullptr,
         bool isUseDma = false, bool isCaptureFullOfScreen = false) { return nullptr; }
     virtual std::vector<std::shared_ptr<Media::PixelMap>> GetDisplayHDRSnapshot(
-        DisplayId displayId, DmErrorCode* errorCode = nullptr, bool isUseDma = false,
+        DisplayId displayId, DmErrorCode& errorCode, bool isUseDma = false,
         bool isCaptureFullOfScreen = false) { return { nullptr, nullptr }; }
     virtual std::shared_ptr<Media::PixelMap> GetSnapshotByPicker(Media::Rect &rect,
         DmErrorCode* errorCode = nullptr)
@@ -175,10 +175,8 @@ public:
     virtual uint32_t GetScreenBrightness(uint64_t screenId) { return 0; }
     virtual std::vector<DisplayId> GetAllDisplayIds() { return std::vector<DisplayId>{}; }
     virtual sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) { return nullptr; }
-    virtual sptr<CutoutInfo> GetCutoutInfoWithRotation(DisplayId displayId, int32_t rotation)
-    {
-        return nullptr;
-    }
+    virtual sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId, int32_t width, int32_t height,
+                                           Rotation rotation) { return nullptr; }
     virtual DMError HasImmersiveWindow(ScreenId screenId, bool &immersive)
     {
         return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
@@ -256,6 +254,10 @@ public:
     virtual void SetForceCloseHdr(ScreenId screenid, bool isForceCloseHdr) {}
 
     virtual sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() { return nullptr; }
+    virtual DMError GetLiveCreaseRegion(FoldCreaseRegion& region)
+    {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 
     virtual DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds,
         std::vector<DisplayId>& displayIds) { return DMError::DM_OK; }
@@ -274,8 +276,8 @@ public:
     virtual std::shared_ptr<RSDisplayNode> GetDisplayNode(ScreenId screenId) { return nullptr; }
     virtual void UpdateScreenRotationProperty(ScreenId screenId, const RRectT<float>& bounds, float rotation,
         ScreenPropertyChangeType screenPropertyChangeType, bool isSwitchUser = false) {}
-    virtual void UpdateScreenDirectionInfo(ScreenId screenId, float screenComponentRotation, float rotation,
-        float phyRotation, ScreenPropertyChangeType screenPropertyChangeType) {}
+    virtual void UpdateScreenDirectionInfo(ScreenId screenId, const ScreenDirectionInfo& directionInfo,
+        ScreenPropertyChangeType screenPropertyChangeType, const RRect& bounds) {}
     virtual void UpdateAvailableArea(ScreenId screenId, DMRect area) {}
     virtual void UpdateSuperFoldAvailableArea(ScreenId screenId, DMRect bArea, DMRect cArea) {}
     virtual void UpdateSuperFoldExpandAvailableArea(ScreenId screenId, DMRect area) {}
@@ -347,12 +349,9 @@ public:
         return nullptr;
     }
     virtual std::vector<std::shared_ptr<Media::PixelMap>> GetDisplayHDRSnapshotWithOption(
-        const CaptureOption& captureOption, DmErrorCode* errorCode = nullptr)
+        const CaptureOption& captureOption, DmErrorCode& errorCode)
     {
-        if (errorCode == nullptr) {
-            return { nullptr, nullptr };
-        }
-        *errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
+        errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
         return { nullptr, nullptr };
     }
     virtual DMError SetScreenSkipProtectedWindow(const std::vector<ScreenId> &screenIds, bool isEnable)
@@ -374,6 +373,9 @@ public:
     virtual DMError GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
         ScreenId& screenId, DMRect& screenArea) { return DMError::DM_OK; }
     virtual DMError SetVirtualScreenAutoRotation(ScreenId screenId, bool enable) { return DMError::DM_OK; }
+    virtual DMError SetScreenPrivacyWindowTagSwitch(ScreenId screenId, const std::vector<std::string>& privacyWindowTag,
+        bool enable) { return DMError::DM_OK; }
+    virtual bool SynchronizePowerStatus(ScreenPowerState state) { return false; }
 };
 } // namespace Rosen
 } // namespace OHOS

@@ -212,6 +212,46 @@ HWTEST_F(KeyboardSessionTest3, UseFocusIdIfCallingSessionIdInvalid01, TestSize.L
 }
 
 /**
+ * @tc.name: UseFocusIdIfCallingSessionIdInvalid02
+ * @tc.desc: test function: UseFocusIdIfCallingSessionIdInvalid
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest3, UseFocusIdIfCallingSessionIdInvalid02, TestSize.Level1)
+{
+    auto keyboardSession = GetKeyboardSession("UseFocusIdIfCallingSessionIdInvalid02",
+        "UseFocusIdIfCallingSessionIdInvalid02");
+    sptr<KeyboardSession::KeyboardSessionCallback> keyboardCallback =
+        new (std::nothrow) KeyboardSession::KeyboardSessionCallback();
+    keyboardSession->keyboardCallback_ = keyboardCallback;
+    sptr<SceneSession> sceneSession = GetSceneSession("TestSceneSession", "TestSceneSession");
+    sceneSession->persistentId_ = 100;
+    keyboardSession->keyboardCallback_->onGetSceneSession =
+        [sceneSession](uint32_t callingSessionId)->sptr<SceneSession> {
+            if (sceneSession->persistentId_ != callingSessionId) {
+                return nullptr;
+            }
+            return sceneSession;
+        };
+
+    keyboardSession->GetSessionProperty()->SetCallingSessionId(100);
+    keyboardSession->UseFocusIdIfCallingSessionIdInvalid();
+    auto resultId = keyboardSession->GetCallingSessionId();
+    EXPECT_EQ(resultId, 100);
+
+    keyboardSession->GetSessionProperty()->SetCallingSessionId(101);
+    keyboardSession->keyboardCallback_->onGetFocusedSessionId = []()->int32_t {
+        return 100;
+    };
+    keyboardSession->UseFocusIdIfCallingSessionIdInvalid();
+    resultId = keyboardSession->GetCallingSessionId();
+    EXPECT_EQ(resultId, 100);
+    keyboardSession->keyboardCallback_->onCallingSessionIdChange = nullptr;
+    keyboardSession->UseFocusIdIfCallingSessionIdInvalid();
+    keyboardSession->keyboardCallback_->onCallingSessionIdChange = [](int32_t callingSessionid) {};
+    keyboardSession->UseFocusIdIfCallingSessionIdInvalid();
+}
+
+/**
  * @tc.name: SetSurfaceBounds01
  * @tc.desc: test function: SetSurfaceBounds
  * @tc.type: FUNC
@@ -571,6 +611,50 @@ HWTEST_F(KeyboardSessionTest3, CalculateOccupiedAreaAfterUIRefresh01, Function |
 }
 
 /**
+ * @tc.name: CalculateOccupiedAreaAfterUIRefresh02
+ * @tc.desc: check func CalculateOccupiedAreaAfterUIRefresh
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest3, CalculateOccupiedAreaAfterUIRefresh02, Function | SmallTest | Level1)
+{
+    sptr<KeyboardSession::KeyboardSessionCallback> keyboardCallback =
+        sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
+    
+    SessionInfo callingSessionInfo;
+    callingSessionInfo.abilityName_ = "CallingSession";
+    callingSessionInfo.bundleName_ = "CallingSession";
+    auto callingSession = sptr<SceneSession>::MakeSptr(callingSessionInfo, nullptr);
+    callingSession->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
+    keyboardCallback->onGetSceneSession = [&](uint32_t persistentId) {
+        callingSession->persistentId_ = persistentId;
+        return callingSession;
+    };
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    
+    SessionInfo info;
+    info.abilityName_ = "keyboardSession";
+    info.bundleName_ = "keyboardSession";
+    sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, specificCallback, keyboardCallback);
+    keyboardSession->property_->SetCallingSessionId(36);
+    keyboardSession->isVisible_ = true;
+
+    callingSession->UpdateSizeChangeReason(SizeChangeReason::DRAG);
+    callingSession->SetOriPosYBeforeRaisedByKeyboard(100);
+    keyboardSession->CalculateOccupiedAreaAfterUIRefresh();
+    EXPECT_EQ(callingSession->GetOriPosYBeforeRaisedByKeyboard(), 0);
+
+    callingSession->UpdateSizeChangeReason(SizeChangeReason::DRAG_MOVE);
+    keyboardSession->CalculateOccupiedAreaAfterUIRefresh();
+    EXPECT_EQ(callingSession->GetOriPosYBeforeRaisedByKeyboard(), 0);
+
+    callingSession->SetOriPosYBeforeRaisedByKeyboard(200);
+    callingSession->UpdateSizeChangeReason(SizeChangeReason::ROTATION);
+    EXPECT_EQ(keyboardSession->stateChanged_, false);
+    EXPECT_EQ(callingSession->GetOriPosYBeforeRaisedByKeyboard(), 200);
+}
+
+/**
  * @tc.name: SetKeyboardEffectOptionChangeListener
  * @tc.desc: check func SetKeyboardEffectOptionChangeListener
  * @tc.type: FUNC
@@ -664,7 +748,7 @@ HWTEST_F(KeyboardSessionTest3, ProcessKeyboardOccupiedAreaInfo, Function | Small
     bool needCheckRSTransaction = true;
     keyboardSession->isKeyboardSyncTransactionOpen_ = true;
     keyboardSession->ProcessKeyboardOccupiedAreaInfo(0, needRecalculateAvoidAreas, needCheckRSTransaction);
-    ASSERT_EQ(keyboardSession->isKeyboardSyncTransactionOpen_, true);
+    ASSERT_EQ(keyboardSession->isKeyboardSyncTransactionOpen_, false);
 
     keyboardSession->keyboardCallback_->onGetSceneSession =
         [sceneSession](uint32_t callingSessionId) -> sptr<SceneSession> {
@@ -682,6 +766,14 @@ HWTEST_F(KeyboardSessionTest3, ProcessKeyboardOccupiedAreaInfo, Function | Small
     needCheckRSTransaction = false;
     keyboardSession->ProcessKeyboardOccupiedAreaInfo(0, needRecalculateAvoidAreas, needCheckRSTransaction);
     ASSERT_EQ(keyboardSession->isKeyboardSyncTransactionOpen_, true);
+
+    keyboardSession->keyboardCallback_->onGetSceneSession = [&](uint32_t persistentId) {
+        return sceneSession;
+    };
+    keyboardSession->isKeyboardSyncTransactionOpen_ = true;
+    needCheckRSTransaction = true;
+    keyboardSession->ProcessKeyboardOccupiedAreaInfo(0, needRecalculateAvoidAreas, needCheckRSTransaction);
+    ASSERT_EQ(keyboardSession->isKeyboardSyncTransactionOpen_, false);
 }
 
 /**
@@ -698,9 +790,6 @@ HWTEST_F(KeyboardSessionTest3, NotifyOccupiedAreaChanged, Function | SmallTest |
     sptr<SceneSession> callingSession = GetSceneSession("TestSceneSession", "TestSceneSession");
     ASSERT_NE(callingSession, nullptr);
     sptr<OccupiedAreaChangeInfo> occupiedAreaInfo = nullptr;
-
-    keyboardSession->NotifyOccupiedAreaChanged(nullptr, occupiedAreaInfo, false, nullptr);
-    EXPECT_TRUE(g_logMsg.find("callingSession is null") != std::string::npos);
 
     keyboardSession->NotifyOccupiedAreaChanged(callingSession, occupiedAreaInfo, false, nullptr);
     EXPECT_TRUE(g_logMsg.find("occupiedAreaInfo is null") != std::string::npos);

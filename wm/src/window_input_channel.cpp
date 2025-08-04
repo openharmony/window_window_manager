@@ -64,7 +64,7 @@ __attribute__((no_sanitize("cfi"))) void WindowInputChannel::HandleKeyEvent(
     }
 
     if (window_ == nullptr) {
-        WLOGFE("window_ is nullptr");
+        TLOGE(WmsLogTag::WMS_EVENT, "window_ is nullptr");
         return;
     }
     WLOGFD("Receive key event, Id: %{public}u, keyCode: %{public}d",
@@ -175,6 +175,7 @@ void WindowInputChannel::HandlePointerEvent(std::shared_ptr<MMI::PointerEvent>& 
     TLOGD(WmsLogTag::WMS_EVENT, "Dispatch move event, windowId: %{public}u, action: %{public}d",
         window_->GetWindowId(), action);
     window_->ConsumePointerEvent(pointerEvent);
+    window_->SetTouchEvent(action);
 }
 
 void WindowInputChannel::Destroy()

@@ -69,7 +69,6 @@ void PcFoldScreenController::OnConnect()
                 if (status != prevStatus) {
                     controller->UpdateRect();
                 }
-                controller->FoldStatusChangeForFullScreenWaterfallMode(displayId, status, prevStatus);
                 controller->FoldStatusChangeForSupportEnterWaterfallMode(displayId, status, prevStatus);
             });
         }
@@ -95,7 +94,6 @@ void PcFoldScreenController::OnConnect()
                     TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "controller is nullptr");
                     return;
                 }
-                controller->SystemKeyboardStatusChangeForFullScreenWaterfallMode(displayId, hasSystemKeyboard);
                 controller->SystemKeyboardStatusChangeForSupportEnterWaterfallMode(displayId, hasSystemKeyboard);
             });
         }
@@ -114,16 +112,6 @@ bool PcFoldScreenController::IsSupportEnterWaterfallMode(SuperFoldStatus status,
     return status == SuperFoldStatus::HALF_FOLDED && !hasSystemKeyboard && !isFullScreenWaterfallMode_;
 }
 
-void PcFoldScreenController::FoldStatusChangeForFullScreenWaterfallMode(
-    DisplayId displayId, SuperFoldStatus status, SuperFoldStatus prevStatus)
-{
-    if ((prevStatus == SuperFoldStatus::HALF_FOLDED && status == SuperFoldStatus::FOLDED) ||
-        (prevStatus == SuperFoldStatus::FOLDED && status == SuperFoldStatus::HALF_FOLDED)) {
-        return;
-    }
-    UpdateFullScreenWaterfallMode(false);
-}
-
 void PcFoldScreenController::FoldStatusChangeForSupportEnterWaterfallMode(
     DisplayId displayId, SuperFoldStatus status, SuperFoldStatus prevStatus)
 {
@@ -139,12 +127,6 @@ void PcFoldScreenController::FoldStatusChangeForSupportEnterWaterfallMode(
         return;
     }
     UpdateSupportEnterWaterfallMode();
-}
-
-void PcFoldScreenController::SystemKeyboardStatusChangeForFullScreenWaterfallMode(
-    DisplayId displayId, bool hasSystemKeyboard)
-{
-    UpdateFullScreenWaterfallMode(false);
 }
 
 void PcFoldScreenController::SystemKeyboardStatusChangeForSupportEnterWaterfallMode(

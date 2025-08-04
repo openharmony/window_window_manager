@@ -18,6 +18,7 @@
 
 #include <map>
 #include <mutex>
+#include <set>
 
 #include <common/rs_rect.h>
 
@@ -135,8 +136,8 @@ private:
     void ConnectToServer();
     bool CheckIfNeedConnectScreen(SessionOption option);
     void OnScreenConnectionChanged(SessionOption option, ScreenEvent screenEvent) override;
-    void HandleScreenConnection(SessionOption option);
-    void HandleScreenDisconnection(SessionOption option);
+    bool HandleScreenConnection(SessionOption option);
+    bool HandleScreenDisconnection(SessionOption option);
     void NotifyClientScreenConnect(sptr<ScreenSession>& screenSession);
     void OnPropertyChanged(ScreenId screenId,
         const ScreenProperty& property, ScreenPropertyChangeReason reason) override;
@@ -162,6 +163,9 @@ private:
     void NotifyScreenDisconnect(const sptr<ScreenSession>& screenSession);
     void UpdatePropertyWhenSwitchUser(const sptr <ScreenSession>& screenSession,
         float rotation, RRect bounds, ScreenId screenId);
+    sptr<ScreenSession> CreateTempScreenSession(
+        ScreenId screenId, ScreenId rsId, const std::shared_ptr<RSDisplayNode>& displayNode);
+
     mutable std::mutex screenSessionMapMutex_;
     std::map<ScreenId, sptr<ScreenSession>> screenSessionMap_;
     std::map<ScreenId, sptr<ScreenSession>> extraScreenSessionMap_;
@@ -174,6 +178,9 @@ private:
     sptr<IDisplayChangeListener> displayChangeListener_;
     FoldDisplayMode displayMode_ = FoldDisplayMode::UNKNOWN;
     SuperFoldStatus currentstate_ = SuperFoldStatus::UNKNOWN;
+
+    std::mutex screenEventMutex_;
+    std::unordered_set<ScreenId> connectedScreenSet_;
 };
 } // namespace OHOS::Rosen
 

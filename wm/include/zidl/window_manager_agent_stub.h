@@ -31,9 +31,9 @@ public:
 
 private:
     bool ReadWindowInfoList(MessageParcel& data,
-        std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList);
+        std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList);
     bool ReadWindowInfo(MessageParcel& data,
-        std::unordered_map<WindowInfoKey, std::any>& windowInfo);
+        std::unordered_map<WindowInfoKey, WindowChangeInfoType>& windowInfo);
 };
 } // namespace Rosen
 } // namespace OHOS

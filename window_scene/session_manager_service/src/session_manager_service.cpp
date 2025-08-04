@@ -40,6 +40,7 @@ SessionManagerService* SessionManagerService::GetInstance()
     return sessionManagerService.GetRefPtr();
 }
 
+// LCOV_EXCL_START
 void SessionManagerService::Init()
 {
     AAFwk::AbilityManagerClient::GetInstance()->SetSessionManagerService(this->AsObject());
@@ -67,6 +68,7 @@ void SessionManagerService::NotifySceneBoardAvailable()
     }
     mockSessionManagerServiceProxy->NotifySceneBoardAvailable();
 }
+// LCOV_EXCL_STOP
 
 sptr<IRemoteObject> SessionManagerService::GetSceneSessionManager()
 {

@@ -293,12 +293,12 @@ void JsRootSceneSession::PendingSessionActivationInner(std::shared_ptr<SessionIn
             return;
         }
         napi_value argv[] = {jsSessionInfo};
-        TLOGNI(WmsLogTag::WMS_LIFE, "pend active success, id:%{public}d",
-            sessionInfo->persistentId_);
+        napi_value callResult = nullptr;
         napi_call_function(env_ref, NapiGetUndefined(env_ref),
-            jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+            jsCallBack->GetNapiValue(), ArraySize(argv), argv, &callResult);
         SceneSessionManager::GetInstance().RemoveLifeCycleTaskByPersistentId(
             sessionInfo->persistentId_, LifeCycleTaskType::START);
+        ProcessPendingSessionActivationResult(env_ref, callResult, sessionInfo);
     };
     taskScheduler_->PostMainThreadTask(task, "PendingSessionActivationInner");
 }
@@ -416,7 +416,6 @@ void JsRootSceneSession::PendingSessionActivation(SessionInfo& info)
 
 void JsRootSceneSession::BatchPendingSessionsActivation(const std::vector<std::shared_ptr<SessionInfo>>& sessionInfos)
 {
-    std::vector<sptr<SceneSession>> sceneSessions;
     for (auto& info : sessionInfos) {
         if (info == nullptr) {
             TLOGE(WmsLogTag::WMS_LIFE, "sessionInfo is null");
@@ -426,26 +425,7 @@ void JsRootSceneSession::BatchPendingSessionsActivation(const std::vector<std::s
             "appIndex %{public}d, reuse %{public}d, requestId %{public}d, specifiedFlag %{public}s",
             info->bundleName_.c_str(), info->moduleName_.c_str(),
             info->abilityName_.c_str(), info->appIndex_, info->reuse, info->requestId, info->specifiedFlag_.c_str());
-        auto sceneSession = GenSceneSession(*info);
-        if (sceneSession == nullptr) {
-            TLOGE(WmsLogTag::WMS_LIFE, "GenSceneSession failed");
-            return;
-        }
- 
         if (info->want != nullptr) {
-            bool isNeedBackToOther = info->want->GetBoolParam(AAFwk::Want::PARAM_BACK_TO_OTHER_MISSION_STACK, false);
-            TLOGI(WmsLogTag::WMS_LIFE, "session: %{public}d isNeedBackToOther: %{public}d",
-                  sceneSession->GetPersistentId(), isNeedBackToOther);
-            if (isNeedBackToOther) {
-                info->callerPersistentId_ = GetRealCallerSessionId(sceneSession);
-                VerifyCallerToken(*info);
-            } else {
-                info->callerPersistentId_ = INVALID_SESSION_ID;
-            }
- 
-            auto focusedOnShow = info->want->GetBoolParam(AAFwk::Want::PARAM_RESV_WINDOW_FOCUSED, true);
-            sceneSession->SetFocusedOnShow(focusedOnShow);
- 
             std::string continueSessionId =
                 info->want->GetStringParam(Rosen::PARAM_KEY::PARAM_DMS_CONTINUE_SESSION_ID_KEY);
             if (!continueSessionId.empty()) {
@@ -459,17 +439,7 @@ void JsRootSceneSession::BatchPendingSessionsActivation(const std::vector<std::s
                 TLOGI(WmsLogTag::WMS_LIFE, "Continue app with persistentId: %{public}d", info->persistentId_);
                 SingletonContainer::Get<DmsReporter>().ReportContinueApp(true, static_cast<int32_t>(WSError::WS_OK));
             }
-        } else {
-            TLOGI(WmsLogTag::WMS_LIFE, "session: %{public}d want is empty", sceneSession->GetPersistentId());
-            sceneSession->SetFocusedOnShow(true);
         }
- 
-        sceneSession->SetSessionInfo(*info);
-        std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(*info);
-        if (info->fullScreenStart_) {
-            sceneSession->NotifySessionFullScreen(true);
-        }
-        sceneSessions.emplace_back(sceneSession);
     }
     BatchPendingSessionsActivationInner(sessionInfos);
 }

@@ -204,6 +204,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleAddSkipSelfWhenShowOnVirtualScreenList(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REMOVE_SKIP_SELF_ON_VIRTUAL_SCREEN):
             return HandleRemoveSkipSelfWhenShowOnVirtualScreenList(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_SCREEN_PRIVACY_WINDOW_TAG_SWITCH):
+            return HandleSetScreenPrivacyWindowTagSwitch(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_IS_PC_WINDOW):
             return HandleIsPcWindow(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_IS_FREE_MULTI_WINDOW):
@@ -248,6 +250,10 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleAnimateTo(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_CREATE_UI_EFFECT_CONTROLLER):
             return HandleCreateUIEffectController(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_ADD_SESSION_BLACK_LIST):
+            return HandleAddSessionBlackList(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REMOVE_SESSION_BLACK_LIST):
+            return HandleRemoveSessionBlackList(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_PIP_SWITCH_STATUS):
             return HandleGetPiPSettingSwitchStatus(data, reply);
         default:
@@ -264,7 +270,7 @@ int SceneSessionManagerStub::HandleCreateAndConnectSpecificSession(MessageParcel
     sptr<IRemoteObject> eventChannelObject = data.ReadRemoteObject();
     sptr<IWindowEventChannel> eventChannel = iface_cast<IWindowEventChannel>(eventChannelObject);
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Unmarshalling(data);
-    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "Unmarshalling RSSurfaceNode: %{public}s",
+    TLOGD(WmsLogTag::WMS_SCB, "Unmarshalling RSSurfaceNode: %{public}s",
           RSAdapterUtil::RSNodeToStr(surfaceNode).c_str());
     if (sessionStage == nullptr || eventChannel == nullptr || surfaceNode == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "Failed to read scene session stage object or event channel object!");
@@ -489,7 +495,7 @@ int SceneSessionManagerStub::HandleRegisterWindowManagerAgent(MessageParcel& dat
         return ERR_INVALID_DATA;
     }
     WindowManagerAgentType type = static_cast<WindowManagerAgentType>(typeId);
-    TLOGI(WmsLogTag::DEFAULT, "type=%{public}u", typeId);
+    TLOGD(WmsLogTag::DEFAULT, "type=%{public}u", typeId);
     sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
     sptr<IWindowManagerAgent> windowManagerAgentProxy =
         iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
@@ -507,7 +513,7 @@ int SceneSessionManagerStub::HandleUnregisterWindowManagerAgent(MessageParcel& d
         return ERR_INVALID_DATA;
     }
     WindowManagerAgentType type = static_cast<WindowManagerAgentType>(typeId);
-    TLOGI(WmsLogTag::DEFAULT, "type=%{public}u", typeId);
+    TLOGD(WmsLogTag::DEFAULT, "type=%{public}u", typeId);
     sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
     sptr<IWindowManagerAgent> windowManagerAgentProxy =
         iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
@@ -1725,6 +1731,7 @@ int SceneSessionManagerStub::HandleSkipSnapshotByUserIdAndBundleNames(MessagePar
     return ERR_NONE;
 }
 
+// LCOV_EXCL_START
 int SceneSessionManagerStub::HandleSetProcessWatermark(MessageParcel& data, MessageParcel& reply)
 {
     int32_t pid = INVALID_PID;
@@ -1845,6 +1852,49 @@ int SceneSessionManagerStub::HandleRemoveSkipSelfWhenShowOnVirtualScreenList(Mes
     return ERR_NONE;
 }
 
+int SceneSessionManagerStub::HandleSetScreenPrivacyWindowTagSwitch(MessageParcel& data, MessageParcel& reply)
+{
+    uint64_t screenId = INVALID_SCREEN_ID;
+    if (!data.ReadUint64(screenId)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read screenId failed.");
+        return ERR_INVALID_DATA;
+    }
+
+    uint64_t size = 0;
+    if (!data.ReadUint64(size)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read size failed.");
+        return ERR_INVALID_DATA;
+    }
+
+    if (size > MAX_VECTOR_SIZE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Vector is too big, size is %{public}" PRIu64, size);
+        return ERR_INVALID_DATA;
+    }
+
+    std::vector<std::string> privacyWindowTags;
+    for (uint64_t i = 0; i < size; i++) {
+        std::string privacyWidnowTag;
+        if (!data.ReadString(privacyWidnowTag)) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read privacyWidnowTag failed.");
+            return ERR_INVALID_DATA;
+        }
+        privacyWindowTags.push_back(privacyWidnowTag);
+    }
+
+    bool enable;
+    if (!data.ReadBool(enable)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read enable failed.");
+        return ERR_INVALID_DATA;
+    }
+
+    WMError errCode = SetScreenPrivacyWindowTagSwitch(screenId, privacyWindowTags, enable);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
 int SceneSessionManagerStub::HandleIsPcWindow(MessageParcel& data, MessageParcel& reply)
 {
     bool isPcWindow = false;
@@ -1920,6 +1970,7 @@ int SceneSessionManagerStub::HandleGetDisplayIdByWindowId(MessageParcel& data, M
     }
     return ERR_NONE;
 }
+// LCOV_EXCL_STOP
 
 int SceneSessionManagerStub::HandleIsWindowRectAutoSave(MessageParcel& data, MessageParcel& reply)
 {
@@ -2069,6 +2120,7 @@ int SceneSessionManagerStub::HandleSetAppKeyFramePolicy(MessageParcel& data, Mes
     return ERR_NONE;
 }
 
+// LCOV_EXCL_START
 int SceneSessionManagerStub::HandleShiftAppWindowPointerEvent(MessageParcel& data, MessageParcel& reply)
 {
     int32_t sourcePersistentId = INVALID_WINDOW_ID;
@@ -2135,6 +2187,7 @@ int SceneSessionManagerStub::HandleSetStartWindowBackgroundColor(MessageParcel& 
     }
     return ERR_NONE;
 }
+// LCOV_EXCL_STOP
 
 int SceneSessionManagerStub::HandleMinimizeByWindowId(MessageParcel& data, MessageParcel& reply)
 {
@@ -2187,6 +2240,7 @@ int SceneSessionManagerStub::HandleUseImplicitAnimation(MessageParcel& data, Mes
     return ERR_NONE;
 }
 
+// LCOV_EXCL_START
 int SceneSessionManagerStub::HandleAnimateTo(MessageParcel& data, MessageParcel& reply)
 {
     int32_t windowId = 0;
@@ -2239,6 +2293,101 @@ int SceneSessionManagerStub::HandleCreateUIEffectController(MessageParcel& data,
     }
     return ERR_NONE;
 }
+
+int SceneSessionManagerStub::HandleAddSessionBlackList(MessageParcel& data, MessageParcel& reply)
+{
+    uint64_t size = 0;
+    if (!data.ReadUint64(size)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read size failed");
+        return ERR_INVALID_DATA;
+    }
+    if (size > MAX_VECTOR_SIZE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Vector is too big, size is %{public}" PRIu64, size);
+        return ERR_INVALID_DATA;
+    }
+    std::unordered_set<std::string> bundleNames;
+    for (int64_t i = 0; i < size; i++) {
+        std::string bundleName;
+        if (!data.ReadString(bundleName)) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read windowId failed");
+            return ERR_INVALID_DATA;
+        }
+        bundleNames.insert(bundleName);
+    }
+
+    size = 0;
+    if (!data.ReadUint64(size)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read size failed");
+        return ERR_INVALID_DATA;
+    }
+    if (size > MAX_VECTOR_SIZE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Vector is too big, size is %{public}" PRIu64, size);
+        return ERR_INVALID_DATA;
+    }
+    std::unordered_set<std::string> privacyWindowTags;
+    for (int64_t i = 0; i < size; i++) {
+        std::string privacyWindowTag = 0;
+        if (!data.ReadString(privacyWindowTag)) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read privacyWindowTag failed");
+            return ERR_INVALID_DATA;
+        }
+        privacyWindowTags.insert(privacyWindowTag);
+    }
+    WMError errCode = AddSessionBlackList(bundleNames, privacyWindowTags);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write errCode failed");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleRemoveSessionBlackList(MessageParcel& data, MessageParcel& reply)
+{
+    uint64_t size = 0;
+    if (!data.ReadUint64(size)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read size failed");
+        return ERR_INVALID_DATA;
+    }
+    if (size > MAX_VECTOR_SIZE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Vector is too big, size is %{public}" PRIu64, size);
+        return ERR_INVALID_DATA;
+    }
+    std::unordered_set<std::string> bundleNames;
+    for (int64_t i = 0; i < size; i++) {
+        std::string bundleName;
+        if (!data.ReadString(bundleName)) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read bundleName failed");
+            return ERR_INVALID_DATA;
+        }
+        bundleNames.insert(bundleName);
+    }
+
+    size = 0;
+    if (!data.ReadUint64(size)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read size failed");
+        return ERR_INVALID_DATA;
+    }
+    if (size > MAX_VECTOR_SIZE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Vector is too big, size is %{public}" PRIu64, size);
+        return ERR_INVALID_DATA;
+    }
+    std::unordered_set<std::string> privacyWindowTags;
+    for (int64_t i = 0; i < size; i++) {
+        std::string privacyWindowTag = 0;
+        if (!data.ReadString(privacyWindowTag)) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read privacyWindowTag failed");
+            return ERR_INVALID_DATA;
+        }
+        privacyWindowTags.insert(privacyWindowTag);
+    }
+    WMError errCode = RemoveSessionBlackList(bundleNames, privacyWindowTags);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write errCode failed");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+// LCOV_EXCL_STOP
 
 int SceneSessionManagerStub::HandleGetPiPSettingSwitchStatus(MessageParcel& data, MessageParcel& reply)
 {

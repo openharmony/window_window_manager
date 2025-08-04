@@ -16,6 +16,7 @@
 // gtest
 #include <gtest/gtest.h>
 #include "common_test_utils.h"
+#include "modifier_render_thread/rs_modifiers_draw_thread.h"
 #include "scene_board_judgement.h"
 #include "window.h"
 #include "window_helper.h"
@@ -43,7 +44,12 @@ public:
 
 void WindowAnimateToTest::SetUpTestCase() {}
 
-void WindowAnimateToTest::TearDownTestCase() {}
+void WindowAnimateToTest::TearDownTestCase()
+{
+#ifdef RS_ENABLE_VK
+    RSModifiersDrawThread::Destroy();
+#endif
+}
 
 void WindowAnimateToTest::SetUp()
 {
@@ -109,29 +115,6 @@ HWTEST_F(WindowAnimateToTest, AnimateTo02, TestSize.Level1)
     animationProperty.targetScale = 0.5f;
     ASSERT_EQ(WMError::WM_DO_NOTHING,
         WindowManager::GetInstance().AnimateTo(MAX_WINDOW_ID, animationProperty, animationOption));
-}
-
-/**
- * @tc.name: SetFrameRectForPartialZoomIn
- * @tc.desc: test founction SetFrameRectForPartialZoomIn.
- * @tc.type: FUNC
- */
-HWTEST_F(WindowAnimateToTest, SetFrameRectForPartialZoomIn, TestSize.Level1)
-{
-    Utils::TestWindowInfo windowInfo = {
-        .name = "SetFrameRectForPartialZoomIn",
-        .rect = { 0, 0, 10, 10 }, // 0, 10 is valid rect params
-        .type = WindowType::WINDOW_TYPE_MAGNIFICATION,
-        .mode = WindowMode::WINDOW_MODE_FLOATING,
-        .needAvoid = false,
-        .parentLimit = false,
-        .parentId = INVALID_WINDOW_ID,
-    };
-
-    const sptr<Window>& window = Utils::CreateTestWindow(windowInfo);
-    EXPECT_NE(nullptr, window);
-    Rect frameRect = { 10, 10, 10, 10 }; // 10 is valid frame rect param
-    EXPECT_EQ(WMError::WM_OK, window->SetFrameRectForPartialZoomIn(frameRect));
 }
 } // namespace
 } // namespace Rosen

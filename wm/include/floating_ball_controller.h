@@ -22,6 +22,7 @@
 #include "wm_common.h"
 #include "floating_ball_option.h"
 #include "floating_ball_interface.h"
+#include "floating_ball_report.h"
  
 namespace OHOS {
 namespace Rosen {
@@ -51,8 +52,8 @@ public:
     void UpdateMainWindow(const sptr<Window>& mainWindow);
  
 private:
-    WMError CreateFloatingBallWindow();
-    WMError StartFloatingBallInner();
+    WMError CreateFloatingBallWindow(const sptr<FbOption>& option);
+    WMError StartFloatingBallInner(const sptr<FbOption>& option);
  
     template<typename T> WMError RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
     template<typename T> WMError UnRegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
@@ -61,10 +62,10 @@ private:
     void OnFloatingBallStop();
  
     wptr<FloatingBallController> weakRef_ = nullptr;
-    sptr<FbOption> fbOption_ = nullptr;
     sptr<Window> window_ = nullptr;
     sptr<Window> mainWindow_ = nullptr;
     uint32_t mainWindowId_ = 0;
+    uint32_t templateType_ = 0;
     FbWindowState curState_ = FbWindowState::STATE_UNDEFINED;
     void* contextPtr_ = nullptr;
     bool stopFromClient_ = false;

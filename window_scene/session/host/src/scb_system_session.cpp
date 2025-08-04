@@ -54,7 +54,7 @@ SCBSystemSession::SCBSystemSession(const SessionInfo& info, const sptr<SpecificS
         }
         surfaceNode_ = Rosen::RSSurfaceNode::Create(config, Rosen::RSSurfaceNodeType::APP_WINDOW_NODE);
         RSAdapterUtil::SetRSUIContext(surfaceNode_, GetRSUIContext(), true);
-        TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "Create RSSurfaceNode: %{public}s, name: %{public}s",
+        TLOGD(WmsLogTag::WMS_SCB, "Create RSSurfaceNode: %{public}s, name: %{public}s",
               RSAdapterUtil::RSNodeToStr(surfaceNode_).c_str(), name.c_str());
         SetIsUseControlSession(info.isUseControlSession);
     }
@@ -71,8 +71,9 @@ WSError SCBSystemSession::ProcessPointDownSession(int32_t posX, int32_t posY)
     const auto id = GetPersistentId();
     const auto type = GetWindowType();
     TLOGD(WmsLogTag::WMS_INPUT_KEY_FLOW, "id: %{public}d, type: %{public}d", id, type);
+    auto ret = SceneSession::ProcessPointDownSession(posX, posY);
     PresentFocusIfPointDown();
-    return SceneSession::ProcessPointDownSession(posX, posY);
+    return ret;
 }
 
 WSError SCBSystemSession::NotifyClientToUpdateRect(const std::string& updateReason,
@@ -116,7 +117,7 @@ sptr<SceneSession> SCBSystemSession::GetKeyboardSession() const
 
 void SCBSystemSession::PresentFocusIfPointDown()
 {
-    TLOGI(WmsLogTag::DEFAULT, "Id:%{public}d,type:%{public}d", GetPersistentId(), GetWindowType());
+    TLOGI(WmsLogTag::WMS_FOCUS, "Id:%{public}d,type:%{public}d", GetPersistentId(), GetWindowType());
     if (!isFocused_ && GetFocusable()) {
         FocusChangeReason reason = FocusChangeReason::CLICK;
         NotifyRequestFocusStatusNotifyManager(true, false, reason);

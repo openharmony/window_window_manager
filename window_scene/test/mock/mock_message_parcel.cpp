@@ -26,13 +26,18 @@ bool g_setWriteUint32ErrorFlag = false;
 bool g_setWriteUint64ErrorFlag = false;
 bool g_setWriteFloatErrorFlag = false;
 bool g_setWriteString16ErrorFlag = false;
+bool g_setWriteStringErrorFlag = false;
 bool g_setWriteParcelableErrorFlag = false;
 bool g_setWriteInterfaceTokenErrorFlag = false;
+bool g_setWriteRemoteObjectErrorFlag = false;
 bool g_setReadBoolErrorFlag = false;
 bool g_setReadUint32ErrorFlag = false;
 bool g_setReadInt32ErrorFlag = false;
+bool g_setReadUint64ErrorFlag = false;
 bool g_setReadInt64ErrorFlag = false;
+bool g_setReadFloatErrorFlag = false;
 bool g_setReadStringVectorErrorFlag = false;
+bool g_setReadStringErrorFlag = false;
 #ifdef ENABLE_MOCK_WRITE_STRING
 const static std::string ERROR_FLAG = "error";
 #endif
@@ -53,13 +58,18 @@ void MockMessageParcel::ClearAllErrorFlag()
     g_setWriteUint64ErrorFlag = false;
     g_setWriteFloatErrorFlag = false;
     g_setWriteString16ErrorFlag = false;
+    g_setWriteStringErrorFlag = false;
     g_setWriteParcelableErrorFlag = false;
     g_setWriteInterfaceTokenErrorFlag = false;
+    g_setWriteRemoteObjectErrorFlag = false;
     g_setReadBoolErrorFlag = false;
     g_setReadUint32ErrorFlag = false;
     g_setReadInt32ErrorFlag = false;
+    g_setReadUint64ErrorFlag = false;
     g_setReadInt64ErrorFlag = false;
+    g_setReadFloatErrorFlag = false;
     g_setReadStringVectorErrorFlag = false;
+    g_setReadStringErrorFlag = false;
 }
 
 void MockMessageParcel::SetWriteBoolErrorFlag(bool flag)
@@ -97,6 +107,11 @@ void MockMessageParcel::SetWriteString16ErrorFlag(bool flag)
     g_setWriteString16ErrorFlag = flag;
 }
 
+void MockMessageParcel::SetWriteStringErrorFlag(bool flag)
+{
+    g_setWriteStringErrorFlag = flag;
+}
+
 void MockMessageParcel::SetWriteParcelableErrorFlag(bool flag)
 {
     g_setWriteParcelableErrorFlag = flag;
@@ -105,6 +120,11 @@ void MockMessageParcel::SetWriteParcelableErrorFlag(bool flag)
 void MockMessageParcel::SetWriteInterfaceTokenErrorFlag(bool flag)
 {
     g_setWriteInterfaceTokenErrorFlag = flag;
+}
+
+void MockMessageParcel::SetWriteRemoteObjectErrorFlag(bool flag)
+{
+    g_setWriteRemoteObjectErrorFlag = flag;
 }
 
 void MockMessageParcel::SetReadUint32ErrorFlag(bool flag)
@@ -122,20 +142,43 @@ void MockMessageParcel::SetReadBoolErrorFlag(bool flag)
     g_setReadBoolErrorFlag = flag;
 }
 
+void MockMessageParcel::SetReadUint64ErrorFlag(bool flag)
+{
+    g_setReadUint64ErrorFlag = flag;
+}
+
 void MockMessageParcel::SetReadInt64ErrorFlag(bool flag)
 {
     g_setReadInt64ErrorFlag = flag;
+}
+
+void MockMessageParcel::SetReadFloatErrorFlag(bool flag)
+{
+    g_setReadFloatErrorFlag = flag;
 }
 
 void MockMessageParcel::SetReadStringVectorErrorFlag(bool flag)
 {
     g_setReadStringVectorErrorFlag = flag;
 }
+
+void MockMessageParcel::SetReadStringErrorFlag(bool flag)
+{
+    g_setReadStringErrorFlag = flag;
+}
 }
 
 bool MessageParcel::WriteInterfaceToken(std::u16string name)
 {
     if (g_setWriteInterfaceTokenErrorFlag) {
+        return false;
+    }
+    return true;
+}
+
+bool MessageParcel::WriteRemoteObject(const sptr<IRemoteObject> &object)
+{
+    if (g_setWriteRemoteObjectErrorFlag) {
         return false;
     }
     return true;
@@ -149,17 +192,6 @@ bool Parcel::WriteParcelable(const Parcelable* object)
     }
     return true;
 }
-
-#ifdef ENABLE_MOCK_WRITE_STRING
-bool Parcel::WriteString(const std::string& value)
-{
-    (void)value;
-    if (value == ERROR_FLAG) {
-        return false;
-    }
-    return true;
-}
-#endif
 
 bool Parcel::WriteBool(bool value)
 {
@@ -218,6 +250,12 @@ bool Parcel::WriteString16(const std::u16string& value)
     return !g_setWriteString16ErrorFlag;
 }
 
+bool Parcel::WriteString(const std::string& value)
+{
+    (void)value;
+    return !g_setWriteStringErrorFlag;
+}
+
 bool Parcel::ReadBool(bool& value)
 {
     if (g_setReadBoolErrorFlag) {
@@ -246,6 +284,14 @@ bool Parcel::ReadInt32(int32_t& value)
 }
 #endif
 
+bool Parcel::ReadUint64(uint64_t& value)
+{
+    if (g_setReadUint64ErrorFlag) {
+        return false;
+    }
+    return true;
+}
+
 #ifdef ENABLE_MOCK_READ_INT64
 bool Parcel::ReadInt64(int64_t& value)
 {
@@ -255,6 +301,14 @@ bool Parcel::ReadInt64(int64_t& value)
     return true;
 }
 #endif
+
+bool Parcel::ReadFloat(float& value)
+{
+    if (g_setReadFloatErrorFlag) {
+        return false;
+    }
+    return true;
+}
 
 #ifdef ENABLE_MOCK_WRITE_STRING_VECTOR
 bool Parcel::WriteStringVector(const std::vector<std::string>& val)
@@ -270,6 +324,14 @@ bool Parcel::WriteStringVector(const std::vector<std::string>& val)
 bool Parcel::ReadStringVector(std::vector<std::string>* val)
 {
     if (g_setReadStringVectorErrorFlag) {
+        return false;
+    }
+    return true;
+}
+
+bool Parcel::ReadString(std::string& val)
+{
+    if (g_setReadStringErrorFlag) {
         return false;
     }
     return true;

@@ -79,7 +79,7 @@ void MoveDragController::NotifyWindowInputPidChange(bool isServerPid)
 {
     if (pidChangeCallback_) {
         pidChangeCallback_(persistentId_, isServerPid);
-        WLOGFI("id: %{public}d, isServerPid:%{public}d", persistentId_, isServerPid);
+        TLOGI(WmsLogTag::WMS_LAYOUT, "id:%{public}d, isServerPid:%{public}d", persistentId_, isServerPid);
     }
 }
 
@@ -91,8 +91,8 @@ bool MoveDragController::HasPointDown()
 void MoveDragController::SetStartMoveFlag(bool flag)
 {
     if (flag && (!hasPointDown_ || isStartDrag_)) {
-        WLOGFD("StartMove, but has not pointed down or is dragging, hasPointDown_: %{public}d, isStartFlag: %{public}d",
-            hasPointDown_, isStartDrag_);
+        TLOGD(WmsLogTag::WMS_LAYOUT, "StartMove, but has not pointed down or is dragging, hasPointDown:%{public}d, "
+            "isStartFlag:%{public}d", hasPointDown_, isStartDrag_);
         ClearSpecifyMoveStartDisplay();
         return;
     }
@@ -102,7 +102,13 @@ void MoveDragController::SetStartMoveFlag(bool flag)
         ClearSpecifyMoveStartDisplay();
     }
     ResSchedReportData(OHOS::ResourceSchedule::ResType::RES_TYPE_MOVE_WINDOW, flag);
-    WLOGFI("SetStartMoveFlag, isStartMove_: %{public}d id:%{public}d", isStartMove_, persistentId_);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "isStartMove:%{public}d, id:%{public}d", isStartMove_, persistentId_);
+}
+
+void MoveDragController::SetStartDragFlag(bool flag)
+{
+    isStartDrag_ = flag;
+    TLOGI(WmsLogTag::WMS_LAYOUT, "isStartDrag:%{public}d, id:%{public}d", isStartDrag_, persistentId_);
 }
 
 void MoveDragController::SetMovable(bool isMovable)
@@ -117,7 +123,7 @@ void MoveDragController::SetNotifyWindowPidChangeCallback(const NotifyWindowPidC
 
 bool MoveDragController::GetStartMoveFlag() const
 {
-    WLOGFD("GetStartMoveFlag, isStartMove_: %{public}d id:%{public}d", isStartMove_, persistentId_);
+    TLOGD(WmsLogTag::WMS_LAYOUT, "isStartMove:%{public}d, id:%{public}d", isStartMove_, persistentId_);
     return isStartMove_;
 }
 
@@ -312,7 +318,7 @@ WSRect MoveDragController::GetFullScreenToFloatingRect(const WSRect& originalRec
         return originalRect;
     }
     if (originalRect.width_ == 0) {
-        TLOGI(WmsLogTag::WMS_LAYOUT, "original rect witch is zero");
+        TLOGI(WmsLogTag::WMS_LAYOUT, "original rect width is zero");
         return windowRect;
     }
     // Drag and drop to full screen in proportion
@@ -324,8 +330,7 @@ WSRect MoveDragController::GetFullScreenToFloatingRect(const WSRect& originalRec
         windowRect.width_,
         windowRect.height_,
     };
-    TLOGI(WmsLogTag::WMS_LAYOUT, "target rect [%{public}d,%{public}d,%{public}u,%{public}u]", targetRect.posX_,
-        targetRect.posY_, targetRect.width_, targetRect.height_);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "target rect:%{public}s", targetRect.ToString().c_str());
     return targetRect;
 }
 
@@ -338,11 +343,11 @@ bool MoveDragController::ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEven
     const WSRect& originalRect)
 {
     if (pointerEvent == nullptr) {
-        WLOGE("ConsumeMoveEvent stop because of nullptr");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "ConsumeMoveEvent stop because of nullptr");
         return false;
     }
     if (GetStartDragFlag()) {
-        WLOGFI("the window is being resized");
+        TLOGI(WmsLogTag::WMS_LAYOUT, "the window is being resized");
         return false;
     }
     int32_t pointerId = pointerEvent->GetPointerId();
@@ -350,7 +355,7 @@ bool MoveDragController::ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEven
     int32_t startPointerType = moveDragProperty_.pointerType_;
     if ((startPointerId != -1 && startPointerId != pointerId) ||
         (startPointerType != -1 && pointerEvent->GetSourceType() != startPointerType)) {
-        WLOGFI("block unnecessary pointer event inside the window");
+        TLOGI(WmsLogTag::WMS_LAYOUT, "block unnecessary pointer event inside the window");
         return false;
     }
     MMI::PointerEvent::PointerItem pointerItem;
@@ -358,7 +363,7 @@ bool MoveDragController::ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEven
     if (!pointerEvent->GetPointerItem(pointerId, pointerItem) ||
         (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE &&
          (pointerEvent->GetButtonId() != MMI::PointerEvent::MOUSE_BUTTON_LEFT && !GetStartMoveFlag()))) {
-        WLOGFD("invalid pointerEvent id: %{public}d", persistentId_);
+        TLOGD(WmsLogTag::WMS_LAYOUT, "invalid pointerEvent id:%{public}d", persistentId_);
         return false;
     }
 
@@ -368,15 +373,15 @@ bool MoveDragController::ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEven
     if (!GetStartMoveFlag()) {
         if (action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
             action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
-            WLOGFD("Move event hasPointDown");
+            TLOGD(WmsLogTag::WMS_LAYOUT, "Move event hasPointDown");
             hasPointDown_ = true;
         } else if (action == MMI::PointerEvent::POINTER_ACTION_UP ||
             action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP ||
             action == MMI::PointerEvent::POINTER_ACTION_CANCEL) {
-            WLOGFD("Reset hasPointDown_ when point up or cancel");
+            TLOGD(WmsLogTag::WMS_LAYOUT, "Reset hasPointDown_ when point up or cancel");
             hasPointDown_ = false;
         }
-        WLOGFD("No need to move action id: %{public}d", action);
+        TLOGD(WmsLogTag::WMS_LAYOUT, "No need to move action:%{public}d, id:%{public}d", action, persistentId_);
         return false;
     }
 
@@ -458,7 +463,7 @@ void MoveDragController::ModifyWindowCoordinatesWhenMoveEnd(const std::shared_pt
 void MoveDragController::ProcessWindowDragHotAreaFunc(bool isSendHotAreaMessage, SizeChangeReason reason)
 {
     if (isSendHotAreaMessage) {
-        WLOGFI("ProcessWindowDragHotAreaFunc start, isSendHotAreaMessage: %{public}u, reason: %{public}d",
+        TLOGI(WmsLogTag::WMS_LAYOUT, "start, isSendHotAreaMessage:%{public}u, reason:%{public}d",
             isSendHotAreaMessage, reason);
     }
     if (windowDragHotAreaFunc_ && isSendHotAreaMessage) {
@@ -473,15 +478,16 @@ void MoveDragController::UpdateGravityWhenDrag(const std::shared_ptr<MMI::Pointe
     if (surfaceNode == nullptr || pointerEvent == nullptr || type_ == AreaType::UNDEFINED) {
         return;
     }
-    if (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_DOWN ||
-        pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
+    auto actionType = pointerEvent->GetPointerAction();
+    if (actionType == MMI::PointerEvent::POINTER_ACTION_DOWN ||
+        actionType == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
         Gravity dragGravity = GRAVITY_MAP.at(type_);
         if (dragGravity >= Gravity::TOP && dragGravity <= Gravity::BOTTOM_RIGHT) {
-            WLOGFI("begin SetFrameGravity:%{public}d, type:%{public}d", dragGravity, type_);
+            TLOGI(WmsLogTag::WMS_LAYOUT, "begin SetFrameGravity:%{public}d, type:%{public}d, id:%{public}d",
+                dragGravity, type_, persistentId_);
             surfaceNode->SetFrameGravity(dragGravity);
             RSTransactionAdapter::FlushImplicitTransaction(surfaceNode);
         }
-        return;
     }
 }
 
@@ -539,7 +545,7 @@ bool MoveDragController::ConsumeDragEvent(const std::shared_ptr<MMI::PointerEven
     }
     MMI::PointerEvent::PointerItem pointerItem;
     if (!pointerEvent->GetPointerItem(pointerId, pointerItem)) {
-        WLOGE("Get PointerItem failed");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Get PointerItem failed");
         return false;
     }
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;
@@ -573,7 +579,7 @@ bool MoveDragController::ConsumeDragEvent(const std::shared_ptr<MMI::PointerEven
                 return true;
             }
             reason = SizeChangeReason::DRAG_END;
-            isStartDrag_ = false;
+            SetStartDragFlag(false);
             hasPointDown_ = false;
             moveDragEndDisplayId_ = GetTargetRect(TargetRectCoordinate::GLOBAL).IsOverlap(screenRect) ?
                 moveDragStartDisplayId_ : static_cast<uint64_t>(pointerEvent->GetTargetDisplayId());
@@ -591,11 +597,11 @@ bool MoveDragController::ConsumeDragEvent(const std::shared_ptr<MMI::PointerEven
 
 void MoveDragController::MoveDragInterrupted(bool resetPosition)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "Screen anomaly, MoveDrag has been interrupted.");
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Screen anomaly, MoveDrag has been interrupted, id:%{public}d", persistentId_);
     SizeChangeReason reason = SizeChangeReason::DRAG_END;
     hasPointDown_ = false;
-    if (isStartDrag_) {
-        isStartDrag_ = false;
+    if (GetStartDragFlag()) {
+        SetStartDragFlag(false);
         ResSchedReportData(OHOS::ResourceSchedule::ResType::RES_TYPE_RESIZE_WINDOW, false);
         NotifyWindowInputPidChange(isStartDrag_);
     };
@@ -1045,7 +1051,7 @@ bool MoveDragController::EventDownInit(const std::shared_ptr<MMI::PointerEvent>&
     moveDragProperty_.originalRect_.posX_ = (originalRect.posX_ - parentRect_.posX_) / moveDragProperty_.scaleX_;
     moveDragProperty_.originalRect_.posY_ = (originalRect.posY_ - parentRect_.posY_) / moveDragProperty_.scaleY_;
     mainMoveAxis_ = AxisType::UNDEFINED;
-    isStartDrag_ = true;
+    SetStartDragFlag(true);
     NotifyWindowInputPidChange(isStartDrag_);
     return true;
 }
@@ -1411,7 +1417,7 @@ WSError MoveDragController::UpdateMoveTempProperty(const std::shared_ptr<MMI::Po
     if (!pointerEvent->GetPointerItem(pointerId, pointerItem) ||
         (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE &&
         pointerEvent->GetButtonId() != MMI::PointerEvent::MOUSE_BUTTON_LEFT)) {
-        WLOGFW("invalid pointerEvent");
+        TLOGW(WmsLogTag::WMS_LAYOUT, "invalid pointerEvent");
         return WSError::WS_ERROR_NULLPTR;
     }
 
@@ -1434,7 +1440,7 @@ WSError MoveDragController::UpdateMoveTempProperty(const std::shared_ptr<MMI::Po
         case MMI::PointerEvent::POINTER_ACTION_MOVE:
             if ((startPointerId != -1 && startPointerId != pointerId) ||
                 (startPointerType != -1 && pointerType != startPointerType)) {
-                WLOGFI("block unnecessary pointer event inside the window");
+                TLOGI(WmsLogTag::WMS_LAYOUT, "block unnecessary pointer event inside the window");
                 return WSError::WS_DO_NOTHING;
             }
             moveTempProperty_.lastMovePointerPosX_ = pointerDisplayX;
@@ -1533,8 +1539,8 @@ void MoveDragController::CalcFirstMoveTargetRect(const WSRect& windowRect, bool 
         targetRect.posY_ = moveDragProperty_.originalRect_.posY_ + offsetY;
         targetRect = GetTargetDisplayRectRelatedToStartDisplay(targetRect, specifyMoveStartDisplayId_);
     }
-    TLOGI(WmsLogTag::WMS_LAYOUT, "first move rect: [%{public}d, %{public}d, %{public}u, %{public}u]", targetRect.posX_,
-        targetRect.posY_, targetRect.width_, targetRect.height_);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "id:%{public}d, first move rect: %{public}s",
+        persistentId_, targetRect.ToString().c_str());
     moveDragProperty_.targetRect_ = targetRect;
     isAdaptToProportionalScale_ = useWindowRect;
     ProcessSessionRectChange(SizeChangeReason::DRAG_MOVE);
@@ -1544,11 +1550,11 @@ bool MoveDragController::CheckDragEventLegal(const std::shared_ptr<MMI::PointerE
     const sptr<WindowSessionProperty> property)
 {
     if (pointerEvent == nullptr || property == nullptr) {
-        WLOGE("ConsumeDragEvent stop because of nullptr");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "ConsumeDragEvent stop because of nullptr");
         return false;
     }
     if (GetStartMoveFlag()) {
-        WLOGFD("the window is being moved");
+        TLOGD(WmsLogTag::WMS_LAYOUT, "the window is being moved");
         return false;
     }
     if (!GetStartDragFlag() && pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_DOWN &&
@@ -1558,7 +1564,7 @@ bool MoveDragController::CheckDragEventLegal(const std::shared_ptr<MMI::PointerE
     int32_t pointerId = pointerEvent->GetPointerId();
     int32_t startPointerId = moveDragProperty_.pointerId_;
     if (GetStartDragFlag() && startPointerId != -1 && startPointerId != pointerId) {
-        WLOGFI("block unnecessary pointer event inside the window");
+        TLOGI(WmsLogTag::WMS_LAYOUT, "block unnecessary pointer event inside the window");
         return false;
     }
     return true;
@@ -1570,7 +1576,7 @@ void MoveDragController::UpdateHotAreaType(const std::shared_ptr<MMI::PointerEve
     int32_t pointerId = pointerEvent->GetPointerId();
     MMI::PointerEvent::PointerItem pointerItem;
     if (!pointerEvent->GetPointerItem(pointerId, pointerItem)) {
-        WLOGFW("invalid pointerEvent");
+        TLOGW(WmsLogTag::WMS_LAYOUT, "invalid pointerEvent");
         return;
     }
     int32_t pointerDisplayX = pointerItem.GetDisplayX();
@@ -1579,7 +1585,7 @@ void MoveDragController::UpdateHotAreaType(const std::shared_ptr<MMI::PointerEve
     uint32_t windowDragHotAreaType = SceneSession::GetWindowDragHotAreaType(displayId, WINDOW_HOT_AREA_TYPE_UNDEFINED,
         pointerDisplayX, pointerDisplayY);
     if (windowDragHotAreaType_ != windowDragHotAreaType) {
-        WLOGFI("the pointerEvent is window drag hot area, old type is: %{public}d, new type is: %{public}d",
+        TLOGI(WmsLogTag::WMS_LAYOUT, "window drag hot area is changed, old type:%{public}d, new type:%{public}d",
             windowDragHotAreaType_, windowDragHotAreaType);
     }
     if (hotAreaDisplayId_ != displayId) {
@@ -1612,9 +1618,9 @@ void MoveDragController::SetWindowDragHotAreaFunc(const NotifyWindowDragHotAreaF
 
 void MoveDragController::OnLostFocus()
 {
-    TLOGW(WmsLogTag::WMS_LAYOUT, "window id %{public}d lost focus, should stop MoveDrag isMove: %{public}d,"
-        "isDrag: %{public}d", persistentId_, isStartMove_, isStartDrag_);
     if (isStartMove_ || isStartDrag_) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "window id:%{public}d lost focus, should stop MoveDrag, isMove:%{public}d, "
+            "isDrag:%{public}d", persistentId_, isStartMove_, isStartDrag_);
         MoveDragInterrupted(false);
     }
 }

@@ -607,6 +607,10 @@ void DisplayManagerService::UpdateRSTree(DisplayId displayId, DisplayId parentDi
 DMError DisplayManagerService::AddSurfaceNodeToDisplay(DisplayId displayId,
     std::shared_ptr<RSSurfaceNode>& surfaceNode, bool onTop)
 {
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "Permission denied!");
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
     TLOGI(WmsLogTag::DMS, "DisplayId: %{public}" PRIu64 ", onTop: %{public}d", displayId, onTop);
     if (surfaceNode == nullptr) {
         TLOGW(WmsLogTag::DMS, "Surface is null");
@@ -619,6 +623,10 @@ DMError DisplayManagerService::AddSurfaceNodeToDisplay(DisplayId displayId,
 DMError DisplayManagerService::RemoveSurfaceNodeFromDisplay(DisplayId displayId,
     std::shared_ptr<RSSurfaceNode>& surfaceNode)
 {
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "Permission denied!");
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
     TLOGI(WmsLogTag::DMS, "DisplayId: %{public}" PRIu64, displayId);
     if (surfaceNode == nullptr) {
         TLOGW(WmsLogTag::DMS, "Surface is null");
@@ -850,5 +858,11 @@ std::vector<DisplayPhysicalResolution> DisplayManagerService::GetAllDisplayPhysi
         allDisplayPhysicalResolution_.emplace_back(defaultResolution);
     }
     return allDisplayPhysicalResolution_;
+}
+
+bool DisplayManagerService::SetVirtualScreenAsDefault(ScreenId screenId)
+{
+    TLOGI(WmsLogTag::DMS, "Enter, screenId: %{public}" PRIu64 "", screenId);
+    return abstractScreenController_->SetVirtualScreenAsDefault(screenId);
 }
 } // namespace OHOS::Rosen

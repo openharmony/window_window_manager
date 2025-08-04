@@ -15,6 +15,7 @@
 
 // gtest
 #include <gtest/gtest.h>
+#include "modifier_render_thread/rs_modifiers_draw_thread.h"
 #include "scene_board_judgement.h"
 #include "window_manager.h"
 #include "window_test_utils.h"
@@ -46,7 +47,12 @@ void WindowModeSupportTypeTest::SetUpTestCase()
     Utils::InitByDisplayRect(displayRect);
 }
 
-void WindowModeSupportTypeTest::TearDownTestCase() {}
+void WindowModeSupportTypeTest::TearDownTestCase()
+{
+#ifdef RS_ENABLE_VK
+    RSModifiersDrawThread::Destroy();
+#endif
+}
 
 void WindowModeSupportTypeTest::SetUp()
 {

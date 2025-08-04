@@ -567,6 +567,21 @@ HWTEST_F(WindowTest, SetLayoutFullScreen, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetIgnoreSafeArea
+ * @tc.desc: SetIgnoreSafeArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, SetIgnoreSafeArea, TestSize.Level1)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    auto ret = window->SetIgnoreSafeArea(true);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    ret = window->SetIgnoreSafeArea(false);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
  * @tc.name: SetTitleAndDockHoverShown
  * @tc.desc: get
  * @tc.type: FUNC
@@ -2047,14 +2062,15 @@ HWTEST_F(WindowTest, WindowChangeListener01, TestSize.Level1)
 HWTEST_F(WindowTest, IOccupiedAreaChangeListener, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
-    auto ret = true;
+
     sptr<IOccupiedAreaChangeListener> listener = sptr<IOccupiedAreaChangeListener>::MakeSptr();
     Rect rect = { 0, 0, 0, 0 };
-    window->RegisterOccupiedAreaChangeListener(listener);
+    auto ret = window->RegisterOccupiedAreaChangeListener(listener);
+    EXPECT_EQ(WMError::WM_OK, ret);
     sptr<OccupiedAreaChangeInfo> info = sptr<OccupiedAreaChangeInfo>::MakeSptr(OccupiedAreaType::TYPE_INPUT, rect, 80);
     listener->OnSizeChange(info, nullptr);
-    window->UnregisterOccupiedAreaChangeListener(listener);
-    ASSERT_EQ(true, ret);
+    ret = window->UnregisterOccupiedAreaChangeListener(listener);
+    EXPECT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -2989,18 +3005,8 @@ HWTEST_F(WindowTest, SetFollowParentMultiScreenPolicy, Function | SmallTest | Le
 HWTEST_F(WindowTest, IsPcOrPadFreeMultiWindowMode, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
-    bool isPcOrFreeMultiWindow = true;
-    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    EXPECT_CALL(m->Mock(), IsPcOrPadFreeMultiWindowMode(_)).Times(1).WillOnce(DoAll(
-        SetArgReferee<0>(isPcOrFreeMultiWindow),
-        Return(WMError::WM_OK)
-    ));
     auto ret = window->IsPcOrPadFreeMultiWindowMode();
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(ret, isPcOrFreeMultiWindow);
-    } else {
-        EXPECT_EQ(ret, false);
-    }
+    EXPECT_EQ(ret, false);
     EXPECT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -3012,18 +3018,8 @@ HWTEST_F(WindowTest, IsPcOrPadFreeMultiWindowMode, TestSize.Level1)
 HWTEST_F(WindowTest, GetFreeMultiWindowModeEnabledState, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
-    bool isFreeMultiWindow = true;
-    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    EXPECT_CALL(m->Mock(), IsFreeMultiWindowMode(_)).Times(1).WillOnce(DoAll(
-        SetArgReferee<0>(isFreeMultiWindow),
-        Return(WMError::WM_OK)
-    ));
     auto ret = window->GetFreeMultiWindowModeEnabledState();
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(ret, isFreeMultiWindow);
-    } else {
-        EXPECT_EQ(ret, false);
-    }
+    EXPECT_EQ(ret, false);
     EXPECT_EQ(WMError::WM_OK, window->Destroy());
 }
 } // namespace

@@ -92,4 +92,5 @@ interface OHOS.Rosen.IDisplayManager {
     void GetAllDisplayPhysicalResolution([out] DisplayPhysicalResolution[] displayPhysicalResolutions);
     void SetScreenBrightness([in] unsigned long screenId, [in] unsigned int level, [out] boolean isSucc);
     void GetScreenBrightness([in] unsigned long screenId, [out] unsigned int level);
+    void SetVirtualScreenAsDefault([in] unsigned long screenId, [out] boolean isSucc);
 }

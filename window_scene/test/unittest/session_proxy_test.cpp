@@ -1613,6 +1613,47 @@ HWTEST_F(SessionProxyTest, IsMainWindowFullScreenAcrossDisplays, Function | Smal
 }
 
 /**
+ * @tc.name: OnUpdateColorMode
+ * @tc.desc: OnUpdateColorMode test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, OnUpdateColorMode, Function | SmallTest | Level2)
+{
+    std::string colorMode = "DARK";
+    bool hasDarkRes = true;
+    auto sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    ASSERT_NE(sProxy, nullptr);
+    auto ret = sProxy->OnUpdateColorMode(colorMode, hasDarkRes);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    sProxy = sptr<SessionProxy>::MakeSptr(remoteMocker);
+    ASSERT_NE(sProxy, nullptr);
+    ret = sProxy->OnUpdateColorMode(colorMode, hasDarkRes);
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    ret = sProxy->OnUpdateColorMode(colorMode, hasDarkRes);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    remoteMocker->SetRequestResult(ERR_NONE);
+
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    ret = sProxy->OnUpdateColorMode(colorMode, hasDarkRes);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+
+    MockMessageParcel::SetWriteStringErrorFlag(true);
+    ret = sProxy->OnUpdateColorMode(colorMode, hasDarkRes);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ret = sProxy->OnUpdateColorMode(colorMode, hasDarkRes);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteBoolErrorFlag(false);
+    MockMessageParcel::SetWriteStringErrorFlag(false);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+}
+
+/**
  * @tc.name: GetTargetOrientationConfigInfo
  * @tc.desc: GetTargetOrientationConfigInfo test
  * @tc.type: FUNC
@@ -1979,6 +2020,48 @@ HWTEST_F(SessionProxyTest, TestUpdateGlobalDisplayRectFromClient, Function | Sma
     mockRemote->sendRequestResult_ = ERR_NONE;
     sptr<SessionProxy> okProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
     EXPECT_EQ(WSError::WS_OK, okProxy->UpdateGlobalDisplayRectFromClient(rect, reason));
+}
+
+/**
+ * @tc.name: GetAppHookWindowInfoFromServer
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, GetAppHookWindowInfoFromServer, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: GetAppHookWindowInfoFromServer start";
+    auto mockRemote = sptr<MockIRemoteObject>::MakeSptr();
+    auto sProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    MockMessageParcel::ClearAllErrorFlag();
+    HookWindowInfo hookWindowInfo;
+
+    // Case 1: Failed to write interface token
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, sProxy->GetAppHookWindowInfoFromServer(hookWindowInfo));
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    // Case 2: remote is nullptr
+    sptr<SessionProxy> nullProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, nullProxy->GetAppHookWindowInfoFromServer(hookWindowInfo));
+
+    // Case 3: Failed to send request
+    mockRemote->SetRequestResult(ERR_TRANSACTION_FAILED);
+    sptr<SessionProxy> failSendRequestProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, failSendRequestProxy->GetAppHookWindowInfoFromServer(hookWindowInfo));
+    mockRemote->SetRequestResult(ERR_NONE);
+
+    // Case 4: Failed to read replyInfo and ret
+    MockMessageParcel::SetReadBoolErrorFlag(true);
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, sProxy->GetAppHookWindowInfoFromServer(hookWindowInfo));
+    MockMessageParcel::SetReadBoolErrorFlag(false);
+    MockMessageParcel::SetReadInt32ErrorFlag(false);
+
+    // Case 5: Success
+    sptr<SessionProxy> okProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    EXPECT_EQ(WMError::WM_OK, okProxy->GetAppHookWindowInfoFromServer(hookWindowInfo));
+    MockMessageParcel::ClearAllErrorFlag();
+    GTEST_LOG_(INFO) << "SessionProxyTest: GetAppHookWindowInfoFromServer end";
 }
 } // namespace
 } // namespace Rosen

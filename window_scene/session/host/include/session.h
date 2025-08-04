@@ -95,6 +95,8 @@ using NotifyDisplayIdChangedNotifyManagerFunc = std::function<void(int32_t persi
 using GetStateFromManagerFunc = std::function<bool(const ManagerState key)>;
 using NotifySystemSessionPointerEventFunc = std::function<void(std::shared_ptr<MMI::PointerEvent> pointerEvent)>;
 using NotifySessionInfoChangeNotifyManagerFunc = std::function<void(int32_t persistentid)>;
+using NotifySessionPropertyChangeNotifyManagerFunc =
+    std::function<void(int32_t persistentid, WindowInfoKey windowInfoKey)>;
 using NotifySystemSessionKeyEventFunc = std::function<bool(std::shared_ptr<MMI::KeyEvent> keyEvent,
     bool isPreImeEvent)>;
 using NotifyContextTransparentFunc = std::function<void()>;
@@ -112,6 +114,7 @@ using NotifyHighlightChangeFunc = std::function<void(bool isHighlight)>;
 using NotifySurfaceBoundsChangeFunc = std::function<void(const WSRect& rect, bool isGlobal, bool needFlush)>;
 using HasRequestedVsyncFunc = std::function<WSError(bool& hasRequestedVsync)>;
 using RequestNextVsyncWhenModeChangeFunc = std::function<WSError(const std::shared_ptr<VsyncCallback>& vsyncCallback)>;
+using NotifyClearSubSessionFunc = std::function<void(const int32_t subPersistentId)>;
 class ILifecycleListener {
 public:
     virtual void OnActivation() {}
@@ -326,6 +329,7 @@ public:
     void SetSessionRect(const WSRect& rect);
     WSRect GetSessionRect() const;
     WSRect GetSessionGlobalRect() const;
+    WSRect GetSessionScreenRelativeRect() const;
     WSRect GetSessionGlobalRectInMultiScreen() const;
     WMError GetGlobalScaledRect(Rect& globalScaledRect) override;
     void SetSessionGlobalRect(const WSRect& rect);
@@ -383,11 +387,13 @@ public:
     virtual void UnregisterSessionChangeListeners();
     void SetSessionStateChangeNotifyManagerListener(const NotifySessionStateChangeNotifyManagerFunc& func);
     void SetSessionInfoChangeNotifyManagerListener(const NotifySessionInfoChangeNotifyManagerFunc& func);
+    void SetSessionPropertyChangeNotifyManagerListener(const NotifySessionPropertyChangeNotifyManagerFunc& func);
     void SetDisplayIdChangedNotifyManagerListener(const NotifyDisplayIdChangedNotifyManagerFunc& func);
     void SetRequestFocusStatusNotifyManagerListener(const NotifyRequestFocusStatusNotifyManagerFunc& func);
     void SetNotifyUIRequestFocusFunc(const NotifyUIRequestFocusFunc& func);
     void SetNotifyUILostFocusFunc(const NotifyUILostFocusFunc& func);
     void SetGetStateFromManagerListener(const GetStateFromManagerFunc& func);
+    void SetClearSubSessionCallback(const NotifyClearSubSessionFunc& func);
 
     void SetSystemConfig(const SystemSessionConfig& systemConfig);
     void SetSnapshotScale(const float snapshotScale);
@@ -417,6 +423,9 @@ public:
     WSError SetCompatibleModeProperty(const sptr<CompatibleModeProperty> compatibleModeProperty);
     WSError PcAppInPadNormalClose();
     WSError SetIsPcAppInPad(bool enable);
+    WSError SetPcAppInpadCompatibleMode(bool enabled);
+    WSError SetPcAppInpadSpecificSystemBarInvisible(bool isPcAppInpadSpecificSystemBarInvisible);
+    WSError SetPcAppInpadOrientationLandscape(bool isPcAppInpadOrientationLandscape);
     bool NeedNotify() const;
     void SetNeedNotify(bool needNotify);
     WSError SetTouchable(bool touchable);
@@ -440,6 +449,11 @@ public:
     void SetContextTransparentFunc(const NotifyContextTransparentFunc& func);
     void NotifyContextTransparent();
     bool NeedCheckContextTransparent() const;
+
+    /*
+     * Window Layout
+     */
+    bool UpdateWindowModeSupportType(const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo);
 
     /*
      * Window Rotate Animation
@@ -675,9 +689,10 @@ public:
     void SetRequestNextVsyncWhenModeChangeFunc(RequestNextVsyncWhenModeChangeFunc&& func);
     void SetGlobalDisplayRect(const WSRect& rect);
     WSRect GetGlobalDisplayRect() const;
-    WSRect ComputeGlobalDisplayRect() const;
     virtual WSError UpdateGlobalDisplayRect(const WSRect& rect, SizeChangeReason reason);
+    WSError NotifyClientToUpdateGlobalDisplayRect(const WSRect& rect, SizeChangeReason reason);
     const sptr<LayoutController>& GetLayoutController() const { return layoutController_; }
+    WSError NotifyAppHookWindowInfoUpdated();
 
     /*
      * Screen Lock
@@ -728,7 +743,7 @@ public:
     void DeleteHasSnapshot(SnapshotStatus key);
     void DeleteHasSnapshotFreeMultiWindow();
     void SetFreeMultiWindow();
-    bool freeMultiWindow_ = false;
+    std::atomic<bool> freeMultiWindow_ { false };
 
     /*
      * Specific Window
@@ -770,6 +785,7 @@ protected:
     bool IsTopDialog() const;
     void HandlePointDownDialog(int32_t pointAction);
     void NotifySessionInfoChange();
+    void NotifySessionPropertyChange(WindowInfoKey windowInfoKey);
     void NotifyDisplayIdChanged(int32_t persistentId, uint64_t screenId);
 
     void PostTask(Task&& task, const std::string& name = "sessionTask", int64_t delayTime = 0);
@@ -819,6 +835,7 @@ protected:
     NotifySessionStateChangeFunc sessionStateChangeFunc_;
     NotifyBufferAvailableChangeFunc bufferAvailableChangeFunc_;
     NotifySessionInfoChangeNotifyManagerFunc sessionInfoChangeNotifyManagerFunc_;
+    NotifySessionPropertyChangeNotifyManagerFunc sessionPropertyChangeNotifyManagerFunc_;
     NotifyDisplayIdChangedNotifyManagerFunc displayIdChangedNotifyManagerFunc_;
     NotifySessionStateChangeNotifyManagerFunc sessionStateChangeNotifyManagerFunc_;
     NotifyRequestFocusStatusNotifyManagerFunc requestFocusStatusNotifyManagerFunc_;
@@ -857,6 +874,7 @@ protected:
     VisibilityChangedDetectFunc visibilityChangedDetectFunc_ GUARDED_BY(SCENE_GUARD);
     NofitySessionLabelAndIconUpdatedFunc updateSessionLabelAndIconFunc_;
     NotifySessionGetTargetOrientationConfigInfoFunc sessionGetTargetOrientationConfigInfoFunc_;
+    NotifyClearSubSessionFunc clearSubSessionFunc_;
 
     /*
      * Window Rotate Animation
@@ -889,6 +907,10 @@ protected:
         SizeChangeReason reason = SizeChangeReason::UNDEFINED) const { return false; }
     bool IsDragStart() const { return isDragStart_; }
     void SetDragStart(bool isDragStart);
+    std::vector<AppExecFwk::SupportWindowMode> ExtractSupportWindowModeFromMetaData(
+        const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo);
+    std::vector<AppExecFwk::SupportWindowMode> ParseWindowModeFromMetaData(
+        const std::string& supportModesInFreeMultiWindow);
     HasRequestedVsyncFunc hasRequestedVsyncFunc_;
     RequestNextVsyncWhenModeChangeFunc requestNextVsyncWhenModeChangeFunc_;
     WSError RequestNextVsyncWhenModeChange();
@@ -1081,6 +1103,7 @@ private:
     bool isDragStart_ = { false };
     std::atomic_bool isWindowModeDirty_ = false;
     std::atomic<int32_t> timesToWaitForVsync_ = 0;
+    SizeChangeReason globalDisplayRectSizeChangeReason_ = SizeChangeReason::END;
 
     /*
      * Screen Lock

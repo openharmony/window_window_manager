@@ -932,8 +932,47 @@ HWTEST_F(WindowSessionTest3, SetAcquireRotateAnimationConfigFunc, TestSize.Level
 HWTEST_F(WindowSessionTest3, SetIsPcAppInPad, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
-    bool isPcAppInPad = false;
-    auto result = session_->SetIsPcAppInPad(isPcAppInPad);
+    bool isPcAppInLargeScreenDevice = false;
+    auto result = session_->SetIsPcAppInPad(isPcAppInLargeScreenDevice);
+    EXPECT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: SetPcAppInpadCompatibleMode
+ * @tc.desc: SetPcAppInpadCompatibleMode Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, SetPcAppInpadCompatibleMode, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    bool enabled = false;
+    auto result = session_->SetPcAppInpadCompatibleMode(enabled);
+    EXPECT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: SetPcAppInpadSpecificSystemBarInvisible
+ * @tc.desc: SetPcAppInpadSpecificSystemBarInvisible Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, SetPcAppInpadSpecificSystemBarInvisible, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    bool isPcAppInpadSpecificSystemBarInvisible = false;
+    auto result = session_->SetPcAppInpadSpecificSystemBarInvisible(isPcAppInpadSpecificSystemBarInvisible);
+    EXPECT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: SetPcAppInpadOrientationLandscape
+ * @tc.desc: SetPcAppInpadOrientationLandscape Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, SetPcAppInpadOrientationLandscape, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    bool isPcAppInpadOrientationLandscape = false;
+    auto result = session_->SetPcAppInpadOrientationLandscape(isPcAppInpadOrientationLandscape);
     EXPECT_EQ(result, WSError::WS_OK);
 }
 
@@ -964,6 +1003,25 @@ HWTEST_F(WindowSessionTest3, NotifySessionInfoChange, TestSize.Level1)
     session_->SetSessionInfoChangeNotifyManagerListener(func);
     session_->NotifySessionInfoChange();
     ASSERT_EQ(resultValue, 1);
+}
+
+/**
+ * @tc.name: NotifySessionPropertyChange01
+ * @tc.desc: NotifySessionPropertyChange Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, NotifySessionPropertyChange01, TestSize.Level1)
+{
+    int resultValue = 0;
+    NotifySessionPropertyChangeNotifyManagerFunc func =
+        [&resultValue](int32_t persistentid, WindowInfoKey windowInfoKey) { resultValue = 1; };
+    session_->sessionPropertyChangeNotifyManagerFunc_ = nullptr;
+    session_->NotifySessionPropertyChange(WindowInfoKey::WINDOW_RECT);
+    EXPECT_EQ(resultValue, 0);
+
+    session_->SetSessionPropertyChangeNotifyManagerListener(func);
+    session_->NotifySessionPropertyChange(WindowInfoKey::WINDOW_RECT);
+    EXPECT_EQ(resultValue, 1);
 }
 
 /**

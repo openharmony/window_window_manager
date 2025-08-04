@@ -19,6 +19,10 @@
 
 #include "fold_screen_controller/super_fold_state_manager.h"
 #include "fold_screen_state_internel.h"
+#include "screen_session_manager/include/screen_session_manager.h"
+#include "display_manager_agent_default.h"
+#include "screen_scene_config.h"
+#define private public
 
 using namespace testing;
 using namespace testing::ext;
@@ -36,7 +40,10 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+    static ScreenSessionManager& ssm_;
 };
+
+ScreenSessionManager& SuperFoldStateManagerTest::ssm_ = ScreenSessionManager::GetInstance();
 
 void SuperFoldStateManagerTest::SetUpTestCase()
 {
@@ -413,6 +420,173 @@ HWTEST_F(SuperFoldStateManagerTest, GetCurrentStatus_ShouldReturnKeyboard_WhenHa
 
     EXPECT_EQ(curState, SuperFoldStatus::UNKNOWN);
 }
+
+/**
+* @tc.name  : GetFoldCreaseHeight
+* @tc.desc  : GetFoldCreaseHeight
+* @tc.type: FUNC
+*/
+HWTEST_F(SuperFoldStateManagerTest, GetFoldCreaseHeight, TestSize.Level1)
+{
+    SuperFoldStateManager superFoldStateManager = SuperFoldStateManager();
+    const uint32_t DEFAULT_FOLD_REGION_HEIGHT = 82;
+    superFoldStateManager.currentSuperFoldCreaseRegion_ = nullptr;
+    uint32_t result = superFoldStateManager.GetFoldCreaseHeight();
+    EXPECT_EQ(result, DEFAULT_FOLD_REGION_HEIGHT);
+    std::vector<DMRect> rect = {};
+    superFoldStateManager.currentSuperFoldCreaseRegion_ = sptr<FoldCreaseRegion>::MakeSptr(0, rect);
+    result = superFoldStateManager.GetFoldCreaseHeight();
+    EXPECT_EQ(result, DEFAULT_FOLD_REGION_HEIGHT);
+    rect.push_back({0, 0,
+        DEFAULT_FOLD_REGION_HEIGHT * 2, DEFAULT_FOLD_REGION_HEIGHT * 2
+    });
+    superFoldStateManager.currentSuperFoldCreaseRegion_ = sptr<FoldCreaseRegion>::MakeSptr(0, rect);
+    result = superFoldStateManager.GetFoldCreaseHeight();
+    EXPECT_EQ(result, DEFAULT_FOLD_REGION_HEIGHT * 2);
+}
+ 
+/**
+* @tc.name  : RefreshMirrorRegionInner_NullptrScreenSession
+* @tc.desc  : Test When null, return expect
+* @tc.type: FUNC
+*/
+HWTEST_F(SuperFoldStateManagerTest, RefreshMirrorRegionInner_NullptrScreenSession, TestSize.Level1)
+{
+    ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
+    sptr<ScreenSession> mainScreenSession = nullptr;
+    sptr<ScreenSession> secondarySession = nullptr;
+    SuperFoldStateManager superFoldStateManager;
+    ASSERT_EQ(superFoldStateManager.RefreshMirrorRegionInner(mainScreenSession, secondarySession),
+        DMError::DM_ERROR_NULLPTR);
+    mainScreenSession = sptr<ScreenSession>::MakeSptr();
+    ASSERT_EQ(superFoldStateManager.RefreshMirrorRegionInner(mainScreenSession, secondarySession),
+        DMError::DM_ERROR_NULLPTR);
+}
+ 
+/**
+* @tc.name  : RefreshMirrorRegionInner_NormalCase
+* @tc.desc  : Test When NormalCase, return DMError::OK
+* @tc.type: FUNC
+*/
+HWTEST_F(SuperFoldStateManagerTest, RefreshMirrorRegionInner_NormalCase, TestSize.Level1)
+{
+    ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
+    SuperFoldStateManager superFoldStateManager;
+    superFoldStateManager.SetCurrentStatus(SuperFoldStatus::UNKNOWN);
+    sptr<ScreenSession> mainScreenSession = ssm_.GetOrCreateScreenSession(0);
+    ScreenProperty mainScreenProperty;
+    mainScreenProperty.bounds_.rect_ = { 0, 0, 100, 100 };
+    mainScreenSession->SetScreenProperty(mainScreenProperty);
+ 
+    sptr<ScreenSession> secondarySession = ssm_.GetOrCreateScreenSession(1);
+    ScreenProperty secondaryScreenProperty;
+    secondaryScreenProperty.bounds_.rect_ = { 0, 0, 100, 100 };
+    secondarySession->SetScreenProperty(secondaryScreenProperty);
+    EXPECT_EQ(superFoldStateManager.RefreshMirrorRegionInner(mainScreenSession, secondarySession), DMError::DM_OK);
+}
+ 
+/**
+ * @tc.name  : RefreshExternalRegion_ShouldReturnOk_WhenNoExtendScreenConnected
+ * @tc.desc  : When the extended screen is not connected, the function should return DM_OK and ignore the refresh.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SuperFoldStateManagerTest, RefreshExternalRegion_ShouldReturnOk_WhenNoExtendScreenConnected, TestSize.Level1)
+{
+    ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
+    ssm_.SetIsExtendScreenConnected(false);
+    SuperFoldStateManager superFoldStateManager;
+    DMError result = superFoldStateManager.RefreshExternalRegion();
+    ssm_.SetIsExtendScreenConnected(true);
+ 
+    sptr<ScreenSession> mainScreenSession = ssm_.GetOrCreateScreenSession(0);
+    mainScreenSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    ScreenProperty mainScreenProperty;
+    mainScreenProperty.bounds_.rect_ = { 0, 0, 100, 100 };
+    mainScreenSession->SetScreenProperty(mainScreenProperty);
+    result = superFoldStateManager.RefreshExternalRegion();
+ 
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    auto screenId = ScreenSessionManager::GetInstance().CreateVirtualScreen(
+        virtualOption, displayManagerAgent->AsObject());
+    auto secondarySession = ScreenSessionManager::GetInstance().GetScreenSession(screenId);
+    
+    secondarySession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
+    ScreenProperty secondaryScreenProperty;
+    secondaryScreenProperty.bounds_.rect_ = { 0, 0, 100, 100 };
+    secondarySession->SetScreenProperty(secondaryScreenProperty);
+    result = superFoldStateManager.RefreshExternalRegion();
+    EXPECT_EQ(result, DMError::DM_OK);
+ 
+    sptr<IDisplayManagerAgent> displayManagerAgent1 = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption1;
+    virtualOption1.name_ = "createVirtualOption";
+    auto screenId1 = ScreenSessionManager::GetInstance().CreateVirtualScreen(
+        virtualOption1, displayManagerAgent1->AsObject());
+    auto thirdSession = ScreenSessionManager::GetInstance().GetScreenSession(screenId1);
+    thirdSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
+    ScreenProperty thirdScreenProperty;
+    thirdScreenProperty.bounds_.rect_ = { 0, 0, 100, 100 };
+    thirdSession->SetScreenProperty(thirdScreenProperty);
+    result = superFoldStateManager.RefreshExternalRegion();
+    EXPECT_EQ(result, DMError::DM_OK);
+ 
+    ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId);
+    ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId1);
+}
+
+/**
+ * @tc.name  : ForceChangeMirrorMode_ShouldReturnNullptrError_WhenMainScreenSessionIsNull
+ * @tc.number: ForceChangeMirrorModeTest_001
+ * @tc.desc  : When `mainScreenSession` is `nullptr`, the function should return `DM_ERROR_NULLPTR`
+ */
+HWTEST_F(SuperFoldStateManagerTest, ForceChangeMirrorMode_ShouldReturnNullptrError_WhenMainScreenSessionIsNull,
+    TestSize.Level0)
+{
+    SuperFoldStateManager manager;
+    sptr<ScreenSession> mainScreenSession = nullptr;
+    sptr<ScreenSession> secondarySession = sptr<ScreenSession>::MakeSptr();
+    DMError result = manager.ForceChangeMirrorMode(mainScreenSession, secondarySession);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, result);
+}
+
+/**
+ * @tc.name  : ForceChangeMirrorMode_ShouldReturnNullptrError_WhenSecondarySessionIsNull
+ * @tc.number: ForceChangeMirrorModeTest_002
+ * @tc.desc  : When `secondarySession` is `nullptr`, the function should return `DM_ERROR_NULLPTR`.
+ */
+HWTEST_F(SuperFoldStateManagerTest, ForceChangeMirrorMode_ShouldReturnNullptrError_WhenSecondarySessionIsNull,
+    TestSize.Level0)
+{
+    SuperFoldStateManager manager;
+    sptr<ScreenSession> mainScreenSession = sptr<ScreenSession>::MakeSptr();
+    sptr<ScreenSession> secondarySession = nullptr;
+    DMError result = manager.ForceChangeMirrorMode(mainScreenSession, secondarySession);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, result);
+}
+
+/**
+ * @tc.name  : ForceChangeMirrorMode_ShouldNotSetMultiScreenMode_WhenConditionsNotMet
+ * @tc.number: ForceChangeMirrorModeTest_003
+ * @tc.desc  : When the conditions are not met, the function should not call SetMultiScreenMode and return DM_OK.
+ */
+HWTEST_F(
+    SuperFoldStateManagerTest, ForceChangeMirrorMode_ShouldNotSetMultiScreenMode_WhenConditionsNotMet, TestSize.Level0)
+{
+    sptr<ScreenSession> mainScreenSession = sptr<ScreenSession>::MakeSptr();
+    sptr<ScreenSession> secondarySession = sptr<ScreenSession>::MakeSptr();
+
+    SuperFoldStateManager manager;
+    manager.SetCurrentStatus(SuperFoldStatus::FOLDED);
+    DMError result = manager.ForceChangeMirrorMode(mainScreenSession, secondarySession);
+    ASSERT_EQ(DMError::DM_OK, result);
+
+    manager.SetCurrentStatus(SuperFoldStatus::EXPANDED);
+    result = manager.ForceChangeMirrorMode(mainScreenSession, secondarySession);
+    ASSERT_EQ(DMError::DM_OK, result);
+}
+
 }
 }
 }

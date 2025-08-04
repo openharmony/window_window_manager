@@ -90,7 +90,7 @@ void WindowManagerAgent::NotifyWindowPidVisibilityChanged(const sptr<WindowPidVi
 }
 
 void WindowManagerAgent::NotifyWindowPropertyChange(uint32_t propertyDirtyFlags,
-    const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList)
+    const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList)
 {
     SingletonContainer::Get<WindowManager>().NotifyWindowPropertyChange(propertyDirtyFlags, windowInfoList);
 }

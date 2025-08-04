@@ -626,6 +626,32 @@ HWTEST_F(ScreenSceneConfigTest, CalcCutoutBoundaryRect04, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetFoldDisplayMode
+ * @tc.desc: GetFoldDisplayMode func
+ * @tc.type: FUNC
+*/
+HWTEST_F(ScreenSceneConfigTest, GetFoldDisplayMode, TestSize.Level1)
+{
+    DisplayPhysicalResolution physicalSize1{ FoldDisplayMode::MAIN, 100, 200 };
+    ScreenSceneConfig::displayPhysicalResolution_.emplace_back(physicalSize1);
+
+    DisplayPhysicalResolution physicalSize2{ FoldDisplayMode::FULL, 300, 600 };
+    ScreenSceneConfig::displayPhysicalResolution_.emplace_back(physicalSize2);
+
+    FoldDisplayMode result = ScreenSceneConfig::GetFoldDisplayMode(200, 100);
+    EXPECT_EQ(FoldDisplayMode::MAIN, result);
+    result = ScreenSceneConfig::GetFoldDisplayMode(100, 200);
+    EXPECT_EQ(FoldDisplayMode::MAIN, result);
+
+    result = ScreenSceneConfig::GetFoldDisplayMode(300, 600);
+    EXPECT_EQ(FoldDisplayMode::FULL, result);
+    result = ScreenSceneConfig::GetFoldDisplayMode(600, 300);
+    EXPECT_EQ(FoldDisplayMode::FULL, result);
+
+    ScreenSceneConfig::displayPhysicalResolution_.clear();
+}
+
+/**
  * @tc.name: SetCutoutSvgPath
  * @tc.desc: SetCutoutSvgPath func
  * @tc.type: FUNC
@@ -633,6 +659,7 @@ HWTEST_F(ScreenSceneConfigTest, CalcCutoutBoundaryRect04, TestSize.Level1)
 HWTEST_F(ScreenSceneConfigTest, SetCutoutSvgPath, TestSize.Level1)
 {
     uint64_t displayId = 0;
+    ScreenSceneConfig::SetCutoutSvgPath(displayId, "");
     ScreenSceneConfig::SetCutoutSvgPath(displayId, "oo");
     auto result_ = ScreenSceneConfig::GetCutoutBoundaryRect(displayId);
     ASSERT_NE(0, result_.size());
@@ -645,6 +672,7 @@ HWTEST_F(ScreenSceneConfigTest, SetCutoutSvgPath, TestSize.Level1)
  */
 HWTEST_F(ScreenSceneConfigTest, SetSubCutoutSvgPath, TestSize.Level1)
 {
+    ScreenSceneConfig::SetSubCutoutSvgPath("");
     ScreenSceneConfig::SetSubCutoutSvgPath("oo");
     auto result = ScreenSceneConfig::GetSubCutoutBoundaryRect();
     ASSERT_NE(0, result.size());

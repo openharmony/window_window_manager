@@ -25,27 +25,32 @@ namespace Rosen {
 class FutureCallback : public RefBase {
 public:
     WSError OnUpdateSessionRect(
-        const Rect& rect, WindowSizeChangeReason reason, int32_t persistenId);
-    Rect GetResizeAsyncResult(long timeOut); // unit: ms
-    Rect GetMoveToAsyncResult(long timeOut); // unit: ms
+        const Rect& rect, WindowSizeChangeReason reason, int32_t persistentId);
+    WSError OnUpdateGlobalDisplayRect(
+        const Rect& rect, WindowSizeChangeReason reason, int32_t persistentId);
+    Rect GetResizeAsyncResult(long timeoutMs);
+    Rect GetMoveToAsyncResult(long timeoutMs);
+    Rect GetMoveWindowToGlobalDisplayAsyncResult(long timeoutMs);
     void ResetResizeLock();
     void ResetMoveToLock();
-    int32_t GetUpdateRectResult(long timeOut);
-    void OnFirstValidRectUpdate(int32_t persistenId);
+    void ResetMoveWindowToGlobalDisplayLock();
+    int32_t GetUpdateRectResult(long timeoutMs);
+    void OnFirstValidRectUpdate(int32_t persistentId);
 
     // oriention
-    OrientationInfo GetTargetOrientationResult(long timeOut); // unit: ms
+    OrientationInfo GetTargetOrientationResult(long timeoutMs);
     void ResetGetTargetRotationLock();
     WSError OnUpdateTargetOrientationInfo(OrientationInfo& info);
 
     // rotation change
-    RotationChangeResult GetRotationResult(long timeout);
+    RotationChangeResult GetRotationResult(long timeoutMs);
     void ResetRotationResultLock();
     void OnUpdateRotationResult(RotationChangeResult rotationChangeResult);
 
 private:
     RunnableFuture<Rect> resizeFuture_{};
     RunnableFuture<Rect> moveToFuture_{};
+    RunnableFuture<Rect> moveWindowToGlobalDisplayFuture_{};
     RunnableFuture<OrientationInfo> getTargetRotationFuture_{};
     RunnableFuture<RotationChangeResult> getRotationResultFuture_{};
     RunnableFuture<int32_t> updateRectFuture_{};

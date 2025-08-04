@@ -47,6 +47,7 @@ public:
     void ClearSnapshot(SnapshotStatus key);
     bool IsSnapshotExisted(SnapshotStatus key = defaultStatus);
     std::string GetSnapshotFilePath(SnapshotStatus& key, bool useKey = false, bool freeMultiWindow = false);
+    bool FindClosestFormSnapshot(SnapshotStatus& key);
     std::pair<uint32_t, uint32_t> GetSnapshotSize(SnapshotStatus key = defaultStatus,
         bool freeMultiWindow = false) const;
     void SetSnapshotSize(SnapshotStatus key, bool freeMultiWindow, std::pair<uint32_t, uint32_t> size);
@@ -77,7 +78,7 @@ private:
     std::pair<uint32_t, uint32_t> snapshotSize_[SCREEN_COUNT][ORIENTATION_COUNT];
     std::pair<uint32_t, uint32_t> snapshotFreeMultiWindowSize_;
     bool hasSnapshot_[SCREEN_COUNT][ORIENTATION_COUNT] = {};
-    bool hasSnapshotFreeMultiWindow_;
+    bool hasSnapshotFreeMultiWindow_ = false;
 
     static std::string updatedIconDirectory_;
     std::string updatedIconPath_;
@@ -89,6 +90,8 @@ private:
 
     static std::shared_ptr<WSFFRTHelper> snapshotFfrtHelper_;
     mutable std::mutex savingSnapshotMutex_;
+    mutable std::mutex hasSnapshotMutex_;
+    mutable std::mutex snapshotSizeMutex_;
 };
 } // namespace OHOS::Rosen
 

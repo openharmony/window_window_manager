@@ -69,6 +69,14 @@ HWTEST_F(WindowInspetorTest, ProcessArkUIInspectorMessage, TestSize.Level1)
     std::string message3 = "{method:WMS.windowList,params:{interface:getCurrentProcessWindowList}}";
     ret = WindowInspector::GetInstance().ProcessArkUIInspectorMessage(message3, jsonStr);
     EXPECT_EQ(false, ret);
+
+    std::string message4 = R"({"method":30,"params":{"interface":"getCurrentProcessWindowList"}})";
+    ret = WindowInspector::GetInstance().ProcessArkUIInspectorMessage(message4, jsonStr);
+    EXPECT_EQ(false, ret);
+
+    std::string message5 = R"({"method":"WMS.windowList","params":{"command":30}})";
+    ret = WindowInspector::GetInstance().ProcessArkUIInspectorMessage(message5, jsonStr);
+    EXPECT_EQ(false, ret);
 }
 } // namespace
 } // namespace Rosen

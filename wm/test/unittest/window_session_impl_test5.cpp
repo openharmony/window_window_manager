@@ -42,6 +42,10 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+
+private:
+    static constexpr int32_t PERSISTENT_ID_ONE = 1;
+    static constexpr int32_t PERSISTENT_ID_TWO = 2;
 };
 
 void WindowSessionImplTest5::SetUpTestCase() {}
@@ -692,7 +696,67 @@ HWTEST_F(WindowSessionImplTest5, isNeededForciblySetOrientation, Function | Smal
     EXPECT_EQ(window->isNeededForciblySetOrientation(Orientation::HORIZONTAL), true);
     EXPECT_EQ(window->isNeededForciblySetOrientation(Orientation::SENSOR), true);
     EXPECT_EQ(window->isNeededForciblySetOrientation(Orientation::FOLLOW_DESKTOP), true);
+    EXPECT_EQ(window->isNeededForciblySetOrientation(Orientation::INVALID), false);
+    window->SetRequestedOrientation(Orientation::USER_ROTATION_PORTRAIT, false);
+    EXPECT_EQ(window->isNeededForciblySetOrientation(Orientation::INVALID), true);
+    window->SetRequestedOrientation(Orientation::USER_ROTATION_PORTRAIT);
+    EXPECT_EQ(window->isNeededForciblySetOrientation(Orientation::INVALID), false);
+    window->SetRequestedOrientation(Orientation::HORIZONTAL, false);
+    EXPECT_EQ(window->isNeededForciblySetOrientation(Orientation::INVALID), true);
     GTEST_LOG_(INFO) << "WindowSessionImplTest5: isNeededForciblySetOrientation end";
+}
+
+/**
+ * @tc.name: ConvertInvalidOrientation()
+ * @tc.desc: ConvertInvalidOrientation()
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, ConvertInvalidOrientation, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest5: ConvertInvalidOrientation start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetDisplayId(0);
+    option->SetWindowName("ConvertInvalidOrientation");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+    window->state_ = WindowState::STATE_CREATED;
+
+    Orientation ori = Orientation::USER_ROTATION_PORTRAIT;
+    window->SetRequestedOrientation(ori);
+    window->SetRequestedOrientation(Orientation::INVALID, false);
+    EXPECT_EQ(window->ConvertInvalidOrientation(), Orientation::USER_PAGE_ROTATION_PORTRAIT);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest5: ConvertInvalidOrientation end";
+}
+
+/**
+ * @tc.name: IsUserPageOrientation()
+ * @tc.desc: IsUserPageOrientation()
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, IsUserPageOrientation, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest5: IsUserPageOrientation start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetDisplayId(0);
+    option->SetWindowName("IsUserPageOrientation");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+    window->state_ = WindowState::STATE_CREATED;
+
+    Orientation ori = Orientation::USER_ROTATION_PORTRAIT;
+    window->IsUserPageOrientation(ori);
+    EXPECT_EQ(window->IsUserPageOrientation(Orientation::USER_ROTATION_PORTRAIT), false);
+    EXPECT_EQ(window->IsUserPageOrientation(Orientation::USER_PAGE_ROTATION_PORTRAIT), true);
+    EXPECT_EQ(window->IsUserPageOrientation(Orientation::USER_PAGE_ROTATION_LANDSCAPE), true);
+    EXPECT_EQ(window->IsUserPageOrientation(Orientation::USER_PAGE_ROTATION_PORTRAIT_INVERTED), true);
+    EXPECT_EQ(window->IsUserPageOrientation(Orientation::USER_PAGE_ROTATION_LANDSCAPE_INVERTED), true);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest5: IsUserPageOrientation end";
 }
 
 /**
@@ -752,8 +816,8 @@ HWTEST_F(WindowSessionImplTest5, GetScaleWindow, Function | SmallTest | Level2)
     sptr<WindowOption> option2 = sptr<WindowOption>::MakeSptr();
     option2->SetWindowName("GetScaleWindow_extensionWindow");
     sptr<WindowSessionImpl> extensionWindow = sptr<WindowSessionImpl>::MakeSptr(option2);
-    WindowSessionImpl::windowExtensionSessionSet_.clear();
-    WindowSessionImpl::windowExtensionSessionSet_.insert(extensionWindow);
+    WindowSessionImpl::GetWindowExtensionSessionSet().clear();
+    WindowSessionImpl::GetWindowExtensionSessionSet().insert(extensionWindow);
     extensionWindow->property_->SetPersistentId(2);
     extensionWindow->isUIExtensionAbilityProcess_ = true;
     int32_t testId = 3;
@@ -774,7 +838,7 @@ HWTEST_F(WindowSessionImplTest5, GetScaleWindow, Function | SmallTest | Level2)
     res = mainWindow->GetScaleWindow(testId);
     EXPECT_EQ(res, nullptr);
     WindowSessionImpl::windowSessionMap_.clear();
-    WindowSessionImpl::windowExtensionSessionSet_.clear();
+    WindowSessionImpl::GetWindowExtensionSessionSet().clear();
 }
 
 /**
@@ -790,20 +854,19 @@ HWTEST_F(WindowSessionImplTest5, GetWindowScaleCoordinate01, Function | SmallTes
     int32_t id = 1;
     mainWindow->property_->SetPersistentId(id);
     mainWindow->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    int32_t x = 100;
-    int32_t y = 100;
-    auto res = mainWindow->GetWindowScaleCoordinate(x, y, id);
+    CursorInfo cursorInfo;
+    auto res = mainWindow->GetWindowScaleCoordinate(id, cursorInfo);
     EXPECT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
     WindowSessionImpl::windowSessionMap_.clear();
     WindowSessionImpl::windowSessionMap_.insert(std::make_pair(mainWindow->GetWindowName(),
         std::pair<uint64_t, sptr<WindowSessionImpl>>(mainWindow->GetWindowId(), mainWindow)));
-    res = mainWindow->GetWindowScaleCoordinate(x, y, id);
+    res = mainWindow->GetWindowScaleCoordinate(id, cursorInfo);
     EXPECT_EQ(res, WMError::WM_OK);
 
     sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
     compatibleModeProperty->SetIsAdaptToSimulationScale(true);
     mainWindow->property_->SetCompatibleModeProperty(compatibleModeProperty);
-    res = mainWindow->GetWindowScaleCoordinate(x, y, id);
+    res = mainWindow->GetWindowScaleCoordinate(id, cursorInfo);
     EXPECT_EQ(res, WMError::WM_OK);
 
     sptr<WindowOption> subWindowOption = sptr<WindowOption>::MakeSptr();
@@ -814,18 +877,18 @@ HWTEST_F(WindowSessionImplTest5, GetWindowScaleCoordinate01, Function | SmallTes
     subWindow->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     WindowSessionImpl::windowSessionMap_.insert(std::make_pair(subWindow->GetWindowName(),
         std::pair<uint64_t, sptr<WindowSessionImpl>>(subWindow->GetWindowId(), subWindow)));
-    res = subWindow->GetWindowScaleCoordinate(x, y, subWindow->GetPersistentId());
+    res = subWindow->GetWindowScaleCoordinate(subWindow->GetPersistentId(), cursorInfo);
     EXPECT_EQ(res, WMError::WM_OK);
     mainWindow->context_ = std::make_shared<AbilityRuntime::AbilityContextImpl>();
     subWindow->context_ = mainWindow->context_;
     subWindow->property_->SetIsUIExtensionAbilityProcess(true);
-    res = mainWindow->GetWindowScaleCoordinate(x, y, id);
+    res = mainWindow->GetWindowScaleCoordinate(id, cursorInfo);
     EXPECT_EQ(res, WMError::WM_OK);
     subWindow->property_->SetIsUIExtensionAbilityProcess(false);
-    res = mainWindow->GetWindowScaleCoordinate(x, y, id);
+    res = mainWindow->GetWindowScaleCoordinate(id, cursorInfo);
     EXPECT_EQ(res, WMError::WM_OK);
     mainWindow->compatScaleX_ = 0.5;
-    res = mainWindow->GetWindowScaleCoordinate(x, y, id);
+    res = mainWindow->GetWindowScaleCoordinate(id, cursorInfo);
     EXPECT_EQ(res, WMError::WM_OK);
     WindowSessionImpl::windowSessionMap_.clear();
 }
@@ -840,29 +903,28 @@ HWTEST_F(WindowSessionImplTest5, GetWindowScaleCoordinate02, Function | SmallTes
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetWindowScaleCoordinate02_extensionWindow");
     sptr<WindowSessionImpl> extensionWindow = sptr<WindowSessionImpl>::MakeSptr(option);
-    WindowSessionImpl::windowExtensionSessionSet_.clear();
-    WindowSessionImpl::windowExtensionSessionSet_.insert(extensionWindow);
+    WindowSessionImpl::GetWindowExtensionSessionSet().clear();
+    WindowSessionImpl::GetWindowExtensionSessionSet().insert(extensionWindow);
     extensionWindow->property_->SetPersistentId(2);
     extensionWindow->isUIExtensionAbilityProcess_ = true;
     extensionWindow->property_->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
     int32_t id = 1;
-    int32_t x = 100;
-    int32_t y = 100;
-    auto res = extensionWindow->GetWindowScaleCoordinate(x, y, id);
+    CursorInfo cursorInfo;
+    auto res = extensionWindow->GetWindowScaleCoordinate(id, cursorInfo);
     EXPECT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
     extensionWindow->property_->SetParentPersistentId(id);
     extensionWindow->property_->SetParentId(id);
-    res = extensionWindow->GetWindowScaleCoordinate(x, y, id);
+    res = extensionWindow->GetWindowScaleCoordinate(id, cursorInfo);
     EXPECT_EQ(res, WMError::WM_OK);
     sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
     compatibleModeProperty->SetIsAdaptToSimulationScale(true);
     extensionWindow->property_->SetCompatibleModeProperty(compatibleModeProperty);
-    res = extensionWindow->GetWindowScaleCoordinate(x, y, id);
+    res = extensionWindow->GetWindowScaleCoordinate(id, cursorInfo);
     EXPECT_EQ(res, WMError::WM_OK);
     extensionWindow->compatScaleX_ = 0.5;
-    res = extensionWindow->GetWindowScaleCoordinate(x, y, id);
+    res = extensionWindow->GetWindowScaleCoordinate(id, cursorInfo);
     EXPECT_EQ(res, WMError::WM_OK);
-    WindowSessionImpl::windowExtensionSessionSet_.clear();
+    WindowSessionImpl::GetWindowExtensionSessionSet().clear();
 }
 
 /**
@@ -1041,7 +1103,7 @@ HWTEST_F(WindowSessionImplTest5, GetPropertyByContext, Function | SmallTest | Le
     mainWindow->property_->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
     property = window->GetPropertyByContext();
     EXPECT_EQ(property->GetPersistentId(), persistentId);
-    window->windowExtensionSessionSet_.insert(mainWindow);
+    window->GetWindowExtensionSessionSet().insert(mainWindow);
     property = window->GetPropertyByContext();
     EXPECT_EQ(property->GetPersistentId(), mainPersistentId);
 }
@@ -1587,13 +1649,24 @@ HWTEST_F(WindowSessionImplTest5, TestClientToGlobalDisplay, TestSize.Level1)
 
     Rect globalRect { 100, 200, 300, 400 };
     window->property_->SetGlobalDisplayRect(globalRect);
+    Transform transform;
+    transform.scaleX_ = 1.0f;
+    transform.scaleY_ = 1.0f;
+    window->SetCurrentTransform(transform);
 
-    Position clientPos { 10, 20 };
-    Position expectedGlobalPos { 110, 220 };
+    Position inPosition { 10, 20 };
+    Position outPosition;
+    Position expectedPosition { 110, 220 };
 
-    auto result = window->ClientToGlobalDisplay(clientPos);
-    EXPECT_NE(result, clientPos);
-    EXPECT_EQ(result, expectedGlobalPos);
+    auto ret = window->ClientToGlobalDisplay(inPosition, outPosition);
+    EXPECT_EQ(ret, WMError::WM_OK);
+    EXPECT_NE(outPosition, inPosition);
+    EXPECT_EQ(outPosition, expectedPosition);
+
+    transform.scaleX_ = 0.5f;
+    window->SetCurrentTransform(transform);
+    ret = window->ClientToGlobalDisplay(inPosition, outPosition);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS);
 }
 
 /**
@@ -1608,13 +1681,24 @@ HWTEST_F(WindowSessionImplTest5, TestGlobalDisplayToClient, TestSize.Level1)
 
     Rect globalRect { 100, 200, 300, 400 };
     window->property_->SetGlobalDisplayRect(globalRect);
+    Transform transform;
+    transform.scaleX_ = 1.0f;
+    transform.scaleY_ = 1.0f;
+    window->SetCurrentTransform(transform);
 
-    Position globalPos { 110, 220 };
-    Position expectedClientPos { 10, 20 };
+    Position inPosition { 110, 220 };
+    Position outPosition;
+    Position expectedPosition { 10, 20 };
 
-    auto result = window->GlobalDisplayToClient(globalPos);
-    EXPECT_NE(result, globalPos);
-    EXPECT_EQ(result, expectedClientPos);
+    auto ret = window->GlobalDisplayToClient(inPosition, outPosition);
+    EXPECT_EQ(ret, WMError::WM_OK);
+    EXPECT_NE(outPosition, inPosition);
+    EXPECT_EQ(outPosition, expectedPosition);
+
+    transform.scaleX_ = 0.5f;
+    window->SetCurrentTransform(transform);
+    ret = window->GlobalDisplayToClient(inPosition, outPosition);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS);
 }
 
 /**
@@ -1628,17 +1712,47 @@ HWTEST_F(WindowSessionImplTest5, TestUpdateGlobalDisplayRectFromServer, TestSize
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->property_->SetPersistentId(1001);
 
-    WSRect oldRect { 100, 200, 300, 400 };
-    window->property_->SetGlobalDisplayRect({ 100, 200, 300, 400 });
-    auto ret = window->UpdateGlobalDisplayRectFromServer(oldRect, SizeChangeReason::UNDEFINED);
+    WSRect rect = { 10, 20, 200, 100 };
+    window->property_->SetGlobalDisplayRect({ 10, 20, 200, 100 });
+    window->globalDisplayRectSizeChangeReason_ = SizeChangeReason::RESIZE;
+
+    // Case 1: No change, should do nothing
+    Rect expectedRect { 10, 20, 200, 100 };
+    auto ret = window->UpdateGlobalDisplayRectFromServer(rect, SizeChangeReason::RESIZE);
     EXPECT_EQ(ret, WSError::WS_DO_NOTHING);
-
-    WSRect newRect { 150, 250, 300, 400 };
-    ret = window->UpdateGlobalDisplayRectFromServer(newRect, SizeChangeReason::UNDEFINED);
-    EXPECT_EQ(ret, WSError::WS_OK);
-
-    Rect expectedRect { 150, 250, 300, 400 };
     EXPECT_EQ(window->GetGlobalDisplayRect(), expectedRect);
+    EXPECT_EQ(window->globalDisplayRectSizeChangeReason_, SizeChangeReason::RESIZE);
+
+    // Case 2: Change reason, should update
+    ret = window->UpdateGlobalDisplayRectFromServer(rect, SizeChangeReason::MOVE);
+    EXPECT_EQ(ret, WSError::WS_OK);
+    EXPECT_EQ(window->GetGlobalDisplayRect(), expectedRect);
+    EXPECT_EQ(window->globalDisplayRectSizeChangeReason_, SizeChangeReason::MOVE);
+
+    // Case 3: Change rect, should update
+    WSRect updated = { 30, 40, 200, 100 };
+    expectedRect = { 30, 40, 200, 100 };
+    ret = window->UpdateGlobalDisplayRectFromServer(updated, SizeChangeReason::MOVE);
+    EXPECT_EQ(ret, WSError::WS_OK);
+    EXPECT_EQ(window->GetGlobalDisplayRect(), expectedRect);
+    EXPECT_EQ(window->globalDisplayRectSizeChangeReason_, SizeChangeReason::MOVE);
+
+    // Case 4: Change reason and rect, should update
+    updated = { 0, 0, 200, 100 };
+    expectedRect = { 0, 0, 200, 100 };
+    ret = window->UpdateGlobalDisplayRectFromServer(updated, SizeChangeReason::DRAG);
+    EXPECT_EQ(ret, WSError::WS_OK);
+    EXPECT_EQ(window->GetGlobalDisplayRect(), expectedRect);
+    EXPECT_EQ(window->globalDisplayRectSizeChangeReason_, SizeChangeReason::DRAG);
+
+    // Case 5: Drag move, should update but keep reason as DRAG_MOVE
+    window->globalDisplayRectSizeChangeReason_ = SizeChangeReason::DRAG_MOVE;
+    updated = { 20, 20, 200, 100 };
+    expectedRect = { 20, 20, 200, 100 };
+    ret = window->UpdateGlobalDisplayRectFromServer(updated, SizeChangeReason::DRAG_END);
+    EXPECT_EQ(ret, WSError::WS_OK);
+    EXPECT_EQ(window->GetGlobalDisplayRect(), expectedRect);
+    EXPECT_EQ(window->globalDisplayRectSizeChangeReason_, SizeChangeReason::DRAG_MOVE);
 }
 
 /**
@@ -1766,6 +1880,80 @@ HWTEST_F(WindowSessionImplTest5, OnPointDown, TestSize.Level1)
 
     EXPECT_CALL(*(session), ProcessPointDownSession(_, _)).Times(1).WillOnce(Return(WSError::WS_OK));
     EXPECT_TRUE(window->OnPointDown(0, 0, 0));
+}
+
+/**
+ * @tc.name: UpdateEnableDragWhenSwitchMultiWindow
+ * @tc.desc: UpdateEnableDragWhenSwitchMultiWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, UpdateEnableDragWhenSwitchMultiWindow, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateEnableDragWhenSwitchMultiWindow");
+    option->SetWindowType(WindowType::WINDOW_TYPE_MAGNIFICATION);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->hasSetEnableDrag_.store(true);
+    window->UpdateEnableDragWhenSwitchMultiWindow(false);
+    EXPECT_EQ(true, window->property_->dragEnabled_);
+
+    window->hasSetEnableDrag_.store(false);
+    window->UpdateEnableDragWhenSwitchMultiWindow(false);
+    EXPECT_EQ(false, window->property_->dragEnabled_);
+
+    window->property_->type_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+    sptr<CompatibleModeProperty> property = sptr<CompatibleModeProperty>::MakeSptr();
+    property->disableDragResize_ = true;
+    window->property_->compatibleModeProperty_ = property;
+    window->UpdateEnableDragWhenSwitchMultiWindow(true);
+    EXPECT_EQ(false, window->property_->dragEnabled_);
+
+    property->disableDragResize_ = false;
+    window->UpdateEnableDragWhenSwitchMultiWindow(true);
+    EXPECT_EQ(true, window->property_->dragEnabled_);
+}
+
+/**
+ * @tc.name: SwitchSubWindow
+ * @tc.desc: SwitchSubWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, SwitchSubWindow, Function | SmallTest | Level1)
+{
+    sptr<WindowOption> subOption = sptr<WindowOption>::MakeSptr();
+    subOption->SetWindowName("SwitchSubWindow");
+    subOption->SetSubWindowDecorEnable(true);
+    subOption->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    sptr<WindowSessionImpl> subWindow = sptr<WindowSessionImpl>::MakeSptr(subOption);
+    ASSERT_NE(subWindow, nullptr);
+    ASSERT_NE(subWindow->property_, nullptr);
+    subWindow->property_->SetPersistentId(PERSISTENT_ID_TWO);
+    subWindow->property_->SetDecorEnable(true);
+    subWindow->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    subWindow->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    subWindow->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    subWindow->windowSystemConfig_.isSystemDecorEnable_ = true;
+    subWindow->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    // freemultiwindowmode start
+    EXPECT_EQ(subWindow->IsDecorEnable(), false);
+    // cover emprty map
+    subWindow->SwitchSubWindow(false, PERSISTENT_ID_ONE);
+
+    std::vector<sptr<WindowSessionImpl>> vec;
+    WindowSessionImpl::subWindowSessionMap_.insert(std::pair<int32_t,
+        std::vector<sptr<WindowSessionImpl>>>(PERSISTENT_ID_ONE, vec));
+    WindowSessionImpl::subWindowSessionMap_[PERSISTENT_ID_ONE].push_back(subWindow);
+    subWindow->SwitchSubWindow(true, PERSISTENT_ID_ONE);
+    WindowMode mode = subWindow->property_->GetWindowMode();
+    bool decorVisible = mode == WindowMode::WINDOW_MODE_FLOATING ||
+        mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY ||
+        (mode == WindowMode::WINDOW_MODE_FULLSCREEN && !subWindow->property_->IsLayoutFullScreen());
+    if (subWindow->windowSystemConfig_.freeMultiWindowSupport_) {
+        auto isSubWindow = WindowHelper::IsSubWindow(subWindow->GetType());
+        decorVisible = decorVisible && (subWindow->windowSystemConfig_.freeMultiWindowEnable_ ||
+            (subWindow->property_->GetIsPcAppInPad() && isSubWindow));
+    }
+    EXPECT_EQ(decorVisible, true);
 }
 } // namespace
 } // namespace Rosen

@@ -21,6 +21,8 @@
 
 namespace OHOS {
 namespace Rosen {
+using NotifyWindowRecoverStateChangeFunc = std::function<void(bool isSpecificSession,
+    const WindowRecoverState& state)>;
 
 class WindowSceneSessionImpl : public WindowSessionImpl {
 public:
@@ -64,6 +66,7 @@ public:
     WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) override;
     WMError SetFrameRectForPartialZoomIn(const Rect& frameRect) override;
     WMError UpdateWindowModeForUITest(int32_t updateMode) override;
+    WSError NotifyAppHookWindowInfoUpdated() override;
 
     /*
      * Window Hierarchy
@@ -218,6 +221,7 @@ public:
      */
     WSError SwitchFreeMultiWindow(bool enable) override;
     virtual bool GetFreeMultiWindowModeEnabledState() override;
+    void UpdateImmersiveBySwitchMode(bool freeMultiWindowEnable);
 
     void NotifyKeyboardPanelInfoChange(const KeyboardPanelInfo& keyboardPanelInfo) override;
     virtual WMError SetImmersiveModeEnabledState(bool enable) override;
@@ -295,6 +299,7 @@ public:
     SystemBarProperty GetSystemBarPropertyByType(WindowType type) const override;
     WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
     WMError SetLayoutFullScreen(bool status) override;
+    WMError SetIgnoreSafeArea(bool isIgnoreSafeArea) override;
     WMError SetFullScreen(bool status) override;
     WMError UpdateSystemBarProperties(const std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
         const std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags) override;
@@ -346,6 +351,7 @@ protected:
      */
     WMError RecoverAndConnectSpecificSession();
     WMError RecoverAndReconnectSceneSession();
+    void RegisterWindowRecoverStateChangeListener();
 
 private:
     WMError DestroyInner(bool needNotifyServer);
@@ -378,7 +384,7 @@ private:
     bool CheckTouchSlop(int32_t pointerId, int32_t x, int32_t y, int32_t threshold);
     void IgnoreClickEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     bool HandlePointDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-        const MMI::PointerEvent::PointerItem& pointerItem, int32_t sourceType, float vpr, const WSRect& rect);
+        const MMI::PointerEvent::PointerItem& pointerItem);
     std::unique_ptr<Media::PixelMap> HandleWindowMask(const std::vector<std::vector<uint32_t>>& windowMask);
     void CalculateNewLimitsByLimits(
         WindowLimits& newLimits, WindowLimits& customizedLimits, float& virtualPixelRatio);
@@ -396,12 +402,16 @@ private:
      * Window Recover
      */
     void RegisterSessionRecoverListener(bool isSpecificSession);
+    void OnWindowRecoverStateChange(bool isSpecificSession, const WindowRecoverState& state);
+    void UpdateStartRecoverProperty(bool isSpecificSession);
+    void UpdateFinishRecoverProperty(bool isSpecificSession);
+    NotifyWindowRecoverStateChangeFunc windowRecoverStateChangeFunc_;
 
     /*
      * Window Layout
      */
     void CheckMoveConfiguration(MoveConfiguration& moveConfiguration);
-    void UpdateEnableDragWhenSwitchMultiWindow(bool enable);
+    WMError GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo) override;
 
     /*
      * PC Window Layout
@@ -420,9 +430,9 @@ private:
     bool enableDefaultAnimation_ = true;
     sptr<IAnimationTransitionController> animationTransitionController_;
     uint32_t setSameSystembarPropertyCnt_ = 0;
-    std::atomic<bool> isDefaultDensityEnabled_ = false;
     std::atomic<uint32_t> getAvoidAreaCnt_ = 0;
     std::atomic<bool> enableImmersiveMode_ = false;
+    std::atomic<bool> cacheEnableImmersiveMode_ = false;
     bool titleHoverShowEnabled_ = true;
     bool dockHoverShowEnabled_ = true;
     void PreLayoutOnShow(WindowType type, const sptr<DisplayInfo>& info = nullptr);
@@ -435,6 +445,8 @@ private:
     /*
      * Window Property
      */
+    void RecoverSessionProperty();
+    WMError UpdateColorMode(const std::shared_ptr<AppExecFwk::Configuration>& configuration = nullptr);
     void InitSystemSessionDragEnable();
     bool IsSystemDensityChanged(const sptr<DisplayInfo>& displayInfo);
     bool IsDefaultDensityEnabled();
@@ -442,12 +454,15 @@ private:
     float customDensity_ = UNDEFINED_DENSITY;
     bool isEnableDefaultDensityWhenCreate_ = false;
     std::string specifiedColorMode_;
+    WMError SetPcAppInpadSpecificSystemBarInvisible();
+    WMError SetPcAppInpadOrientationLandscape();
 
     /*
      * Sub Window
      */
     void AddSubWindowMapForExtensionWindow();
     WMError GetParentSessionAndVerify(bool isToast, sptr<WindowSessionImpl>& parentSession);
+    static WMError VerifySubWindowLevel(bool isToast, const sptr<WindowSessionImpl>& parentSession);
     WMError SetParentWindowInner(int32_t oldParentWindowId, const sptr<WindowSessionImpl>& newParentWindow);
 
     WMError RegisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;
@@ -473,6 +488,8 @@ private:
     bool CheckCanMoveWindowType();
     bool CheckCanMoveWindowTypeByDevice();
     bool CheckIsPcAppInPadFullScreenOnMobileWindowMode();
+    AreaType GetDragAreaByDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+        const MMI::PointerEvent::PointerItem& pointerItem);
 
     /*
      * PC Window

@@ -38,6 +38,7 @@ enum class ListenerFuncType : uint32_t {
     SESSION_PIP_CONTROL_STATUS_CHANGE_CB,
     SESSION_AUTO_START_PIP_CB,
     CREATE_SUB_SESSION_CB,
+    CLEAR_SUB_SESSION_CB,
     BIND_DIALOG_TARGET_CB,
     RAISE_TO_TOP_CB,
     RAISE_TO_TOP_POINT_DOWN_CB,
@@ -250,7 +251,9 @@ private:
     static napi_value SendFbActionEvent(napi_env env, napi_callback_info info);
     static napi_value CreateSessionInfosNapiValue(
         napi_env env, const std::vector<std::shared_ptr<SessionInfo>>& sessionInfos);
-
+    static napi_value SetPcAppInpadCompatibleMode(napi_env env, napi_callback_info info);
+    static napi_value SetPcAppInpadSpecificSystemBarInvisible(napi_env env, napi_callback_info info);
+    static napi_value SetPcAppInpadOrientationLandscape(napi_env env, napi_callback_info info);
     /*
      * PC Window
      */
@@ -339,6 +342,9 @@ private:
     static napi_value GetJsPanelSessionObj(napi_env env, const sptr<SceneSession>& session);
     napi_value OnRequestSpecificSessionClose(napi_env env, napi_callback_info info);
     napi_value OnSendFbActionEvent(napi_env env, napi_callback_info info);
+    napi_value OnSetPcAppInpadCompatibleMode(napi_env env, napi_callback_info info);
+    napi_value OnSetPcAppInpadSpecificSystemBarInvisible(napi_env env, napi_callback_info info);
+    napi_value OnSetPcAppInpadOrientationLandscape(napi_env env, napi_callback_info info);
 
     /*
      * PC Window
@@ -349,6 +355,7 @@ private:
     void ProcessChangeSessionVisibilityWithStatusBarRegister();
     void ProcessBufferAvailableChangeRegister();
     void ProcessCreateSubSessionRegister();
+    void ProcessClearSubSessionRegister();
     void ProcessBindDialogTargetRegister();
     void ProcessSessionRectChangeRegister();
     void ProcessFloatingBallUpdateRegister();
@@ -433,6 +440,7 @@ private:
     void ChangeSessionVisibilityWithStatusBarInner(std::shared_ptr<SessionInfo> sessionInfo, bool visible);
     void OnBufferAvailableChange(const bool isBufferAvailable, bool startWindowInvisible = false);
     void OnCreateSubSession(const sptr<SceneSession>& sceneSession);
+    void OnClearSubSession(int32_t subPersistentId);
     void OnBindDialogTarget(const sptr<SceneSession>& sceneSession);
     void OnSessionRectChange(const WSRect& rect,
         SizeChangeReason reason = SizeChangeReason::UNDEFINED, DisplayId displayId = DISPLAY_ID_INVALID,

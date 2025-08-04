@@ -176,18 +176,26 @@ public:
     /**
      * @brief Convert a position from client (window-relative) coordinates to global coordinates.
      *
-     * @param position The position relative to the window.
-     * @return The corresponding position in global coordinates.
+     * @param inPosition The position relative to the window.
+     * @param outPosition [out] The corresponding position in global coordinates.
+     * @return WMError::WM_OK on success, or appropriate error code on failure.
      */
-    virtual Position ClientToGlobalDisplay(const Position& position) const { return { 0, 0 }; }
+    virtual WMError ClientToGlobalDisplay(const Position& inPosition, Position& outPosition) const
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 
     /**
      * @brief Convert a position from global coordinates to client (window-relative) coordinates.
      *
-     * @param position The position in global coordinates.
-     * @return The corresponding position relative to the window.
+     * @param inPosition The position in global coordinates.
+     * @param outPosition [out] The corresponding position relative to the window.
+     * @return WMError::WM_OK on success, or appropriate error code on failure.
      */
-    virtual Position GlobalDisplayToClient(const Position& position) const { return { 0, 0 }; }
+    virtual WMError GlobalDisplayToClient(const Position& inPosition, Position& outPosition) const
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 
     virtual WindowType GetType() const = 0;
     virtual WindowMode GetWindowMode() const = 0;
@@ -230,6 +238,7 @@ public:
     virtual WMError GetSystemBarProperties(std::map<WindowType, SystemBarProperty>& properties) = 0;
     virtual WMError SetFullScreen(bool status) = 0;
     virtual WMError SetLayoutFullScreen(bool status) = 0;
+    virtual WMError SetIgnoreSafeArea(bool isIgnoreSafeArea) { return WMError::WM_OK; }
     virtual WMError SetTitleAndDockHoverShown(bool titleHoverShowEnabled = true,
         bool dockHoverShowEnabled = true) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError Destroy() = 0;
@@ -426,6 +435,7 @@ public:
     virtual float GetCustomDensity() const { return UNDEFINED_DENSITY; }
     virtual WMError SetWindowShadowEnabled(bool isEnabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual bool GetWindowShadowEnabled() const { return true; }
+    virtual WMError SetWindowDefaultDensityEnabled(bool enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError GetWindowDensityInfo(
         WindowDensityInfo& densityInfo) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError IsMainWindowFullScreenAcrossDisplays(
@@ -447,6 +457,7 @@ public:
     virtual bool IsPadWindow() const { return false; }
     virtual bool IsPcOrFreeMultiWindowCapabilityEnabled() const { return false; }
     virtual bool IsPcOrPadFreeMultiWindowMode() const { return false; }
+    virtual bool IsPadAndNotFreeMutiWindowCompatibleMode() const { return false; }
     virtual bool IsSceneBoardEnabled() const { return false; }
     virtual bool GetCompatibleModeInPc() const { return false; }
     virtual WmErrorCode KeepKeyboardOnFocus(bool keepKeyboardFlag) = 0;
@@ -564,6 +575,13 @@ public:
      * @return * void
      */
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) {}
+
+    /**
+     * @brief Set touch event
+     *
+     * @param touchType int32_t.
+     */
+    virtual void SetTouchEvent(int32_t touchType) {}
 
     virtual WMError SetImmersiveModeEnabledState(bool enable) { return WMError::WM_OK; }
 

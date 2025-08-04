@@ -52,10 +52,6 @@ ohos_source_set("ui_effect_controller_common") {
     ":libwmutil_public_config",
   ]
 
-  external_deps = [
-    "hilog:libhilog",
-  ]
-
   public_deps = [
     ":libwmutil_base",
   ]
@@ -63,6 +59,7 @@ ohos_source_set("ui_effect_controller_common") {
   public_external_deps = [
     "c_utils:utils",
     "graphic_2d:librender_service_client",
+    "hilog:libhilog",
     "ability_runtime:runtime",
     "napi:ace_napi",
   ]
@@ -95,6 +92,7 @@ ohos_static_library("libwmutil_static") {
     "src/permission.cpp",
     "src/persistent_storage.cpp",
     "src/pip_report.cpp",
+    "src/floating_ball_report.cpp",
     "src/screen_group_info.cpp",
     "src/screen_info.cpp",
     "src/screenshot_info.cpp",
@@ -211,6 +209,7 @@ ohos_shared_library("libwmutil") {
     "src/permission.cpp",
     "src/persistent_storage.cpp",
     "src/pip_report.cpp",
+    "src/floating_ball_report.cpp",
     "src/rs_adapter.cpp",
     "src/screen_fold_data.cpp",
     "src/screen_group_info.cpp",

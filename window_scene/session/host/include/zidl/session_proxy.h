@@ -50,6 +50,7 @@ public:
     WSError SyncSessionEvent(SessionEvent event) override;
     WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) override;
     WSError OnDefaultDensityEnabled(bool isDefaultDensityEnabled) override;
+    WMError OnUpdateColorMode(const std::string& colorMode, bool hasDarkRes) override;
     WSError OnTitleAndDockHoverShowChange(bool isTitleHoverShown = true,
         bool isDockHoverShown = true) override;
     WSError OnRestoreMainWindow() override;
@@ -189,6 +190,7 @@ public:
     WSError UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode,
         std::shared_ptr<RSTransaction>& rsTransaction) override;
     WSError SetDragKeyFramePolicy(const KeyFramePolicy& keyFramePolicy) override;
+    WMError GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo) override;
 
     /**
      * Window Transition Animation For PC

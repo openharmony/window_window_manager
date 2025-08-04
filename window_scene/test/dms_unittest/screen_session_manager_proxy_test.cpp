@@ -1295,6 +1295,34 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetCutoutInfo, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetCutoutInfo2
+ * @tc.desc: GetCutoutInfo2
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, GetCutoutInfo2, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<CutoutInfo> expectation = nullptr;
+    DisplayId displayId = 0;
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint64ErrorFlag(true);
+    auto res = screenSessionManagerProxy->GetCutoutInfo(displayId, 0, 0, Rotation::ROTATION_0);
+    EXPECT_EQ(res, expectation);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    res = screenSessionManagerProxy->GetCutoutInfo(displayId, 0, 0, Rotation::ROTATION_0);
+    EXPECT_EQ(res, expectation);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    res = screenSessionManagerProxy->GetCutoutInfo(displayId, 0, 0, Rotation::ROTATION_0);
+    EXPECT_EQ(res, expectation);
+}
+
+/**
  * @tc.name: HasImmersiveWindow
  * @tc.desc: HasImmersiveWindow
  * @tc.type: FUNC
@@ -2091,6 +2119,51 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualScreenAutoRotation, Function |
 
     auto ret = screenSessionManagerProxy->SetVirtualScreenAutoRotation(screenId, enable);
     EXPECT_EQ(DMError::DM_ERROR_INVALID_PARAM, ret);
+}
+
+/**
+ * @tc.name: SetScreenPrivacyWindowTagSwitch
+ * @tc.desc: SetScreenPrivacyWindowTagSwitch test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, SetScreenPrivacyWindowTagSwitch, Function | SmallTest | Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ScreenId mainScreenId = 0;
+    std::vector<std::string> privacyWindowTag{"test1", "test2"};
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    screenSessionManagerProxy->SetScreenPrivacyWindowTagSwitch(mainScreenId, privacyWindowTag, true);
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint64ErrorFlag(true);
+    screenSessionManagerProxy->SetScreenPrivacyWindowTagSwitch(mainScreenId, privacyWindowTag, true);
+    EXPECT_TRUE(logMsg.find("Write screenId failed") != std::string::npos);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    screenSessionManagerProxy->SetScreenPrivacyWindowTagSwitch(mainScreenId, privacyWindowTag, true);
+    EXPECT_TRUE(logMsg.find("Write enable failed") != std::string::npos);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    screenSessionManagerProxy->SetScreenPrivacyWindowTagSwitch(mainScreenId, privacyWindowTag, true);
+    EXPECT_TRUE(logMsg.find("SendRequest failed") == std::string::npos);
+
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    auto proxy = sptr<ScreenSessionManagerProxy>::MakeSptr(remoteMocker);
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    proxy->SetScreenPrivacyWindowTagSwitch(mainScreenId, privacyWindowTag, true);
+    EXPECT_TRUE(logMsg.find("SendRequest failed") != std::string::npos);
+    remoteMocker->SetRequestResult(ERR_NONE);
+
+    remoteMocker = nullptr;
+    proxy = sptr<ScreenSessionManagerProxy>::MakeSptr(remoteMocker);
+    proxy->SetScreenPrivacyWindowTagSwitch(mainScreenId, privacyWindowTag, true);
+    EXPECT_TRUE(logMsg.find("remote is null") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 }
 }

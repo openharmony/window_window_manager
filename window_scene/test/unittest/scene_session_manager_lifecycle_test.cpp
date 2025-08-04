@@ -935,10 +935,10 @@ HWTEST_F(SceneSessionManagerLifecycleTest, StartUIAbilityBySCBTimeoutCheck, Test
     sptr<AAFwk::SessionInfo> abilitySessionInfo = ssm_->SetAbilitySessionInfo(sceneSession);
     ASSERT_NE(abilitySessionInfo, nullptr);
     bool isColdStart = true;
-    ASSERT_EQ(ssm_->StartUIAbilityBySCBTimeoutCheck(
+    ASSERT_EQ(ssm_->StartUIAbilityBySCBTimeoutCheck(sceneSession,
                   abilitySessionInfo, static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL), isColdStart),
               2097202);
-    ASSERT_EQ(ssm_->StartUIAbilityBySCBTimeoutCheck(
+    ASSERT_EQ(ssm_->StartUIAbilityBySCBTimeoutCheck(sceneSession,
                   abilitySessionInfo, static_cast<uint32_t>(WindowStateChangeReason::USER_SWITCH), isColdStart),
               2097202);
 }

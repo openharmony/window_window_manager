@@ -25,6 +25,7 @@
 #include "session/host/include/main_session.h"
 #include "wm_common.h"
 #include "mock/mock_session_stage.h"
+#include "mock/mock_accesstoken_kit.h"
 #include "input_event.h"
 #include <pointer_event.h>
 #include <ui/rs_surface_node.h>
@@ -461,8 +462,8 @@ HWTEST_F(SceneSessionTest, HandleActionUpdateWindowShadowEnabled01, TestSize.Lev
     ASSERT_NE(sceneSession, nullptr);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     sceneSession->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
     sceneSession->containerColorList_.insert("abc");
-
     auto ret = sceneSession->HandleActionUpdateWindowShadowEnabled(property, action);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
 
@@ -640,7 +641,83 @@ HWTEST_F(SceneSessionTest, SetPrivacyMode03, TestSize.Level0)
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
     sceneSession->surfaceNode_ = surfaceNode;
     sceneSession->SetPrivacyMode(true);
-    ASSERT_EQ(true, sceneSession->appUseControlMap_.size() == 0);
+    EXPECT_EQ(sceneSession->appUseControlMap_.size(), 0);
+}
+
+/**
+ * @tc.name: UpdatePrivacyModeControlInfo01
+ * @tc.desc: UpdatePrivacyModeControlInfo01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, UpdatePrivacyModeControlInfo01, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.bundleName_ = "testBundleName";
+    info.abilityName_ = "testAbilityName";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetPrivacyMode(true);
+    sceneSession->property_ = property;
+    sceneSession->UpdatePrivacyModeControlInfo();
+    EXPECT_EQ(sceneSession->appUseControlMap_.size(), 1);
+    EXPECT_EQ(sceneSession->appUseControlMap_[ControlAppType::PRIVACY_WINDOW].isNeedControl, true);
+}
+
+/**
+ * @tc.name: UpdatePrivacyModeControlInfo02
+ * @tc.desc: UpdatePrivacyModeControlInfo02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, UpdatePrivacyModeControlInfo02, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.bundleName_ = "testBundleName";
+    info.abilityName_ = "testAbilityName";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->property_ = nullptr;
+    sptr<SceneSession::SpecificSessionCallback> specificSessionCb =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> subSession = sptr<SceneSession>::MakeSptr(info, specificSessionCb);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetPrivacyMode(true);
+    subSession->property_ = property;
+    sceneSession->AddSubSession(subSession);
+    sceneSession->UpdatePrivacyModeControlInfo();
+    EXPECT_EQ(sceneSession->appUseControlMap_.size(), 1);
+    EXPECT_EQ(sceneSession->appUseControlMap_[ControlAppType::PRIVACY_WINDOW].isNeedControl, true);
+}
+
+/**
+ * @tc.name: HasSubSessionInPrivacyMode
+ * @tc.desc: HasSubSessionInPrivacyMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, HasSubSessionInPrivacyMode, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.bundleName_ = "testBundleName";
+    info.abilityName_ = "testAbilityName";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->property_ = nullptr;
+    sptr<SceneSession::SpecificSessionCallback> specificSessionCb =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> subSession = sptr<SceneSession>::MakeSptr(info, specificSessionCb);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetPrivacyMode(false);
+    subSession->property_ = property;
+
+    subSession->subSession_.push_back(nullptr);
+    subSession->AddSubSession(sptr<SceneSession>::MakeSptr(info, specificSessionCb));
+    sptr<SceneSession::SpecificSessionCallback> specificSessionCb2 =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> subSession2 = sptr<SceneSession>::MakeSptr(info, specificSessionCb2);
+    sptr<WindowSessionProperty> property2 = sptr<WindowSessionProperty>::MakeSptr();
+    property2->SetPrivacyMode(true);
+    subSession2->property_ = property2;
+    subSession->AddSubSession(subSession2);
+
+    sceneSession->AddSubSession(subSession);
+    EXPECT_EQ(sceneSession->HasSubSessionInPrivacyMode(), true);
 }
 
 /**
@@ -694,6 +771,39 @@ HWTEST_F(SceneSessionTest, UpdateAcrossDisplaysChangeRegistered01, TestSize.Leve
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     ret = sceneSession->UpdateAcrossDisplaysChangeRegistered(true);
     EXPECT_NE(ret, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: ColorMode01
+ * @tc.desc: Test OnUpdateColorMode And GetAbilityColorMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, ColorMode01, TestSize.Level0)
+{
+    SessionInfo info;
+    info.abilityName_ = "test";
+    info.bundleName_ = "test";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    std::string colorMode = "dark";
+    bool hasDarkRes = true;
+    auto ret = sceneSession->OnUpdateColorMode(colorMode, hasDarkRes);
+    EXPECT_NE(WMError::WM_OK, ret);
+
+    std::string resMode = sceneSession->GetAbilityColorMode();
+    EXPECT_NE("dark", resMode);
+
+    hasDarkRes = false;
+    ret = sceneSession->OnUpdateColorMode(colorMode, hasDarkRes);
+    EXPECT_NE(WMError::WM_OK, ret);
+    resMode = sceneSession->GetAbilityColorMode();
+    EXPECT_NE("auto", resMode);
+
+    colorMode = "light";
+    ret = sceneSession->OnUpdateColorMode(colorMode, hasDarkRes);
+    EXPECT_NE(WMError::WM_OK, ret);
+    resMode = sceneSession->GetAbilityColorMode();
+    EXPECT_NE("light", resMode);
 }
 
 /**
@@ -1843,6 +1953,21 @@ HWTEST_F(SceneSessionTest, UpdateSessionRect4, TestSize.Level1)
     WSRect newRect1 = subSession->GetSessionRect();
     EXPECT_EQ(newRect1.posX_, oldRect1.posX_ - mainRect.posX_);
     EXPECT_EQ(newRect1.posY_, oldRect1.posY_ - mainRect.posY_);
+    mainSession->systemConfig_.freeMultiWindowSupport_ = true;
+    mainSession->systemConfig_.freeMultiWindowEnable_ = true;
+    result = mainSession->UpdateSessionRect(oldRect1, reason, isGlobal);
+    result = mainSession->UpdateSessionRect(oldRect1, reason, isGlobal, true);
+    mainSession->systemConfig_.freeMultiWindowEnable_ = false;
+    result = mainSession->UpdateSessionRect(oldRect1, reason, isGlobal);
+    result = mainSession->UpdateSessionRect(oldRect1, reason, isGlobal, true);
+    subSubSession->systemConfig_.freeMultiWindowSupport_ = true;
+    subSubSession->systemConfig_.freeMultiWindowEnable_ = true;
+    result = subSubSession->UpdateSessionRect(oldRect1, reason, isGlobal);
+    result = subSubSession->UpdateSessionRect(oldRect1, reason, isGlobal, true);
+    subSubSession->systemConfig_.freeMultiWindowEnable_ = false;
+    result = subSubSession->UpdateSessionRect(oldRect1, reason, isGlobal);
+    result = subSubSession->UpdateSessionRect(oldRect1, reason, isGlobal, true);
+    ASSERT_EQ(result, WSError::WS_OK);
     // Test the changes of rect values of multi-level subWindow in the phone scenario
     WSRect oldRect2({ 30, 30, 30, 30 });
     result = subSubSession->UpdateSessionRect(oldRect2, reason, isGlobal);

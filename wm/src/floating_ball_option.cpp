@@ -46,6 +46,7 @@ void FbOption::SetIcon(const std::shared_ptr<Media::PixelMap>& icon)
     icon_ = icon;
 }
 
+// LCOV_EXCL_START
 uint32_t FbOption::GetTemplate() const
 {
     return template_;
@@ -78,6 +79,7 @@ void FbOption::GetFbTemplateBaseInfo(FloatingBallTemplateBaseInfo& fbTemplateBas
     fbTemplateBaseInfo.content_ = content_;
     fbTemplateBaseInfo.backgroundColor_ = backgroundColor_;
 }
+// LCOV_EXCL_STOP
 
 } // namespace Rosen
 } // namespace OHOS

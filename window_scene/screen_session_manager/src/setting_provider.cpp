@@ -28,9 +28,9 @@
 
 namespace OHOS {
 namespace Rosen {
-SettingProvider* SettingProvider::instance_;
-std::mutex SettingProvider::mutex_;
-sptr<IRemoteObject> SettingProvider::remoteObj_;
+sptr<SettingProvider> SettingProvider::instance_ = nullptr;
+std::mutex SettingProvider::instanceMutex_;
+sptr<IRemoteObject> SettingProvider::remoteObj_ = nullptr;
 namespace {
 const std::string SETTING_COLUMN_KEYWORD = "KEYWORD";
 const std::string SETTING_COLUMN_VALUE = "VALUE";
@@ -46,18 +46,12 @@ constexpr const char *SETTINGS_DATA_EXT_URI = "datashare:///com.ohos.settingsdat
 constexpr int32_t PARAM_NUM_TEN = 10;
 } // namespace
 
-SettingProvider::~SettingProvider()
-{
-    instance_ = nullptr;
-    remoteObj_ = nullptr;
-}
-
 SettingProvider& SettingProvider::GetInstance(int32_t systemAbilityId)
 {
     if (instance_ == nullptr) {
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::lock_guard<std::mutex> lock(instanceMutex_);
         if (instance_ == nullptr) {
-            instance_ = new SettingProvider();
+            instance_ = sptr<SettingProvider>::MakeSptr();
             Initialize(systemAbilityId);
         }
     }

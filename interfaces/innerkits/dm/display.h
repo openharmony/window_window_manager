@@ -23,6 +23,7 @@
 namespace OHOS::Rosen {
 class DisplayInfo;
 class CutoutInfo;
+class FoldCreaseRegion;
 
 class Display : public RefBase {
 friend class DisplayManager;
@@ -111,6 +112,13 @@ public:
     Rotation GetRotation() const;
 
     /**
+     * @brief Get the rotation of the display before API 14.
+     *
+     * @return Rotation of the display before API 14.
+     */
+    Rotation GetOriginRotation() const;
+
+    /**
      * @brief Get the Orientation of the display.
      *
      * @return Orientation indicates the direction of the display content.
@@ -175,6 +183,13 @@ public:
      * @return DMError
      */
     DMError GetDisplayCapability(std::string& capabilitInfo) const;
+
+    /**
+     * @brief Get the fold crease region in the current display mode.
+     *
+     * @return { FoldCreaseRegion } fold crease region in the current display mode.
+     */
+    DMError GetLiveCreaseRegion(FoldCreaseRegion& region) const;
 
 protected:
     // No more methods or variables can be defined here.

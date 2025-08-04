@@ -40,6 +40,10 @@ private:
     FoldStatus GetFoldStateUnpower(const std::vector<uint16_t> &halls);
     void ReportSecondaryReflexion(int32_t currentStatus, int32_t nextStatus, bool isSecondaryReflexion);
     void SendReflexionResult(bool isSecondaryReflexion);
+    FoldStatus HandleSecondaryOneStep(FoldStatus currentStatus, FoldStatus nextStatus,
+        const std::vector<float>& angles, const std::vector<uint16_t>& halls) override;
+    FoldStatus CalculateNewABFoldStatus(float previousAngle, uint16_t previousHall, float angle, uint16_t hall);
+
     int32_t allowUserSensorForLargeFoldDeviceAB = 0;
     int32_t allowUserSensorForLargeFoldDeviceBC = 0;
     bool isHasReflexioned = false;

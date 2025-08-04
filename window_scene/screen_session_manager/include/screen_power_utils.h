@@ -32,6 +32,7 @@ public:
 
 private:
     static std::mutex powerTimingMutex_;
+    static std::mutex powerLockMutex_;
     static bool isEnablePowerForceTimingOut_;
 };
 } // Rosen

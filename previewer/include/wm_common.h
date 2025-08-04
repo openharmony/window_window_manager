@@ -16,13 +16,13 @@
 #ifndef OHOS_ROSEN_WM_COMMON_H
 #define OHOS_ROSEN_WM_COMMON_H
 
-#include <any>
 #include <cmath>
 #include <map>
 #include <memory>
 #include <sstream>
 #include <string>
 #include <unordered_set>
+#include <variant>
 
 #include <float.h>
 
@@ -554,6 +554,55 @@ struct KeyFramePolicy : public Parcelable {
 };
 
 /**
+ * @struct HookWindowInfo.
+ *
+ * @brief Configures window hook behavior based on window size ratios.
+ */
+struct HookWindowInfo : public Parcelable {
+    bool enableHookWindow{ false };
+    float widthHookRatio{ 1.0f };
+
+    static constexpr float DEFAULT_WINDOW_SIZE_HOOK_RATIO = 1.0f;
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        return WriteAllFields(parcel);
+    }
+
+    static HookWindowInfo* Unmarshalling(Parcel& parcel)
+    {
+        auto hookWindowInfo = std::make_unique<HookWindowInfo>();
+        if (!hookWindowInfo || !ReadAllFields(parcel, *hookWindowInfo)) {
+            return nullptr;
+        }
+        return hookWindowInfo.release();
+    }
+
+    std::string ToString() const
+    {
+        constexpr int precision = 6; // Print float with precision of 6 decimal places.
+        std::ostringstream oss;
+        oss << std::boolalpha  // For true/false instead of 1/0
+            << "enableHookWindow: " << enableHookWindow
+            << ", widthHookRatio: " << std::fixed << std::setprecision(precision) << widthHookRatio;
+        return oss.str();
+    }
+
+private:
+    bool WriteAllFields(Parcel& parcel) const
+    {
+        return parcel.WriteBool(enableHookWindow) &&
+               parcel.WriteFloat(widthHookRatio);
+    }
+
+    static bool ReadAllFields(Parcel& parcel, HookWindowInfo& info)
+    {
+        return parcel.ReadBool(info.enableHookWindow) &&
+               parcel.ReadFloat(info.widthHookRatio);
+    }
+};
+
+/**
  * @brief Enumerates layout mode of window.
  */
 enum class WindowLayoutMode : uint32_t {
@@ -757,8 +806,8 @@ struct Rect {
      */
     static bool IsRightBottomValid(int32_t x, int32_t y, uint32_t width, uint32_t height)
     {
-        int64_t right = static_cast<int64_t>(x) + width;
-        int64_t bottom = static_cast<int64_t>(y) + height;
+        int64_t right = static_cast<int64_t>(x) + static_cast<int64_t>(width);
+        int64_t bottom = static_cast<int64_t>(y) + static_cast<int64_t>(height);
         return right <= INT32_MAX && bottom <= INT32_MAX;
     }
 };
@@ -924,6 +973,17 @@ struct WindowAnchorInfo : public Parcelable {
         int32_t offsetY) : isAnchorEnabled_(isAnchorEnabled),  windowAnchor_(windowAnchor),
         offsetX_(offsetX), offsetY_(offsetY) {}
 
+    bool operator==(const WindowAnchorInfo& other) const
+    {
+        return isAnchorEnabled_ == other.isAnchorEnabled_ && windowAnchor_ == other.windowAnchor_ &&
+            offsetX_ == other.offsetX_ && offsetY_ == other.offsetY_;
+    }
+
+    bool operator!=(const WindowAnchorInfo& other) const
+    {
+        return !(*this == other);
+    }
+
     bool Marshalling(Parcel& parcel) const override
     {
         return parcel.WriteBool(isAnchorEnabled_) && parcel.WriteUint32(static_cast<uint32_t>(windowAnchor_)) &&
@@ -1039,6 +1099,16 @@ struct WindowLimits {
     bool IsEmpty() const
     {
         return (maxHeight_ == 0 || minHeight_ == 0 || maxWidth_ == 0 || minWidth_ == 0);
+    }
+
+    std::string ToString() const
+    {
+        constexpr int precision = 6;
+        std::ostringstream oss;
+        oss << "[" << maxWidth_ << " " << maxHeight_ << " " << minWidth_ << " " << minHeight_
+            << " " << std::fixed << std::setprecision(precision) << maxRatio_ << " " << minRatio_
+            << " " << vpRatio_ << "]";
+        return oss.str();
     }
 };
 
@@ -1495,6 +1565,8 @@ enum class WindowInfoKey : int32_t {
     VISIBILITY_STATE = 1 << 4,
     DISPLAY_ID = 1 << 5,
     WINDOW_RECT = 1 << 6,
+    WINDOW_MODE = 1 << 7,
+    FLOATING_SCALE = 1 << 8,
 };
 
 /*

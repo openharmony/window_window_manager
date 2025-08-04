@@ -96,38 +96,38 @@ typedef enum : uint32_t {
     IMAGE_HDR_ISO_SINGLE,
 } ScreenHDRFormat;
 
-const std::map<GraphicCM_ColorSpaceType, ColorSpace> NATIVE_TO_JS_COLOR_SPACE_TYPE_MAP {
-    { GraphicCM_ColorSpaceType::GRAPHIC_CM_COLORSPACE_NONE,        ColorSpace::UNKNOWN },
-    { GraphicCM_ColorSpaceType::GRAPHIC_CM_ADOBERGB_FULL,          ColorSpace::ADOBE_RGB },
-    { GraphicCM_ColorSpaceType::GRAPHIC_CM_ADOBERGB_LIMIT,         ColorSpace::ADOBE_RGB },
-    { GraphicCM_ColorSpaceType::GRAPHIC_CM_BT2020_HLG_FULL,        ColorSpace::BT2020_HLG },
-    { GraphicCM_ColorSpaceType::GRAPHIC_CM_BT2020_HLG_LIMIT,       ColorSpace::BT2020_HLG },
-    { GraphicCM_ColorSpaceType::GRAPHIC_CM_DISPLAY_BT2020_HLG,     ColorSpace::BT2020_HLG },
-    { GraphicCM_ColorSpaceType::GRAPHIC_CM_BT2020_PQ_FULL,         ColorSpace::BT2020_PQ },
-    { GraphicCM_ColorSpaceType::GRAPHIC_CM_BT2020_PQ_LIMIT,        ColorSpace::BT2020_PQ },
-    { GraphicCM_ColorSpaceType::GRAPHIC_CM_DISPLAY_BT2020_PQ,      ColorSpace::BT2020_PQ },
-    { GraphicCM_ColorSpaceType::GRAPHIC_CM_BT601_EBU_FULL,         ColorSpace::BT601_EBU },
-    { GraphicCM_ColorSpaceType::GRAPHIC_CM_BT601_EBU_LIMIT,        ColorSpace::BT601_EBU },
-    { GraphicCM_ColorSpaceType::GRAPHIC_CM_BT601_SMPTE_C_FULL,     ColorSpace::BT601_SMPTE_C },
-    { GraphicCM_ColorSpaceType::GRAPHIC_CM_BT601_SMPTE_C_LIMIT,    ColorSpace::BT601_SMPTE_C },
-    { GraphicCM_ColorSpaceType::GRAPHIC_CM_BT709_FULL,             ColorSpace::BT709 },
-    { GraphicCM_ColorSpaceType::GRAPHIC_CM_BT709_LIMIT,            ColorSpace::BT709 },
-    { GraphicCM_ColorSpaceType::GRAPHIC_CM_P3_HLG_FULL,            ColorSpace::P3_HLG },
-    { GraphicCM_ColorSpaceType::GRAPHIC_CM_P3_HLG_LIMIT,           ColorSpace::P3_HLG },
-    { GraphicCM_ColorSpaceType::GRAPHIC_CM_DISPLAY_P3_HLG,         ColorSpace::P3_HLG },
-    { GraphicCM_ColorSpaceType::GRAPHIC_CM_P3_PQ_FULL,             ColorSpace::P3_PQ },
-    { GraphicCM_ColorSpaceType::GRAPHIC_CM_P3_PQ_LIMIT,            ColorSpace::P3_PQ },
-    { GraphicCM_ColorSpaceType::GRAPHIC_CM_DISPLAY_P3_PQ,          ColorSpace::P3_PQ },
-    { GraphicCM_ColorSpaceType::GRAPHIC_CM_P3_FULL,                ColorSpace::DISPLAY_P3 },
-    { GraphicCM_ColorSpaceType::GRAPHIC_CM_P3_LIMIT,               ColorSpace::DISPLAY_P3 },
-    { GraphicCM_ColorSpaceType::GRAPHIC_CM_DISPLAY_P3_SRGB,        ColorSpace::DISPLAY_P3 },
-    { GraphicCM_ColorSpaceType::GRAPHIC_CM_SRGB_FULL,              ColorSpace::SRGB },
-    { GraphicCM_ColorSpaceType::GRAPHIC_CM_SRGB_LIMIT,             ColorSpace::SRGB },
-    { GraphicCM_ColorSpaceType::GRAPHIC_CM_DISPLAY_SRGB,           ColorSpace::SRGB },
-    { GraphicCM_ColorSpaceType::GRAPHIC_CM_LINEAR_SRGB,            ColorSpace::LINEAR_SRGB },
-    { GraphicCM_ColorSpaceType::GRAPHIC_CM_LINEAR_BT709,           ColorSpace::LINEAR_SRGB },
-    { GraphicCM_ColorSpaceType::GRAPHIC_CM_LINEAR_P3,              ColorSpace::LINEAR_P3 },
-    { GraphicCM_ColorSpaceType::GRAPHIC_CM_LINEAR_BT2020,          ColorSpace::LINEAR_BT2020 },
+const std::map<GraphicCM_ColorSpaceType, DmsColorSpace> NATIVE_TO_JS_COLOR_SPACE_TYPE_MAP {
+    { GraphicCM_ColorSpaceType::GRAPHIC_CM_COLORSPACE_NONE,        DmsColorSpace::UNKNOWN },
+    { GraphicCM_ColorSpaceType::GRAPHIC_CM_ADOBERGB_FULL,          DmsColorSpace::ADOBE_RGB },
+    { GraphicCM_ColorSpaceType::GRAPHIC_CM_ADOBERGB_LIMIT,         DmsColorSpace::ADOBE_RGB },
+    { GraphicCM_ColorSpaceType::GRAPHIC_CM_BT2020_HLG_FULL,        DmsColorSpace::BT2020_HLG },
+    { GraphicCM_ColorSpaceType::GRAPHIC_CM_BT2020_HLG_LIMIT,       DmsColorSpace::BT2020_HLG },
+    { GraphicCM_ColorSpaceType::GRAPHIC_CM_DISPLAY_BT2020_HLG,     DmsColorSpace::BT2020_HLG },
+    { GraphicCM_ColorSpaceType::GRAPHIC_CM_BT2020_PQ_FULL,         DmsColorSpace::BT2020_PQ },
+    { GraphicCM_ColorSpaceType::GRAPHIC_CM_BT2020_PQ_LIMIT,        DmsColorSpace::BT2020_PQ },
+    { GraphicCM_ColorSpaceType::GRAPHIC_CM_DISPLAY_BT2020_PQ,      DmsColorSpace::BT2020_PQ },
+    { GraphicCM_ColorSpaceType::GRAPHIC_CM_BT601_EBU_FULL,         DmsColorSpace::BT601_EBU },
+    { GraphicCM_ColorSpaceType::GRAPHIC_CM_BT601_EBU_LIMIT,        DmsColorSpace::BT601_EBU },
+    { GraphicCM_ColorSpaceType::GRAPHIC_CM_BT601_SMPTE_C_FULL,     DmsColorSpace::BT601_SMPTE_C },
+    { GraphicCM_ColorSpaceType::GRAPHIC_CM_BT601_SMPTE_C_LIMIT,    DmsColorSpace::BT601_SMPTE_C },
+    { GraphicCM_ColorSpaceType::GRAPHIC_CM_BT709_FULL,             DmsColorSpace::BT709 },
+    { GraphicCM_ColorSpaceType::GRAPHIC_CM_BT709_LIMIT,            DmsColorSpace::BT709 },
+    { GraphicCM_ColorSpaceType::GRAPHIC_CM_P3_HLG_FULL,            DmsColorSpace::P3_HLG },
+    { GraphicCM_ColorSpaceType::GRAPHIC_CM_P3_HLG_LIMIT,           DmsColorSpace::P3_HLG },
+    { GraphicCM_ColorSpaceType::GRAPHIC_CM_DISPLAY_P3_HLG,         DmsColorSpace::P3_HLG },
+    { GraphicCM_ColorSpaceType::GRAPHIC_CM_P3_PQ_FULL,             DmsColorSpace::P3_PQ },
+    { GraphicCM_ColorSpaceType::GRAPHIC_CM_P3_PQ_LIMIT,            DmsColorSpace::P3_PQ },
+    { GraphicCM_ColorSpaceType::GRAPHIC_CM_DISPLAY_P3_PQ,          DmsColorSpace::P3_PQ },
+    { GraphicCM_ColorSpaceType::GRAPHIC_CM_P3_FULL,                DmsColorSpace::DISPLAY_P3 },
+    { GraphicCM_ColorSpaceType::GRAPHIC_CM_P3_LIMIT,               DmsColorSpace::DISPLAY_P3 },
+    { GraphicCM_ColorSpaceType::GRAPHIC_CM_DISPLAY_P3_SRGB,        DmsColorSpace::DISPLAY_P3 },
+    { GraphicCM_ColorSpaceType::GRAPHIC_CM_SRGB_FULL,              DmsColorSpace::SRGB },
+    { GraphicCM_ColorSpaceType::GRAPHIC_CM_SRGB_LIMIT,             DmsColorSpace::SRGB },
+    { GraphicCM_ColorSpaceType::GRAPHIC_CM_DISPLAY_SRGB,           DmsColorSpace::SRGB },
+    { GraphicCM_ColorSpaceType::GRAPHIC_CM_LINEAR_SRGB,            DmsColorSpace::LINEAR_SRGB },
+    { GraphicCM_ColorSpaceType::GRAPHIC_CM_LINEAR_BT709,           DmsColorSpace::LINEAR_SRGB },
+    { GraphicCM_ColorSpaceType::GRAPHIC_CM_LINEAR_P3,              DmsColorSpace::LINEAR_P3 },
+    { GraphicCM_ColorSpaceType::GRAPHIC_CM_LINEAR_BT2020,          DmsColorSpace::LINEAR_BT2020 },
 };
 
 const std::map<ScreenHDRFormat, HDRFormat> NATIVE_TO_JS_HDR_FORMAT_TYPE_MAP {
@@ -207,6 +207,13 @@ napi_value JsDisplay::UnregisterDisplayManagerCallback(napi_env env, napi_callba
 {
     JsDisplay* me = CheckParamsAndGetThis<JsDisplay>(env, info);
     return (me != nullptr) ? me->OnUnregisterDisplayManagerCallback(env, info) : nullptr;
+}
+
+napi_value JsDisplay::GetLiveCreaseRegion(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::DMS, "called");
+    JsDisplay* me = CheckParamsAndGetThis<JsDisplay>(env, info);
+    return (me != nullptr) ? me->OnGetLiveCreaseRegion(env, info) : nullptr;
 }
 
 bool NapiIsCallable(napi_env env, napi_value value)
@@ -560,6 +567,25 @@ napi_value JsDisplay::OnHasImmersiveWindow(napi_env env, napi_callback_info info
     return result;
 }
 
+napi_value JsDisplay::OnGetLiveCreaseRegion(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::DMS, "called");
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc >= ARGC_ONE) {
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
+    }
+    FoldCreaseRegion region;
+    DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(display_->GetLiveCreaseRegion(region));
+    if (ret != DmErrorCode::DM_OK) {
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(ret)));
+        return NapiGetUndefined(env);
+    }
+    return CreateJsFoldCreaseRegionObject(env, region);
+}
+
 napi_value JsDisplay::GetSupportedColorSpaces(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::DMS, "called");
@@ -872,6 +898,7 @@ napi_value CreateJsDisplayObject(napi_env env, sptr<Display>& display)
         BindNativeFunction(env, objValue, "on", "JsDisplay", JsDisplay::RegisterDisplayManagerCallback);
         BindNativeFunction(env, objValue, "off", "JsDisplay", JsDisplay::UnregisterDisplayManagerCallback);
         BindNativeFunction(env, objValue, "getDisplayCapability", "JsDisplay", JsDisplay::GetDisplayCapability);
+        BindNativeFunction(env, objValue, "getLiveCreaseRegion", "JsDisplay", JsDisplay::GetLiveCreaseRegion);
         std::shared_ptr<NativeReference> jsDisplayRef;
         napi_ref result = nullptr;
         napi_create_reference(env, objValue, 1, &result);
@@ -881,6 +908,33 @@ napi_value CreateJsDisplayObject(napi_env env, sptr<Display>& display)
         g_JsDisplayMap[displayId] = jsDisplayRef;
     }
     return objValue;
+}
+
+napi_value CreateJsFoldCreaseRegionObject(napi_env env, const FoldCreaseRegion& region)
+{
+    TLOGI(WmsLogTag::DMS, "called");
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::DMS, "Failed to convert prop to jsObject");
+        return NapiGetUndefined(env);
+    }
+    DisplayId displayId = region.GetDisplayId();
+    std::vector<DMRect> creaseRects = region.GetCreaseRects();
+    napi_set_named_property(env, objValue, "displayId", CreateJsValue(env, static_cast<uint32_t>(displayId)));
+    napi_set_named_property(env, objValue, "creaseRects", CreateJsCreaseRectsArrayObject(env, creaseRects));
+    return objValue;
+}
+
+napi_value CreateJsCreaseRectsArrayObject(napi_env env, const std::vector<DMRect>& creaseRects)
+{
+    napi_value arrayValue = nullptr;
+    napi_create_array_with_length(env, creaseRects.size(), &arrayValue);
+    size_t i = 0;
+    for (const auto& rect : creaseRects) {
+        napi_set_element(env, arrayValue, i++, CreateJsRectObject(env, rect));
+    }
+    return arrayValue;
 }
 }  // namespace Rosen
 }  // namespace OHOS

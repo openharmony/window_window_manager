@@ -405,6 +405,13 @@ ohos_unittest("ws_session_test") {
     "accessibility:accessibility_common",
     "eventhandler:libeventhandler",
   ]
+
+  cflags = []
+  defines = []
+  if (window_manager_feature_asbng_path_enable) {
+    defines += [ "WINDOW_ATOMIC_SERVICE_ATTRIBUTION_ENABLE" ]
+    cflags += [ "-DACE_ENGINE_PLUGIN_PATH=\"${window_manager_feature_asbng_path}\"" ]
+  }
 }
 
 ohos_unittest("ws_session_lifecycle_test") {
@@ -893,6 +900,7 @@ ohos_unittest("ws_scene_session_test") {
   module_out_path = module_out_path
 
   sources = [
+    "${window_base_path}/window_scene/test/mock/mock_accesstoken_kit.cpp",
     "scene_session_test.cpp",
     "scene_session_test2.cpp",
     "scene_session_test3.cpp",
@@ -941,6 +949,13 @@ ohos_unittest("ws_scene_session_lifecycle_test") {
 
   external_deps = test_external_deps
   external_deps += [ "ability_base:session_info" ]
+
+  cflags = []
+  defines = []
+  if (window_manager_feature_asbng_path_enable) {
+    defines += [ "WINDOW_ATOMIC_SERVICE_ATTRIBUTION_ENABLE" ]
+    cflags += [ "-DACE_ENGINE_PLUGIN_PATH=\"${window_manager_feature_asbng_path}\"" ]
+  }
 }
 
 ohos_unittest("ws_window_session_property_test") {
