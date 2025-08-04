@@ -12599,6 +12599,9 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
                 if (auto iter = uiParams.find(sceneSession->GetPersistentId()); iter != uiParams.end()) {
                     if ((systemConfig_.IsPhoneWindow() || systemConfig_.IsPadWindow()) &&
                         sceneSession->IsAppSession()) {
+                        if (!sceneSession->IsVisible()) {
+                            appZOrderList.push_back(std::make_pair(0, iter->second.zOrder_));
+                        }
                         appZOrderList.push_back(std::make_pair(sceneSession->GetZOrder(), iter->second.zOrder_));
                     }
                     sessionMapDirty_ |= sceneSession->UpdateUIParam(iter->second);
