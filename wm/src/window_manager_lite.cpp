@@ -815,6 +815,7 @@ WMError WindowManagerLite::UnregisterWMSConnectionChangedListener()
     TLOGI(WmsLogTag::WMS_MULTI_USER, "Unregister enter");
     std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
     pImpl_->wmsConnectionChangedListener_ = nullptr;
+    WindowAdapterLite::GetInstance().UnregisterWMSConnectionChangedListener();
     return WMError::WM_OK;
 }
 

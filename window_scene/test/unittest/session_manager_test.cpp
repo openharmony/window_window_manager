@@ -365,6 +365,25 @@ HWTEST_F(SessionManagerTest, RegisterWindowManagerRecoverCallbackFunc, Function 
     sm_->RegisterWindowManagerRecoverCallbackFunc(testFunc);
     ASSERT_NE(sm_->windowManagerRecoverFunc_, nullptr);
 }
+
+/**
+ * @tc.name: UnregisterWMSConnectionChangedListener
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionManagerTest, UnregisterWMSConnectionChangedListener, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, sm_);
+
+    sm_->mockSessionManagerServiceProxy_ = nullptr;
+    auto ret = sm_->UnregisterWMSConnectionChangedListener();
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    sptr<IRemoteObject> remoteObject = sptr<IRemoteObjectMocker>::MakeSptr();
+    sm_->mockSessionManagerServiceProxy_ = iface_cast<IMockSessionManagerInterface>(remoteObject);
+    ret = sm_->UnregisterWMSConnectionChangedListener();
+    ASSERT_EQ(WMError::WM_OK, ret);
+}
 }
 }
 }
