@@ -2143,6 +2143,9 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, voi
             state_);
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    if (GetUIContentSharedPtr() != nullptr) {
+        shouldReNotifyHighlight_ = true;
+    }
     NotifySetUIContentComplete();
     OHOS::Ace::UIContentErrorCode aceRet = OHOS::Ace::UIContentErrorCode::NO_ERRORS;
     WMError initUIContentRet = InitUIContent(contentInfo, env, storage, setUIContentType, restoreType, ability, aceRet,
@@ -2796,7 +2799,7 @@ void WindowSessionImpl::SetRequestedOrientation(Orientation orientation, bool ne
     }
     TLOGI(WmsLogTag::WMS_MAIN, "id:%{public}u lastReqOrientation:%{public}u target:%{public}u state:%{public}u",
         GetPersistentId(), property_->GetRequestedOrientation(), orientation, state_);
-    if (!isNeededForciblySetOrientation(orientation)) { 
+    if (!isNeededForciblySetOrientation(orientation)) {
         return;
     }
     if (needAnimation) {
