@@ -58,6 +58,7 @@ public:
      */
     using WMSConnectionChangedCallbackFunc = std::function<void(int32_t, int32_t, bool)>;
     WMError RegisterWMSConnectionChangedListener(const WMSConnectionChangedCallbackFunc& callbackFunc);
+    WMError UnregisterWMSConnectionChangedListener();
     void OnWMSConnectionChanged(
         int32_t userId, int32_t screenId, bool isConnected, const sptr<ISessionManagerService>& sessionManagerService);
     using UserSwitchCallbackFunc = std::function<void()>;
@@ -92,6 +93,7 @@ private:
      * Window Recover
      */
     void RegisterSMSRecoverListener();
+    void UnregisterSMSRecoverListener();
 
     std::recursive_mutex mutex_;
     sptr<IMockSessionManagerInterface> mockSessionManagerServiceProxy_ = nullptr;
