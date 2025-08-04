@@ -235,6 +235,15 @@ HWTEST_F(WindowSceneSessionImplAnimationTest, SetWindowShadowRadius, TestSize.Le
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
     ret = window->SetWindowShadowRadius(1.0f);
     EXPECT_EQ(WMError::WM_OK, ret);
+
+    const std::string feature = "large_screen";
+    std::string deviceType = system::GetParameter("const.product.devicetype", "");
+    auto context = std::make_shared<MockAbilityContextImpl>();
+    window->context_ = context;
+    context->hapModuleInfo_ = std::make_shared<AppExecFwk::HapModuleInfo>();
+    context->hapModuleInfo_->requiredDeviceFeatures = {{deviceType, {feature}}};
+    ret = window->SetWindowShadowRadius(1.0f);
+    EXPECT_EQ(WMError::WM_OK, ret);
 }
 
 /**

@@ -1056,6 +1056,13 @@ HWTEST_F(WindowSceneSessionImplTest4, SetWindowTitle, TestSize.Level1)
     window->windowSystemConfig_.freeMultiWindowEnable_ = false;
     window->windowSystemConfig_.isSystemDecorEnable_ = false;
     EXPECT_EQ(WMError::WM_OK, window->SetWindowTitle(title));
+    const std::string feature = "large_screen";
+    std::string deviceType = system::GetParameter("const.product.devicetype", "");
+    auto context = std::make_shared<MockAbilityContextImpl>();
+    window->context_ = context;
+    context->hapModuleInfo_ = std::make_shared<AppExecFwk::HapModuleInfo>();
+    context->hapModuleInfo_->requiredDeviceFeatures = {{deviceType, {feature}}};
+    EXPECT_EQ(WMError::WM_OK, window->SetWindowTitle(title));
     EXPECT_EQ(WMError::WM_OK, window->Destroy(true));
 }
 
