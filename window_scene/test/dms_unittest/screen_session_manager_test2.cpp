@@ -1219,6 +1219,7 @@ HWTEST_F(ScreenSessionManagerTest, ConfigureDpi01, Function | SmallTest | Level3
     ScreenSessionManager::GetInstance().ConfigureDpi();
     EXPECT_TRUE(ScreenSessionManager::GetInstance().densityDpi_ ==
         static_cast<float>(PC_MODE_DPI) / BASELINE_DENSITY);
+    system::SetParameter("persist.sceneboard.ispcmode", "false");
 }
 }
 }
