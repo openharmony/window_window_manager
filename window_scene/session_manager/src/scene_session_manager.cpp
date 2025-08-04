@@ -6239,6 +6239,7 @@ WSError SceneSessionManager::SetBrightness(const sptr<SceneSession>& sceneSessio
 
 void SceneSessionManager::PostBrightnessTask(float brightness)
 {
+#ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
     bool postTaskRet = true;
     bool isPC = systemConfig_.IsPcWindow();
     if (std::fabs(brightness - UNDEFINED_BRIGHTNESS) < std::numeric_limits<float>::min()) {
@@ -6265,10 +6266,12 @@ void SceneSessionManager::PostBrightnessTask(float brightness)
     if (!postTaskRet) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "post task failed. task is SetBrightness");
     }
+#endif
 }
 
 WSError SceneSessionManager::UpdateBrightness(int32_t persistentId)
 {
+#ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
     if (systemConfig_.IsPcWindow()) {
         return WSError::WS_OK;
     }
@@ -6301,6 +6304,9 @@ WSError SceneSessionManager::UpdateBrightness(int32_t persistentId)
         }
         brightnessSessionId_ = sceneSession->GetPersistentId();
     }
+#else
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "Can not found the sub system of DisplayPowerMgr");
+#endif
     return WSError::WS_OK;
 }
 
