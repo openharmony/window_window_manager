@@ -25,6 +25,7 @@
 #include "session/host/include/scene_session.h"
 #include "session/host/include/main_session.h"
 #include "window_manager_agent.h"
+#include "window_manager_hilog.h"
 #include "session_manager.h"
 #include "zidl/window_manager_agent_interface.h"
 #include "mock/mock_accesstoken_kit.h"
@@ -38,6 +39,14 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+    std::string g_logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
+        const char *msg)
+    {
+        g_logMsg = msg;
+    }
+}
 namespace {
 const std::string EMPTY_DEVICE_ID = "";
 constexpr int WAIT_SLEEP_TIME = 1;
@@ -1285,6 +1294,103 @@ HWTEST_F(SceneSessionManagerTest2, ConfigSystemUIStatusBar01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ConfigFreeMultiWindowForDefaultDragResizeType01
+ * @tc.desc: call ConfigFreeMultiWindow and check the defaultDragResizeType_ default value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, ConfigFreeMultiWindowForDefaultDragResizeType01, TestSize.Level1)
+{
+    ssm_->systemConfig_.freeMultiWindowConfig_.defaultDragResizeType_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    ssm_->ConfigFreeMultiWindow();
+    ASSERT_EQ(ssm_->systemConfig_.freeMultiWindowConfig_.defaultDragResizeType_, DragResizeType::RESIZE_TYPE_UNDEFINED);
+}
+
+/**
+ * @tc.name: ConfigFreeMultiWindowForDefaultDragResizeType02
+ * @tc.desc: call ConfigFreeMultiWindow and check the defaultDragResizeType_ invalid string value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, ConfigFreeMultiWindowForDefaultDragResizeType02, TestSize.Level1)
+{
+    ssm_->systemConfig_.freeMultiWindowConfig_.defaultDragResizeType_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+        "<freeMultiWindow enable=\"true\">"
+        "<defaultDragResizeType>na</defaultDragResizeType>"
+        "</freeMultiWindow>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    ssm_->ConfigFreeMultiWindow();
+    ASSERT_EQ(ssm_->systemConfig_.freeMultiWindowConfig_.defaultDragResizeType_, DragResizeType::RESIZE_TYPE_UNDEFINED);
+}
+
+/**
+ * @tc.name: ConfigFreeMultiWindowForDefaultDragResizeType03
+ * @tc.desc: call ConfigFreeMultiWindow and check the defaultDragResizeType_ invalid int value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, ConfigFreeMultiWindowForDefaultDragResizeType03, TestSize.Level1)
+{
+    ssm_->systemConfig_.freeMultiWindowConfig_.defaultDragResizeType_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+        "<freeMultiWindow enable=\"true\">"
+        "<defaultDragResizeType>-2</defaultDragResizeType>"
+        "</freeMultiWindow>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    ssm_->ConfigFreeMultiWindow();
+    ASSERT_EQ(ssm_->systemConfig_.freeMultiWindowConfig_.defaultDragResizeType_, DragResizeType::RESIZE_TYPE_UNDEFINED);
+}
+
+/**
+ * @tc.name: ConfigFreeMultiWindowForDefaultDragResizeType04
+ * @tc.desc: call ConfigFreeMultiWindow and check the defaultDragResizeType_ exceeding the max value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, ConfigFreeMultiWindowForDefaultDragResizeType04, TestSize.Level1)
+{
+    ssm_->systemConfig_.freeMultiWindowConfig_.defaultDragResizeType_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+        "<freeMultiWindow enable=\"true\">"
+        "<defaultDragResizeType>999999</defaultDragResizeType>"
+        "</freeMultiWindow>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    ssm_->ConfigFreeMultiWindow();
+    ASSERT_EQ(ssm_->systemConfig_.freeMultiWindowConfig_.defaultDragResizeType_, DragResizeType::RESIZE_TYPE_UNDEFINED);
+}
+
+/**
+ * @tc.name: ConfigFreeMultiWindowForDefaultDragResizeType05
+ * @tc.desc: call ConfigFreeMultiWindow and check the defaultDragResizeType_ valid value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, ConfigFreeMultiWindowForDefaultDragResizeType05, TestSize.Level1)
+{
+    ssm_->systemConfig_.freeMultiWindowConfig_.defaultDragResizeType_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+        "<freeMultiWindow enable=\"true\">"
+        "<defaultDragResizeType>2</defaultDragResizeType>"
+        "</freeMultiWindow>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    ssm_->ConfigFreeMultiWindow();
+    ASSERT_EQ(ssm_->systemConfig_.freeMultiWindowConfig_.defaultDragResizeType_, DragResizeType::RESIZE_WHEN_DRAG_END);
+}
+
+/**
  * @tc.name: Init
  * @tc.desc: SceneSesionManager init
  * @tc.type: FUNC
@@ -1417,6 +1523,8 @@ HWTEST_F(SceneSessionManagerTest2, SetSessionContinueState, TestSize.Level1)
  */
 HWTEST_F(SceneSessionManagerTest2, SetSessionContinueState002, TestSize.Level1)
 {
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     MessageParcel* data = new MessageParcel();
     sptr<IRemoteObject> token = data->ReadRemoteObject();
     auto continueState = static_cast<ContinueState>(0);
@@ -1424,13 +1532,11 @@ HWTEST_F(SceneSessionManagerTest2, SetSessionContinueState002, TestSize.Level1)
     info.abilityName_ = "test1";
     info.bundleName_ = "test2";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    if (sceneSession == nullptr) {
-        delete data;
-        return;
-    }
+    ASSERT_NE(sceneSession, nullptr);
     ssm_->sceneSessionMap_.insert({ 1000, sceneSession });
     ssm_->SetSessionContinueState(token, continueState);
-    ASSERT_NE(sceneSession, nullptr);
+    EXPECT_TRUE(g_logMsg.find("in") != std::string::npos);
+    LOG_SetCallback(nullptr);
     delete data;
 }
 
@@ -1916,6 +2022,8 @@ HWTEST_F(SceneSessionManagerTest2, OnVirtualScreenDisconnected, TestSize.Level1)
     listener->OnVirtualScreenDisconnected(9999);
 
     ASSERT_NE(nullptr, ssm_);
+    ssm_->screenRSBlackListConfigMap_.clear();
+    ssm_->sessionBlackListInfoMap_.clear();
 
     SessionInfo info;
     info.abilityName_ = "OnVirtualScreenDisconnected";
@@ -1924,8 +2032,16 @@ HWTEST_F(SceneSessionManagerTest2, OnVirtualScreenDisconnected, TestSize.Level1)
     auto ret = ssm_->OnVirtualScreenDisconnected(1);
     EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
 
-    ret = ssm_->OnVirtualScreenDisconnected(10);
+    ssm_->sessionBlackListInfoMap_[1];
+    ret = ssm_->OnVirtualScreenDisconnected(1);
     EXPECT_EQ(WMError::WM_OK, ret);
+
+    ssm_->screenRSBlackListConfigMap_[1];
+    ret = ssm_->OnVirtualScreenDisconnected(1);
+    EXPECT_EQ(WMError::WM_OK, ret);
+
+    ssm_->screenRSBlackListConfigMap_.clear();
+    ssm_->sessionBlackListInfoMap_.clear();
 }
 
 /**
@@ -2002,6 +2118,9 @@ HWTEST_F(SceneSessionManagerTest2, RemoveSessionFromBlackList, TestSize.Level1)
     sceneSession->persistentId_ = 9996;
     ret = ssm_->RemoveSessionFromBlackList(sceneSession);
     EXPECT_EQ(WMError::WM_OK, ret);
+
+    ret = ssm_->RemoveSessionFromBlackList(nullptr);
+    EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
 }
 
 /**

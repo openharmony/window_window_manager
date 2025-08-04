@@ -1228,14 +1228,14 @@ bool WindowSessionProperty::GetIsAppSupportPhoneInPc() const
     return isAppSupportPhoneInPc_;
 }
 
-void WindowSessionProperty::SetIsPcAppInPad(bool isPcAppInPad)
+void WindowSessionProperty::SetIsPcAppInPad(bool isPcAppInLargeScreenDevice)
 {
-    isPcAppInPad_ = isPcAppInPad;
+    isPcAppInLargeScreenDevice_ = isPcAppInLargeScreenDevice;
 }
 
 bool WindowSessionProperty::GetIsPcAppInPad() const
 {
-    return isPcAppInPad_;
+    return isPcAppInLargeScreenDevice_;
 }
 
 void WindowSessionProperty::SetSubWindowLevel(uint32_t subWindowLevel)
@@ -1256,6 +1256,16 @@ void WindowSessionProperty::SetSubWindowZLevel(int32_t zLevel)
 int32_t WindowSessionProperty::GetSubWindowZLevel() const
 {
     return zLevel_;
+}
+
+void WindowSessionProperty::SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo)
+{
+    windowAnchorInfo_ = windowAnchorInfo;
+}
+
+WindowAnchorInfo WindowSessionProperty::GetWindowAnchorInfo() const
+{
+    return windowAnchorInfo_;
 }
 
 void WindowSessionProperty::SetZIndex(int32_t zIndex)
@@ -1340,7 +1350,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         MarshallingWindowMask(parcel) &&
         parcel.WriteParcelable(&keyboardLayoutParams_) &&
         parcel.WriteBool(isAppSupportPhoneInPc_) &&
-        parcel.WriteBool(isPcAppInPad_) &&
+        parcel.WriteBool(isPcAppInLargeScreenDevice_) &&
         parcel.WriteString(appInstanceKey_) && parcel.WriteBool(isSystemKeyboard_) &&
         parcel.WriteUint32(avoidAreaOption_) && parcel.WriteBool(isWindowDelayRaiseEnabled_) &&
         parcel.WriteUint8(backgroundAlpha_) && parcel.WriteParcelable(&keyboardEffectOption_) &&
@@ -1351,7 +1361,11 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteParcelable(compatibleModeProperty_) && parcel.WriteBool(subWindowOutlineEnabled_) &&
         parcel.WriteUint32(windowModeSupportType_) &&
         MarshallingShadowsInfo(parcel) &&
-        MarshallingFbTemplateInfo(parcel);
+        MarshallingFbTemplateInfo(parcel) &&
+        MarshallingWindowAnchorInfo(parcel) &&
+        parcel.WriteBool(isPcAppInpadSpecificSystemBarInvisible_) &&
+        parcel.WriteBool(isPcAppInpadOrientationLandscape_) &&
+        parcel.WriteBool(isPcAppInpadCompatibleMode_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1462,6 +1476,10 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetWindowModeSupportType(parcel.ReadUint32());
     UnmarshallingShadowsInfo(parcel, property);
     UnmarshallingFbTemplateInfo(parcel, property);
+    UnmarshallingWindowAnchorInfo(parcel, property);
+    property->SetPcAppInpadSpecificSystemBarInvisible(parcel.ReadBool());
+    property->SetPcAppInpadOrientationLandscape(parcel.ReadBool());
+    property->SetPcAppInpadCompatibleMode(parcel.ReadBool());
     return property;
 }
 
@@ -1540,7 +1558,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     }
     collaboratorType_ = property->collaboratorType_;
     isAppSupportPhoneInPc_ = property->isAppSupportPhoneInPc_;
-    isPcAppInPad_ = property->isPcAppInPad_;
+    isPcAppInLargeScreenDevice_ = property->isPcAppInLargeScreenDevice_;
     subWindowLevel_ = property->subWindowLevel_;
     realParentId_ = property->realParentId_;
     uiExtensionUsage_ = property->uiExtensionUsage_;
@@ -1564,6 +1582,10 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     isFollowScreenChange_ = property->isFollowScreenChange_;
     subWindowOutlineEnabled_ = property->subWindowOutlineEnabled_;
     shadowsInfo_ = property->shadowsInfo_;
+    windowAnchorInfo_ = property->windowAnchorInfo_;
+    isPcAppInpadSpecificSystemBarInvisible_ = property->isPcAppInpadSpecificSystemBarInvisible_;
+    isPcAppInpadOrientationLandscape_ = property->isPcAppInpadOrientationLandscape_;
+    isPcAppInpadCompatibleMode_ = property->isPcAppInpadCompatibleMode_;
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)
@@ -2065,6 +2087,8 @@ WindowLimits WindowSessionProperty::GetUserWindowLimits() const
 
 void WindowSessionProperty::SetConfigWindowLimitsVP(const WindowLimits& windowConfigLimitsVP)
 {
+    TLOGI(WmsLogTag::WMS_LAYOUT, "id:%{public}d, windowLimits:%{public}s", GetPersistentId(),
+        windowConfigLimitsVP.ToString().c_str());
     configLimitsVP_ = windowConfigLimitsVP;
 }
 
@@ -2255,6 +2279,11 @@ bool WindowSessionProperty::IsWindowLimitDisabled() const
     return compatibleModeProperty_ && compatibleModeProperty_->IsWindowLimitDisabled();
 }
 
+bool WindowSessionProperty::IsDecorFullscreenDisabled() const
+{
+    return compatibleModeProperty_ && compatibleModeProperty_->IsDecorFullscreenDisabled();
+}
+
 bool WindowSessionProperty::IsSupportRotateFullScreen() const
 {
     return compatibleModeProperty_ && compatibleModeProperty_->IsSupportRotateFullScreen();
@@ -2268,6 +2297,36 @@ bool WindowSessionProperty::IsAdaptToSubWindow() const
 bool WindowSessionProperty::IsAdaptToSimulationScale() const
 {
     return compatibleModeProperty_ && compatibleModeProperty_->IsAdaptToSimulationScale();
+}
+
+void WindowSessionProperty::SetPcAppInpadCompatibleMode(bool enabled)
+{
+    isPcAppInpadCompatibleMode_ = enabled;
+}
+
+void WindowSessionProperty::SetPcAppInpadSpecificSystemBarInvisible(bool isPcAppInpadSpecificSystemBarInvisible)
+{
+    isPcAppInpadSpecificSystemBarInvisible_ = isPcAppInpadSpecificSystemBarInvisible;
+}
+
+void WindowSessionProperty::SetPcAppInpadOrientationLandscape(bool isPcAppInpadOrientationLandscape)
+{
+    isPcAppInpadOrientationLandscape_ = isPcAppInpadOrientationLandscape;
+}
+
+bool WindowSessionProperty::GetPcAppInpadCompatibleMode() const
+{
+    return isPcAppInpadCompatibleMode_;
+}
+
+bool WindowSessionProperty::GetPcAppInpadSpecificSystemBarInvisible() const
+{
+    return isPcAppInpadSpecificSystemBarInvisible_;
+}
+
+bool WindowSessionProperty::GetPcAppInpadOrientationLandscape() const
+{
+    return isPcAppInpadOrientationLandscape_;
 }
 
 void CompatibleModeProperty::SetIsAdaptToImmersive(bool isAdaptToImmersive)
@@ -2370,6 +2429,16 @@ bool CompatibleModeProperty::IsWindowLimitDisabled() const
     return disableWindowLimit_;
 }
 
+void CompatibleModeProperty::SetDisableDecorFullscreen(bool disableDecorFullscreen)
+{
+    disableDecorFullscreen_ = disableDecorFullscreen;
+}
+
+bool CompatibleModeProperty::IsDecorFullscreenDisabled() const
+{
+    return disableDecorFullscreen_;
+}
+
 void CompatibleModeProperty::SetIsSupportRotateFullScreen(bool isSupportRotateFullScreen)
 {
     isSupportRotateFullScreen_ = isSupportRotateFullScreen;
@@ -2412,6 +2481,7 @@ bool CompatibleModeProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(disableFullScreen_) &&
         parcel.WriteBool(disableSplit_) &&
         parcel.WriteBool(disableWindowLimit_) &&
+        parcel.WriteBool(disableDecorFullscreen_) &&
         parcel.WriteBool(isSupportRotateFullScreen_) &&
         parcel.WriteBool(isAdaptToSubWindow_) &&
         parcel.WriteBool(isAdaptToSimulationScale_);
@@ -2433,6 +2503,7 @@ CompatibleModeProperty* CompatibleModeProperty::Unmarshalling(Parcel& parcel)
     property->disableFullScreen_ = parcel.ReadBool();
     property->disableSplit_ = parcel.ReadBool();
     property->disableWindowLimit_ = parcel.ReadBool();
+    property->disableDecorFullscreen_ = parcel.ReadBool();
     property->isSupportRotateFullScreen_ = parcel.ReadBool();
     property->isAdaptToSubWindow_ = parcel.ReadBool();
     property->isAdaptToSimulationScale_ = parcel.ReadBool();
@@ -2453,6 +2524,21 @@ void CompatibleModeProperty::CopyFrom(const sptr<CompatibleModeProperty>& proper
     disableFullScreen_ = property->disableFullScreen_;
     disableWindowLimit_ = property->disableWindowLimit_;
     isAdaptToSimulationScale_= property->isAdaptToSimulationScale_;
+}
+
+bool WindowSessionProperty::MarshallingWindowAnchorInfo(Parcel& parcel) const
+{
+    return parcel.WriteParcelable(&windowAnchorInfo_);
+}
+
+void WindowSessionProperty::UnmarshallingWindowAnchorInfo(Parcel& parcel, WindowSessionProperty* property)
+{
+    sptr<WindowAnchorInfo> windowAnchorInfo = parcel.ReadParcelable<WindowAnchorInfo>();
+    if (windowAnchorInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "windowAnchorInfo is null");
+        return;
+    }
+    property->SetWindowAnchorInfo(*windowAnchorInfo);
 }
 
 bool WindowSessionProperty::MarshallingShadowsInfo(Parcel& parcel) const

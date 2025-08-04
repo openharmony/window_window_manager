@@ -70,12 +70,8 @@ private:
         ThrowSlipWindowMode startWindowMode, ThrowSlipMode throwMode) const;
 
     bool IsSupportEnterWaterfallMode(SuperFoldStatus status, bool hasSystemKeyboard) const;
-    void FoldStatusChangeForFullScreenWaterfallMode(
-        DisplayId displayId, SuperFoldStatus status, SuperFoldStatus prevStatus);
     void FoldStatusChangeForSupportEnterWaterfallMode(
         DisplayId displayId, SuperFoldStatus status, SuperFoldStatus prevStatus);
-    void SystemKeyboardStatusChangeForFullScreenWaterfallMode(
-        DisplayId displayId, bool hasSystemKeyboard);
     void SystemKeyboardStatusChangeForSupportEnterWaterfallMode(
         DisplayId displayId, bool hasSystemKeyboard);
 

@@ -40,6 +40,14 @@ constexpr float MAX_BRAND_CONTENT_WIDTH_VP = 400.0;       // 400.0 indicates max
 constexpr float MIN_BRAND_CONTENT_HEIGHT_VP = 80.0;       // 80.0 indicates min brand content height of windowRect
 constexpr float MIN_RECT_HEIGHT_VP = 100.0;               // 100.0 indicates min rect height of windowRect
 constexpr float SIDE_DISTANCE_VP = 16.0;                  // 16.0 indicates side distance of windowRect
+constexpr float WIDTH_THRESHOLD_SMALL_VP = 320.0;         // Small threshold, use it when windowWidth <=320
+constexpr float WIDTH_THRESHOLD_MEDIUM_VP = 600.0;        // Medium threshold, use it when windowWidth <=600
+constexpr float WIDTH_THRESHOLD_LARGE_VP = 840.0;         // Large threshold, use it when windowWidth <=840
+constexpr float ICON_SIZE_SMALL_VP = 128.0;               // 128.0 indicates small app icon sideLength
+constexpr float ICON_SIZE_MEDIUM_VP = 192.0;              // 192.0 indicates medium app icon sideLength
+constexpr float ICON_SIZE_LARGE_VP = 256.0;               // 256.0 indicates large app icon sideLength
+constexpr float ASPECT_RATIO_1 = 9.0f / 7.2f;             // windowRect Aspect ratio threshold 9 : 7.2
+constexpr float ASPECT_RATIO_2 = 9.0f / 10.8f;            // windwoRect Aspect ratio threshold 9 : 10.8
 constexpr float EIGHTY_PERCENT = 0.8;                     // 0.8 indicates eighty percent
 constexpr float FORTY_PERCENT = 0.4;                      // 0.4 indicates forty percent
 constexpr float SEVENTY_PERCENT = 0.7;                    // 0.7 indicates seventy percent
@@ -55,6 +63,23 @@ bool IsValidPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap)
     return pixelMap->GetHeight() > 0 && pixelMap->GetWidth() > 0;
 }
 
+template <typename T>
+void TryDrawResource(const std::shared_ptr<Rosen::ResourceInfo>& resource, uint32_t frameIdx, T&& drawFunc,
+    const char* resourceName)
+{
+    if (!resource || resource->pixelMaps.empty()) {
+        TLOGD(WmsLogTag::WMS_PATTERN, "draw failed, null resource.");
+        return;
+    }
+    uint32_t idx = (resource->pixelMaps.size() > 1) ? frameIdx : 0;
+    const auto& map = resource->pixelMaps[idx];
+    if (IsValidPixelMap(map)) {
+        if (!drawFunc(map)) {
+            TLOGD(WmsLogTag::WMS_PATTERN, "draw StartingWindow %{public}s failed.", resourceName);
+        }
+    }
+}
+
 bool IsValidRect(const Rect& targetRect, const Rect& winRect)
 {
     bool valid = targetRect.posX_ > 0
@@ -64,6 +89,34 @@ bool IsValidRect(const Rect& targetRect, const Rect& winRect)
               && (targetRect.posX_ + targetRect.width_) < winRect.width_
               && (targetRect.posY_ + targetRect.height_) < winRect.height_;
     return valid;
+}
+
+Rect GetAppIconRect(const Rect& winRect, const float ratio)
+{
+    float width  = static_cast<float>(winRect.width_);
+    float height = static_cast<float>(winRect.height_);
+    float aspectRatio = width / height;
+    float sideLen = ICON_SIZE_LARGE_VP * ratio;
+    if (width <= WIDTH_THRESHOLD_SMALL_VP * ratio) {
+        sideLen = ICON_SIZE_SMALL_VP * ratio;
+    } else if (width <= WIDTH_THRESHOLD_MEDIUM_VP * ratio) {
+        sideLen = MathHelper::GreatNotEqual(aspectRatio, ASPECT_RATIO_2) ?
+            ICON_SIZE_SMALL_VP * ratio : ICON_SIZE_MEDIUM_VP * ratio;
+    } else if (width <= WIDTH_THRESHOLD_LARGE_VP * ratio) {
+        sideLen = MathHelper::GreatNotEqual(aspectRatio, ASPECT_RATIO_1) ?
+            ICON_SIZE_MEDIUM_VP * ratio : ICON_SIZE_LARGE_VP * ratio;
+    }
+    float posX = (width - sideLen) * CENTER_IN_RECT;
+    float posY = (SEVENTY_PERCENT * height - FIXED_TOP_SAFE_AREA_HEIGHT_VP * ratio - sideLen) *
+        CENTER_IN_RECT + FIXED_TOP_SAFE_AREA_HEIGHT_VP * ratio;
+
+    Rosen::Rect appIconRect {
+        static_cast<int32_t>(posX),
+        static_cast<int32_t>(posY),
+        static_cast<uint32_t>(sideLen),
+        static_cast<uint32_t>(sideLen)
+    };
+    return appIconRect;
 }
 
 Rect GetAboveRect(const Rect& winRect, const float ratio)
@@ -106,7 +159,7 @@ Rect GetBelowRect(const Rect& winRect, const float ratio)
 }
 
 void FitAndDraw(const std::shared_ptr<Media::PixelMap>& pixelMap, const Rect& targetRect,
-    const std::shared_ptr<Drawing::Canvas>& canvas, ImageFit fit)
+    Drawing::Canvas& canvas, ImageFit fit)
 {
     auto rsImage = std::make_shared<Rosen::RSImage>();
     if (rsImage == nullptr) {
@@ -115,21 +168,21 @@ void FitAndDraw(const std::shared_ptr<Media::PixelMap>& pixelMap, const Rect& ta
     }
     rsImage->SetPixelMap(pixelMap);
     rsImage->SetImageFit(int(fit));
-    canvas->Save();
-    canvas->Translate(targetRect.posX_, targetRect.posY_);
+    canvas.Save();
+    canvas.Translate(targetRect.posX_, targetRect.posY_);
     rsImage->CanvasDrawImage(
-        *canvas,
+        canvas,
         Drawing::Rect(
             targetRect.posX_,
             targetRect.posY_,
             targetRect.posX_ + targetRect.width_,
             targetRect.posY_ + targetRect.height_),
         Drawing::SamplingOptions());
-    canvas->Restore();
+    canvas.Restore();
 }
 
-bool DoDrawAppIconOrIllustration(const std::shared_ptr<Media::PixelMap>& pixelMap, const Rect& winRect,
-    const std::shared_ptr<Drawing::Canvas>& canvas, const float ratio, ImageFit fit)
+bool DoDrawIllustration(const std::shared_ptr<Media::PixelMap>& pixelMap, const Rect& winRect,
+    Drawing::Canvas& canvas, const float ratio, ImageFit fit)
 {
     auto aboveRect = GetAboveRect(winRect, ratio);
     if (!IsValidRect(aboveRect, winRect)) {
@@ -140,8 +193,20 @@ bool DoDrawAppIconOrIllustration(const std::shared_ptr<Media::PixelMap>& pixelMa
     return true;
 }
 
+bool DoDrawAppIcon(const std::shared_ptr<Media::PixelMap>& pixelMap, const Rect& winRect,
+    Drawing::Canvas& canvas, const float ratio, ImageFit fit)
+{
+    auto appRect = GetAppIconRect(winRect, ratio);
+    if (!IsValidRect(appRect, winRect)) {
+        TLOGD(WmsLogTag::WMS_PATTERN, "appRect is invalid.");
+        return false;
+    }
+    FitAndDraw(pixelMap, appRect, canvas, fit);
+    return true;
+}
+
 bool DoDrawBranding(const std::shared_ptr<Media::PixelMap>& pixelMap, const Rect& winRect,
-    const std::shared_ptr<Drawing::Canvas>& canvas, const float ratio, ImageFit fit)
+    Drawing::Canvas& canvas, const float ratio, ImageFit fit)
 {
     if ((winRect.height_ * THIRTY_PERCENT) < MIN_RECT_HEIGHT_VP * ratio) {
         TLOGD(WmsLogTag::WMS_PATTERN, "rect is invalid.");
@@ -157,7 +222,7 @@ bool DoDrawBranding(const std::shared_ptr<Media::PixelMap>& pixelMap, const Rect
 }
 
 bool DoDrawBackgroundImage(const std::shared_ptr<Media::PixelMap>& pixelMap, const Rect& winRect,
-    const std::shared_ptr<Drawing::Canvas>& canvas, const std::string &fit)
+    Drawing::Canvas& canvas, const std::string &fit)
 {
     const std::unordered_map<std::string, ImageFit> drawStrategies = {
         { "Fill", ImageFit::FILL },
@@ -568,7 +633,8 @@ bool SurfaceDraw::DrawMasking(std::shared_ptr<RSSurfaceNode> surfaceNode, Rect s
 }
 
 bool SurfaceDraw::DrawCustomStartingWindow(const std::shared_ptr<RSSurfaceNode>& surfaceNode,
-    const Rect& rect, const std::shared_ptr<Rosen::StartingWindowPageDrawInfo>& info, const float ratio)
+    const Rect& rect, const std::shared_ptr<Rosen::StartingWindowPageDrawInfo>& info,
+    float ratio, const std::array<uint32_t, size_t(StartWindowResType::Count)>& frameIndex)
 {
     int32_t winHeight = static_cast<int32_t>(rect.height_);
     int32_t winWidth = static_cast<int32_t>(rect.width_);
@@ -582,8 +648,8 @@ bool SurfaceDraw::DrawCustomStartingWindow(const std::shared_ptr<RSSurfaceNode>&
         TLOGD(WmsLogTag::WMS_PATTERN, "buffer or virAddr is nullptr");
         return false;
     }
-    if (!DoDrawCustomStartingWindow(buffer, rect, info, ratio)) {
-        TLOGD(WmsLogTag::WMS_PATTERN, "draw background image failed");
+    if (!DoDrawCustomStartingWindow(buffer, rect, info, ratio, frameIndex)) {
+        TLOGD(WmsLogTag::WMS_PATTERN, "draw Custom startingwindow page failed");
         return false;
     }
     OHOS::BufferFlushConfig flushConfig = {
@@ -601,7 +667,8 @@ bool SurfaceDraw::DrawCustomStartingWindow(const std::shared_ptr<RSSurfaceNode>&
 }
 
 bool SurfaceDraw::DoDrawCustomStartingWindow(const sptr<OHOS::SurfaceBuffer>& buffer, const Rect& rect,
-    const std::shared_ptr<Rosen::StartingWindowPageDrawInfo>& info, const float ratio)
+    const std::shared_ptr<Rosen::StartingWindowPageDrawInfo>& info, const float ratio,
+    const std::array<uint32_t, size_t(StartWindowResType::Count)>& frameIndex)
 {
     if (info == nullptr || rect.width_ <= 0 || rect.height_ <= 0 || ratio  <= 0) {
         TLOGD(WmsLogTag::WMS_PATTERN, "info is nullptr or invalid rect and ratio");
@@ -612,33 +679,24 @@ bool SurfaceDraw::DoDrawCustomStartingWindow(const sptr<OHOS::SurfaceBuffer>& bu
     Drawing::Bitmap customDrawBitmap;
     Drawing::BitmapFormat format { Drawing::ColorType::COLORTYPE_RGBA_8888, Drawing::AlphaType::ALPHATYPE_OPAQUE };
     customDrawBitmap.Build(alignWidth, rect.height_, format);
-    auto canvas = std::make_shared<Drawing::Canvas>();
-    if (canvas == nullptr) {
-        TLOGD(WmsLogTag::WMS_PATTERN, "canvas is nullptr");
-        return false;
-    }
-    canvas->Bind(customDrawBitmap);
-    canvas->Clear(info->bgColor);
+    Drawing::Canvas canvas;
+    canvas.Bind(customDrawBitmap);
+    canvas.Clear(info->bgColor);
+    TryDrawResource(info->bgImage, frameIndex[(size_t)StartWindowResType::BgImage],
+        [&](const auto& map) { return DoDrawBackgroundImage(map, rect, canvas, info->startWindowBackgroundImageFit); },
+        "background image");
 
-    if (IsValidPixelMap(info->bgImagePixelMap)) {
-        if (!DoDrawBackgroundImage(info->bgImagePixelMap, rect, canvas, info->startWindowBackgroundImageFit)) {
-            TLOGD(WmsLogTag::WMS_PATTERN, "draw background image failed");
-        }
-    }
-    if (IsValidPixelMap(info->brandingPixelMap)) {
-        if (!DoDrawBranding(info->brandingPixelMap, rect, canvas, ratio, ImageFit::SCALE_DOWN)) {
-            TLOGD(WmsLogTag::WMS_PATTERN, "draw branding image failed");
-        }
-    }
-    if (IsValidPixelMap(info->appIconPixelMap)) {
-        if (!DoDrawAppIconOrIllustration(info->appIconPixelMap, rect, canvas, ratio, ImageFit::CONTAIN)) {
-            TLOGD(WmsLogTag::WMS_PATTERN, "draw appIcon image failed");
-        }
-    }
-    if (IsValidPixelMap(info->illustrationPixelMap)) {
-        if (!DoDrawAppIconOrIllustration(info->illustrationPixelMap, rect, canvas, ratio, ImageFit::SCALE_DOWN))
-            TLOGD(WmsLogTag::WMS_PATTERN, "draw illustraction image failed");
-    }
+    TryDrawResource(info->branding, frameIndex[(size_t)StartWindowResType::Branding],
+        [&](const auto& map) { return DoDrawBranding(map, rect, canvas, ratio, ImageFit::SCALE_DOWN); },
+        "branding image");
+
+    TryDrawResource(info->illustration, frameIndex[(size_t)StartWindowResType::Illustration],
+        [&](const auto& map) { return DoDrawIllustration(map, rect, canvas, ratio, ImageFit::SCALE_DOWN); },
+        "illustration image");
+
+    TryDrawResource(info->appIcon, frameIndex[(size_t)StartWindowResType::AppIcon],
+        [&](const auto& map) { return DoDrawAppIcon(map, rect, canvas, ratio, ImageFit::CONTAIN); },
+        "app icon image");
     int32_t bufferSize = bufferStride * rect.height_;
     uint8_t* bitmapAddr = static_cast<uint8_t*>(customDrawBitmap.GetPixels());
     auto addr = static_cast<uint8_t *>(buffer->GetVirAddr());

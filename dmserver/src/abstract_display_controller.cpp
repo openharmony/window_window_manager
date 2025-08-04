@@ -171,16 +171,15 @@ void AbstractDisplayController::OnAbstractScreenDisconnect(sptr<AbstractScreen> 
         TLOGE(WmsLogTag::DMS, "the information of the screen is wrong");
         return;
     }
-    TLOGI(WmsLogTag::DMS, "disconnect screen. id:%{public}" PRIu64"", absScreen->dmsId_);
-    sptr<AbstractScreenGroup> screenGroup;
-    DisplayId absDisplayId = DISPLAY_ID_INVALID;
-    sptr<AbstractDisplay> abstractDisplay = nullptr;
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    screenGroup = absScreen->GetGroup();
+    sptr<AbstractScreenGroup> screenGroup = absScreen->GetGroup();
     if (screenGroup == nullptr) {
         TLOGE(WmsLogTag::DMS, "the group information of the screen is wrong");
         return;
     }
+
+    TLOGI(WmsLogTag::DMS, "disconnect screen. id:%{public}" PRIu64"", absScreen->dmsId_);
+    DisplayId absDisplayId = DISPLAY_ID_INVALID;
+    sptr<AbstractDisplay> abstractDisplay = nullptr;
     if (screenGroup->combination_ == ScreenCombination::SCREEN_ALONE
         || screenGroup->combination_ == ScreenCombination::SCREEN_MIRROR) {
         absDisplayId = ProcessNormalScreenDisconnected(absScreen, screenGroup, abstractDisplay);
@@ -193,14 +192,17 @@ void AbstractDisplayController::OnAbstractScreenDisconnect(sptr<AbstractScreen> 
         TLOGE(WmsLogTag::DMS, "the displayId of the disconnected expand screen was not found");
         return;
     }
+
     if (screenGroup->combination_ == ScreenCombination::SCREEN_ALONE
         || screenGroup->combination_ == ScreenCombination::SCREEN_MIRROR) {
         if (screenGroup->GetChildCount() == 0) {
-            abstractDisplayMap_.erase(absDisplayId);
+            std::lock_guard<std::recursive_mutex> lock(mutex_);
             DisplayManagerAgentController::GetInstance().OnDisplayDestroy(absDisplayId);
+            abstractDisplayMap_.erase(absDisplayId);
         }
     } else if (screenGroup->combination_ == ScreenCombination::SCREEN_EXPAND) {
         SetDisplayStateChangeListener(abstractDisplay, DisplayStateChangeType::DESTROY);
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
         DisplayManagerAgentController::GetInstance().OnDisplayDestroy(absDisplayId);
         abstractDisplayMap_.erase(absDisplayId);
     } else {
@@ -360,23 +362,29 @@ void AbstractDisplayController::ProcessDisplayCompression(sptr<AbstractScreen> a
 
 sptr<AbstractDisplay> AbstractDisplayController::GetAbstractDisplayByAbsScreen(sptr<AbstractScreen> absScreen)
 {
-    sptr<AbstractDisplay> abstractDisplay = nullptr;
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    auto iter = abstractDisplayMap_.begin();
-    for (; iter != abstractDisplayMap_.end(); iter++) {
-        if (iter->second->GetAbstractScreenId() == absScreen->dmsId_) {
-            abstractDisplay = iter->second;
-            TLOGD(WmsLogTag::DMS, "find abstract display of the screen. display %{public}" PRIu64", screen"
-                " %{public}" PRIu64"", abstractDisplay->GetId(), absScreen->dmsId_);
-            break;
-        }
+    if (absScreen == nullptr) {
+        TLOGE(WmsLogTag::DMS, "absScreen is invaild");
+        return nullptr;
     }
     sptr<AbstractScreenGroup> group = absScreen->GetGroup();
     if (group == nullptr) {
         TLOGE(WmsLogTag::DMS, "cannot get screen group");
         return nullptr;
     }
-    if (iter == abstractDisplayMap_.end()) {
+    sptr<AbstractDisplay> abstractDisplay = nullptr;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        auto iter = abstractDisplayMap_.begin();
+        for (; iter != abstractDisplayMap_.end(); iter++) {
+            if (iter->second->GetAbstractScreenId() == absScreen->dmsId_) {
+                abstractDisplay = iter->second;
+                TLOGD(WmsLogTag::DMS, "find abstract display of the screen. display %{public}" PRIu64", screen"
+                    " %{public}" PRIu64"", abstractDisplay->GetId(), absScreen->dmsId_);
+                break;
+            }
+        }
+    }
+    if (abstractDisplay == nullptr) {
         if (group->combination_ == ScreenCombination::SCREEN_ALONE
             || group->combination_ == ScreenCombination::SCREEN_EXPAND) {
             TLOGE(WmsLogTag::DMS, "Screen combination is SCREEN_ALONE or SCREEN_EXPAND, cannot find abstract "
@@ -387,7 +395,6 @@ sptr<AbstractDisplay> AbstractDisplayController::GetAbstractDisplayByAbsScreen(s
         } else {
             TLOGE(WmsLogTag::DMS, "Unknown combination");
         }
-        return nullptr;
     }
     return abstractDisplay;
 }

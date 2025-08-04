@@ -451,7 +451,7 @@ std::shared_ptr<RSUIContext> WindowNode::GetRSUIContext() const
             }
         }
     }
-    TLOGD(WmsLogTag::WMS_RS_CLI_MULTI_INST, "%{public}s",
+    TLOGD(WmsLogTag::WMS_SCB, "%{public}s",
           RSAdapterUtil::RSUIContextToStr(rsUIContext).c_str());
     return rsUIContext;
 }

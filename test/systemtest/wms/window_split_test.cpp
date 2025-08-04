@@ -15,6 +15,7 @@
 
 // gtest
 #include <gtest/gtest.h>
+#include "modifier_render_thread/rs_modifiers_draw_thread.h"
 #include "window_test_utils.h"
 #include "wm_common.h"
 using namespace testing;
@@ -39,7 +40,12 @@ private:
 
 void WindowSplitTest::SetUpTestCase() {}
 
-void WindowSplitTest::TearDownTestCase() {}
+void WindowSplitTest::TearDownTestCase()
+{
+#ifdef RS_ENABLE_VK
+    RSModifiersDrawThread::Destroy();
+#endif
+}
 
 void WindowSplitTest::SetUp()
 {

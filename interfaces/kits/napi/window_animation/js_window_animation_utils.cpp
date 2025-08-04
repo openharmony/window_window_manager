@@ -192,8 +192,11 @@ napi_value ConvertWindowAnimationOptionToJsValue(napi_env env,
             napi_set_named_property(env, configJsValue, "duration", CreateJsValue(env, animationConfig.duration));
             break;
         }
-        case WindowAnimationCurve::INTERPOLATION_SPRING:
         case WindowAnimationCurve::CUBIC_BEZIER: {
+            napi_set_named_property(env, configJsValue, "duration", CreateJsValue(env, animationConfig.duration));
+            [[fallthrough]];
+        }
+        case WindowAnimationCurve::INTERPOLATION_SPRING: {
             napi_value params = nullptr;
             napi_create_array(env, &params);
             for (uint32_t i = 0; i < ANIMATION_PARAM_SIZE; ++i) {
@@ -327,6 +330,11 @@ bool CheckWindowAnimationOption(napi_env env, WindowAnimationOption& animationCo
             break;
         }
         case WindowAnimationCurve::CUBIC_BEZIER: {
+            if (animationConfig.duration > ANIMATION_MAX_DURATION) {
+                TLOGE(WmsLogTag::WMS_ANIMATION, "Duration is invalid: %{public}u", animationConfig.duration);
+                result = WmErrorCode::WM_ERROR_ILLEGAL_PARAM;
+                return false;
+            }
             break;
         }
         default:
@@ -360,8 +368,15 @@ bool ConvertWindowAnimationOptionFromJsValue(napi_env env, napi_value jsAnimatio
             animationConfig.duration = duration;
             break;
         }
-        case static_cast<uint32_t>(WindowAnimationCurve::INTERPOLATION_SPRING):
         case static_cast<uint32_t>(WindowAnimationCurve::CUBIC_BEZIER): {
+            if (!ParseJsValue(jsAnimationConfig, env, "duration", duration)) {
+                result = WmErrorCode::WM_ERROR_INVALID_PARAM;
+                return false;
+            }
+            animationConfig.duration = duration;
+            [[fallthrough]];
+        }
+        case static_cast<uint32_t>(WindowAnimationCurve::INTERPOLATION_SPRING): {
             napi_value paramsValue = nullptr;
             napi_get_named_property(env, jsAnimationConfig, "param", &paramsValue);
             for (uint32_t i = 0; i < ANIMATION_PARAM_SIZE; ++i) {

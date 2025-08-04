@@ -160,9 +160,9 @@ HWTEST_F(RootSceneTest, UpdateConfigurationForAll, TestSize.Level1)
  */
 HWTEST_F(RootSceneTest, RegisterInputEventListener01, TestSize.Level1)
 {
-    RootScene rootScene;
-    rootScene.RegisterInputEventListener();
-    ASSERT_EQ(1, rootScene.GetWindowId());
+    sptr<RootScene> rootScene = sptr<RootScene>::MakeSptr();
+    rootScene->RegisterInputEventListener();
+    ASSERT_EQ(1, rootScene->GetWindowId());
 }
 
 /**
@@ -244,6 +244,32 @@ HWTEST_F(RootSceneTest, SetUiDvsyncSwitchErr, TestSize.Level1)
     RootScene rootScene;
     rootScene.SetUiDvsyncSwitch(true);
     rootScene.SetUiDvsyncSwitch(false);
+    ASSERT_EQ(1, rootScene.GetWindowId());
+}
+
+/**
+ * @tc.name: SetTouchEvent
+ * @tc.desc: SetTouchEvent Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, SetTouchEventSucc, TestSize.Level1)
+{
+    RootScene rootScene;
+    rootScene.SetTouchEvent(0);
+    rootScene.SetTouchEvent(1);
+    ASSERT_EQ(1, rootScene.GetWindowId());
+}
+
+/**
+ * @tc.name: SetTouchEvent
+ * @tc.desc: SetTouchEvent Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, SetTouchEventErr, TestSize.Level1)
+{
+    RootScene rootScene;
+    rootScene.SetTouchEvent(0);
+    rootScene.SetTouchEvent(1);
     ASSERT_EQ(1, rootScene.GetWindowId());
 }
 

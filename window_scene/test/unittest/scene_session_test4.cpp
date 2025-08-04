@@ -106,8 +106,13 @@ HWTEST_F(SceneSessionTest4, HandleActionUpdateFlags, TestSize.Level1)
 HWTEST_F(SceneSessionTest4, HandleActionUpdateTouchHotArea, TestSize.Level1)
 {
     SessionInfo info;
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    specificCb->onWindowInfoUpdate_ = [](int32_t persistentId, WindowUpdateType type) {};
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCb);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    std::vector<Rect> hotAreas;
+    hotAreas.push_back({1, 2, 3, 4});
+    property->SetTouchHotAreas(hotAreas);
     WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO;
     WMError ret = sceneSession->HandleActionUpdateTouchHotArea(property, action);
     ASSERT_EQ(WMError::WM_OK, ret);
@@ -353,6 +358,12 @@ HWTEST_F(SceneSessionTest4, RequestSessionBack, TestSize.Level1)
     };
     session->backPressedFunc_ = func;
     EXPECT_EQ(WSError::WS_OK, session->RequestSessionBack(true));
+
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    EXPECT_NE(nullptr, surfaceNode);
+    session->SetLeashWinSurfaceNode(surfaceNode);
+    ASSERT_EQ(WSError::WS_OK, session->RequestSessionBack(true));
 }
 
 /**

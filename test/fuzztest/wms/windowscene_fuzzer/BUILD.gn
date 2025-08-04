@@ -52,7 +52,6 @@ ohos_fuzztest("WindowSceneFuzzTest") {
     "image_framework:image_native",
     "ipc:ipc_single",
     "napi:ace_napi",
-    "node:node_header_notice",
   ]
 }
 

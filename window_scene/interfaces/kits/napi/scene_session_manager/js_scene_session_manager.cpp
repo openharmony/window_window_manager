@@ -268,6 +268,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::IsScbCoreEnabled);
     BindNativeFunction(env, exportObj, "updateAppHookDisplayInfo", moduleName,
         JsSceneSessionManager::UpdateAppHookDisplayInfo);
+    BindNativeFunction(env, exportObj, "updateAppHookWindowInfo", moduleName,
+        JsSceneSessionManager::UpdateAppHookWindowInfo);
     BindNativeFunction(env, exportObj, "notifyHookOrientationChange", moduleName,
         JsSceneSessionManager::NotifyHookOrientationChange);
     BindNativeFunction(env, exportObj, "refreshPcZOrder", moduleName,
@@ -318,6 +320,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::SetUIEffectControllerAliveInUI);
     BindNativeFunction(env, exportObj, "setPiPSettingSwitchStatus", moduleName,
         JsSceneSessionManager::SetPiPSettingSwitchStatus);
+    BindNativeFunction(env, exportObj, "UpdateSystemDecorEnable", moduleName,
+        JsSceneSessionManager::UpdateSystemDecorEnable);
     return NapiGetUndefined(env);
 }
 
@@ -1292,6 +1296,14 @@ napi_value JsSceneSessionManager::UpdateAppHookDisplayInfo(napi_env env, napi_ca
     return (me != nullptr) ? me->OnUpdateAppHookDisplayInfo(env, info) : nullptr;
 }
 
+napi_value JsSceneSessionManager::UpdateAppHookWindowInfo(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "[NAPI]");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnUpdateAppHookWindowInfo(env, info) : nullptr;
+}
+
+
 napi_value JsSceneSessionManager::NotifyHookOrientationChange(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_COMPAT, "[NAPI]");
@@ -2107,7 +2119,9 @@ napi_value JsSceneSessionManager::OnRequestSceneSessionActivation(napi_env env, 
 
     bool isNewActive = true;
     ConvertFromJsValue(env, argv[1], isNewActive);
-    SceneSessionManager::GetInstance().RequestSceneSessionActivation(sceneSession, isNewActive);
+    int32_t requestId = DEFAULT_REQUEST_FROM_SCB_ID;
+    ConvertFromJsValue(env, argv[ARG_INDEX_TWO], requestId);
+    SceneSessionManager::GetInstance().RequestSceneSessionActivation(sceneSession, isNewActive, requestId);
     return NapiGetUndefined(env);
 }
 
@@ -2345,7 +2359,7 @@ napi_value JsSceneSessionManager::OnRequestSceneSessionByCall(napi_env env, napi
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < ARGC_ONE) {
+    if (argc < ARGC_TWO) {
         WLOGFE("Argc is invalid: %{public}zu", argc);
         errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
     }
@@ -2381,7 +2395,9 @@ napi_value JsSceneSessionManager::OnRequestSceneSessionByCall(napi_env env, napi
         return NapiGetUndefined(env);
     }
 
-    SceneSessionManager::GetInstance().RequestSceneSessionByCall(sceneSession);
+    int32_t requestId = DEFAULT_REQUEST_FROM_SCB_ID;
+    ConvertFromJsValue(env, argv[1], requestId);
+    SceneSessionManager::GetInstance().RequestSceneSessionByCall(sceneSession, requestId);
     return NapiGetUndefined(env);
 }
 
@@ -4045,6 +4061,38 @@ napi_value JsSceneSessionManager::OnUpdateAppHookDisplayInfo(napi_env env, napi_
     return NapiGetUndefined(env);
 }
 
+napi_value JsSceneSessionManager::OnUpdateAppHookWindowInfo(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_TWO;
+    napi_value argv[ARGC_TWO] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+
+    if (argc < ARGC_TWO) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    std::string bundleName;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_ZERO], bundleName)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to bundleName");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    HookWindowInfo hookWindowInfo{};
+    if (!ConvertHookWindowInfoFromJs(env, argv[ARG_INDEX_ONE], hookWindowInfo)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to hookWindowInfo");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    SceneSessionManager::GetInstance().UpdateAppHookWindowInfo(bundleName, hookWindowInfo);
+    return NapiGetUndefined(env);
+}
+
 napi_value JsSceneSessionManager::OnNotifyHookOrientationChange(napi_env env, napi_callback_info info)
 {
     size_t argc = ARGC_ONE;
@@ -4073,8 +4121,8 @@ napi_value JsSceneSessionManager::SetAppForceLandscapeConfig(napi_env env, napi_
 
 napi_value JsSceneSessionManager::OnSetAppForceLandscapeConfig(napi_env env, napi_callback_info info)
 {
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
+    size_t argc = ARGC_FIVE;
+    napi_value argv[ARGC_FIVE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_THREE) {
         TLOGE(WmsLogTag::DEFAULT, "Argc is invalid: %{public}zu", argc);
@@ -4112,9 +4160,14 @@ napi_value JsSceneSessionManager::OnSetAppForceLandscapeConfig(napi_env env, nap
         return NapiGetUndefined(env);
     }
 
-    TLOGI(WmsLogTag::DEFAULT, "app: %{public}s, mode: %{public}d, homePage: %{public}s, supportSplit: %{public}d",
-        bundleName.c_str(), mode, homePage.c_str(), supportSplit);
-    AppForceLandscapeConfig config = { mode, homePage, supportSplit };
+    std::string arkUIOptions;
+    if (argc >= ARGC_FIVE && ConvertFromJsValue(env, argv[ARGC_FOUR], arkUIOptions)) {
+        TLOGD(WmsLogTag::DEFAULT, "arkUIOptions: %{public}s", arkUIOptions.c_str());
+    }
+
+    TLOGI(WmsLogTag::DEFAULT, "app: %{public}s, mode: %{public}d, homePage: %{public}s, supportSplit: %{public}d, "
+        "arkUIOptions: %{public}s", bundleName.c_str(), mode, homePage.c_str(), supportSplit, arkUIOptions.c_str());
+    AppForceLandscapeConfig config = { mode, homePage, supportSplit, arkUIOptions };
     SceneSessionManager::GetInstance().SetAppForceLandscapeConfig(bundleName, config);
     return NapiGetUndefined(env);
 }
@@ -4926,6 +4979,7 @@ void JsSceneSessionManager::OnTransferSessionToTargetScreen(const TransferSessio
             napi_value wantParams = OHOS::AppExecFwk::WrapWantParams(env, info.wantParams);
             napi_value argv[] = { persistentId, toScreenId, wantParams };
             napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+            SceneSessionManager::GetInstance().UpdateScreenLockState(info.persistentId);
         }, __func__);
 }
 
@@ -5174,6 +5228,35 @@ napi_value JsSceneSessionManager::OnSetPiPSettingSwitchStatus(napi_env env, napi
         return NapiGetUndefined(env);
     }
     SceneSessionManager::GetInstance().SetPiPSettingSwitchStatus(switchStatus);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSessionManager::UpdateSystemDecorEnable(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_DECOR, "in");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnUpdateSystemDecorEnable(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::OnUpdateSystemDecorEnable(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_ONE;
+    napi_value argv[ARGC_ONE] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_DECOR, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool enable = true;
+    if (!ConvertFromJsValue(env, argv[0], enable)) {
+        TLOGE(WmsLogTag::WMS_DECOR, "Failed to convert parameter to enable");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    SceneSessionManager::GetInstance().UpdateSystemDecorEnable(enable);
     return NapiGetUndefined(env);
 }
 } // namespace OHOS::Rosen

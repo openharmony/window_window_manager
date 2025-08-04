@@ -16,6 +16,7 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H
 #define OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H
 
+#include <charconv>
 #include <inttypes.h>
 #include <iomanip>
 #include <map>
@@ -39,10 +40,17 @@ enum class SupportWindowMode;
 
 namespace OHOS::Rosen {
 class RSTransaction;
+
+// Type alias for screen identifier, consistent with ScreenId defined in dm_common.h.
+using ScreenId = uint64_t;
+
 constexpr int32_t ROTATE_ANIMATION_DURATION = 400;
 constexpr int32_t INVALID_SESSION_ID = 0;
+constexpr int32_t DEFAULT_REQUEST_FROM_SCB_ID = -1;
 constexpr int32_t WINDOW_SUPPORT_MODE_MAX_SIZE = 4;
 constexpr int32_t DEFAULT_SCALE_RATIO = 100;
+constexpr uint32_t COLOR_WHITE = 0xffffffff;
+constexpr uint32_t COLOR_BLACK = 0xff000000;
 const std::string WINDOW_SCREEN_LOCK_PREFIX = "windowLock_";
 const std::string VIEW_SCREEN_LOCK_PREFIX = "viewLock_";
 
@@ -358,6 +366,15 @@ enum class StartWindowType : uint32_t {
     REMOVE_NODE_INVISIBLE,
 };
 
+struct AtomicServiceInfo {
+    std::string appNameInfo_ = "";
+    std::string eyelashRingIcon_ = "";
+    std::string circleIcon_ = "";
+    int32_t resizable_ = 0;
+    std::vector<std::string> deviceTypes_;
+    std::vector<std::string> supportWindowMode_;
+};
+
 struct SessionInfo {
     std::string bundleName_ = "";
     std::string moduleName_ = "";
@@ -371,6 +388,7 @@ struct SessionInfo {
     uint64_t screenId_ = -1;
     bool isPersistentRecover_ = false;
     bool isFromIcon_ = false;
+    AtomicServiceInfo atomicServiceInfo_;
 
     mutable std::shared_ptr<AAFwk::Want> want = nullptr; // want for ability start
     std::shared_ptr<std::mutex> wantMutex_ = std::make_shared<std::mutex>();
@@ -686,14 +704,60 @@ struct WSRectT {
         return static_cast<F>(interWidth) * static_cast<F>(interHeight);
     }
 
-    inline std::string ToString() const
+    /**
+     * @brief Returns a string in the format: [posX posY width height]
+     *
+     * @note Optimized for performance:
+     *       - Avoid std::stringstream and other formatting streams.
+     *       - Pre-allocates string capacity to minimize reallocations.
+     *       - Use std::to_chars for fast, allocation-free conversions.
+     *
+     * @return std::string A string representing the rectangle.
+     */
+    std::string ToString() const
     {
-        constexpr int precision = 2;
-        std::stringstream ss;
-        ss << "[" << std::fixed << std::setprecision(precision) << posX_ << " " << posY_ << " " <<
-            width_ << " " << height_ << "]";
-        return ss.str();
+        std::string result;
+        if constexpr (std::is_integral_v<T>) {
+            result.reserve(49); // 49: 11 digits * 4 + spaces + brackets
+        } else {
+            result.reserve(133); // 133: 32 digits * 4 + spaces + brackets
+        }
+
+        // Helper: append either value or INF/-INF when overflow occurs
+        auto appendValueOrInf = [&](char* buf, char* ptr, const std::errc ec, T value) {
+            if (ec == std::errc::value_too_large) {
+                result.append(value < 0 ? "-INF" : "INF");
+            } else {
+                result.append(buf, ptr);
+            }
+        };
+
+        // Helper: convert and append value based on type
+        auto appendValue = [&](T value) {
+            if constexpr (std::is_integral_v<T>) {
+                char buf[11]; // 11: max digits for integer
+                auto [ptr, ec] = std::to_chars(buf, buf + sizeof(buf), value);
+                appendValueOrInf(buf, ptr, ec, value);
+            } else {
+                constexpr int precision = 2;
+                char buf[32]; // 32: max digits for floating number
+                auto [ptr, ec] = std::to_chars(buf, buf + sizeof(buf), value, std::chars_format::fixed, precision);
+                appendValueOrInf(buf, ptr, ec, value);
+            }
+        };
+
+        result.push_back('[');
+        appendValue(posX_);
+        result.push_back(' ');
+        appendValue(posY_);
+        result.push_back(' ');
+        appendValue(width_);
+        result.push_back(' ');
+        appendValue(height_);
+        result.push_back(']');
+        return result;
     }
+
     static const WSRectT<T> EMPTY_RECT;
 };
 
@@ -704,20 +768,20 @@ using WSRect = WSRectT<int32_t>;
 using WSRectF = WSRectT<float>;
 
 /**
- * @struct WSRelativeDisplayRect
+ * @struct WSScreenRelativeRect
  *
- * @brief Represent the rectangle of a window relative to a specific display.
+ * @brief Represent a window rectangle defined relative to a specific screen.
  */
-struct WSRelativeDisplayRect {
-    // The ID of the associated display.
-    uint64_t displayId = UINT64_MAX;
-    // The window rectangle relative to the specified display.
-    WSRect rect = WSRect::EMPTY_RECT;
+struct WSScreenRelativeRect {
+    // The ID of the screen this rectangle is relative to.
+    ScreenId screenId;
+    // The window rectangle relative to the specified screen.
+    WSRect rect;
 
     inline std::string ToString() const
     {
         std::ostringstream oss;
-        oss << displayId << ", " << rect.ToString();
+        oss << screenId << ", " << rect.ToString();
         return oss.str();
     }
 };
@@ -778,11 +842,24 @@ struct StartingWindowInfo {
     std::string startWindowType_;
 };
 
+enum class StartWindowResType {
+    AppIcon = 0,
+    Illustration,
+    Branding,
+    BgImage,
+    Count
+};
+
+struct ResourceInfo {
+    std::vector<std::shared_ptr<Media::PixelMap>> pixelMaps;
+    std::vector<int32_t> delayTimes;
+};
+
 struct StartingWindowPageDrawInfo {
-    std::shared_ptr<Media::PixelMap> appIconPixelMap = nullptr;
-    std::shared_ptr<Media::PixelMap> illustrationPixelMap = nullptr;
-    std::shared_ptr<Media::PixelMap> bgImagePixelMap = nullptr;
-    std::shared_ptr<Media::PixelMap> brandingPixelMap = nullptr;
+    std::shared_ptr<ResourceInfo> appIcon = nullptr;
+    std::shared_ptr<ResourceInfo> illustration = nullptr;
+    std::shared_ptr<ResourceInfo> bgImage = nullptr;
+    std::shared_ptr<ResourceInfo> branding = nullptr;
     uint32_t bgColor = 0;
     std::string startWindowBackgroundImageFit = "";
 };
@@ -869,6 +946,7 @@ struct SessionEventParam {
 };
 
 struct BackgroundParams {
+    int32_t persistentId = INVALID_SESSION_ID;
     bool shouldBackToCaller = true;
     AAFwk::WantParams wantParams {};
 };
@@ -964,6 +1042,8 @@ enum class SessionPropertyFlag {
     VISIBILITY_STATE = 1 << 4,
     DISPLAY_ID = 1 << 5,
     WINDOW_RECT = 1 << 6,
+    WINDOW_MODE = 1 << 7,
+    FLOATING_SCALE = 1 << 8,
 };
 
 /**
@@ -995,6 +1075,37 @@ enum class SnapshotNodeType : uint32_t {
 
 enum class AsyncTraceTaskId: int32_t {
     THROW_SLIP_ANIMATION = 0,
+};
+
+/**
+ * @brief Recover state
+ */
+enum class RecoverState : uint32_t {
+    RECOVER_INITIAL = 0,
+    RECOVER_ENABLE_INPUT,
+    RECOVER_END,
+};
+
+/**
+ * @brief Client window recover state
+ */
+enum class WindowRecoverState : uint32_t {
+    WINDOW_NOT_RECONNECT = 0,
+    WINDOW_START_RECONNECT,
+    WINDOW_DOING_RECONNECT,
+    WINDOW_FINISH_RECONNECT,
+    WINDOW_RECOVER_STATE_END,
+};
+
+/**
+ * @brief Server session recover state
+ */
+enum class SessionRecoverState : uint32_t {
+    SESSION_NOT_RECONNECT = 0,
+    SESSION_START_RECONNECT,
+    SESSION_DOING_RECONNECT,
+    SESSION_FINISH_RECONNECT,
+    SESSION_RECOVER_STATE_END,
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H

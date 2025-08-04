@@ -26,15 +26,17 @@
 namespace OHOS::Rosen {
 class JsScreenSession : public IScreenChangeListener {
 public:
-    JsScreenSession(napi_env env, const sptr<ScreenSession>& screenSession, const ScreenEvent screenEvent);
+    JsScreenSession(napi_env env, const sptr<ScreenSession>& screenSession);
     virtual ~JsScreenSession();
 
-    static napi_value Create(napi_env env, const sptr<ScreenSession>& screenSession, const ScreenEvent screenEvent);
+    static napi_value Create(napi_env env, const sptr<ScreenSession>& screenSession);
     static void Finalizer(napi_env env, void* data, void* hint);
 
 private:
     static napi_value LoadContent(napi_env env, napi_callback_info info);
     napi_value OnLoadContent(napi_env env, napi_callback_info info);
+    static napi_value DestroyContent(napi_env env, napi_callback_info info);
+    napi_value OnDestroyContent(napi_env env, napi_callback_info info);
     napi_value ScheduleLoadContentTask(napi_env env, const std::string& contentUrl,
         std::weak_ptr<AbilityRuntime::Context> contextWeakPtr, std::shared_ptr<NativeReference> contentStorage);
     static napi_value RegisterCallback(napi_env env, napi_callback_info info);
@@ -46,6 +48,8 @@ private:
     static napi_value GetScreenUIContext(napi_env env, napi_callback_info info);
     napi_value OnGetScreenUIContext(napi_env env, napi_callback_info info);
     void CallJsCallback(const std::string& callbackType);
+    std::shared_ptr<NativeReference> GetJSCallback(const std::string& callbackType);
+    bool IsCallbackRegistered(const std::string& callbackType);
     void RegisterScreenChangeListener();
     void UnRegisterScreenChangeListener();
 
@@ -74,6 +78,7 @@ private:
     sptr<ScreenSession> screenSession_;
     sptr<ScreenScene> screenScene_ = nullptr;
     std::map<std::string, std::shared_ptr<NativeReference>> mCallback_;
+    std::shared_mutex jsCbMapMutex_;
 };
 } // namespace OHOS::Rosen
 

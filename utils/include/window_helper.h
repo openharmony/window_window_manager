@@ -188,6 +188,21 @@ public:
                 type == WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR);
     }
 
+    static inline bool IsKeyboardWindow(WindowType type)
+    {
+        return type == WindowType::WINDOW_TYPE_KEYBOARD_PANEL || type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT;
+    }
+
+    static inline bool IsSystemOrSubWindow(WindowType type)
+    {
+        return IsSubWindow(type) || IsSystemWindow(type);
+    }
+
+    static inline bool IsNeedWaitAttachStateWindow(WindowType type)
+    {
+        return !IsKeyboardWindow(type) && IsSystemOrSubWindow(type);
+    }
+
     static inline bool IsDynamicWindow(WindowType type)
     {
         return type == WindowType::WINDOW_TYPE_DYNAMIC;
@@ -688,6 +703,24 @@ public:
             start = end + delimiter.length();
         }
         container.insert(inputStr.substr(start));
+    }
+
+    /**
+     * @brief Check whether the window has scaling applied.
+     *
+     * This method returns true if scaleX or scaleY is not equal to 1,
+     * meaning the window is currently scaled.
+     *
+     * @param transform The layout transform of the window.
+     * @return true if the window is scaled, false otherwise.
+     */
+    static bool IsScaled(const Transform& transform)
+    {
+        auto IsApproximatelyOne = [](float value) {
+            constexpr float EPSILON = 1e-6f;
+            return std::fabs(value - 1.0f) < EPSILON;
+        };
+        return !IsApproximatelyOne(transform.scaleX_) || !IsApproximatelyOne(transform.scaleY_);
     }
 
 private:

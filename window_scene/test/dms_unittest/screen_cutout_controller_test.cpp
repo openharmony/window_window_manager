@@ -68,491 +68,219 @@ void ScreenCutoutControllerTest::TearDown()
 }
 
 namespace {
+/**
+ * @tc.name: GetCutoutArea
+ * @tc.desc: GetCutoutArea func
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenCutoutControllerTest, GetCutoutArea, TestSize.Level1)
+{
+    uint32_t width = 1276;
+    uint32_t height = 2848;
+    sptr<ScreenCutoutController> controller = sptr<ScreenCutoutController>::MakeSptr();
 
-    /**
-     * @tc.name: CreateWaterfallRect
-     * @tc.desc: CreateWaterfallRect func
-     * @tc.type: FUNC
-     */
-    HWTEST_F(ScreenCutoutControllerTest, CreateWaterfallRect, TestSize.Level1)
-    {
-        DMRect emptyRect = {0, 0, 0, 0};
-        DMRect emptyRect_ = {1, 2, 3, 3};
-        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
+    std::string svgPath = "M600 44 L676 44 v 76 h -76 Z";
+    ScreenSceneConfig::SetSubCutoutSvgPath(svgPath);
+    std::vector<DMRect> cutoutRects;
+    controller->GetCutoutArea(0, width, height, Rotation::ROTATION_0, cutoutRects);
+    EXPECT_EQ(cutoutRects.size(), 0);
+    controller->GetCutoutArea(0, width, height, Rotation::ROTATION_90, cutoutRects);
+    EXPECT_EQ(cutoutRects.size(), 0);
+    controller->GetCutoutArea(0, width, height, Rotation::ROTATION_180, cutoutRects);
+    EXPECT_EQ(cutoutRects.size(), 0);
+    controller->GetCutoutArea(0, width, height, Rotation::ROTATION_270, cutoutRects);
+    EXPECT_EQ(cutoutRects.size(), 0);
+}
 
-        DMRect result = controller->CreateWaterfallRect(0, 0, 0, 0);
-        ASSERT_EQ(result, emptyRect);
-        DMRect result_ = controller->CreateWaterfallRect(1, 2, 3, 3);
-        ASSERT_EQ(result_, emptyRect_);
-    }
+/**
+ * @tc.name: CalcCutoutRects
+ * @tc.desc: CalcCutoutRects func
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenCutoutControllerTest, CalcCutoutRects, TestSize.Level1)
+{
+    DMRect emptyRect = { 0, 0, 0, 0 };
+    uint32_t width = 2224;
+    uint32_t height = 2496;
+    sptr<ScreenCutoutController> controller = sptr<ScreenCutoutController>::MakeSptr();
 
-    /**
-     * @tc.name: GetScreenCutoutInfo01
-     * @tc.desc: GetScreenCutoutInfo func
-     * @tc.type: FUNC
-     */
-    HWTEST_F(ScreenCutoutControllerTest, GetScreenCutoutInfo01, TestSize.Level1)
-    {
-        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
-        DisplayId displayId = 0;
-        ASSERT_NE(nullptr, controller->GetScreenCutoutInfo(displayId));
-    }
+    std::vector<DMRect> boundaryRects = {};
+    boundaryRects.emplace_back(DMRect {2109, 28, 69, 69});
 
-    /**
-     * @tc.name: GetCutoutInfoWithRotation
-     * @tc.desc: GetCutoutInfoWithRotation func
-     * @tc.type: FUNC
-     */
-    HWTEST_F(ScreenCutoutControllerTest, GetCutoutInfoWithRotation, Function | SmallTest | Level3)
-    {
-        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
-        DisplayId displayId = 0;
-        int32_t rotation = 0;
-        auto cutoutInfo = controller->GetCutoutInfoWithRotation(displayId, rotation);
-        ASSERT_NE(nullptr, cutoutInfo);
-    }
+    std::vector<DMRect> cutoutRects;
+    controller->CalcCutoutRects(boundaryRects, width, height, Rotation::ROTATION_0, cutoutRects);
+    EXPECT_EQ(cutoutRects.size(), 1);
+    emptyRect = { 2109, 28, 69, 69 };
+    EXPECT_EQ(cutoutRects[0], emptyRect);
+    
+    cutoutRects.clear();
+    controller->CalcCutoutRects(boundaryRects, height, width, Rotation::ROTATION_90, cutoutRects);
+    EXPECT_EQ(cutoutRects.size(), 1);
+    emptyRect = { 2399, 2109, 69, 69 };
+    EXPECT_EQ(cutoutRects[0], emptyRect);
+    
+    cutoutRects.clear();
+    controller->CalcCutoutRects(boundaryRects, width, height, Rotation::ROTATION_180, cutoutRects);
+    EXPECT_EQ(cutoutRects.size(), 1);
+    emptyRect = { 46, 2399, 69, 69 };
+    EXPECT_EQ(cutoutRects[0], emptyRect);
+    
+    cutoutRects.clear();
+    controller->CalcCutoutRects(boundaryRects, height, width, Rotation::ROTATION_270, cutoutRects);
+    EXPECT_EQ(cutoutRects.size(), 1);
+    emptyRect = { 28, 46, 69, 69 };
+    EXPECT_EQ(cutoutRects[0], emptyRect);
 
-    /**
-     * @tc.name: GetScreenCutoutInfo02
-     * @tc.desc: GetScreenCutoutInfo func
-     * @tc.type: FUNC
-     */
-    HWTEST_F(ScreenCutoutControllerTest, GetScreenCutoutInfo02, TestSize.Level1)
-    {
-        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
-        DisplayId displayId = 1;
-        DMRect emptyRect = {0, 0, 0, 0};
-        DMRect emptyRect_ = {1, 2, 3, 3};
-        std::vector<DMRect> boundaryRects = {emptyRect, emptyRect_};
-        ASSERT_NE(nullptr, controller->GetScreenCutoutInfo(displayId));
-    }
+    cutoutRects.clear();
+    controller->CalcCutoutRects(boundaryRects, height, width, static_cast<Rotation>(5), cutoutRects);
+    EXPECT_EQ(cutoutRects.size(), 0);
+}
 
-    /**
-     * @tc.name: ConvertBoundaryRectsByRotation
-     * @tc.desc: ScreenCutoutController convert boundary rects by rotation
-     * @tc.type: FUNC
-     */
-    HWTEST_F(ScreenCutoutControllerTest, ConvertBoundaryRectsByRotation01, TestSize.Level1)
-    {
-        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
-        DMRect emptyRect = {0, 0, 0, 0};
-        DMRect emptyRect_ = {1, 2, 3, 3};
-        DisplayId displayId = 0;
-        std::vector<DMRect> boundaryRects = {emptyRect, emptyRect_};
-        ASSERT_TRUE(controller != nullptr);
-        controller->ConvertBoundaryRectsByRotation(displayId, boundaryRects);
-    }
+/**
+ * @tc.name: GetWaterfallArea
+ * @tc.desc: GetWaterfallArea func
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenCutoutControllerTest, GetWaterfallArea, TestSize.Level1)
+{
+    DMRect emptyRect = { 0, 0, 0, 0 };
+    uint32_t width = 1276;
+    uint32_t height = 2848;
+    sptr<ScreenCutoutController> controller = sptr<ScreenCutoutController>::MakeSptr();
 
-    /**
-     * @tc.name: ConvertBoundaryRectsByRotation
-     * @tc.desc: ROTATION_0
-     * @tc.type: FUNC
-     */
-    HWTEST_F(ScreenCutoutControllerTest, ConvertBoundaryRectsByRotation02, TestSize.Level1)
-    {
-        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
-        DMRect emptyRect = {0, 0, 0, 0};
-        DMRect emptyRect_ = {1, 2, 3, 3};
-        std::vector<DMRect> boundaryRects = {emptyRect, emptyRect_};
-        sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
-        VirtualScreenOption virtualOption;
-        virtualOption.name_ = "createVirtualOption";
-        auto screenId = ScreenSessionManager::GetInstance().CreateVirtualScreen(
-            virtualOption, displayManagerAgent->AsObject());
-        ScreenProperty screenProperty = ScreenSessionManager::GetInstance().GetScreenProperty(screenId);
-        ASSERT_NE(ScreenSessionManager::GetInstance().GetDisplayInfoById(screenId), nullptr);
-        ASSERT_TRUE(controller != nullptr);
-        EXPECT_EQ(screenProperty.GetScreenRotation(), Rotation::ROTATION_0);
-        controller->ConvertBoundaryRectsByRotation(screenId, boundaryRects);
-        ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId);
-    }
+    ScreenSceneConfig::isWaterfallDisplay_ = true;
+    WaterfallDisplayAreaRects waterfallArea;
+    controller->GetWaterfallArea(width, height, Rotation::ROTATION_0, waterfallArea);
+    EXPECT_EQ(waterfallArea.left, emptyRect);
 
-    /**
-     * @tc.name: ConvertBoundaryRectsByRotation
-     * @tc.desc: Current Rotation0, Get cutoutInfo with Rotation90
-     * @tc.type: FUNC
-     */
-    HWTEST_F(ScreenCutoutControllerTest, ConvertBoundaryRectsWithAnotherRotation, Function | SmallTest | Level3)
-    {
-        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
-        DMRect emptyRect = {0, 0, 0, 0};
-        DMRect emptyRect_ = {1, 2, 3, 3};
-        std::vector<DMRect> boundaryRects = {emptyRect, emptyRect_};
-        sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
-        VirtualScreenOption virtualOption;
-        virtualOption.name_ = "createVirtualOption";
-        auto screenId = ScreenSessionManager::GetInstance().CreateVirtualScreen(
-            virtualOption, displayManagerAgent->AsObject());
-        ScreenProperty screenProperty = ScreenSessionManager::GetInstance().GetScreenProperty(screenId);
-        ASSERT_NE(ScreenSessionManager::GetInstance().GetDisplayInfoById(screenId), nullptr);
-        ASSERT_TRUE(controller != nullptr);
-        EXPECT_EQ(screenProperty.GetScreenRotation(), Rotation::ROTATION_0);
-        int32_t rotation90 = 1;
-        controller->ConvertBoundaryRectsByRotation(screenId, boundaryRects, rotation90);
-        ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId);
-    }
+    ScreenSceneConfig::intNumbersConfig_["curvedScreenBoundary"] = { 0, 0, 0, 0 };
+    controller->GetWaterfallArea(width, height, Rotation::ROTATION_0, waterfallArea);
+    EXPECT_EQ(waterfallArea.left, emptyRect);
+}
 
-    /**
-     * @tc.name: ConvertBoundaryRectsByRotation
-     * @tc.desc: ROTATION_90
-     * @tc.type: FUNC
-     */
-    HWTEST_F(ScreenCutoutControllerTest, ConvertBoundaryRectsByRotation03, TestSize.Level1)
-    {
-        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
-        DMRect emptyRect = {0, 0, 0, 0};
-        DMRect emptyRect_ = {1, 2, 3, 3};
-        std::vector<DMRect> boundaryRects = {emptyRect, emptyRect_};
-        sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
-        VirtualScreenOption virtualOption;
-        virtualOption.name_ = "createVirtualOption";
-        auto screenId = ScreenSessionManager::GetInstance().CreateVirtualScreen(
-            virtualOption, displayManagerAgent->AsObject());
-        ASSERT_NE(ScreenSessionManager::GetInstance().GetDisplayInfoById(screenId), nullptr);
-        ASSERT_TRUE(controller != nullptr);
-        ScreenProperty screenProperty = ScreenSessionManager::GetInstance().GetScreenProperty(screenId);
-        Rotation rotation = Rotation::ROTATION_90;
-        screenProperty.UpdateScreenRotation(rotation);
-        ASSERT_NE(screenProperty.GetScreenRotation(), Rotation::ROTATION_0);
-        controller->ConvertBoundaryRectsByRotation(screenId, boundaryRects);
-        ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId);
-    }
+/**
+ * @tc.name: CalcCutoutRects
+ * @tc.desc: CalcCutoutRects func
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenCutoutControllerTest, CalcWaterfallRects0, TestSize.Level1)
+{
+    DMRect emptyRect = { 0, 0, 0, 0 };
+    const std::vector numberVec = { 0, 0, 0, 0 };
+    uint32_t width = 1276;
+    uint32_t height = 2848;
+    sptr<ScreenCutoutController> controller = sptr<ScreenCutoutController>::MakeSptr();
+    WaterfallDisplayAreaRects waterfallArea;
 
-    /**
-     * @tc.name: ConvertBoundaryRectsByRotation
-     * @tc.desc: ROTATION_180
-     * @tc.type: FUNC
-     */
-    HWTEST_F(ScreenCutoutControllerTest, ConvertBoundaryRectsByRotation04, TestSize.Level1)
-    {
-        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
-        DMRect emptyRect = {0, 0, 0, 0};
-        DMRect emptyRect_ = {1, 2, 3, 3};
-        std::vector<DMRect> boundaryRects = {emptyRect, emptyRect_};
-        sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
-        VirtualScreenOption virtualOption;
-        virtualOption.name_ = "createVirtualOption";
-        auto screenId = ScreenSessionManager::GetInstance().CreateVirtualScreen(
-            virtualOption, displayManagerAgent->AsObject());
-        ASSERT_NE(ScreenSessionManager::GetInstance().GetDisplayInfoById(screenId), nullptr);
-        ASSERT_TRUE(controller != nullptr);
-        ScreenProperty screenProperty = ScreenSessionManager::GetInstance().GetScreenProperty(screenId);
-        Rotation rotation = Rotation::ROTATION_180;
-        screenProperty.UpdateScreenRotation(rotation);
-        ASSERT_NE(screenProperty.GetScreenRotation(), Rotation::ROTATION_0);
-        controller->ConvertBoundaryRectsByRotation(screenId, boundaryRects);
-        ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId);
-    }
+    controller->CalcWaterfallRects(numberVec, width, height, Rotation::ROTATION_0, waterfallArea);
+    EXPECT_EQ(waterfallArea.left, emptyRect);
+    EXPECT_EQ(waterfallArea.top, emptyRect);
+    EXPECT_EQ(waterfallArea.right, emptyRect);
+    EXPECT_EQ(waterfallArea.bottom, emptyRect);
+}
 
-    /**
-     * @tc.name: ConvertBoundaryRectsByRotation
-     * @tc.desc: ROTATION_270
-     * @tc.type: FUNC
-     */
-    HWTEST_F(ScreenCutoutControllerTest, ConvertBoundaryRectsByRotation05, TestSize.Level1)
-    {
-        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
-        DMRect emptyRect = {0, 0, 0, 0};
-        DMRect emptyRect_ = {1, 2, 3, 3};
-        std::vector<DMRect> boundaryRects = {emptyRect, emptyRect_};
-        sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
-        VirtualScreenOption virtualOption;
-        virtualOption.name_ = "createVirtualOption";
-        auto screenId = ScreenSessionManager::GetInstance().CreateVirtualScreen(
-            virtualOption, displayManagerAgent->AsObject());
-        ASSERT_NE(ScreenSessionManager::GetInstance().GetDisplayInfoById(screenId), nullptr);
-        ASSERT_TRUE(controller != nullptr);
-        ScreenProperty screenProperty = ScreenSessionManager::GetInstance().GetScreenProperty(screenId);
-        Rotation rotation = Rotation::ROTATION_270;
-        screenProperty.UpdateScreenRotation(rotation);
-        ASSERT_NE(screenProperty.GetScreenRotation(), Rotation::ROTATION_0);
-        controller->ConvertBoundaryRectsByRotation(screenId, boundaryRects);
-        ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId);
-    }
+/**
+ * @tc.name: CalcCutoutRects
+ * @tc.desc: CalcCutoutRects func
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenCutoutControllerTest, CalcWaterfallRects1, TestSize.Level1)
+{
+    DMRect emptyRect = { 0, 0, 0, 0 };
+    const std::vector numberVec = { 1276, 0, 0, 0 };
+    uint32_t width = 1276;
+    uint32_t height = 2848;
+    sptr<ScreenCutoutController> controller = sptr<ScreenCutoutController>::MakeSptr();
+    WaterfallDisplayAreaRects waterfallArea;
 
-    /**
-     * @tc.name: CurrentRotation90
-     * @tc.desc: CurrentRotation90 func
-     * @tc.type: FUNC
-     */
-    HWTEST_F(ScreenCutoutControllerTest, CurrentRotation90, TestSize.Level1)
-    {
-        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
-        std::vector<DMRect> displayBoundaryRects;
-        DMRect emptyRect = {10, 10, 20, 20};
-        DMRect emptyRect_ = {30, 30, 40, 40};
-        displayBoundaryRects.push_back(emptyRect);
-        displayBoundaryRects.push_back(emptyRect_);
+    controller->CalcWaterfallRects(numberVec, width, height, Rotation::ROTATION_0, waterfallArea);
+    EXPECT_EQ(waterfallArea.left, emptyRect);
+    EXPECT_EQ(waterfallArea.top, emptyRect);
+    EXPECT_EQ(waterfallArea.right, emptyRect);
+    EXPECT_EQ(waterfallArea.bottom, emptyRect);
+}
 
-        std::vector<DMRect> finalVector;
-        uint32_t displayWidth = 100;
-        controller->CurrentRotation90(displayBoundaryRects, finalVector, displayWidth);
+/**
+ * @tc.name: CalcCutoutRects
+ * @tc.desc: CalcCutoutRects func
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenCutoutControllerTest, CalcWaterfallRects2, TestSize.Level1)
+{
+    DMRect emptyRect = { 0, 0, 0, 0 };
+    const std::vector numberVec = { 1, 2, 1, 2 };
+    uint32_t width = 1276;
+    uint32_t height = 2848;
+    sptr<ScreenCutoutController> controller = sptr<ScreenCutoutController>::MakeSptr();
+    WaterfallDisplayAreaRects waterfallArea;
 
-        ASSERT_EQ(finalVector.size(), 2);
-        ASSERT_EQ(finalVector[0].posX_, 70);
-        ASSERT_EQ(finalVector[0].posY_, 10);
-        ASSERT_EQ(finalVector[0].width_, 20);
-        ASSERT_EQ(finalVector[0].height_, 20);
-    }
+    controller->CalcWaterfallRects(numberVec, width, height, Rotation::ROTATION_0, waterfallArea);
+    emptyRect = { 0, 0, 1, height };
+    EXPECT_EQ(waterfallArea.left, emptyRect);
+    emptyRect = { 0, 0, width, 2 };
+    EXPECT_EQ(waterfallArea.top, emptyRect);
+    emptyRect = { width - 1, 0, 1, height };
+    EXPECT_EQ(waterfallArea.right, emptyRect);
+    emptyRect = { 0, height - 2, width, 2 };
+    EXPECT_EQ(waterfallArea.bottom, emptyRect);
 
-    /**
-     * @tc.name: CurrentRotation180
-     * @tc.desc: CurrentRotation180 func
-     * @tc.type: FUNC
-     */
-    HWTEST_F(ScreenCutoutControllerTest, CurrentRotation180, TestSize.Level1)
-    {
-        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
-        std::vector<DMRect> displayBoundaryRects;
-        DMRect emptyRect = {10, 10, 20, 20};
-        DMRect emptyRect_ = {30, 30, 40, 40};
-        displayBoundaryRects.push_back(emptyRect);
-        displayBoundaryRects.push_back(emptyRect_);
+    controller->CalcWaterfallRects(numberVec, width, height, Rotation::ROTATION_180, waterfallArea);
+    emptyRect = { 0, 0, 1, height };
+    EXPECT_EQ(waterfallArea.left, emptyRect);
+    emptyRect = { 0, 0, width, 2 };
+    EXPECT_EQ(waterfallArea.top, emptyRect);
+    emptyRect = { width - 1, 0, 1, height };
+    EXPECT_EQ(waterfallArea.right, emptyRect);
+    emptyRect = { 0, height - 2, width, 2 };
+    EXPECT_EQ(waterfallArea.bottom, emptyRect);
 
-        std::vector<DMRect> finalVector;
-        uint32_t displayWidth = 100;
-        uint32_t displayHeight = 200;
-        controller->CurrentRotation180(displayBoundaryRects, finalVector, displayWidth, displayHeight);
+    std::swap(width, height);
+    controller->CalcWaterfallRects(numberVec, width, height, Rotation::ROTATION_90, waterfallArea);
+    emptyRect = { 0, 0, 2, height };
+    EXPECT_EQ(waterfallArea.left, emptyRect);
+    emptyRect = { 0, 0, width, 1 };
+    EXPECT_EQ(waterfallArea.top, emptyRect);
+    emptyRect = { width - 2, 0, 2, height };
+    EXPECT_EQ(waterfallArea.right, emptyRect);
+    emptyRect = { 0, height - 1, width, 1 };
+    EXPECT_EQ(waterfallArea.bottom, emptyRect);
 
-        ASSERT_EQ(finalVector.size(), 2);
-        ASSERT_EQ(finalVector[0].posX_, 70);
-        ASSERT_EQ(finalVector[0].posY_, 170);
-        ASSERT_EQ(finalVector[0].width_, 20);
-        ASSERT_EQ(finalVector[0].height_, 20);
-    }
+    controller->CalcWaterfallRects(numberVec, width, height, Rotation::ROTATION_270, waterfallArea);
+    emptyRect = { 0, 0, 2, height };
+    EXPECT_EQ(waterfallArea.left, emptyRect);
+    emptyRect = { 0, 0, width, 1 };
+    EXPECT_EQ(waterfallArea.top, emptyRect);
+    emptyRect = { width - 2, 0, 2, height };
+    EXPECT_EQ(waterfallArea.right, emptyRect);
+    emptyRect = { 0, height - 1, width, 1 };
+    EXPECT_EQ(waterfallArea.bottom, emptyRect);
 
-    /**
-     * @tc.name: CurrentRotation270
-     * @tc.desc: CurrentRotation270 func
-     * @tc.type: FUNC
-     */
-    HWTEST_F(ScreenCutoutControllerTest, CurrentRotation270, TestSize.Level1)
-    {
-        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
-        std::vector<DMRect> displayBoundaryRects;
-        DMRect emptyRect = {10, 10, 20, 20};
-        DMRect emptyRect_ = {30, 30, 40, 40};
-        displayBoundaryRects.push_back(emptyRect);
-        displayBoundaryRects.push_back(emptyRect_);
+    emptyRect = { 0, 0, 0, 0 };
+    waterfallArea.left = emptyRect;
+    controller->CalcWaterfallRects(numberVec, width, height, static_cast<Rotation>(5), waterfallArea);
+    EXPECT_EQ(waterfallArea.left, emptyRect);
+}
 
-        std::vector<DMRect> finalVector;
-        uint32_t displayHeight = 200;
-        controller->CurrentRotation270(displayBoundaryRects, finalVector, displayHeight);
+/**
+ * @tc.name: InitRect
+ * @tc.desc: InitRect func
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenCutoutControllerTest, InitRect, TestSize.Level1)
+{
+    DMRect emptyRect = { 0, 0, 0, 0 };
+    sptr<ScreenCutoutController> controller = sptr<ScreenCutoutController>::MakeSptr();
 
-        ASSERT_EQ(finalVector.size(), 2);
-        ASSERT_EQ(finalVector[0].posX_, 10);
-        ASSERT_EQ(finalVector[0].posY_, 170);
-        ASSERT_EQ(finalVector[0].width_, 20);
-        ASSERT_EQ(finalVector[0].height_, 20);
-    }
-
-    /**
-     * @tc.name: CheckBoundaryRects
-     * @tc.desc: ScreenCutoutController check boundary rects
-     * @tc.type: FUNC
-     */
-    HWTEST_F(ScreenCutoutControllerTest, CheckBoundaryRects, TestSize.Level1)
-    {
-        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
-        DMRect emptyRect = {-15, -15, 8, 8};
-        DMRect emptyRect_ = {21, 21, 3, 3};
-        std::vector<DMRect> boundaryRects = {emptyRect_, emptyRect};
-        ScreenProperty screenProperty;
-        auto screenBounds = RRect({ 0, 0, 35, 35 }, 0.0f, 0.0f);
-        screenProperty.SetBounds(screenBounds);
-        ASSERT_TRUE(controller != nullptr);
-        controller->CheckBoundaryRects(boundaryRects, screenProperty);
-    }
-
-    /**
-     * @tc.name: CalcWaterfallRects01
-     * @tc.desc: ScreenCutoutController calc waterfall rects
-     * @tc.type: FUNC
-     */
-    HWTEST_F(ScreenCutoutControllerTest, CalcWaterfallRects01, TestSize.Level1)
-    {
-        DisplayId displayId = 0;
-        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
-        ASSERT_TRUE(controller != nullptr);
-        controller->CalcWaterfallRects(displayId);
-    }
-
-    /**
-     * @tc.name: CalcWaterfallRects02
-     * @tc.desc: ScreenCutoutController calc waterfall rects
-     * @tc.type: FUNC
-     */
-    HWTEST_F(ScreenCutoutControllerTest, CalcWaterfallRects02, TestSize.Level1)
-    {
-        sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
-        VirtualScreenOption virtualOption;
-        virtualOption.name_ = "createVirtualOption";
-        auto screenId = ScreenSessionManager::GetInstance().CreateVirtualScreen(
-            virtualOption, displayManagerAgent->AsObject());
-        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
-        ASSERT_NE(controller, nullptr);
-        EXPECT_FALSE(ScreenSceneConfig::IsWaterfallDisplay());
-        bool testWaterfallDisplay = ScreenSceneConfig::isWaterfallDisplay_;
-        ScreenSceneConfig::isWaterfallDisplay_ = true;
-        EXPECT_TRUE(ScreenSceneConfig::IsWaterfallDisplay());
-        controller->CalcWaterfallRects(screenId);
-        ScreenSceneConfig::isWaterfallDisplay_ = testWaterfallDisplay;
-        ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId);
-    }
-
-    /**
-     * @tc.name: CalcWaterfallRects03
-     * @tc.desc: ScreenCutoutController calc waterfall rects
-     * @tc.type: FUNC
-     */
-    HWTEST_F(ScreenCutoutControllerTest, CalcWaterfallRects03, TestSize.Level1)
-    {
-        DisplayId displayId = 1;
-        ScreenSceneConfig::GetCurvedScreenBoundaryConfig() = {0, 0, 0, 0};
-        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
-        ASSERT_TRUE(controller != nullptr);
-        controller->CalcWaterfallRects(displayId);
-    }
-
-    /**
-     * @tc.name: CalcWaterfallRects04
-     * @tc.desc: ScreenCutoutController calc waterfall rects
-     * @tc.type: FUNC
-     */
-    HWTEST_F(ScreenCutoutControllerTest, CalcWaterfallRects04, TestSize.Level1)
-    {
-        DisplayId displayId = 1;
-        ScreenSceneConfig::GetCurvedScreenBoundaryConfig() = {};
-        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
-        ASSERT_TRUE(controller != nullptr);
-        controller->CalcWaterfallRects(displayId);
-    }
-
-    /**
-     * @tc.name: CalcWaterfallRectsByRotation
-     * @tc.desc: ScreenCutoutController calc waterfall rects by rotation
-     * @tc.type: FUNC
-     */
-    HWTEST_F(ScreenCutoutControllerTest, CalcWaterfallRectsByRotation, TestSize.Level1)
-    {
-        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
-        Rotation rotation;
-        uint32_t displayHeight = 1024;
-        uint32_t displayWidth = 512;
-        std::vector<uint32_t> realNumVec = {16, 32, 8, 8};
-        rotation = Rotation::ROTATION_0;
-        ASSERT_TRUE(controller != nullptr);
-        controller->CalcWaterfallRectsByRotation(rotation, displayHeight, displayWidth, realNumVec);
-        rotation = Rotation::ROTATION_90;
-        controller->CalcWaterfallRectsByRotation(rotation, displayHeight, displayWidth, realNumVec);
-        rotation = Rotation::ROTATION_180;
-        controller->CalcWaterfallRectsByRotation(rotation, displayHeight, displayWidth, realNumVec);
-        rotation = Rotation::ROTATION_270;
-        controller->CalcWaterfallRectsByRotation(rotation, displayHeight, displayWidth, realNumVec);
-    }
-
-    /**
-     * @tc.name: CalculateCurvedCompression
-     * @tc.desc: ScreenCutoutController calculate curved compression
-     * @tc.type: FUNC
-     */
-    HWTEST_F(ScreenCutoutControllerTest, CalculateCurvedCompression, TestSize.Level1)
-    {
-        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
-        RectF finalRect = RectF(0, 0, 0, 0);
-        ScreenProperty screenProperty;
-        RectF result = controller->CalculateCurvedCompression(screenProperty);
-        ASSERT_EQ(finalRect.left_, result.left_);
-        ASSERT_EQ(finalRect.top_, result.top_);
-        ASSERT_EQ(finalRect.width_, result.width_);
-        ASSERT_EQ(finalRect.height_, result.height_);
-    }
-
-    /**
-     * @tc.name: IsDisplayRotationHorizontal
-     * @tc.desc: IsDisplayRotationHorizontal func
-     * @tc.type: FUNC
-     */
-    HWTEST_F(ScreenCutoutControllerTest, IsDisplayRotationHorizontal, TestSize.Level1)
-    {
-        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
-        ASSERT_EQ(false, controller->IsDisplayRotationHorizontal(Rotation::ROTATION_0));
-        ASSERT_EQ(false, controller->IsDisplayRotationHorizontal(Rotation::ROTATION_180));
-        ASSERT_EQ(true, controller->IsDisplayRotationHorizontal(Rotation::ROTATION_90));
-        ASSERT_EQ(true, controller->IsDisplayRotationHorizontal(Rotation::ROTATION_270));
-    }
-
-    /**
-     * @tc.name: ConvertDeviceToDisplayRotation01
-     * @tc.desc: ConvertDeviceToDisplayRotation func
-     * @tc.type: FUNC
-     */
-    HWTEST_F(ScreenCutoutControllerTest, ConvertDeviceToDisplayRotation01, TestSize.Level1)
-    {
-        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
-        ASSERT_EQ(Rotation::ROTATION_0, controller->ConvertDeviceToDisplayRotation(DeviceRotationValue::INVALID));
-        DeviceRotationValue deviceRotation;
-        deviceRotation = DeviceRotationValue::ROTATION_PORTRAIT;
-        Rotation result01 = controller->ConvertDeviceToDisplayRotation(deviceRotation);
-        ASSERT_EQ(result01, Rotation::ROTATION_0);
-    }
-
-    /**
-     * @tc.name: GetCurrentDisplayRotation01
-     * @tc.desc: GetCurrentDisplayRotation func
-     * @tc.type: FUNC
-     */
-    HWTEST_F(ScreenCutoutControllerTest, GetCurrentDisplayRotation01, TestSize.Level1)
-    {
-        DisplayId displayId = 2000;
-        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
-        controller->defaultDeviceRotation_ = 0;
-        ASSERT_EQ(Rotation::ROTATION_0, controller->GetCurrentDisplayRotation(displayId));
-        controller->defaultDeviceRotation_ = 1;
-        ASSERT_NE(Rotation::ROTATION_0, controller->GetCurrentDisplayRotation(displayId));
-    }
-
-    /**
-     * @tc.name: GetCurrentDisplayRotation
-     * @tc.desc: GetCurrentDisplayRotation func
-     * @tc.type: FUNC
-     */
-    HWTEST_F(ScreenCutoutControllerTest, GetCurrentDisplayRotation02, TestSize.Level1)
-    {
-        sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
-        VirtualScreenOption virtualOption;
-        virtualOption.name_ = "createVirtualOption";
-        auto screenId = ScreenSessionManager::GetInstance().CreateVirtualScreen(
-            virtualOption, displayManagerAgent->AsObject());
-        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
-        ASSERT_NE(controller, nullptr);
-        auto displayInfo = ScreenSessionManager::GetInstance().GetDisplayInfoById(screenId);
-        ASSERT_NE(displayInfo, nullptr);
-        ASSERT_EQ(displayInfo->GetRotation(), controller->GetCurrentDisplayRotation(screenId));
-    }
-
-    /**
-     * @tc.name: ProcessRotationMapping
-     * @tc.desc: ProcessRotationMapping func
-     * @tc.type: FUNC
-     */
-    HWTEST_F(ScreenCutoutControllerTest, ProcessRotationMapping, TestSize.Level1)
-    {
-        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
-        ASSERT_TRUE(controller != nullptr);
-        controller->ProcessRotationMapping();
-    }
-
-    /**
-     * @tc.name: GetOffsetY
-     * @tc.desc: GetOffsetY func
-     * @tc.type: FUNC
-     */
-    HWTEST_F(ScreenCutoutControllerTest, GetOffsetY, TestSize.Level1)
-    {
-        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
-        ASSERT_EQ(0, controller->GetOffsetY());
-    }
+    controller->InitRect(100, 100, 0, 100, emptyRect);
+    EXPECT_EQ(emptyRect, DMRect::NONE());
+    controller->InitRect(100, 100, 100, 0, emptyRect);
+    EXPECT_EQ(emptyRect, DMRect::NONE());
+    controller->InitRect(100, 100, 100, 100, emptyRect);
+    EXPECT_EQ(emptyRect.posX_, 100);
+    EXPECT_EQ(emptyRect.posY_, 100);
+    EXPECT_EQ(emptyRect.width_, 100);
+    EXPECT_EQ(emptyRect.height_, 100);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

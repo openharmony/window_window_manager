@@ -256,6 +256,179 @@ HWTEST_F(SessionLayoutTest, SetDragStart, TestSize.Level1)
     session->SetDragStart(false);
     ASSERT_EQ(false, session->IsDragStart());
 }
+
+/**
+ * @tc.name: UpdateWindowModeSupportType01
+ * @tc.desc: UpdateWindowModeSupportType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionLayoutTest, UpdateWindowModeSupportType01, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdateWindowModeSupportType01";
+    info.bundleName_ = "UpdateWindowModeSupportType01";
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
+
+    EXPECT_EQ(session->UpdateWindowModeSupportType(nullptr), false);
+
+    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
+    EXPECT_EQ(session->UpdateWindowModeSupportType(abilityInfo), false);
+}
+
+/**
+ * @tc.name: SetHasRequestedVsyncFunc
+ * @tc.desc: SetHasRequestedVsyncFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionLayoutTest, SetHasRequestedVsyncFunc, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetHasRequestedVsyncFunc";
+    info.bundleName_ = "SetHasRequestedVsyncFunc";
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
+    session->SetHasRequestedVsyncFunc(nullptr);
+    ASSERT_EQ(nullptr, session->hasRequestedVsyncFunc_);
+    session->SetHasRequestedVsyncFunc([](bool& hasRequestedVsync) {
+        hasRequestedVsync = true;
+        return WSError::WS_OK;
+    });
+    ASSERT_NE(nullptr, session->hasRequestedVsyncFunc_);
+}
+
+/**
+ * @tc.name: SetRequestNextVsyncWhenModeChangeFunc
+ * @tc.desc: SetRequestNextVsyncWhenModeChangeFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionLayoutTest, SetRequestNextVsyncWhenModeChangeFunc, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetRequestNextVsyncWhenModeChangeFunc";
+    info.bundleName_ = "SetRequestNextVsyncWhenModeChangeFunc";
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
+    session->SetRequestNextVsyncWhenModeChangeFunc(nullptr);
+    ASSERT_EQ(nullptr, session->requestNextVsyncWhenModeChangeFunc_);
+    session->SetRequestNextVsyncWhenModeChangeFunc([](const std::shared_ptr<VsyncCallback>& vsyncCallback) {
+        return WSError::WS_OK;
+    });
+    ASSERT_NE(nullptr, session->requestNextVsyncWhenModeChangeFunc_);
+}
+
+/**
+ * @tc.name: RequestNextVsyncWhenModeChange
+ * @tc.desc: RequestNextVsyncWhenModeChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionLayoutTest, RequestNextVsyncWhenModeChange, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "RequestNextVsyncWhenModeChange";
+    info.bundleName_ = "RequestNextVsyncWhenModeChange";
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
+    auto ret = session->RequestNextVsyncWhenModeChange();
+    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, ret);
+    session->SetHasRequestedVsyncFunc([](bool& hasRequestedVsync) {
+        hasRequestedVsync = true;
+        return WSError::WS_OK;
+    });
+    ret = session->RequestNextVsyncWhenModeChange();
+    EXPECT_EQ(WSError::WS_OK, ret);
+}
+
+/**
+ * @tc.name: InitVsyncCallbackForModeChangeAndRequestNextVsync
+ * @tc.desc: InitVsyncCallbackForModeChangeAndRequestNextVsync
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionLayoutTest, InitVsyncCallbackForModeChangeAndRequestNextVsync, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "InitVsyncCallbackForModeChangeAndRequestNextVsync";
+    info.bundleName_ = "InitVsyncCallbackForModeChangeAndRequestNextVsync";
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
+    session->isWindowModeDirty_.store(true);
+    session->timesToWaitForVsync_.store(2);
+    session->requestNextVsyncWhenModeChangeFunc_ = nullptr;
+    session->InitVsyncCallbackForModeChangeAndRequestNextVsync();
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_EQ(session->timesToWaitForVsync_.load(), 2);
+
+    session->SetRequestNextVsyncWhenModeChangeFunc([](const std::shared_ptr<VsyncCallback>& vsyncCallback) {
+        vsyncCallback->onCallback(1, 1);
+        return WSError::WS_OK;
+    });
+    session->InitVsyncCallbackForModeChangeAndRequestNextVsync();
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_NE(session->timesToWaitForVsync_.load(), 2);
+}
+
+/**
+ * @tc.name: OnVsyncReceivedAfterModeChanged
+ * @tc.desc: OnVsyncReceivedAfterModeChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionLayoutTest, OnVsyncReceivedAfterModeChanged, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "OnVsyncReceivedAfterModeChanged";
+    info.bundleName_ = "OnVsyncReceivedAfterModeChanged";
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
+    session->isWindowModeDirty_.store(false);
+    session->timesToWaitForVsync_.store(2);
+    session->OnVsyncReceivedAfterModeChanged();
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_EQ(session->timesToWaitForVsync_.load(), 2);
+
+    session->SetRequestNextVsyncWhenModeChangeFunc([](const std::shared_ptr<VsyncCallback>& vsyncCallback) {
+        vsyncCallback->onCallback(1, 1);
+        return WSError::WS_OK;
+    });
+    session->isWindowModeDirty_.store(true);
+    session->OnVsyncReceivedAfterModeChanged();
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_NE(session->timesToWaitForVsync_.load(), 2);
+
+    session->isWindowModeDirty_.store(true);
+    session->timesToWaitForVsync_.store(-1);
+    session->OnVsyncReceivedAfterModeChanged();
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_EQ(session->timesToWaitForVsync_.load(), 0);
+
+    session->isWindowModeDirty_.store(true);
+    session->timesToWaitForVsync_.store(1);
+    session->sessionStage_ = nullptr;
+    session->OnVsyncReceivedAfterModeChanged();
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_EQ(session->isWindowModeDirty_.load(), false);
+
+    session->isWindowModeDirty_.store(true);
+    session->timesToWaitForVsync_.store(1);
+    session->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
+    session->OnVsyncReceivedAfterModeChanged();
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_EQ(session->isWindowModeDirty_.load(), false);
+}
+
+/**
+ * @tc.name: NotifyAppHookWindowInfoUpdated
+ * @tc.desc: NotifyAppHookWindowInfoUpdated
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionLayoutTest, NotifyAppHookWindowInfoUpdated, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifyAppHookWindowInfoUpdated";
+    info.bundleName_ = "NotifyAppHookWindowInfoUpdated";
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
+
+    session->sessionStage_ = nullptr;
+    WSError errCode = session->NotifyAppHookWindowInfoUpdated();
+    EXPECT_EQ(errCode, WSError::WS_ERROR_NULLPTR);
+
+    session->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
+    errCode = session->NotifyAppHookWindowInfoUpdated();
+    EXPECT_EQ(errCode, WSError::WS_OK);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

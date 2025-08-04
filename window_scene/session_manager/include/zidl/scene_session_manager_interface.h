@@ -123,6 +123,7 @@ public:
         TRANS_ID_UPDATE_SESSION_SCREEN_LOCK,
         TRANS_ID_ADD_SKIP_SELF_ON_VIRTUAL_SCREEN,
         TRANS_ID_REMOVE_SKIP_SELF_ON_VIRTUAL_SCREEN,
+        TRANS_ID_SET_SCREEN_PRIVACY_WINDOW_TAG_SWITCH,
         TRANS_ID_IS_PC_WINDOW,
         TRANS_ID_IS_FREE_MULTI_WINDOW,
         TRANS_ID_IS_PC_OR_PAD_FREE_MULTI_WINDOW_MODE,
@@ -149,6 +150,8 @@ public:
         TRANS_ID_GET_HOST_GLOBAL_SCALE_RECT,
         TRANS_ID_ANIMATE_TO_WINDOW,
         TRANS_ID_CREATE_UI_EFFECT_CONTROLLER,
+        TRANS_ID_ADD_SESSION_BLACK_LIST,
+        TRANS_ID_REMOVE_SESSION_BLACK_LIST,
         TRANS_ID_GET_PIP_SWITCH_STATUS,
     };
 
@@ -392,6 +395,9 @@ public:
     virtual WMError RemoveSkipSelfWhenShowOnVirtualScreenList(
         const std::vector<int32_t>& persistentIds) { return WMError::WM_OK; }
 
+    virtual WMError SetScreenPrivacyWindowTagSwitch(
+        uint64_t screenId, const std::vector<std::string>& privacyWindowTags, bool enable) { return WMError::WM_OK; }
+
     WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) override { return WMError::WM_OK; }
 
     WMError IsWindowRectAutoSave(const std::string& key, bool& enabled,
@@ -423,6 +429,10 @@ public:
         const WindowAnimationOption& animationOption) override { return WMError::WM_OK; }
     WMError CreateUIEffectController(const sptr<IUIEffectControllerClient>& controllerClient,
         sptr<IUIEffectController>& controller, int32_t& controllerId) override { return WMError::WM_OK; };
+    WMError AddSessionBlackList(const std::unordered_set<std::string>& bundleNames,
+        const std::unordered_set<std::string>& privacyWindowTags) override { return WMError::WM_OK; }
+    WMError RemoveSessionBlackList(const std::unordered_set<std::string>& bundleNames,
+        const std::unordered_set<std::string>& privacyWindowTags) override { return WMError::WM_OK; }
     WMError GetPiPSettingSwitchStatus(bool& switchStatus) override { return WMError::WM_OK; }
 };
 } // namespace OHOS::Rosen

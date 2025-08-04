@@ -22,6 +22,8 @@
 #include "setting_provider.h"
 #include "system_ability_definition.h"
 #include "window_manager_hilog.h"
+#include "fold_screen_state_internel.h"
+#include "fold_screen_controller/super_fold_state_manager.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -45,12 +47,12 @@ constexpr uint32_t SCREEN_MAIN_IN_DATA = 0;
 constexpr uint32_t SCREEN_MIRROR_IN_DATA = 1;
 constexpr uint32_t SCREEN_EXTEND_IN_DATA = 2;
 constexpr ScreenId RS_ID_INTERNAL = 0;
+constexpr uint32_t EXTEND_SCREEN_DPI_LEVEL_NEG_ONE = -1;
 constexpr uint32_t EXTEND_SCREEN_DPI_LEVEL_ZERO = 0;
 constexpr uint32_t EXTEND_SCREEN_DPI_LEVEL_ONE = 1;
-constexpr uint32_t EXTEND_SCREEN_DPI_LEVEL_TWO = 2;
-constexpr float EXTEND_SCREEN_DPI_ZERO_PARAMETER = 0.7f;
-constexpr float EXTEND_SCREEN_DPI_ONE_PARAMETER = 0.85f;
-constexpr float EXTEND_SCREEN_DPI_TWO_PARAMETER = 1.00f;
+constexpr float EXTEND_SCREEN_DPI_NEG_ONE_PARAMETER = 0.7f;
+constexpr float EXTEND_SCREEN_DPI_ZERO_PARAMETER = 0.85f;
+constexpr float EXTEND_SCREEN_DPI_ONE_PARAMETER = 1.00f;
 const std::string SCREEN_SHAPE = system::GetParameter("const.window.screen_shape", "0:0");
 constexpr int32_t INDEX_EXTEND_SCREEN_DPI_POSITION = -1;
 
@@ -414,6 +416,12 @@ bool ScreenSettingHelper::GetScreenMode(MultiScreenInfo& info, const std::string
         return false;
     } else {
         mode = static_cast<uint32_t>(strtoll(screenMode[DATA_INDEX_ONE].c_str(), nullptr, PARAM_NUM_TEN));
+#ifdef FOLD_ABILITY_ENABLE
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() &&
+        SuperFoldStateManager::GetInstance().GetCurrentStatus() != SuperFoldStatus::EXPANDED) {
+        mode = SCREEN_MIRROR_IN_DATA;
+    }
+#endif
         TLOGW(WmsLogTag::DMS, "external screen mode: %{public}d", mode);
         if (!UpdateScreenMode(info, mode, true)) {
             return false;
@@ -585,18 +593,27 @@ bool ScreenSettingHelper::GetSettingExtendScreenDpi(float& coef, const std::stri
     }
     TLOGI(WmsLogTag::DMS, "get setting extend dpi is %{public}d", value);
     switch (value) {
+        case EXTEND_SCREEN_DPI_LEVEL_NEG_ONE:
+            coef = EXTEND_SCREEN_DPI_NEG_ONE_PARAMETER;
+            break;
         case EXTEND_SCREEN_DPI_LEVEL_ZERO:
             coef = EXTEND_SCREEN_DPI_ZERO_PARAMETER;
             break;
         case EXTEND_SCREEN_DPI_LEVEL_ONE:
             coef = EXTEND_SCREEN_DPI_ONE_PARAMETER;
             break;
-        case EXTEND_SCREEN_DPI_LEVEL_TWO:
-            coef = EXTEND_SCREEN_DPI_TWO_PARAMETER;
-            break;
         default:
             coef = EXTEND_SCREEN_DPI_ONE_PARAMETER;
             break;
+    }
+    return true;
+}
+
+bool ScreenSettingHelper::ConvertStrToInt32(const std::string& str, int32_t& num)
+{
+    auto res = std::from_chars(str.data(), str.data() + str.size(), num);
+    if (res.ec != std::errc()) {
+        return false;
     }
     return true;
 }

@@ -158,6 +158,8 @@ public:
     Rotation CalcRotation(Orientation orientation, FoldDisplayMode foldDisplayMode) const;
     DisplayOrientation CalcDisplayOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode) const;
     DisplayOrientation CalcDeviceOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode) const;
+    DisplayOrientation CalcDeviceOrientationWithBounds(Rotation rotation,
+        FoldDisplayMode foldDisplayMode, const RRect& bounds) const;
     void FillScreenInfo(sptr<ScreenInfo> info) const;
     void InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint, bool isExtend = false,
         float positionX = 0, float positionY = 0);
@@ -198,7 +200,7 @@ public:
     void UpdateToInputManager(RRect bounds, int rotation, int deviceRotation, FoldDisplayMode foldDisplayMode);
     void UpdatePropertyAfterRotation(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
     void UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
-    void UpdateRotationOrientation(int rotation, FoldDisplayMode foldDisplayMode);
+    void UpdateRotationOrientation(int rotation, FoldDisplayMode foldDisplayMode, const RRect& bounds);
     void UpdatePropertyByFakeInUse(bool isFakeInUse);
     ScreenProperty UpdatePropertyByFoldControl(const ScreenProperty& updatedProperty,
         FoldDisplayMode foldDisplayMode = FoldDisplayMode::UNKNOWN);
@@ -213,7 +215,9 @@ public:
     void SetFrameGravity(Gravity gravity);
 
     void SetHdrFormats(std::vector<uint32_t>&& hdrFormats);
+    std::vector<uint32_t> GetHdrFormats();
     void SetColorSpaces(std::vector<uint32_t>&& colorSpaces);
+    std::vector<uint32_t> GetColorSpaces();
     void SetSupportedRefreshRate(std::vector<uint32_t>&& supportedRefreshRate);
     std::vector<uint32_t> GetSupportedRefreshRate() const;
     void SetForceCloseHdr(bool isForceCloseHdr);
@@ -328,7 +332,7 @@ public:
     DisplayId GetDisplayId();
 
     std::vector<sptr<SupportedScreenModes>> GetScreenModes();
-    void SetScreenModes(std::vector<sptr<SupportedScreenModes>> modes);
+    void SetScreenModes(const std::vector<sptr<SupportedScreenModes>>& modes);
 
     int32_t GetActiveId();
     void SetActiveId(int32_t activeIdx);
@@ -346,6 +350,7 @@ public:
 
     void SetIsAvailableAreaNeedNotify(bool isAvailableAreaNeedNotify);
     bool GetIsAvailableAreaNeedNotify() const;
+    uint64_t GetSessionId() const;
 
     /*
      * RS Client Multi Instance
@@ -368,6 +373,9 @@ public:
     uint32_t GetScreenAreaWidth() const;
     void SetScreenAreaHeight(uint32_t screenAreaHeight);
     uint32_t GetScreenAreaHeight() const;
+
+    void UpdateMirrorWidth(uint32_t mirrorWidth);
+    void UpdateMirrorHeight(uint32_t mirrorHeight);
 
 private:
     ScreenProperty property_;
@@ -392,8 +400,11 @@ private:
     bool isFold_ = false;
     float currentSensorRotation_ { -1.0f };
     float currentValidSensorRotation_ { -1.0f };
+    mutable std::shared_mutex hdrFormatsMutex_;
     std::vector<uint32_t> hdrFormats_;
+    mutable std::shared_mutex colorSpacesMutex_;
     std::vector<uint32_t> colorSpaces_;
+    mutable std::shared_mutex supportedRefreshRateMutex_;
     std::vector<uint32_t> supportedRefreshRate_;
     MirrorScreenType mirrorScreenType_ { MirrorScreenType::VIRTUAL_MIRROR };
     std::string serialNumber_;
@@ -411,13 +422,19 @@ private:
     bool isEnableCanvasRotation_ = false;
     std::mutex isEnableRegionRotationMutex_;
     std::mutex isEnableCanvasRotationMutex_;
+    std::shared_mutex availableAreaMutex_;
     bool isAvailableAreaNeedNotify_ = false;
     bool isSecurity_ = true;
+    uint64_t sessionId_;
+    bool lastCloseHdrStatus_ = false;
+    mutable std::shared_mutex modesMutex_;
 
     /*
      * RS Client Multi Instance
      */
     std::shared_ptr<RSUIDirector> rsUIDirector_;
+
+    inline static std::atomic<uint64_t> sessionIdGenerator_ { 0 };
 };
 
 class ScreenSessionGroup : public ScreenSession {
@@ -448,6 +465,7 @@ private:
         sptr<ScreenSession> defaultScreenSession);
 
     std::map<ScreenId, std::pair<sptr<ScreenSession>, Point>> screenSessionMap_;
+    mutable std::shared_mutex screenSessionMapMutex_;
 };
 
 } // namespace OHOS::Rosen

@@ -59,6 +59,7 @@ constexpr int W_DISPLAY_OFFSET_X = 5;
 constexpr int W_DISPLAY_OFFSET_Y = 5;
 constexpr int W_DISPLAY_WIDTH = 5;
 constexpr int W_DISPLAY_HEITHT = 5;
+constexpr int DECIMAL_NUM = 10;
 }
 
 DisplayDumper::DisplayDumper(const sptr<AbstractDisplayController>& abstractDisplayController,
@@ -143,10 +144,10 @@ DMError DisplayDumper::DumpInfo(const std::vector<std::string>& args, std::strin
     } else if (args[0] == ARG_DUMP_DISPLAY && args[1] == ARG_DUMP_ALL) {
         return DumpAllDisplayInfo(dumpInfo);
     } else if (args[0] == ARG_DUMP_SCREEN && IsValidDigitString(args[1])) {
-        ScreenId screenId = std::stoull(args[1]);
+        ScreenId screenId = strtoll(args[1].c_str(), nullptr, DECIMAL_NUM);
         return DumpSpecifiedScreenInfo(screenId, dumpInfo);
     } else if (args[0] == ARG_DUMP_DISPLAY && IsValidDigitString(args[1])) {
-        DisplayId displayId = std::stoull(args[1]);
+        DisplayId displayId = strtoll(args[1].c_str(), nullptr, DECIMAL_NUM);
         return DumpSpecifiedDisplayInfo(displayId, dumpInfo);
     } else {
         return DMError::DM_ERROR_INVALID_PARAM;

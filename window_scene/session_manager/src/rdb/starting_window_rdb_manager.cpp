@@ -131,7 +131,8 @@ std::shared_ptr<NativeRdb::RdbStore> StartingWindowRdbManager::GetRdbStore()
     WmsRdbOpenCallback wmsCallback(wmsRdbConfig_);
     rdbStore_ = NativeRdb::RdbHelper::GetRdbStore(
         rdbStoreConfig, wmsRdbConfig_.version, wmsCallback, resCode);
-    TLOGD(WmsLogTag::WMS_PATTERN, "resCode:%{public}d", resCode);
+    TLOGI(WmsLogTag::WMS_PATTERN, "resCode: %{public}d, version: %{public}d",
+        resCode, wmsRdbConfig_.version);
     return rdbStore_;
 }
 
@@ -268,6 +269,10 @@ std::string StartingWindowRdbManager::GetStartWindowValFromProfile(const AppExec
         return defaultVal;
     }
     std::string rawData(fileContentPtr.get(), fileContentPtr.get() + len);
+    if (!nlohmann::json::accept(rawData)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "rawData failed");
+        return defaultVal;
+    }
     nlohmann::json profileJson = nlohmann::json::parse(rawData);
     if (profileJson.is_discarded()) {
         TLOGE(WmsLogTag::WMS_PATTERN, "bad profile file");

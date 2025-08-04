@@ -204,6 +204,13 @@ public:
     sptr<Display> GetDefaultDisplaySync(bool isFromNapi = false);
 
     /**
+     * @brief Provide ability of setting virtual screen as primary for no-screen device.
+     *
+     * @param screenId ScreenId used in virtual screen.
+    */
+    bool SetVirtualScreenAsDefault(ScreenId screenId);
+
+    /**
      * @brief Get the display object by id.
      *
      * @param displayId Id of the target display.
@@ -274,7 +281,7 @@ public:
      * @return std::vector<std::shared_ptr<Media::PixelMap>> Vector of screenshot pixel maps.
      */
     std::vector<std::shared_ptr<Media::PixelMap>> GetScreenHDRshot(DisplayId displayId,
-        DmErrorCode* errorCode = nullptr, bool isUseDma = false, bool isCaptureFullOfScreen = false);
+        DmErrorCode& errorCode, bool isUseDma = false, bool isCaptureFullOfScreen = false);
 
     /**
      * @brief Get screenshot by user select area.
@@ -860,7 +867,7 @@ public:
      * @return std::vector<std::shared_ptr<Media::PixelMap>> Vector of screenshot pixel maps.
      */
     std::vector<std::shared_ptr<Media::PixelMap>> GetScreenHDRshotWithOption(
-        const CaptureOption& captureOption, DmErrorCode* errorCode = nullptr);
+        const CaptureOption& captureOption, DmErrorCode& errorCode);
 
     /**
      * @brief Get CutoutInfo with rotation

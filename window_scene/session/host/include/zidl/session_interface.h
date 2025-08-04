@@ -360,6 +360,7 @@ public:
     virtual WMError UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action) { return WMError::WM_OK; }
     virtual WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) { return WMError::WM_OK; }
+    virtual WMError GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo) { return WMError::WM_OK; }
     virtual WSError AdjustKeyboardLayout(const KeyboardLayoutParams& params) { return WSError::WS_OK; }
     virtual WSError SetDialogSessionBackGestureEnabled(bool isEnabled) { return WSError::WS_OK; }
     virtual void NotifyExtensionDetachToDisplay() {}
@@ -491,6 +492,7 @@ public:
     virtual WSError UpdateRotationChangeRegistered(int32_t persistentId, bool isRegister) { return WSError::WS_OK; }
     virtual WMError UpdateScreenshotAppEventRegistered(int32_t persistentId, bool isRegister) { return WMError::WM_OK; }
     virtual WMError UpdateAcrossDisplaysChangeRegistered(bool isRegister) { return WMError::WM_OK; }
+    virtual WMError OnUpdateColorMode(const std::string& colorMode, bool hasDarkRes) { return WMError::WM_OK; }
     virtual WMError IsMainWindowFullScreenAcrossDisplays(bool& isAcrossDisplays) { return WMError::WM_OK; }
     virtual WSError GetIsHighlighted(bool& isHighlighted) { return WSError::WS_OK; }
 

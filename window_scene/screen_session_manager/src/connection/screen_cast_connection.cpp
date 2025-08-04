@@ -30,6 +30,7 @@ ScreenCastConnection &ScreenCastConnection::GetInstance()
     return screenCastConnection;
 }
 
+// LCOV_EXCL_START
 bool ScreenCastConnection::CastConnectExtension(const int32_t &paramFlag)
 {
     if (bundleName_.empty() || abilityName_.empty()) {
@@ -73,6 +74,7 @@ void ScreenCastConnection::CastDisconnectExtension()
     abilityConnection_ = nullptr;
     TLOGI(WmsLogTag::DMS, "CastDisconnectExtension exit");
 }
+// LCOV_EXCL_STOP
 
 void ScreenCastConnection::SetBundleName(const std::string &bundleName)
 {
@@ -84,6 +86,7 @@ void ScreenCastConnection::SetAbilityName(const std::string &abilityName)
     abilityName_ = abilityName;
 }
 
+// LCOV_EXCL_START
 std::string ScreenCastConnection::GetBundleName() const
 {
     return bundleName_;
@@ -112,4 +115,5 @@ int32_t ScreenCastConnection::SendMessageToCastService(const int32_t &transCode,
     }
     return abilityConnection_->SendMessage(transCode, data, reply);
 }
+// LCOV_EXCL_STOP
 } // namespace OHOS::Rosen

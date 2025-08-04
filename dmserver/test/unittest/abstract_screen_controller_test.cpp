@@ -17,6 +17,7 @@
 
 #include "abstract_screen_controller.h"
 #include "iremote_object_mocker.h"
+#include "modifier_render_thread/rs_modifiers_draw_thread.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -43,6 +44,9 @@ void AbstractScreenControllerTest::SetUpTestCase()
 
 void AbstractScreenControllerTest::TearDownTestCase()
 {
+#ifdef RS_ENABLE_VK
+    RSModifiersDrawThread::Destroy();
+#endif
 }
 
 void AbstractScreenControllerTest::SetUp()
@@ -855,8 +859,10 @@ HWTEST_F(AbstractScreenControllerTest, OnRemoteDied03, TestSize.Level1)
     sptr<IRemoteObject> agent = new IRemoteObjectMocker();
     std::vector<ScreenId> screens {5};
     absController_->screenAgentMap_.insert(std::make_pair(agent, screens));
+    absController_->defaultRsScreenId_ = 0;
     ASSERT_EQ(true, absController_->OnRemoteDied(agent));
     ASSERT_EQ(0, absController_->screenAgentMap_.size());
+    absController_->defaultRsScreenId_ = SCREEN_ID_INVALID;
 }
 
 /**
@@ -1289,6 +1295,23 @@ HWTEST_F(AbstractScreenControllerTest, MakeMirror06, TestSize.Level1)
     absController_->abstractScreenCallback_ = new AbstractScreenController::AbstractScreenCallback;
     ASSERT_TRUE(DMError::DM_OK != absController_->MakeMirror(2, screens));
     ASSERT_EQ(DMError::DM_OK, absController_->StopScreens(screens, ScreenCombination::SCREEN_MIRROR));
+}
+
+/**
+ * @tc.name: SetVirtualScreenAsDefault
+ * @tc.desc: SetVirtualScreenAsDefault test
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbstractScreenControllerTest, SetVirtualScreenAsDefault, TestSize.Level1)
+{
+    ScreenId screenId = 0;
+    auto res = absController_->SetVirtualScreenAsDefault(screenId);
+    EXPECT_FALSE(res);
+    VirtualScreenOption option;
+    sptr<IRemoteObject> displayManagerAgent = new IRemoteObjectMocker();
+    auto virtualScreenId = absController_->CreateVirtualScreen(option, displayManagerAgent);
+    res = absController_->SetVirtualScreenAsDefault(virtualScreenId);
+    EXPECT_FALSE(res);
 }
 }
 } // namespace Rosen

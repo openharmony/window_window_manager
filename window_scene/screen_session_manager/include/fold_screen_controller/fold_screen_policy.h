@@ -44,6 +44,7 @@ public:
     virtual void SendSensorResult(FoldStatus foldStatus);
     virtual ScreenId GetCurrentScreenId();
     virtual sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
+    virtual FoldCreaseRegion GetLiveCreaseRegion();
     virtual void LockDisplayStatus(bool locked);
     virtual void SetOnBootAnimation(bool onBootAnimation);
     virtual void UpdateForPhyScreenPropertyChange();
@@ -67,11 +68,13 @@ public:
     ScreenId screenId_ { SCREEN_ID_INVALID };
     ScreenProperty screenProperty_;
     mutable std::recursive_mutex displayModeMutex_;
+    mutable std::mutex liveCreaseRegionMutex_;
     FoldDisplayMode currentDisplayMode_ = FoldDisplayMode::UNKNOWN;
     FoldStatus currentFoldStatus_ = FoldStatus::UNKNOWN;
     FoldDisplayMode lastDisplayMode_ = FoldDisplayMode::UNKNOWN;
     FoldStatus lastFoldStatus_ = FoldStatus::UNKNOWN;
     sptr<FoldCreaseRegion> currentFoldCreaseRegion_ = nullptr;
+    FoldCreaseRegion liveCreaseRegion_ = FoldCreaseRegion(0, {});
     bool lockDisplayStatus_ = false;
     bool onBootAnimation_ = false;
     std::atomic<bool> isClearingBootAnimation_ = false;

@@ -29,6 +29,7 @@ WM_IMPLEMENT_SINGLE_INSTANCE(SuperFoldStateManager)
 
 namespace {
 const std::string g_FoldScreenRect = system::GetParameter("const.window.foldscreen.config_rect", "");
+constexpr uint32_t DEFAULT_FOLD_REGION_HEIGHT = 82; // default height of pivot area
 const int32_t PARAM_NUMBER_MIN = 10;
 const int32_t HEIGHT_HALF = 2;
 #ifdef TP_FEATURE_ENABLE
@@ -38,6 +39,10 @@ const char* KEYBOARD_OFF_CONFIG = "version:3+whole";
 #endif
 static bool isKeyboardOn_ = false;
 static bool isSystemKeyboardOn_ = false;
+constexpr int32_t FOLD_CREASE_RECT_SIZE = 4; //numbers of parameter on the current device is 4
+const std::string g_LiveCreaseRegion = system::GetParameter("const.display.foldscreen.crease_region", "");
+const std::string FOLD_CREASE_DELIMITER = ",;";
+constexpr ScreenId SCREEN_ID_FULL = 0;
 }
 
 void SuperFoldStateManager::DoAngleChangeFolded(SuperFoldStatusChangeEvents event)
@@ -182,6 +187,50 @@ void SuperFoldStateManager::InitSuperFoldCreaseRegionParams()
     currentSuperFoldCreaseRegion_ = new FoldCreaseRegion(screenIdFull, rect);
 }
 
+FoldCreaseRegion SuperFoldStateManager::GetFoldCreaseRegion(bool isVertical) const
+{
+    std::vector<int32_t> foldRect = FoldScreenStateInternel::StringFoldRectSplitToInt(g_LiveCreaseRegion,
+        FOLD_CREASE_DELIMITER);
+    if (foldRect.size() != FOLD_CREASE_RECT_SIZE) {
+        TLOGE(WmsLogTag::DMS, "foldRect is invalid");
+        return FoldCreaseRegion(0, {});
+    }
+
+    ScreenId screenIdFull = 0;
+    std::vector<DMRect> foldCreaseRect;
+    GetFoldCreaseRect(isVertical, foldRect, foldCreaseRect);
+    return FoldCreaseRegion(screenIdFull, foldCreaseRect);
+}
+
+void SuperFoldStateManager::GetFoldCreaseRect(bool isVertical,
+    const std::vector<int32_t>& foldRect, std::vector<DMRect>& foldCreaseRect) const
+{
+    int32_t liveCreaseRegionPosX; // live Crease Region PosX
+    int32_t liveCreaseRegionPosY; // live Crease Region PosY
+    uint32_t liveCreaseRegionPosWidth; // live Crease Region PosWidth
+    uint32_t liveCreaseRegionPosHeight; // live Crease Region PosHeight
+    if (isVertical) {
+        TLOGI(WmsLogTag::DMS, "the current FoldCreaseRect is vertical");
+        liveCreaseRegionPosX = foldRect[1];
+        liveCreaseRegionPosY = foldRect[0];
+        liveCreaseRegionPosWidth = static_cast<uint32_t>(foldRect[3]);
+        liveCreaseRegionPosHeight = static_cast<uint32_t>(foldRect[2]);
+    } else {
+        TLOGI(WmsLogTag::DMS, "the current FoldCreaseRect is horizontal");
+        liveCreaseRegionPosX = foldRect[0];
+        liveCreaseRegionPosY = foldRect[1];
+        liveCreaseRegionPosWidth = static_cast<uint32_t>(foldRect[2]);
+        liveCreaseRegionPosHeight = static_cast<uint32_t>(foldRect[3]);
+    }
+    foldCreaseRect = {
+        {
+            liveCreaseRegionPosX, liveCreaseRegionPosY,
+            liveCreaseRegionPosWidth, liveCreaseRegionPosHeight
+        }
+    };
+    return;
+}
+
 SuperFoldStateManager::SuperFoldStateManager()
 {
     InitSuperFoldStateManagerMap();
@@ -306,6 +355,37 @@ sptr<FoldCreaseRegion> SuperFoldStateManager::GetCurrentFoldCreaseRegion()
     return currentSuperFoldCreaseRegion_;
 }
 
+FoldCreaseRegion SuperFoldStateManager::GetLiveCreaseRegion()
+{
+    TLOGI(WmsLogTag::DMS, "enter");
+    SuperFoldStatus curFoldState = ScreenSessionManager::GetInstance().GetSuperFoldStatus();
+    if (curFoldState == SuperFoldStatus::UNKNOWN || curFoldState == SuperFoldStatus::FOLDED) {
+        return FoldCreaseRegion(0, {});
+    }
+    sptr<ScreenSession> screenSession = ScreenSessionManager::GetInstance().GetScreenSession(SCREEN_ID_FULL);
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "default screenSession is null");
+        return FoldCreaseRegion(0, {});
+    }
+    DisplayOrientation displayOrientation = screenSession->GetScreenProperty().GetDisplayOrientation();
+    switch (displayOrientation) {
+        case DisplayOrientation::PORTRAIT:
+        case DisplayOrientation::PORTRAIT_INVERTED: {
+            liveCreaseRegion_ = GetFoldCreaseRegion(false);
+            break;
+        }
+        case DisplayOrientation::LANDSCAPE:
+        case DisplayOrientation::LANDSCAPE_INVERTED: {
+            liveCreaseRegion_ = GetFoldCreaseRegion(true);
+            break;
+        }
+        default: {
+            TLOGE(WmsLogTag::DMS, "displayOrientation is invalid");
+        }
+    }
+    return liveCreaseRegion_;
+}
+
 void SuperFoldStateManager::HandleDisplayNotify(SuperFoldStatusChangeEvents changeEvent)
 {
     TLOGI(WmsLogTag::DMS, "changeEvent: %{public}d", static_cast<uint32_t>(changeEvent));
@@ -361,6 +441,103 @@ void SuperFoldStateManager::HandleExtendToHalfFoldDisplayNotify(sptr<ScreenSessi
         fakeScreenSession->ConvertToDisplayInfo());
     screenSession->PropertyChange(screenSession->GetScreenProperty(),
         ScreenPropertyChangeReason::SUPER_FOLD_STATUS_CHANGE);
+    RefreshExternalRegion();
+}
+
+uint32_t SuperFoldStateManager::GetFoldCreaseHeight() const
+{
+    if (currentSuperFoldCreaseRegion_ == nullptr) {
+        return DEFAULT_FOLD_REGION_HEIGHT;
+    }
+    std::vector<DMRect> creaseRects = currentSuperFoldCreaseRegion_->GetCreaseRects();
+    if (!creaseRects.empty()) {
+        return creaseRects[0].height_;
+    }
+    return DEFAULT_FOLD_REGION_HEIGHT;
+}
+
+DMError SuperFoldStateManager::ForceChangeMirrorMode(
+    sptr<ScreenSession>& mainScreenSession, sptr<ScreenSession>& secondarySession)
+{
+    if (mainScreenSession == nullptr || secondarySession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "screenSession is null");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    TLOGI(WmsLogTag::DMS, "currentStatus: %{public}d", GetCurrentStatus());
+    if (GetCurrentStatus() != SuperFoldStatus::EXPANDED) {
+        ScreenSessionManager::GetInstance().SetMultiScreenMode(
+            mainScreenSession->GetRSScreenId(), secondarySession->GetRSScreenId(),
+            MultiScreenMode::SCREEN_MIRROR);
+    }
+    return DMError::DM_OK;
+}
+
+DMError SuperFoldStateManager::RefreshMirrorRegionInner(
+    sptr<ScreenSession>& mainScreenSession, sptr<ScreenSession>& secondarySession)
+{
+    if (mainScreenSession == nullptr || secondarySession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "mainScreenSession or secondarySession is null");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    auto mainScreenProperty = mainScreenSession->GetScreenProperty();
+    auto screenProperty = secondarySession->GetScreenProperty();
+    std::shared_ptr<RSDisplayNode> displayNode = mainScreenSession->GetDisplayNode();
+    if (displayNode == nullptr) {
+        TLOGE(WmsLogTag::DMS, "displayNode is null.");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    DMRect mirrorRegion = DMRect::NONE();
+    if (GetCurrentStatus() != SuperFoldStatus::EXPANDED) {
+        mirrorRegion.posX_ = 0;
+        mirrorRegion.posY_ = 0;
+        mirrorRegion.width_ = mainScreenProperty.GetScreenRealWidth();
+        mirrorRegion.height_ = (mainScreenProperty.GetScreenRealHeight() - GetFoldCreaseHeight()) / HEIGHT_HALF;
+        if (mirrorRegion.width_ == 0 || mirrorRegion.height_ == 0) {
+            TLOGE(WmsLogTag::DMS, "mirrorRegion.width_:%{public}d mirrorRegion.height_:%{public}d",
+                mirrorRegion.width_, mirrorRegion.height_);
+            return DMError::DM_ERROR_INVALID_PARAM;
+        }
+    }
+    mainScreenSession->UpdateMirrorWidth(mirrorRegion.width_);
+    mainScreenSession->UpdateMirrorHeight(mirrorRegion.height_);
+    secondarySession->SetMirrorScreenRegion(secondarySession->GetScreenId(), mirrorRegion);
+    secondarySession->SetIsPhysicalMirrorSwitch(true);
+    secondarySession->EnableMirrorScreenRegion();
+    RSDisplayNodeConfig config = { secondarySession->rsId_, true, displayNode->GetId() };
+    secondarySession->ReuseDisplayNode(config);
+    return DMError::DM_OK;
+}
+
+DMError SuperFoldStateManager::RefreshExternalRegion()
+{
+    if (!ScreenSessionManager::GetInstance().GetIsExtendScreenConnected()) {
+        TLOGW(WmsLogTag::DMS, "extend screen not connect");
+        return DMError::DM_OK;
+    }
+    sptr<ScreenSession> mainScreenSession = ScreenSessionManager::GetInstance().GetDefaultScreenSession();
+    if (mainScreenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "GetScreenSession null");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    std::vector<ScreenId> screenIds = ScreenSessionManager::GetInstance().GetAllScreenIds();
+    for (auto screenId : screenIds) {
+        sptr<ScreenSession> secondarySession = ScreenSessionManager::GetInstance().GetScreenSession(screenId);
+        if (secondarySession == nullptr) {
+            TLOGE(WmsLogTag::DMS, "get mainScreenSession failed secondarySession null");
+            continue;
+        }
+        if (secondarySession->GetScreenProperty().GetScreenType() == ScreenType::REAL &&
+            secondarySession->GetIsExtend()) {
+            if (GetCurrentStatus() != SuperFoldStatus::EXPANDED &&
+                secondarySession->GetScreenCombination() != ScreenCombination::SCREEN_MIRROR) {
+                ForceChangeMirrorMode(mainScreenSession, secondarySession);
+            }
+            if (secondarySession->GetScreenCombination() == ScreenCombination::SCREEN_MIRROR) {
+                RefreshMirrorRegionInner(mainScreenSession, secondarySession);
+            }
+        }
+    }
+    return DMError::DM_OK;
 }
 
 void SuperFoldStateManager::HandleHalfFoldToExtendDisplayNotify(sptr<ScreenSession> screenSession)
@@ -380,6 +557,7 @@ void SuperFoldStateManager::HandleHalfFoldToExtendDisplayNotify(sptr<ScreenSessi
         DisplayChangeEvent::SUPER_FOLD_RESOLUTION_CHANGED);
     screenSession->PropertyChange(screenSession->GetScreenProperty(),
         ScreenPropertyChangeReason::SUPER_FOLD_STATUS_CHANGE);
+    RefreshExternalRegion();
 }
 
 void SuperFoldStateManager::HandleKeyboardOnDisplayNotify(sptr<ScreenSession> screenSession)

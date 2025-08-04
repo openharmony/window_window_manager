@@ -16,12 +16,13 @@
 #include <gtest/gtest.h>
 
 #include <gmock/gmock.h>
-#include "parameters.h"
+#include "ability_context_impl.h"
 #include "floating_ball_controller.h"
 #include "floating_ball_manager.h"
+#include "modifier_render_thread/rs_modifiers_draw_thread.h"
+#include "parameters.h"
 #include "window.h"
 #include "wm_common.h"
-#include "ability_context_impl.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -97,6 +98,9 @@ void FloatingBallControllerTest::SetUpTestCase()
 
 void FloatingBallControllerTest::TearDownTestCase()
 {
+#ifdef RS_ENABLE_VK
+    RSModifiersDrawThread::Destroy();
+#endif
 }
 
 void FloatingBallControllerTest::SetUp()
@@ -125,18 +129,17 @@ namespace {
  */
 HWTEST_F(FloatingBallControllerTest, CreateFloatingBallWindow01, TestSize.Level1)
 {
-    std::unique_ptr<AbilityRuntime::AbilityContextImpl> contextPtr =
-        std::make_unique<AbilityRuntime::AbilityContextImpl>();
-    fbController_->contextPtr_ = contextPtr.get();
-    fbController_->fbOption_ = nullptr;
-    EXPECT_EQ(WMError::WM_ERROR_FB_STATE_ABNORMALLY, fbController_->CreateFloatingBallWindow());
-    fbController_->fbOption_ = option_;
+    std::shared_ptr<AbilityRuntime::AbilityContextImpl> contextPtr =
+        std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    fbController_->contextPtr_ = &contextPtr;
+    sptr<FbOption> nullOption = nullptr;
+    EXPECT_EQ(WMError::WM_ERROR_FB_STATE_ABNORMALLY, fbController_->CreateFloatingBallWindow(nullOption));
     mw_->SetWindowState(WindowState::STATE_INITIAL);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, fbController_->CreateFloatingBallWindow());
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, fbController_->CreateFloatingBallWindow(option_));
     mw_->SetWindowState(WindowState::STATE_SHOWN);
-    EXPECT_EQ(WMError::WM_ERROR_FB_CREATE_FAILED, fbController_->CreateFloatingBallWindow());
+    EXPECT_EQ(WMError::WM_ERROR_FB_CREATE_FAILED, fbController_->CreateFloatingBallWindow(option_));
 
-    fbController_->CreateFloatingBallWindow();
+    fbController_->CreateFloatingBallWindow(option_);
     fbController_->UpdateMainWindow(nullptr);
     EXPECT_EQ(100, fbController_->mainWindowId_);
     fbController_->UpdateMainWindow(mw_);

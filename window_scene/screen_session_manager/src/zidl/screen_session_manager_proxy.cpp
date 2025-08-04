@@ -18,6 +18,9 @@
 #include "marshalling_helper.h"
 
 namespace OHOS::Rosen {
+namespace {
+constexpr uint32_t  MAX_CREASE_REGION_SIZE = 20;
+}
 
 sptr<DisplayInfo> OHOS::Rosen::ScreenSessionManagerProxy::GetDefaultDisplayInfo()
 {
@@ -1800,7 +1803,7 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetDisplaySnapshot(D
 }
 
 std::vector<std::shared_ptr<Media::PixelMap>> ScreenSessionManagerProxy::GetDisplayHDRSnapshot(DisplayId displayId,
-    DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen)
+    DmErrorCode& errorCode, bool isUseDma, bool isCaptureFullOfScreen)
 {
     TLOGD(WmsLogTag::DMS, "enter");
     sptr<IRemoteObject> remote = Remote();
@@ -1840,10 +1843,7 @@ std::vector<std::shared_ptr<Media::PixelMap>> ScreenSessionManagerProxy::GetDisp
     TLOGI(WmsLogTag::DMS, "reply pixelMap and hdrPixelMap");
     std::shared_ptr<Media::PixelMap> sdrpixelMap(reply.ReadParcelable<Media::PixelMap>());
     std::shared_ptr<Media::PixelMap> hdrPixelMap(reply.ReadParcelable<Media::PixelMap>());
-    DmErrorCode replyErrorCode = static_cast<DmErrorCode>(reply.ReadInt32());
-    if (errorCode) {
-        *errorCode = replyErrorCode;
-    }
+    errorCode = static_cast<DmErrorCode>(reply.ReadInt32());
     if (sdrpixelMap == nullptr) {
         TLOGW(WmsLogTag::DMS, "SendRequest sdrpixelMap is nullptr.");
         return { nullptr, nullptr };
@@ -2284,7 +2284,8 @@ sptr<CutoutInfo> ScreenSessionManagerProxy::GetCutoutInfo(DisplayId displayId)
     return info;
 }
 
-sptr<CutoutInfo> ScreenSessionManagerProxy::GetCutoutInfoWithRotation(DisplayId displayId, int32_t rotation)
+sptr<CutoutInfo> ScreenSessionManagerProxy::GetCutoutInfo(DisplayId displayId, int32_t width,
+                                                          int32_t height, Rotation rotation)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -2302,7 +2303,15 @@ sptr<CutoutInfo> ScreenSessionManagerProxy::GetCutoutInfoWithRotation(DisplayId 
         TLOGE(WmsLogTag::DMS, "write displayId failed!");
         return nullptr;
     }
-    if (!data.WriteInt32(rotation)) {
+    if (!data.WriteInt32(width)) {
+        TLOGE(WmsLogTag::DMS, "write width failed!");
+        return nullptr;
+    }
+    if (!data.WriteInt32(height)) {
+        TLOGE(WmsLogTag::DMS, "write height failed!");
+        return nullptr;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(rotation))) {
         TLOGE(WmsLogTag::DMS, "write rotation failed!");
         return nullptr;
     }
@@ -2857,6 +2866,58 @@ sptr<FoldCreaseRegion> ScreenSessionManagerProxy::GetCurrentFoldCreaseRegion()
     return reply.ReadStrongParcelable<FoldCreaseRegion>();
 }
 
+DMError ScreenSessionManagerProxy::GetLiveCreaseRegion(FoldCreaseRegion& region)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGW(WmsLogTag::DMS, "remote is null");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (remote->SendRequest(
+        static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCENE_BOARD_GET_LIVE_CREASE_REGION),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    DMError ret = static_cast<DMError>(reply.ReadInt32());
+    if (ret != DMError::DM_OK) {
+        return ret;
+    }
+    DisplayId displayId;
+    if (!reply.ReadUint64(displayId)) {
+        TLOGE(WmsLogTag::DMS, "Read displayId failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    uint32_t size = 0;
+    if (!reply.ReadUint32(size) || size > MAX_CREASE_REGION_SIZE) {
+        TLOGE(WmsLogTag::DMS, "Invalid creaseRects size");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    std::vector<DMRect> creaseRects;
+    for (uint32_t i = 0; i < size; i++) {
+        int32_t posX;
+        int32_t posY;
+        uint32_t width;
+        uint32_t height;
+        if (!reply.ReadInt32(posX) || !reply.ReadInt32(posY) ||
+        !reply.ReadUint32(width) || !reply.ReadUint32(height)) {
+            TLOGE(WmsLogTag::DMS, "Failed to read crease rect");
+            return DMError::DM_ERROR_IPC_FAILED;
+        }
+        creaseRects.emplace_back(DMRect{posX, posY, width, height});
+    }
+    region = FoldCreaseRegion(displayId, creaseRects);
+    return ret;
+}
+
 DMError ScreenSessionManagerProxy::MakeUniqueScreen(const std::vector<ScreenId>& screenIds,
     std::vector<DisplayId>& displayIds)
 {
@@ -3033,8 +3094,8 @@ ScreenCombination ScreenSessionManagerProxy::GetScreenCombination(ScreenId scree
     return static_cast<ScreenCombination>(reply.ReadUint32());
 }
 
-void ScreenSessionManagerProxy::UpdateScreenDirectionInfo(ScreenId screenId, float screenComponentRotation,
-    float rotation, float phyRotation, ScreenPropertyChangeType screenPropertyChangeType)
+void ScreenSessionManagerProxy::UpdateScreenDirectionInfo(ScreenId screenId, const ScreenDirectionInfo& directionInfo,
+    ScreenPropertyChangeType screenPropertyChangeType, const RRect& bounds)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -3053,20 +3114,24 @@ void ScreenSessionManagerProxy::UpdateScreenDirectionInfo(ScreenId screenId, flo
         TLOGE(WmsLogTag::DMS, "Write screenId failed");
         return;
     }
-    if (!data.WriteFloat(screenComponentRotation)) {
+    if (!data.WriteFloat(directionInfo.screenRotation_)) {
         TLOGE(WmsLogTag::DMS, "Write screenComponentRotation failed");
         return;
     }
-    if (!data.WriteFloat(rotation)) {
+    if (!data.WriteFloat(directionInfo.rotation_)) {
         TLOGE(WmsLogTag::DMS, "Write rotation failed");
         return;
     }
-    if (!data.WriteFloat(phyRotation)) {
+    if (!data.WriteFloat(directionInfo.phyRotation_)) {
         TLOGE(WmsLogTag::DMS, "Write phyRotation failed");
         return;
     }
     if (!data.WriteUint32(static_cast<uint32_t>(screenPropertyChangeType))) {
         TLOGE(WmsLogTag::DMS, "Write screenPropertyChangeType failed");
+        return;
+    }
+    if (!RSMarshallingHelper::Marshalling(data, bounds)) {
+        TLOGE(WmsLogTag::DMS, "Write bounds failed");
         return;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_UPDATE_SCREEN_DIRECTION_INFO),
@@ -4186,7 +4251,7 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetDisplaySnapshotWi
 }
 
 std::vector<std::shared_ptr<Media::PixelMap>> ScreenSessionManagerProxy::GetDisplayHDRSnapshotWithOption(
-    const CaptureOption& captureOption, DmErrorCode* errorCode)
+    const CaptureOption& captureOption, DmErrorCode& errorCode)
 {
     TLOGD(WmsLogTag::DMS, "enter");
     sptr<IRemoteObject> remote = Remote();
@@ -4216,10 +4281,7 @@ std::vector<std::shared_ptr<Media::PixelMap>> ScreenSessionManagerProxy::GetDisp
  
     std::shared_ptr<Media::PixelMap> sdrpixelMap(reply.ReadParcelable<Media::PixelMap>());
     std::shared_ptr<Media::PixelMap> hdrPixelMap(reply.ReadParcelable<Media::PixelMap>());
-    DmErrorCode replyErrorCode = static_cast<DmErrorCode>(reply.ReadInt32());
-    if (errorCode) {
-        *errorCode = replyErrorCode;
-    }
+    errorCode = static_cast<DmErrorCode>(reply.ReadInt32());
     if (sdrpixelMap == nullptr) {
         TLOGW(WmsLogTag::DMS, "SendRequest sdrpixelMap is nullptr.");
         return { nullptr, nullptr };
@@ -4490,6 +4552,42 @@ DMError ScreenSessionManagerProxy::SetVirtualScreenAutoRotation(ScreenId screenI
         return DMError::DM_ERROR_WRITE_DATA_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_AUTO_ROTATION),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    return static_cast<DMError>(reply.ReadInt32());
+}
+
+DMError ScreenSessionManagerProxy::SetScreenPrivacyWindowTagSwitch(ScreenId screenId,
+    const std::vector<std::string>& privacyWindowTag, bool enable)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DMS, "remote is null");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageParcel data;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (!data.WriteUint64(static_cast<uint64_t>(screenId))) {
+        TLOGE(WmsLogTag::DMS, "Write screenId failed");
+        return DMError::DM_ERROR_WRITE_DATA_FAILED;
+    }
+    if (!data.WriteStringVector(privacyWindowTag)) {
+        TLOGE(WmsLogTag::DMS, "Write privacyWindowTag failed");
+        return DMError::DM_ERROR_WRITE_DATA_FAILED;
+    }
+    if (!data.WriteBool(enable)) {
+        TLOGE(WmsLogTag::DMS, "Write enable failed");
+        return DMError::DM_ERROR_WRITE_DATA_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREEN_PRIVACY_WINDOW_TAG_SWITCH),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;

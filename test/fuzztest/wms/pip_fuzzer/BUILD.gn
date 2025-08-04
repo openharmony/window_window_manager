@@ -66,7 +66,6 @@ ohos_fuzztest("PipFuzzTest") {
     "input:libmmi-client",
     "ipc:ipc_single",
     "napi:ace_napi",
-    "node:node_header_notice",
     "window_manager:libwindow_extension_client",
   ]
 }

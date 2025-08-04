@@ -37,8 +37,10 @@
 
 namespace OHOS::Rosen {
 namespace save {
+static const uint32_t PIXMAP_VECTOR_ONLY_SDR_SIZE = 1;
 static const uint32_t PIXMAP_VECTOR_SIZE = 2;
 static const uint32_t SDR_PIXMAP = 0;
+static const uint32_t HDR_PIXMAP = 1;
 struct Option {
     Media::Rect rect;
     Media::Size size;
@@ -292,10 +294,10 @@ static void AsyncGetScreenHDRshot(napi_env env, std::unique_ptr<HdrParam>& param
     CaptureOption option = { param->option.displayId, param->option.isNeedNotify, param->option.isNeedPointer,
         param->option.isCaptureFullOfScreen};
     if (!option.isNeedNotify_) {
-        param->imageVec = DisplayManager::GetInstance().GetScreenHDRshotWithOption(option, &param->wret);
+        param->imageVec = DisplayManager::GetInstance().GetScreenHDRshotWithOption(option, param->wret);
     } else {
         TLOGI(WmsLogTag::DMS, "Get Screenshot by default option");
-        param->imageVec = DisplayManager::GetInstance().GetScreenHDRshot(param->option.displayId, &param->wret,
+        param->imageVec = DisplayManager::GetInstance().GetScreenHDRshot(param->option.displayId, param->wret,
             true, param->option.isCaptureFullOfScreen);
     }
     if ((param->imageVec.size() != PIXMAP_VECTOR_SIZE || param->imageVec[SDR_PIXMAP] == nullptr) &&
@@ -390,6 +392,32 @@ napi_value Resolve(napi_env env, std::unique_ptr<Param> &param)
     return jsImage;
 }
 
+napi_value CreateJsPixelmapVec(napi_env env, std::unique_ptr<HdrParam>& param)
+{
+    napi_value jsPixelmapVec = nullptr;
+    napi_value result;
+    uint32_t pixReturnJsVecLength = 0;
+    if (param->imageVec[HDR_PIXMAP] == nullptr) {
+        pixReturnJsVecLength = PIXMAP_VECTOR_ONLY_SDR_SIZE;
+    } else {
+        pixReturnJsVecLength = PIXMAP_VECTOR_SIZE;
+    }
+    napi_create_array_with_length(env, pixReturnJsVecLength, &jsPixelmapVec);
+    if (jsPixelmapVec == nullptr) {
+        TLOGE(WmsLogTag::DMS, "Failed to create pixelmap array");
+        NAPI_CALL(env, napi_get_undefined(env, &result));
+        return result;
+    }
+    uint32_t index = 0;
+    for (const auto& pixelmap : param->imageVec) {
+        if (pixelmap == nullptr) {
+            break;
+        }
+        napi_set_element(env, jsPixelmapVec, index++, OHOS::Media::PixelMapNapi::CreatePixelMap(env, pixelmap));
+    }
+    return jsPixelmapVec;
+}
+
 napi_value HDRResolve(napi_env env, std::unique_ptr<HdrParam>& param)
 {
     napi_status ret = napi_ok;
@@ -439,19 +467,8 @@ napi_value HDRResolve(napi_env env, std::unique_ptr<HdrParam>& param)
         NAPI_CALL(env, napi_get_undefined(env, &result));
         return result;
     }
- 
-    napi_value jsImages = nullptr;
-    napi_create_array_with_length(env, PIXMAP_VECTOR_SIZE, &jsImages);
-    if (jsImages == nullptr) {
-        TLOGE(WmsLogTag::DMS, "Failed to create pixelmap array");
-        NAPI_CALL(env, napi_get_undefined(env, &result));
-        return result;
-    }
-    uint32_t index = 0;
-    for (const auto pixelmap : param->imageVec) {
-        napi_set_element(env, jsImages, index++, OHOS::Media::PixelMapNapi::CreatePixelMap(env, pixelmap));
-    }
-    return jsImages;
+
+    return CreateJsPixelmapVec(env, param);
 }
 
 napi_value PickFunc(napi_env env, napi_callback_info info)

@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+#include "modifier_render_thread/rs_modifiers_draw_thread.h"
 #include "display_cutout_controller.h"
 #include "display_manager_service_inner.h"
 #include "display_manager_service.h"
@@ -38,6 +39,9 @@ void DisplayCutoutControllerTest::SetUpTestCase()
 
 void DisplayCutoutControllerTest::TearDownTestCase()
 {
+#ifdef RS_ENABLE_VK
+    RSModifiersDrawThread::Destroy();
+#endif
 }
 
 void DisplayCutoutControllerTest::SetUp()

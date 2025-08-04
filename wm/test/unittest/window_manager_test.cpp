@@ -82,7 +82,7 @@ public:
 class TestWindowVisibilityStateListener : public IWindowInfoChangedListener {
 public:
     void OnWindowInfoChanged(
-        const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList) override
+        const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList) override
     {
         WLOGI("TestWindowUpdateListener");
     };
@@ -90,7 +90,8 @@ public:
 
 class TestWindowDisplayIdChangeListener : public IWindowInfoChangedListener {
 public:
-    void OnWindowInfoChanged(const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList) override
+    void OnWindowInfoChanged(
+        const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList) override
     {
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "TestWindowDisplayIdChangeListener");
     };
@@ -98,9 +99,34 @@ public:
 
 class TestWindowRectChangedListener : public IWindowInfoChangedListener {
 public:
-    void OnWindowInfoChanged(const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList) override
+    void OnWindowInfoChanged(
+        const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList) override
     {
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "TestWindowRectChangedListener");
+    };
+};
+
+class TestWindowModeChangedListenerForPropertyChange : public IWindowInfoChangedListener {
+public:
+    int32_t count_ = 0;
+
+    void OnWindowInfoChanged(
+        const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList) override
+    {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "TestWindowModeChangedListenerForPropertyChange");
+        ++count_;
+    };
+};
+
+class TestFloatingScaleChangedListener : public IWindowInfoChangedListener {
+public:
+    int32_t count_ = 0;
+
+    void OnWindowInfoChanged(
+        const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList) override
+    {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "TestFloatingScaleChangedListener");
+        ++count_;
     };
 };
 
@@ -2081,6 +2107,188 @@ HWTEST_F(WindowManagerTest, NotifyWindowSystemBarPropertyChange, TestSize.Level1
 }
 
 /**
+ * @tc.name: RegisterFloatingScaleChangedListener01
+ * @tc.desc: check RegisterFloatingScaleChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, RegisterFloatingScaleChangedListener01, Function | SmallTest | Level2)
+{
+    auto& windowManager = WindowManager::GetInstance();
+    auto oldWindowManagerAgent = windowManager.pImpl_->windowPropertyChangeAgent_;
+    auto oldListeners = windowManager.pImpl_->floatingScaleChangeListeners_;
+    windowManager.pImpl_->windowPropertyChangeAgent_ = nullptr;
+    windowManager.pImpl_->floatingScaleChangeListeners_.clear();
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterFloatingScaleChangedListener(nullptr));
+
+    sptr<TestFloatingScaleChangedListener> listener = sptr<TestFloatingScaleChangedListener>::MakeSptr();
+
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, windowManager.RegisterFloatingScaleChangedListener(listener));
+    EXPECT_EQ(0, windowManager.pImpl_->floatingScaleChangeListeners_.size());
+
+    // to check that the same listner can not be registered twice
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, windowManager.RegisterFloatingScaleChangedListener(listener));
+    EXPECT_EQ(0, windowManager.pImpl_->floatingScaleChangeListeners_.size());
+
+    windowManager.pImpl_->windowPropertyChangeAgent_ = oldWindowManagerAgent;
+    windowManager.pImpl_->floatingScaleChangeListeners_ = oldListeners;
+}
+
+/**
+ * @tc.name: UnregisterFloatingScaleChangedListener01
+ * @tc.desc: check UnregisterFloatingScaleChangedListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, UnregisterFloatingScaleChangedListener01, Function | SmallTest | Level2)
+{
+    auto& windowManager = WindowManager::GetInstance();
+    auto oldWindowManagerAgent = windowManager.pImpl_->windowPropertyChangeAgent_;
+    auto oldListeners = windowManager.pImpl_->floatingScaleChangeListeners_;
+    windowManager.pImpl_->windowPropertyChangeAgent_ = sptr<WindowManagerAgent>::MakeSptr();
+    windowManager.pImpl_->floatingScaleChangeListeners_.clear();
+
+    // check nullpter
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.UnregisterFloatingScaleChangedListener(nullptr));
+
+    sptr<TestFloatingScaleChangedListener> listener1 = sptr<TestFloatingScaleChangedListener>::MakeSptr();
+    sptr<TestFloatingScaleChangedListener> listener2 = sptr<TestFloatingScaleChangedListener>::MakeSptr();
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, windowManager.UnregisterFloatingScaleChangedListener(listener1));
+
+    windowManager.RegisterFloatingScaleChangedListener(listener1);
+    windowManager.RegisterFloatingScaleChangedListener(listener2);
+    EXPECT_EQ(0, windowManager.pImpl_->floatingScaleChangeListeners_.size());
+
+    EXPECT_EQ(WMError::WM_OK, windowManager.UnregisterFloatingScaleChangedListener(listener1));
+    EXPECT_EQ(WMError::WM_OK, windowManager.UnregisterFloatingScaleChangedListener(listener2));
+    EXPECT_EQ(0, windowManager.pImpl_->floatingScaleChangeListeners_.size());
+    ASSERT_EQ(nullptr, windowManager.pImpl_->windowPropertyChangeAgent_);
+
+    windowManager.pImpl_->floatingScaleChangeListeners_.emplace_back(listener1);
+    EXPECT_EQ(WMError::WM_OK, windowManager.UnregisterFloatingScaleChangedListener(listener1));
+    EXPECT_EQ(0, windowManager.pImpl_->floatingScaleChangeListeners_.size());
+
+    windowManager.pImpl_->windowPropertyChangeAgent_ = oldWindowManagerAgent;
+    windowManager.pImpl_->floatingScaleChangeListeners_ = oldListeners;
+}
+
+/**
+ * @tc.name: NotifyFloatingScaleChange
+ * @tc.desc: check NotifyFloatingScaleChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, NotifyFloatingScaleChange, TestSize.Level1)
+{
+    std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>> windowInfoList;
+    windowInfoList.push_back({{WindowInfoKey::DISPLAY_ID, 5}});
+
+    auto& windowManager = WindowManager::GetInstance();
+    windowManager.pImpl_->floatingScaleChangeListeners_.clear();
+    windowManager.pImpl_->NotifyFloatingScaleChange(windowInfoList);
+
+    windowManager.pImpl_->floatingScaleChangeListeners_.push_back(nullptr);
+    windowManager.pImpl_->NotifyFloatingScaleChange(windowInfoList);
+
+    sptr<TestFloatingScaleChangedListener> listener =
+        sptr<TestFloatingScaleChangedListener>::MakeSptr();
+
+    windowManager.pImpl_->NotifyFloatingScaleChange(windowInfoList);
+    EXPECT_EQ(listener->count_, 0);
+}
+
+/**
+ * @tc.name: RegisterWindowModeChangedListenerForPropertyChange01
+ * @tc.desc: check RegisterWindowModeChangedListenerForPropertyChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, RegisterWindowModeChangedListenerForPropertyChange01, Function | SmallTest | Level2)
+{
+    auto& windowManager = WindowManager::GetInstance();
+    auto oldWindowManagerAgent = windowManager.pImpl_->windowPropertyChangeAgent_;
+    auto oldListeners = windowManager.pImpl_->windowModeChangeListeners_;
+    windowManager.pImpl_->windowPropertyChangeAgent_ = nullptr;
+    windowManager.pImpl_->windowModeChangeListeners_.clear();
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterWindowModeChangedListenerForPropertyChange(nullptr));
+
+    sptr<TestWindowModeChangedListenerForPropertyChange> listener =
+        sptr<TestWindowModeChangedListenerForPropertyChange>::MakeSptr();
+
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION,
+        windowManager.RegisterWindowModeChangedListenerForPropertyChange(listener));
+    EXPECT_EQ(0, windowManager.pImpl_->windowModeChangeListeners_.size());
+
+    // to check that the same listner can not be registered twice
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION,
+        windowManager.RegisterWindowModeChangedListenerForPropertyChange(listener));
+    EXPECT_EQ(0, windowManager.pImpl_->windowModeChangeListeners_.size());
+
+    windowManager.pImpl_->windowPropertyChangeAgent_ = oldWindowManagerAgent;
+    windowManager.pImpl_->windowModeChangeListeners_ = oldListeners;
+}
+
+/**
+ * @tc.name: UnregisterWindowModeChangedListenerForPropertyChange01
+ * @tc.desc: check UnregisterWindowModeChangedListenerForPropertyChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, UnregisterWindowModeChangedListenerForPropertyChange01, Function | SmallTest | Level2)
+{
+    auto& windowManager = WindowManager::GetInstance();
+    auto oldWindowManagerAgent = windowManager.pImpl_->windowPropertyChangeAgent_;
+    auto oldListeners = windowManager.pImpl_->windowModeChangeListeners_;
+    windowManager.pImpl_->windowPropertyChangeAgent_ = sptr<WindowManagerAgent>::MakeSptr();
+    windowManager.pImpl_->windowModeChangeListeners_.clear();
+
+    // check nullpter
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.UnregisterWindowModeChangedListenerForPropertyChange(nullptr));
+
+    sptr<TestWindowModeChangedListenerForPropertyChange> listener1 =
+        sptr<TestWindowModeChangedListenerForPropertyChange>::MakeSptr();
+    sptr<TestWindowModeChangedListenerForPropertyChange> listener2 =
+        sptr<TestWindowModeChangedListenerForPropertyChange>::MakeSptr();
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION,
+        windowManager.UnregisterWindowModeChangedListenerForPropertyChange(listener1));
+
+    windowManager.RegisterWindowModeChangedListenerForPropertyChange(listener1);
+    windowManager.RegisterWindowModeChangedListenerForPropertyChange(listener2);
+    EXPECT_EQ(0, windowManager.pImpl_->windowModeChangeListeners_.size());
+
+    EXPECT_EQ(WMError::WM_OK, windowManager.UnregisterWindowModeChangedListenerForPropertyChange(listener1));
+    EXPECT_EQ(WMError::WM_OK, windowManager.UnregisterWindowModeChangedListenerForPropertyChange(listener2));
+    EXPECT_EQ(0, windowManager.pImpl_->windowModeChangeListeners_.size());
+    ASSERT_EQ(nullptr, windowManager.pImpl_->windowPropertyChangeAgent_);
+
+    windowManager.pImpl_->windowModeChangeListeners_.emplace_back(listener1);
+    EXPECT_EQ(WMError::WM_OK, windowManager.UnregisterWindowModeChangedListenerForPropertyChange(listener1));
+    EXPECT_EQ(0, windowManager.pImpl_->windowModeChangeListeners_.size());
+
+    windowManager.pImpl_->windowPropertyChangeAgent_ = oldWindowManagerAgent;
+    windowManager.pImpl_->windowModeChangeListeners_ = oldListeners;
+}
+
+/**
+ * @tc.name: NotifyWindowModeChangeForPropertyChange
+ * @tc.desc: check NotifyWindowModeChangeForPropertyChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, NotifyWindowModeChangeForPropertyChange, TestSize.Level1)
+{
+    std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>> windowInfoList;
+    windowInfoList.push_back({{WindowInfoKey::DISPLAY_ID, 5}});
+
+    auto& windowManager = WindowManager::GetInstance();
+    windowManager.pImpl_->windowModeChangeListeners_.clear();
+    windowManager.pImpl_->NotifyWindowModeChangeForPropertyChange(windowInfoList);
+
+    windowManager.pImpl_->windowModeChangeListeners_.push_back(nullptr);
+    windowManager.pImpl_->NotifyWindowModeChangeForPropertyChange(windowInfoList);
+
+    sptr<TestWindowModeChangedListenerForPropertyChange> listener =
+        sptr<TestWindowModeChangedListenerForPropertyChange>::MakeSptr();
+
+    windowManager.pImpl_->NotifyWindowModeChangeForPropertyChange(windowInfoList);
+    EXPECT_EQ(listener->count_, 0);
+}
+
+/**
  * @tc.name: RegisterRectChangedListener01
  * @tc.desc: check RegisterRectChangedListener
  * @tc.type: FUNC
@@ -2132,9 +2340,9 @@ HWTEST_F(WindowManagerTest, UnregisterRectChangedListener01, Function | SmallTes
 
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    windowManager.RegisterVisibilityStateChangedListener(listener1);
+    windowManager.RegisterRectChangedListener(listener1);
     EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    windowManager.RegisterVisibilityStateChangedListener(listener2);
+    windowManager.RegisterRectChangedListener(listener2);
     EXPECT_EQ(0, windowManager.pImpl_->windowRectChangeListeners_.size());
 
     EXPECT_EQ(WMError::WM_OK, windowManager.UnregisterRectChangedListener(listener1));
@@ -2289,6 +2497,34 @@ HWTEST_F(WindowManagerTest, NotifyWMSWindowDestroyed02, TestSize.Level1)
     EXPECT_NE(lifeCycleInfo.windowId, listener->listenerLifeCycleInfo.windowId);
     EXPECT_NE(lifeCycleInfo.windowType, listener->listenerLifeCycleInfo.windowType);
     EXPECT_NE(lifeCycleInfo.windowName, listener->listenerLifeCycleInfo.windowName);
+}
+
+/**
+ * @tc.name: AddSessionBlackList01
+ * @tc.desc: check AddSessionBlackList
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, AddSessionBlackList01, TestSize.Level1)
+{
+    WMError ret;
+    std::unordered_set<std::string> bundleNames;
+    std::unordered_set<std::string> privacyWindowTags;
+    ret = WindowManager::GetInstance().AddSessionBlackList(bundleNames, privacyWindowTags);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
+}
+
+/**
+ * @tc.name: RemoveSessionBlackList01
+ * @tc.desc: check RemoveSessionBlackList
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, RemoveSessionBlackList01, TestSize.Level1)
+{
+    WMError ret;
+    std::unordered_set<std::string> bundleNames;
+    std::unordered_set<std::string> privacyWindowTags;
+    ret = WindowManager::GetInstance().RemoveSessionBlackList(bundleNames, privacyWindowTags);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
 }
 }
 } // namespace

@@ -225,10 +225,14 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleLayoutFullScreenChange(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_DEFAULT_DENSITY_ENABLED):
             return HandleDefaultDensityEnabled(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_COLOR_MODE):
+            return HandleUpdateColorMode(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TITLE_AND_DOCK_HOVER_SHOW_CHANGE):
             return HandleTitleAndDockHoverShowChange(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_FORCE_LANDSCAPE_CONFIG):
             return HandleGetAppForceLandscapeConfig(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_HOOK_WINDOW_INFO):
+            return HandleGetAppHookWindowInfoFromServer(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_DIALOG_SESSION_BACKGESTURE_ENABLE):
             return HandleSetDialogSessionBackGestureEnabled(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_STATUSBAR_HEIGHT):
@@ -422,6 +426,7 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         TLOGE(WmsLogTag::WMS_LIFE, "Failed to read scene session stage object or event channel object!");
         return ERR_INVALID_DATA;
     }
+    // LCOV_EXCL_START
     bool hasWindowSessionProperty = false;
     if (!data.ReadBool(hasWindowSessionProperty)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read hasWindowSessionProperty failed.");
@@ -494,13 +499,18 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteBool(property->GetDragEnabled());
         reply.WriteBool(property->GetIsAtomicService());
         reply.WriteBool(property->GetIsAbilityHook());
+        reply.WriteBool(property->GetPcAppInpadCompatibleMode());
+        reply.WriteBool(property->GetPcAppInpadSpecificSystemBarInvisible());
+        reply.WriteBool(property->GetPcAppInpadOrientationLandscape());
         reply.WriteParcelable(property->GetCompatibleModeProperty());
         reply.WriteBool(property->GetUseControlStateFromProperty());
     }
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
+    // LCOV_EXCL_STOP
 }
 
+// LCOV_EXCL_START
 int SessionStub::HandleNotifyFrameLayoutFinish(MessageParcel& data, MessageParcel& reply)
 {
     bool notifyListener = data.ReadBool();
@@ -535,6 +545,7 @@ int SessionStub::HandleRemoveStartingWindow(MessageParcel& data, MessageParcel& 
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
+// LCOV_EXCL_STOP
 
 int SessionStub::HandleSessionEvent(MessageParcel& data, MessageParcel& reply)
 {
@@ -575,6 +586,22 @@ int SessionStub::HandleLayoutFullScreenChange(MessageParcel& data, MessageParcel
     TLOGD(WmsLogTag::WMS_LAYOUT_PC, "isLayoutFullScreen: %{public}d", isLayoutFullScreen);
     WSError errCode = OnLayoutFullScreenChange(isLayoutFullScreen);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleUpdateColorMode(MessageParcel& data, MessageParcel& reply)
+{
+    std::string colorMode;
+    if (!data.ReadString(colorMode)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read colorMode failed.");
+        return ERR_INVALID_DATA;
+    }
+    bool hasDarkRes = false;
+    if (!data.ReadBool(hasDarkRes)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read hasDarkRes failed.");
+        return ERR_INVALID_DATA;
+    }
+    OnUpdateColorMode(colorMode, hasDarkRes);
     return ERR_NONE;
 }
 
@@ -814,6 +841,7 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
     return ERR_NONE;
 }
 
+// LCOV_EXCL_START
 int SessionStub::HandleBatchPendingSessionsActivation(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "In!");
@@ -911,6 +939,7 @@ int SessionStub::ReadOneAbilitySessionInfo(MessageParcel& data, sptr<AAFwk::Sess
     }
     return ERR_NONE;
 }
+// LCOV_EXCL_STOP
 
 /** @note @window.layout */
 int SessionStub::HandleUpdateSessionRect(MessageParcel& data, MessageParcel& reply)
@@ -1356,6 +1385,7 @@ int SessionStub::HandleUpdatePiPRect(MessageParcel& data, MessageParcel& reply)
     return ERR_NONE;
 }
 
+// LCOV_EXCL_START
 int SessionStub::HandleUpdatePiPControlStatus(MessageParcel& data, MessageParcel& reply)
 {
     TLOGI(WmsLogTag::WMS_PIP, "called");
@@ -1483,6 +1513,7 @@ int SessionStub::HandleGetFloatingBallWindowId(MessageParcel& data, MessageParce
     }
     return ERR_NONE;
 }
+// LCOV_EXCL_STOP
 
 int SessionStub::HandleSetSystemEnableDrag(MessageParcel& data, MessageParcel& reply)
 {
@@ -1624,6 +1655,22 @@ int SessionStub::HandleGetAppForceLandscapeConfig(MessageParcel& data, MessagePa
     WMError ret = GetAppForceLandscapeConfig(config);
     reply.WriteParcelable(&config);
     reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleGetAppHookWindowInfoFromServer(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    HookWindowInfo hookWindowInfo{};
+    WMError ret = GetAppHookWindowInfoFromServer(hookWindowInfo);
+    if (!reply.WriteParcelable(&hookWindowInfo)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "write hookWindowInfo failed");
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "write ret failed");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 

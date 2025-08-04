@@ -1034,6 +1034,35 @@ HWTEST_F(ScreenSessionManagerClientTest, SwitchUserCallback02, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SwitchUserCallback03
+ * @tc.desc: SwitchUserCallback test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, SwitchUserCallback03, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    std::vector<int32_t> oldScbPids = {0};
+    int32_t currentScbPid = 1;
+    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    screenSessionManagerClient_->screenSessionManager_ = sptr<ScreenSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+    ScreenId screenId = 1234;
+    sptr<ScreenSession> screenSession = nullptr;
+    screenSessionManagerClient_->screenSessionMap_.insert({screenId, screenSession});
+    screenSessionManagerClient_->SwitchUserCallback(oldScbPids, currentScbPid);
+    EXPECT_TRUE(logMsg.find("screenSession is null") != std::string::npos);
+    logMsg.clear();
+    screenSession = sptr<ScreenSession>::MakeSptr(screenId, ScreenProperty(), 0);
+    screenSessionManagerClient_->screenSessionMap_.erase(screenId);
+    screenSessionManagerClient_->screenSessionMap_.insert({screenId, screenSession});
+    screenSessionManagerClient_->SwitchUserCallback(oldScbPids, currentScbPid);
+    EXPECT_FALSE(logMsg.find("screenSession is null") != std::string::npos);
+    screenSessionManagerClient_->screenSessionMap_.erase(screenId);
+    logMsg.clear();
+}
+
+/**
  * @tc.name: SwitchingCurrentUser
  * @tc.desc: SwitchingCurrentUser test
  * @tc.type: FUNC
@@ -1522,11 +1551,10 @@ HWTEST_F(ScreenSessionManagerClientTest, HandleScreenDisconnection, TestSize.Lev
  */
 HWTEST_F(ScreenSessionManagerClientTest, OnCreateScreenSessionOnly, TestSize.Level2)
 {
-    sptr<ScreenSessionManagerClient> client = new ScreenSessionManagerClient();
-    ASSERT_TRUE(client != nullptr);
+    sptr<ScreenSessionManagerClient> client = sptr<ScreenSessionManagerClient>::MakeSptr();
     client->ConnectToServer();
 
-    sptr<ScreenSession> screenSession1 = new ScreenSession(50, ScreenProperty(), 0);
+    sptr<ScreenSession> screenSession1 = sptr<ScreenSession>::MakeSptr(50, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession1);
     client->screenSessionMap_[50] = screenSession1;
 
@@ -1597,8 +1625,11 @@ HWTEST_F(ScreenSessionManagerClientTest, OnExtendDisplayNodeChange, TestSize.Lev
 HWTEST_F(ScreenSessionManagerClientTest, OnMainDisplayNodeChange, TestSize.Level2)
 {
     ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
-    screenSessionManagerClient_->ConnectToServer();
+    screenSessionManagerClient_->screenSessionManager_ = nullptr;
+    auto ret = screenSessionManagerClient_->OnMainDisplayNodeChange(53, 50, 50);
+    EXPECT_EQ(ret, false);
 
+    screenSessionManagerClient_->screenSessionManager_ = sptr<ScreenSessionManagerProxyMock>::MakeSptr();
     RSDisplayNodeConfig config;
     std::shared_ptr<RSDisplayNode> node1 = std::make_shared<RSDisplayNode>(config);
     std::shared_ptr<RSDisplayNode> node2 = std::make_shared<RSDisplayNode>(config);
@@ -1617,7 +1648,7 @@ HWTEST_F(ScreenSessionManagerClientTest, OnMainDisplayNodeChange, TestSize.Level
     sptr<ScreenSession> screenSession4 = nullptr;
     screenSessionManagerClient_->screenSessionMap_[53] = screenSession4;
 
-    auto ret = screenSessionManagerClient_->OnMainDisplayNodeChange(53, 50, 50);
+    ret = screenSessionManagerClient_->OnMainDisplayNodeChange(53, 50, 50);
     EXPECT_EQ(ret, false);
 
     ret = screenSessionManagerClient_->OnMainDisplayNodeChange(50, 52, 52);
@@ -1761,6 +1792,53 @@ HWTEST_F(ScreenSessionManagerClientTest, SetPrimaryDisplaySystemDpi, TestSize.Le
     dpi = 2.2f;
     client->SetPrimaryDisplaySystemDpi(dpi);
     EXPECT_EQ(DisplayManager::GetInstance().GetPrimaryDisplaySystemDpi(), 2.2f);
+}
+/**
+ * @tc.name: DisconnectAllExternalScreen
+ * @tc.desc: DisconnectAllExternalScreen test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, DisconnectAllExternalScreen, TestSize.Level2)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    ASSERT_NE(screenSessionManagerClient_, nullptr);
+    RSDisplayNodeConfig config;
+    std::shared_ptr<RSDisplayNode> node1 = std::make_shared<RSDisplayNode>(config);
+    screenSessionManagerClient_->screenSessionMap_[50] = nullptr;
+    screenSessionManagerClient_->DisconnectAllExternalScreen();
+    EXPECT_TRUE(logMsg.find("screenSession is nullptr") != std::string::npos);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(50, 50, "test1", ScreenProperty(), node1);
+    ASSERT_NE(nullptr, screenSession);
+    screenSessionManagerClient_->screenSessionMap_[50] = screenSession;
+    screenSession->SetScreenType(ScreenType::REAL);
+    screenSession->SetIsExtend(true);
+    screenSessionManagerClient_->DisconnectAllExternalScreen();
+    EXPECT_TRUE(logMsg.find("disconnect extend screen") != std::string::npos);
+}
+
+/**
+ * @tc.name: CreateTempScreenSession
+ * @tc.desc: CreateTempScreenSession test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, CreateTempScreenSession, TestSize.Level2)
+{
+    ASSERT_NE(screenSessionManagerClient_, nullptr);
+    RSDisplayNodeConfig config;
+    std::shared_ptr<RSDisplayNode> node1 = std::make_shared<RSDisplayNode>(config);
+    std::shared_ptr<RSDisplayNode> node2 = std::make_shared<RSDisplayNode>(config);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(50, 50, "test1", ScreenProperty(), node1);
+    ASSERT_NE(nullptr, screenSession);
+    screenSessionManagerClient_->screenSessionMap_[50] = screenSession;
+    screenSessionManagerClient_->screenSessionManager_ = sptr<ScreenSessionManagerProxyMock>::MakeSptr();
+ 
+    auto tempScreenSession = screenSessionManagerClient_->CreateTempScreenSession(50, 51, node2);
+    ASSERT_NE(nullptr, tempScreenSession);
+    tempScreenSession = screenSessionManagerClient_->CreateTempScreenSession(52, 51, node2);
+    ASSERT_NE(nullptr, tempScreenSession);
+    screenSessionManagerClient_->screenSessionManager_ = nullptr;
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -26,7 +26,8 @@ bool ScreenInfo::Marshalling(Parcel &parcel) const
         parcel.WriteUint32(static_cast<uint32_t>(sourceMode_)) &&
         parcel.WriteUint32(static_cast<uint32_t>(type_)) &&
         parcel.WriteUint32(modeId_) && parcel.WriteUint32(static_cast<uint32_t>(modes_.size())) &&
-        parcel.WriteBool(isExtend_) && parcel.WriteString(serialNumber_) && parcel.WriteUint64(rsId_);
+        parcel.WriteBool(isExtend_) && parcel.WriteString(serialNumber_) && parcel.WriteUint64(rsId_) &&
+        parcel.WriteUint32(mirrorWidth_) && parcel.WriteUint32(mirrorHeight_);
     if (!res) {
         return false;
     }
@@ -73,7 +74,8 @@ bool ScreenInfo::InnerUnmarshalling(Parcel& parcel)
         parcel.ReadBool(isScreenGroup_) && parcel.ReadUint32(rotation) &&
         parcel.ReadUint32(orientation) && parcel.ReadUint32(sourceMode) && parcel.ReadUint32(type) &&
         parcel.ReadUint32(modeId_) && parcel.ReadUint32(size) &&
-        parcel.ReadBool(isExtend_) && parcel.ReadString(serialNumber_) && parcel.ReadUint64(rsId_);
+        parcel.ReadBool(isExtend_) && parcel.ReadString(serialNumber_) && parcel.ReadUint64(rsId_) &&
+        parcel.ReadUint32(mirrorWidth_) && parcel.ReadUint32(mirrorHeight_);
     if (!res1) {
         return false;
     }

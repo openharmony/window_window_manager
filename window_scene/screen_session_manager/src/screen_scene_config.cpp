@@ -26,6 +26,7 @@
 #include <vector>
 
 #include "config_policy_utils.h"
+#include "fold_screen_state_internel.h"
 #include "include/core/SkMatrix.h"
 #include "include/core/SkPath.h"
 #include "include/core/SkPathMeasure.h"
@@ -63,7 +64,8 @@ enum XmlNodeElement {
     SCROLLABLE_PARAM,
     IS_SUPPORT_CAPTURE,
     IS_SUPPORT_OFFSCREEN_RENDERING,
-    OFF_SCREEN_PPI_THRESHOLD
+    OFF_SCREEN_PPI_THRESHOLD,
+    PC_MODE_DPI
 };
 }
 
@@ -107,7 +109,8 @@ std::map<int32_t, std::string> ScreenSceneConfig::xmlNodeMap_ = {
     {SCROLLABLE_PARAM, "scrollableParam"},
     {IS_SUPPORT_CAPTURE, "isSupportCapture"},
     {IS_SUPPORT_OFFSCREEN_RENDERING, "isSupportOffScreenRendering"},
-    {OFF_SCREEN_PPI_THRESHOLD, "offScreenPPIThreshold"}
+    {OFF_SCREEN_PPI_THRESHOLD, "offScreenPPIThreshold"},
+    {PC_MODE_DPI, "pcModeDpi"}
 };
 
 
@@ -198,7 +201,8 @@ void ScreenSceneConfig::ParseNodeConfig(const xmlNodePtr& currNode)
         (xmlNodeMap_[CURVED_AREA_IN_LANDSCAPE] == nodeName) ||
         (xmlNodeMap_[BUILD_IN_DEFAULT_ORIENTATION] == nodeName) ||
         (xmlNodeMap_[DEFAULT_DEVICE_ROTATION_OFFSET] == nodeName) ||
-        (xmlNodeMap_[OFF_SCREEN_PPI_THRESHOLD] == nodeName);
+        (xmlNodeMap_[OFF_SCREEN_PPI_THRESHOLD] == nodeName) ||
+        (xmlNodeMap_[PC_MODE_DPI] == nodeName);
     bool stringConfigCheck = (xmlNodeMap_[DEFAULT_DISPLAY_CUTOUT_PATH] == nodeName) ||
         (xmlNodeMap_[SUB_DISPLAY_CUTOUT_PATH] == nodeName) ||
         (xmlNodeMap_[ROTATION_POLICY] == nodeName) ||
@@ -262,6 +266,7 @@ void ScreenSceneConfig::ReadIntNumbersConfigInfo(const xmlNodePtr& currNode)
     xmlFree(context);
 }
 
+// LCOV_EXCL_START
 void ScreenSceneConfig::ReadPhysicalDisplayConfigInfo(const xmlNodePtr& currNode)
 {
     xmlChar* displayMode = xmlGetProp(currNode, reinterpret_cast<const xmlChar*>("displayMode"));
@@ -307,10 +312,28 @@ void ScreenSceneConfig::ReadPhysicalDisplayConfigInfo(const xmlNodePtr& currNode
     xmlFree(displayModeContext);
     xmlFree(displayMode);
 }
+// LCOV_EXCL_STOP
 
 std::vector<DisplayPhysicalResolution> ScreenSceneConfig::GetAllDisplayPhysicalConfig()
 {
     return displayPhysicalResolution_;
+}
+
+// LCOV_EXCL_START
+FoldDisplayMode ScreenSceneConfig::GetFoldDisplayMode(uint32_t width, uint32_t height)
+{
+    // Due to incorrect configuration files, custom processing is required.
+    if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
+        return (width == height) ? FoldDisplayMode::MAIN : FoldDisplayMode::FULL;
+    }
+
+    for (const DisplayPhysicalResolution& resolution : displayPhysicalResolution_) {
+        if ((resolution.physicalWidth_ == width && resolution.physicalHeight_ == height) ||
+            (resolution.physicalWidth_ == height && resolution.physicalHeight_ == width)) {
+            return resolution.foldDisplayMode_;
+        }
+    }
+    return FoldDisplayMode::UNKNOWN;
 }
 
 void ScreenSceneConfig::ReadScrollableParam(const xmlNodePtr& currNode)
@@ -362,6 +385,7 @@ std::map<FoldDisplayMode, ScrollableParam> ScreenSceneConfig::GetAllScrollablePa
 {
     return scrollableParams_;
 }
+// LCOV_EXCL_STOP
 
 void ScreenSceneConfig::ReadEnableConfigInfo(const xmlNodePtr& currNode)
 {
@@ -403,6 +427,7 @@ void ScreenSceneConfig::ReadStringConfigInfo(const xmlNodePtr& currNode)
     xmlFree(context);
 }
 
+// LCOV_EXCL_START
 void ScreenSceneConfig::ReadStringListConfigInfo(const xmlNodePtr& rootNode, std::string name)
 {
     if (rootNode == nullptr || rootNode->name == nullptr) {
@@ -428,6 +453,7 @@ void ScreenSceneConfig::ReadStringListConfigInfo(const xmlNodePtr& rootNode, std
     stringListConfig_[name] = stringVec;
     xmlFree(rootContext);
 }
+// LCOV_EXCL_STOP
 
 const std::map<std::string, bool>& ScreenSceneConfig::GetEnableConfig()
 {
@@ -466,14 +492,21 @@ void ScreenSceneConfig::DumpConfig()
     }
 }
 
+// LCOV_EXCL_START
 void ScreenSceneConfig::SetCutoutSvgPath(uint64_t displayId, const std::string& svgPath)
 {
+    if (svgPath.empty()) {
+        return;
+    }
     cutoutBoundaryRectMap_.clear();
     cutoutBoundaryRectMap_[displayId].emplace_back(CalcCutoutBoundaryRect(svgPath));
 }
 
 void ScreenSceneConfig::SetSubCutoutSvgPath(const std::string& svgPath)
 {
+    if (svgPath.empty()) {
+        return;
+    }
     subCutoutBoundaryRect_.clear();
     subCutoutBoundaryRect_.emplace_back(CalcCutoutBoundaryRect(svgPath));
 }
@@ -588,4 +621,5 @@ bool ScreenSceneConfig::IsSupportOffScreenRendering()
     }
     return false;
 }
+// LCOV_EXCL_STOP
 } // namespace OHOS::Rosen

@@ -43,14 +43,15 @@ public:
     MOCK_METHOD1(GetDisplayState, DisplayState(DisplayId displayId));
     MOCK_METHOD1(NotifyDisplayEvent, void(DisplayEvent event));
     MOCK_METHOD1(GetDisplayInfo, sptr<DisplayInfo>(DisplayId displayId));
-    MOCK_METHOD1(GetCutoutInfo, sptr<CutoutInfo>(DisplayId displayId));
+    MOCK_METHOD4(GetCutoutInfo, sptr<CutoutInfo>(DisplayId displayId, int32_t width, int32_t height,
+        Rotation rotation));
     MOCK_METHOD2(GetAvailableArea, DMError(ScreenId screenId, DMRect& area));
     MOCK_METHOD2(HasImmersiveWindow, DMError(ScreenId screenId, bool& immersive));
     MOCK_METHOD0(GetAllDisplayIds, std::vector<DisplayId>());
     MOCK_METHOD4(GetDisplayHDRSnapshot, std::vector<std::shared_ptr<Media::PixelMap>>(DisplayId displayId,
-        DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen));
+        DmErrorCode& errorCode, bool isUseDma, bool isCaptureFullOfScreen));
     MOCK_METHOD2(GetDisplayHDRSnapshotWithOption, std::vector<std::shared_ptr<Media::PixelMap>>(
-        const CaptureOption& captureOption, DmErrorCode* errorCode));
+        const CaptureOption& captureOption, DmErrorCode& errorCode));
 };
 
 class MockScreenManagerAdapter : public ScreenManagerAdapter {

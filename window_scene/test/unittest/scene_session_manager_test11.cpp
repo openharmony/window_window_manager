@@ -479,18 +479,22 @@ HWTEST_F(SceneSessionManagerTest11, ShiftAppWindowPointerEvent, TestSize.Level1)
 
     int32_t fingerId = 0;
     auto res = ssm_->ShiftAppWindowPointerEvent(sourcePersistentId, targetPersistentId, fingerId);
-    ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_SESSION);
+
+    SessionInfo sourceInfo;
+    sourceInfo.windowType_ = 1;
+    sptr<SceneSession> sourceSceneSession = sptr<SceneSession>::MakeSptr(sourceInfo, nullptr);
+    ssm_->sceneSessionMap_.insert({ sourceSceneSession->GetPersistentId(), sourceSceneSession });
+    res = ssm_->ShiftAppWindowPointerEvent(sourceSceneSession->GetPersistentId(), targetPersistentId, fingerId);
+    EXPECT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
 
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     ssm_->systemConfig_.freeMultiWindowEnable_ = true;
     ssm_->systemConfig_.freeMultiWindowSupport_ = true;
-    res = ssm_->ShiftAppWindowPointerEvent(sourcePersistentId, targetPersistentId, fingerId);
+    res = ssm_->ShiftAppWindowPointerEvent(sourceSceneSession->GetPersistentId(),
+        sourceSceneSession->GetPersistentId(), fingerId);
     ASSERT_EQ(res, WMError::WM_ERROR_INVALID_CALLING);
-
-    sourcePersistentId = 1;
-    ssm_->sceneSessionMap_.clear();
-    res = ssm_->ShiftAppWindowPointerEvent(sourcePersistentId, targetPersistentId, fingerId);
-    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_SESSION);
+    ssm_->sceneSessionMap_.erase(sourceSceneSession->GetPersistentId());
 }
 
 /**
@@ -514,6 +518,7 @@ HWTEST_F(SceneSessionManagerTest11, HasFloatingWindowForeground, TestSize.Level1
  */
 HWTEST_F(SceneSessionManagerTest11, SetParentWindow, TestSize.Level1)
 {
+    ssm_->sceneSessionMap_.clear();
     ASSERT_NE(ssm_, nullptr);
     int32_t subWindowId = 1;
     int32_t newParentWindowId = 3;
@@ -742,54 +747,6 @@ HWTEST_F(SceneSessionManagerTest11, GetIconFromDesk, TestSize.Level1)
     std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
     sessionInfo.want = want;
     ASSERT_EQ(false, ssm_->GetIconFromDesk(sessionInfo, startupPagePath));
-}
-
-/**
- * @tc.name: GetStartingWindowInfoFromCache
- * @tc.desc: GetStartingWindowInfoFromCache
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest11, GetStartingWindowInfoFromCache, TestSize.Level1)
-{
-    ASSERT_NE(ssm_, nullptr);
-    SessionInfo sessionInfo;
-    sessionInfo.moduleName_ = "test";
-    sessionInfo.abilityName_ = BUNDLE_NAME;
-    sessionInfo.bundleName_ = BUNDLE_NAME;
-    StartingWindowInfo startingWindowInfo;
-    bool res = ssm_->GetStartingWindowInfoFromCache(sessionInfo, startingWindowInfo);
-    ASSERT_EQ(res, false);
-
-    std::map<std::string, StartingWindowInfo> startingWindowInfoMap{ { BUNDLE_NAME, startingWindowInfo } };
-    ssm_->startingWindowMap_.insert({ BUNDLE_NAME, startingWindowInfoMap });
-    res = ssm_->GetStartingWindowInfoFromCache(sessionInfo, startingWindowInfo);
-    ASSERT_EQ(res, false);
-    ssm_->startingWindowMap_.clear();
-}
-
-/**
- * @tc.name: GetStartingWindowInfoFromCache02
- * @tc.desc: GetStartingWindowInfoFromCache
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest11, GetStartingWindowInfoFromCache02, TestSize.Level1)
-{
-    ASSERT_NE(ssm_, nullptr);
-    SessionInfo sessionInfo;
-    sessionInfo.moduleName_ = "te";
-    sessionInfo.abilityName_ = "st";
-    sessionInfo.bundleName_ = "test";
-    StartingWindowInfo startingWindowInfo;
-
-    bool res = ssm_->GetStartingWindowInfoFromCache(sessionInfo, startingWindowInfo);
-    ASSERT_EQ(res, false);
-
-    std::map<std::string, StartingWindowInfo> startingWindowInfoMap{ { "test", startingWindowInfo } };
-    ssm_->startingWindowMap_.insert({ "test", startingWindowInfoMap });
-
-    res = ssm_->GetStartingWindowInfoFromCache(sessionInfo, startingWindowInfo);
-    ASSERT_EQ(res, true);
-    ssm_->startingWindowMap_.clear();
 }
 
 /**

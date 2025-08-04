@@ -174,16 +174,16 @@ HWTEST_F(WindowSessionImplTest3, SetForceSplitEnable, TestSize.Level1)
 
     int32_t FORCE_SPLIT_MODE = 5;
     int32_t NAV_FORCE_SPLIT_MODE = 6;
-    AppForceLandscapeConfig config = { FORCE_SPLIT_MODE, "MainPage", true };
+    AppForceLandscapeConfig config = { FORCE_SPLIT_MODE, "MainPage", true, "ArkuiOptions" };
     window_->SetForceSplitEnable(config);
 
-    config = { FORCE_SPLIT_MODE, "MainPage", false };
+    config = { FORCE_SPLIT_MODE, "MainPage", false, "ArkuiOptions" };
     window_->SetForceSplitEnable(config);
 
-    config = { NAV_FORCE_SPLIT_MODE, "MainPage", true };
+    config = { NAV_FORCE_SPLIT_MODE, "MainPage", true, "ArkuiOptions" };
     window_->SetForceSplitEnable(config);
 
-    config = { NAV_FORCE_SPLIT_MODE, "MainPage", false };
+    config = { NAV_FORCE_SPLIT_MODE, "MainPage", false, "ArkuiOptions" };
     window_->SetForceSplitEnable(config);
     EXPECT_TRUE(logMsg.find("uiContent is null!") != std::string::npos);
     LOG_SetCallback(nullptr);
@@ -1223,6 +1223,8 @@ HWTEST_F(WindowSessionImplTest3, ClearTouchEventFilter, TestSize.Level1)
  */
 HWTEST_F(WindowSessionImplTest3, FilterPointerEvent, TestSize.Level1)
 {
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("FilterPointerEvent");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
@@ -1239,6 +1241,11 @@ HWTEST_F(WindowSessionImplTest3, FilterPointerEvent, TestSize.Level1)
     });
     ret = window->FilterPointerEvent(pointerEvent);
     ASSERT_EQ(true, ret);
+
+    pointerEvent->SetPointerAction(OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE);
+    EXPECT_TRUE(logMsg.find("id") != std::string::npos);
+    logMsg.clear();
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -1306,7 +1313,7 @@ HWTEST_F(WindowSessionImplTest3, NotifyPointerEvent, TestSize.Level1)
 
     window->SetWindowDelayRaiseEnabled(false);
     window->NotifyPointerEvent(pointerEvent);
-    EXPECT_TRUE(logMsg.find("UI content dose not consume") != std::string::npos);
+    EXPECT_TRUE(logMsg.find("UI content does not consume") != std::string::npos);
     logMsg.clear();
 
     window->inputEventConsumer_ = std::make_shared<MockInputEventConsumer>();
@@ -1412,6 +1419,13 @@ HWTEST_F(WindowSessionImplTest3, SetWindowDelayRaiseEnabled, TestSize.Level1)
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     ret = window->SetWindowDelayRaiseEnabled(true);
     ASSERT_EQ(ret, WMError::WM_OK);
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    window->property_->SetPcAppInpadCompatibleMode(true);
+    window->windowSystemConfig_.freeMultiWindowEnable_ = false;
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    ret = window->SetWindowDelayRaiseEnabled(true);
+    EXPECT_EQ(WMError::WM_OK, ret);
 }
 
 /**

@@ -170,7 +170,7 @@ void ChannelDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
         TLOGE(WmsLogTag::WMS_UIEXT, "listener_ is null");
         return;
     }
-    TLOGE(WmsLogTag::WMS_UIEXT, "Died");
+    TLOGD(WmsLogTag::WMS_UIEXT, "Died");
     listener_->ResetTransferKeyEventForConsumedParams(false, WSError::WS_ERROR_IPC_FAILED);
 }
 
@@ -185,7 +185,7 @@ ExtensionSession::ExtensionSession(const SessionInfo& info) : Session(info)
 
 ExtensionSession::~ExtensionSession()
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "realease extension, id=%{public}d", persistentId_);
+    TLOGI(WmsLogTag::WMS_UIEXT, "id=%{public}d", persistentId_);
     RemoveExtensionPersistentId(persistentId_);
     if (windowEventChannel_ == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "window event channel is null");
@@ -277,7 +277,7 @@ WSError ExtensionSession::TransferAbilityResult(uint32_t resultCode, const AAFwk
 
 int32_t ExtensionSession::TransferExtensionData(const AAFwk::WantParams& wantParams)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "id: %{public}d", GetPersistentId());
+    TLOGNI(WmsLogTag::WMS_UIEXT, "uec recv");
     if (extSessionEventCallback_ != nullptr &&
         extSessionEventCallback_->transferExtensionDataFunc_ != nullptr) {
         extSessionEventCallback_->transferExtensionDataFunc_(wantParams);
@@ -546,7 +546,7 @@ WSError ExtensionSession::NotifyDumpInfo(const std::vector<std::string>& params,
 
 int32_t ExtensionSession::GetStatusBarHeight()
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "persistenId=%{public}d", GetPersistentId());
+    TLOGI(WmsLogTag::WMS_UIEXT, "in");
     if (extSessionEventCallback_ != nullptr && extSessionEventCallback_->getStatusBarHeightFunc_ != nullptr) {
         return extSessionEventCallback_->getStatusBarHeightFunc_();
     }

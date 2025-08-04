@@ -17,6 +17,7 @@
 #include "common_test_utils.h"
 #include "display_manager.h"
 #include "display_manager_proxy.h"
+#include "modifier_render_thread/rs_modifiers_draw_thread.h"
 #include "screen_manager.h"
 #include "window.h"
 #include "window_manager_hilog.h"
@@ -84,6 +85,9 @@ void DisplayPowerTest::SetUpTestCase()
 void DisplayPowerTest::TearDownTestCase()
 {
     DisplayManager::GetInstance().UnregisterDisplayPowerEventListener(listener_);
+#ifdef RS_ENABLE_VK
+    RSModifiersDrawThread::Destroy();
+#endif
 }
 
 void DisplayPowerTest::SetUp()

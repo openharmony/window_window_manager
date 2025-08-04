@@ -208,6 +208,15 @@ sptr<FoldCreaseRegion> FoldScreenController::GetCurrentFoldCreaseRegion()
     return foldScreenPolicy_->GetCurrentFoldCreaseRegion();
 }
 
+FoldCreaseRegion FoldScreenController::GetLiveCreaseRegion() const
+{
+    if (foldScreenPolicy_ == nullptr) {
+        TLOGW(WmsLogTag::DMS, "GetLiveCreaseRegion: foldScreenPolicy_ is null");
+        return FoldCreaseRegion(0, {});
+    }
+    return foldScreenPolicy_->GetLiveCreaseRegion();
+}
+
 ScreenId FoldScreenController::GetCurrentScreenId()
 {
     if (foldScreenPolicy_ == nullptr) {

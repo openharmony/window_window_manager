@@ -29,6 +29,7 @@ const static int32_t ERR_INVALID_DATA = -1;
 const static int32_t MAX_BUFF_SIZE = 100;
 const static float INVALID_DEFAULT_DENSITY = 1.0f;
 const static uint32_t PIXMAP_VECTOR_SIZE = 2;
+constexpr uint32_t  MAX_CREASE_REGION_SIZE = 20;
 }
 
 int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
@@ -513,7 +514,7 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
                 return ERR_INVALID_DATA;
             }
             std::vector<std::shared_ptr<Media::PixelMap>> displaySnapshotVec = GetDisplayHDRSnapshot(
-                displayId, &errCode, isUseDma, isCaptureFullOfScreen);
+                displayId, errCode, isUseDma, isCaptureFullOfScreen);
             if (displaySnapshotVec.size() != PIXMAP_VECTOR_SIZE) {
                 TLOGE(WmsLogTag::DMS, "Dail to receive displaySnapshotVec in stub.");
                 reply.WriteParcelable(nullptr);
@@ -735,8 +736,18 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         }
         case DisplayManagerMessage::TRANS_ID_GET_CUTOUT_INFO_WITH_ROTATION: {
             DisplayId displayId = static_cast<DisplayId>(data.ReadUint64());
-            int32_t rotation = data.ReadInt32();
-            sptr<CutoutInfo> cutoutInfo = GetCutoutInfoWithRotation(displayId, rotation);
+            int32_t width = 0;
+            if (!data.ReadInt32(width)) {
+                TLOGE(WmsLogTag::DMS, "Read width failed");
+                return ERR_INVALID_DATA;
+            }
+            int32_t height = 0;
+            if (!data.ReadInt32(height)) {
+                TLOGE(WmsLogTag::DMS, "Read height failed");
+                return ERR_INVALID_DATA;
+            }
+            Rotation rotation = static_cast<Rotation>(data.ReadUint32());
+            sptr<CutoutInfo> cutoutInfo = GetCutoutInfo(displayId, width, height, rotation);
             reply.WriteParcelable(cutoutInfo);
             break;
         }
@@ -853,6 +864,29 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteStrongParcelable(GetCurrentFoldCreaseRegion());
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_GET_LIVE_CREASE_REGION: {
+            FoldCreaseRegion region;
+            DMError ret = GetLiveCreaseRegion(region);
+            static_cast<void>(reply.WriteInt32(static_cast<int32_t>(ret)));
+            if (ret != DMError::DM_OK) {
+                break;
+            }
+            static_cast<void>(reply.WriteUint64(region.GetDisplayId()));
+            const auto& creaseRects = region.GetCreaseRects();
+            uint32_t size = static_cast<uint32_t>(creaseRects.size());
+            if (size > MAX_CREASE_REGION_SIZE) {
+                TLOGE(WmsLogTag::DMS, "CreaseRects size exceeds max limit");
+                break;
+            }
+            static_cast<void>(reply.WriteUint32(size));
+            for (const auto& rect : creaseRects) {
+                static_cast<void>(reply.WriteInt32(rect.posX_));
+                static_cast<void>(reply.WriteInt32(rect.posY_));
+                static_cast<void>(reply.WriteUint32(rect.width_));
+                static_cast<void>(reply.WriteUint32(rect.height_));
+            }
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_MAKE_UNIQUE_SCREEN: {
             std::vector<ScreenId> uniqueScreenIds;
             uint32_t size = data.ReadUint32();
@@ -907,8 +941,16 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             auto rotation = data.ReadFloat();
             auto phyRotation = data.ReadFloat();
             auto screenPropertyChangeType = static_cast<ScreenPropertyChangeType>(data.ReadUint32());
-            UpdateScreenDirectionInfo(screenId, screenComponentRotation, rotation, phyRotation,
-                screenPropertyChangeType);
+            RRect bounds;
+            if (!RSMarshallingHelper::Unmarshalling(data, bounds)) {
+                TLOGE(WmsLogTag::DMS, "Read bounds failed");
+                break;
+            }
+            ScreenDirectionInfo directionInfo;
+            directionInfo.screenRotation_ = screenComponentRotation;
+            directionInfo.rotation_ = rotation;
+            directionInfo.phyRotation_ = phyRotation;
+            UpdateScreenDirectionInfo(screenId, directionInfo, screenPropertyChangeType, bounds);
             break;
         }
         case DisplayManagerMessage::TRANS_ID_UPDATE_SCREEN_ROTATION_PROPERTY: {
@@ -1250,6 +1292,43 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             ProcSetVirtualScreenAutoRotation(data, reply);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SET_SCREEN_PRIVACY_WINDOW_TAG_SWITCH: {
+            ScreenId screenId = SCREEN_ID_INVALID;
+            if (!data.ReadUint64(screenId)) {
+                TLOGE(WmsLogTag::DMS, "Read screenId failed");
+                return ERR_INVALID_DATA;
+            }
+            std::vector<std::string> privacyWindowTag;
+            if (!data.ReadStringVector(&privacyWindowTag)) {
+                TLOGE(WmsLogTag::DMS, "Read privacyWindowTag failed");
+                return ERR_INVALID_DATA;
+            }
+            bool enable = false;
+            if (!data.ReadBool(enable)) {
+                TLOGE(WmsLogTag::DMS, "Read enable failed");
+                return ERR_INVALID_DATA;
+            }
+            DMError ret = SetScreenPrivacyWindowTagSwitch(screenId, privacyWindowTag, enable);
+            if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+                TLOGE(WmsLogTag::DMS, "Write reault failed");
+                return ERR_INVALID_DATA;
+            }
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SYNCHRONIZED_POWER_STATUS: {
+            uint32_t stateTemp = 0;
+            if (!data.ReadUint32(stateTemp)) {
+                TLOGE(WmsLogTag::DMS, "Read state failed");
+                return ERR_INVALID_DATA;
+            }
+            ScreenPowerState state = static_cast<ScreenPowerState>(stateTemp);
+            bool res = SynchronizePowerStatus(state);
+            if (!reply.WriteBool(res)) {
+                TLOGE(WmsLogTag::DMS, "Write res failed");
+                return ERR_INVALID_DATA;
+            }
+            break;
+        }
         default:
             TLOGW(WmsLogTag::DMS, "unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1403,7 +1482,7 @@ void ScreenSessionManagerStub::ProcGetDisplayHDRSnapshotWithOption(MessageParcel
         return;
     }
     DmErrorCode errCode = DmErrorCode::DM_OK;
-    std::vector<std::shared_ptr<Media::PixelMap>> captureVec = GetDisplayHDRSnapshotWithOption(option, &errCode);
+    std::vector<std::shared_ptr<Media::PixelMap>> captureVec = GetDisplayHDRSnapshotWithOption(option, errCode);
     if (captureVec.size() != PIXMAP_VECTOR_SIZE) {
         TLOGE(WmsLogTag::DMS, "captureVec size: %{public}u", captureVec.size());
         reply.WriteParcelable(nullptr);

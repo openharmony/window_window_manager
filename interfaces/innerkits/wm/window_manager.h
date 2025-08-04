@@ -43,6 +43,8 @@ struct SystemBarRegionTint {
 };
 using SystemBarRegionTints = std::vector<SystemBarRegionTint>;
 using GetJSWindowObjFunc = std::function<void*(const std::string& windowName)>;
+using WindowChangeInfoType = std::variant<int32_t, uint32_t, int64_t, uint64_t, std::string, float, Rect, WindowMode,
+    WindowVisibilityState>;
 
 struct VisibleWindowNumInfo {
     uint32_t displayId;
@@ -264,7 +266,7 @@ public:
      * @param windowInfoList
      */
     virtual void OnWindowInfoChanged(
-        const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList) = 0;
+        const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList) = 0;
 
     void SetInterestInfo(const std::unordered_set<WindowInfoKey>& interestInfo) { interestInfo_ = interestInfo; }
     const std::unordered_set<WindowInfoKey>& GetInterestInfo() const { return interestInfo_; }
@@ -342,6 +344,7 @@ public:
     float scaleVal_;
     float scaleX_;
     float scaleY_;
+    bool isCompatScaleMode_ { false };
     std::string bundleName_;
     std::vector<Rect> touchHotAreas_;
 };
@@ -870,7 +873,7 @@ public:
      * @return WM_OK means notify success, others means notify failed.
      */
     void NotifyWindowPropertyChange(uint32_t propertyDirtyFlags,
-        const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList);
+        const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList);
 
     /**
      * @brief Minimize all app window.
@@ -1325,6 +1328,24 @@ public:
      */
     void NotifyWMSWindowDestroyed(const WindowLifeCycleInfo& lifeCycleInfo);
 
+    /**
+     * @brief Add BundleNames to the list that will hide on virtual screen.
+     * @param bundleNames BundleNames that need to add.
+     * @param privacyWindowTags Tags of privacy window.
+     * @return WM_OK means add success, others means add failed.
+     */
+    WMError AddSessionBlackList(
+        const std::unordered_set<std::string>& bundleNames, const std::unordered_set<std::string>& privacyWindowTags);
+
+    /**
+     * @brief Remove BundleNames from the list that will hide on virtual screen.
+     * @param bundleNames BundleNames that need to remove.
+     * @param privacyWindowTags Tags of privacy window.
+     * @return WM_OK means remove success, others means remove failed.
+     */
+    WMError RemoveSessionBlackList(
+        const std::unordered_set<std::string>& bundleNames, const std::unordered_set<std::string>& privacyWindowTags);
+
 private:
     WindowManager();
     ~WindowManager();
@@ -1364,6 +1385,10 @@ private:
     WMError UnregisterDisplayIdChangedListener(const sptr<IWindowInfoChangedListener>& listener);
     WMError RegisterRectChangedListener(const sptr<IWindowInfoChangedListener>& listener);
     WMError UnregisterRectChangedListener(const sptr<IWindowInfoChangedListener>& listener);
+    WMError RegisterWindowModeChangedListenerForPropertyChange(const sptr<IWindowInfoChangedListener>& listener);
+    WMError UnregisterWindowModeChangedListenerForPropertyChange(const sptr<IWindowInfoChangedListener>& listener);
+    WMError RegisterFloatingScaleChangedListener(const sptr<IWindowInfoChangedListener>& listener);
+    WMError UnregisterFloatingScaleChangedListener(const sptr<IWindowInfoChangedListener>& listener);
     void SetIsModuleHookOffToSet(const std::string& moduleName);
     bool GetIsModuleHookOffFromSet(const std::string& moduleName);
 };

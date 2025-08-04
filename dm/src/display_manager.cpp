@@ -99,6 +99,7 @@ public:
     DMError UnregisterDisplayListener(sptr<IDisplayListener> listener);
     bool SetDisplayState(DisplayState state, DisplayStateCallback callback);
     void SetVirtualDisplayMuteFlag(ScreenId screenId, bool muteFlag);
+    bool SetVirtualScreenAsDefault(ScreenId screenId);
     DMError RegisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener);
     DMError UnregisterDisplayPowerEventListener(sptr<IDisplayPowerEventListener> listener);
     DMError RegisterScreenshotListener(sptr<IScreenshotListener> listener);
@@ -499,7 +500,7 @@ void DisplayManager::Impl::ClearDisplayStateCallback()
     TLOGD(WmsLogTag::DMS, "[UL_POWER]Clear displaystatecallback enter");
     displayStateCallback_ = nullptr;
     if (displayStateAgent_ != nullptr) {
-        TLOGI(WmsLogTag::DMS, "[UL_POWER]UnregisterDisplayManagerAgent enter and displayStateAgent_ is cleared");
+        TLOGI(WmsLogTag::DMS, "[UL_POWER]UnregisterDisplayManagerAgent and clear displayStateAgent_");
         SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(displayStateAgent_,
             DisplayManagerAgentType::DISPLAY_STATE_LISTENER);
         displayStateAgent_ = nullptr;
@@ -677,6 +678,11 @@ sptr<Display> DisplayManager::Impl::GetDefaultDisplaySync()
     defaultDisplayId_ = displayId;
     return displayMap_[displayId];
 }
+ 
+bool DisplayManager::Impl::SetVirtualScreenAsDefault(ScreenId screenId)
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().SetVirtualScreenAsDefault(screenId);
+}
 
 sptr<Display> DisplayManager::Impl::GetDisplayById(DisplayId displayId)
 {
@@ -811,7 +817,7 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId display
 }
 
 std::vector<std::shared_ptr<Media::PixelMap>> DisplayManager::GetScreenHDRshot(DisplayId displayId,
-    DmErrorCode* errorCode, bool isUseDma, bool isCaptureFullOfScreen)
+    DmErrorCode& errorCode, bool isUseDma, bool isCaptureFullOfScreen)
 {
     if (displayId == DISPLAY_ID_INVALID) {
         TLOGE(WmsLogTag::DMS, "displayId invalid!");
@@ -1034,6 +1040,15 @@ sptr<Display> DisplayManager::GetDefaultDisplaySync(bool isFromNapi)
         }
     }
     return pImpl_->GetDefaultDisplaySync();
+}
+
+bool DisplayManager::SetVirtualScreenAsDefault(ScreenId screenId)
+{
+    if (pImpl_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "pImpl_ is null");
+        return false;
+    }
+    return pImpl_->SetVirtualScreenAsDefault(screenId);
 }
 
 std::vector<DisplayId> DisplayManager::GetAllDisplayIds()
@@ -1817,7 +1832,7 @@ void DisplayManager::Impl::NotifyAvailableAreaChanged(DMRect rect, DisplayId dis
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         availableAreaListenersMap = availableAreaListenersMap_;
     }
-    if (availableAreaListenersMap_.find(displayId) != availableAreaListenersMap_.end()) {
+    if (availableAreaListenersMap.find(displayId) != availableAreaListenersMap.end()) {
         for (auto& listener : availableAreaListenersMap[displayId]) {
             listener->OnAvailableAreaChanged(rect);
         }
@@ -2065,13 +2080,17 @@ DMError DisplayManager::Impl::UnregisterAvailableAreaListener(sptr<IAvailableAre
 
 void DisplayManager::Impl::NotifyScreenshot(sptr<ScreenshotInfo> info)
 {
-    TLOGI(WmsLogTag::DMS, "NotifyScreenshot trigger:[%{public}s] displayId:%{public}" PRIu64" size:%{public}zu",
-        info->GetTrigger().c_str(), info->GetDisplayId(), screenshotListeners_.size());
+    if (info == nullptr) {
+        TLOGE(WmsLogTag::DMS, "info is null");
+        return;
+    }
     std::set<sptr<IScreenshotListener>> screenshotListeners;
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         screenshotListeners = screenshotListeners_;
     }
+    TLOGI(WmsLogTag::DMS, "NotifyScreenshot trigger:[%{public}s] displayId:%{public}" PRIu64" size:%{public}zu",
+        info->GetTrigger().c_str(), info->GetDisplayId(), screenshotListeners.size());
     for (auto& listener : screenshotListeners) {
         listener->OnScreenshot(*info);
     }
@@ -2079,13 +2098,13 @@ void DisplayManager::Impl::NotifyScreenshot(sptr<ScreenshotInfo> info)
 
 void DisplayManager::Impl::NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status)
 {
-    TLOGD(WmsLogTag::DMS, "[UL_POWER]NotifyDisplayPowerEvent event:%{public}u, status:%{public}u, size:%{public}zu",
-        event, status, powerEventListeners_.size());
     std::set<sptr<IDisplayPowerEventListener>> powerEventListeners;
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         powerEventListeners = powerEventListeners_;
     }
+    TLOGD(WmsLogTag::DMS, "[UL_POWER]NotifyDisplayPowerEvent event:%{public}u, status:%{public}u, size:%{public}zu",
+        event, status, powerEventListeners.size());
     for (auto& listener : powerEventListeners) {
         listener->OnDisplayPowerEvent(event, status);
     }
@@ -2525,7 +2544,7 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshotWithOption(const C
 }
 
 std::vector<std::shared_ptr<Media::PixelMap>> DisplayManager::GetScreenHDRshotWithOption(
-    const CaptureOption& captureOption, DmErrorCode* errorCode)
+    const CaptureOption& captureOption, DmErrorCode& errorCode)
 {
     TLOGI(WmsLogTag::DMS, "start!");
     if (captureOption.displayId_ == DISPLAY_ID_INVALID) {
@@ -2557,13 +2576,12 @@ sptr<CutoutInfo> DisplayManager::GetCutoutInfoWithRotation(Rotation rotation)
 
 sptr<CutoutInfo> DisplayManager::Impl::GetCutoutInfoWithRotation(Rotation rotation)
 {
-    int32_t rotationNum = static_cast<int32_t>(rotation);
     auto displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetDefaultDisplayInfo();
     if (displayInfo == nullptr) {
         return nullptr;
     }
-    auto displayId = displayInfo->GetDisplayId();
-    return SingletonContainer::Get<DisplayManagerAdapter>().GetCutoutInfoWithRotation(displayId, rotationNum);
+    return SingletonContainer::Get<DisplayManagerAdapter>().GetCutoutInfo(displayInfo->GetDisplayId(),
+        displayInfo->GetWidth(), displayInfo->GetHeight(), rotation);
 }
 
 DMError DisplayManager::GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
