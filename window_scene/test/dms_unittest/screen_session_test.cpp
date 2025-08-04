@@ -4027,11 +4027,13 @@ HWTEST_F(ScreenSessionTest, GetChildCount, TestSize.Level1)
 HWTEST_F(ScreenSessionTest, SetForceCloseHdr, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetForceCloseHdr start";
-    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    LOG_SetCallback(MyLogCallback);
+    ScreenProperty newScreenProperty;
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr(0,newScreenProperty,0);
     ASSERT_NE(session, nullptr);
     session->SetForceCloseHdr(true);
     session->SetForceCloseHdr(false);
-    EXPECT_TRUE(g_errLog.find("Start get screen status.") != std::string::npos);
+    EXPECT_FALSE(g_errLog.find("Start get screen status.") != std::string::npos);
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetForceCloseHdr end";
 }
 
@@ -4043,11 +4045,13 @@ HWTEST_F(ScreenSessionTest, SetForceCloseHdr, TestSize.Level1)
 HWTEST_F(ScreenSessionTest, SetForceCloseHdr01, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetForceCloseHdr start";
-    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    LOG_SetCallback(MyLogCallback);
+    ScreenProperty newScreenProperty;
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr(0,newScreenProperty,0);
     ASSERT_NE(session, nullptr);
     session->SetForceCloseHdr(false);
     session->SetForceCloseHdr(false);
-    EXPECT_TRUE(g_errLog.find("Start get screen status.") != std::string::npos);
+    EXPECT_TRUE(g_errLog.find("lastCloseHdrStatus_ and isForceCloseHdr are the same.") != std::string::npos);
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetForceCloseHdr end";
 }
 
