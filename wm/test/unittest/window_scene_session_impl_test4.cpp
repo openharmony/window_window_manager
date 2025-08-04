@@ -17,9 +17,11 @@
 #include <parameters.h>
 #include "ability_context_impl.h"
 #include "display_info.h"
+#include "mock_ability_context_impl.h"
 #include "mock_session.h"
 #include "mock_uicontent.h"
 #include "mock_window_adapter.h"
+#include "parameters.h"
 #include "singleton_mocker.h"
 #include "window_scene_session_impl.h"
 #include "window_session_impl.h"
@@ -1057,7 +1059,7 @@ HWTEST_F(WindowSceneSessionImplTest4, SetWindowTitle, TestSize.Level1)
     window->windowSystemConfig_.isSystemDecorEnable_ = false;
     EXPECT_EQ(WMError::WM_OK, window->SetWindowTitle(title));
     const std::string feature = "large_screen";
-    std::string deviceType = system::GetParameter("const.product.devicetype", "");
+    std::string deviceType = OHOS::system::GetParameter("const.product.devicetype", "");
     auto context = std::make_shared<MockAbilityContextImpl>();
     window->context_ = context;
     context->hapModuleInfo_ = std::make_shared<AppExecFwk::HapModuleInfo>();
