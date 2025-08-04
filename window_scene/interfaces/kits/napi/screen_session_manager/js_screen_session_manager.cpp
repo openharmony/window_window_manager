@@ -1206,7 +1206,7 @@ napi_value JsScreenSessionManager::OnSetScreenFreezeImmediately(napi_env env, co
                 "Input parameter is missing or invalid"));
             return NapiGetUndefined(env);
         }
-        scaleParam[i] = (scaleParam[i] > 0.0 && scaleParam[i] < 1.0) ? scaleParam[i] : 1.0;
+        scaleParam[i] = MathHelper::Clamp(scaleParam[i], 0.0, 1.0);
     }
     bool isFreeze = false;
     if (!ConvertFromJsValue(env, argv[ARGC_THREE], isFreeze)) {
