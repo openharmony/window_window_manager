@@ -390,7 +390,7 @@ private:
      */
     std::unordered_map<int32_t, RotationChangeResult> GetRotationChangeResult(
         const std::vector<sptr<SceneSession>>& activeSceneSessionMapCopy,
-        const RotationChangeInfo& rotationChangeInfo);
+        const RotationChangeInfo& rotationChangeInfo, bool isRestrictNotify = false);
 
     /*
      * Window Pattern

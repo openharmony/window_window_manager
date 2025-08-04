@@ -574,7 +574,8 @@ public:
     WSError NotifyRotationProperty(uint32_t rotation, uint32_t width, uint32_t height);
     void RegisterUpdateRotationChangeListener(NotifyRotationChangeFunc&& callback);
     WSError UpdateRotationChangeRegistered(int32_t persistentId, bool isRegister) override;
-    RotationChangeResult NotifyRotationChange(const RotationChangeInfo& rotationChangeInfo);
+    RotationChangeResult NotifyRotationChange(const RotationChangeInfo& rotationChangeInfo,
+        bool isRestrictNotify = false);
     bool isRotationChangeCallbackRegistered = false;
     WSError SetCurrentRotation(int32_t currentRotation);
     void RegisterFollowScreenChangeCallback(NotifyFollowScreenChangeFunc&& callback);
