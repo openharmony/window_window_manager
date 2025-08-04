@@ -56,6 +56,7 @@ const float FULL_STATUS_OFFSET_X = 1136;
 const float SCREEN_HEIGHT = 2232;
 constexpr uint32_t SECONDARY_ROTATION_270 = 3;
 constexpr uint32_t SECONDARY_ROTATION_MOD = 4;
+constexpr int32_t SNAPSHOT_TIMEOUT_MS = 300;
 constexpr ScreenId SCREEN_ID_DEFAULT = 0;
 constexpr float HORIZONTAL = 270.f;
 ScreenCache<int32_t, int32_t> g_uidVersionMap(MAP_SIZE, NO_EXIST_UID_VERSION);
@@ -2419,7 +2420,7 @@ std::shared_ptr<Media::PixelMap> ScreenSession::SetScreenFreezeImmediately(float
         }
     }
     if (isFreeze) {
-        auto pixelMap = callback->GetResult(300);
+        auto pixelMap = callback->GetResult(SNAPSHOT_TIMEOUT_MS);
         if (pixelMap != nullptr) {
             TLOGD(WmsLogTag::DMS, "save pixelMap WxH = %{public}dx%{public}d", pixelMap->GetWidth(),
                 pixelMap->GetHeight());
