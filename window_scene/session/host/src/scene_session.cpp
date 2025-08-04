@@ -1156,7 +1156,13 @@ void SceneSession::RegisterUpdateAppUseControlCallback(UpdateAppUseControlFunc&&
             return;
         }
         session->onUpdateAppUseControlFunc_ = std::move(callback);
-        session->UpdatePrivacyModeControlInfo();
+        if (session->GetSessionInfo().hasPrivacyModeControl) {
+            TLOGNI(WmsLogTag::WMS_LIFE, "has privacy mode control, id:%{public}d", session->GetPersistentId());
+            ControlInfo controlInfo = { .isNeedControl = true, .isControlRecentOnly = true };
+            session->NotifyUpdateAppUseControl(ControlAppType::PRIVACY_WINDOW, controlInfo);
+        } else {
+            session->UpdatePrivacyModeControlInfo();
+        }
         if (!session->onGetAllAppUseControlMapFunc_) {
             TLOGNE(WmsLogTag::WMS_LIFE,
                 "id: %{public}d session GetAllAppUseControlMapFunc is null", session->GetPersistentId());

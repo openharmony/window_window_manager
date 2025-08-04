@@ -1040,6 +1040,23 @@ HWTEST_F(SceneSessionTest6, RegisterUpdateAppUseControlCallback, Function | Smal
 }
 
 /**
+ * @tc.name: RegisterUpdateAppUseControlCallbackHasPrivacyModeControl
+ * @tc.desc: RegisterUpdateAppUseControlCallbackHasPrivacyModeControl
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, RegisterUpdateAppUseControlCallbackHasPrivacyModeControl, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.bundleName_ = "app";
+    info.hasPrivacyModeControl = true;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto callback = [](ControlAppType type, bool isNeedControl, bool isControlRecentOnly) {};
+    sceneSession->RegisterUpdateAppUseControlCallback(callback);
+    usleep(SLEEP_TIME);
+    EXPECT_TRUE(sceneSession->appUseControlMap_[ControlAppType::PRIVACY_WINDOW].isNeedControl);
+}
+
+/**
  * @tc.name: GetScreenWidthAndHeightFromClient
  * @tc.desc: GetScreenWidthAndHeightFromClient
  * @tc.type: FUNC

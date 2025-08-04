@@ -122,6 +122,22 @@ napi_valuetype GetType(napi_env env, napi_value value)
     return res;
 }
 
+template<class T>
+bool ConvertFromJsValueProperty(napi_env env, napi_value jsValue, const char* name, T& value)
+{
+    napi_value jsProperty = nullptr;
+    napi_get_named_property(env, jsValue, name, &jsProperty);
+    if (GetType(env, jsProperty) != napi_undefined) {
+        T propertyValue;
+        if (!ConvertFromJsValue(env, jsProperty, propertyValue)) {
+            TLOGE(WmsLogTag::DEFAULT, "Failed to convert parameter to %{public}s", name);
+            return false;
+        }
+        value = propertyValue;
+    }
+    return true;
+}
+
 napi_value ConvertTransitionAnimationToJsValue(napi_env env, std::shared_ptr<TransitionAnimation> transitionAnimation)
 {
     napi_value objValue = nullptr;
@@ -661,6 +677,9 @@ bool ConvertSessionInfoState(napi_env env, napi_value jsObject, SessionInfo& ses
         return false;
     }
     if (!IsJsIsUseControlSessionUndefined(env, jsIsUseControlSession, sessionInfo)) {
+        return false;
+    }
+    if (!ConvertFromJsValueProperty(env, jsObject, "hasPrivacyModeControl", sessionInfo.hasPrivacyModeControl)) {
         return false;
     }
     return true;
