@@ -578,7 +578,7 @@ public:
     void SetHasRootSceneRequestedVsyncFunc(HasRootSceneRequestedVsyncFunc&& func);
     void SetRequestVsyncByRootSceneWhenModeChangeFunc(RequestVsyncByRootSceneWhenModeChangeFunc&& func);
     WMError UpdateWindowModeByIdForUITest(int32_t windowId, int32_t updateMode) override;
-    
+
     /*
      * Window Property
      */
@@ -926,7 +926,7 @@ private:
     bool MissionChanged(const sptr<SceneSession>& prevSession, const sptr<SceneSession>& currSession);
     std::string GetAllSessionFocusInfo();
     void RegisterRequestFocusStatusNotifyManagerFunc(const sptr<SceneSession>& sceneSession);
-    void ProcessUpdateLastFocusedAppId(const std::vector<uint32_t>& zOrderList);
+    void ProcessUpdateLastFocusedAppId(const std::vector<std::pair<uint32_t, uint32_t>>& zOrderList);
     WSError ProcessModalTopmostRequestFocusImmediately(const sptr<SceneSession>& sceneSession);
     WSError ProcessSubWindowRequestFocusImmediately(const sptr<SceneSession>& sceneSession);
     WSError ProcessDialogRequestFocusImmediately(const sptr<SceneSession>& sceneSession);
