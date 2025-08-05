@@ -915,6 +915,10 @@ WSError SceneSessionManager::SetSessionContinueState(const sptr<IRemoteObject>& 
     const ContinueState& continueState)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "in");
+    if (!SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::DEFAULT, "Permission denied to set continue state!");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
     int32_t callingUid = IPCSkeleton::GetCallingUid();
     return taskScheduler_->PostSyncTask([this, token, continueState, callingUid, where = __func__] {
         sptr <SceneSession> sceneSession = FindSessionByToken(token);
@@ -3113,7 +3117,8 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
     }
     if (sceneSession->GetSessionInfo().ancoSceneState < AncoSceneState::NOTIFY_CREATE) {
         FillSessionInfo(sceneSession);
-        if (!PreHandleCollaborator(sceneSession, persistentId)) {
+        if (CheckCollaboratorType(sceneSession->GetCollaboratorType()) &&
+            !PreHandleCollaborator(sceneSession, persistentId)) {
             TLOGE(WmsLogTag::WMS_LIFE, "[id: %{public}d] ancoSceneState: %{public}d",
                 persistentId, sceneSession->GetSessionInfo().ancoSceneState);
             ExceptionInfo exceptionInfo;
@@ -11707,6 +11712,10 @@ WSError SceneSessionManager::PendingSessionToBackground(const sptr<IRemoteObject
 WSError SceneSessionManager::PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token,
     bool shouldBackToCaller)
 {
+    if (!SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::DEFAULT, "Permission denied for going to background!");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
     return taskScheduler_->PostSyncTask([this, &token, shouldBackToCaller] {
         if (auto session = FindSessionByToken(token)) {
             return session->PendingSessionToBackgroundForDelegator(shouldBackToCaller);

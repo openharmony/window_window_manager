@@ -325,7 +325,9 @@ void Session::SetSessionInfo(const SessionInfo& info)
     sessionInfo_.uiAbilityId_ = info.uiAbilityId_;
     sessionInfo_.requestId = info.requestId;
     sessionInfo_.startSetting = info.startSetting;
-    sessionInfo_.continueSessionId_ = info.continueSessionId_;
+    if (!info.continueSessionId_.empty()) {
+        sessionInfo_.continueSessionId_ = info.continueSessionId_;
+    }
     sessionInfo_.isAtomicService_ = info.isAtomicService_;
     sessionInfo_.callState_ = info.callState_;
     sessionInfo_.processOptions = info.processOptions;
