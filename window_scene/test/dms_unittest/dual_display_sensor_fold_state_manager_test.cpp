@@ -79,7 +79,7 @@ namespace {
     HWTEST_F(DualDisplaySensorFoldStateManagerTest, DualDisplaySensorFoldStateManager, TestSize.Level1)
     {
         if (!FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
-            GTEST_SKIP(); 
+            GTEST_SKIP();
         }
         std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
         DualDisplaySensorFoldStateManager mgr = DualDisplaySensorFoldStateManager(screenPowerTaskScheduler);
