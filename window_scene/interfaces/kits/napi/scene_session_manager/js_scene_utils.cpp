@@ -2203,7 +2203,7 @@ napi_value CreateResultMapToJsValue(napi_env env,
     const std::unordered_map<int32_t, RotationChangeResult>& rotationChangeResultMap)
 {
     if (rotationChangeResultMap.empty()) {
-        TLOGD(WmsLogTag::WMS_ROTATION, "rotationChangeResultMap is empty");
+        TLOGE(WmsLogTag::WMS_ROTATION, "rotationChangeResultMap is empty");
         return nullptr;
     }
     napi_value arrayValue = nullptr;
