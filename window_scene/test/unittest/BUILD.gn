@@ -456,7 +456,10 @@ ohos_unittest("ws_scene_session_manager_lite_test") {
 ohos_unittest("ws_scene_session_manager_lifecycle_test") {
   module_out_path = module_out_path
 
-  sources = [ "scene_session_manager_lifecycle_test.cpp" ]
+  sources = [
+    "${window_base_path}/window_scene/test/mock/mock_accesstoken_kit.cpp",
+    "scene_session_manager_lifecycle_test.cpp"
+  ]
 
   cflags_cc = [ "-Wno-thread-safety" ]
 
