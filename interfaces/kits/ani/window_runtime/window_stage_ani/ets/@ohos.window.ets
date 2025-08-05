@@ -2349,6 +2349,7 @@ export class WindowInternal implements Window {
             taskpool.execute((): WindowProperties => {
                 let res = this.getProperties(this.nativeObj) as WindowPropertiesInternal;
                 res.type = res.typeInternal as WindowType;
+                res.displayId = windowProperties.displayIdInternal;
                 return res;
             }).then((ret: NullishType) => {
                 resolve(ret as WindowProperties);
