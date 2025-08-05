@@ -152,29 +152,14 @@ bool IntentionEventManager::InputEventListener::CheckPointerEvent(
     return true;
 }
 
-void IntentionEventManager::InputEventListener::ProcessInjectionEvent(
-    std::shared_ptr<MMI::PointerEvent> pointerEvent) const
-{
-    auto dispatchTimes = pointerEvent->GetDispatchTimes();
-    MMI::PointerEvent::PointerItem pointerItem;
-    auto pointerId = pointerEvent->GetPointerId();
-    if (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE &&
-        pointerEvent->HasFlag(MMI::InputEvent::EVENT_FLAG_SIMULATE)) {
-        MMI::InputManager::GetInstance()->TransformMouseEventToTouchEvent(pointerEvent);
-    }
-    if (dispatchTimes > 0 && pointerEvent->GetPointerItem(pointerId, pointerItem)) {
-        pointerItem.SetPointerId(pointerId + dispatchTimes * TRANSPARENT_FINGER_ID);
-        pointerEvent->UpdatePointerItem(pointerId, pointerItem);
-        pointerEvent->SetPointerId(pointerId + dispatchTimes * TRANSPARENT_FINGER_ID);
-    }
-}
-
 void IntentionEventManager::InputEventListener::OnInputEvent(
     std::shared_ptr<MMI::PointerEvent> pointerEvent) const
 {
     if (!CheckPointerEvent(pointerEvent)) {
         return;
     }
+    LogPointInfo(pointerEvent);
+    int32_t action = pointerEvent->GetPointerAction();
     uint32_t windowId = static_cast<uint32_t>(pointerEvent->GetTargetWindowId());
     auto sceneSession = SceneSessionManager::GetInstance().GetSceneSession(windowId);
     if (sceneSession == nullptr) {
@@ -183,9 +168,15 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
         return;
     }
     auto dispatchTimes = pointerEvent->GetDispatchTimes();
-    ProcessInjectionEvent(pointerEvent);
-    int32_t action = pointerEvent->GetPointerAction();
-    LogPointInfo(pointerEvent);
+    if (dispatchTimes > 0) {
+        MMI::PointerEvent::PointerItem pointerItem;
+        auto pointerId = pointerEvent->GetPointerId();
+        if (pointerEvent->GetPointerItem(pointerId, pointerItem)) {
+            pointerItem.SetPointerId(pointerId + dispatchTimes * TRANSPARENT_FINGER_ID);
+            pointerEvent->UpdatePointerItem(pointerId, pointerItem);
+            pointerEvent->SetPointerId(pointerId + dispatchTimes * TRANSPARENT_FINGER_ID);
+        }
+    }
     auto sourceType = pointerEvent->GetSourceType();
     if (action != MMI::PointerEvent::POINTER_ACTION_MOVE) {
         if (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE ||

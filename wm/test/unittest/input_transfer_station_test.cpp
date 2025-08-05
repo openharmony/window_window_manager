@@ -168,6 +168,11 @@ HWTEST_F(InputTransferStationTest, OnInputEvent3, TestSize.Level1)
     pointerEvent->SetPointerAction(static_cast<int32_t>(MMI::PointerEvent::POINTER_ACTION_MOVE));
     pointerEvent->SetAgentWindowId(0);
     listener->OnInputEvent(pointerEvent);
+    pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
+    pointerEvent->SetPointerAction(static_cast<int32_t>(MMI::PointerEvent::POINTER_ACTION_DOWN));
+    pointerEvent->AddFlag(MMI::InputEvent::EVENT_FLAG_GESTURE_SUPPLEMENT);
+    listener->OnInputEvent(pointerEvent);
+    EXPECT_EQ(pointerEvent->GetSourceType(), MMI::PointerEvent::SOURCE_TYPE_MOUSE);
     pointerEvent->SetAgentWindowId(static_cast<uint32_t>(-1));
     InputTransferStation::GetInstance().destroyed_ = true;
     auto channel = InputTransferStation::GetInstance().GetInputChannel(0);

@@ -86,25 +86,13 @@ const std::map<int32_t, int32_t> MOUSE_ACTION_MAP = {
     { (int32_t)AceTouchType::HOVER_CANCEL, MMI::PointerEvent::POINTER_ACTION_HOVER_CANCEL }
 };
 
-void TransferToMMIFormat(int32_t aceType, MMI::PointerEvent& pointerEvent)
+int32_t GetMMITouchType(int32_t aceType)
 {
-    auto sourceType = pointerEvent.GetSourceType();
-    if (sourceType == MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
-        auto it = TOUCH_ACTION_MAP.find(aceType);
-        if (it == TOUCH_ACTION_MAP.end()) {
-            pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
-            return;
-        }
-        pointerEvent.SetPointerAction(it->second);
-    } else if (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
-        pointerEvent.SetButtonId(MMI::PointerEvent::MOUSE_BUTTON_LEFT);
-        auto it = MOUSE_ACTION_MAP.find(aceType);
-        if (it == MOUSE_ACTION_MAP.end()) {
-            pointerEvent.SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
-            return;
-        }
-        pointerEvent.SetPointerAction(it->second);
+    auto it = TOUCH_ACTION_MAP.find(aceType);
+    if (it == TOUCH_ACTION_MAP.end()) {
+        return MMI::PointerEvent::POINTER_ACTION_UNKNOWN;
     }
+    return it->second;
 }
 } // namespace
 
@@ -901,8 +889,6 @@ bool ConvertPointerItemFromJs(napi_env env, napi_value touchObject, MMI::Pointer
     MMI::PointerEvent::PointerItem pointerItem;
     napi_value jsId = nullptr;
     napi_get_named_property(env, touchObject, "id", &jsId);
-    napi_value jsTouchType = nullptr;
-    napi_get_named_property(env, touchObject, "type", &jsTouchType);
     napi_value jsWindowX = nullptr;
     napi_get_named_property(env, touchObject, "windowX", &jsWindowX);
     napi_value jsWindowY = nullptr;
@@ -918,12 +904,6 @@ bool ConvertPointerItemFromJs(napi_env env, napi_value touchObject, MMI::Pointer
     }
     pointerItem.SetPointerId(id);
     pointerEvent.SetPointerId(id);
-    int32_t touchType;
-    if (!ConvertFromJsValue(env, jsTouchType, touchType)) {
-        WLOGFE("Failed to convert parameter to touchType");
-        return false;
-    }
-    TransferToMMIFormat(touchType, pointerEvent);
     double windowX;
     if (!ConvertFromJsValue(env, jsWindowX, windowX)) {
         WLOGFE("Failed to convert parameter to windowX");
@@ -994,20 +974,12 @@ bool ConvertTouchesObjectFromJs(napi_env env, napi_value jsTouches, int32_t poin
     return true;
 }
 
-int32_t ConvertMMISourceType(int32_t sourceType)
-{
-    if (sourceType == static_cast<int32_t>(AceSourceType::TOUCH)) {
-        return MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN;
-    } else if (sourceType == static_cast<int32_t>(AceSourceType::MOUSE)) {
-        return MMI::PointerEvent::SOURCE_TYPE_MOUSE;
-    }
-    return MMI::PointerEvent::SOURCE_TYPE_UNKNOWN;
-}
-
 bool ConvertPointerEventFromJs(napi_env env, napi_value jsObject, MMI::PointerEvent& pointerEvent)
 {
     napi_value jsSourceType = nullptr;
     napi_get_named_property(env, jsObject, "source", &jsSourceType);
+    napi_value jsTouchType = nullptr;
+    napi_get_named_property(env, jsObject, "type", &jsTouchType);
     napi_value jsTimestamp = nullptr;
     napi_get_named_property(env, jsObject, "timestamp", &jsTimestamp);
     napi_value jsChangedTouches = nullptr;
@@ -1019,7 +991,16 @@ bool ConvertPointerEventFromJs(napi_env env, napi_value jsObject, MMI::PointerEv
         WLOGFE("Failed to convert parameter to sourceType");
         return false;
     }
-    pointerEvent.SetSourceType(ConvertMMISourceType(sourceType));
+    pointerEvent.SetSourceType(MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
+    if (sourceType == static_cast<int32_t>(AceSourceType::MOUSE)) {
+        pointerEvent.AddFlag(MMI::InputEvent::EVENT_FLAG_GESTURE_SUPPLEMENT);
+    }
+    int32_t touchType;
+    if (!ConvertFromJsValue(env, jsTouchType, touchType)) {
+        WLOGFE("Failed to convert parameter to touchType");
+        return false;
+    }
+    pointerEvent.SetPointerAction(GetMMITouchType(touchType));
     double timestamp;
     if (!ConvertFromJsValue(env, jsTimestamp, timestamp)) {
         WLOGFE("Failed to convert parameter to timestamp");

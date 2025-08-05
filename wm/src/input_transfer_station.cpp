@@ -77,6 +77,11 @@ void InputEventListener::HandleInputEvent(std::shared_ptr<MMI::PointerEvent> poi
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "IEL:PointerEvent id:%d action:%d",
         pointerEvent->GetId(), pointerEvent->GetPointerAction());
+    if (pointerEvent->HasFlag(MMI::InputEvent::EVENT_FLAG_GESTURE_SUPPLEMENT)) {
+        MMI::InputManager::GetInstance()->TransformTouchEventToMouseEvent(pointerEvent);
+        TLOGD(WmsLogTag::WMS_INPUT_KEY_FLOW, "transfer event %{public}d to mouse event",
+            pointerEvent->GetId());
+    }
     // If handling input event at server, client will receive pointEvent that the winId is -1, intercept log error
     uint32_t invalidId = static_cast<uint32_t>(-1);
     uint32_t windowId = static_cast<uint32_t>(pointerEvent->GetAgentWindowId());
