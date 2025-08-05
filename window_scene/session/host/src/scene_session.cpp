@@ -8863,7 +8863,7 @@ RotationChangeResult SceneSession::NotifyRotationChange(const RotationChangeInfo
 
 WSError SceneSession::SetCurrentRotation(int32_t currentRotation)
 {
-    TLOGD(WmsLogTag::WMS_ROTATION, "currentRotation: %{public}d", currentRotation);
+    TLOGI(WmsLogTag::WMS_ROTATION, "currentRotation: %{public}d", currentRotation);
     PostTask([weakThis = wptr(this), currentRotation, where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
