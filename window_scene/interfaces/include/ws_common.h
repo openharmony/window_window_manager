@@ -454,6 +454,7 @@ struct SessionInfo {
      * App Use Control
      */
     bool isUseControlSession = false; // Indicates whether the session is used for controlling a main session.
+    bool hasPrivacyModeControl = false;
 
     /*
      * UIExtension
