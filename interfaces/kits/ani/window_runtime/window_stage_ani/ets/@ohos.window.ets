@@ -2340,7 +2340,7 @@ export class WindowInternal implements Window {
 
     public getProperties(callback: AsyncCallback<WindowProperties>): void {
         taskpool.execute((): WindowProperties => {
-            let res = this.getProperties(this.nativeObj);
+            let res = this.getProperties(this.nativeObj) as WindowPropertiesInternal;
             res.type = res.typeInternal as WindowType;
             res.displayId = windowProperties.displayIdInternal;
             return res;
