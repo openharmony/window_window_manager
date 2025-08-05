@@ -245,7 +245,7 @@ void AniWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info,
         return;
     }
     AniWindowUtils::CallAniFunctionVoid(env_, "L@ohos/window/window;", "runKeyboardHeightChangeCallback",
-        nullptr, thisListener->aniCallback_, static_cast<ani_double>(info->rect_.height_));
+        nullptr, thisListener->aniCallback_, static_cast<ani_int>(info->rect_.height_));
 }
 
 void AniWindowListener::OnKeyboardDidShow(const KeyboardPanelInfo& keyboardPanelInfo)
