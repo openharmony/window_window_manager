@@ -4029,7 +4029,7 @@ HWTEST_F(ScreenSessionTest, SetForceCloseHdr, TestSize.Level1)
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetForceCloseHdr start";
     LOG_SetCallback(MyLogCallback);
     ScreenProperty newScreenProperty;
-    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr(0,newScreenProperty,0);
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr(0, newScreenProperty, 0);
     ASSERT_NE(session, nullptr);
     session->SetForceCloseHdr(true);
     session->SetForceCloseHdr(false);
@@ -4047,7 +4047,7 @@ HWTEST_F(ScreenSessionTest, SetForceCloseHdr01, TestSize.Level1)
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetForceCloseHdr start";
     LOG_SetCallback(MyLogCallback);
     ScreenProperty newScreenProperty;
-    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr(0,newScreenProperty,0);
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr(0, newScreenProperty, 0);
     ASSERT_NE(session, nullptr);
     session->SetForceCloseHdr(false);
     session->SetForceCloseHdr(false);
