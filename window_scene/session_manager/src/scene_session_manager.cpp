@@ -126,8 +126,6 @@ constexpr int SCALE_MAX_WIDTH = 8;
 constexpr int PID_MAX_WIDTH = 8;
 constexpr int PARENT_ID_MAX_WIDTH = 6;
 constexpr int WINDOW_NAME_MAX_LENGTH = 20;
-constexpr int VISIBILITY_MAX_LENGTH = 20;
-constexpr int PRIVACY_MODE_MAX_LENGTH = 20;
 constexpr int32_t CANCEL_POINTER_ID = 99999999;
 constexpr int32_t STATUS_BAR_AVOID_AREA = 0;
 const std::string ARG_DUMP_ALL = "-a";
@@ -6740,8 +6738,6 @@ void SceneSessionManager::DumpSessionInfo(const sptr<SceneSession>& session, std
     uint32_t orientation = 0;
     const std::string& windowName = sName.size() <= WINDOW_NAME_MAX_LENGTH ?
         sName : sName.substr(0, WINDOW_NAME_MAX_LENGTH);
-    bool isPrivacyMode = session->GetSessionProperty()->GetPrivacyMode() ||
-        session->GetCombinedExtWindowFlags().privacyModeFlag;
     // std::setw is used to set the output width and different width values are set to keep the format aligned.
     oss << std::left << std::setw(WINDOW_NAME_MAX_WIDTH) << windowName
         << std::left << std::setw(DISPLAY_NAME_MAX_WIDTH) << displayId
@@ -6767,9 +6763,7 @@ void SceneSessionManager::DumpSessionInfo(const sptr<SceneSession>& session, std
         << std::left << std::setw(SCALE_MAX_WIDTH) << GetFloatWidth(SCALE_MAX_WIDTH, session->GetScaleY())
         << std::left << std::setw(SCALE_MAX_WIDTH) << GetFloatWidth(SCALE_MAX_WIDTH, session->GetPivotX())
         << std::left << std::setw(SCALE_MAX_WIDTH) << GetFloatWidth(SCALE_MAX_WIDTH, session->GetPivotY())
-        << "] "
-        << std::left << std::setw(VISIBILITY_MAX_LENGTH) << static_cast<uint32_t>(session->GetVisibilityState())
-        << std::left << std::setw(PRIVACY_MODE_MAX_LENGTH) << isPrivacyMode
+        << "]"
         << std::endl;
 }
 
@@ -6801,7 +6795,7 @@ WSError SceneSessionManager::GetAllSessionDumpInfo(std::string& dumpInfo)
     oss << "-------------------------------------ScreenGroup 0"
         << "-------------------------------------" << std::endl;
     oss << "WindowName           DisplayId Pid     WinId Type Mode Flag ZOrd Orientation [ x    y    w    h    ]"
-        << " [ OffsetX OffsetY ] [ ScaleX  ScaleY  PivotX  PivotY  ] VisibilityState IsPrivacyMode" << std::endl;
+        << " [ OffsetX OffsetY ] [ ScaleX  ScaleY  PivotX  PivotY  ]" << std::endl;
     std::vector<sptr<SceneSession>> allSession;
     std::vector<sptr<SceneSession>> backgroundSession;
     std::map<int32_t, sptr<SceneSession>> sceneSessionMapCopy;
