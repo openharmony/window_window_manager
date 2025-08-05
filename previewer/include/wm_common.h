@@ -1622,6 +1622,7 @@ struct RotationChangeResult {
  */
 enum DefaultSpecificZIndex {
     MUTISCREEN_COLLABORATION = 930,
+    SUPER_PRIVACY_ANIMATION = 1100,
 };
 
 /**
