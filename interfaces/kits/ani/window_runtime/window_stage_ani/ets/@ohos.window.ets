@@ -1132,6 +1132,7 @@ export class WindowPropertiesInternal implements WindowProperties {
     isTransparent: boolean;
     id: int;
     displayId?: long;
+    displayIdInternal: long;
     typeInternal: int;
     name?: string;
 }
@@ -2338,6 +2339,7 @@ export class WindowInternal implements Window {
     public getWindowProperties(): WindowProperties {
         let windowProperties = this.getWindowProperties(this.nativeObj) as WindowPropertiesInternal;
         windowProperties.type = windowProperties.typeInternal as WindowType;
+        windowProperties.displayId = windowProperties.displayIdInternal;
         return windowProperties;
     }
 
