@@ -13794,7 +13794,7 @@ bool SceneSessionManager::IsGetWindowLayoutInfoNeeded(const sptr<SceneSession>& 
     while (pos > 0 && std::isdigit(static_cast<unsigned char>(name[pos - 1]))) {
         --pos;
     }
-    name = name.substr(0, pos);
+    name.resize(pos);
     return !session->GetSessionInfo().isSystem_ || LAYOUT_INFO_WHITELIST.find(name) != LAYOUT_INFO_WHITELIST.end();
 }
 
