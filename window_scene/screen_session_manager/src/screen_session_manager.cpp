@@ -1445,6 +1445,9 @@ void ScreenSessionManager::HandleScreenConnectEvent(sptr<ScreenSession> screenSe
     HandlePhysicalMirrorConnect(screenSession, phyMirrorEnable);
     auto clientProxy = GetClientProxy();
 #ifdef FOLD_ABILITY_ENABLE
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        SuperFoldStateManager::GetInstance().RefreshExternalRegion();
+    }
     if (foldScreenController_ != nullptr) {
         if ((screenId == 0 || (screenId == SCREEN_ID_MAIN && isCoordinationFlag_ == true)) && clientProxy) {
             TLOGW(WmsLogTag::DMS, "event: connect %{public}" PRIu64 ", %{public}" PRIu64 ", "
