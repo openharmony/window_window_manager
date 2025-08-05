@@ -13790,11 +13790,12 @@ int32_t SceneSessionManager::GetFoldLowerScreenPosY() const
 
 bool SceneSessionManager::IsGetWindowLayoutInfoNeeded(const sptr<SceneSession>& session) const
 {
-    constexpr int32_t GROUP_ONE = 1;
     std::string name = session->GetWindowName();
-    std::regex pattern("^(.*?)(\\d*)$"); // Remove last digit
-    std::smatch matches;
-    name = std::regex_search(name, matches, pattern) ? matches[GROUP_ONE] : name;
+    size_t pos = name.size();
+    while (pos > 0 && std::isdigit(static_cast<unsigned char>(name[pos - 1]))) {
+        --pos;
+    }
+    name.resize(pos);
     return !session->GetSessionInfo().isSystem_ || LAYOUT_INFO_WHITELIST.find(name) != LAYOUT_INFO_WHITELIST.end();
 }
 
