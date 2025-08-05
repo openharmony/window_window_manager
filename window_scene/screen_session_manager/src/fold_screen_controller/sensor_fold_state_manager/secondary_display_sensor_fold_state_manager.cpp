@@ -61,15 +61,15 @@ void SecondaryDisplaySensorFoldStateManager::HandleAngleOrHallChange(const std::
         TLOGE(WmsLogTag::DMS, "halls size is not right, halls size %{public}zu", halls.size());
         return;
     }
-    bool isPowerOn = PowerMgr::PowerMgrClient::GetInstance().IsScreenOn();
+    bool isFoldScreenOn = PowerMgr::PowerMgrClient::GetInstance().IsFoldScreenOn();
     {
         std::lock_guard<std::mutex> lock(secondaryFoldStatusMutex_);
-        if (!isPowerOn && curHallAB_ == halls[0] && curHallBC_ == halls[1]) {
+        if (!isFoldScreenOn && curHallAB_ == halls[0] && curHallBC_ == halls[1]) {
             TLOGI(WmsLogTag::DMS, "hall value is not change in unPower");
             return;
         }
     }
-    FoldStatus nextState = GetNextFoldState(angles, halls, isPostureRegistered);
+    FoldStatus nextState = GetNextFoldState(angles, halls, isPostureRegistered, isFoldScreenOn);
     HandleSensorChange(nextState, angles, halls, foldScreenPolicy);
     if (angles.size() != ANGLES_AXIS_SIZE) {
         TLOGE(WmsLogTag::DMS, "angles size is not right, angles size %{public}zu", angles.size());
@@ -91,14 +91,13 @@ void SecondaryDisplaySensorFoldStateManager::HandleAngleOrHallChange(const std::
 }
 
 FoldStatus SecondaryDisplaySensorFoldStateManager::GetNextFoldState(const std::vector<float> &angles,
-    const std::vector<uint16_t> &halls, bool isPostureRegistered)
+    const std::vector<uint16_t> &halls, bool isPostureRegistered, bool isFoldScreenOn)
 {
     TLOGD(WmsLogTag::DMS, "%{public}s, %{public}s",
         FoldScreenStateInternel::TransVec2Str(angles, "angle").c_str(),
         FoldScreenStateInternel::TransVec2Str(halls, "hall").c_str());
 
     FoldStatus state = FoldStatus::UNKNOWN;
-    bool isPowerOn = PowerMgr::PowerMgrClient::GetInstance().IsFoldScreenOn();
     if (angles.size() != ANGLES_AXIS_SIZE || halls.size() != HALLS_AXIS_SIZE) {
         TLOGE(WmsLogTag::DMS, "angles or halls size is not right, angles size %{public}zu, halls size %{public}zu",
             angles.size(), halls.size());
@@ -109,7 +108,7 @@ FoldStatus SecondaryDisplaySensorFoldStateManager::GetNextFoldState(const std::v
         curHallAB_ = halls[0];
         curHallBC_ = halls[1];
     }
-    if (!isPowerOn || !isPostureRegistered) {
+    if (!isFoldScreenOn || !isPostureRegistered) {
         state = GetFoldStateUnpower(halls);
         return state;
     }
