@@ -26,7 +26,6 @@ group("unittest") {
     ":ws_distributed_client_test",
     ":ws_ffrt_helper_test",
     ":ws_hidumper_controller_test",
-    ":ws_keyboard_session_test",
     ":ws_main_session_lifecycle_test",
     ":ws_main_session_test",
     ":ws_move_drag_controller_test",
@@ -113,6 +112,7 @@ group("unittest") {
     "rotation:ws_window_session_property_rotation_test",
     "ui_extension:unittest",
     "window_focus:unittest",
+    "window_keyboard:unittest",
     "window_pattern:window_pattern_snapshot_test",
     "window_pattern:window_pattern_starting_window_rdb_test",
     "window_pattern:window_pattern_starting_window_test",
@@ -221,20 +221,6 @@ ohos_unittest("ws_system_session_lifecycle_test") {
   module_out_path = module_out_path
 
   sources = [ "system_session_lifecycle_test.cpp" ]
-
-  deps = [ ":ws_unittest_common" ]
-
-  external_deps = test_external_deps
-}
-
-ohos_unittest("ws_keyboard_session_test") {
-  module_out_path = module_out_path
-
-  sources = [
-    "keyboard_session_test.cpp",
-    "keyboard_session_test2.cpp",
-    "keyboard_session_test3.cpp",
-  ]
 
   deps = [ ":ws_unittest_common" ]
 
@@ -1453,6 +1439,7 @@ ohos_static_library("ws_unittest_common") {
     "rotation:*",
     "ui_extension:*",
     "window_focus:*",
+    "window_keyboard:*",
     "window_pattern:*",
     "window_recover:*",
   ]
