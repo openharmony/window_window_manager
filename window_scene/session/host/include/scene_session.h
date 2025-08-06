@@ -905,7 +905,6 @@ protected:
     void CalculateAvoidAreaByType(AvoidAreaType type,
         const WSRect& winRect, const WSRect& avoidRect, AvoidArea& avoidArea);
 
-
     /*
      * Gesture Back
      */
