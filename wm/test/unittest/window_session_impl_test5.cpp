@@ -1955,6 +1955,37 @@ HWTEST_F(WindowSessionImplTest5, SwitchSubWindow, Function | SmallTest | Level1)
     }
     EXPECT_EQ(decorVisible, true);
 }
+
+/**
+ * @tc.name: NotifySizeChangeFlag
+ * @tc.desc: NotifySizeChangeFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, NotifySizeChangeFlag, Function | SmallTest | Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifySizeChangeFlag");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    Rect requestRect = { 0, 0, 50, 50 };
+    Rect windowRect = { 0, 0, 0, 0 };
+    window->property_->SetWindowRect(windowRect);
+    window->property_->SetRequestRect(requestRect);
+
+    window->SetNotifySizeChangeFlag(false);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT_NAVIGATION);
+    window->SetNotifySizeChangeFlag(true);
+    ASSERT_EQ(window->notifySizeChangeFlag_, true);
+
+    window->SetNotifySizeChangeFlag(false);
+    window->property_->SetWindowRect(requestRect);
+    window->SetNotifySizeChangeFlag(true);
+    ASSERT_EQ(window->notifySizeChangeFlag_, false);
+
+    window->SetNotifySizeChangeFlag(false);
+    window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    window->SetNotifySizeChangeFlag(true);
+    ASSERT_EQ(window->notifySizeChangeFlag_, false);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
