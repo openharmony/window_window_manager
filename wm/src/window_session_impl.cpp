@@ -6294,7 +6294,7 @@ WMError WindowSessionImpl::HandleEspecialEscKeyEvent(const std::shared_ptr<MMI::
     bool escToBackFlag = keyEvent->HasFlag(MMI::InputEvent::EVENT_FLAG_KEYBOARD_ESCAPE);
     if (!escToBackFlag) {
         WLOGFE("ESC no flag, do not transfer to back, return");
-        return WMError::WM_ERROR_NULLPTR;
+        return WMError::WM_DO_NOTHING;
     }
     if (!IsPadWindow()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -6303,16 +6303,16 @@ WMError WindowSessionImpl::HandleEspecialEscKeyEvent(const std::shared_ptr<MMI::
     if (IsPcOrPadFreeMultiWindowMode() &&
         property_->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
         GetImmersiveModeEnabledState()) {
-        WLOGD("free multi window mode and in full fill Immersivemode, recover");
+        WLOGFD("free multi window mode and in full fill Immersivemode, recover");
         auto ret = Recover();
         if (ret != WMError::WM_OK) {
-            WLOGE("Full fill Immersivemode can not recover, handlebackevent");
+            WLOGFE("Full fill Immersivemode can not recover, handlebackevent");
             HandleBackEvent();
         }
         return WMError::WM_OK;
     }
 
-    WLOGD("normal mode, handlebackevent");
+    WLOGFD("normal mode, handlebackevent");
     HandleBackEvent();
     return WMError::WM_OK;
 }

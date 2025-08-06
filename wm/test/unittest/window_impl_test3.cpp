@@ -346,14 +346,14 @@ HWTEST_F(WindowImplTest3, HandleBackKeyPressedEvent, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleEscpecialEscKeyEvent001
- * @tc.desc: HandleEscpecialEscKeyEvent test
+ * @tc.name: HandleEspecialEscKeyEvent001
+ * @tc.desc: HandleEspecialEscKeyEvent test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest3, HandleEscpecialEscKeyEvent001, TestSize.Level1)
+HWTEST_F(WindowImplTest3, HandleEspecialEscKeyEvent001, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_COMPONENT);
     sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
     ASSERT_NE(window, nullptr);
 
@@ -361,20 +361,17 @@ HWTEST_F(WindowImplTest3, HandleEscpecialEscKeyEvent001, TestSize.Level1)
     ASSERT_NE(keyEvent, nullptr);
     keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_ESCAPE);
     ASSERT_EQ(WMError::WM_DO_NOTHING, window->HandleEspecialEscKeyEvent(keyEvent));
-
-    keyEvent->AddFlag(MMI::InputEvent::EVENT_FLAG_KEYBOARD_ESCAPE);
-    EXPECT_EQ(true, keyEvent->HasFlag(MMI::InputEvent::EVENT_FLAG_KEYBOARD_ESCAPE));
 }
 
 /**
- * @tc.name: HandleEscpecialEscKeyEvent002
- * @tc.desc: HandleEscpecialEscKeyEvent test
+ * @tc.name: HandleEspecialEscKeyEvent002
+ * @tc.desc: HandleEspecialEscKeyEvent test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest3, HandleEscpecialEscKeyEvent002, TestSize.Level1)
+HWTEST_F(WindowImplTest3, HandleEspecialEscKeyEvent002, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_COMPONENT);
     sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
     ASSERT_NE(window, nullptr);
 
@@ -384,14 +381,14 @@ HWTEST_F(WindowImplTest3, HandleEscpecialEscKeyEvent002, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleEscpecialEscKeyEvent003
- * @tc.desc: HandleEscpecialEscKeyEvent test
+ * @tc.name: HandleEspecialEscKeyEvent003
+ * @tc.desc: HandleEspecialEscKeyEvent test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest3, HandleEscpecialEscKeyEvent003, TestSize.Level1)
+HWTEST_F(WindowImplTest3, HandleEspecialEscKeyEvent003, TestSize.Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_COMPONENT);
     sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
     ASSERT_NE(window, nullptr);
 
@@ -411,14 +408,14 @@ HWTEST_F(WindowImplTest3, HandleEscpecialEscKeyEvent003, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleEscpecialEscKeyEvent004
- * @tc.desc: HandleEscpecialEscKeyEvent test
+ * @tc.name: HandleEspecialEscKeyEvent004
+ * @tc.desc: HandleEspecialEscKeyEvent test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowImplTest3, HandleEscpecialEscKeyEvent004, TestSize.Level1)
+HWTEST_F(WindowImplTest3, HandleEspecialEscKeyEvent004, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_COMPONENT);
     sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
     ASSERT_NE(window, nullptr);
 
@@ -429,7 +426,7 @@ HWTEST_F(WindowImplTest3, HandleEscpecialEscKeyEvent004, TestSize.Level1)
     EXPECT_EQ(true, keyEvent->HasFlag(MMI::InputEvent::EVENT_FLAG_KEYBOARD_ESCAPE));
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
-    ASSERT_NE(xindow->property_, nullptr);
+    ASSERT_NE(window->property_, nullptr);
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     window->enableImmersiveMode_ = true;
     WMError result1 = window->HandleEspecialEscKeyEvent(keyEvent);
