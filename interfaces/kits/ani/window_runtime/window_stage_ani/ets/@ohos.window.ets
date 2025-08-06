@@ -426,6 +426,16 @@ namespace window {
     regionTint: Array<SystemBarRegionTint>;
   }
 
+  export enum RectChangeReason {
+    UNDEFINED = 0,
+    MAXIMIZE = 1,
+    RECOVER = 2,
+    MOVE = 3,
+    DRAG = 4,
+    DRAG_START = 5,
+    DRAG_END = 6,
+  }
+
   export interface Rect {
     /**
      * The left of the Rect.
@@ -529,6 +539,11 @@ namespace window {
     top: int;
     width: int;
     height: int;
+  }
+
+  export interface RectChangeOptions {
+    rect: Rect;
+    reason: RectChangeReason;
   }
 
   export class SizeInternal implements Size {
@@ -3150,14 +3165,14 @@ function runWindowTouchOutCallback(cb: object): void {
     func();
 }
 
-function runWindowRectCallback(cb: object, cbArg: object): void {
-    const func = cb as (cbArg: Rect) => void;
-    func(cbArg as Rect);
-}
-
 function runWindowSizeCallback(cb: object, cbArg: object): void {
     const func = cb as (cbArg: Size) => void;
     func(cbArg as Size);
+}
+
+function runWindowRectChangeCallback(cb: object, rect: object, reason: int): void {
+    const func = cb as (data: RectChangeOptions) => void;
+    func({rect: rect as Rect, reason: reason as RectChangeReason});
 }
 
 function runKeyboardHeightChangeCallback(cb: object, cbArg: number): void {

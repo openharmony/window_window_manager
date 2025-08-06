@@ -486,15 +486,15 @@ void AniWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
         TLOGD(WmsLogTag::WMS_LAYOUT, "drag end change to move event");
         rectChangeReason = RectChangeReason::MOVE;
     }
-    auto task = [self = weakRef_, rect, reason, eng = env_] () {
+    auto task = [self = weakRef_, rect, rectChangeReason, eng = env_] () {
         auto thisListener = self.promote();
         if (thisListener == nullptr || eng == nullptr || thisListener->aniCallback_ == nullptr) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI]this listener, eng or callback is nullptr");
             return;
         }
-        AniWindowUtils::CallAniFunctionVoid(eng, "L@ohos/window/window;", "runWindowRectCallback",
+        AniWindowUtils::CallAniFunctionVoid(eng, "L@ohos/window/window;", "runWindowRectChangeCallback",
             nullptr, thisListener->aniCallback_, AniWindowUtils::CreateAniRect(eng, rect),
-            static_cast<ani_int>(reason));
+            static_cast<ani_int>(rectChangeReason));
     };
     if (!eventHandler_) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "get main event handler failed!");
