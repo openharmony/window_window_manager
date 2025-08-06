@@ -1193,7 +1193,7 @@ napi_value JsScreenSessionManager::OnSetScreenFreezeImmediately(napi_env env, co
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    int32_t screenId = INVALID_SCREEN_ID;
+    int32_t screenId = INVALID_ID;
     if (!ConvertFromJsValue(env, argv[0], screenId) || screenId < 0) {
         TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to screenId");
         napi_throw(env, JsErrUtils::CreateJsError(env, DMError::DM_ERROR_INVALID_PARAM,
