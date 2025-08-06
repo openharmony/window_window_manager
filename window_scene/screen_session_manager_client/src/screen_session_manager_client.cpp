@@ -1309,7 +1309,7 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManagerClient::SetScreenFreezeImme
 {
     auto screenSession = GetScreenSession(screenId);
     if (!screenSession) {
-        TLOGE(WmsLogTag::DMS, "get screen session is null");
+        TLOGE(WmsLogTag::DMS, "get screen session is null, screenId is %{public}" PRIu64, screenId);
         return nullptr;
     }
     return screenSession->SetScreenFreezeImmediately(scaleX, scaleY, isFreeze);

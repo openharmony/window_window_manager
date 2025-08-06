@@ -25,6 +25,7 @@
 #include "js_device_screen_config.h"
 #include "pixel_map_napi.h"
 #include "window_manager_hilog.h"
+#include "js_err_utils.h"
 
 #ifdef POWER_MANAGER_ENABLE
 #include "shutdown/shutdown_client.h"
@@ -40,6 +41,7 @@ constexpr size_t ARGC_FOUR = 4;
 
 namespace {
 const std::string ON_SCREEN_CONNECTION_CHANGE_CALLBACK = "screenConnectChange";
+constexpr int32_t INVALID_ID = -1;
 } // namespace
 
 JsScreenSessionManager::JsScreenSessionManager(napi_env env) : env_(env)
@@ -1187,14 +1189,14 @@ napi_value JsScreenSessionManager::OnSetScreenFreezeImmediately(napi_env env, co
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != ARGC_FOUR) {
         TLOGE(WmsLogTag::DMS, "[NAPI]Argc is invalid: %{public}zu", argc);
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+        napi_throw(env, JsErrUtils::CreateJsError(env, DMError::DM_ERROR_INVALID_PARAM,
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    int32_t screenId;
-    if (!ConvertFromJsValue(env, argv[0], screenId)) {
+    int32_t screenId = INVALID_SCREEN_ID;
+    if (!ConvertFromJsValue(env, argv[0], screenId) || screenId < 0) {
         TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to screenId");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+        napi_throw(env, JsErrUtils::CreateJsError(env, DMError::DM_ERROR_INVALID_PARAM,
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
@@ -1202,7 +1204,7 @@ napi_value JsScreenSessionManager::OnSetScreenFreezeImmediately(napi_env env, co
     for (uint8_t i = 0; i < ARGC_TWO; i++) {
         if (!ConvertFromJsValue(env, argv[i + 1], scaleParam[i])) {
             TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to scale[%d]", i + 1);
-            napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            napi_throw(env, JsErrUtils::CreateJsError(env, DMError::DM_ERROR_INVALID_PARAM,
                 "Input parameter is missing or invalid"));
             return NapiGetUndefined(env);
         }
@@ -1211,13 +1213,14 @@ napi_value JsScreenSessionManager::OnSetScreenFreezeImmediately(napi_env env, co
     bool isFreeze = false;
     if (!ConvertFromJsValue(env, argv[ARGC_THREE], isFreeze)) {
         TLOGE(WmsLogTag::DMS, "Failed to convert parameter to isFreeze");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+        napi_throw(env, JsErrUtils::CreateJsError(env, DMError::DM_ERROR_INVALID_PARAM,
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     napi_value nativeData = nullptr;
-    auto pixelMap = ScreenSessionManagerClient::GetInstance().SetScreenFreezeImmediately(screenId,
-        static_cast<float>(scaleParam[0]), static_cast<float>(scaleParam[1]), isFreeze);
+    auto pixelMap = ScreenSessionManagerClient::GetInstance().SetScreenFreezeImmediately(
+        static_cast<ScreenId>(screenId), static_cast<float>(scaleParam[0]), static_cast<float>(scaleParam[1]),
+        isFreeze);
     if (isFreeze) {
         if (pixelMap == nullptr) {
             TLOGE(WmsLogTag::DMS, "[NAPI]pixelMap is nullptr");
