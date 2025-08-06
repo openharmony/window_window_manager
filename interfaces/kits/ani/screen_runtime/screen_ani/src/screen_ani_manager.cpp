@@ -222,10 +222,19 @@ ani_double ScreenManagerAni::MakeMirror(ani_env* env, ani_double mainScreen, ani
     env->Object_GetPropertyByName_Double(mirrorScreen, "length", &length);
     TLOGI(WmsLogTag::DMS, "[ANI] length %{public}d", (ani_int)length);
     for (uint32_t i = 0; i < length; i++) {
-        ani_double screenId;
-        if (ANI_OK != env->Object_CallMethodByName_Double(mirrorScreen, "$_get", "I:D", &screenId, (ani_double)i)) {
-            TLOGE(WmsLogTag::DMS, "[ANI] get ani_array index %{public}u fail", (ani_int)i);
+        ani_ref screenIdRef;
+        auto ret = env->Object_CallMethodByName_Ref(mirrorScreen, "$_get", "I:Lstd/core/Object;",
+            &screenIdRef, (ani_int)i);
+        if (ANI_OK != ret) {
+            TLOGE(WmsLogTag::DMS, "[ANI] get ani_array index %{public}u fail, ret: %{public}u", (ani_int)i, ret);
             AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to get screenId");
+            return static_cast<ani_double>(INVALID_SCREEN_ID);
+        }
+        ani_double screenId;
+        ret = env->Object_CallMethodByName_Double(static_cast<ani_object>(screenIdRef), "unboxed", ":D", &screenId);
+        if (ANI_OK != ret) {
+            TLOGE(WmsLogTag::DMS, "[ANI] unboxed screenId failed, ret: %{public}u", ret);
+            AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to unboxed screenId");
             return static_cast<ani_double>(INVALID_SCREEN_ID);
         }
         screenIds.emplace_back(static_cast<ScreenId>(screenId));
