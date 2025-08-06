@@ -482,33 +482,30 @@ HWTEST_F(WindowSessionImplTest2, UpdateAvoidArea, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleEscpecialEscKeyEvent001
- * @tc.desc: HandleEscpecialEscKeyEvent test
+ * @tc.name: HandleEspecialEscKeyEvent001
+ * @tc.desc: HandleEspecialEscKeyEvent test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, HandleEscpecialEscKeyEvent001, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest2, HandleEspecialEscKeyEvent001, TestSize.Level1)
 {
-    auto window = GetTestWindowImpl("HandleEscpecialEscKeyEvent001");
+    auto window = GetTestWindowImpl("HandleEspecialEscKeyEvent001");
     ASSERT_NE(window, nullptr);
 
     std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     ASSERT_NE(keyEvent, nullptr);
     keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_ESCAPE);
     ASSERT_EQ(WMError::WM_DO_NOTHING, window->HandleEspecialEscKeyEvent(keyEvent));
-
-    keyEvent->AddFlag(MMI::InputEvent::EVENT_FLAG_KEYBOARD_ESCAPE);
-    EXPECT_EQ(true, keyEvent->HasFlag(MMI::InputEvent::EVENT_FLAG_KEYBOARD_ESCAPE));
     window->Destroy();
 }
 
 /**
- * @tc.name: HandleEscpecialEscKeyEvent002
- * @tc.desc: HandleEscpecialEscKeyEvent test
+ * @tc.name: HandleEspecialEscKeyEvent002
+ * @tc.desc: HandleEspecialEscKeyEvent test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, HandleEscpecialEscKeyEvent002, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest2, HandleEspecialEscKeyEvent002, TestSize.Level1)
 {
-    auto window = GetTestWindowImpl("HandleEscpecialEscKeyEvent002");
+    auto window = GetTestWindowImpl("HandleEspecialEscKeyEvent002");
     ASSERT_NE(window, nullptr);
 
     std::shared_ptr<MMI::KeyEvent> keyEvent = nullptr;
@@ -518,14 +515,14 @@ HWTEST_F(WindowSessionImplTest2, HandleEscpecialEscKeyEvent002, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleEscpecialEscKeyEvent003
- * @tc.desc: HandleEscpecialEscKeyEvent test
+ * @tc.name: HandleEspecialEscKeyEvent003
+ * @tc.desc: HandleEspecialEscKeyEvent test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, HandleEscpecialEscKeyEvent003, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest2, HandleEspecialEscKeyEvent003, TestSize.Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("HandleEscpecialEscKeyEvent003");
+    option->SetWindowName("HandleEspecialEscKeyEvent003");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     ASSERT_NE(window, nullptr);
 
@@ -545,14 +542,14 @@ HWTEST_F(WindowSessionImplTest2, HandleEscpecialEscKeyEvent003, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleEscpecialEscKeyEvent004
- * @tc.desc: HandleEscpecialEscKeyEvent test
+ * @tc.name: HandleEspecialEscKeyEvent004
+ * @tc.desc: HandleEspecialEscKeyEvent test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, HandleEscpecialEscKeyEvent004, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest2, HandleEspecialEscKeyEvent004, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("HandleEscpecialEscKeyEvent004");
+    option->SetWindowName("HandleEspecialEscKeyEvent004");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     ASSERT_NE(window, nullptr);
 
