@@ -2689,7 +2689,7 @@ HWTEST_F(SceneSessionTest5, NotifyRotationChange_IsRestrictNotify_SystemWindow, 
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
 
     SessionInfo info;
-    info.windowType_ = static_cast<uint32_t>(WindowType::BELOW_APP_SYSTEM_WINDOW_BASE);
+    property->SetWindowType(WindowType::WINDOW_TYPE_DESKTOP);
     sptr<SceneSessionMocker> session = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
     session->isRotationChangeCallbackRegistered = true;
     session->sessionStage_ = sessionStageMocker;
@@ -2729,7 +2729,7 @@ HWTEST_F(SceneSessionTest5, NotifyRotationChange_IsRestrictNotify_NotSystemWindo
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
 
     SessionInfo info;
-    info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     sptr<SceneSessionMocker> session = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
     session->isRotationChangeCallbackRegistered = true;
     session->sessionStage_ = sessionStageMocker;
