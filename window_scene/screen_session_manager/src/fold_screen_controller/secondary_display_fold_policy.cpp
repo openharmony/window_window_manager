@@ -258,13 +258,13 @@ void SecondaryDisplayFoldPolicy::CloseCoordinationScreen()
         return;
     }
     TLOGI(WmsLogTag::DMS, "Close Coordination Screen current mode=%{public}d", currentDisplayMode_);
-    
+
     AddOrRemoveDisplayNodeToTree(SCREEN_ID_MAIN, REMOVE_DISPLAY_NODE);
- 
+
     ScreenSessionManager::GetInstance().OnScreenChange(SCREEN_ID_MAIN, ScreenEvent::DISCONNECTED);
     ScreenSessionManager::GetInstance().SetCoordinationFlag(false);
 }
- 
+
 void SecondaryDisplayFoldPolicy::ChangeScreenDisplayModeToCoordination()
 {
     std::lock_guard<std::mutex> lock(coordinationMutex_);
@@ -273,13 +273,13 @@ void SecondaryDisplayFoldPolicy::ChangeScreenDisplayModeToCoordination()
         return;
     }
     TLOGI(WmsLogTag::DMS, "change displaymode to coordination current mode=%{public}d", currentDisplayMode_);
-    
+
     ScreenSessionManager::GetInstance().SetCoordinationFlag(true);
     ScreenSessionManager::GetInstance().OnScreenChange(SCREEN_ID_MAIN, ScreenEvent::CONNECTED);
- 
+
     AddOrRemoveDisplayNodeToTree(SCREEN_ID_MAIN, ADD_DISPLAY_NODE);
 }
- 
+
 void SecondaryDisplayFoldPolicy::AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32_t command)
 {
     TLOGI(WmsLogTag::DMS, "AddOrRemoveDisplayNodeToTree, screenId: %{public}" PRIu64 ", command: %{public}d",
@@ -294,7 +294,7 @@ void SecondaryDisplayFoldPolicy::AddOrRemoveDisplayNodeToTree(ScreenId screenId,
         TLOGE(WmsLogTag::DMS, "AddOrRemoveDisplayNodeToTree, displayNode is null");
         return;
     }
- 
+
     if (command == ADD_DISPLAY_NODE) {
         UpdateDisplayNodeBasedOnScreenId(screenId, displayNode);
         displayNode->AddDisplayNodeToTree();
@@ -305,7 +305,7 @@ void SecondaryDisplayFoldPolicy::AddOrRemoveDisplayNodeToTree(ScreenId screenId,
     TLOGI(WmsLogTag::DMS, "add or remove displayNode");
     RSTransactionAdapter::FlushImplicitTransaction(screenSession->GetRSUIContext());
 }
- 
+
 void SecondaryDisplayFoldPolicy::UpdateDisplayNodeBasedOnScreenId(ScreenId screenId,
     std::shared_ptr<RSDisplayNode> displayNode)
 {
@@ -319,7 +319,7 @@ void SecondaryDisplayFoldPolicy::UpdateDisplayNodeBasedOnScreenId(ScreenId scree
     displayNode->SetFrame(0, 0, screenParams_[MAIN_STATUS_WIDTH], screenParams_[SCREEN_HEIGHT]);
     displayNode->SetBounds(0, 0, screenParams_[MAIN_STATUS_WIDTH], screenParams_[SCREEN_HEIGHT]);
 }
- 
+
 void SecondaryDisplayFoldPolicy::ExitCoordination()
 {
     std::lock_guard<std::mutex> lock(coordinationMutex_);
@@ -577,6 +577,8 @@ void SecondaryDisplayFoldPolicy::SetStatusConditionalActiveRectAndTpFeature(Scre
     auto globalFullStatusScreenBounds = RRect({0, screenParams_[FULL_STATUS_OFFSET_X],
         screenParams_[FULL_STATUS_WIDTH], screenParams_[SCREEN_HEIGHT]}, 0.0f, 0.0f);
     screenProperty.SetBounds(globalFullStatusScreenBounds);
+    screenProperty.SetScreenAreaOffsetY(screenParams_[FULL_STATUS_OFFSET_X]);
+    screenProperty.SetScreenAreaHeight(screenParams_[FULL_STATUS_WIDTH]);
     OHOS::Rect rectCur {
         .x = 0,
         .y = 0,
