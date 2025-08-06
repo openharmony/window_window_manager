@@ -3850,7 +3850,7 @@ napi_value JsWindow::OnGetPreferredOrientation(napi_env env, napi_callback_info 
     }
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_ROTATION, "window is nullptr");
-        return JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, 
+        return JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
             "[window][getPreferredOrientation]msg: window is nullptr");
     }
     Orientation requestedOrientation = windowToken_->GetRequestedOrientation();
