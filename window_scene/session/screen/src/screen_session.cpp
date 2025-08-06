@@ -2185,7 +2185,7 @@ void ScreenSession::SetForceCloseHdr(bool isForceCloseHdr)
         return;
     }
     if (lastCloseHdrStatus_ == isForceCloseHdr) {
-        TLOGD(WmsLogTag::DMS, "lastCloseHdrStatus_ and isForceCloseHdr are the same.");
+        TLOGE(WmsLogTag::DMS, "lastCloseHdrStatus_ and isForceCloseHdr are the same.");
         return;
     }
     lastCloseHdrStatus_ = isForceCloseHdr;
