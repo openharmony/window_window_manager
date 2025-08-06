@@ -1412,6 +1412,36 @@ HWTEST_F(SceneSessionTest, ProcessWindowMoving, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PrintAvoidAreaInfo
+ * @tc.desc: PrintAvoidAreaInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, PrintAvoidAreaInfo, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "PrintAvoidAreaInfo";
+    info.bundleName_ = "PrintAvoidAreaInfo";
+    sptr<SceneSession>sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->property_->displayId_ = 0;
+    WSRect winRect;
+    WSRect avoidRect;
+    auto type = AvoidAreaType::TYPE_SYSTEM;
+    sceneSession->PrintAvoidAreaInfo(sceneSession->property_->displayId_, type, winRect, avoidRect);
+    std::tuple<DisplayId, WSRect, WSRect> inputParamters(sceneSession->property_->displayId_, winRect, avoidRect);
+    EXPECT_EQ(inputParamters, sceneSession->lastAvoidAreaInputParamtersMap_[type]);
+    sceneSession->property_->displayId_ = 1;
+    sceneSession->PrintAvoidAreaInfo(sceneSession->property_->displayId_, type, winRect, avoidRect);
+    std::tuple<DisplayId, WSRect, WSRect> inputParamters1(sceneSession->property_->displayId_, winRect, avoidRect);
+    EXPECT_EQ(inputParamters1, sceneSession->lastAvoidAreaInputParamtersMap_[type]);
+    sceneSession->PrintAvoidAreaInfo(sceneSession->property_->displayId_, type, winRect, avoidRect);
+    EXPECT_EQ(inputParamters1, sceneSession->lastAvoidAreaInputParamtersMap_[type]);
+    AvoidArea avoidArea;
+    sceneSession->CalculateAvoidAreaByType(type, winRect, avoidRect, avoidArea);
+    EXPECT_EQ(inputParamters1, sceneSession->lastAvoidAreaInputParamtersMap_[type]);
+}
+
+/**
  * @tc.name: CalculateAvoidAreaRect
  * @tc.desc: CalculateAvoidAreaRect
  * @tc.type: FUNC
