@@ -276,6 +276,7 @@ public:
         const std::shared_ptr<RSTransaction>& rsTransaction, const sptr<class Display>& display);
     void UpdateMode(WindowMode mode);
     void UpdateWindowModeSupportType(uint32_t windowModeSupportType);
+    WMError HandleEspecialEscKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
     virtual void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& inputEvent) override;
     virtual void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& inputEvent) override;
     virtual void RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback) override;
@@ -583,6 +584,7 @@ private:
     std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
     bool needNotifyFocusLater_ = false;
     bool escKeyEventTriggered_ = false;
+    bool escKeyHasDown_ { false };
     bool enableImmersiveMode_ = false;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
     std::atomic<float> virtualPixelRatio_ = 1.0f;

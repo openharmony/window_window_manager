@@ -6284,6 +6284,39 @@ bool WindowSessionImpl::FilterPointerEvent(const std::shared_ptr<MMI::PointerEve
     return isFiltered;
 }
 
+WMError WindowSessionImpl::HandleEspecialEscKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
+{
+    if (keyEvent == nullptr) {
+        WLOGFE("keyevent is nullptr, return");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    bool escToBackFlag = keyEvent->HasFlag(MMI::InputEvent::EVENT_FLAG_KEYBOARD_ESCAPE);
+    if (!escToBackFlag) {
+        WLOGFE("ESC no flag, do not transfer to back, return");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    if (!IsPadWindow()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
+    if (IsPcOrPadFreeMultiWindowMode() &&
+        property_->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
+        GetImmersiveModeEnabledState()) {
+        WLOGD("free multi window mode and in full fill Immersivemode, recover");
+        auto ret = Recover();
+        if (ret != WMError::WM_OK) {
+            WLOGE("Full fill Immersivemode can not recover, handlebackevent");
+            HandleBackEvent();
+        }
+        return WMError::WM_OK;
+    }
+
+    WLOGD("normal mode, handlebackevent");
+    HandleBackEvent();
+    return WMError::WM_OK;
+}
+
 void WindowSessionImpl::DispatchKeyEventCallback(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed)
 {
     std::shared_ptr<IInputEventConsumer> inputEventConsumer;
@@ -6319,22 +6352,18 @@ void WindowSessionImpl::DispatchKeyEventCallback(const std::shared_ptr<MMI::KeyE
 
     if (auto uiContent = GetUIContentSharedPtr()) {
         if (FilterKeyEvent(keyEvent)) return;
-        TLOGI(WmsLogTag::WMS_EVENT, "Start to process keyEvent, id: %{public}d", keyEvent->GetId());
         isConsumed = uiContent->ProcessKeyEvent(keyEvent);
-        if (!isConsumed && keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ESCAPE &&
-            IsPcOrPadFreeMultiWindowMode() &&
-            property_->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
-            GetImmersiveModeEnabledState() &&
-            keyAction == MMI::KeyEvent::KEY_ACTION_DOWN && !escKeyEventTriggered_) {
-            WLOGI("recover from fullscreen cause KEYCODE_ESCAPE");
-            Recover();
-        }
+        TLOGI(WmsLogTag::WMS_EVENT, "Start to process keyEvent, id: %{public}d, consumed: %{public}d,"
+            "escKeyEventTriggered: %{public}d, escKeyHasDown: %{public}d",
+            keyEvent->GetId(), isConsumed, escKeyEventTriggered_, escKeyHasDown_);
         NotifyConsumeResultToFloatWindow(keyEvent, isConsumed);
-        if (!isConsumed) {
+        if (!isConsumed && !escKeyEventTriggered_ && escKeyHasDown_) {
+            HandleEspecialEscKeyEvent(keyEvent);
             keyEvent->MarkProcessed();
         }
         if (keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ESCAPE) {
-            escKeyEventTriggered_ = (keyAction == MMI::KeyEvent::KEY_ACTION_UP) ? false : true;
+            escKeyHasDown_ = (keyAction == MMI::KeyEvent::KEY_ACTION_DOWN) ? true : false;
+            escKeyEventTriggered_ = (isConsumed) ? true : false;
         }
     }
 }
