@@ -900,7 +900,10 @@ protected:
     NotifySystemBarPropertyChangeFunc onSystemBarPropertyChange_;
     GetStatusBarAvoidHeightFunc onGetStatusBarAvoidHeightFunc_;
     GetStatusBarConstantlyShowFunc onGetStatusBarConstantlyShowFunc_;
-    void IsNeedPrintCalcuteInfo(AvoidAreaType type, const WSRect& rect, const WSRect& avoidRect);
+    void PrintAvoidAreaInfo(DisplayId displayId,
+        AvoidAreaType type, const WSRect& winRect, const WSRect& avoidRect) const;
+    void CalculateAvoidAreaByType(AvoidAreaType type,
+        const WSRect& winRect, const WSRect& avoidRect, AvoidArea& avoidArea);
 
 
     /*

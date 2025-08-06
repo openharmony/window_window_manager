@@ -54,8 +54,7 @@ void RootSceneSession::GetSystemAvoidAreaForRoot(const WSRect& rect, AvoidArea& 
         if (onGetStatusBarAvoidHeightFunc_) {
             onGetStatusBarAvoidHeightFunc_(displayId, statusBarRect);
         }
-        IsNeedPrintCalcuteInfo(AvoidAreaType::TYPE_SYSTEM, rect, statusBarRect);
-        CalculateAvoidAreaRect(rect, statusBarRect, avoidArea);
+        CalculateAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM, rect, statusBarRect, avoidArea);
     }
 }
 
@@ -81,12 +80,10 @@ void RootSceneSession::GetKeyboardAvoidAreaForRoot(const WSRect& rect, AvoidArea
                 keyboardRect = inputMethod->GetKeyboardPanelSession()->GetSessionRect();
                 inputMethod->RecalculatePanelRectForAvoidArea(keyboardRect);
             }
-            IsNeedPrintCalcuteInfo(AvoidAreaType::TYPE_KEYBOARD, rect, keyboardRect);
-            CalculateAvoidAreaRect(rect, keyboardRect, avoidArea);
+            CalculateAvoidAreaByType(AvoidAreaType::TYPE_KEYBOARD, rect, keyboardRect, avoidArea);
         } else {
             WSRect inputMethodRect = inputMethod->GetSessionRect();
-            IsNeedPrintCalcuteInfo(AvoidAreaType::TYPE_KEYBOARD, rect, inputMethodRect);
-            CalculateAvoidAreaRect(rect, inputMethodRect, avoidArea);
+            CalculateAvoidAreaByType(AvoidAreaType::TYPE_KEYBOARD, rect, inputMethodRect, avoidArea);
         }
     }
 }
@@ -113,8 +110,7 @@ void RootSceneSession::GetCutoutAvoidAreaForRoot(const WSRect& rect, AvoidArea& 
             cutoutArea.posX_, cutoutArea.posY_,
             cutoutArea.width_, cutoutArea.height_
         };
-        IsNeedPrintCalcuteInfo(AvoidAreaType::TYPE_CUTOUT, rect, cutoutAreaRect);
-        CalculateAvoidAreaRect(rect, cutoutAreaRect, avoidArea);
+        CalculateAvoidAreaByType(AvoidAreaType::TYPE_CUTOUT, rect, cutoutAreaRect, avoidArea);
     }
 }
 
@@ -124,8 +120,7 @@ void RootSceneSession::GetAINavigationBarAreaForRoot(const WSRect& rect, AvoidAr
     if (specificCallback_ != nullptr && specificCallback_->onGetAINavigationBarArea_) {
         barArea = specificCallback_->onGetAINavigationBarArea_(GetSessionProperty()->GetDisplayId());
     }
-    IsNeedPrintCalcuteInfo(AvoidAreaType::TYPE_NAVIGATION_INDICATOR, rect, barArea);
-    CalculateAvoidAreaRect(rect, barArea, avoidArea);
+    CalculateAvoidAreaByType(AvoidAreaType::TYPE_NAVIGATION_INDICATOR, rect, barArea, avoidArea);
 }
 
 AvoidArea RootSceneSession::GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect, int32_t apiVersion)
