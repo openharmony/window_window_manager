@@ -82,7 +82,7 @@ config("libmockwms_config") {
 
 idl_gen_interface("mock_session_manager_service_interface") {
   sources = [ "IMockSessionManagerInterface.idl" ]
-  log_domainid = "0xD004201"
+  log_domainid = "0xD004200"
   log_tag = "IMockSessionManager"
   part_name = "window_manager"
   subsystem_name = "window"
