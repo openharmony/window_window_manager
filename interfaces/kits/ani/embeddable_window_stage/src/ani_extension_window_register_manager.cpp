@@ -13,10 +13,9 @@
  * limitations under the License.
  */
 
-#include "ani_extension_window_register_manager.h"
-
 #include "ani.h"
 #include "ani_extension_window_listener.h"
+#include "ani_extension_window_register_manager.h"
 #include "singleton_container.h"
 #include "window_manager.h"
 #include "window_manager_hilog.h"
