@@ -1016,7 +1016,7 @@ bool ConvertPointerEventFromJs(napi_env env, napi_value jsObject, MMI::PointerEv
     }
     int32_t touchType;
     if (!ConvertFromJsValue(env, jsTouchType, touchType)) {
-        WLOGFE("Failed to convert parameter to touchType");
+        TLOGE(WmsLogTag::WMS_EVENT, "Failed to convert parameter to touchType");
         return false;
     }
     pointerEvent.SetPointerAction(GetMMITouchType(touchType));
