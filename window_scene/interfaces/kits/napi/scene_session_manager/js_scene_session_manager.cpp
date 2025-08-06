@@ -4799,7 +4799,10 @@ napi_value JsSceneSessionManager::OnNotifyRotationChange(napi_env env, napi_call
         return NapiGetUndefined(env);
     }
     bool isRestrictNotify = false;
-    ConvertFromJsValue(env, argv[1], isRestrictNotify);
+    if (!ConvertFromJsValue(env, argv[1], isRestrictNotify)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to isRestrictNotify");
+        return NapiGetUndefined(env);
+    }
     TLOGI(WmsLogTag::WMS_ROTATION, "info type: %{public}d, rect: [%{public}d, %{public}d, %{public}d, %{public}d], "
         "isRestrictNotify: %{public}d",
         static_cast<uint32_t>(rotationChangeInfo.type_), rotationChangeInfo.displayRect_.posX_,

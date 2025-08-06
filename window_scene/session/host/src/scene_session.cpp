@@ -8840,9 +8840,9 @@ RotationChangeResult SceneSession::NotifyRotationChange(const RotationChangeInfo
     bool isRestrictNotify)
 {
     WindowType type = Session::GetWindowType();
-    bool isSystemCalling = SessionPermission::IsSystemCalling();
+    bool isSystemCalling = GetSessionProperty()->GetSystemCalling();
     return PostSyncTask(
-        [weakThis = wptr(this), &rotationChangeInfo, isRestrictNotify, type, isSystemCalling,
+        [weakThis = wptr(this), rotationChangeInfo, isRestrictNotify, type, isSystemCalling,
             where = __func__]() -> RotationChangeResult {
             auto session = weakThis.promote();
             if (!session) {
