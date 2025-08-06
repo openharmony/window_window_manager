@@ -14,8 +14,8 @@
  */
 
 #include "display_ani_listener.h"
-#include "window_manager_hilog.h"
 #include "display_ani_utils.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {

@@ -17,12 +17,12 @@
 #include <hitrace_meter.h>
 
 #include "ani.h"
-#include "display_ani.h"
-#include "singleton_container.h"
-#include "display_manager.h"
-#include "window_manager_hilog.h"
 #include "dm_common.h"
+#include "display_ani.h"
+#include "display_manager.h"
 #include "refbase.h"
+#include "singleton_container.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
