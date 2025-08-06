@@ -75,7 +75,11 @@ void RssEventListener::OnReceiveEvent(uint32_t eventType, uint32_t eventValue,
     callBackContext->extraInfo = std::move(extraInfo);
     callBackContext->eventCb = eventCb_;
     napi_acquire_threadsafe_function(threadSafeFunction_);
-    napi_call_threadsafe_function(threadSafeFunction_, callBackContext, napi_tsfn_blocking);
+    napi_status status = napi_call_threadsafe_function(threadSafeFunction_, callBackContext, napi_tsfn_blocking);
+    if (status != napi_ok) {
+        delete callBackContext;
+        callBackContext = nullptr;
+    }
 }
 
 RssSession& RssSession::GetInstance()
