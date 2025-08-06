@@ -346,6 +346,112 @@ HWTEST_F(WindowImplTest3, HandleBackKeyPressedEvent, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleEscpecialEscKeyEvent001
+ * @tc.desc: HandleEscpecialEscKeyEvent test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest3, HandleEscpecialEscKeyEvent001, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+
+    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
+    ASSERT_NE(keyEvent, nullptr);
+    keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_ESCAPE);
+    ASSERT_EQ(WMError::WM_DO_NOTHING, window->HandleEspecialEscKeyEvent(keyEvent));
+
+    keyEvent->AddFlag(MMI::InputEvent::EVENT_FLAG_KEYBOARD_ESCAPE);
+    EXPECT_EQ(true, keyEvent->HasFlag(MMI::InputEvent::EVENT_FLAG_KEYBOARD_ESCAPE));
+}
+
+/**
+ * @tc.name: HandleEscpecialEscKeyEvent002
+ * @tc.desc: HandleEscpecialEscKeyEvent test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest3, HandleEscpecialEscKeyEvent002, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+
+    std::shared_ptr<MMI::KeyEvent> keyEvent = nullptr;
+    WMError result = window->HandleEspecialEscKeyEvent(keyEvent);
+    EXPECT_EQ(result, WMError::WM_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: HandleEscpecialEscKeyEvent003
+ * @tc.desc: HandleEscpecialEscKeyEvent test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest3, HandleEscpecialEscKeyEvent003, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+
+    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
+    ASSERT_NE(keyEvent, nullptr);
+    keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_ESCAPE);
+    keyEvent->AddFlag(MMI::InputEvent::EVENT_FLAG_KEYBOARD_ESCAPE);
+    EXPECT_EQ(true, keyEvent->HasFlag(MMI::InputEvent::EVENT_FLAG_KEYBOARD_ESCAPE));
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    WMError result1 = window->HandleEspecialEscKeyEvent(keyEvent);
+    EXPECT_EQ(result1, WMError::WM_ERROR_INVALID_WINDOW);
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    WMError result2 = window->HandleEspecialEscKeyEvent(keyEvent);
+    EXPECT_EQ(result2, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: HandleEscpecialEscKeyEvent004
+ * @tc.desc: HandleEscpecialEscKeyEvent test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest3, HandleEscpecialEscKeyEvent004, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+
+    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
+    ASSERT_NE(keyEvent, nullptr);
+    keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_ESCAPE);
+    keyEvent->AddFlag(MMI::InputEvent::EVENT_FLAG_KEYBOARD_ESCAPE);
+    EXPECT_EQ(true, keyEvent->HasFlag(MMI::InputEvent::EVENT_FLAG_KEYBOARD_ESCAPE));
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    ASSERT_NE(xindow->property_, nullptr);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    window->enableImmersiveMode_ = true;
+    WMError result1 = window->HandleEspecialEscKeyEvent(keyEvent);
+    EXPECT_EQ(result1, WMError::WM_OK);
+
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    window->enableImmersiveMode_ = false;
+    WMError result2 = window->HandleEspecialEscKeyEvent(keyEvent);
+    EXPECT_EQ(result2, WMError::WM_OK);
+
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    window->enableImmersiveMode_ = true;
+    WMError result3 = window->HandleEspecialEscKeyEvent(keyEvent);
+    EXPECT_EQ(result3, WMError::WM_OK);
+
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    window->enableImmersiveMode_ = false;
+    WMError result4 = window->HandleEspecialEscKeyEvent(keyEvent);
+    EXPECT_EQ(result4, WMError::WM_OK);
+}
+
+/**
  * @tc.name: ConsumeKeyEvent
  * @tc.desc: ConsumeKeyEvent test
  * @tc.type: FUNC
@@ -373,6 +479,137 @@ HWTEST_F(WindowImplTest3, ConsumeKeyEvent, TestSize.Level1)
     window->inputEventConsumer_ = nullptr;
     EXPECT_CALL(*content, ProcessBackPressed());
     window->ConsumeKeyEvent(keyEvent);
+}
+
+/**
+ * @tc.name: ConsumeKeyEvent001
+ * @tc.desc: ConsumeKeyEvent test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest3, ConsumeKeyEvent001, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_COMPONENT);
+    sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+
+    window->uiContent_ = nullptr;
+    std::shared_ptr<MockInputEventConsumer> inputEventConsumer = std::make_shared<MockInputEventConsumer>();
+    window->inputEventConsumer_ = inputEventConsumer;
+    ASSERT_NE(window->inputEventConsumer_, nullptr);
+
+    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
+    ASSERT_NE(keyEvent, nullptr);
+    keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_ESCAPE);
+    keyEvent->SetKeyAction(MMI::KeyEvent::KEY_ACTION_DOWN);
+    window->ConsumeKeyEvent(keyEvent);
+
+    keyEvent->SetKeyAction(MMI::KeyEvent::KEY_ACTION_UP);
+    window->ConsumeKeyEvent(keyEvent);
+
+    window->inputEventConsumer_ = nullptr;
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    ASSERT_NE(window->uiContent_, nullptr);
+
+    keyEvent->SetKeyAction(MMI::KeyEvent::KEY_ACTION_DOWN);
+    window->ConsumeKeyEvent(keyEvent);
+    EXPECT_EQ(window->escKeyHasDown_, true);
+    EXPECT_EQ(window->escKeyEventTriggered_, false);
+
+    keyEvent->SetKeyAction(MMI::KeyEvent::KEY_ACTION_UP);
+    window->ConsumeKeyEvent(keyEvent);
+    EXPECT_EQ(window->escKeyHasDown_, false);
+    EXPECT_EQ(window->escKeyEventTriggered_, false);
+}
+
+/**
+ * @tc.name: ConsumeKeyEvent002
+ * @tc.desc: ConsumeKeyEvent test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest3, ConsumeKeyEvent002, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_COMPONENT);
+    sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+
+    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
+    ASSERT_NE(keyEvent, nullptr);
+    window->inputEventConsumer_ = nullptr;
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    ASSERT_NE(window->uiContent_, nullptr);
+
+    keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_ESCAPE);
+    keyEvent->SetKeyAction(MMI::KeyEvent::KEY_ACTION_UP);
+    window->escKeyEventTriggered_ = false;
+    window->escKeyHasDown_ = true;
+    window->ConsumeKeyEvent(keyEvent);
+    EXPECT_EQ(window->escKeyHasDown_, false);
+    EXPECT_EQ(window->escKeyEventTriggered_, false);
+
+    window->escKeyEventTriggered_ = false;
+    window->escKeyHasDown_ = false;
+    window->ConsumeKeyEvent(keyEvent);
+    EXPECT_EQ(window->escKeyHasDown_, false);
+    EXPECT_EQ(window->escKeyEventTriggered_, false);
+
+    window->escKeyEventTriggered_ = true;
+    window->escKeyHasDown_ = false;
+    window->ConsumeKeyEvent(keyEvent);
+    EXPECT_EQ(window->escKeyHasDown_, false);
+    EXPECT_EQ(window->escKeyEventTriggered_, false);
+
+    window->escKeyEventTriggered_ = true;
+    window->escKeyHasDown_ = true;
+    window->ConsumeKeyEvent(keyEvent);
+    EXPECT_EQ(window->escKeyHasDown_, false);
+    EXPECT_EQ(window->escKeyEventTriggered_, false);
+}
+
+/**
+ * @tc.name: ConsumeKeyEvent003
+ * @tc.desc: ConsumeKeyEvent test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest3, ConsumeKeyEvent003, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_COMPONENT);
+    sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+
+    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
+    ASSERT_NE(keyEvent, nullptr);
+    window->inputEventConsumer_ = nullptr;
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    ASSERT_NE(window->uiContent_, nullptr);
+
+    keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_ESCAPE);
+    keyEvent->SetKeyAction(MMI::KeyEvent::KEY_ACTION_DOWN);
+    window->escKeyEventTriggered_ = false;
+    window->escKeyHasDown_ = false;
+    window->ConsumeKeyEvent(keyEvent);
+    EXPECT_EQ(window->escKeyHasDown_, true);
+    EXPECT_EQ(window->escKeyEventTriggered_, false);
+
+    window->escKeyEventTriggered_ = false;
+    window->escKeyHasDown_ = true;
+    window->ConsumeKeyEvent(keyEvent);
+    EXPECT_EQ(window->escKeyHasDown_, true);
+    EXPECT_EQ(window->escKeyEventTriggered_, false);
+
+    window->escKeyEventTriggered_ = true;
+    window->escKeyHasDown_ = false;
+    window->ConsumeKeyEvent(keyEvent);
+    EXPECT_EQ(window->escKeyHasDown_, true);
+    EXPECT_EQ(window->escKeyEventTriggered_, false);
+
+    window->escKeyEventTriggered_ = true;
+    window->escKeyHasDown_ = true;
+    window->ConsumeKeyEvent(keyEvent);
+    EXPECT_EQ(window->escKeyHasDown_, true);
+    EXPECT_EQ(window->escKeyEventTriggered_, false);
 }
 
 /**
