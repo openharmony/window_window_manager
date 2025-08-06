@@ -2344,7 +2344,7 @@ void SceneSession::CalculateAvoidAreaByType(AvoidAreaType type,
     auto displayId = GetSessionProperty()->GetDisplayId();
     PrintAvoidAreaInfo(displayId, type, winRect, avoidRect);
     CalculateAvoidAreaRect(winRect, avoidRect, avoidArea);
-    lastAvoidAreaInputParamtersMap_[type] = std::make_tuple(displayId, rect, avoidRect);
+    lastAvoidAreaInputParamtersMap_[type] = std::make_tuple(displayId, winRect, avoidRect);
 }
 
 void SceneSession::CalculateAvoidAreaRect(const WSRect& rect, const WSRect& avoidRect, AvoidArea& avoidArea) const
@@ -2537,7 +2537,7 @@ void SceneSession::GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea)
     return;
 }
 
-void SceneSession::GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea)
+void SceneSession::GetAINavigationBarArea(WSRect& rect, AvoidArea& avoidArea)
 {
     if (Session::GetWindowMode() == WindowMode::WINDOW_MODE_PIP) {
         TLOGD(WmsLogTag::WMS_IMMS, "window mode pip return");
