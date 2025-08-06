@@ -623,6 +623,7 @@ protected:
     void NotifyTransformChange(const Transform& transForm) override;
     void NotifySingleHandTransformChange(const SingleHandTransform& singleHandTransform) override;
     bool IsKeyboardEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
+    WMError HandleEspecialEscKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
     void DispatchKeyEventCallback(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed);
     bool IsVerticalOrientation(Orientation orientation) const;
     bool IsHorizontalOrientation(Orientation orientation) const;
@@ -702,6 +703,7 @@ protected:
     bool useUniqueDensity_ { false };
     float virtualPixelRatio_ { 1.0f };
     bool escKeyEventTriggered_ = false;
+    bool escKeyHasDown_ { false };
     // Check whether the UIExtensionAbility process is started
     static bool isUIExtensionAbilityProcess_;
     WSError SwitchFreeMultiWindow(bool enable) override;
