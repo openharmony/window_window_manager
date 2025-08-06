@@ -25,7 +25,7 @@ export type WindowEventCallback = (data: window.WindowEventType) => void;
 export type WindowRectCallback = (data: window.Rect) => void;
 export type WindowSizeCallback = (data: window.Size) => void;
 export type WindowStatusCallback = (data: window.WindowStatusType) => void;
-export type KeyboardHeightChangeCallback = (data: number) => void;
+export type KeyboardHeightChangeCallback = (data: int) => void;
 export type KeyboardDidShowOrHideCallback = (data: window.KeyboardInfo) => void;
 export type WindowVoidCallback = () => void;
 const DOMAIN = 0x4200;
@@ -3181,9 +3181,9 @@ function runWindowSizeCallback(cb: object, cbArg: object): void {
     func(cbArg as Size);
 }
 
-function runKeyboardHeightChangeCallback(cb: object, cbArg: number): void {
-    const func = cb as (cbArg: number) => void;
-    func(cbArg as number);
+function runKeyboardHeightChangeCallback(cb: object, cbArg: int): void {
+    const func = cb as (cbArg: int) => void;
+    func(cbArg as int);
 }
 
 function runKeyboardDidShowCallback(cb: object, cbArg: object): void {
