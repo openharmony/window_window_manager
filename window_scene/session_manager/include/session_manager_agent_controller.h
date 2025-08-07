@@ -68,6 +68,7 @@ private:
     std::map<int32_t, std::map<WindowManagerAgentType, sptr<IWindowManagerAgent>>> windowManagerPidAgentMap_;
     std::map<sptr<IRemoteObject>, std::pair<int32_t, WindowManagerAgentType>> windowManagerAgentPairMap_;
     std::mutex windowManagerAgentPidMapMutex_;
+    WindowStyleStatus windowStyleStatus_;
 };
 }
 }
