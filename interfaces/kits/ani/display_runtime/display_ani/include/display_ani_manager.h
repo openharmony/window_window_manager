@@ -34,7 +34,7 @@ public:
     static void GetCurrentFoldCreaseRegion(ani_env* env, ani_object obj, ani_long nativeObj);
 
     static void GetAllDisplaysAni(ani_env* env, ani_object arrayObj);
-    static void GetDisplayByIdSyncAni(ani_env* env, ani_object obj, ani_double displayId);
+    static void GetDisplayByIdSyncAni(ani_env* env, ani_object obj, ani_long displayId);
     static void GetDefaultDisplaySyncAni(ani_env* env, ani_object obj);
 
     static void RegisterCallback(ani_env* env, ani_string type,
@@ -45,7 +45,7 @@ public:
     DMError UnregisterAllDisplayListenerWithType(std::string type);
     DmErrorCode ProcessRegisterCallback(ani_env* env, std::string& typeStr,
         sptr<DisplayAniListener> displayAniListener);
-    static ani_boolean HasPrivateWindow(ani_env* env, ani_double displayId);
+    static ani_boolean HasPrivateWindow(ani_env* env, ani_long displayId);
     static void GetAllDisplayPhysicalResolution(ani_env* env, ani_object arrayObj, ani_long nativeObj);
 private:
     void OnRegisterCallback(ani_env* env, ani_string type, ani_ref callback);

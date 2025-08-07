@@ -63,10 +63,10 @@ ani_status ScreenAniUtils::ConvertScreen(ani_env *env, sptr<Screen> screen, ani_
 {
     sptr<ScreenInfo> info = screen->GetScreenInfo();
     TLOGI(WmsLogTag::DMS, "[ANI] convert screen id %{public}u", static_cast<uint32_t>(info->GetScreenId()));
-    env->Object_SetFieldByName_Double(obj, "<property>id", static_cast<ani_double>(info->GetScreenId()));
-    env->Object_SetFieldByName_Double(obj, "<property>parent", static_cast<ani_double>(info->GetParentId()));
-    env->Object_SetFieldByName_Double(obj, "<property>activeModeIndex",
-        static_cast<ani_double>(info->GetModeId()));
+    env->Object_SetFieldByName_Long(obj, "<property>id", static_cast<ani_long>(info->GetScreenId()));
+    env->Object_SetFieldByName_Long(obj, "<property>parent", static_cast<ani_long>(info->GetParentId()));
+    env->Object_SetFieldByName_Long(obj, "<property>activeModeIndex",
+        static_cast<ani_long>(info->GetModeId()));
     env->Object_SetFieldByName_Int(obj, "orientation_", static_cast<ani_int>(info->GetOrientation()));
     env->Object_SetFieldByName_Int(obj, "sourceMode_", static_cast<ani_int>(info->GetSourceMode()));
     std::unique_ptr<ScreenAni> screenAni = std::make_unique<ScreenAni>(screen);
@@ -131,10 +131,10 @@ ani_object ScreenAniUtils::NewNativeObject(ani_env* env, const std::string& objN
 
 void ScreenAniUtils::ConvertScreenMode(ani_env* env, sptr<SupportedScreenModes> mode, ani_object obj)
 {
-    env->Object_SetFieldByName_Double(obj, "<property>id", static_cast<ani_double>(mode->id_));
-    env->Object_SetFieldByName_Double(obj, "<property>width", static_cast<ani_double>(mode->width_));
-    env->Object_SetFieldByName_Double(obj, "<property>height", static_cast<ani_double>(mode->height_));
-    env->Object_SetFieldByName_Double(obj, "<property>refreshRate", static_cast<ani_double>(mode->refreshRate_));
+    env->Object_SetFieldByName_Long(obj, "<property>id", static_cast<ani_long>(mode->id_));
+    env->Object_SetFieldByName_Long(obj, "<property>width", static_cast<ani_long>(mode->width_));
+    env->Object_SetFieldByName_Long(obj, "<property>height", static_cast<ani_long>(mode->height_));
+    env->Object_SetFieldByName_Int(obj, "<property>refreshRate", static_cast<ani_int>(mode->refreshRate_));
 }
 
 ani_status ScreenAniUtils::ConvertScreens(ani_env *env, std::vector<sptr<Screen>> screens, ani_object& screensAni)
