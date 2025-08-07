@@ -6309,7 +6309,7 @@ void WindowSceneSessionImpl::HandleDownForCompatibleMode(const std::shared_ptr<M
         if (transferX < 0) {
             transferX = 0;
         }
-        TLOGI(WmsLogTag::DEFAULT, "DOWN in mapping region, displayX: %{public}d, transferX: %{public}d, "
+        TLOGD(WmsLogTag::DEFAULT, "DOWN in mapping region, displayX: %{private}d, transferX: %{public}d, "
             "pointerId: %{public}d", displayX, transferX, pointerId);
         eventMapDeltaXByDisplay_[displayId][pointerId] = transferX - displayX;
         ConvertPointForCompatibleMode(pointerEvent, pointerItem, transferX);
@@ -6339,7 +6339,7 @@ void WindowSceneSessionImpl::HandleMoveForCompatibleMode(const std::shared_ptr<M
         isOverTouchSlop_ = true;
     }
     int32_t transferX = displayX + GetValueByKey(eventMapDeltaXByDisplay_, displayId)[pointerId];
-    TLOGD(WmsLogTag::WMS_COMPAT, "MOVE, displayX: %{public}d, transferX: %{public}d, pointerId: %{public}d",
+    TLOGD(WmsLogTag::WMS_COMPAT, "MOVE, displayX: %{private}d, transferX: %{public}d, pointerId: %{public}d",
         displayX, transferX, pointerId);
     ConvertPointForCompatibleMode(pointerEvent, pointerItem, transferX);
 }
@@ -6361,7 +6361,7 @@ void WindowSceneSessionImpl::HandleUpForCompatibleMode(const std::shared_ptr<MMI
         int32_t displayX = pointerItem.GetDisplayX();
         int32_t transferX = displayX + GetValueByKey(eventMapDeltaXByDisplay_, displayId)[pointerId];
         ConvertPointForCompatibleMode(pointerEvent, pointerItem, transferX);
-        TLOGI(WmsLogTag::WMS_COMPAT, "UP, displayX: %{public}d, transferX: %{public}d, pointerId: %{public}d",
+        TLOGD(WmsLogTag::WMS_COMPAT, "UP, displayX: %{private}d, transferX: %{public}d, pointerId: %{public}d",
             displayX, transferX, pointerId);
         GetValueByKey(eventMapDeltaXByDisplay_, displayId)[pointerId] = 0;
         GetValueByKey(eventMapTriggerByDisplay_, displayId)[pointerId] = false;
