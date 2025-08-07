@@ -474,6 +474,7 @@ public:
     WMError UpdateWindowModeForUITest(int32_t updateMode) override { return WMError::WM_OK; }
     void UpdateEnableDragWhenSwitchMultiWindow(bool enable);
     WSError NotifyAppHookWindowInfoUpdated() override { return WSError::WS_DO_NOTHING; }
+    void SetNotifySizeChangeFlag(bool flag);
 
     /*
      * Free Multi Window
@@ -1090,6 +1091,7 @@ private:
     SizeChangeReason globalDisplayRectSizeChangeReason_ = SizeChangeReason::END;
     std::shared_mutex hookWindowInfoMutex_;
     HookWindowInfo hookWindowInfo_;
+    std::atomic_bool notifySizeChangeFlag_ = false;
 
     /*
      * Window Decor

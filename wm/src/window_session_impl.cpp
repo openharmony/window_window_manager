@@ -1250,8 +1250,10 @@ void WindowSessionImpl::UpdateRectForOtherReasonTask(const Rect& wmRect, const R
     WindowSizeChangeReason wmReason, const std::shared_ptr<RSTransaction>& rsTransaction,
     const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
-    if ((wmRect != preRect) || (wmReason != lastSizeChangeReason_) || !postTaskDone_) {
+    if ((wmRect != preRect) || (wmReason != lastSizeChangeReason_)
+        || !postTaskDone_ || notifySizeChangeFlag_) {
         NotifySizeChange(wmRect, wmReason);
+        SetNotifySizeChangeFlag(false);
         lastSizeChangeReason_ = wmReason;
         postTaskDone_ = true;
     }
@@ -8058,5 +8060,22 @@ void WindowSessionImpl::UpdateEnableDragWhenSwitchMultiWindow(bool enable)
     }
     UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED);
 }
+
+void WindowSessionImpl::SetNotifySizeChangeFlag(bool flag)
+{
+    if (flag) {
+        if (GetType() != WindowType::WINDOW_TYPE_FLOAT_NAVIGATION) {
+            return;
+        }
+        if (GetRect() == GetRequestRect()) {
+            return;
+        }
+        notifySizeChangeFlag_ = true;
+        TLOGD(WmsLogTag::WMS_LAYOUT, "Set notify size change flag is true");
+        return;
+    }
+    notifySizeChangeFlag_ = false;
+}
+
 } // namespace Rosen
 } // namespace OHOS
