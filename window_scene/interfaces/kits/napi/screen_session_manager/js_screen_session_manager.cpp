@@ -25,7 +25,6 @@
 #include "js_device_screen_config.h"
 #include "pixel_map_napi.h"
 #include "window_manager_hilog.h"
-#include "js_err_utils.h"
 
 #ifdef POWER_MANAGER_ENABLE
 #include "shutdown/shutdown_client.h"
