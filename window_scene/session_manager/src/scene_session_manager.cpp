@@ -5594,7 +5594,7 @@ sptr<SceneSession> SceneSessionManager::GetNextFocusableSession(int32_t persiste
             return false;
         }
         if (previousFocusedSessionFound && session->GetFocusable() &&
-            session->IsVisible() && CheckParentSessionVisible(session)) {
+            session->IsVisibleNotBackground() && CheckParentSessionVisible(session)) {
             ret = session;
             return true;
         }
@@ -7618,7 +7618,7 @@ void SceneSessionManager::GetCollaboratorAbilityInfos(const std::vector<AppExecF
         if (iter == abilityInfoMap.end()) {
             TLOGW(WmsLogTag::DEFAULT, "launcher ability not found, bundle:%{public}s", bundleInfo.name.c_str());
             auto hapModuleListIter = std::find_if(hapModulesList.begin(), hapModulesList.end(),
-                [](const AppExecFwk::HapModuleInfo& hapModule) { return !hapModule.abilityInfos.empty(); }); 
+                [](const AppExecFwk::HapModuleInfo& hapModule) { return !hapModule.abilityInfos.empty(); });
             if (hapModuleListIter != hapModulesList.end()) {
                 abilityInfo = hapModuleListIter->abilityInfos[0];
             } else {
@@ -7636,7 +7636,7 @@ void SceneSessionManager::GetCollaboratorAbilityInfos(const std::vector<AppExecF
         scbAbilityInfo.codePath_ = bundleInfo.applicationInfo.codePath;
         GetOrientationFromResourceManager(scbAbilityInfo.abilityInfo_);
         scbAbilityInfos.push_back(scbAbilityInfo);
-    } 
+    }
 }
 
 void SceneSessionManager::GetOrientationFromResourceManager(AppExecFwk::AbilityInfo& abilityInfo)
