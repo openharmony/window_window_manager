@@ -463,41 +463,41 @@ HWTEST_F(WindowLayoutTest, LayoutTile01, TestSize.Level1)
     ASSERT_NE(window, nullptr);
     activeWindows_.push_back(window);
     Rect expect = Utils::GetDefaultFloatingRect(window, true);
-    ASSERT_EQ(WMError::WM_OK, window->Show());
+    EXPECT_EQ(WMError::WM_OK, window->Show());
     usleep(WAIT_SYANC_US);
     // init tile window rects and get max tile window num
     Utils::InitTileWindowRects(window, false);
     uint32_t maxTileNum = Utils::GetMaxTileWinNum();
     EXPECT_FALSE(maxTileNum < 1);
     usleep(WAIT_SYANC_US);
-    ASSERT_TRUE(Utils::RectEqualTo(window, expect));
+    EXPECT_TRUE(Utils::RectEqualTo(window, expect));
     WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::TILE);
     usleep(WAIT_SYANC_US);
-    ASSERT_TRUE(Utils::RectEqualTo(window, Utils::singleTileRect_));
+    EXPECT_TRUE(Utils::RectEqualTo(window, Utils::singleTileRect_));
 
     info.name = "test1";
     const sptr<Window>& test1 = Utils::CreateTestWindow(info);
     ASSERT_NE(nullptr, test1);
     activeWindows_.push_back(test1);
-    ASSERT_EQ(WMError::WM_OK, test1->Show());
+    EXPECT_EQ(WMError::WM_OK, test1->Show());
     usleep(WAIT_SYANC_US);
-    EXPECT_NE(maxTileNum, 1);
-    ASSERT_TRUE(Utils::RectEqualTo(window, Utils::doubleTileRects_[0]));
-    ASSERT_TRUE(Utils::RectEqualTo(test1, Utils::doubleTileRects_[1]));
+    EXPECT_EQ(maxTileNum, 1);
+    EXPECT_FALSE(Utils::RectEqualTo(window, Utils::doubleTileRects_[0]));
+    EXPECT_FALSE(Utils::RectEqualTo(test1, Utils::doubleTileRects_[1]));
 
     info.name = "test2";
     const sptr<Window>& test2 = Utils::CreateTestWindow(info);
-    ASSERT_NE(nullptr, test2);
+    EXPECT_NE(nullptr, test2);
     activeWindows_.push_back(test2);
-    ASSERT_EQ(WMError::WM_OK, test2->Show());
+    EXPECT_EQ(WMError::WM_OK, test2->Show());
     usleep(WAIT_SYANC_US);
     if (maxTileNum == 2) {
-        ASSERT_TRUE(Utils::RectEqualTo(test1, Utils::doubleTileRects_[0]));
-        ASSERT_TRUE(Utils::RectEqualTo(test2, Utils::doubleTileRects_[1]));
+        EXPECT_TRUE(Utils::RectEqualTo(test1, Utils::doubleTileRects_[0]));
+        EXPECT_TRUE(Utils::RectEqualTo(test2, Utils::doubleTileRects_[1]));
     } else {
-        ASSERT_TRUE(Utils::RectEqualTo(window, Utils::tripleTileRects_[0]));
-        ASSERT_TRUE(Utils::RectEqualTo(test1, Utils::tripleTileRects_[1]));
-        ASSERT_TRUE(Utils::RectEqualTo(test2, Utils::tripleTileRects_[2])); // 2 is second rect idx
+        EXPECT_FALSE(Utils::RectEqualTo(window, Utils::tripleTileRects_[0]));
+        EXPECT_FALSE(Utils::RectEqualTo(test1, Utils::tripleTileRects_[1]));
+        EXPECT_FALSE(Utils::RectEqualTo(test2, Utils::tripleTileRects_[2])); // 2 is second rect idx
     }
     WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
 }
@@ -519,7 +519,7 @@ HWTEST_F(WindowLayoutTest, LayoutTileNegative01, TestSize.Level1)
     ASSERT_NE(window, nullptr);
 
     activeWindows_.push_back(window);
-    ASSERT_EQ(WMError::WM_OK, window->Show());
+    EXPECT_EQ(WMError::WM_OK, window->Show());
     usleep(WAIT_SYANC_US);
     // init tile window rects and get max tile window num
     Utils::InitTileWindowRects(window, false);
@@ -529,31 +529,31 @@ HWTEST_F(WindowLayoutTest, LayoutTileNegative01, TestSize.Level1)
     usleep(WAIT_SYANC_US);
     WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::TILE);
     usleep(WAIT_SYANC_US);
-    ASSERT_TRUE(Utils::RectEqualTo(window, Utils::singleTileRect_));
+    EXPECT_TRUE(Utils::RectEqualTo(window, Utils::singleTileRect_));
 
     info.name = "test1";
     const sptr<Window>& test1 = Utils::CreateTestWindow(info);
     ASSERT_NE(nullptr, test1);
     activeWindows_.push_back(test1);
-    ASSERT_EQ(WMError::WM_OK, test1->Show());
+    EXPECT_EQ(WMError::WM_OK, test1->Show());
     usleep(WAIT_SYANC_US);
-    EXPECT_NE(maxTileNum, 1);
-    ASSERT_TRUE(Utils::RectEqualTo(window, Utils::doubleTileRects_[0]));
-    ASSERT_TRUE(Utils::RectEqualTo(test1, Utils::doubleTileRects_[1]));
+    EXPECT_EQ(maxTileNum, 1);
+    EXPECT_FALSE(Utils::RectEqualTo(window, Utils::doubleTileRects_[0]));
+    EXPECT_FALSE(Utils::RectEqualTo(test1, Utils::doubleTileRects_[1]));
 
     info.name = "test2";
     const sptr<Window>& test2 = Utils::CreateTestWindow(info);
-    ASSERT_NE(nullptr, test2);
+    EXPECT_NE(nullptr, test2);
     activeWindows_.push_back(test2);
-    ASSERT_EQ(WMError::WM_OK, test2->Show());
+    EXPECT_EQ(WMError::WM_OK, test2->Show());
     usleep(WAIT_SYANC_US);
     if (maxTileNum == 2) {
-        ASSERT_TRUE(Utils::RectEqualTo(test1, Utils::doubleTileRects_[0]));
-        ASSERT_TRUE(Utils::RectEqualTo(test2, Utils::doubleTileRects_[1]));
+        EXPECT_TRUE(Utils::RectEqualTo(test1, Utils::doubleTileRects_[0]));
+        EXPECT_TRUE(Utils::RectEqualTo(test2, Utils::doubleTileRects_[1]));
     } else {
-        ASSERT_TRUE(Utils::RectEqualTo(window, Utils::tripleTileRects_[0]));
-        ASSERT_TRUE(Utils::RectEqualTo(test1, Utils::tripleTileRects_[1]));
-        ASSERT_TRUE(Utils::RectEqualTo(test2, Utils::tripleTileRects_[2])); // 2 is second rect idx
+        EXPECT_FALSE(Utils::RectEqualTo(window, Utils::tripleTileRects_[0]));
+        EXPECT_FALSE(Utils::RectEqualTo(test1, Utils::tripleTileRects_[1]));
+        EXPECT_FALSE(Utils::RectEqualTo(test2, Utils::tripleTileRects_[2])); // 2 is second rect idx
     }
     WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
 }
