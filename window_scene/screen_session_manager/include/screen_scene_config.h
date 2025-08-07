@@ -51,6 +51,7 @@ public:
     static bool IsSupportCapture();
     static bool IsSupportOffScreenRendering();
     static uint32_t GetOffScreenPPIThreshold();
+    static bool IsSupportDuringCall();
 
 private:
     static std::map<int32_t, std::string> xmlNodeMap_;

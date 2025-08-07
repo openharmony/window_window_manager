@@ -90,6 +90,7 @@ public:
     FoldDisplayMode GetFoldDisplayMode();
     FoldDisplayMode GetFoldDisplayModeForExternal();
     void SetFoldDisplayMode(const FoldDisplayMode);
+    void SetFoldDisplayModeAsync(const FoldDisplayMode);
     DMError SetFoldDisplayModeFromJs(const FoldDisplayMode, std::string reason = "");
     void SetDisplayScale(ScreenId screenId, float scaleX, float scaleY, float pivotX, float pivotY);
     void SetFoldStatusLocked(bool locked);
@@ -1151,6 +1152,11 @@ void DisplayManager::SetFoldDisplayMode(const FoldDisplayMode mode)
     pImpl_->SetFoldDisplayMode(mode);
 }
 
+void DisplayManager::SetFoldDisplayModeAsync(const FoldDisplayMode mode)
+{
+    pImpl_->SetFoldDisplayModeAsync(mode);
+}
+
 DMError DisplayManager::SetFoldDisplayModeFromJs(const FoldDisplayMode mode, std::string reason)
 {
     return pImpl_->SetFoldDisplayModeFromJs(mode, reason);
@@ -1170,6 +1176,11 @@ void DisplayManager::Impl::SetDisplayScale(ScreenId screenId,
 void DisplayManager::Impl::SetFoldDisplayMode(const FoldDisplayMode mode)
 {
     SingletonContainer::Get<DisplayManagerAdapter>().SetFoldDisplayMode(mode);
+}
+
+void DisplayManager::Impl::SetFoldDisplayModeAsync(const FoldDisplayMode mode)
+{
+    SingletonContainer::Get<DisplayManagerAdapter>().SetFoldDisplayModeAsync(mode);
 }
 
 DMError DisplayManager::Impl::SetFoldDisplayModeFromJs(const FoldDisplayMode mode, std::string reason)

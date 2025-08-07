@@ -123,8 +123,9 @@ void FoldScreenController::RecoverDisplayMode()
     }
     if (!FoldScreenStateInternel::IsSingleDisplayFoldDevice() &&
         !FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() &&
-        !FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
-        TLOGI(WmsLogTag::DMS, "not single display fold (pocket) device, skip");
+        !FoldScreenStateInternel::IsSecondaryDisplayFoldDevice() &&
+        !FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
+        TLOGI(WmsLogTag::DMS, "current fold device do not need recover, skip");
         return;
     }
     TLOGI(WmsLogTag::DMS, "%{public}d -> %{public}d", currentDisplayMode, displayMode);

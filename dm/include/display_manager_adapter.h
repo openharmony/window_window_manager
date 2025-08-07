@@ -94,6 +94,7 @@ public:
     virtual FoldStatus GetFoldStatus();
     virtual FoldDisplayMode GetFoldDisplayMode();
     virtual void SetFoldDisplayMode(const FoldDisplayMode);
+    virtual void SetFoldDisplayModeAsync(const FoldDisplayMode);
     virtual DMError SetFoldDisplayModeFromJs(const FoldDisplayMode, std::string reason = "");
     virtual void SetDisplayScale(ScreenId screenId, float scaleX, float scaleY, float pivotX, float pivotY);
     virtual void SetFoldStatusLocked(bool locked);

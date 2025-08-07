@@ -47,6 +47,7 @@ public:
 
     FoldDisplayMode GetFoldDisplayMode();
     void SetFoldDisplayMode(const FoldDisplayMode displayMode);
+    void SetFoldDisplayModeAsync(const FoldDisplayMode displayMode);
     bool IsFoldable();
     FoldStatus GetFoldStatus();
     sptr<DisplayInfo> GetDefaultDisplayInfo();
