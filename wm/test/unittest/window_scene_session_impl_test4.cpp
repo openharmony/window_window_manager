@@ -436,6 +436,53 @@ HWTEST_F(WindowSceneSessionImplTest4, ResetSuperFoldDisplayY, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ResetSuperFoldDisplayY01
+ * @tc.desc: ResetSuperFoldDisplayY01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, ResetSuperFoldDisplayY01, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("ResetSuperFoldDisplayY01");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    windowSceneSessionImpl->superFoldOffsetY_ = 150;
+    MMI::PointerEvent::PointerItem pointerItem;
+    pointerItem.SetDisplayYPos(100);
+    pointerEvent->AddPointerItem(pointerItem);
+    auto originalDisplayY = pointerItem.GetDisplayYPos();
+    windowSceneSessionImpl->ResetSuperFoldDisplayY(pointerEvent);
+    pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
+    auto updatedDisplayY = pointerItem.GetDisplayYPos();
+    ASSERT_EQ(updatedDisplayY, originalDisplayY);
+
+    pointerItem.SetDisplayYPos(150);
+    pointerEvent->AddPointerItem(pointerItem);
+    originalDisplayY = pointerItem.GetDisplayYPos();
+    windowSceneSessionImpl->ResetSuperFoldDisplayY(pointerEvent);
+    pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
+    updatedDisplayY = pointerItem.GetDisplayYPos();
+    ASSERT_EQ(updatedDisplayY, originalDisplayY - 150);
+
+    pointerItem.SetDisplayYPos(150.001);
+    pointerEvent->AddPointerItem(pointerItem);
+    originalDisplayY = pointerItem.GetDisplayYPos();
+    windowSceneSessionImpl->ResetSuperFoldDisplayY(pointerEvent);
+    pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
+    updatedDisplayY = pointerItem.GetDisplayYPos();
+    ASSERT_EQ(updatedDisplayY, originalDisplayY - 150);
+
+    pointerItem.SetDisplayYPos(151.001);
+    pointerEvent->AddPointerItem(pointerItem);
+    originalDisplayY = pointerItem.GetDisplayYPos();
+    windowSceneSessionImpl->ResetSuperFoldDisplayY(pointerEvent);
+    pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
+    updatedDisplayY = pointerItem.GetDisplayYPos();
+    ASSERT_EQ(updatedDisplayY, originalDisplayY - 150);
+}
+
+/**
  * @tc.name: ConsumePointerEventInner
  * @tc.desc: ConsumePointerEventInner
  * @tc.type: FUNC
