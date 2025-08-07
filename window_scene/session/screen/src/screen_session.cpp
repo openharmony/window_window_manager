@@ -2394,7 +2394,7 @@ void ScreenSession::ScreenModeChange(ScreenModeChangeEvent screenModeChangeEvent
 }
 
 std::shared_ptr<Media::PixelMap> ScreenSession::SetScreenFreezeImmediately(float scaleX, float scaleY, bool isFreeze)
-{ 
+{
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ss:SetScreenFreezeImmediately");
     auto callback = std::make_shared<SurfaceCaptureFuture>();
     {
