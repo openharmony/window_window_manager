@@ -481,6 +481,7 @@ public:
     bool SynchronizePowerStatus(ScreenPowerState state) override;
     std::shared_ptr<TaskScheduler> GetPowerTaskScheduler() const;
     bool GetCancelSuspendStatus() const;
+    void RemoveScreenCastInfo(ScreenId screenId);
 
 protected:
     ScreenSessionManager();
@@ -835,6 +836,11 @@ private:
     bool HandleSwitchPcMode();
     void SwitchModeHandleExternalScreen(bool isSwitchToPcMode);
     void WaitUpdateAvailableAreaForPc();
+
+    std::unordered_map<ScreenId, std::pair<ScreenId, ScreenCombination>> screenCastInfoMap_;
+    std::shared_mutex screenCastInfoMapMutex_;
+    bool HasSameScreenCastInfo(ScreenId screenId, ScreenId castScreenId, ScreenCombination screenCombination);
+    void SetScreenCastInfo(ScreenId screenId, ScreenId castScreenId, ScreenCombination screenCombination);
 
     LowTempMode lowTemp_ {LowTempMode::UNKNOWN};
     std::mutex lowTempMutex_;
