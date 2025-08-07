@@ -1544,6 +1544,7 @@ void WindowSceneSessionImpl::PreLayoutOnShow(WindowType type, const sptr<Display
         if (auto hostSession = GetHostSession()) {
             WSRect wsRect = { requestRect.posX_, requestRect.posY_, requestRect.width_, requestRect.height_ };
             if (type != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+                SetNotifySizeChangeFlag(true);
                 property_->SetWindowRect(requestRect);
             }
             hostSession->UpdateClientRect(wsRect);
