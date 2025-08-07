@@ -16,10 +16,6 @@ import type { AsyncCallback, Callback} from '@ohos.base';
 import { BusinessError } from '@ohos.base';
 import colorSpaceManager from '@ohos.graphics.colorSpaceManager';
 import hdrCapability from '@ohos.graphics.hdrCapability';
-import hilog from '@ohos.hilog';
-
-const DOMAIN = 0x4201;
-const TAG = '[ANI]';
 
 export default namespace display {
 
@@ -29,23 +25,23 @@ const DISPLAY_ARRAY_LENGTH = 15;
 const CUTO_ARRAY_LENGTH = 5;  
 
 export interface Rect {
-    left: number;
+    left: long;
 
-    top: number;
+    top: long;
 
-    width: number;
+    width: long;
 
-    height: number;
+    height: long;
 }
 
 export class RectImpl implements Rect {
-    left: number;
+    left: long;
 
-    top: number;
+    top: long;
 
-    width: number;
+    width: long;
 
-    height: number;
+    height: long;
 }
 
 interface WaterfallDisplayAreaRects {
@@ -95,7 +91,7 @@ export class CutoutInfoImpl implements CutoutInfo {
 }
 
 export interface FoldCreaseRegion {
-    readonly displayId: number;
+    readonly displayId: long;
 
     readonly creaseRects: Array<Rect>;
 }
@@ -108,7 +104,7 @@ export class FoldCreaseRegionImpl implements FoldCreaseRegion {
         }
     }
 
-    readonly displayId: number;
+    readonly displayId: long;
 
     readonly creaseRects: Array<Rect>;
 }
@@ -162,7 +158,7 @@ enum DisplayState {
 }
 
 export interface Display {
-    id: double;
+    id: long;
 
     name: string;
 
@@ -170,17 +166,17 @@ export interface Display {
 
     state: DisplayState;
 
-    refreshRate: double;
+    refreshRate: int;
 
-    rotation: double;
+    rotation: int;
 
-    width: double;
+    width: long;
  
-    height: double;
+    height: long;
 
-    availableHeight: double;
+    availableHeight: long;
 
-    availableWidth: double;
+    availableWidth: long;
 
     densityDPI: double;
 
@@ -221,7 +217,7 @@ export class DisplayImpl implements Display {
         this.hdrFormats = new Array<hdrCapability.HDRFormat>();
     }
 
-    id: double;
+    id: long;
 
     name: string;
 
@@ -230,17 +226,17 @@ export class DisplayImpl implements Display {
     state: DisplayState;
     state_: int;
 
-    refreshRate: double;
+    refreshRate: int;
 
-    rotation: double;
+    rotation: int;
 
-    width: double;
+    width: long;
  
-    height: double;
+    height: long;
 
-    availableHeight: double;
+    availableHeight: long;
 
-    availableWidth: double;
+    availableWidth: long;
 
     densityDPI: double;
 
@@ -297,7 +293,7 @@ export class DisplayImpl implements Display {
         taskpool.execute((): boolean => {
             return this.hasImmersiveWindowInternal();
         }).then((ret: NullishType) => {
-            callback(new BusinessError(), ret as boolean);
+            callback(null, ret as boolean);
         }).catch((err: NullishType) => {
             callback(err as BusinessError, false);
         });
@@ -395,7 +391,7 @@ function minusCreaseRects(foldCreaseRegionObj: FoldCreaseRegion): void {
 export native function getCurrentFoldCreaseRegionNative(foldCreaseRegion: object, nativeObj: long): void;
 
 // display sync interfaces
-export function getDisplayByIdSync(displayId: number): Display {
+export function getDisplayByIdSync(displayId: long): Display {
     let display = new DisplayImpl();
     getDisplayByIdSyncNative(display as object, displayId);
     display.state = display.state_ as DisplayState;
@@ -403,7 +399,7 @@ export function getDisplayByIdSync(displayId: number): Display {
     return display;
 }
 
-export native function getDisplayByIdSyncNative(obj: object, displayId: number): void;
+export native function getDisplayByIdSyncNative(obj: object, displayId: long): void;
 
 export function getDefaultDisplaySync(): Display {
     let display = new DisplayImpl();
@@ -418,7 +414,6 @@ export native function getDefaultDisplaySyncNative(obj: object): void;
 export native function getAllDisplaysSyncNative(displayArray: Array<Display>): void;
 
 export function getAllDisplays(callback: AsyncCallback<Array<Display>>): void {
-    hilog.info(DOMAIN, TAG, 'get all display from ani');
     let res: Array<Display> = new Array<Display>(DISPLAY_ARRAY_LENGTH);
     for (let i = 0; i < res.length; i++) {
         res[i] = new DisplayImpl();
@@ -428,7 +423,6 @@ export function getAllDisplays(callback: AsyncCallback<Array<Display>>): void {
         minusDisplayArray(res);
         callback(null, res);
     } catch (err: BusinessError) {
-        hilog.error(DOMAIN, TAG, 'get all display from err');
         callback(err, res);
     }
     return;
@@ -480,9 +474,9 @@ export function off<T>(type: string, callback?: Callback<T>): void {
 
 export native function syncOff(type: string, nativeObj: long, callback?: object) : void;
 
-export function displayEventCallBack(cb: object, cbArg: double): void {
-    const func = cb as (cbArg: double) => void;
-    func(cbArg as double);
+export function displayEventCallBack(cb: object, cbArg: long): void {
+    const func = cb as (cbArg: long) => void;
+    func(cbArg as long);
 }
 
 export function foldStatusCallback(cb: object, cbArg: int): void {
@@ -496,8 +490,8 @@ export function foldDisplayModeCallback(cb: object, cbArg: int): void {
 }
 
 export function foldAngleChangeCallback(cb: object, cbArg: object): void {
-    const func = cb as (cbArg: Array<number>) => void;
-    func(cbArg as Array<number>);
+    const func = cb as (cbArg: Array<double>) => void;
+    func(cbArg as Array<double>);
 }
 
 export function captureStatusChangedCallback(cb: object, cbArg: boolean): void {
@@ -510,7 +504,7 @@ export function availableAreaChangedCallback(cb: object, cbArg: object): void {
     func(cbArg as Rect);
 }
 
-export native function hasPrivateWindow(displayId: number): boolean;
+export native function hasPrivateWindow(displayId: long): boolean;
 
 export function getAllDisplayPhysicalResolution(): Promise<Array<DisplayPhysicalResolution>> {
     return new Promise<Array<DisplayPhysicalResolution>>((resolve: (value: Array<DisplayPhysicalResolution>) => void,
@@ -548,18 +542,18 @@ export native function getAllDisplayPhysicalResolutionNative(PhysicalResolutions
 export interface DisplayPhysicalResolution {
     foldDisplayMode: FoldDisplayMode;
 
-    physicalWidth: number;
+    physicalWidth: long;
 
-    physicalHeight: number;
+    physicalHeight: long;
 }
 
 export class DisplayPhysicalResolutionImpl implements DisplayPhysicalResolution{
     foldDisplayMode: FoldDisplayMode;
     foldDisplayMode_: int;
 
-    physicalWidth: number;
+    physicalWidth: long;
 
-    physicalHeight: number;
+    physicalHeight: long;
 }
 
 export let displayMgrRef: long;

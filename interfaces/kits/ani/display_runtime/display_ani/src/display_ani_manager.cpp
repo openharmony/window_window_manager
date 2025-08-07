@@ -106,15 +106,15 @@ void DisplayManagerAni::OnGetCurrentFoldCreaseRegion(ani_env* env, ani_object ob
         return;
     }
     TLOGI(WmsLogTag::DMS, "[ANI] DisplayManager GetCurrentFoldCreaseRegion success %{public}d", (int)displayId);
-    if (ANI_OK != env->Object_SetFieldByName_Double(obj, "<property>displayId", (ani_double)displayId)) {
+    if (ANI_OK != env->Object_SetFieldByName_Long(obj, "<property>displayId", (ani_long)displayId)) {
         TLOGE(WmsLogTag::DMS, "[ANI] set displayId field fail");
     }
     ani_ref creaseRectsObj{};
     if (ANI_OK != env->Object_GetFieldByName_Ref(obj, "<property>creaseRects", &creaseRectsObj)) {
         TLOGE(WmsLogTag::DMS, "[ANI] get ani_array len fail");
     }
-    ani_double length;
-    if (ANI_OK != env->Object_GetPropertyByName_Double(static_cast<ani_object>(creaseRectsObj), "length", &length)) {
+    ani_int length;
+    if (ANI_OK != env->Object_GetPropertyByName_Int(static_cast<ani_object>(creaseRectsObj), "length", &length)) {
         TLOGE(WmsLogTag::DMS, "[ANI] get ani_array len fail");
     }
     TLOGI(WmsLogTag::DMS, "[ANI] set CurrentFoldCreaseRegion property begin");
@@ -136,8 +136,8 @@ void DisplayManagerAni::GetAllDisplaysAni(ani_env* env, ani_object arrayObj)
     if (displays.empty()) {
         AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_SCREEN, "");
     }
-    ani_double length;
-    if (ANI_OK != env->Object_GetPropertyByName_Double(arrayObj, "length", &length)) {
+    ani_int length;
+    if (ANI_OK != env->Object_GetPropertyByName_Int(arrayObj, "length", &length)) {
         TLOGE(WmsLogTag::DMS, "[ANI] get ani_array len fail");
     }
 
@@ -154,9 +154,9 @@ void DisplayManagerAni::GetAllDisplaysAni(ani_env* env, ani_object arrayObj)
     TLOGI(WmsLogTag::DMS, "[ANI] GetAllDisplaysAni end");
 }
 
-void DisplayManagerAni::GetDisplayByIdSyncAni(ani_env* env, ani_object obj, ani_double displayId)
+void DisplayManagerAni::GetDisplayByIdSyncAni(ani_env* env, ani_object obj, ani_long displayId)
 {
-    TLOGE(WmsLogTag::DMS, "[ANI] begin");
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
     if (displayId < 0) {
         TLOGE(WmsLogTag::DMS, "[ANI] Invalid displayId, less than 0");
         return;
@@ -422,7 +422,7 @@ DMError DisplayManagerAni::UnregisterAllDisplayListenerWithType(std::string type
     return ret;
 }
 
-ani_boolean DisplayManagerAni::HasPrivateWindow(ani_env* env, ani_double displayId)
+ani_boolean DisplayManagerAni::HasPrivateWindow(ani_env* env, ani_long displayId)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] begin");
     bool hasPrivateWindow = false;
