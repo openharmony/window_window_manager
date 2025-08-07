@@ -1510,6 +1510,7 @@ void ScreenSessionManager::HandleScreenDisconnectEvent(sptr<ScreenSession> scree
        TLOGE(WmsLogTag::DMS, "screenSession is nullptr");
        return;
     }
+    RemoveScreenCastInfo(screenId);
     if (g_isPcDevice) {
         ScreenId rsId = screenSession->GetRSScreenId();
         if (screenId != rsId && screenSession->GetScreenProperty().GetScreenType() == ScreenType::REAL) {
@@ -5074,6 +5075,7 @@ DMError ScreenSessionManager::DestroyVirtualScreen(ScreenId screenId)
             }
             screenSessionMap_.erase(screenId);
         }
+        RemoveScreenCastInfo(screenId);
         NotifyScreenDisconnected(screenId);
         if (auto clientProxy = GetClientProxy()) {
             clientProxy->OnVirtualScreenDisconnected(rsScreenId);
@@ -6048,6 +6050,10 @@ void ScreenSessionManager::ChangeScreenGroup(sptr<ScreenSessionGroup> group, con
         }
         TLOGI(WmsLogTag::DMS, "Screen->groupSmsId_: %{public}" PRIu64"", screen->groupSmsId_);
         screen->groupSmsId_ = 1;
+        if (!HasSameScreenCastInfo(screen->GetScreenId(), group->mirrorScreenId_, combination)) {
+            TLOGI(WmsLogTag::DMS, "has not same cast info");
+            filterScreen = false;
+        }
         if (filterScreen && screen->groupSmsId_ == group->screenId_ && group->HasChild(screen->screenId_)) {
             // screen already in group
             if (combination != ScreenCombination::SCREEN_MIRROR ||
@@ -6082,9 +6088,44 @@ void ScreenSessionManager::ChangeScreenGroup(sptr<ScreenSessionGroup> group, con
                     mainScreenRegion.width_, mainScreenRegion.height_);
             }
         }
+        NotifyScreenChanged(screen->ConvertToScreenInfo(), ScreenChangeEvent::SCREEN_SOURCE_MODE_CHANGE);
+        NotifyDisplayChanged(screen->ConvertToDisplayInfo(), DisplayChangeEvent::SOURCE_MODE_CHANGED);
+        SetScreenCastInfo(screen->GetScreenId(), group->mirrorScreenId_, combination);
     }
     group->combination_ = combination;
     AddScreenToGroup(group, addScreens, addChildPos, removeChildResMap);
+}
+
+bool ScreenSessionManager::HasSameScreenCastInfo(ScreenId screenId,
+    ScreenId castScreenId, ScreenCombination screenCombination)
+{
+    std::shared_lock<std::shared_mutex> lock(screenCastInfoMapMutex_);
+    auto iter = screenCastInfoMap_.find(screenId);
+    if (iter != screenCastInfoMap_.end() && screenCastInfoMap_[screenId].first == castScreenId &&
+        screenCastInfoMap_[screenId].second == screenCombination) {
+        return true;
+    }
+    return false;
+}
+ 
+void ScreenSessionManager::SetScreenCastInfo(ScreenId screenId,
+    ScreenId castScreenId, ScreenCombination screenCombination)
+{
+    std::unique_lock<std::shared_mutex> lock(screenCastInfoMapMutex_);
+    screenCastInfoMap_[screenId] = std::make_pair(castScreenId, screenCombination);
+    TLOGI(WmsLogTag::DMS,
+        "screenId:%{public}" PRIu64 ",castScreenId:%{public}" PRIu64 ",screenCombination:%{public}d",
+        screenId, castScreenId, screenCombination);
+}
+ 
+void ScreenSessionManager::RemoveScreenCastInfo(ScreenId screenId)
+{
+    std::unique_lock<std::shared_mutex> lock(screenCastInfoMapMutex_);
+    auto iter = screenCastInfoMap_.find(screenId);
+    if (iter != screenCastInfoMap_.end()) {
+        screenCastInfoMap_.erase(screenId);
+    }
+    TLOGI(WmsLogTag::DMS, "screenId:%{public}" PRIu64 "", screenId);
 }
 
 void ScreenSessionManager::IsEnableRegionRotation(sptr<ScreenSession> screenSession)
@@ -9538,6 +9579,9 @@ DMError ScreenSessionManager::SetMultiScreenMode(ScreenId mainScreenId, ScreenId
         return DMError::DM_OK;
     }
     SetMultiScreenModeInner(mainScreenId, secondaryScreenId, screenMode);
+    auto combination = screenMode == MultiScreenMode::SCREEN_MIRROR ?
+        ScreenCombination::SCREEN_MIRROR : ScreenCombination::SCREEN_EXPAND;
+    SetScreenCastInfo(secondaryScreenId, mainScreenId, combination);
     NotifyScreenModeChange();
 #endif
     return DMError::DM_OK;
