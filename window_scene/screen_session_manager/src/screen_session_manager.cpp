@@ -6087,6 +6087,7 @@ void ScreenSessionManager::ChangeScreenGroup(sptr<ScreenSessionGroup> group, con
                     screenId, mirrorScreenId, mainScreenRegion.posX_, mainScreenRegion.posY_,
                     mainScreenRegion.width_, mainScreenRegion.height_);
             }
+            ChangeMirrorScreenConfig(group, mainScreenRegion, screen);
         }
         NotifyScreenChanged(screen->ConvertToScreenInfo(), ScreenChangeEvent::SCREEN_SOURCE_MODE_CHANGE);
         NotifyDisplayChanged(screen->ConvertToDisplayInfo(), DisplayChangeEvent::SOURCE_MODE_CHANGED);
@@ -6094,6 +6095,25 @@ void ScreenSessionManager::ChangeScreenGroup(sptr<ScreenSessionGroup> group, con
     }
     group->combination_ = combination;
     AddScreenToGroup(group, addScreens, addChildPos, removeChildResMap);
+}
+
+void ScreenSessionManager::ChangeMirrorScreenConfig(sptr<ScreenSessionGroup> group,
+        DMRect& mainScreenRegion, sptr<ScreenSession> screen)
+{
+    auto screenId = screen->GetScreenId();
+    auto mirrorScreenId = group->mirrorScreenId_;
+    ScreenId rsScreenId = SCREEN_ID_INVALID;
+    if (!ConvertScreenIdToRsScreenId(screenId, rsScreenId)) {
+        TLOGE(WmsLogTag::DMS, "Screen: %{public}" PRIu64" convert to rs id failed", mirrorScreenId);
+    } else {
+        screen->SetMirrorScreenRegion(rsScreenId, mainScreenRegion);
+        screen->SetIsPhysicalMirrorSwitch(false);
+        IsEnableRegionRotation(screen);
+        TLOGI(WmsLogTag::DMS, "Screen: %{public}" PRIu64" mirror to %{public}"
+            PRIu64" with region, x:%{public}d y:%{public}d w:%{public}u h:%{public}u",
+            screenId, mirrorScreenId, mainScreenRegion.posX_, mainScreenRegion.posY_,
+            mainScreenRegion.width_, mainScreenRegion.height_);
+     }
 }
 
 bool ScreenSessionManager::HasSameScreenCastInfo(ScreenId screenId,
