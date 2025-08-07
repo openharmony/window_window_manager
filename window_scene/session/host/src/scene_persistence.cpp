@@ -320,9 +320,9 @@ void ScenePersistence::SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap>& p
         pixelMap->GetHeight() > ICON_IMAGE_WIDTH_HEIGHT_SIZE_LIMIT) {
         // large image need scale
         double xScale = pixelMap->GetWidth() > ICON_IMAGE_WIDTH_HEIGHT_SIZE_LIMIT ?
-            ICON_IMAGE_WIDTH_HEIGHT_SIZE_LIMIT / ((double) pixelMap->GetWidth()) : ICON_IMAGE_MAX_SCALE;
+            ICON_IMAGE_WIDTH_HEIGHT_SIZE_LIMIT / static_cast<double>(pixelMap->GetWidth()) : ICON_IMAGE_MAX_SCALE;
         double yScale = pixelMap->GetHeight() > ICON_IMAGE_WIDTH_HEIGHT_SIZE_LIMIT ?
-            ICON_IMAGE_WIDTH_HEIGHT_SIZE_LIMIT / ((double) pixelMap->GetHeight()) : ICON_IMAGE_MAX_SCALE;
+            ICON_IMAGE_WIDTH_HEIGHT_SIZE_LIMIT / static_cast<double>(pixelMap->GetHeight()) : ICON_IMAGE_MAX_SCALE;
         pixelMap->scale(xScale, yScale, Media::AntiAliasingOption::MEDIUM);
     }
     if (remove(updatedIconPath_.c_str())) {
