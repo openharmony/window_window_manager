@@ -841,6 +841,8 @@ private:
     std::shared_mutex screenCastInfoMapMutex_;
     bool HasSameScreenCastInfo(ScreenId screenId, ScreenId castScreenId, ScreenCombination screenCombination);
     void SetScreenCastInfo(ScreenId screenId, ScreenId castScreenId, ScreenCombination screenCombination);
+    void ChangeMirrorScreenConfig(ScreenId screenId, sptr<ScreenSessionGroup> group,
+        DMRect& mainScreenRegion, sptr<ScreenSession> screen);
 
     LowTempMode lowTemp_ {LowTempMode::UNKNOWN};
     std::mutex lowTempMutex_;

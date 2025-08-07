@@ -1358,6 +1358,33 @@ HWTEST_F(ScreenSessionManagerTest, ChangeScreenGroup, TestSize.Level1) {
     g_errLog.clear();
     ssm_->RemoveScreenCastInfo(screenId);
 }
+
+/**
+ * @tc.name: ChangeMirrorScreenConfig
+ * @tc.desc: ChangeMirrorScreenConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, ChangeMirrorScreenConfig, TestSize.Level1) {
+    ASSERT_NE(ssm_, nullptr);
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    ScreenId groupId = 1;
+    ScreenId screenId = 4080;
+    ScreenId mainScreenId = 0;
+    sptr<ScreenSessionGroup> group =
+        sptr<ScreenSessionGroup>::MakeSptr(groupId, SCREEN_ID_INVALID, "test", ScreenCombination::SCREEN_MIRROR);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(screenId, ScreenProperty(), 0);
+    ssm_->screenSessionMap_[screenId] = screenSession;
+    group->mirrorScreenId_ = mainScreenId;
+    DMRect region = { 0, 0, 1, 1 };
+    ssm_->ChangeMirrorScreenConfig(group, region, screenSession);
+    EXPECT_TRUE(g_errLog.find("convert to rs id failed") != std::string::npos);
+    g_errLog.clear();
+    ssm_->ScreenIdManager_.UpdateScreenId(screenId, screenId);
+    ssm_->ChangeMirrorScreenConfig(group, region, screenSession);
+    EXPECT_TRUE(g_errLog.find("with region") != std::string::npos);
+    g_errLog.clear();
+}
 }
 }
 }
