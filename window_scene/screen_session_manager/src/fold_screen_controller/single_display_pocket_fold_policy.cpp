@@ -674,6 +674,25 @@ void SingleDisplayPocketFoldPolicy::CloseCoordinationScreen()
     ScreenSessionManager::GetInstance().SetCoordinationFlag(false);
 }
 
+void SingleDisplayPocketFoldPolicy::GetAllCreaseRegion(std::vector<FoldCreaseRegionItem>& foldCreaseRegionItems)
+{
+    FoldCreaseRegionItem MCreaseItem{DisplayOrientation::LANDSCAPE, FoldDisplayMode::MAIN,
+        FoldCreaseRegion(0, {})};
+    FoldCreaseRegionItem FPorCreaseItem{DisplayOrientation::PORTRAIT, FoldDisplayMode::FULL,
+        GetFoldCreaseRegion(false)};
+    FoldCreaseRegionItem FLandCreaseItem{DisplayOrientation::LANDSCAPE, FoldDisplayMode::FULL,
+        GetFoldCreaseRegion(true)};
+    FoldCreaseRegionItem CPorCreaseItem{DisplayOrientation::PORTRAIT, FoldDisplayMode::COORDINATION,
+        GetFoldCreaseRegion(false)};
+    FoldCreaseRegionItem CLandCreaseItem{DisplayOrientation::LANDSCAPE, FoldDisplayMode::COORDINATION,
+        GetFoldCreaseRegion(true)};
+    foldCreaseRegionItems.push_back(MCreaseItem);
+    foldCreaseRegionItems.push_back(FPorCreaseItem);
+    foldCreaseRegionItems.push_back(FLandCreaseItem);
+    foldCreaseRegionItems.push_back(CPorCreaseItem);
+    foldCreaseRegionItems.push_back(CLandCreaseItem);
+}
+
 void SingleDisplayPocketFoldPolicy::ExitCoordination()
 {
     std::lock_guard<std::mutex> lock(coordinationMutex_);

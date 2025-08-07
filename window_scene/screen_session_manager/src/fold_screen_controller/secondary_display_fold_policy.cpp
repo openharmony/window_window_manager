@@ -99,6 +99,28 @@ SecondaryDisplayFoldPolicy::SecondaryDisplayFoldPolicy(std::recursive_mutex& dis
     currentFoldCreaseRegion_ = new FoldCreaseRegion(screenIdFull, rect);
 }
 
+void SecondaryDisplayFoldPolicy::GetAllCreaseRegion(std::vector<FoldCreaseRegionItem>& foldCreaseRegionItems)
+{
+    FoldCreaseRegionItem MLandCreaseItem{DisplayOrientation::LANDSCAPE, FoldDisplayMode::MAIN,
+        FoldCreaseRegion(0, {})};
+    FoldCreaseRegionItem MPorCreaseItem{DisplayOrientation::PORTRAIT, FoldDisplayMode::MAIN,
+        FoldCreaseRegion(0, {})};
+    FoldCreaseRegionItem FLandCreaseItem{DisplayOrientation::LANDSCAPE, FoldDisplayMode::FULL,
+        GetStatusFullFoldCreaseRegion(false)};
+    FoldCreaseRegionItem FPorCreaseItem{DisplayOrientation::PORTRAIT, FoldDisplayMode::FULL,
+        GetStatusFullFoldCreaseRegion(true)};
+    FoldCreaseRegionItem GLandCreaseItem{DisplayOrientation::LANDSCAPE, FoldDisplayMode::GLOBAL_FULL,
+        GetStatusGlobalFullFoldCreaseRegion(false)};
+    FoldCreaseRegionItem GPorCreaseItem{DisplayOrientation::PORTRAIT, FoldDisplayMode::GLOBAL_FULL,
+        GetStatusGlobalFullFoldCreaseRegion(true)};
+    foldCreaseRegionItems.push_back(MLandCreaseItem);
+    foldCreaseRegionItems.push_back(MPorCreaseItem);
+    foldCreaseRegionItems.push_back(FLandCreaseItem);
+    foldCreaseRegionItems.push_back(FPorCreaseItem);
+    foldCreaseRegionItems.push_back(GLandCreaseItem);
+    foldCreaseRegionItems.push_back(GPorCreaseItem);
+}
+
 FoldCreaseRegion SecondaryDisplayFoldPolicy::GetStatusFullFoldCreaseRegion(bool isVertical) const
 {
     std::vector<int32_t> foldRect = FoldScreenStateInternel::StringFoldRectSplitToInt(g_FoldScreenRect,

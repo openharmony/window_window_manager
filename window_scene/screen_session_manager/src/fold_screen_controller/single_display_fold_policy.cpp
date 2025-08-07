@@ -243,6 +243,19 @@ FoldCreaseRegion SingleDisplayFoldPolicy::GetLiveCreaseRegion()
     return liveCreaseRegion_;
 }
 
+void SingleDisplayFoldPolicy::GetAllCreaseRegion(std::vector<FoldCreaseRegionItem>& foldCreaseRegionItems)
+{
+    FoldCreaseRegionItem MCreaseItem{DisplayOrientation::LANDSCAPE, FoldDisplayMode::MAIN,
+        FoldCreaseRegion(0, {})};
+    FoldCreaseRegionItem FPorCreaseItem{DisplayOrientation::PORTRAIT, FoldDisplayMode::FULL,
+        GetFoldCreaseRegion(true)};
+    FoldCreaseRegionItem FLandCreaseItem{DisplayOrientation::LANDSCAPE, FoldDisplayMode::FULL,
+        GetFoldCreaseRegion(false)};
+    foldCreaseRegionItems.push_back(MCreaseItem);
+    foldCreaseRegionItems.push_back(FPorCreaseItem);
+    foldCreaseRegionItems.push_back(FLandCreaseItem);
+}
+
 void SingleDisplayFoldPolicy::LockDisplayStatus(bool locked)
 {
     TLOGI(WmsLogTag::DMS, "LockDisplayStatus locked: %{public}d", locked);

@@ -34,6 +34,15 @@ enum class DisplayModeChangeReason : uint32_t {
     INVALID,
 };
 
+struct FoldCreaseRegionItem {
+    DisplayOrientation orientation_;
+    FoldDisplayMode foldDisplayMode_;
+    FoldCreaseRegion region_;
+    FoldCreaseRegionItem(DisplayOrientation orientation, FoldDisplayMode foldDisplayMode, FoldCreaseRegion region)
+        : orientation_(orientation), foldDisplayMode_(foldDisplayMode), region_(region) {
+    }
+};
+
 class FoldScreenPolicy : public RefBase {
 public:
     FoldScreenPolicy();
@@ -57,6 +66,7 @@ public:
     virtual Drawing::Rect GetScreenSnapshotRect();
     virtual void SetMainScreenRegion(DMRect& mainScreenRegion);
     virtual void SetIsClearingBootAnimation(bool isClearingBootAnimation);
+    virtual void GetAllCreaseRegion(std::vector<FoldCreaseRegionItem>& foldCreaseRegionItems);
     void ClearState();
     FoldDisplayMode GetScreenDisplayMode();
     FoldStatus GetFoldStatus();
