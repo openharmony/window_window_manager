@@ -1380,7 +1380,7 @@ HWTEST_F(ScreenSessionManagerTest, ChangeMirrorScreenConfig, TestSize.Level1) {
     ssm_->ChangeMirrorScreenConfig(group, region, screenSession);
     EXPECT_TRUE(g_errLog.find("convert to rs id failed") != std::string::npos);
     g_errLog.clear();
-    ssm_->ScreenIdManager_.UpdateScreenId(screenId, screenId);
+    ssm_->screenIdManager_.UpdateScreenId(screenId, screenId);
     ssm_->ChangeMirrorScreenConfig(group, region, screenSession);
     EXPECT_TRUE(g_errLog.find("with region") != std::string::npos);
     g_errLog.clear();
