@@ -3373,6 +3373,29 @@ HWTEST_F(WindowExtensionSessionImplTest, RegisterOccupiedAreaChangeListener, Tes
     window_->NotifyOccupiedAreaChange(info);
     EXPECT_EQ(WMError::WM_OK, window_->UnregisterOccupiedAreaChangeListener(listener));
 }
+
+/**
+ * @tc.name: UpdateRotationDuration
+ * @tc.desc: UpdateRotationDuration Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UpdateRotationDuration, TestSize.Level2)
+{
+    WindowSizeChangeReason reason = WindowSizeChangeReason::SNAPSHOT_ROTATION;
+    int32_t duration = -1;
+    int32_t transactionDuration = 123;
+    std::shared_ptr<RSTransaction> rsTransaction = std::make_shared<RSTransaction>();
+    rsTransaction->duration_ = transactionDuration;
+    window_->UpdateRotationDuration(reason, duration, rsTransaction);
+    EXPECT_EQ(duration, transactionDuration);
+    EXPECT_EQ(reason, WindowSizeChangeReason::ROTATION);
+
+    duration = -1;
+    reason = WindowSizeChangeReason::ROTATION;
+    window_->UpdateRotationDuration(reason, duration, rsTransaction);
+    EXPECT_EQ(duration, transactionDuration);
+    EXPECT_EQ(reason, WindowSizeChangeReason::ROTATION);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

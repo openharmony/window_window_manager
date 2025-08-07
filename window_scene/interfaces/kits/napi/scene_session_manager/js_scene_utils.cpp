@@ -1708,6 +1708,8 @@ napi_value CreateJsSessionSizeChangeReason(napi_env env)
         static_cast<int32_t>(SizeChangeReason::MAXIMIZE_IN_IMPLICT)));
     napi_set_named_property(env, objValue, "RECOVER_IN_IMPLICIT", CreateJsValue(env,
         static_cast<int32_t>(SizeChangeReason::RECOVER_IN_IMPLICIT)));
+    napi_set_named_property(env, objValue, "SNAPSHOT_ROTATION", CreateJsValue(env,
+        static_cast<int32_t>(SizeChangeReason::SNAPSHOT_ROTATION)));
     napi_set_named_property(env, objValue, "END", CreateJsValue(env,
         static_cast<int32_t>(SizeChangeReason::END)));
 

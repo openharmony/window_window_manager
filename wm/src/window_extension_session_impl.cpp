@@ -959,6 +959,17 @@ void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const
     handler_->PostTask(task, "WMS_WindowExtensionSessionImpl_UpdateRectForRotation");
 }
 
+void WindowExtensionSessionImpl::UpdateRotationDuration(WindowSizeChangeReason& reason, int32_t& duration,
+    const std::shared_ptr<RSTransaction>& rsTransaction)
+{
+    if (reason == WindowSizeChangeReason::SNAPSHOT_ROTATION) {
+        duration = rsTransaction->GetDuration();
+        reason = WindowSizeChangeReason::ROTATION;
+    } else {
+        duration = rsTransaction->GetDuration() ? rsTransaction->GetDuration() : duration;
+    }
+}
+
 void WindowExtensionSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, WindowSizeChangeReason wmReason,
     const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
