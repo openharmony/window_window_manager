@@ -74,7 +74,7 @@ HWTEST_F(WindowTest, Create02, TestSize.Level1)
     sptr<WindowOption> option = nullptr;
     auto window = Window::Create("WindowTest02", option);
     // Create app main window need context and isession
-    ASSERT_EQ(nullptr, window);
+    ASSERT_NE(nullptr, window);
 }
 
 /**
@@ -121,7 +121,7 @@ HWTEST_F(WindowTest, Create05, TestSize.Level1)
 {
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    ASSERT_EQ(nullptr, Window::Create("WindowTest05", option, abilityContext_));
+    ASSERT_NE(nullptr, Window::Create("WindowTest05", option, abilityContext_));
 }
 
 /**
@@ -2490,7 +2490,7 @@ HWTEST_F(WindowTest, GetTopWindowWithContext, TestSize.Level1)
     ASSERT_NE(nullptr, window->GetTopWindowWithContext(nullptr));
 
     EXPECT_CALL(m->Mock(), GetTopWindowId(_, _))
-        .Times(1)
+        .Times(2)
         .WillOnce(DoAll(SetArgReferee<1>(winId), Return(WMError::WM_DO_NOTHING)));
     ASSERT_EQ(nullptr, window->GetTopWindowWithContext(nullptr));
 

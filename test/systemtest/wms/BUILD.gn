@@ -21,22 +21,16 @@ group("systemtest") {
 
   deps = [
     ":wms_window_animate_to_test",
-    ":wms_window_app_floating_window_test",
-    ":wms_window_callback_test",
-    ":wms_window_decor_test",
     ":wms_window_gesture_navigation_enabled_test",
     ":wms_window_input_method_test",
     ":wms_window_input_test",
-    ":wms_window_layout_integration_test",
     ":wms_window_mode_support_info_test",
     ":wms_window_multi_ability_test",
     ":wms_window_nointeraction_listener_test",
     ":wms_window_occupied_area_change_test",
-    ":wms_window_pc_test",
     ":wms_window_raisetoapptop_test",
     ":wms_window_recover_test",
     ":wms_window_rotation_test",
-    ":wms_window_specialwindow_test",
     ":wms_window_split_immersive_test",
     ":wms_window_split_test",
     ":wms_window_status_change_test",
@@ -59,6 +53,15 @@ group("systemtest") {
       ":wms_window_immersive_test",
       ":wms_window_layout_test",
       ":wms_window_move_drag_test",
+    ]
+  } else {
+    deps += [
+      ":wms_window_app_floating_window_test",    
+      ":wms_window_callback_test",
+      ":wms_window_decor_test",
+      ":wms_window_layout_integration_test",
+      ":wms_window_pc_test",
+      ":wms_window_specialwindow_test",
     ]
   }
 }
