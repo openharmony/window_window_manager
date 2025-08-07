@@ -63,6 +63,19 @@ void SCBSystemSessionTest::TearDown()
 
 namespace {
 /**
+ * @tc.name: IsVisibleNotBackground
+ * @tc.desc: check func IsVisibleNotBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(SCBSystemSessionTest, IsVisibleNotBackground, TestSize.Level1)
+{
+    ASSERT_NE(scbSystemSession_, nullptr);
+    EXPECT_EQ(false, scbSystemSession_->IsVisibleNotBackground());
+    scbSystemSession_->isVisible_ = true;
+    EXPECT_EQ(true, scbSystemSession_->IsVisibleNotBackground());
+}
+
+/**
  * @tc.name: NotifyClientToUpdateRect01
  * @tc.desc: check func NotifyClientToUpdateRect
  * @tc.type: FUNC
@@ -265,15 +278,15 @@ HWTEST_F(SCBSystemSessionTest, NotifyClientToUpdateRect02, Function | SmallTest 
         onClearDisplayStatusBarTemporarilyFlags;
     auto ret = scbSystemSession->NotifyClientToUpdateRect("SCBSystemSessionTest", nullptr);
     ASSERT_EQ(WSError::WS_OK, ret);
-    
+
     scbSystemSession->specificCallback_->onClearDisplayStatusBarTemporarilyFlags_ = nullptr;
     ret = scbSystemSession->NotifyClientToUpdateRect("SCBSystemSessionTest", nullptr);
     ASSERT_EQ(WSError::WS_OK, ret);
-    
+
     scbSystemSession->specificCallback_->onUpdateAvoidArea_ = nullptr;
     ret = scbSystemSession->NotifyClientToUpdateRect("SCBSystemSessionTest", nullptr);
     ASSERT_EQ(WSError::WS_OK, ret);
-    
+
     scbSystemSession->specificCallback_->onClearDisplayStatusBarTemporarilyFlags_ =
         onClearDisplayStatusBarTemporarilyFlags;
     ret = scbSystemSession->NotifyClientToUpdateRect("SCBSystemSessionTest", nullptr);
@@ -302,16 +315,16 @@ HWTEST_F(SCBSystemSessionTest, NotifyClientToUpdateRect03, Function | SmallTest 
     scbSystemSession_->isKeyboardPanelEnabled_ = true;
     ret = scbSystemSession_->NotifyClientToUpdateRect("SCBSystemSessionTest", nullptr);
     ASSERT_EQ(WSError::WS_OK, ret);
-    
+
     scbSystemSession_->isKeyboardPanelEnabled_ = false;
     ret = scbSystemSession_->NotifyClientToUpdateRect("SCBSystemSessionTest", nullptr);
     ASSERT_EQ(WSError::WS_OK, ret);
-    
+
     scbSystemSession_->keyboardPanelRectUpdateCallback_ = nullptr;
     scbSystemSession_->isKeyboardPanelEnabled_ = true;
     ret = scbSystemSession_->NotifyClientToUpdateRect("SCBSystemSessionTest", nullptr);
     ASSERT_EQ(WSError::WS_OK, ret);
-    
+
     scbSystemSession_->isKeyboardPanelEnabled_ = false;
     ret = scbSystemSession_->NotifyClientToUpdateRect("SCBSystemSessionTest", nullptr);
     ASSERT_EQ(WSError::WS_OK, ret);
@@ -323,16 +336,16 @@ HWTEST_F(SCBSystemSessionTest, NotifyClientToUpdateRect03, Function | SmallTest 
     scbSystemSession_->isKeyboardPanelEnabled_ = true;
     ret = scbSystemSession_->NotifyClientToUpdateRect("SCBSystemSessionTest", nullptr);
     ASSERT_EQ(WSError::WS_OK, ret);
-    
+
     scbSystemSession_->isKeyboardPanelEnabled_ = false;
     ret = scbSystemSession_->NotifyClientToUpdateRect("SCBSystemSessionTest", nullptr);
     ASSERT_EQ(WSError::WS_OK, ret);
-    
+
     scbSystemSession_->keyboardPanelRectUpdateCallback_ = nullptr;
     scbSystemSession_->isKeyboardPanelEnabled_ = true;
     ret = scbSystemSession_->NotifyClientToUpdateRect("SCBSystemSessionTest", nullptr);
     ASSERT_EQ(WSError::WS_OK, ret);
-    
+
     scbSystemSession_->isKeyboardPanelEnabled_ = false;
     ret = scbSystemSession_->NotifyClientToUpdateRect("SCBSystemSessionTest", nullptr);
     ASSERT_EQ(WSError::WS_OK, ret);

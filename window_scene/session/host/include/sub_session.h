@@ -33,6 +33,7 @@ public:
     WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     void RectCheck(uint32_t curWidth, uint32_t curHeight) override;
     bool IsVisibleForeground() const override;
+    bool IsVisibleNotBackground() const override;
 
 protected:
     void UpdatePointerArea(const WSRect& rect) override;
