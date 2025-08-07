@@ -319,6 +319,17 @@ public:
         std::map<WindowType, SystemBarProperty>& newSystemBarProperties,
         std::map<WindowType, SystemBarProperty>& systemBarProperties);
 
+    /**
+     * @brief Convert a WMError to its corresponding WmErrorCode.
+     *
+     * If the WMError is not found in the mapping, returns the given default code.
+     *
+     * @param error WMError value to convert.
+     * @param defaultCode Value to return if mapping is not found (default: WM_ERROR_STATE_ABNORMALLY).
+     * @return Corresponding WmErrorCode or defaultCode if unmapped.
+     */
+    static WmErrorCode ToErrorCode(WMError error, WmErrorCode defaultCode = WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+
 private:
     static void SetSystemPropertiesWindowRect(ani_env* env, const sptr<Window>& window,
         ani_object& systemProperties, const char* clsName);
