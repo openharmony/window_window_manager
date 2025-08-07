@@ -62,11 +62,11 @@ void AniExtensionWindowListener::Callback()
     ani_status ret {};
     ani_function fn {};
     ani_namespace ns {};
-    if ((ret = env_->FindNamespace("L@ohos/uiExtensionHost/uiExtensionHost;", &ns)) != ANI_OK) {
+    if ((ret = env_->FindNamespace("@ohos.uiExtensionHost.uiExtensionHost", &ns)) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]canot find ns %{public}d", ret);
         return;
     }
-    if ((ret = env_->Namespace_FindFunction(ns, "callback", "Lstd/core/Object;Lstd/core/Object;:V", &fn)) != ANI_OK) {
+    if ((ret = env_->Namespace_FindFunction(ns, "callback", "C{std.core.Object}C{std.core.Object}:", &fn)) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]cannot find callback %{public}d", ret);
         return;
     }

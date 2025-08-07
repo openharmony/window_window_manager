@@ -86,7 +86,7 @@ void DisplayAniUtils::ConvertDisplayPhysicalResolution(std::vector<DisplayPhysic
 
     for (uint32_t i = 0; i < displayPhysicalArray.size() && i < static_cast<uint32_t>(arrayObjLen); i++) {
         ani_ref obj;
-        env->Object_CallMethodByName_Ref(arrayObj, "$_get", "I:Lstd/core/Object;", &obj, (ani_int)i);
+        env->Object_CallMethodByName_Ref(arrayObj, "$_get", "i:C{std.core.Object}", &obj, (ani_int)i);
         env->Object_SetFieldByName_Int(static_cast<ani_object>(obj), "foldDisplayMode_",
             static_cast<ani_int>(displayPhysicalArray[i].foldDisplayMode_));
         env->Object_SetFieldByName_Double(static_cast<ani_object>(obj), "<property>physicalWidth",
@@ -204,7 +204,7 @@ ani_status DisplayAniUtils::NewAniObject(ani_env* env, ani_class cls, const char
 ani_status DisplayAniUtils::NewAniObjectNoParams(ani_env* env, ani_class cls, ani_object* object)
 {
     ani_method aniCtor;
-    auto ret = env->Class_FindMethod(cls, "<ctor>", ":V", &aniCtor);
+    auto ret = env->Class_FindMethod(cls, "<ctor>", ":", &aniCtor);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] find ctor method fail");
         return ret;

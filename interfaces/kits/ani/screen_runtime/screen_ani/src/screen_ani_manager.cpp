@@ -223,7 +223,7 @@ ani_double ScreenManagerAni::MakeMirror(ani_env* env, ani_double mainScreen, ani
     TLOGI(WmsLogTag::DMS, "[ANI] length %{public}d", (ani_int)length);
     for (uint32_t i = 0; i < length; i++) {
         ani_ref screenIdRef;
-        auto ret = env->Object_CallMethodByName_Ref(mirrorScreen, "$_get", "I:Lstd/core/Object;",
+        auto ret = env->Object_CallMethodByName_Ref(mirrorScreen, "$_get", "i:C{std.core.Object}",
             &screenIdRef, (ani_int)i);
         if (ANI_OK != ret) {
             TLOGE(WmsLogTag::DMS, "[ANI] get ani_array index %{public}u fail, ret: %{public}u", (ani_int)i, ret);
@@ -231,7 +231,7 @@ ani_double ScreenManagerAni::MakeMirror(ani_env* env, ani_double mainScreen, ani
             return static_cast<ani_double>(INVALID_SCREEN_ID);
         }
         ani_double screenId;
-        ret = env->Object_CallMethodByName_Double(static_cast<ani_object>(screenIdRef), "unboxed", ":D", &screenId);
+        ret = env->Object_CallMethodByName_Double(static_cast<ani_object>(screenIdRef), "unboxed", ":d", &screenId);
         if (ANI_OK != ret) {
             TLOGE(WmsLogTag::DMS, "[ANI] unboxed screenId failed, ret: %{public}u", ret);
             AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to unboxed screenId");
@@ -254,7 +254,7 @@ ani_status ScreenManagerAni::InitScreenManagerAni(ani_namespace screenNameSpace,
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI] begin");
     ani_function setObjFunc = nullptr;
-    ani_status ret = env->Namespace_FindFunction(screenNameSpace, "setScreenMgrRef", "J:V", &setObjFunc);
+    ani_status ret = env->Namespace_FindFunction(screenNameSpace, "setScreenMgrRef", "l:", &setObjFunc);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] find setNativeObj func fail %{public}u", ret);
         return ret;
@@ -302,7 +302,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_NOT_FOUND;
     }
     ani_namespace nsp;
-    if ((ret = env->FindNamespace("L@ohos/screen/screen;", &nsp)) != ANI_OK) {
+    if ((ret = env->FindNamespace("@ohos.screen.screen", &nsp)) != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] null env %{public}u", ret);
         return ANI_NOT_FOUND;
     }
@@ -322,12 +322,12 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_NOT_FOUND;
     }
     ani_class screenCls = nullptr;
-    if ((ret = env->FindClass("L@ohos/screen/screen/ScreenImpl;", &screenCls)) != ANI_OK) {
+    if ((ret = env->FindClass("@ohos.screen.screen.ScreenImpl", &screenCls)) != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] null env %{public}u", ret);
         return ANI_NOT_FOUND;
     }
     std::array methods = {
-        ani_native_function {"setDensityDpiInternal", "D:V",
+        ani_native_function {"setDensityDpiInternal", "d:",
             reinterpret_cast<void *>(ScreenAni::SetDensityDpi)},
     };
     if ((ret = env->Class_BindNativeMethods(screenCls, methods.data(), methods.size())) != ANI_OK) {
