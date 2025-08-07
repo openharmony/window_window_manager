@@ -921,12 +921,7 @@ void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const
 
         auto rsUIContext = window->GetRSUIContext();
         if (needSync) {
-            if (wmReason == WindowSizeChangeReason::SNAPSHOT_ROTATION) {
-                duration = rsTransaction->GetDuration();
-                wmReason = WindowSizeChangeReason::ROTATION;
-            } else {
-                duration = rsTransaction->GetDuration() ? rsTransaction->GetDuration() : duration;
-            }
+            window->UpdateRotationDuration(wmReason, duration, rsTransaction);
             RSTransactionAdapter::FlushImplicitTransaction(rsUIContext);
             rsTransaction->Begin();
         }
