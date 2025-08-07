@@ -1561,13 +1561,15 @@ WSError WindowSessionImpl::UpdateFocus(bool isFocused)
     TLOGI(WmsLogTag::WMS_FOCUS, "focus: %{public}u, id: %{public}d", isFocused, GetPersistentId());
     isFocused_ = isFocused;
     if (isFocused) {
+        std::string bundleName = IsAnco() && property_->GetAncoRealBundleName() != "" ?
+            property_->GetAncoRealBundleName() : property_->GetSessionInfo().bundleName_;
         HiSysEventWrite(
             OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
             "FOCUS_WINDOW",
             OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
             "PID", getpid(),
             "UID", getuid(),
-            "BUNDLE_NAME", property_->GetSessionInfo().bundleName_,
+            "BUNDLE_NAME", bundleName,
             "WINDOW_TYPE", static_cast<uint32_t>(GetType()));
         NotifyAfterFocused();
     } else {

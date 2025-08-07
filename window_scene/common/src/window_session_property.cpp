@@ -1482,7 +1482,6 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetPcAppInpadOrientationLandscape(parcel.ReadBool());
     property->SetPcAppInpadCompatibleMode(parcel.ReadBool());
     property->SetAncoRealBundleName(parcel.ReadString());
-
     return property;
 }
 
@@ -2333,13 +2332,12 @@ bool WindowSessionProperty::GetPcAppInpadOrientationLandscape() const
     return isPcAppInpadOrientationLandscape_;
 }
 
-bool WindowSessionProperty::SetAncoRealBundleName(std::string ancoRealBundleName)
+void WindowSessionProperty::SetAncoRealBundleName(std::string ancoRealBundleName)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "%{public}d SetAncoRealBundleName , %{public}s",  GetPersistentId(), ancoRealBundleName..c_str());
     ancoRealBundleName_ = ancoRealBundleName;
 }
 
-bool WindowSessionProperty::GetAncoRealBundleName()
+std::string WindowSessionProperty::GetAncoRealBundleName() const;
 {
     return ancoRealBundleName_;
 }

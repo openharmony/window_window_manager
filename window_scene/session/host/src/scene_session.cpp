@@ -153,7 +153,6 @@ WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
             property->SetCollaboratorType(session->GetCollaboratorType());
             property->SetAppInstanceKey(session->GetAppInstanceKey());
             property->SetUseControlStateToProperty(session->isAppUseControl_);
-            TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s session is IsAnco, SetAncoRealBundleName", where);
             property->SetAncoRealBundleName(session->IsAnco() ? session->GetSessionInfo().bundleName_ : "");
         }
         session->RetrieveStatusBarDefaultVisibility();
