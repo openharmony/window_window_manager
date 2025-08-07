@@ -71,6 +71,35 @@ FoldScreenController::~FoldScreenController()
     TLOGI(WmsLogTag::DMS, "FoldScreenController is destructed");
 }
 
+nlohmann::ordered_json FoldScreenController::GetFoldCreaseRegionJson()
+{
+    if (foldCreaseRegionItems_.size() == 0) {
+        foldScreenPolicy_->GetAllCreaseRegion(foldCreaseRegionItems_);
+    }
+    nlohmann::ordered_json ret = nlohmann::ordered_json::array();
+    for (auto foldCreaseRegionItem : foldCreaseRegionItems_) {
+        nlohmann::ordered_json capabilityInfo;
+        capabilityInfo["foldDisplayMode"] =
+            std::to_string(static_cast<int32_t>(foldCreaseRegionItem.foldDisplayMode_));
+        capabilityInfo["displayOrientation"] =
+            std::to_string(static_cast<int32_t>(foldCreaseRegionItem.orientation_));
+        capabilityInfo["creaseRects"]["displayId"] =
+            std::to_string(static_cast<int32_t>(foldCreaseRegionItem.region_.GetDisplayId()));
+        auto creaseRects = foldCreaseRegionItem.region_.GetCreaseRects();
+        capabilityInfo["creaseRects"]["rects"] = nlohmann::ordered_json::array();
+        for (auto creaseRect : creaseRects) {
+            capabilityInfo["creaseRects"]["rects"].push_back({
+                {"posX", creaseRect.posX_},
+                {"posY", creaseRect.posY_},
+                {"width", creaseRect.width_},
+                {"height", creaseRect.height_}
+            });
+        }
+        ret.push_back(capabilityInfo);
+    }
+    return ret;
+}
+
 sptr<FoldScreenPolicy> FoldScreenController::GetFoldScreenPolicy(DisplayDeviceType productType)
 {
     sptr<FoldScreenPolicy> tempPolicy = nullptr;
