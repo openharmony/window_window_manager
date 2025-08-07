@@ -2337,7 +2337,7 @@ void WindowSessionProperty::SetAncoRealBundleName(std::string ancoRealBundleName
     ancoRealBundleName_ = ancoRealBundleName;
 }
 
-std::string WindowSessionProperty::GetAncoRealBundleName() const;
+std::string WindowSessionProperty::GetAncoRealBundleName() const
 {
     return ancoRealBundleName_;
 }
