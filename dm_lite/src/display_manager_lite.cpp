@@ -37,6 +37,7 @@ public:
     FoldDisplayMode GetFoldDisplayMode();
     FoldDisplayMode GetFoldDisplayModeForExternal();
     void SetFoldDisplayMode(const FoldDisplayMode);
+    void SetFoldDisplayModeAsync(const FoldDisplayMode);
     bool IsFoldable();
 
     DMError RegisterDisplayListener(sptr<IDisplayListener> listener);
@@ -557,9 +558,19 @@ void DisplayManagerLite::SetFoldDisplayMode(const FoldDisplayMode mode)
     return pImpl_->SetFoldDisplayMode(mode);
 }
 
+void DisplayManagerLite::SetFoldDisplayModeAsync(const FoldDisplayMode mode)
+{
+    return pImpl_->SetFoldDisplayModeAsync(mode);
+}
+
 void DisplayManagerLite::Impl::SetFoldDisplayMode(const FoldDisplayMode mode)
 {
     return SingletonContainer::Get<DisplayManagerAdapterLite>().SetFoldDisplayMode(mode);
+}
+
+void DisplayManagerLite::Impl::SetFoldDisplayModeAsync(const FoldDisplayMode mode)
+{
+    return SingletonContainer::Get<DisplayManagerAdapterLite>().SetFoldDisplayModeAsync(mode);
 }
 
 void DisplayManagerLite::Impl::OnRemoteDied()

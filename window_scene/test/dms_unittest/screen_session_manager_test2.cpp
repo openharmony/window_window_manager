@@ -20,6 +20,7 @@
 #include "display_manager_agent_default.h"
 #include "screen_session_manager/include/screen_session_manager.h"
 #include "screen_scene_config.h"
+#include "screen_setting_helper.h"
 #include "fold_screen_state_internel.h"
 #include "mock/mock_accesstoken_kit.h"
 #include "window_manager_hilog.h"
@@ -1272,6 +1273,33 @@ HWTEST_F(ScreenSessionManagerTest, GetCancelSuspendStatus04, TestSize.Level1)
     ssm_->sessionDisplayPowerController_->needCancelNotify_ = true;
     ssm_->sessionDisplayPowerController_->canceledSuspend_ = true;
     EXPECT_TRUE(ssm_->GetCancelSuspendStatus());
+}
+/*
+ * @tc.name: RegisterSettingDuringCallStateObserver
+ * @tc.desc: RegisterSettingDuringCallStateObserver
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, RegisterSettingDuringCallStateObserver, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    if (FoldScreenStateInternel::IsDualDisplayFoldDevice() && ScreenSceneConfig::IsSupportDuringCall()) {
+        ssm_->RegisterSettingDuringCallStateObserver();
+        ASSERT_NE(ScreenSettingHelper::duringCallStateObserver_, nullptr);
+    }
+}
+
+/**
+ * @tc.name: UpdateDuringCallState
+ * @tc.desc: UpdateDuringCallState
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, UpdateDuringCallState, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    if (FoldScreenStateInternel::IsDualDisplayFoldDevice() && ScreenSceneConfig::IsSupportDuringCall()) {
+        ssm_->UpdateDuringCallState();
+        ASSERT_EQ(ssm_->duringCallState_, 0);
+    }
 }
 }
 }
