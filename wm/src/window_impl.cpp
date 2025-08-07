@@ -3166,7 +3166,7 @@ void WindowImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
             WLOGD("Transfer key event to uiContent");
             bool handled = static_cast<bool>(uiContent_->ProcessKeyEvent(keyEvent));
             WLOGI("event handled: %{public}d, escKeyEventTriggered: %{public}d, escKeyHasDown: %{public}d",
-                handled, escKeyEventTriggered_, escKeyHasDown_)
+                handled, escKeyEventTriggered_, escKeyHasDown_);
             if (!handled && !escKeyEventTriggered_ && escKeyHasDown_) {
                 HandleEspecialEscKeyEvent(keyEvent);
             }
