@@ -7707,9 +7707,9 @@ sptr<SceneSession> SceneSessionManager::GetNextFocusableSession(DisplayId displa
 sptr<SceneSession> SceneSessionManager::GetNextFocusableSessionWhenFloatWindowExist(DisplayId displayGroupId,
                                                                                     int32_t persistentId)
 {
-    bool isPhoneLOrPadWithoutPcMode =
+    bool isPhoneOrPadWithoutPcMode =
         (systemConfig_.IsPhoneWindow() || systemConfig_.IsPadWindow()) && !systemConfig_.IsFreeMultiWindowMode();
-    if (!isPhoneLOrPadWithoutPcMode) {
+    if (!isPhoneOrPadWithoutPcMode) {
         return nullptr;
     }
     auto topFloatingSession = GetTopFloatingSession(displayGroupId, persistentId);
@@ -7819,12 +7819,11 @@ bool SceneSessionManager::CheckBlockingFocus(const sptr<SceneSession>& session, 
               session->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING);
         bool isPcOrPcMode =
             systemConfig_.IsPcWindow() || (isPhoneOrPad && systemConfig_.IsFreeMultiWindowMode());
-
         if (isPcOrPcMode && session->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT) {
             return false;
         }
-        bool isPhoneLOrPadWithoutPcMode = isPhoneOrPad && !systemConfig_.IsFreeMultiWindowMode();
-        if (isPhoneLOrPadWithoutPcMode && session->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
+        bool isPhoneOrPadWithoutPcMode = isPhoneOrPad && !systemConfig_.IsFreeMultiWindowMode();
+        if (isPhoneOrPadWithoutPcMode && session->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
             SessionHelper::IsMainWindow(session->GetWindowType()) && !session->GetIsMidScene()) {
             return false;
         }
