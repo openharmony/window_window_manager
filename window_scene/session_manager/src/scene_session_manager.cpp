@@ -2904,11 +2904,8 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
         TLOGW(WmsLogTag::WMS_LIFE, "Invalid callState:%{public}d", sessionInfo.callState_);
     }
     abilitySessionInfo->scenarios = sessionInfo.scenarios;
-    if (requestId == DEFAULT_REQUEST_FROM_SCB_ID) {
-        TLOGI(WmsLogTag::WMS_LIFE, "Is SCB Call, set flag: true persistentId:%{public}d",
-            abilitySessionInfo->persistentId);
-        abilitySessionInfo->isCallBySCB = true;
-    }
+    TLOGI(WmsLogTag::WMS_LIFE, "Is SCB Call, set flag:%{public}d, persistentId:%{public}d, requestId:%{public}d",
+        requestId == DEFAULT_REQUEST_FROM_SCB_ID, abilitySessionInfo->persistentId, requestId);
     return abilitySessionInfo;
 }
 
