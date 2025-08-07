@@ -271,6 +271,12 @@ private:
      * PC Fold Screen
      */
     WMError OnWaterfallModeChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+
+    /*
+     * Window Rotation
+     */
+    void UpdateRotationDuration(WindowSizeChangeReason& reason, int32_t& duration,
+        const std::shared_ptr<RSTransaction>& rsTransaction);
 };
 } // namespace Rosen
 } // namespace OHOS

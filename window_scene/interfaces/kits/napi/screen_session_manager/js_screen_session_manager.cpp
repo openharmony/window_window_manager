@@ -37,10 +37,10 @@ constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
 constexpr size_t ARGC_THREE = 3;
 constexpr size_t ARGC_FOUR = 4;
+constexpr int32_t INVALID_ID = -1;
 
 namespace {
 const std::string ON_SCREEN_CONNECTION_CHANGE_CALLBACK = "screenConnectChange";
-constexpr int32_t INVALID_ID = -1;
 } // namespace
 
 JsScreenSessionManager::JsScreenSessionManager(napi_env env) : env_(env)
