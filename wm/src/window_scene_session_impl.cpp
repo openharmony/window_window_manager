@@ -5528,7 +5528,9 @@ WSError WindowSceneSessionImpl::SwitchFreeMultiWindow(bool enable)
         WindowMode::WINDOW_MODE_FULLSCREEN)) {
         UpdateDecorEnable(true);
     }
-    UpdateImmersiveBySwitchMode(enable);
+    if (WindowHelper::IsWindowModeSupported(property_->GetWindowModeSupportType(), WindowMode::WINDOW_MODE_FLOATING)) {
+        UpdateImmersiveBySwitchMode(enable);
+    }
     SwitchSubWindow(enable, GetPersistentId());
     return WSError::WS_OK;
 }
