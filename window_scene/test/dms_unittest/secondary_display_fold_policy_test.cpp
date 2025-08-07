@@ -632,6 +632,40 @@ HWTEST_F(SecondaryDisplayFoldPolicyTest, SetStatusConditionalActiveRectAndTpFeat
     policy.SetStatusConditionalActiveRectAndTpFeature(property);
     EXPECT_FALSE(policy.onBootAnimation_);
 }
+
+/**
+ * @tc.name: InitPositionZInfosFeature
+ * @tc.desc: test function : InitPositionZInfosFeature
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecondaryDisplayFoldPolicyTest, InitPositionZInfosFeature, TestSize.Level1)
+{
+    std::recursive_mutex displayInfoMutex;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+    SecondaryDisplayFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
+
+    policy.dualDisplayNodePositionZ_.clear();
+    policy.InitPositionZInfos();
+    EXPECT_FALSE(policy.dualDisplayNodePositionZ_.empty());
+
+    policy.InitPositionZInfos();
+    EXPECT_FALSE(policy.dualDisplayNodePositionZ_.empty());
+}
+
+/**
+ * @tc.name: UpdatePositionZForDualDisplayNodeFeature
+ * @tc.desc: test function : UpdatePositionZForDualDisplayNodeFeature
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecondaryDisplayFoldPolicyTest, UpdatePositionZForDualDisplayNodeFeature, TestSize.Level1)
+{
+    std::recursive_mutex displayInfoMutex;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+    SecondaryDisplayFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
+
+    policy.UpdatePositionZForDualDisplayNode();
+    EXPECT_FALSE(policy.dualDisplayNodePositionZ_.empty());
+}
 }
 } // namespace Rosen
 } // namespace OHOS
