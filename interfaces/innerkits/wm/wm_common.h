@@ -769,7 +769,7 @@ enum class WindowStyleStatus : uint32_t {
     WINDOW_STYLE_STATUS_UNDIFINED,
     WINDOW_STYLE_STATUS_PC_MODE,
     WINDOW_STYLE_STATUS_PAD_MODE
-} 
+};
 
 /**
  * @brief Disable Gesture Back Type
