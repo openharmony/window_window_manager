@@ -1274,6 +1274,12 @@ napi_value NapiThrowError(napi_env env, WmErrorCode errCode)
     return NapiGetUndefined(env);
 }
 
+napi_value NapiThrowError(napi_env env, WmErrorCode errCode, const std::string& msg)
+{
+    napi_throw(env, JsErrUtils::CreateJsError(env, errCode, msg));
+    return NapiGetUndefined(env);
+}
+
 napi_valuetype GetType(napi_env env, napi_value value)
 {
     napi_valuetype res = napi_undefined;
@@ -5365,7 +5371,8 @@ napi_value JsWindow::OnSetCallingWindow(napi_env env, napi_callback_info info)
 napi_value JsWindow::OnDisableWindowDecor(napi_env env, napi_callback_info info)
 {
     if (windowToken_ == nullptr) {
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][disableWindowDecor]msg: windowToken is nullptr");
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->DisableAppWindowDecor());
     if (ret != WmErrorCode::WM_OK) {
@@ -7133,7 +7140,8 @@ napi_value JsWindow::OnSetWindowDecorVisible(napi_env env, napi_callback_info in
     }
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_DECOR, "WindowToken is nullptr");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][setWindowDecorVisible]msg: WindowToken is nullptr");
     }
     bool isVisible = true;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], isVisible)) {
@@ -7154,7 +7162,8 @@ napi_value JsWindow::OnGetWindowDecorVisible(napi_env env, napi_callback_info in
 {
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_DECOR, "window is nullptr");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][getWindowDecorVisible]msg: WindowToken is nullptr");
     }
     bool isVisible = false;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->GetDecorVisible(isVisible));
@@ -7183,7 +7192,8 @@ napi_value JsWindow::OnSetWindowTitleMoveEnabled(napi_env env, napi_callback_inf
     }
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_DECOR, "windowToken is nullptr");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][setWindowTitleMoveEnabled]msg: windowToken is nullptr");
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetWindowTitleMoveEnabled(enable));
     if (ret != WmErrorCode::WM_OK) {
@@ -7429,7 +7439,8 @@ napi_value JsWindow::OnSetWindowDecorHeight(napi_env env, napi_callback_info inf
     }
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_DECOR, "WindowToken is nullptr");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][setWindowDecorHeight]msg: WindowToken is nullptr");
     }
     int32_t height = 0;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], height)) {
@@ -7456,7 +7467,8 @@ napi_value JsWindow::OnGetWindowDecorHeight(napi_env env, napi_callback_info inf
 {
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_DECOR, "window is nullptr");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][getWindowDecorHeight]msg: window is nullptr");
     }
     int32_t height = 0;
     WMError ret = windowToken_->GetDecorHeight(height);
@@ -7464,7 +7476,8 @@ napi_value JsWindow::OnGetWindowDecorHeight(napi_env env, napi_callback_info inf
         if (ret == WMError::WM_ERROR_DEVICE_NOT_SUPPORT) {
             return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
         }
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][getWindowDecorHeight]msg: Get window decor height failed");
     }
     TLOGI(WmsLogTag::WMS_DECOR, "end, window [%{public}u, %{public}s] height=%{public}d",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), height);
@@ -7475,7 +7488,8 @@ napi_value JsWindow::OnSetDecorButtonStyle(napi_env env, napi_callback_info info
 {
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_DECOR, "window is nullptr");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][setDecorButtonStyle]msg: window is nullptr");
     }
     if (windowToken_->IsPadAndNotFreeMutiWindowCompatibleMode()) {
         TLOGE(WmsLogTag::WMS_DECOR, "This is PcAppInPad, not support");
@@ -7517,7 +7531,8 @@ napi_value JsWindow::OnGetDecorButtonStyle(napi_env env, napi_callback_info info
 {
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_DECOR, "window is nullptr");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][getDecorButtonStyle]msg: window is nullptr");
     }
     if (windowToken_->IsPadAndNotFreeMutiWindowCompatibleMode()) {
         TLOGE(WmsLogTag::WMS_DECOR, "This is PcAppInPad, not support");
@@ -7536,7 +7551,8 @@ napi_value JsWindow::OnGetDecorButtonStyle(napi_env env, napi_callback_info info
     auto jsDecorButtonStyle = CreateJsDecorButtonStyleObj(env, decorButtonStyle);
     if (jsDecorButtonStyle == nullptr) {
         TLOGE(WmsLogTag::WMS_DECOR, "decorButtonStyle format failed");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY,
+            "[window][getDecorButtonStyle]msg: decorButtonStyle format failed");
     }
     return jsDecorButtonStyle;
 }
@@ -7545,7 +7561,8 @@ napi_value JsWindow::OnGetTitleButtonRect(napi_env env, napi_callback_info info)
 {
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_DECOR, "window is nullptr");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][getTitleButtonRect]msg: window is nullptr");
     }
     TitleButtonRect titleButtonRect;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->GetTitleButtonArea(titleButtonRect));
@@ -7556,7 +7573,8 @@ napi_value JsWindow::OnGetTitleButtonRect(napi_env env, napi_callback_info info)
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
     napi_value TitleButtonAreaObj = ConvertTitleButtonAreaToJsValue(env, titleButtonRect);
     if (TitleButtonAreaObj == nullptr) {
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][getTitleButtonRect]msg: titleButtonRect convert failed");
     }
     return TitleButtonAreaObj;
 }
@@ -7665,7 +7683,8 @@ napi_value JsWindow::OnSetTitleButtonVisible(napi_env env, napi_callback_info in
     }
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_DECOR, "WindowToken is nullptr");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][setTitleButtonVisible]msg: WindowToken is nullptr");
     }
     WMError errCode = windowToken_->SetTitleButtonVisible(isMaximizeVisible, isMinimizeVisible, isSplitVisible,
         isCloseVisible);
@@ -7743,7 +7762,8 @@ napi_value JsWindow::OnSetWindowTitle(napi_env env, napi_callback_info info)
         auto window = windowToken.promote();
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_DECOR, "%{public}s window is nullptr", where);
-            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                "[window][setWindowTitle]msg: window is nullptr"));
             return;
         }
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetWindowTitle(title));
@@ -7755,8 +7775,8 @@ napi_value JsWindow::OnSetWindowTitle(napi_env env, napi_callback_info info)
         }
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetWindowTitle") != napi_status::napi_ok) {
-        napiAsyncTask->Reject(env, CreateJsError(env,
-            static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
+        napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][setWindowTitle]msg: send event failed"));
     }
     return result;
 }
@@ -8777,12 +8797,14 @@ napi_value JsWindow::OnSetRelativePositionToParentWindowEnabled(napi_env env, na
         auto window = weakToken.promote();
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_SUB, "%{public}s window is nullptr", where);
-            task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                "[window][setRelativePositionToParentWindowEnabled]msg: window is nullptr"));
             return;
         }
         if (!WindowHelper::IsSubWindow(window->GetType())) {
             TLOGNE(WmsLogTag::WMS_SUB, "%{public}s only sub window is valid", where);
-            task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_CALLING)));
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_CALLING,
+                "[window][setRelativePositionToParentWindowEnabled]msg: only sub window is valid"));
             return;
         }
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetWindowAnchorInfo(windowAnchorInfo));
@@ -8794,8 +8816,8 @@ napi_value JsWindow::OnSetRelativePositionToParentWindowEnabled(napi_env env, na
         }
     };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
-        napiAsyncTask->Reject(env, CreateJsError(env,
-            static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
+        napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][setRelativePositionToParentWindowEnabled]msg: send event failed"));
     }
     return result;
 }
