@@ -57,7 +57,7 @@ void DisplayAni::GetCutoutInfo(ani_env* env, ani_object obj, ani_object cutoutIn
     for (int i = 0; i < std::min(int(length), static_cast<int>(rects.size())); i++) {
         ani_ref currentCutoutInfo;
         if (ANI_OK != env->Object_CallMethodByName_Ref(static_cast<ani_object>(boundingRects), "$_get",
-            "I:Lstd/core/Object;", &currentCutoutInfo, (ani_int)i)) {
+            "i:C{std.core.Object}", &currentCutoutInfo, (ani_int)i)) {
             TLOGE(WmsLogTag::DMS, "[ANI] get ani_array index %{public}u fail", (ani_int)i);
         }
         TLOGI(WmsLogTag::DMS, "current i: %{public}d", i);
@@ -320,23 +320,23 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_NOT_FOUND;
     }
     ani_namespace nsp;
-    if ((ret = env->FindNamespace("L@ohos/display/display;", &nsp)) != ANI_OK) {
+    if ((ret = env->FindNamespace("@ohos.display.display", &nsp)) != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] null env %{public}u", ret);
         return ANI_NOT_FOUND;
     }
     DisplayManagerAni::InitDisplayManagerAni(nsp, env);
     std::array funcs = {
-        ani_native_function {"isFoldable", ":Z", reinterpret_cast<void *>(DisplayManagerAni::IsFoldableAni)},
-        ani_native_function {"getFoldDisplayModeNative", ":I",
+        ani_native_function {"isFoldable", ":z", reinterpret_cast<void *>(DisplayManagerAni::IsFoldableAni)},
+        ani_native_function {"getFoldDisplayModeNative", ":i",
             reinterpret_cast<void *>(DisplayManagerAni::GetFoldDisplayModeAni)},
-        ani_native_function {"getFoldStatusNative", ":I", reinterpret_cast<void *>(DisplayManagerAni::GetFoldStatus)},
-        ani_native_function {"getCurrentFoldCreaseRegionNative", "Lstd/core/Object;J:V",
+        ani_native_function {"getFoldStatusNative", ":i", reinterpret_cast<void *>(DisplayManagerAni::GetFoldStatus)},
+        ani_native_function {"getCurrentFoldCreaseRegionNative", "C{std.core.Object}l:",
             reinterpret_cast<void *>(DisplayManagerAni::GetCurrentFoldCreaseRegion)},
-        ani_native_function {"getDisplayByIdSyncNative", "Lstd/core/Object;D:V",
+        ani_native_function {"getDisplayByIdSyncNative", "C{std.core.Object}d:",
             reinterpret_cast<void *>(DisplayManagerAni::GetDisplayByIdSyncAni)},
-        ani_native_function {"getDefaultDisplaySyncNative", "Lstd/core/Object;:V",
+        ani_native_function {"getDefaultDisplaySyncNative", "C{std.core.Object}:",
             reinterpret_cast<void *>(DisplayManagerAni::GetDefaultDisplaySyncAni)},
-        ani_native_function {"getAllDisplaysSyncNative", "Lescompat/Array;:V",
+        ani_native_function {"getAllDisplaysSyncNative", "C{escompat.Array}:",
             reinterpret_cast<void *>(DisplayManagerAni::GetAllDisplaysAni)},
         ani_native_function {"syncOn", nullptr,
             reinterpret_cast<void *>(DisplayManagerAni::RegisterCallback)},
@@ -354,16 +354,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     }
 
     ani_class displayCls = nullptr;
-    if ((ret = env->FindClass("L@ohos/display/display/DisplayImpl;", &displayCls)) != ANI_OK) {
+    if ((ret = env->FindClass("@ohos.display.display.DisplayImpl", &displayCls)) != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] null env %{public}u", ret);
         return ANI_NOT_FOUND;
     }
     std::array methods = {
-        ani_native_function {"getCutoutInfoInternal", "L@ohos/display/display/CutoutInfo;:V",
+        ani_native_function {"getCutoutInfoInternal", "C{@ohos.display.display.CutoutInfo}:",
             reinterpret_cast<void *>(DisplayAni::GetCutoutInfo)},
-        ani_native_function {"getAvailableAreaInternal", "L@ohos/display/display/Rect;:V",
+        ani_native_function {"getAvailableAreaInternal", "C{@ohos.display.display.Rect}:",
             reinterpret_cast<void *>(DisplayAni::GetAvailableArea)},
-        ani_native_function {"hasImmersiveWindowInternal", ":Z",
+        ani_native_function {"hasImmersiveWindowInternal", ":z",
             reinterpret_cast<void *>(DisplayAni::HasImmersiveWindow)},
         ani_native_function {"syncOn", nullptr,
             reinterpret_cast<void *>(DisplayAni::RegisterCallback)},

@@ -95,35 +95,35 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_NOT_FOUND;
     }
     ani_class cls = nullptr;
-    if ((ret = env->FindClass("L@ohos/window/window/WindowStageInternal;", &cls)) != ANI_OK) {
+    if ((ret = env->FindClass("@ohos.window.window.WindowStageInternal", &cls)) != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] can't find class %{public}u", ret);
         return ANI_NOT_FOUND;
     }
     std::array methods = {
-        ani_native_function {"setWindowRectAutoSave", "JZZ:V",
+        ani_native_function {"setWindowRectAutoSave", "lzz:",
             reinterpret_cast<void *>(SetWindowRectAutoSave)},
-        ani_native_function {"isWindowRectAutoSave", "J:Z",
+        ani_native_function {"isWindowRectAutoSave", "l:z",
             reinterpret_cast<void *>(IsWindowRectAutoSave)},
-        ani_native_function {"removeStartingWindow", "J:V",
+        ani_native_function {"removeStartingWindow", "l:",
             reinterpret_cast<void *>(RemoveStartingWindow)},
         ani_native_function {"loadContentSync",
-            "JLstd/core/String;Larkui/stateManagement/storage/localStorage/LocalStorage;:V",
+            "lC{std.core.String}C{arkui.stateManagement.storage.localStorage.LocalStorage}:",
             reinterpret_cast<void *>(AniWindowStage::LoadContent)},
         ani_native_function {"disableWindowDecorSync", nullptr,
             reinterpret_cast<void *>(AniWindowStage::DisableWindowDecor)},
         ani_native_function {"setShowOnLockScreenSync",
             nullptr, reinterpret_cast<void *>(AniWindowStage::SetShowOnLockScreen)},
-        ani_native_function {"getMainWindowSync", "J:L@ohos/window/window/Window;",
+        ani_native_function {"getMainWindowSync", "l:C{@ohos.window.window.Window}",
             reinterpret_cast<void *>(WindowGetMainWindow)},
-        ani_native_function {"createSubWindowSync", "JLstd/core/String;:L@ohos/window/window/Window;",
+        ani_native_function {"createSubWindowSync", "lC{std.core.String}:C{@ohos.window.window.Window}",
             reinterpret_cast<void *>(CreateSubWindow)},
         ani_native_function {"onSync", nullptr,
             reinterpret_cast<void *>(AniWindowStage::RegisterWindowCallback)},
         ani_native_function {"offSync", nullptr,
             reinterpret_cast<void *>(AniWindowStage::UnregisterWindowCallback)},
-        ani_native_function {"nativeTransferStatic", "Lstd/interop/ESValue;:Lstd/core/Object;",
+        ani_native_function {"nativeTransferStatic", "C{std.interop.ESValue}:C{std.core.Object}",
             reinterpret_cast<void *>(AniWindowStage::NativeTransferStatic)},
-        ani_native_function {"nativeTransferDynamic", "J:Lstd/interop/ESValue;",
+        ani_native_function {"nativeTransferDynamic", "l:C{std.interop.ESValue}",
             reinterpret_cast<void *>(AniWindowStage::NativeTransferDynamic)},
     };
     for (auto method : methods) {
