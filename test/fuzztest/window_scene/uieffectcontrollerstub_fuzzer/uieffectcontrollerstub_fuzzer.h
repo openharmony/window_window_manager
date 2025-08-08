@@ -13,19 +13,9 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ROSEN_WINDOW_SCENE_MOCK_UI_EFFECT_CONTROLLER_STUB_H
-#define OHOS_ROSEN_WINDOW_SCENE_MOCK_UI_EFFECT_CONTROLLER_STUB_H
-#include <gmock/gmock.h>
+#ifndef TEST_FUZZTEST_UI_EFFECT_CONTROLLER_STUB_FUZZER_H
+#define TEST_FUZZTEST_UI_EFFECT_CONTROLLER_STUB_FUZZER_H
 
-#include "ui_effect_controller_client_stub.h"
+#define FUZZ_PROJECT_NAME "uieffectcontrollerstub_fuzzer"
 
-namespace OHOS {
-namespace Rosen {
-class UIEffectControllerClientStubMocker : public UIEffectControllerClientStub {
-public:
-    MOCK_METHOD(WMError, SetParams, (const sptr<UIEffectParams>& params), (override));
-    MOCK_METHOD(sptr<IRemoteObject>, AsObject, (), (override));
-};
-}
-} // namespace OHOS::Rosen
-#endif // OHOS_ROSEN_WINDOW_SCENE_MOCK_SUB_SESSION_H
+#endif
