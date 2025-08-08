@@ -2332,7 +2332,7 @@ bool WindowSessionProperty::GetPcAppInpadOrientationLandscape() const
     return isPcAppInpadOrientationLandscape_;
 }
 
-void WindowSessionProperty::SetAncoRealBundleName(std::string ancoRealBundleName)
+void WindowSessionProperty::SetAncoRealBundleName(const std::string& ancoRealBundleName)
 {
     ancoRealBundleName_ = ancoRealBundleName;
 }
