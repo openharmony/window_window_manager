@@ -386,6 +386,60 @@ FoldCreaseRegion SuperFoldStateManager::GetLiveCreaseRegion()
     return liveCreaseRegion_;
 }
 
+nlohmann::ordered_json SuperFoldStateManager::GetFoldCreaseRegionJson()
+{
+    if (superFoldCreaseRegionItems_.size() == 0) {
+        GetAllCreaseRegion();
+    }
+    nlohmann::ordered_json ret = nlohmann::ordered_json::array();
+    for (const auto& foldCreaseRegionItem : superFoldCreaseRegionItems_) {
+        nlohmann::ordered_json capabilityInfo;
+        capabilityInfo["superFoldStatus"] =
+            std::to_string(static_cast<int32_t>(foldCreaseRegionItem.superFoldStatus_));
+        capabilityInfo["displayOrientation"] =
+            std::to_string(static_cast<int32_t>(foldCreaseRegionItem.orientation_));
+        capabilityInfo["creaseRects"]["displayId"] =
+            std::to_string(static_cast<int32_t>(foldCreaseRegionItem.region_.GetDisplayId()));
+        auto creaseRects = foldCreaseRegionItem.region_.GetCreaseRects();
+        capabilityInfo["creaseRects"]["rects"] = nlohmann::ordered_json::array();
+        for (const auto& creaseRect : creaseRects) {
+            capabilityInfo["creaseRects"]["rects"].push_back({
+                {"posX", creaseRect.posX_},
+                {"posY", creaseRect.posY_},
+                {"width", creaseRect.width_},
+                {"height", creaseRect.height_}
+            });
+        }
+        ret.push_back(capabilityInfo);
+    }
+    return ret;
+}
+
+void SuperFoldStateManager::GetAllCreaseRegion()
+{
+    SuperFoldCreaseRegionItem FCreaseItem{DisplayOrientation::LANDSCAPE, SuperFoldStatus::FOLDED,
+        FoldCreaseRegion(0, {})};
+    SuperFoldCreaseRegionItem HPorCreaseItem{DisplayOrientation::PORTRAIT, SuperFoldStatus::HALF_FOLDED,
+        GetFoldCreaseRegion(false)};
+    SuperFoldCreaseRegionItem HLandCreaseItem{DisplayOrientation::LANDSCAPE, SuperFoldStatus::HALF_FOLDED,
+        GetFoldCreaseRegion(true)};
+    SuperFoldCreaseRegionItem EPorCreaseItem{DisplayOrientation::PORTRAIT, SuperFoldStatus::EXPANDED,
+        GetFoldCreaseRegion(false)};
+    SuperFoldCreaseRegionItem ELandCreaseItem{DisplayOrientation::LANDSCAPE, SuperFoldStatus::EXPANDED,
+        GetFoldCreaseRegion(true)};
+    SuperFoldCreaseRegionItem KPorCreaseItem{DisplayOrientation::PORTRAIT, SuperFoldStatus::KEYBOARD,
+        GetFoldCreaseRegion(false)};
+    SuperFoldCreaseRegionItem KLandCreaseItem{DisplayOrientation::LANDSCAPE, SuperFoldStatus::KEYBOARD,
+        GetFoldCreaseRegion(true)};
+    superFoldCreaseRegionItems_.push_back(FCreaseItem);
+    superFoldCreaseRegionItems_.push_back(HPorCreaseItem);
+    superFoldCreaseRegionItems_.push_back(HLandCreaseItem);
+    superFoldCreaseRegionItems_.push_back(EPorCreaseItem);
+    superFoldCreaseRegionItems_.push_back(ELandCreaseItem);
+    superFoldCreaseRegionItems_.push_back(KPorCreaseItem);
+    superFoldCreaseRegionItems_.push_back(KLandCreaseItem);
+}
+
 void SuperFoldStateManager::HandleDisplayNotify(SuperFoldStatusChangeEvents changeEvent)
 {
     TLOGI(WmsLogTag::DMS, "changeEvent: %{public}d", static_cast<uint32_t>(changeEvent));
