@@ -6135,7 +6135,7 @@ void ScreenSessionManager::RemoveScreenCastInfo(ScreenId screenId)
     if (iter == screenCastInfoMap_.end()) {
         return;
     }
-    screenCastInfoMap_.erase(screenId);
+    screenCastInfoMap_.erase(iter);
     TLOGI(WmsLogTag::DMS, "screenId:%{public}" PRIu64 "", screenId);
 }
 
