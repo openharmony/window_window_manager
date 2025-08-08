@@ -56,7 +56,6 @@
 #include "perform_reporter.h"
 #include "picture_in_picture_manager.h"
 #include "parameters.h"
-#include "session_helper.h"
 #include "floating_ball_manager.h"
 #include "sys_cap_util.h"
 
@@ -2432,12 +2431,14 @@ WMError WindowSessionImpl::ClientToGlobalDisplay(const Position& inPosition, Pos
             windowId, transform.scaleX_, transform.scaleY_);
         return WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS;
     }
-
     const auto globalDisplayRect = GetGlobalDisplayRect();
-    outPosition = {
-        globalDisplayRect.posX_ + inPosition.x,
-        globalDisplayRect.posY_ + inPosition.y
-    };
+    const Position& basePosition = {globalDisplayRect.posX_, globalDisplayRect.posY_};
+    if (!inPosition.SafeAdd(basePosition, outPosition)) {
+        TLOGW(WmsLogTag::WMS_LAYOUT,
+            "Position overflow, windowId: %{public}u, inPosition: %{public}s, basePosition: %{public}s",
+            windowId, inPosition.ToString().c_str(), basePosition.ToString().c_str());
+        return WMError::WM_ERROR_ILLEGAL_PARAM;
+    }
     TLOGD(WmsLogTag::WMS_LAYOUT,
         "windowId: %{public}u, globalDisplayRect: %{public}s, inPosition: %{public}s, outPosition: %{public}s",
         windowId, globalDisplayRect.ToString().c_str(),
@@ -2455,12 +2456,14 @@ WMError WindowSessionImpl::GlobalDisplayToClient(const Position& inPosition, Pos
             windowId, transform.scaleX_, transform.scaleY_);
         return WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS;
     }
-
     const auto globalDisplayRect = GetGlobalDisplayRect();
-    outPosition = {
-        inPosition.x - globalDisplayRect.posX_,
-        inPosition.y - globalDisplayRect.posY_
-    };
+    const Position& basePosition = {globalDisplayRect.posX_, globalDisplayRect.posY_};
+    if (!inPosition.SafeSub(basePosition, outPosition)) {
+        TLOGW(WmsLogTag::WMS_LAYOUT,
+            "Position overflow, windowId: %{public}u, inPosition: %{public}s, basePosition: %{public}s",
+            windowId, inPosition.ToString().c_str(), basePosition.ToString().c_str());
+        return WMError::WM_ERROR_ILLEGAL_PARAM;
+    }
     TLOGD(WmsLogTag::WMS_LAYOUT,
         "windowId: %{public}u, globalDisplayRect: %{public}s, inPosition: %{public}s, outPosition: %{public}s",
         windowId, globalDisplayRect.ToString().c_str(),
