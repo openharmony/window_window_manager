@@ -136,8 +136,9 @@ napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
         JsScreenSessionManager::SetPrimaryDisplaySystemDpi);
     BindNativeFunction(env, exportObj, "getPrimaryDisplaySystemDpi", moduleName,
         JsScreenSessionManager::GetPrimaryDisplaySystemDpi);
-    BindNativeFunction(env, exportObj, "setScreenFreezeImmediately", moduleName,
-        JsScreenSessionManager::SetScreenFreezeImmediately);
+    BindNativeFunction(env, exportObj, "freezeScreen", moduleName, JsScreenSessionManager::FreezeScreen);
+    BindNativeFunction(env, exportObj, "getScreenSnapshotWithAllWindows", moduleName,
+        JsScreenSessionManager::GetScreenSnapshotWithAllWindows);
     return NapiGetUndefined(env);
 }
 
@@ -360,11 +361,18 @@ napi_value JsScreenSessionManager::GetPrimaryDisplaySystemDpi(napi_env env, napi
     return (me != nullptr) ? me->OnGetPrimaryDisplaySystemDpi(env, info) : nullptr;
 }
 
-napi_value JsScreenSessionManager::SetScreenFreezeImmediately(napi_env env, napi_callback_info info)
+napi_value JsScreenSessionManager::FreezeScreen(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::DMS, "[NAPI]SetScreenFreezeImmediately");
+    TLOGD(WmsLogTag::DMS, "[NAPI]FreezeScreen");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
-    return (me != nullptr) ? me->OnSetScreenFreezeImmediately(env, info) : nullptr;
+    return (me != nullptr) ? me->OnFreezeScreen(env, info) : nullptr;
+}
+
+napi_value JsScreenSessionManager::GetScreenSnapshotWithAllWindows(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DMS, "[NAPI]GetScreenSnapshotWithAllWindows");
+    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
+    return (me != nullptr) ? me->OnGetScreenSnapshotWithAllWindows(env, info) : nullptr;
 }
 
 void JsScreenSessionManager::OnScreenConnected(const sptr<ScreenSession>& screenSession)
@@ -1180,9 +1188,39 @@ napi_value JsScreenSessionManager::OnGetPrimaryDisplaySystemDpi(napi_env env, na
     return CreateJsValue(env, primaryDisplaySystemDpi * BASELINE_DENSITY);
 }
 
-napi_value JsScreenSessionManager::OnSetScreenFreezeImmediately(napi_env env, const napi_callback_info info)
+napi_value JsScreenSessionManager::OnFreezeScreen(napi_env env, const napi_callback_info info)
 {
-    TLOGD(WmsLogTag::DMS, "[NAPI]OnSetScreenFreezeImmediately");
+    TLOGD(WmsLogTag::DMS, "[NAPI]OnFreezeScreen");
+    size_t argc = ARGC_TWO;
+    napi_value argv[ARGC_TWO] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_TWO) {
+        TLOGE(WmsLogTag::DMS, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t screenId = INVALID_ID;
+    if (!ConvertFromJsValue(env, argv[0], screenId) || screenId < 0) {
+        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to screenId");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool isFreeze = false;
+    if (!ConvertFromJsValue(env, argv[ARGC_ONE], isFreeze)) {
+        TLOGE(WmsLogTag::DMS, "Failed to convert parameter to isFreeze");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    ScreenSessionManagerClient::GetInstance().FreezeScreen(static_cast<ScreenId>(screenId), isFreeze);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsScreenSessionManager::OnGetScreenSnapshotWithAllWindows(napi_env env, const napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DMS, "[NAPI]OnGetScreenSnapshotWithAllWindows");
     size_t argc = ARGC_FOUR;
     napi_value argv[ARGC_FOUR] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -1209,29 +1247,24 @@ napi_value JsScreenSessionManager::OnSetScreenFreezeImmediately(napi_env env, co
         }
         scaleParam[i] = MathHelper::Clamp(scaleParam[i], 0.0, 1.0);
     }
-    bool isFreeze = false;
-    if (!ConvertFromJsValue(env, argv[ARGC_THREE], isFreeze)) {
-        TLOGE(WmsLogTag::DMS, "Failed to convert parameter to isFreeze");
+    bool isNeedCheckDrmAndSurfaceLock = false;
+    if (!ConvertFromJsValue(env, argv[ARGC_THREE], isNeedCheckDrmAndSurfaceLock)) {
+        TLOGE(WmsLogTag::DMS, "Failed to convert parameter to isNeedCheckDrmAndSurfaceLock");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     napi_value nativeData = nullptr;
-    auto pixelMap = ScreenSessionManagerClient::GetInstance().SetScreenFreezeImmediately(
+    auto pixelMap = ScreenSessionManagerClient::GetInstance().GetScreenSnapshotWithAllWindows(
         static_cast<ScreenId>(screenId), static_cast<float>(scaleParam[0]), static_cast<float>(scaleParam[1]),
-        isFreeze);
-    if (isFreeze) {
-        if (pixelMap == nullptr) {
-            TLOGE(WmsLogTag::DMS, "[NAPI]pixelMap is nullptr");
-            return nativeData;
-        }
-        nativeData = Media::PixelMapNapi::CreatePixelMap(env, pixelMap);
-        if (nativeData != nullptr) {
-            TLOGD(WmsLogTag::DMS, "[NAPI]pixelmap W x H = %{public}d x %{public}d", pixelMap->GetWidth(),
-                pixelMap->GetHeight());
-        } else {
-            TLOGE(WmsLogTag::DMS, "[NAPI]create native pixelmap failed");
-        }
+        isNeedCheckDrmAndSurfaceLock);
+    if (pixelMap == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[NAPI]pixelMap is nullptr");
+        return nativeData;
+    }
+    nativeData = Media::PixelMapNapi::CreatePixelMap(env, pixelMap);
+    if (nativeData == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[NAPI]create native pixelmap failed");
     }
     return nativeData;
 }

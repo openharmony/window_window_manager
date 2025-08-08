@@ -71,7 +71,8 @@ private:
     static napi_value NotifyScreenMaskAppear(napi_env env, napi_callback_info info);
     static napi_value SetPrimaryDisplaySystemDpi(napi_env env, napi_callback_info info);
     static napi_value GetPrimaryDisplaySystemDpi(napi_env env, napi_callback_info info);
-    static napi_value SetScreenFreezeImmediately(napi_env env, napi_callback_info info);
+    static napi_value FreezeScreen(napi_env env, napi_callback_info info);
+    static napi_value GetScreenSnapshotWithAllWindows(napi_env env, napi_callback_info info);
 
     napi_value OnRegisterCallback(napi_env env, const napi_callback_info info);
     napi_value OnUpdateScreenRotationProperty(napi_env env, const napi_callback_info info);
@@ -103,7 +104,8 @@ private:
     napi_value OnNotifyScreenMaskAppear(napi_env env, napi_callback_info info);
     napi_value OnSetPrimaryDisplaySystemDpi(napi_env env, napi_callback_info info);
     napi_value OnGetPrimaryDisplaySystemDpi(napi_env env, napi_callback_info info);
-    napi_value OnSetScreenFreezeImmediately(napi_env env, napi_callback_info info);
+    napi_value OnFreezeScreen(napi_env env, napi_callback_info info);
+    napi_value OnGetScreenSnapshotWithAllWindows(napi_env env, napi_callback_info info);
 
     std::shared_ptr<NativeReference> screenConnectionCallback_;
     std::shared_ptr<NativeReference> shutdownCallback_;
