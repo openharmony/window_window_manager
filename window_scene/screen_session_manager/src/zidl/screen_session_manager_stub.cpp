@@ -1074,6 +1074,11 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             NotifyFoldToExpandCompletion(foldToExpand);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_NOTIFY_SCREEN_CONNECT_COMPLETION: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            NotifyScreenConnectCompletion(screenId);
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_GET_VIRTUAL_SCREEN_FLAG: {
             ProcGetVirtualScreenFlag(data, reply);
             break;

@@ -52,6 +52,7 @@ public:
         MultiScreenPositionOptions mainScreenOptions, MultiScreenPositionOptions secondScreenOption);
 
     void MultiScreenReportDataToRss(std::string multiScreenType, std::string status);
+    void NotifyScreenConnectCompletion(ScreenId screenId);
 private:
     MultiScreenManager();
     ~MultiScreenManager();
@@ -89,6 +90,9 @@ private:
     void DoFirstExtendChangeMirror(sptr<ScreenSession> firstSession, sptr<ScreenSession> secondarySession);
 
     std::pair<ScreenId, MultiScreenMode> lastScreenMode_;  // main screen id & secondary screen mode
+    std::mutex uniqueScreenMutex_;
+    std::condition_variable uniqueScreenCV_;
+    std::map<ScreenId, bool> uniqueScreenTimeoutMap_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_MULTI_SCREEN_MANAGER_H

@@ -34,6 +34,7 @@ const std::string MULTI_SCREEN_EXIT_STR = "exit";
 const std::string MULTI_SCREEN_ENTER_STR = "enter";
 constexpr int32_t MULTI_SCREEN_EXIT = 0;
 constexpr int32_t MULTI_SCREEN_ENTER = 1;
+constexpr uint32_t SCREEN_CONNECT_TIMEOUT = 500;
 }
 MultiScreenManager::MultiScreenManager()
 {
@@ -158,6 +159,16 @@ DMError MultiScreenManager::PhysicalScreenUniqueSwitch(const std::vector<ScreenI
         screenSession->ReuseDisplayNode(config);
         screenSession->SetVirtualPixelRatio(screenSession->GetScreenProperty().GetDefaultDensity());
         ScreenSessionManager::GetInstance().OnVirtualScreenChange(physicalScreenId, ScreenEvent::CONNECTED);
+        std::unique_lock<std::mutex> lock(uniqueScreenMutex_);
+        if ((screenSession != nullptr) && (screenSession->GetInnerName() == "CustomScbScreen")) {
+            uniqueScreenTimeoutMap_[physicalScreenId] = true;
+            if (uniqueScreenCV_.wait_for(lock, std::chrono::milliseconds(SCREEN_CONNECT_TIMEOUT))
+                == std::cv_status::timeout) {
+                uniqueScreenTimeoutMap_[physicalScreenId] = false;
+                TLOGE(WmsLogTag::DMS, "wait for unique screen connect timeout, screenId:%{public}" PRIu64,
+                    physicalScreenId);
+            }
+        }
         ScreenSessionManager::GetInstance().RemoveScreenCastInfo(physicalScreenId);
         ScreenSessionManager::GetInstance().NotifyScreenChanged(
             screenSession->ConvertToScreenInfo(), ScreenChangeEvent::SCREEN_SOURCE_MODE_CHANGE);
@@ -207,10 +218,32 @@ DMError MultiScreenManager::VirtualScreenUniqueSwitch(sptr<ScreenSession> screen
         ScreenSessionManager::GetInstance().RemoveScreenCastInfo(uniqueScreenId);
         // virtual screen create callback to notify scb
         ScreenSessionManager::GetInstance().OnVirtualScreenChange(uniqueScreenId, ScreenEvent::CONNECTED);
+        std::unique_lock<std::mutex> lock(uniqueScreenMutex_);
+        if ((uniqueScreen != nullptr) && (uniqueScreen->GetInnerName() == "CustomScbScreen")) {
+            uniqueScreenTimeoutMap_[uniqueScreenId] = true;
+            if (uniqueScreenCV_.wait_for(lock, std::chrono::milliseconds(SCREEN_CONNECT_TIMEOUT))
+                == std::cv_status::timeout) {
+                uniqueScreenTimeoutMap_[uniqueScreenId] = false;
+                TLOGE(WmsLogTag::DMS, "wait for screen connect timeout, screenId:%{public}" PRIu64,
+                    uniqueScreenId);
+            }
+        }
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:VirtualScreenUniqueSwitch end");
     TLOGW(WmsLogTag::DMS, "to unique and notify scb end");
     return DMError::DM_OK;
+}
+
+void MultiScreenManager::NotifyScreenConnectCompletion(ScreenId screenId)
+{
+    std::unique_lock<std::mutex> lock(uniqueScreenMutex_);
+    TLOGI(WmsLogTag::DMS, "ENTER, screenId:%{public}" PRIu64, screenId);
+    auto it = uniqueScreenTimeoutMap_.find(screenId);
+    if (it != uniqueScreenTimeoutMap_.end()) {
+        if (it->second) {
+            uniqueScreenCV_.notify_all();
+        }
+    }
 }
 
 static void AddUniqueScreenDisplayId(std::vector<DisplayId>& displayIds,
@@ -238,11 +271,19 @@ DMError MultiScreenManager::UniqueSwitch(const std::vector<ScreenId>& screenIds,
     FilterPhysicalAndVirtualScreen(screenIds, physicalScreenIds, virtualScreenIds);
 
     if (!virtualScreenIds.empty()) {
+        {
+            std::unique_lock<std::mutex> lock(uniqueScreenMutex_);
+            uniqueScreenTimeoutMap_.clear();
+        }
         switchStatus = ScreenSessionManager::GetInstance().VirtualScreenUniqueSwitch(virtualScreenIds);
         TLOGW(WmsLogTag::DMS, "virtual screen switch to unique result: %{public}d", switchStatus);
         AddUniqueScreenDisplayId(displayIds, virtualScreenIds, switchStatus);
     }
     if (!physicalScreenIds.empty()) {
+        {
+            std::unique_lock<std::mutex> lock(uniqueScreenMutex_);
+            uniqueScreenTimeoutMap_.clear();
+        }
         switchStatus = PhysicalScreenUniqueSwitch(physicalScreenIds);
         if (switchStatus == DMError::DM_OK) {
             for (auto screenId : physicalScreenIds) {

@@ -84,6 +84,7 @@ public:
     int32_t SetScreenOnDelayTime(int32_t delay);
     void SetCameraStatus(int32_t cameraStatus, int32_t cameraPosition);
     void NotifyFoldToExpandCompletion(bool foldToExpand);
+    void NotifyScreenConnectCompletion(ScreenId screenId);
     void RecordEventFromScb(std::string description, bool needRecordEvent);
     FoldStatus GetFoldStatus();
     SuperFoldStatus GetSuperFoldStatus();
