@@ -2426,7 +2426,7 @@ WMError WindowSessionImpl::ClientToGlobalDisplay(const Position& inPosition, Pos
         return WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS;
     }
     const auto globalDisplayRect = GetGlobalDisplayRect();
-    const Position basePosition = {globalDisplayRect.posX_, globalDisplayRect.posY_};
+    const Position& basePosition = {globalDisplayRect.posX_, globalDisplayRect.posY_};
     if (!inPosition.SafeAdd(basePosition, outPosition)) {
         TLOGW(WmsLogTag::WMS_LAYOUT,
             "Position overflow, windowId: %{public}u, inPosition: %{public}s, basePosition: %{public}s",
@@ -2451,7 +2451,7 @@ WMError WindowSessionImpl::GlobalDisplayToClient(const Position& inPosition, Pos
         return WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS;
     }
     const auto globalDisplayRect = GetGlobalDisplayRect();
-    const Position basePosition = {globalDisplayRect.posX_, globalDisplayRect.posY_};
+    const Position& basePosition = {globalDisplayRect.posX_, globalDisplayRect.posY_};
     if (!inPosition.SafeSub(basePosition, outPosition)) {
         TLOGW(WmsLogTag::WMS_LAYOUT,
             "Position overflow, windowId: %{public}u, inPosition: %{public}s, basePosition: %{public}s",
