@@ -3594,6 +3594,7 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
             return WSError::WS_ERROR_INVALID_SESSION;
         }
         DeleteProcessMap(sceneSession->GetSessionInfo(), persistentId);
+        startingWindowRdbMgr_->ClearRdbStore();
         auto sceneSessionInfo = SetAbilitySessionInfo(sceneSession);
         sceneSession->GetCloseAbilityWantAndClean(sceneSessionInfo->want);
         ResetSceneSessionInfoWant(sceneSessionInfo);
@@ -5365,6 +5366,7 @@ void SceneSessionManager::UpdateAllStartingWindowRdb()
         auto batchInsertRes = startingWindowRdbMgr_->BatchInsert(outInsertNum, inputValues);
         TLOGNI(WmsLogTag::WMS_PATTERN, "res: %{public}d, bundles: %{public}zu, insert: %{public}" PRId64,
             batchInsertRes, bundleInfos.size(), outInsertNum);
+        startingWindowRdbMgr_->ClearRdbStore();
         };
     ffrtQueueHelper_->SubmitTask(loadTask);
 }
