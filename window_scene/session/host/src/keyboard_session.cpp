@@ -728,7 +728,7 @@ void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRe
             // When the keyboard shows/hides rapidly in succession,
             // the attributes aren't refreshed but occupied area info recalculation needs to be triggered.
             if (!animationInfo.isGravityChanged) {
-                session->keyboardStateOrRectChanged_ = true;
+                session->stateChanged_ = true;
             }
             // If the vsync period terminates, immediately notify all registered listeners.
             if (session->keyboardCallback_ != nullptr &&
@@ -738,7 +738,7 @@ void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRe
             if (isLayoutFinished) {
                 TLOGI(WmsLogTag::WMS_KEYBOARD, "vsync period completed, id: %{public}d", callingId);
                 session->ProcessKeyboardOccupiedAreaInfo(callingId, true, true);
-                session->keyboardStateOrRectChanged_ = false;
+                session->stateChanged_ = false;
             }
             if (session->IsSessionForeground() && session->GetCallingSessionId() == INVALID_WINDOW_ID &&
                 !animationInfo.isGravityChanged) {
@@ -1094,7 +1094,7 @@ void KeyboardSession::CalculateOccupiedAreaAfterUIRefresh()
     if ((keyboardDirtyFlags & static_cast<uint32_t>(SessionUIDirtyFlag::VISIBLE)) !=
         static_cast<uint32_t>(SessionUIDirtyFlag::NONE) ||
         (keyboardDirtyFlags & static_cast<uint32_t>(SessionUIDirtyFlag::RECT)) !=
-        static_cast<uint32_t>(SessionUIDirtyFlag::NONE) || keyboardStateOrRectChanged_) {
+        static_cast<uint32_t>(SessionUIDirtyFlag::NONE) || stateChanged_) {
         TLOGD(WmsLogTag::WMS_KEYBOARD, "Keyboard panel rect has changed");
         needRecalculateOccupiedArea = true;
     }
@@ -1118,8 +1118,8 @@ void KeyboardSession::CalculateOccupiedAreaAfterUIRefresh()
         }
     }
     if (needRecalculateOccupiedArea) {
-        ProcessKeyboardOccupiedAreaInfo(callingId, false, keyboardStateOrRectChanged_);
-        keyboardStateOrRectChanged_ = false;
+        ProcessKeyboardOccupiedAreaInfo(callingId, false, stateChanged_);
+        stateChanged_ = false;
     }
 }
 } // namespace OHOS::Rosen

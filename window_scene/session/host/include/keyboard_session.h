@@ -115,7 +115,7 @@ private:
     bool CalculateOccupiedArea(const sptr<SceneSession>& callingSession, const WSRect& callingSessionRect,
         const WSRect& panelRect, sptr<OccupiedAreaChangeInfo>& occupiedAreaInfo);
     void CloseRSTransaction();
-    bool keyboardStateOrRectChanged_ = false;
+    bool stateChanged_ = false;
     void CalculateOccupiedAreaAfterUIRefresh() override;
     WSRect CalculateScaledRect(WSRect sessionRect, float scaleX, float scaleY);
 
