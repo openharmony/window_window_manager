@@ -296,6 +296,7 @@ public:
         return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
     }
     virtual void NotifyFoldToExpandCompletion(bool foldToExpand) {}
+    virtual void NotifyScreenConnectCompletion(ScreenId screenId) {}
     virtual void RecordEventFromScb(std::string description, bool needRecordEvent) {}
     virtual DeviceScreenConfig GetDeviceScreenConfig() { return {}; }
     virtual DMError SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refreshRate,

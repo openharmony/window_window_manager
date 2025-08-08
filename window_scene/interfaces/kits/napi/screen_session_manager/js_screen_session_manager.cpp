@@ -104,6 +104,8 @@ napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
         JsScreenSessionManager::SetScreenOffDelayTime);
     BindNativeFunction(env, exportObj, "notifyFoldToExpandCompletion", moduleName,
         JsScreenSessionManager::NotifyFoldToExpandCompletion);
+    BindNativeFunction(env, exportObj, "notifyScreenConnectCompletion", moduleName,
+        JsScreenSessionManager::NotifyScreenConnectCompletion);
     BindNativeFunction(env, exportObj, "recordEventFromScb", moduleName,
         JsScreenSessionManager::RecordEventFromScb);
     BindNativeFunction(env, exportObj, "getFoldStatus", moduleName, JsScreenSessionManager::GetFoldStatus);
@@ -253,6 +255,13 @@ napi_value JsScreenSessionManager::NotifyFoldToExpandCompletion(napi_env env, na
     TLOGD(WmsLogTag::DMS, "[NAPI]NotifyFoldToExpandCompletion");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnNotifyFoldToExpandCompletion(env, info) : nullptr;
+}
+
+napi_value JsScreenSessionManager::NotifyScreenConnectCompletion(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DMS, "[NAPI]NotifyFoldToExpandCompletion");
+    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
+    return (me != nullptr) ? me->OnNotifyScreenConnectCompletion(env, info) : nullptr;
 }
 
 napi_value JsScreenSessionManager::RecordEventFromScb(napi_env env, napi_callback_info info)
@@ -876,6 +885,29 @@ napi_value JsScreenSessionManager::OnNotifyFoldToExpandCompletion(napi_env env, 
         return NapiGetUndefined(env);
     }
     ScreenSessionManagerClient::GetInstance().NotifyFoldToExpandCompletion(foldToExpand);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsScreenSessionManager::OnNotifyScreenConnectCompletion(napi_env env, const napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DMS, "[NAPI]OnNotifyScreenConnectCompletion");
+    size_t argc = ARGC_ONE;
+    napi_value argv[ARGC_ONE] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_ONE) {
+        TLOGE(WmsLogTag::DMS, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t screenId;
+    if (!ConvertFromJsValue(env, argv[0], screenId) || (screenId < 0)) {
+        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to screenId");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    ScreenSessionManagerClient::GetInstance().NotifyScreenConnectCompletion(static_cast<uint64_t>(screenId));
     return NapiGetUndefined(env);
 }
 

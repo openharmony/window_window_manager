@@ -56,6 +56,7 @@ private:
     static napi_value SetScreenOnDelayTime(napi_env env, napi_callback_info info);
     static napi_value SetForceCloseHdr(napi_env env, napi_callback_info info);
     static napi_value NotifyFoldToExpandCompletion(napi_env env, napi_callback_info info);
+    static napi_value NotifyScreenConnectCompletion(napi_env env, napi_callback_info info);
     static napi_value RecordEventFromScb(napi_env env, napi_callback_info info);
     static napi_value SetCameraStatus(napi_env env, napi_callback_info info);
     static napi_value GetFoldStatus(napi_env env, napi_callback_info info);
@@ -89,6 +90,7 @@ private:
     napi_value OnSetCameraStatus(napi_env env, napi_callback_info info);
     napi_value OnSetForceCloseHdr(napi_env env, const napi_callback_info info);
     napi_value OnNotifyFoldToExpandCompletion(napi_env env, const napi_callback_info info);
+    napi_value OnNotifyScreenConnectCompletion(napi_env env, const napi_callback_info info);
     napi_value OnRecordEventFromScb(napi_env env, const napi_callback_info info);
     napi_value OnGetFoldStatus(napi_env env, const napi_callback_info info);
     napi_value OnGetSuperFoldStatus(napi_env env, const napi_callback_info info);
