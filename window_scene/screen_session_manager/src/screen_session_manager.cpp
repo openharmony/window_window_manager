@@ -6084,13 +6084,16 @@ void ScreenSessionManager::ChangeScreenGroup(sptr<ScreenSessionGroup> group, con
     AddScreenToGroup(group, addScreens, addChildPos, removeChildResMap);
 }
 
-void ScreenSessionManager::ChangeMirrorScreenConfig(sptr<ScreenSessionGroup> group,
-        DMRect& mainScreenRegion, sptr<ScreenSession> screen)
+void ScreenSessionManager::ChangeMirrorScreenConfig(const sptr<ScreenSessionGroup>& group,
+        const DMRect& mainScreenRegion, sptr<ScreenSession>& screen)
 {
     if (screen == nullptr) {
         return;
     }
     auto screenId = screen->GetScreenId();
+    if (group == nullptr) {
+        return;
+    }
     auto mirrorScreenId = group->mirrorScreenId_;
     ScreenId rsScreenId = SCREEN_ID_INVALID;
     if (!ConvertScreenIdToRsScreenId(screenId, rsScreenId)) {
@@ -6122,7 +6125,7 @@ void ScreenSessionManager::SetScreenCastInfo(ScreenId screenId,
     ScreenId castScreenId, ScreenCombination screenCombination)
 {
     std::unique_lock<std::shared_mutex> lock(screenCastInfoMapMutex_);
-    screenCastInfoMap_[screenId] = std::make_pair(castScreenId, screenCombination);
+    screenCastInfoMap_.insert(std::make_pair(screenId, std::make_pair(castScreenId, screenCombination)));
     TLOGI(WmsLogTag::DMS,
         "screenId:%{public}" PRIu64 ",castScreenId:%{public}" PRIu64 ",screenCombination:%{public}d",
         screenId, castScreenId, screenCombination);
