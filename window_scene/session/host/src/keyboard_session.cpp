@@ -460,9 +460,13 @@ bool KeyboardSession::CheckIfNeedRaiseCallingSession(sptr<SceneSession> callingS
          callingSession->GetParentSession()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING);
     bool isFreeMultiWindowMode = callingSession->IsFreeMultiWindowMode();
     bool isMidScene = callingSession->GetIsMidScene();
+    bool isPhoneNotFreeMultiWindow = systemConfig_.IsPhoneWindow() && !isFreeMultiWindowMode;
+    bool isPadNotFreeMultiWindow = systemConfig_.IsPadWindow() && !isFreeMultiWindowMode;
     if (isCallingSessionFloating && isMainOrParentFloating && !isMidScene &&
-        (systemConfig_.IsPhoneWindow() || (systemConfig_.IsPadWindow() && !isFreeMultiWindowMode))) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "No need to raise calling session in float window");
+        (isPhoneNotFreeMultiWindow || isPadNotFreeMultiWindow)) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "No need to raise calling session in float window, "
+            "isPhoneNotFreeMultiWindow: %{public}d, isPadNotFreeMultiWindow: %{public}d",
+            isPhoneNotFreeMultiWindow, isPadNotFreeMultiWindow);
         return false;
     }
 

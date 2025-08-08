@@ -3883,8 +3883,11 @@ bool Session::CheckEmptyKeyboardAvoidAreaIfNeeded() const
         GetParentSession() != nullptr &&
         GetParentSession()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
     bool isMidScene = GetIsMidScene();
-    bool isPhoneOrPadNotFreeMultiWindow =
-        systemConfig_.IsPhoneWindow() || (systemConfig_.IsPadWindow() && !systemConfig_.IsFreeMultiWindowMode());
+    bool isPhoneNotFreeMultiWindow = systemConfig_.IsPhoneWindow() && !systemConfig_.IsFreeMultiWindowMode();
+    bool isPadNotFreeMultiWindow = systemConfig_.IsPadWindow() && !systemConfig_.IsFreeMultiWindowMode();
+    bool isPhoneOrPadNotFreeMultiWindow = isPhoneNotFreeMultiWindow || isPadNotFreeMultiWindow;
+    TLOGI(WmsLogTag::WMS_LIFE, "check keyboard avoid area, isPhoneNotFreeMultiWindow: %{public}d, "
+        "isPadNotFreeMultiWindow: %{public}d", isPhoneNotFreeMultiWindow, isPadNotFreeMultiWindow);
     return (isMainFloating || isParentFloating) && !isMidScene && isPhoneOrPadNotFreeMultiWindow;
 }
 
