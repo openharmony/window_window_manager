@@ -6111,8 +6111,7 @@ bool ScreenSessionManager::HasSameScreenCastInfo(ScreenId screenId,
 {
     std::shared_lock<std::shared_mutex> lock(screenCastInfoMapMutex_);
     auto iter = screenCastInfoMap_.find(screenId);
-    if (iter != screenCastInfoMap_.end() && screenCastInfoMap_[screenId].first == castScreenId &&
-        screenCastInfoMap_[screenId].second == screenCombination) {
+    if (iter != screenCastInfoMap_.end() && iter->first == castScreenId && iter->second == screenCombination) {
         return true;
     }
     return false;
