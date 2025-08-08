@@ -94,7 +94,6 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         TLOGE(WmsLogTag::DEFAULT, "[ANI] null env");
         return ANI_NOT_FOUND;
     }
-
     ani_class cls = nullptr;
     if ((ret = env->FindClass("L@ohos/window/window/WindowStageInternal;", &cls)) != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] can't find class %{public}u", ret);
@@ -122,6 +121,10 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindowStage::RegisterWindowCallback)},
         ani_native_function {"offSync", nullptr,
             reinterpret_cast<void *>(AniWindowStage::UnregisterWindowCallback)},
+        ani_native_function {"nativeTransferStatic", "Lstd/interop/ESValue;:Lstd/core/Object;",
+            reinterpret_cast<void *>(AniWindowStage::NativeTransferStatic)},
+        ani_native_function {"nativeTransferDynamic", "J:Lstd/interop/ESValue;",
+            reinterpret_cast<void *>(AniWindowStage::NativeTransferDynamic)},
     };
     for (auto method : methods) {
         if ((ret = env->Class_BindNativeMethods(cls, &method, 1u)) != ANI_OK) {
@@ -131,7 +134,6 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         }
     }
     *result = ANI_VERSION_1;
-
     AniWindowManager::AniWindowManagerInit(env);
     OHOS::Rosen::ANI_Window_Constructor(vm, result);
     return ANI_OK;
