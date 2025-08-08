@@ -46,6 +46,8 @@ constexpr uint32_t HALF_DIVIDER = 2;
 constexpr float MAIN_DISPLAY_ROTATION_DEGREE = 180;
 constexpr float ROTATION_TRANSLATE_X = 612;
 constexpr float ROTATION_TRANSLATE_Y = -612;
+constexpr float FULL_NODE_POSITION_Z = 0.0f;
+constexpr float MAIN_NODE_POSITION_Z = 1.0f;
 constexpr int32_t FOLD_CREASE_RECT_SIZE = 8; // numbers of parameter on the current device is 8
 const std::string g_FoldScreenRect = system::GetParameter("const.display.foldscreen.crease_region", "");
 const std::string FOLD_CREASE_DELIMITER = ",;";
@@ -299,6 +301,8 @@ void SecondaryDisplayFoldPolicy::ChangeScreenDisplayModeToCoordination()
     ScreenSessionManager::GetInstance().SetCoordinationFlag(true);
     ScreenSessionManager::GetInstance().OnScreenChange(SCREEN_ID_MAIN, ScreenEvent::CONNECTED);
 
+    // set position_Z for dual displayNode
+    UpdatePositionZForDualDisplayNode();
     AddOrRemoveDisplayNodeToTree(SCREEN_ID_MAIN, ADD_DISPLAY_NODE);
 }
 
@@ -340,6 +344,36 @@ void SecondaryDisplayFoldPolicy::UpdateDisplayNodeBasedOnScreenId(ScreenId scree
     displayNode->SetTranslate({ROTATION_TRANSLATE_X, ROTATION_TRANSLATE_Y});
     displayNode->SetFrame(0, 0, screenParams_[MAIN_STATUS_WIDTH], screenParams_[SCREEN_HEIGHT]);
     displayNode->SetBounds(0, 0, screenParams_[MAIN_STATUS_WIDTH], screenParams_[SCREEN_HEIGHT]);
+}
+
+void SecondaryDisplayFoldPolicy::InitPositionZInfos()
+{
+    if (!dualDisplayNodePositionZ_.empty()) {
+        return;
+    }
+    dualDisplayNodePositionZ_.insert(std::make_pair(SCREEN_ID_FULL, FULL_NODE_POSITION_Z));
+    dualDisplayNodePositionZ_.insert(std::make_pair(SCREEN_ID_MAIN, MAIN_NODE_POSITION_Z));
+}
+
+void SecondaryDisplayFoldPolicy::UpdatePositionZForDualDisplayNode()
+{
+    InitPositionZInfos();
+    for (const auto& pair : dualDisplayNodePositionZ_) {
+        int screenId = pair.first;
+        float positionZ = pair.second;
+        sptr<ScreenSession> screenSession = ScreenSessionManager::GetInstance().GetScreenSession(screenId);
+        if (screenSession == nullptr) {
+            TLOGE(WmsLogTag::DMS, "AddOrRemoveDisplayNodeToTree, screenSession is null");
+            continue;
+        }
+        std::shared_ptr<RSDisplayNode> displayNode = screenSession->GetDisplayNode();
+        if (displayNode == nullptr) {
+            TLOGE(WmsLogTag::DMS, "AddOrRemoveDisplayNodeToTree, displayNode is null");
+            continue;
+        }
+        displayNode->SetPositionZ(positionZ);
+        RSTransactionAdapter::FlushImplicitTransaction(screenSession->GetRSUIContext());
+    }
 }
 
 void SecondaryDisplayFoldPolicy::ExitCoordination()

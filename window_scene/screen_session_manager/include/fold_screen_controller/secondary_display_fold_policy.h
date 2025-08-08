@@ -47,6 +47,8 @@ private:
     void CloseCoordinationScreen();
     void ChangeScreenDisplayModeToCoordination();
     void UpdateDisplayNodeBasedOnScreenId(ScreenId screenId, std::shared_ptr<RSDisplayNode> displayNode);
+    void InitPositionZInfos();
+    void UpdatePositionZForDualDisplayNode();
     void RecoverWhenBootAnimationExit();
     void ReportFoldDisplayModeChange(FoldDisplayMode displayMode);
     void SendPropertyChangeResult(sptr<ScreenSession> screenSession, ScreenId screenId,
@@ -68,6 +70,7 @@ private:
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler_;
     std::vector<uint32_t> screenParams_;
     bool isChangeScreenWhenBootCompleted = false;
+    std::map<ScreenId, float> dualDisplayNodePositionZ_;
 };
 } // namespace OHOS::Rosen
 #endif //OHOS_ROSEN_WINDOW_SCENE_SECONDARY_DISPLAY_FOLD_POLICY_H
