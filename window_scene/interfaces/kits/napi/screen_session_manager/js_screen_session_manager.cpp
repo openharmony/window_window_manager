@@ -36,6 +36,8 @@ using namespace AbilityRuntime;
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
 constexpr size_t ARGC_THREE = 3;
+constexpr size_t ARGC_FOUR = 4;
+constexpr int32_t INVALID_ID = -1;
 
 namespace {
 const std::string ON_SCREEN_CONNECTION_CHANGE_CALLBACK = "screenConnectChange";
@@ -134,6 +136,8 @@ napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
         JsScreenSessionManager::SetPrimaryDisplaySystemDpi);
     BindNativeFunction(env, exportObj, "getPrimaryDisplaySystemDpi", moduleName,
         JsScreenSessionManager::GetPrimaryDisplaySystemDpi);
+    BindNativeFunction(env, exportObj, "setScreenFreezeImmediately", moduleName,
+        JsScreenSessionManager::SetScreenFreezeImmediately);
     return NapiGetUndefined(env);
 }
 
@@ -354,6 +358,13 @@ napi_value JsScreenSessionManager::GetPrimaryDisplaySystemDpi(napi_env env, napi
     TLOGD(WmsLogTag::DMS, "[NAPI].");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnGetPrimaryDisplaySystemDpi(env, info) : nullptr;
+}
+
+napi_value JsScreenSessionManager::SetScreenFreezeImmediately(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DMS, "[NAPI]SetScreenFreezeImmediately");
+    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
+    return (me != nullptr) ? me->OnSetScreenFreezeImmediately(env, info) : nullptr;
 }
 
 void JsScreenSessionManager::OnScreenConnected(const sptr<ScreenSession>& screenSession)
@@ -1167,5 +1178,61 @@ napi_value JsScreenSessionManager::OnGetPrimaryDisplaySystemDpi(napi_env env, na
     TLOGD(WmsLogTag::DMS, "[NAPI].");
     float primaryDisplaySystemDpi = DisplayManager::GetInstance().GetPrimaryDisplaySystemDpi();
     return CreateJsValue(env, primaryDisplaySystemDpi * BASELINE_DENSITY);
+}
+
+napi_value JsScreenSessionManager::OnSetScreenFreezeImmediately(napi_env env, const napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DMS, "[NAPI]OnSetScreenFreezeImmediately");
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_FOUR) {
+        TLOGE(WmsLogTag::DMS, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t screenId = INVALID_ID;
+    if (!ConvertFromJsValue(env, argv[0], screenId) || screenId < 0) {
+        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to screenId");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    std::array<double, ARGC_TWO> scaleParam;
+    for (uint8_t i = 0; i < ARGC_TWO; i++) {
+        if (!ConvertFromJsValue(env, argv[i + 1], scaleParam[i])) {
+            TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to scale[%d]", i + 1);
+            napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                "Input parameter is missing or invalid"));
+            return NapiGetUndefined(env);
+        }
+        scaleParam[i] = MathHelper::Clamp(scaleParam[i], 0.0, 1.0);
+    }
+    bool isFreeze = false;
+    if (!ConvertFromJsValue(env, argv[ARGC_THREE], isFreeze)) {
+        TLOGE(WmsLogTag::DMS, "Failed to convert parameter to isFreeze");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    napi_value nativeData = nullptr;
+    auto pixelMap = ScreenSessionManagerClient::GetInstance().SetScreenFreezeImmediately(
+        static_cast<ScreenId>(screenId), static_cast<float>(scaleParam[0]), static_cast<float>(scaleParam[1]),
+        isFreeze);
+    if (isFreeze) {
+        if (pixelMap == nullptr) {
+            TLOGE(WmsLogTag::DMS, "[NAPI]pixelMap is nullptr");
+            return nativeData;
+        }
+        nativeData = Media::PixelMapNapi::CreatePixelMap(env, pixelMap);
+        if (nativeData != nullptr) {
+            TLOGD(WmsLogTag::DMS, "[NAPI]pixelmap W x H = %{public}d x %{public}d", pixelMap->GetWidth(),
+                pixelMap->GetHeight());
+        } else {
+            TLOGE(WmsLogTag::DMS, "[NAPI]create native pixelmap failed");
+        }
+    }
+    return nativeData;
 }
 } // namespace OHOS::Rosen

@@ -553,6 +553,7 @@ enum class SizeChangeReason : uint32_t {
     RECOVER_IN_IMPLICIT = 33,
     OCCUPIED_AREA_CHANGE = 34,
     SCREEN_RELATIVE_POSITION_CHANGE,
+    SNAPSHOT_ROTATION = 37,
     END,
 };
 
@@ -1001,6 +1002,7 @@ enum class SystemAnimatedSceneType : uint32_t {
     SCENE_LOCKSCREEN_TO_LAUNCHER, // Unlock screen.
     SCENE_ENTER_MIN_WINDOW, // Enter the window minimization state
     SCENE_RECOVER_MIN_WINDOW, // Recover minimized window
+    SCENE_SNAPSHOT_ROTATION, // Snapshot rotation
     SCENE_OTHERS, // 1.Default state 2.The state in which the animation ends
 };
 

@@ -328,6 +328,7 @@ public:
     void UpdateDisplayNodeRotation(int rotation);
     void BeforeScreenPropertyChange(FoldStatus foldStatus);
     void ScreenModeChange(ScreenModeChangeEvent screenModeChangeEvent);
+    std::shared_ptr<Media::PixelMap> SetScreenFreezeImmediately(float scaleX, float scaleY, bool isFreeze);
 
     DisplayId GetDisplayId();
 

@@ -1094,7 +1094,8 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
         "WindowSessionImpl::UpdateRect id: %d [%d, %d, %u, %u] reason: %u hasRSTransaction: %u", GetPersistentId(),
         wmRect.posX_, wmRect.posY_, wmRect.width_, wmRect.height_, wmReason, config.rsTransaction_ != nullptr);
-    if (handler_ != nullptr && wmReason == WindowSizeChangeReason::ROTATION) {
+    if (handler_ != nullptr && (wmReason == WindowSizeChangeReason::ROTATION ||
+        wmReason == WindowSizeChangeReason::SNAPSHOT_ROTATION)) {
         postTaskDone_ = false;
         UpdateRectForRotation(wmRect, preRect, wmReason, config, avoidAreas);
     } else if (handler_ != nullptr && wmReason == WindowSizeChangeReason::PAGE_ROTATION) {
@@ -1168,6 +1169,9 @@ void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& pr
                 window->NotifyRotationAnimationEnd();
             }
         });
+        if (wmReason == WindowSizeChangeReason::SNAPSHOT_ROTATION) {
+            wmReason = WindowSizeChangeReason::ROTATION;
+        }
         if ((wmRect != preRect) || (wmReason != window->lastSizeChangeReason_)) {
             window->NotifySizeChange(wmRect, wmReason);
             window->lastSizeChangeReason_ = wmReason;
