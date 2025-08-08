@@ -268,8 +268,9 @@ WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params
             session->SetWindowAnimationFlag(true);
         }
         // avoidHeight is set, notify avoidArea in case ui params don't flush
-        if (params.landscapeAvoidHeight_ >= 0 && params.portraitAvoidHeight_ >= 0 && lastParams != params &&
-            session->IsSessionForeground()) {
+        if (lastParams != params && session->IsSessionForeground() && params.landscapeAvoidHeight_ >= 0 &&
+            params.portraitAvoidHeight_ >= 0 && lastParams.landscapeAvoidHeight_ >= 0 &&
+            lastParams.portraitAvoidHeight_ >= 0) {
             TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard avoidHeight is set, id: %{public}d",
                 session->GetCallingSessionId());
             session->ProcessKeyboardOccupiedAreaInfo(session->GetCallingSessionId(), true, false);
@@ -727,7 +728,7 @@ void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRe
             // When the keyboard shows/hides rapidly in succession,
             // the attributes aren't refreshed but occupied area info recalculation needs to be triggered.
             if (!animationInfo.isGravityChanged) {
-                session->stateChanged_ = true;
+                session->keyboardStateOrRectChanged_ = true;
             }
             // If the vsync period terminates, immediately notify all registered listeners.
             if (session->keyboardCallback_ != nullptr &&
@@ -737,7 +738,7 @@ void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRe
             if (isLayoutFinished) {
                 TLOGI(WmsLogTag::WMS_KEYBOARD, "vsync period completed, id: %{public}d", callingId);
                 session->ProcessKeyboardOccupiedAreaInfo(callingId, true, true);
-                session->stateChanged_ = false;
+                session->keyboardStateOrRectChanged_ = false;
             }
             if (session->IsSessionForeground() && session->GetCallingSessionId() == INVALID_WINDOW_ID &&
                 !animationInfo.isGravityChanged) {
@@ -1093,7 +1094,7 @@ void KeyboardSession::CalculateOccupiedAreaAfterUIRefresh()
     if ((keyboardDirtyFlags & static_cast<uint32_t>(SessionUIDirtyFlag::VISIBLE)) !=
         static_cast<uint32_t>(SessionUIDirtyFlag::NONE) ||
         (keyboardDirtyFlags & static_cast<uint32_t>(SessionUIDirtyFlag::RECT)) !=
-        static_cast<uint32_t>(SessionUIDirtyFlag::NONE) || stateChanged_) {
+        static_cast<uint32_t>(SessionUIDirtyFlag::NONE) || keyboardStateOrRectChanged_) {
         TLOGD(WmsLogTag::WMS_KEYBOARD, "Keyboard panel rect has changed");
         needRecalculateOccupiedArea = true;
     }
@@ -1117,8 +1118,8 @@ void KeyboardSession::CalculateOccupiedAreaAfterUIRefresh()
         }
     }
     if (needRecalculateOccupiedArea) {
-        ProcessKeyboardOccupiedAreaInfo(callingId, false, stateChanged_);
-        stateChanged_ = false;
+        ProcessKeyboardOccupiedAreaInfo(callingId, false, keyboardStateOrRectChanged_);
+        keyboardStateOrRectChanged_ = false;
     }
 }
 } // namespace OHOS::Rosen
