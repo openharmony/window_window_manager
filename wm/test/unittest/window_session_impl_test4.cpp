@@ -1351,6 +1351,47 @@ HWTEST_F(WindowSessionImplTest4, UpdateRect03, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateRect04
+ * @tc.desc: UpdateRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, UpdateRect04, TestSize.Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetDisplayId(0);
+    option->SetWindowName("WindowSessionImplUpdateRect04");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    auto runner = AppExecFwk::EventRunner::Create("UpdateRectForRotation02");
+    std::shared_ptr<AppExecFwk::EventHandler> handler = std::make_shared<AppExecFwk::EventHandler>(runner);
+    runner->Run();
+    window->handler_  = handler;
+
+    WSRect rect;
+    rect.posX_ = 0;
+    rect.posY_ = 0;
+    rect.height_ = 50;
+    rect.width_ = 50;
+ 
+    Rect preRect;
+    preRect.posX_ = 0;
+    preRect.posY_ = 0;
+    preRect.height_ = 200;
+    preRect.width_ = 200;
+
+    window->property_->SetWindowRect(preRect);
+    SizeChangeReason reason = SizeChangeReason::SNAPSHOT_ROTATION;
+    WSError res = window->UpdateRect(rect, reason);
+    ASSERT_EQ(res, WSError::WS_OK);
+
+    preRect.height_ = 200;
+    preRect.width_ = 200;
+    window->property_->SetWindowRect(preRect);
+    reason = SizeChangeReason::UNDEFINED;
+    res = window->UpdateRect(rect, reason);
+    ASSERT_EQ(res, WSError::WS_OK);
+}
+
+/**
  * @tc.name: GetTitleButtonVisible02
  * @tc.desc: GetTitleButtonVisible
  * @tc.type: FUNC

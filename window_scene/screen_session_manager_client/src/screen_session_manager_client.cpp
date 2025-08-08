@@ -1312,4 +1312,15 @@ DMError ScreenSessionManagerClient::SetPrimaryDisplaySystemDpi(float dpi)
     }
     return screenSessionManager_->SetPrimaryDisplaySystemDpi(dpi);
 }
+
+std::shared_ptr<Media::PixelMap> ScreenSessionManagerClient::SetScreenFreezeImmediately(ScreenId screenId,
+    float scaleX, float scaleY, bool isFreeze)
+{
+    auto screenSession = GetScreenSession(screenId);
+    if (!screenSession) {
+        TLOGE(WmsLogTag::DMS, "get screen session is null, screenId is %{public}" PRIu64, screenId);
+        return nullptr;
+    }
+    return screenSession->SetScreenFreezeImmediately(scaleX, scaleY, isFreeze);
+}
 } // namespace OHOS::Rosen
