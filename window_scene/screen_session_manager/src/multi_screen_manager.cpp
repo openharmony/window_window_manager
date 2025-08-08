@@ -133,6 +133,10 @@ DMError MultiScreenManager::PhysicalScreenMirrorSwitch(const std::vector<ScreenI
         screenSession->SetMirrorScreenRegion(defaultSession->GetRSScreenId(), mirrorRegion);
         screenSession->SetIsPhysicalMirrorSwitch(true);
         screenSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
+        ScreenSessionManager::GetInstance().NotifyScreenChanged(
+            screenSession->ConvertToScreenInfo(), ScreenChangeEvent::SCREEN_SOURCE_MODE_CHANGE);
+        ScreenSessionManager::GetInstance().NotifyDisplayChanged(
+            screenSession->ConvertToDisplayInfo(), DisplayChangeEvent::SOURCE_MODE_CHANGED);
     }
     TLOGW(WmsLogTag::DMS, "physical screen switch to mirror end");
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:PhysicalScreenMirrorSwitch end");
@@ -154,6 +158,11 @@ DMError MultiScreenManager::PhysicalScreenUniqueSwitch(const std::vector<ScreenI
         screenSession->ReuseDisplayNode(config);
         screenSession->SetVirtualPixelRatio(screenSession->GetScreenProperty().GetDefaultDensity());
         ScreenSessionManager::GetInstance().OnVirtualScreenChange(physicalScreenId, ScreenEvent::CONNECTED);
+        ScreenSessionManager::GetInstance().RemoveScreenCastInfo(physicalScreenId);
+        ScreenSessionManager::GetInstance().NotifyScreenChanged(
+            screenSession->ConvertToScreenInfo(), ScreenChangeEvent::SCREEN_SOURCE_MODE_CHANGE);
+        ScreenSessionManager::GetInstance().NotifyDisplayChanged(
+            screenSession->ConvertToDisplayInfo(), DisplayChangeEvent::SOURCE_MODE_CHANGED);
     }
     TLOGW(WmsLogTag::DMS, "end");
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:PhysicalScreenUniqueSwitch end");
@@ -190,9 +199,12 @@ DMError MultiScreenManager::VirtualScreenUniqueSwitch(sptr<ScreenSession> screen
         auto uniqueScreen = ScreenSessionManager::GetInstance().GetScreenSession(uniqueScreenId);
         if (uniqueScreen != nullptr) {
             uniqueScreen->SetScreenCombination(ScreenCombination::SCREEN_UNIQUE);
+            ScreenSessionManager::GetInstance().NotifyDisplayChanged(uniqueScreen->ConvertToDisplayInfo(),
+                DisplayChangeEvent::SOURCE_MODE_CHANGED);
             ScreenSessionManager::GetInstance().NotifyScreenChanged(uniqueScreen->ConvertToScreenInfo(),
                 ScreenChangeEvent::SCREEN_SWITCH_CHANGE);
         }
+        ScreenSessionManager::GetInstance().RemoveScreenCastInfo(uniqueScreenId);
         // virtual screen create callback to notify scb
         ScreenSessionManager::GetInstance().OnVirtualScreenChange(uniqueScreenId, ScreenEvent::CONNECTED);
     }
