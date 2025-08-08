@@ -2287,6 +2287,10 @@ int SceneSessionManagerStub::HandleCreateUIEffectController(MessageParcel& data,
         TLOGE(WmsLogTag::WMS_ANIMATION, "Write id failed.");
         return ERR_INVALID_DATA;
     }
+    if (controller == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "controller is nullptr.");
+        return ERR_INVALID_DATA;
+    }
     if (!reply.WriteRemoteObject(controller->AsObject())) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Write controller failed.");
         return ERR_INVALID_DATA;

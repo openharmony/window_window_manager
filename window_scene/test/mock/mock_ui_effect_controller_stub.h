@@ -17,7 +17,7 @@
 #define OHOS_ROSEN_WINDOW_SCENE_MOCK_UI_EFFECT_CONTROLLER_INTERFACE_H
 #include <gmock/gmock.h>
 
-#include "../../session/host/include/ui_effect_controller_stub.h"
+#include "ui_effect_controller_stub.h"
 
 namespace OHOS {
 namespace Rosen {

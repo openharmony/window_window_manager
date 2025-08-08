@@ -17,7 +17,7 @@
 #include "ui_effect_controller.h"
 #include "ui_effect_controller_proxy.h"
 #include "ui_effect_controller_client_proxy.h"
-#include "../../../test/common/mock/iremote_object_mocker.h"
+#include "iremote_object_mocker.h"
 
 bool g_setWriteStrongParcelableErrorFlag = false;
 int32_t g_setWriteStrongParcelableErrorIndex = 0;
