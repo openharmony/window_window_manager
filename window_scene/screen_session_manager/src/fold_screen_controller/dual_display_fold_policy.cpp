@@ -270,7 +270,7 @@ FoldCreaseRegion DualDisplayFoldPolicy::GetLiveCreaseRegion()
     return liveCreaseRegion_;
 }
 
-void DualDisplayFoldPolicy::GetAllCreaseRegion(std::vector<FoldCreaseRegionItem>& foldCreaseRegionItems)
+void DualDisplayFoldPolicy::GetAllCreaseRegion(std::vector<FoldCreaseRegionItem>& foldCreaseRegionItems) const
 {
     FoldCreaseRegionItem SCreaseItem{DisplayOrientation::LANDSCAPE, FoldDisplayMode::SUB,
         FoldCreaseRegion(0, {})};

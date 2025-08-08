@@ -41,7 +41,7 @@ public:
     void AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32_t command) override {};
     FoldDisplayMode GetModeMatchStatus() override;
     void SetIsClearingBootAnimation(bool isClearingBootAnimation) override;
-    void GetAllCreaseRegion(std::vector<FoldCreaseRegionItem>& foldCreaseRegionItems) override;
+    void GetAllCreaseRegion(std::vector<FoldCreaseRegionItem>& foldCreaseRegionItems) const override;
 private:
     void ChangeScreenDisplayModeToMain(sptr<ScreenSession> screenSession,
         DisplayModeChangeReason reason = DisplayModeChangeReason::DEFAULT);

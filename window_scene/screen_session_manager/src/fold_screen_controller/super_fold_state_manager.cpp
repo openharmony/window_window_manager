@@ -392,7 +392,7 @@ nlohmann::ordered_json SuperFoldStateManager::GetFoldCreaseRegionJson()
         GetAllCreaseRegion();
     }
     nlohmann::ordered_json ret = nlohmann::ordered_json::array();
-    for (auto foldCreaseRegionItem : superFoldCreaseRegionItems_) {
+    for (const auto& foldCreaseRegionItem : superFoldCreaseRegionItems_) {
         nlohmann::ordered_json capabilityInfo;
         capabilityInfo["superFoldStatus"] =
             std::to_string(static_cast<int32_t>(foldCreaseRegionItem.superFoldStatus_));
@@ -402,7 +402,7 @@ nlohmann::ordered_json SuperFoldStateManager::GetFoldCreaseRegionJson()
             std::to_string(static_cast<int32_t>(foldCreaseRegionItem.region_.GetDisplayId()));
         auto creaseRects = foldCreaseRegionItem.region_.GetCreaseRects();
         capabilityInfo["creaseRects"]["rects"] = nlohmann::ordered_json::array();
-        for (auto creaseRect : creaseRects) {
+        for (const auto& creaseRect : creaseRects) {
             capabilityInfo["creaseRects"]["rects"].push_back({
                 {"posX", creaseRect.posX_},
                 {"posY", creaseRect.posY_},

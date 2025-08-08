@@ -47,8 +47,7 @@ struct SuperFoldCreaseRegionItem {
     SuperFoldStatus superFoldStatus_;
     FoldCreaseRegion region_;
     SuperFoldCreaseRegionItem(DisplayOrientation orientation, SuperFoldStatus superFoldStatus, FoldCreaseRegion region)
-        : orientation_(orientation), superFoldStatus_(superFoldStatus), region_(region) {
-    }
+        : orientation_(orientation), superFoldStatus_(superFoldStatus), region_(region) {}
 };
 
 class SuperFoldStateManager final {

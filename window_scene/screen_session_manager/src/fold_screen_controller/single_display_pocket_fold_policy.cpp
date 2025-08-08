@@ -674,7 +674,7 @@ void SingleDisplayPocketFoldPolicy::CloseCoordinationScreen()
     ScreenSessionManager::GetInstance().SetCoordinationFlag(false);
 }
 
-void SingleDisplayPocketFoldPolicy::GetAllCreaseRegion(std::vector<FoldCreaseRegionItem>& foldCreaseRegionItems)
+void SingleDisplayPocketFoldPolicy::GetAllCreaseRegion(std::vector<FoldCreaseRegionItem>& foldCreaseRegionItems) const
 {
     FoldCreaseRegionItem MCreaseItem{DisplayOrientation::LANDSCAPE, FoldDisplayMode::MAIN,
         FoldCreaseRegion(0, {})};

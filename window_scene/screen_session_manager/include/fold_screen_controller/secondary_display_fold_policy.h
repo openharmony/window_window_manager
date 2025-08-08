@@ -39,7 +39,7 @@ public:
     std::vector<uint32_t> GetScreenParams() override;
     void ExitCoordination() override;
     void SetSecondaryDisplayModeChangeStatus(bool status) override;
-    void GetAllCreaseRegion(std::vector<FoldCreaseRegionItem>& foldCreaseRegionItems) override;
+    void GetAllCreaseRegion(std::vector<FoldCreaseRegionItem>& foldCreaseRegionItems) const override;
     void AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32_t command) override;
 private:
     void ChangeSuperScreenDisplayMode(sptr<ScreenSession> screenSession,
