@@ -942,14 +942,12 @@ bool ConvertPointerItemFromJs(napi_env env, napi_value touchObject, MMI::Pointer
         WLOGFE("Failed to convert parameter to displayX");
         return false;
     }
-    pointerItem.SetDisplayX(std::round(displayX * vpr));
     pointerItem.SetDisplayXPos(displayX * vpr);
     double displayY;
     if (!ConvertFromJsValue(env, jsDisplayY, displayY)) {
         WLOGFE("Failed to convert parameter to displayY");
         return false;
     }
-    pointerItem.SetDisplayY(std::round(displayY * vpr));
     pointerItem.SetDisplayYPos(displayY * vpr);
     pointerEvent.AddPointerItem(pointerItem);
     return true;
