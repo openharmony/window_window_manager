@@ -99,7 +99,7 @@ SecondaryDisplayFoldPolicy::SecondaryDisplayFoldPolicy(std::recursive_mutex& dis
     currentFoldCreaseRegion_ = new FoldCreaseRegion(screenIdFull, rect);
 }
 
-void SecondaryDisplayFoldPolicy::GetAllCreaseRegion(std::vector<FoldCreaseRegionItem>& foldCreaseRegionItems)
+void SecondaryDisplayFoldPolicy::GetAllCreaseRegion(std::vector<FoldCreaseRegionItem>& foldCreaseRegionItems) const
 {
     FoldCreaseRegionItem MLandCreaseItem{DisplayOrientation::LANDSCAPE, FoldDisplayMode::MAIN,
         FoldCreaseRegion(0, {})};

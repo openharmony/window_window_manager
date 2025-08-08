@@ -39,8 +39,7 @@ struct FoldCreaseRegionItem {
     FoldDisplayMode foldDisplayMode_;
     FoldCreaseRegion region_;
     FoldCreaseRegionItem(DisplayOrientation orientation, FoldDisplayMode foldDisplayMode, FoldCreaseRegion region)
-        : orientation_(orientation), foldDisplayMode_(foldDisplayMode), region_(region) {
-    }
+        : orientation_(orientation), foldDisplayMode_(foldDisplayMode), region_(region) {}
 };
 
 class FoldScreenPolicy : public RefBase {
@@ -66,7 +65,7 @@ public:
     virtual Drawing::Rect GetScreenSnapshotRect();
     virtual void SetMainScreenRegion(DMRect& mainScreenRegion);
     virtual void SetIsClearingBootAnimation(bool isClearingBootAnimation);
-    virtual void GetAllCreaseRegion(std::vector<FoldCreaseRegionItem>& foldCreaseRegionItems);
+    virtual void GetAllCreaseRegion(std::vector<FoldCreaseRegionItem>& foldCreaseRegionItems) const;
     void ClearState();
     FoldDisplayMode GetScreenDisplayMode();
     FoldStatus GetFoldStatus();

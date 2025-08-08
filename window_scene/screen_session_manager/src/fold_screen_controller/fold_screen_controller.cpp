@@ -73,11 +73,15 @@ FoldScreenController::~FoldScreenController()
 
 nlohmann::ordered_json FoldScreenController::GetFoldCreaseRegionJson()
 {
+    nlohmann::ordered_json ret = nlohmann::ordered_json::array();
+    if (foldScreenPolicy_ == nullptr) {
+        return ret;
+    }
     if (foldCreaseRegionItems_.size() == 0) {
         foldScreenPolicy_->GetAllCreaseRegion(foldCreaseRegionItems_);
     }
-    nlohmann::ordered_json ret = nlohmann::ordered_json::array();
-    for (auto foldCreaseRegionItem : foldCreaseRegionItems_) {
+
+    for (const auto& foldCreaseRegionItem : foldCreaseRegionItems_) {
         nlohmann::ordered_json capabilityInfo;
         capabilityInfo["foldDisplayMode"] =
             std::to_string(static_cast<int32_t>(foldCreaseRegionItem.foldDisplayMode_));
@@ -87,7 +91,7 @@ nlohmann::ordered_json FoldScreenController::GetFoldCreaseRegionJson()
             std::to_string(static_cast<int32_t>(foldCreaseRegionItem.region_.GetDisplayId()));
         auto creaseRects = foldCreaseRegionItem.region_.GetCreaseRects();
         capabilityInfo["creaseRects"]["rects"] = nlohmann::ordered_json::array();
-        for (auto creaseRect : creaseRects) {
+        for (const auto& creaseRect : creaseRects) {
             capabilityInfo["creaseRects"]["rects"].push_back({
                 {"posX", creaseRect.posX_},
                 {"posY", creaseRect.posY_},
