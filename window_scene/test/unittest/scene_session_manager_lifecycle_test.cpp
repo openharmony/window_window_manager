@@ -29,6 +29,7 @@
 #include "window_manager_agent.h"
 #include "session_manager.h"
 #include "zidl/window_manager_agent_interface.h"
+#include "mock/mock_accesstoken_kit.h"
 #include "mock/mock_session_stage.h"
 #include "mock/mock_window_event_channel.h"
 #include "application_info.h"
@@ -170,6 +171,9 @@ HWTEST_F(SceneSessionManagerLifecycleTest, NotifySessionMovedToFront, TestSize.L
  */
 HWTEST_F(SceneSessionManagerLifecycleTest, PendingSessionToBackgroundForDelegator, TestSize.Level1)
 {
+    MockAccesstokenKit::MockIsSACalling(false);
+    ASSERT_EQ(ssm_->PendingSessionToBackgroundForDelegator(nullptr, true), WSError::WS_ERROR_INVALID_PERMISSION);
+    MockAccesstokenKit::MockIsSACalling(true);
     WSError ret;
     ret = ssm_->PendingSessionToBackgroundForDelegator(nullptr, true);
     ASSERT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);

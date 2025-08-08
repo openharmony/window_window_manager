@@ -1509,6 +1509,9 @@ HWTEST_F(SceneSessionManagerTest2, SetSessionContinueState, TestSize.Level1)
     MessageParcel* data = new MessageParcel();
     sptr<IRemoteObject> token = data->ReadRemoteObject();
     auto continueState = static_cast<ContinueState>(data->ReadInt32());
+    MockAccesstokenKit::MockIsSACalling(false);
+    ASSERT_EQ(ssm_->SetSessionContinueState(token, continueState), WSError::WS_ERROR_INVALID_PERMISSION);
+    MockAccesstokenKit::MockIsSACalling(true);
     WSError result02 = ssm_->SetSessionContinueState(nullptr, continueState);
     WSError result01 = ssm_->SetSessionContinueState(token, continueState);
     ASSERT_EQ(result02, WSError::WS_ERROR_INVALID_PARAM);
