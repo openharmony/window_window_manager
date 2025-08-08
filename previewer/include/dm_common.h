@@ -380,12 +380,12 @@ struct Position {
 
     bool SafeAdd(const Position& other, Position& result) const
     {
-        return SafeOp(other, result, std::plus<int64_t>());
+        return SafeOp(other, std::plus<int64_t>(), result);
     }
 
     bool SafeSub(const Position& other, Position& result) const
     {
-        return SafeOp(other, result, std::minus<int64_t>());
+        return SafeOp(other, std::minus<int64_t>(), result);
     }
 
     inline std::string ToString() const
@@ -397,7 +397,7 @@ struct Position {
 
 private:
     template<typename Op>
-    bool SafeOp(const Position& other, Position& result, Op op) const
+    bool SafeOp(const Position& other, Op op, Position& result) const
     {
         int64_t newX = op(static_cast<int64_t>(x), static_cast<int64_t>(other.x));
         int64_t newY = op(static_cast<int64_t>(y), static_cast<int64_t>(other.y));
