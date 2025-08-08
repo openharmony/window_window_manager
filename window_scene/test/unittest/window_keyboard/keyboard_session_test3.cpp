@@ -580,17 +580,17 @@ HWTEST_F(KeyboardSessionTest3, CalculateOccupiedAreaAfterUIRefresh01, Function |
     keyboardSession->isVisible_ = true;
 
     keyboardSession->CalculateOccupiedAreaAfterUIRefresh();
-    EXPECT_EQ(keyboardSession->keyboardStateOrRectChanged_, false);
+    EXPECT_EQ(keyboardSession->stateChanged_, false);
 
     keyboardSession->isVisible_ = false;
     keyboardSession->dirtyFlags_ &= ~static_cast<uint32_t>(SessionUIDirtyFlag::VISIBLE);
     keyboardSession->CalculateOccupiedAreaAfterUIRefresh();
-    EXPECT_EQ(keyboardSession->keyboardStateOrRectChanged_, false);
+    EXPECT_EQ(keyboardSession->stateChanged_, false);
 
     keyboardCallback->onGetSceneSession = [](uint32_t persistentId) { return nullptr; };
     keyboardSession->isVisible_ = true;
     keyboardSession->CalculateOccupiedAreaAfterUIRefresh();
-    EXPECT_EQ(keyboardSession->keyboardStateOrRectChanged_, false);
+    EXPECT_EQ(keyboardSession->stateChanged_, false);
 
     keyboardSession->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
     keyboardCallback->onGetSceneSession = [](uint32_t persistentId) {
@@ -602,12 +602,12 @@ HWTEST_F(KeyboardSessionTest3, CalculateOccupiedAreaAfterUIRefresh01, Function |
         return callingSession;
     };
     keyboardSession->CalculateOccupiedAreaAfterUIRefresh();
-    EXPECT_EQ(keyboardSession->keyboardStateOrRectChanged_, false);
+    EXPECT_EQ(keyboardSession->stateChanged_, false);
 
-    keyboardSession->keyboardStateOrRectChanged_ = true;
+    keyboardSession->stateChanged_ = true;
     keyboardSession->dirtyFlags_ &= ~static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
     keyboardSession->CalculateOccupiedAreaAfterUIRefresh();
-    EXPECT_EQ(keyboardSession->keyboardStateOrRectChanged_, false);
+    EXPECT_EQ(keyboardSession->stateChanged_, false);
 }
 
 /**
@@ -650,7 +650,7 @@ HWTEST_F(KeyboardSessionTest3, CalculateOccupiedAreaAfterUIRefresh02, Function |
 
     callingSession->SetOriPosYBeforeRaisedByKeyboard(200);
     callingSession->UpdateSizeChangeReason(SizeChangeReason::ROTATION);
-    EXPECT_EQ(keyboardSession->keyboardStateOrRectChanged_, false);
+    EXPECT_EQ(keyboardSession->stateChanged_, false);
     EXPECT_EQ(callingSession->GetOriPosYBeforeRaisedByKeyboard(), 200);
 }
 
