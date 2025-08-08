@@ -270,7 +270,7 @@ public:
      */
     void SetUseControlStateToProperty(bool isUseControlState);
     bool GetUseControlStateFromProperty() const;
-    void SetAncoRealBundleName(std::string ancoRealBundleName);
+    void SetAncoRealBundleName(const std::string& ancoRealBundleName);
     std::string GetAncoRealBundleName() const;
 
     /*
