@@ -6095,6 +6095,7 @@ void ScreenSessionManager::ChangeMirrorScreenConfig(sptr<ScreenSessionGroup> gro
     ScreenId rsScreenId = SCREEN_ID_INVALID;
     if (!ConvertScreenIdToRsScreenId(screenId, rsScreenId)) {
         TLOGE(WmsLogTag::DMS, "Screen: %{public}" PRIu64" convert to rs id failed", mirrorScreenId);
+        return;
     }
     screen->SetMirrorScreenRegion(rsScreenId, mainScreenRegion);
     screen->SetIsPhysicalMirrorSwitch(false);
