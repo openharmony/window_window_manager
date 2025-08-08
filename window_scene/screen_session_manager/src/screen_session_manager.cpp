@@ -6087,20 +6087,22 @@ void ScreenSessionManager::ChangeScreenGroup(sptr<ScreenSessionGroup> group, con
 void ScreenSessionManager::ChangeMirrorScreenConfig(sptr<ScreenSessionGroup> group,
         DMRect& mainScreenRegion, sptr<ScreenSession> screen)
 {
+    if (screen == nullptr) {
+        return;
+    }
     auto screenId = screen->GetScreenId();
     auto mirrorScreenId = group->mirrorScreenId_;
     ScreenId rsScreenId = SCREEN_ID_INVALID;
     if (!ConvertScreenIdToRsScreenId(screenId, rsScreenId)) {
         TLOGE(WmsLogTag::DMS, "Screen: %{public}" PRIu64" convert to rs id failed", mirrorScreenId);
-    } else {
-        screen->SetMirrorScreenRegion(rsScreenId, mainScreenRegion);
-        screen->SetIsPhysicalMirrorSwitch(false);
-        IsEnableRegionRotation(screen);
-        TLOGI(WmsLogTag::DMS, "Screen: %{public}" PRIu64" mirror to %{public}"
-            PRIu64" with region, x:%{public}d y:%{public}d w:%{public}u h:%{public}u",
-            screenId, mirrorScreenId, mainScreenRegion.posX_, mainScreenRegion.posY_,
-            mainScreenRegion.width_, mainScreenRegion.height_);
-     }
+    }
+    screen->SetMirrorScreenRegion(rsScreenId, mainScreenRegion);
+    screen->SetIsPhysicalMirrorSwitch(false);
+    IsEnableRegionRotation(screen);
+    TLOGI(WmsLogTag::DMS, "Screen: %{public}" PRIu64" mirror to %{public}"
+        PRIu64" with region, x:%{public}d y:%{public}d w:%{public}u h:%{public}u",
+        screenId, mirrorScreenId, mainScreenRegion.posX_, mainScreenRegion.posY_,
+        mainScreenRegion.width_, mainScreenRegion.height_);
 }
 
 bool ScreenSessionManager::HasSameScreenCastInfo(ScreenId screenId,
@@ -6129,9 +6131,10 @@ void ScreenSessionManager::RemoveScreenCastInfo(ScreenId screenId)
 {
     std::unique_lock<std::shared_mutex> lock(screenCastInfoMapMutex_);
     auto iter = screenCastInfoMap_.find(screenId);
-    if (iter != screenCastInfoMap_.end()) {
-        screenCastInfoMap_.erase(screenId);
+    if (iter == screenCastInfoMap_.end()) {
+        return;
     }
+    screenCastInfoMap_.erase(screenId);
     TLOGI(WmsLogTag::DMS, "screenId:%{public}" PRIu64 "", screenId);
 }
 
