@@ -997,8 +997,6 @@ bool ConvertPointerEventFromJs(napi_env env, napi_value jsObject, MMI::PointerEv
 {
     napi_value jsSourceType = nullptr;
     napi_get_named_property(env, jsObject, "source", &jsSourceType);
-    napi_value jsTouchType = nullptr;
-    napi_get_named_property(env, jsObject, "type", &jsTouchType);
     napi_value jsTimestamp = nullptr;
     napi_get_named_property(env, jsObject, "timestamp", &jsTimestamp);
     napi_value jsChangedTouches = nullptr;
@@ -1014,12 +1012,6 @@ bool ConvertPointerEventFromJs(napi_env env, napi_value jsObject, MMI::PointerEv
     if (sourceType == static_cast<int32_t>(AceSourceType::MOUSE)) {
         pointerEvent.AddFlag(MMI::InputEvent::EVENT_FLAG_GESTURE_SUPPLEMENT);
     }
-    int32_t touchType;
-    if (!ConvertFromJsValue(env, jsTouchType, touchType)) {
-        TLOGE(WmsLogTag::WMS_EVENT, "Failed to convert parameter to touchType");
-        return false;
-    }
-    pointerEvent.SetPointerAction(GetMMITouchType(touchType));
     double timestamp;
     if (!ConvertFromJsValue(env, jsTimestamp, timestamp)) {
         WLOGFE("Failed to convert parameter to timestamp");
@@ -1037,6 +1029,14 @@ bool ConvertPointerEventFromJs(napi_env env, napi_value jsObject, MMI::PointerEv
         WLOGFE("Failed get to touchObject");
         return false;
     }
+    napi_value jsTouchType = nullptr;
+    napi_get_named_property(env, touchObject, "type", &jsTouchType);
+    int32_t touchType;
+    if (!ConvertFromJsValue(env, jsTouchType, touchType)) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Failed to convert parameter to touchType");
+        return false;
+    }
+    pointerEvent.SetPointerAction(GetMMITouchType(touchType));
     napi_value jsId = nullptr;
     napi_get_named_property(env, touchObject, "id", &jsId);
     int32_t pointerId;
