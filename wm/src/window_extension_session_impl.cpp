@@ -921,7 +921,7 @@ void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const
 
         auto rsUIContext = window->GetRSUIContext();
         if (needSync) {
-            window->UpdateRotationDuration(wmReason, duration, rsTransaction);
+            window->UpdateRotateDuration(wmReason, duration, rsTransaction);
             RSTransactionAdapter::FlushImplicitTransaction(rsUIContext);
             rsTransaction->Begin();
         }
@@ -954,7 +954,7 @@ void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const
     handler_->PostTask(task, "WMS_WindowExtensionSessionImpl_UpdateRectForRotation");
 }
 
-void WindowExtensionSessionImpl::UpdateRotationDuration(WindowSizeChangeReason& reason, int32_t& duration,
+void WindowExtensionSessionImpl::UpdateRotateDuration(WindowSizeChangeReason& reason, int32_t& duration,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
     if (reason == WindowSizeChangeReason::SNAPSHOT_ROTATION) {

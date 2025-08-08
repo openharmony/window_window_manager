@@ -2394,12 +2394,25 @@ void ScreenSession::ScreenModeChange(ScreenModeChangeEvent screenModeChangeEvent
     }
 }
 
-std::shared_ptr<Media::PixelMap> ScreenSession::SetScreenFreezeImmediately(float scaleX, float scaleY, bool isFreeze)
+void ScreenSession::FreezeScreen(bool isFreeze)
 {
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ss:SetScreenFreezeImmediately");
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ss:FreezeScreen");
+    std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
+    if (displayNode_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "displayNode is null");
+        return;
+    }
+    RSInterfaces::GetInstance().FreezeScreen(displayNode_, isFreeze);
+}
+
+std::shared_ptr<Media::PixelMap> ScreenSession::GetScreenSnapshotWithAllWindows(float scaleX, float scaleY,
+    bool isNeedCheckDrmAndSurfaceLock)
+{
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ss:GetScreenSnapshotWithAllWindows");
     auto callback = std::make_shared<SurfaceCaptureFuture>();
     {
-        DmsXcollie dmsXcollie("DMS:SetScreenFreezeImmediately:SetScreenFreezeImmediately", XCOLLIE_TIMEOUT_5S);
+        DmsXcollie dmsXcollie("DMS:GetScreenSnapshotWithAllWindows:TaskSurfaceCaptureWithAllWindows",
+            XCOLLIE_TIMEOUT_5S);
         std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
         if (displayNode_ == nullptr) {
             TLOGE(WmsLogTag::DMS, "displayNode is null");
@@ -2410,13 +2423,14 @@ std::shared_ptr<Media::PixelMap> ScreenSession::SetScreenFreezeImmediately(float
             .scaleY = scaleY,
         };
         SetScreenSnapshotRect(config);
-        bool ret = RSInterfaces::GetInstance().SetScreenFreezeImmediately(displayNode_, isFreeze, callback, config);
+        bool ret = RSInterfaces::GetInstance().TaskSurfaceCaptureWithAllWindows(displayNode_, callback, config,
+            isNeedCheckDrmAndSurfaceLock);
         if (!ret) {
-            TLOGE(WmsLogTag::DMS, "get screen snapshot failed");
+            TLOGE(WmsLogTag::DMS, "take surface capture with all windows failed");
             return nullptr;
         }
     }
-    if (isFreeze) {
+    if (callback) {
         auto pixelMap = callback->GetResult(SNAPSHOT_TIMEOUT_MS);
         if (pixelMap != nullptr) {
             TLOGD(WmsLogTag::DMS, "save pixelMap WxH = %{public}dx%{public}d", pixelMap->GetWidth(),
