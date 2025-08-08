@@ -6353,8 +6353,8 @@ void WindowSessionImpl::DispatchKeyEventCallback(const std::shared_ptr<MMI::KeyE
     if (auto uiContent = GetUIContentSharedPtr()) {
         if (FilterKeyEvent(keyEvent)) return;
         isConsumed = uiContent->ProcessKeyEvent(keyEvent);
-        TLOGI(WmsLogTag::WMS_EVENT, "Start to process keyEvent, id: %{public}d, consumed: %{public}d,"
-            "escKeyEventTriggered: %{public}d, escKeyHasDown: %{public}d",
+        TLOGI(WmsLogTag::WMS_EVENT, "id: %{public}d, consumed: %{public}d,"
+            "escTrigger: %{public}d, escDown: %{public}d",
             keyEvent->GetId(), isConsumed, escKeyEventTriggered_, escKeyHasDown_);
         NotifyConsumeResultToFloatWindow(keyEvent, isConsumed);
         if (!isConsumed && !escKeyEventTriggered_ && escKeyHasDown_) {
