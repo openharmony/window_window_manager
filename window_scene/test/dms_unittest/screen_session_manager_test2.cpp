@@ -1384,6 +1384,14 @@ HWTEST_F(ScreenSessionManagerTest, ChangeMirrorScreenConfig, TestSize.Level1) {
     ssm_->ChangeMirrorScreenConfig(group, region, screenSession);
     EXPECT_TRUE(g_errLog.find("with region") != std::string::npos);
     g_errLog.clear();
+    group = nullptr;
+    ssm_->ChangeMirrorScreenConfig(group, region, screenSession);
+    EXPECT_FALSE(g_errLog.find("with region") != std::string::npos);
+    g_errLog.clear();
+    screenSession = nullptr;
+    ssm_->ChangeMirrorScreenConfig(group, region, screenSession);
+    EXPECT_FALSE(g_errLog.find("with region") != std::string::npos);
+    g_errLog.clear();
 }
 }
 }
