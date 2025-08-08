@@ -1261,6 +1261,7 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
         return WSError::WS_ERROR_NULLPTR;
     }
     sessionStage_ = sessionStage;
+    NotifyAppHookWindowInfoUpdated();
     sessionStage_->SetCurrentRotation(currentRotation_);
     windowEventChannel_ = eventChannel;
     SetSurfaceNode(surfaceNode);
@@ -1383,6 +1384,7 @@ WSError Session::Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<I
         return WSError::WS_ERROR_NULLPTR;
     }
     sessionStage_ = sessionStage;
+    NotifyAppHookWindowInfoUpdated();
     SetSurfaceNode(surfaceNode);
     windowEventChannel_ = eventChannel;
     abilityToken_ = token;
