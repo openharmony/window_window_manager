@@ -165,17 +165,7 @@ DMError MultiScreenManager::PhysicalScreenUniqueSwitch(const std::vector<ScreenI
         }
         ScreenSessionManager::GetInstance().OnVirtualScreenChange(physicalScreenId, ScreenEvent::CONNECTED);
         ScreenSessionManager::GetInstance().RemoveScreenCastInfo(physicalScreenId);
-        {
-            std::unique_lock<std::mutex> lock(uniqueScreenMutex_);
-            if ((screenSession != nullptr) && (screenSession->GetInnerName() == CUSTOM_SCB_SCREEN_NAME)) {
-                if (!uniqueScreenCV_.wait_for(lock, std::chrono::milliseconds(SCREEN_CONNECT_TIMEOUT), [this, physicalScreenId] {
-                    return uniqueScreenTimeoutMap_[physicalScreenId]; })) {
-                    TLOGE(WmsLogTag::DMS, "wait for unique screen connect timeout, screenId:%{public}" PRIu64,
-                        physicalScreenId);
-                }
-                uniqueScreenTimeoutMap_.erase(physicalScreenId);
-            }
-        }
+        BlockScreenConnect(screenSession, physicalScreenId);
         ScreenSessionManager::GetInstance().NotifyScreenChanged(
             screenSession->ConvertToScreenInfo(), ScreenChangeEvent::SCREEN_SOURCE_MODE_CHANGE);
         ScreenSessionManager::GetInstance().NotifyDisplayChanged(
@@ -228,19 +218,26 @@ DMError MultiScreenManager::VirtualScreenUniqueSwitch(sptr<ScreenSession> screen
         }
         // virtual screen create callback to notify scb
         ScreenSessionManager::GetInstance().OnVirtualScreenChange(uniqueScreenId, ScreenEvent::CONNECTED);
-        std::unique_lock<std::mutex> lock(uniqueScreenMutex_);
-        if ((uniqueScreen != nullptr) && (uniqueScreen->GetInnerName() == CUSTOM_SCB_SCREEN_NAME)) {
-            if (!uniqueScreenCV_.wait_for(lock, std::chrono::milliseconds(SCREEN_CONNECT_TIMEOUT), [this, uniqueScreenId] {
-                return uniqueScreenTimeoutMap_[uniqueScreenId]; })) {
-                TLOGE(WmsLogTag::DMS, "wait for screen connect timeout, screenId:%{public}" PRIu64,
-                    uniqueScreenId);
-            }
-            uniqueScreenTimeoutMap_.erase(uniqueScreenId);
-        }
+        BlockScreenConnect(uniqueScreen, uniqueScreenId);
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:VirtualScreenUniqueSwitch end");
     TLOGW(WmsLogTag::DMS, "to unique and notify scb end");
     return DMError::DM_OK;
+}
+
+void MultiScreenManager::BlockScreenConnect(sptr<ScreenSession>& screenSession, ScreenId screenId)
+{
+    std::unique_lock<std::mutex> lock(uniqueScreenMutex_);
+    if ((screenSession != nullptr) && (screenSession->GetInnerName() == CUSTOM_SCB_SCREEN_NAME)) {
+        auto func = [this, screenId] {
+            return uniqueScreenTimeoutMap_[screenId];
+        };
+        if (!uniqueScreenCV_.wait_for(lock, std::chrono::milliseconds(SCREEN_CONNECT_TIMEOUT), func) {
+            TLOGE(WmsLogTag::DMS, "wait for screen connect timeout, screenId:%{public}" PRIu64,
+                screenId);
+        }
+        uniqueScreenTimeoutMap_.erase(screenId);
+    }
 }
 
 void MultiScreenManager::NotifyScreenConnectCompletion(ScreenId screenId)
