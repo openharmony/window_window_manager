@@ -453,6 +453,7 @@ HWTEST_F(DragControllerTest, HandlePointerEvent, TestSize.Level1)
     pointerEvent->SetAgentWindowId(1);
     MMI::PointerEvent::PointerItem pointerItem;
     pointerItem.SetPointerId(0);
+    pointerItem.SetOriginPointerId(0);
     pointerItem.SetDisplayX(0);
     pointerItem.SetDisplayY(0);
     pointerEvent->AddPointerItem(pointerItem);

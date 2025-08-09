@@ -351,18 +351,21 @@ bool MoveDragController::ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEven
         return false;
     }
     int32_t pointerId = pointerEvent->GetPointerId();
+    MMI::PointerEvent::PointerItem pointerItem;
+    if (!pointerEvent->GetPointerItem(pointerId, pointerItem)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to get pointer item, pointerId: %{public}d", pointerId);
+        return false;
+    }
     int32_t startPointerId = moveDragProperty_.pointerId_;
     int32_t startPointerType = moveDragProperty_.pointerType_;
-    if ((startPointerId != -1 && startPointerId != pointerId) ||
-        (startPointerType != -1 && pointerEvent->GetSourceType() != startPointerType)) {
+    int32_t sourceType = pointerEvent->GetSourceType();
+    if ((startPointerId != -1 && startPointerId != pointerItem.GetOriginPointerId()) ||
+        (startPointerType != -1 && startPointerType != sourceType)) {
         TLOGI(WmsLogTag::WMS_LAYOUT, "block unnecessary pointer event inside the window");
         return false;
     }
-    MMI::PointerEvent::PointerItem pointerItem;
-    int32_t sourceType = pointerEvent->GetSourceType();
-    if (!pointerEvent->GetPointerItem(pointerId, pointerItem) ||
-        (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE &&
-         (pointerEvent->GetButtonId() != MMI::PointerEvent::MOUSE_BUTTON_LEFT && !GetStartMoveFlag()))) {
+    if (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE &&
+        pointerEvent->GetButtonId() != MMI::PointerEvent::MOUSE_BUTTON_LEFT && !GetStartMoveFlag()) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "invalid pointerEvent id:%{public}d", persistentId_);
         return false;
     }
@@ -533,19 +536,6 @@ bool MoveDragController::ConsumeDragEvent(const std::shared_ptr<MMI::PointerEven
     const WSRect& originalRect, const sptr<WindowSessionProperty> property, const SystemSessionConfig& sysConfig)
 {
     if (!CheckDragEventLegal(pointerEvent, property)) {
-        return false;
-    }
-    int32_t pointerId = pointerEvent->GetPointerId();
-    int32_t startPointerId = moveDragProperty_.pointerId_;
-    int32_t startPointerType = moveDragProperty_.pointerType_;
-    if ((startPointerId != -1 && startPointerId != pointerId) ||
-        (startPointerType != -1 && pointerEvent->GetSourceType() != startPointerType)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "block unnecessary pointer event inside the window");
-        return false;
-    }
-    MMI::PointerEvent::PointerItem pointerItem;
-    if (!pointerEvent->GetPointerItem(pointerId, pointerItem)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Get PointerItem failed");
         return false;
     }
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;
@@ -823,7 +813,7 @@ void MoveDragController::InitializeMoveDragPropertyNotValid(const std::shared_pt
 
     int32_t pointerDisplayX = pointerItem.GetDisplayX();
     int32_t pointerDisplayY = pointerItem.GetDisplayY();
-    moveDragProperty_.pointerId_ = pointerId;
+    moveDragProperty_.pointerId_ = pointerItem.GetOriginPointerId();
     moveDragProperty_.pointerType_ = pointerEvent->GetSourceType();
     moveDragProperty_.originalPointerPosX_ = pointerDisplayX;
     moveDragProperty_.originalPointerPosY_ = pointerDisplayY;
@@ -1041,7 +1031,7 @@ bool MoveDragController::EventDownInit(const std::shared_ptr<MMI::PointerEvent>&
     InitDecorValue(property, sysConfig);
     limits_ = property->GetWindowLimits();
     isAdaptToDragScale_ = property->IsAdaptToDragScale();
-    moveDragProperty_.pointerId_ = pointerEvent->GetPointerId();
+    moveDragProperty_.pointerId_ = pointerItem.GetOriginPointerId();
     moveDragProperty_.pointerType_ = sourceType;
     moveDragProperty_.originalPointerPosX_ = pointerItem.GetDisplayX();
     moveDragProperty_.originalPointerPosY_ = pointerItem.GetDisplayY();
@@ -1428,7 +1418,7 @@ WSError MoveDragController::UpdateMoveTempProperty(const std::shared_ptr<MMI::Po
     switch (pointerEvent->GetPointerAction()) {
         case MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN:
         case MMI::PointerEvent::POINTER_ACTION_DOWN:
-            moveTempProperty_.pointerId_ = pointerId;
+            moveTempProperty_.pointerId_ = pointerItem.GetOriginPointerId();
             moveTempProperty_.pointerType_ = pointerType;
             moveTempProperty_.lastDownPointerPosX_ = pointerDisplayX;
             moveTempProperty_.lastDownPointerPosY_ = pointerDisplayY;
@@ -1438,7 +1428,7 @@ WSError MoveDragController::UpdateMoveTempProperty(const std::shared_ptr<MMI::Po
             moveTempProperty_.lastDownPointerWindowY_ = pointerItem.GetWindowY();
             break;
         case MMI::PointerEvent::POINTER_ACTION_MOVE:
-            if ((startPointerId != -1 && startPointerId != pointerId) ||
+            if ((startPointerId != -1 && startPointerId != pointerItem.GetOriginPointerId()) ||
                 (startPointerType != -1 && pointerType != startPointerType)) {
                 TLOGI(WmsLogTag::WMS_LAYOUT, "block unnecessary pointer event inside the window");
                 return WSError::WS_DO_NOTHING;
@@ -1562,9 +1552,16 @@ bool MoveDragController::CheckDragEventLegal(const std::shared_ptr<MMI::PointerE
         return false;
     }
     int32_t pointerId = pointerEvent->GetPointerId();
+    MMI::PointerEvent::PointerItem pointerItem;
+    if (!pointerEvent->GetPointerItem(pointerId, pointerItem)) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Failed to get pointer item, pointerId: %{public}d", pointerId);
+        return false;
+    }
     int32_t startPointerId = moveDragProperty_.pointerId_;
-    if (GetStartDragFlag() && startPointerId != -1 && startPointerId != pointerId) {
-        TLOGI(WmsLogTag::WMS_LAYOUT, "block unnecessary pointer event inside the window");
+    int32_t startPointerType = moveDragProperty_.pointerType_;
+    if (GetStartDragFlag() && ((startPointerId != -1 && startPointerId != pointerItem.GetOriginPointerId()) ||
+                               (startPointerType != -1 && startPointerType != pointerEvent->GetSourceType()))) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "block unnecessary pointer event inside the window");
         return false;
     }
     return true;
