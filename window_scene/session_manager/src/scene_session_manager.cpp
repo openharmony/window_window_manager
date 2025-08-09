@@ -17051,7 +17051,7 @@ WMError SceneSessionManager::NotifyTransferSessionToTargetScreen(const TransferS
     return WMError::WM_OK;
 }
 
-WMError SceneSessionManager::NotifySessionTransferToTargetScreenEvent(const int32_t persistentId,
+void SceneSessionManager::NotifySessionTransferToTargetScreenEvent(const int32_t persistentId,
     const uint32_t resultCode, const uint64_t fromScreenId, const uint64_t toScreenId)
 {
     auto sceneSession = GetSceneSession(persistentId);

@@ -161,10 +161,12 @@ public:
     void OnLifecycleEvent(SessionLifecycleEvent event, const LifecycleEventPayload& payload) override
     {
         event_ = event;
+        payload_ = payload;
     }
 
 private:
     ISessionLifecycleListener::SessionLifecycleEvent event_;
+    ISessionLifecycleListener::LifecycleEventPayload payload_;
 };
 
 sptr<SceneSessionManager> SessionListenerControllerTest::ssm_ = nullptr;
@@ -675,14 +677,14 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionTransferToTargetScreenEvent
     sptr<MySessionLifecycleListener> myListener = new MySessionLifecycleListener();
     sptr<ISessionLifecycleListener> listener = iface_cast<ISessionLifecycleListener>(myListener->AsObject());
     ASSERT_NE(listener, nullptr);
-    std::vector<int32_t> persistentIdList = { 9527 };
+    std::vector<int32_t> persistentIdList = { 111 };
     slController->RegisterSessionLifecycleListener(listener, persistentIdList);
 
     SessionInfo info;
     info.bundleName_ = "com.example.myapp";
     info.abilityName_ = "MainAbility";
     info.moduleName_ = "entry";
-    info.persistentId_ = 101;
+    info.persistentId_ = -1;
     info.appIndex_ = 0;
     uint32_t resultCode = 0;
     uint64_t fromScreenId = 0;
@@ -692,7 +694,7 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionTransferToTargetScreenEvent
     usleep(WAIT_SYNC_IN_NS);
     EXPECT_EQ(myListener->event_, ISessionLifecycleListener::SessionLifecycleEvent::CREATED);
 
-    info.persistentId_ = 9527;
+    info.persistentId_ = 111;
     slController->NotifySessionTransferToTargetScreenEvent(info, resultCode, fromScreenId, toScreenId);
     usleep(WAIT_SYNC_IN_NS);
     EXPECT_EQ(myListener->event_, ISessionLifecycleListener::SessionLifecycleEvent::TRANSFER_TO_TARGET_SCREEN);
@@ -720,11 +722,11 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionTransferToTargetScreenEvent
     info.bundleName_ = "com.example.myapp";
     info.abilityName_ = "MainAbility";
     info.moduleName_ = "entry";
-    info.persistentId_ = 101;
+    info.persistentId_ = 11;
     info.appIndex_ = 0;
     uint32_t resultCode = 0;
     uint64_t fromScreenId = 0;
-    uint64_t toScreenId = -1;
+    uint64_t toScreenId = 1;
 
     slController->NotifySessionTransferToTargetScreenEvent(info, resultCode, fromScreenId, toScreenId);
     usleep(WAIT_SYNC_IN_NS);
@@ -756,7 +758,7 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionTransferToTargetScreenEvent
     info.appIndex_ = 0;
     uint32_t resultCode = 1;
     uint64_t fromScreenId = 2;
-    uint64_t toScreenId = 3
+    uint64_t toScreenId = 3;
 
     slController->NotifySessionTransferToTargetScreenEvent(info, resultCode, fromScreenId, toScreenId);
     usleep(WAIT_SYNC_IN_NS);

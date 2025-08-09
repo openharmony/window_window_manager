@@ -4969,7 +4969,7 @@ void JsSceneSessionManager::RegisterTransferSessionToTargetScreenCallback()
 {
     SceneSessionManager::GetInstance().RegisterTransferSessionToTargetScreenCallback(
         [this](const TransferSessionInfo& info) {
-            auto sceneSession = SceneSessionManager::getInstance().GetSceneSession(info.persistentId);
+            auto sceneSession = SceneSessionManager::GetInstance().GetSceneSession(info.persistentId);
             if (sceneSession == nullptr) {
                 TLOGE(WmsLogTag::WMS_MAIN, "sceneSession is nullptr");
                 return;
@@ -5005,7 +5005,7 @@ void JsSceneSessionManager::OnTransferSessionToTargetScreen(const TransferSessio
 
             uint32_t resultCode = 0;
             std::string resultMessage = "";
-            if (!ConverSessionResultFromJsValue(env, callResult, resultCode, resultMessage)) {
+            if (!ConvertSessionResultFromJsValue(env, callResult, resultCode, resultMessage)) {
                 return;
             }
             SceneSessionManager::GetInstance().NotifySessionTransferToTargetScreenEvent(

@@ -2039,7 +2039,7 @@ HWTEST_F(SceneSessionManagerTest, NotifySessionTransferToTargetScreenEvent001, T
     uint64_t fromScreenId = 1;
     uint64_t toScreenId = 1;
     ssm_->NotifySessionTransferToTargetScreenEvent(persistentId, resultCode, fromScreenId, toScreenId);
-    EXPECT_TRUE(g_logMsg.find("sceneSession if nullptr") != std::string::npos);
+    EXPECT_TRUE(g_logMsg.find("sceneSession is nullptr") != std::string::npos);
 }
 
 /**
@@ -2061,7 +2061,7 @@ HWTEST_F(SceneSessionManagerTest, NotifySessionTransferToTargetScreenEvent002, T
 
     g_logMsg.clear();
     ssm_->NotifySessionTransferToTargetScreenEvent(sceneSession->GetPersistentId(), 1, 1, 2);
-    EXPECT_FALSE(g_logMsg.find("sceneSession if nullptr") != std::string::npos);
+    EXPECT_FALSE(g_logMsg.find("sceneSession is nullptr") != std::string::npos);
 }
 } // namespace
 } // namespace Rosen

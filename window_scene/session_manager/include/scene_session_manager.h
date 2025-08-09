@@ -746,7 +746,7 @@ public:
     void RegisterTransferSessionToTargetScreenCallback(NotifyTransferSessionToTargetScreenFunc&& func);
     WMError NotifyTransferSessionToTargetScreen(const TransferSessionInfo& info);
     void NotifySessionTransferToTargetScreenEvent(const int32_t persistentId,
-        const uint32_t resultCode, const uint64_t fromScreenid, const uint64_t toScreenId); 
+        const uint32_t resultCode, const uint64_t fromScreenid, const uint64_t toScreenId);
     WSError GetApplicationInfo(const std::string& bundleName, SCBApplicationInfo& scbApplicationInfo);
     WSError GetRecentMainSessionInfoList(std::vector<RecentSessionInfo>& recentSessionInfoList);
     void UpdateRecentMainSessionInfos(const std::vector<int32_t>& recentMainSessionIdList);
