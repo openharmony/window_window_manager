@@ -50,7 +50,7 @@ public:
         const SessionInfo& sessionInfo);
 
     void NotifySessionTransferToTargetScreenEvent(const SessionInfo& sessionInfo,
-        const uint32_t resultCode, const uint_64 fromScreenId, const uint64_t toScreenId);
+        const uint32_t resultCode, const uint64_t fromScreenId, const uint64_t toScreenId);
 
     WMError RegisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener,
         const std::vector<int32_t>& persistentIdList);

@@ -1473,7 +1473,7 @@ void ProcessPendingSessionActivationResult(napi_env env, napi_value callResult,
 {
     uint32_t resultCode = 0;
     std::string resultMessage = "";
-    if (!ConvertSessionResultFromJsValue(env, callResult， resultCode, resultMessage)) {
+    if (!ConvertSessionResultFromJsValue(env, callResult, resultCode, resultMessage)) {
         return;
     }
     if (resultCode >= static_cast<uint32_t>(RequestResultCode::FAIL)) {

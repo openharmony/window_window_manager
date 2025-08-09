@@ -465,7 +465,7 @@ void SessionListenerController::NotifyMissionEvent(
     }
 }
 
-void SessionListenerController::NotifySessionTransferToTargetScreenEvent(const SessionInfo& sessionInfo
+void SessionListenerController::NotifySessionTransferToTargetScreenEvent(const SessionInfo& sessionInfo,
     const uint32_t resultCode, const uint64_t fromScreenId, const uint64_t toScreenId)
 {
     int32_t persistentId = sessionInfo.persistentId_;
@@ -481,10 +481,11 @@ void SessionListenerController::NotifySessionTransferToTargetScreenEvent(const S
         [weakThis = weak_from_this(), event, payload, bundleName, persistentId, where = __func__] {
             auto controller = weakThis.lock();
             if (controller == nullptr) {
-                TLOGE(WmsLogTag::WMS_LIFE, "controller is null.");
+                TLOGNE(WmsLogTag::WMS_LIFE, "controller is null.");
                 return;
             }
-            TLOGI(WmsLogTag::WMS_LIFE, "start notify listeners, bundleName:%{public}s, Id:%{public}d, state:%{public}d",
+            TLOGNI(WmsLogTag::WMS_LIFE,
+                "start notify listeners, bundleName:%{public}s, Id:%{public}d, state:%{public}d",
                 bundleName.c_str(), persistentId, event);
         
             controller->NotifyListeners(controller->listenerMapById_, persistentId, event, payload);
