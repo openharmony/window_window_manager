@@ -63,6 +63,10 @@ ani_object AniWindowStage::NativeTransferStatic(ani_env* aniEnv, ani_class cls, 
         return AniWindowUtils::CreateAniUndefined(aniEnv);
     }
     JsWindowStage* jsWindowStage = static_cast<JsWindowStage*>(unwrapResult);
+    if (jsWindowStage == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[ANI] jsWindowStage is nullptr");
+        return AniWindowUtils::CreateAniUndefined(aniEnv);
+    }
     std::shared_ptr<WindowScene> windowScene = jsWindowStage->GetWindowScene().lock();
     return CreateAniWindowStage(aniEnv, windowScene);
 }
