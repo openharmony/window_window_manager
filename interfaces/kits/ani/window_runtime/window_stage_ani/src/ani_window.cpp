@@ -115,18 +115,18 @@ ani_object AniWindow::NativeTransferDynamic(ani_env* aniEnv, ani_class cls, ani_
     hybridgref ref {};
     if (!hybridgref_create_from_napi(napiEnv, jsWindow, &ref)) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] create hybridgref fail");
-        arkts_napi_scope_close(napiEnv, 0, nullptr, nullptr);
+        arkts_napi_scope_close_n(napiEnv, 0, nullptr, nullptr);
         return AniWindowUtils::CreateAniUndefined(aniEnv);
     }
     ani_object result {};
     if (!hybridgref_get_esvalue(aniEnv, ref, &result)) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] get esvalue fail");
         hybridgref_delete_from_napi(napiEnv, ref);
-        arkts_napi_scope_close(napiEnv, 0, nullptr, nullptr);
+        arkts_napi_scope_close_n(napiEnv, 0, nullptr, nullptr);
         return AniWindowUtils::CreateAniUndefined(aniEnv);
     }
     if (!hybridgref_delete_from_napi(napiEnv, ref)) {
-        arkts_napi_scope_close(napiEnv, 0, nullptr, nullptr);
+        arkts_napi_scope_close_n(napiEnv, 0, nullptr, nullptr);
         TLOGE(WmsLogTag::DEFAULT, "[ANI] delete hybridgref fail");
         return AniWindowUtils::CreateAniUndefined(aniEnv);
     }
