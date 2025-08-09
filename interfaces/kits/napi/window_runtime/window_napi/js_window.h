@@ -43,6 +43,7 @@ class JsWindow final {
 public:
     explicit JsWindow(const sptr<Window>& window);
     ~JsWindow();
+    sptr<Window> GetWindow() { return windowToken_; }
     static void Finalizer(napi_env env, void* data, void* hint);
     static napi_value Show(napi_env env, napi_callback_info info);
     static napi_value ShowWindow(napi_env env, napi_callback_info info);
