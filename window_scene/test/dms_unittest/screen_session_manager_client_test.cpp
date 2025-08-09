@@ -1006,6 +1006,17 @@ HWTEST_F(ScreenSessionManagerClientTest, NotifyFoldToExpandCompletion, TestSize.
 }
 
 /**
+ * @tc.name: NotifyScreenConnectCompletion
+ * @tc.desc: NotifyScreenConnectCompletion test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, NotifyScreenConnectCompletion, TestSize.Level1)
+{
+    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+    screenSessionManagerClient_->NotifyScreenConnectCompletion(1001);
+}
+
+/**
  * @tc.name: SwitchUserCallback01
  * @tc.desc: SwitchUserCallback test
  * @tc.type: FUNC
