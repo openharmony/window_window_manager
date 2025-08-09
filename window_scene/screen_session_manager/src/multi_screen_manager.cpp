@@ -232,7 +232,7 @@ void MultiScreenManager::BlockScreenConnect(sptr<ScreenSession>& screenSession, 
         auto func = [this, screenId] {
             return uniqueScreenTimeoutMap_[screenId];
         };
-        if (!uniqueScreenCV_.wait_for(lock, std::chrono::milliseconds(SCREEN_CONNECT_TIMEOUT), func) {
+        if (!uniqueScreenCV_.wait_for(lock, std::chrono::milliseconds(SCREEN_CONNECT_TIMEOUT), func)) {
             TLOGE(WmsLogTag::DMS, "wait for screen connect timeout, screenId:%{public}" PRIu64,
                 screenId);
         }
