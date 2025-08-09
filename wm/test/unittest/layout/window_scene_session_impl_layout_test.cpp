@@ -710,17 +710,11 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, GetAppHookWindowInfoFromServer, TestS
     const int32_t windowId = 2025;
     window->property_->SetPersistentId(windowId);
 
-    // Case 1: Invalid window session
-    window->hostSession_ = nullptr;
-    HookWindowInfo hookWindowInfo;
-    WMError res = window->GetAppHookWindowInfoFromServer(hookWindowInfo);
-    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
-
-    // Case 2: success
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
-    res = window->GetAppHookWindowInfoFromServer(hookWindowInfo);
+    HookWindowInfo hookWindowInfo;
+    WMError res = window->GetAppHookWindowInfoFromServer(hookWindowInfo);
     EXPECT_NE(res, WMError::WM_ERROR_INVALID_WINDOW);
 }
 
