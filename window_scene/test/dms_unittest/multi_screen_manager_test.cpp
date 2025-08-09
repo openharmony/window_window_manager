@@ -475,6 +475,26 @@ HWTEST_F(MultiScreenManagerTest, PhysicalScreenUniqueSwitch04, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PhysicalScreenUniqueSwitch_CustomScbScreenCreate
+ * @tc.desc: screenSession != nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, PhysicalScreenUniqueSwitch05, TestSize.Level1)
+{
+    std::vector<ScreenId> screenIds = {1002, 1003};
+    sptr<ScreenSession> session = new ScreenSession();
+    session->SetInnerName("CustomScbScreen");
+    ScreenSessionManager::GetInstance().screenSessionMap_[
+       1002] = session;
+    sptr<ScreenSession> session1 = new ScreenSession();
+    session->SetInnerName("UNKOWN");
+    ScreenSessionManager::GetInstance().screenSessionMap_[
+       1003] = session1;
+    DMError ret = MultiScreenManager::GetInstance().PhysicalScreenUniqueSwitch(screenIds);
+    EXPECT_EQ(ret, DMError::DM_OK);
+}
+
+/**
  * @tc.name: VirtualScreenUniqueSwitch01
  * @tc.desc: VirtualScreenUniqueSwitch func
  * @tc.type: FUNC
@@ -628,6 +648,35 @@ HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch12, TestSize.Level1)
     std::vector<ScreenId> screenIds = {1004, 1001};
     DMError ret = MultiScreenManager::GetInstance().VirtualScreenUniqueSwitch(screenSession, screenIds);
     EXPECT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: VirtualScreenUniqueSwitch13
+ * @tc.desc: VirtualScreenUniqueSwitch func
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch13, TestSize.Level1)
+{
+    std::vector<ScreenId> screenIds = {1002};
+    sptr<ScreenSession> screenSession = new ScreenSession();
+    screenSession->SetInnerName("CustomScbScreen");
+    ScreenSessionManager::GetInstance().screenSessionMap_[
+       1002] = screenSession;
+    DMError ret = MultiScreenManager::GetInstance().VirtualScreenUniqueSwitch(screenSession, screenIds);
+    EXPECT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: NotifyScreenConnectCompletion01
+ * @tc.desc: NotifyScreenConnectCompletion func
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, NotifyScreenConnectCompletion01, TestSize.Level1)
+{
+    MultiScreenManager::GetInstance().uniqueScreenTimeoutMap_.clear();
+    MultiScreenManager::GetInstance().uniqueScreenTimeoutMap_[1002] = true;
+    MultiScreenManager::GetInstance().NotifyScreenConnectCompletion(1002);
+    EXPECT_EQ(MultiScreenManager::GetInstance().uniqueScreenTimeoutMap_[1002], true);
 }
 
 /**
