@@ -977,7 +977,7 @@ HWTEST_F(ScreenSessionManagerTest, OnVerticalChangeBoundsWhenSwitchUser, TestSiz
     sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(screenId, ScreenProperty(), 0);
     ASSERT_NE(screenSession, nullptr);
     ScreenProperty screenProperty = screenSession->GetScreenProperty();
-    auto rotation = screenSession->GetScreenProperty().GetRotation();
+    auto rotation = screenProperty.GetRotation();
     constexpr float SECONDARY_ROTATION_90 = 90.0F;
     screenProperty.SetRotation(SECONDARY_ROTATION_90);
     RRect bounds = screenProperty.GetBounds();
