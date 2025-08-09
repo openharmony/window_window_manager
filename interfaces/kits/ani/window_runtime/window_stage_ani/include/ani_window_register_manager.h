@@ -18,6 +18,7 @@
 
 #include <map>
 #include <mutex>
+
 #include "ani_window_listener.h"
 #include "refbase.h"
 #include "window.h"

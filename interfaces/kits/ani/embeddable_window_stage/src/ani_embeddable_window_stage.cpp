@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-#include "ani.h"
 #include "ani_embeddable_window_stage.h"
+
+#include "ani.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS {

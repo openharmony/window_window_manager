@@ -12,6 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include "screen_ani_manager.h"
+
 #include <algorithm>
 #include <hitrace_meter.h>
 
@@ -20,7 +23,6 @@
 #include "dm_common.h"
 #include "refbase.h"
 #include "screen_ani_listener.h"
-#include "screen_ani_manager.h"
 #include "screen_ani_utils.h"
 #include "singleton_container.h"
 #include "window_manager_hilog.h"

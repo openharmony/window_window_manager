@@ -13,13 +13,14 @@
  * limitations under the License.
  */
 
+#include "screen_ani_utils.h"
+
 #include <hitrace_meter.h>
 
 #include "ani.h"
 #include "dm_common.h"
 #include "refbase.h"
 #include "screen.h"
-#include "screen_ani_utils.h"
 #include "screen_manager.h"
 #include "singleton_container.h"
 #include "window_manager_hilog.h"
