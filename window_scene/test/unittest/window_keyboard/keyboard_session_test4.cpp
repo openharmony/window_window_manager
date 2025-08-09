@@ -392,16 +392,16 @@ HWTEST_F(KeyboardSessionTest4, CloseKeyboardSyncTransaction04, TestSize.Level1)
     animationInfo.isGravityChanged = false;
     keyboardSession->keyboardCallback_->isLastFrameLayoutFinished = []() { return true; };
     keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, true, animationInfo);
-    EXPECT_EQ(false, keyboardSession->keyboardStateOrRectChanged_);
+    EXPECT_EQ(false, keyboardSession->stateChanged_);
 
     keyboardSession->keyboardCallback_->isLastFrameLayoutFinished = []() { return false; };
     keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, true, animationInfo);
-    EXPECT_EQ(true, keyboardSession->keyboardStateOrRectChanged_);
+    EXPECT_EQ(true, keyboardSession->stateChanged_);
 
-    keyboardSession->keyboardStateOrRectChanged_ = false;
+    keyboardSession->stateChanged_ = false;
     animationInfo.isGravityChanged = true;
     keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, true, animationInfo);
-    EXPECT_EQ(false, keyboardSession->keyboardStateOrRectChanged_);
+    EXPECT_EQ(false, keyboardSession->stateChanged_);
 }
 
 /**
