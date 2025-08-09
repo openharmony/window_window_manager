@@ -14,6 +14,7 @@
  */
 #ifndef OHOS_ANI_DISPLAY_UTILS_H
 #define OHOS_ANI_DISPLAY_UTILS_H
+
 #include <hitrace_meter.h>
 
 #include "ani.h"

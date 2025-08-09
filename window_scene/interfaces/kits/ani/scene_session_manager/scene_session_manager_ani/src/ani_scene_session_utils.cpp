@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 
+#include "ani_scene_session_utils.h"
+
 #include "ani.h"
 #include "ani_err_utils.h"
-#include "ani_scene_session_utils.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS {

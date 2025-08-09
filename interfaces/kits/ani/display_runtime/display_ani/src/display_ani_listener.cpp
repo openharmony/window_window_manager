@@ -14,6 +14,7 @@
  */
 
 #include "display_ani_listener.h"
+
 #include "display_ani_utils.h"
 #include "window_manager_hilog.h"
 

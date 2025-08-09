@@ -17,6 +17,7 @@
 #define OHOS_ANI_EXTENSION_WINDOW_REGISTER_MANAGER_H
 
 #include <mutex>
+
 #include "ani.h"
 #include "ani_extension_window_listener.h"
 #include "refbase.h"

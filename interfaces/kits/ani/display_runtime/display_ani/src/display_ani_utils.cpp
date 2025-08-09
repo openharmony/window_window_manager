@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
+#include "display_ani_utils.h"
+
 #include <hitrace_meter.h>
 
 #include "ani.h"
 #include "display.h"
 #include "display_ani.h"
-#include "display_ani_utils.h"
 #include "display_info.h"
 #include "display_manager.h"
 #include "dm_common.h"

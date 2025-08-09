@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
+#include "ani_window_manager.h"
+
 #include <ability.h>
 
 #include "ani.h"
 #include "ani_window.h"
-#include "ani_window_manager.h"
 #include "ani_window_utils.h"
 #include "window_manager_hilog.h"
 #include "window_scene.h"

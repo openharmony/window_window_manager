@@ -13,10 +13,11 @@
  * limitations under the License.
  */
 
+#include "ani_scene_session_manager.h"
+
 #include <ui_content.h>
 
 #include "ani.h"
-#include "ani_scene_session_manager.h"
 #include "ani_scene_session_utils.h"
 #include "root_scene.h"
 #include "window_manager_hilog.h"

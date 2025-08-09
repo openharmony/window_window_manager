@@ -12,12 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include "display_ani.h"
+
 #include <hitrace_meter.h>
 
 #include "ani.h"
 #include "ani_err_utils.h"
 #include "display.h"
-#include "display_ani.h"
 #include "display_ani_manager.h"
 #include "display_ani_utils.h"
 #include "display_info.h"

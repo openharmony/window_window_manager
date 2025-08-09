@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "ani_window_utils.h"
+
 #include <iomanip>
 #include <regex>
 #include <sstream>
@@ -20,7 +22,6 @@
 #include "ani.h"
 #include "ani_err_utils.h"
 #include "ani_window.h"
-#include "ani_window_utils.h"
 #include "bundle_constants.h"
 #include "ipc_skeleton.h"
 #include "ui_content.h"

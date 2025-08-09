@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
+#include "ani_window.h"
+
 #include <cstdint>
 #include <memory>
 
 #include "ani.h"
 #include "ani_err_utils.h"
-#include "ani_window.h"
 #include "ani_window_utils.h"
 #include "window_helper.h"
 #include "window_manager.h"
