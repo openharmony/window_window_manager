@@ -1497,13 +1497,13 @@ void AniWindow::Resize(ani_env* env, ani_int width, ani_int height)
     const uint32_t windowId = windowToken_->GetWindowId();
     if (errorCode != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_LAYOUT,
-            "[ANI] Resize failed, windowId: %{public}u, width: %{public}u, height: %{public}u, ret: %{public}d",
+            "[ANI] Failed, windowId: %{public}u, width: %{public}u, height: %{public}u, ret: %{public}d",
             windowId, w, h, static_cast<int32_t>(ret));
         AniWindowUtils::AniThrowError(env, errorCode);
         return;
     }
 
-    TLOGD(WmsLogTag::WMS_LAYOUT, "[ANI] Resize success, windowId: %{public}u, width: %{public}u, height: %{public}u",
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[ANI] Success, windowId: %{public}u, width: %{public}u, height: %{public}u",
         windowId, w, h);
     return;
 }
@@ -1525,13 +1525,13 @@ void AniWindow::MoveWindowTo(ani_env* env, ani_int x, ani_int y)
     const uint32_t windowId = windowToken_->GetWindowId();
     if (errorCode != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_LAYOUT,
-            "[ANI] MoveWindowTo failed, windowId: %{public}u, x: %{public}d, y: %{public}d, ret: %{public}d",
+            "[ANI] Failed, windowId: %{public}u, x: %{public}d, y: %{public}d, ret: %{public}d",
             windowId, targetX, targetY, static_cast<int32_t>(ret));
         AniWindowUtils::AniThrowError(env, errorCode);
         return;
     }
 
-    TLOGD(WmsLogTag::WMS_LAYOUT, "[ANI] MoveWindowTo success, windowId: %{public}u, x: %{public}d, y: %{public}d",
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[ANI] Success, windowId: %{public}u, x: %{public}d, y: %{public}d",
         windowId, targetX, targetY);
     return;
 }
@@ -1550,12 +1550,12 @@ ani_object AniWindow::GetGlobalRect(ani_env* env)
 
     const uint32_t windowId = windowToken_->GetWindowId();
     if (errorCode != WmErrorCode::WM_OK) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] GetGlobalRect failed, windowId: %{public}u, ret: %{public}d",
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] Failed, windowId: %{public}u, ret: %{public}d",
             windowId, static_cast<int32_t>(ret));
         return AniWindowUtils::AniThrowError(env, errorCode);
     }
 
-    TLOGD(WmsLogTag::WMS_LAYOUT, "[ANI] Window [%{public}u, %{public}s], globalScaledRect: %{public}s",
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[ANI] Success, window [%{public}u, %{public}s], globalScaledRect: %{public}s",
         windowId, windowToken_->GetWindowName().c_str(), globalScaledRect.ToString().c_str());
     return AniWindowUtils::CreateAniRect(env, globalScaledRect);
 }
