@@ -519,37 +519,10 @@ HWTEST_F(WindowSessionImplTest2, HandleEspecialEscKeyEvent002, TestSize.Level1)
  * @tc.desc: HandleEspecialEscKeyEvent test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, HandleEspecialEscKeyEvent003, TestSize.Level0)
+HWTEST_F(WindowSessionImplTest2, HandleEspecialEscKeyEvent003, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("HandleEspecialEscKeyEvent003");
-    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    ASSERT_NE(window, nullptr);
-
-    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
-    ASSERT_NE(keyEvent, nullptr);
-    keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_ESCAPE);
-    keyEvent->AddFlag(MMI::InputEvent::EVENT_FLAG_KEYBOARD_ESCAPE);
-    EXPECT_EQ(true, keyEvent->HasFlag(MMI::InputEvent::EVENT_FLAG_KEYBOARD_ESCAPE));
-
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    WMError result1 = window->HandleEspecialEscKeyEvent(keyEvent);
-    EXPECT_EQ(result1, WMError::WM_ERROR_INVALID_WINDOW);
-
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
-    WMError result2 = window->HandleEspecialEscKeyEvent(keyEvent);
-    EXPECT_EQ(result2, WMError::WM_OK);
-}
-
-/**
- * @tc.name: HandleEspecialEscKeyEvent004
- * @tc.desc: HandleEspecialEscKeyEvent test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest2, HandleEspecialEscKeyEvent004, TestSize.Level1)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("HandleEspecialEscKeyEvent004");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     ASSERT_NE(window, nullptr);
 

@@ -3115,31 +3115,28 @@ void WindowImpl::PerformBack()
 WMError WindowImpl::HandleEspecialEscKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
     if (keyEvent == nullptr) {
-        WLOGFE("keyevent is nullptr, return");
+        TLOGE(WmsLogTag::WMS_EVENT, "keyevent is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
 
     bool escToBackFlag = keyEvent->HasFlag(MMI::InputEvent::EVENT_FLAG_KEYBOARD_ESCAPE);
     if (!escToBackFlag) {
-        WLOGFE("ESC no flag, do not transfer to back, return");
+        TLOGE(WmsLogTag::WMS_EVENT, "ESC no flag");
         return WMError::WM_DO_NOTHING;
-    }
-    if (!windowSystemConfig_.IsPadWindow()) {
-        return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
     if (property_->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
         GetImmersiveModeEnabledState()) {
-        WLOGFD("free multi window mode and in full fill Immersivemode, recover");
+        TLOGD(WmsLogTag::WMS_EVENT, "multi window and Immersivemode, recover");
         auto ret = Recover();
         if (ret != WMError::WM_OK) {
-            WLOGFE("Full fill Immersivemode can not recover, handlebackevent");
+            TLOGE(WmsLogTag::WMS_EVENT, "recover failed, handlebackevent");
             HandleBackKeyPressedEvent(keyEvent);
         }
         return WMError::WM_OK;
     }
 
-    WLOGFD("normal mode, handlebackevent");
+    TLOGD(WmsLogTag::WMS_EVENT, "normal mode, handlebackevent");
     HandleBackKeyPressedEvent(keyEvent);
     return WMError::WM_OK;
 }
@@ -3165,14 +3162,14 @@ void WindowImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
         } else if (uiContent_ != nullptr) {
             WLOGD("Transfer key event to uiContent");
             bool handled = static_cast<bool>(uiContent_->ProcessKeyEvent(keyEvent));
-            WLOGI("handled: %{public}d, escTrigger: %{public}d, escDown: %{public}d",
+           TLOGI(WmsLogTag::WMS_EVENT, "handled: %{public}d, escTrigger: %{public}d, escDown: %{public}d",
                 handled, escKeyEventTriggered_, escKeyHasDown_);
             if (!handled && !escKeyEventTriggered_ && escKeyHasDown_) {
                 HandleEspecialEscKeyEvent(keyEvent);
             }
             if (keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ESCAPE) {
-                escKeyHasDown_ = (keyAction == MMI::KeyEvent::KEY_ACTION_DOWN) ? true : false;
-                escKeyEventTriggered_ = (handled) ? true : false;
+                escKeyHasDown_ = (keyAction == MMI::KeyEvent::KEY_ACTION_DOWN);
+                escKeyEventTriggered_ = handled;
             }
             shouldMarkProcess = !handled;
         } else {
