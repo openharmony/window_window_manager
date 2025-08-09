@@ -567,7 +567,7 @@ void ScreenSessionManagerClient::NotifyFoldToExpandCompletion(bool foldToExpand)
 void ScreenSessionManagerClient::NotifyScreenConnectCompletion(ScreenId screenId)
 {
     if (!screenSessionManager_) {
-        TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
+        TLOGE(WmsLogTag::DMS, "screenSessionManager is null");
         return;
     }
     screenSessionManager_->NotifyScreenConnectCompletion(screenId);
