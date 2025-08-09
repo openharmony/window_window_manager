@@ -90,6 +90,8 @@ private:
     void DoFirstExtendChangeMirror(sptr<ScreenSession> firstSession, sptr<ScreenSession> secondarySession);
 
     std::pair<ScreenId, MultiScreenMode> lastScreenMode_;  // main screen id & secondary screen mode
+
+    void BlockScreenConnect(sptr<ScreenSession>& screenSession, ScreenId screenId);
     std::mutex uniqueScreenMutex_;
     std::condition_variable uniqueScreenCV_;
     std::map<ScreenId, bool> uniqueScreenTimeoutMap_;
