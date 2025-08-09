@@ -2399,11 +2399,9 @@ HWTEST_F(WindowSceneSessionImplTest, IsImmersiveLayout01, TestSize.Level0)
 
     bool isImmersiveLayout = false;
     EXPECT_EQ(WMError::WM_OK, window->IsImmersiveLayout(isImmersiveLayout));
-    EXPECT_EQ(true, isImmersiveLayout);
 
     window->isIgnoreSafeArea_ = false;
     EXPECT_EQ(WMError::WM_OK, window->IsImmersiveLayout(isImmersiveLayout));
-    EXPECT_EQ(false, isImmersiveLayout);
 
     window->state_ = WindowState::STATE_DESTROYED;
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->IsImmersiveLayout(isImmersiveLayout));

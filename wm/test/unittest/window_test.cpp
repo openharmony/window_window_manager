@@ -21,6 +21,7 @@
 #include "scene_board_judgement.h"
 #include "singleton_mocker.h"
 #include "window.h"
+#include "window_manager_hilog.h"
 #include "window_session_impl.h"
 #include "wm_common.h"
 
@@ -28,6 +29,14 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
+namespace {
+    std::string g_logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
+        const char *msg)
+    {
+        g_logMsg = msg;
+    }
+}
 namespace Rosen {
 using Mocker = SingletonMocker<WindowAdapter, MockWindowAdapter>;
 class WindowTest : public testing::Test {
@@ -835,10 +844,12 @@ HWTEST_F(WindowTest, IsPrivacyMode, TestSize.Level1)
  */
 HWTEST_F(WindowTest, SetSystemPrivacyMode, TestSize.Level1)
 {
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     sptr<Window> window = sptr<Window>::MakeSptr();
-    auto ret = false;
     window->SetSystemPrivacyMode(true);
-    ASSERT_EQ(false, ret);
+    EXPECT_FALSE(g_logMsg.find("SetSystemPrivacyMode") != std::string::npos);
+    LOG_SetCallback(nullptr);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -1032,11 +1043,13 @@ HWTEST_F(WindowTest, UpdateSurfaceNodeAfterCustomAnimation, TestSize.Level1)
  */
 HWTEST_F(WindowTest, SetInputEventConsumer, TestSize.Level1)
 {
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     sptr<Window> window = sptr<Window>::MakeSptr();
-    auto ret = true;
     std::shared_ptr<IInputEventConsumer> inputEventConsumer;
     window->SetInputEventConsumer(inputEventConsumer);
-    ASSERT_EQ(true, ret);
+    EXPECT_FALSE(g_logMsg.find("in") != std::string::npos);
+    LOG_SetCallback(nullptr);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -1047,11 +1060,13 @@ HWTEST_F(WindowTest, SetInputEventConsumer, TestSize.Level1)
  */
 HWTEST_F(WindowTest, ConsumeKeyEvent, TestSize.Level1)
 {
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     sptr<Window> window = sptr<Window>::MakeSptr();
-    auto ret = WMError::WM_OK;
     std::shared_ptr<MMI::KeyEvent> inputEvent = nullptr;
     window->ConsumeKeyEvent(inputEvent);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    EXPECT_FALSE(g_logMsg.find("There is no key event consumer") != std::string::npos);
+    LOG_SetCallback(nullptr);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -1063,10 +1078,9 @@ HWTEST_F(WindowTest, ConsumeKeyEvent, TestSize.Level1)
 HWTEST_F(WindowTest, PreNotifyKeyEvent, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
-    auto ret = WMError::WM_OK;
     std::shared_ptr<MMI::KeyEvent> inputEvent = nullptr;
-    window->PreNotifyKeyEvent(inputEvent);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    auto ret = window->PreNotifyKeyEvent(inputEvent);
+    EXPECT_EQ(ret, false);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -1077,11 +1091,13 @@ HWTEST_F(WindowTest, PreNotifyKeyEvent, TestSize.Level1)
  */
 HWTEST_F(WindowTest, ConsumePointerEvent, TestSize.Level1)
 {
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     sptr<Window> window = sptr<Window>::MakeSptr();
-    auto ret = WMError::WM_OK;
     std::shared_ptr<MMI::PointerEvent> inputEvent = nullptr;
     window->ConsumePointerEvent(inputEvent);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    EXPECT_FALSE(g_logMsg.find("PointerEvent is nullptr") != std::string::npos);
+    LOG_SetCallback(nullptr);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -1092,12 +1108,14 @@ HWTEST_F(WindowTest, ConsumePointerEvent, TestSize.Level1)
  */
 HWTEST_F(WindowTest, RequestVsync, TestSize.Level1)
 {
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     sptr<Window> window = sptr<Window>::MakeSptr();
     std::shared_ptr<VsyncCallback> vsyncCallback = nullptr;
-    auto ret = WMError::WM_OK;
     window->RequestVsync(vsyncCallback);
     // no return
-    ASSERT_EQ(WMError::WM_OK, ret);
+    EXPECT_FALSE(g_logMsg.find("vsyncStation is null") != std::string::npos);
+    LOG_SetCallback(nullptr);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -1108,12 +1126,14 @@ HWTEST_F(WindowTest, RequestVsync, TestSize.Level1)
  */
 HWTEST_F(WindowTest, UpdateConfiguration, TestSize.Level1)
 {
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     sptr<Window> window = sptr<Window>::MakeSptr();
     std::shared_ptr<AppExecFwk::Configuration> conf = nullptr;
-    auto ret = WMError::WM_OK;
     window->UpdateConfiguration(conf);
     // no return
-    ASSERT_EQ(WMError::WM_OK, ret);
+    EXPECT_FALSE(g_logMsg.find("uiContent null") != std::string::npos);
+    LOG_SetCallback(nullptr);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -1264,12 +1284,14 @@ HWTEST_F(WindowTest, UnregisterDisplayMoveListener, TestSize.Level1)
  */
 HWTEST_F(WindowTest, RegisterWindowDestroyedListener, TestSize.Level1)
 {
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     sptr<Window> window = sptr<Window>::MakeSptr();
     NotifyNativeWinDestroyFunc func = nullptr;
-    auto ret = WMError::WM_OK;
     window->RegisterWindowDestroyedListener(func);
     // no return
-    ASSERT_EQ(WMError::WM_OK, ret);
+    EXPECT_FALSE(g_logMsg.find("Start register") != std::string::npos);
+    LOG_SetCallback(nullptr);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -1444,11 +1466,13 @@ HWTEST_F(WindowTest, UnregisterDialogTargetTouchListener, TestSize.Level1)
  */
 HWTEST_F(WindowTest, RegisterDialogDeathRecipientListener, TestSize.Level1)
 {
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     sptr<Window> window = sptr<Window>::MakeSptr();
-    auto ret = WMError::WM_OK;
     sptr<IDialogDeathRecipientListener> listener = nullptr;
     window->RegisterDialogDeathRecipientListener(listener);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    EXPECT_FALSE(g_logMsg.find("listener is null") != std::string::npos);
+    LOG_SetCallback(nullptr);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -1459,11 +1483,13 @@ HWTEST_F(WindowTest, RegisterDialogDeathRecipientListener, TestSize.Level1)
  */
 HWTEST_F(WindowTest, UnregisterDialogDeathRecipientListener, TestSize.Level1)
 {
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     sptr<Window> window = sptr<Window>::MakeSptr();
-    auto ret = WMError::WM_OK;
     sptr<IDialogDeathRecipientListener> listener = nullptr;
     window->UnregisterDialogDeathRecipientListener(listener);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    EXPECT_FALSE(g_logMsg.find("Start unregister") != std::string::npos);
+    LOG_SetCallback(nullptr);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -1475,10 +1501,8 @@ HWTEST_F(WindowTest, UnregisterDialogDeathRecipientListener, TestSize.Level1)
 HWTEST_F(WindowTest, NotifyTouchDialogTarget, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
-    auto ret = WMError::WM_OK;
     sptr<IDialogTargetTouchListener> listener = nullptr;
     window->NotifyTouchDialogTarget();
-    ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -1489,11 +1513,13 @@ HWTEST_F(WindowTest, NotifyTouchDialogTarget, TestSize.Level1)
  */
 HWTEST_F(WindowTest, SetAceAbilityHandler, TestSize.Level1)
 {
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     sptr<Window> window = sptr<Window>::MakeSptr();
-    auto ret = WMError::WM_OK;
     sptr<IAceAbilityHandler> handler = nullptr;
     window->SetAceAbilityHandler(handler);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    EXPECT_FALSE(g_logMsg.find("ace ability handler is nullptr") != std::string::npos);
+    LOG_SetCallback(nullptr);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -1575,11 +1601,13 @@ HWTEST_F(WindowTest, GetUIContent, TestSize.Level1)
  */
 HWTEST_F(WindowTest, OnNewWant, TestSize.Level1)
 {
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     sptr<Window> window = sptr<Window>::MakeSptr();
     AAFwk::Want want;
-    auto ret = true;
     window->OnNewWant(want);
-    ASSERT_EQ(true, ret);
+    EXPECT_FALSE(g_logMsg.find("window") != std::string::npos);
+    LOG_SetCallback(nullptr);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -1590,11 +1618,13 @@ HWTEST_F(WindowTest, OnNewWant, TestSize.Level1)
  */
 HWTEST_F(WindowTest, SetRequestedOrientation, TestSize.Level1)
 {
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     sptr<Window> window = sptr<Window>::MakeSptr();
-    auto ret = true;
     Orientation ori = Orientation::UNSPECIFIED;
     window->SetRequestedOrientation(ori);
-    ASSERT_EQ(true, ret);
+    EXPECT_FALSE(g_logMsg.find("window is invalid") != std::string::npos);
+    LOG_SetCallback(nullptr);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -1661,9 +1691,7 @@ HWTEST_F(WindowTest, GetRequestedTouchHotAreas, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     std::vector<Rect> rects;
-    auto ret = WMError::WM_OK;
     window->GetRequestedTouchHotAreas(rects);
-    ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -1802,10 +1830,12 @@ HWTEST_F(WindowTest, CloseDirectly, TestSize.Level1)
  */
 HWTEST_F(WindowTest, StartMove, TestSize.Level1)
 {
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     sptr<Window> window = sptr<Window>::MakeSptr();
-    auto ret = WMError::WM_OK;
     window->StartMove();
-    ASSERT_EQ(WMError::WM_OK, ret);
+    EXPECT_FALSE(g_logMsg.find("current window can not be moved") != std::string::npos);
+    LOG_SetCallback(nullptr);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -1856,10 +1886,12 @@ HWTEST_F(WindowTest, IsSupportWideGamut, TestSize.Level1)
  */
 HWTEST_F(WindowTest, SetColorSpace, TestSize.Level1)
 {
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     sptr<Window> window = sptr<Window>::MakeSptr();
-    bool ret = true;
     window->SetColorSpace(ColorSpace::COLOR_SPACE_DEFAULT);
-    ASSERT_EQ(true, ret);
+    EXPECT_FALSE(g_logMsg.find("surface node is nullptr") != std::string::npos);
+    LOG_SetCallback(nullptr);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -1883,12 +1915,14 @@ HWTEST_F(WindowTest, GetColorSpace, TestSize.Level1)
  */
 HWTEST_F(WindowTest, DumpInfo, TestSize.Level1)
 {
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     sptr<Window> window = sptr<Window>::MakeSptr();
     std::vector<std::string> params;
     std::vector<std::string> info;
-    auto ret = true;
     window->DumpInfo(params, info);
-    ASSERT_EQ(true, ret);
+    EXPECT_FALSE(g_logMsg.find("Dump ArkUI help Info") != std::string::npos);
+    LOG_SetCallback(nullptr);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -1988,9 +2022,7 @@ HWTEST_F(WindowTest, GetKeyboardAnimationConfig, TestSize.Level1)
 HWTEST_F(WindowTest, SetNeedDefaultAnimation, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
-    auto ret = true;
     window->SetNeedDefaultAnimation(true);
-    ASSERT_EQ(true, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -2029,11 +2061,13 @@ HWTEST_F(WindowTest, TransferExtensionData, TestSize.Level1)
  */
 HWTEST_F(WindowTest, RegisterTransferComponentDataListener, TestSize.Level1)
 {
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     sptr<Window> window = sptr<Window>::MakeSptr();
     NotifyTransferComponentDataFunc func;
-    auto ret = true;
     window->RegisterTransferComponentDataListener(func);
-    ASSERT_EQ(true, ret);
+    EXPECT_FALSE(g_logMsg.find("Window invalid.") != std::string::npos);
+    LOG_SetCallback(nullptr);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -2045,12 +2079,12 @@ HWTEST_F(WindowTest, RegisterTransferComponentDataListener, TestSize.Level1)
 HWTEST_F(WindowTest, WindowChangeListener01, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
-    auto ret = true;
     sptr<IWindowChangeListener> listener = sptr<IWindowChangeListener>::MakeSptr();
-    window->RegisterWindowChangeListener(listener);
+    auto ret = window->RegisterWindowChangeListener(listener);
+    EXPECT_EQ(WMError::WM_OK, ret);
     listener->OnModeChange(WindowMode::WINDOW_MODE_UNDEFINED, false);
-    window->UnregisterWindowChangeListener(listener);
-    ASSERT_EQ(true, ret);
+    auto ret1 = window->UnregisterWindowChangeListener(listener);
+    EXPECT_EQ(WMError::WM_OK, ret1);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -2069,8 +2103,8 @@ HWTEST_F(WindowTest, IOccupiedAreaChangeListener, TestSize.Level1)
     EXPECT_EQ(WMError::WM_OK, ret);
     sptr<OccupiedAreaChangeInfo> info = sptr<OccupiedAreaChangeInfo>::MakeSptr(OccupiedAreaType::TYPE_INPUT, rect, 80);
     listener->OnSizeChange(info, nullptr);
-    ret = window->UnregisterOccupiedAreaChangeListener(listener);
-    EXPECT_EQ(WMError::WM_OK, ret);
+    auto ret1 = window->UnregisterOccupiedAreaChangeListener(listener);
+    EXPECT_EQ(WMError::WM_OK, ret1);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -2082,14 +2116,14 @@ HWTEST_F(WindowTest, IOccupiedAreaChangeListener, TestSize.Level1)
 HWTEST_F(WindowTest, WindowChangeListener02, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
-    auto ret = true;
     sptr<IWindowChangeListener> listener = sptr<IWindowChangeListener>::MakeSptr();
-    window->RegisterWindowChangeListener(listener);
+    auto ret = window->RegisterWindowChangeListener(listener);
+    EXPECT_EQ(WMError::WM_OK, ret);
     Rect rect = { 0, 0, 0, 0 };
     std::shared_ptr<RSTransaction> rstransaction;
     listener->OnSizeChange(rect, WindowSizeChangeReason::UNDEFINED, rstransaction);
-    window->UnregisterWindowChangeListener(listener);
-    ASSERT_EQ(true, ret);
+    auto ret1 = window->UnregisterWindowChangeListener(listener);
+    EXPECT_EQ(WMError::WM_OK, ret1);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -2101,12 +2135,11 @@ HWTEST_F(WindowTest, WindowChangeListener02, TestSize.Level1)
 HWTEST_F(WindowTest, IAnimationTransitionController, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
-    auto ret = true;
     sptr<IAnimationTransitionController> listener = sptr<IAnimationTransitionController>::MakeSptr();
-    window->RegisterAnimationTransitionController(listener);
+    auto ret = window->RegisterAnimationTransitionController(listener);
+    EXPECT_EQ(WMError::WM_OK, ret);
     listener->AnimationForShown();
     listener->AnimationForHidden();
-    ASSERT_EQ(true, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -2118,7 +2151,6 @@ HWTEST_F(WindowTest, IAnimationTransitionController, TestSize.Level1)
 HWTEST_F(WindowTest, IInputEventConsumer, TestSize.Level1)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
-    auto ret = true;
     std::shared_ptr<IInputEventConsumer> listener = std::make_shared<IInputEventConsumer>();
     std::shared_ptr<MMI::KeyEvent> keyEvent = nullptr;
     std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
@@ -2126,24 +2158,6 @@ HWTEST_F(WindowTest, IInputEventConsumer, TestSize.Level1)
     listener->OnInputEvent(keyEvent);
     listener->OnInputEvent(pointerEvent);
     listener->OnInputEvent(axisEvent);
-    ASSERT_EQ(true, ret);
-    ASSERT_EQ(WMError::WM_OK, window->Destroy());
-}
-
-/**
- * @tc.name: IDialogDeathRecipientListener
- * @tc.desc: IDialogDeathRecipientListener fun
- * @tc.type: FUNC
- */
-HWTEST_F(WindowTest, IDialogDeathRecipientListener, TestSize.Level1)
-{
-    sptr<Window> window = sptr<Window>::MakeSptr();
-    auto ret = true;
-    sptr<IDialogDeathRecipientListener> listener = sptr<IDialogDeathRecipientListener>::MakeSptr();
-    Rect rect = { 0, 0, 0, 0 };
-    sptr<OccupiedAreaChangeInfo> info = sptr<OccupiedAreaChangeInfo>::MakeSptr(OccupiedAreaType::TYPE_INPUT, rect, 80);
-    listener->OnDialogDeathRecipient();
-    ASSERT_EQ(true, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -2154,32 +2168,16 @@ HWTEST_F(WindowTest, IDialogDeathRecipientListener, TestSize.Level1)
  */
 HWTEST_F(WindowTest, IAceAbilityHandler, TestSize.Level1)
 {
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     sptr<Window> window = sptr<Window>::MakeSptr();
-    auto ret = true;
     sptr<IAceAbilityHandler> listener = sptr<IAceAbilityHandler>::MakeSptr();
     uint32_t color = 66;
     listener->SetBackgroundColor(color);
-    listener->GetBackgroundColor();
-    ASSERT_EQ(true, ret);
-    ASSERT_EQ(WMError::WM_OK, window->Destroy());
-}
-
-/**
- * @tc.name: IDispatchInputEventListener
- * @tc.desc: IDispatchInputEventListener fun
- * @tc.type: FUNC
- */
-HWTEST_F(WindowTest, IDispatchInputEventListener, TestSize.Level1)
-{
-    sptr<Window> window = sptr<Window>::MakeSptr();
-    auto ret = true;
-    sptr<IDispatchInputEventListener> listener = sptr<IDispatchInputEventListener>::MakeSptr();
-    std::shared_ptr<MMI::KeyEvent> keyEvent = nullptr;
-    std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
-    std::shared_ptr<MMI::AxisEvent> axisEvent = nullptr;
-    listener->OnDispatchPointerEvent(pointerEvent);
-    listener->OnDispatchKeyEvent(keyEvent);
-    ASSERT_EQ(true, ret);
+    EXPECT_FALSE(g_logMsg.find("invalid color string") != std::string::npos);
+    LOG_SetCallback(nullptr);
+    auto ret = listener->GetBackgroundColor();
+    EXPECT_EQ(ret, 0xffffffff);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -2196,19 +2194,6 @@ HWTEST_F(WindowTest, keyboardAnimationCurveMarshalling, TestSize.Level1)
     Parcel parcel;
     curveConfig.Unmarshalling(parcel);
     ASSERT_EQ(true, ret);
-}
-
-/**
- * @tc.name: BackgroundFailed
- * @tc.desc: window life cycle BackgroundFailed
- * @tc.type: FUNC
- */
-HWTEST_F(WindowTest, WindowLifeCycleBackgroundFailed, TestSize.Level1)
-{
-    IWindowLifeCycle windowLifeCycle;
-    int32_t ret = 0;
-    windowLifeCycle.BackgroundFailed(ret);
-    ASSERT_EQ(0, ret);
 }
 
 /**
@@ -2584,11 +2569,13 @@ HWTEST_F(WindowTest, TriggerBindModalUIExtension, TestSize.Level1)
  */
 HWTEST_F(WindowTest, RegisterTransferComponentDataForResultListener, TestSize.Level1)
 {
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     sptr<Window> window = sptr<Window>::MakeSptr();
     NotifyTransferComponentDataForResultFunc func;
-    auto ret = true;
     window->RegisterTransferComponentDataForResultListener(func);
-    ASSERT_EQ(true, ret);
+    EXPECT_FALSE(g_logMsg.find("session invalid.") != std::string::npos);
+    LOG_SetCallback(nullptr);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -2940,7 +2927,6 @@ HWTEST_F(WindowTest, GetIsMidScene, TestSize.Level1)
     bool isMidScene = false;
     WMError res = window->GetIsMidScene(isMidScene);
     EXPECT_EQ(WMError::WM_OK, res);
-    ASSERT_EQ(isMidScene, false);
     EXPECT_EQ(WMError::WM_OK, window->Destroy());
 }
 

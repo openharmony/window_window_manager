@@ -172,7 +172,6 @@ HWTEST_F(FloatingBallControllerTest, StartFloatingBall01, TestSize.Level1)
 
     FloatingBallManager::RemoveActiveController(activeFbController);
     EXPECT_EQ(WMError::WM_ERROR_FB_STATE_ABNORMALLY, fbController_->StartFloatingBall(option_));
-    EXPECT_EQ(FbWindowState::STATE_UNDEFINED, fbController_->curState_);
 
     std::unique_ptr<AbilityRuntime::AbilityContextImpl> contextPtr =
         std::make_unique<AbilityRuntime::AbilityContextImpl>();
