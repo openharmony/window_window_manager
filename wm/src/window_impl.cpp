@@ -3162,7 +3162,7 @@ void WindowImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
         } else if (uiContent_ != nullptr) {
             WLOGD("Transfer key event to uiContent");
             bool handled = static_cast<bool>(uiContent_->ProcessKeyEvent(keyEvent));
-           TLOGI(WmsLogTag::WMS_EVENT, "handled: %{public}d, escTrigger: %{public}d, escDown: %{public}d",
+            TLOGI(WmsLogTag::WMS_EVENT, "handled: %{public}d, escTrigger: %{public}d, escDown: %{public}d",
                 handled, escKeyEventTriggered_, escKeyHasDown_);
             if (!handled && !escKeyEventTriggered_ && escKeyHasDown_) {
                 HandleEspecialEscKeyEvent(keyEvent);
