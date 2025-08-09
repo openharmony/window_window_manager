@@ -32,6 +32,7 @@ const std::string SCREEN_OUTER_ON = "on";
 const std::string SCREEN_OUTER_OFF = "off";
 const std::string MULTI_SCREEN_EXIT_STR = "exit";
 const std::string MULTI_SCREEN_ENTER_STR = "enter";
+const std::string CUSTOM_SCB_SCREEN_NAME = "CustomScbScreen";
 constexpr int32_t MULTI_SCREEN_EXIT = 0;
 constexpr int32_t MULTI_SCREEN_ENTER = 1;
 constexpr uint32_t SCREEN_CONNECT_TIMEOUT = 500;
@@ -158,18 +159,21 @@ DMError MultiScreenManager::PhysicalScreenUniqueSwitch(const std::vector<ScreenI
         RSDisplayNodeConfig config = { screenSession->screenId_, false, INVALID_NODEID };
         screenSession->ReuseDisplayNode(config);
         screenSession->SetVirtualPixelRatio(screenSession->GetScreenProperty().GetDefaultDensity());
+        {
+            std::unique_lock<std::mutex> lock(uniqueScreenMutex_);
+            uniqueScreenTimeoutMap_.insert_or_assign(physicalScreenId, false);
+        }
         ScreenSessionManager::GetInstance().OnVirtualScreenChange(physicalScreenId, ScreenEvent::CONNECTED);
         ScreenSessionManager::GetInstance().RemoveScreenCastInfo(physicalScreenId);
         {
             std::unique_lock<std::mutex> lock(uniqueScreenMutex_);
-            if ((screenSession != nullptr) && (screenSession->GetInnerName() == "CustomScbScreen")) {
-                uniqueScreenTimeoutSet_.insert(physicalScreenId);
-                if (uniqueScreenCV_.wait_for(lock, std::chrono::milliseconds(SCREEN_CONNECT_TIMEOUT))
-                    == std::cv_status::timeout) {
-                    uniqueScreenTimeoutSet_.erase(physicalScreenId);
+            if ((screenSession != nullptr) && (screenSession->GetInnerName() == CUSTOM_SCB_SCREEN_NAME)) {
+                if (!uniqueScreenCV_.wait_for(lock, std::chrono::milliseconds(SCREEN_CONNECT_TIMEOUT), [this, physicalScreenId] {
+                    return uniqueScreenTimeoutMap_[physicalScreenId]; })) {
                     TLOGE(WmsLogTag::DMS, "wait for unique screen connect timeout, screenId:%{public}" PRIu64,
                         physicalScreenId);
                 }
+                uniqueScreenTimeoutMap_.erase(physicalScreenId);
             }
         }
         ScreenSessionManager::GetInstance().NotifyScreenChanged(
@@ -218,17 +222,20 @@ DMError MultiScreenManager::VirtualScreenUniqueSwitch(sptr<ScreenSession> screen
                 ScreenChangeEvent::SCREEN_SWITCH_CHANGE);
         }
         ScreenSessionManager::GetInstance().RemoveScreenCastInfo(uniqueScreenId);
+        {
+            std::unique_lock<std::mutex> lock(uniqueScreenMutex_);
+            uniqueScreenTimeoutMap_.insert_or_assign(uniqueScreenId, false);
+        }
         // virtual screen create callback to notify scb
         ScreenSessionManager::GetInstance().OnVirtualScreenChange(uniqueScreenId, ScreenEvent::CONNECTED);
         std::unique_lock<std::mutex> lock(uniqueScreenMutex_);
-        if ((uniqueScreen != nullptr) && (uniqueScreen->GetInnerName() == "CustomScbScreen")) {
-            uniqueScreenTimeoutSet_.insert(uniqueScreenId);
-            if (uniqueScreenCV_.wait_for(lock, std::chrono::milliseconds(SCREEN_CONNECT_TIMEOUT))
-                == std::cv_status::timeout) {
-                uniqueScreenTimeoutSet_.erase(uniqueScreenId);
+        if ((uniqueScreen != nullptr) && (uniqueScreen->GetInnerName() == CUSTOM_SCB_SCREEN_NAME)) {
+            if (!uniqueScreenCV_.wait_for(lock, std::chrono::milliseconds(SCREEN_CONNECT_TIMEOUT), [this, uniqueScreenId] {
+                return uniqueScreenTimeoutMap_[uniqueScreenId]; })) {
                 TLOGE(WmsLogTag::DMS, "wait for screen connect timeout, screenId:%{public}" PRIu64,
                     uniqueScreenId);
             }
+            uniqueScreenTimeoutMap_.erase(uniqueScreenId);
         }
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:VirtualScreenUniqueSwitch end");
@@ -240,10 +247,12 @@ void MultiScreenManager::NotifyScreenConnectCompletion(ScreenId screenId)
 {
     std::unique_lock<std::mutex> lock(uniqueScreenMutex_);
     TLOGI(WmsLogTag::DMS, "ENTER, screenId:%{public}" PRIu64, screenId);
-    auto it = uniqueScreenTimeoutSet_.find(screenId);
-    if (it != uniqueScreenTimeoutSet_.end()) {
-        uniqueScreenTimeoutSet_.erase(screenId);
-        uniqueScreenCV_.notify_all();
+    auto it = uniqueScreenTimeoutMap_.find(screenId);
+    if (it != uniqueScreenTimeoutMap_.end()) {
+        if (!(it->second)) {
+            uniqueScreenTimeoutMap_[screenId] = true;
+            uniqueScreenCV_.notify_all();
+        }
     }
 }
 
