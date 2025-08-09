@@ -2228,13 +2228,6 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, voi
         SetForceSplitEnable(config);
     }
 
-    HookWindowInfo hookWindowInfo{};
-    if (WindowHelper::IsMainWindow(winType)) {
-        if (GetAppHookWindowInfoFromServer(hookWindowInfo) == WMError::WM_OK) {
-            SetAppHookWindowInfo(hookWindowInfo);
-        }
-    }
-
     uint32_t version = 0;
     auto context = GetContext();
     if ((context != nullptr) && (context->GetApplicationInfo() != nullptr)) {
