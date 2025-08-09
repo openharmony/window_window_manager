@@ -965,6 +965,28 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenPrivacyWindowTagSwitch002, TestSize.
 }
 
 /**
+ * @tc.name: OnVerticalChangeBoundsWhenSwitchUser
+ * @tc.desc: OnVerticalChangeBoundsWhenSwitchUser test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, OnVerticalChangeBoundsWhenSwitchUser, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ScreenId screenId = 1050;
+    DMRect area{0, 0, 600, 800};
+    sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(screenId, ScreenProperty(), 0);
+    ASSERT_NE(screenSession, nullptr);
+    ScreenProperty screenProperty = screenSession->GetScreenProperty();
+    auto rotation = screenSession->GetScreenProperty().GetRotation();
+    constexpr float SECONDARY_ROTATION_90 = 90.0F;
+    screenProperty.SetRotation(SECONDARY_ROTATION_90);
+    RRect bounds = screenProperty.GetBounds();
+    ssm_->OnVerticalChangeBoundsWhenSwitchUser(screenSession);
+    RRect afterbounds = screenProperty.GetBounds();
+    EXPECT_EQ(bounds.rect_.GetHeight(), bounds.rect_.GetWidth());
+}
+
+/**
  * @tc.name: SetLandscapeLockStatus01
  * @tc.desc: SetLandscapeLockStatus01 test
  * @tc.type: FUNC
