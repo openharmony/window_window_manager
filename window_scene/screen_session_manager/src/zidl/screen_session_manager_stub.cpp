@@ -1448,6 +1448,7 @@ void ScreenSessionManagerStub::ProcGetDisplaySnapshotWithOption(MessageParcel& d
     option.displayId_ = static_cast<DisplayId>(data.ReadUint64());
     option.isNeedNotify_ = static_cast<bool>(data.ReadBool());
     option.isNeedPointer_ = static_cast<bool>(data.ReadBool());
+    option.isCaptureFullOfScreen_ = static_cast<bool>(data.ReadBool());
     if (!data.ReadUInt64Vector(&option.surfaceNodesList_)) {
         TLOGE(WmsLogTag::DMS, "Read node surfaceNodesList failed");
         return;
