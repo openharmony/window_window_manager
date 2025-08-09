@@ -5524,6 +5524,18 @@ DMError ScreenSessionManager::DoMakeUniqueScreenOld(const std::vector<ScreenId>&
     return DMError::DM_OK;
 }
 
+void ScreenSessionManager::NotifyScreenConnectCompletion(ScreenId screenId)
+{
+#ifdef WM_MULTI_SCREEN_ENABLE
+    TLOGI(WmsLogTag::DMS, "ENTER, screenId:%{public}" PRIu64, screenId);
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "permission denied!");
+        return;
+    }
+    MultiScreenManager::GetInstance().NotifyScreenConnectCompletion(screenId);
+#endif
+}
+
 DMError ScreenSessionManager::MakeExpand(std::vector<ScreenId> screenId,
                                          std::vector<Point> startPoint,
                                          ScreenId& screenGroupId)

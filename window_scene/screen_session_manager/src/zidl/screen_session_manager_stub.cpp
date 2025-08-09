@@ -1074,6 +1074,15 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             NotifyFoldToExpandCompletion(foldToExpand);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_NOTIFY_SCREEN_CONNECT_COMPLETION: {
+            ScreenId screenId = SCREEN_ID_INVALID;
+            if (!data.ReadUint64(screenId)) {
+                TLOGE(WmsLogTag::DMS, "Read screenId failed");
+                return ERR_INVALID_DATA;
+            }
+            NotifyScreenConnectCompletion(static_cast<ScreenId>(screenId));
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_GET_VIRTUAL_SCREEN_FLAG: {
             ProcGetVirtualScreenFlag(data, reply);
             break;
