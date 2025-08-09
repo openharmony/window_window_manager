@@ -674,9 +674,9 @@ HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch13, TestSize.Level1)
 HWTEST_F(MultiScreenManagerTest, NotifyScreenConnectCompletion01, TestSize.Level1)
 {
     MultiScreenManager::GetInstance().uniqueScreenTimeoutMap_.clear();
-    MultiScreenManager::GetInstance().uniqueScreenTimeoutMap_[1002] = true;
-    MultiScreenManager::GetInstance().NotifyScreenConnectCompletion(1002);
-    EXPECT_EQ(MultiScreenManager::GetInstance().uniqueScreenTimeoutMap_[1002], true);
+    MultiScreenManager::GetInstance().uniqueScreenTimeoutMap_[1100] = false;
+    MultiScreenManager::GetInstance().NotifyScreenConnectCompletion(1100);
+    EXPECT_EQ(MultiScreenManager::GetInstance().uniqueScreenTimeoutMap_[1100], true);
 }
 
 /**
