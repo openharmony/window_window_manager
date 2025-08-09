@@ -564,6 +564,15 @@ void ScreenSessionManagerClient::NotifyFoldToExpandCompletion(bool foldToExpand)
     screenSessionManager_->NotifyFoldToExpandCompletion(foldToExpand);
 }
 
+void ScreenSessionManagerClient::NotifyScreenConnectCompletion(ScreenId screenId)
+{
+    if (!screenSessionManager_) {
+        TLOGE(WmsLogTag::DMS, "screenSessionManager is null");
+        return;
+    }
+    screenSessionManager_->NotifyScreenConnectCompletion(screenId);
+}
+
 void ScreenSessionManagerClient::RecordEventFromScb(std::string description, bool needRecordEvent)
 {
     if (!screenSessionManager_) {
