@@ -159,17 +159,19 @@ DMError MultiScreenManager::PhysicalScreenUniqueSwitch(const std::vector<ScreenI
         screenSession->ReuseDisplayNode(config);
         screenSession->SetVirtualPixelRatio(screenSession->GetScreenProperty().GetDefaultDensity());
         ScreenSessionManager::GetInstance().OnVirtualScreenChange(physicalScreenId, ScreenEvent::CONNECTED);
-        std::unique_lock<std::mutex> lock(uniqueScreenMutex_);
-        if ((screenSession != nullptr) && (screenSession->GetInnerName() == "CustomScbScreen")) {
-            uniqueScreenTimeoutMap_[physicalScreenId] = true;
-            if (uniqueScreenCV_.wait_for(lock, std::chrono::milliseconds(SCREEN_CONNECT_TIMEOUT))
-                == std::cv_status::timeout) {
-                uniqueScreenTimeoutMap_[physicalScreenId] = false;
-                TLOGE(WmsLogTag::DMS, "wait for unique screen connect timeout, screenId:%{public}" PRIu64,
-                    physicalScreenId);
+        ScreenSessionManager::GetInstance().RemoveScreenCastInfo(physicalScreenId);
+        {
+            std::unique_lock<std::mutex> lock(uniqueScreenMutex_);
+            if ((screenSession != nullptr) && (screenSession->GetInnerName() == "CustomScbScreen")) {
+                uniqueScreenTimeoutMap_[physicalScreenId] = true;
+                if (uniqueScreenCV_.wait_for(lock, std::chrono::milliseconds(SCREEN_CONNECT_TIMEOUT))
+                    == std::cv_status::timeout) {
+                    uniqueScreenTimeoutMap_[physicalScreenId] = false;
+                    TLOGE(WmsLogTag::DMS, "wait for unique screen connect timeout, screenId:%{public}" PRIu64,
+                        physicalScreenId);
+                }
             }
         }
-        ScreenSessionManager::GetInstance().RemoveScreenCastInfo(physicalScreenId);
         ScreenSessionManager::GetInstance().NotifyScreenChanged(
             screenSession->ConvertToScreenInfo(), ScreenChangeEvent::SCREEN_SOURCE_MODE_CHANGE);
         ScreenSessionManager::GetInstance().NotifyDisplayChanged(
