@@ -8260,7 +8260,7 @@ void ScreenSessionManager::ScbStatusRecoveryWhenSwitchUser(std::vector<int32_t> 
 #endif
 }
 
-void ScreenSessionManager::OnVerticalChangeBoundsWhenSwitchUser(sptr<ScreenSession>& screenSession)
+void ScreenSessionManager::OnVerticalChangeBoundsWhenSwitchUser(sptr<ScreenSession> screenSession)
 {
     if (screenSession == nullptr) {
         TLOGE(WmsLogTag::DMS, "screenSession is nullptr");
@@ -8269,7 +8269,7 @@ void ScreenSessionManager::OnVerticalChangeBoundsWhenSwitchUser(sptr<ScreenSessi
     auto rotation = screenSession->GetScreenProperty().GetRotation();
     if (std::fabs(rotation - SECONDARY_ROTATION_90) < FLT_EPSILON ||
         std::fabs(rotation - SECONDARY_ROTATION_270) < FLT_EPSILON ) {
-        RRect bounds = screenSession->GetScreenProperty().GetBounds();
+        const RRect& bounds = screenSession->GetScreenProperty().GetBounds();
         RRect afterBounds =
             RRect({ 0, bounds.rect_.GetTop(), bounds.rect_.GetHeight(), bounds.rect_.GetWidth()}, 0.0f, 0.0f);
         screenSession->SetBounds(afterBounds);
