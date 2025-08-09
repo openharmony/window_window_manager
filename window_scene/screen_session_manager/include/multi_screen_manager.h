@@ -92,7 +92,7 @@ private:
     std::pair<ScreenId, MultiScreenMode> lastScreenMode_;  // main screen id & secondary screen mode
     std::mutex uniqueScreenMutex_;
     std::condition_variable uniqueScreenCV_;
-    std::map<ScreenId, bool> uniqueScreenTimeoutMap_;
+    std::set<ScreenId> uniqueScreenTimeoutSet_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_MULTI_SCREEN_MANAGER_H
