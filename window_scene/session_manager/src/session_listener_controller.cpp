@@ -242,14 +242,17 @@ void SessionListenerController::CallListeners(F func, Args&&... args)
     }
 }
 
-void SessionListenerController::ConstructPayload(
-    ISessionLifecycleListener::LifecycleEventPayload& payload, const SessionInfo& sessionInfo)
+void SessionListenerController::ConstructPayload(ISessionLifecycleListener::LifecycleEventPayload& payload,
+    const SessionInfo& sessionInfo, const uint32_t resultCode, const uint64_t fromScreenId, const uint64_t toScreenId)
 {
     payload.bundleName_ = sessionInfo.bundleName_;
     payload.moduleName_ = sessionInfo.moduleName_;
     payload.abilityName_ = sessionInfo.abilityName_;
     payload.appIndex_ = sessionInfo.appIndex_;
     payload.persistentId_ = sessionInfo.persistentId_;
+    payload.resultCode_ = resultCode;
+    payload.fromScreenId_ = fromScreenId;
+    payload.toScreenId_ = toScreenId;
 }
 
 WMError SessionListenerController::RegisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener,
@@ -460,6 +463,38 @@ void SessionListenerController::NotifyMissionEvent(
         default:
             break;
     }
+}
+
+void SessionListenerController::NotifySessionTransferToTargetScreenEvent(const SessionInfo& sessionInfo
+    const uint32_t resultCode, const uint64_t fromScreenId, const uint64_t toScreenId)
+{
+    int32_t persistentId = sessionInfo.persistentId_;
+    if (persistentId <= INVALID_SESSION_ID) {
+        TLOGE(WmsLogTag::WMS_LIFE, "invalid persistentId!");
+        return;
+    }
+    std::string bundleName = sessionInfo.bundleName_;
+    auto event = ISessionLifecycleListener::SessionLifecycleEvent::TRANSFER_TO_TARGET_SCREEN;
+    ISessionLifecycleListener::LifecycleEventPayload payload;
+    ConstructPayload(payload, sessionInfo, resultCode, fromScreenId, toScreenId);
+    taskScheduler_->PostAsyncTask(
+        [weakThis = weak_from_this(), event, payload, bundleName, persistentId, where = __func__] {
+            auto controller = weakThis.lock();
+            if (controller == nullptr) {
+                TLOGE(WmsLogTag::WMS_LIFE, "controller is null.");
+                return;
+            }
+            TLOGI(WmsLogTag::WMS_LIFE, "start notify listeners, bundleName:%{public}s, Id:%{public}d, state:%{public}d",
+                bundleName.c_str(), persistentId, event);
+        
+            controller->NotifyListeners(controller->listenerMapById_, persistentId, event, payload);
+            controller->NotifyListeners(controller->listenerMapByBundle_, bundleName, event, payload);
+            for (const auto& listener : controller->listenersOfAllBundles_) {
+                if (listener != nullptr) {
+                    listener->OnLifecycleEvent(event, payload);
+                }
+            }
+        }, __func__);
 }
 
 bool SessionListenerController::IsListenerMapByIdSizeReachLimit() const

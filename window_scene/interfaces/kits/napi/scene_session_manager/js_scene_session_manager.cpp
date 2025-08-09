@@ -4969,25 +4969,47 @@ void JsSceneSessionManager::RegisterTransferSessionToTargetScreenCallback()
 {
     SceneSessionManager::GetInstance().RegisterTransferSessionToTargetScreenCallback(
         [this](const TransferSessionInfo& info) {
-            this->OnTransferSessionToTargetScreen(info);
+            auto sceneSession = SceneSessionManager::getInstance().GetSceneSession(info.persistentId);
+            if (sceneSession == nullptr) {
+                TLOGE(WmsLogTag::WMS_MAIN, "sceneSession is nullptr");
+                return;
+            }
+            this->OnTransferSessionToTargetScreen(info, sceneSession->GetSessionProperty()->GetDisplayId());
     });
 }
 
-void JsSceneSessionManager::OnTransferSessionToTargetScreen(const TransferSessionInfo& info)
+void JsSceneSessionManager::OnTransferSessionToTargetScreen(const TransferSessionInfo& info,
+    const uint64_t fromScreenId)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "in");
+    const char* const where = __func__;
     taskScheduler_->PostMainThreadTask(
-        [this, info, jsCallBack = GetJSCallback(SCENE_SESSION_TRANSFER_TO_TARGET_SCREEN_CB), env = env_] {
+        [info, fromScreenId, where,
+            jsCallBack = GetJSCallback(SCENE_SESSION_TRANSFER_TO_TARGET_SCREEN_CB), env = env_] {
             if (jsCallBack == nullptr) {
-                TLOGNE(WmsLogTag::WMS_LIFE, "jsCallBack is nullptr");
+                TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s:jsCallBack is nullptr", where);
                 return;
             }
             napi_value persistentId = CreateJsValue(env, info.persistentId);
             napi_value toScreenId = CreateJsValue(env, info.toScreenId);
             napi_value wantParams = OHOS::AppExecFwk::WrapWantParams(env, info.wantParams);
             napi_value argv[] = { persistentId, toScreenId, wantParams };
-            napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+            napi_value callResult = nullptr;
+            napi_status ret = napi_call_function(
+                env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, &callResult);
+            if (ret != napi_ok) {
+                TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s:napi call exception ret:%{public}d", where, ret);
+                return;
+            }
             SceneSessionManager::GetInstance().UpdateScreenLockState(info.persistentId);
+
+            uint32_t resultCode = 0;
+            std::string resultMessage = "";
+            if (!ConverSessionResultFromJsValue(env, callResult, resultCode, resultMessage)) {
+                return;
+            }
+            SceneSessionManager::GetInstance().NotifySessionTransferToTargetScreenEvent(
+                info.persistentId, resultCode, fromScreenId, info.toScreenId);
         }, __func__);
 }
 
