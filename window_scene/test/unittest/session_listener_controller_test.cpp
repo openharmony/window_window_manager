@@ -161,10 +161,12 @@ public:
     void OnLifecycleEvent(SessionLifecycleEvent event, const LifecycleEventPayload& payload) override
     {
         event_ = event;
+        payload_ = payload;
     }
 
 private:
     ISessionLifecycleListener::SessionLifecycleEvent event_;
+    ISessionLifecycleListener::LifecycleEventPayload payload_;
 };
 
 sptr<SceneSessionManager> SessionListenerControllerTest::ssm_ = nullptr;
@@ -663,6 +665,108 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionLifecycleEvent03, Function 
     slController->NotifySessionLifecycleEvent(ISessionLifecycleListener::SessionLifecycleEvent::ACTIVE, info);
     usleep(WAIT_SYNC_IN_NS);
     EXPECT_EQ(myListener->event_, ISessionLifecycleListener::SessionLifecycleEvent::ACTIVE);
+}
+
+/**
+ * @tc.name: NotifySessionTransferToTargetScreenEvent01_ByPersistentId
+ * @tc.desc: NotifySessionTransferToTargetScreenEvent01_ByPersistentId
+ * @tc.type: CLASS
+ */
+HWTEST_F(SessionListenerControllerTest, NotifySessionTransferToTargetScreenEvent01_ByPersistentId, TestSize.Level1)
+{
+    sptr<MySessionLifecycleListener> myListener = new MySessionLifecycleListener();
+    sptr<ISessionLifecycleListener> listener = iface_cast<ISessionLifecycleListener>(myListener->AsObject());
+    ASSERT_NE(listener, nullptr);
+    std::vector<int32_t> persistentIdList = { 111 };
+    slController->RegisterSessionLifecycleListener(listener, persistentIdList);
+
+    SessionInfo info;
+    info.bundleName_ = "com.example.myapp";
+    info.abilityName_ = "MainAbility";
+    info.moduleName_ = "entry";
+    info.persistentId_ = -1;
+    info.appIndex_ = 0;
+    uint32_t resultCode = 0;
+    uint64_t fromScreenId = 0;
+    uint64_t toScreenId = 1;
+
+    slController->NotifySessionTransferToTargetScreenEvent(info, resultCode, fromScreenId, toScreenId);
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_EQ(myListener->event_, ISessionLifecycleListener::SessionLifecycleEvent::CREATED);
+
+    info.persistentId_ = 111;
+    slController->NotifySessionTransferToTargetScreenEvent(info, resultCode, fromScreenId, toScreenId);
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_EQ(myListener->event_, ISessionLifecycleListener::SessionLifecycleEvent::TRANSFER_TO_TARGET_SCREEN);
+    EXPECT_EQ(myListener->payload_.persistentId_, info.persistentId_);
+    EXPECT_EQ(myListener->payload_.fromScreenId_, fromScreenId);
+    EXPECT_EQ(myListener->payload_.toScreenId_, toScreenId);
+    EXPECT_EQ(myListener->payload_.resultCode_, resultCode);
+}
+
+/**
+ * @tc.name: NotifySessionTransferToTargetScreenEvent02_ByBundleName
+ * @tc.desc: NotifySessionTransferToTargetScreenEvent02_ByBundleName
+ * @tc.type: CLASS
+ */
+HWTEST_F(SessionListenerControllerTest, NotifySessionTransferToTargetScreenEvent02_ByBundleName, TestSize.Level1)
+{
+    sptr<MySessionLifecycleListener> myListener = new MySessionLifecycleListener();
+    sptr<ISessionLifecycleListener> listener = iface_cast<ISessionLifecycleListener>(myListener->AsObject());
+    ASSERT_NE(listener, nullptr);
+    std::vector<std::string> bundleNameList;
+    bundleNameList.emplace_back("com.example.myapp");
+    slController->RegisterSessionLifecycleListener(listener, bundleNameList);
+
+    SessionInfo info;
+    info.bundleName_ = "com.example.myapp";
+    info.abilityName_ = "MainAbility";
+    info.moduleName_ = "entry";
+    info.persistentId_ = 11;
+    info.appIndex_ = 0;
+    uint32_t resultCode = 0;
+    uint64_t fromScreenId = 0;
+    uint64_t toScreenId = 1;
+
+    slController->NotifySessionTransferToTargetScreenEvent(info, resultCode, fromScreenId, toScreenId);
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_EQ(myListener->event_, ISessionLifecycleListener::SessionLifecycleEvent::TRANSFER_TO_TARGET_SCREEN);
+    EXPECT_EQ(myListener->payload_.persistentId_, info.persistentId_);
+    EXPECT_EQ(myListener->payload_.fromScreenId_, fromScreenId);
+    EXPECT_EQ(myListener->payload_.toScreenId_, toScreenId);
+    EXPECT_EQ(myListener->payload_.resultCode_, resultCode);
+}
+
+/**
+ * @tc.name: NotifySessionTransferToTargetScreenEvent03_ByAll
+ * @tc.desc: NotifySessionTransferToTargetScreenEvent03_ByAll
+ * @tc.type: CLASS
+ */
+HWTEST_F(SessionListenerControllerTest, NotifySessionTransferToTargetScreenEvent03_ByAll, TestSize.Level1)
+{
+    sptr<MySessionLifecycleListener> myListener = new MySessionLifecycleListener();
+    sptr<ISessionLifecycleListener> listener = iface_cast<ISessionLifecycleListener>(myListener->AsObject());
+    ASSERT_NE(listener, nullptr);
+    std::vector<std::string> bundleNameList;
+    slController->RegisterSessionLifecycleListener(listener, bundleNameList);
+
+    SessionInfo info;
+    info.bundleName_ = "com.example.myapp";
+    info.abilityName_ = "MainAbility";
+    info.moduleName_ = "entry";
+    info.persistentId_ = 11;
+    info.appIndex_ = 0;
+    uint32_t resultCode = 1;
+    uint64_t fromScreenId = 2;
+    uint64_t toScreenId = 3;
+
+    slController->NotifySessionTransferToTargetScreenEvent(info, resultCode, fromScreenId, toScreenId);
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_EQ(myListener->event_, ISessionLifecycleListener::SessionLifecycleEvent::TRANSFER_TO_TARGET_SCREEN);
+    EXPECT_EQ(myListener->payload_.persistentId_, info.persistentId_);
+    EXPECT_EQ(myListener->payload_.fromScreenId_, fromScreenId);
+    EXPECT_EQ(myListener->payload_.toScreenId_, toScreenId);
+    EXPECT_EQ(myListener->payload_.resultCode_, resultCode);
 }
 } // namespace
 } // namespace Rosen

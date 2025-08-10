@@ -17051,6 +17051,18 @@ WMError SceneSessionManager::NotifyTransferSessionToTargetScreen(const TransferS
     return WMError::WM_OK;
 }
 
+void SceneSessionManager::NotifySessionTransferToTargetScreenEvent(const int32_t persistentId,
+    const uint32_t resultCode, const uint64_t fromScreenId, const uint64_t toScreenId)
+{
+    auto sceneSession = GetSceneSession(persistentId);
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "sceneSession is nullptr");
+        return;
+    }
+    listenerController_->NotifySessionTransferToTargetScreenEvent(
+        sceneSession->GetSessionInfo(), resultCode, fromScreenId, toScreenId);
+}
+
 WMError SceneSessionManager::AnimateTo(int32_t windowId, const WindowAnimationProperty& animationProperty,
         const WindowAnimationOption& animationOption)
 {
