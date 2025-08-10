@@ -1473,9 +1473,7 @@ void ProcessPendingSessionActivationResult(napi_env env, napi_value callResult,
 {
     uint32_t resultCode = 0;
     std::string resultMessage = "";
-    if (!ParseJsValue(env, callResult, "resultCode", resultCode) ||
-        !ParseJsValue(env, callResult, "resultMessage", resultMessage)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "JsRootSceneSession ParseJsValue resultCode fail");
+    if (!ConvertSessionResultFromJsValue(env, callResult, resultCode, resultMessage)) {
         return;
     }
     if (resultCode >= static_cast<uint32_t>(RequestResultCode::FAIL)) {
@@ -1485,6 +1483,21 @@ void ProcessPendingSessionActivationResult(napi_env env, napi_value callResult,
     TLOGI(WmsLogTag::WMS_LIFE, "persistentId:%{public}d, requestId:%{public}d,"
         "resultCode:%{public}d, resultMessage:%{public}s",
         sessionInfo->persistentId_, sessionInfo->requestId, resultCode, resultMessage.c_str());
+}
+
+bool ConvertSessionResultFromJsValue(napi_env env, napi_value jsResult, uint32_t& resultCode,
+    std::string& resultMessage)
+{
+    uint32_t tempResultCode = 0;
+    std::string tempResultMessage = "";
+    if (!ParseJsValue(env, jsResult, "resultCode", tempResultCode) ||
+        !ParseJsValue(env, jsResult, "resultMessage", tempResultMessage)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "ConvertSessionResultFromJsValue fail");
+        return false;
+    }
+    resultCode = tempResultCode;
+    resultMessage = tempResultMessage;
+    return true;
 }
 
 napi_value CreateJsExceptionInfo(napi_env env, const ExceptionInfo& exceptionInfo)
