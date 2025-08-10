@@ -672,7 +672,7 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionLifecycleEvent03, Function 
  * @tc.desc: NotifySessionTransferToTargetScreenEvent01_ByPersistentId
  * @tc.type: CLASS
  */
-HWTEST_F(SessionListenerControllerTest, NotifySessionTransferToTargetScreenEvent01_ByPersistentId, Function | SmallTest | Level2)
+HWTEST_F(SessionListenerControllerTest, NotifySessionTransferToTargetScreenEvent01_ByPersistentId, TestSize.Level1)
 {
     sptr<MySessionLifecycleListener> myListener = new MySessionLifecycleListener();
     sptr<ISessionLifecycleListener> listener = iface_cast<ISessionLifecycleListener>(myListener->AsObject());
@@ -709,7 +709,7 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionTransferToTargetScreenEvent
  * @tc.desc: NotifySessionTransferToTargetScreenEvent02_ByBundleName
  * @tc.type: CLASS
  */
-HWTEST_F(SessionListenerControllerTest, NotifySessionTransferToTargetScreenEvent02_ByBundleName, Function | SmallTest | Level2)
+HWTEST_F(SessionListenerControllerTest, NotifySessionTransferToTargetScreenEvent02_ByBundleName, TestSize.Level1)
 {
     sptr<MySessionLifecycleListener> myListener = new MySessionLifecycleListener();
     sptr<ISessionLifecycleListener> listener = iface_cast<ISessionLifecycleListener>(myListener->AsObject());
@@ -742,7 +742,7 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionTransferToTargetScreenEvent
  * @tc.desc: NotifySessionTransferToTargetScreenEvent03_ByAll
  * @tc.type: CLASS
  */
-HWTEST_F(SessionListenerControllerTest, NotifySessionTransferToTargetScreenEvent03_ByAll, Function | SmallTest | Level2)
+HWTEST_F(SessionListenerControllerTest, NotifySessionTransferToTargetScreenEvent03_ByAll, TestSize.Level1)
 {
     sptr<MySessionLifecycleListener> myListener = new MySessionLifecycleListener();
     sptr<ISessionLifecycleListener> listener = iface_cast<ISessionLifecycleListener>(myListener->AsObject());
