@@ -809,7 +809,7 @@ HWTEST_F(MoveDragControllerTest, TestConsumeMoveEventWithNotStartMove, TestSize.
     moveDragController->SetStartDragFlag(false);
     moveDragController->moveDragProperty_.pointerId_ = pointerId;
     moveDragController->moveDragProperty_.pointerType_ = pointerEvent->GetSourceType();
-    moveDragController->SetStartMoveFlag(false);
+    moveDragController->isStartMove_ = false;
 
     // Case 1: Mouse right button & not start move
     pointerEvent->SetButtonId(MMI::PointerEvent::MOUSE_BUTTON_RIGHT);
@@ -876,42 +876,42 @@ HWTEST_F(MoveDragControllerTest, TestConsumeMoveEventWithStartMove, TestSize.Lev
     moveDragController->moveDragProperty_.pointerType_ = pointerEvent->GetSourceType();
 
     // Case 1: MOVE normal flow
-    moveDragController->SetStartMoveFlag(true);
+    moveDragController->isStartMove_ = true;
     moveDragController->moveDragIsInterrupted_ = false;
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
     EXPECT_TRUE(moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
 
     // Case 2: MOVE interrupted
-    moveDragController->SetStartMoveFlag(true);
+    moveDragController->isStartMove_ = true;
     moveDragController->moveDragIsInterrupted_ = true;
     EXPECT_TRUE(moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
-    EXPECT_FALSE(moveDragController->GetStartMoveFlag());
+    EXPECT_FALSE(moveDragController->isStartMove_);
 
     // Case 3: UP ends drag
-    moveDragController->SetStartMoveFlag(true);
+    moveDragController->isStartMove_ = true;
     moveDragController->hasPointDown_ = true;
     moveDragController->moveDragIsInterrupted_ = false;
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UP);
     EXPECT_FALSE(moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
     EXPECT_FALSE(moveDragController->hasPointDown_);
-    EXPECT_FALSE(moveDragController->GetStartMoveFlag());
+    EXPECT_FALSE(moveDragController->isStartMove_);
 
     // Case 4: CANCEL with hasPointDown_ is false
-    moveDragController->SetStartMoveFlag(true);
+    moveDragController->isStartMove_ = true;
     moveDragController->hasPointDown_ = false;
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_CANCEL);
     EXPECT_TRUE(moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
 
     // Case 5: BUTTON_DOWN with moveDragIsInterrupted_ is true
-    moveDragController->SetStartMoveFlag(true);
+    moveDragController->isStartMove_ = true;
     moveDragController->hasPointDown_ = true;
     moveDragController->moveDragIsInterrupted_ = true;
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
     EXPECT_TRUE(moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
-    EXPECT_FALSE(moveDragController->GetStartMoveFlag());
+    EXPECT_FALSE(moveDragController->isStartMove_);
 
     // Case 6: UNKNOWN action
-    moveDragController->SetStartMoveFlag(true);
+    moveDragController->isStartMove_ = true;
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
     EXPECT_TRUE(moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
 }
@@ -1255,15 +1255,16 @@ HWTEST_F(MoveDragControllerTest, GetFullScreenToFloatingRect, TestSize.Level1)
  */
 HWTEST_F(MoveDragControllerTest, CheckDragEventLegal, TestSize.Level1)
 {
-    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
-    ASSERT_NE(pointerEvent, nullptr);
+    constexpr int32_t pointerId = 0;
+    MMI::PointerEvent::PointerItem pointerItem;
+    pointerItem.SetPointerId(pointerId);
+    pointerItem.SetOriginPointerId(pointerId);
+    auto pointerEvent = MMI::PointerEvent::Create();
+    pointerEvent->SetPointerId(pointerId);
+    pointerEvent->AddPointerItem(pointerItem);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(property, nullptr);
-    auto tempPointerEvent = pointerEvent;
-    pointerEvent = nullptr;
-    auto result = moveDragController->CheckDragEventLegal(pointerEvent, property);
+    auto result = moveDragController->CheckDragEventLegal(nullptr, property);
     ASSERT_EQ(result, false);
-    pointerEvent = tempPointerEvent;
     result = moveDragController->CheckDragEventLegal(pointerEvent, nullptr);
     ASSERT_EQ(result, false);
     moveDragController->isStartMove_ = true;

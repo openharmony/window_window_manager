@@ -103,7 +103,6 @@ std::shared_ptr<MMI::PointerEvent> WindowMoveDragTest::CreatePointerEvent(int32_
 {
     MMI::PointerEvent::PointerItem pointerItem;
     pointerItem.SetPointerId(pointerId);
-    pointerItem.SetOriginPointerId(pointerId);
     pointerItem.SetDisplayX(posX);
     pointerItem.SetDisplayY(posY);
 
