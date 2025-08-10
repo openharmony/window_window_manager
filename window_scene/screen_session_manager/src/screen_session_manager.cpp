@@ -4839,9 +4839,7 @@ ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
             std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
             screenSessionMap_.insert(std::make_pair(smsScreenId, screenSession));
         }
-        if (option.name_ == SCREEN_NAME_CAST) {
-            screenSession->SetVirtualScreenFlag(VirtualScreenFlag::CAST);
-        }
+        screenSession->SetVirtualScreenFlag(option.virtualScreenFlag_);
         NotifyScreenConnected(screenSession->ConvertToScreenInfo());
         TLOGW(WmsLogTag::DMS, "create success. ScreenId: %{public}" PRIu64", rsId: %{public}" PRIu64"",
             smsScreenId, rsId);

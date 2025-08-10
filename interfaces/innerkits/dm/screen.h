@@ -39,6 +39,7 @@ struct VirtualScreenOption {
     std::vector<uint64_t> missionIds_ {};
     VirtualScreenType virtualScreenType_ {VirtualScreenType::UNKNOWN};
     bool isSecurity_ {true};
+    VirtualScreenFlag virtualScreenFlag_ {VirtualScreenFlag::DEFAULT};
 };
 
 class Screen : public RefBase {
