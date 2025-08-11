@@ -225,8 +225,6 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleLayoutFullScreenChange(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_DEFAULT_DENSITY_ENABLED):
             return HandleDefaultDensityEnabled(data, reply);
-        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_COLOR_MODE):
-            return HandleUpdateColorMode(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TITLE_AND_DOCK_HOVER_SHOW_CHANGE):
             return HandleTitleAndDockHoverShowChange(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_FORCE_LANDSCAPE_CONFIG):
@@ -587,22 +585,6 @@ int SessionStub::HandleLayoutFullScreenChange(MessageParcel& data, MessageParcel
     TLOGD(WmsLogTag::WMS_LAYOUT_PC, "isLayoutFullScreen: %{public}d", isLayoutFullScreen);
     WSError errCode = OnLayoutFullScreenChange(isLayoutFullScreen);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
-    return ERR_NONE;
-}
-
-int SessionStub::HandleUpdateColorMode(MessageParcel& data, MessageParcel& reply)
-{
-    std::string colorMode;
-    if (!data.ReadString(colorMode)) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read colorMode failed.");
-        return ERR_INVALID_DATA;
-    }
-    bool hasDarkRes = false;
-    if (!data.ReadBool(hasDarkRes)) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read hasDarkRes failed.");
-        return ERR_INVALID_DATA;
-    }
-    OnUpdateColorMode(colorMode, hasDarkRes);
     return ERR_NONE;
 }
 
