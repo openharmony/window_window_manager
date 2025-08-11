@@ -33,6 +33,15 @@ namespace Rosen {
 namespace {
 #define ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {return;}
 }
+
+namespace {
+    std::string g_errLog;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
+        const char* msg)
+    {
+        g_errLog += msg;
+    }
+}
     
 class SuperFoldStateManagerTest : public testing::Test {
 public:
@@ -587,6 +596,59 @@ HWTEST_F(
     ASSERT_EQ(DMError::DM_OK, result);
 }
 
+/**
+ * @tc.name: GetFoldCreaseRect01
+ * @tc.desc: test function : GetFoldCreaseRect01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SuperFoldStateManagerTest, GetFoldCreaseRect01, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    std::vector<DMRect> foldCreaseRect;
+    std::vector<int32_t> foldRect = {
+        100, // posX
+        200, // posY
+        300, // width
+        400  // height
+    };
+    std::function<void()> func = [&]()
+    {
+        SuperFoldStateManager::GetInstance().GetFoldCreaseRegion(true, false);
+        SuperFoldStateManager::GetInstance().GetFoldCreaseRect(true, false, foldRect, foldCreaseRect);
+    };
+ 
+    func();
+    EXPECT_TRUE(g_errLog.find("the current FoldCreaseRect is vertical") != std::string::npos);
+    LOG_SetCallback(nullptr);
+}
+ 
+/**
+ * @tc.name: GetFoldCreaseRect02
+ * @tc.desc: test function : GetFoldCreaseRect02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SuperFoldStateManagerTest, GetFoldCreaseRect02, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    std::vector<DMRect> foldCreaseRect;
+    std::vector<int32_t> foldRect = {
+        100, // posX
+        200, // posY
+        300, // width
+        400  // height
+    };
+    std::function<void()> func = [&]()
+    {
+        SuperFoldStateManager::GetInstance().GetFoldCreaseRegion(false, false);
+        SuperFoldStateManager::GetInstance().GetFoldCreaseRect(false, false, foldRect, foldCreaseRect);
+    };
+ 
+    func();
+    EXPECT_TRUE(g_errLog.find("the current FoldCreaseRect is horizontal") != std::string::npos);
+    LOG_SetCallback(nullptr);
+}
 }
 }
 }
