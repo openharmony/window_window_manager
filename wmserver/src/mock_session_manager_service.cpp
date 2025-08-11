@@ -341,7 +341,7 @@ ErrCode MockSessionManagerService::RegisterSMSRecoverListener(const sptr<IRemote
     bool isWMSConnected = false;
     {
         std::lock_guard<std::mutex> lock(wmsConnectionStatusLock_);
-        if (wmsConnectionStatusMap_.find(defaultWMSUserId_) != wmsConnectionStatusMap_.end()) {、
+        if (wmsConnectionStatusMap_.find(defaultWMSUserId_) != wmsConnectionStatusMap_.end()) {
             //TODO 这里回调只能返回默认scb的sessionManagerService
             isWMSConnected = wmsConnectionStatusMap_[defaultWMSUserId_];
         }
