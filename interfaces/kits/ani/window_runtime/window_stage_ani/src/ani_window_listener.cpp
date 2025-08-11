@@ -107,7 +107,7 @@ void AniWindowListener::LifeCycleCallBack(LifeCycleEventType eventType)
         AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
-void AniWindowListener::WindowStageLifecycleCallback(windowStageLifeCycleEventType eventType)
+void AniWindowListener::WindowStageLifecycleCallback(WindowStageLifeCycleEventType eventType)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]windowStageLifecycleCallback, envent type: %{public}u", eventType);
     auto task = [self = weakRef_, eventType, eng = env_] () {
