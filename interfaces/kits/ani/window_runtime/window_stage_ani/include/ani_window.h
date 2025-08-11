@@ -100,8 +100,12 @@ public:
     void Minimize(ani_env* env);
     void HideWindowFunction(ani_env* env, WmErrorCode errCode);
     void Maximize(ani_env* env, ani_int presentation);
-    ani_object Resize(ani_env* env, ani_double width, ani_double height);
-    ani_object MoveWindowTo(ani_env* env, ani_double x, ani_double y);
+
+   /*
+    * Window Layout
+    */
+    void Resize(ani_env* env, ani_int width, ani_int height);
+    void MoveWindowTo(ani_env* env, ani_int x, ani_int y);
     ani_object GetGlobalRect(ani_env* env);
 
     ani_int GetWindowDecorHeight(ani_env* env);

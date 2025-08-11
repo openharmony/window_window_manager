@@ -255,8 +255,8 @@ ani_object AniWindowUtils::CreateAniSize(ani_env* env, int32_t width, int32_t he
         TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to new obj");
         return AniWindowUtils::CreateAniUndefined(env);
     }
-    CallAniMethodVoid(env, aniRect, aniClass, "<set>width", nullptr, ani_double(width));
-    CallAniMethodVoid(env, aniRect, aniClass, "<set>height", nullptr, ani_double(height));
+    CallAniMethodVoid(env, aniRect, aniClass, "<set>width", nullptr, ani_int(width));
+    CallAniMethodVoid(env, aniRect, aniClass, "<set>height", nullptr, ani_int(height));
     return aniRect;
 }
 
@@ -363,10 +363,10 @@ ani_object AniWindowUtils::CreateAniRect(ani_env* env, const Rect& rect)
         TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to create new obj");
         return AniWindowUtils::CreateAniUndefined(env);
     }
-    CallAniMethodVoid(env, aniRect, aniClass, "<set>left", nullptr, ani_double(rect.posX_));
-    CallAniMethodVoid(env, aniRect, aniClass, "<set>top", nullptr, ani_double(rect.posY_));
-    CallAniMethodVoid(env, aniRect, aniClass, "<set>width", nullptr, ani_double(rect.width_));
-    CallAniMethodVoid(env, aniRect, aniClass, "<set>height", nullptr, ani_double(rect.height_));
+    CallAniMethodVoid(env, aniRect, aniClass, "<set>left", nullptr, ani_int(rect.posX_));
+    CallAniMethodVoid(env, aniRect, aniClass, "<set>top", nullptr, ani_int(rect.posY_));
+    CallAniMethodVoid(env, aniRect, aniClass, "<set>width", nullptr, ani_int(rect.width_));
+    CallAniMethodVoid(env, aniRect, aniClass, "<set>height", nullptr, ani_int(rect.height_));
     return aniRect;
 }
 
@@ -1072,6 +1072,18 @@ void AniWindowUtils::GetSpecificBarStatus(sptr<Window>& window, const std::strin
     systemBarProperties[type].enableAnimation_ = newSystemBarProperties[type].enableAnimation_;
     systemBarProperties[type].settingFlag_ = systemBarProperties[type].settingFlag_ |
         SystemBarSettingFlag::ENABLE_SETTING;
+}
+
+WmErrorCode AniWindowUtils::ToErrorCode(WMError error, WmErrorCode defaultCode)
+{
+    auto it = WM_JS_TO_ERROR_CODE_MAP.find(error);
+    if (it != WM_JS_TO_ERROR_CODE_MAP.end()) {
+        return it->second;
+    }
+    TLOGW(WmsLogTag::DEFAULT,
+        "[ANI] Unknown error: %{public}d, return defaultCode: %{public}d",
+        static_cast<int32_t>(error), static_cast<int32_t>(defaultCode));
+    return defaultCode;
 }
 } // namespace Rosen
 } // namespace OHOS
