@@ -570,6 +570,13 @@ export enum WindowEventType {
     WINDOW_DESTROYED = 7
 }
 
+export enum WindowStageLifeCycleEventType {
+    FOREGROUND = 1,
+    RESUMED = 2,
+    PAUSED = 3,
+    BACKGROUND = 4,
+}
+
 export enum WindowMode {
     UNDEFINED = 1,
     FULLSCREEN = 2,
@@ -1754,6 +1761,11 @@ export function getLastWindow(ctx: BaseContext, callback: AsyncCallback<Window>)
     }).catch((err: NullishType) => {
         callback(err as BusinessError, new WindowInternal());
     });
+}
+
+function runWindowStageLifecycleEventCallBack(cb: object, cbArg: int): void {
+    const func = cb as (cbArg: WindowStageLifeCycleEventType) => void;
+    func(cbArg as WindowStageLifeCycleEventType);
 }
 
 function runWindowEventCallBack(cb: object, cbArg: int): void {
