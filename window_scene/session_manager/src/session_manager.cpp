@@ -226,10 +226,8 @@ void SessionManager::InitSessionManagerServiceProxy()
     RegisterSMSRecoverListener();
 
     auto proxy = SessionManagerLite::GetInstance(userId_)->GetSessionManagerServiceProxy();
-    {
-        std::lock_guard<std::mutex> lock(sessionManagerServiceMutex_);
-        sessionManagerServiceProxy_ = proxy;
-    }
+    std::lock_guard<std::mutex> lock(sessionManagerServiceMutex_);
+    sessionManagerServiceProxy_ = proxy;
     if (!sessionManagerServiceProxy_) {
         TLOGE(WmsLogTag::WMS_SCB, "failed to get sms proxy");
     }

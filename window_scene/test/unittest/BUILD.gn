@@ -1362,7 +1362,10 @@ ohos_unittest("ws_mock_session_manager_service_test") {
 
   include_dirs = [ "../mock" ]
 
-  sources = [ "mock_session_manager_service_test.cpp" ]
+  sources = [ 
+    "${window_base_path}/window_scene/test/mock/mock_accesstoken_kit.cpp",
+    "mock_session_manager_service_test.cpp"
+  ]
 
   deps = [
     ":ws_unittest_common",

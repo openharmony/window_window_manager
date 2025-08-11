@@ -169,7 +169,7 @@ HWTEST_F(SessionManagerTest, RegisterWindowManagerRecoverCallbackFunc, TestSize.
 HWTEST_F(SessionManagerTest, GetInsance, TestSize.Level1)
 {
     sptr<SessionManager> instance = nullptr;
-    userId = -1;
+    int32_t userId = -1;
     instance = SessionManager::GetInstance(userId);
     ASSERT_NE(nullptr, instance);
 

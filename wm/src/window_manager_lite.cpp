@@ -30,7 +30,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowManagerLite"};
 }
 std::unordered_map<int32_t, sptr<WindowManagerLite>> WindowManagerLite::windowManagerLiteMap_ = {};
-std::mutex_ WindowManagerLite::windowManagerLiteMapMutex_;
+std::mutex WindowManagerLite::windowManagerLiteMapMutex_;
 
 class WindowManagerLite::Impl {
 public:
@@ -363,13 +363,13 @@ WindowManagerLite::~WindowManagerLite()
     destroyed_ = true;
 }
 
-WindowAdapterLite& WindowAdapterLite::GetInstance()
+WindowManagerLite& WindowManagerLite::GetInstance()
 {
-    static sptr<WindowAdapterLite> instance = new WindowAdapterLite();
+    static sptr<WindowManagerLite> instance = new WindowManagerLite();
     return *instance;
 }
 
-WindowAdapterLite& WindowAdapterLite::GetInstance(const int32_t userId)
+sptr<WindowManagerLite> WindowManagerLite::GetInstance(const int32_t userId)
 {
     /**
      * Only system applications or services with a userId of 0 are allowed to communicate
@@ -379,7 +379,7 @@ WindowAdapterLite& WindowAdapterLite::GetInstance(const int32_t userId)
     int32_t clientUserId = GetUserIdByUid(getuid());
     if (clientUserId != SYSTEM_USERID || userId <= INVALID_USER_ID) {
         TLOGI(WmsLogTag::WMS_MULTI_USER, "user singleton mode");
-        instance = &WindowAdapterLite::GetInstance();
+        instance = &WindowManagerLite::GetInstance();
         return instance;
     }
 
@@ -390,7 +390,7 @@ WindowAdapterLite& WindowAdapterLite::GetInstance(const int32_t userId)
         return iter->second;
     }
     TLOGI(WmsLogTag::WMS_MULTI_USER, "create new instance userId: %{public}d", userId);
-    instance = new WindowAdapterLite(userId);
+    instance = new WindowManagerLite(userId);
     windowManagerLiteMap_.insert({ userId, instance });
     return instance;
 }
@@ -398,9 +398,9 @@ WindowAdapterLite& WindowAdapterLite::GetInstance(const int32_t userId)
 WMError WindowManagerLite::RemoveInstanceByUserId(const int userId)
 {
     TLOGI(WmsLogTag::WMS_MULTI_USER, "remove instance userId: %{public}d", userId);
-    std:lock_guard<std::mutex> lock(windowManagerLiteMapMutex_);
+    std::lock_guard<std::mutex> lock(windowManagerLiteMapMutex_);
     windowManagerLiteMap_.erase(userId);
-    return WMError::OK;
+    return WMError::WM_OK;
 }
 
 WMError WindowManagerLite::RegisterFocusChangedListener(const sptr<IFocusChangedListener>& listener)

@@ -532,7 +532,7 @@ void WindowManager::Impl::NotifyWMSWindowDestroyed(const WindowLifeCycleInfo& li
 }
 
 WindowManager::WindowManager(const int32_t userId) : userId_(userId),
-    pImpl_(std::make_unique<Impl>(mutex_))
+    pImpl_(std::make_unique<Impl>())
 {
 }
 
