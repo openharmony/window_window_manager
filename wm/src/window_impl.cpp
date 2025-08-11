@@ -3162,7 +3162,7 @@ void WindowImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
                     handled = true;
                     keyEvent->MarkProcessed();
                 }
-                TLOGE(WmsLogTag::WMS_EVENT, "recover from fullscreen, consumed: %{public}d", isConsumed);
+                TLOGE(WmsLogTag::WMS_EVENT, "recover from fullscreen, handled: %{public}d", handled);
             }
             if (!handled && !escKeyEventTriggered_ && escKeyHasDown_) {
                 HandleEspecialEscKeyEvent(keyEvent);
