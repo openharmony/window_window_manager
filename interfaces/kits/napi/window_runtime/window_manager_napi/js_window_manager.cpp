@@ -957,7 +957,7 @@ static napi_value GetTopWindowTask(void* contextPtr, napi_env env, napi_value ca
             if (lists->ability->GetWindow() == nullptr) {
                 lists->errorCode = newApi ? static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY) :
                     static_cast<int32_t>(WMError::WM_ERROR_NULLPTR);
-                lists->errMsg = "FA mode can not get ability window";
+                lists->errMsg = "[window][getLatsWindow]msg: FA mode can not get ability window";
                 return;
             }
             lists->window = Window::GetTopWindowWithId(lists->ability->GetWindow()->GetWindowId());
@@ -966,7 +966,7 @@ static napi_value GetTopWindowTask(void* contextPtr, napi_env env, napi_value ca
             if (contextPtr == nullptr || context == nullptr) {
                 lists->errorCode = newApi ? static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY) :
                     static_cast<int32_t>(WMError::WM_ERROR_NULLPTR);
-                lists->errMsg = "Stage mode without context";
+                lists->errMsg = "[window][getLatsWindow]msg: Stage mode without context";
                 return;
             }
             lists->window = Window::GetTopWindowWithContext(context->lock());
@@ -976,9 +976,9 @@ static napi_value GetTopWindowTask(void* contextPtr, napi_env env, napi_value ca
         if (lists == nullptr) {
             if (newApi) {
                 task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-                    "napi abnormal"));
+                    "[window][getLatsWindow]msg: NAPI abnormal"));
             } else {
-                task.Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_NULLPTR, "napi abnormal"));
+                task.Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_NULLPTR, "[window][getLatsWindow]msg: NAPI abnormal"));
             }
             return;
         }
@@ -996,10 +996,10 @@ static napi_value GetTopWindowTask(void* contextPtr, napi_env env, napi_value ca
         if (lists->window == nullptr || lists->window->GetWindowState() == WindowState::STATE_DESTROYED) {
             if (newApi) {
                 task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-                    "Get top window failed"));
+                    "[window][getLatsWindow]msg: Get top window failed"));
             } else {
                 task.Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_NULLPTR,
-                    "Get top window failed"));
+                    "[window][getLatsWindow]msg: Get top window failed"));
             }
             return;
         }
