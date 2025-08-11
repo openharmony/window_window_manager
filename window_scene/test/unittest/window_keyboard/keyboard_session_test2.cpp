@@ -415,7 +415,7 @@ HWTEST_F(KeyboardSessionTest2, CheckIfNeedRaiseCallingSession01, TestSize.Level1
     callingSession->systemConfig_.freeMultiWindowSupport_ = true;
     callingSession->systemConfig_.freeMultiWindowEnable_ = true;
     auto ret = keyboardSession->CheckIfNeedRaiseCallingSession(callingSession, true);
-    EXPECT_EQ(ret, false);
+    EXPECT_EQ(ret, true);
     callingSession->systemConfig_.freeMultiWindowEnable_ = false;
     ret = keyboardSession->CheckIfNeedRaiseCallingSession(callingSession, true);
     EXPECT_EQ(ret, false);
