@@ -3125,17 +3125,6 @@ WMError WindowImpl::HandleEspecialEscKeyEvent(const std::shared_ptr<MMI::KeyEven
         return WMError::WM_DO_NOTHING;
     }
 
-    if (property_->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
-        GetImmersiveModeEnabledState()) {
-        TLOGD(WmsLogTag::WMS_EVENT, "multi window and Immersivemode, recover");
-        auto ret = Recover();
-        if (ret != WMError::WM_OK) {
-            TLOGE(WmsLogTag::WMS_EVENT, "recover failed, handlebackevent");
-            HandleBackKeyPressedEvent(keyEvent);
-        }
-        return WMError::WM_OK;
-    }
-
     TLOGD(WmsLogTag::WMS_EVENT, "normal mode, handlebackevent");
     HandleBackKeyPressedEvent(keyEvent);
     return WMError::WM_OK;
@@ -3164,6 +3153,17 @@ void WindowImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
             bool handled = static_cast<bool>(uiContent_->ProcessKeyEvent(keyEvent));
             TLOGI(WmsLogTag::WMS_EVENT, "handled: %{public}d, escTrigger: %{public}d, escDown: %{public}d",
                 handled, escKeyEventTriggered_, escKeyHasDown_);
+            if (!handled && keyCode == MMI::KeyEvent::KEYCODE_ESCAPE &&
+                GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
+                property_->GetMaximizeMode() == MaximizeMode::MODE_FULL_FILL &&
+                keyAction == MMI::KeyEvent::KEY_ACTION_DOWN && !escKeyEventTriggered_) {
+                auto ret = Recover();
+                if (ret == WMError::WM_OK) {
+                    handled = true;
+                    keyEvent->MarkProcessed();
+                }
+                TLOGE(WmsLogTag::WMS_EVENT, "recover from fullscreen, consumed: %{public}d", isConsumed);
+            }
             if (!handled && !escKeyEventTriggered_ && escKeyHasDown_) {
                 HandleEspecialEscKeyEvent(keyEvent);
             }

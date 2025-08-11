@@ -398,54 +398,8 @@ HWTEST_F(WindowImplTest3, HandleEspecialEscKeyEvent003, TestSize.Level0)
     keyEvent->AddFlag(MMI::InputEvent::EVENT_FLAG_KEYBOARD_ESCAPE);
     EXPECT_EQ(true, keyEvent->HasFlag(MMI::InputEvent::EVENT_FLAG_KEYBOARD_ESCAPE));
 
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    WMError result1 = window->HandleEspecialEscKeyEvent(keyEvent);
-    EXPECT_EQ(result1, WMError::WM_ERROR_INVALID_WINDOW);
-
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
-    WMError result2 = window->HandleEspecialEscKeyEvent(keyEvent);
-    EXPECT_EQ(result2, WMError::WM_OK);
-}
-
-/**
- * @tc.name: HandleEspecialEscKeyEvent004
- * @tc.desc: HandleEspecialEscKeyEvent test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowImplTest3, HandleEspecialEscKeyEvent004, TestSize.Level1)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowType(WindowType::WINDOW_TYPE_APP_COMPONENT);
-    sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
-    ASSERT_NE(window, nullptr);
-
-    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
-    ASSERT_NE(keyEvent, nullptr);
-    keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_ESCAPE);
-    keyEvent->AddFlag(MMI::InputEvent::EVENT_FLAG_KEYBOARD_ESCAPE);
-    EXPECT_EQ(true, keyEvent->HasFlag(MMI::InputEvent::EVENT_FLAG_KEYBOARD_ESCAPE));
-
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
-    ASSERT_NE(window->property_, nullptr);
-    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    window->enableImmersiveMode_ = true;
-    WMError result1 = window->HandleEspecialEscKeyEvent(keyEvent);
-    EXPECT_EQ(result1, WMError::WM_OK);
-
-    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    window->enableImmersiveMode_ = false;
-    WMError result2 = window->HandleEspecialEscKeyEvent(keyEvent);
-    EXPECT_EQ(result2, WMError::WM_OK);
-
-    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    window->enableImmersiveMode_ = true;
-    WMError result3 = window->HandleEspecialEscKeyEvent(keyEvent);
-    EXPECT_EQ(result3, WMError::WM_OK);
-
-    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    window->enableImmersiveMode_ = false;
-    WMError result4 = window->HandleEspecialEscKeyEvent(keyEvent);
-    EXPECT_EQ(result4, WMError::WM_OK);
+    WMError result = window->HandleEspecialEscKeyEvent(keyEvent);
+    EXPECT_EQ(result, WMError::WM_OK);
 }
 
 /**

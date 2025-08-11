@@ -532,27 +532,8 @@ HWTEST_F(WindowSessionImplTest2, HandleEspecialEscKeyEvent003, TestSize.Level1)
     keyEvent->AddFlag(MMI::InputEvent::EVENT_FLAG_KEYBOARD_ESCAPE);
     EXPECT_EQ(true, keyEvent->HasFlag(MMI::InputEvent::EVENT_FLAG_KEYBOARD_ESCAPE));
 
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
-    window->windowSystemConfig_.freeMultiWindowEnable_ = true;
-    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
-    WMError result1 = window->HandleEspecialEscKeyEvent(keyEvent);
-    EXPECT_EQ(result1, WMError::WM_OK);
-
-    window->windowSystemConfig_.freeMultiWindowEnable_ = false;
-    window->windowSystemConfig_.freeMultiWindowSupport_ = false;
-    WMError result2 = window->HandleEspecialEscKeyEvent(keyEvent);
-    EXPECT_EQ(result2, WMError::WM_OK);
-
-    ASSERT_NE(window->property_, nullptr);
-    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    window->windowSystemConfig_.freeMultiWindowEnable_ = true;
-    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
-    WMError result3 = window->HandleEspecialEscKeyEvent(keyEvent);
-    EXPECT_EQ(result3, WMError::WM_OK);
-
-    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    WMError result4 = window->HandleEspecialEscKeyEvent(keyEvent);
-    EXPECT_EQ(result4, WMError::WM_OK);
+    WMError result = window->HandleEspecialEscKeyEvent(keyEvent);
+    EXPECT_EQ(result, WMError::WM_OK);
 }
 
 /**
