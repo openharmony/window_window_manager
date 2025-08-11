@@ -336,6 +336,7 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
         property->SetPcAppInpadOrientationLandscape(reply.ReadBool());
         property->SetCompatibleModeProperty(reply.ReadParcelable<CompatibleModeProperty>());
         property->SetUseControlStateToProperty(reply.ReadBool());
+        property->SetAncoRealBundleName(reply.ReadString());
     }
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
