@@ -646,7 +646,11 @@ int SessionStageStub::HandleNotifyForegroundInteractiveStatus(MessageParcel& dat
 int SessionStageStub::HandleNotifyAppUseControlStatus(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "called");
-    bool useControlState = data.ReadBool();
+    bool useControlState = false;
+    if (!data.ReadBool(useControlState)) {
+        TLOGW(WmsLogTag::WMS_LIFE, "Failed to read useControlState");
+        return ERR_INVALID_DATA;
+    }
     NotifyAppUseControlStatus(useControlState);
     return ERR_NONE;
 }

@@ -634,7 +634,8 @@ WSError SceneSession::DisconnectTask(bool isFromClient, bool isSaveSnapshot)
         }
         auto isMainWindow = SessionHelper::IsMainWindow(session->GetWindowType());
         if (isMainWindow) {
-            TLOGNI(WmsLogTag::WMS_LIFE, "Notify scene session id: %{public}d paused", session->GetPersistentId());
+            TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s Notify scene session id: %{public}d paused", where,
+                session->GetPersistentId());
             session->UpdateLifecyclePausedInner();
         }
         if (isFromClient) {
@@ -1206,14 +1207,8 @@ void SceneSession::NotifyUpdateAppUseControl(ControlAppType type, const ControlI
                 TLOGNW(WmsLogTag::WMS_LIFE, "%{public}s sessionStage is nullptr or privacy mode control", where);
                 return;
             }
+            TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s isAppUseControl: %{public}d", where, isAppUseControl);
             session->sessionStage_->NotifyAppUseControlStatus(isAppUseControl);
-            if (isAppUseControl) {
-                TLOGNI(WmsLogTag::WMS_LIFE, "begin call pause");
-                session->NotifyForegroundInteractiveStatus(false);
-            } else {
-                TLOGNI(WmsLogTag::WMS_LIFE, "begin call resume");
-                session->NotifyForegroundInteractiveStatus(true);
-            }
         }
     }, __func__);
 }
