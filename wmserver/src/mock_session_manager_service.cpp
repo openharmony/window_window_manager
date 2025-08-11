@@ -513,6 +513,11 @@ void MockSessionManagerService::NotifySceneBoardAvailableToClient(int32_t userId
     }
     TLOGI(WmsLogTag::WMS_RECOVER, "userId=%{public}d, Remote process count = %{public}" PRIu64, userId,
         static_cast<uint64_t>(smsRecoverListenerMap->size()));
+    if (userId == SYSTEM_USERID) {
+        TLOGD(WmsLogTag::WMS_MULTI_USER, "System user, return default sessionManagerService with %{public}d",
+              defaultWMSUserId_);              
+        userId = defaultWMSUserId_;
+    }
     //TODO 这里以前是currentUserId，需要验证下改成userId对不对        
     auto sessionManagerService = GetSessionManagerServiceByUserId(userId);
     if (sessionManagerService == nullptr) {
@@ -537,6 +542,11 @@ void MockSessionManagerService::NotifySceneBoardAvailableToLiteClient(int32_t us
     }
     TLOGI(WmsLogTag::WMS_RECOVER, "userId=%{public}d, Remote process count = %{public}" PRIu64, userId,
         static_cast<uint64_t>(smsLiteRecoverListenerMap->size()));
+    if (userId == SYSTEM_USERID) {
+        TLOGD(WmsLogTag::WMS_MULTI_USER, "System user, return default sessionManagerService with %{public}d",
+              defaultWMSUserId_);              
+        userId = defaultWMSUserId_;
+    }    
     //TODO 这里以前是currentUserId，需要验证下改成userId对不对            
     auto sessionManagerService = GetSessionManagerServiceByUserId(userId);
     if (sessionManagerService == nullptr) {
