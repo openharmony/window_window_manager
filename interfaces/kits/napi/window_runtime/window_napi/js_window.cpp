@@ -1268,7 +1268,7 @@ napi_value NapiGetUndefined(napi_env env)
     return result;
 }
 
-napi_value NapiThrowError(napi_env env, WmErrorCode errCode, std::string& msg)
+napi_value NapiThrowError(napi_env env, WmErrorCode errCode)
 {
     napi_throw(env, JsErrUtils::CreateJsError(env, errCode));
     return NapiGetUndefined(env);
