@@ -335,7 +335,7 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
         property->SetPcAppInpadSpecificSystemBarInvisible(reply.ReadBool());
         property->SetPcAppInpadOrientationLandscape(reply.ReadBool());
         property->SetCompatibleModeProperty(reply.ReadParcelable<CompatibleModeProperty>());
-        property->SetUseControlStateToProperty(reply.ReadBool());
+        property->SetUseControlState(reply.ReadBool());
         property->SetAncoRealBundleName(reply.ReadString());
     }
     int32_t ret = reply.ReadInt32();

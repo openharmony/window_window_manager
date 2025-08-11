@@ -82,8 +82,8 @@ private:
         napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessLifeCycleEventRegister(sptr<JsWindowListener> listener, sptr<Window> window, bool isRegister,
         napi_env env, napi_value parameter = nullptr);
-    WmErrorCode ProcessWindowStageLifeCycleEventRegister(sptr<JsWindowListener>& listener, sptr<Window>& window,
-        bool isRegister, napi_env env, napi_value parameter = nullptr);
+    WmErrorCode ProcessWindowStageLifeCycleEventRegister(const sptr<JsWindowListener>& listener,
+        const sptr<Window>& window, bool isRegister, napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessOccupiedAreaChangeRegister(sptr<JsWindowListener> listener, sptr<Window> window,
         bool isRegister, napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessKeyboardWillShowRegister(sptr<JsWindowListener> listener, const sptr<Window>& window,

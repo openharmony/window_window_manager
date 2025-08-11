@@ -268,8 +268,8 @@ public:
     /*
      * Window Lifecycle
      */
-    void SetUseControlStateToProperty(bool isUseControlState);
-    bool GetUseControlStateFromProperty() const;
+    void SetUseControlState(bool isUseControlState);
+    bool GetUseControlState() const;
     void SetAncoRealBundleName(const std::string& ancoRealBundleName);
     std::string GetAncoRealBundleName() const;
 

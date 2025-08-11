@@ -1271,11 +1271,11 @@ HWTEST_F(WindowSessionImplTest, NotifyForegroundInteractiveStatus01, TestSize.Le
 
     ASSERT_NE(nullptr, foreWindow1->property_);
     foreWindow1->property_->SetPersistentId(1);
-    foreWindow1->property_->SetUseControlStateToProperty(true);
+    foreWindow1->property_->SetUseControlState(true);
     foreWindow1->NotifyForegroundInteractiveStatus(false);
     foreWindow1->NotifyForegroundInteractiveStatus(true);
     EXPECT_TRUE(g_errLog.find("app is in control") != std::string::npos);
-    foreWindow1->property_->SetUseControlStateToProperty(false);
+    foreWindow1->property_->SetUseControlState(false);
     foreWindow1->NotifyForegroundInteractiveStatus(false);
     foreWindow1->NotifyForegroundInteractiveStatus(true);
     EXPECT_EQ(WMError::WM_OK, foreWindow1->Destroy());
@@ -1397,7 +1397,7 @@ HWTEST_F(WindowSessionImplTest, NotifyAfterLifecycleBackground, TestSize.Level1)
 
     ASSERT_NE(nullptr, notifyWindow->property_);
     notifyWindow->property_->SetPersistentId(1);
-    notifyWindow->property_->SetUseControlStateToProperty(true);
+    notifyWindow->property_->SetUseControlState(true);
     notifyWindow->NotifyAfterLifecycleResumed();
     WSError res = notifyWindow->NotifyCloseExistPipWindow();
     EXPECT_EQ(res, WSError::WS_OK);
