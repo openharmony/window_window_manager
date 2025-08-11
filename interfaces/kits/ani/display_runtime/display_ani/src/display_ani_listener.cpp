@@ -414,10 +414,14 @@ void DisplayAniListener::OnAvailableAreaChanged(DMRect area)
     if (env_ != nullptr) {
         auto it = aniCallback_.find(EVENT_AVAILABLE_AREA_CHANGED);
         for (auto oneAniCallback : it->second) {
-            ani_object rectObj = nullptr;
-            DisplayAniUtils::ConvertRect(area, rectObj, env_);
-            auto task = [env = env_, oneAniCallback, rectObj] () {
-                DisplayAniUtils::CallAniFunctionVoid(env, "@ohos.display.display", "availableAreaChangedCallback",
+            auto task = [env = env_, oneAniCallback, area] () {
+                ani_object rectObj = DisplayAniUtils::CreateRectObject(env);
+                if (!rectObj) {
+                    TLOGE(WmsLogTag::DMS, "[ANI] CreateRectObject failed");
+                    return;
+                }
+                DisplayAniUtils::ConvertRect(area, rectObj, env);
+                DisplayAniUtils::CallAniFunctionVoid(env, "L@ohos/display/display;", "availableAreaChangedCallback",
                     nullptr, oneAniCallback, rectObj);
             };
             if (!eventHandler_) {
