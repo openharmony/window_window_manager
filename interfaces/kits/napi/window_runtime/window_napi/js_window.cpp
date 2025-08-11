@@ -4214,21 +4214,24 @@ napi_value JsWindow::OnSetWindowFocusable(napi_env env, napi_callback_info info)
             auto window = weakToken.promote();
             if (window == nullptr) {
                 task->Reject(env,
-                    JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "[window][setWindowFocusable]msg: Invalidate params."));
+                    JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                        "[window][setWindowFocusable]msg: Invalidate params."));
                 return;
             }
             WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetFocusable(focusable));
             if (ret == WmErrorCode::WM_OK) {
                 task->Resolve(env, NapiGetUndefined(env));
             } else {
-                task->Reject(env, JsErrUtils::CreateJsError(env, ret, "[window][setWindowFocusable]msg: Window set focusable failed"));
+                task->Reject(env, JsErrUtils::CreateJsError(env, ret,
+                    "[window][setWindowFocusable]msg: Window set focusable failed"));
             }
             TLOGNI(WmsLogTag::WMS_FOCUS, "%{public}s: Window [%{public}u, %{public}s] set focusable end",
                 where, window->GetWindowId(), window->GetWindowName().c_str());
         };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetWindowFocusable") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
-            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "[window][setWindowFocusable]msg: Failed to send event"));
+            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                "[window][setWindowFocusable]msg: Failed to send event"));
     }
     return result;
 }
@@ -4380,7 +4383,7 @@ napi_value JsWindow::OnSetSubWindowZLevel(napi_env env, napi_callback_info info)
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_HIERARCHY, "%{public}s window is nullptr", where);
             task->Reject(env, JsErrUtils::CreateJsError(env,
-                WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "[window][setSubWindowZLevel]msg: window is nullptr."));
+                WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "[window][setSubWindowZLevel]msg: Window is nullptr"));
             return;
         }
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetSubWindowZLevel(zLevel));
@@ -5085,7 +5088,8 @@ napi_value JsWindow::OnRaiseAboveTarget(napi_env env, napi_callback_info info)
                 return;
             }
             if (errCode != WmErrorCode::WM_OK) {
-                task->Reject(env, JsErrUtils::CreateJsError(env, errCode, "[window][raiseAboveTarget]msg: Invalidate params."));
+                task->Reject(env, JsErrUtils::CreateJsError(env, errCode,
+                    "[window][raiseAboveTarget]msg: Invalidate params."));
                 return;
             }
             WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RaiseAboveTarget(subWindowId));
@@ -6348,7 +6352,7 @@ napi_value JsWindow::OnSetShadow(napi_env env, napi_callback_info info)
     }
     return NapiGetUndefined(env);
 }
-  
+
 void JsWindow::ParseShadowOptionalParameters(WmErrorCode& ret, std::shared_ptr<ShadowsInfo>& shadowsInfo,
     napi_env env, const napi_value* argv, size_t argc)
 {
@@ -8072,7 +8076,7 @@ static void SetRequestFocusTask(NapiAsyncTask::ExecuteCallback& execute, NapiAsy
             task.Resolve(env, NapiGetUndefined(env));
         } else {
             task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr,
-                "[window][requestFocus] msg: JsWindow::OnRequestFocus failed"));
+                "[window][requestFocus]msg: Request focus failed"));
         }
     };
 }
@@ -8657,7 +8661,8 @@ napi_value JsWindow::OnSetExclusivelyHighlighted(napi_env env, napi_callback_inf
             task->Resolve(env, NapiGetUndefined(env));
         } else {
             WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
-            task->Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode, "[window][setExclusivelyHighlighted]msg: Set exclusively highlighted failed"));
+            task->Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode,
+                "[window][setExclusivelyHighlighted]msg: Set exclusively highlighted failed"));
         }
         TLOGNI(WmsLogTag::WMS_FOCUS, "%{public}s: end, window: [%{public}u, %{public}s]",
             where, window->GetWindowId(), window->GetWindowName().c_str());
