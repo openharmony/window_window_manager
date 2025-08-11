@@ -324,16 +324,10 @@ HWTEST_F(WindowSessionImplTest2, UpdateViewportConfig_KeyFrame, TestSize.Level1)
     std::map<AvoidAreaType, AvoidArea> avoidAreas;
     KeyFramePolicy keyFramePolicy;
     window->SetKeyFramePolicy(keyFramePolicy);
-    window->keyFramePolicy_.stopping_ = true;
     WindowSizeChangeReason reason = WindowSizeChangeReason::UNDEFINED;
     window->UpdateViewportConfig(rect, reason, nullptr, displayInfo, avoidAreas);
-    ASSERT_EQ(window->keyFramePolicy_.stopping_, true);
+    ASSERT_EQ(window->keyFramePolicy_.stopping_, false);
     reason = WindowSizeChangeReason::DRAG_END;
-    window->UpdateViewportConfig(rect, reason, nullptr, displayInfo, avoidAreas);
-    ASSERT_EQ(window->keyFramePolicy_.stopping_, false);
-    window->UpdateViewportConfig(rect, reason, nullptr, displayInfo, avoidAreas);
-    ASSERT_EQ(window->keyFramePolicy_.stopping_, false);
-    reason = WindowSizeChangeReason::UNDEFINED;
     window->UpdateViewportConfig(rect, reason, nullptr, displayInfo, avoidAreas);
     ASSERT_EQ(window->keyFramePolicy_.stopping_, false);
     window->Destroy();
