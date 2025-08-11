@@ -151,6 +151,7 @@ HWTEST_F(WindowSceneSessionImplTest4, ConsumePointerEvent02, TestSize.Level1)
     pointerEvent->SetSourceType(1);
     MMI::PointerEvent::PointerItem pointerItem;
     pointerItem.SetPointerId(pointerId);
+    pointerItem.SetOriginPointerId(pointerId);
     pointerEvent->AddPointerItem(pointerItem);
 
     windowSceneSessionImpl->property_->SetWindowDelayRaiseEnabled(false);
