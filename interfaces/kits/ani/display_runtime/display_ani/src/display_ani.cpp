@@ -86,8 +86,7 @@ void DisplayAni::GetAvailableArea(ani_env* env, ani_object obj, ani_object avail
     DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(display->GetAvailableArea(area));
     if (ret != DmErrorCode::DM_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] Display get available area failed.");
-        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_SCREEN,
-            "JsDisplay::GetAvailableArea failed.");
+        AniErrUtils::ThrowBusinessError(env, ret, "JsDisplay::GetAvailableArea failed.");
         return;
     }
     DisplayAniUtils::ConvertRect(area, availableAreaObj, env);
@@ -190,6 +189,7 @@ void DisplayAni::OnRegisterCallback(ani_env* env, ani_object obj, ani_string typ
         return;
     }
     displayAniListener->AddCallback(typeString, cbRef);
+    displayAniListener->SetMainEventHandler();
     jsCbMap_[typeString][callback] = displayAniListener;
 }
 

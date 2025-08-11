@@ -255,5 +255,28 @@ ani_status DisplayAniUtils::CallAniFunctionVoid(ani_env *env, const char* ns,
     return ret;
 }
 
+ani_object DisplayAniUtils::CreateRectObject(ani_env *env)
+{
+    ani_class aniClass{};
+    ani_status status = env->FindClass("L@ohos/display/display/RectImpl;", &aniClass);
+    if (status != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] class not found, status:%{public}d", static_cast<int32_t>(status));
+        return nullptr;
+    }
+    ani_method aniCtor;
+    auto ret = env->Class_FindMethod(aniClass, "<Ctor>", ":V", &aniCtor);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Class_FindMethod failed");
+        return nullptr;
+    }
+    ani_object rectObj;
+    status = env->Object_New(aniClass, aniCtor, &rectObj);
+    if (status != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] NewAniObject failed");
+        return nullptr;
+    }
+    return rectObj;
+}
+
 }
 }
