@@ -118,13 +118,15 @@ private:
         std::vector<std::string>>& userIdAndBunldeNames);
 
     sptr<IRemoteObject> screenSessionManager_;
-    sptr<IRemoteObject> sceneSessionManager_;
+    sptr<IRemoteObject> defaultSceneSessionManager_;
 
     /*
      * Multi User
      */
-    int32_t currentWMSUserId_;
-    int32_t currentScreenId_;
+    int32_t defaultWMSUserId_;
+    int32_t defaultScreenId_;
+    std::shared_mutex screenId2UserIdMapLock_;
+    std::map<int32_t> screenId2UserIdMap_;
     std::shared_mutex smsDeathRecipientMapLock_;
     std::map<int32_t, sptr<SMSDeathRecipient>> smsDeathRecipientMap_;
     std::shared_mutex sessionManagerServiceMapLock_;
