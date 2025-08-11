@@ -559,9 +559,10 @@ void MockSessionManagerService::NotifyWMSConnected(int32_t userId, int32_t scree
 {
     TLOGI(WmsLogTag::WMS_MULTI_USER, "userId = %{public}d, screenId = %{public}d, isColdStart = %{public}d", userId,
         screenId, isColdStart);
-    // currentScreenId_ = screenId;
-    // currentWMSUserId_ = userId;
     //TODO 这里需要通过dms提供的defaultScreenId获取到defaultWMSUserId，一旦默认屏幕上的用户发生切换，需要修改默认用户id。
+    if (screenId == defaultScreenId_) {
+        defaultWMSUserId_ = userId;
+    }
     std::shared_lock<std::shared_mutex> lock(screenId2UserIdMapLock_);
     screenId2UserIdMap_[screenId] = userId;
     auto smsDeathRecipient = GetSMSDeathRecipientByUserId(userId);
