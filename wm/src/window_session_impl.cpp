@@ -6297,18 +6297,6 @@ WMError WindowSessionImpl::HandleEspecialEscKeyEvent(const std::shared_ptr<MMI::
         return WMError::WM_DO_NOTHING;
     }
 
-    if (IsPcOrPadFreeMultiWindowMode() &&
-        property_->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
-        GetImmersiveModeEnabledState()) {
-        TLOGD(WmsLogTag::WMS_EVENT, "multi window and Immersivemode, recover");
-        auto ret = Recover();
-        if (ret != WMError::WM_OK) {
-            TLOGE(WmsLogTag::WMS_EVENT, "recover failed, handlebackevent");
-            HandleBackEvent();
-        }
-        return WMError::WM_OK;
-    }
-
     TLOGD(WmsLogTag::WMS_EVENT, "normal mode, handlebackevent");
     HandleBackEvent();
     return WMError::WM_OK;
@@ -6353,9 +6341,23 @@ void WindowSessionImpl::DispatchKeyEventCallback(const std::shared_ptr<MMI::KeyE
         TLOGI(WmsLogTag::WMS_EVENT, "id: %{public}d, consumed: %{public}d,"
             "escTrigger: %{public}d, escDown: %{public}d",
             keyEvent->GetId(), isConsumed, escKeyEventTriggered_, escKeyHasDown_);
+        if (!isConsumed && keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ESCAPE &&
+            IsPcOrPadFreeMultiWindowMode() &&
+            property_->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
+            GetImmersiveModeEnabledState() &&
+            keyAction == MMI::KeyEvent::KEY_ACTION_DOWN && !escKeyEventTriggered_) {
+            auto ret = Recover();
+            if (ret == WMError::WM_OK) {
+                isConsumed = true;
+                keyEvent->MarkProcessed();
+            }
+            TLOGE(WmsLogTag::WMS_EVENT, "recover from fullscreen, consumed: %{public}d", isConsumed);
+        }
         NotifyConsumeResultToFloatWindow(keyEvent, isConsumed);
         if (!isConsumed && !escKeyEventTriggered_ && escKeyHasDown_) {
             HandleEspecialEscKeyEvent(keyEvent);
+        }
+        if (!isConsumed) {
             keyEvent->MarkProcessed();
         }
         if (keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ESCAPE) {
