@@ -1442,7 +1442,7 @@ HWTEST_F(WindowSessionImplTest, NotifyAfterLifecycleBackground, TestSize.Level1)
     ASSERT_NE(nullptr, window);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    EXPECT_EQ(WMError::WM_OK, pauseWindow->Create(nullptr, session));
+    EXPECT_EQ(WMError::WM_OK, window->Create(nullptr, session));
     window->property_->SetPersistentId(1);
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_HIDDEN;
@@ -1452,12 +1452,12 @@ HWTEST_F(WindowSessionImplTest, NotifyAfterLifecycleBackground, TestSize.Level1)
     EXPECT_FALSE(window->IsWindowSessionInvalid());
     window->state_ = WindowState::STATE_HIDDEN;
     window->NotifyAppUseControlStatus(true);
-    window->state_ = WindowState::STATE_HIDDEN;
+    window->state_ = WindowState::STATE_SHOWN;
     window->NotifyAppUseControlStatus(true);
     window->NotifyAppUseControlStatus(false);
-    WSError res = pauseWindow->NotifyCloseExistPipWindow();
+    WSError res = window->NotifyCloseExistPipWindow();
     EXPECT_EQ(res, WSError::WS_OK);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, pauseWindow->Destroy());
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
 }
 
 /**

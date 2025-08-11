@@ -1638,18 +1638,18 @@ void WindowSessionImpl::NotifyForegroundInteractiveStatus(bool interactive)
     if (IsWindowSessionInvalid() || state_ != WindowState::STATE_SHOWN) {
         return;
     }
-    bool useControlState = property_->GetUseControlState();
-    if (useControlState && interactive) {
-        TLOGI(WmsLogTag::WMS_LIFE, "app is in control state, no need notify new resume");
-        NotifyAfterResumed();
-        return;
+    if (interactive) {
+        bool useControlState = property_->GetUseControlState();
+        TLOGI(WmsLogTag::WMS_LIFE, "useControlState: %{public}d", useControlState);
+        if (!useControlState) {
+            NotifyAfterLifecycleResumed();
+        }
     }
 
     if (IsNotifyInteractiveDuplicative(interactive)) {
         return;
     }
     if (interactive) {
-        NotifyAfterLifecycleResumed();
         NotifyAfterResumed();
     } else {
         NotifyAfterPaused();
