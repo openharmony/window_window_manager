@@ -1268,7 +1268,7 @@ napi_value NapiGetUndefined(napi_env env)
     return result;
 }
 
-napi_value NapiThrowError(napi_env env, WmErrorCode errCode)
+napi_value NapiThrowError(napi_env env, WmErrorCode errCode, std::string& msg)
 {
     napi_throw(env, JsErrUtils::CreateJsError(env, errCode));
     return NapiGetUndefined(env);
@@ -4421,7 +4421,7 @@ napi_value JsWindow::OnGetSubWindowZLevel(napi_env env, napi_callback_info info)
     int32_t zLevel = 0;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->GetSubWindowZLevel(zLevel));
     if (ret != WmErrorCode::WM_OK) {
-        return NapiThrowError(env, ret);
+        return NapiThrowError(env, ret, "[window][getSubWindowZLevel]msg: Get sub window zLevel failed");
     }
     napi_value objValue = nullptr;
     napi_set_named_property(env, objValue, "zLevel", CreateJsValue(env, zLevel));
