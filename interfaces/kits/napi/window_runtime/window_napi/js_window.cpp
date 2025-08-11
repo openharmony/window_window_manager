@@ -4416,7 +4416,8 @@ napi_value JsWindow::OnGetSubWindowZLevel(napi_env env, napi_callback_info info)
     }
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "window is nullptr");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][getSubWindowZLevel]msg: Window is nullptr");
     }
     int32_t zLevel = 0;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->GetSubWindowZLevel(zLevel));
