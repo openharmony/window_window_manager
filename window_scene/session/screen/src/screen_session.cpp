@@ -2430,17 +2430,15 @@ std::shared_ptr<Media::PixelMap> ScreenSession::GetScreenSnapshotWithAllWindows(
             return nullptr;
         }
     }
-    if (callback) {
-        auto pixelMap = callback->GetResult(SNAPSHOT_TIMEOUT_MS);
-        if (pixelMap != nullptr) {
-            TLOGD(WmsLogTag::DMS, "save pixelMap WxH = %{public}dx%{public}d", pixelMap->GetWidth(),
-                pixelMap->GetHeight());
-        } else {
-            TLOGE(WmsLogTag::DMS, "failed to get pixelMap");
-        }
-        return pixelMap;
+    auto pixelMap = callback->GetResult(SNAPSHOT_TIMEOUT_MS);
+    if (pixelMap != nullptr) {
+        TLOGD(WmsLogTag::DMS, "get pixelMap WxH = %{public}dx%{public}d, NeedCheckDrmAndSurfaceLock is %{public}d",
+            pixelMap->GetWidth(), pixelMap->GetHeight(), isNeedCheckDrmAndSurfaceLock);
+    } else {
+        TLOGE(WmsLogTag::DMS, "null pixelMap, may have drm or surface lock, NeedCheckDrmAndSurfaceLock is %{public}d",
+            isNeedCheckDrmAndSurfaceLock);
     }
-    return nullptr;
+    return pixelMap;
 }
 
 void ScreenSession::SetIsPhysicalMirrorSwitch(bool isPhysicalMirrorSwitch)
