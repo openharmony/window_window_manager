@@ -4215,7 +4215,7 @@ napi_value JsWindow::OnSetWindowFocusable(napi_env env, napi_callback_info info)
             if (window == nullptr) {
                 task->Reject(env,
                     JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-                        "[window][setWindowFocusable]msg: Invalidate params."));
+                        "[window][setWindowFocusable]msg: Window is nullptr"));
                 return;
             }
             WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetFocusable(focusable));
