@@ -23,6 +23,7 @@
 #include "session_manager_service_recover_interface.h"
 #include "singleton_delegator.h"
 #include "window_manager_hilog.h"
+#include "iremote_object_mocker.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -225,7 +226,7 @@ HWTEST_F(SessionManagerLiteTest, SessionManagerServiceLiteRecoverListener1, Test
 {
     int32_t userId = 101;
     sptr<SessionManagerLite> sml = SessionManagerLite::GetInstance(userId);
-    ASSERT_NE(nullptr, instance);
+    ASSERT_NE(nullptr, sml);
 
     sptr<SessionManagerServiceLiteRecoverListener> listener = new SessionManagerServiceLiteRecoverListener(sml);
     sptr<IRemoteObject> service = sptr<IRemoteObjectMocker>::MakeSptr();
@@ -269,7 +270,7 @@ HWTEST_F(SessionManagerLiteTest, SessionManagerServiceLiteRecoverListener3, Test
     int32_t userId = 101;
 
     sptr<SessionManagerLite> sml = SessionManagerLite::GetInstance(userId);
-    stpr<SessionManagerServiceLiteRecoverListener> listener = new SessionManagerServiceLiteRecoverListener(sml);
+    sptr<SessionManagerServiceLiteRecoverListener> listener = new SessionManagerServiceLiteRecoverListener(sml);
     ASSERT_NE(nullptr, listener);
 
     code = static_cast<uint32_t>(OHOS::Rosen::ISessionManagerServiceRecoverListener::

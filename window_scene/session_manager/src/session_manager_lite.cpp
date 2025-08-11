@@ -357,7 +357,7 @@ void SessionManagerLite::InitSessionManagerServiceProxy()
     if (userId_ == INVALID_USER_ID) {
         errCode = mockSessionManagerServiceProxy_->GetSessionManagerService(remoteObject);
     } else {
-        errCode = mockSessionManagerServiceProxy_->GetSessionManagerService(userId_, remoteObject);
+        errCode = mockSessionManagerServiceProxy_->GetSessionManagerServiceByUserId(userId_, remoteObject);
     }
     if (errCode != ERR_NONE) {
         TLOGE(WmsLogTag::DEFAULT, "userId is illegal");
@@ -528,8 +528,8 @@ void SessionManagerLite::RegisterSMSRecoverListener()
         sptr<SessionManagerLite> sml(this);
         smsRecoverListener_ = sptr<SessionManagerServiceLiteRecoverListener>::MakeSptr(sml);
         std::string identity = IPCSkeleton::ResetCallingIdentity();
-        TLOGD(WmsLogTag::WMS_RECOVER, "Register recover listener, userId: %{public}d", userId_);
-        mockSessionManagerServiceProxy_->RegisterSMSLiteRecoverListener(smsRecoverListener_);
+        TLOGD(WmsLogTag::WMS_RECOVER, "Register recover listener, userId_: %{public}d", userId_);
+        mockSessionManagerServiceProxy_->RegisterSMSLiteRecoverListener(smsRecoverListener_, userId_);
         IPCSkeleton::SetCallingIdentity(identity);
     }
 }
@@ -539,7 +539,7 @@ void SessionManagerLite::UnregisterSMSRecoverListener()
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     recoverListenerRegistered_ = false;
     if (mockSessionManagerServiceProxy_) {
-        TLOGD(WmsLogTag::WMS_RECOVER, "Unregister recover listener, userId: %{public}d", userId_);
+        TLOGD(WmsLogTag::WMS_RECOVER, "UnRegister recover listener, userId_: %{public}d", userId_);
         mockSessionManagerServiceProxy_->UnregisterSMSLiteRecoverListener(userId_);
     }
 }
