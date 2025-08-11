@@ -126,9 +126,11 @@ void MockSessionManagerService::SMSDeathRecipient::SetScreenId(int32_t screenId)
 }
 
 MockSessionManagerService::MockSessionManagerService()
-    : SystemAbility(WINDOW_MANAGER_SERVICE_ID, true), currentWMSUserId_(INVALID_USER_ID),
-      currentScreenId_(DEFAULT_SCREEN_ID)
-{}
+    : SystemAbility(WINDOW_MANAGER_SERVICE_ID, true), defaultWMSUserId_(INVALID_USER_ID),
+      defaultScreenId_(DEFAULT_SCREEN_ID)
+{
+    //TODO 需要从dms获取默认屏幕id
+}
 
 bool MockSessionManagerService::RegisterMockSessionManagerService()
 {
@@ -210,25 +212,25 @@ bool MockSessionManagerService::SetSessionManagerService(const sptr<IRemoteObjec
         WLOGFE("sessionManagerService is nullptr");
         return false;
     }
-    currentWMSUserId_ = GetUserIdByCallingUid();
-    if (currentWMSUserId_ <= INVALID_USER_ID) {
-        TLOGE(WmsLogTag::WMS_MULTI_USER, "userId is illegal: %{public}d", currentWMSUserId_);
+    int32_t clientUserId = GetUserIdByCallingUid();
+    if (clientUserId <= INVALID_USER_ID) {
+        TLOGE(WmsLogTag::WMS_MULTI_USER, "userId is illegal: %{public}d", clientUserId);
         return false;
     }
     {
         std::unique_lock<std::shared_mutex> lock(sessionManagerServiceMapLock_);
-        sessionManagerServiceMap_[currentWMSUserId_] = sessionManagerService;
+        sessionManagerServiceMap_[clientUserId] = sessionManagerService;
     }
-    RecoverSCBSnapshotSkipByUserId(currentWMSUserId_);
-    auto smsDeathRecipient = GetSMSDeathRecipientByUserId(currentWMSUserId_);
+    RecoverSCBSnapshotSkipByUserId(clientUserId);
+    auto smsDeathRecipient = GetSMSDeathRecipientByUserId(clientUserId);
     if (!smsDeathRecipient) {
-        smsDeathRecipient = new SMSDeathRecipient(currentWMSUserId_);
+        smsDeathRecipient = new SMSDeathRecipient(clientUserId);
         std::unique_lock<std::shared_mutex> lock(smsDeathRecipientMapLock_);
         if (!smsDeathRecipient) {
             TLOGE(WmsLogTag::WMS_MULTI_USER, "Failed to create death Recipient ptr smsDeathRecipient");
             return false;
         }
-        smsDeathRecipientMap_[currentWMSUserId_] = smsDeathRecipient;
+        smsDeathRecipientMap_[clientUserId] = smsDeathRecipient;
     }
     if (sessionManagerService->IsProxyObject() && !sessionManagerService->AddDeathRecipient(smsDeathRecipient)) {
         TLOGE(WmsLogTag::WMS_MULTI_USER, "Failed to add death recipient");
@@ -237,6 +239,7 @@ bool MockSessionManagerService::SetSessionManagerService(const sptr<IRemoteObjec
     RegisterMockSessionManagerService();
     TLOGI(WmsLogTag::WMS_MULTI_USER, "sessionManagerService set success!");
     system::SetParameter(BOOTEVENT_WMS_READY.c_str(), "true");
+    //TODO 这里会反复获取并赋值默认的scb句柄
     GetSceneSessionManager();
 
     return true;
@@ -276,10 +279,11 @@ ErrCode MockSessionManagerService::GetSessionManagerService(sptr<IRemoteObject>&
         TLOGE(WmsLogTag::WMS_MULTI_USER, "userId is illegal: %{public}d", clientUserId);
         return ERR_INVALID_VALUE;
     }
+    //TODO U0用户只能拿到默认scb的句柄， 有问题， 要么改逻辑，要么加重载方法
     if (clientUserId == SYSTEM_USERID) {
-        TLOGD(WmsLogTag::WMS_MULTI_USER, "System user, return current sessionManagerService with %{public}d",
-              currentWMSUserId_);
-        clientUserId = currentWMSUserId_;
+        TLOGD(WmsLogTag::WMS_MULTI_USER, "System user, return default sessionManagerService with %{public}d",
+              defaultWMSUserId_);              
+        clientUserId = defaultWMSUserId_;
     }
     sessionManagerService = GetSessionManagerServiceByUserId(clientUserId);
     return ERR_OK;
@@ -308,27 +312,6 @@ void MockSessionManagerService::RemoveSessionManagerServiceByUserId(int32_t user
     }
 }
 
-ErrCode MockSessionManagerService::NotifySceneBoardAvailable()
-{
-    if (!SessionPermission::IsSystemCalling()) {
-        TLOGE(WmsLogTag::WMS_RECOVER, "permission denied");
-        return ERR_PERMISSION_DENIED;
-    }
-    int32_t userId = GetUserIdByCallingUid();
-    if (userId <= INVALID_USER_ID) {
-        TLOGE(WmsLogTag::WMS_RECOVER, "userId is illegal: %{public}d", userId);
-        return ERR_INVALID_VALUE;
-    }
-    TLOGI(WmsLogTag::WMS_RECOVER, "scene board is available with userId=%{public}d", userId);
-
-    NotifySceneBoardAvailableToLiteClient(SYSTEM_USERID);
-    NotifySceneBoardAvailableToLiteClient(userId);
-
-    NotifySceneBoardAvailableToClient(SYSTEM_USERID);
-    NotifySceneBoardAvailableToClient(userId);
-    return ERR_OK;
-}
-
 ErrCode MockSessionManagerService::RegisterSMSRecoverListener(const sptr<IRemoteObject>& listener)
 {
     if (listener == nullptr) {
@@ -354,21 +337,24 @@ ErrCode MockSessionManagerService::RegisterSMSRecoverListener(const sptr<IRemote
     if (clientUserId != SYSTEM_USERID) {
         return ERR_WOULD_BLOCK;
     }
+    //TODO 这里现在只支持默认屏幕用户的
     bool isWMSConnected = false;
     {
         std::lock_guard<std::mutex> lock(wmsConnectionStatusLock_);
-        if (wmsConnectionStatusMap_.find(currentWMSUserId_) != wmsConnectionStatusMap_.end()) {
-            isWMSConnected = wmsConnectionStatusMap_[currentWMSUserId_];
+        if (wmsConnectionStatusMap_.find(defaultWMSUserId_) != wmsConnectionStatusMap_.end()) {、
+            //TODO 这里回调只能返回默认scb的sessionManagerService
+            isWMSConnected = wmsConnectionStatusMap_[defaultWMSUserId_];
         }
     }
     if (smsListener && isWMSConnected) {
-        auto sessionManagerService = GetSessionManagerServiceByUserId(currentWMSUserId_);
+        //TODO 这里回调只能返回默认scb的sessionManagerService
+        auto sessionManagerService = GetSessionManagerServiceByUserId(defaultWMSUserId_);
         if (sessionManagerService == nullptr) {
             TLOGE(WmsLogTag::WMS_RECOVER, "SessionManagerService is null");
             return ERR_DEAD_OBJECT;
         }
         TLOGI(WmsLogTag::WMS_RECOVER, "WMS ready,notify client");
-        smsListener->OnWMSConnectionChanged(currentWMSUserId_, currentScreenId_, true, sessionManagerService);
+        smsListener->OnWMSConnectionChanged(defaultWMSUserId_, defaultScreenId_, true, sessionManagerService);
     }
     return ERR_OK;
 }
@@ -412,30 +398,6 @@ void MockSessionManagerService::UnregisterSMSRecoverListener(int32_t userId, int
     }
 }
 
-void MockSessionManagerService::NotifySceneBoardAvailableToClient(int32_t userId)
-{
-    std::shared_lock<std::shared_mutex> lock(smsRecoverListenerLock_);
-    std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>* smsRecoverListenerMap =
-        GetSMSRecoverListenerMap(userId);
-    if (!smsRecoverListenerMap) {
-        TLOGW(WmsLogTag::WMS_RECOVER, "smsRecoverListenerMap is null");
-        return;
-    }
-    TLOGI(WmsLogTag::WMS_RECOVER, "userId=%{public}d, Remote process count = %{public}" PRIu64, userId,
-        static_cast<uint64_t>(smsRecoverListenerMap->size()));
-    auto sessionManagerService = GetSessionManagerServiceByUserId(currentWMSUserId_);
-    if (sessionManagerService == nullptr) {
-        TLOGE(WmsLogTag::WMS_RECOVER, "SessionManagerService is null");
-        return;
-    }
-    for (auto& iter : *smsRecoverListenerMap) {
-        if (iter.second != nullptr) {
-            TLOGI(WmsLogTag::WMS_RECOVER, "Call OnSessionManagerServiceRecover pid = %{public}d", iter.first);
-            iter.second->OnSessionManagerServiceRecover(sessionManagerService);
-        }
-    }
-}
-
 ErrCode MockSessionManagerService::RegisterSMSLiteRecoverListener(const sptr<IRemoteObject>& listener)
 {
     if (listener == nullptr) {
@@ -460,21 +422,22 @@ ErrCode MockSessionManagerService::RegisterSMSLiteRecoverListener(const sptr<IRe
     if (clientUserId != SYSTEM_USERID) {
         return ERR_WOULD_BLOCK;
     }
+    //TODO 这里现在只支持默认屏幕用户的
     bool isWMSConnected = false;
     {
         std::lock_guard<std::mutex> lock(wmsConnectionStatusLock_);
-        if (wmsConnectionStatusMap_.find(currentWMSUserId_) != wmsConnectionStatusMap_.end()) {
-            isWMSConnected = wmsConnectionStatusMap_[currentWMSUserId_];
+        if (wmsConnectionStatusMap_.find(defaultWMSUserId_) != wmsConnectionStatusMap_.end()) {
+            isWMSConnected = wmsConnectionStatusMap_[defaultWMSUserId_];
         }
     }
     if (smsListener && isWMSConnected) {
-        auto sessionManagerService = GetSessionManagerServiceByUserId(currentWMSUserId_);
+        auto sessionManagerService = GetSessionManagerServiceByUserId(defaultWMSUserId_);
         if (sessionManagerService == nullptr) {
             TLOGE(WmsLogTag::WMS_RECOVER, "SessionManagerService is null");
             return ERR_DEAD_OBJECT;
         }
         TLOGD(WmsLogTag::WMS_MULTI_USER, "Lite wms is already connected, notify client");
-        smsListener->OnWMSConnectionChanged(currentWMSUserId_, currentScreenId_, true, sessionManagerService);
+        smsListener->OnWMSConnectionChanged(defaultWMSUserId_, defaultScreenId_, true, sessionManagerService);
     }
     return ERR_OK;
 }
@@ -517,6 +480,53 @@ void MockSessionManagerService::UnregisterSMSLiteRecoverListener(int32_t userId,
     }
 }
 
+// 下面三个函数是recover相关的，会通知SYSTEM_USERID和userId， scb ts侧会调用过来。
+ErrCode MockSessionManagerService::NotifySceneBoardAvailable()
+{
+    if (!SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_RECOVER, "permission denied");
+        return ERR_PERMISSION_DENIED;
+    }
+    int32_t userId = GetUserIdByCallingUid();
+    if (userId <= INVALID_USER_ID) {
+        TLOGE(WmsLogTag::WMS_RECOVER, "userId is illegal: %{public}d", userId);
+        return ERR_INVALID_VALUE;
+    }
+    TLOGI(WmsLogTag::WMS_RECOVER, "scene board is available with userId=%{public}d", userId);
+
+    NotifySceneBoardAvailableToLiteClient(SYSTEM_USERID);
+    NotifySceneBoardAvailableToLiteClient(userId);
+
+    NotifySceneBoardAvailableToClient(SYSTEM_USERID);
+    NotifySceneBoardAvailableToClient(userId);
+    return ERR_OK;
+}
+
+void MockSessionManagerService::NotifySceneBoardAvailableToClient(int32_t userId)
+{
+    std::shared_lock<std::shared_mutex> lock(smsRecoverListenerLock_);
+    std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>* smsRecoverListenerMap =
+        GetSMSRecoverListenerMap(userId);
+    if (!smsRecoverListenerMap) {
+        TLOGW(WmsLogTag::WMS_RECOVER, "smsRecoverListenerMap is null");
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_RECOVER, "userId=%{public}d, Remote process count = %{public}" PRIu64, userId,
+        static_cast<uint64_t>(smsRecoverListenerMap->size()));
+    //TODO 这里以前是currentUserId，需要验证下改成userId对不对        
+    auto sessionManagerService = GetSessionManagerServiceByUserId(userId);
+    if (sessionManagerService == nullptr) {
+        TLOGE(WmsLogTag::WMS_RECOVER, "SessionManagerService is null");
+        return;
+    }
+    for (auto& iter : *smsRecoverListenerMap) {
+        if (iter.second != nullptr) {
+            TLOGI(WmsLogTag::WMS_RECOVER, "Call OnSessionManagerServiceRecover pid = %{public}d", iter.first);
+            iter.second->OnSessionManagerServiceRecover(sessionManagerService);
+        }
+    }
+}
+
 void MockSessionManagerService::NotifySceneBoardAvailableToLiteClient(int32_t userId)
 {
     std::shared_lock<std::shared_mutex> lock(smsLiteRecoverListenerLock_);
@@ -527,7 +537,8 @@ void MockSessionManagerService::NotifySceneBoardAvailableToLiteClient(int32_t us
     }
     TLOGI(WmsLogTag::WMS_RECOVER, "userId=%{public}d, Remote process count = %{public}" PRIu64, userId,
         static_cast<uint64_t>(smsLiteRecoverListenerMap->size()));
-    auto sessionManagerService = GetSessionManagerServiceByUserId(currentWMSUserId_);
+    //TODO 这里以前是currentUserId，需要验证下改成userId对不对            
+    auto sessionManagerService = GetSessionManagerServiceByUserId(userId);
     if (sessionManagerService == nullptr) {
         TLOGE(WmsLogTag::WMS_RECOVER, "SessionManagerService is null");
         return;
@@ -542,13 +553,18 @@ void MockSessionManagerService::NotifySceneBoardAvailableToLiteClient(int32_t us
     }
 }
 
+// dms进行用户切换时，会调用该方法，传入切入用户id,屏幕id, 非冷启动
+// scb启动时，会通过SCBScreenSessionManager连接fundation进程的dms服务端，连接后，会调用SetClient，dms服务端会发起一次NotifyWMSConnected(userid,screenId, true)。此时是冷启动
 void MockSessionManagerService::NotifyWMSConnected(int32_t userId, int32_t screenId, bool isColdStart)
 {
     TLOGI(WmsLogTag::WMS_MULTI_USER, "userId = %{public}d, screenId = %{public}d, isColdStart = %{public}d", userId,
         screenId, isColdStart);
-    currentScreenId_ = screenId;
-    currentWMSUserId_ = userId;
-    auto smsDeathRecipient = GetSMSDeathRecipientByUserId(currentWMSUserId_);
+    // currentScreenId_ = screenId;
+    // currentWMSUserId_ = userId;
+    //TODO 这里需要通过dms提供的defaultScreenId获取到defaultWMSUserId，一旦默认屏幕上的用户发生切换，需要修改默认用户id。
+    std::shared_lock<std::shared_mutex> lock(screenId2UserIdMapLock_);
+    screenId2UserIdMap_[screenId] = userId;
+    auto smsDeathRecipient = GetSMSDeathRecipientByUserId(userId);
     if (smsDeathRecipient != nullptr) {
         smsDeathRecipient->SetScreenId(screenId);
     }
@@ -583,7 +599,7 @@ void MockSessionManagerService::NotifyWMSConnectionChangedToClient(
     TLOGD(WmsLogTag::WMS_MULTI_USER,
           "wmsUserId = %{public}d, isConnected = %{public}d, remote process count = %{public}zu",
           wmsUserId, isConnected, smsRecoverListenerMap->size());
-    auto sessionManagerService = GetSessionManagerServiceByUserId(currentWMSUserId_);
+    auto sessionManagerService = GetSessionManagerServiceByUserId(wmsUserId);
     if (sessionManagerService == nullptr) {
         TLOGE(WmsLogTag::WMS_RECOVER, "SessionManagerService is null");
         return;
@@ -606,7 +622,7 @@ void MockSessionManagerService::NotifyWMSConnectionChangedToLiteClient(
         return;
     }
     TLOGD(WmsLogTag::WMS_MULTI_USER, "wmsUserId = %{public}d, isConnected = %{public}d", wmsUserId, isConnected);
-    auto sessionManagerService = GetSessionManagerServiceByUserId(currentWMSUserId_);
+    auto sessionManagerService = GetSessionManagerServiceByUserId(wmsUserId);
     if (sessionManagerService == nullptr) {
         TLOGE(WmsLogTag::WMS_RECOVER, "SessionManagerService is null");
         return;
@@ -639,7 +655,7 @@ void MockSessionManagerService::ShowIllegalArgsInfo(std::string& dumpInfo)
 
 sptr<IRemoteObject> MockSessionManagerService::GetSceneSessionManager()
 {
-    auto sessionManagerService = GetSessionManagerServiceByUserId(currentWMSUserId_);
+    auto sessionManagerService = GetSessionManagerServiceByUserId(defaultWMSUserId_);
     if (sessionManagerService == nullptr) {
         WLOGFE("SessionManagerService is null");
         return nullptr;
@@ -654,8 +670,8 @@ sptr<IRemoteObject> MockSessionManagerService::GetSceneSessionManager()
         WLOGFW("Get scene session manager proxy failed, scene session manager service is null");
         return sptr<IRemoteObject>(nullptr);
     }
-    sceneSessionManager_ = remoteObject;
-    return sceneSessionManager_;
+    defaultSceneSessionManager_ = remoteObject;
+    return defaultSceneSessionManager_;
 }
 
 int MockSessionManagerService::DumpSessionInfo(const std::vector<std::string>& args, std::string& dumpInfo)
@@ -663,20 +679,21 @@ int MockSessionManagerService::DumpSessionInfo(const std::vector<std::string>& a
     if (args.empty()) {
         return -1;  // WMError::WM_ERROR_INVALID_PARAM;
     }
-    auto sessionManagerService = GetSessionManagerServiceByUserId(currentWMSUserId_);
+    // TODO 这里现在只能获取默认屏幕用户的dump信息
+    auto sessionManagerService = GetSessionManagerServiceByUserId(defaultWMSUserId_);
     if (sessionManagerService == nullptr) {
         WLOGFE("sessionManagerService is nullptr");
         return -1;
     }
-    if (!sceneSessionManager_) {
+    if (!defaultSceneSessionManager_) {
         WLOGFW("Get scene session manager ...");
         GetSceneSessionManager();
-        if (!sceneSessionManager_) {
+        if (!defaultSceneSessionManager_) {
             WLOGFW("Get scene session manager proxy failed, nullptr");
             return -1;
         }
     }
-    sptr<ISceneSessionManager> sceneSessionManagerProxy = iface_cast<ISceneSessionManager>(sceneSessionManager_);
+    sptr<ISceneSessionManager> sceneSessionManagerProxy = iface_cast<ISceneSessionManager>(defaultSceneSessionManager_);
     WSError ret = sceneSessionManagerProxy->GetSessionDumpInfo(args, dumpInfo);
     if (ret != WSError::WS_OK) {
         WLOGFD("sessionManagerService set success!");
@@ -751,15 +768,16 @@ bool MockSessionManagerService::SMSDeathRecipient::IsSceneBoardTestMode()
 void MockSessionManagerService::GetProcessSurfaceNodeIdByPersistentId(const int32_t pid,
     const std::vector<uint64_t>& windowIdList, std::vector<uint64_t>& surfaceNodeIds)
 {
-    auto sessionManagerService = GetSessionManagerServiceByUserId(currentWMSUserId_);
+    //TODO 这里现在只支持默认屏幕用户的
+    auto sessionManagerService = GetSessionManagerServiceByUserId(defaultWMSUserId_);
     if (sessionManagerService == nullptr) {
         WLOGFE("sessionManagerService is nullptr");
         return;
     }
-    if (!sceneSessionManager_) {
+    if (!defaultSceneSessionManager_) {
         WLOGFW("Get scene session manager ...");
         GetSceneSessionManager();
-        if (!sceneSessionManager_) {
+        if (!defaultSceneSessionManager_) {
             WLOGFW("Get scene session manager proxy failed, nullptr");
             return;
         }
@@ -772,7 +790,7 @@ void MockSessionManagerService::GetProcessSurfaceNodeIdByPersistentId(const int3
     for (uint64_t id : windowIdList) {
         persistentIds.push_back(static_cast<int32_t>(id));
     }
-    sptr<ISceneSessionManager> sceneSessionManagerProxy = iface_cast<ISceneSessionManager>(sceneSessionManager_);
+    sptr<ISceneSessionManager> sceneSessionManagerProxy = iface_cast<ISceneSessionManager>(defaultSceneSessionManager_);
     WMError ret = sceneSessionManagerProxy->GetProcessSurfaceNodeIdByPersistentId(
         pid, persistentIds, surfaceNodeIds);
     if (ret != WMError::WM_OK) {
@@ -782,19 +800,20 @@ void MockSessionManagerService::GetProcessSurfaceNodeIdByPersistentId(const int3
 
 void MockSessionManagerService::AddSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds)
 {
-    auto sessionManagerService = GetSessionManagerServiceByUserId(currentWMSUserId_);
+     //TODO 这里现在只支持默认屏幕用户的
+    auto sessionManagerService = GetSessionManagerServiceByUserId(defaultWMSUserId_);
     if (sessionManagerService == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sessionManagerService is nullptr");
         return;
     }
-    if (!sceneSessionManager_) {
+    if (!defaultSceneSessionManager_) {
         GetSceneSessionManager();
-        if (!sceneSessionManager_) {
+        if (!defaultSceneSessionManager_) {
             TLOGW(WmsLogTag::WMS_ATTRIBUTE, "get scene session manager proxy failed, nullptr");
             return;
         }
     }
-    sptr<ISceneSessionManager> sceneSessionManagerProxy = iface_cast<ISceneSessionManager>(sceneSessionManager_);
+    sptr<ISceneSessionManager> sceneSessionManagerProxy = iface_cast<ISceneSessionManager>(defaultSceneSessionManager_);
     if (sceneSessionManagerProxy == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sessionManagerServiceProxy is nullptr");
         return;
@@ -807,19 +826,20 @@ void MockSessionManagerService::AddSkipSelfWhenShowOnVirtualScreenList(const std
 
 void MockSessionManagerService::RemoveSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds)
 {
-    auto sessionManagerService = GetSessionManagerServiceByUserId(currentWMSUserId_);
+     //TODO 这里现在只支持默认屏幕用户的
+    auto sessionManagerService = GetSessionManagerServiceByUserId(defaultWMSUserId_);
     if (sessionManagerService == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sessionManagerService is nullptr");
         return;
     }
-    if (!sceneSessionManager_) {
+    if (!defaultSceneSessionManager_) {
         GetSceneSessionManager();
-        if (!sceneSessionManager_) {
+        if (!defaultSceneSessionManager_) {
             TLOGW(WmsLogTag::WMS_ATTRIBUTE, "get scene session manager proxy failed, nullptr");
             return;
         }
     }
-    sptr<ISceneSessionManager> sceneSessionManagerProxy = iface_cast<ISceneSessionManager>(sceneSessionManager_);
+    sptr<ISceneSessionManager> sceneSessionManagerProxy = iface_cast<ISceneSessionManager>(defaultSceneSessionManager_);
     if (sceneSessionManagerProxy == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sessionManagerServiceProxy is nullptr");
         return;
@@ -837,19 +857,20 @@ void MockSessionManagerService::SetScreenPrivacyWindowTagSwitch(
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "PrivacyWindowTags is empty");
         return;
     }
-    auto sessionManagerService = GetSessionManagerServiceByUserId(currentWMSUserId_);
+    //TODO 这里现在只支持默认屏幕用户的  这个方法还有个screenId
+    auto sessionManagerService = GetSessionManagerServiceByUserId(defaultWMSUserId_);
     if (sessionManagerService == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sessionManagerService is nullptr");
         return;
     }
-    if (!sceneSessionManager_) {
+    if (!defaultSceneSessionManager_) {
         GetSceneSessionManager();
-        if (!sceneSessionManager_) {
+        if (!defaultSceneSessionManager_) {
             TLOGW(WmsLogTag::WMS_ATTRIBUTE, "get scene session manager proxy failed, nullptr");
             return;
         }
     }
-    sptr<ISceneSessionManager> sceneSessionManagerProxy = iface_cast<ISceneSessionManager>(sceneSessionManager_);
+    sptr<ISceneSessionManager> sceneSessionManagerProxy = iface_cast<ISceneSessionManager>(defaultSceneSessionManager_);
     if (sceneSessionManagerProxy == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sessionManagerServiceProxy is nullptr");
         return;
