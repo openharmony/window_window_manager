@@ -573,8 +573,10 @@ void MockSessionManagerService::NotifyWMSConnected(int32_t userId, int32_t scree
     if (screenId == defaultScreenId_) {
         defaultWMSUserId_ = userId;
     }
-    std::shared_lock<std::shared_mutex> lock(screenId2UserIdMapLock_);
-    screenId2UserIdMap_[screenId] = userId;
+    {
+        std::lock_guard<std::mutex> lock(screenId2UserIdMapLock_);
+        screenId2UserIdMap_[screenId] = userId;
+    }
     auto smsDeathRecipient = GetSMSDeathRecipientByUserId(userId);
     if (smsDeathRecipient != nullptr) {
         smsDeathRecipient->SetScreenId(screenId);
@@ -705,6 +707,10 @@ int MockSessionManagerService::DumpSessionInfo(const std::vector<std::string>& a
         }
     }
     sptr<ISceneSessionManager> sceneSessionManagerProxy = iface_cast<ISceneSessionManager>(defaultSceneSessionManager_);
+    if (sceneSessionManagerProxy == nullptr) {
+        WLOGFW("sessionManagerServiceProxy is nullptr");
+        return -1;
+    }
     WSError ret = sceneSessionManagerProxy->GetSessionDumpInfo(args, dumpInfo);
     if (ret != WSError::WS_OK) {
         WLOGFD("sessionManagerService set success!");
@@ -797,11 +803,14 @@ void MockSessionManagerService::GetProcessSurfaceNodeIdByPersistentId(const int3
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowIdList is null, no need to get surfaceNodeId");
         return;
     }
-    std::vector<int32_t> persistentIds;
-    for (uint64_t id : windowIdList) {
-        persistentIds.push_back(static_cast<int32_t>(id));
-    }
+    std::vector<int32_t> persistentIds(windowIdList.size());
+    std::transform(windowIdList.begin(), windowIdList.end(),
+       persistentIds.begin(), [](uint64_t id) { return static_cast<int32_t>(id); });
     sptr<ISceneSessionManager> sceneSessionManagerProxy = iface_cast<ISceneSessionManager>(defaultSceneSessionManager_);
+    if (sceneSessionManagerProxy == nullptr) {
+        WLOGFW("sessionManagerServiceProxy is nullptr");
+        return;
+    }
     WMError ret = sceneSessionManagerProxy->GetProcessSurfaceNodeIdByPersistentId(
         pid, persistentIds, surfaceNodeIds);
     if (ret != WMError::WM_OK) {
