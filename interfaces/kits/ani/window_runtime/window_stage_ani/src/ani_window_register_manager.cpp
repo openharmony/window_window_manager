@@ -395,7 +395,7 @@ WmErrorCode AniWindowRegisterManager::ProcessWindowStageListener(RegisterListene
         case RegisterListenerType::WINDOW_STAGE_CLOSE_CB:
             return ProcessMainWindowCloseRegister(windowManagerListener, window, isRegister, env);
         case RegisterListenerType::WINDOW_STAGE_LIFECYCLE_EVENT_CB:
-            return ProcessWindowStageLifeCycleEventRegister(indowManagerListener, window, isRegister, env);
+            return ProcessWindowStageLifeCycleEventRegister(windowManagerListener, window, isRegister, env);
         default:
             TLOGE(WmsLogTag::DEFAULT, "[ANI]RegisterListenerType %{public}u is not supported",
                 static_cast<uint32_t>(registerListenerType));
