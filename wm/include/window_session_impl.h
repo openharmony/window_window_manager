@@ -623,7 +623,7 @@ protected:
     void NotifyTransformChange(const Transform& transForm) override;
     void NotifySingleHandTransformChange(const SingleHandTransform& singleHandTransform) override;
     bool IsKeyboardEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
-    WMError HandleEspecialEscKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
+    WMError HandleEscKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed);
     void DispatchKeyEventCallback(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed);
     bool IsVerticalOrientation(Orientation orientation) const;
     bool IsHorizontalOrientation(Orientation orientation) const;
