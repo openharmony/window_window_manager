@@ -1005,6 +1005,8 @@ void SceneSessionManager::ConfigWindowEffect(const WindowSceneConfig::ConfigItem
     if (item.IsMap()) {
         if (ConfigAppWindowCornerRadius(item["float"], config.floatCornerRadius_)) {
             appWindowSceneConfig_ = config;
+            // set default corner radius of window by system config
+            systemConfig_.defaultCornerRadius_ = config.floatCornerRadius_;
         }
     }
 
@@ -3731,8 +3733,6 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         property->SetSubWindowLevel(parentProperty->GetSubWindowLevel() + 1);
     }
     auto initClientDisplayId = UpdateSpecificSessionClientDisplayId(property);
-    TLOGI(WmsLogTag::WMS_LIFE, "The corner radius is %{public}f", appWindowSceneConfig_.floatCornerRadius_);
-    property->SetWindowCornerRadius(appWindowSceneConfig_.floatCornerRadius_);
     bool shouldBlock = false;
     bool isSystemCalling = SessionPermission::IsSystemCalling();
     if (!isSystemCalling) {
@@ -3807,7 +3807,6 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
             return WSError::WS_ERROR_NULLPTR;
         }
         newSession->SetClientDisplayId(initClientDisplayId);
-        newSession->GetSessionProperty()->SetWindowCornerRadius(property->GetWindowCornerRadius());
         property->SetSystemCalling(isSystemCalling);
         auto errCode = newSession->ConnectInner(
             sessionStage, eventChannel, surfaceNode, systemConfig_, property, token, pid, uid);
