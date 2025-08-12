@@ -629,7 +629,7 @@ HWTEST_F(WindowSessionImplTest2, HandleEscKeyEvent005, TestSize.Level1)
 
     window->escKeyEventTriggered_ = true;
     window->escKeyHasDown_ = true;
-    keyEvent->SetKeyAction(MMI::KeyEvent::KEY_ACTION_DOWN);
+    keyEvent->SetKeyAction(MMI::KeyEvent::KEY_ACTION_UP);
     EXPECT_EQ(WMError::WM_OK, window->HandleEscKeyEvent(keyEvent, isConsumed));
 
     window->escKeyEventTriggered_ = false;
