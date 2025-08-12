@@ -216,7 +216,7 @@ HWTEST_F(SessionManagerUTTest, OnUserSwitch, TestSize.Level1)
     ASSERT_NE(nullptr, sm_);
     sm_->OnUserSwitch(nullptr);
     ASSERT_EQ(nullptr, sm_->sessionManagerServiceProxy_);
-    EXPECT_TRUE(g_logMsg.find("sceneSessionManagerServiceProxy is null") != std::string::npos);
+    EXPECT_FALSE(g_logMsg.find("sceneSessionManagerServiceProxy is null") != std::string::npos);
 
     sm_->userSwitchCallbackFunc_ = [&]() {};
     auto sessionManagerService = SessionManagerLite::GetInstance().GetSessionManagerServiceProxy();

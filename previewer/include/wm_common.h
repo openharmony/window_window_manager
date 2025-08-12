@@ -449,6 +449,7 @@ enum class WindowSizeChangeReason : uint32_t {
     MAXIMIZE_IN_IMPLICT = 32,
     RECOVER_IN_IMPLICIT = 33,
     SCREEN_RELATIVE_POSITION_CHANGE,
+    SNAPSHOT_ROTATION = 37,
     END
 };
 

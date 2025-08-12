@@ -44,7 +44,7 @@ namespace {
     void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
         const char* msg)
     {
-        g_errLog = msg;
+        g_errLog += msg;
     }
 }
 class ScreenSessionManagerTest : public testing::Test {
@@ -968,6 +968,28 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenPrivacyWindowTagSwitch002, TestSize.
 }
 
 /**
+ * @tc.name: OnVerticalChangeBoundsWhenSwitchUser
+ * @tc.desc: OnVerticalChangeBoundsWhenSwitchUser test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, OnVerticalChangeBoundsWhenSwitchUser, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ScreenId screenId = 1050;
+    DMRect area{0, 0, 600, 800};
+    sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(screenId, ScreenProperty(), 0);
+    ASSERT_NE(screenSession, nullptr);
+    ScreenProperty screenProperty = screenSession->GetScreenProperty();
+    auto rotation = screenProperty.GetRotation();
+    constexpr float SECONDARY_ROTATION_90 = 90.0F;
+    screenProperty.SetRotation(SECONDARY_ROTATION_90);
+    RRect bounds = screenProperty.GetBounds();
+    ssm_->OnVerticalChangeBoundsWhenSwitchUser(screenSession);
+    RRect afterbounds = screenProperty.GetBounds();
+    EXPECT_EQ(bounds.rect_.GetHeight(), bounds.rect_.GetWidth());
+}
+
+/**
  * @tc.name: SetLandscapeLockStatus01
  * @tc.desc: SetLandscapeLockStatus01 test
  * @tc.type: FUNC
@@ -1274,6 +1296,127 @@ HWTEST_F(ScreenSessionManagerTest, GetCancelSuspendStatus04, TestSize.Level1)
     ssm_->sessionDisplayPowerController_->canceledSuspend_ = true;
     EXPECT_TRUE(ssm_->GetCancelSuspendStatus());
 }
+
+/**
+ * @tc.name: HasSameScreenCastInfo
+ * @tc.desc: HasSameScreenCastInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, HasSameScreenCastInfo01, TestSize.Level1) {
+    ASSERT_NE(ssm_, nullptr);
+    ScreenId screenId = 1660;
+    ScreenId mainScreenId = 0;
+    EXPECT_FALSE(ssm_->HasSameScreenCastInfo(screenId, mainScreenId, ScreenCombination::SCREEN_MIRROR));
+    ssm_->SetScreenCastInfo(screenId, mainScreenId, ScreenCombination::SCREEN_MIRROR);
+    EXPECT_TRUE(ssm_->HasSameScreenCastInfo(screenId, mainScreenId, ScreenCombination::SCREEN_MIRROR));
+    ssm_->RemoveScreenCastInfo(screenId);
+    EXPECT_FALSE(ssm_->HasSameScreenCastInfo(screenId, mainScreenId, ScreenCombination::SCREEN_MIRROR));
+}
+ 
+/**
+ * @tc.name: HasSameScreenCastInfo
+ * @tc.desc: HasSameScreenCastInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, HasSameScreenCastInfo02, TestSize.Level1) {
+    ASSERT_NE(ssm_, nullptr);
+    ScreenId screenId = 1660;
+    ScreenId mainScreenId1 = 0;
+    ScreenId mainScreenId2 = 1;
+    ssm_->SetScreenCastInfo(screenId, mainScreenId1, ScreenCombination::SCREEN_MIRROR);
+    EXPECT_FALSE(ssm_->HasSameScreenCastInfo(mainScreenId1, mainScreenId2, ScreenCombination::SCREEN_MIRROR));
+    EXPECT_FALSE(ssm_->HasSameScreenCastInfo(screenId, mainScreenId2, ScreenCombination::SCREEN_MIRROR));
+    EXPECT_FALSE(ssm_->HasSameScreenCastInfo(screenId, mainScreenId1, ScreenCombination::SCREEN_EXPAND));
+    EXPECT_TRUE(ssm_->HasSameScreenCastInfo(screenId, mainScreenId1, ScreenCombination::SCREEN_MIRROR));
+    ssm_->RemoveScreenCastInfo(screenId);
+}
+ 
+/**
+ * @tc.name: RemoveScreenCastInfo
+ * @tc.desc: RemoveScreenCastInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, RemoveScreenCastInfo, TestSize.Level1) {
+    ASSERT_NE(ssm_, nullptr);
+    ScreenId screenId = 1660;
+    ScreenId mainScreenId = 0;
+    ScreenId screenIdNotExist = 1080;
+    ssm_->SetScreenCastInfo(screenId, mainScreenId, ScreenCombination::SCREEN_MIRROR);
+    EXPECT_TRUE(ssm_->HasSameScreenCastInfo(screenId, mainScreenId, ScreenCombination::SCREEN_MIRROR));
+    ssm_->RemoveScreenCastInfo(screenIdNotExist);
+    EXPECT_TRUE(ssm_->HasSameScreenCastInfo(screenId, mainScreenId, ScreenCombination::SCREEN_MIRROR));
+    ssm_->RemoveScreenCastInfo(screenId);
+    EXPECT_FALSE(ssm_->HasSameScreenCastInfo(screenId, mainScreenId, ScreenCombination::SCREEN_MIRROR));
+}
+ 
+/**
+ * @tc.name: ChangeScreenGroup
+ * @tc.desc: ChangeScreenGroup test screenCastInfo has same
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, ChangeScreenGroup, TestSize.Level1) {
+    ASSERT_NE(ssm_, nullptr);
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    ScreenId groupId = 1;
+    ScreenId screenId = 4080;
+    ScreenId mainScreenId = 0;
+    sptr<ScreenSessionGroup> group =
+        sptr<ScreenSessionGroup>::MakeSptr(groupId, SCREEN_ID_INVALID, "test", ScreenCombination::SCREEN_MIRROR);
+    group->mirrorScreenId_ = mainScreenId;
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(screenId, ScreenProperty(), 0);
+    ssm_->screenSessionMap_[screenId] = screenSession;
+    std::vector<ScreenId> screens;
+    screens.emplace_back(screenId);
+    DMRect region = { 0, 0, 1, 1 };
+    Point point;
+    std::vector<Point> startPoints;
+    startPoints.insert(startPoints.begin(), screens.size(), point);
+    ssm_->ChangeScreenGroup(group, screens, startPoints, true, ScreenCombination::SCREEN_MIRROR, region);
+    EXPECT_TRUE(g_errLog.find("has not same cast info") != std::string::npos);
+    g_errLog.clear();
+    ssm_->SetScreenCastInfo(screenId, mainScreenId, ScreenCombination::SCREEN_MIRROR);
+    ssm_->ChangeScreenGroup(group, screens, startPoints, true, ScreenCombination::SCREEN_MIRROR, region);
+    EXPECT_FALSE(g_errLog.find("has not same cast info") != std::string::npos);
+    g_errLog.clear();
+    ssm_->RemoveScreenCastInfo(screenId);
+}
+
+/**
+ * @tc.name: ChangeMirrorScreenConfig
+ * @tc.desc: ChangeMirrorScreenConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, ChangeMirrorScreenConfig, TestSize.Level1) {
+    ASSERT_NE(ssm_, nullptr);
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    ScreenId groupId = 1;
+    ScreenId screenId = 4080;
+    ScreenId mainScreenId = 0;
+    sptr<ScreenSessionGroup> group =
+        sptr<ScreenSessionGroup>::MakeSptr(groupId, SCREEN_ID_INVALID, "test", ScreenCombination::SCREEN_MIRROR);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(screenId, ScreenProperty(), 0);
+    ssm_->screenSessionMap_[screenId] = screenSession;
+    group->mirrorScreenId_ = mainScreenId;
+    DMRect region = { 0, 0, 1, 1 };
+    ssm_->ChangeMirrorScreenConfig(group, region, screenSession);
+    EXPECT_TRUE(g_errLog.find("convert to rs id failed") != std::string::npos);
+    g_errLog.clear();
+    ssm_->screenIdManager_.UpdateScreenId(screenId, screenId);
+    ssm_->ChangeMirrorScreenConfig(group, region, screenSession);
+    EXPECT_TRUE(g_errLog.find("with region") != std::string::npos);
+    g_errLog.clear();
+    group = nullptr;
+    ssm_->ChangeMirrorScreenConfig(group, region, screenSession);
+    EXPECT_FALSE(g_errLog.find("with region") != std::string::npos);
+    g_errLog.clear();
+    screenSession = nullptr;
+    ssm_->ChangeMirrorScreenConfig(group, region, screenSession);
+    EXPECT_FALSE(g_errLog.find("with region") != std::string::npos);
+    g_errLog.clear();
+}
+
 /*
  * @tc.name: RegisterSettingDuringCallStateObserver
  * @tc.desc: RegisterSettingDuringCallStateObserver

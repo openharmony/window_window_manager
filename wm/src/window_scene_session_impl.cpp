@@ -1088,15 +1088,15 @@ void WindowSceneSessionImpl::ResetSuperFoldDisplayY(const std::shared_ptr<MMI::P
             TLOGE(WmsLogTag::WMS_INPUT_KEY_FLOW, "Get pointerItem failed");
             return;
         }
-        if (auto displayY = pointerItem.GetDisplayY(); displayY >= superFoldOffsetY_) {
-            pointerItem.SetDisplayY(displayY - superFoldOffsetY_);
-            pointerItem.SetDisplayYPos(pointerItem.GetDisplayYPos() - superFoldOffsetY_);
+        if (auto displayYPos = pointerItem.GetDisplayYPos();
+            !MathHelper::LessNotEqual(displayYPos, superFoldOffsetY_)) {
+            pointerItem.SetDisplayYPos(displayYPos - superFoldOffsetY_);
             pointerEvent->UpdatePointerItem(pointerId, pointerItem);
             pointerEvent->SetTargetDisplayId(DISPLAY_ID_C);
             TLOGD(WmsLogTag::WMS_EVENT, "Calculated superFoldOffsetY:%{public}d,displayId:%{public}d,"
-                "InputId:%{public}d,pointerId:%{public}d,displayx:%{private}d,displayy:%{private}d,",
+                "InputId:%{public}d,pointerId:%{public}d,displayXPos:%{private}f,displayYPos:%{private}f,",
                 superFoldOffsetY_, pointerEvent->GetTargetDisplayId(), pointerEvent->GetId(),
-                pointerId, pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
+                pointerId, pointerItem.GetDisplayXPos(), pointerItem.GetDisplayYPos());
         }
     }
 }
@@ -1544,6 +1544,7 @@ void WindowSceneSessionImpl::PreLayoutOnShow(WindowType type, const sptr<Display
         if (auto hostSession = GetHostSession()) {
             WSRect wsRect = { requestRect.posX_, requestRect.posY_, requestRect.width_, requestRect.height_ };
             if (type != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+                SetNotifySizeChangeFlag(true);
                 property_->SetWindowRect(requestRect);
             }
             hostSession->UpdateClientRect(wsRect);
@@ -5533,7 +5534,9 @@ WSError WindowSceneSessionImpl::SwitchFreeMultiWindow(bool enable)
         WindowMode::WINDOW_MODE_FULLSCREEN)) {
         UpdateDecorEnable(true);
     }
-    UpdateImmersiveBySwitchMode(enable);
+    if (WindowHelper::IsWindowModeSupported(property_->GetWindowModeSupportType(), WindowMode::WINDOW_MODE_FLOATING)) {
+        UpdateImmersiveBySwitchMode(enable);
+    }
     SwitchSubWindow(enable, GetPersistentId());
     return WSError::WS_OK;
 }
@@ -6309,7 +6312,7 @@ void WindowSceneSessionImpl::HandleDownForCompatibleMode(const std::shared_ptr<M
         if (transferX < 0) {
             transferX = 0;
         }
-        TLOGI(WmsLogTag::DEFAULT, "DOWN in mapping region, displayX: %{public}d, transferX: %{public}d, "
+        TLOGD(WmsLogTag::DEFAULT, "DOWN in mapping region, displayX: %{private}d, transferX: %{public}d, "
             "pointerId: %{public}d", displayX, transferX, pointerId);
         eventMapDeltaXByDisplay_[displayId][pointerId] = transferX - displayX;
         ConvertPointForCompatibleMode(pointerEvent, pointerItem, transferX);
@@ -6339,7 +6342,7 @@ void WindowSceneSessionImpl::HandleMoveForCompatibleMode(const std::shared_ptr<M
         isOverTouchSlop_ = true;
     }
     int32_t transferX = displayX + GetValueByKey(eventMapDeltaXByDisplay_, displayId)[pointerId];
-    TLOGD(WmsLogTag::WMS_COMPAT, "MOVE, displayX: %{public}d, transferX: %{public}d, pointerId: %{public}d",
+    TLOGD(WmsLogTag::WMS_COMPAT, "MOVE, displayX: %{private}d, transferX: %{public}d, pointerId: %{public}d",
         displayX, transferX, pointerId);
     ConvertPointForCompatibleMode(pointerEvent, pointerItem, transferX);
 }
@@ -6361,7 +6364,7 @@ void WindowSceneSessionImpl::HandleUpForCompatibleMode(const std::shared_ptr<MMI
         int32_t displayX = pointerItem.GetDisplayX();
         int32_t transferX = displayX + GetValueByKey(eventMapDeltaXByDisplay_, displayId)[pointerId];
         ConvertPointForCompatibleMode(pointerEvent, pointerItem, transferX);
-        TLOGI(WmsLogTag::WMS_COMPAT, "UP, displayX: %{public}d, transferX: %{public}d, pointerId: %{public}d",
+        TLOGD(WmsLogTag::WMS_COMPAT, "UP, displayX: %{private}d, transferX: %{public}d, pointerId: %{public}d",
             displayX, transferX, pointerId);
         GetValueByKey(eventMapDeltaXByDisplay_, displayId)[pointerId] = 0;
         GetValueByKey(eventMapTriggerByDisplay_, displayId)[pointerId] = false;
@@ -6878,10 +6881,6 @@ WSError WindowSceneSessionImpl::NotifyAppForceLandscapeConfigUpdated()
 
 WMError WindowSceneSessionImpl::GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo)
 {
-    if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::DEFAULT, "HostSession is invalid");
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
     return hostSession->GetAppHookWindowInfoFromServer(hookWindowInfo);

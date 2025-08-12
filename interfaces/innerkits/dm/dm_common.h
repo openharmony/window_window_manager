@@ -717,11 +717,35 @@ struct Position {
         return !(*this == other);
     }
 
+    bool SafeAdd(const Position& other, Position& result) const
+    {
+        return SafeOp(other, std::plus<int64_t>(), result);
+    }
+
+    bool SafeSub(const Position& other, Position& result) const
+    {
+        return SafeOp(other, std::minus<int64_t>(), result);
+    }
+
     inline std::string ToString() const
     {
         std::ostringstream oss;
         oss << "[" << x << ", " << y << "]";
         return oss.str();
+    }
+
+private:
+    template<typename Op>
+    bool SafeOp(const Position& other, Op op, Position& result) const
+    {
+        int64_t newX = op(static_cast<int64_t>(x), static_cast<int64_t>(other.x));
+        int64_t newY = op(static_cast<int64_t>(y), static_cast<int64_t>(other.y));
+        if (newX < INT32_MIN || newX > INT32_MAX || newY < INT32_MIN || newY > INT32_MAX) {
+            return false;
+        }
+        result.x = static_cast<int32_t>(newX);
+        result.y = static_cast<int32_t>(newY);
+        return true;
     }
 };
 

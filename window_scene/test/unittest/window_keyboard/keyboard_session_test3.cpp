@@ -44,7 +44,7 @@ namespace {
     void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
         const char* msg)
     {
-        g_logMsg = msg;
+        g_logMsg += msg;
     }
 }
 class KeyboardSessionTest3 : public testing::Test {
@@ -791,22 +791,30 @@ HWTEST_F(KeyboardSessionTest3, NotifyOccupiedAreaChanged, Function | SmallTest |
     ASSERT_NE(callingSession, nullptr);
     sptr<OccupiedAreaChangeInfo> occupiedAreaInfo = nullptr;
 
+    g_logMsg.clear();
     keyboardSession->NotifyOccupiedAreaChanged(callingSession, occupiedAreaInfo, false, nullptr);
     EXPECT_TRUE(g_logMsg.find("occupiedAreaInfo is null") != std::string::npos);
 
+    g_logMsg.clear();
     callingSession->sessionInfo_.isSystem_ = true;
     occupiedAreaInfo = sptr<OccupiedAreaChangeInfo>::MakeSptr();
     ASSERT_NE(occupiedAreaInfo, nullptr);
     keyboardSession->NotifyOccupiedAreaChanged(callingSession, occupiedAreaInfo, false, nullptr);
     EXPECT_TRUE(g_logMsg.find("Calling id:") != std::string::npos);
 
+    g_logMsg.clear();
     callingSession->sessionInfo_.isSystem_ = false;
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
+    ASSERT_NE(mockSessionStage, nullptr);
+    callingSession->sessionStage_ = mockSessionStage;
+    EXPECT_CALL(*mockSessionStage, NotifyOccupiedAreaChangeInfo(_, _, _, _)).Times(2);
     keyboardSession->NotifyOccupiedAreaChanged(callingSession, occupiedAreaInfo, false, nullptr);
     EXPECT_TRUE(g_logMsg.find("Calling id:") != std::string::npos);
 
+    g_logMsg.clear();
     callingSession->sessionInfo_.isSystem_ = false;
     keyboardSession->NotifyOccupiedAreaChanged(callingSession, occupiedAreaInfo, true, nullptr);
-    EXPECT_TRUE(g_logMsg.find("Calling id:") != std::string::npos);
+    EXPECT_TRUE(g_logMsg.find("size of avoidAreas: 5") != std::string::npos);
 }
 } // namespace
 } // namespace Rosen

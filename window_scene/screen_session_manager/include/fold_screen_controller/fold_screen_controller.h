@@ -70,12 +70,14 @@ public:
     FoldDisplayMode GetLastCacheDisplayMode();
     void AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32_t command);
     void SetIsClearingBootAnimation(bool isClearingBootAnimation);
+    nlohmann::ordered_json GetFoldCreaseRegionJson();
 private:
     sptr<FoldScreenPolicy> GetFoldScreenPolicy(DisplayDeviceType productType);
     sptr<FoldScreenPolicy> foldScreenPolicy_;
     sptr<SensorFoldStateManager> sensorFoldStateManager_;
     std::recursive_mutex& displayInfoMutex_;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler_;
+    std::vector<FoldCreaseRegionItem> foldCreaseRegionItems_;
 };
 } // namespace OHOS::Rosen
 #endif //OHOS_ROSEN_WINDOW_SCENE_FOLD_SCREEN_CONTROLLER_H

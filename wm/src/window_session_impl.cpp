@@ -56,7 +56,6 @@
 #include "perform_reporter.h"
 #include "picture_in_picture_manager.h"
 #include "parameters.h"
-#include "session_helper.h"
 #include "floating_ball_manager.h"
 #include "sys_cap_util.h"
 
@@ -71,7 +70,7 @@ constexpr int32_t FORCE_SPLIT_MODE = 5;
 constexpr int32_t NAV_FORCE_SPLIT_MODE = 6;
 constexpr int32_t API_VERSION_18 = 18;
 constexpr uint32_t API_VERSION_MOD = 1000;
-constexpr int32_t  WINDOW_ROTATION_CHANGE = 20;
+constexpr int32_t  WINDOW_ROTATION_CHANGE = 50;
 constexpr uint32_t INVALID_TARGET_API_VERSION = 0;
 constexpr uint32_t OPAQUE = 0xFF000000;
 constexpr int32_t WINDOW_CONNECT_TIMEOUT = 3000;
@@ -1094,7 +1093,8 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
         "WindowSessionImpl::UpdateRect id: %d [%d, %d, %u, %u] reason: %u hasRSTransaction: %u", GetPersistentId(),
         wmRect.posX_, wmRect.posY_, wmRect.width_, wmRect.height_, wmReason, config.rsTransaction_ != nullptr);
-    if (handler_ != nullptr && wmReason == WindowSizeChangeReason::ROTATION) {
+    if (handler_ != nullptr && (wmReason == WindowSizeChangeReason::ROTATION ||
+        wmReason == WindowSizeChangeReason::SNAPSHOT_ROTATION)) {
         postTaskDone_ = false;
         UpdateRectForRotation(wmRect, preRect, wmReason, config, avoidAreas);
     } else if (handler_ != nullptr && wmReason == WindowSizeChangeReason::PAGE_ROTATION) {
@@ -1168,6 +1168,9 @@ void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& pr
                 window->NotifyRotationAnimationEnd();
             }
         });
+        if (wmReason == WindowSizeChangeReason::SNAPSHOT_ROTATION) {
+            wmReason = WindowSizeChangeReason::ROTATION;
+        }
         if ((wmRect != preRect) || (wmReason != window->lastSizeChangeReason_)) {
             window->NotifySizeChange(wmRect, wmReason);
             window->lastSizeChangeReason_ = wmReason;
@@ -1250,8 +1253,10 @@ void WindowSessionImpl::UpdateRectForOtherReasonTask(const Rect& wmRect, const R
     WindowSizeChangeReason wmReason, const std::shared_ptr<RSTransaction>& rsTransaction,
     const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
-    if ((wmRect != preRect) || (wmReason != lastSizeChangeReason_) || !postTaskDone_) {
+    if ((wmRect != preRect) || (wmReason != lastSizeChangeReason_)
+        || !postTaskDone_ || notifySizeChangeFlag_) {
         NotifySizeChange(wmRect, wmReason);
+        SetNotifySizeChangeFlag(false);
         lastSizeChangeReason_ = wmReason;
         postTaskDone_ = true;
     }
@@ -1561,13 +1566,15 @@ WSError WindowSessionImpl::UpdateFocus(bool isFocused)
     TLOGI(WmsLogTag::WMS_FOCUS, "focus: %{public}u, id: %{public}d", isFocused, GetPersistentId());
     isFocused_ = isFocused;
     if (isFocused) {
+        std::string bundleName = IsAnco() && property_->GetAncoRealBundleName() != "" ?
+            property_->GetAncoRealBundleName() : property_->GetSessionInfo().bundleName_;
         HiSysEventWrite(
             OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
             "FOCUS_WINDOW",
             OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
             "PID", getpid(),
             "UID", getuid(),
-            "BUNDLE_NAME", property_->GetSessionInfo().bundleName_,
+            "BUNDLE_NAME", bundleName,
             "WINDOW_TYPE", static_cast<uint32_t>(GetType()));
         NotifyAfterFocused();
     } else {
@@ -2223,13 +2230,6 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, voi
         SetForceSplitEnable(config);
     }
 
-    HookWindowInfo hookWindowInfo{};
-    if (WindowHelper::IsMainWindow(winType)) {
-        if (GetAppHookWindowInfoFromServer(hookWindowInfo) == WMError::WM_OK) {
-            SetAppHookWindowInfo(hookWindowInfo);
-        }
-    }
-
     uint32_t version = 0;
     auto context = GetContext();
     if ((context != nullptr) && (context->GetApplicationInfo() != nullptr)) {
@@ -2426,12 +2426,14 @@ WMError WindowSessionImpl::ClientToGlobalDisplay(const Position& inPosition, Pos
             windowId, transform.scaleX_, transform.scaleY_);
         return WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS;
     }
-
     const auto globalDisplayRect = GetGlobalDisplayRect();
-    outPosition = {
-        globalDisplayRect.posX_ + inPosition.x,
-        globalDisplayRect.posY_ + inPosition.y
-    };
+    const Position& basePosition = {globalDisplayRect.posX_, globalDisplayRect.posY_};
+    if (!inPosition.SafeAdd(basePosition, outPosition)) {
+        TLOGW(WmsLogTag::WMS_LAYOUT,
+            "Position overflow, windowId: %{public}u, inPosition: %{public}s, basePosition: %{public}s",
+            windowId, inPosition.ToString().c_str(), basePosition.ToString().c_str());
+        return WMError::WM_ERROR_ILLEGAL_PARAM;
+    }
     TLOGD(WmsLogTag::WMS_LAYOUT,
         "windowId: %{public}u, globalDisplayRect: %{public}s, inPosition: %{public}s, outPosition: %{public}s",
         windowId, globalDisplayRect.ToString().c_str(),
@@ -2449,12 +2451,14 @@ WMError WindowSessionImpl::GlobalDisplayToClient(const Position& inPosition, Pos
             windowId, transform.scaleX_, transform.scaleY_);
         return WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS;
     }
-
     const auto globalDisplayRect = GetGlobalDisplayRect();
-    outPosition = {
-        inPosition.x - globalDisplayRect.posX_,
-        inPosition.y - globalDisplayRect.posY_
-    };
+    const Position& basePosition = {globalDisplayRect.posX_, globalDisplayRect.posY_};
+    if (!inPosition.SafeSub(basePosition, outPosition)) {
+        TLOGW(WmsLogTag::WMS_LAYOUT,
+            "Position overflow, windowId: %{public}u, inPosition: %{public}s, basePosition: %{public}s",
+            windowId, inPosition.ToString().c_str(), basePosition.ToString().c_str());
+        return WMError::WM_ERROR_ILLEGAL_PARAM;
+    }
     TLOGD(WmsLogTag::WMS_LAYOUT,
         "windowId: %{public}u, globalDisplayRect: %{public}s, inPosition: %{public}s, outPosition: %{public}s",
         windowId, globalDisplayRect.ToString().c_str(),
@@ -6285,6 +6289,39 @@ bool WindowSessionImpl::FilterPointerEvent(const std::shared_ptr<MMI::PointerEve
     return isFiltered;
 }
 
+WMError WindowSessionImpl::HandleEscKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed)
+{
+    if (keyEvent == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "keyevent is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    if (!isConsumed && keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ESCAPE &&
+        IsPcOrPadFreeMultiWindowMode() &&
+        property_->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
+        GetImmersiveModeEnabledState() &&
+        keyEvent->GetKeyAction() == MMI::KeyEvent::KEY_ACTION_DOWN && !escKeyEventTriggered_) {
+        if (Recover() == WMError::WM_OK) {
+            isConsumed = true;
+            keyEvent->MarkProcessed();
+        }
+        TLOGE(WmsLogTag::WMS_EVENT, "recover from fullscreen, consumed: %{public}d", isConsumed);
+    }
+
+    if (!isConsumed && !escKeyEventTriggered_ && escKeyHasDown_) {
+        bool escToBackFlag = keyEvent->HasFlag(MMI::InputEvent::EVENT_FLAG_KEYBOARD_ESCAPE);
+        if (!escToBackFlag) {
+            TLOGE(WmsLogTag::WMS_EVENT, "ESC no flag");
+            return WMError::WM_DO_NOTHING;
+        }
+
+        TLOGI(WmsLogTag::WMS_EVENT, "normal mode, handlebackevent");
+        HandleBackEvent();
+    }
+
+    return WMError::WM_OK;
+}
+
 void WindowSessionImpl::DispatchKeyEventCallback(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed)
 {
     std::shared_ptr<IInputEventConsumer> inputEventConsumer;
@@ -6320,22 +6357,18 @@ void WindowSessionImpl::DispatchKeyEventCallback(const std::shared_ptr<MMI::KeyE
 
     if (auto uiContent = GetUIContentSharedPtr()) {
         if (FilterKeyEvent(keyEvent)) return;
-        TLOGI(WmsLogTag::WMS_EVENT, "Start to process keyEvent, id: %{public}d", keyEvent->GetId());
         isConsumed = uiContent->ProcessKeyEvent(keyEvent);
-        if (!isConsumed && keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ESCAPE &&
-            IsPcOrPadFreeMultiWindowMode() &&
-            property_->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
-            GetImmersiveModeEnabledState() &&
-            keyAction == MMI::KeyEvent::KEY_ACTION_DOWN && !escKeyEventTriggered_) {
-            WLOGI("recover from fullscreen cause KEYCODE_ESCAPE");
-            Recover();
-        }
+        TLOGI(WmsLogTag::WMS_EVENT, "id: %{public}d, consumed: %{public}d,"
+            "escTrigger: %{public}d, escDown: %{public}d",
+            keyEvent->GetId(), isConsumed, escKeyEventTriggered_, escKeyHasDown_);
+        HandleEscKeyEvent(keyEvent, isConsumed);
         NotifyConsumeResultToFloatWindow(keyEvent, isConsumed);
         if (!isConsumed) {
             keyEvent->MarkProcessed();
         }
         if (keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ESCAPE) {
-            escKeyEventTriggered_ = (keyAction == MMI::KeyEvent::KEY_ACTION_UP) ? false : true;
+            escKeyHasDown_ = (keyAction == MMI::KeyEvent::KEY_ACTION_DOWN);
+            escKeyEventTriggered_ = isConsumed;
         }
     }
 }
@@ -8058,5 +8091,22 @@ void WindowSessionImpl::UpdateEnableDragWhenSwitchMultiWindow(bool enable)
     }
     UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED);
 }
+
+void WindowSessionImpl::SetNotifySizeChangeFlag(bool flag)
+{
+    if (flag) {
+        if (GetType() != WindowType::WINDOW_TYPE_FLOAT_NAVIGATION) {
+            return;
+        }
+        if (GetRect() == GetRequestRect()) {
+            return;
+        }
+        notifySizeChangeFlag_ = true;
+        TLOGD(WmsLogTag::WMS_LAYOUT, "Set notify size change flag is true");
+        return;
+    }
+    notifySizeChangeFlag_ = false;
+}
+
 } // namespace Rosen
 } // namespace OHOS

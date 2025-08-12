@@ -200,6 +200,7 @@ public:
     virtual DMError GetAvailableArea(DisplayId displayId, DMRect& area) override;
     virtual DMError GetExpandAvailableArea(DisplayId displayId, DMRect& area) override;
     void NotifyFoldToExpandCompletion(bool foldToExpand) override;
+    void NotifyScreenConnectCompletion(ScreenId screenId) override;
     void RecordEventFromScb(std::string description, bool needRecordEvent) override;
     void SwitchUser() override;
 

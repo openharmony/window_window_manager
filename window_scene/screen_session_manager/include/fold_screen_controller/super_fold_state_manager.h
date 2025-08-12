@@ -22,6 +22,7 @@
 #include <map>
 #include <utility>
 #include <atomic>
+#include "nlohmann/json.hpp"
 #include "session/screen/include/screen_session.h"
 
 #include "dm_common.h"
@@ -40,6 +41,14 @@ enum class ScreenDirectionType : uint32_t {
 };
 
 class RSInterfaces;
+
+struct SuperFoldCreaseRegionItem {
+    DisplayOrientation orientation_;
+    SuperFoldStatus superFoldStatus_;
+    FoldCreaseRegion region_;
+    SuperFoldCreaseRegionItem(DisplayOrientation orientation, SuperFoldStatus superFoldStatus, FoldCreaseRegion region)
+        : orientation_(orientation), superFoldStatus_(superFoldStatus), region_(region) {}
+};
 
 class SuperFoldStateManager final {
     WM_DECLARE_SINGLE_INSTANCE_BASE(SuperFoldStateManager)
@@ -73,6 +82,10 @@ public:
 
     DMError RefreshExternalRegion();
 
+    void GetAllCreaseRegion();
+
+    nlohmann::ordered_json GetFoldCreaseRegionJson();
+
 private:
     std::atomic<SuperFoldStatus> curState_ = SuperFoldStatus::UNKNOWN;
     sptr<FoldCreaseRegion> currentSuperFoldCreaseRegion_ = nullptr;
@@ -81,6 +94,7 @@ private:
     void GetFoldCreaseRect(bool isVertical, const std::vector<int32_t>& foldRect,
         std::vector<DMRect>& foldCreaseRect) const;
     std::mutex superStatusMutex_;
+    std::vector<SuperFoldCreaseRegionItem> superFoldCreaseRegionItems_;
     struct Transition {
         SuperFoldStatus nextState;
         std::function<void (SuperFoldStatusChangeEvents)> action;

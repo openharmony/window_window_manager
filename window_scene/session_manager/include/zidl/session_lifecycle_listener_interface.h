@@ -38,6 +38,9 @@ public:
         INACTIVE,
         RESUME,
         PAUSE,
+
+        // more
+        TRANSFER_TO_TARGET_SCREEN,
         EVENT_END,
     };
 
@@ -48,7 +51,10 @@ public:
                    parcel.WriteString(moduleName_) &&
                    parcel.WriteString(abilityName_) &&
                    parcel.WriteInt32(appIndex_) &&
-                   parcel.WriteInt32(persistentId_);
+                   parcel.WriteInt32(persistentId_) &&
+                   parcel.WriteUint32(resultCode_) &&
+                   parcel.WriteUint64(fromScreenId_) &&
+                   parcel.WriteUint64(toScreenId_);
         }
 
         static LifecycleEventPayload* Unmarshalling(Parcel& parcel)
@@ -58,7 +64,10 @@ public:
                 !parcel.ReadString(payload->moduleName_) ||
                 !parcel.ReadString(payload->abilityName_) ||
                 !parcel.ReadInt32(payload->appIndex_) ||
-                !parcel.ReadInt32(payload->persistentId_)) {
+                !parcel.ReadInt32(payload->persistentId_) ||
+                !parcel.ReadUint32(payload->resultCode_) ||
+                !parcel.ReadUint64(payload->fromScreenId_) ||
+                !parcel.ReadUint64(payload->toScreenId_)) {
                 delete payload;
                 return nullptr;
             }
@@ -70,6 +79,9 @@ public:
         std::string abilityName_;
         int32_t appIndex_ = 0;
         int32_t persistentId_ = 0;
+        uint32_t resultCode_ = 0;
+        uint64_t fromScreenId_ = 0;
+        uint64_t toScreenId_ = 0;
     };
 
     virtual void OnLifecycleEvent(SessionLifecycleEvent event, const LifecycleEventPayload& payload) {};

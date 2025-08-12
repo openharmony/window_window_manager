@@ -56,6 +56,7 @@ const float FULL_STATUS_OFFSET_X = 1136;
 const float SCREEN_HEIGHT = 2232;
 constexpr uint32_t SECONDARY_ROTATION_270 = 3;
 constexpr uint32_t SECONDARY_ROTATION_MOD = 4;
+constexpr int32_t SNAPSHOT_TIMEOUT_MS = 300;
 constexpr ScreenId SCREEN_ID_DEFAULT = 0;
 constexpr float HORIZONTAL = 270.f;
 ScreenCache<int32_t, int32_t> g_uidVersionMap(MAP_SIZE, NO_EXIST_UID_VERSION);
@@ -96,7 +97,6 @@ ScreenSession::ScreenSession(const ScreenSessionConfig& config, ScreenSessionRea
         }
         case ScreenSessionReason::CREATE_SESSION_FOR_REAL: {
             rsConfig.screenId = screenId_;
-            rsConfig.isSync = true;
             break;
         }
         case ScreenSessionReason::CREATE_SESSION_WITHOUT_DISPLAY_NODE: {
@@ -2392,6 +2392,41 @@ void ScreenSession::ScreenModeChange(ScreenModeChangeEvent screenModeChangeEvent
         }
         listener->OnScreenModeChange(screenModeChangeEvent);
     }
+}
+
+std::shared_ptr<Media::PixelMap> ScreenSession::SetScreenFreezeImmediately(float scaleX, float scaleY, bool isFreeze)
+{
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ss:SetScreenFreezeImmediately");
+    auto callback = std::make_shared<SurfaceCaptureFuture>();
+    {
+        DmsXcollie dmsXcollie("DMS:SetScreenFreezeImmediately:SetScreenFreezeImmediately", XCOLLIE_TIMEOUT_5S);
+        std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
+        if (displayNode_ == nullptr) {
+            TLOGE(WmsLogTag::DMS, "displayNode is null");
+            return nullptr;
+        }
+        RSSurfaceCaptureConfig config = {
+            .scaleX = scaleX,
+            .scaleY = scaleY,
+        };
+        SetScreenSnapshotRect(config);
+        bool ret = RSInterfaces::GetInstance().SetScreenFreezeImmediately(displayNode_, isFreeze, callback, config);
+        if (!ret) {
+            TLOGE(WmsLogTag::DMS, "get screen snapshot failed");
+            return nullptr;
+        }
+    }
+    if (isFreeze) {
+        auto pixelMap = callback->GetResult(SNAPSHOT_TIMEOUT_MS);
+        if (pixelMap != nullptr) {
+            TLOGD(WmsLogTag::DMS, "save pixelMap WxH = %{public}dx%{public}d", pixelMap->GetWidth(),
+                pixelMap->GetHeight());
+        } else {
+            TLOGE(WmsLogTag::DMS, "failed to get pixelMap");
+        }
+        return pixelMap;
+    }
+    return nullptr;
 }
 
 void ScreenSession::SetIsPhysicalMirrorSwitch(bool isPhysicalMirrorSwitch)

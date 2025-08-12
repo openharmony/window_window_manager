@@ -3110,7 +3110,8 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
     }
     if (sceneSession->GetSessionInfo().ancoSceneState < AncoSceneState::NOTIFY_CREATE) {
         FillSessionInfo(sceneSession);
-        if (!PreHandleCollaborator(sceneSession, persistentId)) {
+        if (CheckCollaboratorType(sceneSession->GetCollaboratorType()) &&
+            !PreHandleCollaborator(sceneSession, persistentId)) {
             TLOGE(WmsLogTag::WMS_LIFE, "[id: %{public}d] ancoSceneState: %{public}d",
                 persistentId, sceneSession->GetSessionInfo().ancoSceneState);
             ExceptionInfo exceptionInfo;
@@ -3594,6 +3595,7 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
             return WSError::WS_ERROR_INVALID_SESSION;
         }
         DeleteProcessMap(sceneSession->GetSessionInfo(), persistentId);
+        startingWindowRdbMgr_->ClearRdbStore();
         auto sceneSessionInfo = SetAbilitySessionInfo(sceneSession);
         sceneSession->GetCloseAbilityWantAndClean(sceneSessionInfo->want);
         ResetSceneSessionInfoWant(sceneSessionInfo);
@@ -5365,6 +5367,7 @@ void SceneSessionManager::UpdateAllStartingWindowRdb()
         auto batchInsertRes = startingWindowRdbMgr_->BatchInsert(outInsertNum, inputValues);
         TLOGNI(WmsLogTag::WMS_PATTERN, "res: %{public}d, bundles: %{public}zu, insert: %{public}" PRId64,
             batchInsertRes, bundleInfos.size(), outInsertNum);
+        startingWindowRdbMgr_->ClearRdbStore();
         };
     ffrtQueueHelper_->SubmitTask(loadTask);
 }
@@ -7707,9 +7710,9 @@ sptr<SceneSession> SceneSessionManager::GetNextFocusableSession(DisplayId displa
 sptr<SceneSession> SceneSessionManager::GetNextFocusableSessionWhenFloatWindowExist(DisplayId displayGroupId,
                                                                                     int32_t persistentId)
 {
-    bool isPhoneOrPad =
-        systemConfig_.IsPhoneWindow() || (systemConfig_.IsPadWindow() && !systemConfig_.IsFreeMultiWindowMode());
-    if (!isPhoneOrPad) {
+    bool isPhoneOrPadWithoutPcMode =
+        (systemConfig_.IsPhoneWindow() || systemConfig_.IsPadWindow()) && !systemConfig_.IsFreeMultiWindowMode();
+    if (!isPhoneOrPadWithoutPcMode) {
         return nullptr;
     }
     auto topFloatingSession = GetTopFloatingSession(displayGroupId, persistentId);
@@ -7818,14 +7821,12 @@ bool SceneSessionManager::CheckBlockingFocus(const sptr<SceneSession>& session, 
               session->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT,
               session->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING);
         bool isPcOrPcMode =
-            systemConfig_.IsPcWindow() || (systemConfig_.IsPadWindow() && systemConfig_.IsFreeMultiWindowMode());
-
+            systemConfig_.IsPcWindow() || (isPhoneOrPad && systemConfig_.IsFreeMultiWindowMode());
         if (isPcOrPcMode && session->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT) {
             return false;
         }
-        bool isPhoneAndPadWithoutPcMode =
-            systemConfig_.IsPhoneWindow() || (systemConfig_.IsPadWindow() && !systemConfig_.IsFreeMultiWindowMode());
-        if (isPhoneAndPadWithoutPcMode && session->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
+        bool isPhoneOrPadWithoutPcMode = isPhoneOrPad && !systemConfig_.IsFreeMultiWindowMode();
+        if (isPhoneOrPadWithoutPcMode && session->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
             SessionHelper::IsMainWindow(session->GetWindowType()) && !session->GetIsMidScene()) {
             return false;
         }
@@ -17038,6 +17039,18 @@ WMError SceneSessionManager::NotifyTransferSessionToTargetScreen(const TransferS
         }
     }, __func__);
     return WMError::WM_OK;
+}
+
+void SceneSessionManager::NotifySessionTransferToTargetScreenEvent(const int32_t persistentId,
+    const uint32_t resultCode, const uint64_t fromScreenId, const uint64_t toScreenId)
+{
+    auto sceneSession = GetSceneSession(persistentId);
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "sceneSession is nullptr");
+        return;
+    }
+    listenerController_->NotifySessionTransferToTargetScreenEvent(
+        sceneSession->GetSessionInfo(), resultCode, fromScreenId, toScreenId);
 }
 
 WMError SceneSessionManager::AnimateTo(int32_t windowId, const WindowAnimationProperty& animationProperty,
