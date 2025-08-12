@@ -6284,7 +6284,7 @@ bool WindowSessionImpl::FilterPointerEvent(const std::shared_ptr<MMI::PointerEve
     return isFiltered;
 }
 
-WMError WindowSessionImpl::HandleEscKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
+WMError WindowSessionImpl::HandleEscKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed)
 {
     if (keyEvent == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "keyevent is nullptr");
@@ -6295,9 +6295,8 @@ WMError WindowSessionImpl::HandleEscKeyEvent(const std::shared_ptr<MMI::KeyEvent
         IsPcOrPadFreeMultiWindowMode() &&
         property_->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
         GetImmersiveModeEnabledState() &&
-        keyAction == MMI::KeyEvent::KEY_ACTION_DOWN && !escKeyEventTriggered_) {
-        auto ret = Recover();
-        if (ret == WMError::WM_OK) {
+        keyEvent->GetKeyAction() == MMI::KeyEvent::KEY_ACTION_DOWN && !escKeyEventTriggered_) {
+        if (Recover() == WMError::WM_OK) {
             isConsumed = true;
             keyEvent->MarkProcessed();
         }
