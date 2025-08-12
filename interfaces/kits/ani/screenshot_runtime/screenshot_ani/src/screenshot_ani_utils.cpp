@@ -96,11 +96,11 @@ void ScreenshotAniUtils::GetScreenshotParam(ani_env *env, std::unique_ptr<Param>
         TLOGI(WmsLogTag::DMS, "[ANI] null param");
         return;
     }
-    ani_double displayId = 0;
-    env->Object_GetPropertyByName_Double(options, "displayId", &displayId);
+    ani_long displayId = 0;
+    env->Object_GetPropertyByName_Long(options, "displayId", &displayId);
     param->option.displayId = static_cast<DisplayId>(displayId);
-    ani_double rotation = 0;
-    env->Object_GetPropertyByName_Double(options, "rotation", &rotation);
+    ani_int rotation = 0;
+    env->Object_GetPropertyByName_Int(options, "rotation", &rotation);
     param->option.rotation = static_cast<int32_t>(rotation);
     ani_boolean isNeedNotify = true;
     env->Object_GetPropertyByName_Boolean(options, "isNotificationNeeded", &isNeedNotify);
@@ -116,10 +116,10 @@ void ScreenshotAniUtils::GetScreenshotSize(ani_env *env, std::unique_ptr<Param> 
 {
     ani_ref obj;
     env->Object_GetPropertyByName_Ref(options, "imageSize", &obj);
-    ani_double width;
-    ani_double height;
-    env->Object_GetPropertyByName_Double(static_cast<ani_object>(obj), "width", &width);
-    env->Object_GetPropertyByName_Double(static_cast<ani_object>(obj), "height", &height);
+    ani_long width;
+    ani_long height;
+    env->Object_GetPropertyByName_Long(static_cast<ani_object>(obj), "width", &width);
+    env->Object_GetPropertyByName_Long(static_cast<ani_object>(obj), "height", &height);
     param->option.size.width = static_cast<int32_t>(width);
     param->option.size.height = static_cast<int32_t>(height);
     TLOGI(WmsLogTag::DMS, "[ANI] get imageSize width = %{public}d, height = %{public}d",
@@ -130,14 +130,14 @@ void ScreenshotAniUtils::GetScreenshotRect(ani_env *env, std::unique_ptr<Param> 
 {
     ani_ref obj;
     env->Object_GetPropertyByName_Ref(options, "screenRect", &obj);
-    ani_double left = 0;
-    ani_double top = 0;
-    ani_double width = 0;
-    ani_double height = 0;
-    env->Object_GetPropertyByName_Double(static_cast<ani_object>(obj), "left", &left);
-    env->Object_GetPropertyByName_Double(static_cast<ani_object>(obj), "top", &top);
-    env->Object_GetPropertyByName_Double(static_cast<ani_object>(obj), "width", &width);
-    env->Object_GetPropertyByName_Double(static_cast<ani_object>(obj), "height", &height);
+    ani_long left = 0;
+    ani_long top = 0;
+    ani_long width = 0;
+    ani_long height = 0;
+    env->Object_GetPropertyByName_Long(static_cast<ani_object>(obj), "left", &left);
+    env->Object_GetPropertyByName_Long(static_cast<ani_object>(obj), "top", &top);
+    env->Object_GetPropertyByName_Long(static_cast<ani_object>(obj), "width", &width);
+    env->Object_GetPropertyByName_Long(static_cast<ani_object>(obj), "height", &height);
     param->option.rect.left = static_cast<int32_t>(left);
     param->option.rect.top = static_cast<int32_t>(top);
     param->option.rect.width = static_cast<int32_t>(width);
