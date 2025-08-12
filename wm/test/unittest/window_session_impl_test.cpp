@@ -1437,7 +1437,7 @@ HWTEST_F(WindowSessionImplTest, NotifyAfterLifecycleBackground, TestSize.Level1)
 {
     sptr<WindowOption> appOption = sptr<WindowOption>::MakeSptr();
     ASSERT_NE(nullptr, appOption);
-    pauseOption->SetWindowName("NotifyAppUseControlStatus");
+    appOption->SetWindowName("NotifyAppUseControlStatus");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(appOption);
     ASSERT_NE(nullptr, window);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
