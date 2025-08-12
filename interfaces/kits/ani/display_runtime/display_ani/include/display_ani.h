@@ -25,7 +25,7 @@ class DisplayAni {
 public:
     explicit DisplayAni(const std::shared_ptr<OHOS::Rosen::Display>& display);
 
-    static void getCutoutInfo(ani_env* env, ani_object obj, ani_object cutoutInfoObj);
+    static void GetCutoutInfo(ani_env* env, ani_object obj, ani_object cutoutInfoObj);
 };
 }  // namespace Rosen
 }  // namespace OHOS
