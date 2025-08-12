@@ -25,7 +25,7 @@ export type WindowEventCallback = (data: window.WindowEventType) => void;
 export type WindowRectCallback = (data: window.Rect) => void;
 export type WindowSizeCallback = (data: window.Size) => void;
 export type WindowStatusCallback = (data: window.WindowStatusType) => void;
-export type KeyboardHeightChangeCallback = (data: number) => void;
+export type KeyboardHeightChangeCallback = (data: int) => void;
 export type KeyboardDidShowOrHideCallback = (data: window.KeyboardInfo) => void;
 export type WindowVoidCallback = () => void;
 const DOMAIN = 0x4200;
@@ -426,6 +426,16 @@ namespace window {
     regionTint: Array<SystemBarRegionTint>;
   }
 
+  export enum RectChangeReason {
+    UNDEFINED = 0,
+    MAXIMIZE = 1,
+    RECOVER = 2,
+    MOVE = 3,
+    DRAG = 4,
+    DRAG_START = 5,
+    DRAG_END = 6,
+  }
+
   export interface Rect {
     /**
      * The left of the Rect.
@@ -529,6 +539,11 @@ namespace window {
     top: int;
     width: int;
     height: int;
+  }
+
+  export interface RectChangeOptions {
+    rect: Rect;
+    reason: RectChangeReason;
   }
 
   export class SizeInternal implements Size {
@@ -1142,6 +1157,7 @@ export class WindowPropertiesInternal implements WindowProperties {
     isTransparent: boolean;
     id: int;
     displayId?: long;
+    displayIdInternal: long;
     typeInternal: int;
     name?: string;
 }
@@ -1842,6 +1858,8 @@ export class WindowStageInternal implements WindowStage {
         this.nativeObj = nativeObj;
     }
 
+    private static native nativeTransferStatic(input: ESValue): Object;
+    private static native nativeTransferDynamic(nativeObj: long): ESValue;
     public native setWindowRectAutoSave(nativeObj: long, enabled: boolean, isSaveBySpecifiedFlag: boolean): void;
     public native isWindowRectAutoSave(nativeObj: long): boolean;
     public native removeStartingWindow(nativeObj: long): void;
@@ -1852,6 +1870,25 @@ export class WindowStageInternal implements WindowStage {
     public native createSubWindowSync(nativeObj: long, name: String): Window;
     native onSync(nativeObj: long, eventType: 'windowStageEvent', callback: Object): void;
     native offSync(nativeObj: long, eventType: 'windowStageEvent', callback?: Object): void;
+
+    public static transferStatic(input: Any): Object {
+      hilog.info(DOMAIN, TAG, 'transfer static, input:' + input);
+      let windowStage: ESValue = ESValue.wrap(input).getPropertySafe('windowStage_');
+      if (windowStage !== ESValue.Undefined) {
+        return WindowStageInternal.nativeTransferStatic(windowStage);
+      } else {
+        return WindowStageInternal.nativeTransferStatic(ESValue.wrap(input));
+      }
+    }
+
+    public static transferDynamic(input: Object): Any {
+      hilog.info(DOMAIN, TAG, 'transfer dynamic, input:' + input);
+      if (input instanceof WindowStageInternal) {
+        return WindowStageInternal.nativeTransferDynamic((input as WindowStageInternal).nativeObj).unwrap();
+      } else {
+        return undefined;
+      }
+    }
 
     public setWindowRectAutoSave(enabled: boolean, isSaveBySpecifiedFlag: boolean): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
@@ -2032,6 +2069,9 @@ export class WindowInternal implements Window {
         this.nativeObj = nativeObject;
     }
 
+    private static native nativeTransferStatic(input: ESValue): Object;
+    private static native nativeTransferDynamic(nativeObj: long): ESValue;
+
     private native setFollowParentWindowLayoutEnabled(nativeObj: long, enabled: boolean): void;
     private native setWindowDelayRaiseOnDrag(nativeObj: long, isEnabled: boolean): void;
     private native getParentWindow(nativeObj: long): Window;
@@ -2048,7 +2088,7 @@ export class WindowInternal implements Window {
     private native restore(nativeObj: long): void;
 
     private native startMoving(nativeObj: long): void;
-    private native startMoveWindowWithCoordinate(nativeObj: long, offsetX: double, offsetY: double): void;
+    private native startMoveWindowWithCoordinate(nativeObj: long, offsetX: int, offsetY: int): void;
     private native setWindowTitleButtonVisible(nativeObj: long, visibleParam: WindowTitleButtonVisibleParam): void;
     private native setDecorButtonStyle(nativeObj: long, decorStyle: DecorButtonStyle): void;
     private native getWindowStatus(nativeObj: long): int;
@@ -2058,11 +2098,11 @@ export class WindowInternal implements Window {
     private native moveWindowTo(nativeObj: long, x: int, y: int): void;
     private native getGlobalRect(nativeObj:long): Rect;
 
-    private native getWindowDecorHeight(nativeObj:long): double;
+    private native getWindowDecorHeight(nativeObj:long): int;
     private native setWindowBackgroundColor(nativeObj: long, color: string): int;
     private native setImmersiveModeEnabledState(nativeObj: long, enable: boolean): int;
     private native setWindowDecorVisible(nativeObj: long, isVisible: boolean): int;
-    private native setWindowDecorHeight(nativeObj: long, height: double): int;
+    private native setWindowDecorHeight(nativeObj: long, height: int): int;
     private native getWindowProperties(nativeObj: long): WindowProperties;
     private native getProperties(nativeObj: long): WindowProperties;
     private native isWindowSupportWideGamut(nativeObj: long): boolean;
@@ -2101,6 +2141,16 @@ export class WindowInternal implements Window {
     private native keepKeyboardOnFocusSync(nativeObj: long, enable: boolean): void;
     private native onSync(nativeObj: long, type: string, callback: object): void;
     private native offSync(nativeObj: long, type: string, callback?: object): void;
+
+    public static transferStatic(input: Any): Object {
+      hilog.info(DOMAIN, TAG, 'window transfer static, input:' + input);
+      return WindowInternal.nativeTransferStatic(ESValue.wrap(input));
+    }
+
+    public static transferDynamic(input: Object): Any {
+      hilog.info(DOMAIN, TAG, 'window transfer dynamic, input:' + input);
+      return WindowInternal.nativeTransferDynamic((input as WindowInternal).nativeObj).unwrap();
+    }
 
     public setFollowParentWindowLayoutEnabled(enabled: boolean): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
@@ -2241,7 +2291,7 @@ export class WindowInternal implements Window {
       });
     }
 
-    public startMoving(offsetX: double, offsetY: double): Promise<void> {
+    public startMoving(offsetX: int, offsetY: int): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) :void => {
         taskpool.execute((): void => {
           this.startMoveWindowWithCoordinate(this.nativeObj, offsetX, offsetY);
@@ -2362,7 +2412,7 @@ export class WindowInternal implements Window {
        return ret;
     }
   
-    public getWindowDecorHeight(): number {
+    public getWindowDecorHeight(): int {
        let ret = this.getWindowDecorHeight(this.nativeObj);
        return ret;
     }
@@ -2403,13 +2453,14 @@ export class WindowInternal implements Window {
         this.setWindowDecorVisible(this.nativeObj, isVisible);
     }
 
-    public setWindowDecorHeight(height: number): void {
+    public setWindowDecorHeight(height: int): void {
         this.setWindowDecorHeight(this.nativeObj, height);
     }
 
     public getWindowProperties(): WindowProperties {
         let windowProperties = this.getWindowProperties(this.nativeObj) as WindowPropertiesInternal;
         windowProperties.type = windowProperties.typeInternal as WindowType;
+        windowProperties.displayId = windowProperties.displayIdInternal;
         return windowProperties;
     }
 
@@ -2419,6 +2470,7 @@ export class WindowInternal implements Window {
             taskpool.execute((): WindowProperties => {
                 let res = this.getProperties(this.nativeObj) as WindowPropertiesInternal;
                 res.type = res.typeInternal as WindowType;
+                res.displayId = res.displayIdInternal;
                 return res;
             }).then((ret: NullishType) => {
                 resolve(ret as WindowProperties);
@@ -2430,7 +2482,9 @@ export class WindowInternal implements Window {
 
     public getProperties(callback: AsyncCallback<WindowProperties>): void {
         taskpool.execute((): WindowProperties => {
-            let res = this.getProperties(this.nativeObj);
+            let res = this.getProperties(this.nativeObj) as WindowPropertiesInternal;
+            res.type = res.typeInternal as WindowType;
+            res.displayId = res.displayIdInternal;
             return res;
         }).then((ret: NullishType) => {
             callback(new BusinessError(), ret as WindowProperties);
@@ -2969,7 +3023,7 @@ export interface Window {
     restore(): Promise<void>;
 
     startMoving(): Promise<void>;
-    startMoving(offsetX: double, offsetY: double): Promise<void>;
+    startMoving(offsetX: int, offsetY: int): Promise<void>;
     setWindowTitleButtonVisible(isMaximizeButtonVisible: boolean, isMinimizeButtonVisible: boolean,
         isCloseButtonVisible?: boolean): void;
     setDecorButtonStyle(dectorStyle: DecorButtonStyle): void;
@@ -2982,13 +3036,13 @@ export interface Window {
     resize(width: int, height: int, callback: AsyncCallback<void>): void;
     moveWindowTo(x: int, y: int, callback: AsyncCallback<void>): void;
     getGlobalRect(): Rect;
-    getWindowDecorHeight(): double;
+    getWindowDecorHeight(): int;
     setWindowBackgroundColor(color: string | ColorMetrics): void;
     setBackgroundColor(color: string): Promise<void>;
     setBackgroundColor(color: string, callback: AsyncCallback<void>): void;
     setImmersiveModeEnabledState(enable: boolean): void;
     setWindowDecorVisible(isVisible: boolean): void;
-    setWindowDecorHeight(height: number): void;
+    setWindowDecorHeight(height: int): void;
     getWindowProperties(): WindowProperties;
     getProperties(): Promise<WindowProperties>;
     getProperties(callback: AsyncCallback<WindowProperties>): void;
@@ -3238,19 +3292,19 @@ function runWindowTouchOutCallback(cb: object): void {
     func();
 }
 
-function runWindowRectCallback(cb: object, cbArg: object): void {
-    const func = cb as (cbArg: Rect) => void;
-    func(cbArg as Rect);
-}
-
 function runWindowSizeCallback(cb: object, cbArg: object): void {
     const func = cb as (cbArg: Size) => void;
     func(cbArg as Size);
 }
 
-function runKeyboardHeightChangeCallback(cb: object, cbArg: number): void {
-    const func = cb as (cbArg: number) => void;
-    func(cbArg as number);
+function runWindowRectChangeCallback(cb: object, rect: object, reason: int): void {
+    const func = cb as (data: RectChangeOptions) => void;
+    func({rect: rect as Rect, reason: reason as RectChangeReason});
+}
+
+function runKeyboardHeightChangeCallback(cb: object, cbArg: int): void {
+    const func = cb as (cbArg: int) => void;
+    func(cbArg as int);
 }
 
 function runKeyboardDidShowCallback(cb: object, cbArg: object): void {

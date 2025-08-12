@@ -26,7 +26,7 @@ export function save(options: ScreenshotOptions, callback: AsyncCallback<image.P
         let res: image.PixelMap = saveSync(options);
         return res;
     }).then((ret: NullishType) => {
-        callback(new BusinessError(), ret as image.PixelMap);
+        callback(null, ret as image.PixelMap);
     }).catch((err: NullishType) => {
         callback(err as BusinessError, undefined);
     });
@@ -37,7 +37,7 @@ export function save(callback: AsyncCallback<image.PixelMap | undefined>): void 
         let res: image.PixelMap = saveSync();
         return res;
     }).then((ret: NullishType) => {
-        callback(new BusinessError(), ret as image.PixelMap);
+        callback(null, ret as image.PixelMap);
     }).catch((err: NullishType) => {
         callback(err as BusinessError, undefined);
     });
@@ -46,7 +46,7 @@ export function save(callback: AsyncCallback<image.PixelMap | undefined>): void 
 export function save(options?: ScreenshotOptions): Promise<image.PixelMap> {
     return new Promise<image.PixelMap>((resolve: (value: image.PixelMap) => void, reject: (error: BusinessError) => void ) => {
         taskpool.execute((): image.PixelMap => {
-            let res: image.PixelMap = saveSync();
+            let res: image.PixelMap = saveSync(options);
             return res;
         }).then((ret: NullishType) => {
             resolve(ret as image.PixelMap);
@@ -63,9 +63,9 @@ export interface ScreenshotOptions {
  
     imageSize: Size;
  
-    rotation: number;
+    rotation: int;
  
-    displayId: number;
+    displayId: long;
  
     isNotificationNeeded: boolean;
  
@@ -77,9 +77,9 @@ export class ScreenshotOptionsImpl implements ScreenshotOptions{
  
     imageSize: Size;
  
-    rotation: number;
+    rotation: int;
  
-    displayId: number;
+    displayId: long;
  
     isNotificationNeeded: boolean;
     
@@ -87,35 +87,35 @@ export class ScreenshotOptionsImpl implements ScreenshotOptions{
 }
  
 export interface Size {
-    width: number;
+    width: long;
  
-    height: number;
+    height: long;
 }
  
 export class SizeImpl implements Size {
-    width: number;
+    width: long;
  
-    height: number;
+    height: long;
 }
  
 export interface Rect {
-    left: number;
+    left: long;
  
-    top: number;
+    top: long;
  
-    width: number;
+    width: long;
  
-    height: number;
+    height: long;
 }
  
 export class RectImpl implements Rect {
-    left: number;
+    left: long;
  
-    top: number;
+    top: long;
  
-    width: number;
+    width: long;
  
-    height: number;
+    height: long;
 }
  
 }

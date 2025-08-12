@@ -49,7 +49,7 @@ ani_object AniExtensionWindow::CreateAniExtensionWindow(ani_env* env, sptr<Rosen
 
     ani_status ret;
     ani_class cls = nullptr;
-    if ((ret = env->FindClass("L@ohos/uiExtensionHost/uiExtensionHost/UIExtensionHostInternal;", &cls)) != ANI_OK) {
+    if ((ret = env->FindClass("@ohos.uiExtensionHost.uiExtensionHost.UIExtensionHostInternal", &cls)) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] null env %{public}u", ret);
         return cls;
     }
@@ -65,7 +65,7 @@ ani_object AniExtensionWindow::CreateAniExtensionWindow(ani_env* env, sptr<Rosen
     }
 
     ani_method initFunc = nullptr;
-    if ((ret = env->Class_FindMethod(cls, "<ctor>", ":V", &initFunc)) != ANI_OK) {
+    if ((ret = env->Class_FindMethod(cls, "<ctor>", ":", &initFunc)) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] get ctor fail %{public}u", ret);
         return nullptr;
     }
@@ -75,7 +75,7 @@ ani_object AniExtensionWindow::CreateAniExtensionWindow(ani_env* env, sptr<Rosen
         return nullptr;
     }
     ani_method setObjFunc = nullptr;
-    if ((ret = env->Class_FindMethod(cls, "setNativeObj", "J:V", &setObjFunc)) != ANI_OK) {
+    if ((ret = env->Class_FindMethod(cls, "setNativeObj", "l:", &setObjFunc)) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] get ctor fail %{public}u", ret);
         return nullptr;
     }
@@ -318,21 +318,21 @@ ani_object createExtentionWindow(ani_env* env, ani_long win, ani_int hostId)
 extern "C" {
 using namespace OHOS::Rosen;
 std::array extensionWindowNativeMethods = {
-    ani_native_function {"getProperties", "JLstd/core/Object;:I", reinterpret_cast<void *>(ExtWindowGetProperties)},
-    ani_native_function {"setProperties", "JLstd/core/Object;:I", reinterpret_cast<void *>(ExtWindowSetProperties)},
-    ani_native_function {"getWindowAvoidArea", "JILstd/core/Object;:I",
+    ani_native_function {"getProperties", "lC{std.core.Object}:i", reinterpret_cast<void *>(ExtWindowGetProperties)},
+    ani_native_function {"setProperties", "lC{std.core.Object}:i", reinterpret_cast<void *>(ExtWindowSetProperties)},
+    ani_native_function {"getWindowAvoidArea", "liC{std.core.Object}:i",
         reinterpret_cast<void *>(ExtWindowGetWindowAvoidArea)},
-    ani_native_function {"setWaterMarkFlag", "JZ:V",
+    ani_native_function {"setWaterMarkFlag", "lz:",
         reinterpret_cast<void *>(ExtWindowSetWaterMarkFlag)},
-    ani_native_function {"hidePrivacyContentForHost", "JZ:V",
+    ani_native_function {"hidePrivacyContentForHost", "lz:",
         reinterpret_cast<void *>(ExtWindowHidePrivacyContentForHost)},
-    ani_native_function {"onAvoidAreaChange", "JLstd/core/Object;Lstd/core/Object;:I",
+    ani_native_function {"onAvoidAreaChange", "lC{std.core.Object}C{std.core.Object}:i",
         reinterpret_cast<void *>(ExtWindowOnAvoidAreaChange)},
-    ani_native_function {"onWindowSizeChange", "JLstd/core/Object;Lstd/core/Object;:I",
+    ani_native_function {"onWindowSizeChange", "lC{std.core.Object}C{std.core.Object}:i",
         reinterpret_cast<void *>(ExtWindowOnWindowSizeChange)},
-    ani_native_function {"offAvoidAreaChange", "JLstd/core/Object;:I",
+    ani_native_function {"offAvoidAreaChange", "lC{std.core.Object}:i",
         reinterpret_cast<void *>(ExtWindowOffAvoidAreaChange)},
-    ani_native_function {"offWindowSizeChange", "JLstd/core/Object;:I",
+    ani_native_function {"offWindowSizeChange", "lC{std.core.Object}:i",
         reinterpret_cast<void *>(ExtWindowOffWindowSizeChange)},
     };
 ANI_EXPORT ani_status ExtensionWindow_ANI_Constructor(ani_vm *vm, uint32_t *result)
@@ -347,7 +347,7 @@ ANI_EXPORT ani_status ExtensionWindow_ANI_Constructor(ani_vm *vm, uint32_t *resu
     }
 
     ani_class cls = nullptr;
-    if ((ret = env->FindClass("L@ohos/uiExtensionHost/uiExtensionHost/UIExtensionHostInternal;", &cls)) != ANI_OK) {
+    if ((ret = env->FindClass("@ohos.uiExtensionHost.uiExtensionHost.UIExtensionHostInternal", &cls)) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] null env %{public}u", ret);
         return ANI_NOT_FOUND;
     }
@@ -361,7 +361,7 @@ ANI_EXPORT ani_status ExtensionWindow_ANI_Constructor(ani_vm *vm, uint32_t *resu
 
     // test
     ani_namespace ns;
-    if ((ret = env->FindNamespace("L@ohos/uiExtensionHost/uiExtensionHost;", &ns)) != ANI_OK) {
+    if ((ret = env->FindNamespace("@ohos.uiExtensionHost.uiExtensionHost", &ns)) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] find ns %{public}u", ret);
         return ANI_NOT_FOUND;
     }

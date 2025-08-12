@@ -37,6 +37,10 @@ public:
     ani_ref GetAniRef() { return aniRef_; }
     void SetAniRef(const ani_ref& aniRef) { aniRef_ = aniRef; }
 
+    // transfer
+    static ani_object NativeTransferStatic(ani_env* aniEnv, ani_class cls, ani_object input);
+    static ani_object NativeTransferDynamic(ani_env* aniEnv, ani_class cls, ani_long nativeObj);
+
     /* window obj stored in ANI */
     static AniWindow* GetWindowObjectFromEnv(ani_env* env, ani_object obj);
 
@@ -89,22 +93,26 @@ public:
     void SetTitleAndDockHoverShown(ani_env* env, ani_boolean isTitleHoverShown, ani_boolean isDockHoverShown);
     void Restore(ani_env* env);
     void StartMoving(ani_env* env);
-    void StartMoveWindowWithCoordinate(ani_env* env, ani_double offsetX, ani_double offsetY);
+    void StartMoveWindowWithCoordinate(ani_env* env, ani_int offsetX, ani_int offsetY);
     void SetWindowTitleButtonVisible(ani_env* env, ani_object visibleParam);
     void SetDecorButtonStyle(ani_env* env, ani_object decorStyle);
     ani_int GetWindowStatus(ani_env* env);
     void Minimize(ani_env* env);
     void HideWindowFunction(ani_env* env, WmErrorCode errCode);
     void Maximize(ani_env* env, ani_int presentation);
+
+   /*
+    * Window Layout
+    */
     void Resize(ani_env* env, ani_int width, ani_int height);
     void MoveWindowTo(ani_env* env, ani_int x, ani_int y);
     ani_object GetGlobalRect(ani_env* env);
 
-    ani_double GetWindowDecorHeight(ani_env* env);
+    ani_int GetWindowDecorHeight(ani_env* env);
     ani_object SetWindowBackgroundColor(ani_env* env, const std::string& color);
     ani_object SetImmersiveModeEnabledState(ani_env* env, bool enable);
     ani_object SetWindowDecorVisible(ani_env* env, bool isVisible);
-    ani_object SetWindowDecorHeight(ani_env* env, ani_double height);
+    ani_object SetWindowDecorHeight(ani_env* env, ani_int height);
     ani_object GetWindowPropertiesSync(ani_env* env);
     ani_boolean IsWindowSupportWideGamut(ani_env* env);
     ani_object SetWindowLayoutFullScreen(ani_env* env, ani_boolean isLayoutFullScreen);
