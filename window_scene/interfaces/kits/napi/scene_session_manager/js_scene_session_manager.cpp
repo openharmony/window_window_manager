@@ -2129,8 +2129,8 @@ napi_value JsSceneSessionManager::OnRequestSceneSessionBackground(napi_env env, 
 {
     TLOGI(WmsLogTag::WMS_LIFE, "in");
     WSErrorCode errCode = WSErrorCode::WS_OK;
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
+    size_t argc = 5;
+    napi_value argv[5] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_ONE) {
         TLOGE(WmsLogTag::WMS_LIFE, "Argc is invalid: %{public}zu", argc);
@@ -2186,8 +2186,14 @@ napi_value JsSceneSessionManager::OnRequestSceneSessionBackground(napi_env env, 
         TLOGI(WmsLogTag::WMS_LIFE, "isSaveSnapshot: %{public}u", isSaveSnapshot);
     }
 
+    ScreenLockReason reason = ScreenLockReason::DEFAULT;
+    if (argc >= ARGC_FIVE) {
+        ConvertFromJsValue(env, argv[ARGC_FOUR], reason);
+        TLOGI(WmsLogTag::WMS_LIFE, "screenLockReason: %{public}u", reason);
+    }
+
     SceneSessionManager::GetInstance().RequestSceneSessionBackground(sceneSession, isDelegator, isToDesktop,
-        isSaveSnapshot);
+        isSaveSnapshot, reason);
     return NapiGetUndefined(env);
 }
 

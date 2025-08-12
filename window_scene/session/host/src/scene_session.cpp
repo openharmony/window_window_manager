@@ -498,11 +498,11 @@ WSError SceneSession::NotifyFrameLayoutFinishFromApp(bool notifyListener, const 
     return WSError::WS_OK;
 }
 
-WSError SceneSession::BackgroundTask(const bool isSaveSnapshot)
+WSError SceneSession::BackgroundTask(const bool isSaveSnapshot, ScreenLockReason reason)
 {
     auto needSaveSnapshot = !ScenePersistentStorage::HasKey("SetImageForRecent_" + std::to_string(GetPersistentId()),
         ScenePersistentStorageType::MAXIMIZE_STATE);
-    PostTask([weakThis = wptr(this), isSaveSnapshot, needSaveSnapshot, where = __func__] {
+    PostTask([weakThis = wptr(this), isSaveSnapshot, needSaveSnapshot, reason, where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
@@ -518,7 +518,7 @@ WSError SceneSession::BackgroundTask(const bool isSaveSnapshot)
         }
         if (WindowHelper::IsMainWindow(session->GetWindowType()) && isSaveSnapshot && needSaveSnapshot) {
             session->SetFreeMultiWindow();
-            session->SaveSnapshot(true);
+            session->SaveSnapshot(true, true, nullptr, false, reason);
         }
         if (session->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
             session->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::VISIBLE);
