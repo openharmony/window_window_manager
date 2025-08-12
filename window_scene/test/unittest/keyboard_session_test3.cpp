@@ -772,7 +772,7 @@ HWTEST_F(KeyboardSessionTest3, NotifyOccupiedAreaChanged, Function | SmallTest |
     EXPECT_TRUE(g_logMsg.find("Calling id:") != std::string::npos);
 
     g_logMsg.clear();
-    callingSession->sessionInfo_.isSystem_ = false;
+    CallingSession->sessionInfo_.isSystem_ = false;
     keyboardSession->NotifyOccupiedAreaChanged(callingSession, occupiedAreaInfo, true, nullptr);
     EXPECT_TRUE(g_logMsg.find("size of avoidAreas: 5") != std::string::npos);
 }
