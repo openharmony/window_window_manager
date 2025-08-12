@@ -10680,6 +10680,14 @@ void SceneSessionManager::RemoveSessionFromBlackListInfoSet(
     }
 }
 
+WMError SceneSessionManager::RecoverWindowPropertyChangeFlag(uint32_t observedFlags, uint32_t interestedFlags)
+{
+    observedFlags_ |= observedFlags;
+    interestedFlags_ |= interestedFlags;
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "observedFlags: %{public}u, interestedFlags: %{public}u");
+    return WMError::WM_OK;
+}
+
 WMError SceneSessionManager::RegisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey,
     uint32_t interestInfo, const sptr<IWindowManagerAgent>& windowManagerAgent)
 {

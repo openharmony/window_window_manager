@@ -183,6 +183,9 @@ WMError WindowAdapter::RegisterWindowPropertyChangeAgent(WindowInfoKey windowInf
         }
         windowManagerAgentMap_[type].insert(windowManagerAgent);
     }
+    
+    observedFlags_ |= static_cast<uint32_t>(windowInfoKey);
+    interestedFlags_ |= interestInfo;
 
     return wmsProxy->RegisterWindowPropertyChangeAgent(windowInfoKey, interestInfo, windowManagerAgent);
 }
@@ -195,6 +198,9 @@ WMError WindowAdapter::UnregisterWindowPropertyChangeAgent(WindowInfoKey windowI
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
     auto ret = wmsProxy->UnregisterWindowPropertyChangeAgent(windowInfoKey, interestInfo, windowManagerAgent);
+
+    observedFlags_ &= !(static_cast<uint32_t>(windowInfoKey));
+    interestedFlags_ &= !interestInfo;
 
     WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_PROPERTY;
     std::lock_guard<std::mutex> lock(mutex_);
@@ -462,6 +468,7 @@ void WindowAdapter::WindowManagerAndSessionRecover()
     }
 
     ReregisterWindowManagerAgent();
+    RecoverWindowPropertyChangeFlag();
 
     std::map<int32_t, SessionRecoverCallbackFunc> sessionRecoverCallbackFuncMap;
     {
@@ -487,6 +494,19 @@ void WindowAdapter::WindowManagerAndSessionRecover()
         if (ret != WMError::WM_OK) {
             TLOGE(WmsLogTag::WMS_RECOVER, "ui effect create failed, id: %{public}d, reason %{public}d", it.first, ret);
         }
+    }
+}
+
+void WindowAdapter::RecoverWindowPropertyChangeFlag()
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (!windowManagerServiceProxy_ || !windowManagerServiceProxy_->AsObject()) {
+        TLOGE(WmsLogTag::WMS_RECOVER, "proxy is null");
+        return;
+    }
+    if (windowManagerServiceProxy_->RecoverWindowPropertyChangeFlag(
+        observedFlags_, interestedFlags_) != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_RECOVER, "failed");
     }
 }
 
