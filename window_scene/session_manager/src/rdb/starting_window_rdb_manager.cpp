@@ -116,6 +116,12 @@ StartingWindowRdbManager::StartingWindowRdbManager(const WmsRdbConfig& wmsRdbCon
 
 StartingWindowRdbManager::~StartingWindowRdbManager()
 {
+    ClearRdbStore();
+}
+
+void StartingWindowRdbManager::ClearRdbStore()
+{
+    std::lock_guard<std::mutex> lock(rdbMutex_);
     rdbStore_ = nullptr;
 }
 

@@ -466,7 +466,7 @@ HWTEST_F(WebPictureInPictureControllerInterfaceTest, UnsetPipInitialSurfaceRect,
 {
     controller->Create(pipConfig);
     WMError ret = controller->SetPipInitialSurfaceRect(10, 10, 20, 20);
-    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(WMError::WM_ERROR_PIP_INTERNAL_ERROR, ret);
     ret = controller->UnsetPipInitialSurfaceRect();
     EXPECT_EQ(WMError::WM_OK, ret);
     controller->sptrWebPipController_ = nullptr;

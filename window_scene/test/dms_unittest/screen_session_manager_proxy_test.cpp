@@ -259,6 +259,26 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualPixelRatio, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyScreenConnectCompletion
+ * @tc.desc: NotifyScreenConnectCompletion
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, NotifyScreenConnectCompletion, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ScreenId id = 1001;
+ 
+    std::function<void()> func = [&]()
+    {
+        screenSessionManagerProxy->NotifyScreenConnectCompletion(id);
+    };
+    func();
+    EXPECT_TRUE(logMsg.find("SendRequest failed") == std::string::npos);
+    LOG_SetCallback(nullptr);
+}
+
+/**
  * @tc.name: SetVirtualPixelRatioSystem
  * @tc.desc: SetVirtualPixelRatioSystem
  * @tc.type: FUNC

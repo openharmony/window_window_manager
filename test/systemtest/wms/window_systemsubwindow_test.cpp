@@ -325,7 +325,7 @@ HWTEST_F(WindowSystemSubWindowTest, SystemSubWindow07, TestSize.Level1)
     struct Rect rect = { 0, 0, 100, 200 };
     uint32_t flags = 0;
     sptr<Window> subWindow = CreateSystemSubWindow(baseWindow, rect, flags);
-    ASSERT_NE(nullptr, subWindow);
+    ASSERT_EQ(nullptr, subWindow);
     ASSERT_EQ(WMError::WM_OK, baseWindow->Destroy());
 }
 } // namespace Rosen

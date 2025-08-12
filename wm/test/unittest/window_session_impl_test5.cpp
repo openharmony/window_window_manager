@@ -1647,26 +1647,33 @@ HWTEST_F(WindowSessionImplTest5, TestClientToGlobalDisplay, TestSize.Level1)
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
 
-    Rect globalRect { 100, 200, 300, 400 };
-    window->property_->SetGlobalDisplayRect(globalRect);
+    Position inPosition;
+    Position outPosition;
+
+    // Case 1: Scaled window does not support coordinate conversion
     Transform transform;
+    transform.scaleX_ = 0.5f;
+    window->SetCurrentTransform(transform);
+    auto ret = window->ClientToGlobalDisplay(inPosition, outPosition);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS);
     transform.scaleX_ = 1.0f;
     transform.scaleY_ = 1.0f;
     window->SetCurrentTransform(transform);
 
-    Position inPosition { 10, 20 };
-    Position outPosition;
-    Position expectedPosition { 110, 220 };
+    // Case 2: Conversion overflow
+    inPosition = { INT32_MAX, INT32_MAX };
+    Rect globalRect { 100, 200, 300, 400 };
+    window->property_->SetGlobalDisplayRect(globalRect);
+    ret = window->ClientToGlobalDisplay(inPosition, outPosition);
+    EXPECT_EQ(ret, WMError::WM_ERROR_ILLEGAL_PARAM);
 
-    auto ret = window->ClientToGlobalDisplay(inPosition, outPosition);
+    // Case 3: Successful conversion
+    inPosition = { 10, 20 };
+    Position expectedPosition { 110, 220 };
+    ret = window->ClientToGlobalDisplay(inPosition, outPosition);
     EXPECT_EQ(ret, WMError::WM_OK);
     EXPECT_NE(outPosition, inPosition);
     EXPECT_EQ(outPosition, expectedPosition);
-
-    transform.scaleX_ = 0.5f;
-    window->SetCurrentTransform(transform);
-    ret = window->ClientToGlobalDisplay(inPosition, outPosition);
-    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS);
 }
 
 /**
@@ -1679,26 +1686,33 @@ HWTEST_F(WindowSessionImplTest5, TestGlobalDisplayToClient, TestSize.Level1)
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
 
-    Rect globalRect { 100, 200, 300, 400 };
-    window->property_->SetGlobalDisplayRect(globalRect);
+    Position inPosition;
+    Position outPosition;
+
+    // Case 1: Scaled window does not support coordinate conversion
     Transform transform;
+    transform.scaleX_ = 0.5f;
+    window->SetCurrentTransform(transform);
+    auto ret = window->GlobalDisplayToClient(inPosition, outPosition);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS);
     transform.scaleX_ = 1.0f;
     transform.scaleY_ = 1.0f;
     window->SetCurrentTransform(transform);
 
-    Position inPosition { 110, 220 };
-    Position outPosition;
-    Position expectedPosition { 10, 20 };
+    // Case 2: Conversion overflow
+    inPosition = { INT32_MIN, INT32_MIN };
+    Rect globalRect { 100, 200, 300, 400 };
+    window->property_->SetGlobalDisplayRect(globalRect);
+    ret = window->GlobalDisplayToClient(inPosition, outPosition);
+    EXPECT_EQ(ret, WMError::WM_ERROR_ILLEGAL_PARAM);
 
-    auto ret = window->GlobalDisplayToClient(inPosition, outPosition);
+    // Case 3: Successful conversion
+    inPosition = { 110, 220 };
+    Position expectedPosition { 10, 20 };
+    ret = window->GlobalDisplayToClient(inPosition, outPosition);
     EXPECT_EQ(ret, WMError::WM_OK);
     EXPECT_NE(outPosition, inPosition);
     EXPECT_EQ(outPosition, expectedPosition);
-
-    transform.scaleX_ = 0.5f;
-    window->SetCurrentTransform(transform);
-    ret = window->GlobalDisplayToClient(inPosition, outPosition);
-    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS);
 }
 
 /**
@@ -1954,6 +1968,37 @@ HWTEST_F(WindowSessionImplTest5, SwitchSubWindow, Function | SmallTest | Level1)
             (subWindow->property_->GetIsPcAppInPad() && isSubWindow));
     }
     EXPECT_EQ(decorVisible, true);
+}
+
+/**
+ * @tc.name: NotifySizeChangeFlag
+ * @tc.desc: NotifySizeChangeFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, NotifySizeChangeFlag, Function | SmallTest | Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifySizeChangeFlag");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    Rect requestRect = { 0, 0, 50, 50 };
+    Rect windowRect = { 0, 0, 0, 0 };
+    window->property_->SetWindowRect(windowRect);
+    window->property_->SetRequestRect(requestRect);
+
+    window->SetNotifySizeChangeFlag(false);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT_NAVIGATION);
+    window->SetNotifySizeChangeFlag(true);
+    ASSERT_EQ(window->notifySizeChangeFlag_, true);
+
+    window->SetNotifySizeChangeFlag(false);
+    window->property_->SetWindowRect(requestRect);
+    window->SetNotifySizeChangeFlag(true);
+    ASSERT_EQ(window->notifySizeChangeFlag_, false);
+
+    window->SetNotifySizeChangeFlag(false);
+    window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    window->SetNotifySizeChangeFlag(true);
+    ASSERT_EQ(window->notifySizeChangeFlag_, false);
 }
 } // namespace
 } // namespace Rosen

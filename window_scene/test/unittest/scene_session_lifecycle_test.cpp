@@ -826,7 +826,7 @@ HWTEST_F(SceneSessionLifecycleTest, ConnectInner01, TestSize.Level0)
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(property, nullptr);
     sceneSession->clientIdentityToken_ = "session1";
-
+    sceneSession->SetCollaboratorType(static_cast<int32_t>(CollaboratorType::RESERVE_TYPE));
     auto result = sceneSession->ConnectInner(
         mockSessionStage, nullptr, nullptr, systemConfig, property, nullptr, -1, -1, "session2");
     ASSERT_EQ(result, WSError::WS_OK);
@@ -837,6 +837,7 @@ HWTEST_F(SceneSessionLifecycleTest, ConnectInner01, TestSize.Level0)
 
     result = sceneSession->ConnectInner(mockSessionStage, nullptr, nullptr, systemConfig, property, nullptr, -1, -1);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
+    EXPECT_EQ(property->GetAncoRealBundleName(), "ConnectInner01");
 }
 
 /**

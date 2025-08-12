@@ -84,6 +84,7 @@ public:
     int32_t SetScreenOnDelayTime(int32_t delay);
     void SetCameraStatus(int32_t cameraStatus, int32_t cameraPosition);
     void NotifyFoldToExpandCompletion(bool foldToExpand);
+    void NotifyScreenConnectCompletion(ScreenId screenId);
     void RecordEventFromScb(std::string description, bool needRecordEvent);
     FoldStatus GetFoldStatus();
     SuperFoldStatus GetSuperFoldStatus();
@@ -121,6 +122,8 @@ public:
     void NotifyExtendScreenDestroyFinish();
     void NotifyScreenMaskAppear();
     DMError SetPrimaryDisplaySystemDpi(float dpi);
+    std::shared_ptr<Media::PixelMap> SetScreenFreezeImmediately(ScreenId screenId, float scaleX, float scaleY,
+        bool isFreeze);
 
     /*
      * RS Client Multi Instance

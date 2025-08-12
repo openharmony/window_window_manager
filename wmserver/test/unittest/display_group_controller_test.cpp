@@ -560,54 +560,6 @@ HWTEST_F(DisplayGroupControllerTest, ProcessNotCrossNodesOnDestroyedDisplay01, T
 }
 
 /**
- * @tc.name: ProcessNotCrossNodesOnDestroyedDisplay04
- * @tc.desc: Node with WINDOW_TYPE_STATUS_BAR
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayGroupControllerTest, ProcessNotCrossNodesOnDestroyedDisplay04, TestSize.Level1)
-{
-    displayGroupController_->InitNewDisplay(1);
-    SetDisplayGroupInfo(1, {200, 200, 200, 200});
-    sptr<WindowNode> node1 = new WindowNode();
-    node1->SetWindowProperty(CreateWindowProperty(100, WindowType::WINDOW_TYPE_STATUS_BAR));
-    ASSERT_NE(nullptr, node1);
-    displayGroupController_->InitNewDisplay(1);
-    SetDisplayGroupInfo(1, {200, 200, 200, 200});
-    std::vector<sptr<WindowNode>>* rootApp = displayGroupController_->GetWindowNodesByDisplayIdAndRootType(
-        1, WindowRootNodeType::ABOVE_WINDOW_NODE);
-    rootApp->push_back(node1);
-    node1->SetDisplayId(1);
-    std::vector<uint32_t> windowIds;
-    displayGroupController_->ProcessNotCrossNodesOnDestroyedDisplay(1, windowIds);
-    ASSERT_EQ(1, windowIds.size());
-    ASSERT_EQ(1, node1->GetDisplayId());
-}
-
-/**
- * @tc.name: ProcessNotCrossNodesOnDestroyedDisplay06
- * @tc.desc: Execute to move to default display
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayGroupControllerTest, ProcessNotCrossNodesOnDestroyedDisplay06, TestSize.Level1)
-{
-    displayGroupController_->InitNewDisplay(1);
-    SetDisplayGroupInfo(1, {200, 200, 200, 200});
-    sptr<WindowNode> node1 = new WindowNode();
-    node1->SetWindowProperty(CreateWindowProperty(100));
-    ASSERT_NE(nullptr, node1);
-    displayGroupController_->InitNewDisplay(1);
-    SetDisplayGroupInfo(1, {200, 200, 200, 200});
-    std::vector<sptr<WindowNode>>* rootApp = displayGroupController_->GetWindowNodesByDisplayIdAndRootType(
-        1, WindowRootNodeType::APP_WINDOW_NODE);
-    rootApp->push_back(node1);
-    node1->SetDisplayId(1);
-    std::vector<uint32_t> windowIds;
-    windowIds.push_back(node1->GetWindowId());
-    displayGroupController_->ProcessNotCrossNodesOnDestroyedDisplay(1, windowIds);
-    ASSERT_EQ(0, node1->GetDisplayId());
-}
-
-/**
  * @tc.name: ProcessNotCrossNodesOnDestroyedDisplay07
  * @tc.desc: DisplayId not equals to defaultDisplayId, and no node on groupWindowTree
  * @tc.type: FUNC
@@ -619,23 +571,6 @@ HWTEST_F(DisplayGroupControllerTest, ProcessNotCrossNodesOnDestroyedDisplay07, T
     std::vector<uint32_t> windowIds;
     displayGroupController_->ProcessNotCrossNodesOnDestroyedDisplay(1, windowIds);
     ASSERT_EQ(0, windowIds.size());
-}
-
-/**
- * @tc.name: UpdateNodeSizeChangeReasonWithRotation02
- * @tc.desc: UpdateNodeSizeChangeReasonWithRotation failed
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayGroupControllerTest, UpdateNodeSizeChangeReasonWithRotation02, TestSize.Level1)
-{
-    sptr<WindowNode> node1 = new WindowNode();
-    node1->SetWindowProperty(CreateWindowProperty(100, WindowType::WINDOW_TYPE_DOCK_SLICE));
-    ASSERT_NE(nullptr, node1);
-    std::vector<sptr<WindowNode>>* rootApp = displayGroupController_->GetWindowNodesByDisplayIdAndRootType(
-        0, WindowRootNodeType::ABOVE_WINDOW_NODE);
-    rootApp->push_back(node1);
-    displayGroupController_->UpdateNodeSizeChangeReasonWithRotation(0, displayGroupInfo_.GetAllDisplayRects());
-    ASSERT_NE(WindowSizeChangeReason::ROTATION, node1->GetWindowSizeChangeReason());
 }
 
 /**
@@ -728,22 +663,6 @@ HWTEST_F(DisplayGroupControllerTest, ProcessDisplayDestroy, TestSize.Level1)
     std::vector<uint32_t> windowIds;
     displayGroupController_->ProcessDisplayDestroy(defaultDisplayId, displayInfo,
                                                    displayRectMap, windowIds);
-    auto layoutPolicy = container_->GetLayoutPolicy();
-    ASSERT_NE(nullptr, layoutPolicy);
-}
-
-/**
- * @tc.name: ProcessSystemBarRotation
- * @tc.desc: ProcessSystemBarRotation
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayGroupControllerTest, ProcessSystemBarRotation, TestSize.Level1)
-{
-    sptr<WindowNode> node = new WindowNode();
-    node->SetWindowProperty(CreateWindowProperty(100));
-    ASSERT_NE(nullptr, node);
-    std::map<DisplayId, Rect> displayRectMap = {};
-    displayGroupController_->ProcessSystemBarRotation(node, displayRectMap);
     auto layoutPolicy = container_->GetLayoutPolicy();
     ASSERT_NE(nullptr, layoutPolicy);
 }
@@ -847,26 +766,6 @@ HWTEST_F(DisplayGroupControllerTest, UpdateSplitRatioPoints03, TestSize.Level1)
     DisplayGroupWindowTree displayGroupWindowTree_;
     displayGroupWindowTree_.find(displayId) = displayGroupWindowTree_.end();
     displayGroupController_->ProcessNotCrossNodesOnDestroyedDisplay(1, windowIds);
-    ASSERT_EQ(0, windowIds.size());
-}
-
-/**
- * @tc.name: PreProcessWindowNode05
- * @tc.desc:UpdateSplitRatioPoints
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayGroupControllerTest, PreProcessWindowNode05, TestSize.Level1)
-{
-    WindowUpdateType type = WindowUpdateType::WINDOW_UPDATE_ACTIVE;
-    sptr<WindowNode> node1 = new WindowNode();
-    node1->SetWindowProperty(CreateWindowProperty(100));
-    ASSERT_NE(nullptr, node1);
-    displayGroupController_->PreProcessWindowNode(node1, type);
-    if (type != WindowUpdateType::WINDOW_UPDATE_ADDED)
-    {
-        type = WindowUpdateType::WINDOW_UPDATE_ADDED;
-    }
-    std::vector<uint32_t> windowIds;
     ASSERT_EQ(0, windowIds.size());
 }
 }

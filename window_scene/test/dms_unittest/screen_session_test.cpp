@@ -4491,6 +4491,65 @@ HWTEST_F(ScreenSessionTest, SetScreenArea, TestSize.Level1)
     EXPECT_EQ(300, screenSession->GetScreenAreaWidth());
     EXPECT_EQ(400, screenSession->GetScreenAreaHeight());
 }
+
+/**
+ * @tc.name: SetScreenFreezeImmediately01
+ * @tc.desc: displayNode_ is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetScreenFreezeImmediately01, TestSize.Level2)
+{
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
+    screenSession->displayNode_ = nullptr;
+    float scaleX = 1.0;
+    float scaleY = 1.0;
+    bool isFreeze = true;
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    pixelMap = screenSession->SetScreenFreezeImmediately(scaleX, scaleY, isFreeze);
+    EXPECT_EQ(pixelMap, nullptr);
+}
+
+/**
+ * @tc.name: SetScreenFreezeImmediately02
+ * @tc.desc: isFreeze is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetScreenFreezeImmediately02, TestSize.Level2)
+{
+    ScreenId screenId = 100;
+    ScreenProperty screenProperty;
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(screenId, screenProperty, screenId);
+    Rosen::RSDisplayNodeConfig config = { .screenId = 100 };
+    std::shared_ptr<RSDisplayNode> displayNode = Rosen::RSDisplayNode::Create(config);
+    screenSession->SetDisplayNode(displayNode);
+    float scaleX = 1.0;
+    float scaleY = 1.0;
+    bool isFreeze = true;
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    pixelMap = screenSession->SetScreenFreezeImmediately(scaleX, scaleY, isFreeze);
+    EXPECT_EQ(pixelMap, nullptr);
+}
+
+/**
+ * @tc.name: SetScreenFreezeImmediately03
+ * @tc.desc: isFreeze is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetScreenFreezeImmediately03, TestSize.Level2)
+{
+    ScreenId screenId = 0;
+    ScreenProperty screenProperty;
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(screenId, screenProperty, screenId);
+    RSDisplayNodeConfig config;
+    std::shared_ptr<RSDisplayNode> displayNode = std::make_shared<RSDisplayNode>(config);
+    screenSession->SetDisplayNode(displayNode);
+    float scaleX = 1.0;
+    float scaleY = 1.0;
+    bool isFreeze = false;
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    pixelMap = screenSession->SetScreenFreezeImmediately(scaleX, scaleY, isFreeze);
+    EXPECT_EQ(pixelMap, nullptr);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

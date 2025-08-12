@@ -19,9 +19,13 @@ group("unittest") {
   deps = [
     ":extension_data_handler_test",
     ":ws_extension_session_manager_test",
-    ":ws_extension_session_test",
-    ":ws_scene_session_manager_extension_test",
   ]
+  if(window_manager_use_sceneboard) {
+    deps += [
+      ":ws_extension_session_test",
+      ":ws_scene_session_manager_extension_test",
+    ]
+  }
 }
 
 module_out_path = "window_manager/window_manager/window_scene/ui_extension"
