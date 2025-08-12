@@ -6284,7 +6284,7 @@ bool WindowSessionImpl::FilterPointerEvent(const std::shared_ptr<MMI::PointerEve
     return isFiltered;
 }
 
-WMError WindowSessionImpl::HandleEspecialEscKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
+WMError WindowSessionImpl::HandleEscKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
     if (keyEvent == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "keyevent is nullptr");
@@ -6357,7 +6357,7 @@ void WindowSessionImpl::DispatchKeyEventCallback(const std::shared_ptr<MMI::KeyE
         TLOGI(WmsLogTag::WMS_EVENT, "id: %{public}d, consumed: %{public}d,"
             "escTrigger: %{public}d, escDown: %{public}d",
             keyEvent->GetId(), isConsumed, escKeyEventTriggered_, escKeyHasDown_);
-        HandleEspecialEscKeyEvent(keyEvent, isConsumed);
+        HandleEscKeyEvent(keyEvent, isConsumed);
         NotifyConsumeResultToFloatWindow(keyEvent, isConsumed);
         if (!isConsumed) {
             keyEvent->MarkProcessed();
