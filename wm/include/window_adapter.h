@@ -231,6 +231,9 @@ private:
      */
     void ReregisterWindowManagerAgent();
     void WindowManagerAndSessionRecover();
+    void RecoverWindowPropertyChangeFlag();
+    uint32_t observedFlags_;
+    uint32_t interestedFlags_;
 
     sptr<IWindowManager> GetWindowManagerServiceProxy() const;
 

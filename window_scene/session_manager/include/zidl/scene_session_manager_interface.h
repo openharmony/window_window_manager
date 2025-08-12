@@ -153,6 +153,7 @@ public:
         TRANS_ID_ADD_SESSION_BLACK_LIST,
         TRANS_ID_REMOVE_SESSION_BLACK_LIST,
         TRANS_ID_GET_PIP_SWITCH_STATUS,
+        TRANS_ID_RECOVER_WINDOW_PROPERTY_CHANGE_FLAG,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
@@ -275,6 +276,10 @@ public:
         uint32_t interestInfo, const sptr<IWindowManagerAgent>& windowManagerAgent) override { return WMError::WM_OK; }
     WMError UnregisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey,
         uint32_t interestInfo, const sptr<IWindowManagerAgent>& windowManagerAgent) override { return WMError::WM_OK;}
+    WMError RecoverWindowPropertyChangeFlag(uint32_t observedFlags, uint32_t interestedFlags) override
+    {
+        return WMError::WM_OK;
+    }
     WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) override
     {
         return WMError::WM_OK;
