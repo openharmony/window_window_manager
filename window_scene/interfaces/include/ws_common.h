@@ -1076,6 +1076,15 @@ enum class SnapshotNodeType : uint32_t {
     APP_NODE,
 };
 
+enum class ScreenLockReason {
+    DEFAULT = 0,
+
+    /*
+     * Expanded to folded on single pocket
+     */
+    EXPAND_TO_FOLD_SINGLE_POCKET,
+};
+
 enum class AsyncTraceTaskId: int32_t {
     THROW_SLIP_ANIMATION = 0,
 };

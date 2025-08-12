@@ -206,7 +206,7 @@ public:
     WSError Foreground(sptr<WindowSessionProperty> property, bool isFromClient = false,
         const std::string& identityToken = "") override;
     WSError Background(bool isFromClient = false, const std::string& identityToken = "") override;
-    WSError BackgroundTask(const bool isSaveSnapshot = true);
+    WSError BackgroundTask(const bool isSaveSnapshot = true, ScreenLockReason reason = ScreenLockReason::DEFAULT);
     WSError Disconnect(bool isFromClient = false, const std::string& identityToken = "") override;
     WSError DisconnectTask(bool isFromClient = false, bool isSaveSnapshot = true);
     void SetClientIdentityToken(const std::string& clientIdentityToken);
