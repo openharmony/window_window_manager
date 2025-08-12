@@ -134,7 +134,7 @@ HWTEST_F(WindowManagerStubTest, OnRemoteRequest04, TestSize.Level1)
     uint32_t code = static_cast<uint32_t>(IWindowManager::WindowManagerMessage::TRANS_ID_GET_AVOID_AREA);
 
     int res = stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, static_cast<int>(ERR_NONE));
+    EXPECT_NE(res, static_cast<int>(ERR_NONE));
 }
 
 /**

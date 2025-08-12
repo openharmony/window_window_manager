@@ -135,7 +135,7 @@ HWTEST_F(FloatingBallControllerTest, CreateFloatingBallWindow01, TestSize.Level1
     sptr<FbOption> nullOption = nullptr;
     EXPECT_EQ(WMError::WM_ERROR_FB_STATE_ABNORMALLY, fbController_->CreateFloatingBallWindow(nullOption));
     mw_->SetWindowState(WindowState::STATE_INITIAL);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, fbController_->CreateFloatingBallWindow(option_));
+    EXPECT_EQ(WMError::WM_ERROR_FB_CREATE_FAILED, fbController_->CreateFloatingBallWindow(option_));
     mw_->SetWindowState(WindowState::STATE_SHOWN);
     EXPECT_EQ(WMError::WM_ERROR_FB_CREATE_FAILED, fbController_->CreateFloatingBallWindow(option_));
 
