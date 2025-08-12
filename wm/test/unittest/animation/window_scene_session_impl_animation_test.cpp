@@ -327,21 +327,36 @@ HWTEST_F(WindowSceneSessionImplAnimationTest, GetWindowCornerRadius, TestSize.Le
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     float cornerRadius = 0.0f;
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->GetWindowCornerRadius(cornerRadius));
+
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    window->property_->SetPersistentId(1);
     window->hostSession_ = session;
-    window->property_->SetWindowCornerRadius(1.0f);
-
+    window->state_ = WindowState::STATE_CREATED;
+    ASSERT_NE(nullptr, window->property_);
+    window->property_->SetPersistentId(1);
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    window->property_->SetWindowCornerRadius(WINDOW_CORNER_RADIUS_INVALID);
+    window->windowSystemConfig_.defaultCornerRadius_ = WINDOW_CORNER_RADIUS_INVALID;
     auto ret = window->GetWindowCornerRadius(cornerRadius);
-    EXPECT_EQ(1.0f, cornerRadius);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(0.0f, cornerRadius);
+
+    window->windowSystemConfig_.defaultCornerRadius_ = 1.0f; // 1.0f is valid default corner radius
+    ret = window->GetWindowCornerRadius(cornerRadius);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(window->windowSystemConfig_.defaultCornerRadius_, cornerRadius);
+
+    window->property_->SetWindowCornerRadius(1.0f); // 1.0f is valid window corner radius
+    ret = window->GetWindowCornerRadius(cornerRadius);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(1.0f, cornerRadius); // 1.0f is valid window corner radius
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     ret = window->GetWindowCornerRadius(cornerRadius);
-    EXPECT_EQ(1.0f, cornerRadius);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(1.0f, cornerRadius); // 1.0f is valid window corner radius
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
@@ -357,7 +372,8 @@ HWTEST_F(WindowSceneSessionImplAnimationTest, GetWindowCornerRadius, TestSize.Le
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     ret = window->GetWindowCornerRadius(cornerRadius);
-    EXPECT_EQ(1.0f, cornerRadius);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(1.0f, cornerRadius); // 1.0f is valid window corner radius
 }
 
 /**

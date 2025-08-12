@@ -301,7 +301,6 @@ int SceneSessionManagerStub::HandleCreateAndConnectSpecificSession(MessageParcel
     reply.WriteRemoteObject(sceneSession->AsObject());
     reply.WriteParcelable(&systemConfig);
     reply.WriteUint32(property->GetSubWindowLevel());
-    reply.WriteFloat(property->GetWindowCornerRadius());
     reply.WriteUint64(property->GetDisplayId());
     reply.WriteUint32(static_cast<uint32_t>(WSError::WS_OK));
     return ERR_NONE;
