@@ -50,8 +50,8 @@ void DisplayAni::GetCutoutInfo(ani_env* env, ani_object obj, ani_object cutoutIn
     if (ANI_OK != status) {
         TLOGE(WmsLogTag::DMS, "[ANI] get field bounding rects fail, ani_status = %{public}d", status);
     }
-    ani_double length;
-    if (ANI_OK != env->Object_GetPropertyByName_Double(static_cast<ani_object>(boundingRects), "length", &length)) {
+    ani_int length;
+    if (ANI_OK != env->Object_GetPropertyByName_Int(static_cast<ani_object>(boundingRects), "length", &length)) {
         TLOGE(WmsLogTag::DMS, "[ANI] get ani_array len fail");
     }
     for (int i = 0; i < std::min(int(length), static_cast<int>(rects.size())); i++) {
@@ -73,8 +73,8 @@ void DisplayAni::GetCutoutInfo(ani_env* env, ani_object obj, ani_object cutoutIn
 void DisplayAni::GetAvailableArea(ani_env* env, ani_object obj, ani_object availableAreaObj)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] begin");
-    ani_double id;
-    env->Object_GetFieldByName_Double(obj, "<property>id", &id);
+    ani_long id;
+    env->Object_GetFieldByName_Long(obj, "<property>id", &id);
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(id);
     if (display == nullptr) {
         TLOGE(WmsLogTag::DMS, "[ANI] can not find display.");
@@ -95,8 +95,8 @@ void DisplayAni::GetAvailableArea(ani_env* env, ani_object obj, ani_object avail
 ani_boolean DisplayAni::HasImmersiveWindow(ani_env* env, ani_object obj)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] begin");
-    ani_double id;
-    env->Object_GetFieldByName_Double(obj, "<property>id", &id);
+    ani_long id;
+    env->Object_GetFieldByName_Long(obj, "<property>id", &id);
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(id);
     if (display == nullptr) {
         TLOGE(WmsLogTag::DMS, "[ANI]can not find display.");
@@ -332,7 +332,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         ani_native_function {"getFoldStatusNative", ":i", reinterpret_cast<void *>(DisplayManagerAni::GetFoldStatus)},
         ani_native_function {"getCurrentFoldCreaseRegionNative", "C{std.core.Object}l:",
             reinterpret_cast<void *>(DisplayManagerAni::GetCurrentFoldCreaseRegion)},
-        ani_native_function {"getDisplayByIdSyncNative", "C{std.core.Object}d:",
+        ani_native_function {"getDisplayByIdSyncNative", "C{std.core.Object}l:",
             reinterpret_cast<void *>(DisplayManagerAni::GetDisplayByIdSyncAni)},
         ani_native_function {"getDefaultDisplaySyncNative", "C{std.core.Object}:",
             reinterpret_cast<void *>(DisplayManagerAni::GetDefaultDisplaySyncAni)},
