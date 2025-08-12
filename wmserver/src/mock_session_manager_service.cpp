@@ -42,6 +42,7 @@
 #include "session_manager_service_interface.h"
 #include "screen_session_manager_lite.h"
 #include "common/include/session_permission.h"
+#include "display_manager.h"
 
 #define PATH_LEN 1024
 #define O_RDWR   02
@@ -129,7 +130,8 @@ MockSessionManagerService::MockSessionManagerService()
     : SystemAbility(WINDOW_MANAGER_SERVICE_ID, true), defaultWMSUserId_(INVALID_USER_ID),
       defaultScreenId_(DEFAULT_SCREEN_ID)
 {
-    //TODO 需要从dms获取默认屏幕id
+    defaultScreenId_ = DisplayManager::GetInstance().GetDefaultDisplayId();
+    TLOGI(WmsLogTag::WMS_MULTI_USER, "MockSessionManagerService initialized. Default screenId: %{public}d", defaultScreenId_);
 }
 
 bool MockSessionManagerService::RegisterMockSessionManagerService()
@@ -518,7 +520,6 @@ void MockSessionManagerService::NotifySceneBoardAvailableToClient(int32_t userId
               defaultWMSUserId_);              
         userId = defaultWMSUserId_;
     }
-    //TODO 这里以前是currentUserId，需要验证下改成userId对不对        
     auto sessionManagerService = GetSessionManagerServiceByUserId(userId);
     if (sessionManagerService == nullptr) {
         TLOGE(WmsLogTag::WMS_RECOVER, "SessionManagerService is null");
@@ -547,7 +548,6 @@ void MockSessionManagerService::NotifySceneBoardAvailableToLiteClient(int32_t us
               defaultWMSUserId_);              
         userId = defaultWMSUserId_;
     }    
-    //TODO 这里以前是currentUserId，需要验证下改成userId对不对            
     auto sessionManagerService = GetSessionManagerServiceByUserId(userId);
     if (sessionManagerService == nullptr) {
         TLOGE(WmsLogTag::WMS_RECOVER, "SessionManagerService is null");
@@ -563,13 +563,10 @@ void MockSessionManagerService::NotifySceneBoardAvailableToLiteClient(int32_t us
     }
 }
 
-// dms进行用户切换时，会调用该方法，传入切入用户id,屏幕id, 非冷启动
-// scb启动时，会通过SCBScreenSessionManager连接fundation进程的dms服务端，连接后，会调用SetClient，dms服务端会发起一次NotifyWMSConnected(userid,screenId, true)。此时是冷启动
 void MockSessionManagerService::NotifyWMSConnected(int32_t userId, int32_t screenId, bool isColdStart)
 {
     TLOGI(WmsLogTag::WMS_MULTI_USER, "userId = %{public}d, screenId = %{public}d, isColdStart = %{public}d", userId,
         screenId, isColdStart);
-    //TODO 这里需要通过dms提供的defaultScreenId获取到defaultWMSUserId，一旦默认屏幕上的用户发生切换，需要修改默认用户id。
     if (screenId == defaultScreenId_) {
         defaultWMSUserId_ = userId;
     }
