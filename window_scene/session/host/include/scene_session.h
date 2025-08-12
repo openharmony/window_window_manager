@@ -987,8 +987,8 @@ protected:
     virtual void NotifyUpdateFloatingBall(const FloatingBallTemplateInfo& fbTemplateInfo) {};
     virtual void NotifyStopFloatingBall() {};
     virtual void NotifyRestoreFloatingBallMainWindow(const std::shared_ptr<AAFwk::Want>& want) {};
-    uint64_t fbClickTime_ = 0;
     std::mutex fbClickMutex_;
+    uint8_t fbClickCnt_ {0};
     FloatingBallTemplateInfo fbTemplateInfo_ = {};
 
     /*
