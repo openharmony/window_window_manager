@@ -49,24 +49,24 @@ ani_status AniWindowManager::AniWindowManagerInit(ani_env* env)
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     ani_namespace ns;
     ani_status ret;
-    if ((ret = env->FindNamespace("L@ohos/window/window;", &ns)) != ANI_OK) {
+    if ((ret = env->FindNamespace("@ohos.window.window", &ns)) != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] find ns %{public}u", ret);
         return ANI_NOT_FOUND;
     }
     std::array functions = {
-        ani_native_function {"CreateWindowStage", "J:L@ohos/window/window/WindowStageInternal;",
+        ani_native_function {"CreateWindowStage", "l:C{@ohos.window.window.WindowStageInternal}",
             reinterpret_cast<void *>(AniWindowManager::WindowStageCreate)},
         ani_native_function {"getWindowsByCoordinate",
-            "JL@ohos/window/window/GetWindowsByCoordinateParam;:Lescompat/Array;",
+            "lC{@ohos.window.window.GetWindowsByCoordinateParam}:C{escompat.Array}",
             reinterpret_cast<void *>(AniWindowManager::GetWindowsByCoordinate)},
         ani_native_function {"getLastWindowSync",
-            "JLapplication/BaseContext/BaseContext;:L@ohos/window/window/Window;",
+            "lC{application.BaseContext.BaseContext}:C{@ohos.window.window.Window}",
             reinterpret_cast<void *>(AniWindowManager::GetLastWindow)},
         ani_native_function {"findWindowSync",
-            "JLstd/core/String;:L@ohos/window/window/Window;",
+            "lC{std.core.String}:C{@ohos.window.window.Window}",
             reinterpret_cast<void *>(AniWindowManager::FindWindow)},
-        ani_native_function {"minimizeAllSync", "JJ:V", reinterpret_cast<void *>(AniWindowManager::MinimizeAll)},
-        ani_native_function {"shiftAppWindowFocusSync", "JII:V",
+        ani_native_function {"minimizeAllSync", "ll:", reinterpret_cast<void *>(AniWindowManager::MinimizeAll)},
+        ani_native_function {"shiftAppWindowFocusSync", "lii:",
             reinterpret_cast<void *>(AniWindowManager::ShiftAppWindowFocus)},
         ani_native_function {"onSync", nullptr,
             reinterpret_cast<void *>(AniWindowManager::RegisterWindowManagerCallback)},
@@ -74,7 +74,7 @@ ani_status AniWindowManager::AniWindowManagerInit(ani_env* env)
             reinterpret_cast<void *>(AniWindowManager::UnregisterWindowManagerCallback)},
         ani_native_function {"windowDestroyCallback", nullptr, reinterpret_cast<void *>(AniWindow::Finalizer)},
         ani_native_function {"createWindowSync",
-            "JL@ohos/window/window/Configuration;:L@ohos/window/window/Window;",
+            "lC{@ohos.window.window.Configuration}:C{@ohos.window.window.Window}",
             reinterpret_cast<void *>(AniWindowManager::CreateWindow)},
     };
     if ((ret = env->Namespace_BindNativeFunctions(ns, functions.data(), functions.size())) != ANI_OK) {
@@ -83,7 +83,7 @@ ani_status AniWindowManager::AniWindowManagerInit(ani_env* env)
     }
 
     ani_function setObjFunc = nullptr;
-    ret = env->Namespace_FindFunction(ns, "setNativeObj", "J:V", &setObjFunc);
+    ret = env->Namespace_FindFunction(ns, "setNativeObj", "l:", &setObjFunc);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] find setNativeObj func fail %{public}u", ret);
         return ret;
@@ -426,17 +426,21 @@ void AniWindowManager::OnUnregisterWindowManagerCallback(ani_env* env, ani_strin
     }
 }
 
-void AniWindowManager::ShiftAppWindowFocus(ani_env* env, ani_object obj, ani_long nativeObj,
+void AniWindowManager::ShiftAppWindowFocus(ani_env* env, ani_long nativeObj,
     ani_int sourceWindowId, ani_int targetWindowId)
 {
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     AniWindowManager* aniWindowManager = reinterpret_cast<AniWindowManager*>(nativeObj);
-    aniWindowManager->OnShiftAppWindowFocus(env, sourceWindowId, targetWindowId);
+    if (aniWindowManager != nullptr) {
+        aniWindowManager->OnShiftAppWindowFocus(env, sourceWindowId, targetWindowId);
+    } else {
+        TLOGE(WmsLogTag::WMS_FOCUS, "[ANI] aniWindowManager is nullptr");
+    }
 }
 
 void AniWindowManager::OnShiftAppWindowFocus(ani_env* env, ani_int sourceWindowId, ani_int targetWindowId)
 {
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    TLOGI(WmsLogTag::WMS_FOCUS, "[ANI] sourceWindowId: %{public}d targetWindowId: %{public}d",
+        static_cast<int32_t>(sourceWindowId), static_cast<int32_t>(targetWindowId));
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
         SingletonContainer::Get<WindowManager>().ShiftAppWindowFocus(sourceWindowId, targetWindowId));
     if (ret != WmErrorCode::WM_OK) {

@@ -22,6 +22,11 @@
 #include "ani_window.h"
 #include "ani_window_manager.h"
 #include "ani_window_utils.h"
+#include "interop_js/arkts_esvalue.h"
+#include "interop_js/arkts_interop_js_api.h"
+#include "interop_js/hybridgref_ani.h"
+#include "interop_js/hybridgref_napi.h"
+#include "js_window_stage.h"
 #include "window_manager_hilog.h"
 #include "permission.h"
 #include "window_scene.h"
@@ -43,6 +48,61 @@ AniWindowStage::AniWindowStage(const std::shared_ptr<Rosen::WindowScene>& window
 AniWindowStage::~AniWindowStage()
 {
     TLOGE(WmsLogTag::DEFAULT, "[ANI] Ani WindowStage died");
+}
+
+ani_object AniWindowStage::NativeTransferStatic(ani_env* aniEnv, ani_class cls, ani_object input)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "[ANI]");
+    void *unwrapResult = nullptr;
+    if (!arkts_esvalue_unwrap(aniEnv, input, &unwrapResult)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[ANI] fail to unwrap input");
+        return AniWindowUtils::CreateAniUndefined(aniEnv);
+    }
+    if (unwrapResult == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[ANI] unwrapResult is nullptr");
+        return AniWindowUtils::CreateAniUndefined(aniEnv);
+    }
+    JsWindowStage* jsWindowStage = static_cast<JsWindowStage*>(unwrapResult);
+    if (jsWindowStage == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[ANI] jsWindowStage is nullptr");
+        return AniWindowUtils::CreateAniUndefined(aniEnv);
+    }
+    std::shared_ptr<WindowScene> windowScene = jsWindowStage->GetWindowScene().lock();
+    return CreateAniWindowStage(aniEnv, windowScene);
+}
+
+ani_object AniWindowStage::NativeTransferDynamic(ani_env* aniEnv, ani_class cls, ani_long nativeObj)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "[ANI]");
+    AniWindowStage* aniWindowStage = reinterpret_cast<AniWindowStage*>(nativeObj);
+    if (aniWindowStage == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[ANI] aniWindowStage is nullptr");
+        return AniWindowUtils::CreateAniUndefined(aniEnv);
+    }
+    napi_env napiEnv {};
+    if (!arkts_napi_scope_open(aniEnv, &napiEnv)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[ANI] napi scope open fail");
+        return AniWindowUtils::CreateAniUndefined(aniEnv);
+    }
+    napi_value jsWindowStage = CreateJsWindowStage(napiEnv, aniWindowStage->GetWindowScene().lock());
+    hybridgref ref {};
+    if (!hybridgref_create_from_napi(napiEnv, jsWindowStage, &ref)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[ANI] create hybridgref fail");
+        return AniWindowUtils::CreateAniUndefined(aniEnv);
+    }
+    ani_object result {};
+    if (!hybridgref_get_esvalue(aniEnv, ref, &result)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[ANI] get esvalue fail");
+        return AniWindowUtils::CreateAniUndefined(aniEnv);
+    }
+    if (!hybridgref_delete_from_napi(napiEnv, ref)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[ANI] delete hybridgref fail");
+    }
+    if (!arkts_napi_scope_close_n(napiEnv, 0, nullptr, nullptr)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[ANI] napi close scope fail");
+        return AniWindowUtils::CreateAniUndefined(aniEnv);
+    }
+    return result;
 }
 
 void AniWindowStage::LoadContent(ani_env* env, ani_object obj, ani_long nativeObj, ani_string path,
@@ -131,7 +191,7 @@ __attribute__((no_sanitize("cfi")))
 
     ani_status ret;
     ani_class cls = nullptr;
-    if ((ret = env->FindClass("L@ohos/window/window/WindowStageInternal;", &cls)) != ANI_OK) {
+    if ((ret = env->FindClass("@ohos.window.window.WindowStageInternal", &cls)) != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] null env %{public}u", ret);
         return cls;
     }
@@ -140,7 +200,7 @@ __attribute__((no_sanitize("cfi")))
     TLOGD(WmsLogTag::DEFAULT, "[ANI] native obj %{public}p", windowStage.get());
 
     ani_method initFunc = nullptr;
-    if ((ret = env->Class_FindMethod(cls, "<ctor>", ":V", &initFunc)) != ANI_OK) {
+    if ((ret = env->Class_FindMethod(cls, "<ctor>", ":", &initFunc)) != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] get ctor fail %{public}u", ret);
         return nullptr;
     }
@@ -150,7 +210,7 @@ __attribute__((no_sanitize("cfi")))
         return nullptr;
     }
     ani_method setObjFunc = nullptr;
-    if ((ret = env->Class_FindMethod(cls, "setNativeObj", "J:V", &setObjFunc)) != ANI_OK) {
+    if ((ret = env->Class_FindMethod(cls, "setNativeObj", "l:", &setObjFunc)) != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] call setNativeObj fail %{public}u", ret);
         return nullptr;
     }
