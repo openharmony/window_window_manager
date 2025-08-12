@@ -3112,24 +3112,6 @@ void WindowImpl::PerformBack()
     handler_->PostTask(task, "WindowImpl::PerformBack");
 }
 
-WMError WindowImpl::HandleEspecialEscKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
-{
-    if (keyEvent == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "keyevent is nullptr");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-
-    bool escToBackFlag = keyEvent->HasFlag(MMI::InputEvent::EVENT_FLAG_KEYBOARD_ESCAPE);
-    if (!escToBackFlag) {
-        TLOGE(WmsLogTag::WMS_EVENT, "ESC no flag");
-        return WMError::WM_DO_NOTHING;
-    }
-
-    TLOGD(WmsLogTag::WMS_EVENT, "normal mode, handlebackevent");
-    HandleBackKeyPressedEvent(keyEvent);
-    return WMError::WM_OK;
-}
-
 void WindowImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
     int32_t keyCode = keyEvent->GetKeyCode();
@@ -3151,25 +3133,15 @@ void WindowImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
         } else if (uiContent_ != nullptr) {
             WLOGD("Transfer key event to uiContent");
             bool handled = static_cast<bool>(uiContent_->ProcessKeyEvent(keyEvent));
-            TLOGI(WmsLogTag::WMS_EVENT, "handled: %{public}d, escTrigger: %{public}d, escDown: %{public}d",
-                handled, escKeyEventTriggered_, escKeyHasDown_);
             if (!handled && keyCode == MMI::KeyEvent::KEYCODE_ESCAPE &&
                 GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
                 property_->GetMaximizeMode() == MaximizeMode::MODE_FULL_FILL &&
                 keyAction == MMI::KeyEvent::KEY_ACTION_DOWN && !escKeyEventTriggered_) {
-                auto ret = Recover();
-                if (ret == WMError::WM_OK) {
-                    handled = true;
-                    keyEvent->MarkProcessed();
-                }
-                TLOGE(WmsLogTag::WMS_EVENT, "recover from fullscreen, handled: %{public}d", handled);
-            }
-            if (!handled && !escKeyEventTriggered_ && escKeyHasDown_) {
-                HandleEspecialEscKeyEvent(keyEvent);
+                WLOGI("recover from fullscreen cause KEYCODE_ESCAPE");
+                Recover();
             }
             if (keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ESCAPE) {
-                escKeyHasDown_ = (keyAction == MMI::KeyEvent::KEY_ACTION_DOWN);
-                escKeyEventTriggered_ = handled;
+                escKeyEventTriggered_ = (keyAction == MMI::KeyEvent::KEY_ACTION_UP) ? false : true;
             }
             shouldMarkProcess = !handled;
         } else {
