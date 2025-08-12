@@ -129,9 +129,9 @@ HWTEST_F(WindowDragTest, DragIn, TestSize.Level1)
     dragWindow->MoveTo(300, 300);
     sleep(WAIT_CALLBACK_US);
 
-    ASSERT_EQ(300, firstWindowDragListener_->point_.x);
-    ASSERT_EQ(300, firstWindowDragListener_->point_.y);
-    ASSERT_EQ(DragEvent::DRAG_EVENT_IN, firstWindowDragListener_->event_);
+    EXPECT_EQ(300, firstWindowDragListener_->point_.x);
+    EXPECT_EQ(300, firstWindowDragListener_->point_.y);
+    EXPECT_EQ(DragEvent::DRAG_EVENT_IN, firstWindowDragListener_->event_);
 
     firstWindow->UnregisterDragListener(firstWindowDragListener_);
 }
@@ -157,15 +157,15 @@ HWTEST_F(WindowDragTest, DragMove, TestSize.Level1)
     dragWindow->MoveTo(300, 300);
 
     sleep(WAIT_CALLBACK_US);
-    ASSERT_EQ(300, firstWindowDragListener_->point_.x);
-    ASSERT_EQ(300, firstWindowDragListener_->point_.y);
-    ASSERT_EQ(DragEvent::DRAG_EVENT_IN, firstWindowDragListener_->event_);
+    EXPECT_EQ(300, firstWindowDragListener_->point_.x);
+    EXPECT_EQ(300, firstWindowDragListener_->point_.y);
+    EXPECT_EQ(DragEvent::DRAG_EVENT_IN, firstWindowDragListener_->event_);
 
     dragWindow->MoveTo(400, 400);
     sleep(WAIT_CALLBACK_US);
-    ASSERT_EQ(400, firstWindowDragListener_->point_.x);
-    ASSERT_EQ(400, firstWindowDragListener_->point_.y);
-    ASSERT_EQ(DragEvent::DRAG_EVENT_MOVE, firstWindowDragListener_->event_);
+    EXPECT_EQ(400, firstWindowDragListener_->point_.x);
+    EXPECT_EQ(400, firstWindowDragListener_->point_.y);
+    EXPECT_EQ(DragEvent::DRAG_EVENT_MOVE, firstWindowDragListener_->event_);
 
     firstWindow->UnregisterDragListener(firstWindowDragListener_);
 }
@@ -198,22 +198,22 @@ HWTEST_F(WindowDragTest, DragOut, TestSize.Level1)
     dragWindow->MoveTo(300, 300);
 
     sleep(WAIT_CALLBACK_US);
-    ASSERT_EQ(300, firstWindowDragListener_->point_.x);
-    ASSERT_EQ(300, firstWindowDragListener_->point_.y);
-    ASSERT_EQ(DragEvent::DRAG_EVENT_IN, firstWindowDragListener_->event_);
+    EXPECT_EQ(300, firstWindowDragListener_->point_.x);
+    EXPECT_EQ(300, firstWindowDragListener_->point_.y);
+    EXPECT_EQ(DragEvent::DRAG_EVENT_IN, firstWindowDragListener_->event_);
 
     dragWindow->MoveTo(400, 400);
     sleep(WAIT_CALLBACK_US);
-    ASSERT_EQ(400, firstWindowDragListener_->point_.x);
-    ASSERT_EQ(400, firstWindowDragListener_->point_.y);
-    ASSERT_EQ(DragEvent::DRAG_EVENT_MOVE, firstWindowDragListener_->event_);
+    EXPECT_EQ(400, firstWindowDragListener_->point_.x);
+    EXPECT_EQ(400, firstWindowDragListener_->point_.y);
+    EXPECT_EQ(DragEvent::DRAG_EVENT_MOVE, firstWindowDragListener_->event_);
 
     dragWindow->MoveTo(600, 600);
     sleep(WAIT_CALLBACK_US);
-    ASSERT_EQ(100, secondWindowDragListener_->point_.x);
-    ASSERT_EQ(100, secondWindowDragListener_->point_.y);
-    ASSERT_EQ(DragEvent::DRAG_EVENT_IN, secondWindowDragListener_->event_);
-    ASSERT_EQ(DragEvent::DRAG_EVENT_OUT, firstWindowDragListener_->event_);
+    EXPECT_EQ(100, secondWindowDragListener_->point_.x);
+    EXPECT_EQ(100, secondWindowDragListener_->point_.y);
+    EXPECT_EQ(DragEvent::DRAG_EVENT_IN, secondWindowDragListener_->event_);
+    EXPECT_EQ(DragEvent::DRAG_EVENT_OUT, firstWindowDragListener_->event_);
 
     firstWindow->UnregisterDragListener(firstWindowDragListener_);
     secondWindow->UnregisterDragListener(secondWindowDragListener_);
