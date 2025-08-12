@@ -404,7 +404,7 @@ public:
     WMError SetAPPWindowIcon(const std::shared_ptr<Media::PixelMap>& icon) override;
     WMError SetWindowContainerColor(const std::string& activeColor, const std::string& inactiveColor) override;
     WMError SetWindowContainerModalColor(const std::string& activeColor, const std::string& inactiveColor) override;
-    nlohmann::json setContainerButtonStyle(const DecorButtonStyle& decorButtonStyle);
+    nlohmann::json SetContainerButtonStyle(const DecorButtonStyle& decorButtonStyle);
     void UpdateDecorEnable(bool needNotify = false, WindowMode mode = WindowMode::WINDOW_MODE_UNDEFINED);
 
     /*
