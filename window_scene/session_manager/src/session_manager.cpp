@@ -92,7 +92,14 @@ WM_IMPLEMENT_SINGLE_INSTANCE(SessionManager)
 
 SessionManager::~SessionManager()
 {
-    WLOGFI("destroyed!");
+    sptr<IRemoteObject> remoteObject = nullptr;
+    if (mockSessionManagerServiceProxy_) {
+        remoteObject = mockSessionManagerServiceProxy_->AsObject();
+    }
+    if (remoteObject) {
+        remoteObject->RemoveDeathRecipient(foundationDeath_);
+    }
+    TLOGI(WmsLogTag::WMS_LIFE, "destroyed");
 }
 
 void SessionManager::OnWMSConnectionChangedCallback(
