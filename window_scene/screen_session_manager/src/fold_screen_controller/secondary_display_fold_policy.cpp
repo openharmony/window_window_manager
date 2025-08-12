@@ -365,6 +365,10 @@ void SecondaryDisplayFoldPolicy::ExitCoordination()
     AddOrRemoveDisplayNodeToTree(SCREEN_ID_MAIN, REMOVE_DISPLAY_NODE);
     ScreenSessionManager::GetInstance().OnScreenChange(SCREEN_ID_MAIN, ScreenEvent::DISCONNECTED);
     ScreenSessionManager::GetInstance().SetCoordinationFlag(false);
+#ifdef TP_FEATURE_ENABLE
+    TLOGI(WmsLogTag::DMS, "ExitCoordination SetTpFeatureConfig to full");
+    RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE, STATUS_FULL, TpFeatureConfigType::AFT_TP_FEATURE);
+#endif
     FoldDisplayMode displayMode = GetModeMatchStatus();
     currentDisplayMode_ = displayMode;
     lastDisplayMode_ = displayMode;
