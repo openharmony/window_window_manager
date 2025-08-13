@@ -123,6 +123,13 @@ WM_IMPLEMENT_SINGLE_INSTANCE(SessionManagerLite)
 
 SessionManagerLite::~SessionManagerLite()
 {
+    sptr<IRemoteObject> remoteObject = nullptr;
+    if (mockSessionManagerServiceProxy_) {
+        remoteObject = mockSessionManagerServiceProxy_->AsObject();
+    }
+    if (remoteObject) {
+        remoteObject->RemoveDeathRecipient(foundationDeath_);
+    }
     TLOGI(WmsLogTag::WMS_LIFE, "destroyed");
 }
 
