@@ -272,6 +272,8 @@ public:
     bool GetUseControlStateFromProperty() const;
     void SetAncoRealBundleName(const std::string& ancoRealBundleName);
     std::string GetAncoRealBundleName() const;
+    void SetMissionInfo(const MissionInfo& missionInfo);
+    MissionInfo GetMissionInfo() const;
 
     /*
      * UIExtension
@@ -570,6 +572,8 @@ private:
     mutable std::mutex lifecycleUseControlMutex_;
     bool isUseControlState_ = false;
     std::string ancoRealBundleName_  = "";
+    MissionInfo missionInfo_;
+    mutable std::mutex missionInfoMutex_;
     
     /*
      * Window Property

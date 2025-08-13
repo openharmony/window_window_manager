@@ -505,6 +505,8 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteParcelable(property->GetCompatibleModeProperty());
         reply.WriteBool(property->GetUseControlStateFromProperty());
         reply.WriteString(property->GetAncoRealBundleName());
+        MissionInfo missionInfo = property->GetMissionInfo();
+        reply.WriteParcelable(&missionInfo);
     }
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;

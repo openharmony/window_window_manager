@@ -2854,6 +2854,35 @@ struct ShadowsInfo : public Parcelable {
 };
 
 /**
+ * @struct MissionInfo
+ *
+ * @brief infos of mission
+ */
+struct MissionInfo : public Parcelable {
+    bool startupInvisibility_ = false;
+
+    MissionInfo() {}
+    MissionInfo(bool startupInvisibility) : startupInvisibility_(startupInvisibility) {}
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        if (!parcel.WriteBool(startupInvisibility_)) {
+            return false;
+        }
+        return true;
+    }
+
+    static MissionInfo* Unmarshalling(Parcel& parcel)
+    {
+        auto missionInfo = std::make_unique<MissionInfo>();
+        if (!missionInfo || !parcel.ReadBool(missionInfo->startupInvisibility_)) {
+            return nullptr;
+        }
+        return missionInfo.release();
+    }
+};
+
+/**
  * @brief Enumerates session state of recent session
  */
 enum class RecentSessionState : uint32_t {
