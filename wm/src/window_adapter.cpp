@@ -497,17 +497,18 @@ void WindowAdapter::WindowManagerAndSessionRecover()
     }
 }
 
-void WindowAdapter::RecoverWindowPropertyChangeFlag()
+WMError  WindowAdapter::RecoverWindowPropertyChangeFlag()
 {
     std::lock_guard<std::mutex> lock(mutex_);
     if (!windowManagerServiceProxy_ || !windowManagerServiceProxy_->AsObject()) {
         TLOGE(WmsLogTag::WMS_RECOVER, "proxy is null");
-        return;
+        return WMError::WM_ERROR_NULLPTR;
     }
-    if (windowManagerServiceProxy_->RecoverWindowPropertyChangeFlag(
-        observedFlags_, interestedFlags_) != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_RECOVER, "failed");
+    auto ret = windowManagerServiceProxy_->RecoverWindowPropertyChangeFlag(observedFlags_, interestedFlags_);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_RECOVER, "failed, ret=%{public}d", static_cast<int32_t>(ret));
     }
+    return ret;
 }
 
 void WindowAdapter::ReregisterWindowManagerAgent()
