@@ -334,7 +334,7 @@ HWTEST_F(WindowSessionImplRotationTest, UpdateRectForRotation02, TestSize.Level2
     auto runner = AppExecFwk::EventRunner::Create("UpdateRectForRotation02");
     std::shared_ptr<AppExecFwk::EventHandler> handler = std::make_shared<AppExecFwk::EventHandler>(runner);
     runner->Run();
-    window->handler_  = handler;
+    window->handler_ = handler;
  
     Rect wmRect;
     wmRect.posX_ = 0;

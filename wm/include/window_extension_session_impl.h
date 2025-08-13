@@ -275,7 +275,7 @@ private:
     /*
      * Window Rotation
      */
-    void UpdateRotationDuration(WindowSizeChangeReason& reason, int32_t& duration,
+    void UpdateRotateDuration(WindowSizeChangeReason& reason, int32_t& duration,
         const std::shared_ptr<RSTransaction>& rsTransaction);
 };
 } // namespace Rosen

@@ -1364,7 +1364,7 @@ HWTEST_F(WindowSessionImplTest4, UpdateRect04, TestSize.Level2)
     auto runner = AppExecFwk::EventRunner::Create("UpdateRectForRotation02");
     std::shared_ptr<AppExecFwk::EventHandler> handler = std::make_shared<AppExecFwk::EventHandler>(runner);
     runner->Run();
-    window->handler_  = handler;
+    window->handler_ = handler;
 
     WSRect rect;
     rect.posX_ = 0;
@@ -1381,14 +1381,18 @@ HWTEST_F(WindowSessionImplTest4, UpdateRect04, TestSize.Level2)
     window->property_->SetWindowRect(preRect);
     SizeChangeReason reason = SizeChangeReason::SNAPSHOT_ROTATION;
     WSError res = window->UpdateRect(rect, reason);
-    ASSERT_EQ(res, WSError::WS_OK);
+    EXPECT_EQ(res, WSError::WS_OK);
 
     preRect.height_ = 200;
     preRect.width_ = 200;
     window->property_->SetWindowRect(preRect);
     reason = SizeChangeReason::UNDEFINED;
     res = window->UpdateRect(rect, reason);
-    ASSERT_EQ(res, WSError::WS_OK);
+    EXPECT_EQ(res, WSError::WS_OK);
+
+    window->handler_ = nullptr;
+    res = window->UpdateRect(rect, reason);
+    EXPECT_EQ(res, WSError::WS_OK);
 }
 
 /**
