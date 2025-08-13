@@ -51,10 +51,10 @@ WMError SessionManagerAgentController::RegisterWindowManagerAgent(const sptr<IWi
         windowManagerAgentPairMap_.insert(std::map<sptr<IRemoteObject>,
             std::pair<int32_t, WindowManagerAgentType>>::value_type(windowManagerAgent->AsObject(), pidPair));
         if (type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_STYLE &&
-            windowModeStatus_ != WindowModeStatus::WINDOW_STYLE_STATUS_UNDIFINED) {
-            NotifyWindowStyleChange(windowModeStatus_ == WindowModeStatus::WINDOW_STYLE_STATUS_PC_MODE ?
+            windowManagementMode_ != WindowManagementMode::UNDEFINED) {
+            NotifyWindowStyleChange(windowManagementMode_ == WindowManagementMode::FREEFORM ?
                 WindowStyleType::WINDOW_STYLE_FREE_MULTI_WINDOW : WindowStyleType::WINDOW_STYLE_DEFAULT);
-            windowModeStatus_ = WindowModeStatus::WINDOW_STYLE_STATUS_UNDIFINED;
+            windowManagementMode_ = WindowManagementMode::UNDEFINED;
         }
         return WMError::WM_OK;
     } else {
@@ -235,8 +235,8 @@ void SessionManagerAgentController::NotifyWindowStyleChange(WindowStyleType type
         }
     }
     if (!hasNotified) {
-        windowModeStatus_ = type == WindowStyleType::WINDOW_STYLE_FREE_MULTI_WINDOW ?
-            WindowModeStatus::WINDOW_STYLE_STATUS_PC_MODE : WindowModeStatus::WINDOW_STYLE_STATUS_PAD_MODE;
+        windowManagementMode_ = type == WindowStyleType::WINDOW_STYLE_FREE_MULTI_WINDOW ?
+            WindowManagementMode::FREEFORM : WindowManagementMode::FULLSCREEN;
     }
 }
 
