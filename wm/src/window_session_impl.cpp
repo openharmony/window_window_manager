@@ -1638,18 +1638,15 @@ void WindowSessionImpl::NotifyForegroundInteractiveStatus(bool interactive)
     if (IsWindowSessionInvalid() || state_ != WindowState::STATE_SHOWN) {
         return;
     }
+    if (IsNotifyInteractiveDuplicative(interactive)) {
+        return;
+    }
     if (interactive) {
         bool useControlState = property_->GetUseControlState();
         TLOGI(WmsLogTag::WMS_LIFE, "useControlState: %{public}d", useControlState);
         if (!useControlState) {
             NotifyAfterLifecycleResumed();
         }
-    }
-
-    if (IsNotifyInteractiveDuplicative(interactive)) {
-        return;
-    }
-    if (interactive) {
         NotifyAfterResumed();
     } else {
         NotifyAfterPaused();
