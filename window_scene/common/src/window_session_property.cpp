@@ -2554,6 +2554,18 @@ void WindowSessionProperty::UnmarshallingWindowAnchorInfo(Parcel& parcel, Window
     property->SetWindowAnchorInfo(*windowAnchorInfo);
 }
 
+void WindowSessionProperty::SetMissionInfo(const MissionInfo& missionInfo)
+{
+    std::lock_guard<std::mutex> lock(missionInfoMutex_);
+    missionInfo_ = missionInfo;
+}
+
+MissionInfo WindowSessionProperty::GetMissionInfo() const
+{
+    std::lock_guard<std::mutex> lock(missionInfoMutex_);
+    return missionInfo_;
+}
+
 bool WindowSessionProperty::MarshallingShadowsInfo(Parcel& parcel) const
 {
     return parcel.WriteParcelable(&shadowsInfo_);

@@ -44,6 +44,7 @@
 #endif // DEVICE_STATUS_ENABLE
 #include "interfaces/include/ws_common.h"
 #include "pixel_map.h"
+#include "process_options.h"
 #include "rs_adapter.h"
 #include "session_coordinate_helper.h"
 #include "session/screen/include/screen_session.h"
@@ -154,6 +155,12 @@ WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
             property->SetAppInstanceKey(session->GetAppInstanceKey());
             property->SetUseControlStateToProperty(session->isAppUseControl_);
             property->SetAncoRealBundleName(session->IsAnco() ? session->GetSessionInfo().bundleName_ : "");
+            if (session->GetSessionInfo().processOptions != nullptr) {
+                MissionInfo missionInfo;
+                missionInfo.startupInvisibility_ = session->GetSessionInfo().processOptions->startupVisibility ==
+                    AAFwk::StartupVisibility::STARTUP_HIDE;
+                property->SetMissionInfo(missionInfo);
+            }
         }
         session->RetrieveStatusBarDefaultVisibility();
         auto ret = LOCK_GUARD_EXPR(SCENE_GUARD, session->Session::ConnectInner(
