@@ -231,7 +231,7 @@ private:
      */
     void ReregisterWindowManagerAgent();
     void WindowManagerAndSessionRecover();
-    void RecoverWindowPropertyChangeFlag();
+    WMError RecoverWindowPropertyChangeFlag();
     uint32_t observedFlags_;
     uint32_t interestedFlags_;
 
