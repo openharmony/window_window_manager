@@ -563,6 +563,48 @@ WSError SceneSessionManagerLiteProxy::GetFocusSessionElement(AppExecFwk::Element
     return static_cast<WSError>(reply.ReadInt32());
 }
 
+WSError SceneSessionManagerLiteProxy::IsFocusWindowParent(const sptr<IRemoteObject>& token, bool& isParent)
+{
+    TLOGI(WmsLogTag::WMS_FOCUS, "run");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (token == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Token is nullptr");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Write interfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteRemoteObject(token)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Write token failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_IS_FOCUS_WINDOW_PARENT),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    bool value = false;
+    if (!reply.ReadBool(value)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Read result failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Read ret failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    isParent = value;
+    return static_cast<WSError>(ret);
+}
+
 WSError SceneSessionManagerLiteProxy::GetSessionSnapshot(const std::string& deviceId, int32_t persistentId,
     SessionSnapshot& snapshot, bool isLowResolution)
 {
