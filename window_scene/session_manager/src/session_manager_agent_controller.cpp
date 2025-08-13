@@ -51,10 +51,10 @@ WMError SessionManagerAgentController::RegisterWindowManagerAgent(const sptr<IWi
         windowManagerAgentPairMap_.insert(std::map<sptr<IRemoteObject>,
             std::pair<int32_t, WindowManagerAgentType>>::value_type(windowManagerAgent->AsObject(), pidPair));
         if (type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_STYLE &&
-            windowStyleStatus_ != WindowStyleStatus::WINDOW_STYLE_STATUS_UNDIFINED) {
-            NotifyWindowStyleChange(windowStyleStatus_ == WindowStyleStatus::WINDOW_STYLE_STATUS_PC_MODE ?
+            windowModeStatus_ != WindowModeStatus::WINDOW_STYLE_STATUS_UNDIFINED) {
+            NotifyWindowStyleChange(windowModeStatus_ == WindowModeStatus::WINDOW_STYLE_STATUS_PC_MODE ?
                 WindowStyleType::WINDOW_STYLE_FREE_MULTI_WINDOW : WindowStyleType::WINDOW_STYLE_DEFAULT);
-            windowStyleStatus_ = WindowStyleStatus::WINDOW_STYLE_STATUS_UNDIFINED;
+            windowModeStatus_ = WindowModeStatus::WINDOW_STYLE_STATUS_UNDIFINED;
         }
         return WMError::WM_OK;
     } else {
