@@ -1228,6 +1228,23 @@ std::string ScreenSessionManager::ConvertEdidToString(const struct BaseEdid edid
     return oss.str();
 }
 
+void ScreenSessionManager::DisConnectScreenIfScreenInfoNull(sptr<ScreenSession>& screenSession)
+{
+#ifdef FOLD_ABILITY_ENABLE
+   if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        return;
+   }
+   if (screenSession == nullptr || clientProxy_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "screenSession or clientProxy_ is null");
+        return;
+    }
+    if (IsDefaultMirrMode(screenSession->GetRSScreenId())) {
+        clientProxy_->OnScreenConnectionChanged(
+            GetSessionOption(screenSession, screenSession->GetRSScreenId()), ScreenEvent::DISCONNECTED);
+    }
+#endif
+}
+
 bool ScreenSessionManager::RecoverRestoredMultiScreenMode(sptr<ScreenSession> screenSession)
 {
 #ifdef WM_MULTI_SCREEN_ENABLE
@@ -1238,6 +1255,7 @@ bool ScreenSessionManager::RecoverRestoredMultiScreenMode(sptr<ScreenSession> sc
     std::map<std::string, MultiScreenInfo> multiScreenInfoMap = ScreenSettingHelper::GetMultiScreenInfo();
     std::string serialNumber = screenSession->GetSerialNumber();
     if (!CheckMultiScreenInfoMap(multiScreenInfoMap, serialNumber)) {
+        DisConnectScreenIfScreenInfoNull(screenSession);
         return false;
     }
     auto info = multiScreenInfoMap[serialNumber];
@@ -2505,6 +2523,24 @@ sptr<ScreenSession> ScreenSessionManager::GetPhysicalScreenSession(ScreenId scre
     return screenSession;
 }
 
+void ScreenSessionManager::SetDefaultScreenModeWhenCreateMirror(sptr<ScreenSession>& screenSession)
+{
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "screenSession is null");
+        return;
+    }
+#ifdef FOLD_ABILITY_ENABLE
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() &&
+        SuperFoldStateManager::GetInstance().GetCurrentStatus() != SuperFoldStatus::EXPANDED) {
+        screenSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
+    } else {
+#endif
+    screenSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
+#ifdef FOLD_ABILITY_ENABLE
+    }
+#endif
+}
+
 sptr<ScreenSession> ScreenSessionManager::CreatePhysicalMirrorSessionInner(ScreenId screenId, ScreenId defScreenId,
     ScreenProperty property)
 {
@@ -2526,7 +2562,7 @@ sptr<ScreenSession> ScreenSessionManager::CreatePhysicalMirrorSessionInner(Scree
         InitExtendScreenProperty(screenId, screenSession, property);
         screenSession->SetName(SCREEN_NAME_EXTEND);
         screenSession->SetIsExtend(true);
-        screenSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
+        SetDefaultScreenModeWhenCreateMirror(screenSession);
     } else {
         screenSession->SetIsExtend(true);
         screenSession->SetName(SCREEN_NAME_CAST);
@@ -8671,6 +8707,22 @@ void ScreenSessionManager::SetPhysicalRotationClientInner(ScreenId screenId, int
     TLOGI(WmsLogTag::DMS, "SetPhysicalRotationClientInner end");
 }
 
+void ScreenSessionManager::RecoverDefaultScreenModeInner(ScreenId innerRsId, ScreenId externalRsId)
+{
+#ifdef FOLD_ABILITY_ENABLE
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() &&
+        SuperFoldStateManager::GetInstance().GetCurrentStatus() != SuperFoldStatus::EXPANDED) {
+        SetMultiScreenMode(innerRsId, externalRsId, MultiScreenMode::SCREEN_MIRROR);
+        ReportHandleScreenEvent(ScreenEvent::CONNECTED, ScreenCombination::SCREEN_MIRROR);
+    } else {
+#endif
+    SetMultiScreenMode(innerRsId, externalRsId, MultiScreenMode::SCREEN_EXTEND);
+    ReportHandleScreenEvent(ScreenEvent::CONNECTED, ScreenCombination::SCREEN_EXTEND);
+#ifdef FOLD_ABILITY_ENABLE
+    }
+#endif
+}
+
 void ScreenSessionManager::RecoverMultiScreenMode(sptr<ScreenSession> screenSession)
 {
     if (screenSession == nullptr) {
@@ -8697,8 +8749,7 @@ void ScreenSessionManager::RecoverMultiScreenMode(sptr<ScreenSession> screenSess
             TLOGW(WmsLogTag::DMS, "same rsId: %{public}" PRIu64, innerRsId);
             return;
         }
-        SetMultiScreenMode(innerRsId, externalRsId, MultiScreenMode::SCREEN_EXTEND);
-        ReportHandleScreenEvent(ScreenEvent::CONNECTED, ScreenCombination::SCREEN_EXTEND);
+        RecoverDefaultScreenModeInner(innerRsId, externalRsId);
         SetMultiScreenDefaultRelativePosition();
     }
     sptr<ScreenSession> newInternalSession = GetInternalScreenSession();
