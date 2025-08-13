@@ -96,6 +96,33 @@ HWTEST_F(SceneSessionManagerStubTest2, HandleIsFreeMultiWindow, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleRecoverWindowPropertyChangeFlag01
+ * @tc.desc: test HandleRecoverWindowPropertyChangeFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest2, HandleRecoverWindowPropertyChangeFlag01, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    auto res = stub_->HandleRecoverWindowPropertyChangeFlag(data, reply);
+    EXPECT_EQ(res, ERR_TRANSACTION_FAILED);
+
+    data.WriteUint32(0);
+    res = stub_->HandleRecoverWindowPropertyChangeFlag(data, reply);
+    EXPECT_EQ(res, ERR_TRANSACTION_FAILED);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    res = stub_->HandleRecoverWindowPropertyChangeFlag(data, reply);
+    EXPECT_EQ(res, ERR_TRANSACTION_FAILED);
+    MockMessageParcel::ClearAllErrorFlag();
+
+    res = stub_->HandleRecoverWindowPropertyChangeFlag(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
  * @tc.name: HandleCreateUIEffectController
  * @tc.desc: test HandleCreateUIEffectController
  * @tc.type: FUNC
