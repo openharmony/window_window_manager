@@ -573,6 +573,9 @@ DMError SuperFoldStateManager::RefreshMirrorRegionInner(
                 mirrorRegion.width_, mirrorRegion.height_);
             return DMError::DM_ERROR_INVALID_PARAM;
         }
+    } else {
+        mirrorRegion.width_ = mainScreenProperty.GetScreenRealWidth();
+        mirrorRegion.height_ = mainScreenProperty.GetScreenRealHeight();
     }
     mainScreenSession->UpdateMirrorWidth(mirrorRegion.width_);
     mainScreenSession->UpdateMirrorHeight(mirrorRegion.height_);
