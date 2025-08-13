@@ -52,12 +52,12 @@ HWTEST_F(SessionManagerAgentControllerTest, RegisterWindowManagerAgent, TestSize
     sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
     WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
     int32_t pid = 65535;
-    SessionManagerAgentController::GetInstance().windowModeStatus_ = WindowModeStatus::WINDOW_STYLE_STATUS_PC_MODE;
+    SessionManagerAgentController::GetInstance().windowModeStatus_ = WindowModeStatus::WINDOW_MODE_STATUS_PC_MODE;
     ASSERT_EQ(WMError::WM_OK,
               SessionManagerAgentController::GetInstance().RegisterWindowManagerAgent(windowManagerAgent, type, pid));
     ASSERT_EQ(WMError::WM_OK,
               SessionManagerAgentController::GetInstance().UnregisterWindowManagerAgent(windowManagerAgent, type, pid));
-    SessionManagerAgentController::GetInstance().windowModeStatus_ = WindowModeStatus::WINDOW_STYLE_STATUS_UNDIFINED;
+    SessionManagerAgentController::GetInstance().windowModeStatus_ = WindowModeStatus::WINDOW_MODE_STATUS_UNDIFINED;
 }
 
 /**
