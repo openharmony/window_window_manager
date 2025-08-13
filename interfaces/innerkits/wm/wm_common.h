@@ -765,10 +765,10 @@ enum class WindowStyleType : uint8_t {
 /**
  * @brief Enumerates window style status
  */
-enum class WindowModeStatus : uint32_t {
-    WINDOW_MODE_STATUS_UNDIFINED,
-    WINDOW_MODE_STATUS_PC_MODE,
-    WINDOW_MODE_STATUS_PAD_MODE
+enum class WindowManagementMode : uint32_t {
+    UNDEFINED,
+    FREEFORM,
+    FULLSCREEN
 };
 
 /**
