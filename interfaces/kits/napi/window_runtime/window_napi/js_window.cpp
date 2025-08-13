@@ -6258,14 +6258,15 @@ napi_value JsWindow::OnSetWindowCornerRadius(napi_env env, napi_callback_info in
         auto window = weakWindow.promote();
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is nullptr", where);
-            WmErrorCode wmErroeCode = WM_JS_TO_ERROR_CODE_MAP.at(WMError::WM_ERROR_NULLPTR);
-            task->Reject(env, JsErrUtils::CreateJsError(env, wmErroeCode, "window is nullptr."));
+            WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(WMError::WM_ERROR_NULLPTR);
+            task->Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode,
+                "[window][setWindowCornerRadius]msg:native window is nullptr."));
             return;
         }
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetWindowCornerRadius(cornerRadius));
         if (ret != WmErrorCode::WM_OK) {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "Set failed!");
-            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "Set failed."));
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "[window][setWindowCornerRadius]msg:set failed."));
         } else {
             TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u, %{public}s] set success.",
                 window->GetWindowId(), window->GetWindowName().c_str());
@@ -6275,7 +6276,8 @@ napi_value JsWindow::OnSetWindowCornerRadius(napi_env env, napi_callback_info in
     napi_status status = napi_send_event(env, std::move(asyncTask), napi_eprio_high, "OnSetWindowCornerRadius");
     if (status != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
-            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
+            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
+                "[window][setWindowCornerRadius]msg:send event failed"));
     }
     return result;
 }
@@ -6291,7 +6293,8 @@ napi_value JsWindow::OnGetWindowCornerRadius(napi_env env, napi_callback_info in
     }
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "WindowToken is nullptr.");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][getWindowCornerRadius]msg:native window is nullptr.");
     }
     if (!WindowHelper::IsFloatOrSubWindow(windowToken_->GetType())) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "This is not sub window or float window.");
@@ -6302,12 +6305,13 @@ napi_value JsWindow::OnGetWindowCornerRadius(napi_env env, napi_callback_info in
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->GetWindowCornerRadius(cornerRadius));
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Get failed, cornerRadius: %{public}f.", cornerRadius);
-        return NapiThrowError(env, ret);
+        return NapiThrowError(env, ret, "[window][getWindowCornerRadius]msg:fail to get window corner radius.");
     }
     napi_value jsCornerRadius = CreateJsValue(env, cornerRadius);
     if (jsCornerRadius == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "jsCornerRadius is nullptr");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][getWindowCornerRadius]msg:convert corner radius to js value failed.");
     }
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u, %{public}s] Get success, cornerRadius=%{public}f.",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), cornerRadius);
@@ -6403,7 +6407,8 @@ napi_value JsWindow::OnSetWindowShadowRadius(napi_env env, napi_callback_info in
     }
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "WindowToken is nullptr.");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][setWindowShadowRadius]msg:native window is nullptr");
     }
     if (!WindowHelper::IsFloatOrSubWindow(windowToken_->GetType())) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "This is not sub window or float window.");
@@ -6426,13 +6431,13 @@ napi_value JsWindow::OnSetWindowShadowRadius(napi_env env, napi_callback_info in
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetWindowShadowRadius(radius));
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Set failed, radius: %{public}f.", radius);
-        return NapiThrowError(env, ret);
+        return NapiThrowError(env, ret, "[window][setWindowShadowRadius]msg:set failed");
     }
     WmErrorCode syncShadowsRet = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SyncShadowsToComponent(*shadowsInfo));
     if (syncShadowsRet != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Sync shadows to component fail! ret:  %{public}u",
             static_cast<int32_t>(syncShadowsRet));
-        return NapiThrowError(env, syncShadowsRet);
+        return NapiThrowError(env, syncShadowsRet, "[window][setWindowShadowRadius]msg:sync shadows to component fail");
     }
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u, %{public}s] set success, radius=%{public}f.",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), radius);
@@ -7402,7 +7407,8 @@ napi_value JsWindow::OnSetWindowTransitionAnimation(napi_env env, napi_callback_
         auto window = weakToken.promote();
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_ANIMATION, "%{public}s window is nullptr", where);
-            task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
+                "[window][setWindowTransitionAnimation]msg:native window is nullptr"));
             return;
         }
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetWindowTransitionAnimation(
@@ -7416,7 +7422,8 @@ napi_value JsWindow::OnSetWindowTransitionAnimation(napi_env env, napi_callback_
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetWindowTransitionAnimation") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env, CreateJsError(env,
-            static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
+            static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
+            "[window][setWindowTransitionAnimation]msg:send event failed"));
     }
     return result;
 }
@@ -7426,7 +7433,8 @@ napi_value JsWindow::OnGetWindowTransitionAnimation(napi_env env, napi_callback_
     TLOGD(WmsLogTag::WMS_ANIMATION, "[NAPI]");
     WmErrorCode enableResult = WmErrorCode::WM_OK;
     if (!IsTransitionAnimationEnable(env, windowToken_, enableResult)) {
-        return NapiThrowError(env, enableResult);
+        return NapiThrowError(env, enableResult,
+            "[window][getWindowTransitionAnimation]msg:transition animation is not enable");
     }
     size_t argc = ONE_PARAMS_SIZE;
     napi_value argv[ONE_PARAMS_SIZE] = { nullptr };
