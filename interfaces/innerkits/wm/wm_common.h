@@ -764,6 +764,15 @@ enum class WindowStyleType : uint8_t {
 };
 
 /**
+ * @brief Enumerates window style status
+ */
+enum class WindowManagementMode : uint32_t {
+    UNDEFINED,
+    FREEFORM,
+    FULLSCREEN
+};
+
+/**
  * @brief Disable Gesture Back Type
  */
 enum class GestureBackType : uint8_t {

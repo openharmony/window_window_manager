@@ -3568,7 +3568,7 @@ WMError WindowSessionImpl::SetDecorButtonStyle(const DecorButtonStyle& decorButt
         TLOGE(WmsLogTag::WMS_DECOR, "uiContent is null, windowId: %{public}u", GetWindowId());
         return WMError::WM_ERROR_NULLPTR;
     }
-    nlohmann::json decorJson = WindowSessionImpl::setContainerButtonStyle(decorButtonStyle);
+    nlohmann::json decorJson = WindowSessionImpl::SetContainerButtonStyle(decorButtonStyle);
     auto decorJsonStr =  decorJson.dump();
     TLOGI(WmsLogTag::WMS_DECOR, "decorJsonStr: %{public}s", decorJsonStr.c_str());
     uiContent->OnContainerModalEvent(DECOR_BUTTON_STYLE_CHANGE, decorJsonStr);
@@ -7983,7 +7983,7 @@ WSError WindowSessionImpl::SetCurrentRotation(int32_t currentRotation)
     return WSError::WS_OK;
 }
 
-nlohmann::json WindowSessionImpl::setContainerButtonStyle(const DecorButtonStyle& decorButtonStyle)
+nlohmann::json WindowSessionImpl::SetContainerButtonStyle(const DecorButtonStyle& decorButtonStyle)
 {
     nlohmann::json decorJson;
     decorJson.emplace(BUTTON_BACKGROUND_CORNER_RADIUS, decorButtonStyle.buttonBackgroundCornerRadius);
