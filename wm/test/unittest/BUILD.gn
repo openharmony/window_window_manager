@@ -20,6 +20,7 @@ group("unittest") {
 
   deps = [
     ":wm_floating_ball_manager_test",
+    ":wm_floating_ball_new_test",
     ":wm_floating_ball_test",
     ":wm_gtx_input_event_sender_test",
     ":wm_input_transfer_station_test",
@@ -634,6 +635,25 @@ ohos_unittest("wm_floating_ball_test") {
   sources = [
     "floating_ball_controller_test.cpp",
     "floating_ball_option_test.cpp",
+  ]
+
+  deps = [ ":wm_unittest_common" ]
+
+  external_deps = [
+    "ability_runtime:runtime",
+    "c_utils:utils",
+    "graphic_2d:librender_service_base",
+    "graphic_2d:librender_service_client",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("wm_floating_ball_new_test") {
+  module_out_path = module_out_path
+
+  sources = [
+    "floating_ball_controller_new_test.cpp",
+    "floating_ball_option_new_test.cpp",
   ]
 
   deps = [ ":wm_unittest_common" ]
