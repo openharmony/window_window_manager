@@ -74,6 +74,13 @@ enum class LifeCycleEventType : uint32_t {
     DESTROYED,
 };
 
+enum class WindowStageLifeCycleEventType : uint32_t {
+    FOREGROUND = 1,
+    BACKGROUND,
+    RESUMED,
+    PAUSED,
+};
+
 const std::map<WindowType, ApiWindowType> NATIVE_JS_TO_WINDOW_TYPE_MAP {
     { WindowType::WINDOW_TYPE_APP_SUB_WINDOW,      ApiWindowType::TYPE_APP               },
     { WindowType::WINDOW_TYPE_DIALOG,              ApiWindowType::TYPE_DIALOG            },
