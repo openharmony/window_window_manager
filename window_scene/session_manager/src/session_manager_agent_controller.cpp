@@ -235,8 +235,8 @@ void SessionManagerAgentController::NotifyWindowStyleChange(WindowStyleType type
         }
     }
     if (!hasNotified) {
-        windowStyleStatus_ = type == WindowStyleType::WINDOW_STYLE_FREE_MULTI_WINDOW ?
-            WindowStyleStatus::WINDOW_STYLE_STATUS_PC_MODE : WindowStyleStatus::WINDOW_STYLE_STATUS_PAD_MODE;
+        windowModeStatus_ = type == WindowStyleType::WINDOW_STYLE_FREE_MULTI_WINDOW ?
+            WindowModeStatus::WINDOW_STYLE_STATUS_PC_MODE : WindowModeStatus::WINDOW_STYLE_STATUS_PAD_MODE;
     }
 }
 
