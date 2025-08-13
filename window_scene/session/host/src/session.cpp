@@ -2691,12 +2691,12 @@ bool Session::GetEnableAddSnapshot() const
 }
 
 void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media::PixelMap> persistentPixelMap,
-    bool updateSnapshot)
+    bool updateSnapshot, ScreenLockReason reason)
 {
     if (scenePersistence_ == nullptr) {
         return;
     }
-    auto key = GetSessionStatus();
+    auto key = GetSessionStatus(reason);
     auto rotate = WSSnapshotHelper::GetDisplayOrientation(currentRotation_);
     if (persistentPixelMap) {
         key = defaultStatus;
@@ -2879,7 +2879,7 @@ SnapshotStatus Session::GetWindowStatus() const
     return std::make_pair(snapshotScreen, orientation);
 }
 
-SnapshotStatus Session::GetSessionStatus() const
+SnapshotStatus Session::GetSessionStatus(ScreenLockReason reason) const
 {
     if (!SupportSnapshotAllSessionStatus()) {
         return defaultStatus;
@@ -2889,6 +2889,9 @@ SnapshotStatus Session::GetSessionStatus() const
         snapshotScreen = lastSnapshotScreen_;
     } else {
         snapshotScreen = WSSnapshotHelper::GetScreenStatus();
+    }
+    if (reason == ScreenLockReason::EXPAND_TO_FOLD_SINGLE_POCKET) {
+        snapshotScreen = SCREEN_EXPAND;
     }
     uint32_t orientation = WSSnapshotHelper::GetOrientation(currentRotation_);
     return std::make_pair(snapshotScreen, orientation);
