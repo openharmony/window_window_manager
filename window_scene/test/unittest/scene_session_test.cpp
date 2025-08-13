@@ -1818,10 +1818,24 @@ HWTEST_F(SceneSessionTest, UpdateSessionRectPosYFromClient01, TestSize.Level1)
     sceneSession->UpdateSessionRectPosYFromClient(SizeChangeReason::UNDEFINED, displayId, rect);
     EXPECT_EQ(rect.posY_, 100);
     sceneSession->clientDisplayId_ = 999;
+    sceneSession->configDisplayId_ = 999;
     rect = { 0, 100, 100, 100 };
-    auto rect2 = rect;
-    sceneSession->UpdateSessionRectPosYFromClient(SizeChangeReason::UNDEFINED, displayId, rect);
-    EXPECT_EQ(rect.posY_, rect2.posY_);
+    sceneSession->UpdateSessionRectPosYFromClient(SizeChangeReason::RESIZE, displayId, rect);
+    EXPECT_EQ(rect.posY_, 100 + 1648 + 40);
+
+    sceneSession->clientDisplayId_ = 999;
+    sceneSession->configDisplayId_ = 999;
+    rect = { 0, 1700, 100, 100 };
+    sceneSession->UpdateSessionRectPosYFromClient(SizeChangeReason::RESIZE, displayId, rect);
+    EXPECT_EQ(rect.posY_, 1700);
+
+    WSRect sessionRect = {100, 200, 1000, 1000};
+    sceneSession->SetSessionRect(sessionRect);
+    sceneSession->clientDisplayId_ = 999;
+    sceneSession->configDisplayId_ = 999;
+    rect = { 0, -100, 100, 100 };
+    sceneSession->UpdateSessionRectPosYFromClient(SizeChangeReason::RESIZE, displayId, rect);
+    EXPECT_EQ(rect.posY_, -100 + sessionRect.posY_);
 }
 
 /**
