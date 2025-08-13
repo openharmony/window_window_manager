@@ -1207,7 +1207,8 @@ void SceneSession::NotifyUpdateAppUseControl(ControlAppType type, const ControlI
                 TLOGNW(WmsLogTag::WMS_LIFE, "%{public}s sessionStage is nullptr or privacy mode control", where);
                 return;
             }
-            TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s isAppUseControl: %{public}d", where, isAppUseControl);
+            TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s isAppUseControl: %{public}d, persistentId: %{public}d", where,
+                isAppUseControl, session->GetPersistentId());
             session->sessionStage_->NotifyAppUseControlStatus(isAppUseControl);
         }
     }, __func__);

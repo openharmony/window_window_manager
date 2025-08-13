@@ -1643,7 +1643,8 @@ void WindowSessionImpl::NotifyForegroundInteractiveStatus(bool interactive)
     }
     if (interactive) {
         bool useControlState = property_->GetUseControlState();
-        TLOGI(WmsLogTag::WMS_LIFE, "useControlState: %{public}d", useControlState);
+        TLOGI(WmsLogTag::WMS_LIFE, "useControlState: %{public}d, persistentId: %{public}d", useControlState,
+            GetPersistentId());
         if (!useControlState) {
             NotifyAfterLifecycleResumed();
         }
@@ -1661,7 +1662,8 @@ void WindowSessionImpl::NotifyAppUseControlStatus(bool isUseControl)
         isAppUseControl_ = isUseControl;
     }
     property_->SetUseControlState(isUseControl);
-    TLOGI(WmsLogTag::WMS_LIFE, "isUseControl: %{public}d, state_: %{public}d", isUseControl, state_);
+    TLOGI(WmsLogTag::WMS_LIFE, "isUseControl: %{public}d, state_: %{public}d, persistentId: %{public}d",
+        isUseControl, state_, GetPersistentId());
     if (IsWindowSessionInvalid() || state_ != WindowState::STATE_SHOWN) {
         return;
     }

@@ -1433,7 +1433,7 @@ HWTEST_F(WindowSessionImplTest, NotifyAfterLifecycleBackground, TestSize.Level1)
  * @tc.desc: NotifyAppUseControlStatus
  * @tc.type: FUNC
  */
- HWTEST_F(WindowSessionImplTest, NotifyAppUseControlStatus, TestSize.Level1)
+ HWTEST_F(WindowSessionImplTest, NotifyAppUseControlStatusWhenSetStateThenReturnOK, TestSize.Level1)
 {
     sptr<WindowOption> appOption = sptr<WindowOption>::MakeSptr();
     ASSERT_NE(nullptr, appOption);
