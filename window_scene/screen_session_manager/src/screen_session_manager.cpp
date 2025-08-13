@@ -1238,7 +1238,7 @@ void ScreenSessionManager::DisConnectScreenIfScreenInfoNull(sptr<ScreenSession>&
         TLOGE(WmsLogTag::DMS, "screenSession or clientProxy_ is null");
         return;
     }
-    if (IsDefaultMirrMode(screenSession->GetRSScreenId())) {
+    if (IsDefaultMirrorMode(screenSession->GetRSScreenId())) {
         clientProxy_->OnScreenConnectionChanged(
             GetSessionOption(screenSession, screenSession->GetRSScreenId()), ScreenEvent::DISCONNECTED);
     }
