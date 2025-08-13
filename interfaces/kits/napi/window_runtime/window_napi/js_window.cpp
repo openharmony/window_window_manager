@@ -4221,21 +4221,24 @@ napi_value JsWindow::OnSetWindowFocusable(napi_env env, napi_callback_info info)
             auto window = weakToken.promote();
             if (window == nullptr) {
                 task->Reject(env,
-                    JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "Invalidate params."));
+                    JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                        "[window][setWindowFocusable]msg: Window is nullptr"));
                 return;
             }
             WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetFocusable(focusable));
             if (ret == WmErrorCode::WM_OK) {
                 task->Resolve(env, NapiGetUndefined(env));
             } else {
-                task->Reject(env, JsErrUtils::CreateJsError(env, ret, "Window set focusable failed"));
+                task->Reject(env, JsErrUtils::CreateJsError(env, ret,
+                    "[window][setWindowFocusable]msg: Window set focusable failed"));
             }
             TLOGNI(WmsLogTag::WMS_FOCUS, "%{public}s: Window [%{public}u, %{public}s] set focusable end",
                 where, window->GetWindowId(), window->GetWindowName().c_str());
         };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetWindowFocusable") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
-            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
+            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                "[window][setWindowFocusable]msg: Failed to send event"));
     }
     return result;
 }
@@ -4282,13 +4285,15 @@ napi_value JsWindow::OnSetTopmost(napi_env env, napi_callback_info info)
     NapiAsyncTask::CompleteCallback complete =
         [weakToken, errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
             if (errCodePtr == nullptr) {
-                task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+                task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                    "[window][setTopmost]msg: System abnormal"));
                 return;
             }
             if (*errCodePtr == WmErrorCode::WM_OK) {
                 task.Resolve(env, NapiGetUndefined(env));
             } else {
-                task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr, "Window set topmost failed"));
+                task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr,
+                    "[window][setTopmost]msg: Window set topmost failed"));
             }
         };
     napi_value result = nullptr;
@@ -4385,21 +4390,23 @@ napi_value JsWindow::OnSetSubWindowZLevel(napi_env env, napi_callback_info info)
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_HIERARCHY, "%{public}s window is nullptr", where);
             task->Reject(env, JsErrUtils::CreateJsError(env,
-                WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "window is nullptr."));
+                WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "[window][setSubWindowZLevel]msg: Window is nullptr"));
             return;
         }
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetSubWindowZLevel(zLevel));
         if (ret == WmErrorCode::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
         } else {
-            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "Set sub window zLevel failed"));
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret,
+                "[window][setSubWindowZLevel]msg: Set sub window zLevel failed"));
         }
         TLOGNI(WmsLogTag::WMS_HIERARCHY, "window [%{public}u, %{public}s], zLevel = %{public}d, ret = %{public}d",
             window->GetWindowId(), window->GetWindowName().c_str(), zLevel, ret);
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetSubWindowZLevel") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
-            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "send event failed"));
+            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                "[window][setSubWindowZLevel]msg: Failed to send event"));
     }
     return result;
 }
@@ -4416,12 +4423,13 @@ napi_value JsWindow::OnGetSubWindowZLevel(napi_env env, napi_callback_info info)
     }
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "window is nullptr");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][getSubWindowZLevel]msg: Window is nullptr");
     }
     int32_t zLevel = 0;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->GetSubWindowZLevel(zLevel));
     if (ret != WmErrorCode::WM_OK) {
-        return NapiThrowError(env, ret);
+        return NapiThrowError(env, ret, "[window][getSubWindowZLevel]msg: Get sub window zLevel failed");
     }
     napi_value objValue = nullptr;
     napi_set_named_property(env, objValue, "zLevel", CreateJsValue(env, zLevel));
@@ -5083,23 +5091,27 @@ napi_value JsWindow::OnRaiseAboveTarget(napi_env env, napi_callback_info info)
         [weakToken = wptr<Window>(windowToken_), subWindowId, errCode, env, task = napiAsyncTask, where = __func__] {
             auto window = weakToken.promote();
             if (window == nullptr) {
-                task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+                task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                    "[window][raiseAboveTarget]msg: Window is nullptr"));
                 return;
             }
             if (errCode != WmErrorCode::WM_OK) {
-                task->Reject(env, JsErrUtils::CreateJsError(env, errCode, "Invalidate params."));
+                task->Reject(env, JsErrUtils::CreateJsError(env, errCode,
+                    "[window][raiseAboveTarget]msg: Invalidate params."));
                 return;
             }
             WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RaiseAboveTarget(subWindowId));
             if (ret == WmErrorCode::WM_OK) {
                 task->Resolve(env, NapiGetUndefined(env));
             } else {
-                task->Reject(env, JsErrUtils::CreateJsError(env, ret, "Window set raiseAboveTarget failed"));
+                task->Reject(env, JsErrUtils::CreateJsError(env, ret,
+                    "[window][raiseAboveTarget]msg: Window set raiseAboveTarget failed"));
             }
         };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnRaiseAboveTarget") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
-            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
+            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                "[window][raiseAboveTarget]msg: Failed to send event"));
     }
     return result;
 }
@@ -5140,21 +5152,23 @@ napi_value JsWindow::OnRaiseMainWindowAboveTarget(napi_env env, napi_callback_in
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
     auto asyncTask = [weakToken = wptr<Window>(windowToken_), targetId, env, task = napiAsyncTask, errCode] {
         if (errCode != WmErrorCode::WM_OK) {
-            task->Reject(env, JsErrUtils::CreateJsError(env, errCode));
+            task->Reject(env, JsErrUtils::CreateJsError(env, errCode,
+                "[window][raiseMainWindowAboveTarget]msg: Invalidate params."));
             return;
         }
         auto window = weakToken.promote();
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_HIERARCHY, "window is nullptr");
-            task->Reject(env,
-                         JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "window is nullptr"));
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                "[window][raiseMainWindowAboveTarget]msg: Window is nullptr"));
             return;
         }
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RaiseMainWindowAboveTarget(targetId));
         if (ret == WmErrorCode::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
         } else {
-            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "raise main window above target failed"));
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret,
+                "[window][raiseMainWindowAboveTarget]msg: Raise main window above target failed"));
         }
         TLOGNI(WmsLogTag::WMS_HIERARCHY,
                "source window: %{public}u, target window: %{public}u, ret = %{public}d",
@@ -5162,7 +5176,8 @@ napi_value JsWindow::OnRaiseMainWindowAboveTarget(napi_env env, napi_callback_in
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnRaiseMainWindowAboveTarget") != napi_status::napi_ok) {
         napiAsyncTask->Reject(
-            env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "send event failed"));
+            env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                "[window][raiseMainWindowAboveTarget]msg: Failed to send event"));
     }
     return result;
 }
@@ -5814,14 +5829,16 @@ napi_value JsWindow::OnRaiseToAppTop(napi_env env, napi_callback_info info)
             auto window = weakToken.promote();
             if (window == nullptr) {
                 TLOGNE(WmsLogTag::WMS_HIERARCHY, "%{public}s: window is nullptr", where);
-                task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+                task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                    "[window][raiseToAppTop]msg: Window is nullptr"));
                 return;
             }
 
             WmErrorCode errCode = WM_JS_TO_ERROR_CODE_MAP.at(window->RaiseToAppTop());
             if (errCode != WmErrorCode::WM_OK) {
                 TLOGNE(WmsLogTag::WMS_HIERARCHY, "raise window zorder failed");
-                task->Reject(env, JsErrUtils::CreateJsError(env, errCode));
+                task->Reject(env, JsErrUtils::CreateJsError(env, errCode,
+                    "[window][raiseToAppTop]msg: Raise window zorder failed"));
                 return;
             }
             task->Resolve(env, NapiGetUndefined(env));
@@ -5830,7 +5847,8 @@ napi_value JsWindow::OnRaiseToAppTop(napi_env env, napi_callback_info info)
         };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnRaiseToAppTop") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
-            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
+            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                "[window][raiseToAppTop]msg: Failed to send event"));
     }
     return result;
 }
@@ -6342,7 +6360,7 @@ napi_value JsWindow::OnSetShadow(napi_env env, napi_callback_info info)
     }
     return NapiGetUndefined(env);
 }
-  
+
 void JsWindow::ParseShadowOptionalParameters(WmErrorCode& ret, std::shared_ptr<ShadowsInfo>& shadowsInfo,
     napi_env env, const napi_value* argv, size_t argc)
 {
@@ -8071,13 +8089,15 @@ static void SetRequestFocusTask(NapiAsyncTask::ExecuteCallback& execute, NapiAsy
     };
     complete = [weakToken, errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
         if (errCodePtr == nullptr) {
-            task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+            task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                "[window][requestFocus]msg: System abnormal"));
             return;
         }
         if (*errCodePtr == WmErrorCode::WM_OK) {
             task.Resolve(env, NapiGetUndefined(env));
         } else {
-            task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr, "JsWindow::OnRequestFocus failed"));
+            task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr,
+                "[window][requestFocus]msg: Request focus failed"));
         }
     };
 }
@@ -8653,7 +8673,8 @@ napi_value JsWindow::OnSetExclusivelyHighlighted(napi_env env, napi_callback_inf
         auto window = weakToken.promote();
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_FOCUS, "%{public}s: window is nullptr", where);
-            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                "[window][setExclusivelyHighlighted]msg: Window is nullptr"));
             return;
         }
         WMError ret = window->SetExclusivelyHighlighted(exclusivelyHighlighted);
@@ -8661,14 +8682,16 @@ napi_value JsWindow::OnSetExclusivelyHighlighted(napi_env env, napi_callback_inf
             task->Resolve(env, NapiGetUndefined(env));
         } else {
             WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
-            task->Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode, "Set exclusively highlighted failed"));
+            task->Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode,
+                "[window][setExclusivelyHighlighted]msg: Set exclusively highlighted failed"));
         }
         TLOGNI(WmsLogTag::WMS_FOCUS, "%{public}s: end, window: [%{public}u, %{public}s]",
             where, window->GetWindowId(), window->GetWindowName().c_str());
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetExclusivelyHighlighted") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env, CreateJsError(env,
-            static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
+            static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
+                "[window][setExclusivelyHighlighted]msg: Failed to send event"));
     }
     return result;
 }
