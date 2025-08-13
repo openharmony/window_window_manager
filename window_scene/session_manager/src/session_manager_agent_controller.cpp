@@ -226,15 +226,15 @@ void SessionManagerAgentController::NotifyWindowStyleChange(WindowStyleType type
 {
     TLOGD(WmsLogTag::WMS_MAIN, "windowStyletype: %{public}d",
           static_cast<uint8_t>(type));
-    bool isNotify = false;
+    bool hasNotified = false;
     for (auto& agent : smAgentContainer_.GetAgentsByType(
         WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_STYLE)) {
         if (agent != nullptr) {
             agent->NotifyWindowStyleChange(type);
-            isNotify = true;
+            hasNotified = true;
         }
     }
-    if (!isNotify) {
+    if (!hasNotified) {
         windowStyleStatus_ = type == WindowStyleType::WINDOW_STYLE_FREE_MULTI_WINDOW ?
             WindowStyleStatus::WINDOW_STYLE_STATUS_PC_MODE : WindowStyleStatus::WINDOW_STYLE_STATUS_PAD_MODE;
     }
