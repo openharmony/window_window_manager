@@ -273,7 +273,8 @@ public:
         bool runInFfrt = false, float scaleParam = 0.0f, bool useCurWindow = false) const;
     void ResetSnapshot();
     void SaveSnapshot(bool useFfrt, bool needPersist = true,
-        std::shared_ptr<Media::PixelMap> persistentPixelMap = nullptr, bool updateSnapshot = false);
+        std::shared_ptr<Media::PixelMap> persistentPixelMap = nullptr, bool updateSnapshot = false,
+        ScreenLockReason reason = ScreenLockReason::DEFAULT);
     void SetSaveSnapshotCallback(Task&& task)
     {
         if (task) {
@@ -733,7 +734,7 @@ public:
     bool SupportSnapshotAllSessionStatus() const;
     void InitSnapshotCapacity();
     SnapshotStatus GetWindowStatus() const;
-    SnapshotStatus GetSessionStatus() const;
+    SnapshotStatus GetSessionStatus(ScreenLockReason reason = ScreenLockReason::DEFAULT) const;
     DisplayOrientation GetWindowOrientation() const;
     uint32_t GetLastOrientation() const;
     bool HasSnapshotFreeMultiWindow();
