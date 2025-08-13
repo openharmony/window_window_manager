@@ -54,6 +54,10 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return WSError::WS_OK;
     }
+    WSError IsFocusWindowParent(const sptr<IRemoteObject>& token, bool& isParent) override
+    {
+        return WSError::WS_OK;
+    }
     WSError RegisterSessionListener(const sptr<ISessionListener>& listener, bool isRecover = false) override
     {
         return WSError::WS_OK;
@@ -566,6 +570,22 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetFocusSessionElement1, TestSiz
     MessageParcel reply;
     auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleGetFocusSessionElement(data, reply);
     EXPECT_EQ(ERR_INVALID_DATA, res);
+}
+
+/**
+ * @tc.name: HandleIsFocusWindowParent
+ * @tc.desc: test function : HandleIsFocusWindowParent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleIsFocusWindowParent, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleIsFocusWindowParent(data, reply);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
+    const sptr<IRemoteObject> token = sptr<MockIRemoteObject>::MakeSptr();
+    data.WriteRemoteObject(token);
+    EXPECT_EQ(ERR_NONE, res);
 }
 
 /**
@@ -1260,7 +1280,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleSendPointerEventForHover, Functi
 {
     MessageParcel data;
     MessageParcel reply;
-    const sptr<IRemoteObject> token = sptr<MockIRemoteObject>::MakeSptr();
+    sptr<IRemoteObject> token = sptr<MockIRemoteObject>::MakeSptr();
     data.WriteRemoteObject(token);
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleSendPointerEventForHover(data, reply);

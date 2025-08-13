@@ -492,6 +492,7 @@ public:
     WSError GetIsHighlighted(bool& isHighlighted) override;
     WSError HandlePointerEventForFocus(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         bool isExecuteDelayRaise = false);
+    bool HasParentSessionWithToken(const sptr<IRemoteObject>& token);
 
     /*
      * Multi Window

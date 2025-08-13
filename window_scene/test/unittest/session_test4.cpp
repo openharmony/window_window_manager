@@ -1472,6 +1472,36 @@ HWTEST_F(WindowSessionTest4, TestGetSessionScreenRelativeRect_002, TestSize.Leve
     WSRect result = session_->GetSessionScreenRelativeRect();
     EXPECT_EQ(result, expectedRect);
 }
+
+/**
+ * @tc.name: HasParentSessionWithToken
+ * @tc.desc: get relative rect when reason is not drag move
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, HasParentSessionWithToken, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "HasParentSessionWithToken";
+    info.bundleName_ = "HasParentSessionWithToken";
+    sptr<Session> session = sptr<Session>::MakeSptr(info, nullptr);
+
+    sptr<IRemoteObject> token = sptr<MockIRemoteObject>::MakeSptr();
+    bool ret = session->HasParentSessionWithToken(token);
+    EXPECT_EQ(ret, false);
+
+    SessionInfo parentSessionInfo;
+    parentSessionInfo.abilityName_ = "parentSession";
+    parentSessionInfo.bundleName_ = "parentSession";
+    sptr<Session> parentSession = sptr<Session>::MakeSptr(parentSessionInfo, nullptr);
+    session->SetParentSession(parentSession);
+
+    ret = session->HasParentSessionWithToken(token);
+    EXPECT_EQ(ret, false);
+
+    parentSession->SetAbilityToken(token);
+    ret = session->HasParentSessionWithToken(token);
+    EXPECT_EQ(ret, true);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
