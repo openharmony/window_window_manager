@@ -1349,7 +1349,9 @@ void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
             (windowModeSupportType == WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN) :
             (WindowHelper::IsWindowModeSupported(windowModeSupportType, WindowMode::WINDOW_MODE_FULLSCREEN) &&
             !WindowHelper::IsWindowModeSupported(windowModeSupportType, WindowMode::WINDOW_MODE_FLOATING));
-        bool onlySupportFullScreen = isWindowModeSupportFullscreen &&
+        auto mainWindow = FindMainWindowWithContext();
+        bool isAnco = mainWindow != nullptr && mainWindow->IsAnco();
+        bool onlySupportFullScreen = (isWindowModeSupportFullscreen || isAnco) &&
             ((!windowSystemConfig_.IsPhoneWindow() && !windowSystemConfig_.IsPadWindow()) || IsFreeMultiWindowMode());
         bool compatibleDisableFullScreen = property_->IsFullScreenDisabled();
         if ((onlySupportFullScreen || property_->GetFullScreenStart()) && !compatibleDisableFullScreen) {
@@ -5534,7 +5536,10 @@ WSError WindowSceneSessionImpl::SwitchFreeMultiWindow(bool enable)
         WindowMode::WINDOW_MODE_FULLSCREEN)) {
         UpdateDecorEnable(true);
     }
-    if (WindowHelper::IsWindowModeSupported(property_->GetWindowModeSupportType(), WindowMode::WINDOW_MODE_FLOATING)) {
+    auto mainWindow = FindMainWindowWithContext();
+    bool isAnco = mainWindow != nullptr && mainWindow->IsAnco();
+    if (WindowHelper::IsWindowModeSupported(property_->GetWindowModeSupportType(), WindowMode::WINDOW_MODE_FLOATING) &&
+        !isAnco) {
         UpdateImmersiveBySwitchMode(enable);
     }
     SwitchSubWindow(enable, GetPersistentId());
