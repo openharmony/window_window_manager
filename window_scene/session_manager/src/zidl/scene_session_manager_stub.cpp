@@ -2336,7 +2336,7 @@ int SceneSessionManagerStub::HandleAddSessionBlackList(MessageParcel& data, Mess
         return ERR_INVALID_DATA;
     }
     std::unordered_set<std::string> bundleNames;
-    for (int64_t i = 0; i < size; i++) {
+    for (uint64_t i = 0; i < size; i++) {
         std::string bundleName;
         if (!data.ReadString(bundleName)) {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read windowId failed");
@@ -2355,7 +2355,7 @@ int SceneSessionManagerStub::HandleAddSessionBlackList(MessageParcel& data, Mess
         return ERR_INVALID_DATA;
     }
     std::unordered_set<std::string> privacyWindowTags;
-    for (int64_t i = 0; i < size; i++) {
+    for (uint64_t i = 0; i < size; i++) {
         std::string privacyWindowTag = 0;
         if (!data.ReadString(privacyWindowTag)) {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read privacyWindowTag failed");
@@ -2383,7 +2383,7 @@ int SceneSessionManagerStub::HandleRemoveSessionBlackList(MessageParcel& data, M
         return ERR_INVALID_DATA;
     }
     std::unordered_set<std::string> bundleNames;
-    for (int64_t i = 0; i < size; i++) {
+    for (uint64_t i = 0; i < size; i++) {
         std::string bundleName;
         if (!data.ReadString(bundleName)) {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read bundleName failed");
@@ -2402,7 +2402,7 @@ int SceneSessionManagerStub::HandleRemoveSessionBlackList(MessageParcel& data, M
         return ERR_INVALID_DATA;
     }
     std::unordered_set<std::string> privacyWindowTags;
-    for (int64_t i = 0; i < size; i++) {
+    for (uint64_t i = 0; i < size; i++) {
         std::string privacyWindowTag = 0;
         if (!data.ReadString(privacyWindowTag)) {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read privacyWindowTag failed");
