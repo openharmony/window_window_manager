@@ -134,6 +134,7 @@ public:
     static napi_value SetSupportFunctionType(napi_env env, napi_callback_info info);
     static napi_value GetApplicationInfo(napi_env env, napi_callback_info info);
     static napi_value SetUIEffectControllerAliveInUI(napi_env env, napi_callback_info info);
+    static napi_value SupportCreateFloatWindow(napi_env env, napi_callback_info info);
 
     /*
      * PC Window
@@ -374,6 +375,7 @@ private:
     static napi_value StartAbilityBySpecified(napi_env env, napi_callback_info info);
     static napi_value StartUIAbilityBySCB(napi_env env, napi_callback_info info);
     napi_value OnGetApplicationInfo(napi_env env, napi_callback_info info);
+    napi_value OnSupportCreateFloatWindow(napi_env env, napi_callback_info info);
     void RegisterSceneSessionDestructCallback();
     void OnSceneSessionDestruct(int32_t persistentId);
     void RegisterTransferSessionToTargetScreenCallback();

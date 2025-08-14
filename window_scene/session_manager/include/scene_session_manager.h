@@ -762,6 +762,7 @@ public:
     WMError UpdateKioskAppList(const std::vector<std::string>& kioskAppList);
     WMError EnterKioskMode(const sptr<IRemoteObject>& token);
     WMError ExitKioskMode();
+    void ConfigSupportCreateFloatWindow();
     void RegisterGetStartWindowConfigCallback(const sptr<SceneSession>& sceneSession);
     void RegisterUpdateKioskAppListCallback(UpdateKioskAppListFunc&& func);
     void RegisterKioskModeChangeCallback(KioskModeChangeFunc&& func);
