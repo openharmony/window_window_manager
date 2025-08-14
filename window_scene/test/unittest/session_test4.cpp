@@ -18,6 +18,7 @@
 #include <pointer_event.h>
 #include <ui/rs_surface_node.h>
 
+#include "iremote_object_mocker.h"
 #include "key_event.h"
 #include "mock/mock_session.h"
 #include "mock/mock_session_stage.h"
@@ -1483,7 +1484,7 @@ HWTEST_F(WindowSessionTest4, HasParentSessionWithToken, TestSize.Level1)
     SessionInfo info;
     info.abilityName_ = "HasParentSessionWithToken";
     info.bundleName_ = "HasParentSessionWithToken";
-    sptr<Session> session = sptr<Session>::MakeSptr(info, nullptr);
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
 
     sptr<IRemoteObject> token = sptr<MockIRemoteObject>::MakeSptr();
     bool ret = session->HasParentSessionWithToken(token);
@@ -1492,7 +1493,7 @@ HWTEST_F(WindowSessionTest4, HasParentSessionWithToken, TestSize.Level1)
     SessionInfo parentSessionInfo;
     parentSessionInfo.abilityName_ = "parentSession";
     parentSessionInfo.bundleName_ = "parentSession";
-    sptr<Session> parentSession = sptr<Session>::MakeSptr(parentSessionInfo, nullptr);
+    sptr<Session> parentSession = sptr<Session>::MakeSptr(parentSessionInfo);
     session->SetParentSession(parentSession);
 
     ret = session->HasParentSessionWithToken(token);

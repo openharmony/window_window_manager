@@ -565,7 +565,7 @@ WSError SceneSessionManagerLiteProxy::GetFocusSessionElement(AppExecFwk::Element
 
 WSError SceneSessionManagerLiteProxy::IsFocusWindowParent(const sptr<IRemoteObject>& token, bool& isParent)
 {
-    TLOGI(WmsLogTag::WMS_FOCUS, "run");
+    TLOGD(WmsLogTag::WMS_FOCUS, "run");
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -602,6 +602,7 @@ WSError SceneSessionManagerLiteProxy::IsFocusWindowParent(const sptr<IRemoteObje
         return WSError::WS_ERROR_IPC_FAILED;
     }
     isParent = value;
+    TLOGD(WmsLogTag::WMS_FOCUS, "isParent: %{public}d", isParent);
     return static_cast<WSError>(ret);
 }
 

@@ -1282,14 +1282,12 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleSendPointerEventForHover, Functi
     MessageParcel reply;
     sptr<IRemoteObject> token = sptr<MockIRemoteObject>::MakeSptr();
     data.WriteRemoteObject(token);
-    auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleSendPointerEventForHover(data, reply);
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleSendPointerEventForHover(data, reply);
     EXPECT_EQ(ERR_INVALID_DATA, res);
 
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     pointerEvent->WriteToParcel(data);
-    res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleSendPointerEventForHover(data, reply);
+    res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleSendPointerEventForHover(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 } // namespace
