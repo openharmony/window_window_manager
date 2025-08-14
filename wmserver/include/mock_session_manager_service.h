@@ -45,7 +45,7 @@ public:
      */
     bool SetSessionManagerService(const sptr<IRemoteObject>& sessionManagerService);
     ErrCode GetSessionManagerService(sptr<IRemoteObject>& sessionManagerService) override;
-    ErrCode GetSessionManagerService(int32_t userId, sptr<IRemoteObject>& sessionManagerService) override;
+    ErrCode GetSessionManagerServiceByUserId(int32_t userId, sptr<IRemoteObject>& sessionManagerService) override;
     void NotifyWMSConnected(int32_t userId, int32_t screenId, bool isColdStart);
     void NotifyNotKillService() {}
 
