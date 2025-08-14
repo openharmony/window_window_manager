@@ -26,7 +26,7 @@
 namespace OHOS::Rosen {
 const uint32_t FOLD_TO_EXPAND_ONBOOTANIMATION_TASK_NUM = 1;
 const uint32_t FOLD_TO_EXPAND_TASK_NUM = 3;
-constexpr uint32_t SECONDARY_FOLD_TO_EXPAND_TASK_NUM = 2;
+constexpr uint32_t SECONDARY_FOLD_TO_EXPAND_TASK_NUM = 3;
 
 enum class DisplayModeChangeReason : uint32_t {
     DEFAULT = 0,
