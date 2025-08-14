@@ -422,6 +422,7 @@ WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property
         auto leashWinSurfaceNode = session->GetLeashWinSurfaceNode();
         if (leashWinSurfaceNode && sessionProperty) {
             bool lastPrivacyMode = sessionProperty->GetPrivacyMode() || sessionProperty->GetSystemPrivacyMode();
+            AutoRSTransaction trans(GetRSUIContext());
             leashWinSurfaceNode->SetSecurityLayer(lastPrivacyMode);
         }
         session->MarkAvoidAreaAsDirty();
@@ -4624,7 +4625,8 @@ void SceneSession::SetPrivacyMode(bool isPrivacy)
     }
     bool lastPrivacyMode = property->GetPrivacyMode() || property->GetSystemPrivacyMode();
     if (lastPrivacyMode == isPrivacy) {
-        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "mode is same as: %{public}d", isPrivacy);
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "mode is same as: win=[%{public}d, %{public}s], isPrivacy=%{public}d",
+            GetWindowId(), GetWindowName().c_str(), isPrivacy);
         return;
     }
     property->SetPrivacyMode(isPrivacy);
@@ -4649,9 +4651,9 @@ void SceneSession::NotifyPrivacyModeChange()
 {
     bool isPrivacyMode = GetSessionProperty()->GetPrivacyMode();
     bool currExtPrivacyMode = combinedExtWindowFlags_.privacyModeFlag;
-    TLOGD(WmsLogTag::WMS_SCB, "id:%{public}d, currExtPrivacyMode:%{public}d, session property privacyMode: %{public}d, "
-        "last privacyMode:%{public}d",
-        GetPersistentId(), currExtPrivacyMode, isPrivacyMode, isPrivacyMode_);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "win:[%{public}d, %{public}s], currExtPrivacyMode:%{public}d, "
+        "session property privacyMode:%{public}d, last privacyMode:%{public}d",
+        GetPersistentId(), GetWindowName().c_str(), currExtPrivacyMode, isPrivacyMode, isPrivacyMode_);
     bool mixedPrivacyMode = currExtPrivacyMode || isPrivacyMode;
     if (mixedPrivacyMode != isPrivacyMode_) {
         isPrivacyMode_ = mixedPrivacyMode;
