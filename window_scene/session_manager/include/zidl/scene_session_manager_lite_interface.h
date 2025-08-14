@@ -147,7 +147,7 @@ public:
     virtual WSError GetFocusSessionToken(sptr<IRemoteObject>& token, DisplayId displayId = DEFAULT_DISPLAY_ID) = 0;
     virtual WSError GetFocusSessionElement(AppExecFwk::ElementName& element,
         DisplayId displayId = DEFAULT_DISPLAY_ID) = 0;
-    virtual WSError IsFocusWindowParent(const sptr<IRemoteObject>& token, bool& isParent) = 0;
+    virtual WSError IsFocusWindowParent(const sptr<IRemoteObject>& token, bool& isParent) { return WSError::WS_OK; }
     virtual WSError GetSessionSnapshot(const std::string& deviceId, int32_t persistentId,
                                        SessionSnapshot& snapshot, bool isLowResolution) = 0;
     virtual WSError LockSession(int32_t sessionId) = 0;
