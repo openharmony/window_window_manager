@@ -539,7 +539,6 @@ int SceneSessionManagerStub::HandleRecoverWindowPropertyChangeFlag(MessageParcel
     }
 
     WMError errCode = RecoverWindowPropertyChangeFlag(observedFlags, interestFlags);
-
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write errCode failed");
         return ERR_TRANSACTION_FAILED;
