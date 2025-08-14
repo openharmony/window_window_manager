@@ -6266,7 +6266,8 @@ napi_value JsWindow::OnSetWindowCornerRadius(napi_env env, napi_callback_info in
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetWindowCornerRadius(cornerRadius));
         if (ret != WmErrorCode::WM_OK) {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "Set failed!");
-            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "[window][setWindowCornerRadius]msg:set failed."));
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret,
+                "[window][setWindowCornerRadius]msg:set window corner radius failed."));
         } else {
             TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u, %{public}s] set success.",
                 window->GetWindowId(), window->GetWindowName().c_str());
@@ -6305,7 +6306,7 @@ napi_value JsWindow::OnGetWindowCornerRadius(napi_env env, napi_callback_info in
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->GetWindowCornerRadius(cornerRadius));
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Get failed, cornerRadius: %{public}f.", cornerRadius);
-        return NapiThrowError(env, ret, "[window][getWindowCornerRadius]msg:fail to get window corner radius.");
+        return NapiThrowError(env, ret, "[window][getWindowCornerRadius]msg:get window corner radius failed.");
     }
     napi_value jsCornerRadius = CreateJsValue(env, cornerRadius);
     if (jsCornerRadius == nullptr) {
@@ -6359,7 +6360,7 @@ napi_value JsWindow::OnSetShadow(napi_env env, napi_callback_info info)
 
     WmErrorCode syncShadowsRet = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SyncShadowsToComponent(*shadowsInfo));
     if (syncShadowsRet != WmErrorCode::WM_OK) {
-        TLOGE(WmsLogTag::WMS_ANIMATION, "Sync shadows to component fail! ret:  %{public}u",
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Sync shadows to component failed! ret:  %{public}u",
             static_cast<int32_t>(syncShadowsRet));
     }
     return NapiGetUndefined(env);
@@ -6431,13 +6432,14 @@ napi_value JsWindow::OnSetWindowShadowRadius(napi_env env, napi_callback_info in
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetWindowShadowRadius(radius));
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Set failed, radius: %{public}f.", radius);
-        return NapiThrowError(env, ret, "[window][setWindowShadowRadius]msg:set failed");
+        return NapiThrowError(env, ret, "[window][setWindowShadowRadius]msg:set shadow radius failed");
     }
     WmErrorCode syncShadowsRet = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SyncShadowsToComponent(*shadowsInfo));
     if (syncShadowsRet != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Sync shadows to component fail! ret:  %{public}u",
             static_cast<int32_t>(syncShadowsRet));
-        return NapiThrowError(env, syncShadowsRet, "[window][setWindowShadowRadius]msg:sync shadows to component fail");
+        return NapiThrowError(env, syncShadowsRet,
+            "[window][setWindowShadowRadius]msg:sync shadows to component failed");
     }
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u, %{public}s] set success, radius=%{public}f.",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), radius);
