@@ -185,7 +185,7 @@ HWTEST_F(KeyboardSessionTest2, AdjustKeyboardLayout01, TestSize.Level1)
 }
 
 /**
- * @tc.name: AdjustKeyboardLayout01
+ * @tc.name: AdjustKeyboardLayout02
  * @tc.desc: AdjustKeyboardLayout
  * @tc.type: FUNC
  */
@@ -269,9 +269,16 @@ HWTEST_F(KeyboardSessionTest2, AdjustKeyboardLayout04, Function | SmallTest | Le
     sptr<SceneSession::SpecificSessionCallback> specificCb =
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, specificCb, keyboardCb);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     KeyboardLayoutParams params;
-    params.landscapeAvoidHeight_ = 300;
-    params.portraitAvoidHeight_ = 700;
+    KeyboardLayoutParams lastParams;
+
+    lastParams.landscapeAvoidHeight_ = 300;
+    lastParams.portraitAvoidHeight_ = 700;
+    property->SetKeyboardLayoutParams(lastParams);
+    keyboardSession->SetSessionProperty(property);
+    params.landscapeAvoidHeight_ = 200;
+    params.portraitAvoidHeight_ = 600;
 
     keyboardSession->state_ = SessionState::STATE_FOREGROUND;
     keyboardSession->AdjustKeyboardLayout(params);
@@ -282,6 +289,12 @@ HWTEST_F(KeyboardSessionTest2, AdjustKeyboardLayout04, Function | SmallTest | Le
     keyboardSession->AdjustKeyboardLayout(params);
     EXPECT_TRUE(g_logMsg.find("Keyboard avoidHeight is set") == std::string::npos);
 
+    params.landscapeAvoidHeight_ = 200;
+    params.portraitAvoidHeight_ = -100;
+    keyboardSession->AdjustKeyboardLayout(params);
+    EXPECT_TRUE(g_logMsg.find("Keyboard avoidHeight is set") == std::string::npos);
+    LOG_SetCallback(nullptr);
+
     params.landscapeAvoidHeight_ = 0;
     keyboardSession->state_ = SessionState::STATE_BACKGROUND;
     keyboardSession->AdjustKeyboardLayout(params);
@@ -290,6 +303,65 @@ HWTEST_F(KeyboardSessionTest2, AdjustKeyboardLayout04, Function | SmallTest | Le
     keyboardSession->state_ = SessionState::STATE_FOREGROUND;
     keyboardSession->AdjustKeyboardLayout(params);
     EXPECT_TRUE(g_logMsg.find("Keyboard avoidHeight is set") == std::string::npos);
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: AdjustKeyboardLayout05
+ * @tc.desc: AdjustKeyboardLayout test
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest2, AdjustKeyboardLayout05, Function | SmallTest | Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(KeyboardSessionTest2Callback);
+    SessionInfo info;
+    info.abilityName_ = "AdjustKeyboardLayout05";
+    info.bundleName_ = "AdjustKeyboardLayout05";
+    sptr<KeyboardSession::KeyboardSessionCallback> keyboardCb =
+        sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
+    sptr<SceneSession::SpecificSessionCallback> specificCb =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, specificCb, keyboardCb);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    KeyboardLayoutParams params;
+    KeyboardLayoutParams lastParams;
+
+    lastParams.landscapeAvoidHeight_ = 300;
+    lastParams.portraitAvoidHeight_ = 700;
+    property->SetKeyboardLayoutParams(lastParams);
+    keyboardSession->SetSessionProperty(property);
+    params.landscapeAvoidHeight_ = 200;
+    params.portraitAvoidHeight_ = 600;
+
+    keyboardSession->state_ = SessionState::STATE_FOREGROUND;
+    keyboardSession->AdjustKeyboardLayout(params);
+    EXPECT_TRUE(g_logMsg.find("Keyboard avoidHeight is set") != std::string::npos);
+
+    g_logMsg.clear();
+    lastParams.landscapeAvoidHeight_ = 300;
+    lastParams.portraitAvoidHeight_ = 700;
+    property->SetKeyboardLayoutParams(lastParams);
+    keyboardSession->SetSessionProperty(property);
+    params.landscapeAvoidHeight_ = 300;
+    params.portraitAvoidHeight_ = 700;
+    keyboardSession->AdjustKeyboardLayout(params);
+    EXPECT_TRUE(g_logMsg.find("Keyboard avoidHeight is set") == std::string::npos);
+
+    lastParams.landscapeAvoidHeight_ = -300;
+    lastParams.portraitAvoidHeight_ = 700;
+    property->SetKeyboardLayoutParams(lastParams);
+    keyboardSession->SetSessionProperty(property);
+    keyboardSession->AdjustKeyboardLayout(params);
+    EXPECT_TRUE(g_logMsg.find("Keyboard avoidHeight is set") == std::string::npos);
+
+    lastParams.landscapeAvoidHeight_ = 300;
+    lastParams.portraitAvoidHeight_ = -700;
+    property->SetKeyboardLayoutParams(lastParams);
+    keyboardSession->SetSessionProperty(property);
+    keyboardSession->AdjustKeyboardLayout(params);
+    EXPECT_TRUE(g_logMsg.find("Keyboard avoidHeight is set") == std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
