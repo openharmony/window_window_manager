@@ -291,7 +291,7 @@ ErrCode MockSessionManagerService::GetSessionManagerService(sptr<IRemoteObject>&
     return ERR_OK;
 }
 
-ErrCode MockSessionManagerService::GetSessionManagerService(int32_t userId, sptr<IRemoteObject>& sessionManagerService)
+ErrCode MockSessionManagerService::GetSessionManagerServiceByUserId(int32_t userId, sptr<IRemoteObject>& sessionManagerService)
 {
     int32_t clientUserId = GetUserIdByCallingUid();
     if (clientUserId <= INVALID_USER_ID) {
@@ -975,16 +975,16 @@ ErrCode MockSessionManagerService::GetSceneSessionManagerCommon(
     return ERR_OK;
 }
 
-ErrCode MockSessionManagerService::GetSceneSessionManagerLiteByUserId(int32_t userId, sptr<IRemoteObject>& sceneSessionManagerLite)
+ErrCode MockSessionManagerService::GetSceneSessionManagerLiteByUserId(int32_t userId,
+     sptr<IRemoteObject>& sceneSessionManagerLite)
 {
-    return GetSceneSessionManagerCommon(userId, sceneSessionManagerLite, true); 
+    return GetSceneSessionManagerCommon(userId, sceneSessionManagerLite, true);
 }
 
-ErrCode MockSessionManagerService::GetSceneSessionManagerByUserId(
-    int32_t userId, 
+ErrCode MockSessionManagerService::GetSceneSessionManagerByUserId(int32_t userId,
     sptr<IRemoteObject>& sceneSessionManager)
 {
-    return GetSceneSessionManagerCommon(userId, sceneSessionManager, false); 
+    return GetSceneSessionManagerCommon(userId, sceneSessionManager, false);
 }
 
 ErrCode MockSessionManagerService::RecoverSCBSnapshotSkipByUserId(int32_t userId)
