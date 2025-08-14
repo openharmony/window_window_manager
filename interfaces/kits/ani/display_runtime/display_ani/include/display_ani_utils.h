@@ -55,6 +55,8 @@ static ani_status GetAniString(ani_env* env, const std::string& str, ani_string*
 
 static ani_status CallAniFunctionVoid(ani_env *env, const char* ns,
     const char* fn, const char* signature, ...);
+
+static ani_object CreateRectObject(ani_env *env);
 };
 }
 }

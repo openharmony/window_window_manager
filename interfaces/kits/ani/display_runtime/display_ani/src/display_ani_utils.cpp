@@ -54,10 +54,10 @@ void DisplayAniUtils::ConvertRect(DMRect rect, ani_object rectObj, ani_env* env)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] rect area info: %{public}d, %{public}d, %{public}u, %{public}u",
         rect.posX_, rect.posY_, rect.width_, rect.height_);
-    env->Object_SetFieldByName_Double(rectObj, "<property>left", rect.posX_);
-    env->Object_SetFieldByName_Double(rectObj, "<property>width", rect.width_);
-    env->Object_SetFieldByName_Double(rectObj, "<property>top", rect.posY_);
-    env->Object_SetFieldByName_Double(rectObj, "<property>height", rect.height_);
+    env->Object_SetFieldByName_Long(rectObj, "<property>left", rect.posX_);
+    env->Object_SetFieldByName_Long(rectObj, "<property>width", rect.width_);
+    env->Object_SetFieldByName_Long(rectObj, "<property>top", rect.posY_);
+    env->Object_SetFieldByName_Long(rectObj, "<property>height", rect.height_);
 }
 
 void DisplayAniUtils::ConvertWaterArea(WaterfallDisplayAreaRects waterfallDisplayAreaRects,
@@ -81,17 +81,17 @@ void DisplayAniUtils::ConvertWaterArea(WaterfallDisplayAreaRects waterfallDispla
 void DisplayAniUtils::ConvertDisplayPhysicalResolution(std::vector<DisplayPhysicalResolution>& displayPhysicalArray,
     ani_object arrayObj, ani_env *env)
 {
-    ani_double arrayObjLen;
-    env->Object_GetPropertyByName_Double(arrayObj, "length", &arrayObjLen);
+    ani_int arrayObjLen;
+    env->Object_GetPropertyByName_Int(arrayObj, "length", &arrayObjLen);
 
     for (uint32_t i = 0; i < displayPhysicalArray.size() && i < static_cast<uint32_t>(arrayObjLen); i++) {
         ani_ref obj;
-        env->Object_CallMethodByName_Ref(arrayObj, "$_get", "I:Lstd/core/Object;", &obj, (ani_int)i);
+        env->Object_CallMethodByName_Ref(arrayObj, "$_get", "i:C{std.core.Object}", &obj, (ani_int)i);
         env->Object_SetFieldByName_Int(static_cast<ani_object>(obj), "foldDisplayMode_",
             static_cast<ani_int>(displayPhysicalArray[i].foldDisplayMode_));
-        env->Object_SetFieldByName_Double(static_cast<ani_object>(obj), "<property>physicalWidth",
+        env->Object_SetFieldByName_Long(static_cast<ani_object>(obj), "<property>physicalWidth",
             displayPhysicalArray[i].physicalWidth_);
-        env->Object_SetFieldByName_Double(static_cast<ani_object>(obj), "<property>physicalHeight",
+        env->Object_SetFieldByName_Long(static_cast<ani_object>(obj), "<property>physicalHeight",
             displayPhysicalArray[i].physicalHeight_);
     }
 }
@@ -99,7 +99,7 @@ void DisplayAniUtils::ConvertDisplayPhysicalResolution(std::vector<DisplayPhysic
 ani_status DisplayAniUtils::CvtDisplay(sptr<Display> display, ani_env* env, ani_object obj)
 {
     sptr<DisplayInfo> info = display->GetDisplayInfoWithCache();
-    int setfieldid = env->Object_SetFieldByName_Double(obj, "<property>id", info->GetDisplayId());
+    int setfieldid = env->Object_SetFieldByName_Long(obj, "<property>id", info->GetDisplayId());
     if (ANI_OK != setfieldid) {
         TLOGE(WmsLogTag::DMS, "[ANI] set id failed: %{public}d", setfieldid);
     }
@@ -115,16 +115,16 @@ ani_status DisplayAniUtils::CvtDisplay(sptr<Display> display, ani_env* env, ani_
     } else {
         env->Object_SetFieldByName_Int(obj, "<property>state_", 0);
     }
-    env->Object_SetFieldByName_Double(obj, "<property>refreshRate", info->GetRefreshRate());
-    env->Object_SetFieldByName_Double(obj, "<property>rotation", static_cast<uint32_t>(info->GetRotation()));
+    env->Object_SetFieldByName_Int(obj, "<property>refreshRate", info->GetRefreshRate());
+    env->Object_SetFieldByName_Int(obj, "<property>rotation", static_cast<uint32_t>(info->GetRotation()));
     ani_status setfieldRes = env->Object_SetFieldByName_Double(obj, "<property>width",
         static_cast<uint32_t>(info->GetWidth()));
     if (ANI_OK != setfieldRes) {
         TLOGE(WmsLogTag::DMS, "[ANI] set failed: %{public}d, %{public}u", info->GetWidth(), setfieldRes);
     }
-    env->Object_SetFieldByName_Double(obj, "<property>height", display->GetHeight());
-    env->Object_SetFieldByName_Double(obj, "<property>availableWidth", info->GetAvailableWidth());
-    env->Object_SetFieldByName_Double(obj, "<property>availableHeight", info->GetAvailableHeight());
+    env->Object_SetFieldByName_Long(obj, "<property>height", display->GetHeight());
+    env->Object_SetFieldByName_Long(obj, "<property>availableWidth", info->GetAvailableWidth());
+    env->Object_SetFieldByName_Long(obj, "<property>availableHeight", info->GetAvailableHeight());
     env->Object_SetFieldByName_Double(obj, "<property>densityDPI", info->GetVirtualPixelRatio() * DOT_PER_INCH);
     env->Object_SetFieldByName_Int(obj, "<property>orientation_", static_cast<uint32_t>(info->GetDisplayOrientation()));
     env->Object_SetFieldByName_Double(obj, "<property>densityPixels", info->GetVirtualPixelRatio());
@@ -204,7 +204,7 @@ ani_status DisplayAniUtils::NewAniObject(ani_env* env, ani_class cls, const char
 ani_status DisplayAniUtils::NewAniObjectNoParams(ani_env* env, ani_class cls, ani_object* object)
 {
     ani_method aniCtor;
-    auto ret = env->Class_FindMethod(cls, "<ctor>", ":V", &aniCtor);
+    auto ret = env->Class_FindMethod(cls, "<ctor>", ":", &aniCtor);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] find ctor method fail");
         return ret;
@@ -253,6 +253,29 @@ ani_status DisplayAniUtils::CallAniFunctionVoid(ani_env *env, const char* ns,
         return ret;
     }
     return ret;
+}
+
+ani_object DisplayAniUtils::CreateRectObject(ani_env *env)
+{
+    ani_class aniClass{};
+    ani_status status = env->FindClass("L@ohos/display/display/RectImpl;", &aniClass);
+    if (status != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] class not found, status:%{public}d", static_cast<int32_t>(status));
+        return nullptr;
+    }
+    ani_method aniCtor;
+    auto ret = env->Class_FindMethod(aniClass, "<Ctor>", ":V", &aniCtor);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Class_FindMethod failed");
+        return nullptr;
+    }
+    ani_object rectObj;
+    status = env->Object_New(aniClass, aniCtor, &rectObj);
+    if (status != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] NewAniObject failed");
+        return nullptr;
+    }
+    return rectObj;
 }
 
 }
