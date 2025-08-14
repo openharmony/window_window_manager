@@ -41,12 +41,7 @@ void ScreenAniListener::AddCallback(const std::string& type, ani_ref callback)
         return;
     }
     std::lock_guard<std::mutex> lock(mtx_);
-    ani_ref cbRef{};
-    if (env_->GlobalReference_Create(callback, &cbRef) != ANI_OK) {
-        TLOGE(WmsLogTag::DMS, "[ANI]create global ref fail");
-        return;
-    };
-    aniCallback_[type].emplace_back(cbRef);
+    aniCallback_[type].emplace_back(callback);
     TLOGI(WmsLogTag::DMS, "[ANI] AddCallback success aniCallback_ size: %{public}u!",
         static_cast<uint32_t>(aniCallback_[type].size()));
 }
@@ -103,18 +98,16 @@ void ScreenAniListener::OnConnect(ScreenId id)
             return;
         }
         ani_boolean undefRes = 0;
-        ani_boolean nullRes = 0;
         env_->Reference_IsUndefined(oneAniCallback, &undefRes);
-        env_->Reference_IsNull(oneAniCallback, &nullRes);
         // judge is null or undefined
-        if (undefRes != 0 || nullRes != 0) {
-            TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback is undefRes or null");
+        if (undefRes) {
+            TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback is undef");
             continue;
         }
 
         auto task = [env = env_, oneAniCallback, id] {
-            ScreenAniUtils::CallAniFunctionVoid(env, "L@ohos/screen/screen;", "screenEventCallBack",
-                "Lstd/core/Object;D:V", oneAniCallback, static_cast<ani_double>(id));
+            ScreenAniUtils::CallAniFunctionVoid(env, "@ohos.screen.screen", "screenEventCallBack",
+                "C{std.core.Object}l:", oneAniCallback, static_cast<ani_long>(id));
         };
         if (!eventHandler_) {
             TLOGE(WmsLogTag::DMS, "[ANI] get main event handler failed!");
@@ -152,18 +145,16 @@ void ScreenAniListener::OnDisconnect(ScreenId id)
             return;
         }
         ani_boolean undefRes = 0;
-        ani_boolean nullRes = 0;
         env_->Reference_IsUndefined(oneAniCallback, &undefRes);
-        env_->Reference_IsNull(oneAniCallback, &nullRes);
         // judge is null or undefined
-        if (undefRes != 0 || nullRes != 0) {
-            TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback is undefRes or null");
+        if (undefRes) {
+            TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback is undef");
             continue;
         }
 
         auto task = [env = env_, oneAniCallback, id] {
-            ScreenAniUtils::CallAniFunctionVoid(env, "L@ohos/screen/screen;", "screenEventCallBack",
-                "Lstd/core/Object;D:V", oneAniCallback, static_cast<ani_double>(id));
+            ScreenAniUtils::CallAniFunctionVoid(env, "@ohos.screen.screen", "screenEventCallBack",
+                "C{std.core.Object}l:", oneAniCallback, static_cast<ani_long>(id));
         };
         if (!eventHandler_) {
             TLOGE(WmsLogTag::DMS, "[ANI] get main event handler failed!");
@@ -173,8 +164,7 @@ void ScreenAniListener::OnDisconnect(ScreenId id)
             AppExecFwk::EventQueue::Priority::IMMEDIATE);
     }
 }
- 
-// need to implement
+
 void ScreenAniListener::OnChange(ScreenId id)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] begin");
@@ -195,7 +185,6 @@ void ScreenAniListener::OnChange(ScreenId id)
         return;
     }
     std::vector<ani_ref> vec = it->second;
-    TLOGI(WmsLogTag::DMS, "vec_callback size: %{public}d", vec.size());
     // find callbacks in vector
     for (auto oneAniCallback : vec) {
         if (env_ == nullptr) {
@@ -203,21 +192,21 @@ void ScreenAniListener::OnChange(ScreenId id)
             return;
         }
         ani_boolean undefRes = 0;
-        ani_boolean nullRes = 0;
         env_->Reference_IsUndefined(oneAniCallback, &undefRes);
-        env_->Reference_IsNull(oneAniCallback, &nullRes);
-        // judge is null or undefined
-        if (undefRes == 1) {
-            TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback undefRes, return");
+        if (undefRes) {
+            TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback undefRes, continue");
+            continue;
+        }
+        auto task = [env = env_, oneAniCallback, id] () {
+            ScreenAniUtils::CallAniFunctionVoid(env, "@ohos.screen.screen", "screenEventCallBack",
+                "C{std.core.Object}l:", oneAniCallback, static_cast<ani_long>(id));
+        };
+        if (!eventHandler_) {
+            TLOGE(WmsLogTag::DMS, "get main event handler failed!");
             return;
         }
-        if (nullRes == 1) {
-            TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback null, return");
-            return;
-        }
-        
-        ScreenAniUtils::CallAniFunctionVoid(env_, "L@ohos/screen/screen;", "screenEventCallBack",
-            "Lstd/core/Object;D:V", oneAniCallback, static_cast<ani_double>(id));
+        eventHandler_->PostTask(task, "dms:AniScreenListener::CreateCallBack", 0,
+            AppExecFwk::EventQueue::Priority::IMMEDIATE);
     }
 }
  
