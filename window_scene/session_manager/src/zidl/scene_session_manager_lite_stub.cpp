@@ -469,7 +469,7 @@ int SceneSessionManagerLiteStub::HandleGetFocusSessionElement(MessageParcel& dat
 
 int SceneSessionManagerLiteStub::HandleIsFocusWindowParent(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGI(WmsLogTag::WMS_FOCUS, "run");
+    TLOGD(WmsLogTag::WMS_FOCUS, "run");
     sptr<IRemoteObject> token = data.ReadRemoteObject();
     if (token == nullptr) {
         TLOGE(WmsLogTag::WMS_FOCUS, "Token is nullptr");
@@ -477,7 +477,7 @@ int SceneSessionManagerLiteStub::HandleIsFocusWindowParent(MessageParcel& data, 
     }
     bool isParent = false;
     WSError errCode = IsFocusWindowParent(token, isParent);
-    TLOGI(WmsLogTag::WMS_FOCUS, "isParent: %{public}d", isParent);
+    TLOGD(WmsLogTag::WMS_FOCUS, "isParent: %{public}d", isParent);
     if (!reply.WriteBool(isParent)) {
         TLOGE(WmsLogTag::WMS_FOCUS, "Write isParent failed.");
         return ERR_INVALID_DATA;

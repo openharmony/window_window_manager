@@ -11751,6 +11751,33 @@ WSError SceneSessionManager::GetFocusSessionToken(sptr<IRemoteObject>& token, Di
     }, __func__);
 }
 
+WSError SceneSessionManager::GetFocusSessionElement(AppExecFwk::ElementName& element, DisplayId displayId)
+{
+    auto pid = IPCSkeleton::GetCallingRealPid();
+    AppExecFwk::RunningProcessInfo info;
+    DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->GetRunningProcessInfoByPid(pid, info);
+    if (!info.isTestProcess && !SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "permission denied!");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
+    return taskScheduler_->PostSyncTask([this, &element, where = __func__, displayId]() {
+        auto focusGroup = windowFocusController_->GetFocusGroup(displayId);
+        if (focusGroup == nullptr) {
+            TLOGNE(WmsLogTag::WMS_FOCUS, "focus group is nullptr: %{public}" PRIu64, displayId);
+            return WSError::WS_ERROR_INVALID_SESSION;
+        }
+        TLOGND(WmsLogTag::WMS_FOCUS, "%{public}s with focusedSessionId: %{public}d",
+            where, focusGroup->GetFocusedSessionId());
+        if (auto sceneSession = GetSceneSession(focusGroup->GetFocusedSessionId())) {
+            const auto& sessionInfo = sceneSession->GetSessionInfo();
+            element = AppExecFwk::ElementName("", sessionInfo.bundleName_,
+                sessionInfo.abilityName_, sessionInfo.moduleName_);
+            return WSError::WS_OK;
+        }
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }, __func__);
+}
+
 WSError SceneSessionManager::IsFocusWindowParent(const sptr<IRemoteObject>& token, bool& isParent)
 {
     if (!SessionPermission::IsSACalling()) {
@@ -11777,33 +11804,6 @@ WSError SceneSessionManager::IsFocusWindowParent(const sptr<IRemoteObject>& toke
         }
         isParent = false;
         return WSError::WS_OK;
-    }, __func__);
-}
-
-WSError SceneSessionManager::GetFocusSessionElement(AppExecFwk::ElementName& element, DisplayId displayId)
-{
-    auto pid = IPCSkeleton::GetCallingRealPid();
-    AppExecFwk::RunningProcessInfo info;
-    DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->GetRunningProcessInfoByPid(pid, info);
-    if (!info.isTestProcess && !SessionPermission::IsSystemCalling()) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "permission denied!");
-        return WSError::WS_ERROR_INVALID_PERMISSION;
-    }
-    return taskScheduler_->PostSyncTask([this, &element, where = __func__, displayId]() {
-        auto focusGroup = windowFocusController_->GetFocusGroup(displayId);
-        if (focusGroup == nullptr) {
-            TLOGNE(WmsLogTag::WMS_FOCUS, "focus group is nullptr: %{public}" PRIu64, displayId);
-            return WSError::WS_ERROR_INVALID_SESSION;
-        }
-        TLOGND(WmsLogTag::WMS_FOCUS, "%{public}s with focusedSessionId: %{public}d",
-            where, focusGroup->GetFocusedSessionId());
-        if (auto sceneSession = GetSceneSession(focusGroup->GetFocusedSessionId())) {
-            const auto& sessionInfo = sceneSession->GetSessionInfo();
-            element = AppExecFwk::ElementName("", sessionInfo.bundleName_,
-                sessionInfo.abilityName_, sessionInfo.moduleName_);
-            return WSError::WS_OK;
-        }
-        return WSError::WS_ERROR_INVALID_SESSION;
     }, __func__);
 }
 

@@ -254,15 +254,14 @@ HWTEST_F(sceneSessionManagerLiteProxyTest, SendPointerEventForHover, TestSize.Le
 HWTEST_F(sceneSessionManagerLiteProxyTest, IsFocusWindowParent, TestSize.Level1)
 {
     sptr<MockIRemoteObject> iRemoteObjectMocker = sptr<MockIRemoteObject>::MakeSptr();
-    sptr<SceneSessionManagerLiteProxy> 
-     =
+    sptr<SceneSessionManagerLiteProxy> sceneSessionManagerLiteProxy =
         sptr<SceneSessionManagerLiteProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(sceneSessionManagerLiteProxy, nullptr);
     MockMessageParcel::ClearAllErrorFlag();
     sptr<IRemoteObject> token = nullptr;
     bool isParent = false;
     WSError errCode = sceneSessionManagerLiteProxy->IsFocusWindowParent(token, isParent);
-    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_INVALID_PARAM);
 
     token = sptr<MockIRemoteObject>::MakeSptr();
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
