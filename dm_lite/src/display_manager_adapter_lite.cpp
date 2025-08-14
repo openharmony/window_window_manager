@@ -146,6 +146,13 @@ void DisplayManagerAdapterLite::SetFoldDisplayMode(const FoldDisplayMode mode)
     return displayManagerServiceProxy_->SetFoldDisplayMode(mode);
 }
 
+void DisplayManagerAdapterLite::SetFoldDisplayModeAsync(const FoldDisplayMode mode)
+{
+    INIT_PROXY_CHECK_RETURN();
+
+    return displayManagerServiceProxy_->SetFoldDisplayModeAsync(mode);
+}
+
 sptr<DisplayInfo> DisplayManagerAdapterLite::GetDisplayInfo(DisplayId displayId)
 {
     if (displayId == DISPLAY_ID_INVALID) {

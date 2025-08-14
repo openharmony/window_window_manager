@@ -3679,7 +3679,7 @@ void ScreenSessionManager::TryToRecoverFoldDisplayMode(ScreenPowerStatus status)
 
 bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateChangeReason reason)
 {
-    TLOGI(WmsLogTag::DMS, "[UL_POWER] enter status:%{public}u", status);
+    TLOGI(WmsLogTag::DMS, "[UL_POWER] enter status:%{public}u, reason:%{public}u", status, reason);
     auto screenIds = GetAllScreenIds();
     if (screenIds.empty()) {
         TLOGI(WmsLogTag::DMS, "[UL_POWER] screenIds empty");
@@ -3921,6 +3921,9 @@ void ScreenSessionManager::BootFinishedCallback(const char *key, const char *val
         that.UpdateDisplayState(that.GetAllScreenIds(), DisplayState::ON);
         that.RegisterSettingDpiObserver();
         that.RegisterSettingExtendScreenDpiObserver();
+        if (FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
+            that.RegisterSettingDuringCallStateObserver();
+        }
         if (that.foldScreenPowerInit_ != nullptr) {
             that.foldScreenPowerInit_();
         }
@@ -11036,5 +11039,36 @@ bool ScreenSessionManager::GetCancelSuspendStatus() const
     std::lock_guard<std::mutex> notifyLock(sessionDisplayPowerController_->notifyMutex_);
     return sessionDisplayPowerController_->needCancelNotify_ ||
             sessionDisplayPowerController_->canceledSuspend_;
+}
+
+void ScreenSessionManager::RegisterSettingDuringCallStateObserver()
+{
+    TLOGI(WmsLogTag::DMS, "Register Setting During Call State Observer");
+    SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) { UpdateDuringCallState(); };
+    ScreenSettingHelper::RegisterSettingDuringCallStateObserver(updateFunc);
+}
+
+void ScreenSessionManager::UpdateDuringCallState()
+{
+    TLOGI(WmsLogTag::DMS, "update during call state, current state: %{public}d", duringCallState_);
+    bool ret = ScreenSettingHelper::GetSettingDuringCallState(duringCallState_);
+    if (!ret) {
+        TLOGE(WmsLogTag::DMS, "get setting during call state failed");
+        return;
+    }
+    TLOGI(WmsLogTag::DMS, "get setting during call state: %{public}d", duringCallState_);
+#ifdef FOLD_ABILITY_ENABLE
+    if (ScreenSceneConfig::IsSupportDuringCall() && !duringCallState_ && foldScreenController_ != nullptr &&
+        foldScreenController_->GetDisplayMode() == FoldDisplayMode::SUB) {
+        TLOGI(WmsLogTag::DMS, "duringcallstate exit, recover displaymode");
+        foldScreenController_->RecoverDisplayMode();
+    }
+#endif
+}
+
+void ScreenSessionManager::SetDuringCallState(bool value)
+{
+    bool ret = ScreenSettingHelper::SetSettingDuringCallState("during_call_state", value);
+    TLOGI(WmsLogTag::DMS, "set during call state to %{public}d, ret:%{public}d", value, ret);
 }
 } // namespace OHOS::Rosen

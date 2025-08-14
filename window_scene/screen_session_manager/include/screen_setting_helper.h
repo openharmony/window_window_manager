@@ -60,6 +60,10 @@ public:
     static void UnregisterSettingWireCastObserver();
     static void RegisterSettingExtendScreenDpiObserver(SettingObserver::UpdateFunc func);
     static void UnRegisterSettingExtendScreenDpiObserver();
+    static void RegisterSettingDuringCallStateObserver(SettingObserver::UpdateFunc func);
+    static void UnregisterSettingDuringCallStateObserver();
+    static bool GetSettingDuringCallState(bool& enable, const std::string& key = SETTING_DURING_CALL_KEY);
+    static bool SetSettingDuringCallState(const std::string& key, bool value);
     static bool GetSettingExtendScreenDpi(float& coef, const std::string& key = SETTING_EXTEND_DPI_KEY);
     static bool ConvertStrToUint64(const std::string& str, uint64_t& num);
     static bool ConvertStrToInt32(const std::string& str, int32_t& num);
@@ -71,12 +75,14 @@ private:
     static const constexpr char* SETTING_ROTATION_SCREEN_ID_KEY {"screen_rotation_screen_id_value"};
     static const constexpr char* SETTING_SCREEN_MODE_KEY {"user_set_screen_mode_edid"};
     static const constexpr char* SETTING_EXTEND_DPI_KEY {"user_set_dpi_extend"};
+    static const constexpr char* SETTING_DURING_CALL_KEY {"during_call_state"};
     static const constexpr uint32_t BASE_TEN = 10;
     static sptr<SettingObserver> dpiObserver_;
     static sptr<SettingObserver> castObserver_;
     static sptr<SettingObserver> rotationObserver_;
     static sptr<SettingObserver> wireCastObserver_;
     static sptr<SettingObserver> extendScreenDpiObserver_;
+    static sptr<SettingObserver> duringCallStateObserver_;
 };
 } // namespace Rosen
 } // namespace OHOS

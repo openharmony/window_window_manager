@@ -1247,6 +1247,30 @@ HWTEST_F(ScreenSceneConfigTest, IsSupportOffScreenRendering02, TestSize.Level1)
     bool res = ScreenSceneConfig::IsSupportOffScreenRendering();
     EXPECT_EQ(false, res);
 }
+
+/**
+ * @tc.name: IsSupportDuringCall01
+ * @tc.desc: IsSupportDuringCall01
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, IsSupportDuringCall01, TestSize.Level1)
+{
+    ScreenSceneConfig::enableConfig_["supportDuringCall"] = true;
+    bool res = ScreenSceneConfig::IsSupportDuringCall();
+    EXPECT_TRUE(res);
+}
+
+/**
+ * @tc.name: IsSupportDuringCall02
+ * @tc.desc: IsSupportDuringCall02
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, IsSupportDuringCall02, TestSize.Level1)
+{
+    ScreenSceneConfig::enableConfig_.erase("supportDuringCall");
+    bool res = ScreenSceneConfig::IsSupportDuringCall();
+    EXPECT_FALSE(res);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
