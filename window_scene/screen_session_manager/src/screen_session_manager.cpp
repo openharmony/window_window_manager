@@ -195,6 +195,8 @@ constexpr int32_t SCREEN_HEIGHT_INDEX = 3;
 constexpr int32_t STATUS_PARAM_VALID_INDEX = 4;
 constexpr uint32_t MAIN_STATUS_DEFAULT_WIDTH = 1008;
 constexpr uint32_t SCREEN_DEFAULT_HEIGHT = 2232;
+constexpr int32_t SECONDARY_FULL_OFFSET = 1136;
+constexpr int32_t SECONDARY_FULL_STATUS_WIDTH = 2048;
 
 // based on the bundle_util
 // LCOV_EXCL_START
@@ -3398,7 +3400,7 @@ bool ScreenSessionManager::TryToCancelScreenOff()
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::DMS, "Permission denied!");
         return false;
-    }    
+    }
     TLOGI(WmsLogTag::DMS, "[UL_POWER]about to cancel suspend, can:%{public}d, got:%{public}d, need:%{public}d",
         sessionDisplayPowerController_->canCancelSuspendNotify_, gotScreenOffNotify_, needScreenOffNotify_);
     if (sessionDisplayPowerController_->canCancelSuspendNotify_) {
@@ -6135,7 +6137,7 @@ bool ScreenSessionManager::HasSameScreenCastInfo(ScreenId screenId,
     }
     return false;
 }
- 
+
 void ScreenSessionManager::SetScreenCastInfo(ScreenId screenId,
     ScreenId castScreenId, ScreenCombination screenCombination)
 {
@@ -6145,7 +6147,7 @@ void ScreenSessionManager::SetScreenCastInfo(ScreenId screenId,
         "screenId:%{public}" PRIu64 ",castScreenId:%{public}" PRIu64 ",screenCombination:%{public}d",
         screenId, castScreenId, screenCombination);
 }
- 
+
 void ScreenSessionManager::RemoveScreenCastInfo(ScreenId screenId)
 {
     std::unique_lock<std::shared_mutex> lock(screenCastInfoMapMutex_);
@@ -8627,8 +8629,19 @@ void ScreenSessionManager::SetClientInner()
         float phyWidth = 0.0f;
         float phyHeight = 0.0f;
         bool isReset = true;
+        int boundaryOffset = 0;
         GetCurrentScreenPhyBounds(phyWidth, phyHeight, isReset, iter.first);
         auto localRotation = iter.second->GetRotation();
+        if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+            FoldDisplayMode displayMode = GetFoldDisplayMode();
+            if (displayMode == FoldDisplayMode::FULL) {
+                boundaryOffset = SECONDARY_FULL_OFFSET;
+                phyWidth = SECONDARY_FULL_STATUS_WIDTH;
+            } else if (displayMode == FoldDisplayMode::MAIN) {
+                phyWidth = MAIN_STATUS_DEFAULT_WIDTH;
+                phyHeight = SCREEN_DEFAULT_HEIGHT;
+            }
+        }
         TLOGI(WmsLogTag::DMS, "phyWidth = :%{public}f, phyHeight = :%{public}f, localRotation = :%{public}u",
             phyWidth, phyHeight, localRotation);
         if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
@@ -8638,7 +8651,7 @@ void ScreenSessionManager::SetClientInner()
                     iter.first);
                 SetRotation(iter.first, Rotation::ROTATION_0, false);
                 SetPhysicalRotationClientInner(iter.first, 0);
-                iter.second->SetDisplayBoundary(RectF(0, 0, phyWidth, phyHeight), 0);
+                iter.second->SetDisplayBoundary(RectF(0, boundaryOffset, phyWidth, phyHeight), 0);
             }
         }
         auto clientProxy = GetClientProxy();
@@ -8651,13 +8664,9 @@ void ScreenSessionManager::SetClientInner()
             RecoverMultiScreenMode(iter.second);
             continue;
         }
-        if (!g_isPcDevice) {
-            clientProxy->OnScreenConnectionChanged(GetSessionOption(iter.second, iter.first),
-                ScreenEvent::CONNECTED);
-        } else {
-            TLOGI(WmsLogTag::DMS, "recover screen, id: %{public}" PRIu64, iter.first);
-            RecoverMultiScreenMode(iter.second);
-        }
+        clientProxy->OnScreenConnectionChanged(GetSessionOption(iter.second, iter.first),
+            ScreenEvent::CONNECTED);
+        RecoverMultiScreenMode(iter.second);
     }
 }
 
@@ -10587,7 +10596,7 @@ sptr<ScreenSession> ScreenSessionManager::GetPhysicalScreenSession(ScreenId scre
             screenEventTracker_.LogWarningAllInfos();
         }
     }
-    
+
     std::lock_guard<std::recursive_mutex> lock(physicalScreenSessionMapMutex_);
     auto iter = physicalScreenSessionMap_.find(screenId);
     if (iter == physicalScreenSessionMap_.end()) {
