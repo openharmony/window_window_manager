@@ -609,7 +609,7 @@ private:
     void HandleSuperFoldStatusLocked(bool isLocked);
     void CalculateRotatedDisplay(Rotation rotation, const DMRect& screenRegion, DMRect& displayRegion, DMRect& displayArea);
     void CalculateScreenArea(const DMRect& displayRegion, const DMRect& displayArea, const DMRect& screenRegion, DMRect& screenArea);
-    void DisConnectScreenIfScreenInfoNull(sptr<ScreenSession>& screenSession);
+    void DisconnectScreenIfScreenInfoNull(sptr<ScreenSession>& screenSession);
     void RecoverDefaultScreenModeInner(ScreenId innerRsId, ScreenId externalRsId);
     void SetDefaultScreenModeWhenCreateMirror(sptr<ScreenSession>& screenSession);
 #ifdef DEVICE_STATUS_ENABLE
