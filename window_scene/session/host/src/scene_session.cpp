@@ -152,7 +152,7 @@ WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
         if (property) {
             property->SetCollaboratorType(session->GetCollaboratorType());
             property->SetAppInstanceKey(session->GetAppInstanceKey());
-            property->SetUseControlStateToProperty(session->isAppUseControl_);
+            property->SetUseControlState(session->isAppUseControl_);
             property->SetAncoRealBundleName(session->IsAnco() ? session->GetSessionInfo().bundleName_ : "");
         }
         session->RetrieveStatusBarDefaultVisibility();
@@ -634,7 +634,8 @@ WSError SceneSession::DisconnectTask(bool isFromClient, bool isSaveSnapshot)
         }
         auto isMainWindow = SessionHelper::IsMainWindow(session->GetWindowType());
         if (isMainWindow) {
-            TLOGNI(WmsLogTag::WMS_LIFE, "Notify scene session id: %{public}d paused", session->GetPersistentId());
+            TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s Notify scene session id: %{public}d paused", where,
+                session->GetPersistentId());
             session->UpdateLifecyclePausedInner();
         }
         if (isFromClient) {
@@ -1206,14 +1207,9 @@ void SceneSession::NotifyUpdateAppUseControl(ControlAppType type, const ControlI
                 TLOGNW(WmsLogTag::WMS_LIFE, "%{public}s sessionStage is nullptr or privacy mode control", where);
                 return;
             }
+            TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s isAppUseControl: %{public}d, persistentId: %{public}d", where,
+                isAppUseControl, session->GetPersistentId());
             session->sessionStage_->NotifyAppUseControlStatus(isAppUseControl);
-            if (isAppUseControl) {
-                TLOGNI(WmsLogTag::WMS_LIFE, "begin call pause");
-                session->NotifyForegroundInteractiveStatus(false);
-            } else {
-                TLOGNI(WmsLogTag::WMS_LIFE, "begin call resume");
-                session->NotifyForegroundInteractiveStatus(true);
-            }
         }
     }, __func__);
 }
