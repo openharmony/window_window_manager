@@ -503,7 +503,7 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteBool(property->GetPcAppInpadSpecificSystemBarInvisible());
         reply.WriteBool(property->GetPcAppInpadOrientationLandscape());
         reply.WriteParcelable(property->GetCompatibleModeProperty());
-        reply.WriteBool(property->GetUseControlStateFromProperty());
+        reply.WriteBool(property->GetUseControlState());
         reply.WriteString(property->GetAncoRealBundleName());
     }
     reply.WriteUint32(static_cast<uint32_t>(errCode));
