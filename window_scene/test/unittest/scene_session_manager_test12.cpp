@@ -2746,7 +2746,7 @@ HWTEST_F(SceneSessionManagerTest12, UpdateSystemDecorEnable, Function | SmallTes
  */
 HWTEST_F(SceneSessionManagerTest12, IsFocusWindowParent, Function | SmallTest | Level2)
 {
-sptr<IRemoteObject> token = sptr<MockIRemoteObject>::MakeSptr();
+    sptr<IRemoteObject> token = sptr<MockIRemoteObject>::MakeSptr();
     bool isParent = false;
     MockAccesstokenKit::MockIsSACalling(false);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_PERMISSION, ssm_->IsFocusWindowParent(token, isParent));
