@@ -524,7 +524,7 @@ int SceneSessionManagerStub::HandleUnregisterWindowManagerAgent(MessageParcel& d
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleRecoverWindowPropertyChangeFlag(MessageParcel& data, MessageParcel& reply);
+int SceneSessionManagerStub::HandleRecoverWindowPropertyChangeFlag(MessageParcel& data, MessageParcel& reply)
 {
     uint32_t observedFlags = 0;
     if (!data.ReadUint32(observedFlags)) {
