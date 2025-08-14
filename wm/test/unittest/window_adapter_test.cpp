@@ -521,7 +521,7 @@ HWTEST_F(WindowAdapterTest, RecoverWindowPropertyChangeFlag01, TestSize.Level1)
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
 
     windowAdapter.InitWMSProxy();
-    ASSERT_NE(windowAdapter.windowManagerServiceProxy_, false);
+    ASSERT_NE(windowAdapter.windowManagerServiceProxy_, nullptr);
     ret = windowAdapter.RecoverWindowPropertyChangeFlag();
     EXPECT_EQ(WMError::WM_OK, ret);
 }
