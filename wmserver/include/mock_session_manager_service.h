@@ -68,7 +68,6 @@ public:
     ErrCode SetSnapshotSkipByIdNamesMap(const std::unordered_map<int32_t,
         std::vector<std::string>>& userIdAndBunldeNames) override;
 
-
     ErrCode GetSceneSessionManagerLiteByUserId(int32_t userId,
         sptr<IRemoteObject>& sceneSessionManagerLite) override;
     ErrCode GetSceneSessionManagerByUserId(int32_t userId,
@@ -112,6 +111,8 @@ private:
     void ShowAceDumpHelp(std::string& dumpInfo);
     void ShowIllegalArgsInfo(std::string& dumpInfo);
 
+    ErrCode GetSceneSessionManagerCommon(int32_t userId, sptr<IRemoteObject>& result, bool isLite);
+    
     /*
      * Window Snapshot
      */
