@@ -31,6 +31,7 @@
 #include "session_display_power_controller.h"
 #include "wm_single_instance.h"
 #include "screen_edid_parse.h"
+#include "session_manager/include/ffrt_queue_helper.h"
 
 #include "agent_death_recipient.h"
 #include "screen.h"
@@ -480,6 +481,7 @@ public:
     bool SetScreenOffset(ScreenId screenId, float offsetX, float offsetY);
     bool SynchronizePowerStatus(ScreenPowerState state) override;
     std::shared_ptr<TaskScheduler> GetPowerTaskScheduler() const;
+    std::shared_ptr<FfrtQueueHelper> GetFfrtQueueHelper() const;
     bool GetCancelSuspendStatus() const;
 
 protected:
@@ -655,6 +657,7 @@ private:
     RSInterfaces& rsInterface_;
     std::shared_ptr<TaskScheduler> taskScheduler_;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler_;
+    std::shared_ptr<FfrtQueueHelper> ffrtQueueHelper_ = nullptr;
 
     /*
      * multi user

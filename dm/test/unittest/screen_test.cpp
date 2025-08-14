@@ -39,26 +39,22 @@ public:
     virtual void SetUp() override;
     virtual void TearDown() override;
 
-    static sptr<Display> defaultDisplay_;
     static ScreenId defaultScreenId_;
     static sptr<Screen> screen_;
 };
-sptr<Display> ScreenTest::defaultDisplay_ = nullptr;
 ScreenId ScreenTest::defaultScreenId_ = SCREEN_ID_INVALID;
 sptr<Screen> ScreenTest::screen_ = nullptr;
 bool g_isPcDevice = ScreenSceneConfig::GetExternalScreenDefaultMode() == "none";
 
 void ScreenTest::SetUpTestCase()
 {
-    defaultDisplay_ = DisplayManager::GetInstance().GetDefaultDisplay();
-    defaultScreenId_ = static_cast<ScreenId>(defaultDisplay_->GetId());
+    defaultScreenId_ = DisplayManager::GetInstance().GetDefaultDisplayId();
     screen_ = ScreenManager::GetInstance().GetScreenById(defaultScreenId_);
     usleep(SLEEP_TIME_IN_US);
 }
 
 void ScreenTest::TearDownTestCase()
 {
-    defaultDisplay_ = nullptr;
     screen_ = nullptr;
 }
 
