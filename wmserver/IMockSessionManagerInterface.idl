@@ -18,6 +18,7 @@ interface_token OHOS.IMockSessionManager;
 
 interface OHOS.Rosen.IMockSessionManagerInterface {
     [ipccode 0] void GetSessionManagerService([out] IRemoteObject sessionManageService);
+    void GetSessionManagerServiceByUserId([in] int userId, [out] IRemoteObject sessionManageService);
     void GetScreenSessionManagerLite([out] IRemoteObject screenSessionManagerLite);
     [oneway] void NotifySceneBoardAvailable();
     void RegisterSMSRecoverListener([in] IRemoteObject listener);
@@ -26,4 +27,6 @@ interface OHOS.Rosen.IMockSessionManagerInterface {
     void UnregisterSMSLiteRecoverListener();
     void SetSnapshotSkipByUserIdAndBundleNames([in] int userId, [in] String[] bundleNameList);
     void SetSnapshotSkipByIdNamesMap([in] Map<int, String[]> userIdAndBundleNames);
+    void GetSceneSessionManagerLiteByUserId([in] int userId, [out] IRemoteObject sceneSessionManagerLite);
+    void GetSceneSessionManagerByUserId([in] int userId, [out] IRemoteObject sceneSessionManager);
 }

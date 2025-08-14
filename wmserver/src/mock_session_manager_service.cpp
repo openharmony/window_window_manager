@@ -282,7 +282,6 @@ ErrCode MockSessionManagerService::GetSessionManagerService(sptr<IRemoteObject>&
         TLOGE(WmsLogTag::WMS_MULTI_USER, "userId is illegal: %{public}d", clientUserId);
         return ERR_INVALID_VALUE;
     }
-    //TODO U0用户只能拿到默认scb的句柄， 有问题， 要么改逻辑，要么加重载方法
     if (clientUserId == SYSTEM_USERID) {
         TLOGD(WmsLogTag::WMS_MULTI_USER, "System user, return default sessionManagerService with %{public}d",
               defaultWMSUserId_);
@@ -291,6 +290,21 @@ ErrCode MockSessionManagerService::GetSessionManagerService(sptr<IRemoteObject>&
     sessionManagerService = GetSessionManagerServiceByUserId(clientUserId);
     return ERR_OK;
 }
+
+ErrCode MockSessionManagerService::GetSessionManagerService(int32_t userId, sptr<IRemoteObject>& sessionManagerService)
+{
+    int32_t clientUserId = GetUserIdByCallingUid();
+    if (clientUserId <= INVALID_USER_ID) {
+        TLOGE(WmsLogTag::WMS_MULTI_USER, "userId is illegal: %{public}d", clientUserId);
+        return ERR_INVALID_VALUE;
+    }
+    if (clientUserId != SYSTEM_USERID) {
+        return ERR_WOULD_BLOCK;
+    }
+    sessionManagerService = GetSessionManagerServiceByUserId(userId);
+    return ERR_OK;
+}
+
 
 sptr<IRemoteObject> MockSessionManagerService::GetSessionManagerServiceByUserId(int32_t userId)
 {
@@ -917,6 +931,60 @@ sptr<IRemoteObject> MockSessionManagerService::GetSceneSessionManagerByUserId(in
         WLOGFW("Get scene session manager proxy failed");
     }
     return remoteObject;
+}
+
+ErrCode MockSessionManagerService::GetSceneSessionManagerCommon(
+    int32_t userId, 
+    sptr<IRemoteObject>& result, 
+    bool isLite)
+{
+    int32_t clientUserId = GetUserIdByCallingUid();
+    if (clientUserId <= INVALID_USER_ID) {
+        TLOGE(WmsLogTag::WMS_MULTI_USER, "userId is illegal: %{public}d", clientUserId);
+        return ERR_INVALID_VALUE;
+    }
+
+    if (clientUserId != SYSTEM_USERID) {
+        return ERR_WOULD_BLOCK;
+    }
+
+    auto sessionManagerService = GetSessionManagerServiceByUserId(userId);
+    if (sessionManagerService == nullptr) {
+        WLOGFE("sessionManagerService is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+
+    sptr<ISessionManagerService> sessionManagerServiceProxy =
+        iface_cast<ISessionManagerService>(sessionManagerService);
+    if (sessionManagerServiceProxy == nullptr) {
+        WLOGFE("sessionManagerServiceProxy is nullptr");
+        return ERR_DEAD_OBJECT;
+    }
+
+    if (isLite) {
+        result = sessionManagerServiceProxy->GetSceneSessionManagerLite();
+    } else {
+        result = sessionManagerServiceProxy->GetSceneSessionManager();
+    }
+
+    if (result == nullptr) {
+        WLOGFW("Get scene session manager proxy failed, scene session manager service %s is null",
+               isLite ? "(lite)" : "");
+        return ERR_DEAD_OBJECT;
+    }
+    return ERR_OK;
+}
+
+ErrCode MockSessionManagerService::GetSceneSessionManagerLiteByUserId(int32_t userId, sptr<IRemoteObject>& sceneSessionManagerLite)
+{
+    return GetSceneSessionManagerCommon(userId, sceneSessionManagerLite, true); 
+}
+
+ErrCode MockSessionManagerService::GetSceneSessionManagerByUserId(
+    int32_t userId, 
+    sptr<IRemoteObject>& sceneSessionManager)
+{
+    return GetSceneSessionManagerCommon(userId, sceneSessionManager, false); 
 }
 
 ErrCode MockSessionManagerService::RecoverSCBSnapshotSkipByUserId(int32_t userId)
