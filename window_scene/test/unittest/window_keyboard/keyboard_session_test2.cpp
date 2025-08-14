@@ -269,12 +269,12 @@ HWTEST_F(KeyboardSessionTest2, AdjustKeyboardLayout04, Function | SmallTest | Le
     sptr<SceneSession::SpecificSessionCallback> specificCb =
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, specificCb, keyboardCb);
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     KeyboardLayoutParams params;
     KeyboardLayoutParams lastParams;
 
     lastParams.landscapeAvoidHeight_ = 300;
     lastParams.portraitAvoidHeight_ = 700;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetKeyboardLayoutParams(lastParams);
     keyboardSession->SetSessionProperty(property);
     params.landscapeAvoidHeight_ = 200;
