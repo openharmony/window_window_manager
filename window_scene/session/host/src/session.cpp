@@ -1906,7 +1906,8 @@ void Session::PostLifeCycleTask(Task&& task, const std::string& name, const Life
     PostTask(std::move(frontLifeCycleTask->task), frontLifeCycleTask->name);
 }
 
-bool Session::SetLifeCycleTaskRunning(const sptr<SessionLifeCycleTask>& lifeCycleTask) {
+bool Session::SetLifeCycleTaskRunning(const sptr<SessionLifeCycleTask>& lifeCycleTask)
+{
     if (lifeCycleTask == nullptr || lifeCycleTask->running) {
         TLOGW(WmsLogTag::WMS_LIFE, "LifeCycleTask is running or null. PersistentId: %{public}d", persistentId_);
         return false;

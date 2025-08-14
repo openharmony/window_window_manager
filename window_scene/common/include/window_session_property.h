@@ -793,6 +793,7 @@ struct SystemSessionConfig : public Parcelable {
     bool skipRedundantWindowStatusNotifications_ = false;
     uint32_t supportFunctionType_ = 0;
     bool supportSnapshotAllSessionStatus_ = false;
+    bool supportCreateFloatWindow_ = false;
 
     virtual bool Marshalling(Parcel& parcel) const override
     {

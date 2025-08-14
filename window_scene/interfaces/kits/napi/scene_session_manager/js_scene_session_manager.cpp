@@ -310,6 +310,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::SupportZLevel);
     BindNativeFunction(env, exportObj, "setSupportFunctionType", moduleName,
         JsSceneSessionManager::SetSupportFunctionType);
+    BindNativeFunction(env, exportObj, "supportCreateFloatWindow", moduleName,
+        JsSceneSessionManager::SupportCreateFloatWindow);
     BindNativeFunction(env, exportObj, "getApplicationInfo", moduleName,
         JsSceneSessionManager::GetApplicationInfo);
     BindNativeFunction(env, exportObj, "updateRecentMainSessionList", moduleName,
@@ -3638,6 +3640,19 @@ napi_value JsSceneSessionManager::SupportSnapshotAllSessionStatus(napi_env env, 
 napi_value JsSceneSessionManager::OnSupportSnapshotAllSessionStatus(napi_env env, napi_callback_info info)
 {
     SceneSessionManager::GetInstance().ConfigSupportSnapshotAllSessionStatus();
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSessionManager::SupportCreateFloatWindow(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnSupportCreateFloatWindow(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::OnSupportCreateFloatWindow(napi_env env, napi_callback_info info)
+{
+    SceneSessionManager::GetInstance().ConfigSupportCreateFloatWindow();
     return NapiGetUndefined(env);
 }
 
