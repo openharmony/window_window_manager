@@ -481,6 +481,9 @@ public:
     DMError SetVirtualScreenAutoRotation(ScreenId screenId, bool enable) override;
     bool SetScreenOffset(ScreenId screenId, float offsetX, float offsetY);
     bool SynchronizePowerStatus(ScreenPowerState state) override;
+    void RegisterSettingDuringCallStateObserver();
+    void UpdateDuringCallState();
+    void SetDuringCallState(bool value);
     std::shared_ptr<TaskScheduler> GetPowerTaskScheduler() const;
     bool GetCancelSuspendStatus() const;
     void RemoveScreenCastInfo(ScreenId screenId);
@@ -850,6 +853,9 @@ private:
     std::mutex lowTempMutex_;
     std::mutex pcModeSwitchMutex_;
     std::atomic<DisplayGroupId> displayGroupNum_ { 1 };
+
+    // Fold Screen duringcall
+    bool duringCallState_ = false;
 
 private:
     class ScbClientListenerDeathRecipient : public IRemoteObject::DeathRecipient {

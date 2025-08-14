@@ -1507,6 +1507,26 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetFoldDisplayMode, TestSize.Level1)
     screenSessionManagerProxy->SetFoldDisplayMode(displayMode);
     if (screenSessionManagerProxy->IsFoldable() && !FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         EXPECT_NE(ScreenSessionManager::GetInstance().foldScreenController_, nullptr);
+    } else if (FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
+        EXPECT_NE(ScreenSessionManager::GetInstance().foldScreenController_, nullptr);
+    } else {
+        EXPECT_EQ(ScreenSessionManager::GetInstance().foldScreenController_, nullptr);
+    }
+}
+
+/**
+ * @tc.name: SetFoldDisplayModeAsync
+ * @tc.desc: SetFoldDisplayModeAsync
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, SetFoldDisplayModeAsync, TestSize.Level1)
+{
+    FoldDisplayMode displayMode = FoldDisplayMode::UNKNOWN;
+    screenSessionManagerProxy->SetFoldDisplayModeAsync(displayMode);
+    if (screenSessionManagerProxy->IsFoldable() && !FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        EXPECT_NE(ScreenSessionManager::GetInstance().foldScreenController_, nullptr);
+    } else if (FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
+        EXPECT_NE(ScreenSessionManager::GetInstance().foldScreenController_, nullptr);
     } else {
         EXPECT_EQ(ScreenSessionManager::GetInstance().foldScreenController_, nullptr);
     }
