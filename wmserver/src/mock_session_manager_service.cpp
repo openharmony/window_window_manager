@@ -131,7 +131,7 @@ MockSessionManagerService::MockSessionManagerService()
       defaultScreenId_(DEFAULT_SCREEN_ID)
 {
     defaultScreenId_ = DisplayManager::GetInstance().GetDefaultDisplayId();
-    TLOGI(WmsLogTag::WMS_MULTI_USER, "MockSessionManagerService initialized. Default screenId: %{public}d", 
+    TLOGI(WmsLogTag::WMS_MULTI_USER, "MockSessionManagerService initialized. Default screenId: %{public}d",
         defaultScreenId_);
 }
 

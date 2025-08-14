@@ -45,6 +45,7 @@ public:
      */
     bool SetSessionManagerService(const sptr<IRemoteObject>& sessionManagerService);
     ErrCode GetSessionManagerService(sptr<IRemoteObject>& sessionManagerService) override;
+    ErrCode GetSessionManagerService(int32_t userId, sptr<IRemoteObject>& sessionManagerService) override;
     void NotifyWMSConnected(int32_t userId, int32_t screenId, bool isColdStart);
     void NotifyNotKillService() {}
 
@@ -66,6 +67,12 @@ public:
         const std::vector<std::string>& bundleNameList) override;
     ErrCode SetSnapshotSkipByIdNamesMap(const std::unordered_map<int32_t,
         std::vector<std::string>>& userIdAndBunldeNames) override;
+
+
+    ErrCode GetSceneSessionManagerLiteByUserId(int32_t userId,
+        sptr<IRemoteObject>& sceneSessionManagerLite) override;
+    ErrCode GetSceneSessionManagerByUserId(int32_t userId,
+        sptr<IRemoteObject>& sceneSessionManager) override;
 
 protected:
     MockSessionManagerService();
