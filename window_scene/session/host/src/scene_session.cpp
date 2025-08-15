@@ -414,8 +414,7 @@ WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property
         int32_t persistentId = session->GetPersistentId();
         auto ret = session->Session::Foreground(property);
         if (ret != WSError::WS_OK) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session foreground failed, ret=%{public}d persistentId=%{public}d",
-                where, ret, persistentId);
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s ret=%{public}d win=%{public}d", where, ret, persistentId);
             return ret;
         }
         session->NotifySingleHandTransformChange(session->GetSingleHandTransform());
