@@ -199,8 +199,8 @@ WMError WindowAdapter::UnregisterWindowPropertyChangeAgent(WindowInfoKey windowI
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
     auto ret = wmsProxy->UnregisterWindowPropertyChangeAgent(windowInfoKey, interestInfo, windowManagerAgent);
 
-    observedFlags_ &= !(static_cast<uint32_t>(windowInfoKey));
-    interestedFlags_ &= !interestInfo;
+    observedFlags_ &= ~(static_cast<uint32_t>(windowInfoKey));
+    interestedFlags_ &= ~interestInfo;
 
     WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_PROPERTY;
     std::lock_guard<std::mutex> lock(mutex_);
