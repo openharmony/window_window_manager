@@ -169,7 +169,7 @@ bool AniWindowUtils::GetPropertyRectObject(ani_env* env, const char* propertyNam
     ret_bool |= GetIntObject(env, "height", static_cast<ani_object>(windowRect), height);
     if (!ret_bool) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] GetIntObject Failed");
-        return AniWindowUtils::CreateAniUndefined(env);
+        return false;
     }
     result.posX_ = posX;
     result.posY_ = posY;
