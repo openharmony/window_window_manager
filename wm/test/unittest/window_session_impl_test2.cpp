@@ -565,10 +565,12 @@ HWTEST_F(WindowSessionImplTest2, HandleEscKeyEvent004, TestSize.Level1)
     ASSERT_NE(keyEvent, nullptr);
     bool isConsumed = false;
     keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_ESCAPE);
+    keyEvent->SetKeyAction(MMI::KeyEvent::KEY_ACTION_DOWN);
     keyEvent->AddFlag(MMI::InputEvent::EVENT_FLAG_KEYBOARD_ESCAPE);
     EXPECT_EQ(true, keyEvent->HasFlag(MMI::InputEvent::EVENT_FLAG_KEYBOARD_ESCAPE));
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    window->escKeyEventTriggered_ = false;
     window->windowSystemConfig_.freeMultiWindowEnable_ = true;
     window->windowSystemConfig_.freeMultiWindowSupport_ = true;
     EXPECT_EQ(WMError::WM_OK, window->HandleEscKeyEvent(keyEvent, isConsumed));
@@ -581,7 +583,17 @@ HWTEST_F(WindowSessionImplTest2, HandleEscKeyEvent004, TestSize.Level1)
     window->windowSystemConfig_.freeMultiWindowEnable_ = true;
     window->windowSystemConfig_.freeMultiWindowSupport_ = true;
     EXPECT_EQ(WMError::WM_OK, window->HandleEscKeyEvent(keyEvent, isConsumed));
-    
+
+    window->SetImmersiveModeEnabledState(true);
+    EXPECT_EQ(WMError::WM_OK, window->HandleEscKeyEvent(keyEvent, isConsumed));
+
+    window->escKeyEventTriggered_ = true;
+    EXPECT_EQ(WMError::WM_OK, window->HandleEscKeyEvent(keyEvent, isConsumed));
+
+    keyEvent->SetKeyAction(MMI::KeyEvent::KEY_ACTION_UP);
+    EXPECT_EQ(WMError::WM_OK, window->HandleEscKeyEvent(keyEvent, isConsumed));
+
+    keyEvent->SetKeyAction(MMI::KeyEvent::KEY_ACTION_DOWN);
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     EXPECT_EQ(WMError::WM_OK, window->HandleEscKeyEvent(keyEvent, isConsumed));
 }
