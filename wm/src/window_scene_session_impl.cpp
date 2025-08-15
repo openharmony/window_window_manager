@@ -139,6 +139,7 @@ constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_WIDTH = 40;
 constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_HEIGHT = 40;
 constexpr int32_t API_VERSION_18 = 18;
 constexpr uint32_t SNAPSHOT_TIMEOUT = 2000; // MS
+constexpr uint32_t REASON_MAXIMIZE_MODE_CHANGE = 1;
 }
 std::mutex WindowSceneSessionImpl::keyboardPanelInfoChangeListenerMutex_;
 using WindowSessionImplMap = std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>;
@@ -3581,7 +3582,8 @@ WMError WindowSceneSessionImpl::Recover(uint32_t reason)
         }
         hostSession->OnSessionEvent(SessionEvent::EVENT_RECOVER);
         // need notify arkui maximize mode change
-        if (reason == 1 && property_->GetMaximizeMode() == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
+        if (reason == REASON_MAXIMIZE_MODE_CHANGE &&
+            property_->GetMaximizeMode() == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
             UpdateMaximizeMode(MaximizeMode::MODE_RECOVER);
         }
         SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
@@ -3682,8 +3684,8 @@ WMError WindowSceneSessionImpl::SetSupportedWindowModes(
         return WMError::WM_OK;
     }
 
-    if (!IsPcOrPadFreeMultiWindowMode()) {
-        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "This is not PC, not supported");
+    if (!(windowSystemConfig_.IsPcWindow() || windowSystemConfig_.freeMultiWindowSupport_)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Neither is Pc nor support free multi window, invalid calling");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
 
@@ -3727,6 +3729,28 @@ WMError WindowSceneSessionImpl::GrayOutMaximizeButton(bool isGrayOut)
     return WMError::WM_OK;
 }
 
+void WindowSceneSessionImpl::UpdateWindowModeWhenSupportTypeChange(uint32_t windowModeSupportType)
+{
+    bool onlySupportFullScreen =
+        WindowHelper::IsWindowModeSupported(windowModeSupportType, WindowMode::WINDOW_MODE_FULLSCREEN) &&
+        !WindowHelper::IsWindowModeSupported(windowModeSupportType, WindowMode::WINDOW_MODE_FLOATING);
+    bool disableFullScreen = property_->IsFullScreenDisabled();
+    if (onlySupportFullScreen && !property_->IsLayoutFullScreen() && !disableFullScreen) {
+        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "onlySupportFullScreen:%{public}d IsLayoutFullScreen:%{public}d",
+            onlySupportFullScreen, property_->IsLayoutFullScreen());
+        Maximize(MaximizePresentation::ENTER_IMMERSIVE);
+        return;
+    }
+
+    bool onlySupportFloating =
+        !WindowHelper::IsWindowModeSupported(windowModeSupportType, WindowMode::WINDOW_MODE_FULLSCREEN) &&
+        WindowHelper::IsWindowModeSupported(windowModeSupportType, WindowMode::WINDOW_MODE_FLOATING);
+    if (onlySupportFloating) {
+        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "onlySupportFloating:%{public}d", onlySupportFloating);
+        Recover(REASON_MAXIMIZE_MODE_CHANGE);
+    }
+}
+
 WMError WindowSceneSessionImpl::SetSupportedWindowModesInner(
     const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes)
 {
@@ -3750,35 +3774,23 @@ WMError WindowSceneSessionImpl::SetSupportedWindowModesInner(
     }
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "winId: %{public}u, windowModeSupportType: %{public}u",
         GetWindowId(), windowModeSupportType);
-    property_->SetWindowModeSupportType(windowModeSupportType);
-    // update windowModeSupportType to server
-    haveSetSupportedWindowModes_ = true;
-    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO);
 
+    // update windowModeSupportType to server
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
     hostSession->NotifySupportWindowModesChange(supportedWindowModes);
-
-    UpdateTitleButtonVisibility();
-    bool onlySupportFullScreen =
-        WindowHelper::IsWindowModeSupported(windowModeSupportType, WindowMode::WINDOW_MODE_FULLSCREEN) &&
-        !WindowHelper::IsWindowModeSupported(windowModeSupportType, WindowMode::WINDOW_MODE_FLOATING);
-    bool disableFullScreen = property_->IsFullScreenDisabled();
-    if (onlySupportFullScreen && !property_->IsLayoutFullScreen() && !disableFullScreen) {
-        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "onlySupportFullScreen:%{public}d IsLayoutFullScreen:%{public}d",
-            onlySupportFullScreen, property_->IsLayoutFullScreen());
-        Maximize(MaximizePresentation::ENTER_IMMERSIVE);
+    if (!IsPcOrPadFreeMultiWindowMode()) {
+        pendingWindowModeSupportType_ = windowModeSupportType;
+        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "pending update, winId: %{public}u, windowModeSupportType: %{public}u",
+            GetWindowId(), windowModeSupportType);
         return WMError::WM_OK;
     }
 
-    bool onlySupportFloating =
-        !WindowHelper::IsWindowModeSupported(windowModeSupportType, WindowMode::WINDOW_MODE_FULLSCREEN) &&
-        WindowHelper::IsWindowModeSupported(windowModeSupportType, WindowMode::WINDOW_MODE_FLOATING);
-    if (onlySupportFloating) {
-        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "onlySupportFloating:%{public}d", onlySupportFloating);
-        Recover(1);
-    }
-
+    haveSetSupportedWindowModes_ = true;
+    property_->SetWindowModeSupportType(windowModeSupportType);
+    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO);
+    UpdateTitleButtonVisibility();
+    UpdateWindowModeWhenSupportTypeChange(windowModeSupportType);
     return WMError::WM_OK;
 }
 
@@ -5479,6 +5491,9 @@ WSError WindowSceneSessionImpl::SwitchFreeMultiWindow(bool enable)
     NotifySwitchFreeMultiWindow(enable);
     // Switch process finish, update system config
     SetFreeMultiWindowMode(enable);
+    if (enable) {
+        PendingUpdateSupportWindowModesWhenSwitchMultiWindow();
+    }
     UpdateSupportWindowModesWhenSwitchFreeMultiWindow();
     UpdateEnableDragWhenSwitchMultiWindow(enable);
     if (!enable && !WindowHelper::IsWindowModeSupported(property_->GetWindowModeSupportType(),
@@ -5493,6 +5508,36 @@ WSError WindowSceneSessionImpl::SwitchFreeMultiWindow(bool enable)
     }
     SwitchSubWindow(enable, GetPersistentId());
     return WSError::WS_OK;
+}
+
+void WindowSceneSessionImpl::PendingUpdateSupportWindowModesWhenSwitchMultiWindow()
+{
+    if (pendingWindowModeSupportType_ == WindowModeSupport::WINDOW_MODE_SUPPORT_ALL) {
+        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "pending data has not set, id: %{public}d", GetPersistentId());
+        return;
+    }
+
+    uint32_t windowModeSupportType = pendingWindowModeSupportType_;
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "id: %{public}d, windowModeSupportType: %{public}u",
+        GetPersistentId(), windowModeSupportType);
+    
+    pendingWindowModeSupportType_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
+    property_->SetWindowModeSupportType(windowModeSupportType);
+
+    // update windowModeSupportType to server
+    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO);
+    UpdateTitleButtonVisibility();
+    haveSetSupportedWindowModes_ = true;
+
+    // update window mode immediately when pending window support type take effect
+    bool onlySupportFullScreen =
+        WindowHelper::IsWindowModeSupported(windowModeSupportType, WindowMode::WINDOW_MODE_FULLSCREEN) &&
+        !WindowHelper::IsWindowModeSupported(windowModeSupportType, WindowMode::WINDOW_MODE_FLOATING);
+    bool disableFullScreen = property_->IsFullScreenDisabled();
+    if (onlySupportFullScreen && !disableFullScreen) {
+        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "only support fullscreen, enter immersive");
+        Maximize(MaximizePresentation::ENTER_IMMERSIVE);
+    }
 }
 
 void WindowSceneSessionImpl::UpdateImmersiveBySwitchMode(bool freeMultiWindowEnable)
