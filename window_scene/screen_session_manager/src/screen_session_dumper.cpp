@@ -70,6 +70,7 @@ const std::string ARG_CHANGE_OUTER_CMD = "outer";
 const std::string ANGLE_STR = "angle";
 const std::string HALL_STR = "hall";
 const std::string ARG_SET_LANDSCAPE_LOCK = "-landscapelock";
+const std::string ARG_SET_DURINGCALL_STATE = "-duringcallstate";
 #ifdef FOLD_ABILITY_ENABLE
 constexpr int SUPER_FOLD_STATUS_MAX = 2;
 const char SECONDARY_DUMPER_VALUE_BOUNDARY[] = "mfg";
@@ -247,6 +248,8 @@ void ScreenSessionDumper::ExecuteInjectCmd2()
         SetSecondaryStatusChange(params_[0]);
     } else if (params_[0].find(ARG_SET_LANDSCAPE_LOCK) != std::string::npos) {
         SetLandscapeLock(params_[0]);
+    } else if (params_[0].find(ARG_SET_DURINGCALL_STATE) != std::string::npos) {
+        SetDuringCallState(params_[0]);
     }
 }
 
@@ -1055,6 +1058,31 @@ void ScreenSessionDumper::SetLandscapeLock(std::string input)
             ScreenSessionManager::GetInstance().HandleExtendScreenDisconnect(0);
         }
         TLOGI(WmsLogTag::DMS, "landscape lock: %{public}d", value);
+    }
+#endif
+}
+
+void ScreenSessionDumper::SetDuringCallState(std::string input)
+{
+#ifdef FOLD_ABILITY_ENABLE
+    size_t commaPos = input.find_last_of(',');
+    if ((commaPos != std::string::npos) && (input.substr(0, commaPos) == ARG_SET_DURINGCALL_STATE)) {
+        std::string valueStr = input.substr(commaPos + 1);
+        if (valueStr.size() != 1) {
+            dumpInfo_.append("[error]: the value is too long");
+            return;
+        }
+        if (!std::isdigit(valueStr[0])) {
+            dumpInfo_.append("[error]: value is not a number");
+            return;
+        }
+        if ((valueStr[0] != '0') && (valueStr[0] != '1')) {
+            TLOGE(WmsLogTag::DMS, "param is invalid: %{public}s", valueStr.c_str());
+            return;
+        }
+        bool value = static_cast<bool>(std::stoi(valueStr));
+        ScreenSessionManager::GetInstance().SetDuringCallState(value);
+        TLOGI(WmsLogTag::DMS, "SetDuringCallState: %{public}d", value);
     }
 #endif
 }

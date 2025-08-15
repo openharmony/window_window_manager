@@ -774,39 +774,6 @@ HWTEST_F(SceneSessionTest, UpdateAcrossDisplaysChangeRegistered01, TestSize.Leve
 }
 
 /**
- * @tc.name: ColorMode01
- * @tc.desc: Test OnUpdateColorMode And GetAbilityColorMode
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest, ColorMode01, TestSize.Level0)
-{
-    SessionInfo info;
-    info.abilityName_ = "test";
-    info.bundleName_ = "test";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
-    std::string colorMode = "dark";
-    bool hasDarkRes = true;
-    auto ret = sceneSession->OnUpdateColorMode(colorMode, hasDarkRes);
-    EXPECT_NE(WMError::WM_OK, ret);
-
-    std::string resMode = sceneSession->GetAbilityColorMode();
-    EXPECT_NE("dark", resMode);
-
-    hasDarkRes = false;
-    ret = sceneSession->OnUpdateColorMode(colorMode, hasDarkRes);
-    EXPECT_NE(WMError::WM_OK, ret);
-    resMode = sceneSession->GetAbilityColorMode();
-    EXPECT_NE("auto", resMode);
-
-    colorMode = "light";
-    ret = sceneSession->OnUpdateColorMode(colorMode, hasDarkRes);
-    EXPECT_NE(WMError::WM_OK, ret);
-    resMode = sceneSession->GetAbilityColorMode();
-    EXPECT_NE("light", resMode);
-}
-
-/**
  * @tc.name: IsMainWindowFullScreenAcrossDisplays
  * @tc.desc: IsMainWindowFullScreenAcrossDisplays01
  * @tc.type: FUNC
@@ -1818,10 +1785,24 @@ HWTEST_F(SceneSessionTest, UpdateSessionRectPosYFromClient01, TestSize.Level1)
     sceneSession->UpdateSessionRectPosYFromClient(SizeChangeReason::UNDEFINED, displayId, rect);
     EXPECT_EQ(rect.posY_, 100);
     sceneSession->clientDisplayId_ = 999;
+    sceneSession->configDisplayId_ = 999;
     rect = { 0, 100, 100, 100 };
-    auto rect2 = rect;
-    sceneSession->UpdateSessionRectPosYFromClient(SizeChangeReason::UNDEFINED, displayId, rect);
-    EXPECT_EQ(rect.posY_, rect2.posY_);
+    sceneSession->UpdateSessionRectPosYFromClient(SizeChangeReason::RESIZE, displayId, rect);
+    EXPECT_EQ(rect.posY_, 100 + 1648 + 40);
+
+    sceneSession->clientDisplayId_ = 999;
+    sceneSession->configDisplayId_ = 999;
+    rect = { 0, 1700, 100, 100 };
+    sceneSession->UpdateSessionRectPosYFromClient(SizeChangeReason::RESIZE, displayId, rect);
+    EXPECT_EQ(rect.posY_, 1700);
+
+    WSRect sessionRect = {100, 200, 1000, 1000};
+    sceneSession->SetSessionRect(sessionRect);
+    sceneSession->clientDisplayId_ = 999;
+    sceneSession->configDisplayId_ = 999;
+    rect = { 0, -100, 100, 100 };
+    sceneSession->UpdateSessionRectPosYFromClient(SizeChangeReason::RESIZE, displayId, rect);
+    EXPECT_EQ(rect.posY_, -100 + sessionRect.posY_);
 }
 
 /**

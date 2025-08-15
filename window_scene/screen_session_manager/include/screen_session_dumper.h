@@ -84,6 +84,7 @@ private:
         std::vector<float> &postures, std::vector<uint16_t> &halls);
     void TriggerSecondarySensor(const std::string &valueStr);
     void TriggerSecondaryFoldStatus(const std::string &valueStr);
+    void SetDuringCallState(std::string input);
     bool IsDeveloperModeCommand();
 private:
     int fd_;

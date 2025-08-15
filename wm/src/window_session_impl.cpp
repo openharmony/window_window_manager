@@ -1638,18 +1638,16 @@ void WindowSessionImpl::NotifyForegroundInteractiveStatus(bool interactive)
     if (IsWindowSessionInvalid() || state_ != WindowState::STATE_SHOWN) {
         return;
     }
-    bool useControlState = property_->GetUseControlStateFromProperty();
-    if (useControlState && interactive) {
-        TLOGI(WmsLogTag::WMS_LIFE, "app is in control state, no need notify new resume");
-        NotifyAfterResumed();
-        return;
-    }
-
     if (IsNotifyInteractiveDuplicative(interactive)) {
         return;
     }
     if (interactive) {
-        NotifyAfterLifecycleResumed();
+        bool useControlState = property_->GetUseControlState();
+        TLOGI(WmsLogTag::WMS_LIFE, "useControlState: %{public}d, persistentId: %{public}d", useControlState,
+            GetPersistentId());
+        if (!useControlState) {
+            NotifyAfterLifecycleResumed();
+        }
         NotifyAfterResumed();
     } else {
         NotifyAfterPaused();
@@ -1659,9 +1657,21 @@ void WindowSessionImpl::NotifyForegroundInteractiveStatus(bool interactive)
 
 void WindowSessionImpl::NotifyAppUseControlStatus(bool isUseControl)
 {
-    std::lock_guard<std::mutex> lock(appUseControlMutex_);
-    isAppUseControl_ = isUseControl;
-    property_->SetUseControlStateToProperty(isUseControl);
+    {
+        std::lock_guard<std::mutex> lock(appUseControlMutex_);
+        isAppUseControl_ = isUseControl;
+    }
+    property_->SetUseControlState(isUseControl);
+    TLOGI(WmsLogTag::WMS_LIFE, "isUseControl: %{public}d, state_: %{public}d, persistentId: %{public}d",
+        isUseControl, state_, GetPersistentId());
+    if (IsWindowSessionInvalid() || state_ != WindowState::STATE_SHOWN) {
+        return;
+    }
+    if (isUseControl) {
+        NotifyAfterLifecyclePaused();
+    } else {
+        NotifyAfterLifecycleResumed();
+    }
 }
 
 void WindowSessionImpl::NotifyLifecyclePausedStatus()
@@ -5079,12 +5089,11 @@ void WindowSessionImpl::NotifyAfterLifecycleResumed()
 {
     TLOGI(WmsLogTag::WMS_LIFE, "in");
     std::lock_guard<std::recursive_mutex> lockListener(windowStageLifeCycleListenerMutex_);
-    bool useControlState = property_->GetUseControlStateFromProperty();
+    bool useControlState = property_->GetUseControlState();
     if (useControlState) {
         auto lifecycleListeners = GetListeners<IWindowStageLifeCycle>();
         CALL_LIFECYCLE_LISTENER(AfterLifecyclePaused, lifecycleListeners);
         isInteractiveStateFlag_ = false;
-        interactive_ = false;
         return;
     }
 
@@ -5109,7 +5118,6 @@ void WindowSessionImpl::NotifyAfterLifecyclePaused()
         TLOGI(WmsLogTag::WMS_LIFE, "window has been in noninteractive status");
         return;
     }
-    interactive_ = false;
     isInteractiveStateFlag_ = false;
     auto lifecycleListeners = GetListeners<IWindowStageLifeCycle>();
     CALL_LIFECYCLE_LISTENER(AfterLifecyclePaused, lifecycleListeners);

@@ -53,6 +53,8 @@ constexpr float INNER_BORDER_VP = 5.0f;
 constexpr float OUTSIDE_BORDER_VP = 4.0f;
 constexpr float INNER_ANGLE_VP = 16.0f;
 constexpr uint32_t MAX_LIFE_CYCLE_TASK_IN_QUEUE = 15;
+constexpr uint32_t COLOR_WHITE = 0xffffffff;
+constexpr uint32_t COLOR_BLACK = 0xff000000;
 constexpr int64_t LIFE_CYCLE_TASK_EXPIRED_TIME_LIMIT = 350;
 static bool g_enableForceUIFirst = system::GetParameter("window.forceUIFirst.enabled", "1") == "1";
 constexpr int64_t STATE_DETECT_DELAYTIME = 3 * 1000;
@@ -1904,7 +1906,8 @@ void Session::PostLifeCycleTask(Task&& task, const std::string& name, const Life
     PostTask(std::move(frontLifeCycleTask->task), frontLifeCycleTask->name);
 }
 
-bool Session::SetLifeCycleTaskRunning(const sptr<SessionLifeCycleTask>& lifeCycleTask) {
+bool Session::SetLifeCycleTaskRunning(const sptr<SessionLifeCycleTask>& lifeCycleTask)
+{
     if (lifeCycleTask == nullptr || lifeCycleTask->running) {
         TLOGW(WmsLogTag::WMS_LIFE, "LifeCycleTask is running or null. PersistentId: %{public}d", persistentId_);
         return false;
@@ -2691,12 +2694,12 @@ bool Session::GetEnableAddSnapshot() const
 }
 
 void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media::PixelMap> persistentPixelMap,
-    bool updateSnapshot)
+    bool updateSnapshot, ScreenLockReason reason)
 {
     if (scenePersistence_ == nullptr) {
         return;
     }
-    auto key = GetSessionStatus();
+    auto key = GetSessionStatus(reason);
     auto rotate = WSSnapshotHelper::GetDisplayOrientation(currentRotation_);
     if (persistentPixelMap) {
         key = defaultStatus;
@@ -2879,7 +2882,7 @@ SnapshotStatus Session::GetWindowStatus() const
     return std::make_pair(snapshotScreen, orientation);
 }
 
-SnapshotStatus Session::GetSessionStatus() const
+SnapshotStatus Session::GetSessionStatus(ScreenLockReason reason) const
 {
     if (!SupportSnapshotAllSessionStatus()) {
         return defaultStatus;
@@ -2889,6 +2892,9 @@ SnapshotStatus Session::GetSessionStatus() const
         snapshotScreen = lastSnapshotScreen_;
     } else {
         snapshotScreen = WSSnapshotHelper::GetScreenStatus();
+    }
+    if (reason == ScreenLockReason::EXPAND_TO_FOLD_SINGLE_POCKET) {
+        snapshotScreen = SCREEN_EXPAND;
     }
     uint32_t orientation = WSSnapshotHelper::GetOrientation(currentRotation_);
     return std::make_pair(snapshotScreen, orientation);

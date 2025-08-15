@@ -1680,6 +1680,21 @@ HWTEST_F(SceneSessionManagerTest11, GetFbPanelWindowId, TestSize.Level1)
     MockAccesstokenKit::MockAccessTokenKitRet(-1);
     ssm_->sceneSessionMap_.clear();
 }
+
+/**
+ * @tc.name: ConfigSupportCreateFloatWindow
+ * @tc.desc: test function : ConfigSupportCreateFloatWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, ConfigSupportCreateFloatWindow, TestSize.Level0)
+{
+    ASSERT_NE(nullptr, ssm_);
+
+    ssm_->ConfigSupportCreateFloatWindow();
+
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_TRUE(ssm_->systemConfig_.supportCreateFloatWindow_);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
