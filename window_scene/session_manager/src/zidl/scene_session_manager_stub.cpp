@@ -256,6 +256,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleRemoveSessionBlackList(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_PIP_SWITCH_STATUS):
             return HandleGetPiPSettingSwitchStatus(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_RECOVER_WINDOW_PROPERTY_CHANGE_FLAG):
+            return HandleRecoverWindowPropertyChangeFlag(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -519,6 +521,29 @@ int SceneSessionManagerStub::HandleUnregisterWindowManagerAgent(MessageParcel& d
         iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
     WMError errCode = UnregisterWindowManagerAgent(type, windowManagerAgentProxy);
     reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleRecoverWindowPropertyChangeFlag(MessageParcel& data, MessageParcel& reply)
+{
+    uint32_t observedFlags = 0;
+    if (!data.ReadUint32(observedFlags)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read observedFlags failed");
+        return ERR_TRANSACTION_FAILED;
+    }
+
+    uint32_t interestFlags = 0;
+    if (!data.ReadUint32(interestFlags)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read interestFlags failed");
+        return ERR_TRANSACTION_FAILED;
+    }
+
+    WMError errCode = RecoverWindowPropertyChangeFlag(observedFlags, interestFlags);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write errCode failed");
+        return ERR_TRANSACTION_FAILED;
+    }
+
     return ERR_NONE;
 }
 
@@ -2310,7 +2335,7 @@ int SceneSessionManagerStub::HandleAddSessionBlackList(MessageParcel& data, Mess
         return ERR_INVALID_DATA;
     }
     std::unordered_set<std::string> bundleNames;
-    for (int64_t i = 0; i < size; i++) {
+    for (uint64_t i = 0; i < size; i++) {
         std::string bundleName;
         if (!data.ReadString(bundleName)) {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read windowId failed");
@@ -2329,7 +2354,7 @@ int SceneSessionManagerStub::HandleAddSessionBlackList(MessageParcel& data, Mess
         return ERR_INVALID_DATA;
     }
     std::unordered_set<std::string> privacyWindowTags;
-    for (int64_t i = 0; i < size; i++) {
+    for (uint64_t i = 0; i < size; i++) {
         std::string privacyWindowTag = 0;
         if (!data.ReadString(privacyWindowTag)) {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read privacyWindowTag failed");
@@ -2357,7 +2382,7 @@ int SceneSessionManagerStub::HandleRemoveSessionBlackList(MessageParcel& data, M
         return ERR_INVALID_DATA;
     }
     std::unordered_set<std::string> bundleNames;
-    for (int64_t i = 0; i < size; i++) {
+    for (uint64_t i = 0; i < size; i++) {
         std::string bundleName;
         if (!data.ReadString(bundleName)) {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read bundleName failed");
@@ -2376,7 +2401,7 @@ int SceneSessionManagerStub::HandleRemoveSessionBlackList(MessageParcel& data, M
         return ERR_INVALID_DATA;
     }
     std::unordered_set<std::string> privacyWindowTags;
-    for (int64_t i = 0; i < size; i++) {
+    for (uint64_t i = 0; i < size; i++) {
         std::string privacyWindowTag = 0;
         if (!data.ReadString(privacyWindowTag)) {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read privacyWindowTag failed");

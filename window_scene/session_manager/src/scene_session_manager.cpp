@@ -10581,11 +10581,22 @@ void SceneSessionManager::RemoveSessionFromBlackListInfoSet(
     }
 }
 
+WMError SceneSessionManager::RecoverWindowPropertyChangeFlag(uint32_t observedFlags, uint32_t interestedFlags)
+{
+    observedFlags_ |= observedFlags;
+    interestedFlags_ |= interestedFlags;
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "observedFlags: %{public}u, interestedFlags: %{public}u",
+        observedFlags_, interestedFlags_);
+    return WMError::WM_OK;
+}
+
 WMError SceneSessionManager::RegisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey,
     uint32_t interestInfo, const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
     observedFlags_ |= static_cast<uint32_t>(windowInfoKey);
     interestedFlags_ |= interestInfo;
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "observedFlags: %{public}u, interestedFlags: %{public}u",
+        observedFlags_, interestedFlags_);
     return RegisterWindowManagerAgent(
         WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_PROPERTY, windowManagerAgent);
 }
@@ -10593,8 +10604,10 @@ WMError SceneSessionManager::RegisterWindowPropertyChangeAgent(WindowInfoKey win
 WMError SceneSessionManager::UnregisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey,
     uint32_t interestInfo, const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
-    observedFlags_ &= !(static_cast<uint32_t>(windowInfoKey));
-    interestedFlags_ &= !interestInfo;
+    observedFlags_ &= ~(static_cast<uint32_t>(windowInfoKey));
+    interestedFlags_ &= ~interestInfo;
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "observedFlags: %{public}u, interestedFlags: %{public}u",
+        observedFlags_, interestedFlags_);
     return UnregisterWindowManagerAgent(
         WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_PROPERTY, windowManagerAgent);
 }
