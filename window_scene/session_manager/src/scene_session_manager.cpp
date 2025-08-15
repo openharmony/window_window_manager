@@ -11679,6 +11679,35 @@ WSError SceneSessionManager::GetFocusSessionElement(AppExecFwk::ElementName& ele
     }, __func__);
 }
 
+WSError SceneSessionManager::IsFocusWindowParent(const sptr<IRemoteObject>& token, bool& isParent)
+{
+    if (!SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "permission denied!");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
+    return taskScheduler_->PostSyncTask([this, &token, &isParent, where = __func__]() {
+        std::vector<std::pair<DisplayId, int32_t>> allFocusedSessionList =
+            windowFocusController_->GetAllFocusedSessionList();
+        if (allFocusedSessionList.size() == 0) {
+            TLOGNE(WmsLogTag::WMS_FOCUS, "%{public}s has no focus group",  where);
+            return WSError::WS_ERROR_INVALID_SESSION;
+        }
+        for (const auto& focusState : allFocusedSessionList) {
+            auto focusedSession = GetSceneSession(focusState.second);
+            if (focusedSession == nullptr) {
+                TLOGNE(WmsLogTag::WMS_FOCUS, "%{public}s session is nullptr: %{public}d",  where, focusState.second);
+                return WSError::WS_ERROR_INVALID_SESSION;
+            }
+            if (focusedSession->GetAbilityToken() == token || focusedSession->HasParentSessionWithToken(token)) {
+                isParent = true;
+                return WSError::WS_OK;
+            }
+        }
+        isParent = false;
+        return WSError::WS_OK;
+    }, __func__);
+}
+
 WSError SceneSessionManager::UpdateSessionAvoidAreaListener(int32_t persistentId, bool haveListener)
 {
     const auto callingPid = IPCSkeleton::GetCallingRealPid();

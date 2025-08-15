@@ -138,6 +138,12 @@ WSError SceneSessionManagerLite::GetFocusSessionElement(AppExecFwk::ElementName&
     return SceneSessionManager::GetInstance().GetFocusSessionElement(element, displayId);
 }
 
+WSError SceneSessionManagerLite::IsFocusWindowParent(const sptr<IRemoteObject>& token, bool& isParent)
+{
+    TLOGD(WmsLogTag::WMS_FOCUS, "in");
+    return SceneSessionManager::GetInstance().IsFocusWindowParent(token, isParent);
+}
+
 WSError SceneSessionManagerLite::ClearSession(int32_t persistentId)
 {
     WLOGFD("Id: %{public}d", persistentId);

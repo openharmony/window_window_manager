@@ -2491,6 +2491,19 @@ WSError Session::HandlePointerEventForFocus(const std::shared_ptr<MMI::PointerEv
     return WSError::WS_OK;
 }
 
+bool Session::HasParentSessionWithToken(const sptr<IRemoteObject>& token)
+{
+    auto parentSession = GetParentSession();
+    if (parentSession == nullptr) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "parent session is nullptr: %{public}d", GetPersistentId());
+        return false;
+    }
+    if (parentSession->GetAbilityToken() == token) {
+        return true;
+    }
+    return parentSession->HasParentSessionWithToken(token);
+}
+
 WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     bool needNotifyClient, bool isExecuteDelayRaise)
 {

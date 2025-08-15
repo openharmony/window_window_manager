@@ -2738,6 +2738,42 @@ HWTEST_F(SceneSessionManagerTest12, UpdateSystemDecorEnable, Function | SmallTes
     EXPECT_EQ(result, WMError::WM_OK);
     EXPECT_EQ(ssm_->systemConfig_.isSystemDecorEnable_, enable);
 }
+
+/**
+ * @tc.name: IsFocusWindowParent
+ * @tc.desc: test function : IsFocusWindowParent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, IsFocusWindowParent, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> token = sptr<MockIRemoteObject>::MakeSptr();
+    bool isParent = false;
+    MockAccesstokenKit::MockIsSACalling(false);
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_PERMISSION, ssm_->IsFocusWindowParent(token, isParent));
+
+    MockAccesstokenKit::MockIsSACalling(true);
+    ssm_->sceneSessionMap_.clear();
+
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "IsFocusWindowParent";
+    sessionInfo.abilityName_ = "IsFocusWindowParent";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession->property_->SetPersistentId(1);
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    focusGroup->SetFocusedSessionId(1);
+
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, ssm_->IsFocusWindowParent(token, isParent));
+
+    ssm_->sceneSessionMap_.emplace(1, sceneSession);
+    sceneSession->SetAbilityToken(token);
+
+    EXPECT_EQ(WSError::WS_OK, ssm_->IsFocusWindowParent(token, isParent));
+    EXPECT_EQ(true, isParent);
+
+    sceneSession->SetAbilityToken(nullptr);
+    EXPECT_EQ(WSError::WS_OK, ssm_->IsFocusWindowParent(token, isParent));
+    EXPECT_EQ(false, isParent);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

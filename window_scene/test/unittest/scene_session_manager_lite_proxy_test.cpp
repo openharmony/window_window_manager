@@ -245,4 +245,43 @@ HWTEST_F(sceneSessionManagerLiteProxyTest, SendPointerEventForHover, TestSize.Le
     EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
     MockMessageParcel::SetReadInt32ErrorFlag(false);
 }
+
+/**
+ * @tc.name: IsFocusWindowParent
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerLiteProxyTest, IsFocusWindowParent, TestSize.Level1)
+{
+    sptr<MockIRemoteObject> iRemoteObjectMocker = sptr<MockIRemoteObject>::MakeSptr();
+    sptr<SceneSessionManagerLiteProxy> sceneSessionManagerLiteProxy =
+        sptr<SceneSessionManagerLiteProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sceneSessionManagerLiteProxy, nullptr);
+    MockMessageParcel::ClearAllErrorFlag();
+    sptr<IRemoteObject> token = nullptr;
+    bool isParent = false;
+    WSError errCode = sceneSessionManagerLiteProxy->IsFocusWindowParent(token, isParent);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_INVALID_PARAM);
+
+    token = sptr<MockIRemoteObject>::MakeSptr();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    errCode = sceneSessionManagerLiteProxy->IsFocusWindowParent(token, isParent);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    iRemoteObjectMocker->SetRequestResult(1);
+    errCode = sceneSessionManagerLiteProxy->IsFocusWindowParent(token, isParent);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+    iRemoteObjectMocker->SetRequestResult(0);
+
+    MockMessageParcel::SetReadBoolErrorFlag(true);
+    errCode = sceneSessionManagerLiteProxy->IsFocusWindowParent(token, isParent);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetReadBoolErrorFlag(false);
+
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    errCode = sceneSessionManagerLiteProxy->IsFocusWindowParent(token, isParent);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetReadInt32ErrorFlag(false);
+}
 }
