@@ -3211,7 +3211,6 @@ bool ScreenSessionManager::SetScreenPowerByIdForPC(ScreenId screenId, ScreenPowe
                 MultiScreenModeChange(screenId, screenId, "off");
                 SetIsOuterOnlyModeBeforePowerOff(false);
             }
-
 #endif
             break;
         }
