@@ -876,7 +876,8 @@ public:
      */
     static sptr<Window> Create(const std::string& windowName,
         sptr<WindowOption>& option, const std::shared_ptr<AbilityRuntime::Context>& context = nullptr,
-        WMError& errCode = DefaultCreateErrCode);
+        WMError& errCode = DefaultCreateErrCode,
+        const std::shared_ptr<RSUIContext>& rsUiContext = nullptr);
 
     /**
      * @brief create main/uiextension window with session

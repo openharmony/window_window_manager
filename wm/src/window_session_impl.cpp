@@ -268,7 +268,8 @@ std::atomic<bool> WindowSessionImpl::defaultDensityEnabledGlobalConfig_ = false;
         }                                                                      \
     } while (false)
 
-WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
+WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option,
+    const std::shared_ptr<RSUIContext>& rsUIContext)
 {
     WLOGFD("[WMSCom] Constructor");
     property_ = sptr<WindowSessionProperty>::MakeSptr();
@@ -309,7 +310,7 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     windowOption_ = option;
     handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
 
-    RSAdapterUtil::InitRSUIDirector(rsUIDirector_, true, true);
+    RSAdapterUtil::InitRSUIDirector(rsUIDirector_, true, true, rsUIContext);
     if (WindowHelper::IsSubWindow(GetType())) {
         property_->SetDecorEnable(option->GetSubWindowDecorEnable());
     }
