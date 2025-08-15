@@ -10703,8 +10703,8 @@ WMError SceneSessionManager::RegisterWindowPropertyChangeAgent(WindowInfoKey win
 WMError SceneSessionManager::UnregisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey,
     uint32_t interestInfo, const sptr<IWindowManagerAgent>& windowManagerAgent)
 {
-    observedFlags_ &= !(static_cast<uint32_t>(windowInfoKey));
-    interestedFlags_ &= !interestInfo;
+    observedFlags_ &= ~(static_cast<uint32_t>(windowInfoKey));
+    interestedFlags_ &= ~interestInfo;
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "observedFlags: %{public}u, interestedFlags: %{public}u",
         observedFlags_, interestedFlags_);
     return UnregisterWindowManagerAgent(
