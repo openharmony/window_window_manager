@@ -551,7 +551,7 @@ napi_value JsDisplay::OnHasImmersiveWindow(napi_env env, napi_callback_info info
         if (ret == DmErrorCode::DM_OK) {
             task->Resolve(env, CreateJsValue(env, immersive));
             TLOGNI(WmsLogTag::DMS, "JsDisplay::OnHasImmersiveWindow success - immersive window exists: %{public}d",
-                    immersive);
+                immersive);
         } else {
             task->Reject(env, CreateJsError(env,
                 static_cast<int32_t>(ret), "JsDisplay::OnHasImmersiveWindow failed."));
