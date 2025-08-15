@@ -488,6 +488,7 @@ HWTEST_F(SuperFoldStateManagerTest, RefreshMirrorRegionInner_NormalCase, TestSiz
     mainScreenSession->SetScreenProperty(mainScreenProperty);
  
     sptr<ScreenSession> secondarySession = ssm_.GetOrCreateScreenSession(1);
+    superFoldStateManager.SetCurrentStatus(SuperFoldStatus::EXPANDED);
     ScreenProperty secondaryScreenProperty;
     secondaryScreenProperty.bounds_.rect_ = { 0, 0, 100, 100 };
     secondarySession->SetScreenProperty(secondaryScreenProperty);

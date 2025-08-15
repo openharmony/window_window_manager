@@ -1444,6 +1444,64 @@ HWTEST_F(ScreenSessionManagerTest, UpdateDuringCallState, Function | SmallTest |
         ASSERT_EQ(ssm_->duringCallState_, 0);
     }
 }
+/**
+ * @tc.name: DisconnectScreenIfScreenInfoNull
+ * @tc.desc: DisconnectScreenIfScreenInfoNull
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, DisconnectScreenIfScreenInfoNull01, TestSize.Level1) {
+    ASSERT_NE(ssm_, nullptr);
+#define FOLD_ABILITY_ENABLE
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        sptr<ScreenSession> session = ssm_->GetOrCreateScreenSession(SCREENID);
+        EXPECT_NE(session, nullptr);
+        ssm_->SetClient(nullptr);
+        ASSERT_EQ(ssm_->GetClientProxy(), nullptr);
+        ssm_->DisConnectScreenIfScreenInfoNull(session);
+    }
+#undef FOLD_ABILITY_ENABLE
+}
+
+/**
+ * @tc.name: SetDefaultScreenModeWhenCreateMirror
+ * @tc.desc: SetDefaultScreenModeWhenCreateMirror
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetDefaultScreenModeWhenCreateMirror, TestSize.Level1) {
+    ASSERT_NE(ssm_, nullptr);
+#define FOLD_ABILITY_ENABLE
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        sptr<ScreenSession> session = nullptr;
+        ssm_->SetDefaultScreenModeWhenCreateMirror(session);
+        session = ssm_->GetOrCreateScreenSession(0);
+        auto mode = session->GetScreenCombination();
+        ssm_->SetDefaultScreenModeWhenCreateMirror(session);
+        ASSERT_EQ(session->GetScreenCombination(), mode);
+    }
+#undef FOLD_ABILITY_ENABLE
+}
+
+/**
+ * @tc.name: RecoverDefaultScreenModeInner
+ * @tc.desc: RecoverDefaultScreenModeInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, RecoverDefaultScreenModeInner, TestSize.Level1) {
+    ASSERT_NE(ssm_, nullptr);
+#define FOLD_ABILITY_ENABLE
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        ScreenId innerRsId = 0;
+        ScreenId externalRsId = 11;
+        ssm_->SetIsFoldStatusLocked(true);
+        EXPECT_EQ(ssm_->GetIsFoldStatusLocked(), true);
+        ssm_->RecoverDefaultScreenModeInner(innerRsId, externalRsId);
+        SuperFoldStateManager::GetInstance().SetCurrentStatus(SuperFoldStatus::EXPANDED);
+        innerRsId = 1;
+        externalRsId = 12;
+        ssm_->RecoverDefaultScreenModeInner(innerRsId, externalRsId);
+    }
+#undef FOLD_ABILITY_ENABLE
+}
 }
 }
 }
