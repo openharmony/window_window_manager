@@ -3198,11 +3198,8 @@ bool ScreenSessionManager::SetScreenPowerByIdForPC(ScreenId screenId, ScreenPowe
         case ScreenPowerState::POWER_ON: {
             TLOGI(WmsLogTag::DMS, "[UL_POWER]Set ScreenPowerStatus: POWER_STATUS_ON");
 #ifdef WM_MULTI_SCREEN_ENABLE
-            {
-                std::lock_guard<std::mutex> lock(screenChangeMutex_);
-                if (GetIsOuterOnlyMode() && !GetIsOuterOnlyModeBeforePowerOff()) {
-                    MultiScreenModeChange(screenId, screenId, "on");
-                }
+            if (GetIsOuterOnlyMode() && !GetIsOuterOnlyModeBeforePowerOff()) {
+                MultiScreenModeChange(screenId, screenId, "on");
             }
 #endif
             break;
@@ -3210,12 +3207,9 @@ bool ScreenSessionManager::SetScreenPowerByIdForPC(ScreenId screenId, ScreenPowe
         case ScreenPowerState::POWER_OFF: {
             TLOGI(WmsLogTag::DMS, "[UL_POWER]Set ScreenPowerStatus: POWER_STATUS_OFF");
 #ifdef WM_MULTI_SCREEN_ENABLE
-            {
-                std::lock_guard<std::mutex> lock(screenChangeMutex_);
-                if (!GetIsOuterOnlyMode() && !GetIsOuterOnlyModeBeforePowerOff()) {
-                    MultiScreenModeChange(screenId, screenId, "off");
-                    SetIsOuterOnlyModeBeforePowerOff(false);
-                }
+            if (!GetIsOuterOnlyMode() && !GetIsOuterOnlyModeBeforePowerOff()) {
+                MultiScreenModeChange(screenId, screenId, "off");
+                SetIsOuterOnlyModeBeforePowerOff(false);
             }
 
 #endif
@@ -9768,6 +9762,7 @@ void ScreenSessionManager::MultiScreenModeChange(ScreenId mainScreenId, ScreenId
     const std::string& operateMode)
 {
 #ifdef WM_MULTI_SCREEN_ENABLE
+    std::lock_guard<std::mutex> lock(screenModeChangeMutex_);
     TLOGW(WmsLogTag::DMS, "mainId=%{public}" PRIu64" secondId=%{public}" PRIu64" operateType: %{public}s",
         mainScreenId, secondaryScreenId, operateMode.c_str());
     OnScreenModeChange(ScreenModeChangeEvent::BEGIN);
