@@ -12651,7 +12651,8 @@ BrokerStates SceneSessionManager::CheckIfReuseSession(SessionInfo& sessionInfo)
 BrokerStates SceneSessionManager::NotifyStartAbility(
     int32_t collaboratorType, const SessionInfo& sessionInfo, int32_t persistentId)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "type %{public}d id %{public}d windowMode %{public}d", collaboratorType, persistentId, sessionInfo.windowMode);
+    TLOGI(WmsLogTag::WMS_LIFE, "type %{public}d id %{public}d windowMode %{public}d",
+        collaboratorType, persistentId, sessionInfo.windowMode);
     sptr<AAFwk::IAbilityManagerCollaborator> collaborator = GetCollaboratorByType(collaboratorType);
     if (collaborator == nullptr) {
         return BrokerStates::BROKER_UNKOWN;
