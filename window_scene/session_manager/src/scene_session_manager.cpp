@@ -12651,7 +12651,7 @@ BrokerStates SceneSessionManager::CheckIfReuseSession(SessionInfo& sessionInfo)
 BrokerStates SceneSessionManager::NotifyStartAbility(
     int32_t collaboratorType, const SessionInfo& sessionInfo, int32_t persistentId)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "type %{public}d id %{public}d", collaboratorType, persistentId);
+    TLOGI(WmsLogTag::WMS_LIFE, "type %{public}d id %{public}d windowMode %{public}d", collaboratorType, persistentId, sessionInfo.windowMode);
     sptr<AAFwk::IAbilityManagerCollaborator> collaborator = GetCollaboratorByType(collaboratorType);
     if (collaborator == nullptr) {
         return BrokerStates::BROKER_UNKOWN;
@@ -12676,11 +12676,11 @@ BrokerStates SceneSessionManager::NotifyStartAbility(
         std::shared_ptr<int32_t> ret = std::make_shared<int32_t>(0);
         std::shared_ptr<AAFwk::Want> notifyWant = std::make_shared<AAFwk::Want>(sessionInfo.GetWantSafely());
         bool isTimeout = ffrtQueueHelper_->SubmitTaskAndWait([this, collaborator, accessTokenIDEx,
-            notifyWant, abilityInfo = sessionInfo.abilityInfo, ret] {
+            notifyWant, abilityInfo = sessionInfo.abilityInfo, windowMode = sessionInfo.windowMode, ret] {
             int timerId = HiviewDFX::XCollie::GetInstance().SetTimer("WMS:SSM:NotifyStartAbility",
                 NOTIFY_START_ABILITY_TIMEOUT/1000, nullptr, nullptr, HiviewDFX::XCOLLIE_FLAG_LOG);
             auto result = collaborator->NotifyStartAbility(*abilityInfo, currentUserId_, *notifyWant,
-                static_cast<uint64_t>(accessTokenIDEx));
+                static_cast<uint64_t>(accessTokenIDEx), windowMode);
             HiviewDFX::XCollie::GetInstance().CancelTimer(timerId);
             *ret = static_cast<int32_t>(result);
         }, NOTIFY_START_ABILITY_TIMEOUT);

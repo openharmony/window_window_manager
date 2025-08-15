@@ -670,6 +670,9 @@ bool ConvertSessionInfoState(napi_env env, napi_value jsObject, SessionInfo& ses
     if (!ConvertFromJsValueProperty(env, jsObject, "hasPrivacyModeControl", sessionInfo.hasPrivacyModeControl)) {
         return false;
     }
+    if (!ConvertFromJsValueProperty(env, jsObject, "windowMode", sessionInfo.windowMode)) {
+        return false;
+    }
     return true;
 }
 
