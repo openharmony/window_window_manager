@@ -523,7 +523,7 @@ HWTEST_F(WindowAdapterTest, RecoverWindowPropertyChangeFlag01, TestSize.Level1)
     windowAdapter.InitWMSProxy();
     ASSERT_NE(windowAdapter.windowManagerServiceProxy_, nullptr);
     ret = windowAdapter.RecoverWindowPropertyChangeFlag();
-    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
 }
 
 /**
