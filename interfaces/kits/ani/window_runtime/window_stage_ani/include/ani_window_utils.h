@@ -42,9 +42,9 @@ public:
     static ani_status GetPropertyIntObject(ani_env* env, const char* propertyName, ani_object object, int32_t& result);
     static ani_status GetPropertyDoubleObject(ani_env* env, const char* propertyName,
         ani_object object, double& result);
-    static ani_status GetPropertyRectObject(ani_env* env, const char* propertyName,
+    static bool GetPropertyRectObject(ani_env* env, const char* propertyName,
         ani_object object, Rect& result);
-    static ani_status GetIntObject(ani_env* env, const char* propertyName, ani_object object, int32_t& result);
+    static bool GetIntObject(ani_env* env, const char* propertyName, ani_object object, int32_t& result);
     static ani_status GetDoubleObject(ani_env* env, ani_object double_object, double& result);
     static ani_status NewAniObjectNoParams(ani_env* env, const char* cls, ani_object* object);
     static ani_status NewAniObject(ani_env* env, const char* cls, const char* signature, ani_object* result, ...);
