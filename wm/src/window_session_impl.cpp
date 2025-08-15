@@ -6313,7 +6313,7 @@ WMError WindowSessionImpl::HandleEscKeyEvent(const std::shared_ptr<MMI::KeyEvent
             isConsumed = true;
             keyEvent->MarkProcessed();
         }
-        TLOGE(WmsLogTag::WMS_EVENT, "recover from fullscreen, consumed: %{public}d", isConsumed);
+        TLOGI(WmsLogTag::WMS_EVENT, "recover from fullscreen, consumed: %{public}d", isConsumed);
     }
 
     if (!isConsumed && !escKeyEventTriggered_ && escKeyHasDown_) {
