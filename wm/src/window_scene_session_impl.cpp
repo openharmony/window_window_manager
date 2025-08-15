@@ -4660,6 +4660,13 @@ WMError WindowSceneSessionImpl::GetWindowCornerRadius(float& cornerRadius)
     }
 
     cornerRadius = property_->GetWindowCornerRadius();
+    if (MathHelper::LessNotEqual(cornerRadius, 0.0f)) {
+        // Invalid corner radius means app has not set corner radius of the window, return the default corner radius
+        TLOGI(WmsLogTag::WMS_ANIMATION, "System config radius: %{public}f, property radius: %{public}f, id: %{public}d",
+              windowSystemConfig_.defaultCornerRadius_, cornerRadius, GetPersistentId());
+        cornerRadius = MathHelper::LessNotEqual(windowSystemConfig_.defaultCornerRadius_, 0.0f) ?
+            0.0f : windowSystemConfig_.defaultCornerRadius_;
+    }
     return WMError::WM_OK;
 }
 

@@ -35,6 +35,7 @@ class CompatibleModeProperty;
 using HandlWritePropertyFunc = bool (WindowSessionProperty::*)(Parcel& parcel);
 using HandlReadPropertyFunc = void (WindowSessionProperty::*)(Parcel& parcel);
 using TransitionAnimationMapType = std::unordered_map<WindowTransitionType, std::shared_ptr<TransitionAnimation>>;
+constexpr float WINDOW_CORNER_RADIUS_INVALID = -1.0f;
 
 class WindowSessionProperty : public Parcelable {
 public:
@@ -574,7 +575,7 @@ private:
     /*
      * Window Property
      */
-    float cornerRadius_ = 0.0f;
+    float cornerRadius_ = WINDOW_CORNER_RADIUS_INVALID; // corner radius of window set by application
     mutable std::mutex cornerRadiusMutex_;
     ShadowsInfo shadowsInfo_;
     mutable std::mutex shadowsInfoMutex_;
@@ -794,6 +795,7 @@ struct SystemSessionConfig : public Parcelable {
     uint32_t supportFunctionType_ = 0;
     bool supportSnapshotAllSessionStatus_ = false;
     bool supportCreateFloatWindow_ = false;
+    float defaultCornerRadius_ = 0.0f; // default corner radius of window set by system config
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
@@ -850,6 +852,9 @@ struct SystemSessionConfig : public Parcelable {
         if (!parcel.WriteBool(supportSnapshotAllSessionStatus_)) {
             return false;
         }
+        if (!parcel.WriteFloat(defaultCornerRadius_)) {
+            return false;
+        }
         return true;
     }
 
@@ -900,6 +905,10 @@ struct SystemSessionConfig : public Parcelable {
         config->skipRedundantWindowStatusNotifications_ = parcel.ReadBool();
         config->supportFunctionType_ = parcel.ReadUint32();
         config->supportSnapshotAllSessionStatus_ = parcel.ReadBool();
+        if (!parcel.ReadFloat(config->defaultCornerRadius_)) {
+            delete config;
+            return nullptr;
+        }
         return config;
     }
 
