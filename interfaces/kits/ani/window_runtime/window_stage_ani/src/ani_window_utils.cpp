@@ -148,7 +148,7 @@ ani_status AniWindowUtils::GetPropertyDoubleObject(ani_env* env, const char* pro
     return ret;
 }
 
-ani_status AniWindowUtils::GetPropertyRectObject(ani_env* env, const char* propertyName,
+bool AniWindowUtils::GetPropertyRectObject(ani_env* env, const char* propertyName,
     ani_object object, Rect& result)
 {
     ani_ref windowRect;
@@ -156,21 +156,20 @@ ani_status AniWindowUtils::GetPropertyRectObject(ani_env* env, const char* prope
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref %{public}s Failed, ret : %{public}u",
             propertyName, static_cast<int32_t>(ret));
-        return ret;
+        return false;
     }
 
     int32_t posX = 0;
     int32_t posY = 0;
     int32_t width = 0;
     int32_t height = 0;
-    ret |= GetIntObject(env, "left", static_cast<ani_object>(windowRect), posX);
-    ret |= GetIntObject(env, "top", static_cast<ani_object>(windowRect), posY);
-    ret |= GetIntObject(env, "width", static_cast<ani_object>(windowRect), width);
-    ret |= GetIntObject(env, "height", static_cast<ani_object>(windowRect), height);
-    if (ret != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] GetIntObject Failed, ret : %{public}u",
-            static_cast<int32_t>(ret));
-        return ret;
+    bool ret_bool = GetIntObject(env, "left", static_cast<ani_object>(windowRect), posX);
+    ret_bool |= GetIntObject(env, "top", static_cast<ani_object>(windowRect), posY);
+    ret_bool |= GetIntObject(env, "width", static_cast<ani_object>(windowRect), width);
+    ret_bool |= GetIntObject(env, "height", static_cast<ani_object>(windowRect), height);
+    if (!ret_bool) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] GetIntObject Failed");
+        return AniWindowUtils::CreateAniUndefined(env);
     }
     result.posX_ = posX;
     result.posY_ = posY;
@@ -178,10 +177,10 @@ ani_status AniWindowUtils::GetPropertyRectObject(ani_env* env, const char* prope
     result.height_ = height;
     TLOGI(WmsLogTag::DEFAULT, "[ANI] rect is [%{public}u, %{public}u, %{public}u, %{public}u]",
         result.posX_, result.posY_, result.width_, result.height_);
-    return ret;
+    return ret_bool;
 }
 
-ani_status AniWindowUtils::GetIntObject(ani_env* env, const char* propertyName,
+bool AniWindowUtils::GetIntObject(ani_env* env, const char* propertyName,
     ani_object object, int32_t& result)
 {
     ani_int int_value;
@@ -189,10 +188,10 @@ ani_status AniWindowUtils::GetIntObject(ani_env* env, const char* propertyName,
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Int %{public}s Failed, ret : %{public}u",
             propertyName, static_cast<int32_t>(ret));
-        return ret;
+        return false;
     }
     result = static_cast<int32_t>(int_value);
-    return ret;
+    return true;
 }
 
 ani_status AniWindowUtils::GetDoubleObject(ani_env* env, ani_object double_object, double& result)
@@ -621,9 +620,9 @@ void AniWindowUtils::ParseRotationChangeResult(ani_env* env, ani_object obj, Rot
     }
 
     Rect windowRect;
-    ret = GetPropertyRectObject(env, "windowRect", obj, windowRect);
-    if (ret != ANI_OK) {
-        TLOGE(WmsLogTag::WMS_ROTATION, "[ANI] GetPropertyRectObject failed, ret: %{public}d", ret);
+    bool ret_bool = GetPropertyRectObject(env, "windowRect", obj, windowRect);
+    if (!ret_bool) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[ANI] GetPropertyRectObject failed");
         return;
     }
     rotationChangeResult.rectType_ = static_cast<RectType>(rectType);
