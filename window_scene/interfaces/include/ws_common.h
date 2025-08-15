@@ -49,8 +49,6 @@ constexpr int32_t INVALID_SESSION_ID = 0;
 constexpr int32_t DEFAULT_REQUEST_FROM_SCB_ID = -1;
 constexpr int32_t WINDOW_SUPPORT_MODE_MAX_SIZE = 4;
 constexpr int32_t DEFAULT_SCALE_RATIO = 100;
-constexpr uint32_t COLOR_WHITE = 0xffffffff;
-constexpr uint32_t COLOR_BLACK = 0xff000000;
 const std::string WINDOW_SCREEN_LOCK_PREFIX = "windowLock_";
 const std::string VIEW_SCREEN_LOCK_PREFIX = "viewLock_";
 
@@ -1074,6 +1072,15 @@ enum class SnapshotNodeType : uint32_t {
     DEFAULT_NODE = 0,
     LEASH_NODE,
     APP_NODE,
+};
+
+enum class ScreenLockReason {
+    DEFAULT = 0,
+
+    /*
+     * Expanded to folded on single pocket
+     */
+    EXPAND_TO_FOLD_SINGLE_POCKET,
 };
 
 enum class AsyncTraceTaskId: int32_t {

@@ -1342,6 +1342,24 @@ HWTEST_F(ScreenSessionDumperTest, SetEnterOrExitTentMode, TestSize.Level1)
     ASSERT_EQ(tentMode, false);
 }
 
+/**
+ * @tc.name: SetDuringCallState
+ * @tc.desc: test function : SetDuringCallState
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, SetDuringCallState, TestSize.Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-h"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    
+    dumper->SetDuringCallState("-duringcallstate, 1");
+    ASSERT_TRUE(ScreenSessionManager::GetInstance().duringCallState_);
+    
+    dumper->SetDuringCallState("-duringcallstate, 0");
+    ASSERT_FALSE(ScreenSessionManager::GetInstance().duringCallState_);
+}
+
 #endif // FOLD_ABILITY_ENABLE
 }
 }

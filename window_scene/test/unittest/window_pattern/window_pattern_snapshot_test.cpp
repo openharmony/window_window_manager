@@ -735,6 +735,10 @@ HWTEST_F(WindowPatternSnapshotTest, GetSessionStatus, TestSize.Level1)
     sceneSession->state_ = SessionState::STATE_ACTIVE;
     ret = sceneSession->GetSessionStatus();
     EXPECT_EQ(ret.second, 0);
+
+    ScreenLockReason reason = ScreenLockReason::EXPAND_TO_FOLD_SINGLE_POCKET;
+    ret = sceneSession->GetSessionStatus(reason);
+    EXPECT_EQ(ret.first, 1);
 }
 
 /**

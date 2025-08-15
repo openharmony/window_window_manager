@@ -268,8 +268,8 @@ public:
     /*
      * Window Lifecycle
      */
-    void SetUseControlStateToProperty(bool isUseControlState);
-    bool GetUseControlStateFromProperty() const;
+    void SetUseControlState(bool isUseControlState);
+    bool GetUseControlState() const;
     void SetAncoRealBundleName(const std::string& ancoRealBundleName);
     std::string GetAncoRealBundleName() const;
 
@@ -793,6 +793,7 @@ struct SystemSessionConfig : public Parcelable {
     bool skipRedundantWindowStatusNotifications_ = false;
     uint32_t supportFunctionType_ = 0;
     bool supportSnapshotAllSessionStatus_ = false;
+    bool supportCreateFloatWindow_ = false;
 
     virtual bool Marshalling(Parcel& parcel) const override
     {

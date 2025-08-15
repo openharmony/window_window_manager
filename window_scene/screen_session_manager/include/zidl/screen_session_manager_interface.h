@@ -231,6 +231,7 @@ public:
     virtual DMError SetPrimaryDisplaySystemDpi(float dpi) { return DMError::DM_OK; }
     // Fold Screen
     virtual void SetFoldDisplayMode(const FoldDisplayMode displayMode) {}
+    virtual void SetFoldDisplayModeAsync(const FoldDisplayMode displayMode) {}
     virtual DMError SetFoldDisplayModeFromJs(const FoldDisplayMode displayMode,
         std::string reason = "") { return DMError::DM_OK; }
 
