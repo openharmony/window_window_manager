@@ -36,13 +36,14 @@ public:
     static ani_status InitScreenManagerAni(ani_namespace screenNameSpace, ani_env* env);
     DmErrorCode ProcessRegisterCallback(ani_env* env, std::string& typeStr,
         sptr<ScreenAniListener> screenAniListener);
-    static ani_double MakeMirror(ani_env* env, ani_double mainScreen, ani_object mirrorScreen);
+    static ani_long MakeMirror(ani_env* env, ani_long mainScreen, ani_object mirrorScreen);
     static void GetAllScreens(ani_env* env, ani_object screensAni);
 private:
     void OnRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
     void OnUnRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
     DMError UnRegisterScreenListenerWithType(std::string type, ani_env* env, ani_ref callback);
     DMError UnRegisterAllScreenListenerWithType(std::string type);
+    bool IsCallbackRegistered(ani_env* env, const std::string& type, ani_ref callback);
     std::mutex mtx_;
     std::map<std::string, std::map<ani_ref, sptr<ScreenAniListener>>> jsCbMap_;
 };

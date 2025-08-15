@@ -19,7 +19,6 @@
 #include "dm_common.h"
 #include "refbase.h"
 #include "pixel_map.h"
-#include "pixel_map_ani.h"
  
 #include "ani.h"
  
@@ -31,7 +30,7 @@ struct Option {
     int rotation = 0;
     DisplayId displayId = 0;
     bool isNeedNotify = true;
-    bool isNeedPointer = true;
+    bool isCaptureFullOfScreen = true;
 };
  
 struct Param {
