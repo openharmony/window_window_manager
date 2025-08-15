@@ -8692,6 +8692,7 @@ void SceneSession::ModifyRSAnimatableProperty(bool isDefaultSidebarBlur, bool is
     constexpr int32_t duration = 150;
     if (isDefaultSidebarBlur) {
         auto rsUIContext = GetRSUIContext();
+        AutoRSTransaction trans(rsUIContext);
         if (isNeedAnimation) {
             Rosen::RSAnimationTimingProtocol timingProtocol;
             timingProtocol.SetDuration(duration);
