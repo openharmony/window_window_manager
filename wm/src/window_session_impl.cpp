@@ -273,6 +273,26 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option,
 {
     WLOGFD("[WMSCom] Constructor");
     property_ = sptr<WindowSessionProperty>::MakeSptr();
+    windowOption_ = option;
+    handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
+
+    InitPropertyFromOption(option);
+    
+    RSAdapterUtil::InitRSUIDirector(rsUIDirector_, true, true, rsUIContext);
+    if (WindowHelper::IsSubWindow(GetType())) {
+        property_->SetDecorEnable(option->GetSubWindowDecorEnable());
+    }
+    surfaceNode_ = CreateSurfaceNode(property_->GetWindowName(), optionWindowType);
+    if (surfaceNode_ != nullptr) {
+        vsyncStation_ = std::make_shared<VsyncStation>(surfaceNode_->GetId());
+    }
+    WindowHelper::SplitStringByDelimiter(
+        system::GetParameter("const.window.containerColorLists", ""), ",", containerColorList_);
+    SetDefaultDensityEnabledValue(defaultDensityEnabledGlobalConfig_);
+}
+
+void WindowSessionImpl::InitPropertyFromOption(const sptr<WindowOption>& option) 
+{
     WindowType optionWindowType = option->GetWindowType();
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = option->GetBundleName();
@@ -307,20 +327,6 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option,
     updateRectCallback_ = sptr<FutureCallback>::MakeSptr();
     isMainHandlerAvailable_ = option->GetMainHandlerAvailable();
     isIgnoreSafeArea_ = WindowHelper::IsSubWindow(optionWindowType);
-    windowOption_ = option;
-    handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
-
-    RSAdapterUtil::InitRSUIDirector(rsUIDirector_, true, true, rsUIContext);
-    if (WindowHelper::IsSubWindow(GetType())) {
-        property_->SetDecorEnable(option->GetSubWindowDecorEnable());
-    }
-    surfaceNode_ = CreateSurfaceNode(property_->GetWindowName(), optionWindowType);
-    if (surfaceNode_ != nullptr) {
-        vsyncStation_ = std::make_shared<VsyncStation>(surfaceNode_->GetId());
-    }
-    WindowHelper::SplitStringByDelimiter(
-        system::GetParameter("const.window.containerColorLists", ""), ",", containerColorList_);
-    SetDefaultDensityEnabledValue(defaultDensityEnabledGlobalConfig_);
 }
 
 bool WindowSessionImpl::IsPcWindow() const

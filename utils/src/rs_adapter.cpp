@@ -484,7 +484,7 @@ void RSAdapterUtil::InitRSUIDirector(std::shared_ptr<RSUIDirector>& rsUIDirector
     rsUIDirector = RSUIDirector::Create();
     if (rsUIDirector) {
         rsUIDirector->Init(shouldCreateRenderThread, isMultiInstance, rsUiContext);
-        TLOGI(WmsLogTag::WMS_SCB, "Create RSUIDirector: %{public}s, rsUIContext: %{public}s", 
+        TLOGI(WmsLogTag::WMS_SCB, "Create RSUIDirector: %{public}s, rsUIContext: %{public}s",
               RSAdapterUtil::RSUIDirectorToStr(rsUIDirector).c_str(),
               RSAdapterUtil::RSUIContextToStr(rsUiContext).c_str());
     } else {
