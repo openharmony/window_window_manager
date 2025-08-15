@@ -803,7 +803,7 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
     };
     if (startsWith(windowName, SCREENSHOT_WINDOW_NAME_PREFIX) || startsWith(windowName, PREVIEW_WINDOW_NAME_PREFIX)) {
         windowNameType = WINDOW_NAME_TYPE_THUMBNAIL;
-    }else if(startsWith(windowName, VOICEINPUT_WINDOW_NAME_PREFIX)){
+    } else if (startsWith(windowName, VOICEINPUT_WINDOW_NAME_PREFIX)){
         windowNameType = WINDOW_NAME_TYPE_VOICEINPUT;
     }
     auto pixelMap = windowSessionProperty->GetWindowMask();
