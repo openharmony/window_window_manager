@@ -42,12 +42,7 @@ void DisplayAniListener::AddCallback(const std::string& type, ani_ref callback)
         return;
     }
     std::lock_guard<std::mutex> lock(aniCallbackMtx_);
-    ani_ref cbRef{};
-    if (env_->GlobalReference_Create(callback, &cbRef) != ANI_OK) {
-        TLOGE(WmsLogTag::DMS, "[ANI]create global ref fail");
-        return;
-    };
-    aniCallback_[type].emplace_back(cbRef);
+    aniCallback_[type].emplace_back(callback);
     TLOGI(WmsLogTag::DMS, "[ANI] AddCallback success aniCallback_ size: %{public}u!",
         static_cast<uint32_t>(aniCallback_[type].size()));
 }
@@ -77,6 +72,13 @@ void DisplayAniListener::RemoveCallback(ani_env* env, const std::string& type, a
 void DisplayAniListener::RemoveAllCallback()
 {
     std::lock_guard<std::mutex> lock(aniCallbackMtx_);
+    for (const auto& [typeString, callbacks] : aniCallback_) {
+        for (auto callback : callbacks) {
+            if (env_) {
+                env_->GlobalReference_Delete(callback);
+            }
+        }
+    }
     aniCallback_.clear();
 }
 
@@ -107,15 +109,13 @@ void DisplayAniListener::OnCreate(DisplayId id)
             return;
         }
         ani_boolean undefRes = 0;
-        ani_boolean nullRes = 0;
         env_->Reference_IsUndefined(oneAniCallback, &undefRes);
-        env_->Reference_IsNull(oneAniCallback, &nullRes);
-        if (undefRes != 0 || nullRes != 0) {
-            TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback is undefRes or null");
+        if (undefRes) {
+            TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback is undef");
             continue;
         }
         auto task = [env = env_, oneAniCallback, id] {
-            DisplayAniUtils::CallAniFunctionVoid(env, "L@ohos/display/display;", "displayEventCallBack",
+            DisplayAniUtils::CallAniFunctionVoid(env, "@ohos.display.display", "displayEventCallBack",
                 nullptr, oneAniCallback, static_cast<ani_double>(id));
         };
         if (!eventHandler_) {
@@ -154,15 +154,13 @@ void DisplayAniListener::OnDestroy(DisplayId id)
             return;
         }
         ani_boolean undefRes = 0;
-        ani_boolean nullRes = 0;
         env_->Reference_IsUndefined(oneAniCallback, &undefRes);
-        env_->Reference_IsNull(oneAniCallback, &nullRes);
-        if (undefRes != 0 || nullRes != 0) {
-            TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback is undefRes or null");
+        if (undefRes) {
+            TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback is undef");
             continue;
         }
         auto task = [env = env_, oneAniCallback, id] {
-            DisplayAniUtils::CallAniFunctionVoid(env, "L@ohos/display/display;", "displayEventCallBack",
+            DisplayAniUtils::CallAniFunctionVoid(env, "@ohos.display.display", "displayEventCallBack",
                 nullptr, oneAniCallback, static_cast<ani_double>(id));
         };
         if (!eventHandler_) {
@@ -198,15 +196,13 @@ void DisplayAniListener::OnChange(DisplayId id)
             return;
         }
         ani_boolean undefRes = 0;
-        ani_boolean nullRes = 0;
         env_->Reference_IsUndefined(oneAniCallback, &undefRes);
-        env_->Reference_IsNull(oneAniCallback, &nullRes);
-        if (undefRes != 0 || nullRes != 0) {
-            TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback undefRes, return");
+        if (undefRes) {
+            TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback undef, return");
             continue;
         }
         auto task = [env = env_, oneAniCallback, id] {
-            DisplayAniUtils::CallAniFunctionVoid(env, "L@ohos/display/display;", "displayEventCallBack",
+            DisplayAniUtils::CallAniFunctionVoid(env, "@ohos.display.display", "displayEventCallBack",
                 nullptr, oneAniCallback, static_cast<ani_double>(id));
         };
         if (!eventHandler_) {
@@ -243,7 +239,7 @@ void DisplayAniListener::OnPrivateWindow(bool hasPrivate)
     auto it = aniCallback_.find(EVENT_PRIVATE_MODE_CHANGE);
     for (auto oneAniCallback : it->second) {
         auto task = [env = env_, oneAniCallback, hasPrivate] () {
-            DisplayAniUtils::CallAniFunctionVoid(env, "L@ohos/display/display;", "captureStatusChangedCallback",
+            DisplayAniUtils::CallAniFunctionVoid(env, "@ohos.display.display", "captureStatusChangedCallback",
                 nullptr, oneAniCallback, hasPrivate);
         };
         if (!eventHandler_) {
@@ -279,7 +275,7 @@ void DisplayAniListener::OnFoldStatusChanged(FoldStatus foldStatus)
     auto it = aniCallback_.find(EVENT_FOLD_STATUS_CHANGED);
     for (auto oneAniCallback : it->second) {
         auto task = [env = env_, oneAniCallback, foldStatus] () {
-            DisplayAniUtils::CallAniFunctionVoid(env, "L@ohos/display/display;", "foldStatusCallback",
+            DisplayAniUtils::CallAniFunctionVoid(env, "@ohos.display.display", "foldStatusCallback",
                 nullptr, oneAniCallback, static_cast<ani_int>(foldStatus));
         };
         if (!eventHandler_) {
@@ -313,7 +309,7 @@ void DisplayAniListener::OnFoldAngleChanged(std::vector<float> foldAngles)
         DisplayAniUtils::CreateAniArrayDouble(env_, foldAngles.size(), &cbArray, foldAngles);
         for (auto oneAniCallback : it->second) {
             auto task = [env = env_, oneAniCallback, cbArray] () {
-                DisplayAniUtils::CallAniFunctionVoid(env, "L@ohos/display/display;", "foldAngleChangeCallback",
+                DisplayAniUtils::CallAniFunctionVoid(env, "@ohos.display.display", "foldAngleChangeCallback",
                     nullptr, oneAniCallback, cbArray);
             };
             if (!eventHandler_) {
@@ -348,7 +344,7 @@ void DisplayAniListener::OnCaptureStatusChanged(bool isCapture)
         auto it = aniCallback_.find(EVENT_CAPTURE_STATUS_CHANGED);
         for (auto oneAniCallback : it->second) {
             auto task = [env = env_, oneAniCallback, isCapture] () {
-                DisplayAniUtils::CallAniFunctionVoid(env, "L@ohos/display/display;", "captureStatusChangedCallback",
+                DisplayAniUtils::CallAniFunctionVoid(env, "@ohos.display.display", "captureStatusChangedCallback",
                     nullptr, oneAniCallback, isCapture);
             };
             if (!eventHandler_) {
@@ -384,7 +380,7 @@ void DisplayAniListener::OnDisplayModeChanged(FoldDisplayMode foldDisplayMode)
         auto it = aniCallback_.find(EVENT_DISPLAY_MODE_CHANGED);
         for (auto oneAniCallback : it->second) {
             auto task = [env = env_, oneAniCallback, foldDisplayMode] () {
-                DisplayAniUtils::CallAniFunctionVoid(env, "L@ohos/display/display;", "foldDisplayModeCallback",
+                DisplayAniUtils::CallAniFunctionVoid(env, "@ohos.display.display", "foldDisplayModeCallback",
                     nullptr, oneAniCallback, static_cast<ani_int>(foldDisplayMode));
             };
             if (!eventHandler_) {
@@ -418,9 +414,13 @@ void DisplayAniListener::OnAvailableAreaChanged(DMRect area)
     if (env_ != nullptr) {
         auto it = aniCallback_.find(EVENT_AVAILABLE_AREA_CHANGED);
         for (auto oneAniCallback : it->second) {
-            ani_object rectObj = nullptr;
-            DisplayAniUtils::ConvertRect(area, rectObj, env_);
-            auto task = [env = env_, oneAniCallback, rectObj] () {
+            auto task = [env = env_, oneAniCallback, area] () {
+                ani_object rectObj = DisplayAniUtils::CreateRectObject(env);
+                if (!rectObj) {
+                    TLOGE(WmsLogTag::DMS, "[ANI] CreateRectObject failed");
+                    return;
+                }
+                DisplayAniUtils::ConvertRect(area, rectObj, env);
                 DisplayAniUtils::CallAniFunctionVoid(env, "L@ohos/display/display;", "availableAreaChangedCallback",
                     nullptr, oneAniCallback, rectObj);
             };

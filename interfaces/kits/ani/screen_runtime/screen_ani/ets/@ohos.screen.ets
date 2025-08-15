@@ -20,43 +20,41 @@ export default namespace screen {
 
 loadLibrary('screenani_kit.z');
 
-export function on(eventType: 'connect' | 'disconnect' | 'change', callback: Callback<number>): void{
+export function on<T>(eventType: string, callback: Callback<T>): void{
     syncOn(eventType, callback, screenMgrRef);
 }
-native function syncOn(eventType: 'connect' | 'disconnect' | 'change',
-    callback: Callback<number>, nativeObj: long): void;
+native function syncOn(eventType: string, callback: object, nativeObj: long): void;
 
-export function off(eventType: 'connect' | 'disconnect' | 'change', callback?: Callback<number>): void{
+export function off<T>(eventType: string, callback?: Callback<T>): void{
     syncOff(eventType, screenMgrRef, callback);
 }
-native function syncOff(eventType: 'connect' | 'disconnect' | 'change',
-    nativeObj: long, callback?: Callback<number>): void;
+native function syncOff(eventType: string, nativeObj: long, callback?: object): void;
 
-export function makeMirror(mainScreen: number, mirrorScreen: Array<number>, callback: AsyncCallback<number>): void {
-    taskpool.execute((): number => {
-        let res: number = makeMirrorInternal(mainScreen, mirrorScreen);
+export function makeMirror(mainScreen: long, mirrorScreen: Array<long>, callback: AsyncCallback<long>): void {
+    taskpool.execute((): long => {
+        let res: long = makeMirrorInternal(mainScreen, mirrorScreen);
         return res;
     }).then((ret: NullishType) => {
-        callback(new BusinessError(), ret as number);
+        callback(null, ret as long);
     }).catch((err: NullishType) => {
         callback(err as BusinessError, -1);
     });
 }
 
-export function makeMirror(mainScreen: number, mirrorScreen: Array<number>): Promise<number> {
-    return new Promise<number>((resolve: (value: number) => void, reject: (error: BusinessError) => void ) => {
-        taskpool.execute((): number => {
-            let res: number = makeMirrorInternal(mainScreen, mirrorScreen);
+export function makeMirror(mainScreen: long, mirrorScreen: Array<long>): Promise<long> {
+    return new Promise<long>((resolve: (value: long) => void, reject: (error: BusinessError) => void ) => {
+        taskpool.execute((): long => {
+            let res: long = makeMirrorInternal(mainScreen, mirrorScreen);
             return res;
         }).then((ret: NullishType) => {
-            resolve(ret as number);
+            resolve(ret as long);
         }).catch((err: NullishType) => {
             reject(err as BusinessError);
         });
     })
 }
 
-export native function makeMirrorInternal(mainScreen: number, mirrorScreen: Array<number>): number;
+export native function makeMirrorInternal(mainScreen: long, mirrorScreen: Array<long>): long;
 
 export function getAllScreens(callback: AsyncCallback<Array<Screen>>): void {
     taskpool.execute((): Array<Screen> => {
@@ -68,7 +66,7 @@ export function getAllScreens(callback: AsyncCallback<Array<Screen>>): void {
         minusScreens(screens);
         return screens;
     }).then((ret: NullishType) => {
-        callback(new BusinessError(), ret as Array<Screen>);
+        callback(null, ret as Array<Screen>);
     }).catch((err: NullishType) => {
         callback(err as BusinessError, new Array<Screen>());
     });
@@ -123,21 +121,21 @@ export native function getAllScreensInternal(screens: Array<Screen>): void;
 
 export interface Screen {
 
-    readonly id: number;
+    readonly id: long;
 
-    readonly parent: number;
+    readonly parent: long;
 
     readonly supportedModeInfo: Array<ScreenModeInfo>;
 
-    readonly activeModeIndex: number;
+    readonly activeModeIndex: long;
 
     readonly orientation: Orientation;
 
     readonly sourceMode: ScreenSourceMode;
 
-    setDensityDpi(densityDpi: number, callback: AsyncCallback<void>): void;
+    setDensityDpi(densityDpi: double, callback: AsyncCallback<void>): void;
 
-    setDensityDpi(densityDpi: number): Promise<void>;
+    setDensityDpi(densityDpi: double): Promise<void>;
 }
 
 class ScreenImpl implements Screen {
@@ -162,14 +160,14 @@ class ScreenImpl implements Screen {
         this.screenNativeObj = screen.screenNativeObj;
     }
 
-    readonly id: number;
+    readonly id: long;
 
-    readonly parent: number;
+    readonly parent: long;
 
     readonly supportedModeInfo: Array<ScreenModeInfo>;
     supportedModeInfo_: Array<ScreenModeInfo>;
 
-    readonly activeModeIndex: number;
+    readonly activeModeIndex: long;
 
     readonly orientation: Orientation;
     orientation_: int;
@@ -180,17 +178,17 @@ class ScreenImpl implements Screen {
 
     screenNativeObj: long;
 
-    setDensityDpi(densityDpi: number, callback: AsyncCallback<void>): void {
+    setDensityDpi(densityDpi: double, callback: AsyncCallback<void>): void {
         taskpool.execute((): void => {
             this.setDensityDpiInternal(densityDpi);
         }).then(() => {
-            callback(new BusinessError(), undefined);
+            callback(null, undefined);
         }).catch((err: NullishType) => {
             callback(err as BusinessError, undefined);
         });
     }
 
-    setDensityDpi(densityDpi: number): Promise<void> {
+    setDensityDpi(densityDpi: double): Promise<void> {
         return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
             taskpool.execute((): void => {
                 this.setDensityDpiInternal(densityDpi);
@@ -202,27 +200,27 @@ class ScreenImpl implements Screen {
         });
     }
 
-    native setDensityDpiInternal(densityDpi: number): void;
+    native setDensityDpiInternal(densityDpi: double): void;
 }
 
 export interface ScreenModeInfo {
-    id: number;
+    id: long;
 
-    width: number;
+    width: long;
 
-    height: number;
+    height: long;
 
-    refreshRate: number;
+    refreshRate: int;
 }
 
 class ScreenModeInfoImpl implements ScreenModeInfo{
-    id: number;
+    id: long;
 
-    width: number;
+    width: long;
 
-    height: number;
+    height: long;
 
-    refreshRate: number;
+    refreshRate: int;
 }
 
 export enum ScreenSourceMode {
@@ -252,8 +250,8 @@ export function setScreenMgrRef(nativeObj: long): void{
     screenMgrRef = nativeObj;
 }
 
-export function screenEventCallBack(cb: object, cbArg: double): void {
-    const func = cb as (cbArg: double) => void;
-    func(cbArg as double);
+export function screenEventCallBack(cb: object, cbArg: long): void {
+    const func = cb as (cbArg: long) => void;
+    func(cbArg as long);
 }
 }

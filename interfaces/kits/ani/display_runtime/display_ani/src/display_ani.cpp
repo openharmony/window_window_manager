@@ -50,14 +50,14 @@ void DisplayAni::GetCutoutInfo(ani_env* env, ani_object obj, ani_object cutoutIn
     if (ANI_OK != status) {
         TLOGE(WmsLogTag::DMS, "[ANI] get field bounding rects fail, ani_status = %{public}d", status);
     }
-    ani_double length;
-    if (ANI_OK != env->Object_GetPropertyByName_Double(static_cast<ani_object>(boundingRects), "length", &length)) {
+    ani_int length;
+    if (ANI_OK != env->Object_GetPropertyByName_Int(static_cast<ani_object>(boundingRects), "length", &length)) {
         TLOGE(WmsLogTag::DMS, "[ANI] get ani_array len fail");
     }
     for (int i = 0; i < std::min(int(length), static_cast<int>(rects.size())); i++) {
         ani_ref currentCutoutInfo;
         if (ANI_OK != env->Object_CallMethodByName_Ref(static_cast<ani_object>(boundingRects), "$_get",
-            "I:Lstd/core/Object;", &currentCutoutInfo, (ani_int)i)) {
+            "i:C{std.core.Object}", &currentCutoutInfo, (ani_int)i)) {
             TLOGE(WmsLogTag::DMS, "[ANI] get ani_array index %{public}u fail", (ani_int)i);
         }
         TLOGI(WmsLogTag::DMS, "current i: %{public}d", i);
@@ -73,8 +73,8 @@ void DisplayAni::GetCutoutInfo(ani_env* env, ani_object obj, ani_object cutoutIn
 void DisplayAni::GetAvailableArea(ani_env* env, ani_object obj, ani_object availableAreaObj)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] begin");
-    ani_double id;
-    env->Object_GetFieldByName_Double(obj, "<property>id", &id);
+    ani_long id;
+    env->Object_GetFieldByName_Long(obj, "<property>id", &id);
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(id);
     if (display == nullptr) {
         TLOGE(WmsLogTag::DMS, "[ANI] can not find display.");
@@ -86,8 +86,7 @@ void DisplayAni::GetAvailableArea(ani_env* env, ani_object obj, ani_object avail
     DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(display->GetAvailableArea(area));
     if (ret != DmErrorCode::DM_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] Display get available area failed.");
-        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_SCREEN,
-            "JsDisplay::GetAvailableArea failed.");
+        AniErrUtils::ThrowBusinessError(env, ret, "JsDisplay::GetAvailableArea failed.");
         return;
     }
     DisplayAniUtils::ConvertRect(area, availableAreaObj, env);
@@ -96,8 +95,8 @@ void DisplayAni::GetAvailableArea(ani_env* env, ani_object obj, ani_object avail
 ani_boolean DisplayAni::HasImmersiveWindow(ani_env* env, ani_object obj)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] begin");
-    ani_double id;
-    env->Object_GetFieldByName_Double(obj, "<property>id", &id);
+    ani_long id;
+    env->Object_GetFieldByName_Long(obj, "<property>id", &id);
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(id);
     if (display == nullptr) {
         TLOGE(WmsLogTag::DMS, "[ANI]can not find display.");
@@ -150,12 +149,10 @@ void DisplayAni::OnRegisterCallback(ani_env* env, ani_object obj, ani_string typ
     std::string typeString;
     DisplayAniUtils::GetStdString(env, type, typeString);
     ani_boolean callbackUndefined = 0;
-    ani_boolean callbackIsNull = 0;
     env->Reference_IsUndefined(callback, &callbackUndefined);
-    env->Reference_IsNull(callback, &callbackIsNull);
-    if (callbackUndefined || callbackIsNull) {
+    if (callbackUndefined) {
         std::string errMsg = "[ANI] failed to register display listener with type, cbk null or undefined";
-        TLOGE(WmsLogTag::DMS, "callbackNull or undefined");
+        TLOGE(WmsLogTag::DMS, "callback undef");
         AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, errMsg);
         return;
     }
@@ -192,6 +189,7 @@ void DisplayAni::OnRegisterCallback(ani_env* env, ani_object obj, ani_string typ
         return;
     }
     displayAniListener->AddCallback(typeString, cbRef);
+    displayAniListener->SetMainEventHandler();
     jsCbMap_[typeString][callback] = displayAniListener;
 }
 
@@ -213,10 +211,10 @@ void DisplayAni::OnUnRegisterCallback(ani_env* env, ani_object obj, ani_string t
     TLOGI(WmsLogTag::DMS, "[ANI] begin");
     std::string typeString;
     DisplayAniUtils::GetStdString(env, type, typeString);
-    ani_boolean callbackNull = 0;
-    env->Reference_IsUndefined(callback, &callbackNull);
+    ani_boolean callbackUndefined = 0;
+    env->Reference_IsUndefined(callback, &callbackUndefined);
     DmErrorCode ret;
-    if (callbackNull) {
+    if (callbackUndefined) {
         TLOGI(WmsLogTag::DMS, "[ANI] for all");
         ret = DM_JS_TO_ERROR_CODE_MAP.at(UnregisterAllDisplayListenerWithType(typeString));
     } else {
@@ -322,23 +320,23 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_NOT_FOUND;
     }
     ani_namespace nsp;
-    if ((ret = env->FindNamespace("L@ohos/display/display;", &nsp)) != ANI_OK) {
+    if ((ret = env->FindNamespace("@ohos.display.display", &nsp)) != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] null env %{public}u", ret);
         return ANI_NOT_FOUND;
     }
     DisplayManagerAni::InitDisplayManagerAni(nsp, env);
     std::array funcs = {
-        ani_native_function {"isFoldable", ":Z", reinterpret_cast<void *>(DisplayManagerAni::IsFoldableAni)},
-        ani_native_function {"getFoldDisplayModeNative", ":I",
+        ani_native_function {"isFoldable", ":z", reinterpret_cast<void *>(DisplayManagerAni::IsFoldableAni)},
+        ani_native_function {"getFoldDisplayModeNative", ":i",
             reinterpret_cast<void *>(DisplayManagerAni::GetFoldDisplayModeAni)},
-        ani_native_function {"getFoldStatusNative", ":I", reinterpret_cast<void *>(DisplayManagerAni::GetFoldStatus)},
-        ani_native_function {"getCurrentFoldCreaseRegionNative", "Lstd/core/Object;J:V",
+        ani_native_function {"getFoldStatusNative", ":i", reinterpret_cast<void *>(DisplayManagerAni::GetFoldStatus)},
+        ani_native_function {"getCurrentFoldCreaseRegionNative", "C{std.core.Object}l:",
             reinterpret_cast<void *>(DisplayManagerAni::GetCurrentFoldCreaseRegion)},
-        ani_native_function {"getDisplayByIdSyncNative", "Lstd/core/Object;D:V",
+        ani_native_function {"getDisplayByIdSyncNative", "C{std.core.Object}l:",
             reinterpret_cast<void *>(DisplayManagerAni::GetDisplayByIdSyncAni)},
-        ani_native_function {"getDefaultDisplaySyncNative", "Lstd/core/Object;:V",
+        ani_native_function {"getDefaultDisplaySyncNative", "C{std.core.Object}:",
             reinterpret_cast<void *>(DisplayManagerAni::GetDefaultDisplaySyncAni)},
-        ani_native_function {"getAllDisplaysSyncNative", "Lescompat/Array;:V",
+        ani_native_function {"getAllDisplaysSyncNative", "C{escompat.Array}:",
             reinterpret_cast<void *>(DisplayManagerAni::GetAllDisplaysAni)},
         ani_native_function {"syncOn", nullptr,
             reinterpret_cast<void *>(DisplayManagerAni::RegisterCallback)},
@@ -356,16 +354,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     }
 
     ani_class displayCls = nullptr;
-    if ((ret = env->FindClass("L@ohos/display/display/DisplayImpl;", &displayCls)) != ANI_OK) {
+    if ((ret = env->FindClass("@ohos.display.display.DisplayImpl", &displayCls)) != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] null env %{public}u", ret);
         return ANI_NOT_FOUND;
     }
     std::array methods = {
-        ani_native_function {"getCutoutInfoInternal", "L@ohos/display/display/CutoutInfo;:V",
+        ani_native_function {"getCutoutInfoInternal", "C{@ohos.display.display.CutoutInfo}:",
             reinterpret_cast<void *>(DisplayAni::GetCutoutInfo)},
-        ani_native_function {"getAvailableAreaInternal", "L@ohos/display/display/Rect;:V",
+        ani_native_function {"getAvailableAreaInternal", "C{@ohos.display.display.Rect}:",
             reinterpret_cast<void *>(DisplayAni::GetAvailableArea)},
-        ani_native_function {"hasImmersiveWindowInternal", ":Z",
+        ani_native_function {"hasImmersiveWindowInternal", ":z",
             reinterpret_cast<void *>(DisplayAni::HasImmersiveWindow)},
         ani_native_function {"syncOn", nullptr,
             reinterpret_cast<void *>(DisplayAni::RegisterCallback)},
