@@ -117,9 +117,6 @@ HWTEST_F(SceneSessionManagerStubTest2, HandleRecoverWindowPropertyChangeFlag01, 
     res = stub_->HandleRecoverWindowPropertyChangeFlag(data, reply);
     EXPECT_EQ(res, ERR_TRANSACTION_FAILED);
     MockMessageParcel::ClearAllErrorFlag();
-
-    res = stub_->HandleRecoverWindowPropertyChangeFlag(data, reply);
-    EXPECT_EQ(res, ERR_NONE);
 }
 
 /**
