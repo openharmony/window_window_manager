@@ -423,6 +423,7 @@ public:
     void OnScreenChangeForPC(ScreenId screenId, ScreenEvent screenEvent, ScreenChangeReason reason);
     void OnScreenChangeDefault(ScreenId screenId, ScreenEvent screenEvent, ScreenChangeReason reason);
     void OnFoldScreenChange(sptr<ScreenSession>& screenSession);
+    void OnFoldStatusChange(bool isSwitching);
     void SetCoordinationFlag(bool isCoordinationFlag);
     bool GetCoordinationFlag(void);
     DMError SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refreshRate,
@@ -503,6 +504,7 @@ private:
     void ConfigureWaterfallDisplayCompressionParams();
     void ConfigureScreenSnapshotParams();
     void RegisterScreenChangeListener();
+    void RegisterFoldNotSwitchingListener();
     void RegisterRefreshRateChangeListener();
     void OnHgmRefreshRateChange(uint32_t refreshRate);
     sptr<ScreenSession> GetOrCreateScreenSession(ScreenId screenId);

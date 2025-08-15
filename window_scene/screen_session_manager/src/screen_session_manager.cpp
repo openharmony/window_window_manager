@@ -439,6 +439,9 @@ void ScreenSessionManager::Init()
     }
 
     RegisterScreenChangeListener();
+    if(FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        RegisterFoldNotSwitchingListener();
+    }
     if (!ScreenSceneConfig::IsSupportRotateWithSensor()) {
         TLOGI(WmsLogTag::DMS, "Current type not support SetSensorSubscriptionEnabled.");
     } else if (GetScreenPower(SCREEN_ID_FULL) == ScreenPowerState::POWER_ON) {
@@ -735,6 +738,22 @@ void ScreenSessionManager::RegisterScreenChangeListener()
     }
 }
 
+void ScreenSessionManager::RegisterFoldNotSwitchingListener()
+{
+    TLOGI(WmsLogTag::DMS, "start");
+    auto res = rsInterface_.SetScreenSwitchingNotifyCallback(
+        [this](bool isSwitching) {
+            OnFoldStatusChange(isSwitching);
+        });
+    if (res != StatusCode::SUCCESS) {
+        auto task = [this]() { RegisterFoldNotSwitchingListener(); };
+        taskScheduler_->PostAsyncTask(task, "RegisterFoldNotSwitchingListener", 50);  // Retry after 50 ms.
+        screenEventTracker_.RecordEvent("Dms fold not switching register failed.");
+    } else {
+        screenEventTracker_.RecordEvent("Dms fold not switching register success.");
+    }
+}
+
 void ScreenSessionManager::ReportFoldDisplayTime(uint64_t screenId, int64_t rsFirstFrameTime)
 {
 #ifdef FOLD_ABILITY_ENABLE
@@ -1005,6 +1024,20 @@ void ScreenSessionManager::OnFoldScreenChange(sptr<ScreenSession>& screenSession
     if (foldScreenController_ != nullptr) {
         RegisterFirstFrameCommitCallback();
         screenSession->SetFoldScreen(true);
+    }
+#endif
+}
+
+void ScreenSessionManager::OnFoldStatusChange(bool isSwitching)
+{
+#ifdef FOLD_ABILITY_ENABLE
+    if (foldScreenController_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "fold screen controller is not initialized.");
+        return;
+    }
+    if (!isSwitching) {
+        TLOGI(WmsLogTag::DMS, "receive switching end.");
+        foldScreenController_->SetdisplayModeChangeStatus(false);
     }
 #endif
 }
