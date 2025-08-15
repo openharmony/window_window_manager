@@ -782,8 +782,8 @@ napi_value JsWindowManager::OnFindWindowSync(napi_env env, napi_callback_info in
     } else {
         sptr<Window> window = Window::Find(windowName);
         if (window == nullptr) {
-            napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
-                "[windowLifecycle][OnFindWindowSync]msg: window is nullptr");
+            napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                "[window][OnFindWindowSync]msg: window is nullptr"));
             return NapiGetUndefined(env);
         } else {
             return CreateJsWindowObject(env, window);
