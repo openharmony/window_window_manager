@@ -510,6 +510,23 @@ HWTEST_F(WindowAdapterTest, GetVisibilityWindowInfo, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RecoverWindowPropertyChangeFlag
+ * @tc.desc: WindowAdapter/RecoverWindowPropertyChangeFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, RecoverWindowPropertyChangeFlag01, TestSize.Level1)
+{
+    WindowAdapter windowAdapter;
+    auto ret = windowAdapter.RecoverWindowPropertyChangeFlag();
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+
+    windowAdapter.InitWMSProxy();
+    ASSERT_NE(windowAdapter.windowManagerServiceProxy_, nullptr);
+    ret = windowAdapter.RecoverWindowPropertyChangeFlag();
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+}
+
+/**
  * @tc.name: ReregisterWindowManagerAgent
  * @tc.desc: WindowAdapter/ReregisterWindowManagerAgent
  * @tc.type: FUNC

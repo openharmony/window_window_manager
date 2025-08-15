@@ -183,6 +183,9 @@ WMError WindowAdapter::RegisterWindowPropertyChangeAgent(WindowInfoKey windowInf
         }
         windowManagerAgentMap_[type].insert(windowManagerAgent);
     }
+    
+    observedFlags_ |= static_cast<uint32_t>(windowInfoKey);
+    interestedFlags_ |= interestInfo;
 
     return wmsProxy->RegisterWindowPropertyChangeAgent(windowInfoKey, interestInfo, windowManagerAgent);
 }
@@ -195,6 +198,9 @@ WMError WindowAdapter::UnregisterWindowPropertyChangeAgent(WindowInfoKey windowI
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
     auto ret = wmsProxy->UnregisterWindowPropertyChangeAgent(windowInfoKey, interestInfo, windowManagerAgent);
+
+    observedFlags_ &= ~(static_cast<uint32_t>(windowInfoKey));
+    interestedFlags_ &= ~interestInfo;
 
     WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_PROPERTY;
     std::lock_guard<std::mutex> lock(mutex_);
@@ -462,6 +468,7 @@ void WindowAdapter::WindowManagerAndSessionRecover()
     }
 
     ReregisterWindowManagerAgent();
+    RecoverWindowPropertyChangeFlag();
 
     std::map<int32_t, SessionRecoverCallbackFunc> sessionRecoverCallbackFuncMap;
     {
@@ -488,6 +495,20 @@ void WindowAdapter::WindowManagerAndSessionRecover()
             TLOGE(WmsLogTag::WMS_RECOVER, "ui effect create failed, id: %{public}d, reason %{public}d", it.first, ret);
         }
     }
+}
+
+WMError  WindowAdapter::RecoverWindowPropertyChangeFlag()
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (!windowManagerServiceProxy_ || !windowManagerServiceProxy_->AsObject()) {
+        TLOGE(WmsLogTag::WMS_RECOVER, "proxy is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    auto ret = windowManagerServiceProxy_->RecoverWindowPropertyChangeFlag(observedFlags_, interestedFlags_);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_RECOVER, "failed, ret=%{public}d", static_cast<int32_t>(ret));
+    }
+    return ret;
 }
 
 void WindowAdapter::ReregisterWindowManagerAgent()
