@@ -730,8 +730,8 @@ private:
     uint32_t defaultDeviceRotationOffset_ { 0 };
     std::atomic<ExtendScreenConnectStatus> extendScreenConnectStatus_ = ExtendScreenConnectStatus::UNKNOWN;
     bool isExtendScreenConnected_ = false;
-    bool isOuterOnlyMode_ = false;
-    bool isOuterOnlyModeBeforePowerOff_ = false;
+    std::atomic<bool> isOuterOnlyMode_ = false;
+    std::atomic<bool> isOuterOnlyModeBeforePowerOff_ = false;
     std::atomic<bool> isFoldStatusLocked_ = false;
     std::atomic<bool> isLandscapeLockStatus_ = false;
     std::atomic<bool> isLapTopLidOpen_ = true;
@@ -768,6 +768,7 @@ private:
     std::mutex screenMaskMutex_;
     std::condition_variable screenMaskCV_;
     std::mutex displayAddMutex_;
+    std::mutex screenModeChangeMutex_;
     std::condition_variable displayAddCV_;
     mutable std::mutex setPcStatusMutex_;
 
