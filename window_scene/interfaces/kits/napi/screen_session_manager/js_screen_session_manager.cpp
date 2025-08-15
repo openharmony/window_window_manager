@@ -73,6 +73,8 @@ napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
         JsScreenUtils::CreateJsScreenPropertyChangeType(env));
     napi_set_named_property(env, exportObj, "SuperFoldStatus",
         JsScreenUtils::CreateJsSuperFoldStatus(env));
+    napi_set_named_property(env, exportObj, "FoldDisplayMode",
+        JsScreenUtils::CreateJsFoldDisplayMode(env));
     napi_set_named_property(env, exportObj, "ExtendScreenConnectStatus",
         JsScreenUtils::CreateJsExtendScreenConnectStatus(env));
     napi_set_named_property(env, exportObj, "ScreenModeChangeEvent",
@@ -138,6 +140,8 @@ napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
         JsScreenSessionManager::SetPrimaryDisplaySystemDpi);
     BindNativeFunction(env, exportObj, "getPrimaryDisplaySystemDpi", moduleName,
         JsScreenSessionManager::GetPrimaryDisplaySystemDpi);
+    BindNativeFunction(env, exportObj, "getFoldDisplayMode", moduleName,
+        JsScreenSessionManager::GetFoldDisplayMode);
     BindNativeFunction(env, exportObj, "freezeScreen", moduleName, JsScreenSessionManager::FreezeScreen);
     BindNativeFunction(env, exportObj, "getScreenSnapshotWithAllWindows", moduleName,
         JsScreenSessionManager::GetScreenSnapshotWithAllWindows);
@@ -368,6 +372,13 @@ napi_value JsScreenSessionManager::GetPrimaryDisplaySystemDpi(napi_env env, napi
     TLOGD(WmsLogTag::DMS, "[NAPI].");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnGetPrimaryDisplaySystemDpi(env, info) : nullptr;
+}
+
+napi_value JsScreenSessionManager::GetFoldDisplayMode(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DMS, "[NAPI].");
+    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
+    return (me != nullptr) ? me->OnGetFoldDisplayMode(env, info) : nullptr;
 }
 
 napi_value JsScreenSessionManager::FreezeScreen(napi_env env, napi_callback_info info)
@@ -1218,6 +1229,13 @@ napi_value JsScreenSessionManager::OnGetPrimaryDisplaySystemDpi(napi_env env, na
     TLOGD(WmsLogTag::DMS, "[NAPI].");
     float primaryDisplaySystemDpi = DisplayManager::GetInstance().GetPrimaryDisplaySystemDpi();
     return CreateJsValue(env, primaryDisplaySystemDpi * BASELINE_DENSITY);
+}
+
+napi_value JsScreenSessionManager::OnGetFoldDisplayMode(napi_env env, napi_callback_info info)
+{
+    FoldDisplayMode foldDisplayMode = DisplayManager::GetInstance().GetFoldDisplayMode();
+    TLOGI(WmsLogTag::DMS, "[NAPI] foldDisplayMode:%{public}d", foldDisplayMode);
+    return CreateJsValue(env, foldDisplayMode);
 }
 
 napi_value JsScreenSessionManager::OnFreezeScreen(napi_env env, const napi_callback_info info)

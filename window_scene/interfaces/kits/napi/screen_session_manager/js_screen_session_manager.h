@@ -72,6 +72,7 @@ private:
     static napi_value NotifyScreenMaskAppear(napi_env env, napi_callback_info info);
     static napi_value SetPrimaryDisplaySystemDpi(napi_env env, napi_callback_info info);
     static napi_value GetPrimaryDisplaySystemDpi(napi_env env, napi_callback_info info);
+    static napi_value GetFoldDisplayMode(napi_env env, napi_callback_info info);
     static napi_value FreezeScreen(napi_env env, napi_callback_info info);
     static napi_value GetScreenSnapshotWithAllWindows(napi_env env, napi_callback_info info);
 
@@ -106,6 +107,7 @@ private:
     napi_value OnNotifyScreenMaskAppear(napi_env env, napi_callback_info info);
     napi_value OnSetPrimaryDisplaySystemDpi(napi_env env, napi_callback_info info);
     napi_value OnGetPrimaryDisplaySystemDpi(napi_env env, napi_callback_info info);
+    napi_value OnGetFoldDisplayMode(napi_env env, napi_callback_info info);
     napi_value OnFreezeScreen(napi_env env, napi_callback_info info);
     napi_value OnGetScreenSnapshotWithAllWindows(napi_env env, napi_callback_info info);
 
