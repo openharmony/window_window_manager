@@ -559,7 +559,7 @@ void AniWindowListener::OnRotationChange(const RotationChangeInfo& rotationChang
     };
     if (!eventHandler_ ||
         (eventHandler_->GetEventRunner() && eventHandler_->GetEventRunner()->IsCurrentRunnerThread())) {
-        TLOGE(WmsLogTag::WMS_ROTATION, "get main event handler failed or current is already main thread!");
+        TLOGW(WmsLogTag::WMS_ROTATION, "get main event handler failed or current is already main thread!");
         return task();
     }
     eventHandler_->PostSyncTask(task, __func__, AppExecFwk::EventQueue::Priority::IMMEDIATE);
