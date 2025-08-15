@@ -159,18 +159,25 @@ ani_status AniWindowUtils::GetPropertyRectObject(ani_env* env, const char* prope
         return ret;
     }
 
-    int32_t posX;
-    int32_t posY;
-    int32_t width;
-    int32_t height;
-    GetIntObject(env, "left", static_cast<ani_object>(windowRect), posX);
-    GetIntObject(env, "top", static_cast<ani_object>(windowRect), posY);
-    GetIntObject(env, "width", static_cast<ani_object>(windowRect), width);
-    GetIntObject(env, "height", static_cast<ani_object>(windowRect), height);
+    int32_t posX = 0;
+    int32_t posY = 0;
+    int32_t width = 0;
+    int32_t height = 0;
+    ret |= GetIntObject(env, "left", static_cast<ani_object>(windowRect), posX);
+    ret |= GetIntObject(env, "top", static_cast<ani_object>(windowRect), posY);
+    ret |= GetIntObject(env, "width", static_cast<ani_object>(windowRect), width);
+    ret |= GetIntObject(env, "height", static_cast<ani_object>(windowRect), height);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] GetIntObject Failed, ret : %{public}u",
+            static_cast<int32_t>(ret));
+        return ret;
+    }
     result.posX_ = posX;
     result.posY_ = posY;
     result.width_ = width;
     result.height_ = height;
+    TLOGI(WmsLogTag::DEFAULT, "[ANI] rect is [%{public}u, %{public}u, %{public}u, %{public}u]",
+        result.posX_, result.posY_, result.width_, result.height_);
     return ret;
 }
 
@@ -185,7 +192,6 @@ ani_status AniWindowUtils::GetIntObject(ani_env* env, const char* propertyName,
         return ret;
     }
     result = static_cast<int32_t>(int_value);
-    TLOGI(WmsLogTag::DEFAULT, "[ANI] %{public}s is: %{public}u", propertyName, result);
     return ret;
 }
 
@@ -615,7 +621,11 @@ void AniWindowUtils::ParseRotationChangeResult(ani_env* env, ani_object obj, Rot
     }
 
     Rect windowRect;
-    GetPropertyRectObject(env, "windowRect", obj, windowRect);
+    ret = GetPropertyRectObject(env, "windowRect", obj, windowRect);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[ANI] GetPropertyRectObject failed, ret: %{public}d", ret);
+        return;
+    }
     rotationChangeResult.rectType_ = static_cast<RectType>(rectType);
     rotationChangeResult.windowRect_ = windowRect;
 }
