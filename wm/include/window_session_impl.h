@@ -78,7 +78,8 @@ using IKBWillHideListener = IKeyboardWillHideListener;
 
 class WindowSessionImpl : public Window, public virtual SessionStageStub {
 public:
-    explicit WindowSessionImpl(const sptr<WindowOption>& option);
+    explicit WindowSessionImpl(const sptr<WindowOption>& option,
+        const std::shared_ptr<RSUIContext>& rsUIContext = nullptr);
     ~WindowSessionImpl();
 
     static sptr<Window> Find(const std::string& name);

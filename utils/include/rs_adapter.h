@@ -172,7 +172,8 @@ public:
     static bool IsClientMultiInstanceEnabled();
     static void InitRSUIDirector(std::shared_ptr<RSUIDirector>& rsUIDirector,
                                  bool shouldCreateRenderThread = true,
-                                 bool isMultiInstance = false);
+                                 bool isMultiInstance = false,
+                                 const std::shared_ptr<RSUIContext>& rsUiContext = nullptr);
     static void SetRSUIContext(const std::shared_ptr<RSNode>& rsNode,
                                const std::shared_ptr<RSUIContext>& rsUIContext,
                                bool skipCheckInMultiInstance = false);

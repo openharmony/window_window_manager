@@ -472,7 +472,8 @@ bool RSAdapterUtil::IsClientMultiInstanceEnabled()
 }
 
 void RSAdapterUtil::InitRSUIDirector(std::shared_ptr<RSUIDirector>& rsUIDirector,
-                                     bool shouldCreateRenderThread, bool isMultiInstance)
+                                     bool shouldCreateRenderThread, bool isMultiInstance,
+                                     const std::shared_ptr<RSUIContext>& rsUiContext)
 {
     RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED();
     if (rsUIDirector) {
@@ -482,9 +483,11 @@ void RSAdapterUtil::InitRSUIDirector(std::shared_ptr<RSUIDirector>& rsUIDirector
     }
     rsUIDirector = RSUIDirector::Create();
     if (rsUIDirector) {
-        rsUIDirector->Init(shouldCreateRenderThread, isMultiInstance);
+        rsUIDirector->Init(shouldCreateRenderThread, isMultiInstance, rsUiContext);
         TLOGI(WmsLogTag::WMS_SCB,
-              "Create RSUIDirector: %{public}s", RSAdapterUtil::RSUIDirectorToStr(rsUIDirector).c_str());
+              "Create RSUIDirector: %{public}s, rsUIContext: %{public}s", 
+              RSAdapterUtil::RSUIDirectorToStr(rsUIDirector).c_str(),
+              RSAdapterUtil::RSUIContextToStr(rsUiContext).c_str(),);
     } else {
         TLOGE(WmsLogTag::WMS_SCB, "Failed to create RSUIDirector");
     }
