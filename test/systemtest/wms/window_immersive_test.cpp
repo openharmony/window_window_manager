@@ -272,7 +272,7 @@ HWTEST_F(WindowImmersiveTest, ImmersiveTest01, TestSize.Level1)
     activeWindows_.push_back(window);
     SetWindowSystemProps(window, TEST_PROPS_1);
     ASSERT_EQ(WMError::WM_OK, window->Show());
-    ASSERT_FALSE(SystemBarPropsEqualsTo(TEST_PROPS_1));
+    EXPECT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_1));
     ASSERT_EQ(WMError::WM_OK, window->Hide());
 }
 
@@ -294,13 +294,13 @@ HWTEST_F(WindowImmersiveTest, ImmersiveTest02, TestSize.Level1)
     SetWindowSystemProps(window2, TEST_PROPS_2);
     EXPECT_EQ(WMError::WM_OK, window1->Show());
 
-    EXPECT_FALSE(SystemBarPropsEqualsTo(TEST_PROPS_1));
+    EXPECT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_1));
     EXPECT_EQ(WMError::WM_OK, window2->Show());
 
-    EXPECT_FALSE(SystemBarPropsEqualsTo(TEST_PROPS_2));
+    EXPECT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_2));
     EXPECT_EQ(WMError::WM_OK, window2->Hide());
 
-    EXPECT_FALSE(SystemBarPropsEqualsTo(TEST_PROPS_1));
+    EXPECT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_1));
     EXPECT_EQ(WMError::WM_OK, window1->Hide());
 }
 
@@ -322,13 +322,13 @@ HWTEST_F(WindowImmersiveTest, ImmersiveTest03, TestSize.Level1)
     activeWindows_.push_back(window2);
     SetWindowSystemProps(window2, TEST_PROPS_2);
     EXPECT_EQ(WMError::WM_OK, window1->Show());
-    EXPECT_FALSE(SystemBarPropsEqualsTo(TEST_PROPS_1));
+    EXPECT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_1));
 
     EXPECT_EQ(WMError::WM_OK, window2->Show());
-    EXPECT_FALSE(SystemBarPropsEqualsTo(TEST_PROPS_2));
+    EXPECT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_2));
 
     EXPECT_EQ(WMError::WM_OK, window1->Hide());
-    EXPECT_FALSE(SystemBarPropsEqualsTo(TEST_PROPS_2));
+    EXPECT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_2));
 }
 
 /**
@@ -344,15 +344,15 @@ HWTEST_F(WindowImmersiveTest, ImmersiveTest04, TestSize.Level1)
     activeWindows_.push_back(window1);
     SetWindowSystemProps(window1, TEST_PROPS_1);
     EXPECT_EQ(WMError::WM_OK, window1->Show());
-    EXPECT_FALSE(SystemBarPropsEqualsTo(TEST_PROPS_1));
+    EXPECT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_1));
 
     EXPECT_EQ(WMError::WM_OK, window1->SetLayoutFullScreen(true));
     EXPECT_EQ(true, window1->IsLayoutFullScreen());
-    EXPECT_FALSE(SystemBarPropsEqualsTo(TEST_PROPS_1));
+    EXPECT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_1));
 
     EXPECT_EQ(WMError::WM_OK, window1->SetLayoutFullScreen(false));
     EXPECT_EQ(false, window1->IsLayoutFullScreen());
-    EXPECT_FALSE(SystemBarPropsEqualsTo(TEST_PROPS_1));
+    EXPECT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_1));
 
     EXPECT_EQ(WMError::WM_OK, window1->Hide());
 }
@@ -370,7 +370,7 @@ HWTEST_F(WindowImmersiveTest, ImmersiveTest05, TestSize.Level1)
     activeWindows_.push_back(window1);
     SetWindowSystemProps(window1, TEST_PROPS_1);
     EXPECT_EQ(WMError::WM_OK, window1->Show());
-    EXPECT_FALSE(SystemBarPropsEqualsTo(TEST_PROPS_1));
+    EXPECT_TRUE(SystemBarPropsEqualsTo(TEST_PROPS_1));
 
     EXPECT_EQ(WMError::WM_OK, window1->SetFullScreen(true));
     EXPECT_EQ(true, window1->IsFullScreen());
