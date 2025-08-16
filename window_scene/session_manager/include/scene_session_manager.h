@@ -167,6 +167,8 @@ using KioskModeChangeFunc = std::function<void(bool isKioskMode, int32_t persist
 using NotifySessionRecoverStateChangeFunc = std::function<void(const SessionRecoverState& state,
     const sptr<WindowSessionProperty>& property)>;
 using NotifyRecoverStateChangeFunc = std::function<void(const RecoverState& state)>;
+using FindScenePanelRsNodeByZOrderFunc = std::function<std::shared_ptr<Rosen::RSNode>(DisplayId screenId,
+    uint32_t targetZOrder)>;
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
@@ -235,6 +237,7 @@ public:
     void SetSCBFocusChangeListener(const NotifyDiffSCBAfterUpdateFocusFunc&& func);
     void SetCallingSessionIdSessionListenser(const ProcessCallingSessionIdChangeFunc& func);
     void SetDumpUITreeFunc(const DumpUITreeFunc& func);
+    void SetFindScenePanelRsNodeByZOrderFunc(FindScenePanelRsNodeByZOrderFunc&& func);
     const AppWindowSceneConfig& GetWindowSceneConfig() const;
 
     /*
@@ -1207,9 +1210,9 @@ private:
     ProcessCloseTargetFloatWindowFunc closeTargetFloatWindowFunc_;
     SetForegroundWindowNumFunc setForegroundWindowNumFunc_;
     MinimizeByWindowIdFunc minimizeByWindowIdFunc_;
-
+    FindScenePanelRsNodeByZOrderFunc FindScenePanelRsNodeByZOrderFunc_;
     AppWindowSceneConfig appWindowSceneConfig_;
-
+    
     /*
      * Window Recover
      */
