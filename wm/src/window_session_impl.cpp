@@ -276,8 +276,14 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option,
     windowOption_ = option;
     handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
 
+    WindowType optionWindowType = option->GetWindowType();
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = option->GetBundleName();
+    property_->SetSessionInfo(sessionInfo);
+    property_->SetWindowType(optionWindowType);
     InitPropertyFromOption(option);
-    
+    isIgnoreSafeArea_ = WindowHelper::IsSubWindow(optionWindowType);
+
     RSAdapterUtil::InitRSUIDirector(rsUIDirector_, true, true, rsUIContext);
     if (WindowHelper::IsSubWindow(GetType())) {
         property_->SetDecorEnable(option->GetSubWindowDecorEnable());
@@ -291,15 +297,10 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option,
     SetDefaultDensityEnabledValue(defaultDensityEnabledGlobalConfig_);
 }
 
-void WindowSessionImpl::InitPropertyFromOption(const sptr<WindowOption>& option) 
+void WindowSessionImpl::InitPropertyFromOption(const sptr<WindowOption>& option)
 {
-    WindowType optionWindowType = option->GetWindowType();
-    SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = option->GetBundleName();
-    property_->SetSessionInfo(sessionInfo);
     property_->SetWindowName(option->GetWindowName());
     property_->SetRequestRect(option->GetWindowRect());
-    property_->SetWindowType(optionWindowType);
     property_->SetFocusable(option->GetFocusable());
     property_->SetTouchable(option->GetTouchable());
     property_->SetDisplayId(option->GetDisplayId());
@@ -326,7 +327,7 @@ void WindowSessionImpl::InitPropertyFromOption(const sptr<WindowOption>& option)
     getRotationResultFuture_ = sptr<FutureCallback>::MakeSptr();
     updateRectCallback_ = sptr<FutureCallback>::MakeSptr();
     isMainHandlerAvailable_ = option->GetMainHandlerAvailable();
-    isIgnoreSafeArea_ = WindowHelper::IsSubWindow(optionWindowType);
+    
 }
 
 bool WindowSessionImpl::IsPcWindow() const
