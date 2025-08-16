@@ -707,6 +707,16 @@ export enum ModalityType {
     APPLICATION_MODALITY = 1
 }
 
+export enum RotationChangeType {
+  WINDOW_WILL_ROTATE = 0,
+  WINDOW_DID_ROTATE = 1
+}
+
+export enum RectType {
+  RELATIVE_TO_SCREEN = 0,
+  RELATIVE_TO_PARENT_WINDOW = 1
+}
+
 export interface SystemBarProperties {
     /**
      * The color of the status bar.
@@ -1755,6 +1765,89 @@ export class TranslateOptionsInternal implements TranslateOptions {
   x?: double;
   y?: double;
   z?: double;
+}
+
+/**
+ * Rotation change info
+ *
+ * @interface RotationChangeInfo
+ * @syscap SystemCapability.Window.SessionManager
+ * @atomicservice
+ * @since 19
+ */
+export interface RotationChangeInfo {
+  /**
+   * Rotation change type
+   *
+   * @type { RotationChangeType }
+   * @syscap SystemCapability.Window.SessionManager
+   * @atomicservice
+   * @since 19
+   */
+  type: RotationChangeType;
+  /**
+   * window orientation
+   *
+   * @type { int }
+   * @syscap SystemCapability.Window.SessionManager
+   * @atomicservice
+   * @since 19
+   */
+  orientation: int;
+  /**
+   * Display id
+   *
+   * @type { long }
+   * @syscap SystemCapability.Window.SessionManager
+   * @atomicservice
+   * @since 19
+   */
+  displayId: long;
+  /**
+   * Display rect
+   *
+   * @type { Rect }
+   * @syscap SystemCapability.Window.SessionManager
+   * @atomicservice
+   * @since 19
+   */
+  displayRect: Rect;
+}
+
+export class RotationChangeInfoInternal implements RotationChangeInfo {
+  type: RotationChangeType;
+  orientation: int;
+  displayId: long;
+  displayRect: Rect;
+}
+
+/**
+ * Rotation change result
+ *
+ * @interface RotationChangeResult
+ * @syscap SystemCapability.Window.SessionManager
+ * @atomicservice
+ * @since 19
+ */
+export interface RotationChangeResult {
+  /**
+   * Rect type
+   *
+   * @type { RectType }
+   * @syscap SystemCapability.Window.SessionManager
+   * @atomicservice
+   * @since 19
+   */
+  rectType: RectType;
+  /**
+   * Window Rect
+   *
+   * @type { Rect }
+   * @syscap SystemCapability.Window.SessionManager
+   * @atomicservice
+   * @since 19
+   */
+  windowRect: Rect;
 }
 
 export class WindowStageInternal implements WindowStage {
