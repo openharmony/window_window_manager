@@ -422,6 +422,19 @@ napi_value JsScreenSession::OnDestroyContent(napi_env env, napi_callback_info in
     return NapiGetUndefined(env);
 }
 
+napi_value JsScreenSession::ReleaseResource(napi_env env, napi_callback_info info)
+{
+    JsScreenSession* me = CheckParamsAndGetThis<JsScreenSession>(env, info);
+    return (me != nullptr) ? me->OnReleaseResource(env, info) : nullptr;
+}
+
+napi_value JsScreenSession::OnReleaseResource(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::DMS, "[NAPI]");
+    mCallback_.clear();
+    return NapiGetUndefined(env);
+}
+
 napi_value JsScreenSession::GetScreenUIContext(napi_env env, napi_callback_info info)
 {
     JsScreenSession* me = CheckParamsAndGetThis<JsScreenSession>(env, info);
