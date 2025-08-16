@@ -1360,7 +1360,7 @@ napi_value JsWindow::OnShowWindow(napi_env env, napi_callback_info info)
         auto weakWindow = weakToken.promote();
         if (weakWindow == nullptr) {
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-                "[window][OnShowWindow]msg: window is nullptr or get invalid param"));
+                "[window][showWindow]msg: window is nullptr or get invalid param"));
             TLOGNE(WmsLogTag::WMS_LIFE, "window is nullptr or get invalid param");
             return;
         }
@@ -1387,7 +1387,7 @@ napi_value JsWindow::OnShowWindow(napi_env env, napi_callback_info info)
             task->Resolve(env, NapiGetUndefined(env));
         } else {
             task->Reject(env, JsErrUtils::CreateJsError(env, WM_JS_TO_ERROR_CODE_MAP.at(ret),
-                "[window][OnShowWindow]msg: Window show failed"));
+                "[window][showWindow]msg: window show failed"));
         }
         TLOGNI(WmsLogTag::WMS_LIFE, "Window [%{public}u, %{public}s] show end, ret=%{public}d",
             weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
@@ -1515,7 +1515,7 @@ napi_value JsWindow::OnDestroyWindow(napi_env env, napi_callback_info info)
         if (weakWindow == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "window is nullptr or get invalid param");
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-                "[window][OnDestroyWindow]msg: window is nullptr or get invalid param"));
+                "[window][destroyWindow]msg: window is nullptr or get invalid param"));
             return;
         }
         if (WindowHelper::IsMainWindow(weakWindow->GetType())) {
@@ -1584,7 +1584,7 @@ napi_value JsWindow::HideWindowFunction(napi_env env, napi_callback_info info, W
             task->Resolve(env, NapiGetUndefined(env));
         } else {
             task->Reject(env, JsErrUtils::CreateJsError(env, ret,
-                "[window][HideWindowFunction]msg: Window hide failed"));
+                "[window][hide]msg: Window hide failed"));
         }
         TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s end, window [%{public}u] ret=%{public}d", where,
             weakWindow->GetWindowId(), ret);
