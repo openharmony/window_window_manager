@@ -37,8 +37,7 @@ public:
     bool IsNeedCrossDisplayRendering() const override;
     void HandleCrossMoveToSurfaceNode(WSRect& globalRect) override;
     std::set<uint64_t> GetNewDisplayIdsDuringMoveTo(WSRect& newRect);
-    void HandleCrossSurfaceNodeByWindowAnchor(SizeChangeReason reason,
-        const sptr<ScreenSession>& screenSession) override;
+    void HandleCrossSurfaceNodeByWindowAnchor(SizeChangeReason reason, DisplayId displayId) override;
 
     void SetParentSessionCallback(NotifySetParentSessionFunc&& func) override;
     WMError NotifySetParentSession(int32_t oldParentWindowId, int32_t newParentWindowId) override;
