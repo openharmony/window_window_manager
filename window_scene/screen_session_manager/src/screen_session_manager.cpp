@@ -2290,6 +2290,8 @@ DMError ScreenSessionManager::SetVirtualPixelRatio(ScreenId screenId, float virt
         sptr<ScreenSession> fakeScreenSession = screenSession->GetFakeScreenSession();
         if (fakeScreenSession != nullptr) {
             fakeScreenSession->SetVirtualPixelRatio(virtualPixelRatio);
+            NotifyDisplayChanged(fakeScreenSession->ConvertToDisplayInfo(),
+                DisplayChangeEvent::DISPLAY_VIRTUAL_PIXEL_RATIO_CHANGED);
         }
     }
     std::map<DisplayId, sptr<DisplayInfo>> emptyMap;
@@ -9966,6 +9968,7 @@ void ScreenSessionManager::MultiScreenModeChange(ScreenId mainScreenId, ScreenId
     const std::string& operateMode)
 {
 #ifdef WM_MULTI_SCREEN_ENABLE
+    std::lock_guard<std::mutex> lock(screenModeChangeMutex_);
     TLOGW(WmsLogTag::DMS, "mainId=%{public}" PRIu64" secondId=%{public}" PRIu64" operateType: %{public}s",
         mainScreenId, secondaryScreenId, operateMode.c_str());
     OnScreenModeChange(ScreenModeChangeEvent::BEGIN);
