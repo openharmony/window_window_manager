@@ -2633,7 +2633,7 @@ napi_value JsWindow::OnRegisterWindowCallback(napi_env env, napi_callback_info i
     WmErrorCode ret = registerManager_->RegisterListener(windowToken, cbType, CaseType::CASE_WINDOW,
         env, callback, parameter);
     if (ret != WmErrorCode::WM_OK) {
-        return NapiThrowError(env, ret, "[window][on('%{public}s')]msg: register listener failed.", cbType.c_str());
+        return NapiThrowError(env, ret, "[window][on]msg: register listener failed.");
     }
     TLOGI(WmsLogTag::DEFAULT, "Id=%{public}u, type=%{public}s", windowToken->GetWindowId(), cbType.c_str());
     // if comptible mode app adpt to immersive, avoid area change will be called when regist
@@ -2678,7 +2678,7 @@ napi_value JsWindow::OnUnregisterWindowCallback(napi_env env, napi_callback_info
     }
 
     if (ret != WmErrorCode::WM_OK) {
-        return NapiThrowError(env, ret, "[window][off('%{public}s')]msg: unregister listener failed", cbType.c_str());
+        return NapiThrowError(env, ret, "[window][off]msg: unregister listener failed");
     }
     WLOGFI("Unregister end, window [%{public}u, %{public}s], type=%{public}s",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), cbType.c_str());

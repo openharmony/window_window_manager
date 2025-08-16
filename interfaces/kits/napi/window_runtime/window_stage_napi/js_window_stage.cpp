@@ -341,14 +341,13 @@ napi_value JsWindowStage::OnEvent(napi_env env, napi_callback_info info)
     if (window == nullptr) {
         WLOGFE("Get window failed");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-            "[window][on('%{public}s')]msg: get window failed.", eventString.c_str()));
+            "[window][on]msg: get window failed."));
         return NapiGetUndefined(env);
     }
     auto ret = g_listenerManager->RegisterListener(window, eventString, CaseType::CASE_STAGE, env, value);
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::DEFAULT, "register event %{public}s failed, ret=%{public}d", eventString.c_str(), ret);
-        napi_throw(env, JsErrUtils::CreateJsError(env, ret, "[window][on('%{public}s')]msg: regist event failed.",
-            eventString.c_str()));
+        napi_throw(env, JsErrUtils::CreateJsError(env, ret, "[window][on]msg: register event failed."));
         return NapiGetUndefined(env);
     }
     WLOGI("Window [%{public}u, %{public}s] register event %{public}s",
@@ -381,7 +380,7 @@ napi_value JsWindowStage::OffEvent(napi_env env, napi_callback_info info)
     if (window == nullptr) {
         WLOGFE("Get window failed");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-            "[window][off('%{public}s')]msg: get main window failed", eventString.c_str()));
+            "[window][off]msg: get main window failed"));
         return NapiGetUndefined(env);
     }
     napi_value value = nullptr;
@@ -398,8 +397,7 @@ napi_value JsWindowStage::OffEvent(napi_env env, napi_callback_info info)
     }
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::DEFAULT, "unregister event %{public}s failed, ret=%{public}d", eventString.c_str(), ret);
-        napi_throw(env, JsErrUtils::CreateJsError(env, ret,
-            "[window][off('%{public}s')]msg: unregister event failed", eventString.c_str()));
+        napi_throw(env, JsErrUtils::CreateJsError(env, ret, "[window][off]msg: unregister event failed"));
         return NapiGetUndefined(env);
     }
     WLOGI("Window [%{public}u, %{public}s] unregister event %{public}s",
