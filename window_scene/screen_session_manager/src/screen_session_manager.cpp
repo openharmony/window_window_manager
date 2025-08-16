@@ -2290,6 +2290,8 @@ DMError ScreenSessionManager::SetVirtualPixelRatio(ScreenId screenId, float virt
         sptr<ScreenSession> fakeScreenSession = screenSession->GetFakeScreenSession();
         if (fakeScreenSession != nullptr) {
             fakeScreenSession->SetVirtualPixelRatio(virtualPixelRatio);
+            NotifyDisplayChanged(fakeScreenSession->ConvertToDisplayInfo(),
+                DisplayChangeEvent::DISPLAY_VIRTUAL_PIXEL_RATIO_CHANGED);
         }
     }
     std::map<DisplayId, sptr<DisplayInfo>> emptyMap;
