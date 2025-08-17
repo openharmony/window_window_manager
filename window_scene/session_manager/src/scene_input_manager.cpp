@@ -77,8 +77,8 @@ bool operator==(const MMI::DisplayInfo& a, const MMI::DisplayInfo& b)
         a.screenArea.area != b.screenArea.area || a.rsId != b.rsId) {
         return false;
     }
-    if (a.offsetX != b.offsetX || a.offsetY != b.offsetY || a.pointerActiveWidth = b.pointerActiveWidth ||
-        a.pointerActiveHeight = b.pointerActiveHeight) {
+    if (a.offsetX != b.offsetX || a.offsetY != b.offsetY || a.pointerActiveWidth != b.pointerActiveWidth ||
+        a.pointerActiveHeight != b.pointerActiveHeight) {
         return false;
     }
     return true;
