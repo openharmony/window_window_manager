@@ -326,8 +326,7 @@ void WindowSessionImpl::InitPropertyFromOption(const sptr<WindowOption>& option)
     getTargetInfoCallback_ = sptr<FutureCallback>::MakeSptr();
     getRotationResultFuture_ = sptr<FutureCallback>::MakeSptr();
     updateRectCallback_ = sptr<FutureCallback>::MakeSptr();
-    isMainHandlerAvailable_ = option->GetMainHandlerAvailable();
-    
+    isMainHandlerAvailable_ = option->GetMainHandlerAvailable();   
 }
 
 bool WindowSessionImpl::IsPcWindow() const
