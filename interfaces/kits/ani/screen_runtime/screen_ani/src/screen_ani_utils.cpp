@@ -80,13 +80,13 @@ ani_status ScreenAniUtils::ConvertScreen(ani_env *env, sptr<Screen> screen, ani_
         return ANI_ERROR;
     }
     std::vector<sptr<SupportedScreenModes>> modes = info->GetModes();
-    ani_array_ref screenModeInfos = NewNativeArray(env, "@ohos.screen.screen.ScreenModeInfoImpl",
+    ani_array screenModeInfos = NewNativeArray(env, "@ohos.screen.screen.ScreenModeInfoImpl",
         static_cast<uint32_t>(modes.size()));
     ani_size index = 0;
     for (auto mode : modes) {
         ani_object screenModeInfo = NewNativeObject(env, "@ohos.screen.screen.ScreenModeInfoImpl");
         ConvertScreenMode(env, mode, screenModeInfo);
-        if (ANI_OK != env->Array_Set_Ref(screenModeInfos, index, screenModeInfo)) {
+        if (ANI_OK != env->Array_Set(screenModeInfos, index, screenModeInfo)) {
             TLOGE(WmsLogTag::DMS, "[ANI] Array_Set_Ref fail");
             return ANI_ERROR;
         }
@@ -101,15 +101,11 @@ ani_status ScreenAniUtils::ConvertScreen(ani_env *env, sptr<Screen> screen, ani_
     return ANI_OK;
 }
 
-ani_array_ref ScreenAniUtils::NewNativeArray(ani_env* env, const std::string& objName, uint32_t size)
+ani_array ScreenAniUtils::NewNativeArray(ani_env* env, const std::string& objName, uint32_t size)
 {
-    ani_array_ref array = nullptr;
-    ani_class cls;
-    if (env->FindClass(objName.c_str(), &cls) != ANI_OK) {
-        TLOGE(WmsLogTag::DMS, "[ANI] class not found");
-        return array;
-    }
-    if (env->Array_New_Ref(cls, size, CreateAniUndefined(env), &array) != ANI_OK) {
+    ani_array array = nullptr;
+
+    if (env->Array_New(size, CreateAniUndefined(env), &array) != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] create array failed");
     }
     return array;
