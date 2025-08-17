@@ -58,7 +58,7 @@ bool operator==(const MMI::ScreenInfo& a, const MMI::ScreenInfo& b)
         a.dpi != b.dpi || a.ppi != b.ppi) {
         return false;
     }
-    if (a.rotation !== b.rotation) {
+    if (a.rotation != b.rotation) {
         return false;
     }
     return true;
