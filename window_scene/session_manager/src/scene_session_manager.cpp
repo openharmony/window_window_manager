@@ -5544,6 +5544,10 @@ void SceneSessionManager::RemovePreLoadStartingWindowFromMap(const SessionInfo& 
 
 void SceneSessionManager::PreLoadStartingWindow(sptr<SceneSession> sceneSession)
 {
+    if (!systemConfig_.IsPhoneWindow()) {
+        TLOGD(WmsLogTag::WMS_PATTERN, "only for phone");
+        return;
+    }
     const char* const where = __func__;
     auto loadTask = [this, weakSceneSession = wptr(sceneSession), where]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:PreLoadStartingWindow");
@@ -5608,7 +5612,7 @@ bool SceneSessionManager::CheckAndGetPreLoadResourceId(const StartingWindowInfo&
         return false;
     }
     const auto& extName = iconPath.substr(pos);
-    if (extName != ".png" && extName != ".jpg") {
+    if (extName != ".png" && extName != ".jpg" && extName != ".webp" && extName != ".astc") {
         TLOGI(WmsLogTag::WMS_PATTERN, "format not need preLoad: %{private}s", iconPath.c_str());
         return false;
     }
