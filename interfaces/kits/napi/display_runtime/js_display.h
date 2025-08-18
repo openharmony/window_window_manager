@@ -78,6 +78,7 @@ public:
     static napi_value GetDisplayCapability(napi_env env, napi_callback_info info);
     static napi_value RegisterDisplayManagerCallback(napi_env env, napi_callback_info info);
     static napi_value UnregisterDisplayManagerCallback(napi_env env, napi_callback_info info);
+    sptr<Display> GetDisplay() { return display_; }
 
 private:
     sptr<Display> display_ = nullptr;
