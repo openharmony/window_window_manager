@@ -1360,7 +1360,7 @@ napi_value JsWindow::OnShowWindow(napi_env env, napi_callback_info info)
         auto weakWindow = weakToken.promote();
         if (weakWindow == nullptr) {
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-                "[window][showWindow]msg: Window is nullptr or get invalid param."));
+                "[window][showWindow]msg: Window is nullptr."));
             TLOGNE(WmsLogTag::WMS_LIFE, "window is nullptr or get invalid param");
             return;
         }
@@ -1515,7 +1515,7 @@ napi_value JsWindow::OnDestroyWindow(napi_env env, napi_callback_info info)
         if (weakWindow == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "window is nullptr or get invalid param");
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-                "[window][destroyWindow]msg: Window is nullptr or get invalid param."));
+                "[window][destroyWindow]msg: Window is nullptr."));
             return;
         }
         if (WindowHelper::IsMainWindow(weakWindow->GetType())) {
@@ -1569,7 +1569,7 @@ napi_value JsWindow::HideWindowFunction(napi_env env, napi_callback_info info, W
         if (weakWindow == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "window is nullptr or get invalid param");
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-                "[window][hide]msg: Window is nullptr or get invalid param."));
+                "[window][hide]msg: Window is nullptr."));
             return;
         }
         if (WindowHelper::IsMainWindow(weakWindow->GetType())) {
@@ -2921,7 +2921,7 @@ napi_value JsWindow::LoadContentScheduleNew(napi_env env, napi_callback_info inf
         if (weakWindow == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "Window is nullptr or get invalid param");
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-                "[window][loadContent]msg: Window is nullptr or get invalid param."));
+                "[window][loadContent]msg: Window is nullptr."));
             return;
         }
         LoadContentTask(contentStorage, contextUrl, weakWindow, env, *task, isLoadedByName);
@@ -8412,7 +8412,7 @@ napi_value JsWindow::OnCreateSubWindowWithOptions(napi_env env, napi_callback_in
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_SUB, "%{public}s window is nullptr", where);
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-                "[window][createSubWindowWithOptions]msg: AsyncTask window is nullptr."));
+                "[window][createSubWindowWithOptions]msg: Window is nullptr on asyncTask."));
             return;
         }
         if (!WindowHelper::IsFloatOrSubWindow(window->GetType()) &&

@@ -347,7 +347,7 @@ napi_value JsWindowStage::OnEvent(napi_env env, napi_callback_info info)
     auto ret = g_listenerManager->RegisterListener(window, eventString, CaseType::CASE_STAGE, env, value);
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::DEFAULT, "register event %{public}s failed, ret=%{public}d", eventString.c_str(), ret);
-        napi_throw(env, JsErrUtils::CreateJsError(env, ret, "[window][on]msg: Register event failed."));
+        napi_throw(env, JsErrUtils::CreateJsError(env, ret, "[window][on]msg: Register event listener failed."));
         return NapiGetUndefined(env);
     }
     WLOGI("Window [%{public}u, %{public}s] register event %{public}s",
@@ -397,7 +397,7 @@ napi_value JsWindowStage::OffEvent(napi_env env, napi_callback_info info)
     }
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::DEFAULT, "unregister event %{public}s failed, ret=%{public}d", eventString.c_str(), ret);
-        napi_throw(env, JsErrUtils::CreateJsError(env, ret, "[window][off]msg: Unregister event failed."));
+        napi_throw(env, JsErrUtils::CreateJsError(env, ret, "[window][off]msg: Unregister event listener failed."));
         return NapiGetUndefined(env);
     }
     WLOGI("Window [%{public}u, %{public}s] unregister event %{public}s",
