@@ -4655,7 +4655,7 @@ napi_value JsWindow::OnSetWakeUpScreen(napi_env env, napi_callback_info info)
 
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetTurnScreenOn(wakeUp));
     if (ret != WmErrorCode::WM_OK) {
-        return NapiThrowError(env, ret, "[window][setWakeUpScreen]msg: turn screen on faield");
+        return NapiThrowError(env, ret, "[window][setWakeUpScreen]msg: turn screen on failed");
     }
 
     WLOGI("Window [%{public}u, %{public}s] set wake up screen %{public}d end",
@@ -5819,7 +5819,7 @@ napi_value JsWindow::OnSnapshotIgnorePrivacy(napi_env env, napi_callback_info in
                 return;
             } else if (ret != WmErrorCode::WM_OK) {
                 task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-                    "[window][snapshotIgnorePrivacy]msg: snapshot faield"));
+                    "[window][snapshotIgnorePrivacy]msg: snapshot failed"));
                 TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "get pixelmap failed, code:%{public}d", ret);
                 return;
             }
@@ -8605,7 +8605,7 @@ napi_value JsWindow::OnGetWindowDensityInfo(napi_env env, napi_callback_info inf
     } else {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "create js windowDensityInfo failed");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-            "[window][getWindowDensityInfo]msg: convert density info faield");
+            "[window][getWindowDensityInfo]msg: convert density info failed");
     }
 }
 
@@ -8671,7 +8671,7 @@ napi_value JsWindow::OnIsMainWindowFullScreenAcrossDisplays(napi_env env, napi_c
             }
         } else {
             task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr,
-                "[window][isMainWindowFullScreenAcrossDisplays]msg: query faield"));
+                "[window][isMainWindowFullScreenAcrossDisplays]msg: query failed"));
         }
     };
     napi_value result = nullptr;
