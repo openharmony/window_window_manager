@@ -3317,7 +3317,7 @@ WMError SceneSessionManager::CreateUIEffectController(const sptr<IUIEffectContro
 }
 
 WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSession>& sceneSession,
-    const bool isDelegator, const bool isToDesktop, const bool isSaveSnapshot, ScreenLockReason reason)
+    const bool isDelegator, const bool isToDesktop, const bool isSaveSnapshot, BackgroundReason reason)
 {
     auto task = [this, weakSceneSession = wptr(sceneSession), isDelegator, isToDesktop, isSaveSnapshot, reason] {
         auto sceneSession = weakSceneSession.promote();
