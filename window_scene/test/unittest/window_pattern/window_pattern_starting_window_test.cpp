@@ -456,6 +456,10 @@ HWTEST_F(WindowPatternStartingWindowTest, CheckAndGetPreLoadResourceId, TestSize
     EXPECT_EQ(true, ssm_->CheckAndGetPreLoadResourceId(startingWindowInfo, resId));
     startingWindowInfo.iconPathEarlyVersion_ = "resource:///12345678.jpg";
     EXPECT_EQ(true, ssm_->CheckAndGetPreLoadResourceId(startingWindowInfo, resId));
+    startingWindowInfo.iconPathEarlyVersion_ = "resource:///12345678.webp";
+    EXPECT_EQ(true, ssm_->CheckAndGetPreLoadResourceId(startingWindowInfo, resId));
+    startingWindowInfo.iconPathEarlyVersion_ = "resource:///12345678.astc";
+    EXPECT_EQ(true, ssm_->CheckAndGetPreLoadResourceId(startingWindowInfo, resId));
 }
 
 /**
@@ -467,6 +471,9 @@ HWTEST_F(WindowPatternStartingWindowTest, PreLoadStartingWindow, TestSize.Level1
 {
     ASSERT_NE(ssm_, nullptr);
     sptr<SceneSession> sceneSession = nullptr;
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ssm_->PreLoadStartingWindow(sceneSession);
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     ssm_->PreLoadStartingWindow(sceneSession);
     SessionInfo info;
     info.bundleName_ = "bundleName_";
