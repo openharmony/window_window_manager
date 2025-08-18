@@ -8381,8 +8381,8 @@ bool SceneSessionManager::JudgeNeedNotifyPrivacyInfo(DisplayId displayId,
         }
     } while (false);
 
-    TLOGD(WmsLogTag::WMS_MAIN, "display[%{public}" PRIu64 "] need notify privacy state: %{public}d.",
-          displayId, needNotify);
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "display=%{public}" PRIu64 ", needNotify=%{public}d, sendTimes=%{public}d",
+          displayId, needNotify, reSendTimes);
     if (needNotify) {
         reSendTimes = MAX_RESEND_TIMES;
         privacyBundleMap_[displayId] = privacyBundles;
@@ -8414,7 +8414,7 @@ void SceneSessionManager::UpdatePrivateStateAndNotify(uint32_t persistentId)
         !bundleListForNotify.empty() || specialExtWindowHasPrivacyMode_.load());
     ScreenSessionManagerClient::GetInstance().SetScreenPrivacyWindowList(displayId, bundleListForNotify);
     if (!bundleListForNotify.empty()) {
-        TLOGI(WmsLogTag::WMS_MAIN, "first privacy window bundle name: %{public}s.", bundleListForNotify[0].c_str());
+        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "first privacy window bundle: %{public}s", bundleListForNotify[0].c_str());
     }
     for (const auto& bundle : bundleListForNotify) {
         TLOGD(WmsLogTag::WMS_MAIN, "notify dms privacy bundle, display=%{public}" PRIu64 ", bundle=%{public}s.",
@@ -8460,6 +8460,8 @@ void SceneSessionManager::GetSceneSessionPrivacyModeBundles(DisplayId displayId,
             sceneSession->GetCombinedExtWindowFlags().privacyModeFlag;
         bool IsSystemWindowVisible = sceneSession->GetSessionInfo().isSystem_ && sceneSession->IsVisible();
         if ((isForeground || IsSystemWindowVisible) && isPrivate) {
+            TLOGI(WmsLogTag::WMS_ATTRIBUTE, "found privacy win=[%{public}d, %{public}s]",
+                sceneSession->GetWindowId(), sceneSession->GetWindowName().c_str());
             if (!sceneSession->GetSessionInfo().bundleName_.empty()) {
                 privacyBundles.insert(sceneSession->GetSessionInfo().bundleName_);
             } else {
