@@ -965,15 +965,14 @@ HWTEST_F(SystemSessionTest, RestoreFbMainWindow, Function | SmallTest | Level2)
     EXPECT_EQ(systemSession->RestoreFbMainWindow(want), WMError::WM_ERROR_INVALID_CALLING);
 
     LOCK_GUARD_EXPR(SCENE_GUARD, systemSession->SetCallingPid(IPCSkeleton::GetCallingPid()));
-    EXPECT_EQ(systemSession->RestoreFbMainWindow(want), WMError::WM_ERROR_FB_RESTORE_MAIN_WINDOW_FAILED);
-
     std::string bundle = "testBundle";
     want->SetBundle(bundle);
     EXPECT_EQ(systemSession->RestoreFbMainWindow(want), WMError::WM_ERROR_FB_RESTORE_MAIN_WINDOW_FAILED);
+
     systemSession->EditSessionInfo().bundleName_ = bundle;
-    uint64_t nowTime = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
-        std::chrono::system_clock::now().time_since_epoch()).count());
-    systemSession->fbClickTime_ = nowTime - 1000;
+    EXPECT_EQ(systemSession->RestoreFbMainWindow(want), WMError::WM_ERROR_FB_RESTORE_MAIN_WINDOW_FAILED);
+    
+    ++systemSession->fbClickCnt_;
     EXPECT_EQ(systemSession->RestoreFbMainWindow(want), WMError::WM_OK);
 }
 
