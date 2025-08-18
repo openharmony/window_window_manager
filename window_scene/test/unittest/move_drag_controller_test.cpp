@@ -288,38 +288,38 @@ HWTEST_F(MoveDragControllerTest, UpdateGravityWhenDrag, TestSize.Level0)
         moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
         moveDragController->type_ = AreaType::RIGHT;
         moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
-        auto gravityIter = surfaceNode->propertyModifiers_.find(RSModifierType::FRAME_GRAVITY);
-        EXPECT_EQ(gravityIter, surfaceNode->propertyModifiers_.end());
+        auto modifier = surfaceNode->GetModifierByType(ModifierNG::RSModifierType::CLIP_TO_FRAME);
+        EXPECT_EQ(modifier, nullptr);
 
         pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
         moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
-        gravityIter = surfaceNode->propertyModifiers_.find(RSModifierType::FRAME_GRAVITY);
-        EXPECT_EQ(gravityIter, surfaceNode->propertyModifiers_.end());
+        modifier = surfaceNode->GetModifierByType(ModifierNG::RSModifierType::CLIP_TO_FRAME);
+        EXPECT_EQ(modifier, nullptr);
 
         pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_DOWN);
         moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
-        gravityIter = surfaceNode->propertyModifiers_.find(RSModifierType::FRAME_GRAVITY);
-        EXPECT_EQ(gravityIter, surfaceNode->propertyModifiers_.end());
+        modifier = surfaceNode->GetModifierByType(ModifierNG::RSModifierType::CLIP_TO_FRAME);
+        EXPECT_EQ(modifier, nullptr);
 
         pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UP);
         moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
-        gravityIter = surfaceNode->propertyModifiers_.find(RSModifierType::FRAME_GRAVITY);
-        EXPECT_EQ(gravityIter, surfaceNode->propertyModifiers_.end());
+        modifier = surfaceNode->GetModifierByType(ModifierNG::RSModifierType::CLIP_TO_FRAME);
+        EXPECT_EQ(modifier, nullptr);
 
         pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
         moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
-        gravityIter = surfaceNode->propertyModifiers_.find(RSModifierType::FRAME_GRAVITY);
-        EXPECT_EQ(gravityIter, surfaceNode->propertyModifiers_.end());
+        modifier = surfaceNode->GetModifierByType(ModifierNG::RSModifierType::CLIP_TO_FRAME);
+        EXPECT_EQ(modifier, nullptr);
 
         pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_CANCEL);
         moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
-        gravityIter = surfaceNode->propertyModifiers_.find(RSModifierType::FRAME_GRAVITY);
-        EXPECT_EQ(gravityIter, surfaceNode->propertyModifiers_.end());
+        modifier = surfaceNode->GetModifierByType(ModifierNG::RSModifierType::CLIP_TO_FRAME);
+        EXPECT_EQ(modifier, nullptr);
 
         pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
         moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
-        gravityIter = surfaceNode->propertyModifiers_.find(RSModifierType::FRAME_GRAVITY);
-        EXPECT_EQ(gravityIter, surfaceNode->propertyModifiers_.end());
+        modifier = surfaceNode->GetModifierByType(ModifierNG::RSModifierType::CLIP_TO_FRAME);
+        EXPECT_EQ(modifier, nullptr);
     }
 }
 
@@ -1797,21 +1797,21 @@ HWTEST_F(MoveDragControllerTest, UpdateSubWindowGravityWhenFollow01, TestSize.Le
 
     followController->type_ = AreaType::UNDEFINED;
     moveDragController->UpdateSubWindowGravityWhenFollow(nullptr, nullptr);
-    auto gravityIter = surfaceNode->propertyModifiers_.find(RSModifierType::FRAME_GRAVITY);
-    ASSERT_EQ(gravityIter, surfaceNode->propertyModifiers_.end());
+    auto modifier = surfaceNode->GetModifierByType(ModifierNG::RSModifierType::CLIP_TO_FRAME);
+    ASSERT_EQ(modifier, nullptr);
 
     moveDragController->UpdateSubWindowGravityWhenFollow(nullptr, surfaceNode);
-    gravityIter = surfaceNode->propertyModifiers_.find(RSModifierType::FRAME_GRAVITY);
-    ASSERT_EQ(gravityIter, surfaceNode->propertyModifiers_.end());
+    modifier = surfaceNode->GetModifierByType(ModifierNG::RSModifierType::CLIP_TO_FRAME);
+    ASSERT_EQ(modifier, nullptr);
 
     moveDragController->UpdateSubWindowGravityWhenFollow(followController, surfaceNode);
-    gravityIter = surfaceNode->propertyModifiers_.find(RSModifierType::FRAME_GRAVITY);
-    ASSERT_EQ(gravityIter, surfaceNode->propertyModifiers_.end());
+    modifier = surfaceNode->GetModifierByType(ModifierNG::RSModifierType::CLIP_TO_FRAME);
+    ASSERT_EQ(modifier, nullptr);
 
     followController->type_ = AreaType::TOP;
     moveDragController->UpdateSubWindowGravityWhenFollow(followController, surfaceNode);
-    gravityIter = surfaceNode->propertyModifiers_.find(RSModifierType::FRAME_GRAVITY);
-    ASSERT_EQ(gravityIter, surfaceNode->propertyModifiers_.end());
+    modifier = surfaceNode->GetModifierByType(ModifierNG::RSModifierType::CLIP_TO_FRAME);
+    ASSERT_EQ(modifier, nullptr);
 }
 } // namespace
 } // namespace Rosen
