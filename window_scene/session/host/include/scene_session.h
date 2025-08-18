@@ -206,7 +206,7 @@ public:
     WSError Foreground(sptr<WindowSessionProperty> property, bool isFromClient = false,
         const std::string& identityToken = "") override;
     WSError Background(bool isFromClient = false, const std::string& identityToken = "") override;
-    WSError BackgroundTask(const bool isSaveSnapshot = true, ScreenLockReason reason = ScreenLockReason::DEFAULT);
+    WSError BackgroundTask(const bool isSaveSnapshot = true, BackgroundReason reason = BackgroundReason::DEFAULT);
     WSError Disconnect(bool isFromClient = false, const std::string& identityToken = "") override;
     WSError DisconnectTask(bool isFromClient = false, bool isSaveSnapshot = true);
     void SetClientIdentityToken(const std::string& clientIdentityToken);
@@ -985,8 +985,8 @@ protected:
     virtual void NotifyUpdateFloatingBall(const FloatingBallTemplateInfo& fbTemplateInfo) {};
     virtual void NotifyStopFloatingBall() {};
     virtual void NotifyRestoreFloatingBallMainWindow(const std::shared_ptr<AAFwk::Want>& want) {};
-    uint64_t fbClickTime_ = 0;
     std::mutex fbClickMutex_;
+    uint8_t fbClickCnt_ {0};
     FloatingBallTemplateInfo fbTemplateInfo_ = {};
 
     /*

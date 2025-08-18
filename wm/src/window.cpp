@@ -36,13 +36,14 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "Window"
 
 static sptr<Window> CreateWindowWithSession(sptr<WindowOption>& option,
     const std::shared_ptr<OHOS::AbilityRuntime::Context>& context, WMError& errCode,
-    sptr<ISession> iSession = nullptr, const std::string& identityToken = "", bool isModuleAbilityHookEnd = false)
+    sptr<ISession> iSession = nullptr, const std::string& identityToken = "", bool isModuleAbilityHookEnd = false,
+    const std::shared_ptr<RSUIContext>& rsUiContext = nullptr)
 {
     WLOGFD("in");
     sptr<WindowSessionImpl> windowSessionImpl = nullptr;
     auto sessionType = option->GetWindowSessionType();
     if (sessionType == WindowSessionType::SCENE_SESSION) {
-        windowSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+        windowSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option, rsUiContext);
     } else if (sessionType == WindowSessionType::EXTENSION_SESSION) {
         option->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
         windowSessionImpl = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
@@ -63,7 +64,8 @@ static sptr<Window> CreateWindowWithSession(sptr<WindowOption>& option,
 }
 
 sptr<Window> Window::Create(const std::string& windowName, sptr<WindowOption>& option,
-    const std::shared_ptr<OHOS::AbilityRuntime::Context>& context, WMError& errCode)
+    const std::shared_ptr<OHOS::AbilityRuntime::Context>& context, WMError& errCode,
+    const std::shared_ptr<RSUIContext>& rsUiContext)
 {
     if (windowName.empty()) {
         WLOGFE("window name is empty");
@@ -87,7 +89,7 @@ sptr<Window> Window::Create(const std::string& windowName, sptr<WindowOption>& o
     }
     option->SetWindowName(windowName);
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        return CreateWindowWithSession(option, context, errCode);
+        return CreateWindowWithSession(option, context, errCode, nullptr, "", false, rsUiContext);
     }
     if (option->GetOnlySupportSceneBoard()) {
         errCode = WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
