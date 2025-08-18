@@ -34,6 +34,9 @@ public:
     static void CreateDisplayAni(sptr<Display> display, ani_object displayAni, ani_env* env);
     void OnRegisterCallback(ani_env* env, ani_object obj, ani_string type, ani_ref aniCallback);
     void OnUnRegisterCallback(ani_env* env, ani_object obj, ani_string type, ani_ref aniCallback);
+    static ani_boolean TransferStatic(ani_env* env, ani_object obj, ani_object input, ani_object displayAniObj);
+    static ani_object TransferDynamic(ani_env* env, ani_object obj, ani_long nativeObj);
+    sptr<Display> GetDisplay() { return display_; }
 private:
     DMError UnregisterAllDisplayListenerWithType(std::string type);
     DMError UnregisterDisplayListenerWithType(std::string type, ani_env *env, ani_ref aniCallback);

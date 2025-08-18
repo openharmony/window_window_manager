@@ -333,11 +333,33 @@ export class DisplayImpl implements Display {
         this.syncOff(type, callback);
     }
 
+    static transferStatic(input: Any): Object {
+        let display = new DisplayImpl();
+        let display_input: ESValue = ESValue.wrap(input);
+        let ret = false;
+        if (display_input !== ESValue.Undefined) {
+            ret = DisplayImpl.nativeTransferStatic(display_input, display as Object);
+            display.state = display.state_ as DisplayState;
+            display.orientation = display.orientation_ as Orientation;
+        }
+        if (!ret) {
+            return {};
+        }
+        return display as Object;
+    }
+
+    static transferDynamic(input: Object): Any {
+        return DisplayImpl.nativeTransferDynamic((input as DisplayImpl).displayRef).unwrap();
+    }
+
     native syncOn(type: string, callback: object): void;
     native syncOff(type: string, callback?: object): void;
     native getAvailableAreaInternal(rect: Rect): void;
     native getCutoutInfoInternal(cutoutInfo: CutoutInfo): void;
     native hasImmersiveWindowInternal(): boolean;
+
+    native static nativeTransferStatic(input: ESValue, display: Object): boolean;
+    native static nativeTransferDynamic(nativeObj: long): ESValue;
 }
 
 function minusRectArray(rectArr: Array<Rect>): void {
