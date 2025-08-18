@@ -24,6 +24,7 @@ config("screen_common_config") {
     "../../../innerkits/wm",
     "../../../innerkits/dm",
     "../../../../wm/include",
+    "../../napi/screen_runtime/napi",
   ]
 }
 
@@ -63,6 +64,7 @@ ohos_shared_library("screenani_kit") {
     "../../../../dm:libdm",
     "../../../../utils:libwmutil",
     "../../../../utils:libwmutil_base",
+    "../../../../interfaces/kits/napi/screen_runtime:screen_kit",
   ]
 
   external_deps = [
@@ -75,6 +77,8 @@ ohos_shared_library("screenani_kit") {
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "runtime_core:ani",
+    "napi:ace_napi",
+    "runtime_core:ani_helpers",
   ]
 
   innerapi_tags = [ "platformsdk" ]

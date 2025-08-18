@@ -70,3 +70,41 @@ ohos_shared_library("screen_napi") {
   part_name = "window_manager"
   subsystem_name = "window"
 }
+
+ohos_shared_library("screen_kit") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+  sources = [
+    "napi/js_screen.cpp",
+  ]
+
+  configs = [
+    ":screen_runtime_config",
+    "../../../../resources/config/build:coverage_flags",
+  ]
+
+  deps = [
+    "../../../../dm:libdm",
+    "../../../../utils:libwmutil",
+    "../../../../utils:libwmutil_base",
+  ]
+
+  external_deps = [
+    "ability_runtime:runtime",
+    "c_utils:utils",
+    "graphic_2d:librender_service_base",
+    "graphic_surface:surface",  # use for SurfaceUtils
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
+    "napi:ace_napi",
+  ]
+
+  innerapi_tags = [ "platformsdk" ]
+  part_name = "window_manager"
+  subsystem_name = "window"
+}

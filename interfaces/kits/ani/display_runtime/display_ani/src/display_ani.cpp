@@ -15,17 +15,22 @@
 #include <hitrace_meter.h>
 
 #include "ani.h"
-#include "display_ani.h"
-#include "display_info.h"
-#include "display.h"
-#include "singleton_container.h"
-#include "display_manager.h"
-#include "window_manager_hilog.h"
-#include "dm_common.h"
-#include "display_ani_utils.h"
-#include "refbase.h"
-#include "display_ani_manager.h"
 #include "ani_err_utils.h"
+#include "display.h"
+#include "display_ani.h"
+#include "display_ani_manager.h"
+#include "display_ani_utils.h"
+#include "display_info.h"
+#include "display_manager.h"
+#include "dm_common.h"
+#include "interop_js/arkts_esvalue.h"
+#include "interop_js/arkts_interop_js_api.h"
+#include "interop_js/hybridgref_ani.h"
+#include "interop_js/hybridgref_napi.h"
+#include "js_display.h"
+#include "refbase.h"
+#include "singleton_container.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -169,7 +174,7 @@ void DisplayAni::OnRegisterCallback(ani_env* env, ani_object obj, ani_string typ
     }
     DMError ret = DMError::DM_OK;
     std::lock_guard<std::mutex> lock(mtx_);
-    if (typeString == EVENT_AVAILABLE_AREA_CHANGED) {
+    if (typeString == ANI_EVENT_AVAILABLE_AREA_CHANGED) {
         auto displayId = display_->GetId();
         TLOGI(WmsLogTag::DMS, "[ANI] availableAreaChange begin");
         ret = SingletonContainer::Get<DisplayManager>().RegisterAvailableAreaListener(displayAniListener, displayId);
@@ -245,7 +250,7 @@ DMError DisplayAni::UnregisterAllDisplayListenerWithType(std::string type)
             continue;
         }
         it->second->RemoveAllCallback();
-        if (type == EVENT_AVAILABLE_AREA_CHANGED) {
+        if (type == ANI_EVENT_AVAILABLE_AREA_CHANGED) {
             auto displayId = display_->GetId();
             sptr<DisplayManager::IAvailableAreaListener> thisListener(it->second);
             ret = SingletonContainer::Get<DisplayManager>().UnregisterAvailableAreaListener(thisListener, displayId);
@@ -276,7 +281,7 @@ DMError DisplayAni::UnregisterDisplayListenerWithType(std::string type, ani_env*
                 continue;
             }
             it->second->RemoveCallback(env, type, callback);
-            if (type == EVENT_AVAILABLE_AREA_CHANGED) {
+            if (type == ANI_EVENT_AVAILABLE_AREA_CHANGED) {
                 TLOGI(WmsLogTag::DMS, "[ANI] start to unregis display event listener! event = %{public}s",
                     type.c_str());
                 auto displayId = display_->GetId();
@@ -307,6 +312,66 @@ void DisplayAni::CreateDisplayAni(sptr<Display> display, ani_object displayObj, 
         "displayRef", reinterpret_cast<ani_long>(displayAni.release()))) {
         TLOGE(WmsLogTag::DMS, "[ANI] set displayAni ref fail");
     }
+}
+
+ani_boolean DisplayAni::TransferStatic(ani_env* env, ani_object obj, ani_object input, ani_object displayAniObj)
+{
+    TLOGI(WmsLogTag::DMS, "begin");
+    void *unwrapResult = nullptr;
+    auto ret = arkts_esvalue_unwrap(env, input, &unwrapResult);
+    if (!ret) {
+        TLOGE(WmsLogTag::DMS, "[ANI] fail to unwrap input, %{public}d", ret);
+        return false;
+    }
+    if (unwrapResult == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] unwrapResult is nullptr");
+        return false;
+    }
+    JsDisplay* jsDisplay = static_cast<JsDisplay*>(unwrapResult);
+    if (jsDisplay == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] jsDisplay is nullptr");
+        return false;
+    }
+    
+    sptr<Display> display = jsDisplay->GetDisplay();
+    DisplayAniUtils::CvtDisplay(display, env, displayAniObj);
+    DisplayAni::CreateDisplayAni(display, displayAniObj, env);
+    return true;
+}
+ 
+ani_object DisplayAni::TransferDynamic(ani_env* env, ani_object obj, ani_long nativeObj)
+{
+    TLOGI(WmsLogTag::DMS, "begin");
+    DisplayAni* aniDisplay = reinterpret_cast<DisplayAni*>(nativeObj);
+    if (aniDisplay == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] aniDisplay is nullptr");
+        return nullptr;
+    }
+    napi_env napiEnv = {};
+    if (!arkts_napi_scope_open(env, &napiEnv)) {
+        TLOGE(WmsLogTag::DMS, "arkts_napi_scope_open failed");
+        return nullptr;
+    }
+    
+    sptr<OHOS::Rosen::Display> display = aniDisplay->GetDisplay();
+    napi_value jsDisplay = CreateJsDisplayObject(napiEnv, display);
+    hybridgref ref = nullptr;
+    if (!hybridgref_create_from_napi(napiEnv, jsDisplay, &ref)) {
+        TLOGE(WmsLogTag::DMS, "hybridgref_create_from_napi failed");
+        return nullptr;
+    }
+    ani_object result = nullptr;
+    if (!hybridgref_get_esvalue(env, ref, &result)) {
+        hybridgref_delete_from_napi(napiEnv, ref);
+        TLOGE(WmsLogTag::DMS, "hybridgref_get_esvalue failed");
+        return nullptr;
+    }
+    hybridgref_delete_from_napi(napiEnv, ref);
+    if (!arkts_napi_scope_close_n(napiEnv, 0, nullptr, nullptr)) {
+        TLOGE(WmsLogTag::DMS, "arkts_napi_scope_close_n failed");
+        return nullptr;
+    }
+    return result;
 }
 
 extern "C" {
@@ -369,6 +434,10 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(DisplayAni::RegisterCallback)},
         ani_native_function {"syncOff", nullptr,
             reinterpret_cast<void *>(DisplayAni::UnRegisterCallback)},
+        ani_native_function {"nativeTransferStatic", "C{std.interop.ESValue}C{std.core.Object}:z",
+            reinterpret_cast<void *>(DisplayAni::TransferStatic)},
+        ani_native_function {"nativeTransferDynamic", "l:C{std.interop.ESValue}",
+            reinterpret_cast<void *>(DisplayAni::TransferDynamic)},
     };
     if ((ret = env->Class_BindNativeMethods(displayCls, methods.data(), methods.size())) != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] bind class fail %{public}u", ret);
