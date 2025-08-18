@@ -2188,10 +2188,10 @@ napi_value JsSceneSessionManager::OnRequestSceneSessionBackground(napi_env env, 
         TLOGI(WmsLogTag::WMS_LIFE, "isSaveSnapshot: %{public}u", isSaveSnapshot);
     }
 
-    ScreenLockReason reason = ScreenLockReason::DEFAULT;
+    BackgroundReason reason = BackgroundReason::DEFAULT;
     if (argc >= ARGC_FIVE) {
         ConvertFromJsValue(env, argv[ARGC_FOUR], reason);
-        TLOGI(WmsLogTag::WMS_LIFE, "screenLockReason: %{public}u", reason);
+        TLOGI(WmsLogTag::WMS_LIFE, "backgroundReason: %{public}u", reason);
     }
 
     SceneSessionManager::GetInstance().RequestSceneSessionBackground(sceneSession, isDelegator, isToDesktop,

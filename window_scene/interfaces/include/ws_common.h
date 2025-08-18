@@ -1074,7 +1074,7 @@ enum class SnapshotNodeType : uint32_t {
     APP_NODE,
 };
 
-enum class ScreenLockReason {
+enum class BackgroundReason {
     DEFAULT = 0,
 
     /*
