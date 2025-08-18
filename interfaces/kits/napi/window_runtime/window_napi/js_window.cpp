@@ -2921,7 +2921,7 @@ napi_value JsWindow::LoadContentScheduleNew(napi_env env, napi_callback_info inf
         if (weakWindow == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "Window is nullptr or get invalid param");
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-                "[window][loadContent]msg: Wadk window is nullptr."));
+                "[window][loadContent]msg: Weak window is nullptr."));
             return;
         }
         LoadContentTask(contentStorage, contextUrl, weakWindow, env, *task, isLoadedByName);
