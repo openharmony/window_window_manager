@@ -2921,7 +2921,7 @@ napi_value JsWindow::LoadContentScheduleNew(napi_env env, napi_callback_info inf
         if (weakWindow == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "Window is nullptr or get invalid param");
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-                "[window][loadContent]msg: Window is nullptr."));
+                "[window][loadContent]msg: Wadk window is nullptr."));
             return;
         }
         LoadContentTask(contentStorage, contextUrl, weakWindow, env, *task, isLoadedByName);
@@ -8507,7 +8507,7 @@ napi_value JsWindow::OnGetParentWindow(napi_env env, napi_callback_info info)
     if (objValue == nullptr) {
         TLOGE(WmsLogTag::WMS_SUB, "create js window failed");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-            "[window][getParentWindow]msg: Get parent window failed.");
+            "[window][getParentWindow]msg: Create js window object failed.");
     }
     TLOGI(WmsLogTag::WMS_SUB, "window id: %{public}u set parent window id: %{public}u end",
         windowToken_->GetWindowId(), parentWindow->GetWindowId());
