@@ -849,16 +849,14 @@ ohos_unittest("ws_scene_session_manager_stub_test") {
 ohos_unittest("ws_scene_session_manager_stub_test2") {
   module_out_path = module_out_path
 
+  configs = [ "${window_base_path}/window_scene/session:ui_effect_public_config" ]
+
   sources = [
     "${window_base_path}/window_scene/test/mock/mock_message_parcel.cpp",
     "scene_session_manager_stub_test2.cpp",
   ]
 
-  deps = [
-    ":ws_unittest_common",
-    "${window_base_path}/window_scene/session:ui_effect_controller",
-    "${window_base_path}/window_scene/session:ui_effect_controller_client",
-  ]
+  deps = [ ":ws_unittest_common" ]
 
   external_deps = test_external_deps
 }
