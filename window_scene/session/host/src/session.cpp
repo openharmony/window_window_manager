@@ -2889,10 +2889,7 @@ SnapshotStatus Session::GetWindowStatus() const
     if (!SupportSnapshotAllSessionStatus()) {
         return defaultStatus;
     }
-    uint32_t snapshotScreen = WSSnapshotHelper::GetScreenStatus();
-    auto windowOrientation = GetWindowOrientation();
-    uint32_t orientation = WSSnapshotHelper::GetOrientation(windowOrientation);
-    return std::make_pair(snapshotScreen, orientation);
+    return WSSnapshotHelper::GetWindowStatus();
 }
 
 SnapshotStatus Session::GetSessionSnapshotStatus(BackgroundReason reason) const
@@ -2913,25 +2910,12 @@ SnapshotStatus Session::GetSessionSnapshotStatus(BackgroundReason reason) const
     return std::make_pair(snapshotScreen, orientation);
 }
 
-DisplayOrientation Session::GetWindowOrientation() const
+uint32_t Session::GetWindowOrientation() const
 {
     if (!SupportSnapshotAllSessionStatus()) {
-        return DisplayOrientation::PORTRAIT;
+        return 0;
     }
-    DisplayId displayId = GetScreenId();
-    auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(displayId);
-    if (!screenSession) {
-        TLOGE(WmsLogTag::WMS_PATTERN, "screenSession is nullptr, id:%{public}d", persistentId_);
-        return DisplayOrientation::PORTRAIT;
-    }
-    auto screenProperty = screenSession->GetScreenProperty();
-    DisplayOrientation displayOrientation = screenProperty.GetDisplayOrientation();
-    auto windowOrientation = static_cast<uint32_t>(displayOrientation);
-    auto snapshotScreen = WSSnapshotHelper::GetScreenStatus();
-    if (snapshotScreen == SCREEN_UNKNOWN) {
-        windowOrientation = (windowOrientation + SECONDARY_EXPAND_OFFSET) % ROTATION_COUNT;
-    }
-    return static_cast<DisplayOrientation>(windowOrientation);
+    return WSSnapshotHelper::GetRotation();
 }
 
 uint32_t Session::GetLastOrientation() const
