@@ -78,7 +78,8 @@ using IKBWillHideListener = IKeyboardWillHideListener;
 
 class WindowSessionImpl : public Window, public virtual SessionStageStub {
 public:
-    explicit WindowSessionImpl(const sptr<WindowOption>& option);
+    explicit WindowSessionImpl(const sptr<WindowOption>& option,
+        const std::shared_ptr<RSUIContext>& rsUIContext = nullptr);
     ~WindowSessionImpl();
 
     static sptr<Window> Find(const std::string& name);
@@ -847,6 +848,7 @@ protected:
     bool grayOutMaximizeButton_ = false;
     
 private:
+    void InitPropertyFromOption(const sptr<WindowOption>& option);
     //Trans between colorGamut and colorSpace
     static ColorSpace GetColorSpaceFromSurfaceGamut(GraphicColorGamut colorGamut);
     static GraphicColorGamut GetSurfaceGamutFromColorSpace(ColorSpace colorSpace);

@@ -26,7 +26,8 @@ using NotifyWindowRecoverStateChangeFunc = std::function<void(bool isSpecificSes
 
 class WindowSceneSessionImpl : public WindowSessionImpl {
 public:
-    explicit WindowSceneSessionImpl(const sptr<WindowOption>& option);
+    explicit WindowSceneSessionImpl(const sptr<WindowOption>& option,
+        const std::shared_ptr<RSUIContext>& rsUIContext = nullptr);
     ~WindowSceneSessionImpl();
     WMError Create(const std::shared_ptr<AbilityRuntime::Context>& context,
         const sptr<Rosen::ISession>& iSession, const std::string& identityToken = "",
