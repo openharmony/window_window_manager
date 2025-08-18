@@ -2588,7 +2588,7 @@ napi_value JsWindow::OnGetWindowPropertiesSync(napi_env env, napi_callback_info 
         return objValue;
     } else {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-            "[window][getWindowProperties]msg: create window property object faield");
+            "[window][getWindowProperties]msg: create window property object failed");
     }
 }
 
