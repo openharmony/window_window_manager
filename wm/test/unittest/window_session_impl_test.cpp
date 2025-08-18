@@ -1462,7 +1462,7 @@ HWTEST_F(WindowSessionImplTest, NotifyAfterLifecycleBackground, TestSize.Level1)
 
     WSError res = window->NotifyCloseExistPipWindow();
     EXPECT_EQ(res, WSError::WS_OK);
-    EXPECT_EQ(WMError::WS_OK, window->Destroy());
+    EXPECT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
