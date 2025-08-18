@@ -924,7 +924,7 @@ HWTEST_F(SceneInputManagerTest, CheckNeedUpdateFordDisplayInfos, TestSize.Level1
     ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
     displayInfos[0].transform[0] = 0.002;
     ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
-    displayInfo.transform.emplace_back(0.00002);
+    displayInfos[0].transform.emplace_back(0.00002);
     ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
     displayInfos[0].scalePercent = 2;
     ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
