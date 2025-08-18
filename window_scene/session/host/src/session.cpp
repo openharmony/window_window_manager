@@ -2625,7 +2625,7 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(bool runInFfrt, float scalePa
         return nullptr;
     }
     auto surfaceNode = GetSurfaceNode();
-    auto key = GetSessionStatus();
+    auto key = GetSessionSnapshotStatus();
     auto isPersistentImageFit = IsPersistentImageFit();
     if (isPersistentImageFit) key = defaultStatus;
     if (!surfaceNode || !surfaceNode->IsBufferAvailable()) {
@@ -2707,12 +2707,12 @@ bool Session::GetEnableAddSnapshot() const
 }
 
 void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media::PixelMap> persistentPixelMap,
-    bool updateSnapshot, ScreenLockReason reason)
+    bool updateSnapshot, BackgroundReason reason)
 {
     if (scenePersistence_ == nullptr) {
         return;
     }
-    auto key = GetSessionStatus(reason);
+    auto key = GetSessionSnapshotStatus(reason);
     auto rotate = WSSnapshotHelper::GetDisplayOrientation(currentRotation_);
     if (persistentPixelMap) {
         key = defaultStatus;
@@ -2895,7 +2895,7 @@ SnapshotStatus Session::GetWindowStatus() const
     return std::make_pair(snapshotScreen, orientation);
 }
 
-SnapshotStatus Session::GetSessionStatus(ScreenLockReason reason) const
+SnapshotStatus Session::GetSessionSnapshotStatus(BackgroundReason reason) const
 {
     if (!SupportSnapshotAllSessionStatus()) {
         return defaultStatus;
@@ -2906,7 +2906,7 @@ SnapshotStatus Session::GetSessionStatus(ScreenLockReason reason) const
     } else {
         snapshotScreen = WSSnapshotHelper::GetScreenStatus();
     }
-    if (reason == ScreenLockReason::EXPAND_TO_FOLD_SINGLE_POCKET) {
+    if (reason == BackgroundReason::EXPAND_TO_FOLD_SINGLE_POCKET) {
         snapshotScreen = SCREEN_EXPAND;
     }
     uint32_t orientation = WSSnapshotHelper::GetOrientation(currentRotation_);

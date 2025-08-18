@@ -699,7 +699,7 @@ public:
         int32_t requestId = DEFAULT_REQUEST_FROM_SCB_ID);
     WSError RequestSceneSessionBackground(const sptr<SceneSession>& sceneSession, const bool isDelegator = false,
         const bool isToDesktop = false, const bool isSaveSnapshot = true,
-        ScreenLockReason reason = ScreenLockReason::DEFAULT);
+        BackgroundReason reason = BackgroundReason::DEFAULT);
     WSError RequestSceneSessionDestruction(const sptr<SceneSession>& sceneSession, bool needRemoveSession = true,
         bool isSaveSnapshot = true, const bool isForceClean = false, bool isUserRequestedExit = false);
     WSError RequestSceneSessionDestructionInner(sptr<SceneSession>& sceneSession,
