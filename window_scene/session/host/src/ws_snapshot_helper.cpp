@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session/host/include/ws_snapshot_helper.h"
 
 namespace OHOS::Rosen {
@@ -26,10 +25,15 @@ const std::unordered_map<int32_t, DisplayOrientation> ROTATION_TO_DISPLAYORIENTA
 };
 }
 
+WSSnapshotHelper* WSSnapshotHelper::GetInstance()
+{
+    static WSSnapshotHelper instance;
+    return &instance;
+}
+
 uint32_t WSSnapshotHelper::GetScreenStatus()
 {
-    FoldStatus foldStatus = ScreenSessionManagerClient::GetInstance().GetFoldStatus();
-    return GetScreenStatus(foldStatus);
+    return GetInstance()->windowStatus_.first;
 }
 
 // LCOV_EXCL_START
@@ -52,6 +56,37 @@ DisplayOrientation WSSnapshotHelper::GetDisplayOrientation(int32_t rotation)
         return it->second;
     }
     return DisplayOrientation::PORTRAIT;
+}
+
+void WSSnapshotHelper::SetWindowScreenStatus(uint32_t screenStatus)
+{
+    GetInstance()->windowStatus_.first = screenStatus;
+}
+
+void WSSnapshotHelper::SetWindowScreenStatus(FoldStatus foldStatus)
+{
+    SetWindowScreenStatus(GetScreenStatus(foldStatus));
+}
+
+void WSSnapshotHelper::SetWindowOrientationStatus(uint32_t orientationStatus)
+{
+    GetInstance()->windowStatus_.second = orientationStatus;
+}
+
+void WSSnapshotHelper::SetWindowOrientationStatus(Rotation rotation)
+{
+    GetInstance()->windowRotation_ = rotation;
+    SetWindowOrientationStatus(GetOrientation(rotation));
+}
+
+SnapshotStatus WSSnapshotHelper::GetWindowStatus()
+{
+    return GetInstance()->windowStatus_;
+}
+
+uint32_t WSSnapshotHelper::GetRotation()
+{
+    return static_cast<uint32_t>(GetInstance()->windowRotation_);
 }
 // LCOV_EXCL_STOP
 } // namespace OHOS::Rosen
