@@ -552,9 +552,9 @@ napi_value JsWindowStage::OnCreateSubWindow(napi_env env, napi_callback_info inf
         windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
         auto window = weakScene->CreateWindow(windowName, windowOption);
         if (window == nullptr) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "Get window failed");
+            TLOGNE(WmsLogTag::WMS_LIFE, "Create window failed");
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-                "[window][createSubWindow]msg: Get window failed."));
+                "[window][createSubWindow]msg: Create window failed."));
             return;
         }
         task->Resolve(env, CreateJsWindowObject(env, window));
@@ -874,9 +874,9 @@ napi_value JsWindowStage::OnCreateSubWindowWithOptions(napi_env env, napi_callba
         option->SetOnlySupportSceneBoard(true);
         auto window = windowScene->CreateWindow(windowName, option);
         if (window == nullptr) {
-            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s Get window failed", where);
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s Create window failed", where);
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-                "[window][createSubWindowWithOptions]msg: Get window failed."));
+                "[window][createSubWindowWithOptions]msg: Create window failed."));
             return;
         }
         task->Resolve(env, CreateJsWindowObject(env, window));
