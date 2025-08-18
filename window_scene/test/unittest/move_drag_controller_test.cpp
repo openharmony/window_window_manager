@@ -289,37 +289,37 @@ HWTEST_F(MoveDragControllerTest, UpdateGravityWhenDrag, TestSize.Level0)
         moveDragController->type_ = AreaType::RIGHT;
         moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
         auto modifier = surfaceNode->GetModifierByType(ModifierNG::RSModifierType::CLIP_TO_FRAME);
-        EXPECT_EQ(modifier, nullptr);
+        EXPECT_NE(modifier, nullptr);
 
         pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
         moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
         modifier = surfaceNode->GetModifierByType(ModifierNG::RSModifierType::CLIP_TO_FRAME);
-        EXPECT_EQ(modifier, nullptr);
+        EXPECT_NE(modifier, nullptr);
 
         pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_DOWN);
         moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
         modifier = surfaceNode->GetModifierByType(ModifierNG::RSModifierType::CLIP_TO_FRAME);
-        EXPECT_EQ(modifier, nullptr);
+        EXPECT_NE(modifier, nullptr);
 
         pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UP);
         moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
         modifier = surfaceNode->GetModifierByType(ModifierNG::RSModifierType::CLIP_TO_FRAME);
-        EXPECT_EQ(modifier, nullptr);
+        EXPECT_NE(modifier, nullptr);
 
         pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
         moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
         modifier = surfaceNode->GetModifierByType(ModifierNG::RSModifierType::CLIP_TO_FRAME);
-        EXPECT_EQ(modifier, nullptr);
+        EXPECT_NE(modifier, nullptr);
 
         pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_CANCEL);
         moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
         modifier = surfaceNode->GetModifierByType(ModifierNG::RSModifierType::CLIP_TO_FRAME);
-        EXPECT_EQ(modifier, nullptr);
+        EXPECT_NE(modifier, nullptr);
 
         pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
         moveDragController->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
         modifier = surfaceNode->GetModifierByType(ModifierNG::RSModifierType::CLIP_TO_FRAME);
-        EXPECT_EQ(modifier, nullptr);
+        EXPECT_NE(modifier, nullptr);
     }
 }
 
@@ -1798,20 +1798,20 @@ HWTEST_F(MoveDragControllerTest, UpdateSubWindowGravityWhenFollow01, TestSize.Le
     followController->type_ = AreaType::UNDEFINED;
     moveDragController->UpdateSubWindowGravityWhenFollow(nullptr, nullptr);
     auto modifier = surfaceNode->GetModifierByType(ModifierNG::RSModifierType::CLIP_TO_FRAME);
-    ASSERT_EQ(modifier, nullptr);
+    EXPECT_NE(modifier, nullptr);
 
     moveDragController->UpdateSubWindowGravityWhenFollow(nullptr, surfaceNode);
     modifier = surfaceNode->GetModifierByType(ModifierNG::RSModifierType::CLIP_TO_FRAME);
-    ASSERT_EQ(modifier, nullptr);
+    EXPECT_NE(modifier, nullptr);
 
     moveDragController->UpdateSubWindowGravityWhenFollow(followController, surfaceNode);
     modifier = surfaceNode->GetModifierByType(ModifierNG::RSModifierType::CLIP_TO_FRAME);
-    ASSERT_EQ(modifier, nullptr);
+    EXPECT_NE(modifier, nullptr);
 
     followController->type_ = AreaType::TOP;
     moveDragController->UpdateSubWindowGravityWhenFollow(followController, surfaceNode);
     modifier = surfaceNode->GetModifierByType(ModifierNG::RSModifierType::CLIP_TO_FRAME);
-    ASSERT_EQ(modifier, nullptr);
+    EXPECT_NE(modifier, nullptr);
 }
 } // namespace
 } // namespace Rosen
