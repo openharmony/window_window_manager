@@ -67,8 +67,10 @@ ani_status ScreenAniUtils::ConvertScreen(ani_env *env, sptr<Screen> screen, ani_
     env->Object_SetFieldByName_Long(obj, "<property>parent", static_cast<ani_long>(info->GetParentId()));
     env->Object_SetFieldByName_Long(obj, "<property>activeModeIndex",
         static_cast<ani_long>(info->GetModeId()));
-    env->Object_SetFieldByName_Int(obj, "orientation_", static_cast<ani_int>(info->GetOrientation()));
-    env->Object_SetFieldByName_Int(obj, "sourceMode_", static_cast<ani_int>(info->GetSourceMode()));
+    env->Object_SetFieldByName_Ref(obj, "<property>orientation", ScreenAniUtils::CreateAniEnum(env,
+        "@ohos.screen.screen.Orientation", static_cast<ani_int>(info->GetOrientation())));
+    env->Object_SetFieldByName_Ref(obj, "<property>sourceMode", ScreenAniUtils::CreateAniEnum(env,
+        "@ohos.screen.screen.ScreenSourceMode", static_cast<ani_int>(info->GetSourceMode())));
     std::unique_ptr<ScreenAni> screenAni = std::make_unique<ScreenAni>(screen);
     if (ANI_OK != env->Object_SetFieldByName_Long(obj, "screenNativeObj",
         reinterpret_cast<ani_long>(screenAni.release()))) {
@@ -88,8 +90,10 @@ ani_status ScreenAniUtils::ConvertScreen(ani_env *env, sptr<Screen> screen, ani_
         }
         index++;
     }
-    if (ANI_OK != env->Object_SetFieldByName_Ref(obj, "supportedModeInfo_", screenModeInfos)) {
-        TLOGE(WmsLogTag::DMS, "[ANI] get ScreenModeInfos fail");
+    auto ret = env->Object_SetFieldByName_Ref(obj, "<property>supportedModeInfo",
+        static_cast<ani_ref>(screenModeInfos));
+    if (ANI_OK != ret) {
+        TLOGE(WmsLogTag::DMS, "[ANI] get ScreenModeInfos fail, ret: %{public}d", ret);
         return ANI_ERROR;
     }
     return ANI_OK;
@@ -186,5 +190,17 @@ ani_status ScreenAniUtils::CallAniFunctionVoid(ani_env *env, const char* ns,
     return ret;
 }
 
+ani_enum_item ScreenAniUtils::CreateAniEnum(ani_env* env, const char* enum_descriptor, ani_size index)
+{
+    ani_enum enumType;
+    ani_status ret = env->FindEnum(enum_descriptor, &enumType);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Failed to find enum,%{public}s", enum_descriptor);
+        return nullptr;
+    }
+    ani_enum_item enumItem;
+    env->Enum_GetEnumItemByIndex(enumType, index, &enumItem);
+    return enumItem;
+}
 }
 }

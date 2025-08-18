@@ -13,10 +13,17 @@
  * limitations under the License.
  */
 #include "screen_ani.h"
- 
-#include "dm_common.h"
-#include "window_manager_hilog.h"
+
 #include "ani_err_utils.h"
+#include "dm_common.h"
+#include "interop_js/arkts_esvalue.h"
+#include "interop_js/arkts_interop_js_api.h"
+#include "interop_js/hybridgref_ani.h"
+#include "interop_js/hybridgref_napi.h"
+#include "js_screen.h"
+#include "screen_ani_utils.h"
+#include "window_manager_hilog.h"
+
  
 namespace OHOS {
 namespace Rosen {
@@ -43,6 +50,64 @@ void ScreenAni::OnSetDensityDpi(ani_env* env, ani_object obj, ani_double density
         AniErrUtils::ThrowBusinessError(env, ret, "JsScreen::OnSetDensityDpi failed.");
     }
 }
+
+ani_boolean ScreenAni::TransferStatic(ani_env* env, ani_object obj, ani_object input, ani_object screenAniObj)
+{
+    TLOGI(WmsLogTag::DMS, "begin");
+    void *unwrapResult = nullptr;
+    auto ret = arkts_esvalue_unwrap(env, input, &unwrapResult);
+    if (!ret) {
+        TLOGE(WmsLogTag::DMS, "[ANI] fail to unwrap input, ret: %{public}d", ret);
+        return false;
+    }
+    if (unwrapResult == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] unwrapResult is nullptr");
+        return false;
+    }
+    JsScreen* jsScreen = static_cast<JsScreen*>(unwrapResult);
+    if (jsScreen == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] jsScreen is nullptr");
+        return false;
+    }
+    
+    sptr<Screen> screen = jsScreen->GetScreen();
+    ScreenAniUtils::ConvertScreen(env, screen, screenAniObj);
+    return true;
+}
  
+ani_object ScreenAni::TransferDynamic(ani_env* env, ani_object obj, ani_long nativeObj)
+{
+    TLOGI(WmsLogTag::DMS, "begin");
+    ScreenAni* aniScreen = reinterpret_cast<ScreenAni*>(nativeObj);
+    if (aniScreen == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] aniScreen is nullptr");
+        return nullptr;
+    }
+    napi_env napiEnv = {};
+    if (!arkts_napi_scope_open(env, &napiEnv)) {
+        TLOGE(WmsLogTag::DMS, "arkts_napi_scope_open failed");
+        return nullptr;
+    }
+    
+    sptr<OHOS::Rosen::Screen> screen = aniScreen->GetScreen();
+    napi_value jsScreen = CreateJsScreenObject(napiEnv, screen);
+    hybridgref ref = nullptr;
+    if (!hybridgref_create_from_napi(napiEnv, jsScreen, &ref)) {
+        TLOGE(WmsLogTag::DMS, "hybridgref_create_from_napi failed");
+        return nullptr;
+    }
+    ani_object result = nullptr;
+    if (!hybridgref_get_esvalue(env, ref, &result)) {
+        hybridgref_delete_from_napi(napiEnv, ref);
+        TLOGE(WmsLogTag::DMS, "hybridgref_get_esvalue failed");
+        return nullptr;
+    }
+    hybridgref_delete_from_napi(napiEnv, ref);
+    if (!arkts_napi_scope_close_n(napiEnv, 0, nullptr, nullptr)) {
+        TLOGE(WmsLogTag::DMS, "arkts_napi_scope_close_n failed");
+        return nullptr;
+    }
+    return result;
+}
 }
 }

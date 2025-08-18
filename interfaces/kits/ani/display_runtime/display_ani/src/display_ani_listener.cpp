@@ -95,7 +95,7 @@ void DisplayAniListener::OnCreate(DisplayId id)
         TLOGE(WmsLogTag::DMS, "[ANI] Ani callback is empty!");
         return;
     }
-    auto it = aniCallback_.find(EVENT_ADD);
+    auto it = aniCallback_.find(ANI_EVENT_ADD);
     if (it == aniCallback_.end()) {
         TLOGE(WmsLogTag::DMS, "[ANI] Add callback has not been registered");
         return;
@@ -140,7 +140,7 @@ void DisplayAniListener::OnDestroy(DisplayId id)
         TLOGE(WmsLogTag::DMS, "[ANI] Ani callback is empty!");
         return;
     }
-    auto it = aniCallback_.find(EVENT_REMOVE);
+    auto it = aniCallback_.find(ANI_EVENT_REMOVE);
     if (it == aniCallback_.end()) {
         TLOGE(WmsLogTag::DMS, "[ANI] Remove callback has not been registered");
         return;
@@ -184,7 +184,7 @@ void DisplayAniListener::OnChange(DisplayId id)
         TLOGE(WmsLogTag::DMS, "[ANI] OnChange not register!");
         return;
     }
-    auto it = aniCallback_.find(EVENT_CHANGE);
+    auto it = aniCallback_.find(ANI_EVENT_CHANGE);
     if (it == aniCallback_.end()) {
         TLOGE(WmsLogTag::DMS, "[ANI] OnChange not this event, return");
         return;
@@ -227,7 +227,7 @@ void DisplayAniListener::OnPrivateWindow(bool hasPrivate)
         TLOGE(WmsLogTag::DMS, "[ANI] OnPrivateWindow not register!");
         return;
     }
-    if (aniCallback_.find(EVENT_PRIVATE_MODE_CHANGE) == aniCallback_.end()) {
+    if (aniCallback_.find(ANI_EVENT_PRIVATE_MODE_CHANGE) == aniCallback_.end()) {
         TLOGE(WmsLogTag::DMS, "[ANI] OnPrivateWindow not this event, return");
         return;
     }
@@ -236,7 +236,7 @@ void DisplayAniListener::OnPrivateWindow(bool hasPrivate)
         return;
     }
 
-    auto it = aniCallback_.find(EVENT_PRIVATE_MODE_CHANGE);
+    auto it = aniCallback_.find(ANI_EVENT_PRIVATE_MODE_CHANGE);
     for (auto oneAniCallback : it->second) {
         auto task = [env = env_, oneAniCallback, hasPrivate] () {
             DisplayAniUtils::CallAniFunctionVoid(env, "@ohos.display.display", "captureStatusChangedCallback",
@@ -264,7 +264,7 @@ void DisplayAniListener::OnFoldStatusChanged(FoldStatus foldStatus)
         TLOGE(WmsLogTag::DMS, "[ANI] OnFoldStatusChanged not register!");
         return;
     }
-    if (aniCallback_.find(EVENT_FOLD_STATUS_CHANGED) == aniCallback_.end()) {
+    if (aniCallback_.find(ANI_EVENT_FOLD_STATUS_CHANGED) == aniCallback_.end()) {
         TLOGE(WmsLogTag::DMS, "[ANI] OnFoldStatusChanged not this event, return");
         return;
     }
@@ -272,7 +272,7 @@ void DisplayAniListener::OnFoldStatusChanged(FoldStatus foldStatus)
         TLOGE(WmsLogTag::DMS, "[ANI] env is nullptr");
         return;
     }
-    auto it = aniCallback_.find(EVENT_FOLD_STATUS_CHANGED);
+    auto it = aniCallback_.find(ANI_EVENT_FOLD_STATUS_CHANGED);
     for (auto oneAniCallback : it->second) {
         auto task = [env = env_, oneAniCallback, foldStatus] () {
             DisplayAniUtils::CallAniFunctionVoid(env, "@ohos.display.display", "foldStatusCallback",
@@ -299,12 +299,12 @@ void DisplayAniListener::OnFoldAngleChanged(std::vector<float> foldAngles)
         TLOGE(WmsLogTag::DMS, "[ANI] OnFoldAngleChanged not register!");
         return;
     }
-    if (aniCallback_.find(EVENT_FOLD_ANGLE_CHANGED) == aniCallback_.end()) {
+    if (aniCallback_.find(ANI_EVENT_FOLD_ANGLE_CHANGED) == aniCallback_.end()) {
         TLOGE(WmsLogTag::DMS, "[ANI] OnFoldAngleChanged not this event, return");
         return;
     }
     if (env_ != nullptr) {
-        auto it = aniCallback_.find(EVENT_FOLD_ANGLE_CHANGED);
+        auto it = aniCallback_.find(ANI_EVENT_FOLD_ANGLE_CHANGED);
         ani_array_double cbArray;
         DisplayAniUtils::CreateAniArrayDouble(env_, foldAngles.size(), &cbArray, foldAngles);
         for (auto oneAniCallback : it->second) {
@@ -336,12 +336,12 @@ void DisplayAniListener::OnCaptureStatusChanged(bool isCapture)
         TLOGE(WmsLogTag::DMS, "[ANI] OnCaptureStatusChanged not register!");
         return;
     }
-    if (aniCallback_.find(EVENT_CAPTURE_STATUS_CHANGED) == aniCallback_.end()) {
+    if (aniCallback_.find(ANI_EVENT_CAPTURE_STATUS_CHANGED) == aniCallback_.end()) {
         TLOGE(WmsLogTag::DMS, "[ANI] OnCaptureStatusChanged not this event, return");
         return;
     }
     if (env_ != nullptr) {
-        auto it = aniCallback_.find(EVENT_CAPTURE_STATUS_CHANGED);
+        auto it = aniCallback_.find(ANI_EVENT_CAPTURE_STATUS_CHANGED);
         for (auto oneAniCallback : it->second) {
             auto task = [env = env_, oneAniCallback, isCapture] () {
                 DisplayAniUtils::CallAniFunctionVoid(env, "@ohos.display.display", "captureStatusChangedCallback",
@@ -372,12 +372,12 @@ void DisplayAniListener::OnDisplayModeChanged(FoldDisplayMode foldDisplayMode)
         TLOGE(WmsLogTag::DMS, "[ANI] OnDisplayModeChanged not register!");
         return;
     }
-    if (aniCallback_.find(EVENT_DISPLAY_MODE_CHANGED) == aniCallback_.end()) {
+    if (aniCallback_.find(ANI_EVENT_DISPLAY_MODE_CHANGED) == aniCallback_.end()) {
         TLOGE(WmsLogTag::DMS, "[ANI] OnDisplayModeChanged not this event, return");
         return;
     }
     if (env_ != nullptr) {
-        auto it = aniCallback_.find(EVENT_DISPLAY_MODE_CHANGED);
+        auto it = aniCallback_.find(ANI_EVENT_DISPLAY_MODE_CHANGED);
         for (auto oneAniCallback : it->second) {
             auto task = [env = env_, oneAniCallback, foldDisplayMode] () {
                 DisplayAniUtils::CallAniFunctionVoid(env, "@ohos.display.display", "foldDisplayModeCallback",
@@ -407,12 +407,12 @@ void DisplayAniListener::OnAvailableAreaChanged(DMRect area)
         TLOGE(WmsLogTag::DMS, "[ANI] OnAvailableAreaChanged not register!");
         return;
     }
-    if (aniCallback_.find(EVENT_AVAILABLE_AREA_CHANGED) == aniCallback_.end()) {
+    if (aniCallback_.find(ANI_EVENT_AVAILABLE_AREA_CHANGED) == aniCallback_.end()) {
         TLOGE(WmsLogTag::DMS, "[ANI] OnAvailableAreaChanged not this event, return");
         return;
     }
     if (env_ != nullptr) {
-        auto it = aniCallback_.find(EVENT_AVAILABLE_AREA_CHANGED);
+        auto it = aniCallback_.find(ANI_EVENT_AVAILABLE_AREA_CHANGED);
         for (auto oneAniCallback : it->second) {
             auto task = [env = env_, oneAniCallback, area] () {
                 ani_object rectObj = DisplayAniUtils::CreateRectObject(env);
