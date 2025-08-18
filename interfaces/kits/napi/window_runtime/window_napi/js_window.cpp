@@ -4148,7 +4148,6 @@ napi_value JsWindow::OnSetWindowBrightness(napi_env env, napi_callback_info info
     if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-
     napi_value lastParam = (argc <= 1) ? nullptr :
         ((argv[1] != nullptr && GetType(env, argv[1]) == napi_function) ? argv[1] : nullptr);
     napi_value result = nullptr;
@@ -4156,9 +4155,8 @@ napi_value JsWindow::OnSetWindowBrightness(napi_env env, napi_callback_info info
     auto asyncTask = [weakToken = wptr<Window>(windowToken_), brightness, env, task = napiAsyncTask] {
         auto weakWindow = weakToken.promote();
         if (weakWindow == nullptr) {
-            task->Reject(env,
-                JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-                    "[window][setWindowBrightness]msg: invalid window"));
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                "[window][setWindowBrightness]msg: invalid window"));
             return;
         }
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetBrightness(brightness));
@@ -4173,9 +4171,8 @@ napi_value JsWindow::OnSetWindowBrightness(napi_env env, napi_callback_info info
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetWindowBrightness") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_IMMS, "napi_send_event failed");
-        napiAsyncTask->Reject(env,
-            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-                "[window][setWindowBrightness]msg: failed to send event"));
+        napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][setWindowBrightness]msg: failed to send event"));
     }
     return result;
 }
@@ -7915,21 +7912,18 @@ napi_value JsWindow::OnSetWindowMask(napi_env env, napi_callback_info info)
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_PC, "%{public}s window is nullptr", where);
             WmErrorCode wmErrorCode = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
-            task->Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode,
-                "[window][setWindowMask]msg: invalid window"));
+            task->Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode, "[window][setWindowMask]msg:invalid window"));
             return;
         }
         if (!WindowHelper::IsSubWindow(window->GetType()) &&
             !WindowHelper::IsAppFloatingWindow(window->GetType())) {
             WmErrorCode wmErrorCode = WmErrorCode::WM_ERROR_INVALID_CALLING;
-            task->Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode,
-                "[window][setWindowMask]msg: invalid window type"));
+            task->Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode, "[window][setWindowMask]msg: invalid type"));
             return;
         }
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetWindowMask(windowMask));
         if (ret != WmErrorCode::WM_OK) {
-            task->Reject(env, JsErrUtils::CreateJsError(env, ret,
-                "[window][setWindowMask]msg: set window mask failed"));
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "[window][setWindowMask]msg: set mask failed"));
             TLOGNE(WmsLogTag::WMS_PC, "%{public}s Window [%{public}u, %{public}s] set window mask failed",
                 where, window->GetWindowId(), window->GetWindowName().c_str());
             return;
@@ -7939,8 +7933,8 @@ napi_value JsWindow::OnSetWindowMask(napi_env env, napi_callback_info info)
             where, window->GetWindowId(), window->GetWindowName().c_str());
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetWindowMask") != napi_status::napi_ok) {
-        napiAsyncTask->Reject(env,
-            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
+        napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][setWindowMask]msg: send event failed"));
     }
     return result;
 }
@@ -8731,8 +8725,7 @@ napi_value JsWindow::OnSetSystemAvoidAreaEnabled(napi_env env, napi_callback_inf
             task.Resolve(env, NapiGetUndefined(env));
         } else {
             TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s failed, ret %{public}d", where, *errCodePtr);
-            task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr,
-                "[window][setSystemAvoidAreaEnabled]msg: set system avoid area enabled failed"));
+            task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr, "set system avoid area enabled failed."));
         }
     };
     napi_value result = nullptr;
