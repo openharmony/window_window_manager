@@ -37,8 +37,8 @@ constexpr uint32_t G_STATUS_WIDTH = 3184;
 const ScreenId SCREENID = 1000;
 constexpr uint32_t EXCEPTION_DPI = 10;
 constexpr uint32_t PC_MODE_DPI = 304;
-const ScreenId SCREEN_ID_FULL = 0;
-const ScreenId SCREEN_ID_MAIN = 5;
+constexpr ScreenId SCREEN_ID_FULL = 0;
+constexpr ScreenId SCREEN_ID_MAIN = 5;
 }
 namespace {
     std::string g_errLog;
