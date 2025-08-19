@@ -1795,7 +1795,7 @@ napi_value JsWindow::OnMoveWindowTo(napi_env env, napi_callback_info info)
     }
     if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
-            "[window][moveWindowTo]msg: failed");
+            "[window][moveWindowTo]msg: Failed");
     }
     // 2: params num; 2: index of callback
     napi_value lastParam = (argc <= 2) ? nullptr :
@@ -7423,7 +7423,7 @@ napi_value JsWindow::OnSetFollowParentMultiScreenPolicy(napi_env env, napi_callb
     if (argc != ARG_COUNT_ONE) {
         TLOGE(WmsLogTag::WMS_SUB, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
-            "[window][setFollowParentMultiScreenPolicy]msg: argc is invalid");
+            "[window][setFollowParentMultiScreenPolicy]msg: Argc is invalid");
     }
     bool enabled = false;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], enabled)) {
@@ -8131,14 +8131,14 @@ napi_value JsWindow::OnGetWindowStatus(napi_env env, napi_callback_info info)
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_PC, "window is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-            "[window][getWindowStatus]msg: window is nullptr");
+            "[window][getWindowStatus]msg: Window is nullptr");
     }
     WindowStatus windowStatus;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->GetWindowStatus(windowStatus));
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_PC, "failed, ret=%{public}d", ret);
         return NapiThrowError(env, ret,
-            "[window][getWindowStatus]msg: falied");
+            "[window][getWindowStatus]msg: Falied");
     }
     auto objValue = CreateJsValue(env, windowStatus);
     if (objValue != nullptr) {
@@ -8147,7 +8147,7 @@ napi_value JsWindow::OnGetWindowStatus(napi_env env, napi_callback_info info)
     } else {
         TLOGE(WmsLogTag::WMS_PC, "create js value windowStatus failed");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-            "[window][getWindowStatus]msg: create js value windowStatus failed");
+            "[window][getWindowStatus]msg: Create js value windowStatus failed");
     }
 }
 
