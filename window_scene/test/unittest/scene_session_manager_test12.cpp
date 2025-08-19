@@ -1794,6 +1794,80 @@ HWTEST_F(SceneSessionManagerTest12, HasFloatingWindowForeground06, TestSize.Leve
 }
 
 /**
+ * @tc.name: GetRouterStackInfo01
+ * @tc.desc: test function : GetRouterStackInfo01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetRouterStackInfo01, Function | SmallTest | Level2)
+{
+    class TestRouterListener : public SessionRouterStackListenerStub {
+        void SendRouterStackInfo(const sptr<RouterStackInfo>& routerStackInfo) override {}
+    };
+    int32_t persistentId = -1;
+    auto listener = sptr<TestRouterListener>::MakeSptr();
+    MockAccesstokenKit::MockIsSystemApp(true);
+    MockAccesstokenKit::MockIsSACalling(true);
+
+    auto result = ssm_->GetRouterStackInfo(persistentId, listener);
+    EXPECT_EQ(result, WMError::WM_ERROR_NULLPTR);
+
+    result = ssm_->GetRouterStackInfo(persistentId, nullptr);
+    EXPECT_EQ(result, WMError::WM_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: GetRouterStackInfo02
+ * @tc.desc: test function : GetRouterStackInfo02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetRouterStackInfo02, Function | SmallTest | Level2)
+{
+    class TestRouterListener : public SessionRouterStackListenerStub {
+        void SendRouterStackInfo(const sptr<RouterStackInfo>& routerStackInfo) override {}
+    };
+
+    SessionInfo info;
+    info.abilityName_ = "GetRouterStackInfo02";
+    info.bundleName_ = "GetRouterStackInfo02";
+    info.windowType_ = static_cast<u_int32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<SceneSessionMocker> sceneSession = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+
+    auto listener = sptr<TestRouterListener>::MakeSptr();
+    MockAccesstokenKit::MockIsSystemApp(true);
+    MockAccesstokenKit::MockIsSACalling(true);
+
+    auto result = ssm_->GetRouterStackInfo(sceneSession->GetPersistentId(), listener);
+    EXPECT_EQ(result, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: GetRouterStackInfo03
+ * @tc.desc: test function : GetRouterStackInfo03
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetRouterStackInfo03, Function | SmallTest | Level2)
+{
+    MockAccesstokenKit::MockIsSystemApp(false);
+    MockAccesstokenKit::MockIsSACalling(false);
+    auto result = ssm_->GetRouterStackInfo(1, nullptr);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
+
+    MockAccesstokenKit::MockIsSystemApp(false);
+    MockAccesstokenKit::MockIsSACalling(true);
+    result = ssm_->GetRouterStackInfo(1, nullptr);
+    EXPECT_EQ(result, WMError::WM_ERROR_NULLPTR);
+
+    MockAccesstokenKit::MockIsSystemApp(true);
+    MockAccesstokenKit::MockIsSACalling(false);
+    result = ssm_->GetRouterStackInfo(1, nullptr);
+    EXPECT_EQ(result, WMError::WM_ERROR_NULLPTR);
+
+    MockAccesstokenKit::MockIsSystemApp(true);
+    MockAccesstokenKit::MockIsSACalling(true);
+}
+
+/**
  * @tc.name: UpdateSessionWithFoldStateChange
  * @tc.desc: test function : UpdateSessionWithFoldStateChange
  * @tc.type: FUNC
@@ -1868,6 +1942,121 @@ HWTEST_F(SceneSessionManagerTest12, GetActiveSceneSessionCopy, Function | SmallT
     ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
     std::vector<sptr<SceneSession>> activeSession = ssm_->GetActiveSceneSessionCopy();
     EXPECT_EQ(activeSession.empty(), false);
+}
+
+/**
+ * @tc.name: GetHookedSessionByModuleName
+ * @tc.desc: test function : GetHookedSessionByModuleName
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetHookedSessionByModuleName, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.bundleName_ = "testBundleName1";
+    info.moduleName_ = "testModuleName1";
+    info.appIndex_ = 1;
+    info.appInstanceKey_ = "";
+    sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    auto res = ssm_->GetHookedSessionByModuleName(info);
+    ASSERT_EQ(res, nullptr);
+
+    ssm_->sceneSessionMap_.insert({101, sceneSession});
+    res = ssm_->GetHookedSessionByModuleName(info);
+    ASSERT_EQ(res, sceneSession);
+
+    info.appInstanceKey_ = "testAppInstanceKey1";
+    res = ssm_->GetHookedSessionByModuleName(info);
+    ASSERT_EQ(res, nullptr);
+
+    info.appIndex_ = 2;
+    res = ssm_->GetHookedSessionByModuleName(info);
+    ASSERT_EQ(res, nullptr);
+
+    info.moduleName_ = "testModuleName2";
+    res = ssm_->GetHookedSessionByModuleName(info);
+    ASSERT_EQ(res, nullptr);
+
+    info.bundleName_ = "testBundleName2";
+    res = ssm_->GetHookedSessionByModuleName(info);
+    ASSERT_EQ(res, nullptr);
+}
+
+/**
+ * @tc.name: RequestSceneSession
+ * @tc.desc: test function : RequestSceneSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, RequestSceneSession, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.bundleName_ = "testBundleName1";
+    info.moduleName_ = "testModuleName1";
+    info.abilityName_ = "testAbilityName1";
+    info.persistentId_ = 101;
+    info.appIndex_ = 0;
+    sptr<SceneSessionMocker> sceneSession = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->sessionInfo_.isAbilityHook_ = true;
+    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
+    ssm_->sceneSessionMap_[101] = sceneSession;
+
+    auto result = ssm_->RequestSceneSession(info, windowSessionProperty);
+    ASSERT_NE(result, nullptr);
+    ASSERT_EQ(result->GetSessionInfo().moduleName_, info.moduleName_);
+}
+
+/**
+ * @tc.name: RegisterSceneSessionDestructCallback
+ * @tc.desc: test function : RegisterSceneSessionDestructCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, RegisterSceneSessionDestructCallback, Function | SmallTest | Level2)
+{
+    NotifySceneSessionDestructFunc func = [](int32_t persistentId) { return; };
+    ssm_->RegisterSceneSessionDestructCallback(std::move(func));
+    ASSERT_NE(nullptr, ssm_->onSceneSessionDestruct_);
+}
+
+/**
+ * @tc.name: RegisterSceneSessionDestructNotifyManagerFunc
+ * @tc.desc: test function : RegisterSceneSessionDestructNotifyManagerFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, RegisterSceneSessionDestructNotifyManagerFunc, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.bundleName_ = "RegisterSceneSessionDestructNotifyManageFunc";
+    info.moduleName_ = "RegisterSceneSessionDestructNotifyManageFunc";
+    info.abilityName_ = "RegisterSceneSessionDestructNotifyManageFunc";
+    info.persistentId_ = 999;
+    sptr<MainSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    NotifySceneSessionDestructFunc func = [](int32_t persistentId) { return; };
+    ssm_->RegisterSceneSessionDestructCallback(std::move(func));
+    ssm_->RegisterSceneSessionDestructNotifyManagerFunc(sceneSession);
+    ASSERT_NE(sceneSession->notifySceneSessionDestructFunc_, nullptr);
+}
+
+/**
+ * @tc.name: UpdateAbilityHookState
+ * @tc.desc: test function : UpdateAbilityHookState
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, UpdateAbilityHookState, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.bundleName_ = "UpdateAbilityHookState_bundle";
+    info.moduleName_ = "UpdateAbilityHookState_module";
+    info.abilityName_ = "UpdateAbilityHookState_ability";
+    info.persistentId_ = 101;
+    sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+
+    ssm_->UpdateAbilityHookState(sceneSession, true);
+    EXPECT_EQ(true, sceneSession->GetSessionInfo().isAbilityHook_);
 }
 
 /**
