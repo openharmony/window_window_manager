@@ -381,6 +381,37 @@ HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, GetNextFoldStateHalf02, Tes
 }
 
 /**
+ * @tc.name: GetNextFoldStateHalf03
+ * @tc.desc: test function : GetNextFoldStateHalf
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, GetNextFoldStateHalf03, TestSize.Level1)
+{
+    SecondaryDisplaySensorFoldStateManager manager;
+    int32_t allowUserSensorForLargeFoldDevice = 0;
+    FoldStatus state = FoldStatus::UNKNOWN;
+    float angel = 40.0F;
+    uint16_t hall = 0;
+    auto result = manager.GetNextFoldStateHalf(angel, hall, state, allowUserSensorForLargeFoldDevice);
+    EXPECT_EQ(static_cast<int>(result), 2);
+
+    angel = 60.0F;
+    hall = 0;
+    result = manager.GetNextFoldStateHalf(angel, hall, state, allowUserSensorForLargeFoldDevice);
+    EXPECT_EQ(static_cast<int>(result), 3);
+
+    angel = 40.0F;
+    hall = 1;
+    result = manager.GetNextFoldStateHalf(angel, hall, state, allowUserSensorForLargeFoldDevice);
+    EXPECT_EQ(static_cast<int>(result), 3);
+
+    angel = 60.0F;
+    hall = 1;
+    result = manager.GetNextFoldStateHalf(angel, hall, state, allowUserSensorForLargeFoldDevice);
+    EXPECT_EQ(static_cast<int>(result), 3);
+}
+
+/**
  * @tc.name: GetGlobalFoldState
  * @tc.desc: test function : GetGlobalFoldState
  * @tc.type: FUNC
