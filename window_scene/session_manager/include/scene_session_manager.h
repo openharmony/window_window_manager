@@ -1025,7 +1025,7 @@ private:
     WSError RequestSceneSessionActivationInner(sptr<SceneSession>& sceneSession, bool isNewActive,
         int32_t requestId = DEFAULT_REQUEST_FROM_SCB_ID) REQUIRES(SCENE_GUARD);
     WSError SetBrightness(const sptr<SceneSession>& sceneSession, float brightness);
-    void PostBrightnessTask(float brightness);
+    void PostBrightnessTask(const sptr<SceneSession>& sceneSession, float brightness);
     WSError UpdateBrightness(int32_t persistentId);
     void SetDisplayBrightness(float brightness);
     float GetDisplayBrightness() const;
@@ -1230,7 +1230,7 @@ private:
     SystemSessionConfig systemConfig_;
     float snapshotScale_ = 0.5;
     int32_t brightnessSessionId_ = INVALID_SESSION_ID;
-    float displayBrightness_ = UNDEFINED_BRIGHTNESS;
+    std::atomic<bool> displayBrightness_ = UNDEFINED_BRIGHTNESS;
     bool isScreenLocked_ { false };
     bool isPrepareTerminateEnable_ { false };
 
