@@ -34,6 +34,8 @@ public:
     static void CreateDisplayAni(sptr<Display> display, ani_object displayAni, ani_env* env);
     void OnRegisterCallback(ani_env* env, ani_object obj, ani_string type, ani_ref aniCallback);
     void OnUnRegisterCallback(ani_env* env, ani_object obj, ani_string type, ani_ref aniCallback);
+    static ani_status NspBindNativeFunctions(ani_env* env, ani_namespace nsp);
+    static ani_status ClassBindNativeFunctions(ani_env* env, ani_class displayCls);
     static ani_boolean TransferStatic(ani_env* env, ani_object obj, ani_object input, ani_object displayAniObj);
     static ani_object TransferDynamic(ani_env* env, ani_object obj, ani_long nativeObj);
     sptr<Display> GetDisplay() { return display_; }

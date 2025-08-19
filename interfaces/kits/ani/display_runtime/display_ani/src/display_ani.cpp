@@ -374,22 +374,8 @@ ani_object DisplayAni::TransferDynamic(ani_env* env, ani_object obj, ani_long na
     return result;
 }
 
-extern "C" {
-ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
+ani_status DisplayAni::NspBindNativeFunctions(ani_env* env, ani_namespace nsp)
 {
-    using namespace OHOS::Rosen;
-    ani_status ret;
-    ani_env *env;
-    if ((ret = vm->GetEnv(ANI_VERSION_1, &env)) != ANI_OK) {
-        TLOGE(WmsLogTag::DMS, "[ANI] null env");
-        return ANI_NOT_FOUND;
-    }
-    ani_namespace nsp;
-    if ((ret = env->FindNamespace("@ohos.display.display", &nsp)) != ANI_OK) {
-        TLOGE(WmsLogTag::DMS, "[ANI] null env %{public}u", ret);
-        return ANI_NOT_FOUND;
-    }
-    DisplayManagerAni::InitDisplayManagerAni(nsp, env);
     std::array funcs = {
         ani_native_function {"isFoldable", ":z", reinterpret_cast<void *>(DisplayManagerAni::IsFoldableAni)},
         ani_native_function {"getFoldDisplayModeNative", ":i",
@@ -413,16 +399,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(DisplayManagerAni::GetAllDisplayPhysicalResolution)},
         ani_native_function {"isCaptured", nullptr, reinterpret_cast<void *>(DisplayManagerAni::IsCaptured)},
     };
-    if ((ret = env->Namespace_BindNativeFunctions(nsp, funcs.data(), funcs.size()))) {
+    auto ret = env->Namespace_BindNativeFunctions(nsp, funcs.data(), funcs.size());
+    if (ANI_OK != ret) {
         TLOGE(WmsLogTag::DMS, "[ANI] bind namespace fail %{public}u", ret);
         return ANI_NOT_FOUND;
     }
+    return ANI_OK;
+}
 
-    ani_class displayCls = nullptr;
-    if ((ret = env->FindClass("@ohos.display.display.DisplayImpl", &displayCls)) != ANI_OK) {
-        TLOGE(WmsLogTag::DMS, "[ANI] null env %{public}u", ret);
-        return ANI_NOT_FOUND;
-    }
+ani_status DisplayAni::ClassBindNativeFunctions(ani_env* env, ani_class displayCls)
+{
     std::array methods = {
         ani_native_function {"getCutoutInfoInternal", "C{@ohos.display.display.CutoutInfo}:",
             reinterpret_cast<void *>(DisplayAni::GetCutoutInfo)},
@@ -439,9 +425,45 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         ani_native_function {"nativeTransferDynamic", "l:C{std.interop.ESValue}",
             reinterpret_cast<void *>(DisplayAni::TransferDynamic)},
     };
-    if ((ret = env->Class_BindNativeMethods(displayCls, methods.data(), methods.size())) != ANI_OK) {
+    auto ret = env->Class_BindNativeMethods(displayCls, methods.data(), methods.size());
+    if (ANI_OK != ret) {
         TLOGE(WmsLogTag::DMS, "[ANI] bind class fail %{public}u", ret);
         return ANI_NOT_FOUND;
+    }
+    return ANI_OK;
+}
+
+extern "C" {
+ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
+{
+    using namespace OHOS::Rosen;
+    ani_status ret;
+    ani_env *env;
+    if ((ret = vm->GetEnv(ANI_VERSION_1, &env)) != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] null env");
+        return ANI_NOT_FOUND;
+    }
+    ani_namespace nsp;
+    if ((ret = env->FindNamespace("@ohos.display.display", &nsp)) != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] null env %{public}u", ret);
+        return ANI_NOT_FOUND;
+    }
+    DisplayManagerAni::InitDisplayManagerAni(nsp, env);
+    ret = DisplayAni::NspBindNativeFunctions(env, nsp);
+    if (ANI_OK != ret) {
+        TLOGE(WmsLogTag::DMS, "[ANI] bind namespace fail %{public}u", ret);
+        return ret;
+    }
+
+    ani_class displayCls = nullptr;
+    if ((ret = env->FindClass("@ohos.display.display.DisplayImpl", &displayCls)) != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] null env %{public}u", ret);
+        return ANI_NOT_FOUND;
+    }
+    ret = DisplayAni::ClassBindNativeFunctions(env, displayCls);
+    if (ANI_OK != ret) {
+        TLOGE(WmsLogTag::DMS, "[ANI] bind class fail %{public}u", ret);
+        return ret;
     }
     *result = ANI_VERSION_1;
     return ANI_OK;
