@@ -3782,8 +3782,8 @@ void ScreenSessionManager::SetScreenPowerForFold(ScreenId screenId, ScreenPowerS
         (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() ||
         FoldScreenStateInternel::IsDualDisplayFoldDevice() ||
         FoldScreenStateInternel::IsSingleDisplayFoldDevice());
-    if (lastPowerForAllStatus_.load() == ScreenPowerStatus::POWER_STATUS_ON_ADVANCED
-        && screenId == lastScreenId_.load() && FoldScreenStateInternel::IsSingleDisplayFoldDevice()) {
+    if (lastPowerForAllStatus_.load() == ScreenPowerStatus::POWER_STATUS_ON_ADVANCED &&
+        screenId == lastScreenId_.load() && FoldScreenStateInternel::IsSingleDisplayFoldDevice()) {
         // 预下电
         TLOGI(WmsLogTag::DMS, "set advancedOn powerStatus off, screenId:%{public}" PRIu64, screenId);
         SetRSScreenPowerStatus(screenId, ScreenPowerStatus::POWER_STATUS_OFF_ADVANCED);
