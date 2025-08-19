@@ -125,9 +125,6 @@ HWTEST_F(SurfaceDrawTest, DrawImage01, TestSize.Level1)
 {
     ASSERT_FALSE(SurfaceDraw::DrawImage(nullptr, 0, 0, ""));
     sptr<Window> window = CreateTestWindow("testDrawImage");
-    if (window == nullptr) {
-        return;
-    }
     ASSERT_NE(nullptr, window);
     window->Show();
     usleep(WAIT_FOR_SYNC_US / 20); // wait for rect updated
@@ -165,9 +162,6 @@ HWTEST_F(SurfaceDrawTest, DrawMasking01, TestSize.Level1)
     ASSERT_FALSE(SurfaceDraw::DrawMasking(nullptr, screenRect, transRect));
 
     sptr<Window> window = CreateTestWindow("testDrawMasking");
-    if (window == nullptr) {
-        return;
-    }
     ASSERT_NE(nullptr, window);
     window->Show();
     usleep(WAIT_FOR_SYNC_US / 20); // wait for rect updated
@@ -192,9 +186,6 @@ HWTEST_F(SurfaceDrawTest, DrawMasking01, TestSize.Level1)
 HWTEST_F(SurfaceDrawTest, DoDrawImageRect01, TestSize.Level1)
 {
     sptr<Window> window = CreateTestWindow("testDoDrawImageRect");
-    if (window == nullptr) {
-        return;
-    }
     ASSERT_NE(window, nullptr);
     window->Show();
     usleep(WAIT_FOR_SYNC_US / 20); // wait for rect updated
@@ -207,9 +198,7 @@ HWTEST_F(SurfaceDrawTest, DoDrawImageRect01, TestSize.Level1)
     sptr<OHOS::Surface> layer = SurfaceDraw::GetLayer(surfaceNode);
     ASSERT_NE(layer, nullptr);
     sptr<OHOS::SurfaceBuffer> buffer = SurfaceDraw::GetSurfaceBuffer(layer, rect.width_, rect.height_);
-    if (buffer == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, buffer);
 
     ASSERT_FALSE(SurfaceDraw::DoDrawImageRect(buffer, rect, nullptr, color, false));
 
@@ -228,9 +217,6 @@ HWTEST_F(SurfaceDrawTest, DoDrawImageRect01, TestSize.Level1)
 HWTEST_F(SurfaceDrawTest, GetSurfaceSnapshot01, TestSize.Level1)
 {
     sptr<Window> window = CreateTestWindow("testDoDrawImageRect");
-    if (window == nullptr) {
-        return;
-    }
     ASSERT_NE(window, nullptr);
     window->Show();
     usleep(WAIT_FOR_SYNC_US / 20); // wait for rect updated
@@ -255,9 +241,6 @@ HWTEST_F(SurfaceDrawTest, DrawColor01, TestSize.Level1)
 {
     ASSERT_FALSE(SurfaceDraw::DrawColor(nullptr, 0, 0, 0));
     sptr<Window> window = CreateTestWindow("DrawColor");
-    if (window == nullptr) {
-        return;
-    }
     ASSERT_NE(nullptr, window);
     window->Show();
     usleep(WAIT_FOR_SYNC_US / 20); // wait for rect updated
@@ -279,9 +262,6 @@ HWTEST_F(SurfaceDrawTest, DrawColor01, TestSize.Level1)
 HWTEST_F(SurfaceDrawTest, DoDraw01, TestSize.Level1)
 {
     sptr<Window> window = CreateTestWindow("DoDrawTest01");
-    if (window == nullptr) {
-        return;
-    }
     ASSERT_NE(nullptr, window);
     window->Show();
     usleep(WAIT_FOR_SYNC_US / 20); // wait for rect updated
@@ -304,9 +284,6 @@ HWTEST_F(SurfaceDrawTest, DoDraw01, TestSize.Level1)
 HWTEST_F(SurfaceDrawTest, DoDraw02, TestSize.Level1)
 {
     sptr<Window> window = CreateTestWindow("DoDraw02");
-    if (window == nullptr) {
-        return;
-    }
     ASSERT_NE(window, nullptr);
     window->Show();
     usleep(WAIT_FOR_SYNC_US / 20); // wait for rect updated
@@ -316,9 +293,7 @@ HWTEST_F(SurfaceDrawTest, DoDraw02, TestSize.Level1)
     sptr<OHOS::Surface> layer = SurfaceDraw::GetLayer(surfaceNode);
     ASSERT_NE(layer, nullptr);
     sptr<OHOS::SurfaceBuffer> buffer = SurfaceDraw::GetSurfaceBuffer(layer, rect.width_, rect.height_);
-    if (buffer == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, buffer);
     std::shared_ptr<Media::PixelMap> pixelMap = SurfaceDraw::DecodeImageToPixelMap(IMAGE_PLACE_HOLDER_PNG_PATH);
     ASSERT_NE(pixelMap, nullptr);
     ASSERT_FALSE(SurfaceDraw::DoDraw(nullptr, 0, 0, pixelMap));
@@ -333,9 +308,6 @@ HWTEST_F(SurfaceDrawTest, DoDraw02, TestSize.Level1)
 HWTEST_F(SurfaceDrawTest, DoDraw03, TestSize.Level1)
 {
     sptr<Window> window = CreateTestWindow("DoDrawTest03");
-    if (window == nullptr) {
-        return;
-    }
     ASSERT_NE(nullptr, window);
     window->Show();
     usleep(WAIT_FOR_SYNC_US / 20); // wait for rect updated
@@ -346,9 +318,7 @@ HWTEST_F(SurfaceDrawTest, DoDraw03, TestSize.Level1)
     sptr<OHOS::Surface> layer = SurfaceDraw::GetLayer(surfaceNode);
     ASSERT_NE(layer, nullptr);
     sptr<OHOS::SurfaceBuffer> buffer = SurfaceDraw::GetSurfaceBuffer(layer, rect.width_, rect.height_);
-    if (buffer == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, buffer);
     ASSERT_FALSE(SurfaceDraw::DoDraw(nullptr, 0, 0, color));
     window->Destroy();
 }
@@ -361,9 +331,6 @@ HWTEST_F(SurfaceDrawTest, DoDraw03, TestSize.Level1)
 HWTEST_F(SurfaceDrawTest, DrawImageRect01, TestSize.Level1)
 {
     sptr<Window> window = CreateTestWindow("DrawImageRect");
-    if (window == nullptr) {
-        return;
-    }
     ASSERT_NE(window, nullptr);
     window->Show();
     usleep(WAIT_FOR_SYNC_US / 20); // wait for rect updated
