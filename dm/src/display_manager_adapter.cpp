@@ -1476,6 +1476,7 @@ DMError ScreenManagerAdapter::SetVirtualScreenFlag(ScreenId screenId, VirtualScr
     if (screenFlag < VirtualScreenFlag::DEFAULT || screenFlag >= VirtualScreenFlag::MAX) {
         return DMError::DM_ERROR_INVALID_PARAM;
     }
+    TLOGI(WmsLogTag::DMS, "VirtualScreenFlag:%{public}d", screenFlag);
     if (screenSessionManagerServiceProxy_) {
         return screenSessionManagerServiceProxy_->SetVirtualScreenFlag(screenId, screenFlag);
     }
