@@ -37,6 +37,8 @@ constexpr uint32_t G_STATUS_WIDTH = 3184;
 const ScreenId SCREENID = 1000;
 constexpr uint32_t EXCEPTION_DPI = 10;
 constexpr uint32_t PC_MODE_DPI = 304;
+const ScreenId SCREEN_ID_FULL = 0;
+const ScreenId SCREEN_ID_MAIN = 5;
 }
 namespace {
     std::string g_errLog;
@@ -78,6 +80,67 @@ void ScreenSessionManagerTest::TearDown()
 }
 
 namespace {
+
+/**
+ * @tc.name: SetScreenPowerForFold01
+ * @tc.desc: SetScreenPowerForFold test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetScreenPowerForFold01, TestSize.Level1)
+{
+    // 内屏预上电
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<ScreenSessionManager> ssm = sptr<ScreenSessionManager>::MakeSptr();
+    ssm->SetRSScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_ON_ADVANCED);
+
+    // 下电
+    ssm->lastPowerForAllStatus_.store(ScreenPowerStatus::POWER_STATUS_ON_ADVANCED);
+    ssm->lastScreenId_.store(SCREEN_ID_FULL);
+    ssm->SetScreenPowerForFold(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_OFF);
+    if (FoldScreenStateInternel::IsSingleDisplayFoldDevice()) {
+        EXPECT_TRUE(g_errLog.find("set advancedOn powerStatus off") != std::string::npos);
+    } else {
+        EXPECT_TRUE(g_errLog.find("set advancedOn powerStatus off") == std::string::npos);
+    }
+}
+
+/**
+ * @tc.name: SetScreenPowerForFold02
+ * @tc.desc: SetScreenPowerForFold test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetScreenPowerForFold02, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<ScreenSessionManager> ssm = sptr<ScreenSessionManager>::MakeSptr();
+    ssm->SetRSScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_ON_ADVANCED);
+
+    ssm->lastPowerForAllStatus_.store(ScreenPowerStatus::POWER_STATUS_OFF);
+    ssm->lastScreenId_.store(SCREEN_ID_FULL);
+    ssm->SetScreenPowerForFold(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_OFF);
+    EXPECT_TRUE(g_errLog.find("set advancedOn powerStatus off") == std::string::npos);
+}
+
+/**
+ * @tc.name: SetScreenPowerForFold03
+ * @tc.desc: SetScreenPowerForFold test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetScreenPowerForFold03, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<ScreenSessionManager> ssm = sptr<ScreenSessionManager>::MakeSptr();
+    ssm->SetRSScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_ON_ADVANCED);
+
+    ssm->lastPowerForAllStatus_.store(ScreenPowerStatus::POWER_STATUS_ON_ADVANCED);
+    ssm->lastScreenId_.store(SCREEN_ID_MAIN);
+    ssm->SetScreenPowerForFold(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_OFF);
+    EXPECT_TRUE(g_errLog.find("set advancedOn powerStatus off") == std::string::npos);
+}
+
 /**
  * @tc.name: SwitchScrollParam01
  * @tc.desc: SwitchScrollParam test
