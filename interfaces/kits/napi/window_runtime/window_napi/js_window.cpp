@@ -1816,7 +1816,7 @@ napi_value JsWindow::OnMoveWindowTo(napi_env env, napi_callback_info info)
             task->Resolve(env, NapiGetUndefined(env));
         } else {
             task->Reject(env, JsErrUtils::CreateJsError(env, ret,
-                 "[Window][MoveWindowTo]msg: move failed"));
+                 "[window][moveWindowTo]msg: move failed"));
         }
         TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s: window [%{public}u, %{public}s] ret=%{public}d",
                where, window->GetWindowId(), window->GetWindowName().c_str(), ret);
@@ -1824,7 +1824,7 @@ napi_value JsWindow::OnMoveWindowTo(napi_env env, napi_callback_info info)
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnMoveWindowTo") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-                "[Window][MoveWindowTo]msg: failed to send event"));
+                "[window][moveWindowTo]msg: failed to send event"));
     }
     return result;
 }
