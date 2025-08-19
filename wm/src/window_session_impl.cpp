@@ -73,7 +73,7 @@ constexpr uint32_t API_VERSION_MOD = 1000;
 constexpr int32_t  WINDOW_ROTATION_CHANGE = 50;
 constexpr uint32_t INVALID_TARGET_API_VERSION = 0;
 constexpr uint32_t OPAQUE = 0xFF000000;
-constexpr int32_t WINDOW_CONNECT_TIMEOUT = 3000;
+constexpr int32_t WINDOW_CONNECT_TIMEOUT = 1000;
 constexpr int32_t WINDOW_LIFECYCLE_TIMEOUT = 100;
 
 /*
@@ -678,7 +678,7 @@ WMError WindowSessionImpl::Connect()
         iSessionStage, iWindowEventChannel, surfaceNode_, windowSystemConfig_, property_,
         token, identityToken_);
     if (SysCapUtil::GetBundleName() != AppExecFwk::Constants::SCENE_BOARD_BUNDLE_NAME &&
-        WindowHelper::IsMainWindow(GetType())) {
+        WindowHelper::IsMainWindow(GetType()) && !property_->GetMissionInfo().startupInvisibility_) {
         auto startTime = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now().time_since_epoch()).count();
         updateRectCallback_->GetUpdateRectResult(WINDOW_CONNECT_TIMEOUT);
@@ -7160,7 +7160,7 @@ void WindowSessionImpl::NotifyWindowStatusDidChange(WindowMode mode)
 void WindowSessionImpl::NotifyFirstValidLayoutUpdate(const Rect& preRect, const Rect& newRect)
 {
     bool isFirstValidLayoutUpdate = true;
-    if (preRect.IsUninitializedSize() && !newRect.IsUninitializedSize() &&
+    if (!newRect.IsUninitializedSize() &&
         isFirstValidLayoutUpdate_.compare_exchange_strong(isFirstValidLayoutUpdate, false)) {
         updateRectCallback_->OnFirstValidRectUpdate(GetPersistentId());
         TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, rect:%{public}s", GetPersistentId(), newRect.ToString().c_str());
