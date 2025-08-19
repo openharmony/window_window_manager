@@ -2936,11 +2936,11 @@ void ScreenSessionManager::InitExtendScreenDensity(sptr<ScreenSession> session, 
     float defaultDensity = screenSession->GetScreenProperty().GetDefaultDensity();
     TLOGW(WmsLogTag::DMS, "extendDensity = %{public}f", extendDensity);
     session->SetVirtualPixelRatio(extendDensity * g_extendScreenDpiCoef);
-    session->SetDefaultDensity(defaultDensity * g_extendScreenDpiCoef);
+    session->SetDefaultDensity(defaultDensity * EXTEND_SCREEN_DPI_DEFAULT_PARAMETER);
     session->SetDensityInCurResolution(curResolution);
     ScreenId screenId = session->GetScreenId();
     property.SetVirtualPixelRatio(extendDensity * g_extendScreenDpiCoef);
-    property.SetDefaultDensity(defaultDensity * g_extendScreenDpiCoef);
+    property.SetDefaultDensity(defaultDensity * EXTEND_SCREEN_DPI_DEFAULT_PARAMETER);
     property.SetDensityInCurResolution(curResolution);
     {
         std::lock_guard<std::recursive_mutex> lock_phy(phyScreenPropMapMutex_);
