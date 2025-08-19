@@ -28,7 +28,7 @@ public:
     void OnSetDensityDpi(ani_env* env, ani_object obj, ani_double densityDpi);
     static ani_boolean TransferStatic(ani_env* env, ani_object obj, ani_object input, ani_object screenAniObj);
     static ani_object TransferDynamic(ani_env* env, ani_object obj, ani_long nativeObj);
-    sptr<Screen> GetScreen() { return screen_; }
+    sptr<Screen> GetScreen() const { return screen_; }
  
 private:
     sptr<Screen> screen_ = nullptr;

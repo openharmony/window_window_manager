@@ -54,7 +54,7 @@ void ScreenAni::OnSetDensityDpi(ani_env* env, ani_object obj, ani_double density
 ani_boolean ScreenAni::TransferStatic(ani_env* env, ani_object obj, ani_object input, ani_object screenAniObj)
 {
     TLOGI(WmsLogTag::DMS, "begin");
-    void *unwrapResult = nullptr;
+    void* unwrapResult = nullptr;
     auto ret = arkts_esvalue_unwrap(env, input, &unwrapResult);
     if (!ret) {
         TLOGE(WmsLogTag::DMS, "[ANI] fail to unwrap input, ret: %{public}d", ret);

@@ -317,7 +317,7 @@ void DisplayAni::CreateDisplayAni(sptr<Display> display, ani_object displayObj, 
 ani_boolean DisplayAni::TransferStatic(ani_env* env, ani_object obj, ani_object input, ani_object displayAniObj)
 {
     TLOGI(WmsLogTag::DMS, "begin");
-    void *unwrapResult = nullptr;
+    void* unwrapResult = nullptr;
     auto ret = arkts_esvalue_unwrap(env, input, &unwrapResult);
     if (!ret) {
         TLOGE(WmsLogTag::DMS, "[ANI] fail to unwrap input, %{public}d", ret);
@@ -334,7 +334,10 @@ ani_boolean DisplayAni::TransferStatic(ani_env* env, ani_object obj, ani_object 
     }
     
     sptr<Display> display = jsDisplay->GetDisplay();
-    DisplayAniUtils::CvtDisplay(display, env, displayAniObj);
+    if (ANI_OK != DisplayAniUtils::CvtDisplay(display, env, displayAniObj)) {
+        TLOGE(WmsLogTag::DMS, "[ANI] convert display failed");
+        return false;
+    }
     DisplayAni::CreateDisplayAni(display, displayAniObj, env);
     return true;
 }
@@ -434,11 +437,11 @@ ani_status DisplayAni::ClassBindNativeFunctions(ani_env* env, ani_class displayC
 }
 
 extern "C" {
-ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
+ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
 {
     using namespace OHOS::Rosen;
     ani_status ret;
-    ani_env *env;
+    ani_env* env;
     if ((ret = vm->GetEnv(ANI_VERSION_1, &env)) != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] null env");
         return ANI_NOT_FOUND;

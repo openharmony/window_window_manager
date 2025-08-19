@@ -38,7 +38,7 @@ public:
     static ani_status ClassBindNativeFunctions(ani_env* env, ani_class displayCls);
     static ani_boolean TransferStatic(ani_env* env, ani_object obj, ani_object input, ani_object displayAniObj);
     static ani_object TransferDynamic(ani_env* env, ani_object obj, ani_long nativeObj);
-    sptr<Display> GetDisplay() { return display_; }
+    sptr<Display> GetDisplay() const { return display_; }
 private:
     DMError UnregisterAllDisplayListenerWithType(std::string type);
     DMError UnregisterDisplayListenerWithType(std::string type, ani_env *env, ani_ref aniCallback);
