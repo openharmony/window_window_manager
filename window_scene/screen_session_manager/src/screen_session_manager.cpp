@@ -4923,6 +4923,7 @@ ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
             screenSessionMap_.insert(std::make_pair(smsScreenId, screenSession));
         }
         screenSession->SetVirtualScreenFlag(option.virtualScreenFlag_);
+        TLOGI(WmsLogTag::DMS, "virtualScreenFlag: %{public}d", option.virtualScreenFlag_);
         NotifyScreenConnected(screenSession->ConvertToScreenInfo());
         TLOGW(WmsLogTag::DMS, "create success. ScreenId: %{public}" PRIu64", rsId: %{public}" PRIu64"",
             smsScreenId, rsId);
