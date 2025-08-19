@@ -1795,7 +1795,7 @@ napi_value JsWindow::OnMoveWindowTo(napi_env env, napi_callback_info info)
     }
     if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
-             "[window][moveWindowTo]msg: failed");
+            "[window][moveWindowTo]msg: failed");
     }
     // 2: params num; 2: index of callback
     napi_value lastParam = (argc <= 2) ? nullptr :
@@ -1824,7 +1824,7 @@ napi_value JsWindow::OnMoveWindowTo(napi_env env, napi_callback_info info)
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnMoveWindowTo") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-                 "[Window][MoveWindowTo]msg: failed to send event"));
+                "[Window][MoveWindowTo]msg: failed to send event"));
     }
     return result;
 }
@@ -1873,19 +1873,19 @@ napi_value JsWindow::OnMoveWindowToAsync(napi_env env, napi_callback_info info)
     if (argc < 2) { // 2: minimum param num
         TLOGE(WmsLogTag::WMS_LAYOUT, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
-             "[window][moveWindowToAsync]msg: Argc is invalid");
+            "[window][moveWindowToAsync]msg: Argc is invalid");
     }
     int32_t x = 0;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], x)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to x");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
-             "[window][moveWindowToAsync]msg: Failed to convert parameter to x");
+            "[window][moveWindowToAsync]msg: Failed to convert parameter to x");
     }
     int32_t y = 0;
     if (!ConvertFromJsValue(env, argv[INDEX_ONE], y)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to y");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
-             "[window][moveWindowToAsync]msg: Failed to convert parameter to y");
+            "[window][moveWindowToAsync]msg: Failed to convert parameter to y");
     }
     MoveConfiguration moveConfiguration;
     size_t lastParamIndex = INDEX_TWO;
@@ -1894,7 +1894,7 @@ napi_value JsWindow::OnMoveWindowToAsync(napi_env env, napi_callback_info info)
         if (!GetMoveConfigurationFromJsValue(env, argv[INDEX_TWO], moveConfiguration)) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to moveConfiguration");
             return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
-                 "[window][moveWindowToAsync]msg: Failed to convert parameter to moveConfiguration");
+                "[window][moveWindowToAsync]msg: Failed to convert parameter to moveConfiguration");
         }
     }
     NapiAsyncTask::ExecuteCallback execute;
@@ -1956,28 +1956,28 @@ napi_value JsWindow::OnMoveWindowToGlobal(napi_env env, napi_callback_info info)
     if (argc < 2) { // 2:minimum param num
         TLOGE(WmsLogTag::WMS_LAYOUT, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
-             "[window][moveWindowToGlobal]msg: Argc is invalid");
+            "[window][moveWindowToGlobal]msg: Argc is invalid");
     }
     int32_t x = 0;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], x)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to x");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
-             "[window][moveWindowToGlobal]msg: Failed to convert parameter to x");
+            "[window][moveWindowToGlobal]msg: Failed to convert parameter to x");
     }
     int32_t y = 0;
     if (!ConvertFromJsValue(env, argv[INDEX_ONE], y)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to y");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
-             "[window][moveWindowToGlobal]msg: Failed to convert parameter to y");
+            "[window][moveWindowToGlobal]msg: Failed to convert parameter to y");
     }
     MoveConfiguration moveConfiguration;
     size_t lastParamIndex = INDEX_TWO;
     if (argc > TWO_PARAMS_SIZE && argv[INDEX_TWO] != nullptr && GetType(env, argv[INDEX_TWO]) == napi_object) {
         lastParamIndex = INDEX_THREE; // MoveConfiguration is optional param
         if (!GetMoveConfigurationFromJsValue(env, argv[INDEX_TWO], moveConfiguration)) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to moveConfiguration and rectAnimationConfig");
+            TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to moveConfiguration");
             return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
-                 "[window][moveWindowToGlobal]msg: Failed to convert parameter to moveConfiguration and rectAnimationConfig");
+                "[window][moveWindowToGlobal]msg: Failed to convert parameter to moveConfiguration");
         }
     }
     NapiAsyncTask::ExecuteCallback execute;
@@ -2524,7 +2524,7 @@ napi_value JsWindow::OnSetWindowMode(napi_env env, napi_callback_info info)
         auto window = windowToken.promote();
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: window is nullptr", where);
-            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, 
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
                 "[window][setwindowMode]msg: window is nullptr"));
             return;
         }
@@ -7135,7 +7135,8 @@ napi_value JsWindow::OnSetWindowLimits(napi_env env, napi_callback_info info)
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1 || argv[INDEX_ZERO] == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Argc is invalid: %{public}zu", argc);
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM, "[window][setWindowLimits]msg: argc is invalid");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][setWindowLimits]msg: argc is invalid");
     }
     WindowLimits windowLimits;
     if (!ParseWindowLimits(env, argv[INDEX_ZERO], windowLimits)) {
@@ -8277,7 +8278,8 @@ napi_value JsWindow::OnStartMoving(napi_env env, napi_callback_info info)
         if (*err == WmErrorCode::WM_OK) {
             task.Resolve(env, NapiGetUndefined(env));
         } else {
-            task.Reject(env, CreateJsError(env, static_cast<int32_t>(*err), "[window][startMoving]msg: Move system window failed."));
+            task.Reject(env, CreateJsError(env, static_cast<int32_t>(*err),
+            "[window][startMoving]msg: Move system window failed."));
         }
     };
     napi_value result = nullptr;
