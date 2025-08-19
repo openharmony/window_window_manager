@@ -1230,7 +1230,7 @@ private:
     SystemSessionConfig systemConfig_;
     float snapshotScale_ = 0.5;
     int32_t brightnessSessionId_ = INVALID_SESSION_ID;
-    std::atomic<bool> displayBrightness_ = UNDEFINED_BRIGHTNESS;
+    std::atomic<float> displayBrightness_ = UNDEFINED_BRIGHTNESS;
     bool isScreenLocked_ { false };
     bool isPrepareTerminateEnable_ { false };
 
