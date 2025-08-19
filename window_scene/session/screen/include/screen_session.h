@@ -226,6 +226,9 @@ public:
     void SetVirtualScreenFlag(VirtualScreenFlag screenFlag);
     void SetSecurity(bool isSecurity);
 
+    VirtualScreenType GetVirtualScreenType();
+    void SetVirtualScreenType(VirtualScreenType screenType);
+
     std::string name_ { "UNKNOWN" };
     ScreenId screenId_ {};
     ScreenId rsId_ {};
@@ -388,6 +391,7 @@ private:
     ScreenCombination combination_ { ScreenCombination::SCREEN_ALONE };
     mutable std::mutex combinationMutex_; // above guarded by clientProxyMutex_
     VirtualScreenFlag screenFlag_ { VirtualScreenFlag::DEFAULT };
+    VirtualScreenType screenType_ { VirtualScreenType::UNKNOWN };
     bool hasPrivateWindowForeground_ = false;
     bool isFakeInUse_ = false;  // is fakeScreenSession can be used
     bool isBScreenHalf_ = false;

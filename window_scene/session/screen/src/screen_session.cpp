@@ -972,6 +972,16 @@ void ScreenSession::SetVirtualScreenFlag(VirtualScreenFlag screenFlag)
     screenFlag_ = screenFlag;
 }
 
+VirtualScreenType ScreenSession::GetVirtualScreenType()
+{
+    return screenType_;
+}
+
+void ScreenSession::SetVirtualScreenType(VirtualScreenType screenType)
+{
+    screenType_ = screenType;
+}
+
 void ScreenSession::SetSecurity(bool isSecurity)
 {
     isSecurity_ = isSecurity;
