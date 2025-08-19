@@ -6248,14 +6248,14 @@ WMError WindowSceneSessionImpl::IsImmersiveLayout(bool& isImmersiveLayout) const
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (IsPcOrPadFreeMuiltiWindowMode()) {
+    if (IsPcOrPadFreeMultiWindowMode()) {
         auto uiContent = GetUIContentSharedPtr();
         if (uiContent == nullptr) {
             TLOGE(WmsLogTag::WMS_IMMS, "uicontent is null");
             return WMError::WM_ERROR_INVALID_WINDOW;
         }
         Rect drawableRect;
-        uiContent->GetWinodwPaintSize(drawableRect);
+        uiContent->GetWindowPaintSize(drawableRect);
         isImmersiveLayout = drawableRect == GetRect();
     } else {
         isImmersiveLayout = isIgnoreSafeArea_;
