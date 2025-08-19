@@ -337,6 +337,12 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
         property->SetCompatibleModeProperty(reply.ReadParcelable<CompatibleModeProperty>());
         property->SetUseControlState(reply.ReadBool());
         property->SetAncoRealBundleName(reply.ReadString());
+        sptr<MissionInfo> missionInfo = reply.ReadParcelable<MissionInfo>();
+        if (missionInfo == nullptr) {
+            TLOGE(WmsLogTag::WMS_LIFE, "read missionInfo is nullptr.");
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
+        property->SetMissionInfo(*missionInfo);
     }
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
