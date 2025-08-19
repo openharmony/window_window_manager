@@ -4833,6 +4833,7 @@ ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
             return SCREEN_ID_INVALID;
         }
         screenSession->SetName(option.name_);
+        screenSession->SetVirtualScreenType(option.virtualScreenType_);
         screenSession->SetMirrorScreenType(MirrorScreenType::VIRTUAL_MIRROR);
         screenSession->SetSecurity(option.isSecurity_);
         {
@@ -7185,12 +7186,14 @@ DMError ScreenSessionManager::SetFoldDisplayModeInner(const FoldDisplayMode disp
     if (foldScreenController_->GetTentMode() &&
         (displayMode == FoldDisplayMode::FULL || displayMode == FoldDisplayMode::COORDINATION)) {
         TLOGW(WmsLogTag::DMS, "in TentMode, SetFoldDisplayMode to %{public}d failed", displayMode);
-        return DMError::DM_ERROR_INVALID_MODE_ID;
+        return DMError::DM_ERROR_NOT_SUPPORT_COOR_WHEN_TENTMODE;
     } else if ((FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() ||
-        FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) && IsScreenCasting() &&
+        FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) &&
         displayMode == FoldDisplayMode::COORDINATION) {
-        TLOGW(WmsLogTag::DMS, "is phone casting, SetFoldDisplayMode to %{public}d is not allowed", displayMode);
-        return DMError::DM_ERROR_INVALID_MODE_ID;
+        DMError err = CanEnterCoordination();
+        if (err != DMError::DM_OK) {
+            return err;
+        }
     }
     if (reason.compare("backSelfie") == 0) {
         UpdateCameraBackSelfie(true);
@@ -10233,15 +10236,35 @@ int32_t ScreenSessionManager::GetCameraPosition()
     return cameraPosition_;
 }
 
-bool ScreenSessionManager::IsScreenCasting()
+DMError ScreenSessionManager::CanEnterCoordination()
 {
-    if (virtualScreenCount_ > 0 || hdmiScreenCount_ > 0) {
-        TLOGI(WmsLogTag::DMS, "virtualScreenCount_: %{public}" PRIu32 ", hdmiScreenCount_: %{public}d",
-            virtualScreenCount_, hdmiScreenCount_);
-        return true;
+    if (hdmiScreenCount_ > 0) {
+        TLOGW(WmsLogTag::DMS, "hdmiScreenCount_: %{public}d cannot enter coordination", hdmiScreenCount_);
+        return DMError::DM_ERROR_NOT_SUPPORT_COOR_WHEN_WIRED_CASTING;
     }
-    TLOGI(WmsLogTag::DMS, "not casting");
-    return false;
+
+    if (virtualScreenCount_ == 0) {
+        return DMError::DM_OK;
+    }
+    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+    for (const auto& pair : screenSessionMap_) {
+        sptr<ScreenSession> session = pair.second;
+        if (!session) {
+            TLOGW(WmsLogTag::DMS, "screenId=%{public}" PRIu64", session is null", pair.first);
+            continue;
+        }
+        if (session->GetIsRealScreen()) {
+            continue;
+        }
+        if (session->GetVirtualScreenType() != VirtualScreenType::SCREEN_RECORDING) {
+            TLOGW(WmsLogTag::DMS, "wireless casting: %{public}u cannot enter coordination", session->GetVirtualScreenType());
+            return DMError::DM_ERROR_NOT_SUPPORT_COOR_WHEN_WIRLESS_CASTING;
+        } else {
+            TLOGW(WmsLogTag::DMS, "screen recording cannot enter coordination");
+            return DMError::DM_ERROR_NOT_SUPPORT_COOR_WHEN_RECORDING;
+        }
+    }
+    return DMError::DM_OK;
 }
 
 SessionOption ScreenSessionManager::GetSessionOption(sptr<ScreenSession> screenSession)
