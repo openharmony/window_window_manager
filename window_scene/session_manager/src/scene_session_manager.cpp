@@ -6158,14 +6158,14 @@ void SceneSessionManager::PostBrightnessTask(const sptr<SceneSession>& sceneSess
         wptr<SceneSession> weakSceneSession(sceneSession);
         auto task = [where = __func__, weakSceneSession, brightness, isPC] {
             auto sceneSession = weakSceneSession.promote();
-                if (sceneSession == nullptr) {
-                    TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s sceneSession is null", where);
-                    return;
-                }
-                if (!sceneSession->IsSessionForeground()) {
-                    TLOGNW(WmsLogTag::WMS_ATTRIBUTE, "%{public}s sceneSession state is invalid", where);
-                    return;
-                }
+            if (sceneSession == nullptr) {
+                TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s sceneSession is null", where);
+                return;
+            }
+            if (!sceneSession->IsSessionForeground()) {
+                TLOGNW(WmsLogTag::WMS_ATTRIBUTE, "%{public}s sceneSession state is invalid", where);
+                return;
+            }
             if (isPC) {
                 DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().SetBrightness(
                     static_cast<uint32_t>(brightness * MAX_BRIGHTNESS));
