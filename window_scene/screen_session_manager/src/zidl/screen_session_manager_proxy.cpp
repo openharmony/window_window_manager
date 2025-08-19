@@ -1101,7 +1101,8 @@ ScreenId ScreenSessionManagerProxy::CreateVirtualScreen(VirtualScreenOption virt
         data.WriteInt32(virtualOption.flags_) && data.WriteBool(virtualOption.isForShot_) &&
         data.WriteUInt64Vector(virtualOption.missionIds_) &&
         data.WriteUint32(static_cast<uint32_t>(virtualOption.virtualScreenType_)) &&
-        data.WriteBool(virtualOption.isSecurity_);
+        data.WriteBool(virtualOption.isSecurity_) &&
+        data.WriteUint32(static_cast<uint32_t>(virtualOption.virtualScreenFlag_));
     if (virtualOption.surface_ != nullptr && virtualOption.surface_->GetProducer() != nullptr) {
         res = res &&
             data.WriteBool(true) &&
