@@ -3302,7 +3302,7 @@ WMError WindowSceneSessionImpl::SetWindowTitle(const std::string& title)
         return WMError::WM_OK;
     }
     if (!(windowSystemConfig_.IsPcWindow() || windowSystemConfig_.IsPadWindow() ||
-          IsDeviceFeatureCapableForFreeMultiWindow())) {
+          windowSystemConfig_.IsPhoneWindow() || IsDeviceFeatureCapableForFreeMultiWindow())) {
         TLOGE(WmsLogTag::WMS_DECOR, "device not support");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -4717,8 +4717,8 @@ WMError WindowSceneSessionImpl::SetWindowShadowRadius(float radius)
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (!windowSystemConfig_.IsPcWindow() && !windowSystemConfig_.IsPadWindow() &&
-        !IsDeviceFeatureCapableForFreeMultiWindow()) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "This is not PC or Pad, not supported.");
+        !windowSystemConfig_.IsPhoneWindow() && !IsDeviceFeatureCapableForFreeMultiWindow()) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "device not support.");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     if (!WindowHelper::IsFloatOrSubWindow(GetType())) {
