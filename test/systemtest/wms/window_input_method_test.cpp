@@ -77,9 +77,7 @@ HWTEST_F(WindowInputMethodTest, ShowKeyboard01, TestSize.Level1)
         .parentId = INVALID_WINDOW_ID,
     };
     const sptr<Window>& fullWindow = Utils::CreateTestWindow(windowInfo);
-    if (fullWindow == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, fullWindow);
     KeyboardEffectOption effectOption;
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         sleep(TEST_SLEEP_SECOND);

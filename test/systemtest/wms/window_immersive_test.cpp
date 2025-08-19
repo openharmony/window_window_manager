@@ -434,9 +434,7 @@ HWTEST_F(WindowImmersiveTest, GetAvoidAreaByTypeTest01, TestSize.Level1)
 HWTEST_F(WindowImmersiveTest, DockWindowTest01, TestSize.Level1)
 {
     const sptr<Window>& dockWindow = Utils::CreateDockWindow();
-    if (dockWindow == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, dockWindow);
 
     if (WMError::WM_ERROR_INVALID_WINDOW == dockWindow->Show()) {
         ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, dockWindow->Show());
@@ -445,9 +443,7 @@ HWTEST_F(WindowImmersiveTest, DockWindowTest01, TestSize.Level1)
     }
 
     const sptr<Window>& window = Utils::CreateTestWindow(fullScreenAppinfo_);
-    if (window == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, window);
     usleep(WAIT_ASYNC_US);
     auto act = testSystemBarChangedListener_->tints_;
     for (SystemBarRegionTint tint : act) {
