@@ -39,8 +39,10 @@ static int32_t g_screenRotationOffset = system::GetIntParameter<int32_t>("const.
 constexpr float ZORDER_UIEXTENSION_INDEX = 0.1;
 constexpr int WINDOW_NAME_TYPE_UNKNOWN = 0;
 constexpr int WINDOW_NAME_TYPE_THUMBNAIL = 1;
+constexpr int WINDOW_NAME_TYPE_VOICEINPUT = 2;
 const std::string SCREENSHOT_WINDOW_NAME_PREFIX = "ScreenShotWindow";
 const std::string PREVIEW_WINDOW_NAME_PREFIX = "PreviewWindow";
+const std::string VOICEINPUT_WINDOW_NAME_PREFIX = "__VoiceHardwareInput";
 } // namespace
 
 static bool operator==(const MMI::Rect left, const MMI::Rect right)
@@ -801,6 +803,8 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
     };
     if (startsWith(windowName, SCREENSHOT_WINDOW_NAME_PREFIX) || startsWith(windowName, PREVIEW_WINDOW_NAME_PREFIX)) {
         windowNameType = WINDOW_NAME_TYPE_THUMBNAIL;
+    } else if (startsWith(windowName, VOICEINPUT_WINDOW_NAME_PREFIX)) {
+        windowNameType = WINDOW_NAME_TYPE_VOICEINPUT;
     }
     auto pixelMap = windowSessionProperty->GetWindowMask();
     MMI::WindowInfo windowInfo = {
