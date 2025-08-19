@@ -334,7 +334,7 @@ ani_boolean DisplayAni::TransferStatic(ani_env* env, ani_object obj, ani_object 
     }
     
     sptr<Display> display = jsDisplay->GetDisplay();
-    if (ANI_OK != DisplayAniUtils::CvtDisplay(display, env, displayAniObj)) {
+    if (DisplayAniUtils::CvtDisplay(display, env, displayAniObj) != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] convert display failed");
         return false;
     }
@@ -403,7 +403,7 @@ ani_status DisplayAni::NspBindNativeFunctions(ani_env* env, ani_namespace nsp)
         ani_native_function {"isCaptured", nullptr, reinterpret_cast<void *>(DisplayManagerAni::IsCaptured)},
     };
     auto ret = env->Namespace_BindNativeFunctions(nsp, funcs.data(), funcs.size());
-    if (ANI_OK != ret) {
+    if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] bind namespace fail %{public}u", ret);
         return ANI_NOT_FOUND;
     }
@@ -429,7 +429,7 @@ ani_status DisplayAni::ClassBindNativeFunctions(ani_env* env, ani_class displayC
             reinterpret_cast<void *>(DisplayAni::TransferDynamic)},
     };
     auto ret = env->Class_BindNativeMethods(displayCls, methods.data(), methods.size());
-    if (ANI_OK != ret) {
+    if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] bind class fail %{public}u", ret);
         return ANI_NOT_FOUND;
     }
@@ -453,7 +453,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
     }
     DisplayManagerAni::InitDisplayManagerAni(nsp, env);
     ret = DisplayAni::NspBindNativeFunctions(env, nsp);
-    if (ANI_OK != ret) {
+    if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] bind namespace fail %{public}u", ret);
         return ret;
     }

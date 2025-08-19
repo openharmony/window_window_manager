@@ -71,7 +71,10 @@ ani_boolean ScreenAni::TransferStatic(ani_env* env, ani_object obj, ani_object i
     }
     
     sptr<Screen> screen = jsScreen->GetScreen();
-    ScreenAniUtils::ConvertScreen(env, screen, screenAniObj);
+    if (ScreenAniUtils::ConvertScreen(env, screen, screenAniObj) != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] convert screen failed");
+        return false;
+    }
     return true;
 }
  
