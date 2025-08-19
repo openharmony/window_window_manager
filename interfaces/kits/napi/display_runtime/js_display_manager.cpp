@@ -867,7 +867,7 @@ napi_value OnSetFoldDisplayMode(napi_env env, napi_callback_info info)
             return NapiGetUndefined(env);
         }
     }
-    DMError dmError = SingletonContainer::Get<DisplayManager>().SetFoldDisplayModeFromJs(mode, reason));
+    DMError dmError = SingletonContainer::Get<DisplayManager>().SetFoldDisplayModeFromJs(mode, reason);
     std::string errMsg = "";
     if (DM_ERROR_JS_TO_ERROR_MESSAGE_MAP.find(dmError) != DM_ERROR_JS_TO_ERROR_MESSAGE_MAP.end()) {
         errMsg = DM_ERROR_JS_TO_ERROR_MESSAGE_MAP.at(dmError);

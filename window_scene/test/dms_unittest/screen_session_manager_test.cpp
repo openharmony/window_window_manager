@@ -148,10 +148,8 @@ HWTEST_F(ScreenSessionManagerTest, CanEnterCoordinationRecording, TestSize.Level
     sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "createVirtualOptionRecord";
+    virtualOption.virtualScreenType_ = VirtualScreenType::SCREEN_RECORDING;
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
-    if (screenId != VIRTUAL_SCREEN_ID) {
-        ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
-    }
     auto ret = ssm_->CanEnterCoordination();
     EXPECT_EQ(ret, DMError::DM_ERROR_NOT_SUPPORT_COOR_WHEN_RECORDING);
     ssm_->DestroyVirtualScreen(screenId)
@@ -6065,9 +6063,6 @@ HWTEST_F(ScreenSessionManagerTest, CanEnterCoordination02, Function | SmallTest 
     virtualOption.name_ = "createVirtualOption";
     virtualOption.virtualScreenType_ = VirtualScreenType::SCREEN_CASTING;
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
-    if (screenId != VIRTUAL_SCREEN_ID) {
-        ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
-    }
     auto ret = ssm_->CanEnterCoordination();
     EXPECT_EQ(ret, DMError::DM_ERROR_NOT_SUPPORT_COOR_WHEN_WIRLESS_CASTING);
     ssm_->DestroyVirtualScreen(screenId)
