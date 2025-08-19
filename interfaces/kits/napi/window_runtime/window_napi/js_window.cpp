@@ -7220,7 +7220,7 @@ napi_value JsWindow::OnGetWindowLimits(napi_env env, napi_callback_info info)
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "window is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-             "[window][getWindowLimits]msg: window is nullptr");
+            "[window][getWindowLimits]msg: window is nullptr");
     }
     WindowLimits windowLimits;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->GetWindowLimits(windowLimits));
