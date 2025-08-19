@@ -58,6 +58,9 @@ bool operator==(const MMI::ScreenInfo& a, const MMI::ScreenInfo& b)
         a.dpi != b.dpi || a.ppi != b.ppi) {
         return false;
     }
+    if (a.rotation != b.rotation) {
+        return false;
+    }
     return true;
 }
 
@@ -72,6 +75,10 @@ bool operator==(const MMI::DisplayInfo& a, const MMI::DisplayInfo& b)
         a.isCurrentOffScreenRendering != b.isCurrentOffScreenRendering || a.displaySourceMode != b.displaySourceMode ||
         a.oneHandX != b.oneHandX || a.oneHandY != b.oneHandY || a.screenArea.id != b.screenArea.id ||
         a.screenArea.area != b.screenArea.area || a.rsId != b.rsId) {
+        return false;
+    }
+    if (a.offsetX != b.offsetX || a.offsetY != b.offsetY || a.pointerActiveWidth != b.pointerActiveWidth ||
+        a.pointerActiveHeight != b.pointerActiveHeight) {
         return false;
     }
     return true;

@@ -145,59 +145,6 @@ void MaxWindowInfoTest(sptr<SceneSessionManager> ssm_)
 }
 
 /**
- * @tc.name: CheckNeedUpdate
- * @tc.desc: CheckNeedUpdate
- * @tc.type: FUNC
- */
-HWTEST_F(SceneInputManagerTest, CheckNeedUpdate5, TestSize.Level0)
-{
-    std::vector<MMI::ScreenInfo> screenInfos;
-    std::vector<MMI::DisplayInfo> displayInfos;
-    std::vector<MMI::WindowInfo> windowInfoList;
-    MMI::DisplayInfo displayinfo;
-    displayInfos.emplace_back(displayinfo);
-    MMI::WindowInfo windowinfo;
-    windowInfoList.emplace_back(windowinfo);
-    int32_t focusId = 0;
-    Rosen::SceneSessionManager::GetInstance().SetFocusedSessionId(focusId, DEFAULT_DISPLAY_ID);
-    SceneInputManager::GetInstance().lastFocusId_ = 0;
-    SceneInputManager::GetInstance().lastDisplayInfos_ = displayInfos;
-    SceneInputManager::GetInstance().lastWindowInfoList_ = windowInfoList;
-    bool result = false;
-    windowInfoList[0].transform.emplace_back(1.0);
-    SceneInputManager::GetInstance().lastWindowInfoList_[0].transform.emplace_back(2.0);
-    result = SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList);
-    ASSERT_TRUE(result);
-    windowInfoList[0].transform.clear();
-    SceneInputManager::GetInstance().lastWindowInfoList_[0].transform.clear();
-
-    displayInfos[0].id = 1;
-    result = SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList);
-    ASSERT_TRUE(result);
-    displayInfos[0].id = 0;
-
-    displayInfos[0].x = 1;
-    result = SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList);
-    ASSERT_TRUE(result);
-    displayInfos[0].x = 0;
-
-    displayInfos[0].y = 1;
-    result = SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList);
-    ASSERT_TRUE(result);
-    displayInfos[0].y = 0;
-
-    displayInfos[0].width = 1;
-    result = SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList);
-    ASSERT_TRUE(result);
-    displayInfos[0].width = 0;
-
-    displayInfos[0].height = 1;
-    result = SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList);
-    ASSERT_TRUE(result);
-    displayInfos[0].height = 0;
-}
-
-/**
  * @tc.name: UpdateFocusedSessionId
  * @tc.desc: UpdateFocusedSessionId
  * @tc.type: FUNC
@@ -251,33 +198,6 @@ HWTEST_F(SceneInputManagerTest, CheckNeedUpdate6, TestSize.Level1)
     ASSERT_TRUE(result);
     windowInfoList[0].transform.clear();
     SceneInputManager::GetInstance().lastWindowInfoList_[0].transform.clear();
-    displayInfos[0].dpi = 1;
-    result = SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList);
-    ASSERT_TRUE(result);
-    displayInfos[0].dpi = 0;
-
-    displayInfos[0].name = "TestName";
-    result = SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList);
-    ASSERT_TRUE(result);
-    displayInfos[0].name = "";
-
-    result = SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList);
-    ASSERT_TRUE(result);
-
-    displayInfos[0].direction = MMI::Direction::DIRECTION90;
-    result = SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList);
-    ASSERT_TRUE(result);
-    displayInfos[0].direction = MMI::Direction::DIRECTION0;
-
-    displayInfos[0].displayDirection = MMI::Direction::DIRECTION90;
-    result = SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList);
-    ASSERT_TRUE(result);
-    displayInfos[0].displayDirection = MMI::Direction::DIRECTION0;
-
-    displayInfos[0].displayMode = MMI::DisplayMode::FULL;
-    result = SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList);
-    ASSERT_TRUE(result);
-    displayInfos[0].displayMode = MMI::DisplayMode::UNKNOWN;
 }
 
 /**
@@ -896,29 +816,149 @@ HWTEST_F(SceneInputManagerTest, ConstructDisplayGroupInfos, TestSize.Level1)
 }
 
 /**
- * @tc.name: CheckNeedUpdate
- * @tc.desc: CheckNeedUpdate
+ * @tc.name: CheckNeedUpdateForScreenInfos
+ * @tc.desc: CheckNeedUpdateForScreenInfos
  * @tc.type: FUNC
  */
-HWTEST_F(SceneInputManagerTest, CheckNeedUpdate, TestSize.Level1)
+HWTEST_F(SceneInputManagerTest, CheckNeedUpdateForScreenInfos, TestSize.Level1)
 {
     std::vector<MMI::ScreenInfo> screenInfos;
     std::vector<MMI::DisplayInfo> displayInfos;
     std::vector<MMI::WindowInfo> windowInfoList;
     MMI::ScreenInfo screenInfo;
-    screenInfo.id = 3;
+    screenInfo.id = 1;
+    screenInfo.uniqueId = "test01";
+    screenInfo.screenType = MMI::ScreenType::REAL;
+    screenInfo.width = 1;
+    screenInfo.height = 1;
+    screenInfo.physicalWidth = 1;
+    screenInfo.physicalHeight = 1;
+    screenInfo.tpDirection = MMI::Direction::DIRECTION90;
+    screenInfo.dpi = 1;
+    screenInfo.ppi = 1;
+    screenInfo.rotation = MMI::Rotation::ROTATION_0;
     screenInfos.emplace_back(screenInfo);
-    auto result = SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList);
-    ASSERT_TRUE(result);
-    result = SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList);
-    ASSERT_FALSE(result);
-    std::vector<MMI::ScreenInfo> screenInfos01;
-    MMI::ScreenInfo screenInfo01;
-    screenInfo01.id = 1;
-    screenInfos01.emplace_back(screenInfo01);
-    SceneInputManager::GetInstance().FlushEmptyInfoToMMI();
-    result = SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos01, displayInfos, windowInfoList);
-    ASSERT_TRUE(result);
+    ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
+    ASSERT_FALSE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
+    screenInfos[0].id = 2;
+    ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
+    screenInfos[0].uniqueId = "test02";
+    ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
+    screenInfos[0].screenType = MMI::ScreenType::VIRTUAL;
+    ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
+    screenInfos[0].width = 2;
+    ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
+    screenInfos[0].height = 2;
+    ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
+    screenInfos[0].physicalWidth = 2;
+    ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
+    screenInfos[0].physicalHeight = 2;
+    ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
+    screenInfos[0].tpDirection = MMI::Direction::DIRECTION270;
+    ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
+    screenInfos[0].dpi = 2;
+    ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
+    screenInfos[0].ppi = 2;
+    ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
+    screenInfos[0].rotation = MMI::Rotation::ROTATION_90;
+    ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
+    ASSERT_FALSE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
+}
+
+/**
+ * @tc.name: CheckNeedUpdateFordDisplayInfos
+ * @tc.desc: CheckNeedUpdateFordDisplayInfos
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneInputManagerTest, CheckNeedUpdateFordDisplayInfos, TestSize.Level1)
+{
+    std::vector<MMI::ScreenInfo> screenInfos;
+    std::vector<MMI::DisplayInfo> displayInfos;
+    std::vector<MMI::WindowInfo> windowInfoList;
+    MMI::DisplayInfo displayInfo;
+    displayInfo.id = 1;
+    displayInfo.x = 1;
+    displayInfo.y = 1;
+    displayInfo.width = 1;
+    displayInfo.height = 1;
+    displayInfo.dpi = 1;
+    displayInfo.name = "displayInfo01";
+    displayInfo.direction = MMI::Direction::DIRECTION90;
+    displayInfo.displayDirection = MMI::Direction::DIRECTION90;
+    displayInfo.displayMode = MMI::DisplayMode::FULL;
+    displayInfo.transform.emplace_back(0.001);
+    displayInfo.scalePercent = 100;
+    displayInfo.expandHeight = 1;
+    displayInfo.isCurrentOffScreenRendering = true;
+    displayInfo.displaySourceMode = MMI::DisplaySourceMode::SCREEN_MAIN;
+    displayInfo.oneHandX = 1;
+    displayInfo.oneHandY = 1;
+    displayInfo.screenArea = { 1, { 1, 1, 1, 1 } };
+    displayInfo.rsId = 1;
+    displayInfo.offsetX = 1;
+    displayInfo.offsetY = 1;
+    displayInfo.pointerActiveWidth = 1;
+    displayInfo.pointerActiveHeight = 1;
+    displayInfos.emplace_back(displayInfo);
+    ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
+    ASSERT_FALSE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
+    displayInfos[0].id = 2;
+    ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
+    displayInfos[0].x = 2;
+    ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
+    displayInfos[0].y = 2;
+    ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
+    displayInfos[0].width = 2;
+    ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
+    displayInfos[0].height = 2;
+    ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
+    displayInfos[0].dpi = 2;
+    ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
+    displayInfos[0].name = "displayInfo02";
+    ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
+    displayInfos[0].direction = MMI::Direction::DIRECTION180;
+    ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
+    displayInfos[0].displayDirection = MMI::Direction::DIRECTION180;
+    ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
+    displayInfos[0].displayMode = MMI::DisplayMode::SUB;
+    ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
+    displayInfos[0].transform[0] = 0.002;
+    ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
+    displayInfos[0].transform.emplace_back(0.00002);
+    ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
+    displayInfos[0].scalePercent = 2;
+    ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
+    displayInfos[0].expandHeight = 2;
+    ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
+    displayInfos[0].isCurrentOffScreenRendering = false;
+    ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
+    displayInfos[0].displaySourceMode = MMI::DisplaySourceMode::SCREEN_EXTEND;
+    ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
+    displayInfos[0].oneHandX = 2;
+    ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
+    displayInfos[0].oneHandY = 2;
+    ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
+    displayInfos[0].rsId = 2;
+    ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
+    displayInfos[0].offsetX = 2;
+    ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
+    displayInfos[0].offsetY = 2;
+    ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
+    displayInfos[0].pointerActiveWidth = 2;
+    ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
+    displayInfos[0].pointerActiveHeight = 2;
+    ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
+    displayInfos[0].screenArea = { 2, { 1, 1, 1, 1 } };
+    ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
+    displayInfos[0].screenArea = { 2, { 2, 1, 1, 1 } };
+    ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
+    displayInfos[0].screenArea = { 2, { 2, 2, 1, 1 } };
+    ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
+    displayInfos[0].screenArea = { 2, { 2, 2, 2, 1 } };
+    ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
+    displayInfos[0].screenArea = { 2, { 2, 2, 2, 2 } };
+    ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
+    ASSERT_FALSE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
 }
 } // namespace
 } // namespace Rosen
