@@ -6139,7 +6139,7 @@ void SceneSessionManager::PostBrightnessTask(const sptr<SceneSession>& sceneSess
     if (std::fabs(brightness - UNDEFINED_BRIGHTNESS) < std::numeric_limits<float>::min()) {
         if (!isPC) {
             wptr<SceneSession> weakSceneSession(sceneSession);
-            auto task = [where = __func__, weakSceneSession] {
+            auto task = [this, where = __func__, weakSceneSession] {
                 auto sceneSession = weakSceneSession.promote();
                 if (sceneSession == nullptr) {
                     TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s sceneSession is null", where);
@@ -6152,11 +6152,11 @@ void SceneSessionManager::PostBrightnessTask(const sptr<SceneSession>& sceneSess
                 DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().RestoreBrightness();
                 SetDisplayBrightness(UNDEFINED_BRIGHTNESS); // UNDEFINED_BRIGHTNESS means system default brightness
             };
-            eventHandler_->AddExportTask("DisplayPowerMgr:RestoreBrightness", task);
+            taskScheduler_->AddExportTask("DisplayPowerMgr:RestoreBrightness", task);
         }
     } else {
         wptr<SceneSession> weakSceneSession(sceneSession);
-        auto task = [where = __func__, weakSceneSession, brightness, isPC] {
+        auto task = [this, where = __func__, weakSceneSession, brightness, isPC] {
             auto sceneSession = weakSceneSession.promote();
             if (sceneSession == nullptr) {
                 TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s sceneSession is null", where);
@@ -6175,7 +6175,7 @@ void SceneSessionManager::PostBrightnessTask(const sptr<SceneSession>& sceneSess
             }
             SetDisplayBrightness(brightness);
         };
-        eventHandler_->AddExportTask("DisplayPowerMgr:OverrideBrightness", task);
+        taskScheduler_->AddExportTask("DisplayPowerMgr:OverrideBrightness", task);
     }
 #endif
 }
@@ -6201,23 +6201,23 @@ WSError SceneSessionManager::UpdateBrightness(int32_t persistentId)
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Brightness: [%{public}f, %{public}f]", GetDisplayBrightness(), brightness);
     if (std::fabs(brightness - UNDEFINED_BRIGHTNESS) < std::numeric_limits<float>::min()) {
         if (IsNeedUpdateBrightness(persistentId, brightness)) {
-            auto task = [where = __func__] {
+            auto task = [this, where = __func__] {
                 TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s adjust brightness with default value", where);
                 DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().RestoreBrightness();
                 SetDisplayBrightness(UNDEFINED_BRIGHTNESS); // UNDEFINED_BRIGHTNESS means system default brightness
             };
-            eventHandler_->AddExportTask("DisplayPowerMgr:UpdateBrightness_RestoreBrightness", task);
+            taskScheduler_->AddExportTask("DisplayPowerMgr:UpdateBrightness_RestoreBrightness", task);
             brightnessSessionId_ = INVALID_WINDOW_ID;
         }
     } else {
         if (std::fabs(brightness - GetDisplayBrightness()) > std::numeric_limits<float>::min()) {
-            auto task = [where = __func__, brightness] {
+            auto task = [this, where = __func__, brightness] {
                 TLOGI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s adjust brightness with value", where);
                 DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().OverrideBrightness(
                     static_cast<uint32_t>(brightness * MAX_BRIGHTNESS));
                 SetDisplayBrightness(brightness);
             };
-            eventHandler_->AddExportTask("DisplayPowerMgr:UpdateBrightness_OverrideBrightness", task);
+            taskScheduler_->AddExportTask("DisplayPowerMgr:UpdateBrightness_OverrideBrightness", task);
         }
         brightnessSessionId_ = sceneSession->GetPersistentId();
     }
