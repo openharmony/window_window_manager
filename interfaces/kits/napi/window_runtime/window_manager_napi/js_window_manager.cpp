@@ -674,18 +674,21 @@ napi_value JsWindowManager::OnGetSnapshot(napi_env env, napi_callback_info info)
     NapiAsyncTask::CompleteCallback complete =
         [=](napi_env env, NapiAsyncTask& task, int32_t status) {
             if (dataPack->result != WMError::WM_OK) {
-                task.Reject(env, JsErrUtils::CreateJsError(env, WM_JS_TO_ERROR_CODE_MAP.at(dataPack->result)));
+                task.Reject(env, JsErrUtils::CreateJsError(env, WM_JS_TO_ERROR_CODE_MAP.at(dataPack->result),
+                    "[window][getSnapshot]msg: get snapshot failed"));
                 TLOGNW(WmsLogTag::WMS_SYSTEM, "Get snapshot not ok!");
                 return;
             }
             if (dataPack->pixelMap == nullptr) {
-                task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+                task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                    "[window][getSnapshot]msg: pixel map is invalid"));
                 TLOGNE(WmsLogTag::WMS_SYSTEM, "Get snapshot is nullptr!");
                 return;
             }
             auto nativePixelMap = Media::PixelMapNapi::CreatePixelMap(env, dataPack->pixelMap);
             if (nativePixelMap == nullptr) {
-                task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+                task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                    "[window][getSnapshot]msg: create native pixel map failed"));
                 TLOGNE(WmsLogTag::WMS_SYSTEM, "Create native pixelmap is nullptr!");
                 return;
             }
@@ -895,7 +898,7 @@ napi_value JsWindowManager::OnRegisterWindowManagerCallback(napi_env env, napi_c
 
     WmErrorCode ret = registerManager_->RegisterListener(nullptr, cbType, CaseType::CASE_WINDOW_MANAGER, env, value);
     if (ret != WmErrorCode::WM_OK) {
-        napi_throw(env, JsErrUtils::CreateJsError(env, ret));
+        napi_throw(env, JsErrUtils::CreateJsError(env, ret, "[window][on]msg: register " + cbType + " failed"));
         return NapiGetUndefined(env);
     }
     TLOGD(WmsLogTag::DEFAULT, "Register end, type=%{public}s", cbType.c_str());
@@ -933,7 +936,7 @@ napi_value JsWindowManager::OnUnregisterWindowManagerCallback(napi_env env, napi
         }
     }
     if (ret != WmErrorCode::WM_OK) {
-        napi_throw(env, JsErrUtils::CreateJsError(env, ret));
+        napi_throw(env, JsErrUtils::CreateJsError(env, ret, "[window][off]msg: unregister " + cbType + " failed"));
         return NapiGetUndefined(env);
     }
     TLOGD(WmsLogTag::DEFAULT, "Unregister end, type=%{public}s", cbType.c_str());
@@ -1152,13 +1155,15 @@ napi_value JsWindowManager::OnSetGestureNavigationEnabled(napi_env env, napi_cal
             task->Resolve(env, NapiGetUndefined(env));
             WLOGD("SetGestureNavigationEnabled success");
         } else {
-            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "SetGestureNavigationEnabled failed"));
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret,
+                "[window][setGestureNavigationEnabled]msg: set gesture navigation failed"));
         }
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetGestureNavigationEnabled") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_IMMS, "napi_send_event failed");
         napiAsyncTask->Reject(env,
-            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
+            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                "[window][setGestureNavigationEnabled]msg: failed to send event"));
     }
     return result;
 }
@@ -1441,7 +1446,8 @@ napi_value JsWindowManager::OnGetTopNavDestinationName(napi_env env, napi_callba
                 if (WM_JS_TO_ERROR_CODE_MAP.count(*errCodePtr) > 0) {
                     retErrCode = WM_JS_TO_ERROR_CODE_MAP.at(*errCodePtr);
                 }
-                task.Reject(env, JsErrUtils::CreateJsError(env, retErrCode));
+                task.Reject(env, JsErrUtils::CreateJsError(env, retErrCode,
+                    "[window][getTopNavDestinationName]msg: get top navigation name failed"));
                 return;
             }
             TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s ok, topNavDestName: %{public}s, windowId: %{public}d",
