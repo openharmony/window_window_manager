@@ -4163,8 +4163,7 @@ napi_value JsWindow::OnSetWindowBrightness(napi_env env, napi_callback_info info
         if (ret == WmErrorCode::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
         } else {
-            task->Reject(env, JsErrUtils::CreateJsError(env, ret,
-                "[window][setWindowBrightness]msg: set window brightness failed"));
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "Window set brightness failed"));
         }
         TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u, %{public}s] set brightness end, result: %{public}d",
             weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
