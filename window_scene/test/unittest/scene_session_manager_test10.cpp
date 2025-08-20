@@ -1142,6 +1142,53 @@ HWTEST_F(SceneSessionManagerTest10, NotifyAppUseControlList, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyAppUseControlListInner
+ * @tc.desc: NotifyAppUseControlListInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, NotifyAppUseControlListInner, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    int32_t controlListSize = -1;
+    ssm->notifyAppUseControlListFunc_ = [&controlListSize]
+        (ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList) {
+            controlListSize = controlList.size();
+        };
+    AppUseControlInfo controlById;
+    controlById.persistentId_ = 100;
+    std::vector<AppUseControlInfo> controlList;
+    controlList.push_back(controlById);
+    ssm_->NotifyAppUseControlListInner(ControlAppType::DLP_HIDE, 0, controlList);
+    EXPECT_EQ(controlListSize, -1);
+    ssm_->sceneSessionMap_.emplace(100, nullptr);
+    ssm_->NotifyAppUseControlListInner(ControlAppType::DLP_HIDE, 0, controlList);
+    EXPECT_EQ(controlListSize, -1);
+
+    sessionInfo sessionInfo;
+    sessionInfo.persistentId_ = 100;
+    sessionInfo.bundleName_ = "bundleName";
+    sessionInfo.appIndex_ = 0;
+    sessionInfo.windowType_ = 1;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ssm_->sceneSessionMap_.emplace(100, sceneSession);
+
+    ssm_->NotifyAppUseControlListInner(ControlAppType::DLP_HIDE, 0, controlList);
+    EXPECT_EQ(controlListSize, -1);
+
+    AppUseControlInfo controlByBundle;
+    controlByBundle.bundleName_ = "bundleName";
+    controlByBundle.appIndex_ = 0;
+    controlList.push_back(controlByBundle);
+    ssm_->NotifyAppUseControlListInner(ControlAppType::DLP_HIDE, 0, controlList);
+    EXPECT_EQ(controlListSize, 1);
+
+    ssm->notifyAppUseControlListFunc_ = nullptr;
+    controlListSize = -1;
+    ssm_->NotifyAppUseControlListInner(ControlAppType::DLP_HIDE, 0, controlList);
+    EXPECT_EQ(controlListSize, -1);
+}
+
+/**
  * @tc.name: MinimizeMainSession
  * @tc.desc: test MinimizeMainSession
  * @tc.type: FUNC

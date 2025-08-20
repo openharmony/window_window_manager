@@ -11312,28 +11312,46 @@ WSError SceneSessionManager::NotifyAppUseControlList(
         }
     }
     taskScheduler_->PostAsyncTask([this, type, userId, controlList] {
-        if (notifyAppUseControlListFunc_ != nullptr) {
-            notifyAppUseControlListFunc_(type, userId, controlList);
-        }
-
-        std::vector<sptr<SceneSession>> mainSessions;
-        for (const auto& appUseControlInfo : controlList) {
-            RefreshAllAppUseControlMap(appUseControlInfo, type);
-            GetMainSessionByBundleNameAndAppIndex(appUseControlInfo.bundleName_, appUseControlInfo.appIndex_, mainSessions);
-            if (mainSessions.empty()) {
-                continue;
-            }
-            ControlInfo controlInfo = {
-                .isNeedControl = appUseControlInfo.isNeedControl_,
-                .isControlRecentOnly = appUseControlInfo.isControlRecentOnly_
-            };
-            for (const auto& session : mainSessions) {
-                session->NotifyUpdateAppUseControl(type, controlInfo);
-            }
-            mainSessions.clear();
-        }
+        NotifyAppUseControlListInner(type, userId, controlList);
     }, __func__);
     return WSError::WS_OK;
+}
+
+void SceneSessionManager::NotifyAppUseControlListInner(
+    ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList)
+{
+    std::vector<sptr<SceneSession>> mainSessions;
+    std::vector<AppUseControlInfo> controlByBundleList;
+    for (const auto& appUseControlInfo : controlList) {
+        if (appUseControlInfo.persistentId_ > INVALID_WINDOW_ID) {
+            // control by peristentId
+            TLOGI(WmsLogTag::WMS_MAIN, "control by id:%{public}d", appUseControlInfo.persistentId_);
+            auto iter = sceneSessionMap_.find(appUseControlInfo.persistentId_);
+            if (iter == sceneSessionMap_.end() || iter->second == nullptr) {
+                TLOGW(WmsLogTag::WMS_MAIN, "session not found, id:%{public}d", appUseControlInfo.persistentId_);
+                continue;
+            }
+            mainSessions.push_back(iter->second);
+        } else {
+            // control by bundleName and appIndex
+            RefreshAllAppUseControlMap(appUseControlInfo, type);
+            GetMainSessionByBundleNameAndAppIndex(appUseControlInfo.bundleName_, appUseControlInfo.appIndex_, mainSessions);
+        }
+        if (mainSessions.empty()) {
+            continue;
+        }
+        ControlInfo controlInfo = {
+            .isNeedControl = appUseControlInfo.isNeedControl_,
+            .isControlRecentOnly = appUseControlInfo.isControlRecentOnly_
+        };
+        for (const auto& session : mainSessions) {
+            session->NotifyUpdateAppUseControl(type, controlInfo);
+        }
+        mainSessions.clear();
+    }
+    if (notifyAppUseControlListFunc_ != nullptr && controlByBundleList.size() > 0) {
+        notifyAppUseControlListFunc_(type, userId, controlByBundleList);
+    }
 }
 
 void SceneSessionManager::RefreshAllAppUseControlMap(const AppUseControlInfo& appUseControlInfo, ControlAppType type)
