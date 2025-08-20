@@ -629,7 +629,7 @@ private:
     int NotifyPowerEventForDualDisplay(DisplayPowerEvent event, EventStatus status,
         PowerStateChangeReason reason);
     bool IsExtendMode();
-    bool IsScreenCasting();
+    DMError CanEnterCoordination();
     bool GetPcStatus() const;
     void SetPcStatus(bool isPc);
     const std::set<std::string> g_packageNames_ {};
