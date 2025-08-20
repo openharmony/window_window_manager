@@ -137,9 +137,6 @@ HWTEST_F(WindowSystemToastWindowTest, SystemToastWindow02, TestSize.Level1)
 
     Rect fltWindRect = GetRectWithVpr(0, 0, 400, 600);
     sptr<Window> fltWin = CreateSystemToastWindow(WindowType::WINDOW_TYPE_SYSTEM_TOAST, fltWindRect);
-    if (fltWin == nullptr) {
-        return;
-    }
     ASSERT_NE(nullptr, fltWin);
 
     if (scene->GoForeground() == WMError::WM_OK) {
@@ -171,9 +168,6 @@ HWTEST_F(WindowSystemToastWindowTest, SystemToastWindow03, TestSize.Level1)
 
     Rect fltWindRect = GetRectWithVpr(0, 0, 400, 600);
     sptr<Window> fltWin = CreateSystemToastWindow(WindowType::WINDOW_TYPE_SYSTEM_TOAST, fltWindRect);
-    if (fltWin == nullptr) {
-        return;
-    }
     ASSERT_NE(nullptr, fltWin);
     if (scene->GoForeground() == WMError::WM_OK) {
         ASSERT_EQ(WMError::WM_OK, scene->GoForeground());
@@ -207,9 +201,6 @@ HWTEST_F(WindowSystemToastWindowTest, SystemToastWindow04, TestSize.Level1)
 
     Rect fltWindRect = GetRectWithVpr(0, 0, 400, 600);
     sptr<Window> fltWin = CreateSystemToastWindow(WindowType::WINDOW_TYPE_SYSTEM_TOAST, fltWindRect);
-    if (fltWin == nullptr) {
-        return;
-    }
     ASSERT_NE(nullptr, fltWin);
 
     if (scene->GoForeground() != WMError::WM_OK) {
