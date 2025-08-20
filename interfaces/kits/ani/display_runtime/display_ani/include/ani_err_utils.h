@@ -18,7 +18,6 @@
 
 #include "ani.h"
 #include "dm_common.h"
-#include "wm_common.h"
 
 namespace OHOS::Rosen {
 class AniErrUtils {

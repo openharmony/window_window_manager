@@ -99,9 +99,7 @@ function minusScreens(screens: Array<Screen>) {
         if (currentScreen.id < 0) {
             break;
         }
-        minusScreenModeInfo(currentScreen.supportedModeInfo_);
-        let current: Screen = new ScreenImpl(screens[i] as ScreenImpl);
-        screens[i] = current;
+        minusScreenModeInfo(currentScreen.supportedModeInfo);
     }
     screens.splice(i);
 }
@@ -150,31 +148,17 @@ class ScreenImpl implements Screen {
         }
     }
 
-    constructor(screen: ScreenImpl) {
-        this.id = screen.id;
-        this.parent = screen.parent;
-        this.activeModeIndex = screen.activeModeIndex;
-        this.orientation = screen.orientation_ as Orientation;
-        this.supportedModeInfo = screen.supportedModeInfo_;
-        this.sourceMode = screen.sourceMode_ as ScreenSourceMode;
-        this.screenNativeObj = screen.screenNativeObj;
-    }
-
     readonly id: long;
 
     readonly parent: long;
 
     readonly supportedModeInfo: Array<ScreenModeInfo>;
-    supportedModeInfo_: Array<ScreenModeInfo>;
 
     readonly activeModeIndex: long;
 
     readonly orientation: Orientation;
-    orientation_: int;
 
     readonly sourceMode: ScreenSourceMode;
-    sourceMode_: int;
-    sourceModeLen: int;
 
     screenNativeObj: long;
 
@@ -200,7 +184,27 @@ class ScreenImpl implements Screen {
         });
     }
 
+    static transferStatic(input: Any): Object {
+        let screen = new ScreenImpl();
+        let screen_input: ESValue = ESValue.wrap(input);
+        let ret = false;
+        if (screen_input !== ESValue.Undefined) {
+            ret = ScreenImpl.nativeTransferStatic(screen_input, screen as Object);
+            minusScreenModeInfo(screen.supportedModeInfo);
+        }
+        if (!ret) {
+            return {};
+        }
+        return screen as Object;
+    }
+
+    static transferDynamic(input: Object): Any {
+        return ScreenImpl.nativeTransferDynamic((input as ScreenImpl).screenNativeObj).unwrap();
+    }
+
     native setDensityDpiInternal(densityDpi: double): void;
+    native static nativeTransferStatic(input: ESValue, screen: Object): boolean;
+    native static nativeTransferDynamic(nativeObj: long): ESValue;
 }
 
 export interface ScreenModeInfo {

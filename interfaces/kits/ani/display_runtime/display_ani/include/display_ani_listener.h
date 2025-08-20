@@ -59,15 +59,15 @@ private:
     wptr<DisplayAniListener> weakRef_  = nullptr;
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_ = nullptr;
 };
-const std::string EVENT_ADD = "add";
-const std::string EVENT_REMOVE = "remove";
-const std::string EVENT_CHANGE = "change";
-const std::string EVENT_PRIVATE_MODE_CHANGE = "privateModeChange";
-const std::string EVENT_FOLD_STATUS_CHANGED = "foldStatusChange";
-const std::string EVENT_FOLD_ANGLE_CHANGED = "foldAngleChange";
-const std::string EVENT_CAPTURE_STATUS_CHANGED = "captureStatusChange";
-const std::string EVENT_DISPLAY_MODE_CHANGED = "foldDisplayModeChange";
-const std::string EVENT_AVAILABLE_AREA_CHANGED = "availableAreaChange";
+const std::string ANI_EVENT_ADD = "add";
+const std::string ANI_EVENT_REMOVE = "remove";
+const std::string ANI_EVENT_CHANGE = "change";
+const std::string ANI_EVENT_PRIVATE_MODE_CHANGE = "privateModeChange";
+const std::string ANI_EVENT_FOLD_STATUS_CHANGED = "foldStatusChange";
+const std::string ANI_EVENT_FOLD_ANGLE_CHANGED = "foldAngleChange";
+const std::string ANI_EVENT_CAPTURE_STATUS_CHANGED = "captureStatusChange";
+const std::string ANI_EVENT_DISPLAY_MODE_CHANGED = "foldDisplayModeChange";
+const std::string ANI_EVENT_AVAILABLE_AREA_CHANGED = "availableAreaChange";
 }  // namespace Rosen
 }  // namespace OHOS
 #endif
