@@ -264,26 +264,26 @@ DmErrorCode DisplayManagerAni::ProcessRegisterCallback(ani_env* env, std::string
     sptr<DisplayAniListener> displayAniListener)
 {
     DmErrorCode ret = DmErrorCode::DM_ERROR_INVALID_PARAM;
-    if (typeStr == EVENT_ADD || typeStr == EVENT_REMOVE || typeStr == EVENT_CHANGE) {
+    if (typeStr == ANI_EVENT_ADD || typeStr == ANI_EVENT_REMOVE || typeStr == ANI_EVENT_CHANGE) {
         TLOGI(WmsLogTag::DMS, "ProcessRegisterCallback %{public}s", typeStr.c_str());
         ret = DM_JS_TO_ERROR_CODE_MAP.at(
             SingletonContainer::Get<DisplayManager>().RegisterDisplayListener(displayAniListener));
-    } else if (typeStr == EVENT_FOLD_STATUS_CHANGED) {
+    } else if (typeStr == ANI_EVENT_FOLD_STATUS_CHANGED) {
         ret = DM_JS_TO_ERROR_CODE_MAP.at(
             SingletonContainer::Get<DisplayManager>().RegisterFoldStatusListener(displayAniListener));
-    } else if (typeStr == EVENT_DISPLAY_MODE_CHANGED) {
+    } else if (typeStr == ANI_EVENT_DISPLAY_MODE_CHANGED) {
         ret = DM_JS_TO_ERROR_CODE_MAP.at(
             SingletonContainer::Get<DisplayManager>().RegisterDisplayModeListener(displayAniListener));
-    } else if (typeStr == EVENT_AVAILABLE_AREA_CHANGED) {
+    } else if (typeStr == ANI_EVENT_AVAILABLE_AREA_CHANGED) {
         ret = DM_JS_TO_ERROR_CODE_MAP.at(
             SingletonContainer::Get<DisplayManager>().RegisterAvailableAreaListener(displayAniListener));
-    } else if (typeStr == EVENT_FOLD_ANGLE_CHANGED) {
+    } else if (typeStr == ANI_EVENT_FOLD_ANGLE_CHANGED) {
         ret = DM_JS_TO_ERROR_CODE_MAP.at(
             SingletonContainer::Get<DisplayManager>().RegisterFoldAngleListener(displayAniListener));
-    } else if (typeStr == EVENT_CAPTURE_STATUS_CHANGED) {
+    } else if (typeStr == ANI_EVENT_CAPTURE_STATUS_CHANGED) {
         ret = DM_JS_TO_ERROR_CODE_MAP.at(
             SingletonContainer::Get<DisplayManager>().RegisterCaptureStatusListener(displayAniListener));
-    } else if (typeStr == EVENT_PRIVATE_MODE_CHANGE) {
+    } else if (typeStr == ANI_EVENT_PRIVATE_MODE_CHANGE) {
         ret = DM_JS_TO_ERROR_CODE_MAP.at(
             SingletonContainer::Get<DisplayManager>().RegisterPrivateWindowListener(displayAniListener));
     }
@@ -349,30 +349,30 @@ DMError DisplayManagerAni::UnRegisterDisplayListenerWithType(std::string type, a
         env->Reference_StrictEquals(callback, it->first, &isEquals);
         if (isEquals) {
             it->second->RemoveCallback(env, type, callback);
-            if (type == EVENT_ADD || type == EVENT_REMOVE || type == EVENT_CHANGE) {
+            if (type == ANI_EVENT_ADD || type == ANI_EVENT_REMOVE || type == ANI_EVENT_CHANGE) {
                 sptr<DisplayManager::IDisplayListener> thisListener(it->second);
                 ret = SingletonContainer::Get<DisplayManager>().UnregisterDisplayListener(thisListener);
-            } else if (type == EVENT_FOLD_STATUS_CHANGED) {
+            } else if (type == ANI_EVENT_FOLD_STATUS_CHANGED) {
                 sptr<DisplayManager::IFoldStatusListener> thisListener(it->second);
                 ret = SingletonContainer::Get<DisplayManager>().UnregisterFoldStatusListener(thisListener);
                 TLOGI(WmsLogTag::DMS, "[ANI] UnRegisterDisplayListener foldStatusChange success");
-            } else if (type == EVENT_DISPLAY_MODE_CHANGED) {
+            } else if (type == ANI_EVENT_DISPLAY_MODE_CHANGED) {
                 sptr<DisplayManager::IDisplayModeListener> thisListener(it->second);
                 ret = SingletonContainer::Get<DisplayManager>().UnregisterDisplayModeListener(thisListener);
                 TLOGI(WmsLogTag::DMS, "[ANI] UnRegisterDisplayListener foldDisplayModeChange success");
-            } else if (type == EVENT_AVAILABLE_AREA_CHANGED) {
+            } else if (type == ANI_EVENT_AVAILABLE_AREA_CHANGED) {
                 sptr<DisplayManager::IAvailableAreaListener> thisListener(it->second);
                 ret = SingletonContainer::Get<DisplayManager>().UnregisterAvailableAreaListener(thisListener);
                 TLOGI(WmsLogTag::DMS, "[ANI] UnRegisterDisplayListener availableAreaListener success");
-            } else if (type == EVENT_FOLD_ANGLE_CHANGED) {
+            } else if (type == ANI_EVENT_FOLD_ANGLE_CHANGED) {
                 sptr<DisplayManager::IFoldAngleListener> thisListener(it->second);
                 ret = SingletonContainer::Get<DisplayManager>().UnregisterFoldAngleListener(thisListener);
                 TLOGI(WmsLogTag::DMS, "[ANI] UnRegisterDisplayListener foldAngleListener success");
-            } else if (type == EVENT_CAPTURE_STATUS_CHANGED) {
+            } else if (type == ANI_EVENT_CAPTURE_STATUS_CHANGED) {
                 sptr<DisplayManager::ICaptureStatusListener> thisListener(it->second);
                 SingletonContainer::Get<DisplayManager>().UnregisterCaptureStatusListener(thisListener);
                 TLOGI(WmsLogTag::DMS, "[ANI] UnRegisterDisplayListener captureStatusListener success");
-            } else if (type == EVENT_PRIVATE_MODE_CHANGE) {
+            } else if (type == ANI_EVENT_PRIVATE_MODE_CHANGE) {
                 sptr<DisplayManager::IPrivateWindowListener> thisListener(it->second);
                 ret = SingletonContainer::Get<DisplayManager>().UnregisterPrivateWindowListener(thisListener);
                 TLOGI(WmsLogTag::DMS, "[ANI] UnRegisterDisplayListener privateWindowListener success");
@@ -394,25 +394,25 @@ DMError DisplayManagerAni::UnregisterAllDisplayListenerWithType(std::string type
     DMError ret = DMError::DM_OK;
     for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
         it->second->RemoveAllCallback();
-        if (type == EVENT_ADD || type == EVENT_REMOVE || type == EVENT_CHANGE) {
+        if (type == ANI_EVENT_ADD || type == ANI_EVENT_REMOVE || type == ANI_EVENT_CHANGE) {
             sptr<DisplayManager::IDisplayListener> thisListener(it->second);
             ret = SingletonContainer::Get<DisplayManager>().UnregisterDisplayListener(thisListener);
-        } else if (type == EVENT_FOLD_STATUS_CHANGED) {
+        } else if (type == ANI_EVENT_FOLD_STATUS_CHANGED) {
             sptr<DisplayManager::IFoldStatusListener> thisListener(it->second);
             ret = SingletonContainer::Get<DisplayManager>().UnregisterFoldStatusListener(thisListener);
-        } else if (type == EVENT_DISPLAY_MODE_CHANGED) {
+        } else if (type == ANI_EVENT_DISPLAY_MODE_CHANGED) {
             sptr<DisplayManager::IDisplayModeListener> thisListener(it->second);
             ret = SingletonContainer::Get<DisplayManager>().UnregisterDisplayModeListener(thisListener);
-        } else if (type == EVENT_AVAILABLE_AREA_CHANGED) {
+        } else if (type == ANI_EVENT_AVAILABLE_AREA_CHANGED) {
             sptr<DisplayManager::IAvailableAreaListener> thisListener(it->second);
             ret = SingletonContainer::Get<DisplayManager>().UnregisterAvailableAreaListener(thisListener);
-        } else if (type == EVENT_FOLD_ANGLE_CHANGED) {
+        } else if (type == ANI_EVENT_FOLD_ANGLE_CHANGED) {
             sptr<DisplayManager::IFoldAngleListener> thisListener(it->second);
             ret = SingletonContainer::Get<DisplayManager>().UnregisterFoldAngleListener(thisListener);
-        } else if (type == EVENT_CAPTURE_STATUS_CHANGED) {
+        } else if (type == ANI_EVENT_CAPTURE_STATUS_CHANGED) {
             sptr<DisplayManager::ICaptureStatusListener> thisListener(it->second);
             ret = SingletonContainer::Get<DisplayManager>().UnregisterCaptureStatusListener(thisListener);
-        } else if (type == EVENT_PRIVATE_MODE_CHANGE) {
+        } else if (type == ANI_EVENT_PRIVATE_MODE_CHANGE) {
             sptr<DisplayManager::IPrivateWindowListener> thisListener(it->second);
             ret = SingletonContainer::Get<DisplayManager>().UnregisterPrivateWindowListener(thisListener);
         }
@@ -427,14 +427,14 @@ ani_boolean DisplayManagerAni::HasPrivateWindow(ani_env* env, ani_long displayId
     TLOGI(WmsLogTag::DMS, "[ANI] begin");
     bool hasPrivateWindow = false;
     if (displayId < 0) {
-        std::string errMsg = "Invalid args count, need one arg";
-        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_SCREEN, "");
+        TLOGE(WmsLogTag::DMS, "Invalid displayId: %{public}" PRId64, displayId);
+        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_ILLEGAL_PARAM, "Invalid displayId");
         return hasPrivateWindow;
     }
     DmErrorCode errCode = DM_JS_TO_ERROR_CODE_MAP.at(
         SingletonContainer::Get<DisplayManager>().HasPrivateWindow(static_cast<int64_t>(displayId), hasPrivateWindow));
     if (errCode != DmErrorCode::DM_OK) {
-        std::string errMsg = "Failed to convert parameter to displayId";
+        TLOGE(WmsLogTag::DMS, "Failed to convert parameter to displayId");
         AniErrUtils::ThrowBusinessError(env, errCode, "Failed to convert parameter to displayId");
         return hasPrivateWindow;
     }

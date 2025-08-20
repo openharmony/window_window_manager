@@ -15,17 +15,22 @@
 #include <hitrace_meter.h>
 
 #include "ani.h"
-#include "display_ani.h"
-#include "display_info.h"
-#include "display.h"
-#include "singleton_container.h"
-#include "display_manager.h"
-#include "window_manager_hilog.h"
-#include "dm_common.h"
-#include "display_ani_utils.h"
-#include "refbase.h"
-#include "display_ani_manager.h"
 #include "ani_err_utils.h"
+#include "display.h"
+#include "display_ani.h"
+#include "display_ani_manager.h"
+#include "display_ani_utils.h"
+#include "display_info.h"
+#include "display_manager.h"
+#include "dm_common.h"
+#include "interop_js/arkts_esvalue.h"
+#include "interop_js/arkts_interop_js_api.h"
+#include "interop_js/hybridgref_ani.h"
+#include "interop_js/hybridgref_napi.h"
+#include "js_display.h"
+#include "refbase.h"
+#include "singleton_container.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -169,7 +174,7 @@ void DisplayAni::OnRegisterCallback(ani_env* env, ani_object obj, ani_string typ
     }
     DMError ret = DMError::DM_OK;
     std::lock_guard<std::mutex> lock(mtx_);
-    if (typeString == EVENT_AVAILABLE_AREA_CHANGED) {
+    if (typeString == ANI_EVENT_AVAILABLE_AREA_CHANGED) {
         auto displayId = display_->GetId();
         TLOGI(WmsLogTag::DMS, "[ANI] availableAreaChange begin");
         ret = SingletonContainer::Get<DisplayManager>().RegisterAvailableAreaListener(displayAniListener, displayId);
@@ -245,7 +250,7 @@ DMError DisplayAni::UnregisterAllDisplayListenerWithType(std::string type)
             continue;
         }
         it->second->RemoveAllCallback();
-        if (type == EVENT_AVAILABLE_AREA_CHANGED) {
+        if (type == ANI_EVENT_AVAILABLE_AREA_CHANGED) {
             auto displayId = display_->GetId();
             sptr<DisplayManager::IAvailableAreaListener> thisListener(it->second);
             ret = SingletonContainer::Get<DisplayManager>().UnregisterAvailableAreaListener(thisListener, displayId);
@@ -276,7 +281,7 @@ DMError DisplayAni::UnregisterDisplayListenerWithType(std::string type, ani_env*
                 continue;
             }
             it->second->RemoveCallback(env, type, callback);
-            if (type == EVENT_AVAILABLE_AREA_CHANGED) {
+            if (type == ANI_EVENT_AVAILABLE_AREA_CHANGED) {
                 TLOGI(WmsLogTag::DMS, "[ANI] start to unregis display event listener! event = %{public}s",
                     type.c_str());
                 auto displayId = display_->GetId();
@@ -309,22 +314,71 @@ void DisplayAni::CreateDisplayAni(sptr<Display> display, ani_object displayObj, 
     }
 }
 
-extern "C" {
-ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
+ani_boolean DisplayAni::TransferStatic(ani_env* env, ani_object obj, ani_object input, ani_object displayAniObj)
 {
-    using namespace OHOS::Rosen;
-    ani_status ret;
-    ani_env *env;
-    if ((ret = vm->GetEnv(ANI_VERSION_1, &env)) != ANI_OK) {
-        TLOGE(WmsLogTag::DMS, "[ANI] null env");
-        return ANI_NOT_FOUND;
+    TLOGI(WmsLogTag::DMS, "begin");
+    void* unwrapResult = nullptr;
+    auto ret = arkts_esvalue_unwrap(env, input, &unwrapResult);
+    if (!ret) {
+        TLOGE(WmsLogTag::DMS, "[ANI] fail to unwrap input, %{public}d", ret);
+        return false;
     }
-    ani_namespace nsp;
-    if ((ret = env->FindNamespace("@ohos.display.display", &nsp)) != ANI_OK) {
-        TLOGE(WmsLogTag::DMS, "[ANI] null env %{public}u", ret);
-        return ANI_NOT_FOUND;
+    if (unwrapResult == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] unwrapResult is nullptr");
+        return false;
     }
-    DisplayManagerAni::InitDisplayManagerAni(nsp, env);
+    JsDisplay* jsDisplay = static_cast<JsDisplay*>(unwrapResult);
+    if (jsDisplay == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] jsDisplay is nullptr");
+        return false;
+    }
+    
+    sptr<Display> display = jsDisplay->GetDisplay();
+    if (DisplayAniUtils::CvtDisplay(display, env, displayAniObj) != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] convert display failed");
+        return false;
+    }
+    DisplayAni::CreateDisplayAni(display, displayAniObj, env);
+    return true;
+}
+ 
+ani_object DisplayAni::TransferDynamic(ani_env* env, ani_object obj, ani_long nativeObj)
+{
+    TLOGI(WmsLogTag::DMS, "begin");
+    DisplayAni* aniDisplay = reinterpret_cast<DisplayAni*>(nativeObj);
+    if (aniDisplay == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] aniDisplay is nullptr");
+        return nullptr;
+    }
+    napi_env napiEnv = {};
+    if (!arkts_napi_scope_open(env, &napiEnv)) {
+        TLOGE(WmsLogTag::DMS, "arkts_napi_scope_open failed");
+        return nullptr;
+    }
+    
+    sptr<OHOS::Rosen::Display> display = aniDisplay->GetDisplay();
+    napi_value jsDisplay = CreateJsDisplayObject(napiEnv, display);
+    hybridgref ref = nullptr;
+    if (!hybridgref_create_from_napi(napiEnv, jsDisplay, &ref)) {
+        TLOGE(WmsLogTag::DMS, "hybridgref_create_from_napi failed");
+        return nullptr;
+    }
+    ani_object result = nullptr;
+    if (!hybridgref_get_esvalue(env, ref, &result)) {
+        hybridgref_delete_from_napi(napiEnv, ref);
+        TLOGE(WmsLogTag::DMS, "hybridgref_get_esvalue failed");
+        return nullptr;
+    }
+    hybridgref_delete_from_napi(napiEnv, ref);
+    if (!arkts_napi_scope_close_n(napiEnv, 0, nullptr, nullptr)) {
+        TLOGE(WmsLogTag::DMS, "arkts_napi_scope_close_n failed");
+        return nullptr;
+    }
+    return result;
+}
+
+ani_status DisplayAni::NspBindNativeFunctions(ani_env* env, ani_namespace nsp)
+{
     std::array funcs = {
         ani_native_function {"isFoldable", ":z", reinterpret_cast<void *>(DisplayManagerAni::IsFoldableAni)},
         ani_native_function {"getFoldDisplayModeNative", ":i",
@@ -348,16 +402,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(DisplayManagerAni::GetAllDisplayPhysicalResolution)},
         ani_native_function {"isCaptured", nullptr, reinterpret_cast<void *>(DisplayManagerAni::IsCaptured)},
     };
-    if ((ret = env->Namespace_BindNativeFunctions(nsp, funcs.data(), funcs.size()))) {
+    auto ret = env->Namespace_BindNativeFunctions(nsp, funcs.data(), funcs.size());
+    if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] bind namespace fail %{public}u", ret);
         return ANI_NOT_FOUND;
     }
+    return ANI_OK;
+}
 
-    ani_class displayCls = nullptr;
-    if ((ret = env->FindClass("@ohos.display.display.DisplayImpl", &displayCls)) != ANI_OK) {
-        TLOGE(WmsLogTag::DMS, "[ANI] null env %{public}u", ret);
-        return ANI_NOT_FOUND;
-    }
+ani_status DisplayAni::ClassBindNativeFunctions(ani_env* env, ani_class displayCls)
+{
     std::array methods = {
         ani_native_function {"getCutoutInfoInternal", "C{@ohos.display.display.CutoutInfo}:",
             reinterpret_cast<void *>(DisplayAni::GetCutoutInfo)},
@@ -369,10 +423,54 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(DisplayAni::RegisterCallback)},
         ani_native_function {"syncOff", nullptr,
             reinterpret_cast<void *>(DisplayAni::UnRegisterCallback)},
+        ani_native_function {"nativeTransferStatic", "C{std.interop.ESValue}C{std.core.Object}:z",
+            reinterpret_cast<void *>(DisplayAni::TransferStatic)},
+        ani_native_function {"nativeTransferDynamic", "l:C{std.interop.ESValue}",
+            reinterpret_cast<void *>(DisplayAni::TransferDynamic)},
     };
-    if ((ret = env->Class_BindNativeMethods(displayCls, methods.data(), methods.size())) != ANI_OK) {
+    auto ret = env->Class_BindNativeMethods(displayCls, methods.data(), methods.size());
+    if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] bind class fail %{public}u", ret);
         return ANI_NOT_FOUND;
+    }
+    return ANI_OK;
+}
+
+extern "C" {
+ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
+{
+    using namespace OHOS::Rosen;
+    ani_status ret;
+    ani_env* env;
+    if ((ret = vm->GetEnv(ANI_VERSION_1, &env)) != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] null env");
+        return ANI_NOT_FOUND;
+    }
+    ani_namespace nsp;
+    if ((ret = env->FindNamespace("@ohos.display.display", &nsp)) != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] null env %{public}u", ret);
+        return ANI_NOT_FOUND;
+    }
+    DisplayManagerAni::InitDisplayManagerAni(nsp, env);
+    ret = DisplayAni::NspBindNativeFunctions(env, nsp);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] bind namespace fail %{public}u", ret);
+        return ret;
+    }
+
+    ani_class displayCls = nullptr;
+    if ((ret = env->FindClass("@ohos.display.display.DisplayImpl", &displayCls)) != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] null env %{public}u", ret);
+        return ANI_NOT_FOUND;
+    }
+    ret = DisplayAni::ClassBindNativeFunctions(env, displayCls);
+    if (ANI_OK != ret) {
+        TLOGE(WmsLogTag::DMS, "[ANI] bind class fail %{public}u", ret);
+        return ret;
+    }
+    if (result != nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Result is nullptr");
+        return ANI_INVALID_ARGS;
     }
     *result = ANI_VERSION_1;
     return ANI_OK;

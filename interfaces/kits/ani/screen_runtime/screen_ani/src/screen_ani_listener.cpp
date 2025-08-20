@@ -84,7 +84,7 @@ void ScreenAniListener::OnConnect(ScreenId id)
         TLOGE(WmsLogTag::DMS, "[ANI] OnConnect not register!");
         return;
     }
-    auto it = aniCallback_.find(EVENT_CONNECT);
+    auto it = aniCallback_.find(ANI_EVENT_CONNECT);
     if (it == aniCallback_.end()) {
         TLOGE(WmsLogTag::DMS, "[ANI] OnConnect not this event, return");
         return;
@@ -131,7 +131,7 @@ void ScreenAniListener::OnDisconnect(ScreenId id)
         TLOGE(WmsLogTag::DMS, "[ANI] OnDisconnect not register!");
         return;
     }
-    auto it = aniCallback_.find(EVENT_DISCONNECT);
+    auto it = aniCallback_.find(ANI_EVENT_DISCONNECT);
     if (it == aniCallback_.end()) {
         TLOGE(WmsLogTag::DMS, "[ANI] OnDisconnect not this event, return");
         return;
@@ -179,7 +179,7 @@ void ScreenAniListener::OnChange(ScreenId id)
         TLOGE(WmsLogTag::DMS, "[ANI] OnChange not register!");
         return;
     }
-    auto it = aniCallback_.find(EVENT_CHANGE);
+    auto it = aniCallback_.find(ANI_EVENT_CHANGE);
     if (it == aniCallback_.end()) {
         TLOGE(WmsLogTag::DMS, "[ANI] OnChange not this event, return");
         return;
