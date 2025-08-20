@@ -1588,8 +1588,7 @@ WSError SceneSessionManagerLiteProxy::NotifyAppUseControlList(
     }
 
     for (const auto& control : controlList) {
-        if (!data.WriteString(control.bundleName_) || !data.WriteInt32(control.appIndex_) ||
-            !data.WriteBool(control.isNeedControl_) || !data.WriteBool(control.isControlRecentOnly_)) {
+        if (!data.WriteParcelable(&control)) {
             TLOGE(WmsLogTag::WMS_LIFE, "Write controlList failed");
             return WSError::WS_ERROR_INVALID_PARAM;
         }

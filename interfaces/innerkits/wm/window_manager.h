@@ -365,6 +365,7 @@ struct AppUseControlInfo : public Parcelable {
     {
         return parcel.WriteString(bundleName_) &&
                parcel.WriteInt32(appIndex_) &&
+               parcel.WriteInt32(persistentId_) &&
                parcel.WriteBool(isNeedControl_) &&
                parcel.WriteBool(isControlRecentOnly_);
     }
@@ -380,6 +381,7 @@ struct AppUseControlInfo : public Parcelable {
         auto info = new AppUseControlInfo();
         if (!parcel.ReadString(info->bundleName_) ||
             !parcel.ReadInt32(info->appIndex_) ||
+            !parcel.ReadInt32(info->persistentId_) ||
             !parcel.ReadBool(info->isNeedControl_) ||
             !parcel.ReadBool(info->isControlRecentOnly_)) {
             delete info;
@@ -390,6 +392,7 @@ struct AppUseControlInfo : public Parcelable {
 
     std::string bundleName_ = "";
     int32_t appIndex_ = 0;
+    int32_t persistentId_ = INVALID_WINDOW_ID; // greater than 0 means control by id
     bool isNeedControl_ = false;
     bool isControlRecentOnly_ = false;
 };

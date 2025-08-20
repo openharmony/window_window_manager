@@ -1225,7 +1225,7 @@ void SceneSession::UpdatePrivacyModeControlInfo()
 {
     bool isPrivacyMode = false;
     auto property = GetSessionProperty();
-    if ((property && property->GetPrivacyMode()) || HasSubSessionInPrivacyMode()) {
+    if ((property && property->GetPrivacyMode()) || HasChildSessionInPrivacyMode()) {
         isPrivacyMode = true;
     }
     if (!isPrivacyMode && appUseControlMap_.find(ControlAppType::PRIVACY_WINDOW) == appUseControlMap_.end()) {
@@ -1236,7 +1236,7 @@ void SceneSession::UpdatePrivacyModeControlInfo()
     NotifyUpdateAppUseControl(ControlAppType::PRIVACY_WINDOW, controlInfo);
 }
 
-bool SceneSession::HasSubSessionInPrivacyMode()
+bool SceneSession::HasChildSessionInPrivacyMode()
 {
     for (const auto& subSession : GetSubSession()) {
         if (subSession == nullptr) {
@@ -1247,7 +1247,21 @@ bool SceneSession::HasSubSessionInPrivacyMode()
         if (property && property->GetPrivacyMode()) {
             return true;
         }
-        if (subSession->HasSubSessionInPrivacyMode()) {
+        if (subSession->HasChildSessionInPrivacyMode()) {
+            return true;
+        }
+    }
+    for (const auto& dialogSession : GetDialogVector()) {
+        if (dialogSession == nullptr) {
+            TLOGW(WmsLogTag::WMS_LIFE, "dialogSession is nullptr");
+            continue;
+        }
+        auto property = dialogSession->GetSessionProperty();
+        if (property && property->GetPrivacyMode()) {
+            return true;
+        }
+        auto dialogSceneSession = GetSceneSessionById(dialogSession->GetPersistentId());
+        if (dialogSceneSession && dialogSceneSession->HasChildSessionInPrivacyMode()) {
             return true;
         }
     }
