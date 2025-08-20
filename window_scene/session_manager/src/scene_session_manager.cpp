@@ -6152,7 +6152,7 @@ void SceneSessionManager::PostBrightnessTask(const sptr<SceneSession>& sceneSess
                 DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().RestoreBrightness();
                 SetDisplayBrightness(UNDEFINED_BRIGHTNESS); // UNDEFINED_BRIGHTNESS means system default brightness
             };
-            taskScheduler_->AddExportTask("DisplayPowerMgr:RestoreBrightness", task);
+            taskScheduler_->AddExportTask("DisplayPowerMgr:RestoreBrightness", std::move(task));
         }
     } else {
         wptr<SceneSession> weakSceneSession(sceneSession);
@@ -6175,7 +6175,7 @@ void SceneSessionManager::PostBrightnessTask(const sptr<SceneSession>& sceneSess
             }
             SetDisplayBrightness(brightness);
         };
-        taskScheduler_->AddExportTask("DisplayPowerMgr:OverrideBrightness", task);
+        taskScheduler_->AddExportTask("DisplayPowerMgr:OverrideBrightness", std::move(task));
     }
 #endif
 }
@@ -6206,7 +6206,7 @@ WSError SceneSessionManager::UpdateBrightness(int32_t persistentId)
                 DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().RestoreBrightness();
                 SetDisplayBrightness(UNDEFINED_BRIGHTNESS); // UNDEFINED_BRIGHTNESS means system default brightness
             };
-            taskScheduler_->AddExportTask("DisplayPowerMgr:UpdateBrightness_RestoreBrightness", task);
+            taskScheduler_->AddExportTask("DisplayPowerMgr:UpdateBrightness_RestoreBrightness", std::move(task));
             brightnessSessionId_ = INVALID_WINDOW_ID;
         }
     } else {
@@ -6217,7 +6217,7 @@ WSError SceneSessionManager::UpdateBrightness(int32_t persistentId)
                     static_cast<uint32_t>(brightness * MAX_BRIGHTNESS));
                 SetDisplayBrightness(brightness);
             };
-            taskScheduler_->AddExportTask("DisplayPowerMgr:UpdateBrightness_OverrideBrightness", task);
+            taskScheduler_->AddExportTask("DisplayPowerMgr:UpdateBrightness_OverrideBrightness", std::move(task));
         }
         brightnessSessionId_ = sceneSession->GetPersistentId();
     }
