@@ -3302,6 +3302,15 @@ void SceneSessionManager::ConfigSupportSnapshotAllSessionStatus()
     taskScheduler_->PostAsyncTask(task, "ConfigSupportSnapshotAllSessionStatus");
 }
 
+void SceneSessionManager::ConfigSupportPreloadStartingWindow()
+{
+    TLOGI(WmsLogTag::WMS_PATTERN, "support");
+    auto task = [this] {
+        systemConfig_.supportPreloadStartingWindow_ = true;
+    };
+    taskScheduler_->PostAsyncTask(task, "ConfigSupportPreloadStartingWindow");
+}
+
 WMError SceneSessionManager::CreateUIEffectController(const sptr<IUIEffectControllerClient>& controllerClient,
         sptr<IUIEffectController>& controller, int32_t& controllerId)
 {
@@ -5544,8 +5553,8 @@ void SceneSessionManager::RemovePreLoadStartingWindowFromMap(const SessionInfo& 
 
 void SceneSessionManager::PreLoadStartingWindow(sptr<SceneSession> sceneSession)
 {
-    if (!systemConfig_.IsPhoneWindow()) {
-        TLOGD(WmsLogTag::WMS_PATTERN, "only for phone");
+    if (!systemConfig_.supportPreloadStartingWindow_) {
+        TLOGD(WmsLogTag::WMS_PATTERN, "not supported");
         return;
     }
     const char* const where = __func__;
@@ -5611,8 +5620,11 @@ bool SceneSessionManager::CheckAndGetPreLoadResourceId(const StartingWindowInfo&
         TLOGE(WmsLogTag::WMS_PATTERN, "format error: %{private}s", iconPath.c_str());
         return false;
     }
+    static const std::unordered_set<std::string> supportImageFormat = {
+        ".png", ".jpg", ".webp", ".astc"
+    };
     const auto& extName = iconPath.substr(pos);
-    if (extName != ".png" && extName != ".jpg" && extName != ".webp" && extName != ".astc") {
+    if (!supportImageFormat.count(extName)) {
         TLOGI(WmsLogTag::WMS_PATTERN, "format not need preLoad: %{private}s", iconPath.c_str());
         return false;
     }
