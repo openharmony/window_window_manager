@@ -966,7 +966,7 @@ protected:
     bool isFollowParentLayout_ = false;
     NotifyWindowAnchorInfoChangeFunc onWindowAnchorInfoChangeFunc_ = nullptr;
     WindowAnchorInfo windowAnchorInfo_;
-    FindScenePanelRsNodeByZOrderFunc FindScenePanelRsNodeByZOrderFunc_;
+    FindScenePanelRsNodeByZOrderFunc findScenePanelRsNodeByZOrderFunc_;
     int32_t cloneNodeCount_ = 0;
 
     virtual void NotifySubSessionRectChangeByAnchor(const WSRect& parentRect,

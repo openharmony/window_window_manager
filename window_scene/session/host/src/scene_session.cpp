@@ -4232,11 +4232,11 @@ WSError SceneSession::KeyFrameAnimateEnd()
 std::shared_ptr<Rosen::RSNode> SceneSession::GetWindowDragMoveMountedNode(DisplayId displayId,
     uint32_t targetZOrder)
 {
-    if (!FindScenePanelRsNodeByZOrderFunc_) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "FindScenePanelRsNodeByZOrderFunc_ is null");
+    if (!findScenePanelRsNodeByZOrderFunc_) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "findScenePanelRsNodeByZOrderFunc_ is null");
         return nullptr;
     }
-    return FindScenePanelRsNodeByZOrderFunc_(displayId, targetZOrder);
+    return findScenePanelRsNodeByZOrderFunc_(displayId, targetZOrder);
 }
 
 /** @note @window.drag */
@@ -9263,6 +9263,6 @@ WSError SceneSession::SetFrameRectForPartialZoomInInner(const Rect& frameRect)
 
 void SceneSession::SetFindScenePanelRsNodeByZOrderFunc(FindScenePanelRsNodeByZOrderFunc&& func)
 {
-    FindScenePanelRsNodeByZOrderFunc_ = std::move(func);
+    findScenePanelRsNodeByZOrderFunc_ = std::move(func);
 }
 } // namespace OHOS::Rosen

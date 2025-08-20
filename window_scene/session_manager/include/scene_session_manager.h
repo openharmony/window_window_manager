@@ -1210,9 +1210,9 @@ private:
     ProcessCloseTargetFloatWindowFunc closeTargetFloatWindowFunc_;
     SetForegroundWindowNumFunc setForegroundWindowNumFunc_;
     MinimizeByWindowIdFunc minimizeByWindowIdFunc_;
-    FindScenePanelRsNodeByZOrderFunc FindScenePanelRsNodeByZOrderFunc_;
+    FindScenePanelRsNodeByZOrderFunc findScenePanelRsNodeByZOrderFunc_;
     AppWindowSceneConfig appWindowSceneConfig_;
-    
+
     /*
      * Window Recover
      */

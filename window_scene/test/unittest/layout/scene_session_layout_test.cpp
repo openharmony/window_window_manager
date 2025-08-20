@@ -1163,7 +1163,6 @@ HWTEST_F(SceneSessionLayoutTest, GetWindowDragMoveMountedNode01, TestSize.Level1
     });
     rsNode = session->GetWindowDragMoveMountedNode(0, 0);
     EXPECT_NE(rsNode, nullptr);
-
 }
 
 } // namespace
