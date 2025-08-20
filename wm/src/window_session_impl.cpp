@@ -2336,15 +2336,17 @@ void WindowSessionImpl::UpdateDecorEnableToAce(bool isDecorEnable)
         bool decorVisible = mode == WindowMode::WINDOW_MODE_FLOATING ||
             mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY ||
             (mode == WindowMode::WINDOW_MODE_FULLSCREEN && !property_->IsLayoutFullScreen());
-        TLOGD(WmsLogTag::WMS_DECOR, "decorVisible:%{public}d", decorVisible);
+        
         if (windowSystemConfig_.freeMultiWindowSupport_) {
             auto isSubWindow = WindowHelper::IsSubWindow(GetType());
             decorVisible = decorVisible && (windowSystemConfig_.freeMultiWindowEnable_ ||
-                (property_->GetIsPcAppInPad() && isSubWindow));
+                (property_->GetIsPcAppInPad() && isSubWindow)) &&
+                !(mode == WindowMode::WINDOW_MODE_FULLSCREEN && property_->GetCompatibleModeProperty());
         }
         if (GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN && property_->IsDecorFullscreenDisabled()) {
             decorVisible = false;
         }
+        TLOGD(WmsLogTag::WMS_DECOR, "decorVisible:%{public}d", decorVisible);
         uiContent->UpdateDecorVisible(decorVisible, isDecorEnable);
         return;
     }
@@ -2371,7 +2373,8 @@ void WindowSessionImpl::UpdateDecorEnable(bool needNotify, WindowMode mode)
             if (windowSystemConfig_.freeMultiWindowSupport_) {
                 auto isSubWindow = WindowHelper::IsSubWindow(GetType());
                 decorVisible = decorVisible && (windowSystemConfig_.freeMultiWindowEnable_ ||
-                    (property_->GetIsPcAppInPad() && isSubWindow));
+                    (property_->GetIsPcAppInPad() && isSubWindow)) &&
+                    !(mode == WindowMode::WINDOW_MODE_FULLSCREEN && property_->GetCompatibleModeProperty());
             }
             TLOGI(WmsLogTag::WMS_DECOR, "decorVisible:%{public}d, id: %{public}d", decorVisible, GetPersistentId());
             uiContent->UpdateDecorVisible(decorVisible, IsDecorEnable());
