@@ -839,6 +839,7 @@ WMError WindowExtensionSessionImpl::SetUIContentInner(const std::string& content
     }
     SetUIContentComplete();
     NotifyModalUIExtensionMayBeCovered(true);
+    SetLayoutFullScreen(immersiveModeEnabled_);
 
     UpdateAccessibilityTreeInfo();
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
@@ -1556,6 +1557,7 @@ WMError WindowExtensionSessionImpl::SetLayoutFullScreen(bool status)
     property_->SetIsLayoutFullScreen(status);
     isIgnoreSafeArea_ = status;
     isIgnoreSafeAreaNeedNotify_ = true;
+    immersiveModeEnabled_ = status;
     if (auto uiContent = GetUIContentSharedPtr()) {
         uiContent->SetIgnoreViewSafeArea(status);
     }
