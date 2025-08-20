@@ -3345,6 +3345,7 @@ WSError Session::SetCompatibleModeProperty(const sptr<CompatibleModeProperty> co
         TLOGE(WmsLogTag::WMS_COMPAT, "id: %{public}d property is nullptr", persistentId_);
         return WSError::WS_ERROR_NULLPTR;
     }
+    
     property->SetCompatibleModeProperty(compatibleModeProperty);
     if (!sessionStage_) {
         TLOGE(WmsLogTag::WMS_COMPAT, "sessionStage is null");
