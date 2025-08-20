@@ -171,6 +171,11 @@ int32_t Session::GetPersistentId() const
     return persistentId_;
 }
 
+int32_t Session::GetCurrentRotation() const
+{
+    return currentRotation_;
+}
+
 void Session::SetSurfaceNode(const std::shared_ptr<RSSurfaceNode>& surfaceNode)
 {
     RSAdapterUtil::SetRSUIContext(surfaceNode, GetRSUIContext(), true);
