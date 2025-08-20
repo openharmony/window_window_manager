@@ -3345,8 +3345,10 @@ WSError Session::SetCompatibleModeProperty(const sptr<CompatibleModeProperty> co
         TLOGE(WmsLogTag::WMS_COMPAT, "id: %{public}d property is nullptr", persistentId_);
         return WSError::WS_ERROR_NULLPTR;
     }
-    
     property->SetCompatibleModeProperty(compatibleModeProperty);
+    if (compatibleModeProperty && compatibleModeProperty->IsDragResizeDisabled()) {
+        property->SetDragEnabled(false);
+    }
     if (!sessionStage_) {
         TLOGE(WmsLogTag::WMS_COMPAT, "sessionStage is null");
         return WSError::WS_ERROR_NULLPTR;
