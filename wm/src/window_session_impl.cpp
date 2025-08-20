@@ -350,7 +350,7 @@ bool WindowSessionImpl::IsPcOrPadFreeMultiWindowMode() const
     return windowSystemConfig_.IsPcWindow() || IsFreeMultiWindowMode();
 }
 
-bool WindowSessionImpl::IsPadAndNotFreeMutiWindowCompatibleMode() const
+bool WindowSessionImpl::IsPadAndNotFreeMultiWindowCompatibleMode() const
 {
     return property_->GetPcAppInpadCompatibleMode() &&
         !IsFreeMultiWindowMode();
@@ -369,8 +369,7 @@ bool WindowSessionImpl::GetCompatibleModeInPc() const
 
 bool WindowSessionImpl::IsAdaptToCompatibleImmersive() const
 {
-    auto property = GetPropertyByContext();
-    return property->IsAdaptToImmersive();
+    return property_->IsAdaptToImmersive();
 }
 
 bool WindowSessionImpl::IsAdaptToSimulationScale() const
@@ -954,7 +953,6 @@ void WindowSessionImpl::RemoveSubWindow(int32_t parentPersistentId)
     std::lock_guard<std::recursive_mutex> lock(subWindowSessionMutex_);
     auto subIter = subWindowSessionMap_.find(parentPersistentId);
     if (subIter == subWindowSessionMap_.end()) {
-        TLOGW(WmsLogTag::WMS_SUB, "find parentPersistentId: %{public}d failed", parentPersistentId);
         return;
     }
     auto& subWindows = subIter->second;
@@ -2723,7 +2721,7 @@ WMError WindowSessionImpl::SetWindowDelayRaiseEnabled(bool isEnabled)
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (IsPadAndNotFreeMutiWindowCompatibleMode()) {
+    if (IsPadAndNotFreeMultiWindowCompatibleMode()) {
         TLOGE(WmsLogTag::WMS_FOCUS, "The is PcAppInPad, not supported");
         return WMError::WM_OK;
     }
@@ -2926,16 +2924,14 @@ void WindowSessionImpl::SetRequestedOrientation(Orientation orientation, bool ne
     if (!isNeededForciblySetOrientation(orientation)) {
         return;
     }
+    if (property_->IsSupportRotateFullScreen()) {
+        TLOGI(WmsLogTag::WMS_COMPAT, "compatible request horizontal orientation %{public}u", orientation);
+        property_->SetIsLayoutFullScreen(IsHorizontalOrientation(orientation));
+    }
     if (needAnimation) {
         NotifyPreferredOrientationChange(orientation);
         SetUserRequestedOrientation(orientation);
     }
-    // when compatible mode disable fullscreen and request orientation, will enter into immersive mode
-    if (property_->IsFullScreenDisabled() && IsHorizontalOrientation(orientation)) {
-        TLOGI(WmsLogTag::WMS_COMPAT, "compatible request horizontal orientation %{public}u", orientation);
-        property_->SetIsLayoutFullScreen(true);
-    }
-    // the orientation of the invalid type is only applied to pageRotation.
     if (orientation == Orientation::INVALID) {
         Orientation requestedOrientation = ConvertInvalidOrientation();
         property_->SetRequestedOrientation(requestedOrientation, needAnimation);
@@ -3421,7 +3417,7 @@ WMError WindowSessionImpl::SetWindowTitleMoveEnabled(bool enable)
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (IsPadAndNotFreeMutiWindowCompatibleMode()) {
+    if (IsPadAndNotFreeMultiWindowCompatibleMode()) {
         TLOGE(WmsLogTag::WMS_DECOR, "The is PcAppInPad, not supported");
         return WMError::WM_OK;
     }
@@ -3452,7 +3448,7 @@ WMError WindowSessionImpl::SetSubWindowModal(bool isModal, ModalityType modality
         TLOGE(WmsLogTag::WMS_SUB, "called by invalid window type, type:%{public}d", GetType());
         return WMError::WM_ERROR_INVALID_CALLING;
     }
-    if (modalityType == ModalityType::APPLICATION_MODALITY && IsPadAndNotFreeMutiWindowCompatibleMode()) {
+    if (modalityType == ModalityType::APPLICATION_MODALITY && IsPadAndNotFreeMultiWindowCompatibleMode()) {
         TLOGE(WmsLogTag::WMS_SUB, "This is PcAppInPad, not support");
         return WMError::WM_OK;
     }

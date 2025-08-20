@@ -614,8 +614,8 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
     const auto& initRect = GetRequestRect();
     if (GetHostSession()) { // main window
         SetDefaultDisplayIdIfNeed();
-        ret = Connect();
         SetTargetAPIVersion(SysCapUtil::GetApiCompatibleVersion());
+        ret = Connect();
         TLOGD(WmsLogTag::WMS_PC, "targeAPItVersion: %{public}d", GetTargetAPIVersion());
     } else { // system or sub window
         TLOGI(WmsLogTag::WMS_LIFE, "Create system or sub window with type=%{public}d", GetType());
@@ -674,7 +674,7 @@ WMError WindowSceneSessionImpl::SetPcAppInpadSpecificSystemBarInvisible()
 {
     TLOGI(WmsLogTag::WMS_COMPAT, "isPcAppInpadSpecificSystemBarInvisible: %{public}d",
         property_->GetPcAppInpadSpecificSystemBarInvisible());
-    if (WindowHelper::IsMainWindow(GetType()) && IsPadAndNotFreeMutiWindowCompatibleMode() &&
+    if (WindowHelper::IsMainWindow(GetType()) && IsPadAndNotFreeMultiWindowCompatibleMode() &&
         property_->GetPcAppInpadSpecificSystemBarInvisible()) {
         SystemBarProperty statusProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
         UpdateSpecificSystemBarEnabled(false, false, statusProperty);
@@ -693,7 +693,7 @@ WMError WindowSceneSessionImpl::SetPcAppInpadOrientationLandscape()
 {
     TLOGI(WmsLogTag::WMS_COMPAT, "isPcAppInpadOrientationLandscape: %{public}d",
         property_->GetPcAppInpadOrientationLandscape());
-    if (WindowHelper::IsMainWindow(GetType()) && IsPadAndNotFreeMutiWindowCompatibleMode() &&
+    if (WindowHelper::IsMainWindow(GetType()) && IsPadAndNotFreeMultiWindowCompatibleMode() &&
         property_->GetPcAppInpadOrientationLandscape()) {
         SetRequestedOrientation(Orientation::HORIZONTAL, false);
         return WMError::WM_OK;
@@ -797,7 +797,7 @@ WMError WindowSceneSessionImpl::SetParentWindow(int32_t newParentWindowId)
     }
     auto oldParentWindow = GetWindowWithId(oldParentWindowId);
     if (oldParentWindow == nullptr) {
-        TLOGE(WmsLogTag::WMS_SUB, "winId: %{public}d find not old parent window By Id: %{public}d",
+        TLOGE(WmsLogTag::WMS_SUB, "winId: %{public}d can not find old parent window By Id: %{public}d",
             subWindowId, oldParentWindowId);
         return WMError::WM_ERROR_INVALID_PARENT;
     }
@@ -808,7 +808,7 @@ WMError WindowSceneSessionImpl::SetParentWindow(int32_t newParentWindowId)
     }
     auto newParentWindow = GetWindowWithId(newParentWindowId);
     if (newParentWindow == nullptr) {
-        TLOGE(WmsLogTag::WMS_SUB, "winId: %{public}d find not new parent window By Id: %{public}d",
+        TLOGE(WmsLogTag::WMS_SUB, "winId: %{public}d can not find new parent window By Id: %{public}d",
             subWindowId, newParentWindowId);
         return WMError::WM_ERROR_INVALID_PARENT;
     }
@@ -1228,31 +1228,6 @@ static void GetWindowSizeLimits(std::shared_ptr<AppExecFwk::AbilityInfo> ability
         windowSizeLimits.minWindowHeight : abilityInfo->minWindowHeight;
 }
 
-void WindowSceneSessionImpl::HandleWindowLimitsInCompatibleMode(WindowSizeLimits& windowSizeLimits)
-{
-    if (!property_->IsWindowLimitDisabled()) {
-        return;
-    }
-    windowSizeLimits.maxWindowWidth = windowSystemConfig_.maxFloatingWindowSize_;
-    windowSizeLimits.maxWindowHeight = windowSystemConfig_.maxFloatingWindowSize_;
-    if (WindowHelper::IsMainWindow(GetType())) {
-        windowSizeLimits.minWindowWidth = windowSystemConfig_.miniWidthOfMainWindow_;
-        windowSizeLimits.minWindowHeight = windowSystemConfig_.miniHeightOfMainWindow_;
-    } else if (WindowHelper::IsSubWindow(GetType())) {
-        windowSizeLimits.minWindowWidth = windowSystemConfig_.miniWidthOfSubWindow_;
-        windowSizeLimits.minWindowHeight = windowSystemConfig_.miniHeightOfSubWindow_;
-    } else if (WindowHelper::IsDialogWindow(GetType())) {
-        windowSizeLimits.minWindowWidth = windowSystemConfig_.miniWidthOfDialogWindow_;
-        windowSizeLimits.minWindowHeight = windowSystemConfig_.miniHeightOfDialogWindow_;
-    } else {
-        windowSizeLimits.minWindowWidth = MIN_FLOATING_WIDTH;
-        windowSizeLimits.minWindowHeight = MIN_FLOATING_HEIGHT;
-    }
-    TLOGI(WmsLogTag::WMS_COMPAT, "maxWidth: %{public}u, minWidth: %{public}u, maxHeight: %{public}u, "
-        "minHeight: %{public}u", windowSizeLimits.maxWindowWidth, windowSizeLimits.minWindowWidth,
-        windowSizeLimits.maxWindowHeight, windowSizeLimits.minWindowHeight);
-}
-
 std::vector<AppExecFwk::SupportWindowMode> WindowSceneSessionImpl::ExtractSupportWindowModeFromMetaData(
     const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo)
 {
@@ -1300,9 +1275,6 @@ void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
     if (abilityInfo != nullptr) {
         WindowSizeLimits windowSizeLimits = property_->GetWindowSizeLimits();
         GetWindowSizeLimits(abilityInfo, windowSizeLimits);
-        if (property_->IsWindowLimitDisabled()) {
-            HandleWindowLimitsInCompatibleMode(windowSizeLimits);
-        }
         property_->SetConfigWindowLimitsVP({
             windowSizeLimits.maxWindowWidth, windowSizeLimits.maxWindowHeight,
             windowSizeLimits.minWindowWidth, windowSizeLimits.minWindowHeight,
@@ -2052,10 +2024,10 @@ WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearLis
     }
 
     DestroySubWindow();
-	{
+    {
         std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
         windowSessionMap_.erase(property_->GetWindowName());
-	}
+    }
     {
         std::lock_guard<std::mutex> lock(hostSessionMutex_);
         hostSession_ = nullptr;
@@ -2970,7 +2942,7 @@ WMError WindowSceneSessionImpl::SetTitleAndDockHoverShown(
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "window is not main window");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
-    if (IsPadAndNotFreeMutiWindowCompatibleMode()) {
+    if (IsPadAndNotFreeMultiWindowCompatibleMode()) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "This is PcAppInPad, not supported");
         return WMError::WM_OK;
     }
@@ -3558,7 +3530,7 @@ WMError WindowSceneSessionImpl::Recover(uint32_t reason)
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (IsPadAndNotFreeMutiWindowCompatibleMode()) {
+    if (IsPadAndNotFreeMultiWindowCompatibleMode()) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "The device is not supported");
         return WMError::WM_OK;
     }
@@ -3609,7 +3581,7 @@ WMError WindowSceneSessionImpl::SetWindowRectAutoSave(bool enabled, bool isSaveB
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
-    if (IsPadAndNotFreeMutiWindowCompatibleMode()) {
+    if (IsPadAndNotFreeMultiWindowCompatibleMode()) {
         TLOGE(WmsLogTag::WMS_MAIN, "This is PcAppInPad, not supported");
         return WMError::WM_OK;
     }
@@ -3682,7 +3654,7 @@ WMError WindowSceneSessionImpl::SetSupportedWindowModes(
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
-    if (IsPadAndNotFreeMutiWindowCompatibleMode()) {
+    if (IsPadAndNotFreeMultiWindowCompatibleMode()) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "This is PcAppInpad, not supported");
         return WMError::WM_OK;
     }
@@ -5671,7 +5643,8 @@ WMError WindowSceneSessionImpl::GetWindowLimits(WindowLimits& windowLimits)
 void WindowSceneSessionImpl::UpdateNewSize()
 {
     if (GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING || property_->IsWindowLimitDisabled()) {
-        TLOGI(WmsLogTag::WMS_LAYOUT, "Fullscreen couldnot update new size, Id: %{public}u", GetWindowId());
+        TLOGI(WmsLogTag::WMS_LAYOUT, "fullscreen of compatible mode could not update new size, Id: %{public}u",
+            GetPersistentId());
         return;
     }
     bool needResize = false;
@@ -5953,7 +5926,7 @@ WMError WindowSceneSessionImpl::SetFollowParentMultiScreenPolicy(bool enabled)
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (IsPadAndNotFreeMutiWindowCompatibleMode()) {
+    if (IsPadAndNotFreeMultiWindowCompatibleMode()) {
         TLOGE(WmsLogTag::WMS_SUB, "This is PcAppInpad, not Suppored");
         return WMError::WM_OK;
     }
