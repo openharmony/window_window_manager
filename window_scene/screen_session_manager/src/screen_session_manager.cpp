@@ -8595,7 +8595,7 @@ void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& cl
     SetClientInner();
     SwitchScbNodeHandle(userId, newScbPid, true);
     }
-    AddScbClientDeathRecipient(client, newScbPid);
+    AddScbClientDeathRecipient(client, IPCSkeleton::GetCallingPid());
 
     static bool isNeedSwitchScreen = FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() ||
         FoldScreenStateInternel::IsSingleDisplayFoldDevice();
