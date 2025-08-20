@@ -262,6 +262,20 @@ HWTEST_F(SceneSessionLifecycleTest, ForegroundTask01, TestSize.Level0)
     EXPECT_EQ(true, session->isUIFirstEnabled_);
     session->SetSessionState(SessionState::STATE_CONNECT);
     EXPECT_EQ(WSError::WS_OK, session->ForegroundTask(property));
+
+    session->isUIFirstEnabled_ = true;
+    EXPECT_EQ(true, session->isUIFirstEnabled_);
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    EXPECT_NE(nullptr, surfaceNode);
+    session->SetLeashWinSurfaceNode(surfaceNode);
+    session->SetSessionState(SessionState::STATE_CONNECT);
+    EXPECT_EQ(WSError::WS_OK, session->ForegroundTask(property));
+
+    session->isUIFirstEnabled_ = false;
+    EXPECT_EQ(false, session->isUIFirstEnabled_);
+    session->SetSessionState(SessionState::STATE_CONNECT);
+    EXPECT_EQ(WSError::WS_OK, session->ForegroundTask(property));
 }
 
 /**

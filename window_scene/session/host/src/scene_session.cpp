@@ -444,9 +444,11 @@ WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property
             TLOGNI(WmsLogTag::WMS_LIFE,
                 "%{public}s foreground specific callback does not take effect, callback function null", where);
         }
-        if (session->isUIFirstEnabled_) {
-            session->SetSystemSceneForceUIFirst(false);
+        if (session->isUIFirstEnabled_ && leashWinSurfaceNode) {
+            leashWinSurfaceNode->SetForceUIFirst(false);
             session->isUIFirstEnabled_ = false;
+            TLOGNI(WmsLogTag::WMS_ANIMATION, "%{public}s %{public}" PRIu64 " forceUIFirst=false.",
+                leashWinSurfaceNode->GetName().c_str(), leashWinSurfaceNode->GetId());
         }
         return WSError::WS_OK;
     }, __func__);
