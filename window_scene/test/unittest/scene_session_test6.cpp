@@ -594,6 +594,46 @@ HWTEST_F(SceneSessionTest6, IsInCompatScaleMode, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsInCompatScaleMode_forSubWindow
+ * @tc.desc: IsInCompatScaleMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, IsInCompatScaleMode_forSubWindow, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsInCompatScaleMode_forSubWindow";
+    info.bundleName_ = "IsInCompatScaleMode_forSubWindow";
+    info.screenId_ = 0;
+    sptr<SceneSession> subSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> mainSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_FALSE(subSession->IsInCompatScaleMode());
+    subSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    EXPECT_FALSE(subSession->IsInCompatScaleMode());
+
+    sptr<SceneSession::SpecificSessionCallback> callBack = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    subSession->specificCallback_ = callBack;
+    auto task = [&mainSession](int32_t persistentId) { return mainSession; };
+    callBack->onGetSceneSessionByIdCallback_ = task;
+    subSession->SetCallingPid(1);
+    mainSession->SetCallingPid(2);
+    EXPECT_FALSE(subSession->IsInCompatScaleMode());
+
+    mainSession->SetCallingPid(1);
+    EXPECT_FALSE(subSession->IsInCompatScaleMode());
+
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToProportionalScale(true);
+    mainSession->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    EXPECT_TRUE(subSession->IsInCompatScaleMode());
+
+    compatibleModeProperty->SetIsAdaptToProportionalScale(false);
+    compatibleModeProperty->SetIsAdaptToSimulationScale(true);
+    EXPECT_TRUE(subSession->IsInCompatScaleMode());
+    compatibleModeProperty->SetIsAdaptToProportionalScale(true);
+    EXPECT_TRUE(subSession->IsInCompatScaleMode());
+}
+
+/**
  * @tc.name: GetSystemAvoidArea
  * @tc.desc: GetSystemAvoidArea function
  * @tc.type: FUNC

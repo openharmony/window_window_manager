@@ -3677,8 +3677,14 @@ bool SceneSession::IsInCompatScaleStatus() const
     return false;
 }
 
-bool SceneSession::IsInCompatScaleMode() const
+bool SceneSession::IsInCompatScaleMode()
 {
+    if (WindowHelper::IsSubWindow(GetWindowType())) {
+        auto mainSession = GetSceneSessionById(GetMainSessionId());
+        if (mainSession && GetCallingPid() == mainSession->GetCallingPid()) {
+            return mainSession->IsInCompatScaleMode();
+        }
+    }
     auto property = GetSessionProperty();
     return property->IsAdaptToProportionalScale() || property->IsAdaptToSimulationScale();
 }
