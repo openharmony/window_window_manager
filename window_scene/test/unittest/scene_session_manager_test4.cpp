@@ -1545,14 +1545,60 @@ HWTEST_F(SceneSessionManagerTest4, PostBrightnessTask01, TestSize.Level1)
     ssm_->SetDisplayBrightness(999);
 
     sptr<SceneSession> sceneSession = nullptr;
+    ssm_->PostBrightnessTask(sceneSession, -1.0f);
+    EXPECT_EQ(ssm_->GetDisplayBrightness(), 999.0f);
     ssm_->PostBrightnessTask(sceneSession, 1.0f);
-    EXPECT_EQ(ssm_->GetDisplayBrightness(), 999);
+    EXPECT_EQ(ssm_->GetDisplayBrightness(), 999.0f);
 
     SessionInfo sessionInfo;
     sessionInfo.isSystem_ = false;
     sessionInfo.bundleName_ = "bundleName";
     sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    sceneSession->SetSessionState()
+    sceneSession->SetSessionState(SessionState::STATE_DISCONNECT)
+    ssm_->PostBrightnessTask(sceneSession, -1.0f);
+    EXPECT_EQ(ssm_->GetDisplayBrightness(), 999.0f);
+    ssm_->PostBrightnessTask(sceneSession, 1.0f);
+    EXPECT_EQ(ssm_->GetDisplayBrightness(), 999.0f);
+
+    sceneSession->SetSessionState(SessionState::STATE_FOREGROUND)
+    ssm_->PostBrightnessTask(sceneSession, -1.0f);
+    EXPECT_EQ(ssm_->GetDisplayBrightness(), -1.0f);
+    ssm_->PostBrightnessTask(sceneSession, 1.0f);
+    EXPECT_EQ(ssm_->GetDisplayBrightness(), 1.0f);
+}
+
+/**
+ * @tc.name: PostBrightnessTask02
+ * @tc.desc: PostBrightnessTask
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest4, PostBrightnessTask01, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ssm_->SetDisplayBrightness(999);
+
+    sptr<SceneSession> sceneSession = nullptr;
+    ssm_->PostBrightnessTask(sceneSession, -1.0f);
+    EXPECT_EQ(ssm_->GetDisplayBrightness(), 999.0f);
+    ssm_->PostBrightnessTask(sceneSession, 1.0f);
+    EXPECT_EQ(ssm_->GetDisplayBrightness(), 999.0f);
+
+    SessionInfo sessionInfo;
+    sessionInfo.isSystem_ = false;
+    sessionInfo.bundleName_ = "bundleName";
+    sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession->SetSessionState(SessionState::STATE_DISCONNECT)
+    ssm_->PostBrightnessTask(sceneSession, -1.0f);
+    EXPECT_EQ(ssm_->GetDisplayBrightness(), 999.0f);
+    ssm_->PostBrightnessTask(sceneSession, 1.0f);
+    EXPECT_EQ(ssm_->GetDisplayBrightness(), 999.0f);
+
+    sceneSession->SetSessionState(SessionState::STATE_FOREGROUND)
+    ssm_->PostBrightnessTask(sceneSession, -1.0f);
+    EXPECT_EQ(ssm_->GetDisplayBrightness(), 999.0f);
+    ssm_->PostBrightnessTask(sceneSession, 1.0f);
+    EXPECT_EQ(ssm_->GetDisplayBrightness(), 1.0f);
 }
 
 /**
