@@ -471,9 +471,9 @@ HWTEST_F(WindowPatternStartingWindowTest, PreLoadStartingWindow, TestSize.Level1
 {
     ASSERT_NE(ssm_, nullptr);
     sptr<SceneSession> sceneSession = nullptr;
-    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ssm_->systemConfig_.supportPreloadStartingWindow_ = false;
     ssm_->PreLoadStartingWindow(sceneSession);
-    ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ssm_->systemConfig_.supportPreloadStartingWindow_ = true;
     ssm_->PreLoadStartingWindow(sceneSession);
     SessionInfo info;
     info.bundleName_ = "bundleName_";
