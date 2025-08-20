@@ -12,9 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "screen_ani_listener.h"
-#include "window_manager_hilog.h"
+
 #include "screen_ani_utils.h"
+#include "window_manager_hilog.h"
  
 namespace OHOS {
 namespace Rosen {

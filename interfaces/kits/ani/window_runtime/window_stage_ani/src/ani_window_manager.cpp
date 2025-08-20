@@ -18,10 +18,10 @@
 #include <ability.h>
 
 #include "ani.h"
-#include "window_scene.h"
-#include "window_manager_hilog.h"
-#include "ani_window_utils.h"
 #include "ani_window.h"
+#include "ani_window_utils.h"
+#include "window_manager_hilog.h"
+#include "window_scene.h"
 
 namespace OHOS {
 namespace Rosen {

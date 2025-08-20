@@ -12,20 +12,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include "display_ani.h"
+
 #include <hitrace_meter.h>
 
 #include "ani.h"
-#include "display_ani.h"
-#include "display_info.h"
-#include "display.h"
-#include "singleton_container.h"
-#include "display_manager.h"
-#include "window_manager_hilog.h"
-#include "dm_common.h"
-#include "display_ani_utils.h"
-#include "refbase.h"
-#include "display_ani_manager.h"
 #include "ani_err_utils.h"
+#include "display.h"
+#include "display_ani_manager.h"
+#include "display_ani_utils.h"
+#include "display_info.h"
+#include "display_manager.h"
+#include "dm_common.h"
+#include "refbase.h"
+#include "singleton_container.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
