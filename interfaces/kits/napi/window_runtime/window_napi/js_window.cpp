@@ -1873,7 +1873,7 @@ napi_value JsWindow::OnMoveWindowToAsync(napi_env env, napi_callback_info info)
     if (argc < 2) { // 2: minimum param num
         TLOGE(WmsLogTag::WMS_LAYOUT, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
-            "[window][moveWindowToAsync]msg: Argc is invalid");
+            "[window][moveWindowToAsync]msg: Number of parameters is invalid");
     }
     int32_t x = 0;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], x)) {
@@ -1956,7 +1956,7 @@ napi_value JsWindow::OnMoveWindowToGlobal(napi_env env, napi_callback_info info)
     if (argc < 2) { // 2:minimum param num
         TLOGE(WmsLogTag::WMS_LAYOUT, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
-            "[window][moveWindowToGlobal]msg: Argc is invalid");
+            "[window][moveWindowToGlobal]msg: Number of parameters is invalid");
     }
     int32_t x = 0;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], x)) {
@@ -2002,7 +2002,7 @@ napi_value JsWindow::OnMoveWindowToGlobalDisplay(napi_env env, napi_callback_inf
     if (argc != TWO_PARAMS_SIZE) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid argc: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
-            "[window][moveWindowToGlobalDisplay]msg: Invalid");
+            "[window][moveWindowToGlobalDisplay]msg: Invalid argc");
     }
 
     int32_t x = 0;
@@ -6816,13 +6816,13 @@ napi_value JsWindow::OnResetAspectRatio(napi_env env, napi_callback_info info)
     if (argc > 1) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
-            "[window][resetAspectRatio]msg: Argc is invalid");
+            "[window][resetAspectRatio]msg: Number of parameters is invalid");
     }
 
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "WindowToken is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-            "[window][resetAspectRatio]msg: WindowToken is nullptr");
+            "[window][resetAspectRatio]msg: Window is nullptr");
     }
 
     if (!WindowHelper::IsMainWindow(windowToken_->GetType())) {
@@ -6839,7 +6839,7 @@ napi_value JsWindow::OnResetAspectRatio(napi_env env, napi_callback_info info)
         auto window = weakToken.promote();
         if (window == nullptr) {
             task->Reject(env, JsErrUtils::CreateJsError(env,
-                WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "[window][resetAspectRatio]msg: Failed."));
+                WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "[window][resetAspectRatio]msg: window is nullptr"));
             return;
         }
         WMError ret = window->ResetAspectRatio();
@@ -6913,7 +6913,7 @@ napi_value JsWindow::OnMaximize(napi_env env, napi_callback_info info)
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "WindowToken is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-            "[window][maximize]msg: WindowToken is nullptr");
+            "[window][maximize]msg: window is nullptr");
     }
     if (!(WindowHelper::IsMainWindow(windowToken_->GetType()) ||
           windowToken_->IsSubWindowMaximizeSupported())) {
