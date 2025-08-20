@@ -18,14 +18,14 @@
 #include <algorithm>
 
 #include "ani.h"
-#include "singleton_container.h"
-#include "window_manager_hilog.h"
+#include "ani_err_utils.h"
 #include "dm_common.h"
 #include "refbase.h"
 #include "screen_ani.h"
 #include "screen_ani_utils.h"
 #include "screen_ani_listener.h"
-#include "ani_err_utils.h"
+#include "singleton_container.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -108,7 +108,7 @@ DmErrorCode ScreenManagerAni::ProcessRegisterCallback(ani_env* env, std::string&
     sptr<ScreenAniListener> screenAniListener)
 {
     DmErrorCode ret = DmErrorCode::DM_ERROR_INVALID_PARAM;
-    if (typeStr == EVENT_CHANGE || typeStr == EVENT_CONNECT || typeStr == EVENT_DISCONNECT) {
+    if (typeStr == ANI_EVENT_CHANGE || typeStr == ANI_EVENT_CONNECT || typeStr == ANI_EVENT_DISCONNECT) {
         TLOGI(WmsLogTag::DMS, "ProcessRegisterCallback %{public}s", typeStr.c_str());
         ret = DM_JS_TO_ERROR_CODE_MAP.at(
             SingletonContainer::Get<ScreenManager>().RegisterScreenListener(screenAniListener));
@@ -134,13 +134,9 @@ void ScreenManagerAni::OnUnRegisterCallback(ani_env* env, ani_string type, ani_r
     }
 
     if (ret != DmErrorCode::DM_OK) {
-        DmErrorCode errCode = DmErrorCode::DM_ERROR_INVALID_PARAM;
-        if (ret == DmErrorCode::DM_ERROR_NOT_SYSTEM_APP) {
-            errCode = ret;
-        }
         std::string errMsg = "[ANI] failed to unregister screen listener with type";
         TLOGE(WmsLogTag::DMS, "[ANI] failed to unregister screen listener with type");
-        AniErrUtils::ThrowBusinessError(env, DMError::DM_ERROR_INVALID_PARAM, errMsg);
+        AniErrUtils::ThrowBusinessError(env, ret, errMsg);
     }
 }
 
@@ -179,7 +175,7 @@ DMError ScreenManagerAni::UnRegisterScreenListenerWithType(std::string type, ani
         env->Reference_StrictEquals(cbRef, it->first, &isEquals);
         if (isEquals) {
             it->second->RemoveCallback(env, type, callback);
-            if (type == EVENT_CHANGE) {
+            if (type == ANI_EVENT_CONNECT || type == ANI_EVENT_DISCONNECT || type == ANI_EVENT_CHANGE) {
                 TLOGI(WmsLogTag::DMS, "[ANI] start to unregis screen event listener! event = %{public}s",
                     type.c_str());
                 sptr<ScreenManager::IScreenListener> thisListener(it->second);
@@ -207,7 +203,7 @@ DMError ScreenManagerAni::UnRegisterAllScreenListenerWithType(std::string type)
     DMError ret = DMError::DM_OK;
     for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
         it->second->RemoveAllCallback();
-        if (type == EVENT_CHANGE) {
+        if (type == ANI_EVENT_CONNECT || type == ANI_EVENT_DISCONNECT || type == ANI_EVENT_CHANGE) {
             sptr<ScreenManager::IScreenListener> thisListener(it->second);
             ret = SingletonContainer::Get<ScreenManager>().UnregisterScreenListener(thisListener);
         }
@@ -221,7 +217,7 @@ ani_long ScreenManagerAni::MakeMirror(ani_env* env, ani_long mainScreen, ani_obj
     std::vector<ScreenId> screenIds;
     env->Object_GetPropertyByName_Int(mirrorScreen, "length", &length);
     TLOGI(WmsLogTag::DMS, "[ANI] length %{public}d", (ani_int)length);
-    for (uint32_t i = 0; i < length; i++) {
+    for (int32_t i = 0; i < length; i++) {
         ani_ref screenIdRef;
         auto ret = env->Object_CallMethodByName_Ref(mirrorScreen, "$_get", "i:C{std.core.Object}",
             &screenIdRef, (ani_int)i);
@@ -329,6 +325,10 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     std::array methods = {
         ani_native_function {"setDensityDpiInternal", "d:",
             reinterpret_cast<void *>(ScreenAni::SetDensityDpi)},
+        ani_native_function {"nativeTransferStatic", "C{std.interop.ESValue}C{std.core.Object}:z",
+            reinterpret_cast<void *>(ScreenAni::TransferStatic)},
+        ani_native_function {"nativeTransferDynamic", "l:C{std.interop.ESValue}",
+            reinterpret_cast<void *>(ScreenAni::TransferDynamic)},
     };
     if ((ret = env->Class_BindNativeMethods(screenCls, methods.data(), methods.size())) != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] bind screen class fail %{public}u", ret);
