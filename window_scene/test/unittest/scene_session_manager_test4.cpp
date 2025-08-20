@@ -1534,6 +1534,28 @@ HWTEST_F(SceneSessionManagerTest4, GetAllClearableSessions, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PostBrightnessTask01
+ * @tc.desc: PostBrightnessTask
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest4, PostBrightnessTask01, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ssm_->SetDisplayBrightness(999);
+
+    sptr<SceneSession> sceneSession = nullptr;
+    ssm_->PostBrightnessTask(sceneSession, 1.0f);
+    EXPECT_EQ(ssm_->GetDisplayBrightness(), 999);
+
+    SessionInfo sessionInfo;
+    sessionInfo.isSystem_ = false;
+    sessionInfo.bundleName_ = "bundleName";
+    sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession->SetSessionState()
+}
+
+/**
  * @tc.name: UpdateBrightness
  * @tc.desc: UpdateBrightness
  * @tc.type: FUNC
