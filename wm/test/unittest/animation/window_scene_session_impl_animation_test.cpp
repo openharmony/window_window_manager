@@ -220,7 +220,7 @@ HWTEST_F(WindowSceneSessionImplAnimationTest, SetWindowShadowRadius, TestSize.Le
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     ret = window->SetWindowShadowRadius(1.0f);
-    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
@@ -235,6 +235,10 @@ HWTEST_F(WindowSceneSessionImplAnimationTest, SetWindowShadowRadius, TestSize.Le
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    ret = window->SetWindowShadowRadius(1.0f);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     ret = window->SetWindowShadowRadius(1.0f);
     EXPECT_EQ(WMError::WM_OK, ret);
 
