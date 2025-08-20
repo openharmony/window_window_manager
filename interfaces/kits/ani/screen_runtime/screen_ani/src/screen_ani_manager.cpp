@@ -12,18 +12,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <hitrace_meter.h>
+
+#include "screen_ani_manager.h"
+
 #include <algorithm>
+#include <hitrace_meter.h>
 
 #include "ani.h"
-#include "singleton_container.h"
-#include "window_manager_hilog.h"
+#include "ani_err_utils.h"
 #include "dm_common.h"
 #include "refbase.h"
-#include "screen_ani_manager.h"
-#include "screen_ani_utils.h"
 #include "screen_ani_listener.h"
-#include "ani_err_utils.h"
+#include "screen_ani_utils.h"
+#include "singleton_container.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {

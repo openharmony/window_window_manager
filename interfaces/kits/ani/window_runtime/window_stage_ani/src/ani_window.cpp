@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-
 #include "ani_window.h"
 
 #include <cstdint>
@@ -23,9 +22,9 @@
 #include "ani_err_utils.h"
 #include "ani_window_utils.h"
 #include "window_helper.h"
-#include "window_scene.h"
 #include "window_manager.h"
 #include "window_manager_hilog.h"
+#include "window_scene.h"
 #include "wm_common.h"
 
 using OHOS::Rosen::WindowScene;

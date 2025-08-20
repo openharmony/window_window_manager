@@ -16,12 +16,12 @@
 #define SCREEN_MANAGER_ANI_H
 
 #include <mutex>
-#include "dm_common.h"
-#include "refbase.h"
-#include "screen_manager.h"
 
 #include "ani.h"
+#include "dm_common.h"
+#include "refbase.h"
 #include "screen_ani_listener.h"
+#include "screen_manager.h"
 
 namespace OHOS {
 namespace Rosen {
