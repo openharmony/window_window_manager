@@ -867,11 +867,18 @@ napi_value OnSetFoldDisplayMode(napi_env env, napi_callback_info info)
             return NapiGetUndefined(env);
         }
     }
-    DmErrorCode errCode = DM_JS_TO_ERROR_CODE_MAP.at(
-        SingletonContainer::Get<DisplayManager>().SetFoldDisplayModeFromJs(mode, reason));
-    TLOGI(WmsLogTag::DMS, "[NAPI]%{public}d", static_cast<int32_t>(errCode));
+    DMError dmError = SingletonContainer::Get<DisplayManager>().SetFoldDisplayModeFromJs(mode, reason);
+    std::string errMsg = "";
+    if (DM_ERROR_JS_TO_ERROR_MESSAGE_MAP.find(dmError) != DM_ERROR_JS_TO_ERROR_MESSAGE_MAP.end()) {
+        errMsg = DM_ERROR_JS_TO_ERROR_MESSAGE_MAP.at(dmError);
+    }
+    DmErrorCode errCode = DmErrorCode::DM_ERROR_SYSTEM_INNORMAL;
+    if (DM_JS_TO_ERROR_CODE_MAP.find(dmError) != DM_JS_TO_ERROR_CODE_MAP.end()) {
+        errCode = DM_JS_TO_ERROR_CODE_MAP.at(dmError);
+    }
+    TLOGI(WmsLogTag::DMS, "[NAPI]%{public}d, error message: %{public}s", static_cast<int32_t>(errCode), errMsg.c_str());
     if (errCode != DmErrorCode::DM_OK) {
-        napi_throw(env, JsErrUtils::CreateJsError(env, errCode));
+        napi_throw(env, JsErrUtils::CreateJsError(env, errCode, errMsg));
         return NapiGetUndefined(env);
     }
     return NapiGetUndefined(env);

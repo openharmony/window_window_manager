@@ -135,6 +135,28 @@ HWTEST_F(ScreenSessionManagerTest, RegisterDisplayManagerAgent, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CanEnterCoordinationRecording
+ * @tc.desc: CanEnterCoordinationRecording test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CanEnterCoordinationRecording, TestSize.Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->virtualScreenCount_ = 1;
+    ssm_->hdmiScreenCount_ = 0;
+
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOptionRecord";
+    virtualOption.virtualScreenType_ = VirtualScreenType::SCREEN_RECORDING;
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    auto ret = ssm_->CanEnterCoordination();
+    EXPECT_EQ(ret, DMError::DM_ERROR_NOT_SUPPORT_COOR_WHEN_RECORDING);
+    ssm_->DestroyVirtualScreen(screenId)
+}
+
+
+/**
  * @tc.name: WakeupBegin
  * @tc.desc: WakeupBegin test
  * @tc.type: FUNC
@@ -6003,6 +6025,65 @@ HWTEST_F(ScreenSessionManagerTest, IsScreenCasting, Function | SmallTest | Level
     ssm_->hdmiScreenCount_ = 0;
     ret = ssm_->IsScreenCasting();
     ASSERT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: CanEnterCoordination01
+ * @tc.desc: CanEnterCoordination01 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CanEnterCoordination01, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->virtualScreenCount_ = 0;
+    ssm_->hdmiScreenCount_ = 1;
+    auto ret = ssm_->CanEnterCoordination();
+    EXPECT_EQ(ret, DMError::DM_ERROR_NOT_SUPPORT_COOR_WHEN_WIRED_CASTING);
+
+    ssm_->virtualScreenCount_ = 0;
+    ssm_->hdmiScreenCount_ = 0;
+    auto ret = ssm_->CanEnterCoordination();
+    EXPECT_EQ(ret, DMError::DM_OK);
+}
+
+/**
+ * @tc.name: CanEnterCoordination02
+ * @tc.desc: CanEnterCoordination02 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CanEnterCoordination02, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->screenSessionMap_[50] = nullptr;
+    ssm_->virtualScreenCount_ = 1;
+    ssm_->hdmiScreenCount_ = 0;
+
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    virtualOption.virtualScreenType_ = VirtualScreenType::SCREEN_CASTING;
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    auto ret = ssm_->CanEnterCoordination();
+    EXPECT_EQ(ret, DMError::DM_ERROR_NOT_SUPPORT_COOR_WHEN_WIRLESS_CASTING);
+    ssm_->DestroyVirtualScreen(screenId)
+}
+
+/**
+ * @tc.name: CanEnterCoordination03
+ * @tc.desc: CanEnterCoordination03 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CanEnterCoordination03, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    auto oldMap = ssm_->screenSessionMap_;
+    std::map<ScreenId, sptr<ScreenSession>> newScreenSessionMap_{};
+    ssm_->screenSessionMap_ = newScreenSessionMap_;
+    ssm_->virtualScreenCount_ = 1;
+    ssm_->hdmiScreenCount_ = 0;
+    auto ret = ssm_->CanEnterCoordination();
+    EXPECT_EQ(ret, DMError::DM_OK);
+    ssm_->screenSessionMap_ = oldMap;
 }
 
 /**
