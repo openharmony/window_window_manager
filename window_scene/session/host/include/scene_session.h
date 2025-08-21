@@ -1301,6 +1301,7 @@ private:
     void OnKeyFrameNextVsync(uint64_t count);
     bool KeyFrameNotifyFilter(const WSRect& rect, SizeChangeReason reason);
     bool KeyFrameRectAlmostSame(const WSRect& rect1, const WSRect& rect2);
+    std::mutex keyFrameMutex_;
     KeyFramePolicy keyFramePolicy_;
     std::shared_ptr<RSCanvasNode> keyFrameCloneNode_ = nullptr;
     bool keyFrameAnimating_ = false;
