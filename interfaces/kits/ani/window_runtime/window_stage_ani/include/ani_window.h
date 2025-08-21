@@ -76,6 +76,7 @@ public:
     static void Rotate(ani_env* env, ani_object obj, ani_long nativeObj, ani_object rotateOptions);
     static void SetShadow(ani_env* env, ani_object obj, ani_long nativeObj, ani_double radius,
         ani_string color, ani_object offsetX, ani_object offsetY);
+    static void SetCornerRadius(ani_env* env, ani_object obj, ani_long nativeObj, ani_double cornerRadius);
     static void Finalizer(ani_env* env, ani_long nativeObj);
 
     void SetFollowParentWindowLayoutEnabled(ani_env* env, ani_boolean enabled);
@@ -149,6 +150,7 @@ private:
     void OnTranslate(ani_env* env, ani_object translateOptions);
     void OnRotate(ani_env* env, ani_object rotateOptions);
     void OnSetShadow(ani_env* env, ani_double radius, ani_string color, ani_object offsetX, ani_object offsetY);
+    void OnSetCornerRadius(ani_env* env, ani_double cornerRadius);
     static bool ParseScaleOption(ani_env* env, ani_object scaleOptions, Transform& trans);
     static bool ParseTranslateOption(ani_env* env, ani_object translateOptions, Transform& trans);
     static bool ParseRotateOption(ani_env* env, ani_object rotateOptions, Transform& trans);
