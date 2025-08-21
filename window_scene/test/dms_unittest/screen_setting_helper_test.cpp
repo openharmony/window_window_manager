@@ -883,6 +883,48 @@ namespace {
         EXPECT_TRUE(screenSettingHelper.ConvertStrToInt32(str, num1));
         EXPECT_EQ(123, num1);
     }
+
+    /**
+     * @tc.name: RegisterSettingDuringCallStateObserver
+     * @tc.desc: RegisterSettingDuringCallStateObserver
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, RegisterSettingDuringCallStateObserver, TestSize.Level1)
+    {
+        bool flag = false;
+        auto func = [&flag] (const std::string&) {
+            TLOGI(WmsLogTag::DMS, "UT test");
+            flag = true;
+        };
+        ScreenSettingHelper::RegisterSettingDuringCallStateObserver(func);
+        ASSERT_NE(ScreenSettingHelper::duringCallStateObserver_, nullptr);
+    }
+
+    /**
+     * @tc.name: UnregisterSettingDuringCallStateObserver
+     * @tc.desc: UnregisterSettingDuringCallStateObserver
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, UnregisterSettingDuringCallStateObserver, TestSize.Level1)
+    {
+        ScreenSettingHelper::UnregisterSettingDuringCallStateObserver();
+        ASSERT_EQ(ScreenSettingHelper::duringCallStateObserver_, nullptr);
+    }
+
+    /**
+     * @tc.name: GetSettingDuringCallStateTest
+     * @tc.desc: Test GetSettingDuringCallState func
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, GetSettingDuringCallStateTest, Function | SmallTest | Level3)
+    {
+        ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
+        bool value = true;
+
+        screenSettingHelper.SetSettingDuringCallState("during_call_state", false);
+        screenSettingHelper.GetSettingDuringCallState(value);
+        ASSERT_FALSE(value);
+    }
 }
 } // namespace Rosen
 } // namespace OHOS

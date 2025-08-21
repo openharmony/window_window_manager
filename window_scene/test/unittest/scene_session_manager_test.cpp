@@ -2025,6 +2025,44 @@ HWTEST_F(SceneSessionManagerTest, SkipSnapshotForAppProcess, TestSize.Level1)
     ssm_->sceneSessionMap_.erase(-1);
     usleep(WAIT_SYNC_FOR_TEST_END_IN_NS);
 }
+
+/**
+ * @tc.name: NotifySessionTransferToTargetScreenEvent001
+ * @tc.desc: NotifySessionTransferToTargetScreenEventTest persistentId is invalid
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, NotifySessionTransferToTargetScreenEvent001, TestSize.Level1)
+{
+    g_logMsg.clear();
+    int32_t persistentId = -1;
+    uint32_t resultCode = 1;
+    uint64_t fromScreenId = 1;
+    uint64_t toScreenId = 1;
+    ssm_->NotifySessionTransferToTargetScreenEvent(persistentId, resultCode, fromScreenId, toScreenId);
+    EXPECT_TRUE(g_logMsg.find("sceneSession is nullptr") != std::string::npos);
+}
+
+/**
+ * @tc.name: NotifySessionTransferToTargetScreenEvent002
+ * @tc.desc: NotifySessionTransferToTargetScreenEventTest persistentId is valid
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, NotifySessionTransferToTargetScreenEvent002, TestSize.Level1)
+{
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo info;
+    info.abilityName_ = "test";
+    info.bundleName_ = "test";
+    info.persistentId_ = 9527;
+    info.windowType_ = static_cast<uint32_t>(WindowType::APP_WINDOW_BASE);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
+
+    g_logMsg.clear();
+    ssm_->NotifySessionTransferToTargetScreenEvent(sceneSession->GetPersistentId(), 1, 1, 2);
+    EXPECT_FALSE(g_logMsg.find("sceneSession is nullptr") != std::string::npos);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

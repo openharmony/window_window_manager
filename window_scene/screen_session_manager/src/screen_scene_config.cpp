@@ -65,7 +65,8 @@ enum XmlNodeElement {
     IS_SUPPORT_CAPTURE,
     IS_SUPPORT_OFFSCREEN_RENDERING,
     OFF_SCREEN_PPI_THRESHOLD,
-    PC_MODE_DPI
+    PC_MODE_DPI,
+    SUPPORT_DURING_CALL
 };
 }
 
@@ -110,7 +111,8 @@ std::map<int32_t, std::string> ScreenSceneConfig::xmlNodeMap_ = {
     {IS_SUPPORT_CAPTURE, "isSupportCapture"},
     {IS_SUPPORT_OFFSCREEN_RENDERING, "isSupportOffScreenRendering"},
     {OFF_SCREEN_PPI_THRESHOLD, "offScreenPPIThreshold"},
-    {PC_MODE_DPI, "pcModeDpi"}
+    {PC_MODE_DPI, "pcModeDpi"},
+    {SUPPORT_DURING_CALL, "supportDuringCall"}
 };
 
 
@@ -194,7 +196,8 @@ void ScreenSceneConfig::ParseNodeConfig(const xmlNodePtr& currNode)
         (xmlNodeMap_[IS_RIGHT_POWER_BUTTON] == nodeName) ||
         (xmlNodeMap_[IS_SUPPORT_CAPTURE] == nodeName) ||
         (xmlNodeMap_[SUPPORT_ROTATE_WITH_SCREEN] == nodeName)||
-        (xmlNodeMap_[IS_SUPPORT_OFFSCREEN_RENDERING] == nodeName);
+        (xmlNodeMap_[IS_SUPPORT_OFFSCREEN_RENDERING] == nodeName) ||
+        (xmlNodeMap_[SUPPORT_DURING_CALL] == nodeName);
     bool numberConfigCheck = (xmlNodeMap_[DPI] == nodeName) ||
         (xmlNodeMap_[SUB_DPI] == nodeName) ||
         (xmlNodeMap_[CURVED_SCREEN_BOUNDARY] == nodeName) ||
@@ -618,6 +621,14 @@ bool ScreenSceneConfig::IsSupportOffScreenRendering()
 {
     if (enableConfig_.count("isSupportOffScreenRendering") != 0) {
         return static_cast<bool>(enableConfig_["isSupportOffScreenRendering"]);
+    }
+    return false;
+}
+
+bool ScreenSceneConfig::IsSupportDuringCall()
+{
+    if (enableConfig_.count("supportDuringCall") != 0) {
+        return static_cast<bool>(enableConfig_["supportDuringCall"]);
     }
     return false;
 }

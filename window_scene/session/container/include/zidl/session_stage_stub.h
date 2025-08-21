@@ -101,6 +101,7 @@ private:
     int HandleNotifyRotationChange(MessageParcel& data, MessageParcel& reply);
     int HandleSetCurrentRotation(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyAppForceLandscapeConfigUpdated(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyAppHookWindowInfoUpdated(MessageParcel& data, MessageParcel& reply);
     int HandleGetRouterStackInfo(MessageParcel& data, MessageParcel& reply);
     int HandleCloseSpecificScene(MessageParcel& data, MessageParcel& reply);
     int HandleSendFbActionEvent(MessageParcel& data, MessageParcel& reply);

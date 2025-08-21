@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -568,6 +568,13 @@ export enum WindowEventType {
     WINDOW_INACTIVE = 3,
     WINDOW_HIDDEN = 4,
     WINDOW_DESTROYED = 7
+}
+
+export enum WindowStageLifeCycleEventType {
+    FOREGROUND = 1,
+    RESUMED = 2,
+    PAUSED = 3,
+    BACKGROUND = 4,
 }
 
 export enum WindowMode {
@@ -1754,6 +1761,11 @@ export function getLastWindow(ctx: BaseContext, callback: AsyncCallback<Window>)
     }).catch((err: NullishType) => {
         callback(err as BusinessError, new WindowInternal());
     });
+}
+
+function runWindowStageLifecycleEventCallBack(cb: object, cbArg: int): void {
+    const func = cb as (cbArg: WindowStageLifeCycleEventType) => void;
+    func(cbArg as WindowStageLifeCycleEventType);
 }
 
 function runWindowEventCallBack(cb: object, cbArg: int): void {

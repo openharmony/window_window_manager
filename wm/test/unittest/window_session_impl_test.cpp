@@ -1271,11 +1271,11 @@ HWTEST_F(WindowSessionImplTest, NotifyForegroundInteractiveStatus01, TestSize.Le
 
     ASSERT_NE(nullptr, foreWindow1->property_);
     foreWindow1->property_->SetPersistentId(1);
-    foreWindow1->property_->SetUseControlStateToProperty(true);
+    foreWindow1->property_->SetUseControlState(true);
     foreWindow1->NotifyForegroundInteractiveStatus(false);
     foreWindow1->NotifyForegroundInteractiveStatus(true);
-    EXPECT_TRUE(g_errLog.find("app is in control") != std::string::npos);
-    foreWindow1->property_->SetUseControlStateToProperty(false);
+    EXPECT_TRUE(g_errLog.find("useControlState:") != std::string::npos);
+    foreWindow1->property_->SetUseControlState(false);
     foreWindow1->NotifyForegroundInteractiveStatus(false);
     foreWindow1->NotifyForegroundInteractiveStatus(true);
     EXPECT_EQ(WMError::WM_OK, foreWindow1->Destroy());
@@ -1397,7 +1397,7 @@ HWTEST_F(WindowSessionImplTest, NotifyAfterLifecycleBackground, TestSize.Level1)
 
     ASSERT_NE(nullptr, notifyWindow->property_);
     notifyWindow->property_->SetPersistentId(1);
-    notifyWindow->property_->SetUseControlStateToProperty(true);
+    notifyWindow->property_->SetUseControlState(true);
     notifyWindow->NotifyAfterLifecycleResumed();
     WSError res = notifyWindow->NotifyCloseExistPipWindow();
     EXPECT_EQ(res, WSError::WS_OK);
@@ -1426,6 +1426,43 @@ HWTEST_F(WindowSessionImplTest, NotifyAfterLifecycleBackground, TestSize.Level1)
     WSError res = pauseWindow->NotifyCloseExistPipWindow();
     EXPECT_EQ(res, WSError::WS_OK);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, pauseWindow->Destroy());
+}
+
+/**
+ * @tc.name: Notify04
+ * @tc.desc: NotifyAppUseControlStatus
+ * @tc.type: FUNC
+ */
+ HWTEST_F(WindowSessionImplTest, NotifyAppUseControlStatusWhenSetStateThenReturnOK, TestSize.Level1)
+{
+    sptr<WindowOption> appOption = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, appOption);
+    appOption->SetWindowName("NotifyAppUseControlStatus");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(appOption);
+    ASSERT_NE(nullptr, window);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    EXPECT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+
+    window->property_->SetPersistentId(1);
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_HIDDEN;
+    window->NotifyAppUseControlStatus(true);
+
+    window->state_ = WindowState::STATE_SHOWN;
+    window->NotifyAppUseControlStatus(true);
+
+    EXPECT_FALSE(window->IsWindowSessionInvalid());
+    window->state_ = WindowState::STATE_HIDDEN;
+    window->NotifyAppUseControlStatus(true);
+
+    window->state_ = WindowState::STATE_SHOWN;
+    window->NotifyAppUseControlStatus(true);
+    window->NotifyAppUseControlStatus(false);
+
+    WSError res = window->NotifyCloseExistPipWindow();
+    EXPECT_EQ(res, WSError::WS_OK);
+    EXPECT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**

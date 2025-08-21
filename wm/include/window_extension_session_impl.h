@@ -257,6 +257,7 @@ private:
     AAFwk::WantParams extensionConfig_ {};
     bool hostGestureBackEnabled_ { true };
     bool hostImmersiveModeEnabled_ { false };
+    bool immersiveModeEnabled_ { false };
     std::mutex hostWindowRectChangeListenerMutex_;
     std::mutex keyboardDidShowListenerMutex_;
     std::mutex keyboardDidHideListenerMutex_;
@@ -271,6 +272,12 @@ private:
      * PC Fold Screen
      */
     WMError OnWaterfallModeChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+
+    /*
+     * Window Rotation
+     */
+    void UpdateRotateDuration(WindowSizeChangeReason& reason, int32_t& duration,
+        const std::shared_ptr<RSTransaction>& rsTransaction);
 };
 } // namespace Rosen
 } // namespace OHOS

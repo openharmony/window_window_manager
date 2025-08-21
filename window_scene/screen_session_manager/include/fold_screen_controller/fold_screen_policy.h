@@ -26,12 +26,20 @@
 namespace OHOS::Rosen {
 const uint32_t FOLD_TO_EXPAND_ONBOOTANIMATION_TASK_NUM = 1;
 const uint32_t FOLD_TO_EXPAND_TASK_NUM = 3;
-constexpr uint32_t SECONDARY_FOLD_TO_EXPAND_TASK_NUM = 2;
+constexpr uint32_t SECONDARY_FOLD_TO_EXPAND_TASK_NUM = 3;
 
 enum class DisplayModeChangeReason : uint32_t {
     DEFAULT = 0,
     RECOVER,
     INVALID,
+};
+
+struct FoldCreaseRegionItem {
+    DisplayOrientation orientation_;
+    FoldDisplayMode foldDisplayMode_;
+    FoldCreaseRegion region_;
+    FoldCreaseRegionItem(DisplayOrientation orientation, FoldDisplayMode foldDisplayMode, FoldCreaseRegion region)
+        : orientation_(orientation), foldDisplayMode_(foldDisplayMode), region_(region) {}
 };
 
 class FoldScreenPolicy : public RefBase {
@@ -57,6 +65,7 @@ public:
     virtual Drawing::Rect GetScreenSnapshotRect();
     virtual void SetMainScreenRegion(DMRect& mainScreenRegion);
     virtual void SetIsClearingBootAnimation(bool isClearingBootAnimation);
+    virtual void GetAllCreaseRegion(std::vector<FoldCreaseRegionItem>& foldCreaseRegionItems) const;
     void ClearState();
     FoldDisplayMode GetScreenDisplayMode();
     FoldStatus GetFoldStatus();

@@ -13,18 +13,19 @@
  * limitations under the License.
  */
 
+#include "display_ani_utils.h"
+
 #include <hitrace_meter.h>
 
 #include "ani.h"
-#include "display_ani_utils.h"
+#include "display.h"
 #include "display_ani.h"
 #include "display_info.h"
-#include "display.h"
-#include "singleton_container.h"
 #include "display_manager.h"
-#include "window_manager_hilog.h"
 #include "dm_common.h"
 #include "refbase.h"
+#include "singleton_container.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -117,7 +118,7 @@ ani_status DisplayAniUtils::cvtDisplay(sptr<Display> display, ani_env* env, ani_
     env->Object_SetFieldByName_Double(obj, "<property>yDPI", info->GetYDpi());
     auto colorSpaces = info->GetColorSpaces();
     auto hdrFormats = info->GetHdrFormats();
-    TLOGI(WmsLogTag::DMS, "[ANI] colorSpaces(0) %{public}u, %{public}u", colorSpaces.size(), colorSpaces[1]);
+    TLOGI(WmsLogTag::DMS, "[ANI] colorSpaces(0) %{public}zu, %{public}u", colorSpaces.size(), colorSpaces[1]);
     if (colorSpaces.size() != 0) {
         ani_array_int colorSpacesAni;
         CreateAniArrayInt(env, colorSpaces.size(), &colorSpacesAni, colorSpaces);

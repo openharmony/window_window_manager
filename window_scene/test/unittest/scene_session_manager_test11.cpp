@@ -966,18 +966,18 @@ HWTEST_F(SceneSessionManagerTest11, UpdateHighlightStatus, TestSize.Level1)
     sptr<SceneSession> nullSceneSession2;
 
     ssm_->UpdateHighlightStatus(DEFAULT_DISPLAY_ID, nullSceneSession1, nullSceneSession2, false);
-    ASSERT_EQ(ssm_->highlightIds_.size(), 0);
+    EXPECT_EQ(ssm_->highlightIds_.size(), 0);
 
     ssm_->AddHighlightSessionIds(preSceneSession, false);
-    ASSERT_EQ(ssm_->highlightIds_.size(), 1);
+    EXPECT_EQ(ssm_->highlightIds_.size(), 1);
     ssm_->UpdateHighlightStatus(DEFAULT_DISPLAY_ID, preSceneSession, nullSceneSession2, false);
-    ASSERT_EQ(ssm_->highlightIds_.size(), 1);
+    EXPECT_EQ(ssm_->highlightIds_.size(), 1);
     ssm_->UpdateHighlightStatus(DEFAULT_DISPLAY_ID, preSceneSession, nullSceneSession2, true);
-    ASSERT_EQ(ssm_->highlightIds_.size(), 0);
+    EXPECT_EQ(ssm_->highlightIds_.size(), 0);
 
     ssm_->UpdateHighlightStatus(DEFAULT_DISPLAY_ID, preSceneSession, currSceneSession, true);
     ssm_->UpdateHighlightStatus(DEFAULT_DISPLAY_ID, preSceneSession, currSceneSession, false);
-    ASSERT_EQ(ssm_->highlightIds_.size(), 1);
+    EXPECT_EQ(ssm_->highlightIds_.size(), 1);
 
     currSceneSession->property_->isExclusivelyHighlighted_ = false;
     preSceneSession->property_->SetPersistentId(2);
@@ -1679,6 +1679,21 @@ HWTEST_F(SceneSessionManagerTest11, GetFbPanelWindowId, TestSize.Level1)
     EXPECT_EQ(sceneSession->GetWindowId(), windowId);
     MockAccesstokenKit::MockAccessTokenKitRet(-1);
     ssm_->sceneSessionMap_.clear();
+}
+
+/**
+ * @tc.name: ConfigSupportCreateFloatWindow
+ * @tc.desc: test function : ConfigSupportCreateFloatWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, ConfigSupportCreateFloatWindow, TestSize.Level0)
+{
+    ASSERT_NE(nullptr, ssm_);
+
+    ssm_->ConfigSupportCreateFloatWindow();
+
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_TRUE(ssm_->systemConfig_.supportCreateFloatWindow_);
 }
 } // namespace
 } // namespace Rosen

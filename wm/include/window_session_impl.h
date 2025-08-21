@@ -78,7 +78,8 @@ using IKBWillHideListener = IKeyboardWillHideListener;
 
 class WindowSessionImpl : public Window, public virtual SessionStageStub {
 public:
-    explicit WindowSessionImpl(const sptr<WindowOption>& option);
+    explicit WindowSessionImpl(const sptr<WindowOption>& option,
+        const std::shared_ptr<RSUIContext>& rsUIContext = nullptr);
     ~WindowSessionImpl();
 
     static sptr<Window> Find(const std::string& name);
@@ -404,7 +405,7 @@ public:
     WMError SetAPPWindowIcon(const std::shared_ptr<Media::PixelMap>& icon) override;
     WMError SetWindowContainerColor(const std::string& activeColor, const std::string& inactiveColor) override;
     WMError SetWindowContainerModalColor(const std::string& activeColor, const std::string& inactiveColor) override;
-    nlohmann::json setContainerButtonStyle(const DecorButtonStyle& decorButtonStyle);
+    nlohmann::json SetContainerButtonStyle(const DecorButtonStyle& decorButtonStyle);
     void UpdateDecorEnable(bool needNotify = false, WindowMode mode = WindowMode::WINDOW_MODE_UNDEFINED);
 
     /*
@@ -473,6 +474,8 @@ public:
     WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) override { return WSError::WS_OK; }
     WMError UpdateWindowModeForUITest(int32_t updateMode) override { return WMError::WM_OK; }
     void UpdateEnableDragWhenSwitchMultiWindow(bool enable);
+    WSError NotifyAppHookWindowInfoUpdated() override { return WSError::WS_DO_NOTHING; }
+    void SetNotifySizeChangeFlag(bool flag);
 
     /*
      * Free Multi Window
@@ -483,7 +486,7 @@ public:
     {
         windowSystemConfig_.freeMultiWindowEnable_ = enable;
     }
-    void SwitchSubWindow(int32_t parentId);
+    void SwitchSubWindow(bool freeMultiWindowEnable, int32_t parentId);
 
     /*
      * Window Immersive
@@ -622,6 +625,7 @@ protected:
     void NotifyTransformChange(const Transform& transForm) override;
     void NotifySingleHandTransformChange(const SingleHandTransform& singleHandTransform) override;
     bool IsKeyboardEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
+    WMError HandleEscKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed);
     void DispatchKeyEventCallback(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed);
     bool IsVerticalOrientation(Orientation orientation) const;
     bool IsHorizontalOrientation(Orientation orientation) const;
@@ -701,6 +705,7 @@ protected:
     bool useUniqueDensity_ { false };
     float virtualPixelRatio_ { 1.0f };
     bool escKeyEventTriggered_ = false;
+    bool escKeyHasDown_ { false };
     // Check whether the UIExtensionAbility process is started
     static bool isUIExtensionAbilityProcess_;
     WSError SwitchFreeMultiWindow(bool enable) override;
@@ -780,6 +785,10 @@ protected:
     void NotifyWindowStatusDidChange(WindowMode mode);
     void NotifyFirstValidLayoutUpdate(const Rect& preRect, const Rect& newRect);
     std::atomic_bool hasSetEnableDrag_ = false;
+    void HookWindowSizeByHookWindowInfo(Rect& rect);
+    void SetAppHookWindowInfo(const HookWindowInfo& hookWindowInfo);
+    HookWindowInfo GetAppHookWindowInfo();
+    virtual WMError GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo) { return WMError::WM_OK; }
 
     /*
      * Window Immersive
@@ -807,8 +816,6 @@ protected:
     /*
      * Window Property
      */
-    std::string colorMode_;
-    bool hasDarkRes_ = false;
     std::unordered_set<std::string> containerColorList_;
     float lastSystemDensity_ = UNDEFINED_DENSITY;
     static std::atomic<bool> defaultDensityEnabledGlobalConfig_;
@@ -841,6 +848,7 @@ protected:
     bool grayOutMaximizeButton_ = false;
     
 private:
+    void InitPropertyFromOption(const sptr<WindowOption>& option);
     //Trans between colorGamut and colorSpace
     static ColorSpace GetColorSpaceFromSurfaceGamut(GraphicColorGamut colorGamut);
     static GraphicColorGamut GetSurfaceGamutFromColorSpace(ColorSpace colorSpace);
@@ -1083,6 +1091,9 @@ private:
     std::atomic<WindowStatus> lastStatusWhenNotifyWindowStatusDidChange_ = WindowStatus::WINDOW_STATUS_UNDEFINED;
     std::atomic<bool> isFirstValidLayoutUpdate_ = true;
     SizeChangeReason globalDisplayRectSizeChangeReason_ = SizeChangeReason::END;
+    std::shared_mutex hookWindowInfoMutex_;
+    HookWindowInfo hookWindowInfo_;
+    std::atomic_bool notifySizeChangeFlag_ = false;
 
     /*
      * Window Decor

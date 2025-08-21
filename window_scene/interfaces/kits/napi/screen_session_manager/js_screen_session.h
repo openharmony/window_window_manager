@@ -37,6 +37,8 @@ private:
     napi_value OnLoadContent(napi_env env, napi_callback_info info);
     static napi_value DestroyContent(napi_env env, napi_callback_info info);
     napi_value OnDestroyContent(napi_env env, napi_callback_info info);
+    static napi_value ReleaseResource(napi_env env, napi_callback_info info);
+    napi_value OnReleaseResource(napi_env env, napi_callback_info info);
     napi_value ScheduleLoadContentTask(napi_env env, const std::string& contentUrl,
         std::weak_ptr<AbilityRuntime::Context> contextWeakPtr, std::shared_ptr<NativeReference> contentStorage);
     static napi_value RegisterCallback(napi_env env, napi_callback_info info);

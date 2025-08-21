@@ -32,6 +32,7 @@ sptr<SettingObserver> ScreenSettingHelper::castObserver_;
 sptr<SettingObserver> ScreenSettingHelper::rotationObserver_;
 sptr<SettingObserver> ScreenSettingHelper::wireCastObserver_;
 sptr<SettingObserver> ScreenSettingHelper::extendScreenDpiObserver_;
+sptr<SettingObserver> ScreenSettingHelper::duringCallStateObserver_;
 constexpr int32_t PARAM_NUM_TEN = 10;
 constexpr uint32_t EXPECT_SCREEN_MODE_SIZE = 2;
 constexpr uint32_t EXPECT_RELATIVE_POSITION_SIZE = 3;
@@ -615,6 +616,65 @@ bool ScreenSettingHelper::ConvertStrToInt32(const std::string& str, int32_t& num
     if (res.ec != std::errc()) {
         return false;
     }
+    return true;
+}
+
+void ScreenSettingHelper::RegisterSettingDuringCallStateObserver(SettingObserver::UpdateFunc func)
+{
+    if (duringCallStateObserver_ != nullptr) {
+        TLOGW(WmsLogTag::DMS, "during call state observer is registered");
+        return;
+    }
+    SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    duringCallStateObserver_ = settingProvider.CreateObserver(SETTING_DURING_CALL_KEY, func);
+    if (duringCallStateObserver_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "create observer failed");
+        return;
+    }
+    ErrCode ret = settingProvider.RegisterObserver(duringCallStateObserver_);
+    if (ret != ERR_OK) {
+        TLOGW(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
+        duringCallStateObserver_ = nullptr;
+    }
+}
+
+void ScreenSettingHelper::UnregisterSettingDuringCallStateObserver()
+{
+    if (duringCallStateObserver_ == nullptr) {
+        TLOGW(WmsLogTag::DMS, "duringCallStateObserver_ is nullptr");
+        return;
+    }
+    SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    ErrCode ret = settingProvider.UnregisterObserver(duringCallStateObserver_);
+    if (ret != ERR_OK) {
+        TLOGW(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
+    }
+    duringCallStateObserver_ = nullptr;
+}
+
+bool ScreenSettingHelper::GetSettingDuringCallState(bool& enable, const std::string& key)
+{
+    SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    bool value = 0;
+    ErrCode ret = settingProvider.GetBoolValue(key, value);
+    if (ret != ERR_OK) {
+        TLOGE(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
+        return false;
+    }
+    TLOGI(WmsLogTag::DMS, "get during call state is %{public}d", value);
+    enable = value;
+    return true;
+}
+
+bool ScreenSettingHelper::SetSettingDuringCallState(const std::string& key, bool value)
+{
+    SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    ErrCode ret = settingProvider.PutBoolValue(key, value);
+    if (ret != ERR_OK) {
+        TLOGE(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
+        return false;
+    }
+    TLOGI(WmsLogTag::DMS, "put during call state is %{public}d", value);
     return true;
 }
 } // namespace Rosen

@@ -144,4 +144,6 @@ Drawing::Rect FoldScreenPolicy::GetScreenSnapshotRect()
 void FoldScreenPolicy::SetMainScreenRegion(DMRect& mainScreenRegion) {}
 
 void FoldScreenPolicy::SetIsClearingBootAnimation(bool isClearingBootAnimation) {}
+
+void FoldScreenPolicy::GetAllCreaseRegion(std::vector<FoldCreaseRegionItem>& foldCreaseRegionItems) const {}
 } // namespace OHOS::Rosen

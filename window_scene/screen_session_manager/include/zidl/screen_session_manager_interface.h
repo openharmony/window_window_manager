@@ -231,6 +231,7 @@ public:
     virtual DMError SetPrimaryDisplaySystemDpi(float dpi) { return DMError::DM_OK; }
     // Fold Screen
     virtual void SetFoldDisplayMode(const FoldDisplayMode displayMode) {}
+    virtual void SetFoldDisplayModeAsync(const FoldDisplayMode displayMode) {}
     virtual DMError SetFoldDisplayModeFromJs(const FoldDisplayMode displayMode,
         std::string reason = "") { return DMError::DM_OK; }
 
@@ -296,6 +297,7 @@ public:
         return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
     }
     virtual void NotifyFoldToExpandCompletion(bool foldToExpand) {}
+    virtual void NotifyScreenConnectCompletion(ScreenId screenId) {}
     virtual void RecordEventFromScb(std::string description, bool needRecordEvent) {}
     virtual DeviceScreenConfig GetDeviceScreenConfig() { return {}; }
     virtual DMError SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refreshRate,

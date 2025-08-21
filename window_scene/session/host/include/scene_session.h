@@ -101,6 +101,7 @@ using NotifyRestoreMainWindowFunc = std::function<void()>;
 using SetSkipSelfWhenShowOnVirtualScreenCallback = std::function<void(uint64_t surfaceNodeId, bool isSkip)>;
 using SetSkipEventOnCastPlusCallback = std::function<void(int32_t persistentId, bool isSkip)>;
 using NotifyForceSplitFunc = std::function<AppForceLandscapeConfig(const std::string& bundleName)>;
+using GetHookWindowInfoFunc = std::function<HookWindowInfo(const std::string& bundleName)>;
 using UpdatePrivateStateAndNotifyFunc = std::function<void(int32_t persistentId)>;
 using UpdateScreenshotAppEventRegisteredFunc = std::function<void(int32_t persistentId, bool isRegister)>;
 using PiPStateChangeCallback = std::function<void(const std::string& bundleName, bool isForeground)>;
@@ -119,7 +120,7 @@ using NotifyAvoidAreaChangeCallback = std::function<void(const sptr<AvoidArea>& 
 using NotifySetSupportedWindowModesFunc = std::function<void(
     std::vector<AppExecFwk::SupportWindowMode>&& supportedWindowModes)>;
 using GetStatusBarAvoidHeightFunc = std::function<void(DisplayId displayId, WSRect& barArea)>;
-using GetStatusBarConstantlyShowFunc = std::function<void(DisplayId dispalyId, bool& isVisible)>;
+using GetStatusBarConstantlyShowFunc = std::function<void(DisplayId displayId, bool& isVisible)>;
 using NotifySetWindowCornerRadiusFunc = std::function<void(float cornerRadius)>;
 using GetKeyboardOccupiedAreaWithRotationCallback =
     std::function<void(int32_t persistentId, Rotation rotation, std::vector<std::pair<bool, WSRect>>& avoidAreas)>;
@@ -205,7 +206,7 @@ public:
     WSError Foreground(sptr<WindowSessionProperty> property, bool isFromClient = false,
         const std::string& identityToken = "") override;
     WSError Background(bool isFromClient = false, const std::string& identityToken = "") override;
-    WSError BackgroundTask(const bool isSaveSnapshot = true);
+    WSError BackgroundTask(const bool isSaveSnapshot = true, BackgroundReason reason = BackgroundReason::DEFAULT);
     WSError Disconnect(bool isFromClient = false, const std::string& identityToken = "") override;
     WSError DisconnectTask(bool isFromClient = false, bool isSaveSnapshot = true);
     void SetClientIdentityToken(const std::string& clientIdentityToken);
@@ -574,7 +575,8 @@ public:
     WSError NotifyRotationProperty(uint32_t rotation, uint32_t width, uint32_t height);
     void RegisterUpdateRotationChangeListener(NotifyRotationChangeFunc&& callback);
     WSError UpdateRotationChangeRegistered(int32_t persistentId, bool isRegister) override;
-    RotationChangeResult NotifyRotationChange(const RotationChangeInfo& rotationChangeInfo);
+    RotationChangeResult NotifyRotationChange(const RotationChangeInfo& rotationChangeInfo,
+        bool isRestrictNotify = false);
     bool isRotationChangeCallbackRegistered = false;
     WSError SetCurrentRotation(int32_t currentRotation);
     void RegisterFollowScreenChangeCallback(NotifyFollowScreenChangeFunc&& callback);
@@ -779,6 +781,8 @@ public:
     bool IsAnyParentSessionDragZooming() const override;
     bool IsCompatibleModeDirtyDragScaleWindow() const;
     void ResetCompatibleModeDragScaleFlags();
+    void RegisterAppHookWindowInfoFunc(GetHookWindowInfoFunc&& func);
+    WMError GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo) override;
 
     /*
      * Gesture Back
@@ -849,8 +853,6 @@ public:
     WMError NotifySubSessionAcrossDisplaysChange(bool isAcrossDisplays);
     WMError NotifyFollowedParentWindowAcrossDisplaysChange(bool isAcrossDisplays);
     void NotifySessionAcrossDisplaysChange(const sptr<SceneSession>& sceneSession, bool isAcrossDisplays);
-    WMError OnUpdateColorMode(const std::string& colorMode, bool hasDarkRes) override;
-    std::string GetAbilityColorMode() const;
 
     /*
      * Window Pattern
@@ -900,6 +902,10 @@ protected:
     NotifySystemBarPropertyChangeFunc onSystemBarPropertyChange_;
     GetStatusBarAvoidHeightFunc onGetStatusBarAvoidHeightFunc_;
     GetStatusBarConstantlyShowFunc onGetStatusBarConstantlyShowFunc_;
+    void PrintAvoidAreaInfo(DisplayId displayId,
+        AvoidAreaType type, const WSRect& winRect, const WSRect& avoidRect) const;
+    void CalculateAvoidAreaByType(AvoidAreaType type,
+        const WSRect& winRect, const WSRect& avoidRect, AvoidArea& avoidArea);
 
     /*
      * Gesture Back
@@ -979,8 +985,8 @@ protected:
     virtual void NotifyUpdateFloatingBall(const FloatingBallTemplateInfo& fbTemplateInfo) {};
     virtual void NotifyStopFloatingBall() {};
     virtual void NotifyRestoreFloatingBallMainWindow(const std::shared_ptr<AAFwk::Want>& want) {};
-    uint64_t fbClickTime_ = 0;
     std::mutex fbClickMutex_;
+    uint8_t fbClickCnt_ {0};
     FloatingBallTemplateInfo fbTemplateInfo_ = {};
 
     /*
@@ -1038,7 +1044,7 @@ private:
     void GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea);
     void GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea);
     void GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea);
-    void GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) const;
+    void GetAINavigationBarArea(WSRect& rect, AvoidArea& avoidArea);
     AvoidArea GetAvoidAreaByTypeInner(AvoidAreaType type, const WSRect& rect = WSRect::EMPTY_RECT);
     WSError GetAvoidAreasByRotation(Rotation rotation, const WSRect& rect,
         const std::map<WindowType, SystemBarProperty>& properties, std::map<AvoidAreaType, AvoidArea>& avoidAreas);
@@ -1226,6 +1232,7 @@ private:
     /*
      * Window Layout
      */
+    GetHookWindowInfoFunc getHookWindowInfoFunc_ = nullptr;
     bool SaveAspectRatio(float ratio);
     WSError UpdateRectForDrag(const WSRect& rect);
     void UpdateSessionRectPosYFromClient(SizeChangeReason reason, DisplayId& configDisplayId, WSRect& rect);
@@ -1359,6 +1366,7 @@ private:
     bool isStatusBarVisible_ = true;
     IsLastFrameLayoutFinishedFunc isLastFrameLayoutFinishedFunc_;
     IsAINavigationBarAvoidAreaValidFunc isAINavigationBarAvoidAreaValid_;
+    std::unordered_map<AvoidAreaType, std::tuple<DisplayId, WSRect, WSRect>> lastAvoidAreaInputParamtersMap_;
 
     /*
      * PC Window Layout
@@ -1382,9 +1390,6 @@ private:
     bool isAncoForFloatingWindow_ = false;
     bool subWindowOutlineEnabled_ = false;
     std::atomic_bool isRegisterAcrossDisplaysChanged_ = false;
-    std::string colorMode_;
-    bool hasDarkRes_ = false;
-    mutable std::mutex colorModeMutex_;
     NotifySetWindowShadowsFunc onSetWindowShadowsFunc_;
     UpdateScreenshotAppEventRegisteredFunc updateScreenshotAppEventRegisteredFunc_;
 
