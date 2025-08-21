@@ -2337,7 +2337,6 @@ void WindowSessionImpl::UpdateDecorEnableToAce(bool isDecorEnable)
             mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY ||
             (mode == WindowMode::WINDOW_MODE_FULLSCREEN && !property_->IsLayoutFullScreen());
         TLOGD(WmsLogTag::WMS_DECOR, "decorVisible:%{public}d", decorVisible);
-
         if (windowSystemConfig_.freeMultiWindowSupport_) {
             auto isSubWindow = WindowHelper::IsSubWindow(GetType());
             decorVisible = decorVisible && (windowSystemConfig_.freeMultiWindowEnable_ ||
