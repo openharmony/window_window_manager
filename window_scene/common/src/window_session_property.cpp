@@ -1589,6 +1589,10 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     isPcAppInpadOrientationLandscape_ = property->isPcAppInpadOrientationLandscape_;
     isPcAppInpadCompatibleMode_ = property->isPcAppInpadCompatibleMode_;
     ancoRealBundleName_ = property->ancoRealBundleName_;
+    {
+        std::lock_guard<std::mutex> lock(missionInfoMutex_);
+        missionInfo_ = property->missionInfo_;
+    }
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)
