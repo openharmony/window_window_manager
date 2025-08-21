@@ -2426,6 +2426,9 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         sceneSession->RegisterGetFbPanelWindowIdFunc([this](uint32_t& windowId) {
             return this->GetFbPanelWindowId(windowId);
         });
+        sceneSession->SetFindScenePanelRsNodeByZOrderFunc([this](uint64_t screenId, uint32_t targetZOrder) {
+            return this->findScenePanelRsNodeByZOrderFunc_(screenId, targetZOrder);
+        });
         DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
         GetAppDragResizeType(sessionInfo.bundleName_, dragResizeType);
         sceneSession->SetAppDragResizeType(dragResizeType);
@@ -6981,6 +6984,11 @@ void SceneSessionManager::SetStatusBarDefaultVisibilityPerDisplay(DisplayId disp
         TLOGNI(WmsLogTag::WMS_IMMS, "set default visibility, "
             "display id %{public}" PRIu64 " visible %{public}d", displayId, visible);
     }, __func__);
+}
+
+void SceneSessionManager::SetFindScenePanelRsNodeByZOrderFunc(FindScenePanelRsNodeByZOrderFunc&& func)
+{
+    findScenePanelRsNodeByZOrderFunc_ = std::move(func);
 }
 
 bool SceneSessionManager::GetStatusBarDefaultVisibilityByDisplayId(DisplayId displayId)

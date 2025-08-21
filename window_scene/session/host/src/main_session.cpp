@@ -413,12 +413,11 @@ void MainSession::NotifySubSessionRectChangeByAnchor(const WSRect& parentRect,
     }
 }
 
-void MainSession::HandleSubSessionSurfaceNodeByWindowAnchor(SizeChangeReason reason,
-    const sptr<ScreenSession>& screenSession)
+void MainSession::HandleSubSessionSurfaceNodeByWindowAnchor(SizeChangeReason reason, DisplayId displayId)
 {
     for (const auto& subSession : GetSubSession()) {
         if (subSession && subSession->GetWindowAnchorInfo().isAnchorEnabled_ && subSession->IsSessionForeground()) {
-            subSession->HandleCrossSurfaceNodeByWindowAnchor(reason, screenSession);
+            subSession->HandleCrossSurfaceNodeByWindowAnchor(reason, displayId);
         }
     }
 }
