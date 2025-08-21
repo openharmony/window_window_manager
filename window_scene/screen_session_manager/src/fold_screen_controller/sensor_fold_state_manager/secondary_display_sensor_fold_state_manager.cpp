@@ -46,6 +46,7 @@ constexpr int32_t HALL_THRESHOLD = 1;
 constexpr int32_t HALL_FOLDED_THRESHOLD = 0;
 constexpr int32_t HALF_FOLD_VALUE = 3;
 constexpr int32_t REFLEXION_VALUE = 2;
+constexpr float DEFAULT_ANGLE_VALUE = 5.0F;
 
 constexpr uint32_t FULL_WAIT_TIMES = 215;
 constexpr float ANGLE_DIFF_OF_SECONDARY_AB = 15.0F;
@@ -61,15 +62,20 @@ void SecondaryDisplaySensorFoldStateManager::HandleAngleOrHallChange(const std::
         TLOGE(WmsLogTag::DMS, "halls size is not right, halls size %{public}zu", halls.size());
         return;
     }
-    bool isFoldScreenOn = PowerMgr::PowerMgrClient::GetInstance().IsFoldScreenOn();
+    if ((std::fabs(angles[1] - DEFAULT_ANGLE_VALUE) < FLT_EPSILON && halls[1] == HALL_THRESHOLD) ||
+        (std::fabs(angles[0] - DEFAULT_ANGLE_VALUE) < FLT_EPSILON && halls[0] == HALL_THRESHOLD)) {
+        TLOGI(WmsLogTag::DMS, "hall change but posture not change");
+        return;
+    }
+    bool isScreenOn = PowerMgr::PowerMgrClient::GetInstance().IsScreenOn();
     {
         std::lock_guard<std::mutex> lock(secondaryFoldStatusMutex_);
-        if (!isFoldScreenOn && curHallAB_ == halls[0] && curHallBC_ == halls[1]) {
+        if (!isScreenOn && curHallAB_ == halls[0] && curHallBC_ == halls[1]) {
             TLOGI(WmsLogTag::DMS, "hall value is not change in unPower");
             return;
         }
     }
-    FoldStatus nextState = GetNextFoldState(angles, halls, isPostureRegistered, isFoldScreenOn);
+    FoldStatus nextState = GetNextFoldState(angles, halls, isPostureRegistered, isScreenOn);
     HandleSensorChange(nextState, angles, halls, foldScreenPolicy);
     if (angles.size() != ANGLES_AXIS_SIZE) {
         TLOGE(WmsLogTag::DMS, "angles size is not right, angles size %{public}zu", angles.size());
