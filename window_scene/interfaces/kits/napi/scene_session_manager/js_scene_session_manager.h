@@ -170,6 +170,7 @@ public:
      * Window Pattern
      */
     static napi_value SupportSnapshotAllSessionStatus(napi_env env, napi_callback_info info);
+    static napi_value SupportPreloadStartingWindow(napi_env env, napi_callback_info info);
 
     /*
      * PiP Window
@@ -400,6 +401,7 @@ private:
      * Window Pattern
      */
     napi_value OnSupportSnapshotAllSessionStatus(napi_env env, napi_callback_info info);
+    napi_value OnSupportPreloadStartingWindow(napi_env env, napi_callback_info info);
 
     napi_value OnUpdateSystemDecorEnable(napi_env env, napi_callback_info info);
 };
