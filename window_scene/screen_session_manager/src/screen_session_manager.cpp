@@ -8315,7 +8315,6 @@ void ScreenSessionManager::SwitchUser()
         return;
     }
     auto userId = GetUserIdByCallingUid();
-    auto newScbPid = IPCSkeleton::GetCallingPid();
     currentUserIdForSettings_ = userId;
     if (g_isPcDevice && userSwitching_) {
         std::unique_lock<std::mutex> lock(switchUserMutex_);
@@ -8324,7 +8323,10 @@ void ScreenSessionManager::SwitchUser()
             userSwitching_ = false;
         }
     }
-    SwitchScbNodeHandle(userId, newScbPid, false);
+    {
+    std::lock_guard<std::mutex> lock(oldScbPidsMutex_);
+    SwitchScbNodeHandle(userId, IPCSkeleton::GetCallingPid(), false);
+    }
     MockSessionManagerService::GetInstance().NotifyWMSConnected(userId, GetDefaultScreenId(), false);
 #endif
 }
