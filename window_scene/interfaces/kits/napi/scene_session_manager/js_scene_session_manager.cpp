@@ -4794,8 +4794,7 @@ napi_value JsSceneSessionManager::OnSetStatusBarAvoidHeight(napi_env env, napi_c
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    if (SceneSessionManager::GetInstance().GetSystemSessionConfig().IsPcWindow() ||
-        SceneSessionManager::GetInstance().GetSystemSessionConfig().IsFreeMultiWindowMode()) {
+    if (SceneSessionManager::GetInstance().GetSystemSessionConfig().IsPcWindow()) {
         TLOGE(WmsLogTag::WMS_IMMS, "device not support");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_DEVICE_NOT_SUPPORT),
             "Device is not supported"));
