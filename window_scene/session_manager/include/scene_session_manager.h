@@ -239,6 +239,7 @@ public:
     void SetDumpUITreeFunc(const DumpUITreeFunc& func);
     void SetFindScenePanelRsNodeByZOrderFunc(FindScenePanelRsNodeByZOrderFunc&& func);
     const AppWindowSceneConfig& GetWindowSceneConfig() const;
+    void ApplyFeatureConfig(const std::unordered_map<std::string, std::string>& configMap);
 
     /*
      * Window Recover

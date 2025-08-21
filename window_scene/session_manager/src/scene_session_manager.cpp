@@ -196,6 +196,10 @@ const std::unordered_set<std::string> LAYOUT_INFO_WHITELIST = {
     "SCBStatusBar"
 };
 
+const std::unordered_map<std::string, SystemSessionConfig::ConvertSystemConfigFunc> convertConfigMap = {
+    {"supportUIExtensionSubWindow", &SystemSessionConfig::ConvertSupportUIExtensionSubWindow},
+};
+
 const std::chrono::milliseconds WAIT_TIME(3 * 1000); // 3 * 1000 wait for 3s
 
 std::string GetCurrentTime()
@@ -3743,6 +3747,10 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
             return WSError::WS_ERROR_INVALID_WINDOW;
         }
         property->SetSubWindowLevel(parentProperty->GetSubWindowLevel() + 1);
+        if (WindowHelper::IsSystemWindow(parentSession->GetWindowType()) && property->GetIsUIExtFirstSubWindow() &&
+            systemConfig_.supportUIExtensionSubWindow_) {
+            property->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION_SUB_WINDOW);
+        }
     }
     auto initClientDisplayId = UpdateSpecificSessionClientDisplayId(property);
     bool shouldBlock = false;
@@ -10844,6 +10852,23 @@ static void FillUnreliableWindowInfo(const sptr<SceneSession>& sceneSession,
     info->scaleY_ = sceneSession->GetScaleY();
     infos.emplace_back(info);
     TLOGD(WmsLogTag::WMS_MAIN, "wid=%{public}d", info->windowId_);
+}
+
+void SceneSessionManager::ApplyFeatureConfig(const std::unordered_map<std::string, std::string>& configMap)
+{
+    auto task = [this, where = __func__, configMap] {
+        for (const auto& [configName, configValue] : configMap ) {
+            TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s, configEntry is %{public}s: %{public}s",
+                where, configName.c_str(), configValue.c_str());
+            auto convertIter = convertConfigMap.find(configName);
+            if (convertIter != convertConfigMap.end()) {
+                auto convertFunc = convertIter->second;
+                (this->systemConfig_.*convertFunc)(systemConfig_, value);
+            }
+        }
+        return WMError::WM_OK;
+    };
+    taskScheduler_->PostSyncTask(task, "ApplyFeatureConfig");
 }
 
 WMError SceneSessionManager::GetUnreliableWindowInfo(int32_t windowId,
