@@ -732,7 +732,7 @@ export interface SystemBarProperties {
      * @atomicservice
      * @since 12
      */
-    statusBarColor: string;
+    statusBarColor?: string;
 
     /**
      * The light icon of the status bar.
@@ -748,7 +748,7 @@ export interface SystemBarProperties {
      * @atomicservice
      * @since 12
      */
-    isStatusBarLightIcon: boolean;
+    isStatusBarLightIcon?: boolean;
 
     /**
      * The content color of the status bar
@@ -764,7 +764,7 @@ export interface SystemBarProperties {
      * @atomicservice
      * @since 12
      */
-    statusBarContentColor: string;
+    statusBarContentColor?: string;
 
     /**
      * The color of the navigation bar.
@@ -780,7 +780,7 @@ export interface SystemBarProperties {
      * @atomicservice
      * @since 12
      */
-    navigationBarColor: string;
+    navigationBarColor?: string;
 
     /**
      * The light icon of the navigation bar.
@@ -796,7 +796,7 @@ export interface SystemBarProperties {
      * @atomicservice
      * @since 12
      */
-    isNavigationBarLightIcon: boolean;
+    isNavigationBarLightIcon?: boolean;
 
     /**
      * The content color of the navigation bar
@@ -812,7 +812,7 @@ export interface SystemBarProperties {
      * @atomicservice
      * @since 12
      */
-    navigationBarContentColor: string;
+    navigationBarContentColor?: string;
 
     /**
      * Enable the animation of the status bar.
@@ -822,7 +822,7 @@ export interface SystemBarProperties {
      * @atomicservice
      * @since 12
      */
-    enableStatusBarAnimation: boolean;
+    enableStatusBarAnimation?: boolean;
 
     /**
      * Enable the animation of the navigation bar.
@@ -832,18 +832,18 @@ export interface SystemBarProperties {
      * @atomicservice
      * @since 12
      */
-    enableNavigationBarAnimation: boolean;
+    enableNavigationBarAnimation?: boolean;
 }
 
 export class SystemBarPropertiesInternal implements SystemBarProperties {
-    statusBarColor: string = "";
-    isStatusBarLightIcon: boolean;
-    statusBarContentColor: string = "";
-    navigationBarColor: string = "";
-    isNavigationBarLightIcon: boolean;
-    navigationBarContentColor: string = "";
-    enableStatusBarAnimation: boolean;
-    enableNavigationBarAnimation: boolean;
+    statusBarColor?: string;
+    isStatusBarLightIcon?: boolean;
+    statusBarContentColor?: string;
+    navigationBarColor?: string;
+    isNavigationBarLightIcon?: boolean;
+    navigationBarContentColor?: string;
+    enableStatusBarAnimation?: boolean;
+    enableNavigationBarAnimation?: boolean;
 }
 
 /**
