@@ -138,10 +138,22 @@ export enum FoldStatus {
 
     FOLD_STATUS_FOLDED,
 
-    FOLD_STATUS_HALF_FOLDED
+    FOLD_STATUS_HALF_FOLDED,
+
+    FOLD_STATUS_EXPANDED_WITH_SECOND_EXPANDED = 11,
+
+    FOLD_STATUS_EXPANDED_WITH_SECOND_HALF_FOLDED = 21,
+
+    FOLD_STATUS_FOLDED_WITH_SECOND_EXPANDED = 12,
+
+    FOLD_STATUS_FOLDED_WITH_SECOND_HALF_FOLDED = 22,
+
+    FOLD_STATUS_HALF_FOLDED_WITH_SECOND_EXPANDED = 13,
+
+    FOLD_STATUS_HALF_FOLDED_WITH_SECOND_HALF_FOLDED = 23
   }
 
-enum DisplayState {
+export enum DisplayState {
     STATE_UNKNOWN = 0,
 
     STATE_OFF,
@@ -155,6 +167,26 @@ enum DisplayState {
     STATE_VR,
 
     STATE_ON_SUSPEND
+}
+
+export enum ScreenShape {
+    
+    RECTANGLE = 0,
+
+    ROUND = 1
+}
+
+export enum DisplaySourceMode {
+    
+    NONE = 0,
+
+    MAIN = 1,
+
+    MIRROR = 2,
+
+    EXTEND = 3,
+
+    ALONE = 4
 }
 
 export interface Display {
@@ -190,9 +222,19 @@ export interface Display {
 
     yDPI: double;
 
+    screenShape?: ScreenShape;
+
     colorSpaces: Array<colorSpaceManager.ColorSpace>;
 
     hdrFormats: Array<hdrCapability.HDRFormat>;
+
+    sourceMode?:DisplaySourceMode;
+
+    x?: long;
+
+    y?: long;
+
+    supportedRefreshRates?: Array<int>;
 
     getCutoutInfo(callback: AsyncCallback<CutoutInfo>): void;
 
@@ -215,6 +257,7 @@ export class DisplayImpl implements Display {
     constructor() {
         this.colorSpaces = new Array<colorSpaceManager.ColorSpace>();
         this.hdrFormats = new Array<hdrCapability.HDRFormat>();
+        this.supportedRefreshRates = new Array<int>();
     }
 
     id: long;
@@ -224,7 +267,6 @@ export class DisplayImpl implements Display {
     alive: boolean;
 
     state: DisplayState;
-    state_: int;
 
     refreshRate: int;
 
@@ -241,7 +283,6 @@ export class DisplayImpl implements Display {
     densityDPI: double;
 
     orientation: Orientation;
-    orientation_: int;
 
     densityPixels: double;
 
@@ -251,9 +292,19 @@ export class DisplayImpl implements Display {
 
     yDPI: double;
 
+    screenShape?: ScreenShape;
+
     colorSpaces: Array<colorSpaceManager.ColorSpace>;
 
     hdrFormats: Array<hdrCapability.HDRFormat>;
+
+    sourceMode?: DisplaySourceMode;
+
+    x?: long;
+
+    y?: long;
+
+    supportedRefreshRates?: Array<int>;
 
     displayRef: long;
 
@@ -339,8 +390,6 @@ export class DisplayImpl implements Display {
         let ret = false;
         if (display_input !== ESValue.Undefined) {
             ret = DisplayImpl.nativeTransferStatic(display_input, display as Object);
-            display.state = display.state_ as DisplayState;
-            display.orientation = display.orientation_ as Orientation;
         }
         if (!ret) {
             return {};
@@ -416,8 +465,6 @@ export native function getCurrentFoldCreaseRegionNative(foldCreaseRegion: object
 export function getDisplayByIdSync(displayId: long): Display {
     let display = new DisplayImpl();
     getDisplayByIdSyncNative(display as object, displayId);
-    display.state = display.state_ as DisplayState;
-    display.orientation = display.orientation_ as Orientation;
     return display;
 }
 
@@ -426,8 +473,6 @@ export native function getDisplayByIdSyncNative(obj: object, displayId: long): v
 export function getDefaultDisplaySync(): Display {
     let display = new DisplayImpl();
     getDefaultDisplaySyncNative(display as object);
-    display.state = display.state_ as DisplayState;
-    display.orientation = display.orientation_ as Orientation;
     return display;
 }
 
@@ -474,8 +519,6 @@ function minusDisplayArray(displayArr: Array<Display>): void {
             break;
         }
         let dp = displayArr[i] as DisplayImpl;
-        dp.state = dp.state_ as DisplayState;
-        dp.orientation = dp.orientation_ as Orientation;
     }
     displayArr.splice(i);
 }

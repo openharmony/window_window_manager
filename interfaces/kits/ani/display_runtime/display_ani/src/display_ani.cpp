@@ -468,7 +468,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         TLOGE(WmsLogTag::DMS, "[ANI] bind class fail %{public}u", ret);
         return ret;
     }
-    if (result != nullptr) {
+    if (result == nullptr) {
         TLOGE(WmsLogTag::DMS, "[ANI] Result is nullptr");
         return ANI_INVALID_ARGS;
     }
