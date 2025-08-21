@@ -872,6 +872,32 @@ HWTEST_F(SceneSessionDirtyManagerTest, CalNotRotateTransform2, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CalSpecialNotRotateTransformTest
+ * @tc.desc: CalSpecialNotRotateTransform
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest, CalSpecialNotRotateTransformTest, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ScreenProperty screenProperty;
+    Matrix3f transform;
+    manager_->CalSpecialNotRotateTransform(nullptr, screenProperty, transform);
+    EXPECT_TRUE(g_logMsg.find("sceneSession is null") != std::string::npos);
+
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "CalSpecialNotRotateTransformTest";
+    sessionInfo.moduleName_ = "sessionInfo";
+    Matrix3f testTransform = transform;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    manager_->CalSpecialNotRotateTransform(sceneSession, screenProperty, transform);
+    EXPECT_TRUE(g_logMsg.find("sceneSession is null") != std::string::npos);
+    EXPECT_NE(transform, testTransform);
+    LOG_SetCallback(nullptr);
+}
+
+/**
  * @tc.name: UpdateWindowFlags
  * @tc.desc: UpdateWindowFlags
  * @tc.type: FUNC
@@ -1015,6 +1041,189 @@ HWTEST_F(SceneSessionDirtyManagerTest, CalTransform_CompatMode, TestSize.Level1)
     testTransform = Matrix3f::IDENTITY;
     EXPECT_EQ(transform, testTransform.Translate(translate).Scale(scale, 0.5f, 0.5f)
         .Inverse().Translate(translateOffset));
+}
+
+/**
+ * @tc.name: CalTransformSessionPropertyNullptr
+ * @tc.desc: CalTransform
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest, CalTransformSessionPropertyNullptr, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "CalTransformSessionPropertyNullptr";
+    sessionInfo.moduleName_ = "CalTransformSessionPropertyNullptr";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    Matrix3f transform;
+    SingleHandData testSingleHandData;
+    
+    auto oriProperty = sceneSession->GetSessionProperty();
+    sceneSession->property_ = nullptr;
+    manager_->CalTransform(sceneSession, transform, testSingleHandData);
+    EXPECT_TRUE(g_logMsg.find("sessionProperty is null") != std::string::npos);
+    sceneSession->property_ = oriProperty;
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: CalTransformTest_01
+ * @tc.desc: CalTransform isRotate false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest, CalTransformTest_01, TestSize.Level1)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "CalTransformTest_01";
+    sessionInfo.moduleName_ = "CalTransformTest_01";
+    sessionInfo.isRotable_ = false;
+    sessionInfo.isSystem_ = true;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    Vector2f scale(sceneSession->GetScaleX(), sceneSession->GetScaleY());
+    Vector2f translate = sceneSession->GetSessionGlobalPosition(false);
+    Vector2f offset = sceneSession->GetSessionGlobalPosition(false);
+    Matrix3f transform;
+    SingleHandData testSingleHandData;
+
+    auto screenId = 1001;
+    sceneSession->GetSessionProperty()->SetDisplayId(screenId);
+    ScreenSessionConfig config;
+    sptr<ScreenSession> screenSession =
+        sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    ASSERT_NE(screenSession, nullptr);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(screenId, screenSession);
+    ScreenSessionManagerClient::GetInstance().OnUpdateFoldDisplayMode(FoldDisplayMode::UNKNOWN);
+    manager_->CalTransform(sceneSession, transform, testSingleHandData);
+    ASSERT_EQ(transform, transform.Translate(translate)
+        .Scale(scale, sceneSession->GetPivotX(), sceneSession->GetPivotY()).Inverse());
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.erase(screenId);
+}
+
+/**
+ * @tc.name: CalTransformTest_02
+ * @tc.desc: CalTransform isRotate false isRotateWindow false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest, CalTransformTest_02, TestSize.Level1)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "CalTransformTest_02";
+    sessionInfo.moduleName_ = "CalTransformTest_02";
+    sessionInfo.isRotable_ = false;
+    sessionInfo.isSystem_ = true;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    Vector2f scale(sceneSession->GetScaleX(), sceneSession->GetScaleY());
+    Vector2f translate = sceneSession->GetSessionGlobalPosition(false);
+    Vector2f offset = sceneSession->GetSessionGlobalPosition(false);
+    Matrix3f transform;
+    SingleHandData testSingleHandData;
+
+    auto screenId = 1001;
+    sceneSession->GetSessionProperty()->SetDisplayId(screenId);
+    ScreenSessionConfig config;
+    sptr<ScreenSession> screenSession =
+        sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    ASSERT_NE(screenSession, nullptr);
+    screenSession->GetScreenProperty().SetPhysicalRotation(180.0f);
+    screenSession->GetScreenProperty().SetScreenComponentRotation(90.0f);
+
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(screenId, screenSession);
+    sceneSession->SetCurrentRotation(90);
+    ScreenSessionManagerClient::GetInstance().OnUpdateFoldDisplayMode(FoldDisplayMode::FULL);
+    manager_->CalTransform(sceneSession, transform, testSingleHandData);
+    ASSERT_EQ(transform, transform.Translate(translate)
+        .Scale(scale, sceneSession->GetPivotX(), sceneSession->GetPivotY()).Inverse());
+
+    ScreenSessionManagerClient::GetInstance().OnUpdateFoldDisplayMode(FoldDisplayMode::GLOBAL_FULL);
+    manager_->CalTransform(sceneSession, transform, testSingleHandData);
+    ASSERT_EQ(transform, transform.Translate(translate)
+        .Scale(scale, sceneSession->GetPivotX(), sceneSession->GetPivotY()).Inverse());
+
+    ScreenSessionManagerClient::GetInstance().OnUpdateFoldDisplayMode(FoldDisplayMode::MAIN);
+    manager_->CalTransform(sceneSession, transform, testSingleHandData);
+    ASSERT_EQ(transform, transform.Translate(translate)
+        .Scale(scale, sceneSession->GetPivotX(), sceneSession->GetPivotY()).Inverse());
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.erase(screenId);
+}
+
+/**
+ * @tc.name: CalTransformTest_03
+ * @tc.desc: CalTransform isRotate true isRotateWindow false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest, CalTransformTest_03, TestSize.Level1)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "CalTransformTest_03";
+    sessionInfo.moduleName_ = "CalTransformTest_03";
+    sessionInfo.isRotable_ = true;
+    sessionInfo.isSystem_ = false;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    Vector2f scale(sceneSession->GetScaleX(), sceneSession->GetScaleY());
+    Vector2f translate = sceneSession->GetSessionGlobalPosition(false);
+    Vector2f offset = sceneSession->GetSessionGlobalPosition(false);
+    Matrix3f transform;
+    SingleHandData testSingleHandData;
+
+    auto screenId = 1001;
+    sceneSession->GetSessionProperty()->SetDisplayId(screenId);
+    ScreenSessionConfig config;
+    sptr<ScreenSession> screenSession =
+        sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    ASSERT_NE(screenSession, nullptr);
+    screenSession->GetScreenProperty().SetPhysicalRotation(180.0f);
+    screenSession->GetScreenProperty().SetScreenComponentRotation(90.0f);
+
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(screenId, screenSession);
+    sceneSession->SetCurrentRotation(90);
+    ScreenSessionManagerClient::GetInstance().OnUpdateFoldDisplayMode(FoldDisplayMode::UNKNOWN);
+    manager_->CalTransform(sceneSession, transform, testSingleHandData);
+    ASSERT_EQ(transform, transform.Translate(translate)
+        .Scale(scale, sceneSession->GetPivotX(), sceneSession->GetPivotY()).Inverse());
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.erase(screenId);
+}
+
+/**
+ * @tc.name: CalTransformTest_04
+ * @tc.desc: CalTransform isRotate true isRotateWindow true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest, CalTransformTest_04, TestSize.Level1)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "CalTransformTest_04";
+    sessionInfo.moduleName_ = "CalTransformTest_04";
+    sessionInfo.isRotable_ = true;
+    sessionInfo.isSystem_ = true;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    Vector2f scale(sceneSession->GetScaleX(), sceneSession->GetScaleY());
+    Vector2f translate = sceneSession->GetSessionGlobalPosition(false);
+    Vector2f offset = sceneSession->GetSessionGlobalPosition(false);
+    Matrix3f transform;
+    SingleHandData testSingleHandData;
+
+    auto screenId = 1001;
+    sceneSession->GetSessionProperty()->SetDisplayId(screenId);
+    ScreenSessionConfig config;
+    sptr<ScreenSession> screenSession =
+        sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    ASSERT_NE(screenSession, nullptr);
+    screenSession->GetScreenProperty().SetPhysicalRotation(180.0f);
+    screenSession->GetScreenProperty().SetScreenComponentRotation(90.0f);
+
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(screenId, screenSession);
+    sceneSession->SetCurrentRotation(0);
+    ScreenSessionManagerClient::GetInstance().OnUpdateFoldDisplayMode(FoldDisplayMode::MAIN);
+    manager_->CalTransform(sceneSession, transform, testSingleHandData);
+    ASSERT_EQ(transform, transform.Translate(translate)
+        .Scale(scale, sceneSession->GetPivotX(), sceneSession->GetPivotY()).Inverse());
+
+    ScreenSessionManagerClient::GetInstance().OnUpdateFoldDisplayMode(FoldDisplayMode::FULL);
+    manager_->CalTransform(sceneSession, transform, testSingleHandData);
+    ASSERT_EQ(transform, transform.Translate(translate)
+        .Scale(scale, sceneSession->GetPivotX(), sceneSession->GetPivotY()).Inverse());
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.erase(screenId);
 }
 
 /**
