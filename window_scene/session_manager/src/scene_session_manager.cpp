@@ -10958,6 +10958,7 @@ bool SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInf
     info->displayId_ = displayId;
     info->focused_ = sceneSession->GetPersistentId() == GetFocusedSessionId(displayId);
     info->windowRect_ = { wsRect.posX_, wsRect.posY_, wsRect.width_, wsRect.height_ };
+    sceneSession->GetGlobalScaledRect(info->scaleRect_);
     infos.emplace_back(info);
     TLOGD(WmsLogTag::WMS_ATTRIBUTE, "wid: %{public}d, innerWid: %{public}d, nodeId: %{public}d"
         ", bundleName: %{public}s, displayId: %{public}" PRIu64 ", rect: %{public}s",
