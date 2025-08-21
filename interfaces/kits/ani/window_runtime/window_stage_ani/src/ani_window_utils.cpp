@@ -65,8 +65,8 @@ ani_status AniWindowUtils::GetStdString(ani_env *env, ani_string ani_str, std::s
 
 ani_status AniWindowUtils::GetStdStringVector(ani_env* env, ani_object ary, std::vector<std::string>& result)
 {
-    ani_double length;
-    ani_status ret = env->Object_GetPropertyByName_Double(ary, "length", &length);
+    ani_int length;
+    ani_status ret = env->Object_GetPropertyByName_Int(ary, "length", &length);
     if (ret != ANI_OK) {
         return ret;
     }
@@ -938,6 +938,12 @@ uint32_t AniWindowUtils::GetColorFromAni(ani_env* env,
 {
     ani_ref result;
     env->Object_GetPropertyByName_Ref(aniObject, name, &result);
+    ani_boolean isColorUndefined;
+    env->Reference_IsUndefined(result, &isColorUndefined);
+    if (isColorUndefined) {
+        TLOGE(WmsLogTag::WMS_IMMS, "the color is undefined");
+    }
+
     ani_string aniColor = reinterpret_cast<ani_string>(result);
     std::string colorStr;
     GetStdString(env, aniColor, colorStr);
