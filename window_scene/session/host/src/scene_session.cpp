@@ -103,6 +103,12 @@ bool CheckIfRectElementIsTooLarge(const WSRect& rect)
     }
     return false;
 }
+
+bool isMainOrExtendScreenMode(const ScreenSourceMode& screenSourceMode)
+{
+    return screenSourceMode == ScreenSourceMode::SCREEN_MAIN ||
+        screenSourceMode == ScreenSourceMode::SCREEN_EXTEND;
+}
 } // namespace
 
 MaximizeMode SceneSession::maximizeMode_ = MaximizeMode::MODE_RECOVER;
@@ -4238,6 +4244,16 @@ WSError SceneSession::KeyFrameAnimateEnd()
     return WSError::WS_OK;
 }
 
+std::shared_ptr<Rosen::RSNode> SceneSession::GetWindowDragMoveMountedNode(DisplayId displayId,
+    uint32_t targetZOrder)
+{
+    if (!findScenePanelRsNodeByZOrderFunc_) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "findScenePanelRsNodeByZOrderFunc_ is null");
+        return nullptr;
+    }
+    return findScenePanelRsNodeByZOrderFunc_(displayId, targetZOrder);
+}
+
 /** @note @window.drag */
 void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
 {
@@ -4252,6 +4268,7 @@ void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
         TLOGE(WmsLogTag::WMS_LAYOUT, "startScreenSession is null, startDisplayId: %{public}" PRIu64, startDisplayId);
         return;
     }
+    bool isStartScreenMainOrExtend = isMainOrExtendScreenMode(startScreenSession->GetSourceMode());
     if (reason == SizeChangeReason::DRAG || reason == SizeChangeReason::DRAG_MOVE) {
         for (const auto displayId : moveDragController_->GetNewAddedDisplayIdsDuringMoveDrag()) {
             if (displayId == moveDragController_->GetMoveDragStartDisplayId()) {
@@ -4262,17 +4279,18 @@ void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
                 TLOGD(WmsLogTag::WMS_LAYOUT, "ScreenSession is null");
                 continue;
             }
-            bool isStartScreenMainOrExtend = startScreenSession->GetSourceMode() == ScreenSourceMode::SCREEN_MAIN
-                || startScreenSession->GetSourceMode() == ScreenSourceMode::SCREEN_EXTEND;
-            bool isDestScreenMainOrExtend = screenSession->GetSourceMode() == ScreenSourceMode::SCREEN_MAIN
-                || screenSession->GetSourceMode() == ScreenSourceMode::SCREEN_EXTEND;
+            bool isDestScreenMainOrExtend = isMainOrExtendScreenMode(screenSession->GetSourceMode());
             // Not main to extend or extend to main or extend to extend, no need to add cross parent child
             if (!(isStartScreenMainOrExtend && isDestScreenMainOrExtend)) {
                 TLOGD(WmsLogTag::WMS_LAYOUT, "No need to add cross-parent child elements for out-of-scope situations, "
                     "DisplayId: %{public}" PRIu64, displayId);
                 continue;
             }
-
+            auto dragMoveMountedNode = GetWindowDragMoveMountedNode(displayId, this->GetZOrder());
+            if (dragMoveMountedNode == nullptr) {
+                TLOGE(WmsLogTag::WMS_LAYOUT, "dragMoveMountedNode is null");
+                continue;
+            }
             {
                 AutoRSTransaction trans(movedSurfaceNode->GetRSUIContext());
                 movedSurfaceNode->SetPositionZ(MOVE_DRAG_POSITION_Z);
@@ -4280,37 +4298,29 @@ void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
             }
 
             {
-                AutoRSTransaction trans(screenSession->GetRSUIContext());
-                TLOGI(WmsLogTag::WMS_LAYOUT, "Add window to display: %{public}" PRIu64, displayId);
-                screenSession->GetDisplayNode()->AddCrossScreenChild(movedSurfaceNode, -1, true);
+                AutoRSTransaction trans(dragMoveMountedNode->GetRSUIContext());
+                dragMoveMountedNode->AddCrossScreenChild(movedSurfaceNode, -1, true);
             }
-            HandleSubSessionSurfaceNodeByWindowAnchor(reason, screenSession);
+            HandleSubSessionSurfaceNodeByWindowAnchor(reason, displayId);
+            TLOGI(WmsLogTag::WMS_LAYOUT, "Add window to display: %{public}" PRIu64 "persistentId: %{public}d",
+                displayId, GetPersistentId());
         }
     } else if (reason == SizeChangeReason::DRAG_END) {
         for (const auto displayId : moveDragController_->GetDisplayIdsDuringMoveDrag()) {
             if (displayId == moveDragController_->GetMoveDragStartDisplayId()) {
                 continue;
             }
-            auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSessionById(displayId);
-            if (screenSession == nullptr) {
-                TLOGD(WmsLogTag::WMS_LAYOUT, "ScreenSession is null");
-                continue;
-            }
-            bool isStartScreenMainOrExtend = startScreenSession->GetSourceMode() == ScreenSourceMode::SCREEN_MAIN
-                || startScreenSession->GetSourceMode() == ScreenSourceMode::SCREEN_EXTEND;
-            bool isDestScreenMainOrExtend = screenSession->GetSourceMode() == ScreenSourceMode::SCREEN_MAIN
-                || screenSession->GetSourceMode() == ScreenSourceMode::SCREEN_EXTEND;
-            // Not main to extend or extend to main or extend to extend, no need to add cross parent child
-            if (!(isStartScreenMainOrExtend && isDestScreenMainOrExtend)) {
-                TLOGD(WmsLogTag::WMS_LAYOUT, "No need to add cross-parent child elements for out-of-scope situations, "
-                    "DisplayId: %{public}" PRIu64, displayId);
+            auto dragMoveMountedNode = GetWindowDragMoveMountedNode(displayId, this->GetZOrder());
+            if (dragMoveMountedNode == nullptr) {
+                TLOGE(WmsLogTag::WMS_LAYOUT, "dragMoveMountedNode is null");
                 continue;
             }
             movedSurfaceNode->SetPositionZ(moveDragController_->GetOriginalPositionZ());
-            screenSession->GetDisplayNode()->RemoveCrossScreenChild(movedSurfaceNode);
+            dragMoveMountedNode->RemoveCrossScreenChild(movedSurfaceNode);
             movedSurfaceNode->SetIsCrossNode(false);
-            TLOGI(WmsLogTag::WMS_LAYOUT, "Remove window from display: %{public}" PRIu64, displayId);
-            HandleSubSessionSurfaceNodeByWindowAnchor(reason, screenSession);
+            HandleSubSessionSurfaceNodeByWindowAnchor(reason, displayId);
+            TLOGI(WmsLogTag::WMS_LAYOUT, "Remove window from display: %{public}" PRIu64 "persistentId: %{public}d",
+                displayId, GetPersistentId());
         }
     }
 }
@@ -9265,5 +9275,10 @@ WSError SceneSession::SetFrameRectForPartialZoomInInner(const Rect& frameRect)
     surfaceNode->SetRegionToBeMagnified({ frameRect.posX_, frameRect.posY_, frameRect.width_, frameRect.height_ });
     TLOGI(WmsLogTag::WMS_ANIMATION, "frameRect: %{public}s", frameRect.ToString().c_str());
     return WSError::WS_OK;
+}
+
+void SceneSession::SetFindScenePanelRsNodeByZOrderFunc(FindScenePanelRsNodeByZOrderFunc&& func)
+{
+    findScenePanelRsNodeByZOrderFunc_ = std::move(func);
 }
 } // namespace OHOS::Rosen

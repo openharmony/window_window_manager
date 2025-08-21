@@ -147,6 +147,9 @@ using NotifyAnimateToFunc = std::function<void(const WindowAnimationProperty& an
 using GetAllAppUseControlMapFunc =
     std::function<std::unordered_map<std::string, std::unordered_map<ControlAppType, ControlInfo>>&()>;
 using GetFbPanelWindowIdFunc =  std::function<WMError(uint32_t& windowId)>;
+using FindScenePanelRsNodeByZOrderFunc = std::function<std::shared_ptr<Rosen::RSNode>(DisplayId displayId,
+    uint32_t targetZOrder)>;
+
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
     uint32_t callingTokenId { 0 };
@@ -263,8 +266,7 @@ public:
     void HandleCrossMoveTo(WSRect& globalRect);
     virtual void HandleCrossMoveToSurfaceNode(WSRect& globalRect) {}
     virtual bool IsNeedCrossDisplayRendering() const { return false; }
-    virtual void HandleCrossSurfaceNodeByWindowAnchor(SizeChangeReason reason,
-        const sptr<ScreenSession>& screenSession) {}
+    virtual void HandleCrossSurfaceNodeByWindowAnchor(SizeChangeReason reason, DisplayId displayId) {}
     virtual void SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool needFlush = true);
 
     virtual void OpenKeyboardSyncTransaction() {}
@@ -302,6 +304,7 @@ public:
     void SetFloatingScale(float floatingScale) override;
     WSError RaiseAboveTarget(int32_t subWindowId) override;
     WSError RaiseMainWindowAboveTarget(int32_t targetId) override;
+    std::shared_ptr<Rosen::RSNode> GetWindowDragMoveMountedNode(DisplayId displayId, uint32_t targetZOrder);
 
     /*
      * PiP Window
@@ -783,6 +786,7 @@ public:
     void ResetCompatibleModeDragScaleFlags();
     void RegisterAppHookWindowInfoFunc(GetHookWindowInfoFunc&& func);
     WMError GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo) override;
+    void SetFindScenePanelRsNodeByZOrderFunc(FindScenePanelRsNodeByZOrderFunc&& func);
 
     /*
      * Gesture Back
@@ -962,6 +966,7 @@ protected:
     bool isFollowParentLayout_ = false;
     NotifyWindowAnchorInfoChangeFunc onWindowAnchorInfoChangeFunc_ = nullptr;
     WindowAnchorInfo windowAnchorInfo_;
+    FindScenePanelRsNodeByZOrderFunc findScenePanelRsNodeByZOrderFunc_;
     int32_t cloneNodeCount_ = 0;
 
     virtual void NotifySubSessionRectChangeByAnchor(const WSRect& parentRect,
@@ -1237,8 +1242,7 @@ private:
     WSError UpdateRectForDrag(const WSRect& rect);
     void UpdateSessionRectPosYFromClient(SizeChangeReason reason, DisplayId& configDisplayId, WSRect& rect);
     void HandleSubSessionSurfaceNode(bool isAdd, DisplayId draggingOrMovingParentDisplayId);
-    virtual void HandleSubSessionSurfaceNodeByWindowAnchor(SizeChangeReason reason,
-        const sptr<ScreenSession>& screenSession) {}
+    virtual void HandleSubSessionSurfaceNodeByWindowAnchor(SizeChangeReason reason, DisplayId displayId) {}
     virtual void AddSurfaceNodeToScreen(DisplayId draggingOrMovingParentDisplayId) {}
     virtual void RemoveSurfaceNodeFromScreen() {}
     void SetParentRect();
