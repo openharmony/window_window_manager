@@ -96,9 +96,26 @@ void DisplayAniUtils::ConvertDisplayPhysicalResolution(std::vector<DisplayPhysic
     }
 }
 
+ani_enum_item DisplayAniUtils::CreateAniEnum(ani_env* env, const char* enum_descriptor, ani_size index)
+{
+    ani_enum enumType;
+    ani_status ret = env->FindEnum(enum_descriptor, &enumType);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Failed to find enum, %{public}s", enum_descriptor);
+        return nullptr;
+    }
+    ani_enum_item enumItem;
+    env->Enum_GetEnumItemByIndex(enumType, index, &enumItem);
+    return enumItem;
+}
+
 ani_status DisplayAniUtils::CvtDisplay(sptr<Display> display, ani_env* env, ani_object obj)
 {
     sptr<DisplayInfo> info = display->GetDisplayInfoWithCache();
+    if (info == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Failed to GetDisplayInfo");
+        return ANI_ERROR;
+    }
     int setfieldid = env->Object_SetFieldByName_Long(obj, "<property>id", info->GetDisplayId());
     if (ANI_OK != setfieldid) {
         TLOGE(WmsLogTag::DMS, "[ANI] set id failed: %{public}d", setfieldid);
@@ -111,9 +128,11 @@ ani_status DisplayAniUtils::CvtDisplay(sptr<Display> display, ani_env* env, ani_
     env->Object_SetFieldByName_Ref(obj, "<property>name", str);
     env->Object_SetFieldByName_Boolean(obj, "<property>alive", info->GetAliveStatus());
     if (NATIVE_TO_JS_DISPLAY_STATE_MAP.count(info->GetDisplayState()) != 0) {
-        env->Object_SetFieldByName_Int(obj, "<property>state_", static_cast<uint32_t>(info->GetDisplayState()));
+        env->Object_SetFieldByName_Ref(obj, "<property>state", DisplayAniUtils::CreateAniEnum(
+            env, "@ohos.display.display.DisplayState", static_cast<ani_size>(info->GetDisplayState())));
     } else {
-        env->Object_SetFieldByName_Int(obj, "<property>state_", 0);
+        env->Object_SetFieldByName_Ref(obj, "<property>state", DisplayAniUtils::CreateAniEnum(
+            env, "@ohos.display.display.DisplayState", static_cast<ani_size>(0)));
     }
     env->Object_SetFieldByName_Int(obj, "<property>refreshRate", info->GetRefreshRate());
     env->Object_SetFieldByName_Int(obj, "<property>rotation", static_cast<uint32_t>(info->GetRotation()));
@@ -126,14 +145,27 @@ ani_status DisplayAniUtils::CvtDisplay(sptr<Display> display, ani_env* env, ani_
     env->Object_SetFieldByName_Long(obj, "<property>availableWidth", info->GetAvailableWidth());
     env->Object_SetFieldByName_Long(obj, "<property>availableHeight", info->GetAvailableHeight());
     env->Object_SetFieldByName_Double(obj, "<property>densityDPI", info->GetVirtualPixelRatio() * DOT_PER_INCH);
-    env->Object_SetFieldByName_Int(obj, "<property>orientation_", static_cast<uint32_t>(info->GetDisplayOrientation()));
+    env->Object_SetFieldByName_Ref(obj, "<property>orientation", DisplayAniUtils::CreateAniEnum(
+        env, "@ohos.display.display.Orientation", static_cast<ani_size>(info->GetDisplayOrientation())));
     env->Object_SetFieldByName_Double(obj, "<property>densityPixels", info->GetVirtualPixelRatio());
     env->Object_SetFieldByName_Double(obj, "<property>scaledDensity", info->GetVirtualPixelRatio());
     env->Object_SetFieldByName_Double(obj, "<property>xDPI", info->GetXDpi());
     env->Object_SetFieldByName_Double(obj, "<property>yDPI", info->GetYDpi());
+    env->Object_SetFieldByName_Ref(obj, "<property>screenShape", DisplayAniUtils::CreateAniEnum(
+        env, "@ohos.display.display.ScreenShape", static_cast<ani_size>(info->GetScreenShape())));
+    if (info->GetDisplaySourceMode() == DisplaySourceMode::MAIN ||
+        info->GetDisplaySourceMode() == DisplaySourceMode::EXTEND) {
+        env->Object_SetFieldByName_Long(obj, "<property>x", info->GetX());
+        env->Object_SetFieldByName_Long(obj, "<property>y", info->GetY());
+    } else {
+        env->Object_SetFieldByName_Ref(obj, "<property>x", DisplayAniUtils::CreateAniUndefined(env));
+        env->Object_SetFieldByName_Ref(obj, "<property>y", DisplayAniUtils::CreateAniUndefined(env));
+    }
+    env->Object_SetFieldByName_Ref(obj, "<property>sourceMode", DisplayAniUtils::CreateAniEnum(
+        env, "@ohos.display.display.DisplaySourceMode", static_cast<ani_size>(info->GetDisplaySourceMode())));
     auto colorSpaces = info->GetColorSpaces();
     auto hdrFormats = info->GetHdrFormats();
-    TLOGI(WmsLogTag::DMS, "[ANI] colorSpaces(0) %{public}d", (int)colorSpaces.size());
+    auto supportedRefreshRates = info->GetSupportedRefreshRate();
     if (colorSpaces.size() != 0) {
         ani_array_int colorSpacesAni;
         CreateAniArrayInt(env, colorSpaces.size(), &colorSpacesAni, colorSpaces);
@@ -143,6 +175,12 @@ ani_status DisplayAniUtils::CvtDisplay(sptr<Display> display, ani_env* env, ani_
         ani_array_int hdrFormatsAni;
         CreateAniArrayInt(env, hdrFormats.size(), &hdrFormatsAni, hdrFormats);
         env->Object_SetFieldByName_Ref(obj, "<property>hdrFormats", static_cast<ani_ref>(hdrFormatsAni));
+    }
+    if (supportedRefreshRates.size() != 0) {
+        ani_array_int supportedRefreshRatesAni;
+        CreateAniArrayInt(env, hdrFormats.size(), &supportedRefreshRatesAni, supportedRefreshRates);
+        env->Object_SetFieldByName_Ref(obj, "<property>supportedRefreshRates",
+            static_cast<ani_ref>(supportedRefreshRatesAni));
     }
     return ANI_OK;
 }
@@ -258,7 +296,7 @@ ani_status DisplayAniUtils::CallAniFunctionVoid(ani_env *env, const char* ns,
 ani_object DisplayAniUtils::CreateRectObject(ani_env *env)
 {
     ani_class aniClass{};
-    ani_status status = env->FindClass("L@ohos/display/display/RectImpl;", &aniClass);
+    ani_status status = env->FindClass("@ohos.display.display.RectImpl", &aniClass);
     if (status != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] class not found, status:%{public}d", static_cast<int32_t>(status));
         return nullptr;
