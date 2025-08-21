@@ -8315,7 +8315,6 @@ void ScreenSessionManager::SwitchUser()
         return;
     }
     auto userId = GetUserIdByCallingUid();
-    auto newScbPid = IPCSkeleton::GetCallingPid();
     currentUserIdForSettings_ = userId;
     if (g_isPcDevice && userSwitching_) {
         std::unique_lock<std::mutex> lock(switchUserMutex_);
@@ -8324,7 +8323,10 @@ void ScreenSessionManager::SwitchUser()
             userSwitching_ = false;
         }
     }
-    SwitchScbNodeHandle(userId, newScbPid, false);
+    {
+        std::lock_guard<std::mutex> lock(oldScbPidsMutex_);
+        SwitchScbNodeHandle(userId, IPCSkeleton::GetCallingPid(), false);
+    }
     MockSessionManagerService::GetInstance().NotifyWMSConnected(userId, GetDefaultScreenId(), false);
 #endif
 }
@@ -8578,21 +8580,23 @@ void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& cl
             userSwitching_ = false;
         }
     }
-    SetClientProxy(client);
-    auto userId = GetUserIdByCallingUid();
-    auto newScbPid = IPCSkeleton::GetCallingPid();
+    {
+        std::unique_lock<std::mutex> lock(oldScbPidsMutex_);
+        SetClientProxy(client);
+        auto userId = GetUserIdByCallingUid();
+        auto newScbPid = IPCSkeleton::GetCallingPid();
 
-    std::ostringstream oss;
-    oss << "set client userId: " << userId
-        << " clientName: " << SysCapUtil::GetClientName();
-    TLOGI(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
-    screenEventTracker_.RecordEvent(oss.str());
-    currentUserIdForSettings_ = userId;
-    MockSessionManagerService::GetInstance().NotifyWMSConnected(userId, GetDefaultScreenId(), true);
-    NotifyClientProxyUpdateFoldDisplayMode(GetFoldDisplayMode());
-    SetClientInner();
-    SwitchScbNodeHandle(userId, newScbPid, true);
-    AddScbClientDeathRecipient(client, newScbPid);
+        std::ostringstream oss;
+        oss << "set client userId: " << userId << " clientName: " << SysCapUtil::GetClientName();
+        TLOGI(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
+        screenEventTracker_.RecordEvent(oss.str());
+        currentUserIdForSettings_ = userId;
+        MockSessionManagerService::GetInstance().NotifyWMSConnected(userId, GetDefaultScreenId(), true);
+        NotifyClientProxyUpdateFoldDisplayMode(GetFoldDisplayMode());
+        SetClientInner();
+        SwitchScbNodeHandle(userId, newScbPid, true);
+    }
+    AddScbClientDeathRecipient(client, IPCSkeleton::GetCallingPid());
 
     static bool isNeedSwitchScreen = FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() ||
         FoldScreenStateInternel::IsSingleDisplayFoldDevice();
@@ -8620,7 +8624,6 @@ void ScreenSessionManager::SwitchScbNodeHandle(int32_t newUserId, int32_t newScb
     TLOGI(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
     screenEventTracker_.RecordEvent(oss.str());
 
-    std::unique_lock<std::mutex> lock(oldScbPidsMutex_);
     if (currentScbPId_ != INVALID_SCB_PID) {
         auto pidIter = std::find(oldScbPids_.begin(), oldScbPids_.end(), currentScbPId_);
         if (pidIter == oldScbPids_.end() && currentScbPId_ > 0) {
