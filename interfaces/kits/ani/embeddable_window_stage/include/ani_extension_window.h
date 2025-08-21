@@ -37,13 +37,13 @@ public:
         sptr<AAFwk::SessionInfo> sessionInfo);
     static ani_object CreateAniExtensionWindow(ani_env* env, sptr<Rosen::Window> window, int32_t hostWindowId);
     WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea);
-    WMError OnSetWaterMarkFlag(ani_env* env, ani_boolean enable);
-    WMError OnHidePrivacyContentForHost(ani_env* env, ani_boolean shouldHide);
-    WMError GetRect(Rect&);
-    WMError RegisterListener(const std::string& cbType, ani_env* env, ani_object fn, ani_object fnArg);
-    WMError UnregisterListener(const std::string& cbType, ani_env* env, ani_object fn);
+    WmErrorCode OnSetWaterMarkFlag(ani_env* env, ani_boolean enable);
+    WmErrorCode OnHidePrivacyContentForHost(ani_env* env, ani_boolean shouldHide);
+    WmErrorCode GetExtensionWindowRect(Rect& rect);
+    WmErrorCode RegisterListener(const std::string& cbType, ani_env* env, ani_object fn, ani_object fnArg);
+    WmErrorCode UnregisterListener(const std::string& cbType, ani_env* env, ani_object fn);
 private:
-    bool WindowIsValid();
+    bool IsExtensionWindowValid();
     std::shared_ptr<Rosen::ExtensionWindow> extensionWindow_;
     int32_t hostWindowId_ = 0;
     sptr<AAFwk::SessionInfo> sessionInfo_ = nullptr;
