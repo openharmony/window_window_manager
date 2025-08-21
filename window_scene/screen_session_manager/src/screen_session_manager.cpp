@@ -1699,8 +1699,8 @@ void ScreenSessionManager::OnHgmRefreshRateChange(uint32_t refreshRate)
         screenSession->UpdateRefreshRate(refreshRate);
         NotifyDisplayChanged(screenSession->ConvertToDisplayInfo(),
             DisplayChangeEvent::UPDATE_REFRESHRATE);
-        UpdateCoordinationRefreshRate(screenSession, refreshRate);
-        UpdateSuperFoldRefreshRate(refreshRate);
+        UpdateCoordinationRefreshRate(refreshRate);
+        UpdateSuperFoldRefreshRate(screenSession, refreshRate);
         std::map<ScreenId, sptr<ScreenSession>> screenSessionMap;
         {
             std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
