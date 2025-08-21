@@ -4429,7 +4429,6 @@ void SceneSessionManager::HandleUserSwitching(bool isUserActive)
         UpdatePrivateStateAndNotifyForAllScreens();
     } else { // switch to another user
         SceneInputManager::GetInstance().FlushEmptyInfoToMMI();
-        rsInterface_.RemoveVirtualScreenBlackList(INVALID_SCREEN_ID, skipSurfaceNodeIds_);
         // minimized UI abilities when the user is switching and inactive
         ProcessUIAbilityOnUserSwitch(isUserActive);
     }
@@ -4440,6 +4439,8 @@ void SceneSessionManager::HandleUserSwitched(bool isUserActive)
     if (isUserActive) {
         // start UI abilities only after the user has switched and become active
         ProcessUIAbilityOnUserSwitch(isUserActive);
+    } else {
+        rsInterface_.RemoveVirtualScreenBlackList(INVALID_SCREEN_ID, skipSurfaceNodeIds_);
     }
 }
 

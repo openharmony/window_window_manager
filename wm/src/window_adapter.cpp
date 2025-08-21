@@ -366,8 +366,14 @@ void WindowAdapter::UnregisterSessionRecoverCallbackFunc(int32_t persistentId)
 
 WMError WindowAdapter::RegisterWMSConnectionChangedListener(const WMSConnectionChangedCallbackFunc& callbackFunc)
 {
-    WLOGFI("RegisterWMSConnectionChangedListener in");
+    TLOGI(WmsLogTag::WMS_MULTI_USER, "RegisterWMSConnectionChangedListener in");
     return SessionManager::GetInstance().RegisterWMSConnectionChangedListener(callbackFunc);
+}
+
+WMError WindowAdapter::UnregisterWMSConnectionChangedListener()
+{
+    TLOGI(WmsLogTag::WMS_MULTI_USER, "unregister wms connection changed listener");
+    return SessionManager::GetInstance().UnregisterWMSConnectionChangedListener();
 }
 
 void WindowAdapter::WindowManagerAndSessionRecover()
