@@ -1699,7 +1699,8 @@ void ScreenSessionManager::OnHgmRefreshRateChange(uint32_t refreshRate)
         screenSession->UpdateRefreshRate(refreshRate);
         NotifyDisplayChanged(screenSession->ConvertToDisplayInfo(),
             DisplayChangeEvent::UPDATE_REFRESHRATE);
-        UpdateCoordinationRefreshRate(refreshRate);
+        UpdateCoordinationRefreshRate(screenSession, refreshRate);
+        UpdateSuperFoldRefreshRate(refreshRate);
         std::map<ScreenId, sptr<ScreenSession>> screenSessionMap;
         {
             std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
@@ -1720,6 +1721,29 @@ void ScreenSessionManager::OnHgmRefreshRateChange(uint32_t refreshRate)
     }
     return;
 }
+
+void ScreenSessionManager::UpdateSuperFoldRefreshRate(sptr<ScreenSession> screenSession, uint32_t refreshRate)
+{
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        TLOGD(WmsLogTag::DMS, "not super fold display device.");
+        return;
+    }
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "screenSession is nullptr")
+        return;
+    }
+    sptr<ScreenSession> fakeScreenSession = screenSession->GetFakeScreenSession();
+    if (fakeScreenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "fakeScreenSession is nullptr")
+        return;
+    }
+    fakeScreenSession->UpdateRefreshRate(refreshRate);
+    if (screenSession->GetScreenProperty().GetIsFakeInUse()) {
+        NotifyDisplayChanged(fakeScreenSession->ConvertToDisplayInfo(), DisplayChangeEvent::UPDATE_REFRESHRATE);
+        TLOGE(WmsLogTag::DMS, "notify success")
+    }
+}
+
 
 bool ScreenSessionManager::IsPhysicalScreenAndInUse(sptr<ScreenSession> screenSession) const
 {
