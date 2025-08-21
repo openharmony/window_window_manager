@@ -560,6 +560,7 @@ HWTEST_F(SceneSessionManagerTest8, SetBrightness, TestSize.Level1)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     EXPECT_NE(nullptr, sceneSession);
     sceneSession->persistentId_ = 2024;
+    sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
 
     ssm_->SetDisplayBrightness(3.14f);
     std::shared_ptr<AppExecFwk::EventHandler> pipeEventHandler = nullptr;
