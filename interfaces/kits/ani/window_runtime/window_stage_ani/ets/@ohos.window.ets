@@ -1302,6 +1302,9 @@ export interface WindowDensityInfo {
     defaultDensity: double;
     customDensity: double;
 }
+export interface SystemBarStyle {
+  statusBarContentColor?: string;
+}
 
 export interface AvoidAreaOptions {
     type: AvoidAreaType;
