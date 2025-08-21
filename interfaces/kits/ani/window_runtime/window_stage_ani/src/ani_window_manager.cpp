@@ -301,11 +301,15 @@ bool ParseConfigOption(ani_env* env, ani_object configuration, WindowOption &opt
 
     ani_ref result;
     env->Object_GetPropertyByName_Ref(configuration, "title", &result);
-    ani_string aniDialogTitle = reinterpret_cast<ani_string>(result);
-    std::string dialogTitle;
-    AniWindowUtils::GetStdString(env, aniDialogTitle, dialogTitle);
-    TLOGI(WmsLogTag::DEFAULT, "[ANI] dialogTitle: %{public}s", dialogTitle.c_str());
-    option.SetDialogTitle(dialogTitle);
+    ani_boolean isTitleUndefined = false;
+    env->Reference_IsUndefined(result, &isTitleUndefined);
+    if (!isTitleUndefined) {
+        ani_string aniDialogTitle = reinterpret_cast<ani_string>(result);
+        std::string dialogTitle;
+        AniWindowUtils::GetStdString(env, aniDialogTitle, dialogTitle);
+        TLOGI(WmsLogTag::DEFAULT, "[ANI] dialogTitle: %{public}s", dialogTitle.c_str());
+        option.SetDialogTitle(dialogTitle);
+    }
 
     env->Object_GetPropertyByName_Ref(configuration, "ctx", &result);
     ani_object aniContextPtr = reinterpret_cast<ani_object>(result);
