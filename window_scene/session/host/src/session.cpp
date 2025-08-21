@@ -3341,11 +3341,14 @@ WSError Session::SetAppSupportPhoneInPc(bool isSupportPhone)
 WSError Session::SetCompatibleModeProperty(const sptr<CompatibleModeProperty> compatibleModeProperty)
 {
     auto property = GetSessionProperty();
-    if (property == nullptr) {
+    if (property == nullptr || compatibleModeProperty == nullptr) {
         TLOGE(WmsLogTag::WMS_COMPAT, "id: %{public}d property is nullptr", persistentId_);
         return WSError::WS_ERROR_NULLPTR;
     }
     property->SetCompatibleModeProperty(compatibleModeProperty);
+    if (compatibleModeProperty->IsDragResizeDisabled()) {
+        property->SetDragEnabled(false);
+    }
     if (!sessionStage_) {
         TLOGE(WmsLogTag::WMS_COMPAT, "sessionStage is null");
         return WSError::WS_ERROR_NULLPTR;
