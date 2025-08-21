@@ -28,31 +28,38 @@
 
 namespace OHOS {
 namespace Rosen {
+const std::string WINDOW_SIZE_CHANGE_CB = "windowSizeChange";
+const std::string AVOID_AREA_CHANGE_CB = "avoidAreaChange";
+const std::string WINDOW_STAGE_EVENT_CB = "windowStageEvent";
+const std::string WINDOW_EVENT_CB = "windowEvent";
+constexpr const char* ETS_UIEXTENSION_HOST_NAMESPACE_DESCRIPTOR = "L@ohos/uiExtensionHost/uiExtensionHost;";
+
 class AniExtensionWindowListener : public IWindowChangeListener,
                                    public IAvoidAreaChangedListener,
                                    public IWindowLifeCycle,
                                    public IOccupiedAreaChangeListener {
 public:
     AniExtensionWindowListener(ani_env* env, ani_ref func, ani_ref data)
-        : env_(env), callBack_(func), callBackData_(data), weakRef_(wptr<AniExtensionWindowListener> (this)) {}
+        : env_(env), aniCallback_(func), aniCallbackData_(data), weakRef_(wptr<AniExtensionWindowListener> (this)) {}
     ~AniExtensionWindowListener();
+    ani_ref GetAniCallback() const { return aniCallback_; }
+    void SetAniCallback(ani_ref aniCallback) { aniCallback_ = aniCallback; }
     void OnSizeChange(Rect rect, WindowSizeChangeReason reason,
-                      const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
+        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
     void OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaType type,
         const sptr<OccupiedAreaChangeInfo>& info = nullptr) override;
     void OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info,
-                      const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
+        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
     void SetMainEventHandler();
-    bool IsSameRef(ani_ref newRef);
     void SetSizeInfo(uint32_t width, uint32_t height);
 
 private:
-    void CallBack();
+    void CallSizeChangeCallback();
     uint32_t currentWidth_ = 0;
     uint32_t currentHeight_ = 0;
     ani_env* env_ = nullptr;
-    ani_ref callBack_;
-    ani_ref callBackData_;
+    ani_ref aniCallback_;
+    ani_ref aniCallbackData_;
     wptr<AniExtensionWindowListener> weakRef_ = nullptr;
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_ = nullptr;
     DEFINE_VAR_DEFAULT_FUNC_SET(bool, IsDeprecatedInterface, isDeprecatedInterface, false)
