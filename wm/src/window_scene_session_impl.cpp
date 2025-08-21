@@ -2397,7 +2397,7 @@ WMError WindowSceneSessionImpl::CheckAndModifyWindowRect(uint32_t& width, uint32
 }
 
 /** @note @window.layout */
-WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height, const RectAnimationConfig& rectAnimationConfig)
+WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height)
 {
     auto reason = SizeChangeReason::RESIZE;
     if (isResizedByLimit_) {
@@ -2431,21 +2431,16 @@ WMError WindowSceneSessionImpl::Resize(uint32_t width, uint32_t height, const Re
         windowRect.ToString().c_str(), newRect.ToString().c_str());
 
     property_->SetRequestRect(newRect);
-    property_->SetRectAnimationConfig(rectAnimationConfig);
 
     WSRect wsRect = { newRect.posX_, newRect.posY_, newRect.width_, newRect.height_ };
     auto hostSession = GetHostSession();
-    if (rectAnimationConfig.duration > 0 && reason == SizeChangeReason::RESIZE) {
-        reason = SizeChangeReason::RESIZE_WITH_ANIMATION;
-    }
 
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
-    auto ret = hostSession->UpdateSessionRect(wsRect, reason, false, false, {}, rectAnimationConfig);
+    auto ret = hostSession->UpdateSessionRect(wsRect, reason);
     return static_cast<WMError>(ret);
 }
 
-WMError WindowSceneSessionImpl::ResizeAsync(uint32_t width, uint32_t height,
-    const RectAnimationConfig& rectAnimationConfig)
+WMError WindowSceneSessionImpl::ResizeAsync(uint32_t width, uint32_t height)
 {
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Session is invalid");
@@ -2457,7 +2452,7 @@ WMError WindowSceneSessionImpl::ResizeAsync(uint32_t width, uint32_t height,
             GetWindowId(), GetWindowMode());
         return WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS;
     }
-    auto ret = Resize(width, height, rectAnimationConfig);
+    auto ret = Resize(width, height);
     if (state_ == WindowState::STATE_SHOWN) {
         layoutCallback_->ResetResizeLock();
         auto startTime = std::chrono::duration_cast<std::chrono::milliseconds>(
