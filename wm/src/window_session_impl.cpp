@@ -8082,7 +8082,6 @@ void WindowSessionImpl::SwitchSubWindow(bool freeMultiWindowEnable, int32_t pare
             subWindowSession->SetFreeMultiWindowMode(freeMultiWindowEnable);
             subWindowSession->UpdateTitleButtonVisibility();
             subWindowSession->UpdateDecorEnable(true);
-            subWindowSession->UpdateEnableDragWhenSwitchMultiWindow(freeMultiWindowEnable);
             subWindowSession->SwitchSubWindow(freeMultiWindowEnable, subWindowSession->GetPersistentId());
         }
     }
