@@ -226,6 +226,9 @@ public:
     void SetVirtualScreenFlag(VirtualScreenFlag screenFlag);
     void SetSecurity(bool isSecurity);
 
+    VirtualScreenType GetVirtualScreenType();
+    void SetVirtualScreenType(VirtualScreenType screenType);
+
     std::string name_ { "UNKNOWN" };
     ScreenId screenId_ {};
     ScreenId rsId_ {};
@@ -328,11 +331,14 @@ public:
     void UpdateDisplayNodeRotation(int rotation);
     void BeforeScreenPropertyChange(FoldStatus foldStatus);
     void ScreenModeChange(ScreenModeChangeEvent screenModeChangeEvent);
+    void FreezeScreen(bool isFreeze);
+    std::shared_ptr<Media::PixelMap> GetScreenSnapshotWithAllWindows(float scaleX, float scaleY,
+        bool isNeedCheckDrmAndSurfaceLock);
 
     DisplayId GetDisplayId();
 
     std::vector<sptr<SupportedScreenModes>> GetScreenModes();
-    void SetScreenModes(std::vector<sptr<SupportedScreenModes>> modes);
+    void SetScreenModes(const std::vector<sptr<SupportedScreenModes>>& modes);
 
     int32_t GetActiveId();
     void SetActiveId(int32_t activeIdx);
@@ -387,6 +393,7 @@ private:
     ScreenCombination combination_ { ScreenCombination::SCREEN_ALONE };
     mutable std::mutex combinationMutex_; // above guarded by clientProxyMutex_
     VirtualScreenFlag screenFlag_ { VirtualScreenFlag::DEFAULT };
+    VirtualScreenType screenType_ { VirtualScreenType::UNKNOWN };
     bool hasPrivateWindowForeground_ = false;
     bool isFakeInUse_ = false;  // is fakeScreenSession can be used
     bool isBScreenHalf_ = false;
@@ -427,6 +434,7 @@ private:
     bool isSecurity_ = true;
     uint64_t sessionId_;
     bool lastCloseHdrStatus_ = false;
+    mutable std::shared_mutex modesMutex_;
 
     /*
      * RS Client Multi Instance

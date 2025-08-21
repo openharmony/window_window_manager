@@ -44,6 +44,7 @@ public:
     void TearDown() override;
 
 private:
+    RSSurfaceNode::SharedPtr CreateRSSurfaceNode();
     sptr<SessionStageMocker> mockSessionStage_ = nullptr;
 };
 
@@ -57,6 +58,14 @@ void SceneSessionLayoutTest::SetUp()
 }
 
 void SceneSessionLayoutTest::TearDown() {}
+
+RSSurfaceNode::SharedPtr SceneSessionLayoutTest::CreateRSSurfaceNode()
+{
+    struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
+    rsSurfaceNodeConfig.SurfaceNodeName = "WindowSessionTestSurfaceNode";
+    auto surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig);
+    return surfaceNode;
+}
 
 namespace {
 /**
@@ -1076,6 +1085,86 @@ HWTEST_F(SceneSessionLayoutTest, SetMoveAvailableArea02, TestSize.Level1)
     res = sceneSession->SetMoveAvailableArea(0);
     EXPECT_EQ(res, WSError::WS_OK);
 }
+
+/**
+ * @tc.name: GetAppHookWindowInfoFromServer
+ * @tc.desc: GetAppHookWindowInfoFromServer
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLayoutTest, GetAppHookWindowInfoFromServer, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetAppHookWindowInfoFromServer";
+    info.bundleName_ = "GetAppHookWindowInfoFromServer";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    sceneSession->getHookWindowInfoFunc_ = nullptr;
+    HookWindowInfo hookWindowInfo;
+    WMError errCode = sceneSession->GetAppHookWindowInfoFromServer(hookWindowInfo);
+    EXPECT_EQ(errCode, WMError::WM_ERROR_NULLPTR);
+    EXPECT_EQ(hookWindowInfo.enableHookWindow, false);
+
+    sceneSession->getHookWindowInfoFunc_ = [](const std::string& bundleName) -> HookWindowInfo {
+        HookWindowInfo hookInfo;
+        hookInfo.enableHookWindow = true;
+        return hookInfo;
+    };
+    HookWindowInfo hookWindowInfo2;
+    errCode = sceneSession->GetAppHookWindowInfoFromServer(hookWindowInfo2);
+    EXPECT_EQ(errCode, WMError::WM_OK);
+    EXPECT_EQ(hookWindowInfo2.enableHookWindow, true);
+}
+
+/**
+ * @tc.name: RegisterAppHookWindowInfoFunc
+ * @tc.desc: RegisterAppHookWindowInfoFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLayoutTest, RegisterAppHookWindowInfoFunc, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "RegisterAppHookWindowInfoFunc";
+    info.bundleName_ = "RegisterAppHookWindowInfoFunc";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->getHookWindowInfoFunc_ = nullptr;
+
+    // Case 1: func is not nullptr
+    sceneSession->RegisterAppHookWindowInfoFunc([](const std::string& bundleName) -> HookWindowInfo {
+        HookWindowInfo hookInfo;
+        hookInfo.enableHookWindow = true;
+        return hookInfo;
+    });
+    ASSERT_NE(sceneSession->getHookWindowInfoFunc_, nullptr);
+    HookWindowInfo hookWindowInfo;
+    WMError errCode = sceneSession->GetAppHookWindowInfoFromServer(hookWindowInfo);
+    EXPECT_EQ(errCode, WMError::WM_OK);
+    EXPECT_EQ(hookWindowInfo.enableHookWindow, true);
+
+    // Case 2: func is nullptr
+    sceneSession->RegisterAppHookWindowInfoFunc(nullptr);
+    ASSERT_NE(sceneSession->getHookWindowInfoFunc_, nullptr);
+}
+
+/**
+ * @tc.name: GetWindowDragMoveMountedNode01
+ * @tc.desc: GetWindowDragMoveMountedNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLayoutTest, GetWindowDragMoveMountedNode01, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetWindowDragMoveMountedNode";
+    info.bundleName_ = "GetWindowDragMoveMountedNode";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto rsNode = session->GetWindowDragMoveMountedNode(std::numeric_limits<uint32_t>::max(), 0);
+    EXPECT_EQ(rsNode, nullptr);
+    sceneSession->SetFindScenePanelRsNodeByZOrderFunc([this](uint64_t screenId, uint32_t targetZOrder) {
+        return CreateRSSurfaceNode();
+    });
+    rsNode = session->GetWindowDragMoveMountedNode(0, 0);
+    EXPECT_NE(rsNode, nullptr);
+}
+
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

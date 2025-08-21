@@ -631,7 +631,7 @@ HWTEST_F(WindowOptionTest, SetConstrainedModal, TestSize.Level1)
     ASSERT_EQ(false, option->IsConstrainedModal());
     option->SetUIExtensionUsage(static_cast<uint32_t>(UIExtensionUsage::MODAL));
     option->SetConstrainedModal(true);
-    ASSERT_EQ(false, option->IsConstrainedModal());
+    ASSERT_EQ(true, option->IsConstrainedModal());
 }
 } // namespace
 } // namespace Rosen

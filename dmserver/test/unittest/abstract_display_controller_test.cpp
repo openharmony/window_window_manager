@@ -284,6 +284,9 @@ HWTEST_F(AbstractDisplayControllerTest, ProcessDisplayCompression01, TestSize.Le
  */
 HWTEST_F(AbstractDisplayControllerTest, GetAbstractDisplayByAbsScreen01, TestSize.Level1)
 {
+    auto ret = absDisplayController_->GetAbstractDisplayByAbsScreen(nullptr);
+    EXPECT_EQ(nullptr, ret);
+
     EXPECT_NE(nullptr, absDisplayController_->GetAbstractDisplayByAbsScreen(absScreen_));
 
     auto oriId = absScreen_->groupDmsId_;

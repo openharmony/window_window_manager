@@ -34,7 +34,8 @@ constexpr uint8_t ASTC_IMAGE_QUALITY = 20;
 constexpr const char* IMAGE_FORMAT = "image/png";
 constexpr const char* IMAGE_SUFFIX = ".png";
 constexpr uint8_t IMAGE_QUALITY = 100;
-
+constexpr int32_t ICON_IMAGE_WIDTH_HEIGHT_SIZE_LIMIT = 1024;
+constexpr double ICON_IMAGE_MAX_SCALE = 1;
 constexpr uint8_t SUCCESS = 0;
 } // namespace
 
@@ -195,6 +196,7 @@ void ScenePersistence::ResetSnapshotCache()
             isSavingSnapshot.store(false);
         }
     }
+    isSavingSnapshotFreeMultiWindow_.store(false);
 }
 
 void ScenePersistence::RenameSnapshotFromOldPersistentId(const int32_t& oldPersistentId)
@@ -257,6 +259,7 @@ std::string ScenePersistence::GetSnapshotFilePath(SnapshotStatus& key, bool useK
     if (FindClosestFormSnapshot(key)) {
         return snapshotPath_[key.first][key.second];
     }
+    TLOGW(WmsLogTag::WMS_PATTERN, "Failed");
     return snapshotPath_[SCREEN_UNKNOWN][SNAPSHOT_PORTRAIT];
 }
 
@@ -313,7 +316,15 @@ void ScenePersistence::SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap>& p
     option.format = IMAGE_FORMAT;
     option.quality = IMAGE_QUALITY;
     option.numberHint = 1;
-
+    if (pixelMap->GetWidth() > ICON_IMAGE_WIDTH_HEIGHT_SIZE_LIMIT ||
+        pixelMap->GetHeight() > ICON_IMAGE_WIDTH_HEIGHT_SIZE_LIMIT) {
+        // large image need scale
+        double xScale = pixelMap->GetWidth() > ICON_IMAGE_WIDTH_HEIGHT_SIZE_LIMIT ?
+            ICON_IMAGE_WIDTH_HEIGHT_SIZE_LIMIT / static_cast<double>(pixelMap->GetWidth()) : ICON_IMAGE_MAX_SCALE;
+        double yScale = pixelMap->GetHeight() > ICON_IMAGE_WIDTH_HEIGHT_SIZE_LIMIT ?
+            ICON_IMAGE_WIDTH_HEIGHT_SIZE_LIMIT / static_cast<double>(pixelMap->GetHeight()) : ICON_IMAGE_MAX_SCALE;
+        pixelMap->scale(xScale, yScale, Media::AntiAliasingOption::MEDIUM);
+    }
     if (remove(updatedIconPath_.c_str())) {
         TLOGD(WmsLogTag::DEFAULT, "Failed to delete old file");
     }

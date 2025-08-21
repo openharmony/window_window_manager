@@ -206,10 +206,7 @@ HWTEST_F(WindowVisibilityInfoTest, WindowVisibilityInfoTest01, TestSize.Level1)
     floatAppInfo_.name = "window1";
     floatAppInfo_.rect = { 0, 0, 300, 100 };
     sptr<Window> window1 = Utils::CreateTestWindow(floatAppInfo_);
-    if (window1 == nullptr) {
-        return;
-    }
-
+    ASSERT_NE(nullptr, window1);
     subAppInfo_.name = "subWindow1";
     subAppInfo_.rect = { 0, 600, 300, 100 };
     subAppInfo_.parentId = window1->GetWindowId();

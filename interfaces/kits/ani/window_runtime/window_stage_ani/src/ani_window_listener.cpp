@@ -107,6 +107,27 @@ void AniWindowListener::LifeCycleCallBack(LifeCycleEventType eventType)
         AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
+void AniWindowListener::WindowStageLifecycleCallback(WindowStageLifeCycleEventType eventType)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]windowStageLifecycleCallback, envent type: %{public}u", eventType);
+    auto task = [self = weakRef_, eventType, eng = env_] () {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "AniWindowListener::windowStageLifecycleCallback");
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || eng == nullptr) {
+            TLOGE(WmsLogTag::DEFAULT, "[ANI]this listener or eng is nullptr");
+            return;
+        }
+        AniWindowUtils::CallAniFunctionVoid(eng, "L@ohos/window/window;", "runWindowStageLifecycleEventCallBack",
+            nullptr, thisListener->aniCallBack_, static_cast<ani_int>(eventType));
+    };
+    if (!eventHandler_) {
+        TLOGE(WmsLogTag::DEFAULT, "get main event handler failed!");
+        return;
+    }
+    eventHandler_->PostTask(task, "wms:AniWindowListener::windowStageLifecycleCallback", 0,
+        AppExecFwk::EventQueue::Priority::IMMEDIATE);
+}
+
 void AniWindowListener::AfterForeground()
 {
     if (state_ == WindowState::STATE_INITIAL || state_ == WindowState::STATE_HIDDEN) {
@@ -229,6 +250,40 @@ void AniWindowListener::OnSubWindowClose(bool& terminateCloseProcess)
 
 void AniWindowListener::OnMainWindowClose(bool& terminateCloseProcess)
 {
+}
+
+void AniWindowListener::AfterLifecycleForeground()
+{
+    if (caseType_ == CaseType::CASE_STAGE) {
+        if (state_ == WindowState::STATE_INITIAL || state_ == WindowState::STATE_HIDDEN) {
+            WindowStageLifecycleCallback(WindowStageLifeCycleEventType::FOREGROUND);
+            state_ = WindowState::STATE_SHOWN;
+        }
+    }
+}
+
+void AniWindowListener::AfterLifecycleBackground()
+{
+    if (caseType_ == CaseType::CASE_STAGE) {
+        if (state_ == WindowState::STATE_INITIAL || state_ == WindowState::STATE_SHOWN) {
+            WindowStageLifecycleCallback(WindowStageLifeCycleEventType::BACKGROUND);
+            state_ = WindowState::STATE_HIDDEN;
+        }
+    }
+}
+
+void AniWindowListener::AfterLifecycleResumed()
+{
+    if (caseType_ == CaseType::CASE_STAGE) {
+        WindowStageLifecycleCallback(WindowStageLifeCycleEventType::RESUMED);
+    }
+}
+
+void AniWindowListener::AfterLifecyclePaused()
+{
+    if (caseType_ == CaseType::CASE_STAGE) {
+        WindowStageLifecycleCallback(WindowStageLifeCycleEventType::PAUSED);
+    }
 }
 } // namespace Rosen
 } // namespace OHOS

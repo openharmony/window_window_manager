@@ -696,6 +696,13 @@ public:
     void SetFoldDisplayMode(const FoldDisplayMode mode);
 
     /**
+     * @brief Change the display mode of the foldable device asynchronously.
+     *
+     * @param mode target display mode to change.
+     */
+    void SetFoldDisplayModeAsync(const FoldDisplayMode mode);
+
+    /**
      * @brief Change the display mode of the foldable device from js.
      *
      * @param mode target display mode to change.

@@ -116,6 +116,12 @@ StartingWindowRdbManager::StartingWindowRdbManager(const WmsRdbConfig& wmsRdbCon
 
 StartingWindowRdbManager::~StartingWindowRdbManager()
 {
+    ClearRdbStore();
+}
+
+void StartingWindowRdbManager::ClearRdbStore()
+{
+    std::lock_guard<std::mutex> lock(rdbMutex_);
     rdbStore_ = nullptr;
 }
 
@@ -131,7 +137,8 @@ std::shared_ptr<NativeRdb::RdbStore> StartingWindowRdbManager::GetRdbStore()
     WmsRdbOpenCallback wmsCallback(wmsRdbConfig_);
     rdbStore_ = NativeRdb::RdbHelper::GetRdbStore(
         rdbStoreConfig, wmsRdbConfig_.version, wmsCallback, resCode);
-    TLOGD(WmsLogTag::WMS_PATTERN, "resCode:%{public}d", resCode);
+    TLOGI(WmsLogTag::WMS_PATTERN, "resCode: %{public}d, version: %{public}d",
+        resCode, wmsRdbConfig_.version);
     return rdbStore_;
 }
 

@@ -118,6 +118,7 @@ public:
         const sptr<IRemoteObject>& callback);
     WMError GetSnapshotByWindowId(int32_t windowId, std::shared_ptr<Media::PixelMap>& pixelMap);
     WMError RegisterWMSConnectionChangedListener(const WMSConnectionChangedCallbackFunc& callbackFunc);
+    WMError UnregisterWMSConnectionChangedListener();
     virtual WMError SetSessionGravity(int32_t persistentId, SessionGravity gravity, uint32_t percent);
     virtual WMError BindDialogSessionTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken);
     virtual WMError RequestFocusStatus(int32_t persistentId, bool isFocused);
@@ -230,6 +231,9 @@ private:
      */
     void ReregisterWindowManagerAgent();
     void WindowManagerAndSessionRecover();
+    WMError RecoverWindowPropertyChangeFlag();
+    uint32_t observedFlags_;
+    uint32_t interestedFlags_;
 
     sptr<IWindowManager> GetWindowManagerServiceProxy() const;
 

@@ -429,6 +429,8 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
         CreateJsValue(env, static_cast<int32_t>(session->IsSystemKeyboard())));
     napi_set_named_property(env, objValue, "bundleName",
         CreateJsValue(env, session->GetSessionInfo().bundleName_));
+    napi_set_named_property(env, objValue, "windowName",
+        CreateJsValue(env, session->GetWindowName()));
     napi_set_named_property(env, objValue, "zLevel",
         CreateJsValue(env, static_cast<int32_t>(session->GetSubWindowZLevel())));
     napi_set_named_property(env, objValue, "subWindowOutlineEnabled",
@@ -7596,20 +7598,24 @@ void JsSceneSession::NotifyHighlightChange(bool isHighlight)
 
 void JsSceneSession::ProcessWindowAnchorInfoChangeRegister()
 {
-    NotifyWindowAnchorInfoChangeFunc func =
-    [weakThis = wptr(this), where = __func__](const WindowAnchorInfo& windowAnchorInfo) {
-        auto jsSceneSession = weakThis.promote();
-        if (!jsSceneSession) {
-            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s: jsSceneSession is null", where);
-            return;
-        }
-        jsSceneSession->NotifyWindowAnchorInfoChange(windowAnchorInfo);
-    };
     auto session = weakSession_.promote();
     if (session == nullptr) {
         TLOGE(WmsLogTag::WMS_SUB, "session is nullptr");
         return;
     }
+    if (!session->GetSystemConfig().supportFollowRelativePositionToParent_) {
+        TLOGD(WmsLogTag::WMS_SUB, "system config not support");
+        return;
+    }
+    NotifyWindowAnchorInfoChangeFunc func =
+        [weakThis = wptr(this), where = __func__](const WindowAnchorInfo& windowAnchorInfo) {
+            auto jsSceneSession = weakThis.promote();
+            if (!jsSceneSession) {
+                TLOGNE(WmsLogTag::WMS_SUB, "%{public}s: jsSceneSession is null", where);
+                return;
+            }
+            jsSceneSession->NotifyWindowAnchorInfoChange(windowAnchorInfo);
+        };
     session->SetWindowAnchorInfoChangeFunc(std::move(func));
 }
 

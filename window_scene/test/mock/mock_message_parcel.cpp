@@ -35,6 +35,7 @@ bool g_setReadUint32ErrorFlag = false;
 bool g_setReadInt32ErrorFlag = false;
 bool g_setReadUint64ErrorFlag = false;
 bool g_setReadInt64ErrorFlag = false;
+bool g_setReadFloatErrorFlag = false;
 bool g_setReadStringVectorErrorFlag = false;
 bool g_setReadStringErrorFlag = false;
 #ifdef ENABLE_MOCK_WRITE_STRING
@@ -66,6 +67,7 @@ void MockMessageParcel::ClearAllErrorFlag()
     g_setReadInt32ErrorFlag = false;
     g_setReadUint64ErrorFlag = false;
     g_setReadInt64ErrorFlag = false;
+    g_setReadFloatErrorFlag = false;
     g_setReadStringVectorErrorFlag = false;
     g_setReadStringErrorFlag = false;
 }
@@ -150,6 +152,11 @@ void MockMessageParcel::SetReadInt64ErrorFlag(bool flag)
     g_setReadInt64ErrorFlag = flag;
 }
 
+void MockMessageParcel::SetReadFloatErrorFlag(bool flag)
+{
+    g_setReadFloatErrorFlag = flag;
+}
+
 void MockMessageParcel::SetReadStringVectorErrorFlag(bool flag)
 {
     g_setReadStringVectorErrorFlag = flag;
@@ -169,6 +176,7 @@ bool MessageParcel::WriteInterfaceToken(std::u16string name)
     return true;
 }
 
+#ifdef ENABLE_MOCK_WRITE_REMOTE_OBJECT
 bool MessageParcel::WriteRemoteObject(const sptr<IRemoteObject> &object)
 {
     if (g_setWriteRemoteObjectErrorFlag) {
@@ -176,6 +184,7 @@ bool MessageParcel::WriteRemoteObject(const sptr<IRemoteObject> &object)
     }
     return true;
 }
+#endif
 
 bool Parcel::WriteParcelable(const Parcelable* object)
 {
@@ -294,6 +303,14 @@ bool Parcel::ReadInt64(int64_t& value)
     return true;
 }
 #endif
+
+bool Parcel::ReadFloat(float& value)
+{
+    if (g_setReadFloatErrorFlag) {
+        return false;
+    }
+    return true;
+}
 
 #ifdef ENABLE_MOCK_WRITE_STRING_VECTOR
 bool Parcel::WriteStringVector(const std::vector<std::string>& val)

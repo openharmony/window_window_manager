@@ -264,15 +264,17 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowEffect01, TestSize.Level1)
         "</Configs>";
     WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigWindowSceneXml();
-    ASSERT_EQ(ssm_->appWindowSceneConfig_.focusedShadow_.alpha_, 0);
-    ASSERT_EQ(ssm_->appWindowSceneConfig_.focusedShadow_.offsetX_, 1);
-    ASSERT_EQ(ssm_->appWindowSceneConfig_.focusedShadow_.offsetY_, 1);
-    ASSERT_EQ(ssm_->appWindowSceneConfig_.focusedShadow_.radius_, 0.5);
-    ASSERT_EQ(ssm_->appWindowSceneConfig_.focusedShadowDark_.alpha_, 1);
-    ASSERT_EQ(ssm_->appWindowSceneConfig_.focusedShadowDark_.offsetX_, 2);
-    ASSERT_EQ(ssm_->appWindowSceneConfig_.focusedShadowDark_.offsetY_, 2);
-    ASSERT_EQ(ssm_->appWindowSceneConfig_.focusedShadowDark_.radius_, 1);
-    ASSERT_EQ(ssm_->appWindowSceneConfig_.focusedShadowDark_.color_, "#ff111111");
+    EXPECT_EQ(ssm_->appWindowSceneConfig_.focusedShadow_.alpha_, 0);
+    EXPECT_EQ(ssm_->appWindowSceneConfig_.focusedShadow_.offsetX_, 1);
+    EXPECT_EQ(ssm_->appWindowSceneConfig_.focusedShadow_.offsetY_, 1);
+    EXPECT_EQ(ssm_->appWindowSceneConfig_.focusedShadow_.radius_, 0.5);
+    EXPECT_EQ(ssm_->appWindowSceneConfig_.focusedShadowDark_.alpha_, 1);
+    EXPECT_EQ(ssm_->appWindowSceneConfig_.focusedShadowDark_.offsetX_, 2);
+    EXPECT_EQ(ssm_->appWindowSceneConfig_.focusedShadowDark_.offsetY_, 2);
+    EXPECT_EQ(ssm_->appWindowSceneConfig_.focusedShadowDark_.radius_, 1);
+    EXPECT_EQ(ssm_->appWindowSceneConfig_.focusedShadowDark_.color_, "#ff111111");
+    EXPECT_EQ(ssm_->appWindowSceneConfig_.floatCornerRadius_, 0);
+    EXPECT_EQ(ssm_->systemConfig_.defaultCornerRadius_, 0);
 }
 
 /**
@@ -2022,6 +2024,8 @@ HWTEST_F(SceneSessionManagerTest2, OnVirtualScreenDisconnected, TestSize.Level1)
     listener->OnVirtualScreenDisconnected(9999);
 
     ASSERT_NE(nullptr, ssm_);
+    ssm_->screenRSBlackListConfigMap_.clear();
+    ssm_->sessionBlackListInfoMap_.clear();
 
     SessionInfo info;
     info.abilityName_ = "OnVirtualScreenDisconnected";
@@ -2030,8 +2034,16 @@ HWTEST_F(SceneSessionManagerTest2, OnVirtualScreenDisconnected, TestSize.Level1)
     auto ret = ssm_->OnVirtualScreenDisconnected(1);
     EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
 
-    ret = ssm_->OnVirtualScreenDisconnected(10);
+    ssm_->sessionBlackListInfoMap_[1];
+    ret = ssm_->OnVirtualScreenDisconnected(1);
     EXPECT_EQ(WMError::WM_OK, ret);
+
+    ssm_->screenRSBlackListConfigMap_[1];
+    ret = ssm_->OnVirtualScreenDisconnected(1);
+    EXPECT_EQ(WMError::WM_OK, ret);
+
+    ssm_->screenRSBlackListConfigMap_.clear();
+    ssm_->sessionBlackListInfoMap_.clear();
 }
 
 /**

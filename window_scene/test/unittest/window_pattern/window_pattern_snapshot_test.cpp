@@ -715,26 +715,30 @@ HWTEST_F(WindowPatternSnapshotTest, GetWindowStatus, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetSessionStatus
- * @tc.desc: GetSessionStatus Test
+ * @tc.name: GetSessionSnapshotStatus
+ * @tc.desc: GetSessionSnapshotStatus Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPatternSnapshotTest, GetSessionStatus, TestSize.Level1)
+HWTEST_F(WindowPatternSnapshotTest, GetSessionSnapshotStatus, TestSize.Level1)
 {
     SessionInfo info;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->capacity_ = defaultCapacity;
-    auto ret = sceneSession->GetSessionStatus();
+    auto ret = sceneSession->GetSessionSnapshotStatus();
     EXPECT_EQ(ret, defaultStatus);
 
     sceneSession->capacity_ = maxCapacity;
     sceneSession->state_ = SessionState::STATE_DISCONNECT;
     sceneSession->currentRotation_ = 0;
-    sceneSession->GetSessionStatus();
+    sceneSession->GetSessionSnapshotStatus();
 
     sceneSession->state_ = SessionState::STATE_ACTIVE;
-    ret = sceneSession->GetSessionStatus();
+    ret = sceneSession->GetSessionSnapshotStatus();
     EXPECT_EQ(ret.second, 0);
+
+    BackgroundReason reason = BackgroundReason::EXPAND_TO_FOLD_SINGLE_POCKET;
+    ret = sceneSession->GetSessionSnapshotStatus(reason);
+    EXPECT_EQ(ret.first, 1);
 }
 
 /**
@@ -936,12 +940,17 @@ HWTEST_F(WindowPatternSnapshotTest, DeleteHasSnapshot, TestSize.Level1)
  */
 HWTEST_F(WindowPatternSnapshotTest, SetFreeMultiWindow, TestSize.Level1)
 {
+    session_->capacity_ = maxCapacity;
     ASSERT_NE(session_, nullptr);
     session_->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     session_->SetFreeMultiWindow();
     EXPECT_EQ(session_->freeMultiWindow_, true);
 
     session_->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    session_->SetFreeMultiWindow();
+    EXPECT_EQ(session_->freeMultiWindow_, false);
+
+    session_->capacity_ = defaultCapacity;
     session_->SetFreeMultiWindow();
     EXPECT_EQ(session_->freeMultiWindow_, false);
 }

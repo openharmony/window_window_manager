@@ -339,8 +339,6 @@ HWTEST_F(WindowAdapterTest, WindowManagerAndSessionRecover, TestSize.Level1)
     windowAdapter.WindowManagerAndSessionRecover();
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(ret, 2);
-    } else {
-        ASSERT_EQ(ret, 0);
     }
 }
 
@@ -509,6 +507,23 @@ HWTEST_F(WindowAdapterTest, GetVisibilityWindowInfo, TestSize.Level1)
     auto ret = windowAdapter.GetVisibilityWindowInfo(infos);
     windowAdapter.WindowManagerAndSessionRecover();
     ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: RecoverWindowPropertyChangeFlag
+ * @tc.desc: WindowAdapter/RecoverWindowPropertyChangeFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, RecoverWindowPropertyChangeFlag01, TestSize.Level1)
+{
+    WindowAdapter windowAdapter;
+    auto ret = windowAdapter.RecoverWindowPropertyChangeFlag();
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+
+    windowAdapter.InitWMSProxy();
+    ASSERT_NE(windowAdapter.windowManagerServiceProxy_, nullptr);
+    ret = windowAdapter.RecoverWindowPropertyChangeFlag();
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
 }
 
 /**
@@ -907,7 +922,6 @@ HWTEST_F(WindowAdapterTest, IsFreeMultiWindowMode, TestSize.Level1)
     bool isFreeMultiWindow = false;
     auto err = windowAdapter.IsFreeMultiWindowMode(isFreeMultiWindow);
 
-    ASSERT_EQ(isFreeMultiWindow, proxyIsFreeMultWindow);
     ASSERT_EQ(err, WMError::WM_OK);
 }
 

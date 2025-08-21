@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "permission.h"
 #include "sys_cap_util.h"
 #include "string_util.h"
 #include "window_manager_hilog.h"
@@ -96,7 +97,11 @@ uint32_t SysCapUtil::GetApiCompatibleVersion()
 std::string SysCapUtil::GetProcessName()
 {
     OHOS::Security::AccessToken::NativeTokenInfo info;
-    if (Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(IPCSkeleton::GetCallingTokenID(), info) != 0) {
+    uint32_t tokenId = IPCSkeleton::GetCallingTokenID();
+    if (!Permission::IsTokenNativeOrShellType(tokenId)) {
+        return "";
+    }
+    if (Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(tokenId, info) != 0) {
         WLOGFW("get token info failed");
         return "";
     }

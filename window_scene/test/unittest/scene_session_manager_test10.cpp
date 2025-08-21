@@ -880,6 +880,23 @@ HWTEST_F(SceneSessionManagerTest10, RegisterRequestVsyncFunc01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RegisterSessionPropertyChangeNotifyManagerFunc
+ * @tc.desc: test RegisterSessionPropertyChangeNotifyManagerFunc01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, RegisterSessionPropertyChangeNotifyManagerFunc01, TestSize.Level1)
+{
+    ssm_->RegisterSessionPropertyChangeNotifyManagerFunc(nullptr);
+    SessionInfo info;
+    info.abilityName_ = "RegisterRequestVsyncFunc01";
+    info.bundleName_ = "RegisterRequestVsyncFunc01";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ssm_->RegisterSessionPropertyChangeNotifyManagerFunc(sceneSession);
+    EXPECT_NE(nullptr, sceneSession->sessionPropertyChangeNotifyManagerFunc_);
+}
+
+/**
  * @tc.name: TestEraseSceneSessionAndMarkDirtyLocked_01
  * @tc.desc: Test EraseSceneSessionAndMarkDirtyLocked with erase id not exist
  * @tc.type: FUNC
@@ -961,7 +978,7 @@ HWTEST_F(SceneSessionManagerTest10, TestEraseSceneSessionAndMarkDirtyLocked_03, 
 HWTEST_F(SceneSessionManagerTest10, ProcessUpdateLastFocusedAppId, TestSize.Level1)
 {
     ssm_->sceneSessionMap_.clear();
-    std::vector<uint32_t> zOrderList;
+    std::vector<std::pair<uint32_t, uint32_t>> zOrderList;
     ssm_->windowFocusController_->UpdateFocusedAppSessionId(DEFAULT_DISPLAY_ID, INVALID_SESSION_ID);
     ssm_->ProcessUpdateLastFocusedAppId(zOrderList);
 
@@ -977,7 +994,7 @@ HWTEST_F(SceneSessionManagerTest10, ProcessUpdateLastFocusedAppId, TestSize.Leve
     ssm_->ProcessUpdateLastFocusedAppId(zOrderList);
     ASSERT_EQ(1, focusGroup->GetLastFocusedAppSessionId());
 
-    zOrderList.push_back(103);
+    zOrderList.push_back(std::make_pair(100, 103));
     ssm_->ProcessUpdateLastFocusedAppId(zOrderList);
     ASSERT_EQ(INVALID_SESSION_ID, focusGroup->GetLastFocusedAppSessionId());
 }
@@ -1642,15 +1659,15 @@ HWTEST_F(SceneSessionManagerTest10, RefreshAllAppUseControlMap, TestSize.Level1)
     AppUseControlInfo appUseControlInfo;
     appUseControlInfo.bundleName_ = "app_bundle_name";
     ssm_->RefreshAllAppUseControlMap(appUseControlInfo, ControlAppType::APP_LOCK);
- 
+
     appUseControlInfo.isNeedControl_ = true;
     ssm_->RefreshAllAppUseControlMap(appUseControlInfo, ControlAppType::APP_LOCK);
     EXPECT_EQ(1, ssm_->allAppUseControlMap_.size());
- 
+
     appUseControlInfo.isNeedControl_ = false;
     ssm_->RefreshAllAppUseControlMap(appUseControlInfo, ControlAppType::APP_LOCK);
     EXPECT_EQ(0, ssm_->allAppUseControlMap_.size());
- 
+
     appUseControlInfo.isNeedControl_ = false;
     appUseControlInfo.isControlRecentOnly_ = true;
     appUseControlInfo.isControlRecentOnly_ = false;

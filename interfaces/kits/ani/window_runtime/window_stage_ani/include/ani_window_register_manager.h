@@ -18,6 +18,7 @@
 
 #include <map>
 #include <mutex>
+
 #include "ani_window_listener.h"
 #include "refbase.h"
 #include "window.h"
@@ -46,6 +47,7 @@ enum class RegisterListenerType : uint32_t {
     SUB_WINDOW_CLOSE_CB,
     WINDOW_STAGE_EVENT_CB,
     WINDOW_STAGE_CLOSE_CB,
+    WINDOW_STAGE_LIFECYCLE_EVENT_CB,
 };
 
 class AniWindowRegisterManager {
@@ -66,6 +68,8 @@ private:
         ani_env* env);
     WmErrorCode ProcessLifeCycleEventRegister(sptr<AniWindowListener> listener, sptr<Window> window, bool isRegister,
         ani_env* env);
+    WmErrorCode ProcessWindowStageLifeCycleEventRegister(sptr<AniWindowListener> listener, sptr<Window> window,
+        bool isRegister, ani_env* env);
     WmErrorCode ProcessOccupiedAreaChangeRegister(sptr<AniWindowListener> listener, sptr<Window> window,
         bool isRegister, ani_env* env);
     WmErrorCode ProcessSystemBarChangeRegister(sptr<AniWindowListener> listener, sptr<Window> window, bool isRegister,

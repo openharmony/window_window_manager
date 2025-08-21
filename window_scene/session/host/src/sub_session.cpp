@@ -206,8 +206,9 @@ WSError SubSession::ProcessPointDownSession(int32_t posX, int32_t posY)
     if (sessionProperty && sessionProperty->GetRaiseEnabled()) {
         RaiseToAppTopForPointDown();
     }
+    auto ret = SceneSession::ProcessPointDownSession(posX, posY);
     PresentFocusIfPointDown();
-    return SceneSession::ProcessPointDownSession(posX, posY);
+    return ret;
 }
 
 int32_t SubSession::GetMissionId() const
@@ -360,34 +361,39 @@ WMError SubSession::NotifySetParentSession(int32_t oldParentWindowId, int32_t ne
     }, __func__);
 }
 
-void SubSession::HandleCrossSurfaceNodeByWindowAnchor(SizeChangeReason reason, const sptr<ScreenSession>& screenSession)
+void SubSession::HandleCrossSurfaceNodeByWindowAnchor(SizeChangeReason reason, DisplayId displayId)
 {
-    if (!screenSession) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, ScreenSession is null", GetPersistentId());
-        return;
-    }
     auto surfaceNode = GetSurfaceNodeForMoveDrag();
     if (!surfaceNode) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, SurfaceNode is null", GetPersistentId());
         return;
     }
-    DisplayId displayId = screenSession->GetDisplayId();
     if (reason == SizeChangeReason::DRAG || reason == SizeChangeReason::DRAG_MOVE) {
+        auto dragMoveMountedNode = GetWindowDragMoveMountedNode(displayId, this->GetZOrder());
+        if (dragMoveMountedNode == nullptr) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "dragMoveMountedNode is null");
+            return;
+        }
         {
             AutoRSTransaction trans(surfaceNode->GetRSUIContext());
             surfaceNode->SetPositionZ(GetZOrder());
             surfaceNode->SetIsCrossNode(true);
         }
         {
-            AutoRSTransaction trans(screenSession->GetRSUIContext());
-            screenSession->GetDisplayNode()->AddCrossScreenChild(surfaceNode, SUFFIX_INDEX, true);
+            AutoRSTransaction trans(dragMoveMountedNode->GetRSUIContext());
+            dragMoveMountedNode->AddCrossScreenChild(surfaceNode, SUFFIX_INDEX, true);
         }
         cloneNodeCountDuringCross_.fetch_add(1);
         TLOGI(WmsLogTag::WMS_LAYOUT, "Add sub window to display:%{public}" PRIu64 " persistentId:%{public}d, "
             "cloneNodeCountDuringCross:%{public}d", displayId, GetPersistentId(), cloneNodeCountDuringCross_.load());
     } else if (reason == SizeChangeReason::DRAG_END) {
         surfaceNode->SetPositionZ(moveDragController_->GetOriginalPositionZ());
-        screenSession->GetDisplayNode()->RemoveCrossScreenChild(surfaceNode);
+        auto dragMoveMountedNode = GetWindowDragMoveMountedNode(displayId, this->GetZOrder());
+        if (dragMoveMountedNode == nullptr) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "dragMoveMountedNode is null");
+            return;
+        }
+        dragMoveMountedNode->RemoveCrossScreenChild(surfaceNode);
         surfaceNode->SetIsCrossNode(false);
         cloneNodeCountDuringCross_.fetch_sub(1);
         TLOGI(WmsLogTag::WMS_LAYOUT, "Remove sub window from display:%{public}" PRIu64 " persistentId:%{public}d, "
@@ -450,10 +456,15 @@ void SubSession::HandleCrossMoveToSurfaceNode(WSRect& globalRect)
             TLOGD(WmsLogTag::WMS_LAYOUT, "virtual screen, no need to add cross parent child");
             continue;
         }
+        auto dragMoveMountedNode = GetWindowDragMoveMountedNode(displayId, this->GetZOrder());
+        if (dragMoveMountedNode == nullptr) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "dragMoveMountedNode is null");
+            continue;
+        }
         movedSurfaceNode->SetPositionZ(GetZOrder());
         {
-            AutoRSTransaction trans(screenSession->GetRSUIContext());
-            screenSession->GetDisplayNode()->AddCrossScreenChild(movedSurfaceNode, SUFFIX_INDEX, true);
+            AutoRSTransaction trans(dragMoveMountedNode->GetRSUIContext());
+            dragMoveMountedNode->AddCrossScreenChild(movedSurfaceNode, SUFFIX_INDEX, true);
         }
         cloneNodeCount_++;
         movedSurfaceNode->SetIsCrossNode(true);
@@ -518,10 +529,15 @@ void SubSession::AddSurfaceNodeToScreen(DisplayId draggingOrMovingParentDisplayI
             TLOGD(WmsLogTag::WMS_LAYOUT, "virtual screen, no need to add cross parent child");
             continue;
         }
+        auto dragMoveMountedNode = GetWindowDragMoveMountedNode(displayId, this->GetZOrder());
+        if (dragMoveMountedNode == nullptr) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "dragMoveMountedNode is null");
+            continue;
+        }
         currSurfacedNode->SetPositionZ(GetZOrder());
         {
-            AutoRSTransaction trans(screenSession->GetRSUIContext());
-            screenSession->GetDisplayNode()->AddCrossScreenChild(currSurfacedNode, SUFFIX_INDEX, true);
+            AutoRSTransaction trans(dragMoveMountedNode->GetRSUIContext());
+            dragMoveMountedNode->AddCrossScreenChild(currSurfacedNode, SUFFIX_INDEX, true);
         }
         cloneNodeCount_++;
         currSurfacedNode->SetIsCrossNode(true);

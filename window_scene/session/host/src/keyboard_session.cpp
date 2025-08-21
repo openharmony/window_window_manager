@@ -268,8 +268,9 @@ WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params
             session->SetWindowAnimationFlag(true);
         }
         // avoidHeight is set, notify avoidArea in case ui params don't flush
-        if (params.landscapeAvoidHeight_ >= 0 && params.portraitAvoidHeight_ >= 0 && lastParams != params &&
-            session->IsSessionForeground()) {
+        if (lastParams != params && session->IsSessionForeground() && params.landscapeAvoidHeight_ >= 0 &&
+            params.portraitAvoidHeight_ >= 0 && lastParams.landscapeAvoidHeight_ >= 0 &&
+            lastParams.portraitAvoidHeight_ >= 0) {
             TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard avoidHeight is set, id: %{public}d",
                 session->GetCallingSessionId());
             session->ProcessKeyboardOccupiedAreaInfo(session->GetCallingSessionId(), true, false);
@@ -346,6 +347,10 @@ void KeyboardSession::NotifyOccupiedAreaChanged(const sptr<SceneSession>& callin
     }
     if (callingSession->IsSystemSession()) {
         NotifyRootSceneOccupiedAreaChange(occupiedAreaInfo);
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling id: %{public}d, safeRect: %{public}s"
+            ", textFieldPositionY_: %{public}f, textFieldHeight_: %{public}f",
+            callingSession->GetPersistentId(), occupiedAreaInfo->rect_.ToString().c_str(),
+            occupiedAreaInfo->textFieldPositionY_, occupiedAreaInfo->textFieldHeight_);
     } else {
         std::map<AvoidAreaType, AvoidArea> avoidAreas = {};
         if (needRecalculateAvoidAreas) {
@@ -354,18 +359,7 @@ void KeyboardSession::NotifyOccupiedAreaChanged(const sptr<SceneSession>& callin
         const WSRect& callingSessionRect = callingSession->GetSessionRect();
         callingSession->NotifyOccupiedAreaChangeInfo(occupiedAreaInfo, rsTransaction,
             SessionHelper::TransferToRect(callingSessionRect), avoidAreas);
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling id: %{public}d, callingSessionRect: %{public}s"
-            ", size of avoidAreas: %{public}d", callingSession->GetPersistentId(),
-            callingSessionRect.ToString().c_str(), static_cast<int32_t>(avoidAreas.size()));
-        for (const auto& [type, avoidArea] : avoidAreas) {
-            TLOGI(WmsLogTag::WMS_KEYBOARD, "avoidAreaType: %{public}u, avoidArea: %{public}s",
-                type, avoidArea.ToString().c_str());
-        }
     }
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling id: %{public}d, safeRect: %{public}s"
-        ", textFieldPositionY_: %{public}f, textFieldHeight_: %{public}f", callingSession->GetPersistentId(),
-        occupiedAreaInfo->rect_.ToString().c_str(), occupiedAreaInfo->textFieldPositionY_,
-        occupiedAreaInfo->textFieldHeight_);
 }
 
 bool KeyboardSession::CalculateOccupiedArea(const sptr<SceneSession>& callingSession, const WSRect& callingSessionRect,
@@ -466,9 +460,13 @@ bool KeyboardSession::CheckIfNeedRaiseCallingSession(sptr<SceneSession> callingS
          callingSession->GetParentSession()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING);
     bool isFreeMultiWindowMode = callingSession->IsFreeMultiWindowMode();
     bool isMidScene = callingSession->GetIsMidScene();
+    bool isPhoneNotFreeMultiWindow = systemConfig_.IsPhoneWindow() && !isFreeMultiWindowMode;
+    bool isPadNotFreeMultiWindow = systemConfig_.IsPadWindow() && !isFreeMultiWindowMode;
     if (isCallingSessionFloating && isMainOrParentFloating && !isMidScene &&
-        (systemConfig_.IsPhoneWindow() || (systemConfig_.IsPadWindow() && !isFreeMultiWindowMode))) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "No need to raise calling session in float window");
+        (isPhoneNotFreeMultiWindow || isPadNotFreeMultiWindow)) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "No need to raise calling session in float window, "
+            "isPhoneNotFreeMultiWindow: %{public}d, isPadNotFreeMultiWindow: %{public}d",
+            isPhoneNotFreeMultiWindow, isPadNotFreeMultiWindow);
         return false;
     }
 
@@ -656,6 +654,9 @@ void KeyboardSession::UseFocusIdIfCallingSessionIdInvalid()
     } else {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Using focusedSession id: %{public}d", focusedSessionId);
         GetSessionProperty()->SetCallingSessionId(focusedSessionId);
+        if (keyboardCallback_ != nullptr && keyboardCallback_->onCallingSessionIdChange != nullptr) {
+            keyboardCallback_->onCallingSessionIdChange(focusedSessionId);
+        }
     }
 }
 

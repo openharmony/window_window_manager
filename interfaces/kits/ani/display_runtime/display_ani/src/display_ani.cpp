@@ -12,20 +12,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include "display_ani.h"
+
 #include <hitrace_meter.h>
 
 #include "ani.h"
-#include "display_ani.h"
-#include "display_info.h"
-#include "display.h"
-#include "singleton_container.h"
-#include "display_manager.h"
-#include "window_manager_hilog.h"
-#include "dm_common.h"
-#include "display_ani_utils.h"
-#include "refbase.h"
-#include "display_ani_manager.h"
 #include "ani_err_utils.h"
+#include "display.h"
+#include "display_ani_manager.h"
+#include "display_ani_utils.h"
+#include "display_info.h"
+#include "display_manager.h"
+#include "dm_common.h"
+#include "refbase.h"
+#include "singleton_container.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -35,13 +37,18 @@ DisplayAni::DisplayAni(const std::shared_ptr<OHOS::Rosen::Display>& display)
 {
 }
 
-void DisplayAni::getCutoutInfo(ani_env* env, ani_object obj, ani_object cutoutInfoObj)
+void DisplayAni::GetCutoutInfo(ani_env* env, ani_object obj, ani_object cutoutInfoObj)
 {
     auto display = SingletonContainer::Get<DisplayManager>().GetDefaultDisplay();
-    TLOGI(WmsLogTag::DMS, "[ANI] getCutoutInfo begin");
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
+    if (display == nullptr) {
+        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_SCREEN, "");
+        return;
+    }
     sptr<CutoutInfo> cutoutInfo = display->GetCutoutInfo();
     if (cutoutInfo == nullptr) {
         AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_SCREEN, "");
+        return;
     }
     std::vector<DMRect> rects = cutoutInfo->GetBoundingRects();
     // bounding rects
@@ -116,7 +123,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     }
     std::array methods = {
         ani_native_function {"getCutoutInfoInternal", "L@ohos/display/display/CutoutInfo;:V",
-            reinterpret_cast<void *>(DisplayAni::getCutoutInfo)},
+            reinterpret_cast<void *>(DisplayAni::GetCutoutInfo)},
     };
     if ((ret = env->Class_BindNativeMethods(displayCls, methods.data(), methods.size())) != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] bind fail %{public}u", ret);

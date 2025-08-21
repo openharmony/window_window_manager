@@ -144,29 +144,25 @@ HWTEST_F(MainSessionLayoutTest, HandleSubSessionSurfaceNodeByWindowAnchor, TestS
     sptr<SubSession> subSession = sptr<SubSession>::MakeSptr(info, nullptr);
     mainSession->subSession_.emplace_back(nullptr);
     mainSession->subSession_.emplace_back(subSession);
-    ScreenSessionConfig config = {
-        .screenId = 100,
-        .rsId = 101,
-        .name = "OpenHarmony",
-    };
-    sptr<ScreenSession> screenSession =
-        sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     auto surfaceNode = CreateRSSurfaceNode();
     ASSERT_NE(nullptr, surfaceNode);
     subSession->SetSurfaceNode(surfaceNode);
+    subSession->SetFindScenePanelRsNodeByZOrderFunc([this](uint64_t screenId, uint32_t targetZOrder) {
+        return CreateRSSurfaceNode();
+    });
 
     subSession->state_ = SessionState::STATE_FOREGROUND;
     subSession->windowAnchorInfo_.isAnchorEnabled_ = false;
     subSession->cloneNodeCountDuringCross_.store(0);
-    mainSession->HandleSubSessionSurfaceNodeByWindowAnchor(SizeChangeReason::DRAG, screenSession);
+    mainSession->HandleSubSessionSurfaceNodeByWindowAnchor(SizeChangeReason::DRAG, 0);
     EXPECT_EQ(subSession->cloneNodeCountDuringCross_, 0);
 
     subSession->windowAnchorInfo_.isAnchorEnabled_ = true;
-    mainSession->HandleSubSessionSurfaceNodeByWindowAnchor(SizeChangeReason::DRAG, screenSession);
+    mainSession->HandleSubSessionSurfaceNodeByWindowAnchor(SizeChangeReason::DRAG, 0);
     EXPECT_EQ(subSession->cloneNodeCountDuringCross_, 1);
 
     subSession->state_ = SessionState::STATE_BACKGROUND;
-    mainSession->HandleSubSessionSurfaceNodeByWindowAnchor(SizeChangeReason::DRAG_END, screenSession);
+    mainSession->HandleSubSessionSurfaceNodeByWindowAnchor(SizeChangeReason::DRAG_END, 0);
     EXPECT_EQ(subSession->cloneNodeCountDuringCross_, 1);
 }
 } // namespace

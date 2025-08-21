@@ -838,6 +838,7 @@ WMError WindowExtensionSessionImpl::SetUIContentInner(const std::string& content
     }
     SetUIContentComplete();
     NotifyModalUIExtensionMayBeCovered(true);
+    SetLayoutFullScreen(immersiveModeEnabled_);
 
     UpdateAccessibilityTreeInfo();
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
@@ -883,7 +884,7 @@ WSError WindowExtensionSessionImpl::UpdateRect(const WSRect& rect, SizeChangeRea
         SingletonContainer::Get<WindowAdapter>().UpdateModalExtensionRect(abilityToken_, wmRect);
     }
 
-    if (wmReason == WindowSizeChangeReason::ROTATION) {
+    if (wmReason == WindowSizeChangeReason::ROTATION || wmReason == WindowSizeChangeReason::SNAPSHOT_ROTATION) {
         const std::shared_ptr<RSTransaction>& rsTransaction = config.rsTransaction_;
         UpdateRectForRotation(wmRect, preRect, wmReason, rsTransaction, avoidAreas);
     } else if (handler_ != nullptr) {
@@ -920,7 +921,7 @@ void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const
 
         auto rsUIContext = window->GetRSUIContext();
         if (needSync) {
-            duration = rsTransaction->GetDuration() ? rsTransaction->GetDuration() : duration;
+            window->UpdateRotateDuration(wmReason, duration, rsTransaction);
             RSTransactionAdapter::FlushImplicitTransaction(rsUIContext);
             rsTransaction->Begin();
         }
@@ -951,6 +952,17 @@ void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const
         }
     };
     handler_->PostTask(task, "WMS_WindowExtensionSessionImpl_UpdateRectForRotation");
+}
+
+void WindowExtensionSessionImpl::UpdateRotateDuration(WindowSizeChangeReason& reason, int32_t& duration,
+    const std::shared_ptr<RSTransaction>& rsTransaction)
+{
+    if (reason == WindowSizeChangeReason::SNAPSHOT_ROTATION) {
+        duration = rsTransaction->GetDuration();
+        reason = WindowSizeChangeReason::ROTATION;
+    } else {
+        duration = rsTransaction->GetDuration() ? rsTransaction->GetDuration() : duration;
+    }
 }
 
 void WindowExtensionSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, WindowSizeChangeReason wmReason,
@@ -1544,6 +1556,7 @@ WMError WindowExtensionSessionImpl::SetLayoutFullScreen(bool status)
     property_->SetIsLayoutFullScreen(status);
     isIgnoreSafeArea_ = status;
     isIgnoreSafeAreaNeedNotify_ = true;
+    immersiveModeEnabled_ = status;
     if (auto uiContent = GetUIContentSharedPtr()) {
         uiContent->SetIgnoreViewSafeArea(status);
     }

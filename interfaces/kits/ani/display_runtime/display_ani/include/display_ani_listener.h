@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,11 +17,12 @@
 #define OHOS_ANI_DISPLAY_LISTENER_H
 
 #include <mutex>
-#include "dm_common.h"
-#include "refbase.h"
-#include "display_manager.h"
+
 #include "ani.h"
+#include "display_manager.h"
+#include "dm_common.h"
 #include "event_handler.h"
+#include "refbase.h"
 
 namespace OHOS {
 namespace Rosen {

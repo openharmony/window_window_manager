@@ -150,7 +150,7 @@ Rotation Display::GetRotation() const
     return pImpl_->GetDisplayInfo()->GetRotation();
 }
 
-Rotation Display::GetScreenRotation() const
+Rotation Display::GetOriginRotation() const
 {
     UpdateDisplayInfo();
     if (pImpl_ == nullptr) {
@@ -162,7 +162,7 @@ Rotation Display::GetScreenRotation() const
         TLOGE(WmsLogTag::DMS, "displayInfo is nullptr");
         return Rotation::ROTATION_0;
     }
-    return displayInfo->GetScreenRotation();
+    return displayInfo->GetOriginRotation();
 }
 
 Orientation Display::GetOrientation() const
@@ -231,7 +231,7 @@ sptr<DisplayInfo> Display::GetDisplayInfoWithCache() const
 sptr<CutoutInfo> Display::GetCutoutInfo() const
 {
     return SingletonContainer::Get<DisplayManagerAdapter>().GetCutoutInfo(GetId(), GetWidth(),
-                                                                          GetHeight(), GetScreenRotation());
+                                                                          GetHeight(), GetOriginRotation());
 }
 
 DMError Display::HasImmersiveWindow(bool& immersive)

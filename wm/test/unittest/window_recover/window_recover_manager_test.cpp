@@ -120,12 +120,12 @@ HWTEST_F(WindowRecoverManagerTest, RecoverAndReconnectSceneSession01, TestSize.L
     sptr<IRemoteObject> token = nullptr;
     auto ret1 =
         windowAdapter.RecoverAndReconnectSceneSession(iSessionStage, eventChannel, nullptr, session, nullptr, token);
-    ASSERT_EQ(ret1, WMError::WM_DO_NOTHING);
+    ASSERT_EQ(ret1, WMError::WM_OK);
 
     windowAdapter.isProxyValid_ = true;
     auto ret2 =
         windowAdapter.RecoverAndReconnectSceneSession(iSessionStage, eventChannel, nullptr, session, nullptr, token);
-    ASSERT_EQ(ret2, WMError::WM_DO_NOTHING);
+    ASSERT_EQ(ret2, WMError::WM_OK);
 
     sptr<IRemoteObject> remotObject = nullptr;
     windowAdapter.windowManagerServiceProxy_ = iface_cast<IWindowManager>(remotObject);

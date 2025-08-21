@@ -15,7 +15,9 @@
 
 #ifndef OHOS_JS_WINDOW_UTILS_H
 #define OHOS_JS_WINDOW_UTILS_H
+
 #include <map>
+
 #include "ani.h"
 #include "native_engine/native_engine.h"
 #include "native_engine/native_value.h"
@@ -72,6 +74,13 @@ enum class LifeCycleEventType : uint32_t {
     RESUMED,
     PAUSED,
     DESTROYED,
+};
+
+enum class WindowStageLifeCycleEventType : uint32_t {
+    FOREGROUND = 1,
+    BACKGROUND,
+    RESUMED,
+    PAUSED,
 };
 
 const std::map<WindowType, ApiWindowType> NATIVE_JS_TO_WINDOW_TYPE_MAP {
@@ -306,6 +315,17 @@ public:
     static void GetSpecificBarStatus(sptr<Window>& window, const std::string& name,
         std::map<WindowType, SystemBarProperty>& newSystemBarProperties,
         std::map<WindowType, SystemBarProperty>& systemBarProperties);
+
+    /**
+     * @brief Convert a WMError to its corresponding WmErrorCode.
+     *
+     * If the WMError is not found in the mapping, returns the given default code.
+     *
+     * @param error WMError value to convert.
+     * @param defaultCode Value to return if mapping is not found (default: WM_ERROR_STATE_ABNORMALLY).
+     * @return Corresponding WmErrorCode or defaultCode if unmapped.
+     */
+    static WmErrorCode ToErrorCode(WMError error, WmErrorCode defaultCode = WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
 
 private:
     static void SetSystemPropertiesWindowRect(ani_env* env, const sptr<Window>& window,

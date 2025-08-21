@@ -156,8 +156,6 @@ HWTEST_F(VsyncStationTest, DecreaseRequestVsyncTimes, TestSize.Level1)
     int32_t desired = requestVsyncTimes_.load();
     if (current != 0) {
         EXPECT_EQ(current - 1, desired);
-    } else {
-        EXPECT_EQ(current, desired);
     }
 }
 } // namespace

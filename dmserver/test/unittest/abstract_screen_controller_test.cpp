@@ -859,8 +859,10 @@ HWTEST_F(AbstractScreenControllerTest, OnRemoteDied03, TestSize.Level1)
     sptr<IRemoteObject> agent = new IRemoteObjectMocker();
     std::vector<ScreenId> screens {5};
     absController_->screenAgentMap_.insert(std::make_pair(agent, screens));
+    absController_->defaultRsScreenId_ = 0;
     ASSERT_EQ(true, absController_->OnRemoteDied(agent));
     ASSERT_EQ(0, absController_->screenAgentMap_.size());
+    absController_->defaultRsScreenId_ = SCREEN_ID_INVALID;
 }
 
 /**

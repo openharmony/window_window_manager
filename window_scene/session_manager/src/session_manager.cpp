@@ -92,7 +92,14 @@ WM_IMPLEMENT_SINGLE_INSTANCE(SessionManager)
 
 SessionManager::~SessionManager()
 {
-    WLOGFI("destroyed!");
+    sptr<IRemoteObject> remoteObject = nullptr;
+    if (mockSessionManagerServiceProxy_) {
+        remoteObject = mockSessionManagerServiceProxy_->AsObject();
+    }
+    if (remoteObject) {
+        remoteObject->RemoveDeathRecipient(foundationDeath_);
+    }
+    TLOGI(WmsLogTag::WMS_LIFE, "destroyed");
 }
 
 void SessionManager::OnWMSConnectionChangedCallback(
@@ -242,6 +249,7 @@ __attribute__((no_sanitize("cfi"))) void SessionManager::InitSceneSessionManager
 
 void SessionManager::RegisterSMSRecoverListener()
 {
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (!isRecoverListenerRegistered_) {
         if (!mockSessionManagerServiceProxy_) {
             TLOGE(WmsLogTag::WMS_RECOVER, "mockSessionManagerServiceProxy is null");
@@ -253,6 +261,15 @@ void SessionManager::RegisterSMSRecoverListener()
         std::string identity = IPCSkeleton::ResetCallingIdentity();
         mockSessionManagerServiceProxy_->RegisterSMSRecoverListener(smsRecoverListener_);
         IPCSkeleton::SetCallingIdentity(identity);
+    }
+}
+
+void SessionManager::UnregisterSMSRecoverListener()
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    isRecoverListenerRegistered_ = false;
+    if (mockSessionManagerServiceProxy_) {
+        mockSessionManagerServiceProxy_->UnregisterSMSRecoverListener();
     }
 }
 
@@ -336,8 +353,18 @@ WMError SessionManager::RegisterWMSConnectionChangedListener(const WMSConnection
             TLOGE(WmsLogTag::WMS_MULTI_USER, "Init mock session manager service failed");
             return ret;
         }
-        RegisterSMSRecoverListener();
     }
+    RegisterSMSRecoverListener();
+    return WMError::WM_OK;
+}
+
+WMError SessionManager::UnregisterWMSConnectionChangedListener()
+{
+    {
+        std::lock_guard<std::mutex> lock(wmsConnectionMutex_);
+        wmsConnectionChangedFunc_ = nullptr;
+    }
+    UnregisterSMSRecoverListener();
     return WMError::WM_OK;
 }
 

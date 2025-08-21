@@ -700,6 +700,79 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithoutParentWindow, TestSi
     int32_t windowInfoSize = sceneSessionMap.size();
     ASSERT_EQ(windowInfoSize, 0);
 }
+
+/**
+ * @tc.name: GetWindowInfoWithScreenshotPrefix
+ * @tc.desc: windowInfo with screenshot prefix
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithScreenshotPrefix, TestSize.Level2)
+{
+    SessionInfo info;
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> windowSessionProperty = session->GetSessionProperty();
+    session->SetSessionProperty(windowSessionProperty);
+    windowSessionProperty->SetWindowName("ScreenShotWindowExample");
+
+    auto result = manager_->GetWindowInfo(session, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
+
+    EXPECT_EQ(result.first.windowNameType, 1);
+}
+
+/**
+ * @tc.name: GetWindowInfoWithPreviewPrefix
+ * @tc.desc: windowInfo with preview prefix
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithPreviewPrefix, TestSize.Level2)
+{
+    SessionInfo info;
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> windowSessionProperty = session->GetSessionProperty();
+    session->SetSessionProperty(windowSessionProperty);
+    windowSessionProperty->SetWindowName("PreviewWindowExample");
+
+    auto result = manager_->GetWindowInfo(session, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
+
+    EXPECT_EQ(result.first.windowNameType, 1);
+}
+
+/**
+ * @tc.name: GetWindowInfoWithoutSpecialPrefix
+ * @tc.desc: windowInfo without special prefix
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithoutSpecialPrefix, TestSize.Level2)
+{
+    SessionInfo info;
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> windowSessionProperty = session->GetSessionProperty();
+    session->SetSessionProperty(windowSessionProperty);
+    windowSessionProperty->SetWindowName("RegularWindowExample");
+
+    auto result = manager_->GetWindowInfo(session, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
+
+    EXPECT_EQ(result.first.windowNameType, 0);
+}
+
+/**
+ * @tc.name: GetWindowInfoWithVoiceInputPrefix
+ * @tc.desc: windowInfo with preview prefix
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithVoiceInputPrefix, TestSize.Level2)
+{
+    std::vector<MMI::WindowInfo> lastWindowInfoList;
+    SessionInfo info;
+    sptr<SceneSession> session = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<WindowSessionProperty> windowSessionProperty = session->GetSessionProperty();
+    session->SetSessionProperty(windowSessionProperty);
+    windowSessionProperty->SetWindowName("__VoiceHardwareInputExample");
+ 
+    auto result = manager_->GetWindowInfo(session, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
+ 
+    EXPECT_EQ(result.first.windowNameType, 2);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

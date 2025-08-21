@@ -42,7 +42,14 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
-
+namespace {
+    std::string g_errLog;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
+        const char *msg)
+    {
+        g_errLog = msg;
+    }
+}
 class GetKeyboardGravitySceneSession : public SceneSession {
 public:
     GetKeyboardGravitySceneSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
@@ -758,6 +765,12 @@ HWTEST_F(SceneSessionTest5, HandleSessionDragEvent, TestSize.Level1)
     compatibleModeProperty->SetIsAdaptToDragScale(true);
     session->property_->SetCompatibleModeProperty(compatibleModeProperty);
     session->HandleSessionDragEvent(event);
+
+    session->HandleSessionDragEvent(SessionEvent::EVENT_END_MOVE);
+    EXPECT_EQ(session->GetDragResizeTypeDuringDrag(), DragResizeType::RESIZE_TYPE_UNDEFINED);
+
+    session->HandleSessionDragEvent(SessionEvent::EVENT_MAXIMIZE);
+    EXPECT_EQ(session->GetDragResizeTypeDuringDrag(), DragResizeType::RESIZE_TYPE_UNDEFINED);
 }
 
 /**
@@ -1837,6 +1850,64 @@ HWTEST_F(SceneSessionTest5, HandleMoveDragSurfaceBounds, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleMoveDragSurfaceBounds02
+ * @tc.desc: HandleMoveDragSurfaceBounds for interrupted
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, HandleMoveDragSurfaceBounds02, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "HandleMoveDragSurfaceBounds02";
+    info.bundleName_ = "HandleMoveDragSurfaceBounds02";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(1000, session->GetWindowType());
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    WSRect preRect = { 0, 0, 50, 50 };
+    WSRect rect = { 0, 0, 100, 100 };
+    WSRect globalRect = { 0, 0, 100, 100 };
+    session->SetRequestNextVsyncFunc([](const std::shared_ptr<VsyncCallback>& callback) {
+        callback->onCallback(1, 1);
+    });
+    ASSERT_NE(nullptr, session->requestNextVsyncFunc_);
+    session->SetSessionRect(preRect);
+    EXPECT_EQ(preRect, session->GetSessionRect());
+    session->keyFramePolicy_.running_ = false;
+    session->moveDragController_->SetStartDragFlag(false);
+    session->HandleMoveDragSurfaceBounds(rect, globalRect, SizeChangeReason::DRAG_END);
+    session->HandleMoveDragSurfaceBounds(rect, globalRect, SizeChangeReason::DRAG);
+    EXPECT_EQ(rect, session->GetSessionRect());
+    EXPECT_EQ(false, session->moveDragController_->GetStartDragFlag());
+
+    session->moveDragController_->SetStartDragFlag(true);
+    session->HandleMoveDragSurfaceBounds(rect, globalRect, SizeChangeReason::DRAG);
+    EXPECT_EQ(rect, session->GetSessionRect());
+    session->HandleMoveDragSurfaceBounds(rect, globalRect, SizeChangeReason::DRAG_END);
+    EXPECT_EQ(true, session->moveDragController_->GetStartDragFlag());
+}
+
+/**
+ * @tc.name: OnNextVsyncReceivedWhenDrag
+ * @tc.desc: OnNextVsyncReceivedWhenDrag
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, OnNextVsyncReceivedWhenDrag, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "OnNextVsyncReceivedWhenDrag";
+    info.bundleName_ = "OnNextVsyncReceivedWhenDrag";
+    LOG_SetCallback(MyLogCallback);
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    session->moveDragController_ = nullptr;
+    WSRect globalRect = { 0, 0, 100, 100 };
+    bool isGlobal = true;
+    bool needFlush = true;
+    bool needSetBoundsNextVsync = true;
+    session->UpdateRectForDrag(globalRect);
+    session->OnNextVsyncReceivedWhenDrag(globalRect, isGlobal, needFlush, needSetBoundsNextVsync);
+    EXPECT_TRUE(g_errLog.find("session moveDragController is null") != std::string::npos);
+}
+
+/**
  * @tc.name: SetNotifyVisibleChangeFunc
  * @tc.desc: SetNotifyVisibleChangeFunc Test
  * @tc.type: FUNC
@@ -2602,6 +2673,86 @@ HWTEST_F(SceneSessionTest5, NotifyRotationChange, Function | SmallTest | Level2)
     ASSERT_NE(sessionStageMocker, nullptr);
     session->sessionStage_ = sessionStageMocker;
     res = session->NotifyRotationChange(rotationInfo);
+    EXPECT_EQ(res.windowRect_.width_, 0);
+}
+
+/**
+ * @tc.name: NotifyRotationChange_IsRestrictNotify_SystemWindow
+ * @tc.desc: NotifyRotationChange_IsRestrictNotify_SystemWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, NotifyRotationChange_IsRestrictNotify_SystemWindow, Function | SmallTest | Level2)
+{
+    sptr<SessionStageMocker> sessionStageMocker = sptr<SessionStageMocker>::MakeSptr();
+    ASSERT_NE(sessionStageMocker, nullptr);
+    RotationChangeInfo rotationInfo = { RotationChangeType::WINDOW_WILL_ROTATE, 0, 0, { 0, 0, 2720, 1270 } };
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+
+    SessionInfo info;
+    property->SetWindowType(WindowType::WINDOW_TYPE_DESKTOP);
+    sptr<SceneSessionMocker> session = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
+    session->isRotationChangeCallbackRegistered = true;
+    session->sessionStage_ = sessionStageMocker;
+    bool isRestrictNotify = false;
+    property->isSystemCalling_ = true;
+    session->SetSessionProperty(property);
+    RotationChangeResult res = session->NotifyRotationChange(rotationInfo, isRestrictNotify);
+    EXPECT_EQ(res.windowRect_.width_, 0);
+
+    property->isSystemCalling_ = false;
+    session->SetSessionProperty(property);
+    res = session->NotifyRotationChange(rotationInfo, isRestrictNotify);
+    EXPECT_EQ(res.windowRect_.width_, 0);
+
+    isRestrictNotify = true;
+    property->isSystemCalling_ = true;
+    session->SetSessionProperty(property);
+    res = session->NotifyRotationChange(rotationInfo, isRestrictNotify);
+    EXPECT_EQ(res.windowRect_.width_, 0);
+
+    property->isSystemCalling_ = false;
+    session->SetSessionProperty(property);
+    res = session->NotifyRotationChange(rotationInfo, isRestrictNotify);
+    EXPECT_EQ(res.windowRect_.width_, 0);
+}
+
+/**
+ * @tc.name: NotifyRotationChange_IsRestrictNotify_NotSystemWindow
+ * @tc.desc: NotifyRotationChange_IsRestrictNotify_NotSystemWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, NotifyRotationChange_IsRestrictNotify_NotSystemWindow, Function | SmallTest | Level2)
+{
+    sptr<SessionStageMocker> sessionStageMocker = sptr<SessionStageMocker>::MakeSptr();
+    ASSERT_NE(sessionStageMocker, nullptr);
+    RotationChangeInfo rotationInfo = { RotationChangeType::WINDOW_WILL_ROTATE, 0, 0, { 0, 0, 2720, 1270 } };
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+
+    SessionInfo info;
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<SceneSessionMocker> session = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
+    session->isRotationChangeCallbackRegistered = true;
+    session->sessionStage_ = sessionStageMocker;
+    bool isRestrictNotify = false;
+    property->isSystemCalling_ = true;
+    session->SetSessionProperty(property);
+    RotationChangeResult res = session->NotifyRotationChange(rotationInfo, isRestrictNotify);
+    EXPECT_EQ(res.windowRect_.width_, 0);
+
+    property->isSystemCalling_ = false;
+    session->SetSessionProperty(property);
+    res = session->NotifyRotationChange(rotationInfo, isRestrictNotify);
+    EXPECT_EQ(res.windowRect_.width_, 0);
+
+    isRestrictNotify = true;
+    property->isSystemCalling_ = true;
+    session->SetSessionProperty(property);
+    res = session->NotifyRotationChange(rotationInfo, isRestrictNotify);
+    EXPECT_EQ(res.windowRect_.width_, 0);
+
+    property->isSystemCalling_ = false;
+    session->SetSessionProperty(property);
+    res = session->NotifyRotationChange(rotationInfo, isRestrictNotify);
     EXPECT_EQ(res.windowRect_.width_, 0);
 }
 

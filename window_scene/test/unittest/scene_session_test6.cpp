@@ -594,6 +594,46 @@ HWTEST_F(SceneSessionTest6, IsInCompatScaleMode, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsInCompatScaleMode_forSubWindow
+ * @tc.desc: IsInCompatScaleMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, IsInCompatScaleMode_forSubWindow, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsInCompatScaleMode_forSubWindow";
+    info.bundleName_ = "IsInCompatScaleMode_forSubWindow";
+    info.screenId_ = 0;
+    sptr<SceneSession> subSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> mainSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_FALSE(subSession->IsInCompatScaleMode());
+    subSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    EXPECT_FALSE(subSession->IsInCompatScaleMode());
+
+    sptr<SceneSession::SpecificSessionCallback> callBack = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    subSession->specificCallback_ = callBack;
+    auto task = [&mainSession](int32_t persistentId) { return mainSession; };
+    callBack->onGetSceneSessionByIdCallback_ = task;
+    subSession->SetCallingPid(1);
+    mainSession->SetCallingPid(2);
+    EXPECT_FALSE(subSession->IsInCompatScaleMode());
+
+    mainSession->SetCallingPid(1);
+    EXPECT_FALSE(subSession->IsInCompatScaleMode());
+
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToProportionalScale(true);
+    mainSession->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    EXPECT_TRUE(subSession->IsInCompatScaleMode());
+
+    compatibleModeProperty->SetIsAdaptToProportionalScale(false);
+    compatibleModeProperty->SetIsAdaptToSimulationScale(true);
+    EXPECT_TRUE(subSession->IsInCompatScaleMode());
+    compatibleModeProperty->SetIsAdaptToProportionalScale(true);
+    EXPECT_TRUE(subSession->IsInCompatScaleMode());
+}
+
+/**
  * @tc.name: GetSystemAvoidArea
  * @tc.desc: GetSystemAvoidArea function
  * @tc.type: FUNC
@@ -762,7 +802,9 @@ HWTEST_F(SceneSessionTest6, NotifyKeyboardAnimationWillBeginInvalidSessionStage,
     bool withAnimation = false;
     const std::shared_ptr<RSTransaction>& rsTransaction = std::make_shared<RSTransaction>();
     sceneSession->NotifyKeyboardAnimationWillBegin(isShowAnimation, beginRect, endRect, withAnimation, rsTransaction);
-    EXPECT_TRUE(g_errlog.find("sessionStage_ is null") != std::string::npos);
+    if (HiLogIsLoggable(HILOG_DOMAIN_WINDOW, g_domainContents[static_cast<uint32_t>(WmsLogTag::DEFAULT)], LOG_DEBUG)) {
+        EXPECT_TRUE(g_errlog.find("sessionStage_ is null") != std::string::npos);
+    }
 }
 
 /**
@@ -1035,6 +1077,23 @@ HWTEST_F(SceneSessionTest6, RegisterUpdateAppUseControlCallback, Function | Smal
     allAppUseMap[key][ControlAppType::APP_LOCK] = controlInfo;
     sceneSession->RegisterUpdateAppUseControlCallback(callback);
     ASSERT_NE(nullptr, sceneSession->onUpdateAppUseControlFunc_);
+}
+
+/**
+ * @tc.name: RegisterUpdateAppUseControlCallbackHasPrivacyModeControl
+ * @tc.desc: RegisterUpdateAppUseControlCallbackHasPrivacyModeControl
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, RegisterUpdateAppUseControlCallbackHasPrivacyModeControl, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.bundleName_ = "app";
+    info.hasPrivacyModeControl = true;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto callback = [](ControlAppType type, bool isNeedControl, bool isControlRecentOnly) {};
+    sceneSession->RegisterUpdateAppUseControlCallback(callback);
+    usleep(SLEEP_TIME);
+    EXPECT_TRUE(sceneSession->appUseControlMap_[ControlAppType::PRIVACY_WINDOW].isNeedControl);
 }
 
 /**

@@ -52,7 +52,7 @@ public:
     void NotifyWindowSystemBarPropertyChange(WindowType type, const SystemBarProperty& systemBarProperty);
     void UpdatePiPWindowStateChanged(const std::string& bundleName, bool isForeground);
     void NotifyWindowPropertyChange(uint32_t propertyDirtyFlags,
-        const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList);
+        const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList);
 
 private:
     SessionManagerAgentController()
@@ -68,6 +68,7 @@ private:
     std::map<int32_t, std::map<WindowManagerAgentType, sptr<IWindowManagerAgent>>> windowManagerPidAgentMap_;
     std::map<sptr<IRemoteObject>, std::pair<int32_t, WindowManagerAgentType>> windowManagerAgentPairMap_;
     std::mutex windowManagerAgentPidMapMutex_;
+    WindowManagementMode windowManagementMode_;
 };
 }
 }

@@ -251,7 +251,7 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
                 return ERR_INVALID_DATA;
             }
 
-            std::vector<std::unordered_map<WindowInfoKey, std::any>> windowInfoList;
+            std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>> windowInfoList;
             if (!ReadWindowInfoList(data, windowInfoList)) {
                 TLOGE(WmsLogTag::WMS_ATTRIBUTE, "fail to read windowInfoList.");
                 return ERR_INVALID_DATA;
@@ -268,7 +268,7 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
 
 // LCOV_EXCL_START
 bool WindowManagerAgentStub::ReadWindowInfoList(MessageParcel& data,
-    std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList)
+    std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList)
 {
     uint32_t windowInfoListLength = 0;
     if (!data.ReadUint32(windowInfoListLength)) {
@@ -284,7 +284,7 @@ bool WindowManagerAgentStub::ReadWindowInfoList(MessageParcel& data,
             return false;
         }
         size_t windowInfoSize = static_cast<size_t>(windowInfoLength);
-        std::unordered_map<WindowInfoKey, std::any> windowInfo;
+        std::unordered_map<WindowInfoKey, WindowChangeInfoType> windowInfo;
         for (size_t j = 0; j < windowInfoSize; j++) {
             if (!ReadWindowInfo(data, windowInfo)) {
                 TLOGE(WmsLogTag::WMS_ATTRIBUTE, "fail to read windowInfo.");
@@ -297,7 +297,7 @@ bool WindowManagerAgentStub::ReadWindowInfoList(MessageParcel& data,
 }
 
 bool WindowManagerAgentStub::ReadWindowInfo(MessageParcel& data,
-    std::unordered_map<WindowInfoKey, std::any>& windowInfo)
+    std::unordered_map<WindowInfoKey, WindowChangeInfoType>& windowInfo)
 {
     int32_t windowInfoKeyValue = 0;
     if (!data.ReadInt32(windowInfoKeyValue)) {
@@ -344,6 +344,15 @@ bool WindowManagerAgentStub::ReadWindowInfo(MessageParcel& data,
             windowInfo[windowInfoKey] = static_cast<WindowVisibilityState>(value);
             break;
         }
+        case WindowInfoKey::WINDOW_MODE : {
+            uint32_t value = 0;
+            if (!data.ReadUint32(value)) {
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read WindowMode failed");
+                return false;
+            }
+            windowInfo[windowInfoKey] = static_cast<WindowMode>(value);
+            break;
+        }
         case WindowInfoKey::DISPLAY_ID : {
             uint64_t value = 0;
             if (!data.ReadUint64(value)) {
@@ -361,6 +370,15 @@ bool WindowManagerAgentStub::ReadWindowInfo(MessageParcel& data,
                 return false;
             }
             windowInfo[windowInfoKey] = rect;
+            break;
+        }
+        case WindowInfoKey::FLOATING_SCALE : {
+            float value = 0.f;
+            if (!data.ReadFloat(value)) {
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read float failed");
+                return false;
+            }
+            windowInfo[windowInfoKey] = value;
             break;
         }
         default : {

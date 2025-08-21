@@ -84,6 +84,8 @@ napi_value JsScreenSession::Create(napi_env env, const sptr<ScreenSession>& scre
         JsScreenSession::GetScreenUIContext);
     BindNativeFunction(env, objValue, "destroyContent", moduleName,
         JsScreenSession::DestroyContent);
+    BindNativeFunction(env, objValue, "releaseResource", moduleName,
+        JsScreenSession::ReleaseResource);
     return objValue;
 }
 
@@ -408,7 +410,8 @@ napi_value JsScreenSession::OnDestroyContent(napi_env env, napi_callback_info in
 
     if (screenScene_ == nullptr) {
         TLOGE(WmsLogTag::DMS, "screenScene_ is nullptr");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+        std::string errMsg = "[destroyContent]message: content is null, possible causes: content has been destroyed.";
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), errMsg));
         return NapiGetUndefined(env);
     }
 
@@ -418,6 +421,19 @@ napi_value JsScreenSession::OnDestroyContent(napi_env env, napi_callback_info in
         TLOGW(WmsLogTag::DMS, "destroy screen scene, screenId:%{public}" PRIu64 ", sessionId:%{public}" PRIu64,
             screenSession_->GetScreenId(), screenSession_->GetSessionId());
     }
+    return NapiGetUndefined(env);
+}
+
+napi_value JsScreenSession::ReleaseResource(napi_env env, napi_callback_info info)
+{
+    JsScreenSession* me = CheckParamsAndGetThis<JsScreenSession>(env, info);
+    return (me != nullptr) ? me->OnReleaseResource(env, info) : nullptr;
+}
+
+napi_value JsScreenSession::OnReleaseResource(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::DMS, "[NAPI]");
+    mCallback_.clear();
     return NapiGetUndefined(env);
 }
 
@@ -438,22 +454,24 @@ napi_value JsScreenSession::OnGetScreenUIContext(napi_env env, napi_callback_inf
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
-
+    std::string errMsg = "[getScreenUIContext]message: content is null, possible causes: content does not exist.";
     if (screenScene_ == nullptr) {
         TLOGE(WmsLogTag::DMS, "screenScene_ is nullptr");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), errMsg));
         return NapiGetUndefined(env);
     }
     const auto& uiContent = screenScene_->GetUIContent();
     if (uiContent == nullptr) {
         TLOGE(WmsLogTag::DMS, "uiContent is nullptr");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), errMsg));
         return NapiGetUndefined(env);
     }
     napi_value uiContext = uiContent->GetUINapiContext();
     if (uiContext == nullptr) {
         TLOGE(WmsLogTag::DMS, "uiContext obtained from jsEngine is nullptr");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+        errMsg = "[getScreenUIContext]message: content is null, " \
+            "possible causes: content obtained from jsEngine is nullptr.";
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), errMsg));
         return NapiGetUndefined(env);
     }
     TLOGI(WmsLogTag::DMS, "success");

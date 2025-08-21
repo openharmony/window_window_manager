@@ -159,12 +159,16 @@ WmErrorCode JsWindowRegisterManager::ProcessLifeCycleEventRegister(sptr<JsWindow
     return ret;
 }
 
-WmErrorCode JsWindowRegisterManager::ProcessWindowStageLifeCycleEventRegister(sptr<JsWindowListener> listener,
-    sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
+WmErrorCode JsWindowRegisterManager::ProcessWindowStageLifeCycleEventRegister(const sptr<JsWindowListener>& listener,
+    const sptr<Window>& window, bool isRegister, napi_env env, napi_value parameter)
 {
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "Window is nullptr");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    if (!window->IsSceneBoardEnabled()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "sceneBoard is not enabled");
+        return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     sptr<IWindowStageLifeCycle> thisListener(listener);
     WmErrorCode ret = WmErrorCode::WM_OK;

@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-
 #include "ani_window_stage.h"
 
 #include <memory>
@@ -22,8 +21,8 @@
 #include "ani_window.h"
 #include "ani_window_manager.h"
 #include "ani_window_utils.h"
-#include "window_manager_hilog.h"
 #include "permission.h"
+#include "window_manager_hilog.h"
 #include "window_scene.h"
 
 using OHOS::Rosen::WindowScene;

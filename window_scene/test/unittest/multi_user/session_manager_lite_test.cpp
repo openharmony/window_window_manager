@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "session_manager_lite.h"
+#include "iremote_object_mocker.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -222,6 +223,25 @@ HWTEST_F(SessionManagerLiteTest, RegisterUserSwitchListener, Function | SmallTes
 
     sml_->RegisterUserSwitchListener([]() {});
     ASSERT_NE(sml_->userSwitchCallbackFunc_, nullptr);
+}
+
+/**
+ * @tc.name: UnregisterWMSConnectionChangedListener
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionManagerLiteTest, UnregisterWMSConnectionChangedListener, Function | SmallTest | Level2)
+{
+    ASSERT_NE(nullptr, sml_);
+
+    sml_->mockSessionManagerServiceProxy_ = nullptr;
+    auto ret = sml_->UnregisterWMSConnectionChangedListener();
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    sptr<IRemoteObject> remoteObject = sptr<IRemoteObjectMocker>::MakeSptr();
+    sml_->mockSessionManagerServiceProxy_ = iface_cast<IMockSessionManagerInterface>(remoteObject);
+    ret = sml_->UnregisterWMSConnectionChangedListener();
+    ASSERT_EQ(WMError::WM_OK, ret);
 }
 } // namespace Rosen
 } // namespace OHOS
