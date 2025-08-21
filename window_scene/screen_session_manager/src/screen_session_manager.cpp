@@ -227,6 +227,7 @@ ScreenSessionManager::ScreenSessionManager()
     screenOnDelay_ = CV_WAIT_SCREENON_MS;
     taskScheduler_ = std::make_shared<TaskScheduler>(SCREEN_SESSION_MANAGER_THREAD);
     screenPowerTaskScheduler_ = std::make_shared<TaskScheduler>(SCREEN_SESSION_MANAGER_SCREEN_POWER_THREAD);
+    ffrtQueueHelper_ = std::make_shared<FfrtQueueHelper>();
     screenCutoutController_ = new (std::nothrow) ScreenCutoutController();
     if (!screenCutoutController_) {
         TLOGE(WmsLogTag::DMS, "screenCutoutController_ is nullptr");
@@ -11163,6 +11164,11 @@ bool ScreenSessionManager::SynchronizePowerStatus(ScreenPowerState state)
 std::shared_ptr<TaskScheduler> ScreenSessionManager::GetPowerTaskScheduler() const
 {
     return screenPowerTaskScheduler_;
+}
+
+std::shared_ptr<FfrtQueueHelper> ScreenSessionManager::GetFfrtQueueHelper() const
+{
+    return ffrtQueueHelper_;
 }
 
 bool ScreenSessionManager::GetCancelSuspendStatus() const

@@ -121,9 +121,9 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, const std:
         }
         manager->ProcessNotifyFoldStatusChange(currentState, newState, angles, policy);
     };
-    taskScheduler_ = ScreenSessionManager::GetInstance().GetPowerTaskScheduler();
-    if (taskScheduler_ != nullptr) {
-        taskScheduler_->PostAsyncTask(task, "secondaryFoldStatusChange");
+    auto ffrtQueueHelper = ScreenSessionManager::GetInstance().GetFfrtQueueHelper();
+    if (ffrtQueueHelper != nullptr) {
+        ffrtQueueHelper->SubmitTask(task);
     }
 }
 

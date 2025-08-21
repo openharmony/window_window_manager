@@ -1014,7 +1014,6 @@ bool ScreenSessionManagerClient::HandleScreenDisconnection(SessionOption option)
         TLOGE(WmsLogTag::DMS, "screenSession is null");
         return false;
     }
-    screenSession->DestroyScreenScene();
     NotifyScreenDisconnect(screenSession);
     {
         std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
