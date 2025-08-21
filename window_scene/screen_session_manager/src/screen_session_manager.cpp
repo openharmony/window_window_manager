@@ -8324,8 +8324,8 @@ void ScreenSessionManager::SwitchUser()
         }
     }
     {
-    std::lock_guard<std::mutex> lock(oldScbPidsMutex_);
-    SwitchScbNodeHandle(userId, IPCSkeleton::GetCallingPid(), false);
+        std::lock_guard<std::mutex> lock(oldScbPidsMutex_);
+        SwitchScbNodeHandle(userId, IPCSkeleton::GetCallingPid(), false);
     }
     MockSessionManagerService::GetInstance().NotifyWMSConnected(userId, GetDefaultScreenId(), false);
 #endif
@@ -8581,21 +8581,20 @@ void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& cl
         }
     }
     {
-    std::unique_lock<std::mutex> lock(oldScbPidsMutex_);
-    SetClientProxy(client);
-    auto userId = GetUserIdByCallingUid();
-    auto newScbPid = IPCSkeleton::GetCallingPid();
+        std::unique_lock<std::mutex> lock(oldScbPidsMutex_);
+        SetClientProxy(client);
+        auto userId = GetUserIdByCallingUid();
+        auto newScbPid = IPCSkeleton::GetCallingPid();
 
-    std::ostringstream oss;
-    oss << "set client userId: " << userId
-        << " clientName: " << SysCapUtil::GetClientName();
-    TLOGI(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
-    screenEventTracker_.RecordEvent(oss.str());
-    currentUserIdForSettings_ = userId;
-    MockSessionManagerService::GetInstance().NotifyWMSConnected(userId, GetDefaultScreenId(), true);
-    NotifyClientProxyUpdateFoldDisplayMode(GetFoldDisplayMode());
-    SetClientInner();
-    SwitchScbNodeHandle(userId, newScbPid, true);
+        std::ostringstream oss;
+        oss << "set client userId: " << userId << " clientName: " << SysCapUtil::GetClientName();
+        TLOGI(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
+        screenEventTracker_.RecordEvent(oss.str());
+        currentUserIdForSettings_ = userId;
+        MockSessionManagerService::GetInstance().NotifyWMSConnected(userId, GetDefaultScreenId(), true);
+        NotifyClientProxyUpdateFoldDisplayMode(GetFoldDisplayMode());
+        SetClientInner();
+        SwitchScbNodeHandle(userId, newScbPid, true);
     }
     AddScbClientDeathRecipient(client, IPCSkeleton::GetCallingPid());
 
