@@ -15,6 +15,8 @@
 
 #include "screen_power_utils.h"
 #include "power_mgr_client.h"
+#include "screenlock_manager.h"
+#include "screen_session_manager.h"
 #include "window_manager_hilog.h"
 
 using namespace OHOS::PowerMgr;
@@ -23,6 +25,7 @@ namespace OHOS {
 namespace Rosen {
 
 std::mutex ScreenPowerUtils::powerTimingMutex_;
+std::mutex ScreenPowerUtils::powerLockMutex_;
 bool ScreenPowerUtils::isEnablePowerForceTimingOut_ = false;
 
 void ScreenPowerUtils::EnablePowerForceTimingOut()
@@ -74,11 +77,23 @@ void ScreenPowerUtils::DisablePowerForceTimingOut()
 
 void ScreenPowerUtils::LightAndLockScreen(const std::string& detail)
 {
+    std::lock_guard<std::mutex> lock(powerLockMutex_);
     auto& powerMgrClient = PowerMgrClient::GetInstance();
-    if (!powerMgrClient.IsScreenOn()) {
+    auto lockManager = OHOS::ScreenLock::ScreenLockManager::GetInstance();
+    if (lockManager == nullptr) {
+        TLOGE(WmsLogTag::DMS, "lockManager is nullptr");
+        return;
+    }
+    bool isScreenLocked = lockManager->IsScreenLocked();
+    bool isScreenOn = powerMgrClient.IsScreenOn();
+    TLOGI(WmsLogTag::DMS, "isScreenLocked: %{public}d, isScreenOn: %{public}d", isScreenLocked, isScreenOn);
+    if (!isScreenOn && !isScreenLocked) {
         PowerErrors wakeupRet = powerMgrClient.WakeupDevice(WakeupDeviceType::WAKEUP_DEVICE_APPLICATION, detail);
-        PowerErrors suspendRet = powerMgrClient.SuspendDevice();
-        TLOGI(WmsLogTag::DMS, "wakeupRet: %{public}d, suspendRet: %{public}d", wakeupRet, suspendRet);
+        auto userId = ScreenSessionManager::GetInstance().GetCurrentUserId();
+        std::string identity = IPCSkeleton::ResetCallingIdentity();
+        int32_t lockRet = lockManager->Lock(userId);
+        IPCSkeleton::SetCallingIdentity(identity);
+        TLOGI(WmsLogTag::DMS, "wakeupRet: %{public}d, lockRet: %{public}d", wakeupRet, lockRet);
     }
 }
 bool ScreenPowerUtils::GetEnablePowerForceTimingOut()

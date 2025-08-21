@@ -17,9 +17,11 @@
 #include <parameters.h>
 #include "ability_context_impl.h"
 #include "display_info.h"
+#include "mock_ability_context_impl.h"
 #include "mock_session.h"
 #include "mock_uicontent.h"
 #include "mock_window_adapter.h"
+#include "parameters.h"
 #include "singleton_mocker.h"
 #include "window_scene_session_impl.h"
 #include "window_session_impl.h"
@@ -149,6 +151,7 @@ HWTEST_F(WindowSceneSessionImplTest4, ConsumePointerEvent02, TestSize.Level1)
     pointerEvent->SetSourceType(1);
     MMI::PointerEvent::PointerItem pointerItem;
     pointerItem.SetPointerId(pointerId);
+    pointerItem.SetOriginPointerId(pointerId);
     pointerEvent->AddPointerItem(pointerItem);
 
     windowSceneSessionImpl->property_->SetWindowDelayRaiseEnabled(false);
@@ -430,6 +433,53 @@ HWTEST_F(WindowSceneSessionImplTest4, ResetSuperFoldDisplayY, TestSize.Level1)
     windowSceneSessionImpl->ResetSuperFoldDisplayY(pointerEvent);
     pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
     updatedDisplayY = pointerItem.GetDisplayY();
+    ASSERT_EQ(updatedDisplayY, originalDisplayY - 150);
+}
+
+/**
+ * @tc.name: ResetSuperFoldDisplayY01
+ * @tc.desc: ResetSuperFoldDisplayY01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, ResetSuperFoldDisplayY01, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("ResetSuperFoldDisplayY01");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    windowSceneSessionImpl->superFoldOffsetY_ = 150;
+    MMI::PointerEvent::PointerItem pointerItem;
+    pointerItem.SetDisplayYPos(100);
+    pointerEvent->AddPointerItem(pointerItem);
+    auto originalDisplayY = pointerItem.GetDisplayYPos();
+    windowSceneSessionImpl->ResetSuperFoldDisplayY(pointerEvent);
+    pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
+    auto updatedDisplayY = pointerItem.GetDisplayYPos();
+    ASSERT_EQ(updatedDisplayY, originalDisplayY);
+
+    pointerItem.SetDisplayYPos(150);
+    pointerEvent->AddPointerItem(pointerItem);
+    originalDisplayY = pointerItem.GetDisplayYPos();
+    windowSceneSessionImpl->ResetSuperFoldDisplayY(pointerEvent);
+    pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
+    updatedDisplayY = pointerItem.GetDisplayYPos();
+    ASSERT_EQ(updatedDisplayY, originalDisplayY - 150);
+
+    pointerItem.SetDisplayYPos(150.001);
+    pointerEvent->AddPointerItem(pointerItem);
+    originalDisplayY = pointerItem.GetDisplayYPos();
+    windowSceneSessionImpl->ResetSuperFoldDisplayY(pointerEvent);
+    pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
+    updatedDisplayY = pointerItem.GetDisplayYPos();
+    ASSERT_EQ(updatedDisplayY, originalDisplayY - 150);
+
+    pointerItem.SetDisplayYPos(151.001);
+    pointerEvent->AddPointerItem(pointerItem);
+    originalDisplayY = pointerItem.GetDisplayYPos();
+    windowSceneSessionImpl->ResetSuperFoldDisplayY(pointerEvent);
+    pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
+    updatedDisplayY = pointerItem.GetDisplayYPos();
     ASSERT_EQ(updatedDisplayY, originalDisplayY - 150);
 }
 
@@ -1032,8 +1082,6 @@ HWTEST_F(WindowSceneSessionImplTest4, SetWindowTitle, TestSize.Level1)
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
     window->property_->SetPersistentId(1);
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    EXPECT_EQ(window->SetWindowTitle(title), WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     window->windowSystemConfig_.freeMultiWindowSupport_ = false;
     window->windowSystemConfig_.isSystemDecorEnable_ = false;
@@ -1051,10 +1099,23 @@ HWTEST_F(WindowSceneSessionImplTest4, SetWindowTitle, TestSize.Level1)
     EXPECT_EQ(window->Create(abilityContext_, session), WMError::WM_OK);
     EXPECT_EQ(window->SetWindowTitle(title), WMError::WM_OK);
 
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    window->windowSystemConfig_.isSystemDecorEnable_ = true;
+    window->property_->SetDecorEnable(true);
+    EXPECT_EQ(window->SetWindowTitle(title), WMError::WM_OK);
+ 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
     window->property_->SetPcAppInpadCompatibleMode(true);
     window->windowSystemConfig_.freeMultiWindowEnable_ = false;
     window->windowSystemConfig_.isSystemDecorEnable_ = false;
+    EXPECT_EQ(WMError::WM_OK, window->SetWindowTitle(title));
+    const std::string feature = "large_screen";
+    std::string deviceType = OHOS::system::GetParameter("const.product.devicetype", "");
+    auto context = std::make_shared<MockAbilityContextImpl>();
+    window->context_ = context;
+    context->hapModuleInfo_ = std::make_shared<AppExecFwk::HapModuleInfo>();
+    context->hapModuleInfo_->requiredDeviceFeatures = {{deviceType, {feature}}};
     EXPECT_EQ(WMError::WM_OK, window->SetWindowTitle(title));
     EXPECT_EQ(WMError::WM_OK, window->Destroy(true));
 }

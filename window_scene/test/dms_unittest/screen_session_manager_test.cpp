@@ -135,6 +135,28 @@ HWTEST_F(ScreenSessionManagerTest, RegisterDisplayManagerAgent, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CanEnterCoordinationRecording
+ * @tc.desc: CanEnterCoordinationRecording test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CanEnterCoordinationRecording, TestSize.Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->virtualScreenCount_ = 1;
+    ssm_->hdmiScreenCount_ = 0;
+
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOptionRecord";
+    virtualOption.virtualScreenType_ = VirtualScreenType::SCREEN_RECORDING;
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    auto ret = ssm_->CanEnterCoordination();
+    EXPECT_EQ(ret, DMError::DM_ERROR_NOT_SUPPORT_COOR_WHEN_RECORDING);
+    ssm_->DestroyVirtualScreen(screenId)
+}
+
+
+/**
  * @tc.name: WakeupBegin
  * @tc.desc: WakeupBegin test
  * @tc.type: FUNC
@@ -6006,6 +6028,65 @@ HWTEST_F(ScreenSessionManagerTest, IsScreenCasting, Function | SmallTest | Level
 }
 
 /**
+ * @tc.name: CanEnterCoordination01
+ * @tc.desc: CanEnterCoordination01 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CanEnterCoordination01, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->virtualScreenCount_ = 0;
+    ssm_->hdmiScreenCount_ = 1;
+    auto ret = ssm_->CanEnterCoordination();
+    EXPECT_EQ(ret, DMError::DM_ERROR_NOT_SUPPORT_COOR_WHEN_WIRED_CASTING);
+
+    ssm_->virtualScreenCount_ = 0;
+    ssm_->hdmiScreenCount_ = 0;
+    auto ret = ssm_->CanEnterCoordination();
+    EXPECT_EQ(ret, DMError::DM_OK);
+}
+
+/**
+ * @tc.name: CanEnterCoordination02
+ * @tc.desc: CanEnterCoordination02 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CanEnterCoordination02, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->screenSessionMap_[50] = nullptr;
+    ssm_->virtualScreenCount_ = 1;
+    ssm_->hdmiScreenCount_ = 0;
+
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    virtualOption.virtualScreenType_ = VirtualScreenType::SCREEN_CASTING;
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    auto ret = ssm_->CanEnterCoordination();
+    EXPECT_EQ(ret, DMError::DM_ERROR_NOT_SUPPORT_COOR_WHEN_WIRLESS_CASTING);
+    ssm_->DestroyVirtualScreen(screenId)
+}
+
+/**
+ * @tc.name: CanEnterCoordination03
+ * @tc.desc: CanEnterCoordination03 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CanEnterCoordination03, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    auto oldMap = ssm_->screenSessionMap_;
+    std::map<ScreenId, sptr<ScreenSession>> newScreenSessionMap_{};
+    ssm_->screenSessionMap_ = newScreenSessionMap_;
+    ssm_->virtualScreenCount_ = 1;
+    ssm_->hdmiScreenCount_ = 0;
+    auto ret = ssm_->CanEnterCoordination();
+    EXPECT_EQ(ret, DMError::DM_OK);
+    ssm_->screenSessionMap_ = oldMap;
+}
+
+/**
  * @tc.name: GetCameraPosition
  * @tc.desc: GetCameraPosition
  * @tc.type: FUNC
@@ -7160,20 +7241,20 @@ HWTEST_F(ScreenSessionManagerTest, SetPrimaryDisplaySystemDpi, Function | SmallT
 }
 
 /**
- * @tc.name: SwitchPCMode
- * @tc.desc: SwitchPCMode
+ * @tc.name: HandleSwitchPcMode
+ * @tc.desc: HandleSwitchPcMode
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerTest, SwitchPCMode, TestSize.Level1)
+HWTEST_F(ScreenSessionManagerTest, HandleSwitchPcMode, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     if (!IS_SUPPORT_PC_MODE) {
-        bool isPcDevice = ssm_->SwitchPCMode();
+        bool isPcDevice = ssm_->HandleSwitchPcMode();
         ASSERT_EQ(isPcDevice, g_isPcDevice);
         return;
     }
     bool isPcMode = system::GetBoolParameter("persist.sceneboard.ispcmode", false);
-    bool isPcDevice = ssm_->SwitchPCMode();
+    bool isPcDevice = ssm_->HandleSwitchPcMode();
     if (isPcMode) {
         EXPECT_TRUE(isPcDevice);
     } else {
@@ -7182,11 +7263,11 @@ HWTEST_F(ScreenSessionManagerTest, SwitchPCMode, TestSize.Level1)
 }
 
 /**
- * @tc.name: SwitchExternalScreenToMirror
- * @tc.desc: SwitchExternalScreenToMirror
+ * @tc.name: SwitchModeHandleExternalScreen
+ * @tc.desc: SwitchModeHandleExternalScreen
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerTest, SwitchExternalScreenToMirror, TestSize.Level1)
+HWTEST_F(ScreenSessionManagerTest, SwitchModeHandleExternalScreen01, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     sptr<IDisplayManagerAgent> displayManagerAgent = sptr<DisplayManagerAgentDefault>::MakeSptr();
@@ -7195,7 +7276,7 @@ HWTEST_F(ScreenSessionManagerTest, SwitchExternalScreenToMirror, TestSize.Level1
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
     sptr<ScreenSession> screenSession = ssm_->GetScreenSession(screenId);
     ASSERT_NE(screenSession, nullptr);
-    ssm_->SwitchExternalScreenToMirror();
+    ssm_->SwitchModeHandleExternalScreen(false);
     EXPECT_NE(screenSession->GetScreenCombination(), ScreenCombination::SCREEN_MIRROR);
     screenSession->SetIsRealScreen(true);
     ssm_->screenSessionMap_.insert(std::make_pair(777, nullptr));
@@ -7204,11 +7285,50 @@ HWTEST_F(ScreenSessionManagerTest, SwitchExternalScreenToMirror, TestSize.Level1
     VirtualScreenOption virtualOption1;
     virtualOption1.name_ = "createVirtualOption2";
     auto virtualScreenId = ssm_->CreateVirtualScreen(virtualOption1, displayManagerAgent1->AsObject());
-    ssm_->SwitchExternalScreenToMirror();
-    EXPECT_EQ(screenSession->GetScreenCombination(), ScreenCombination::SCREEN_MIRROR);
+    ssm_->SwitchModeHandleExternalScreen(false);
+    EXPECT_EQ(screenSession->GetName(), "CastEngine");
     screenSession->SetIsRealScreen(false);
     ssm_->DestroyVirtualScreen(screenId);
     ssm_->DestroyVirtualScreen(virtualScreenId);
+}
+
+/**
+ * @tc.name: SwitchModeHandleExternalScreen
+ * @tc.desc: SwitchModeHandleExternalScreen
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SwitchModeHandleExternalScreen02, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->screenSessionMap_.clear();
+    sptr<IDisplayManagerAgent> displayManagerAgent = sptr<DisplayManagerAgentDefault>::MakeSptr();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "testVirtualOption";
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    sptr<ScreenSession> screenSession = ssm_->GetScreenSession(screenId);
+    ASSERT_NE(screenSession, nullptr);
+    screenSession->SetIsRealScreen(true);
+    ssm_->SwitchModeHandleExternalScreen(true);
+    EXPECT_NE(screenSession->GetScreenCombination(), ScreenCombination::SCREEN_MIRROR);
+    ssm_->DestroyVirtualScreen(screenId);
+}
+
+/**
+ * @tc.name: CreateVirtualScreen
+ * @tc.desc: CreateVirtualScreen test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CreateVirtualScreen, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<IDisplayManagerAgent> displayManagerAgent = sptr<DisplayManagerAgentDefault>::MakeSptr();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "CastEngine";
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    sptr<ScreenSession> screenSession = ssm_->GetScreenSession(screenId);
+    ASSERT_NE(screenSession, nullptr);
+    EXPECT_EQ(screenSession->GetVirtualScreenFlag(), VirtualScreenFlag::CAST);
+    ssm_->DestroyVirtualScreen(screenId);
 }
 
 /**

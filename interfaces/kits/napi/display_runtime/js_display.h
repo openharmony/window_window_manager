@@ -27,7 +27,7 @@
 
 namespace OHOS {
 namespace Rosen {
-enum class ColorSpace : uint32_t {
+enum class DmsColorSpace : uint32_t {
     UNKNOWN = 0,
     ADOBE_RGB = 1,
     BT2020_HLG = 2,

@@ -70,15 +70,12 @@ HWTEST_F(SubSessionLayoutTest, HandleCrossSurfaceNodeByWindowAnchor, TestSize.Le
     info.bundleName_ = "HandleCrossSurfaceNodeByWindowAnchor";
     sptr<SubSession> sceneSession = sptr<SubSession>::MakeSptr(info, nullptr);
     sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    sceneSession->HandleCrossSurfaceNodeByWindowAnchor(SizeChangeReason::UNDEFINED, nullptr);
-    ScreenSessionConfig config = {
-        .screenId = 100,
-        .rsId = 101,
-        .name = "OpenHarmony",
-    };
-    sptr<ScreenSession> screenSession =
-        sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
-    sceneSession->HandleCrossSurfaceNodeByWindowAnchor(SizeChangeReason::UNDEFINED, screenSession);
+    sceneSession->HandleCrossSurfaceNodeByWindowAnchor(SizeChangeReason::UNDEFINED,
+        std::numeric_limits<uint32_t>::max());
+    sceneSession->HandleCrossSurfaceNodeByWindowAnchor(SizeChangeReason::UNDEFINED, 0);
+    sceneSession->SetFindScenePanelRsNodeByZOrderFunc([this](uint64_t screenId, uint32_t targetZOrder) {
+        return CreateRSSurfaceNode();
+    });
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
     rsSurfaceNodeConfig.SurfaceNodeName = info.abilityName_;
     RSSurfaceNodeType rsSurfaceNodeType = RSSurfaceNodeType::DEFAULT;
@@ -87,13 +84,13 @@ HWTEST_F(SubSessionLayoutTest, HandleCrossSurfaceNodeByWindowAnchor, TestSize.Le
     sceneSession->SetSurfaceNode(surfaceNode);
 
     sceneSession->cloneNodeCountDuringCross_.store(0);
-    sceneSession->HandleCrossSurfaceNodeByWindowAnchor(SizeChangeReason::DRAG, screenSession);
+    sceneSession->HandleCrossSurfaceNodeByWindowAnchor(SizeChangeReason::DRAG, 0);
     EXPECT_EQ(1, sceneSession->cloneNodeCountDuringCross_.load());
-    sceneSession->HandleCrossSurfaceNodeByWindowAnchor(SizeChangeReason::DRAG_MOVE, screenSession);
+    sceneSession->HandleCrossSurfaceNodeByWindowAnchor(SizeChangeReason::DRAG_MOVE, 0);
     EXPECT_EQ(2, sceneSession->cloneNodeCountDuringCross_.load());
-    sceneSession->HandleCrossSurfaceNodeByWindowAnchor(SizeChangeReason::DRAG_END, screenSession);
+    sceneSession->HandleCrossSurfaceNodeByWindowAnchor(SizeChangeReason::DRAG_END, 0);
     EXPECT_EQ(1, sceneSession->cloneNodeCountDuringCross_.load());
-    sceneSession->HandleCrossSurfaceNodeByWindowAnchor(SizeChangeReason::UNDEFINED, screenSession);
+    sceneSession->HandleCrossSurfaceNodeByWindowAnchor(SizeChangeReason::UNDEFINED, 0);
     EXPECT_EQ(1, sceneSession->cloneNodeCountDuringCross_.load());
 }
 } // namespace

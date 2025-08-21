@@ -432,7 +432,8 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToMain(sptr<ScreenSes
 #ifdef TP_FEATURE_ENABLE
     RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE, MAIN_TP.c_str());
 #endif
-    if (PowerMgr::PowerMgrClient::GetInstance().IsFoldScreenOn()) {
+    if (PowerMgr::PowerMgrClient::GetInstance().IsFoldScreenOn() ||
+        ScreenSessionManager::GetInstance().GetCancelSuspendStatus()) {
         ChangeScreenDisplayModeToMainWhenFoldScreenOn(screenSession);
     } else { // When the screen is off and folded, it is not powered on
         ScreenSessionManager::GetInstance().ForceSkipScreenOffAnimation();
@@ -671,6 +672,25 @@ void SingleDisplayPocketFoldPolicy::CloseCoordinationScreen()
 
     ScreenSessionManager::GetInstance().OnScreenChange(SCREEN_ID_MAIN, ScreenEvent::DISCONNECTED);
     ScreenSessionManager::GetInstance().SetCoordinationFlag(false);
+}
+
+void SingleDisplayPocketFoldPolicy::GetAllCreaseRegion(std::vector<FoldCreaseRegionItem>& foldCreaseRegionItems) const
+{
+    FoldCreaseRegionItem MCreaseItem{DisplayOrientation::LANDSCAPE, FoldDisplayMode::MAIN,
+        FoldCreaseRegion(0, {})};
+    FoldCreaseRegionItem FPorCreaseItem{DisplayOrientation::PORTRAIT, FoldDisplayMode::FULL,
+        GetFoldCreaseRegion(false)};
+    FoldCreaseRegionItem FLandCreaseItem{DisplayOrientation::LANDSCAPE, FoldDisplayMode::FULL,
+        GetFoldCreaseRegion(true)};
+    FoldCreaseRegionItem CPorCreaseItem{DisplayOrientation::PORTRAIT, FoldDisplayMode::COORDINATION,
+        GetFoldCreaseRegion(false)};
+    FoldCreaseRegionItem CLandCreaseItem{DisplayOrientation::LANDSCAPE, FoldDisplayMode::COORDINATION,
+        GetFoldCreaseRegion(true)};
+    foldCreaseRegionItems.push_back(MCreaseItem);
+    foldCreaseRegionItems.push_back(FPorCreaseItem);
+    foldCreaseRegionItems.push_back(FLandCreaseItem);
+    foldCreaseRegionItems.push_back(CPorCreaseItem);
+    foldCreaseRegionItems.push_back(CLandCreaseItem);
 }
 
 void SingleDisplayPocketFoldPolicy::ExitCoordination()

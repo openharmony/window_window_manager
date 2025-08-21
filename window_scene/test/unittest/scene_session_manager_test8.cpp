@@ -560,6 +560,7 @@ HWTEST_F(SceneSessionManagerTest8, SetBrightness, TestSize.Level1)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     EXPECT_NE(nullptr, sceneSession);
     sceneSession->persistentId_ = 2024;
+    sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
 
     ssm_->SetDisplayBrightness(3.14f);
     std::shared_ptr<AppExecFwk::EventHandler> pipeEventHandler = nullptr;
@@ -1091,10 +1092,12 @@ HWTEST_F(SceneSessionManagerTest8, PackWindowPropertyChangeInfo01, TestSize.Leve
     sceneSession1->SetSessionGlobalRect(rect);
     sceneSession1->SetSessionState(SessionState::STATE_FOREGROUND);
     sceneSession1->GetSessionProperty()->SetDisplayId(0);
+    sceneSession1->GetSessionProperty()->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    sceneSession1->SetFloatingScale(1.0f);
 
-    std::unordered_map<WindowInfoKey, std::any> windowPropertyChangeInfo;
+    std::unordered_map<WindowInfoKey, WindowChangeInfoType> windowPropertyChangeInfo;
     ssm_->PackWindowPropertyChangeInfo(sceneSession1, windowPropertyChangeInfo);
-    EXPECT_EQ(windowPropertyChangeInfo.size(), 7);
+    EXPECT_EQ(windowPropertyChangeInfo.size(), 9);
 }
 
 /**
@@ -1464,6 +1467,38 @@ HWTEST_F(SceneSessionManagerTest8, NotifyOnAttachToFrameNode01, TestSize.Level1)
     ssm_->sessionRSBlackListConfigSet_.clear();
     ssm_->sessionBlackListInfoMap_.clear();
     ssm_->bundleRSBlackListConfigMap_.clear();
+}
+
+/**
+ * @tc.name: SetSurfaceNodeIds01
+ * @tc.desc: test function : SetSurfaceNodeIds
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, SetSurfaceNodeIds01, TestSize.Level1)
+{
+    ssm_->sessionBlackListInfoMap_.clear();
+    ssm_->sceneSessionMap_.clear();
+    std::vector<uint64_t> surfaceNodeIds;
+    ssm_->sessionBlackListInfoMap_[0].insert({ .windowId = 0 });
+    ssm_->sessionBlackListInfoMap_[0].insert({ .windowId = 0, .privacyWindowTag = "test" });
+    ssm_->SetSurfaceNodeIds(0, surfaceNodeIds);
+    EXPECT_EQ(ssm_->sessionBlackListInfoMap_[0].size(), 1);
+
+    surfaceNodeIds.push_back(1);
+    ssm_->SetSurfaceNodeIds(0, surfaceNodeIds);
+    EXPECT_EQ(ssm_->sessionBlackListInfoMap_[0].size(), 1);
+
+    SessionInfo sessionInfo1;
+    sessionInfo1.bundleName_ = "test";
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo1, nullptr);
+    ssm_->sceneSessionMap_.insert({1, sceneSession1});
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    ASSERT_NE(nullptr, surfaceNode);
+    surfaceNode->SetId(1);
+    sceneSession1->SetSurfaceNode(surfaceNode);
+    ssm_->SetSurfaceNodeIds(0, surfaceNodeIds);
+    EXPECT_EQ(ssm_->sessionBlackListInfoMap_[0].size(), 2);
 }
 
 /**

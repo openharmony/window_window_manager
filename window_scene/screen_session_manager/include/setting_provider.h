@@ -20,10 +20,11 @@
 #include "errors.h"
 #include "mutex"
 #include "setting_observer.h"
+#include <refbase.h>
 
 namespace OHOS {
 namespace Rosen {
-class SettingProvider : public NoCopyable {
+class SettingProvider : public NoCopyable, public RefBase {
 public:
     static SettingProvider& GetInstance(int32_t systemAbilityId);
     ErrCode GetStringValue(const std::string& key, std::string& value);
@@ -47,12 +48,11 @@ public:
     ErrCode GetLongValueMultiUserByTable(const std::string& key, int64_t& value, std::string tableName);
     ErrCode GetStringValueMultiUserByTable(const std::string& key, std::string& value, std::string tableName);
 
-protected:
-    ~SettingProvider() override;
+    ~SettingProvider() = default;
 
 private:
-    static SettingProvider* instance_;
-    static std::mutex mutex_;
+    static sptr<SettingProvider> instance_;
+    static std::mutex instanceMutex_;
     static sptr<IRemoteObject> remoteObj_;
 
     static void Initialize(int32_t systemAbilityId);

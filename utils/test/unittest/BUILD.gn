@@ -33,7 +33,6 @@ group("unittest") {
     ":utils_screen_group_info_test",
     ":utils_screen_info_test",
     ":utils_string_test",
-    ":utils_surface_draw_test",
     ":utils_surface_reader_test",
     ":utils_window_helper_test",
     ":utils_window_property_test",
@@ -42,6 +41,11 @@ group("unittest") {
     ":utils_wm_occlusion_region_test",
     ":wm_window_frame_trace_impl_test",
   ]
+  if (!window_manager_use_sceneboard) {
+    deps += [
+      ":utils_surface_draw_test",
+    ]
+  }
 }
 
 test_external_deps = [

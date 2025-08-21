@@ -35,6 +35,7 @@ class CompatibleModeProperty;
 using HandlWritePropertyFunc = bool (WindowSessionProperty::*)(Parcel& parcel);
 using HandlReadPropertyFunc = void (WindowSessionProperty::*)(Parcel& parcel);
 using TransitionAnimationMapType = std::unordered_map<WindowTransitionType, std::shared_ptr<TransitionAnimation>>;
+constexpr float WINDOW_CORNER_RADIUS_INVALID = -1.0f;
 
 class WindowSessionProperty : public Parcelable {
 public:
@@ -268,8 +269,12 @@ public:
     /*
      * Window Lifecycle
      */
-    void SetUseControlStateToProperty(bool isUseControlState);
-    bool GetUseControlStateFromProperty() const;
+    void SetUseControlState(bool isUseControlState);
+    bool GetUseControlState() const;
+    void SetAncoRealBundleName(const std::string& ancoRealBundleName);
+    std::string GetAncoRealBundleName() const;
+    void SetMissionInfo(const MissionInfo& missionInfo);
+    MissionInfo GetMissionInfo() const;
 
     /*
      * UIExtension
@@ -567,11 +572,14 @@ private:
      */
     mutable std::mutex lifecycleUseControlMutex_;
     bool isUseControlState_ = false;
+    std::string ancoRealBundleName_  = "";
+    MissionInfo missionInfo_;
+    mutable std::mutex missionInfoMutex_;
     
     /*
      * Window Property
      */
-    float cornerRadius_ = 0.0f;
+    float cornerRadius_ = WINDOW_CORNER_RADIUS_INVALID; // corner radius of window set by application
     mutable std::mutex cornerRadiusMutex_;
     ShadowsInfo shadowsInfo_;
     mutable std::mutex shadowsInfoMutex_;
@@ -718,20 +726,21 @@ struct FreeMultiWindowConfig : public Parcelable {
 
 struct AppForceLandscapeConfig : public Parcelable {
     int32_t mode_ = 0;
-    std::string homePage_;
+    std::string homePage_ = "";
     int32_t supportSplit_ = -1;
+    std::string arkUIOptions_ = "";
 
     AppForceLandscapeConfig() {}
-    AppForceLandscapeConfig(int32_t mode, const std::string& homePage, int32_t supportSplit)
-        : mode_(mode), homePage_(homePage), supportSplit_(supportSplit)
-    {
-    }
+    AppForceLandscapeConfig(int32_t mode, const std::string& homePage, int32_t supportSplit,
+        const std::string& arkUIOptions) : mode_(mode), homePage_(homePage), supportSplit_(supportSplit),
+        arkUIOptions_(arkUIOptions) {}
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
         if (!parcel.WriteInt32(mode_) ||
             !parcel.WriteString(homePage_) ||
-            !parcel.WriteInt32(supportSplit_)) {
+            !parcel.WriteInt32(supportSplit_) ||
+            !parcel.WriteString(arkUIOptions_)) {
             return false;
         }
         return true;
@@ -739,17 +748,17 @@ struct AppForceLandscapeConfig : public Parcelable {
 
     static AppForceLandscapeConfig* Unmarshalling(Parcel& parcel)
     {
-        AppForceLandscapeConfig* config = new (std::nothrow) AppForceLandscapeConfig();
+        std::unique_ptr<AppForceLandscapeConfig> config = std::make_unique<AppForceLandscapeConfig>();
         if (config == nullptr) {
             return nullptr;
         }
         if (!parcel.ReadInt32(config->mode_) ||
             !parcel.ReadString(config->homePage_) ||
-            !parcel.ReadInt32(config->supportSplit_)) {
-            delete config;
+            !parcel.ReadInt32(config->supportSplit_) ||
+            !parcel.ReadString(config->arkUIOptions_)) {
             return nullptr;
         }
-        return config;
+        return config.release();
     }
 };
 
@@ -789,6 +798,9 @@ struct SystemSessionConfig : public Parcelable {
     bool skipRedundantWindowStatusNotifications_ = false;
     uint32_t supportFunctionType_ = 0;
     bool supportSnapshotAllSessionStatus_ = false;
+    bool supportPreloadStartingWindow_ = false;
+    bool supportCreateFloatWindow_ = false;
+    float defaultCornerRadius_ = 0.0f; // default corner radius of window set by system config
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
@@ -847,6 +859,12 @@ struct SystemSessionConfig : public Parcelable {
         if (!parcel.WriteBool(supportSnapshotAllSessionStatus_)) {
             return false;
         }
+        if (!parcel.WriteBool(supportPreloadStartingWindow_)) {
+            return false;
+        }
+        if (!parcel.WriteFloat(defaultCornerRadius_)) {
+            return false;
+        }
         return true;
     }
 
@@ -897,6 +915,11 @@ struct SystemSessionConfig : public Parcelable {
         config->skipRedundantWindowStatusNotifications_ = parcel.ReadBool();
         config->supportFunctionType_ = parcel.ReadUint32();
         config->supportSnapshotAllSessionStatus_ = parcel.ReadBool();
+        config->supportPreloadStartingWindow_ = parcel.ReadBool();
+        if (!parcel.ReadFloat(config->defaultCornerRadius_)) {
+            delete config;
+            return nullptr;
+        }
         return config;
     }
 

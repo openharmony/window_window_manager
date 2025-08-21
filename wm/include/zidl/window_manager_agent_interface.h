@@ -86,7 +86,7 @@ public:
     virtual void NotifyWindowSystemBarPropertyChange(WindowType type, const SystemBarProperty& systemBarProperty) = 0;
     virtual void UpdatePiPWindowStateChanged(const std::string& bundleName, bool isForeground) = 0;
     virtual void NotifyWindowPropertyChange(uint32_t propertyDirtyFlags,
-        const std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowInfoList) = 0;
+        const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList) = 0;
 };
 } // namespace Rosen
 } // namespace OHOS

@@ -57,6 +57,8 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleGetFocusSessionToken(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_FOCUS_SESSION_ELEMENT):
             return HandleGetFocusSessionElement(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_IS_FOCUS_WINDOW_PARENT):
+            return HandleIsFocusWindowParent(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_REGISTER_SESSION_LISTENER):
             return HandleRegisterSessionListener(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UNREGISTER_SESSION_LISTENER):
@@ -462,6 +464,28 @@ int SceneSessionManagerLiteStub::HandleGetFocusSessionElement(MessageParcel& dat
     WSError errCode = GetFocusSessionElement(element, displayId);
     reply.WriteParcelable(&element);
     reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleIsFocusWindowParent(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_FOCUS, "run");
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    if (token == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Token is nullptr");
+        return ERR_INVALID_DATA;
+    }
+    bool isParent = false;
+    WSError errCode = IsFocusWindowParent(token, isParent);
+    TLOGD(WmsLogTag::WMS_FOCUS, "isParent: %{public}d", isParent);
+    if (!reply.WriteBool(isParent)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Write isParent failed.");
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Write errCode failed.");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 

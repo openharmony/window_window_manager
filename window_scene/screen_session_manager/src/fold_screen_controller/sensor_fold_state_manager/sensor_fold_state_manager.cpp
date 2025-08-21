@@ -43,7 +43,7 @@ void SensorFoldStateManager::HandleTentChange(int tentType, sptr<FoldScreenPolic
 void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, float angle,
     sptr<FoldScreenPolicy> foldScreenPolicy)
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mStateMutex_);
     if (nextState == FoldStatus::UNKNOWN) {
         TLOGW(WmsLogTag::DMS, "fold state is UNKNOWN");
         return;
@@ -71,33 +71,32 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, float angl
 void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, const std::vector<float> &angles,
     const std::vector<uint16_t>& halls, sptr<FoldScreenPolicy> foldScreenPolicy)
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (nextState == FoldStatus::UNKNOWN) {
-        TLOGW(WmsLogTag::DMS, "fold state is UNKNOWN");
-        return;
-    }
-    if (mState_ == nextState) {
-        TLOGD(WmsLogTag::DMS, "fold state doesn't change, foldState = %{public}d.", mState_);
-        return;
-    }
     {
-        std::unique_lock<std::mutex> lock(oneStepMutex_);
-        if (isInOneStep_) {
-            TLOGI(WmsLogTag::DMS, "is oneStep now, ignore nextState:%{public}d", nextState);
-            switch (nextState) {
-                case FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND:
-                    [[fallthrough]];
-                case FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_HALF_FOLDED:
-                    [[fallthrough]];
-                case FoldStatus::FOLD_STATE_HALF_FOLDED_WITH_SECOND_EXPAND:
-                    [[fallthrough]];
-                case FoldStatus::FOLD_STATE_HALF_FOLDED_WITH_SECOND_HALF_FOLDED: {
-                    oneStep_.notify_all();
-                    ProcessNotifyFoldStatusChange(mState_, nextState, angles, foldScreenPolicy);
-                    return;
+        std::lock_guard<std::recursive_mutex> lock(mStateMutex_);
+        if (nextState == FoldStatus::UNKNOWN) {
+            TLOGW(WmsLogTag::DMS, "fold state is UNKNOWN");
+            return;
+        }
+        if (mState_ == nextState) {
+            TLOGD(WmsLogTag::DMS, "fold state doesn't change, foldState = %{public}d.", mState_);
+            return;
+        }
+        {
+            std::unique_lock<std::mutex> lock(oneStepMutex_);
+            if (isInOneStep_) {
+                TLOGI(WmsLogTag::DMS, "is oneStep now, ignore nextState:%{public}d", nextState);
+                switch (nextState) {
+                    case FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND:
+                    case FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_HALF_FOLDED:
+                    case FoldStatus::FOLD_STATE_HALF_FOLDED_WITH_SECOND_EXPAND:
+                    case FoldStatus::FOLD_STATE_HALF_FOLDED_WITH_SECOND_HALF_FOLDED: {
+                        oneStep_.notify_all();
+                        ProcessNotifyFoldStatusChange(mState_, nextState, angles, foldScreenPolicy);
+                        return;
+                    }
+                    default:
+                        return;
                 }
-                default:
-                    return;
             }
         }
     }
@@ -108,10 +107,19 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, const std:
             TLOGNE(WmsLogTag::DMS, "sensorFoldStateManager or foldScreenPolicy is nullptr.");
             return;
         }
-        TLOGNI(WmsLogTag::DMS, "current state: %{public}d, next state: %{public}d.", manager->mState_, nextState);
-        FoldStatus currentState = manager->mState_;
-        manager->mState_ = manager->HandleSecondaryOneStep(currentState, nextState, angles, halls);
-        manager->ProcessNotifyFoldStatusChange(currentState, manager->mState_, angles, policy);
+        FoldStatus currentState = FoldStatus::UNKNOWN;
+        FoldStatus newState = FoldStatus::UNKNOWN;
+        {
+            std::lock_guard<std::recursive_mutex> lock(manager->mStateMutex_);
+            currentState = manager->mState_;
+        }
+        TLOGNI(WmsLogTag::DMS, "current state: %{public}d, next state: %{public}d.", currentState, nextState);
+        newState = manager->HandleSecondaryOneStep(currentState, nextState, angles, halls);
+        {
+            std::lock_guard<std::recursive_mutex> lock(manager->mStateMutex_);
+            manager->mState_ = newState;
+        }
+        manager->ProcessNotifyFoldStatusChange(currentState, newState, angles, policy);
     };
     taskScheduler_ = ScreenSessionManager::GetInstance().GetPowerTaskScheduler();
     if (taskScheduler_ != nullptr) {

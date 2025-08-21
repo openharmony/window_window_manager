@@ -45,7 +45,7 @@ public:
     void NotifyWindowVisibilityStateChanged(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos);
     void PackWindowChangeInfo(const std::unordered_set<WindowInfoKey>& interestInfo,
         const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos,
-        std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowChangeInfos);
+        std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowChangeInfos);
     void NotifyWindowDrawingContentInfoChanged(const std::vector<sptr<WindowDrawingContentInfo>>&
         windowDrawingContentInfos);
     void NotifyWindowModeChange(WindowModeType type);
@@ -186,7 +186,7 @@ void WindowManagerLite::Impl::NotifyWindowVisibilityStateChanged(
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "listener is null");
             continue;
         }
-        std::vector<std::unordered_map<WindowInfoKey, std::any>> windowChangeInfos;
+        std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>> windowChangeInfos;
         PackWindowChangeInfo(listener->GetInterestInfo(), windowVisibilityInfos, windowChangeInfos);
         TLOGD(WmsLogTag::WMS_ATTRIBUTE, "Notify WindowVisibilityState to caller, info size: %{public}zu",
             windowChangeInfos.size());
@@ -196,10 +196,10 @@ void WindowManagerLite::Impl::NotifyWindowVisibilityStateChanged(
 
 void WindowManagerLite::Impl::PackWindowChangeInfo(const std::unordered_set<WindowInfoKey>& interestInfo,
     const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos,
-    std::vector<std::unordered_map<WindowInfoKey, std::any>>& windowChangeInfos)
+    std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowChangeInfos)
 {
     for (const auto& info : windowVisibilityInfos) {
-        std::unordered_map<WindowInfoKey, std::any> windowChangeInfo;
+        std::unordered_map<WindowInfoKey, WindowChangeInfoType> windowChangeInfo;
         if (interestInfo.find(WindowInfoKey::WINDOW_ID) != interestInfo.end()) {
             windowChangeInfo.emplace(WindowInfoKey::WINDOW_ID, info->windowId_);
         }
@@ -286,7 +286,7 @@ void WindowManagerLite::Impl::NotifyAccessibilityWindowInfo(const std::vector<sp
 
 void WindowManagerLite::Impl::UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing)
 {
-    TLOGI(WmsLogTag::WMS_SYSTEM, "Camera window, accessTokenId=%{public}u, isShowing=%{public}u",
+    TLOGI(WmsLogTag::WMS_PIP, "Camera window, accessTokenId=%{public}u, isShowing=%{public}u",
         accessTokenId, isShowing);
     std::vector<sptr<ICameraWindowChangedListener>> cameraWindowChangeListeners;
     {
@@ -708,7 +708,7 @@ WMError WindowManagerLite::UnregisterWindowModeChangedListener(const sptr<IWindo
 WMError WindowManagerLite::RegisterCameraWindowChangedListener(const sptr<ICameraWindowChangedListener>& listener)
 {
     if (listener == nullptr) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "listener could not be null");
+        TLOGE(WmsLogTag::WMS_PIP, "listener could not be null");
         return WMError::WM_ERROR_NULLPTR;
     }
 
@@ -736,7 +736,7 @@ WMError WindowManagerLite::RegisterCameraWindowChangedListener(const sptr<ICamer
 WMError WindowManagerLite::UnregisterCameraWindowChangedListener(const sptr<ICameraWindowChangedListener>& listener)
 {
     if (listener == nullptr) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "listener could not be null");
+        TLOGE(WmsLogTag::WMS_PIP, "listener could not be null");
         return WMError::WM_ERROR_NULLPTR;
     }
 
@@ -819,6 +819,7 @@ WMError WindowManagerLite::UnregisterWMSConnectionChangedListener()
     TLOGI(WmsLogTag::WMS_MULTI_USER, "Unregister enter");
     std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
     pImpl_->wmsConnectionChangedListener_ = nullptr;
+    WindowAdapterLite::GetInstance().UnregisterWMSConnectionChangedListener();
     return WMError::WM_OK;
 }
 

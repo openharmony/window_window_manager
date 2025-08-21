@@ -52,7 +52,10 @@ ohos_shared_library("embeddablewindowstage") {
     ":embeddable_window_stage_js",
   ]
 
-  external_deps = [ "napi:ace_napi" ]
+  external_deps = [
+    "ipc:ipc_single",
+    "napi:ace_napi",
+  ]
 
   relative_install_dir = "module/application"
   part_name = "window_manager"

@@ -28,36 +28,29 @@
 
 namespace OHOS {
 namespace Rosen {
-SettingProvider* SettingProvider::instance_;
-std::mutex SettingProvider::mutex_;
-sptr<IRemoteObject> SettingProvider::remoteObj_;
+sptr<SettingProvider> SettingProvider::instance_ = nullptr;
+std::mutex SettingProvider::instanceMutex_;
+sptr<IRemoteObject> SettingProvider::remoteObj_ = nullptr;
 namespace {
 const std::string SETTING_COLUMN_KEYWORD = "KEYWORD";
 const std::string SETTING_COLUMN_VALUE = "VALUE";
 const std::string SETTING_URI_PROXY = "datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA?Proxy=true";
-const std::string SETTING_WALL_URI =
-    "datashare:///com.ohos.settingsdata/entry/settingsdata/USER_SETTINGSDATA_SECURE_100?Proxy=true";
 const std::string WALL_KEY = "wallpaperAodDisplay";
+const std::string DURING_CALL_KEY = "during_call_state";
 const std::string SETTING_MULTI_USER_URI = "datashare:///com.ohos.settingsdata/entry/settingsdata/";
 const std::string SETTING_MULTI_USER_TABLE = "USER_SETTINGSDATA_";
-const std::string SETTING_WALL_MULTI_USER_TABLE = "USER_SETTINGSDATA_SECURE_";
+const std::string SETTING_SECURE_MULTI_USER_TABLE = "USER_SETTINGSDATA_SECURE_";
 const std::string SETTING_MULTI_USER_PROXY = "?Proxy=true";
 constexpr const char *SETTINGS_DATA_EXT_URI = "datashare:///com.ohos.settingsdata.DataAbility";
 constexpr int32_t PARAM_NUM_TEN = 10;
 } // namespace
 
-SettingProvider::~SettingProvider()
-{
-    instance_ = nullptr;
-    remoteObj_ = nullptr;
-}
-
 SettingProvider& SettingProvider::GetInstance(int32_t systemAbilityId)
 {
     if (instance_ == nullptr) {
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::lock_guard<std::mutex> lock(instanceMutex_);
         if (instance_ == nullptr) {
-            instance_ = new SettingProvider();
+            instance_ = sptr<SettingProvider>::MakeSptr();
             Initialize(systemAbilityId);
         }
     }
@@ -143,7 +136,8 @@ ErrCode SettingProvider::RegisterObserver(const sptr<SettingObserver>& observer)
         return ERR_NO_INIT;
     }
     std::string callingIdentity = IPCSkeleton::ResetCallingIdentity();
-    auto uri = AssembleUri(observer->GetKey());
+    Uri uri = (observer->GetKey() == DURING_CALL_KEY) ?
+        AssembleUriMultiUser(observer->GetKey()) : AssembleUri(observer->GetKey());
     auto helper = CreateDataShareHelper();
     if (helper == nullptr) {
         IPCSkeleton::SetCallingIdentity(callingIdentity);
@@ -204,7 +198,7 @@ ErrCode SettingProvider::GetStringValue(const std::string& key, std::string& val
     std::vector<std::string> columns = {SETTING_COLUMN_VALUE};
     DataShare::DataSharePredicates predicates;
     predicates.EqualTo(SETTING_COLUMN_KEYWORD, key);
-    Uri uri = (key == WALL_KEY) ? AssembleUriMultiUser(key) : AssembleUri(key);
+    Uri uri = (key == WALL_KEY || key == DURING_CALL_KEY) ? AssembleUriMultiUser(key) : AssembleUri(key);
     auto resultSet = helper->Query(uri, predicates, columns);
     ReleaseDataShareHelper(helper);
     if (resultSet == nullptr) {
@@ -290,7 +284,7 @@ ErrCode SettingProvider::PutStringValue(const std::string& key, const std::strin
     bucket.Put(SETTING_COLUMN_VALUE, valueObj);
     DataShare::DataSharePredicates predicates;
     predicates.EqualTo(SETTING_COLUMN_KEYWORD, key);
-    Uri uri(AssembleUri(key));
+    Uri uri = (key == DURING_CALL_KEY) ? AssembleUriMultiUser(key) : AssembleUri(key);
     if (helper->Update(uri, predicates, bucket) <= 0) {
         TLOGD(WmsLogTag::DMS, "no data exist, insert one row");
         helper->Insert(uri, bucket);
@@ -358,16 +352,13 @@ Uri SettingProvider::AssembleUriMultiUser(const std::string& key)
         std::string userIdString = std::to_string(userId);
         uriString = SETTING_MULTI_USER_URI + SETTING_MULTI_USER_TABLE + userIdString +
             SETTING_MULTI_USER_PROXY + "&key=" + key;
-        if (key == WALL_KEY) {
-            uriString = SETTING_MULTI_USER_URI + SETTING_WALL_MULTI_USER_TABLE +
+        if (key == WALL_KEY || key == DURING_CALL_KEY) {
+            uriString = SETTING_MULTI_USER_URI + SETTING_SECURE_MULTI_USER_TABLE +
                 userIdString + SETTING_MULTI_USER_PROXY + "&key=" + key;
         }
     } else {
         TLOGE(WmsLogTag::DMS, "invalid userId: %{public}d, use default uri", userId);
         uriString = SETTING_URI_PROXY + "&key=" + key;
-        if (key == WALL_KEY) {
-            uriString = SETTING_WALL_URI + "&key=" + key;
-        }
     }
     Uri uri(uriString);
     return uri;

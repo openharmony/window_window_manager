@@ -17,6 +17,7 @@
 #define OHOS_ANI_EXTENSION_WINDOW_REGISTER_MANAGER_H
 
 #include <mutex>
+
 #include "ani.h"
 #include "ani_extension_window_listener.h"
 #include "refbase.h"
@@ -30,9 +31,9 @@ class AniExtensionWindowRegisterManager {
 public:
     AniExtensionWindowRegisterManager();
     ~AniExtensionWindowRegisterManager();
-    WMError RegisterListener(sptr<Window> window, const std::string& type,
+    WmErrorCode RegisterListener(sptr<Window> window, const std::string& type,
         CaseType caseType, ani_env* env, ani_object fn, ani_object fnArg);
-    WMError UnregisterListener(sptr<Window> window, std::string type,
+    WmErrorCode UnregisterListener(sptr<Window> window, const std::string& type,
         CaseType caseType, ani_env* env, ani_object fn);
 
 private:
@@ -44,13 +45,13 @@ private:
     };
 
     bool IsCallbackRegistered(ani_env* env, const std::string& type, ani_object fn);
-    WMError ProcessWindowChangeRegister(sptr<AniExtensionWindowListener> listener,
+    WmErrorCode ProcessWindowChangeRegister(sptr<AniExtensionWindowListener> listener,
         sptr<Window> window, bool isRegister);
-    WMError ProcessAvoidAreaChangeRegister(sptr<AniExtensionWindowListener> listener,
+    WmErrorCode ProcessAvoidAreaChangeRegister(sptr<AniExtensionWindowListener> listener,
         sptr<Window> window, bool isRegister);
-    WMError ProcessLifeCycleEventRegister(sptr<AniExtensionWindowListener> listener,
+    WmErrorCode ProcessLifeCycleEventRegister(sptr<AniExtensionWindowListener> listener,
         sptr<Window> window, bool isRegister);
-    WMError ProcessRegister(CaseType caseType, const sptr<AniExtensionWindowListener>& listener,
+    WmErrorCode ProcessRegister(CaseType caseType, const sptr<AniExtensionWindowListener>& listener,
         const sptr<Window>& window, const std::string& type, bool isRegister);
     std::map<std::string, std::map<ani_ref, sptr<AniExtensionWindowListener>>> aniCbMap_;
     std::mutex mtx_;

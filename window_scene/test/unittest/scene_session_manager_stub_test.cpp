@@ -27,7 +27,6 @@
 #include "zidl/window_manager_agent_interface.h"
 #include "pattern_detach_callback.h"
 #include "test/mock/mock_session_stage.h"
-#include "../../session/host/include/ui_effect_controller_client.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -2714,20 +2713,6 @@ HWTEST_F(SceneSessionManagerStubTest, HandleAnimateTo, Function | SmallTest | Le
     EXPECT_EQ(res, ERR_NONE);
 }
 
-HWTEST_F(SceneSessionManagerStubTest, HandleCreateUIEffectController, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    uint32_t code = static_cast<uint32_t>(
-        ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_CREATE_UI_EFFECT_CONTROLLER);
-    sptr<IUIEffectControllerClient> client = sptr<UIEffectControllerClient>::MakeSptr();
-    stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(stub_->HandleCreateUIEffectController(data, reply), ERR_INVALID_DATA);
-    data.WriteRemoteObject(client->AsObject());
-    stub_->HandleCreateUIEffectController(data, reply);
-}
-
 /**
  * @tc.name: HandleGetPiPSettingSwitchStatus
  * @tc.desc: test HandleGetPiPSettingSwitchStatus
@@ -2771,6 +2756,35 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetScreenPrivacyWindowTagSwitch01, F
 }
 
 /**
+ * @tc.name: HandleSetScreenPrivacyWindowTagSwitch02
+ * @tc.desc: Size is too big
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleSetScreenPrivacyWindowTagSwitch02, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    std::vector<std::string> privacyWindowTags;
+    for (uint64_t i = 0; i < 200; ++i) {
+        privacyWindowTags.emplace_back("test");
+    }
+    uint64_t screenId = INVALID_SCREEN_ID;
+    data.WriteUint64(screenId);
+
+    uint64_t size = privacyWindowTags.size();
+    data.WriteUint64(size);
+    for (auto privacyWindowTag : privacyWindowTags) {
+        data.WriteString(privacyWindowTag);
+    }
+
+    bool enable = false;
+    data.WriteBool(enable);
+
+    int res = stub_->HandleSetScreenPrivacyWindowTagSwitch(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+}
+
+/**
  * @tc.name: HandleAddSessionBlackList01
  * @tc.desc: test HandleAddSessionBlackList
  * @tc.type: FUNC
@@ -2799,6 +2813,40 @@ HWTEST_F(SceneSessionManagerStubTest, HandleAddSessionBlackList01, Function | Sm
 }
 
 /**
+ * @tc.name: HandleAddSessionBlackList02
+ * @tc.desc: Size is too big
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleAddSessionBlackList02, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    std::unordered_set<std::string> bundleNames;
+    for (int32_t i = 0; i < 200; ++i) {
+        bundleNames.insert(std::to_string(i));
+    }
+    std::vector<std::string> privacyWindowTags;
+    for (uint64_t j = 0; j < 200; ++j) {
+        privacyWindowTags.emplace_back("test");
+    }
+
+    uint64_t size = bundleNames.size();
+    data.WriteUint64(size);
+    for (auto bundleName : bundleNames) {
+        data.WriteString(bundleName);
+    }
+
+    size = privacyWindowTags.size();
+    data.WriteUint64(size);
+    for (auto privacyWindowTag : privacyWindowTags) {
+        data.WriteString(privacyWindowTag);
+    }
+
+    int res = stub_->HandleAddSessionBlackList(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+}
+
+/**
  * @tc.name: HandleRemoveSessionBlackList01
  * @tc.desc: test HandleRemoveSessionBlackList
  * @tc.type: FUNC
@@ -2824,6 +2872,40 @@ HWTEST_F(SceneSessionManagerStubTest, HandleRemoveSessionBlackList01, Function |
 
     int res = stub_->HandleRemoveSessionBlackList(data, reply);
     EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleRemoveSessionBlackList02
+ * @tc.desc: Size is too big
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleRemoveSessionBlackList02, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    std::unordered_set<std::string> bundleNames;
+    for (int32_t i = 0; i < 200; ++i) {
+        bundleNames.insert(std::to_string(i));
+    }
+    std::vector<std::string> privacyWindowTags;
+    for (uint64_t j = 0; j < 200; ++j) {
+        privacyWindowTags.emplace_back("test");
+    }
+
+    uint64_t size = bundleNames.size();
+    data.WriteUint64(size);
+    for (auto bundleName : bundleNames) {
+        data.WriteString(bundleName);
+    }
+
+    size = privacyWindowTags.size();
+    data.WriteUint64(size);
+    for (auto privacyWindowTag : privacyWindowTags) {
+        data.WriteString(privacyWindowTag);
+    }
+
+    int res = stub_->HandleRemoveSessionBlackList(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
 }
 } // namespace
 } // namespace Rosen

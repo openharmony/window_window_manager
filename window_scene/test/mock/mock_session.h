@@ -58,6 +58,7 @@ public:
     MOCK_METHOD1(SetGlobalMaximizeMode, WSError(MaximizeMode mode));
     MOCK_METHOD1(NotifyExtensionTimeout, void(int32_t errorCode));
     MOCK_METHOD1(GetAppForceLandscapeConfig, WMError(AppForceLandscapeConfig& config));
+    MOCK_METHOD1(GetAppHookWindowInfoFromServer, WMError(HookWindowInfo& hookWindowInfo));
     MOCK_METHOD1(SetDialogSessionBackGestureEnabled, WSError(bool isEnabled));
     MOCK_METHOD1(SetActive, WSError(bool active));
     MOCK_METHOD1(SyncSessionEvent, WSError(SessionEvent event));
@@ -66,6 +67,7 @@ public:
     MOCK_METHOD2(UpdateSessionPropertyByAction, WMError(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action));
     MOCK_METHOD1(TransferExtensionData, int32_t(const AAFwk::WantParams& wantParams));
+    MOCK_METHOD1(RaiseMainWindowAboveTarget, WSError(int32_t targetId));
     MOCK_METHOD(WSError, ProcessPointDownSession, (int32_t x, int32_t y), (override));
     MOCK_CONST_METHOD2(ConvertGlobalRectToRelative, WSRect(const WSRect& globalRect, DisplayId targetDisplayId));
 };

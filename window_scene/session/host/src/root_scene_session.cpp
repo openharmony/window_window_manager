@@ -47,17 +47,14 @@ void RootSceneSession::GetSystemAvoidAreaForRoot(const WSRect& rect, AvoidArea& 
                 displayId, isVisible);
         }
         if (!isVisible) {
-            TLOGI(WmsLogTag::WMS_IMMS, "root scene status bar not visible");
+            TLOGI(WmsLogTag::WMS_IMMS, "invisible");
             continue;
         }
         WSRect statusBarRect = statusBar->GetSessionRect();
         if (onGetStatusBarAvoidHeightFunc_) {
             onGetStatusBarAvoidHeightFunc_(displayId, statusBarRect);
         }
-        CalculateAvoidAreaRect(rect, statusBarRect, avoidArea);
-        TLOGI(WmsLogTag::WMS_IMMS, "displayId %{public}" PRIu64 " root scene %{public}s "
-              "status bar %{public}s area %{public}s",
-              displayId, rect.ToString().c_str(), statusBarRect.ToString().c_str(), avoidArea.ToString().c_str());
+        CalculateAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM, rect, statusBarRect, avoidArea);
     }
 }
 
@@ -83,14 +80,10 @@ void RootSceneSession::GetKeyboardAvoidAreaForRoot(const WSRect& rect, AvoidArea
                 keyboardRect = inputMethod->GetKeyboardPanelSession()->GetSessionRect();
                 inputMethod->RecalculatePanelRectForAvoidArea(keyboardRect);
             }
-            CalculateAvoidAreaRect(rect, keyboardRect, avoidArea);
-            TLOGI(WmsLogTag::WMS_IMMS, "root scene %{public}s keyboard %{public}s area %{public}s",
-                  rect.ToString().c_str(), keyboardRect.ToString().c_str(), avoidArea.ToString().c_str());
+            CalculateAvoidAreaByType(AvoidAreaType::TYPE_KEYBOARD, rect, keyboardRect, avoidArea);
         } else {
             WSRect inputMethodRect = inputMethod->GetSessionRect();
-            CalculateAvoidAreaRect(rect, inputMethodRect, avoidArea);
-            TLOGI(WmsLogTag::WMS_IMMS, "root scene %{public}s input method %{public}s area %{public}s",
-                  rect.ToString().c_str(), inputMethodRect.ToString().c_str(), avoidArea.ToString().c_str());
+            CalculateAvoidAreaByType(AvoidAreaType::TYPE_KEYBOARD, rect, inputMethodRect, avoidArea);
         }
     }
 }
@@ -117,9 +110,7 @@ void RootSceneSession::GetCutoutAvoidAreaForRoot(const WSRect& rect, AvoidArea& 
             cutoutArea.posX_, cutoutArea.posY_,
             cutoutArea.width_, cutoutArea.height_
         };
-        CalculateAvoidAreaRect(rect, cutoutAreaRect, avoidArea);
-        TLOGI(WmsLogTag::WMS_IMMS, "root scene %{public}s cutout %{public}s area %{public}s",
-              rect.ToString().c_str(), cutoutAreaRect.ToString().c_str(), avoidArea.ToString().c_str());
+        CalculateAvoidAreaByType(AvoidAreaType::TYPE_CUTOUT, rect, cutoutAreaRect, avoidArea);
     }
 }
 
@@ -129,9 +120,7 @@ void RootSceneSession::GetAINavigationBarAreaForRoot(const WSRect& rect, AvoidAr
     if (specificCallback_ != nullptr && specificCallback_->onGetAINavigationBarArea_) {
         barArea = specificCallback_->onGetAINavigationBarArea_(GetSessionProperty()->GetDisplayId());
     }
-    CalculateAvoidAreaRect(rect, barArea, avoidArea);
-    TLOGI(WmsLogTag::WMS_IMMS, "root scene %{public}s AI bar %{public}s area %{public}s",
-          rect.ToString().c_str(), barArea.ToString().c_str(), avoidArea.ToString().c_str());
+    CalculateAvoidAreaByType(AvoidAreaType::TYPE_NAVIGATION_INDICATOR, rect, barArea, avoidArea);
 }
 
 AvoidArea RootSceneSession::GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect, int32_t apiVersion)
@@ -179,7 +168,7 @@ void RootSceneSession::SetRootSessionRect(const WSRect& rect)
 {
     if (!rect.IsInvalid() && GetSessionRect() != rect) {
         layoutController_->SetSessionRect(rect);
-        TLOGI(WmsLogTag::WMS_IMMS, "root session update rect: %{public}s", GetSessionRect().ToString().c_str());
+        TLOGI(WmsLogTag::WMS_IMMS, "update rect: %{public}s", GetSessionRect().ToString().c_str());
         if (specificCallback_ != nullptr && specificCallback_->onUpdateAvoidArea_) {
             specificCallback_->onUpdateAvoidArea_(GetPersistentId());
         }

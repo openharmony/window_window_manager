@@ -674,18 +674,21 @@ napi_value JsWindowManager::OnGetSnapshot(napi_env env, napi_callback_info info)
     NapiAsyncTask::CompleteCallback complete =
         [=](napi_env env, NapiAsyncTask& task, int32_t status) {
             if (dataPack->result != WMError::WM_OK) {
-                task.Reject(env, JsErrUtils::CreateJsError(env, WM_JS_TO_ERROR_CODE_MAP.at(dataPack->result)));
+                task.Reject(env, JsErrUtils::CreateJsError(env, WM_JS_TO_ERROR_CODE_MAP.at(dataPack->result),
+                    "[window][getSnapshot]msg: get snapshot failed"));
                 TLOGNW(WmsLogTag::WMS_SYSTEM, "Get snapshot not ok!");
                 return;
             }
             if (dataPack->pixelMap == nullptr) {
-                task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+                task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                    "[window][getSnapshot]msg: pixel map is invalid"));
                 TLOGNE(WmsLogTag::WMS_SYSTEM, "Get snapshot is nullptr!");
                 return;
             }
             auto nativePixelMap = Media::PixelMapNapi::CreatePixelMap(env, dataPack->pixelMap);
             if (nativePixelMap == nullptr) {
-                task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+                task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                    "[window][getSnapshot]msg: create native pixel map failed"));
                 TLOGNE(WmsLogTag::WMS_SYSTEM, "Create native pixelmap is nullptr!");
                 return;
             }
@@ -782,7 +785,8 @@ napi_value JsWindowManager::OnFindWindowSync(napi_env env, napi_callback_info in
     } else {
         sptr<Window> window = Window::Find(windowName);
         if (window == nullptr) {
-            napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+            napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                "[window][findWindow]msg: Window is nullptr."));
             return NapiGetUndefined(env);
         } else {
             return CreateJsWindowObject(env, window);
@@ -894,7 +898,7 @@ napi_value JsWindowManager::OnRegisterWindowManagerCallback(napi_env env, napi_c
 
     WmErrorCode ret = registerManager_->RegisterListener(nullptr, cbType, CaseType::CASE_WINDOW_MANAGER, env, value);
     if (ret != WmErrorCode::WM_OK) {
-        napi_throw(env, JsErrUtils::CreateJsError(env, ret));
+        napi_throw(env, JsErrUtils::CreateJsError(env, ret, "[window][on]msg: register " + cbType + " failed"));
         return NapiGetUndefined(env);
     }
     TLOGD(WmsLogTag::DEFAULT, "Register end, type=%{public}s", cbType.c_str());
@@ -932,7 +936,7 @@ napi_value JsWindowManager::OnUnregisterWindowManagerCallback(napi_env env, napi
         }
     }
     if (ret != WmErrorCode::WM_OK) {
-        napi_throw(env, JsErrUtils::CreateJsError(env, ret));
+        napi_throw(env, JsErrUtils::CreateJsError(env, ret, "[window][off]msg: unregister " + cbType + " failed"));
         return NapiGetUndefined(env);
     }
     TLOGD(WmsLogTag::DEFAULT, "Unregister end, type=%{public}s", cbType.c_str());
@@ -957,7 +961,7 @@ static napi_value GetTopWindowTask(void* contextPtr, napi_env env, napi_value ca
             if (lists->ability->GetWindow() == nullptr) {
                 lists->errorCode = newApi ? static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY) :
                     static_cast<int32_t>(WMError::WM_ERROR_NULLPTR);
-                lists->errMsg = "FA mode can not get ability window";
+                lists->errMsg = "[window][getLatsWindow]msg: FA mode can not get ability window";
                 return;
             }
             lists->window = Window::GetTopWindowWithId(lists->ability->GetWindow()->GetWindowId());
@@ -966,7 +970,7 @@ static napi_value GetTopWindowTask(void* contextPtr, napi_env env, napi_value ca
             if (contextPtr == nullptr || context == nullptr) {
                 lists->errorCode = newApi ? static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY) :
                     static_cast<int32_t>(WMError::WM_ERROR_NULLPTR);
-                lists->errMsg = "Stage mode without context";
+                lists->errMsg = "[window][getLatsWindow]msg: Stage mode without context";
                 return;
             }
             lists->window = Window::GetTopWindowWithContext(context->lock());
@@ -976,9 +980,10 @@ static napi_value GetTopWindowTask(void* contextPtr, napi_env env, napi_value ca
         if (lists == nullptr) {
             if (newApi) {
                 task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-                    "napi abnormal"));
+                    "[window][getLatsWindow]msg: NAPI abnormal"));
             } else {
-                task.Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_NULLPTR, "napi abnormal"));
+                task.Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_NULLPTR,
+                    "[window][getLatsWindow]msg: NAPI abnormal"));
             }
             return;
         }
@@ -996,10 +1001,10 @@ static napi_value GetTopWindowTask(void* contextPtr, napi_env env, napi_value ca
         if (lists->window == nullptr || lists->window->GetWindowState() == WindowState::STATE_DESTROYED) {
             if (newApi) {
                 task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-                    "Get top window failed"));
+                    "[window][getLatsWindow]msg: Get top window failed"));
             } else {
                 task.Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_NULLPTR,
-                    "Get top window failed"));
+                    "[window][getLatsWindow]msg: Get top window failed"));
             }
             return;
         }
@@ -1150,13 +1155,15 @@ napi_value JsWindowManager::OnSetGestureNavigationEnabled(napi_env env, napi_cal
             task->Resolve(env, NapiGetUndefined(env));
             WLOGD("SetGestureNavigationEnabled success");
         } else {
-            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "SetGestureNavigationEnabled failed"));
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret,
+                "[window][setGestureNavigationEnabled]msg: set gesture navigation failed"));
         }
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetGestureNavigationEnabled") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_IMMS, "napi_send_event failed");
         napiAsyncTask->Reject(env,
-            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
+            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                "[window][setGestureNavigationEnabled]msg: failed to send event"));
     }
     return result;
 }
@@ -1439,7 +1446,8 @@ napi_value JsWindowManager::OnGetTopNavDestinationName(napi_env env, napi_callba
                 if (WM_JS_TO_ERROR_CODE_MAP.count(*errCodePtr) > 0) {
                     retErrCode = WM_JS_TO_ERROR_CODE_MAP.at(*errCodePtr);
                 }
-                task.Reject(env, JsErrUtils::CreateJsError(env, retErrCode));
+                task.Reject(env, JsErrUtils::CreateJsError(env, retErrCode,
+                    "[window][getTopNavDestinationName]msg: get top navigation name failed"));
                 return;
             }
             TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s ok, topNavDestName: %{public}s, windowId: %{public}d",
@@ -1583,8 +1591,8 @@ napi_value JsWindowManager::OnShiftAppWindowPointerEvent(napi_env env, napi_call
     };
     napi_status status = napi_send_event(env, std::move(asyncTask), napi_eprio_high, "OnShiftAppWindowPointerEvent");
     if (status != napi_status::napi_ok) {
-        napiAsyncTask->Reject(env,
-            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
+        napiAsyncTask->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
+            "[window][shiftAppWindowPointerEvent]msg:send event failed"));
     }
     return result;
 }
@@ -1767,7 +1775,7 @@ napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
     napi_set_named_property(env, exportObj, "AnimationType", AnimationTypeInit(env));
     napi_set_named_property(env, exportObj, "WindowTransitionType", WindowTransitionTypeInit(env));
     napi_set_named_property(env, exportObj, "WindowAnimationCurve", WindowAnimationCurveInit(env));
-    
+
     const char *moduleName = "JsWindowManager";
     BindNativeFunction(env, exportObj, "create", moduleName, JsWindowManager::Create);
     BindNativeFunction(env, exportObj, "createWindow", moduleName, JsWindowManager::CreateWindow);

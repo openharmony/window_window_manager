@@ -17,6 +17,7 @@
 #include <new>
 
 #include <hitrace_meter.h>
+#include <js_err_utils.h>
 #include "js_runtime_utils.h"
 #include "native_engine/native_reference.h"
 #include "display_manager.h"
@@ -300,7 +301,10 @@ napi_value OnGetDisplayByIdSync(napi_env env, napi_callback_info info)
     sptr<Display> display = SingletonContainer::Get<DisplayManager>().GetDisplayById(static_cast<DisplayId>(displayId));
     if (display == nullptr) {
         TLOGE(WmsLogTag::DMS, "[NAPI]Display info is nullptr, js error will be happen");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_SYSTEM_INNORMAL)));
+        std::ostringstream oss;
+        oss << "[getDisplayByIdSync]message: display is null, possible causes: display id " << displayId << " ";
+        oss << "corresponding display does not exist.";
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_SYSTEM_INNORMAL), oss.str()));
         return NapiGetUndefined(env);
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "Sync:OnGetDisplayByIdSync end");
@@ -745,7 +749,7 @@ napi_value OnHasPrivateWindow(napi_env env, napi_callback_info info)
     TLOGI(WmsLogTag::DMS, "[NAPI]Display id = %{public}" PRIu64", hasPrivateWindow = %{public}u err = %{public}d",
         static_cast<uint64_t>(displayId), hasPrivateWindow, errCode);
     if (errCode != DmErrorCode::DM_OK) {
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(errCode)));
+        napi_throw(env, JsErrUtils::CreateJsError(env, errCode));
         return NapiGetUndefined(env);
     }
     napi_value result;
@@ -863,11 +867,18 @@ napi_value OnSetFoldDisplayMode(napi_env env, napi_callback_info info)
             return NapiGetUndefined(env);
         }
     }
-    DmErrorCode errCode = DM_JS_TO_ERROR_CODE_MAP.at(
-        SingletonContainer::Get<DisplayManager>().SetFoldDisplayModeFromJs(mode, reason));
-    TLOGI(WmsLogTag::DMS, "[NAPI]%{public}d", static_cast<int32_t>(errCode));
+    DMError dmError = SingletonContainer::Get<DisplayManager>().SetFoldDisplayModeFromJs(mode, reason);
+    std::string errMsg = "";
+    if (DM_ERROR_JS_TO_ERROR_MESSAGE_MAP.find(dmError) != DM_ERROR_JS_TO_ERROR_MESSAGE_MAP.end()) {
+        errMsg = DM_ERROR_JS_TO_ERROR_MESSAGE_MAP.at(dmError);
+    }
+    DmErrorCode errCode = DmErrorCode::DM_ERROR_SYSTEM_INNORMAL;
+    if (DM_JS_TO_ERROR_CODE_MAP.find(dmError) != DM_JS_TO_ERROR_CODE_MAP.end()) {
+        errCode = DM_JS_TO_ERROR_CODE_MAP.at(dmError);
+    }
+    TLOGI(WmsLogTag::DMS, "[NAPI]%{public}d, error message: %{public}s", static_cast<int32_t>(errCode), errMsg.c_str());
     if (errCode != DmErrorCode::DM_OK) {
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(errCode)));
+        napi_throw(env, JsErrUtils::CreateJsError(env, errCode, errMsg));
         return NapiGetUndefined(env);
     }
     return NapiGetUndefined(env);
@@ -894,7 +905,7 @@ napi_value OnSetFoldStatusLocked(napi_env env, napi_callback_info info)
     DmErrorCode errCode = DM_JS_TO_ERROR_CODE_MAP.at(
         SingletonContainer::Get<DisplayManager>().SetFoldStatusLockedFromJs(locked));
     if (errCode != DmErrorCode::DM_OK) {
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(errCode)));
+        napi_throw(env, JsErrUtils::CreateJsError(env, errCode));
         return NapiGetUndefined(env);
     }
     TLOGI(WmsLogTag::DMS, "[NAPI]locked: %{public}d", locked);
@@ -1700,33 +1711,33 @@ napi_value InitColorSpace(napi_env env)
     }
 
     napi_set_named_property(env, objValue, "UNKNOWN",
-        CreateJsValue(env, static_cast<uint32_t>(ColorSpace::UNKNOWN)));
+        CreateJsValue(env, static_cast<uint32_t>(DmsColorSpace::UNKNOWN)));
     napi_set_named_property(env, objValue, "ADOBE_RGB",
-        CreateJsValue(env, static_cast<uint32_t>(ColorSpace::ADOBE_RGB)));
+        CreateJsValue(env, static_cast<uint32_t>(DmsColorSpace::ADOBE_RGB)));
     napi_set_named_property(env, objValue, "BT2020_HLG",
-        CreateJsValue(env, static_cast<uint32_t>(ColorSpace::BT2020_HLG)));
+        CreateJsValue(env, static_cast<uint32_t>(DmsColorSpace::BT2020_HLG)));
     napi_set_named_property(env, objValue, "BT2020_PQ",
-        CreateJsValue(env, static_cast<uint32_t>(ColorSpace::BT2020_PQ)));
+        CreateJsValue(env, static_cast<uint32_t>(DmsColorSpace::BT2020_PQ)));
     napi_set_named_property(env, objValue, "BT601_EBU",
-        CreateJsValue(env, static_cast<uint32_t>(ColorSpace::BT601_EBU)));
+        CreateJsValue(env, static_cast<uint32_t>(DmsColorSpace::BT601_EBU)));
     napi_set_named_property(env, objValue, "BT601_SMPTE_C",
-        CreateJsValue(env, static_cast<uint32_t>(ColorSpace::BT601_SMPTE_C)));
+        CreateJsValue(env, static_cast<uint32_t>(DmsColorSpace::BT601_SMPTE_C)));
     napi_set_named_property(env, objValue, "BT709",
-        CreateJsValue(env, static_cast<uint32_t>(ColorSpace::BT709)));
+        CreateJsValue(env, static_cast<uint32_t>(DmsColorSpace::BT709)));
     napi_set_named_property(env, objValue, "P3_HLG",
-        CreateJsValue(env, static_cast<uint32_t>(ColorSpace::P3_HLG)));
+        CreateJsValue(env, static_cast<uint32_t>(DmsColorSpace::P3_HLG)));
     napi_set_named_property(env, objValue, "P3_PQ",
-        CreateJsValue(env, static_cast<uint32_t>(ColorSpace::P3_PQ)));
+        CreateJsValue(env, static_cast<uint32_t>(DmsColorSpace::P3_PQ)));
     napi_set_named_property(env, objValue, "DISPLAY_P3",
-        CreateJsValue(env, static_cast<uint32_t>(ColorSpace::DISPLAY_P3)));
+        CreateJsValue(env, static_cast<uint32_t>(DmsColorSpace::DISPLAY_P3)));
     napi_set_named_property(env, objValue, "SRGB",
-        CreateJsValue(env, static_cast<uint32_t>(ColorSpace::SRGB)));
+        CreateJsValue(env, static_cast<uint32_t>(DmsColorSpace::SRGB)));
     napi_set_named_property(env, objValue, "LINEAR_SRGB",
-        CreateJsValue(env, static_cast<uint32_t>(ColorSpace::LINEAR_SRGB)));
+        CreateJsValue(env, static_cast<uint32_t>(DmsColorSpace::LINEAR_SRGB)));
     napi_set_named_property(env, objValue, "LINEAR_P3",
-        CreateJsValue(env, static_cast<uint32_t>(ColorSpace::LINEAR_P3)));
+        CreateJsValue(env, static_cast<uint32_t>(DmsColorSpace::LINEAR_P3)));
     napi_set_named_property(env, objValue, "LINEAR_BT2020",
-        CreateJsValue(env, static_cast<uint32_t>(ColorSpace::LINEAR_BT2020)));
+        CreateJsValue(env, static_cast<uint32_t>(DmsColorSpace::LINEAR_BT2020)));
     return objValue;
 }
 

@@ -52,10 +52,12 @@ HWTEST_F(SessionManagerAgentControllerTest, RegisterWindowManagerAgent, TestSize
     sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
     WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS;
     int32_t pid = 65535;
+    SessionManagerAgentController::GetInstance().windowManagementMode_ = WindowManagementMode::FREEFORM;
     ASSERT_EQ(WMError::WM_OK,
               SessionManagerAgentController::GetInstance().RegisterWindowManagerAgent(windowManagerAgent, type, pid));
     ASSERT_EQ(WMError::WM_OK,
               SessionManagerAgentController::GetInstance().UnregisterWindowManagerAgent(windowManagerAgent, type, pid));
+    SessionManagerAgentController::GetInstance().windowManagementMode_ = WindowManagementMode::UNDEFINED;
 }
 
 /**
@@ -223,6 +225,7 @@ HWTEST_F(SessionManagerAgentControllerTest, NotifyWindowStyleChange, TestSize.Le
     int32_t pid = 65535;
     sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
     WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_STYLE;
+    SessionManagerAgentController::GetInstance().NotifyWindowStyleChange(Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT);
     ASSERT_EQ(WMError::WM_OK,
               SessionManagerAgentController::GetInstance().RegisterWindowManagerAgent(windowManagerAgent, type, pid));
     SessionManagerAgentController::GetInstance().NotifyWindowStyleChange(Rosen::WindowStyleType::WINDOW_STYLE_DEFAULT);
@@ -260,7 +263,7 @@ HWTEST_F(SessionManagerAgentControllerTest, NotifyWindowPropertyChange01, TestSi
     sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
     WindowManagerAgentType type = WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_PROPERTY;
     uint32_t propertyDirtyFlags = 0;
-    std::vector<std::unordered_map<WindowInfoKey, std::any>> windowInfoList;
+    std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>> windowInfoList;
 
     EXPECT_EQ(WMError::WM_OK,
               SessionManagerAgentController::GetInstance().RegisterWindowManagerAgent(windowManagerAgent, type, pid));

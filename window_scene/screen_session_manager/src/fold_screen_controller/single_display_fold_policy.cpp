@@ -243,6 +243,19 @@ FoldCreaseRegion SingleDisplayFoldPolicy::GetLiveCreaseRegion()
     return liveCreaseRegion_;
 }
 
+void SingleDisplayFoldPolicy::GetAllCreaseRegion(std::vector<FoldCreaseRegionItem>& foldCreaseRegionItems) const
+{
+    FoldCreaseRegionItem MCreaseItem{DisplayOrientation::LANDSCAPE, FoldDisplayMode::MAIN,
+        FoldCreaseRegion(0, {})};
+    FoldCreaseRegionItem FPorCreaseItem{DisplayOrientation::PORTRAIT, FoldDisplayMode::FULL,
+        GetFoldCreaseRegion(true)};
+    FoldCreaseRegionItem FLandCreaseItem{DisplayOrientation::LANDSCAPE, FoldDisplayMode::FULL,
+        GetFoldCreaseRegion(false)};
+    foldCreaseRegionItems.push_back(MCreaseItem);
+    foldCreaseRegionItems.push_back(FPorCreaseItem);
+    foldCreaseRegionItems.push_back(FLandCreaseItem);
+}
+
 void SingleDisplayFoldPolicy::LockDisplayStatus(bool locked)
 {
     TLOGI(WmsLogTag::DMS, "LockDisplayStatus locked: %{public}d", locked);
@@ -386,7 +399,8 @@ void SingleDisplayFoldPolicy::ChangeScreenDisplayModeToMain(sptr<ScreenSession> 
 #ifdef TP_FEATURE_ENABLE
     RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE, MAIN_TP.c_str());
 #endif
-    if (PowerMgr::PowerMgrClient::GetInstance().IsFoldScreenOn()) {
+    if (PowerMgr::PowerMgrClient::GetInstance().IsFoldScreenOn() ||
+        ScreenSessionManager::GetInstance().GetCancelSuspendStatus()) {
         ChangeScreenDisplayModeToMainWhenFoldScreenOn(screenSession);
     } else { // When the screen is off and folded, it is not powered on
         ScreenSessionManager::GetInstance().ForceSkipScreenOffAnimation();

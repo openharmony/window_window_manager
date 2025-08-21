@@ -58,6 +58,9 @@ bool operator==(const MMI::ScreenInfo& a, const MMI::ScreenInfo& b)
         a.dpi != b.dpi || a.ppi != b.ppi) {
         return false;
     }
+    if (a.rotation != b.rotation) {
+        return false;
+    }
     return true;
 }
 
@@ -72,6 +75,10 @@ bool operator==(const MMI::DisplayInfo& a, const MMI::DisplayInfo& b)
         a.isCurrentOffScreenRendering != b.isCurrentOffScreenRendering || a.displaySourceMode != b.displaySourceMode ||
         a.oneHandX != b.oneHandX || a.oneHandY != b.oneHandY || a.screenArea.id != b.screenArea.id ||
         a.screenArea.area != b.screenArea.area || a.rsId != b.rsId) {
+        return false;
+    }
+    if (a.offsetX != b.offsetX || a.offsetY != b.offsetY || a.pointerActiveWidth != b.pointerActiveWidth ||
+        a.pointerActiveHeight != b.pointerActiveHeight) {
         return false;
     }
     return true;
@@ -284,8 +291,8 @@ void SceneInputManager::ConstructDisplayGroupInfos(std::map<ScreenId, ScreenProp
         }
         MMI::DisplayInfo displayInfo = {
             .id = screenId,
-            .x = screenProperty.GetStartX(),
-            .y = screenProperty.GetStartY(),
+            .x = screenProperty.GetX(),
+            .y = screenProperty.GetY(),
             .width = screenProperty.GetValidWidth(),
             .height =screenProperty.GetValidHeight(),
             .dpi = screenProperty.GetDensity() *  DOT_PER_INCH,
@@ -294,7 +301,6 @@ void SceneInputManager::ConstructDisplayGroupInfos(std::map<ScreenId, ScreenProp
             .displayDirection = ConvertDegreeToMMIRotation(screenProperty.GetScreenComponentRotation()),
             .displayMode = static_cast<MMI::DisplayMode>(displayMode),
             .transform = transformData,
-            
             .scalePercent = scalePercent,
             .expandHeight = expandHeight,
             .isCurrentOffScreenRendering = screenProperty.GetCurrentOffScreenRendering(),

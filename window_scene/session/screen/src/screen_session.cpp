@@ -56,6 +56,7 @@ const float FULL_STATUS_OFFSET_X = 1136;
 const float SCREEN_HEIGHT = 2232;
 constexpr uint32_t SECONDARY_ROTATION_270 = 3;
 constexpr uint32_t SECONDARY_ROTATION_MOD = 4;
+constexpr int32_t SNAPSHOT_TIMEOUT_MS = 300;
 constexpr ScreenId SCREEN_ID_DEFAULT = 0;
 constexpr float HORIZONTAL = 270.f;
 ScreenCache<int32_t, int32_t> g_uidVersionMap(MAP_SIZE, NO_EXIST_UID_VERSION);
@@ -142,6 +143,7 @@ void ScreenSession::CreateDisplayNode(const Rosen::RSDisplayNodeConfig& config)
 void ScreenSession::ReuseDisplayNode(const RSDisplayNodeConfig& config)
 {
     if (displayNode_) {
+        std::unique_lock<std::shared_mutex> lock(displayNodeMutex_);
         displayNode_->SetDisplayNodeMirrorConfig(config);
         RSTransactionAdapter::FlushImplicitTransaction(displayNode_);
     } else {
@@ -220,6 +222,7 @@ ScreenSession::ScreenSession(ScreenId screenId, const ScreenProperty& property,
 ScreenSession::ScreenSession(const std::string& name, ScreenId smsId, ScreenId rsId, ScreenId defaultScreenId)
     : name_(name), screenId_(smsId), rsId_(rsId), defaultScreenId_(defaultScreenId)
 {
+    sessionId_ = sessionIdGenerator_++;
     (void)rsId_;
     property_.SetRsId(rsId_);
     RSAdapterUtil::InitRSUIDirector(rsUIDirector_, true, true);
@@ -243,7 +246,7 @@ ScreenSession::ScreenSession(const std::string& name, ScreenId smsId, ScreenId r
 
 void ScreenSession::SetDisplayNodeScreenId(ScreenId screenId)
 {
-    std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
+    std::unique_lock<std::shared_mutex> lock(displayNodeMutex_);
     if (displayNode_ != nullptr) {
         TLOGI(WmsLogTag::DMS, "SetDisplayNodeScreenId %{public}" PRIu64"", screenId);
         displayNode_->SetScreenId(screenId);
@@ -367,7 +370,6 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
         displayInfo->SetRotation(property_.GetScreenRotation());
         displayInfo->SetDisplayOrientation(property_.GetDisplayOrientation());
     }
-    displayInfo->SetScreenRotation(property_.GetScreenRotation());
     displayInfo->SetOrientation(property_.GetOrientation());
     displayInfo->SetOffsetX(property_.GetOffsetX());
     displayInfo->SetOffsetY(property_.GetOffsetY());
@@ -692,6 +694,8 @@ ScreenProperty ScreenSession::UpdatePropertyByFoldControl(const ScreenProperty& 
             CalcDeviceOrientation(property_.GetScreenRotation(), foldDisplayMode);
         property_.SetDisplayOrientation(deviceOrientation);
         property_.SetDeviceOrientation(deviceOrientation);
+        property_.SetScreenAreaOffsetY(updatedProperty.GetScreenAreaOffsetY());
+        property_.SetScreenAreaHeight(updatedProperty.GetScreenAreaHeight());
     }
     UpdateTouchBoundsAndOffset();
     return property_;
@@ -968,6 +972,16 @@ void ScreenSession::SetVirtualScreenFlag(VirtualScreenFlag screenFlag)
     screenFlag_ = screenFlag;
 }
 
+VirtualScreenType ScreenSession::GetVirtualScreenType()
+{
+    return screenType_;
+}
+
+void ScreenSession::SetVirtualScreenType(VirtualScreenType screenType)
+{
+    screenType_ = screenType;
+}
+
 void ScreenSession::SetSecurity(bool isSecurity)
 {
     isSecurity_ = isSecurity;
@@ -1136,6 +1150,7 @@ void ScreenSession::UpdateValidRotationToScb()
 
 sptr<SupportedScreenModes> ScreenSession::GetActiveScreenMode() const
 {
+    std::shared_lock<std::shared_mutex> lock(modesMutex_);
     if (activeIdx_ < 0 || activeIdx_ >= static_cast<int32_t>(modes_.size())) {
         TLOGW(WmsLogTag::DMS, "SCB: active mode index is wrong: %{public}d", activeIdx_);
         return nullptr;
@@ -2182,7 +2197,7 @@ void ScreenSession::SetForceCloseHdr(bool isForceCloseHdr)
         return;
     }
     if (lastCloseHdrStatus_ == isForceCloseHdr) {
-        TLOGD(WmsLogTag::DMS, "lastCloseHdrStatus_ and isForceCloseHdr are the same.");
+        TLOGE(WmsLogTag::DMS, "lastCloseHdrStatus_ and isForceCloseHdr are the same.");
         return;
     }
     lastCloseHdrStatus_ = isForceCloseHdr;
@@ -2389,6 +2404,53 @@ void ScreenSession::ScreenModeChange(ScreenModeChangeEvent screenModeChangeEvent
     }
 }
 
+void ScreenSession::FreezeScreen(bool isFreeze)
+{
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ss:FreezeScreen");
+    std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
+    if (displayNode_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "displayNode is null");
+        return;
+    }
+    RSInterfaces::GetInstance().FreezeScreen(displayNode_, isFreeze);
+}
+
+std::shared_ptr<Media::PixelMap> ScreenSession::GetScreenSnapshotWithAllWindows(float scaleX, float scaleY,
+    bool isNeedCheckDrmAndSurfaceLock)
+{
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ss:GetScreenSnapshotWithAllWindows");
+    auto callback = std::make_shared<SurfaceCaptureFuture>();
+    {
+        DmsXcollie dmsXcollie("DMS:GetScreenSnapshotWithAllWindows:TaskSurfaceCaptureWithAllWindows",
+            XCOLLIE_TIMEOUT_5S);
+        std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
+        if (displayNode_ == nullptr) {
+            TLOGE(WmsLogTag::DMS, "displayNode is null");
+            return nullptr;
+        }
+        RSSurfaceCaptureConfig config = {
+            .scaleX = scaleX,
+            .scaleY = scaleY,
+        };
+        SetScreenSnapshotRect(config);
+        bool ret = RSInterfaces::GetInstance().TaskSurfaceCaptureWithAllWindows(displayNode_, callback, config,
+            isNeedCheckDrmAndSurfaceLock);
+        if (!ret) {
+            TLOGE(WmsLogTag::DMS, "take surface capture with all windows failed");
+            return nullptr;
+        }
+    }
+    auto pixelMap = callback->GetResult(SNAPSHOT_TIMEOUT_MS);
+    if (pixelMap != nullptr) {
+        TLOGD(WmsLogTag::DMS, "get pixelMap WxH = %{public}dx%{public}d, NeedCheckDrmAndSurfaceLock is %{public}d",
+            pixelMap->GetWidth(), pixelMap->GetHeight(), isNeedCheckDrmAndSurfaceLock);
+    } else {
+        TLOGW(WmsLogTag::DMS, "null pixelMap, may have drm or surface lock, NeedCheckDrmAndSurfaceLock is %{public}d",
+            isNeedCheckDrmAndSurfaceLock);
+    }
+    return pixelMap;
+}
+
 void ScreenSession::SetIsPhysicalMirrorSwitch(bool isPhysicalMirrorSwitch)
 {
     isPhysicalMirrorSwitch_ = isPhysicalMirrorSwitch;
@@ -2476,11 +2538,13 @@ void ScreenSession::SetScreenProperty(ScreenProperty property)
 
 std::vector<sptr<SupportedScreenModes>> ScreenSession::GetScreenModes()
 {
+    std::shared_lock<std::shared_mutex> lock(modesMutex_);
     return modes_;
 }
 
-void ScreenSession::SetScreenModes(std::vector<sptr<SupportedScreenModes>> modes)
+void ScreenSession::SetScreenModes(const std::vector<sptr<SupportedScreenModes>>& modes)
 {
+    std::unique_lock<std::shared_mutex> lock(modesMutex_);
     modes_ = modes;
 }
 

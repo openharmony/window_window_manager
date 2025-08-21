@@ -15,6 +15,7 @@
 
 #ifndef OHOS_ANI_SCENE_SESSION_UTILS_H
 #define OHOS_ANI_SCENE_SESSION_UTILS_H
+
 #include "ani.h"
 #include "wm_common.h"
 

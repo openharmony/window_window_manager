@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "ani_window_utils.h"
 
 #include <iomanip>
@@ -23,8 +24,8 @@
 #include "ani_window.h"
 #include "bundle_constants.h"
 #include "ipc_skeleton.h"
-#include "window_manager_hilog.h"
 #include "ui_content.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -733,6 +734,18 @@ void AniWindowUtils::GetSpecificBarStatus(sptr<Window>& window, const std::strin
     systemBarProperties[type].enableAnimation_ = newSystemBarProperties[type].enableAnimation_;
     systemBarProperties[type].settingFlag_ = systemBarProperties[type].settingFlag_ |
         SystemBarSettingFlag::ENABLE_SETTING;
+}
+
+WmErrorCode AniWindowUtils::ToErrorCode(WMError error, WmErrorCode defaultCode)
+{
+    auto it = WM_JS_TO_ERROR_CODE_MAP.find(error);
+    if (it != WM_JS_TO_ERROR_CODE_MAP.end()) {
+        return it->second;
+    }
+    TLOGW(WmsLogTag::DEFAULT,
+        "[ANI] Unknown error: %{public}d, return defaultCode: %{public}d",
+        static_cast<int32_t>(error), static_cast<int32_t>(defaultCode));
+    return defaultCode;
 }
 } // namespace Rosen
 } // namespace OHOS

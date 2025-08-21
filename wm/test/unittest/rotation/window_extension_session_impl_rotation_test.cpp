@@ -106,6 +106,51 @@ HWTEST_F(WindowExtensionSessionImplRotationTest, UpdateRectForRotation, TestSize
     window_->UpdateRectForRotation(rect, rect, wmReason, rsTransaction);
     usleep(WAIT_SYNC_IN_NS);
 }
+
+/**
+ * @tc.name: UpdateRectForRotation02
+ * @tc.desc: UpdateRectForRotation02 Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplRotationTest, UpdateRectForRotation02, TestSize.Level2)
+{
+    EXPECT_NE(nullptr, window_);
+    auto runner = AppExecFwk::EventRunner::Create("ExtensionUpdateRectForRotation02");
+    std::shared_ptr<AppExecFwk::EventHandler> handler = std::make_shared<AppExecFwk::EventHandler>(runner);
+    runner->Run();
+    window_->handler_ = handler;
+    std::shared_ptr<RSTransaction> rsTransaction = std::make_shared<RSTransaction>();
+    rsTransaction->syncId_ = 1;
+    rsTransaction->isOpenSyncTransaction_ = true;
+    
+    Rect wmRect;
+    wmRect.posX_ = 0;
+    wmRect.posY_ = 0;
+    wmRect.height_ = 50;
+    wmRect.width_ = 50;
+
+    Rect preRect;
+    preRect.posX_ = 0;
+    preRect.posY_ = 0;
+    preRect.height_ = 200;
+    preRect.width_ = 200;
+
+    window_->property_->SetWindowRect(preRect);
+    WindowSizeChangeReason wmReason = WindowSizeChangeReason::SNAPSHOT_ROTATION;
+    window_->UpdateRectForRotation(wmRect, preRect, wmReason, rsTransaction);
+    usleep(WAIT_SYNC_IN_NS);
+
+    WSRect wsRect;
+    wsRect.posX_ = 0;
+    wsRect.posY_ = 0;
+    wsRect.height_ = 50;
+    wsRect.width_ = 50;
+    window_->property_->SetUIExtensionUsage(UIExtensionUsage::CONSTRAINED_EMBEDDED);
+    SizeChangeReason reason = SizeChangeReason::SNAPSHOT_ROTATION;
+    SceneAnimationConfig config { .rsTransaction_ = rsTransaction };
+    WSError res = window_->UpdateRect(wsRect, reason, config);
+    EXPECT_EQ(res, WSError::WS_OK);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

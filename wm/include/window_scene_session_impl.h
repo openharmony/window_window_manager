@@ -26,7 +26,8 @@ using NotifyWindowRecoverStateChangeFunc = std::function<void(bool isSpecificSes
 
 class WindowSceneSessionImpl : public WindowSessionImpl {
 public:
-    explicit WindowSceneSessionImpl(const sptr<WindowOption>& option);
+    explicit WindowSceneSessionImpl(const sptr<WindowOption>& option,
+        const std::shared_ptr<RSUIContext>& rsUIContext = nullptr);
     ~WindowSceneSessionImpl();
     WMError Create(const std::shared_ptr<AbilityRuntime::Context>& context,
         const sptr<Rosen::ISession>& iSession, const std::string& identityToken = "",
@@ -64,6 +65,7 @@ public:
     WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) override;
     WMError SetFrameRectForPartialZoomIn(const Rect& frameRect) override;
     WMError UpdateWindowModeForUITest(int32_t updateMode) override;
+    WSError NotifyAppHookWindowInfoUpdated() override;
 
     /*
      * Window Hierarchy
@@ -203,7 +205,9 @@ public:
     WmErrorCode StartMoveWindowWithCoordinate(int32_t offsetX, int32_t offsetY) override;
     WmErrorCode StopMoveWindow() override;
     WMError SetSupportedWindowModesInner(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes);
+    void UpdateWindowModeWhenSupportTypeChange(uint32_t windowModeSupportType);
     bool haveSetSupportedWindowModes_ = false;
+    uint32_t pendingWindowModeSupportType_ { WindowModeSupport::WINDOW_MODE_SUPPORT_ALL };
 
     /*
      * Compatible Mode
@@ -218,6 +222,7 @@ public:
      */
     WSError SwitchFreeMultiWindow(bool enable) override;
     virtual bool GetFreeMultiWindowModeEnabledState() override;
+    void UpdateImmersiveBySwitchMode(bool freeMultiWindowEnable);
 
     void NotifyKeyboardPanelInfoChange(const KeyboardPanelInfo& keyboardPanelInfo) override;
     virtual WMError SetImmersiveModeEnabledState(bool enable) override;
@@ -364,6 +369,7 @@ private:
     void UpdateNewSize();
     void fillWindowLimits(WindowLimits& windowLimits);
     void UpdateSupportWindowModesWhenSwitchFreeMultiWindow();
+    void PendingUpdateSupportWindowModesWhenSwitchMultiWindow();
     void ConsumePointerEventInner(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         MMI::PointerEvent::PointerItem& pointerItem, bool isHitTargetDraggable = false);
     void HandleEventForCompatibleMode(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
@@ -407,6 +413,7 @@ private:
      * Window Layout
      */
     void CheckMoveConfiguration(MoveConfiguration& moveConfiguration);
+    WMError GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo) override;
 
     /*
      * PC Window Layout
@@ -427,6 +434,7 @@ private:
     uint32_t setSameSystembarPropertyCnt_ = 0;
     std::atomic<uint32_t> getAvoidAreaCnt_ = 0;
     std::atomic<bool> enableImmersiveMode_ = false;
+    std::atomic<bool> cacheEnableImmersiveMode_ = false;
     bool titleHoverShowEnabled_ = true;
     bool dockHoverShowEnabled_ = true;
     void PreLayoutOnShow(WindowType type, const sptr<DisplayInfo>& info = nullptr);
@@ -439,8 +447,6 @@ private:
     /*
      * Window Property
      */
-    void RecoverSessionProperty();
-    WMError UpdateColorMode(const std::shared_ptr<AppExecFwk::Configuration>& configuration = nullptr);
     void InitSystemSessionDragEnable();
     bool IsSystemDensityChanged(const sptr<DisplayInfo>& displayInfo);
     bool IsDefaultDensityEnabled();
@@ -456,6 +462,7 @@ private:
      */
     void AddSubWindowMapForExtensionWindow();
     WMError GetParentSessionAndVerify(bool isToast, sptr<WindowSessionImpl>& parentSession);
+    static WMError VerifySubWindowLevel(bool isToast, const sptr<WindowSessionImpl>& parentSession);
     WMError SetParentWindowInner(int32_t oldParentWindowId, const sptr<WindowSessionImpl>& newParentWindow);
 
     WMError RegisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;

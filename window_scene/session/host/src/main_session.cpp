@@ -111,8 +111,9 @@ WSError MainSession::ProcessPointDownSession(int32_t posX, int32_t posY)
     if (isModal) {
         Session::ProcessClickModalWindowOutside(posX, posY);
     }
+    auto ret = SceneSession::ProcessPointDownSession(posX, posY);
     PresentFocusIfPointDown();
-    return SceneSession::ProcessPointDownSession(posX, posY);
+    return ret;
 }
 
 void MainSession::NotifyForegroundInteractiveStatus(bool interactive)
@@ -412,12 +413,11 @@ void MainSession::NotifySubSessionRectChangeByAnchor(const WSRect& parentRect,
     }
 }
 
-void MainSession::HandleSubSessionSurfaceNodeByWindowAnchor(SizeChangeReason reason,
-    const sptr<ScreenSession>& screenSession)
+void MainSession::HandleSubSessionSurfaceNodeByWindowAnchor(SizeChangeReason reason, DisplayId displayId)
 {
     for (const auto& subSession : GetSubSession()) {
         if (subSession && subSession->GetWindowAnchorInfo().isAnchorEnabled_ && subSession->IsSessionForeground()) {
-            subSession->HandleCrossSurfaceNodeByWindowAnchor(reason, screenSession);
+            subSession->HandleCrossSurfaceNodeByWindowAnchor(reason, displayId);
         }
     }
 }

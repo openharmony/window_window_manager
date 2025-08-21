@@ -123,6 +123,13 @@ WM_IMPLEMENT_SINGLE_INSTANCE(SessionManagerLite)
 
 SessionManagerLite::~SessionManagerLite()
 {
+    sptr<IRemoteObject> remoteObject = nullptr;
+    if (mockSessionManagerServiceProxy_) {
+        remoteObject = mockSessionManagerServiceProxy_->AsObject();
+    }
+    if (remoteObject) {
+        remoteObject->RemoveDeathRecipient(foundationDeath_);
+    }
     TLOGI(WmsLogTag::WMS_LIFE, "destroyed");
 }
 
@@ -412,8 +419,18 @@ WMError SessionManagerLite::RegisterWMSConnectionChangedListener(const WMSConnec
             TLOGE(WmsLogTag::WMS_MULTI_USER, "Init mock session manager service failed");
             return ret;
         }
-        RegisterSMSRecoverListener();
     }
+    RegisterSMSRecoverListener();
+    return WMError::WM_OK;
+}
+
+WMError SessionManagerLite::UnregisterWMSConnectionChangedListener()
+{
+    {
+        std::lock_guard<std::mutex> lock(wmsConnectionMutex_);
+        wmsConnectionChangedFunc_ = nullptr;
+    }
+    UnregisterSMSRecoverListener();
     return WMError::WM_OK;
 }
 
@@ -452,6 +469,7 @@ WMError SessionManagerLite::InitMockSMSProxy()
 
 void SessionManagerLite::RegisterSMSRecoverListener()
 {
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (!recoverListenerRegistered_) {
         if (!mockSessionManagerServiceProxy_) {
             TLOGE(WmsLogTag::WMS_RECOVER, "mockSessionManagerServiceProxy is null");
@@ -463,6 +481,15 @@ void SessionManagerLite::RegisterSMSRecoverListener()
         std::string identity = IPCSkeleton::ResetCallingIdentity();
         mockSessionManagerServiceProxy_->RegisterSMSLiteRecoverListener(smsRecoverListener_);
         IPCSkeleton::SetCallingIdentity(identity);
+    }
+}
+
+void SessionManagerLite::UnregisterSMSRecoverListener()
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    recoverListenerRegistered_ = false;
+    if (mockSessionManagerServiceProxy_) {
+        mockSessionManagerServiceProxy_->UnregisterSMSLiteRecoverListener();
     }
 }
 

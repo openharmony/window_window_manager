@@ -150,6 +150,8 @@ public:
     void ClearSpecifyMoveStartDisplay();
     WSRect GetTargetDisplayRectRelatedToStartDisplay(WSRect rect, DisplayId displayId) const;
     void StopMoving();
+    void SetLastDragEndRect(const WSRect& rect) { lastDragEndRect_ = rect; }
+    WSRect GetLastDragEndRect() const { return lastDragEndRect_; }
 
 private:
     struct MoveDragProperty {
@@ -364,6 +366,11 @@ private:
     bool isSpecifyMoveStart_ = false;
     bool isAdaptToProportionalScale_ = false;
     // Above guarded by specifyMoveStartMutex_
+
+    /*
+     * PC Window Layout
+     */
+    WSRect lastDragEndRect_ = { 0, 0, 0, 0 };
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_MOVE_DRAG_CONTROLLER_H

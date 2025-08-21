@@ -408,6 +408,27 @@ HWTEST_F(SessionLayoutTest, OnVsyncReceivedAfterModeChanged, TestSize.Level1)
     usleep(WAIT_SYNC_IN_NS);
     EXPECT_EQ(session->isWindowModeDirty_.load(), false);
 }
+
+/**
+ * @tc.name: NotifyAppHookWindowInfoUpdated
+ * @tc.desc: NotifyAppHookWindowInfoUpdated
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionLayoutTest, NotifyAppHookWindowInfoUpdated, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifyAppHookWindowInfoUpdated";
+    info.bundleName_ = "NotifyAppHookWindowInfoUpdated";
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
+
+    session->sessionStage_ = nullptr;
+    WSError errCode = session->NotifyAppHookWindowInfoUpdated();
+    EXPECT_EQ(errCode, WSError::WS_ERROR_NULLPTR);
+
+    session->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
+    errCode = session->NotifyAppHookWindowInfoUpdated();
+    EXPECT_EQ(errCode, WSError::WS_OK);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

@@ -111,6 +111,7 @@ public:
     static napi_value NotifyEnterRecentTask(napi_env env, napi_callback_info info);
     static napi_value UpdateDisplayHookInfo(napi_env env, napi_callback_info info);
     static napi_value UpdateAppHookDisplayInfo(napi_env env, napi_callback_info info);
+    static napi_value UpdateAppHookWindowInfo(napi_env env, napi_callback_info info);
     static napi_value NotifyHookOrientationChange(napi_env env, napi_callback_info info);
     static napi_value InitScheduleUtils(napi_env env, napi_callback_info info);
     static napi_value SetAppForceLandscapeConfig(napi_env env, napi_callback_info info);
@@ -133,6 +134,7 @@ public:
     static napi_value SetSupportFunctionType(napi_env env, napi_callback_info info);
     static napi_value GetApplicationInfo(napi_env env, napi_callback_info info);
     static napi_value SetUIEffectControllerAliveInUI(napi_env env, napi_callback_info info);
+    static napi_value SupportCreateFloatWindow(napi_env env, napi_callback_info info);
 
     /*
      * PC Window
@@ -168,6 +170,7 @@ public:
      * Window Pattern
      */
     static napi_value SupportSnapshotAllSessionStatus(napi_env env, napi_callback_info info);
+    static napi_value SupportPreloadStartingWindow(napi_env env, napi_callback_info info);
 
     /*
      * PiP Window
@@ -234,6 +237,7 @@ private:
     napi_value OnNotifyEnterRecentTask(napi_env env, napi_callback_info info);
     napi_value OnUpdateDisplayHookInfo(napi_env env, napi_callback_info info);
     napi_value OnUpdateAppHookDisplayInfo(napi_env env, napi_callback_info info);
+    napi_value OnUpdateAppHookWindowInfo(napi_env env, napi_callback_info info);
     napi_value OnNotifyHookOrientationChange(napi_env env, napi_callback_info info);
     napi_value OnInitScheduleUtils(napi_env env, napi_callback_info info);
     napi_value OnSetAppForceLandscapeConfig(napi_env env, napi_callback_info info);
@@ -372,10 +376,11 @@ private:
     static napi_value StartAbilityBySpecified(napi_env env, napi_callback_info info);
     static napi_value StartUIAbilityBySCB(napi_env env, napi_callback_info info);
     napi_value OnGetApplicationInfo(napi_env env, napi_callback_info info);
+    napi_value OnSupportCreateFloatWindow(napi_env env, napi_callback_info info);
     void RegisterSceneSessionDestructCallback();
     void OnSceneSessionDestruct(int32_t persistentId);
     void RegisterTransferSessionToTargetScreenCallback();
-    void OnTransferSessionToTargetScreen(const TransferSessionInfo& info);
+    void OnTransferSessionToTargetScreen(const TransferSessionInfo& info, const uint64_t fromScreenId);
     static napi_value UpdateRecentMainSessionInfos(napi_env env, napi_callback_info info);
 
     napi_env env_;
@@ -390,12 +395,13 @@ private:
      */
     std::unordered_map<int32_t, RotationChangeResult> GetRotationChangeResult(
         const std::vector<sptr<SceneSession>>& activeSceneSessionMapCopy,
-        const RotationChangeInfo& rotationChangeInfo);
+        const RotationChangeInfo& rotationChangeInfo, bool isRestrictNotify = false);
 
     /*
      * Window Pattern
      */
     napi_value OnSupportSnapshotAllSessionStatus(napi_env env, napi_callback_info info);
+    napi_value OnSupportPreloadStartingWindow(napi_env env, napi_callback_info info);
 
     napi_value OnUpdateSystemDecorEnable(napi_env env, napi_callback_info info);
 };

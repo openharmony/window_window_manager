@@ -1101,7 +1101,8 @@ ScreenId ScreenSessionManagerProxy::CreateVirtualScreen(VirtualScreenOption virt
         data.WriteInt32(virtualOption.flags_) && data.WriteBool(virtualOption.isForShot_) &&
         data.WriteUInt64Vector(virtualOption.missionIds_) &&
         data.WriteUint32(static_cast<uint32_t>(virtualOption.virtualScreenType_)) &&
-        data.WriteBool(virtualOption.isSecurity_);
+        data.WriteBool(virtualOption.isSecurity_) &&
+        data.WriteUint32(static_cast<uint32_t>(virtualOption.virtualScreenFlag_));
     if (virtualOption.surface_ != nullptr && virtualOption.surface_->GetProducer() != nullptr) {
         res = res &&
             data.WriteBool(true) &&
@@ -2486,6 +2487,30 @@ void ScreenSessionManagerProxy::SetFoldDisplayMode(const FoldDisplayMode display
     }
 }
 
+void ScreenSessionManagerProxy::SetFoldDisplayModeAsync(const FoldDisplayMode displayMode)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGW(WmsLogTag::DMS, "remote is null");
+        return;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken Failed");
+        return;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(displayMode))) {
+        TLOGE(WmsLogTag::DMS, "Write displayMode failed");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCENE_BOARD_SET_FOLD_DISPLAY_MODE),
+                            data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "Send TRANS_ID_SCENE_BOARD_SET_FOLD_DISPLAY_MODE request failed");
+    }
+}
+
 //SetFoldDisplayModeFromJs add DMError to return DMErrorCode for js
 DMError ScreenSessionManagerProxy::SetFoldDisplayModeFromJs(const FoldDisplayMode displayMode, std::string reason)
 {
@@ -3599,6 +3624,33 @@ void ScreenSessionManagerProxy::NotifyFoldToExpandCompletion(bool foldToExpand)
         return;
     }
 }
+
+void ScreenSessionManagerProxy::NotifyScreenConnectCompletion(ScreenId screenId)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DMS, "remote is null");
+        return;
+    }
+
+    MessageOption option(MessageOption::TF_ASYNC);
+    MessageParcel reply;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return ;
+    }
+    if (!data.WriteUint64(screenId)) {
+        TLOGE(WmsLogTag::DMS, "Write screenId failed");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_NOTIFY_SCREEN_CONNECT_COMPLETION),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
+        return;
+    }
+}
+
 
 void ScreenSessionManagerProxy::RecordEventFromScb(std::string description, bool needRecordEvent)
 {

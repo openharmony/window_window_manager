@@ -94,9 +94,7 @@ HWTEST_F(WindowSplitTest, SplitWindow01, TestSize.Level1)
     splitInfo_.mode = WindowMode::WINDOW_MODE_FULLSCREEN;
 
     const sptr<Window>& priWindow = Utils::CreateTestWindow(splitInfo_);
-    if (priWindow == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, priWindow);
     activeWindows_.push_back(priWindow);
     priWindow->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
     sleep(SPLIT_TEST_SLEEP_S);
@@ -104,9 +102,7 @@ HWTEST_F(WindowSplitTest, SplitWindow01, TestSize.Level1)
     sleep(SPLIT_TEST_SLEEP_S);
 
     const sptr<Window>& fullWindow = Utils::CreateTestWindow(fullInfo_);
-    if (fullWindow == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, fullWindow);
     activeWindows_.push_back(fullWindow);
     fullWindow->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
     sleep(SPLIT_TEST_SLEEP_S);
@@ -136,9 +132,7 @@ HWTEST_F(WindowSplitTest, SplitWindow02, TestSize.Level1)
     splitInfo_.mode = WindowMode::WINDOW_MODE_FULLSCREEN;
 
     const sptr<Window>& fullWindow = Utils::CreateTestWindow(fullInfo_);
-    if (fullWindow == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, fullWindow);
     activeWindows_.push_back(fullWindow);
     fullWindow->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
     sleep(SPLIT_TEST_SLEEP_S);
@@ -176,9 +170,7 @@ HWTEST_F(WindowSplitTest, SplitScreen03, TestSize.Level1)
     splitInfo_.mode = WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
 
     const sptr<Window>& fullWindow = Utils::CreateTestWindow(fullInfo_);
-    if (fullWindow == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, fullWindow);
     activeWindows_.push_back(fullWindow);
     ASSERT_EQ(WMError::WM_OK, fullWindow->Show());
     sleep(SPLIT_TEST_SLEEP_S);
@@ -212,9 +204,7 @@ HWTEST_F(WindowSplitTest, SplitScreen04, TestSize.Level1)
     splitInfo_.mode = WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
 
     const sptr<Window>& fullWindow = Utils::CreateTestWindow(fullInfo_);
-    if (fullWindow == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, fullWindow);
 
     activeWindows_.push_back(fullWindow);
     ASSERT_EQ(WMError::WM_OK, fullWindow->Show());

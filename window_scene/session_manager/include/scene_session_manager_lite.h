@@ -33,6 +33,7 @@ public:
         bool shouldBackToCaller = true) override;
     WSError GetFocusSessionToken(sptr<IRemoteObject>& token, DisplayId displayId = DEFAULT_DISPLAY_ID) override;
     WSError GetFocusSessionElement(AppExecFwk::ElementName& element, DisplayId displayId = DEFAULT_DISPLAY_ID) override;
+    WSError IsFocusWindowParent(const sptr<IRemoteObject>& token, bool& isParent) override;
     WSError RegisterSessionListener(const sptr<ISessionListener>& listener, bool isRecover = false) override;
     WSError UnRegisterSessionListener(const sptr<ISessionListener>& listener) override;
     WSError GetSessionInfos(const std::string& deviceId, int32_t numMax,

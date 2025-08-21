@@ -82,7 +82,6 @@ public:
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(DisplaySourceMode, DisplaySourceMode, displaySourceMode, DisplaySourceMode::NONE);
     DEFINE_VAR_DEFAULT_FUNC_GET_SET(std::vector<uint32_t>, SupportedRefreshRate, supportedRefreshRate,
         std::vector<uint32_t>());
-    DEFINE_VAR_DEFAULT_FUNC_GET_SET(Rotation, ScreenRotation, screenRotation, Rotation::ROTATION_0);
 };
 } // namespace OHOS::Rosen
 #endif // FOUNDATION_DMSERVER_DISPLAY_INFO_H

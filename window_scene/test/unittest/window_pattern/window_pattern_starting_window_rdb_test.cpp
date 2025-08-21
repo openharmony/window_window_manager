@@ -193,6 +193,55 @@ HWTEST_F(WindowPatternStartingWindowRdbTest, QueryData, TestSize.Level1)
     ASSERT_EQ(res, true);
     ASSERT_EQ(inputInfo.backgroundColor_, resInfo.backgroundColor_);
 }
+
+/**
+ * @tc.name: UpgradeDbToNextVersion
+ * @tc.desc: UpgradeDbToNextVersion
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternStartingWindowRdbTest, UpgradeDbToNextVersion, TestSize.Level1)
+{
+    ASSERT_NE(startingWindowRdbMgr_, nullptr);
+    auto rdbStore = startingWindowRdbMgr_->GetRdbStore();
+    ASSERT_NE(rdbStore, nullptr);
+    WmsRdbOpenCallback wmsCallback(startingWindowRdbMgr_->wmsRdbConfig_);
+    wmsCallback.UpgradeDbToNextVersion(*rdbStore, 1);
+    wmsCallback.UpgradeDbToNextVersion(*rdbStore, 2);
+    wmsCallback.UpgradeDbToNextVersion(*rdbStore, 3);
+    ASSERT_NE(rdbStore, nullptr);
+}
+
+/**
+ * @tc.name: AddColumn
+ * @tc.desc: AddColumn
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternStartingWindowRdbTest, AddColumn, TestSize.Level1)
+{
+    ASSERT_NE(startingWindowRdbMgr_, nullptr);
+    auto rdbStore = startingWindowRdbMgr_->GetRdbStore();
+    ASSERT_NE(rdbStore, nullptr);
+    WmsRdbOpenCallback wmsCallback(startingWindowRdbMgr_->wmsRdbConfig_);
+    wmsCallback.AddColumn(*rdbStore, "TEST_COLUMN TEXT");
+    ASSERT_NE(rdbStore, nullptr);
+}
+
+/**
+ * @tc.name: OnUpgrade
+ * @tc.desc: OnUpgrade
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternStartingWindowRdbTest, OnUpgrade, TestSize.Level1)
+{
+    ASSERT_NE(startingWindowRdbMgr_, nullptr);
+    auto rdbStore = startingWindowRdbMgr_->GetRdbStore();
+    ASSERT_NE(rdbStore, nullptr);
+    WmsRdbOpenCallback wmsCallback(startingWindowRdbMgr_->wmsRdbConfig_);
+    int res = wmsCallback.OnUpgrade(*rdbStore, 2, 1);
+    EXPECT_EQ(res, NativeRdb::E_OK);
+    res = wmsCallback.OnUpgrade(*rdbStore, 1, 2);
+    EXPECT_EQ(res, NativeRdb::E_OK);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

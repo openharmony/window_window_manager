@@ -887,13 +887,13 @@ ShadowsInfo WindowSessionProperty::GetWindowShadows() const
     return shadowsInfo_;
 }
 
-void WindowSessionProperty::SetUseControlStateToProperty(bool isUseControlState)
+void WindowSessionProperty::SetUseControlState(bool isUseControlState)
 {
     std::lock_guard<std::mutex> lock(lifecycleUseControlMutex_);
     isUseControlState_ = isUseControlState;
 }
 
-bool WindowSessionProperty::GetUseControlStateFromProperty() const
+bool WindowSessionProperty::GetUseControlState() const
 {
     std::lock_guard<std::mutex> lock(lifecycleUseControlMutex_);
     return isUseControlState_;
@@ -1365,7 +1365,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         MarshallingWindowAnchorInfo(parcel) &&
         parcel.WriteBool(isPcAppInpadSpecificSystemBarInvisible_) &&
         parcel.WriteBool(isPcAppInpadOrientationLandscape_) &&
-        parcel.WriteBool(isPcAppInpadCompatibleMode_);
+        parcel.WriteBool(isPcAppInpadCompatibleMode_) &&
+        parcel.WriteString(ancoRealBundleName_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1480,6 +1481,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetPcAppInpadSpecificSystemBarInvisible(parcel.ReadBool());
     property->SetPcAppInpadOrientationLandscape(parcel.ReadBool());
     property->SetPcAppInpadCompatibleMode(parcel.ReadBool());
+    property->SetAncoRealBundleName(parcel.ReadString());
     return property;
 }
 
@@ -1586,6 +1588,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     isPcAppInpadSpecificSystemBarInvisible_ = property->isPcAppInpadSpecificSystemBarInvisible_;
     isPcAppInpadOrientationLandscape_ = property->isPcAppInpadOrientationLandscape_;
     isPcAppInpadCompatibleMode_ = property->isPcAppInpadCompatibleMode_;
+    ancoRealBundleName_ = property->ancoRealBundleName_;
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)
@@ -2329,6 +2332,16 @@ bool WindowSessionProperty::GetPcAppInpadOrientationLandscape() const
     return isPcAppInpadOrientationLandscape_;
 }
 
+void WindowSessionProperty::SetAncoRealBundleName(const std::string& ancoRealBundleName)
+{
+    ancoRealBundleName_ = ancoRealBundleName;
+}
+
+std::string WindowSessionProperty::GetAncoRealBundleName() const
+{
+    return ancoRealBundleName_;
+}
+
 void CompatibleModeProperty::SetIsAdaptToImmersive(bool isAdaptToImmersive)
 {
     isAdaptToImmersive_ = isAdaptToImmersive;
@@ -2539,6 +2552,18 @@ void WindowSessionProperty::UnmarshallingWindowAnchorInfo(Parcel& parcel, Window
         return;
     }
     property->SetWindowAnchorInfo(*windowAnchorInfo);
+}
+
+void WindowSessionProperty::SetMissionInfo(const MissionInfo& missionInfo)
+{
+    std::lock_guard<std::mutex> lock(missionInfoMutex_);
+    missionInfo_ = missionInfo;
+}
+
+MissionInfo WindowSessionProperty::GetMissionInfo() const
+{
+    std::lock_guard<std::mutex> lock(missionInfoMutex_);
+    return missionInfo_;
 }
 
 bool WindowSessionProperty::MarshallingShadowsInfo(Parcel& parcel) const

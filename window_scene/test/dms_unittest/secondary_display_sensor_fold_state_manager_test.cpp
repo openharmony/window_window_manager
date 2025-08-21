@@ -77,7 +77,7 @@ HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, HandleAngleOrHallChange01, 
     sptr<FoldScreenPolicy> foldScreenPolicy = nullptr;
     SecondaryDisplaySensorFoldStateManager manager;
     manager.HandleAngleOrHallChange(angels, halls, foldScreenPolicy, isPostureRegistered);
-    EXPECT_EQ(manager.GetNextFoldState(angels, halls, isPostureRegistered), FoldStatus::FOLDED);
+    EXPECT_EQ(manager.GetNextFoldState(angels, halls, isPostureRegistered, true), FoldStatus::FOLDED);
 }
 
 /**
@@ -97,7 +97,7 @@ HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, HandleAngleOrHallChange02, 
     SecondaryDisplaySensorFoldStateManager manager;
     manager.HandleAngleOrHallChange(angels, halls, foldScreenPolicy, isPostureRegistered);
     angels = {0, 0, 0};
-    EXPECT_EQ(manager.GetNextFoldState(angels, halls, isPostureRegistered), FoldStatus::FOLDED);
+    EXPECT_EQ(manager.GetNextFoldState(angels, halls, isPostureRegistered, true), FoldStatus::FOLDED);
 }
 
 /**
@@ -120,7 +120,7 @@ HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, HandleAngleOrHallChange03, 
     EXPECT_NE(foldScreenPolicy, nullptr);
     SecondaryDisplaySensorFoldStateManager manager;
     manager.HandleAngleOrHallChange(angels, halls, foldScreenPolicy, isPostureRegistered);
-    EXPECT_EQ(manager.GetNextFoldState(angels, halls, isPostureRegistered),
+    EXPECT_EQ(manager.GetNextFoldState(angels, halls, isPostureRegistered, true),
         FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND);
 }
 
@@ -144,7 +144,7 @@ HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, HandleAngleOrHallChange04, 
     EXPECT_NE(foldScreenPolicy, nullptr);
     SecondaryDisplaySensorFoldStateManager manager;
     manager.HandleAngleOrHallChange(angels, halls, foldScreenPolicy, isPostureRegistered);
-    EXPECT_EQ(manager.GetNextFoldState(angels, halls, isPostureRegistered),
+    EXPECT_EQ(manager.GetNextFoldState(angels, halls, isPostureRegistered, true),
         FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND);
 }
 
@@ -170,17 +170,17 @@ HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, HandleAngleOrHallChange05, 
     manager.curHallAB_ = 0;
     manager.curHallBC_ = 0;
     manager.HandleAngleOrHallChange(angels, halls, foldScreenPolicy, isPostureRegistered);
-    EXPECT_EQ(manager.GetNextFoldState(angels, halls, isPostureRegistered),
+    EXPECT_EQ(manager.GetNextFoldState(angels, halls, isPostureRegistered, true),
         FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND);
     manager.curHallAB_ = 0;
     manager.curHallBC_ = 1;
     manager.HandleAngleOrHallChange(angels, halls, foldScreenPolicy, isPostureRegistered);
-    EXPECT_EQ(manager.GetNextFoldState(angels, halls, isPostureRegistered),
+    EXPECT_EQ(manager.GetNextFoldState(angels, halls, isPostureRegistered, true),
         FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND);
     manager.curHallAB_ = 1;
     manager.curHallBC_ = 0;
     manager.HandleAngleOrHallChange(angels, halls, foldScreenPolicy, isPostureRegistered);
-    EXPECT_EQ(manager.GetNextFoldState(angels, halls, isPostureRegistered),
+    EXPECT_EQ(manager.GetNextFoldState(angels, halls, isPostureRegistered, true),
         FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND);
 }
 
@@ -231,7 +231,7 @@ HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, HandleAngleOrHallChange07, 
     ASSERT_NE(foldScreenPolicy, nullptr);
     SecondaryDisplaySensorFoldStateManager manager;
     manager.HandleAngleOrHallChange(angels, halls, foldScreenPolicy, isPostureRegistered);
-    EXPECT_EQ(manager.GetNextFoldState(angels, halls, isPostureRegistered),
+    EXPECT_EQ(manager.GetNextFoldState(angels, halls, isPostureRegistered, true),
         FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND);
 }
 
@@ -378,6 +378,37 @@ HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, GetNextFoldStateHalf02, Tes
     angel = 130.0F + 0.1;
     auto result8 = manager.GetNextFoldStateHalf(angel, hall, state, allowUserSensorForLargeFoldDevice);
     EXPECT_EQ(static_cast<int>(result8), 3);
+}
+
+/**
+ * @tc.name: GetNextFoldStateHalf03
+ * @tc.desc: test function : GetNextFoldStateHalf
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, GetNextFoldStateHalf03, TestSize.Level1)
+{
+    SecondaryDisplaySensorFoldStateManager manager;
+    int32_t allowUserSensorForLargeFoldDevice = 0;
+    FoldStatus state = FoldStatus::UNKNOWN;
+    float angel = 40.0F;
+    uint16_t hall = 0;
+    auto result = manager.GetNextFoldStateHalf(angel, hall, state, allowUserSensorForLargeFoldDevice);
+    EXPECT_EQ(static_cast<int>(result), 2);
+
+    angel = 60.0F;
+    hall = 0;
+    result = manager.GetNextFoldStateHalf(angel, hall, state, allowUserSensorForLargeFoldDevice);
+    EXPECT_EQ(static_cast<int>(result), 3);
+
+    angel = 40.0F;
+    hall = 1;
+    result = manager.GetNextFoldStateHalf(angel, hall, state, allowUserSensorForLargeFoldDevice);
+    EXPECT_EQ(static_cast<int>(result), 3);
+
+    angel = 60.0F;
+    hall = 1;
+    result = manager.GetNextFoldStateHalf(angel, hall, state, allowUserSensorForLargeFoldDevice);
+    EXPECT_EQ(static_cast<int>(result), 3);
 }
 
 /**

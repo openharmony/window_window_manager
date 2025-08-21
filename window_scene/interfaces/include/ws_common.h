@@ -16,6 +16,7 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H
 #define OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H
 
+#include <charconv>
 #include <inttypes.h>
 #include <iomanip>
 #include <map>
@@ -48,8 +49,6 @@ constexpr int32_t INVALID_SESSION_ID = 0;
 constexpr int32_t DEFAULT_REQUEST_FROM_SCB_ID = -1;
 constexpr int32_t WINDOW_SUPPORT_MODE_MAX_SIZE = 4;
 constexpr int32_t DEFAULT_SCALE_RATIO = 100;
-constexpr uint32_t COLOR_WHITE = 0xffffffff;
-constexpr uint32_t COLOR_BLACK = 0xff000000;
 const std::string WINDOW_SCREEN_LOCK_PREFIX = "windowLock_";
 const std::string VIEW_SCREEN_LOCK_PREFIX = "viewLock_";
 
@@ -453,6 +452,7 @@ struct SessionInfo {
      * App Use Control
      */
     bool isUseControlSession = false; // Indicates whether the session is used for controlling a main session.
+    bool hasPrivacyModeControl = false;
 
     /*
      * UIExtension
@@ -551,6 +551,7 @@ enum class SizeChangeReason : uint32_t {
     RECOVER_IN_IMPLICIT = 33,
     OCCUPIED_AREA_CHANGE = 34,
     SCREEN_RELATIVE_POSITION_CHANGE,
+    SNAPSHOT_ROTATION = 37,
     END,
 };
 
@@ -703,14 +704,60 @@ struct WSRectT {
         return static_cast<F>(interWidth) * static_cast<F>(interHeight);
     }
 
-    inline std::string ToString() const
+    /**
+     * @brief Returns a string in the format: [posX posY width height]
+     *
+     * @note Optimized for performance:
+     *       - Avoid std::stringstream and other formatting streams.
+     *       - Pre-allocates string capacity to minimize reallocations.
+     *       - Use std::to_chars for fast, allocation-free conversions.
+     *
+     * @return std::string A string representing the rectangle.
+     */
+    std::string ToString() const
     {
-        constexpr int precision = 2;
-        std::stringstream ss;
-        ss << "[" << std::fixed << std::setprecision(precision) << posX_ << " " << posY_ << " " <<
-            width_ << " " << height_ << "]";
-        return ss.str();
+        std::string result;
+        if constexpr (std::is_integral_v<T>) {
+            result.reserve(49); // 49: 11 digits * 4 + spaces + brackets
+        } else {
+            result.reserve(133); // 133: 32 digits * 4 + spaces + brackets
+        }
+
+        // Helper: append either value or INF/-INF when overflow occurs
+        auto appendValueOrInf = [&](char* buf, char* ptr, const std::errc ec, T value) {
+            if (ec == std::errc::value_too_large) {
+                result.append(value < 0 ? "-INF" : "INF");
+            } else {
+                result.append(buf, ptr);
+            }
+        };
+
+        // Helper: convert and append value based on type
+        auto appendValue = [&](T value) {
+            if constexpr (std::is_integral_v<T>) {
+                char buf[11]; // 11: max digits for integer
+                auto [ptr, ec] = std::to_chars(buf, buf + sizeof(buf), value);
+                appendValueOrInf(buf, ptr, ec, value);
+            } else {
+                constexpr int precision = 2;
+                char buf[32]; // 32: max digits for floating number
+                auto [ptr, ec] = std::to_chars(buf, buf + sizeof(buf), value, std::chars_format::fixed, precision);
+                appendValueOrInf(buf, ptr, ec, value);
+            }
+        };
+
+        result.push_back('[');
+        appendValue(posX_);
+        result.push_back(' ');
+        appendValue(posY_);
+        result.push_back(' ');
+        appendValue(width_);
+        result.push_back(' ');
+        appendValue(height_);
+        result.push_back(']');
+        return result;
     }
+
     static const WSRectT<T> EMPTY_RECT;
 };
 
@@ -953,6 +1000,7 @@ enum class SystemAnimatedSceneType : uint32_t {
     SCENE_LOCKSCREEN_TO_LAUNCHER, // Unlock screen.
     SCENE_ENTER_MIN_WINDOW, // Enter the window minimization state
     SCENE_RECOVER_MIN_WINDOW, // Recover minimized window
+    SCENE_SNAPSHOT_ROTATION, // Snapshot rotation
     SCENE_OTHERS, // 1.Default state 2.The state in which the animation ends
 };
 
@@ -995,6 +1043,8 @@ enum class SessionPropertyFlag {
     VISIBILITY_STATE = 1 << 4,
     DISPLAY_ID = 1 << 5,
     WINDOW_RECT = 1 << 6,
+    WINDOW_MODE = 1 << 7,
+    FLOATING_SCALE = 1 << 8,
 };
 
 /**
@@ -1022,6 +1072,15 @@ enum class SnapshotNodeType : uint32_t {
     DEFAULT_NODE = 0,
     LEASH_NODE,
     APP_NODE,
+};
+
+enum class BackgroundReason {
+    DEFAULT = 0,
+
+    /*
+     * Expanded to folded on single pocket
+     */
+    EXPAND_TO_FOLD_SINGLE_POCKET,
 };
 
 enum class AsyncTraceTaskId: int32_t {

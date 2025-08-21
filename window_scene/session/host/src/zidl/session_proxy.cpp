@@ -335,7 +335,14 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
         property->SetPcAppInpadSpecificSystemBarInvisible(reply.ReadBool());
         property->SetPcAppInpadOrientationLandscape(reply.ReadBool());
         property->SetCompatibleModeProperty(reply.ReadParcelable<CompatibleModeProperty>());
-        property->SetUseControlStateToProperty(reply.ReadBool());
+        property->SetUseControlState(reply.ReadBool());
+        property->SetAncoRealBundleName(reply.ReadString());
+        sptr<MissionInfo> missionInfo = reply.ReadParcelable<MissionInfo>();
+        if (missionInfo == nullptr) {
+            TLOGE(WmsLogTag::WMS_LIFE, "read missionInfo is nullptr.");
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
+        property->SetMissionInfo(*missionInfo);
     }
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
@@ -896,36 +903,6 @@ WSError SessionProxy::OnDefaultDensityEnabled(bool isDefaultDensityEnabled)
     }
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
-}
-
-WMError SessionProxy::OnUpdateColorMode(const std::string& colorMode, bool hasDarkRes)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "WriteInterfaceToken failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteString(colorMode)) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write colorMode failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteBool(hasDarkRes)) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write hasDarkRes failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "remote is null");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_COLOR_MODE),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "SendRequest failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    return WMError::WM_OK;
 }
 
 WSError SessionProxy::OnTitleAndDockHoverShowChange(bool isTitleHoverShown, bool isDockHoverShown)
@@ -2473,6 +2450,37 @@ WMError SessionProxy::GetAppForceLandscapeConfig(AppForceLandscapeConfig& config
         config = *replyConfig;
     }
     int32_t ret = reply.ReadInt32();
+    return static_cast<WMError>(ret);
+}
+
+WMError SessionProxy::GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "WriteInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (!remote) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    uint32_t requestCode = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_HOOK_WINDOW_INFO);
+    if (remote->SendRequest(requestCode, data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<HookWindowInfo> replyInfo = reply.ReadParcelable<HookWindowInfo>();
+    if (replyInfo) {
+        hookWindowInfo = *replyInfo;
+    }
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read ret failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
     return static_cast<WMError>(ret);
 }
 

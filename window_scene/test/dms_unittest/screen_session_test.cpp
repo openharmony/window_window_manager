@@ -3252,12 +3252,43 @@ HWTEST_F(ScreenSessionTest, ReuseDisplayNode, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: ReuseDisplayNode start";
     Rosen::RSDisplayNodeConfig rsConfig;
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
+    screenSession->SetDisplayNode(nullptr);
+    screenSession->ReuseDisplayNode(rsConfig);
+
     rsConfig.isMirrored = true;
     rsConfig.screenId = 101;
-    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
-    screenSession->displayNode_ = nullptr;
+    std::shared_ptr<RSDisplayNode> displayNode = RSDisplayNode::Create(rsConfig);
+    screenSession->SetDisplayNode(displayNode);
     screenSession->ReuseDisplayNode(rsConfig);
     GTEST_LOG_(INFO) << "ScreenSessionTest: ReuseDisplayNode end";
+}
+
+/**
+ * @tc.name: GetScreenModes
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, GetScreenModes, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: GetScreenModes start";
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    auto modes_ = session->GetScreenModes();
+    GTEST_LOG_(INFO) << "ScreenSessionTest: GetScreenModes end";
+}
+
+/**
+ * @tc.name: SetScreenModes
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetScreenModes, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetScreenModes start";
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    sptr<SupportedScreenModes> supportedScreenModes = new SupportedScreenModes();
+    session->SetScreenModes({supportedScreenModes});
+    GTEST_LOG_(INFO) << "ScreenSessionTest: SetScreenModes end";
 }
 
 /**
@@ -3996,11 +4027,13 @@ HWTEST_F(ScreenSessionTest, GetChildCount, TestSize.Level1)
 HWTEST_F(ScreenSessionTest, SetForceCloseHdr, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetForceCloseHdr start";
-    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    LOG_SetCallback(MyLogCallback);
+    ScreenProperty newScreenProperty;
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr(0, newScreenProperty, 0);
     ASSERT_NE(session, nullptr);
     session->SetForceCloseHdr(true);
     session->SetForceCloseHdr(false);
-    EXPECT_TRUE(g_errLog.find("Start get screen status.") != std::string::npos);
+    EXPECT_FALSE(g_errLog.find("Start get screen status.") != std::string::npos);
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetForceCloseHdr end";
 }
 
@@ -4012,11 +4045,13 @@ HWTEST_F(ScreenSessionTest, SetForceCloseHdr, TestSize.Level1)
 HWTEST_F(ScreenSessionTest, SetForceCloseHdr01, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetForceCloseHdr start";
-    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    LOG_SetCallback(MyLogCallback);
+    ScreenProperty newScreenProperty;
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr(0, newScreenProperty, 0);
     ASSERT_NE(session, nullptr);
     session->SetForceCloseHdr(false);
     session->SetForceCloseHdr(false);
-    EXPECT_TRUE(g_errLog.find("Start get screen status.") != std::string::npos);
+    EXPECT_TRUE(g_errLog.find("lastCloseHdrStatus_ and isForceCloseHdr are the same.") != std::string::npos);
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetForceCloseHdr end";
 }
 
@@ -4455,6 +4490,68 @@ HWTEST_F(ScreenSessionTest, SetScreenArea, TestSize.Level1)
     EXPECT_EQ(200, screenSession->GetScreenAreaOffsetY());
     EXPECT_EQ(300, screenSession->GetScreenAreaWidth());
     EXPECT_EQ(400, screenSession->GetScreenAreaHeight());
+}
+
+/**
+ * @tc.name: FreezeScreen
+ * @tc.desc: FreezeScreen Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, FreezeScreen, TestSize.Level2)
+{
+    LOG_SetCallback(MyLogCallback);
+    g_errLog.clear();
+    ScreenId screenId = 0;
+    ScreenProperty screenProperty;
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(screenId, screenProperty, screenId);
+    screenSession->displayNode_ = nullptr;
+    bool isFreeze = false;
+    screenSession->FreezeScreen(isFreeze);
+    EXPECT_TRUE(g_errLog.find("displayNode is null") != std::string::npos);
+
+    RSDisplayNodeConfig config;
+    std::shared_ptr<RSDisplayNode> displayNode = std::make_shared<RSDisplayNode>(config);
+    screenSession->SetDisplayNode(displayNode);
+    screenSession->FreezeScreen(isFreeze);
+    g_errLog.clear();
+}
+
+/**
+ * @tc.name: GetScreenSnapshotWithAllWindows01
+ * @tc.desc: GetScreenSnapshotWithAllWindows01 Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, GetScreenSnapshotWithAllWindows01, TestSize.Level2)
+{
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
+    screenSession->displayNode_ = nullptr;
+    float scaleX = 1.0;
+    float scaleY = 1.0;
+    bool isNeedCheckDrmAndSurfaceLock = true;
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    pixelMap = screenSession->GetScreenSnapshotWithAllWindows(scaleX, scaleY, isNeedCheckDrmAndSurfaceLock);
+    EXPECT_EQ(pixelMap, nullptr);
+}
+
+/**
+ * @tc.name: GetScreenSnapshotWithAllWindows02
+ * @tc.desc: GetScreenSnapshotWithAllWindows02 Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, GetScreenSnapshotWithAllWindows02, TestSize.Level2)
+{
+    ScreenId screenId = 100;
+    ScreenProperty screenProperty;
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(screenId, screenProperty, screenId);
+    Rosen::RSDisplayNodeConfig config = { .screenId = 100 };
+    std::shared_ptr<RSDisplayNode> displayNode = Rosen::RSDisplayNode::Create(config);
+    screenSession->SetDisplayNode(displayNode);
+    float scaleX = 1.0;
+    float scaleY = 1.0;
+    bool isNeedCheckDrmAndSurfaceLock = true;
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    pixelMap = screenSession->GetScreenSnapshotWithAllWindows(scaleX, scaleY, isNeedCheckDrmAndSurfaceLock);
+    EXPECT_EQ(pixelMap, nullptr);
 }
 } // namespace
 } // namespace Rosen
