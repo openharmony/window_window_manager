@@ -2574,8 +2574,8 @@ static ani_int WindowSetWindowDecorHeight(ani_env* env, ani_object obj, ani_long
 
 static ani_object WindowGetWindowProperties(ani_env* env, ani_object obj, ani_long nativeObj)
 {
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
     using namespace OHOS::Rosen;
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] windowToken_ is nullptr");
