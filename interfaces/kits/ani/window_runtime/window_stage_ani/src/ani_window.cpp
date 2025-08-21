@@ -139,12 +139,12 @@ ani_object AniWindow::NativeTransferDynamic(ani_env* aniEnv, ani_class cls, ani_
 
 void AniWindow::SetWindowColorSpace(ani_env* env, ani_object obj, ani_long nativeObj, ani_int colorSpace)
 {
-    TLOGI(WmsLogTag::DEFAULT, "[ANI] colorSpace:%{public}d", static_cast<int32_t>(colorSpace));
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI] colorSpace:%{public}d", static_cast<int32_t>(colorSpace));
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow != nullptr) {
         aniWindow->OnSetWindowColorSpace(env, colorSpace);
     } else {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] aniWindow is nullptr");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] aniWindow is nullptr");
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
 }
@@ -153,19 +153,19 @@ void AniWindow::OnSetWindowColorSpace(ani_env* env, ani_int colorSpace)
 {
     if (static_cast<int32_t>(colorSpace) > static_cast<int32_t>(ColorSpace::COLOR_SPACE_WIDE_GAMUT) ||
         static_cast<int32_t>(colorSpace) < static_cast<int32_t>(ColorSpace::COLOR_SPACE_DEFAULT)) {
-        TLOGE(WmsLogTag::DEFAULT, "ColorSpace %{public}u invalid!", static_cast<uint32_t>(colorSpace));
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "ColorSpace %{public}u invalid!", static_cast<uint32_t>(colorSpace));
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
         return;
     }
-    TLOGI(WmsLogTag::DEFAULT, "[ANI] colorSpace:%{public}d", static_cast<int32_t>(colorSpace));
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI] colorSpace:%{public}d", static_cast<int32_t>(colorSpace));
     auto window = GetWindow();
     if (window == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI]window is nullptr");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI]window is nullptr");
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
     window->SetColorSpace(static_cast<ColorSpace>(colorSpace));
-    TLOGI(WmsLogTag::DEFAULT, "[ANI] SetWindowColorSpace end");
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI] SetWindowColorSpace end");
 }
 
 void AniWindow::SetPreferredOrientation(ani_env* env, ani_object obj, ani_long nativeObj, ani_int orientation)
@@ -667,23 +667,23 @@ void AniWindow::OnSetUIContent(ani_env* env, ani_string path)
 
 void AniWindow::SetWindowKeepScreenOn(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isKeepScreenOn)
 {
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] aniWindow is nullptr");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] aniWindow is nullptr");
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
     aniWindow->OnSetWindowKeepScreenOn(env, isKeepScreenOn);
-    TLOGI(WmsLogTag::DEFAULT, "[ANI] SetWindowKeepScreenOn end");
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI] SetWindowKeepScreenOn end");
 }
 
 void AniWindow::OnSetWindowKeepScreenOn(ani_env* env, ani_boolean isKeepScreenOn)
 {
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
     auto window = GetWindow();
     if (window == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] window is nullptr");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] window is nullptr");
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
@@ -2635,7 +2635,7 @@ static ani_int WindowSetSpecificSystemBarEnabled(ani_env* env, ani_object obj, a
     TLOGI(WmsLogTag::WMS_IMMS, "[ANI]");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] windowToken_ is nullptr");
+        TLOGE(WmsLogTag::WMS_IMMS, "[ANI] windowToken_ is nullptr");
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return ANI_ERROR;
     }
