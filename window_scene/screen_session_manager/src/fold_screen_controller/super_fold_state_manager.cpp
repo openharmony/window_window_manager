@@ -43,6 +43,8 @@ constexpr int32_t FOLD_CREASE_RECT_SIZE = 4; //numbers of parameter on the curre
 const std::string g_LiveCreaseRegion = system::GetParameter("const.display.foldscreen.crease_region", "");
 const std::string FOLD_CREASE_DELIMITER = ",;";
 constexpr ScreenId SCREEN_ID_FULL = 0;
+const int32_t SCREEN_WIDTH_INDEX = 2;
+const int32_t CREASE_WIDTH_INDEX = 3;
 }
 
 void SuperFoldStateManager::DoAngleChangeFolded(SuperFoldStatusChangeEvents event)
@@ -187,7 +189,7 @@ void SuperFoldStateManager::InitSuperFoldCreaseRegionParams()
     currentSuperFoldCreaseRegion_ = new FoldCreaseRegion(screenIdFull, rect);
 }
 
-FoldCreaseRegion SuperFoldStateManager::GetFoldCreaseRegion(bool isVertical) const
+FoldCreaseRegion SuperFoldStateManager::GetFoldCreaseRegion(bool isVertical, bool isNeedReverse) const
 {
     std::vector<int32_t> foldRect = FoldScreenStateInternel::StringFoldRectSplitToInt(g_LiveCreaseRegion,
         FOLD_CREASE_DELIMITER);
@@ -198,29 +200,37 @@ FoldCreaseRegion SuperFoldStateManager::GetFoldCreaseRegion(bool isVertical) con
 
     ScreenId screenIdFull = 0;
     std::vector<DMRect> foldCreaseRect;
-    GetFoldCreaseRect(isVertical, foldRect, foldCreaseRect);
+    GetFoldCreaseRect(isVertical, isNeedReverse, foldRect, foldCreaseRect);
     return FoldCreaseRegion(screenIdFull, foldCreaseRect);
 }
 
-void SuperFoldStateManager::GetFoldCreaseRect(bool isVertical,
+void SuperFoldStateManager::GetFoldCreaseRect(bool isVertical, bool isNeedReverse,
     const std::vector<int32_t>& foldRect, std::vector<DMRect>& foldCreaseRect) const
 {
     int32_t liveCreaseRegionPosX; // live Crease Region PosX
     int32_t liveCreaseRegionPosY; // live Crease Region PosY
     uint32_t liveCreaseRegionPosWidth; // live Crease Region PosWidth
     uint32_t liveCreaseRegionPosHeight; // live Crease Region PosHeight
+    int32_t curLeft = foldRect[0];
+    int32_t curTop = foldRect[1];
+    uint32_t screenWidth = static_cast<uint32_t>(foldRect[SCREEN_WIDTH_INDEX]);
+    uint32_t creaseWidth = static_cast<uint32_t>(foldRect[CREASE_WIDTH_INDEX]);
+    if (isNeedReverse) {
+        auto screenProperty = ScreenSessionManager::GetInstance().GetPhyScreenProperty(SCREEN_ID_FULL);
+        curTop = screenProperty.GetPhyBounds().rect_.GetHeight() - curTop - creaseWidth;
+    }
     if (isVertical) {
         TLOGI(WmsLogTag::DMS, "the current FoldCreaseRect is vertical");
-        liveCreaseRegionPosX = foldRect[1];
-        liveCreaseRegionPosY = foldRect[0];
-        liveCreaseRegionPosWidth = static_cast<uint32_t>(foldRect[3]);
-        liveCreaseRegionPosHeight = static_cast<uint32_t>(foldRect[2]);
+        liveCreaseRegionPosX = curTop;
+        liveCreaseRegionPosY = curLeft;
+        liveCreaseRegionPosWidth = creaseWidth;
+        liveCreaseRegionPosHeight = screenWidth;
     } else {
         TLOGI(WmsLogTag::DMS, "the current FoldCreaseRect is horizontal");
-        liveCreaseRegionPosX = foldRect[0];
-        liveCreaseRegionPosY = foldRect[1];
-        liveCreaseRegionPosWidth = static_cast<uint32_t>(foldRect[2]);
-        liveCreaseRegionPosHeight = static_cast<uint32_t>(foldRect[3]);
+        liveCreaseRegionPosX = curLeft;
+        liveCreaseRegionPosY = curTop;
+        liveCreaseRegionPosWidth = screenWidth;
+        liveCreaseRegionPosHeight = creaseWidth;
     }
     foldCreaseRect = {
         {
@@ -369,14 +379,20 @@ FoldCreaseRegion SuperFoldStateManager::GetLiveCreaseRegion()
     }
     DisplayOrientation displayOrientation = screenSession->GetScreenProperty().GetDisplayOrientation();
     switch (displayOrientation) {
-        case DisplayOrientation::PORTRAIT:
-        case DisplayOrientation::PORTRAIT_INVERTED: {
-            liveCreaseRegion_ = GetFoldCreaseRegion(false);
+        case DisplayOrientation::PORTRAIT: {
+            liveCreaseRegion_ = GetFoldCreaseRegion(false, false);
             break;
         }
-        case DisplayOrientation::LANDSCAPE:
+        case DisplayOrientation::PORTRAIT_INVERTED: {
+            liveCreaseRegion_ = GetFoldCreaseRegion(false, true);
+            break;
+        }
+        case DisplayOrientation::LANDSCAPE: {
+            liveCreaseRegion_ = GetFoldCreaseRegion(true, true);
+            break;
+        }
         case DisplayOrientation::LANDSCAPE_INVERTED: {
-            liveCreaseRegion_ = GetFoldCreaseRegion(true);
+            liveCreaseRegion_ = GetFoldCreaseRegion(true, false);
             break;
         }
         default: {
@@ -384,6 +400,66 @@ FoldCreaseRegion SuperFoldStateManager::GetLiveCreaseRegion()
         }
     }
     return liveCreaseRegion_;
+}
+
+nlohmann::ordered_json SuperFoldStateManager::GetFoldCreaseRegionJson()
+{
+    if (superFoldCreaseRegionItems_.size() == 0) {
+        GetAllCreaseRegion();
+    }
+    nlohmann::ordered_json ret = nlohmann::ordered_json::array();
+    for (const auto& foldCreaseRegionItem : superFoldCreaseRegionItems_) {
+        nlohmann::ordered_json capabilityInfo;
+        capabilityInfo["superFoldStatus"] =
+            std::to_string(static_cast<int32_t>(foldCreaseRegionItem.superFoldStatus_));
+        capabilityInfo["displayOrientation"] =
+            std::to_string(static_cast<int32_t>(foldCreaseRegionItem.orientation_));
+        capabilityInfo["creaseRects"]["displayId"] =
+            std::to_string(static_cast<int32_t>(foldCreaseRegionItem.region_.GetDisplayId()));
+        auto creaseRects = foldCreaseRegionItem.region_.GetCreaseRects();
+        capabilityInfo["creaseRects"]["rects"] = nlohmann::ordered_json::array();
+        for (const auto& creaseRect : creaseRects) {
+            capabilityInfo["creaseRects"]["rects"].push_back({
+                {"posX", creaseRect.posX_},
+                {"posY", creaseRect.posY_},
+                {"width", creaseRect.width_},
+                {"height", creaseRect.height_}
+            });
+        }
+        ret.push_back(capabilityInfo);
+    }
+    return ret;
+}
+
+void SuperFoldStateManager::GetAllCreaseRegion()
+{
+    SuperFoldCreaseRegionItem FCreaseItem{DisplayOrientation::LANDSCAPE, SuperFoldStatus::FOLDED,
+        FoldCreaseRegion(0, {})};
+    SuperFoldCreaseRegionItem HPorCreaseItem{DisplayOrientation::PORTRAIT, SuperFoldStatus::HALF_FOLDED,
+        GetFoldCreaseRegion(false, false)};
+    SuperFoldCreaseRegionItem HLandCreaseItem{DisplayOrientation::LANDSCAPE, SuperFoldStatus::HALF_FOLDED,
+        GetFoldCreaseRegion(true, false)};
+    SuperFoldCreaseRegionItem EPorCreaseItem{DisplayOrientation::PORTRAIT, SuperFoldStatus::EXPANDED,
+        GetFoldCreaseRegion(false, false)};
+    SuperFoldCreaseRegionItem ELandCreaseItem{DisplayOrientation::LANDSCAPE, SuperFoldStatus::EXPANDED,
+        GetFoldCreaseRegion(true, true)};
+    SuperFoldCreaseRegionItem EPorInvRCreaseItem{DisplayOrientation::PORTRAIT_INVERTED, SuperFoldStatus::EXPANDED,
+        GetFoldCreaseRegion(false, true)};
+    SuperFoldCreaseRegionItem ELandInvRCreaseItem{DisplayOrientation::LANDSCAPE_INVERTED, SuperFoldStatus::EXPANDED,
+        GetFoldCreaseRegion(true, false)};
+    SuperFoldCreaseRegionItem KPorCreaseItem{DisplayOrientation::PORTRAIT, SuperFoldStatus::KEYBOARD,
+        GetFoldCreaseRegion(false, false)};
+    SuperFoldCreaseRegionItem KLandCreaseItem{DisplayOrientation::LANDSCAPE, SuperFoldStatus::KEYBOARD,
+        GetFoldCreaseRegion(true, false)};
+    superFoldCreaseRegionItems_.push_back(FCreaseItem);
+    superFoldCreaseRegionItems_.push_back(HPorCreaseItem);
+    superFoldCreaseRegionItems_.push_back(HLandCreaseItem);
+    superFoldCreaseRegionItems_.push_back(EPorCreaseItem);
+    superFoldCreaseRegionItems_.push_back(ELandCreaseItem);
+    superFoldCreaseRegionItems_.push_back(EPorInvRCreaseItem);
+    superFoldCreaseRegionItems_.push_back(ELandInvRCreaseItem);
+    superFoldCreaseRegionItems_.push_back(KPorCreaseItem);
+    superFoldCreaseRegionItems_.push_back(KLandCreaseItem);
 }
 
 void SuperFoldStateManager::HandleDisplayNotify(SuperFoldStatusChangeEvents changeEvent)
@@ -497,6 +573,9 @@ DMError SuperFoldStateManager::RefreshMirrorRegionInner(
                 mirrorRegion.width_, mirrorRegion.height_);
             return DMError::DM_ERROR_INVALID_PARAM;
         }
+    } else {
+        mirrorRegion.width_ = mainScreenProperty.GetScreenRealWidth();
+        mirrorRegion.height_ = mainScreenProperty.GetScreenRealHeight();
     }
     mainScreenSession->UpdateMirrorWidth(mirrorRegion.width_);
     mainScreenSession->UpdateMirrorHeight(mirrorRegion.height_);
@@ -514,7 +593,7 @@ DMError SuperFoldStateManager::RefreshExternalRegion()
         TLOGW(WmsLogTag::DMS, "extend screen not connect");
         return DMError::DM_OK;
     }
-    sptr<ScreenSession> mainScreenSession = ScreenSessionManager::GetInstance().GetDefaultScreenSession();
+    sptr<ScreenSession> mainScreenSession = ScreenSessionManager::GetInstance().GetScreenSessionByRsId(SCREEN_ID_FULL);
     if (mainScreenSession == nullptr) {
         TLOGE(WmsLogTag::DMS, "GetScreenSession null");
         return DMError::DM_ERROR_NULLPTR;

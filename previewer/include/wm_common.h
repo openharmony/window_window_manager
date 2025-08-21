@@ -449,6 +449,7 @@ enum class WindowSizeChangeReason : uint32_t {
     MAXIMIZE_IN_IMPLICT = 32,
     RECOVER_IN_IMPLICIT = 33,
     SCREEN_RELATIVE_POSITION_CHANGE,
+    SNAPSHOT_ROTATION = 37,
     END
 };
 
@@ -550,6 +551,55 @@ struct KeyFramePolicy : public Parcelable {
         oss << "[" << static_cast<uint32_t>(dragResizeType_) << " " << interval_ << " " << distance_;
         oss << " " << animationDuration_ << " " << animationDelay_ << "]";
         return oss.str();
+    }
+};
+
+/**
+ * @struct HookWindowInfo.
+ *
+ * @brief Configures window hook behavior based on window size ratios.
+ */
+struct HookWindowInfo : public Parcelable {
+    bool enableHookWindow{ false };
+    float widthHookRatio{ 1.0f };
+
+    static constexpr float DEFAULT_WINDOW_SIZE_HOOK_RATIO = 1.0f;
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        return WriteAllFields(parcel);
+    }
+
+    static HookWindowInfo* Unmarshalling(Parcel& parcel)
+    {
+        auto hookWindowInfo = std::make_unique<HookWindowInfo>();
+        if (!hookWindowInfo || !ReadAllFields(parcel, *hookWindowInfo)) {
+            return nullptr;
+        }
+        return hookWindowInfo.release();
+    }
+
+    std::string ToString() const
+    {
+        constexpr int precision = 6; // Print float with precision of 6 decimal places.
+        std::ostringstream oss;
+        oss << std::boolalpha  // For true/false instead of 1/0
+            << "enableHookWindow: " << enableHookWindow
+            << ", widthHookRatio: " << std::fixed << std::setprecision(precision) << widthHookRatio;
+        return oss.str();
+    }
+
+private:
+    bool WriteAllFields(Parcel& parcel) const
+    {
+        return parcel.WriteBool(enableHookWindow) &&
+               parcel.WriteFloat(widthHookRatio);
+    }
+
+    static bool ReadAllFields(Parcel& parcel, HookWindowInfo& info)
+    {
+        return parcel.ReadBool(info.enableHookWindow) &&
+               parcel.ReadFloat(info.widthHookRatio);
     }
 };
 
@@ -1573,6 +1623,7 @@ struct RotationChangeResult {
  */
 enum DefaultSpecificZIndex {
     MUTISCREEN_COLLABORATION = 930,
+    SUPER_PRIVACY_ANIMATION = 1100,
 };
 
 /**

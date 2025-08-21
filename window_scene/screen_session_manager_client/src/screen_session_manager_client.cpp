@@ -564,6 +564,15 @@ void ScreenSessionManagerClient::NotifyFoldToExpandCompletion(bool foldToExpand)
     screenSessionManager_->NotifyFoldToExpandCompletion(foldToExpand);
 }
 
+void ScreenSessionManagerClient::NotifyScreenConnectCompletion(ScreenId screenId)
+{
+    if (!screenSessionManager_) {
+        TLOGE(WmsLogTag::DMS, "screenSessionManager is null");
+        return;
+    }
+    screenSessionManager_->NotifyScreenConnectCompletion(screenId);
+}
+
 void ScreenSessionManagerClient::RecordEventFromScb(std::string description, bool needRecordEvent)
 {
     if (!screenSessionManager_) {
@@ -630,22 +639,31 @@ void ScreenSessionManagerClient::SwitchingCurrentUser()
 
 void ScreenSessionManagerClient::DisconnectAllExternalScreen()
 {
-    std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
-    for (auto sessionIt = screenSessionMap_.rbegin(); sessionIt != screenSessionMap_.rend(); ++sessionIt) {
-        auto screenSession = sessionIt->second;
-        if (screenSession == nullptr) {
-            TLOGE(WmsLogTag::DMS, "screenSession is nullptr!");
-            continue;
+    ScreenId setScreenId = SCREEN_ID_INVALID;
+    {
+        std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
+        for (auto sessionIt = screenSessionMap_.rbegin(); sessionIt != screenSessionMap_.rend(); ++sessionIt) {
+            auto screenSession = sessionIt->second;
+            if (screenSession == nullptr) {
+                TLOGE(WmsLogTag::DMS, "screenSession is nullptr!");
+                continue;
+            }
+            if (screenSession->GetScreenProperty().GetScreenType() ==
+                ScreenType::REAL && screenSession->GetIsExtend()) {
+                TLOGI(WmsLogTag::DMS, "disconnect extend screen, screenId = %{public}" PRIu64, sessionIt->first);
+                screenSession->DestroyScreenScene();
+                NotifyScreenDisconnect(screenSession);
+                ScreenId screenId = sessionIt->first;
+                screenSessionMap_.erase(screenId);
+                setScreenId = screenId;
+                screenSession->Disconnect();
+                break;
+            }
         }
-        if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::REAL && screenSession->GetIsExtend()) {
-            TLOGI(WmsLogTag::DMS, "disconnect extend screen, screenId = %{public}" PRIu64, sessionIt->first);
-            screenSession->DestroyScreenScene();
-            NotifyScreenDisconnect(screenSession);
-            ScreenId screenId = sessionIt->first;
-            screenSessionMap_.erase(screenId);
-            screenSession->Disconnect();
-            break;
-        }
+    }
+    if (setScreenId != SCREEN_ID_INVALID) {
+        std::unique_lock<std::mutex> lock(screenEventMutex_);
+        connectedScreenSet_.erase(setScreenId);
     }
 }
 
@@ -1302,5 +1320,26 @@ DMError ScreenSessionManagerClient::SetPrimaryDisplaySystemDpi(float dpi)
         return DMError::DM_ERROR_NULLPTR;
     }
     return screenSessionManager_->SetPrimaryDisplaySystemDpi(dpi);
+}
+
+void ScreenSessionManagerClient::FreezeScreen(ScreenId screenId, bool isFreeze)
+{
+    auto screenSession = GetScreenSession(screenId);
+    if (!screenSession) {
+        TLOGE(WmsLogTag::DMS, "get screen session is null, screenId is %{public}" PRIu64, screenId);
+        return;
+    }
+    screenSession->FreezeScreen(isFreeze);
+}
+
+std::shared_ptr<Media::PixelMap> ScreenSessionManagerClient::GetScreenSnapshotWithAllWindows(ScreenId screenId,
+    float scaleX, float scaleY, bool isNeedCheckDrmAndSurfaceLock)
+{
+    auto screenSession = GetScreenSession(screenId);
+    if (!screenSession) {
+        TLOGE(WmsLogTag::DMS, "get screen session is null, screenId is %{public}" PRIu64, screenId);
+        return nullptr;
+    }
+    return screenSession->GetScreenSnapshotWithAllWindows(scaleX, scaleY, isNeedCheckDrmAndSurfaceLock);
 }
 } // namespace OHOS::Rosen

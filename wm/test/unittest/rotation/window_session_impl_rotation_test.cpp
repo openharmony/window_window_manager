@@ -320,6 +320,50 @@ HWTEST_F(WindowSessionImplRotationTest, GetRequestedOrientation02, TestSize.Leve
     ASSERT_EQ(ret, Orientation::UNSPECIFIED);
     GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: GetRequestedOrientation02 end";
 }
+
+/**
+ * @tc.name: UpdateRectForRotation02
+ * @tc.desc: UpdateRectForRotation02 Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplRotationTest, UpdateRectForRotation02, TestSize.Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateRectForRotation02");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    auto runner = AppExecFwk::EventRunner::Create("UpdateRectForRotation02");
+    std::shared_ptr<AppExecFwk::EventHandler> handler = std::make_shared<AppExecFwk::EventHandler>(runner);
+    runner->Run();
+    window->handler_ = handler;
+ 
+    Rect wmRect;
+    wmRect.posX_ = 0;
+    wmRect.posY_ = 0;
+    wmRect.height_ = 50;
+    wmRect.width_ = 50;
+ 
+    Rect preRect;
+    preRect.posX_ = 0;
+    preRect.posY_ = 0;
+    preRect.height_ = 200;
+    preRect.width_ = 200;
+ 
+    window->property_->SetWindowRect(preRect);
+    WindowSizeChangeReason wmReason = WindowSizeChangeReason::SNAPSHOT_ROTATION;
+    std::shared_ptr<RSTransaction> rsTransaction;
+    SceneAnimationConfig config{ .rsTransaction_ = rsTransaction };
+    window->UpdateRectForRotation(wmRect, preRect, wmReason, config);
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_EQ(window->lastSizeChangeReason_, WindowSizeChangeReason::ROTATION);
+ 
+    preRect.height_ = 200;
+    preRect.width_ = 200;
+    window->property_->SetWindowRect(preRect);
+    wmReason = WindowSizeChangeReason::ROTATION;
+    window->UpdateRectForRotation(wmRect, preRect, wmReason, config);
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_EQ(window->lastSizeChangeReason_, WindowSizeChangeReason::ROTATION);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

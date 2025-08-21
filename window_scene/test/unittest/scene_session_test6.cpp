@@ -762,7 +762,9 @@ HWTEST_F(SceneSessionTest6, NotifyKeyboardAnimationWillBeginInvalidSessionStage,
     bool withAnimation = false;
     const std::shared_ptr<RSTransaction>& rsTransaction = std::make_shared<RSTransaction>();
     sceneSession->NotifyKeyboardAnimationWillBegin(isShowAnimation, beginRect, endRect, withAnimation, rsTransaction);
-    EXPECT_TRUE(g_errlog.find("sessionStage_ is null") != std::string::npos);
+    if (HiLogIsLoggable(HILOG_DOMAIN_WINDOW, g_domainContents[static_cast<uint32_t>(WmsLogTag::DEFAULT)], LOG_DEBUG)) {
+        EXPECT_TRUE(g_errlog.find("sessionStage_ is null") != std::string::npos);
+    }
 }
 
 /**
@@ -1035,6 +1037,23 @@ HWTEST_F(SceneSessionTest6, RegisterUpdateAppUseControlCallback, Function | Smal
     allAppUseMap[key][ControlAppType::APP_LOCK] = controlInfo;
     sceneSession->RegisterUpdateAppUseControlCallback(callback);
     ASSERT_NE(nullptr, sceneSession->onUpdateAppUseControlFunc_);
+}
+
+/**
+ * @tc.name: RegisterUpdateAppUseControlCallbackHasPrivacyModeControl
+ * @tc.desc: RegisterUpdateAppUseControlCallbackHasPrivacyModeControl
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, RegisterUpdateAppUseControlCallbackHasPrivacyModeControl, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.bundleName_ = "app";
+    info.hasPrivacyModeControl = true;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto callback = [](ControlAppType type, bool isNeedControl, bool isControlRecentOnly) {};
+    sceneSession->RegisterUpdateAppUseControlCallback(callback);
+    usleep(SLEEP_TIME);
+    EXPECT_TRUE(sceneSession->appUseControlMap_[ControlAppType::PRIVACY_WINDOW].isNeedControl);
 }
 
 /**

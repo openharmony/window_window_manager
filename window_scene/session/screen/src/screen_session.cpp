@@ -56,6 +56,7 @@ const float FULL_STATUS_OFFSET_X = 1136;
 const float SCREEN_HEIGHT = 2232;
 constexpr uint32_t SECONDARY_ROTATION_270 = 3;
 constexpr uint32_t SECONDARY_ROTATION_MOD = 4;
+constexpr int32_t SNAPSHOT_TIMEOUT_MS = 300;
 constexpr ScreenId SCREEN_ID_DEFAULT = 0;
 constexpr float HORIZONTAL = 270.f;
 ScreenCache<int32_t, int32_t> g_uidVersionMap(MAP_SIZE, NO_EXIST_UID_VERSION);
@@ -96,7 +97,6 @@ ScreenSession::ScreenSession(const ScreenSessionConfig& config, ScreenSessionRea
         }
         case ScreenSessionReason::CREATE_SESSION_FOR_REAL: {
             rsConfig.screenId = screenId_;
-            rsConfig.isSync = true;
             break;
         }
         case ScreenSessionReason::CREATE_SESSION_WITHOUT_DISPLAY_NODE: {
@@ -694,6 +694,8 @@ ScreenProperty ScreenSession::UpdatePropertyByFoldControl(const ScreenProperty& 
             CalcDeviceOrientation(property_.GetScreenRotation(), foldDisplayMode);
         property_.SetDisplayOrientation(deviceOrientation);
         property_.SetDeviceOrientation(deviceOrientation);
+        property_.SetScreenAreaOffsetY(updatedProperty.GetScreenAreaOffsetY());
+        property_.SetScreenAreaHeight(updatedProperty.GetScreenAreaHeight());
     }
     UpdateTouchBoundsAndOffset();
     return property_;
@@ -968,6 +970,16 @@ VirtualScreenFlag ScreenSession::GetVirtualScreenFlag()
 void ScreenSession::SetVirtualScreenFlag(VirtualScreenFlag screenFlag)
 {
     screenFlag_ = screenFlag;
+}
+
+VirtualScreenType ScreenSession::GetVirtualScreenType()
+{
+    return screenType_;
+}
+
+void ScreenSession::SetVirtualScreenType(VirtualScreenType screenType)
+{
+    screenType_ = screenType;
 }
 
 void ScreenSession::SetSecurity(bool isSecurity)
@@ -2185,7 +2197,7 @@ void ScreenSession::SetForceCloseHdr(bool isForceCloseHdr)
         return;
     }
     if (lastCloseHdrStatus_ == isForceCloseHdr) {
-        TLOGD(WmsLogTag::DMS, "lastCloseHdrStatus_ and isForceCloseHdr are the same.");
+        TLOGE(WmsLogTag::DMS, "lastCloseHdrStatus_ and isForceCloseHdr are the same.");
         return;
     }
     lastCloseHdrStatus_ = isForceCloseHdr;
@@ -2390,6 +2402,53 @@ void ScreenSession::ScreenModeChange(ScreenModeChangeEvent screenModeChangeEvent
         }
         listener->OnScreenModeChange(screenModeChangeEvent);
     }
+}
+
+void ScreenSession::FreezeScreen(bool isFreeze)
+{
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ss:FreezeScreen");
+    std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
+    if (displayNode_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "displayNode is null");
+        return;
+    }
+    RSInterfaces::GetInstance().FreezeScreen(displayNode_, isFreeze);
+}
+
+std::shared_ptr<Media::PixelMap> ScreenSession::GetScreenSnapshotWithAllWindows(float scaleX, float scaleY,
+    bool isNeedCheckDrmAndSurfaceLock)
+{
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ss:GetScreenSnapshotWithAllWindows");
+    auto callback = std::make_shared<SurfaceCaptureFuture>();
+    {
+        DmsXcollie dmsXcollie("DMS:GetScreenSnapshotWithAllWindows:TaskSurfaceCaptureWithAllWindows",
+            XCOLLIE_TIMEOUT_5S);
+        std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
+        if (displayNode_ == nullptr) {
+            TLOGE(WmsLogTag::DMS, "displayNode is null");
+            return nullptr;
+        }
+        RSSurfaceCaptureConfig config = {
+            .scaleX = scaleX,
+            .scaleY = scaleY,
+        };
+        SetScreenSnapshotRect(config);
+        bool ret = RSInterfaces::GetInstance().TaskSurfaceCaptureWithAllWindows(displayNode_, callback, config,
+            isNeedCheckDrmAndSurfaceLock);
+        if (!ret) {
+            TLOGE(WmsLogTag::DMS, "take surface capture with all windows failed");
+            return nullptr;
+        }
+    }
+    auto pixelMap = callback->GetResult(SNAPSHOT_TIMEOUT_MS);
+    if (pixelMap != nullptr) {
+        TLOGD(WmsLogTag::DMS, "get pixelMap WxH = %{public}dx%{public}d, NeedCheckDrmAndSurfaceLock is %{public}d",
+            pixelMap->GetWidth(), pixelMap->GetHeight(), isNeedCheckDrmAndSurfaceLock);
+    } else {
+        TLOGW(WmsLogTag::DMS, "null pixelMap, may have drm or surface lock, NeedCheckDrmAndSurfaceLock is %{public}d",
+            isNeedCheckDrmAndSurfaceLock);
+    }
+    return pixelMap;
 }
 
 void ScreenSession::SetIsPhysicalMirrorSwitch(bool isPhysicalMirrorSwitch)

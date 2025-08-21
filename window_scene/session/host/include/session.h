@@ -273,7 +273,8 @@ public:
         bool runInFfrt = false, float scaleParam = 0.0f, bool useCurWindow = false) const;
     void ResetSnapshot();
     void SaveSnapshot(bool useFfrt, bool needPersist = true,
-        std::shared_ptr<Media::PixelMap> persistentPixelMap = nullptr, bool updateSnapshot = false);
+        std::shared_ptr<Media::PixelMap> persistentPixelMap = nullptr, bool updateSnapshot = false,
+        BackgroundReason reason = BackgroundReason::DEFAULT);
     void SetSaveSnapshotCallback(Task&& task)
     {
         if (task) {
@@ -492,6 +493,7 @@ public:
     WSError GetIsHighlighted(bool& isHighlighted) override;
     WSError HandlePointerEventForFocus(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         bool isExecuteDelayRaise = false);
+    bool HasParentSessionWithToken(const sptr<IRemoteObject>& token);
 
     /*
      * Multi Window
@@ -692,6 +694,7 @@ public:
     virtual WSError UpdateGlobalDisplayRect(const WSRect& rect, SizeChangeReason reason);
     WSError NotifyClientToUpdateGlobalDisplayRect(const WSRect& rect, SizeChangeReason reason);
     const sptr<LayoutController>& GetLayoutController() const { return layoutController_; }
+    WSError NotifyAppHookWindowInfoUpdated();
 
     /*
      * Screen Lock
@@ -732,7 +735,7 @@ public:
     bool SupportSnapshotAllSessionStatus() const;
     void InitSnapshotCapacity();
     SnapshotStatus GetWindowStatus() const;
-    SnapshotStatus GetSessionStatus() const;
+    SnapshotStatus GetSessionSnapshotStatus(BackgroundReason reason = BackgroundReason::DEFAULT) const;
     DisplayOrientation GetWindowOrientation() const;
     uint32_t GetLastOrientation() const;
     bool HasSnapshotFreeMultiWindow();

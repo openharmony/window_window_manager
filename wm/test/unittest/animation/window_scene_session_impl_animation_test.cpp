@@ -19,9 +19,11 @@
 #include "common_test_utils.h"
 #include "extension_data_handler.h"
 #include "iremote_object_mocker.h"
+#include "mock_ability_context_impl.h"
 #include "mock_session.h"
 #include "mock_uicontent.h"
 #include "mock_window_adapter.h"
+#include "parameters.h"
 #include "singleton_mocker.h"
 #include "window_scene_session_impl.h"
 
@@ -218,7 +220,7 @@ HWTEST_F(WindowSceneSessionImplAnimationTest, SetWindowShadowRadius, TestSize.Le
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     ret = window->SetWindowShadowRadius(1.0f);
-    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
@@ -233,6 +235,19 @@ HWTEST_F(WindowSceneSessionImplAnimationTest, SetWindowShadowRadius, TestSize.Le
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    ret = window->SetWindowShadowRadius(1.0f);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ret = window->SetWindowShadowRadius(1.0f);
+    EXPECT_EQ(WMError::WM_OK, ret);
+
+    const std::string feature = "large_screen";
+    std::string deviceType = OHOS::system::GetParameter("const.product.devicetype", "");
+    auto context = std::make_shared<MockAbilityContextImpl>();
+    window->context_ = context;
+    context->hapModuleInfo_ = std::make_shared<AppExecFwk::HapModuleInfo>();
+    context->hapModuleInfo_->requiredDeviceFeatures = {{deviceType, {feature}}};
     ret = window->SetWindowShadowRadius(1.0f);
     EXPECT_EQ(WMError::WM_OK, ret);
 }
@@ -316,21 +331,36 @@ HWTEST_F(WindowSceneSessionImplAnimationTest, GetWindowCornerRadius, TestSize.Le
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     float cornerRadius = 0.0f;
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->GetWindowCornerRadius(cornerRadius));
+
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    window->property_->SetPersistentId(1);
     window->hostSession_ = session;
-    window->property_->SetWindowCornerRadius(1.0f);
-
+    window->state_ = WindowState::STATE_CREATED;
+    ASSERT_NE(nullptr, window->property_);
+    window->property_->SetPersistentId(1);
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    window->property_->SetWindowCornerRadius(WINDOW_CORNER_RADIUS_INVALID);
+    window->windowSystemConfig_.defaultCornerRadius_ = WINDOW_CORNER_RADIUS_INVALID;
     auto ret = window->GetWindowCornerRadius(cornerRadius);
-    EXPECT_EQ(1.0f, cornerRadius);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(0.0f, cornerRadius);
+
+    window->windowSystemConfig_.defaultCornerRadius_ = 1.0f; // 1.0f is valid default corner radius
+    ret = window->GetWindowCornerRadius(cornerRadius);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(window->windowSystemConfig_.defaultCornerRadius_, cornerRadius);
+
+    window->property_->SetWindowCornerRadius(1.0f); // 1.0f is valid window corner radius
+    ret = window->GetWindowCornerRadius(cornerRadius);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(1.0f, cornerRadius); // 1.0f is valid window corner radius
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     ret = window->GetWindowCornerRadius(cornerRadius);
-    EXPECT_EQ(1.0f, cornerRadius);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(1.0f, cornerRadius); // 1.0f is valid window corner radius
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
@@ -346,7 +376,8 @@ HWTEST_F(WindowSceneSessionImplAnimationTest, GetWindowCornerRadius, TestSize.Le
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     ret = window->GetWindowCornerRadius(cornerRadius);
-    EXPECT_EQ(1.0f, cornerRadius);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(1.0f, cornerRadius); // 1.0f is valid window corner radius
 }
 
 /**

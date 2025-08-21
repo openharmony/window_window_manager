@@ -2677,6 +2677,86 @@ HWTEST_F(SceneSessionTest5, NotifyRotationChange, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: NotifyRotationChange_IsRestrictNotify_SystemWindow
+ * @tc.desc: NotifyRotationChange_IsRestrictNotify_SystemWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, NotifyRotationChange_IsRestrictNotify_SystemWindow, Function | SmallTest | Level2)
+{
+    sptr<SessionStageMocker> sessionStageMocker = sptr<SessionStageMocker>::MakeSptr();
+    ASSERT_NE(sessionStageMocker, nullptr);
+    RotationChangeInfo rotationInfo = { RotationChangeType::WINDOW_WILL_ROTATE, 0, 0, { 0, 0, 2720, 1270 } };
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+
+    SessionInfo info;
+    property->SetWindowType(WindowType::WINDOW_TYPE_DESKTOP);
+    sptr<SceneSessionMocker> session = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
+    session->isRotationChangeCallbackRegistered = true;
+    session->sessionStage_ = sessionStageMocker;
+    bool isRestrictNotify = false;
+    property->isSystemCalling_ = true;
+    session->SetSessionProperty(property);
+    RotationChangeResult res = session->NotifyRotationChange(rotationInfo, isRestrictNotify);
+    EXPECT_EQ(res.windowRect_.width_, 0);
+
+    property->isSystemCalling_ = false;
+    session->SetSessionProperty(property);
+    res = session->NotifyRotationChange(rotationInfo, isRestrictNotify);
+    EXPECT_EQ(res.windowRect_.width_, 0);
+
+    isRestrictNotify = true;
+    property->isSystemCalling_ = true;
+    session->SetSessionProperty(property);
+    res = session->NotifyRotationChange(rotationInfo, isRestrictNotify);
+    EXPECT_EQ(res.windowRect_.width_, 0);
+
+    property->isSystemCalling_ = false;
+    session->SetSessionProperty(property);
+    res = session->NotifyRotationChange(rotationInfo, isRestrictNotify);
+    EXPECT_EQ(res.windowRect_.width_, 0);
+}
+
+/**
+ * @tc.name: NotifyRotationChange_IsRestrictNotify_NotSystemWindow
+ * @tc.desc: NotifyRotationChange_IsRestrictNotify_NotSystemWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, NotifyRotationChange_IsRestrictNotify_NotSystemWindow, Function | SmallTest | Level2)
+{
+    sptr<SessionStageMocker> sessionStageMocker = sptr<SessionStageMocker>::MakeSptr();
+    ASSERT_NE(sessionStageMocker, nullptr);
+    RotationChangeInfo rotationInfo = { RotationChangeType::WINDOW_WILL_ROTATE, 0, 0, { 0, 0, 2720, 1270 } };
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+
+    SessionInfo info;
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<SceneSessionMocker> session = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
+    session->isRotationChangeCallbackRegistered = true;
+    session->sessionStage_ = sessionStageMocker;
+    bool isRestrictNotify = false;
+    property->isSystemCalling_ = true;
+    session->SetSessionProperty(property);
+    RotationChangeResult res = session->NotifyRotationChange(rotationInfo, isRestrictNotify);
+    EXPECT_EQ(res.windowRect_.width_, 0);
+
+    property->isSystemCalling_ = false;
+    session->SetSessionProperty(property);
+    res = session->NotifyRotationChange(rotationInfo, isRestrictNotify);
+    EXPECT_EQ(res.windowRect_.width_, 0);
+
+    isRestrictNotify = true;
+    property->isSystemCalling_ = true;
+    session->SetSessionProperty(property);
+    res = session->NotifyRotationChange(rotationInfo, isRestrictNotify);
+    EXPECT_EQ(res.windowRect_.width_, 0);
+
+    property->isSystemCalling_ = false;
+    session->SetSessionProperty(property);
+    res = session->NotifyRotationChange(rotationInfo, isRestrictNotify);
+    EXPECT_EQ(res.windowRect_.width_, 0);
+}
+
+/**
  * @tc.name: SetSessionGetTargetOrientationConfigInfoCallback
  * @tc.desc: SetSessionGetTargetOrientationConfigInfoCallback
  * @tc.type: FUNC

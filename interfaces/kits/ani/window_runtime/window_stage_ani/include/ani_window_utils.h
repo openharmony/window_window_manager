@@ -15,7 +15,9 @@
 
 #ifndef OHOS_JS_WINDOW_UTILS_H
 #define OHOS_JS_WINDOW_UTILS_H
+
 #include <map>
+
 #include "ani.h"
 #include "native_engine/native_engine.h"
 #include "native_engine/native_value.h"
@@ -72,6 +74,13 @@ enum class LifeCycleEventType : uint32_t {
     RESUMED,
     PAUSED,
     DESTROYED,
+};
+
+enum class WindowStageLifeCycleEventType : uint32_t {
+    FOREGROUND = 1,
+    BACKGROUND,
+    RESUMED,
+    PAUSED,
 };
 
 const std::map<WindowType, ApiWindowType> NATIVE_JS_TO_WINDOW_TYPE_MAP {

@@ -25,9 +25,9 @@ namespace Rosen {
 class FutureCallback : public RefBase {
 public:
     WSError OnUpdateSessionRect(
-        const Rect& rect, WindowSizeChangeReason reason, int32_t persistenId);
+        const Rect& rect, WindowSizeChangeReason reason, int32_t persistentId);
     WSError OnUpdateGlobalDisplayRect(
-        const Rect& rect, WindowSizeChangeReason reason, int32_t persistenId);
+        const Rect& rect, WindowSizeChangeReason reason, int32_t persistentId);
     Rect GetResizeAsyncResult(long timeoutMs);
     Rect GetMoveToAsyncResult(long timeoutMs);
     Rect GetMoveWindowToGlobalDisplayAsyncResult(long timeoutMs);
@@ -35,7 +35,7 @@ public:
     void ResetMoveToLock();
     void ResetMoveWindowToGlobalDisplayLock();
     int32_t GetUpdateRectResult(long timeoutMs);
-    void OnFirstValidRectUpdate(int32_t persistenId);
+    void OnFirstValidRectUpdate(int32_t persistentId);
 
     // oriention
     OrientationInfo GetTargetOrientationResult(long timeoutMs);

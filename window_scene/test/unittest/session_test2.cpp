@@ -962,6 +962,9 @@ HWTEST_F(WindowSessionTest2, SetSessionInfo, TestSize.Level1)
     ASSERT_EQ("", session_->sessionInfo_.continueSessionId_);
     ASSERT_EQ(nullptr, session_->sessionInfo_.startSetting);
     ASSERT_EQ(processOptions, session_->sessionInfo_.processOptions);
+    info.continueSessionId_ = "continueSessionId";
+    session_->SetSessionInfo(info);
+    ASSERT_EQ(session_->sessionInfo_.continueSessionId_, "continueSessionId");
 }
 
 /**

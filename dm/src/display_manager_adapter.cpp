@@ -1178,6 +1178,15 @@ void DisplayManagerAdapter::SetFoldDisplayMode(const FoldDisplayMode mode)
     }
 }
 
+void DisplayManagerAdapter::SetFoldDisplayModeAsync(const FoldDisplayMode mode)
+{
+    INIT_PROXY_CHECK_RETURN();
+
+    if (screenSessionManagerServiceProxy_) {
+        screenSessionManagerServiceProxy_->SetFoldDisplayModeAsync(mode);
+    }
+}
+
 DMError DisplayManagerAdapter::SetFoldDisplayModeFromJs(const FoldDisplayMode mode, std::string reason)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
@@ -1467,6 +1476,7 @@ DMError ScreenManagerAdapter::SetVirtualScreenFlag(ScreenId screenId, VirtualScr
     if (screenFlag < VirtualScreenFlag::DEFAULT || screenFlag >= VirtualScreenFlag::MAX) {
         return DMError::DM_ERROR_INVALID_PARAM;
     }
+    TLOGI(WmsLogTag::DMS, "VirtualScreenFlag:%{public}d", screenFlag);
     if (screenSessionManagerServiceProxy_) {
         return screenSessionManagerServiceProxy_->SetVirtualScreenFlag(screenId, screenFlag);
     }

@@ -53,6 +53,8 @@ constexpr float INNER_BORDER_VP = 5.0f;
 constexpr float OUTSIDE_BORDER_VP = 4.0f;
 constexpr float INNER_ANGLE_VP = 16.0f;
 constexpr uint32_t MAX_LIFE_CYCLE_TASK_IN_QUEUE = 15;
+constexpr uint32_t COLOR_WHITE = 0xffffffff;
+constexpr uint32_t COLOR_BLACK = 0xff000000;
 constexpr int64_t LIFE_CYCLE_TASK_EXPIRED_TIME_LIMIT = 350;
 static bool g_enableForceUIFirst = system::GetParameter("window.forceUIFirst.enabled", "1") == "1";
 constexpr int64_t STATE_DETECT_DELAYTIME = 3 * 1000;
@@ -325,7 +327,9 @@ void Session::SetSessionInfo(const SessionInfo& info)
     sessionInfo_.uiAbilityId_ = info.uiAbilityId_;
     sessionInfo_.requestId = info.requestId;
     sessionInfo_.startSetting = info.startSetting;
-    sessionInfo_.continueSessionId_ = info.continueSessionId_;
+    if (!info.continueSessionId_.empty()) {
+        sessionInfo_.continueSessionId_ = info.continueSessionId_;
+    }
     sessionInfo_.isAtomicService_ = info.isAtomicService_;
     sessionInfo_.callState_ = info.callState_;
     sessionInfo_.processOptions = info.processOptions;
@@ -1184,16 +1188,20 @@ WSError Session::UpdateRectWithLayoutInfo(const WSRect& rect, SizeChangeReason r
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     GetLayoutController()->SetSessionRect(rect);
+    WSRect updateRect = IsNeedConvertToRelativeRect(reason) ?
+        GetLayoutController()->ConvertGlobalRectToRelative(rect, GetDisplayId()) : rect;
+
+    // Window Layout Global Coordinate System
+    auto globalDisplayRect = SessionCoordinateHelper::RelativeToGlobalDisplayRect(GetScreenId(), updateRect);
+    UpdateGlobalDisplayRect(globalDisplayRect, reason);
+
     if (!Session::IsBackgroundUpdateRectNotifyEnabled() && !IsSessionForeground()) {
         return WSError::WS_DO_NOTHING;
     }
     if (sessionStage_ != nullptr) {
         int32_t rotateAnimationDuration = GetRotateAnimationDuration();
         SceneAnimationConfig config { .rsTransaction_ = rsTransaction, .animationDuration_ = rotateAnimationDuration };
-        WSRect updateRect = rect;
         UpdateClientRectPosYAndDisplayId(updateRect);
-        updateRect = IsNeedConvertToRelativeRect(reason) ?
-            GetLayoutController()->ConvertGlobalRectToRelative(updateRect, GetDisplayId()) : updateRect;
         sessionStage_->UpdateRect(updateRect, reason, config, avoidAreas);
         SetClientRect(rect);
         RectCheckProcess();
@@ -1257,6 +1265,7 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
         return WSError::WS_ERROR_NULLPTR;
     }
     sessionStage_ = sessionStage;
+    NotifyAppHookWindowInfoUpdated();
     sessionStage_->SetCurrentRotation(currentRotation_);
     windowEventChannel_ = eventChannel;
     SetSurfaceNode(surfaceNode);
@@ -1269,11 +1278,6 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
     WindowHelper::IsUIExtensionWindow(GetWindowType()) ?
         UpdateRect(GetSessionRect(), SizeChangeReason::UNDEFINED, "Connect") :
         NotifyClientToUpdateRect("Connect", nullptr);
-
-    // Window Layout Global Coordinate System
-    auto globalDisplayRect = SessionCoordinateHelper::RelativeToGlobalDisplayRect(GetScreenId(), GetSessionRect());
-    UpdateGlobalDisplayRect(globalDisplayRect, SizeChangeReason::UNDEFINED);
-
     EditSessionInfo().disableDelegator = property->GetIsAbilityHookOff();
     NotifyConnect();
     if (WindowHelper::IsSubWindow(GetWindowType()) && surfaceNode_ != nullptr) {
@@ -1384,6 +1388,7 @@ WSError Session::Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<I
         return WSError::WS_ERROR_NULLPTR;
     }
     sessionStage_ = sessionStage;
+    NotifyAppHookWindowInfoUpdated();
     SetSurfaceNode(surfaceNode);
     windowEventChannel_ = eventChannel;
     abilityToken_ = token;
@@ -1901,7 +1906,8 @@ void Session::PostLifeCycleTask(Task&& task, const std::string& name, const Life
     PostTask(std::move(frontLifeCycleTask->task), frontLifeCycleTask->name);
 }
 
-bool Session::SetLifeCycleTaskRunning(const sptr<SessionLifeCycleTask>& lifeCycleTask) {
+bool Session::SetLifeCycleTaskRunning(const sptr<SessionLifeCycleTask>& lifeCycleTask)
+{
     if (lifeCycleTask == nullptr || lifeCycleTask->running) {
         TLOGW(WmsLogTag::WMS_LIFE, "LifeCycleTask is running or null. PersistentId: %{public}d", persistentId_);
         return false;
@@ -2193,6 +2199,14 @@ WSError Session::NotifyAppForceLandscapeConfigUpdated()
     return sessionStage_->NotifyAppForceLandscapeConfigUpdated();
 }
 
+WSError Session::NotifyAppHookWindowInfoUpdated()
+{
+    if (!sessionStage_) {
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->NotifyAppHookWindowInfoUpdated();
+}
+
 void Session::SetParentSession(const sptr<Session>& session)
 {
     if (session == nullptr) {
@@ -2477,6 +2491,19 @@ WSError Session::HandlePointerEventForFocus(const std::shared_ptr<MMI::PointerEv
     return WSError::WS_OK;
 }
 
+bool Session::HasParentSessionWithToken(const sptr<IRemoteObject>& token)
+{
+    auto parentSession = GetParentSession();
+    if (parentSession == nullptr) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "parent session is nullptr: %{public}d", GetPersistentId());
+        return false;
+    }
+    if (parentSession->GetAbilityToken() == token) {
+        return true;
+    }
+    return parentSession->HasParentSessionWithToken(token);
+}
+
 WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     bool needNotifyClient, bool isExecuteDelayRaise)
 {
@@ -2598,7 +2625,7 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(bool runInFfrt, float scalePa
         return nullptr;
     }
     auto surfaceNode = GetSurfaceNode();
-    auto key = GetSessionStatus();
+    auto key = GetSessionSnapshotStatus();
     auto isPersistentImageFit = IsPersistentImageFit();
     if (isPersistentImageFit) key = defaultStatus;
     if (!surfaceNode || !surfaceNode->IsBufferAvailable()) {
@@ -2680,12 +2707,12 @@ bool Session::GetEnableAddSnapshot() const
 }
 
 void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media::PixelMap> persistentPixelMap,
-    bool updateSnapshot)
+    bool updateSnapshot, BackgroundReason reason)
 {
     if (scenePersistence_ == nullptr) {
         return;
     }
-    auto key = GetSessionStatus();
+    auto key = GetSessionSnapshotStatus(reason);
     auto rotate = WSSnapshotHelper::GetDisplayOrientation(currentRotation_);
     if (persistentPixelMap) {
         key = defaultStatus;
@@ -2868,7 +2895,7 @@ SnapshotStatus Session::GetWindowStatus() const
     return std::make_pair(snapshotScreen, orientation);
 }
 
-SnapshotStatus Session::GetSessionStatus() const
+SnapshotStatus Session::GetSessionSnapshotStatus(BackgroundReason reason) const
 {
     if (!SupportSnapshotAllSessionStatus()) {
         return defaultStatus;
@@ -2878,6 +2905,9 @@ SnapshotStatus Session::GetSessionStatus() const
         snapshotScreen = lastSnapshotScreen_;
     } else {
         snapshotScreen = WSSnapshotHelper::GetScreenStatus();
+    }
+    if (reason == BackgroundReason::EXPAND_TO_FOLD_SINGLE_POCKET) {
+        snapshotScreen = SCREEN_EXPAND;
     }
     uint32_t orientation = WSSnapshotHelper::GetOrientation(currentRotation_);
     return std::make_pair(snapshotScreen, orientation);
@@ -3876,8 +3906,11 @@ bool Session::CheckEmptyKeyboardAvoidAreaIfNeeded() const
         GetParentSession() != nullptr &&
         GetParentSession()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
     bool isMidScene = GetIsMidScene();
-    bool isPhoneOrPadNotFreeMultiWindow =
-        systemConfig_.IsPhoneWindow() || (systemConfig_.IsPadWindow() && !systemConfig_.IsFreeMultiWindowMode());
+    bool isPhoneNotFreeMultiWindow = systemConfig_.IsPhoneWindow() && !systemConfig_.IsFreeMultiWindowMode();
+    bool isPadNotFreeMultiWindow = systemConfig_.IsPadWindow() && !systemConfig_.IsFreeMultiWindowMode();
+    bool isPhoneOrPadNotFreeMultiWindow = isPhoneNotFreeMultiWindow || isPadNotFreeMultiWindow;
+    TLOGI(WmsLogTag::WMS_LIFE, "check keyboard avoid area, isPhoneNotFreeMultiWindow: %{public}d, "
+        "isPadNotFreeMultiWindow: %{public}d", isPhoneNotFreeMultiWindow, isPadNotFreeMultiWindow);
     return (isMainFloating || isParentFloating) && !isMidScene && isPhoneOrPadNotFreeMultiWindow;
 }
 

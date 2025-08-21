@@ -31,7 +31,7 @@ public:
         sptr<FoldScreenPolicy> foldScreenPolicy, bool isPostureRegistered) override;
 private:
     FoldStatus GetNextFoldState(const std::vector<float> &angles, const std::vector<uint16_t> &halls,
-        bool isPostureRegistered);
+        bool isPostureRegistered, bool isFoldScreenOn);
     FoldStatus GetNextFoldStateHalf(float angle, uint16_t hall, FoldStatus myNextStatus,
         int32_t allowUserSensorForLargeFoldDevice);
     FoldStatus GetGlobalFoldState(FoldStatus PrimaryFoldState, FoldStatus SecondaryFoldState);

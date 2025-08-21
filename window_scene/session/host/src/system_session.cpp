@@ -28,7 +28,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "System
 
 constexpr uint32_t MIN_SYSTEM_WINDOW_WIDTH = 5;
 constexpr uint32_t MIN_SYSTEM_WINDOW_HEIGHT = 5;
-constexpr uint64_t FLOATING_BALL_CLICK_INTERVAL = 5000;
+constexpr uint8_t MAX_FB_CLICK_COUNT = 8;
 const std::string FB_CLICK_EVENT = "click";
 
 SystemSession::SystemSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
@@ -501,15 +501,13 @@ WMError SystemSession::RestoreFbMainWindow(const std::shared_ptr<AAFwk::Want>& w
                 session->GetSessionInfo().bundleName_.c_str(), want->GetBundle().c_str());
             return WMError::WM_ERROR_FB_RESTORE_MAIN_WINDOW_FAILED;
         }
-        uint64_t nowTime = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now().time_since_epoch()).count());
         {
             std::lock_guard<std::mutex> lock(session->fbClickMutex_);
-            if (nowTime - session->fbClickTime_ >= FLOATING_BALL_CLICK_INTERVAL) {
-                TLOGNW(WmsLogTag::WMS_SYSTEM, "%{public}s Start time is too long from click, deny", where);
+            if (session->fbClickCnt_ == 0) {
+                TLOGNE(WmsLogTag::WMS_SYSTEM, "%{public}s not click, deny", where);
                 return WMError::WM_ERROR_FB_RESTORE_MAIN_WINDOW_FAILED;
             }
-            session->fbClickTime_ = 0;
+            session->fbClickCnt_--;
         }
         TLOGNI(WmsLogTag::WMS_SYSTEM,
             "%{public}s restore window, bundle %{public}s, ability %{public}s, session bundle %{public}s",
@@ -580,8 +578,10 @@ WSError SystemSession::SendFbActionEvent(const std::string& action)
         return WSError::WS_ERROR_NULLPTR;
     }
     if (action == FB_CLICK_EVENT) {
-        fbClickTime_ = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now().time_since_epoch()).count());
+        std::lock_guard<std::mutex> lock(fbClickMutex_);
+        if (fbClickCnt_ < MAX_FB_CLICK_COUNT) {
+            ++fbClickCnt_;
+        }
     }
     return sessionStage_->SendFbActionEvent(action);
 }

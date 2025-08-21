@@ -299,6 +299,7 @@ public:
     void SetIsOuterOnlyMode(bool isOuterOnlyMode);
     bool GetIsOuterOnlyModeBeforePowerOff();
     void SetIsOuterOnlyModeBeforePowerOff(bool isOuterOnlyModeBeforePowerOff);
+    void OnVerticalChangeBoundsWhenSwitchUser(sptr<ScreenSession> screenSession);
 
     bool SetScreenPower(ScreenPowerStatus status, PowerStateChangeReason reason);
     void SetScreenPowerForFold(ScreenPowerStatus status);
@@ -362,6 +363,7 @@ public:
     DMError GetExpandAvailableArea(DisplayId displayId, DMRect& area) override;
     void NotifyAvailableAreaChanged(DMRect area, DisplayId displayId);
     void NotifyFoldToExpandCompletion(bool foldToExpand) override;
+    void NotifyScreenConnectCompletion(ScreenId screenId) override;
     void RecordEventFromScb(std::string description, bool needRecordEvent) override;
     void SetCameraStatus(int32_t cameraStatus, int32_t cameraPosition) override;
     bool GetSnapshotArea(Media::Rect &rect, DmErrorCode* errorCode, ScreenId &screenId);
@@ -421,6 +423,7 @@ public:
     void OnScreenChangeForPC(ScreenId screenId, ScreenEvent screenEvent, ScreenChangeReason reason);
     void OnScreenChangeDefault(ScreenId screenId, ScreenEvent screenEvent, ScreenChangeReason reason);
     void OnFoldScreenChange(sptr<ScreenSession>& screenSession);
+    void OnFoldStatusChange(bool isSwitching);
     void SetCoordinationFlag(bool isCoordinationFlag);
     bool GetCoordinationFlag(void);
     DMError SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refreshRate,
@@ -479,8 +482,12 @@ public:
     DMError SetVirtualScreenAutoRotation(ScreenId screenId, bool enable) override;
     bool SetScreenOffset(ScreenId screenId, float offsetX, float offsetY);
     bool SynchronizePowerStatus(ScreenPowerState state) override;
+    void RegisterSettingDuringCallStateObserver();
+    void UpdateDuringCallState();
+    void SetDuringCallState(bool value);
     std::shared_ptr<TaskScheduler> GetPowerTaskScheduler() const;
     bool GetCancelSuspendStatus() const;
+    void RemoveScreenCastInfo(ScreenId screenId);
 
 protected:
     ScreenSessionManager();
@@ -497,6 +504,7 @@ private:
     void ConfigureWaterfallDisplayCompressionParams();
     void ConfigureScreenSnapshotParams();
     void RegisterScreenChangeListener();
+    void RegisterFoldNotSwitchingListener();
     void RegisterRefreshRateChangeListener();
     void OnHgmRefreshRateChange(uint32_t refreshRate);
     sptr<ScreenSession> GetOrCreateScreenSession(ScreenId screenId);
@@ -606,6 +614,9 @@ private:
     void HandleSuperFoldStatusLocked(bool isLocked);
     void CalculateRotatedDisplay(Rotation rotation, const DMRect& screenRegion, DMRect& displayRegion, DMRect& displayArea);
     void CalculateScreenArea(const DMRect& displayRegion, const DMRect& displayArea, const DMRect& screenRegion, DMRect& screenArea);
+    void DisconnectScreenIfScreenInfoNull(sptr<ScreenSession>& screenSession);
+    void RecoverDefaultScreenModeInner(ScreenId innerRsId, ScreenId externalRsId);
+    void SetDefaultScreenModeWhenCreateMirror(sptr<ScreenSession>& screenSession);
 #ifdef DEVICE_STATUS_ENABLE
     void SetDragWindowScreenId(ScreenId screenId, ScreenId displayNodeScreenId);
 #endif // DEVICE_STATUS_ENABLE
@@ -618,7 +629,7 @@ private:
     int NotifyPowerEventForDualDisplay(DisplayPowerEvent event, EventStatus status,
         PowerStateChangeReason reason);
     bool IsExtendMode();
-    bool IsScreenCasting();
+    DMError CanEnterCoordination();
     bool GetPcStatus() const;
     void SetPcStatus(bool isPc);
     const std::set<std::string> g_packageNames_ {};
@@ -731,8 +742,8 @@ private:
     uint32_t defaultDeviceRotationOffset_ { 0 };
     std::atomic<ExtendScreenConnectStatus> extendScreenConnectStatus_ = ExtendScreenConnectStatus::UNKNOWN;
     bool isExtendScreenConnected_ = false;
-    bool isOuterOnlyMode_ = false;
-    bool isOuterOnlyModeBeforePowerOff_ = false;
+    std::atomic<bool> isOuterOnlyMode_ = false;
+    std::atomic<bool> isOuterOnlyModeBeforePowerOff_ = false;
     std::atomic<bool> isFoldStatusLocked_ = false;
     std::atomic<bool> isLandscapeLockStatus_ = false;
     std::atomic<bool> isLapTopLidOpen_ = true;
@@ -769,6 +780,7 @@ private:
     std::mutex screenMaskMutex_;
     std::condition_variable screenMaskCV_;
     std::mutex displayAddMutex_;
+    std::mutex screenModeChangeMutex_;
     std::condition_variable displayAddCV_;
     mutable std::mutex setPcStatusMutex_;
 
@@ -836,10 +848,20 @@ private:
     void SwitchModeHandleExternalScreen(bool isSwitchToPcMode);
     void WaitUpdateAvailableAreaForPc();
 
+    std::unordered_map<ScreenId, std::pair<ScreenId, ScreenCombination>> screenCastInfoMap_;
+    std::shared_mutex screenCastInfoMapMutex_;
+    bool HasSameScreenCastInfo(ScreenId screenId, ScreenId castScreenId, ScreenCombination screenCombination);
+    void SetScreenCastInfo(ScreenId screenId, ScreenId castScreenId, ScreenCombination screenCombination);
+    void ChangeMirrorScreenConfig(const sptr<ScreenSessionGroup>& group,
+        const DMRect& mainScreenRegion, sptr<ScreenSession>& screen);
+
     LowTempMode lowTemp_ {LowTempMode::UNKNOWN};
     std::mutex lowTempMutex_;
     std::mutex pcModeSwitchMutex_;
     std::atomic<DisplayGroupId> displayGroupNum_ { 1 };
+
+    // Fold Screen duringcall
+    bool duringCallState_ = false;
 
 private:
     class ScbClientListenerDeathRecipient : public IRemoteObject::DeathRecipient {
