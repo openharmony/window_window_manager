@@ -2024,7 +2024,7 @@ export class WindowInternal implements Window {
     private native rotate(nativeObj: long, rotateOptions: RotateOptions): void;
     private native setShadow(nativeObj: long, radius: double, color?: string,
       offsetX?: double, offsetY?: double): void;
-
+    private native setCornerRadiusSync(nativeObj: long, cornerRadius: double): void;
     private native setWindowColorSpaceSync(nativeObj: long, colorSpace: int): void;
     private native setPreferredOrientationSync(nativeObj: long, orientation: int): void;
     private native setWindowPrivacyModeSync(nativeObj: long, isPrivacyMode: boolean): void;
@@ -2808,6 +2808,10 @@ export class WindowInternal implements Window {
       this.setShadow(this.nativeObj, radius, color, offsetX, offsetY);
     }
 
+    public setCornerRadius(cornerRadius: double): void {
+      this.setCornerRadiusSync(this.nativeObj, cornerRadius);
+    }
+
     public on<T>(type: string, callback: Callback<T>): void {
       this.onSync(this.nativeObj, type, callback);
     }
@@ -3004,6 +3008,7 @@ export interface Window {
     translate(translateOptions: TranslateOptions): void;
     rotate(rotateOptions: RotateOptions): void;
     setShadow(radius: double, color?: string, offsetX?: double, offsetY?: double): void;
+    setCornerRadius(cornerRadius: double): void;
     on<T>(type: string, callback: Callback<T>): void;
     on<T>(type: 'noInteractionDetected', timeout: long, callback: Callback<T>): void;
     off<T>(type: string, callback?: Callback<T>): void;
