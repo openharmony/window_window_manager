@@ -3276,7 +3276,7 @@ bool WindowSceneSessionImpl::IsDecorEnable() const
     bool isSubWindow = WindowHelper::IsSubWindow(windowType);
     bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
     bool isValidWindow = isMainWindow ||
-        ((isSubWindow || isDialogWindow) && property_->IsDecorEnable());
+        ((isSubWindow || isDialogWindow || IsSubWindowMaximizeSupported()) && property_->IsDecorEnable());
     bool isWindowModeSupported = WindowHelper::IsWindowModeSupported(
         windowSystemConfig_.decorWindowModeSupportType_, GetWindowMode());
     if (windowSystemConfig_.freeMultiWindowSupport_) {
@@ -3285,6 +3285,9 @@ bool WindowSceneSessionImpl::IsDecorEnable() const
     bool enable = isValidWindow && windowSystemConfig_.isSystemDecorEnable_ &&
         isWindowModeSupported;
     if ((isSubWindow || isDialogWindow) && property_->GetIsPcAppInPad() && property_->IsDecorEnable()) {
+        enable = true;
+    }
+    if (IsSubWindowMaximizeSupported() && property_->IsDecorEnable()) {
         enable = true;
     }
     TLOGD(WmsLogTag::WMS_DECOR, "get decor enable %{public}d", enable);
