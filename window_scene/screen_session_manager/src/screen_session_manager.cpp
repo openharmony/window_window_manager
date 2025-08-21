@@ -1729,18 +1729,18 @@ void ScreenSessionManager::UpdateSuperFoldRefreshRate(sptr<ScreenSession> screen
         return;
     }
     if (screenSession == nullptr) {
-        TLOGE(WmsLogTag::DMS, "screenSession is nullptr")
+        TLOGE(WmsLogTag::DMS, "screenSession is nullptr");
         return;
     }
     sptr<ScreenSession> fakeScreenSession = screenSession->GetFakeScreenSession();
     if (fakeScreenSession == nullptr) {
-        TLOGE(WmsLogTag::DMS, "fakeScreenSession is nullptr")
+        TLOGE(WmsLogTag::DMS, "fakeScreenSession is nullptr");
         return;
     }
     fakeScreenSession->UpdateRefreshRate(refreshRate);
     if (screenSession->GetScreenProperty().GetIsFakeInUse()) {
         NotifyDisplayChanged(fakeScreenSession->ConvertToDisplayInfo(), DisplayChangeEvent::UPDATE_REFRESHRATE);
-        TLOGE(WmsLogTag::DMS, "notify success")
+        TLOGE(WmsLogTag::DMS, "notify success");
     }
 }
 
