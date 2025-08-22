@@ -941,7 +941,8 @@ uint32_t AniWindowUtils::GetColorFromAni(ani_env* env,
     ani_boolean isColorUndefined;
     env->Reference_IsUndefined(result, &isColorUndefined);
     if (isColorUndefined) {
-        TLOGE(WmsLogTag::WMS_IMMS, "the color is undefined");
+        TLOGI(WmsLogTag::WMS_IMMS, "the color is undefined, return default");
+        return defaultColor;
     }
 
     ani_string aniColor = reinterpret_cast<ani_string>(result);
