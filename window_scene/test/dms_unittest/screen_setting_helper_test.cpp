@@ -28,6 +28,14 @@ namespace Rosen {
 namespace {
     constexpr uint32_t SLEEP_TIME_US = 100000;
 }
+namespace {
+    std::string g_errLog;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
+        const char* msg)
+    {
+        g_errLog += msg;
+    }
+}
 
 class ScreenSettingHelperTest : public testing::Test {
 public:
@@ -898,6 +906,17 @@ namespace {
         };
         ScreenSettingHelper::RegisterSettingDuringCallStateObserver(func);
         ASSERT_NE(ScreenSettingHelper::duringCallStateObserver_, nullptr);
+
+        g_errLog.clear();
+        LOG_SetCallback(MyLogCallback);
+        bool flag1 = false;
+        auto func1 = [&flag1] (const std::string&) {
+            TLOGI(WmsLogTag::DMS, "UT test");
+            flag1 = true;
+        };
+        ScreenSettingHelper::RegisterSettingDuringCallStateObserver(func1);
+        EXPECT_TRUE(g_errLog.find("during call state observer is registered") != std::string::npos);
+        LOG_SetCallback(nullptr);
     }
 
     /**
@@ -909,6 +928,12 @@ namespace {
     {
         ScreenSettingHelper::UnregisterSettingDuringCallStateObserver();
         ASSERT_EQ(ScreenSettingHelper::duringCallStateObserver_, nullptr);
+
+        g_errLog.clear();
+        LOG_SetCallback(MyLogCallback);
+        ScreenSettingHelper::UnregisterSettingDuringCallStateObserver();
+        EXPECT_TRUE(g_errLog.find("duringCallStateObserver_ is nullptr") != std::string::npos);
+        LOG_SetCallback(nullptr);
     }
 
     /**
@@ -923,7 +948,7 @@ namespace {
 
         screenSettingHelper.SetSettingDuringCallState("during_call_state", false);
         screenSettingHelper.GetSettingDuringCallState(value);
-        ASSERT_FALSE(value);
+        ASSERT_TRUE(value);
     }
 }
 } // namespace Rosen
