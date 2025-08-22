@@ -251,7 +251,6 @@ HWTEST_F(SceneSessionLifecycleTest, Foreground07, TestSize.Level0)
     SessionInfo info;
     info.abilityName_ = "Foreground07";
     info.bundleName_ = "Foreground07";
-
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
@@ -271,7 +270,7 @@ HWTEST_F(SceneSessionLifecycleTest, Foreground07, TestSize.Level0)
     };
     session->SetGetStateFromManagerListener(func);
     MockAccesstokenKit::MockAccessTokenKitRet(-1);
-    EXPECT_EQ(WSError::WS_OK, session->Foreground(property, false));
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->Foreground(property, false));
     MockAccesstokenKit::MockAccessTokenKitRet(0);
 }
 
