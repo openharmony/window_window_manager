@@ -156,10 +156,10 @@ public:
     void ReleaseDisplayNode();
 
     Rotation CalcRotation(Orientation orientation, FoldDisplayMode foldDisplayMode) const;
-    DisplayOrientation CalcDisplayOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode) const;
-    DisplayOrientation CalcDeviceOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode) const;
+    DisplayOrientation CalcDisplayOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode);
+    DisplayOrientation CalcDeviceOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode);
     DisplayOrientation CalcDeviceOrientationWithBounds(Rotation rotation,
-        FoldDisplayMode foldDisplayMode, const RRect& bounds) const;
+        FoldDisplayMode foldDisplayMode, const RRect& bounds);
     void FillScreenInfo(sptr<ScreenInfo> info) const;
     void InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint, bool isExtend = false,
         float positionX = 0, float positionY = 0);
@@ -196,7 +196,7 @@ public:
     bool IsTouchEnabled();
     void SetIsPhysicalMirrorSwitch(bool isPhysicalMirrorSwitch);
     bool GetIsPhysicalMirrorSwitch();
-    void UpdateTouchBoundsAndOffset();
+    void UpdateTouchBoundsAndOffset(FoldDisplayMode foldDisplayMode);
     void UpdateToInputManager(RRect bounds, int rotation, int deviceRotation, FoldDisplayMode foldDisplayMode);
     void UpdatePropertyAfterRotation(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
     void UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
@@ -358,6 +358,10 @@ public:
     bool GetIsAvailableAreaNeedNotify() const;
     uint64_t GetSessionId() const;
 
+    void SetRotationCorrectionMap(std::unordered_map<FoldDisplayMode, int32_t>& rotationCorrectionMap);
+    std::unordered_map<FoldDisplayMode, int32_t> GetRotationCorrectionMap();
+    Rotation GetRotationCorrection(FoldDisplayMode foldDisplayMode);
+
     /*
      * RS Client Multi Instance
      */
@@ -435,6 +439,10 @@ private:
     uint64_t sessionId_;
     bool lastCloseHdrStatus_ = false;
     mutable std::shared_mutex modesMutex_;
+
+    void RemoveRotationCorrection(Rotation& rotation, FoldDisplayMode foldDisplayMode);
+    std::unordered_map<FoldDisplayMode, int32_t> rotationCorrectionMap_;
+    std::shared_mutex rotationCorrectionMutex_;
 
     /*
      * RS Client Multi Instance

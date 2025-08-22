@@ -40,6 +40,7 @@ constexpr uint32_t EXCEPTION_DPI = 10;
 constexpr uint32_t PC_MODE_DPI = 304;
 constexpr ScreenId SCREEN_ID_FULL = 0;
 constexpr ScreenId SCREEN_ID_MAIN = 5;
+const bool CORRECTION_ENABLE = system::GetIntParameter<int32_t>("const.system.sensor_correction_enable", 0) == 1;
 }
 namespace {
     std::string g_errLog;
@@ -1047,7 +1048,7 @@ HWTEST_F(ScreenSessionManagerTest, OnVerticalChangeBoundsWhenSwitchUser, TestSiz
     constexpr float SECONDARY_ROTATION_90 = 90.0F;
     screenProperty.SetRotation(SECONDARY_ROTATION_90);
     RRect bounds = screenProperty.GetBounds();
-    ssm_->OnVerticalChangeBoundsWhenSwitchUser(screenSession);
+    ssm_->OnVerticalChangeBoundsWhenSwitchUser(screenSession, FoldDisplayMode::UNKNOWN);
     RRect afterbounds = screenProperty.GetBounds();
     EXPECT_EQ(bounds.rect_.GetHeight(), bounds.rect_.GetWidth());
 }
@@ -1542,6 +1543,202 @@ HWTEST_F(ScreenSessionManagerTest, SetDefaultScreenModeWhenCreateMirror, TestSiz
         ASSERT_EQ(session->GetScreenCombination(), mode);
     }
 #undef FOLD_ABILITY_ENABLE
+}
+
+/**
+ * @tc.name: GetOldDisplayModeRotation
+ * @tc.desc: GetOldDisplayModeRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetOldDisplayModeRotation, TestSize.Level1)
+{
+    auto foldController = sptr<FoldScreenController>::MakeSptr(ssm_->displayInfoMutex_,
+        ssm_->screenPowerTaskScheduler_);
+    ASSERT_NE(foldController, nullptr);
+    DisplayPhysicalResolution physicalSize_full;
+    physicalSize_full.foldDisplayMode_ = FoldDisplayMode::FULL;
+    physicalSize_full.physicalWidth_ = 2048;
+    physicalSize_full.physicalHeight_ = 2232;
+    DisplayPhysicalResolution physicalSize_main;
+    physicalSize_main.foldDisplayMode_ = FoldDisplayMode::MAIN;
+    physicalSize_main.physicalWidth_ = 1008;
+    physicalSize_main.physicalHeight_ = 2232;
+    DisplayPhysicalResolution physicalSize_global_full;
+    physicalSize_global_full.foldDisplayMode_ = FoldDisplayMode::GLOBAL_FULL;
+    physicalSize_global_full.physicalWidth_ = 3184;
+    physicalSize_global_full.physicalHeight_ = 2232;
+    ScreenSceneConfig::displayPhysicalResolution_.emplace_back(physicalSize_full);
+    ScreenSceneConfig::displayPhysicalResolution_.emplace_back(physicalSize_main);
+    ScreenSceneConfig::displayPhysicalResolution_.emplace_back(physicalSize_global_full);
+    auto foldPolicy = foldController->GetFoldScreenPolicy(DisplayDeviceType::SECONDARY_DISPLAY_DEVICE);
+    ASSERT_NE(foldPolicy, nullptr);
+    foldPolicy->lastDisplayMode_ = FoldDisplayMode::MAIN;
+    foldController->foldScreenPolicy_ = foldPolicy;
+    ssm_->foldScreenController_ = foldController;
+    std::unordered_map<FoldDisplayMode, int32_t> rotationCorrectionMap;
+    rotationCorrectionMap.insert({FoldDisplayMode::GLOBAL_FULL, 3});
+    ssm_->rotationCorrectionMap_ = rotationCorrectionMap;
+    Rotation rotation = ssm_->GetOldDisplayModeRotation(FoldDisplayMode::MAIN, Rotation::ROTATION_0);
+    EXPECT_EQ(rotation, Rotation::ROTATION_0);
+    rotation = ssm_->GetOldDisplayModeRotation(FoldDisplayMode::GLOBAL_FULL, Rotation::ROTATION_0);
+    if (CORRECTION_ENABLE) {
+        EXPECT_EQ(rotation, Rotation::ROTATION_90);
+    } else {
+        EXPECT_EQ(rotation, Rotation::ROTATION_0);
+    }
+}
+ 
+/**
+ * @tc.name: SwapScreenWeightAndHeight
+ * @tc.desc: SwapScreenWeightAndHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SwapScreenWeightAndHeight, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<ScreenSession> screenSession = nullptr;
+    ssm_->SwapScreenWeightAndHeight(screenSession);
+    EXPECT_TRUE(g_errLog.find("screenSession is null") != std::string::npos);
+    screenSession = sptr<ScreenSession>::MakeSptr();
+    ScreenProperty property;
+    RRect bounds;
+    bounds.rect_.width_ = 100;
+    bounds.rect_.height_ = 200;
+    property.SetBounds(bounds);
+    screenSession->SetScreenProperty(property);
+    ssm_->SwapScreenWeightAndHeight(screenSession);
+    auto afterBounds = screenSession->GetScreenProperty().GetBounds();
+    EXPECT_EQ(afterBounds.rect_.width_, bounds.rect_.height_);
+    EXPECT_EQ(afterBounds.rect_.height_, bounds.rect_.width_);
+    g_errLog.clear();
+}
+ 
+/**
+ * @tc.name: HandleScreenRotationAndBoundsWhenSetClient
+ * @tc.desc: HandleScreenRotationAndBoundsWhenSetClient
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, HandleScreenRotationAndBoundsWhenSetClient, TestSize.Level1)
+{
+    auto foldController = sptr<FoldScreenController>::MakeSptr(ssm_->displayInfoMutex_,
+        ssm_->screenPowerTaskScheduler_);
+    ASSERT_NE(foldController, nullptr);
+    auto foldPolicy = foldController->GetFoldScreenPolicy(DisplayDeviceType::SINGLE_DISPLAY_DEVICE);
+    ASSERT_NE(foldPolicy, nullptr);
+    foldPolicy->lastDisplayMode_ = FoldDisplayMode::GLOBAL_FULL;
+    foldController->foldScreenPolicy_ = foldPolicy;
+    ssm_->foldScreenController_ = foldController;
+    std::unordered_map<FoldDisplayMode, int32_t> rotationCorrectionMap;
+    rotationCorrectionMap.insert({FoldDisplayMode::GLOBAL_FULL, 3});
+    ssm_->rotationCorrectionMap_ = rotationCorrectionMap;
+    ScreenId id = 123;
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(id, ScreenProperty(), 0);
+    if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        screenSession->SetRotation(Rotation::ROTATION_0);
+        ssm_->HandleScreenRotationAndBoundsWhenSetClient(screenSession);
+        EXPECT_EQ(screenSession->GetRotation(), Rotation::ROTATION_0);
+        screenSession->SetRotation(Rotation::ROTATION_180);
+        ssm_->HandleScreenRotationAndBoundsWhenSetClient(screenSession);
+        EXPECT_EQ(screenSession->GetRotation(), Rotation::ROTATION_0);
+        screenSession->SetRotation(Rotation::ROTATION_270);
+        ssm_->HandleScreenRotationAndBoundsWhenSetClient(screenSession);
+        EXPECT_EQ(screenSession->GetRotation(), Rotation::ROTATION_0);
+    } else {
+        screenSession->SetRotation(Rotation::ROTATION_270);
+        ssm_->HandleScreenRotationAndBoundsWhenSetClient(screenSession);
+        EXPECT_EQ(screenSession->GetRotation(), Rotation::ROTATION_270);
+        screenSession->SetRotation(Rotation::ROTATION_270);
+        foldPolicy->lastDisplayMode_ = FoldDisplayMode::UNKNOWN;
+        ssm_->HandleScreenRotationAndBoundsWhenSetClient(screenSession);
+        EXPECT_EQ(screenSession->GetRotation(), Rotation::ROTATION_270);
+        screenSession->SetRotation(Rotation::ROTATION_0);
+        ssm_->HandleScreenRotationAndBoundsWhenSetClient(screenSession);
+        EXPECT_EQ(screenSession->GetRotation(), Rotation::ROTATION_0);
+    }
+}
+ 
+/**
+ * @tc.name: RemoveRotationCorrection
+ * @tc.desc: RemoveRotationCorrection
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, RemoveRotationCorrection, TestSize.Level1)
+{
+    auto afterRotation = ssm_->RemoveRotationCorrection(Rotation::ROTATION_270);
+    EXPECT_EQ(afterRotation, Rotation::ROTATION_270);
+}
+ 
+/**
+ * @tc.name: GetConfigCorrectionByDisplayMode
+ * @tc.desc: GetConfigCorrectionByDisplayMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetConfigCorrectionByDisplayMode, TestSize.Level1)
+{
+    ssm_->rotationCorrectionMap_.clear();
+    bool correctionEnable = system::GetIntParameter<int32_t>("const.system.sensor_correction_enable", 0) == 1;
+    if (correctionEnable) {
+        auto rotation = ssm_->GetConfigCorrectionByDisplayMode(FoldDisplayMode::MAIN);
+        EXPECT_EQ(rotation, Rotation::ROTATION_0);
+        std::unordered_map<FoldDisplayMode, int32_t> rotationCorrectionMap;
+        rotationCorrectionMap.insert({FoldDisplayMode::MAIN, 3});
+        ssm_->rotationCorrectionMap_ = rotationCorrectionMap;
+        rotation = ssm_->GetConfigCorrectionByDisplayMode(FoldDisplayMode::MAIN);
+        EXPECT_EQ(rotation, Rotation::ROTATION_270);
+ 
+    } else {
+        auto rotation = ssm_->GetConfigCorrectionByDisplayMode(FoldDisplayMode::MAIN);
+        EXPECT_EQ(rotation, Rotation::ROTATION_0);
+    }
+}
+ 
+/**
+ * @tc.name: InitRotationCorrectionMap
+ * @tc.desc: rotationCorrectionMap not null
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, InitRotationCorrectionMap01, TestSize.Level1)
+{
+    ssm_->rotationCorrectionMap_.clear();
+    std::unordered_map<FoldDisplayMode, int32_t> rotationCorrectionMap;
+    rotationCorrectionMap.insert({FoldDisplayMode::MAIN, 3});
+    ssm_->rotationCorrectionMap_ = rotationCorrectionMap;
+    ssm_->InitRotationCorrectionMap("");
+    EXPECT_TRUE(ssm_->rotationCorrectionMap_.find(FoldDisplayMode::MAIN) != ssm_->rotationCorrectionMap_.end());
+    ssm_->rotationCorrectionMap_.clear();
+    std::string config = "1,0;2,0;5,3;";
+    ssm_->InitRotationCorrectionMap(config);
+    EXPECT_EQ(ssm_->rotationCorrectionMap_[FoldDisplayMode::GLOBAL_FULL], 3);
+}
+ 
+/**
+ * @tc.name: InitRotationCorrectionMap
+ * @tc.desc: split failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, InitRotationCorrectionMap02, TestSize.Level1)
+{
+    ssm_->rotationCorrectionMap_.clear();
+    ssm_->InitRotationCorrectionMap("");
+    EXPECT_TRUE(ssm_->rotationCorrectionMap_.empty());
+    ssm_->rotationCorrectionMap_.clear();
+    std::string config = ";;";
+    ssm_->InitRotationCorrectionMap(config);
+    EXPECT_TRUE(ssm_->rotationCorrectionMap_.empty());
+}
+ 
+/**
+ * @tc.name: InitRotationCorrectionMap
+ * @tc.desc: InitRotationCorrectionMap
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, InitRotationCorrectionMap03, TestSize.Level1)
+{
+    ssm_->rotationCorrectionMap_.clear();
+    std::string config = "1,0,1;1,0;2,0;5,3;3,a;a,a";
+    ssm_->InitRotationCorrectionMap(config);
+    EXPECT_EQ(ssm_->rotationCorrectionMap_[FoldDisplayMode::GLOBAL_FULL], 3);
 }
 
 /**
