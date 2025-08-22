@@ -38,6 +38,7 @@ public:
         sptr<ScreenAniListener> screenAniListener);
     static ani_long MakeMirror(ani_env* env, ani_long mainScreen, ani_object mirrorScreen);
     static void GetAllScreens(ani_env* env, ani_object screensAni);
+    static void CreateVirtualScreen(ani_env* env, ani_object options, ani_object virtualScreen);
 private:
     void OnRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
     void OnUnRegisterCallback(ani_env* env, ani_string type, ani_ref callback);

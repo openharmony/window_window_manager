@@ -287,6 +287,42 @@ void ScreenManagerAni::GetAllScreens(ani_env* env, ani_object screensAni)
     }
 }
 
+void ScreenManagerAni::CreateVirtualScreen(ani_env* env, ani_object options, ani_object virtualScreen)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] start");
+    ani_boolean undefRes = 0;
+    env->Reference_IsUndefined(options, &undefRes);
+    if (undefRes != 0) {
+        TLOGE(WmsLogTag::DMS, "[ANI] options is undefined or null");
+        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_ILLEGAL_PARAM, 
+            "options is undefined or null");
+        return;
+    }
+
+    VirtualScreenOption option;
+    auto ret = ScreenAniUtils::GetVirtualScreenOption(env, options, option);
+    if (ret != DmErrorCode::DM_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Get virtual screen options failed");
+        AniErrUtils::ThrowBusinessError(env, ret, "Get virtual screen options failed");
+        return;
+    }
+
+    auto screenId = SingletonContainer::Get<ScreenManager>().CreateVirtualScreen(option);
+    auto screen = SingletonContainer::Get<ScreenManager>().GetScreenById(screenId);
+    if (screen == nullptr) {
+        ret = DmErrorCode::DM_ERROR_INVALID_SCREEN;
+        if (screenId == ERROR_ID_NOT_SYSTEM_APP) {
+            ret = DmErrorCode::DM_ERROR_NOT_SYSTEM_APP;
+        }
+        TLOGE(WmsLogTag::DMS, "[ANI] Get virtual screen failed");
+        AniErrUtils::ThrowBusinessError(env, ret, "Get virtual screen failed");
+        return;        
+    }
+    if (ANI_OK != ScreenAniUtils::ConvertScreen(env, screen, virtualScreen)) {
+        TLOGE(WmsLogTag::DMS, "[ANI] ConvertScreen fail");
+    }
+}
+
 extern "C" {
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
@@ -313,6 +349,8 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(ScreenManagerAni::MakeMirror)},
         ani_native_function {"getAllScreensInternal", nullptr,
             reinterpret_cast<void *>(ScreenManagerAni::GetAllScreens)}
+        ani_native_function {"createVirtualScreenInternal", nullptr,
+            reinterpret_cast<void *>(ScreenManagerAni::CreateVirtualScreen)},
     };
     if ((ret = env->Namespace_BindNativeFunctions(nsp, funcs.data(), funcs.size()))) {
         TLOGE(WmsLogTag::DMS, "[ANI] bind namespace fail %{public}u", ret);

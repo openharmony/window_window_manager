@@ -26,6 +26,7 @@
 #include "screen_manager.h"
 #include "singleton_container.h"
 #include "window_manager_hilog.h"
+#include "surface_utils.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -202,6 +203,76 @@ ani_enum_item ScreenAniUtils::CreateAniEnum(ani_env* env, const char* enum_descr
     ani_enum_item enumItem;
     env->Enum_GetEnumItemByIndex(enumType, index, &enumItem);
     return enumItem;
+}
+
+DmErrorCode ScreenAniUtils::GetVirtualScreenOption(ani_env* env, ani_object options, VirtualScreenOption& option)
+{
+    ani_ref nameRef = nullptr;
+    auto ret = env->Object_GetFieldByName_Ref(options, "<property>name", &nameRef);
+    if(ret != ANI_OK || nameRef == nullptr) {
+        TLOGE(WmsLogTag::DMS, "Failed to get nameRef.");
+        return DmErrorCode::DM_ERROR_ILLEGAL_PARAM;
+    }
+    ret = GetStdString(env, static_cast<ani_string>(nameRef), option.name_);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to get name.");
+        return DmErrorCode::DM_ERROR_ILLEGAL_PARAM;
+    }
+
+    ani_long widthAni = 0;
+    ret = env->Object_GetFieldByName_Long(options, "<property>width", &widthAni);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to get width.");
+        return DmErrorCode::DM_ERROR_ILLEGAL_PARAM;
+    }
+    option.width_ = static_cast<uint32_t>(widthAni);
+    ani_long heightAni = 0;
+    ret = env->Object_GetFieldByName_Long(options, "<property>height", &heightAni);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to get height.");
+        return DmErrorCode::DM_ERROR_ILLEGAL_PARAM;
+    }
+    option.height_ = static_cast<uint32_t>(heightAni);
+
+    ani_double densityAni = 0;
+    ret = env->Object_GetFieldByName_Double(options, "<property>density", &densityAni);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to get density.");
+        return DmErrorCode::DM_ERROR_ILLEGAL_PARAM;
+    }
+    option.density_ = static_cast<float>(densityAni);
+
+    ani_ref surfaceIdRef = nullptr;
+    ret = env->Object_GetFieldByName_Ref(options, "<property>surfaceId", &surfaceIdRef);
+    if(ret != ANI_OK || surfaceIdRef == nullptr) {
+        TLOGE(WmsLogTag::DMS, "Failed to get surfaceIdRef.");
+        return DmErrorCode::DM_ERROR_ILLEGAL_PARAM;
+    }
+
+    ret = GetSurfaceFromAni(env, static_cast<ani_string>(surfaceIdRef), option.surface_);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to get surface.");
+        return DmErrorCode::DM_ERROR_ILLEGAL_PARAM;
+    }
+    return DmErrorCode::DM_OK;
+}
+
+ani_status ScreenAniUtils::GetSurfaceFromAni(ani_env* env, ani_string surfaceIdAniStr, sptr<Surface>& surface)
+{
+    std::string surfaceIdStr;
+    auto ret = GetStdString(env, surfaceIdAniStr, surfaceIdStr);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to get surface.");
+        return ret;
+    }
+    uint64_t surfaceId = 0;
+    std::istringstream inputStream(surfaceIdStr);
+    inputStream >> surfaceId;
+    surface = SurfaceUtils::GetInstance()->GetSurface(surfaceId);
+    if (surface == nullptr) {
+        TLOGI(WmsLogTag::DMS, "GetSurfaceFromAni failed, surfaceId:%{public}" PRIu64, surfaceId);
+    }
+    return ANI_OK;
 }
 }
 }

@@ -115,7 +115,34 @@ function minusScreenModeInfo(screenModeInfo: Array<ScreenModeInfo>) {
     screenModeInfo.splice(i);
 }
 
+export function createVirtualScreen(options: VirtualScreenOption, callback: AsyncCallback<Screen>): void {
+    taskpool.execute((): Screen => {
+        let screen = new ScreenImpl();
+        createVirtualScreenInternal(options, screen);
+        return screen;
+    }).then((ret: NullishType) => {
+        callback(null, ret as Screen);
+    }).catch((err: NullishType) => {
+        callback(err as BusinessError, undefined);
+    });
+}
+
+export function createVirtualScreen(options: VirtualScreenOption): Promise<Screen> {
+    return new Promise<Screen>((resolve: (value: Screen) => void, reject: (error: BusinessError) => void ) => {
+        taskpool.execute((): Screen => {
+            let screen = new ScreenImpl();
+            createVirtualScreenInternal(options, screen);
+            return screen;
+        }).then((ret: NullishType) => {
+            resolve(ret as Screen);
+        }).catch((err: NullishType) => {
+            reject(err as BusinessError);
+        });
+    });
+}
+
 export native function getAllScreensInternal(screens: Array<Screen>): void;
+export native function createVirtualScreenInternal(options: VirtualScreenOption, screen: ScreenImpl): void;
 
 export interface Screen {
 
@@ -247,6 +274,18 @@ export enum Orientation {
     REVERSE_VERTICAL = 3,
 
     REVERSE_HORIZONTAL = 4
+}
+
+export interface VirtualScreenOption {
+    name: string;
+
+    width: long;
+
+    height: long;
+
+    density: double;
+
+    surfaceId: string;
 }
 
 export let screenMgrRef: long;
