@@ -247,18 +247,18 @@ HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, HandleAngleOrHallChange08, 
     }
     g_errLog.clear();
     LOG_SetCallback(MyLogCallback);
-    std::vector<float> angles = { 5, 5 };
+    std::vector<float> angles = { 5, 5, 5 };
     std::vector<uint16_t> halls = { 0, 1 };
     SecondaryDisplaySensorFoldStateManager manager;
     g_errLog.clear();
     manager.HandleAngleOrHallChange(angles, halls, nullptr, false);
     EXPECT_TRUE(g_errLog.find("hall change but posture not change") != std::string::npos);
-    angles = { 5, 5 };
+    angles = { 5, 5, 5 };
     halls = { 0, 0 };
     g_errLog.clear();
     manager.HandleAngleOrHallChange(angles, halls, nullptr, false);
     EXPECT_FALSE(g_errLog.find("hall change but posture not change") != std::string::npos);
-    angles = { 4, 4 };
+    angles = { 4, 4, 4 };
     halls = { 1, 1 };
     g_errLog.clear();
     manager.HandleAngleOrHallChange(angles, halls, nullptr, false);

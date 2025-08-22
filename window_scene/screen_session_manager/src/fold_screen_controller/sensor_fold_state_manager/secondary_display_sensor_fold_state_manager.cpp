@@ -58,8 +58,9 @@ SecondaryDisplaySensorFoldStateManager::~SecondaryDisplaySensorFoldStateManager(
 void SecondaryDisplaySensorFoldStateManager::HandleAngleOrHallChange(const std::vector<float>& angles,
     const std::vector<uint16_t>& halls, sptr<FoldScreenPolicy> foldScreenPolicy, bool isPostureRegistered)
 {
-    if (halls.size() != HALLS_AXIS_SIZE) {
-        TLOGE(WmsLogTag::DMS, "halls size is not right, halls size %{public}zu", halls.size());
+    if (halls.size() != HALLS_AXIS_SIZE || angles.size() != ANGLES_AXIS_SIZE) {
+        TLOGE(WmsLogTag::DMS, "halls size or angles is not right, size %{public}zu, %{public}zu",
+            halls.size(), angles.size());
         return;
     }
     if ((std::fabs(angles[1] - DEFAULT_ANGLE_VALUE) < FLT_EPSILON && halls[1] == HALL_THRESHOLD) ||
