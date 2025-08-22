@@ -3900,7 +3900,7 @@ HWTEST_F(ScreenSessionTest, UpdateTouchBoundsAndOffset, TestSize.Level1)
         ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
     ASSERT_NE(screenSession, nullptr);
 
-    screenSession->UpdateTouchBoundsAndOffset();
+    screenSession->UpdateTouchBoundsAndOffset(FoldDisplayMode::UNKNOWN);
     EXPECT_EQ(0, screenSession->property_.GetInputOffsetY());
     GTEST_LOG_(INFO) << "ScreenSessionTest: UpdateTouchBoundsAndOffset end";
 }
@@ -4514,6 +4514,67 @@ HWTEST_F(ScreenSessionTest, FreezeScreen, TestSize.Level2)
     screenSession->SetDisplayNode(displayNode);
     screenSession->FreezeScreen(isFreeze);
     g_errLog.clear();
+}
+
+/**
+ * @tc.name: GetRotationCorrection
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, GetRotationCorrection, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    Rotation rotation = session->GetRotationCorrection(FoldDisplayMode::MAIN);
+    EXPECT_EQ(rotation, Rotation::ROTATION_0);
+    std::unordered_map<FoldDisplayMode, int32_t> rotationCorrectionMap;
+    rotationCorrectionMap.insert({FoldDisplayMode::MAIN, 3});
+    session->SetRotationCorrectionMap(rotationCorrectionMap);
+    rotation = session->GetRotationCorrection(FoldDisplayMode::MAIN);
+    EXPECT_EQ(rotation, Rotation::ROTATION_270);
+    rotation = session->GetRotationCorrection(FoldDisplayMode::FULL);
+    EXPECT_EQ(rotation, Rotation::ROTATION_0);
+}
+ 
+/**
+ * @tc.name: RemoveRotationCorrection
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, RemoveRotationCorrection, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    Rotation rotation = Rotation::ROTATION_270;
+    std::unordered_map<FoldDisplayMode, int32_t> rotationCorrectionMap;
+    rotationCorrectionMap.insert({FoldDisplayMode::MAIN, 3});
+    session->SetRotationCorrectionMap(rotationCorrectionMap);
+    session->RemoveRotationCorrection(rotation, FoldDisplayMode::MAIN);
+    EXPECT_EQ(rotation, Rotation::ROTATION_0);
+ 
+    rotation = Rotation::ROTATION_270;
+    session->RemoveRotationCorrection(rotation, FoldDisplayMode::FULL);
+    EXPECT_EQ(rotation, Rotation::ROTATION_270);
+ 
+    rotation = static_cast<Rotation>(100);
+    session->RemoveRotationCorrection(rotation, FoldDisplayMode::FULL);
+    EXPECT_EQ(static_cast<int32_t>(rotation), 100);
+}
+ 
+/**
+ * @tc.name: SetRotationCorrectionMap
+ * @tc.desc: test set and get
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetRotationCorrectionMap, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    std::unordered_map<FoldDisplayMode, int32_t> rotationCorrectionMap;
+    rotationCorrectionMap.insert({FoldDisplayMode::MAIN, 3});
+    session->SetRotationCorrectionMap(rotationCorrectionMap);
+    auto correctionMap = session->GetRotationCorrectionMap();
+    EXPECT_EQ(correctionMap[FoldDisplayMode::MAIN], 3);
 }
 
 /**

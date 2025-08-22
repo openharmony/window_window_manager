@@ -30,32 +30,7 @@ void ScreenSessionManagerClientProxy::OnScreenConnectionChanged(SessionOption Se
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
-        return;
-    }
-    if (!data.WriteUint64(SessionOption.rsId_)) {
-        TLOGE(WmsLogTag::DMS, "Write rsId failed");
-        return;
-    }
-    if (!data.WriteString(SessionOption.name_)) {
-        TLOGE(WmsLogTag::DMS, "Write name failed");
-        return;
-    }
-    if (!data.WriteBool(SessionOption.isExtend_)) {
-        TLOGE(WmsLogTag::DMS, "Write isExtended failed");
-        return;
-    }
-    if (!data.WriteString(SessionOption.innerName_)) {
-        TLOGE(WmsLogTag::DMS, "Write innerName failed");
-        return;
-    }
-    if (!data.WriteUint64(SessionOption.screenId_)) {
-        TLOGE(WmsLogTag::DMS, "Write screenId failed");
-        return;
-    }
-    if (!data.WriteUint8(static_cast<uint8_t>(screenEvent))) {
-        TLOGE(WmsLogTag::DMS, "Write screenEvent failed");
+    if (!ScreenConnectWriteParam(SessionOption, screenEvent, data)) {
         return;
     }
     if (remote->SendRequest(
@@ -64,6 +39,54 @@ void ScreenSessionManagerClientProxy::OnScreenConnectionChanged(SessionOption Se
         TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return;
     }
+}
+
+bool ScreenSessionManagerClientProxy::ScreenConnectWriteParam(SessionOption& SessionOption,
+    ScreenEvent screenEvent, MessageParcel& data)
+{
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return false;
+    }
+    if (!data.WriteUint64(SessionOption.rsId_)) {
+        TLOGE(WmsLogTag::DMS, "Write rsId failed");
+        return false;
+    }
+    if (!data.WriteString(SessionOption.name_)) {
+        TLOGE(WmsLogTag::DMS, "Write name failed");
+        return false;
+    }
+    if (!data.WriteBool(SessionOption.isExtend_)) {
+        TLOGE(WmsLogTag::DMS, "Write isExtended failed");
+        return false;
+    }
+    if (!data.WriteString(SessionOption.innerName_)) {
+        TLOGE(WmsLogTag::DMS, "Write innerName failed");
+        return false;
+    }
+    if (!data.WriteUint64(SessionOption.screenId_)) {
+        TLOGE(WmsLogTag::DMS, "Write screenId failed");
+        return false;
+    }
+    if (!data.WriteUint8(static_cast<uint8_t>(screenEvent))) {
+        TLOGE(WmsLogTag::DMS, "Write screenEvent failed");
+        return false;
+    }
+    if (!data.WriteUint64(static_cast<uint64_t>(SessionOption.rotationCorrectionMap_.size()))) {
+        TLOGE(WmsLogTag::DMS, "Write size failed");
+        return false;
+    }
+    for (auto& iter : SessionOption.rotationCorrectionMap_) {
+        if (!data.WriteUint32(static_cast<uint32_t>(iter.first))) {
+            TLOGE(WmsLogTag::DMS, "Write displayMode failed");
+            return false;
+        }
+        if (!data.WriteUint32(static_cast<uint32_t>(iter.second))) {
+            TLOGE(WmsLogTag::DMS, "Write offset failed");
+            return false;
+        }
+    }
+    return true;
 }
 
 void ScreenSessionManagerClientProxy::SwitchUserCallback(std::vector<int32_t> oldScbPids, int32_t currentScbPid)
