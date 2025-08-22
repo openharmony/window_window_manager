@@ -1393,6 +1393,184 @@ HWTEST_F(SceneSessionManagerTest2, ConfigFreeMultiWindowForDefaultDragResizeType
 }
 
 /**
+ * @tc.name: ConfigFreeMultiWindow
+ * @tc.desc: call ConfigFreeMultiWindow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, ConfigFreeMultiWindowTest, TestSize.Level1)
+{
+    ssm_->systemConfig_.freeMultiWindowConfig_.defaultDragResizeType_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+        "<freeMultiWindow enable=\"true\">"
+        "<windowEffect>"
+        "<appWindows>"
+        "<shadow>"
+        "<focused>"
+        "<elevation>0</elevation>"
+        "<offsetX>1</offsetX>"
+        "<offsetY>2</offsetY>"
+        "<radius>0.5</radius>"
+        "</focused>"
+        "<unfocused>"
+        "<elevation>0</elevation>"
+        "<color>#000000</color>"
+        "<offsetX>1</offsetX>"
+        "<offsetY>1</offsetY>"
+        "<alpha>0</alpha>"
+        "<radius>0.5</radius>"
+        "</unfocused>"
+        "</shadow>"
+        "<shadowDark>"
+        "<focused>"
+        "<elevation>0</elevation>"
+        "<offsetX>1</offsetX>"
+        "<offsetY>2</offsetY>"
+        "</focused>"
+        "<unfocused>"
+        "<elevation>0</elevation>"
+        "<color>#000000</color>"
+        "<offsetX>1</offsetX>"
+        "<offsetY>1</offsetY>"
+        "<alpha>0</alpha>"
+        "<radius>0.5</radius>"
+        "</unfocused>"
+        "</shadowDark>"
+        "</appWindows>"
+        "</windowEffect>"
+        "</freeMultiWindow>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    ssm_->ConfigFreeMultiWindow();
+    // freeMultiWindow windowEffect
+    auto windowEffect = ssm_->systemConfig_.freeMultiWindowConfig_.appWindowSceneConfig_;
+    
+    ASSERT_FLOAT_EQ(windowEffect.focusedShadow_.alpha_, 0);
+    ASSERT_FLOAT_EQ(windowEffect.focusedShadow_.offsetX_, 1);
+    ASSERT_FLOAT_EQ(windowEffect.focusedShadow_.offsetY_, 2);
+    ASSERT_FLOAT_EQ(windowEffect.focusedShadow_.radius_, 0.5);
+    ASSERT_FLOAT_EQ(windowEffect.unfocusedShadow_.alpha_, 0);
+    ASSERT_FLOAT_EQ(windowEffect.unfocusedShadow_.offsetX_, 1);
+    ASSERT_FLOAT_EQ(windowEffect.unfocusedShadow_.offsetY_, 1);
+    ASSERT_FLOAT_EQ(windowEffect.unfocusedShadow_.radius_, 0.5);
+}
+
+/**
+ * @tc.name: LoadFreeMultiWindowConfigTest
+ * @tc.desc: call LoadFreeMultiWindowConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, LoadFreeMultiWindowConfigTest, TestSize.Level1)
+{
+    ssm_->systemConfig_.freeMultiWindowConfig_.defaultDragResizeType_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+        "<windowEffect>"
+        "<appWindows>"
+        "<shadow>"
+        "<focused>"
+        "<elevation>0</elevation>"
+        "<alpha>1</alpha>"
+        "<offsetX>2</offsetX>"
+        "<offsetY>2</offsetY>"
+        "<radius>0</radius>"
+        "</focused>"
+        "<unfocused>"
+        "<elevation>0</elevation>"
+        "<color>#000000</color>"
+        "<offsetX>2</offsetX>"
+        "<offsetY>2</offsetY>"
+        "<alpha>1</alpha>"
+        "<radius>0</radius>"
+        "</unfocused>"
+        "</shadow>"
+        "<shadowDark>"
+        "<focused>"
+        "<elevation>0</elevation>"
+        "<offsetX>2</offsetX>"
+        "<offsetY>2</offsetY>"
+        "</focused>"
+        "<unfocused>"
+        "<elevation>0</elevation>"
+        "<color>#000000</color>"
+        "<offsetX>2</offsetX>"
+        "<offsetY>2</offsetY>"
+        "<alpha>0</alpha>"
+        "<radius>0.5</radius>"
+        "</unfocused>"
+        "</shadowDark>"
+        "</appWindows>"
+        "</windowEffect>"
+        "<freeMultiWindow enable=\"true\">"
+        "<windowEffect>"
+        "<appWindows>"
+        "<shadow>"
+        "<focused>"
+        "<elevation>0</elevation>"
+        "<color>#000000</color>"
+        "<alpha>0</alpha>"
+        "<offsetX>3</offsetX>"
+        "<offsetY>3</offsetY>"
+        "<radius>0.5</radius>"
+        "</focused>"
+        "<unfocused>"
+        "<elevation>0</elevation>"
+        "<color>#000000</color>"
+        "<offsetX>3</offsetX>"
+        "<offsetY>3</offsetY>"
+        "<alpha>0</alpha>"
+        "<radius>0.5</radius>"
+        "</unfocused>"
+        "</shadow>"
+        "<shadowDark>"
+        "<focused>"
+        "<elevation>0</elevation>"
+        "<offsetX>3</offsetX>"
+        "<offsetY>3</offsetY>"
+        "<radius>0.5</radius>"
+        "</focused>"
+        "<unfocused>"
+        "<elevation>0</elevation>"
+        "<color>#000000</color>"
+        "<offsetX>3</offsetX>"
+        "<offsetY>3</offsetY>"
+        "<alpha>0</alpha>"
+        "<radius>0.5</radius>"
+        "</unfocused>"
+        "</shadowDark>"
+        "</appWindows>"
+        "</windowEffect>"
+        "</freeMultiWindow>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    ssm_->ConfigFreeMultiWindow();
+    ASSERT_EQ(ssm_->systemConfig_.freeMultiWindowSupport_, true);
+    // load windowEffect
+    ssm_->LoadFreeMultiWindowConfig(false);
+    ASSERT_FLOAT_EQ(ssm_->appWindowSceneConfig_.focusedShadow_.offsetX_, 2);
+    ASSERT_FLOAT_EQ(ssm_->appWindowSceneConfig_.focusedShadow_.offsetY_, 2);
+    ASSERT_FLOAT_EQ(ssm_->appWindowSceneConfig_.focusedShadow_.alpha_, 1);
+    ASSERT_FLOAT_EQ(ssm_->appWindowSceneConfig_.focusedShadow_.radius_, 0);
+    ASSERT_FLOAT_EQ(ssm_->appWindowSceneConfig_.unfocusedShadow_.alpha_, 1);
+    ASSERT_FLOAT_EQ(ssm_->appWindowSceneConfig_.unfocusedShadow_.offsetX_, 2);
+    ASSERT_FLOAT_EQ(ssm_->appWindowSceneConfig_.unfocusedShadow_.offsetY_, 2);
+    ASSERT_FLOAT_EQ(ssm_->appWindowSceneConfig_.unfocusedShadow_.radius_, 0);
+
+    // load FreeMultiWindow windowEffect config
+    ssm_->LoadFreeMultiWindowConfig(true);
+    ASSERT_FLOAT_EQ(ssm_->appWindowSceneConfig_.focusedShadow_.alpha_, 0);
+    ASSERT_FLOAT_EQ(ssm_->appWindowSceneConfig_.focusedShadow_.offsetX_, 3);
+    ASSERT_FLOAT_EQ(ssm_->appWindowSceneConfig_.focusedShadow_.offsetY_, 3);
+    ASSERT_FLOAT_EQ(ssm_->appWindowSceneConfig_.focusedShadow_.radius_, 0.5);
+    ASSERT_FLOAT_EQ(ssm_->appWindowSceneConfig_.unfocusedShadow_.alpha_, 0);
+    ASSERT_FLOAT_EQ(ssm_->appWindowSceneConfig_.unfocusedShadow_.offsetX_, 3);
+    ASSERT_FLOAT_EQ(ssm_->appWindowSceneConfig_.unfocusedShadow_.offsetY_, 3);
+    ASSERT_FLOAT_EQ(ssm_->appWindowSceneConfig_.unfocusedShadow_.radius_, 0.5);
+}
+
+/**
  * @tc.name: Init
  * @tc.desc: SceneSesionManager init
  * @tc.type: FUNC
