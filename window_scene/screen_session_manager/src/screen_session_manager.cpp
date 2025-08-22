@@ -1744,7 +1744,6 @@ void ScreenSessionManager::UpdateSuperFoldRefreshRate(sptr<ScreenSession> screen
     }
 }
 
-
 bool ScreenSessionManager::IsPhysicalScreenAndInUse(sptr<ScreenSession> screenSession) const
 {
     if (!screenSession) {
