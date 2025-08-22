@@ -17,6 +17,7 @@
 
 #include <system_ability_definition.h>
 
+#include "screen_session_manager.h"
 #include "setting_provider.h"
 
 using namespace testing;
@@ -158,6 +159,36 @@ HWTEST_F(SettingProviderTest, PutStringValue02, TestSize.Level1)
     auto observer = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).CreateObserver(
         "settings.power.suspend_sources", updateFunc);
     EXPECT_EQ(SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).PutStringValue(key, value, needNotify), ERR_OK);
+}
+
+/**
+ * @tc.name: AssembleUriMultiUser
+ * @tc.desc: test function : AssembleUriMultiUser
+ * @tc.type: FUNC
+ */
+HWTEST_F(SettingProviderTest, AssembleUriMultiUser, TestSize.Level1)
+{
+    int32_t saveSettings = ScreenSessionManager::GetInstance().currentUserIdForSettings_;
+    ScreenSessionManager::GetInstance().currentUserIdForSettings_ = 1;
+
+    // key == DURING_CALL_KEY
+    std::string key = "during_call_state";
+    auto res = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).AssembleUriMultiUser(key);
+    EXPECT_TRUE(res.ToString().find("USER_SETTINGSDATA_SECURE_") != std::string::npos);
+
+    // key != DURING_CALL_KEY
+    key = "ut_test";
+    res = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).AssembleUriMultiUser(key);
+    EXPECT_FALSE(res.ToString().find("USER_SETTINGSDATA_SECURE_") != std::string::npos);
+
+    //userId = 0
+    ScreenSessionManager::GetInstance().currentUserIdForSettings_ = 0;
+    key = "ut_test";
+    res = SettingProvider::GetInstance(POWER_MANAGER_SERVICE_ID).AssembleUriMultiUser(key);
+    EXPECT_TRUE(res.ToString().find("datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA") !=
+        std::string::npos);
+
+    ScreenSessionManager::GetInstance().currentUserIdForSettings_ = saveSettings;
 }
 }
 }
