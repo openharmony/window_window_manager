@@ -1110,7 +1110,7 @@ HWTEST_F(ScreenSessionTest, Resize002, TestSize.Level1)
     ASSERT_NE(nullptr, screenSession);
     uint32_t width = 1000;
     uint32_t height = 1000;
-    screenSession->Resize(width, height);
+    screenSession->Resize(width, height, false);
     GTEST_LOG_(INFO) << "Resize002 end";
 }
 
