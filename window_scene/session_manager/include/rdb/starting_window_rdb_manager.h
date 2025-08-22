@@ -60,7 +60,6 @@ public:
     std::string GetStartWindowValFromProfile(const AppExecFwk::AbilityInfo& abilityInfo,
         const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr,
         const std::string& key, const std::string& defaultVal);
-    void ClearRdbStore();
 
 private:
     std::shared_ptr<NativeRdb::RdbStore> GetRdbStore();
