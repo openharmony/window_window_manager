@@ -8464,7 +8464,7 @@ void ScreenSessionManager::SwapScreenWeightAndHeight(sptr<ScreenSession>& screen
     auto lastWidth = bounds.rect_.GetWidth();
     auto lastHeight = bounds.rect_.GetHeight();
     RRect afterBounds =
-            RRect({ 0, bounds.rect_.GetTop(), lastHeight, lastWidth}, 0.0f, 0.0f);
+        RRect({ 0, bounds.rect_.GetTop(), lastHeight, lastWidth}, 0.0f, 0.0f);
     screenSession->SetBounds(afterBounds);
     TLOGI(WmsLogTag::DMS, "before width:%{public}f, height:%{public}f,after width:%{public}f, height:%{public}f",
         lastWidth, lastHeight, afterBounds.rect_.GetWidth(), afterBounds.rect_.GetHeight());
@@ -8810,15 +8810,13 @@ void ScreenSessionManager::HandleScreenRotationAndBoundsWhenSetClient(sptr<Scree
         {
             SwapScreenWeightAndHeight(screenSession);
         }
-    } else {
-        if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
-            bool isModeChanged = localRotation != Rotation::ROTATION_0;
-            if (isModeChanged && isReset) {
-                TLOGI(WmsLogTag::DMS, "screen(id:%{public}" PRIu64 ") current is not default mode, reset it", screenId);
-                SetRotation(screenId, Rotation::ROTATION_0, false);
-                SetPhysicalRotationClientInner(screenId, 0);
-                screenSession->SetDisplayBoundary(RectF(0, boundaryOffset, phyWidth, phyHeight), 0);
-            }
+    } else if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        bool isModeChanged = localRotation != Rotation::ROTATION_0;
+        if (isModeChanged && isReset) {
+            TLOGI(WmsLogTag::DMS, "screen(id:%{public}" PRIu64 ") current is not default mode, reset it", screenId);
+            SetRotation(screenId, Rotation::ROTATION_0, false);
+            SetPhysicalRotationClientInner(screenId, 0);
+            screenSession->SetDisplayBoundary(RectF(0, boundaryOffset, phyWidth, phyHeight), 0);
         }
     }
 }
@@ -11260,7 +11258,7 @@ void ScreenSessionManager::InitRotationCorrectionMap(std::string displayModeCorr
         TLOGE(WmsLogTag::DMS, "invalid config");
         return;
     }
-    for (std::string displayModeCorrection : displayModeCorrections) {
+    for (const std::string& displayModeCorrection : displayModeCorrections) {
         std::vector<std::string> corrections = {};
         splitSuccess = ScreenSettingHelper::SplitString(corrections, displayModeCorrection, ',');
         uint32_t dataSize = corrections.size();
