@@ -2465,7 +2465,7 @@ WMError WindowSceneSessionImpl::ResizeAsync(uint32_t width, uint32_t height)
             GetWindowId(), GetWindowMode());
         return WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS;
     }
-    auto ret = Resize(width, height, rectAnimationConfig);
+    auto ret = Resize(width, height);
     if (state_ == WindowState::STATE_SHOWN) {
         layoutCallback_->ResetResizeLock();
         auto startTime = std::chrono::duration_cast<std::chrono::milliseconds>(
