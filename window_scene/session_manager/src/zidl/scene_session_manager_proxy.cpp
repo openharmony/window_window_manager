@@ -3567,7 +3567,11 @@ WMError SceneSessionManagerProxy::MinimizeByWindowId(const std::vector<int32_t>&
         TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    return static_cast<WMError>(reply.ReadInt32());
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(ret);
 }
 
 WMError SceneSessionManagerProxy::SetForegroundWindowNum(uint32_t windowNum)
@@ -3598,7 +3602,7 @@ WMError SceneSessionManagerProxy::SetForegroundWindowNum(uint32_t windowNum)
 
 WSError SceneSessionManagerProxy::UseImplicitAnimation(int32_t hostWindowId, bool useImplicit)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "run SceneSessionManagerProxy::GetHostWindowRect");
+    TLOGD(WmsLogTag::WMS_UIEXT, "Run SceneSessionManagerProxy::UseImplicitAnimation");
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
