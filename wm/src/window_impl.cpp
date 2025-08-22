@@ -2020,7 +2020,7 @@ WMError WindowImpl::MoveTo(int32_t x, int32_t y, bool isMoveToGlobal, MoveConfig
     return UpdateProperty(PropertyChangeAction::ACTION_UPDATE_RECT);
 }
 
-WMError WindowImpl::Resize(uint32_t width, uint32_t height)
+WMError WindowImpl::Resize(uint32_t width, uint32_t height, const RectAnimationConfig& rectAnimationConfig)
 {
     WLOGFD("id:%{public}d Resize %{public}u %{public}u",
           property_->GetWindowId(), width, height);
