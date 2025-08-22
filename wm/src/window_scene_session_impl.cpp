@@ -3258,7 +3258,7 @@ bool WindowSceneSessionImpl::IsDecorEnable() const
     bool isSubWindow = WindowHelper::IsSubWindow(windowType);
     bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
     bool isValidWindow = isMainWindow ||
-        ((isSubWindow || isDialogWindow) && property_->IsDecorEnable());
+        ((isSubWindow || isDialogWindow || IsSubWindowMaximizeSupported()) && property_->IsDecorEnable());
     bool isWindowModeSupported = WindowHelper::IsWindowModeSupported(
         windowSystemConfig_.decorWindowModeSupportType_, GetWindowMode());
     if (windowSystemConfig_.freeMultiWindowSupport_) {
@@ -3267,6 +3267,9 @@ bool WindowSceneSessionImpl::IsDecorEnable() const
     bool enable = isValidWindow && windowSystemConfig_.isSystemDecorEnable_ &&
         isWindowModeSupported;
     if ((isSubWindow || isDialogWindow) && property_->GetIsPcAppInPad() && property_->IsDecorEnable()) {
+        enable = true;
+    }
+    if (IsSubWindowMaximizeSupported() && property_->IsDecorEnable()) {
         enable = true;
     }
     TLOGD(WmsLogTag::WMS_DECOR, "get decor enable %{public}d", enable);
@@ -5509,6 +5512,25 @@ void WindowSceneSessionImpl::UpdateSupportWindowModesWhenSwitchFreeMultiWindow()
     auto windowModeSupportType = WindowHelper::ConvertSupportModesToSupportType(updateWindowModes);
     property_->SetWindowModeSupportType(windowModeSupportType);
     UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO);
+}
+
+void WindowSceneSessionImpl::UpdateEnableDragWhenSwitchMultiWindow(bool enable)
+{
+    if (hasSetEnableDrag_.load() || property_->IsDragResizeDisabled()) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "EnableDrag is already set, id: %{public}d", GetPersistentId());
+        return;
+    }
+    auto isSystemWindow = WindowHelper::IsSystemWindow(property_->GetWindowType());
+    bool isDialog = WindowHelper::IsDialogWindow(property_->GetWindowType());
+    bool isSystemCalling = property_->GetSystemCalling();
+    TLOGI(WmsLogTag::WMS_LAYOUT, "windId: %{public}d, isSystemWindow: %{public}d, isDialog: %{public}d, "
+        "isSystemCalling: %{public}d", GetPersistentId(), isSystemWindow, isDialog, isSystemCalling);
+    if (!enable || (isSystemWindow && !isDialog && !isSystemCalling)) {
+        property_->SetDragEnabled(false);
+    } else {
+        property_->SetDragEnabled(true);
+    }
+    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED);
 }
 
 WSError WindowSceneSessionImpl::SwitchFreeMultiWindow(bool enable)

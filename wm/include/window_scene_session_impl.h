@@ -414,6 +414,7 @@ private:
      * Window Layout
      */
     void CheckMoveConfiguration(MoveConfiguration& moveConfiguration);
+    void UpdateEnableDragWhenSwitchMultiWindow(bool enable);
     WMError GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo) override;
 
     /*
