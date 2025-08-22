@@ -18,6 +18,7 @@
 #include "iremote_object_mocker.h"
 #include "mock/mock_message_parcel.h"
 #include "zidl/screen_session_manager_client_proxy.h"
+#include "window_manager_hilog.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -26,6 +27,14 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
+}
+namespace {
+    std::string logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
+        const char* msg)
+    {
+        logMsg += msg;
+    }
 }
 class ScreenSessionManagerClientProxyTest : public testing::Test {
 public:
@@ -468,6 +477,94 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, OnVirtualScreenDisconnected, TestS
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     ssmProxy->OnVirtualScreenDisconnected(displayId);
     MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
+ * @tc.name: OnScreenConnectionChangedMock
+ * @tc.desc: OnScreenConnectionChangedMock
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientProxyTest, OnScreenConnectionChangedMock, TestSize.Level1)
+{
+    ASSERT_TRUE(screenSessionManagerClientProxy_ != nullptr);
+    ScreenEvent screenEvent = ScreenEvent::CONNECTED;
+    std::unordered_map<FoldDisplayMode, int32_t> rotationCorrectionMap;
+    rotationCorrectionMap.insert({FoldDisplayMode::MAIN, 3});
+    SessionOption option = {
+        .rsId_ = 0,
+        .isExtend_ = false,
+        .screenId_ = 0,
+        .rotationCorrectionMap_ = rotationCorrectionMap,
+    };
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    // remote == nullptr
+    auto proxy = sptr<ScreenSessionManagerClientProxy>::MakeSptr(nullptr);
+    proxy->OnScreenConnectionChanged(option, screenEvent);
+    // SendRequest failed
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    proxy = sptr<ScreenSessionManagerClientProxy>::MakeSptr(remoteMocker);
+    ASSERT_NE(proxy, nullptr);
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    ret = proxy->OnScreenConnectionChanged(option, screenEvent);
+    remoteMocker->SetRequestResult(ERR_NONE);
+    // Pass all
+    ret = proxy->OnScreenConnectionChanged(option, screenEvent);
+    // write param failed
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    screenSessionManagerClientProxy_->OnScreenConnectionChanged(option, screenEvent);
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+    logMsg.clear();
+    MockMessageParcel::ClearAllErrorFlag();
+}
+ 
+/**
+ * @tc.name: ScreenConnectWriteParam
+ * @tc.desc: ScreenConnectWriteParam
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientProxyTest, ScreenConnectWriteParam, TestSize.Level1)
+{
+    MessageParcel data;
+    ScreenEvent screenEvent = ScreenEvent::CONNECTED;
+    std::unordered_map<FoldDisplayMode, int32_t> rotationCorrectionMap;
+    rotationCorrectionMap.insert({FoldDisplayMode::MAIN, 3});
+    SessionOption option = {
+        .rsId_ = 0,
+        .isExtend_ = false,
+        .screenId_ = 0,
+        .rotationCorrectionMap_ = rotationCorrectionMap
+    };
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    auto proxy = sptr<ScreenSessionManagerClientProxy>::MakeSptr(remoteMocker);
+ 
+    bool ret = proxy->ScreenConnectWriteParam(option, screenEvent, data);
+    EXPECT_TRUE(ret);
+ 
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ret = proxy->ScreenConnectWriteParam(option, screenEvent, data);
+    EXPECT_FALSE(ret);
+ 
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint64ErrorFlag(true);
+    ret = proxy->ScreenConnectWriteParam(option, screenEvent, data);
+    EXPECT_FALSE(ret);
+ 
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteStringErrorFlag(true);
+    ret = proxy->ScreenConnectWriteParam(option, screenEvent, data);
+    EXPECT_FALSE(ret);
+ 
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    ret = proxy->ScreenConnectWriteParam(option, screenEvent, data);
+    EXPECT_FALSE(ret);
+ 
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    ret = proxy->ScreenConnectWriteParam(option, screenEvent, data);
+    EXPECT_FALSE(ret);
 }
 } // namespace Rosen
 } // namespace OHOS

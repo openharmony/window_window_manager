@@ -207,7 +207,7 @@ public:
 
     RRect GetPhysicalTouchBounds();
 
-    void SetPhysicalTouchBounds();
+    void SetPhysicalTouchBounds(Rotation rotationOffset);
 
     int32_t GetInputOffsetX();
 

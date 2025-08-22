@@ -300,7 +300,7 @@ public:
     void SetIsOuterOnlyMode(bool isOuterOnlyMode);
     bool GetIsOuterOnlyModeBeforePowerOff();
     void SetIsOuterOnlyModeBeforePowerOff(bool isOuterOnlyModeBeforePowerOff);
-    void OnVerticalChangeBoundsWhenSwitchUser(sptr<ScreenSession> screenSession);
+    void OnVerticalChangeBoundsWhenSwitchUser(sptr<ScreenSession>& screenSession, FoldDisplayMode oldScbDisplayMode);
 
     bool SetScreenPower(ScreenPowerStatus status, PowerStateChangeReason reason);
     void SetScreenPowerForFold(ScreenPowerStatus status);
@@ -490,6 +490,8 @@ public:
     std::shared_ptr<FfrtQueueHelper> GetFfrtQueueHelper() const;
     bool GetCancelSuspendStatus() const;
     void RemoveScreenCastInfo(ScreenId screenId);
+    Rotation GetConfigCorrectionByDisplayMode(FoldDisplayMode displayMode);
+    Rotation RemoveRotationCorrection(Rotation rotation);
 
 protected:
     ScreenSessionManager();
@@ -857,11 +859,17 @@ private:
     void SetScreenCastInfo(ScreenId screenId, ScreenId castScreenId, ScreenCombination screenCombination);
     void ChangeMirrorScreenConfig(const sptr<ScreenSessionGroup>& group,
         const DMRect& mainScreenRegion, sptr<ScreenSession>& screen);
+    void InitRotationCorrectionMap(std::string displayModeCorrectionConfig);
+    void SwapScreenWeightAndHeight(sptr<ScreenSession>& screenSession);
+    Rotation GetOldDisplayModeRotation(FoldDisplayMode oldDisplayMode, Rotation rotation);
+    void HandleScreenRotationAndBoundsWhenSetClient(sptr<ScreenSession>& screenSession);
 
     LowTempMode lowTemp_ {LowTempMode::UNKNOWN};
     std::mutex lowTempMutex_;
     std::mutex pcModeSwitchMutex_;
     std::atomic<DisplayGroupId> displayGroupNum_ { 1 };
+    std::unordered_map<FoldDisplayMode, int32_t> rotationCorrectionMap_;
+    std::shared_mutex rotationCorrectionMutex_;
 
     // Fold Screen duringcall
     bool duringCallState_ = false;

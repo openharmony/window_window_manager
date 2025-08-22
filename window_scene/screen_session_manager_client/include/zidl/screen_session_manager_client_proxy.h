@@ -67,6 +67,8 @@ public:
     void OnScreenModeChanged(ScreenModeChangeEvent screenModeChangeEvent) override;
 private:
     static inline BrokerDelegator<ScreenSessionManagerClientProxy> delegator_;
+    bool ScreenConnectWriteParam(SessionOption& SessionOption,
+        ScreenEvent screenEvent, MessageParcel& data);
 };
 } // namespace OHOS::Rosen
 

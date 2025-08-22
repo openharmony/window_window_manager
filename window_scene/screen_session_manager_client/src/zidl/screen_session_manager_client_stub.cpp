@@ -195,12 +195,18 @@ int ScreenSessionManagerClientStub::HandleOnScreenConnectionChanged(MessageParce
     auto innerName = data.ReadString();
     auto screenId = static_cast<ScreenId>(data.ReadUint64());
     auto screenEvent = static_cast<ScreenEvent>(data.ReadUint8());
+    auto size = data.ReadUint64();
+    std::unordered_map<FoldDisplayMode, int32_t> rotationCorrectionMap;
+    for (uint64_t i = 0; i < size; i++) {
+        rotationCorrectionMap.insert({static_cast<FoldDisplayMode>(data.ReadUint32()), data.ReadUint32()});
+    }
     SessionOption option = {
         .rsId_ = rsId,
         .name_ = name,
         .isExtend_ = isExtend,
         .innerName_ = innerName,
         .screenId_ = screenId,
+        .rotationCorrectionMap_ = rotationCorrectionMap
     };
     OnScreenConnectionChanged(option, screenEvent);
     return ERR_NONE;

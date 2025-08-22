@@ -421,7 +421,7 @@ void ScreenSessionManagerClient::UpdateScreenRotationProperty(ScreenId screenId,
     screenSession->SetScreenComponentRotation(directionInfo.screenRotation_);
     screenSession->UpdateToInputManager(bounds, directionInfo.notifyRotation_, directionInfo.rotation_,
         foldDisplayMode);
-    screenSession->UpdateTouchBoundsAndOffset();
+    screenSession->UpdateTouchBoundsAndOffset(foldDisplayMode);
     TLOGW(WmsLogTag::DMS, "superFoldStatus:%{public}d", currentstate_);
     if (currentstate_ != SuperFoldStatus::KEYBOARD) {
         screenSession->SetValidHeight(bounds.rect_.GetHeight());
@@ -1003,6 +1003,7 @@ bool ScreenSessionManagerClient::HandleScreenConnection(SessionOption option)
         screenSessionMap_[option.screenId_] = screenSession;
         extraScreenSessionMap_[option.screenId_] = screenSession;
     }
+    screenSession->SetRotationCorrectionMap(option.rotationCorrectionMap_);
     NotifyClientScreenConnect(screenSession);
     return true;
 }
