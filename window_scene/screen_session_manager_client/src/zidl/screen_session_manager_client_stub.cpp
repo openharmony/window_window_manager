@@ -195,10 +195,24 @@ int ScreenSessionManagerClientStub::HandleOnScreenConnectionChanged(MessageParce
     auto innerName = data.ReadString();
     auto screenId = static_cast<ScreenId>(data.ReadUint64());
     auto screenEvent = static_cast<ScreenEvent>(data.ReadUint8());
-    auto size = data.ReadUint64();
+    uint64_t size = 0;
+    if (!data.ReadUint64(size)) {
+        TLOGE(WmsLogTag::DMS, "Failed to read size");
+        return ERR_INVALID_DATA;
+    }
     std::unordered_map<FoldDisplayMode, int32_t> rotationCorrectionMap;
     for (uint64_t i = 0; i < size; i++) {
-        rotationCorrectionMap.insert({static_cast<FoldDisplayMode>(data.ReadUint32()), data.ReadUint32()});
+        uint32_t foldDisplayMode = 0;
+        if (!data.ReadUint32(foldDisplayMode)) {
+            TLOGE(WmsLogTag::DMS, "Failed to read foldDisplayMode");
+            return ERR_INVALID_DATA;
+        }
+        uint32_t offset = 0;
+        if (!data.ReadUint32(offset)) {
+            TLOGE(WmsLogTag::DMS, "Failed to read offset");
+            return ERR_INVALID_DATA;
+        }
+        rotationCorrectionMap.insert({static_cast<FoldDisplayMode>(foldDisplayMode), offset});
     }
     SessionOption option = {
         .rsId_ = rsId,
