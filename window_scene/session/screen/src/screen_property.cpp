@@ -29,6 +29,7 @@ constexpr int32_t TRUNCATE_TWO_DECIMALS = 100;
 constexpr int32_t TRUNCATE_THREE_DECIMALS = 1000;
 constexpr float SECONDARY_ROTATION_90 = 90.0F;
 constexpr float SECONDARY_ROTATION_270 = 270.0F;
+constexpr float SECONDARY_ROTATION_360 = 360.0F;
 constexpr int32_t SECONDARY_FULL_OFFSETY = 1136;
 constexpr int32_t FULL_STATUS_WIDTH = 2048;
 constexpr int32_t SCREEN_HEIGHT = 2232;
@@ -617,14 +618,18 @@ RRect ScreenProperty::GetPhysicalTouchBounds()
     return physicalTouchBounds_;
 }
 
-void ScreenProperty::SetPhysicalTouchBounds()
+void ScreenProperty::SetPhysicalTouchBounds(Rotation rotationOffset)
 {
     if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
         physicalTouchBounds_.rect_.width_ = bounds_.rect_.width_;
         physicalTouchBounds_.rect_.height_ = bounds_.rect_.height_;
         return;
     }
-    if (rotation_ == SECONDARY_ROTATION_90 || rotation_ == SECONDARY_ROTATION_270) {
+    float correctionValue = rotation_ - static_cast<float>(rotationOffset) * SECONDARY_ROTATION_90 +
+        SECONDARY_ROTATION_360;
+    float correctionRotation = static_cast<float>(static_cast<uint32_t>(correctionValue) % 360);
+    if (std::fabs(correctionRotation - SECONDARY_ROTATION_90) < FLT_EPSILON ||
+        std::fabs(correctionRotation - SECONDARY_ROTATION_270) < FLT_EPSILON) {
         physicalTouchBounds_.rect_.width_ = phyBounds_.rect_.width_;
         physicalTouchBounds_.rect_.height_ = phyBounds_.rect_.height_;
     } else {

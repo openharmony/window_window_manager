@@ -708,6 +708,7 @@ struct SessionOption {
     bool isExtend_;
     std::string innerName_;
     ScreenId screenId_;
+    std::unordered_map<FoldDisplayMode, int32_t> rotationCorrectionMap_;
 };
 
 /**
