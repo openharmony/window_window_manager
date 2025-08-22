@@ -40,6 +40,7 @@ constexpr uint32_t EXCEPTION_DPI = 10;
 constexpr uint32_t PC_MODE_DPI = 304;
 constexpr ScreenId SCREEN_ID_FULL = 0;
 constexpr ScreenId SCREEN_ID_MAIN = 5;
+bool CORRECTION_ENABLE = system::GetIntParameter<int32_t>("const.system.sensor_correction_enable", 0) == 1;
 }
 namespace {
     std::string g_errLog;
@@ -1551,7 +1552,6 @@ HWTEST_F(ScreenSessionManagerTest, SetDefaultScreenModeWhenCreateMirror, TestSiz
  */
 HWTEST_F(ScreenSessionManagerTest, GetOldDisplayModeRotation, TestSize.Level1)
 {
-    bool CORRECTION_ENABLE = system::GetIntParameter<int32_t>("const.system.sensor_correction_enable", 0) == 1;
     auto foldController = sptr<FoldScreenController>::MakeSptr(ssm_->displayInfoMutex_,
         ssm_->screenPowerTaskScheduler_);
     ASSERT_NE(foldController, nullptr);
@@ -1624,22 +1624,7 @@ HWTEST_F(ScreenSessionManagerTest, HandleScreenRotationAndBoundsWhenSetClient, T
     auto foldController = sptr<FoldScreenController>::MakeSptr(ssm_->displayInfoMutex_,
         ssm_->screenPowerTaskScheduler_);
     ASSERT_NE(foldController, nullptr);
-    DisplayPhysicalResolution physicalSize_full;
-    physicalSize_full.foldDisplayMode_ = FoldDisplayMode::FULL;
-    physicalSize_full.physicalWidth_ = 2048;
-    physicalSize_full.physicalHeight_ = 2232;
-    DisplayPhysicalResolution physicalSize_main;
-    physicalSize_main.foldDisplayMode_ = FoldDisplayMode::MAIN;
-    physicalSize_main.physicalWidth_ = 1008;
-    physicalSize_main.physicalHeight_ = 2232;
-    DisplayPhysicalResolution physicalSize_global_full;
-    physicalSize_global_full.foldDisplayMode_ = FoldDisplayMode::GLOBAL_FULL;
-    physicalSize_global_full.physicalWidth_ = 3184;
-    physicalSize_global_full.physicalHeight_ = 2232;
-    ScreenSceneConfig::displayPhysicalResolution_.emplace_back(physicalSize_full);
-    ScreenSceneConfig::displayPhysicalResolution_.emplace_back(physicalSize_main);
-    ScreenSceneConfig::displayPhysicalResolution_.emplace_back(physicalSize_global_full);
-    auto foldPolicy = foldController->GetFoldScreenPolicy(DisplayDeviceType::SECONDARY_DISPLAY_DEVICE);
+    auto foldPolicy = foldController->GetFoldScreenPolicy(DisplayDeviceType::SINGLE_DISPLAY_DEVICE);
     ASSERT_NE(foldPolicy, nullptr);
     foldPolicy->lastDisplayMode_ = FoldDisplayMode::GLOBAL_FULL;
     foldController->foldScreenPolicy_ = foldPolicy;
