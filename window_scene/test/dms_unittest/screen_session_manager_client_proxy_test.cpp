@@ -506,7 +506,7 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, OnScreenConnectionChangedMock, Tes
     proxy = sptr<ScreenSessionManagerClientProxy>::MakeSptr(remoteMocker);
     ASSERT_NE(proxy, nullptr);
     remoteMocker->SetRequestResult(ERR_INVALID_DATA);
-    ret = proxy->OnScreenConnectionChanged(option, screenEvent);
+    bool ret = proxy->OnScreenConnectionChanged(option, screenEvent);
     remoteMocker->SetRequestResult(ERR_NONE);
     // Pass all
     ret = proxy->OnScreenConnectionChanged(option, screenEvent);
