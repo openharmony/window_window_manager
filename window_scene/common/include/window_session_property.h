@@ -688,6 +688,7 @@ struct FreeMultiWindowConfig : public Parcelable {
     WindowMode defaultWindowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
     uint32_t maxMainFloatingWindowNumber_ = 0;
     DragResizeType defaultDragResizeType_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    AppWindowSceneConfig appWindowSceneConfig_;
 
     virtual bool Marshalling(Parcel& parcel) const override
     {

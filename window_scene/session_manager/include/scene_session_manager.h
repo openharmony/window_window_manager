@@ -823,7 +823,8 @@ private:
     void LoadWindowParameter();
     void ConfigWindowSceneXml();
     void ConfigWindowSceneXml(const WindowSceneConfig::ConfigItem& config);
-    void ConfigWindowEffect(const WindowSceneConfig::ConfigItem& effectConfig);
+    void ConfigWindowEffect(const WindowSceneConfig::ConfigItem& effectConfig,
+        AppWindowSceneConfig& AppWindowSceneConfig);
     void ConfigWindowImmersive(const WindowSceneConfig::ConfigItem& immersiveConfig);
     void ConfigKeyboardAnimation(const WindowSceneConfig::ConfigItem& animationConfig);
     void ConfigDefaultKeyboardAnimation(KeyboardSceneAnimationConfig& animationIn,

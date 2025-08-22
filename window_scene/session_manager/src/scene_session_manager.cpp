@@ -672,7 +672,7 @@ void SceneSessionManager::ConfigWindowSceneXml()
     const auto& config = WindowSceneConfig::GetConfig();
     WindowSceneConfig::ConfigItem item = config["windowEffect"];
     if (item.IsMap()) {
-        ConfigWindowEffect(item);
+        ConfigWindowEffect(item, appWindowSceneConfig_);
     }
 
     item = config["decor"];
@@ -827,6 +827,10 @@ void SceneSessionManager::ConfigFreeMultiWindow()
             systemConfig_.freeMultiWindowConfig_.defaultDragResizeType_ =
                 static_cast<DragResizeType>(static_cast<uint32_t>(param));
         }
+        item = freeMultiWindowConfig["windowEffect"];
+        if (item.IsMap()) {
+            ConfigWindowEffect(item, systemConfig_.freeMultiWindowConfig_.appWindowSceneConfig_);
+        }
     }
 }
 
@@ -837,6 +841,10 @@ void SceneSessionManager::LoadFreeMultiWindowConfig(bool enable)
         systemConfig_.defaultWindowMode_ = freeMultiWindowConfig.defaultWindowMode_;
         systemConfig_.decorWindowModeSupportType_ = freeMultiWindowConfig.decorWindowModeSupportType_;
         systemConfig_.isSystemDecorEnable_ = freeMultiWindowConfig.isSystemDecorEnable_;
+        appWindowSceneConfig_.focusedShadow_ = freeMultiWindowConfig.appWindowSceneConfig_.focusedShadow_;
+        appWindowSceneConfig_.unfocusedShadow_ = freeMultiWindowConfig.appWindowSceneConfig_.unfocusedShadow_;
+        appWindowSceneConfig_.focusedShadowDark_ = freeMultiWindowConfig.appWindowSceneConfig_.focusedShadowDark_;
+        appWindowSceneConfig_.unfocusedShadowDark_ = freeMultiWindowConfig.appWindowSceneConfig_.unfocusedShadowDark_;
     } else {
         const auto& config = WindowSceneConfig::GetConfig();
         auto item = config["decor"];
@@ -849,6 +857,10 @@ void SceneSessionManager::LoadFreeMultiWindowConfig(bool enable)
             (param == static_cast<int32_t>(WindowMode::WINDOW_MODE_FULLSCREEN) ||
              param == static_cast<int32_t>(WindowMode::WINDOW_MODE_FLOATING))) {
             systemConfig_.defaultWindowMode_ = static_cast<WindowMode>(static_cast<uint32_t>(param));
+        }
+        item = config["windowEffect"];
+        if (item.IsMap()) {
+            ConfigWindowEffect(item, appWindowSceneConfig_);
         }
     }
     systemConfig_.freeMultiWindowEnable_ = enable;
@@ -997,15 +1009,16 @@ static inline bool IsAtomicServiceFreeInstall(const SessionInfo& sessionInfo)
         (sessionInfo.want->GetFlags() & AAFwk::Want::FLAG_INSTALL_ON_DEMAND) == AAFwk::Want::FLAG_INSTALL_ON_DEMAND;
 }
 
-void SceneSessionManager::ConfigWindowEffect(const WindowSceneConfig::ConfigItem& effectConfig)
+void SceneSessionManager::ConfigWindowEffect(const WindowSceneConfig::ConfigItem& effectConfig,
+    AppWindowSceneConfig& appWindowSceneConfig)
 {
     AppWindowSceneConfig config;
     // config corner radius
     WindowSceneConfig::ConfigItem item = effectConfig["appWindows"]["cornerRadius"];
     if (item.IsMap()) {
         if (ConfigAppWindowCornerRadius(item["float"], config.floatCornerRadius_)) {
-            appWindowSceneConfig_ = config;
             // set default corner radius of window by system config
+            appWindowSceneConfig.floatCornerRadius_ = config.floatCornerRadius_;
             systemConfig_.defaultCornerRadius_ = config.floatCornerRadius_;
         }
     }
@@ -1014,34 +1027,34 @@ void SceneSessionManager::ConfigWindowEffect(const WindowSceneConfig::ConfigItem
     item = effectConfig["appWindows"]["shadow"]["focused"];
     if (item.IsMap()) {
         if (ConfigAppWindowShadow(item, config.focusedShadow_)) {
-            appWindowSceneConfig_.focusedShadow_ = config.focusedShadow_;
+            appWindowSceneConfig.focusedShadow_ = config.focusedShadow_;
         }
     }
     item = effectConfig["appWindows"]["shadow"]["unfocused"];
     if (item.IsMap()) {
         if (ConfigAppWindowShadow(item, config.unfocusedShadow_)) {
-            appWindowSceneConfig_.unfocusedShadow_ = config.unfocusedShadow_;
+            appWindowSceneConfig.unfocusedShadow_ = config.unfocusedShadow_;
         }
     }
-    AddAlphaToColor(appWindowSceneConfig_.focusedShadow_.alpha_, appWindowSceneConfig_.focusedShadow_.color_);
-    AddAlphaToColor(appWindowSceneConfig_.unfocusedShadow_.alpha_, appWindowSceneConfig_.unfocusedShadow_.color_);
+    AddAlphaToColor(appWindowSceneConfig.focusedShadow_.alpha_, appWindowSceneConfig.focusedShadow_.color_);
+    AddAlphaToColor(appWindowSceneConfig.unfocusedShadow_.alpha_, appWindowSceneConfig.unfocusedShadow_.color_);
 
     // config shadow in dark mode
     item = effectConfig["appWindows"]["shadowDark"]["focused"];
     if (item.IsMap()) {
         if (ConfigAppWindowShadow(item, config.focusedShadowDark_)) {
-            appWindowSceneConfig_.focusedShadowDark_ = config.focusedShadowDark_;
+            appWindowSceneConfig.focusedShadowDark_ = config.focusedShadowDark_;
         }
     }
     item = effectConfig["appWindows"]["shadowDark"]["unfocused"];
     if (item.IsMap()) {
         if (ConfigAppWindowShadow(item, config.unfocusedShadowDark_)) {
-            appWindowSceneConfig_.unfocusedShadowDark_ = config.unfocusedShadowDark_;
+            appWindowSceneConfig.unfocusedShadowDark_ = config.unfocusedShadowDark_;
         }
     }
-    AddAlphaToColor(appWindowSceneConfig_.focusedShadowDark_.alpha_, appWindowSceneConfig_.focusedShadowDark_.color_);
-    AddAlphaToColor(appWindowSceneConfig_.unfocusedShadowDark_.alpha_,
-        appWindowSceneConfig_.unfocusedShadowDark_.color_);
+    AddAlphaToColor(appWindowSceneConfig.focusedShadowDark_.alpha_, appWindowSceneConfig.focusedShadowDark_.color_);
+    AddAlphaToColor(appWindowSceneConfig.unfocusedShadowDark_.alpha_,
+        appWindowSceneConfig.unfocusedShadowDark_.color_);
 
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "successfully");
 }
