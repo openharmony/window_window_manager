@@ -585,7 +585,7 @@ WMError WindowImpl::MoveTo(int32_t x, int32_t y, bool isMoveToGlobal, MoveConfig
     return WMError::WM_OK;
 }
 
-WMError WindowImpl::Resize(uint32_t width, uint32_t height)
+WMError WindowImpl::Resize(uint32_t width, uint32_t height, const RectAnimationConfig& rectAnimationConfig)
 {
     return WMError::WM_OK;
 }
