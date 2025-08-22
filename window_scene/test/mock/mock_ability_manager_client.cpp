@@ -36,6 +36,8 @@ void MockAbilityManagerClient::SetUIExtensionSessionInfo(const UIExtensionSessio
 {
     g_uiExtensionSessionInfo = std::make_shared<UIExtensionSessionInfo>();
     g_uiExtensionSessionInfo->hostElementName.SetBundleName(sessionInfo.hostElementName.GetBundleName());
+    g_uiExtensionSessionInfo->persistentId = sessionInfo.persistentId;
+    g_uiExtensionSessionInfo->hostWindowId = sessionInfo.hostWindowId;
 }
 
 ErrCode AbilityManagerClient::GetUIExtensionRootHostInfo(const sptr<IRemoteObject> token,
@@ -52,6 +54,8 @@ ErrCode AbilityManagerClient::GetUIExtensionSessionInfo(const sptr<IRemoteObject
 {
     if (g_uiExtensionSessionInfo) {
         sessionInfo.hostElementName.SetBundleName(g_uiExtensionSessionInfo->hostElementName.GetBundleName());
+        sessionInfo.persistentId = g_uiExtensionSessionInfo->persistentId;
+        sessionInfo.hostWindowId = g_uiExtensionSessionInfo->hostWindowId;
     }
     return 0;
 }
