@@ -147,7 +147,7 @@ public:
     bool IsPadWindow() const override;
     bool IsPcOrFreeMultiWindowCapabilityEnabled() const override;
     bool IsPcOrPadFreeMultiWindowMode() const override;
-    bool IsPadAndNotFreeMutiWindowCompatibleMode() const override;
+    bool IsPadAndNotFreeMultiWindowCompatibleMode() const override;
     bool IsSceneBoardEnabled() const override;
     bool GetCompatibleModeInPc() const override;
     void HookCompatibleModeAvoidAreaNotify() override;

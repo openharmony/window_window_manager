@@ -624,7 +624,7 @@ napi_value JsWindowStage::OnSetWindowModal(napi_env env, napi_callback_info info
             "[window][setWindowModal]msg: invalid main window"));
         return NapiGetUndefined(env);
     }
-    if (window->IsPadAndNotFreeMutiWindowCompatibleMode()) {
+    if (window->IsPadAndNotFreeMultiWindowCompatibleMode()) {
         TLOGE(WmsLogTag::WMS_MAIN, "This is PcAppInPad, not support");
         return NapiGetUndefined(env);
     }
