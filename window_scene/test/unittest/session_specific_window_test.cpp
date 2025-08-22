@@ -715,6 +715,49 @@ HWTEST_F(SessionSpecificWindowTest, HandleSubWindowClick07, Function | SmallTest
         MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, false);
     EXPECT_EQ(hasNotifyManagerToRequestFocus, true);
 }
+
+/**
+ * @tc.name: HandleSubWindowClick08
+ * @tc.desc: HandleSubWindowClick
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionSpecificWindowTest, HandleSubWindowClick08, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+
+    SessionInfo info;
+    info.abilityName_ = "testSession1";
+    info.moduleName_ = "testSession2";
+    info.bundleName_ = "testSession3";
+    sptr<Session> parentSession = sptr<Session>::MakeSptr(info);
+
+    bool hasNotifyManagerToRaise = false;
+    parentSession->SetClickListener([&hasNotifyManagerToRaise](bool requestFocus, bool isClick) {
+        hasNotifyManagerToRaise = true;
+    });
+
+    session_->property_->SetRaiseEnabled(false);
+    hasNotifyManagerToRaise = false;
+    session_->HandleSubWindowClick(MMI::PointerEvent::POINTER_ACTION_HOVER_ENTER,
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, false);
+    EXPECT_EQ(hasNotifyManagerToRaise, false);
+
+    session_->SetParentSession(parentSession);
+    hasNotifyManagerToRaise = false;
+    session_->HandleSubWindowClick(MMI::PointerEvent::POINTER_ACTION_MOVE,
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, false);
+    EXPECT_EQ(hasNotifyManagerToRaise, false);
+
+    hasNotifyManagerToRaise = false;
+    session_->HandleSubWindowClick(MMI::PointerEvent::POINTER_ACTION_HOVER_ENTER,
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, false);
+    EXPECT_EQ(hasNotifyManagerToRaise, true);
+
+    hasNotifyManagerToRaise = false;
+    session_->HandleSubWindowClick(MMI::PointerEvent::POINTER_ACTION_DOWN,
+        MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, false);
+    EXPECT_EQ(hasNotifyManagerToRaise, true);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

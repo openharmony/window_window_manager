@@ -2442,7 +2442,7 @@ WSError Session::HandleSubWindowClick(int32_t action, int32_t sourceType, bool i
           GetPersistentId(), raiseEnabled, isPointDown, isPointDown);
     if (raiseEnabled && isPointDown && !isModal) {
         RaiseToAppTopForPointDown();
-    } else if (parentSession && !isPointMove) {
+    } else if (parentSession && isPointDown) {
         // sub window is forbidden to raise to top after click, but its parent should raise
         parentSession->NotifyClick(!IsScbCoreEnabled());
     }
