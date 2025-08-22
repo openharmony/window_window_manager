@@ -816,6 +816,8 @@ protected:
     /*
      * Window Property
      */
+    std::string colorMode_;
+    bool hasDarkRes_;
     std::unordered_set<std::string> containerColorList_;
     float lastSystemDensity_ = UNDEFINED_DENSITY;
     static std::atomic<bool> defaultDensityEnabledGlobalConfig_;
