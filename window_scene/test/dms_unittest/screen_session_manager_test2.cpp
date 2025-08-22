@@ -40,7 +40,7 @@ constexpr uint32_t EXCEPTION_DPI = 10;
 constexpr uint32_t PC_MODE_DPI = 304;
 constexpr ScreenId SCREEN_ID_FULL = 0;
 constexpr ScreenId SCREEN_ID_MAIN = 5;
-bool CORRECTION_ENABLE = system::GetIntParameter<int32_t>("const.system.sensor_correction_enable", 0) == 1;
+const bool CORRECTION_ENABLE = system::GetIntParameter<int32_t>("const.system.sensor_correction_enable", 0) == 1;
 }
 namespace {
     std::string g_errLog;
