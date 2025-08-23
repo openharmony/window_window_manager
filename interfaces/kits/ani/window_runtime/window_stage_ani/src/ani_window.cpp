@@ -2077,6 +2077,7 @@ void AniWindow::SetSystemBarProperties(ani_env* env, ani_object aniSystemBarProp
     if (!AniWindowUtils::SetSystemBarPropertiesFromAni(env, aniProperties, aniSystemBarPropertyFlags,
         aniSystemBarProperties, windowToken_)) {
         TLOGE(WmsLogTag::WMS_IMMS, "[ANI] Failed to convert parameter to systemBarProperties");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
         return;
     }
 
