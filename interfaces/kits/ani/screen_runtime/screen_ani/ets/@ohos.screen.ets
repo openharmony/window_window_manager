@@ -141,8 +141,31 @@ export function createVirtualScreen(options: VirtualScreenOption): Promise<Scree
     });
 }
 
+export function setVirtualScreenSurface(screenId: long, surfaceId: string, callback: AsyncCallback<void>): void {
+    taskpool.execute((): void => {
+        setVirtualScreenSurfaceInternal(screenId, surfaceId);
+    }).then(() => {
+        callback(null, undefined);
+    }).catch((err: NullishType) => {
+        callback(err as BusinessError, undefined);
+    });
+}
+
+export function setVirtualScreenSurface(screenId: long, surfaceId: string): Promise<void> {
+    return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) => {
+        taskpool.execute((): void => {
+            setVirtualScreenSurfaceInternal(screenId, surfaceId);
+        }).then(() => {
+            resolve(undefined);
+        }).catch((err: NullishType) => {
+            reject(err as BusinessError);
+        });
+    });
+}
+
 export native function getAllScreensInternal(screens: Array<Screen>): void;
 export native function createVirtualScreenInternal(options: VirtualScreenOption, screen: ScreenImpl): void;
+export native function setVirtualScreenSurfaceInternal(screenId: long, surfaceId: string): void;
 
 export interface Screen {
 
