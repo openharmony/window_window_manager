@@ -242,6 +242,19 @@ export function setMultiScreenRelativePosition(mainScreenOptions: MultiScreenPos
     });
 }
 
+export function setMultiScreenMode(primaryScreenId: long, secondaryScreenId: long,
+    secondaryScreenMode: MultiScreenMode): Promise<void> {
+    return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) => {
+        taskpool.execute((): void => {
+            setMultiScreenModeInternal(primaryScreenId, secondaryScreenId, secondaryScreenMode);
+        }).then(() => {
+            resolve(undefined);
+        }).catch((err: NullishType) => {
+            reject(err as BusinessError);
+        });
+    });
+}
+
 export native function getAllScreensInternal(screens: Array<Screen>): void;
 export native function createVirtualScreenInternal(options: VirtualScreenOption, screen: ScreenImpl): void;
 export native function setVirtualScreenSurfaceInternal(screenId: long, surfaceId: string): void;
@@ -250,6 +263,8 @@ export native function isScreenRotationLockedInternal(): boolean;
 export native function setScreenRotationLockedInternal(isLocked: boolean): void;
 export native function setMultiScreenRelativePositionInternal(mainScreenOptions: MultiScreenPositionOptions,
     secondaryScreenOptions: MultiScreenPositionOptions): void;
+export native function setMultiScreenModeInternal(primaryScreenId: long, secondaryScreenId: long,
+    secondaryScreenMode: MultiScreenMode): void;
 
 export interface Screen {
 
@@ -375,6 +390,12 @@ class MultiScreenPositionOptionsImpl implements MultiScreenPositionOptions{
     startX: long;
 
     startY: long;
+}
+
+export enum MultiScreenMode {
+    SCREEN_MIRROR = 0,
+
+    SCREEN_EXTEND = 1
 }
 
 export enum ScreenSourceMode {
