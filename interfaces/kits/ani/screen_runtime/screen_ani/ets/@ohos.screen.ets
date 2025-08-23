@@ -185,10 +185,33 @@ export function destroyVirtualScreen(screenId: long): Promise<void> {
     });
 }
 
+export function isScreenRotationLocked(callback: AsyncCallback<boolean>): void {
+    taskpool.execute((): boolean => {
+        return isScreenRotationLockedInternal();
+    }).then((ret: NullishType) => {
+        callback(null, ret as boolean);
+    }).catch((err: NullishType) => {
+        callback(err as BusinessError, undefined);
+    });
+}
+
+export function isScreenRotationLocked(): Promise<boolean> {
+    return new Promise<boolean>((resolve: (value: boolean) => void, reject: (error: BusinessError) => void ) => {
+        taskpool.execute((): boolean => {
+            return isScreenRotationLockedInternal();
+        }).then((ret: NullishType) => {
+            resolve(ret as boolean);
+        }).catch((err: NullishType) => {
+            reject(err as BusinessError);
+        });
+    });
+}
+
 export native function getAllScreensInternal(screens: Array<Screen>): void;
 export native function createVirtualScreenInternal(options: VirtualScreenOption, screen: ScreenImpl): void;
 export native function setVirtualScreenSurfaceInternal(screenId: long, surfaceId: string): void;
 export native function destroyVirtualScreenInternal(screenId: long): void;
+export native function isScreenRotationLockedInternal(): boolean;
 
 export interface Screen {
 
