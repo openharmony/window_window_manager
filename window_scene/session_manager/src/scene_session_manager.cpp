@@ -10856,14 +10856,14 @@ static void FillUnreliableWindowInfo(const sptr<SceneSession>& sceneSession,
 
 void SceneSessionManager::ApplyFeatureConfig(const std::unordered_map<std::string, std::string>& configMap)
 {
-    auto task = [this, where = __func__, configMap] {
-        for (const auto& [configName, configValue] : configMap ) {
+    auto task = [this, where = __func__, &configMap] {
+        for (const auto& [configName, configValue] : configMap) {
             TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s, configEntry is %{public}s: %{public}s",
                 where, configName.c_str(), configValue.c_str());
             auto convertIter = convertConfigMap.find(configName);
             if (convertIter != convertConfigMap.end()) {
                 auto convertFunc = convertIter->second;
-                (this->systemConfig_.*convertFunc)(systemConfig_, value);
+                (this->systemConfig_.*convertFunc)(systemConfig_, configValue);
             }
         }
         return WMError::WM_OK;
