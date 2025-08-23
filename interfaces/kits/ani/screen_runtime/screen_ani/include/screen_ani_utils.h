@@ -50,6 +50,9 @@ static ani_enum_item CreateAniEnum(ani_env* env, const char* enum_descriptor, an
 static DmErrorCode GetVirtualScreenOption(ani_env* env, ani_object options, VirtualScreenOption& option);
 
 static ani_status GetSurfaceFromAni(ani_env* env, ani_string surfaceIdAniStr, sptr<Surface>& surface);
+
+static GetMultiScreenPositionOptionsFromAni(ani_env* env, ani_object screenOptionsAni,
+    MultiScreenPositionOptions& mainScreenOptions);
 };
 }
 }
