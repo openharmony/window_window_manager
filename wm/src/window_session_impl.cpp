@@ -6321,8 +6321,9 @@ WMError WindowSessionImpl::HandleEscKeyEvent(const std::shared_ptr<MMI::KeyEvent
 
     if (!isConsumed && !escKeyEventTriggered_ && escKeyHasDown_) {
         bool escToBackFlag = keyEvent->HasFlag(MMI::InputEvent::EVENT_FLAG_KEYBOARD_ESCAPE);
-        if (!escToBackFlag) {
-            TLOGE(WmsLogTag::WMS_EVENT, "ESC no flag");
+        // noflag do not handle; UEC do not handle because it is handled in the host window
+        if (!escToBackFlag || property_->GetWindowType() == WindowType::WINDOW_TYPE_UI_EXTENSION) {
+            TLOGE(WmsLogTag::WMS_EVENT, "ESC no flag or UIExtension window");
             return WMError::WM_DO_NOTHING;
         }
 

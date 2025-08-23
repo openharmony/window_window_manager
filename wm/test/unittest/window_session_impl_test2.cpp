@@ -484,6 +484,7 @@ HWTEST_F(WindowSessionImplTest2, HandleEscKeyEvent001, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("HandleEscKeyEvent001");
     ASSERT_NE(window, nullptr);
+    ASSERT_NE(window->property_, nullptr);
 
     std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     ASSERT_NE(keyEvent, nullptr);
@@ -498,6 +499,9 @@ HWTEST_F(WindowSessionImplTest2, HandleEscKeyEvent001, TestSize.Level1)
     EXPECT_EQ(true, keyEvent->HasFlag(MMI::InputEvent::EVENT_FLAG_KEYBOARD_ESCAPE));
     WMError result = window->HandleEscKeyEvent(keyEvent, isConsumed);
     EXPECT_EQ(result, WMError::WM_OK);
+
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
+    ASSERT_EQ(WMError::WM_DO_NOTHING, window->HandleEscKeyEvent(keyEvent, isConsumed));
     window->Destroy();
 }
 
