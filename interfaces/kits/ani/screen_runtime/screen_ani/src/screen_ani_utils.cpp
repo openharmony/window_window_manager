@@ -274,5 +274,34 @@ ani_status ScreenAniUtils::GetSurfaceFromAni(ani_env* env, ani_string surfaceIdA
     }
     return ANI_OK;
 }
+
+ani_status ScreenAniUtils::GetMultiScreenPositionOptionsFromAni(ani_env* env, ani_object screenOptionsAni,
+    MultiScreenPositionOptions& mainScreenOptions)
+{
+    ani_long screenIdAni = 0;
+    auto ret = env->Object_GetFieldByName_Long(screenOptionsAni, "<property>id", &screenIdAni);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to get screenId.");
+        return ret;
+    }
+    mainScreenOptions.screenId_ = static_cast<ScreenId>(screenIdAni);
+
+    ani_long startXAni = 0;
+    ret = env->Object_GetFieldByName_Long(screenOptionsAni, "<property>startX", &startXAni);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to get startX.");
+        return ret;
+    }
+    mainScreenOptions.startX_ = static_cast<uint32_t>(startXAni);
+
+    ani_long startYAni = 0;
+    ret = env->Object_GetFieldByName_Long(screenOptionsAni, "<property>startY", &startYAni);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to get startY.");
+        return ret;
+    }
+    mainScreenOptions.startX_ = static_cast<uint32_t>(startYAni);
+    return ANI_OK;
+}
 }
 }

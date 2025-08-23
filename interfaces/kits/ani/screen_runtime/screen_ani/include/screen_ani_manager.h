@@ -43,6 +43,8 @@ public:
     static void DestroyVirtualScreen(ani_env* env, ani_long screenId);
     static ani_boolean IsScreenRotationLocked(ani_env* env);
     static void SetScreenRotationLocked(ani_env* env, ani_boolean isLocked);
+    static void SetMultiScreenRelativePosition(ani_env* env, ani_object mainScreenOptionsAni,
+        ani_object secondaryScreenOptionsAni);
 private:
     void OnRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
     void OnUnRegisterCallback(ani_env* env, ani_string type, ani_ref callback);

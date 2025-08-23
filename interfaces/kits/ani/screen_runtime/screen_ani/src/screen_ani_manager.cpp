@@ -384,6 +384,33 @@ void ScreenManagerAni::SetScreenRotationLocked(ani_env* env, ani_boolean isLocke
     TLOGNI(WmsLogTag::DMS, "SetScreenRotationLocked success");
 }
 
+void ScreenManagerAni::SetMultiScreenRelativePosition(ani_env* env, ani_object mainScreenOptionsAni,
+    ani_object secondaryScreenOptionsAni)
+{
+    MultiScreenPositionOptions mainScreenOptions;
+    auto ret = ScreenAniUtils::GetMultiScreenPositionOptionsFromAni(env, mainScreenOptionsAni, mainScreenOptions);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Get mainScreenOptions failed.");
+        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_ILLEGAL_PARAM, "Get mainScreenOptions failed.");
+        return;
+    }
+    MultiScreenPositionOptions secondScreenOption;
+    ret = ScreenAniUtils::GetMultiScreenPositionOptionsFromAni(env, secondaryScreenOptionsAni, secondScreenOption);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Get secondScreenOption failed.");
+        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_ILLEGAL_PARAM, "Get secondScreenOption failed.");
+        return;
+    }
+    DmErrorCode res = DM_JS_TO_ERROR_CODE_MAP.at(
+        SingletonContainer::Get<ScreenManager>().SetMultiScreenRelativePosition(mainScreenOptions, secondScreenOption));
+    if (res != DmErrorCode::DM_OK) {
+        TLOGE(WmsLogTag::DMS, "ScreenManager::SetMultiScreenRelativePosition failed.");
+        AniErrUtils::ThrowBusinessError(env, res, "ScreenManager::SetMultiScreenRelativePosition failed.");
+        return;
+    }
+    TLOGNI(WmsLogTag::DMS, "SetScreenRotationLocked success");
+}
+
 extern "C" {
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
@@ -420,6 +447,8 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(ScreenManagerAni::IsScreenRotationLocked)},
         ani_native_function {"setScreenRotationLockedInternal", nullptr,
             reinterpret_cast<void *>(ScreenManagerAni::SetScreenRotationLocked)},
+        ani_native_function {"setMultiScreenRelativePositionInternal", nullptr,
+            reinterpret_cast<void *>(ScreenManagerAni::SetMultiScreenRelativePosition)},
     };
     if ((ret = env->Namespace_BindNativeFunctions(nsp, funcs.data(), funcs.size()))) {
         TLOGE(WmsLogTag::DMS, "[ANI] bind namespace fail %{public}u", ret);
