@@ -411,6 +411,27 @@ void ScreenManagerAni::SetMultiScreenRelativePosition(ani_env* env, ani_object m
     TLOGNI(WmsLogTag::DMS, "SetScreenRotationLocked success");
 }
 
+void ScreenManagerAni::SetMultiScreenMode(ani_env* env, ani_long primaryScreenId, ani_long secondaryScreenId,
+    ani_enum_item secondaryScreenMode)
+{
+    ani_int screenModeInt = 0;
+    ani_status ret = env->EnumItem_GetValue_Int(secondaryScreenMode, &screenModeInt);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Get screenMode failed, ret: %{public}u", ret);
+        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to Get screenMode");
+        return;
+    }
+    MultiScreenMode screenMode;
+    screenMode = static_cast<MultiScreenMode>(screenModeInt);
+    DmErrorCode res = DM_JS_TO_ERROR_CODE_MAP.at(
+        SingletonContainer::Get<ScreenManager>().SetMultiScreenMode(static_cast<ScreenId>(primaryScreenId),
+            static_cast<ScreenId>(secondaryScreenId), screenMode));
+    if (res != DmErrorCode::DM_OK) {
+        TLOGE(WmsLogTag::DMS, "ScreenManager::SetMultiScreenMode failed.");
+        AniErrUtils::ThrowBusinessError(env, res, "ScreenManager::SetMultiScreenMode failed.");
+    }
+}
+
 extern "C" {
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
@@ -449,6 +470,8 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(ScreenManagerAni::SetScreenRotationLocked)},
         ani_native_function {"setMultiScreenRelativePositionInternal", nullptr,
             reinterpret_cast<void *>(ScreenManagerAni::SetMultiScreenRelativePosition)},
+        ani_native_function {"setMultiScreenModeInternal", nullptr,
+            reinterpret_cast<void *>(ScreenManagerAni::SetMultiScreenMode)},
     };
     if ((ret = env->Namespace_BindNativeFunctions(nsp, funcs.data(), funcs.size()))) {
         TLOGE(WmsLogTag::DMS, "[ANI] bind namespace fail %{public}u", ret);
