@@ -323,6 +323,30 @@ void ScreenManagerAni::CreateVirtualScreen(ani_env* env, ani_object options, ani
     }
 }
 
+void ScreenManagerAni::SetVirtualScreenSurface(ani_env* env, ani_long screenId, ani_string surfaceIdAni)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] start");
+    sptr<Surface> surface;
+    auto ret = ScreenAniUtils::GetSurfaceFromAni(env, surfaceIdAni, surface);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to get surface.");
+        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_ILLEGAL_PARAM, "Failed to get surface");
+        return;
+    }
+    if (surface == nullptr) {
+        TLOGE(WmsLogTag::DMS, "Set virtual screen surface failed, surface is nullptr.");
+        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_ILLEGAL_PARAM, "surface is nullptr");
+        return;
+    }
+    DmErrorCode res = DM_JS_TO_ERROR_CODE_MAP.at(
+        SingletonContainer::Get<ScreenManager>().SetVirtualScreenSurface(static_cast<ScreenId>(screenId), surface));
+    if (res != DmErrorCode::DM_OK) {
+        TLOGE(WmsLogTag::DMS, "ScreenManager::SetVirtualScreenSurface failed.");
+        AniErrUtils::ThrowBusinessError(env, res, "ScreenManager::SetVirtualScreenSurface failed.");
+        return;
+    }
+}
+
 extern "C" {
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
@@ -351,6 +375,8 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(ScreenManagerAni::GetAllScreens)}
         ani_native_function {"createVirtualScreenInternal", nullptr,
             reinterpret_cast<void *>(ScreenManagerAni::CreateVirtualScreen)},
+        ani_native_function {"setVirtualScreenSurfaceInternal", nullptr,
+            reinterpret_cast<void *>(ScreenManagerAni::SetVirtualScreenSurface)},
     };
     if ((ret = env->Namespace_BindNativeFunctions(nsp, funcs.data(), funcs.size()))) {
         TLOGE(WmsLogTag::DMS, "[ANI] bind namespace fail %{public}u", ret);
