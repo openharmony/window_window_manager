@@ -980,11 +980,9 @@ HWTEST_F(ScreenSessionManagerTest, UpdateSuperFoldRefreshRate, TestSize.Level1)
     ssm_->UpdateSuperFoldRefreshRate(screenSession, tempRefreshRate);
     EXPECT_TRUE(g_errLog.find("screenSession is nullptr") != std::string::npos);
 
-
     ScreenId screenId = 1050;
     DMRect area{0, 0, 600, 800};
     screenSession = new (std::nothrow) ScreenSession(screenId, ScreenProperty(), 0);
-
     sptr<ScreenSession> fakescreenSession = nullptr;
     screenSession->SetFakeScreenSession(fakescreenSession);
     ssm_->UpdateSuperFoldRefreshRate(screenSession, tempRefreshRate);
