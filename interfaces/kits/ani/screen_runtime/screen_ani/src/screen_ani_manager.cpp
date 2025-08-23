@@ -372,6 +372,18 @@ ani_boolean ScreenManagerAni::IsScreenRotationLocked(ani_env* env)
     return isLocked;
 }
 
+void ScreenManagerAni::SetScreenRotationLocked(ani_env* env, ani_boolean isLocked)
+{
+    auto ret = DM_JS_TO_ERROR_CODE_MAP.at(
+            SingletonContainer::Get<ScreenManager>().SetScreenRotationLocked(isLocked));
+    if (ret != DmErrorCode::DM_OK) {
+        TLOGE(WmsLogTag::DMS, "ScreenManager::SetScreenRotationLocked failed.");
+        AniErrUtils::ThrowBusinessError(env, ret, "ScreenManager::SetScreenRotationLocked failed.");
+        return;
+    }
+    TLOGNI(WmsLogTag::DMS, "SetScreenRotationLocked success");
+}
+
 extern "C" {
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
@@ -406,6 +418,8 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(ScreenManagerAni::DestroyVirtualScreen)},
         ani_native_function {"isScreenRotationLockedInternal", nullptr,
             reinterpret_cast<void *>(ScreenManagerAni::IsScreenRotationLocked)},
+        ani_native_function {"setScreenRotationLockedInternal", nullptr,
+            reinterpret_cast<void *>(ScreenManagerAni::SetScreenRotationLocked)},
     };
     if ((ret = env->Namespace_BindNativeFunctions(nsp, funcs.data(), funcs.size()))) {
         TLOGE(WmsLogTag::DMS, "[ANI] bind namespace fail %{public}u", ret);
