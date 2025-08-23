@@ -40,6 +40,7 @@ public:
     static void GetAllScreens(ani_env* env, ani_object screensAni);
     static void CreateVirtualScreen(ani_env* env, ani_object options, ani_object virtualScreen);
     static void SetVirtualScreenSurface(ani_env* env, ani_long screenId, ani_string surfaceIdAni);
+    static void DestroyVirtualScreen(ani_env* env, ani_long screenId);
 private:
     void OnRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
     void OnUnRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
