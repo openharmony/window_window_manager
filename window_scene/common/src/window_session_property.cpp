@@ -14,6 +14,7 @@
  */
 
 #include "common/include/window_session_property.h"
+#include "string_util.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
 #include "window_helper.h"
@@ -2583,6 +2584,12 @@ void WindowSessionProperty::UnmarshallingShadowsInfo(Parcel& parcel, WindowSessi
         return;
     }
     property->SetWindowShadows(*shadowsInfo);
+}
+
+void SystemSessionConfig::ConvertSupportUIExtensionSubWindow(const std::string& itemValue,
+    SystemSessionConfig& systemConfig)
+{
+    systemConfig.supportUIExtensionSubWindow_ = StringUtil::ConvertStringToBool(itemValue);
 }
 } // namespace Rosen
 } // namespace OHOS

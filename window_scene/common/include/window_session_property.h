@@ -27,8 +27,6 @@
 #include <cfloat>
 #include "pixel_map.h"
 #include "floating_ball_template_info.h"
-#include "string_util.h"
-#include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -804,7 +802,9 @@ struct SystemSessionConfig : public Parcelable {
     bool supportCreateFloatWindow_ = false;
     float defaultCornerRadius_ = 0.0f; // default corner radius of window set by system config
     bool supportUIExtensionSubWindow_ = false;
-    using ConvertSystemConfigFunc = void(SystemSessionConfig::*)(SystemSessionConfig& systemConfig, const std::string& configItem);
+    using ConvertSystemConfigFunc = void(SystemSessionConfig::*)(const std::string& configItem,
+        SystemSessionConfig& systemConfig);
+    void ConvertSupportUIExtensionSubWindow(const std::string& itemValue, SystemSessionConfig& systemConfig);
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
@@ -948,11 +948,6 @@ struct SystemSessionConfig : public Parcelable {
     bool IsPcOrPcMode() const
     {
         return IsPcWindow() || (IsPadWindow() && IsFreeMultiWindowMode());
-    }
-
-    void ConvertSupportUIExtensionSubWindow(SystemSessionConfig& systemConfig, const std::string& itemValue)
-    {
-        systemConfig.supportUIExtensionSubWindow_ = StringUtil::ConvertStringToBool(itemValue);
     }
 };
 } // namespace Rosen
