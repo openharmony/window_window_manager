@@ -59,31 +59,31 @@ export function save(options?: ScreenshotOptions): Promise<image.PixelMap> {
 native function saveSync(screenshotOptions?: ScreenshotOptions): image.PixelMap;
  
 export interface ScreenshotOptions {
-    screenRect: Rect;
+    screenRect?: Rect;
  
-    imageSize: Size;
+    imageSize?: Size;
  
-    rotation: int;
+    rotation?: int;
  
-    displayId: long;
+    displayId?: long;
  
-    isNotificationNeeded: boolean;
+    isNotificationNeeded?: boolean;
  
-    isCaptureFullOfScreen: boolean;
+    isCaptureFullOfScreen?: boolean;
 }
  
 export class ScreenshotOptionsImpl implements ScreenshotOptions{
-    screenRect: Rect;
+    screenRect?: Rect;
  
-    imageSize: Size;
+    imageSize?: Size;
  
-    rotation: int;
+    rotation?: int;
  
-    displayId: long;
+    displayId?: long;
  
-    isNotificationNeeded: boolean;
+    isNotificationNeeded?: boolean;
     
-    isCaptureFullOfScreen: boolean;
+    isCaptureFullOfScreen?: boolean;
 }
  
 export interface Size {
