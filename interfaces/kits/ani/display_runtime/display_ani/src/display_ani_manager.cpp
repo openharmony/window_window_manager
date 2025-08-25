@@ -159,6 +159,7 @@ void DisplayManagerAni::GetDisplayByIdSyncAni(ani_env* env, ani_object obj, ani_
     TLOGI(WmsLogTag::DMS, "[ANI] begin");
     if (displayId < 0) {
         TLOGE(WmsLogTag::DMS, "[ANI] Invalid displayId, less than 0");
+        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Invalid displayId");
         return;
     }
     sptr<Display> display = SingletonContainer::Get<DisplayManager>().GetDisplayById(static_cast<DisplayId>(displayId));
@@ -428,7 +429,7 @@ ani_boolean DisplayManagerAni::HasPrivateWindow(ani_env* env, ani_long displayId
     bool hasPrivateWindow = false;
     if (displayId < 0) {
         TLOGE(WmsLogTag::DMS, "Invalid displayId: %{public}" PRId64, displayId);
-        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_ILLEGAL_PARAM, "Invalid displayId");
+        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Invalid displayId");
         return hasPrivateWindow;
     }
     DmErrorCode errCode = DM_JS_TO_ERROR_CODE_MAP.at(
