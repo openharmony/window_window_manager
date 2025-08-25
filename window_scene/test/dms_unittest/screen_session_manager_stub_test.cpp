@@ -3332,6 +3332,24 @@ HWTEST_F(ScreenSessionManagerStubTest, SetScreenPrivacyWindowTagSwitch, TestSize
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, ERR_NONE);
 }
+
+/**
+ * @tc.name: NotifySwitchUserAnimationFinish
+ * @tc.desc: normal function, TRANS_ID_NOTIFY_SWITCH_USER_ANIMATION_FINISH test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerStubTest, NotifySwitchUserAnimationFinish, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    std::vector<ScreenId> screenIds;
+
+    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
+    uint32_t code = static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_NOTIFY_SWITCH_USER_ANIMATION_FINISH);
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, ERR_NONE);
+}
 }
 }
 }

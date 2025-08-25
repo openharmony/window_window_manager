@@ -1400,8 +1400,8 @@ DMError ScreenSessionManagerProxy::DestroyVirtualScreen(ScreenId screenId)
     return static_cast<DMError>(reply.ReadInt32());
 }
 
-DMError ScreenSessionManagerProxy::MakeMirror(ScreenId mainScreenId,
-                                              std::vector<ScreenId> mirrorScreenIds, ScreenId& screenGroupId)
+DMError ScreenSessionManagerProxy::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
+                                              ScreenId& screenGroupId, bool forceMirror)
 {
     TLOGW(WmsLogTag::DMS, "SCB: ENTER");
     sptr<IRemoteObject> remote = Remote();
@@ -4645,5 +4645,26 @@ DMError ScreenSessionManagerProxy::SetScreenPrivacyWindowTagSwitch(ScreenId scre
         return DMError::DM_ERROR_IPC_FAILED;
     }
     return static_cast<DMError>(reply.ReadInt32());
+}
+
+void ScreenSessionManagerProxy::NotifySwitchUserAnimationFinish()
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DMS, "remote is null");
+        return;
+    }
+    MessageParcel reply;
+    MessageParcel data;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_NOTIFY_SWITCH_USER_ANIMATION_FINISH),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
+        return;
+    }
 }
 } // namespace OHOS::Rosen

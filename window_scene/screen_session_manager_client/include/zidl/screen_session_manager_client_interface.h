@@ -59,6 +59,7 @@ public:
         TRANS_ID_ON_DUMP_SCREEN_SESSION,
         TRANS_ID_ON_BEFORE_PROPERTY_CHANGED,
         TRANS_ID_ON_SCREEN_MODE_CHANGED,
+        TRANS_ID_ON_ANIMATE_FINISH_TIMEOUT,
     };
 
     virtual void SwitchUserCallback(std::vector<int32_t> oldScbPids, int32_t currentScbPid) = 0;
@@ -100,6 +101,7 @@ public:
         ScreenCombination extendCombination) = 0;
     virtual std::string OnDumperClientScreenSessions() = 0;
     virtual void OnScreenModeChanged(ScreenModeChangeEvent screenModeChangeEvent) = 0;
+    virtual void OnAnimationFinish() = 0;
 };
 } // namespace OHOS::Rosen
 

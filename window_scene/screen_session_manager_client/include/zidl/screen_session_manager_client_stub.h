@@ -65,6 +65,7 @@ private:
     int HandleOnDumperClientScreenSessions(MessageParcel& data, MessageParcel& reply);
     int HandleOnBeforeScreenPropertyChange(MessageParcel& data, MessageParcel& reply);
     int HandleOnScreenModeChanged(MessageParcel& data, MessageParcel& reply);
+    int HandleOnAnimationFinish(MessageParcel& data, MessageParcel& reply);
 
     HandleScreenChangeMap HandleScreenChangeMap_ {};
 };

@@ -1001,4 +1001,25 @@ void ScreenSessionManagerClientProxy::OnScreenModeChanged(ScreenModeChangeEvent 
         return;
     }
 }
+
+void ScreenSessionManagerClientProxy::OnAnimationFinish()
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DMS, "remote is nullptr");
+        return;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(
+        ScreenSessionManagerClientMessage::TRANS_ID_ON_ANIMATE_FINISH_TIMEOUT), data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
+        return;
+    }
+}
 } // namespace OHOS::Rosen
