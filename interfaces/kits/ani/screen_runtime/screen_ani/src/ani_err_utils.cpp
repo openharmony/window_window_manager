@@ -82,8 +82,8 @@ static std::map<DmErrorCode, const char*> DM_ERROR_CODE_TO_ERROR_MSG_MAP {
 
 std::string AniErrUtils::GetErrorMsg(const DMError& errorCode)
 {
-    return DM_ERROR_TO_ERROR_MSG_MAP.find(errorCode) != DM_ERROR_TO_ERROR_MSG_MAP.end() ?
-        DM_ERROR_TO_ERROR_MSG_MAP.at(errorCode) : "";
+    auto it = DM_ERROR_TO_ERROR_MSG_MAP.find(errorCode);
+    return it != DM_ERROR_TO_ERROR_MSG_MAP.end() ? it->second : "";
 }
 
 std::string AniErrUtils::GetErrorMsg(const DmErrorCode& errorCode)

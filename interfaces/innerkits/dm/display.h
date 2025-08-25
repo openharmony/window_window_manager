@@ -153,6 +153,13 @@ public:
      * @return DM error codes.
      */
     DMError HasImmersiveWindow(bool& immersive);
+    
+    /**
+     * @brief get available area of the display.(the screen area without dock and statusbar)
+     * @param area available area of the screen.
+     * @return DMError
+     */
+    DMError GetAvailableArea(DMRect& area) const;
 
     /**
      * @brief Get the supported HDR format of the screen.
@@ -169,13 +176,6 @@ public:
      * @return DM_OK means get success, others means get failed.
      */
     DMError GetSupportedColorSpaces(std::vector<uint32_t>& colorSpaces) const;
-
-    /**
-     * @brief get available area of the display.(the screen area without dock and statusbar)
-     * @param area available area of the screen.
-     * @return DMError
-     */
-    DMError GetAvailableArea(DMRect& area) const;
 
     /**
      * @brief Get current display information, including foldstatus, displaymode, rotation, and orientation information.

@@ -59,7 +59,7 @@ void JsScreenListener::AddCallback(const std::string& type, napi_value jsListene
     napi_create_reference(env_, jsListenerObject, 1, &result);
     callbackRef.reset(reinterpret_cast<NativeReference*>(result));
     jsCallBack_[type].emplace_back(std::move(callbackRef));
-    TLOGI(WmsLogTag::DMS, "success jsCallBack_ size: %{public}u!",
+    TLOGI(WmsLogTag::DMS, "success, jsCallBack_ size: %{public}u!",
         static_cast<uint32_t>(jsCallBack_[type].size()));
 }
 
@@ -87,7 +87,7 @@ void JsScreenListener::RemoveCallback(napi_env env, const std::string& type, nap
             iter++;
         }
     }
-    TLOGI(WmsLogTag::DMS, "success jsCallBack_ size: %{public}u!",
+    TLOGI(WmsLogTag::DMS, "success, jsCallBack_ size: %{public}u!",
         static_cast<uint32_t>(listeners.size()));
 }
 

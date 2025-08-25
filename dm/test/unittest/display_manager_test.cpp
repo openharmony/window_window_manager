@@ -15,8 +15,12 @@
 
 #include <gtest/gtest.h>
 
+#define private public
+#define protected public
 #include "display_manager.cpp"
 #include "display_manager.h"
+#undef private
+#undef protected
 #include "display_manager_proxy.h"
 #include "dm_common.h"
 #include "mock_display_manager_adapter.h"
@@ -30,7 +34,6 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 using Mocker = SingletonMocker<DisplayManagerAdapter, MockDisplayManagerAdapter>;
-using MockerManager = SingletonMocker<DisplayManager, MockDisplayManger>;
 class DmMockScreenshotListener : public DisplayManager::IScreenshotListener {
 public:
     void OnScreenshot(const ScreenshotInfo info) override {}
@@ -88,6 +91,13 @@ static const int32_t EXECUTION_TIMES = 1;
 static const int32_t PIXELMAP_SIZE = 2;
 static const int32_t SDR_PIXELMAP = 0;
 static const int32_t HDR_PIXELMAP = 1;
+
+std::string g_errLog;
+void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
+    const char* msg)
+{
+    g_errLog = msg;
+}
 
 /**
  * @tc.name: Freeze01
@@ -388,6 +398,19 @@ HWTEST_F(DisplayManagerTest, GetDisplayById, TestSize.Level1)
     DisplayId displayId = -1;
     g_dmIsDestroyed = true;
     auto ret = DisplayManager::GetInstance().GetDisplayById(displayId);
+    ASSERT_EQ(ret, nullptr);
+}
+
+/**
+ * @tc.name: GetVisibleAreaDisplayInfoById
+ * @tc.desc: GetVisibleAreaDisplayInfoById fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetVisibleAreaDisplayInfoById, TestSize.Level1)
+{
+    DisplayId displayId = -1;
+    g_dmIsDestroyed = true;
+    auto ret = DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(displayId);
     ASSERT_EQ(ret, nullptr);
 }
 
@@ -1786,6 +1809,337 @@ HWTEST_F(DisplayManagerTest, GetVisibleAreaDisplayInfoById_ShouldReturnNull_When
 }
 
 /**
+ * @tc.name: ConvertRelativeCoordinateToGlobalNullDisplay
+ * @tc.desc: Test convert relative coordinate to global coordinate failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, ConvertRelativeCoordinateToGlobalNullDisplay, TestSize.Level1)
+{
+    RelativePosition relativePosition = {-1, {1, 2}};
+    Position globalPosition;
+    DMError errorCode = DisplayManager::GetInstance().ConvertRelativeCoordinateToGlobal(relativePosition,
+        globalPosition);
+    EXPECT_EQ(errorCode, DMError::DM_ERROR_ILLEGAL_PARAM);
+}
+
+/**
+ * @tc.name: ConvertRelativeCoordinateToGlobalSuccess
+ * @tc.desc: Test convert relative coordinate to global coordinate success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, ConvertRelativeCoordinateToGlobalSuccess, TestSize.Level1)
+{
+    RelativePosition relativePosition = {0, {10, 20}};
+    Position globalPosition;
+    DMError errorCode = DisplayManager::GetInstance().ConvertRelativeCoordinateToGlobal(relativePosition,
+        globalPosition);
+    EXPECT_EQ(errorCode, DMError::DM_OK);
+    EXPECT_EQ(globalPosition.x, 10);
+    EXPECT_EQ(globalPosition.y, 20);
+}
+
+/**
+ * @tc.name: ConvertRelativeCoordinateToGlobalOverflow
+ * @tc.desc: Test convert relative coordinate to global coordinate while add overflow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, ConvertRelativeCoordinateToGlobalOverflow, TestSize.Level1)
+{
+    DisplayId displayId = 100;
+    RelativePosition relativePosition = {displayId, {100, 200}};
+    Position globalPosition;
+    sptr<DisplayInfo> displayInfo = new DisplayInfo();
+    displayInfo->SetX(2147483647);
+    displayInfo->SetY(2147483647);
+    displayInfo->SetDisplaySourceMode(DisplaySourceMode::MAIN);
+    sptr<Display> display1 = new Display("displayMock", displayInfo);
+    DisplayManager::GetInstance().pImpl_->displayMap_.insert(std::make_pair(displayId, display1));
+    DisplayManager::GetInstance().pImpl_->needUpdateDisplayFromDMS_ = false;
+    auto currentTime = std::chrono::steady_clock::now();
+    DisplayManager::GetInstance().pImpl_->displayUptateTimeMap_[displayId] = currentTime;
+    DMError errorCode = DisplayManager::GetInstance().pImpl_->ConvertRelativeCoordinateToGlobal(relativePosition,
+        globalPosition);
+    EXPECT_EQ(errorCode, DMError::DM_ERROR_ILLEGAL_PARAM);
+    DisplayManager::GetInstance().pImpl_->displayMap_.erase(displayId);
+
+    displayId = 101;
+    relativePosition = {displayId, {100, 200}};
+    displayInfo->SetX(0);
+    displayInfo->SetY(2147483647);
+    displayInfo->SetDisplaySourceMode(DisplaySourceMode::MAIN);
+    sptr<Display> display2 = new Display("displayMock", displayInfo);
+    DisplayManager::GetInstance().pImpl_->displayMap_.insert(std::make_pair(displayId, display2));
+    DisplayManager::GetInstance().pImpl_->needUpdateDisplayFromDMS_ = false;
+    currentTime = std::chrono::steady_clock::now();
+    DisplayManager::GetInstance().pImpl_->displayUptateTimeMap_[displayId] = currentTime;
+    errorCode = DisplayManager::GetInstance().pImpl_->ConvertRelativeCoordinateToGlobal(relativePosition,
+        globalPosition);
+    EXPECT_EQ(errorCode, DMError::DM_ERROR_ILLEGAL_PARAM);
+    DisplayManager::GetInstance().pImpl_->displayMap_.erase(displayId);
+
+    displayId = 102;
+    relativePosition = {displayId, {-100, -200}};
+    displayInfo->SetX(-2147483648);
+    displayInfo->SetY(-2147483648);
+    displayInfo->SetDisplaySourceMode(DisplaySourceMode::MAIN);
+    sptr<Display> display3 = new Display("displayMock", displayInfo);
+    DisplayManager::GetInstance().pImpl_->displayMap_.insert(std::make_pair(displayId, display3));
+    DisplayManager::GetInstance().pImpl_->needUpdateDisplayFromDMS_ = false;
+    currentTime = std::chrono::steady_clock::now();
+    DisplayManager::GetInstance().pImpl_->displayUptateTimeMap_[displayId] = currentTime;
+    errorCode = DisplayManager::GetInstance().pImpl_->ConvertRelativeCoordinateToGlobal(relativePosition,
+        globalPosition);
+    EXPECT_EQ(errorCode, DMError::DM_ERROR_ILLEGAL_PARAM);
+    DisplayManager::GetInstance().pImpl_->displayMap_.erase(displayId);
+
+    displayId = 103;
+    relativePosition = {displayId, {-100, -200}};
+    displayInfo->SetX(0);
+    displayInfo->SetY(-2147483648);
+    displayInfo->SetDisplaySourceMode(DisplaySourceMode::MAIN);
+    sptr<Display> display4 = new Display("displayMock", displayInfo);
+    DisplayManager::GetInstance().pImpl_->displayMap_.insert(std::make_pair(displayId, display4));
+    DisplayManager::GetInstance().pImpl_->needUpdateDisplayFromDMS_ = false;
+    currentTime = std::chrono::steady_clock::now();
+    DisplayManager::GetInstance().pImpl_->displayUptateTimeMap_[displayId] = currentTime;
+    errorCode = DisplayManager::GetInstance().pImpl_->ConvertRelativeCoordinateToGlobal(relativePosition,
+        globalPosition);
+    EXPECT_EQ(errorCode, DMError::DM_ERROR_ILLEGAL_PARAM);
+    DisplayManager::GetInstance().pImpl_->displayMap_.erase(displayId);
+}
+
+/**
+ * @tc.name: ConvertRelativeCoordinateToGlobalNotMainMod
+ * @tc.desc: Test convert relative coordinate to global coordinate while not main source mode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, ConvertRelativeCoordinateToGlobalNotMainMod, TestSize.Level1)
+{
+    DisplayId displayId = 200;
+    RelativePosition relativePosition = {displayId, {100, 200}};
+    Position globalPosition;
+    sptr<DisplayInfo> displayInfo = new DisplayInfo();
+    displayInfo->SetX(0);
+    displayInfo->SetY(0);
+    displayInfo->SetDisplaySourceMode(DisplaySourceMode::NONE);
+    sptr<Display> display1 = new Display("displayMock", displayInfo);
+
+    DisplayManager::GetInstance().pImpl_->displayMap_.insert(std::make_pair(displayId, display1));
+    DisplayManager::GetInstance().pImpl_->needUpdateDisplayFromDMS_ = false;
+    auto currentTime = std::chrono::steady_clock::now();
+    DisplayManager::GetInstance().pImpl_->displayUptateTimeMap_[displayId] = currentTime;
+    std::cout << "start convert" << std::endl;
+    DMError errorCode = DisplayManager::GetInstance().pImpl_->ConvertRelativeCoordinateToGlobal(relativePosition,
+        globalPosition);
+    EXPECT_EQ(errorCode, DMError::DM_ERROR_ILLEGAL_PARAM);
+    DisplayManager::GetInstance().pImpl_->displayMap_.erase(displayId);
+}
+
+/**
+ * @tc.name: ConvertGlobalCoordinateToRelativeOutDisplay
+ * @tc.desc: Test convert global coordinate to relative coordinate failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, ConvertGlobalCoordinateToRelativeOutDisplay, TestSize.Level1)
+{
+    RelativePosition relativePosition;
+    Position globalPosition = {10000, 20000};
+    DMError errorCode = DisplayManager::GetInstance().ConvertGlobalCoordinateToRelative(globalPosition,
+        relativePosition);
+    EXPECT_EQ(errorCode, DMError::DM_OK);
+    EXPECT_EQ(relativePosition.displayId, 0);
+    EXPECT_EQ(relativePosition.position.x, 10000);
+    EXPECT_EQ(relativePosition.position.y, 20000);
+}
+
+/**
+ * @tc.name: ConvertGlobalCoordinateToRelativeIndisplay
+ * @tc.desc: Test convert global coordinate to relative coordinate success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, ConvertGlobalCoordinateToRelativeIndisplay, TestSize.Level1)
+{
+    RelativePosition relativePosition;
+    Position globalPosition = {10, 20};
+    DMError errorCode = DisplayManager::GetInstance().ConvertGlobalCoordinateToRelative(globalPosition,
+        relativePosition);
+    EXPECT_EQ(errorCode, DMError::DM_OK);
+    EXPECT_EQ(relativePosition.displayId, 0);
+    EXPECT_EQ(relativePosition.position.x, 10);
+    EXPECT_EQ(relativePosition.position.y, 20);
+}
+
+/**
+ * @tc.name: ConvertGlobalCoordinateToRelativeNullDisplay
+ * @tc.desc: Test convert global coordinate to relative coordinate while display is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, ConvertGlobalCoordinateToRelativeNullDisplay, TestSize.Level1)
+{
+    RelativePosition relativePosition;
+    Position globalPosition = {10000, 20000};
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), GetAllDisplayIds()).Times(1).WillOnce(Return(std::vector<DisplayId>{-1}));
+    DMError errorCode = DisplayManager::GetInstance().ConvertGlobalCoordinateToRelative(globalPosition,
+        relativePosition);
+    EXPECT_EQ(errorCode, DMError::DM_OK);
+    EXPECT_EQ(relativePosition.displayId, 0);
+    EXPECT_EQ(relativePosition.position.x, 10000);
+    EXPECT_EQ(relativePosition.position.y, 20000);
+}
+
+/**
+ * @tc.name: ConvertGlobalCoordinateToRelativeNotMainMode
+ * @tc.desc: Test convert global coordinate to relative coordinate while not main source mode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, ConvertGlobalCoordinateToRelativeNotMainMode, TestSize.Level1)
+{
+    DisplayId displayId = 300;
+    RelativePosition relativePosition;
+    Position globalPosition = {100, 200};
+    sptr<DisplayInfo> displayInfo = new DisplayInfo();
+    displayInfo->SetDisplaySourceMode(DisplaySourceMode::NONE);
+    sptr<Display> display1 = new Display("displayMock", displayInfo);
+
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    EXPECT_CALL(m->Mock(), GetAllDisplayIds()).Times(1).WillOnce(Return(std::vector<DisplayId>{displayId}));
+    DisplayManager::GetInstance().pImpl_->displayMap_.insert(std::make_pair(displayId, display1));
+    DisplayManager::GetInstance().pImpl_->needUpdateDisplayFromDMS_ = false;
+    auto currentTime = std::chrono::steady_clock::now();
+    DisplayManager::GetInstance().pImpl_->displayUptateTimeMap_[displayId] = currentTime;
+    DMError errorCode = DisplayManager::GetInstance().pImpl_->ConvertGlobalCoordinateToRelative(globalPosition,
+        relativePosition);
+    EXPECT_EQ(errorCode, DMError::DM_OK);
+    EXPECT_EQ(relativePosition.displayId, 0);
+    EXPECT_EQ(relativePosition.position.x, 100);
+    EXPECT_EQ(relativePosition.position.y, 200);
+    DisplayManager::GetInstance().pImpl_->displayMap_.erase(displayId);
+}
+
+/**
+ * @tc.name: ConvertGlobalCoordinateToRelativeWithDisplayIdInvalidDisplay
+ * @tc.desc: Test convert global coordinate to relative coordinate with ID failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, ConvertGlobalCoordinateToRelativeWithDisplayIdInvalidDisplay, TestSize.Level1)
+{
+    RelativePosition relativePosition;
+    Position globalPosition = {10, 20};
+    DisplayId displayId = -1;
+    DMError errorCode = DisplayManager::GetInstance().ConvertGlobalCoordinateToRelativeWithDisplayId(globalPosition,
+        displayId, relativePosition);
+    EXPECT_EQ(errorCode, DMError::DM_OK);
+    EXPECT_EQ(relativePosition.displayId, 0);
+    EXPECT_EQ(relativePosition.position.x, 10);
+    EXPECT_EQ(relativePosition.position.y, 20);
+}
+
+/**
+ * @tc.name: ConvertGlobalCoordinateToRelativeWithDisplayIdOutRange.
+ * @tc.desc: Test convert global coordinate to relative coordinate with ID out range.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, ConvertGlobalCoordinateToRelativeWithDisplayIdOutRange, TestSize.Level1)
+{
+    RelativePosition relativePosition;
+    Position globalPosition = {-10000, -20000};
+    DisplayId displayId = 0;
+    DMError errorCode = DisplayManager::GetInstance().ConvertGlobalCoordinateToRelativeWithDisplayId(globalPosition,
+        displayId, relativePosition);
+    EXPECT_EQ(errorCode, DMError::DM_OK);
+    EXPECT_EQ(relativePosition.displayId, 0);
+    EXPECT_EQ(relativePosition.position.x, -10000);
+    EXPECT_EQ(relativePosition.position.y, -20000);
+}
+
+/**
+ * @tc.name: ConvertGlobalCoordinateToRelativeWithDisplayIdInRange
+ * @tc.desc: Test convert global coordinate to relative coordinate with ID success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, ConvertGlobalCoordinateToRelativeWithDisplayIdInRange, TestSize.Level1)
+{
+    RelativePosition relativePosition;
+    Position globalPosition = {10, 20};
+    DisplayId displayId = 0;
+    DMError errorCode = DisplayManager::GetInstance().ConvertGlobalCoordinateToRelativeWithDisplayId(globalPosition,
+        displayId, relativePosition);
+    EXPECT_EQ(errorCode, DMError::DM_OK);
+    EXPECT_EQ(relativePosition.displayId, 0);
+    EXPECT_EQ(relativePosition.position.x, 10);
+    EXPECT_EQ(relativePosition.position.y, 20);
+}
+
+/**
+ * @tc.name: ConvertGlobalCoordinateToRelativeWithDisplayIdOverflow
+ * @tc.desc: Test convert global coordinate to relative coordinate with ID while add overflow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, ConvertGlobalCoordinateToRelativeWithDisplayIdOverflow, TestSize.Level1)
+{
+    DisplayId displayId = 400;
+    RelativePosition relativePosition;
+    Position globalPosition = {-100, -200};
+    sptr<DisplayInfo> displayInfo = new DisplayInfo();
+    displayInfo->SetX(2147483647);
+    displayInfo->SetY(2147483647);
+    displayInfo->SetDisplaySourceMode(DisplaySourceMode::MAIN);
+    sptr<Display> display1 = new Display("displayMock", displayInfo);
+
+    DisplayManager::GetInstance().pImpl_->displayMap_.insert(std::make_pair(displayId, display1));
+    DisplayManager::GetInstance().pImpl_->needUpdateDisplayFromDMS_ = false;
+    auto currentTime = std::chrono::steady_clock::now();
+    DisplayManager::GetInstance().pImpl_->displayUptateTimeMap_[displayId] = currentTime;
+    DMError errorCode = DisplayManager::GetInstance().pImpl_->ConvertGlobalCoordinateToRelativeWithDisplayId(
+        globalPosition, displayId, relativePosition);
+    EXPECT_EQ(errorCode, DMError::DM_ERROR_ILLEGAL_PARAM);
+    DisplayManager::GetInstance().pImpl_->displayMap_.erase(displayId);
+
+    displayId = 401;
+    displayInfo->SetX(0);
+    displayInfo->SetY(2147483647);
+    displayInfo->SetDisplaySourceMode(DisplaySourceMode::MAIN);
+    sptr<Display> display2 = new Display("displayMock", displayInfo);
+
+    DisplayManager::GetInstance().pImpl_->displayMap_.insert(std::make_pair(displayId, display2));
+    DisplayManager::GetInstance().pImpl_->needUpdateDisplayFromDMS_ = false;
+    currentTime = std::chrono::steady_clock::now();
+    DisplayManager::GetInstance().pImpl_->displayUptateTimeMap_[displayId] = currentTime;
+    errorCode = DisplayManager::GetInstance().pImpl_->ConvertGlobalCoordinateToRelativeWithDisplayId(globalPosition,
+        displayId, relativePosition);
+    EXPECT_EQ(errorCode, DMError::DM_ERROR_ILLEGAL_PARAM);
+    DisplayManager::GetInstance().pImpl_->displayMap_.erase(displayId);
+}
+
+/**
+ * @tc.name: ConvertGlobalCoordinateToRelativeWithDisplayIdNotMainMode
+ * @tc.desc: Test convert global coordinate to relative coordinate with ID while not main source mode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, ConvertGlobalCoordinateToRelativeWithDisplayIdNotMainMode, TestSize.Level1)
+{
+    DisplayId displayId = 500;
+    RelativePosition relativePosition;
+    Position globalPosition = {-100, -200};
+    sptr<DisplayInfo> displayInfo = new DisplayInfo();
+    displayInfo->SetX(0);
+    displayInfo->SetY(0);
+    displayInfo->SetDisplaySourceMode(DisplaySourceMode::NONE);
+    sptr<Display> display1 = new Display("displayMock", displayInfo);
+
+    DisplayManager::GetInstance().pImpl_->displayMap_.insert(std::make_pair(displayId, display1));
+    DisplayManager::GetInstance().pImpl_->needUpdateDisplayFromDMS_ = false;
+    auto currentTime = std::chrono::steady_clock::now();
+    DisplayManager::GetInstance().pImpl_->displayUptateTimeMap_[displayId] = currentTime;
+    DMError errorCode =
+        DisplayManager::GetInstance().pImpl_->ConvertGlobalCoordinateToRelativeWithDisplayId(globalPosition,
+            displayId, relativePosition);
+    EXPECT_EQ(errorCode, DMError::DM_ERROR_ILLEGAL_PARAM);
+    DisplayManager::GetInstance().pImpl_->displayMap_.erase(displayId);
+}
+
+/**
  * @tc.name: GetSnapshotByPicker_LockFailed_Test
  * @tc.desc: Test GetSnapshotByPicker when try_lock fails
  * @tc.type: FUNC
@@ -1870,11 +2224,11 @@ HWTEST_F(DisplayManagerTest, GetScreenshotreturnsnullptr, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetScreenHdrshot_ShouldReturnNullptrVector_WhenSnapshotFails
+ * @tc.name: GetScreenHDRshot_ShouldReturnNullptrVector_WhenSnapshotFails
  * @tc.desc: Test that GetScreenHDRshot returns a vector with two nullptrs when the snapshot fails.
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, GetScreenHdrshot_ShouldReturnNullptrVector_WhenSnapshotFails, TestSize.Level1)
+HWTEST_F(DisplayManagerTest, GetScreenHDRshot_ShouldReturnNullptrVector_WhenSnapshotFails, TestSize.Level1)
 {
     DisplayManager displayManager;
     DisplayId validDisplayId = DEFAULT_DISPLAY;
@@ -1896,11 +2250,11 @@ HWTEST_F(DisplayManagerTest, GetScreenHdrshot_ShouldReturnNullptrVector_WhenSnap
 }
  
 /**
- * @tc.name: GetScreenHdrshot_ShouldReturnSnapshotVector_WhenSnapshotSizeIsTwo
+ * @tc.name: GetScreenHDRshot_ShouldReturnSnapshotVector_WhenSnapshotSizeIsTwo
  * @tc.desc: Test that GetScreenHDRshot returns a vector with two nullptrs when snapshotSize is two.
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, GetScreenHdrshot_ShouldReturnSnapshotVector_WhenSnapshotSizeIsTwo, TestSize.Level1)
+HWTEST_F(DisplayManagerTest, GetScreenHDRshot_ShouldReturnSnapshotVector_WhenSnapshotSizeIsTwo, TestSize.Level1)
 {
     DisplayManager displayManager;
     DisplayManagerAdapter displayManagerAdapter;
@@ -1923,15 +2277,15 @@ HWTEST_F(DisplayManagerTest, GetScreenHdrshot_ShouldReturnSnapshotVector_WhenSna
 }
  
 /**
- * @tc.name: GetScreenHdrshot_GetDisplayHDRSnapshot
+ * @tc.name: GetScreenHDRshot_GetDisplayHDRSnapshot_DISPLAY_ID_INVALID
  * @tc.desc: Test that GetScreenHDRshot returns a vector when snapshotSize is two.
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, GetScreenHdrshot_GetDisplayHDRSnapshot, TestSize.Level1)
+HWTEST_F(DisplayManagerTest, GetScreenHDRshot_GetDisplayHDRSnapshot_DISPLAY_ID_INVALID, TestSize.Level1)
 {
     DisplayManager displayManager;
     DisplayManagerAdapter displayManagerAdapter;
-    DisplayId validDisplayId = DEFAULT_DISPLAY;
+    DisplayId validDisplayId = DISPLAY_ID_INVALID;
     DmErrorCode errorCode;
     bool isUseDma = false;
     bool isCaptureFullOfScreen = false;
@@ -1945,11 +2299,11 @@ HWTEST_F(DisplayManagerTest, GetScreenHdrshot_GetDisplayHDRSnapshot, TestSize.Le
 }
  
 /**
- * @tc.name: GetScreenHdrshot_GetDisplayHDRSnapshot001
+ * @tc.name: GetScreenHDRshot_GetDisplayHDRSnapshot001
  * @tc.desc: Test that GetScreenHDRshot returns a vector when snapshotSize is two.
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, GetScreenHdrshot_GetDisplayHDRSnapshot001, TestSize.Level1)
+HWTEST_F(DisplayManagerTest, GetScreenHDRshot_GetDisplayHDRSnapshot001, TestSize.Level1)
 {
     DisplayManager displayManager;
     DisplayManagerAdapter displayManagerAdapter;
@@ -2123,7 +2477,7 @@ HWTEST_F(DisplayManagerTest, GetCallingAbilityDisplayId_shouldReturnInvalid_When
  * @tc.desc: GetFoldDisplayMode returns UNKNOWN
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, ShouldNotReturnGLOBAL_FULL, TestSize.Level1)
+HWTEST_F(DisplayManagerTest, ShouldReturnUNKNOWN, TestSize.Level1)
 {
     DisplayManager displayManager;
     DisplayManagerAdapter displayManagerAdapter;
@@ -2132,7 +2486,7 @@ HWTEST_F(DisplayManagerTest, ShouldNotReturnGLOBAL_FULL, TestSize.Level1)
 
     auto result = displayManager.GetFoldDisplayModeForExternal();
 
-    EXPECT_NE(result, OHOS::Rosen::FoldDisplayMode::GLOBAL_FULL);
+    EXPECT_EQ(result, OHOS::Rosen::FoldDisplayMode::UNKNOWN);
 }
 
 /**
@@ -2370,10 +2724,34 @@ HWTEST_F(DisplayManagerTest, GetScreenHDRshotWithOption_WhenDisplayIdIsValidButS
     captureOption.displayId_ = DEFAULT_DISPLAY;
     DmErrorCode errorCode;
  
-    std::unique_ptr<MockerManager> m = std::make_unique<MockerManager>();
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
  
     EXPECT_CALL(m->Mock(), GetDisplayHDRSnapshotWithOption(_, _)).Times(1).WillOnce(
         Return(std::vector<std::shared_ptr<Media::PixelMap>> { nullptr, nullptr }));
+ 
+    std::vector<std::shared_ptr<Media::PixelMap>> result =
+        DisplayManager::GetInstance().GetScreenHDRshotWithOption(captureOption, errorCode);
+ 
+    EXPECT_EQ(result.size(), PIXELMAP_SIZE);
+    EXPECT_EQ(result[SDR_PIXELMAP], nullptr);
+    EXPECT_EQ(result[HDR_PIXELMAP], nullptr);
+}
+
+/**
+ * @tc.name: GetScreenHDRshotWithOption_GetScreenHDRshotWithOption_one
+ * @tc.desc: Test that the function returns a vector with two nullptrs when displayId is valid but snapshot fails.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetScreenHDRshotWithOption_GetScreenHDRshotWithOption_one, TestSize.Level1)
+{
+    CaptureOption captureOption;
+    captureOption.displayId_ = DEFAULT_DISPLAY;
+    DmErrorCode errorCode;
+ 
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+ 
+    EXPECT_CALL(m->Mock(), GetDisplayHDRSnapshotWithOption(_, _)).Times(1).WillOnce(
+        Return(std::vector<std::shared_ptr<Media::PixelMap>> { nullptr }));
  
     std::vector<std::shared_ptr<Media::PixelMap>> result =
         DisplayManager::GetInstance().GetScreenHDRshotWithOption(captureOption, errorCode);
@@ -2390,146 +2768,12 @@ HWTEST_F(DisplayManagerTest, GetScreenHDRshotWithOption_WhenDisplayIdIsValidButS
  */
 HWTEST_F(DisplayManagerTest, GetPrimaryDisplaySystemDpi, TestSize.Level1)
 {
+    float dpi = SingletonContainer::Get<DisplayManager>().GetPrimaryDisplaySystemDpi();
+    SingletonContainer::Get<DisplayManagerAdapter>().InitDMSProxy();
     sptr<DisplayInfo> displayInfo = new DisplayInfo();
-    float dpi = DisplayManager::GetInstance().GetPrimaryDisplaySystemDpi();
-    EXPECT_EQ(dpi, displayInfo->GetDensityInCurResolution());
-}
-
-/**
- * @tc.name: ConvertRelativeCoordinateToGlobalNullDisplay
- * @tc.desc: Test convert relative coordinate to global coordinate failed
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerTest, ConvertRelativeCoordinateToGlobalNullDisplay, TestSize.Level1)
-{
-    RelativePosition relativePosition = {100, {1, 2}};
-    Position globalPosition;
-    DMError errorCode = DisplayManager::GetInstance().ConvertRelativeCoordinateToGlobal(relativePosition,
-        globalPosition);
-    EXPECT_EQ(errorCode, DMError::DM_ERROR_ILLEGAL_PARAM);
-}
-
-/**
- * @tc.name: ConvertRelativeCoordinateToGlobalSuccess
- * @tc.desc: Test convert relative coordinate to global coordinate success
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerTest, ConvertRelativeCoordinateToGlobalSuccess, TestSize.Level1)
-{
-    RelativePosition relativePosition = {0, {10, 20}};
-    Position globalPosition;
-    DMError errorCode = DisplayManager::GetInstance().ConvertRelativeCoordinateToGlobal(relativePosition,
-        globalPosition);
-    EXPECT_EQ(errorCode, DMError::DM_OK);
-    EXPECT_EQ(globalPosition.x, 10);
-    EXPECT_EQ(globalPosition.y, 20);
-}
-
-/**
- * @tc.name: ConvertGlobalCoordinateToRelativeOutDisplay
- * @tc.desc: Test convert relative coordinate to global coordinate failed
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerTest, ConvertGlobalCoordinateToRelativeOutDisplay, TestSize.Level1)
-{
-    RelativePosition relativePosition;
-    Position globalPosition = {10000, 20000};
-    DMError errorCode = DisplayManager::GetInstance().ConvertGlobalCoordinateToRelative(globalPosition,
-        relativePosition);
-    EXPECT_EQ(errorCode, DMError::DM_OK);
-    EXPECT_EQ(relativePosition.displayId, 0);
-    EXPECT_EQ(relativePosition.position.x, 10000);
-    EXPECT_EQ(relativePosition.position.y, 20000);
-}
-
-/**
- * @tc.name: ConvertGlobalCoordinateToRelativeIndisplay
- * @tc.desc: Test convert relative coordinate to global coordinate success
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerTest, ConvertGlobalCoordinateToRelativeIndisplay, TestSize.Level1)
-{
-    RelativePosition relativePosition;
-    Position globalPosition = {10, 20};
-    DMError errorCode = DisplayManager::GetInstance().ConvertGlobalCoordinateToRelative(globalPosition,
-        relativePosition);
-    EXPECT_EQ(errorCode, DMError::DM_OK);
-    EXPECT_EQ(relativePosition.displayId, 0);
-    EXPECT_EQ(relativePosition.position.x, 10);
-    EXPECT_EQ(relativePosition.position.y, 20);
-}
-
-/**
- * @tc.name: ConvertGlobalCoordinateToRelativeNullDisplay
- * @tc.desc: Test convert relative coordinate to global coordinate while display is null.
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerTest, ConvertGlobalCoordinateToRelativeNullDisplay, TestSize.Level1)
-{
-    RelativePosition relativePosition;
-    Position globalPosition = {10000, 20000};
-    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    EXPECT_CALL(m->Mock(), GetAllDisplayIds()).Times(1).WillOnce(Return(std::vector<DisplayId>{-1}));
-    DMError errorCode = DisplayManager::GetInstance().ConvertGlobalCoordinateToRelative(globalPosition,
-        relativePosition);
-    EXPECT_EQ(errorCode, DMError::DM_OK);
-    EXPECT_EQ(relativePosition.displayId, 0);
-    EXPECT_EQ(relativePosition.position.x, 10000);
-    EXPECT_EQ(relativePosition.position.y, 20000);
-}
-
-/**
- * @tc.name: ConvertGlobalCoordinateToRelativeWithDisplayIdInvalidDisplay
- * @tc.desc: Test convert relative coordinate to global coordinate failed
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerTest, ConvertGlobalCoordinateToRelativeWithDisplayIdInvalidDisplay, TestSize.Level1)
-{
-    RelativePosition relativePosition;
-    Position globalPosition = {10, 20};
-    DisplayId displayId = 100;
-    DMError errorCode = DisplayManager::GetInstance().ConvertGlobalCoordinateToRelativeWithDisplayId(globalPosition,
-        displayId, relativePosition);
-    EXPECT_EQ(errorCode, DMError::DM_OK);
-    EXPECT_EQ(relativePosition.displayId, 0);
-    EXPECT_EQ(relativePosition.position.x, 10);
-    EXPECT_EQ(relativePosition.position.y, 20);
-}
-
-/**
- * @tc.name: ConvertGlobalCoordinateToRelativeWithDisplayIdOutRange
- * @tc.desc: Test convert relative coordinate to global coordinate failed
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerTest, ConvertGlobalCoordinateToRelativeWithDisplayIdOutRange, TestSize.Level1)
-{
-    RelativePosition relativePosition;
-    Position globalPosition = {-10000, -20000};
-    DisplayId displayId = 0;
-    DMError errorCode = DisplayManager::GetInstance().ConvertGlobalCoordinateToRelativeWithDisplayId(globalPosition,
-        displayId, relativePosition);
-    EXPECT_EQ(errorCode, DMError::DM_OK);
-    EXPECT_EQ(relativePosition.displayId, 0);
-    EXPECT_EQ(relativePosition.position.x, -10000);
-    EXPECT_EQ(relativePosition.position.y, -20000);
-}
-
-/**
- * @tc.name: ConvertGlobalCoordinateToRelativeWithDisplayIdInRange
- * @tc.desc: Test convert relative coordinate to global coordinate success
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerTest, ConvertGlobalCoordinateToRelativeWithDisplayIdInRange, TestSize.Level1)
-{
-    RelativePosition relativePosition;
-    Position globalPosition = {10, 20};
-    DisplayId displayId = 0;
-    DMError errorCode = DisplayManager::GetInstance().ConvertGlobalCoordinateToRelativeWithDisplayId(globalPosition,
-        displayId, relativePosition);
-    EXPECT_EQ(errorCode, DMError::DM_OK);
-    EXPECT_EQ(relativePosition.displayId, 0);
-    EXPECT_EQ(relativePosition.position.x, 10);
-    EXPECT_EQ(relativePosition.position.y, 20);
+    ASSERT_NE(displayInfo, nullptr);
+    float primaryDisplaySystemDpi = displayInfo->GetDefaultVirtualPixelRatio();
+    EXPECT_EQ(dpi, primaryDisplaySystemDpi);
 }
 
 /**
@@ -2544,6 +2788,44 @@ HWTEST_F(DisplayManagerTest, SetVirtualScreenAsDefault, TestSize.Level1)
     bool res = SingletonContainer::Get<DisplayManager>().SetVirtualScreenAsDefault(screenId);
     EXPECT_FALSE(res);
 #undef SCREENLESS_ENABLE
+}
+
+/**
+ * @tc.name: NotifyAvailableAreaChanged
+ * @tc.desc: Test NotifyAvailableAreaChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, NotifyAvailableAreaChanged, TestSize.Level1)
+{
+    DMRect rect = {2, 2, 2, 2};
+    DisplayId displayId = 1234;
+    std::set<sptr<DisplayManager::IAvailableAreaListener>> availableAreaSet;
+    auto displayManagerImpl = DisplayManager::GetInstance().pImpl_;
+    ASSERT_NE(displayManagerImpl, nullptr);
+    displayManagerImpl->NotifyAvailableAreaChanged(rect, displayId);
+    displayManagerImpl->availableAreaListenersMap_.insert({displayId, availableAreaSet});
+    displayManagerImpl->NotifyAvailableAreaChanged(rect, displayId);
+}
+
+/**
+ * @tc.name: NotifyScreenshot
+ * @tc.desc: Test NotifyScreenshot
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, NotifyScreenshot, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    auto displayManagerImpl = DisplayManager::GetInstance().pImpl_;
+    ASSERT_NE(displayManagerImpl, nullptr);
+    sptr<ScreenshotInfo> info = nullptr;
+    displayManagerImpl->NotifyScreenshot(info);
+    EXPECT_TRUE(g_errLog.find("info is null") != std::string::npos);
+    g_errLog.clear();
+    info = sptr<ScreenshotInfo>::MakeSptr();
+    displayManagerImpl->NotifyScreenshot(info);
+    EXPECT_TRUE(g_errLog.find("NotifyScreenshot trigger") != std::string::npos);
+    g_errLog.clear();
 }
 }
 } // namespace Rosen

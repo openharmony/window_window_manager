@@ -45,10 +45,10 @@ constexpr uint32_t BASELINE_DENSITY = 160;
 constexpr uint32_t HALF_SCREEN_PARAM = 2;
 const std::string DM_ERROR_MSG_NOT_SUPPORT_COOR_WHEN_WIRED_CASTING =
     "[wired casting]not support coordination when wired casting.";
-const std::string DM_ERROR_MSG_NOT_SUPPORT_COOR_WHEN_WIRLESS_CASTING =
+const std::string DM_ERROR_MSG_NOT_SUPPORT_COOR_WHEN_WIRELESS_CASTING =
     "[wireless casting]not support coordination when wireless casting.";
 const std::string DM_ERROR_MSG_NOT_SUPPORT_COOR_WHEN_RECORDING =
-    "[recording]not support coordination when wired recording.";
+    "[recording]not support coordination when recording.";
 const std::string DM_ERROR_MSG_NOT_SUPPORT_COOR_WHEN_TENTMODE =
     "[tentmode]not support coordination when tentmode.";
 }
@@ -266,7 +266,7 @@ const std::map<DMError, DmErrorCode> DM_JS_TO_ERROR_CODE_MAP {
 
 const std::map<DMError, std::string> DM_ERROR_JS_TO_ERROR_MESSAGE_MAP {
     {DMError::DM_ERROR_NOT_SUPPORT_COOR_WHEN_WIRED_CASTING,      DM_ERROR_MSG_NOT_SUPPORT_COOR_WHEN_WIRED_CASTING   },
-    {DMError::DM_ERROR_NOT_SUPPORT_COOR_WHEN_WIRLESS_CASTING,    DM_ERROR_MSG_NOT_SUPPORT_COOR_WHEN_WIRLESS_CASTING },
+    {DMError::DM_ERROR_NOT_SUPPORT_COOR_WHEN_WIRLESS_CASTING,    DM_ERROR_MSG_NOT_SUPPORT_COOR_WHEN_WIRELESS_CASTING },
     {DMError::DM_ERROR_NOT_SUPPORT_COOR_WHEN_RECORDING,          DM_ERROR_MSG_NOT_SUPPORT_COOR_WHEN_RECORDING       },
     {DMError::DM_ERROR_NOT_SUPPORT_COOR_WHEN_TENTMODE,           DM_ERROR_MSG_NOT_SUPPORT_COOR_WHEN_TENTMODE        },
 };
@@ -453,6 +453,18 @@ enum class FoldStatus: uint32_t {
 };
 
 /**
+ * @brief Enumerates the fold display mode.
+ */
+enum class FoldDisplayMode: uint32_t {
+    UNKNOWN = 0,
+    FULL = 1,
+    MAIN = 2,
+    SUB = 3,
+    COORDINATION = 4,
+    GLOBAL_FULL = 5,
+};
+
+/**
  * @brief Enumerates the super fold state change events.
  */
 enum class SuperFoldStatusChangeEvents : uint32_t {
@@ -485,18 +497,6 @@ enum class ExtendScreenConnectStatus: uint32_t {
     UNKNOWN = 0,
     CONNECT,
     DISCONNECT,
-};
-
-/**
- * @brief Enumerates the fold display mode.
- */
-enum class FoldDisplayMode: uint32_t {
-    UNKNOWN = 0,
-    FULL = 1,
-    MAIN = 2,
-    SUB = 3,
-    COORDINATION = 4,
-    GLOBAL_FULL = 5,
 };
 
 enum class DisplayType : uint32_t {

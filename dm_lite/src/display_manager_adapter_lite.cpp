@@ -97,24 +97,6 @@ sptr<DisplayInfo> DisplayManagerAdapterLite::GetDefaultDisplayInfo()
     return displayManagerServiceProxy_->GetDefaultDisplayInfo();
 }
 
-bool DisplayManagerAdapterLite::IsScreenLessDevice()
-{
-#ifdef SCREENLESS_ENABLE
-    return true;
-#else
-    return false;
-#endif
-}
-
-bool ScreenManagerAdapterLite::IsScreenLessDevice()
-{
-#ifdef SCREENLESS_ENABLE
-    return true;
-#else
-    return false;
-#endif
-}
-
 bool DisplayManagerAdapterLite::IsFoldable()
 {
     if (IsScreenLessDevice()) {
@@ -419,6 +401,15 @@ void BaseAdapterLite::Clear()
         displayManagerServiceProxy_->AsObject()->RemoveDeathRecipient(dmsDeath_);
     }
     isProxyValid_ = false;
+}
+
+bool BaseAdapterLite::IsScreenLessDevice()
+{
+#ifdef SCREENLESS_ENABLE
+    return true;
+#else
+    return false;
+#endif
 }
 
 bool DisplayManagerAdapterLite::GetKeyboardState()

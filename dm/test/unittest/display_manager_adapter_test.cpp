@@ -877,6 +877,32 @@ HWTEST_F(DisplayManagerAdapterTest, GetExpandAvailableArea, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetVirtualScreenAutoRotation
+ * @tc.desc: SetVirtualScreenAutoRotation test invalid ID
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, SetVirtualScreenAutoRotation, TestSize.Level1)
+{
+    ScreenId screenId = 1111;
+    bool enable = false;
+    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualScreenAutoRotation(screenId, enable);
+    EXPECT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: SetVirtualScreenAutoRotation02
+ * @tc.desc: SetVirtualScreenAutoRotation test main screen ID
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, SetVirtualScreenAutoRotation02, TestSize.Level1)
+{
+    ScreenId screenId = 0;
+    bool enable = false;
+    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualScreenAutoRotation(screenId, enable);
+    EXPECT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
+}
+
+/**
  * @tc.name: GetDisplayHDRSnapshotWithOption001
  * @tc.desc: GetDisplayHDRSnapshotWithOption test
  * @tc.type: FUNC
@@ -909,27 +935,45 @@ HWTEST_F(DisplayManagerAdapterTest, GetDisplayHDRSnapshot001, TestSize.Level1)
     DmErrorCode errorCode;
     bool isUseDma = false;
     bool isCaptureFullOfScreen = false;
- 
+
+    sptr<IScreenSessionManager> screenSessionManagerServiceProxyTmp =
+        SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_;
+    SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_ = nullptr;
     std::vector<std::shared_ptr<Media::PixelMap>> result =
         SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayHDRSnapshot(
             validDisplayId, errorCode, isUseDma, isCaptureFullOfScreen);
+    SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_ =
+        screenSessionManagerServiceProxyTmp;
  
     EXPECT_EQ(result.size(), PIXELMAP_SIZE);
     EXPECT_EQ(result[SDR_PIXELMAP], nullptr);
     EXPECT_EQ(result[HDR_PIXELMAP], nullptr);
 }
-
+ 
 /**
- * @tc.name: SetVirtualScreenAutoRotation
- * @tc.desc: SetVirtualScreenAutoRotation test
+ * @tc.name: GetDisplayHDRSnapshot002
+ * @tc.desc: GetDisplayHDRSnapshot test
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, SetVirtualScreenAutoRotation, TestSize.Level1)
+HWTEST_F(DisplayManagerAdapterTest, GetDisplayHDRSnapshot002, TestSize.Level1)
 {
-    ScreenId screenId = 1111;
-    bool enable = false;
-    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualScreenAutoRotation(screenId, enable);
-    EXPECT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
+    DisplayId validDisplayId = DEFAULT_DISPLAY;
+    DmErrorCode errorCode;
+    bool isUseDma = false;
+    bool isCaptureFullOfScreen = false;
+ 
+    sptr<IScreenSessionManager> screenSessionManagerServiceProxyTmp =
+        SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_;
+    SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_ = nullptr;
+    std::vector<std::shared_ptr<Media::PixelMap>> result =
+        SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayHDRSnapshot(
+            validDisplayId, errorCode, isUseDma, isCaptureFullOfScreen);
+    SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_ =
+        screenSessionManagerServiceProxyTmp;
+ 
+    EXPECT_EQ(result.size(), PIXELMAP_SIZE);
+    EXPECT_EQ(result[SDR_PIXELMAP], nullptr);
+    EXPECT_EQ(result[HDR_PIXELMAP], nullptr);
 }
 
 /**
@@ -944,7 +988,7 @@ HWTEST_F(DisplayManagerAdapterTest, SetScreenPrivacyWindowTagSwitch, TestSize.Le
     DMError res = SingletonContainer::Get<ScreenManagerAdapter>().SetScreenPrivacyWindowTagSwitch(screenId,
         privacyWindowTag, true);
     EXPECT_EQ(res, DMError::DM_OK);
-
+ 
     sptr<IScreenSessionManager> screenSessionManagerServiceProxyTmp =
         SingletonContainer::Get<ScreenManagerAdapter>().screenSessionManagerServiceProxy_;
     SingletonContainer::Get<ScreenManagerAdapter>().screenSessionManagerServiceProxy_ = nullptr;
@@ -965,6 +1009,22 @@ HWTEST_F(DisplayManagerAdapterTest, SetVirtualScreenAsDefault, TestSize.Level1)
     ScreenId screenId = 0;
     bool res = SingletonContainer::Get<DisplayManagerAdapter>().SetVirtualScreenAsDefault(screenId);
     EXPECT_FALSE(res);
+}
+
+/**
+ * @tc.name: GetLiveCreaseRegion
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, GetLiveCreaseRegion, TestSize.Level1)
+{
+    FoldCreaseRegion region;
+    DMError err = SingletonContainer::Get<DisplayManagerAdapter>().GetLiveCreaseRegion(region);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(err, DMError::DM_ERROR_DEVICE_NOT_SUPPORT);
+    } else {
+        EXPECT_EQ(err, DMError::DM_OK);
+    }
 }
 }
 }
