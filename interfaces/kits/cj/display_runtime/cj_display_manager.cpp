@@ -224,18 +224,18 @@ bool CJDisplayManager::IsCaptured()
 
 static void SetDisplayPhysicalResolutionObject(DisplayPhysicalResolution& resolution, RetStruct& ret)
 {
-    DisplayPhysicalResolution* dataPtr = static_cast<DisplayPhysicalResolution*>(ret.data);
-    dataPtr[ret.len].foldDisplayMode_ = resolution.foldDisplayMode_;
-    dataPtr[ret.len].physicalWidth_ = resolution.physicalWidth_;
-    dataPtr[ret.len].physicalHeight_ = resolution.physicalHeight_;
+    CDisplayPhysicalResolution* dataPtr = static_cast<CDisplayPhysicalResolution*>(ret.data);
+    dataPtr[ret.len].foldDisplayMode = static_cast<uint32_t>(resolution.foldDisplayMode_);
+    dataPtr[ret.len].physicalWidth = resolution.physicalWidth_;
+    dataPtr[ret.len].physicalHeight = resolution.physicalHeight_;
     ret.len++;
 }
 
 static void SetDisplayPhysicalResolutionArrayObject(
     std::vector<DisplayPhysicalResolution>& resolutionList, RetStruct& ret)
 {
-    DisplayPhysicalResolution* resolutions =
-        static_cast<DisplayPhysicalResolution*>(malloc(sizeof(DisplayPhysicalResolution) * resolutionList.size()));
+    CDisplayPhysicalResolution* resolutions =
+        static_cast<CDisplayPhysicalResolution*>(malloc(sizeof(CDisplayPhysicalResolution) * resolutionList.size()));
     if (resolutions == nullptr) {
         TLOGE(WmsLogTag::DMS,
             "[SetDisplayPhysicalResolutionArrayObject] ERROR Failed to create display physical resolution list.");
