@@ -242,7 +242,6 @@ bool MockSessionManagerService::SetSessionManagerService(const sptr<IRemoteObjec
     RegisterMockSessionManagerService();
     TLOGI(WmsLogTag::WMS_MULTI_USER, "sessionManagerService set success!");
     system::SetParameter(BOOTEVENT_WMS_READY.c_str(), "true");
-    //TODO 这里会反复获取并赋值默认的scb句柄
     GetSceneSessionManager();
 
     return true;
@@ -355,17 +354,14 @@ ErrCode MockSessionManagerService::RegisterSMSRecoverListener(const sptr<IRemote
     if (clientUserId != SYSTEM_USERID) {
         return ERR_WOULD_BLOCK;
     }
-    //TODO 这里现在只支持默认屏幕用户的
     bool isWMSConnected = false;
     {
         std::lock_guard<std::mutex> lock(wmsConnectionStatusLock_);
         if (wmsConnectionStatusMap_.find(defaultWMSUserId_) != wmsConnectionStatusMap_.end()) {
-            //TODO 这里回调只能返回默认scb的sessionManagerService
             isWMSConnected = wmsConnectionStatusMap_[defaultWMSUserId_];
         }
     }
     if (smsListener && isWMSConnected) {
-        //TODO 这里回调只能返回默认scb的sessionManagerService
         auto sessionManagerService = GetSessionManagerServiceByUserId(defaultWMSUserId_);
         if (sessionManagerService == nullptr) {
             TLOGE(WmsLogTag::WMS_RECOVER, "SessionManagerService is null");
@@ -440,7 +436,6 @@ ErrCode MockSessionManagerService::RegisterSMSLiteRecoverListener(const sptr<IRe
     if (clientUserId != SYSTEM_USERID) {
         return ERR_WOULD_BLOCK;
     }
-    //TODO 这里现在只支持默认屏幕用户的
     bool isWMSConnected = false;
     {
         std::lock_guard<std::mutex> lock(wmsConnectionStatusLock_);
@@ -498,7 +493,6 @@ void MockSessionManagerService::UnregisterSMSLiteRecoverListener(int32_t userId,
     }
 }
 
-// 下面三个函数是recover相关的，会通知SYSTEM_USERID和userId， scb ts侧会调用过来。
 ErrCode MockSessionManagerService::NotifySceneBoardAvailable()
 {
     if (!SessionPermission::IsSystemCalling()) {
@@ -705,7 +699,6 @@ int MockSessionManagerService::DumpSessionInfo(const std::vector<std::string>& a
     if (args.empty()) {
         return -1;  // WMError::WM_ERROR_INVALID_PARAM;
     }
-    // TODO 这里现在只能获取默认屏幕用户的dump信息
     auto sessionManagerService = GetSessionManagerServiceByUserId(defaultWMSUserId_);
     if (sessionManagerService == nullptr) {
         WLOGFE("sessionManagerService is nullptr");
@@ -798,7 +791,6 @@ bool MockSessionManagerService::SMSDeathRecipient::IsSceneBoardTestMode()
 void MockSessionManagerService::GetProcessSurfaceNodeIdByPersistentId(const int32_t pid,
     const std::vector<uint64_t>& windowIdList, std::vector<uint64_t>& surfaceNodeIds)
 {
-    //TODO 这里现在只支持默认屏幕用户的
     auto sessionManagerService = GetSessionManagerServiceByUserId(defaultWMSUserId_);
     if (sessionManagerService == nullptr) {
         WLOGFE("sessionManagerService is nullptr");
@@ -833,7 +825,6 @@ void MockSessionManagerService::GetProcessSurfaceNodeIdByPersistentId(const int3
 
 void MockSessionManagerService::AddSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds)
 {
-     //TODO 这里现在只支持默认屏幕用户的
     auto sessionManagerService = GetSessionManagerServiceByUserId(defaultWMSUserId_);
     if (sessionManagerService == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sessionManagerService is nullptr");
@@ -859,7 +850,6 @@ void MockSessionManagerService::AddSkipSelfWhenShowOnVirtualScreenList(const std
 
 void MockSessionManagerService::RemoveSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds)
 {
-     //TODO 这里现在只支持默认屏幕用户的
     auto sessionManagerService = GetSessionManagerServiceByUserId(defaultWMSUserId_);
     if (sessionManagerService == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sessionManagerService is nullptr");
@@ -890,7 +880,6 @@ void MockSessionManagerService::SetScreenPrivacyWindowTagSwitch(
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "PrivacyWindowTags is empty");
         return;
     }
-    //TODO 这里现在只支持默认屏幕用户的  这个方法还有个screenId
     auto sessionManagerService = GetSessionManagerServiceByUserId(defaultWMSUserId_);
     if (sessionManagerService == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sessionManagerService is nullptr");
