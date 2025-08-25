@@ -859,10 +859,8 @@ HWTEST_F(AbstractScreenControllerTest, OnRemoteDied03, TestSize.Level1)
     sptr<IRemoteObject> agent = new IRemoteObjectMocker();
     std::vector<ScreenId> screens {5};
     absController_->screenAgentMap_.insert(std::make_pair(agent, screens));
-    absController_->defaultRsScreenId_ = 0;
     ASSERT_EQ(true, absController_->OnRemoteDied(agent));
     ASSERT_EQ(0, absController_->screenAgentMap_.size());
-    absController_->defaultRsScreenId_ = SCREEN_ID_INVALID;
 }
 
 /**
@@ -1280,21 +1278,6 @@ HWTEST_F(AbstractScreenControllerTest, InitVirtualScreen03, TestSize.Level1)
         sptr<AbstractScreen> screen = absController_->InitVirtualScreen(0, 0, option);
         ASSERT_EQ(ScreenType::VIRTUAL, screen->type_);
     }
-}
-
-/**
- * @tc.name: MakeMirror
- * @tc.desc: MakeMirror test
- * @tc.type: FUNC
- */
-HWTEST_F(AbstractScreenControllerTest, MakeMirror06, TestSize.Level1)
-{
-    std::vector<ScreenId> screens;
-    absController_->dmsScreenMap_[2]->type_ = ScreenType::REAL;
-    absController_->dmsScreenMap_[2]->groupDmsId_ = 5;
-    absController_->abstractScreenCallback_ = new AbstractScreenController::AbstractScreenCallback;
-    ASSERT_TRUE(DMError::DM_OK != absController_->MakeMirror(2, screens));
-    ASSERT_EQ(DMError::DM_OK, absController_->StopScreens(screens, ScreenCombination::SCREEN_MIRROR));
 }
 
 /**

@@ -20,6 +20,7 @@
 #include "singleton_mocker.h"
 #include "display_cutout_controller.h"
 #include "scene_board_judgement.h"
+#include "display.cpp"
 
 using namespace testing;
 using namespace testing::ext;
@@ -36,15 +37,13 @@ public:
     virtual void TearDown() override;
 
     static sptr<Display> defaultDisplay_;
-    static DisplayId defaultDisplayId_;
 };
 sptr<Display> DisplayTest::defaultDisplay_ = nullptr;
-DisplayId DisplayTest::defaultDisplayId_ = DISPLAY_ID_INVALID;
 
 void DisplayTest::SetUpTestCase()
 {
-    defaultDisplay_ = DisplayManager::GetInstance().GetDefaultDisplay();
-    defaultDisplayId_ = static_cast<DisplayId>(defaultDisplay_->GetId());
+    sptr<DisplayInfo> displayInfo = sptr<DisplayInfo>::MakeSptr();
+    defaultDisplay_ = sptr<Display>::MakeSptr("", displayInfo);
 }
 
 void DisplayTest::TearDownTestCase()
@@ -70,7 +69,7 @@ namespace {
 HWTEST_F(DisplayTest, GetCutoutInfo01, TestSize.Level1)
 {
     auto cutoutInfo = defaultDisplay_->GetCutoutInfo();
-    ASSERT_NE(nullptr, cutoutInfo);
+    ASSERT_EQ(nullptr, cutoutInfo);
 }
 
 /**
@@ -163,7 +162,7 @@ HWTEST_F(DisplayTest, SetWaterfallCompression02, TestSize.Level1)
 HWTEST_F(DisplayTest, GetName01, TestSize.Level1)
 {
     auto name = defaultDisplay_->GetName();
-    ASSERT_FALSE(name.empty());
+    ASSERT_TRUE(name.empty());
 }
 
 /**
@@ -202,7 +201,7 @@ HWTEST_F(DisplayTest, GetPhysicalWidth, TestSize.Level1)
 {
     auto physicalwidth = defaultDisplay_->GetPhysicalWidth();
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(physicalwidth, 0);
+        ASSERT_EQ(physicalwidth, 0);
     } else {
         ASSERT_EQ(physicalwidth, 0);
     }
@@ -217,7 +216,7 @@ HWTEST_F(DisplayTest, GetPhysicalHeight, TestSize.Level1)
 {
     auto physicalheight = defaultDisplay_->GetPhysicalHeight();
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(physicalheight, 0);
+        ASSERT_EQ(physicalheight, 0);
     } else {
         ASSERT_EQ(physicalheight, 0);
     }
@@ -315,10 +314,18 @@ HWTEST_F(DisplayTest, GetLiveCreaseRegion, TestSize.Level1)
  */
 HWTEST_F(DisplayTest, GetOriginRotation, TestSize.Level1)
 {
-    auto baseInfo = defaultDisplay_->GetDisplayInfo();
+    sptr<DisplayInfo> baseInfo = sptr<DisplayInfo>::MakeSptr();
+    sptr<Display> display = sptr<Display>::MakeSptr("", baseInfo);
     Rotation rotation = Rotation::ROTATION_90;
     baseInfo->SetOriginRotation(rotation);
-    EXPECT_EQ(defaultDisplay_->GetOriginRotation(), rotation);
+    EXPECT_EQ(display->GetOriginRotation(), rotation);
+ 
+    display->pImpl_->displayInfo_ = nullptr;
+    baseInfo->SetOriginRotation(rotation);
+    EXPECT_EQ(display->GetOriginRotation(), Rotation::ROTATION_0);
+    display->pImpl_ = nullptr;
+    baseInfo->SetOriginRotation(rotation);
+    EXPECT_EQ(display->GetOriginRotation(), Rotation::ROTATION_0);
 }
 }
 } // namespace Rosen

@@ -128,7 +128,7 @@ void CJDisplayListener::OnFoldAngleChanged(std::vector<float> foldAngles)
     std::lock_guard<std::mutex> lock(mtx_);
     TLOGI(WmsLogTag::DMS, "called");
     if (cjCallBack_.empty()) {
-        TLOGE(WmsLogTag::DMS, "Cnot register!");
+        TLOGE(WmsLogTag::DMS, "not register!");
         return;
     }
     if (cjCallBack_.find(EVENT_FOLD_ANGLE_CHANGED) == cjCallBack_.end()) {

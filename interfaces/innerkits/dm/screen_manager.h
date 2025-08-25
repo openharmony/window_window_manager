@@ -257,6 +257,15 @@ public:
     DMError SetScreenPrivacyMaskImage(ScreenId screenId, const std::shared_ptr<Media::PixelMap>& privacyMaskImg);
 
     /**
+     * @brief Set canvas auto rotate
+     *
+     * @param screenId Screen id.
+     * @param canvasRotation auto rotate
+     * @return DM_OK means set success, others means set failed.
+     */
+    DMError SetVirtualMirrorScreenCanvasRotation(ScreenId screenId, bool canvasRotation);
+
+    /**
      * @brief Resize virtual screen
      *
      * @param screenId the id of virtual screen to be resized.
@@ -265,15 +274,6 @@ public:
      * @return DM_OK means set success, others means set failed.
      */
     DMError ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height);
-
-    /**
-     * @brief Set buffer auto rotate
-     *
-     * @param screenId Screen id.
-     * @param bufferRotation auto rotate
-     * @return DM_OK means set success, others means set failed.
-     */
-    DMError SetVirtualMirrorScreenCanvasRotation(ScreenId screenId, bool canvasRotation);
 
     /**
      * @brief Set virtual screen scale mode
@@ -459,7 +459,7 @@ public:
      *
      * @param screenId virtual screen id.
      * @param enable True means enable, false means disable.
-     * @return DM_OK means set success, others means faild.
+     * @return DM_OK means set success, others means failed.
      */
     DMError SetVirtualScreenAutoRotation(ScreenId screenId, bool enable);
 
@@ -469,7 +469,7 @@ public:
      * @param screenId virtual screen id.
      * @param privacyWindowTag tag of the privacy window.
      * @param enable True means enable, false means disable.
-     * @return DM_OK means set success, others means faild.
+     * @return DM_OK means set success, others means failed.
      */
     DMError SetScreenPrivacyWindowTagSwitch(ScreenId screenId, const std::vector<std::string>& privacyWindowTag,
         bool enable);

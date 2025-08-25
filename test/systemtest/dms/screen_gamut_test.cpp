@@ -35,7 +35,8 @@ sptr<Screen> ScreenGamutTest::defaultScreen_ = nullptr;
 
 void ScreenGamutTest::SetUpTestCase()
 {
-    auto screens = ScreenManager::GetInstance().GetAllScreens();
+    std::vector<sptr<Screen>> screens;
+    ScreenManager::GetInstance().GetAllScreens(screens);
     if (screens.size() > 0) {
         defaultScreen_ = screens[0];
     }

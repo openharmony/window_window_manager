@@ -151,7 +151,7 @@ JsDisplay::JsDisplay(const sptr<Display>& display) : display_(display)
 
 JsDisplay::~JsDisplay()
 {
-    TLOGI(WmsLogTag::DMS, "JsDisplay::~JsDisplay is called");
+    TLOGI(WmsLogTag::DMS, "called");
 }
 
 void JsDisplay::Finalizer(napi_env env, void* data, void* hint)
@@ -168,10 +168,10 @@ void JsDisplay::Finalizer(napi_env env, void* data, void* hint)
         return;
     }
     DisplayId displayId = display->GetId();
-    TLOGI(WmsLogTag::DMS, "displayId : %{public}" PRIu64"", displayId);
+    TLOGD(WmsLogTag::DMS, "displayId : %{public}" PRIu64"", displayId);
     std::lock_guard<std::recursive_mutex> lock(g_mutex);
     if (g_JsDisplayMap.find(displayId) != g_JsDisplayMap.end()) {
-        TLOGI(WmsLogTag::DMS, "Display is destroyed: %{public}" PRIu64"", displayId);
+        TLOGI(WmsLogTag::DMS, "destroyed: %{public}" PRIu64"", displayId);
         g_JsDisplayMap.erase(displayId);
     }
 }
@@ -287,7 +287,7 @@ napi_value JsDisplay::OnRegisterDisplayManagerCallback(napi_env env, napi_callba
 DMError JsDisplay::RegisterDisplayListenerWithType(napi_env env, const std::string& type, napi_value value)
 {
     if (IsCallbackRegistered(env, type, value)) {
-        TLOGI(WmsLogTag::DMS, "callback already registered!");
+        TLOGE(WmsLogTag::DMS, "callback already registered!");
         return DMError::DM_OK;
     }
     std::unique_ptr<NativeReference> callbackRef;
@@ -401,8 +401,8 @@ DMError JsDisplay::UnRegisterDisplayListenerWithType(napi_env env, const std::st
                 ret = DMError::DM_ERROR_INVALID_PARAM;
             }
             jsCbMap_[type].erase(it++);
-            TLOGI(WmsLogTag::DMS, "unregister display listener with type %{public}s  ret: %{public}u", type.c_str(),
-                ret);
+            TLOGI(WmsLogTag::DMS, "unregister display listener with type %{public}s  ret: %{public}u",
+                type.c_str(), ret);
             break;
         } else {
             it++;
@@ -570,15 +570,15 @@ napi_value JsDisplay::OnHasImmersiveWindow(napi_env env, napi_callback_info info
 napi_value JsDisplay::OnGetLiveCreaseRegion(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::DMS, "called");
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc >= ARGC_ONE) {
+    FoldCreaseRegion region;
+    DMError nativeErrorCode = display_->GetLiveCreaseRegion(region);
+    auto errorCodeMapping = DM_JS_TO_ERROR_CODE_MAP.find(nativeErrorCode);
+    if (errorCodeMapping == DM_JS_TO_ERROR_CODE_MAP.end()) {
+        TLOGE(WmsLogTag::DMS, "Unrecognized DMError: %{public}d", static_cast<int32_t>(nativeErrorCode));
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
-    FoldCreaseRegion region;
-    DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(display_->GetLiveCreaseRegion(region));
+    DmErrorCode ret = errorCodeMapping->second;
     if (ret != DmErrorCode::DM_OK) {
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(ret)));
         return NapiGetUndefined(env);
@@ -730,7 +730,7 @@ static napi_value CreateJsSupportedRefreshRateArray(napi_env env, const std::vec
     napi_value arrayValue = nullptr;
     napi_create_array_with_length(env, supportedRefreshRate.size(), &arrayValue);
     if (arrayValue == nullptr) {
-        TLOGE(WmsLogTag::DMS, "Failed to create supported Refresh Rate array");
+        TLOGE(WmsLogTag::DMS, "Failed to create supported refresh rate array");
         return NapiGetUndefined(env);
     }
     uint32_t index = 0;
@@ -859,7 +859,7 @@ void NapiSetNamedProperty(napi_env env, napi_value objValue, sptr<DisplayInfo> i
         napi_set_named_property(env, objValue, "y", NapiGetUndefined(env));
     }
     napi_set_named_property(env, objValue, "sourceMode", CreateJsValue(env, info->GetDisplaySourceMode()));
-    napi_set_named_property(env, objValue, "supportedRefreshRate", CreateJsSupportedRefreshRateArray(
+    napi_set_named_property(env, objValue, "supportedRefreshRates", CreateJsSupportedRefreshRateArray(
         env, info->GetSupportedRefreshRate()));
 }
 
@@ -891,8 +891,8 @@ napi_value CreateJsDisplayObject(napi_env env, sptr<Display>& display)
         std::unique_ptr<JsDisplay> jsDisplay = std::make_unique<JsDisplay>(display);
         napi_wrap(env, objValue, jsDisplay.release(), JsDisplay::Finalizer, nullptr, nullptr);
         BindNativeFunction(env, objValue, "getCutoutInfo", "JsDisplay", JsDisplay::GetCutoutInfo);
-        BindNativeFunction(env, objValue, "getAvailableArea", "JsDisplay", JsDisplay::GetAvailableArea);
         BindNativeFunction(env, objValue, "hasImmersiveWindow", "JsDisplay", JsDisplay::HasImmersiveWindow);
+        BindNativeFunction(env, objValue, "getAvailableArea", "JsDisplay", JsDisplay::GetAvailableArea);
         BindNativeFunction(env, objValue, "getSupportedColorSpaces", "JsDisplay", JsDisplay::GetSupportedColorSpaces);
         BindNativeFunction(env, objValue, "getSupportedHDRFormats", "JsDisplay", JsDisplay::GetSupportedHDRFormats);
         BindNativeFunction(env, objValue, "on", "JsDisplay", JsDisplay::RegisterDisplayManagerCallback);
