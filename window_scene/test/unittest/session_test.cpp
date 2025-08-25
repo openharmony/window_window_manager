@@ -187,16 +187,16 @@ HWTEST_F(WindowSessionTest, SetActive01, TestSize.Level1)
  */
 HWTEST_F(WindowSessionTest, SetCompatibleModeProperty, TestSize.Level1)
 {
-    EXPECT_NE(nullptr, session_->GetSessionProperty());
     sptr<CompatibleModeProperty> compatibleModeProperty = nullptr;
-    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, session_->SetCompatibleModeProperty(compatibleModeProperty));
-    compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
     session_->sessionStage_ = mockSessionStage_;
-    ASSERT_EQ(WSError::WS_OK, session_->SetCompatibleModeProperty(compatibleModeProperty));
-    ASSERT_EQ(session_->GetSessionProperty()->GetDragEnabled(), true);
+    EXPECT_EQ(WSError::WS_OK, session_->SetCompatibleModeProperty(compatibleModeProperty));
+    EXPECT_EQ(session_->GetSessionProperty()->GetDragEnabled(), true);
+    compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    EXPECT_EQ(WSError::WS_OK, session_->SetCompatibleModeProperty(compatibleModeProperty));
+    EXPECT_EQ(session_->GetSessionProperty()->GetDragEnabled(), true);
     compatibleModeProperty->SetDisableDragResize(true);
-    ASSERT_EQ(WSError::WS_OK, session_->SetCompatibleModeProperty(compatibleModeProperty));
-    ASSERT_EQ(session_->GetSessionProperty()->GetDragEnabled(), false);
+    EXPECT_EQ(WSError::WS_OK, session_->SetCompatibleModeProperty(compatibleModeProperty));
+    EXPECT_EQ(session_->GetSessionProperty()->GetDragEnabled(), false);
 }
 
 /**
