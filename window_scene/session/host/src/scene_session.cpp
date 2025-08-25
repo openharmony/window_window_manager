@@ -4077,7 +4077,7 @@ void SceneSession::SetKeyFramePolicy(const KeyFramePolicy& keyFramePolicy)
 
 WSError SceneSession::SetDragKeyFramePolicy(const KeyFramePolicy& keyFramePolicy)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "in");
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "in");
     std::lock_guard<std::mutex> lock(keyFrameMutex_);
     bool running = keyFramePolicy_.running_;
     bool stopping = keyFramePolicy_.stopping_;
@@ -4095,18 +4095,27 @@ void SceneSession::UpdateKeyFrameState(SizeChangeReason reason, const WSRect& re
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "no moveDragController or sessionStage");
         return;
     }
-    std::lock_guard<std::mutex> lock(keyFrameMutex_);
     if (reason == SizeChangeReason::DRAG_START && moveDragController_->GetStartDragFlag()) {
         TLOGD(WmsLogTag::WMS_LAYOUT_PC, "key frame start check");
-        if (!keyFramePolicy_.enabled() || GetAppDragResizeType() == DragResizeType::RESIZE_WHEN_DRAG_END) {
-            keyFramePolicy_.running_ = false;
+        {
+            std::lock_guard<std::mutex> lock(keyFrameMutex_);
+            if (!keyFramePolicy_.enabled() || GetAppDragResizeType() == DragResizeType::RESIZE_WHEN_DRAG_END) {
+                keyFramePolicy_.running_ = false;
+                return;
+            }
+            return InitKeyFrameState(rect);
+        }
+    }
+    {
+        std::lock_guard<std::mutex> lock(keyFrameMutex_);
+        if (!keyFramePolicy_.running_ || !keyFrameCloneNode_) {
+            TLOGD(WmsLogTag::WMS_LAYOUT_PC, "key frame not start");
             return;
         }
-        return InitKeyFrameState(rect);
-    }
-    if (!keyFramePolicy_.running_ || !keyFrameCloneNode_) {
-        TLOGD(WmsLogTag::WMS_LAYOUT_PC, "key frame not start");
-        return;
+        if (reason == SizeChangeReason::DRAG_END) {
+            keyFramePolicy_.running_ = false;
+            keyFramePolicy_.stopping_ = true;
+        }
     }
     if (reason == SizeChangeReason::DRAG) {
         TLOGD(WmsLogTag::WMS_LAYOUT_PC, "reset gravity and resize clone node");
@@ -4123,8 +4132,7 @@ void SceneSession::UpdateKeyFrameState(SizeChangeReason reason, const WSRect& re
         keyFrameCloneNode_->SetFrame(0, 0, rect.width_, rect.height_);
         RSTransactionAdapter::FlushImplicitTransaction(GetRSUIContext());
     } else if (reason == SizeChangeReason::DRAG_END) {
-        keyFramePolicy_.running_ = false;
-        keyFramePolicy_.stopping_ = true;
+        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "key frame stopping");
         sessionStage_->SetKeyFramePolicy(keyFramePolicy_);
         keyFrameCloneNode_ = nullptr;
     }
