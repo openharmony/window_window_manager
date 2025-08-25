@@ -1032,6 +1032,32 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenPrivacyWindowTagSwitch002, TestSize.
 }
 
 /**
+ * @tc.name: UpdateSuperFoldRefreshRate
+ * @tc.desc: UpdateSuperFoldRefreshRate test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, UpdateSuperFoldRefreshRate, TestSize.Level1)
+{
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        GTEST_SKIP();
+    }
+    g_errLog.clear();
+    uint32_t tempRefreshRate = 60;
+    sptr<ScreenSession> screenSession = nullptr;
+    ssm_->UpdateSuperFoldRefreshRate(screenSession, tempRefreshRate);
+    EXPECT_TRUE(g_errLog.find("screenSession is nullptr") != std::string::npos);
+
+    ScreenId screenId = 1050;
+    DMRect area{0, 0, 600, 800};
+    screenSession = new (std::nothrow) ScreenSession(screenId, ScreenProperty(), 0);
+    sptr<ScreenSession> fakescreenSession = nullptr;
+    screenSession->SetFakeScreenSession(fakescreenSession);
+    ssm_->UpdateSuperFoldRefreshRate(screenSession, tempRefreshRate);
+    EXPECT_TRUE(g_errLog.find("fakeScreenSession is nullptr") != std::string::npos);
+    g_errLog.clear();
+}
+
+/**
  * @tc.name: OnVerticalChangeBoundsWhenSwitchUser
  * @tc.desc: OnVerticalChangeBoundsWhenSwitchUser test
  * @tc.type: FUNC
