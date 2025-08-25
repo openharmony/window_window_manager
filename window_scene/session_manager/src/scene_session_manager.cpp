@@ -5337,6 +5337,10 @@ void SceneSessionManager::GetBundleStartingWindowInfos(bool isDark, const AppExe
 {
     for (const auto& moduleInfo : bundleInfo.hapModuleInfos) {
         for (const auto& abilityInfo : moduleInfo.abilityInfos) {
+            if (abilityInfo.startWindowId == 0 && abilityInfo.startWindowBackgroundId == 0) {
+                TLOGD(WmsLogTag::WMS_PATTERN, "not ability:%{public}s", abilityInfo.bundleName.c_str());
+                continue;
+            }
             StartingWindowRdbItemKey itemKey = {
                 .bundleName = abilityInfo.bundleName,
                 .moduleName = abilityInfo.moduleName,
