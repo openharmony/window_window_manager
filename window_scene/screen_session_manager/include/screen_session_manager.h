@@ -519,6 +519,7 @@ private:
     void InitSecondaryDisplayPhysicalParams();
     ScreenId GetPhyScreenId(ScreenId screenId);
     void UpdateCoordinationRefreshRate(uint32_t refreshRate);
+    void UpdateSuperFoldRefreshRate(sptr<ScreenSession> screenSession, uint32_t refreshRate);
     void GetInternalWidth();
     void InitExtendScreenDensity(sptr<ScreenSession> session, ScreenProperty property);
     void InitExtendScreenProperty(ScreenId screenId, sptr<ScreenSession> session, ScreenProperty property);
