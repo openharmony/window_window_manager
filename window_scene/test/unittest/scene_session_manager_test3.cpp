@@ -1174,6 +1174,44 @@ HWTEST_F(SceneSessionManagerTest3, HandleHideNonSystemFloatingWindows, TestSize.
 }
 
 /**
+
+@tc.name: UpdateForceHideState
+@tc.desc: SceneSesionManager update Force Hide system state
+@tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest3, UpdateForceHideState, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdateForceHideState";
+    info.bundleName_ = "UpdateForceHideState";
+    sptr sceneSession = sptr::MakeSptr(info, nullptr);
+    sptr property = sptr::MakeSptr();
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    property->SetHideNonSystemFloatingWindows(true);
+    sceneSession->property_->windowMode_ = WindowMode::WINDOW_MODE_PIP;
+    ssm_->systemTopSceneSessionMap_.clear();
+    ssm_->UpdateForceHideState(sceneSession, property, true);
+    EXPECT_EQ(ssm_->systemTopSceneSessionMap_.size(), 0);
+    property->SetHideNonSystemFloatingWindows(true);
+    sceneSession->property_->windowMode_ = WindowMode::WINDOW_MODE_FLOATING;
+    ssm_->systemTopSceneSessionMap_.clear();
+    ssm_->UpdateForceHideState(sceneSession, property, true);
+    EXPECT_EQ(ssm_->systemTopSceneSessionMap_.size(), 1);
+    property->SetHideNonSystemFloatingWindows(false);
+    property->SetFloatingWindowAppType(true);
+    property->SetSystemCalling(false);
+    sceneSession->property_->windowMode_ = WindowMode::WINDOW_MODE_PIP;
+    ssm_->systemTopSceneSessionMap_.clear();
+    ssm_->UpdateForceHideState(sceneSession, property, true);
+    EXPECT_EQ(ssm_->systemTopSceneSessionMap_.size(), 0);
+    property->SetHideNonSystemFloatingWindows(false);
+    sceneSession->property_->windowMode_ = WindowMode::WINDOW_MODE_FLOATING;
+    ssm_->systemTopSceneSessionMap_.clear();
+    ssm_->UpdateForceHideState(sceneSession, property, true);
+    EXPECT_EQ(ssm_->systemTopSceneSessionMap_.size(), 0);
+}
+
+/**
  * @tc.name: UpdateBrightness01
  * @tc.desc: SceneSesionManager update brightness
  * @tc.type: FUNC

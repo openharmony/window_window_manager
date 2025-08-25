@@ -6158,10 +6158,11 @@ void SceneSessionManager::UpdateForceHideState(const sptr<SceneSession>& sceneSe
     bool forceHideFloatOld = !systemTopSceneSessionMap_.empty();
     bool notifyAll = false;
     if (add) {
-        if (property->GetHideNonSystemFloatingWindows()) {
+        if (property->GetHideNonSystemFloatingWindows() && sceneSession->GetWindowMode() != WindowMode::WINDOW_MODE_PIP) {
             systemTopSceneSessionMap_.insert({ persistentId, sceneSession });
             notifyAll = !forceHideFloatOld;
-        } else if ((property->IsFloatingWindowAppType() && !property->GetSystemCalling()) ||
+        } else if ((property->IsFloatingWindowAppType() && !property->GetSystemCalling() &&
+            sceneSession->GetWindowMode() != WindowMode::WINDOW_MODE_PIP) ||
             sceneSession->GetIsAncoForFloatingWindow()) {
             nonSystemFloatSceneSessionMap_.insert({ persistentId, sceneSession });
             if (forceHideFloatOld) {
