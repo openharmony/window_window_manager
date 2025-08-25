@@ -1318,6 +1318,14 @@ WMError WindowAdapter::CreateUIEffectController(const sptr<IUIEffectControllerCl
     return wmsProxy->CreateUIEffectController(controllerClient, controller, controllerId);
 }
 
+WMError WindowAdapter::GetPiPSettingSwitchStatus(bool& switchStatus)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->GetPiPSettingSwitchStatus(switchStatus);
+}
+
 WMError WindowAdapter::AddSessionBlackList(
     const std::unordered_set<std::string>& bundleNames, const std::unordered_set<std::string>& privacyWindowTags)
 {
@@ -1334,14 +1342,6 @@ WMError WindowAdapter::RemoveSessionBlackList(
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
     return wmsProxy->RemoveSessionBlackList(bundleNames, privacyWindowTags);
-}
-
-WMError WindowAdapter::GetPiPSettingSwitchStatus(bool& switchStatus)
-{
-    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
-    auto wmsProxy = GetWindowManagerServiceProxy();
-    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
-    return wmsProxy->GetPiPSettingSwitchStatus(switchStatus);
 }
 } // namespace Rosen
 } // namespace OHOS
