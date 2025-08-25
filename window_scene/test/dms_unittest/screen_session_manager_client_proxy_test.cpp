@@ -517,7 +517,7 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, OnScreenConnectionChangedMock, Tes
     logMsg.clear();
     MockMessageParcel::ClearAllErrorFlag();
 }
- 
+
 /**
  * @tc.name: ScreenConnectWriteParam
  * @tc.desc: ScreenConnectWriteParam
@@ -537,34 +537,60 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, ScreenConnectWriteParam, TestSize.
     };
     sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
     auto proxy = sptr<ScreenSessionManagerClientProxy>::MakeSptr(remoteMocker);
- 
+
     bool ret = proxy->ScreenConnectWriteParam(option, screenEvent, data);
     EXPECT_TRUE(ret);
- 
+
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     ret = proxy->ScreenConnectWriteParam(option, screenEvent, data);
     EXPECT_FALSE(ret);
- 
+
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteUint64ErrorFlag(true);
     ret = proxy->ScreenConnectWriteParam(option, screenEvent, data);
     EXPECT_FALSE(ret);
- 
+
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteStringErrorFlag(true);
     ret = proxy->ScreenConnectWriteParam(option, screenEvent, data);
     EXPECT_FALSE(ret);
- 
+
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteBoolErrorFlag(true);
     ret = proxy->ScreenConnectWriteParam(option, screenEvent, data);
     EXPECT_FALSE(ret);
- 
+
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteUint32ErrorFlag(true);
     ret = proxy->ScreenConnectWriteParam(option, screenEvent, data);
     EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: OnAnimationFinish
+ * @tc.desc: OnAnimationFinish test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientProxyTest, OnAnimationFinish, TestSize.Level1)
+{
+    MockMessageParcel::ClearAllErrorFlag();
+    auto proxy = sptr<ScreenSessionManagerClientProxy>::MakeSptr(nullptr);
+    proxy->OnAnimationFinish();
+
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    proxy = sptr<ScreenSessionManagerClientProxy>::MakeSptr(remoteMocker);
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ASSERT_NE(proxy, nullptr);
+    proxy->OnAnimationFinish();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+    ASSERT_NE(proxy, nullptr);
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    proxy->OnAnimationFinish();
+    remoteMocker->SetRequestResult(ERR_NONE);
+    proxy->OnAnimationFinish();
+    MockMessageParcel::ClearAllErrorFlag();
 }
 } // namespace Rosen
 } // namespace OHOS

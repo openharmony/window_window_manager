@@ -149,6 +149,10 @@ void ScreenSessionManagerClientStub::InitScreenChangeMap()
         [this](MessageParcel& data, MessageParcel& reply) {
         return HandleOnScreenModeChanged(data, reply);
     };
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_ON_ANIMATE_FINISH_TIMEOUT] =
+        [this](MessageParcel& data, MessageParcel& reply) {
+        return HandleOnAnimationFinish(data, reply);
+    };
 }
 
 ScreenSessionManagerClientStub::ScreenSessionManagerClientStub()
@@ -516,6 +520,12 @@ int ScreenSessionManagerClientStub::HandleOnScreenModeChanged(MessageParcel& dat
     auto screenModeChangeEvent = static_cast<ScreenModeChangeEvent>(data.ReadUint32());
     TLOGI(WmsLogTag::DMS, "screenModeChangeEvent: %{public}d", screenModeChangeEvent);
     OnScreenModeChanged(screenModeChangeEvent);
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerClientStub::HandleOnAnimationFinish(MessageParcel& data, MessageParcel& reply)
+{
+    OnAnimationFinish();
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

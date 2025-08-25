@@ -130,7 +130,7 @@ public:
     virtual DMError DestroyVirtualScreen(ScreenId screenId) override;
     DMError ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height) override;
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
-        ScreenId& screenGroupId) override;
+        ScreenId& screenGroupId, bool forceMirror = false) override;
     virtual DMError MakeMirrorForRecord(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
         ScreenId& screenGroupId) override;
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
@@ -206,7 +206,8 @@ public:
         std::map<ScreenId, bool>& removeChildResMap);
     bool CheckScreenInScreenGroup(sptr<ScreenSession> screen) const;
 
-    DMError SetMirror(ScreenId screenId, std::vector<ScreenId> screens, DMRect mainScreenRegion);
+    DMError SetMirror(ScreenId screenId, std::vector<ScreenId> screens, DMRect mainScreenRegion,
+        bool forceMirror = false);
     DMError StopScreens(const std::vector<ScreenId>& screenIds, ScreenCombination stopCombination);
 
     void NotifyScreenConnected(sptr<ScreenInfo> screenInfo);
@@ -492,6 +493,7 @@ public:
     void RemoveScreenCastInfo(ScreenId screenId);
     Rotation GetConfigCorrectionByDisplayMode(FoldDisplayMode displayMode);
     Rotation RemoveRotationCorrection(Rotation rotation);
+    void NotifySwitchUserAnimationFinish() override;
 
 protected:
     ScreenSessionManager();
@@ -562,7 +564,7 @@ private:
     void MultiScreenModeChange(ScreenId mainScreenId, ScreenId secondaryScreenId, const std::string& operateType);
     void OperateModeChange(ScreenId mainScreenId, ScreenId secondaryScreenId, sptr<ScreenSession>& firstSession,
         sptr<ScreenSession>& secondarySession, const std::string& operateMode);
-    void SetClientInner();
+    void SetClientInner(int32_t newUserId);
     void RecoverMultiScreenMode(sptr<ScreenSession> screenSession);
     void GetCurrentScreenPhyBounds(float& phyWidth, float& phyHeight, bool& isReset, const ScreenId& screenid);
     void SetPhysicalRotationClientInner(ScreenId screenId, int rotation);
@@ -575,7 +577,7 @@ private:
     void NotifyCaptureStatusChanged();
     void NotifyCaptureStatusChanged(bool IsCaptured);
     DMError DoMakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
-        DMRect mainScreenRegion, ScreenId& screenGroupId);
+        DMRect mainScreenRegion, ScreenId& screenGroupId, bool forceMirror = false);
     bool OnMakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint);
     bool OnRemoteDied(const sptr<IRemoteObject>& agent);
     std::string TransferTypeToString(ScreenType type) const;
@@ -873,6 +875,23 @@ private:
 
     // Fold Screen duringcall
     bool duringCallState_ = false;
+
+    mutable std::recursive_mutex userDisplayNodeMapMutex_;
+    std::map<int32_t, std::map<ScreenId, std::shared_ptr<RSDisplayNode>>> userDisplayNodeMap_;
+    std::condition_variable switchUserDisplayNodeCV_;
+    std::mutex switchUserDisplayNodeMutex_;
+    bool animateFinishAllNotified_ = false;
+
+    void AddOrUpdateUserDisplayNode(int32_t userId, ScreenId screenId, std::shared_ptr<RSDisplayNode>& displayNode);
+    void RemoveUserDisplayNode(int32_t userId, ScreenId screenId);
+    std::map<ScreenId, std::shared_ptr<RSDisplayNode>> GetUserDisplayNodeMap(int32_t userId);
+    void SwitchUserDealUserDisplayNode(int32_t newUserId);
+    void AddUserDisplayNodeOnTree(int32_t userId);
+    void RemoveUserDisplayNodeFromTree(int32_t userId);
+    void SetUserDisplayNodePositionZ(int32_t userId, float positionZ);
+    void HandleNewUserDisplayNode(int32_t newUserId, bool coldBoot);
+    void WaitSwitchUserAnimateFinish(int32_t newUserId, bool isColdSwitch);
+    void MakeMirrorAfterSwitchUser();
 
 private:
     class ScbClientListenerDeathRecipient : public IRemoteObject::DeathRecipient {

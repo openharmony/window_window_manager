@@ -1017,5 +1017,21 @@ HWTEST_F(ScreenSessionManagerClientStubTest, HandleOnScreenModeChanged, TestSize
     auto ret = screenSessionManagerClientStub_->HandleOnScreenModeChanged(data, reply);
     EXPECT_EQ(ret, 0);
 }
+
+/**
+ * @tc.name: HandleOnAnimationFinish
+ * @tc.desc: HandleOnAnimationFinish test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientStubTest, HandleOnAnimationFinish, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteInterfaceToken(ScreenSessionManagerClientStub::GetDescriptor());
+    ASSERT_TRUE(screenSessionManagerClientStub_ != nullptr);
+    auto ret = screenSessionManagerClientStub_->HandleOnAnimationFinish(data, reply);
+    EXPECT_EQ(ret, 0);
+}
 } // namespace Rosen
 } // namespace OHOS

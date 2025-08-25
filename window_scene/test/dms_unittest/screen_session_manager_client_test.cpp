@@ -1916,5 +1916,66 @@ HWTEST_F(ScreenSessionManagerClientTest, GetScreenSnapshotWithAllWindows02, Test
     EXPECT_EQ(res, nullptr);
     screenSessionManagerClient_->screenSessionMap_.clear();
 }
+
+/**
+ * @tc.name: NotifySwitchUserAnimationFinish
+ * @tc.desc: NotifySwitchUserAnimationFinish test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, NotifySwitchUserAnimationFinish, TestSize.Level1)
+{
+    sptr<ScreenSessionManagerClient> client = sptr<ScreenSessionManagerClient>::MakeSptr();
+    ASSERT_NE(client, nullptr);
+    client->ConnectToServer();
+    
+
+    std::string desc1 = "desc1";
+    std::string desc2 = "desc2";
+    std::string desc3 = "desc3";
+    client->NotifySwitchUserAnimationFinish(desc1);
+
+    client->animateFinishDescriptionSet_.insert(desc2);
+    client->animateFinishDescriptionSet_.insert(desc3);
+
+    logMsg.clear();
+    client->NotifySwitchUserAnimationFinish(desc1);
+    EXPECT_TRUE(logMsg.find("not find description in map") != std::string::npos);
+
+    client->NotifySwitchUserAnimationFinish(desc2);
+    EXPECT_NE(client->animateFinishNotificationSet_.find(desc2), client->animateFinishNotificationSet_.end());
+
+    logMsg.clear();
+    client->NotifySwitchUserAnimationFinish(desc3);
+    EXPECT_TRUE(logMsg.find("notify all animate finished") != std::string::npos);
+    logMsg.clear();
+    EXPECT_TRUE(client->animateFinishNotificationSet_.empty());
+    
+
+    client->screenSessionManager_ = nullptr;
+    client->NotifySwitchUserAnimationFinish(desc2);
+    client->NotifySwitchUserAnimationFinish(desc3);
+    EXPECT_TRUE(logMsg.find("screenSessionManager_ is null") != std::string::npos);
+    logMsg.clear();
+}
+
+/**
+ * @tc.name: RegisterSwitchUserAnimationNotification
+ * @tc.desc: RegisterSwitchUserAnimationNotification test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, RegisterSwitchUserAnimationNotification, TestSize.Level1)
+{
+    sptr<ScreenSessionManagerClient> client = sptr<ScreenSessionManagerClient>::MakeSptr();
+    ASSERT_NE(client, nullptr);
+    client->ConnectToServer();
+
+    std::string desc1 = "desc1";
+    std::string desc2 = "desc2";
+    client->RegisterSwitchUserAnimationNotification(desc1);
+    EXPECT_NE(client->animateFinishDescriptionSet_.find(desc1), client->animateFinishDescriptionSet_.end());
+    client->RegisterSwitchUserAnimationNotification(desc1);
+    EXPECT_NE(client->animateFinishDescriptionSet_.find(desc1), client->animateFinishDescriptionSet_.end());
+    EXPECT_EQ(client->animateFinishDescriptionSet_.size(), 1);
+}
 } // namespace Rosen
 } // namespace OHOS

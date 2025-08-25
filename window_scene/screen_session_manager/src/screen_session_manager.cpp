@@ -203,6 +203,13 @@ const std::string DISPLAYMODE_CORRECTION = system::GetParameter("const.dms.rotat
 constexpr uint32_t EXPECT_DISPLAY_MODE_CORRECTION_SIZE = 2;
 constexpr int32_t PARAM_NUM_TEN = 10;
 
+constexpr int32_t COLD_SWITCH_ANIMATE_TIMEOUT_MILLISECONDS = 3000;
+constexpr int32_t HOT_SWITCH_ANIMATE_TIMEOUT_MILLISECONDS = 1200;
+
+constexpr float POSITION_Z_DEFAULT = 2.0f;
+constexpr float POSITION_Z_HIGH = 3.0f;
+constexpr float POSITION_Z_LOW = 1.0f;
+
 // based on the bundle_util
 // LCOV_EXCL_START
 inline int32_t GetUserIdByCallingUid()
@@ -5222,7 +5229,7 @@ void ScreenSessionManager::MirrorSwitchNotify(ScreenId screenId)
 }
 
 DMError ScreenSessionManager::DoMakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
-    DMRect mainScreenRegion, ScreenId& screenGroupId)
+    DMRect mainScreenRegion, ScreenId& screenGroupId, bool forceMirror)
 {
 #ifdef WM_MULTI_SCREEN_ENABLE
     TLOGW(WmsLogTag::DMS, "enter!");
@@ -5253,7 +5260,7 @@ DMError ScreenSessionManager::DoMakeMirror(ScreenId mainScreenId, std::vector<Sc
         OnVirtualScreenChange(screenId, ScreenEvent::DISCONNECTED);
     }
     DMError makeResult = MultiScreenManager::GetInstance().MirrorSwitch(mainScreenId,
-        allMirrorScreenIds, mainScreenRegion, screenGroupId);
+        allMirrorScreenIds, mainScreenRegion, screenGroupId, forceMirror);
     if (makeResult != DMError::DM_OK) {
         TLOGE(WmsLogTag::DMS, "MakeMirror set mirror failed.");
         return makeResult;
@@ -5276,16 +5283,16 @@ DMError ScreenSessionManager::DoMakeMirror(ScreenId mainScreenId, std::vector<Sc
 }
 
 DMError ScreenSessionManager::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
-    ScreenId& screenGroupId)
+    ScreenId& screenGroupId, bool forceMirror)
 {
 #ifdef FOLD_ABILITY_ENABLE
     if (foldScreenController_ != nullptr && FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
         DMRect mainScreenRegion = DMRect::NONE();
         foldScreenController_->SetMainScreenRegion(mainScreenRegion);
-        return DoMakeMirror(mainScreenId, mirrorScreenIds, mainScreenRegion, screenGroupId);
+        return DoMakeMirror(mainScreenId, mirrorScreenIds, mainScreenRegion, screenGroupId, forceMirror);
     }
 #endif
-    return DoMakeMirror(mainScreenId, mirrorScreenIds, DMRect::NONE(), screenGroupId);
+    return DoMakeMirror(mainScreenId, mirrorScreenIds, DMRect::NONE(), screenGroupId, forceMirror);
 }
 
 DMError ScreenSessionManager::MakeMirrorForRecord(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
@@ -6086,7 +6093,8 @@ bool ScreenSessionManager::RemoveChildFromGroup(sptr<ScreenSession> screen, sptr
     return true;
 }
 
-DMError ScreenSessionManager::SetMirror(ScreenId screenId, std::vector<ScreenId> screens, DMRect mainScreenRegion)
+DMError ScreenSessionManager::SetMirror(ScreenId screenId, std::vector<ScreenId> screens, DMRect mainScreenRegion,
+    bool forceMirror)
 {
     TLOGI(WmsLogTag::DMS, "screenId:%{public}" PRIu64"", screenId);
     sptr<ScreenSession> screen = GetScreenSession(screenId);
@@ -6108,7 +6116,8 @@ DMError ScreenSessionManager::SetMirror(ScreenId screenId, std::vector<ScreenId>
     std::vector<Point> startPoints;
     startPoints.insert(startPoints.begin(), screens.size(), point);
     bool filterMirroredScreen =
-        group->combination_ == ScreenCombination::SCREEN_MIRROR && group->mirrorScreenId_ == screen->screenId_;
+        group->combination_ == ScreenCombination::SCREEN_MIRROR && group->mirrorScreenId_ == screen->screenId_
+            && !forceMirror;
     group->mirrorScreenId_ = screen->screenId_;
     ChangeScreenGroup(group, screens, startPoints, filterMirroredScreen, ScreenCombination::SCREEN_MIRROR,
         mainScreenRegion);
@@ -8639,7 +8648,7 @@ void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& cl
         currentUserIdForSettings_ = userId;
         MockSessionManagerService::GetInstance().NotifyWMSConnected(userId, GetDefaultScreenId(), true);
         NotifyClientProxyUpdateFoldDisplayMode(GetFoldDisplayMode());
-        SetClientInner();
+        SetClientInner(userId);
         SwitchScbNodeHandle(userId, newScbPid, true);
     }
     AddScbClientDeathRecipient(client, IPCSkeleton::GetCallingPid());
@@ -8670,6 +8679,10 @@ void ScreenSessionManager::SwitchScbNodeHandle(int32_t newUserId, int32_t newScb
     TLOGI(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
     screenEventTracker_.RecordEvent(oss.str());
 
+    if (currentUserId_ != newUserId) {
+        HandleNewUserDisplayNode(newUserId, coldBoot);
+    }
+
     if (currentScbPId_ != INVALID_SCB_PID) {
         auto pidIter = std::find(oldScbPids_.begin(), oldScbPids_.end(), currentScbPId_);
         if (pidIter == oldScbPids_.end() && currentScbPId_ > 0) {
@@ -8693,6 +8706,9 @@ void ScreenSessionManager::SwitchScbNodeHandle(int32_t newUserId, int32_t newScb
         HotSwitch(newUserId, newScbPid);
     }
     UpdateDisplayScaleState(GetDefaultScreenId());
+    if (currentUserId_ != newUserId) {
+        WaitSwitchUserAnimateFinish(newUserId, coldBoot);
+    }
     currentUserId_ = newUserId;
     currentScbPId_ = newScbPid;
     scbSwitchCV_.notify_all();
@@ -8754,8 +8770,9 @@ int32_t ScreenSessionManager::GetCurrentUserId()
     return currentUserIdForSettings_;
 }
 
-void ScreenSessionManager::SetClientInner()
+void ScreenSessionManager::SetClientInner(int32_t newUserId)
 {
+    SwitchUserDealUserDisplayNode(newUserId);
     std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     for (auto& iter : screenSessionMap_) {
         if (!iter.second) {
@@ -11131,6 +11148,238 @@ DMError ScreenSessionManager::SetVirtualScreenAutoRotation(ScreenId screenId, bo
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     return DMError::DM_OK;
+}
+
+void ScreenSessionManager::AddOrUpdateUserDisplayNode(int32_t userId, ScreenId screenId,
+    std::shared_ptr<RSDisplayNode>& displayNode)
+{
+    TLOGI(WmsLogTag::DMS, "userId: %{public}d, screenId: %{public}" PRIu64 "", userId, screenId);
+    std::lock_guard<std::recursive_mutex> lock(userDisplayNodeMapMutex_);
+    userDisplayNodeMap_[userId].insert_or_assign(screenId, displayNode);
+}
+
+void ScreenSessionManager::RemoveUserDisplayNode(int32_t userId, ScreenId screenId)
+{
+    std::lock_guard<std::recursive_mutex> lock(userDisplayNodeMapMutex_);
+    auto iter = userDisplayNodeMap_.find(userId);
+    if (iter == userDisplayNodeMap_.end()) {
+        TLOGE(WmsLogTag::DMS, "userId: %{public}d not found", userId);
+        return;
+    }
+    if (userDisplayNodeMap_[userId].find(screenId) == userDisplayNodeMap_[userId].end()) {
+        TLOGE(WmsLogTag::DMS, "displayNode not exist, userId: %{public}d, screenId %{public}" PRIu64 "",
+            userId, screenId);
+        return;
+    }
+    TLOGI(WmsLogTag::DMS, "remove displayNode, userId: %{public}d, screenId %{public}" PRIu64 "",
+        userId, screenId);
+    userDisplayNodeMap_[userId].erase(screenId);
+    if (userDisplayNodeMap_[userId].size() <= 0) {
+        userDisplayNodeMap_.erase(userId);
+    }
+}
+
+std::map<ScreenId, std::shared_ptr<RSDisplayNode>> ScreenSessionManager::GetUserDisplayNodeMap(int32_t userId)
+{
+    std::lock_guard<std::recursive_mutex> lock(userDisplayNodeMapMutex_);
+    auto iter = userDisplayNodeMap_.find(userId);
+    if (iter == userDisplayNodeMap_.end()) {
+        TLOGE(WmsLogTag::DMS, "userId: %{public}d not found", userId);
+        return {};
+    }
+    return iter->second;
+}
+
+void ScreenSessionManager::SwitchUserDealUserDisplayNode(int32_t newUserId)
+{
+    auto newUserDisplayNodeMap = GetUserDisplayNodeMap(newUserId);
+    std::ostringstream oss;
+    for (auto sessionIt : newUserDisplayNodeMap) {
+        oss << sessionIt.first << ",";
+    }
+    std::vector<ScreenId> phyScreenIds;
+    std::map<ScreenId, sptr<ScreenSession>> screenSessionMapCopy;
+    {
+        std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+        screenSessionMapCopy = screenSessionMap_;
+    }
+    for (auto sessionIt : screenSessionMapCopy) {
+        auto screenSession = sessionIt.second;
+        if (screenSession == nullptr) {
+            TLOGI(WmsLogTag::DMS, "screenSession is nullptr, screenId: %{public}" PRIu64 "", sessionIt.first);
+            continue;
+        }
+        if (!screenSession->GetIsRealScreen()) {
+            continue;
+        }
+        TLOGI(WmsLogTag::DMS, "start set new user displayNode, newUserId: %{public}d", newUserId);
+        auto screenId = screenSession->GetScreenId();
+        if (newUserDisplayNodeMap.find(screenId) == newUserDisplayNodeMap.end()) {
+            Rosen::RSDisplayNodeConfig rsConfig;
+            rsConfig.screenId = screenId;
+            screenSession->CreateDisplayNode(rsConfig);
+            std::shared_ptr<RSDisplayNode> displayNode = screenSession->GetDisplayNode();
+            if (displayNode == nullptr) {
+                TLOGI(WmsLogTag::DMS, "displayNode is null");
+                continue;
+            }
+            TLOGI(WmsLogTag::DMS, "screen id %{public}" PRIu64 "", screenId);
+            AddOrUpdateUserDisplayNode(newUserId, screenId, displayNode);
+        } else {
+            screenSession->SetDisplayNode(newUserDisplayNodeMap[screenId]);
+        }
+        phyScreenIds.emplace_back(screenId);
+    }
+    for (auto newUserMapIt : newUserDisplayNodeMap) {
+        auto screenId = newUserMapIt.first;
+        if (std::find(phyScreenIds.begin(), phyScreenIds.end(), screenId) == phyScreenIds.end()) {
+            RemoveUserDisplayNode(newUserId, screenId);
+        }
+    }
+}
+
+void ScreenSessionManager::AddUserDisplayNodeOnTree(int32_t userId)
+{
+    TLOGI(WmsLogTag::DMS, "userId: %{public}d", userId);
+    auto userDisplayNodeMap = GetUserDisplayNodeMap(userId);
+    std::unordered_set<std::shared_ptr<RSUIContext>> rsUIContexts;
+    for (auto userDisplayNodeIt : userDisplayNodeMap) {
+        auto displayNode = userDisplayNodeIt.second;
+        if (displayNode == nullptr) {
+            continue;
+        }
+        displayNode->AddDisplayNodeToTree();
+        auto screenId = userDisplayNodeIt.first;
+        auto screenSession = GetScreenSession(screenId);
+        if (!screenSession) {
+            TLOGW(WmsLogTag::DMS, "screen Session is null");
+            continue;
+        }
+        rsUIContexts.insert(screenSession->GetRSUIContext());
+    }
+    RSTransactionAdapter::FlushImplicitTransaction(rsUIContexts);
+}
+
+void ScreenSessionManager::RemoveUserDisplayNodeFromTree(int32_t userId)
+{
+    TLOGI(WmsLogTag::DMS, "userId: %{public}d", userId);
+    auto userDisplayNodeMap = GetUserDisplayNodeMap(userId);
+    std::unordered_set<std::shared_ptr<RSUIContext>> rsUIContexts;
+    for (auto userDisplayNodeIt : userDisplayNodeMap) {
+        auto displayNode = userDisplayNodeIt.second;
+        if (displayNode == nullptr) {
+            continue;
+        }
+        displayNode->RemoveDisplayNodeFromTree();
+        auto screenId = userDisplayNodeIt.first;
+        auto screenSession = GetScreenSession(screenId);
+        if (!screenSession) {
+            TLOGW(WmsLogTag::DMS, "screen Session is null");
+            continue;
+        }
+        rsUIContexts.insert(screenSession->GetRSUIContext());
+    }
+    RSTransactionAdapter::FlushImplicitTransaction(rsUIContexts);
+}
+
+void ScreenSessionManager::SetUserDisplayNodePositionZ(int32_t userId, float positionZ)
+{
+    TLOGI(WmsLogTag::DMS, "userId: %{public}d, positionZ: %{public}f", userId, positionZ);
+    auto userDisplayNodeMap = GetUserDisplayNodeMap(userId);
+    std::unordered_set<std::shared_ptr<RSUIContext>> rsUIContexts;
+    for (auto userDisplayNodeIt : userDisplayNodeMap) {
+        auto displayNode = userDisplayNodeIt.second;
+        if (displayNode == nullptr) {
+            continue;
+        }
+        displayNode->SetPositionZ(positionZ);
+        auto screenId = userDisplayNodeIt.first;
+        auto screenSession = GetScreenSession(screenId);
+        if (!screenSession) {
+            TLOGW(WmsLogTag::DMS, "screen Session is null");
+            continue;
+        }
+        rsUIContexts.insert(screenSession->GetRSUIContext());
+    }
+    RSTransactionAdapter::FlushImplicitTransaction(rsUIContexts);
+}
+
+void ScreenSessionManager::HandleNewUserDisplayNode(int32_t newUserId, bool coldBoot)
+{
+    std::unique_lock<std::mutex> lock(switchUserDisplayNodeMutex_);
+    TLOGI(WmsLogTag::DMS, "newUserId: %{public}d, coldBoot: %{public}d", newUserId, coldBoot);
+    SetUserDisplayNodePositionZ(currentUserId_, POSITION_Z_DEFAULT);
+    if (!coldBoot) {
+        TLOGI(WmsLogTag::DMS, "deal with userDisplayNode");
+        SwitchUserDealUserDisplayNode(newUserId);
+    }
+    SetUserDisplayNodePositionZ(newUserId, POSITION_Z_LOW);
+    AddUserDisplayNodeOnTree(newUserId);
+    MakeMirrorAfterSwitchUser();
+}
+
+void ScreenSessionManager::WaitSwitchUserAnimateFinish(int32_t newUserId, bool isColdSwitch)
+{
+    TLOGI(WmsLogTag::DMS, "enter, newUserId: %{public}d, isColdSwitch: %{public}d", newUserId, isColdSwitch);
+    std::unique_lock<std::mutex> lock(switchUserDisplayNodeMutex_);
+    uint32_t waitTimes = isColdSwitch ? COLD_SWITCH_ANIMATE_TIMEOUT_MILLISECONDS :
+                                        HOT_SWITCH_ANIMATE_TIMEOUT_MILLISECONDS;
+    if (!switchUserDisplayNodeCV_.wait_for(lock, std::chrono::milliseconds(waitTimes),
+        [this] { return animateFinishAllNotified_; })) {
+        TLOGI(WmsLogTag::DMS, "switch user animate timeout");
+    }
+    animateFinishAllNotified_ = false;
+    auto clientProxy = GetClientProxy();
+    if (!clientProxy) {
+        TLOGE(WmsLogTag::DMS, "clientProxy is null");
+        return;
+    }
+    clientProxy->OnAnimationFinish();
+    SetUserDisplayNodePositionZ(newUserId, POSITION_Z_HIGH);
+    RemoveUserDisplayNodeFromTree(currentUserId_);
+    TLOGI(WmsLogTag::DMS, "success");
+}
+
+void ScreenSessionManager::MakeMirrorAfterSwitchUser()
+{
+    TLOGI(WmsLogTag::DMS, "start to make mirror");
+    ScreenId mainScreenId = INVALID_SCREEN_ID;
+    std::vector<ScreenId> mirrorScreenIds;
+    {
+        std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+        for (auto it : screenSessionMap_) {
+            auto screenSession = it.second;
+            if (!screenSession) {
+                TLOGW(WmsLogTag::DMS, "screen session is null");
+                continue;
+            }
+            if (screenSession->GetScreenCombination() == ScreenCombination::SCREEN_MIRROR) {
+                mirrorScreenIds.emplace_back(it.first);
+                continue;
+            }
+            if (screenSession->GetScreenCombination() == ScreenCombination::SCREEN_MAIN) {
+                mainScreenId = it.first;
+            }
+        }
+        if (mirrorScreenIds.empty()) {
+            TLOGI(WmsLogTag::DMS, "no mirror screens, no need to make mirror");
+            return;
+        }
+        if (mainScreenId == INVALID_SCREEN_ID) {
+            TLOGE(WmsLogTag::DMS, "make mirror error, no main screen");
+            return;
+        }
+    }
+    ScreenId screenGroupId = SCREEN_GROUP_ID_DEFAULT;
+    MakeMirror(mainScreenId, mirrorScreenIds, screenGroupId, true);
+}
+
+void ScreenSessionManager::NotifySwitchUserAnimationFinish()
+{
+    TLOGI(WmsLogTag::DMS, "enter");
+    std::unique_lock<std::mutex> lock(switchUserDisplayNodeMutex_);
+    animateFinishAllNotified_ = true;
+    switchUserDisplayNodeCV_.notify_all();
 }
 
 bool ScreenSessionManager::SetScreenOffset(ScreenId screenId, float offsetX, float offsetY)
