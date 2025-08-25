@@ -1979,7 +1979,7 @@ export class WindowStageInternal implements WindowStage {
         let ret = this.getMainWindowSync(this.nativeObj);
         return ret;
     }
-
+    
     public getMainWindow(): Promise<Window> {
         return new Promise<Window>((resolve: (value: Window) => void, reject: (error: BusinessError) => void) => {
             taskpool.execute((): Window => {
@@ -2107,7 +2107,9 @@ export class WindowInternal implements Window {
     private native getProperties(nativeObj: long): WindowProperties;
     private native isWindowSupportWideGamut(nativeObj: long): boolean;
     private native setWindowLayoutFullScreen(nativeObj: long, isLayoutFullScreen: boolean): int;
+    private native setRaiseByClickEnabled(nativeObj: long, enable: boolean): int;
     private native setWindowSystemBarProperties(nativeObj: long, systemBarProperties: SystemBarProperties): int;
+    private native setExclusivelyHighlighted(nativeObj: long, exclusivelyHighlighted: boolean): int;
     private native setSpecificSystemBarEnabled(nativeObj: long, name: String, enable: boolean, enableAnimation: boolean): int;
     private native snapshot(nativeObj: long): image.PixelMap;
     private native hideNonSystemFloatingWindows(nativeObj: long, shouldHide: boolean): void;
@@ -2132,10 +2134,12 @@ export class WindowInternal implements Window {
     private native showWindowSync(nativeObj: long): void;
     private native destroyWindowSync(nativeObj: long): void;
     private native isWindowShowingSync(nativeObj: long): boolean;
+    private native isWindowHighlightedSync(nativeObj: long): boolean;
     private native hideWithAnimationSync(nativeObj: long): void;
     private native showWithAnimationSync(nativeObj: long): void;
     private native setWindowFocusableSync(nativeObj: long, isFocusable: boolean): void;
-
+    private native getSubWindowZLevelSync(nativeObj: long): double;
+    private native setSubWindowZLevelSync(nativeObj: long, zLevel: number): void;
     private native setWindowTouchableSync(nativeObj: long, isTouchable: boolean): void;
     private native onNoInteractionDetected(nativeObj: long, type: string, timeout: long, callback: Object): void;
     private native keepKeyboardOnFocusSync(nativeObj: long, enable: boolean): void;
@@ -2539,6 +2543,40 @@ export class WindowInternal implements Window {
         });
     }
 
+    public setRaiseByClickEnabled(enable: boolean): Promise<void> {
+        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) :void => {
+            taskpool.execute((): void => {
+                this.setRaiseByClickEnabled(this.nativeObj, enable);
+            }).then((ret: NullishType) :void => {
+                resolve(undefined);
+            }).catch((err: NullishType) :void => {
+                reject(err as BusinessError);
+            });
+        });
+    }
+
+    public setRaiseByClickEnabled(enable: boolean, callback: AsyncCallback<void>): void {
+        taskpool.execute((): void => {
+            this.setRaiseByClickEnabled(this.nativeObj, enable);
+        }).then((ret: NullishType) => {
+            callback(new BusinessError(), undefined);
+        }).catch((err: NullishType) => {
+            callback(err as BusinessError, undefined);
+        });
+    }
+
+    public setExclusivelyHighlighted(exclusivelyHighlighted: boolean): Promise<void> {
+        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) :void => {
+            taskpool.execute((): void => {
+                this.setExclusivelyHighlighted(this.nativeObj, exclusivelyHighlighted);
+            }).then((ret: NullishType) :void => {
+                resolve(undefined);
+            }).catch((err: NullishType) :void => {
+                reject(err as BusinessError);
+            });
+        });
+    }
+
     public setWindowSystemBarProperties(systemBarProperties: SystemBarProperties): Promise<void> {
         return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) :void => {
             taskpool.execute((): void => {
@@ -2855,6 +2893,23 @@ export class WindowInternal implements Window {
       });
     }
 
+    public getSubWindowZLevel(): number{
+      let ret = this.getSubWindowZLevelSync(this.nativeObj);
+      return ret;
+    };
+
+    public setSubWindowZLevel(zLevel: number): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.setSubWindowZLevelSync(this.nativeObj, zLevel);
+        }).then((ret: NullishType) => {
+          resolve(undefined);
+        }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
     public keepKeyboardOnFocus(keepKeyboardFlag: boolean): void {
       this.keepKeyboardOnFocusSync(this.nativeObj, keepKeyboardFlag);
     }
@@ -2961,6 +3016,10 @@ export class WindowInternal implements Window {
       return this.isWindowShowingSync(this.nativeObj);
     }
 
+    public isWindowHighlighted(): boolean {
+      return this.isWindowHighlightedSync(this.nativeObj);
+    }
+    
     public hideWithAnimation(callback: AsyncCallback<void>): void {
       taskpool.execute((): void => {
         this.hideWithAnimationSync(this.nativeObj);
@@ -3050,6 +3109,9 @@ export interface Window {
     isWindowSupportWideGamut(callback: AsyncCallback<boolean>): void;
     setWindowLayoutFullScreen(isLayoutFullScreen: boolean): Promise<void>;
     setWindowLayoutFullScreen(isLayoutFullScreen: boolean, callback: AsyncCallback<void>): void;
+    setExclusivelyHighlighted(exclusivelyHighlighted: boolean): Promise<void>;
+    setRaiseByClickEnabled(enable: boolean): Promise<void>;
+    setRaiseByClickEnabled(enable: boolean, callback: AsyncCallback<void>): void;
     setWindowSystemBarProperties(systemBarProperties: SystemBarProperties): Promise<void>;
     setWindowSystemBarProperties(systemBarProperties: SystemBarProperties, callback: AsyncCallback<void>): void;
     setSpecificSystemBarEnabled(name: String, enable: boolean, enableAnimation?: boolean): Promise<void>;
@@ -3083,12 +3145,15 @@ export interface Window {
     destroyWindow(callback: AsyncCallback<void>): void;
     destroyWindow(): Promise<void>;
     isWindowShowing(): boolean;
+    isWindowHighlighted(): boolean;
     hideWithAnimation(callback: AsyncCallback<void>): void;
     hideWithAnimation(): Promise<void>;
     showWithAnimation(callback: AsyncCallback<void>): void;
     showWithAnimation(): Promise<void>;
     setWindowFocusable(isFocusable: boolean): Promise<void>;
     setWindowFocusable(isFocusable: boolean, callback: AsyncCallback<void>): void;
+    getSubWindowZLevel(): number;
+    setSubWindowZLevel(zLevel: number): Promise<void>;
     keepKeyboardOnFocus(enable: boolean): void;
     setWindowTouchable(isTouchable: boolean): Promise<void>
     setWindowTouchable(isTouchable: boolean, callback: AsyncCallback<void>): void
