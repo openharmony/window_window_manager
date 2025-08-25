@@ -2336,7 +2336,8 @@ void WindowSessionImpl::UpdateDecorEnableToAce(bool isDecorEnable)
         if (windowSystemConfig_.freeMultiWindowSupport_) {
             auto isSubWindow = WindowHelper::IsSubWindow(GetType());
             decorVisible = decorVisible && (windowSystemConfig_.freeMultiWindowEnable_ ||
-                (property_->GetIsPcAppInPad() && isSubWindow));
+                (property_->GetIsPcAppInPad() && isSubWindow)) &&
+                !(mode == WindowMode::WINDOW_MODE_FULLSCREEN && property_->GetCompatibleModeProperty());
         }
         uiContent->UpdateDecorVisible(decorVisible, isDecorEnable);
         return;
@@ -2364,7 +2365,8 @@ void WindowSessionImpl::UpdateDecorEnable(bool needNotify, WindowMode mode)
             if (windowSystemConfig_.freeMultiWindowSupport_) {
                 auto isSubWindow = WindowHelper::IsSubWindow(GetType());
                 decorVisible = decorVisible && (windowSystemConfig_.freeMultiWindowEnable_ ||
-                    (property_->GetIsPcAppInPad() && isSubWindow));
+                    (property_->GetIsPcAppInPad() && isSubWindow)) &&
+                    !(mode == WindowMode::WINDOW_MODE_FULLSCREEN && property_->GetCompatibleModeProperty());
             }
             if (GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN && property_->IsDecorFullscreenDisabled()) {
                 decorVisible = false;
