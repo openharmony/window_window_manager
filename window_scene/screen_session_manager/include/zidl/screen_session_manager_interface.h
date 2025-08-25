@@ -187,7 +187,7 @@ public:
     virtual sptr<ScreenGroupInfo> GetScreenGroupInfoById(ScreenId screenId) { return nullptr; }
     virtual DMError GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos) { return DMError::DM_OK; }
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
-        ScreenId& screenGroupId) { return DMError::DM_OK; }
+        ScreenId& screenGroupId, bool forceMirror = false) { return DMError::DM_OK; }
 
     virtual DMError MakeMirrorForRecord(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
         ScreenId &screenGroupId)
@@ -378,6 +378,7 @@ public:
     virtual DMError SetScreenPrivacyWindowTagSwitch(ScreenId screenId, const std::vector<std::string>& privacyWindowTag,
         bool enable) { return DMError::DM_OK; }
     virtual bool SynchronizePowerStatus(ScreenPowerState state) { return false; }
+    virtual void NotifySwitchUserAnimationFinish() {}
 };
 } // namespace Rosen
 } // namespace OHOS

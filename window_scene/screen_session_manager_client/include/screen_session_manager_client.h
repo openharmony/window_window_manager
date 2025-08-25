@@ -121,6 +121,9 @@ public:
     void NotifyExtendScreenCreateFinish();
     void NotifyExtendScreenDestroyFinish();
     void NotifyScreenMaskAppear();
+    void NotifySwitchUserAnimationFinish(const std::string& description);
+    void RegisterSwitchUserAnimationNotification(const std::string& description);
+    void OnAnimationFinish() override;
     DMError SetPrimaryDisplaySystemDpi(float dpi);
     void FreezeScreen(ScreenId screenId, bool isFreeze);
     std::shared_ptr<Media::PixelMap> GetScreenSnapshotWithAllWindows(ScreenId screenId, float scaleX, float scaleY,
@@ -185,6 +188,10 @@ private:
 
     std::mutex screenEventMutex_;
     std::unordered_set<ScreenId> connectedScreenSet_;
+    std::set<std::string> animateFinishDescriptionSet_;
+    std::set<std::string> animateFinishNotificationSet_;
+    mutable std::shared_mutex animateFinishDescriptionSetMutex_;
+    mutable std::mutex animateFinishNotificationSetMutex_;
 };
 } // namespace OHOS::Rosen
 

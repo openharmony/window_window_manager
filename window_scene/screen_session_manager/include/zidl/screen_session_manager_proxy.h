@@ -93,7 +93,7 @@ public:
     virtual DMError SetVirtualMirrorScreenScaleMode(ScreenId screenId, ScreenScaleMode scaleMode) override;
 
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
-        ScreenId& screenGroupId) override;
+        ScreenId& screenGroupId, bool forceRecord = false) override;
     virtual DMError MakeMirrorForRecord(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
         ScreenId& screenGroupId) override;
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
@@ -241,6 +241,7 @@ public:
     DMError SetVirtualScreenAutoRotation(ScreenId screenId, bool enable) override;
     DMError SetScreenPrivacyWindowTagSwitch(ScreenId screenId, const std::vector<std::string>& privacyWindowTag,
         bool enable) override;
+    void NotifySwitchUserAnimationFinish() override;
 
 private:
     static inline BrokerDelegator<ScreenSessionManagerProxy> delegator_;
