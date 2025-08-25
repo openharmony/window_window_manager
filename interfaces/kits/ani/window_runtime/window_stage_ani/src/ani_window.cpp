@@ -607,8 +607,11 @@ void AniWindow::OnSetWindowPrivacyMode(ani_env* env, ani_boolean isPrivacyMode)
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
-    auto ret = window->SetPrivacyMode(static_cast<bool>(isPrivacyMode));
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI] ret:%{public}d", static_cast<int32_t>(ret));
+    auto ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetPrivacyMode(static_cast<bool>(isPrivacyMode)));
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] ret:%{public}d", static_cast<int32_t>(ret));
+        AniWindowUtils::AniThrowError(env, ret);
+    }
 }
 
 void AniWindow::Recover(ani_env* env, ani_object obj, ani_long nativeObj)
@@ -2018,7 +2021,7 @@ ani_object AniWindow::GetWindowPropertiesSync(ani_env* env)
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] windowToken_ is nullptr");
-        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     auto objValue = AniWindowUtils::CreateWindowsProperties(env, windowToken_);
     if (objValue == nullptr) {
@@ -2074,6 +2077,7 @@ void AniWindow::SetSystemBarProperties(ani_env* env, ani_object aniSystemBarProp
     if (!AniWindowUtils::SetSystemBarPropertiesFromAni(env, aniProperties, aniSystemBarPropertyFlags,
         aniSystemBarProperties, windowToken_)) {
         TLOGE(WmsLogTag::WMS_IMMS, "[ANI] Failed to convert parameter to systemBarProperties");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
         return;
     }
 
@@ -2112,7 +2116,7 @@ ani_object AniWindow::SetSpecificSystemBarEnabled(ani_env* env, ani_string name,
         TLOGE(WmsLogTag::WMS_IMMS, "[ANI] windowToken_ is nullptr");
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    AniWindowUtils::GetSpecificBarStatus(windowToken_, barName, systemBarProperties, systemBarProperties);
+    AniWindowUtils::GetSpecificBarStatus(windowToken_, barName, aniSystemBarProperties, systemBarProperties);
     WmErrorCode err = WmErrorCode::WM_OK;
     if (barName.compare("status") == 0) {
         err = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetSpecificBarProperty(
