@@ -27,8 +27,12 @@ namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "ScenePersistence" };
 constexpr const char* UNDERLINE_SEPARATOR = "_";
+<<<<<<< HEAD
 constexpr const char* ASTC_IMAGE_FORMAT_PC = "image/astc/8*8";
 constexpr const char* ASTC_IMAGE_FORMAT = "image/astc/4*4";
+=======
+constexpr const char* ASTC_IMAGE_FORMAT = "image/astc/8*8";
+>>>>>>> 671b0cb2e8f792773e9645101fcb36d55d21cd08
 constexpr const char* ASTC_IMAGE_SUFFIX = ".astc";
 constexpr uint8_t ASTC_IMAGE_QUALITY = 20;
 
