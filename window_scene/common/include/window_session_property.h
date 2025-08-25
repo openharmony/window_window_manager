@@ -802,9 +802,8 @@ struct SystemSessionConfig : public Parcelable {
     bool supportCreateFloatWindow_ = false;
     float defaultCornerRadius_ = 0.0f; // default corner radius of window set by system config
     bool supportUIExtensionSubWindow_ = false;
-    using ConvertSystemConfigFunc = void(SystemSessionConfig::*)(const std::string& configItem,
-        SystemSessionConfig& systemConfig);
-    void ConvertSupportUIExtensionSubWindow(const std::string& itemValue, SystemSessionConfig& systemConfig);
+
+    void ConvertSupportUIExtensionSubWindow(const std::string& itemValue);
 
     virtual bool Marshalling(Parcel& parcel) const override
     {

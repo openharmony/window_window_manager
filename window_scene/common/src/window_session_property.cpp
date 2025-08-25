@@ -2586,10 +2586,9 @@ void WindowSessionProperty::UnmarshallingShadowsInfo(Parcel& parcel, WindowSessi
     property->SetWindowShadows(*shadowsInfo);
 }
 
-void SystemSessionConfig::ConvertSupportUIExtensionSubWindow(const std::string& itemValue,
-    SystemSessionConfig& systemConfig)
+void SystemSessionConfig::ConvertSupportUIExtensionSubWindow(const std::string& itemValue)
 {
-    systemConfig.supportUIExtensionSubWindow_ = StringUtil::ConvertStringToBool(itemValue);
+    supportUIExtensionSubWindow_ = StringUtil::ConvertStringToBool(itemValue);
 }
 } // namespace Rosen
 } // namespace OHOS
