@@ -187,9 +187,10 @@ HWTEST_F(WindowSessionTest, SetActive01, TestSize.Level1)
  */
 HWTEST_F(WindowSessionTest, SetCompatibleModeProperty, TestSize.Level1)
 {
-    EXPECT_NE(nullptr, session_->GetSessionProperty());
+    EXPECT_NE(nullptr, session_->GetSessionProperty()); 
     sptr<CompatibleModeProperty> compatibleModeProperty = nullptr;
     EXPECT_EQ(WSError::WS_ERROR_NULLPTR, session_->SetCompatibleModeProperty(compatibleModeProperty));
+    
     compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
     session_->sessionStage_ = mockSessionStage_;
     EXPECT_EQ(WSError::WS_OK, session_->SetCompatibleModeProperty(compatibleModeProperty));
