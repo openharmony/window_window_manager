@@ -662,28 +662,28 @@ HWTEST_F(SceneSessionManagerTest12, CreateAndConnectSpecificSession04, TestSize.
     ssm_->systemConfig_.supportUIExtensionSubWindow_ = true;
     ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
         systemConfig, token);
-    EXPECT_EQ(property->GetWindowType(), WindowType::WINDOW_TYPE_UI_EXTENSION_SUB_WINDOW);
+    EXPECT_EQ(property->GetWindowType(), WindowType::WINDOW_TYPE_SCB_SUB_WINDOW);
 
     // Create UI_EXTENSION_SUB_WINDOW failed
     property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     ssm_->systemConfig_.supportUIExtensionSubWindow_ = false;
     ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
         systemConfig, token);
-    EXPECT_NE(property->GetWindowType(), WindowType::WINDOW_TYPE_UI_EXTENSION_SUB_WINDOW);
+    EXPECT_NE(property->GetWindowType(), WindowType::WINDOW_TYPE_SCB_SUB_WINDOW);
 
     // Create UI_EXTENSION_SUB_WINDOW failed
     property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     property->SetIsUIExtFirstSubWindow(false);
     ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
         systemConfig, token);
-    EXPECT_NE(property->GetWindowType(), WindowType::WINDOW_TYPE_UI_EXTENSION_SUB_WINDOW);
+    EXPECT_NE(property->GetWindowType(), WindowType::WINDOW_TYPE_SCB_SUB_WINDOW);
 
     // Create UI_EXTENSION_SUB_WINDOW failed
     property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     parentSession->GetSessionProperty()->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
         systemConfig, token);
-    EXPECT_NE(property->GetWindowType(), WindowType::WINDOW_TYPE_UI_EXTENSION_SUB_WINDOW);
+    EXPECT_NE(property->GetWindowType(), WindowType::WINDOW_TYPE_SCB_SUB_WINDOW);
 }
 
 /**
