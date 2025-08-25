@@ -1762,6 +1762,220 @@ HWTEST_F(ScreenSessionManagerTest, RecoverDefaultScreenModeInner, TestSize.Level
     }
 #undef FOLD_ABILITY_ENABLE
 }
+
+/**
+ * @tc.name: AddOrUpdateUserDisplayNode
+ * @tc.desc: AddOrUpdateUserDisplayNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, AddOrUpdateUserDisplayNode, TestSize.Level1)
+{
+    RSDisplayNodeConfig config;
+    auto node = std::make_shared<RSDisplayNode>(config);
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->AddOrUpdateUserDisplayNode(100, 1, node);
+
+    auto userIt = ssm_->userDisplayNodeMap_.find(100);
+    ASSERT_NE(userIt, ssm_->userDisplayNodeMap_.end());
+    
+    auto& screenMap = userIt->second;
+    auto screenIt = screenMap.find(1);
+    ASSERT_NE(screenIt, screenMap.end());
+    EXPECT_EQ(screenIt->second, node);
+}
+
+/**
+ * @tc.name: RemoveUserDisplayNode
+ * @tc.desc: RemoveUserDisplayNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, RemoveUserDisplayNode, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    int32_t user1 = 100;
+    int32_t user2 = 200;
+    ScreenId screen1 = 1;
+    ScreenId screen2 = 2;
+    RSDisplayNodeConfig config;
+    auto node1 = std::make_shared<RSDisplayNode>(config);
+    auto node2 = std::make_shared<RSDisplayNode>(config);
+    ssm_->userDisplayNodeMap_[user1].insert_or_assign(screen1, node1);
+    ssm_->RemoveUserDisplayNode(user2, screen1);
+    EXPECT_EQ(ssm_->userDisplayNodeMap_.size(), 1);
+    
+    ssm_->userDisplayNodeMap_[user2].insert_or_assign(screen2, node2);
+    ssm_->RemoveUserDisplayNode(user2, screen1);
+    EXPECT_EQ(ssm_->userDisplayNodeMap_.size(), 2);
+
+    ssm_->userDisplayNodeMap_[user2].insert_or_assign(screen1, node2);
+    ssm_->RemoveUserDisplayNode(user2, screen1);
+    auto findRes = ssm_->userDisplayNodeMap_.find(user2);
+    EXPECT_NE(findRes, ssm_->userDisplayNodeMap_.end());
+    EXPECT_EQ(findRes->second.find(screen1), findRes->second.end());
+
+    ssm_->RemoveUserDisplayNode(user2, screen2);
+    EXPECT_EQ(ssm_->userDisplayNodeMap_.find(user2), ssm_->userDisplayNodeMap_.end());
+}
+
+/**
+ * @tc.name: GetUserDisplayNodeMap
+ * @tc.desc: GetUserDisplayNodeMap
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetUserDisplayNodeMap, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    int32_t user1 = 100;
+    ScreenId screen1 = 1;
+    RSDisplayNodeConfig config;
+    auto node1 = std::make_shared<RSDisplayNode>(config);
+    ssm_->userDisplayNodeMap_[user1].insert_or_assign(screen1, node1);
+    auto res = ssm_->GetUserDisplayNodeMap(user1);
+    auto it = res.find(screen1);
+    ASSERT_NE(it, res.end());
+    ASSERT_EQ(it->second, node1);
+}
+
+/**
+ * @tc.name: SwitchUserDealUserDisplayNode
+ * @tc.desc: SwitchUserDealUserDisplayNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SwitchUserDealUserDisplayNode, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    int32_t userId = 100;
+    ScreenId sc1 = 1;
+    ScreenId sc2 = 2;
+    ScreenId sc3 = 3;
+    ScreenId sc4 = 4;
+
+    auto realSession1 = sptr<ScreenSession>::MakeSptr();
+    realSession1->SetScreenId(sc1);
+    realSession1->SetIsRealScreen(true);
+    
+    auto realSession2 = sptr<ScreenSession>::MakeSptr();
+    realSession2->SetScreenId(sc2);
+    realSession2->SetIsRealScreen(true);
+    
+    auto virtualSession = sptr<ScreenSession>::MakeSptr();
+    virtualSession->SetScreenId(sc3);
+    virtualSession->SetIsRealScreen(false);
+
+    ssm_->screenSessionMap_[sc1] = realSession1;
+    ssm_->screenSessionMap_[sc2] = realSession2;
+    ssm_->screenSessionMap_[sc3] = virtualSession;
+
+    auto& userNodeMap = ssm_->userDisplayNodeMap_[userId];
+    RSDisplayNodeConfig config;
+    auto presetNode = std::make_shared<RSDisplayNode>(config);
+    userNodeMap[sc1] = presetNode;
+    userNodeMap[sc4] = presetNode;
+    ssm_->SwitchUserDealUserDisplayNode(userId);
+
+    // 验证结果
+    auto& resultMap = ssm_->userDisplayNodeMap_[userId];
+    EXPECT_EQ(resultMap[sc1], presetNode);
+    EXPECT_NE(resultMap.find(sc2), resultMap.end());
+    EXPECT_NE(resultMap[sc2], nullptr);
+    EXPECT_NE(resultMap[sc2], presetNode);
+    EXPECT_EQ(resultMap.find(sc4), resultMap.end());
+    EXPECT_EQ(resultMap.find(sc3), resultMap.end());
+}
+
+/**
+ * @tc.name: AddUserDisplayNodeOnTree
+ * @tc.desc: AddUserDisplayNodeOnTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, AddUserDisplayNodeOnTree, TestSize.Level1)
+{
+    g_errLog.clear();
+    int32_t userId = 100;
+    ScreenId screenId1 = 1;
+    ScreenId screenId2 = 2;
+    RSDisplayNodeConfig config;
+    auto node1 = std::make_shared<RSDisplayNode>(config);
+    std::shared_ptr<RSDisplayNode> node2 = nullptr;
+    ssm_->userDisplayNodeMap_[userId].insert_or_assign(screenId1, node1);
+    ssm_->userDisplayNodeMap_[userId].insert_or_assign(screenId2, node2);
+    ssm_->AddUserDisplayNodeOnTree(userId);
+    
+    EXPECT_TRUE(g_errLog.find("userId: ") != std::string::npos);
+    g_errLog.clear();
+}
+
+/**
+ * @tc.name: RemoveUserDisplayNodeFromTree
+ * @tc.desc: RemoveUserDisplayNodeFromTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, RemoveUserDisplayNodeFromTree, TestSize.Level1)
+{
+    int32_t userId = 100;
+    ScreenId screenId1 = 1;
+    ScreenId screenId2 = 2;
+    RSDisplayNodeConfig config;
+    auto node1 = std::make_shared<RSDisplayNode>(config);
+    std::shared_ptr<RSDisplayNode> node2 = nullptr;
+    ssm_->userDisplayNodeMap_[userId].insert_or_assign(screenId1, node1);
+    ssm_->userDisplayNodeMap_[userId].insert_or_assign(screenId2, node2);
+    ssm_->AddUserDisplayNodeOnTree(userId);
+    g_errLog.clear();
+    ssm_->RemoveUserDisplayNodeFromTree(userId);
+    EXPECT_TRUE(g_errLog.find("userId: ") != std::string::npos);
+    g_errLog.clear();
+}
+
+/**
+ * @tc.name: SetUserDisplayNodePositionZ
+ * @tc.desc: SetUserDisplayNodePositionZ
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetUserDisplayNodePositionZ, TestSize.Level1)
+{
+    g_errLog.clear();
+    int32_t userId = 100;
+    float positionZ = 2.0f;
+    ScreenId screenId1 = 1;
+    ScreenId screenId2 = 2;
+    RSDisplayNodeConfig config;
+    auto node1 = std::make_shared<RSDisplayNode>(config);
+    std::shared_ptr<RSDisplayNode> node2 = nullptr;
+    ssm_->userDisplayNodeMap_[userId].insert_or_assign(screenId1, node1);
+    ssm_->userDisplayNodeMap_[userId].insert_or_assign(screenId2, node2);
+    ssm_->SetUserDisplayNodePositionZ(userId, positionZ);
+    
+    ASSERT_TRUE(g_errLog.find("positionZ:") != std::string::npos);
+    g_errLog.clear();
+}
+
+/**
+ * @tc.name: HandleNewUserDisplayNode
+ * @tc.desc: HandleNewUserDisplayNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, HandleNewUserDisplayNode, TestSize.Level1) {
+    ASSERT_NE(ssm_, nullptr);
+    int32_t oldUserId = 100;
+    int32_t newUserId = 200;
+    ssm_->currentUserId_ = oldUserId;
+    g_errLog.clear();
+
+    RSDisplayNodeConfig config;
+    auto oldUserNode = std::make_shared<Rosen::RSDisplayNode>(config);
+    auto newUserNode = std::make_shared<Rosen::RSDisplayNode>(config);
+
+    ssm_->userDisplayNodeMap_[oldUserId][1] = oldUserNode;
+    float position = 5.0f;
+    oldUserNode->SetPositionZ(position);
+    newUserNode->SetPositionZ(position);
+    ssm_->HandleNewUserDisplayNode(newUserId, false);
+    EXPECT_TRUE(g_errLog.find("deal with userDisplayNode") != std::string::npos);
+    g_errLog.clear();
+    EXPECT_TRUE(ssm_->userDisplayNodeMap_[newUserId].size() > 0);
+}
+
 }
 }
 }
