@@ -39,6 +39,7 @@ void ScreenshotManagerAni::InitScreenshotManagerAni(ani_namespace nsp, ani_env* 
  
 ani_object ScreenshotManagerAni::Save(ani_env* env, ani_object options)
 {
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
     auto param = std::make_unique<Param>();
     if (param == nullptr) {
         TLOGI(WmsLogTag::DMS, "Create param failed.");
@@ -50,14 +51,18 @@ ani_object ScreenshotManagerAni::Save(ani_env* env, ani_object options)
     param->validInputParam = true;
     if (!optionsUndefined) {
         param->useInputOption = true;
-        ScreenshotAniUtils::GetScreenshotParam(env, param, options);
+        ani_status ret = ScreenshotAniUtils::GetScreenshotParam(env, param, options);
+        if (ret != ANI_OK) {
+            AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "get screen shot param failed");
+            return nullptr;
+        }
     }
     param->isPick = false;
     GetScreenshot(env, param);
     if (param->wret != DmErrorCode::DM_OK) {
         if (param->wret == DmErrorCode::DM_ERROR_NO_PERMISSION ||
             param->wret == DmErrorCode::DM_ERROR_INVALID_PARAM ||
-            param->wret == DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT ||
+            param->wret == DmErrorCode::DM_ERROR_NOT_SYSTEM_APP ||
             param->wret == DmErrorCode::DM_ERROR_SYSTEM_INNORMAL) {
             AniErrUtils::ThrowBusinessError(env, param->wret, param->errMessage);
         }
@@ -72,6 +77,7 @@ ani_object ScreenshotManagerAni::Save(ani_env* env, ani_object options)
  
 void ScreenshotManagerAni::GetScreenshot(ani_env *env, std::unique_ptr<Param> &param)
 {
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
     if (!param->validInputParam) {
         TLOGI(WmsLogTag::DMS, "Get Screenshot invalidInputParam");
         param->image = nullptr;
