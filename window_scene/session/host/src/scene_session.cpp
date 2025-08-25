@@ -452,8 +452,6 @@ WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property
         if (session->isUIFirstEnabled_ && leashWinSurfaceNode) {
             leashWinSurfaceNode->SetForceUIFirst(false);
             session->isUIFirstEnabled_ = false;
-            TLOGNI(WmsLogTag::WMS_ANIMATION, "%{public}s %{public}" PRIu64 " forceUIFirst=false.",
-                leashWinSurfaceNode->GetName().c_str(), leashWinSurfaceNode->GetId());
         }
         return WSError::WS_OK;
     }, __func__);
@@ -8462,7 +8460,7 @@ void SceneSession::SetWindowCornerRadiusCallback(NotifySetWindowCornerRadiusFunc
         }
         session->onSetWindowCornerRadiusFunc_ = std::move(func);
         auto property = session->GetSessionProperty();
-        float cornerRadius = property->GetWindowCornerRadius();
+        float cornerRadius = property ? property->GetWindowCornerRadius() : WINDOW_CORNER_RADIUS_INVALID;
         if (!MathHelper::LessNotEqual(cornerRadius, 0.0f)) {
             // Valid corner radius menas app has set corner radius of the window, need to update to scb.
             session->onSetWindowCornerRadiusFunc_(cornerRadius);
