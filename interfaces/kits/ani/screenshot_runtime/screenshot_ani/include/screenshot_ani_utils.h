@@ -36,11 +36,11 @@ static ani_status CallAniFunctionVoid(ani_env* env, const char* ns,
  
 static void ConvertScreenshot(ani_env* env, std::shared_ptr<Media::PixelMap> image, ani_object obj);
  
-static ani_status GetScreenshotParam(ani_env* env, std::unique_ptr<Param>& param, ani_object options);
+static ani_status GetScreenshotParam(ani_env* env, const std::unique_ptr<Param>& param, ani_object options);
 
-static ani_status GetScreenshotSize(ani_env* env, std::unique_ptr<Param>& param, ani_object options);
+static ani_status GetScreenshotSize(ani_env* env, const std::unique_ptr<Param>& param, ani_object options);
 
-static ani_status GetScreenshotRect(ani_env* env, std::unique_ptr<Param>& param, ani_object options);
+static ani_status GetScreenshotRect(ani_env* env, const std::unique_ptr<Param>& param, ani_object options);
 
 static ani_status ReadOptionalField(ani_env* env, ani_object obj, const char* fieldName, ani_ref& ref);
 static ani_status ReadOptionalLongField(ani_env* env, ani_object obj, const char* fieldName, ani_long& value);
