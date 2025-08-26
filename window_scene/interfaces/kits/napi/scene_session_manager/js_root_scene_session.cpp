@@ -166,8 +166,9 @@ void JsRootSceneSession::ProcessPendingSceneSessionActivationRegister()
 void JsRootSceneSession::ProcessBatchPendingSceneSessionsActivationRegister()
 {
     rootSceneSession_->SetBatchPendingSessionsActivationEventListener([this]
-        (const std::vector<std::shared_ptr<SessionInfo>>& sessionInfos) {
-        this->BatchPendingSessionsActivation(sessionInfos);
+        (const std::vector<std::shared_ptr<SessionInfo>>& sessionInfos,
+        const std::vector<std::shared_ptr<PendingSessionActivationConfig>>& configs) {
+        this->BatchPendingSessionsActivation(sessionInfos, configs);
     });
     TLOGD(WmsLogTag::WMS_LIFE, "success");
 }
@@ -326,18 +327,56 @@ napi_value JsRootSceneSession::CreateSessionInfosNapiValue(
     }
     return arrayValue;
 }
+
+napi_value JsRootSceneSession::CreatePendingInfosNapiValue(
+    napi_env env, const std::vector<std::shared_ptr<SessionInfo>>& sessionInfos,
+    const std::vector<std::shared_ptr<PendingSessionActivationConfig>>& configs)
+{
+    napi_value arrayValue = nullptr;
+    napi_create_array_with_length(env, sessionInfos.size(), &arrayValue);
+ 
+    if (arrayValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to create napi array");
+        return NapiGetUndefined(env);
+    }
+
+    if (configs.empty()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "configs is empty");
+        return CreateSessionInfosNapiValue(env, sessionInfos);
+    }
+
+    if (sessionInfos.size() != configs.size()) {
+        TLOGE(WmsLogTag::WMS_LIFE,
+            "The caller Param is illegal parameters.sessionInfo: %{public}zu configs: %{public}zu",
+            sessionInfos.size(), configs.size());
+        return NapiGetUndefined(env);
+    }
+
+    TLOGI(WmsLogTag::WMS_LIFE, "sessionInfos:%{public}zu", sessionInfos.size());
+    int32_t index = 0;
+    for (size_t i = 0; i < sessionInfos.size(); i++) {
+        napi_value objValue = nullptr;
+        napi_create_object(env, &objValue);
+        if (objValue == nullptr) {
+            TLOGE(WmsLogTag::WMS_LIFE, "failed to create napi object");
+            return NapiGetUndefined(env);
+        }
+        napi_set_element(env, arrayValue, index++, CreateJsSessionInfo(env, *(sessionInfos[i]), configs[i]));
+    }
+    return arrayValue;
+}
  
 void JsRootSceneSession::BatchPendingSessionsActivationInner(
-    const std::vector<std::shared_ptr<SessionInfo>>& sessionInfos)
+    const std::vector<std::shared_ptr<SessionInfo>>& sessionInfos,
+    const std::vector<std::shared_ptr<PendingSessionActivationConfig>>& configs)
 {
     const char* const where = __func__;
-    auto task = [jsCallBack = GetJSCallback(BATCH_PENDING_SCENE_ACTIVE_CB), sessionInfos, env = env_, where] {
+    auto task = [jsCallBack = GetJSCallback(BATCH_PENDING_SCENE_ACTIVE_CB), sessionInfos, configs, env = env_, where] {
         if (!jsCallBack) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s jsCallBack is nullptr", where);
             return;
         }
- 
-        napi_value jsSessionInfos = CreateSessionInfosNapiValue(env, sessionInfos);
+        napi_value jsSessionInfos = CreatePendingInfosNapiValue(env, sessionInfos, configs);
         if (jsSessionInfos == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s target session info is nullptr", where);
             return;
@@ -414,7 +453,8 @@ void JsRootSceneSession::PendingSessionActivation(SessionInfo& info)
     }
 }
 
-void JsRootSceneSession::BatchPendingSessionsActivation(const std::vector<std::shared_ptr<SessionInfo>>& sessionInfos)
+void JsRootSceneSession::BatchPendingSessionsActivation(const std::vector<std::shared_ptr<SessionInfo>>& sessionInfos,
+    const std::vector<std::shared_ptr<PendingSessionActivationConfig>>& configs)
 {
     for (auto& info : sessionInfos) {
         if (info == nullptr) {
@@ -441,7 +481,7 @@ void JsRootSceneSession::BatchPendingSessionsActivation(const std::vector<std::s
             }
         }
     }
-    BatchPendingSessionsActivationInner(sessionInfos);
+    BatchPendingSessionsActivationInner(sessionInfos, configs);
 }
 
 void JsRootSceneSession::VerifyCallerToken(SessionInfo& info)
