@@ -146,6 +146,10 @@ public:
     }
     virtual WMError GetTopNavDestinationName(int32_t windowId,
         std::string& topNavDestName) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError SetWatermarkImageForApp(const std::shared_ptr<Media::PixelMap>& pixelMap,
+        std::string& watermarkName) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError RecoverWatermarkImageForApp(const std::string& watermarkName) {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) = 0;
     virtual WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller) = 0;
     virtual WMError GetSystemConfig(SystemConfig& systemConfig) = 0;
