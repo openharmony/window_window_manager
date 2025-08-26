@@ -827,7 +827,7 @@ protected:
     bool isActive_ = false;
     bool isSystemActive_ = false;
     WSRectF bounds_;
-    Rotation rotation_;
+    Rotation rotation_ { Rotation::ROTATION_0 };
     float offsetX_ = 0.0f;
     float offsetY_ = 0.0f;
     std::atomic_bool isExitSplitOnBackground_ = false;
