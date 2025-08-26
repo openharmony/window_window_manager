@@ -147,8 +147,10 @@ private:
     sptr<SceneSession> GenSceneSession(SessionInfo& info);
     void PendingSessionActivation(SessionInfo& info);
     void PendingSessionActivationInner(std::shared_ptr<SessionInfo> sessionInfo);
-    void BatchPendingSessionsActivation(const std::vector<std::shared_ptr<SessionInfo>>& sessionInfos);
-    void BatchPendingSessionsActivationInner(const std::vector<std::shared_ptr<SessionInfo>>& sessionInfos);
+    void BatchPendingSessionsActivation(const std::vector<std::shared_ptr<SessionInfo>>& sessionInfos,
+        const std::vector<std::shared_ptr<PendingSessionActivationConfig>>& configs);
+    void BatchPendingSessionsActivationInner(const std::vector<std::shared_ptr<SessionInfo>>& sessionInfos,
+        const std::vector<std::shared_ptr<PendingSessionActivationConfig>>& configs);
     void OnSessionStateChange(const SessionState& state);
     void OnUpdateTransitionAnimation(const WindowTransitionType& type, const TransitionAnimation& animation);
     void OnSessionEvent(uint32_t eventId, const SessionEventParam& param);
@@ -251,6 +253,9 @@ private:
     static napi_value SendFbActionEvent(napi_env env, napi_callback_info info);
     static napi_value CreateSessionInfosNapiValue(
         napi_env env, const std::vector<std::shared_ptr<SessionInfo>>& sessionInfos);
+    static napi_value CreatePendingInfosNapiValue(napi_env env,
+        const std::vector<std::shared_ptr<SessionInfo>>& sessionInfos,
+        const std::vector<std::shared_ptr<PendingSessionActivationConfig>>& configs);
     static napi_value SetPcAppInpadCompatibleMode(napi_env env, napi_callback_info info);
     static napi_value SetPcAppInpadSpecificSystemBarInvisible(napi_env env, napi_callback_info info);
     static napi_value SetPcAppInpadOrientationLandscape(napi_env env, napi_callback_info info);

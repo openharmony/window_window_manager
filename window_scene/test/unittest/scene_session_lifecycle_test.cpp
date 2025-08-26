@@ -44,6 +44,7 @@ public:
     void TearDown() override;
     sptr<SceneSession> sceneSession;
     SessionInfo info;
+    PendingSessionActivationConfig configs;
 };
 
 void SceneSessionLifecycleTest::SetUpTestCase() {}
@@ -1211,9 +1212,20 @@ HWTEST_F(SceneSessionLifecycleTest, BatchPendingSessionsActivation, TestSize.Lev
     sessionInfo->want.SetFlags(flags);
     sessionInfo->isAtomicService = true;
     abilitySessionInfos.emplace_back(sessionInfo);
-    WSError result = sceneSession->BatchPendingSessionsActivation(abilitySessionInfos);
-
+    std::vector<PendingSessionActivationConfig> configs;
+    PendingSessionActivationConfig config;
+    configs.emplace_back(config);
+    WSError result = sceneSession->BatchPendingSessionsActivation(abilitySessionInfos, configs);
     EXPECT_EQ(result, WSError::WS_OK);
+
+    auto func = [](std::vector<std::shared_ptr<SessionInfo>>& info,
+        const std::vector<std::shared_ptr<PendingSessionActivationConfig>>& configs) {
+        std::cout << "enter batchPendingSessionsActivationFunc" << std::endl;
+    };
+    sceneSession->Session::SetBatchPendingSessionsActivationEventListener(func);
+    result = sceneSession->BatchPendingSessionsActivation(abilitySessionInfos, configs);
+    EXPECT_EQ(result, WSError::WS_OK);
+    MockAccesstokenKit::ChangeMockStateToInit();
 }
 
 /**
