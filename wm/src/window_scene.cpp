@@ -102,7 +102,7 @@ WMError WindowScene::Init(DisplayId displayId, const std::shared_ptr<AbilityRunt
         std::string moduleName = context->GetHapModuleInfo() ? context->GetHapModuleInfo()->moduleName : "";
         if (!moduleName.empty()) {
             isModuleAbilityHookEnd =
-               SingletonContainer::Get<WindowManager>().IsModuleHookOff(isModuleAbilityHookEnd, moduleName);
+                SingletonContainer::Get<WindowManager>().IsModuleHookOff(isModuleAbilityHookEnd, moduleName);
         }
     }
     auto mainWindow = SingletonContainer::Get<StaticCall>()
