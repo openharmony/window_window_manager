@@ -15,6 +15,7 @@
 
 import { AsyncCallback, Callback } from '@ohos.base';
 import { BusinessError } from '@ohos.base';
+import image from '@ohos.multimedia.image';
 
 export default namespace screen {
 
@@ -255,6 +256,18 @@ export function setMultiScreenMode(primaryScreenId: long, secondaryScreenId: lon
     });
 }
 
+export function setScreenPrivacyMaskImage(screenId: long, image?: image.PixelMap): Promise<void> {
+    return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) => {
+        taskpool.execute((): void => {
+            setScreenPrivacyMaskImageInternal(screenId, image);
+        }).then(() => {
+            resolve(undefined);
+        }).catch((err: NullishType) => {
+            reject(err as BusinessError);
+        });
+    });
+}
+
 export native function getAllScreensInternal(screens: Array<Screen>): void;
 export native function createVirtualScreenInternal(options: VirtualScreenOption, screen: ScreenImpl): void;
 export native function setVirtualScreenSurfaceInternal(screenId: long, surfaceId: string): void;
@@ -265,6 +278,7 @@ export native function setMultiScreenRelativePositionInternal(mainScreenOptions:
     secondaryScreenOptions: MultiScreenPositionOptions): void;
 export native function setMultiScreenModeInternal(primaryScreenId: long, secondaryScreenId: long,
     secondaryScreenMode: MultiScreenMode): void;
+export native function setScreenPrivacyMaskImageInternal(screenId: long, image?: image.PixelMap): void;
 
 export interface Screen {
 

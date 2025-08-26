@@ -432,6 +432,29 @@ void ScreenManagerAni::SetMultiScreenMode(ani_env* env, ani_long primaryScreenId
     }
 }
 
+void ScreenManagerAni::SetScreenPrivacyMaskImage(ani_env* env, ani_long screenId, ani_object imageAni)
+{
+    std::shared_ptr<Media::PixelMap> privacyMaskImg;
+    ani_boolean isImageAniUndefined = 0;
+    env->Reference_IsUndefined(imageAni, &isImageAniUndefined);
+    if (!isImageAniUndefined) {
+        privacyMaskImg = OHOS::Media::PixelMapTaiheAni::GetNativePixelMap(env, imageAni);
+        if (privacyMaskImg == nullptr) {
+            TLOGE(WmsLogTag::DMS, "[ANI] Failed to convert parameter to pixelmap.");
+            AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM,
+                "Failed to convert parameter to pixelmap.");
+            return;
+        }
+    }
+    auto res = DM_JS_TO_ERROR_CODE_MAP.at(
+            SingletonContainer::Get<ScreenManager>().SetScreenPrivacyMaskImage(static_cast<ScreenId>(screenId),
+                privacyMaskImg));
+    if (res != DmErrorCode::DM_OK) {
+        TLOGE(WmsLogTag::DMS, "ScreenManager::SetScreenPrivacyMaskImage failed.");
+        AniErrUtils::ThrowBusinessError(env, res, "ScreenManager::SetScreenPrivacyMaskImage failed.");
+    }
+}
+
 extern "C" {
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
@@ -472,6 +495,8 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(ScreenManagerAni::SetMultiScreenRelativePosition)},
         ani_native_function {"setMultiScreenModeInternal", nullptr,
             reinterpret_cast<void *>(ScreenManagerAni::SetMultiScreenMode)},
+        ani_native_function {"setScreenPrivacyMaskImageInternal", nullptr,
+            reinterpret_cast<void *>(ScreenManagerAni::SetScreenPrivacyMaskImage)},
     };
     if ((ret = env->Namespace_BindNativeFunctions(nsp, funcs.data(), funcs.size()))) {
         TLOGE(WmsLogTag::DMS, "[ANI] bind namespace fail %{public}u", ret);
