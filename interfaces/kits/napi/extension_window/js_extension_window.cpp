@@ -1120,106 +1120,154 @@ napi_value JsExtensionWindow::OnHideNonSecureWindows(napi_env env, napi_callback
 {
     if (extensionWindow_ == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "extensionWindow_ is nullptr");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][hideNonSecureWindows]msg: extensionWindow_ is nullptr");
     }
     sptr<Window> windowImpl = extensionWindow_->GetWindow();
     if (windowImpl == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "windowImpl is nullptr");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][hideNonSecureWindows]msg: windowImpl is nullptr");
     }
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Argc is invalid: %{public}zu", argc);
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][hideNonSecureWindows]msg: Argc is invalid");
     }
     bool shouldHide = false;
     if (!ConvertFromJsValue(env, argv[0], shouldHide)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Failed to convert parameter to bool");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][hideNonSecureWindows]msg: Failed to convert parameter to bool");
     }
 
-    WmErrorCode ret = WmErrorCode::WM_OK;
-    ret = WM_JS_TO_ERROR_CODE_MAP.at(extensionWindow_->HideNonSecureWindows(shouldHide));
-    if (ret != WmErrorCode::WM_OK) {
-        return NapiThrowError(env, ret);
+    auto ret = WM_JS_TO_ERROR_CODE_MAP.at(extensionWindow_->HideNonSecureWindows(shouldHide));
+    const char* const where = __func__;
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [where, env, ret, task = napiAsyncTask]() mutable {
+        if (ret == WmErrorCode::WM_OK) {
+            task->Resolve(env, NapiGetUndefined(env));
+        } else {
+            TLOGNE(WmsLogTag::WMS_UIEXT, "%{public}s failed, code: %{public}d", where, ret);
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(ret),
+                "[window][hideNonSecureWindows]msg: hideNonSecureWindows failed"));
+        }
+    };
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnHideNonSecureWindows") != napi_status::napi_ok) {
+        napiAsyncTask->Reject(env,
+            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
+                "[window][hideNonSecureWindows]msg: Failed to send event"));
     }
     TLOGI(WmsLogTag::WMS_UIEXT, "end, window [%{public}u, %{public}s], shouldHide:%{public}u",
           windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str(), shouldHide);
-    return NapiGetUndefined(env);
+    return result;
 }
 
 napi_value JsExtensionWindow::OnSetWaterMarkFlag(napi_env env, napi_callback_info info)
 {
     if (extensionWindow_ == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "extensionWindow_ is nullptr");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][setWaterMarkFlag]msg: extensionWindow_ is nullptr");
     }
     sptr<Window> windowImpl = extensionWindow_->GetWindow();
     if (windowImpl == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "windowImpl is nullptr");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][setWaterMarkFlag]msg: windowImpl is nullptr");
     }
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Argc is invalid: %{public}zu", argc);
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][setWaterMarkFlag]msg: Argc is invalid");
     }
     bool isEnable = false;
     if (!ConvertFromJsValue(env, argv[0], isEnable)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Failed to convert parameter to bool");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][setWaterMarkFlag]msg: Failed to convert parameter to bool");
     }
 
-    WmErrorCode ret = WmErrorCode::WM_OK;
-    ret = WM_JS_TO_ERROR_CODE_MAP.at(extensionWindow_->SetWaterMarkFlag(isEnable));
-    if (ret != WmErrorCode::WM_OK) {
-        return NapiThrowError(env, ret);
+    auto ret = WM_JS_TO_ERROR_CODE_MAP.at(extensionWindow_->SetWaterMarkFlag(isEnable));
+    const char* const where = __func__;
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [where, env, ret, task = napiAsyncTask]() mutable {
+        if (ret == WmErrorCode::WM_OK) {
+            task->Resolve(env, NapiGetUndefined(env));
+        } else {
+            TLOGNE(WmsLogTag::WMS_UIEXT, "%{public}s failed, code: %{public}d", where, ret);
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(ret),
+                "[window][setWaterMarkFlag]msg: setWaterMarkFlag failed"));
+        }
+    };
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetWaterMarkFlag") != napi_status::napi_ok) {
+        napiAsyncTask->Reject(env,
+            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
+                "[window][setWaterMarkFlag]msg: Failed to send event"));
     }
     TLOGI(WmsLogTag::WMS_UIEXT, "end, window [%{public}u, %{public}s], isEnable:%{public}u.",
           windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str(), isEnable);
-    return NapiGetUndefined(env);
+    return result;
 }
 
 napi_value JsExtensionWindow::OnHidePrivacyContentForHost(napi_env env, napi_callback_info info)
 {
     if (extensionWindow_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "extension window is nullptr");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        TLOGE(WmsLogTag::WMS_UIEXT, "extensionWindow_ is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][hidePrivacyContentForHost]msg: extensionWindow_ is nullptr");
     }
-
     sptr<Window> windowImpl = extensionWindow_->GetWindow();
     if (windowImpl == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "windowImpl is nullptr");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][hidePrivacyContentForHost]msg: windowImpl is nullptr");
     }
-
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Argc is invalid: %{public}zu", argc);
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][hidePrivacyContentForHost]msg: Argc is invalid");
     }
-
     bool needHide = false;
     if (!ConvertFromJsValue(env, argv[0], needHide)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Failed to convert parameter to bool");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][hidePrivacyContentForHost]msg: Failed to convert parameter to bool");
     }
 
     auto ret = WM_JS_TO_ERROR_CODE_MAP.at(extensionWindow_->HidePrivacyContentForHost(needHide));
-    if (ret != WmErrorCode::WM_OK) {
-        return NapiThrowError(env, ret);
+    const char* const where = __func__;
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [where, env, ret, task = napiAsyncTask]() mutable {
+        if (ret == WmErrorCode::WM_OK) {
+            task->Resolve(env, NapiGetUndefined(env));
+        } else {
+            TLOGNE(WmsLogTag::WMS_UIEXT, "%{public}s failed, code: %{public}d", where, ret);
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(ret),
+                "[window][hidePrivacyContentForHost]msg: hidePrivacyContentForHost failed"));
+        }
+    };
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnHidePrivacyContentForHost") != napi_status::napi_ok) {
+        napiAsyncTask->Reject(env,
+            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
+                "[window][hidePrivacyContentForHost]msg: Failed to send event"));
     }
 
     TLOGI(WmsLogTag::WMS_UIEXT, "finished, window [%{public}u, %{public}s], needHide:%{public}u.",
           windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str(), needHide);
-
-    return NapiGetUndefined(env);
+    return result;
 }
 
 napi_value JsExtensionWindow::GetProperties(napi_env env, napi_callback_info info)
