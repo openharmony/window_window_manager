@@ -127,6 +127,11 @@ void MockMessageParcel::SetWriteRemoteObjectErrorFlag(bool flag)
     g_setWriteRemoteObjectErrorFlag = flag;
 }
 
+void MockMessageParcel::SetReadBoolErrorFlag(bool flag)
+{
+    g_setReadBoolErrorFlag = flag;
+}
+
 void MockMessageParcel::SetReadUint32ErrorFlag(bool flag)
 {
     g_setReadUint32ErrorFlag = flag;
@@ -135,11 +140,6 @@ void MockMessageParcel::SetReadUint32ErrorFlag(bool flag)
 void MockMessageParcel::SetReadInt32ErrorFlag(bool flag)
 {
     g_setReadInt32ErrorFlag = flag;
-}
-
-void MockMessageParcel::SetReadBoolErrorFlag(bool flag)
-{
-    g_setReadBoolErrorFlag = flag;
 }
 
 void MockMessageParcel::SetReadUint64ErrorFlag(bool flag)
@@ -258,7 +258,7 @@ bool Parcel::WriteString(const std::string& value)
     return !g_setWriteStringErrorFlag;
 }
 
-bool Parcel::ReadBool(bool& value)
+bool Parcel::ReadBool(bool& val)
 {
     if (g_setReadBoolErrorFlag) {
         return false;

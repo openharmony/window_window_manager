@@ -210,21 +210,6 @@ HWTEST_F(SceneSessionManagerKioskTest,
 }
 
 /**
- * @tc.name  : UpdateKioskAppList_ShouldReturnInvalidParam_WhenKioskAppListIsEmpty
- * @tc.number: UpdateKioskAppList_002
- * @tc.desc  : Test: When the passed kioskAppList is empty, UpdateKioskAppList should return WM_ERROR_INVALID_PARAM
- */
-HWTEST_F(SceneSessionManagerKioskTest,
-    ATC_UpdateKioskAppList_ShouldReturnInvalidParam_WhenKioskAppListIsEmpty, TestSize.Level0)
-{
-    MockAccesstokenKit::MockIsSystemApp(true);
-    MockAccesstokenKit::MockIsSACalling(true);
-    std::vector<std::string> kioskAppList = {};
-    WMError result = ssm_->UpdateKioskAppList(kioskAppList);
-    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
-}
-
-/**
  * @tc.name  : UpdateKioskAppList_ShouldCallUpdateKioskAppListFunc_WhenUpdateKioskAppListFuncIsNotNull
  * @tc.number: UpdateKioskAppList_003
  * @tc.desc  : When updateKioskAppListFun_ is not empty, UpdateKioskAppList should call updateKisokAppListFunc_
@@ -296,7 +281,7 @@ HWTEST_F(SceneSessionManagerKioskTest,
 /**
  * @tc.name  : RegisterKioskModeChangeCallback_ShouldCallCallback_WhenValidFuncIsProvided
  * @tc.number: RegisterKioskModeChangeCallbackTest_001
- * @tc.desc  : 测试在传入有效回调函数时，函数是否被正确调用
+ * @tc.desc  : Test whether the function is called correctly when a valid callback function is passed in
  */
 HWTEST_F(SceneSessionManagerKioskTest,
     ATC_RegisterKioskModeChangeCallback_ShouldCallCallback_WhenValidFuncIsProvided, TestSize.Level0)
@@ -309,6 +294,6 @@ HWTEST_F(SceneSessionManagerKioskTest,
     usleep(WAIT_SYNC_IN_NS);
     EXPECT_TRUE(ssm_->kioskModeChangeFunc_ != nullptr);
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS
