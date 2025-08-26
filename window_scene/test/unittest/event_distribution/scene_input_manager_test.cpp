@@ -866,11 +866,11 @@ HWTEST_F(SceneInputManagerTest, CheckNeedUpdateForScreenInfos, TestSize.Level1)
 }
 
 /**
- * @tc.name: CheckNeedUpdateFordDisplayInfos
- * @tc.desc: CheckNeedUpdateFordDisplayInfos
+ * @tc.name: CheckNeedUpdateForDisplayInfos
+ * @tc.desc: CheckNeedUpdateForDisplayInfos
  * @tc.type: FUNC
  */
-HWTEST_F(SceneInputManagerTest, CheckNeedUpdateFordDisplayInfos, TestSize.Level1)
+HWTEST_F(SceneInputManagerTest, CheckNeedUpdateForDisplayInfos, TestSize.Level1)
 {
     std::vector<MMI::ScreenInfo> screenInfos;
     std::vector<MMI::DisplayInfo> displayInfos;
