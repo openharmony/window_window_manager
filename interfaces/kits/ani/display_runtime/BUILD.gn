@@ -71,6 +71,7 @@ ohos_shared_library("displayani_kit") {
     "eventhandler:libeventhandler",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
+    "ipc:ipc_single",
     "runtime_core:ani",
   ]
 
