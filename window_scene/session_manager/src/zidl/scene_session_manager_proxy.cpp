@@ -105,6 +105,12 @@ WSError SceneSessionManagerProxy::CreateAndConnectSpecificSession(const sptr<ISe
     if (property->GetDisplayId() != VIRTUAL_DISPLAY_ID) {
         property->SetDisplayId(displayId);
     }
+    uint32_t windowType = 0;
+    if (!reply.ReadUint32(windowType)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read windowType failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    property->SetWindowType(static_cast<WindowType>(windowType));
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
 }

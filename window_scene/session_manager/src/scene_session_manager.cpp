@@ -10855,7 +10855,8 @@ void SceneSessionManager::ApplyFeatureConfig(const std::unordered_map<std::strin
     auto task = [this, where = __func__, &configMap] {
         if (convertConfigMap_.empty()) {
             convertConfigMap_ = {
-                {"supportUIExtensionSubWindow", &SystemSessionConfig::ConvertSupportUIExtensionSubWindow},
+                {"supportUIExtensionSubWindow", std::bind(&SystemSessionConfig::ConvertSupportUIExtensionSubWindow,
+                    &systemConfig_, std::placeholders::_1)},
             };
         }
         for (const auto& [configName, configValue] : configMap) {
