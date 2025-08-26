@@ -90,7 +90,8 @@ ani_status ScreenshotAniUtils::CallAniFunctionVoid(ani_env* env, const char* ns,
     return ret;
 }
  
-ani_status ScreenshotAniUtils::GetScreenshotParam(ani_env* env, std::unique_ptr<Param>& param, ani_object options)
+ani_status ScreenshotAniUtils::GetScreenshotParam(ani_env* env, const std::unique_ptr<Param>& param,
+    ani_object options)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] begin");
     if (param == nullptr) {
@@ -136,7 +137,7 @@ ani_status ScreenshotAniUtils::GetScreenshotParam(ani_env* env, std::unique_ptr<
     return ANI_OK;
 }
 
-ani_status ScreenshotAniUtils::GetScreenshotSize(ani_env* env, std::unique_ptr<Param>& param, ani_object options)
+ani_status ScreenshotAniUtils::GetScreenshotSize(ani_env* env, const std::unique_ptr<Param>& param, ani_object options)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] begin");
     ani_ref obj;
@@ -166,7 +167,7 @@ ani_status ScreenshotAniUtils::GetScreenshotSize(ani_env* env, std::unique_ptr<P
     return ANI_OK;
 }
 
-ani_status ScreenshotAniUtils::GetScreenshotRect(ani_env* env, std::unique_ptr<Param>& param, ani_object options)
+ani_status ScreenshotAniUtils::GetScreenshotRect(ani_env* env, const std::unique_ptr<Param>& param, ani_object options)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] begin");
     ani_ref obj;
