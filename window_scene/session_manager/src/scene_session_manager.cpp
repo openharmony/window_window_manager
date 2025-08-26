@@ -16052,7 +16052,8 @@ void SceneSessionManager::RemoveProcessWatermarkPid(int32_t pid)
     }
 }
 
-WMError SetWatermarkImageForApp(const std::shared_ptr<Media::PixelMap>& pixelMap, std::string& watermarkName)
+WMError SceneSessionManager::SetWatermarkImageForApp(const std::shared_ptr<Media::PixelMap>& pixelMap,
+    std::string& watermarkName)
 {
     int32_t pid = IPCSkeleton::GetCallingRealPid();
     const char* const where = __func__;
@@ -16068,19 +16069,42 @@ WMError SetWatermarkImageForApp(const std::shared_ptr<Media::PixelMap>& pixelMap
         }
         std::string newWatermarkName;
         auto nodeIds = GetSessionNodeIdsAndWatermarkNameByPid(pid, newWatermarkName);
-        if (!watermarkName.empty() && watermarkName != newWatermarkName) {
-            //todo:
+        if (newWatermarkName == watermarkName) {
+            TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: same watermark=%{public}s, pid=%{public}d",
+                where, watermarkName.c_str(), pid);
+            return WMError::WM_OK;
         }
-        return WSError::WS_OK;
+        auto rsErrCode = RSInterfaces::GetInstance().SetSurfaceWatermark(newWatermarkName, pixelMap, nodeIds,
+            CUSTOM_WATER_MARK);
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: prevWatermark=%{public}s, curWatermark=%{public}s, "
+            "pid=%{public}d, rsErrCode=%{public}u", where, watermarkName.c_str(), newWatermarkName.c_str(), pid,
+            static_cast<uint32_t>(rsErrCode));
+        if (rsErrCode == WATER_MARK_SUCCESS) {
+            watermarkName = newWatermarkName;
+            std::unique_lock<std::shared_mutex> lock(appWatermarkMapMutex_);
+            appWatermarkPidMap_.insert_or_assign(pid, watermarkName);
+            return WMError::WM_OK;
+        }
+        if (rsErrCode == WATER_MARK_IMG_SIZE_ERROR) {
+            return WMError::WM_ERROR_ILLEGAL_PARAM;
+        }
+        return WMError::WM_ERROR_SYSTEM_ABNORMALLY;
     };
     return taskScheduler_->PostSyncTask(task, where);
 }
 
-WMError RecoverWatermarkImageForApp(const std::string& watermarkName)
+WMError SceneSessionManager::RecoverWatermarkImageForApp(const std::string& watermarkName)
 {
+    int32_t pid = IPCSkeleton::GetCallingRealPid();
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "watermark=%{public}s, pid=%{public}d", watermarkName.c_str(), pid);
+    if (!watermarkName.empty()) {
+        std::unique_lock<std::shared_mutex> lock(appWatermarkMapMutex_);
+        appWatermarkPidMap_.insert_or_assign(pid, watermarkName);
+    }
+    return WMError::WM_OK;
 }
 
-std::vector<NodeId> GetSessionNodeIdsAndWatermarkNameByPid(int32_t pid, std::string& watermarkName)
+std::vector<NodeId> SceneSessionManager::GetSessionNodeIdsAndWatermarkNameByPid(int32_t pid, std::string& watermarkName)
 {
     std::vector<NodeId> nodeIds;
     std::string bundleName;
