@@ -3759,6 +3759,10 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
             return WSError::WS_ERROR_INVALID_WINDOW;
         }
         property->SetSubWindowLevel(parentProperty->GetSubWindowLevel() + 1);
+        if (parentSession->GetSessionInfo().isSystem_ && property->GetIsUIExtFirstSubWindow() &&
+            systemConfig_.supportUIExtensionSubWindow_) {
+            property->SetWindowType(WindowType::WINDOW_TYPE_SCB_SUB_WINDOW);
+        }
     }
     auto initClientDisplayId = UpdateSpecificSessionClientDisplayId(property);
     bool shouldBlock = false;
@@ -10994,6 +10998,29 @@ static void FillUnreliableWindowInfo(const sptr<SceneSession>& sceneSession,
     info->scaleY_ = sceneSession->GetScaleY();
     infos.emplace_back(info);
     TLOGD(WmsLogTag::WMS_MAIN, "wid=%{public}d", info->windowId_);
+}
+
+void SceneSessionManager::ApplyFeatureConfig(const std::unordered_map<std::string, std::string>& configMap)
+{
+    auto task = [this, where = __func__, &configMap] {
+        if (convertConfigMap_.empty()) {
+            convertConfigMap_ = {
+                {"supportUIExtensionSubWindow", std::bind(&SystemSessionConfig::ConvertSupportUIExtensionSubWindow,
+                    &systemConfig_, std::placeholders::_1)},
+            };
+        }
+        for (const auto& [configName, configValue] : configMap) {
+            TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s, configEntry is %{public}s: %{public}s",
+                where, configName.c_str(), configValue.c_str());
+            auto convertIter = convertConfigMap_.find(configName);
+            if (convertIter != convertConfigMap_.end()) {
+                auto convertFunc = convertIter->second;
+                convertFunc(configValue);
+            }
+        }
+        return WMError::WM_OK;
+    };
+    taskScheduler_->PostSyncTask(task, "ApplyFeatureConfig");
 }
 
 WMError SceneSessionManager::GetUnreliableWindowInfo(int32_t windowId,

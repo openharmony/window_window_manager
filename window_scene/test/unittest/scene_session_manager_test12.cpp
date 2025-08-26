@@ -632,6 +632,77 @@ HWTEST_F(SceneSessionManagerTest12, CreateAndConnectSpecificSession03, TestSize.
 }
 
 /**
+ * @tc.name: CreateAndConnectSpecificSession
+ * @tc.desc: CreateAndConnectSpecificSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, CreateAndConnectSpecificSession04, TestSize.Level1)
+{
+    sptr<ISessionStage> sessionStage;
+    sptr<IWindowEventChannel> eventChannel;
+    std::shared_ptr<RSSurfaceNode> node = nullptr;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sptr<ISession> session;
+    SystemSessionConfig systemConfig;
+    sptr<IRemoteObject> token;
+    int32_t id = 0;
+    ASSERT_NE(ssm_, nullptr);
+
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test2";
+    sptr<SceneSession> parentSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    parentSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
+    ssm_->sceneSessionMap_.insert({ parentSession->GetPersistentId(), parentSession });
+
+    // Create UI_EXTENSION_SUB_WINDOW success
+    property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    property->SetParentPersistentId(parentSession->GetPersistentId());
+    property->SetIsUIExtFirstSubWindow(true);
+    ssm_->systemConfig_.supportUIExtensionSubWindow_ = true;
+    ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
+        systemConfig, token);
+    EXPECT_EQ(property->GetWindowType(), WindowType::WINDOW_TYPE_SCB_SUB_WINDOW);
+
+    // Create UI_EXTENSION_SUB_WINDOW failed
+    property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    ssm_->systemConfig_.supportUIExtensionSubWindow_ = false;
+    ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
+        systemConfig, token);
+    EXPECT_NE(property->GetWindowType(), WindowType::WINDOW_TYPE_SCB_SUB_WINDOW);
+
+    // Create UI_EXTENSION_SUB_WINDOW failed
+    property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    property->SetIsUIExtFirstSubWindow(false);
+    ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
+        systemConfig, token);
+    EXPECT_NE(property->GetWindowType(), WindowType::WINDOW_TYPE_SCB_SUB_WINDOW);
+
+    // Create UI_EXTENSION_SUB_WINDOW failed
+    property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    parentSession->GetSessionProperty()->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
+        systemConfig, token);
+    EXPECT_NE(property->GetWindowType(), WindowType::WINDOW_TYPE_SCB_SUB_WINDOW);
+}
+
+/**
+ * @tc.name: ApplyFeatureConfig
+ * @tc.desc: ApplyFeatureConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, ApplyFeatureConfig, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    std::unordered_map<std::string, std::string> configMap = {
+        {"testKey", "testVal"},
+        {"supportUIExtensionSubWindow", "true"}
+    };
+    ssm_->ApplyFeatureConfig(configMap);
+    EXPECT_TRUE(ssm_->systemConfig_.supportUIExtensionSubWindow_);
+}
+
+/**
  * @tc.name: SetCreateKeyboardSessionListener
  * @tc.desc: SetCreateKeyboardSessionListener
  * @tc.type: FUNC

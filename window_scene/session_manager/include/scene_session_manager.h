@@ -171,6 +171,7 @@ using NotifySessionRecoverStateChangeFunc = std::function<void(const SessionReco
 using NotifyRecoverStateChangeFunc = std::function<void(const RecoverState& state)>;
 using FindScenePanelRsNodeByZOrderFunc = std::function<std::shared_ptr<Rosen::RSNode>(DisplayId screenId,
     uint32_t targetZOrder)>;
+using ConvertSystemConfigFunc = std::function<void(const std::string& configItem)>;
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
@@ -241,6 +242,7 @@ public:
     void SetDumpUITreeFunc(const DumpUITreeFunc& func);
     void SetFindScenePanelRsNodeByZOrderFunc(FindScenePanelRsNodeByZOrderFunc&& func);
     const AppWindowSceneConfig& GetWindowSceneConfig() const;
+    void ApplyFeatureConfig(const std::unordered_map<std::string, std::string>& configMap);
 
     /*
      * Window Recover
@@ -816,6 +818,7 @@ protected:
 private:
     std::atomic<bool> enterRecent_ { false };
     bool isKeyboardPanelEnabled_ = false;
+    std::unordered_map<std::string, ConvertSystemConfigFunc> convertConfigMap_;
     static sptr<SceneSessionManager> CreateInstance();
     static inline bool isNotCurrentScreen(sptr<SceneSession> sceneSession, ScreenId screenId)
     {
