@@ -819,9 +819,11 @@ struct SystemSessionConfig : public Parcelable {
             return false;
         }
 
-        if (!parcel.WriteUint32(miniWidthOfMainWindow_) || !parcel.WriteUint32(miniHeightOfMainWindow_) ||
-            !parcel.WriteUint32(miniWidthOfSubWindow_) || !parcel.WriteUint32(miniHeightOfSubWindow_) ||
-            !parcel.WriteUint32(miniWidthOfDialogWindow_) || !parcel.WriteUint32(miniHeightOfDialogWindow_)) {
+        bool parcelWriteFail = !parcel.WriteUint32(miniWidthOfMainWindow_) ||
+                !parcel.WriteUint32(miniHeightOfMainWindow_) || !parcel.WriteUint32(miniWidthOfSubWindow_) ||
+                !parcel.WriteUint32(miniHeightOfSubWindow_) || !parcel.WriteUint32(miniWidthOfDialogWindow_) ||
+                !parcel.WriteUint32(miniHeightOfDialogWindow_);
+        if (parcelWriteFail) {
             return false;
         }
 
