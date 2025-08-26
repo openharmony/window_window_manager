@@ -53,12 +53,12 @@ public:
      * Window Recover
      */
     ErrCode NotifySceneBoardAvailable() override;
-    ErrCode RegisterSMSRecoverListener(const sptr<IRemoteObject>& listener) override;
-    ErrCode UnregisterSMSRecoverListener() override;
-    void UnregisterSMSRecoverListener(int32_t userId, int32_t pid);
-    ErrCode RegisterSMSLiteRecoverListener(const sptr<IRemoteObject>& listener) override;
-    ErrCode UnregisterSMSLiteRecoverListener() override;
-    void UnregisterSMSLiteRecoverListener(int32_t userId, int32_t pid);
+    ErrCode RegisterSMSRecoverListener(const sptr<IRemoteObject>& listener, int32_t userId) override;
+    ErrCode UnregisterSMSRecoverListener(int32_t userId) override;
+    void UnregisterSMSRecoverListener(int32_t clientUserId, DisplayId displayId, int32_t pid);
+    ErrCode RegisterSMSLiteRecoverListener(const sptr<IRemoteObject>& listener, int32_t userId) override;
+    ErrCode UnregisterSMSLiteRecoverListener(int32_t userId) override;
+    void UnregisterSMSLiteRecoverListener(int32_t clientUserId, DisplayId displayId, int32_t pid);
 
     /*
      * Window Snapshot
@@ -99,7 +99,9 @@ private:
     void RemoveSessionManagerServiceByUserId(int32_t userId);
     bool RegisterMockSessionManagerService();
     std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>* GetSMSRecoverListenerMap(int32_t userId);
+    std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>* GetSMSRecoverListenerMapU0(int32_t displayId);
     std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>* GetSMSLiteRecoverListenerMap(int32_t userId);
+    std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>* GetSMSLiteRecoverListenerMapU0(int32_t displayId);
     void NotifySceneBoardAvailableToClient(int32_t userId);
     void NotifySceneBoardAvailableToLiteClient(int32_t userId);
     void NotifyWMSConnectionChanged(int32_t wmsUserId, int32_t screenId, bool isConnected);
@@ -133,6 +135,8 @@ private:
      */
     int32_t defaultWMSUserId_;
     int32_t defaultScreenId_;
+    std::mutex userId2ScreenIdMapLock_;
+    std::map<int32_t, int32_t> userId2ScreenIdMap_;
     std::shared_mutex smsDeathRecipientMapLock_;
     std::map<int32_t, sptr<SMSDeathRecipient>> smsDeathRecipientMap_;
     std::shared_mutex sessionManagerServiceMapLock_;
@@ -147,6 +151,11 @@ private:
     std::map<int32_t, std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>> smsRecoverListenerMap_;
     std::shared_mutex smsLiteRecoverListenerLock_;
     std::map<int32_t, std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>> smsLiteRecoverListenerMap_;
+
+    std::shared_mutex smsRecoverListenerLockU0_;
+    std::map<int32_t, std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>> smsRecoverListenerMapU0_;
+    std::shared_mutex smsLiteRecoverListenerLockU0_;
+    std::map<int32_t, std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>> smsLiteRecoverListenerMapU0_;
 
     /*
      * Window Snapshot
