@@ -280,6 +280,27 @@ WMError WindowAdapter::GetTopNavDestinationName(int32_t windowId, std::string& t
     return wmsProxy->GetTopNavDestinationName(windowId, topNavDestName);
 }
 
+WMError WindowAdapter::SetWatermarkImageForApp(const std::shared_ptr<Media::PixelMap>& pixelMap)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->SetWatermarkImageForApp(pixelMap, appWatermarkName_);
+}
+
+void WindowAdapter::RecoverWatermarkImageForApp()
+{
+    if (appWatermarkName_.empty()) {
+        return;
+    }
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    auto errCode = wmsProxy->RecoverWatermarkImageForApp(appWatermarkName_);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "watermarkName: %{public}s: errCode: %{public}d",
+        appWatermarkName_.c_str(), static_cast<int32_t>(errCode));
+}
+
 WMError WindowAdapter::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
@@ -469,6 +490,7 @@ void WindowAdapter::WindowManagerAndSessionRecover()
 
     ReregisterWindowManagerAgent();
     RecoverWindowPropertyChangeFlag();
+    RecoverWatermarkImageForApp();
 
     std::map<int32_t, SessionRecoverCallbackFunc> sessionRecoverCallbackFuncMap;
     {

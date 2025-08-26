@@ -100,6 +100,8 @@ public:
         TRANS_ID_GET_WINDOW_LAYOUT_INFO,
         TRANS_ID_GET_GLOBAL_WINDOW_MODE,
         TRANS_ID_GET_TOP_NAV_DEST_NAME,
+        TRANS_ID_SET_APP_WATERMARK_IMAGE,
+        TRANS_ID_RECOVER_APP_WATERMARK_IMAGE,
         TRANS_ID_GET_VISIBILITY_WINDOW_INFO_ID,
         TRANS_ID_ADD_EXTENSION_WINDOW_STAGE_TO_SCB,
         TRANS_ID_REMOVE_EXTENSION_WINDOW_STAGE_FROM_SCB,
@@ -295,6 +297,9 @@ public:
     WMError GetGlobalWindowMode(DisplayId displayId,
         GlobalWindowMode& globalWinMode) override { return WMError::WM_OK; }
     WMError GetTopNavDestinationName(int32_t windowId, std::string& topNavDestName) override { return WMError::WM_OK; }
+    WMError SetWatermarkImageForApp(const std::shared_ptr<Media::PixelMap>& pixelMap,
+        std::string& watermarkName) override { return WMError::WM_OK; }
+    WMError RecoverWatermarkImageForApp(const std::string& watermarkName) override { return WMError::WM_OK; }
     WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) override { return WMError::WM_OK; }
     WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller) override
     {

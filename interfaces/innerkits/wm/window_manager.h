@@ -956,6 +956,14 @@ public:
     WMError GetTopNavDestinationName(int32_t windowId, std::string& topNavDestName) const;
 
     /**
+     * @brief Set watermark for app.
+     *
+     * @param pixelMap the watermark image to set, nullptr means cancel watermark.
+     * @return WM_OK means get success, others means get failed.
+     */
+    WMError SetWatermarkImageForApp(const std::shared_ptr<Media::PixelMap>& pixelMap);
+
+    /**
      * @brief Get visibility window info.
      *
      * @param infos Visible window infos
