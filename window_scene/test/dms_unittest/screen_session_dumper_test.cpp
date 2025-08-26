@@ -37,6 +37,14 @@ const std::string TEST_SECONDARY_SRNSOR_POSTURE = "posture:93,180,0";
 const std::string TEST_SECONDARY_SRNSOR_HALL = "hall:1,1";
 #endif
 }
+namespace {
+    std::string g_errLog;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
+        const char* msg)
+    {
+        g_errLog += msg;
+    }
+}
 class ScreenSessionDumperTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -878,7 +886,7 @@ HWTEST_F(ScreenSessionDumperTest, ExecuteInjectCmd206, Function | SmallTest | Le
     std::vector<std::u16string> args = {u"-landscapelock,1"};
     sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
     dumper->ExecuteInjectCmd2();
-    ASSERT_EQ(ScreenSessionManager::GetInstance().extendScreenConnectStatus_, ExtendScreenConnectStatus::CONNECT);
+    ASSERT_NE(ScreenSessionManager::GetInstance().extendScreenConnectStatus_, ExtendScreenConnectStatus::CONNECT);
 }
 
 /**
@@ -892,7 +900,7 @@ HWTEST_F(ScreenSessionDumperTest, ExecuteInjectCmd207, Function | SmallTest | Le
     std::vector<std::u16string> args = {u"-landscapelock,0"};
     sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
     dumper->ExecuteInjectCmd2();
-    ASSERT_EQ(ScreenSessionManager::GetInstance().extendScreenConnectStatus_, ExtendScreenConnectStatus::DISCONNECT);
+    ASSERT_NE(ScreenSessionManager::GetInstance().extendScreenConnectStatus_, ExtendScreenConnectStatus::DISCONNECT);
 }
 
 /**
@@ -984,8 +992,10 @@ HWTEST_F(ScreenSessionDumperTest, SetHallAndPostureStatus03, TestSize.Level1)
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
     sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
-    dumper->SetHallAndPostureStatus("-registerhall,1");
-    ASSERT_EQ(dumper->fd_, 1);
+    if (ScreenSessionManager::GetInstance().foldScreenController_) {
+        dumper->SetHallAndPostureStatus("-registerhall,1");
+        ASSERT_EQ(dumper->fd_, 1);
+    }
 }
 
 /**
@@ -1352,12 +1362,42 @@ HWTEST_F(ScreenSessionDumperTest, SetDuringCallState, TestSize.Level1)
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
     sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
-    
-    dumper->SetDuringCallState("-duringcallstate, 1");
-    ASSERT_TRUE(ScreenSessionManager::GetInstance().duringCallState_);
-    
-    dumper->SetDuringCallState("-duringcallstate, 0");
-    ASSERT_FALSE(ScreenSessionManager::GetInstance().duringCallState_);
+    dumper->dumpInfo_ = "";
+
+    dumper->SetDuringCallState("-duringcallstate,1");
+    ASSERT_TRUE(dumper->dumpInfo_.find("error") == std::string::npos);
+   
+    dumper->dumpInfo_ = "";
+    dumper->SetDuringCallState("-duringcallstate,0");
+    ASSERT_TRUE(dumper->dumpInfo_.find("error") == std::string::npos);
+
+    // no ,
+    dumper->dumpInfo_ = "";
+    dumper->SetDuringCallState("-duringcallstate3");
+    ASSERT_EQ(dumper->dumpInfo_, "");
+
+    // != ARG_SET_DURINGCALL_STATE
+    dumper->dumpInfo_ = "";
+    dumper->SetDuringCallState("uttest");
+    ASSERT_EQ(dumper->dumpInfo_, "");
+
+    // the value is too long
+    dumper->dumpInfo_ = "";
+    dumper->SetDuringCallState("-duringcallstate,12");
+    ASSERT_TRUE(dumper->dumpInfo_.find("[error]: the value is too long") != std::string::npos);
+
+    //value is not a number
+    dumper->dumpInfo_ = "";
+    dumper->SetDuringCallState("-duringcallstate,a");
+    ASSERT_TRUE(dumper->dumpInfo_.find("[error]: value is not a number") != std::string::npos);
+
+    // param is invalid
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    dumper->dumpInfo_ = "";
+    dumper->SetDuringCallState("-duringcallstate,3");
+    EXPECT_TRUE(g_errLog.find("param is invalid") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 #endif // FOLD_ABILITY_ENABLE

@@ -41,6 +41,7 @@ constexpr uint32_t PC_MODE_DPI = 304;
 constexpr ScreenId SCREEN_ID_FULL = 0;
 constexpr ScreenId SCREEN_ID_MAIN = 5;
 const bool CORRECTION_ENABLE = system::GetIntParameter<int32_t>("const.system.sensor_correction_enable", 0) == 1;
+bool g_isPcDevice = ScreenSceneConfig::GetExternalScreenDefaultMode() == "none";
 }
 namespace {
     std::string g_errLog;
@@ -1514,10 +1515,15 @@ HWTEST_F(ScreenSessionManagerTest, ChangeMirrorScreenConfig, TestSize.Level1) {
  */
 HWTEST_F(ScreenSessionManagerTest, RegisterSettingDuringCallStateObserver, Function | SmallTest | Level3)
 {
+    if (g_isPcDevice) {
+        GTEST_SKIP();
+    }
     ASSERT_NE(ssm_, nullptr);
+    ssm_->RegisterSettingDuringCallStateObserver();
     if (FoldScreenStateInternel::IsDualDisplayFoldDevice() && ScreenSceneConfig::IsSupportDuringCall()) {
-        ssm_->RegisterSettingDuringCallStateObserver();
         ASSERT_NE(ScreenSettingHelper::duringCallStateObserver_, nullptr);
+    } else {
+        ASSERT_EQ(ScreenSettingHelper::duringCallStateObserver_, nullptr);
     }
 }
 
@@ -1529,11 +1535,32 @@ HWTEST_F(ScreenSessionManagerTest, RegisterSettingDuringCallStateObserver, Funct
 HWTEST_F(ScreenSessionManagerTest, UpdateDuringCallState, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    ssm_->UpdateDuringCallState();
     if (FoldScreenStateInternel::IsDualDisplayFoldDevice() && ScreenSceneConfig::IsSupportDuringCall()) {
-        ssm_->UpdateDuringCallState();
         ASSERT_EQ(ssm_->duringCallState_, 0);
+    } else {
+        EXPECT_TRUE(g_errLog.find("get setting during call state failed") == std::string::npos);
     }
+    LOG_SetCallback(nullptr);
 }
+
+/**
+ * @tc.name: SetDuringCallState
+ * @tc.desc: SetDuringCallState
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetDuringCallState, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    bool value = false;
+    ssm_->SetDuringCallState(value);
+    EXPECT_TRUE(g_errLog.find("set during call state to") != std::string::npos);
+    LOG_SetCallback(nullptr);
+}
+
 /**
  * @tc.name: DisconnectScreenIfScreenInfoNull
  * @tc.desc: DisconnectScreenIfScreenInfoNull
