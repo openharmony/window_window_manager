@@ -545,6 +545,7 @@ HWTEST_F(DisplayGroupControllerTest, MoveCrossNodeToTargetDisplay01, TestSize.Le
     auto showingDisplays = child->GetShowingDisplays();
     ASSERT_NE(0, showingDisplays.size());
     ASSERT_EQ(0, showingDisplays[0]);
+    node1->children_.pop_back();
 }
 
 /**
