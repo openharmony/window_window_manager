@@ -339,7 +339,7 @@ HWTEST_F(SecondaryDisplayFoldPolicyTest, SetStatusFullActiveRectAndTpFeature, Te
     ScreenProperty property = policy.screenProperty_;
     sptr<ScreenSession> screenSession = ScreenSessionManager::GetInstance().GetScreenSession(0);
 
-    policy.SetStatusFullActiveRectAndTpFeature(screenSession, property);
+    policy.SetStatusFullActiveRectAndTpFeature(screenSession, property, true);
     EXPECT_FALSE(policy.onBootAnimation_);
 }
 
