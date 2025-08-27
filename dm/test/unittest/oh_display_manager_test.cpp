@@ -20,6 +20,7 @@
 #include "oh_display_manager.h"
 #include "oh_display_manager_inner.h"
 #include "pixelmap_native_impl.h"
+#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -564,6 +565,9 @@ HWTEST_F(OHDisplayManagerTest, DisplayRemoveListener, TestSize.Level1)
  */
 HWTEST_F(OHDisplayManagerTest, DisplayRemoveListener02, TestSize.Level1)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return;
+    }
     uint32_t* testIndex = nullptr;
     NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_RegisterDisplayRemoveListener(
         DisplayRemoveCallback, testIndex);
@@ -596,6 +600,9 @@ HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_CreateAvailableArea01, Te
  */
 HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_CreateAvailableArea02, TestSize.Level1)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return;
+    }
     uint64_t testId = 0;
     NativeDisplayManager_Rect *availableArea = nullptr;
     NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_CreateAvailableArea(testId, &availableArea);
@@ -764,6 +771,9 @@ HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDisplayPosition05, Tes
  */
 HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDisplayPosition06, TestSize.Level1)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return;
+    }
     uint64_t testId = 2; // 异常屏幕
     int32_t x = -1;
     int32_t y = -1;
