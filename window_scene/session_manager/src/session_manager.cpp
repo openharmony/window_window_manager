@@ -252,7 +252,8 @@ void SessionManager::RegisterSMSRecoverListener()
         TLOGD(WmsLogTag::WMS_RECOVER, "Register recover listener");
         smsRecoverListener_ = sptr<SessionManagerServiceRecoverListener>::MakeSptr();
         std::string identity = IPCSkeleton::ResetCallingIdentity();
-        mockSessionManagerServiceProxy_->RegisterSMSRecoverListener(smsRecoverListener_);
+        TLOGD(WmsLogTag::WMS_RECOVER, "Register recover listener, userId_: %{public}d", userId_);
+        mockSessionManagerServiceProxy_->RegisterSMSRecoverListener(smsRecoverListener_, userId_);
         IPCSkeleton::SetCallingIdentity(identity);
     }
 }
@@ -262,7 +263,8 @@ void SessionManager::UnregisterSMSRecoverListener()
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     isRecoverListenerRegistered_ = false;
     if (mockSessionManagerServiceProxy_) {
-        mockSessionManagerServiceProxy_->UnregisterSMSRecoverListener();
+        TLOGD(WmsLogTag::WMS_RECOVER, "UnRegister recover listener, userId_: %{public}d", userId_);
+        mockSessionManagerServiceProxy_->UnregisterSMSRecoverListener(userId_);
     }
 }
 
