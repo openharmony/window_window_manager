@@ -4202,19 +4202,20 @@ void SceneSession::OnKeyFrameNextVsync(uint64_t count)
 
 bool SceneSession::KeyFrameNotifyFilter(const WSRect& rect, SizeChangeReason reason)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "reason in: %{public}d", reason);
-    std::lock_guard<std::mutex> lock(keyFrameMutex_);
-    if (!keyFramePolicy_.running_) {
+    KeyFramePolicy keyFramePolicy;
+    {
+        std::lock_guard<std::mutex> lock(keyFrameMutex_);
+        keyFramePolicy = keyFramePolicy_;
+    }
+    if (!keyFramePolicy.running_) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "skip filter for not running");
         return false;
     }
     if (reason == SizeChangeReason::DRAG_START) {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "ensure start reason send");
         NotifyClientToUpdateRect("OnMoveDragCallback", nullptr);
         return true;
     }
     if (reason != SizeChangeReason::DRAG) {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "skip filter for not drag");
         return false;
     }
     if (keyFrameAnimating_) {
@@ -4225,13 +4226,13 @@ bool SceneSession::KeyFrameNotifyFilter(const WSRect& rect, SizeChangeReason rea
     uint64_t nowTimeStamp = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()).count());
     uint64_t interval = nowTimeStamp - lastKeyFrameStamp_;
-    bool intervalCheckPass = interval >= keyFramePolicy_.interval_;
+    bool intervalCheckPass = interval >= keyFramePolicy.interval_;
     bool distanceCheckPass = false;
     double distance = 0;
-    if (keyFramePolicy_.distance_ > 0) {
+    if (keyFramePolicy.distance_ > 0) {
         distance = sqrt(pow(rect.width_ - lastKeyFrameRect_.width_, POW_DOUBLE) +
                         pow(rect.height_ - lastKeyFrameRect_.height_, POW_DOUBLE));
-        distanceCheckPass = distance >= keyFramePolicy_.distance_;
+        distanceCheckPass = distance >= keyFramePolicy.distance_;
     }
     TLOGI(WmsLogTag::WMS_LAYOUT, "key frame checking: %{public}" PRIu64 "[%{public}d], %{public}f[%{public}d]",
         interval, intervalCheckPass, distance, distanceCheckPass);
