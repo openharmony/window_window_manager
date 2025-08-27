@@ -943,6 +943,9 @@ namespace {
      */
     HWTEST_F(ScreenSettingHelperTest, GetSettingDuringCallStateTest, Function | SmallTest | Level3)
     {
+        if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+            return;
+        }
         ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
         bool value = true;
 
