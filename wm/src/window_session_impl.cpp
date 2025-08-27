@@ -2339,6 +2339,9 @@ void WindowSessionImpl::UpdateDecorEnableToAce(bool isDecorEnable)
                 (property_->GetIsPcAppInPad() && isSubWindow)) &&
                 !(mode == WindowMode::WINDOW_MODE_FULLSCREEN && property_->GetCompatibleModeProperty());
         }
+        if (mode == WindowMode::WINDOW_MODE_FULLSCREEN && property_->IsDecorFullscreenDisabled()) {
+            decorVisible = false;
+        }
         uiContent->UpdateDecorVisible(decorVisible, isDecorEnable);
         return;
     }
