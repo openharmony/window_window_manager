@@ -99,10 +99,14 @@ private:
     sptr<IRemoteObject> GetSessionManagerServiceByUserId(int32_t userId);
     void RemoveSessionManagerServiceByUserId(int32_t userId);
     bool RegisterMockSessionManagerService();
+    ErrCode MockSessionManagerService::ValidateParameters(int32_t clientUserId, int32_t userId) const;
+    ErrCode MockSessionManagerService::GetForegroundOsAccountDisplayId(int32_t userId, DisplayId& displayId) const;
     std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>* GetSMSRecoverListenerMap(int32_t userId);
-    std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>* GetSystemAppSMSRecoverListenerMap(int32_t displayId);
+    std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>* GetSystemAppSMSRecoverListenerMap(
+        int32_t displayId);
     std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>* GetSMSLiteRecoverListenerMap(int32_t userId);
-    std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>* GetSystemAppSMSLiteRecoverListenerMap(int32_t displayId);
+    std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>* GetSystemAppSMSLiteRecoverListenerMap(
+        int32_t displayId);
     void NotifySceneBoardAvailableToClient(int32_t userId);
     void NotifySceneBoardAvailableToSystemAppClient(int32_t userId);
     void NotifySceneBoardAvailableToLiteClient(int32_t userId);
@@ -156,9 +160,11 @@ private:
     std::map<int32_t, std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>> smsLiteRecoverListenerMap_;
 
     std::shared_mutex systemAppSmsRecoverListenerLock_;
-    std::map<DisplayId, std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>> systemAppSmsRecoverListenerMap_;
+    std::map<DisplayId, std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>> 
+        systemAppSmsRecoverListenerMap_;
     std::shared_mutex systemAppSmsLiteRecoverListenerLock_;
-    std::map<DisplayId, std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>> systemAppSmsLiteRecoverListenerMap_;
+    std::map<DisplayId, std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>> 
+        systemAppSmsLiteRecoverListenerMap_;
 
     /*
      * Window Snapshot
