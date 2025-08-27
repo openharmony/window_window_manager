@@ -204,7 +204,7 @@ public:
      * Window Property
      */
     virtual WMError SetWatermarkImageForApp(const std::shared_ptr<Media::PixelMap>& pixelMap);
-    virtual void RecoverWatermarkImageForApp();
+    virtual WMError RecoverWatermarkImageForApp();
     virtual WMError NotifyScreenshotEvent(ScreenshotEventType type);
     virtual WMError CreateUIEffectController(const sptr<IUIEffectControllerClient>& controllerClient,
         sptr<IUIEffectController>& controller, int32_t& controllerId);
