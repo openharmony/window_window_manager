@@ -1242,6 +1242,8 @@ HWTEST_F(SceneSessionTest6, SetWindowTransitionAnimation, Function | SmallTest |
     ret = session->SetWindowTransitionAnimation(transitionType, animation);
     ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_CALLING);
 }
+
+
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
