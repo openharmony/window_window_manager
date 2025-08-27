@@ -288,10 +288,10 @@ WMError WindowAdapter::SetWatermarkImageForApp(const std::shared_ptr<Media::Pixe
     return wmsProxy->SetWatermarkImageForApp(pixelMap, appWatermarkName_);
 }
 
-void WindowAdapter::RecoverWatermarkImageForApp()
+WMError WindowAdapter::RecoverWatermarkImageForApp()
 {
     if (appWatermarkName_.empty()) {
-        return;
+        return WMError::WM_OK;
     }
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
     auto wmsProxy = GetWindowManagerServiceProxy();
@@ -299,6 +299,7 @@ void WindowAdapter::RecoverWatermarkImageForApp()
     auto errCode = wmsProxy->RecoverWatermarkImageForApp(appWatermarkName_);
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "watermarkName: %{public}s: errCode: %{public}d",
         appWatermarkName_.c_str(), static_cast<int32_t>(errCode));
+    return errCode;
 }
 
 WMError WindowAdapter::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos)

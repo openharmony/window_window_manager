@@ -2274,7 +2274,7 @@ WMError SceneSessionManagerProxy::SetWatermarkImageForApp(const std::shared_ptr<
     }
     if (!data.WriteParcelable(pixelMap.get())) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write pixelMap failed");
-        return WSError::WS_ERROR_IPC_FAILED;
+        return WMError::WM_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
