@@ -1093,7 +1093,6 @@ private:
     bool IsNeedUpdateBrightness(int32_t persistentId, float brightness);
     void RegisterSessionPropertyChangeNotifyManagerFunc(const sptr<SceneSession>& sceneSession);
     void NotifySessionPropertyChangeFromSession(int32_t persistentId, WindowInfoKey windowInfoKey);
-    std::vector<NodeId> GetSessionNodeIdsAndWatermarkNameByPid(int32_t pid, std::string& watermarkName);
 
     /*
      * Window Rotate Animation
@@ -1448,6 +1447,9 @@ private:
      */
     bool SetSessionWatermarkForAppProcess(const sptr<SceneSession>& sceneSession);
     void RemoveProcessWatermarkPid(int32_t pid);
+    std::vector<NodeId> GetSessionNodeIdsAndWatermarkNameByPid(int32_t pid, std::string& watermarkName);
+    void SetWatermarkForSession(const sptr<SceneSession>& session);
+    void ClearWatermarkForSession(const sptr<SceneSession>& session);
 
     /*
      * Window Layout

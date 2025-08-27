@@ -4782,6 +4782,18 @@ void SceneSession::SetWatermarkEnabled(const std::string& watermarkName, bool is
     }
 }
 
+std::vector<NodeId> SceneSession::GetValidSurfaceNodeIds() const
+{
+    std::vector<NodeId> nodeIds;
+    if (auto surfaceNode = GetSurfaceNode()) {
+        nodeIds.push_back(surfaceNode->GetId());
+    }
+    if (auto leashWinSurfaceNode = GetLeashWinSurfaceNode()) {
+        nodeIds.push_back(leashWinSurfaceNode->GetId());
+    }
+    return nodeIds;
+}
+
 void SceneSession::SetPiPTemplateInfo(const PiPTemplateInfo& pipTemplateInfo)
 {
     pipTemplateInfo_ = pipTemplateInfo;
