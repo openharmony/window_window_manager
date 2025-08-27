@@ -20,10 +20,10 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
-const std::string PNAMEID = "SCB_FLOATING_BALL";
-const std::string PVERSION = "1.0";
+constexpr char PNAMEID[] = "SCB_FLOATING_BALL";
+constexpr char PVERSION[] = "1.0";
 }
-WM_IMPLEMENT_SINGLE_INSTANCE(FloatingballReporter)
+WM_IMPLEMENT_SINGLE_INSTANCE(FloatingBallReporter)
 
 constexpr char EVENT_KEY_TEMPLATE_TYPE[] = "TEMPLATE_TYPE";
 constexpr char EVENT_KEY_PNAMEID[] = "PNAMEID";
@@ -31,76 +31,25 @@ constexpr char EVENT_KEY_PVERSION[] = "PVERSION";
 constexpr char EVENT_KEY_PACKAGE_NAME[] = "PACKAGE_NAME";
 constexpr char EVENT_KEY_ERROR_REASON[] = "ERROR_REASON";
 
-constexpr char EVENT_KEY_START_FLOATING_BALL[] = "START_FLOATING_BALL";
-constexpr char EVENT_KEY_UPDATE_FLOATING_BALL[] = "UPDATE_FLOATING_BALL";
-constexpr char EVENT_KEY_REMOVE_FLOATING_BALL[] = "REMOVE_FLOATING_BALL";
-constexpr char EVENT_KEY_RESTORE_FLOATING_BALL_WINDOW[] = "RESTORE_FLOATING_BALL_WINDOW";
-
-void FloatingballReporter::SetCurrentPackageName(const std::string& packageName)
+void FloatingBallReporter::SetCurrentPackageName(const std::string& packageName)
 {
     std::lock_guard<std::mutex> lock(packageNameMutex_);
     packageName_ = packageName;
 }
 
-std::string FloatingballReporter::GetPackageName() const
+std::string FloatingBallReporter::GetPackageName() const
 {
     std::lock_guard<std::mutex> lock(packageNameMutex_);
     return packageName_;
 }
 
-void FloatingballReporter::ReportFbStart(const uint32_t& templateType, const std::string& errorReason)
+void FloatingBallReporter::ReportFbEvent(const std::string& eventName, const uint32_t& templateType,
+    const std::string& errorReason)
 {
-    TLOGI(WmsLogTag::WMS_SYSTEM, "Report start floating ball window");
+    TLOGI(WmsLogTag::WMS_SYSTEM, "Report ReportFbEvent, eventName:%{public}s, templateType:%{public}u",
+        eventName.c_str(), templateType);
     int32_t ret = HiSysEventWrite(
-        OHOS::HiviewDFX::HiSysEvent::Domain::MULTIWINDOW_UE, EVENT_KEY_START_FLOATING_BALL,
-        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
-        EVENT_KEY_PNAMEID, PNAMEID,
-        EVENT_KEY_PVERSION, PVERSION,
-        EVENT_KEY_PACKAGE_NAME, GetPackageName(),
-        EVENT_KEY_TEMPLATE_TYPE, templateType,
-        EVENT_KEY_ERROR_REASON, errorReason);
-    if (ret != 0) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "Write HiSysEvent error, errCode:%{public}d", ret);
-    }
-}
-
-void FloatingballReporter::ReportFbUpdateContent(const uint32_t& templateType, const std::string &errorReason)
-{
-    TLOGI(WmsLogTag::WMS_SYSTEM, "Report update floating ball window content");
-    int32_t ret = HiSysEventWrite(
-        OHOS::HiviewDFX::HiSysEvent::Domain::MULTIWINDOW_UE, EVENT_KEY_UPDATE_FLOATING_BALL,
-        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
-        EVENT_KEY_PNAMEID, PNAMEID,
-        EVENT_KEY_PVERSION, PVERSION,
-        EVENT_KEY_PACKAGE_NAME, GetPackageName(),
-        EVENT_KEY_TEMPLATE_TYPE, templateType,
-        EVENT_KEY_ERROR_REASON, errorReason);
-    if (ret != 0) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "Write HiSysEvent error, errCode:%{public}d", ret);
-    }
-}
-
-void FloatingballReporter::ReportFbRemove(const uint32_t& templateType, const std::string& errorReason)
-{
-    TLOGI(WmsLogTag::WMS_SYSTEM, "Report remove floating ball window");
-    int32_t ret = HiSysEventWrite(
-        OHOS::HiviewDFX::HiSysEvent::Domain::MULTIWINDOW_UE, EVENT_KEY_REMOVE_FLOATING_BALL,
-        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
-        EVENT_KEY_PNAMEID, PNAMEID,
-        EVENT_KEY_PVERSION, PVERSION,
-        EVENT_KEY_PACKAGE_NAME, GetPackageName(),
-        EVENT_KEY_TEMPLATE_TYPE, templateType,
-        EVENT_KEY_ERROR_REASON, errorReason);
-    if (ret != 0) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "Write HiSysEvent error, errCode:%{public}d", ret);
-    }
-}
-
-void FloatingballReporter::ReportFbRestoreMainWindow(const uint32_t& templateType, const std::string& errorReason)
-{
-    TLOGI(WmsLogTag::WMS_SYSTEM, "Report restore main window to app, templateType:%{public}d", templateType);
-    int32_t ret = HiSysEventWrite(
-        OHOS::HiviewDFX::HiSysEvent::Domain::MULTIWINDOW_UE, EVENT_KEY_RESTORE_FLOATING_BALL_WINDOW,
+        OHOS::HiviewDFX::HiSysEvent::Domain::MULTIWINDOW_UE, eventName,
         OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
         EVENT_KEY_PNAMEID, PNAMEID,
         EVENT_KEY_PVERSION, PVERSION,
