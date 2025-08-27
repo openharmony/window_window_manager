@@ -434,6 +434,9 @@ HWTEST_F(ScreenSceneConfigTest, GetCutoutBoundaryRect, TestSize.Level1)
  */
 HWTEST_F(ScreenSceneConfigTest, GetSubCutoutBoundaryRect, TestSize.Level1)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return;
+    }
     auto result = ScreenSceneConfig::GetSubCutoutBoundaryRect();
     if (ScreenSessionManager::GetInstance().IsFoldable() && !FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         ASSERT_TRUE(result.size() > 0);

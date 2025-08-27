@@ -750,7 +750,10 @@ if (window_manager_fold_ability) {
 
     sources = [ "fold_screen_controller_test.cpp" ]
 
-    deps = [ ":ws_unittest_common" ]
+    deps = [ 
+      ":ws_unittest_common",
+      "${window_base_path}/window_scene/interfaces/innerkits:libwsutils"
+    ]
 
     external_deps = test_external_deps
     external_deps += [ "init:libbegetutil" ]
