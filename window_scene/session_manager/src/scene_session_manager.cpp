@@ -11551,11 +11551,18 @@ void SceneSessionManager::NotifyAppUseControlListInner(
                 TLOGW(WmsLogTag::WMS_MAIN, "session not found, id:%{public}d", appUseControlInfo.persistentId_);
                 continue;
             }
+            if (iter->second->GetSessionInfo().bundleName_ != appUseControlInfo.bundleName_ ||
+                iter->second->GetSessionInfo().appIndex_ != appUseControlInfo.appIndex_ ||
+                !SessionHelper::IsMainWindow(iter->second->GetWindowType())) {
+                TLOGW(WmsLogTag::WMS_MAIN, "invalid session, id:%{public}d", appUseControlInfo.persistentId_);
+                continue;
+            }
             mainSessions.push_back(iter->second);
         } else {
             // control by bundleName and appIndex
             RefreshAllAppUseControlMap(appUseControlInfo, type);
             GetMainSessionByBundleNameAndAppIndex(appUseControlInfo.bundleName_, appUseControlInfo.appIndex_, mainSessions);
+            controlByBundleList.push_back(appUseControlInfo);
         }
         if (mainSessions.empty()) {
             continue;
