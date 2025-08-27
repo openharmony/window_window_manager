@@ -700,7 +700,7 @@ void MockSessionManagerService::NotifySceneBoardAvailableToSystemAppLiteClient(i
     }
     std::shared_lock<std::shared_mutex> lock(systemAppSmsLiteRecoverListenerLock_);
     std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>* systemAppSmsLiteRecoverListenerMap =
-        GetSystemAppSMSRecoverListenerMap(displayId);
+        GetSystemAppSMSLiteRecoverListenerMap(displayId);
     if (!systemAppSmsLiteRecoverListenerMap) {
         TLOGW(WmsLogTag::WMS_RECOVER, "systemAppSmsLiteRecoverListenerMap is null");
         return;
