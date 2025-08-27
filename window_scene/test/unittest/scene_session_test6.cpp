@@ -1243,7 +1243,22 @@ HWTEST_F(SceneSessionTest6, SetWindowTransitionAnimation, Function | SmallTest |
     ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_CALLING);
 }
 
+/**
+ * @tc.name: SetSupportEnterWaterfallMode
+ * @tc.desc: SetSupportEnterWaterfallMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, SetSupportEnterWaterfallMode, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    session->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    session->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    session->SetSupportEnterWaterfallMode(true);
 
+    session->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    session->SetSupportEnterWaterfallMode(true);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
