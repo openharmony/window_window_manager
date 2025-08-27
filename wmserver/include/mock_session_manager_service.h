@@ -19,6 +19,7 @@
 #include <shared_mutex>
 #include <system_ability.h>
 
+#include "dm_common.h"
 #include "mock_session_manager_interface_stub.h"
 #include "wm_single_instance.h"
 #include "zidl/session_manager_service_recover_interface.h"
@@ -55,10 +56,10 @@ public:
     ErrCode NotifySceneBoardAvailable() override;
     ErrCode RegisterSMSRecoverListener(const sptr<IRemoteObject>& listener, int32_t userId) override;
     ErrCode UnregisterSMSRecoverListener(int32_t userId) override;
-    void UnregisterSMSRecoverListener(int32_t clientUserId, DisplayId displayId, int32_t pid);
+    void UnregisterSMSRecoverListener(int32_t clientUserId, int32_t displayId, int32_t pid);
     ErrCode RegisterSMSLiteRecoverListener(const sptr<IRemoteObject>& listener, int32_t userId) override;
     ErrCode UnregisterSMSLiteRecoverListener(int32_t userId) override;
-    void UnregisterSMSLiteRecoverListener(int32_t clientUserId, DisplayId displayId, int32_t pid);
+    void UnregisterSMSLiteRecoverListener(int32_t clientUserId, int32_t displayId, int32_t pid);
 
     /*
      * Window Snapshot

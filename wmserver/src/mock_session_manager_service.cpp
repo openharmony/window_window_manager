@@ -447,7 +447,7 @@ ErrCode MockSessionManagerService::UnregisterSMSRecoverListener(int32_t userId)
     return ERR_OK;
 }
 
-void MockSessionManagerService::UnregisterSMSRecoverListener(int32_t clientUserId, DisplayId displayId, int32_t pid)
+void MockSessionManagerService::UnregisterSMSRecoverListener(int32_t clientUserId, int32_t displayId, int32_t pid)
 {
     TLOGD(WmsLogTag::WMS_RECOVER, "clientUserId = %{public}d, displayId = %{public}d, pid = %{public}d", clientUserId, displayId, pid);
     if (clientUserId == SYSTEM_USERID) {
@@ -594,7 +594,7 @@ ErrCode MockSessionManagerService::UnregisterSMSLiteRecoverListener(int32_t user
     return ERR_OK;
 }
 
-void MockSessionManagerService::UnregisterSMSLiteRecoverListener(int32_t clientUserId, DisplayId displayId, int32_t pid)
+void MockSessionManagerService::UnregisterSMSLiteRecoverListener(int32_t clientUserId, int32_t displayId, int32_t pid)
 {
     TLOGD(WmsLogTag::WMS_RECOVER, "clientUserId = %{public}d, displayId = %{public}d, pid = %{public}d", clientUserId, displayId, pid);
     if (clientUserId == SYSTEM_USERID) {
