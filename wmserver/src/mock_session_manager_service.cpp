@@ -1137,9 +1137,7 @@ ErrCode MockSessionManagerService::GetSceneSessionManagerCommon(
     }
 
     if (result == nullptr) {
-        TLOGE(WmsLogTag::WMS_MULTI_USER, "Get scene session manager proxy failed, 
-               scene session manager service is null, userId: %{public}d, isLite: %{public}d",
-               userId, isLite);
+        TLOGE(WmsLogTag::WMS_MULTI_USER, "Get scene session manager proxy failed, scene session manager service is null, userId: %{public}d, isLite: %{public}d", userId, isLite);
         return ERR_DEAD_OBJECT;
     }
     return ERR_OK;
