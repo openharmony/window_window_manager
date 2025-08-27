@@ -357,7 +357,8 @@ ErrCode MockSessionManagerService::GetForegroundOsAccountDisplayId(int32_t userI
     return err;
 }
 
-void MockSessionManagerService::NotifyWMSConnectionStatus(int32_t userId, const sptr<ISessionManagerServiceRecoverListener>& smsListener) {
+void MockSessionManagerService::NotifyWMSConnectionStatus(int32_t userId, 
+    const sptr<ISessionManagerServiceRecoverListener>& smsListener) {
     bool isWMSConnected = false;
     {
         std::lock_guard<std::mutex> lock(wmsConnectionStatusLock_);
