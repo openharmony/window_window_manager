@@ -452,7 +452,7 @@ ErrCode MockSessionManagerService::UnregisterSMSRecoverListener(int32_t userId)
 
     DisplayId displayId = DISPLAY_ID_INVALID;
     if (clientUserId == SYSTEM_USERID) {
-        err = GetForegroundOsAccountDisplayId(userId, displayId);
+        ret = GetForegroundOsAccountDisplayId(userId, displayId);
         if (ret != ERR_OK) {
             return ret;
         }
@@ -590,7 +590,7 @@ ErrCode MockSessionManagerService::UnregisterSMSLiteRecoverListener(int32_t user
 
     DisplayId displayId = DISPLAY_ID_INVALID;
     if (clientUserId == SYSTEM_USERID) {
-        err = GetForegroundOsAccountDisplayId(userId, displayId);
+        ret = GetForegroundOsAccountDisplayId(userId, displayId);
         if (ret != ERR_OK) {
             return ret;
         }
