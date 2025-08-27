@@ -357,7 +357,7 @@ ErrCode MockSessionManagerService::GetForegroundOsAccountDisplayId(int32_t userI
     return err;
 }
 
-void MockSessionManagerService::NotifyWMSConnectionStatus(int32_t userId, 
+ErrCode MockSessionManagerService::NotifyWMSConnectionStatus(int32_t userId, 
     const sptr<ISessionManagerServiceRecoverListener>& smsListener) {
     bool isWMSConnected = false;
     {
@@ -380,6 +380,7 @@ void MockSessionManagerService::NotifyWMSConnectionStatus(int32_t userId,
         }
         smsListener->OnWMSConnectionChanged(userId, screenId, true, sessionManagerService);
     }
+    return ERR_OK;
 }
 
 ErrCode MockSessionManagerService::RegisterSMSRecoverListener(const sptr<IRemoteObject>& listener, int32_t userId)
@@ -422,8 +423,7 @@ ErrCode MockSessionManagerService::RegisterSMSRecoverListener(const sptr<IRemote
     if (clientUserId != SYSTEM_USERID) {
         return ERR_WOULD_BLOCK;
     }
-    NotifyWMSConnectionStatus(userId, smsListener);
-    return ERR_OK;
+    return NotifyWMSConnectionStatus(userId, smsListener);
 }
 
 std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>* MockSessionManagerService::GetSMSRecoverListenerMap(
@@ -541,8 +541,7 @@ ErrCode MockSessionManagerService::RegisterSMSLiteRecoverListener(const sptr<IRe
     if (clientUserId != SYSTEM_USERID) {
         return ERR_WOULD_BLOCK;
     }
-    NotifyWMSConnectionStatus(userId, smsListener);
-    return ERR_OK;
+    return NotifyWMSConnectionStatus(userId, smsListener);
 }
 
 std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>* MockSessionManagerService::GetSMSLiteRecoverListenerMap(
