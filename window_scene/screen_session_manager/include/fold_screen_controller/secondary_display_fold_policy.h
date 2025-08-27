@@ -54,7 +54,8 @@ private:
     void SendPropertyChangeResult(sptr<ScreenSession> screenSession, ScreenId screenId,
         ScreenPropertyChangeReason reason, FoldDisplayMode displayMode);
     void SetStatusConditionalActiveRectAndTpFeature(ScreenProperty &screenProperty);
-    void SetStatusFullActiveRectAndTpFeature(const sptr<ScreenSession>& screenSession, ScreenProperty &screenProperty);
+    void SetStatusFullActiveRectAndTpFeature(const sptr<ScreenSession>& screenSession, ScreenProperty& screenProperty,
+        bool isNeedToSetSwitch = true);
     void SetStatusMainActiveRectAndTpFeature(const sptr<ScreenSession>& screenSession, ScreenProperty &screenProperty);
     void SetStatusGlobalFullActiveRectAndTpFeature(const sptr<ScreenSession>& screenSession,
         ScreenProperty &screenProperty);
