@@ -2290,7 +2290,12 @@ WMError SceneSessionManagerProxy::SetWatermarkImageForApp(const std::shared_ptr<
     const char* namePtr = nullptr;
     auto size = reply.ReadUint32();
     if (size != 0) {
-        namePtr = reinterpret_cast<const char*>(reply.ReadRawData(size));
+        auto nameData = reply.ReadRawData(size);
+        if (!nameData) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read watermark name failed");
+            return WMError::WM_ERROR_IPC_FAILED;
+        }
+        namePtr = reinterpret_cast<const char*>(nameData);
     }
     watermarkName = (namePtr != nullptr) ? std::string(namePtr, size) : "";
     int32_t errCode = 0;
