@@ -583,7 +583,7 @@ void DualDisplayFoldPolicy::TriggerSensorInSub(const sptr<ScreenSession>& screen
         TLOGE(WmsLogTag::DMS, "screenSessionMain is null");
         return;
     }
-    float sensorRotation = screenSessionMain->GetSensorRotation();
+    float sensorRotation = screenSessionMain->GetValidSensorRotation();
     TLOGI(WmsLogTag::DMS, "sensorRotation = %{public}f", sensorRotation);
     if (FoldScreenStateInternel::FloatEqualAbs(sensorRotation, VERTICAL_ROTATION) ||
         FoldScreenStateInternel::FloatEqualAbs(sensorRotation, VERTICAL_ROTATION_REVERSE)) {
