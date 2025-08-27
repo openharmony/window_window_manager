@@ -99,9 +99,9 @@ private:
     void RemoveSessionManagerServiceByUserId(int32_t userId);
     bool RegisterMockSessionManagerService();
     std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>* GetSMSRecoverListenerMap(int32_t userId);
-    std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>* GetSMSRecoverListenerMapU0(int32_t displayId);
+    std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>* GetSystemAppSMSRecoverListenerMap(int32_t displayId);
     std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>* GetSMSLiteRecoverListenerMap(int32_t userId);
-    std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>* GetSMSLiteRecoverListenerMapU0(int32_t displayId);
+    std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>* GetSystemAppSMSLiteRecoverListenerMap(int32_t displayId);
     void NotifySceneBoardAvailableToClient(int32_t userId);
     void NotifySceneBoardAvailableToLiteClient(int32_t userId);
     void NotifyWMSConnectionChanged(int32_t wmsUserId, int32_t screenId, bool isConnected);
@@ -135,7 +135,7 @@ private:
      */
     int32_t defaultWMSUserId_;
     int32_t defaultScreenId_;
-    std::mutex userId2ScreenIdMapLock_;
+    std::mutex userId2ScreenIdMapMutex_;
     std::map<int32_t, int32_t> userId2ScreenIdMap_;
     std::shared_mutex smsDeathRecipientMapLock_;
     std::map<int32_t, sptr<SMSDeathRecipient>> smsDeathRecipientMap_;
@@ -152,10 +152,10 @@ private:
     std::shared_mutex smsLiteRecoverListenerLock_;
     std::map<int32_t, std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>> smsLiteRecoverListenerMap_;
 
-    std::shared_mutex smsRecoverListenerLockU0_;
-    std::map<int32_t, std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>> smsRecoverListenerMapU0_;
-    std::shared_mutex smsLiteRecoverListenerLockU0_;
-    std::map<int32_t, std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>> smsLiteRecoverListenerMapU0_;
+    std::shared_mutex systemAppSmsRecoverListenerLock_;
+    std::map<DisplayId, std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>> systemAppSmsRecoverListenerMap_;
+    std::shared_mutex systemAppSmsLiteRecoverListenerLock_;
+    std::map<DisplayId, std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>> systemAppSmsLiteRecoverListenerMap_;
 
     /*
      * Window Snapshot
