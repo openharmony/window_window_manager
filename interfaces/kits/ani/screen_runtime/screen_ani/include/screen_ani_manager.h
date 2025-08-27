@@ -48,6 +48,7 @@ public:
     static void SetMultiScreenMode(ani_env* env, ani_long primaryScreenId, ani_long secondaryScreenId,
         ani_enum_item secondaryScreenMode);
     static void SetScreenPrivacyMaskImage(ani_env* env, ani_long screenId, ani_object imageAni);
+    static ani_object MakeUnique(ani_env* env, ani_object uniqueScreenIds);
 private:
     void OnRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
     void OnUnRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
