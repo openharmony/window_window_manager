@@ -103,7 +103,9 @@ private:
     std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>* GetSMSLiteRecoverListenerMap(int32_t userId);
     std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>* GetSystemAppSMSLiteRecoverListenerMap(int32_t displayId);
     void NotifySceneBoardAvailableToClient(int32_t userId);
+    void NotifySceneBoardAvailableToSystemAppClient(int32_t userId);
     void NotifySceneBoardAvailableToLiteClient(int32_t userId);
+    void NotifySceneBoardAvailableToSystemAppLiteClient(int32_t userId);
     void NotifyWMSConnectionChanged(int32_t wmsUserId, int32_t screenId, bool isConnected);
     void NotifyWMSConnectionChangedToClient(int32_t wmsUserId, int32_t screenId, bool isConnected);
     void NotifyWMSConnectionChangedToLiteClient(int32_t wmsUserId, int32_t screenId, bool isConnected);
