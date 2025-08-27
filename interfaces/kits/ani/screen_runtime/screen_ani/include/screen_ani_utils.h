@@ -53,6 +53,10 @@ static ani_status GetSurfaceFromAni(ani_env* env, ani_string surfaceIdAniStr, sp
 
 static GetMultiScreenPositionOptionsFromAni(ani_env* env, ani_object screenOptionsAni,
     MultiScreenPositionOptions& mainScreenOptions);
+
+static ani_object CreateDisplayIdVectorAniObject(ani_env* env, std::vector<DisplayId>& displayIds);
+
+static ani_object CreateAniArray(ani_env* env, size_t size);
 };
 }
 }

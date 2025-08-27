@@ -268,6 +268,19 @@ export function setScreenPrivacyMaskImage(screenId: long, image?: image.PixelMap
     });
 }
 
+export function makeUnique(uniqueScreen: Array<long>): Promise<Array<long>> {
+    return new Promise<Array<long>>((resolve: (value: Array<long>) => void,
+        reject: (error: BusinessError) => void ) => {
+        taskpool.execute((): Array<long> => {
+            return makeUniqueInternal(uniqueScreen);
+        }).then((ret: NullishType) => {
+            resolve(ret as Array<long>);
+        }).catch((err: NullishType) => {
+            reject(err as BusinessError);
+        });
+    });
+}
+
 export native function getAllScreensInternal(screens: Array<Screen>): void;
 export native function createVirtualScreenInternal(options: VirtualScreenOption, screen: ScreenImpl): void;
 export native function setVirtualScreenSurfaceInternal(screenId: long, surfaceId: string): void;
@@ -279,6 +292,7 @@ export native function setMultiScreenRelativePositionInternal(mainScreenOptions:
 export native function setMultiScreenModeInternal(primaryScreenId: long, secondaryScreenId: long,
     secondaryScreenMode: MultiScreenMode): void;
 export native function setScreenPrivacyMaskImageInternal(screenId: long, image?: image.PixelMap): void;
+export native function makeUniqueInternal(uniqueScreen: Array<long>): Array<long>;
 
 export interface Screen {
 

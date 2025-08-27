@@ -455,6 +455,53 @@ void ScreenManagerAni::SetScreenPrivacyMaskImage(ani_env* env, ani_long screenId
     }
 }
 
+ani_object ScreenManagerAni::MakeUnique(ani_env* env, ani_object uniqueScreenIds)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] start");
+    ani_boolean isUniqueScreenIdsUndefined = 0;
+    auto ret = env->Reference_IsUndefined(uniqueScreenIds, &isUniqueScreenIdsUndefined);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] check uniqueScreenIds is undefined failed");
+        return ScreenAniUtils::CreateAniUndefined(env);
+    }
+    if (isUniqueScreenIdsUndefined) {
+        TLOGE(WmsLogTag::DMS, "[ANI] UniqueScreenIds is nullptr.");
+        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "UniqueScreenIds is nullptr.");
+        return ScreenAniUtils::CreateAniUndefined(env);
+    }
+    ani_int length = 0;
+    env->Object_GetPropertyByName_Int(uniqueScreenIds, "length", &length);
+    TLOGI(WmsLogTag::DMS, "[ANI] length %{public}d", (ani_int)length);
+    std::vector<ScreenId> screenIds;
+    for (int32_t i = 0; i < length; i++) {
+        ani_ref screenIdRef;
+        auto ret = env->Object_CallMethodByName_Ref(uniqueScreenIds, "$_get", "i:C{std.core.Object}",
+            &screenIdRef, (ani_int)i);
+        if (ret != ANI_OK) {
+            TLOGE(WmsLogTag::DMS, "[ANI] get ani_array index %{public}u fail, ret: %{public}u", (ani_int)i, ret);
+            AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to get screenId");
+            return ScreenAniUtils::CreateAniUndefined(env);
+        }
+        ani_long screenId;
+        ret = env->Object_CallMethodByName_Long(static_cast<ani_object>(screenIdRef), "unboxed", ":l", &screenId);
+        if (ret != ANI_OK) {
+            TLOGE(WmsLogTag::DMS, "[ANI] unboxed screenId failed, ret: %{public}u", ret);
+            AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to unboxed screenId");
+            return ScreenAniUtils::CreateAniUndefined(env);
+        }
+        screenIds.emplace_back(static_cast<ScreenId>(screenId));
+    }
+    std::vector<DisplayId> displayIds;
+    DmErrorCode res = DM_JS_TO_ERROR_CODE_MAP.at(
+        SingletonContainer::Get<ScreenManager>().MakeUniqueScreen(screenIds, displayIds));
+    if (res != DmErrorCode::DM_OK) {
+        TLOGE(WmsLogTag::DMS, "ScreenManager::MakeUniqueScreen failed.");
+        AniErrUtils::ThrowBusinessError(env, res, "ScreenManager::MakeUniqueScreen failed.");
+    }
+    TLOGI(WmsLogTag::DMS, "[ANI] displayIds length %{public}d", (ani_int)displayIds.size());
+    return ScreenAniUtils::CreateDisplayIdVectorAniObject(env, displayIds);
+}
+
 extern "C" {
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
@@ -497,6 +544,8 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(ScreenManagerAni::SetMultiScreenMode)},
         ani_native_function {"setScreenPrivacyMaskImageInternal", nullptr,
             reinterpret_cast<void *>(ScreenManagerAni::SetScreenPrivacyMaskImage)},
+        ani_native_function {"makeUniqueInternal", nullptr,
+            reinterpret_cast<void *>(ScreenManagerAni::MakeUnique)},
     };
     if ((ret = env->Namespace_BindNativeFunctions(nsp, funcs.data(), funcs.size()))) {
         TLOGE(WmsLogTag::DMS, "[ANI] bind namespace fail %{public}u", ret);

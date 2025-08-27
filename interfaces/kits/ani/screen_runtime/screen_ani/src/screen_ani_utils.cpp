@@ -303,5 +303,49 @@ ani_status ScreenAniUtils::GetMultiScreenPositionOptionsFromAni(ani_env* env, an
     mainScreenOptions.startX_ = static_cast<uint32_t>(startYAni);
     return ANI_OK;
 }
+
+ani_object ScreenAniUtils::CreateDisplayIdVectorAniObject(ani_env* env, std::vector<DisplayId>& displayIds)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] start");
+    ani_object arrayObj = ScreenAniUtils::CreateAniArray(env, displayIds.size());
+    ani_boolean isUndefined;
+    env->Reference_IsUndefined(arrayObj, &isUndefined);
+    if (isUndefined) {
+        TLOGE(WmsLogTag::DMS, "Failed to create arrayObject");
+        return arrayObj;
+    }
+    ani_size index = 0;
+    for (const auto& displayId : displayIds) {
+        TLOGI(WmsLogTag::DMS, "displayId: %{public}" PRIu64, displayId);
+        ani_status ret = env->Object_CallMethodByName_Void(arrayObj, "$_set", "il:V", index,
+            static_cast<ani_long>(displayId));
+        if (ret != ANI_OK) {
+            TLOGE(WmsLogTag::DMS, "Failed to set displayId item, index: %{public}zu, ret: %{public}d", index, ret);
+            continue;
+        }
+        index++;
+    }
+    return arrayObj;
+}
+
+ani_object ScreenAniUtils::CreateAniArray(ani_env* env, size_t size)
+{
+    ani_class arrayCls;
+    if (env->FindClass("escompat.Array", &arrayCls) != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to find class escompat.Array");
+        return CreateAniUndefined(env);
+    }
+    ani_method arrayCtor;
+    if (env->Class_FindMethod(arrayCls, "<ctor>", "i:", &arrayCtor) != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to find <ctor>");
+        return CreateAniUndefined(env);
+    }
+    ani_object arrayObj = nullptr;
+    if (env->Object_New(arrayCls, arrayCtor, &arrayObj, size) != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to create object Array");
+        return CreateAniUndefined(env);
+    }
+    return arrayObj;
+}
 }
 }
