@@ -101,6 +101,7 @@ private:
     bool RegisterMockSessionManagerService();
     ErrCode ValidateParameters(int32_t clientUserId, int32_t userId) const;
     ErrCode GetForegroundOsAccountDisplayId(int32_t userId, DisplayId& displayId) const;
+    void NotifyWMSConnectionStatus(int32_t userId, const sptr<ISessionManagerServiceRecoverListener>& smsListener);
     std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>* GetSMSRecoverListenerMap(int32_t userId);
     std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>* GetSystemAppSMSRecoverListenerMap(
         int32_t displayId);
