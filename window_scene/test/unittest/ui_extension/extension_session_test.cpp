@@ -844,6 +844,10 @@ HWTEST_F(ExtensionSessionTest, Background, TestSize.Level0)
     extensionSession_->state_ = SessionState::STATE_DISCONNECT;
     res = extensionSession_->Background();
     ASSERT_EQ(res, WSError::WS_ERROR_INVALID_SESSION);
+
+    extensionSession_->state_ = SessionState::STATE_BACKGROUND;
+    res = extensionSession_->Background();
+    ASSERT_EQ(res, WSError::WS_OK);
 }
 
 /**
