@@ -27,8 +27,8 @@ namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "ScenePersistence" };
 constexpr const char* UNDERLINE_SEPARATOR = "_";
-constexpr const char* ASTC_IMAGE_FORMAT_PC = "image/astc/8*8";
-constexpr const char* ASTC_IMAGE_FORMAT = "image/astc/4*4";
+constexpr const char* ASTC_IMAGE_FORMAT_LOW = "image/astc/8*8";
+constexpr const char* ASTC_IMAGE_FORMAT_HIGH = "image/astc/4*4";
 constexpr const char* ASTC_IMAGE_SUFFIX = ".astc";
 constexpr uint8_t ASTC_IMAGE_QUALITY = 20;
 
@@ -146,7 +146,7 @@ void ScenePersistence::SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixe
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SaveSnapshot %s", path.c_str());
         OHOS::Media::ImagePacker imagePacker;
         OHOS::Media::PackOption option;
-        const char *astcImageFormat = scenePersistence->isPcWindow_ ? ASTC_IMAGE_FORMAT_PC : ASTC_IMAGE_FORMAT;
+        const char *astcImageFormat = scenePersistence->isPcWindow_ ? ASTC_IMAGE_FORMAT_LOW : ASTC_IMAGE_FORMAT_HIGH;
         option.format = IsAstcEnabled() ? astcImageFormat : IMAGE_FORMAT;
         option.quality = IsAstcEnabled() ? ASTC_IMAGE_QUALITY : IMAGE_QUALITY;
         option.numberHint = 1;
@@ -448,7 +448,7 @@ std::shared_ptr<Media::PixelMap> ScenePersistence::GetLocalSnapshotPixelMap(cons
 
     uint32_t errorCode = 0;
     Media::SourceOptions sourceOpts;
-    const char *astcImageFormat = this->isPcWindow_ ? ASTC_IMAGE_FORMAT_PC : ASTC_IMAGE_FORMAT;
+    const char *astcImageFormat = this->isPcWindow_ ? ASTC_IMAGE_FORMAT_LOW : ASTC_IMAGE_FORMAT_HIGH;
     sourceOpts.formatHint = IsAstcEnabled() ? astcImageFormat : IMAGE_FORMAT;
     std::string path = GetSnapshotFilePath(key, true, freeMultiWindow);
     std::lock_guard lock(savingSnapshotMutex_);
