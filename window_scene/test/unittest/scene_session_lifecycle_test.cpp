@@ -262,10 +262,8 @@ HWTEST_F(SceneSessionLifecycleTest, Foreground07, TestSize.Level0)
         switch (key) {
             case ManagerState::MANAGER_STATE_SCREEN_LOCKED:
                 return true;
-                break;
             default:
                 return false;
-                break;
         }
     };
     session->SetGetStateFromManagerListener(func);
