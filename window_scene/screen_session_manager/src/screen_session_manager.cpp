@@ -2159,7 +2159,7 @@ void ScreenSessionManager::UpdateDisplayHookInfo(int32_t uid, bool enable, const
 }
 
 void ScreenSessionManager::NotifyDisplayChangedByUid(const std::map<ScreenId, sptr<ScreenSession>>& screenSessionMap,
-    DisplayChangeEvent event, uint32_t uid)
+    DisplayChangeEvent event, int32_t uid)
 {
     for (const auto& sessionIt : screenSessionMap) {
         auto screenSession = sessionIt.second;
@@ -2172,7 +2172,7 @@ void ScreenSessionManager::NotifyDisplayChangedByUid(const std::map<ScreenId, sp
 }
 
 void ScreenSessionManager::NotifyDisplayChangedByUidInner(sptr<DisplayInfo> displayInfo,
-    DisplayChangeEvent event, uint32_t uid)
+    DisplayChangeEvent event, int32_t uid)
 {
     if (displayInfo == nullptr) {
             TLOGE(WmsLogTag::DMS, "displayInfo is nullptr.");
@@ -2194,14 +2194,12 @@ void ScreenSessionManager::NotifyDisplayChangedByUidInner(sptr<DisplayInfo> disp
             int32_t agentPid = dmAgentContainer_.GetAgentPid(agent);
             auto iter = uidAndPidMap_.find(uid);
             if (iter == uidAndPidMap_.end() || iter->second != agentPid) {
-                TLOGND(WmsLogTag::DMS, "no notify, evevt:%{public}d, agent size: %{public}u",
-                    event, static_cast<uint32_t>(agents.size()));
+                TLOGND(WmsLogTag::DMS, "no notify");
                 continue;
             }
             if (!IsFreezed(agentPid, DisplayManagerAgentType::DISPLAY_EVENT_LISTENER)) {
                 agent->OnDisplayChange(displayInfo, event);
-                TLOGND(WmsLogTag::DMS, "notify, evevt:%{public}d, agent size: %{public}u",
-                    event, static_cast<uint32_t>(agents.size()));
+                TLOGND(WmsLogTag::DMS, "notify, uid:%{public}d, pid: %{public}d", uid, agentPid);
             }
         }
     };
