@@ -2208,7 +2208,6 @@ void ScreenSessionManager::NotifyDisplayChangedByUidInner(sptr<DisplayInfo> disp
     taskScheduler_->PostAsyncTask(task, "NotifyDisplayChanged");
 }
 
-
 void ScreenSessionManager::GetDisplayHookInfo(int32_t uid, DMHookInfo& hookInfo)
 {
     std::shared_lock<std::shared_mutex> lock(hookInfoMutex_);
