@@ -326,7 +326,6 @@ bool ParseConfigOption(ani_env* env, ani_object configuration, WindowOption &opt
         SingletonContainer::Get<DisplayManager>().GetDisplayById(static_cast<uint64_t>(displayId)) == nullptr) {
         TLOGI(WmsLogTag::DEFAULT, "[ANI] DisplayId is invalid");
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
-        return false;
     }
     option.SetDisplayId(displayId);
 
