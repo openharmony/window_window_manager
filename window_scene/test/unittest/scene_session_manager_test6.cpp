@@ -444,6 +444,38 @@ HWTEST_F(SceneSessionManagerTest6, GetTopNavDestinationName, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetWatermarkImageForApp
+ * @tc.desc: test SetWatermarkImageForApp whether get the top nav destination name.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, SetWatermarkImageForApp, TestSize.Level1)
+{
+    // TODO:
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest";
+    sessionInfo.abilityName_ = "DumpSessionWithId";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, ssm_);
+    auto oldSceneSessionMap = ssm_->sceneSessionMap_;
+    ssm_->sceneSessionMap_.clear();
+
+    std::string topNavDestName;
+    EXPECT_EQ(ssm_->SetWatermarkImageForApp(1000, topNavDestName), WMError::WM_ERROR_INVALID_WINDOW);
+
+    ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession));
+    EXPECT_EQ(ssm_->SetWatermarkImageForApp(2, topNavDestName), WMError::WM_ERROR_INVALID_OPERATION);
+
+    sceneSession->state_ = SessionState::STATE_FOREGROUND;
+    sceneSession->sessionStage_ = nullptr;
+    EXPECT_EQ(ssm_->SetWatermarkImageForApp(2, topNavDestName), WMError::WM_ERROR_SYSTEM_ABNORMALLY);
+
+    sceneSession->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
+    EXPECT_EQ(ssm_->SetWatermarkImageForApp(2, topNavDestName), WMError::WM_OK);
+    ssm_->sceneSessionMap_.clear();
+    ssm_->sceneSessionMap_ = oldSceneSessionMap;
+}
+
+/**
  * @tc.name: SetScreenLocked && IsScreenLocked
  * @tc.desc: SceneSesionManager update screen locked state
  * @tc.type: FUNC

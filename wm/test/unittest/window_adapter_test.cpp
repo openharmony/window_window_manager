@@ -510,6 +510,25 @@ HWTEST_F(WindowAdapterTest, GetVisibilityWindowInfo, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RecoverWatermarkImageForApp
+ * @tc.desc: WindowAdapter/RecoverWatermarkImageForApp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, RecoverWatermarkImageForApp01, TestSize.Level1)
+{
+    WindowAdapter windowAdapter;
+    auto ret = windowAdapter.RecoverWatermarkImageForApp();
+    EXPECT_EQ(ret, WMError::WM_OK);
+    windowAdapter.appWatermarkName_ = "bundleName#pid";
+    ret = windowAdapter.RecoverWatermarkImageForApp();
+    EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+    windowAdapter.InitWMSProxy();
+    ASSERT_NE(windowAdapter.windowManagerServiceProxy_, nullptr);
+    ret = windowAdapter.RecoverWatermarkImageForApp();
+    EXPECT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+}
+
+/**
  * @tc.name: RecoverWindowPropertyChangeFlag
  * @tc.desc: WindowAdapter/RecoverWindowPropertyChangeFlag
  * @tc.type: FUNC
