@@ -231,10 +231,10 @@ ani_ref CreateAniSystemWindow(ani_env* env, void* contextPtr, sptr<WindowOption>
     WMError wmError = WMError::WM_OK;
     sptr<Window> window = Window::Create(windowOption->GetWindowName(), windowOption, context->lock(), wmError);
     WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(wmError);
-    if (window == nullptr && wmErrorCode != WmErrorCode::WM_OK) {
-        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-    } else {
+    if (window != nullptr && wmErrorCode == WmErrorCode::WM_OK) {
         return CreateAniWindowObject(env, window);
+    } else {
+        return AniWindowUtils::AniThrowError(env, wmErrorCode, "Create window failed");
     }
 }
 
@@ -325,7 +325,7 @@ bool ParseConfigOption(ani_env* env, ani_object configuration, WindowOption &opt
     if (displayId < 0 ||
         SingletonContainer::Get<DisplayManager>().GetDisplayById(static_cast<uint64_t>(displayId)) == nullptr) {
         TLOGI(WmsLogTag::DEFAULT, "[ANI] DisplayId is invalid");
-        return false;
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     option.SetDisplayId(displayId);
 
