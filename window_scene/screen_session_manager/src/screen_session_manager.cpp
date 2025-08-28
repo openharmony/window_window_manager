@@ -2151,14 +2151,14 @@ void ScreenSessionManager::UpdateDisplayHookInfo(int32_t uid, bool enable, const
     if (enable) {
         if (uid != 0) {
             displayHookMap_[uid] = hookInfo;
-            NotifyDisplayChangedByHook(screenSessionMapCopy, DisplayChangeEvent::DISPLAY_SIZE_CHANGED, uid);
+            NotifyDisplayChangedByUid(screenSessionMapCopy, DisplayChangeEvent::DISPLAY_SIZE_CHANGED, uid);
         }
     } else {
         displayHookMap_.erase(uid);
     }
 }
 
-void ScreenSessionManager::NotifyDisplayChangedByHook(const std::map<ScreenId, sptr<ScreenSession>>& screenSessionMap,
+void ScreenSessionManager::NotifyDisplayChangedByUid(const std::map<ScreenId, sptr<ScreenSession>>& screenSessionMap,
     DisplayChangeEvent event, uint32_t uid)
 {
     for (const auto& sessionIt : screenSessionMap) {
@@ -2167,35 +2167,47 @@ void ScreenSessionManager::NotifyDisplayChangedByHook(const std::map<ScreenId, s
             TLOGE(WmsLogTag::DMS, "screenSession is nullptr");
             continue;
         }
-        auto displayInfo = screenSession->ConvertToDisplayInfo();
-        if (displayInfo == nullptr) {
+        NotifyDisplayChangedByUidInner(screenSession->ConvertToDisplayInfo(), event, uid);
+    }
+}
+
+void ScreenSessionManager::NotifyDisplayChangedByUidInner(sptr<DisplayInfo> displayInfo,
+    DisplayChangeEvent event, uint32_t uid)
+{
+    if (displayInfo == nullptr) {
             TLOGE(WmsLogTag::DMS, "displayInfo is nullptr.");
             continue;
         }
-        auto task = [=] {
-            auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::DISPLAY_EVENT_LISTENER);
-            if (event == DisplayChangeEvent::UPDATE_REFRESHRATE) {
-                TLOGND(WmsLogTag::DMS, "evevt:%{public}d, displayId:%{public}" PRIu64", agent size: %{public}u",
-                    event, displayInfo->GetDisplayId(), static_cast<uint32_t>(agents.size()));
-            } else {
-                TLOGNI(WmsLogTag::DMS, "evevt:%{public}d, displayId:%{public}" PRIu64", agent size: %{public}u",
-                    event, displayInfo->GetDisplayId(), static_cast<uint32_t>(agents.size()));
+    auto task = [=] {
+        auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::DISPLAY_EVENT_LISTENER);
+        if (event == DisplayChangeEvent::UPDATE_REFRESHRATE) {
+            TLOGND(WmsLogTag::DMS, "evevt:%{public}d, displayId:%{public}" PRIu64", agent size: %{public}u",
+                event, displayInfo->GetDisplayId(), static_cast<uint32_t>(agents.size()));
+        } else {
+            TLOGNI(WmsLogTag::DMS, "evevt:%{public}d, displayId:%{public}" PRIu64", agent size: %{public}u",
+                event, displayInfo->GetDisplayId(), static_cast<uint32_t>(agents.size()));
+        }
+        if (agents.empty()) {
+            return;
+        }
+        for (auto& agent : agents) {
+            int32_t agentPid = dmAgentContainer_.GetAgentPid(agent);
+            auto iter = uidAndPidMap_.find(uid);
+            if (iter == uidAndPidMap_.end() || iter->second != agentPid) {
+                TLOGND(WmsLogTag::DMS, "no notify, evevt:%{public}d, agent size: %{public}u",
+                    event, static_cast<uint32_t>(agents.size()));
+                continue;
             }
-            if (agents.empty()) {
-                return;
+            if (!IsFreezed(agentPid, DisplayManagerAgentType::DISPLAY_EVENT_LISTENER)) {
+                agent->OnDisplayChange(displayInfo, event);
+                TLOGND(WmsLogTag::DMS, "notify, evevt:%{public}d, agent size: %{public}u",
+                    event, static_cast<uint32_t>(agents.size()));
             }
-            for (auto& agent : agents) {
-                int32_t agentPid = dmAgentContainer_.GetAgentPid(agent);
-                auto iter = uidAndPidMap_.find(uid);
-                if (iter != uidAndPidMap_.end() && iter->second == agentPid) {
-                    if (!IsFreezed(agentPid, DisplayManagerAgentType::DISPLAY_EVENT_LISTENER)) {
-                        agent->OnDisplayChange(displayInfo, event);
-                    }
-                }
-            }
-        };
-        taskScheduler_->PostAsyncTask(task, "NotifyDisplayChanged");
+        }
+    };
+    taskScheduler_->PostAsyncTask(task, "NotifyDisplayChanged");
 }
+
 
 void ScreenSessionManager::GetDisplayHookInfo(int32_t uid, DMHookInfo& hookInfo)
 {
