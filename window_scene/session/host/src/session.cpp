@@ -2889,7 +2889,7 @@ SnapshotStatus Session::GetWindowStatus() const
     if (!SupportSnapshotAllSessionStatus()) {
         return defaultStatus;
     }
-    return WSSnapshotHelper::GetWindowStatus();
+    return WSSnapshotHelper::GetInstance()->GetWindowStatus();
 }
 
 SnapshotStatus Session::GetSessionSnapshotStatus(BackgroundReason reason) const
@@ -2915,7 +2915,7 @@ uint32_t Session::GetWindowOrientation() const
     if (!SupportSnapshotAllSessionStatus()) {
         return 0;
     }
-    return WSSnapshotHelper::GetRotation();
+    return WSSnapshotHelper::GetInstance()->GetWindowRotation();
 }
 
 uint32_t Session::GetLastOrientation() const

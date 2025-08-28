@@ -12211,7 +12211,7 @@ void SceneSessionManager::ProcessUpdateRotationChange(DisplayId defaultDisplayId
             sceneSession->SetRotation(displayInfo->GetRotation());
             sceneSession->UpdateOrientation();
         }
-        WSSnapshotHelper::SetWindowOrientationStatus(displayInfo->GetRotation());
+        WSSnapshotHelper::GetInstance()->SetWindowOrientationStatus(displayInfo->GetRotation());
         UpdateDisplayRegion(displayInfo);
         return WSError::WS_OK;
     }, "ProcessUpdateRotationChange" + std::to_string(defaultDisplayId));
@@ -15338,7 +15338,8 @@ WMError SceneSessionManager::MakeScreenFoldData(const std::vector<std::string>& 
     screenFoldData.currentScreenFoldStatusDuration_ = std::stoi(screenFoldInfo[2]); // 2: current duration
     screenFoldData.postureAngle_ = std::atof(screenFoldInfo[3].c_str()); // 3: posture angle (type: float)
     screenFoldData.screenRotation_ = std::stoi(screenFoldInfo[4]); // 4: screen rotation
-    WSSnapshotHelper::SetWindowScreenStatus(static_cast<FoldStatus>(screenFoldData.nextScreenFoldStatus_));
+    WSSnapshotHelper::GetInstance()->SetWindowScreenStatus(
+        static_cast<FoldStatus>(screenFoldData.nextScreenFoldStatus_));
     if (!screenFoldData.GetTypeCThermalWithUtil()) {
         TLOGI(WmsLogTag::DMS, "Error: fail to get typeC thermal.");
         return WMError::WM_DO_NOTHING;

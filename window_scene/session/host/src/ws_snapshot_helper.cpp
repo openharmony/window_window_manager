@@ -79,12 +79,12 @@ void WSSnapshotHelper::SetWindowOrientationStatus(Rotation rotation)
     SetWindowOrientationStatus(GetOrientation(rotation));
 }
 
-SnapshotStatus WSSnapshotHelper::GetWindowStatus()
+SnapshotStatus WSSnapshotHelper::GetWindowStatus() const
 {
     return GetInstance()->windowStatus_;
 }
 
-uint32_t WSSnapshotHelper::GetRotation()
+uint32_t WSSnapshotHelper::GetWindowRotation() const
 {
     return static_cast<uint32_t>(GetInstance()->windowRotation_);
 }
