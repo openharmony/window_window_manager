@@ -2802,7 +2802,6 @@ void SceneSessionManager::InitSceneSession(sptr<SceneSession>& sceneSession, con
     if (sessionLockedStateCacheSet_.find(key) != sessionLockedStateCacheSet_.end()) {
         sceneSession->NotifySessionLockStateChange(true);
     }
-    InsertProcessMap(sessionInfo, sceneSession->GetPersistentId());
 }
 
 void SceneSessionManager::InitFbWindow(const sptr<SceneSession>& sceneSession,
@@ -3623,7 +3622,6 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
             TLOGNE(WmsLogTag::WMS_MAIN, "Destruct session invalid by %{public}d", persistentId);
             return WSError::WS_ERROR_INVALID_SESSION;
         }
-        DeleteProcessMap(sceneSession->GetSessionInfo(), persistentId);
         auto sceneSessionInfo = SetAbilitySessionInfo(sceneSession);
         sceneSession->GetCloseAbilityWantAndClean(sceneSessionInfo->want);
         ResetSceneSessionInfoWant(sceneSessionInfo);
@@ -5235,14 +5233,21 @@ bool SceneSessionManager::CheckStartWindowColorFollowApp(const AppExecFwk::Abili
     const std::string followAPPMode = "FOLLOW_APPLICATION";
     std::string colorModeType = startingWindowRdbMgr_->GetStartWindowValFromProfile(
         abilityInfo, resourceMgr, STARTWINDOW_COLOR_MODE_TYPE, followSystemMode);
-    if (colorModeType == followAPPMode) {
-        TLOGI(WmsLogTag::WMS_PATTERN, "follow app: %{public}s", abilityInfo.bundleName.c_str());
-        std::string key = abilityInfo.bundleName + '_' + abilityInfo.moduleName + '_' + abilityInfo.name;
-        std::unique_lock<std::shared_mutex> lock(startingWindowFollowAppSetMutex_);
-        startingWindowFollowAppSet_.insert(key);
+    if (colorModeType != followAPPMode) {
+        TLOGI(WmsLogTag::WMS_PATTERN, "follow sys: %{public}s", abilityInfo.bundleName.c_str());
+        return false;
+    }
+    std::string key = abilityInfo.moduleName + abilityInfo.name;
+    TLOGI(WmsLogTag::WMS_PATTERN, "follow app: %{public}s %{public}s", abilityInfo.bundleName.c_str(), key.c_str());
+    std::unique_lock<std::shared_mutex> lock(startingWindowFollowAppMapMutex_);
+    auto iter = startingWindowFollowAppMap_.find(abilityInfo.bundleName);
+    if (iter != startingWindowFollowAppMap_.end()) {
+        iter->second.insert(key);
         return true;
     }
-    return false;
+    std::unordered_set<std::string> infoSet({ key });
+    startingWindowFollowAppMap_.emplace(abilityInfo.bundleName, infoSet);
+    return true;
 }
 
 bool SceneSessionManager::GetStartupPageFromResource(const AppExecFwk::AbilityInfo& abilityInfo,
@@ -5423,97 +5428,38 @@ void SceneSessionManager::UpdateAllStartingWindowRdb()
     ffrtQueueHelper_->SubmitTask(loadTask);
 }
 
-void SceneSessionManager::InsertProcessMap(const SessionInfo& sessionInfo, const int32_t persistentId)
+std::string SceneSessionManager::GetCallerSessionColorMode(const SessionInfo& sessionInfo)
 {
-    std::string compareInfo =
-        sessionInfo.bundleName_ + "_" + sessionInfo.appInstanceKey_ + "_" + std::to_string(sessionInfo.appIndex_);
-    TLOGI(WmsLogTag::WMS_PATTERN, "%{public}s, %{public}d", compareInfo.c_str(), persistentId);
-    std::lock_guard<std::mutex> lock(processMapMutex_);
-    processCompareMap_[compareInfo].insert(persistentId);
-}
-
-WSError SceneSessionManager::DeleteProcessMap(const SessionInfo& sessionInfo, const int32_t persistentId)
-{
-    std::string compareInfo =
-        sessionInfo.bundleName_ + "_" + sessionInfo.appInstanceKey_ + "_" + std::to_string(sessionInfo.appIndex_);
-    std::lock_guard<std::mutex> lock(processMapMutex_);
-    auto it = processCompareMap_.find(compareInfo);
-    if (it == processCompareMap_.end()) {
-        return WSError::WS_DO_NOTHING;
-    }
-    auto& vals = it->second;
-    vals.erase(persistentId);
-    TLOGI(WmsLogTag::WMS_PATTERN, "%{public}s, %{public}d", compareInfo.c_str(), persistentId);
-    if (vals.empty()) {
-        processCompareMap_.erase(it);
-        TLOGI(WmsLogTag::WMS_PATTERN, "deleteALL: %{public}s", compareInfo.c_str());
-    }
-    return WSError::WS_OK;
-}
-
-int32_t SceneSessionManager::FindCallerPersistentId(int32_t persistentId)
-{
-    auto session = GetSceneSession(persistentId);
-    if (session == nullptr) {
-        return INVALID_SESSION_ID;
-    }
-    auto callerId = session->GetSessionInfo().callerPersistentId_;
-    TLOGI(WmsLogTag::WMS_PATTERN, "id: %{public}d, CallerId: %{public}d", persistentId, callerId);
-    return callerId;
-}
-
-int32_t SceneSessionManager::GetOriginalPersistentId(const std::set<int32_t>& sessionSet, int32_t persistentId)
-{
-    auto resId = persistentId;
-    auto callerId = FindCallerPersistentId(persistentId);
-    std::unordered_set<int32_t> uniqueSet = { persistentId };
-    while ((callerId != INVALID_SESSION_ID) &&
-           (sessionSet.count(callerId) > 0) && (uniqueSet.count(callerId) == 0)) {
-        resId = callerId;
-        uniqueSet.insert(callerId);
-        callerId = FindCallerPersistentId(callerId);
-    }
-    return resId;
-}
-
-WSError SceneSessionManager::FindProcessMap(const SessionInfo& sessionInfo, int32_t& persistentId)
-{
-    std::string compareInfo =
-        sessionInfo.bundleName_ + "_" + sessionInfo.appInstanceKey_ + "_" + std::to_string(sessionInfo.appIndex_);
-    std::lock_guard<std::mutex> lock(processMapMutex_);
-    auto it = processCompareMap_.find(compareInfo);
-    if (it != processCompareMap_.end() && !it->second.empty()) {
-        persistentId = GetOriginalPersistentId(it->second, *it->second.begin());
-        TLOGI(WmsLogTag::WMS_PATTERN, "find %{public}d", persistentId);
-        return WSError::WS_OK;
-    }
-    TLOGD(WmsLogTag::WMS_PATTERN, "find nothing %{public}s", compareInfo.c_str());
-    return WSError::WS_DO_NOTHING;
-}
-
-std::string SceneSessionManager::GetSessionColorMode(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo)
-{
-    int32_t sameProcessId = 0;
-    if (FindProcessMap(sessionInfo, sameProcessId) != WSError::WS_OK) {
+    if (sessionInfo.bundleName_ != sessionInfo.callerBundleName_) {
+        TLOGI(WmsLogTag::WMS_PATTERN, "bundle %{public}s, caller %{public}s",
+            sessionInfo.bundleName_.c_str(), sessionInfo.callerBundleName_.c_str());
         return AppExecFwk::ConfigurationInner::COLOR_MODE_AUTO;
     }
-    auto session = GetSceneSession(sameProcessId);
-    if (session == nullptr) {
-        TLOGD(WmsLogTag::WMS_PATTERN, "session: %{public}d, nullptr", sameProcessId);
+    auto callerId = sessionInfo.callerPersistentId_;
+    auto callerSession = GetSceneSession(callerId);
+    if (callerSession == nullptr) {
+        TLOGI(WmsLogTag::WMS_PATTERN, "caller session: %{public}d, nullptr", callerId);
         return AppExecFwk::ConfigurationInner::COLOR_MODE_AUTO;
     }
-    auto colorMode = session->GetAbilityColorMode();
+    auto colorMode = callerSession->GetAbilityColorMode();
     return colorMode;
 }
 
 bool SceneSessionManager::GetStartWindowColorFollowApp(const SessionInfo& sessionInfo)
 {
-    std::string key = sessionInfo.bundleName_ + '_' + sessionInfo.moduleName_ + '_' + sessionInfo.abilityName_;
-    std::shared_lock<std::shared_mutex> lock(startingWindowFollowAppSetMutex_);
-    if (startingWindowFollowAppSet_.count(key) != 0) {
+    std::shared_lock<std::shared_mutex> lock(startingWindowFollowAppMapMutex_);
+    auto iter = startingWindowFollowAppMap_.find(sessionInfo.bundleName_);
+    if (iter == startingWindowFollowAppMap_.end()) {
+        TLOGI(WmsLogTag::WMS_PATTERN, "follow sys: %{public}s", sessionInfo.bundleName_.c_str());
+        return false;
+    }
+    std::string key = sessionInfo.moduleName_ + sessionInfo.abilityName_;
+    if (iter->second.count(key) != 0) {
         TLOGI(WmsLogTag::WMS_PATTERN, "follow app: %{public}s", key.c_str());
         return true;
     }
+    TLOGI(WmsLogTag::WMS_PATTERN, "ability follow sys: %{public}s, %{public}s",
+        sessionInfo.bundleName_.c_str(), key.c_str());
     return false;
 }
 
@@ -5528,10 +5474,9 @@ void SceneSessionManager::GetStartupPage(const SessionInfo& sessionInfo, Startin
         return;
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetStartupPage");
-    bool colorFollowApp = GetStartWindowColorFollowApp(sessionInfo);
-    bool isAppDark = GetIsDarkFromConfiguration(GetSessionColorMode(sessionInfo, startingWindowInfo));
+    bool isAppDark = GetIsDarkFromConfiguration(GetCallerSessionColorMode(sessionInfo));
     bool isSystemDark = GetIsDarkFromConfiguration(std::string(AppExecFwk::ConfigurationInner::COLOR_MODE_AUTO));
-    bool isDark = colorFollowApp ? isAppDark : isSystemDark;
+    bool isDark = GetStartWindowColorFollowApp(sessionInfo) ? isAppDark : isSystemDark;
     if (GetStartingWindowInfoFromCache(sessionInfo, startingWindowInfo, isDark)) {
         return;
     }
@@ -5555,6 +5500,7 @@ void SceneSessionManager::GetStartupPage(const SessionInfo& sessionInfo, Startin
     }
     auto appColorMode = isAppDark ? Global::Resource::ColorMode::DARK : Global::Resource::ColorMode::LIGHT;
     if (GetStartupPageFromResource(abilityInfo, startingWindowInfo, isAppDark != isSystemDark, appColorMode)) {
+        isDark = GetStartWindowColorFollowApp(sessionInfo) ? isAppDark : isSystemDark;
         CacheStartingWindowInfo(
             sessionInfo.bundleName_, sessionInfo.moduleName_, sessionInfo.abilityName_, startingWindowInfo, isDark);
         if (startingWindowRdbMgr_ != nullptr) {
@@ -5792,9 +5738,19 @@ bool SceneSessionManager::CheckAndGetPreLoadResourceId(const StartingWindowInfo&
     return true;
 }
 
+void SceneSessionManager::ClearStartWindowColorFollowApp(const std::string& bundleName)
+{
+    std::unique_lock<std::shared_mutex> lock(startingWindowFollowAppMapMutex_);
+    if (auto iter = startingWindowFollowAppMap_.find(bundleName); iter != startingWindowFollowAppMap_.end()) {
+        TLOGI(WmsLogTag::WMS_PATTERN, "erase %{public}s", bundleName.c_str());
+        startingWindowFollowAppMap_.erase(iter);
+    }
+}
+
 void SceneSessionManager::OnBundleUpdated(const std::string& bundleName, int userId)
 {
     taskScheduler_->PostAsyncTask([this, bundleName, where = __func__]() {
+        ClearStartWindowColorFollowApp(bundleName);
         if (startingWindowRdbMgr_ == nullptr || bundleMgr_ == nullptr) {
             TLOGNE(WmsLogTag::WMS_PATTERN, "%{public}s: rdb or bms is nullptr", where);
             return;

@@ -795,10 +795,6 @@ public:
     WMError SetStartWindowBackgroundColor(const std::string& moduleName, const std::string& abilityName,
         uint32_t color, int32_t uid) override;
     void ConfigSupportSnapshotAllSessionStatus();
-    void InsertProcessMap(const SessionInfo& sessionInfo, const int32_t persistentId);
-    WSError DeleteProcessMap(const SessionInfo& sessionInfo, const int32_t persistentId);
-    WSError FindProcessMap(const SessionInfo& sessionInfo, int32_t& persistentId);
-    int32_t FindCallerPersistentId(int32_t persistentId);
     void ConfigSupportPreloadStartingWindow();
 
     /*
@@ -1678,10 +1674,8 @@ private:
     /*
      * Window Pattern
      */
-    std::mutex processMapMutex_;
-    std::unordered_map<std::string, std::set<int32_t>> processCompareMap_;
-    std::shared_mutex startingWindowFollowAppSetMutex_;
-    std::unordered_set<std::string> startingWindowFollowAppSet_;
+    std::shared_mutex startingWindowFollowAppMapMutex_;
+    std::unordered_map<std::string, std::unordered_set<std::string>> startingWindowFollowAppMap_;
     std::unordered_set<std::string> emptyStartupResource_;
     std::atomic<bool> delayRemoveSnapshot_ = false;
     void InitStartingWindowRdb(const std::string& rdbPath);
@@ -1692,6 +1686,7 @@ private:
     bool GetStartingWindowInfoFromRdb(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo,
         bool darkMode);
     bool GetStartWindowColorFollowApp(const SessionInfo& sessionInfo);
+    void ClearStartWindowColorFollowApp(const std::string& bundleName);
     bool GetPathInfoFromResource(const std::shared_ptr<Global::Resource::ResourceManager> resourceMgr,
         bool hapPathEmpty, uint32_t resourceId, std::string& path);
     bool CheckStartWindowColorFollowApp(const AppExecFwk::AbilityInfo& abilityInfo,
@@ -1715,8 +1710,7 @@ private:
     WMError SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit, int32_t persistentId) override;
     void UpdateAllStartingWindowRdb();
     bool needUpdateRdb_ = true;
-    std::string GetSessionColorMode(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo);
-    int32_t GetOriginalPersistentId(const std::set<int32_t>& sessionSet, int32_t persistentId);
+    std::string GetCallerSessionColorMode(const SessionInfo& sessionInfo);
 };
 } // namespace OHOS::Rosen
 
