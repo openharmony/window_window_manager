@@ -288,6 +288,9 @@ HWTEST_F(DisplayTest, GetDisplayInfoWithCache01, TestSize.Level1)
  */
 HWTEST_F(DisplayTest, GetLiveCreaseRegion, TestSize.Level1)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return;
+    }
     sptr<DisplayInfo> baseInfo = sptr<DisplayInfo>::MakeSptr();
     sptr<Display> disPlay = sptr<Display>::MakeSptr("", baseInfo);
     FoldCreaseRegion region;
@@ -315,6 +318,9 @@ HWTEST_F(DisplayTest, GetLiveCreaseRegion, TestSize.Level1)
  */
 HWTEST_F(DisplayTest, GetOriginRotation, TestSize.Level1)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return;
+    }
     auto baseInfo = defaultDisplay_->GetDisplayInfo();
     Rotation rotation = Rotation::ROTATION_90;
     baseInfo->SetOriginRotation(rotation);

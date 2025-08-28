@@ -640,6 +640,9 @@ HWTEST_F(SecondaryDisplayFoldPolicyTest, SetStatusConditionalActiveRectAndTpFeat
  */
 HWTEST_F(SecondaryDisplayFoldPolicyTest, InitPositionZInfosFeature, TestSize.Level1)
 {
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        GTEST_SKIP();
+    }
     std::recursive_mutex displayInfoMutex;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
     SecondaryDisplayFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
@@ -659,6 +662,9 @@ HWTEST_F(SecondaryDisplayFoldPolicyTest, InitPositionZInfosFeature, TestSize.Lev
  */
 HWTEST_F(SecondaryDisplayFoldPolicyTest, UpdatePositionZForDualDisplayNodeFeature, TestSize.Level1)
 {
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        GTEST_SKIP();
+    }
     std::recursive_mutex displayInfoMutex;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
     SecondaryDisplayFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);

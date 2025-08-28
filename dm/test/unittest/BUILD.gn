@@ -223,6 +223,7 @@ ohos_unittest("dm_oh_display_manager_test") {
   deps = [
     ":dm_unittest_common",
     "${window_base_path}/dm:libdm_ndk",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils"
   ]
 
   external_deps = [
