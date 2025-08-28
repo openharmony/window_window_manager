@@ -14,6 +14,7 @@
  */
 
 #include "window_session_impl.h"
+#include "window_scene_session_impl.h"
 
 #include <gtest/gtest.h>
 #include <transaction/rs_transaction.h>
@@ -1290,6 +1291,17 @@ HWTEST_F(WindowSessionImplTest2, UpdateDecorEnableToAce, TestSize.Level1)
     window->windowChangeListeners_.insert({ window->GetPersistentId(), listeners });
     window->windowSystemConfig_.freeMultiWindowSupport_ = false;
     window->UpdateDecorEnableToAce(false);
+
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateDecorEnableToAce2");
+    sptr<WindowSceneSessionImpl> sceneSseeionWindow = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    sceneSseeionWindow->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    sceneSseeionWindow->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    ASSERT_NE(compatibleModeProperty, nullptr);
+    compatibleModeProperty->SetDisableDecorFullscreen(true);
+    sceneSseeionWindow->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    sceneSseeionWindow->UpdateDecorEnableToAce(false);
 
     window->uiContent_ = nullptr;
     window->UpdateDecorEnableToAce(false);
