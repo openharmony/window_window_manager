@@ -16062,11 +16062,11 @@ WMError SceneSessionManager::SetWatermarkImageForApp(const std::shared_ptr<Media
     return taskScheduler_->PostSyncTask([this, pid, pixelMap, &watermarkName, where]() {
         if (pixelMap == nullptr) {
             {
-                std::shared_lock<std::shared_mutex> lock(appWatermarkMapMutex_);
+                std::unique_lock<std::shared_mutex> lock(appWatermarkMapMutex_);
                 auto iter = appWatermarkPidMap_.find(pid);
                 if (iter == appWatermarkPidMap_.end()) {
                     TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: no watermark for pid=%{public}d", where, pid);
-                    return WSError::WS_OK;
+                    return WMError::WM_OK;
                 }
                 watermarkName = iter->second;
                 appWatermarkPidMap_.erase(pid);
@@ -16081,9 +16081,8 @@ WMError SceneSessionManager::SetWatermarkImageForApp(const std::shared_ptr<Media
         auto nodeIds = GetSessionNodeIdsAndWatermarkNameByPid(pid, newWatermarkName);
         auto rsErrCode = RSInterfaces::GetInstance().SetSurfaceWatermark(newWatermarkName, pixelMap, nodeIds,
             CUSTOM_WATER_MARK);
-        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: curWatermark=%{public}s, "
-            "pid=%{public}d, rsErrCode=%{public}u", where, newWatermarkName.c_str(), pid,
-            static_cast<uint32_t>(rsErrCode));
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: pid=%{public}d, curWatermark=%{public}s, rsErrCode=%{public}u",
+            where, pid, newWatermarkName.c_str(), static_cast<uint32_t>(rsErrCode));
         if (rsErrCode == WATER_MARK_SUCCESS) {
             watermarkName = newWatermarkName;
             std::unique_lock<std::shared_mutex> lock(appWatermarkMapMutex_);
@@ -16123,7 +16122,8 @@ std::vector<NodeId> SceneSessionManager::GetSessionNodeIdsAndWatermarkNameByPid(
         }
     }
     watermarkName = SessionUtils::GetAppLockKey(bundleName, pid);
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "pid=%{public}d, bundle=%{public}s", pid, bundleName.c_str());
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "pid=%{public}d, bundle=%{public}s, nodesSize=%{public}u",
+        pid, bundleName.c_str(), static_cast<uint32_t>(nodeIds.size()));
     return nodeIds;
 }
 
@@ -16186,10 +16186,31 @@ void SceneSessionManager::ClearWatermarkForSession(const sptr<SceneSession>& ses
             return;
         }
         RSInterfaces::GetInstance().ClearSurfaceWatermarkForNodes(watermarkName, nodeIds);
+        ClearWatermarkRecordWhenAppExit(session);
         TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: win=[%{public}d, %{public}s], pid=%{public}d, "
             "watermark=%{public}s", where, sceneSession->GetWindowId(), sceneSession->GetWindowName().c_str(),
             pid, watermarkName.c_str());
     }, __func__);
+}
+
+void SceneSessionManager::ClearWatermarkRecordWhenAppExit(const sptr<SceneSession>& session)
+{
+    if (session == nullptr || !SessionHelper::IsMainWindow(session->GetWindowType())) {
+        return;
+    }
+    {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (const auto& [_, sess] : sceneSessionMap_) {
+            if (sess != nullptr && sess->GetCallingPid() == session->GetCallingPid() &&
+                SessionHelper::IsMainWindow(sess->GetWindowType()) && sess->GetWindowId() != session->GetWindowId()) {
+                return;
+            }
+        }
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "app exit: win=[%{public}d, %{public}s], pid=%{public}d",
+        sceneSession->GetWindowId(), sceneSession->GetWindowName().c_str(), session->GetCallingPid());
+    std::unique_lock<std::shared_mutex> lock(appWatermarkMapMutex_);
+    appWatermarkPidMap_.erase(session->GetCallingPid());
 }
 
 WMError SceneSessionManager::GetRootMainWindowId(int32_t persistentId, int32_t& hostWindowId)

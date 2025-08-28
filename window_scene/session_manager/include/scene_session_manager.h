@@ -1450,6 +1450,7 @@ private:
     std::vector<NodeId> GetSessionNodeIdsAndWatermarkNameByPid(int32_t pid, std::string& watermarkName);
     void SetWatermarkForSession(const sptr<SceneSession>& session);
     void ClearWatermarkForSession(const sptr<SceneSession>& session);
+    void ClearWatermarkRecordWhenAppExit(const sptr<SceneSession>& session);
 
     /*
      * Window Layout
