@@ -44,11 +44,16 @@ constexpr SnapshotStatus maxCapacity = { SCREEN_COUNT, ORIENTATION_COUNT };
 
 class WSSnapshotHelper {
 public:
-    WSSnapshotHelper() = default;
-    ~WSSnapshotHelper() = default;
+    static WSSnapshotHelper* GetInstance();
     static uint32_t GetScreenStatus();
     static uint32_t GetScreenStatus(FoldStatus foldStatus);
     static DisplayOrientation GetDisplayOrientation(int32_t rotation);
+    void SetWindowScreenStatus(uint32_t screenStatus);
+    void SetWindowScreenStatus(FoldStatus foldStatus);
+    void SetWindowOrientationStatus(uint32_t orientationStatus);
+    void SetWindowOrientationStatus(Rotation rotation);
+    SnapshotStatus GetWindowStatus() const;
+    uint32_t GetWindowRotation() const;
     static inline uint32_t GetOrientation(int32_t rotation)
     {
         if (rotation == LANDSCAPE_ANGLE || rotation == LANDSCAPE_INVERTED_ANGLE) {
@@ -65,6 +70,20 @@ public:
         }
         return SNAPSHOT_PORTRAIT;
     }
+
+    static inline uint32_t GetOrientation(Rotation rotation)
+    {
+        if (rotation == Rotation::ROTATION_0 || rotation == Rotation::ROTATION_180) {
+            return SNAPSHOT_PORTRAIT;
+        }
+        return SNAPSHOT_LANDSCAPE;
+    }
+
+private:
+    WSSnapshotHelper() = default;
+    ~WSSnapshotHelper() = default;
+    SnapshotStatus windowStatus_;
+    Rotation windowRotation_;
 };
 } // namespace OHOS::Rosen
 
