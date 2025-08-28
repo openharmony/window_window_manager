@@ -16073,13 +16073,13 @@ WMError SceneSessionManager::SetWatermarkImageForApp(const std::shared_ptr<Media
             }
             TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: cancel watermark=%{public}s, pid=%{public}d",
                 where, watermarkName.c_str(), pid);
-            RSInterfaces::GetInstance().ClearSurfaceWatermark(watermarkName);
+            RSInterfaces::GetInstance().ClearSurfaceWatermark(pid, watermarkName);
             watermarkName = "";
             return WMError::WM_OK;
         }
         std::string newWatermarkName;
         auto nodeIds = GetSessionNodeIdsAndWatermarkNameByPid(pid, newWatermarkName);
-        auto rsErrCode = RSInterfaces::GetInstance().SetSurfaceWatermark(newWatermarkName, pixelMap, nodeIds,
+        auto rsErrCode = RSInterfaces::GetInstance().SetSurfaceWatermark(pid, newWatermarkName, pixelMap, nodeIds,
             CUSTOM_WATER_MARK);
         TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: pid=%{public}d, curWatermark=%{public}s, rsErrCode=%{public}u",
             where, pid, newWatermarkName.c_str(), static_cast<uint32_t>(rsErrCode));
@@ -16152,7 +16152,7 @@ void SceneSessionManager::SetWatermarkForSession(const sptr<SceneSession>& sessi
                 where, sceneSession->GetWindowId(), sceneSession->GetWindowName().c_str(), pid);
             return WSError::WS_ERROR_INVALID_WINDOW;
         }
-        auto rsErrCode = RSInterfaces::GetInstance().SetSurfaceWatermark(watermarkName, nullptr, nodeIds,
+        auto rsErrCode = RSInterfaces::GetInstance().SetSurfaceWatermark(pid, watermarkName, nullptr, nodeIds,
             CUSTOM_WATER_MARK);
         TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: win=[%{public}d, %{public}s], pid=%{public}d, "
             "watermark=%{public}s, rsErrCode=%{public}u", where, sceneSession->GetWindowId(),
@@ -16185,7 +16185,7 @@ void SceneSessionManager::ClearWatermarkForSession(const sptr<SceneSession>& ses
                 where, sceneSession->GetWindowId(), sceneSession->GetWindowName().c_str(), pid);
             return;
         }
-        RSInterfaces::GetInstance().ClearSurfaceWatermarkForNodes(watermarkName, nodeIds);
+        RSInterfaces::GetInstance().ClearSurfaceWatermarkForNodes(pid, watermarkName, nodeIds);
         ClearWatermarkRecordWhenAppExit(sceneSession);
         TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: win=[%{public}d, %{public}s], pid=%{public}d, "
             "watermark=%{public}s", where, sceneSession->GetWindowId(), sceneSession->GetWindowName().c_str(),
