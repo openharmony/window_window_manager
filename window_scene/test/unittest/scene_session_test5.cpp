@@ -1190,6 +1190,28 @@ HWTEST_F(SceneSessionTest5, SetWatermarkEnabled, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetValidSurfaceNodeIds
+ * @tc.desc: test GetValidSurfaceNodeIds
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, GetValidSurfaceNodeIds, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetValidSurfaceNodeIds";
+    info.bundleName_ = "GetValidSurfaceNodeIds";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(session, nullptr);
+
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    std::shared_ptr<RSSurfaceNode> leashSurfaceNode = RSSurfaceNode::Create(config);
+    session->SetSurfaceNode(surfaceNode);
+    session->SetLeashWinSurfaceNode(leashSurfaceNode);
+	auto nodeIds = session->GetValidSurfaceNodeIds();
+    EXPECT_EQ(nodeIds.size(), 2);
+}
+
+/**
  * @tc.name: UIExtSurfaceNodeIdCache
  * @tc.desc: UIExtSurfaceNodeIdCache
  * @tc.type: FUNC
