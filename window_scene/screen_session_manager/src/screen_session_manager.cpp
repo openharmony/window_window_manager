@@ -2161,7 +2161,7 @@ void ScreenSessionManager::UpdateDisplayHookInfo(int32_t uid, bool enable, const
 void ScreenSessionManager::NotifyDisplayChangedByHook(const std::map<ScreenId, sptr<ScreenSession>>& screenSessionMap,
     DisplayChangeEvent event, uint32_t uid)
 {
-    for (const auto& sessionIt : screenSessionMapCopy) {
+    for (const auto& sessionIt : screenSessionMap) {
         auto screenSession = sessionIt.second;
         if (screenSession == nullptr) {
             TLOGE(WmsLogTag::DMS, "screenSession is nullptr");

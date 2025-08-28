@@ -702,7 +702,7 @@ private:
     std::map<sptr<IRemoteObject>, std::vector<ScreenId>> screenAgentMap_;
     std::map<ScreenId, sptr<ScreenSessionGroup>> smsScreenGroupMap_;
     std::map<uint32_t, DMHookInfo> displayHookMap_;
-    std::map<uint32_t, uint32_t> uidAndPidMap_;
+    std::map<int32_t, int32_t> uidAndPidMap_;
 
     bool userSwitching_ = false;
     bool isAutoRotationOpen_ = false;
