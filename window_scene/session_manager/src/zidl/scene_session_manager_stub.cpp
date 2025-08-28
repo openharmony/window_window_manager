@@ -1465,7 +1465,6 @@ int SceneSessionManagerStub::HandleSetWatermarkImageForApp(MessageParcel& data, 
 
 int SceneSessionManagerStub::HandleRecoverWatermarkImageForApp(MessageParcel& data, MessageParcel& reply)
 {
-    std::shared_ptr<Media::PixelMap> pixelMap(data.ReadParcelable<Media::PixelMap>());
     std::string watermarkName;
     if (!data.ReadString(watermarkName)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "get watermark name failed");
