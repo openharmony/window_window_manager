@@ -294,6 +294,28 @@ export function makeMirrorWithRegion(mainScreen: long, mirrorScreen: Array<long>
     })
 }
 
+export function stopMirror(mirrorScreen: Array<long>, callback: AsyncCallback<void>): void {
+    taskpool.execute((): void => {
+        stopMirrorInternal(mirrorScreen);
+    }).then(() => {
+        callback(null, undefined);
+    }).catch((err: NullishType) => {
+        callback(err as BusinessError, undefined);
+    });
+}
+
+export function stopMirror(mirrorScreen: Array<long>): Promise<void> {
+    return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) => {
+        taskpool.execute((): void => {
+            stopMirrorInternal(mirrorScreen);
+        }).then(() => {
+            resolve(undefined);
+        }).catch((err: NullishType) => {
+            reject(err as BusinessError);
+        });
+    });
+}
+
 export native function getAllScreensInternal(screens: Array<Screen>): void;
 export native function createVirtualScreenInternal(options: VirtualScreenOption, screen: ScreenImpl): void;
 export native function setVirtualScreenSurfaceInternal(screenId: long, surfaceId: string): void;
@@ -308,6 +330,7 @@ export native function setScreenPrivacyMaskImageInternal(screenId: long, image?:
 export native function makeUniqueInternal(uniqueScreen: Array<long>): Array<long>;
 export native function makeMirrorWithRegionInternal(mainScreen: long, mirrorScreen: Array<long>,
     mainScreenRegion: Rect): long;
+export native function stopMirrorInternal(mirrorScreen: Array<long>): void;
 
 export interface Screen {
 
