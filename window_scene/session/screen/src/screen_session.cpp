@@ -89,14 +89,14 @@ ScreenSession::ScreenSession(const ScreenSessionConfig& config, ScreenSessionRea
             break;
         }
         case ScreenSessionReason::CREATE_SESSION_FOR_MIRROR: {
-            rsConfig.screenId = screenId_;
+            rsConfig.screenId = rsId_;
             rsConfig.isMirrored = true;
             rsConfig.mirrorNodeId = config.mirrorNodeId;
             rsConfig.isSync = true;
             break;
         }
         case ScreenSessionReason::CREATE_SESSION_FOR_REAL: {
-            rsConfig.screenId = screenId_;
+            rsConfig.screenId = rsId_;
             break;
         }
         case ScreenSessionReason::CREATE_SESSION_WITHOUT_DISPLAY_NODE: {

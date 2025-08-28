@@ -136,6 +136,7 @@ ohos_shared_library("screen_session_manager") {
     "init:libbeget_proxy",
     "ipc:ipc_core",
     "libxml2:libxml2",
+    "os_account:os_account_innerkits",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "screenlock_mgr:screenlock_client",
