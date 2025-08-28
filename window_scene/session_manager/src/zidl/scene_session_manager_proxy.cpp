@@ -3707,7 +3707,7 @@ WMError SceneSessionManagerProxy::CreateUIEffectController(const sptr<IUIEffectC
     controllerId = reply.ReadInt32();
     sptr<IRemoteObject> controllerObject = reply.ReadRemoteObject();
     if (controllerObject == nullptr) {
-        TLOGE(WmsLogTag::WMS_ANIMATION, "receive filter failed");
+        TLOGE(WmsLogTag::WMS_ANIMATION, "receive controller object failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     controller = iface_cast<IUIEffectController>(controllerObject);
