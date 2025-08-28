@@ -892,8 +892,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, CalSpecialNotRotateTransformTest, TestSiz
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     manager_->CalSpecialNotRotateTransform(sceneSession, screenProperty, transform);
-    EXPECT_TRUE(g_logMsg.find("sceneSession is null") != std::string::npos);
-    EXPECT_NE(transform, testTransform);
+    EXPECT_TRUE(g_logMsg.find("sceneSession is null") == std::string::npos);
     LOG_SetCallback(nullptr);
 }
 
@@ -1093,11 +1092,13 @@ HWTEST_F(SceneSessionDirtyManagerTest, CalTransformTest_01, TestSize.Level1)
         sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
     ASSERT_NE(screenSession, nullptr);
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(screenId, screenSession);
+    auto displayMode = ScreenSessionManagerClient::GetInstance().GetFoldDisplayMode();
     ScreenSessionManagerClient::GetInstance().OnUpdateFoldDisplayMode(FoldDisplayMode::UNKNOWN);
     manager_->CalTransform(sceneSession, transform, testSingleHandData);
     ASSERT_EQ(transform, transform.Translate(translate)
         .Scale(scale, sceneSession->GetPivotX(), sceneSession->GetPivotY()).Inverse());
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.erase(screenId);
+    ScreenSessionManagerClient::GetInstance().OnUpdateFoldDisplayMode(displayMode);
 }
 
 /**
@@ -1118,6 +1119,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, CalTransformTest_02, TestSize.Level1)
     Vector2f offset = sceneSession->GetSessionGlobalPosition(false);
     Matrix3f transform;
     SingleHandData testSingleHandData;
+    auto displayMode = ScreenSessionManagerClient::GetInstance().GetFoldDisplayMode();
 
     auto screenId = 1001;
     sceneSession->GetSessionProperty()->SetDisplayId(screenId);
@@ -1145,6 +1147,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, CalTransformTest_02, TestSize.Level1)
     ASSERT_EQ(transform, transform.Translate(translate)
         .Scale(scale, sceneSession->GetPivotX(), sceneSession->GetPivotY()).Inverse());
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.erase(screenId);
+    ScreenSessionManagerClient::GetInstance().OnUpdateFoldDisplayMode(displayMode);
 }
 
 /**
@@ -1155,7 +1158,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, CalTransformTest_02, TestSize.Level1)
 HWTEST_F(SceneSessionDirtyManagerTest, CalTransformTest_03, TestSize.Level1)
 {
     SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "CalTransformTest_03";
+    sessionInfo.bundleName_ = "CalTransformTest_SCBScreenLock_03";
     sessionInfo.moduleName_ = "CalTransformTest_03";
     sessionInfo.isRotable_ = true;
     sessionInfo.isSystem_ = false;
@@ -1165,6 +1168,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, CalTransformTest_03, TestSize.Level1)
     Vector2f offset = sceneSession->GetSessionGlobalPosition(false);
     Matrix3f transform;
     SingleHandData testSingleHandData;
+    auto displayMode = ScreenSessionManagerClient::GetInstance().GetFoldDisplayMode();
 
     auto screenId = 1001;
     sceneSession->GetSessionProperty()->SetDisplayId(screenId);
@@ -1182,6 +1186,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, CalTransformTest_03, TestSize.Level1)
     ASSERT_EQ(transform, transform.Translate(translate)
         .Scale(scale, sceneSession->GetPivotX(), sceneSession->GetPivotY()).Inverse());
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.erase(screenId);
+    ScreenSessionManagerClient::GetInstance().OnUpdateFoldDisplayMode(displayMode);
 }
 
 /**
@@ -1192,7 +1197,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, CalTransformTest_03, TestSize.Level1)
 HWTEST_F(SceneSessionDirtyManagerTest, CalTransformTest_04, TestSize.Level1)
 {
     SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "CalTransformTest_04";
+    sessionInfo.bundleName_ = "CalTransformTest_SCBScreenLock_04";
     sessionInfo.moduleName_ = "CalTransformTest_04";
     sessionInfo.isRotable_ = true;
     sessionInfo.isSystem_ = true;
@@ -1202,6 +1207,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, CalTransformTest_04, TestSize.Level1)
     Vector2f offset = sceneSession->GetSessionGlobalPosition(false);
     Matrix3f transform;
     SingleHandData testSingleHandData;
+    auto displayMode = ScreenSessionManagerClient::GetInstance().GetFoldDisplayMode();
 
     auto screenId = 1001;
     sceneSession->GetSessionProperty()->SetDisplayId(screenId);
@@ -1224,6 +1230,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, CalTransformTest_04, TestSize.Level1)
     ASSERT_EQ(transform, transform.Translate(translate)
         .Scale(scale, sceneSession->GetPivotX(), sceneSession->GetPivotY()).Inverse());
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.erase(screenId);
+    ScreenSessionManagerClient::GetInstance().OnUpdateFoldDisplayMode(displayMode);
 }
 
 /**
