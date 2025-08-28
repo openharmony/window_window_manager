@@ -281,6 +281,19 @@ export function makeUnique(uniqueScreen: Array<long>): Promise<Array<long>> {
     });
 }
 
+export function makeMirrorWithRegion(mainScreen: long, mirrorScreen: Array<long>, mainScreenRegion: Rect):
+    Promise<long> {
+    return new Promise<long>((resolve: (value: long) => void, reject: (error: BusinessError) => void ) => {
+        taskpool.execute((): long => {
+            return makeMirrorWithRegionInternal(mainScreen, mirrorScreen, mainScreenRegion);
+        }).then((ret: NullishType) => {
+            resolve(ret as long);
+        }).catch((err: NullishType) => {
+            reject(err as BusinessError);
+        });
+    })
+}
+
 export native function getAllScreensInternal(screens: Array<Screen>): void;
 export native function createVirtualScreenInternal(options: VirtualScreenOption, screen: ScreenImpl): void;
 export native function setVirtualScreenSurfaceInternal(screenId: long, surfaceId: string): void;
@@ -293,6 +306,8 @@ export native function setMultiScreenModeInternal(primaryScreenId: long, seconda
     secondaryScreenMode: MultiScreenMode): void;
 export native function setScreenPrivacyMaskImageInternal(screenId: long, image?: image.PixelMap): void;
 export native function makeUniqueInternal(uniqueScreen: Array<long>): Array<long>;
+export native function makeMirrorWithRegionInternal(mainScreen: long, mirrorScreen: Array<long>,
+    mainScreenRegion: Rect): long;
 
 export interface Screen {
 
