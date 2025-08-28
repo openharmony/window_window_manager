@@ -50,7 +50,7 @@ enum class WindowAnimationCurve : uint32_t {
     LINEAR = 0,
 
     /**
-     * Animation curve type interpolation_spring.
+     * Animation curve type interpolation spring.
      */
     INTERPOLATION_SPRING = 1,
 
