@@ -14,6 +14,7 @@
  */
 
 #include "window_session_impl.h"
+#include "window_scene_session_impl.h"
 
 #include <gtest/gtest.h>
 #include <transaction/rs_transaction.h>
