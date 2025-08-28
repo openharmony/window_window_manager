@@ -2193,7 +2193,7 @@ void ScreenSessionManager::NotifyDisplayChangedByUidInner(sptr<DisplayInfo> disp
         if (agents.empty()) {
             return;
         }
-        for (auto& agent : agents) {
+        for (const auto& agent : agents) {
             int32_t agentPid = dmAgentContainer_.GetAgentPid(agent);
             auto iter = uidAndPidMap_.find(uid);
             if (iter == uidAndPidMap_.end() || iter->second != agentPid) {
