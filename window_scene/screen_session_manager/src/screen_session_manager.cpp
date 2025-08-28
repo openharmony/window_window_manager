@@ -2178,9 +2178,9 @@ void ScreenSessionManager::NotifyDisplayChangedByUidInner(sptr<DisplayInfo> disp
     DisplayChangeEvent event, int32_t uid)
 {
     if (displayInfo == nullptr) {
-            TLOGE(WmsLogTag::DMS, "displayInfo is nullptr.");
-            return;
-        }
+        TLOGE(WmsLogTag::DMS, "displayInfo is nullptr.");
+        return;
+    }
     auto task = [=] {
         auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::DISPLAY_EVENT_LISTENER);
         if (event == DisplayChangeEvent::UPDATE_REFRESHRATE) {
