@@ -350,6 +350,7 @@ void ScreenManagerAni::SetVirtualScreenSurface(ani_env* env, ani_long screenId, 
 
 void ScreenManagerAni::DestroyVirtualScreen(ani_env* env, ani_long screenId)
 {
+    TLOGI(WmsLogTag::DMS, "[ANI] start");
     auto ret = DM_JS_TO_ERROR_CODE_MAP.at(
         SingletonContainer::Get<ScreenManager>().DestroyVirtualScreen(static_cast<ScreenId>(screenId)));
     if (ret != DmErrorCode::DM_OK) {
@@ -361,6 +362,7 @@ void ScreenManagerAni::DestroyVirtualScreen(ani_env* env, ani_long screenId)
 
 ani_boolean ScreenManagerAni::IsScreenRotationLocked(ani_env* env)
 {
+    TLOGI(WmsLogTag::DMS, "[ANI] start");
     bool isLocked = false;
     auto ret = DM_JS_TO_ERROR_CODE_MAP.at(
         SingletonContainer::Get<ScreenManager>().IsScreenRotationLocked(isLocked));
@@ -375,6 +377,7 @@ ani_boolean ScreenManagerAni::IsScreenRotationLocked(ani_env* env)
 
 void ScreenManagerAni::SetScreenRotationLocked(ani_env* env, ani_boolean isLocked)
 {
+    TLOGI(WmsLogTag::DMS, "[ANI] start");
     auto ret = DM_JS_TO_ERROR_CODE_MAP.at(
         SingletonContainer::Get<ScreenManager>().SetScreenRotationLocked(isLocked));
     if (ret != DmErrorCode::DM_OK) {
@@ -388,6 +391,7 @@ void ScreenManagerAni::SetScreenRotationLocked(ani_env* env, ani_boolean isLocke
 void ScreenManagerAni::SetMultiScreenRelativePosition(ani_env* env, ani_object mainScreenOptionsAni,
     ani_object secondaryScreenOptionsAni)
 {
+    TLOGI(WmsLogTag::DMS, "[ANI] start");
     MultiScreenPositionOptions mainScreenOptions;
     auto ret = ScreenAniUtils::GetMultiScreenPositionOptionsFromAni(env, mainScreenOptionsAni, mainScreenOptions);
     if (ret != ANI_OK) {
@@ -415,6 +419,7 @@ void ScreenManagerAni::SetMultiScreenRelativePosition(ani_env* env, ani_object m
 void ScreenManagerAni::SetMultiScreenMode(ani_env* env, ani_long primaryScreenId, ani_long secondaryScreenId,
     ani_enum_item secondaryScreenMode)
 {
+    TLOGI(WmsLogTag::DMS, "[ANI] start");
     ani_int screenModeInt = 0;
     ani_status ret = env->EnumItem_GetValue_Int(secondaryScreenMode, &screenModeInt);
     if (ret != ANI_OK) {
@@ -434,6 +439,7 @@ void ScreenManagerAni::SetMultiScreenMode(ani_env* env, ani_long primaryScreenId
 
 void ScreenManagerAni::SetScreenPrivacyMaskImage(ani_env* env, ani_long screenId, ani_object imageAni)
 {
+    TLOGI(WmsLogTag::DMS, "[ANI] start");
     std::shared_ptr<Media::PixelMap> privacyMaskImg;
     ani_boolean isImageAniUndefined = 0;
     env->Reference_IsUndefined(imageAni, &isImageAniUndefined);
@@ -490,6 +496,7 @@ ani_object ScreenManagerAni::MakeUnique(ani_env* env, ani_object uniqueScreenIds
 ani_long ScreenManagerAni::MakeMirrorWithRegion(ani_env* env, ani_long mainScreen, ani_object mirrorScreen,
     ani_object mainScreenRegionAni)
 {
+    TLOGI(WmsLogTag::DMS, "[ANI] start");
     if (env == nullptr) {
         TLOGE(WmsLogTag::DMS, "[ANI] env is nullptr");
         return INVALID_SCREEN_ID;
@@ -526,6 +533,7 @@ ani_long ScreenManagerAni::MakeMirrorWithRegion(ani_env* env, ani_long mainScree
 
 void ScreenManagerAni::StopMirror(ani_env* env, ani_object mirrorScreen)
 {
+    TLOGI(WmsLogTag::DMS, "[ANI] start");
     if (env == nullptr) {
         TLOGE(WmsLogTag::DMS, "[ANI] env is nullptr");
         return;
@@ -551,6 +559,7 @@ void ScreenManagerAni::StopMirror(ani_env* env, ani_object mirrorScreen)
 
 ani_long ScreenManagerAni::MakeExpand(ani_env* env, ani_object expandOptionsAni)
 {
+    TLOGI(WmsLogTag::DMS, "[ANI] start");
     if (env == nullptr) {
         TLOGE(WmsLogTag::DMS, "[ANI] env is nullptr");
         return static_cast<ani_long>(INVALID_SCREEN_ID);
@@ -590,6 +599,58 @@ ani_long ScreenManagerAni::MakeExpand(ani_env* env, ani_object expandOptionsAni)
         return static_cast<ani_long>(INVALID_SCREEN_ID);
     }
     return static_cast<ani_long>(screenGroupId);
+}
+
+void ScreenManagerAni::StopExpand(ani_env* env, ani_object expandScreensAni)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] start");
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] env is nullptr");
+        return;
+    }
+    if (expandScreensAni == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] expandScreensAni is nullptr");
+        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "expandScreensAni is nullptr");
+        return;
+    }
+    std::vector<ScreenId> screenIds;
+    ani_status ret = ScreenAniUtils::GetScreenIdArrayFromAni(env, expandScreensAni, screenIds);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] get screenId array failed, ret: %{public}u", ret);
+        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "get screenId array failed");
+        return;
+    }
+    DmErrorCode res = DM_JS_TO_ERROR_CODE_MAP.at(
+            SingletonContainer::Get<ScreenManager>().StopExpand(screenIds));
+    if (res != DmErrorCode::DM_OK) {
+        AniErrUtils::ThrowBusinessError(env, res, "ScreenManager::StopExpand failed.");
+    }
+}
+
+void ScreenManagerAni::StopExpand(ani_env* env, ani_object expandScreensAni)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] start");
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] env is nullptr");
+        return;
+    }
+    if (expandScreensAni == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] expandScreensAni is nullptr");
+        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "expandScreensAni is nullptr");
+        return;
+    }
+    std::vector<ScreenId> screenIds;
+    ani_status ret = ScreenAniUtils::GetScreenIdArrayFromAni(env, expandScreensAni, screenIds);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] get screenId array failed, ret: %{public}u", ret);
+        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "get screenId array failed");
+        return;
+    }
+    DmErrorCode res = DM_JS_TO_ERROR_CODE_MAP.at(
+            SingletonContainer::Get<ScreenManager>().StopExpand(screenIds));
+    if (res != DmErrorCode::DM_OK) {
+        AniErrUtils::ThrowBusinessError(env, res, "ScreenManager::StopExpand failed.");
+    }
 }
 
 ani_long ScreenManagerAni::MakeExpand(ani_env* env, ani_object expandOptionsAni)
@@ -670,6 +731,8 @@ ani_status ScreenManagerAni::NspBindNativeFunctions(ani_env* env, ani_namespace 
             reinterpret_cast<void *>(ScreenManagerAni::StopMirror)},
         ani_native_function {"makeExpandInternal", nullptr,
             reinterpret_cast<void *>(ScreenManagerAni::MakeExpand)},
+        ani_native_function {"stopExpandInternal", nullptr,
+            reinterpret_cast<void *>(ScreenManagerAni::StopExpand)},
     };
     ani_status ret = env->Namespace_BindNativeFunctions(nsp, funcs.data(), funcs.size());
     if (ret != ANI_OK) {

@@ -55,6 +55,7 @@ public:
     static ani_status NspBindNativeFunctions(ani_env* env, ani_namespace nsp);
     static ani_status ClassBindNativeFunctions(ani_env* env, ani_class screenCls);
     static ani_long MakeExpand(ani_env* env, ani_object expandOptionsAni);
+    static void StopExpand(ani_env* env, ani_object expandScreensAni);
 private:
     void OnRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
     void OnUnRegisterCallback(ani_env* env, ani_string type, ani_ref callback);

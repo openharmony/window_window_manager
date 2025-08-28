@@ -207,6 +207,7 @@ ani_enum_item ScreenAniUtils::CreateAniEnum(ani_env* env, const char* enum_descr
 
 DmErrorCode ScreenAniUtils::GetVirtualScreenOption(ani_env* env, ani_object options, VirtualScreenOption& option)
 {
+    TLOGI(WmsLogTag::DMS, "[ANI] start");
     ani_ref nameRef = nullptr;
     auto ret = env->Object_GetFieldByName_Ref(options, "<property>name", &nameRef);
     if (ret != ANI_OK || nameRef == nullptr) {
@@ -259,6 +260,7 @@ DmErrorCode ScreenAniUtils::GetVirtualScreenOption(ani_env* env, ani_object opti
 
 ani_status ScreenAniUtils::GetSurfaceFromAni(ani_env* env, ani_string surfaceIdAniStr, sptr<Surface>& surface)
 {
+    TLOGI(WmsLogTag::DMS, "[ANI] start");
     std::string surfaceIdStr;
     auto ret = GetStdString(env, surfaceIdAniStr, surfaceIdStr);
     if (ret != ANI_OK) {
@@ -278,6 +280,7 @@ ani_status ScreenAniUtils::GetSurfaceFromAni(ani_env* env, ani_string surfaceIdA
 ani_status ScreenAniUtils::GetMultiScreenPositionOptionsFromAni(ani_env* env, ani_object screenOptionsAni,
     MultiScreenPositionOptions& mainScreenOptions)
 {
+    TLOGI(WmsLogTag::DMS, "[ANI] start");
     ani_long screenIdAni = 0;
     auto ret = env->Object_GetFieldByName_Long(screenOptionsAni, "<property>id", &screenIdAni);
     if (ret != ANI_OK) {
@@ -330,6 +333,7 @@ ani_object ScreenAniUtils::CreateDisplayIdVectorAniObject(ani_env* env, std::vec
 
 ani_object ScreenAniUtils::CreateAniArray(ani_env* env, size_t size)
 {
+    TLOGI(WmsLogTag::DMS, "[ANI] start");
     ani_class arrayCls;
     if (env->FindClass("escompat.Array", &arrayCls) != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "Failed to find class escompat.Array");
@@ -350,6 +354,7 @@ ani_object ScreenAniUtils::CreateAniArray(ani_env* env, size_t size)
 
 ani_status ScreenAniUtils::GetRectFromAni(ani_env* env, ani_object mainScreenRegionAni, DMRect& mainScreenRegion)
 {
+    TLOGI(WmsLogTag::DMS, "[ANI] start");
     ani_long left = 0;
     auto ret = env->Object_GetFieldByName_Long(mainScreenRegionAni, "<property>left", &left);
     if (ret != ANI_OK) {
@@ -387,6 +392,7 @@ ani_status ScreenAniUtils::GetRectFromAni(ani_env* env, ani_object mainScreenReg
 ani_status ScreenAniUtils::GetScreenIdArrayFromAni(ani_env* env, ani_object mirrorScreen,
     std::vector<ScreenId>& mirrorScreenIds)
 {
+    TLOGI(WmsLogTag::DMS, "[ANI] start");
     ani_int length = 0;
     env->Object_GetPropertyByName_Int(mirrorScreen, "length", &length);
     TLOGI(WmsLogTag::DMS, "[ANI] length %{public}d", (ani_int)length);
@@ -411,6 +417,7 @@ ani_status ScreenAniUtils::GetScreenIdArrayFromAni(ani_env* env, ani_object mirr
 
 ani_status ScreenAniUtils::GetExpandOptionFromAni(ani_env* env, ani_object optionAniObj, ExpandOption& expandOption)
 {
+    TLOGI(WmsLogTag::DMS, "[ANI] start");
     ani_long screenId = 0;
     ani_status ret = env->Object_GetFieldByName_Long(optionAniObj, "<property>screenId", &screenId);
     if (ret != ANI_OK) {
