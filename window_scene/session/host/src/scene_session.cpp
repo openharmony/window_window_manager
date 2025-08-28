@@ -5980,6 +5980,10 @@ void SceneSession::SetSupportEnterWaterfallMode(bool isSupportEnter)
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "sessionStage is nullptr");
         return;
     }
+    if (!WindowHelper::IsMainWindow(GetWindowType())) {
+        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "only main window support enter water fall mode.");
+        return;
+    }
     sessionStage_->SetSupportEnterWaterfallMode(isSupportEnter);
 }
 
