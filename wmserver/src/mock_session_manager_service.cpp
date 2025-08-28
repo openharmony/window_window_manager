@@ -212,6 +212,7 @@ int MockSessionManagerService::Dump(int fd, const std::vector<std::u16string>& a
 
 bool MockSessionManagerService::SetSessionManagerService(const sptr<IRemoteObject>& sessionManagerService)
 {
+    TLOGI(WmsLogTag::WMS_MULTI_USER, "sessionManagerService set start");
     if (!sessionManagerService) {
         WLOGFE("sessionManagerService is nullptr");
         return false;
@@ -350,6 +351,7 @@ ErrCode MockSessionManagerService::GetForegroundOsAccountDisplayId(int32_t userI
 {
     displayId = DISPLAY_ID_INVALID; 
     ErrCode err = AccountSA::OsAccountManager::GetForegroundOsAccountDisplayId(userId, displayId);
+    TLOGI(WmsLogTag::WMS_RECOVER, "displayId: %{public}d,", displayId);
     if (err != ERR_OK) {
         TLOGE(WmsLogTag::WMS_RECOVER, 
               "get user display failed, errorCode: %{public}d, userId %{public}d", err, userId);
@@ -385,6 +387,7 @@ ErrCode MockSessionManagerService::NotifyWMSConnectionStatus(int32_t userId,
 
 ErrCode MockSessionManagerService::RegisterSMSRecoverListener(const sptr<IRemoteObject>& listener, int32_t userId)
 {
+    TLOGI(WmsLogTag::WMS_RECOVER, "userId = %{public}d,", userId);
     if (listener == nullptr) {
         TLOGE(WmsLogTag::WMS_RECOVER, "listener is nullptr");
         return ERR_INVALID_VALUE;
@@ -503,6 +506,7 @@ void MockSessionManagerService::UnregisterSMSRecoverListener(int32_t clientUserI
 
 ErrCode MockSessionManagerService::RegisterSMSLiteRecoverListener(const sptr<IRemoteObject>& listener, int32_t userId)
 {
+    TLOGI(WmsLogTag::WMS_RECOVER, "userId = %{public}d,", userId);
     if (listener == nullptr) {
         TLOGE(WmsLogTag::WMS_RECOVER, "Lite listener is nullptr");
         return ERR_INVALID_VALUE;
