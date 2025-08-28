@@ -317,6 +317,8 @@ void HidumpController::DumpKeyboardParam(
         << std::endl
         << session->GetSCBKeepKeyboardFlag() << "|"
         << session->IsSystemInput() << "|"
+        << 0 << "|"
+        << 0 << "|"
         << property->GetKeepKeyboardFlag() << "|"
         << std::setprecision(precision) << property->GetTextFieldPositionY() << "|"
         << std::setprecision(precision) << property->GetTextFieldHeight() << "|"

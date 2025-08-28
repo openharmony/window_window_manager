@@ -75,6 +75,8 @@ private:
     static napi_value GetFoldDisplayMode(napi_env env, napi_callback_info info);
     static napi_value FreezeScreen(napi_env env, napi_callback_info info);
     static napi_value GetScreenSnapshotWithAllWindows(napi_env env, napi_callback_info info);
+    static napi_value NotifySwitchUserAnimationFinish(napi_env env, napi_callback_info info);
+    static napi_value RegisterSwitchUserAnimationNotification(napi_env env, napi_callback_info info);
 
     napi_value OnRegisterCallback(napi_env env, const napi_callback_info info);
     napi_value OnUpdateScreenRotationProperty(napi_env env, const napi_callback_info info);
@@ -110,6 +112,8 @@ private:
     napi_value OnGetFoldDisplayMode(napi_env env, napi_callback_info info);
     napi_value OnFreezeScreen(napi_env env, napi_callback_info info);
     napi_value OnGetScreenSnapshotWithAllWindows(napi_env env, napi_callback_info info);
+    napi_value OnNotifySwitchUserAnimationFinish(napi_env env, napi_callback_info info);
+    napi_value OnRegisterSwitchUserAnimationNotification(napi_env env, napi_callback_info info);
 
     std::shared_ptr<NativeReference> screenConnectionCallback_;
     std::shared_ptr<NativeReference> shutdownCallback_;

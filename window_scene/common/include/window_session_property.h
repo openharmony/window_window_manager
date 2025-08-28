@@ -688,6 +688,7 @@ struct FreeMultiWindowConfig : public Parcelable {
     WindowMode defaultWindowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
     uint32_t maxMainFloatingWindowNumber_ = 0;
     DragResizeType defaultDragResizeType_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    AppWindowSceneConfig appWindowSceneConfig_;
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
@@ -801,6 +802,9 @@ struct SystemSessionConfig : public Parcelable {
     bool supportPreloadStartingWindow_ = false;
     bool supportCreateFloatWindow_ = false;
     float defaultCornerRadius_ = 0.0f; // default corner radius of window set by system config
+    bool supportUIExtensionSubWindow_ = false;
+
+    void ConvertSupportUIExtensionSubWindow(const std::string& itemValue);
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
@@ -815,9 +819,11 @@ struct SystemSessionConfig : public Parcelable {
             return false;
         }
 
-        if (!parcel.WriteUint32(miniWidthOfMainWindow_) || !parcel.WriteUint32(miniHeightOfMainWindow_) ||
-            !parcel.WriteUint32(miniWidthOfSubWindow_) || !parcel.WriteUint32(miniHeightOfSubWindow_) ||
-            !parcel.WriteUint32(miniWidthOfDialogWindow_) || !parcel.WriteUint32(miniHeightOfDialogWindow_)) {
+        bool parcelWriteFail = !parcel.WriteUint32(miniWidthOfMainWindow_) ||
+                !parcel.WriteUint32(miniHeightOfMainWindow_) || !parcel.WriteUint32(miniWidthOfSubWindow_) ||
+                !parcel.WriteUint32(miniHeightOfSubWindow_) || !parcel.WriteUint32(miniWidthOfDialogWindow_) ||
+                !parcel.WriteUint32(miniHeightOfDialogWindow_);
+        if (parcelWriteFail) {
             return false;
         }
 

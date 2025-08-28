@@ -2287,7 +2287,7 @@ static void SetResizeWindowWithAnimationAsyncTask(NapiAsyncTask::ExecuteCallback
             *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             return;
         }
-        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->ResizeAsync(rect.width_, rect.height_, rectAnimationConfig));
+        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->ResizeAsync(rect.width_, rect.height_));
         TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s end, window [%{public}u, %{public}s] err=%{public}d",
             where, window->GetWindowId(), window->GetWindowName().c_str(), *errCodePtr);
     };
@@ -4377,7 +4377,7 @@ napi_value JsWindow::OnSetWindowTopmost(napi_env env, napi_callback_info info)
         TLOGE(WmsLogTag::WMS_HIERARCHY, "windowToken is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    if (windowToken_->IsPadAndNotFreeMutiWindowCompatibleMode()) {
+    if (windowToken_->IsPadAndNotFreeMultiWindowCompatibleMode()) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "This is PcAppInPad, not support");
         return NapiGetUndefined(env);
     }
@@ -7657,7 +7657,7 @@ napi_value JsWindow::OnSetDecorButtonStyle(napi_env env, napi_callback_info info
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
             "[window][setDecorButtonStyle]msg: window is nullptr");
     }
-    if (windowToken_->IsPadAndNotFreeMutiWindowCompatibleMode()) {
+    if (windowToken_->IsPadAndNotFreeMultiWindowCompatibleMode()) {
         TLOGE(WmsLogTag::WMS_DECOR, "This is PcAppInPad, not support");
         return NapiGetUndefined(env);
     }
@@ -7700,7 +7700,7 @@ napi_value JsWindow::OnGetDecorButtonStyle(napi_env env, napi_callback_info info
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
             "[window][getDecorButtonStyle]msg: window is nullptr");
     }
-    if (windowToken_->IsPadAndNotFreeMutiWindowCompatibleMode()) {
+    if (windowToken_->IsPadAndNotFreeMultiWindowCompatibleMode()) {
         TLOGE(WmsLogTag::WMS_DECOR, "This is PcAppInPad, not support");
         return NapiGetUndefined(env);
     }

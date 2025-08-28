@@ -13,10 +13,11 @@
  * limitations under the License.
  */
 
+#include <memory>
+
+#include "hilog_tag_wrapper.h"
 #include "session_manager/include/zidl/session_lifecycle_listener_stub.h"
 #include "window_manager_hilog.h"
-#include "hilog_tag_wrapper.h"
-#include <memory>
 
 namespace OHOS::Rosen {
 

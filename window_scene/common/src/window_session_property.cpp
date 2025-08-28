@@ -14,6 +14,7 @@
  */
 
 #include "common/include/window_session_property.h"
+#include "string_util.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
 #include "window_helper.h"
@@ -1589,6 +1590,10 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     isPcAppInpadOrientationLandscape_ = property->isPcAppInpadOrientationLandscape_;
     isPcAppInpadCompatibleMode_ = property->isPcAppInpadCompatibleMode_;
     ancoRealBundleName_ = property->ancoRealBundleName_;
+    {
+        std::lock_guard<std::mutex> lock(missionInfoMutex_);
+        missionInfo_ = property->missionInfo_;
+    }
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)
@@ -2579,6 +2584,11 @@ void WindowSessionProperty::UnmarshallingShadowsInfo(Parcel& parcel, WindowSessi
         return;
     }
     property->SetWindowShadows(*shadowsInfo);
+}
+
+void SystemSessionConfig::ConvertSupportUIExtensionSubWindow(const std::string& itemValue)
+{
+    supportUIExtensionSubWindow_ = StringUtil::ConvertStringToBool(itemValue);
 }
 } // namespace Rosen
 } // namespace OHOS

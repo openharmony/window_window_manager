@@ -187,8 +187,16 @@ HWTEST_F(WindowSessionTest, SetActive01, TestSize.Level1)
  */
 HWTEST_F(WindowSessionTest, SetCompatibleModeProperty, TestSize.Level1)
 {
-    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
-    ASSERT_EQ(WSError::WS_OK, session_->SetCompatibleModeProperty(compatibleModeProperty));
+    sptr<CompatibleModeProperty> compatibleModeProperty = nullptr;
+    session_->sessionStage_ = mockSessionStage_;
+    EXPECT_EQ(WSError::WS_OK, session_->SetCompatibleModeProperty(compatibleModeProperty));
+    EXPECT_EQ(session_->GetSessionProperty()->GetDragEnabled(), true);
+    compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    EXPECT_EQ(WSError::WS_OK, session_->SetCompatibleModeProperty(compatibleModeProperty));
+    EXPECT_EQ(session_->GetSessionProperty()->GetDragEnabled(), true);
+    compatibleModeProperty->SetDisableDragResize(true);
+    EXPECT_EQ(WSError::WS_OK, session_->SetCompatibleModeProperty(compatibleModeProperty));
+    EXPECT_EQ(session_->GetSessionProperty()->GetDragEnabled(), false);
 }
 
 /**

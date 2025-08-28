@@ -147,7 +147,7 @@ public:
     bool IsPadWindow() const override;
     bool IsPcOrFreeMultiWindowCapabilityEnabled() const override;
     bool IsPcOrPadFreeMultiWindowMode() const override;
-    bool IsPadAndNotFreeMutiWindowCompatibleMode() const override;
+    bool IsPadAndNotFreeMultiWindowCompatibleMode() const override;
     bool IsSceneBoardEnabled() const override;
     bool GetCompatibleModeInPc() const override;
     void HookCompatibleModeAvoidAreaNotify() override;
@@ -473,7 +473,6 @@ public:
     WMError UnregisterWindowStatusDidChangeListener(const sptr<IWindowStatusDidChangeListener>& listener) override;
     WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) override { return WSError::WS_OK; }
     WMError UpdateWindowModeForUITest(int32_t updateMode) override { return WMError::WM_OK; }
-    void UpdateEnableDragWhenSwitchMultiWindow(bool enable);
     WSError NotifyAppHookWindowInfoUpdated() override { return WSError::WS_DO_NOTHING; }
     void SetNotifySizeChangeFlag(bool flag);
 
@@ -803,6 +802,7 @@ protected:
     bool supportEnterWaterfallMode_ { false };
     std::atomic_bool isFullScreenWaterfallMode_ { false };
     std::atomic_bool isValidWaterfallMode_ { false };
+    bool isFirstNotifyAcrossDisplays_ = true;
     bool isAcrossDisplays_ = false;
     WMError NotifyAcrossDisplaysChange(bool isAcrossDisplays);
     void NotifyWaterfallModeChange(bool isWaterfallMode);
@@ -816,6 +816,8 @@ protected:
     /*
      * Window Property
      */
+    std::string colorMode_;
+    bool hasDarkRes_;
     std::unordered_set<std::string> containerColorList_;
     float lastSystemDensity_ = UNDEFINED_DENSITY;
     static std::atomic<bool> defaultDensityEnabledGlobalConfig_;

@@ -59,7 +59,7 @@ void SceneSessionLayoutTest::SetUp()
 
 void SceneSessionLayoutTest::TearDown() {}
 
-RSSurfaceNode::SharedPtr MainSessionLayoutTest::CreateRSSurfaceNode()
+RSSurfaceNode::SharedPtr SceneSessionLayoutTest::CreateRSSurfaceNode()
 {
     struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
     rsSurfaceNodeConfig.SurfaceNodeName = "WindowSessionTestSurfaceNode";
@@ -1161,7 +1161,7 @@ HWTEST_F(SceneSessionLayoutTest, GetWindowDragMoveMountedNode01, TestSize.Level1
     sceneSession->SetFindScenePanelRsNodeByZOrderFunc([this](uint64_t screenId, uint32_t targetZOrder) {
         return CreateRSSurfaceNode();
     });
-    rsNode = session->GetWindowDragMoveMountedNode(0, 0);
+    rsNode = sceneSession->GetWindowDragMoveMountedNode(0, 0);
     EXPECT_NE(rsNode, nullptr);
 }
 

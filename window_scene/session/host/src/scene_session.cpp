@@ -431,7 +431,6 @@ WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property
         auto leashWinSurfaceNode = session->GetLeashWinSurfaceNode();
         if (leashWinSurfaceNode && sessionProperty) {
             bool lastPrivacyMode = sessionProperty->GetPrivacyMode() || sessionProperty->GetSystemPrivacyMode();
-            AutoRSTransaction trans(session->GetRSUIContext());
             leashWinSurfaceNode->SetSecurityLayer(lastPrivacyMode);
         }
         session->MarkAvoidAreaAsDirty();
@@ -453,8 +452,6 @@ WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property
         if (session->isUIFirstEnabled_ && leashWinSurfaceNode) {
             leashWinSurfaceNode->SetForceUIFirst(false);
             session->isUIFirstEnabled_ = false;
-            TLOGNI(WmsLogTag::WMS_ANIMATION, "%{public}s %{public}" PRIu64 " forceUIFirst=false.",
-                leashWinSurfaceNode->GetName().c_str(), leashWinSurfaceNode->GetId());
         }
         return WSError::WS_OK;
     }, __func__);
@@ -1233,7 +1230,7 @@ void SceneSession::UpdatePrivacyModeControlInfo()
 {
     bool isPrivacyMode = false;
     auto property = GetSessionProperty();
-    if ((property && property->GetPrivacyMode()) || HasSubSessionInPrivacyMode()) {
+    if ((property && property->GetPrivacyMode()) || HasChildSessionInPrivacyMode()) {
         isPrivacyMode = true;
     }
     if (!isPrivacyMode && appUseControlMap_.find(ControlAppType::PRIVACY_WINDOW) == appUseControlMap_.end()) {
@@ -1244,7 +1241,7 @@ void SceneSession::UpdatePrivacyModeControlInfo()
     NotifyUpdateAppUseControl(ControlAppType::PRIVACY_WINDOW, controlInfo);
 }
 
-bool SceneSession::HasSubSessionInPrivacyMode()
+bool SceneSession::HasChildSessionInPrivacyMode()
 {
     for (const auto& subSession : GetSubSession()) {
         if (subSession == nullptr) {
@@ -1255,7 +1252,21 @@ bool SceneSession::HasSubSessionInPrivacyMode()
         if (property && property->GetPrivacyMode()) {
             return true;
         }
-        if (subSession->HasSubSessionInPrivacyMode()) {
+        if (subSession->HasChildSessionInPrivacyMode()) {
+            return true;
+        }
+    }
+    for (const auto& dialogSession : GetDialogVector()) {
+        if (dialogSession == nullptr) {
+            TLOGW(WmsLogTag::WMS_LIFE, "dialogSession is nullptr");
+            continue;
+        }
+        auto property = dialogSession->GetSessionProperty();
+        if (property && property->GetPrivacyMode()) {
+            return true;
+        }
+        auto dialogSceneSession = GetSceneSessionById(dialogSession->GetPersistentId());
+        if (dialogSceneSession && dialogSceneSession->HasChildSessionInPrivacyMode()) {
             return true;
         }
     }
@@ -4053,6 +4064,7 @@ WSError SceneSession::UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsC
 void SceneSession::SetKeyFramePolicy(const KeyFramePolicy& keyFramePolicy)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "in");
+    std::lock_guard<std::mutex> lock(keyFrameMutex_);
     bool running = keyFramePolicy_.running_;
     bool stopping = keyFramePolicy_.stopping_;
     keyFramePolicy_ = keyFramePolicy;
@@ -4063,6 +4075,7 @@ void SceneSession::SetKeyFramePolicy(const KeyFramePolicy& keyFramePolicy)
 WSError SceneSession::SetDragKeyFramePolicy(const KeyFramePolicy& keyFramePolicy)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "in");
+    std::lock_guard<std::mutex> lock(keyFrameMutex_);
     bool running = keyFramePolicy_.running_;
     bool stopping = keyFramePolicy_.stopping_;
     keyFramePolicy_ = keyFramePolicy;
@@ -4081,15 +4094,25 @@ void SceneSession::UpdateKeyFrameState(SizeChangeReason reason, const WSRect& re
     }
     if (reason == SizeChangeReason::DRAG_START && moveDragController_->GetStartDragFlag()) {
         TLOGD(WmsLogTag::WMS_LAYOUT_PC, "key frame start check");
-        if (!keyFramePolicy_.enabled() || GetAppDragResizeType() == DragResizeType::RESIZE_WHEN_DRAG_END) {
-            keyFramePolicy_.running_ = false;
+        {
+            std::lock_guard<std::mutex> lock(keyFrameMutex_);
+            if (!keyFramePolicy_.enabled() || GetAppDragResizeType() == DragResizeType::RESIZE_WHEN_DRAG_END) {
+                keyFramePolicy_.running_ = false;
+                return;
+            }
+            return InitKeyFrameState(rect);
+        }
+    }
+    {
+        std::lock_guard<std::mutex> lock(keyFrameMutex_);
+        if (!keyFramePolicy_.running_ || !keyFrameCloneNode_) {
+            TLOGD(WmsLogTag::WMS_LAYOUT_PC, "key frame not start");
             return;
         }
-        return InitKeyFrameState(rect);
-    }
-    if (!keyFramePolicy_.running_ || !keyFrameCloneNode_) {
-        TLOGD(WmsLogTag::WMS_LAYOUT_PC, "key frame not start");
-        return;
+        if (reason == SizeChangeReason::DRAG_END) {
+            keyFramePolicy_.running_ = false;
+            keyFramePolicy_.stopping_ = true;
+        }
     }
     if (reason == SizeChangeReason::DRAG) {
         TLOGD(WmsLogTag::WMS_LAYOUT_PC, "reset gravity and resize clone node");
@@ -4107,8 +4130,6 @@ void SceneSession::UpdateKeyFrameState(SizeChangeReason reason, const WSRect& re
         RSTransactionAdapter::FlushImplicitTransaction(GetRSUIContext());
     } else if (reason == SizeChangeReason::DRAG_END) {
         TLOGI(WmsLogTag::WMS_LAYOUT_PC, "key frame stopping");
-        keyFramePolicy_.running_ = false;
-        keyFramePolicy_.stopping_ = true;
         sessionStage_->SetKeyFramePolicy(keyFramePolicy_);
         keyFrameCloneNode_ = nullptr;
     }
@@ -4178,18 +4199,20 @@ void SceneSession::OnKeyFrameNextVsync(uint64_t count)
 
 bool SceneSession::KeyFrameNotifyFilter(const WSRect& rect, SizeChangeReason reason)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "reason in: %{public}d", reason);
-    if (!keyFramePolicy_.running_) {
+    KeyFramePolicy keyFramePolicy;
+    {
+        std::lock_guard<std::mutex> lock(keyFrameMutex_);
+        keyFramePolicy = keyFramePolicy_;
+    }
+    if (!keyFramePolicy.running_) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "skip filter for not running");
         return false;
     }
     if (reason == SizeChangeReason::DRAG_START) {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "ensure start reason send");
         NotifyClientToUpdateRect("OnMoveDragCallback", nullptr);
         return true;
     }
     if (reason != SizeChangeReason::DRAG) {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "skip filter for not drag");
         return false;
     }
     if (keyFrameAnimating_) {
@@ -4200,13 +4223,13 @@ bool SceneSession::KeyFrameNotifyFilter(const WSRect& rect, SizeChangeReason rea
     uint64_t nowTimeStamp = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()).count());
     uint64_t interval = nowTimeStamp - lastKeyFrameStamp_;
-    bool intervalCheckPass = interval >= keyFramePolicy_.interval_;
+    bool intervalCheckPass = interval >= keyFramePolicy.interval_;
     bool distanceCheckPass = false;
     double distance = 0;
-    if (keyFramePolicy_.distance_ > 0) {
+    if (keyFramePolicy.distance_ > 0) {
         distance = sqrt(pow(rect.width_ - lastKeyFrameRect_.width_, POW_DOUBLE) +
                         pow(rect.height_ - lastKeyFrameRect_.height_, POW_DOUBLE));
-        distanceCheckPass = distance >= keyFramePolicy_.distance_;
+        distanceCheckPass = distance >= keyFramePolicy.distance_;
     }
     TLOGI(WmsLogTag::WMS_LAYOUT, "key frame checking: %{public}" PRIu64 "[%{public}d], %{public}f[%{public}d]",
         interval, intervalCheckPass, distance, distanceCheckPass);
@@ -5957,6 +5980,10 @@ void SceneSession::SetSupportEnterWaterfallMode(bool isSupportEnter)
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "sessionStage is nullptr");
         return;
     }
+    if (!WindowHelper::IsMainWindow(GetWindowType())) {
+        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "only main window support enter water fall mode.");
+        return;
+    }
     sessionStage_->SetSupportEnterWaterfallMode(isSupportEnter);
 }
 
@@ -7226,6 +7253,27 @@ WSError SceneSession::OnDefaultDensityEnabled(bool isDefaultDensityEnabled)
     return WSError::WS_OK;
 }
 
+WMError SceneSession::OnUpdateColorMode(const std::string& colorMode, bool hasDarkRes)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, colorMode: %{public}s, hasDarkRes: %{public}u",
+        GetPersistentId(), colorMode.c_str(), hasDarkRes);
+    std::lock_guard<std::mutex> lock(colorModeMutex_);
+    colorMode_ = colorMode;
+    hasDarkRes_ = hasDarkRes;
+    return WMError::WM_OK;
+}
+
+std::string SceneSession::GetAbilityColorMode() const
+{
+    std::lock_guard<std::mutex> lock(colorModeMutex_);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, colorMode: %{public}s, hasDarkRes: %{public}u",
+        GetPersistentId(), colorMode_.c_str(), hasDarkRes_);
+    if (colorMode_ == AppExecFwk::ConfigurationInner::COLOR_MODE_DARK && !hasDarkRes_) {
+        return AppExecFwk::ConfigurationInner::COLOR_MODE_AUTO;
+    }
+    return colorMode_;
+}
+
 /** @note @Window.Layout */
 WMError SceneSession::UpdateWindowModeForUITest(int32_t updateMode)
 {
@@ -8017,9 +8065,12 @@ bool SceneSession::NotifyServerToUpdateRect(const SessionUIParam& uiParam, SizeC
         TLOGD(WmsLogTag::WMS_PIPELINE, "skip recent, id:%{public}d", GetPersistentId());
         return false;
     }
-    if (keyFramePolicy_.running_) {
-        TLOGI(WmsLogTag::WMS_PIPELINE, "skip for key frame running, id:%{public}d", GetPersistentId());
-        return false;
+    {
+        std::lock_guard<std::mutex> lock(keyFrameMutex_);
+        if (keyFramePolicy_.running_) {
+            TLOGI(WmsLogTag::WMS_PIPELINE, "skip for key frame running, id:%{public}d", GetPersistentId());
+            return false;
+        }
     }
     if (uiParam.rect_.IsInvalid()) {
         TLOGW(WmsLogTag::WMS_PIPELINE, "id:%{public}d rect:%{public}s is invalid",
@@ -8428,7 +8479,7 @@ void SceneSession::SetWindowCornerRadiusCallback(NotifySetWindowCornerRadiusFunc
         }
         session->onSetWindowCornerRadiusFunc_ = std::move(func);
         auto property = session->GetSessionProperty();
-        float cornerRadius = property->GetWindowCornerRadius();
+        float cornerRadius = property ? property->GetWindowCornerRadius() : WINDOW_CORNER_RADIUS_INVALID;
         if (!MathHelper::LessNotEqual(cornerRadius, 0.0f)) {
             // Valid corner radius menas app has set corner radius of the window, need to update to scb.
             session->onSetWindowCornerRadiusFunc_(cornerRadius);

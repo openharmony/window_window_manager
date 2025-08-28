@@ -55,10 +55,10 @@ class RSTransaction;
 class Session;
 using NotifySessionRectChangeFunc = std::function<void(const WSRect& rect,
     SizeChangeReason reason, DisplayId displayId, const RectAnimationConfig& rectAnimationConfig)>;
+using NotifySessionDisplayIdChangeFunc = std::function<void(uint64_t displayId)>;
 using NotifyUpdateFloatingBallFunc = std::function<void(const FloatingBallTemplateInfo& fbTemplateInfo)>;
 using NotifyStopFloatingBallFunc = std::function<void()>;
 using NotifyRestoreFloatingBallMainWindowFunc = std::function<void(const std::shared_ptr<AAFwk::Want>& want)>;
-using NotifySessionDisplayIdChangeFunc = std::function<void(uint64_t displayId)>;
 using NotifyPendingSessionActivationFunc = std::function<void(SessionInfo& info)>;
 using NotifyBatchPendingSessionsActivationFunc = std::function<void(std::vector<std::shared_ptr<SessionInfo>>& info)>;
 using NotifyChangeSessionVisibilityWithStatusBarFunc = std::function<void(const SessionInfo& info, bool visible)>;
@@ -259,6 +259,7 @@ public:
     virtual WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) { return WSError::WS_OK; }
 
     int32_t GetPersistentId() const;
+    int32_t GetCurrentRotation() const;
     void SetSurfaceNode(const std::shared_ptr<RSSurfaceNode>& surfaceNode);
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const;
     std::optional<NodeId> GetSurfaceNodeId() const;
@@ -826,7 +827,7 @@ protected:
     bool isActive_ = false;
     bool isSystemActive_ = false;
     WSRectF bounds_;
-    Rotation rotation_;
+    Rotation rotation_ { Rotation::ROTATION_0 };
     float offsetX_ = 0.0f;
     float offsetY_ = 0.0f;
     std::atomic_bool isExitSplitOnBackground_ = false;

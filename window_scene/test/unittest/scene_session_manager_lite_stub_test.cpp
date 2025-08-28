@@ -1116,7 +1116,34 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleNotifyAppUseControlList, TestSiz
     data.WriteInt32(appIndex);
     data.WriteBool(isControl);
 
-    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleNotifyAppUseControlList(data, reply);
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleNotifyAppUseControlList(data, reply);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
+}
+
+/**
+ * @tc.name: HandleNotifyAppUseControlList02
+ * @tc.desc: test function : HandleNotifyAppUseControlList02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleNotifyAppUseControlList02, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    uint8_t typeId = 1;
+    int32_t userId = 1;
+    int32_t size = 1;
+    std::string bundleName = "appbundleName";
+    int32_t appIndex = 1;
+    bool isControl = true;
+    bool isControlRecentOnly = true;
+    data.WriteUint8(typeId);
+    data.WriteInt32(userId);
+    data.WriteInt32(size);
+    AppUseControlInfo controlInfo;
+    data.WriteParcelable(&controlInfo);
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleNotifyAppUseControlList(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 

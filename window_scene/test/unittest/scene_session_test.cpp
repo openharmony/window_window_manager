@@ -688,11 +688,11 @@ HWTEST_F(SceneSessionTest, UpdatePrivacyModeControlInfo02, Function | SmallTest 
 }
 
 /**
- * @tc.name: HasSubSessionInPrivacyMode
- * @tc.desc: HasSubSessionInPrivacyMode
+ * @tc.name: HasChildSessionInPrivacyMode
+ * @tc.desc: HasChildSessionInPrivacyMode
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest, HasSubSessionInPrivacyMode, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionTest, HasChildSessionInPrivacyMode, Function | SmallTest | Level3)
 {
     SessionInfo info;
     info.bundleName_ = "testBundleName";
@@ -717,7 +717,40 @@ HWTEST_F(SceneSessionTest, HasSubSessionInPrivacyMode, Function | SmallTest | Le
     subSession->AddSubSession(subSession2);
 
     sceneSession->AddSubSession(subSession);
-    EXPECT_EQ(sceneSession->HasSubSessionInPrivacyMode(), true);
+    EXPECT_EQ(sceneSession->HasChildSessionInPrivacyMode(), true);
+}
+
+/**
+ * @tc.name: HasChildSessionInPrivacyMode02
+ * @tc.desc: HasChildSessionInPrivacyMode02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, HasChildSessionInPrivacyMode02, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.bundleName_ = "testBundleName";
+    info.abilityName_ = "testAbilityName";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->property_ = nullptr;
+    sptr<SceneSession::SpecificSessionCallback> dialogSessionCb =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> dialogSession = sptr<SceneSession>::MakeSptr(info, dialogSessionCb);
+    dialogSessionCb->onGetSceneSessionByIdCallback_ = [&dialogSession](int32_t id) { return dialogSession; };
+    sceneSession->BindDialogToParentSession(dialogSession);
+    EXPECT_FALSE(sceneSession->HasChildSessionInPrivacyMode());
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetPrivacyMode(false);
+    dialogSession->property_ = property;
+    EXPECT_FALSE(sceneSession->HasChildSessionInPrivacyMode());
+    dialogSession->property_->SetPrivacyMode(true);
+    EXPECT_TRUE(sceneSession->HasChildSessionInPrivacyMode());
+
+    dialogSession->property_->SetPrivacyMode(false);
+    sptr<SceneSession> dialogSession2 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    dialogSession2->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    dialogSession2->property_->SetPrivacyMode(true);
+    dialogSession->BindDialogToParentSession(dialogSession2);
+    EXPECT_FALSE(sceneSession->HasChildSessionInPrivacyMode());
 }
 
 /**
@@ -771,6 +804,39 @@ HWTEST_F(SceneSessionTest, UpdateAcrossDisplaysChangeRegistered01, TestSize.Leve
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     ret = sceneSession->UpdateAcrossDisplaysChangeRegistered(true);
     EXPECT_NE(ret, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: ColorMode01
+ * @tc.desc: Test OnUpdateColorMode And GetAbilityColorMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, ColorMode01, TestSize.Level0)
+{
+    SessionInfo info;
+    info.abilityName_ = "test";
+    info.bundleName_ = "test";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    std::string colorMode = "dark";
+    bool hasDarkRes = true;
+    auto ret = sceneSession->OnUpdateColorMode(colorMode, hasDarkRes);
+    EXPECT_NE(WMError::WM_OK, ret);
+
+    std::string resMode = sceneSession->GetAbilityColorMode();
+    EXPECT_NE("dark", resMode);
+
+    hasDarkRes = false;
+    ret = sceneSession->OnUpdateColorMode(colorMode, hasDarkRes);
+    EXPECT_NE(WMError::WM_OK, ret);
+    resMode = sceneSession->GetAbilityColorMode();
+    EXPECT_NE("auto", resMode);
+
+    colorMode = "light";
+    ret = sceneSession->OnUpdateColorMode(colorMode, hasDarkRes);
+    EXPECT_NE(WMError::WM_OK, ret);
+    resMode = sceneSession->GetAbilityColorMode();
+    EXPECT_NE("light", resMode);
 }
 
 /**

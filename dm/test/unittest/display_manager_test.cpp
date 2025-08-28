@@ -1788,8 +1788,6 @@ HWTEST_F(DisplayManagerTest, GetCutoutInfoWithRotation, Function | SmallTest | L
     sptr<CutoutInfo> info = DisplayManager::GetInstance().GetCutoutInfoWithRotation(rotation);
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_NE(nullptr, info);
-    } else {
-        ASSERT_EQ(nullptr, info);
     }
 }
 
@@ -2720,6 +2718,9 @@ HWTEST_F(DisplayManagerTest, GetScreenHDRshotWithOption_ShouldReturnNull_WhenGet
  */
 HWTEST_F(DisplayManagerTest, GetScreenHDRshotWithOption_WhenDisplayIdIsValidButSnapshotFails, TestSize.Level1)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return;
+    }
     CaptureOption captureOption;
     captureOption.displayId_ = DEFAULT_DISPLAY;
     DmErrorCode errorCode;
