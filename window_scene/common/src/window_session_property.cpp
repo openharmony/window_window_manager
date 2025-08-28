@@ -23,7 +23,7 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr uint32_t TOUCH_HOT_AREA_MAX_NUM = 50;
-constexpr uint32_t TRANSTITION_ANIMATION_MAP_SIZE_MAX_NUM = 100;
+constexpr uint32_t TRANSITION_ANIMATION_MAP_SIZE_MAX_NUM = 100;
 }
 
 const std::map<uint64_t, HandlWritePropertyFunc> WindowSessionProperty::writeFuncMap_ {
@@ -1176,7 +1176,7 @@ bool WindowSessionProperty::UnmarshallingSessionInfo(Parcel& parcel, WindowSessi
 bool WindowSessionProperty::MarshallingTransitionAnimationMap(Parcel& parcel) const
 {
     uint32_t transitionAnimationMapSize = transitionAnimationConfig_.size();
-    if (transitionAnimationMapSize > TRANSTITION_ANIMATION_MAP_SIZE_MAX_NUM ||
+    if (transitionAnimationMapSize > TRANSITION_ANIMATION_MAP_SIZE_MAX_NUM ||
         !parcel.WriteUint32(transitionAnimationMapSize)) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to write transitionAnimationMapSize");
         return false;
@@ -1198,7 +1198,7 @@ bool WindowSessionProperty::UnmarshallingTransitionAnimationMap(Parcel& parcel, 
 {
     uint32_t transitionAnimationMapSize = 0;
     if (!parcel.ReadUint32(transitionAnimationMapSize) ||
-        transitionAnimationMapSize > TRANSTITION_ANIMATION_MAP_SIZE_MAX_NUM) {
+        transitionAnimationMapSize > TRANSITION_ANIMATION_MAP_SIZE_MAX_NUM) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to read transitionAnimationMapSize");
         return false;
     }
