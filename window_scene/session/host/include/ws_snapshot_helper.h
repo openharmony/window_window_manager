@@ -48,12 +48,12 @@ public:
     static uint32_t GetScreenStatus();
     static uint32_t GetScreenStatus(FoldStatus foldStatus);
     static DisplayOrientation GetDisplayOrientation(int32_t rotation);
-    static void SetWindowScreenStatus(uint32_t screenStatus);
-    static void SetWindowScreenStatus(FoldStatus foldStatus);
-    static void SetWindowOrientationStatus(uint32_t orientationStatus);
-    static void SetWindowOrientationStatus(Rotation rotation);
-    static SnapshotStatus GetWindowStatus();
-    static uint32_t GetRotation();
+    void SetWindowScreenStatus(uint32_t screenStatus);
+    void SetWindowScreenStatus(FoldStatus foldStatus);
+    void SetWindowOrientationStatus(uint32_t orientationStatus);
+    void SetWindowOrientationStatus(Rotation rotation);
+    SnapshotStatus GetWindowStatus() const;
+    uint32_t GetWindowRotation() const;
     static inline uint32_t GetOrientation(int32_t rotation)
     {
         if (rotation == LANDSCAPE_ANGLE || rotation == LANDSCAPE_INVERTED_ANGLE) {
@@ -78,6 +78,7 @@ public:
         }
         return SNAPSHOT_LANDSCAPE;
     }
+
 private:
     WSSnapshotHelper() = default;
     ~WSSnapshotHelper() = default;
