@@ -349,6 +349,10 @@ export interface Screen {
     setDensityDpi(densityDpi: double, callback: AsyncCallback<void>): void;
 
     setDensityDpi(densityDpi: double): Promise<void>;
+
+    setScreenActiveMode(modeIndex: long, callback: AsyncCallback<void>): void;
+
+    setScreenActiveMode(modeIndex: long): Promise<void>;
 }
 
 class ScreenImpl implements Screen {
@@ -417,9 +421,33 @@ class ScreenImpl implements Screen {
         return ScreenImpl.nativeTransferDynamic((input as ScreenImpl).screenNativeObj).unwrap();
     }
 
+    setScreenActiveMode(modeIndex: long, callback: AsyncCallback<void>): void {
+        taskpool.execute((): void => {
+            this.setScreenActiveModeInternal(modeIndex);
+        }).then(() => {
+            callback(null, undefined);
+        }).catch((err: NullishType) => {
+            callback(err as BusinessError, undefined);
+        });
+    }
+
+    setScreenActiveMode(modeIndex: long): Promise<void> {
+        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ):
+            void => {
+            taskpool.execute((): void => {
+                this.setScreenActiveModeInternal(modeIndex);
+            }).then(() => {
+                resolve(undefined);
+            }).catch((err: NullishType) => {
+                reject(err as BusinessError);
+            });
+        });
+    }
+
     native setDensityDpiInternal(densityDpi: double): void;
     native static nativeTransferStatic(input: ESValue, screen: Object): boolean;
     native static nativeTransferDynamic(nativeObj: long): ESValue;
+    native setScreenActiveModeInternal(modeIndex: long): void;
 }
 
 export interface ScreenModeInfo {

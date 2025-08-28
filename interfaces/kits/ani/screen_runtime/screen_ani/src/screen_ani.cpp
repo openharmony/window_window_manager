@@ -24,6 +24,9 @@
 #include "screen_ani_utils.h"
 #include "window_manager_hilog.h"
 
+#ifdef XPOWER_EVENT_ENABLE
+#include "xpower_event_js.h"
+#endif // XPOWER_EVENT_ENABLE
  
 namespace OHOS {
 namespace Rosen {
@@ -111,6 +114,34 @@ ani_object ScreenAni::TransferDynamic(ani_env* env, ani_object obj, ani_long nat
         return nullptr;
     }
     return result;
+}
+
+void ScreenAni::SetScreenActiveMode(ani_env* env, ani_object obj, ani_long modeIndex)
+{
+    TLOGI(WmsLogTag::DMS, "begin");
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] env is nullptr");
+        return;
+    }
+    ani_long screenNativeRef;
+    if (ANI_OK != env->Object_GetFieldByName_Long(obj, "screenNativeObj", &screenNativeRef)) {
+        TLOGE(WmsLogTag::DMS, "[ANI] screenAni native null ptr");
+        return;
+    }
+#ifdef XPOWER_EVENT_ENABLE
+    HiviewDFX::ReportXPowerJsStackSysEvent(env, "EPS_LCD_FREQ");
+#endif // XPOWER_EVENT_ENABLE
+    ScreenAni* screenAni = reinterpret_cast<ScreenAni*>(screenNativeRef);
+    screenAni->OnSetScreenActiveMode(env, obj, modeIndex);
+}
+
+void ScreenAni::OnSetScreenActiveMode(ani_env* env, ani_object obj, ani_long modeIndex)
+{
+    DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(screen_->SetScreenActiveMode(static_cast<uint32_t>(modeIndex)));
+    if (ret != DmErrorCode::DM_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Set screen active mode fail");
+        AniErrUtils::ThrowBusinessError(env, ret, "Screen::SetScreenActiveMode failed.");
+    }
 }
 }
 }
