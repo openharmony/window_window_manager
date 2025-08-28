@@ -132,7 +132,7 @@ WmErrorCode AniExtensionWindowRegisterManager::RegisterListener(sptr<Window> win
     ani_ref fnArgRef {};
     if ((ret = env->GlobalReference_Create(fnArg, &fnArgRef)) != ANI_OK) {
         env->GlobalReference_Delete(fnRef);
-        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Create fnArg global reference failed, ret: %{public}u}", ret);
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Create fnArg global reference failed, ret: %{public}u", ret);
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     };
     sptr<AniExtensionWindowListener> extensionWindowListener =
