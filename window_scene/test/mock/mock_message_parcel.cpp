@@ -258,7 +258,7 @@ bool Parcel::WriteString(const std::string& value)
     return !g_setWriteStringErrorFlag;
 }
 
-bool Parcel::ReadBool(bool& value)
+bool Parcel::ReadBool(bool& val)
 {
     if (g_setReadBoolErrorFlag) {
         return false;

@@ -15,7 +15,6 @@
 
 #include <accesstoken_kit.h>
 #include <app_mgr_client.h>
-#include <app_mgr_interface.h>
 #include <bundle_constants.h>
 #include <ipc_skeleton.h>
 #include <bundle_mgr_proxy.h>
@@ -313,7 +312,7 @@ bool SessionPermission::CheckCallingIsUserTestMode(pid_t pid)
     bool isUserTestMode = false;
     auto appMgrClient = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance();
     if (appMgrClient == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "AppMgeClient is null!");
+        TLOGE(WmsLogTag::DEFAULT, "AppMgrClient is null!");
         return false;
     }
     // reset ipc identity
