@@ -1291,6 +1291,17 @@ HWTEST_F(WindowSessionImplTest2, UpdateDecorEnableToAce, TestSize.Level1)
     window->windowSystemConfig_.freeMultiWindowSupport_ = false;
     window->UpdateDecorEnableToAce(false);
 
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateDecorEnableToAce2");
+    sptr<WindowSceneSessionImpl> sceneSseeionWindow = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    sceneSseeionWindow->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    sceneSseeionWindow->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    ASSERT_NE(compatibleModeProperty, nullptr);
+    compatibleModeProperty->SetDisableDecorFullscreen(true);
+    sceneSseeionWindow->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    sceneSseeionWindow->UpdateDecorEnableToAce(false);
+
     window->uiContent_ = nullptr;
     window->UpdateDecorEnableToAce(false);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
