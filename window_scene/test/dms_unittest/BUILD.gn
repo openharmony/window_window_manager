@@ -410,6 +410,8 @@ ohos_unittest("ws_screen_session_manager_client_proxy_test") {
     "screen_session_manager_client_proxy_test.cpp"
   ]
 
+  include_dirs = [ "../mock" ]
+
   deps = [ ":ws_unittest_common" ]
   external_deps = test_external_deps
 }
@@ -617,6 +619,12 @@ ohos_unittest("ws_screen_session_dumper_test") {
 
   deps = [ ":ws_unittest_common" ]
 
+  defines = []
+
+  if (window_manager_fold_ability) {
+    defines += [ "FOLD_ABILITY_ENABLE" ]
+  }
+
   external_deps = test_external_deps
   external_deps += [ "init:libbegetutil" ]
 }
@@ -750,7 +758,10 @@ if (window_manager_fold_ability) {
 
     sources = [ "fold_screen_controller_test.cpp" ]
 
-    deps = [ ":ws_unittest_common" ]
+    deps = [ 
+      ":ws_unittest_common",
+      "${window_base_path}/window_scene/interfaces/innerkits:libwsutils"
+    ]
 
     external_deps = test_external_deps
     external_deps += [ "init:libbegetutil" ]

@@ -80,6 +80,8 @@ private:
     SingleHandData GetSingleHandData(const sptr<SceneSession>& sceneSession) const;
     void CalNotRotateTransform(const sptr<SceneSession>& sceneSession, Matrix3f& transform,
         bool useUIExtension = false) const;
+    void CalSpecialNotRotateTransform(const sptr<SceneSession>& sceneSession, ScreenProperty& screenProperty,
+        Matrix3f& transform, bool useUIExtension = false) const;
     void CalTransform(const sptr<SceneSession>& sceneSession, Matrix3f& transform,
         const SingleHandData& singleHandData, bool useUIExtension = false) const;
     void UpdatePrivacyMode(const sptr<SceneSession>& sceneSession,

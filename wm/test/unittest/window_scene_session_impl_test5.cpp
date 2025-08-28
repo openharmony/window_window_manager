@@ -508,6 +508,58 @@ HWTEST_F(WindowSceneSessionImplTest5, IsMainWindowFullScreenAcrossDisplays01, Te
 }
 
 /**
+ * @tc.name: RecoverSessionProperty
+ * @tc.desc: RecoverSessionProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, RecoverSessionProperty, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    window->RecoverSessionProperty();
+}
+
+/**
+ * @tc.name: UpdateColorMode
+ * @tc.desc: UpdateColorMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, UpdateColorMode, TestSize.Level1)
+{
+    std::shared_ptr<AppExecFwk::Configuration> configuration;
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->hostSession_ = nullptr;
+    auto ret = window->UpdateColorMode(configuration);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+
+    AbilityRuntime::ApplicationContext::applicationContext_ = std::make_shared<AbilityRuntime::ApplicationContext>();
+    ret = window->UpdateColorMode(configuration);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+
+    AbilityRuntime::ApplicationContext::applicationContext_->contextImpl_ =
+        std::make_shared<AbilityRuntime::ContextImpl>();
+    ret = window->UpdateColorMode(configuration);
+    configuration = std::make_shared<AppExecFwk::Configuration>();
+    configuration->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE, "dark");
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    ret = window->UpdateColorMode(configuration);
+    EXPECT_EQ(WMError::WM_OK, ret);
+
+    ret = window->UpdateColorMode(configuration);
+    EXPECT_EQ(WMError::WM_OK, ret);
+}
+
+/**
  * @tc.name: SwitchFreeMultiWindow01
  * @tc.desc: SwitchFreeMultiWindow
  * @tc.type: FUNC
@@ -1821,131 +1873,6 @@ HWTEST_F(WindowSceneSessionImplTest5, StopMoveWindow, Function | SmallTest | Tes
 }
 
 /**
- * @tc.name: HandleWindowLimitsInCompatibleMode01
- * @tc.desc: HandleWindowLimitsInCompatibleMode
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest5, HandleWindowLimitsInCompatibleMode01, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    window->property_->SetPersistentId(1);
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
-    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    window->hostSession_ = session;
-    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
-    compatibleModeProperty->SetDisableWindowLimit(true);
-    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
-    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    WindowSizeLimits windowSizeLimits = {0, 0, 0, 0};
-    window->HandleWindowLimitsInCompatibleMode(windowSizeLimits);
-    EXPECT_EQ(windowSizeLimits.maxWindowWidth, window->windowSystemConfig_.maxFloatingWindowSize_);
-    EXPECT_EQ(windowSizeLimits.maxWindowHeight, window->windowSystemConfig_.maxFloatingWindowSize_);
-    EXPECT_EQ(windowSizeLimits.minWindowWidth, window->windowSystemConfig_.miniWidthOfMainWindow_);
-    EXPECT_EQ(windowSizeLimits.minWindowHeight, window->windowSystemConfig_.miniHeightOfMainWindow_);
-}
-
-/**
- * @tc.name: HandleWindowLimitsInCompatibleMode02
- * @tc.desc: HandleWindowLimitsInCompatibleMode
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest5, HandleWindowLimitsInCompatibleMode02, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    window->property_->SetPersistentId(1);
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
-    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    window->hostSession_ = session;
-    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
-    compatibleModeProperty->SetDisableWindowLimit(true);
-    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
-    window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
-    WindowSizeLimits windowSizeLimits = {0, 0, 0, 0};
-    window->HandleWindowLimitsInCompatibleMode(windowSizeLimits);
-    EXPECT_EQ(windowSizeLimits.maxWindowWidth, window->windowSystemConfig_.maxFloatingWindowSize_);
-    EXPECT_EQ(windowSizeLimits.maxWindowHeight, window->windowSystemConfig_.maxFloatingWindowSize_);
-    EXPECT_EQ(windowSizeLimits.minWindowWidth, window->windowSystemConfig_.miniWidthOfSubWindow_);
-    EXPECT_EQ(windowSizeLimits.minWindowHeight, window->windowSystemConfig_.miniHeightOfSubWindow_);
-}
-
-/**
- * @tc.name: HandleWindowLimitsInCompatibleMode03
- * @tc.desc: HandleWindowLimitsInCompatibleMode
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest5, HandleWindowLimitsInCompatibleMode03, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    window->property_->SetPersistentId(1);
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
-    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    window->hostSession_ = session;
-    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
-    compatibleModeProperty->SetDisableWindowLimit(true);
-    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
-    window->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
-    WindowSizeLimits windowSizeLimits = {0, 0, 0, 0};
-    window->HandleWindowLimitsInCompatibleMode(windowSizeLimits);
-    EXPECT_EQ(windowSizeLimits.maxWindowWidth, window->windowSystemConfig_.maxFloatingWindowSize_);
-    EXPECT_EQ(windowSizeLimits.maxWindowHeight, window->windowSystemConfig_.maxFloatingWindowSize_);
-    EXPECT_EQ(windowSizeLimits.minWindowWidth, window->windowSystemConfig_.miniWidthOfDialogWindow_);
-    EXPECT_EQ(windowSizeLimits.minWindowHeight, window->windowSystemConfig_.miniHeightOfDialogWindow_);
-}
-
-/**
- * @tc.name: HandleWindowLimitsInCompatibleMode04
- * @tc.desc: HandleWindowLimitsInCompatibleMode
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest5, HandleWindowLimitsInCompatibleMode04, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    window->property_->SetPersistentId(1);
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
-    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    window->hostSession_ = session;
-    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
-    compatibleModeProperty->SetDisableWindowLimit(true);
-    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
-    window->property_->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
-    WindowSizeLimits windowSizeLimits = {0, 0, 0, 0};
-    window->HandleWindowLimitsInCompatibleMode(windowSizeLimits);
-    EXPECT_EQ(windowSizeLimits.maxWindowWidth, window->windowSystemConfig_.maxFloatingWindowSize_);
-    EXPECT_EQ(windowSizeLimits.maxWindowHeight, window->windowSystemConfig_.maxFloatingWindowSize_);
-    EXPECT_EQ(windowSizeLimits.minWindowWidth, MIN_FLOATING_WIDTH);
-    EXPECT_EQ(windowSizeLimits.minWindowHeight, MIN_FLOATING_HEIGHT);
-}
-
-/**
- * @tc.name: HandleWindowLimitsInCompatibleMode05
- * @tc.desc: HandleWindowLimitsInCompatibleMode
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest5, HandleWindowLimitsInCompatibleMode05, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    window->property_->SetPersistentId(1);
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
-    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    window->hostSession_ = session;
-    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
-    compatibleModeProperty->SetDisableWindowLimit(true);
-    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
-    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    WindowSizeLimits windowSizeLimits = {0, 0, 0, 0};
-    window->HandleWindowLimitsInCompatibleMode(windowSizeLimits);
-    EXPECT_EQ(windowSizeLimits.maxWindowWidth, 0);
-    EXPECT_EQ(windowSizeLimits.maxWindowHeight, 0);
-    EXPECT_EQ(windowSizeLimits.minWindowWidth, 0);
-    EXPECT_EQ(windowSizeLimits.minWindowHeight, 0);
-}
-
-/**
  * @tc.name: IsDecorEnable1
  * @tc.desc: IsDecorEnable1
  * @tc.type: FUNC
@@ -2093,6 +2020,37 @@ HWTEST_F(WindowSceneSessionImplTest5, SetFrameRectForPartialZoomIn02, Function |
     window->property_->persistentId_ = 100; // 100 is persistent id
     window->state_ = WindowState::STATE_CREATED;
     EXPECT_EQ(WMError::WM_OK, window->SetFrameRectForPartialZoomIn(frameRect));
+}
+
+/**
+ * @tc.name: UpdateEnableDragWhenSwitchMultiWindow
+ * @tc.desc: UpdateEnableDragWhenSwitchMultiWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, UpdateEnableDragWhenSwitchMultiWindow, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateEnableDragWhenSwitchMultiWindow");
+    option->SetWindowType(WindowType::WINDOW_TYPE_MAGNIFICATION);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->hasSetEnableDrag_.store(true);
+    window->UpdateEnableDragWhenSwitchMultiWindow(false);
+    EXPECT_EQ(true, window->property_->dragEnabled_);
+
+    window->hasSetEnableDrag_.store(false);
+    window->UpdateEnableDragWhenSwitchMultiWindow(false);
+    EXPECT_EQ(false, window->property_->dragEnabled_);
+
+    window->property_->type_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+    sptr<CompatibleModeProperty> property = sptr<CompatibleModeProperty>::MakeSptr();
+    property->disableDragResize_ = true;
+    window->property_->compatibleModeProperty_ = property;
+    window->UpdateEnableDragWhenSwitchMultiWindow(true);
+    EXPECT_EQ(false, window->property_->dragEnabled_);
+
+    property->disableDragResize_ = false;
+    window->UpdateEnableDragWhenSwitchMultiWindow(true);
+    EXPECT_EQ(true, window->property_->dragEnabled_);
 }
 
 /**

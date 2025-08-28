@@ -135,6 +135,7 @@ public:
     static napi_value GetApplicationInfo(napi_env env, napi_callback_info info);
     static napi_value SetUIEffectControllerAliveInUI(napi_env env, napi_callback_info info);
     static napi_value SupportCreateFloatWindow(napi_env env, napi_callback_info info);
+    static napi_value ApplyFeatureConfig(napi_env env, napi_callback_info info);
 
     /*
      * PC Window
@@ -257,6 +258,7 @@ private:
     napi_value OnSupportZLevel(napi_env env, napi_callback_info info);
     napi_value OnSetSupportFunctionType(napi_env env, napi_callback_info info);
     napi_value OnUpdateRecentMainSessionInfos(napi_env env, napi_callback_info info);
+    napi_value OnApplyFeatureConfig(napi_env env, napi_callback_info info);
     
     /*
      * PC Window

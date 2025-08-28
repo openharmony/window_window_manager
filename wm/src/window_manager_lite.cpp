@@ -286,7 +286,7 @@ void WindowManagerLite::Impl::NotifyAccessibilityWindowInfo(const std::vector<sp
 
 void WindowManagerLite::Impl::UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing)
 {
-    TLOGI(WmsLogTag::WMS_SYSTEM, "Camera window, accessTokenId=%{public}u, isShowing=%{public}u",
+    TLOGI(WmsLogTag::WMS_PIP, "Camera window, accessTokenId=%{public}u, isShowing=%{public}u",
         accessTokenId, isShowing);
     std::vector<sptr<ICameraWindowChangedListener>> cameraWindowChangeListeners;
     {
@@ -708,7 +708,7 @@ WMError WindowManagerLite::UnregisterWindowModeChangedListener(const sptr<IWindo
 WMError WindowManagerLite::RegisterCameraWindowChangedListener(const sptr<ICameraWindowChangedListener>& listener)
 {
     if (listener == nullptr) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "listener could not be null");
+        TLOGE(WmsLogTag::WMS_PIP, "listener could not be null");
         return WMError::WM_ERROR_NULLPTR;
     }
 
@@ -736,7 +736,7 @@ WMError WindowManagerLite::RegisterCameraWindowChangedListener(const sptr<ICamer
 WMError WindowManagerLite::UnregisterCameraWindowChangedListener(const sptr<ICameraWindowChangedListener>& listener)
 {
     if (listener == nullptr) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "listener could not be null");
+        TLOGE(WmsLogTag::WMS_PIP, "listener could not be null");
         return WMError::WM_ERROR_NULLPTR;
     }
 

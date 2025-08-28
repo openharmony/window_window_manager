@@ -883,6 +883,9 @@ HWTEST_F(DisplayManagerAdapterTest, GetExpandAvailableArea, TestSize.Level1)
  */
 HWTEST_F(DisplayManagerAdapterTest, SetVirtualScreenAutoRotation, TestSize.Level1)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return;
+    }
     ScreenId screenId = 1111;
     bool enable = false;
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualScreenAutoRotation(screenId, enable);
@@ -896,6 +899,9 @@ HWTEST_F(DisplayManagerAdapterTest, SetVirtualScreenAutoRotation, TestSize.Level
  */
 HWTEST_F(DisplayManagerAdapterTest, SetVirtualScreenAutoRotation02, TestSize.Level1)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return;
+    }
     ScreenId screenId = 0;
     bool enable = false;
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualScreenAutoRotation(screenId, enable);
@@ -983,6 +989,9 @@ HWTEST_F(DisplayManagerAdapterTest, GetDisplayHDRSnapshot002, TestSize.Level1)
  */
 HWTEST_F(DisplayManagerAdapterTest, SetScreenPrivacyWindowTagSwitch, TestSize.Level1)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return;
+    }
     ScreenId screenId = 0;
     std::vector<std::string> privacyWindowTag{"test1", "test2"};
     DMError res = SingletonContainer::Get<ScreenManagerAdapter>().SetScreenPrivacyWindowTagSwitch(screenId,

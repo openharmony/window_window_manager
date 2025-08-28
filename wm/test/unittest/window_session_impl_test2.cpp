@@ -14,6 +14,7 @@
  */
 
 #include "window_session_impl.h"
+#include "window_scene_session_impl.h"
 
 #include <gtest/gtest.h>
 #include <transaction/rs_transaction.h>
@@ -484,6 +485,7 @@ HWTEST_F(WindowSessionImplTest2, HandleEscKeyEvent001, TestSize.Level1)
 {
     auto window = GetTestWindowImpl("HandleEscKeyEvent001");
     ASSERT_NE(window, nullptr);
+    ASSERT_NE(window->property_, nullptr);
 
     std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     ASSERT_NE(keyEvent, nullptr);
@@ -498,6 +500,9 @@ HWTEST_F(WindowSessionImplTest2, HandleEscKeyEvent001, TestSize.Level1)
     EXPECT_EQ(true, keyEvent->HasFlag(MMI::InputEvent::EVENT_FLAG_KEYBOARD_ESCAPE));
     WMError result = window->HandleEscKeyEvent(keyEvent, isConsumed);
     EXPECT_EQ(result, WMError::WM_OK);
+
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
+    ASSERT_EQ(WMError::WM_DO_NOTHING, window->HandleEscKeyEvent(keyEvent, isConsumed));
     window->Destroy();
 }
 
@@ -1286,6 +1291,17 @@ HWTEST_F(WindowSessionImplTest2, UpdateDecorEnableToAce, TestSize.Level1)
     window->windowChangeListeners_.insert({ window->GetPersistentId(), listeners });
     window->windowSystemConfig_.freeMultiWindowSupport_ = false;
     window->UpdateDecorEnableToAce(false);
+
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateDecorEnableToAce2");
+    sptr<WindowSceneSessionImpl> sceneSseeionWindow = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    sceneSseeionWindow->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    sceneSseeionWindow->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    ASSERT_NE(compatibleModeProperty, nullptr);
+    compatibleModeProperty->SetDisableDecorFullscreen(true);
+    sceneSseeionWindow->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    sceneSseeionWindow->UpdateDecorEnableToAce(false);
 
     window->uiContent_ = nullptr;
     window->UpdateDecorEnableToAce(false);

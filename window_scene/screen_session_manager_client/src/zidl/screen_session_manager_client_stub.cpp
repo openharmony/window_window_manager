@@ -149,6 +149,10 @@ void ScreenSessionManagerClientStub::InitScreenChangeMap()
         [this](MessageParcel& data, MessageParcel& reply) {
         return HandleOnScreenModeChanged(data, reply);
     };
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_ON_ANIMATE_FINISH_TIMEOUT] =
+        [this](MessageParcel& data, MessageParcel& reply) {
+        return HandleOnAnimationFinish(data, reply);
+    };
 }
 
 ScreenSessionManagerClientStub::ScreenSessionManagerClientStub()
@@ -195,12 +199,32 @@ int ScreenSessionManagerClientStub::HandleOnScreenConnectionChanged(MessageParce
     auto innerName = data.ReadString();
     auto screenId = static_cast<ScreenId>(data.ReadUint64());
     auto screenEvent = static_cast<ScreenEvent>(data.ReadUint8());
+    uint64_t size = 0;
+    if (!data.ReadUint64(size)) {
+        TLOGE(WmsLogTag::DMS, "Failed to read size");
+        return ERR_INVALID_DATA;
+    }
+    std::unordered_map<FoldDisplayMode, int32_t> rotationCorrectionMap;
+    for (uint64_t i = 0; i < size; i++) {
+        uint32_t foldDisplayMode = 0;
+        if (!data.ReadUint32(foldDisplayMode)) {
+            TLOGE(WmsLogTag::DMS, "Failed to read foldDisplayMode");
+            return ERR_INVALID_DATA;
+        }
+        uint32_t offset = 0;
+        if (!data.ReadUint32(offset)) {
+            TLOGE(WmsLogTag::DMS, "Failed to read offset");
+            return ERR_INVALID_DATA;
+        }
+        rotationCorrectionMap.insert({static_cast<FoldDisplayMode>(foldDisplayMode), offset});
+    }
     SessionOption option = {
         .rsId_ = rsId,
         .name_ = name,
         .isExtend_ = isExtend,
         .innerName_ = innerName,
         .screenId_ = screenId,
+        .rotationCorrectionMap_ = rotationCorrectionMap
     };
     OnScreenConnectionChanged(option, screenEvent);
     return ERR_NONE;
@@ -496,6 +520,12 @@ int ScreenSessionManagerClientStub::HandleOnScreenModeChanged(MessageParcel& dat
     auto screenModeChangeEvent = static_cast<ScreenModeChangeEvent>(data.ReadUint32());
     TLOGI(WmsLogTag::DMS, "screenModeChangeEvent: %{public}d", screenModeChangeEvent);
     OnScreenModeChanged(screenModeChangeEvent);
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerClientStub::HandleOnAnimationFinish(MessageParcel& data, MessageParcel& reply)
+{
+    OnAnimationFinish();
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

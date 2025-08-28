@@ -60,8 +60,7 @@ public:
     WMError GetGlobalScaledRect(Rect& globalScaledRect) override;
     WMError Resize(uint32_t width, uint32_t height,
         const RectAnimationConfig& rectAnimationConfig = {}) override;
-    WMError ResizeAsync(uint32_t width, uint32_t height,
-        const RectAnimationConfig& rectAnimationConfig = {}) override;
+    WMError ResizeAsync(uint32_t width, uint32_t height) override;
     WMError SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo) override;
     WMError SetFollowParentWindowLayoutEnabled(bool isFollow) override;
     WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) override;
@@ -217,7 +216,6 @@ public:
     WSError NotifyCompatibleModePropertyChange(const sptr<CompatibleModeProperty> property) override;
     void HookDecorButtonStyleInCompatibleMode(uint32_t contentColor);
     WSError PcAppInPadNormalClose() override;
-    void HandleWindowLimitsInCompatibleMode(WindowSizeLimits& windowSizeLimits);
 
     /*
      * Free Multi Window
@@ -415,6 +413,7 @@ private:
      * Window Layout
      */
     void CheckMoveConfiguration(MoveConfiguration& moveConfiguration);
+    void UpdateEnableDragWhenSwitchMultiWindow(bool enable);
     WMError GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo) override;
 
     /*
@@ -449,6 +448,8 @@ private:
     /*
      * Window Property
      */
+    void RecoverSessionProperty();
+    WMError UpdateColorMode(const std::shared_ptr<AppExecFwk::Configuration>& configuration = nullptr);
     void InitSystemSessionDragEnable();
     bool IsSystemDensityChanged(const sptr<DisplayInfo>& displayInfo);
     bool IsDefaultDensityEnabled();

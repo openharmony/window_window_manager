@@ -1340,6 +1340,10 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             }
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_NOTIFY_SWITCH_USER_ANIMATION_FINISH: {
+            NotifySwitchUserAnimationFinish();
+            break;
+        }
         default:
             TLOGW(WmsLogTag::DMS, "unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

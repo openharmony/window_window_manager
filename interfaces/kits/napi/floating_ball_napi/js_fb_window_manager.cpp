@@ -94,6 +94,10 @@ napi_value JsFbWindowManager::NapiSendTask(napi_env env, void* contextPtr)
             *errCodePtr = WmErrorCode::WM_ERROR_FB_INTERNAL_ERROR;
             return;
         }
+        if (fbController == nullptr) {
+            *errCodePtr = WmErrorCode::WM_ERROR_FB_INTERNAL_ERROR;
+            return;
+        }
         fbController->UpdateMainWindow(mainWindow);
     };
     NapiAsyncTask::CompleteCallback complete =

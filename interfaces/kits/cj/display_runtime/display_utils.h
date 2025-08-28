@@ -30,6 +30,12 @@ typedef struct {
 } RetStruct;
 
 typedef struct {
+    uint32_t foldDisplayMode;
+    uint32_t physicalWidth;
+    uint32_t physicalHeight;
+} CDisplayPhysicalResolution;
+
+typedef struct {
     int32_t left;
     int32_t top;
     uint32_t width;

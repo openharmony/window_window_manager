@@ -304,6 +304,7 @@ int SceneSessionManagerStub::HandleCreateAndConnectSpecificSession(MessageParcel
     reply.WriteParcelable(&systemConfig);
     reply.WriteUint32(property->GetSubWindowLevel());
     reply.WriteUint64(property->GetDisplayId());
+    reply.WriteUint32(static_cast<uint32_t>(property->GetWindowType()));
     reply.WriteUint32(static_cast<uint32_t>(WSError::WS_OK));
     return ERR_NONE;
 }

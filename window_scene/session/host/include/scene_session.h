@@ -621,7 +621,7 @@ public:
     void RegisterUpdateAppUseControlCallback(UpdateAppUseControlFunc&& func);
     void NotifyUpdateAppUseControl(ControlAppType type, const ControlInfo& controlInfo) override;
     void UpdatePrivacyModeControlInfo();
-    bool HasSubSessionInPrivacyMode();
+    bool HasChildSessionInPrivacyMode();
     void SetVisibilityChangedDetectFunc(VisibilityChangedDetectFunc&& func);
     virtual void RegisterSessionLockStateChangeCallback(NotifySessionLockStateChangeCallback&& callback) {}
     virtual void NotifySessionLockStateChange(bool isLockedState) {}
@@ -857,6 +857,8 @@ public:
     WMError NotifySubSessionAcrossDisplaysChange(bool isAcrossDisplays);
     WMError NotifyFollowedParentWindowAcrossDisplaysChange(bool isAcrossDisplays);
     void NotifySessionAcrossDisplaysChange(const sptr<SceneSession>& sceneSession, bool isAcrossDisplays);
+    WMError OnUpdateColorMode(const std::string& colorMode, bool hasDarkRes) override;
+    std::string GetAbilityColorMode() const;
 
     /*
      * Window Pattern
@@ -1301,6 +1303,7 @@ private:
     void OnKeyFrameNextVsync(uint64_t count);
     bool KeyFrameNotifyFilter(const WSRect& rect, SizeChangeReason reason);
     bool KeyFrameRectAlmostSame(const WSRect& rect1, const WSRect& rect2);
+    std::mutex keyFrameMutex_;
     KeyFramePolicy keyFramePolicy_;
     std::shared_ptr<RSCanvasNode> keyFrameCloneNode_ = nullptr;
     bool keyFrameAnimating_ = false;
@@ -1394,6 +1397,9 @@ private:
     bool isAncoForFloatingWindow_ = false;
     bool subWindowOutlineEnabled_ = false;
     std::atomic_bool isRegisterAcrossDisplaysChanged_ = false;
+    std::string colorMode_;
+    bool hasDarkRes_ = false;
+    mutable std::mutex colorModeMutex_;
     NotifySetWindowShadowsFunc onSetWindowShadowsFunc_;
     UpdateScreenshotAppEventRegisteredFunc updateScreenshotAppEventRegisteredFunc_;
 

@@ -66,7 +66,6 @@ private:
 
     void ProcessNotifyFoldStatusChange(FoldStatus currentStatus, FoldStatus nextStatus,
         const std::vector<float>& angles, sptr<FoldScreenPolicy> foldScreenPolicy);
-    std::shared_ptr<TaskScheduler> taskScheduler_ = nullptr;
 };
 } // namespace OHOS::Rosen
 #endif //OHOS_ROSEN_SMALL_DEVICE_SCREEN_SENSOR_MANAGER_H

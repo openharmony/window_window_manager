@@ -53,8 +53,6 @@ constexpr float INNER_BORDER_VP = 5.0f;
 constexpr float OUTSIDE_BORDER_VP = 4.0f;
 constexpr float INNER_ANGLE_VP = 16.0f;
 constexpr uint32_t MAX_LIFE_CYCLE_TASK_IN_QUEUE = 15;
-constexpr uint32_t COLOR_WHITE = 0xffffffff;
-constexpr uint32_t COLOR_BLACK = 0xff000000;
 constexpr int64_t LIFE_CYCLE_TASK_EXPIRED_TIME_LIMIT = 350;
 static bool g_enableForceUIFirst = system::GetParameter("window.forceUIFirst.enabled", "1") == "1";
 constexpr int64_t STATE_DETECT_DELAYTIME = 3 * 1000;
@@ -169,6 +167,11 @@ void Session::PostExportTask(Task&& task, const std::string& name, int64_t delay
 int32_t Session::GetPersistentId() const
 {
     return persistentId_;
+}
+
+int32_t Session::GetCurrentRotation() const
+{
+    return currentRotation_;
 }
 
 void Session::SetSurfaceNode(const std::shared_ptr<RSSurfaceNode>& surfaceNode)
@@ -2437,7 +2440,7 @@ WSError Session::HandleSubWindowClick(int32_t action, int32_t sourceType, bool i
           GetPersistentId(), raiseEnabled, isPointDown, isPointDown);
     if (raiseEnabled && isPointDown && !isModal) {
         RaiseToAppTopForPointDown();
-    } else if (parentSession && !isPointMove) {
+    } else if (parentSession && isPointDown) {
         // sub window is forbidden to raise to top after click, but its parent should raise
         parentSession->NotifyClick(!IsScbCoreEnabled());
     }
@@ -3341,11 +3344,14 @@ WSError Session::SetAppSupportPhoneInPc(bool isSupportPhone)
 WSError Session::SetCompatibleModeProperty(const sptr<CompatibleModeProperty> compatibleModeProperty)
 {
     auto property = GetSessionProperty();
-    if (property == nullptr) {
+    if (property == nullptr || compatibleModeProperty == nullptr) {
         TLOGE(WmsLogTag::WMS_COMPAT, "id: %{public}d property is nullptr", persistentId_);
         return WSError::WS_ERROR_NULLPTR;
     }
     property->SetCompatibleModeProperty(compatibleModeProperty);
+    if (compatibleModeProperty->IsDragResizeDisabled()) {
+        property->SetDragEnabled(false);
+    }
     if (!sessionStage_) {
         TLOGE(WmsLogTag::WMS_COMPAT, "sessionStage is null");
         return WSError::WS_ERROR_NULLPTR;

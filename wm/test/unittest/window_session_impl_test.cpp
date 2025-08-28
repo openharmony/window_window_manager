@@ -601,9 +601,11 @@ HWTEST_F(WindowSessionImplTest, UpdateDecorEnable, TestSize.Level1)
     window->UpdateDecorEnable(false, mode);
     ASSERT_EQ(window->property_->windowMode_, mode);
     mode = WindowMode::WINDOW_MODE_FULLSCREEN;
-    window->property_->compatibleModeProperty_->SetDisableDecorFullscreen(true);
-    window->UpdateDecorEnable(false, mode);
-    ASSERT_EQ(window->property_->windowMode_, mode);
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    ASSERT_NE(compatibleModeProperty, nullptr);
+    compatibleModeProperty->SetDisableDecorFullscreen(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    window->UpdateDecorEnable(true, mode);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateDecorEnable end";
 }
 

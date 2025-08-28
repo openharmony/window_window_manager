@@ -866,11 +866,11 @@ HWTEST_F(SceneInputManagerTest, CheckNeedUpdateForScreenInfos, TestSize.Level1)
 }
 
 /**
- * @tc.name: CheckNeedUpdateFordDisplayInfos
- * @tc.desc: CheckNeedUpdateFordDisplayInfos
+ * @tc.name: CheckNeedUpdateForDisplayInfos
+ * @tc.desc: CheckNeedUpdateForDisplayInfos
  * @tc.type: FUNC
  */
-HWTEST_F(SceneInputManagerTest, CheckNeedUpdateFordDisplayInfos, TestSize.Level1)
+HWTEST_F(SceneInputManagerTest, CheckNeedUpdateForDisplayInfos, TestSize.Level1)
 {
     std::vector<MMI::ScreenInfo> screenInfos;
     std::vector<MMI::DisplayInfo> displayInfos;
@@ -899,6 +899,8 @@ HWTEST_F(SceneInputManagerTest, CheckNeedUpdateFordDisplayInfos, TestSize.Level1
     displayInfo.offsetY = 1;
     displayInfo.pointerActiveWidth = 1;
     displayInfo.pointerActiveHeight = 1;
+    displayInfo.deviceRotation = MMI::Direction::DIRECTION90;
+    displayInfo.rotationCorrection = MMI::Direction::DIRECTION90;
     displayInfos.emplace_back(displayInfo);
     ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
     ASSERT_FALSE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
@@ -957,6 +959,10 @@ HWTEST_F(SceneInputManagerTest, CheckNeedUpdateFordDisplayInfos, TestSize.Level1
     displayInfos[0].screenArea = { 2, { 2, 2, 2, 1 } };
     ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
     displayInfos[0].screenArea = { 2, { 2, 2, 2, 2 } };
+    ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
+    displayInfos[0].deviceRotation = MMI::Direction::DIRECTION180;
+    ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
+    displayInfos[0].rotationCorrection = MMI::Direction::DIRECTION180;
     ASSERT_TRUE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
     ASSERT_FALSE(SceneInputManager::GetInstance().CheckNeedUpdate(screenInfos, displayInfos, windowInfoList));
 }

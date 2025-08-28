@@ -315,6 +315,7 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
     SetUIExtensionDestroyComplete();
     RemoveExtensionWindowStageFromSCB(property_->IsConstrainedModal());
     dataHandler_->SetRemoteProxyObject(nullptr);
+    surfaceNode_ = nullptr;
     TLOGI(WmsLogTag::WMS_LIFE, "Destroyed success, id: %{public}d.", GetPersistentId());
     return WMError::WM_OK;
 }

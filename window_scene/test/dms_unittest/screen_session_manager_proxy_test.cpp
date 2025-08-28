@@ -2205,5 +2205,31 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetScreenPrivacyWindowTagSwitch, Functio
     EXPECT_TRUE(logMsg.find("remote is null") != std::string::npos);
     LOG_SetCallback(nullptr);
 }
+
+/**
+ * @tc.name: NotifySwitchUserAnimationFinish
+ * @tc.desc: NotifySwitchUserAnimationFinish test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, NotifySwitchUserAnimationFinish, TestSize.Level1)
+{
+    MockMessageParcel::ClearAllErrorFlag();
+    auto proxy = sptr<ScreenSessionManagerProxy>::MakeSptr(nullptr);
+    proxy->NotifySwitchUserAnimationFinish();
+
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    proxy = sptr<ScreenSessionManagerProxy>::MakeSptr(remoteMocker);
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ASSERT_NE(proxy, nullptr);
+    proxy->NotifySwitchUserAnimationFinish();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+    ASSERT_NE(proxy, nullptr);
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    proxy->NotifySwitchUserAnimationFinish();
+    remoteMocker->SetRequestResult(ERR_NONE);
+    proxy->NotifySwitchUserAnimationFinish();
+    MockMessageParcel::ClearAllErrorFlag();
+}
 }
 }
