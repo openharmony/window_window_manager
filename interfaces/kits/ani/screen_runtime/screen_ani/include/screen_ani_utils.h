@@ -62,6 +62,8 @@ static ani_status GetRectFromAni(ani_env* env, ani_object mainScreenRegionAni, D
 
 static ani_status GetScreenIdArrayFromAni(ani_env* env, ani_object mirrorScreen,
     std::vector<ScreenId>& mirrorScreenIds);
+
+static ani_status GetExpandOptionFromAni(ani_env* env, ani_object optionAniObj, ExpandOption& expandOption);
 };
 }
 }

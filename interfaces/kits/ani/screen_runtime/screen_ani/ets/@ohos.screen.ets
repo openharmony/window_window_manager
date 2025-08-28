@@ -316,6 +316,28 @@ export function stopMirror(mirrorScreen: Array<long>): Promise<void> {
     });
 }
 
+export function makeExpand(options: Array<ExpandOption>, callback: AsyncCallback<long>): void {
+    taskpool.execute((): long => {
+        return makeExpandInternal(options);
+    }).then((ret: NullishType) => {
+        callback(null, ret as long);
+    }).catch((err: NullishType) => {
+        callback(err as BusinessError, -1);
+    });
+}
+
+export function makeExpand(options: Array<ExpandOption>): Promise<long> {
+    return new Promise<long>((resolve: (value: long) => void, reject: (error: BusinessError) => void ) => {
+        taskpool.execute((): long => {
+            return makeExpandInternal(options);
+        }).then((ret: NullishType) => {
+            resolve(ret as long);
+        }).catch((err: NullishType) => {
+            reject(err as BusinessError);
+        });
+    });
+}
+
 export native function getAllScreensInternal(screens: Array<Screen>): void;
 export native function createVirtualScreenInternal(options: VirtualScreenOption, screen: ScreenImpl): void;
 export native function setVirtualScreenSurfaceInternal(screenId: long, surfaceId: string): void;
@@ -331,6 +353,7 @@ export native function makeUniqueInternal(uniqueScreen: Array<long>): Array<long
 export native function makeMirrorWithRegionInternal(mainScreen: long, mirrorScreen: Array<long>,
     mainScreenRegion: Rect): long;
 export native function stopMirrorInternal(mirrorScreen: Array<long>): void;
+export native function makeExpandInternal(options: Array<ExpandOption>): long;
 
 export interface Screen {
 
@@ -526,15 +549,23 @@ export interface VirtualScreenOption {
     surfaceId: string;
 }
 
-export interface Rect {
+interface Rect {
     left: long;
 
     top: long;
 
-    width: long;
+    wigth: long;
 
     height: long;
-} 
+}
+
+interface ExpandOption {
+    screenId: long;
+
+    startX_: long;
+
+    startY_: long;
+}
 
 export let screenMgrRef: long;
 export function setScreenMgrRef(nativeObj: long): void{

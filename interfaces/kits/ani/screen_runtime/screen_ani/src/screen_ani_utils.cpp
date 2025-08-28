@@ -408,5 +408,33 @@ ani_status ScreenAniUtils::GetScreenIdArrayFromAni(ani_env* env, ani_object mirr
     }
     return ANI_OK;
 }
+
+ani_status ScreenAniUtils::GetExpandOptionFromAni(ani_env* env, ani_object optionAniObj, ExpandOption& expandOption)
+{
+    ani_long screenId = 0;
+    ani_status ret = env->Object_GetFieldByName_Long(optionAniObj, "<property>screenId", &screenId);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to get screenId.");
+        return ret;
+    }
+    expandOption.screenId_ = screenId;
+
+    ani_long startX = 0;
+    ret = env->Object_GetFieldByName_Long(optionAniObj, "<property>startX", &startX);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to get startX.");
+        return ret;
+    }
+    expandOption.startX_ = startX;
+
+    ani_long startY = 0;
+    ret = env->Object_GetFieldByName_Long(optionAniObj, "<property>startY", &startY);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to get startY.");
+        return ret;
+    }
+    expandOption.startY_ = startY;
+    return ANI_OK;
+}
 }
 }
