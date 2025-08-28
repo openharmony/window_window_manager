@@ -502,6 +502,57 @@ ani_object ScreenManagerAni::MakeUnique(ani_env* env, ani_object uniqueScreenIds
     return ScreenAniUtils::CreateDisplayIdVectorAniObject(env, displayIds);
 }
 
+ani_long ScreenManagerAni::MakeMirrorWithRegion(ani_env* env, ani_long mainScreen, ani_object mirrorScreen,
+    ani_object mainScreenRegionAni)
+{
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] env is nullptr");
+        return INVALID_SCREEN_ID;
+    }
+    if (mirrorScreen == nullptr || mainScreenRegionAni == nullptr) {
+        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM,
+            "mirrorScreen or mainScreenRegion is nullptr");
+        return static_cast<ani_long>(INVALID_SCREEN_ID);
+    }
+    ani_int length = 0;
+    std::vector<ScreenId> mirrorScreenIds;
+    env->Object_GetPropertyByName_Int(mirrorScreen, "length", &length);
+    TLOGI(WmsLogTag::DMS, "[ANI] length %{public}d", (ani_int)length);
+    for (int32_t i = 0; i < length; i++) {
+        ani_ref screenIdRef;
+        auto ret = env->Object_CallMethodByName_Ref(mirrorScreen, "$_get", "i:C{std.core.Object}",
+            &screenIdRef, (ani_int)i);
+        if (ANI_OK != ret) {
+            TLOGE(WmsLogTag::DMS, "[ANI] get ani_array index %{public}u fail, ret: %{public}u", (ani_int)i, ret);
+            AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to get screenId");
+            return static_cast<ani_long>(INVALID_SCREEN_ID);
+        }
+        ani_long screenId;
+        ret = env->Object_CallMethodByName_Long(static_cast<ani_object>(screenIdRef), "unboxed", ":l", &screenId);
+        if (ANI_OK != ret) {
+            TLOGE(WmsLogTag::DMS, "[ANI] unboxed screenId failed, ret: %{public}u", ret);
+            AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to unboxed screenId");
+            return static_cast<ani_long>(INVALID_SCREEN_ID);
+        }
+        mirrorScreenIds.emplace_back(static_cast<ScreenId>(screenId));
+    }
+    DMRect mainScreenRegion;
+    if (ScreenAniUtils::GetRectFromAni(env, mainScreenRegionAni, mainScreenRegion) != ANI_OK) {
+        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM,
+            "Failed to convert to mainScreenRegion");
+        return static_cast<ani_long>(INVALID_SCREEN_ID);
+    }
+    ScreenId screenGroupId = INVALID_SCREEN_ID;
+    DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(
+        SingletonContainer::Get<ScreenManager>().MakeMirror(static_cast<ScreenId>(mainScreen),
+            mirrorScreenIds, mainScreenRegion, screenGroupId));
+    if (ret != DmErrorCode::DM_OK) {
+        AniErrUtils::ThrowBusinessError(env, ret, "JsScreenManager::OnMakeMirror failed.");
+        return static_cast<ani_long>(INVALID_SCREEN_ID);
+    }
+    return static_cast<ani_long>(screenGroupId);
+}
+
 extern "C" {
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
@@ -546,6 +597,8 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(ScreenManagerAni::SetScreenPrivacyMaskImage)},
         ani_native_function {"makeUniqueInternal", nullptr,
             reinterpret_cast<void *>(ScreenManagerAni::MakeUnique)},
+        ani_native_function {"makeMirrorWithRegionInternal", nullptr,
+            reinterpret_cast<void *>(ScreenManagerAni::MakeMirrorWithRegion)},
     };
     if ((ret = env->Namespace_BindNativeFunctions(nsp, funcs.data(), funcs.size()))) {
         TLOGE(WmsLogTag::DMS, "[ANI] bind namespace fail %{public}u", ret);

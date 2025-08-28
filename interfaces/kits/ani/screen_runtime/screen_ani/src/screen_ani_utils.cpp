@@ -347,5 +347,41 @@ ani_object ScreenAniUtils::CreateAniArray(ani_env* env, size_t size)
     }
     return arrayObj;
 }
+
+ani_status ScreenAniUtils::GetRectFromAni(ani_env* env, ani_object mainScreenRegionAni, DMRect& mainScreenRegion)
+{
+    ani_long left = 0;
+    auto ret = env->Object_GetFieldByName_Long(mainScreenRegionAni, "<property>left", &left);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to get left.");
+        return ret;
+    }
+    mainScreenRegion.posX_ = static_cast<int32_t>(left);
+
+    ani_long top = 0;
+    ret = env->Object_GetFieldByName_Long(mainScreenRegionAni, "<property>top", &top);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to get top.");
+        return ret;
+    }
+    mainScreenRegion.posY_ = static_cast<int32_t>(top);
+
+    ani_long width = 0;
+    ret = env->Object_GetFieldByName_Long(mainScreenRegionAni, "<property>width", &width);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to get width.");
+        return ret;
+    }
+    mainScreenRegion.width_ = static_cast<int32_t>(width);
+
+    ani_long height = 0;
+    ret = env->Object_GetFieldByName_Long(mainScreenRegionAni, "<property>height", &height);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to get height.");
+        return ret;
+    }
+    mainScreenRegion.height_ = static_cast<int32_t>(height);
+    return ANI_OK;
+}
 }
 }

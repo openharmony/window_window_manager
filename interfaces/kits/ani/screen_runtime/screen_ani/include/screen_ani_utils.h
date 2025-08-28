@@ -57,6 +57,8 @@ static GetMultiScreenPositionOptionsFromAni(ani_env* env, ani_object screenOptio
 static ani_object CreateDisplayIdVectorAniObject(ani_env* env, std::vector<DisplayId>& displayIds);
 
 static ani_object CreateAniArray(ani_env* env, size_t size);
+
+static ani_status GetRectFromAni(ani_env* env, ani_object mainScreenRegionAni, DMRect& mainScreenRegion);
 };
 }
 }
