@@ -333,58 +333,6 @@ void MockSessionManagerService::RemoveSessionManagerServiceByUserId(int32_t user
     }
 }
 
-ErrCode MockSessionManagerService::ValidateParameters(int32_t clientUserId, int32_t userId) const
-{
-    if (clientUserId <= INVALID_USER_ID) {
-        TLOGE(WmsLogTag::WMS_RECOVER, "clientUserId is illegal: %{public}d", clientUserId);
-        return ERR_INVALID_VALUE;
-    }
-
-    if (clientUserId == SYSTEM_USERID && userId <= INVALID_USER_ID) {
-        TLOGE(WmsLogTag::WMS_RECOVER, "system userid calling, userId is illegal: %{public}d", userId);
-        return ERR_INVALID_VALUE;
-    }
-    return ERR_OK;
-}
-
-ErrCode MockSessionManagerService::GetForegroundOsAccountDisplayId(int32_t userId, DisplayId& displayId) const 
-{
-    displayId = DISPLAY_ID_INVALID; 
-    ErrCode err = AccountSA::OsAccountManager::GetForegroundOsAccountDisplayId(userId, displayId);
-    TLOGI(WmsLogTag::WMS_RECOVER, "displayId: %{public}d,", displayId);
-    if (err != ERR_OK) {
-        TLOGE(WmsLogTag::WMS_RECOVER, 
-              "get user display failed, errorCode: %{public}d, userId %{public}d", err, userId);
-    }
-    return err;
-}
-
-ErrCode MockSessionManagerService::NotifyWMSConnectionStatus(int32_t userId, 
-    const sptr<ISessionManagerServiceRecoverListener>& smsListener) {
-    bool isWMSConnected = false;
-    {
-        std::lock_guard<std::mutex> lock(wmsConnectionStatusLock_);
-        if (wmsConnectionStatusMap_.find(userId) != wmsConnectionStatusMap_.end()) {
-            isWMSConnected = wmsConnectionStatusMap_[userId];
-        }
-    }
-    if (smsListener && isWMSConnected) {
-        auto sessionManagerService = GetSessionManagerServiceByUserId(userId);
-        if (sessionManagerService == nullptr) {
-            TLOGE(WmsLogTag::WMS_RECOVER, "SessionManagerService is null");
-            return ERR_DEAD_OBJECT;
-        }
-        TLOGI(WmsLogTag::WMS_MULTI_USER, "wms is already connected, notify client");
-        int32_t screenId = DEFAULT_SCREEN_ID;
-        {
-            std::lock_guard<std::mutex> lock(userId2ScreenIdMapMutex_);
-            screenId = userId2ScreenIdMap_[userId];
-        }
-        smsListener->OnWMSConnectionChanged(userId, screenId, true, sessionManagerService);
-    }
-    return ERR_OK;
-}
-
 ErrCode MockSessionManagerService::RegisterSMSRecoverListener(const sptr<IRemoteObject>& listener, int32_t userId)
 {
     TLOGI(WmsLogTag::WMS_RECOVER, "userId = %{public}d,", userId);
@@ -394,6 +342,11 @@ ErrCode MockSessionManagerService::RegisterSMSRecoverListener(const sptr<IRemote
     }
 
     int32_t clientUserId = GetUserIdByCallingUid();
+    // SYSTEM_USERID calling, userId = INVALID_USER_ID, set userId to defaultWMSUserId_
+    if (clientUserId == SYSTEM_USERID && userId == INVALID_USER_ID) {
+        userId = defaultWMSUserId_;
+    }
+
     ErrCode ret = ValidateParameters(clientUserId, userId);
     if (ret != ERR_OK) {
         return ret;
@@ -452,6 +405,10 @@ std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>*
 ErrCode MockSessionManagerService::UnregisterSMSRecoverListener(int32_t userId)
 {
     int32_t clientUserId = GetUserIdByCallingUid();
+    // SYSTEM_USERID calling, userId = INVALID_USER_ID, set userId to defaultWMSUserId_
+    if (clientUserId == SYSTEM_USERID && userId == INVALID_USER_ID) {
+        userId = defaultWMSUserId_;
+    }
 
     ErrCode ret = ValidateParameters(clientUserId, userId);
     if (ret != ERR_OK) {
@@ -513,6 +470,11 @@ ErrCode MockSessionManagerService::RegisterSMSLiteRecoverListener(const sptr<IRe
     }
 
     int32_t clientUserId = GetUserIdByCallingUid();
+    // SYSTEM_USERID calling, userId = INVALID_USER_ID, set userId to defaultWMSUserId_
+    if (clientUserId == SYSTEM_USERID && userId == INVALID_USER_ID) {
+        userId = defaultWMSUserId_;
+    }
+
     ErrCode ret = ValidateParameters(clientUserId, userId);
     if (ret != ERR_OK) {
         return ret;
@@ -571,6 +533,11 @@ std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>*
 ErrCode MockSessionManagerService::UnregisterSMSLiteRecoverListener(int32_t userId)
 {
     int32_t clientUserId = GetUserIdByCallingUid();
+    // SYSTEM_USERID calling, userId = INVALID_USER_ID, set userId to defaultWMSUserId_
+    if (clientUserId == SYSTEM_USERID && userId == INVALID_USER_ID) {
+        userId = defaultWMSUserId_;
+    }
+    
     ErrCode ret = ValidateParameters(clientUserId, userId);
     if (ret != ERR_OK) {
         return ret;
@@ -1240,6 +1207,58 @@ ErrCode MockSessionManagerService::SetSnapshotSkipByIdNamesMapInner(
             TLOGE(WmsLogTag::DEFAULT, "failed");
             return err;
         }
+    }
+    return ERR_OK;
+}
+
+ErrCode MockSessionManagerService::ValidateParameters(int32_t clientUserId, int32_t userId) const
+{
+    if (clientUserId <= INVALID_USER_ID) {
+        TLOGE(WmsLogTag::WMS_RECOVER, "clientUserId is illegal: %{public}d", clientUserId);
+        return ERR_INVALID_VALUE;
+    }
+
+    if (clientUserId == SYSTEM_USERID && userId <= INVALID_USER_ID) {
+        TLOGE(WmsLogTag::WMS_RECOVER, "system userid calling, userId is illegal: %{public}d", userId);
+        return ERR_INVALID_VALUE;
+    }
+    return ERR_OK;
+}
+
+ErrCode MockSessionManagerService::GetForegroundOsAccountDisplayId(int32_t userId, DisplayId& displayId) const 
+{
+    displayId = DISPLAY_ID_INVALID; 
+    ErrCode err = AccountSA::OsAccountManager::GetForegroundOsAccountDisplayId(userId, displayId);
+    TLOGI(WmsLogTag::WMS_RECOVER, "displayId: %{public}d,", displayId);
+    if (err != ERR_OK) {
+        TLOGE(WmsLogTag::WMS_RECOVER, 
+              "get user display failed, errorCode: %{public}d, userId %{public}d", err, userId);
+    }
+    return err;
+}
+
+ErrCode MockSessionManagerService::NotifyWMSConnectionStatus(int32_t userId, 
+    const sptr<ISessionManagerServiceRecoverListener>& smsListener) {
+    bool isWMSConnected = false;
+    {
+        std::lock_guard<std::mutex> lock(wmsConnectionStatusLock_);
+        if (wmsConnectionStatusMap_.find(userId) != wmsConnectionStatusMap_.end()) {
+            isWMSConnected = wmsConnectionStatusMap_[userId];
+        }
+    }
+    if (smsListener && isWMSConnected) {
+        auto sessionManagerService = GetSessionManagerServiceByUserId(userId);
+        if (sessionManagerService == nullptr) {
+            TLOGE(WmsLogTag::WMS_RECOVER, "SessionManagerService is null");
+            return ERR_DEAD_OBJECT;
+        }
+        TLOGI(WmsLogTag::WMS_MULTI_USER, "wms is already connected, notify client");
+        int32_t screenId = DEFAULT_SCREEN_ID;
+        {
+            std::lock_guard<std::mutex> lock(userId2ScreenIdMapMutex_);
+            screenId = userId2ScreenIdMap_[userId];
+        }
+        smsListener->OnWMSConnectionChanged(userId, screenId, true, sessionManagerService);
     }
     return ERR_OK;
 }
