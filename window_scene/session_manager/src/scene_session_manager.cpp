@@ -16186,7 +16186,7 @@ void SceneSessionManager::ClearWatermarkForSession(const sptr<SceneSession>& ses
             return;
         }
         RSInterfaces::GetInstance().ClearSurfaceWatermarkForNodes(watermarkName, nodeIds);
-        ClearWatermarkRecordWhenAppExit(session);
+        ClearWatermarkRecordWhenAppExit(sceneSession);
         TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: win=[%{public}d, %{public}s], pid=%{public}d, "
             "watermark=%{public}s", where, sceneSession->GetWindowId(), sceneSession->GetWindowName().c_str(),
             pid, watermarkName.c_str());
@@ -16208,7 +16208,7 @@ void SceneSessionManager::ClearWatermarkRecordWhenAppExit(const sptr<SceneSessio
         }
     }
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "app exit: win=[%{public}d, %{public}s], pid=%{public}d",
-        sceneSession->GetWindowId(), sceneSession->GetWindowName().c_str(), session->GetCallingPid());
+        session->GetWindowId(), session->GetWindowName().c_str(), session->GetCallingPid());
     std::unique_lock<std::shared_mutex> lock(appWatermarkMapMutex_);
     appWatermarkPidMap_.erase(session->GetCallingPid());
 }
