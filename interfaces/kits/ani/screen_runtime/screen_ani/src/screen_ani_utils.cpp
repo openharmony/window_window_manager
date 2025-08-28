@@ -383,5 +383,30 @@ ani_status ScreenAniUtils::GetRectFromAni(ani_env* env, ani_object mainScreenReg
     mainScreenRegion.height_ = static_cast<int32_t>(height);
     return ANI_OK;
 }
+
+ani_status ScreenAniUtils::GetScreenIdArrayFromAni(ani_env* env, ani_object mirrorScreen,
+    std::vector<ScreenId>& mirrorScreenIds)
+{
+    ani_int length = 0;
+    env->Object_GetPropertyByName_Int(mirrorScreen, "length", &length);
+    TLOGI(WmsLogTag::DMS, "[ANI] length %{public}d", (ani_int)length);
+    for (int32_t i = 0; i < length; i++) {
+        ani_ref screenIdRef;
+        auto ret = env->Object_CallMethodByName_Ref(mirrorScreen, "$_get", "i:C{std.core.Object}",
+            &screenIdRef, (ani_int)i);
+        if (ANI_OK != ret) {
+            TLOGE(WmsLogTag::DMS, "[ANI] get ani_array index %{public}u fail, ret: %{public}u", (ani_int)i, ret);
+            return ret;
+        }
+        ani_long screenId;
+        ret = env->Object_CallMethodByName_Long(static_cast<ani_object>(screenIdRef), "unboxed", ":l", &screenId);
+        if (ANI_OK != ret) {
+            TLOGE(WmsLogTag::DMS, "[ANI] unboxed screenId failed, ret: %{public}u", ret);
+            return ret;
+        }
+        mirrorScreenIds.emplace_back(static_cast<ScreenId>(screenId));
+    }
+    return ANI_OK;
+}
 }
 }

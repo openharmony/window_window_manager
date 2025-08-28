@@ -51,6 +51,7 @@ public:
     static ani_object MakeUnique(ani_env* env, ani_object uniqueScreenIds);
     static ani_long MakeMirrorWithRegion(ani_env* env, ani_long mainScreen, ani_object mirrorScreen,
         ani_object mainScreenRegionAni);
+    static void StopMirror(ani_env* env, ani_object mirrorScreen);
 private:
     void OnRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
     void OnUnRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
