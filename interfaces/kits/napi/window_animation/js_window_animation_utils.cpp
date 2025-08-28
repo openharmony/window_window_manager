@@ -35,6 +35,10 @@ napi_value CreateJsNumber(napi_env env, T value)
         napi_create_int64(env, value, &result);
     } else if constexpr (std::is_same_v<T, double>) {
         napi_create_double(env, value, &result);
+    } else if constexpr (std::is_same_v<T, float>) {
+        napi_create_double(env, static_cast<double>(value), &result);
+    } else {
+        static_assert(!std::is_same_v<T, T>, "not support type");
     }
     return result;
 }
@@ -58,6 +62,8 @@ napi_value CreateJsValue(napi_env env, const T& value)
         (value != nullptr) ? napi_create_string_utf8(env, value, strlen(value), &result) :
             napi_get_undefined(env, &result);
         return result;
+    } else {
+        static_assert(!std::is_same_v<T, T>, "not support type");
     }
 }
 
@@ -72,6 +78,8 @@ bool ConvertFromJsNumber(napi_env env, napi_value jsValue, T& outValue)
         NAPI_CALL_NO_THROW(napi_get_value_int64(env, jsValue, &outValue), false);
     } else if constexpr (std::is_same_v<T, double>) {
         NAPI_CALL_NO_THROW(napi_get_value_double(env, jsValue, &outValue), false);
+    } else {
+        static_assert(!std::is_same_v<T, T>, "not support type");
     }
     return true;
 }
@@ -95,7 +103,7 @@ bool ConvertFromJsValue(napi_env env, napi_value jsValue, T& value)
         auto buffer = std::make_unique<char[]>(len + 1);
         size_t strLength = 0;
         NAPI_CALL_NO_THROW(napi_get_value_string_utf8(env, jsValue, buffer.get(), len + 1, &strLength), false);
-        value = buffer.get();
+        value = std::string(buffer.get(), strLength);
         return true;
     } else if constexpr (std::is_enum_v<ValueType>) {
         std::make_signed_t<ValueType> numberValue = 0;
@@ -104,6 +112,8 @@ bool ConvertFromJsValue(napi_env env, napi_value jsValue, T& value)
         }
         value = static_cast<ValueType>(numberValue);
         return true;
+    } else {
+        static_assert(!std::is_same_v<T, T>, "not support type");
     }
 }
 
@@ -111,7 +121,10 @@ template<class T>
 bool ParseJsValue(napi_value jsObject, napi_env env, const std::string& name, T& data)
 {
     napi_value value = nullptr;
-    napi_get_named_property(env, jsObject, name.c_str(), &value);
+    napi_status status = napi_get_named_property(env, jsObject, name.c_str(), &value);
+    if (status != napi_ok) {
+        return false;
+    }
     napi_valuetype type = napi_undefined;
     napi_typeof(env, value, &type);
     if (type != napi_undefined) {
@@ -201,7 +214,7 @@ napi_value ConvertWindowAnimationOptionToJsValue(napi_env env,
             napi_create_array(env, &params);
             for (uint32_t i = 0; i < ANIMATION_PARAM_SIZE; ++i) {
                 napi_value element;
-                napi_create_double(env, static_cast<double>(animationConfig.params[i]), &element);
+                napi_create_double(env, static_cast<double>(animationConfig.param[i]), &element);
                 napi_set_element(env, params, i, element);
             }
             napi_set_named_property(env, configJsValue, "param", params);
@@ -321,10 +334,10 @@ bool CheckWindowAnimationOption(napi_env env, WindowAnimationOption& animationCo
         }
         case WindowAnimationCurve::INTERPOLATION_SPRING: {
             for (uint32_t i = 1; i < ANIMATION_PARAM_SIZE; ++i) {
-                if (animationConfig.params[i] <= 0.0) {
+                if (animationConfig.param[i] <= 0.0) {
                     TLOGI(WmsLogTag::WMS_ANIMATION, "Interpolation spring param %{public}u is invalid: %{public}f",
-                        i, animationConfig.params[i]);
-                    animationConfig.params[i] = 1.0;
+                        i, animationConfig.param[i]);
+                    animationConfig.param[i] = 1.0;
                 }
             }
             break;
@@ -386,7 +399,7 @@ bool ConvertWindowAnimationOptionFromJsValue(napi_env env, napi_value jsAnimatio
                     result = WmErrorCode::WM_ERROR_INVALID_PARAM;
                     return false;
                 }
-                animationConfig.params[i] = static_cast<float>(params[i]);
+                animationConfig.param[i] = static_cast<float>(params[i]);
             }
             break;
         }
