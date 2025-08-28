@@ -606,8 +606,18 @@ ani_object AniWindowUtils::CreateAniRotationChangeInfo(ani_env* env, const Rotat
 
 void AniWindowUtils::ParseRotationChangeResult(ani_env* env, ani_object obj, RotationChangeResult& rotationChangeResult)
 {
+    ani_boolean isUndefined;
+    ani_status ret = env->Reference_IsUndefined(obj, &isUndefined);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[ANI] Check rotationChangeResultObj isUndefined failed, ret: %{public}d", ret);
+        return;
+    }
+    if (isUndefined) {
+        TLOGI(WmsLogTag::WMS_ROTATION, "[ANI] RotationChangeResult is undefined");
+        return;
+    }
     ani_ref rectTypeRef;
-    ani_status ret = env->Object_GetPropertyByName_Ref(obj, "rectType", &rectTypeRef);
+    ret = env->Object_GetPropertyByName_Ref(obj, "rectType", &rectTypeRef);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::WMS_ROTATION, "[ANI] Object_GetPropertyByName_Ref failed, ret: %{public}d", ret);
         return;
