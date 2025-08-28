@@ -1258,6 +1258,7 @@ HWTEST_F(SceneSessionTest6, SetSupportEnterWaterfallMode, Function | SmallTest |
 
     session->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     session->SetSupportEnterWaterfallMode(true);
+    EXPECT_TRUE(session->sessionStage_ != nullptr);
 }
 } // namespace
 } // namespace Rosen
