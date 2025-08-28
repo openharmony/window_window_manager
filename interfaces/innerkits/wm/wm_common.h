@@ -439,7 +439,7 @@ enum class ControlAppType : uint8_t {
     CONTROL_APP_TYPE_BEGIN = 0,
     APP_LOCK = 1,
     PARENT_CONTROL,
-    DLP_HIDE,
+    DLP,
     PRIVACY_WINDOW,
     CONTROL_APP_TYPE_END,
 };

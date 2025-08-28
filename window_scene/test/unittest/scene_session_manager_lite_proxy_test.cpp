@@ -284,4 +284,28 @@ HWTEST_F(sceneSessionManagerLiteProxyTest, IsFocusWindowParent, TestSize.Level1)
     EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
     MockMessageParcel::SetReadInt32ErrorFlag(false);
 }
+
+/**
+ * @tc.name: NotifyAppUseControlList
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerLiteProxyTest, NotifyAppUseControlList, TestSize.Level1)
+{
+    sptr<MockIRemoteObject> iRemoteObjectMocker = sptr<MockIRemoteObject>::MakeSptr();
+    sptr<SceneSessionManagerLiteProxy> sceneSessionManagerLiteProxy =
+        sptr<SceneSessionManagerLiteProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sceneSessionManagerLiteProxy, nullptr);
+    MockMessageParcel::ClearAllErrorFlag();
+    ControlAppType type = ControlAppType::DLP;
+    int32_t userId = 100;
+    std::vector<AppUseControlInfo> controlList;
+    AppUseControlInfo controlInfo;
+    controlList.push_back(controlInfo);
+    WMError errCode = sceneSessionManagerLiteProxy->NotifyAppUseControlList(type, userId, controlList);
+    EXPECT_EQ(errCode, WSError::WS_OK);
+    MockMessageParcel::SetWriteParcelableErrorFlag(true);
+    errCode = sceneSessionManagerLiteProxy->NotifyAppUseControlList(type, userId, controlList);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_INVALID_PARAM);
+}
 }
