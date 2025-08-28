@@ -1065,7 +1065,6 @@ HWTEST_F(ScreenSessionManagerTest, NotifyDisplayChangedByUidInner, TestSize.Leve
     EXPECT_TRUE(g_errLog.find("uid") != std::string::npos);
 }
 
-
 /**
  * @tc.name: SynchronizePowerStatusPermissionDenied
  * @tc.desc: SynchronizePowerStatus test permission denied.
