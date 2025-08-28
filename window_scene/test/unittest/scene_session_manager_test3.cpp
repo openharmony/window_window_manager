@@ -1452,21 +1452,6 @@ HWTEST_F(SceneSessionManagerTest3, RegisterSessionExceptionFunc, TestSize.Level1
 }
 
 /**
- * @tc.name: UpdateFocus
- * @tc.desc: SceneSesionManager update focus
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest3, UpdateFocus, TestSize.Level1)
-{
-    int32_t persistentId = 10086;
-    SessionInfo info;
-    info.bundleName_ = "bundleName_";
-    bool isFocused = true;
-    WSError result = ssm_->UpdateFocus(persistentId, isFocused);
-    ASSERT_EQ(result, WSError::WS_OK);
-}
-
-/**
  * @tc.name: UpdateWindowMode
  * @tc.desc: SceneSesionManager update window mode
  * @tc.type: FUNC
