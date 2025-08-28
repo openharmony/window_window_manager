@@ -1094,6 +1094,45 @@ HWTEST_F(ScreenSessionManagerTest, SetLandscapeLockStatus01, TestSize.Level1)
     EXPECT_TRUE(g_errLog.find("permission denied!") != std::string::npos);
 }
 
+chaos
+/**
+ * @tc.name: NotifyDisplayChangedByUid
+ * @tc.desc: NotifyDisplayChangedByUid test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, NotifyDisplayChangedByUid, TestSize.Level1)
+{
+    g_errLog.clear();
+    ASSERT_NE(ssm, nullptr);
+    ssm_->screenSessionMap_.clear();
+    ScreenId screenId = 1050;
+    sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(screenId, ScreenProperty(), 0);
+    ASSERT_NE(screenSession, nullptr);
+    ssm_->screenSessionMap_[screenId] = screenSession;
+    std::map<ScreenId, sptr<ScreenSession>> screenSessionMapCopy = ssm_->screenSessionMap_;
+    ssm_->NotifyDisplayChangedByUid(screenSessionMapCopy, DisplayChangeEvent::DISPLAY_SIZE_CHANGED, 2002);
+    ssm_->screenSessionMap_[1051] = nullptr;
+    ssm_->NotifyDisplayChangedByUid(screenSessionMapCopy, DisplayChangeEvent::DISPLAY_SIZE_CHANGED, 2002);
+    EXPECT_TRUE(g_errLog.find("screenSession is nullptr") != std::string::npos);
+}
+
+/**
+ * @tc.name: NotifyDisplayChangedByUidInner
+ * @tc.desc: NotifyDisplayChangedByUidInner test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, NotifyDisplayChangedByUidInner, TestSize.Level1)
+{
+    g_errLog.clear();
+    ASSERT_NE(ssm, nullptr);
+    ScreenId screenId = 1050;
+    sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(screenId, ScreenProperty(), 0);
+    ASSERT_NE(screenSession, nullptr);
+    ssm_->NotifyDisplayChangedByUid((screenSession->ConvertToDisplayInfo(),
+        DisplayChangeEvent::DISPLAY_SIZE_CHANGED, 2002);
+    EXPECT_TRUE(g_errLog.find("uid") != std::string::npos);
+}
+
 /**
  * @tc.name: SynchronizePowerStatusPermissionDenied
  * @tc.desc: SynchronizePowerStatus test permission denied.

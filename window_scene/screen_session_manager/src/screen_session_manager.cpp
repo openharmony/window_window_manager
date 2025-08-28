@@ -573,6 +573,11 @@ DMError ScreenSessionManager::RegisterDisplayManagerAgent(
         TLOGE(WmsLogTag::DMS, "DisplayManagerAgentType: %{public}u", static_cast<uint32_t>(type));
         return DMError::DM_ERROR_INVALID_PARAM;
     }
+    if (type == DisplayManagerAgentType::DISPLAY_EVENT_LISTENER) {
+        auto uid = IPCSkeleton::GetCallingUid();
+        auto pid = IPCSkeleton::GetCallingPid();
+        uidAndPidMap_[uid] = pid;
+    }
     return dmAgentContainer_.RegisterAgent(displayManagerAgent, type) ? DMError::DM_OK :DMError::DM_ERROR_NULLPTR;
 }
 
@@ -2232,15 +2237,68 @@ void ScreenSessionManager::UpdateDisplayHookInfo(int32_t uid, bool enable, const
         TLOGE(WmsLogTag::DMS, "permission denied!");
         return;
     }
-
+    std::map<ScreenId, sptr<ScreenSession>> screenSessionMapCopy;
+    {
+        std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+        screenSessionMapCopy = screenSessionMap_;
+    }
     std::unique_lock<std::shared_mutex> lock(hookInfoMutex_);
     if (enable) {
         if (uid != 0) {
             displayHookMap_[uid] = hookInfo;
+            NotifyDisplayChangedByUid(screenSessionMapCopy, DisplayChangeEvent::DISPLAY_SIZE_CHANGED, uid);
         }
     } else {
         displayHookMap_.erase(uid);
     }
+}
+
+void ScreenSessionManager::NotifyDisplayChangedByUid(const std::map<ScreenId, sptr<ScreenSession>>& screenSessionMap,
+    DisplayChangeEvent event, int32_t uid)
+{
+    for (const auto& sessionIt : screenSessionMap) {
+        auto screenSession = sessionIt.second;
+        if (screenSession == nullptr) {
+            TLOGE(WmsLogTag::DMS, "screenSession is nullptr");
+            continue;
+        }
+        NotifyDisplayChangedByUidInner(screenSession->ConvertToDisplayInfo(), event, uid);
+    }
+}
+
+void ScreenSessionManager::NotifyDisplayChangedByUidInner(sptr<DisplayInfo> displayInfo,
+    DisplayChangeEvent event, int32_t uid)
+{
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::DMS, "displayInfo is nullptr.");
+        return;
+    }
+    auto task = [=] {
+        auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::DISPLAY_EVENT_LISTENER);
+        if (event == DisplayChangeEvent::UPDATE_REFRESHRATE) {
+            TLOGND(WmsLogTag::DMS, "evevt:%{public}d, displayId:%{public}" PRIu64", agent size: %{public}u",
+                event, displayInfo->GetDisplayId(), static_cast<uint32_t>(agents.size()));
+        } else {
+            TLOGNI(WmsLogTag::DMS, "evevt:%{public}d, displayId:%{public}" PRIu64", agent size: %{public}u",
+                event, displayInfo->GetDisplayId(), static_cast<uint32_t>(agents.size()));
+        }
+        if (agents.empty()) {
+            return;
+        }
+        for (const auto& agent : agents) {
+            int32_t agentPid = dmAgentContainer_.GetAgentPid(agent);
+            auto iter = uidAndPidMap_.find(uid);
+            if (iter == uidAndPidMap_.end() || iter->second != agentPid) {
+                TLOGND(WmsLogTag::DMS, "no notify");
+                continue;
+            }
+            if (!IsFreezed(agentPid, DisplayManagerAgentType::DISPLAY_EVENT_LISTENER)) {
+                agent->OnDisplayChange(displayInfo, event);
+                TLOGND(WmsLogTag::DMS, "notify, uid:%{public}d, pid: %{public}d", uid, agentPid);
+            }
+        }
+    };
+    taskScheduler_->PostAsyncTask(task, "NotifyDisplayChanged");
 }
 
 void ScreenSessionManager::GetDisplayHookInfo(int32_t uid, DMHookInfo& hookInfo)
