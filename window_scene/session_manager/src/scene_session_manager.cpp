@@ -384,6 +384,84 @@ SceneSessionManager::~SceneSessionManager()
     SessionChangeRecorder::GetInstance().stopLogFlag_.store(true);
 }
 
+void SceneSessionManager::Init()
+{
+    bool isScbCoreEnabled = system::GetParameter("persist.window.scbcore.enable", "1") == "1";
+    Session::SetScbCoreEnabled(isScbCoreEnabled);
+    bool isBackgroundWindowNotifyEnabled = system::GetParameter("persist.window.background.notify.enable", "0") == "1";
+    Session::SetBackgroundUpdateRectNotifyEnabled(isBackgroundWindowNotifyEnabled);
+
+    constexpr uint64_t interval = 5 * 1000; // 5 second
+    if (HiviewDFX::Watchdog::GetInstance().AddThread(
+        SCENE_SESSION_MANAGER_THREAD, taskScheduler_->GetEventHandler(), interval)) {
+        TLOGW(WmsLogTag::DEFAULT, "Add thread %{public}s to watchdog failed.", SCENE_SESSION_MANAGER_THREAD.c_str());
+    }
+
+    bundleMgr_ = GetBundleManager();
+
+    // Parse configuration.
+    LoadWindowSceneXml();
+    LoadWindowParameter();
+    InitPrepareTerminateConfig();
+
+    ScreenSessionManagerClient::GetInstance().RegisterDisplayChangeListener(sptr<DisplayChangeListener>::MakeSptr());
+    ScreenSessionManagerClient::GetInstance().RegisterScreenConnectionChangeListener(
+        sptr<ScreenConnectionChangeListener>::MakeSptr());
+
+    // create handler for inner command at server
+    eventLoop_ = AppExecFwk::EventRunner::Create(WINDOW_INFO_REPORT_THREAD);
+    eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(eventLoop_);
+    int ret = HiviewDFX::Watchdog::GetInstance().AddThread(WINDOW_INFO_REPORT_THREAD, eventHandler_);
+    if (ret != 0) {
+        TLOGW(WmsLogTag::DEFAULT, "Add thread %{public}s to watchdog failed.", WINDOW_INFO_REPORT_THREAD.c_str());
+    }
+    taskScheduler_->SetExportHandler(eventHandler_);
+
+    scbSessionHandler_ = sptr<ScbSessionHandler>::MakeSptr();
+    AAFwk::AbilityManagerClient::GetInstance()->RegisterSessionHandler(scbSessionHandler_);
+    StartWindowInfoReportLoop();
+    TLOGI(WmsLogTag::DEFAULT, "SSM init success.");
+
+    RegisterAppListener();
+    openDebugTrace_ = std::atoi((system::GetParameter("persist.sys.graphic.openDebugTrace", "0")).c_str()) != 0;
+    isKeyboardPanelEnabled_ = system::GetParameter("persist.sceneboard.keyboardPanel.enabled", "1")  == "1";
+
+    // window recover
+    RegisterSessionRecoverStateChangeListener();
+    RegisterRecoverStateChangeListener();
+
+    // Input init.
+    SceneInputManager::GetInstance().Init();
+    RegisterFlushWindowInfoCallback();
+
+    // DFX
+    SessionChangeRecorder::GetInstance().Init();
+
+    // MMI window state error check
+    int32_t retCode = MMI::InputManager::GetInstance()->
+        RegisterWindowStateErrorCallback([this](int32_t pid, int32_t persistentId) {
+        this->NotifyWindowStateErrorFromMMI(pid, persistentId);
+    });
+    TLOGI(WmsLogTag::WMS_EVENT, "register WindowStateError callback with ret: %{public}d", retCode);
+
+    if (MultiInstanceManager::IsSupportMultiInstance(systemConfig_)) {
+        MultiInstanceManager::GetInstance().Init(bundleMgr_, taskScheduler_);
+        MultiInstanceManager::GetInstance().SetCurrentUserId(currentUserId_);
+    }
+    AbilityInfoManager::GetInstance().Init(bundleMgr_);
+    AbilityInfoManager::GetInstance().SetCurrentUserId(currentUserId_);
+
+    InitVsyncStation();
+    UpdateDarkColorModeToRS();
+    CreateRootSceneSession();
+    foldChangeCallback_ = std::make_shared<FoldScreenStatusChangeCallback>(
+        std::bind(&SceneSessionManager::UpdateSessionWithFoldStateChange, this, std::placeholders::_1,
+        std::placeholders::_2, std::placeholders::_3));
+    PcFoldScreenManager::GetInstance().RegisterFoldScreenStatusChangeCallback(0, foldChangeCallback_);
+
+    InitSnapshotCache();
+}
+
 void SceneSessionManager::RegisterSessionRecoverStateChangeListener()
 {
     sessionRecoverStateChangeFunc_ = [this](const SessionRecoverState& state,
@@ -17392,81 +17470,3 @@ WMError SceneSessionManager::UpdateSystemDecorEnable(bool enable)
     return WMError::WM_OK;
 }
 } // namespace OHOS::Rosen
-
-void SceneSessionManager::Init()
-{
-    bool isScbCoreEnabled = system::GetParameter("persist.window.scbcore.enable", "1") == "1";
-    Session::SetScbCoreEnabled(isScbCoreEnabled);
-    bool isBackgroundWindowNotifyEnabled = system::GetParameter("persist.window.background.notify.enable", "0") == "1";
-    Session::SetBackgroundUpdateRectNotifyEnabled(isBackgroundWindowNotifyEnabled);
-
-    constexpr uint64_t interval = 5 * 1000; // 5 second
-    if (HiviewDFX::Watchdog::GetInstance().AddThread(
-        SCENE_SESSION_MANAGER_THREAD, taskScheduler_->GetEventHandler(), interval)) {
-        TLOGW(WmsLogTag::DEFAULT, "Add thread %{public}s to watchdog failed.", SCENE_SESSION_MANAGER_THREAD.c_str());
-    }
-
-    bundleMgr_ = GetBundleManager();
-
-    // Parse configuration.
-    LoadWindowSceneXml();
-    LoadWindowParameter();
-    InitPrepareTerminateConfig();
-
-    ScreenSessionManagerClient::GetInstance().RegisterDisplayChangeListener(sptr<DisplayChangeListener>::MakeSptr());
-    ScreenSessionManagerClient::GetInstance().RegisterScreenConnectionChangeListener(
-        sptr<ScreenConnectionChangeListener>::MakeSptr());
-
-    // create handler for inner command at server
-    eventLoop_ = AppExecFwk::EventRunner::Create(WINDOW_INFO_REPORT_THREAD);
-    eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(eventLoop_);
-    int ret = HiviewDFX::Watchdog::GetInstance().AddThread(WINDOW_INFO_REPORT_THREAD, eventHandler_);
-    if (ret != 0) {
-        TLOGW(WmsLogTag::DEFAULT, "Add thread %{public}s to watchdog failed.", WINDOW_INFO_REPORT_THREAD.c_str());
-    }
-    taskScheduler_->SetExportHandler(eventHandler_);
-
-    scbSessionHandler_ = sptr<ScbSessionHandler>::MakeSptr();
-    AAFwk::AbilityManagerClient::GetInstance()->RegisterSessionHandler(scbSessionHandler_);
-    StartWindowInfoReportLoop();
-    TLOGI(WmsLogTag::DEFAULT, "SSM init success.");
-
-    RegisterAppListener();
-    openDebugTrace_ = std::atoi((system::GetParameter("persist.sys.graphic.openDebugTrace", "0")).c_str()) != 0;
-    isKeyboardPanelEnabled_ = system::GetParameter("persist.sceneboard.keyboardPanel.enabled", "1")  == "1";
-
-    // window recover
-    RegisterSessionRecoverStateChangeListener();
-    RegisterRecoverStateChangeListener();
-
-    // Input init.
-    SceneInputManager::GetInstance().Init();
-    RegisterFlushWindowInfoCallback();
-
-    // DFX
-    SessionChangeRecorder::GetInstance().Init();
-
-    // MMI window state error check
-    int32_t retCode = MMI::InputManager::GetInstance()->
-        RegisterWindowStateErrorCallback([this](int32_t pid, int32_t persistentId) {
-        this->NotifyWindowStateErrorFromMMI(pid, persistentId);
-    });
-    TLOGI(WmsLogTag::WMS_EVENT, "register WindowStateError callback with ret: %{public}d", retCode);
-
-    if (MultiInstanceManager::IsSupportMultiInstance(systemConfig_)) {
-        MultiInstanceManager::GetInstance().Init(bundleMgr_, taskScheduler_);
-        MultiInstanceManager::GetInstance().SetCurrentUserId(currentUserId_);
-    }
-    AbilityInfoManager::GetInstance().Init(bundleMgr_);
-    AbilityInfoManager::GetInstance().SetCurrentUserId(currentUserId_);
-
-    InitVsyncStation();
-    UpdateDarkColorModeToRS();
-    CreateRootSceneSession();
-    foldChangeCallback_ = std::make_shared<FoldScreenStatusChangeCallback>(
-        std::bind(&SceneSessionManager::UpdateSessionWithFoldStateChange, this, std::placeholders::_1,
-        std::placeholders::_2, std::placeholders::_3));
-    PcFoldScreenManager::GetInstance().RegisterFoldScreenStatusChangeCallback(0, foldChangeCallback_);
-
-    InitSnapshotCache();
-}
