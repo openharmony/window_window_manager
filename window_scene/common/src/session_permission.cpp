@@ -80,9 +80,7 @@ bool SessionPermission::IsSystemCalling()
     if (IsTokenNativeOrShellType(tokenId)) {
         return true;
     }
-    uint64_t accessTokenIDEx = IPCSkeleton::GetCallingFullTokenID();
-    bool isSystemApp = Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(accessTokenIDEx);
-    return isSystemApp;
+    return IsSystemAppCall();
 }
 
 bool SessionPermission::IsSystemAppCall()
@@ -160,8 +158,7 @@ bool SessionPermission::JudgeCallerIsAllowedToUseSystemAPI()
     if (IsSACalling() || IsShellCall()) {
         return true;
     }
-    auto callerToken = IPCSkeleton::GetCallingFullTokenID();
-    return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(callerToken);
+    return IsSystemAppCall();
 }
 
 bool SessionPermission::IsShellCall()
