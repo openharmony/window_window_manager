@@ -1808,7 +1808,9 @@ sptr<DisplayInfo> ScreenSessionManager::HookDisplayInfoByUid(sptr<DisplayInfo> d
         return nullptr;
     }
     auto uid = IPCSkeleton::GetCallingUid();
+    auto pid = IPCSkeleton::GetCallingPid();
     std::shared_lock<std::shared_mutex> lock(hookInfoMutex_);
+    uidAndPidMap_[uid] = pid;
     if (displayHookMap_.find(uid) != displayHookMap_.end()) {
         auto info = displayHookMap_[uid];
         std::ostringstream oss;
