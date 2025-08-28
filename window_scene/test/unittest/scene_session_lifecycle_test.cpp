@@ -23,6 +23,7 @@
 #include "session/host/include/sub_session.h"
 #include "session/host/include/system_session.h"
 #include "session/host/include/main_session.h"
+#include "screen_session_manager_client.h"
 #include "wm_common.h"
 #include "mock/mock_session_stage.h"
 #include "input_event.h"
@@ -238,6 +239,37 @@ HWTEST_F(SceneSessionLifecycleTest, Foreground06, TestSize.Level0)
     property3->SetWindowType(WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE);
     session->SetSessionProperty(property3);
     EXPECT_EQ(WSError::WS_OK, session->Foreground(property, false));
+}
+
+/**
+ * @tc.name: Foreground07
+ * @tc.desc: Foreground07 function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLifecycleTest, Foreground07, TestSize.Level0)
+{
+    SessionInfo info;
+    info.abilityName_ = "Foreground07";
+    info.bundleName_ = "Foreground07";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    session->property_ = property;
+    session->property_->SetDisplayId(ScreenSessionManagerClient::GetInstance().GetDefaultScreenId());
+    session->SetIsActivatedAfterScreenLocked(true);
+
+    GetStateFromManagerFunc func = [](const ManagerState key) {
+        switch (key) {
+            case ManagerState::MANAGER_STATE_SCREEN_LOCKED:
+                return true;
+            default:
+                return false;
+        }
+    };
+    session->SetGetStateFromManagerListener(func);
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->Foreground(property, false));
+    MockAccesstokenKit::MockAccessTokenKitRet(0);
 }
 
 /**
