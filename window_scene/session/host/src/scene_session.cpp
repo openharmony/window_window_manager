@@ -3715,20 +3715,17 @@ bool SceneSession::IsInCompatScaleMode()
 /**
  * throw slip to full screen
  */
-void SceneSession::ThrowSlipToFullScreen(WSRect& endRect, WSRect& rect)
+void SceneSession::ThrowSlipToFullScreen(WSRect& endRect, WSRect& rect, int32_t statusBarHeight, int32_t dockHeight)
 {
     if (pcFoldScreenController_ == nullptr) {
         return;
     }
-
-    int32_t statusBarHeight = IsLayoutFullScreen() ? 0 : GetStatusBarHeight();
-    int32_t dockHeight = IsLayoutFullScreen() ? 0 : GetDockHeight();
     // maximize end rect and notify last rect
     throwSlipToFullScreenAnimCount_.fetch_add(1);
     pcFoldScreenController_->ResizeToFullScreen(endRect, statusBarHeight, dockHeight);
     if (pcFoldScreenController_->IsThrowSlipDirectly()) {
         pcFoldScreenController_->ThrowSlipFloatingRectDirectly(
-            rect, GetSessionRequestRect(), GetStatusBarHeight(), GetDockHeight());
+            rect, GetSessionRequestRect(), statusBarHeight, dockHeight);
     }
 }
 
@@ -3784,7 +3781,7 @@ bool SceneSession::MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeR
     std::function<void()> finishCallback = nullptr;
     bool needSetFullScreen = pcFoldScreenController_->IsStartFullScreen();
     if (needSetFullScreen) {
-        ThrowSlipToFullScreen(endRect, rect);
+        ThrowSlipToFullScreen(endRect, rect, statusBarHeight, dockHeight);
         finishCallback = [weakThis = wptr(this), rect, where = __func__] {
             auto session = weakThis.promote();
             if (session == nullptr) {
