@@ -169,8 +169,9 @@ public:
     bool SetRotationFromWindow(Rotation targetRotation);
     sptr<SupportedScreenModes> GetScreenModesByDisplayId(DisplayId displayId);
     sptr<ScreenInfo> GetScreenInfoByDisplayId(DisplayId displayId);
-    void NotifyDisplayChangedByHook(const std::map<ScreenId, sptr<ScreenSession>>& screenSessionMap, DisplayChangeEvent event,
-        uint32_t uid);
+    void NotifyDisplayChangedByUid(const std::map<ScreenId, sptr<ScreenSession>>& screenSessionMap,
+        DisplayChangeEvent event, uint32_t uid);
+    void NotifyDisplayChangedByUidInner(sptr<DisplayInfo> displayInfo, DisplayChangeEvent event, uint32_t uid);
     void NotifyDisplayCreate(sptr<DisplayInfo> displayInfo);
     void NotifyDisplayDestroy(DisplayId displayId);
     void NotifyAndPublishEvent(sptr<DisplayInfo> displayInfo, ScreenId screenId, sptr<ScreenSession> screenSession);
