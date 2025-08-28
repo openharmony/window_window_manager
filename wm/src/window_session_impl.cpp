@@ -2132,12 +2132,12 @@ WSError WindowSessionImpl::SetKeyFramePolicy(KeyFramePolicy& keyFramePolicy)
 WMError WindowSessionImpl::SetDragKeyFramePolicy(const KeyFramePolicy& keyFramePolicy)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "in");
-    auto session = GetHostSession();
-    if (session == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "session is nullptr");
-        return WMError::WM_ERROR_NULLPTR;
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    WSError errorCode = session->SetDragKeyFramePolicy(keyFramePolicy);
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+    WSError errorCode = hostSession->SetDragKeyFramePolicy(keyFramePolicy);
     TLOGI(WmsLogTag::WMS_LAYOUT, "Id: %{public}d, keyFramePolicy: %{public}s, errorCode: %{public}d",
         GetPersistentId(), keyFramePolicy.ToString().c_str(), static_cast<int32_t>(errorCode));
     return static_cast<WMError>(errorCode);
