@@ -614,6 +614,8 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(ScreenAni::TransferStatic)},
         ani_native_function {"nativeTransferDynamic", "l:C{std.interop.ESValue}",
             reinterpret_cast<void *>(ScreenAni::TransferDynamic)},
+        ani_native_function {"setScreenActiveModeInternal", nullptr,
+            reinterpret_cast<void *>(ScreenAni::SetScreenActiveMode)},
     };
     if ((ret = env->Class_BindNativeMethods(screenCls, methods.data(), methods.size())) != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] bind screen class fail %{public}u", ret);
