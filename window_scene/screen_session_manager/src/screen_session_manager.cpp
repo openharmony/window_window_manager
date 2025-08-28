@@ -552,6 +552,11 @@ DMError ScreenSessionManager::RegisterDisplayManagerAgent(
         TLOGE(WmsLogTag::DMS, "DisplayManagerAgentType: %{public}u", static_cast<uint32_t>(type));
         return DMError::DM_ERROR_INVALID_PARAM;
     }
+    if (type == DisplayManagerAgentType::DISPLAY_EVENT_LISTENER) {
+        auto uid = IPCSkeleton::GetCallingUid();
+        auto pid = IPCSkeleton::GetCallingPid();
+        uidAndPidMap_[uid] = pid;
+    }
     return dmAgentContainer_.RegisterAgent(displayManagerAgent, type) ? DMError::DM_OK :DMError::DM_ERROR_NULLPTR;
 }
 
@@ -1808,9 +1813,7 @@ sptr<DisplayInfo> ScreenSessionManager::HookDisplayInfoByUid(sptr<DisplayInfo> d
         return nullptr;
     }
     auto uid = IPCSkeleton::GetCallingUid();
-    auto pid = IPCSkeleton::GetCallingPid();
     std::shared_lock<std::shared_mutex> lock(hookInfoMutex_);
-    uidAndPidMap_[uid] = pid;
     if (displayHookMap_.find(uid) != displayHookMap_.end()) {
         auto info = displayHookMap_[uid];
         std::ostringstream oss;
