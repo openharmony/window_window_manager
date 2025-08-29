@@ -621,79 +621,10 @@ void ScreenManagerAni::StopExpand(ani_env* env, ani_object expandScreensAni)
         return;
     }
     DmErrorCode res = DM_JS_TO_ERROR_CODE_MAP.at(
-            SingletonContainer::Get<ScreenManager>().StopExpand(screenIds));
+        SingletonContainer::Get<ScreenManager>().StopExpand(screenIds));
     if (res != DmErrorCode::DM_OK) {
         AniErrUtils::ThrowBusinessError(env, res, "ScreenManager::StopExpand failed.");
     }
-}
-
-void ScreenManagerAni::StopExpand(ani_env* env, ani_object expandScreensAni)
-{
-    TLOGI(WmsLogTag::DMS, "[ANI] start");
-    if (env == nullptr) {
-        TLOGE(WmsLogTag::DMS, "[ANI] env is nullptr");
-        return;
-    }
-    if (expandScreensAni == nullptr) {
-        TLOGE(WmsLogTag::DMS, "[ANI] expandScreensAni is nullptr");
-        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "expandScreensAni is nullptr");
-        return;
-    }
-    std::vector<ScreenId> screenIds;
-    ani_status ret = ScreenAniUtils::GetScreenIdArrayFromAni(env, expandScreensAni, screenIds);
-    if (ret != ANI_OK) {
-        TLOGE(WmsLogTag::DMS, "[ANI] get screenId array failed, ret: %{public}u", ret);
-        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "get screenId array failed");
-        return;
-    }
-    DmErrorCode res = DM_JS_TO_ERROR_CODE_MAP.at(
-            SingletonContainer::Get<ScreenManager>().StopExpand(screenIds));
-    if (res != DmErrorCode::DM_OK) {
-        AniErrUtils::ThrowBusinessError(env, res, "ScreenManager::StopExpand failed.");
-    }
-}
-
-ani_long ScreenManagerAni::MakeExpand(ani_env* env, ani_object expandOptionsAni)
-{
-    if (env == nullptr) {
-        TLOGE(WmsLogTag::DMS, "[ANI] env is nullptr");
-        return static_cast<ani_long>(INVALID_SCREEN_ID);
-    }
-    if (expandOptionsAni == nullptr) {
-        TLOGE(WmsLogTag::DMS, "[ANI] expandOptionsAni is nullptr");
-        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "expandOptionsAni is nullptr");
-        return static_cast<ani_long>(INVALID_SCREEN_ID);
-    }
-    std::vector<ExpandOption> options;
-    ani_int length = 0;
-    env->Object_GetPropertyByName_Int(expandOptionsAni, "length", &length);
-    TLOGI(WmsLogTag::DMS, "[ANI] length %{public}d", (ani_int)length);
-    for (int32_t i = 0; i < length; i++) {
-        ani_ref optionRef;
-        auto ret = env->Object_CallMethodByName_Ref(expandOptionsAni, "$_get", "i:C{std.core.Object}",
-            &optionRef, (ani_int)i);
-        if (ret != ANI_OK) {
-            TLOGE(WmsLogTag::DMS, "[ANI] get ani_array index %{public}u fail, ret: %{public}u", (ani_int)i, ret);
-            AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Get optionRef failed");
-            return static_cast<ani_long>(INVALID_SCREEN_ID);
-        }
-        ExpandOption expandOption;
-        ret = ScreenAniUtils::GetExpandOptionFromAni(env, static_cast<ani_object>(optionRef), expandOption);
-        if (ret != ANI_OK) {
-            TLOGE(WmsLogTag::DMS, "[ANI] Get expandOption failed, ret: %{public}u", ret);
-            AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Get expandOption failed");
-            return static_cast<ani_long>(INVALID_SCREEN_ID);
-        }
-        options.emplace_back(expandOption);
-    }
-    ScreenId screenGroupId = INVALID_SCREEN_ID;
-    DmErrorCode res = DM_JS_TO_ERROR_CODE_MAP.at(
-        SingletonContainer::Get<ScreenManager>().MakeExpand(options, screenGroupId));
-    if (res != DmErrorCode::DM_OK) {
-        AniErrUtils::ThrowBusinessError(env, res, "ScreenManager::MakeExpand failed.");
-        return static_cast<ani_long>(INVALID_SCREEN_ID);
-    }
-    return static_cast<ani_long>(screenGroupId);
 }
 
 ani_status ScreenManagerAni::NspBindNativeFunctions(ani_env* env, ani_namespace nsp)
@@ -795,7 +726,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     ret = ScreenManagerAni::ClassBindNativeFunctions(env, screenCls);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] bind screen class fail %{public}u", ret);
-        return ANI_NOT_FOUND;
+        return ret;
     }
     if (result == nullptr) {
         TLOGE(WmsLogTag::DMS, "[ANI] Result is nullptr");
