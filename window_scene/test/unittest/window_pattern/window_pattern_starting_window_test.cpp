@@ -101,7 +101,7 @@ namespace {
  * @tc.desc: GetStartupPage from want
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPatternStartingWindowTest, GetStartupPage01, TestSize.Level1)
+HWTEST_F(WindowPatternStartingWindowTest, GetStartupPage01, TestSize.Level3)
 {
     ASSERT_NE(ssm_, nullptr);
     SessionInfo sessionInfo;
@@ -127,7 +127,7 @@ HWTEST_F(WindowPatternStartingWindowTest, GetStartupPage01, TestSize.Level1)
  * @tc.desc: GetStartupPage from cache
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPatternStartingWindowTest, GetStartupPage02, TestSize.Level1)
+HWTEST_F(WindowPatternStartingWindowTest, GetStartupPage02, TestSize.Level3)
 {
     ASSERT_NE(ssm_, nullptr);
     SessionInfo sessionInfo;
@@ -137,8 +137,9 @@ HWTEST_F(WindowPatternStartingWindowTest, GetStartupPage02, TestSize.Level1)
     StartingWindowInfo cachedInfo;
     cachedInfo.iconPathEarlyVersion_ = "pathFromCache";
     ssm_->startingWindowMap_.clear();
-    auto key = sessionInfo.moduleName_ + sessionInfo.abilityName_;
-    std::map<std::string, StartingWindowInfo> startingWindowInfoMap{ { key, cachedInfo } };
+    bool isDark = false;
+    auto key = sessionInfo.moduleName_ + sessionInfo.abilityName_ + std::to_string(isDark);
+    std::map<std::string, StartingWindowInfo> startingWindowInfoMap { { key, cachedInfo } };
     ssm_->startingWindowMap_.insert({ sessionInfo.bundleName_, startingWindowInfoMap });
     StartingWindowInfo outInfo;
     outInfo.iconPathEarlyVersion_ = "default";
@@ -151,7 +152,7 @@ HWTEST_F(WindowPatternStartingWindowTest, GetStartupPage02, TestSize.Level1)
  * @tc.desc: GetStartupPage from rdb
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPatternStartingWindowTest, GetStartupPage03, TestSize.Level1)
+HWTEST_F(WindowPatternStartingWindowTest, GetStartupPage03, TestSize.Level3)
 {
     ASSERT_NE(ssm_, nullptr);
     InitTestStartingWindowRdb();
@@ -178,7 +179,7 @@ HWTEST_F(WindowPatternStartingWindowTest, GetStartupPage03, TestSize.Level1)
  * @tc.desc: GetStartingWindowInfoFromCache
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPatternStartingWindowTest, GetStartingWindowInfoFromCache, TestSize.Level1)
+HWTEST_F(WindowPatternStartingWindowTest, GetStartingWindowInfoFromCache, TestSize.Level3)
 {
     ASSERT_NE(ssm_, nullptr);
     ssm_->startingWindowMap_.clear();
@@ -205,7 +206,7 @@ HWTEST_F(WindowPatternStartingWindowTest, GetStartingWindowInfoFromCache, TestSi
  * @tc.desc: GetStartingWindowInfoFromRdb
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPatternStartingWindowTest, GetStartingWindowInfoFromRdb, TestSize.Level1)
+HWTEST_F(WindowPatternStartingWindowTest, GetStartingWindowInfoFromRdb, TestSize.Level3)
 {
     ASSERT_NE(ssm_, nullptr);
     InitTestStartingWindowRdb();
@@ -235,7 +236,7 @@ HWTEST_F(WindowPatternStartingWindowTest, GetStartingWindowInfoFromRdb, TestSize
  * @tc.desc: GetIconFromDesk
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPatternStartingWindowTest, GetIconFromDesk, TestSize.Level1)
+HWTEST_F(WindowPatternStartingWindowTest, GetIconFromDesk, TestSize.Level3)
 {
     ASSERT_NE(ssm_, nullptr);
     SessionInfo sessionInfo;
@@ -257,7 +258,7 @@ HWTEST_F(WindowPatternStartingWindowTest, GetIconFromDesk, TestSize.Level1)
  * @tc.desc: GetStartupPageFromResource
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPatternStartingWindowTest, GetStartupPageFromResource, TestSize.Level1)
+HWTEST_F(WindowPatternStartingWindowTest, GetStartupPageFromResource, TestSize.Level3)
 {
     ASSERT_NE(ssm_, nullptr);
     AppExecFwk::AbilityInfo info;
@@ -275,7 +276,7 @@ HWTEST_F(WindowPatternStartingWindowTest, GetStartupPageFromResource, TestSize.L
  * @tc.desc: Cache new starting window info
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPatternStartingWindowTest, CacheStartingWindowInfo01, TestSize.Level1)
+HWTEST_F(WindowPatternStartingWindowTest, CacheStartingWindowInfo01, TestSize.Level3)
 {
     ASSERT_NE(ssm_, nullptr);
     ssm_->startingWindowMap_.clear();
@@ -293,14 +294,16 @@ HWTEST_F(WindowPatternStartingWindowTest, CacheStartingWindowInfo01, TestSize.Le
     /**
      * @tc.steps: step2. Cache info and check result.
      */
-    ssm_->CacheStartingWindowInfo(abilityInfo.bundleName, abilityInfo.moduleName, abilityInfo.name, startingWindowInfo);
+    bool isDark = false;
+    ssm_->CacheStartingWindowInfo(
+        abilityInfo.bundleName, abilityInfo.moduleName, abilityInfo.name, startingWindowInfo, isDark);
     auto iter = ssm_->startingWindowMap_.find(abilityInfo.bundleName);
     ASSERT_NE(iter, ssm_->startingWindowMap_.end());
     auto& infoMap = iter->second;
-    auto infoIter = infoMap.find(abilityInfo.moduleName + abilityInfo.name);
+    auto infoIter = infoMap.find(abilityInfo.moduleName + abilityInfo.name + std::to_string(isDark));
     ASSERT_NE(infoIter, infoMap.end());
-    ASSERT_EQ(infoIter->second.backgroundColorEarlyVersion_, 0xff000000);
-    ASSERT_EQ(infoIter->second.iconPathEarlyVersion_, "cachedPath");
+    EXPECT_EQ(infoIter->second.backgroundColorEarlyVersion_, 0xff000000);
+    EXPECT_EQ(infoIter->second.iconPathEarlyVersion_, "cachedPath");
 }
 
 /**
@@ -308,7 +311,7 @@ HWTEST_F(WindowPatternStartingWindowTest, CacheStartingWindowInfo01, TestSize.Le
  * @tc.desc: Execute when info is cached
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPatternStartingWindowTest, CacheStartingWindowInfo02, TestSize.Level1)
+HWTEST_F(WindowPatternStartingWindowTest, CacheStartingWindowInfo02, TestSize.Level3)
 {
     ASSERT_NE(ssm_, nullptr);
     ssm_->startingWindowMap_.clear();
@@ -331,20 +334,67 @@ HWTEST_F(WindowPatternStartingWindowTest, CacheStartingWindowInfo02, TestSize.Le
         .backgroundColorEarlyVersion_ = 0x00000000,
         .iconPathEarlyVersion_ = "path",
     };
-    std::map<std::string, StartingWindowInfo> startingWindowInfoMap{ { key, anotherStartingWindowInfo } };
-    ssm_->startingWindowMap_.insert({ abilityInfo.bundleName, startingWindowInfoMap });
+    std::map<std::string, StartingWindowInfo> startingWindowInfoMap{{ key, anotherStartingWindowInfo }};
+    ssm_->startingWindowMap_.insert({abilityInfo.bundleName, startingWindowInfoMap});
 
     /**
      * @tc.steps: step3. Execute and check result.
      */
-    ssm_->CacheStartingWindowInfo(abilityInfo.bundleName, abilityInfo.moduleName, abilityInfo.name, startingWindowInfo);
+    bool isDark = false;
+    ssm_->CacheStartingWindowInfo(
+        abilityInfo.bundleName, abilityInfo.moduleName, abilityInfo.name, startingWindowInfo, isDark);
     auto iter = ssm_->startingWindowMap_.find(abilityInfo.bundleName);
     ASSERT_NE(iter, ssm_->startingWindowMap_.end());
     auto& infoMap = iter->second;
-    auto infoIter = infoMap.find(abilityInfo.moduleName + abilityInfo.name);
+    auto infoIter = infoMap.find(abilityInfo.moduleName + abilityInfo.name + std::to_string(isDark));
     ASSERT_NE(infoIter, infoMap.end());
-    ASSERT_NE(infoIter->second.backgroundColorEarlyVersion_, 0xff000000);
-    ASSERT_NE(infoIter->second.iconPathEarlyVersion_, "cachedPath");
+    EXPECT_EQ(infoIter->second.backgroundColorEarlyVersion_, 0xff000000);
+    EXPECT_EQ(infoIter->second.iconPathEarlyVersion_, "cachedPath");
+}
+
+/**
+ * @tc.name: CacheStartingWindowInfo03
+ * @tc.desc: Execute when cache is full
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternStartingWindowTest, CacheStartingWindowInfo03, TestSize.Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->startingWindowMap_.clear();
+    bool isDark = false;
+    for (int index = 0; index < 100; index++) {
+        AppExecFwk::AbilityInfo tempAbilityInfo;
+        tempAbilityInfo.name = "abilityName";
+        tempAbilityInfo.bundleName = "bundleName" + std::to_string(index);
+        tempAbilityInfo.moduleName = "moduleName";
+        StartingWindowInfo tempStartingWindowInfo;
+        tempStartingWindowInfo.backgroundColorEarlyVersion_ = 0xffffffff;
+        tempStartingWindowInfo.iconPathEarlyVersion_ = "otherPath";
+        auto key = tempAbilityInfo.moduleName + tempAbilityInfo.name + std::to_string(isDark);
+        std::map<std::string, StartingWindowInfo> startingWindowInfoMap{{ key, tempStartingWindowInfo }};
+        ssm_->startingWindowMap_.insert({tempAbilityInfo.bundleName, startingWindowInfoMap});
+    }
+
+    AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.bundleName = "bundleName";
+    StartingWindowInfo startingWindowInfo;
+    startingWindowInfo.backgroundColorEarlyVersion_ = 0xff000000;
+    startingWindowInfo.iconPathEarlyVersion_ = "cachedPath";
+    auto key = abilityInfo.moduleName + abilityInfo.name + std::to_string(isDark);
+    ssm_->CacheStartingWindowInfo(
+        abilityInfo.bundleName, abilityInfo.moduleName, abilityInfo.name, startingWindowInfo, isDark);
+    // first item should be removed
+    auto removedIter = ssm_->startingWindowMap_.find("bundleName0");
+    ASSERT_EQ(removedIter, ssm_->startingWindowMap_.end());
+    ASSERT_EQ(ssm_->startingWindowMap_.size(), 100);
+    // check insert result
+    auto iter = ssm_->startingWindowMap_.find(abilityInfo.bundleName);
+    ASSERT_NE(iter, ssm_->startingWindowMap_.end());
+    auto& infoMap = iter->second;
+    auto infoIter = infoMap.find(abilityInfo.moduleName + abilityInfo.name + std::to_string(isDark));
+    ASSERT_NE(infoIter, infoMap.end());
+    EXPECT_EQ(infoIter->second.backgroundColorEarlyVersion_, 0xff000000);
+    EXPECT_EQ(infoIter->second.iconPathEarlyVersion_, "cachedPath");
 }
 
 /**
@@ -352,7 +402,7 @@ HWTEST_F(WindowPatternStartingWindowTest, CacheStartingWindowInfo02, TestSize.Le
  * @tc.desc: GetPathInfoFromResource
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPatternStartingWindowTest, GetPathInfoFromResource, TestSize.Level1)
+HWTEST_F(WindowPatternStartingWindowTest, GetPathInfoFromResource, TestSize.Level3)
 {
     ASSERT_NE(ssm_, nullptr);
     uint32_t resourceId = 0;
@@ -366,7 +416,7 @@ HWTEST_F(WindowPatternStartingWindowTest, GetPathInfoFromResource, TestSize.Leve
  * @tc.desc: GetBundleStartingWindowInfos
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPatternStartingWindowTest, GetBundleStartingWindowInfos, TestSize.Level1)
+HWTEST_F(WindowPatternStartingWindowTest, GetBundleStartingWindowInfos, TestSize.Level3)
 {
     ASSERT_NE(ssm_, nullptr);
     AppExecFwk::BundleInfo bundleInfo;
@@ -549,63 +599,23 @@ HWTEST_F(WindowPatternStartingWindowTest, UpdateAllStartingWindowRdb, TestSize.L
 }
 
 /**
- * @tc.name: UpdateProcessMap
- * @tc.desc: UpdateProcessMap
+ * @tc.name: GetCallerSessionColorMode
+ * @tc.desc: GetCallerSessionColorMode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPatternStartingWindowTest, UpdateProcessMap, TestSize.Level0)
+HWTEST_F(WindowPatternStartingWindowTest, GetCallerSessionColorMode, TestSize.Level0)
 {
     ASSERT_NE(ssm_, nullptr);
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "bundleName_";
-    sessionInfo.moduleName_ = "moduleName_";
-    sessionInfo.abilityName_ = "abilityName_";
-    sessionInfo.appInstanceKey_ = "instanceKey";
-    sessionInfo.appIndex_ = 0;
-    int32_t persistentId0 = 1;
-    auto res = ssm_->FindProcessMap(sessionInfo, persistentId0);
-    EXPECT_EQ(res, WSError::WS_DO_NOTHING);
-
-    ssm_->InsertProcessMap(sessionInfo, persistentId0);
-    int32_t persistentIdRes;
-    res = ssm_->FindProcessMap(sessionInfo, persistentIdRes);
-    EXPECT_EQ(res, WSError::WS_OK);
-    EXPECT_EQ(persistentIdRes, persistentId0);
-    int32_t persistentId1 = 2;
-    ssm_->InsertProcessMap(sessionInfo, persistentId1);
-    res = ssm_->DeleteProcessMap(sessionInfo, persistentId0);
-    EXPECT_EQ(res, WSError::WS_OK);
-    
-    res = ssm_->FindProcessMap(sessionInfo, persistentIdRes);
-    EXPECT_EQ(res, WSError::WS_OK);
-    EXPECT_EQ(persistentIdRes, persistentId1);
-
-    res = ssm_->DeleteProcessMap(sessionInfo, persistentId1);
-    EXPECT_EQ(res, WSError::WS_OK);
-}
-
-/**
- * @tc.name: UpdateProcessMap
- * @tc.desc: UpdateProcessMap
- * @tc.type: FUNC
- */
-HWTEST_F(WindowPatternStartingWindowTest, GetSessionColorMode, TestSize.Level0)
-{
-    ASSERT_NE(ssm_, nullptr);
-    SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "bundleName_";
-    sessionInfo.moduleName_ = "moduleName_";
-    sessionInfo.abilityName_ = "abilityName_";
-    sessionInfo.appInstanceKey_ = "instanceKey";
-    sessionInfo.appIndex_ = 0;
     int32_t persistentId = 1000;
 
-    StartingWindowInfo startingWindowInfo;
-    auto res = ssm_->GetSessionColorMode(sessionInfo, startingWindowInfo);
+    auto res = ssm_->GetCallerSessionColorMode(sessionInfo);
     EXPECT_EQ(res, AppExecFwk::ConfigurationInner::COLOR_MODE_AUTO);
 
-    ssm_->InsertProcessMap(sessionInfo, persistentId);
-    res = ssm_->GetSessionColorMode(sessionInfo, startingWindowInfo);
+    sessionInfo.callerBundleName_ = "bundleName_";
+    sessionInfo.callerPersistentId_ = persistentId;
+    res = ssm_->GetCallerSessionColorMode(sessionInfo);
     EXPECT_EQ(res, AppExecFwk::ConfigurationInner::COLOR_MODE_AUTO);
 
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
@@ -614,44 +624,27 @@ HWTEST_F(WindowPatternStartingWindowTest, GetSessionColorMode, TestSize.Level0)
     ASSERT_NE(ssm_->GetSceneSession(persistentId), nullptr);
 
     sceneSession->OnUpdateColorMode(AppExecFwk::ConfigurationInner::COLOR_MODE_DARK, true);
-    res = ssm_->GetSessionColorMode(sessionInfo, startingWindowInfo);
+    res = ssm_->GetCallerSessionColorMode(sessionInfo);
+    ssm_->sceneSessionMap_.erase(persistentId);
     EXPECT_EQ(res, AppExecFwk::ConfigurationInner::COLOR_MODE_DARK);
 }
 
 /**
- * @tc.name: GetOriginalPersistentId
- * @tc.desc: GetOriginalPersistentId
+ * @tc.name: ClearStartWindowColorFollowApp
+ * @tc.desc: ClearStartWindowColorFollowApp
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPatternStartingWindowTest, GetOriginalPersistentId, TestSize.Level0)
+HWTEST_F(WindowPatternStartingWindowTest, ClearStartWindowColorFollowApp, TestSize.Level0)
 {
     ASSERT_NE(ssm_, nullptr);
-    ssm_->sceneSessionMap_.clear();
-    SessionInfo sessionInfo;
-    int32_t persistentId = 1000;
-    int32_t callerIdA = 1001;
-    int32_t callerIdB = 1002;
-    sessionInfo.callerPersistentId_ = callerIdA;
-
-    std::set<int32_t> sessionSet = { persistentId };
-    auto res = ssm_->GetOriginalPersistentId(sessionSet, persistentId);
-    EXPECT_EQ(res, persistentId);
-
-    CreateSession(sessionInfo, persistentId);
-    res = ssm_->GetOriginalPersistentId(sessionSet, persistentId);
-    EXPECT_EQ(res, persistentId);
-
-    SessionInfo callerA;
-    callerA.callerPersistentId_ = callerIdB;
-    SessionInfo callerB;
-    callerB.callerPersistentId_ = callerIdA;
-    CreateSession(callerA, callerIdA);
-    CreateSession(callerB, callerIdB);
-    sessionSet.insert(callerIdA);
-    sessionSet.insert(callerIdB);
-
-    res = ssm_->GetOriginalPersistentId(sessionSet, persistentId);
-    EXPECT_EQ(res, callerIdB);
+    ssm_->startingWindowFollowAppMap_.clear();
+    EXPECT_EQ(true, ssm_->startingWindowFollowAppMap_.empty());
+    std::string bundleName = "bundleName_";
+    std::unordered_set<std::string> infoSet({ "key" });
+    ssm_->startingWindowFollowAppMap_.emplace(bundleName, infoSet);
+    EXPECT_EQ(false, ssm_->startingWindowFollowAppMap_.empty());
+    ssm_->ClearStartWindowColorFollowApp(bundleName);
+    EXPECT_EQ(true, ssm_->startingWindowFollowAppMap_.empty());
 }
 
 /**
@@ -659,21 +652,26 @@ HWTEST_F(WindowPatternStartingWindowTest, GetOriginalPersistentId, TestSize.Leve
  * @tc.desc: GetStartWindowColorFollowApp
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPatternStartingWindowTest, GetStartWindowColorFollowApp, TestSize.Level1)
+HWTEST_F(WindowPatternStartingWindowTest, GetStartWindowColorFollowApp, TestSize.Level0)
 {
     ASSERT_NE(ssm_, nullptr);
-    ssm_->startingWindowFollowAppSet_.clear();
+    ssm_->startingWindowFollowAppMap_.clear();
+    EXPECT_EQ(true, ssm_->startingWindowFollowAppMap_.empty());
     SessionInfo sessionInfo;
-    sessionInfo.moduleName_ = "moduleName";
-    sessionInfo.abilityName_ = "abilityName";
-    sessionInfo.bundleName_ = "bundleName";
+    sessionInfo.bundleName_ = "bundleName_";
+    sessionInfo.moduleName_ = "moduleName_";
+    sessionInfo.abilityName_ = "abilityName_";
     auto res = ssm_->GetStartWindowColorFollowApp(sessionInfo);
-    EXPECT_EQ(res, false);
-    std::string key = sessionInfo.bundleName_ + '_' + sessionInfo.moduleName_ + '_' + sessionInfo.abilityName_;
-    startingWindowFollowAppSet_.insert(key);
-    auto res = ssm_->GetStartWindowColorFollowApp(sessionInfo);
-    ssm_->startingWindowFollowAppSet_.clear();
-    EXPECT_EQ(res, true);
+    EXPECT_EQ(false, res);
+    ssm_->startingWindowFollowAppMap_.emplace(sessionInfo.bundleName_, std::unordered_set<std::string> {});
+    res = ssm_->GetStartWindowColorFollowApp(sessionInfo);
+    EXPECT_EQ(false, res);
+    ssm_->startingWindowFollowAppMap_[sessionInfo.bundleName_].insert(
+        sessionInfo.moduleName_ + sessionInfo.abilityName_);
+    res = ssm_->GetStartWindowColorFollowApp(sessionInfo);
+    EXPECT_EQ(true, res);
+    ssm_->startingWindowFollowAppMap_.clear();
+    EXPECT_EQ(true, ssm_->startingWindowFollowAppMap_.empty());
 }
 } // namespace
 } // namespace Rosen
