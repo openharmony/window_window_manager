@@ -91,6 +91,9 @@ namespace {
  */
 HWTEST_F(ScreenSessionManagerTest, SetScreenPowerForFold01, TestSize.Level1)
 {
+    if (!FoldScreenStateInternel::IsFoldScreenDevice()) {
+        GTEST_SKIP();
+    }
     // 内屏预上电
     g_errLog.clear();
     LOG_SetCallback(MyLogCallback);
@@ -115,6 +118,9 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenPowerForFold01, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerTest, SetScreenPowerForFold02, TestSize.Level1)
 {
+    if (!FoldScreenStateInternel::IsFoldScreenDevice()) {
+        GTEST_SKIP();
+    }
     g_errLog.clear();
     LOG_SetCallback(MyLogCallback);
     sptr<ScreenSessionManager> ssm = sptr<ScreenSessionManager>::MakeSptr();
@@ -133,6 +139,9 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenPowerForFold02, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerTest, SetScreenPowerForFold03, TestSize.Level1)
 {
+    if (!FoldScreenStateInternel::IsFoldScreenDevice()) {
+        GTEST_SKIP();
+    }
     g_errLog.clear();
     LOG_SetCallback(MyLogCallback);
     sptr<ScreenSessionManager> ssm = sptr<ScreenSessionManager>::MakeSptr();
@@ -1094,7 +1103,6 @@ HWTEST_F(ScreenSessionManagerTest, SetLandscapeLockStatus01, TestSize.Level1)
     EXPECT_TRUE(g_errLog.find("permission denied!") != std::string::npos);
 }
 
-chaos
 /**
  * @tc.name: NotifyDisplayChangedByUid
  * @tc.desc: NotifyDisplayChangedByUid test
@@ -1103,7 +1111,7 @@ chaos
 HWTEST_F(ScreenSessionManagerTest, NotifyDisplayChangedByUid, TestSize.Level1)
 {
     g_errLog.clear();
-    ASSERT_NE(ssm, nullptr);
+    ASSERT_NE(ssm_, nullptr);
     ssm_->screenSessionMap_.clear();
     ScreenId screenId = 1050;
     sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(screenId, ScreenProperty(), 0);
@@ -1111,8 +1119,10 @@ HWTEST_F(ScreenSessionManagerTest, NotifyDisplayChangedByUid, TestSize.Level1)
     ssm_->screenSessionMap_[screenId] = screenSession;
     std::map<ScreenId, sptr<ScreenSession>> screenSessionMapCopy = ssm_->screenSessionMap_;
     ssm_->NotifyDisplayChangedByUid(screenSessionMapCopy, DisplayChangeEvent::DISPLAY_SIZE_CHANGED, 2002);
+    ssm_->screenSessionMap_.clear();
     ssm_->screenSessionMap_[1051] = nullptr;
-    ssm_->NotifyDisplayChangedByUid(screenSessionMapCopy, DisplayChangeEvent::DISPLAY_SIZE_CHANGED, 2002);
+    std::map<ScreenId, sptr<ScreenSession>> screenSessionMapCopy1 = ssm_->screenSessionMap_;
+    ssm_->NotifyDisplayChangedByUid(screenSessionMapCopy1, DisplayChangeEvent::DISPLAY_SIZE_CHANGED, 2002);
     EXPECT_TRUE(g_errLog.find("screenSession is nullptr") != std::string::npos);
 }
 
@@ -1124,13 +1134,13 @@ HWTEST_F(ScreenSessionManagerTest, NotifyDisplayChangedByUid, TestSize.Level1)
 HWTEST_F(ScreenSessionManagerTest, NotifyDisplayChangedByUidInner, TestSize.Level1)
 {
     g_errLog.clear();
-    ASSERT_NE(ssm, nullptr);
+    ASSERT_NE(ssm_, nullptr);
     ScreenId screenId = 1050;
     sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(screenId, ScreenProperty(), 0);
     ASSERT_NE(screenSession, nullptr);
-    ssm_->NotifyDisplayChangedByUid((screenSession->ConvertToDisplayInfo(),
+    ssm_->NotifyDisplayChangedByUidInner(screenSession->ConvertToDisplayInfo(),
         DisplayChangeEvent::DISPLAY_SIZE_CHANGED, 2002);
-    EXPECT_TRUE(g_errLog.find("uid") != std::string::npos);
+    EXPECT_TRUE(g_errLog.find("notify end") != std::string::npos);
 }
 
 /**
