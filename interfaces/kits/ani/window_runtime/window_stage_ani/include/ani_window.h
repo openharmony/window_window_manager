@@ -55,6 +55,11 @@ public:
     static void SetWindowTouchable(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isTouchable);
     static ani_int GetSubWindowZLevel(ani_env* env, ani_object obj, ani_long nativeObj);
     static void SetSubWindowZLevel(ani_env* env, ani_object obj, ani_long nativeObj, ani_int zLevel);
+    static void RaiseAboveTarget(ani_env* env, ani_object obj, ani_long nativeObj, ani_int windowId);
+    static void RaiseToAppTop(ani_env* env, ani_object obj, ani_long nativeObj);
+    static void SetTopmost(ani_env* env, ani_object obj, ani_long nativeObj,ani_boolean isTopmost);
+    static void RequestFocus(ani_env* env, ani_object obj, ani_long nativeObj,ani_boolean isFocused);
+    static ani_boolean IsFocused(ani_env* env, ani_object obj, ani_long nativeObj);
     static void LoadContent(ani_env* env, ani_object obj, ani_long nativeObj,
         ani_string path, ani_object storage);
     static void SetWindowSystemBarEnable(ani_env* env, ani_object obj, ani_long nativeObj, ani_object nameAry);
@@ -138,7 +143,12 @@ private:
     void OnSetWaterMarkFlag(ani_env* env, ani_boolean enable);
     void OnSetWindowFocusable(ani_env* env, ani_boolean isFocusable);
     void OnGetSubWindowZLevel(ani_env* env);
+    ani_boolean OnIsFocused(ani_env* env);
     void OnSetSubWindowZLevel(ani_env* env, ani_int zLevel);
+    void OnRaiseAboveTarget(ani_env* env, ani_int windowId);
+    void OnRaiseToAppTop(ani_env* env);
+    void OnSetTopmost(ani_env* env,ani_boolean isTopmost);
+    void OnRequestFocus(ani_env* env,ani_boolean isFocused);
     void OnLoadContent(ani_env* env, ani_string path, ani_object storage);
     void OnSetWindowSystemBarEnable(ani_env* env, ani_object nameAry);
     ani_object OnGetUIContext(ani_env* env);
