@@ -5573,9 +5573,16 @@ WSError SceneSession::PendingSessionActivation(const sptr<AAFwk::SessionInfo> ab
 
 WSError SceneSession::DoBatchPendingSessionsActivation(
     const std::vector<sptr<AAFwk::SessionInfo>>& abilitySessionInfos,
-    sptr<SceneSession>& session, bool isFoundationCall)
+    sptr<SceneSession>& session, bool isFoundationCall, const std::vector<PendingSessionActivationConfig>& configs)
 {
     std::vector<std::shared_ptr<SessionInfo>> sessionInfos;
+    std::vector<std::shared_ptr<PendingSessionActivationConfig>> abilitySessionActivationConfigs;
+    for (const auto& config : configs) {
+        auto info = std::make_shared<PendingSessionActivationConfig>();
+        info->forceStart = config.forceStart;
+        info->forceNewWant = config.forceNewWant;
+        abilitySessionActivationConfigs.emplace_back(info);
+    }
     for (auto& abilitySessionInfo : abilitySessionInfos) {
         if (abilitySessionInfo == nullptr) {
             TLOGE(WmsLogTag::WMS_LIFE, "abilitySessionInfo is null");
@@ -5606,14 +5613,15 @@ WSError SceneSession::DoBatchPendingSessionsActivation(
     }
     session->sessionInfo_.startMethod = StartMethod::START_CALL;
     if (session->batchPendingSessionsActivationFunc_) {
-        session->batchPendingSessionsActivationFunc_(sessionInfos);
+        session->batchPendingSessionsActivationFunc_(sessionInfos, abilitySessionActivationConfigs);
     }
     return WSError::WS_OK;
 }
 
-WSError SceneSession::BatchPendingSessionsActivation(const std::vector<sptr<AAFwk::SessionInfo>>& abilitySessionInfos)
+
+WSError SceneSession::BatchPendingSessionsActivation(const std::vector<sptr<AAFwk::SessionInfo>>& abilitySessionInfos,
+    const std::vector<PendingSessionActivationConfig>& configs)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "Batch pending session activations size: %{public}zu", abilitySessionInfos.size());
     if (!SessionPermission::IsSystemAppCall() && !SessionPermission::IsSACalling()) {
         TLOGE(WmsLogTag::WMS_LIFE, "The caller is neither a system app nor an SA.");
         return WSError::WS_ERROR_INVALID_PERMISSION;
@@ -5622,9 +5630,16 @@ WSError SceneSession::BatchPendingSessionsActivation(const std::vector<sptr<AAFw
         TLOGE(WmsLogTag::WMS_LIFE, "The caller has not permission granted");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
- 
+
+    if (!configs.empty() && abilitySessionInfos.size() != configs.size()) {
+        TLOGE(WmsLogTag::WMS_LIFE,
+            "The caller Param is illegal parameters. abilitySessionInfos: %{public}zu configs: %{public}zu",
+            abilitySessionInfos.size(), configs.size());
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+
     bool isFoundationCall = SessionPermission::IsFoundationCall();
-    PostTask([weakThis = wptr(this), abilitySessionInfos, isFoundationCall, where = __func__] {
+    PostTask([weakThis = wptr(this), abilitySessionInfos, configs, isFoundationCall, where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
@@ -5634,7 +5649,7 @@ WSError SceneSession::BatchPendingSessionsActivation(const std::vector<sptr<AAFw
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s abilitySessionInfo is null", where);
             return WSError::WS_ERROR_NULLPTR;
         }
-        return session->DoBatchPendingSessionsActivation(abilitySessionInfos, session, isFoundationCall);
+        return session->DoBatchPendingSessionsActivation(abilitySessionInfos, session, isFoundationCall, configs);
     }, __func__);
     return WSError::WS_OK;
 }

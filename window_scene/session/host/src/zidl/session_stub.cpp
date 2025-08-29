@@ -862,7 +862,23 @@ int SessionStub::HandleBatchPendingSessionsActivation(MessageParcel& data, Messa
         }
         abilitySessionInfos.emplace_back(abilitySessionInfo);
     }
-    WSError errCode = BatchPendingSessionsActivation(abilitySessionInfos);
+
+    size = 0;
+    if (!data.ReadInt32(size) || size < 0 || size > MAX_ABILITY_SESSION_INFOS) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read ability config size failed");
+        return ERR_INVALID_DATA;
+    }
+    std::vector<PendingSessionActivationConfig> configs;
+    for (int32_t i = 0; i < size; i++) {
+        PendingSessionActivationConfig config;
+        int readRet = ReadOnePendingSessionActivationConfig(data, config);
+        if (readRet != ERR_NONE) {
+            return readRet;
+        }
+        configs.emplace_back(config);
+    }
+    
+    WSError errCode = BatchPendingSessionsActivation(abilitySessionInfos, configs);
     if (!reply.WriteUint32(static_cast<uint32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write errCode failed");
     }
@@ -2287,6 +2303,19 @@ int SessionStub::HandleUpdateGlobalDisplayRectFromClient(MessageParcel& data, Me
         return ERR_INVALID_DATA;
     }
     UpdateGlobalDisplayRectFromClient(globalDisplayRect, reason);
+    return ERR_NONE;
+}
+
+int SessionStub::ReadOnePendingSessionActivationConfig(MessageParcel& data, PendingSessionActivationConfig& config)
+{
+    if (!data.ReadBool(config.forceStart)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read forceStart failed.");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.ReadBool(config.forceNewWant)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read forceNewWant failed.");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen
