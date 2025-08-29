@@ -8692,16 +8692,38 @@ WSError SceneSession::NotifyRotationProperty(uint32_t rotation, uint32_t width, 
             WSRect wsrect = { 0, 0, width, height };
             auto properties = session->GetSystemBarPropertyForRotation();
             std::map<AvoidAreaType, AvoidArea> avoidAreas;
+            uint32_t orientation = 0;
+            WSError ret = session->ConvertRotationToOrientation(rotation, orientation);
+            if (ret != WSError::WS_OK) {
+                TLOGNE(WmsLogTag::WMS_ROTATION, "failed to convert Rotation to Orientation");
+                return ret;
+            }
+            // Orientation type is required here
             session->GetAvoidAreasByRotation(
-                static_cast<Rotation>(rotation / ROTATION_DEGREE), wsrect, properties, avoidAreas);
+                static_cast<Rotation>(orientation), wsrect, properties, avoidAreas);
             if (!session->sessionStage_) {
                 return WSError::WS_ERROR_NULLPTR;
             }
             Rect rect = { wsrect.posX_, wsrect.posY_, wsrect.width_, wsrect.height_ };
-            OrientationInfo info = { rotation, rect, avoidAreas };
+            OrientationInfo info = { orientation, rect, avoidAreas };
             session->sessionStage_->NotifyTargetRotationInfo(info);
             return WSError::WS_OK;
         }, __func__);
+    return WSError::WS_OK;
+}
+
+WSError SceneSession::ConvertRotationToOrientation(uint32_t rotation, uint32_t& orientation)
+{
+    sptr<ScreenSession> screenSession =
+        ScreenSessionManagerClient::GetInstance().GetScreenSessionById(GetSessionProperty()->GetDisplayId());
+    if (screenSession = nullptr) {
+        TLOGW(WmsLogTag::WMS_ROTATION, "Screen session is null");
+        return WSError::WS_ERROR_INVALID_DISPLAY;
+    }
+    FoldDisplayMode foldDisplayMode = ScreenSessionManagerClient::GetInstance().GetFoldDisplayMode();
+    Rotation targetRotation = static_cast<Rotation>(rotation / ROTATION_DEGREE);
+    DisplayOrientation displayOrientation = screenSession->CalcDisplayOrientation(targetRotation, foldDisplayMode);
+    orientation = static_cast<unit32_t>(displayOrientation);
     return WSError::WS_OK;
 }
 
