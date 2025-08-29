@@ -1029,6 +1029,70 @@ HWTEST_F(sceneSessionManagerProxyTest, SetProcessWatermark, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetWatermarkImageForApp01
+ * @tc.desc: set watermark image for app
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, SetWatermarkImageForApp01, TestSize.Level1)
+{
+    std::string watermarkName;
+    std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
+    auto tempProxy = sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
+    auto ret = tempProxy->SetWatermarkImageForApp(pixelMap, watermarkName);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    auto proxy = sptr<SceneSessionManagerProxy>::MakeSptr(remoteMocker);
+    ASSERT_NE(proxy, nullptr);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ret = proxy->SetWatermarkImageForApp(pixelMap, watermarkName);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    ret = proxy->SetWatermarkImageForApp(pixelMap, watermarkName);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+
+    remoteMocker->SetRequestResult(ERR_NONE);
+    ret = proxy->SetWatermarkImageForApp(pixelMap, watermarkName);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+}
+
+/**
+ * @tc.name: RecoverWatermarkImageForApp01
+ * @tc.desc: recover watermark image for app
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, RecoverWatermarkImageForApp01, TestSize.Level1)
+{
+    std::string watermarkName;
+    auto tempProxy = sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
+    auto ret = tempProxy->RecoverWatermarkImageForApp(watermarkName);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    auto proxy = sptr<SceneSessionManagerProxy>::MakeSptr(remoteMocker);
+    ASSERT_NE(proxy, nullptr);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ret = proxy->RecoverWatermarkImageForApp(watermarkName);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    ASSERT_NE(proxy, nullptr);
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    ret = proxy->RecoverWatermarkImageForApp(watermarkName);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+
+    remoteMocker->SetRequestResult(ERR_NONE);
+    ret = proxy->RecoverWatermarkImageForApp(watermarkName);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+}
+
+/**
  * @tc.name: GetWindowIdsByCoordinate
  * @tc.desc: normal function
  * @tc.type: FUNC

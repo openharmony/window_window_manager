@@ -120,6 +120,63 @@ HWTEST_F(SceneSessionManagerStubTest2, HandleRecoverWindowPropertyChangeFlag01, 
 }
 
 /**
+ * @tc.name: HandleSetWatermarkImageForApp01
+ * @tc.desc: test HandleSetWatermarkImageForApp
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest2, HandleSetWatermarkImageForApp01, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    uint32_t code = static_cast<uint32_t>(
+        ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_SET_APP_WATERMARK_IMAGE);
+    auto res = stub_->ProcessRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, ERR_NONE);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    res = stub_->HandleSetWatermarkImageForApp(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    res = stub_->HandleSetWatermarkImageForApp(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
+ * @tc.name: HandleRecoverWatermarkImageForApp01
+ * @tc.desc: test HandleRecoverWatermarkImageForApp
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest2, HandleRecoverWatermarkImageForApp01, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    uint32_t code = static_cast<uint32_t>(
+        ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_RECOVER_APP_WATERMARK_IMAGE);
+    auto res = stub_->ProcessRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    data.WriteString("watermark");
+    res = stub_->HandleRecoverWatermarkImageForApp(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    data.WriteString("watermark");
+    res = stub_->HandleRecoverWatermarkImageForApp(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+    MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
  * @tc.name: HandleCreateUIEffectController
  * @tc.desc: test HandleCreateUIEffectController
  * @tc.type: FUNC
