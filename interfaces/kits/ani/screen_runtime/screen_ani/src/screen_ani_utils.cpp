@@ -75,7 +75,6 @@ ani_status ScreenAniUtils::CallAniFunctionVoid(ani_env *env, const char* ns,
     }
     va_list args;
     va_start(args, signature);
-    TLOGI(WmsLogTag::DMS, "[ANI]CallAniFunctionVoid begin %{public}s", signature);
     if (func == nullptr) {
         TLOGI(WmsLogTag::DMS, "[ANI] null func ani");
         return ret;

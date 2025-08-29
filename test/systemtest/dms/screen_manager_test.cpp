@@ -260,10 +260,6 @@ void ScreenManagerTest::CheckStateDisplay(DisplayId virtualDisplayId, ScreenId v
 void ScreenManagerTest::CheckScreenStateInGroup(
     bool isInGroup, sptr<ScreenGroup> group, ScreenId groupId, sptr<Screen> virtualScreen, ScreenId virtualScreenId)
 {
-    if (group == nullptr) {
-        GTEST_LOG_(INFO) << "group is nullptr";
-        return;
-    }
     auto childIds = group->GetChildIds();
     ASSERT_LT(0, childIds.size());
     auto iter = std::find(childIds.begin(), childIds.end(), virtualScreenId);
@@ -288,10 +284,6 @@ void ScreenManagerTest::CheckScreenStateInGroup(
 void ScreenManagerTest::CheckScreenGroupState(ScreenCombination combination, ScreenGroupChangeEvent event,
     ScreenId virtualScreenId, sptr<ScreenGroup> group, sptr<ScreenGroupChangeListener> screenGroupChangeListener)
 {
-    if (group == nullptr) {
-        GTEST_LOG_(INFO) << "group is nullptr";
-        return;
-    }
     auto pair = screenGroupChangeListener->changeFuture_.GetResult(TIME_OUT);
     screenGroupChangeListener->changeFuture_.Reset(
         std::make_pair(SCREEN_ID_INVALID, ScreenGroupChangeEvent::REMOVE_FROM_GROUP));
@@ -1088,13 +1080,8 @@ HWTEST_F(ScreenManagerTest, ResizeVirtualScreen01, TestSize.Level1)
 
     auto screen = ScreenManager::GetInstance().GetScreenById(virtualScreenId);
     ASSERT_TRUE(screen);
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(resizeScreenWidthTestOne_, screen->GetWidth());
-        ASSERT_EQ(resizeScreenHeightTestOne_, screen->GetHeight());
-    } else {
-        ASSERT_EQ(resizeScreenWidthTestThree_, screen->GetWidth());
-        ASSERT_EQ(resizeScreenHeightTestThree_, screen->GetHeight());
-    }
+    ASSERT_EQ(resizeScreenWidthTestOne_, screen->GetWidth());
+    ASSERT_EQ(resizeScreenHeightTestOne_, screen->GetHeight());
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
 
@@ -1127,13 +1114,8 @@ HWTEST_F(ScreenManagerTest, ResizeVirtualScreen02, TestSize.Level1)
 
     auto screen = ScreenManager::GetInstance().GetScreenById(virtualScreenId);
     ASSERT_TRUE(screen);
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(resizeScreenWidthTestTwo_, screen->GetWidth());
-        ASSERT_EQ(resizeScreenHeightTestTwo_, screen->GetHeight());
-    } else {
-        ASSERT_EQ(resizeScreenWidthTestThree_, screen->GetWidth());
-        ASSERT_EQ(resizeScreenHeightTestThree_, screen->GetHeight());
-    }
+    ASSERT_EQ(resizeScreenWidthTestTwo_, screen->GetWidth());
+    ASSERT_EQ(resizeScreenHeightTestTwo_, screen->GetHeight());
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
 
@@ -1162,11 +1144,7 @@ HWTEST_F(ScreenManagerTest, ResizeVirtualScreen03, TestSize.Level1)
     DMError res = ScreenManager::GetInstance().ResizeVirtualScreen(virtualScreenId + 1,
         resizeScreenWidthTestOne_, resizeScreenHeightTestOne_);
     sleep(TEST_SLEEP_S);
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
-    } else {
-        ASSERT_EQ(DMError::DM_OK, res);
-    }
+    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
 

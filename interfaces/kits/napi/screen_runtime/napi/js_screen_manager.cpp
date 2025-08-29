@@ -412,13 +412,13 @@ napi_value OnUnregisterScreenManagerCallback(napi_env env, napi_callback_info in
         if ((value == nullptr) || (!NapiIsCallable(env, value))) {
             DmErrorCode ret = UnregisterAllScreenListenerWithType(cbType);
             if (ret != DmErrorCode::DM_OK) {
-                TLOGE(WmsLogTag::DMS, "JsScreenManager::OnUnRegisterAllScreenManagerCallback failed");
+                TLOGE(WmsLogTag::DMS, "failed");
                 napi_throw(env, CreateJsError(env, static_cast<int32_t>(ret)));
             }
         } else {
             DmErrorCode ret = UnRegisterScreenListenerWithType(env, cbType, value);
             if (ret != DmErrorCode::DM_OK) {
-                TLOGE(WmsLogTag::DMS, "JsScreenManager::OnUnRegisterScreenManagerCallback failed");
+                TLOGE(WmsLogTag::DMS, "failed");
                 napi_throw(env, CreateJsError(env, static_cast<int32_t>(ret)));
             }
         }
@@ -428,7 +428,7 @@ napi_value OnUnregisterScreenManagerCallback(napi_env env, napi_callback_info in
 
 napi_value OnMakeMirror(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::DMS, "OnMakeMirror is called");
+    TLOGI(WmsLogTag::DMS, "called");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -516,7 +516,6 @@ napi_value OnMakeMirrorWithRegion(napi_env env, napi_callback_info info)
     napi_value result = nullptr;
     std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
     auto asyncTask = [mainScreenId, mirrorScreenIds, mainScreenRegion, env, task = napiAsyncTask.get()]() {
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsScreenManager::OnMakeMirrorWithRegion");
         ScreenId screenGroupId = INVALID_SCREEN_ID;
         DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(SingletonContainer::Get<ScreenManager>().MakeMirror(mainScreenId,
             mirrorScreenIds, mainScreenRegion, screenGroupId));
@@ -556,7 +555,6 @@ napi_value OnSetMultiScreenMode(napi_env env, napi_callback_info info)
     std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
     auto asyncTask = [mainScreenId, secondaryScreenId, env, screenMode,
         task = napiAsyncTask.get()]() {
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsScreenManager::OnSetMultiScreenMode");
         DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(
             SingletonContainer::Get<ScreenManager>().SetMultiScreenMode(mainScreenId, secondaryScreenId,
                 screenMode));
@@ -593,7 +591,6 @@ napi_value OnSetMultiScreenRelativePosition(napi_env env, napi_callback_info inf
     std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
     auto asyncTask = [mainScreenOptions, secondScreenOption, env,
         task = napiAsyncTask.get()]() {
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsScreenManager::OnSetMultiScreenRelativePosition");
         DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(
             SingletonContainer::Get<ScreenManager>().SetMultiScreenRelativePosition(mainScreenOptions,
                 secondScreenOption));
@@ -611,7 +608,7 @@ napi_value OnSetMultiScreenRelativePosition(napi_env env, napi_callback_info inf
 
 napi_value OnMakeExpand(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::DMS, "OnMakeExpand is called");
+    TLOGI(WmsLogTag::DMS, "called");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -654,8 +651,7 @@ napi_value OnMakeExpand(napi_env env, napi_callback_info info)
             task->Resolve(env, CreateJsValue(env, static_cast<uint32_t>(screenGroupId)));
             TLOGNI(WmsLogTag::DMS, "MakeExpand success");
         } else {
-            task->Reject(env,
-                CreateJsError(env, static_cast<int32_t>(ret), "JsScreenManager::OnMakeExpand failed."));
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(ret), "JsScreenManager::OnMakeExpand failed."));
             TLOGNE(WmsLogTag::DMS, "MakeExpand failed");
         }
         delete task;
@@ -666,7 +662,7 @@ napi_value OnMakeExpand(napi_env env, napi_callback_info info)
 
 napi_value OnStopMirror(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::DMS, "OnStopMirror is called");
+    TLOGI(WmsLogTag::DMS, "called");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -719,7 +715,7 @@ napi_value OnStopMirror(napi_env env, napi_callback_info info)
 
 napi_value OnStopExpand(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::DMS, "OnStopExpand is called");
+    TLOGI(WmsLogTag::DMS, "called");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -912,7 +908,7 @@ static int32_t GetRectFromJs(napi_env env, napi_value optionObject, DMRect& rect
 
 napi_value OnCreateVirtualScreen(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::DMS, "JsScreenManager::OnCreateVirtualScreen is called");
+    TLOGI(WmsLogTag::DMS, "called");
     DmErrorCode errCode = DmErrorCode::DM_OK;
     VirtualScreenOption option;
     size_t argc = 4;
@@ -1097,7 +1093,7 @@ napi_value OnSetVirtualScreenSurface(napi_env env, napi_callback_info info)
         }
     }
     if (errCode == DmErrorCode::DM_ERROR_INVALID_PARAM || surface == nullptr) {
-        TLOGE(WmsLogTag::DMS, "JsScreenManager::OnSetVirtualScreenSurface failed, Invalidate params.");
+        TLOGE(WmsLogTag::DMS, "failed, Invalidate params.");
         return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, errMsg);
     }
     napi_value lastParam = nullptr;
@@ -1152,7 +1148,7 @@ napi_value OnSetScreenPrivacyMaskImage(napi_env env, napi_callback_info info)
         }
     }
     if (errCode != DmErrorCode::DM_OK) {
-        TLOGE(WmsLogTag::DMS, "JsScreenManager::OnSetScreenPrivacyMaskImage failed, Invalidate params.");
+        TLOGE(WmsLogTag::DMS, "failed, Invalidate params.");
         return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, errMsg);
     }
     napi_value lastParam = nullptr;
@@ -1181,7 +1177,7 @@ napi_value OnIsScreenRotationLocked(napi_env env, napi_callback_info info)
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    TLOGI(WmsLogTag::DMS, "OnIsScreenRotationLocked is called");
+    TLOGI(WmsLogTag::DMS, "called");
     napi_value lastParam = nullptr;
     if (argc >= ARGC_ONE && argv[ARGC_ONE - 1] != nullptr &&
         GetType(env, argv[ARGC_ONE - 1]) == napi_function) {
@@ -1233,7 +1229,7 @@ napi_value OnSetScreenRotationLocked(napi_env env, napi_callback_info info)
         }
     }
     if (errCode == DmErrorCode::DM_ERROR_INVALID_PARAM) {
-        TLOGE(WmsLogTag::DMS, "JsScreenManager::OnSetScreenRotationLocked failed, Invalidate params.");
+        TLOGE(WmsLogTag::DMS, "failed, Invalidate params.");
         return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, errMsg);
     }
     napi_value lastParam = (argc <= ARGC_ONE) ? nullptr :
@@ -1272,6 +1268,24 @@ void NapiSendDmsEvent(napi_env env, std::function<void()> asyncTask,
     } else {
         napiAsyncTask.release();
         TLOGE(WmsLogTag::DMS, "send event success");
+    }
+}
+
+std::unique_ptr<NapiAsyncTask> CreateEmptyAsyncTask(napi_env env, napi_value lastParam, napi_value* result)
+{
+    napi_valuetype type = napi_undefined;
+    napi_typeof(env, lastParam, &type);
+    if (lastParam == nullptr || type != napi_function) {
+        napi_deferred nativeDeferred = nullptr;
+        napi_create_promise(env, &nativeDeferred, result);
+        return std::make_unique<NapiAsyncTask>(nativeDeferred, std::unique_ptr<NapiAsyncTask::ExecuteCallback>(),
+            std::unique_ptr<NapiAsyncTask::CompleteCallback>());
+    } else {
+        napi_get_undefined(env, result);
+        napi_ref callbackRef = nullptr;
+        napi_create_reference(env, lastParam, 1, &callbackRef);
+        return std::make_unique<NapiAsyncTask>(callbackRef, std::unique_ptr<NapiAsyncTask::ExecuteCallback>(),
+            std::unique_ptr<NapiAsyncTask::CompleteCallback>());
     }
 }
 };
@@ -1438,7 +1452,7 @@ napi_value JsScreenManagerInit(napi_env env, napi_value exportObj)
     TLOGD(WmsLogTag::DMS, "called");
 
     if (env == nullptr || exportObj == nullptr) {
-        TLOGE(WmsLogTag::DMS, "JsScreenManagerInit env or exportObj is nullptr");
+        TLOGE(WmsLogTag::DMS, "env or exportObj is nullptr");
         return nullptr;
     }
 

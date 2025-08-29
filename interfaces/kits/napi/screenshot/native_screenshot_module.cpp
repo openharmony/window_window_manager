@@ -436,20 +436,26 @@ napi_value HDRResolve(napi_env env, std::unique_ptr<HdrParam>& param)
                 TLOGE(WmsLogTag::DMS, "napi_set_named_property error, code is %{public}d", ret);
             }
             break;
-        case DmErrorCode::DM_ERROR_INVALID_PARAM:
-            ret = napi_set_named_property(env, error, "DM_ERROR_INVALID_PARAM", code);
+        case DmErrorCode::DM_ERROR_NOT_SYSTEM_APP:
+            ret = napi_set_named_property(env, error, "DM_ERROR_NOT_SYSTEM_APP", code);
             if (ret != napi_ok) {
                 TLOGE(WmsLogTag::DMS, "napi_set_named_property error, code is %{public}d", ret);
             }
             break;
-        case DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT:
-            ret = napi_set_named_property(env, error, "DM_ERROR_DEVICE_NOT_SUPPORT", code);
+        case DmErrorCode::DM_ERROR_INVALID_SCREEN:
+            ret = napi_set_named_property(env, error, "DM_ERROR_INVALID_SCREEN", code);
             if (ret != napi_ok) {
                 TLOGE(WmsLogTag::DMS, "napi_set_named_property error, code is %{public}d", ret);
             }
             break;
         case DmErrorCode::DM_ERROR_SYSTEM_INNORMAL:
             ret = napi_set_named_property(env, error, "DM_ERROR_SYSTEM_INNORMAL", code);
+            if (ret != napi_ok) {
+                TLOGE(WmsLogTag::DMS, "napi_set_named_property error, code is %{public}d", ret);
+            }
+            break;
+        case DmErrorCode::DM_ERROR_ILLEGAL_PARAM:
+            ret = napi_set_named_property(env, error, "DM_ERROR_ILLEGAL_PARAM", code);
             if (ret != napi_ok) {
                 TLOGE(WmsLogTag::DMS, "napi_set_named_property error, code is %{public}d", ret);
             }
@@ -505,8 +511,8 @@ static void AsyncGetScreenCapture(napi_env env, std::unique_ptr<Param> &param)
     captureOption.displayId_ = param->option.displayId;
     captureOption.isNeedNotify_ = param->option.isNeedNotify;
     captureOption.isNeedPointer_ = param->option.isNeedPointer;
-    TLOGI(WmsLogTag::DMS, "capture option isNeedNotify=%{public}d isNeedPointer=%{public}d", captureOption.isNeedNotify_,
-        captureOption.isNeedPointer_);
+    TLOGI(WmsLogTag::DMS, "capture option isNeedNotify=%{public}d isNeedPointer=%{public}d",
+        captureOption.isNeedNotify_, captureOption.isNeedPointer_);
     param->image = DisplayManager::GetInstance().GetScreenCapture(captureOption, &param->wret);
     if (param->image == nullptr && param->wret == DmErrorCode::DM_OK) {
         TLOGI(WmsLogTag::DMS, "screen capture failed!");
@@ -606,7 +612,8 @@ napi_value SaveHDRFunc(napi_env env, napi_callback_info info)
         GetScreenshotParam(env, param, argv[0]);
     } else { // parameters > 1
         TLOGI(WmsLogTag::DMS, "argc == 0");
-        param->validInputParam = true;
+        param->validInputParam = false;
+        param->wret = DmErrorCode::DM_ERROR_ILLEGAL_PARAM;
     }
     hdrParam->wret = param->wret;
     hdrParam->option = param->option;
@@ -624,15 +631,8 @@ void SetNamedProperty(napi_env env, napi_value dstObj, const int32_t objValue, c
     napi_set_named_property(env, dstObj, propName, prop);
 }
 
-napi_value ScreenshotModuleInit(napi_env env, napi_value exports)
+void SetDmErrorObjectProperty(napi_env env, napi_value errorCode)
 {
-    TLOGI(WmsLogTag::DMS, "%{public}s called", __PRETTY_FUNCTION__);
-
-    napi_value errorCode = nullptr;
-    napi_value dmErrorCode = nullptr;
-    napi_create_object(env, &errorCode);
-    napi_create_object(env, &dmErrorCode);
-
     SetNamedProperty(env, errorCode,
         (int32_t)DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED, "DM_ERROR_INIT_DMS_PROXY_LOCKED");
     SetNamedProperty(env, errorCode,
@@ -659,7 +659,10 @@ napi_value ScreenshotModuleInit(napi_env env, napi_value exports)
         (int32_t)DMError::DM_ERROR_INVALID_CALLING, "DM_ERROR_INVALID_CALLING");
     SetNamedProperty(env, errorCode,
         (int32_t)DMError::DM_ERROR_UNKNOWN, "DM_ERROR_UNKNOWN");
+}
 
+void SetDmErrorCodeObjectProperty(napi_env env, napi_value dmErrorCode)
+{
     SetNamedProperty(env, dmErrorCode,
         (int32_t)DmErrorCode::DM_ERROR_NO_PERMISSION, "DM_ERROR_NO_PERMISSION");
     SetNamedProperty(env, dmErrorCode,
@@ -672,6 +675,18 @@ napi_value ScreenshotModuleInit(napi_env env, napi_value exports)
         (int32_t)DmErrorCode::DM_ERROR_INVALID_CALLING, "DM_ERROR_INVALID_CALLING");
     SetNamedProperty(env, dmErrorCode,
         (int32_t)DmErrorCode::DM_ERROR_SYSTEM_INNORMAL, "DM_ERROR_SYSTEM_INNORMAL");
+}
+
+napi_value ScreenshotModuleInit(napi_env env, napi_value exports)
+{
+    TLOGI(WmsLogTag::DMS, "called");
+
+    napi_value errorCode = nullptr;
+    napi_value dmErrorCode = nullptr;
+    napi_create_object(env, &errorCode);
+    napi_create_object(env, &dmErrorCode);
+    SetDmErrorObjectProperty(env, errorCode);
+    SetDmErrorCodeObjectProperty(env, dmErrorCode);
 
     napi_property_descriptor properties[] = {
         DECLARE_NAPI_FUNCTION("save", save::MainFunc),
