@@ -8723,7 +8723,7 @@ WSError SceneSession::ConvertRotationToOrientation(uint32_t rotation, uint32_t& 
     FoldDisplayMode foldDisplayMode = ScreenSessionManagerClient::GetInstance().GetFoldDisplayMode();
     Rotation targetRotation = static_cast<Rotation>(rotation / ROTATION_DEGREE);
     DisplayOrientation displayOrientation = screenSession->CalcDisplayOrientation(targetRotation, foldDisplayMode);
-    orientation = static_cast<unit32_t>(displayOrientation);
+    orientation = static_cast<uint32_t>(displayOrientation);
     return WSError::WS_OK;
 }
 
