@@ -576,7 +576,10 @@ DMError ScreenSessionManager::RegisterDisplayManagerAgent(
     if (type == DisplayManagerAgentType::DISPLAY_EVENT_LISTENER) {
         auto uid = IPCSkeleton::GetCallingUid();
         auto pid = IPCSkeleton::GetCallingPid();
-        uidAndPidMap_[uid] = pid;
+        {
+            std::shared_lock<std::shared_mutex> lock(hookInfoMutex_);
+            uidAndPidMap_[uid] = pid;
+        }
     }
     return dmAgentContainer_.RegisterAgent(displayManagerAgent, type) ? DMError::DM_OK :DMError::DM_ERROR_NULLPTR;
 }
@@ -2285,9 +2288,9 @@ void ScreenSessionManager::NotifyDisplayChangedByUidInner(sptr<DisplayInfo> disp
         if (agents.empty()) {
             return;
         }
+        auto iter = uidAndPidMap_.find(uid);
         for (const auto& agent : agents) {
             int32_t agentPid = dmAgentContainer_.GetAgentPid(agent);
-            auto iter = uidAndPidMap_.find(uid);
             if (iter == uidAndPidMap_.end() || iter->second != agentPid) {
                 TLOGND(WmsLogTag::DMS, "no notify");
                 continue;
@@ -2299,6 +2302,7 @@ void ScreenSessionManager::NotifyDisplayChangedByUidInner(sptr<DisplayInfo> disp
         }
     };
     taskScheduler_->PostAsyncTask(task, "NotifyDisplayChanged");
+    TLOGI(WmsLogTag::DMS, "notify end");
 }
 
 void ScreenSessionManager::GetDisplayHookInfo(int32_t uid, DMHookInfo& hookInfo)
