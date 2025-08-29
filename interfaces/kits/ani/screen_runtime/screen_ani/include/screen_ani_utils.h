@@ -51,7 +51,7 @@ static DmErrorCode GetVirtualScreenOption(ani_env* env, ani_object options, Virt
 
 static ani_status GetSurfaceFromAni(ani_env* env, ani_string surfaceIdAniStr, sptr<Surface>& surface);
 
-static GetMultiScreenPositionOptionsFromAni(ani_env* env, ani_object screenOptionsAni,
+static ani_status GetMultiScreenPositionOptionsFromAni(ani_env* env, ani_object screenOptionsAni,
     MultiScreenPositionOptions& mainScreenOptions);
 
 static ani_object CreateDisplayIdVectorAniObject(ani_env* env, std::vector<DisplayId>& displayIds);

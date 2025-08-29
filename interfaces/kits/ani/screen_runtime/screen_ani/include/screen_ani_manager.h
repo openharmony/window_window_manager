@@ -52,6 +52,8 @@ public:
     static ani_long MakeMirrorWithRegion(ani_env* env, ani_long mainScreen, ani_object mirrorScreen,
         ani_object mainScreenRegionAni);
     static void StopMirror(ani_env* env, ani_object mirrorScreen);
+    static ani_status NspBindNativeFunctions(ani_env* env, ani_namespace nsp);
+    static ani_status ClassBindNativeFunctions(ani_env* env, ani_class screenCls);
 private:
     void OnRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
     void OnUnRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
