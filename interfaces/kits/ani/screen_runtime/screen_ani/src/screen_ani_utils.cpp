@@ -209,7 +209,7 @@ DmErrorCode ScreenAniUtils::GetVirtualScreenOption(ani_env* env, ani_object opti
 {
     ani_ref nameRef = nullptr;
     auto ret = env->Object_GetFieldByName_Ref(options, "<property>name", &nameRef);
-    if(ret != ANI_OK || nameRef == nullptr) {
+    if (ret != ANI_OK || nameRef == nullptr) {
         TLOGE(WmsLogTag::DMS, "Failed to get nameRef.");
         return DmErrorCode::DM_ERROR_ILLEGAL_PARAM;
     }
@@ -244,7 +244,7 @@ DmErrorCode ScreenAniUtils::GetVirtualScreenOption(ani_env* env, ani_object opti
 
     ani_ref surfaceIdRef = nullptr;
     ret = env->Object_GetFieldByName_Ref(options, "<property>surfaceId", &surfaceIdRef);
-    if(ret != ANI_OK || surfaceIdRef == nullptr) {
+    if (ret != ANI_OK || surfaceIdRef == nullptr) {
         TLOGE(WmsLogTag::DMS, "Failed to get surfaceIdRef.");
         return DmErrorCode::DM_ERROR_ILLEGAL_PARAM;
     }

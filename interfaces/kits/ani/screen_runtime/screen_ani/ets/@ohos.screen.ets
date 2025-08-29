@@ -526,6 +526,16 @@ export interface VirtualScreenOption {
     surfaceId: string;
 }
 
+export interface Rect {
+    left: long;
+
+    top: long;
+
+    width: long;
+
+    height: long;
+} 
+
 export let screenMgrRef: long;
 export function setScreenMgrRef(nativeObj: long): void{
     screenMgrRef = nativeObj;
