@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 
+#include "scene_board_judgement.h"
 #include "screen_session_manager/include/fold_screen_controller/fold_screen_controller.h"
 #include "screen_session_manager/include/screen_session_manager.h"
 #include "fold_screen_state_internel.h"
@@ -594,6 +595,9 @@ namespace {
      */
     HWTEST_F(FoldScreenControllerTest, OnTentModeChanged02, TestSize.Level1)
     {
+        if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+            return;
+        }
         if (ssm_.IsFoldable()) {
             bool isTentMode = true;
             ssm_.foldScreenController_->OnTentModeChanged(isTentMode);
