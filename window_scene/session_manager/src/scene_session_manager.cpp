@@ -16722,10 +16722,9 @@ DisplayId SceneSessionManager::UpdateSpecificSessionClientDisplayId(const sptr<W
 void SceneSessionManager::UpdateSessionDisplayIdBySessionInfo(
     sptr<SceneSession> sceneSession, const SessionInfo& sessionInfo)
 {
-    if (sceneSession->GetScreenId() == VIRTUAL_DISPLAY_ID &&
-        sceneSession->GetSessionProperty()->GetDisplayId() == VIRTUAL_DISPLAY_ID) {
+    if (sessionInfo.screenId_ != sceneSession->GetScreenId()) {
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s move display %{public}" PRIu64 " from %{public}" PRIu64,
-            sessionInfo.bundleName_.c_str(), sessionInfo.screenId_, VIRTUAL_DISPLAY_ID);
+            sessionInfo.bundleName_.c_str(), sessionInfo.screenId_, sceneSession->GetScreenId());
         sceneSession->SetScreenId(sessionInfo.screenId_);
         sceneSession->GetSessionProperty()->SetDisplayId(sessionInfo.screenId_);
     }
