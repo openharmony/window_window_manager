@@ -1507,7 +1507,7 @@ WSError Session::Background(bool isFromClient, const std::string& identityToken)
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     UpdateSessionState(SessionState::STATE_BACKGROUND);
-    lastSnapshotScreen_ = WSSnapshotHelper::GetScreenStatus();
+    lastSnapshotScreen_ = WSSnapshotHelper::GetInstance()->GetScreenStatus();
     SetIsPendingToBackgroundState(false);
     NotifyBackground();
     PostSpecificSessionLifeCycleTimeoutTask(DETACH_EVENT_NAME);
@@ -1550,7 +1550,7 @@ WSError Session::Disconnect(bool isFromClient, const std::string& identityToken)
     }
     UpdateSessionState(SessionState::STATE_BACKGROUND);
     UpdateSessionState(SessionState::STATE_DISCONNECT);
-    lastSnapshotScreen_ = WSSnapshotHelper::GetScreenStatus();
+    lastSnapshotScreen_ = WSSnapshotHelper::GetInstance()->GetScreenStatus();
     NotifyDisconnect();
     if (visibilityChangedDetectFunc_) {
         visibilityChangedDetectFunc_(GetCallingPid(), isVisible_, false);
@@ -2904,7 +2904,7 @@ SnapshotStatus Session::GetSessionSnapshotStatus(BackgroundReason reason) const
     if (state_ == SessionState::STATE_BACKGROUND || state_ == SessionState::STATE_DISCONNECT) {
         snapshotScreen = lastSnapshotScreen_;
     } else {
-        snapshotScreen = WSSnapshotHelper::GetScreenStatus();
+        snapshotScreen = WSSnapshotHelper::GetInstance()->GetScreenStatus();
     }
     if (reason == BackgroundReason::EXPAND_TO_FOLD_SINGLE_POCKET) {
         snapshotScreen = SCREEN_EXPAND;
@@ -2913,7 +2913,7 @@ SnapshotStatus Session::GetSessionSnapshotStatus(BackgroundReason reason) const
     return std::make_pair(snapshotScreen, orientation);
 }
 
-uint32_t Session::GetWindowOrientation() const
+uint32_t Session::GetWindowSnapshotOrientation() const
 {
     if (!SupportSnapshotAllSessionStatus()) {
         return 0;
