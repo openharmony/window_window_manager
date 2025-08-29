@@ -21,6 +21,15 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+    std::string g_errLog;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
+        const char *msg)
+    {
+        g_errLog = msg;
+    }
+}
+    
 class PersistentStorageTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -60,6 +69,8 @@ HWTEST_F(PersistentStorageTest, HasKey, TestSize.Level1)
  */
 HWTEST_F(PersistentStorageTest, StorageOperate, TestSize.Level1)
 {
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
     const std::string keyName = "/data/service/el1/public/window/window_aspect_ratio.xml";
     float ratio = 1;
     float ratioValue = 2;
@@ -70,7 +81,7 @@ HWTEST_F(PersistentStorageTest, StorageOperate, TestSize.Level1)
 
     PersistentStorage::Insert(keyName, ratioValue, PersistentStorageType::UKNOWN);
     PersistentStorage::Get(keyName, ratio, PersistentStorageType::UKNOWN);
-    EXPECT_EQ(1, ratio);
+    EXPECT_TRUE(g_errLog.find("[PersistentStorage] Preferences is nullptr") != std::string::npos);
 
     PersistentStorage::Insert(keyName, ratioValue, PersistentStorageType::ASPECT_RATIO);
     PersistentStorage::Get(keyName, ratio, PersistentStorageType::ASPECT_RATIO);
@@ -93,6 +104,7 @@ HWTEST_F(PersistentStorageTest, StorageOperate, TestSize.Level1)
     PersistentStorage::Delete(keyName, PersistentStorageType::MAXIMIZE_STATE);
     auto result4 = PersistentStorage::HasKey(keyName, PersistentStorageType::MAXIMIZE_STATE);
     EXPECT_EQ(false, result4);
+    LOG_SetCallback(nullptr);
 }
 
 } // namespace

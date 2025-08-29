@@ -28,6 +28,12 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "PerformReporterTest" };
+    std::string g_errLog;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
+        const char *msg)
+    {
+        g_errLog = msg;
+    }
 }
 class PerformReporterTest : public testing::Test {
 public:
@@ -216,7 +222,6 @@ HWTEST_F(PerformReporterTest, GetMsgString004, TestSize.Level1)
  */
 HWTEST_F(PerformReporterTest, InsertCreateReportInfo005, TestSize.Level1)
 {
-    int res = 0;
     WindowInfoReporter windowInfoReporter;
     std::string bundleName = "bundleName";
     std::string packageName = "packageName";
@@ -225,7 +230,9 @@ HWTEST_F(PerformReporterTest, InsertCreateReportInfo005, TestSize.Level1)
     windowInfoReporter.InsertHideReportInfo(bundleName);
     windowInfoReporter.InsertDestroyReportInfo(bundleName);
     windowInfoReporter.InsertNavigationBarReportInfo(bundleName, packageName);
-    ASSERT_EQ(res, 0);
+    EXPECT_NE(0, windowInfoReporter.windowCreateReportInfos_.size());
+    EXPECT_NE(0, windowInfoReporter.windowShowReportInfos_.size());
+    EXPECT_NE(0, windowInfoReporter.windowHideReportInfos_.size());
 }
 
 /**
@@ -251,17 +258,17 @@ HWTEST_F(PerformReporterTest, UpdateReportInfo006, TestSize.Level1)
  */
 HWTEST_F(PerformReporterTest, UpdateReportInfo007, TestSize.Level1)
 {
-    int res = 0;
     WindowInfoReporter windowInfoReporter;
     FullInfoMap infoMap_1;
     std::string bundleName = "bundleName";
     std::string packageName = "packageName";
     infoMap_1["bundleName"]["packageName"] = 0;
     windowInfoReporter.UpdateReportInfo(infoMap_1, bundleName, packageName);
+    EXPECT_EQ(1, infoMap_1["bundleName"]["packageName"]);
     FullInfoMap infoMap_2;
     infoMap_2["Name"]["packageName"] = 0;
     windowInfoReporter.UpdateReportInfo(infoMap_2, bundleName, packageName);
-    ASSERT_EQ(res, 0);
+    EXPECT_EQ(1, infoMap_2["bundleName"]["packageName"]);
 }
 
 /**
@@ -286,7 +293,6 @@ HWTEST_F(PerformReporterTest, UpdateReportInfo008, TestSize.Level1)
  */
 HWTEST_F(PerformReporterTest, UpdateReportInfo009, TestSize.Level1)
 {
-    int res = 0;
     WindowInfoReporter windowInfoReporter;
     BundleNameMap infoMap_1;
     std::string bundleName = "bundleName";
@@ -295,7 +301,7 @@ HWTEST_F(PerformReporterTest, UpdateReportInfo009, TestSize.Level1)
     BundleNameMap infoMap_2;
     infoMap_2["Name"] = 0;
     windowInfoReporter.UpdateReportInfo(infoMap_2, bundleName);
-    ASSERT_EQ(res, 0);
+    EXPECT_EQ(1, infoMap_2["bundleName"]);
 }
 
 /**
@@ -305,10 +311,12 @@ HWTEST_F(PerformReporterTest, UpdateReportInfo009, TestSize.Level1)
  */
 HWTEST_F(PerformReporterTest, ReportBackButtonInfoImmediately010, TestSize.Level1)
 {
-    int res = 0;
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
     WindowInfoReporter windowInfoReporter;
     windowInfoReporter.ReportBackButtonInfoImmediately();
-    ASSERT_EQ(res, 0);
+    EXPECT_FALSE(g_errLog.find("WM_REPORT_BACK_KEYEVENT") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -318,14 +326,16 @@ HWTEST_F(PerformReporterTest, ReportBackButtonInfoImmediately010, TestSize.Level
  */
 HWTEST_F(PerformReporterTest, ReportZeroOpacityInfoImmediately011, TestSize.Level1)
 {
-    int res = 0;
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
     std::string bundleName;
     std::string packageName = "packageName";
     WindowInfoReporter windowInfoReporter;
     windowInfoReporter.ReportZeroOpacityInfoImmediately(bundleName, packageName);
     bundleName = "bundleName";
     windowInfoReporter.ReportZeroOpacityInfoImmediately(bundleName, packageName);
-    ASSERT_EQ(res, 0);
+    EXPECT_FALSE(g_errLog.find("WM_REPORT_WINDOW_OPACITY_ZERO") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -335,12 +345,14 @@ HWTEST_F(PerformReporterTest, ReportZeroOpacityInfoImmediately011, TestSize.Leve
  */
 HWTEST_F(PerformReporterTest, ReportStartWindow012, TestSize.Level1)
 {
-    int res = 0;
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
     std::string bundleName = "bundleName";
     std::string windowName = "windowName";
     WindowInfoReporter windowInfoReporter;
     windowInfoReporter.ReportStartWindow(bundleName, windowName);
-    ASSERT_EQ(res, 0);
+    EXPECT_FALSE(g_errLog.find("Write HiSysEvent error,") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -350,10 +362,12 @@ HWTEST_F(PerformReporterTest, ReportStartWindow012, TestSize.Level1)
  */
 HWTEST_F(PerformReporterTest, ReportRecordedInfos013, TestSize.Level1)
 {
-    int res = 0;
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
     WindowInfoReporter windowInfoReporter;
     windowInfoReporter.ReportRecordedInfos();
-    ASSERT_EQ(res, 0);
+    EXPECT_FALSE(g_errLog.find("----Report HiSysEvent write all-----") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -363,13 +377,15 @@ HWTEST_F(PerformReporterTest, ReportRecordedInfos013, TestSize.Level1)
  */
 HWTEST_F(PerformReporterTest, ReportContainerStartBegin014, TestSize.Level1)
 {
-    int res = 0;
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
     int32_t missionId = 1;
     std::string bundleName = "bundleName";
     int64_t timestamp = 1;
     WindowInfoReporter windowInfoReporter;
     windowInfoReporter.ReportContainerStartBegin(missionId, bundleName, timestamp);
-    ASSERT_EQ(res, 0);
+    EXPECT_FALSE(g_errLog.find("Write HiSysEvent error,") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -379,14 +395,18 @@ HWTEST_F(PerformReporterTest, ReportContainerStartBegin014, TestSize.Level1)
  */
 HWTEST_F(PerformReporterTest, Report015, TestSize.Level1)
 {
-    int res = 0;
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
     std::string reportTag = "reportTag";
     std::string msg;
     WindowInfoReporter windowInfoReporter;
     windowInfoReporter.Report(reportTag, msg);
+    EXPECT_FALSE(g_errLog.find("Report Tag :") != std::string::npos);
     msg = "msg";
+    g_errLog.clear();
     windowInfoReporter.Report(reportTag, msg);
-    ASSERT_EQ(res, 0);
+    EXPECT_FALSE(g_errLog.find("Write HiSysEvent error,") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -396,10 +416,12 @@ HWTEST_F(PerformReporterTest, Report015, TestSize.Level1)
  */
 HWTEST_F(PerformReporterTest, ClearRecordedInfos016, TestSize.Level1)
 {
-    int res = 0;
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
     WindowInfoReporter windowInfoReporter;
     windowInfoReporter.ClearRecordedInfos();
-    ASSERT_EQ(res, 0);
+    EXPECT_FALSE(g_errLog.find("Clear all hiSysEvent write information") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
