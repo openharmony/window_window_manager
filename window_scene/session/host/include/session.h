@@ -519,7 +519,7 @@ public:
     bool IsSessionForeground() const;
     bool IsSessionNotBackground() const;
     virtual bool IsAnco() const { return false; }
-    virtual void SetBlank(bool isAddBlank) {};
+    virtual void SetBlank(bool isAddBlank) {}
     virtual bool GetBlank() const { return false; }
     virtual bool GetBufferAvailableCallbackEnable() const { return false; }
 
