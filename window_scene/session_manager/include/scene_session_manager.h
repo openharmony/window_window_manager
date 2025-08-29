@@ -827,6 +827,7 @@ private:
     }
     void Init();
     void RegisterAppListener();
+    bool IsPrepareTerminateEnabled() const;
     void InitPrepareTerminateConfig();
     void LoadWindowSceneXml();
     void LoadWindowParameter();

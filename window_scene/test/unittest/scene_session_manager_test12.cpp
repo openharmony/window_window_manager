@@ -17,6 +17,7 @@
 #include <regex>
 #include <bundle_mgr_interface.h>
 #include <bundlemgr/launcher_service.h>
+#include <parameters.h>
 
 #include "common_test_utils.h"
 #include "context.h"
@@ -2864,6 +2865,50 @@ HWTEST_F(SceneSessionManagerTest12, CreateUIEffectController, TestSize.Level1)
     ssm_->systemConfig_.freeMultiWindowSupport_ = false;
     EXPECT_NE(ssm_->CreateUIEffectController(controllerClient, controller, controllerId),
         WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+}
+
+/**
+ * @tc.name: IsPrepareTerminateEnabledTest
+ * @tc.desc: test function : IsPrepareTerminateEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, IsPrepareTerminateEnabledTest, TestSize.Level1)
+{
+    system::SetParameter("persist.sys.prepare_terminate", "true");
+    auto result = ssm_->IsPrepareTerminateEnabled();
+    ASSERT_EQ(result, true);
+
+    system::SetParameter("persist.sys.prepare_terminate", "false");
+    result = ssm_->IsPrepareTerminateEnabled();
+    ASSERT_EQ(result, false);
+}
+
+
+/**
+ * @tc.name: InitPrepareTerminateConfigTest
+ * @tc.desc: test function : InitPrepareTerminateConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, InitPrepareTerminateConfigTest, TestSize.Level1)
+{
+    system::SetParameter("persist.sys.prepare_terminate", "true");
+    ssm_->InitPrepareTerminateConfig();
+    ASSERT_EQ(ssm_->isPrepareTerminateEnable_, true);
+}
+
+/**
+ * @tc.name: CheckPrepareTerminateEnabled01
+ * @tc.desc: test function : PrepareTerminateEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, CheckPrepareTerminateEnabled01, TestSize.Level1)
+{
+    system::SetParameter("persist.sys.prepare_terminate", "true");
+    ssm_->isPrepareTerminateEnable_ = false;
+    bool isPrepareTerminate = false;
+    auto result = ssm_->PrepareTerminate(1, isPrepareTerminate);
+    ASSERT_EQ(isPrepareTerminate, false);
+    ASSERT_EQ(result, WSError::WS_OK);
 }
 
 /**
