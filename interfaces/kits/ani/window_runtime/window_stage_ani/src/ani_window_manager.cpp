@@ -17,21 +17,18 @@
 
 #include <ability.h>
 
+#include "ability_context.h"
 #include "ani.h"
 #include "ani_window.h"
 #include "ani_window_stage.h"
-#include "ani_window.h"
-#include "ani_window_stage.h"
 #include "ani_window_utils.h"
+#include "permission.h"
 #include "singleton_container.h"
+#include "window_helper.h"
 #include "window_manager.h"
 #include "window_manager_hilog.h"
-#include "window_scene.h"
-#include "ani_window_utils.h"
-#include "ability_context.h"
 #include "window_option.h"
-#include "window_helper.h"
-#include "permission.h"
+#include "window_scene.h"
 
 namespace OHOS {
 namespace Rosen {

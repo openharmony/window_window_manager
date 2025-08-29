@@ -15,7 +15,9 @@
 
 #ifndef OHOS_ANI_WINDOW_UTILS_H
 #define OHOS_ANI_WINDOW_UTILS_H
+
 #include <map>
+
 #include "ani.h"
 #include "js_window.h"
 #include "native_engine/native_engine.h"
