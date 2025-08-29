@@ -399,6 +399,10 @@ export interface Screen {
     setScreenActiveMode(modeIndex: long, callback: AsyncCallback<void>): void;
 
     setScreenActiveMode(modeIndex: long): Promise<void>;
+
+    setOrientation(orientation: Orientation, callback: AsyncCallback<void>): void;
+    
+    setOrientation(orientation: Orientation): Promise<void>;
 }
 
 class ScreenImpl implements Screen {
@@ -490,10 +494,34 @@ class ScreenImpl implements Screen {
         });
     }
 
+    setOrientation(orientation: Orientation, callback: AsyncCallback<void>): void {
+        taskpool.execute((): void => {
+            this.setOrientationInternal(orientation);
+        }).then(() => {
+            callback(null, undefined);
+        }).catch((err: NullishType) => {
+            callback(err as BusinessError, undefined);
+        });
+    }
+
+    setOrientation(orientation: Orientation): Promise<void> {
+        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ):
+            void => {
+            taskpool.execute((): void => {
+                this.setOrientationInternal(orientation);
+            }).then(() => {
+                resolve(undefined);
+            }).catch((err: NullishType) => {
+                reject(err as BusinessError);
+            });
+        });
+    }
+
     native setDensityDpiInternal(densityDpi: double): void;
     native static nativeTransferStatic(input: ESValue, screen: Object): boolean;
     native static nativeTransferDynamic(nativeObj: long): ESValue;
     native setScreenActiveModeInternal(modeIndex: long): void;
+    native setOrientationInternal(orientation: Orientation): void;
 }
 
 export interface ScreenModeInfo {
