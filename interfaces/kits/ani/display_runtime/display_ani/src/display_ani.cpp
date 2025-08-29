@@ -12,22 +12,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include "display_ani.h"
+
 #include <hitrace_meter.h>
 
 #include "ani.h"
 #include "ani_err_utils.h"
 #include "display.h"
-#include "display_ani.h"
 #include "display_ani_manager.h"
 #include "display_ani_utils.h"
 #include "display_info.h"
 #include "display_manager.h"
 #include "dm_common.h"
-#include "interop_js/arkts_esvalue.h"
-#include "interop_js/arkts_interop_js_api.h"
-#include "interop_js/hybridgref_ani.h"
-#include "interop_js/hybridgref_napi.h"
-#include "js_display.h"
 #include "refbase.h"
 #include "singleton_container.h"
 #include "window_manager_hilog.h"
