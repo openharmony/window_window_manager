@@ -269,6 +269,7 @@ HWTEST_F(MoveDragControllerTest, CalcMoveInputBarRect, Function | SmallTest | Le
     pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_MOUSE);
     MMI::PointerEvent::PointerItem pointerItem;
     pointerItem.SetPointerId(1);
+    pointerItem.SetOriginPointerId(1);
     pointerItem.SetDisplayX(100);
     pointerItem.SetDisplayY(200);
     pointerEvent->AddPointerItem(pointerItem);
@@ -276,7 +277,7 @@ HWTEST_F(MoveDragControllerTest, CalcMoveInputBarRect, Function | SmallTest | Le
     int32_t pointerPosY = 30;
     int32_t pointerWindowX = 10;
     int32_t pointerWindowY = 10;
-    moveDragController->SetOriginalMoveDragPos(pointerEvent->GetPointerId(),
+    moveDragController->SetOriginalMoveDragPos(pointerItem.GetOriginPointerId(),
         pointerEvent->GetSourceType(), pointerPosX, pointerPosY, pointerWindowX,
         pointerWindowY, originalRect);
     moveDragController->CalcMoveInputBarRect(pointerEvent, originalRect);
@@ -349,6 +350,7 @@ HWTEST_F(MoveDragControllerTest, EventDownInit, Function | SmallTest | Level1)
     pointerEvent->SetTargetDisplayId(0);
     MMI::PointerEvent::PointerItem pointerItem;
     pointerItem.SetPointerId(0);
+    pointerItem.SetOriginPointerId(0);
     originalRect = { 10, 10, 10, 10 };
     pointerItem.SetWindowX(100000000);
     pointerItem.SetWindowY(100000000);
@@ -374,6 +376,7 @@ HWTEST_F(MoveDragControllerTest, EventDownInit01, Function | SmallTest | Level1)
     WSRect originalRect = { 100, 100, 1000, 1000 };
     MMI::PointerEvent::PointerItem pointerItem;
     pointerItem.SetPointerId(1);
+    pointerItem.SetOriginPointerId(1);
     pointerItem.SetWindowX(1);
     pointerItem.SetWindowY(1);
     pointerEvent->AddPointerItem(pointerItem);
@@ -609,45 +612,144 @@ HWTEST_F(MoveDragControllerTest, InitDecorValue01, Function | SmallTest | Level1
 }
 
 /**
- * @tc.name: ConsumeMoveEvent
- * @tc.desc: test function : ConsumeMoveEvent
+ * @tc.name: TestConsumeMoveEventWithEarlyReturns
+ * @tc.desc: Verify that ConsumeMoveEvent handles various early-return scenarios
  * @tc.type: FUNC
  */
-HWTEST_F(MoveDragControllerTest, ConsumeMoveEvent, Function | SmallTest | Level1)
+HWTEST_F(MoveDragControllerTest, TestConsumeMoveEventWithEarlyReturns, TestSize.Level1)
 {
-    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
-    if (!pointerEvent) {
-        return;
-    }
     WSRect originalRect = { 100, 100, 1000, 1000 };
-    ASSERT_EQ(false, moveDragController->ConsumeMoveEvent(nullptr, originalRect));
-    auto preStratDragFlag = moveDragController->GetStartDragFlag();
+    constexpr int32_t pointerId = 0;
+    MMI::PointerEvent::PointerItem pointerItem;
+    pointerItem.SetPointerId(pointerId);
+    pointerItem.SetOriginPointerId(pointerId);
+    auto pointerEvent = MMI::PointerEvent::Create();
+    pointerEvent->SetPointerId(pointerId);
+    pointerEvent->AddPointerItem(pointerItem);
+
+    // Case 1: Pointer event is null
+    EXPECT_FALSE(moveDragController->ConsumeMoveEvent(nullptr, originalRect));
+
+    // Case 2: Start drag flag is true
     moveDragController->isStartDrag_ = true;
-    ASSERT_EQ(false, moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
+    EXPECT_FALSE(moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
     moveDragController->isStartDrag_ = false;
-    pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
-    pointerEvent->SetButtonId(MMI::PointerEvent::MOUSE_BUTTON_LEFT);
-    ASSERT_EQ(false, moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
-    pointerEvent->SetSourceType(MMI::PointerEvent::MOUSE_BUTTON_LEFT);
-    moveDragController->SetStartMoveFlag(false);
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
-    ASSERT_EQ(false, moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_CANCEL);
-    ASSERT_EQ(false, moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
-    moveDragController->SetStartMoveFlag(true);
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
-    ASSERT_EQ(false, moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
-    ASSERT_EQ(false, moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
-    ASSERT_EQ(false, moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
-    moveDragController->moveDragProperty_.pointerId_ = -2;
-    moveDragController->moveDragProperty_.pointerType_ = -2;
-    pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
-    ASSERT_EQ(false, moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
-    moveDragController->isStartDrag_ = preStratDragFlag;
+
+    // Case 3: Failed to get pointer item
+    std::shared_ptr<MMI::PointerEvent> noItemEvent = MMI::PointerEvent::Create();
+    noItemEvent->SetPointerId(pointerId);
+    EXPECT_FALSE(moveDragController->ConsumeMoveEvent(noItemEvent, originalRect));
+
+    // Case 4: StartPointerId mismatch
+    moveDragController->moveDragProperty_.pointerId_ = pointerId + 1;
+    EXPECT_FALSE(moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
+    moveDragController->moveDragProperty_.pointerId_ = pointerId;
+
+    // Case 5: StartPointerType mismatch
+    pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_MOUSE);
+    moveDragController->moveDragProperty_.pointerType_ = pointerEvent->GetSourceType() + 1;
+    EXPECT_FALSE(moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
 }
 
+/**
+ * @tc.name: TestConsumeMoveEventWithNotStartMove
+ * @tc.desc: Verify that ConsumeMoveEvent handles not-start-move flows
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, TestConsumeMoveEventWithNotStartMove, TestSize.Level1)
+{
+    WSRect originalRect = { 100, 100, 1000, 1000 };
+    constexpr int32_t pointerId = 0;
+    MMI::PointerEvent::PointerItem pointerItem;
+    pointerItem.SetPointerId(pointerId);
+    pointerItem.SetOriginPointerId(pointerId);
+    auto pointerEvent = MMI::PointerEvent::Create();
+    pointerEvent->SetPointerId(pointerId);
+    pointerEvent->AddPointerItem(pointerItem);
+    pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_MOUSE);
+    moveDragController->isStartDrag_ = false;
+    moveDragController->moveDragProperty_.pointerId_ = pointerId;
+    moveDragController->moveDragProperty_.pointerType_ = pointerEvent->GetSourceType();
+    moveDragController->isStartMove_ = false;
+
+    // Case 1: Mouse right button & not start move
+    pointerEvent->SetButtonId(MMI::PointerEvent::MOUSE_BUTTON_RIGHT);
+    EXPECT_FALSE(moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
+
+    // Case 2: Mouse left button & not start move
+    pointerEvent->SetButtonId(MMI::PointerEvent::MOUSE_BUTTON_LEFT);
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
+    EXPECT_FALSE(moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
+
+    // Case 3: ACTION_DOWN sets hasPointDown_
+    moveDragController->hasPointDown_ = false;
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_DOWN);
+    EXPECT_FALSE(moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
+    EXPECT_TRUE(moveDragController->hasPointDown_);
+
+    // Case 4: ACTION_BUTTON_DOWN sets hasPointDown_
+    moveDragController->hasPointDown_ = false;
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
+    EXPECT_FALSE(moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
+    EXPECT_TRUE(moveDragController->hasPointDown_);
+
+    // Case 5: ACTION_UP resets hasPointDown_
+    moveDragController->hasPointDown_ = true;
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UP);
+    EXPECT_FALSE(moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
+    EXPECT_FALSE(moveDragController->hasPointDown_);
+
+    // Case 6: ACTION_BUTTON_UP resets hasPointDown_
+    moveDragController->hasPointDown_ = true;
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
+    EXPECT_FALSE(moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
+    EXPECT_FALSE(moveDragController->hasPointDown_);
+
+    // Case 7: ACTION_CANCEL resets hasPointDown_
+    moveDragController->hasPointDown_ = true;
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_CANCEL);
+    EXPECT_FALSE(moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
+    EXPECT_FALSE(moveDragController->hasPointDown_);
+}
+
+/**
+ * @tc.name: TestConsumeMoveEventWithStartMove
+ * @tc.desc: Verify that ConsumeMoveEvent handles start-move flows
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, TestConsumeMoveEventWithStartMove, TestSize.Level1)
+{
+    WSRect originalRect = { 100, 100, 1000, 1000 };
+    constexpr int32_t pointerId = 0;
+    MMI::PointerEvent::PointerItem pointerItem;
+    pointerItem.SetPointerId(pointerId);
+    pointerItem.SetOriginPointerId(pointerId);
+    auto pointerEvent = MMI::PointerEvent::Create();
+    pointerEvent->SetPointerId(pointerId);
+    pointerEvent->AddPointerItem(pointerItem);
+    pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_MOUSE);
+    moveDragController->isStartDrag_ = false;
+    moveDragController->moveDragProperty_.pointerId_ = pointerId;
+    moveDragController->moveDragProperty_.pointerType_ = pointerEvent->GetSourceType();
+
+    // Case 1: MOVE normal flow
+    moveDragController->isStartMove_ = true;
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
+    EXPECT_TRUE(moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
+
+    // Case 2: UP ends drag
+    moveDragController->isStartMove_ = true;
+    moveDragController->hasPointDown_ = true;
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UP);
+    EXPECT_FALSE(moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
+    EXPECT_FALSE(moveDragController->hasPointDown_);
+    EXPECT_FALSE(moveDragController->isStartMove_);
+
+    // Case 3: UNKNOWN action
+    moveDragController->isStartMove_ = true;
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
+    EXPECT_TRUE(moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
+}
 
 /**
  * @tc.name: ProcessWindowDragHotAreaFunc
@@ -698,6 +800,7 @@ HWTEST_F(MoveDragControllerTest, ConsumeDragEvent, Function | SmallTest | Level1
     ASSERT_EQ(false, moveDragController->ConsumeDragEvent(pointerEvent, originalRect, property, sysConfig));
     MMI::PointerEvent::PointerItem pointerItem;
     pointerItem.SetPointerId(0);
+    pointerItem.SetOriginPointerId(0);
     pointerItem.SetWindowX(0);
     pointerItem.SetWindowY(0);
     pointerEvent->AddPointerItem(pointerItem);
@@ -705,7 +808,7 @@ HWTEST_F(MoveDragControllerTest, ConsumeDragEvent, Function | SmallTest | Level1
     pointerEvent->SetPointerAction(static_cast<int32_t>(MMI::PointerEvent::POINTER_ACTION_DOWN));
     ASSERT_EQ(true, moveDragController->ConsumeDragEvent(pointerEvent, originalRect, property, sysConfig));
     pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_MOUSE);
-    moveDragController->moveDragProperty_.pointerId_ = pointerEvent->GetPointerId();
+    moveDragController->moveDragProperty_.pointerId_ = pointerItem.GetOriginPointerId();
     moveDragController->moveDragProperty_.pointerType_ = pointerEvent->GetSourceType();
     pointerEvent->SetButtonId(MMI::PointerEvent::MOUSE_BUTTON_RIGHT);
     ASSERT_EQ(false, moveDragController->ConsumeDragEvent(pointerEvent, originalRect, property, sysConfig));
@@ -903,15 +1006,16 @@ HWTEST_F(MoveDragControllerTest, GetFullScreenToFloatingRect, Function | SmallTe
  */
 HWTEST_F(MoveDragControllerTest, CheckDragEventLegal, Function | SmallTest | Level1)
 {
-    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
-    ASSERT_NE(pointerEvent, nullptr);
-    sptr<WindowSessionProperty> property = new(std::nothrow) WindowSessionProperty();
-    ASSERT_NE(property, nullptr);
-    auto tempPointerEvent = pointerEvent;
-    pointerEvent = nullptr;
-    auto result = moveDragController->CheckDragEventLegal(pointerEvent, property);
+    constexpr int32_t pointerId = 0;
+    MMI::PointerEvent::PointerItem pointerItem;
+    pointerItem.SetPointerId(pointerId);
+    pointerItem.SetOriginPointerId(pointerId);
+    auto pointerEvent = MMI::PointerEvent::Create();
+    pointerEvent->SetPointerId(pointerId);
+    pointerEvent->AddPointerItem(pointerItem);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    auto result = moveDragController->CheckDragEventLegal(nullptr, property);
     ASSERT_EQ(result, false);
-    pointerEvent = tempPointerEvent;
     result = moveDragController->CheckDragEventLegal(pointerEvent, nullptr);
     ASSERT_EQ(result, false);
     moveDragController->isStartMove_ = true;
@@ -949,6 +1053,7 @@ HWTEST_F(MoveDragControllerTest, UpdateMoveTempProperty, Function | SmallTest | 
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
     MMI::PointerEvent::PointerItem pointerItem;
     pointerItem.SetPointerId(0);
+    pointerItem.SetOriginPointerId(0);
     pointerEvent->AddPointerItem(pointerItem);
     pointerEvent->SetPointerId(0);
     pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_MOUSE);
@@ -994,6 +1099,7 @@ HWTEST_F(MoveDragControllerTest, UpdateHotAreaType, Function | SmallTest | Level
     moveDragController->UpdateHotAreaType(pointerEvent);
     MMI::PointerEvent::PointerItem pointerItem;
     pointerItem.SetPointerId(0);
+    pointerItem.SetOriginPointerId(0);
     pointerEvent->AddPointerItem(pointerItem);
     pointerEvent->SetPointerId(0);
     moveDragController->UpdateHotAreaType(pointerEvent);
