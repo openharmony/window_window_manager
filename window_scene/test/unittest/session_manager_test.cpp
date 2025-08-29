@@ -160,6 +160,41 @@ HWTEST_F(SessionManagerTest, RegisterWindowManagerRecoverCallbackFunc, TestSize.
     sm_->RegisterWindowManagerRecoverCallbackFunc(testFunc);
     ASSERT_NE(sm_->windowManagerRecoverFunc_, nullptr);
 }
+
+/**
+ * @tc.name: SessionManager::GetInstance()
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionManagerTest, GetInsance, TestSize.Level1)
+{
+    sptr<SessionManager> instance = nullptr;
+    userId = -1;
+    instance = SessionManager::GetInstance(userId);
+    ASSERT_NE(nullptr, instance);
+
+    userId = 101;
+    instance = SessionManager::GetInstance(userId);
+    ASSERT_NE(nullptr, instance);
+
+    // branch overried
+    instance = SessionManager::GetInstance(userId);
+    ASSERT_NE(nullptr, instance);
+}
+
+/**
+ * @tc.name: RemoveSSMDeathRecipient
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionManagerTest, RemoveSSMDeathRecipient, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, sm_);
+    auto proxy = sm_->GetSceneSessionManagerProxy();
+    ASSERT_NE(nullptr, proxy);
+    sm_->RemoveSSMDeathRecipient();
+}
+
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

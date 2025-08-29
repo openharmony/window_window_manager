@@ -16,24 +16,25 @@
 #include "window_adapter.h"
 #include <iservice_registry.h>
 #include <key_event.h>
-#include <system_ability_definition.h>
 #include <rs_window_animation_target.h>
-#include "window_manager.h"
-#include "window_manager_proxy.h"
-#include "window_manager_hilog.h"
-#include "wm_common.h"
+#include <system_ability_definition.h>
+#include <unistd.h>
+#include "focus_change_info.h"
 #include "scene_board_judgement.h"
 #include "session_manager.h"
-#include "focus_change_info.h"
-#include <unistd.h>
+#include "window_manager.h"
+#include "window_manager_hilog.h"
+#include "window_manager_proxy.h"
 #include "window_session_impl.h"
+#include "wm_common.h"
 
 namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowAdapter"};
 }
-WM_IMPLEMENT_SINGLE_INSTANCE(WindowAdapter)
+std::unordered_map<int32_t, sptr<WindowAdapter>> WindowAdapter::windowAdapterMap_ = {};
+std::mutex WindowAdapter::windowAdapterMapMutex_;
 
 #define INIT_PROXY_CHECK_RETURN(ret)                             \
     do {                                                         \
@@ -65,6 +66,59 @@ WM_IMPLEMENT_SINGLE_INSTANCE(WindowAdapter)
             return;                                                       \
         }                                                                 \
     } while (false)
+
+WMSDeathRecipient::WMSDeathRecipient(const int32_t userId) : userId_(userId) {}
+
+void WMSDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
+{
+    TLOGI(WmsLogTag::WMS_RECOVER, "wms died");
+    sptr<IRemoteObject> object = wptrDeath.promote();
+    if (object == nullptr) {
+        TLOGE(WmsLogTag::WMS_RECOVER, "invalid user: %d", userId_);
+        return;
+    }
+    WindowAdapter::GetInstance(userId_)->ClearWindowAdapter();
+}
+
+WindowAdapter::WindowAdapter(const int32_t userId) : userId_(userId) {}
+
+WindowAdapter& WindowAdapter::GetInstance()
+{
+    static sptr<WindowAdapter> instance = new WindowAdapter();
+    return *instance;
+}
+
+sptr<WindowAdapter> WindowAdapter::GetInstance(const int32_t userId)
+{
+    sptr<WindowAdapter> instance = nullptr;
+
+    if (userId <= INVALID_USER_ID) {
+        instance = &WindowAdapter::GetInstance();
+        return instance;
+    }
+    // multi-instance mode
+    std::lock_guard<std::mutex> lock(windowAdapterMapMutex_);
+    auto iter = windowAdapterMap_.find(userId);
+    if (iter != windowAdapterMap_.end()) {
+        return iter->second;
+    }
+    TLOGI(WmsLogTag::WMS_MULTI_USER, "create new instance userId: %{public}d", userId);
+    instance = new WindowAdapter(userId);
+    windowAdapterMap_.insert({userId, instance});
+    return instance;
+}
+
+WindowAdapter::~WindowAdapter()
+{
+    TLOGI(WmsLogTag::WMS_SCB, "destroyed, userId: %{public}d", userId_);
+    sptr<IRemoteObject> remoteObject = nullptr;
+    if (windowManagerServiceProxy_) {
+        remoteObject = windowManagerServiceProxy_->AsObject();
+    }
+    if (remoteObject) {
+        remoteObject->RemoveDeathRecipient(wmsDeath_);
+    }
+}
 
 WMError WindowAdapter::CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& windowProperty,
     std::shared_ptr<RSSurfaceNode> surfaceNode, uint32_t& windowId, const sptr<IRemoteObject>& token)
@@ -450,13 +504,13 @@ void WindowAdapter::UnregisterSessionRecoverCallbackFunc(int32_t persistentId)
 WMError WindowAdapter::RegisterWMSConnectionChangedListener(const WMSConnectionChangedCallbackFunc& callbackFunc)
 {
     TLOGI(WmsLogTag::WMS_MULTI_USER, "RegisterWMSConnectionChangedListener in");
-    return SessionManager::GetInstance().RegisterWMSConnectionChangedListener(callbackFunc);
+    return SessionManager::GetInstance(userId_)->RegisterWMSConnectionChangedListener(callbackFunc);
 }
 
 WMError WindowAdapter::UnregisterWMSConnectionChangedListener()
 {
     TLOGI(WmsLogTag::WMS_MULTI_USER, "unregister wms connection changed listener");
-    return SessionManager::GetInstance().UnregisterWMSConnectionChangedListener();
+    return SessionManager::GetInstance(userId_)->UnregisterWMSConnectionChangedListener();
 }
 
 void WindowAdapter::WindowManagerAndSessionRecover()
@@ -540,62 +594,50 @@ void WindowAdapter::OnUserSwitch()
 bool WindowAdapter::InitSSMProxy()
 {
     std::lock_guard<std::mutex> lock(mutex_);
-    if (!isProxyValid_) {
-        windowManagerServiceProxy_ = SessionManager::GetInstance().GetSceneSessionManagerProxy();
-        if (!windowManagerServiceProxy_ || !windowManagerServiceProxy_->AsObject()) {
-            WLOGFE("Failed to get system scene session manager services");
-            return false;
-        }
-        wmsDeath_ = new (std::nothrow) WMSDeathRecipient();
-        if (!wmsDeath_) {
-            WLOGFE("Failed to create death Recipient ptr WMSDeathRecipient");
-            return false;
-        }
-        sptr<IRemoteObject> remoteObject = windowManagerServiceProxy_->AsObject();
-        if (remoteObject->IsProxyObject() && !remoteObject->AddDeathRecipient(wmsDeath_)) {
-            WLOGFE("Failed to add death recipient");
-            return false;
-        }
-        if (!recoverInitialized_) {
-            SessionManager::GetInstance().RegisterWindowManagerRecoverCallbackFunc(
-                [this] { this->WindowManagerAndSessionRecover(); });
-            recoverInitialized_ = true;
-        }
-        // U0 system user needs to subscribe OnUserSwitch event
-        int32_t clientUserId = GetUserIdByUid(getuid());
-        if (clientUserId == SYSTEM_USERID && !isRegisteredUserSwitchListener_) {
-            SessionManager::GetInstance().RegisterUserSwitchListener([this]() { this->OnUserSwitch(); });
-            isRegisteredUserSwitchListener_ = true;
-        }
-        isProxyValid_ = true;
+    if (isProxyValid_) {
+        return true;
     }
+    windowManagerServiceProxy_ = SessionManager::GetInstance(userId_)->GetSceneSessionManagerProxy();
+    if (!windowManagerServiceProxy_ || !windowManagerServiceProxy_->AsObject()) {
+        WLOGFE("Failed to get system scene session manager services");
+        return false;
+    }
+    wmsDeath_ = sptr<WMSDeathRecipient>::MakeSptr(userId_);
+    sptr<IRemoteObject> remoteObject = windowManagerServiceProxy_->AsObject();
+    if (remoteObject->IsProxyObject() && !remoteObject->AddDeathRecipient(wmsDeath_)) {
+        WLOGFE("Failed to add death recipient");
+        return false;
+    }
+    if (!recoverInitialized_) {
+        SessionManager::GetInstance(userId_)->RegisterWindowManagerRecoverCallbackFunc([weakThis = wptr(this)] {
+            auto windowAdapter = weakThis.promote();
+            if (!windowAdapter) {
+                TLOGE(WmsLogTag::WMS_SCB, "window adapter is null");
+                return;
+            }
+            windowAdapter->WindowManagerAndSessionRecover();
+        });
+        recoverInitialized_ = true;
+    }
+    // U0 system user needs to subscribe OnUserSwitch event
+    int32_t clientUserId = GetUserIdByUid(getuid());
+    if (clientUserId == SYSTEM_USERID && !isRegisteredUserSwitchListener_) {
+        SessionManager::GetInstance(userId_)->RegisterUserSwitchListener([this]() { this->OnUserSwitch(); });
+        isRegisteredUserSwitchListener_ = true;
+    }
+    isProxyValid_ = true;
     return true;
 }
 
 void WindowAdapter::ClearWindowAdapter()
 {
+    TLOGI(WmsLogTag::WMS_RECOVER, "begin clear");
     std::lock_guard<std::mutex> lock(mutex_);
     if ((windowManagerServiceProxy_ != nullptr) && (windowManagerServiceProxy_->AsObject() != nullptr)) {
         windowManagerServiceProxy_->AsObject()->RemoveDeathRecipient(wmsDeath_);
     }
     isProxyValid_ = false;
     windowManagerServiceProxy_ = nullptr;
-}
-
-void WMSDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
-{
-    if (wptrDeath == nullptr) {
-        WLOGFE("wptrDeath is null");
-        return;
-    }
-
-    sptr<IRemoteObject> object = wptrDeath.promote();
-    if (!object) {
-        WLOGFE("object is null");
-        return;
-    }
-    WLOGI("wms OnRemoteDied");
-    SingletonContainer::Get<WindowAdapter>().ClearWindowAdapter();
 }
 
 WMError WindowAdapter::GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId)

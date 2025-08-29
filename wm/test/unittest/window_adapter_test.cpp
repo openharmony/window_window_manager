@@ -1231,6 +1231,58 @@ HWTEST_F(WindowAdapterTest, UseImplicitAnimation, TestSize.Level1)
     WindowAdapter windowAdapter;
     ASSERT_EQ(WMError::WM_ERROR_INVALID_SESSION, windowAdapter.UseImplicitAnimation(0, true));
 }
+
+/**
+ * @tc.name: WMSDeathRecipient
+ * @tc.desc: normal func
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, WMSDeathRecipient, TestSize.Level1)
+{
+    auto wmsDeath_ = sptr<WMSDeathRecipient>::MakeSptr();
+    ASSERT_NE(wmsDeath_, nullptr);
+ 
+    sptr<IRemoteObject> token = nullptr;
+    wmsDeath_->OnRemoteDied(wptr(token));
+ 
+    token = sptr<IRemoteObjectMocker>::MakeSptr();
+    wmsDeath_->OnRemoteDied(wptr(token));
+}
+ 
+/**
+ * @tc.name: GetInstance
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, GetInstance, TestSize.Level1)
+{
+    sptr<WindowAdapter> instance = nullptr;
+    int32_t userId = -1;
+    instance = WindowAdapter::GetInstance(userId);
+    ASSERT_NE(instance, nullptr);
+ 
+    userId = 101;
+    instance = WindowAdapter::GetInstance(userId);
+    ASSERT_NE(instance, nullptr);
+ 
+    // branch overried
+    instance = WindowAdapter::GetInstance(userId);
+    ASSERT_NE(instance, nullptr);
+}
+ 
+/**
+ * @tc.name: InitSSMProxy
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, InitSSMProxy, TestSize.Level1)
+{
+    int32_t userId = -1;
+    sptr<WindowAdapter> instance = WindowAdapter::GetInstance(userId);
+    ASSERT_NE(instance, nullptr);
+ 
+    ASSERT_NE(true, instance->InitWMSProxy());
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

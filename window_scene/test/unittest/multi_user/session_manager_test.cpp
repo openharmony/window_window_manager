@@ -51,7 +51,7 @@ void SessionManagerTest::TearDown()
 HWTEST_F(SessionManagerTest, GetSceneSessionManagerProxy, Function | SmallTest | Level2)
 {
     ASSERT_NE(nullptr, sm_);
-    sm_->Clear();
+    sm_->RemoveSSMDeathRecipient();
     sm_->ClearSessionManagerProxy();
     auto sceneSessionManagerProxy = sm_->GetSceneSessionManagerProxy();
     ASSERT_NE(nullptr, sceneSessionManagerProxy);
@@ -208,14 +208,9 @@ HWTEST_F(SessionManagerTest, RegisterWMSConnectionChangedListener1, Function | S
 HWTEST_F(SessionManagerTest, UnregisterWMSConnectionChangedListener, Function | SmallTest | Level2)
 {
     ASSERT_NE(nullptr, sm_);
-
-    sm_->mockSessionManagerServiceProxy_ = nullptr;
-    auto ret = sm_->UnregisterWMSConnectionChangedListener();
-    ASSERT_EQ(WMError::WM_OK, ret);
-
     sptr<IRemoteObject> remoteObject = sptr<IRemoteObjectMocker>::MakeSptr();
     sm_->mockSessionManagerServiceProxy_ = iface_cast<IMockSessionManagerInterface>(remoteObject);
-    ret = sm_->UnregisterWMSConnectionChangedListener();
+    auto ret = sm_->UnregisterWMSConnectionChangedListener();
     ASSERT_EQ(WMError::WM_OK, ret);
 }
 } // namespace Rosen
