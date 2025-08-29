@@ -2803,6 +2803,8 @@ HWTEST_F(SceneSessionTest5, GetTargetOrientationConfigInfo, Function | SmallTest
  */
 HWTEST_F(SceneSessionTest5, NotifyRotationProperty, Function | SmallTest | Level2)
 {
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
     SessionInfo info;
     info.abilityName_ = "NotifyRotationProperty";
     info.bundleName_ = "NotifyRotationProperty";
@@ -2818,6 +2820,40 @@ HWTEST_F(SceneSessionTest5, NotifyRotationProperty, Function | SmallTest | Level
     EXPECT_EQ(result2, WSError::WS_OK);
     WSError result3 = sceneSession->NotifyRotationProperty(90, 1, 1);
     EXPECT_EQ(result3, WSError::WS_OK);
+    sceneSession->GetSessionProperty()->SetDisplayId(1024);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(1024, nullptr);
+    sceneSession->NotifyRotationProperty(90, 1, 1);
+    usleep(100000);
+    EXPECT_TRUE(g_errLog.find("failed to convert Rotation to Orientation") != std::string::npos);
+}
+
+/**
+ * @tc.name: ConvertRotationToOrientation
+ * @tc.desc: ConvertRotationToOrientation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, ConvertRotationToOrientation, Function | SmallTest | Level2)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    SessionInfo info;
+    info.abilityName_ = "ConvertRotationToOrientation";
+    info.bundleName_ = "ConvertRotationToOrientation";
+
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+
+    unit32_t orientation = 0;
+    WSError result = sceneSession->ConvertRotationToOrientation(90, orientation);
+    EXPECT_EQ(result, WSError::WS_OK);
+    EXPECT_EQ(orientation, 1);
+
+    sceneSession->GetSessionProperty()->SetDisplayId(1024);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(1024, nullptr);
+    unit32_t orientation1 = 0;
+    sceneSession->ConvertRotationToOrientation(90, orientation1);
+    EXPECT_EQ(orientation1, 0);
+    EXPECT_TRUE(g_errLog.find("Screen session is null") != std::string::npos);
 }
 
 /**
