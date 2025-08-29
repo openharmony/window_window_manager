@@ -757,12 +757,12 @@ DisplaySourceMode AbstractScreen::GetDisplaySourceMode() const
     sptr<AbstractScreenGroup> abstractScreenGroup = GetGroup();
     TLOGI(WmsLogTag::DMS, "in");
     if (abstractScreenGroup == nullptr || screenController_ == nullptr) {
-        TLOGE(WmsLogTag::DMS, "default NONE");
+        TLOGW(WmsLogTag::DMS, "default NONE");
         return DisplaySourceMode::NONE;
     }
     ScreenId defaultId = screenController_->GetDefaultAbstractScreenId();
     if (dmsId_ == defaultId) {
-        TLOGE(WmsLogTag::DMS, "err MAIN");
+        TLOGW(WmsLogTag::DMS, "err MAIN");
         return DisplaySourceMode::MAIN;
     }
     ScreenCombination combination = abstractScreenGroup->GetScreenCombination();
@@ -773,9 +773,7 @@ DisplaySourceMode AbstractScreen::GetDisplaySourceMode() const
         case ScreenCombination::SCREEN_MIRROR: {
             return DisplaySourceMode::MIRROR;
         }
-        case ScreenCombination::SCREEN_EXPAND: {
-            return DisplaySourceMode::EXTEND;
-        }
+        case ScreenCombination::SCREEN_EXPAND:
         case ScreenCombination::SCREEN_EXTEND: {
             return DisplaySourceMode::EXTEND;
         }
@@ -786,7 +784,7 @@ DisplaySourceMode AbstractScreen::GetDisplaySourceMode() const
             return DisplaySourceMode::NONE;
         }
         default: {
-            TLOGE(WmsLogTag::DMS, "default NONE");
+            TLOGW(WmsLogTag::DMS, "default NONE");
             return DisplaySourceMode::NONE;
         }
     }
