@@ -375,6 +375,11 @@ struct AtomicServiceInfo {
     std::vector<std::string> supportWindowMode_;
 };
 
+struct PendingSessionActivationConfig {
+    bool forceStart = false; // is compulsion open
+    bool forceNewWant = true;
+};
+
 struct SessionInfo {
     std::string bundleName_ = "";
     std::string moduleName_ = "";

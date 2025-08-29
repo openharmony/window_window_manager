@@ -212,7 +212,9 @@ bool ConvertJsonFromJs(napi_env env, napi_value value, nlohmann::json& payload);
 bool ParseArrayStringValue(napi_env env, napi_value array, std::vector<std::string>& vector);
 bool ConvertProcessOptionFromJs(napi_env env, napi_value jsObject,
     std::shared_ptr<AAFwk::ProcessOptions> processOptions);
-napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo);
+napi_value CreateJsSessionPendingConfigs(napi_env env, const PendingSessionActivationConfig& config);
+napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo,
+    const std::shared_ptr<PendingSessionActivationConfig>& config = nullptr);
 void ProcessPendingSessionActivationResult(napi_env env, napi_value callResult,
     const std::shared_ptr<SessionInfo>& sessionInfo);
 bool ConvertSessionResultFromJsValue(

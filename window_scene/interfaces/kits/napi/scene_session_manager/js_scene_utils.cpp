@@ -1396,7 +1396,22 @@ napi_value CreateSupportWindowModes(napi_env env,
     return arrayValue;
 }
 
-napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
+napi_value CreateJsSessionPendingConfigs(napi_env env, const PendingSessionActivationConfig &config)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        WLOGFE("Failed to get jsObject");
+        return nullptr;
+    }
+
+    napi_set_named_property(env, objValue, "forceStart", CreateJsValue(env, config.forceStart));
+    napi_set_named_property(env, objValue, "forceNewWant", CreateJsValue(env, config.forceNewWant));
+    return objValue;
+}
+
+napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo,
+    const std::shared_ptr<PendingSessionActivationConfig>& config)
 {
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
@@ -1448,6 +1463,12 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
     SetJsSessionInfoByWant(env, sessionInfo, objValue);
     napi_set_named_property(env, objValue, "supportWindowModes",
         CreateSupportWindowModes(env, sessionInfo.supportedWindowModes));
+
+    if (config != nullptr) {
+        napi_set_named_property(env, objValue, "extendPendingActivationConfig",
+            CreateJsSessionPendingConfigs(env, *(config)));
+    }
+
     napi_set_named_property(env, objValue, "specifiedFlag", CreateJsValue(env, sessionInfo.specifiedFlag_));
     if (sessionInfo.want != nullptr) {
         napi_set_named_property(env, objValue, "want", AppExecFwk::WrapWant(env, sessionInfo.GetWantSafely()));
