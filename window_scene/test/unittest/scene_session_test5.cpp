@@ -2811,6 +2811,11 @@ HWTEST_F(SceneSessionTest5, NotifyRotationProperty, Function | SmallTest | Level
 
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
+    sceneSession->GetSessionProperty()->SetDisplayId(1001);
+    ScreenSessionConfig config;
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(1001, screenSession);
 
     WSError result = sceneSession->NotifyRotationProperty(0, 0, 0);
     EXPECT_EQ(result, WSError::WS_OK);
@@ -2842,6 +2847,11 @@ HWTEST_F(SceneSessionTest5, ConvertRotationToOrientation, Function | SmallTest |
 
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
+    sceneSession->GetSessionProperty()->SetDisplayId(1001);
+    ScreenSessionConfig config;
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(1001, screenSession);
 
     uint32_t orientation = 0;
     WSError result = sceneSession->ConvertRotationToOrientation(90, orientation);
