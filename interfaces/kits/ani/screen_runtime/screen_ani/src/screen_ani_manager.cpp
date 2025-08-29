@@ -22,6 +22,7 @@
 #include "ani_err_utils.h"
 #include "dm_common.h"
 #include "refbase.h"
+#include "screen_ani.h"
 #include "screen_ani_listener.h"
 #include "screen_ani_utils.h"
 #include "singleton_container.h"

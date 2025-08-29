@@ -21,6 +21,8 @@
 #include "dm_common.h"
 #include "refbase.h"
 #include "screen.h"
+#include "screen_ani.h"
+#include "screen_info.h"
 #include "screen_manager.h"
 #include "singleton_container.h"
 #include "window_manager_hilog.h"
