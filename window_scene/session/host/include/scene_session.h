@@ -859,7 +859,6 @@ public:
     void NotifySessionAcrossDisplaysChange(const sptr<SceneSession>& sceneSession, bool isAcrossDisplays);
     WMError OnUpdateColorMode(const std::string& colorMode, bool hasDarkRes) override;
     std::string GetAbilityColorMode() const;
-    std::vector<NodeId> GetValidSurfaceNodeIds() const;
 
     /*
      * Window Pattern

@@ -1242,7 +1242,7 @@ napi_value JsWindowManager::OnSetWatermarkImageForApp(napi_env env, napi_callbac
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM, "argc is mismatch");
     }
-    std::shared_ptr<Media::PixelMap> pixelMap;
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
     int32_t imgWidth = 0;
     int32_t imgHeight = 0;
     if (GetType(env, argv[0]) == napi_object) {
