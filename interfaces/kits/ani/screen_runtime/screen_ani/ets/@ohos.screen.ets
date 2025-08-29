@@ -600,22 +600,52 @@ export interface VirtualScreenOption {
     surfaceId: string;
 }
 
-interface Rect {
+class VirtualScreenOptionImpl implements VirtualScreenOption {
+    name: string;
+
+    width: long;
+
+    height: long;
+
+    density: double;
+
+    surfaceId: string;
+}
+
+export interface Rect {
     left: long;
 
     top: long;
 
-    wigth: long;
+    width: long;
 
     height: long;
 }
 
-interface ExpandOption {
+class RectImpl implements Rect {
+    left: long;
+
+    top: long;
+
+    width: long;
+
+    height: long;
+}
+
+export interface ExpandOption {
     screenId: long;
 
-    startX_: long;
+    startX: long;
 
-    startY_: long;
+    startY: long;
+}
+
+class ExpandOptionImpl implements ExpandOption {
+    screenId: long;
+
+    startX: long;
+
+    startY: long;
 }
 
 export let screenMgrRef: long;
