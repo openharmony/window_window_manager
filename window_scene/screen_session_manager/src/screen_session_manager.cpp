@@ -901,12 +901,15 @@ void ScreenSessionManager::FreeDisplayMirrorNodeInner(const sptr<ScreenSession> 
 void ScreenSessionManager::SetScreenCorrection()
 {
     ScreenRotation screenRotation = ScreenRotation::ROTATION_0;
+    ScreenId screenId = SCREEN_ID_DEFAULT;
     std::ostringstream oss;
     if (g_foldScreenFlag) {
         if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
             screenRotation = static_cast<ScreenRotation>(ROTATION_90);
+            screenId = SCREEN_ID_MAIN;
         } else {
             screenRotation = static_cast<ScreenRotation>(g_screenRotationOffSet);
+            screenId = SCREEN_ID_FULL;
         }
     } else {
         std::vector<std::string> phyOffsets = FoldScreenStateInternel::GetPhyRotationOffset();
@@ -915,11 +918,11 @@ void ScreenSessionManager::SetScreenCorrection()
     }
     auto rotationOffset = GetConfigCorrectionByDisplayMode(GetFoldDisplayMode());
     auto rotation = (static_cast<int32_t>(screenRotation) + static_cast<int32_t>(rotationOffset)) % ROTATION_MOD;
-    auto ret = rsInterface_.SetScreenCorrection(SCREEN_ID_DEFAULT, static_cast<ScreenRotation>(rotation));
+    auto ret = rsInterface_.SetScreenCorrection(screenId, static_cast<ScreenRotation>(rotation));
     oss << "screenRotation: " << static_cast<int32_t>(screenRotation) << " ret value: " << ret;
     TLOGW(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
     screenEventTracker_.RecordEvent(oss.str());
-}
+}`
 
 void ScreenSessionManager::AdaptSuperHorizonalBoot(sptr<ScreenSession> screenSession, ScreenId screenId)
 {
