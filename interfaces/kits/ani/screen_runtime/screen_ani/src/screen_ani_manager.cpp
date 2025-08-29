@@ -753,6 +753,8 @@ ani_status ScreenManagerAni::ClassBindNativeFunctions(ani_env* env, ani_class sc
             reinterpret_cast<void *>(ScreenAni::TransferDynamic)},
         ani_native_function {"setScreenActiveModeInternal", nullptr,
             reinterpret_cast<void *>(ScreenAni::SetScreenActiveMode)},
+        ani_native_function {"setOrientationInternal", nullptr,
+            reinterpret_cast<void *>(ScreenAni::SetOrientation)},
     };
     ani_status ret = env->Class_BindNativeMethods(screenCls, methods.data(), methods.size());
     if (ret != ANI_OK) {
