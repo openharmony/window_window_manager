@@ -31,6 +31,7 @@
 #include "screen_group.h"
 #include "screen_group_info.h"
 #include "screen_info.h"
+#include "display_info.h"
 
 namespace OHOS::Rosen {
 class AbstractScreenGroup;
@@ -62,6 +63,8 @@ public:
     void InitRSDefaultDisplayNode(const RSDisplayNodeConfig& config, const Point& startPoint);
     void UpdateRSDisplayNode(Point startPoint, const sptr<AbstractScreen>& absScreen);
     ScreenId GetScreenGroupId() const;
+    sptr<DisplayInfo> ScreenInfoConvertToDisplayInfo(sptr<ScreenInfo> info);
+    void FillDisplayInfoByScreenInfo(sptr<DisplayInfo> displayInfo, sptr<ScreenInfo> info);
 
     // colorspace, gamut
     DMError GetScreenSupportedColorGamuts(std::vector<ScreenColorGamut>& colorGamuts);
