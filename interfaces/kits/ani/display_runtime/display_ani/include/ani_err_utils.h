@@ -23,8 +23,8 @@
 namespace OHOS::Rosen {
 class AniErrUtils {
 public:
-    static ani_object CreateAniError(ani_env* env, const DMError& errorCode, std::string msg = "");
-    static ani_object CreateAniError(ani_env* env, const DmErrorCode& errorCode, std::string msg = "");
+    static ani_object CreateAniError(ani_env* env, const DMError& errorCode, const std::string& msg = "");
+    static ani_object CreateAniError(ani_env* env, const DmErrorCode& errorCode, const std::string& msg = "");
     static ani_status ThrowBusinessError(ani_env* env, DMError error, std::string message);
     static ani_status ThrowBusinessError(ani_env* env, DmErrorCode error, std::string message);
     static ani_status CreateBusinessError(ani_env* env, int32_t error, std::string message, ani_object* err);
@@ -35,4 +35,4 @@ private:
 };
 } // namespace OHOS::Rosen
 
-#endif //WINDOW_WINDOW_MANAGER_ANI_ERROR_UTILS_H
+#endif //DISPLAY_MANAGER_ANI_ERROR_UTILS_H

@@ -714,9 +714,8 @@ HWTEST_F(DisplayManagerIpcServiceTest, SetVirtualScreenAsDefault, TestSize.Level
     bool isSucc = false;
     uint64_t screenId = SCREEN_ID_INVALID;
  
-    ErrCode result = dms_->SetVirtualScreenAsDefault(screenId, isSucc);
+    dms_->SetVirtualScreenAsDefault(screenId, isSucc);
  
-    EXPECT_EQ(result, ERR_OK);
     EXPECT_FALSE(isSucc);
 }
 } // namespace

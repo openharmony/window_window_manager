@@ -796,8 +796,8 @@ bool DisplayManagerLite::TryToCancelScreenOff()
 
 bool DisplayManagerLite::SetScreenBrightness(uint64_t screenId, uint32_t level)
 {
-    TLOGD(WmsLogTag::DMS, "[UL_POWER]SetScreenBrightness screenId:%{public}" PRIu64", level:%{public}u,", screenId,
-        level);
+    TLOGD(WmsLogTag::DMS, "[UL_POWER]SetScreenBrightness screenId:%{public}" PRIu64", level:%{public}u,",
+        screenId, level);
     SingletonContainer::Get<DisplayManagerAdapterLite>().SetScreenBrightness(screenId, level);
     return true;
 }
@@ -805,8 +805,8 @@ bool DisplayManagerLite::SetScreenBrightness(uint64_t screenId, uint32_t level)
 uint32_t DisplayManagerLite::GetScreenBrightness(uint64_t screenId) const
 {
     uint32_t level = SingletonContainer::Get<DisplayManagerAdapterLite>().GetScreenBrightness(screenId);
-    TLOGD(WmsLogTag::DMS, "[UL_POWER]GetScreenBrightness screenId:%{public}" PRIu64", level:%{public}u,", screenId,
-        level);
+    TLOGD(WmsLogTag::DMS, "[UL_POWER]GetScreenBrightness screenId:%{public}" PRIu64", level:%{public}u,",
+        screenId, level);
     return level;
 }
 

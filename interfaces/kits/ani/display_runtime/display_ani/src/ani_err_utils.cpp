@@ -93,9 +93,9 @@ std::string AniErrUtils::GetErrorMsg(const DmErrorCode& errorCode)
         DM_ERROR_CODE_TO_ERROR_MSG_MAP.at(errorCode) : "";
 }
 
-ani_object AniErrUtils::CreateAniError(ani_env* env, const DMError& errorCode, std::string msg)
+ani_object AniErrUtils::CreateAniError(ani_env* env, const DMError& errorCode, const std::string& message)
 {
-    msg = msg == "" ? GetErrorMsg(errorCode) : msg;
+    auto msg = message == "" ? GetErrorMsg(errorCode) : message;
     ani_string aniMsg;
     env->String_NewUTF8(msg.c_str(), msg.size(), &aniMsg);
     ani_object aniError = nullptr;
@@ -107,9 +107,9 @@ ani_object AniErrUtils::CreateAniError(ani_env* env, const DMError& errorCode, s
     return aniError;
 }
 
-ani_object AniErrUtils::CreateAniError(ani_env* env, const DmErrorCode& errorCode, std::string msg)
+ani_object AniErrUtils::CreateAniError(ani_env* env, const DmErrorCode& errorCode, const std::string& message)
 {
-    msg = msg == "" ? GetErrorMsg(errorCode) : msg;
+    auto msg = message == "" ? GetErrorMsg(errorCode) : message;
     ani_string aniMsg;
     env->String_NewUTF8(msg.c_str(), msg.size(), &aniMsg);
     ani_object aniError = nullptr;
@@ -149,7 +149,7 @@ ani_status AniErrUtils::CreateBusinessError(ani_env* env, int32_t error, std::st
 {
     TLOGI(WmsLogTag::DMS, "[ANI] in");
     ani_class aniClass;
-    ani_status status = env->FindClass("L@ohos/display/BusinessError;", &aniClass);
+    ani_status status = env->FindClass("L@ohos/base/BusinessError;", &aniClass);
     if (status != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] class not found, status:%{public}d", static_cast<int32_t>(status));
         return status;
@@ -167,13 +167,11 @@ ani_status AniErrUtils::CreateBusinessError(ani_env* env, int32_t error, std::st
         TLOGE(WmsLogTag::DMS, "[ANI] fail to new err, status:%{public}d", static_cast<int32_t>(status));
         return status;
     }
-    status = env->Object_SetFieldByName_Int(*err, "<property>code", static_cast<ani_int>(error));
+    status = env->Object_SetFieldByName_Double(*err, "code", static_cast<ani_double>(error));
     if (status != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] fail to set code, status:%{public}d", static_cast<int32_t>(status));
         return status;
     }
-    status = env->Object_SetFieldByName_Int(*err, "<property>code", static_cast<ani_int>(error));
-    
     return ANI_OK;
 }
 

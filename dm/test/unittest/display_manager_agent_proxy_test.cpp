@@ -44,6 +44,7 @@ class DisplayManagerAgentProxyTest : public testing::Test {
 public:
     static void SetUpTestSuite();
     void SetUp() override;
+    void TearDown() override;
     sptr<DisplayManagerAgentProxy> displayManagerAgentProxy;
 };
 
@@ -53,10 +54,6 @@ void DisplayManagerAgentProxyTest::SetUpTestSuite()
 
 void DisplayManagerAgentProxyTest::SetUp()
 {
-    if (displayManagerAgentProxy) {
-        return;
-    }
-
     sptr<IRemoteObject> impl;
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         impl = sptr<IRemoteObjectMocker>::MakeSptr();
@@ -66,6 +63,11 @@ void DisplayManagerAgentProxyTest::SetUp()
 
     displayManagerAgentProxy = sptr<DisplayManagerAgentProxy>::MakeSptr(impl);
     ASSERT_NE(displayManagerAgentProxy, nullptr);
+}
+
+void DisplayManagerAgentProxyTest::TearDown()
+{
+    displayManagerAgentProxy = nullptr;
 }
 
 /**
@@ -149,7 +151,7 @@ HWTEST_F(DisplayManagerAgentProxyTest, NotifyCaptureStatusChanged01, TestSize.Le
 {
     g_logMsg.clear();
     LOG_SetCallback(MyLogCallback);
-    
+
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     displayManagerAgentProxy->NotifyCaptureStatusChanged(false);
@@ -165,7 +167,7 @@ HWTEST_F(DisplayManagerAgentProxyTest, NotifyCaptureStatusChanged02, TestSize.Le
 {
     g_logMsg.clear();
     LOG_SetCallback(MyLogCallback);
-    
+
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteBoolErrorFlag(true);
     displayManagerAgentProxy->NotifyCaptureStatusChanged(false);
@@ -182,7 +184,7 @@ HWTEST_F(DisplayManagerAgentProxyTest, NotifyDisplayChangeInfoChanged, TestSize.
     g_logMsg.clear();
     LOG_SetCallback(MyLogCallback);
     sptr<DisplayChangeInfo> display_change_info = sptr<DisplayChangeInfo>::MakeSptr();
-   
+
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     displayManagerAgentProxy->NotifyDisplayChangeInfoChanged(display_change_info);
@@ -267,7 +269,7 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnScreenConnect02, TestSize.Level1)
     g_logMsg.clear();
     LOG_SetCallback(MyLogCallback);
     sptr<ScreenInfo> screenInfo = sptr<ScreenInfo>::MakeSptr();
-    
+
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     displayManagerAgentProxy->OnScreenConnect(screenInfo);
@@ -284,7 +286,7 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnScreenConnect03, TestSize.Level1)
     g_logMsg.clear();
     LOG_SetCallback(MyLogCallback);
     sptr<ScreenInfo> screenInfo = sptr<ScreenInfo>::MakeSptr();
-    
+
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteParcelableErrorFlag(true);
     displayManagerAgentProxy->OnScreenConnect(screenInfo);
@@ -375,7 +377,7 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnScreenGroupChange02, TestSize.Level1)
     std::string trigger = " ";
     std::vector<sptr<ScreenInfo>> screenInfos = {};
     ScreenGroupChangeEvent event = ScreenGroupChangeEvent::CHANGE_GROUP;
-    
+
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     displayManagerAgentProxy->OnScreenGroupChange(trigger, screenInfos, event);
@@ -394,7 +396,7 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnScreenGroupChange03, TestSize.Level1)
     std::string trigger = " ";
     std::vector<sptr<ScreenInfo>> screenInfos = {};
     ScreenGroupChangeEvent event = ScreenGroupChangeEvent::CHANGE_GROUP;
-    
+
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteUint32ErrorFlag(true);
     displayManagerAgentProxy->OnScreenGroupChange(trigger, screenInfos, event);
@@ -462,7 +464,7 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayChange02, TestSize.Level1)
     LOG_SetCallback(MyLogCallback);
     sptr<DisplayInfo> displayInfo = sptr<DisplayInfo>::MakeSptr();
     DisplayChangeEvent event = DisplayChangeEvent::DISPLAY_FREEZED;
-    
+
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     displayManagerAgentProxy->OnDisplayChange(displayInfo, event);
@@ -480,7 +482,7 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayChange03, TestSize.Level1)
     LOG_SetCallback(MyLogCallback);
     sptr<DisplayInfo> displayInfo = sptr<DisplayInfo>::MakeSptr();
     DisplayChangeEvent event = DisplayChangeEvent::DISPLAY_FREEZED;
-    
+
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteParcelableErrorFlag(true);
     displayManagerAgentProxy->OnDisplayChange(displayInfo, event);
@@ -498,7 +500,7 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnDisplayChange04, TestSize.Level1)
     LOG_SetCallback(MyLogCallback);
     sptr<DisplayInfo> displayInfo = sptr<DisplayInfo>::MakeSptr();
     DisplayChangeEvent event = DisplayChangeEvent::DISPLAY_FREEZED;
-    
+
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteUint32ErrorFlag(true);
     displayManagerAgentProxy->OnDisplayChange(displayInfo, event);
@@ -515,7 +517,7 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnScreenshot01, TestSize.Level1)
     g_logMsg.clear();
     LOG_SetCallback(MyLogCallback);
     sptr<ScreenshotInfo> snapshotInfo = sptr<ScreenshotInfo>::MakeSptr();
-       
+
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     displayManagerAgentProxy->OnScreenshot(snapshotInfo);
@@ -532,7 +534,7 @@ HWTEST_F(DisplayManagerAgentProxyTest, OnScreenshot02, TestSize.Level1)
     g_logMsg.clear();
     LOG_SetCallback(MyLogCallback);
     sptr<ScreenshotInfo> snapshotInfo = sptr<ScreenshotInfo>::MakeSptr();
-       
+
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteParcelableErrorFlag(true);
     displayManagerAgentProxy->OnScreenshot(snapshotInfo);
@@ -584,7 +586,7 @@ HWTEST_F(DisplayManagerAgentProxyTest, NotifyPrivateStateWindowListChanged01, Te
     LOG_SetCallback(MyLogCallback);
     DisplayId id = 0;
     std::vector<std::string> privacyWindowList{"win0", "win1"};
-    
+
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     displayManagerAgentProxy->NotifyPrivateStateWindowListChanged(id, privacyWindowList);
@@ -600,7 +602,7 @@ HWTEST_F(DisplayManagerAgentProxyTest, NotifyFoldStatusChanged, TestSize.Level1)
 {
     g_logMsg.clear();
     LOG_SetCallback(MyLogCallback);
-    
+
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     displayManagerAgentProxy->NotifyFoldStatusChanged(FoldStatus::EXPAND);
@@ -616,7 +618,7 @@ HWTEST_F(DisplayManagerAgentProxyTest, NotifyFoldStatusChanged01, TestSize.Level
 {
     g_logMsg.clear();
     LOG_SetCallback(MyLogCallback);
-    
+
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteUint32ErrorFlag(true);
     displayManagerAgentProxy->NotifyFoldStatusChanged(FoldStatus::EXPAND);

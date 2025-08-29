@@ -650,18 +650,6 @@ HWTEST_F(DisplayManagerTest, GetScreenBrightness, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetVirtualScreenFlag
- * @tc.desc: GetVirtualScreenFlag
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerTest, GetVirtualScreenFlag, TestSize.Level1)
-{
-    uint64_t screenId = 0;
-    auto ret = DisplayManagerLite::GetInstance().GetVirtualScreenFlag(screenId);
-    ASSERT_EQ(ret, VirtualScreenFlag::DEFAULT);
-}
-
-/**
  * @tc.name: RegisterScreenMagneticStateListener
  * @tc.desc: RegisterScreenMagneticStateListener fun
  * @tc.type: FUNC

@@ -34,6 +34,7 @@ public:
     virtual DMError UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type);
     virtual void Clear();
+    virtual bool IsScreenLessDevice();
 protected:
     bool InitDMSProxy();
     std::recursive_mutex mutex_;
@@ -80,7 +81,6 @@ public:
     virtual uint32_t GetScreenBrightness(uint64_t screenId);
     virtual DMError SetSystemKeyboardStatus(bool isTpKeyboardOn = false);
 private:
-    virtual bool IsScreenLessDevice();
     static inline SingletonDelegator<DisplayManagerAdapterLite> delegator;
 };
 
@@ -99,7 +99,6 @@ public:
     virtual DMError GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos);
     virtual bool SynchronizePowerStatus(ScreenPowerState state);
 private:
-    virtual bool IsScreenLessDevice();
     static inline SingletonDelegator<ScreenManagerAdapterLite> delegator;
 };
 

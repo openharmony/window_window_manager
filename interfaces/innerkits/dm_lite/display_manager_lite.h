@@ -180,6 +180,7 @@ public:
      * @brief Change the display mode of the foldable device.
      *
      * @param mode target display mode to change.
+     * 使用场景：目前仅提供给维修场景使用，折叠屏手动色彩校准
      */
     void SetFoldDisplayMode(const FoldDisplayMode mode);
 
