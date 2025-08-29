@@ -474,7 +474,7 @@ HWTEST_F(SceneSessionManagerTest6, SetWatermarkImageForApp2, TestSize.Level1)
     int32_t pid = IPCSkeleton::GetCallingRealPid();
     std::string watermarkName;
     std::string bundleName = "setAppWatermark";
-	std::string targetWatername = SessionUtils::GetAppLockKey(bundleName, pid);
+	std::string targetWatername = bundleName + "#" + std::to_string(appIndex);
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
     ssm_->appWatermarkPidMap_.clear();
@@ -508,7 +508,7 @@ HWTEST_F(SceneSessionManagerTest6, SetWatermarkImageForApp2, TestSize.Level1)
 
     ssm_->appWatermarkPidMap_[pid] = "watermarkName#1";
     EXPECT_EQ(ssm_->SetWatermarkImageForApp(pixelMap, watermarkName), WMError::WM_OK);
-    EXPECT_EQ(watermarkName, SessionUtils::GetAppLockKey(bundleName, pid));
+    EXPECT_EQ(watermarkName, targetWatername);
     EXPECT_EQ(ssm_->appWatermarkPidMap_.size(), 1);
 
     ssm_->appWatermarkPidMap_.clear();
