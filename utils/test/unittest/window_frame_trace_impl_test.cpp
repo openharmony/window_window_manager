@@ -56,9 +56,7 @@ HWTEST_F(WindowFrameTraceImplTest, VsyncStartFrameTrace01, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowFrameTraceImplTest: VsyncStartFrameTrace01 start";
     WindowFrameTraceImpl trace;
-    int32_t res = 0;
     trace.VsyncStartFrameTrace();
-    ASSERT_EQ(res, 0);
     WindowFrameTraceImpl* trace_ = WindowFrameTraceImpl::GetInstance();
     bool res2 = trace_->AccessFrameTrace();
     trace_->VsyncStartFrameTrace();
@@ -75,9 +73,7 @@ HWTEST_F(WindowFrameTraceImplTest, VsyncStopFrameTrace01, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowFrameTraceImplTest: VsyncStopFrameTrace01 start";
     WindowFrameTraceImpl trace;
-    int32_t res = 0;
     trace.VsyncStopFrameTrace();
-    ASSERT_EQ(res, 0);
     WindowFrameTraceImpl* trace_ = WindowFrameTraceImpl::GetInstance();
     bool res2 = trace_->AccessFrameTrace();
     trace_->VsyncStartFrameTrace();
