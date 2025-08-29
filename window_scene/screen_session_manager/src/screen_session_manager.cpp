@@ -922,7 +922,7 @@ void ScreenSessionManager::SetScreenCorrection()
     oss << "screenRotation: " << static_cast<int32_t>(screenRotation) << " ret value: " << ret;
     TLOGW(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
     screenEventTracker_.RecordEvent(oss.str());
-}`
+}
 
 void ScreenSessionManager::AdaptSuperHorizonalBoot(sptr<ScreenSession> screenSession, ScreenId screenId)
 {
