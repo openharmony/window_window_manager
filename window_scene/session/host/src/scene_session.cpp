@@ -8716,7 +8716,7 @@ WSError SceneSession::ConvertRotationToOrientation(uint32_t rotation, uint32_t& 
 {
     sptr<ScreenSession> screenSession =
         ScreenSessionManagerClient::GetInstance().GetScreenSessionById(GetSessionProperty()->GetDisplayId());
-    if (screenSession = nullptr) {
+    if (screenSession == nullptr) {
         TLOGW(WmsLogTag::WMS_ROTATION, "Screen session is null");
         return WSError::WS_ERROR_INVALID_DISPLAY;
     }
