@@ -659,13 +659,21 @@ void SceneSessionManager::LoadWindowSceneXml()
         appWindowSceneConfig_.keyboardAnimationOut_);
 }
 
-void SceneSessionManager::InitPrepareTerminateConfig()
+bool SceneSessionManager::IsPrepareTerminateEnabled() const
 {
     char value[PREPARE_TERMINATE_ENABLE_SIZE] = "false";
     int32_t retSysParam = GetParameter(PREPARE_TERMINATE_ENABLE_PARAMETER, "false", value,
         PREPARE_TERMINATE_ENABLE_SIZE);
     TLOGI(WmsLogTag::DEFAULT, "%{public}s value is %{public}s.", PREPARE_TERMINATE_ENABLE_PARAMETER, value);
     if (retSysParam > 0 && !std::strcmp(value, "true")) {
+        return true;
+    }
+    return false;
+}
+
+void SceneSessionManager::InitPrepareTerminateConfig()
+{
+    if (IsPrepareTerminateEnabled()) {
         isPrepareTerminateEnable_ = true;
     }
 }
@@ -2935,6 +2943,9 @@ WSError SceneSessionManager::PrepareTerminate(int32_t persistentId, bool& isPrep
     if (!isPrepareTerminateEnable_) { // not support prepareTerminate
         isPrepareTerminate = false;
         TLOGE(WmsLogTag::WMS_MAIN, "not support prepareTerminate, Id:%{public}d", persistentId);
+        if (IsPrepareTerminateEnabled()) {
+            TLOGE(WmsLogTag::WMS_MAIN, "prepareTerminateConfig is enable.");
+        }
         return WSError::WS_OK;
     }
     auto sceneSession = GetSceneSession(persistentId);
