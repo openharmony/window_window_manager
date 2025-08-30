@@ -73,9 +73,9 @@ sptr<ScreenInfo> AbstractScreen::ConvertToScreenInfo() const
     return info;
 }
 
-sptr<DisplayInfo> AbstractScreen::ScreenInfoConvertToDisplayInfo(sptr<ScreenInfo> info)
+sptr<DisplayInfo> AbstractScreen::ConvertScreenInfoToDisplayInfo(const sptr<ScreenInfo>& info) const
 {
-    sptr<DisplayInfo> displayInfo = new(std::nothrow) DisplayInfo();
+    sptr<DisplayInfo> displayInfo = sptr<DisplayInfo>::MakeSptr();
     if (displayInfo == nullptr) {
         return nullptr;
     }
@@ -83,7 +83,7 @@ sptr<DisplayInfo> AbstractScreen::ScreenInfoConvertToDisplayInfo(sptr<ScreenInfo
     return displayInfo;
 }
 
-void AbstractScreen::FillDisplayInfoByScreenInfo(sptr<DisplayInfo> displayInfo, sptr<ScreenInfo> info)
+void AbstractScreen::FillDisplayInfoByScreenInfo(sptr<DisplayInfo> displayInfo, const sptr<ScreenInfo>& info) const
 {
     if (displayInfo == nullptr || info == nullptr) {
         TLOGE(WmsLogTag::DMS, "displayInfo is nullptr");
