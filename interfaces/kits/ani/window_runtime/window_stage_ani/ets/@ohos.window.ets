@@ -1137,32 +1137,43 @@ export interface WindowLimits {
 export class WindowStageInternal implements WindowStage {
     static { loadLibrary('windowstageani_kit.z') }
 
-    private nativeObj : long;
+    private nativeObj: long = 0;
     setNativeObj(nativeObj: long):void {
         this.nativeObj = nativeObj;
     }
 
-    public native loadContent(nativeObj:long, path: String): int;
+    public native loadContentSync(nativeObj: long, path: string, storage?: LocalStorage): void;
     public native disableWindowDecorSync(nativeObj:long): void;
     public native setShowOnLockScreenSync(nativeObj:long, showOnLockScreen: boolean): void;
     public native getMainWindowSync(nativeObj: long): Window;
 
-    public loadContent(path: string, callback: AsyncCallback<void>): void {
-        // uicontent not support taskpool, must use ui thread
-        let ret = this.loadContent(this.nativeObj, String(path));
-        if (ret == WMError_WM_DO_NOTHING) {
-            throw {code: WmErrorCode_WM_ERROR_STAGE_ABNORMALLY, message: 
-                "This window state is abnormal."} as BusinessError;
-        } else if (ret == WMError_WM_ERROR_INVALID_PARAM) {
-            throw {code: WmErrorCode_WM_ERROR_INVALID_PARAM, message: 
-                "Parameter error. Possible cause: 1. Mandatory parameters are left unspecified; " +
-                "2. Incorrect parameter types."} as BusinessError;
-        }
-        callback({code: WmErrorCode_WM_OK, message: ""} as BusinessError, undefined);
+    public loadContent(path: string, storage: LocalStorage, callback: AsyncCallback<void>): void {
+      try {
+        this.loadContentSync(this.nativeObj, path, storage);
+        callback(new BusinessError(), undefined);
+      } catch (err: Error) {
+        callback(err as BusinessError, undefined);
+      }
     }
 
-    public loadContentByName(name: string, callback: AsyncCallbackVoid): void {
-        let ret = this.loadContent(this.nativeObj, name);
+    public loadContent(path: string, storage?: LocalStorage): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        try {
+          this.loadContentSync(this.nativeObj, path, storage);
+          resolve(undefined);
+        } catch (err: Error) {
+          reject(err as BusinessError);
+        }
+      });
+    }
+
+    public loadContent(path: string, callback: AsyncCallback<void>): void {
+      try {
+        this.loadContentSync(this.nativeObj, path, undefined);
+        callback(new BusinessError(), undefined);
+      } catch (err: Error) {
+        callback(err as BusinessError, undefined);
+      }
     }
   
     public disableWindowDecor(): void {
@@ -1203,8 +1214,9 @@ export class WindowStageInternal implements WindowStage {
 }
 
 export interface WindowStage {
+    loadContent(path: string, storage: LocalStorage, callback: AsyncCallback<void>): void;
+    loadContent(path: string, storage?: LocalStorage): Promise<void>;
     loadContent(path: string, callback: AsyncCallback<void>): void;
-    loadContentByName(name: string, callback: AsyncCallbackVoid): void;
     getMainWindowSync(): Window;
     getMainWindow(): Promise<Window>;
     getMainWindow(callback: AsyncCallback<Window>): void;
@@ -1242,8 +1254,7 @@ export class WindowInternal implements Window {
     private native setWindowPrivacyModeSync(nativeObj: long, isPrivacyMode: boolean): void;
     private native recoverSync(nativeObj: long): void;
     private native setUIContentSync(nativeObj: long, path: string): void;
-    private native loadContentSync(nativeObj: long, path: string, storage: LocalStorage): void;
-    private native loadContentSync(nativeObj: long, path: string): void;
+    private native loadContentSync(nativeObj: long, path: string, storage?: LocalStorage): void;
     private native setWindowKeepScreenOnSync(nativeObj: long, isKeepScreenOn: boolean): void;
     private native setWindowSystemBarEnableSync(nativeObj: long, names: Array<'status' | 'navigation'>): void;
     private native getUIContextSync(nativeObj: long): UIContext;
@@ -1306,9 +1317,9 @@ export class WindowInternal implements Window {
     }
 
     public setWindowBackgroundColor(color: string | ColorMetrics): void {
-       if (color instanceof string) {
-         this.setWindowBackgroundColor(this.nativeObj, color as string);
-       }
+      if (color instanceof string) {
+        this.setWindowBackgroundColor(this.nativeObj, color as string);
+      }
     }
 
     public setBackgroundColor(color: string): Promise<void> {
@@ -1582,7 +1593,7 @@ export class WindowInternal implements Window {
     public loadContent(path: string): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         try {
-          this.loadContentSync(this.nativeObj, path);
+          this.loadContentSync(this.nativeObj, path, undefined);
           resolve(undefined);
         } catch (err: Error) {
           reject(err as BusinessError);
@@ -1592,7 +1603,7 @@ export class WindowInternal implements Window {
 
     public loadContent(path: string, callback: AsyncCallback<void>): void {
       try {
-        this.loadContentSync(this.nativeObj, path);
+        this.loadContentSync(this.nativeObj, path, undefined);
         callback(new BusinessError(), undefined);
       } catch (err: Error) {
         callback(err as BusinessError, undefined);
@@ -1735,8 +1746,8 @@ export function CreateWindowStageApi(scene: long): WindowStage { return CreateWi
 export native function CreateWindow(window: long): WindowInternal;
 
 let nativeObj: long;
-function setNativeObj(nativeObj: long):void {
-    nativeObj = nativeObj;
+export function setNativeObj(nativeObject: long):void {
+    nativeObj = nativeObject;
 }
 
 native function getLastWindowSync(nativeObj: long, ctx: BaseContext): Window;

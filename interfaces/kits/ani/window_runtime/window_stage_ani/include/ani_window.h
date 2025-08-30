@@ -34,6 +34,8 @@ public:
     explicit AniWindow(const sptr<Window>& window);
     explicit AniWindow(const std::shared_ptr<OHOS::Rosen::Window>& window);
     sptr<Window> GetWindow() { return windowToken_; }
+    ani_ref GetAniRef() { return aniRef_; }
+    void SetAniRef(const ani_ref& aniRef) { aniRef_ = aniRef; }
 
     /* window obj stored in ANI */
     static AniWindow* GetWindowObjectFromEnv(ani_env* env, ani_object obj);
@@ -45,8 +47,7 @@ public:
     static void SetUIContent(ani_env* env, ani_object obj, ani_long nativeObj, ani_string path);
     static void SetWindowKeepScreenOn(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isKeepScreenOn);
     static void SetWaterMarkFlag(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean enable);
-    static void LoadContent(ani_env* env, ani_object obj, ani_long nativeObj, ani_string path);
-    static void LoadContentNew(ani_env* env, ani_object obj, ani_long nativeObj,
+    static void LoadContent(ani_env* env, ani_object obj, ani_long nativeObj,
         ani_string path, ani_object storage);
     static void SetWindowSystemBarEnable(ani_env* env, ani_object obj, ani_long nativeObj, ani_object nameAry);
     static ani_object GetUIContext(ani_env* env, ani_object obj, ani_long nativeObj);
@@ -55,6 +56,7 @@ public:
         ani_ref callback);
     static void UnregisterWindowCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
         ani_ref callback);
+    static void Finalizer(ani_env* env, ani_long nativeObj);
 
     /*
      * Window Layout
@@ -83,7 +85,6 @@ private:
     void OnSetUIContent(ani_env* env, ani_string path);
     void OnSetWindowKeepScreenOn(ani_env* env, ani_boolean isKeepScreenOn);
     void OnSetWaterMarkFlag(ani_env* env, ani_boolean enable);
-    void OnLoadContent(ani_env* env, ani_string path);
     void OnLoadContent(ani_env* env, ani_string path, ani_object storage);
     void OnSetWindowSystemBarEnable(ani_env* env, ani_object nameAry);
     ani_object OnGetUIContext(ani_env* env);
@@ -100,11 +101,13 @@ private:
 
     sptr<Window> windowToken_ = nullptr;
     std::unique_ptr<AniWindowRegisterManager> registerManager_ = nullptr;
+    ani_ref aniRef_ = nullptr;
 };
 
 /* window obj stored in ANI */
 AniWindow* GetWindowObjectFromAni(void* aniObj);
-ani_object CreateAniWindowObject(ani_env* env, sptr<Window>& window);
+ani_ref CreateAniWindowObject(ani_env* env, sptr<Window>& window);
+ani_ref FindAniWindowObject(const std::string& windowName);
 void DropWindowObjectByAni(ani_object obj);
 ani_status ANI_Window_Constructor(ani_vm *vm, uint32_t *result);
 }  // namespace Rosen

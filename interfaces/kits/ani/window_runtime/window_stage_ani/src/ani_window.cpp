@@ -17,6 +17,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <ui_content.h>
 
 #include "ani.h"
 #include "ani_err_utils.h"
@@ -35,8 +36,9 @@ constexpr int32_t MIN_DECOR_HEIGHT = 37;
 constexpr int32_t MAX_DECOR_HEIGHT = 112;
 namespace {
 /* used for free, ani has no destructor right now, only free when aniObj freed */
-static std::map<ani_object, AniWindow*> localObjs;
+static std::map<ani_ref, AniWindow*> g_localObjs;
 } // namespace
+static thread_local std::map<std::string, ani_ref> g_aniWindowMap;
 
 AniWindow::AniWindow(const sptr<Window>& window)
     : windowToken_(window), registerManager_(std::make_unique<AniWindowRegisterManager>())
@@ -137,7 +139,11 @@ void AniWindow::OnSetWindowPrivacyMode(ani_env* env, ani_boolean isPrivacyMode)
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
-    auto ret = window->SetPrivacyMode(static_cast<bool>(isPrivacyMode));
+    auto ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetPrivacyMode(static_cast<bool>(isPrivacyMode)));
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "[ANI] failed");
+        AniWindowUtils::AniThrowError(env, ret);
+    }
     TLOGI(WmsLogTag::DEFAULT, "[ANI] ret:%{public}d", static_cast<int32_t>(ret));
 }
 
@@ -253,36 +259,7 @@ void AniWindow::OnSetWaterMarkFlag(ani_env* env, ani_boolean enable)
     }
 }
 
-void AniWindow::LoadContent(ani_env* env, ani_object obj, ani_long nativeObj, ani_string path)
-{
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
-    if (aniWindow != nullptr) {
-        aniWindow->OnLoadContent(env, path);
-    } else {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] aniWindow is nullptr");
-    }
-}
-
-void AniWindow::OnLoadContent(ani_env* env, ani_string path)
-{
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    auto window = GetWindow();
-    if (window == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] window is nullptr");
-        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-        return;
-    }
-    std::string contentPath;
-    AniWindowUtils::GetStdString(env, path, contentPath);
-    TLOGI(WmsLogTag::DEFAULT, "[ANI] contentPath:%{public}s", contentPath.c_str());
-    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->NapiSetUIContent(contentPath, env, nullptr));
-    if (ret != WmErrorCode::WM_OK) {
-        AniWindowUtils::AniThrowError(env, ret, "Window load content failed");
-    }
-}
-
-void AniWindow::LoadContentNew(ani_env* env, ani_object obj, ani_long nativeObj, ani_string path,
+void AniWindow::LoadContent(ani_env* env, ani_object obj, ani_long nativeObj, ani_string path,
     ani_object storage)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
@@ -305,8 +282,7 @@ void AniWindow::OnLoadContent(ani_env* env, ani_string path, ani_object storage)
     }
     std::string contentPath;
     AniWindowUtils::GetStdString(env, path, contentPath);
-    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->NapiSetUIContent(contentPath, (napi_env)env,
-        (napi_value)storage));
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->NapiSetUIContent(contentPath, env, storage));
     if (ret != WmErrorCode::WM_OK) {
         AniWindowUtils::AniThrowError(env, ret, "Window load content failed");
     }
@@ -445,8 +421,7 @@ ani_object AniWindow::OnGetUIContext(ani_env* env)
         TLOGE(WmsLogTag::DEFAULT, "[ANI] uicontent is nullptr");
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    // 依赖arkui uicontent->GetUINapiContext();
-    return AniWindowUtils::CreateAniUndefined(env);
+    return uicontent->GetUIAniContext();
 }
 
 ani_object AniWindow::GetWindowAvoidArea(ani_env* env, ani_object obj, ani_long nativeObj, ani_int type)
@@ -469,33 +444,40 @@ ani_object AniWindow::OnGetWindowAvoidArea(ani_env* env, ani_int type)
     return AniWindowUtils::CreateAniAvoidArea(env, avoidArea, static_cast<AvoidAreaType>(type));
 }
 
-void DropWindowObjectByAni(ani_object aniObj)
+void DropWindowObjectByAni(ani_ref aniObj)
 {
-    auto obj = localObjs.find(reinterpret_cast<ani_object>(aniObj));
-    if (obj != localObjs.end()) {
+    auto obj = g_localObjs.find(reinterpret_cast<ani_ref>(aniObj));
+    if (obj != g_localObjs.end()) {
         delete obj->second;
     }
-    localObjs.erase(obj);
+    g_localObjs.erase(obj);
 }
 
 AniWindow* GetWindowObjectFromAni(void* aniObj)
 {
-    auto obj = localObjs.find(reinterpret_cast<ani_object>(aniObj));
-    if (obj == localObjs.end()) {
+    auto obj = g_localObjs.find(reinterpret_cast<ani_ref>(aniObj));
+    if (obj == g_localObjs.end()) {
         return nullptr;
     }
     return obj->second;
 }
 
-ani_object CreateAniWindowObject(ani_env* env, sptr<Window>& window)
+ani_ref CreateAniWindowObject(ani_env* env, sptr<Window>& window)
 __attribute__((no_sanitize("cfi")))
 {
-    if (env == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] null env");
+    if (env == nullptr || window == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] invalid env or window");
         return nullptr;
     }
-    TLOGD(WmsLogTag::DEFAULT, "[ANI] create window obj");
-
+    std::string windowName = window->GetWindowName();
+    // avoid repeatedly create ani window when getWindow
+    ani_ref aniWindowObj = FindAniWindowObject(windowName);
+    if (aniWindowObj != nullptr) {
+        TLOGI(WmsLogTag::DEFAULT, "[ANI] FindAniWindowObject %{public}s", windowName.c_str());
+        return aniWindowObj;
+    }
+    TLOGI(WmsLogTag::DEFAULT, "[ANI] create window obj");
+ 
     ani_status ret;
     ani_class cls = nullptr;
     if ((ret = env->FindClass("L@ohos/window/window/WindowInternal;", &cls)) != ANI_OK) {
@@ -503,7 +485,7 @@ __attribute__((no_sanitize("cfi")))
         return nullptr;
     }
     std::unique_ptr<AniWindow> aniWindow = std::make_unique<AniWindow>(window);
-
+ 
     ani_method initFunc = nullptr;
     if ((ret = env->Class_FindMethod(cls, "<ctor>", ":V", &initFunc)) != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] get ctor fail %{public}u", ret);
@@ -519,8 +501,15 @@ __attribute__((no_sanitize("cfi")))
         TLOGE(WmsLogTag::DEFAULT, "[ANI] get ctor fail %{public}u", ret);
         return nullptr;
     }
-    env->Object_CallMethod_Void(obj, setObjFunc, aniWindow.get());
-    localObjs.insert(std::pair(obj, aniWindow.release()));
+    env->Object_CallMethod_Void(obj, setObjFunc, reinterpret_cast<ani_long>(aniWindow.get()));
+    ani_ref ref = nullptr;
+    if (env->GlobalReference_Create(obj, &ref) != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] create global ref fail");
+        return nullptr;
+    };
+    aniWindow->SetAniRef(ref);
+    g_localObjs.insert(std::pair(ref, aniWindow.release()));
+    g_aniWindowMap[windowName] = ref;
     return obj;
 }
 
@@ -867,6 +856,32 @@ ani_object AniWindow::SetSpecificSystemBarEnabled(ani_env* env, ani_string name,
     TLOGE(WmsLogTag::WMS_IMMS, "SetSpecificSystemBarEnabled failed, ret = %{public}d", err);
     return AniWindowUtils::AniThrowError(env, err);
 }
+
+ani_ref FindAniWindowObject(const std::string& windowName)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI] Try to find window %{public}s in g_aniWindowMap", windowName.c_str());
+    if (g_aniWindowMap.find(windowName) == g_aniWindowMap.end()) {
+        TLOGI(WmsLogTag::DEFAULT, "[ANI] Can not find window %{public}s in g_aniWindowMap", windowName.c_str());
+        return nullptr;
+    }
+    return g_aniWindowMap[windowName];
+}
+
+void AniWindow::Finalizer(ani_env* env, ani_long nativeObj)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (aniWindow != nullptr) {
+        auto window = aniWindow->GetWindow();
+        if (window != nullptr) {
+            g_aniWindowMap.erase(window->GetWindowName());
+        }
+        DropWindowObjectByAni(aniWindow->GetAniRef());
+        env->GlobalReference_Delete(aniWindow->GetAniRef());
+    } else {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] aniWindow is nullptr");
+    }
+}
 }  // namespace Rosen
 }  // namespace OHOS
 
@@ -1087,7 +1102,7 @@ __attribute__((no_sanitize("cfi")))
         return nullptr;
     }
     env->Object_CallMethod_Void(obj, setObjFunc, reinterpret_cast<ani_long>(uniqueWindow.get()));
-    localObjs.insert(std::pair(obj, uniqueWindow.release()));
+    g_localObjs.insert(std::pair(obj, uniqueWindow.release()));
 
     return obj;
 }
@@ -1161,11 +1176,9 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindow::Recover)},
         ani_native_function {"setUIContentSync", "JLstd/core/String;:V",
             reinterpret_cast<void *>(AniWindow::SetUIContent)},
-        ani_native_function {"loadContentSync", "JLstd/core/String;:V",
-            reinterpret_cast<void *>(AniWindow::LoadContent)},
         ani_native_function {"loadContentSync",
             "JLstd/core/String;Larkui/stateManagement/storages/localStorage/LocalStorage;:V",
-            reinterpret_cast<void *>(AniWindow::LoadContentNew)},
+            reinterpret_cast<void *>(AniWindow::LoadContent)},
         ani_native_function {"setWindowKeepScreenOnSync", "JZ:V",
             reinterpret_cast<void *>(AniWindow::SetWindowKeepScreenOn)},
         ani_native_function {"setWindowSystemBarEnableSync", "JLescompat/Array;:V",
