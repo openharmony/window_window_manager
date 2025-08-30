@@ -1688,6 +1688,11 @@ WMError WindowManager::GetTopNavDestinationName(int32_t windowId, std::string& t
     return SingletonContainer::Get<WindowAdapter>().GetTopNavDestinationName(windowId, topNavDestName);
 }
 
+WMError WindowManager::SetWatermarkImageForApp(const std::shared_ptr<Media::PixelMap>& pixelMap)
+{
+    return SingletonContainer::Get<WindowAdapter>().SetWatermarkImageForApp(pixelMap);
+}
+
 WMError WindowManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) const
 {
     WMError ret = SingletonContainer::Get<WindowAdapter>().GetVisibilityWindowInfo(infos);

@@ -603,6 +603,9 @@ public:
     WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos) override;
     WMError GetGlobalWindowMode(DisplayId displayId, GlobalWindowMode& globalWinMode) override;
     WMError GetTopNavDestinationName(int32_t windowId, std::string& topNavDestName) override;
+    WMError SetWatermarkImageForApp(const std::shared_ptr<Media::PixelMap>& pixelMap,
+        std::string& watermarkName) override;
+    WMError RecoverWatermarkImageForApp(const std::string& watermarkName) override;
     void SetSkipSelfWhenShowOnVirtualScreen(uint64_t surfaceNodeId, bool isSkip);
     WMError AddSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds) override;
     WMError RemoveSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds) override;
@@ -1446,6 +1449,10 @@ private:
      */
     bool SetSessionWatermarkForAppProcess(const sptr<SceneSession>& sceneSession);
     void RemoveProcessWatermarkPid(int32_t pid);
+    std::vector<NodeId> GetSessionNodeIdsAndWatermarkNameByPid(int32_t pid, std::string& watermarkName);
+    void SetWatermarkForSession(const sptr<SceneSession>& session);
+    void ClearWatermarkForSession(const sptr<SceneSession>& session);
+    void ClearWatermarkRecordWhenAppExit(const sptr<SceneSession>& session);
 
     /*
      * Window Layout
@@ -1489,6 +1496,7 @@ private:
      * Window Watermark
      */
     std::unordered_map<int32_t, std::string> processWatermarkPidMap_; // ONLY Accessed on OS_sceneSession thread
+    std::unordered_map<int32_t, std::string> appWatermarkPidMap_;
 
     /*
      * Dump
