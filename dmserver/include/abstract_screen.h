@@ -63,8 +63,8 @@ public:
     void InitRSDefaultDisplayNode(const RSDisplayNodeConfig& config, const Point& startPoint);
     void UpdateRSDisplayNode(Point startPoint, const sptr<AbstractScreen>& absScreen);
     ScreenId GetScreenGroupId() const;
-    sptr<DisplayInfo> ScreenInfoConvertToDisplayInfo(sptr<ScreenInfo> info);
-    void FillDisplayInfoByScreenInfo(sptr<DisplayInfo> displayInfo, sptr<ScreenInfo> info);
+    sptr<DisplayInfo> ConvertScreenInfoToDisplayInfo(const sptr<ScreenInfo>& info) const;
+    void FillDisplayInfoByScreenInfo(sptr<DisplayInfo> displayInfo, const sptr<ScreenInfo>& info) const;
 
     // colorspace, gamut
     DMError GetScreenSupportedColorGamuts(std::vector<ScreenColorGamut>& colorGamuts);

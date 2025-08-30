@@ -651,7 +651,7 @@ sptr<ScreenInfo> DisplayManagerService::GetScreenInfoById(ScreenId screenId)
     return screen->ConvertToScreenInfo();
 }
 
-sptr<DisplayInfo> DisplayManagerService::GetDisplayInfoByScreenId(ScreenId screenId)
+sptr<DisplayInfo> DisplayManagerService::GetDisplayInfoByScreenId(ScreenId screenId) const
 {
     auto screen = abstractScreenController_->GetAbstractScreen(screenId);
     if (screen == nullptr) {
@@ -660,9 +660,10 @@ sptr<DisplayInfo> DisplayManagerService::GetDisplayInfoByScreenId(ScreenId scree
     }
     sptr<ScreenInfo> screenInfo = screen->ConvertToScreenInfo();
     if (screenInfo == nullptr) {
+        TLOGE(WmsLogTag::DMS, "cannot get screenInfo: %{public}" PRIu64, screenId);
         return nullptr;
     }
-    return screen->ScreenInfoConvertToDisplayInfo(screenInfo);
+    return screen->ConvertScreenInfoToDisplayInfo(screenInfo);
 }
 
 sptr<ScreenGroupInfo> DisplayManagerService::GetScreenGroupInfoById(ScreenId screenId)
