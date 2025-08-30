@@ -334,7 +334,8 @@ bool CheckWindowAnimationOption(napi_env env, WindowAnimationOption& animationCo
         }
         case WindowAnimationCurve::INTERPOLATION_SPRING: {
             for (uint32_t i = 1; i < ANIMATION_PARAM_SIZE; ++i) {
-                if (MathHelper::NearEqual(animationConfig.param[i], 0.0f)) {
+                if (MathHelper::NearEqual(animationConfig.param[i], 0.0f) ||
+                    MathHelper::LessNotEqual(animationConfig.param[i], 0.0f)) {
                     TLOGI(WmsLogTag::WMS_ANIMATION, "Interpolation spring param %{public}u is invalid: %{public}f",
                         i, animationConfig.param[i]);
                     animationConfig.param[i] = 1.0f;
