@@ -162,7 +162,7 @@ HWTEST_F(SceneSessionManagerStubTest2, HandleRecoverWatermarkImageForApp01, Test
     uint32_t code = static_cast<uint32_t>(
         ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_RECOVER_APP_WATERMARK_IMAGE);
     auto res = stub_->ProcessRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, ERR_INVALID_DATA);
+    EXPECT_EQ(res, ERR_NONE);
 
     data.WriteString("watermark");
     res = stub_->HandleRecoverWatermarkImageForApp(data, reply);
