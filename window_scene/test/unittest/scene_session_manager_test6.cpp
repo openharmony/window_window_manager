@@ -560,7 +560,7 @@ HWTEST_F(SceneSessionManagerTest6, SetWatermarkForSession, TestSize.Level1)
     auto session2 = sptr<SceneSession>::MakeSptr(sessionInfo2, nullptr);
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
     session2->SetSurfaceNode(surfaceNode);
-	session2->SetCallingPid(pid);
+    session2->SetCallingPid(pid);
     ssm_->SetWatermarkForSession(session2);
     EXPECT_EQ(ssm_->appWatermarkPidMap_.size(), 1);
 
@@ -569,7 +569,7 @@ HWTEST_F(SceneSessionManagerTest6, SetWatermarkForSession, TestSize.Level1)
     sessionInfo3.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_PIP);
     auto session3 = sptr<SceneSession>::MakeSptr(sessionInfo3, nullptr);
     session3->SetSurfaceNode(nullptr);
-	session3->SetCallingPid(pid);
+    session3->SetCallingPid(pid);
     ssm_->SetWatermarkForSession(session2);
     EXPECT_EQ(ssm_->appWatermarkPidMap_.size(), 1);
 
@@ -597,7 +597,7 @@ HWTEST_F(SceneSessionManagerTest6, ClearWatermarkForSession, TestSize.Level1)
     sessionInfo1.bundleName_ = bundleName;
     sessionInfo1.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW);
     auto session1 = sptr<SceneSession>::MakeSptr(sessionInfo1, nullptr);
-	session1->SetCallingPid(pid + 100);
+    session1->SetCallingPid(pid + 100);
     ssm_->ClearWatermarkForSession(session1);
     EXPECT_EQ(ssm_->appWatermarkPidMap_.size(), 0);
 
