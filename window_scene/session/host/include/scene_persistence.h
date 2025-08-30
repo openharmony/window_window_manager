@@ -92,6 +92,7 @@ private:
     mutable std::mutex savingSnapshotMutex_;
     mutable std::mutex hasSnapshotMutex_;
     mutable std::mutex snapshotSizeMutex_;
+    bool isPcWindow_ = false;
 };
 } // namespace OHOS::Rosen
 
