@@ -343,6 +343,7 @@ ErrCode MockSessionManagerService::RegisterSMSRecoverListener(const sptr<IRemote
     }
 
     int32_t clientUserId = GetUserIdByCallingUid();
+    DisplayId displayId = DISPLAY_ID_INVALID;
     // SYSTEM_USERID calling, userId = INVALID_USER_ID, set userId to defaultWMSUserId_
     if (clientUserId == SYSTEM_USERID && userId == INVALID_USER_ID) {
         TLOGI(WmsLogTag::WMS_MULTI_USER, "system user, userId is INVALID_USER_ID, use defaultWMSUserId_: %{public}d",
@@ -355,12 +356,13 @@ ErrCode MockSessionManagerService::RegisterSMSRecoverListener(const sptr<IRemote
         return ret;
     }
 
-    DisplayId displayId = DISPLAY_ID_INVALID;
-    if (clientUserId == SYSTEM_USERID) {
+    if (clientUserId == SYSTEM_USERID && userId != INVALID_USER_ID) {
         ret = GetForegroundOsAccountDisplayId(userId, displayId);
         if (ret != ERR_OK) {
             return ret;
         }
+    } else {
+        displayId = DEFAULT_SCREEN_ID;
     }
 
     int32_t pid = IPCSkeleton::GetCallingRealPid();
@@ -411,6 +413,7 @@ ErrCode MockSessionManagerService::UnregisterSMSRecoverListener(int32_t userId)
     TLOGI(WmsLogTag::WMS_RECOVER, "userId = %{public}d,", userId);
 
     int32_t clientUserId = GetUserIdByCallingUid();
+    DisplayId displayId = DISPLAY_ID_INVALID;
     // SYSTEM_USERID calling, userId = INVALID_USER_ID, set userId to defaultWMSUserId_
     if (clientUserId == SYSTEM_USERID && userId == INVALID_USER_ID) {
         TLOGI(WmsLogTag::WMS_MULTI_USER, "system user, userId is INVALID_USER_ID, use defaultWMSUserId_: %{public}d",
@@ -423,12 +426,13 @@ ErrCode MockSessionManagerService::UnregisterSMSRecoverListener(int32_t userId)
         return ret;
     }
 
-    DisplayId displayId = DISPLAY_ID_INVALID;
-    if (clientUserId == SYSTEM_USERID) {
+    if (clientUserId == SYSTEM_USERID && userId != INVALID_USER_ID) {
         ret = GetForegroundOsAccountDisplayId(userId, displayId);
         if (ret != ERR_OK) {
             return ret;
         }
+    } else {
+        displayId = DEFAULT_SCREEN_ID;
     }
 
     int32_t pid = IPCSkeleton::GetCallingRealPid();
@@ -476,6 +480,7 @@ ErrCode MockSessionManagerService::RegisterSMSLiteRecoverListener(const sptr<IRe
     }
 
     int32_t clientUserId = GetUserIdByCallingUid();
+    DisplayId displayId = DISPLAY_ID_INVALID;
     // SYSTEM_USERID calling, userId = INVALID_USER_ID, set userId to defaultWMSUserId_
     if (clientUserId == SYSTEM_USERID && userId == INVALID_USER_ID) {
         TLOGI(WmsLogTag::WMS_MULTI_USER, "system user, userId is INVALID_USER_ID, use defaultWMSUserId_: %{public}d",
@@ -488,12 +493,13 @@ ErrCode MockSessionManagerService::RegisterSMSLiteRecoverListener(const sptr<IRe
         return ret;
     }
 
-    DisplayId displayId = DISPLAY_ID_INVALID;
-    if (clientUserId == SYSTEM_USERID) {
+    if (clientUserId == SYSTEM_USERID && userId != INVALID_USER_ID) {
         ret = GetForegroundOsAccountDisplayId(userId, displayId);
         if (ret != ERR_OK) {
             return ret;
         }
+    } else {
+        displayId = DEFAULT_SCREEN_ID;
     }
 
     int32_t pid = IPCSkeleton::GetCallingRealPid();
@@ -544,6 +550,7 @@ ErrCode MockSessionManagerService::UnregisterSMSLiteRecoverListener(int32_t user
     TLOGI(WmsLogTag::WMS_RECOVER, "userId = %{public}d,", userId);
 
     int32_t clientUserId = GetUserIdByCallingUid();
+    DisplayId displayId = DISPLAY_ID_INVALID;
     // SYSTEM_USERID calling, userId = INVALID_USER_ID, set userId to defaultWMSUserId_
     if (clientUserId == SYSTEM_USERID && userId == INVALID_USER_ID) {
         TLOGI(WmsLogTag::WMS_MULTI_USER, "system user, userId is INVALID_USER_ID, use defaultWMSUserId_: %{public}d",
@@ -556,12 +563,13 @@ ErrCode MockSessionManagerService::UnregisterSMSLiteRecoverListener(int32_t user
         return ret;
     }
 
-    DisplayId displayId = DISPLAY_ID_INVALID;
-    if (clientUserId == SYSTEM_USERID) {
+    if (clientUserId == SYSTEM_USERID && userId != INVALID_USER_ID) {
         ret = GetForegroundOsAccountDisplayId(userId, displayId);
         if (ret != ERR_OK) {
             return ret;
         }
+    } else {
+        displayId = DEFAULT_SCREEN_ID;
     }
 
     int32_t pid = IPCSkeleton::GetCallingRealPid();
@@ -1232,11 +1240,6 @@ ErrCode MockSessionManagerService::ValidateParameters(int32_t clientUserId, int3
 {
     if (clientUserId <= INVALID_USER_ID) {
         TLOGE(WmsLogTag::WMS_RECOVER, "clientUserId is illegal: %{public}d", clientUserId);
-        return ERR_INVALID_VALUE;
-    }
-
-    if (clientUserId == SYSTEM_USERID && userId <= INVALID_USER_ID) {
-        TLOGE(WmsLogTag::WMS_RECOVER, "system userid calling, userId is illegal: %{public}d", userId);
         return ERR_INVALID_VALUE;
     }
     return ERR_OK;
