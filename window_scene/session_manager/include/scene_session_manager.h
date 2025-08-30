@@ -1494,7 +1494,6 @@ private:
      * Window Watermark
      */
     std::unordered_map<int32_t, std::string> processWatermarkPidMap_; // ONLY Accessed on OS_sceneSession thread
-    std::shared_mutex appWatermarkMapMutex_;
     std::unordered_map<int32_t, std::string> appWatermarkPidMap_;
 
     /*
