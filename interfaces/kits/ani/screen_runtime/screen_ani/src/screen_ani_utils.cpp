@@ -212,26 +212,26 @@ DmErrorCode ScreenAniUtils::GetVirtualScreenOption(ani_env* env, ani_object opti
     auto ret = env->Object_GetFieldByName_Ref(options, "<property>name", &nameRef);
     if (ret != ANI_OK || nameRef == nullptr) {
         TLOGE(WmsLogTag::DMS, "Failed to get nameRef, ret:%{public}d", ret);
-        return DmErrorCode::DM_ERROR_ILLEGAL_PARAM;
+        return DmErrorCode::DM_ERROR_INVALID_PARAM;
     }
     ret = GetStdString(env, static_cast<ani_string>(nameRef), option.name_);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "Failed to get name, ret:%{public}d", ret);
-        return DmErrorCode::DM_ERROR_ILLEGAL_PARAM;
+        return DmErrorCode::DM_ERROR_INVALID_PARAM;
     }
 
     ani_long widthAni = 0;
     ret = env->Object_GetFieldByName_Long(options, "<property>width", &widthAni);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "Failed to get width, ret:%{public}d", ret);
-        return DmErrorCode::DM_ERROR_ILLEGAL_PARAM;
+        return DmErrorCode::DM_ERROR_INVALID_PARAM;
     }
     option.width_ = static_cast<uint32_t>(widthAni);
     ani_long heightAni = 0;
     ret = env->Object_GetFieldByName_Long(options, "<property>height", &heightAni);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "Failed to get height, ret:%{public}d", ret);
-        return DmErrorCode::DM_ERROR_ILLEGAL_PARAM;
+        return DmErrorCode::DM_ERROR_INVALID_PARAM;
     }
     option.height_ = static_cast<uint32_t>(heightAni);
 
@@ -239,7 +239,7 @@ DmErrorCode ScreenAniUtils::GetVirtualScreenOption(ani_env* env, ani_object opti
     ret = env->Object_GetFieldByName_Double(options, "<property>density", &densityAni);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "Failed to get density, ret:%{public}d", ret);
-        return DmErrorCode::DM_ERROR_ILLEGAL_PARAM;
+        return DmErrorCode::DM_ERROR_INVALID_PARAM;
     }
     option.density_ = static_cast<float>(densityAni);
 
@@ -247,13 +247,13 @@ DmErrorCode ScreenAniUtils::GetVirtualScreenOption(ani_env* env, ani_object opti
     ret = env->Object_GetFieldByName_Ref(options, "<property>surfaceId", &surfaceIdRef);
     if (ret != ANI_OK || surfaceIdRef == nullptr) {
         TLOGE(WmsLogTag::DMS, "Failed to get surfaceIdRef, ret:%{public}d", ret);
-        return DmErrorCode::DM_ERROR_ILLEGAL_PARAM;
+        return DmErrorCode::DM_ERROR_INVALID_PARAM;
     }
 
     ret = GetSurfaceFromAni(env, static_cast<ani_string>(surfaceIdRef), option.surface_);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "Failed to get surface, ret:%{public}d", ret);
-        return DmErrorCode::DM_ERROR_ILLEGAL_PARAM;
+        return DmErrorCode::DM_ERROR_INVALID_PARAM;
     }
     return DmErrorCode::DM_OK;
 }
@@ -311,7 +311,7 @@ ani_object ScreenAniUtils::CreateDisplayIdVectorAniObject(ani_env* env, std::vec
 {
     TLOGI(WmsLogTag::DMS, "[ANI] start");
     ani_object arrayObj = ScreenAniUtils::CreateAniArray(env, displayIds.size());
-    ani_boolean isUndefined;
+    ani_boolean isUndefined = false;
     env->Reference_IsUndefined(arrayObj, &isUndefined);
     if (isUndefined) {
         TLOGE(WmsLogTag::DMS, "Failed to create arrayObject");
