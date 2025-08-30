@@ -87,7 +87,7 @@ WSScreenRelativeRect SessionCoordinateHelper::GlobalToScreenRelativeRect(
 
         // Compute intersection area between this screen and the scaled globalRect.
         uint64_t area = scaledGlobalRect.IntersectionArea<uint64_t>(screenRect);
-        if (area > maxIntersectionArea || (area == maxIntersectionArea && screenId < candidateScreenId)) {
+        if (area > maxIntersectionArea || (area != 0 && area == maxIntersectionArea && screenId < candidateScreenId)) {
             maxIntersectionArea = area;
             candidateScreenId = screenId;
             candidateScreenRect = screenRect;
