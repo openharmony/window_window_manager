@@ -394,14 +394,18 @@ ani_status ScreenAniUtils::GetScreenIdArrayFromAni(ani_env* env, ani_object mirr
 {
     TLOGI(WmsLogTag::DMS, "[ANI] start");
     ani_int length = 0;
-    env->Object_GetPropertyByName_Int(mirrorScreen, "length", &length);
+    auto ret = env->Object_GetPropertyByName_Int(mirrorScreen, "length", &length);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] get ani_array length failed, ret: %{public}u", ret);
+        return ret;
+    }
     TLOGI(WmsLogTag::DMS, "[ANI] length %{public}d", (ani_int)length);
     for (int32_t i = 0; i < length; i++) {
         ani_ref screenIdRef;
-        auto ret = env->Object_CallMethodByName_Ref(mirrorScreen, "$_get", "i:C{std.core.Object}",
+        ret = env->Object_CallMethodByName_Ref(mirrorScreen, "$_get", "i:C{std.core.Object}",
             &screenIdRef, (ani_int)i);
         if (ret != ANI_OK) {
-            TLOGE(WmsLogTag::DMS, "[ANI] get ani_array index %{public}u fail, ret: %{public}u", (ani_int)i, ret);
+            TLOGE(WmsLogTag::DMS, "[ANI] get ani_array index %{public}u failed, ret: %{public}u", (ani_int)i, ret);
             return ret;
         }
         ani_long screenId;
