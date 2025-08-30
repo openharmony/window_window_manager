@@ -13431,7 +13431,8 @@ void SceneSessionManager::PostProcessFocus()
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (auto& iter : sceneSessionMap_) {
             auto session = iter.second;
-            if (session == nullptr || !session->GetPostProcessFocusState().enabled_) {
+            if (session == nullptr || !session->GetPostProcessFocusState().enabled_ ||
+                !session->IsVisibleForeground()) {
                 continue;
             }
             processingSessions.push_back(iter);

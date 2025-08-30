@@ -169,15 +169,17 @@ HWTEST_F(SceneSessionManagerTest8, PostProcessFocus01, TestSize.Level1)
     sessionInfo.abilityName_ = "PostProcessFocus01";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     sceneSession->persistentId_ = 1;
-    sceneSession->state_ = SessionState::STATE_FOREGROUND;
-    sceneSession->isVisible_ = true;
 
     PostProcessFocusState state = { true, true, true, FocusChangeReason::FOREGROUND };
     sceneSession->SetPostProcessFocusState(state);
     sceneSession->SetFocusableOnShow(false);
     ssm_->sceneSessionMap_.emplace(1, sceneSession);
     ssm_->PostProcessFocus();
+    EXPECT_NE(0, focusGroup->GetFocusedSessionId());
 
+    sceneSession->state_ = SessionState::STATE_FOREGROUND;
+    sceneSession->isVisible_ = true;
+    ssm_->PostProcessFocus();
     EXPECT_NE(1, focusGroup->GetFocusedSessionId());
 }
 
