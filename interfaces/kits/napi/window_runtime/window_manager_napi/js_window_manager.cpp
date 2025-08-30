@@ -166,6 +166,13 @@ napi_value JsWindowManager::SetWaterMarkImage(napi_env env, napi_callback_info i
     return (me != nullptr) ? me->OnSetWaterMarkImage(env, info) : nullptr;
 }
 
+napi_value JsWindowManager::SetWatermarkImageForApp(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
+    JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(env, info);
+    return (me != nullptr) ? me->OnSetWatermarkImageForApp(env, info) : nullptr;
+}
+
 napi_value JsWindowManager::ShiftAppWindowFocus(napi_env env, napi_callback_info info)
 {
     JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(env, info);
@@ -1226,6 +1233,58 @@ napi_value JsWindowManager::OnSetWaterMarkImage(napi_env env, napi_callback_info
     return result;
 }
 
+napi_value JsWindowManager::OnSetWatermarkImageForApp(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM, "argc is mismatch");
+    }
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    int32_t imgWidth = 0;
+    int32_t imgHeight = 0;
+    if (GetType(env, argv[0]) == napi_object) {
+        pixelMap = OHOS::Media::PixelMapNapi::GetPixelMap(env, argv[0]);
+        if (pixelMap == nullptr) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "parse image failed");
+            return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM, "get image failed");
+        }
+        imgWidth = pixelMap->GetWidth();
+        imgHeight = pixelMap->GetHeight();
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "isSetWatermark=%{public}d, imgWidth=%{public}d, imgHeight=%{public}d",
+        pixelMap != nullptr, imgWidth, imgHeight);
+    std::shared_ptr<WMError> errCodePtr = std::make_shared<WMError>(WMError::WM_OK);
+    const char* const where = __func__;
+    NapiAsyncTask::ExecuteCallback execute = [pixelMap, errCodePtr, where]() {
+        *errCodePtr = SingletonContainer::Get<WindowManager>().SetWatermarkImageForApp(pixelMap);
+        TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: errCode: %{public}d", where, static_cast<int32_t>(*errCodePtr));
+    };
+    auto complete = [errCodePtr, where](napi_env env, NapiAsyncTask& task, int32_t status) {
+        if (*errCodePtr != WMError::WM_OK) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s failed, errCode: %{public}d",
+                where, static_cast<int32_t>(*errCodePtr));
+            auto retErrCode = WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY;
+            if (WM_JS_TO_ERROR_CODE_MAP.count(*errCodePtr) > 0) {
+                retErrCode = WM_JS_TO_ERROR_CODE_MAP.at(*errCodePtr);
+            }
+            task.Reject(env, JsErrUtils::CreateJsError(env, retErrCode,
+                "[window][setWatermarkImageForAppWindows]msg: set app watermark failed"));
+            return;
+        }
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s succeed", where);
+        task.Resolve(env, NapiGetUndefined(env));
+    };
+    napi_value result = nullptr;
+    auto asyncTask = CreateAsyncTask(env, nullptr,
+        std::make_unique<NapiAsyncTask::ExecuteCallback>(std::move(execute)),
+        std::make_unique<NapiAsyncTask::CompleteCallback>(std::move(complete)), &result);
+    NapiAsyncTask::Schedule("JsWindowManager::OnSetWatermarkImageForApp", env, std::move(asyncTask));
+    return result;
+}
+
 napi_value JsWindowManager::OnShiftAppWindowFocus(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "OnShiftAppWindowFocus");
@@ -1793,6 +1852,8 @@ napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "setGestureNavigationEnabled", moduleName,
         JsWindowManager::SetGestureNavigationEnabled);
     BindNativeFunction(env, exportObj, "setWaterMarkImage", moduleName, JsWindowManager::SetWaterMarkImage);
+    BindNativeFunction(env, exportObj, "setWatermarkImageForAppWindows", moduleName,
+        JsWindowManager::SetWatermarkImageForApp);
     BindNativeFunction(env, exportObj, "shiftAppWindowFocus", moduleName, JsWindowManager::ShiftAppWindowFocus);
     BindNativeFunction(env, exportObj, "getAllWindowLayoutInfo", moduleName, JsWindowManager::GetAllWindowLayoutInfo);
     BindNativeFunction(env, exportObj, "getGlobalWindowMode", moduleName, JsWindowManager::GetGlobalWindowMode);

@@ -1723,6 +1723,17 @@ HWTEST_F(WindowManagerTest, GetTopNavDestinationName, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetWatermarkImageForApp
+ * @tc.desc: test SetWatermarkImageForApp rpc is ok
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, SetWatermarkImageForApp, TestSize.Level1)
+{
+    auto ret = WindowManager::GetInstance().SetWatermarkImageForApp(nullptr);
+    EXPECT_EQ(SingletonContainer::Get<WindowAdapter>().SetWatermarkImageForApp(nullptr), ret);
+}
+
+/**
  * @tc.name: ShiftAppWindowPointerEvent
  * @tc.desc: check ShiftAppWindowPointerEvent
  * @tc.type: FUNC
