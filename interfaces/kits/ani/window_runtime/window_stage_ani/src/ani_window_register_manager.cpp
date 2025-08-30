@@ -12,9 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+ 
+#include "ani_window_register_manager.h"
 
 #include "ani.h"
-#include "ani_window_register_manager.h"
 #include "singleton_container.h"
 #include "window_manager.h"
 #include "window_manager_hilog.h"

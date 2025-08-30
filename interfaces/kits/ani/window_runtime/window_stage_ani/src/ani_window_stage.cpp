@@ -27,8 +27,8 @@
 #include "interop_js/hybridgref_ani.h"
 #include "interop_js/hybridgref_napi.h"
 #include "js_window_stage.h"
-#include "window_manager_hilog.h"
 #include "permission.h"
+#include "window_manager_hilog.h"
 #include "window_scene.h"
 
 using OHOS::Rosen::WindowScene;
