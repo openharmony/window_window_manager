@@ -461,5 +461,23 @@ void DisplayManagerAni::OnGetAllDisplayPhysicalResolution(ani_env* env, ani_obje
         DisplayAniUtils::ConvertDisplayPhysicalResolution(displayPhysicalArray, arrayObj, env);
     }
 }
+
+void DisplayManagerAni::FinalizerDisplay(ani_env* env, ani_object displayObj, ani_long nativeObj)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] DMS FinalizerDisplayNative begin");
+    DisplayManagerAni* displayManagerAni = reinterpret_cast<DisplayManagerAni*>(nativeObj);
+    displayManagerAni->OnFinalizerDisplay(env, displayObj);
+}
+ 
+void DisplayManagerAni::OnFinalizerDisplay(ani_env* env, ani_object displayObj)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] DMS FinalizerDisplayNative begin");
+    ani_long displayId;
+    if (ANI_OK != env->Object_GetFieldByName_Long(displayObj, "<property>id", &displayId)) {
+        TLOGE(WmsLogTag::DMS, "[ANI] DMS FinalizerDisplayNative get displayId failed");
+        return;
+    }
+    DisplayAniUtils::DisposeAniDisplayObject(static_cast<DisplayId>(displayId));
+}
 }
 }

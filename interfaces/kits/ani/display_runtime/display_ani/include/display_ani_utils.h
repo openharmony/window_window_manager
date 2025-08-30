@@ -59,6 +59,10 @@ static ani_status CallAniFunctionVoid(ani_env* env, const char* ns,
     const char* fn, const char* signature, ...);
 
 static ani_object CreateRectObject(ani_env* env);
+
+static std::shared_ptr<DisplayAni> FindAniDisplayObject(sptr<Display> display, DisplayId displayId);
+
+static void DisposeAniDisplayObject(DisplayId displayId);
 };
 }
 }

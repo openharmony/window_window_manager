@@ -307,9 +307,14 @@ DMError DisplayAni::UnregisterDisplayListenerWithType(std::string type, ani_env*
 
 void DisplayAni::CreateDisplayAni(sptr<Display> display, ani_object displayObj, ani_env* env)
 {
-    std::unique_ptr<DisplayAni> displayAni = std::make_unique<DisplayAni>(display);
+    TLOGI(WmsLogTag::DMS, "[ANI] CreateDisplayAni begin");
+    std::shared_ptr<DisplayAni> displayAni = DisplayAniUtils::FindAniDisplayObject(display, display->GetId());
+    if (displayAni == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] CreateDisplayAni failed");
+        return;
+    }
     if (ANI_OK != env->Object_SetFieldByName_Long(static_cast<ani_object>(displayObj),
-        "displayRef", reinterpret_cast<ani_long>(displayAni.release()))) {
+        "displayRef", reinterpret_cast<ani_long>(displayAni.get()))) {
         TLOGE(WmsLogTag::DMS, "[ANI] set displayAni ref fail");
     }
 }
@@ -401,6 +406,8 @@ ani_status DisplayAni::NspBindNativeFunctions(ani_env* env, ani_namespace nsp)
         ani_native_function {"getAllDisplayPhysicalResolutionNative", nullptr,
             reinterpret_cast<void *>(DisplayManagerAni::GetAllDisplayPhysicalResolution)},
         ani_native_function {"isCaptured", nullptr, reinterpret_cast<void *>(DisplayManagerAni::IsCaptured)},
+        ani_native_function {"finalizerDisplayNative", nullptr,
+            reinterpret_cast<void *>(DisplayManagerAni::FinalizerDisplay)},
     };
     auto ret = env->Namespace_BindNativeFunctions(nsp, funcs.data(), funcs.size());
     if (ret != ANI_OK) {

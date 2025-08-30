@@ -29,6 +29,9 @@
 namespace OHOS {
 namespace Rosen {
 
+static thread_local std::map<DisplayId, std::shared_ptr<DisplayAni>> g_AniDisplayMap;
+std::recursive_mutex g_mutex;
+
 enum class DisplayStateMode : uint32_t {
     STATE_UNKNOWN = 0,
     STATE_OFF,
@@ -316,5 +319,27 @@ ani_object DisplayAniUtils::CreateRectObject(ani_env *env)
     return rectObj;
 }
 
+std::shared_ptr<DisplayAni> DisplayAniUtils::FindAniDisplayObject(sptr<Display> display, DisplayId displayId)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] Try to find display %{public}" PRIu64" in g_AniDisplayMap", displayId);
+    std::shared_ptr<DisplayAni> displayAni;
+    std::lock_guard<std::recursive_mutex> lock(g_mutex);
+    if (g_AniDisplayMap.find(displayId) == g_AniDisplayMap.end()) {
+        TLOGI(WmsLogTag::DMS, "[ANI] displayAni nullptr");
+        displayAni = std::make_shared<DisplayAni>(display);
+        g_AniDisplayMap[displayId] = displayAni;
+    }
+    return g_AniDisplayMap[displayId];
+}
+ 
+void DisplayAniUtils::DisposeAniDisplayObject(DisplayId displayId)
+{
+    TLOGI(WmsLogTag::DMS, "displayId : %{public}" PRIu64"", displayId);
+    std::lock_guard<std::recursive_mutex> lock(g_mutex);
+    if (g_AniDisplayMap.find(displayId) != g_AniDisplayMap.end()) {
+        TLOGI(WmsLogTag::DMS, "Display is destroyed: %{public}" PRIu64"", displayId);
+        g_AniDisplayMap.erase(displayId);
+    }
+}
 }
 }
