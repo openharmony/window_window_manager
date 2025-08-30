@@ -586,6 +586,51 @@ void AniWindow::OnSetShadow(ani_env* env, ani_double radius, ani_string color, a
         radiusValue, colorValue.c_str(), offsetXValue, offsetYValue);
 }
 
+void AniWindow::SetCornerRadius(ani_env* env, ani_object obj, ani_long nativeObj, ani_double cornerRadius)
+{
+    TLOGI(WmsLogTag::WMS_ANIMATION, "[ANI] In");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (aniWindow != nullptr) {
+        aniWindow->OnSetCornerRadius(env, cornerRadius);
+    } else {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "[ANI] aniWindow is nullptr");
+    }
+}
+
+void AniWindow::OnSetCornerRadius(ani_env* env, ani_double cornerRadius)
+{
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Permission denied!");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+        return;
+    }
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "windowToken is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Unexpected window type:%{public}d", windowToken_->GetType());
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
+        return;
+    }
+
+    double radius = static_cast<double>(cornerRadius);
+    if (MathHelper::LessNotEqual(radius, 0.0)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Invalid radius:%{public}f", radius);
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return;
+    }
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetCornerRadius(radius));
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "SetCornerRadius failed:%{public}d", ret);
+        AniWindowUtils::AniThrowError(env, ret);
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_ANIMATION, "Window [%{public}u, %{public}s] set success, radius=%{public}f",
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), radius);
+}
+
 void AniWindow::SetWindowPrivacyMode(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isPrivacyMode)
 {
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
@@ -2869,6 +2914,8 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindow::Rotate)},
         ani_native_function {"setShadow", "ldC{std.core.String}C{std.core.Double}C{std.core.Double}:",
             reinterpret_cast<void *>(AniWindow::SetShadow)},
+        ani_native_function {"setCornerRadiusSync", "ld:",
+            reinterpret_cast<void *>(AniWindow::SetCornerRadius)},
         ani_native_function {"onSync", nullptr,
             reinterpret_cast<void *>(AniWindow::RegisterWindowCallback)},
         ani_native_function {"offSync", nullptr,
