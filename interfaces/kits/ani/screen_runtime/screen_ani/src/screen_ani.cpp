@@ -42,6 +42,10 @@ void ScreenAni::SetDensityDpi(ani_env* env, ani_object obj, ani_double densityDp
         return;
     }
     ScreenAni* screenAni = reinterpret_cast<ScreenAni*>(screenNativeRef);
+    if (screenAni == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] screenAni is nullptr");
+        return;
+    }
     screenAni->OnSetDensityDpi(env, obj, densityDpi);
 }
  
@@ -125,18 +129,26 @@ void ScreenAni::SetScreenActiveMode(ani_env* env, ani_object obj, ani_long modeI
     }
     ani_long screenNativeRef;
     if (ANI_OK != env->Object_GetFieldByName_Long(obj, "screenNativeObj", &screenNativeRef)) {
-        TLOGE(WmsLogTag::DMS, "[ANI] screenAni native null ptr");
+        TLOGE(WmsLogTag::DMS, "[ANI] screenAni native nullptr");
         return;
     }
 #ifdef XPOWER_EVENT_ENABLE
     HiviewDFX::ReportXPowerJsStackSysEvent(env, "EPS_LCD_FREQ");
 #endif // XPOWER_EVENT_ENABLE
     ScreenAni* screenAni = reinterpret_cast<ScreenAni*>(screenNativeRef);
+    if (screenAni == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] screenAni is nullptr");
+        return;
+    }
     screenAni->OnSetScreenActiveMode(env, obj, modeIndex);
 }
 
 void ScreenAni::OnSetScreenActiveMode(ani_env* env, ani_object obj, ani_long modeIndex)
 {
+    if (screen_ ==nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] env is nullptr");
+        return;
+    }
     DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(screen_->SetScreenActiveMode(static_cast<uint32_t>(modeIndex)));
     if (ret != DmErrorCode::DM_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] Set screen active mode fail");
@@ -157,16 +169,25 @@ void ScreenAni::SetOrientation(ani_env* env, ani_object obj, ani_enum_item orien
         return;
     }
     ani_long screenNativeRef;
-    if (ANI_OK != env->Object_GetFieldByName_Long(obj, "screenNativeObj", &screenNativeRef)) {
-        TLOGE(WmsLogTag::DMS, "[ANI] screenAni native null ptr");
+    ani_status ret = env->Object_GetFieldByName_Long(obj, "screenNativeObj", &screenNativeRef);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] get screenAni native failed, ret: %{public}u", ret);
         return;
     }
     ScreenAni* screenAni = reinterpret_cast<ScreenAni*>(screenNativeRef);
+    if (screenAni == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] screenAni is nullptr");
+        return;
+    }
     screenAni->OnSetOrientation(env, obj, orientationAni);
 }
 
 void ScreenAni::OnSetOrientation(ani_env* env, ani_object obj, ani_enum_item orientationAni)
 {
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] env is nullptr");
+        return;
+    }
     ani_int orientationInt = 0;
     ani_status ret = env->EnumItem_GetValue_Int(orientationAni, &orientationInt);
     if (ret != ANI_OK) {

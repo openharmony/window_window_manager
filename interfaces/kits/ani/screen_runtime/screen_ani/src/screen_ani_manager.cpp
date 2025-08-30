@@ -291,11 +291,15 @@ void ScreenManagerAni::GetAllScreens(ani_env* env, ani_object screensAni)
 void ScreenManagerAni::CreateVirtualScreen(ani_env* env, ani_object options, ani_object virtualScreen)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] start");
-    ani_boolean undefRes = 0;
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] env is nullptr");
+        return;
+    }
+    ani_boolean undefRes = false;
     env->Reference_IsUndefined(options, &undefRes);
     if (undefRes != 0) {
         TLOGE(WmsLogTag::DMS, "[ANI] options is undefined or null");
-        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_ILLEGAL_PARAM,
+        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM,
             "options is undefined or null");
         return;
     }
@@ -327,16 +331,20 @@ void ScreenManagerAni::CreateVirtualScreen(ani_env* env, ani_object options, ani
 void ScreenManagerAni::SetVirtualScreenSurface(ani_env* env, ani_long screenId, ani_string surfaceIdAni)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] start");
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] env is nullptr");
+        return;
+    }
     sptr<Surface> surface;
     auto ret = ScreenAniUtils::GetSurfaceFromAni(env, surfaceIdAni, surface);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "Failed to get surface.");
-        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_ILLEGAL_PARAM, "Failed to get surface");
+        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to get surface");
         return;
     }
     if (surface == nullptr) {
         TLOGE(WmsLogTag::DMS, "Set virtual screen surface failed, surface is nullptr.");
-        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_ILLEGAL_PARAM, "surface is nullptr");
+        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "surface is nullptr");
         return;
     }
     DmErrorCode res = DM_JS_TO_ERROR_CODE_MAP.at(
@@ -392,18 +400,22 @@ void ScreenManagerAni::SetMultiScreenRelativePosition(ani_env* env, ani_object m
     ani_object secondaryScreenOptionsAni)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] start");
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] env is nullptr");
+        return;
+    }
     MultiScreenPositionOptions mainScreenOptions;
     auto ret = ScreenAniUtils::GetMultiScreenPositionOptionsFromAni(env, mainScreenOptionsAni, mainScreenOptions);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "Get mainScreenOptions failed.");
-        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_ILLEGAL_PARAM, "Get mainScreenOptions failed.");
+        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Get mainScreenOptions failed.");
         return;
     }
     MultiScreenPositionOptions secondScreenOption;
     ret = ScreenAniUtils::GetMultiScreenPositionOptionsFromAni(env, secondaryScreenOptionsAni, secondScreenOption);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "Get secondScreenOption failed.");
-        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_ILLEGAL_PARAM, "Get secondScreenOption failed.");
+        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Get secondScreenOption failed.");
         return;
     }
     DmErrorCode res = DM_JS_TO_ERROR_CODE_MAP.at(
@@ -420,6 +432,10 @@ void ScreenManagerAni::SetMultiScreenMode(ani_env* env, ani_long primaryScreenId
     ani_enum_item secondaryScreenMode)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] start");
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] env is nullptr");
+        return;
+    }
     ani_int screenModeInt = 0;
     ani_status ret = env->EnumItem_GetValue_Int(secondaryScreenMode, &screenModeInt);
     if (ret != ANI_OK) {
@@ -440,8 +456,12 @@ void ScreenManagerAni::SetMultiScreenMode(ani_env* env, ani_long primaryScreenId
 void ScreenManagerAni::SetScreenPrivacyMaskImage(ani_env* env, ani_long screenId, ani_object imageAni)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] start");
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] env is nullptr");
+        return;
+    }
     std::shared_ptr<Media::PixelMap> privacyMaskImg;
-    ani_boolean isImageAniUndefined = 0;
+    ani_boolean isImageAniUndefined = false;
     env->Reference_IsUndefined(imageAni, &isImageAniUndefined);
     if (!isImageAniUndefined) {
         privacyMaskImg = OHOS::Media::PixelMapTaiheAni::GetNativePixelMap(env, imageAni);
@@ -464,7 +484,7 @@ void ScreenManagerAni::SetScreenPrivacyMaskImage(ani_env* env, ani_long screenId
 ani_object ScreenManagerAni::MakeUnique(ani_env* env, ani_object uniqueScreenIds)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] start");
-    ani_boolean isUniqueScreenIdsUndefined = 0;
+    ani_boolean isUniqueScreenIdsUndefined = false;
     auto ret = env->Reference_IsUndefined(uniqueScreenIds, &isUniqueScreenIdsUndefined);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] check uniqueScreenIds is undefined failed");
