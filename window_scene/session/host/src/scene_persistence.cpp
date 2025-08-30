@@ -89,11 +89,7 @@ ScenePersistence::ScenePersistence(const std::string& bundleName, int32_t persis
         snapshotFfrtHelper_ = std::make_shared<WSFFRTHelper>();
     }
     const std::string multiWindowUIType = system::GetParameter("const.window.multiWindowUIType", "HandsetSmartWindow");
-    if (multiWindowUIType == "FreeFormMultiWindow") {
-        isPcWindow_ = true;
-    } else {
-        isPcWindow_ = false;
-    }
+    isPcWindow_ = (multiWindowUIType == "FreeFormMultiWindow");
 }
 
 ScenePersistence::~ScenePersistence()
