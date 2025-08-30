@@ -43,14 +43,14 @@ ani_status AniWindowManager::AniWindowManagerInit(ani_env* env, ani_namespace wi
     return ret;
 }
 
-ani_object AniWindowManager::GetLastWindow(ani_env* env, ani_object obj, ani_long nativeObj, ani_object context)
+ani_ref AniWindowManager::GetLastWindow(ani_env* env, ani_long nativeObj, ani_object context)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     AniWindowManager* aniWindowManager = reinterpret_cast<AniWindowManager*>(nativeObj);
     return aniWindowManager != nullptr ? aniWindowManager->OnGetLastWindow(env, context) : nullptr;
 }
 
-ani_object AniWindowManager::OnGetLastWindow(ani_env* env, ani_object aniContext)
+ani_ref AniWindowManager::OnGetLastWindow(ani_env* env, ani_object aniContext)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     auto contextPtr = AniWindowUtils::GetAbilityContext(env, aniContext);

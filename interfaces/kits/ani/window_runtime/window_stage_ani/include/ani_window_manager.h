@@ -31,9 +31,9 @@ namespace Rosen {
 class AniWindowManager {
 public:
     static ani_status AniWindowManagerInit(ani_env* env, ani_namespace windowNameSpace);
-    static ani_object GetLastWindow(ani_env* env, ani_object obj, ani_long nativeObj, ani_object context);
+    static ani_ref GetLastWindow(ani_env* env, ani_long nativeObj, ani_object context);
 private:
-    ani_object OnGetLastWindow(ani_env* env, ani_object context);
+    ani_ref OnGetLastWindow(ani_env* env, ani_object context);
     ani_object GetTopWindowTask(ani_env* env, void* contextPtr, bool newApi);
 };
 } // namespace Rosen

@@ -347,7 +347,7 @@ bool AniWindowRegisterManager::IsCallbackRegistered(ani_env* env, std::string ty
     return false;
 }
 
-WmErrorCode AniWindowRegisterManager::RegisterListener(sptr<Window> window, std::string type,
+WmErrorCode AniWindowRegisterManager::RegisterListener(sptr<Window> window, const std::string& type,
     CaseType caseType, ani_env* env, ani_ref callback)
 {
     std::lock_guard<std::mutex> lock(mtx_);
@@ -469,16 +469,16 @@ WmErrorCode AniWindowRegisterManager::ProcessListener(RegisterListenerType regis
     const sptr<AniWindowListener>& windowManagerListener, const sptr<Window>& window, bool isRegister, ani_env* env)
 {
     if (caseType == CaseType::CASE_WINDOW_MANAGER) {
-        ProcessWindowManagerListener(registerListenerType, windowManagerListener, window, isRegister, env);
+        return ProcessWindowManagerListener(registerListenerType, windowManagerListener, window, isRegister, env);
     } else if (caseType == CaseType::CASE_WINDOW) {
-        ProcessWindowListener(registerListenerType, windowManagerListener, window, isRegister, env);
+        return ProcessWindowListener(registerListenerType, windowManagerListener, window, isRegister, env);
     } else if (caseType == CaseType::CASE_STAGE) {
-        ProcessWindowStageListener(registerListenerType, windowManagerListener, window, isRegister, env);
+        return ProcessWindowStageListener(registerListenerType, windowManagerListener, window, isRegister, env);
     }
     return WmErrorCode::WM_OK;
 }
 
-WmErrorCode AniWindowRegisterManager::UnregisterListener(sptr<Window> window, std::string type,
+WmErrorCode AniWindowRegisterManager::UnregisterListener(sptr<Window> window, const std::string& type,
     CaseType caseType, ani_env* env, ani_ref callback)
 {
     std::lock_guard<std::mutex> lock(mtx_);
@@ -497,13 +497,17 @@ WmErrorCode AniWindowRegisterManager::UnregisterListener(sptr<Window> window, st
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     RegisterListenerType listenerType = iterCallbackType->second;
-    if (callback == nullptr) {
+    ani_boolean isUndef = ANI_FALSE;
+    env->Reference_IsUndefined(callback, &isUndef);
+    if (isUndef == ANI_TRUE) {
+        TLOGI(WmsLogTag::DEFAULT, "[ANI]Unregister all callbck, type:%{public}s", type.c_str());
         for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
             WmErrorCode ret = ProcessListener(listenerType, caseType, it->second, window, false, env);
             if (ret != WmErrorCode::WM_OK) {
                 TLOGE(WmsLogTag::DEFAULT, "[ANI]Unregister type %{public}s failed, no value", type.c_str());
                 return ret;
             }
+            env->GlobalReference_Delete(it->second->GetAniCallBack());
             jsCbMap_[type].erase(it++);
         }
     } else {
@@ -511,6 +515,7 @@ WmErrorCode AniWindowRegisterManager::UnregisterListener(sptr<Window> window, st
         for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end(); ++it) {
             ani_boolean isEquals = 0;
             env->Reference_StrictEquals(callback, it->first, &isEquals);
+            TLOGI(WmsLogTag::DEFAULT, "[ANI]callback isEquals:%{public}d", static_cast<int32_t>(isEquals));
             if (!isEquals) {
                 continue;
             }
