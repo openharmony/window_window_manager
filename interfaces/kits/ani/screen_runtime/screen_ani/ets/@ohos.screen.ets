@@ -129,7 +129,7 @@ export function createVirtualScreen(options: VirtualScreenOption, callback: Asyn
 }
 
 export function createVirtualScreen(options: VirtualScreenOption): Promise<Screen> {
-    return new Promise<Screen>((resolve: (value: Screen) => void, reject: (error: BusinessError) => void ) => {
+    return new Promise<Screen>((resolve: (value: Screen) => void, reject: (error: BusinessError) => void) => {
         taskpool.execute((): Screen => {
             let screen = new ScreenImpl();
             createVirtualScreenInternal(options, screen);
@@ -153,7 +153,7 @@ export function setVirtualScreenSurface(screenId: long, surfaceId: string, callb
 }
 
 export function setVirtualScreenSurface(screenId: long, surfaceId: string): Promise<void> {
-    return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) => {
+    return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) => {
         taskpool.execute((): void => {
             setVirtualScreenSurfaceInternal(screenId, surfaceId);
         }).then(() => {
@@ -175,7 +175,7 @@ export function destroyVirtualScreen(screenId: long, callback: AsyncCallback<voi
 }
 
 export function destroyVirtualScreen(screenId: long): Promise<void> {
-    return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) => {
+    return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) => {
         taskpool.execute((): void => {
             destroyVirtualScreenInternal(screenId);
         }).then(() => {
@@ -197,7 +197,7 @@ export function isScreenRotationLocked(callback: AsyncCallback<boolean>): void {
 }
 
 export function isScreenRotationLocked(): Promise<boolean> {
-    return new Promise<boolean>((resolve: (value: boolean) => void, reject: (error: BusinessError) => void ) => {
+    return new Promise<boolean>((resolve: (value: boolean) => void, reject: (error: BusinessError) => void) => {
         taskpool.execute((): boolean => {
             return isScreenRotationLockedInternal();
         }).then((ret: NullishType) => {
@@ -219,7 +219,7 @@ export function setScreenRotationLocked(isLocked: boolean, callback: AsyncCallba
 }
 
 export function setScreenRotationLocked(isLocked: boolean): Promise<void> {
-    return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) => {
+    return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) => {
         taskpool.execute((): void => {
             setScreenRotationLockedInternal(isLocked);
         }).then(() => {
@@ -232,7 +232,7 @@ export function setScreenRotationLocked(isLocked: boolean): Promise<void> {
 
 export function setMultiScreenRelativePosition(mainScreenOptions: MultiScreenPositionOptions,
     secondaryScreenOptions: MultiScreenPositionOptions): Promise<void> {
-    return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) => {
+    return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) => {
         taskpool.execute((): void => {
             setMultiScreenRelativePositionInternal(mainScreenOptions, secondaryScreenOptions);
         }).then(() => {
@@ -245,7 +245,7 @@ export function setMultiScreenRelativePosition(mainScreenOptions: MultiScreenPos
 
 export function setMultiScreenMode(primaryScreenId: long, secondaryScreenId: long,
     secondaryScreenMode: MultiScreenMode): Promise<void> {
-    return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) => {
+    return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) => {
         taskpool.execute((): void => {
             setMultiScreenModeInternal(primaryScreenId, secondaryScreenId, secondaryScreenMode);
         }).then(() => {
@@ -257,7 +257,7 @@ export function setMultiScreenMode(primaryScreenId: long, secondaryScreenId: lon
 }
 
 export function setScreenPrivacyMaskImage(screenId: long, image?: image.PixelMap): Promise<void> {
-    return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) => {
+    return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) => {
         taskpool.execute((): void => {
             setScreenPrivacyMaskImageInternal(screenId, image);
         }).then(() => {
@@ -283,7 +283,7 @@ export function makeUnique(uniqueScreen: Array<long>): Promise<Array<long>> {
 
 export function makeMirrorWithRegion(mainScreen: long, mirrorScreen: Array<long>, mainScreenRegion: Rect):
     Promise<long> {
-    return new Promise<long>((resolve: (value: long) => void, reject: (error: BusinessError) => void ) => {
+    return new Promise<long>((resolve: (value: long) => void, reject: (error: BusinessError) => void) => {
         taskpool.execute((): long => {
             return makeMirrorWithRegionInternal(mainScreen, mirrorScreen, mainScreenRegion);
         }).then((ret: NullishType) => {
@@ -305,7 +305,7 @@ export function stopMirror(mirrorScreen: Array<long>, callback: AsyncCallback<vo
 }
 
 export function stopMirror(mirrorScreen: Array<long>): Promise<void> {
-    return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) => {
+    return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) => {
         taskpool.execute((): void => {
             stopMirrorInternal(mirrorScreen);
         }).then(() => {
@@ -327,7 +327,7 @@ export function makeExpand(options: Array<ExpandOption>, callback: AsyncCallback
 }
 
 export function makeExpand(options: Array<ExpandOption>): Promise<long> {
-    return new Promise<long>((resolve: (value: long) => void, reject: (error: BusinessError) => void ) => {
+    return new Promise<long>((resolve: (value: long) => void, reject: (error: BusinessError) => void) => {
         taskpool.execute((): long => {
             return makeExpandInternal(options);
         }).then((ret: NullishType) => {
@@ -349,7 +349,7 @@ export function stopExpand(expandScreen: Array<long>, callback: AsyncCallback<vo
 }
 
 export function stopExpand(expandScreen: Array<long>): Promise<void> {
-    return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) => {
+    return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) => {
         taskpool.execute((): void => {
             stopExpandInternal(expandScreen);
         }).then(() => {
@@ -442,7 +442,7 @@ class ScreenImpl implements Screen {
     }
 
     setDensityDpi(densityDpi: double): Promise<void> {
-        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
+        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
             taskpool.execute((): void => {
                 this.setDensityDpiInternal(densityDpi);
             }).then(() => {
@@ -482,7 +482,7 @@ class ScreenImpl implements Screen {
     }
 
     setScreenActiveMode(modeIndex: long): Promise<void> {
-        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ):
+        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void):
             void => {
             taskpool.execute((): void => {
                 this.setScreenActiveModeInternal(modeIndex);
@@ -505,7 +505,7 @@ class ScreenImpl implements Screen {
     }
 
     setOrientation(orientation: Orientation): Promise<void> {
-        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ):
+        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void):
             void => {
             taskpool.execute((): void => {
                 this.setOrientationInternal(orientation);
