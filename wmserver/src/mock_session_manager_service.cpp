@@ -61,17 +61,6 @@ const std::string KEY_SCENE_BOARD_TEST_ENABLE = "persist.scb.testmode.enable";
 const std::string SCENE_BOARD_BUNDLE_NAME = "com.ohos.sceneboard";
 const std::string TEST_MODULE_NAME_SUFFIX = "_test";
 const std::string BOOTEVENT_WMS_READY = "bootevent.wms.ready";
-
-inline int32_t GetUserIdByCallingUid()
-{
-    int32_t uid = IPCSkeleton::GetCallingUid();
-    TLOGI(WmsLogTag::WMS_MULTI_USER, "get calling uid(%{public}d)", uid);
-    if (uid <= INVALID_UID) {
-        TLOGE(WmsLogTag::WMS_MULTI_USER, "uid is illegal: %{public}d", uid);
-        return INVALID_USER_ID;
-    }
-    return GetUserIdByUid(uid);
-}
 } // namespace
 
 
@@ -1281,6 +1270,17 @@ ErrCode MockSessionManagerService::NotifyWMSConnectionStatus(int32_t userId,
         smsListener->OnWMSConnectionChanged(userId, screenId, true, sessionManagerService);
     }
     return ERR_OK;
+}
+
+int32_t GetUserIdByCallingUid()
+{
+    int32_t uid = IPCSkeleton::GetCallingUid();
+    TLOGI(WmsLogTag::WMS_MULTI_USER, "get calling uid(%{public}d)", uid);
+    if (uid <= INVALID_UID) {
+        TLOGE(WmsLogTag::WMS_MULTI_USER, "uid is illegal: %{public}d", uid);
+        return INVALID_USER_ID;
+    }
+    return GetUserIdByUid(uid);
 }
 } // namespace Rosen
 } // namespace OHOS

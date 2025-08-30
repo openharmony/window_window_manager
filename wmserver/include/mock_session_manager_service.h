@@ -102,6 +102,7 @@ private:
     ErrCode ValidateParameters(int32_t clientUserId, int32_t userId) const;
     ErrCode GetForegroundOsAccountDisplayId(int32_t userId, DisplayId& displayId) const;
     ErrCode NotifyWMSConnectionStatus(int32_t userId, const sptr<ISessionManagerServiceRecoverListener>& smsListener);
+    virtual int32_t GetUserIdByCallingUid();
     std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>* GetSMSRecoverListenerMap(int32_t userId);
     std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>* GetSystemAppSMSRecoverListenerMap(
         int32_t displayId);
