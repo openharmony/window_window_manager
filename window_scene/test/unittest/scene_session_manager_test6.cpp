@@ -474,7 +474,7 @@ HWTEST_F(SceneSessionManagerTest6, SetWatermarkImageForApp2, TestSize.Level1)
     int32_t pid = IPCSkeleton::GetCallingRealPid();
     std::string watermarkName;
     std::string bundleName = "setAppWatermark";
-	std::string targetWatername = bundleName + "#" + std::to_string(appIndex);
+    std::string targetWatername = bundleName + "#" + std::to_string(appIndex);
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
     ssm_->appWatermarkPidMap_.clear();
@@ -486,7 +486,7 @@ HWTEST_F(SceneSessionManagerTest6, SetWatermarkImageForApp2, TestSize.Level1)
     sessionInfo1.bundleName_ = bundleName;
     sessionInfo1.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW);
     auto session1 = sptr<SceneSession>::MakeSptr(sessionInfo1, nullptr);
-	session1->SetCallingPid(pid + 1000);
+    session1->SetCallingPid(pid + 1000);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, session1));
 
     SessionInfo sessionInfo2;
@@ -495,7 +495,7 @@ HWTEST_F(SceneSessionManagerTest6, SetWatermarkImageForApp2, TestSize.Level1)
     auto session2 = sptr<SceneSession>::MakeSptr(sessionInfo2, nullptr);
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
     session2->SetSurfaceNode(surfaceNode);
-	session2->SetCallingPid(pid);
+    session2->SetCallingPid(pid);
     ssm_->sceneSessionMap_.insert(std::make_pair(2, session2));
 
     SessionInfo sessionInfo3;
@@ -503,7 +503,7 @@ HWTEST_F(SceneSessionManagerTest6, SetWatermarkImageForApp2, TestSize.Level1)
     sessionInfo3.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_PIP);
     auto session3 = sptr<SceneSession>::MakeSptr(sessionInfo3, nullptr);
     session3->SetSurfaceNode(nullptr);
-	session3->SetCallingPid(pid);
+    session3->SetCallingPid(pid);
     ssm_->sceneSessionMap_.insert(std::make_pair(3, session3));
 
     ssm_->appWatermarkPidMap_[pid] = "watermarkName#1";
@@ -549,7 +549,7 @@ HWTEST_F(SceneSessionManagerTest6, SetWatermarkForSession, TestSize.Level1)
     sessionInfo1.bundleName_ = bundleName;
     sessionInfo1.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW);
     auto session1 = sptr<SceneSession>::MakeSptr(sessionInfo1, nullptr);
-	session1->SetCallingPid(pid + 100);
+    session1->SetCallingPid(pid + 100);
     ssm_->SetWatermarkForSession(session1);
     EXPECT_EQ(ssm_->appWatermarkPidMap_.size(), 0);
 
@@ -645,7 +645,7 @@ HWTEST_F(SceneSessionManagerTest6, ClearWatermarkRecordWhenAppExit, TestSize.Lev
     sessionInfo1.bundleName_ = bundleName;
     sessionInfo1.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     auto session1 = sptr<SceneSession>::MakeSptr(sessionInfo1, nullptr);
-	session1->SetCallingPid(pid);
+    session1->SetCallingPid(pid);
     session1->persistentId_ = 1;
     ssm_->sceneSessionMap_.insert(std::make_pair(session1->GetPersistentId(), session1));
 
