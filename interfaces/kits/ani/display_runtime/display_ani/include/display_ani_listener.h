@@ -17,11 +17,12 @@
 #define OHOS_ANI_DISPLAY_LISTENER_H
 
 #include <mutex>
-#include "dm_common.h"
-#include "refbase.h"
-#include "display_manager.h"
+
 #include "ani.h"
+#include "display_manager.h"
+#include "dm_common.h"
 #include "event_handler.h"
+#include "refbase.h"
 
 namespace OHOS {
 namespace Rosen {
