@@ -54,9 +54,9 @@ class AniWindowRegisterManager {
 public:
     AniWindowRegisterManager();
     ~AniWindowRegisterManager();
-    WmErrorCode RegisterListener(sptr<Window> window, std::string type,
+    WmErrorCode RegisterListener(sptr<Window> window, const std::string& type,
     CaseType caseType, ani_env* env, ani_ref callback);
-    WmErrorCode UnregisterListener(sptr<Window> window, std::string type,
+    WmErrorCode UnregisterListener(sptr<Window> window, const std::string& type,
     CaseType caseType, ani_env* env, ani_ref callback);
 private:
     bool IsCallbackRegistered(ani_env* env, std::string type, ani_ref jsListenerObject);
