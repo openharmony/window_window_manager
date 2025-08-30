@@ -570,7 +570,7 @@ HWTEST_F(SceneSessionManagerTest6, SetWatermarkForSession, TestSize.Level1)
     auto session3 = sptr<SceneSession>::MakeSptr(sessionInfo3, nullptr);
     session3->SetSurfaceNode(nullptr);
     session3->SetCallingPid(pid);
-    ssm_->SetWatermarkForSession(session2);
+    ssm_->SetWatermarkForSession(session3);
     EXPECT_EQ(ssm_->appWatermarkPidMap_.size(), 1);
 
     ssm_->appWatermarkPidMap_.clear();
@@ -619,7 +619,7 @@ HWTEST_F(SceneSessionManagerTest6, ClearWatermarkForSession, TestSize.Level1)
     auto session3 = sptr<SceneSession>::MakeSptr(sessionInfo3, nullptr);
     session3->SetSurfaceNode(nullptr);
     session3->SetCallingPid(pid);
-    ssm_->ClearWatermarkForSession(session2);
+    ssm_->ClearWatermarkForSession(session3);
     EXPECT_EQ(ssm_->appWatermarkPidMap_.size(), 1);
 
     ssm_->appWatermarkPidMap_.clear();

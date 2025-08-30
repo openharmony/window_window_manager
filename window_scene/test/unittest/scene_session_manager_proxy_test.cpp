@@ -1082,7 +1082,6 @@ HWTEST_F(sceneSessionManagerProxyTest, RecoverWatermarkImageForApp01, TestSize.L
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
 
-    ASSERT_NE(proxy, nullptr);
     remoteMocker->SetRequestResult(ERR_INVALID_DATA);
     ret = proxy->RecoverWatermarkImageForApp(watermarkName);
     EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
