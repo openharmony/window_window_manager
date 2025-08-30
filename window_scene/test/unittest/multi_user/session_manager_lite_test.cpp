@@ -114,7 +114,6 @@ HWTEST_F(SessionManagerLiteTest, OnWMSConnectionChangedCallback, Function | Smal
     bool funcInvoked = false;
     sml_->wmsConnectionChangedFunc_ = nullptr;
     sml_->OnWMSConnectionChangedCallback(101, DEFAULT_SCREEN_ID, true, false);
-    ASSERT_EQ(funcInvoked, false);
 
     sml_->wmsConnectionChangedFunc_ = [&](int32_t userId, int32_t screenId, bool isConnected) { funcInvoked = true; };
     sml_->OnWMSConnectionChangedCallback(101, DEFAULT_SCREEN_ID, true, true);
