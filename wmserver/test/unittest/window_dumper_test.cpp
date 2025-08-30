@@ -73,9 +73,7 @@ HWTEST_F(WindowDumperTest, Dump01, TestSize.Level1)
     sptr<WindowDumper> windowDumper;
     windowDumper = new WindowDumper(WindowManagerService::GetInstance().windowRoot_);
     int fd = open(dumpFile_.c_str(), O_RDWR | O_CREAT | O_TRUNC, 0666);
-    if (fd == -1) {
-        return;
-    }
+    EXPECT_NE(fd, -1);
     std::vector<std::u16string> args;
     WMError ret = windowDumper->Dump(fd, args);
     ASSERT_EQ(ret, WMError::WM_OK);

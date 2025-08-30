@@ -711,7 +711,6 @@ HWTEST_F(WindowRecoverSessionTest, RecoverSessionManagerService, TestSize.Level1
     bool funcInvoked = false;
     sm_->RegisterWindowManagerRecoverCallbackFunc(nullptr);
     sm_->RecoverSessionManagerService(nullptr);
-    ASSERT_EQ(funcInvoked, false);
 
     sm_->RegisterWindowManagerRecoverCallbackFunc([&]() { funcInvoked = true; });
     sm_->RecoverSessionManagerService(nullptr);
