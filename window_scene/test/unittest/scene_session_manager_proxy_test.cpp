@@ -1057,7 +1057,7 @@ HWTEST_F(sceneSessionManagerProxyTest, SetWatermarkImageForApp01, TestSize.Level
 
     remoteMocker->SetRequestResult(ERR_NONE);
     ret = proxy->SetWatermarkImageForApp(pixelMap, watermarkName);
-    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    EXPECT_EQ(ret, WMError::WM_OK);
 }
 
 /**
@@ -1089,7 +1089,7 @@ HWTEST_F(sceneSessionManagerProxyTest, RecoverWatermarkImageForApp01, TestSize.L
 
     remoteMocker->SetRequestResult(ERR_NONE);
     ret = proxy->RecoverWatermarkImageForApp(watermarkName);
-    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    EXPECT_EQ(ret, WMError::WM_OK);
 }
 
 /**
