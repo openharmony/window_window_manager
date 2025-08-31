@@ -162,10 +162,10 @@ private:
     std::map<int32_t, std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>> smsLiteRecoverListenerMap_;
 
     std::shared_mutex systemAppSmsRecoverListenerLock_;
-    std::map<DisplayId, std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>> 
+    std::map<DisplayId, std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>>
         systemAppSmsRecoverListenerMap_;
     std::shared_mutex systemAppSmsLiteRecoverListenerLock_;
-    std::map<DisplayId, std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>> 
+    std::map<DisplayId, std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>>
         systemAppSmsLiteRecoverListenerMap_;
 
     /*
