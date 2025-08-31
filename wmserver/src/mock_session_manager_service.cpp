@@ -387,7 +387,7 @@ std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>* MockSessionManag
     return nullptr;
 }
 
-std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>* 
+std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>*
     MockSessionManagerService::GetSystemAppSMSRecoverListenerMap(int32_t displayId)
 {
     auto iter = systemAppSmsRecoverListenerMap_.find(displayId);
@@ -1247,7 +1247,7 @@ ErrCode MockSessionManagerService::GetForegroundOsAccountDisplayId(int32_t userI
 }
 
 ErrCode MockSessionManagerService::NotifyWMSConnectionStatus(int32_t userId,
-    const sptr<ISessionManagerServiceRecoverListener>& smsListener) 
+    const sptr<ISessionManagerServiceRecoverListener>& smsListener)
 {
     bool isWMSConnected = false;
     {
