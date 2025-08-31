@@ -37,7 +37,7 @@ public:
                 NotifySCBSnapshotSkipByUserIdAndBundleNames,
                 (int32_t, const std::vector<std::string>&, const sptr<IRemoteObject>&),
                 (override));
-    MOCK_METHOD(int32_t, GetUserIdByCallingUid, (), (override));            
+    MOCK_METHOD(int32_t, GetUserIdByCallingUid, (), (override)); 
 };
 
 namespace {
@@ -151,7 +151,7 @@ HWTEST(MockSessionManagerServiceTest, SetSessionManagerServiceFailed, TestSize.L
         .Times(1)
         .WillOnce(Return(-1));
     result = mockMockSms.SetSessionManagerService(mockSessionManagerService);
-    EXPECT_EQ(resultCode, false);
+    EXPECT_EQ(result, false);
 }
 
 /**
@@ -169,7 +169,7 @@ HWTEST(MockSessionManagerServiceTest, SetSessionManagerServiceSuccess, TestSize.
     //     .Times(1)
     //     .WillOnce(Return(100));
     // bool result = mockMockSms.SetSessionManagerService(mockSessionManagerService);
-    // EXPECT_EQ(result, false);
+    // EXPECT_EQ(result, true);
 }
 
 /**
@@ -220,11 +220,11 @@ HWTEST(MockSessionManagerServiceTest, GetSessionManagerServiceByUserId, TestSize
     resultCode = mockMockSms.GetSessionManagerServiceByUserId(userId, sessionManagerService);
     EXPECT_EQ(resultCode, ERR_WOULD_BLOCK);
 
-    // 2. Mock GetUserIdByCallingUid() 返回非系统用户id 0
+    // 2. Mock GetUserIdByCallingUid() 返回系统用户id 0
     EXPECT_CALL(mockMockSms, GetUserIdByCallingUid())
         .Times(1)
         .WillOnce(Return(0));
-    resultCode = mockMockSms.GetSessionManagerServiceByUserId(sessionManagerService);
+    resultCode = mockMockSms.GetSessionManagerServiceByUserId(userId, sessionManagerService);
     EXPECT_EQ(resultCode, ERR_OK);
 }
 
@@ -267,7 +267,7 @@ HWTEST(MockSessionManagerServiceTest, RegisterSMSRecoverListener, TestSize.Level
     listener = sptr<IRemoteObjectMocker>::MakeSptr();
     userId = INVALID_USER_ID;
     resultCode = mockMockSms.RegisterSMSRecoverListener(listener, userId);
-    EXPECT_EQ(resultCode, ERR_WOULD_BLOCK);            
+    EXPECT_EQ(resultCode, ERR_WOULD_BLOCK);
 }
 
 /**
@@ -342,7 +342,7 @@ HWTEST(MockSessionManagerServiceTest, RegisterSMSLiteRecoverListener, TestSize.L
     listener = sptr<IRemoteObjectMocker>::MakeSptr();
     userId = INVALID_USER_ID;
     resultCode = mockMockSms.RegisterSMSLiteRecoverListener(listener, userId);
-    EXPECT_EQ(resultCode, ERR_WOULD_BLOCK);  
+    EXPECT_EQ(resultCode, ERR_WOULD_BLOCK);
 }
 
 /**
@@ -574,7 +574,7 @@ HWTEST(MockSessionManagerServiceTest, GetSceneSessionManagerCommon2, TestSize.Le
 {
     // crash
     // sptr<IRemoteObject> result;
-    // isLite = false;
+    // bool isLite = false;
     // MockMockSessionManagerService mockMockSms;
     // // 设置 103 -> sessionManagerService
     // EXPECT_CALL(mockMockSms, GetUserIdByCallingUid())
@@ -613,7 +613,7 @@ HWTEST(MockSessionManagerServiceTest, GetSceneSessionManagerCommon2, TestSize.Le
     // // Mock GetSceneSessionManager() 返回nullptr
     // resultCode = mockMockSms.GetSceneSessionManagerCommon(103, result, isLite);
     // EXPECT_EQ(resultCode, ERR_DEAD_OBJECT);
-    // EXPECT_EQ(resultCode, nullptr);
+    // EXPECT_EQ(result, nullptr);
 }
 } // namespace
 } // namespace Rosen
