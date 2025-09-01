@@ -290,6 +290,41 @@ HWTEST_F(WindowAdapterLiteTest, SendPointerEventForHover, Function | SmallTest |
     auto err = windowAdapterLite_->SendPointerEventForHover(pointerEvent);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, err);
 }
+
+/**
+ * @tc.name: GetInstance
+ * @tc.desc: sptr<WindowAdapterLite>
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterLiteTest, GetInstance, Function | SmallTest | Level2)
+{
+    sptr<WindowAdapterLite> instance = nullptr;
+    int32_t userId = 100;
+    instance = WindowAdapterLite::GetInstance(userId);
+    ASSERT_NE(instance, nullptr);
+
+    userId = -1;
+    instance = WindowAdapterLite::GetInstance(userId);
+    ASSERT_NE(instance, nullptr);
+
+    userId = -2;
+    instance = WindowAdapterLite::GetInstance(userId);
+    ASSERT_NE(instance, nullptr);
+}
+
+/**
+ * @tc.name: WMSDeathRecipient::OnRemoteDied
+ * @tc.desc: WindowAdapterLite/OnRemoteDied
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterLiteTest, OnRemoteDied2, TestSize.Level1)
+{
+    sptr<WMSDeathRecipient> wmSDeathRecipient = sptr<WMSDeathRecipient>::MakeSptr();
+    ASSERT_NE(wmSDeathRecipient, nullptr);
+    sptr<IRemoteObject> service = sptr<IRemoteObjectMocker>::MakeSptr();
+    wptr<IRemoteObject> wptrDeath = wptr(service);
+    wmSDeathRecipient->OnRemoteDied(wptrDeath);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

@@ -16,19 +16,23 @@
 #ifndef OHOS_ROSEN_WINDOW_MANAGER_H
 #define OHOS_ROSEN_WINDOW_MANAGER_H
 
+#include <iremote_object.h>
 #include <memory>
 #include <mutex>
 #include <refbase.h>
+#include <shared_mutex>
 #include <vector>
-#include <iremote_object.h>
-#include "wm_single_instance.h"
-#include "wm_common.h"
+
 #include "dm_common.h"
 #include "focus_change_info.h"
-#include "window_visibility_info.h"
-#include "window_drawing_content_info.h"
+
 #include "window.h"
+#include "window_drawing_content_info.h"
 #include "window_pid_visibility_info.h"
+#include "window_visibility_info.h"
+#include "wm_common.h"
+#include "wm_single_instance.h"
+
 
 namespace OHOS {
 namespace Rosen {
@@ -612,12 +616,15 @@ public:
  *
  * @brief WindowManager used to manage window.
  */
-class WindowManager {
-WM_DECLARE_SINGLE_INSTANCE_BASE(WindowManager);
-friend class WindowManagerAgent;
-friend class WMSDeathRecipient;
-friend class SSMDeathRecipient;
+class WindowManager : public RefBase {
+    WM_DECLARE_SINGLE_INSTANCE_BASE(WindowManager);
+    friend class WindowManagerAgent;
+    friend class WMSDeathRecipient;
+    friend class SSMDeathRecipient;
 public:
+    static sptr<WindowManager> GetInstance(const int32_t userId);
+    static WMError RemoveInstanceByUserId(const int32_t userId);
+
     /**
      * @brief Register WMS connection status changed listener.
      * @attention Callable only by u0 system user. A process only supports successful registration once.
@@ -1358,9 +1365,17 @@ public:
     WMError RemoveSessionBlackList(
         const std::unordered_set<std::string>& bundleNames, const std::unordered_set<std::string>& privacyWindowTags);
 
+    ~WindowManager() override;
+
 private:
-    WindowManager();
-    ~WindowManager();
+    /**
+     * multi user and multi screen
+     */
+    WindowManager(const int32_t userId = INVALID_USER_ID);
+    int32_t userId_;
+    static std::unordered_map<int32_t, sptr<WindowManager>> windowManagerMap_;
+    static std::mutex windowManagerMapMutex_;
+
     std::recursive_mutex mutex_;
     class Impl;
     std::unique_ptr<Impl> pImpl_;

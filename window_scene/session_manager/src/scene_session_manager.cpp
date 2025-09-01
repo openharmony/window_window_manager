@@ -2063,7 +2063,7 @@ void SceneSessionManager::SetSkipEventOnCastPlusInner(int32_t windowId, bool isS
 {
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Wid: %{public}d, isSkip: %{public}d", windowId, isSkip);
     auto sceneSession = GetSceneSession(windowId);
-    if(sceneSession == nullptr) {
+    if (sceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "SceneSession is nullptr, Wid: %{public}d", windowId);
         return;
     }
