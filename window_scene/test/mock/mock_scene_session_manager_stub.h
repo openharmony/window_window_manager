@@ -27,7 +27,7 @@ public:
         const std::shared_ptr<Media::PixelMap>& icon), (override));
     MOCK_METHOD(WSError, IsValidSessionIds, (const std::vector<int32_t>& sessionIds, std::vector<bool>& results),
         (override));
-    MOCK_METHOD(WSError, PendingSessionToForeground, (const sptr<IRemoteObject>& token),
+    MOCK_METHOD(WSError, PendingSessionToForeground, (const sptr<IRemoteObject>& token, int32_t windowMode),
         (override));
     MOCK_METHOD(WSError, PendingSessionToBackgroundForDelegator, (const sptr<IRemoteObject>& token,
         bool shouldBackToCaller), (override));
