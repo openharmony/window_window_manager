@@ -18,8 +18,8 @@
 #include <hitrace_meter.h>
 
 #include "ani.h"
-#include "dm_common.h"
 #include "display_ani.h"
+#include "dm_common.h"
 #include "display_manager.h"
 #include "refbase.h"
 #include "singleton_container.h"
