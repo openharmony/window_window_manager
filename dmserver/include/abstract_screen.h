@@ -26,12 +26,12 @@
 #include <ui/rs_ui_context.h>
 #include <ui/rs_ui_director.h>
 
+#include "display_info.h"
 #include "noncopyable.h"
 #include "screen.h"
 #include "screen_group.h"
 #include "screen_group_info.h"
 #include "screen_info.h"
-#include "display_info.h"
 
 namespace OHOS::Rosen {
 class AbstractScreenGroup;
