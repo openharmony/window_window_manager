@@ -31,6 +31,7 @@
 #include "include/core/SkPath.h"
 #include "include/core/SkPathMeasure.h"
 #include "include/utils/SkParsePath.h"
+#include "screen_session_manager.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
@@ -45,6 +46,7 @@ enum XmlNodeElement {
     CURVED_SCREEN_BOUNDARY,
     CURVED_AREA_IN_LANDSCAPE,
     IS_CURVED_COMPRESS_ENABLED,
+    IS_CONCURRENT_USER,
     BUILD_IN_DEFAULT_ORIENTATION,
     DEFAULT_DEVICE_ROTATION_OFFSET,
     DEFAULT_DISPLAY_CUTOUT_PATH,
@@ -77,17 +79,20 @@ std::map<std::string, std::vector<std::string>> ScreenSceneConfig::stringListCon
 std::map<uint64_t, std::vector<DMRect>> ScreenSceneConfig::cutoutBoundaryRectMap_;
 std::vector<DisplayPhysicalResolution> ScreenSceneConfig::displayPhysicalResolution_;
 std::map<FoldDisplayMode, ScrollableParam> ScreenSceneConfig::scrollableParams_;
+std::vector<DisplayConfig> ScreenSceneConfig::displaysConfigs_;
 std::vector<DMRect> ScreenSceneConfig::subCutoutBoundaryRect_;
 bool ScreenSceneConfig::isWaterfallDisplay_ = false;
 bool ScreenSceneConfig::isSupportCapture_ = false;
 bool ScreenSceneConfig::isScreenCompressionEnableInLandscape_ = false;
 bool ScreenSceneConfig::isSupportOffScreenRendering_ = false;
+bool ScreenSceneConfig::isConcurrentUser_ = false;
 uint32_t ScreenSceneConfig::curvedAreaInLandscape_ = 0;
 uint32_t ScreenSceneConfig::offScreenPPIThreshold_ = 0;
 std::map<int32_t, std::string> ScreenSceneConfig::xmlNodeMap_ = {
     {DPI, "dpi"},
     {SUB_DPI, "subDpi"},
     {IS_WATERFALL_DISPLAY, "isWaterfallDisplay"},
+    {IS_CONCURRENT_USER, "concurrentUser"},
     {CURVED_SCREEN_BOUNDARY, "curvedScreenBoundary"},
     {CURVED_AREA_IN_LANDSCAPE, "waterfallAreaCompressionSizeWhenHorzontal"},
     {IS_CURVED_COMPRESS_ENABLED, "isWaterfallAreaCompressionEnableWhenHorizontal"},
@@ -114,7 +119,6 @@ std::map<int32_t, std::string> ScreenSceneConfig::xmlNodeMap_ = {
     {PC_MODE_DPI, "pcModeDpi"},
     {SUPPORT_DURING_CALL, "supportDuringCall"}
 };
-
 
 std::vector<std::string> ScreenSceneConfig::Split(std::string str, std::string pattern)
 {
@@ -154,6 +158,7 @@ std::string ScreenSceneConfig::GetConfigPath(const std::string& configFileName)
         TLOGI(WmsLogTag::DMS, "can not get customization config file");
         return "/system/" + configFileName;
     }
+    TLOGI(WmsLogTag::DMS, "get customization config file success");
     return std::string(tmpPath);
 }
 
@@ -183,6 +188,12 @@ bool ScreenSceneConfig::LoadConfigXml()
             continue;
         }
         ParseNodeConfig(curNodePtr);
+        if (xmlStrcmp(curNodePtr->name, reinterpret_cast<const xmlChar*>("displays")) != 0) {
+            ParseNodeConfig(curNodePtr);
+        } else {
+            TLOGI(WmsLogTag::DMS, "find displays keyword, reading the nested content of XML");
+            ParseDisplaysConfig(curNodePtr);
+        }
     }
     xmlFreeDoc(docPtr);
     return true;
@@ -195,6 +206,7 @@ void ScreenSceneConfig::ParseNodeConfig(const xmlNodePtr& currNode)
         (xmlNodeMap_[IS_CURVED_COMPRESS_ENABLED] == nodeName) ||
         (xmlNodeMap_[IS_RIGHT_POWER_BUTTON] == nodeName) ||
         (xmlNodeMap_[IS_SUPPORT_CAPTURE] == nodeName) ||
+        (xmlNodeMap_[IS_CONCURRENT_USER] == nodeName) ||
         (xmlNodeMap_[SUPPORT_ROTATE_WITH_SCREEN] == nodeName)||
         (xmlNodeMap_[IS_SUPPORT_OFFSCREEN_RENDERING] == nodeName) ||
         (xmlNodeMap_[SUPPORT_DURING_CALL] == nodeName);
@@ -230,6 +242,80 @@ void ScreenSceneConfig::ParseNodeConfig(const xmlNodePtr& currNode)
     } else {
         TLOGI(WmsLogTag::DMS, "xml config node name is not match, nodeName:%{public}s", nodeName.c_str());
     }
+}
+
+uint64_t ScreenSceneConfig::ParseStrToUll(const std::string& contentStr)
+{
+    uint64_t num = 0;
+    if (!contentStr.empty() && std::all_of(contentStr.begin(), contentStr.end(), ::isdigit)) {
+        num = std::stoull(contentStr);
+    } else {
+        TLOGE(WmsLogTag::DMS, "Invalid value: %{public}s", contentStr.c_str());
+    }
+    return num;
+}
+
+void ScreenSceneConfig::ParseDisplaysConfig(const xmlNodePtr& currNode)
+{
+    for (xmlNodePtr displayNode = currNode->xmlChildrenNode; displayNode != nullptr; displayNode = displayNode->next) {
+        if (!IsValidNode(*displayNode) ||
+            xmlStrcmp(displayNode->name, reinterpret_cast<const xmlChar*>("display")) != 0) {
+            continue;
+        }
+        DisplayConfig config;
+        TLOGI(WmsLogTag::DMS, "start parse displays config");
+        for (xmlNodePtr fileNode = displayNode->xmlChildrenNode; fileNode != nullptr; fileNode = fileNode->next) {
+            if (!IsValidNode(*fileNode)) {
+                continue;
+            }
+            std::string nodeName = reinterpret_cast<const char*>(fileNode->name);
+            xmlChar* content = xmlNodeGetContent(fileNode);
+            std::string contentStr = reinterpret_cast<const char*>(content);
+            if (nodeName == "physicalId") {
+                config.physicalId = static_cast<ScreenId>(ParseStrToUll(contentStr));
+            } else if (nodeName == "logicalId") {
+                config.logicalId = static_cast<ScreenId>(ParseStrToUll(contentStr));
+            } else if (nodeName == "name") {
+                config.name = contentStr;
+            } else if (nodeName == "dpi") {
+                config.dpi = atoi(contentStr.c_str());
+            } else if (nodeName == "flags") {
+                config.hasFlag = ParseFlagsConfig(fileNode, config.flag);
+            }
+            if (content) {
+                xmlFree(content);
+                content = nullptr;
+            }
+        }
+        displaysConfigs_.push_back(config);
+    }
+}
+
+bool ScreenSceneConfig::ParseFlagsConfig(const xmlNodePtr& flagsNode, DisplayFlag& outFlag)
+{
+    bool foundFlag = false;
+    for (xmlNodePtr flagNode = flagsNode->xmlChildrenNode; flagNode != nullptr; flagNode = flagNode->next) {
+        if (!IsValidNode(*flagNode) || xmlStrcmp(flagNode->name, reinterpret_cast<const xmlChar*>("flag")) != 0) {
+            continue;
+        }
+        xmlChar* typeAttr = xmlGetProp(flagNode, reinterpret_cast<const xmlChar*>("type"));
+        xmlChar* valueAttr = xmlGetProp(flagNode, reinterpret_cast<const xmlChar*>("value"));
+        if (typeAttr && valueAttr) {
+            outFlag.type = reinterpret_cast<const char*>(typeAttr);
+            outFlag.value = atoi(reinterpret_cast<const char*>(valueAttr));
+            foundFlag = true;
+            xmlFree(typeAttr);
+            typeAttr = nullptr;
+            xmlFree(valueAttr);
+            valueAttr = nullptr;
+            break;
+        }
+        xmlFree(typeAttr);
+        typeAttr = nullptr;
+        xmlFree(valueAttr);
+        valueAttr = nullptr;
+    }
+    return foundFlag;
 }
 
 bool ScreenSceneConfig::IsValidNode(const xmlNode& currNode)
@@ -409,6 +495,8 @@ void ScreenSceneConfig::ReadEnableConfigInfo(const xmlNodePtr& currNode)
             isSupportCapture_ = true;
         } else if (xmlNodeMap_[IS_SUPPORT_OFFSCREEN_RENDERING] == nodeName) {
             isSupportOffScreenRendering_ = true;
+        } else if (xmlNodeMap_[IS_CONCURRENT_USER] == nodeName) {
+            isConcurrentUser_ = true;
         }
     } else {
         enableConfig_[nodeName] = false;
@@ -478,6 +566,11 @@ const std::map<std::string, std::vector<std::string>>& ScreenSceneConfig::GetStr
     return stringListConfig_;
 }
 
+const std::vector<DisplayConfig>& ScreenSceneConfig::GetDisplaysConfigs()
+{
+    return displaysConfigs_;
+}
+
 void ScreenSceneConfig::DumpConfig()
 {
     for (auto& enable : enableConfig_) {
@@ -492,6 +585,18 @@ void ScreenSceneConfig::DumpConfig()
     }
     for (auto& string : stringConfig_) {
         TLOGI(WmsLogTag::DMS, "String: %{public}s", string.first.c_str());
+    }
+}
+
+void ScreenSceneConfig::DumpDisplaysConfigs()
+{
+    for (const auto& iter : displaysConfigs_) {
+        TLOGI(WmsLogTag::DMS, "name: %{public}s, physicalId: %{public}" PRIu64 ", logicalId: %{public}" PRIu64
+              ", dpi: %{public}d", iter.name.c_str(), iter.physicalId, iter.logicalId, iter.dpi);
+        if (iter.hasFlag) {
+            TLOGI(WmsLogTag::DMS, "flag type: %{public}s, flag value: %{public}d",
+                  iter.flag.type.c_str(), iter.flag.value);
+        }
     }
 }
 
@@ -631,6 +736,11 @@ bool ScreenSceneConfig::IsSupportDuringCall()
         return static_cast<bool>(enableConfig_["supportDuringCall"]);
     }
     return false;
+}
+
+bool ScreenSceneConfig::IsConcurrentUser()
+{
+    return isConcurrentUser_;
 }
 // LCOV_EXCL_STOP
 } // namespace OHOS::Rosen

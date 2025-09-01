@@ -12477,14 +12477,6 @@ void DisplayChangeListener::OnDisplayStateChange(DisplayId defaultDisplayId, spt
     }
 }
 
-bool CheckIfNeedMultipleFocus(const std::string& name, const ScreenType& screenType)
-{
-    if (screenType == ScreenType::VIRTUAL && (name == "CeliaView" || name == "DevEcoViewer")) {
-        return true;
-    }
-    return false;
-}
-
 void ScreenConnectionChangeListener::OnScreenConnected(const sptr<ScreenSession>& screenSession)
 {
     if (screenSession == nullptr) {
@@ -12498,10 +12490,7 @@ void ScreenConnectionChangeListener::OnScreenConnected(const sptr<ScreenSession>
           screenSession->GetScreenId(),
           screenSession->GetDisplayGroupId(),
           screenSession->GetScreenProperty().GetScreenType());
-    if (CheckIfNeedMultipleFocus(screenSession->GetName(), screenSession->GetScreenProperty().GetScreenType())) {
-        SceneSessionManager::GetInstance().AddFocusGroup(screenSession->GetDisplayGroupId(),
-                                                         screenSession->GetScreenId());
-    }
+    SceneSessionManager::GetInstance().AddFocusGroup(screenSession->GetDisplayGroupId(), screenSession->GetScreenId());
 
     // Window Layout Global Coordinate System: monitors screen position changes in the global coordinate system
     screenSession->RegisterScreenChangeListener(&SceneScreenChangeListener::GetInstance());
@@ -12520,10 +12509,8 @@ void ScreenConnectionChangeListener::OnScreenDisconnected(const sptr<ScreenSessi
           screenSession->GetScreenId(),
           screenSession->GetDisplayGroupId(),
           screenSession->GetScreenProperty().GetScreenType());
-    if (CheckIfNeedMultipleFocus(screenSession->GetName(), screenSession->GetScreenProperty().GetScreenType())) {
-        SceneSessionManager::GetInstance().RemoveFocusGroup(screenSession->GetDisplayGroupId(),
-                                                            screenSession->GetScreenId());
-    }
+    SceneSessionManager::GetInstance().RemoveFocusGroup(screenSession->GetDisplayGroupId(),
+        screenSession->GetScreenId());
 
     // Window Layout Global Coordinate System
     screenSession->UnregisterScreenChangeListener(&SceneScreenChangeListener::GetInstance());

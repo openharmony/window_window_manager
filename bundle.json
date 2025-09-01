@@ -89,7 +89,8 @@
           "device_status",
           "runtime_core",
           "zlib",
-          "screenlock_mgr"
+          "screenlock_mgr",
+          "os_account"
         ],
         "third_party": [
         ]

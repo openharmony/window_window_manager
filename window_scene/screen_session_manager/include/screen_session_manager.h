@@ -518,6 +518,7 @@ private:
     void OnHgmRefreshRateChange(uint32_t refreshRate);
     sptr<ScreenSession> GetOrCreateScreenSession(ScreenId screenId);
     void CreateScreenProperty(ScreenId screenId, ScreenProperty& property);
+    static const std::string GetScreenName(ScreenId screenId);
     void InitScreenProperty(ScreenId screenId, RSScreenModeInfo& screenMode,
         RSScreenCapability& screenCapability, ScreenProperty& property);
     RRect GetScreenBounds(ScreenId screenId, RSScreenModeInfo& screenMode);
@@ -556,6 +557,7 @@ private:
     void SetInnerScreenFallbackPlan(sptr<ScreenSession> screenSession);
     int32_t GetCurrentInUseScreenNumber();
     void ReportHandleScreenEvent(ScreenEvent screenEvent, ScreenCombination screenCombination);
+    void NotifyUserClientProxy(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
     void HandleScreenConnectEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
     void HandleScreenDisconnectEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
     void HandlePhysicalMirrorDisconnect(sptr<ScreenSession> screenSession, ScreenId screenId, bool phyMirrorEnable);
@@ -566,6 +568,7 @@ private:
     ScreenRotation ConvertOffsetToCorrectRotation(int32_t phyOffset);
     Rotation ConvertIntToRotation(int32_t rotation);
     void MultiScreenModeChange(ScreenId mainScreenId, ScreenId secondaryScreenId, const std::string& operateType);
+    void SetClientInner(int32_t userId, const sptr<IScreenSessionManagerClient>& client);
     void OperateModeChange(ScreenId mainScreenId, ScreenId secondaryScreenId, sptr<ScreenSession>& firstSession,
         sptr<ScreenSession>& secondarySession, const std::string& operateMode);
     void SetClientInner(int32_t newUserId);
@@ -650,6 +653,15 @@ private:
     void SetGotScreenOffAndWakeUpBlock();
     void WakeUpPictureFrameBlock(DisplayEvent event);
 
+    /**
+     * multi user concurrency
+     */
+    static bool IsConcurrentUser();
+    void ActiveUser(int32_t userId);
+    DisplayId GetUserDisplayId(int32_t userId);
+    int32_t GetActiveUserByDisplayId(DisplayId displayId);
+    ScreenId GenerateSmsScreenId(ScreenId rsScreenId);
+    
     class ScreenIdManager {
     friend class ScreenSessionGroup;
     public:
@@ -688,6 +700,17 @@ private:
     int32_t currentScbPId_ { -1 };
     int32_t switchId_ { -1 };
     std::vector<int32_t> oldScbPids_ {};
+    std::map<int32_t, sptr<IScreenSessionManagerClient>> multiClientProxyMap_;
+    std::mutex multiClientProxyMapMutex_;
+
+    /*
+        example:
+        user100:    screen0 active=0
+        user101:    screen0 active=1
+        user102:    screen1 active=1
+    */
+    std::map<int32_t, std::pair<bool, ScreenId>> userScreenMap_;
+    std::mutex userScreenMapMutex_;
     std::map<int32_t, sptr<IScreenSessionManagerClient>> clientProxyMap_;
     FoldDisplayMode oldScbDisplayMode_ = FoldDisplayMode::UNKNOWN;
 
