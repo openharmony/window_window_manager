@@ -20,8 +20,8 @@
 #include "display_manager_service.h"
 #include "dm_common.h"
 #include "rs_adapter.h"
-#include "window_manager_hilog.h"
 #include "screen_rotation_controller.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -89,11 +89,11 @@ void AbstractScreen::FillDisplayInfoByScreenInfo(sptr<DisplayInfo> displayInfo, 
         TLOGE(WmsLogTag::DMS, "displayInfo is nullptr");
         return;
     }
-    sptr<SupportedScreenModes> abstractScreenModes = GetActiveScreenMode();
-    if (abstractScreenModes != nullptr) {
-        displayInfo->SetRefreshRate(abstractScreenModes->refreshRate_);
+    sptr<SupportedScreenModes> abstractScreenMode = GetActiveScreenMode();
+    if (abstractScreenMode != nullptr) {
+        displayInfo->SetRefreshRate(abstractScreenMode->refreshRate_);
         std::vector<uint32_t> supportedRefreshRate;
-        supportedRefreshRate.push_back(abstractScreenModes->refreshRate_);
+        supportedRefreshRate.push_back(abstractScreenMode->refreshRate_);
         displayInfo->SetSupportedRefreshRate(supportedRefreshRate);
     }
 
