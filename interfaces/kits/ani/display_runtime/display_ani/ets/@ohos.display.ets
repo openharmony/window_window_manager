@@ -621,6 +621,12 @@ export class DisplayPhysicalResolutionImpl implements DisplayPhysicalResolution{
     physicalHeight: long;
 }
 
+export function disposeDisplay(display: DisplayImpl): void {
+    finalizerDisplayNative(display as object, displayMgrRef);
+}
+
+export native function finalizerDisplayNative(obj: object, nativeObj: long): void
+
 export let displayMgrRef: long;
 
 export function setDisplayMgrRef(nativeObj : long) : void{
