@@ -26,11 +26,11 @@
 namespace OHOS {
 namespace Rosen {
 /**
-* @brief Enumerates window transition type.
-*/
+ * @brief Enumerates window transition type.
+ */
 enum class WindowTransitionType : uint32_t {
     /**
-     * window destroy.
+     * Window destroy.
      */
     DESTROY = 0,
     
@@ -41,21 +41,21 @@ enum class WindowTransitionType : uint32_t {
 };
 
 /**
-* @brief Enumerates window animation curve type.
-*/
+ * @brief Enumerates window animation curve type.
+ */
 enum class WindowAnimationCurve : uint32_t {
     /**
-     * animation curve type linear.
+     * Animation curve type linear.
      */
     LINEAR = 0,
 
     /**
-     * animation curve type interpolation_spring.
+     * Animation curve type interpolation spring.
      */
     INTERPOLATION_SPRING = 1,
 
     /**
-     * animation curve type cubic bezier curve.
+     * Animation curve type cubic bezier curve.
      */
     CUBIC_BEZIER = 2,
 };
@@ -65,15 +65,15 @@ enum class WindowAnimationCurve : uint32_t {
  */
 enum class AnimationType : uint32_t {
     /**
-     * window animation type fade in out
+     * Window animation type fade in out
      */
     FADE_IN_OUT = 0,
     /**
-     * window animation type fade in
+     * Window animation type fade in
      */
     FADE_IN = 1,
     /**
-     * end type
+     * End type
      */
     END,
 };
@@ -105,23 +105,20 @@ struct WindowAnimationProperty : public Parcelable {
 };
 
 /**
-* @brief Window transition animation configuration.
-*/
+ * @brief Window transition animation configuration.
+ */
 struct WindowAnimationOption : public Parcelable {
     WindowAnimationCurve curve = WindowAnimationCurve::LINEAR;
     uint32_t duration = 0;
-    std::array<float, ANIMATION_PARAM_SIZE> params;
+    std::array<float, ANIMATION_PARAM_SIZE> param;
 
     bool Marshalling(Parcel& parcel) const override
     {
         if (!(parcel.WriteUint32(static_cast<uint32_t>(curve)) && parcel.WriteUint32(duration))) {
             return false;
         }
-        if (params.size() > ANIMATION_PARAM_SIZE) {
-            return false;
-        }
-        for (const auto& param: params) {
-            if (!parcel.WriteFloat(param)) {
+        for (const auto& animateParam: param) {
+            if (!parcel.WriteFloat(animateParam)) {
                 return false;
             }
         }
@@ -141,12 +138,8 @@ struct WindowAnimationOption : public Parcelable {
             delete windowAnimationConfig;
             return nullptr;
         }
-        if (windowAnimationConfig->params.size() > ANIMATION_PARAM_SIZE) {
-            delete windowAnimationConfig;
-            return nullptr;
-        }
-        for (auto& param: windowAnimationConfig->params) {
-            if (!parcel.ReadFloat(param)) {
+        for (auto& animateParam: windowAnimationConfig->param) {
+            if (!parcel.ReadFloat(animateParam)) {
                 delete windowAnimationConfig;
                 return nullptr;
             }
@@ -159,8 +152,8 @@ struct WindowAnimationOption : public Parcelable {
         std::ostringstream oss;
         oss << "curve: " << std::to_string(static_cast<int32_t>(curve)) << ", duration: " << \
             std::to_string(static_cast<int32_t>(duration)) << ", params: [ ";
-        for (auto param: params) {
-            oss << std::fixed << std::setprecision(FLOAT_VALUE_LENGTH) << param << ", ";
+        for (auto animateParam: param) {
+            oss << std::fixed << std::setprecision(FLOAT_VALUE_LENGTH) << animateParam << ", ";
         }
         oss << "]";
         return oss.str();
@@ -171,9 +164,6 @@ struct WindowAnimationOption : public Parcelable {
  * The animation configuration of start scene animation
  */
 struct StartAnimationOptions : public Parcelable {
-    /**
-     * The type of window animation
-     */
     AnimationType animationType = AnimationType::FADE_IN_OUT;
 
     bool Marshalling(Parcel& parcel) const override
@@ -201,13 +191,7 @@ struct StartAnimationOptions : public Parcelable {
  * The animation configuration of SA start scene animation
  */
 struct StartAnimationSystemOptions : public Parcelable {
-    /**
-     * The type of window animation
-     */
     AnimationType animationType = AnimationType::FADE_IN_OUT;
-    /**
-     * The config of start secne animation
-     */
     std::shared_ptr<WindowAnimationOption> animationConfig = nullptr;
 
     bool Marshalling(Parcel& parcel) const override
@@ -240,13 +224,7 @@ struct StartAnimationSystemOptions : public Parcelable {
  * The animation params of window create
  */
 struct WindowCreateParams : public Parcelable {
-    /**
-     * The animation configuration of start scene animation
-     */
     std::shared_ptr<StartAnimationOptions> animationParams = nullptr;
-    /**
-     * The animation configuration of SA start scene animation
-     */
     std::shared_ptr<StartAnimationSystemOptions> animationSystemParams = nullptr;
 
     bool Marshalling(Parcel& parcel) const override

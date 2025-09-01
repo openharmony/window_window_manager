@@ -335,7 +335,7 @@ public:
      * Window Animation
      */
     virtual WMError CreateUIEffectController(const sptr<IUIEffectControllerClient>& controllerClient,
-        sptr<IUIEffectController>& controller, int32_t& controllerId) { return WMError::WM_OK; };
+        sptr<IUIEffectController>& controller, int32_t& controllerId) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; };
 
     /*
      * PiP Window
