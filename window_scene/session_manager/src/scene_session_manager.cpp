@@ -11806,7 +11806,7 @@ WSError SceneSessionManager::PendingSessionToForeground(const sptr<IRemoteObject
     return taskScheduler_->PostSyncTask([this, &token, windowMode]() {
         if (auto session = FindSessionByToken(token)) {
             if (windowMode != DEFAULT_INVALID_WINDOW_MODE) {
-                TLOGE(WmsLogTag::WMS_LIFE, "Modify window mode: %{public}d", windowMode);
+                TLOGI(WmsLogTag::WMS_LIFE, "Modify window mode: %{public}d", windowMode);
                 session->SetSessionInfoWindowMode(windowMode);
             }
             return session->PendingSessionToForeground();
