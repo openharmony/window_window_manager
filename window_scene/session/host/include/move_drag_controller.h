@@ -87,6 +87,8 @@ public:
     bool ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& originalRect);
     bool ConsumeDragEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& originalRect,
         const sptr<WindowSessionProperty> property, const SystemSessionConfig& sysConfig);
+        bool ConsumeDragEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& originalRect,
+        const sptr<WindowSessionProperty> property, const SystemSessionConfig& sysConfig, const WindowDecoration& decoration);
     void ModifyWindowCoordinatesWhenMoveEnd(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void CalcFirstMoveTargetRect(const WSRect& windowRect, bool useWindowRect);
     WSRect GetFullScreenToFloatingRect(const WSRect& originalRect, const WSRect& windowRect);
@@ -238,6 +240,8 @@ private:
     void CalcDragTargetRect(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, SizeChangeReason reason);
     bool EventDownInit(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& originalRect,
         const sptr<WindowSessionProperty> property, const SystemSessionConfig& sysConfig);
+    bool EventDownInit(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& originalRect,
+        const sptr<WindowSessionProperty> property, const SystemSessionConfig& sysConfig, const WindowDecoration& decoration);
     bool CalcMoveInputBarRect(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& originalRect);
     void AdjustTargetPositionByAvailableArea(int32_t& moveDragFinalX, int32_t& moveDragFinalY);
     MoveDirection CalcMoveDirection(DisplayId lastDisplayId, DisplayId currentDisplayId);
@@ -301,6 +305,7 @@ private:
     AreaType dragAreaType_ = AreaType::UNDEFINED;
     AxisType mainMoveAxis_ = AxisType::UNDEFINED;
     WindowLimits limits_;
+    WindowDecoration decoration_;
     MoveDragProperty moveDragProperty_;
     MoveDragCallback moveDragCallback_;
     int32_t persistentId_;

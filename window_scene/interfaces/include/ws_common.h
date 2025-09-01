@@ -794,6 +794,37 @@ struct WSScreenRelativeRect {
     }
 };
 
+/**
+ * @struct WindowDecoration
+ *
+ * @brief Represents the window decoration thickness (non-drawable area).
+ *        In general, the top decoration includes the title bar.
+ */
+struct WindowDecoration
+{
+    uint32_t left = 0;
+    uint32_t top = 0;
+    uint32_t right = 0;
+    uint32_t bottom = 0;
+
+    /**
+     * @brief Calculate the total horizontal decoration.
+     */
+    uint32_t Horizontal() const { return left + right; }
+
+    /**
+     * @brief Calculate the total vertical decoration.
+     */
+    uint32_t Vertical() const { return top + bottom; }
+
+    std::string ToString() const
+    {
+        std::ostringstream oss;
+        oss << "[" << left << ", " << top << ", " << right << ", " << bottom << "]";
+        return oss.str();
+    }
+};
+
 struct WindowAnimationInfo {
     WSRect beginRect { 0, 0, 0, 0 };
     WSRect endRect { 0, 0, 0, 0 };

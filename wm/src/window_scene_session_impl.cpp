@@ -2604,6 +2604,27 @@ WMError WindowSceneSessionImpl::ResetAspectRatio()
     return static_cast<WMError>(hostSession->SetAspectRatio(0.0f));
 }
 
+WMError WindowSceneSessionImpl::SetContentAspectRatio(float ratio, bool isPersistent, bool needUpdateRect)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid session");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+    if (ratio == MathHelper::INF || ratio == MathHelper::NAG_INF || std::isnan(ratio) || MathHelper::NearZero(ratio)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "failed, because of wrong value: %{public}f", ratio);
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    TLOGD(WmsLogTag::WMS_LAYOUT,
+        "ratio: %{public}f, isPersistent: %{public}d, needUpdateRect: %{public}d",
+        ratio, isPersistent, needUpdateRect);
+    if (hostSession->SetContentAspectRatio(ratio, isPersistent, needUpdateRect) != WSError::WS_OK) {
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    return WMError::WM_OK;
+}
+
 /** @note @window.hierarchy */
 WMError WindowSceneSessionImpl::RaiseToAppTop()
 {

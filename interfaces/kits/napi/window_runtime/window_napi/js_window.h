@@ -115,6 +115,7 @@ public:
     static napi_value RaiseToAppTop(napi_env env, napi_callback_info info);
     static napi_value SetAspectRatio(napi_env env, napi_callback_info info);
     static napi_value ResetAspectRatio(napi_env env, napi_callback_info info);
+    static napi_value SetContentAspectRatio(napi_env env, napi_callback_info info);
     static napi_value Minimize(napi_env env, napi_callback_info info);
     static napi_value RaiseAboveTarget(napi_env env, napi_callback_info info);
     static napi_value RaiseMainWindowAboveTarget(napi_env env, napi_callback_info info);
@@ -305,6 +306,7 @@ private:
     napi_value OnGetPreferredOrientation(napi_env env, napi_callback_info info);
     napi_value OnRaiseToAppTop(napi_env env, napi_callback_info info);
     napi_value OnSetAspectRatio(napi_env env, napi_callback_info info);
+    napi_value OnSetContentAspectRatio(napi_env env, napi_callback_info info);
     napi_value OnResetAspectRatio(napi_env env, napi_callback_info info);
     napi_value OnMinimize(napi_env env, napi_callback_info info);
     WmErrorCode CheckRaiseMainWindowParams(napi_env env, size_t argc, napi_value argv[],

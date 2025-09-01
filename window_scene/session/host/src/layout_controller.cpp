@@ -167,6 +167,57 @@ void LayoutController::AdjustRectByLimits(WindowLimits limits, float ratio, bool
     }
 }
 
+void LayoutController::AdjustRectByLimits(
+    WindowLimits limits, float ratio, const WindowDecoration& decoration, WSRect& rect)
+{
+    const int32_t decorW = static_cast<int32_t>(decoration.Horizontal());
+    const int32_t decorH = static_cast<int32_t>(decoration.Vertical());
+    rect.width_ -= decorW;
+    rect.height_ -= decorH;
+    limits.minWidth_ -= decorW;
+    limits.maxWidth_ -= decorW;
+    limits.minHeight_ -= decorH;
+    limits.maxHeight_ -= decorH;
+    if (static_cast<uint32_t>(rect.height_) > limits.maxHeight_) {
+        rect.height_ = static_cast<int32_t>(limits.maxHeight_);
+        rect.width_ = floor(rect.height_ * ratio);
+    } else if (static_cast<uint32_t>(rect.width_) > limits.maxWidth_) {
+        rect.width_ = static_cast<int32_t>(limits.maxWidth_);
+        rect.height_ = floor(rect.width_ / ratio);
+    } else if (static_cast<uint32_t>(rect.width_) < limits.minWidth_) {
+        rect.width_ = static_cast<int32_t>(limits.minWidth_);
+        rect.height_ = ceil(rect.width_ / ratio);
+    } else if (static_cast<uint32_t>(rect.height_) < limits.minHeight_) {
+        rect.height_ = static_cast<int32_t>(limits.minHeight_);
+        rect.width_ = ceil(rect.height_ * ratio);
+    }
+    rect.width_ += decorW;
+    rect.height_ += decorH;
+}
+
+WindowLimits LayoutController::GetWindowLimits() const
+{
+    auto limits = sessionProperty_->GetWindowLimits();
+    auto displayId = sessionProperty_->GetDisplayId();
+    auto display = DisplayManager::GetInstance().GetDisplayById(displayId);
+    if (!display) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "display is null, displayId: %{public}" PRIu64, displayId);
+        return limits;
+    }
+    float vpr = display->GetVirtualPixelRatio();
+    int32_t minW;
+    int32_t maxW;
+    int32_t minH;
+    int32_t maxH;
+    SessionUtils::CalcFloatWindowRectLimits(limits,
+        getSystemConfigFunc_().maxFloatingWindowSize_, vpr, minW, maxW, minH, maxH);
+    limits.minWidth_ = static_cast<uint32_t>(minW);
+    limits.maxWidth_ = static_cast<uint32_t>(maxW);
+    limits.minHeight_ = static_cast<uint32_t>(minH);
+    limits.maxHeight_ = static_cast<uint32_t>(maxH);
+    return limits;
+}
+
 bool LayoutController::AdjustRectByAspectRatio(WSRect& rect, bool isDecorEnable)
 {
     const int tolerancePx = 2; // 2: tolerance delta pixel value, unit: px
@@ -211,6 +262,35 @@ bool LayoutController::AdjustRectByAspectRatio(WSRect& rect, bool isDecorEnable)
     AdjustRectByLimits(sessionProperty_->GetWindowLimits(), aspectRatio_, isDecorEnable, vpr, rect);
     if (std::abs(static_cast<int32_t>(originalRect.width_) - static_cast<int32_t>(rect.width_)) <= tolerancePx &&
         std::abs(static_cast<int32_t>(originalRect.height_) - static_cast<int32_t>(rect.height_)) <= tolerancePx) {
+        rect = originalRect;
+        return false;
+    }
+    return true;
+}
+
+bool LayoutController::AdjustRectByAspectRatio(WSRect& rect, const WindowDecoration& decoration)
+{
+    if (sessionProperty_->GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING ||
+        !WindowHelper::IsMainWindow(sessionProperty_->GetWindowType())) {
+        return false;
+    }
+    if (MathHelper::NearZero(aspectRatio_)) {
+        return false;
+    }
+    WSRect originalRect = rect;
+    const int32_t decorW = static_cast<int32_t>(decoration.Horizontal());
+    const int32_t decorH = static_cast<int32_t>(decoration.Vertical());
+    int32_t layoutWidth = rect.width_ - decorW;
+    int32_t layoutHeight = rect.height_ - decorH;
+    if (layoutWidth > layoutHeight * aspectRatio_) {
+        rect.width_ = layoutHeight * aspectRatio_ + decorW;
+    } else {
+        rect.height_ = layoutWidth / aspectRatio_ + decorH;
+    }
+    AdjustRectByLimits(GetWindowLimits(), aspectRatio_, decoration, rect);
+    constexpr int tolerancePx = 2; // 2: tolerance delta pixel value, unit: px
+    if (std::abs(originalRect.width_ - rect.width_) <= tolerancePx &&
+        std::abs(originalRect.height_ - rect.height_) <= tolerancePx) {
         rect = originalRect;
         return false;
     }

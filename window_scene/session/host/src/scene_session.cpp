@@ -1435,6 +1435,36 @@ static WSError CheckAspectRatioValid(const sptr<SceneSession>& session, float ra
     return WSError::WS_OK;
 }
 
+static WSError CheckAspectRatioValid2(
+    const sptr<SceneSession>& session, float ratio, const WindowDecoration& decoration)
+{
+    if (MathHelper::NearZero(ratio)) {
+        return WSError::WS_OK;
+    }
+    if (!session) {
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    auto sessionProperty = session->GetSessionProperty();
+    if (!sessionProperty) {
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    auto limits = sessionProperty->GetWindowLimits();
+    if (limits.minWidth_ && limits.maxHeight_ &&
+        MathHelper::LessNotEqual(ratio,
+            static_cast<float>(limits.minWidth_ - decoration.Horizontal()) /
+            static_cast<float>(limits.maxHeight_ - decoration.Vertical()))) {
+        WLOGE("Failed, because aspectRatio is smaller than minWidth/maxHeight");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    } else if (limits.minHeight_ && limits.maxWidth_ &&
+        MathHelper::GreatNotEqual(ratio,
+            static_cast<float>(limits.maxWidth_ - decoration.Horizontal()) /
+            static_cast<float>(limits.minHeight_ - decoration.Vertical()))) {
+        WLOGE("Failed, because aspectRatio is bigger than maxWidth/minHeight");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    return WSError::WS_OK;
+}
+
 /** @note @window.layout */
 WSError SceneSession::SetAspectRatio(float ratio)
 {
@@ -1469,6 +1499,43 @@ WSError SceneSession::SetAspectRatio(float ratio)
         }
         return WSError::WS_OK;
     }, __func__);
+}
+
+WSError SceneSession::SetContentAspectRatio(float ratio, bool isPersistent, bool needUpdateRect)
+{
+    PostTask([weakThis = wptr(this), ratio, isPersistent, needUpdateRect, where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s session is null", where);
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        const WindowDecoration& decoration = session->GetWindowDecoration();
+        WSError ret = CheckAspectRatioValid2(session, ratio, decoration);
+        if (ret != WSError::WS_OK) {
+            return ret;
+        }
+        session->Session::SetAspectRatio(ratio);
+        if (session->moveDragController_) {
+            session->moveDragController_->SetAspectRatio(ratio);
+        }
+        if (isPersistent) {
+            session->SaveAspectRatio(ratio);
+        }
+        if (needUpdateRect) {
+            WSRect adjustedRect = session->GetSessionRect();
+            TLOGNI(WmsLogTag::WMS_LAYOUT,
+                "%{public}s Before adjusting, the id:%{public}d, the current rect:%{public}s, ratio:%{public}f",
+                where, session->GetPersistentId(), adjustedRect.ToString().c_str(), ratio);
+            if (session->layoutController_->AdjustRectByAspectRatio(adjustedRect, decoration)) {
+                TLOGNI(WmsLogTag::WMS_LAYOUT,
+                    "%{public}s After adjusting, the id:%{public}d, the adjusted rect:%{public}s",
+                    where, session->GetPersistentId(), adjustedRect.ToString().c_str());
+                session->NotifySessionRectChange(adjustedRect, SizeChangeReason::RESIZE);
+            }
+        }
+        return WSError::WS_OK;
+    }, __func__);
+    return WSError::WS_OK;
 }
 
 /** @note @window.layout */
@@ -3232,7 +3299,7 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
         moveDragController_->SetScale(GetScaleX(), GetScaleY()); // need scale ratio to calculate translate
         SetParentRect();
         if (IsDraggable() &&
-            moveDragController_->ConsumeDragEvent(pointerEvent, GetGlobalOrWinRect(), property, systemConfig_)) {
+            moveDragController_->ConsumeDragEvent(pointerEvent, GetGlobalOrWinRect(), property, systemConfig_, GetWindowDecoration())) {
             auto surfaceNode = GetSurfaceNode();
             moveDragController_->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
             PresentFocusIfNeed(pointerEvent->GetPointerAction());
@@ -3472,25 +3539,6 @@ void SceneSession::CheckSubSessionShouldFollowParent(uint64_t displayId)
             session->SetShouldFollowParentWhenShow(false);
         }
     }
-}
-
-bool SceneSession::IsDecorEnable() const
-{
-    auto property = GetSessionProperty();
-    if (property == nullptr) {
-        WLOGE("property is nullptr");
-        return false;
-    }
-    auto windowType = property->GetWindowType();
-    bool isMainWindow = WindowHelper::IsMainWindow(windowType);
-    bool isSubWindow = WindowHelper::IsSubWindow(windowType);
-    bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
-    bool isValidWindow = isMainWindow ||
-        ((isSubWindow || isDialogWindow) && property->IsDecorEnable());
-    bool isWindowModeSupported = WindowHelper::IsWindowModeSupported(
-        systemConfig_.decorWindowModeSupportType_, property->GetWindowMode());
-    bool enable = isValidWindow && systemConfig_.isSystemDecorEnable_ && isWindowModeSupported;
-    return enable;
 }
 
 std::string SceneSession::GetRatioPreferenceKey()
@@ -8320,23 +8368,6 @@ void SceneSession::SetDefaultDisplayIdIfNeed()
             sessionProperty->SetDisplayId(defaultDisplayId);
         }
     }
-}
-
-int32_t SceneSession::GetCustomDecorHeight() const
-{
-    std::lock_guard lock(customDecorHeightMutex_);
-    return customDecorHeight_;
-}
-
-void SceneSession::SetCustomDecorHeight(int32_t height)
-{
-    constexpr int32_t MIN_DECOR_HEIGHT = 37;
-    constexpr int32_t MAX_DECOR_HEIGHT = 112;
-    if (height < MIN_DECOR_HEIGHT || height > MAX_DECOR_HEIGHT) {
-        return;
-    }
-    std::lock_guard lock(customDecorHeightMutex_);
-    customDecorHeight_ = height;
 }
 
 void SceneSession::UpdateGestureBackEnabled()

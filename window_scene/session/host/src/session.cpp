@@ -4941,4 +4941,65 @@ WSError Session::SetIsShowDecorInFreeMultiWindow(bool isShow)
     }
     return WSError::WS_OK;
 }
+
+bool Session::IsDecorEnable() const
+{
+    auto property = GetSessionProperty();
+    if (property == nullptr) {
+        TLOGE(WmsLogTag::WMS_DECOR, "property is nullptr");
+        return false;
+    }
+    auto windowType = property->GetWindowType();
+    bool isMainWindow = WindowHelper::IsMainWindow(windowType);
+    bool isSubWindow = WindowHelper::IsSubWindow(windowType);
+    bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
+    bool isValidWindow = isMainWindow ||
+        ((isSubWindow || isDialogWindow) && property->IsDecorEnable());
+    bool isWindowModeSupported = WindowHelper::IsWindowModeSupported(
+        systemConfig_.decorWindowModeSupportType_, property->GetWindowMode());
+    bool enable = isValidWindow && systemConfig_.isSystemDecorEnable_ && isWindowModeSupported;
+    return enable;
+}
+
+WSError Session::SetDecorVisible(bool isVisible)
+{
+    TLOGD(WmsLogTag::WMS_DECOR, "isVisible: %{public}d", isVisible);
+    isDecorVisible_ = isVisible;
+    return WSError::WS_OK;
+}
+
+bool Session::IsDecorVisible() const
+{
+    return isDecorVisible_;
+}
+
+void Session::SetCustomDecorHeight(int32_t height)
+{
+    constexpr int32_t MIN_DECOR_HEIGHT = 37;
+    constexpr int32_t MAX_DECOR_HEIGHT = 112;
+    if (height < MIN_DECOR_HEIGHT || height > MAX_DECOR_HEIGHT) {
+        return;
+    }
+    std::lock_guard lock(customDecorHeightMutex_);
+    customDecorHeight_ = height;
+}
+
+int32_t Session::GetCustomDecorHeight() const
+{
+    std::lock_guard lock(customDecorHeightMutex_);
+    return customDecorHeight_;
+}
+
+WindowDecoration Session::GetWindowDecoration() const
+{
+    auto getTopDecorInPx = [&]() {
+        if (!IsDecorVisible() || !IsDecorEnable()) {
+            return 0;
+        }
+        std::lock_guard lock(customDecorHeightMutex_);
+        auto decorHeight = customDecorHeight_ != 0 ? customDecorHeight_ : WINDOW_TITLE_BAR_HEIGHT;
+        return decorHeight * vpr_;
+    };
+    return { 0, getTopDecorInPx(), 0, 0 };
+}
 } // namespace OHOS::Rosen
