@@ -261,6 +261,76 @@ ani_object DisplayAniUtils::CreateAniUndefined(ani_env* env)
     return static_cast<ani_object>(aniRef);
 }
 
+DmErrorCode DisplayAniUtils::GetVirtualScreenOptionFromAni(
+    ani_env* env, ani_object virtualScreenConfigObj, VirtualScreenOption& option)
+{
+    ani_ref nameAni = nullptr;
+    std::string nameStr;
+    ani_long width = 0;
+    ani_long height = 0;
+    ani_double density = 0;
+    ani_ref surfaceId = nullptr;
+    env->Object_GetPropertyByName_Ref(virtualScreenConfigObj, "<property>name", &nameAni);
+    if (DisplayAniUtils::GetStdString(env, static_cast<ani_string>(nameAni), option.name_) != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to convert parameter to name.");
+        return DmErrorCode::DM_ERROR_INVALID_PARAM;
+    }
+    if (env->Object_GetPropertyByName_Long(virtualScreenConfigObj, "<property>width", &width) != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to convert parameter to width.");
+        return DmErrorCode::DM_ERROR_INVALID_PARAM;
+    }
+    if (env->Object_GetPropertyByName_Long(virtualScreenConfigObj, "<property>height", &height) != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to convert parameter to height.");
+        return DmErrorCode::DM_ERROR_INVALID_PARAM;
+    }
+    if (env->Object_GetPropertyByName_Double(virtualScreenConfigObj, "<property>density", &density) != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to convert parameter to density.");
+        return DmErrorCode::DM_ERROR_INVALID_PARAM;
+    }
+    option.width_ = static_cast<uint32_t>(width);
+    option.height_ = static_cast<uint32_t>(height);
+    option.density_ = static_cast<float>(density);
+ 
+    env->Object_GetPropertyByName_Ref(virtualScreenConfigObj, "<property>surfaceId", &surfaceId);
+    if (!DisplayAniUtils::GetSurfaceFromAni(env, static_cast<ani_string>(surfaceId), option.surface_)) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Failed to convert surface.");
+        return DmErrorCode::DM_ERROR_INVALID_PARAM;
+    }
+    return DmErrorCode::DM_OK;
+}
+ 
+bool DisplayAniUtils::GetSurfaceFromAni(ani_env* env, ani_string surfaceIdAniValue, sptr<Surface>& surface)
+{
+    if (surfaceIdAniValue == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Failed to convert parameter to surface. Invalidate params.");
+        return false;
+    }
+    ani_size strSize;
+    ani_status ret = env->String_GetUTF8Size(surfaceIdAniValue, &strSize);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Failed to get UTF8 size ret:%{public}d.", static_cast<int32_t>(ret));
+        return false;
+    }
+    std::vector<char> buffer(strSize + 1);
+    char* utf8_buffer = buffer.data();
+    ani_size bytes_writen = 0;
+    ret = env->String_GetUTF8(surfaceIdAniValue, utf8_buffer, strSize + 1, &bytes_writen);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Failed to get UTF8 ret:%{public}d.", static_cast<int32_t>(ret));
+        return false;
+    }
+    utf8_buffer[bytes_writen] = '\0';
+    std::string surfaceStr = std::string(utf8_buffer);
+    uint64_t surfaceId = 0;
+    std::istringstream inputStream(surfaceStr);
+    inputStream >> surfaceId;
+    surface = SurfaceUtils::GetInstance()->GetSurface(surfaceId);
+    if (surface == nullptr) {
+        TLOGI(WmsLogTag::DMS, "[ANI] GetSurfaceFromAni failed, surfaceId:%{public}" PRIu64"", surfaceId);
+    }
+    return true;
+}
+
 ani_status DisplayAniUtils::GetAniString(ani_env* env, const std::string& str, ani_string* result)
 {
     return env->String_NewUTF8(str.c_str(), static_cast<ani_size>(str.size()), result);

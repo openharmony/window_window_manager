@@ -20,6 +20,7 @@
 #include "pixel_map.h"
 #include "singleton_container.h"
 #include "screenshot_ani_manager.h"
+#include "pixel_map_taihe_ani.h"
  
 namespace OHOS::Rosen {
  
@@ -28,6 +29,12 @@ public:
 static ani_status GetStdString(ani_env* env, ani_string ani_str, std::string& result);
  
 static ani_object CreateAniUndefined(ani_env* env);
+
+static ani_object CreateRectObject(ani_env* env);
+
+static void ConvertRect(ani_env* env, Media::Rect rect, ani_object rectObj);
+
+static ani_object CreateScreenshotPickInfo(ani_env* env, std::unique_ptr<Param>& param);
  
 static ani_status GetAniString(ani_env* env, const std::string& str, ani_string* result);
  
