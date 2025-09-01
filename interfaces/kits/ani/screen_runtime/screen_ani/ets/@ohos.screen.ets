@@ -38,7 +38,7 @@ export function makeMirror(mainScreen: long, mirrorScreen: Array<long>, callback
     }).then((ret: NullishType) => {
         callback(null, ret as long);
     }).catch((err: NullishType) => {
-        callback(err as BusinessError, -1);
+        callback(err as BusinessError, undefined);
     });
 }
 
@@ -322,7 +322,7 @@ export function makeExpand(options: Array<ExpandOption>, callback: AsyncCallback
     }).then((ret: NullishType) => {
         callback(null, ret as long);
     }).catch((err: NullishType) => {
-        callback(err as BusinessError, -1);
+        callback(err as BusinessError, undefined);
     });
 }
 

@@ -128,8 +128,10 @@ void ScreenAni::SetScreenActiveMode(ani_env* env, ani_object obj, ani_long modeI
         return;
     }
     ani_long screenNativeRef;
-    if (ANI_OK != env->Object_GetFieldByName_Long(obj, "screenNativeObj", &screenNativeRef)) {
-        TLOGE(WmsLogTag::DMS, "[ANI] screenAni native nullptr");
+    ani_status ret = env->Object_GetFieldByName_Long(obj, "screenNativeObj", &screenNativeRef);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] get screenAni native failed, ret: %{public}u", ret);
+        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "get screenNativeObj failed.");
         return;
     }
 #ifdef XPOWER_EVENT_ENABLE
@@ -151,7 +153,7 @@ void ScreenAni::OnSetScreenActiveMode(ani_env* env, ani_object obj, ani_long mod
     }
     DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(screen_->SetScreenActiveMode(static_cast<uint32_t>(modeIndex)));
     if (ret != DmErrorCode::DM_OK) {
-        TLOGE(WmsLogTag::DMS, "[ANI] Set screen active mode fail");
+        TLOGE(WmsLogTag::DMS, "[ANI] Set screen active mode fail, ret: %{public}u", ret);
         AniErrUtils::ThrowBusinessError(env, ret, "Screen::SetScreenActiveMode failed.");
     }
 }
@@ -172,6 +174,7 @@ void ScreenAni::SetOrientation(ani_env* env, ani_object obj, ani_enum_item orien
     ani_status ret = env->Object_GetFieldByName_Long(obj, "screenNativeObj", &screenNativeRef);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] get screenAni native failed, ret: %{public}u", ret);
+        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "get screenNativeObj failed.");
         return;
     }
     ScreenAni* screenAni = reinterpret_cast<ScreenAni*>(screenNativeRef);
