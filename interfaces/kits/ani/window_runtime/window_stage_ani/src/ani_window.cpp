@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-
 #include "ani_window.h"
 
 #include <cstdint>
@@ -31,9 +30,9 @@
 #include "pixel_map.h"
 #include "pixel_map_taihe_ani.h"
 #include "window_helper.h"
-#include "window_scene.h"
 #include "window_manager.h"
 #include "window_manager_hilog.h"
+#include "window_scene.h"
 #include "wm_common.h"
 #include "wm_math.h"
 

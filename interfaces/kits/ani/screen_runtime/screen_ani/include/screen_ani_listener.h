@@ -17,6 +17,7 @@
 #define OHOS_ANI_SCREEN_LISTENER_H
 
 #include <mutex>
+
 #include "ani.h"
 #include "event_handler.h"
 #include "screen_manager.h"
