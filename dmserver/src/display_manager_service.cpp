@@ -184,12 +184,12 @@ sptr<DisplayInfo> DisplayManagerService::GetDisplayInfoById(DisplayId displayId)
 {
     sptr<AbstractDisplay> display = abstractDisplayController_->GetAbstractDisplay(displayId);
     if (display == nullptr) {
-        TLOGI(WmsLogTag::DMS, "fail to get displayInfo by id: %{public}" PRIu64" invalid display", displayId);
+        TLOGI(WmsLogTag::DMS, "fail to get displayInfo by id: %{public}" PRIu64 " invalid display", displayId);
         sptr<DisplayInfo> displayInfo = GetDisplayInfoByScreenId(displayId);
         if (displayInfo != nullptr) {
             return displayInfo;
         }
-        TLOGW(WmsLogTag::DMS, "fail to get displayInfo by screen id: %{public}" PRIu64" invalid screen", displayId);
+        TLOGW(WmsLogTag::DMS, "fail to get displayInfo by screen id: %{public}" PRIu64 " invalid screen", displayId);
         return nullptr;
     }
     return display->ConvertToDisplayInfo();

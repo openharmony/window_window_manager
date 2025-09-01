@@ -754,8 +754,8 @@ ScreenCombination AbstractScreenGroup::GetScreenCombination() const
 
 DisplaySourceMode AbstractScreen::GetDisplaySourceMode() const
 {
-    sptr<AbstractScreenGroup> abstractScreenGroup = GetGroup();
     TLOGI(WmsLogTag::DMS, "in");
+    sptr<AbstractScreenGroup> abstractScreenGroup = GetGroup();
     if (abstractScreenGroup == nullptr || screenController_ == nullptr) {
         TLOGW(WmsLogTag::DMS, "default NONE");
         return DisplaySourceMode::NONE;
