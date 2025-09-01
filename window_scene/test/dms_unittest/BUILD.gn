@@ -528,6 +528,8 @@ ohos_unittest("ws_screen_session_manager_test") {
     "screen_session_manager_test.cpp"
   ]
 
+  include_dirs = [ "../mock" ]
+
   deps = [
     ":ws_unittest_common",
     "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
