@@ -387,8 +387,8 @@ bool SessionPermission::IsTokenNativeOrShellType(uint32_t tokenId)
 {
     const auto flag = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
     TLOGD(WmsLogTag::DEFAULT, "tokenId:%{private}u, flag:%{public}u", tokenId, flag);
-    if (flag != Security::AccessToken::TypeATokenTypeEnum::TOKEN_NATIVE &&
-        flag != Security::AccessToken::TypeATokenTypeEnum::TOKEN_SHELL) {
+    if (flag != Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE &&
+        flag != Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL) {
         return false;
     }
     return true;
