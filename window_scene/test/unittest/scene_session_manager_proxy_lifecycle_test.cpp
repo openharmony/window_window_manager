@@ -72,13 +72,12 @@ HWTEST_F(sceneSessionManagerProxyLifecycleTest, UpdateSessionWindowVisibilityLis
 HWTEST_F(sceneSessionManagerProxyLifecycleTest, PendingSessionToForeground, TestSize.Level1)
 {
     sptr<IRemoteObject> token = nullptr;
-    int32_t windowMode = 0;
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
         sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
     EXPECT_NE(sceneSessionManagerProxy, nullptr);
 
-    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sceneSessionManagerProxy->PendingSessionToForeground(token, windowMode));
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sceneSessionManagerProxy->PendingSessionToForeground(token));
 }
 
 /**
