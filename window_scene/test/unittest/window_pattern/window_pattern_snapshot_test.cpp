@@ -759,7 +759,7 @@ HWTEST_F(WindowPatternSnapshotTest, GetWindowOrientation, TestSize.Level1)
 
     session_->capacity_ = maxCapacity;
     ret = session_->GetWindowOrientation();
-    EXPECT_EQ(ret, WSSnapshotHelper::GetWindowRotation());
+    EXPECT_EQ(ret, WSSnapshotHelper::GetInstance()->GetWindowRotation());
 }
 
 /**
