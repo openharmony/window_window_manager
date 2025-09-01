@@ -763,6 +763,16 @@ public:
 
     WSError SetIsShowDecorInFreeMultiWindow(bool isShow);
 
+    /*
+     * Window Decor
+     */
+    bool IsDecorEnable() const;
+    WSError SetDecorVisible(bool isVisible) override;
+    bool IsDecorVisible() const;
+    void SetCustomDecorHeight(int32_t height) override;
+    int32_t GetCustomDecorHeight() const;
+    WindowDecoration GetWindowDecoration() const;
+
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
     public:
@@ -1155,6 +1165,14 @@ private:
      */
     uint64_t screenIdOfRSUIContext_ = SCREEN_ID_INVALID;
     std::shared_ptr<RSUIContext> rsUIContext_;
+
+    /*
+     * Window Decor
+     */
+    bool isDecorVisible_ = true;
+    mutable std::mutex customDecorHeightMutex_;
+    int32_t customDecorHeight_ = 0;
+    // guarded by customDecorHeightMutex_
 };
 } // namespace OHOS::Rosen
 

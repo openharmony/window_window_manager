@@ -420,6 +420,18 @@ public:
     virtual bool IsAllowHaveSystemSubWindow() = 0;
     virtual WMError SetAspectRatio(float ratio) = 0;
     virtual WMError ResetAspectRatio() = 0;
+
+    /**
+     * @brief Set content aspect ratio of this window
+     *
+     * @param ratio the aspect ratio of window content
+     * @param isPersistent whether to persist the aspect ratio setting
+     * @param needUpdateRect whether to update the window rect after setting aspect ratio
+     * @return WMError
+     */
+    virtual WMError SetContentAspectRatio(
+        float ratio, bool isPersistent, bool needUpdateRect) { return WMError::WM_OK; }
+
     virtual KeyboardAnimationConfig GetKeyboardAnimationConfig() = 0;
     virtual void SetNeedDefaultAnimation(bool needDefaultAnimation) = 0;
 

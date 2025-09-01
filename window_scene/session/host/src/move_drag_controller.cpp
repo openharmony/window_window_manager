@@ -585,6 +585,60 @@ bool MoveDragController::ConsumeDragEvent(const std::shared_ptr<MMI::PointerEven
     return true;
 }
 
+/** @note @window.drag */
+bool MoveDragController::ConsumeDragEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+    const WSRect& originalRect, const sptr<WindowSessionProperty> property, const SystemSessionConfig& sysConfig, const WindowDecoration& decoration)
+{
+    if (!CheckDragEventLegal(pointerEvent, property)) {
+        return false;
+    }
+    SizeChangeReason reason = SizeChangeReason::UNDEFINED;
+    switch (pointerEvent->GetPointerAction()) {
+        case MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN:
+        case MMI::PointerEvent::POINTER_ACTION_DOWN: {
+            if (!EventDownInit(pointerEvent, originalRect, property, sysConfig, decoration)) {
+                return false;
+            }
+            reason = SizeChangeReason::DRAG_START;
+            ResSchedReportData(OHOS::ResourceSchedule::ResType::RES_TYPE_RESIZE_WINDOW, true);
+            break;
+        }
+        case MMI::PointerEvent::POINTER_ACTION_MOVE: {
+            if (moveDragIsInterrupted_) {
+                MoveDragInterrupted();
+                return true;
+            }
+            reason = SizeChangeReason::DRAG;
+            break;
+        }
+        case MMI::PointerEvent::POINTER_ACTION_UP:
+        case MMI::PointerEvent::POINTER_ACTION_BUTTON_UP:
+        case MMI::PointerEvent::POINTER_ACTION_CANCEL: {
+            if (!hasPointDown_) {
+                return true;
+            }
+            auto screenRect = GetScreenRectById(moveDragStartDisplayId_);
+            if (moveDragIsInterrupted_ || screenRect == WSRect{-1, -1, -1, -1}) {
+                MoveDragInterrupted();
+                return true;
+            }
+            reason = SizeChangeReason::DRAG_END;
+            SetStartDragFlag(false);
+            hasPointDown_ = false;
+            moveDragEndDisplayId_ = GetTargetRect(TargetRectCoordinate::GLOBAL).IsOverlap(screenRect) ?
+                moveDragStartDisplayId_ : static_cast<uint64_t>(pointerEvent->GetTargetDisplayId());
+            ResSchedReportData(OHOS::ResourceSchedule::ResType::RES_TYPE_RESIZE_WINDOW, false);
+            NotifyWindowInputPidChange(isStartDrag_);
+            break;
+        }
+        default:
+            return false;
+    }
+    CalcDragTargetRect(pointerEvent, reason);
+    ProcessSessionRectChange(reason);
+    return true;
+}
+
 void MoveDragController::MoveDragInterrupted(bool resetPosition)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "Screen anomaly, MoveDrag has been interrupted, id:%{public}d", persistentId_);
@@ -997,6 +1051,8 @@ bool MoveDragController::CalcMoveTargetRect(const std::shared_ptr<MMI::PointerEv
 bool MoveDragController::EventDownInit(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     const WSRect& originalRect, const sptr<WindowSessionProperty> property, const SystemSessionConfig& sysConfig)
 {
+    // TODO: 传递 windowDecoration
+    // TODO: 根据 aspectRatio_ 修改 rect
     const auto& sourceType = pointerEvent->GetSourceType();
     if (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE &&
         pointerEvent->GetButtonId() != MMI::PointerEvent::MOUSE_BUTTON_LEFT) {
@@ -1030,6 +1086,61 @@ bool MoveDragController::EventDownInit(const std::shared_ptr<MMI::PointerEvent>&
     }
     InitDecorValue(property, sysConfig);
     limits_ = property->GetWindowLimits();
+    isAdaptToDragScale_ = property->IsAdaptToDragScale();
+    moveDragProperty_.pointerId_ = pointerItem.GetOriginPointerId();
+    moveDragProperty_.pointerType_ = sourceType;
+    moveDragProperty_.originalPointerPosX_ = pointerItem.GetDisplayX();
+    moveDragProperty_.originalPointerPosY_ = pointerItem.GetDisplayY();
+    if (aspectRatio_ <= NEAR_ZERO) {
+        CalcFreeformTranslateLimits(type_);
+    }
+    moveDragProperty_.originalRect_.posX_ = (originalRect.posX_ - parentRect_.posX_) / moveDragProperty_.scaleX_;
+    moveDragProperty_.originalRect_.posY_ = (originalRect.posY_ - parentRect_.posY_) / moveDragProperty_.scaleY_;
+    mainMoveAxis_ = AxisType::UNDEFINED;
+    SetStartDragFlag(true);
+    NotifyWindowInputPidChange(isStartDrag_);
+    return true;
+}
+
+/** @note @window.drag */
+bool MoveDragController::EventDownInit(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+    const WSRect& originalRect, const sptr<WindowSessionProperty> property, const SystemSessionConfig& sysConfig, const WindowDecoration& decoration)
+{
+    // TODO: 根据 aspectRatio_ 修改 rect
+    const auto& sourceType = pointerEvent->GetSourceType();
+    if (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE &&
+        pointerEvent->GetButtonId() != MMI::PointerEvent::MOUSE_BUTTON_LEFT) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "Mouse click event but not left click");
+        return false;
+    }
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "MoveDragController::EventDownInit");
+    int32_t pointerId = pointerEvent->GetPointerId();
+    MMI::PointerEvent::PointerItem pointerItem;
+    pointerEvent->GetPointerItem(pointerId, pointerItem);
+    InitMoveDragProperty();
+    hasPointDown_ = true;
+    moveDragProperty_.originalRect_ = originalRect;
+    auto display = DisplayManager::GetInstance().GetDisplayById(
+        static_cast<uint64_t>(pointerEvent->GetTargetDisplayId()));
+    if (display) {
+        vpr_ = display->GetVirtualPixelRatio();
+    } else {
+        vpr_ = 1.5f;  // 1.5f: default virtual pixel ratio
+    }
+    int outside = (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) ? HOTZONE_POINTER * vpr_ : HOTZONE_TOUCH * vpr_;
+    type_ = SessionHelper::GetAreaType(pointerItem.GetWindowX(), pointerItem.GetWindowY(), sourceType, outside, vpr_,
+        moveDragProperty_.originalRect_);
+    dragAreaType_ = SessionHelper::GetAreaTypeForScaleResize(pointerItem.GetWindowX(), pointerItem.GetWindowY(),
+        outside, moveDragProperty_.originalRect_);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "pointWinX:%{public}d, pointWinY:%{public}d, outside:%{public}d, vpr:%{public}f, "
+        "rect:%{public}s, type:%{public}d", pointerItem.GetWindowX(), pointerItem.GetWindowY(), outside, vpr_,
+        moveDragProperty_.originalRect_.ToString().c_str(), type_);
+    if (type_ == AreaType::UNDEFINED) {
+        return false;
+    }
+    InitDecorValue(property, sysConfig);
+    limits_ = property->GetWindowLimits();
+    decoration_ = decoration;
     isAdaptToDragScale_ = property->IsAdaptToDragScale();
     moveDragProperty_.pointerId_ = pointerItem.GetOriginPointerId();
     moveDragProperty_.pointerType_ = sourceType;
@@ -1162,6 +1273,7 @@ void MoveDragController::CalcFreeformTranslateLimits(AreaType type)
 
 void MoveDragController::CalcFixedAspectRatioTranslateLimits(AreaType type)
 {
+    // TODO: 这里需要修改
     int32_t minW = static_cast<int32_t>(limits_.minWidth_);
     int32_t maxW = static_cast<int32_t>(limits_.maxWidth_);
     int32_t minH = static_cast<int32_t>(limits_.minHeight_);

@@ -193,6 +193,18 @@ public:
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError SetAspectRatio(float ratio) { return WSError::WS_OK; }
+
+    /**
+     * @brief Sets the content aspect ratio of window.
+     *
+     * @param ratio Indicates the value of the aspect ratio (width divided by height).
+     * @param isPersistent Indicates whether to persist the aspect ratio across sessions.
+     * @param needUpdateRect Indicates whether to update the window rectangle after setting the aspect ratio.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError SetContentAspectRatio(
+        float ratio, bool isPersistent, bool needUpdateRect) { return WSError::WS_OK; }
+
     virtual WSError UpdateWindowAnimationFlag(bool needDefaultAnimationFlag) { return WSError::WS_OK; }
     virtual WSError UpdateWindowSceneAfterCustomAnimation(bool isAdd) { return WSError::WS_OK; }
 
@@ -358,6 +370,14 @@ public:
     virtual void NotifyKeyboardDidShowRegistered(bool registered) {};
     virtual void NotifyKeyboardDidHideRegistered(bool registered) {};
     virtual void SetCustomDecorHeight(int32_t height) {};
+
+    /**
+     * @brief Set whether the window decoration is visible.
+     *
+     * @param isVisible True means the window decoration is visible, false means the opposite.
+     */
+    virtual WSError SetDecorVisible(bool isVisible) { return WSError::WS_OK; }
+
     virtual WMError UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action) { return WMError::WM_OK; }
     virtual WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) { return WMError::WM_OK; }

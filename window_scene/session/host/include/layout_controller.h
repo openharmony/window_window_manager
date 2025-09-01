@@ -43,6 +43,7 @@ public:
     WSRect ConvertGlobalRectToRelative(const WSRect& globalRect, DisplayId targetDisplayId) const;
     int32_t GetSessionPersistentId() const;
     bool AdjustRectByAspectRatio(WSRect& rect, bool isDecorEnable);
+    bool AdjustRectByAspectRatio(WSRect& rect, const WindowDecoration& decoration);
     float GetAspectRatio() const { return aspectRatio_; }
     void SetAspectRatio(float ratio) { aspectRatio_ = ratio; }
     float GetScaleX() const { return scaleX_; }
@@ -75,6 +76,8 @@ private:
     GetSystemConfigFunc getSystemConfigFunc_;
 
     void AdjustRectByLimits(WindowLimits limits, float ratio, bool isDecor, float vpr, WSRect& rect);
+    void AdjustRectByLimits(WindowLimits limits, float ratio, const WindowDecoration& decoration, WSRect& rect);
+    WindowLimits GetWindowLimits() const;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_LAYOUT_CONTROLLER_H

@@ -2743,6 +2743,17 @@ public:
     virtual WMError ResetAspectRatio() { return WMError::WM_OK; }
 
     /**
+     * @brief Set content aspect ratio of this window
+     *
+     * @param ratio the aspect ratio of window content
+     * @param isPersistent whether to persist the aspect ratio setting
+     * @param needUpdateRect whether to update the window rect after setting aspect ratio
+     * @return WMError
+     */
+    virtual WMError SetContentAspectRatio(
+        float ratio, bool isPersistent, bool needUpdateRect) { return WMError::WM_OK; }
+
+    /**
      * @brief Get keyboard animation config
      * @return KeyboardAnimationConfig
      */

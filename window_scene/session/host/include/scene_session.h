@@ -294,6 +294,7 @@ public:
         bool needNotifyClient = true, bool isExecuteDelayRaise = false);
     WSError RequestSessionBack(bool needMoveToBackground) override;
     WSError SetAspectRatio(float ratio) override;
+    WSError SetContentAspectRatio(float ratio, bool isPersistent, bool needUpdateRect) override;
     WSError SetGlobalMaximizeMode(MaximizeMode mode) override;
     WSError GetGlobalMaximizeMode(MaximizeMode& mode) override;
     WSError UpdateWindowSceneAfterCustomAnimation(bool isAdd) override;
@@ -520,7 +521,6 @@ public:
      */
     void SetWatermarkEnabled(const std::string& watermarkName, bool isEnabled);
 
-    bool IsDecorEnable() const;
     bool IsAppSession() const;
     bool IsAppOrLowerSystemSession() const;
     bool IsSystemSessionAboveApp() const;
@@ -669,12 +669,6 @@ public:
     WMError NotifyDisableDelegatorChange() override;
     virtual void SetRecentSessionState(RecentSessionInfo& info, const SessionState& state) {}
     void RegisterGetStartWindowConfigFunc(GetStartWindowTypeFunc&& func);
-
-    /*
-     * Window Decor
-     */
-    int32_t GetCustomDecorHeight() const;
-    void SetCustomDecorHeight(int32_t height) override;
 
     WMError UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action) override;
@@ -1253,12 +1247,6 @@ private:
     virtual void RemoveSurfaceNodeFromScreen() {}
     void SetParentRect();
     WSRect GetGlobalOrWinRect();
-
-    /*
-     * Window Decor
-     */
-    mutable std::mutex customDecorHeightMutex_;
-    int32_t customDecorHeight_ = 0;
 
     ForceHideState forceHideState_ { ForceHideState::NOT_HIDDEN };
     int32_t oriPosYBeforeRaisedByKeyboard_ = 0;
