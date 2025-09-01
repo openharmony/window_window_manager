@@ -228,7 +228,12 @@ int SceneSessionManagerLiteStub::HandlePendingSessionToForeground(MessageParcel&
         WLOGFE("token is nullptr");
         return ERR_INVALID_DATA;
     }
-    WSError errCode = PendingSessionToForeground(token);
+    int32_t windowMode = 0;
+    if (!data.ReadInt32(windowMode)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "read windowMode fail");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = PendingSessionToForeground(token, windowMode);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }

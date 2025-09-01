@@ -106,10 +106,10 @@ WSError SceneSessionManagerLite::GetSessionSnapshot(const std::string& deviceId,
     return SceneSessionManager::GetInstance().GetSessionSnapshot(deviceId, persistentId, snapshot, isLowResolution);
 }
 
-WSError SceneSessionManagerLite::PendingSessionToForeground(const sptr<IRemoteObject>& token)
+WSError SceneSessionManagerLite::PendingSessionToForeground(const sptr<IRemoteObject>& token, int32_t windowMode = DEFAULT_INVALID_WINDOW_MODE)
 {
     WLOGFD("in");
-    return SceneSessionManager::GetInstance().PendingSessionToForeground(token);
+    return SceneSessionManager::GetInstance().PendingSessionToForeground(token, windowMode);
 }
 
 WSError SceneSessionManagerLite::PendingSessionToBackground(const sptr<IRemoteObject>& token,
