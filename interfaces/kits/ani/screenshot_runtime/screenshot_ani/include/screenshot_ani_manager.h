@@ -30,6 +30,7 @@ struct Option {
     int rotation = 0;
     DisplayId displayId = 0;
     bool isNeedNotify = true;
+    bool isNeedPointer = true;
     bool isCaptureFullOfScreen = true;
 };
  
@@ -48,8 +49,12 @@ class ScreenshotManagerAni {
 public:
     explicit ScreenshotManagerAni();
     static ani_object Save(ani_env* env, ani_object options);
+    static ani_object Capture(ani_env* env, ani_object options);
+    static ani_object Pick(ani_env* env);
     static void InitScreenshotManagerAni(ani_namespace nsp, ani_env* env);
-    static void GetScreenshot(ani_env *env, std::unique_ptr<Param> &param);
+    static void GetScreenshot(std::unique_ptr<Param>& param);
+    static void GetScreenshotCapture(std::unique_ptr<Param>& param);
+    static void GetScreenshotPick(std::unique_ptr<Param>& param);
 };
 }
 #endif
