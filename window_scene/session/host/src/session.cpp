@@ -353,7 +353,7 @@ void Session::SetSessionInfoWindowInputType(uint32_t windowInputType)
 void Session::SetSessionInfoWindowMode(int32_t windowMode)
 {
     sessionInfo_.windowMode = windowMode;
-} 
+}
 
 DisplayId Session::GetScreenId() const
 {
