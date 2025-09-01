@@ -38,7 +38,7 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return WSError::WS_OK;
     }
-    WSError PendingSessionToForeground(const sptr<IRemoteObject>& token) override
+    WSError PendingSessionToForeground(const sptr<IRemoteObject>& token, int32_t windowMode) override
     {
         return WSError::WS_OK;
     }
