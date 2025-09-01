@@ -521,6 +521,11 @@ ani_object AniWindow::Resize(ani_env* env, ani_double width, ani_double height)
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
 
+    if (width <= 0 || height <= 0) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "width or height should greater than 0!");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+
     const uint32_t w = static_cast<uint32_t>(width);
     const uint32_t h = static_cast<uint32_t>(height);
     const WMError ret = windowToken_->Resize(w, h);
@@ -892,6 +897,7 @@ static void WindowResize(ani_env* env, ani_object obj, ani_long nativeObj, ani_d
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (!aniWindow || !aniWindow->GetWindow()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] windowToken is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
     aniWindow->Resize(env, width, height);
@@ -904,6 +910,7 @@ static void WindowMoveWindowTo(ani_env* env, ani_object obj, ani_long nativeObj,
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (!aniWindow || !aniWindow->GetWindow()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] windowToken is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
     aniWindow->MoveWindowTo(env, x, y);
@@ -916,7 +923,7 @@ static ani_object WindowGetGlobalRect(ani_env* env, ani_object obj, ani_long nat
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (!aniWindow || !aniWindow->GetWindow()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] windowToken is nullptr");
-        return AniWindowUtils::CreateAniUndefined(env);
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     return aniWindow->GetGlobalRect(env);
 }
