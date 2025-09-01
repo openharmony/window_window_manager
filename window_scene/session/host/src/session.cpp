@@ -3725,9 +3725,18 @@ WSRect Session::GetClientRect() const
     return layoutController_->GetClientRect();
 }
 
-WSError Session::SetHidingStartingWindow(bool hidingStartWindow)
+void Session::SetHidingStartingWindow(bool hidingStartWindow)
 {
     hidingStartWindow_ = hidingStartWindow;
+}
+
+bool Session::GetHidingStartingWindow() const
+{
+    return hidingStartWindow_;
+}
+
+WSError Session::SetLeashWindowAlpha(bool hidingStartWindow)
+{
     auto leashSurfaceNode = GetLeashWinSurfaceNode();
     if (leashSurfaceNode == nullptr) {
         TLOGI(WmsLogTag::WMS_PATTERN, "no leashWindow: %{public}d", hidingStartWindow);
@@ -3737,11 +3746,6 @@ WSError Session::SetHidingStartingWindow(bool hidingStartWindow)
     hidingStartWindow ? leashSurfaceNode->SetAlpha(0) : leashSurfaceNode->SetAlpha(1);
     SetTouchable(!hidingStartWindow);
     return WSError::WS_OK;
-}
-
-bool Session::GetHidingStartingWindow() const
-{
-    return hidingStartWindow_;
 }
 
 void Session::SetEnableRemoveStartingWindow(bool enableRemoveStartingWindow)

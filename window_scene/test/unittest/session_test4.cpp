@@ -1340,15 +1340,33 @@ HWTEST_F(WindowSessionTest4, SetHidingStartingWindow, TestSize.Level1)
     ASSERT_NE(session_, nullptr);
 
     session_->SetLeashWinSurfaceNode(nullptr);
-    auto ret = session_->SetHidingStartingWindow(false);
-    EXPECT_EQ(ret, WSError::WS_ERROR_NULLPTR);
+    session_->SetHidingStartingWindow(false);
     EXPECT_TRUE(session_->GetHidingStartingWindow() == false);
 
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
     session_->SetLeashWinSurfaceNode(surfaceNode);
-    ret = session_->SetHidingStartingWindow(true);
+    session_->SetHidingStartingWindow(true);
     EXPECT_TRUE(session_->GetHidingStartingWindow());
+}
+
+/**
+ * @tc.name: SetLeashWindowAlpha
+ * @tc.desc: check func SetLeashWindowAlpha
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, SetLeashWindowAlpha, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+
+    session_->SetLeashWinSurfaceNode(nullptr);
+    auto ret = session_->SetLeashWindowAlpha(false);
+    EXPECT_EQ(ret, WSError::WS_ERROR_NULLPTR);
+
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    session_->SetLeashWinSurfaceNode(surfaceNode);
+    ret = session_->SetLeashWindowAlpha(true);
     EXPECT_EQ(ret, WSError::WS_OK);
 }
 
