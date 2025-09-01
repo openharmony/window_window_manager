@@ -16,6 +16,7 @@
 #include "ani_extension_window_listener.h"
 
 #include <hitrace_meter.h>
+
 #include "ani.h"
 #include "event_handler.h"
 #include "event_runner.h"
