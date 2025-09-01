@@ -742,23 +742,23 @@ HWTEST_F(WindowPatternSnapshotTest, GetSessionSnapshotStatus, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetWindowOrientation
- * @tc.desc: GetWindowOrientation Test
+ * @tc.name: GetWindowSnapshotOrientation
+ * @tc.desc: GetWindowSnapshotOrientation Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPatternSnapshotTest, GetWindowOrientation, TestSize.Level1)
+HWTEST_F(WindowPatternSnapshotTest, GetWindowSnapshotOrientation, TestSize.Level1)
 {
     SessionInfo info;
     info.screenId_ = 0;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    auto ret = sceneSession->GetWindowOrientation();
+    auto ret = sceneSession->GetWindowSnapshotOrientation();
     EXPECT_EQ(ret, 0);
 
     sceneSession->capacity_ = maxCapacity;
-    sceneSession->GetWindowOrientation();
+    sceneSession->GetWindowSnapshotOrientation();
 
     session_->capacity_ = maxCapacity;
-    ret = session_->GetWindowOrientation();
+    ret = session_->GetWindowSnapshotOrientation();
     EXPECT_EQ(ret, WSSnapshotHelper::GetInstance()->GetWindowRotation());
 }
 
