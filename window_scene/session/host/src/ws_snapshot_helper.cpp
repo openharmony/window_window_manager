@@ -33,6 +33,7 @@ WSSnapshotHelper* WSSnapshotHelper::GetInstance()
 
 uint32_t WSSnapshotHelper::GetScreenStatus()
 {
+    std::lock_guard lock(statusMutex_);
     return GetInstance()->windowStatus_.first;
 }
 
@@ -60,6 +61,7 @@ DisplayOrientation WSSnapshotHelper::GetDisplayOrientation(int32_t rotation)
 
 void WSSnapshotHelper::SetWindowScreenStatus(uint32_t screenStatus)
 {
+    std::lock_guard lock(statusMutex_);
     GetInstance()->windowStatus_.first = screenStatus;
 }
 
@@ -70,22 +72,28 @@ void WSSnapshotHelper::SetWindowScreenStatus(FoldStatus foldStatus)
 
 void WSSnapshotHelper::SetWindowOrientationStatus(uint32_t orientationStatus)
 {
+    std::lock_guard lock(statusMutex_);
     GetInstance()->windowStatus_.second = orientationStatus;
 }
 
 void WSSnapshotHelper::SetWindowOrientationStatus(Rotation rotation)
 {
-    GetInstance()->windowRotation_ = rotation;
+    {
+        std::lock_guard lock(rotationMutex_);
+        GetInstance()->windowRotation_ = rotation;
+    }
     SetWindowOrientationStatus(GetOrientation(rotation));
 }
 
 SnapshotStatus WSSnapshotHelper::GetWindowStatus() const
 {
+    std::lock_guard lock(statusMutex_);
     return GetInstance()->windowStatus_;
 }
 
 uint32_t WSSnapshotHelper::GetWindowRotation() const
 {
+    std::lock_guard lock(rotationMutex_);
     return static_cast<uint32_t>(GetInstance()->windowRotation_);
 }
 // LCOV_EXCL_STOP

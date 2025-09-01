@@ -45,7 +45,7 @@ constexpr SnapshotStatus maxCapacity = { SCREEN_COUNT, ORIENTATION_COUNT };
 class WSSnapshotHelper {
 public:
     static WSSnapshotHelper* GetInstance();
-    static uint32_t GetScreenStatus();
+    uint32_t GetScreenStatus();
     static uint32_t GetScreenStatus(FoldStatus foldStatus);
     static DisplayOrientation GetDisplayOrientation(int32_t rotation);
     void SetWindowScreenStatus(uint32_t screenStatus);
@@ -84,6 +84,8 @@ private:
     ~WSSnapshotHelper() = default;
     SnapshotStatus windowStatus_;
     Rotation windowRotation_;
+    mutable std::mutex statusMutex_;
+    mutable std::mutex rotationMutex_;
 };
 } // namespace OHOS::Rosen
 
