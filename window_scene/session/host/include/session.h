@@ -653,8 +653,9 @@ public:
     bool GetAppBufferReady() const;
     void SetUseStartingWindowAboveLocked(bool useStartingWindowAboveLocked);
     bool UseStartingWindowAboveLocked() const;
-    WSError SetHidingStartingWindow(bool hidingStartWindow);
+    void SetHidingStartingWindow(bool hidingStartWindow);
     bool GetHidingStartingWindow() const;
+    WSError SetLeashWindowAlpha(bool hidingStartWindow);
 
     /*
      * Window Hierarchy
