@@ -8826,7 +8826,6 @@ __attribute__((no_sanitize("cfi"))) void SceneSessionManager::OnSessionStateChan
             ClearWatermarkForSession(sceneSession);
             if (SessionHelper::IsMainWindow(sceneSession->GetWindowType())) {
                 RemoveProcessSnapshotSkip(sceneSession->GetCallingPid());
-                RemoveProcessWatermarkPid(sceneSession->GetCallingPid());
             }
             break;
         default:
@@ -16039,14 +16038,6 @@ bool SceneSessionManager::SetSessionWatermarkForAppProcess(const sptr<SceneSessi
     return false;
 }
 
-void SceneSessionManager::RemoveProcessWatermarkPid(int32_t pid)
-{
-    if (processWatermarkPidMap_.find(pid) != processWatermarkPidMap_.end()) {
-        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "process died, delete pid from watermark pid map. pid:%{public}d", pid);
-        processWatermarkPidMap_.erase(pid);
-    }
-}
-
 WMError SceneSessionManager::SetWatermarkImageForApp(const std::shared_ptr<Media::PixelMap>& pixelMap,
     std::string& watermarkName)
 {
@@ -16197,6 +16188,7 @@ void SceneSessionManager::ClearWatermarkRecordWhenAppExit(const sptr<SceneSessio
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "app exit: win=[%{public}d, %{public}s], pid=%{public}d",
         session->GetWindowId(), session->GetWindowName().c_str(), session->GetCallingPid());
     appWatermarkPidMap_.erase(session->GetCallingPid());
+    processWatermarkPidMap_.erase(session->GetCallingPid());
 }
 
 WMError SceneSessionManager::GetRootMainWindowId(int32_t persistentId, int32_t& hostWindowId)
