@@ -138,8 +138,8 @@ WSError SceneSessionManagerLiteProxy::PendingSessionToForeground(const sptr<IRem
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
-    if (!data.WriteRemoteObject(windowMode)) {
-        TLOGE("Write windowMode failed");
+    if (!data.WriteInt32(windowMode)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write windowMode failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
