@@ -1821,15 +1821,14 @@ HWTEST_F(SceneSessionManagerTest2, InitWithRenderServiceAdded, TestSize.Level1)
 HWTEST_F(SceneSessionManagerTest2, PendingSessionToForeground, TestSize.Level1)
 {
     ASSERT_NE(nullptr, ssm_);
-    int32_t windowMode = 0;
-    ssm_->PendingSessionToForeground(nullptr, windowMode);
+    ssm_->PendingSessionToForeground(nullptr);
 
     SessionInfo info;
     info.abilityName_ = "BackgroundTask02";
     info.bundleName_ = "BackgroundTask02";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ssm_->sceneSessionMap_.insert({ 100, sceneSession });
-    ssm_->PendingSessionToForeground(nullptr, windowMode);
+    ssm_->PendingSessionToForeground(nullptr);
 }
 
 /**
