@@ -1624,6 +1624,9 @@ void ScreenSessionManager::HandleScreenConnectEvent(sptr<ScreenSession> screenSe
 void ScreenSessionManager::ScreenConnectHandleFoldScreen(ScreenId screenId, const sptr<ScreenSession>& screenSession,
     bool phyMirrorEnable, ScreenEvent screenEvent)
 {
+    if (screenSession == nullptr) {
+        return;
+    }
     auto clientProxy = GetClientProxy();
     if ((screenId == 0 || (screenId == SCREEN_ID_MAIN && isCoordinationFlag_)) && clientProxy) {
         TLOGW(WmsLogTag::DMS, "event: connect %{public}" PRIu64 ", %{public}" PRIu64 ", "
