@@ -24,6 +24,7 @@
 #include "fold_screen_state_internel.h"
 #include "mock/mock_accesstoken_kit.h"
 #include "window_manager_hilog.h"
+#include "test_client.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -2078,6 +2079,49 @@ HWTEST_F(ScreenSessionManagerTest, HandleNewUserDisplayNode, TestSize.Level1) {
     EXPECT_TRUE(ssm_->userDisplayNodeMap_[newUserId].size() > 0);
 }
 
+/**
+ * @tc.name: HandleFoldDeviceScreenConnect
+ * @tc.desc: HandleFoldDeviceScreenConnect
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, HandleFoldDeviceScreenConnect, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    ScreenId screenId = 0;
+    ssm_->isCoordinationFlag_ = false;
+    ScreenEvent screenEvent = ScreenEvent::CONNECTED;
+    sptr<ScreenSession> session = nullptr;
+    ssm_->HandleFoldDeviceScreenConnect(screenId, session, false, screenEvent);
+    EXPECT_FALSE(g_errLog.find("event: connect") != std::string::npos);
+    g_errLog.clear();
+
+    session = sptr<ScreenSession>::MakeSptr();
+    ssm_->clientProxy_ = nullptr;
+    ssm_->HandleFoldDeviceScreenConnect(screenId, session, false, screenEvent);
+    EXPECT_FALSE(g_errLog.HandleFoldDeviceScreenConnect("event: connect") != std::string::npos);
+    g_errLog.clear();
+ 
+    ssm_->clientProxy_ = sptr<ScreenSessionManagerClientTest>::MakeSptr();
+    ssm_->HandleFoldDeviceScreenConnect(screenId, session, false, screenEvent);
+    EXPECT_TRUE(g_errLog.find("event: connect") != std::string::npos);
+    g_errLog.clear();
+ 
+    screenId = 1;
+    ssm_->HandleFoldDeviceScreenConnect(screenId, session, true, screenEvent);
+    EXPECT_FALSE(g_errLog.find("event: connect") != std::string::npos);
+    g_errLog.clear();
+ 
+    screenId = SCREEN_ID_MAIN;
+    ssm_->HandleFoldDeviceScreenConnect(screenId, session, true, screenEvent);
+    EXPECT_FALSE(g_errLog.find("event: connect") != std::string::npos);
+    g_errLog.clear();
+    
+    ssm_->isCoordinationFlag_ = true;
+    ssm_->HandleFoldDeviceScreenConnect(screenId, session, true, screenEvent);
+    EXPECT_TRUE(g_errLog.find("event: connect") != std::string::npos);
+    g_errLog.clear();
+}
 }
 }
 }
