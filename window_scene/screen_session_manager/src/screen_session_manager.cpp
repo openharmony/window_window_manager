@@ -445,9 +445,9 @@ void ScreenSessionManager::Init()
         screenEventTracker_.RecordEvent("Dms load motion plugin failed.");
         TLOGW(WmsLogTag::DMS, "load motion plugin failed.");
     }
-
-    if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() ||
-        FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
+    static bool isNeedLoadAodLib = FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() ||
+        FoldScreenStateInternel::IsDualDisplayFoldDevice() || FoldScreenStateInternel::IsSingleDisplayFoldDevice();
+    if (isNeedLoadAodLib) {
         if (!LoadAodLib()) {
             TLOGE(WmsLogTag::DMS, "load aod lib failed");
         }
@@ -464,7 +464,6 @@ void ScreenSessionManager::Init()
         SetSensorSubscriptionEnabled();
         screenEventTracker_.RecordEvent("Dms subscribed to sensor successfully.");
     }
-
     // publish init
     ScreenSessionPublish::GetInstance().InitPublishEvents();
     screenEventTracker_.RecordEvent("Dms init end.");
@@ -1583,11 +1582,7 @@ void ScreenSessionManager::HandleScreenConnectEvent(sptr<ScreenSession> screenSe
         SuperFoldStateManager::GetInstance().RefreshExternalRegion();
     }
     if (foldScreenController_ != nullptr) {
-        if ((screenId == 0 || (screenId == SCREEN_ID_MAIN && isCoordinationFlag_ == true)) && clientProxy) {
-            TLOGW(WmsLogTag::DMS, "event: connect %{public}" PRIu64 ", %{public}" PRIu64 ", "
-                "name=%{public}s", screenId, screenSession->GetRSScreenId(), screenSession->GetName().c_str());
-            clientProxy->OnScreenConnectionChanged(GetSessionOption(screenSession, screenId), screenEvent);
-        }
+        HandleFoldDeviceScreenConnect(screenId, screenSession, phyMirrorEnable, screenEvent);
         return;
     }
 #endif
@@ -1623,6 +1618,24 @@ void ScreenSessionManager::HandleScreenConnectEvent(sptr<ScreenSession> screenSe
         NotifyDisplayCreate(screenSession->ConvertToDisplayInfo());
     }
     TLOGW(WmsLogTag::DMS, "connect end. ScreenId: %{public}" PRIu64, screenId);
+}
+
+void ScreenSessionManager::HandleFoldDeviceScreenConnect(ScreenId screenId, const sptr<ScreenSession>& screenSession,
+    bool phyMirrorEnable, ScreenEvent screenEvent)
+{
+    if (screenSession == nullptr) {
+        return;
+    }
+    auto clientProxy = GetClientProxy();
+    if ((screenId == 0 || (screenId == SCREEN_ID_MAIN && isCoordinationFlag_)) && clientProxy) {
+        TLOGW(WmsLogTag::DMS, "event: connect %{public}" PRIu64 ", %{public}" PRIu64 ", "
+            "name=%{public}s", screenId, screenSession->GetRSScreenId(), screenSession->GetName().c_str());
+        clientProxy->OnScreenConnectionChanged(GetSessionOption(screenSession, screenId), screenEvent);
+    }
+    if (phyMirrorEnable) {
+        NotifyScreenConnected(screenSession->ConvertToScreenInfo());
+        NotifyDisplayCreate(screenSession->ConvertToDisplayInfo());
+    }
 }
 
 void ScreenSessionManager::WaitUpdateAvailableAreaForPc()
@@ -4100,9 +4113,9 @@ void ScreenSessionManager::SetScreenPowerForFold(ScreenId screenId, ScreenPowerS
         return;
     }
     static bool isNeedScreenOffDevice =
-        (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() ||
+        FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() ||
         FoldScreenStateInternel::IsDualDisplayFoldDevice() ||
-        FoldScreenStateInternel::IsSingleDisplayFoldDevice());
+        FoldScreenStateInternel::IsSingleDisplayFoldDevice();
     if (lastPowerForAllStatus_.load() == ScreenPowerStatus::POWER_STATUS_ON_ADVANCED &&
         screenId == lastScreenId_.load() && FoldScreenStateInternel::IsSingleDisplayFoldDevice()) {
         // 预下电
