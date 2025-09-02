@@ -445,11 +445,8 @@ void ScreenSessionManager::Init()
         screenEventTracker_.RecordEvent("Dms load motion plugin failed.");
         TLOGW(WmsLogTag::DMS, "load motion plugin failed.");
     }
-
-    static bool isNeedLoadAodLib =
-        FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() ||
-        FoldScreenStateInternel::IsDualDisplayFoldDevice() ||
-        FoldScreenStateInternel::IsSingleDisplayFoldDevice();
+    static bool isNeedLoadAodLib = FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() ||
+        FoldScreenStateInternel::IsDualDisplayFoldDevice() || FoldScreenStateInternel::IsSingleDisplayFoldDevice();
     if (isNeedLoadAodLib) {
         if (!LoadAodLib()) {
             TLOGE(WmsLogTag::DMS, "load aod lib failed");
@@ -467,7 +464,6 @@ void ScreenSessionManager::Init()
         SetSensorSubscriptionEnabled();
         screenEventTracker_.RecordEvent("Dms subscribed to sensor successfully.");
     }
-
     // publish init
     ScreenSessionPublish::GetInstance().InitPublishEvents();
     screenEventTracker_.RecordEvent("Dms init end.");
