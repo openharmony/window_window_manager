@@ -893,7 +893,7 @@ private:
     void SwapScreenWeightAndHeight(sptr<ScreenSession>& screenSession);
     Rotation GetOldDisplayModeRotation(FoldDisplayMode oldDisplayMode, Rotation rotation);
     void HandleScreenRotationAndBoundsWhenSetClient(sptr<ScreenSession>& screenSession);
-    void ScreenConnectHandleFoldScreen(ScreenId screenId, const sptr<ScreenSession>& screenSession,
+    void HandleFoldDeviceScreenConnect(ScreenId screenId, const sptr<ScreenSession>& screenSession,
         bool phyMirrorEnable, ScreenEvent screenEvent);
 
     LowTempMode lowTemp_ {LowTempMode::UNKNOWN};
