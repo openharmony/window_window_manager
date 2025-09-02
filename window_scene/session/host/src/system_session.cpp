@@ -285,7 +285,7 @@ bool SystemSession::CheckKeyEventDispatch(const std::shared_ptr<MMI::KeyEvent>& 
         (state_ != SessionState::STATE_FOREGROUND &&
         state_ != SessionState::STATE_ACTIVE)) {
         TLOGE(WmsLogTag::WMS_DIALOG, "Dialog's parent info : [persistentId: %{publicd}d, state:%{public}d];"
-            "Dialog info:[persistentId: %{publicd}d, state:%{public}d]",
+            "Dialog info:[persistentId: %{public}d, state:%{public}d]",
             parentSession->GetPersistentId(), parentSessionState, GetPersistentId(), GetSessionState());
         return false;
     }
