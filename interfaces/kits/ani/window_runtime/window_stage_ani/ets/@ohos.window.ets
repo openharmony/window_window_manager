@@ -1866,6 +1866,7 @@ export class WindowStageInternal implements WindowStage {
     public native loadContentSync(nativeObj: long, path: string, storage?: LocalStorage): void;
     public native disableWindowDecorSync(nativeObj:long): void;
     public native setShowOnLockScreenSync(nativeObj:long, showOnLockScreen: boolean): void;
+    public native setWindowModal(nativeObj:long,isModal: boolean): Promise<void>;
     public native getMainWindowSync(nativeObj: long): Window;
     public native createSubWindowSync(nativeObj: long, name: String): Window;
     native onSync(nativeObj: long, eventType: 'windowStageEvent', callback: Object): void;
@@ -1971,6 +1972,10 @@ export class WindowStageInternal implements WindowStage {
         this.disableWindowDecorSync(this.nativeObj);
     }
 
+    public setWindowModal(isModal: boolean): Promise<void> {
+        this.setWindowModal(this.nativeObj, isModal);
+    }
+
     public setShowOnLockScreen(showOnLockScreen: boolean): void {
         this.setShowOnLockScreenSync(this.nativeObj, showOnLockScreen);
     }
@@ -2050,6 +2055,7 @@ export interface WindowStage {
     createSubWindow(name: string, callback: AsyncCallback<Window>): void;
     disableWindowDecor(): void;
     setShowOnLockScreen(showOnLockScreen: boolean): void;
+    setWindowModal(isModal: boolean): Promise<void>;
     on(eventType: 'windowStageEvent', callback: Callback<WindowStageEventType>): void;
     off(eventType: 'windowStageEvent', callback?: Callback<WindowStageEventType>): void;
 }
@@ -2142,9 +2148,12 @@ export class WindowInternal implements Window {
     private native raiseAboveTargetSync(nativeObj: long, windowId: int): void;
     private native raiseToAppTopSync(nativeObj: long): void;
     private native setTopmostSync(nativeObj: long,isTopmost: boolean): void;
+    private native setWindowTopmost(nativeObj: long, isWindowTopmost: boolean): void;
     private native requestFocusSync(nativeObj: long,isFocused: boolean): void;
     private native isFocusedSync(nativeObj: long): boolean;
     private native setSubWindowZLevelSync(nativeObj: long, zLevel: int): void;
+    private native setSubWindowModal(nativeObj: long, isModal: boolean): void;
+    private native setSubWindowModalType(nativeObj: long, isModal: boolean, modalityType: int): void;
     private native setWindowTouchableSync(nativeObj: long, isTouchable: boolean): void;
     private native onNoInteractionDetected(nativeObj: long, type: string, timeout: long, callback: Object): void;
     private native keepKeyboardOnFocusSync(nativeObj: long, enable: boolean): void;
@@ -2967,7 +2976,7 @@ export class WindowInternal implements Window {
     public setTopmost(isTopmost: boolean): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
         taskpool.execute((): void => {
-          this.setTopmostSync(this.nativeObj,isTopmost: boolean);
+          this.setTopmostSync(this.nativeObj,isTopmost);
         }).then((ret: NullishType): void => {
           resolve(undefined);
         }).catch((err: NullishType): void => {
@@ -2979,7 +2988,7 @@ export class WindowInternal implements Window {
     public requestFocus(isFocused: boolean): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
         taskpool.execute((): void => {
-          this.requestFocusSync(this.nativeObj,isFocused: boolean);
+          this.requestFocusSync(this.nativeObj,isFocused);
         }).then((ret: NullishType): void => {
           resolve(undefined);
         }).catch((err: NullishType): void => {
@@ -2988,6 +2997,29 @@ export class WindowInternal implements Window {
       });
     }
 
+    public setSubWindowModal(isModal: boolean): Promise<void> {
+        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) :void => {
+            taskpool.execute((): void => {
+                this.setSubWindowModal(this.nativeObj, isModal);
+            }).then((ret: NullishType) :void => {
+                resolve(undefined);
+            }).catch((err: NullishType) :void => {
+                reject(err as BusinessError);
+            });
+        });
+    }
+
+    public setSubWindowModal(isModal: boolean, modalityType: ModalityType): Promise<void> {
+        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) :void => {
+            taskpool.execute((): void => {
+                this.setSubWindowModalType(this.nativeObj, isModal, modalityType);
+            }).then((ret: NullishType) :void => {
+                resolve(undefined);
+            }).catch((err: NullishType) :void => {
+                reject(err as BusinessError);
+            });
+        });
+    }
 
     public keepKeyboardOnFocus(keepKeyboardFlag: boolean): void {
       this.keepKeyboardOnFocusSync(this.nativeObj, keepKeyboardFlag);
@@ -3240,6 +3272,8 @@ export interface Window {
     raiseToAppTop(): Promise<void>;
     setTopmost(isTopmost: boolean): Promise<void>;
     requestFocus(isFocused: boolean): Promise<void>;
+    setSubWindowModal(isModal: boolean): Promise<void>;
+    setSubWindowModal(isModal: boolean, modalityType: ModalityType): Promise<void>;
     keepKeyboardOnFocus(enable: boolean): void;
     setWindowTouchable(isTouchable: boolean): Promise<void>
     setWindowTouchable(isTouchable: boolean, callback: AsyncCallback<void>): void

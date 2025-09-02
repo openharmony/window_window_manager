@@ -865,9 +865,7 @@ void AniWindow::OnRaiseAboveTarget(ani_env* env, ani_int windowId)
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
-    int32_t subWindowId = -1;
-    //GetSubWindowId(env, argv[0], errCode, subWindowId);
-    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RaiseAboveTarget(subWindowId));
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RaiseAboveTarget(windowId));
     if (ret != WmErrorCode::WM_OK) {
         AniWindowUtils::AniThrowError(env, ret, "RaiseAboveTarget failed.");
     }
@@ -964,6 +962,53 @@ void AniWindow::OnRequestFocus(ani_env* env,ani_boolean isFocused)
     if (ret != WmErrorCode::WM_OK) {
         AniWindowUtils::AniThrowError(env, ret, "RequestFocus failed.");
     }
+}
+
+void AniWindow::SetSubWindowModal(ani_env* env, ani_object obj, ani_long nativeObj,ani_boolean isModal)
+{
+    TLOGI(WmsLogTag::WMS_HIERARCHY, "[ANI]");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (aniWindow != nullptr) {
+        aniWindow->OnSetSubWindowModal(env, isModal);
+    } else {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "[ANI] aniWindow is nullptr");
+    }
+}
+
+void AniWindow::OnSetSubWindowModal(ani_env* env,ani_boolean isModal)
+{
+    TLOGI(WmsLogTag::WMS_HIERARCHY, "[ANI]");
+    auto window = GetWindow();
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "[ANI] window is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "[ANI] windowToken_ is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RequestFocusByClient(isFocused));
+    if (ret != WmErrorCode::WM_OK) {
+        AniWindowUtils::AniThrowError(env, ret, "RequestFocus failed.");
+    }
+}
+
+void AniWindow::SetSubWindowModal(ani_env* env, ani_object obj, ani_long nativeObj,ani_boolean isModal,ani_int modalityType)
+{
+    TLOGI(WmsLogTag::WMS_HIERARCHY, "[ANI]");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (aniWindow != nullptr) {
+        aniWindow->OnSetSubWindowModal(env, isModal, modalityType);
+    } else {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "[ANI] aniWindow is nullptr");
+    }
+}
+
+void AniWindow::OnSetSubWindowModal(ani_env* env,ani_boolean isModal,ani_int modalityType)
+{
+    
 }
 
 void AniWindow::SetWindowTouchable(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isTouchable)
@@ -3159,6 +3204,10 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindow::SetTopmost)},
         ani_native_function {"requestFocusSync", "lz:",
             reinterpret_cast<void *>(AniWindow::RequestFocus)},
+        ani_native_function {"setSubWindowModal", "lz:",
+            reinterpret_cast<void *>(AniWindow::SetSubWindowModal)},
+        ani_native_function {"setSubWindowModalType", "lzi:",
+            reinterpret_cast<void *>(AniWindow::SetSubWindowModalType)},
         ani_native_function {"keepKeyboardOnFocusSync", "lz:",
             reinterpret_cast<void *>(AniWindow::KeepKeyboardOnFocus)},
         ani_native_function {"setWindowTouchableSync", "lz:",
