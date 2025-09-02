@@ -989,26 +989,46 @@ void AniWindow::OnSetSubWindowModal(ani_env* env,ani_boolean isModal)
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
-    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RequestFocusByClient(isFocused));
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetSubWindowModal(isModal));
     if (ret != WmErrorCode::WM_OK) {
-        AniWindowUtils::AniThrowError(env, ret, "RequestFocus failed.");
+        AniWindowUtils::AniThrowError(env, ret, "SetSubWindowModal failed.");
     }
 }
 
-void AniWindow::SetSubWindowModal(ani_env* env, ani_object obj, ani_long nativeObj,ani_boolean isModal,ani_int modalityType)
+void AniWindow::SetSubWindowModalType(ani_env* env, ani_object obj, ani_long nativeObj,ani_boolean isModal,ani_int modalityType)
 {
     TLOGI(WmsLogTag::WMS_HIERARCHY, "[ANI]");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow != nullptr) {
-        aniWindow->OnSetSubWindowModal(env, isModal, modalityType);
+        aniWindow->OnSetSubWindowModalType(env, isModal, modalityType);
     } else {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "[ANI] aniWindow is nullptr");
     }
 }
 
-void AniWindow::OnSetSubWindowModal(ani_env* env,ani_boolean isModal,ani_int modalityType)
+void AniWindow::OnSetSubWindowModalType(ani_env* env,ani_boolean isModal,ani_int modalityType)
 {
-    
+    TLOGI(WmsLogTag::WMS_HIERARCHY, "[ANI]");
+    auto window = GetWindow();
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "[ANI] window is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "[ANI] windowToken_ is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    if (!isModal) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "Normal subwindow not support modalityType");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return;
+    }
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetSubWindowModal(isModal, modalityType));
+    if (ret != WmErrorCode::WM_OK) {
+        AniWindowUtils::AniThrowError(env, ret, "SetSubWindowModal failed.");
+    }
 }
 
 void AniWindow::SetWindowTouchable(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isTouchable)
