@@ -1183,6 +1183,13 @@ HWTEST_F(SceneSessionTest6, SetWindowTransitionAnimation, Function | SmallTest |
     auto ret = session->SetWindowTransitionAnimation(transitionType, animation);
     ASSERT_EQ(ret, WSError::WS_ERROR_DEVICE_NOT_SUPPORT);
 
+    session->GetSessionProperty()->SetIsPcAppInPad(true);
+    ret = session->SetWindowTransitionAnimation(transitionType, animation);
+    ASSERT_EQ(ret, WSError::WS_OK);
+    session->GetSessionProperty()->SetIsPcAppInPad(false);
+    ret = session->SetWindowTransitionAnimation(transitionType, animation);
+    ASSERT_EQ(ret, WSError::WS_ERROR_DEVICE_NOT_SUPPORT);
+
     session->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     ret = session->SetWindowTransitionAnimation(transitionType, animation);
     ASSERT_EQ(ret, WSError::WS_OK);
