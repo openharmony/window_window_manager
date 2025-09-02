@@ -6669,25 +6669,35 @@ WMError WindowSceneSessionImpl::SetFollowParentWindowLayoutEnabled(bool isFollow
     return ret != WSError::WS_OK ? WMError::WM_ERROR_SYSTEM_ABNORMALLY : WMError::WM_OK;
 }
 
-WMError WindowSceneSessionImpl::SetWindowTransitionAnimation(WindowTransitionType transitionType,
-    const TransitionAnimation& animation)
+WMError WindowSceneSessionImpl::IsTransitionAnimationSupported() const
 {
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (!IsPcOrPadFreeMultiWindowMode()) {
+    if (!(IsPcOrPadFreeMultiWindowMode() || property_->GetIsPcAppInPad())) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Device is invalid");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     if (!WindowHelper::IsMainWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Window type is invalid");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
-    WSError ret = WSError::WS_DO_NOTHING;
+    return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::SetWindowTransitionAnimation(WindowTransitionType transitionType,
+    const TransitionAnimation& animation)
+{
+    WMError errorCode = IsTransitionAnimationSupported();
+    if (errorCode != WMError::WM_OK) {
+        return errorCode;
+    }
     auto hostSession = GetHostSession();
     if (!hostSession) {
         TLOGI(WmsLogTag::WMS_ANIMATION, "session is nullptr");
         return WMError::WM_ERROR_INVALID_SESSION;
     }
-    ret = hostSession->SetWindowTransitionAnimation(transitionType, animation);
+    WSError ret = hostSession->SetWindowTransitionAnimation(transitionType, animation);
     if (ret == WSError::WS_OK) {
         std::lock_guard<std::mutex> lockListener(transitionAnimationConfigMutex_);
         property_->SetTransitionAnimationConfig(transitionType, animation);
@@ -6698,13 +6708,7 @@ WMError WindowSceneSessionImpl::SetWindowTransitionAnimation(WindowTransitionTyp
 std::shared_ptr<TransitionAnimation> WindowSceneSessionImpl::GetWindowTransitionAnimation(WindowTransitionType
     transitionType)
 {
-    if (IsWindowSessionInvalid()) {
-        return nullptr;
-    }
-    if (!IsPcOrPadFreeMultiWindowMode()) {
-        return nullptr;
-    }
-    if (!WindowHelper::IsMainWindow(GetType())) {
+    if (IsTransitionAnimationSupported() != WMError::WM_OK) {
         return nullptr;
     }
     std::lock_guard<std::mutex> lockListener(transitionAnimationConfigMutex_);
