@@ -761,6 +761,48 @@ HWTEST_F(WindowSessionTest2, GetLeashWinSurfaceNode, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetAndGetShadowSurfaceNode
+ * @tc.desc: SetAndGetShadowSurfaceNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest2, SetAndGetShadowSurfaceNode, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->SetSurfaceNode(nullptr);
+    EXPECT_EQ(session_->GetSurfaceNode(), nullptr);
+    EXPECT_EQ(session_->GetShadowSurfaceNode(), nullptr);
+    EXPECT_EQ(session_->GetRSShadowContext(), nullptr);
+
+    std::shared_ptr<RSSurfaceNode> surfaceNode = WindowSessionTest2::CreateRSSurfaceNode();
+    EXPECT_NE(nullptr, surfaceNode);
+    session_->SetSurfaceNode(surfaceNode);
+    EXPECT_NE(session_->GetSurfaceNode(), nullptr);
+    EXPECT_NE(session_->GetShadowSurfaceNode(), nullptr);
+    EXPECT_NE(session_->GetRSShadowContext(), nullptr);
+}
+
+/**
+ * @tc.name: SetAndGetLeashWinShadowSurfaceNode
+ * @tc.desc: SetAndGetLeashWinShadowSurfaceNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest2, SetAndGetLeashWinShadowSurfaceNode, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->SetLeashWinSurfaceNode(nullptr);
+    EXPECT_EQ(session_->GetLeashWinSurfaceNode(), nullptr);
+    EXPECT_EQ(session_->GetLeashWinShadowSurfaceNode(), nullptr);
+    EXPECT_EQ(session_->GetRSLeashWinShadowContext(), nullptr);
+
+    std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode = WindowSessionTest2::CreateRSSurfaceNode();
+    EXPECT_NE(nullptr, leashWinSurfaceNode);
+    session_->SetLeashWinSurfaceNode(leashWinSurfaceNode);
+    EXPECT_NE(session_->GetLeashWinSurfaceNode(), nullptr);
+    EXPECT_NE(session_->GetLeashWinShadowSurfaceNode(), nullptr);
+    EXPECT_NE(session_->GetRSLeashWinShadowContext(), nullptr);
+}
+
+/**
  * @tc.name: SetSessionInfoAncoSceneState
  * @tc.desc: SetSessionInfoAncoSceneState Test
  * @tc.type: FUNC

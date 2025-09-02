@@ -124,7 +124,9 @@ Session::~Session()
     DeletePersistentImageFit();
     DeleteHasSnapshot();
     if (mainHandler_) {
-        mainHandler_->PostTask([surfaceNode = std::move(surfaceNode_)]() {
+        mainHandler_->PostTask([surfaceNode = std::move(surfaceNode_),
+                                shadowSurfaceNode = std::move(shadowSurfaceNode_),
+                                leashWinShadowSurfaceNode = std::move(leashWinShadowSurfaceNode_)]() {
             // do nothing
         });
     }
@@ -179,12 +181,19 @@ void Session::SetSurfaceNode(const std::shared_ptr<RSSurfaceNode>& surfaceNode)
     RSAdapterUtil::SetRSUIContext(surfaceNode, GetRSUIContext(), true);
     std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
     surfaceNode_ = surfaceNode;
+    shadowSurfaceNode_ = surfaceNode_ ? surfaceNode_->CreateShadowSurfaceNode() : nullptr;
 }
 
 std::shared_ptr<RSSurfaceNode> Session::GetSurfaceNode() const
 {
     std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
     return surfaceNode_;
+}
+
+std::shared_ptr<RSSurfaceNode> Session::GetShadowSurfaceNode() const
+{
+    std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
+    return shadowSurfaceNode_;
 }
 
 std::optional<NodeId> Session::GetSurfaceNodeId() const
@@ -208,6 +217,7 @@ void Session::SetLeashWinSurfaceNode(std::shared_ptr<RSSurfaceNode> leashWinSurf
     }
     std::lock_guard<std::mutex> lock(leashWinSurfaceNodeMutex_);
     leashWinSurfaceNode_ = leashWinSurfaceNode;
+    leashWinShadowSurfaceNode_ = leashWinSurfaceNode_ ? leashWinSurfaceNode_->CreateShadowSurfaceNode() : nullptr;
 }
 
 void Session::SetFrameLayoutFinishListener(const NotifyFrameLayoutFinishFunc& func)
@@ -219,6 +229,12 @@ std::shared_ptr<RSSurfaceNode> Session::GetLeashWinSurfaceNode() const
 {
     std::lock_guard<std::mutex> lock(leashWinSurfaceNodeMutex_);
     return leashWinSurfaceNode_;
+}
+
+std::shared_ptr<RSSurfaceNode> Session::GetLeashWinShadowSurfaceNode() const
+{
+    std::lock_guard<std::mutex> lock(leashWinSurfaceNodeMutex_);
+    return leashWinShadowSurfaceNode_;
 }
 
 std::shared_ptr<RSSurfaceNode> Session::GetSurfaceNodeForMoveDrag() const
@@ -1550,12 +1566,20 @@ WSError Session::Disconnect(bool isFromClient, const std::string& identityToken)
     isNeedSyncSessionRect_ = true;
     if (mainHandler_) {
         std::shared_ptr<RSSurfaceNode> surfaceNode;
+        std::shared_ptr<RSSurfaceNode> shadowSurfaceNode;
+        std::shared_ptr<RSSurfaceNode> leashWinShadowSurfaceNode;
         {
             std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
             surfaceNode_.swap(surfaceNode);
+            shadowSurfaceNode.swap(shadowSurfaceNode_);
+            leashWinShadowSurfaceNode.swap(leashWinShadowSurfaceNode_);
         }
-        mainHandler_->PostTask([surfaceNode = std::move(surfaceNode)]() mutable {
+        mainHandler_->PostTask([surfaceNode = std::move(surfaceNode),
+                                shadowSurfaceNode = std::move(shadowSurfaceNode),
+                                leashWinShadowSurfaceNode = std::move(leashWinShadowSurfaceNode)]() mutable {
             surfaceNode.reset();
+            shadowSurfaceNode.reset();
+            leashWinShadowSurfaceNode.reset();
         });
     }
     UpdateSessionState(SessionState::STATE_BACKGROUND);
@@ -4877,6 +4901,26 @@ std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller)
     TLOGD(WmsLogTag::WMS_SCB, "%{public}s: %{public}s, sessionId: %{public}d, screenId:%{public}" PRIu64,
           caller, RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId(), screenId);
     return rsUIContext_;
+}
+
+std::shared_ptr<RSUIContext> Session::GetRSShadowContext() const
+{
+    std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
+    if (!shadowSurfaceNode_) {
+        TLOGE(WmsLogTag::WMS_SCB, "Shadow surface node is nullptr, id: %{public}d.", GetPersistentId());
+        return nullptr;
+    }
+    return shadowSurfaceNode_->GetRSUIContext();
+}
+
+std::shared_ptr<RSUIContext> Session::GetRSLeashWinShadowContext() const
+{
+    std::lock_guard<std::mutex> lock(leashWinSurfaceNodeMutex_);
+    if (!leashWinShadowSurfaceNode_) {
+        TLOGE(WmsLogTag::WMS_SCB, "Leash win shadow surface node is nullptr, id: %{public}d.", GetPersistentId());
+        return nullptr;
+    }
+    return leashWinShadowSurfaceNode_->GetRSUIContext();
 }
 
 WSError Session::SetIsShowDecorInFreeMultiWindow(bool isShow)
