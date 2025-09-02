@@ -2148,7 +2148,6 @@ export class WindowInternal implements Window {
     private native raiseAboveTargetSync(nativeObj: long, windowId: int): void;
     private native raiseToAppTopSync(nativeObj: long): void;
     private native setTopmostSync(nativeObj: long,isTopmost: boolean): void;
-    private native setWindowTopmost(nativeObj: long, isWindowTopmost: boolean): void;
     private native requestFocusSync(nativeObj: long,isFocused: boolean): void;
     private native setSubWindowModal(nativeObj: long, isModal: boolean): void;
     private native setSubWindowModalType(nativeObj: long, isModal: boolean, modalityType: int): void;
