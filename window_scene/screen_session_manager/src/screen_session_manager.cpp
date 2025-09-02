@@ -1586,7 +1586,7 @@ void ScreenSessionManager::HandleScreenConnectEvent(sptr<ScreenSession> screenSe
         SuperFoldStateManager::GetInstance().RefreshExternalRegion();
     }
     if (foldScreenController_ != nullptr) {
-        ScreenConnectHandleFoldScreen(screenId, screenSession, phyMirrorEnable, screenEvent);
+        HandleFoldDeviceScreenConnect(screenId, screenSession, phyMirrorEnable, screenEvent);
         return;
     }
 #endif
@@ -1624,7 +1624,7 @@ void ScreenSessionManager::HandleScreenConnectEvent(sptr<ScreenSession> screenSe
     TLOGW(WmsLogTag::DMS, "connect end. ScreenId: %{public}" PRIu64, screenId);
 }
 
-void ScreenSessionManager::ScreenConnectHandleFoldScreen(ScreenId screenId, const sptr<ScreenSession>& screenSession,
+void ScreenSessionManager::HandleFoldDeviceScreenConnect(ScreenId screenId, const sptr<ScreenSession>& screenSession,
     bool phyMirrorEnable, ScreenEvent screenEvent)
 {
     if (screenSession == nullptr) {
