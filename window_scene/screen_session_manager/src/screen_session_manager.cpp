@@ -259,6 +259,7 @@ ScreenSessionManager::ScreenSessionManager()
     if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
         InitSecondaryDisplayPhysicalParams();
     }
+    firstSCBConnect_ = true;
     WatchParameter(BOOTEVENT_BOOT_COMPLETED.c_str(), BootFinishedCallback, this);
 }
 
@@ -9097,12 +9098,17 @@ void ScreenSessionManager::SetClientInner(int32_t newUserId, const sptr<IScreenS
         TLOGE(WmsLogTag::DMS, "clientProxy is null");
         return;
     }
+    SwitchUserDealUserDisplayNode(newUserId);
     std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     DisplayId targetDisplay = GetUserDisplayId(newUserId);
+    bool isSuperFoldDeviceBootUp = FoldScreenStateInternel::IsSuperFoldDisplayDevice() && firstSCBConnect_;
     for (auto iter : screenSessionMap_) {
         if (!iter.second) {
             TLOGI(WmsLogTag::DMS, "not notify screen: %{public}" PRIu64 " to user: %{public}d", iter.first, newUserId);
             continue;
+        }
+        if (isSuperFoldDeviceBootUp && iter.second->isInternal_) {
+            iter.second->SetHorizontalRotation();
         }
         if (IsConcurrentUser()) {
             if (targetDisplay != DISPLAY_ID_INVALID && targetDisplay != iter.first) {
@@ -9161,6 +9167,7 @@ void ScreenSessionManager::HandleScreenRotationAndBoundsWhenSetClient(sptr<Scree
             screenSession->SetDisplayBoundary(RectF(0, boundaryOffset, phyWidth, phyHeight), 0);
         }
     }
+    firstSCBConnect_ = false;
 }
 
 void ScreenSessionManager::SetPhysicalRotationClientInner(ScreenId screenId, int rotation)

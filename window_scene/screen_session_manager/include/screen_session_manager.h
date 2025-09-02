@@ -902,6 +902,7 @@ private:
     std::atomic<DisplayGroupId> displayGroupNum_ { 1 };
     std::unordered_map<FoldDisplayMode, int32_t> rotationCorrectionMap_;
     std::shared_mutex rotationCorrectionMutex_;
+    std::atomic<bool> firstSCBConnect_ = false;
 
     // Fold Screen duringcall
     bool duringCallState_ = false;
