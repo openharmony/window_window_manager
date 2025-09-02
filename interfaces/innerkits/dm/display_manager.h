@@ -180,7 +180,7 @@ public:
          * @param DMRect area.
          * @param DisplayId displayId.
          */
-        virtual void OnAvailableAreaChanged(DMRect area, DisplayId displayId) {}
+        virtual void OnAvailableAreaChangedByDisplayId(DMRect area, DisplayId displayId) {}
     };
 
     /**
