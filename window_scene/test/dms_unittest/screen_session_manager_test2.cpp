@@ -2091,27 +2091,35 @@ HWTEST_F(ScreenSessionManagerTest, ScreenConnectHandleFoldScreen, TestSize.Level
     ScreenId screenId = 0;
     ssm_->isCoordinationFlag_ = false;
     ScreenEvent screenEvent = ScreenEvent::CONNECTED;
-    auto session = sptr<ScreenSession>::MakeSptr();
+    ScreenSession session = nullptr;
+    ssm_->ScreenConnectHandleFoldScreen(screenId, session, false, screenEvent);
+    EXPECT_FALSE(g_errLog.find("event: connect") != std::string::npos);
+    g_errLog.clear();
+
+    session = sptr<ScreenSession>::MakeSptr();
     ssm_->clientProxy_ = nullptr;
     ssm_->ScreenConnectHandleFoldScreen(screenId, session, false, screenEvent);
     EXPECT_FALSE(g_errLog.find("event: connect") != std::string::npos);
+    g_errLog.clear();
  
     ssm_->clientProxy_ = sptr<ScreenSessionManagerClientTest>::MakeSptr();
     ssm_->ScreenConnectHandleFoldScreen(screenId, session, false, screenEvent);
     EXPECT_TRUE(g_errLog.find("event: connect") != std::string::npos);
+    g_errLog.clear();
  
     screenId = 1;
     ssm_->ScreenConnectHandleFoldScreen(screenId, session, true, screenEvent);
     EXPECT_FALSE(g_errLog.find("event: connect") != std::string::npos);
+    g_errLog.clear();
  
     screenId = SCREEN_ID_MAIN;
     ssm_->ScreenConnectHandleFoldScreen(screenId, session, true, screenEvent);
     EXPECT_FALSE(g_errLog.find("event: connect") != std::string::npos);
+    g_errLog.clear();
     
     ssm_->isCoordinationFlag_ = true;
     ssm_->ScreenConnectHandleFoldScreen(screenId, session, true, screenEvent);
     EXPECT_TRUE(g_errLog.find("event: connect") != std::string::npos);
- 
     g_errLog.clear();
 }
 }
