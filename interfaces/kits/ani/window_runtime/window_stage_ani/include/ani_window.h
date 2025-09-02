@@ -145,7 +145,7 @@ private:
     void OnSetWindowKeepScreenOn(ani_env* env, ani_boolean isKeepScreenOn);
     void OnSetWaterMarkFlag(ani_env* env, ani_boolean enable);
     void OnSetWindowFocusable(ani_env* env, ani_boolean isFocusable);
-    void OnGetSubWindowZLevel(ani_env* env);
+    ani_int OnGetSubWindowZLevel(ani_env* env);
     ani_boolean OnIsFocused(ani_env* env);
     void OnSetSubWindowZLevel(ani_env* env, ani_int zLevel);
     void OnRaiseAboveTarget(ani_env* env, ani_int windowId);

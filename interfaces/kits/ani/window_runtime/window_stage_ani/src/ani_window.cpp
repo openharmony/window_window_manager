@@ -774,7 +774,7 @@ ani_int AniWindow::OnGetSubWindowZLevel(ani_env* env)
         AniWindowUtils::AniThrowError(env, ret, "GetSubWindowZLevel failed.");
         return ANI_ERROR;
     }
-    return static_cast<ani_double>(zLevel);
+    return static_cast<ani_int>(zLevel);
 }
 
 ani_boolean AniWindow::IsFocused(ani_env* env, ani_object obj, ani_long nativeObj)
@@ -785,7 +785,7 @@ ani_boolean AniWindow::IsFocused(ani_env* env, ani_object obj, ani_long nativeOb
     if (aniWindow == nullptr || aniWindow->GetWindow() == nullptr) {
         TLOGD(WmsLogTag::WMS_HIERARCHY, "[ANI] windowToken_ is nullptr");
         return ANI_ERROR;
-
+    }
     return aniWindow->OnIsFocused(env);
 }
 
@@ -800,7 +800,6 @@ ani_boolean AniWindow::OnIsFocused(ani_env* env)
     }
     bool isFocused = window->IsFocused();
     TLOGI(WmsLogTag::WMS_FOCUS, "[ANI] window isFocused=%{public}u", isFocused);
-    }
     return static_cast<ani_boolean>(isFocused);
 }
 
@@ -809,7 +808,7 @@ void AniWindow::SetSubWindowZLevel(ani_env* env, ani_object obj, ani_long native
     TLOGI(WmsLogTag::WMS_HIERARCHY, "[ANI]");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow != nullptr) {
-        aniWindow->OnSetSubWindowZLevel(env, isFocusable);
+        aniWindow->OnSetSubWindowZLevel(env, zLevel);
     } else {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "[ANI] aniWindow is nullptr");
     }
@@ -876,7 +875,7 @@ void AniWindow::RaiseToAppTop(ani_env* env, ani_object obj, ani_long nativeObj)
     TLOGI(WmsLogTag::WMS_HIERARCHY, "[ANI]");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow != nullptr) {
-        aniWindow->OnRaiseToAppTop(env, windowId);
+        aniWindow->OnRaiseToAppTop(env);
     } else {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "[ANI] aniWindow is nullptr");
     }
@@ -902,18 +901,18 @@ void AniWindow::OnRaiseToAppTop(ani_env* env)
     }
 }
 
-void AniWindow::SetTopmost(ani_env* env, ani_object obj, ani_long nativeObj,ani_boolean isTopmost)
+void AniWindow::SetTopmost(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isTopmost)
 {
     TLOGI(WmsLogTag::WMS_HIERARCHY, "[ANI]");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow != nullptr) {
-        aniWindow->OnSetTopmost(env, windowId);
+        aniWindow->OnSetTopmost(env, isTopmost);
     } else {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "[ANI] aniWindow is nullptr");
     }
 }
 
-void AniWindow::OnSetTopmost(ani_env* env,ani_boolean isTopmost)
+void AniWindow::OnSetTopmost(ani_env* env, ani_boolean isTopmost)
 {
     TLOGI(WmsLogTag::WMS_HIERARCHY, "[ANI]");
     auto window = GetWindow();
@@ -933,18 +932,18 @@ void AniWindow::OnSetTopmost(ani_env* env,ani_boolean isTopmost)
     }
 }
 
-void AniWindow::RequestFocus(ani_env* env, ani_object obj, ani_long nativeObj,ani_boolean isFocused)
+void AniWindow::RequestFocus(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isFocused)
 {
     TLOGI(WmsLogTag::WMS_HIERARCHY, "[ANI]");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow != nullptr) {
-        aniWindow->OnRequestFocus(env, windowId);
+        aniWindow->OnRequestFocus(env, isFocused);
     } else {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "[ANI] aniWindow is nullptr");
     }
 }
 
-void AniWindow::OnRequestFocus(ani_env* env,ani_boolean isFocused)
+void AniWindow::OnRequestFocus(ani_env* env, ani_boolean isFocused)
 {
     TLOGI(WmsLogTag::WMS_HIERARCHY, "[ANI]");
     auto window = GetWindow();
@@ -964,7 +963,7 @@ void AniWindow::OnRequestFocus(ani_env* env,ani_boolean isFocused)
     }
 }
 
-void AniWindow::SetSubWindowModal(ani_env* env, ani_object obj, ani_long nativeObj,ani_boolean isModal)
+void AniWindow::SetSubWindowModal(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isModal)
 {
     TLOGI(WmsLogTag::WMS_HIERARCHY, "[ANI]");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
@@ -975,7 +974,7 @@ void AniWindow::SetSubWindowModal(ani_env* env, ani_object obj, ani_long nativeO
     }
 }
 
-void AniWindow::OnSetSubWindowModal(ani_env* env,ani_boolean isModal)
+void AniWindow::OnSetSubWindowModal(ani_env* env, ani_boolean isModal)
 {
     TLOGI(WmsLogTag::WMS_HIERARCHY, "[ANI]");
     auto window = GetWindow();
@@ -995,7 +994,7 @@ void AniWindow::OnSetSubWindowModal(ani_env* env,ani_boolean isModal)
     }
 }
 
-void AniWindow::SetSubWindowModalType(ani_env* env, ani_object obj, ani_long nativeObj,ani_boolean isModal,ani_int modalityType)
+void AniWindow::SetSubWindowModalType(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isModal, ani_int modalityType)
 {
     TLOGI(WmsLogTag::WMS_HIERARCHY, "[ANI]");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
@@ -1006,7 +1005,7 @@ void AniWindow::SetSubWindowModalType(ani_env* env, ani_object obj, ani_long nat
     }
 }
 
-void AniWindow::OnSetSubWindowModalType(ani_env* env,ani_boolean isModal,ani_int modalityType)
+void AniWindow::OnSetSubWindowModalType(ani_env* env, ani_boolean isModal, ani_int modalityType)
 {
     TLOGI(WmsLogTag::WMS_HIERARCHY, "[ANI]");
     auto window = GetWindow();
@@ -1025,7 +1024,8 @@ void AniWindow::OnSetSubWindowModalType(ani_env* env,ani_boolean isModal,ani_int
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
         return;
     }
-    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetSubWindowModal(isModal, modalityType));
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetSubWindowModal(isModal,
+        static_cast<ModalityType>(modalityType)));
     if (ret != WmErrorCode::WM_OK) {
         AniWindowUtils::AniThrowError(env, ret, "SetSubWindowModal failed.");
     }
@@ -2117,16 +2117,6 @@ ani_boolean AniWindow::OnIsWindowShowing(ani_env* env)
     return ani_boolean(window->GetWindowState() == WindowState::STATE_SHOWN);
 }
 
-void AniWindow::HideWithAnimation(ani_env* env, ani_object obj, ani_long nativeObj)
-{
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
-    if (aniWindow != nullptr) {
-        aniWindow->OnHideWithAnimation(env);
-    } else {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] aniWindow is nullptr");
-    }
-}
 
 ani_boolean AniWindow::IsWindowHighlighted(ani_env* env, ani_object obj, ani_long nativeObj)
 {
