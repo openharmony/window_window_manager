@@ -446,8 +446,11 @@ void ScreenSessionManager::Init()
         TLOGW(WmsLogTag::DMS, "load motion plugin failed.");
     }
 
-    if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() ||
-        FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
+    static bool isNeedLoadAodLib =
+        FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() ||
+        FoldScreenStateInternel::IsDualDisplayFoldDevice() ||
+        FoldScreenStateInternel::IsSingleDisplayFoldDevice();
+    if (isNeedLoadAodLib) {
         if (!LoadAodLib()) {
             TLOGE(WmsLogTag::DMS, "load aod lib failed");
         }
@@ -4114,9 +4117,9 @@ void ScreenSessionManager::SetScreenPowerForFold(ScreenId screenId, ScreenPowerS
         return;
     }
     static bool isNeedScreenOffDevice =
-        (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() ||
+        FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() ||
         FoldScreenStateInternel::IsDualDisplayFoldDevice() ||
-        FoldScreenStateInternel::IsSingleDisplayFoldDevice());
+        FoldScreenStateInternel::IsSingleDisplayFoldDevice();
     if (lastPowerForAllStatus_.load() == ScreenPowerStatus::POWER_STATUS_ON_ADVANCED &&
         screenId == lastScreenId_.load() && FoldScreenStateInternel::IsSingleDisplayFoldDevice()) {
         // 预下电

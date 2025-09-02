@@ -2094,7 +2094,7 @@ HWTEST_F(ScreenSessionManagerTest, ScreenConnectHandleFoldScreen, TestSize.Level
     sptr<ScreenSession> session = nullptr;
     ssm_->ScreenConnectHandleFoldScreen(screenId, session, false, screenEvent);
     EXPECT_FALSE(g_errLog.find("event: connect") != std::string::npos);
-    g_errLog.clear();
+    g_errLog.clear();``````````
 
     session = sptr<ScreenSession>::MakeSptr();
     ssm_->clientProxy_ = nullptr;
