@@ -352,18 +352,20 @@ HWTEST_F(SceneSessionTest4, RequestSessionBack, TestSize.Level1)
     info.abilityName_ = "RequestSessionBack";
     info.bundleName_ = "RequestSessionBack";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(nullptr, session);
     NotifyBackPressedFunc func = [](const bool needMoveToBackground) {
         return;
     };
     session->backPressedFunc_ = func;
+    session->SetLeashWinSurfaceNode(nullptr);
+    EXPECT_EQ(nullptr, session->GetLeashWinShadowSurfaceNode());
     EXPECT_EQ(WSError::WS_OK, session->RequestSessionBack(true));
 
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
     EXPECT_NE(nullptr, surfaceNode);
     session->SetLeashWinSurfaceNode(surfaceNode);
-    ASSERT_EQ(WSError::WS_OK, session->RequestSessionBack(true));
+    EXPECT_NE(nullptr, session->GetLeashWinShadowSurfaceNode());
+    EXPECT_EQ(WSError::WS_OK, session->RequestSessionBack(true));
 }
 
 /**
