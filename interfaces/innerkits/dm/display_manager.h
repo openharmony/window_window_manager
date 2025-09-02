@@ -173,6 +173,14 @@ public:
          * @param DMRect area.
          */
         virtual void OnAvailableAreaChanged(DMRect area) {}
+
+        /**
+         * @brief Notify listeners when available area changed by displayId.
+         *
+         * @param DMRect area.
+         * @param DisplayId displayId.
+         */
+        virtual void OnAvailableAreaChanged(DMRect area, DisplayId displayId) {}
     };
 
     /**
