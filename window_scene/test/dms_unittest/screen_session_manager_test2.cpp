@@ -24,6 +24,7 @@
 #include "fold_screen_state_internel.h"
 #include "mock/mock_accesstoken_kit.h"
 #include "window_manager_hilog.h"
+#include "test_client.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -2078,6 +2079,41 @@ HWTEST_F(ScreenSessionManagerTest, HandleNewUserDisplayNode, TestSize.Level1) {
     EXPECT_TRUE(ssm_->userDisplayNodeMap_[newUserId].size() > 0);
 }
 
+/**
+ * @tc.name: ScreenConnectHandleFoldScreen
+ * @tc.desc: ScreenConnectHandleFoldScreen
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, ScreenConnectHandleFoldScreen, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    ScreenId screenId = 0;
+    ssm_->isCoordinationFlag_ = false;
+    ScreenEvent screenEvent = ScreenEvent::CONNECTED;
+    auto session = sptr<ScreenSession>::MakeSptr();
+    ssm_->clientProxy_ = nullptr;
+    ssm_->ScreenConnectHandleFoldScreen(screenId, session, false, screenEvent);
+    EXPECT_FALSE(g_errLog.find("event: connect") != std::string::npos);
+ 
+    ssm_->clientProxy_ = sptr<ScreenSessionManagerClientTest>::MakeSptr();
+    ssm_->ScreenConnectHandleFoldScreen(screenId, session, false, screenEvent);
+    EXPECT_TRUE(g_errLog.find("event: connect") != std::string::npos);
+ 
+    screenId = 1;
+    ssm_->ScreenConnectHandleFoldScreen(screenId, session, true, screenEvent);
+    EXPECT_FALSE(g_errLog.find("event: connect") != std::string::npos);
+ 
+    screenId = SCREEN_ID_MAIN;
+    ssm_->ScreenConnectHandleFoldScreen(screenId, session, true, screenEvent);
+    EXPECT_FALSE(g_errLog.find("event: connect") != std::string::npos);
+    
+    ssm_->isCoordinationFlag_ = true;
+    ssm_->ScreenConnectHandleFoldScreen(screenId, session, true, screenEvent);
+    EXPECT_TRUE(g_errLog.find("event: connect") != std::string::npos);
+ 
+    g_errLog.clear();
+}
 }
 }
 }

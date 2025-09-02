@@ -1583,11 +1583,7 @@ void ScreenSessionManager::HandleScreenConnectEvent(sptr<ScreenSession> screenSe
         SuperFoldStateManager::GetInstance().RefreshExternalRegion();
     }
     if (foldScreenController_ != nullptr) {
-        if ((screenId == 0 || (screenId == SCREEN_ID_MAIN && isCoordinationFlag_ == true)) && clientProxy) {
-            TLOGW(WmsLogTag::DMS, "event: connect %{public}" PRIu64 ", %{public}" PRIu64 ", "
-                "name=%{public}s", screenId, screenSession->GetRSScreenId(), screenSession->GetName().c_str());
-            clientProxy->OnScreenConnectionChanged(GetSessionOption(screenSession, screenId), screenEvent);
-        }
+        ScreenConnectHandleFoldScreen(screenId, screenSession, phyMirrorEnable, screenEvent);
         return;
     }
 #endif
@@ -1623,6 +1619,21 @@ void ScreenSessionManager::HandleScreenConnectEvent(sptr<ScreenSession> screenSe
         NotifyDisplayCreate(screenSession->ConvertToDisplayInfo());
     }
     TLOGW(WmsLogTag::DMS, "connect end. ScreenId: %{public}" PRIu64, screenId);
+}
+
+void ScreenSessionManager::ScreenConnectHandleFoldScreen(ScreenId screenId, const sptr<ScreenSession>& screenSession,
+    bool phyMirrorEnable, ScreenEvent screenEvent)
+{
+    auto clientProxy = GetClientProxy();
+    if ((screenId == 0 || (screenId == SCREEN_ID_MAIN && isCoordinationFlag_)) && clientProxy) {
+        TLOGW(WmsLogTag::DMS, "event: connect %{public}" PRIu64 ", %{public}" PRIu64 ", "
+            "name=%{public}s", screenId, screenSession->GetRSScreenId(), screenSession->GetName().c_str());
+        clientProxy->OnScreenConnectionChanged(GetSessionOption(screenSession, screenId), screenEvent);
+    }
+    if (phyMirrorEnable) {
+        NotifyScreenConnected(screenSession->ConvertToScreenInfo());
+        NotifyDisplayCreate(screenSession->ConvertToDisplayInfo());
+    }
 }
 
 void ScreenSessionManager::WaitUpdateAvailableAreaForPc()
