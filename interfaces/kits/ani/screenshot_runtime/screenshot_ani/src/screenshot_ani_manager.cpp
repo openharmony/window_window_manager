@@ -60,12 +60,7 @@ ani_object ScreenshotManagerAni::Save(ani_env* env, ani_object options)
     param->isPick = false;
     GetScreenshot(env, param);
     if (param->wret != DmErrorCode::DM_OK) {
-        if (param->wret == DmErrorCode::DM_ERROR_NO_PERMISSION ||
-            param->wret == DmErrorCode::DM_ERROR_INVALID_PARAM ||
-            param->wret == DmErrorCode::DM_ERROR_NOT_SYSTEM_APP ||
-            param->wret == DmErrorCode::DM_ERROR_SYSTEM_INNORMAL) {
-            AniErrUtils::ThrowBusinessError(env, param->wret, param->errMessage);
-        }
+        AniErrUtils::ThrowBusinessError(env, param->wret, param->errMessage);
         return ScreenshotAniUtils::CreateAniUndefined(env);
     }
     if (param->image != nullptr) {
