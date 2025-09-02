@@ -53,7 +53,7 @@ constexpr uint32_t COLOR_WHITE = 0xffffffff;
 constexpr uint32_t COLOR_BLACK = 0xff000000;
 const std::string WINDOW_SCREEN_LOCK_PREFIX = "windowLock_";
 const std::string VIEW_SCREEN_LOCK_PREFIX = "viewLock_";
-constexpr int32_t DEFAULT_INVALID_WINDOW_MODE = -1;
+constexpr int32_t DEFAULT_INVALID_WINDOW_MODE = 0;
 
 enum class WSError : int32_t {
     WS_OK = 0,
