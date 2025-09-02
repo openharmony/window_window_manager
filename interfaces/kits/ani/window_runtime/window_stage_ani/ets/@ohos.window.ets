@@ -2150,10 +2150,10 @@ export class WindowInternal implements Window {
     private native setTopmostSync(nativeObj: long,isTopmost: boolean): void;
     private native setWindowTopmost(nativeObj: long, isWindowTopmost: boolean): void;
     private native requestFocusSync(nativeObj: long,isFocused: boolean): void;
-    private native isFocusedSync(nativeObj: long): boolean;
-    private native setSubWindowZLevelSync(nativeObj: long, zLevel: int): void;
     private native setSubWindowModal(nativeObj: long, isModal: boolean): void;
     private native setSubWindowModalType(nativeObj: long, isModal: boolean, modalityType: int): void;
+    private native isFocusedSync(nativeObj: long): boolean;
+    private native setSubWindowZLevelSync(nativeObj: long, zLevel: int): void;
     private native setWindowTouchableSync(nativeObj: long, isTouchable: boolean): void;
     private native onNoInteractionDetected(nativeObj: long, type: string, timeout: long, callback: Object): void;
     private native keepKeyboardOnFocusSync(nativeObj: long, enable: boolean): void;
