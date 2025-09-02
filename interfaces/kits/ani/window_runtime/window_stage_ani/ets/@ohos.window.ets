@@ -1972,14 +1972,14 @@ export class WindowStageInternal implements WindowStage {
         this.disableWindowDecorSync(this.nativeObj);
     }
 
-    public setWindowModal(isModal: boolean): Promise<void> {
-        this.setWindowModal(this.nativeObj, isModal);
-    }
-
     public setShowOnLockScreen(showOnLockScreen: boolean): void {
         this.setShowOnLockScreenSync(this.nativeObj, showOnLockScreen);
     }
 
+    public setWindowModal(isModal: boolean): Promise<void> {
+        this.setWindowModal(this.nativeObj, isModal);
+    }
+    
     public getMainWindowSync(): Window {
         let ret = this.getMainWindowSync(this.nativeObj);
         return ret;
