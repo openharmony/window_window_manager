@@ -1984,7 +1984,7 @@ export class WindowStageInternal implements WindowStage {
         let ret = this.getMainWindowSync(this.nativeObj);
         return ret;
     }
-    
+
     public getMainWindow(): Promise<Window> {
         return new Promise<Window>((resolve: (value: Window) => void, reject: (error: BusinessError) => void) => {
             taskpool.execute((): Window => {
