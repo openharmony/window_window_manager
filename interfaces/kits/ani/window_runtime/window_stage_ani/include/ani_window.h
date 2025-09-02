@@ -57,10 +57,11 @@ public:
     static void SetSubWindowZLevel(ani_env* env, ani_object obj, ani_long nativeObj, ani_int zLevel);
     static void RaiseAboveTarget(ani_env* env, ani_object obj, ani_long nativeObj, ani_int windowId);
     static void RaiseToAppTop(ani_env* env, ani_object obj, ani_long nativeObj);
-    static void SetTopmost(ani_env* env, ani_object obj, ani_long nativeObj,ani_boolean isTopmost);
-    static void RequestFocus(ani_env* env, ani_object obj, ani_long nativeObj,ani_boolean isFocused);
-    static void SetSubWindowModal(ani_env* env, ani_object obj, ani_long nativeObj,ani_boolean isModal);
-    static void SetSubWindowModalType(ani_env* env, ani_object obj, ani_long nativeObj,ani_boolean isModal,ani_int modalityType);
+    static void SetTopmost(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isTopmost);
+    static void RequestFocus(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isFocused);
+    static void SetSubWindowModal(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isModal);
+    static void SetSubWindowModalType(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isModal,
+        ani_int modalityType);
     static ani_boolean IsFocused(ani_env* env, ani_object obj, ani_long nativeObj);
     static void LoadContent(ani_env* env, ani_object obj, ani_long nativeObj,
         ani_string path, ani_object storage);
@@ -149,10 +150,10 @@ private:
     void OnSetSubWindowZLevel(ani_env* env, ani_int zLevel);
     void OnRaiseAboveTarget(ani_env* env, ani_int windowId);
     void OnRaiseToAppTop(ani_env* env);
-    void OnSetTopmost(ani_env* env,ani_boolean isTopmost);
-    void OnRequestFocus(ani_env* env,ani_boolean isFocused);
-    void OnSetSubWindowModal(ani_env* env,ani_boolean isModal);
-    void OnSetSubWindowModalType(ani_env* env,ani_boolean isModal,ani_int modalityType)
+    void OnSetTopmost(ani_env* env, ani_boolean isTopmost);
+    void OnRequestFocus(ani_env* env, ani_boolean isFocused);
+    void OnSetSubWindowModal(ani_env* env, ani_boolean isModal);
+    void OnSetSubWindowModalType(ani_env* env, ani_boolean isModal, ani_int modalityType)
     void OnLoadContent(ani_env* env, ani_string path, ani_object storage);
     void OnSetWindowSystemBarEnable(ani_env* env, ani_object nameAry);
     ani_object OnGetUIContext(ani_env* env);
