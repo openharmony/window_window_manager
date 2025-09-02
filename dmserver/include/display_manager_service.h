@@ -105,6 +105,7 @@ public:
     void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens);
     sptr<ScreenInfo> GetScreenInfoById(ScreenId screenId);
     sptr<ScreenGroupInfo> GetScreenGroupInfoById(ScreenId screenId);
+    sptr<DisplayInfo> GetDisplayInfoByScreenId(ScreenId screenId) const;
     ScreenId GetScreenGroupIdByScreenId(ScreenId screenId);
     DMError GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos);
 
