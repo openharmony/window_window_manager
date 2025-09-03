@@ -73,7 +73,6 @@ public:
     static napi_value UpdateRotateAnimationConfig(napi_env env, napi_callback_info info);
     static napi_value ProcessBackEvent(napi_env env, napi_callback_info info);
     static napi_value CheckSceneZOrder(napi_env env, napi_callback_info info);
-    static napi_value UpdateFocus(napi_env env, napi_callback_info info);
     static napi_value SetVmaCacheStatus(napi_env env, napi_callback_info info);
     static napi_value InitWithRenderServiceAdded(napi_env env, napi_callback_info info);
     static napi_value GetAllWindowVisibilityInfos(napi_env env, napi_callback_info info);
@@ -200,7 +199,6 @@ private:
     napi_value OnUpdateRotateAnimationConfig(napi_env env, napi_callback_info info);
     napi_value OnProcessBackEvent(napi_env env, napi_callback_info info);
     napi_value OnCheckSceneZOrder(napi_env env, napi_callback_info info);
-    napi_value OnUpdateFocus(napi_env env, napi_callback_info info);
     napi_value OnSetVmaCacheStatus(napi_env env, napi_callback_info info);
     napi_value OnInitWithRenderServiceAdded(napi_env env, napi_callback_info info);
     napi_value OnGetAllWindowVisibilityInfos(napi_env env, napi_callback_info info);

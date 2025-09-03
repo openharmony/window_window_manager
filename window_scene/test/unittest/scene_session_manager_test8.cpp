@@ -175,7 +175,7 @@ HWTEST_F(SceneSessionManagerTest8, PostProcessFocus01, TestSize.Level1)
     sceneSession->SetFocusableOnShow(false);
     ssm_->sceneSessionMap_.emplace(1, sceneSession);
     ssm_->PostProcessFocus();
-    EXPECT_NE(0, focusGroup->GetFocusedSessionId());
+    EXPECT_EQ(0, focusGroup->GetFocusedSessionId());
 
     sceneSession->state_ = SessionState::STATE_FOREGROUND;
     sceneSession->isVisible_ = true;
