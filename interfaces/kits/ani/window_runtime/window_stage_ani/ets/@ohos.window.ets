@@ -717,6 +717,130 @@ export enum RectType {
   RELATIVE_TO_PARENT_WINDOW = 1
 }
 
+export enum ModalityType {
+    /**
+     * The value means window modality.
+     *
+     * @syscap SystemCapability.Window.SessionManager
+     * @atomicservice
+     * @since arkts {'1.1':'14', '1.2':'20'}
+     * @arkts 1.1&1.2
+     */
+    WINDOW_MODALITY = 0,
+    /**
+     * The value means application modality.
+     *
+     * @syscap SystemCapability.Window.SessionManager
+     * @atomicservice
+     * @since arkts {'1.1':'14', '1.2':'20'}
+     * @arkts 1.1&1.2
+     */
+    APPLICATION_MODALITY = 1,
+}
+
+export interface SubWindowOptions {
+    /**
+     * Indicates subwindow title
+     * 
+     * @type { string }
+     * @syscap SystemCapability.Window.SessionManager
+     * @since 11
+     */
+    /**
+     * Indicates subwindow title
+     * 
+     * @type { string }
+     * @syscap SystemCapability.Window.SessionManager
+     * @atomicservice
+     * @since 12
+     */
+    title: string;
+    /**
+     * Indicates decor of subwindow
+     * 
+     * @type { boolean }
+     * @syscap SystemCapability.Window.SessionManager
+     * @since 11
+     */
+    /**
+     * Indicates decor of subwindow
+     * 
+     * @type { boolean }
+     * @syscap SystemCapability.Window.SessionManager
+     * @atomicservice
+     * @since 12
+     */
+    decorEnabled: boolean;
+    /**
+     * Indicates modality of subwindow
+     * 
+     * @type { ?boolean }
+     * @syscap SystemCapability.Window.SessionManager
+     * @atomicservice
+     * @since arkts {'1.1':'12', '1.2':'20'}
+     * @arkts 1.1&1.2
+     */
+    isModal?: boolean;
+    /**
+     * Indicates whether subwindow is topmost
+     * 
+     * @type { ?boolean }
+     * @syscap SystemCapability.Window.SessionManager
+     * @systemapi Hide this for inner system use.
+     * @since arkts {'1.1':'12', '1.2':'20'}
+     * @arkts 1.1&1.2
+     */
+    isTopmost?: boolean;
+    /**
+     * Indicates modality type of subwindow
+     * 
+     * @type { ?ModalityType }
+     * @syscap SystemCapability.Window.SessionManager
+     * @atomicservice
+     * @since arkts {'1.1':'14', '1.2':'20'}
+     * @arkts 1.1&1.2
+     */
+    modalityType?: ModalityType;
+    /**
+     * Indicates position and size of subwindow
+     * 
+     * @type { ?Rect }
+     * @syscap SystemCapability.Window.SessionManager
+     * @atomicservice
+     * @since 18
+     */
+    windowRect?: Rect;
+    /**
+     * Indicates whether subwindow support fullscreen
+     * 
+     * @type { ?boolean }
+     * @syscap SystemCapability.Window.SessionManager
+     * @atomicservice
+     * @since 19
+     */
+    maximizeSupported?: boolean;
+    /**
+     * Indicates zlevel of subwindow
+     * 
+     * @type { ?int }
+     * @syscap SystemCapability.Window.SessionManager
+     * @atomicservice
+     * @since arkts {'1.1':'18', '1.2':'20'}
+     * @arkts 1.1&1.2
+     */
+    zLevel?: int;
+    /**
+     * Indicates whether subwindow show outline
+     * 
+     * @type { ?boolean }
+     * @syscap SystemCapability.Window.SessionManager
+     * @atomicservice
+     * @since 20
+     */
+    outlineEnabled?: boolean;
+
+  }
+
 export interface SystemBarProperties {
     /**
      * The color of the status bar.
