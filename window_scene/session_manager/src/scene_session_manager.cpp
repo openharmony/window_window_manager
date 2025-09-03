@@ -11793,7 +11793,7 @@ void SceneSessionManager::PreloadInLakeApp(const std::string& bundleName)
     }
 }
 
-WSError SceneSessionManager::PendingSessionToForeground(const sptr<IRemoteObject>& token)
+WSError SceneSessionManager::PendingSessionToForeground(const sptr<IRemoteObject>& token, int32_t windowMode)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "in");
     auto pid = IPCSkeleton::GetCallingRealPid();
@@ -11802,8 +11802,12 @@ WSError SceneSessionManager::PendingSessionToForeground(const sptr<IRemoteObject
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
 
-    return taskScheduler_->PostSyncTask([this, &token]() {
+    return taskScheduler_->PostSyncTask([this, &token, windowMode]() {
         if (auto session = FindSessionByToken(token)) {
+            if (windowMode != DEFAULT_INVALID_WINDOW_MODE) {
+                TLOGI(WmsLogTag::WMS_LIFE, "Modify window mode: %{public}d", windowMode);
+                session->SetSessionInfoWindowMode(windowMode);
+            }
             return session->PendingSessionToForeground();
         }
         TLOGNE(WmsLogTag::DEFAULT, "PendingForeground: fail to find token");

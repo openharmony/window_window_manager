@@ -122,7 +122,7 @@ WSError SceneSessionManagerLiteProxy::IsValidSessionIds(
     return static_cast<WSError>(reply.ReadInt32());
 }
 
-WSError SceneSessionManagerLiteProxy::PendingSessionToForeground(const sptr<IRemoteObject>& token)
+WSError SceneSessionManagerLiteProxy::PendingSessionToForeground(const sptr<IRemoteObject>& token, int32_t windowMode)
 {
     WLOGFD("run SceneSessionManagerLiteProxy::PendingSessionToForeground");
     MessageParcel data;
@@ -135,6 +135,11 @@ WSError SceneSessionManagerLiteProxy::PendingSessionToForeground(const sptr<IRem
 
     if (!data.WriteRemoteObject(token)) {
         WLOGFE("Write token failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteInt32(windowMode)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write windowMode failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
