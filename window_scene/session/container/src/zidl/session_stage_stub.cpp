@@ -236,6 +236,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleUpdateGlobalDisplayRectFromServer(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SEND_FB_ACTION_EVENT):
             return HandleSendFbActionEvent(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_UPDATE_SHOW_DECOR_WHEN_LOCKED):
+            return HandleUpdateIsShowDecorWhenLocked(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1222,6 +1224,21 @@ int SessionStageStub::HandleCloseSpecificScene(MessageParcel& data, MessageParce
 {
     TLOGD(WmsLogTag::WMS_EVENT, "in");
     CloseSpecificScene();
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleUpdateIsShowDecorWhenLocked(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "called!");
+    bool isShow = true;
+    if (!data.ReadBool(isShow)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read isShow failed");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = UpdateIsShowDecorWhenLocked(isShow);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

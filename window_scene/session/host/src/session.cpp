@@ -1362,6 +1362,7 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
     property->SetPcAppInpadCompatibleMode(GetSessionProperty()->GetPcAppInpadCompatibleMode());
     property->SetPcAppInpadSpecificSystemBarInvisible(GetSessionProperty()->GetPcAppInpadSpecificSystemBarInvisible());
     property->SetPcAppInpadOrientationLandscape(GetSessionProperty()->GetPcAppInpadOrientationLandscape());
+    property->SetIsShowDecorWhenLocked(isScreenLockedCallback_ && isScreenLockedCallback_());
     SetSessionProperty(property);
     GetSessionProperty()->SetIsNeedUpdateWindowMode(false);
 }
@@ -3333,12 +3334,12 @@ WSError Session::SetAppSupportPhoneInPc(bool isSupportPhone)
 WSError Session::SetCompatibleModeProperty(const sptr<CompatibleModeProperty> compatibleModeProperty)
 {
     auto property = GetSessionProperty();
-    if (property == nullptr || compatibleModeProperty == nullptr) {
+    if (property == nullptr) {
         TLOGE(WmsLogTag::WMS_COMPAT, "id: %{public}d property is nullptr", persistentId_);
         return WSError::WS_ERROR_NULLPTR;
     }
     property->SetCompatibleModeProperty(compatibleModeProperty);
-    if (compatibleModeProperty->IsDragResizeDisabled()) {
+    if (compatibleModeProperty && compatibleModeProperty->IsDragResizeDisabled()) {
         property->SetDragEnabled(false);
     }
     if (!sessionStage_) {
@@ -4872,5 +4873,24 @@ std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller)
     TLOGD(WmsLogTag::WMS_SCB, "%{public}s: %{public}s, sessionId: %{public}d, screenId:%{public}" PRIu64,
           caller, RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId(), screenId);
     return rsUIContext_;
+}
+
+WSError Session::SetIsShowDecorWhenLocked(bool isShow)
+{
+    if (!IsSessionValid()) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Session is invalid, id: %{public}d state: %{public}u",
+            GetPersistentId(), GetSessionState());
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sessionStage_ is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    if (WindowHelper::IsMainWindow(GetWindowType())) {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "id: %{public}d isShow: %{public}d",
+            GetPersistentId(), isShow);
+        return sessionStage_->UpdateIsShowDecorWhenLocked(isShow);
+    }
+    return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen

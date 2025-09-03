@@ -761,6 +761,8 @@ public:
      */
     std::shared_ptr<RSUIContext> GetRSUIContext(const char* caller = "");
 
+    WSError SetIsShowDecorWhenLocked(bool isShow);
+
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
     public:

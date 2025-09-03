@@ -1011,6 +1011,35 @@ HWTEST_F(SessionStageProxyTest, TestUpdateGlobalDisplayRectFromServer, TestSize.
     sptr<SessionStageProxy> successProxy = sptr<SessionStageProxy>::MakeSptr(remoteMock);
     EXPECT_EQ(WSError::WS_OK, successProxy->UpdateGlobalDisplayRectFromServer(rect, reason));
 }
+
+/**
+ * @tc.name: UpdateIsShowDecorWhenLocked
+ * @tc.desc: Test UpdateIsShowDecorWhenLocked
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, UpdateIsShowDecorWhenLocked, TestSize.Level1)
+{
+    ASSERT_TRUE(sessionStage_ != nullptr);
+    bool isShow = true;
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionStage_->UpdateIsShowDecorWhenLocked(isShow));
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    ASSERT_EQ(WSError::WS_OK, sessionStage_->UpdateIsShowDecorWhenLocked(isShow));
+    sptr<SessionStageProxy> sProxy = sptr<SessionStageProxy>::MakeSptr(nullptr);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sProxy->UpdateIsShowDecorWhenLocked(isShow));
+
+    auto remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    remoteMocker->sendRequestResult_ = 1;
+    sptr<SessionStageProxy> sessionStage = sptr<SessionStageProxy>::MakeSptr(remoteMocker);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionStage->UpdateIsShowDecorWhenLocked(isShow));
+
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionStage_->UpdateIsShowDecorWhenLocked(isShow));
+    MockMessageParcel::SetWriteStringErrorFlag(false);
+    MockMessageParcel::ClearAllErrorFlag();
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

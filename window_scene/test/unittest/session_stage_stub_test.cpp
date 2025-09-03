@@ -1286,6 +1286,39 @@ HWTEST_F(SessionStageStubTest, HandleNotifyAppHookWindowInfoUpdated, TestSize.Le
     ASSERT_TRUE(sessionStageStub_ != nullptr);
     EXPECT_EQ(ERR_NONE, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
 }
+
+/**
+ * @tc.name: HandleUpdateIsShowDecorWhenLocked
+ * @tc.desc: test function : HandleUpdateIsShowDecorWhenLocked
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleUpdateIsShowDecorWhenLocked, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
+    data.WriteRemoteObject(windowManagerAgent->AsObject());
+    ASSERT_TRUE(sessionStageStub_ != nullptr);
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_UPDATE_SHOW_DECOR_WHEN_LOCKED);
+    EXPECT_EQ(ERR_INVALID_DATA, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleUpdateIsShowDecorWhenLocked 02
+ * @tc.desc: test function : HandleUpdateIsShowDecorWhenLocked 02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleUpdateIsShowDecorWhenLocked02, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    bool isShow = true;
+    data.WriteBool(static_cast<bool>(isShow));
+    ASSERT_TRUE(sessionStageStub_ != nullptr);
+    EXPECT_EQ(ERR_NONE, sessionStageStub_->HandleUpdateIsShowDecorWhenLocked(data, reply));
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

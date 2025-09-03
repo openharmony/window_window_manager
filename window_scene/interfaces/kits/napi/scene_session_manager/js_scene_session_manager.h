@@ -178,8 +178,6 @@ public:
      */
     static napi_value SetPiPSettingSwitchStatus(napi_env env, napi_callback_info info);
 
-    static napi_value UpdateSystemDecorEnable(napi_env env, napi_callback_info info);
-
 private:
     napi_value OnSetBehindWindowFilterEnabled(napi_env env, napi_callback_info info);
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
@@ -404,8 +402,6 @@ private:
      */
     napi_value OnSupportSnapshotAllSessionStatus(napi_env env, napi_callback_info info);
     napi_value OnSupportPreloadStartingWindow(napi_env env, napi_callback_info info);
-
-    napi_value OnUpdateSystemDecorEnable(napi_env env, napi_callback_info info);
 };
 } // namespace OHOS::Rosen
 

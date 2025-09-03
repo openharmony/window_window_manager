@@ -3032,19 +3032,6 @@ HWTEST_F(SceneSessionManagerTest12, UpdateScreenLockState, Function | SmallTest 
 }
 
 /**
- * @tc.name: UpdateScreenLockState
- * @tc.desc: test function : UpdateScreenLockState
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest12, UpdateSystemDecorEnable, Function | SmallTest | Level2)
-{
-    bool enable = false;
-    auto result = ssm_->UpdateSystemDecorEnable(enable);
-    EXPECT_EQ(result, WMError::WM_OK);
-    EXPECT_EQ(ssm_->systemConfig_.isSystemDecorEnable_, enable);
-}
-
-/**
  * @tc.name: IsFocusWindowParent
  * @tc.desc: test function : IsFocusWindowParent
  * @tc.type: FUNC
