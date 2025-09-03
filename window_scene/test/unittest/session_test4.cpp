@@ -1523,41 +1523,41 @@ HWTEST_F(WindowSessionTest4, HasParentSessionWithToken, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetIsShowDecorWhenLocked 01
- * @tc.desc: Test Case SetIsShowDecorWhenLocked 01
+ * @tc.name: SetIsShowDecorInFreeMultiWindow 01
+ * @tc.desc: Test Case SetIsShowDecorInFreeMultiWindow 01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest4, SetIsShowDecorWhenLocked01, TestSize.Level1)
+HWTEST_F(WindowSessionTest4, SetIsShowDecorInFreeMultiWindow01, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     bool isShow = true;
     session_->state_ = SessionState::STATE_DISCONNECT;
-    WSError result = session_->SetIsShowDecorWhenLocked(isShow);
+    WSError result = session_->SetIsShowDecorInFreeMultiWindow(isShow);
     EXPECT_EQ(result, WSError::WS_ERROR_INVALID_SESSION);
 
     session_->state_ = SessionState::STATE_CONNECT;
     session_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    WSError result02 = session_->SetIsShowDecorWhenLocked(isShow);
+    WSError result02 = session_->SetIsShowDecorInFreeMultiWindow(isShow);
     EXPECT_EQ(result02, WSError::WS_ERROR_NULLPTR);
 }
 
 /**
- * @tc.name: SetIsShowDecorWhenLocked 02
- * @tc.desc: Test Case SetIsShowDecorWhenLocked 02
+ * @tc.name: SetIsShowDecorInFreeMultiWindow 02
+ * @tc.desc: Test Case SetIsShowDecorInFreeMultiWindow 02
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest4, SetIsShowDecorWhenLocked02, TestSize.Level1)
+HWTEST_F(WindowSessionTest4, SetIsShowDecorInFreeMultiWindow02, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     bool isShow = true;
     session_->state_ = SessionState::STATE_CONNECT;
     session_->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
     session_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    WSError result = session_->SetIsShowDecorWhenLocked(isShow);
+    WSError result = session_->SetIsShowDecorInFreeMultiWindow(isShow);
     EXPECT_EQ(result, WSError::WS_OK);
 
     session_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
-    WSError result02 = session_->SetIsShowDecorWhenLocked(isShow);
+    WSError result02 = session_->SetIsShowDecorInFreeMultiWindow(isShow);
     EXPECT_EQ(result02, WSError::WS_OK);
 }
 } // namespace

@@ -1362,7 +1362,10 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
     property->SetPcAppInpadCompatibleMode(GetSessionProperty()->GetPcAppInpadCompatibleMode());
     property->SetPcAppInpadSpecificSystemBarInvisible(GetSessionProperty()->GetPcAppInpadSpecificSystemBarInvisible());
     property->SetPcAppInpadOrientationLandscape(GetSessionProperty()->GetPcAppInpadOrientationLandscape());
-    property->SetIsShowDecorWhenLocked(!(isScreenLockedCallback_ && isScreenLockedCallback_()));
+    const bool isPcMode = system::GetBoolParameter("persist.sceneboard.ispcmode", false);
+    const bool isShow = !(isScreenLockedCallback_ && isScreenLockedCallback_() &&
+        systemConfig_.IsFreeMultiWindowMode() && !isPcMode);
+    property->SetIsShowDecorInFreeMultiWindow(isShow);
     SetSessionProperty(property);
     GetSessionProperty()->SetIsNeedUpdateWindowMode(false);
 }
@@ -4875,7 +4878,7 @@ std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller)
     return rsUIContext_;
 }
 
-WSError Session::SetIsShowDecorWhenLocked(bool isShow)
+WSError Session::SetIsShowDecorInFreeMultiWindow(bool isShow)
 {
     if (!IsSessionValid()) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Session is invalid, id: %{public}d state: %{public}u",
@@ -4889,7 +4892,7 @@ WSError Session::SetIsShowDecorWhenLocked(bool isShow)
     if (WindowHelper::IsMainWindow(GetWindowType())) {
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "id: %{public}d isShow: %{public}d",
             GetPersistentId(), isShow);
-        return sessionStage_->UpdateIsShowDecorWhenLocked(isShow);
+        return sessionStage_->UpdateIsShowDecorInFreeMultiWindow(isShow);
     }
     return WSError::WS_OK;
 }

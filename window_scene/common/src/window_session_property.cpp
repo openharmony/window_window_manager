@@ -1368,7 +1368,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isPcAppInpadOrientationLandscape_) &&
         parcel.WriteBool(isPcAppInpadCompatibleMode_) &&
         parcel.WriteString(ancoRealBundleName_) &&
-        parcel.WriteBool(isShowDecorWhenLocked_);
+        parcel.WriteBool(isShowDecorInFreeMultiWindow_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1484,7 +1484,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetPcAppInpadOrientationLandscape(parcel.ReadBool());
     property->SetPcAppInpadCompatibleMode(parcel.ReadBool());
     property->SetAncoRealBundleName(parcel.ReadString());
-    property->SetIsShowDecorWhenLocked(parcel.ReadBool());
+    property->SetIsShowDecorInFreeMultiWindow(parcel.ReadBool());
     return property;
 }
 
@@ -1596,7 +1596,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
         std::lock_guard<std::mutex> lock(missionInfoMutex_);
         missionInfo_ = property->missionInfo_;
     }
-    isShowDecorWhenLocked_ = property->isShowDecorWhenLocked_;
+    isShowDecorInFreeMultiWindow_ = property->isShowDecorInFreeMultiWindow_;
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)
@@ -2594,14 +2594,14 @@ void SystemSessionConfig::ConvertSupportUIExtensionSubWindow(const std::string& 
     supportUIExtensionSubWindow_ = StringUtil::ConvertStringToBool(itemValue);
 }
 
-void WindowSessionProperty::SetIsShowDecorWhenLocked(bool isShow)
+void WindowSessionProperty::SetIsShowDecorInFreeMultiWindow(bool isShow)
 {
-    isShowDecorWhenLocked_ = isShow;
+    isShowDecorInFreeMultiWindow_ = isShow;
 }
 
-bool WindowSessionProperty::GetIsShowDecorWhenLocked() const
+bool WindowSessionProperty::GetIsShowDecorInFreeMultiWindow() const
 {
-    return isShowDecorWhenLocked_;
+    return isShowDecorInFreeMultiWindow_;
 }
 } // namespace Rosen
 } // namespace OHOS

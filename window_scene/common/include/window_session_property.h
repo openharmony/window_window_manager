@@ -350,8 +350,8 @@ public:
     void SetExclusivelyHighlighted(bool isExclusivelyHighlighted);
     mutable std::mutex windowMaskMutex_;
 
-    void SetIsShowDecorWhenLocked(bool isShow);
-    bool GetIsShowDecorWhenLocked() const;
+    void SetIsShowDecorInFreeMultiWindow(bool isShow);
+    bool GetIsShowDecorInFreeMultiWindow() const;
 
 private:
     void setTouchHotAreasInner(const std::vector<Rect>& rects, std::vector<Rect>& touchHotAreas);
@@ -599,7 +599,7 @@ private:
      */
     std::unordered_map<WindowTransitionType, std::shared_ptr<TransitionAnimation>> transitionAnimationConfig_;
 
-    bool isShowDecorWhenLocked_ { false };
+    bool isShowDecorInFreeMultiWindow_ { true };
 };
  
 class CompatibleModeProperty : public Parcelable {

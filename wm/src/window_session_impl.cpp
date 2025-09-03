@@ -2338,7 +2338,7 @@ void WindowSessionImpl::UpdateDecorEnableToAce(bool isDecorEnable)
             decorVisible = decorVisible && (windowSystemConfig_.freeMultiWindowEnable_ ||
                 (property_->GetIsPcAppInPad() && isSubWindow)) &&
                 !(mode == WindowMode::WINDOW_MODE_FULLSCREEN && property_->GetCompatibleModeProperty()) &&
-                property_->GetIsShowDecorWhenLocked();
+                property_->GetIsShowDecorInFreeMultiWindow();
         }
         if (mode == WindowMode::WINDOW_MODE_FULLSCREEN && property_->IsDecorFullscreenDisabled()) {
             decorVisible = false;
@@ -2371,7 +2371,7 @@ void WindowSessionImpl::UpdateDecorEnable(bool needNotify, WindowMode mode)
                 decorVisible = decorVisible && (windowSystemConfig_.freeMultiWindowEnable_ ||
                     (property_->GetIsPcAppInPad() && isSubWindow)) &&
                     !(mode == WindowMode::WINDOW_MODE_FULLSCREEN && property_->GetCompatibleModeProperty()) &&
-                    property_->GetIsShowDecorWhenLocked();
+                    property_->GetIsShowDecorInFreeMultiWindow();
             }
             if (GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN && property_->IsDecorFullscreenDisabled()) {
                 decorVisible = false;
@@ -8116,10 +8116,10 @@ void WindowSessionImpl::SetNotifySizeChangeFlag(bool flag)
     notifySizeChangeFlag_ = false;
 }
 
-WSError WindowSessionImpl::UpdateIsShowDecorWhenLocked(bool isShow)
+WSError WindowSessionImpl::UpdateIsShowDecorInFreeMultiWindow(bool isShow)
 {
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "isShow: %{public}d", isShow);
-    property_->SetIsShowDecorWhenLocked(isShow);
+    property_->SetIsShowDecorInFreeMultiWindow(isShow);
     return WSError::WS_OK;
 }
 } // namespace Rosen

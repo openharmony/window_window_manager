@@ -2249,7 +2249,7 @@ WSError SessionStageProxy::CloseSpecificScene()
     return WSError::WS_OK;
 }
 
-WSError SessionStageProxy::UpdateIsShowDecorWhenLocked(bool isShow)
+WSError SessionStageProxy::UpdateIsShowDecorInFreeMultiWindow(bool isShow)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2270,7 +2270,7 @@ WSError SessionStageProxy::UpdateIsShowDecorWhenLocked(bool isShow)
     }
 
     if (remote->SendRequest(
-        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_UPDATE_SHOW_DECOR_WHEN_LOCKED),
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_UPDATE_SHOW_DECOR_IN_FREE_MULTI_WINDOW),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
