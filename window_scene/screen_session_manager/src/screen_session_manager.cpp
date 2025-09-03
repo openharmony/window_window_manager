@@ -2219,12 +2219,7 @@ std::vector<DisplayId> ScreenSessionManager::GetAllDisplayIds()
                 sessionIt.first);
             continue;
         }
-        sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
-        if (displayInfo == nullptr) {
-            TLOGE(WmsLogTag::DMS, "error, displayInfo is nullptr.");
-            continue;
-        }
-        DisplayId displayId = displayInfo->GetDisplayId();
+        DisplayId displayId = screenSession->GetDisplayId();
         res.push_back(displayId);
         if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
             continue;
