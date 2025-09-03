@@ -2454,6 +2454,9 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         sceneSession->SetFindScenePanelRsNodeByZOrderFunc([this](uint64_t screenId, uint32_t targetZOrder) {
             return this->findScenePanelRsNodeByZOrderFunc_(screenId, targetZOrder);
         });
+        sceneSession->RegisterForceSplitFullScreenChangeCallback([this](uint32_t uid, bool isFullScreen) {
+            this->NotifyIsFullScreenInForceSplitMode(uid, isFullScreen);
+        });
         DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
         GetAppDragResizeType(sessionInfo.bundleName_, dragResizeType);
         sceneSession->SetAppDragResizeType(dragResizeType);
@@ -13808,7 +13811,7 @@ WMError SceneSessionManager::GetAllWindowLayoutInfo(DisplayId displayId,
                 globalScaledRect.posY_ -= GetFoldLowerScreenPosY();
             }
             HookWindowInfo hookWindowInfo = GetAppHookWindowInfo(session->GetSessionInfo().bundleName_);
-            if (hookWindowInfo.enableHookWindow &&
+            if (hookWindowInfo.enableHookWindow && !session->IsFullScreenInForceSplit() &&
                 WindowHelper::IsMainWindow(session->GetWindowType()) &&
                 !MathHelper::NearEqual(hookWindowInfo.widthHookRatio, HookWindowInfo::DEFAULT_WINDOW_SIZE_HOOK_RATIO)) {
                 globalScaledRect.width_ =
@@ -14004,7 +14007,7 @@ WMError SceneSessionManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisi
             TLOGD(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: wid=%{public}d, globalDisplayRect=%{public}s",
                 where, static_cast<int32_t>(session->GetPersistentId()), globalDisplayRect.ToString().c_str());
             HookWindowInfo hookWindowInfo = GetAppHookWindowInfo(session->GetSessionInfo().bundleName_);
-            if (hookWindowInfo.enableHookWindow &&
+            if (hookWindowInfo.enableHookWindow && !session->IsFullScreenInForceSplit() &&
                 WindowHelper::IsMainWindow(session->GetWindowType()) &&
                 !MathHelper::NearEqual(hookWindowInfo.widthHookRatio, HookWindowInfo::DEFAULT_WINDOW_SIZE_HOOK_RATIO)) {
                 rect.width_ = static_cast<uint32_t>(rect.width_ * hookWindowInfo.widthHookRatio);
@@ -15329,6 +15332,10 @@ WMError SceneSessionManager::UpdateDisplayHookInfo(int32_t uid, uint32_t width, 
     dmHookInfo.enableHookRotation_ = false;
     dmHookInfo.displayOrientation_ = 0;
     dmHookInfo.enableHookDisplayOrientation_ = false;
+    {
+        std::shared_lock lock(appHookWindowInfoMapMutex_);
+        dmHookInfo.isFullScreenInForceSplit_ = fullScreenInForceSplitUidSet_.find(uid) != fullScreenInForceSplitUidSet_.end();
+    }
     ScreenSessionManagerClient::GetInstance().UpdateDisplayHookInfo(uid, enable, dmHookInfo);
     return WMError::WM_OK;
 }
@@ -15348,6 +15355,10 @@ WMError SceneSessionManager::UpdateAppHookDisplayInfo(int32_t uid, const HookInf
     dmHookInfo.enableHookRotation_ = hookInfo.enableHookRotation_;
     dmHookInfo.displayOrientation_ = hookInfo.displayOrientation_;
     dmHookInfo.enableHookDisplayOrientation_ = hookInfo.enableHookDisplayOrientation_;
+    {
+        std::shared_lock lock(appHookWindowInfoMapMutex_);
+        dmHookInfo.isFullScreenInForceSplit_ = fullScreenInForceSplitUidSet_.find(uid) != fullScreenInForceSplitUidSet_.end();
+    }
     ScreenSessionManagerClient::GetInstance().UpdateDisplayHookInfo(uid, enable, dmHookInfo);
     return WMError::WM_OK;
 }
@@ -17528,5 +17539,16 @@ void SceneSessionManager::NotifySessionScreenLockedChange(bool isScreenLocked) {
         sceneSession->GetSessionProperty()->SetIsShowDecorInFreeMultiWindow(isShow);
         sceneSession->SetIsShowDecorInFreeMultiWindow(isShow);
     }
+}
+
+void SceneSessionManager::NotifyIsFullScreenInForceSplitMode(uint32_t uid, bool isFullScreen)
+{
+    std::unique_lock lock(appHookWindowInfoMapMutex_);
+    if (isFullScreen) {
+        fullScreenInForceSplitUidSet_.insert(uid);
+    } else {
+        fullScreenInForceSplitUidSet_.erase(uid);
+    }
+    ScreenSessionManagerClient::GetInstance().NotifyIsFullScreenInForceSplitMode(uid, isFullScreen);
 }
 } // namespace OHOS::Rosen

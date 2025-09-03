@@ -179,6 +179,9 @@ private:
     int HandleSetFrameRectForPartialZoomIn(MessageParcel& data, MessageParcel& reply);
 
     int HandleUpdateGlobalDisplayRectFromClient(MessageParcel& data, MessageParcel& reply);
+
+    // Compatible Mode
+    int HandleNotifyIsFullScreenInForceSplitMode(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 

@@ -74,6 +74,13 @@ public:
     WMError GetRouterStackInfo(std::string& routerStackInfo) const override;
     void SetRecentSessionState(RecentSessionInfo& info, const SessionState& state) override;
 
+    /*
+     * Compatible Mode
+     */
+    WSError NotifyIsFullScreenInForceSplitMode(bool isFullScreen) override;
+    void RegisterForceSplitFullScreenChangeCallback(ForceSplitFullScreenChangeCallback&& callback) override;
+    bool IsFullScreenInForceSplit() override;
+
 protected:
     void UpdatePointerArea(const WSRect& rect) override;
     bool CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const override;
@@ -96,6 +103,12 @@ private:
     void NotifySubSessionRectChangeByAnchor(const WSRect& parentRect,
         SizeChangeReason reason = SizeChangeReason::UNDEFINED, DisplayId displayId = DISPLAY_ID_INVALID) override;
     void HandleSubSessionSurfaceNodeByWindowAnchor(SizeChangeReason reason, DisplayId displayId) override;
+
+    /*
+     * Compatible Mode
+     */
+    ForceSplitFullScreenChangeCallback forceSplitFullScreenChangeCallback_;
+    std::atomic_bool isFullScreenInForceSplit_ { false };
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_MAIN_SESSION_H

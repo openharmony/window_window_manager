@@ -150,6 +150,7 @@ using GetAllAppUseControlMapFunc =
 using GetFbPanelWindowIdFunc =  std::function<WMError(uint32_t& windowId)>;
 using FindScenePanelRsNodeByZOrderFunc = std::function<std::shared_ptr<Rosen::RSNode>(DisplayId displayId,
     uint32_t targetZOrder)>;
+using ForceSplitFullScreenChangeCallback = std::function<void(uint32_t uid, bool isFullScreen)>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
@@ -403,6 +404,8 @@ public:
      */
     bool IsInCompatScaleStatus() const;
     bool IsInCompatScaleMode();
+    virtual void RegisterForceSplitFullScreenChangeCallback(ForceSplitFullScreenChangeCallback&& callback) {}
+    virtual bool IsFullScreenInForceSplit() { return false; }
 
     /*
      * PC Window
