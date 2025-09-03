@@ -486,15 +486,15 @@ HWTEST_F(WindowSessionImplTest4, IsPcWindow, TestSize.Level1)
 }
 
 /**
- * @tc.name: IsPadAndNotFreeMutiWindowCompatibleMode
- * @tc.desc: IsPadAndNotFreeMutiWindowCompatibleMode
+ * @tc.name: IsPadAndNotFreeMultiWindowCompatibleMode
+ * @tc.desc: IsPadAndNotFreeMultiWindowCompatibleMode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest4, IsPadAndNotFreeMutiWindowCompatibleMode, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest4, IsPadAndNotFreeMultiWindowCompatibleMode, TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "WindowSessionImplTest4: IsPadAndNotFreeMutiWindowCompatibleMode start";
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: IsPadAndNotFreeMultiWindowCompatibleMode start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("IsPadAndNotFreeMutiWindowCompatibleMode");
+    option->SetWindowName("IsPadAndNotFreeMultiWindowCompatibleMode");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->property_->SetPersistentId(1);
@@ -504,13 +504,13 @@ HWTEST_F(WindowSessionImplTest4, IsPadAndNotFreeMutiWindowCompatibleMode, TestSi
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
     window->property_->SetPcAppInpadCompatibleMode(true);
     window->windowSystemConfig_.freeMultiWindowEnable_ = false;
-    EXPECT_EQ(true, window->IsPadAndNotFreeMutiWindowCompatibleMode());
+    EXPECT_EQ(true, window->IsPadAndNotFreeMultiWindowCompatibleMode());
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
     window->property_->SetPcAppInpadCompatibleMode(true);
     window->windowSystemConfig_.freeMultiWindowEnable_ = true;
-    window->windowSystemConfig_.isSystemDecorEnable_ = true;
-    EXPECT_EQ(false, window->IsPadAndNotFreeMutiWindowCompatibleMode());
-    GTEST_LOG_(INFO) << "WindowSessionImplTest4: IsPadAndNotFreeMutiWindowCompatibleMode end";
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    EXPECT_EQ(false, window->IsPadAndNotFreeMultiWindowCompatibleMode());
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: IsPadAndNotFreeMultiWindowCompatibleMode end";
 }
 
 /**
@@ -1348,6 +1348,51 @@ HWTEST_F(WindowSessionImplTest4, UpdateRect03, TestSize.Level1)
     window->property_->SetWindowRect(rectW);
     res = window->UpdateRect(rect, reason);
     ASSERT_EQ(res, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: UpdateRect04
+ * @tc.desc: UpdateRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, UpdateRect04, TestSize.Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetDisplayId(0);
+    option->SetWindowName("WindowSessionImplUpdateRect04");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    auto runner = AppExecFwk::EventRunner::Create("UpdateRectForRotation02");
+    std::shared_ptr<AppExecFwk::EventHandler> handler = std::make_shared<AppExecFwk::EventHandler>(runner);
+    runner->Run();
+    window->handler_ = handler;
+
+    WSRect rect;
+    rect.posX_ = 0;
+    rect.posY_ = 0;
+    rect.height_ = 50;
+    rect.width_ = 50;
+ 
+    Rect preRect;
+    preRect.posX_ = 0;
+    preRect.posY_ = 0;
+    preRect.height_ = 200;
+    preRect.width_ = 200;
+
+    window->property_->SetWindowRect(preRect);
+    SizeChangeReason reason = SizeChangeReason::SNAPSHOT_ROTATION;
+    WSError res = window->UpdateRect(rect, reason);
+    EXPECT_EQ(res, WSError::WS_OK);
+
+    preRect.height_ = 200;
+    preRect.width_ = 200;
+    window->property_->SetWindowRect(preRect);
+    reason = SizeChangeReason::UNDEFINED;
+    res = window->UpdateRect(rect, reason);
+    EXPECT_EQ(res, WSError::WS_OK);
+
+    window->handler_ = nullptr;
+    res = window->UpdateRect(rect, reason);
+    EXPECT_EQ(res, WSError::WS_OK);
 }
 
 /**

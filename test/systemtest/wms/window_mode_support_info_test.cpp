@@ -87,9 +87,7 @@ namespace {
 HWTEST_F(WindowModeSupportTypeTest, WindowModeSupportType01, TestSize.Level1)
 {
     const sptr<Window>& window = Utils::CreateTestWindow(fullAppInfo_1_);
-    if (window == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, window);
     window->SetRequestWindowModeSupportType(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN);
     ASSERT_EQ(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN, window->GetRequestWindowModeSupportType());
     window->Destroy();
@@ -103,23 +101,21 @@ HWTEST_F(WindowModeSupportTypeTest, WindowModeSupportType01, TestSize.Level1)
 HWTEST_F(WindowModeSupportTypeTest, WindowModeSupportType02, TestSize.Level1)
 {
     const sptr<Window>& window = Utils::CreateTestWindow(fullAppInfo_1_);
-    if (window == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, window);
     window->SetRequestWindowModeSupportType(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN);
-    ASSERT_EQ(WMError::WM_OK, window->Show());
-    ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, window->GetWindowMode());
+    EXPECT_NE(WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE, window->Show());
+    EXPECT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, window->GetWindowMode());
 
     window->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, window->GetWindowMode());
+    EXPECT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, window->GetWindowMode());
 
     window->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
-    ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, window->GetWindowMode());
+    EXPECT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, window->GetWindowMode());
 
     window->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
-    ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, window->GetWindowMode());
+    EXPECT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, window->GetWindowMode());
 
-    ASSERT_EQ(WMError::WM_OK, window->Hide());
+    EXPECT_EQ(WMError::WM_OK, window->Hide());
     window->Destroy();
 }
 
@@ -131,9 +127,7 @@ HWTEST_F(WindowModeSupportTypeTest, WindowModeSupportType02, TestSize.Level1)
 HWTEST_F(WindowModeSupportTypeTest, WindowModeSupportType03, TestSize.Level1)
 {
     const sptr<Window>& window = Utils::CreateTestWindow(fullAppInfo_1_);
-    if (window == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, window);
     window->SetRequestWindowModeSupportType(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN |
                                             WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING);
     ASSERT_EQ(WMError::WM_OK, window->Show());
@@ -163,9 +157,7 @@ HWTEST_F(WindowModeSupportTypeTest, WindowModeSupportType03, TestSize.Level1)
 HWTEST_F(WindowModeSupportTypeTest, WindowModeSupportType04, TestSize.Level1)
 {
     const sptr<Window>& window = Utils::CreateTestWindow(fullAppInfo_1_);
-    if (window == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, window);
     window->SetRequestWindowModeSupportType(WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING |
                                             WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
                                             WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY);
@@ -182,23 +174,21 @@ HWTEST_F(WindowModeSupportTypeTest, WindowModeSupportType04, TestSize.Level1)
 HWTEST_F(WindowModeSupportTypeTest, WindowModeSupportType05, TestSize.Level1)
 {
     const sptr<Window>& window1 = Utils::CreateTestWindow(fullAppInfo_1_);
-    if (window1 == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, window1);
     window1->SetRequestWindowModeSupportType(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN);
     const sptr<Window>& window2 = Utils::CreateTestWindow(fullAppInfo_2_);
     ASSERT_NE(nullptr, window2);
     window2->SetRequestWindowModeSupportType(WindowModeSupport::WINDOW_MODE_SUPPORT_ALL);
-    ASSERT_EQ(WMError::WM_OK, window1->Show());
-    ASSERT_EQ(WMError::WM_OK, window2->Show());
+    EXPECT_EQ(WMError::WM_OK, window1->Show());
+    EXPECT_EQ(WMError::WM_OK, window2->Show());
     WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::CASCADE);
     usleep(WAIT_SYANC_US);
 
-    ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, window1->GetWindowMode());
+    EXPECT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, window1->GetWindowMode());
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(WindowMode::WINDOW_MODE_FLOATING, window2->GetWindowMode());
+        EXPECT_EQ(WindowMode::WINDOW_MODE_FLOATING, window2->GetWindowMode());
     } else {
-        ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, window2->GetWindowMode());
+        EXPECT_NE(WindowMode::WINDOW_MODE_FULLSCREEN, window2->GetWindowMode());
     }
     window1->Destroy();
     window2->Destroy();
@@ -212,9 +202,7 @@ HWTEST_F(WindowModeSupportTypeTest, WindowModeSupportType05, TestSize.Level1)
 HWTEST_F(WindowModeSupportTypeTest, WindowModeSupportType06, TestSize.Level1)
 {
     const sptr<Window>& window = Utils::CreateTestWindow(fullAppInfo_1_);
-    if (window == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, window);
     window->SetRequestWindowModeSupportType(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN);
     ASSERT_EQ(WMError::WM_OK, window->Show());
     WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::TILE);

@@ -259,6 +259,26 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualPixelRatio, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyScreenConnectCompletion
+ * @tc.desc: NotifyScreenConnectCompletion
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, NotifyScreenConnectCompletion, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ScreenId id = 1001;
+ 
+    std::function<void()> func = [&]()
+    {
+        screenSessionManagerProxy->NotifyScreenConnectCompletion(id);
+    };
+    func();
+    EXPECT_TRUE(logMsg.find("SendRequest failed") == std::string::npos);
+    LOG_SetCallback(nullptr);
+}
+
+/**
  * @tc.name: SetVirtualPixelRatioSystem
  * @tc.desc: SetVirtualPixelRatioSystem
  * @tc.type: FUNC
@@ -1487,6 +1507,26 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetFoldDisplayMode, TestSize.Level1)
     screenSessionManagerProxy->SetFoldDisplayMode(displayMode);
     if (screenSessionManagerProxy->IsFoldable() && !FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         EXPECT_NE(ScreenSessionManager::GetInstance().foldScreenController_, nullptr);
+    } else if (FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
+        EXPECT_NE(ScreenSessionManager::GetInstance().foldScreenController_, nullptr);
+    } else {
+        EXPECT_EQ(ScreenSessionManager::GetInstance().foldScreenController_, nullptr);
+    }
+}
+
+/**
+ * @tc.name: SetFoldDisplayModeAsync
+ * @tc.desc: SetFoldDisplayModeAsync
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, SetFoldDisplayModeAsync, TestSize.Level1)
+{
+    FoldDisplayMode displayMode = FoldDisplayMode::UNKNOWN;
+    screenSessionManagerProxy->SetFoldDisplayModeAsync(displayMode);
+    if (screenSessionManagerProxy->IsFoldable() && !FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        EXPECT_NE(ScreenSessionManager::GetInstance().foldScreenController_, nullptr);
+    } else if (FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
+        EXPECT_NE(ScreenSessionManager::GetInstance().foldScreenController_, nullptr);
     } else {
         EXPECT_EQ(ScreenSessionManager::GetInstance().foldScreenController_, nullptr);
     }
@@ -2164,6 +2204,32 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetScreenPrivacyWindowTagSwitch, Functio
     proxy->SetScreenPrivacyWindowTagSwitch(mainScreenId, privacyWindowTag, true);
     EXPECT_TRUE(logMsg.find("remote is null") != std::string::npos);
     LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: NotifySwitchUserAnimationFinish
+ * @tc.desc: NotifySwitchUserAnimationFinish test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, NotifySwitchUserAnimationFinish, TestSize.Level1)
+{
+    MockMessageParcel::ClearAllErrorFlag();
+    auto proxy = sptr<ScreenSessionManagerProxy>::MakeSptr(nullptr);
+    proxy->NotifySwitchUserAnimationFinish();
+
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    proxy = sptr<ScreenSessionManagerProxy>::MakeSptr(remoteMocker);
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ASSERT_NE(proxy, nullptr);
+    proxy->NotifySwitchUserAnimationFinish();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+    ASSERT_NE(proxy, nullptr);
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    proxy->NotifySwitchUserAnimationFinish();
+    remoteMocker->SetRequestResult(ERR_NONE);
+    proxy->NotifySwitchUserAnimationFinish();
+    MockMessageParcel::ClearAllErrorFlag();
 }
 }
 }

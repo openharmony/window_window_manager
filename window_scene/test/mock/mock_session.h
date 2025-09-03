@@ -67,11 +67,9 @@ public:
     MOCK_METHOD2(UpdateSessionPropertyByAction, WMError(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action));
     MOCK_METHOD1(TransferExtensionData, int32_t(const AAFwk::WantParams& wantParams));
+    MOCK_METHOD1(RaiseMainWindowAboveTarget, WSError(int32_t targetId));
     MOCK_METHOD(WSError, ProcessPointDownSession, (int32_t x, int32_t y), (override));
-    void SetMockLayoutController(const sptr<LayoutController>& layoutController)
-    {
-        layoutController_ = layoutController;
-    }
+    MOCK_CONST_METHOD2(ConvertGlobalRectToRelative, WSRect(const WSRect& globalRect, DisplayId targetDisplayId));
 };
 } // namespace Rosen
 } // namespace OHOS

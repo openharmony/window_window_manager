@@ -688,7 +688,13 @@ HWTEST_F(WindowSessionImplTest3, UpdateRectForOtherReasonTask, TestSize.Level1)
     wmRect.posX_ = 1;
     window_->UpdateRectForOtherReasonTask(wmRect, preRect, wmReason, rsTransaction);
     ASSERT_EQ(window_->postTaskDone_, true);
-
+    WindowType windowType = window_->GetType();
+    window_->postTaskDone_ = true;
+    window_->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT_NAVIGATION);
+    window_->SetNotifySizeChangeFlag(true);
+    window_->UpdateRectForOtherReasonTask(wmRect, preRect, wmReason, rsTransaction);
+    ASSERT_EQ(window_->postTaskDone_, true);
+    window_->property_->SetWindowType(windowType);
     window_->handler_ = nullptr;
     window_->UpdateRectForOtherReason(wmRect, preRect, wmReason, rsTransaction);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateRectForOtherReasonTask end";

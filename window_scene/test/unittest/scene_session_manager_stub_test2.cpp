@@ -28,6 +28,9 @@
 #include "pattern_detach_callback.h"
 #include "test/mock/mock_session_stage.h"
 #include "mock/mock_message_parcel.h"
+#include "test/mock/mock_scene_session_manager_stub.h"
+#include "ui_effect_controller_client.h"
+#include "ui_effect_controller.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -92,6 +95,126 @@ HWTEST_F(SceneSessionManagerStubTest2, HandleIsFreeMultiWindow, TestSize.Level1)
     EXPECT_EQ(res, ERR_NONE);
 }
 
+/**
+ * @tc.name: HandleRecoverWindowPropertyChangeFlag01
+ * @tc.desc: test HandleRecoverWindowPropertyChangeFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest2, HandleRecoverWindowPropertyChangeFlag01, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    auto res = stub_->HandleRecoverWindowPropertyChangeFlag(data, reply);
+    EXPECT_EQ(res, ERR_TRANSACTION_FAILED);
+
+    data.WriteUint32(0);
+    res = stub_->HandleRecoverWindowPropertyChangeFlag(data, reply);
+    EXPECT_EQ(res, ERR_TRANSACTION_FAILED);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    res = stub_->HandleRecoverWindowPropertyChangeFlag(data, reply);
+    EXPECT_EQ(res, ERR_TRANSACTION_FAILED);
+    MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
+ * @tc.name: HandleSetWatermarkImageForApp01
+ * @tc.desc: test HandleSetWatermarkImageForApp
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest2, HandleSetWatermarkImageForApp01, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    uint32_t code = static_cast<uint32_t>(
+        ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_SET_APP_WATERMARK_IMAGE);
+    auto res = stub_->ProcessRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, ERR_NONE);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    res = stub_->HandleSetWatermarkImageForApp(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    res = stub_->HandleSetWatermarkImageForApp(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
+ * @tc.name: HandleRecoverWatermarkImageForApp01
+ * @tc.desc: test HandleRecoverWatermarkImageForApp
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest2, HandleRecoverWatermarkImageForApp01, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    uint32_t code = static_cast<uint32_t>(
+        ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_RECOVER_APP_WATERMARK_IMAGE);
+    auto res = stub_->ProcessRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, ERR_NONE);
+
+    data.WriteString("watermark");
+    res = stub_->HandleRecoverWatermarkImageForApp(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    data.WriteString("watermark");
+    res = stub_->HandleRecoverWatermarkImageForApp(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+    MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
+ * @tc.name: HandleCreateUIEffectController
+ * @tc.desc: test HandleCreateUIEffectController
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest2, HandleCreateUIEffectController, Function | SmallTest | Level2)
+{
+    MockMessageParcel::ClearAllErrorFlag();
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint32_t code = static_cast<uint32_t>(
+        ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_CREATE_UI_EFFECT_CONTROLLER);
+    sptr<IUIEffectControllerClient> client = sptr<UIEffectControllerClient>::MakeSptr();
+    stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(stub_->HandleCreateUIEffectController(data, reply), ERR_INVALID_DATA);
+    data.WriteRemoteObject(client->AsObject());
+    stub_->HandleCreateUIEffectController(data, reply);
+    sptr<MockSceneSessionManagerStub> stubMock = sptr<MockSceneSessionManagerStub>::MakeSptr();
+    EXPECT_CALL(*stubMock, CreateUIEffectController(_, _, _)).WillOnce(Return(static_cast<WMError>(-1)));
+    data.RewindRead(0);
+    EXPECT_EQ(stubMock->HandleCreateUIEffectController(data, reply), ERR_INVALID_DATA);
+    EXPECT_CALL(*stubMock, CreateUIEffectController(_, _, _)).WillOnce(DoAll(Return(WMError::WM_ERROR_NOT_SYSTEM_APP)));
+    data.RewindRead(0);
+    EXPECT_EQ(stubMock->HandleCreateUIEffectController(data, reply), ERR_NONE);
+    EXPECT_CALL(*stubMock, CreateUIEffectController(_, _, _)).WillOnce(DoAll(SetArgReferee<2>(-1),
+        Return(WMError::WM_OK)));
+    data.RewindRead(0);
+    EXPECT_EQ(stubMock->HandleCreateUIEffectController(data, reply), ERR_INVALID_DATA);
+    EXPECT_CALL(*stubMock, CreateUIEffectController(_, _, _)).WillOnce(DoAll(SetArgReferee<1>(nullptr),
+        SetArgReferee<2>(0), Return(WMError::WM_OK)));
+    data.RewindRead(0);
+    EXPECT_EQ(stubMock->HandleCreateUIEffectController(data, reply), ERR_INVALID_DATA);
+    sptr<UIEffectController> server = sptr<UIEffectController>::MakeSptr(0, nullptr, nullptr);
+    EXPECT_CALL(*stubMock, CreateUIEffectController(_, _, _)).WillOnce(DoAll(SetArgReferee<1>(server),
+        SetArgReferee<2>(0), Return(WMError::WM_OK)));
+    data.RewindRead(0);
+    EXPECT_EQ(stubMock->HandleCreateUIEffectController(data, reply), ERR_NONE);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

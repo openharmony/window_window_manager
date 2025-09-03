@@ -65,8 +65,11 @@ public:
     std::string OnDumperClientScreenSessions() override;
     void OnBeforeScreenPropertyChanged(FoldStatus foldStatus) override;
     void OnScreenModeChanged(ScreenModeChangeEvent screenModeChangeEvent) override;
+    void OnAnimationFinish() override;
 private:
     static inline BrokerDelegator<ScreenSessionManagerClientProxy> delegator_;
+    bool ScreenConnectWriteParam(SessionOption& SessionOption,
+        ScreenEvent screenEvent, MessageParcel& data);
 };
 } // namespace OHOS::Rosen
 

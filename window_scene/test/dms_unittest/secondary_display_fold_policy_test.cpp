@@ -339,7 +339,7 @@ HWTEST_F(SecondaryDisplayFoldPolicyTest, SetStatusFullActiveRectAndTpFeature, Te
     ScreenProperty property = policy.screenProperty_;
     sptr<ScreenSession> screenSession = ScreenSessionManager::GetInstance().GetScreenSession(0);
 
-    policy.SetStatusFullActiveRectAndTpFeature(screenSession, property);
+    policy.SetStatusFullActiveRectAndTpFeature(screenSession, property, true);
     EXPECT_FALSE(policy.onBootAnimation_);
 }
 
@@ -631,6 +631,46 @@ HWTEST_F(SecondaryDisplayFoldPolicyTest, SetStatusConditionalActiveRectAndTpFeat
 
     policy.SetStatusConditionalActiveRectAndTpFeature(property);
     EXPECT_FALSE(policy.onBootAnimation_);
+}
+
+/**
+ * @tc.name: InitPositionZInfosFeature
+ * @tc.desc: test function : InitPositionZInfosFeature
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecondaryDisplayFoldPolicyTest, InitPositionZInfosFeature, TestSize.Level1)
+{
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        GTEST_SKIP();
+    }
+    std::recursive_mutex displayInfoMutex;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+    SecondaryDisplayFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
+
+    policy.dualDisplayNodePositionZ_.clear();
+    policy.InitPositionZInfos();
+    EXPECT_FALSE(policy.dualDisplayNodePositionZ_.empty());
+
+    policy.InitPositionZInfos();
+    EXPECT_FALSE(policy.dualDisplayNodePositionZ_.empty());
+}
+
+/**
+ * @tc.name: UpdatePositionZForDualDisplayNodeFeature
+ * @tc.desc: test function : UpdatePositionZForDualDisplayNodeFeature
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecondaryDisplayFoldPolicyTest, UpdatePositionZForDualDisplayNodeFeature, TestSize.Level1)
+{
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        GTEST_SKIP();
+    }
+    std::recursive_mutex displayInfoMutex;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+    SecondaryDisplayFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
+
+    policy.UpdatePositionZForDualDisplayNode();
+    EXPECT_FALSE(policy.dualDisplayNodePositionZ_.empty());
 }
 }
 } // namespace Rosen

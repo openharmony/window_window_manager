@@ -1723,6 +1723,17 @@ HWTEST_F(WindowManagerTest, GetTopNavDestinationName, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetWatermarkImageForApp
+ * @tc.desc: test SetWatermarkImageForApp rpc is ok
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, SetWatermarkImageForApp, TestSize.Level1)
+{
+    auto ret = WindowManager::GetInstance().SetWatermarkImageForApp(nullptr);
+    EXPECT_EQ(SingletonContainer::Get<WindowAdapter>().SetWatermarkImageForApp(nullptr), ret);
+}
+
+/**
  * @tc.name: ShiftAppWindowPointerEvent
  * @tc.desc: check ShiftAppWindowPointerEvent
  * @tc.type: FUNC
@@ -2521,6 +2532,38 @@ HWTEST_F(WindowManagerTest, RemoveSessionBlackList01, TestSize.Level1)
     std::unordered_set<std::string> privacyWindowTags;
     ret = WindowManager::GetInstance().RemoveSessionBlackList(bundleNames, privacyWindowTags);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
+}
+
+/**
+ * @tc.name: GetInstance
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, GetInstance, TestSize.Level1)
+{
+    sptr<WindowManager> instance = nullptr;
+    int32_t userId = -1;
+    instance = WindowManager::GetInstance(userId);
+    ASSERT_NE(instance, nullptr);
+
+    userId = 101;
+    instance = WindowManager::GetInstance(userId);
+    ASSERT_NE(instance, nullptr);
+
+    // branch overried
+    instance = WindowManager::GetInstance(userId);
+    ASSERT_NE(instance, nullptr);
+}
+
+/**
+ * @tc.name: RemoveInstanceByUserId
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, RemoveInstanceByUserId, TestSize.Level1)
+{
+    int32_t userId = 101;
+    ASSERT_EQ(WMError::WM_OK, WindowManager::RemoveInstanceByUserId(userId));
 }
 }
 } // namespace

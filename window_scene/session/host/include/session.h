@@ -55,12 +55,13 @@ class RSTransaction;
 class Session;
 using NotifySessionRectChangeFunc = std::function<void(const WSRect& rect,
     SizeChangeReason reason, DisplayId displayId, const RectAnimationConfig& rectAnimationConfig)>;
+using NotifySessionDisplayIdChangeFunc = std::function<void(uint64_t displayId)>;
 using NotifyUpdateFloatingBallFunc = std::function<void(const FloatingBallTemplateInfo& fbTemplateInfo)>;
 using NotifyStopFloatingBallFunc = std::function<void()>;
 using NotifyRestoreFloatingBallMainWindowFunc = std::function<void(const std::shared_ptr<AAFwk::Want>& want)>;
-using NotifySessionDisplayIdChangeFunc = std::function<void(uint64_t displayId)>;
 using NotifyPendingSessionActivationFunc = std::function<void(SessionInfo& info)>;
-using NotifyBatchPendingSessionsActivationFunc = std::function<void(std::vector<std::shared_ptr<SessionInfo>>& info)>;
+using NotifyBatchPendingSessionsActivationFunc = std::function<void(std::vector<std::shared_ptr<SessionInfo>>& info,
+    const std::vector<std::shared_ptr<PendingSessionActivationConfig>>& configs)>;
 using NotifyChangeSessionVisibilityWithStatusBarFunc = std::function<void(const SessionInfo& info, bool visible)>;
 using NotifySessionStateChangeFunc = std::function<void(const SessionState& state)>;
 using NotifyBufferAvailableChangeFunc = std::function<void(const bool isAvailable, bool startWindowInvisible)>;
@@ -259,6 +260,7 @@ public:
     virtual WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) { return WSError::WS_OK; }
 
     int32_t GetPersistentId() const;
+    int32_t GetCurrentRotation() const;
     void SetSurfaceNode(const std::shared_ptr<RSSurfaceNode>& surfaceNode);
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const;
     std::optional<NodeId> GetSurfaceNodeId() const;
@@ -273,7 +275,8 @@ public:
         bool runInFfrt = false, float scaleParam = 0.0f, bool useCurWindow = false) const;
     void ResetSnapshot();
     void SaveSnapshot(bool useFfrt, bool needPersist = true,
-        std::shared_ptr<Media::PixelMap> persistentPixelMap = nullptr, bool updateSnapshot = false);
+        std::shared_ptr<Media::PixelMap> persistentPixelMap = nullptr, bool updateSnapshot = false,
+        BackgroundReason reason = BackgroundReason::DEFAULT);
     void SetSaveSnapshotCallback(Task&& task)
     {
         if (task) {
@@ -316,6 +319,7 @@ public:
     void GetCloseAbilityWantAndClean(AAFwk::Want& outWant);
     void SetSessionInfo(const SessionInfo& info);
     void SetSessionInfoWindowInputType(uint32_t windowInputType);
+    void SetSessionInfoWindowMode(int32_t windowMode);
     const SessionInfo& GetSessionInfo() const;
     SessionInfo& EditSessionInfo();
     DisplayId GetScreenId() const;
@@ -492,6 +496,7 @@ public:
     WSError GetIsHighlighted(bool& isHighlighted) override;
     WSError HandlePointerEventForFocus(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         bool isExecuteDelayRaise = false);
+    bool HasParentSessionWithToken(const sptr<IRemoteObject>& token);
 
     /*
      * Multi Window
@@ -515,7 +520,7 @@ public:
     bool IsSessionForeground() const;
     bool IsSessionNotBackground() const;
     virtual bool IsAnco() const { return false; }
-    virtual void SetBlank(bool isAddBlank) {};
+    virtual void SetBlank(bool isAddBlank) {}
     virtual bool GetBlank() const { return false; }
     virtual bool GetBufferAvailableCallbackEnable() const { return false; }
 
@@ -649,8 +654,9 @@ public:
     bool GetAppBufferReady() const;
     void SetUseStartingWindowAboveLocked(bool useStartingWindowAboveLocked);
     bool UseStartingWindowAboveLocked() const;
-    WSError SetHidingStartingWindow(bool hidingStartWindow);
+    void SetHidingStartingWindow(bool hidingStartWindow);
     bool GetHidingStartingWindow() const;
+    WSError SetLeashWindowAlpha(bool hidingStartWindow);
 
     /*
      * Window Hierarchy
@@ -733,8 +739,8 @@ public:
     bool SupportSnapshotAllSessionStatus() const;
     void InitSnapshotCapacity();
     SnapshotStatus GetWindowStatus() const;
-    SnapshotStatus GetSessionStatus() const;
-    DisplayOrientation GetWindowOrientation() const;
+    SnapshotStatus GetSessionSnapshotStatus(BackgroundReason reason = BackgroundReason::DEFAULT) const;
+    uint32_t GetWindowSnapshotOrientation() const;
     uint32_t GetLastOrientation() const;
     bool HasSnapshotFreeMultiWindow();
     bool HasSnapshot(SnapshotStatus key);
@@ -824,7 +830,7 @@ protected:
     bool isActive_ = false;
     bool isSystemActive_ = false;
     WSRectF bounds_;
-    Rotation rotation_;
+    Rotation rotation_ { Rotation::ROTATION_0 };
     float offsetX_ = 0.0f;
     float offsetY_ = 0.0f;
     std::atomic_bool isExitSplitOnBackground_ = false;

@@ -159,6 +159,10 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleGetGlobalWindowMode(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_TOP_NAV_DEST_NAME):
             return HandleGetTopNavDestinationName(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_APP_WATERMARK_IMAGE):
+            return HandleSetWatermarkImageForApp(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_RECOVER_APP_WATERMARK_IMAGE):
+            return HandleRecoverWatermarkImageForApp(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_VISIBILITY_WINDOW_INFO_ID):
             return HandleGetVisibilityWindowInfo(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_ADD_EXTENSION_WINDOW_STAGE_TO_SCB):
@@ -256,6 +260,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleRemoveSessionBlackList(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_PIP_SWITCH_STATUS):
             return HandleGetPiPSettingSwitchStatus(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_RECOVER_WINDOW_PROPERTY_CHANGE_FLAG):
+            return HandleRecoverWindowPropertyChangeFlag(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -301,8 +307,8 @@ int SceneSessionManagerStub::HandleCreateAndConnectSpecificSession(MessageParcel
     reply.WriteRemoteObject(sceneSession->AsObject());
     reply.WriteParcelable(&systemConfig);
     reply.WriteUint32(property->GetSubWindowLevel());
-    reply.WriteFloat(property->GetWindowCornerRadius());
     reply.WriteUint64(property->GetDisplayId());
+    reply.WriteUint32(static_cast<uint32_t>(property->GetWindowType()));
     reply.WriteUint32(static_cast<uint32_t>(WSError::WS_OK));
     return ERR_NONE;
 }
@@ -522,6 +528,29 @@ int SceneSessionManagerStub::HandleUnregisterWindowManagerAgent(MessageParcel& d
     return ERR_NONE;
 }
 
+int SceneSessionManagerStub::HandleRecoverWindowPropertyChangeFlag(MessageParcel& data, MessageParcel& reply)
+{
+    uint32_t observedFlags = 0;
+    if (!data.ReadUint32(observedFlags)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read observedFlags failed");
+        return ERR_TRANSACTION_FAILED;
+    }
+
+    uint32_t interestFlags = 0;
+    if (!data.ReadUint32(interestFlags)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read interestFlags failed");
+        return ERR_TRANSACTION_FAILED;
+    }
+
+    WMError errCode = RecoverWindowPropertyChangeFlag(observedFlags, interestFlags);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write errCode failed");
+        return ERR_TRANSACTION_FAILED;
+    }
+
+    return ERR_NONE;
+}
+
 int SceneSessionManagerStub::HandleRegisterWindowPropertyChangeAgent(MessageParcel& data, MessageParcel& reply)
 {
     int32_t windowInfoKeyValue = 0;
@@ -630,7 +659,12 @@ int SceneSessionManagerStub::HandlePendingSessionToForeground(MessageParcel& dat
         WLOGFE("token is nullptr");
         return ERR_INVALID_DATA;
     }
-    WSError errCode = PendingSessionToForeground(token);
+    int32_t windowMode = 0;
+    if (!data.ReadInt32(windowMode)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "read windowMode fail");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = PendingSessionToForeground(token, windowMode);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -1403,6 +1437,48 @@ int SceneSessionManagerStub::HandleGetTopNavDestinationName(MessageParcel& data,
     if (size > 0 && !reply.WriteRawData(topNavDestName.c_str(), size)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write top page name failed");
         return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write error code failed");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleSetWatermarkImageForApp(MessageParcel& data, MessageParcel& reply)
+{
+    std::shared_ptr<Media::PixelMap> pixelMap(data.ReadParcelable<Media::PixelMap>());
+    std::string watermarkName;
+    WMError errCode = SetWatermarkImageForApp(pixelMap, watermarkName);
+    if (errCode != WMError::WM_OK) {
+        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "set app watermark failed");
+    }
+    uint32_t size = static_cast<uint32_t>(watermarkName.length());
+    if (!reply.WriteUint32(size)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write the size of watermark name failed");
+        return ERR_INVALID_DATA;
+    }
+    if (size > 0 && !reply.WriteRawData(watermarkName.c_str(), size)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write watermark name failed");
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write error code failed");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleRecoverWatermarkImageForApp(MessageParcel& data, MessageParcel& reply)
+{
+    std::string watermarkName;
+    if (!data.ReadString(watermarkName)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "get watermark name failed");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = RecoverWatermarkImageForApp(watermarkName);
+    if (errCode != WMError::WM_OK) {
+        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "recover failed, watermarkName=%{public}s", watermarkName.c_str());
     }
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write error code failed");
@@ -2287,6 +2363,10 @@ int SceneSessionManagerStub::HandleCreateUIEffectController(MessageParcel& data,
         TLOGE(WmsLogTag::WMS_ANIMATION, "Write id failed.");
         return ERR_INVALID_DATA;
     }
+    if (controller == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "controller is nullptr.");
+        return ERR_INVALID_DATA;
+    }
     if (!reply.WriteRemoteObject(controller->AsObject())) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Write controller failed.");
         return ERR_INVALID_DATA;
@@ -2306,7 +2386,7 @@ int SceneSessionManagerStub::HandleAddSessionBlackList(MessageParcel& data, Mess
         return ERR_INVALID_DATA;
     }
     std::unordered_set<std::string> bundleNames;
-    for (int64_t i = 0; i < size; i++) {
+    for (uint64_t i = 0; i < size; i++) {
         std::string bundleName;
         if (!data.ReadString(bundleName)) {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read windowId failed");
@@ -2325,7 +2405,7 @@ int SceneSessionManagerStub::HandleAddSessionBlackList(MessageParcel& data, Mess
         return ERR_INVALID_DATA;
     }
     std::unordered_set<std::string> privacyWindowTags;
-    for (int64_t i = 0; i < size; i++) {
+    for (uint64_t i = 0; i < size; i++) {
         std::string privacyWindowTag = 0;
         if (!data.ReadString(privacyWindowTag)) {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read privacyWindowTag failed");
@@ -2353,7 +2433,7 @@ int SceneSessionManagerStub::HandleRemoveSessionBlackList(MessageParcel& data, M
         return ERR_INVALID_DATA;
     }
     std::unordered_set<std::string> bundleNames;
-    for (int64_t i = 0; i < size; i++) {
+    for (uint64_t i = 0; i < size; i++) {
         std::string bundleName;
         if (!data.ReadString(bundleName)) {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read bundleName failed");
@@ -2372,7 +2452,7 @@ int SceneSessionManagerStub::HandleRemoveSessionBlackList(MessageParcel& data, M
         return ERR_INVALID_DATA;
     }
     std::unordered_set<std::string> privacyWindowTags;
-    for (int64_t i = 0; i < size; i++) {
+    for (uint64_t i = 0; i < size; i++) {
         std::string privacyWindowTag = 0;
         if (!data.ReadString(privacyWindowTag)) {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read privacyWindowTag failed");

@@ -58,6 +58,9 @@ bool operator==(const MMI::ScreenInfo& a, const MMI::ScreenInfo& b)
         a.dpi != b.dpi || a.ppi != b.ppi) {
         return false;
     }
+    if (a.rotation != b.rotation) {
+        return false;
+    }
     return true;
 }
 
@@ -72,6 +75,13 @@ bool operator==(const MMI::DisplayInfo& a, const MMI::DisplayInfo& b)
         a.isCurrentOffScreenRendering != b.isCurrentOffScreenRendering || a.displaySourceMode != b.displaySourceMode ||
         a.oneHandX != b.oneHandX || a.oneHandY != b.oneHandY || a.screenArea.id != b.screenArea.id ||
         a.screenArea.area != b.screenArea.area || a.rsId != b.rsId) {
+        return false;
+    }
+    if (a.offsetX != b.offsetX || a.offsetY != b.offsetY || a.pointerActiveWidth != b.pointerActiveWidth ||
+        a.pointerActiveHeight != b.pointerActiveHeight) {
+        return false;
+    }
+    if (a.deviceRotation != b.deviceRotation || a.rotationCorrection != b.rotationCorrection) {
         return false;
     }
     return true;
@@ -282,6 +292,8 @@ void SceneInputManager::ConstructDisplayGroupInfos(std::map<ScreenId, ScreenProp
             scalePercent = singleHandTransform.scaleX * DEFAULT_SCREEN_SCALE;
             expandHeight = screenProperty.GetBounds().rect_.GetHeight() - originRect.height_;
         }
+        int32_t deviceRotation = static_cast<int32_t>(screenProperty.GetDeviceRotation());
+        int32_t rotationCorrection = static_cast<int32_t>(screenSession->GetRotationCorrection(displayMode));
         MMI::DisplayInfo displayInfo = {
             .id = screenId,
             .x = screenProperty.GetX(),
@@ -309,7 +321,9 @@ void SceneInputManager::ConstructDisplayGroupInfos(std::map<ScreenId, ScreenProp
             .offsetX = screenProperty.GetInputOffsetX(),
             .offsetY = screenProperty.GetInputOffsetY(),
             .pointerActiveWidth = screenProperty.GetPointerActiveWidth(),
-            .pointerActiveHeight = screenProperty.GetPointerActiveHeight()
+            .pointerActiveHeight = screenProperty.GetPointerActiveHeight(),
+            .deviceRotation = ConvertDegreeToMMIRotation(deviceRotation * 90.0F),
+            .rotationCorrection = ConvertDegreeToMMIRotation(rotationCorrection * 90.0F)
         };
         DisplayGroupId displayGroupId = screenSession->GetDisplayGroupId();
         if (displayGroupMap.count(displayGroupId) == 0) {

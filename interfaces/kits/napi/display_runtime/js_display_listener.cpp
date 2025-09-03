@@ -28,13 +28,13 @@ using namespace AbilityRuntime;
 
 JsDisplayListener::JsDisplayListener(napi_env env) : env_(env), weakRef_(wptr<JsDisplayListener> (this))
 {
-    TLOGI(WmsLogTag::DMS, "Constructor execution");
+    TLOGI(WmsLogTag::DMS, "Constructor");
     napi_add_env_cleanup_hook(env_, CleanEnv, this);
 }
 
 JsDisplayListener::~JsDisplayListener()
 {
-    TLOGI(WmsLogTag::DMS, "Destructor execution");
+    TLOGI(WmsLogTag::DMS, "Destructor");
     napi_remove_env_cleanup_hook(env_, CleanEnv, this);
     env_ = nullptr;
 }
@@ -63,7 +63,7 @@ void JsDisplayListener::AddCallback(const std::string& type, napi_value jsListen
     callbackRef.reset(reinterpret_cast<NativeReference*>(result));
     std::lock_guard<std::mutex> lock(mtx_);
     jsCallBack_[type].emplace_back(std::move(callbackRef));
-    TLOGD(WmsLogTag::DMS, "success jsCallBack_ size: %{public}u!",
+    TLOGD(WmsLogTag::DMS, "success, jsCallBack_ size: %{public}u!",
         static_cast<uint32_t>(jsCallBack_[type].size()));
 }
 
@@ -91,8 +91,7 @@ void JsDisplayListener::RemoveCallback(napi_env env, const std::string& type, na
             iter++;
         }
     }
-    TLOGI(WmsLogTag::DMS, "success jsCallBack_ size: %{public}u!",
-        static_cast<uint32_t>(listeners.size()));
+    TLOGI(WmsLogTag::DMS, "jsCallBack size: %{public}u!", static_cast<uint32_t>(listeners.size()));
 }
 
 void JsDisplayListener::CallJsMethod(const std::string& methodName, napi_value const * argv, size_t argc)
@@ -152,7 +151,7 @@ void JsDisplayListener::OnCreate(DisplayId id)
 void JsDisplayListener::OnDestroy(DisplayId id)
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    TLOGI(WmsLogTag::DMS, "called, displayId: %{public}d", static_cast<uint32_t>(id));
+    TLOGI(WmsLogTag::DMS, "displayId: %{public}d", static_cast<uint32_t>(id));
     if (jsCallBack_.empty()) {
         TLOGE(WmsLogTag::DMS, "not register!");
         return;
@@ -175,17 +174,17 @@ void JsDisplayListener::OnDestroy(DisplayId id)
     if (env_ != nullptr) {
         napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate, "OnDestroy");
         if (ret != napi_status::napi_ok) {
-            TLOGE(WmsLogTag::DMS, "OFailed to SendEvent.");
+            TLOGE(WmsLogTag::DMS, "Failed to SendEvent.");
         }
     } else {
-        TLOGE(WmsLogTag::DMS, " env is nullptr");
+        TLOGE(WmsLogTag::DMS, "env is nullptr");
     }
 }
 
 void JsDisplayListener::OnChange(DisplayId id)
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    TLOGD(WmsLogTag::DMS, "Jcalled, displayId: %{public}d", static_cast<uint32_t>(id));
+    TLOGD(WmsLogTag::DMS, "called, displayId: %{public}d", static_cast<uint32_t>(id));
     if (jsCallBack_.empty()) {
         TLOGE(WmsLogTag::DMS, "not register!");
         return;
@@ -224,7 +223,7 @@ void JsDisplayListener::OnPrivateWindow(bool hasPrivate)
         return;
     }
     if (jsCallBack_.find(EVENT_PRIVATE_MODE_CHANGE) == jsCallBack_.end()) {
-        TLOGE(WmsLogTag::DMS, "OnPrivateWindow not this event, return");
+        TLOGE(WmsLogTag::DMS, "not this event, return");
         return;
     }
     auto napiTask = [self = weakRef_, hasPrivate, env = env_]() {

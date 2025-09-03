@@ -90,6 +90,7 @@ public:
     FoldDisplayMode GetFoldDisplayMode();
     FoldDisplayMode GetFoldDisplayModeForExternal();
     void SetFoldDisplayMode(const FoldDisplayMode);
+    void SetFoldDisplayModeAsync(const FoldDisplayMode);
     DMError SetFoldDisplayModeFromJs(const FoldDisplayMode, std::string reason = "");
     void SetDisplayScale(ScreenId screenId, float scaleX, float scaleY, float pivotX, float pivotY);
     void SetFoldStatusLocked(bool locked);
@@ -515,7 +516,7 @@ void DisplayManager::Impl::ClearFoldStatusCallback()
         res = SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(foldStatusListenerAgent_,
             DisplayManagerAgentType::FOLD_STATUS_CHANGED_LISTENER);
         foldStatusListenerAgent_ = nullptr;
-        TLOGI(WmsLogTag::DMS, "ClearFoldStatusCallback foldStatusListenerAgent_ is nullptr !");
+        TLOGI(WmsLogTag::DMS, "foldStatusListenerAgent_ is nullptr !");
     }
     if (res != DMError::DM_OK) {
         TLOGW(WmsLogTag::DMS, "UnregisterDisplayManagerAgent FOLD_STATUS_CHANGED_LISTENER failed !");
@@ -1068,7 +1069,7 @@ std::vector<DisplayPhysicalResolution> DisplayManager::GetAllDisplayPhysicalReso
 
 std::vector<sptr<Display>> DisplayManager::GetAllDisplays()
 {
-    TLOGD(WmsLogTag::DMS, "GetAllDisplays start");
+    TLOGD(WmsLogTag::DMS, "start");
     std::vector<sptr<Display>> res;
     auto displayIds = GetAllDisplayIds();
     for (auto displayId : displayIds) {
@@ -1076,7 +1077,7 @@ std::vector<sptr<Display>> DisplayManager::GetAllDisplays()
         if (display != nullptr) {
             res.emplace_back(display);
         } else {
-            TLOGE(WmsLogTag::DMS, "DisplayManager::GetAllDisplays display %" PRIu64" nullptr!", displayId);
+            TLOGE(WmsLogTag::DMS, "display %" PRIu64" nullptr!", displayId);
         }
     }
     return res;
@@ -1151,6 +1152,11 @@ void DisplayManager::SetFoldDisplayMode(const FoldDisplayMode mode)
     pImpl_->SetFoldDisplayMode(mode);
 }
 
+void DisplayManager::SetFoldDisplayModeAsync(const FoldDisplayMode mode)
+{
+    pImpl_->SetFoldDisplayModeAsync(mode);
+}
+
 DMError DisplayManager::SetFoldDisplayModeFromJs(const FoldDisplayMode mode, std::string reason)
 {
     return pImpl_->SetFoldDisplayModeFromJs(mode, reason);
@@ -1170,6 +1176,11 @@ void DisplayManager::Impl::SetDisplayScale(ScreenId screenId,
 void DisplayManager::Impl::SetFoldDisplayMode(const FoldDisplayMode mode)
 {
     SingletonContainer::Get<DisplayManagerAdapter>().SetFoldDisplayMode(mode);
+}
+
+void DisplayManager::Impl::SetFoldDisplayModeAsync(const FoldDisplayMode mode)
+{
+    SingletonContainer::Get<DisplayManagerAdapter>().SetFoldDisplayModeAsync(mode);
 }
 
 DMError DisplayManager::Impl::SetFoldDisplayModeFromJs(const FoldDisplayMode mode, std::string reason)
@@ -2284,7 +2295,7 @@ bool DisplayManager::SetScreenBrightness(uint64_t screenId, uint32_t level)
 uint32_t DisplayManager::GetScreenBrightness(uint64_t screenId) const
 {
     uint32_t level = static_cast<uint32_t>(RSInterfaces::GetInstance().GetScreenBacklight(screenId));
-    TLOGI(WmsLogTag::DMS, "screenId:%{public}" PRIu64", level:%{public}u,", screenId, level);
+    TLOGD(WmsLogTag::DMS, "screenId:%{public}" PRIu64", level:%{public}u,", screenId, level);
     return level;
 }
 
@@ -2617,6 +2628,11 @@ DMError DisplayManager::Impl::ConvertRelativeCoordinateToGlobal(const RelativePo
             relativePosition.displayId);
         return DMError::DM_ERROR_NULLPTR;
     }
+    if (displayInfo->GetDisplaySourceMode() != DisplaySourceMode::MAIN &&
+        displayInfo->GetDisplaySourceMode() != DisplaySourceMode::EXTEND) {
+        TLOGE(WmsLogTag::DMS, "Display is not main or extend mode:%u", displayInfo->GetDisplaySourceMode());
+        return DMError::DM_ERROR_ILLEGAL_PARAM;
+    }
 
     int32_t startX = displayInfo->GetX();
     int32_t startY = displayInfo->GetY();
@@ -2651,14 +2667,14 @@ DMError DisplayManager::Impl::ConvertGlobalCoordinateToRelative(const Position& 
             TLOGW(WmsLogTag::DMS, "get display info failed, display id : %{public}" PRIu64, displayId);
             continue;
         }
+        if (displayInfo->GetDisplaySourceMode() != DisplaySourceMode::MAIN &&
+            displayInfo->GetDisplaySourceMode() != DisplaySourceMode::EXTEND) {
+            TLOGW(WmsLogTag::DMS, "Display is not main or extend mode:%u", displayInfo->GetDisplaySourceMode());
+            continue;
+        }
         if (IsTargetDisplay(displayInfo, globalPosition)) {
             int32_t startX = displayInfo->GetX();
             int32_t startY = displayInfo->GetY();
-            if (IsInt32SubOverflow(globalPosition.x, startX) ||
-                IsInt32SubOverflow(globalPosition.y, startY)) {
-                TLOGE(WmsLogTag::DMS, "coordinate x or y overflowed!");
-                return DMError::DM_ERROR_ILLEGAL_PARAM;
-            }
             relativePosition.displayId = displayInfo->GetDisplayId();
             relativePosition.position.x = globalPosition.x - startX;
             relativePosition.position.y = globalPosition.y - startY;
@@ -2693,6 +2709,11 @@ DMError DisplayManager::Impl::ConvertGlobalCoordinateToRelativeWithDisplayId(con
     if (displayInfo == nullptr) {
         TLOGW(WmsLogTag::DMS, "get display info failed, display id : %{public}" PRIu64, displayId);
         return DMError::DM_ERROR_NULLPTR;
+    }
+    if (displayInfo->GetDisplaySourceMode() != DisplaySourceMode::MAIN &&
+        displayInfo->GetDisplaySourceMode() != DisplaySourceMode::EXTEND) {
+        TLOGE(WmsLogTag::DMS, "Display is not main or extend mode:%u", displayInfo->GetDisplaySourceMode());
+        return DMError::DM_ERROR_ILLEGAL_PARAM;
     }
     int32_t startX = displayInfo->GetX();
     int32_t startY = displayInfo->GetY();

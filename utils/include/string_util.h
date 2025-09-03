@@ -16,6 +16,7 @@
 #ifndef WM_STRING_UTIL_H
 #define WM_STRING_UTIL_H
 
+#include <charconv>
 #include <string>
 
 namespace OHOS {
@@ -23,6 +24,25 @@ namespace Rosen {
 class StringUtil {
 public:
     static std::string Trim(std::string s);
+
+    static inline bool ConvertStringToInt32(const std::string& str, int32_t& num)
+    {
+        auto res = std::from_chars(str.data(), str.data() + str.size(), num);
+        if (res.ec != std::errc()) {
+            return false;
+        }
+        return true;
+    }
+
+    static inline bool ConvertStringToBool(const std::string& str)
+    {
+        std::string tmp = str;
+        std::transform(tmp.begin(), tmp.end(), tmp.begin(), ::tolower);
+        if (tmp == "true" || tmp == "1") {
+            return true;
+        }
+        return false;
+    }
 };
 } // Rosen
 } // OHOS

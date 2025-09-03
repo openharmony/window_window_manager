@@ -514,6 +514,10 @@ WSError ExtensionSession::Background(bool isFromClient, const std::string& ident
         state = SessionState::STATE_INACTIVE;
         isActive_ = false;
     }
+    if (state == SessionState::STATE_BACKGROUND) {
+        TLOGI(WmsLogTag::WMS_LIFE, "ExtensionSession %{public}d state already backgrounded.",  GetPersistentId());
+        return WSError::WS_OK;
+    }
     if (state != SessionState::STATE_INACTIVE) {
         WLOGFW("[WMSLife] Background state invalid! state:%{public}u", state);
         return WSError::WS_ERROR_INVALID_SESSION;

@@ -134,6 +134,8 @@ public:
     static napi_value SetSupportFunctionType(napi_env env, napi_callback_info info);
     static napi_value GetApplicationInfo(napi_env env, napi_callback_info info);
     static napi_value SetUIEffectControllerAliveInUI(napi_env env, napi_callback_info info);
+    static napi_value SupportCreateFloatWindow(napi_env env, napi_callback_info info);
+    static napi_value ApplyFeatureConfig(napi_env env, napi_callback_info info);
 
     /*
      * PC Window
@@ -169,6 +171,7 @@ public:
      * Window Pattern
      */
     static napi_value SupportSnapshotAllSessionStatus(napi_env env, napi_callback_info info);
+    static napi_value SupportPreloadStartingWindow(napi_env env, napi_callback_info info);
 
     /*
      * PiP Window
@@ -255,6 +258,7 @@ private:
     napi_value OnSupportZLevel(napi_env env, napi_callback_info info);
     napi_value OnSetSupportFunctionType(napi_env env, napi_callback_info info);
     napi_value OnUpdateRecentMainSessionInfos(napi_env env, napi_callback_info info);
+    napi_value OnApplyFeatureConfig(napi_env env, napi_callback_info info);
     
     /*
      * PC Window
@@ -374,10 +378,11 @@ private:
     static napi_value StartAbilityBySpecified(napi_env env, napi_callback_info info);
     static napi_value StartUIAbilityBySCB(napi_env env, napi_callback_info info);
     napi_value OnGetApplicationInfo(napi_env env, napi_callback_info info);
+    napi_value OnSupportCreateFloatWindow(napi_env env, napi_callback_info info);
     void RegisterSceneSessionDestructCallback();
     void OnSceneSessionDestruct(int32_t persistentId);
     void RegisterTransferSessionToTargetScreenCallback();
-    void OnTransferSessionToTargetScreen(const TransferSessionInfo& info);
+    void OnTransferSessionToTargetScreen(const TransferSessionInfo& info, const uint64_t fromScreenId);
     static napi_value UpdateRecentMainSessionInfos(napi_env env, napi_callback_info info);
 
     napi_env env_;
@@ -398,6 +403,7 @@ private:
      * Window Pattern
      */
     napi_value OnSupportSnapshotAllSessionStatus(napi_env env, napi_callback_info info);
+    napi_value OnSupportPreloadStartingWindow(napi_env env, napi_callback_info info);
 
     napi_value OnUpdateSystemDecorEnable(napi_env env, napi_callback_info info);
 };

@@ -75,7 +75,11 @@ void RssEventListener::OnReceiveEvent(uint32_t eventType, uint32_t eventValue,
     callBackContext->extraInfo = std::move(extraInfo);
     callBackContext->eventCb = eventCb_;
     napi_acquire_threadsafe_function(threadSafeFunction_);
-    napi_call_threadsafe_function(threadSafeFunction_, callBackContext, napi_tsfn_blocking);
+    napi_status status = napi_call_threadsafe_function(threadSafeFunction_, callBackContext, napi_tsfn_blocking);
+    if (status != napi_ok) {
+        delete callBackContext;
+        callBackContext = nullptr;
+    }
 }
 
 RssSession& RssSession::GetInstance()
@@ -108,6 +112,11 @@ void SetMapValue(napi_env env, const std::string& key, const T& value, napi_valu
     napi_set_property(env, object, keyInfo, valueInfo);
 }
 
+bool IsJsonString(const nlohmann::json& payload, const std::string& key)
+{
+    return payload.contains(key) && payload[key].is_string();
+}
+
 napi_value RssSession::DealRssReply(napi_env env, const nlohmann::json& payload, const nlohmann::json& reply)
 {
     WLOGFI("[NAPI]");
@@ -116,6 +125,12 @@ napi_value RssSession::DealRssReply(napi_env env, const nlohmann::json& payload,
     if (objValue == nullptr) {
         WLOGFE("Object is null!");
         return NapiGetUndefined(env);
+    }
+
+    if (IsJsonString(reply, "resultType") && reply.at("resultType") == "loadSceneJudgement" &&
+        IsJsonString(reply, "resultValue")) {
+        SetMapValue(env, "result", reply["resultValue"].get<std::string>(), objValue);
+        return objValue;
     }
 
     if (!reply.contains("result") || !reply["result"].is_string() || reply.at("result") == "") {

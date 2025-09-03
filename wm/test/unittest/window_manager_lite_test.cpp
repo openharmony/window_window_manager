@@ -1610,6 +1610,38 @@ HWTEST_F(WindowManagerLiteTest, SendPointerEventForHover, Function | SmallTest |
     ret = windowManager.SendPointerEventForHover(pointerEvent);
     EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PERMISSION);
 }
+
+/**
+ * @tc.name: GetInstance
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, GetInstance, TestSize.Level1)
+{
+    sptr<WindowManagerLite> instance = nullptr;
+    int32_t userId = -1;
+    instance = WindowManagerLite::GetInstance(userId);
+    ASSERT_NE(instance, nullptr);
+
+    userId = 101;
+    instance = WindowManagerLite::GetInstance(userId);
+    ASSERT_NE(instance, nullptr);
+
+    // branch overried
+    instance = WindowManagerLite::GetInstance(userId);
+    ASSERT_NE(instance, nullptr);
+}
+
+/**
+ * @tc.name: RemoveInstanceByUserId
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, RemoveInstanceByUserId, TestSize.Level1)
+{
+    int32_t userId = 101;
+    ASSERT_EQ(WMError::WM_OK, WindowManagerLite::RemoveInstanceByUserId(userId));
+}
 }
 } // namespace
 } // namespace OHOS::Rosen

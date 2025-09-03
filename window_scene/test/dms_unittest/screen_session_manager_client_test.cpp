@@ -1006,6 +1006,17 @@ HWTEST_F(ScreenSessionManagerClientTest, NotifyFoldToExpandCompletion, TestSize.
 }
 
 /**
+ * @tc.name: NotifyScreenConnectCompletion
+ * @tc.desc: NotifyScreenConnectCompletion test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, NotifyScreenConnectCompletion, TestSize.Level1)
+{
+    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+    screenSessionManagerClient_->NotifyScreenConnectCompletion(1001);
+}
+
+/**
  * @tc.name: SwitchUserCallback01
  * @tc.desc: SwitchUserCallback test
  * @tc.type: FUNC
@@ -1839,6 +1850,132 @@ HWTEST_F(ScreenSessionManagerClientTest, CreateTempScreenSession, TestSize.Level
     tempScreenSession = screenSessionManagerClient_->CreateTempScreenSession(52, 51, node2);
     ASSERT_NE(nullptr, tempScreenSession);
     screenSessionManagerClient_->screenSessionManager_ = nullptr;
+}
+
+/**
+ * @tc.name: FreezeScreen
+ * @tc.desc: FreezeScreen test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, FreezeScreen, TestSize.Level2)
+{
+    LOG_SetCallback(MyLogCallback);
+    logMsg.clear();
+    screenSessionManagerClient_->screenSessionMap_.clear();
+    ScreenId screenId = 0;
+    bool isFreeze = false;
+    screenSessionManagerClient_->FreezeScreen(screenId, isFreeze);
+    EXPECT_TRUE(logMsg.find("get screen session is null, screenId is 0") != std::string::npos);
+
+    ScreenProperty screenProperty;
+    sptr<ScreenSession> screenSession = new ScreenSession(screenId, screenProperty, screenId);
+    screenSessionManagerClient_->screenSessionMap_.insert(std::make_pair(screenId, screenSession));
+    screenSessionManagerClient_->FreezeScreen(screenId, isFreeze);
+    screenSessionManagerClient_->screenSessionMap_.clear();
+    logMsg.clear();
+}
+
+/**
+ * @tc.name: GetScreenSnapshotWithAllWindows01
+ * @tc.desc: GetScreenSnapshotWithAllWindows01 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, GetScreenSnapshotWithAllWindows01, TestSize.Level2)
+{
+    LOG_SetCallback(MyLogCallback);
+    logMsg.clear();
+    screenSessionManagerClient_->screenSessionMap_.clear();
+    ScreenId screenId = 0;
+    float scaleX = 1.0;
+    float scaleY = 1.0;
+    bool isNeedCheckDrmAndSurfaceLock = false;
+    screenSessionManagerClient_->GetScreenSnapshotWithAllWindows(screenId, scaleX, scaleY,
+        isNeedCheckDrmAndSurfaceLock);
+    EXPECT_TRUE(logMsg.find("get screen session is null, screenId is 0") != std::string::npos);
+    screenSessionManagerClient_->screenSessionMap_.clear();
+    logMsg.clear();
+}
+
+/**
+ * @tc.name: GetScreenSnapshotWithAllWindows02
+ * @tc.desc: GetScreenSnapshotWithAllWindows02 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, GetScreenSnapshotWithAllWindows02, TestSize.Level2)
+{
+    screenSessionManagerClient_->screenSessionMap_.clear();
+    ScreenProperty screenProperty;
+    ScreenId screenId = 0;
+    sptr<ScreenSession> screenSession = new ScreenSession(screenId, screenProperty, screenId);
+    screenSessionManagerClient_->screenSessionMap_.insert(std::make_pair(screenId, screenSession));
+    float scaleX = 1.0;
+    float scaleY = 1.0;
+    bool isNeedCheckDrmAndSurfaceLock = false;
+    std::shared_ptr<Media::PixelMap> res = screenSessionManagerClient_->GetScreenSnapshotWithAllWindows(screenId,
+        scaleX, scaleY, isNeedCheckDrmAndSurfaceLock);
+    EXPECT_EQ(res, nullptr);
+    screenSessionManagerClient_->screenSessionMap_.clear();
+}
+
+/**
+ * @tc.name: NotifySwitchUserAnimationFinish
+ * @tc.desc: NotifySwitchUserAnimationFinish test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, NotifySwitchUserAnimationFinish, TestSize.Level1)
+{
+    sptr<ScreenSessionManagerClient> client = sptr<ScreenSessionManagerClient>::MakeSptr();
+    ASSERT_NE(client, nullptr);
+    client->ConnectToServer();
+    
+
+    std::string desc1 = "desc1";
+    std::string desc2 = "desc2";
+    std::string desc3 = "desc3";
+    client->NotifySwitchUserAnimationFinish(desc1);
+
+    client->animateFinishDescriptionSet_.insert(desc2);
+    client->animateFinishDescriptionSet_.insert(desc3);
+
+    logMsg.clear();
+    client->NotifySwitchUserAnimationFinish(desc1);
+    EXPECT_TRUE(logMsg.find("not find description in map") != std::string::npos);
+
+    client->NotifySwitchUserAnimationFinish(desc2);
+    EXPECT_NE(client->animateFinishNotificationSet_.find(desc2), client->animateFinishNotificationSet_.end());
+
+    logMsg.clear();
+    client->NotifySwitchUserAnimationFinish(desc3);
+    EXPECT_TRUE(logMsg.find("notify all animate finished") != std::string::npos);
+    logMsg.clear();
+    EXPECT_TRUE(client->animateFinishNotificationSet_.empty());
+    
+
+    client->screenSessionManager_ = nullptr;
+    client->NotifySwitchUserAnimationFinish(desc2);
+    client->NotifySwitchUserAnimationFinish(desc3);
+    EXPECT_TRUE(logMsg.find("screenSessionManager_ is null") != std::string::npos);
+    logMsg.clear();
+}
+
+/**
+ * @tc.name: RegisterSwitchUserAnimationNotification
+ * @tc.desc: RegisterSwitchUserAnimationNotification test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, RegisterSwitchUserAnimationNotification, TestSize.Level1)
+{
+    sptr<ScreenSessionManagerClient> client = sptr<ScreenSessionManagerClient>::MakeSptr();
+    ASSERT_NE(client, nullptr);
+    client->ConnectToServer();
+
+    std::string desc1 = "desc1";
+    std::string desc2 = "desc2";
+    client->RegisterSwitchUserAnimationNotification(desc1);
+    EXPECT_NE(client->animateFinishDescriptionSet_.find(desc1), client->animateFinishDescriptionSet_.end());
+    client->RegisterSwitchUserAnimationNotification(desc1);
+    EXPECT_NE(client->animateFinishDescriptionSet_.find(desc1), client->animateFinishDescriptionSet_.end());
+    EXPECT_EQ(client->animateFinishDescriptionSet_.size(), 1);
 }
 } // namespace Rosen
 } // namespace OHOS

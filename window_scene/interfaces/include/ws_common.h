@@ -53,6 +53,7 @@ constexpr uint32_t COLOR_WHITE = 0xffffffff;
 constexpr uint32_t COLOR_BLACK = 0xff000000;
 const std::string WINDOW_SCREEN_LOCK_PREFIX = "windowLock_";
 const std::string VIEW_SCREEN_LOCK_PREFIX = "viewLock_";
+constexpr int32_t DEFAULT_INVALID_WINDOW_MODE = 0;
 
 enum class WSError : int32_t {
     WS_OK = 0,
@@ -375,6 +376,11 @@ struct AtomicServiceInfo {
     std::vector<std::string> supportWindowMode_;
 };
 
+struct PendingSessionActivationConfig {
+    bool forceStart = false; // is compulsion open
+    bool forceNewWant = true;
+};
+
 struct SessionInfo {
     std::string bundleName_ = "";
     std::string moduleName_ = "";
@@ -553,6 +559,7 @@ enum class SizeChangeReason : uint32_t {
     RECOVER_IN_IMPLICIT = 33,
     OCCUPIED_AREA_CHANGE = 34,
     SCREEN_RELATIVE_POSITION_CHANGE,
+    SNAPSHOT_ROTATION = 37,
     END,
 };
 
@@ -1001,6 +1008,7 @@ enum class SystemAnimatedSceneType : uint32_t {
     SCENE_LOCKSCREEN_TO_LAUNCHER, // Unlock screen.
     SCENE_ENTER_MIN_WINDOW, // Enter the window minimization state
     SCENE_RECOVER_MIN_WINDOW, // Recover minimized window
+    SCENE_SNAPSHOT_ROTATION, // Snapshot rotation
     SCENE_OTHERS, // 1.Default state 2.The state in which the animation ends
 };
 
@@ -1072,6 +1080,15 @@ enum class SnapshotNodeType : uint32_t {
     DEFAULT_NODE = 0,
     LEASH_NODE,
     APP_NODE,
+};
+
+enum class BackgroundReason {
+    DEFAULT = 0,
+
+    /*
+     * Expanded to folded on single pocket
+     */
+    EXPAND_TO_FOLD_SINGLE_POCKET,
 };
 
 enum class AsyncTraceTaskId: int32_t {

@@ -523,6 +523,9 @@ HWTEST_F(ScreenSessionManagerClientStubTest, HandleOnScreenConnectionChanged, Te
     std::string name;
     data.WriteString(name);
     data.WriteBool(false);
+    data.WriteUint64(1);
+    data.WriteUint32(1);
+    data.WriteUint32(2);
     int ret = screenSessionManagerClientStub_->HandleOnScreenConnectionChanged(data, reply);
     EXPECT_EQ(ret, 0);
 }
@@ -1012,6 +1015,22 @@ HWTEST_F(ScreenSessionManagerClientStubTest, HandleOnScreenModeChanged, TestSize
     data.WriteUint32(static_cast<u_int32_t>(screenModeChangeEvent));
     ASSERT_TRUE(screenSessionManagerClientStub_ != nullptr);
     auto ret = screenSessionManagerClientStub_->HandleOnScreenModeChanged(data, reply);
+    EXPECT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: HandleOnAnimationFinish
+ * @tc.desc: HandleOnAnimationFinish test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientStubTest, HandleOnAnimationFinish, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteInterfaceToken(ScreenSessionManagerClientStub::GetDescriptor());
+    ASSERT_TRUE(screenSessionManagerClientStub_ != nullptr);
+    auto ret = screenSessionManagerClientStub_->HandleOnAnimationFinish(data, reply);
     EXPECT_EQ(ret, 0);
 }
 } // namespace Rosen

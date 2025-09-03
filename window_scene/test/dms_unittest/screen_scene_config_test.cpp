@@ -434,6 +434,9 @@ HWTEST_F(ScreenSceneConfigTest, GetCutoutBoundaryRect, TestSize.Level1)
  */
 HWTEST_F(ScreenSceneConfigTest, GetSubCutoutBoundaryRect, TestSize.Level1)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return;
+    }
     auto result = ScreenSceneConfig::GetSubCutoutBoundaryRect();
     if (ScreenSessionManager::GetInstance().IsFoldable() && !FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         ASSERT_TRUE(result.size() > 0);
@@ -1246,6 +1249,30 @@ HWTEST_F(ScreenSceneConfigTest, IsSupportOffScreenRendering02, TestSize.Level1)
     ScreenSceneConfig::enableConfig_.erase("isSupportOffScreenRendering");
     bool res = ScreenSceneConfig::IsSupportOffScreenRendering();
     EXPECT_EQ(false, res);
+}
+
+/**
+ * @tc.name: IsSupportDuringCall01
+ * @tc.desc: IsSupportDuringCall01
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, IsSupportDuringCall01, TestSize.Level1)
+{
+    ScreenSceneConfig::enableConfig_["supportDuringCall"] = true;
+    bool res = ScreenSceneConfig::IsSupportDuringCall();
+    EXPECT_TRUE(res);
+}
+
+/**
+ * @tc.name: IsSupportDuringCall02
+ * @tc.desc: IsSupportDuringCall02
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneConfigTest, IsSupportDuringCall02, TestSize.Level1)
+{
+    ScreenSceneConfig::enableConfig_.erase("supportDuringCall");
+    bool res = ScreenSceneConfig::IsSupportDuringCall();
+    EXPECT_FALSE(res);
 }
 }
 } // namespace Rosen

@@ -37,6 +37,7 @@ public:
     FoldDisplayMode GetFoldDisplayMode();
     FoldDisplayMode GetFoldDisplayModeForExternal();
     void SetFoldDisplayMode(const FoldDisplayMode);
+    void SetFoldDisplayModeAsync(const FoldDisplayMode);
     bool IsFoldable();
 
     DMError RegisterDisplayListener(sptr<IDisplayListener> listener);
@@ -557,9 +558,19 @@ void DisplayManagerLite::SetFoldDisplayMode(const FoldDisplayMode mode)
     return pImpl_->SetFoldDisplayMode(mode);
 }
 
+void DisplayManagerLite::SetFoldDisplayModeAsync(const FoldDisplayMode mode)
+{
+    return pImpl_->SetFoldDisplayModeAsync(mode);
+}
+
 void DisplayManagerLite::Impl::SetFoldDisplayMode(const FoldDisplayMode mode)
 {
     return SingletonContainer::Get<DisplayManagerAdapterLite>().SetFoldDisplayMode(mode);
+}
+
+void DisplayManagerLite::Impl::SetFoldDisplayModeAsync(const FoldDisplayMode mode)
+{
+    return SingletonContainer::Get<DisplayManagerAdapterLite>().SetFoldDisplayModeAsync(mode);
 }
 
 void DisplayManagerLite::Impl::OnRemoteDied()
@@ -785,8 +796,8 @@ bool DisplayManagerLite::TryToCancelScreenOff()
 
 bool DisplayManagerLite::SetScreenBrightness(uint64_t screenId, uint32_t level)
 {
-    TLOGD(WmsLogTag::DMS, "[UL_POWER]SetScreenBrightness screenId:%{public}" PRIu64", level:%{public}u,", screenId,
-        level);
+    TLOGD(WmsLogTag::DMS, "[UL_POWER]SetScreenBrightness screenId:%{public}" PRIu64", level:%{public}u,",
+        screenId, level);
     SingletonContainer::Get<DisplayManagerAdapterLite>().SetScreenBrightness(screenId, level);
     return true;
 }
@@ -794,8 +805,8 @@ bool DisplayManagerLite::SetScreenBrightness(uint64_t screenId, uint32_t level)
 uint32_t DisplayManagerLite::GetScreenBrightness(uint64_t screenId) const
 {
     uint32_t level = SingletonContainer::Get<DisplayManagerAdapterLite>().GetScreenBrightness(screenId);
-    TLOGD(WmsLogTag::DMS, "[UL_POWER]GetScreenBrightness screenId:%{public}" PRIu64", level:%{public}u,", screenId,
-        level);
+    TLOGD(WmsLogTag::DMS, "[UL_POWER]GetScreenBrightness screenId:%{public}" PRIu64", level:%{public}u,",
+        screenId, level);
     return level;
 }
 

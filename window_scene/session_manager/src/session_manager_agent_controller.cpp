@@ -50,6 +50,12 @@ WMError SessionManagerAgentController::RegisterWindowManagerAgent(const sptr<IWi
         std::pair<int32_t, WindowManagerAgentType> pidPair = {pid, type};
         windowManagerAgentPairMap_.insert(std::map<sptr<IRemoteObject>,
             std::pair<int32_t, WindowManagerAgentType>>::value_type(windowManagerAgent->AsObject(), pidPair));
+        if (type == WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_STYLE &&
+            windowManagementMode_ != WindowManagementMode::UNDEFINED) {
+            NotifyWindowStyleChange(windowManagementMode_ == WindowManagementMode::FREEFORM ?
+                WindowStyleType::WINDOW_STYLE_FREE_MULTI_WINDOW : WindowStyleType::WINDOW_STYLE_DEFAULT);
+            windowManagementMode_ = WindowManagementMode::UNDEFINED;
+        }
         return WMError::WM_OK;
     } else {
         return WMError::WM_ERROR_NULLPTR;
@@ -220,11 +226,17 @@ void SessionManagerAgentController::NotifyWindowStyleChange(WindowStyleType type
 {
     TLOGD(WmsLogTag::WMS_MAIN, "windowStyletype: %{public}d",
           static_cast<uint8_t>(type));
+    bool hasNotified = false;
     for (auto& agent : smAgentContainer_.GetAgentsByType(
         WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_WINDOW_STYLE)) {
         if (agent != nullptr) {
             agent->NotifyWindowStyleChange(type);
+            hasNotified = true;
         }
+    }
+    if (!hasNotified) {
+        windowManagementMode_ = type == WindowStyleType::WINDOW_STYLE_FREE_MULTI_WINDOW ?
+            WindowManagementMode::FREEFORM : WindowManagementMode::FULLSCREEN;
     }
 }
 

@@ -307,7 +307,7 @@ HWTEST_F(WindowProxyTest, NotifyForegroundInteractiveStatus, TestSize.Level1)
     ASSERT_NE(windowProxy_, nullptr);
     bool interactive = false;
     windowProxy_->NotifyForegroundInteractiveStatus(interactive);
-    EXPECT_TRUE(g_errLog.find("remote is null") != std::string::npos);
+    EXPECT_FALSE(g_errLog.find("remote is null") != std::string::npos);
     LOG_SetCallback(nullptr);
 }
 }

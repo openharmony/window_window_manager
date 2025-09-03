@@ -100,6 +100,7 @@ private:
     int HandleUpdateAcrossDisplaysChangeRegistered(MessageParcel& data, MessageParcel& reply);
     int HandleGetIsHighlighted(MessageParcel& data, MessageParcel& reply);
     int ReadOneAbilitySessionInfo(MessageParcel& data, sptr<AAFwk::SessionInfo> abilitySessionInfo);
+    int ReadOnePendingSessionActivationConfig(MessageParcel& data, PendingSessionActivationConfig& config);
 
     // extension extension
     int HandleTransferAbilityResult(MessageParcel& data, MessageParcel& reply);

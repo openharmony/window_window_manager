@@ -387,8 +387,7 @@ std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>* MockSessionManag
     return nullptr;
 }
 
-std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>*
-    MockSessionManagerService::GetSystemAppSMSRecoverListenerMap(int32_t displayId)
+std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>* MockSessionManagerService::GetSystemAppSMSRecoverListenerMap(int32_t displayId)
 {
     auto iter = systemAppSmsRecoverListenerMap_.find(displayId);
     if (iter != systemAppSmsRecoverListenerMap_.end()) {
@@ -524,8 +523,7 @@ std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>* MockSessionManag
     return nullptr;
 }
 
-std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>*
-    MockSessionManagerService::GetSystemAppSMSLiteRecoverListenerMap(int32_t displayId)
+std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>* MockSessionManagerService::GetSystemAppSMSLiteRecoverListenerMap(int32_t displayId)
 {
     auto iter = systemAppSmsLiteRecoverListenerMap_.find(displayId);
     if (iter != systemAppSmsLiteRecoverListenerMap_.end()) {
@@ -1273,7 +1271,7 @@ ErrCode MockSessionManagerService::NotifyWMSConnectionStatus(int32_t userId,
     return ERR_OK;
 }
 
-int32_t GetUserIdByCallingUid()
+int32_t MockSessionManagerService::GetUserIdByCallingUid()
 {
     int32_t uid = IPCSkeleton::GetCallingUid();
     TLOGI(WmsLogTag::WMS_MULTI_USER, "get calling uid(%{public}d)", uid);

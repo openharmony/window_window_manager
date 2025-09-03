@@ -35,12 +35,15 @@ namespace Rosen {
  *
  * @brief WindowManagerLite used to manage window.
  */
-class WindowManagerLite {
-WM_DECLARE_SINGLE_INSTANCE_BASE(WindowManagerLite);
-friend class WindowManagerAgentLite;
-friend class WMSDeathRecipient;
-friend class SSMDeathRecipient;
+class WindowManagerLite : public RefBase {
+    WM_DECLARE_SINGLE_INSTANCE_BASE(WindowManagerLite);
+    friend class WindowManagerAgentLite;
+    friend class WMSDeathRecipient;
+    friend class SSMDeathRecipient;
 public:
+    static sptr<WindowManagerLite> GetInstance(const int32_t userId);
+    static WMError RemoveInstanceByUserId(const int32_t userId);
+
     /**
      * @brief Register focus changed listener.
      *
@@ -365,13 +368,22 @@ public:
      */
     WMError SendPointerEventForHover(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
+    ~WindowManagerLite() override;
+
 private:
-    WindowManagerLite();
-    ~WindowManagerLite();
+    WindowManagerLite(const int32_t userId = INVALID_USER_ID);
+
     std::recursive_mutex mutex_;
     class Impl;
     std::unique_ptr<Impl> pImpl_;
     bool destroyed_ = false;
+
+    /**
+     * Multi user and multi screen
+     */
+    int32_t userId_;
+    static std::unordered_map<int32_t, sptr<WindowManagerLite>> windowManagerLiteMap_;
+    static std::mutex windowManagerLiteMapMutex_;
 
     void UpdateFocusStatus(uint32_t windowId, const sptr<IRemoteObject>& abilityToken, WindowType windowType,
         DisplayId displayId, bool focused) const;

@@ -53,10 +53,15 @@ private:
      */
     void ProcessPendingSceneSessionActivationRegister();
     void ProcessBatchPendingSceneSessionsActivationRegister();
-    void BatchPendingSessionsActivation(const std::vector<std::shared_ptr<SessionInfo>>& sessionInfos);
-    void BatchPendingSessionsActivationInner(const std::vector<std::shared_ptr<SessionInfo>>& sessionInfos);
+    void BatchPendingSessionsActivation(const std::vector<std::shared_ptr<SessionInfo>>& sessionInfos,
+        const std::vector<std::shared_ptr<PendingSessionActivationConfig>>& configs);
+    void BatchPendingSessionsActivationInner(const std::vector<std::shared_ptr<SessionInfo>>& sessionInfos,
+        const std::vector<std::shared_ptr<PendingSessionActivationConfig>>& configs);
     static napi_value CreateSessionInfosNapiValue(
         napi_env env, const std::vector<std::shared_ptr<SessionInfo>>& sessionInfos);
+    static napi_value CreatePendingInfosNapiValue(
+        napi_env env, const std::vector<std::shared_ptr<SessionInfo>>& sessionInfos,
+        const std::vector<std::shared_ptr<PendingSessionActivationConfig>>& configs);
     napi_env env_;
     std::map<std::string, std::shared_ptr<NativeReference>> jsCbMap_;
     mutable std::shared_mutex jsCbMapMutex_;

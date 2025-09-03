@@ -16,19 +16,23 @@
 #ifndef OHOS_ROSEN_WINDOW_MANAGER_H
 #define OHOS_ROSEN_WINDOW_MANAGER_H
 
+#include <iremote_object.h>
 #include <memory>
 #include <mutex>
 #include <refbase.h>
+#include <shared_mutex>
 #include <vector>
-#include <iremote_object.h>
-#include "wm_single_instance.h"
-#include "wm_common.h"
+
 #include "dm_common.h"
 #include "focus_change_info.h"
-#include "window_visibility_info.h"
-#include "window_drawing_content_info.h"
+
 #include "window.h"
+#include "window_drawing_content_info.h"
 #include "window_pid_visibility_info.h"
+#include "window_visibility_info.h"
+#include "wm_common.h"
+#include "wm_single_instance.h"
+
 
 namespace OHOS {
 namespace Rosen {
@@ -345,6 +349,7 @@ public:
     float scaleX_;
     float scaleY_;
     bool isCompatScaleMode_ { false };
+    Rect scaleRect_;
     std::string bundleName_;
     std::vector<Rect> touchHotAreas_;
 };
@@ -365,6 +370,7 @@ struct AppUseControlInfo : public Parcelable {
     {
         return parcel.WriteString(bundleName_) &&
                parcel.WriteInt32(appIndex_) &&
+               parcel.WriteInt32(persistentId_) &&
                parcel.WriteBool(isNeedControl_) &&
                parcel.WriteBool(isControlRecentOnly_);
     }
@@ -380,6 +386,7 @@ struct AppUseControlInfo : public Parcelable {
         auto info = new AppUseControlInfo();
         if (!parcel.ReadString(info->bundleName_) ||
             !parcel.ReadInt32(info->appIndex_) ||
+            !parcel.ReadInt32(info->persistentId_) ||
             !parcel.ReadBool(info->isNeedControl_) ||
             !parcel.ReadBool(info->isControlRecentOnly_)) {
             delete info;
@@ -390,6 +397,7 @@ struct AppUseControlInfo : public Parcelable {
 
     std::string bundleName_ = "";
     int32_t appIndex_ = 0;
+    int32_t persistentId_ = INVALID_WINDOW_ID; // greater than 0 means control by id
     bool isNeedControl_ = false;
     bool isControlRecentOnly_ = false;
 };
@@ -608,12 +616,15 @@ public:
  *
  * @brief WindowManager used to manage window.
  */
-class WindowManager {
-WM_DECLARE_SINGLE_INSTANCE_BASE(WindowManager);
-friend class WindowManagerAgent;
-friend class WMSDeathRecipient;
-friend class SSMDeathRecipient;
+class WindowManager : public RefBase {
+    WM_DECLARE_SINGLE_INSTANCE_BASE(WindowManager);
+    friend class WindowManagerAgent;
+    friend class WMSDeathRecipient;
+    friend class SSMDeathRecipient;
 public:
+    static sptr<WindowManager> GetInstance(const int32_t userId);
+    static WMError RemoveInstanceByUserId(const int32_t userId);
+
     /**
      * @brief Register WMS connection status changed listener.
      * @attention Callable only by u0 system user. A process only supports successful registration once.
@@ -950,6 +961,14 @@ public:
      * @return WM_OK means get success, others means get failed.
      */
     WMError GetTopNavDestinationName(int32_t windowId, std::string& topNavDestName) const;
+
+    /**
+     * @brief Set watermark for app.
+     *
+     * @param pixelMap the watermark image to set, nullptr means cancel watermark.
+     * @return WM_OK means get success, others means get failed.
+     */
+    WMError SetWatermarkImageForApp(const std::shared_ptr<Media::PixelMap>& pixelMap);
 
     /**
      * @brief Get visibility window info.
@@ -1346,9 +1365,17 @@ public:
     WMError RemoveSessionBlackList(
         const std::unordered_set<std::string>& bundleNames, const std::unordered_set<std::string>& privacyWindowTags);
 
+    ~WindowManager() override;
+
 private:
-    WindowManager();
-    ~WindowManager();
+    /**
+     * multi user and multi screen
+     */
+    WindowManager(const int32_t userId = INVALID_USER_ID);
+    int32_t userId_;
+    static std::unordered_map<int32_t, sptr<WindowManager>> windowManagerMap_;
+    static std::mutex windowManagerMapMutex_;
+
     std::recursive_mutex mutex_;
     class Impl;
     std::unique_ptr<Impl> pImpl_;

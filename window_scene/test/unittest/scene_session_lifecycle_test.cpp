@@ -23,10 +23,12 @@
 #include "session/host/include/sub_session.h"
 #include "session/host/include/system_session.h"
 #include "session/host/include/main_session.h"
+#include "screen_session_manager_client.h"
 #include "wm_common.h"
 #include "mock/mock_session_stage.h"
 #include "input_event.h"
 #include <pointer_event.h>
+#include "process_options.h"
 #include "ui/rs_surface_node.h"
 #include "session/container/include/window_event_channel.h"
 #include "window_event_channel_base.h"
@@ -43,6 +45,7 @@ public:
     void TearDown() override;
     sptr<SceneSession> sceneSession;
     SessionInfo info;
+    PendingSessionActivationConfig configs;
 };
 
 void SceneSessionLifecycleTest::SetUpTestCase() {}
@@ -240,6 +243,37 @@ HWTEST_F(SceneSessionLifecycleTest, Foreground06, TestSize.Level0)
 }
 
 /**
+ * @tc.name: Foreground07
+ * @tc.desc: Foreground07 function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLifecycleTest, Foreground07, TestSize.Level0)
+{
+    SessionInfo info;
+    info.abilityName_ = "Foreground07";
+    info.bundleName_ = "Foreground07";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    session->property_ = property;
+    session->property_->SetDisplayId(ScreenSessionManagerClient::GetInstance().GetDefaultScreenId());
+    session->SetIsActivatedAfterScreenLocked(true);
+
+    GetStateFromManagerFunc func = [](const ManagerState key) {
+        switch (key) {
+            case ManagerState::MANAGER_STATE_SCREEN_LOCKED:
+                return true;
+            default:
+                return false;
+        }
+    };
+    session->SetGetStateFromManagerListener(func);
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->Foreground(property, false));
+    MockAccesstokenKit::MockAccessTokenKitRet(0);
+}
+
+/**
  * @tc.name: ForegroundTask01
  * @tc.desc: ForegroundTask function
  * @tc.type: FUNC
@@ -259,6 +293,20 @@ HWTEST_F(SceneSessionLifecycleTest, ForegroundTask01, TestSize.Level0)
 
     session->isUIFirstEnabled_ = true;
     EXPECT_EQ(true, session->isUIFirstEnabled_);
+    session->SetSessionState(SessionState::STATE_CONNECT);
+    EXPECT_EQ(WSError::WS_OK, session->ForegroundTask(property));
+
+    session->isUIFirstEnabled_ = true;
+    EXPECT_EQ(true, session->isUIFirstEnabled_);
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    EXPECT_NE(nullptr, surfaceNode);
+    session->SetLeashWinSurfaceNode(surfaceNode);
+    session->SetSessionState(SessionState::STATE_CONNECT);
+    EXPECT_EQ(WSError::WS_OK, session->ForegroundTask(property));
+
+    session->isUIFirstEnabled_ = false;
+    EXPECT_EQ(false, session->isUIFirstEnabled_);
     session->SetSessionState(SessionState::STATE_CONNECT);
     EXPECT_EQ(WSError::WS_OK, session->ForegroundTask(property));
 }
@@ -826,7 +874,7 @@ HWTEST_F(SceneSessionLifecycleTest, ConnectInner01, TestSize.Level0)
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(property, nullptr);
     sceneSession->clientIdentityToken_ = "session1";
-
+    sceneSession->SetCollaboratorType(static_cast<int32_t>(CollaboratorType::RESERVE_TYPE));
     auto result = sceneSession->ConnectInner(
         mockSessionStage, nullptr, nullptr, systemConfig, property, nullptr, -1, -1, "session2");
     ASSERT_EQ(result, WSError::WS_OK);
@@ -837,6 +885,7 @@ HWTEST_F(SceneSessionLifecycleTest, ConnectInner01, TestSize.Level0)
 
     result = sceneSession->ConnectInner(mockSessionStage, nullptr, nullptr, systemConfig, property, nullptr, -1, -1);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
+    EXPECT_EQ(property->GetAncoRealBundleName(), "ConnectInner01");
 }
 
 /**
@@ -866,6 +915,36 @@ HWTEST_F(SceneSessionLifecycleTest, ConnectInner02, TestSize.Level0)
     ASSERT_NE(eventChannel, nullptr);
     sceneSession->SetSessionState(SessionState::STATE_DISCONNECT);
     result = sceneSession->ConnectInner(mockSessionStage, eventChannel, nullptr, systemConfig, property, nullptr);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: ConnectInner02
+ * @tc.desc: ConnectInner02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLifecycleTest, ConnectInner03, TestSize.Level0)
+{
+    SessionInfo info;
+    info.bundleName_ = "ConnectInner03";
+    info.abilityName_ = "ConnectInner03";
+
+    std::shared_ptr<AAFwk::ProcessOptions> processOptions = std::make_shared<AAFwk::ProcessOptions>();
+    processOptions->startupVisibility = AAFwk::StartupVisibility::STARTUP_HIDE;
+    info.processOptions = processOptions;
+
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
+    ASSERT_NE(mockSessionStage, nullptr);
+    SystemSessionConfig systemConfig;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+
+    sptr<IWindowEventChannel> eventChannel = sptr<WindowEventChannel>::MakeSptr(mockSessionStage);
+    ASSERT_NE(eventChannel, nullptr);
+    sceneSession->SetSessionState(SessionState::STATE_DISCONNECT);
+    auto result = sceneSession->ConnectInner(mockSessionStage, eventChannel, nullptr, systemConfig, property, nullptr);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
@@ -1165,9 +1244,20 @@ HWTEST_F(SceneSessionLifecycleTest, BatchPendingSessionsActivation, TestSize.Lev
     sessionInfo->want.SetFlags(flags);
     sessionInfo->isAtomicService = true;
     abilitySessionInfos.emplace_back(sessionInfo);
-    WSError result = sceneSession->BatchPendingSessionsActivation(abilitySessionInfos);
-
+    std::vector<PendingSessionActivationConfig> configs;
+    PendingSessionActivationConfig config;
+    configs.emplace_back(config);
+    WSError result = sceneSession->BatchPendingSessionsActivation(abilitySessionInfos, configs);
     EXPECT_EQ(result, WSError::WS_OK);
+
+    auto func = [](std::vector<std::shared_ptr<SessionInfo>>& info,
+        const std::vector<std::shared_ptr<PendingSessionActivationConfig>>& configs) {
+        std::cout << "enter batchPendingSessionsActivationFunc" << std::endl;
+    };
+    sceneSession->Session::SetBatchPendingSessionsActivationEventListener(func);
+    result = sceneSession->BatchPendingSessionsActivation(abilitySessionInfos, configs);
+    EXPECT_EQ(result, WSError::WS_OK);
+    MockAccesstokenKit::ChangeMockStateToInit();
 }
 
 /**

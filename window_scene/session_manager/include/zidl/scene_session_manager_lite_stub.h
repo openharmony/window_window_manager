@@ -40,6 +40,7 @@ private:
     int HandlePendingSessionToBackgroundForDelegator(MessageParcel& data, MessageParcel& reply);
     int HandleGetFocusSessionToken(MessageParcel& data, MessageParcel& reply);
     int HandleGetFocusSessionElement(MessageParcel& data, MessageParcel& reply);
+    int HandleIsFocusWindowParent(MessageParcel& data, MessageParcel& reply);
     int HandleRegisterSessionListener(MessageParcel& data, MessageParcel& reply);
     int HandleUnRegisterSessionListener(MessageParcel& data, MessageParcel& reply);
     int HandleGetSessionInfos(MessageParcel& data, MessageParcel& reply);

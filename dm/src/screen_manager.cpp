@@ -535,8 +535,8 @@ DMError ScreenManager::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> m
 DMError ScreenManager::SetMultiScreenMode(ScreenId mainScreenId, ScreenId secondaryScreenId,
     MultiScreenMode screenMode)
 {
-    TLOGI(WmsLogTag::DMS, "mainScreenId:%{public}" PRIu64",secondaryScreenId:%{public}" PRIu64",screenMode:%{public}u",
-        mainScreenId, secondaryScreenId, screenMode);
+    TLOGI(WmsLogTag::DMS, "mainScreenId:%{public}" PRIu64",secondaryScreenId:%{public}" PRIu64","
+        "screenMode:%{public}u", mainScreenId, secondaryScreenId, screenMode);
     DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().SetMultiScreenMode(mainScreenId,
         secondaryScreenId, screenMode);
     return ret;
@@ -545,8 +545,8 @@ DMError ScreenManager::SetMultiScreenMode(ScreenId mainScreenId, ScreenId second
 DMError ScreenManager::SetMultiScreenRelativePosition(MultiScreenPositionOptions mainScreenOptions,
     MultiScreenPositionOptions secondScreenOption)
 {
-    TLOGI(WmsLogTag::DMS, "mId:%{public}" PRIu64", X:%{public}u, Y:%{public}u,sId:%{public}" PRIu64", X:%{public}u, "
-        "Y:%{public}u", mainScreenOptions.screenId_, mainScreenOptions.startX_, mainScreenOptions.startY_,
+    TLOGI(WmsLogTag::DMS, "mId:%{public}" PRIu64", X:%{public}u, Y:%{public}u,sId:%{public}" PRIu64", "
+        "X:%{public}u, Y:%{public}u", mainScreenOptions.screenId_, mainScreenOptions.startX_, mainScreenOptions.startY_,
         secondScreenOption.screenId_, secondScreenOption.startX_, secondScreenOption.startY_);
     DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().SetMultiScreenRelativePosition(mainScreenOptions,
         secondScreenOption);
@@ -628,11 +628,6 @@ DMError ScreenManager::RemoveVirtualScreenBlockList(const std::vector<int32_t>& 
     return SingletonContainer::Get<ScreenManagerAdapter>().RemoveVirtualScreenBlockList(persistentIds);
 }
 
-DMError ScreenManager::ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height)
-{
-    return SingletonContainer::Get<ScreenManagerAdapter>().ResizeVirtualScreen(screenId, width, height);
-}
-
 DMError ScreenManager::SetScreenPrivacyMaskImage(ScreenId screenId,
     const std::shared_ptr<Media::PixelMap>& privacyMaskImg)
 {
@@ -642,6 +637,11 @@ DMError ScreenManager::SetScreenPrivacyMaskImage(ScreenId screenId,
 DMError ScreenManager::SetVirtualMirrorScreenCanvasRotation(ScreenId screenId, bool rotation)
 {
     return SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualMirrorScreenCanvasRotation(screenId, rotation);
+}
+
+DMError ScreenManager::ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height)
+{
+    return SingletonContainer::Get<ScreenManagerAdapter>().ResizeVirtualScreen(screenId, width, height);
 }
 
 DMError ScreenManager::SetVirtualMirrorScreenScaleMode(ScreenId screenId, ScreenScaleMode scaleMode)

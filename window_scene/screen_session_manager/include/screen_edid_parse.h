@@ -72,7 +72,7 @@ using ParseEdidFunc = int32_t (*)(const uint8_t*, const uint32_t, struct BaseEdi
 
 bool LoadEdidPlugin(void);
 void UnloadEdidPlugin(void);
-bool GetEdid(ScreenId screenId, struct BaseEdid &edid);
+bool GetEdid(ScreenId rsScreenId, struct BaseEdid& edid);
 int32_t GetEdidCheckCode(const std::vector<uint8_t>& edidData);
 }
 }

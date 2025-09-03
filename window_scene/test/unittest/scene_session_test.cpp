@@ -688,11 +688,11 @@ HWTEST_F(SceneSessionTest, UpdatePrivacyModeControlInfo02, Function | SmallTest 
 }
 
 /**
- * @tc.name: HasSubSessionInPrivacyMode
- * @tc.desc: HasSubSessionInPrivacyMode
+ * @tc.name: HasChildSessionInPrivacyMode
+ * @tc.desc: HasChildSessionInPrivacyMode
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest, HasSubSessionInPrivacyMode, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionTest, HasChildSessionInPrivacyMode, Function | SmallTest | Level3)
 {
     SessionInfo info;
     info.bundleName_ = "testBundleName";
@@ -717,7 +717,40 @@ HWTEST_F(SceneSessionTest, HasSubSessionInPrivacyMode, Function | SmallTest | Le
     subSession->AddSubSession(subSession2);
 
     sceneSession->AddSubSession(subSession);
-    EXPECT_EQ(sceneSession->HasSubSessionInPrivacyMode(), true);
+    EXPECT_EQ(sceneSession->HasChildSessionInPrivacyMode(), true);
+}
+
+/**
+ * @tc.name: HasChildSessionInPrivacyMode02
+ * @tc.desc: HasChildSessionInPrivacyMode02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, HasChildSessionInPrivacyMode02, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.bundleName_ = "testBundleName";
+    info.abilityName_ = "testAbilityName";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->property_ = nullptr;
+    sptr<SceneSession::SpecificSessionCallback> dialogSessionCb =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> dialogSession = sptr<SceneSession>::MakeSptr(info, dialogSessionCb);
+    dialogSessionCb->onGetSceneSessionByIdCallback_ = [&dialogSession](int32_t id) { return dialogSession; };
+    sceneSession->BindDialogToParentSession(dialogSession);
+    EXPECT_FALSE(sceneSession->HasChildSessionInPrivacyMode());
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetPrivacyMode(false);
+    dialogSession->property_ = property;
+    EXPECT_FALSE(sceneSession->HasChildSessionInPrivacyMode());
+    dialogSession->property_->SetPrivacyMode(true);
+    EXPECT_TRUE(sceneSession->HasChildSessionInPrivacyMode());
+
+    dialogSession->property_->SetPrivacyMode(false);
+    sptr<SceneSession> dialogSession2 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    dialogSession2->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    dialogSession2->property_->SetPrivacyMode(true);
+    dialogSession->BindDialogToParentSession(dialogSession2);
+    EXPECT_FALSE(sceneSession->HasChildSessionInPrivacyMode());
 }
 
 /**
@@ -1412,6 +1445,36 @@ HWTEST_F(SceneSessionTest, ProcessWindowMoving, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PrintAvoidAreaInfo
+ * @tc.desc: PrintAvoidAreaInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, PrintAvoidAreaInfo, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "PrintAvoidAreaInfo";
+    info.bundleName_ = "PrintAvoidAreaInfo";
+    sptr<SceneSession>sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->property_->displayId_ = 0;
+    WSRect winRect;
+    WSRect avoidRect;
+    auto type = AvoidAreaType::TYPE_SYSTEM;
+    sceneSession->PrintAvoidAreaInfo(sceneSession->property_->displayId_, type, winRect, avoidRect);
+    std::tuple<DisplayId, WSRect, WSRect> inputParamters(sceneSession->property_->displayId_, winRect, avoidRect);
+    EXPECT_EQ(inputParamters, sceneSession->lastAvoidAreaInputParamtersMap_[type]);
+    sceneSession->property_->displayId_ = 1;
+    sceneSession->PrintAvoidAreaInfo(sceneSession->property_->displayId_, type, winRect, avoidRect);
+    std::tuple<DisplayId, WSRect, WSRect> inputParamters1(sceneSession->property_->displayId_, winRect, avoidRect);
+    EXPECT_EQ(inputParamters1, sceneSession->lastAvoidAreaInputParamtersMap_[type]);
+    sceneSession->PrintAvoidAreaInfo(sceneSession->property_->displayId_, type, winRect, avoidRect);
+    EXPECT_EQ(inputParamters1, sceneSession->lastAvoidAreaInputParamtersMap_[type]);
+    AvoidArea avoidArea;
+    sceneSession->CalculateAvoidAreaByType(type, winRect, avoidRect, avoidArea);
+    EXPECT_EQ(inputParamters1, sceneSession->lastAvoidAreaInputParamtersMap_[type]);
+}
+
+/**
  * @tc.name: CalculateAvoidAreaRect
  * @tc.desc: CalculateAvoidAreaRect
  * @tc.type: FUNC
@@ -1788,10 +1851,24 @@ HWTEST_F(SceneSessionTest, UpdateSessionRectPosYFromClient01, TestSize.Level1)
     sceneSession->UpdateSessionRectPosYFromClient(SizeChangeReason::UNDEFINED, displayId, rect);
     EXPECT_EQ(rect.posY_, 100);
     sceneSession->clientDisplayId_ = 999;
+    sceneSession->configDisplayId_ = 999;
     rect = { 0, 100, 100, 100 };
-    auto rect2 = rect;
-    sceneSession->UpdateSessionRectPosYFromClient(SizeChangeReason::UNDEFINED, displayId, rect);
-    EXPECT_EQ(rect.posY_, rect2.posY_);
+    sceneSession->UpdateSessionRectPosYFromClient(SizeChangeReason::RESIZE, displayId, rect);
+    EXPECT_EQ(rect.posY_, 100 + 1648 + 40);
+
+    sceneSession->clientDisplayId_ = 999;
+    sceneSession->configDisplayId_ = 999;
+    rect = { 0, 1700, 100, 100 };
+    sceneSession->UpdateSessionRectPosYFromClient(SizeChangeReason::RESIZE, displayId, rect);
+    EXPECT_EQ(rect.posY_, 1700);
+
+    WSRect sessionRect = {100, 200, 1000, 1000};
+    sceneSession->SetSessionRect(sessionRect);
+    sceneSession->clientDisplayId_ = 999;
+    sceneSession->configDisplayId_ = 999;
+    rect = { 0, -100, 100, 100 };
+    sceneSession->UpdateSessionRectPosYFromClient(SizeChangeReason::RESIZE, displayId, rect);
+    EXPECT_EQ(rect.posY_, -100 + sessionRect.posY_);
 }
 
 /**

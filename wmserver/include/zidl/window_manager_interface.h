@@ -129,6 +129,10 @@ public:
         const sptr<IWindowManagerAgent>& windowManagerAgent) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError UnregisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey, uint32_t interestInfo,
         const sptr<IWindowManagerAgent>& windowManagerAgent) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError RecoverWindowPropertyChangeFlag(uint32_t observedFlags, uint32_t interestedFlags)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     virtual WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) = 0;
     virtual WMError GetUnreliableWindowInfo(int32_t windowId, std::vector<sptr<UnreliableWindowInfo>>& infos) = 0;
     virtual WMError ListWindowInfo(const WindowInfoOption& windowInfoOption,
@@ -142,6 +146,12 @@ public:
     }
     virtual WMError GetTopNavDestinationName(int32_t windowId,
         std::string& topNavDestName) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError SetWatermarkImageForApp(const std::shared_ptr<Media::PixelMap>& pixelMap,
+        std::string& watermarkName) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError RecoverWatermarkImageForApp(const std::string& watermarkName)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     virtual WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) = 0;
     virtual WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller) = 0;
     virtual WMError GetSystemConfig(SystemConfig& systemConfig) = 0;
@@ -325,7 +335,7 @@ public:
      * Window Animation
      */
     virtual WMError CreateUIEffectController(const sptr<IUIEffectControllerClient>& controllerClient,
-        sptr<IUIEffectController>& controller, int32_t& controllerId) { return WMError::WM_OK; };
+        sptr<IUIEffectController>& controller, int32_t& controllerId) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; };
 
     /*
      * PiP Window

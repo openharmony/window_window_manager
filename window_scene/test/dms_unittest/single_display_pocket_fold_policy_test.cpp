@@ -493,15 +493,16 @@ HWTEST_F(SingleDisplayPocketFoldPolicyTest, ChangeScreenDisplayModeToCoordinatio
  */
 HWTEST_F(SingleDisplayPocketFoldPolicyTest, CloseCoordinationScreen, TestSize.Level1)
 {
-    if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
-        std::recursive_mutex displayInfoMutex;
-        std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
-        SingleDisplayPocketFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
-
-        policy.screenPowerTaskScheduler_ = std::make_shared<TaskScheduler>("Test");
-        policy.CloseCoordinationScreen();
-        EXPECT_EQ(ScreenSessionManager::GetInstance().isCoordinationFlag_, false);
+    if (!FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
+        GTEST_SKIP();
     }
+    std::recursive_mutex displayInfoMutex;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+    SingleDisplayPocketFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
+
+    policy.screenPowerTaskScheduler_ = std::make_shared<TaskScheduler>("Test");
+    policy.CloseCoordinationScreen();
+    EXPECT_EQ(ScreenSessionManager::GetInstance().isCoordinationFlag_, false);
 }
 
 /**
@@ -511,16 +512,17 @@ HWTEST_F(SingleDisplayPocketFoldPolicyTest, CloseCoordinationScreen, TestSize.Le
  */
 HWTEST_F(SingleDisplayPocketFoldPolicyTest, ExitCoordination, TestSize.Level1)
 {
-    if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
-        std::recursive_mutex displayInfoMutex;
-        std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
-        SingleDisplayPocketFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
-
-        policy.currentFoldStatus_ = FoldStatus::EXPAND;
-        policy.ExitCoordination();
-        EXPECT_EQ(policy.currentDisplayMode_, FoldDisplayMode::FULL);
-        EXPECT_EQ(policy.lastDisplayMode_, FoldDisplayMode::FULL);
+    if (!FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
+        GTEST_SKIP();
     }
+    std::recursive_mutex displayInfoMutex;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+    SingleDisplayPocketFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
+
+    policy.currentFoldStatus_ = FoldStatus::EXPAND;
+    policy.ExitCoordination();
+    EXPECT_EQ(policy.currentDisplayMode_, FoldDisplayMode::FULL);
+    EXPECT_EQ(policy.lastDisplayMode_, FoldDisplayMode::FULL);
 }
 
 /**

@@ -17,6 +17,7 @@
 #include <regex>
 #include <bundle_mgr_interface.h>
 #include <bundlemgr/launcher_service.h>
+#include <parameters.h>
 
 #include "common_test_utils.h"
 #include "context.h"
@@ -629,6 +630,77 @@ HWTEST_F(SceneSessionManagerTest12, CreateAndConnectSpecificSession03, TestSize.
     res = ssm_->CreateAndConnectSpecificSession(
         sessionStage, eventChannel, node, property, id, session, systemConfig, token);
     EXPECT_EQ(WSError::WS_DO_NOTHING, res);
+}
+
+/**
+ * @tc.name: CreateAndConnectSpecificSession
+ * @tc.desc: CreateAndConnectSpecificSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, CreateAndConnectSpecificSession04, TestSize.Level1)
+{
+    sptr<ISessionStage> sessionStage;
+    sptr<IWindowEventChannel> eventChannel;
+    std::shared_ptr<RSSurfaceNode> node = nullptr;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sptr<ISession> session;
+    SystemSessionConfig systemConfig;
+    sptr<IRemoteObject> token;
+    int32_t id = 0;
+    ASSERT_NE(ssm_, nullptr);
+
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test2";
+    sptr<SceneSession> parentSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    parentSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
+    ssm_->sceneSessionMap_.insert({ parentSession->GetPersistentId(), parentSession });
+
+    // Create UI_EXTENSION_SUB_WINDOW success
+    property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    property->SetParentPersistentId(parentSession->GetPersistentId());
+    property->SetIsUIExtFirstSubWindow(true);
+    ssm_->systemConfig_.supportUIExtensionSubWindow_ = true;
+    ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
+        systemConfig, token);
+    EXPECT_EQ(property->GetWindowType(), WindowType::WINDOW_TYPE_SCB_SUB_WINDOW);
+
+    // Create UI_EXTENSION_SUB_WINDOW failed
+    property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    ssm_->systemConfig_.supportUIExtensionSubWindow_ = false;
+    ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
+        systemConfig, token);
+    EXPECT_NE(property->GetWindowType(), WindowType::WINDOW_TYPE_SCB_SUB_WINDOW);
+
+    // Create UI_EXTENSION_SUB_WINDOW failed
+    property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    property->SetIsUIExtFirstSubWindow(false);
+    ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
+        systemConfig, token);
+    EXPECT_NE(property->GetWindowType(), WindowType::WINDOW_TYPE_SCB_SUB_WINDOW);
+
+    // Create UI_EXTENSION_SUB_WINDOW failed
+    property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    parentSession->GetSessionProperty()->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
+        systemConfig, token);
+    EXPECT_NE(property->GetWindowType(), WindowType::WINDOW_TYPE_SCB_SUB_WINDOW);
+}
+
+/**
+ * @tc.name: ApplyFeatureConfig
+ * @tc.desc: ApplyFeatureConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, ApplyFeatureConfig, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    std::unordered_map<std::string, std::string> configMap = {
+        {"testKey", "testVal"},
+        {"supportUIExtensionSubWindow", "true"}
+    };
+    ssm_->ApplyFeatureConfig(configMap);
+    EXPECT_TRUE(ssm_->systemConfig_.supportUIExtensionSubWindow_);
 }
 
 /**
@@ -1794,6 +1866,80 @@ HWTEST_F(SceneSessionManagerTest12, HasFloatingWindowForeground06, TestSize.Leve
 }
 
 /**
+ * @tc.name: GetRouterStackInfo01
+ * @tc.desc: test function : GetRouterStackInfo01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetRouterStackInfo01, Function | SmallTest | Level2)
+{
+    class TestRouterListener : public SessionRouterStackListenerStub {
+        void SendRouterStackInfo(const sptr<RouterStackInfo>& routerStackInfo) override {}
+    };
+    int32_t persistentId = -1;
+    auto listener = sptr<TestRouterListener>::MakeSptr();
+    MockAccesstokenKit::MockIsSystemApp(true);
+    MockAccesstokenKit::MockIsSACalling(true);
+
+    auto result = ssm_->GetRouterStackInfo(persistentId, listener);
+    EXPECT_EQ(result, WMError::WM_ERROR_NULLPTR);
+
+    result = ssm_->GetRouterStackInfo(persistentId, nullptr);
+    EXPECT_EQ(result, WMError::WM_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: GetRouterStackInfo02
+ * @tc.desc: test function : GetRouterStackInfo02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetRouterStackInfo02, Function | SmallTest | Level2)
+{
+    class TestRouterListener : public SessionRouterStackListenerStub {
+        void SendRouterStackInfo(const sptr<RouterStackInfo>& routerStackInfo) override {}
+    };
+
+    SessionInfo info;
+    info.abilityName_ = "GetRouterStackInfo02";
+    info.bundleName_ = "GetRouterStackInfo02";
+    info.windowType_ = static_cast<u_int32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<SceneSessionMocker> sceneSession = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+
+    auto listener = sptr<TestRouterListener>::MakeSptr();
+    MockAccesstokenKit::MockIsSystemApp(true);
+    MockAccesstokenKit::MockIsSACalling(true);
+
+    auto result = ssm_->GetRouterStackInfo(sceneSession->GetPersistentId(), listener);
+    EXPECT_EQ(result, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: GetRouterStackInfo03
+ * @tc.desc: test function : GetRouterStackInfo03
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetRouterStackInfo03, Function | SmallTest | Level2)
+{
+    MockAccesstokenKit::MockIsSystemApp(false);
+    MockAccesstokenKit::MockIsSACalling(false);
+    auto result = ssm_->GetRouterStackInfo(1, nullptr);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
+
+    MockAccesstokenKit::MockIsSystemApp(false);
+    MockAccesstokenKit::MockIsSACalling(true);
+    result = ssm_->GetRouterStackInfo(1, nullptr);
+    EXPECT_EQ(result, WMError::WM_ERROR_NULLPTR);
+
+    MockAccesstokenKit::MockIsSystemApp(true);
+    MockAccesstokenKit::MockIsSACalling(false);
+    result = ssm_->GetRouterStackInfo(1, nullptr);
+    EXPECT_EQ(result, WMError::WM_ERROR_NULLPTR);
+
+    MockAccesstokenKit::MockIsSystemApp(true);
+    MockAccesstokenKit::MockIsSACalling(true);
+}
+
+/**
  * @tc.name: UpdateSessionWithFoldStateChange
  * @tc.desc: test function : UpdateSessionWithFoldStateChange
  * @tc.type: FUNC
@@ -1868,6 +2014,121 @@ HWTEST_F(SceneSessionManagerTest12, GetActiveSceneSessionCopy, Function | SmallT
     ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
     std::vector<sptr<SceneSession>> activeSession = ssm_->GetActiveSceneSessionCopy();
     EXPECT_EQ(activeSession.empty(), false);
+}
+
+/**
+ * @tc.name: GetHookedSessionByModuleName
+ * @tc.desc: test function : GetHookedSessionByModuleName
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetHookedSessionByModuleName, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.bundleName_ = "testBundleName1";
+    info.moduleName_ = "testModuleName1";
+    info.appIndex_ = 1;
+    info.appInstanceKey_ = "";
+    sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    auto res = ssm_->GetHookedSessionByModuleName(info);
+    ASSERT_EQ(res, nullptr);
+
+    ssm_->sceneSessionMap_.insert({101, sceneSession});
+    res = ssm_->GetHookedSessionByModuleName(info);
+    ASSERT_EQ(res, sceneSession);
+
+    info.appInstanceKey_ = "testAppInstanceKey1";
+    res = ssm_->GetHookedSessionByModuleName(info);
+    ASSERT_EQ(res, nullptr);
+
+    info.appIndex_ = 2;
+    res = ssm_->GetHookedSessionByModuleName(info);
+    ASSERT_EQ(res, nullptr);
+
+    info.moduleName_ = "testModuleName2";
+    res = ssm_->GetHookedSessionByModuleName(info);
+    ASSERT_EQ(res, nullptr);
+
+    info.bundleName_ = "testBundleName2";
+    res = ssm_->GetHookedSessionByModuleName(info);
+    ASSERT_EQ(res, nullptr);
+}
+
+/**
+ * @tc.name: RequestSceneSession
+ * @tc.desc: test function : RequestSceneSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, RequestSceneSession, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.bundleName_ = "testBundleName1";
+    info.moduleName_ = "testModuleName1";
+    info.abilityName_ = "testAbilityName1";
+    info.persistentId_ = 101;
+    info.appIndex_ = 0;
+    sptr<SceneSessionMocker> sceneSession = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->sessionInfo_.isAbilityHook_ = true;
+    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
+    ssm_->sceneSessionMap_[101] = sceneSession;
+
+    auto result = ssm_->RequestSceneSession(info, windowSessionProperty);
+    ASSERT_NE(result, nullptr);
+    ASSERT_EQ(result->GetSessionInfo().moduleName_, info.moduleName_);
+}
+
+/**
+ * @tc.name: RegisterSceneSessionDestructCallback
+ * @tc.desc: test function : RegisterSceneSessionDestructCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, RegisterSceneSessionDestructCallback, Function | SmallTest | Level2)
+{
+    NotifySceneSessionDestructFunc func = [](int32_t persistentId) { return; };
+    ssm_->RegisterSceneSessionDestructCallback(std::move(func));
+    ASSERT_NE(nullptr, ssm_->onSceneSessionDestruct_);
+}
+
+/**
+ * @tc.name: RegisterSceneSessionDestructNotifyManagerFunc
+ * @tc.desc: test function : RegisterSceneSessionDestructNotifyManagerFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, RegisterSceneSessionDestructNotifyManagerFunc, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.bundleName_ = "RegisterSceneSessionDestructNotifyManageFunc";
+    info.moduleName_ = "RegisterSceneSessionDestructNotifyManageFunc";
+    info.abilityName_ = "RegisterSceneSessionDestructNotifyManageFunc";
+    info.persistentId_ = 999;
+    sptr<MainSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    NotifySceneSessionDestructFunc func = [](int32_t persistentId) { return; };
+    ssm_->RegisterSceneSessionDestructCallback(std::move(func));
+    ssm_->RegisterSceneSessionDestructNotifyManagerFunc(sceneSession);
+    ASSERT_NE(sceneSession->notifySceneSessionDestructFunc_, nullptr);
+}
+
+/**
+ * @tc.name: UpdateAbilityHookState
+ * @tc.desc: test function : UpdateAbilityHookState
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, UpdateAbilityHookState, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.bundleName_ = "UpdateAbilityHookState_bundle";
+    info.moduleName_ = "UpdateAbilityHookState_module";
+    info.abilityName_ = "UpdateAbilityHookState_ability";
+    info.persistentId_ = 101;
+    sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+
+    ssm_->UpdateAbilityHookState(sceneSession, true);
+    EXPECT_EQ(true, sceneSession->GetSessionInfo().isAbilityHook_);
 }
 
 /**
@@ -2607,6 +2868,50 @@ HWTEST_F(SceneSessionManagerTest12, CreateUIEffectController, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsPrepareTerminateEnabledTest
+ * @tc.desc: test function : IsPrepareTerminateEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, IsPrepareTerminateEnabledTest, TestSize.Level1)
+{
+    system::SetParameter("persist.sys.prepare_terminate", "true");
+    auto result = ssm_->IsPrepareTerminateEnabled();
+    ASSERT_EQ(result, true);
+
+    system::SetParameter("persist.sys.prepare_terminate", "false");
+    result = ssm_->IsPrepareTerminateEnabled();
+    ASSERT_EQ(result, false);
+}
+
+
+/**
+ * @tc.name: InitPrepareTerminateConfigTest
+ * @tc.desc: test function : InitPrepareTerminateConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, InitPrepareTerminateConfigTest, TestSize.Level1)
+{
+    system::SetParameter("persist.sys.prepare_terminate", "true");
+    ssm_->InitPrepareTerminateConfig();
+    ASSERT_EQ(ssm_->isPrepareTerminateEnable_, true);
+}
+
+/**
+ * @tc.name: CheckPrepareTerminateEnabled01
+ * @tc.desc: test function : PrepareTerminateEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, CheckPrepareTerminateEnabled01, TestSize.Level1)
+{
+    system::SetParameter("persist.sys.prepare_terminate", "true");
+    ssm_->isPrepareTerminateEnable_ = false;
+    bool isPrepareTerminate = false;
+    auto result = ssm_->PrepareTerminate(1, isPrepareTerminate);
+    ASSERT_EQ(isPrepareTerminate, false);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
  * @tc.name: PendingSessionToBackground
  * @tc.desc: test function : PendingSessionToBackground
  * @tc.type: FUNC
@@ -2737,6 +3042,42 @@ HWTEST_F(SceneSessionManagerTest12, UpdateSystemDecorEnable, Function | SmallTes
     auto result = ssm_->UpdateSystemDecorEnable(enable);
     EXPECT_EQ(result, WMError::WM_OK);
     EXPECT_EQ(ssm_->systemConfig_.isSystemDecorEnable_, enable);
+}
+
+/**
+ * @tc.name: IsFocusWindowParent
+ * @tc.desc: test function : IsFocusWindowParent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, IsFocusWindowParent, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> token = sptr<MockIRemoteObject>::MakeSptr();
+    bool isParent = false;
+    MockAccesstokenKit::MockIsSACalling(false);
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_PERMISSION, ssm_->IsFocusWindowParent(token, isParent));
+
+    MockAccesstokenKit::MockIsSACalling(true);
+    ssm_->sceneSessionMap_.clear();
+
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "IsFocusWindowParent";
+    sessionInfo.abilityName_ = "IsFocusWindowParent";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession->property_->SetPersistentId(1);
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    focusGroup->SetFocusedSessionId(1);
+
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, ssm_->IsFocusWindowParent(token, isParent));
+
+    ssm_->sceneSessionMap_.emplace(1, sceneSession);
+    sceneSession->SetAbilityToken(token);
+
+    EXPECT_EQ(WSError::WS_OK, ssm_->IsFocusWindowParent(token, isParent));
+    EXPECT_EQ(true, isParent);
+
+    sceneSession->SetAbilityToken(nullptr);
+    EXPECT_EQ(WSError::WS_OK, ssm_->IsFocusWindowParent(token, isParent));
+    EXPECT_EQ(false, isParent);
 }
 } // namespace
 } // namespace Rosen

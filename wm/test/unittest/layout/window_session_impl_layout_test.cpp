@@ -409,13 +409,13 @@ HWTEST_F(WindowSessionImplLayoutTest, NotifyFirstValidLayoutUpdate, TestSize.Lev
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->property_->SetPersistentId(2025);
 
-    Rect preRect = { 0, 0, 1000, 1000 };
+    Rect preRect = { 0, 0, 0, 0 };
     Rect newRect = { 0, 0, 0, 0 };
     window->isFirstValidLayoutUpdate_ = true;
     window->NotifyFirstValidLayoutUpdate(preRect, newRect);
     EXPECT_EQ(window->isFirstValidLayoutUpdate_, true);
 
-    preRect = { 0, 0, 0, 0 };
+    preRect = { 0, 0, 1000, 1000 };
     window->NotifyFirstValidLayoutUpdate(preRect, newRect);
     EXPECT_EQ(window->isFirstValidLayoutUpdate_, true);
 

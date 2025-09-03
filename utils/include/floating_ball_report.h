@@ -21,15 +21,19 @@
 #include "wm_common.h"
 
 namespace OHOS::Rosen {
-class FloatingballReporter {
-WM_DECLARE_SINGLE_INSTANCE(FloatingballReporter);
+namespace FloatingBallEvent {
+    constexpr char EVENT_KEY_START[] = "START_FLOATING_BALL";
+    constexpr char EVENT_KEY_UPDATE[] = "UPDATE_FLOATING_BALL";
+    constexpr char EVENT_KEY_REMOVE[] = "REMOVE_FLOATING_BALL";
+    constexpr char EVENT_KEY_RESTORE[] = "RESTORE_FLOATING_BALL_WINDOW";
+}
+
+class FloatingBallReporter {
+WM_DECLARE_SINGLE_INSTANCE(FloatingBallReporter);
 
 public:
     void SetCurrentPackageName(const std::string& packageName);
-    void ReportFbStart(const uint32_t& templateType, const std::string& errorReason);
-    void ReportFbRemove(const uint32_t& templateType, const std::string& errorReason);
-    void ReportFbRestoreMainWindow(const uint32_t& templateType, const std::string& errorReason);
-    void ReportFbUpdateContent(const uint32_t& templateType, const std::string &errorReason);
+    void ReportFbEvent(const std::string& eventName, const uint32_t& templateType, const std::string& errorReason);
 private:
     std::string GetPackageName() const;
     std::string packageName_ = "";

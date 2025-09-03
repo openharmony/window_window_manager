@@ -95,8 +95,7 @@ private:
     void SetSubWindowBoundsDuringCross(const WSRect& parentRect, bool isGlobal, bool needFlush) override;
     void NotifySubSessionRectChangeByAnchor(const WSRect& parentRect,
         SizeChangeReason reason = SizeChangeReason::UNDEFINED, DisplayId displayId = DISPLAY_ID_INVALID) override;
-    void HandleSubSessionSurfaceNodeByWindowAnchor(SizeChangeReason reason,
-        const sptr<ScreenSession>& screenSession) override;
+    void HandleSubSessionSurfaceNodeByWindowAnchor(SizeChangeReason reason, DisplayId displayId) override;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_MAIN_SESSION_H

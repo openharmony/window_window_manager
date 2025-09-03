@@ -39,6 +39,7 @@ napi_value NapiGetUndefined(napi_env env);
 napi_valuetype GetType(napi_env env, napi_value value);
 bool NapiIsCallable(napi_env env, napi_value value);
 napi_value NapiThrowError(napi_env env, WmErrorCode errCode);
+napi_value NapiThrowError(napi_env env, WmErrorCode errCode, const std::string& msg);
 class JsWindow final {
 public:
     explicit JsWindow(const sptr<Window>& window);
@@ -313,7 +314,7 @@ private:
     napi_value OnKeepKeyboardOnFocus(napi_env env, napi_callback_info info);
     napi_value OnSetWindowLimits(napi_env env, napi_callback_info info);
     napi_value OnGetWindowLimits(napi_env env, napi_callback_info info);
-    
+
     napi_value OnIsFocused(napi_env env, napi_callback_info info);
     napi_value OnRequestFocus(napi_env env, napi_callback_info info);
     napi_value OnGetWindowDensityInfo(napi_env env, napi_callback_info info);

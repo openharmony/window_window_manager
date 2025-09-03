@@ -34,6 +34,7 @@ public:
     virtual DMError UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type);
     virtual void Clear();
+    virtual bool IsScreenLessDevice();
 protected:
     bool InitDMSProxy();
     std::recursive_mutex mutex_;
@@ -59,6 +60,7 @@ public:
     virtual FoldStatus GetFoldStatus();
     virtual FoldDisplayMode GetFoldDisplayMode();
     virtual void SetFoldDisplayMode(const FoldDisplayMode);
+    virtual void SetFoldDisplayModeAsync(const FoldDisplayMode);
     virtual sptr<DisplayInfo> GetDisplayInfo(DisplayId displayId);
     virtual sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId);
     virtual VirtualScreenFlag GetVirtualScreenFlag(ScreenId screenId);
@@ -79,7 +81,6 @@ public:
     virtual uint32_t GetScreenBrightness(uint64_t screenId);
     virtual DMError SetSystemKeyboardStatus(bool isTpKeyboardOn = false);
 private:
-    virtual bool IsScreenLessDevice();
     static inline SingletonDelegator<DisplayManagerAdapterLite> delegator;
 };
 
@@ -98,7 +99,6 @@ public:
     virtual DMError GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos);
     virtual bool SynchronizePowerStatus(ScreenPowerState state);
 private:
-    virtual bool IsScreenLessDevice();
     static inline SingletonDelegator<ScreenManagerAdapterLite> delegator;
 };
 

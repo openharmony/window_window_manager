@@ -46,6 +46,7 @@ constexpr int32_t HALL_THRESHOLD = 1;
 constexpr int32_t HALL_FOLDED_THRESHOLD = 0;
 constexpr int32_t HALF_FOLD_VALUE = 3;
 constexpr int32_t REFLEXION_VALUE = 2;
+constexpr float DEFAULT_ANGLE_VALUE = 5.0F;
 
 constexpr uint32_t FULL_WAIT_TIMES = 215;
 constexpr float ANGLE_DIFF_OF_SECONDARY_AB = 15.0F;
@@ -57,19 +58,25 @@ SecondaryDisplaySensorFoldStateManager::~SecondaryDisplaySensorFoldStateManager(
 void SecondaryDisplaySensorFoldStateManager::HandleAngleOrHallChange(const std::vector<float>& angles,
     const std::vector<uint16_t>& halls, sptr<FoldScreenPolicy> foldScreenPolicy, bool isPostureRegistered)
 {
-    if (halls.size() != HALLS_AXIS_SIZE) {
-        TLOGE(WmsLogTag::DMS, "halls size is not right, halls size %{public}zu", halls.size());
+    if (halls.size() != HALLS_AXIS_SIZE || angles.size() != ANGLES_AXIS_SIZE) {
+        TLOGE(WmsLogTag::DMS, "halls size or angles is not right, size %{public}zu, %{public}zu",
+            halls.size(), angles.size());
         return;
     }
-    bool isFoldScreenOn = PowerMgr::PowerMgrClient::GetInstance().IsFoldScreenOn();
+    if ((std::fabs(angles[1] - DEFAULT_ANGLE_VALUE) < FLT_EPSILON && halls[1] == HALL_THRESHOLD) ||
+        (std::fabs(angles[0] - DEFAULT_ANGLE_VALUE) < FLT_EPSILON && halls[0] == HALL_THRESHOLD)) {
+        TLOGI(WmsLogTag::DMS, "hall change but posture not change");
+        return;
+    }
+    bool isScreenOn = PowerMgr::PowerMgrClient::GetInstance().IsScreenOn();
     {
         std::lock_guard<std::mutex> lock(secondaryFoldStatusMutex_);
-        if (!isFoldScreenOn && curHallAB_ == halls[0] && curHallBC_ == halls[1]) {
+        if (!isScreenOn && curHallAB_ == halls[0] && curHallBC_ == halls[1]) {
             TLOGI(WmsLogTag::DMS, "hall value is not change in unPower");
             return;
         }
     }
-    FoldStatus nextState = GetNextFoldState(angles, halls, isPostureRegistered, isFoldScreenOn);
+    FoldStatus nextState = GetNextFoldState(angles, halls, isPostureRegistered, isScreenOn);
     HandleSensorChange(nextState, angles, halls, foldScreenPolicy);
     if (angles.size() != ANGLES_AXIS_SIZE) {
         TLOGE(WmsLogTag::DMS, "angles size is not right, angles size %{public}zu", angles.size());
@@ -160,7 +167,7 @@ FoldStatus SecondaryDisplaySensorFoldStateManager::GetNextFoldStateHalf(float an
     FoldStatus state = FoldStatus::UNKNOWN;
 
     if (allowUserSensorForLargeFoldDevice == SMALLER_BOUNDARY_FLAG) {
-        if (std::islessequal(angle, OPEN_GRL_HALF_FOLDED_MIN_THRESHOLD)) {
+        if (std::islessequal(angle, OPEN_GRL_HALF_FOLDED_MIN_THRESHOLD) && hall == HALL_FOLDED_THRESHOLD) {
             state = FoldStatus::FOLDED;
         } else if (std::isgreaterequal(angle, OPEN_GRL_HALF_FOLDED_MIN_THRESHOLD + GRL_HALF_FOLDED_BUFFER) &&
             hall == HALL_FOLDED_THRESHOLD) {
@@ -263,7 +270,8 @@ void SecondaryDisplaySensorFoldStateManager::SendReflexionResult(bool isSecondar
 FoldStatus SecondaryDisplaySensorFoldStateManager::HandleSecondaryOneStep(FoldStatus currentStatus,
     FoldStatus nextStatus, const std::vector<float>& angles, const std::vector<uint16_t>& halls)
 {
-    if (currentStatus != FoldStatus::FOLDED ||
+    bool isPowerOn = PowerMgr::PowerMgrClient::GetInstance().IsScreenOn();
+    if (!isPowerOn || currentStatus != FoldStatus::FOLDED ||
         (nextStatus != FoldStatus::HALF_FOLD && nextStatus != FoldStatus::EXPAND)) {
         return nextStatus;
     }
@@ -292,9 +300,9 @@ FoldStatus SecondaryDisplaySensorFoldStateManager::HandleSecondaryOneStep(FoldSt
 FoldStatus SecondaryDisplaySensorFoldStateManager::CalculateNewABFoldStatus(float previousAngle, uint16_t previousHall,
     float angle, uint16_t hall)
 {
-    if ((previousHall == 1 && hall == 0) ||
-        (previousHall == hall &&
-         angle - previousAngle < ANGLE_DIFF_OF_SECONDARY_AB && angle < OPEN_GRL_HALF_FOLDED_MIN_THRESHOLD)) {
+    if ((previousHall == HALL_THRESHOLD && hall == HALL_FOLDED_THRESHOLD) ||
+        (previousHall == hall && std::islessequal(angle - previousAngle, ANGLE_DIFF_OF_SECONDARY_AB) &&
+         std::islessequal(angle, CLOSE_GRL_HALF_FOLDED_MIN_THRESHOLD))) {
         return FoldStatus::FOLDED;
     } else if (std::isgreaterequal(angle, GRL_HALF_FOLDED_MAX_THRESHOLD - GRL_HALF_FOLDED_BUFFER)) {
         return FoldStatus::EXPAND;

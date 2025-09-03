@@ -33,7 +33,7 @@ public:
     DMError UniqueSwitch(const std::vector<ScreenId>& screenIds, std::vector<DisplayId>& displayIds);
 
     DMError MirrorSwitch(const ScreenId mainScreenId, const std::vector<ScreenId>& screenIds, DMRect mainScreenRegion,
-        ScreenId& screenGroupId);
+        ScreenId& screenGroupId, bool forceMirror = false);
 
     void MultiScreenModeChange(sptr<ScreenSession> mainSession, sptr<ScreenSession> secondarySession,
         const std::string& operateType);
@@ -52,6 +52,7 @@ public:
         MultiScreenPositionOptions mainScreenOptions, MultiScreenPositionOptions secondScreenOption);
 
     void MultiScreenReportDataToRss(std::string multiScreenType, std::string status);
+    void NotifyScreenConnectCompletion(ScreenId screenId);
 private:
     MultiScreenManager();
     ~MultiScreenManager();
@@ -60,9 +61,10 @@ private:
         std::vector<ScreenId>& physicalScreenIds, std::vector<ScreenId>& virtualScreenIds);
 
     DMError VirtualScreenMirrorSwitch(const ScreenId mainScreenId, const std::vector<ScreenId>& screenIds,
-        DMRect mainScreenRegion, ScreenId& screenGroupId);
+        DMRect mainScreenRegion, ScreenId& screenGroupId, bool forceMirror = false);
 
-    DMError PhysicalScreenMirrorSwitch(const std::vector<ScreenId>& screenIds, DMRect mainScreenRegion);
+    DMError PhysicalScreenMirrorSwitch(const std::vector<ScreenId>& screenIds, DMRect mainScreenRegion,
+        bool forceMirror = false);
 
     DMError PhysicalScreenUniqueSwitch(const std::vector<ScreenId>& screenIds);
 
@@ -89,6 +91,11 @@ private:
     void DoFirstExtendChangeMirror(sptr<ScreenSession> firstSession, sptr<ScreenSession> secondarySession);
 
     std::pair<ScreenId, MultiScreenMode> lastScreenMode_;  // main screen id & secondary screen mode
+
+    void BlockScreenConnect(sptr<ScreenSession>& screenSession, ScreenId screenId);
+    std::mutex uniqueScreenMutex_;
+    std::condition_variable uniqueScreenCV_;
+    std::map<ScreenId, bool> uniqueScreenTimeoutMap_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_MULTI_SCREEN_MANAGER_H

@@ -108,6 +108,7 @@ public:
         TRANS_ID_SEND_POINTER_EVENT_FOR_HOVER,
         TRANS_ID_SET_START_WINDOW_BACKGROUND_COLOR,
         TRANS_IS_SET_IMAGE_FOR_RECENT,
+        TRANS_ID_IS_FOCUS_WINDOW_PARENT,
     };
 
     /*
@@ -118,7 +119,8 @@ public:
     /*
      * Window Lifecycle
      */
-    virtual WSError PendingSessionToForeground(const sptr<IRemoteObject>& token) = 0;
+    virtual WSError PendingSessionToForeground(const sptr<IRemoteObject>& token,
+        int32_t windowMode = DEFAULT_INVALID_WINDOW_MODE) = 0;
     virtual WSError PendingSessionToBackground(const sptr<IRemoteObject>& token, const BackgroundParams& params) = 0;
     virtual WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token,
         bool shouldBackToCaller = true) = 0;
@@ -146,6 +148,7 @@ public:
     virtual WSError GetFocusSessionToken(sptr<IRemoteObject>& token, DisplayId displayId = DEFAULT_DISPLAY_ID) = 0;
     virtual WSError GetFocusSessionElement(AppExecFwk::ElementName& element,
         DisplayId displayId = DEFAULT_DISPLAY_ID) = 0;
+    virtual WSError IsFocusWindowParent(const sptr<IRemoteObject>& token, bool& isParent) { return WSError::WS_OK; }
     virtual WSError GetSessionSnapshot(const std::string& deviceId, int32_t persistentId,
                                        SessionSnapshot& snapshot, bool isLowResolution) = 0;
     virtual WSError LockSession(int32_t sessionId) = 0;

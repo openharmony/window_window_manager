@@ -35,6 +35,7 @@ class CompatibleModeProperty;
 using HandlWritePropertyFunc = bool (WindowSessionProperty::*)(Parcel& parcel);
 using HandlReadPropertyFunc = void (WindowSessionProperty::*)(Parcel& parcel);
 using TransitionAnimationMapType = std::unordered_map<WindowTransitionType, std::shared_ptr<TransitionAnimation>>;
+constexpr float WINDOW_CORNER_RADIUS_INVALID = -1.0f;
 
 class WindowSessionProperty : public Parcelable {
 public:
@@ -268,8 +269,12 @@ public:
     /*
      * Window Lifecycle
      */
-    void SetUseControlStateToProperty(bool isUseControlState);
-    bool GetUseControlStateFromProperty() const;
+    void SetUseControlState(bool isUseControlState);
+    bool GetUseControlState() const;
+    void SetAncoRealBundleName(const std::string& ancoRealBundleName);
+    std::string GetAncoRealBundleName() const;
+    void SetMissionInfo(const MissionInfo& missionInfo);
+    MissionInfo GetMissionInfo() const;
 
     /*
      * UIExtension
@@ -567,11 +572,14 @@ private:
      */
     mutable std::mutex lifecycleUseControlMutex_;
     bool isUseControlState_ = false;
+    std::string ancoRealBundleName_  = "";
+    MissionInfo missionInfo_;
+    mutable std::mutex missionInfoMutex_;
     
     /*
      * Window Property
      */
-    float cornerRadius_ = 0.0f;
+    float cornerRadius_ = WINDOW_CORNER_RADIUS_INVALID; // corner radius of window set by application
     mutable std::mutex cornerRadiusMutex_;
     ShadowsInfo shadowsInfo_;
     mutable std::mutex shadowsInfoMutex_;
@@ -680,6 +688,7 @@ struct FreeMultiWindowConfig : public Parcelable {
     WindowMode defaultWindowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
     uint32_t maxMainFloatingWindowNumber_ = 0;
     DragResizeType defaultDragResizeType_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    AppWindowSceneConfig appWindowSceneConfig_;
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
@@ -790,6 +799,12 @@ struct SystemSessionConfig : public Parcelable {
     bool skipRedundantWindowStatusNotifications_ = false;
     uint32_t supportFunctionType_ = 0;
     bool supportSnapshotAllSessionStatus_ = false;
+    bool supportPreloadStartingWindow_ = false;
+    bool supportCreateFloatWindow_ = false;
+    float defaultCornerRadius_ = 0.0f; // default corner radius of window set by system config
+    bool supportUIExtensionSubWindow_ = false;
+
+    void ConvertSupportUIExtensionSubWindow(const std::string& itemValue);
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
@@ -804,9 +819,11 @@ struct SystemSessionConfig : public Parcelable {
             return false;
         }
 
-        if (!parcel.WriteUint32(miniWidthOfMainWindow_) || !parcel.WriteUint32(miniHeightOfMainWindow_) ||
-            !parcel.WriteUint32(miniWidthOfSubWindow_) || !parcel.WriteUint32(miniHeightOfSubWindow_) ||
-            !parcel.WriteUint32(miniWidthOfDialogWindow_) || !parcel.WriteUint32(miniHeightOfDialogWindow_)) {
+        bool parcelWriteFail = !parcel.WriteUint32(miniWidthOfMainWindow_) ||
+                !parcel.WriteUint32(miniHeightOfMainWindow_) || !parcel.WriteUint32(miniWidthOfSubWindow_) ||
+                !parcel.WriteUint32(miniHeightOfSubWindow_) || !parcel.WriteUint32(miniWidthOfDialogWindow_) ||
+                !parcel.WriteUint32(miniHeightOfDialogWindow_);
+        if (parcelWriteFail) {
             return false;
         }
 
@@ -844,6 +861,12 @@ struct SystemSessionConfig : public Parcelable {
             return false;
         }
         if (!parcel.WriteBool(supportSnapshotAllSessionStatus_)) {
+            return false;
+        }
+        if (!parcel.WriteBool(supportPreloadStartingWindow_)) {
+            return false;
+        }
+        if (!parcel.WriteFloat(defaultCornerRadius_)) {
             return false;
         }
         return true;
@@ -896,6 +919,11 @@ struct SystemSessionConfig : public Parcelable {
         config->skipRedundantWindowStatusNotifications_ = parcel.ReadBool();
         config->supportFunctionType_ = parcel.ReadUint32();
         config->supportSnapshotAllSessionStatus_ = parcel.ReadBool();
+        config->supportPreloadStartingWindow_ = parcel.ReadBool();
+        if (!parcel.ReadFloat(config->defaultCornerRadius_)) {
+            delete config;
+            return nullptr;
+        }
         return config;
     }
 

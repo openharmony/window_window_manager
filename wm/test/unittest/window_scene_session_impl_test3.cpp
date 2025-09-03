@@ -706,6 +706,32 @@ HWTEST_F(WindowSceneSessionImplTest3, UpdateFloatingWindowSizeBySizeLimits01, Te
 }
 
 /**
+ * @tc.name: UpdateFloatingWindowSizeBySizeLimits02
+ * @tc.desc: UpdateFloatingWindowSizeBySizeLimits
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest3, UpdateFloatingWindowSizeBySizeLimits02, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateFloatingWindowSizeBySizeLimits02");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    windowSceneSessionImpl->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT_CAMERA);
+    WindowLimits windowLimits = { 1, 1, 1, 1, 0.0f, 2.0f };
+    windowSceneSessionImpl->property_->SetWindowLimits(windowLimits);
+    uint32_t widthLimits = 100;
+    uint32_t heightLimits = 200;
+    windowSceneSessionImpl->UpdateFloatingWindowSizeBySizeLimits(widthLimits, heightLimits);
+    EXPECT_EQ(widthLimits, 100);
+    EXPECT_EQ(heightLimits, 200);
+
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    windowSceneSessionImpl->UpdateFloatingWindowSizeBySizeLimits(widthLimits, heightLimits);
+    EXPECT_EQ(widthLimits, 1);
+    EXPECT_EQ(heightLimits, 1);
+}
+
+/**
  * @tc.name: IsDecorEnable
  * @tc.desc: IsDecorEnable
  * @tc.type: FUNC
@@ -2004,6 +2030,34 @@ HWTEST_F(WindowSceneSessionImplTest3, SetSupportedWindowModes02, TestSize.Level1
     supportedWindowModes.push_back(AppExecFwk::SupportWindowMode::FLOATING);
     window->grayOutMaximizeButton_ = true;
     ret = window->SetSupportedWindowModes(supportedWindowModes, false);
+    EXPECT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: SetSupportedWindowModes04
+ * @tc.desc: SetSupportedWindowModes
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest3, SetSupportedWindowModes04, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetSupportedWindowModes04");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+
+    std::vector<AppExecFwk::SupportWindowMode> supportedWindowModes;
+    supportedWindowModes.push_back(AppExecFwk::SupportWindowMode::FULLSCREEN);
+    supportedWindowModes.push_back(AppExecFwk::SupportWindowMode::SPLIT);
+    supportedWindowModes.push_back(AppExecFwk::SupportWindowMode::FLOATING);
+
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    window->windowSystemConfig_.freeMultiWindowEnable_ = false;
+    auto ret = window->SetSupportedWindowModes(supportedWindowModes);
     EXPECT_EQ(WMError::WM_OK, ret);
 }
 

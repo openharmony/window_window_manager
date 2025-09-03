@@ -44,6 +44,7 @@ public:
     void TearDown() override;
 
 private:
+    RSSurfaceNode::SharedPtr CreateRSSurfaceNode();
     sptr<SessionStageMocker> mockSessionStage_ = nullptr;
 };
 
@@ -57,6 +58,14 @@ void SceneSessionLayoutTest::SetUp()
 }
 
 void SceneSessionLayoutTest::TearDown() {}
+
+RSSurfaceNode::SharedPtr SceneSessionLayoutTest::CreateRSSurfaceNode()
+{
+    struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
+    rsSurfaceNodeConfig.SurfaceNodeName = "WindowSessionTestSurfaceNode";
+    auto surfaceNode = RSSurfaceNode::Create(rsSurfaceNodeConfig);
+    return surfaceNode;
+}
 
 namespace {
 /**
@@ -1135,6 +1144,27 @@ HWTEST_F(SceneSessionLayoutTest, RegisterAppHookWindowInfoFunc, TestSize.Level1)
     sceneSession->RegisterAppHookWindowInfoFunc(nullptr);
     ASSERT_NE(sceneSession->getHookWindowInfoFunc_, nullptr);
 }
+
+/**
+ * @tc.name: GetWindowDragMoveMountedNode01
+ * @tc.desc: GetWindowDragMoveMountedNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLayoutTest, GetWindowDragMoveMountedNode01, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetWindowDragMoveMountedNode";
+    info.bundleName_ = "GetWindowDragMoveMountedNode";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto rsNode = session->GetWindowDragMoveMountedNode(std::numeric_limits<uint32_t>::max(), 0);
+    EXPECT_EQ(rsNode, nullptr);
+    sceneSession->SetFindScenePanelRsNodeByZOrderFunc([this](uint64_t screenId, uint32_t targetZOrder) {
+        return CreateRSSurfaceNode();
+    });
+    rsNode = sceneSession->GetWindowDragMoveMountedNode(0, 0);
+    EXPECT_NE(rsNode, nullptr);
+}
+
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

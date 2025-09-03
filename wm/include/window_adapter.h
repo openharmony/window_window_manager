@@ -18,25 +18,30 @@
 
 #include <refbase.h>
 #include <zidl/window_manager_agent_interface.h>
-
 #include "common/include/window_session_property.h"
-#include "window.h"
-#include "zidl/window_interface.h"
 #include "singleton_delegator.h"
+#include "window.h"
 #include "window_property.h"
 #include "wm_single_instance.h"
+#include "zidl/window_interface.h"
 #include "zidl/window_manager_interface.h"
 
 namespace OHOS {
 namespace Rosen {
 class WMSDeathRecipient : public IRemoteObject::DeathRecipient {
 public:
+    WMSDeathRecipient(const int32_t userId = INVALID_USER_ID);
     virtual void OnRemoteDied(const wptr<IRemoteObject>& wptrDeath) override;
+
+private:
+    int32_t userId_;
 };
 
-class WindowAdapter {
-WM_DECLARE_SINGLE_INSTANCE(WindowAdapter);
+class WindowAdapter : public RefBase {
+WM_DECLARE_SINGLE_INSTANCE_BASE(WindowAdapter);
 public:
+    static sptr<WindowAdapter> GetInstance(const int32_t userId);
+
     using SessionRecoverCallbackFunc = std::function<WMError()>;
     using UIEffectRecoverCallbackFunc = std::function<WMError()>;
     using WMSConnectionChangedCallbackFunc = std::function<void(int32_t, int32_t, bool)>;
@@ -203,6 +208,8 @@ public:
     /*
      * Window Property
      */
+    virtual WMError SetWatermarkImageForApp(const std::shared_ptr<Media::PixelMap>& pixelMap);
+    virtual WMError RecoverWatermarkImageForApp();
     virtual WMError NotifyScreenshotEvent(ScreenshotEventType type);
     virtual WMError CreateUIEffectController(const sptr<IUIEffectControllerClient>& controllerClient,
         sptr<IUIEffectController>& controller, int32_t& controllerId);
@@ -216,21 +223,31 @@ public:
      */
     WMError GetPiPSettingSwitchStatus(bool& switchStatus);
 
+    ~WindowAdapter() override;
+
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;
     bool InitWMSProxy();
     bool InitSSMProxy();
 
     /*
-     * Multi User
+     * Multi user and multi screen
      */
+    explicit WindowAdapter(const int32_t userId = INVALID_USER_ID);
     void OnUserSwitch();
+    int32_t userId_;
+    static std::unordered_map<int32_t, sptr<WindowAdapter>> windowAdapterMap_;
+    static std::mutex windowAdapterMapMutex_;
 
     /*
      * Window Recover
      */
     void ReregisterWindowManagerAgent();
     void WindowManagerAndSessionRecover();
+    WMError RecoverWindowPropertyChangeFlag();
+    uint32_t observedFlags_;
+    uint32_t interestedFlags_;
+    std::string appWatermarkName_;
 
     sptr<IWindowManager> GetWindowManagerServiceProxy() const;
 

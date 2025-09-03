@@ -169,6 +169,11 @@ int32_t Session::GetPersistentId() const
     return persistentId_;
 }
 
+int32_t Session::GetCurrentRotation() const
+{
+    return currentRotation_;
+}
+
 void Session::SetSurfaceNode(const std::shared_ptr<RSSurfaceNode>& surfaceNode)
 {
     RSAdapterUtil::SetRSUIContext(surfaceNode, GetRSUIContext(), true);
@@ -325,7 +330,9 @@ void Session::SetSessionInfo(const SessionInfo& info)
     sessionInfo_.uiAbilityId_ = info.uiAbilityId_;
     sessionInfo_.requestId = info.requestId;
     sessionInfo_.startSetting = info.startSetting;
-    sessionInfo_.continueSessionId_ = info.continueSessionId_;
+    if (!info.continueSessionId_.empty()) {
+        sessionInfo_.continueSessionId_ = info.continueSessionId_;
+    }
     sessionInfo_.isAtomicService_ = info.isAtomicService_;
     sessionInfo_.callState_ = info.callState_;
     sessionInfo_.processOptions = info.processOptions;
@@ -341,6 +348,11 @@ void Session::SetSessionInfoWindowInputType(uint32_t windowInputType)
         sessionInfo_.windowInputType_ = windowInputType;
     }
     NotifySessionInfoChange();
+}
+
+void Session::SetSessionInfoWindowMode(int32_t windowMode)
+{
+    sessionInfo_.windowMode = windowMode;
 }
 
 DisplayId Session::GetScreenId() const
@@ -1261,6 +1273,7 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
         return WSError::WS_ERROR_NULLPTR;
     }
     sessionStage_ = sessionStage;
+    NotifyAppHookWindowInfoUpdated();
     sessionStage_->SetCurrentRotation(currentRotation_);
     windowEventChannel_ = eventChannel;
     SetSurfaceNode(surfaceNode);
@@ -1383,6 +1396,7 @@ WSError Session::Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<I
         return WSError::WS_ERROR_NULLPTR;
     }
     sessionStage_ = sessionStage;
+    NotifyAppHookWindowInfoUpdated();
     SetSurfaceNode(surfaceNode);
     windowEventChannel_ = eventChannel;
     abilityToken_ = token;
@@ -1498,7 +1512,7 @@ WSError Session::Background(bool isFromClient, const std::string& identityToken)
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     UpdateSessionState(SessionState::STATE_BACKGROUND);
-    lastSnapshotScreen_ = WSSnapshotHelper::GetScreenStatus();
+    lastSnapshotScreen_ = WSSnapshotHelper::GetInstance()->GetScreenStatus();
     SetIsPendingToBackgroundState(false);
     NotifyBackground();
     PostSpecificSessionLifeCycleTimeoutTask(DETACH_EVENT_NAME);
@@ -1541,7 +1555,7 @@ WSError Session::Disconnect(bool isFromClient, const std::string& identityToken)
     }
     UpdateSessionState(SessionState::STATE_BACKGROUND);
     UpdateSessionState(SessionState::STATE_DISCONNECT);
-    lastSnapshotScreen_ = WSSnapshotHelper::GetScreenStatus();
+    lastSnapshotScreen_ = WSSnapshotHelper::GetInstance()->GetScreenStatus();
     NotifyDisconnect();
     if (visibilityChangedDetectFunc_) {
         visibilityChangedDetectFunc_(GetCallingPid(), isVisible_, false);
@@ -1900,7 +1914,8 @@ void Session::PostLifeCycleTask(Task&& task, const std::string& name, const Life
     PostTask(std::move(frontLifeCycleTask->task), frontLifeCycleTask->name);
 }
 
-bool Session::SetLifeCycleTaskRunning(const sptr<SessionLifeCycleTask>& lifeCycleTask) {
+bool Session::SetLifeCycleTaskRunning(const sptr<SessionLifeCycleTask>& lifeCycleTask)
+{
     if (lifeCycleTask == nullptr || lifeCycleTask->running) {
         TLOGW(WmsLogTag::WMS_LIFE, "LifeCycleTask is running or null. PersistentId: %{public}d", persistentId_);
         return false;
@@ -2430,7 +2445,7 @@ WSError Session::HandleSubWindowClick(int32_t action, int32_t sourceType, bool i
           GetPersistentId(), raiseEnabled, isPointDown, isPointDown);
     if (raiseEnabled && isPointDown && !isModal) {
         RaiseToAppTopForPointDown();
-    } else if (parentSession && !isPointMove) {
+    } else if (parentSession && isPointDown) {
         // sub window is forbidden to raise to top after click, but its parent should raise
         parentSession->NotifyClick(!IsScbCoreEnabled());
     }
@@ -2482,6 +2497,19 @@ WSError Session::HandlePointerEventForFocus(const std::shared_ptr<MMI::PointerEv
         NotifyClick();
     }
     return WSError::WS_OK;
+}
+
+bool Session::HasParentSessionWithToken(const sptr<IRemoteObject>& token)
+{
+    auto parentSession = GetParentSession();
+    if (parentSession == nullptr) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "parent session is nullptr: %{public}d", GetPersistentId());
+        return false;
+    }
+    if (parentSession->GetAbilityToken() == token) {
+        return true;
+    }
+    return parentSession->HasParentSessionWithToken(token);
 }
 
 WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
@@ -2605,7 +2633,7 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(bool runInFfrt, float scalePa
         return nullptr;
     }
     auto surfaceNode = GetSurfaceNode();
-    auto key = GetSessionStatus();
+    auto key = GetSessionSnapshotStatus();
     auto isPersistentImageFit = IsPersistentImageFit();
     if (isPersistentImageFit) key = defaultStatus;
     if (!surfaceNode || !surfaceNode->IsBufferAvailable()) {
@@ -2687,12 +2715,12 @@ bool Session::GetEnableAddSnapshot() const
 }
 
 void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media::PixelMap> persistentPixelMap,
-    bool updateSnapshot)
+    bool updateSnapshot, BackgroundReason reason)
 {
     if (scenePersistence_ == nullptr) {
         return;
     }
-    auto key = GetSessionStatus();
+    auto key = GetSessionSnapshotStatus(reason);
     auto rotate = WSSnapshotHelper::GetDisplayOrientation(currentRotation_);
     if (persistentPixelMap) {
         key = defaultStatus;
@@ -2869,13 +2897,10 @@ SnapshotStatus Session::GetWindowStatus() const
     if (!SupportSnapshotAllSessionStatus()) {
         return defaultStatus;
     }
-    uint32_t snapshotScreen = WSSnapshotHelper::GetScreenStatus();
-    auto windowOrientation = GetWindowOrientation();
-    uint32_t orientation = WSSnapshotHelper::GetOrientation(windowOrientation);
-    return std::make_pair(snapshotScreen, orientation);
+    return WSSnapshotHelper::GetInstance()->GetWindowStatus();
 }
 
-SnapshotStatus Session::GetSessionStatus() const
+SnapshotStatus Session::GetSessionSnapshotStatus(BackgroundReason reason) const
 {
     if (!SupportSnapshotAllSessionStatus()) {
         return defaultStatus;
@@ -2884,31 +2909,21 @@ SnapshotStatus Session::GetSessionStatus() const
     if (state_ == SessionState::STATE_BACKGROUND || state_ == SessionState::STATE_DISCONNECT) {
         snapshotScreen = lastSnapshotScreen_;
     } else {
-        snapshotScreen = WSSnapshotHelper::GetScreenStatus();
+        snapshotScreen = WSSnapshotHelper::GetInstance()->GetScreenStatus();
+    }
+    if (reason == BackgroundReason::EXPAND_TO_FOLD_SINGLE_POCKET) {
+        snapshotScreen = SCREEN_EXPAND;
     }
     uint32_t orientation = WSSnapshotHelper::GetOrientation(currentRotation_);
     return std::make_pair(snapshotScreen, orientation);
 }
 
-DisplayOrientation Session::GetWindowOrientation() const
+uint32_t Session::GetWindowSnapshotOrientation() const
 {
     if (!SupportSnapshotAllSessionStatus()) {
-        return DisplayOrientation::PORTRAIT;
+        return 0;
     }
-    DisplayId displayId = GetScreenId();
-    auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(displayId);
-    if (!screenSession) {
-        TLOGE(WmsLogTag::WMS_PATTERN, "screenSession is nullptr, id:%{public}d", persistentId_);
-        return DisplayOrientation::PORTRAIT;
-    }
-    auto screenProperty = screenSession->GetScreenProperty();
-    DisplayOrientation displayOrientation = screenProperty.GetDisplayOrientation();
-    auto windowOrientation = static_cast<uint32_t>(displayOrientation);
-    auto snapshotScreen = WSSnapshotHelper::GetScreenStatus();
-    if (snapshotScreen == SCREEN_UNKNOWN) {
-        windowOrientation = (windowOrientation + SECONDARY_EXPAND_OFFSET) % ROTATION_COUNT;
-    }
-    return static_cast<DisplayOrientation>(windowOrientation);
+    return WSSnapshotHelper::GetInstance()->GetWindowRotation();
 }
 
 uint32_t Session::GetLastOrientation() const
@@ -3318,11 +3333,14 @@ WSError Session::SetAppSupportPhoneInPc(bool isSupportPhone)
 WSError Session::SetCompatibleModeProperty(const sptr<CompatibleModeProperty> compatibleModeProperty)
 {
     auto property = GetSessionProperty();
-    if (property == nullptr) {
+    if (property == nullptr || compatibleModeProperty == nullptr) {
         TLOGE(WmsLogTag::WMS_COMPAT, "id: %{public}d property is nullptr", persistentId_);
         return WSError::WS_ERROR_NULLPTR;
     }
     property->SetCompatibleModeProperty(compatibleModeProperty);
+    if (compatibleModeProperty->IsDragResizeDisabled()) {
+        property->SetDragEnabled(false);
+    }
     if (!sessionStage_) {
         TLOGE(WmsLogTag::WMS_COMPAT, "sessionStage is null");
         return WSError::WS_ERROR_NULLPTR;
@@ -3712,9 +3730,18 @@ WSRect Session::GetClientRect() const
     return layoutController_->GetClientRect();
 }
 
-WSError Session::SetHidingStartingWindow(bool hidingStartWindow)
+void Session::SetHidingStartingWindow(bool hidingStartWindow)
 {
     hidingStartWindow_ = hidingStartWindow;
+}
+
+bool Session::GetHidingStartingWindow() const
+{
+    return hidingStartWindow_;
+}
+
+WSError Session::SetLeashWindowAlpha(bool hidingStartWindow)
+{
     auto leashSurfaceNode = GetLeashWinSurfaceNode();
     if (leashSurfaceNode == nullptr) {
         TLOGI(WmsLogTag::WMS_PATTERN, "no leashWindow: %{public}d", hidingStartWindow);
@@ -3724,11 +3751,6 @@ WSError Session::SetHidingStartingWindow(bool hidingStartWindow)
     hidingStartWindow ? leashSurfaceNode->SetAlpha(0) : leashSurfaceNode->SetAlpha(1);
     SetTouchable(!hidingStartWindow);
     return WSError::WS_OK;
-}
-
-bool Session::GetHidingStartingWindow() const
-{
-    return hidingStartWindow_;
 }
 
 void Session::SetEnableRemoveStartingWindow(bool enableRemoveStartingWindow)
@@ -3883,8 +3905,11 @@ bool Session::CheckEmptyKeyboardAvoidAreaIfNeeded() const
         GetParentSession() != nullptr &&
         GetParentSession()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
     bool isMidScene = GetIsMidScene();
-    bool isPhoneOrPadNotFreeMultiWindow =
-        systemConfig_.IsPhoneWindow() || (systemConfig_.IsPadWindow() && !systemConfig_.IsFreeMultiWindowMode());
+    bool isPhoneNotFreeMultiWindow = systemConfig_.IsPhoneWindow() && !systemConfig_.IsFreeMultiWindowMode();
+    bool isPadNotFreeMultiWindow = systemConfig_.IsPadWindow() && !systemConfig_.IsFreeMultiWindowMode();
+    bool isPhoneOrPadNotFreeMultiWindow = isPhoneNotFreeMultiWindow || isPadNotFreeMultiWindow;
+    TLOGI(WmsLogTag::WMS_LIFE, "check keyboard avoid area, isPhoneNotFreeMultiWindow: %{public}d, "
+        "isPadNotFreeMultiWindow: %{public}d", isPhoneNotFreeMultiWindow, isPadNotFreeMultiWindow);
     return (isMainFloating || isParentFloating) && !isMidScene && isPhoneOrPadNotFreeMultiWindow;
 }
 

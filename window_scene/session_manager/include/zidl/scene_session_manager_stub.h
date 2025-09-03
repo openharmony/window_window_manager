@@ -44,6 +44,7 @@ private:
     int HandleRegisterWindowManagerAgent(MessageParcel& data, MessageParcel& reply);
     int HandleRegisterWindowPropertyChangeAgent(MessageParcel& data, MessageParcel& reply);
     int HandleUnregisterWindowPropertyChangeAgent(MessageParcel& data, MessageParcel& reply);
+    int HandleRecoverWindowPropertyChangeFlag(MessageParcel& data, MessageParcel& reply);
     int HandleUnregisterWindowManagerAgent(MessageParcel& data, MessageParcel& reply);
     int HandleGetFocusSessionInfo(MessageParcel& data, MessageParcel& reply);
     int HandleSetSessionLabel(MessageParcel& data, MessageParcel& reply);
@@ -100,6 +101,8 @@ private:
     int HandleGetAllWindowLayoutInfo(MessageParcel& data, MessageParcel& reply);
     int HandleGetGlobalWindowMode(MessageParcel& data, MessageParcel& reply);
     int HandleGetTopNavDestinationName(MessageParcel& data, MessageParcel& reply);
+    int HandleSetWatermarkImageForApp(MessageParcel& data, MessageParcel& reply);
+    int HandleRecoverWatermarkImageForApp(MessageParcel& data, MessageParcel& reply);
     int HandleGetVisibilityWindowInfo(MessageParcel& data, MessageParcel& reply);
     int HandleAddExtensionWindowStageToSCB(MessageParcel& data, MessageParcel& reply);
     int HandleRemoveExtensionWindowStageFromSCB(MessageParcel& data, MessageParcel& reply);

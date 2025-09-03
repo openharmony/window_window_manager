@@ -708,23 +708,6 @@ HWTEST_F(SceneSessionManagerTest3, SetAbilitySessionInfo, TestSize.Level1)
     OHOS::AppExecFwk::ElementName retElementName = ret->want.GetElement();
     ASSERT_EQ(retElementName.GetAbilityName(), info.abilityName_);
     ASSERT_EQ(retElementName.GetBundleName(), info.bundleName_);
-    EXPECT_EQ(true, ret->isCallBySCB);
-}
-
-/**
- * @tc.name: SetAbilitySessionInfo02
- * @tc.desc: SceneSesionManager set ability session from pending
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest3, SetAbilitySessionInfo02, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "SetAbilitySessionInfo";
-    info.bundleName_ = "SetAbilitySessionInfo";
-    sptr<SceneSession> sceneSession;
-    sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sptr<OHOS::AAFwk::SessionInfo> ret = ssm_->SetAbilitySessionInfo(sceneSession, 2);
-    EXPECT_EQ(false, ret->isCallBySCB);
 }
 
 /**
@@ -1188,6 +1171,44 @@ HWTEST_F(SceneSessionManagerTest3, HandleHideNonSystemFloatingWindows, TestSize.
     ssm_->UpdateForceHideState(sceneSession, property, false);
     uint32_t result = property->GetWindowModeSupportType();
     ASSERT_EQ(result, WindowModeSupport::WINDOW_MODE_SUPPORT_ALL);
+}
+
+/**
+
+@tc.name: UpdateForceHideState
+@tc.desc: SceneSesionManager update Force Hide system state
+@tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest3, UpdateForceHideState, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdateForceHideState";
+    info.bundleName_ = "UpdateForceHideState";
+    sptr sceneSession = sptr::MakeSptr(info, nullptr);
+    sptr property = sptr::MakeSptr();
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    property->SetHideNonSystemFloatingWindows(true);
+    sceneSession->property_->windowMode_ = WindowMode::WINDOW_MODE_PIP;
+    ssm_->systemTopSceneSessionMap_.clear();
+    ssm_->UpdateForceHideState(sceneSession, property, true);
+    EXPECT_EQ(ssm_->systemTopSceneSessionMap_.size(), 0);
+    property->SetHideNonSystemFloatingWindows(true);
+    sceneSession->property_->windowMode_ = WindowMode::WINDOW_MODE_FLOATING;
+    ssm_->systemTopSceneSessionMap_.clear();
+    ssm_->UpdateForceHideState(sceneSession, property, true);
+    EXPECT_EQ(ssm_->systemTopSceneSessionMap_.size(), 1);
+    property->SetHideNonSystemFloatingWindows(false);
+    property->SetFloatingWindowAppType(true);
+    property->SetSystemCalling(false);
+    sceneSession->property_->windowMode_ = WindowMode::WINDOW_MODE_PIP;
+    ssm_->systemTopSceneSessionMap_.clear();
+    ssm_->UpdateForceHideState(sceneSession, property, true);
+    EXPECT_EQ(ssm_->systemTopSceneSessionMap_.size(), 0);
+    property->SetHideNonSystemFloatingWindows(false);
+    sceneSession->property_->windowMode_ = WindowMode::WINDOW_MODE_FLOATING;
+    ssm_->systemTopSceneSessionMap_.clear();
+    ssm_->UpdateForceHideState(sceneSession, property, true);
+    EXPECT_EQ(ssm_->systemTopSceneSessionMap_.size(), 0);
 }
 
 /**

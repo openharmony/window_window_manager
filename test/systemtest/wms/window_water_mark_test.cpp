@@ -143,9 +143,6 @@ HWTEST_F(WaterMarkTest, SetWaterMarkFlag01, TestSize.Level1)
     appInfo_.name = "window1";
     appInfo_.rect = { 200, 200, 300, 300 };
     sptr<Window> window = CreateWindow(appInfo_);
-    if (window == nullptr) {
-        return;
-    }
     ASSERT_NE(window, nullptr);
     window->Show();
     sleep(NORMAL_SLEEP_TIME);

@@ -95,7 +95,7 @@ napi_value JsScreen::OnSetOrientation(napi_env env, napi_callback_info info)
     std::string errMsg = "";
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_ONE) {
-        TLOGE(WmsLogTag::DMS, "OnSetOrientation Params not match, info argc: %{public}zu", argc);
+        TLOGE(WmsLogTag::DMS, "Params not match, info argc: %{public}zu", argc);
         errMsg = "Invalid args count, need one arg at least!";
         paramValidFlag = false;
     } else if (!ConvertFromJsValue(env, argv[0], orientation)) {
@@ -104,7 +104,7 @@ napi_value JsScreen::OnSetOrientation(napi_env env, napi_callback_info info)
         errMsg = "Failed to convert parameter to orientation";
     }
     if (!paramValidFlag) {
-        TLOGE(WmsLogTag::DMS, "OnSetOrientation paramValidFlag error");
+        TLOGE(WmsLogTag::DMS, "paramValidFlag error");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
         return NapiGetUndefined(env);
     }
@@ -159,7 +159,7 @@ napi_value JsScreen::OnSetScreenActiveMode(napi_env env, napi_callback_info info
     std::string errMsg = "";
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_ONE) {
-        TLOGE(WmsLogTag::DMS, "OnSetScreenActiveMode Params not match %{public}zu", argc);
+        TLOGE(WmsLogTag::DMS, "Params not match %{public}zu", argc);
         errMsg = "Invalid args count, need one arg at least!";
         paramValidFlag = false;
     } else {
@@ -170,7 +170,7 @@ napi_value JsScreen::OnSetScreenActiveMode(napi_env env, napi_callback_info info
         }
     }
     if (!paramValidFlag) {
-        TLOGE(WmsLogTag::DMS, "OnSetScreenActiveMode paramValidFlag error");
+        TLOGE(WmsLogTag::DMS, "paramValidFlag error");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
         return NapiGetUndefined(env);
     }
@@ -215,7 +215,7 @@ napi_value JsScreen::OnSetDensityDpi(napi_env env, napi_callback_info info)
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_ONE) {
-        TLOGE(WmsLogTag::DMS, "OnSetDensityDpi Params not match %{public}zu", argc);
+        TLOGE(WmsLogTag::DMS, "Params not match %{public}zu", argc);
         errMsg = "Invalid args count, need one arg at least!";
         paramValidFlag = false;
     } else {
@@ -226,7 +226,7 @@ napi_value JsScreen::OnSetDensityDpi(napi_env env, napi_callback_info info)
         }
     }
     if (!paramValidFlag) {
-        TLOGE(WmsLogTag::DMS, "OnSetDensityDpi paramValidFlag error");
+        TLOGE(WmsLogTag::DMS, "paramValidFlag error");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
         return NapiGetUndefined(env);
     }
@@ -305,7 +305,7 @@ napi_value CreateJsScreenObject(napi_env env, sptr<Screen>& screen)
         CreateJsValue(env, screenId == SCREEN_ID_INVALID ? -1 : static_cast<int64_t>(screenId)));
     ScreenId rsId = info->GetRsId();
     napi_set_named_property(env, objValue, "rsId",
-        CreateJsValue(env, screenId == SCREEN_ID_INVALID ? -1 : static_cast<int64_t>(rsId)));
+        CreateJsValue(env, rsId == SCREEN_ID_INVALID ? -1 : static_cast<int64_t>(rsId)));
     ScreenId parentId = info->GetParentId();
     napi_set_named_property(env, objValue, "parent",
         CreateJsValue(env, parentId == SCREEN_ID_INVALID ? -1 : static_cast<int64_t>(parentId)));
