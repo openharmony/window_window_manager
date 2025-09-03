@@ -325,6 +325,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetSubWindowSource(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_FRAMERECT_FOR_PARTIAL_ZOOMIN):
             return HandleSetFrameRectForPartialZoomIn(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_IS_FULL_SCREEN_IN_FORCE_SPLIT):
+            return HandleNotifyIsFullScreenInForceSplitMode(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -2355,6 +2357,21 @@ int SessionStub::ReadOnePendingSessionActivationConfig(MessageParcel& data, Pend
     }
     if (!data.ReadBool(config.forceNewWant)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read forceNewWant failed.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SessionStub::HandleNotifyIsFullScreenInForceSplitMode(MessageParcel& data, MessageParcel& reply)
+{
+    bool isFullScreen = false;
+    if (!data.ReadBool(isFullScreen)) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "Read isFullScreen failed.");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = NotifyIsFullScreenInForceSplitMode(isFullScreen);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "write errCode fail.");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;

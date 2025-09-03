@@ -161,6 +161,9 @@ enum class SessionInterfaceCode {
     TRANS_ID_NOTIFY_FLOATING_BALL_PREPARE_CLOSE,
     TRANS_ID_START_FLOATING_BALL_MAIN_WINDOW,
     TRANS_ID_GET_FLOATING_BALL_WINDOW_ID,
+
+    // Compatible Mode
+    TRANS_ID_NOTIFY_IS_FULL_SCREEN_IN_FORCE_SPLIT,
 };
 } // namespace Rosen
 } // namespace OHOS

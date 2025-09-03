@@ -3066,6 +3066,20 @@ HWTEST_F(SceneSessionManagerTest12, IsFocusWindowParent, Function | SmallTest | 
     EXPECT_EQ(WSError::WS_OK, ssm_->IsFocusWindowParent(token, isParent));
     EXPECT_EQ(false, isParent);
 }
+
+/**
+ * @tc.name: NotifyIsFullScreenInForceSplitMode
+ * @tc.desc: NotifyIsFullScreenInForceSplitMode test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, NotifyIsFullScreenInForceSplitMode, TestSize.Level3)
+{
+    uint32_t uid = 100;
+    ssm_->NotifyIsFullScreenInForceSplitMode(uid, true);
+    EXPECT_EQ(ssm_->fullScreenInForceSplitUidSet_.find(uid) != ssm_->fullScreenInForceSplitUidSet_.end());
+    ssm_->NotifyIsFullScreenInForceSplitMode(uid, false);
+    EXPECT_EQ(ssm_->fullScreenInForceSplitUidSet_.find(uid) == ssm_->fullScreenInForceSplitUidSet_.end());
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

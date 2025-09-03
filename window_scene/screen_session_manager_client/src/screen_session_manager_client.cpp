@@ -837,6 +837,15 @@ void ScreenSessionManagerClient::GetDisplayHookInfo(int32_t uid, DMHookInfo& hoo
     screenSessionManager_->GetDisplayHookInfo(uid, hookInfo);
 }
 
+void ScreenSessionManagerClient::NotifyIsFullScreenInForceSplitMode(int32_t uid, bool isFullScreen)
+{
+    if (!screenSessionManager_) {
+        TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
+        return;
+    }
+    screenSessionManager_->NotifyIsFullScreenInForceSplitMode(uid, isFullScreen);
+}
+
 void ScreenSessionManagerClient::OnFoldStatusChangedReportUE(const std::vector<std::string>& screenFoldInfo)
 {
     if (displayChangeListener_) {
