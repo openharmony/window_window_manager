@@ -523,6 +523,8 @@ public:
     bool IsDecorEnable() const;
     bool IsAppSession() const;
     bool IsAppOrLowerSystemSession() const;
+    virtual bool IsBlockingFocusFullScreenSystemPanel() const;
+    virtual bool IsAppMainWindowFullScreen();
     bool IsSystemSessionAboveApp() const;
     bool IsTurnScreenOn() const;
     bool IsKeepScreenOn() const;
