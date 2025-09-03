@@ -65,6 +65,8 @@ ani_status AniWindowManager::AniWindowManagerInit(ani_env* env)
         ani_native_function {"minimizeAllSync", "ll:", reinterpret_cast<void *>(AniWindowManager::MinimizeAll)},
         ani_native_function {"shiftAppWindowFocusSync", "lii:",
             reinterpret_cast<void *>(AniWindowManager::ShiftAppWindowFocus)},
+        ani_native_function {"shiftAppWindowPointerEventSync", "lii:",
+            reinterpret_cast<void *>(AniWindowManager::ShiftAppWindowPointerEvent)},
         ani_native_function {"onSync", nullptr,
             reinterpret_cast<void *>(AniWindowManager::RegisterWindowManagerCallback)},
         ani_native_function {"offSync", nullptr,
@@ -448,6 +450,36 @@ void AniWindowManager::OnShiftAppWindowFocus(ani_env* env, ani_int sourceWindowI
         AniWindowUtils::AniThrowError(env, ret, "ShiftAppWindowFocus failed.");
     }
     return ;
+}
+
+void AniWindowManager::ShiftAppWindowPointerEvent(ani_env* env, ani_long nativeObj,
+    ani_int sourceWindowId, ani_int targetWindowId)
+{
+    AniWindowManager* aniWindowManager = reinterpret_cast<AniWindowManager*>(nativeObj);
+    if (aniWindowManager != nullptr) {
+        aniWindowManager->OnShiftAppWindowPointerEvent(env, sourceWindowId, targetWindowId);
+    } else {
+        TLOGE(WmsLogTag::WMS_PC, "[ANI]aniWindowManager is nullptr!");
+    }
+}
+
+void AniWindowManager::OnShiftAppWindowPointerEvent(ani_env* env, ani_int sourceWindowId, ani_int targetWindowId)
+{
+    TLOGI(WmsLogTag::WMS_PC, "[ANI]sourceWindowId: %{public}d, targetWindowId: %{public}d",
+        sourceWindowId, targetWindowId);
+    if (sourceWindowId == static_cast<int32_t>(INVALID_WINDOW_ID) ||
+        targetWindowId == static_cast<int32_t>(INVALID_WINDOW_ID)) {
+        TLOGE(WmsLogTag::WMS_PC, "[ANI]invalid sourceWindowId or targetWindowId");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return;
+    }
+    WmErrorCode ret = AniWindowUtils::ToErrorCode(
+        SingletonContainer::Get<WindowManager>().ShiftAppWindowPointerEvent(sourceWindowId, targetWindowId));
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_PC, "[ANI]ShiftAppWindowPointerEvent failed, ret: %{public}d", ret);
+        AniWindowUtils::AniThrowError(env, ret, "ShiftAppWindowPointerEvent failed!");
+    }
+    return;
 }
 }  // namespace Rosen
 }  // namespace OHOS

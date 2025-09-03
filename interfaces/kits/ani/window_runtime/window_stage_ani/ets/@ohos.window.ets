@@ -2121,6 +2121,7 @@ export class WindowInternal implements Window {
     private native rotate(nativeObj: long, rotateOptions: RotateOptions): void;
     private native setShadow(nativeObj: long, radius: double, color?: string,
       offsetX?: double, offsetY?: double): void;
+    private native setTouchableAreas(nativeObj: long, rects: Array<Rect>): void;
     private native setCornerRadiusSync(nativeObj: long, cornerRadius: double): void;
     private native setWindowColorSpaceSync(nativeObj: long, colorSpace: int): void;
     private native setPreferredOrientationSync(nativeObj: long, orientation: int): void;
@@ -2141,6 +2142,8 @@ export class WindowInternal implements Window {
     private native setWindowFocusableSync(nativeObj: long, isFocusable: boolean): void;
 
     private native setWindowTouchableSync(nativeObj: long, isTouchable: boolean): void;
+    private native setDialogBackGestureEnabledSync(nativeObj: long, enabled: boolean): void;
+    private native setWindowMaskSync(nativeObj: long, windowMask: Array<Array<long>>): void;
     private native onNoInteractionDetected(nativeObj: long, type: string, timeout: long, callback: Object): void;
     private native keepKeyboardOnFocusSync(nativeObj: long, enable: boolean): void;
     private native onSync(nativeObj: long, type: string, callback: object): void;
@@ -2885,6 +2888,34 @@ export class WindowInternal implements Window {
       });
     }
 
+    public setDialogBackGestureEnabled(enabled: boolean): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+         taskpool.execute((): void => {
+           this.setDialogBackGestureEnabledSync(this.nativeObj, enabled);
+         }).then((ret: NullishType) => {
+           resolve(undefined);
+         }).catch((err: NullishType) => {
+           reject(err as BusinessError);
+         });
+       });
+    }
+
+    public setWindowMask(windowMask: Array<Array<long>>): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.setWindowMaskSync(this.nativeObj, windowMask);
+        }).then((ret: NullishType) => {
+          resolve(undefined);
+        }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
+    public setTouchableAreas(rects: Array<Rect>): void {
+      this.setTouchableAreas(this.nativeObj, rects);
+    }
+
     public opacity(opacity: double): void {
       this.opacity(this.nativeObj, opacity);
     }
@@ -3100,6 +3131,9 @@ export interface Window {
     keepKeyboardOnFocus(enable: boolean): void;
     setWindowTouchable(isTouchable: boolean): Promise<void>
     setWindowTouchable(isTouchable: boolean, callback: AsyncCallback<void>): void
+    setDialogBackGestureEnabled(enabled: boolean): Promise<void>;
+    setWindowMask(windowMask: Array<Array<long>>): Promise<void>;
+    setTouchableAreas(rects: Array<Rect>): void;
     opacity(opacity: double): void;
     scale(scaleOptions: ScaleOptions): void;
     translate(translateOptions: TranslateOptions): void;
@@ -3128,6 +3162,7 @@ native function findWindowSync(nativeObj: long, name: string): Window;
 native function onSync(nativeObj: long, type: string, callback: object): void;
 native function offSync(nativeObj: long, type: string, callback?: object): void;
 native function shiftAppWindowFocusSync(nativeObj: long, sourceWindowId: int, targetWindowId: int): void;
+native function shiftAppWindowPointerEventSync(nativeObj: long, sourceWindowId: int, targetWindowId: int): void;
 native function createWindowSync(nativeObj: long, config: Configuration): Window;
 
 export function getLastWindow(ctx: BaseContext): Promise<Window> {
@@ -3278,6 +3313,18 @@ export function shiftAppWindowFocus(sourceWindowId: int, targetWindowId: int): P
       }).catch((err: NullishType) => {
           reject(err as BusinessError);
       });
+  });
+}
+
+export function shiftAppWindowPointerEvent(sourceWindowId: int, targetWindowId: int): Promise<void> {
+  return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+    taskpool.execute((): void => {
+      return shiftAppWindowPointerEventSync(nativeObj, sourceWindowId, targetWindowId);
+    }).then((ret: NullishType) => {
+      resolve(undefined);
+    }).catch((err: NullishType) => {
+      reject(err as BusinessError);
+    });
   });
 }
 
