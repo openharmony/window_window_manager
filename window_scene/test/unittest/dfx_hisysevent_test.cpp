@@ -23,6 +23,13 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+    std::string g_logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
+        const char* msg)
+    {
+        g_logMsg += msg;
+    }
 
 class DfxHisyseventTest : public testing::Test {
 public:
@@ -50,18 +57,17 @@ namespace {
 
 TEST_F(DfxHisyseventTest, ApplicationBlockInput_Success)
 {
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     DfxHisysevent dfxHisysevent;
     int32_t eventId = 1;
     int32_t pid = 2;
     std::string bundleName = "TestBundleName";
     int32_t persistentId = 4;
-    int result = 0;
-    std::function<void()> func = [&]() {
-        dfxHisysevent.ApplicationBlockInput(eventId, pid, bundleName, persistentId);
-        result = 1;
-    };
-    func();
-    ASSERT_EQ(result, 1);
+
+    dfxHisysevent.ApplicationBlockInput(eventId, pid, bundleName, persistentId);
+    EXPECT_TRUE(g_logMsg.find("Write HiSysEvent error") == std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -73,18 +79,17 @@ TEST_F(DfxHisyseventTest, ApplicationBlockInput_Success)
 
 TEST_F(DfxHisyseventTest, ApplicationBlockInput_Fail1)
 {
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     DfxHisysevent dfxHisysevent;
     int32_t eventId = 1;
     int32_t pid = -5;
     std::string bundleName = "TestBundleName";
     int32_t persistentId = 2;
-    int result = 0;
-    std::function<void()> func = [&]() {
-        dfxHisysevent.ApplicationBlockInput(eventId, pid, bundleName, persistentId);
-        result = 1;
-    };
-    func();
-    ASSERT_EQ(result, 1);
+
+    dfxHisysevent.ApplicationBlockInput(eventId, pid, bundleName, persistentId);
+    EXPECT_TRUE(g_logMsg.find("Write HiSysEvent error") == std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -96,18 +101,17 @@ TEST_F(DfxHisyseventTest, ApplicationBlockInput_Fail1)
 
 TEST_F(DfxHisyseventTest, ApplicationBlockInput_Fail2)
 {
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     DfxHisysevent dfxHisysevent;
     int32_t eventId = 1;
     int32_t pid = 5;
     std::string bundleName = "TestBundleName";
     int32_t persistentId = -2;
-    int result = 0;
-    std::function<void()> func = [&]() {
-        dfxHisysevent.ApplicationBlockInput(eventId, pid, bundleName, persistentId);
-        result = 1;
-    };
-    func();
-    ASSERT_EQ(result, 1);
+
+    dfxHisysevent.ApplicationBlockInput(eventId, pid, bundleName, persistentId);
+    EXPECT_TRUE(g_logMsg.find("Write HiSysEvent error") == std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -119,20 +123,20 @@ TEST_F(DfxHisyseventTest, ApplicationBlockInput_Fail2)
 
 TEST_F(DfxHisyseventTest, ApplicationBlockInput_Fail3)
 {
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     DfxHisysevent dfxHisysevent;
     int32_t eventId = 1;
     int32_t pid = -5;
     std::string bundleName = "TestBundleName";
     int32_t persistentId = -2;
-    int result = 0;
-    std::function<void()> func = [&]() {
-        dfxHisysevent.ApplicationBlockInput(eventId, pid, bundleName, persistentId);
-        result = 1;
-    };
-    func();
-    ASSERT_EQ(result, 1);
+
+    dfxHisysevent.ApplicationBlockInput(eventId, pid, bundleName, persistentId);
+    EXPECT_TRUE(g_logMsg.find("Write HiSysEvent error") == std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
