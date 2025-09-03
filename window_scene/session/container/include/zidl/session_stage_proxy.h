@@ -115,6 +115,8 @@ public:
     WMError GetRouterStackInfo(std::string& routerStackInfo) override;
     WSError SendFbActionEvent(const std::string& action) override;
 
+    WSError UpdateIsShowDecorWhenLocked(bool isShow) override;
+
 private:
     static inline BrokerDelegator<SessionStageProxy> delegator_;
 };
