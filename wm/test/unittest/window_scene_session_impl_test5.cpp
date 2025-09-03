@@ -1698,6 +1698,13 @@ HWTEST_F(WindowSceneSessionImplTest5, SetWindowTransitionAnimation01, Function |
     ret = window->SetWindowTransitionAnimation(type, animation);
     ASSERT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
 
+    property->SetIsPcAppInPad(true);
+    ret = window->SetWindowTransitionAnimation(type, animation);
+    ASSERT_EQ(ret, WMError::WM_OK);
+    property->SetIsPcAppInPad(false);
+    ret = window->SetWindowTransitionAnimation(type, animation);
+    ASSERT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     ret = window->SetWindowTransitionAnimation(type, animation);
@@ -1734,7 +1741,6 @@ HWTEST_F(WindowSceneSessionImplTest5, GetWindowTransitionAnimation01, Function |
     auto property = window->GetProperty();
 
     WindowTransitionType type = WindowTransitionType::DESTROY;
-
     property->SetWindowState(WindowState::STATE_DESTROYED);
     std::shared_ptr<TransitionAnimation> ret = window->GetWindowTransitionAnimation(type);
     ASSERT_EQ(ret, nullptr);
@@ -1744,26 +1750,28 @@ HWTEST_F(WindowSceneSessionImplTest5, GetWindowTransitionAnimation01, Function |
     window->hostSession_ = session;
     property->persistentId_ = 100;
 
-    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    property->SetWindowState(WindowState::STATE_SHOWN);
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     ret = window->GetWindowTransitionAnimation(type);
     ASSERT_EQ(ret, nullptr);
 
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    TransitionAnimation animation;
+    property->SetTransitionAnimationConfig(type, animation);
+    property->SetIsPcAppInPad(true);
+    ret = window->GetWindowTransitionAnimation(type);
+    ASSERT_NE(ret, nullptr);
+    property->SetIsPcAppInPad(false);
     ret = window->GetWindowTransitionAnimation(type);
     ASSERT_EQ(ret, nullptr);
 
-    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ret = window->GetWindowTransitionAnimation(type);
+    ASSERT_NE(ret, nullptr);
+
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
     window->windowSystemConfig_.freeMultiWindowEnable_ = true;
     window->windowSystemConfig_.freeMultiWindowSupport_ = true;
-    ret = window->GetWindowTransitionAnimation(type);
-    ASSERT_EQ(ret, nullptr);
-
-    TransitionAnimation animation;
-    property->SetWindowState(WindowState::STATE_SHOWN);
-    property->SetTransitionAnimationConfig(type, animation);
     ret = window->GetWindowTransitionAnimation(type);
     ASSERT_NE(ret, nullptr);
 
