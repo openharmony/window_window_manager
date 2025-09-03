@@ -97,6 +97,7 @@ enum class SessionStageInterfaceCode {
     TRANS_ID_UPDATE_GLOBAL_DISPLAY_RECT,
     // Floating ball
     TRANS_ID_SEND_FB_ACTION_EVENT,
+    TRANS_ID_NOTIFY_UPDATE_SHOW_DECOR_WHEN_LOCKED,
 };
 }   // namespace Rosen
 }   // namespace OHOS

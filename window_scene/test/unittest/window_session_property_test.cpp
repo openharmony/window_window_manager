@@ -1654,6 +1654,35 @@ HWTEST_F(WindowSessionPropertyTest, UnmarshallingFbTemplateInfoTest, TestSize.Le
     ASSERT_EQ(property->GetFbTemplateInfo().backgroundColor_, fbTemplateInfo.backgroundColor_);
     ASSERT_EQ(property->GetFbTemplateInfo().icon_, fbTemplateInfo.icon_);
 }
+
+/**
+ * @tc.name: SetScreenLocked
+ * @tc.desc: Test SetScreenLocked
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetIsShowDecorWhenLocked, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    bool isShow = true;
+    property->SetIsShowDecorWhenLocked(isShow);
+    ASSERT_EQ(isShow, property->GetIsShowDecorWhenLocked());
+    isShow = false;
+    property->SetIsShowDecorWhenLocked(isShow);
+    ASSERT_EQ(isShow, property->GetIsShowDecorWhenLocked());
+}
+
+/**
+ * @tc.name: GetIsShowDecorWhenLocked
+ * @tc.desc: Test GetIsShowDecorWhenLocked
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, GetIsShowDecorWhenLocked, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    bool isShow = true;
+    property->SetIsShowDecorWhenLocked(isShow);
+    ASSERT_EQ(true, property->GetIsShowDecorWhenLocked());
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

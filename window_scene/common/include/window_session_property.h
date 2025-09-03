@@ -350,6 +350,9 @@ public:
     void SetExclusivelyHighlighted(bool isExclusivelyHighlighted);
     mutable std::mutex windowMaskMutex_;
 
+    void SetIsShowDecorWhenLocked(bool isShow);
+    bool GetIsShowDecorWhenLocked() const;
+
 private:
     void setTouchHotAreasInner(const std::vector<Rect>& rects, std::vector<Rect>& touchHotAreas);
     bool MarshallingTouchHotAreasInner(const std::vector<Rect>& touchHotAreas, Parcel& parcel) const;
@@ -595,6 +598,8 @@ private:
      * Window Transition Animation For PC
      */
     std::unordered_map<WindowTransitionType, std::shared_ptr<TransitionAnimation>> transitionAnimationConfig_;
+
+    bool isShowDecorWhenLocked_ { false };
 };
  
 class CompatibleModeProperty : public Parcelable {

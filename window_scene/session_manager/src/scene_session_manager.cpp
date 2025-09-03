@@ -8482,6 +8482,7 @@ void SceneSessionManager::SetScreenLocked(const bool isScreenLocked)
         isScreenLocked_ = isScreenLocked;
         DeleteStateDetectTask();
         NotifyPiPWindowVisibleChange(isScreenLocked);
+        NotifySessionScreenLockedChange(isScreenLocked);
     }, __func__);
 }
 
@@ -17578,10 +17579,15 @@ WMError SceneSessionManager::UpdateScreenLockState(int32_t persistentId)
     return WMError::WM_OK;
 }
 
-WMError SceneSessionManager::UpdateSystemDecorEnable(bool enable)
-{
-    TLOGI(WmsLogTag::WMS_DECOR, "set system decor enable: %{public}d", enable);
-    systemConfig_.isSystemDecorEnable_ = enable;
-    return WMError::WM_OK;
+void SceneSessionManager::NotifySessionScreenLockedChange(bool isScreenLocked) {
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    for (const auto& [_, sceneSession] : sceneSessionMap_) {
+        if (sceneSession == nullptr && !(GetSessionProperty()->GetWindowFlags() &
+            static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED))) {
+            continue;
+        }
+        sceneSession->GetSessionProperty()->SetIsShowDecorWhenLocked(!isScreenLocked);
+        sceneSession->SetIsShowDecorWhenLocked(!isScreenLocked);
+    }
 }
 } // namespace OHOS::Rosen
