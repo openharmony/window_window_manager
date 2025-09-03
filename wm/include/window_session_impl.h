@@ -584,7 +584,7 @@ public:
     WMError GetRouterStackInfo(std::string& routerStackInfo) override;
     void SetNavDestinationInfo(const std::string& navDestinationInfo) override;
 
-    WSError UpdateIsShowDecorWhenLocked(bool isShow) override;
+    WSError UpdateIsShowDecorInFreeMultiWindow(bool isShow) override;
 
 protected:
     WMError Connect();

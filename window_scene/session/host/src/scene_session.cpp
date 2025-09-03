@@ -7369,8 +7369,10 @@ void SceneSession::SetTemporarilyShowWhenLocked(bool isTemporarilyShowWhenLocked
     isTemporarilyShowWhenLocked_.store(isTemporarilyShowWhenLocked);
     TLOGI(WmsLogTag::WMS_SCB, "SetTemporarilyShowWhenLocked successfully, target:%{public}u",
         isTemporarilyShowWhenLocked);
-    GetSessionProperty()->SetIsShowDecorWhenLocked(!isTemporarilyShowWhenLocked);
-    SetIsShowDecorWhenLocked(!isTemporarilyShowWhenLocked);
+    const bool isPcMode = system::GetBoolParameter("persist.sceneboard.ispcmode", false);
+    const bool isShow = !(isTemporarilyShowWhenLocked && (systemConfig_.IsFreeMultiWindowMode() && !isPcMode));
+    GetSessionProperty()->SetIsShowDecorInFreeMultiWindow(isShow);
+    SetIsShowDecorInFreeMultiWindow(isShow);
 }
 
 bool SceneSession::IsTemporarilyShowWhenLocked() const

@@ -17582,12 +17582,14 @@ WMError SceneSessionManager::UpdateScreenLockState(int32_t persistentId)
 void SceneSessionManager::NotifySessionScreenLockedChange(bool isScreenLocked) {
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto& [_, sceneSession] : sceneSessionMap_) {
-        if (sceneSession == nullptr && !(sceneSession->GetSessionProperty()->GetWindowFlags() &
+        if (sceneSession == nullptr || !(sceneSession->GetSessionProperty()->GetWindowFlags() &
             static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED))) {
             continue;
         }
-        sceneSession->GetSessionProperty()->SetIsShowDecorWhenLocked(!isScreenLocked);
-        sceneSession->SetIsShowDecorWhenLocked(!isScreenLocked);
+        const bool isPcMode = system::GetBoolParameter("persist.sceneboard.ispcmode", false);
+        const bool isShow = !(isScreenLocked && (systemConfig_.IsFreeMultiWindowMode() && !isPcMode));
+        sceneSession->GetSessionProperty()->SetIsShowDecorInFreeMultiWindow(isShow);
+        sceneSession->SetIsShowDecorInFreeMultiWindow(isShow);
     }
 }
 } // namespace OHOS::Rosen

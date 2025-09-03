@@ -1656,32 +1656,32 @@ HWTEST_F(WindowSessionPropertyTest, UnmarshallingFbTemplateInfoTest, TestSize.Le
 }
 
 /**
- * @tc.name: SetScreenLocked
- * @tc.desc: Test SetScreenLocked
+ * @tc.name: SetIsShowDecorInFreeMultiWindow
+ * @tc.desc: Test SetIsShowDecorInFreeMultiWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionPropertyTest, SetIsShowDecorWhenLocked, TestSize.Level1)
+HWTEST_F(WindowSessionPropertyTest, SetIsShowDecorInFreeMultiWindow, TestSize.Level1)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     bool isShow = true;
-    property->SetIsShowDecorWhenLocked(isShow);
-    ASSERT_EQ(isShow, property->GetIsShowDecorWhenLocked());
+    property->SetIsShowDecorInFreeMultiWindow(isShow);
+    ASSERT_EQ(isShow, property->GetIsShowDecorInFreeMultiWindow());
     isShow = false;
-    property->SetIsShowDecorWhenLocked(isShow);
-    ASSERT_EQ(isShow, property->GetIsShowDecorWhenLocked());
+    property->SetIsShowDecorInFreeMultiWindow(isShow);
+    ASSERT_EQ(isShow, property->GetIsShowDecorInFreeMultiWindow());
 }
 
 /**
- * @tc.name: GetIsShowDecorWhenLocked
- * @tc.desc: Test GetIsShowDecorWhenLocked
+ * @tc.name: GetIsShowDecorInFreeMultiWindow
+ * @tc.desc: Test GetIsShowDecorInFreeMultiWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionPropertyTest, GetIsShowDecorWhenLocked, TestSize.Level1)
+HWTEST_F(WindowSessionPropertyTest, GetIsShowDecorInFreeMultiWindow, TestSize.Level1)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     bool isShow = true;
-    property->SetIsShowDecorWhenLocked(isShow);
-    ASSERT_EQ(true, property->GetIsShowDecorWhenLocked());
+    property->SetIsShowDecorInFreeMultiWindow(isShow);
+    ASSERT_EQ(true, property->GetIsShowDecorInFreeMultiWindow());
 }
 } // namespace
 } // namespace Rosen
