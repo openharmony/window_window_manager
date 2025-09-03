@@ -303,7 +303,7 @@ ani_status ScreenAniUtils::GetMultiScreenPositionOptionsFromAni(ani_env* env, an
         TLOGE(WmsLogTag::DMS, "Failed to get startY, ret:%{public}d", ret);
         return ret;
     }
-    mainScreenOptions.startX_ = static_cast<uint32_t>(startYAni);
+    mainScreenOptions.startY_ = static_cast<uint32_t>(startYAni);
     return ANI_OK;
 }
 

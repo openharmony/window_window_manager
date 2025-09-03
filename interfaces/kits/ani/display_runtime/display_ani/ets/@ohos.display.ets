@@ -109,6 +109,30 @@ export class FoldCreaseRegionImpl implements FoldCreaseRegion {
     readonly creaseRects: Array<Rect>;
 }
 
+export interface VirtualScreenConfig {
+    name: string;
+ 
+    width: long;
+ 
+    height: long;
+ 
+    density: double;
+ 
+    surfaceId: string;
+}
+ 
+export class VirtualScreenConfigImpl implements VirtualScreenConfig {
+    name: string;
+ 
+    width: long;
+ 
+    height: long;
+ 
+    density: double;
+ 
+    surfaceId: string; 
+}
+
 export enum FoldDisplayMode {
     FOLD_DISPLAY_MODE_UNKNOWN = 0,
 
@@ -249,6 +273,8 @@ export interface Display {
     on(type: string, callback: Callback<Rect>): void;
 
     off(type: string, callback?: Callback<Rect>): void;
+
+    getDisplayCapability(): string;
 }
 
 export class DisplayImpl implements Display {
@@ -384,6 +410,11 @@ export class DisplayImpl implements Display {
         this.syncOff(type, callback);
     }
 
+    getDisplayCapability(): string {
+        let displayCapability: string = this.getDisplayCapabilityInternal();
+        return displayCapability;
+    }
+
     static transferStatic(input: Any): Object {
         let display = new DisplayImpl();
         let display_input: ESValue = ESValue.wrap(input);
@@ -405,6 +436,7 @@ export class DisplayImpl implements Display {
     native syncOff(type: string, callback?: object): void;
     native getAvailableAreaInternal(rect: Rect): void;
     native getCutoutInfoInternal(cutoutInfo: CutoutInfo): void;
+    native getDisplayCapabilityInternal(): string;
     native hasImmersiveWindowInternal(): boolean;
 
     native static nativeTransferStatic(input: ESValue, display: Object): boolean;
@@ -431,6 +463,17 @@ export function getFoldDisplayMode(): FoldDisplayMode {
 }
 
 export native function getFoldDisplayModeNative(): int;
+
+export function setFoldDisplayMode(mode: FoldDisplayMode, reason: string): void {
+    setFoldDisplayModeReasonNative(mode as int, reason, displayMgrRef);
+}
+
+export function setFoldDisplayMode(mode: FoldDisplayMode): void {
+    setFoldDisplayModeNative(mode as int, displayMgrRef);
+}
+
+export native function setFoldDisplayModeReasonNative(mode: int, reason: string, nativeObj: long): void;
+export native function setFoldDisplayModeNative(mode: int, nativeObj: long): void;
 
 export function getFoldStatus(): FoldStatus{
     let res = getFoldStatusNative();
@@ -460,6 +503,14 @@ function minusCreaseRects(foldCreaseRegionObj: FoldCreaseRegion): void {
 }
 
 export native function getCurrentFoldCreaseRegionNative(foldCreaseRegion: object, nativeObj: long): void;
+
+export function getPrimaryDisplaySync(): Display {
+    let display = new DisplayImpl();
+    getPrimaryDisplaySyncNative(display as object);
+    return display;
+}
+
+export native function getPrimaryDisplaySyncNative(obj: object): void;
 
 // display sync interfaces
 export function getDisplayByIdSync(displayId: long): Display {
@@ -620,6 +671,70 @@ export class DisplayPhysicalResolutionImpl implements DisplayPhysicalResolution{
 
     physicalHeight: long;
 }
+
+export function makeUnique(screenId: long): Promise<void> {
+    return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) :void => {
+        taskpool.execute((): void => {
+            makeUniqueNative(screenId, displayMgrRef);
+        }).then((ret: NullishType) :void => {
+            resolve(undefined);
+        }).catch((err: NullishType) :void => {
+            reject(err as BusinessError);
+        });
+    });
+}
+ 
+export native function makeUniqueNative(screenId: long, nativeObj: long): void;
+ 
+export function setFoldStatusLocked(locked: boolean): void {
+    setFoldStatusLockedNative(locked, displayMgrRef);
+}
+ 
+export native function setFoldStatusLockedNative(locked: boolean, nativeObj: long):void;
+ 
+export function createVirtualScreen(config: VirtualScreenConfig): Promise<long> {
+    return new Promise<long>((resolve: (value: long) => void, reject: (error: BusinessError) => void ) :void => {
+        taskpool.execute((): long => {
+            let screenId: long;
+            screenId = createVirtualScreenNative(config as object, displayMgrRef);
+            return screenId;
+        }).then((ret: NullishType) :void => {
+            resolve(ret as long);
+        }).catch((err: NullishType) :void => {
+            reject(err as BusinessError);
+        });
+    });  
+}
+ 
+export native function createVirtualScreenNative(config: object, nativeObj: long): long;
+ 
+export function destroyVirtualScreen(screenId: long): Promise<void> {
+    return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) :void => {
+        taskpool.execute((): void => {
+            destroyVirtualScreenNative(screenId, displayMgrRef);
+        }).then((ret: NullishType) :void => {
+            resolve(undefined);
+        }).catch((err: NullishType) :void => {
+            reject(err as BusinessError);
+        });
+    });
+}
+ 
+export native function destroyVirtualScreenNative(screenId: long, nativeObj: long): void;
+ 
+export function setVirtualScreenSurface(screenId: long, surfaceId: string): Promise<void> {
+    return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) :void => {
+        taskpool.execute((): void => {
+            setVirtualScreenSurfaceNative(screenId, surfaceId, displayMgrRef);
+        }).then((ret: NullishType) :void => {
+            resolve(undefined);
+        }).catch((err: NullishType) :void => {
+            reject(err as BusinessError);
+        });
+    });
+}
+ 
+export native function setVirtualScreenSurfaceNative(screenId: long, surfaceId: string, nativeObj: long): void;
 
 export function disposeDisplay(display: DisplayImpl): void {
     finalizerDisplayNative(display as object, displayMgrRef);

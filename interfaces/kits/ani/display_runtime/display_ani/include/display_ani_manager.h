@@ -27,13 +27,17 @@ public:
     explicit DisplayManagerAni();
     static ani_status InitDisplayManagerAni(ani_namespace displayNameSpace, ani_env* env);
 
+    static void SetFoldDisplayModeReasonAni(ani_env* env, ani_int mode, ani_string reason, ani_long nativeObj);
+    static void SetFoldDisplayModeAni(ani_env* env, ani_int mode, ani_long nativeObj);
     static ani_int GetFoldDisplayModeAni(ani_env* env);
+    static void SetFoldStatusLockedAni(ani_env* env, ani_boolean locked, ani_long nativeObj);
     static ani_boolean IsFoldableAni(ani_env* env);
     static ani_int GetFoldStatus(ani_env* env);
     static ani_boolean IsCaptured(ani_env* env);
     static void GetCurrentFoldCreaseRegion(ani_env* env, ani_object obj, ani_long nativeObj);
 
     static void GetAllDisplaysAni(ani_env* env, ani_object arrayObj);
+    static void GetPrimaryDisplaySyncAni(ani_env* env, ani_object obj);
     static void GetDisplayByIdSyncAni(ani_env* env, ani_object obj, ani_long displayId);
     static void GetDefaultDisplaySyncAni(ani_env* env, ani_object obj);
 
@@ -47,12 +51,24 @@ public:
         sptr<DisplayAniListener> displayAniListener);
     static ani_boolean HasPrivateWindow(ani_env* env, ani_long displayId);
     static void GetAllDisplayPhysicalResolution(ani_env* env, ani_object arrayObj, ani_long nativeObj);
+    static void CreateVirtualScreen(ani_env* env,
+        ani_object virtualScreenConfig, ani_long screenId, ani_long nativeObj);
+    static void DestroyVirtualScreen(ani_env* env, ani_long screenId, ani_long nativeObj);
+    static void SetVirtualScreenSurface(ani_env* env, ani_long screenId, ani_string surfaceId, ani_long nativeObj);
+    static void MakeUnique(ani_env* env, ani_long screenId, ani_long nativeObj);
     static void FinalizerDisplay(ani_env* env, ani_object displayObj, ani_long nativeObj);
 private:
     void OnRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
     void OnUnRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
+    void OnSetFoldDisplayModeReasonAni(ani_env* env, ani_int mode, ani_string reason);
+    void OnSetFoldDisplayModeAni(ani_env* env, ani_int mode);
     void OnGetCurrentFoldCreaseRegion(ani_env* env, ani_object obj);
     void OnGetAllDisplayPhysicalResolution(ani_env* env, ani_object arrayObj);
+    void OnSetFoldStatusLockedAni(ani_env* env, ani_boolean locked);
+    ani_long OnCreateVirtualScreen(ani_env* env, ani_object virtualScreenConfig);
+    void OnDestroyVirtualScreen(ani_env* env, ani_long screenId);
+    void OnSetVirtualScreenSurface(ani_env* env, ani_long screenId, ani_string surfaceId);
+    void OnMakeUnique(ani_env* env, ani_long screenId);
     void OnFinalizerDisplay(ani_env* env, ani_object displayObj);
     bool IsCallbackRegistered(ani_env* env, const std::string& type, ani_ref callback);
     std::mutex mtx_;
