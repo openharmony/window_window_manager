@@ -38,7 +38,7 @@ public:
         innerAvailableAreaChangeFunc_ = availableAreaChangeFunc;
     }
 
-    void OnAvailableAreaChangedByDisplayId(DMRect area, DisplayId displayId)
+    void OnAvailableAreaChangedByDisplayId(const DMRect& area, DisplayId displayId)
     {
         if (innerAvailableAreaChangeFunc_ == nullptr) {
             TLOGE(WmsLogTag::DMS, "[DMNDK] callback is nullptr");
