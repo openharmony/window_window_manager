@@ -1837,6 +1837,7 @@ void DisplayManager::Impl::NotifyAvailableAreaChanged(DMRect rect, DisplayId dis
     }
     for (auto& listener : availableAreaListeners) {
         listener->OnAvailableAreaChanged(rect);
+        listener->OnAvailableAreaChangedByDisplayId(rect, displayId);
     }
     std::map<DisplayId, std::set<sptr<IAvailableAreaListener>>> availableAreaListenersMap;
     {
