@@ -65,6 +65,17 @@ public:
     static void UnregisterWindowCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
         ani_ref callback);
     static void ShowWindow(ani_env* env, ani_object obj, ani_long nativeObj);
+    static void SetWindowTitle(ani_env* env, ani_object obj, ani_long nativeObj, ani_string titleName);
+    static void SetTitleButtonVisible(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isMaximizeVisible,
+        ani_boolean isMinimizeVisible, ani_boolean isSplitVisible, ani_boolean isCloseVisible);
+    static void SetWindowTitleMoveEnabled(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean enabled);
+    static ani_object GetTitleButtonRect(ani_env* env, ani_object obj, ani_long nativeObj);
+    static ani_object GetDecorButtonStyle(ani_env* env, ani_object obj, ani_long nativeObj);
+    static void SetTitleAndDockHoverShown(ani_env* env, ani_object obj, ani_long nativeObj,
+        ani_boolean isTitleHoverShown, ani_boolean isDockHoverShown);
+    static void SetHandwritingFlag(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean enable);
+    static ani_boolean GetWindowDecorVisible(ani_env* env, ani_object obj, ani_long nativeObj);
+    static void SetWindowDelayRaiseOnDrag(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isEnabled);
     static void DestroyWindow(ani_env* env, ani_object obj, ani_long nativeObj);
     static ani_boolean IsWindowShowing(ani_env* env, ani_object obj, ani_long nativeObj);
     static void HideWithAnimation(ani_env* env, ani_object obj, ani_long nativeObj);
@@ -140,6 +151,16 @@ private:
     void OnRegisterWindowCallback(ani_env* env, ani_string type, ani_ref callback, ani_long timeout);
     void OnUnregisterWindowCallback(ani_env* env, ani_string type, ani_ref callback);
     void OnShowWindow(ani_env* env);
+    void OnSetWindowTitle(ani_env* env, ani_string titleName);
+    void OnSetTitleButtonVisible(ani_env* env, ani_boolean isMaximizeVisible,
+        ani_boolean isMinimizeVisible, ani_boolean isSplitVisible, ani_boolean isCloseVisible);
+    void OnSetWindowTitleMoveEnabled(ani_env* env, ani_boolean enabled);
+    ani_object OnGetTitleButtonRect(ani_env* env);
+    ani_object OnGetDecorButtonStyle(ani_env* env);
+    void OnSetTitleAndDockHoverShown(ani_env* env, ani_boolean isTitleHoverShown, ani_boolean isDockHoverShown);
+    void OnSetHandwritingFlag(ani_env* env, ani_boolean enable);
+    ani_boolean OnGetWindowDecorVisible(ani_env* env);
+    void OnSetWindowDelayRaiseOnDrag(ani_env* env, ani_boolean isEnabled);
     void OnDestroyWindow(ani_env* env);
     ani_boolean OnIsWindowShowing(ani_env* env);
     void OnHideWithAnimation(ani_env* env);
