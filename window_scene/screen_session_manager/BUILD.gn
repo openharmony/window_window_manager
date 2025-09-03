@@ -61,6 +61,7 @@ ohos_shared_library("screen_session_manager") {
   sources = [
     "../../dm/src/zidl/display_manager_agent_proxy.cpp",
     "../screen_session_manager_client/src/zidl/screen_session_manager_client_proxy.cpp",
+    "../session_manager/src/ffrt_queue_helper.cpp",
     "src/connection/screen_cast_connection.cpp",
     "src/connection/screen_session_ability_connection.cpp",
     "src/connection/screen_snapshot_picker_connection.cpp",
@@ -125,6 +126,7 @@ ohos_shared_library("screen_session_manager") {
     "data_share:datashare_common",
     "data_share:datashare_consumer",
     "eventhandler:libeventhandler",
+    "ffrt:libffrt",
     "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "hicollie:libhicollie",
@@ -134,6 +136,7 @@ ohos_shared_library("screen_session_manager") {
     "init:libbeget_proxy",
     "ipc:ipc_core",
     "libxml2:libxml2",
+    "os_account:os_account_innerkits",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "screenlock_mgr:screenlock_client",

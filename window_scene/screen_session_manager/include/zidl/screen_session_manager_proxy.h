@@ -93,7 +93,7 @@ public:
     virtual DMError SetVirtualMirrorScreenScaleMode(ScreenId screenId, ScreenScaleMode scaleMode) override;
 
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
-        ScreenId& screenGroupId) override;
+        ScreenId& screenGroupId, bool forceRecord = false) override;
     virtual DMError MakeMirrorForRecord(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
         ScreenId& screenGroupId) override;
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
@@ -149,6 +149,7 @@ public:
     virtual void DumpSpecialScreenInfo(ScreenId id, std::string& dumpInfo) override;
     //Fold Screen
     void SetFoldDisplayMode(const FoldDisplayMode displayMode) override;
+    void SetFoldDisplayModeAsync(const FoldDisplayMode displayMode) override;
     DMError SetFoldDisplayModeFromJs(const FoldDisplayMode displayMode, std::string reason = "") override;
 
     void SetDisplayScale(ScreenId screenId, float scaleX, float scaleY,
@@ -199,6 +200,7 @@ public:
     virtual DMError GetAvailableArea(DisplayId displayId, DMRect& area) override;
     virtual DMError GetExpandAvailableArea(DisplayId displayId, DMRect& area) override;
     void NotifyFoldToExpandCompletion(bool foldToExpand) override;
+    void NotifyScreenConnectCompletion(ScreenId screenId) override;
     void RecordEventFromScb(std::string description, bool needRecordEvent) override;
     void SwitchUser() override;
 
@@ -239,6 +241,7 @@ public:
     DMError SetVirtualScreenAutoRotation(ScreenId screenId, bool enable) override;
     DMError SetScreenPrivacyWindowTagSwitch(ScreenId screenId, const std::vector<std::string>& privacyWindowTag,
         bool enable) override;
+    void NotifySwitchUserAnimationFinish() override;
 
 private:
     static inline BrokerDelegator<ScreenSessionManagerProxy> delegator_;

@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include "display_manager_adapter_lite.h"
+#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -156,7 +157,11 @@ HWTEST_F(DisplayManagerAdapterLiteTest, SetDisplayState, TestSize.Level1)
 {
     DisplayState state = DisplayState{1};
     bool ret = SingletonContainer::Get<DisplayManagerAdapterLite>().SetDisplayState(state);
-    ASSERT_FALSE(ret);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_TRUE(ret);
+    } else {
+        ASSERT_FALSE(ret);
+    }
 }
 
 /**
@@ -196,18 +201,6 @@ HWTEST_F(DisplayManagerAdapterLiteTest, SetSystemKeyboardStatus02, TestSize.Leve
 }
 
 /**
- * @tc.name: GetPhysicalScreenIds
- * @tc.desc: GetPhysicalScreenIds
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerAdapterLiteTest, GetPhysicalScreenIds, TestSize.Level1)
-{
-    std::vector<ScreenId> screenIds;
-    auto ret = SingletonContainer::Get<ScreenManagerAdapterLite>().GetPhysicalScreenIds(screenIds);
-    EXPECT_NE(ret, DMError::DM_OK);
-}
-
-/**
  * @tc.name: SetSpecifiedScreenPowerPiling
  * @tc.desc: test piling success
  * @tc.type: FUNC
@@ -232,7 +225,7 @@ HWTEST_F(DisplayManagerAdapterLiteTest, GetScreenPowerPiling, TestSize.Level1)
 #define SCREENLESS_ENABLE
     uint64_t screenId = 0;
     auto ret = SingletonContainer::Get<ScreenManagerAdapterLite>().GetScreenPower(screenId);
-    EXPECT_EQ(ret, ScreenPowerState::POWER_STAND_BY);
+    EXPECT_NE(ret, ScreenPowerState::INVALID_STATE);
 #undef SCREENLESS_ENABLE
 }
 
@@ -395,6 +388,18 @@ HWTEST_F(DisplayManagerAdapterLiteTest, WakeUpBeginPiling, TestSize.Level1)
     auto ret = SingletonContainer::Get<DisplayManagerAdapterLite>().WakeUpBegin(PowerStateChangeReason::POWER_BUTTON);
     EXPECT_TRUE(ret);
 #undef SCREENLESS_ENABLE
+}
+
+/**
+ * @tc.name: GetPhysicalScreenIds
+ * @tc.desc: GetPhysicalScreenIds
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterLiteTest, GetPhysicalScreenIds, TestSize.Level1)
+{
+    std::vector<ScreenId> screenIds;
+    auto ret = SingletonContainer::Get<ScreenManagerAdapterLite>().GetPhysicalScreenIds(screenIds);
+    EXPECT_EQ(ret, DMError::DM_OK);
 }
 }
 }

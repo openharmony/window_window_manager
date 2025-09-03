@@ -13,16 +13,17 @@
  * limitations under the License.
  */
 
+#include "screen_ani_utils.h"
+
 #include <hitrace_meter.h>
 
 #include "ani.h"
-#include "screen_ani_utils.h"
-#include "screen.h"
-#include "singleton_container.h"
-#include "screen_manager.h"
-#include "window_manager_hilog.h"
 #include "dm_common.h"
 #include "refbase.h"
+#include "screen.h"
+#include "screen_manager.h"
+#include "singleton_container.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -74,7 +75,6 @@ ani_status ScreenAniUtils::CallAniFunctionVoid(ani_env *env, const char* ns,
     }
     va_list args;
     va_start(args, signature);
-    TLOGI(WmsLogTag::DMS, "[ANI]CallAniFunctionVoid begin %{public}s", signature);
     if (func == nullptr) {
         TLOGI(WmsLogTag::DMS, "[ANI] null func ani");
         return ret;

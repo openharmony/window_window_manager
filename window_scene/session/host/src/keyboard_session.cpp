@@ -268,8 +268,9 @@ WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params
             session->SetWindowAnimationFlag(true);
         }
         // avoidHeight is set, notify avoidArea in case ui params don't flush
-        if (params.landscapeAvoidHeight_ >= 0 && params.portraitAvoidHeight_ >= 0 && lastParams != params &&
-            session->IsSessionForeground()) {
+        if (lastParams != params && session->IsSessionForeground() && params.landscapeAvoidHeight_ >= 0 &&
+            params.portraitAvoidHeight_ >= 0 && lastParams.landscapeAvoidHeight_ >= 0 &&
+            lastParams.portraitAvoidHeight_ >= 0) {
             TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard avoidHeight is set, id: %{public}d",
                 session->GetCallingSessionId());
             session->ProcessKeyboardOccupiedAreaInfo(session->GetCallingSessionId(), true, false);
@@ -459,9 +460,13 @@ bool KeyboardSession::CheckIfNeedRaiseCallingSession(sptr<SceneSession> callingS
          callingSession->GetParentSession()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING);
     bool isFreeMultiWindowMode = callingSession->IsFreeMultiWindowMode();
     bool isMidScene = callingSession->GetIsMidScene();
+    bool isPhoneNotFreeMultiWindow = systemConfig_.IsPhoneWindow() && !isFreeMultiWindowMode;
+    bool isPadNotFreeMultiWindow = systemConfig_.IsPadWindow() && !isFreeMultiWindowMode;
     if (isCallingSessionFloating && isMainOrParentFloating && !isMidScene &&
-        (systemConfig_.IsPhoneWindow() || (systemConfig_.IsPadWindow() && !isFreeMultiWindowMode))) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "No need to raise calling session in float window");
+        (isPhoneNotFreeMultiWindow || isPadNotFreeMultiWindow)) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "No need to raise calling session in float window, "
+            "isPhoneNotFreeMultiWindow: %{public}d, isPadNotFreeMultiWindow: %{public}d",
+            isPhoneNotFreeMultiWindow, isPadNotFreeMultiWindow);
         return false;
     }
 
@@ -914,8 +919,11 @@ void KeyboardSession::HandleCrossScreenChild(bool isMoveOrDrag)
         RETURN_IF_PARAM_IS_NULL(keyboardPanelSession_);
         auto keyboardPanelSurfaceNode = keyboardPanelSession_->GetSurfaceNode();
         RETURN_IF_PARAM_IS_NULL(keyboardPanelSurfaceNode);
-        auto displayNode = screenSession->GetDisplayNode();
-        RETURN_IF_PARAM_IS_NULL(displayNode);
+        auto dragMoveMountedNode = GetWindowDragMoveMountedNode(displayId, this->GetZOrder());
+        if (dragMoveMountedNode == nullptr) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "dragMoveMountedNode is null");
+            continue;
+        }
         if (isMoveOrDrag) {
             {
                 AutoRSTransaction trans(keyboardPanelSurfaceNode->GetRSUIContext());
@@ -923,14 +931,14 @@ void KeyboardSession::HandleCrossScreenChild(bool isMoveOrDrag)
                 keyboardPanelSurfaceNode->SetIsCrossNode(true);
             }
             {
-                AutoRSTransaction trans(displayNode->GetRSUIContext());
-                displayNode->AddCrossScreenChild(keyboardPanelSurfaceNode, INSERT_TO_THE_END, true);
+                AutoRSTransaction trans(dragMoveMountedNode->GetRSUIContext());
+                dragMoveMountedNode->AddCrossScreenChild(keyboardPanelSurfaceNode, INSERT_TO_THE_END, true);
             }
             TLOGI(WmsLogTag::WMS_KEYBOARD, "Add window: %{public}d to display: %{public}" PRIu64,
                 keyboardPanelSession_->GetPersistentId(), displayId);
         } else {
             keyboardPanelSurfaceNode->SetPositionZ(moveDragController_->GetOriginalPositionZ());
-            displayNode->RemoveCrossScreenChild(keyboardPanelSurfaceNode);
+            dragMoveMountedNode->RemoveCrossScreenChild(keyboardPanelSurfaceNode);
             keyboardPanelSurfaceNode->SetIsCrossNode(false);
             TLOGI(WmsLogTag::WMS_KEYBOARD, "Remove window: %{public}d from display: %{public}" PRIu64,
                 keyboardPanelSession_->GetPersistentId(), displayId);

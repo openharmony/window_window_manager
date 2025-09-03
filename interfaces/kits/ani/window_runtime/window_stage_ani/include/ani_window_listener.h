@@ -50,6 +50,7 @@ const std::string WINDOW_NO_INTERACTION_DETECT_CB = "noInteractionDetected";
 const std::string WINDOW_RECT_CHANGE_CB = "windowRectChange";
 const std::string SUB_WINDOW_CLOSE_CB = "subWindowClose";
 const std::string WINDOW_STAGE_CLOSE_CB = "windowStageClose";
+const std::string WINDOW_STAGE_LIFECYCLE_EVENT_CB = "windowStageLifecycleEvent";
 
 class AniWindowListener : public IWindowChangeListener,
                         public ISystemBarChangedListener,
@@ -68,12 +69,14 @@ class AniWindowListener : public IWindowChangeListener,
                         public IWindowNoInteractionListener,
                         public IWindowRectChangeListener,
                         public IMainWindowCloseListener,
-                        public ISubWindowCloseListener {
+                        public ISubWindowCloseListener,
+                        public IWindowStageLifeCycle {
 public:
     AniWindowListener(ani_env* env, ani_ref callback, CaseType caseType)
         : env_(env), aniCallBack_(callback), caseType_(caseType),
         weakRef_(wptr<AniWindowListener> (this)) {}
     ~AniWindowListener();
+    ani_ref GetAniCallBack() { return aniCallBack_; }
     void OnSystemBarPropertyChange(DisplayId displayId, const SystemBarRegionTints& tints) override;
     void OnSizeChange(Rect rect, WindowSizeChangeReason reason,
     const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
@@ -105,12 +108,18 @@ public:
     void OnSubWindowClose(bool& terminateCloseProcess) override;
     void OnMainWindowClose(bool& terminateCloseProcess) override;
 
+    void AfterLifecycleForeground() override;
+    void AfterLifecycleBackground() override;
+    void AfterLifecycleResumed() override;
+    void AfterLifecyclePaused() override;
+
 private:
     void OnLastStrongRef(const void *) override;
 
     Rect currRect_ = {0, 0, 0, 0};
     WindowState state_ {WindowState::STATE_INITIAL};
     void LifeCycleCallBack(LifeCycleEventType eventType);
+    void WindowStageLifecycleCallback(WindowStageLifeCycleEventType eventType);
     ani_env* env_ = nullptr;
     ani_ref aniCallBack_;
     CaseType caseType_ = CaseType::CASE_WINDOW;

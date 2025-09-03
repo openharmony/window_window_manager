@@ -20,9 +20,11 @@
 #include "display_manager_agent_default.h"
 #include "screen_session_manager/include/screen_session_manager.h"
 #include "screen_scene_config.h"
+#include "screen_setting_helper.h"
 #include "fold_screen_state_internel.h"
 #include "mock/mock_accesstoken_kit.h"
 #include "window_manager_hilog.h"
+#include "test_client.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -37,13 +39,17 @@ constexpr uint32_t G_STATUS_WIDTH = 3184;
 const ScreenId SCREENID = 1000;
 constexpr uint32_t EXCEPTION_DPI = 10;
 constexpr uint32_t PC_MODE_DPI = 304;
+constexpr ScreenId SCREEN_ID_FULL = 0;
+constexpr ScreenId SCREEN_ID_MAIN = 5;
+const bool CORRECTION_ENABLE = system::GetIntParameter<int32_t>("const.system.sensor_correction_enable", 0) == 1;
+bool g_isPcDevice = ScreenSceneConfig::GetExternalScreenDefaultMode() == "none";
 }
 namespace {
     std::string g_errLog;
     void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
         const char* msg)
     {
-        g_errLog = msg;
+        g_errLog += msg;
     }
 }
 class ScreenSessionManagerTest : public testing::Test {
@@ -78,6 +84,76 @@ void ScreenSessionManagerTest::TearDown()
 }
 
 namespace {
+
+/**
+ * @tc.name: SetScreenPowerForFold01
+ * @tc.desc: SetScreenPowerForFold test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetScreenPowerForFold01, TestSize.Level1)
+{
+    if (!FoldScreenStateInternel::IsFoldScreenDevice()) {
+        GTEST_SKIP();
+    }
+    // 内屏预上电
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<ScreenSessionManager> ssm = sptr<ScreenSessionManager>::MakeSptr();
+    ssm->SetRSScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_ON_ADVANCED);
+
+    // 下电
+    ssm->lastPowerForAllStatus_.store(ScreenPowerStatus::POWER_STATUS_ON_ADVANCED);
+    ssm->lastScreenId_.store(SCREEN_ID_FULL);
+    ssm->SetScreenPowerForFold(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_OFF);
+    if (FoldScreenStateInternel::IsSingleDisplayFoldDevice()) {
+        EXPECT_TRUE(g_errLog.find("set advancedOn powerStatus off") != std::string::npos);
+    } else {
+        EXPECT_TRUE(g_errLog.find("set advancedOn powerStatus off") == std::string::npos);
+    }
+}
+
+/**
+ * @tc.name: SetScreenPowerForFold02
+ * @tc.desc: SetScreenPowerForFold test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetScreenPowerForFold02, TestSize.Level1)
+{
+    if (!FoldScreenStateInternel::IsFoldScreenDevice()) {
+        GTEST_SKIP();
+    }
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<ScreenSessionManager> ssm = sptr<ScreenSessionManager>::MakeSptr();
+    ssm->SetRSScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_ON_ADVANCED);
+
+    ssm->lastPowerForAllStatus_.store(ScreenPowerStatus::POWER_STATUS_OFF);
+    ssm->lastScreenId_.store(SCREEN_ID_FULL);
+    ssm->SetScreenPowerForFold(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_OFF);
+    EXPECT_TRUE(g_errLog.find("set advancedOn powerStatus off") == std::string::npos);
+}
+
+/**
+ * @tc.name: SetScreenPowerForFold03
+ * @tc.desc: SetScreenPowerForFold test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetScreenPowerForFold03, TestSize.Level1)
+{
+    if (!FoldScreenStateInternel::IsFoldScreenDevice()) {
+        GTEST_SKIP();
+    }
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<ScreenSessionManager> ssm = sptr<ScreenSessionManager>::MakeSptr();
+    ssm->SetRSScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_ON_ADVANCED);
+
+    ssm->lastPowerForAllStatus_.store(ScreenPowerStatus::POWER_STATUS_ON_ADVANCED);
+    ssm->lastScreenId_.store(SCREEN_ID_MAIN);
+    ssm->SetScreenPowerForFold(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_OFF);
+    EXPECT_TRUE(g_errLog.find("set advancedOn powerStatus off") == std::string::npos);
+}
+
 /**
  * @tc.name: SwitchScrollParam01
  * @tc.desc: SwitchScrollParam test
@@ -967,6 +1043,54 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenPrivacyWindowTagSwitch002, TestSize.
 }
 
 /**
+ * @tc.name: UpdateSuperFoldRefreshRate
+ * @tc.desc: UpdateSuperFoldRefreshRate test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, UpdateSuperFoldRefreshRate, TestSize.Level1)
+{
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        GTEST_SKIP();
+    }
+    g_errLog.clear();
+    uint32_t tempRefreshRate = 60;
+    sptr<ScreenSession> screenSession = nullptr;
+    ssm_->UpdateSuperFoldRefreshRate(screenSession, tempRefreshRate);
+    EXPECT_TRUE(g_errLog.find("screenSession is nullptr") != std::string::npos);
+
+    ScreenId screenId = 1050;
+    DMRect area{0, 0, 600, 800};
+    screenSession = new (std::nothrow) ScreenSession(screenId, ScreenProperty(), 0);
+    sptr<ScreenSession> fakescreenSession = nullptr;
+    screenSession->SetFakeScreenSession(fakescreenSession);
+    ssm_->UpdateSuperFoldRefreshRate(screenSession, tempRefreshRate);
+    EXPECT_TRUE(g_errLog.find("fakeScreenSession is nullptr") != std::string::npos);
+    g_errLog.clear();
+}
+
+/**
+ * @tc.name: OnVerticalChangeBoundsWhenSwitchUser
+ * @tc.desc: OnVerticalChangeBoundsWhenSwitchUser test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, OnVerticalChangeBoundsWhenSwitchUser, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ScreenId screenId = 1050;
+    DMRect area{0, 0, 600, 800};
+    sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(screenId, ScreenProperty(), 0);
+    ASSERT_NE(screenSession, nullptr);
+    ScreenProperty screenProperty = screenSession->GetScreenProperty();
+    auto rotation = screenProperty.GetRotation();
+    constexpr float SECONDARY_ROTATION_90 = 90.0F;
+    screenProperty.SetRotation(SECONDARY_ROTATION_90);
+    RRect bounds = screenProperty.GetBounds();
+    ssm_->OnVerticalChangeBoundsWhenSwitchUser(screenSession, FoldDisplayMode::UNKNOWN);
+    RRect afterbounds = screenProperty.GetBounds();
+    EXPECT_EQ(bounds.rect_.GetHeight(), bounds.rect_.GetWidth());
+}
+
+/**
  * @tc.name: SetLandscapeLockStatus01
  * @tc.desc: SetLandscapeLockStatus01 test
  * @tc.type: FUNC
@@ -978,6 +1102,46 @@ HWTEST_F(ScreenSessionManagerTest, SetLandscapeLockStatus01, TestSize.Level1)
     MockAccesstokenKit::MockIsSystemApp(false);
     ssm_->SetLandscapeLockStatus(true);
     EXPECT_TRUE(g_errLog.find("permission denied!") != std::string::npos);
+}
+
+/**
+ * @tc.name: NotifyDisplayChangedByUid
+ * @tc.desc: NotifyDisplayChangedByUid test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, NotifyDisplayChangedByUid, TestSize.Level1)
+{
+    g_errLog.clear();
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->screenSessionMap_.clear();
+    ScreenId screenId = 1050;
+    sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(screenId, ScreenProperty(), 0);
+    ASSERT_NE(screenSession, nullptr);
+    ssm_->screenSessionMap_[screenId] = screenSession;
+    std::map<ScreenId, sptr<ScreenSession>> screenSessionMapCopy = ssm_->screenSessionMap_;
+    ssm_->NotifyDisplayChangedByUid(screenSessionMapCopy, DisplayChangeEvent::DISPLAY_SIZE_CHANGED, 2002);
+    ssm_->screenSessionMap_.clear();
+    ssm_->screenSessionMap_[1051] = nullptr;
+    std::map<ScreenId, sptr<ScreenSession>> screenSessionMapCopy1 = ssm_->screenSessionMap_;
+    ssm_->NotifyDisplayChangedByUid(screenSessionMapCopy1, DisplayChangeEvent::DISPLAY_SIZE_CHANGED, 2002);
+    EXPECT_TRUE(g_errLog.find("screenSession is nullptr") != std::string::npos);
+}
+
+/**
+ * @tc.name: NotifyDisplayChangedByUidInner
+ * @tc.desc: NotifyDisplayChangedByUidInner test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, NotifyDisplayChangedByUidInner, TestSize.Level1)
+{
+    g_errLog.clear();
+    ASSERT_NE(ssm_, nullptr);
+    ScreenId screenId = 1050;
+    sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(screenId, ScreenProperty(), 0);
+    ASSERT_NE(screenSession, nullptr);
+    ssm_->NotifyDisplayChangedByUidInner(screenSession->ConvertToDisplayInfo(),
+        DisplayChangeEvent::DISPLAY_SIZE_CHANGED, 2002);
+    EXPECT_TRUE(g_errLog.find("notify end") != std::string::npos);
 }
 
 /**
@@ -1272,6 +1436,691 @@ HWTEST_F(ScreenSessionManagerTest, GetCancelSuspendStatus04, TestSize.Level1)
     ssm_->sessionDisplayPowerController_->needCancelNotify_ = true;
     ssm_->sessionDisplayPowerController_->canceledSuspend_ = true;
     EXPECT_TRUE(ssm_->GetCancelSuspendStatus());
+}
+
+/**
+ * @tc.name: HasSameScreenCastInfo
+ * @tc.desc: HasSameScreenCastInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, HasSameScreenCastInfo01, TestSize.Level1) {
+    ASSERT_NE(ssm_, nullptr);
+    ScreenId screenId = 1660;
+    ScreenId mainScreenId = 0;
+    EXPECT_FALSE(ssm_->HasSameScreenCastInfo(screenId, mainScreenId, ScreenCombination::SCREEN_MIRROR));
+    ssm_->SetScreenCastInfo(screenId, mainScreenId, ScreenCombination::SCREEN_MIRROR);
+    EXPECT_TRUE(ssm_->HasSameScreenCastInfo(screenId, mainScreenId, ScreenCombination::SCREEN_MIRROR));
+    ssm_->RemoveScreenCastInfo(screenId);
+    EXPECT_FALSE(ssm_->HasSameScreenCastInfo(screenId, mainScreenId, ScreenCombination::SCREEN_MIRROR));
+}
+ 
+/**
+ * @tc.name: HasSameScreenCastInfo
+ * @tc.desc: HasSameScreenCastInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, HasSameScreenCastInfo02, TestSize.Level1) {
+    ASSERT_NE(ssm_, nullptr);
+    ScreenId screenId = 1660;
+    ScreenId mainScreenId1 = 0;
+    ScreenId mainScreenId2 = 1;
+    ssm_->SetScreenCastInfo(screenId, mainScreenId1, ScreenCombination::SCREEN_MIRROR);
+    EXPECT_FALSE(ssm_->HasSameScreenCastInfo(mainScreenId1, mainScreenId2, ScreenCombination::SCREEN_MIRROR));
+    EXPECT_FALSE(ssm_->HasSameScreenCastInfo(screenId, mainScreenId2, ScreenCombination::SCREEN_MIRROR));
+    EXPECT_FALSE(ssm_->HasSameScreenCastInfo(screenId, mainScreenId1, ScreenCombination::SCREEN_EXPAND));
+    EXPECT_TRUE(ssm_->HasSameScreenCastInfo(screenId, mainScreenId1, ScreenCombination::SCREEN_MIRROR));
+    ssm_->RemoveScreenCastInfo(screenId);
+}
+ 
+/**
+ * @tc.name: RemoveScreenCastInfo
+ * @tc.desc: RemoveScreenCastInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, RemoveScreenCastInfo, TestSize.Level1) {
+    ASSERT_NE(ssm_, nullptr);
+    ScreenId screenId = 1660;
+    ScreenId mainScreenId = 0;
+    ScreenId screenIdNotExist = 1080;
+    ssm_->SetScreenCastInfo(screenId, mainScreenId, ScreenCombination::SCREEN_MIRROR);
+    EXPECT_TRUE(ssm_->HasSameScreenCastInfo(screenId, mainScreenId, ScreenCombination::SCREEN_MIRROR));
+    ssm_->RemoveScreenCastInfo(screenIdNotExist);
+    EXPECT_TRUE(ssm_->HasSameScreenCastInfo(screenId, mainScreenId, ScreenCombination::SCREEN_MIRROR));
+    ssm_->RemoveScreenCastInfo(screenId);
+    EXPECT_FALSE(ssm_->HasSameScreenCastInfo(screenId, mainScreenId, ScreenCombination::SCREEN_MIRROR));
+}
+ 
+/**
+ * @tc.name: ChangeScreenGroup
+ * @tc.desc: ChangeScreenGroup test screenCastInfo has same
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, ChangeScreenGroup, TestSize.Level1) {
+    ASSERT_NE(ssm_, nullptr);
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    ScreenId groupId = 1;
+    ScreenId screenId = 4080;
+    ScreenId mainScreenId = 0;
+    sptr<ScreenSessionGroup> group =
+        sptr<ScreenSessionGroup>::MakeSptr(groupId, SCREEN_ID_INVALID, "test", ScreenCombination::SCREEN_MIRROR);
+    group->mirrorScreenId_ = mainScreenId;
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(screenId, ScreenProperty(), 0);
+    ssm_->screenSessionMap_[screenId] = screenSession;
+    std::vector<ScreenId> screens;
+    screens.emplace_back(screenId);
+    DMRect region = { 0, 0, 1, 1 };
+    Point point;
+    std::vector<Point> startPoints;
+    startPoints.insert(startPoints.begin(), screens.size(), point);
+    ssm_->ChangeScreenGroup(group, screens, startPoints, true, ScreenCombination::SCREEN_MIRROR, region);
+    EXPECT_TRUE(g_errLog.find("has not same cast info") != std::string::npos);
+    g_errLog.clear();
+    ssm_->SetScreenCastInfo(screenId, mainScreenId, ScreenCombination::SCREEN_MIRROR);
+    ssm_->ChangeScreenGroup(group, screens, startPoints, true, ScreenCombination::SCREEN_MIRROR, region);
+    EXPECT_FALSE(g_errLog.find("has not same cast info") != std::string::npos);
+    g_errLog.clear();
+    ssm_->RemoveScreenCastInfo(screenId);
+}
+
+/**
+ * @tc.name: ChangeMirrorScreenConfig
+ * @tc.desc: ChangeMirrorScreenConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, ChangeMirrorScreenConfig, TestSize.Level1) {
+    ASSERT_NE(ssm_, nullptr);
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    ScreenId groupId = 1;
+    ScreenId screenId = 4080;
+    ScreenId mainScreenId = 0;
+    sptr<ScreenSessionGroup> group =
+        sptr<ScreenSessionGroup>::MakeSptr(groupId, SCREEN_ID_INVALID, "test", ScreenCombination::SCREEN_MIRROR);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(screenId, ScreenProperty(), 0);
+    ssm_->screenSessionMap_[screenId] = screenSession;
+    group->mirrorScreenId_ = mainScreenId;
+    DMRect region = { 0, 0, 1, 1 };
+    ssm_->ChangeMirrorScreenConfig(group, region, screenSession);
+    EXPECT_TRUE(g_errLog.find("convert to rs id failed") != std::string::npos);
+    g_errLog.clear();
+    ssm_->screenIdManager_.UpdateScreenId(screenId, screenId);
+    ssm_->ChangeMirrorScreenConfig(group, region, screenSession);
+    EXPECT_TRUE(g_errLog.find("with region") != std::string::npos);
+    g_errLog.clear();
+    group = nullptr;
+    ssm_->ChangeMirrorScreenConfig(group, region, screenSession);
+    EXPECT_FALSE(g_errLog.find("with region") != std::string::npos);
+    g_errLog.clear();
+    screenSession = nullptr;
+    ssm_->ChangeMirrorScreenConfig(group, region, screenSession);
+    EXPECT_FALSE(g_errLog.find("with region") != std::string::npos);
+    g_errLog.clear();
+}
+
+/*
+ * @tc.name: RegisterSettingDuringCallStateObserver
+ * @tc.desc: RegisterSettingDuringCallStateObserver
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, RegisterSettingDuringCallStateObserver, Function | SmallTest | Level3)
+{
+    if (g_isPcDevice) {
+        GTEST_SKIP();
+    }
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->RegisterSettingDuringCallStateObserver();
+    if (FoldScreenStateInternel::IsDualDisplayFoldDevice() && ScreenSceneConfig::IsSupportDuringCall()) {
+        ASSERT_NE(ScreenSettingHelper::duringCallStateObserver_, nullptr);
+    } else {
+        ASSERT_EQ(ScreenSettingHelper::duringCallStateObserver_, nullptr);
+    }
+}
+
+/**
+ * @tc.name: UpdateDuringCallState
+ * @tc.desc: UpdateDuringCallState
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, UpdateDuringCallState, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    ssm_->UpdateDuringCallState();
+    if (FoldScreenStateInternel::IsDualDisplayFoldDevice() && ScreenSceneConfig::IsSupportDuringCall()) {
+        ASSERT_EQ(ssm_->duringCallState_, 0);
+    } else {
+        EXPECT_TRUE(g_errLog.find("get setting during call state failed") == std::string::npos);
+    }
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: SetDuringCallState
+ * @tc.desc: SetDuringCallState
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetDuringCallState, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    bool value = false;
+    ssm_->SetDuringCallState(value);
+    EXPECT_TRUE(g_errLog.find("set during call state to") != std::string::npos);
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: DisconnectScreenIfScreenInfoNull
+ * @tc.desc: DisconnectScreenIfScreenInfoNull
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, DisconnectScreenIfScreenInfoNull01, TestSize.Level1) {
+    ASSERT_NE(ssm_, nullptr);
+#define FOLD_ABILITY_ENABLE
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        sptr<ScreenSession> session = ssm_->GetOrCreateScreenSession(SCREENID);
+        EXPECT_NE(session, nullptr);
+        ssm_->SetClient(nullptr);
+        ASSERT_EQ(ssm_->GetClientProxy(), nullptr);
+        ssm_->DisConnectScreenIfScreenInfoNull(session);
+    }
+#undef FOLD_ABILITY_ENABLE
+}
+
+/**
+ * @tc.name: SetDefaultScreenModeWhenCreateMirror
+ * @tc.desc: SetDefaultScreenModeWhenCreateMirror
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetDefaultScreenModeWhenCreateMirror, TestSize.Level1) {
+    ASSERT_NE(ssm_, nullptr);
+#define FOLD_ABILITY_ENABLE
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        sptr<ScreenSession> session = nullptr;
+        ssm_->SetDefaultScreenModeWhenCreateMirror(session);
+        session = ssm_->GetOrCreateScreenSession(0);
+        auto mode = session->GetScreenCombination();
+        ssm_->SetDefaultScreenModeWhenCreateMirror(session);
+        ASSERT_EQ(session->GetScreenCombination(), mode);
+    }
+#undef FOLD_ABILITY_ENABLE
+}
+
+/**
+ * @tc.name: GetOldDisplayModeRotation
+ * @tc.desc: GetOldDisplayModeRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetOldDisplayModeRotation, TestSize.Level1)
+{
+    auto foldController = sptr<FoldScreenController>::MakeSptr(ssm_->displayInfoMutex_,
+        ssm_->screenPowerTaskScheduler_);
+    ASSERT_NE(foldController, nullptr);
+    DisplayPhysicalResolution physicalSize_full;
+    physicalSize_full.foldDisplayMode_ = FoldDisplayMode::FULL;
+    physicalSize_full.physicalWidth_ = 2048;
+    physicalSize_full.physicalHeight_ = 2232;
+    DisplayPhysicalResolution physicalSize_main;
+    physicalSize_main.foldDisplayMode_ = FoldDisplayMode::MAIN;
+    physicalSize_main.physicalWidth_ = 1008;
+    physicalSize_main.physicalHeight_ = 2232;
+    DisplayPhysicalResolution physicalSize_global_full;
+    physicalSize_global_full.foldDisplayMode_ = FoldDisplayMode::GLOBAL_FULL;
+    physicalSize_global_full.physicalWidth_ = 3184;
+    physicalSize_global_full.physicalHeight_ = 2232;
+    ScreenSceneConfig::displayPhysicalResolution_.emplace_back(physicalSize_full);
+    ScreenSceneConfig::displayPhysicalResolution_.emplace_back(physicalSize_main);
+    ScreenSceneConfig::displayPhysicalResolution_.emplace_back(physicalSize_global_full);
+    auto foldPolicy = foldController->GetFoldScreenPolicy(DisplayDeviceType::SECONDARY_DISPLAY_DEVICE);
+    ASSERT_NE(foldPolicy, nullptr);
+    foldPolicy->lastDisplayMode_ = FoldDisplayMode::MAIN;
+    foldController->foldScreenPolicy_ = foldPolicy;
+    ssm_->foldScreenController_ = foldController;
+    std::unordered_map<FoldDisplayMode, int32_t> rotationCorrectionMap;
+    rotationCorrectionMap.insert({FoldDisplayMode::GLOBAL_FULL, 3});
+    ssm_->rotationCorrectionMap_ = rotationCorrectionMap;
+    Rotation rotation = ssm_->GetOldDisplayModeRotation(FoldDisplayMode::MAIN, Rotation::ROTATION_0);
+    EXPECT_EQ(rotation, Rotation::ROTATION_0);
+    rotation = ssm_->GetOldDisplayModeRotation(FoldDisplayMode::GLOBAL_FULL, Rotation::ROTATION_0);
+    if (CORRECTION_ENABLE) {
+        EXPECT_EQ(rotation, Rotation::ROTATION_90);
+    } else {
+        EXPECT_EQ(rotation, Rotation::ROTATION_0);
+    }
+}
+ 
+/**
+ * @tc.name: SwapScreenWeightAndHeight
+ * @tc.desc: SwapScreenWeightAndHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SwapScreenWeightAndHeight, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    sptr<ScreenSession> screenSession = nullptr;
+    ssm_->SwapScreenWeightAndHeight(screenSession);
+    EXPECT_TRUE(g_errLog.find("screenSession is null") != std::string::npos);
+    screenSession = sptr<ScreenSession>::MakeSptr();
+    ScreenProperty property;
+    RRect bounds;
+    bounds.rect_.width_ = 100;
+    bounds.rect_.height_ = 200;
+    property.SetBounds(bounds);
+    screenSession->SetScreenProperty(property);
+    ssm_->SwapScreenWeightAndHeight(screenSession);
+    auto afterBounds = screenSession->GetScreenProperty().GetBounds();
+    EXPECT_EQ(afterBounds.rect_.width_, bounds.rect_.height_);
+    EXPECT_EQ(afterBounds.rect_.height_, bounds.rect_.width_);
+    g_errLog.clear();
+}
+ 
+/**
+ * @tc.name: HandleScreenRotationAndBoundsWhenSetClient
+ * @tc.desc: HandleScreenRotationAndBoundsWhenSetClient
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, HandleScreenRotationAndBoundsWhenSetClient, TestSize.Level1)
+{
+    auto foldController = sptr<FoldScreenController>::MakeSptr(ssm_->displayInfoMutex_,
+        ssm_->screenPowerTaskScheduler_);
+    ASSERT_NE(foldController, nullptr);
+    auto foldPolicy = foldController->GetFoldScreenPolicy(DisplayDeviceType::SINGLE_DISPLAY_DEVICE);
+    ASSERT_NE(foldPolicy, nullptr);
+    foldPolicy->lastDisplayMode_ = FoldDisplayMode::GLOBAL_FULL;
+    foldController->foldScreenPolicy_ = foldPolicy;
+    ssm_->foldScreenController_ = foldController;
+    std::unordered_map<FoldDisplayMode, int32_t> rotationCorrectionMap;
+    rotationCorrectionMap.insert({FoldDisplayMode::GLOBAL_FULL, 3});
+    ssm_->rotationCorrectionMap_ = rotationCorrectionMap;
+    ScreenId id = 123;
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(id, ScreenProperty(), 0);
+    if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        screenSession->SetRotation(Rotation::ROTATION_0);
+        ssm_->HandleScreenRotationAndBoundsWhenSetClient(screenSession);
+        EXPECT_EQ(screenSession->GetRotation(), Rotation::ROTATION_0);
+        screenSession->SetRotation(Rotation::ROTATION_180);
+        ssm_->HandleScreenRotationAndBoundsWhenSetClient(screenSession);
+        EXPECT_EQ(screenSession->GetRotation(), Rotation::ROTATION_0);
+        screenSession->SetRotation(Rotation::ROTATION_270);
+        ssm_->HandleScreenRotationAndBoundsWhenSetClient(screenSession);
+        EXPECT_EQ(screenSession->GetRotation(), Rotation::ROTATION_0);
+    } else {
+        screenSession->SetRotation(Rotation::ROTATION_270);
+        ssm_->HandleScreenRotationAndBoundsWhenSetClient(screenSession);
+        EXPECT_EQ(screenSession->GetRotation(), Rotation::ROTATION_270);
+        screenSession->SetRotation(Rotation::ROTATION_270);
+        foldPolicy->lastDisplayMode_ = FoldDisplayMode::UNKNOWN;
+        ssm_->HandleScreenRotationAndBoundsWhenSetClient(screenSession);
+        EXPECT_EQ(screenSession->GetRotation(), Rotation::ROTATION_270);
+        screenSession->SetRotation(Rotation::ROTATION_0);
+        ssm_->HandleScreenRotationAndBoundsWhenSetClient(screenSession);
+        EXPECT_EQ(screenSession->GetRotation(), Rotation::ROTATION_0);
+    }
+}
+ 
+/**
+ * @tc.name: RemoveRotationCorrection
+ * @tc.desc: RemoveRotationCorrection
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, RemoveRotationCorrection, TestSize.Level1)
+{
+    auto afterRotation = ssm_->RemoveRotationCorrection(Rotation::ROTATION_270);
+    EXPECT_EQ(afterRotation, Rotation::ROTATION_270);
+}
+ 
+/**
+ * @tc.name: GetConfigCorrectionByDisplayMode
+ * @tc.desc: GetConfigCorrectionByDisplayMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetConfigCorrectionByDisplayMode, TestSize.Level1)
+{
+    ssm_->rotationCorrectionMap_.clear();
+    bool correctionEnable = system::GetIntParameter<int32_t>("const.system.sensor_correction_enable", 0) == 1;
+    if (correctionEnable) {
+        auto rotation = ssm_->GetConfigCorrectionByDisplayMode(FoldDisplayMode::MAIN);
+        EXPECT_EQ(rotation, Rotation::ROTATION_0);
+        std::unordered_map<FoldDisplayMode, int32_t> rotationCorrectionMap;
+        rotationCorrectionMap.insert({FoldDisplayMode::MAIN, 3});
+        ssm_->rotationCorrectionMap_ = rotationCorrectionMap;
+        rotation = ssm_->GetConfigCorrectionByDisplayMode(FoldDisplayMode::MAIN);
+        EXPECT_EQ(rotation, Rotation::ROTATION_270);
+ 
+    } else {
+        auto rotation = ssm_->GetConfigCorrectionByDisplayMode(FoldDisplayMode::MAIN);
+        EXPECT_EQ(rotation, Rotation::ROTATION_0);
+    }
+}
+ 
+/**
+ * @tc.name: InitRotationCorrectionMap
+ * @tc.desc: rotationCorrectionMap not null
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, InitRotationCorrectionMap01, TestSize.Level1)
+{
+    ssm_->rotationCorrectionMap_.clear();
+    std::unordered_map<FoldDisplayMode, int32_t> rotationCorrectionMap;
+    rotationCorrectionMap.insert({FoldDisplayMode::MAIN, 3});
+    ssm_->rotationCorrectionMap_ = rotationCorrectionMap;
+    ssm_->InitRotationCorrectionMap("");
+    EXPECT_TRUE(ssm_->rotationCorrectionMap_.find(FoldDisplayMode::MAIN) != ssm_->rotationCorrectionMap_.end());
+    ssm_->rotationCorrectionMap_.clear();
+    std::string config = "1,0;2,0;5,3;";
+    ssm_->InitRotationCorrectionMap(config);
+    EXPECT_EQ(ssm_->rotationCorrectionMap_[FoldDisplayMode::GLOBAL_FULL], 3);
+}
+ 
+/**
+ * @tc.name: InitRotationCorrectionMap
+ * @tc.desc: split failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, InitRotationCorrectionMap02, TestSize.Level1)
+{
+    ssm_->rotationCorrectionMap_.clear();
+    ssm_->InitRotationCorrectionMap("");
+    EXPECT_TRUE(ssm_->rotationCorrectionMap_.empty());
+    ssm_->rotationCorrectionMap_.clear();
+    std::string config = ";;";
+    ssm_->InitRotationCorrectionMap(config);
+    EXPECT_TRUE(ssm_->rotationCorrectionMap_.empty());
+}
+ 
+/**
+ * @tc.name: InitRotationCorrectionMap
+ * @tc.desc: InitRotationCorrectionMap
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, InitRotationCorrectionMap03, TestSize.Level1)
+{
+    ssm_->rotationCorrectionMap_.clear();
+    std::string config = "1,0,1;1,0;2,0;5,3;3,a;a,a";
+    ssm_->InitRotationCorrectionMap(config);
+    EXPECT_EQ(ssm_->rotationCorrectionMap_[FoldDisplayMode::GLOBAL_FULL], 3);
+}
+
+/**
+ * @tc.name: RecoverDefaultScreenModeInner
+ * @tc.desc: RecoverDefaultScreenModeInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, RecoverDefaultScreenModeInner, TestSize.Level1) {
+    ASSERT_NE(ssm_, nullptr);
+#define FOLD_ABILITY_ENABLE
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        ScreenId innerRsId = 0;
+        ScreenId externalRsId = 11;
+        ssm_->SetIsFoldStatusLocked(true);
+        EXPECT_EQ(ssm_->GetIsFoldStatusLocked(), true);
+        ssm_->RecoverDefaultScreenModeInner(innerRsId, externalRsId);
+        SuperFoldStateManager::GetInstance().SetCurrentStatus(SuperFoldStatus::EXPANDED);
+        innerRsId = 1;
+        externalRsId = 12;
+        ssm_->RecoverDefaultScreenModeInner(innerRsId, externalRsId);
+    }
+#undef FOLD_ABILITY_ENABLE
+}
+
+/**
+ * @tc.name: AddOrUpdateUserDisplayNode
+ * @tc.desc: AddOrUpdateUserDisplayNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, AddOrUpdateUserDisplayNode, TestSize.Level1)
+{
+    RSDisplayNodeConfig config;
+    auto node = std::make_shared<RSDisplayNode>(config);
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->AddOrUpdateUserDisplayNode(100, 1, node);
+
+    auto userIt = ssm_->userDisplayNodeMap_.find(100);
+    ASSERT_NE(userIt, ssm_->userDisplayNodeMap_.end());
+    
+    auto& screenMap = userIt->second;
+    auto screenIt = screenMap.find(1);
+    ASSERT_NE(screenIt, screenMap.end());
+    EXPECT_EQ(screenIt->second, node);
+}
+
+/**
+ * @tc.name: RemoveUserDisplayNode
+ * @tc.desc: RemoveUserDisplayNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, RemoveUserDisplayNode, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    int32_t user1 = 100;
+    int32_t user2 = 200;
+    ScreenId screen1 = 1;
+    ScreenId screen2 = 2;
+    RSDisplayNodeConfig config;
+    auto node1 = std::make_shared<RSDisplayNode>(config);
+    auto node2 = std::make_shared<RSDisplayNode>(config);
+    ssm_->userDisplayNodeMap_[user1].insert_or_assign(screen1, node1);
+    ssm_->RemoveUserDisplayNode(user2, screen1);
+    EXPECT_EQ(ssm_->userDisplayNodeMap_.size(), 1);
+    
+    ssm_->userDisplayNodeMap_[user2].insert_or_assign(screen2, node2);
+    ssm_->RemoveUserDisplayNode(user2, screen1);
+    EXPECT_EQ(ssm_->userDisplayNodeMap_.size(), 2);
+
+    ssm_->userDisplayNodeMap_[user2].insert_or_assign(screen1, node2);
+    ssm_->RemoveUserDisplayNode(user2, screen1);
+    auto findRes = ssm_->userDisplayNodeMap_.find(user2);
+    EXPECT_NE(findRes, ssm_->userDisplayNodeMap_.end());
+    EXPECT_EQ(findRes->second.find(screen1), findRes->second.end());
+
+    ssm_->RemoveUserDisplayNode(user2, screen2);
+    EXPECT_EQ(ssm_->userDisplayNodeMap_.find(user2), ssm_->userDisplayNodeMap_.end());
+}
+
+/**
+ * @tc.name: GetUserDisplayNodeMap
+ * @tc.desc: GetUserDisplayNodeMap
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetUserDisplayNodeMap, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    int32_t user1 = 100;
+    ScreenId screen1 = 1;
+    RSDisplayNodeConfig config;
+    auto node1 = std::make_shared<RSDisplayNode>(config);
+    ssm_->userDisplayNodeMap_[user1].insert_or_assign(screen1, node1);
+    auto res = ssm_->GetUserDisplayNodeMap(user1);
+    auto it = res.find(screen1);
+    ASSERT_NE(it, res.end());
+    ASSERT_EQ(it->second, node1);
+}
+
+/**
+ * @tc.name: SwitchUserDealUserDisplayNode
+ * @tc.desc: SwitchUserDealUserDisplayNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SwitchUserDealUserDisplayNode, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    int32_t userId = 100;
+    ScreenId sc1 = 1;
+    ScreenId sc2 = 2;
+    ScreenId sc3 = 3;
+    ScreenId sc4 = 4;
+
+    auto realSession1 = sptr<ScreenSession>::MakeSptr();
+    realSession1->SetScreenId(sc1);
+    realSession1->SetIsRealScreen(true);
+    
+    auto realSession2 = sptr<ScreenSession>::MakeSptr();
+    realSession2->SetScreenId(sc2);
+    realSession2->SetIsRealScreen(true);
+    
+    auto virtualSession = sptr<ScreenSession>::MakeSptr();
+    virtualSession->SetScreenId(sc3);
+    virtualSession->SetIsRealScreen(false);
+
+    ssm_->screenSessionMap_[sc1] = realSession1;
+    ssm_->screenSessionMap_[sc2] = realSession2;
+    ssm_->screenSessionMap_[sc3] = virtualSession;
+
+    auto& userNodeMap = ssm_->userDisplayNodeMap_[userId];
+    RSDisplayNodeConfig config;
+    auto presetNode = std::make_shared<RSDisplayNode>(config);
+    userNodeMap[sc1] = presetNode;
+    userNodeMap[sc4] = presetNode;
+    ssm_->SwitchUserDealUserDisplayNode(userId);
+
+    // 验证结果
+    auto& resultMap = ssm_->userDisplayNodeMap_[userId];
+    EXPECT_EQ(resultMap[sc1], presetNode);
+    EXPECT_NE(resultMap.find(sc2), resultMap.end());
+    EXPECT_NE(resultMap[sc2], nullptr);
+    EXPECT_NE(resultMap[sc2], presetNode);
+    EXPECT_EQ(resultMap.find(sc4), resultMap.end());
+    EXPECT_EQ(resultMap.find(sc3), resultMap.end());
+}
+
+/**
+ * @tc.name: AddUserDisplayNodeOnTree
+ * @tc.desc: AddUserDisplayNodeOnTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, AddUserDisplayNodeOnTree, TestSize.Level1)
+{
+    g_errLog.clear();
+    int32_t userId = 100;
+    ScreenId screenId1 = 1;
+    ScreenId screenId2 = 2;
+    RSDisplayNodeConfig config;
+    auto node1 = std::make_shared<RSDisplayNode>(config);
+    std::shared_ptr<RSDisplayNode> node2 = nullptr;
+    ssm_->userDisplayNodeMap_[userId].insert_or_assign(screenId1, node1);
+    ssm_->userDisplayNodeMap_[userId].insert_or_assign(screenId2, node2);
+    ssm_->AddUserDisplayNodeOnTree(userId);
+    
+    EXPECT_TRUE(g_errLog.find("userId: ") != std::string::npos);
+    g_errLog.clear();
+}
+
+/**
+ * @tc.name: RemoveUserDisplayNodeFromTree
+ * @tc.desc: RemoveUserDisplayNodeFromTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, RemoveUserDisplayNodeFromTree, TestSize.Level1)
+{
+    int32_t userId = 100;
+    ScreenId screenId1 = 1;
+    ScreenId screenId2 = 2;
+    RSDisplayNodeConfig config;
+    auto node1 = std::make_shared<RSDisplayNode>(config);
+    std::shared_ptr<RSDisplayNode> node2 = nullptr;
+    ssm_->userDisplayNodeMap_[userId].insert_or_assign(screenId1, node1);
+    ssm_->userDisplayNodeMap_[userId].insert_or_assign(screenId2, node2);
+    ssm_->AddUserDisplayNodeOnTree(userId);
+    g_errLog.clear();
+    ssm_->RemoveUserDisplayNodeFromTree(userId);
+    EXPECT_TRUE(g_errLog.find("userId: ") != std::string::npos);
+    g_errLog.clear();
+}
+
+/**
+ * @tc.name: SetUserDisplayNodePositionZ
+ * @tc.desc: SetUserDisplayNodePositionZ
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetUserDisplayNodePositionZ, TestSize.Level1)
+{
+    g_errLog.clear();
+    int32_t userId = 100;
+    float positionZ = 2.0f;
+    ScreenId screenId1 = 1;
+    ScreenId screenId2 = 2;
+    RSDisplayNodeConfig config;
+    auto node1 = std::make_shared<RSDisplayNode>(config);
+    std::shared_ptr<RSDisplayNode> node2 = nullptr;
+    ssm_->userDisplayNodeMap_[userId].insert_or_assign(screenId1, node1);
+    ssm_->userDisplayNodeMap_[userId].insert_or_assign(screenId2, node2);
+    ssm_->SetUserDisplayNodePositionZ(userId, positionZ);
+    
+    ASSERT_TRUE(g_errLog.find("positionZ:") != std::string::npos);
+    g_errLog.clear();
+}
+
+/**
+ * @tc.name: HandleNewUserDisplayNode
+ * @tc.desc: HandleNewUserDisplayNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, HandleNewUserDisplayNode, TestSize.Level1) {
+    ASSERT_NE(ssm_, nullptr);
+    int32_t oldUserId = 100;
+    int32_t newUserId = 200;
+    ssm_->currentUserId_ = oldUserId;
+    g_errLog.clear();
+
+    RSDisplayNodeConfig config;
+    auto oldUserNode = std::make_shared<Rosen::RSDisplayNode>(config);
+    auto newUserNode = std::make_shared<Rosen::RSDisplayNode>(config);
+
+    ssm_->userDisplayNodeMap_[oldUserId][1] = oldUserNode;
+    float position = 5.0f;
+    oldUserNode->SetPositionZ(position);
+    newUserNode->SetPositionZ(position);
+    ssm_->HandleNewUserDisplayNode(newUserId, false);
+    EXPECT_TRUE(g_errLog.find("deal with userDisplayNode") != std::string::npos);
+    g_errLog.clear();
+    EXPECT_TRUE(ssm_->userDisplayNodeMap_[newUserId].size() > 0);
+}
+
+/**
+ * @tc.name: HandleFoldDeviceScreenConnect
+ * @tc.desc: HandleFoldDeviceScreenConnect
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, HandleFoldDeviceScreenConnect, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    ScreenId screenId = 0;
+    ssm_->isCoordinationFlag_ = false;
+    ScreenEvent screenEvent = ScreenEvent::CONNECTED;
+    sptr<ScreenSession> session = nullptr;
+    ssm_->HandleFoldDeviceScreenConnect(screenId, session, false, screenEvent);
+    EXPECT_FALSE(g_errLog.find("event: connect") != std::string::npos);
+    g_errLog.clear();
+
+    session = sptr<ScreenSession>::MakeSptr();
+    ssm_->clientProxy_ = nullptr;
+    ssm_->HandleFoldDeviceScreenConnect(screenId, session, false, screenEvent);
+    EXPECT_FALSE(g_errLog.HandleFoldDeviceScreenConnect("event: connect") != std::string::npos);
+    g_errLog.clear();
+ 
+    ssm_->clientProxy_ = sptr<ScreenSessionManagerClientTest>::MakeSptr();
+    ssm_->HandleFoldDeviceScreenConnect(screenId, session, false, screenEvent);
+    EXPECT_TRUE(g_errLog.find("event: connect") != std::string::npos);
+    g_errLog.clear();
+ 
+    screenId = 1;
+    ssm_->HandleFoldDeviceScreenConnect(screenId, session, true, screenEvent);
+    EXPECT_FALSE(g_errLog.find("event: connect") != std::string::npos);
+    g_errLog.clear();
+ 
+    screenId = SCREEN_ID_MAIN;
+    ssm_->HandleFoldDeviceScreenConnect(screenId, session, true, screenEvent);
+    EXPECT_FALSE(g_errLog.find("event: connect") != std::string::npos);
+    g_errLog.clear();
+    
+    ssm_->isCoordinationFlag_ = true;
+    ssm_->HandleFoldDeviceScreenConnect(screenId, session, true, screenEvent);
+    EXPECT_TRUE(g_errLog.find("event: connect") != std::string::npos);
+    g_errLog.clear();
 }
 }
 }

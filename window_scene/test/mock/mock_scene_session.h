@@ -24,7 +24,7 @@ class SceneSessionMocker : public SceneSession {
 public:
     SceneSessionMocker(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
         : SceneSession(info, specificCallback) {}
-    ~SceneSessionMocker() {};
+    ~SceneSessionMocker() {}
     MOCK_METHOD(void, CheckAndMoveDisplayIdRecursively, (uint64_t displayId), (override));
     MOCK_METHOD(void, SetScreenId, (uint64_t screenId), (override));
     MOCK_METHOD(void, UpdateCrossAxisOfLayout, (const WSRect& rect), (override));

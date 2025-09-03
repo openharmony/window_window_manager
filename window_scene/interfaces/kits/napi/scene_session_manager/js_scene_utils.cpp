@@ -171,7 +171,7 @@ napi_value ConvertWindowAnimationOptionToJsValue(napi_env env,
             napi_create_array(env, &params);
             for (uint32_t i = 0; i < ANIMATION_PARAM_SIZE; ++i) {
                 napi_value element;
-                napi_create_double(env, static_cast<double>(animationConfig.params[i]), &element);
+                napi_create_double(env, static_cast<double>(animationConfig.param[i]), &element);
                 napi_set_element(env, params, i, element);
             }
             napi_set_named_property(env, configJsValue, "param", params);
@@ -670,6 +670,9 @@ bool ConvertSessionInfoState(napi_env env, napi_value jsObject, SessionInfo& ses
     if (!ConvertFromJsValueProperty(env, jsObject, "hasPrivacyModeControl", sessionInfo.hasPrivacyModeControl)) {
         return false;
     }
+    if (!ConvertFromJsValueProperty(env, jsObject, "windowMode", sessionInfo.windowMode)) {
+        return false;
+    }
     return true;
 }
 
@@ -942,14 +945,12 @@ bool ConvertPointerItemFromJs(napi_env env, napi_value touchObject, MMI::Pointer
         WLOGFE("Failed to convert parameter to displayX");
         return false;
     }
-    pointerItem.SetDisplayX(std::round(displayX * vpr));
     pointerItem.SetDisplayXPos(displayX * vpr);
     double displayY;
     if (!ConvertFromJsValue(env, jsDisplayY, displayY)) {
         WLOGFE("Failed to convert parameter to displayY");
         return false;
     }
-    pointerItem.SetDisplayY(std::round(displayY * vpr));
     pointerItem.SetDisplayYPos(displayY * vpr);
     pointerEvent.AddPointerItem(pointerItem);
     return true;
@@ -997,8 +998,6 @@ bool ConvertPointerEventFromJs(napi_env env, napi_value jsObject, MMI::PointerEv
 {
     napi_value jsSourceType = nullptr;
     napi_get_named_property(env, jsObject, "source", &jsSourceType);
-    napi_value jsTouchType = nullptr;
-    napi_get_named_property(env, jsObject, "type", &jsTouchType);
     napi_value jsTimestamp = nullptr;
     napi_get_named_property(env, jsObject, "timestamp", &jsTimestamp);
     napi_value jsChangedTouches = nullptr;
@@ -1014,12 +1013,6 @@ bool ConvertPointerEventFromJs(napi_env env, napi_value jsObject, MMI::PointerEv
     if (sourceType == static_cast<int32_t>(AceSourceType::MOUSE)) {
         pointerEvent.AddFlag(MMI::InputEvent::EVENT_FLAG_GESTURE_SUPPLEMENT);
     }
-    int32_t touchType;
-    if (!ConvertFromJsValue(env, jsTouchType, touchType)) {
-        WLOGFE("Failed to convert parameter to touchType");
-        return false;
-    }
-    pointerEvent.SetPointerAction(GetMMITouchType(touchType));
     double timestamp;
     if (!ConvertFromJsValue(env, jsTimestamp, timestamp)) {
         WLOGFE("Failed to convert parameter to timestamp");
@@ -1037,6 +1030,14 @@ bool ConvertPointerEventFromJs(napi_env env, napi_value jsObject, MMI::PointerEv
         WLOGFE("Failed get to touchObject");
         return false;
     }
+    napi_value jsTouchType = nullptr;
+    napi_get_named_property(env, touchObject, "type", &jsTouchType);
+    int32_t touchType;
+    if (!ConvertFromJsValue(env, jsTouchType, touchType)) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Failed to convert parameter to touchType");
+        return false;
+    }
+    pointerEvent.SetPointerAction(GetMMITouchType(touchType));
     napi_value jsId = nullptr;
     napi_get_named_property(env, touchObject, "id", &jsId);
     int32_t pointerId;
@@ -1395,7 +1396,22 @@ napi_value CreateSupportWindowModes(napi_env env,
     return arrayValue;
 }
 
-napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
+napi_value CreateJsSessionPendingConfigs(napi_env env, const PendingSessionActivationConfig &config)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        WLOGFE("Failed to get jsObject");
+        return nullptr;
+    }
+
+    napi_set_named_property(env, objValue, "forceStart", CreateJsValue(env, config.forceStart));
+    napi_set_named_property(env, objValue, "forceNewWant", CreateJsValue(env, config.forceNewWant));
+    return objValue;
+}
+
+napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo,
+    const std::shared_ptr<PendingSessionActivationConfig>& config)
 {
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
@@ -1447,6 +1463,12 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
     SetJsSessionInfoByWant(env, sessionInfo, objValue);
     napi_set_named_property(env, objValue, "supportWindowModes",
         CreateSupportWindowModes(env, sessionInfo.supportedWindowModes));
+
+    if (config != nullptr) {
+        napi_set_named_property(env, objValue, "extendPendingActivationConfig",
+            CreateJsSessionPendingConfigs(env, *(config)));
+    }
+
     napi_set_named_property(env, objValue, "specifiedFlag", CreateJsValue(env, sessionInfo.specifiedFlag_));
     if (sessionInfo.want != nullptr) {
         napi_set_named_property(env, objValue, "want", AppExecFwk::WrapWant(env, sessionInfo.GetWantSafely()));
@@ -1475,9 +1497,7 @@ void ProcessPendingSessionActivationResult(napi_env env, napi_value callResult,
 {
     uint32_t resultCode = 0;
     std::string resultMessage = "";
-    if (!ParseJsValue(env, callResult, "resultCode", resultCode) ||
-        !ParseJsValue(env, callResult, "resultMessage", resultMessage)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "JsRootSceneSession ParseJsValue resultCode fail");
+    if (!ConvertSessionResultFromJsValue(env, callResult, resultCode, resultMessage)) {
         return;
     }
     if (resultCode >= static_cast<uint32_t>(RequestResultCode::FAIL)) {
@@ -1487,6 +1507,21 @@ void ProcessPendingSessionActivationResult(napi_env env, napi_value callResult,
     TLOGI(WmsLogTag::WMS_LIFE, "persistentId:%{public}d, requestId:%{public}d,"
         "resultCode:%{public}d, resultMessage:%{public}s",
         sessionInfo->persistentId_, sessionInfo->requestId, resultCode, resultMessage.c_str());
+}
+
+bool ConvertSessionResultFromJsValue(napi_env env, napi_value jsResult, uint32_t& resultCode,
+    std::string& resultMessage)
+{
+    uint32_t tempResultCode = 0;
+    std::string tempResultMessage = "";
+    if (!ParseJsValue(env, jsResult, "resultCode", tempResultCode) ||
+        !ParseJsValue(env, jsResult, "resultMessage", tempResultMessage)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "ConvertSessionResultFromJsValue fail");
+        return false;
+    }
+    resultCode = tempResultCode;
+    resultMessage = tempResultMessage;
+    return true;
 }
 
 napi_value CreateJsExceptionInfo(napi_env env, const ExceptionInfo& exceptionInfo)
@@ -1731,6 +1766,8 @@ napi_value CreateJsSessionSizeChangeReason(napi_env env)
         static_cast<int32_t>(SizeChangeReason::MAXIMIZE_IN_IMPLICT)));
     napi_set_named_property(env, objValue, "RECOVER_IN_IMPLICIT", CreateJsValue(env,
         static_cast<int32_t>(SizeChangeReason::RECOVER_IN_IMPLICIT)));
+    napi_set_named_property(env, objValue, "SNAPSHOT_ROTATION", CreateJsValue(env,
+        static_cast<int32_t>(SizeChangeReason::SNAPSHOT_ROTATION)));
     napi_set_named_property(env, objValue, "END", CreateJsValue(env,
         static_cast<int32_t>(SizeChangeReason::END)));
 

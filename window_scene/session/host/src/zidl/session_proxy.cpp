@@ -335,7 +335,14 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
         property->SetPcAppInpadSpecificSystemBarInvisible(reply.ReadBool());
         property->SetPcAppInpadOrientationLandscape(reply.ReadBool());
         property->SetCompatibleModeProperty(reply.ReadParcelable<CompatibleModeProperty>());
-        property->SetUseControlStateToProperty(reply.ReadBool());
+        property->SetUseControlState(reply.ReadBool());
+        property->SetAncoRealBundleName(reply.ReadString());
+        sptr<MissionInfo> missionInfo = reply.ReadParcelable<MissionInfo>();
+        if (missionInfo == nullptr) {
+            TLOGE(WmsLogTag::WMS_LIFE, "read missionInfo is nullptr.");
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
+        property->SetMissionInfo(*missionInfo);
     }
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
@@ -560,12 +567,21 @@ WSError SessionProxy::PendingSessionActivation(sptr<AAFwk::SessionInfo> abilityS
     return static_cast<WSError>(ret);
 }
 
-WSError SessionProxy::BatchPendingSessionsActivation(const std::vector<sptr<AAFwk::SessionInfo>>& abilitySessionInfos)
+
+WSError SessionProxy::BatchPendingSessionsActivation(
+    const std::vector<sptr<AAFwk::SessionInfo>>& abilitySessionInfos,
+    const std::vector<PendingSessionActivationConfig>& configs)
 {
     if (abilitySessionInfos.empty()) {
         TLOGE(WmsLogTag::WMS_LIFE, "abilitySessionInfos is empty");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
+
+    if (!configs.empty() && abilitySessionInfos.size() != configs.size()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "abilitySessionInfos param is error");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
@@ -583,6 +599,19 @@ WSError SessionProxy::BatchPendingSessionsActivation(const std::vector<sptr<AAFw
             return writeRet;
         }
     }
+    
+    if (!data.WriteInt32(static_cast<int32_t>(configs.size()))) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write ability config list size failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    for (const auto& config : configs) {
+        WSError writeRet = WriteOnePendingSessionActivationConfig(data, config);
+        if (writeRet != WSError::WS_OK) {
+            return writeRet;
+        }
+    }
+    
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "remote is null");
@@ -595,6 +624,21 @@ WSError SessionProxy::BatchPendingSessionsActivation(const std::vector<sptr<AAFw
         return WSError::WS_ERROR_IPC_FAILED;
     }
     return static_cast<WSError>(reply.ReadInt32());
+}
+
+WSError SessionProxy::WriteOnePendingSessionActivationConfig(MessageParcel& data,
+    const PendingSessionActivationConfig& configs)
+{
+    if (!data.WriteBool(configs.forceStart)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write forceStart failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(configs.forceNewWant)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write forceNewWant failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    
+    return WSError::WS_OK;
 }
  
 WSError SessionProxy::WriteOneSessionInfo(MessageParcel& data, const sptr<AAFwk::SessionInfo>& abilitySessionInfo)

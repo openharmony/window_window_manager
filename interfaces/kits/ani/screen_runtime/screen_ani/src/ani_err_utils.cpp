@@ -14,10 +14,12 @@
  */
 
 #include "ani_err_utils.h"
+
+#include <map>
+
 #include "screen_ani_utils.h"
 #include "window_manager_hilog.h"
 
-#include <map>
 
 namespace OHOS::Rosen {
 constexpr const char* DM_ERROR_MSG_OK = "ok";
@@ -80,8 +82,8 @@ static std::map<DmErrorCode, const char*> DM_ERROR_CODE_TO_ERROR_MSG_MAP {
 
 std::string AniErrUtils::GetErrorMsg(const DMError& errorCode)
 {
-    return DM_ERROR_TO_ERROR_MSG_MAP.find(errorCode) != DM_ERROR_TO_ERROR_MSG_MAP.end() ?
-        DM_ERROR_TO_ERROR_MSG_MAP.at(errorCode) : "";
+    auto it = DM_ERROR_TO_ERROR_MSG_MAP.find(errorCode);
+    return it != DM_ERROR_TO_ERROR_MSG_MAP.end() ? it->second : "";
 }
 
 std::string AniErrUtils::GetErrorMsg(const DmErrorCode& errorCode)

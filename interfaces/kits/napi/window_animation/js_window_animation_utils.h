@@ -40,6 +40,13 @@ namespace Rosen {
         }                                                                                               \
     } while (0)
 
+    
+inline bool GreatNotEqual(double left, double right)
+{
+    static constexpr double eps = 0.001f;
+    return (left - right) > eps;
+}
+
 napi_value ConvertTransitionAnimationToJsValue(napi_env env,
     std::shared_ptr<TransitionAnimation> transitionAnimation);
 napi_value ConvertWindowAnimationOptionToJsValue(napi_env env,

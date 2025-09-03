@@ -38,7 +38,7 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return WSError::WS_OK;
     }
-    WSError PendingSessionToForeground(const sptr<IRemoteObject>& token) override
+    WSError PendingSessionToForeground(const sptr<IRemoteObject>& token, int32_t windowMode) override
     {
         return WSError::WS_OK;
     }
@@ -51,6 +51,10 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
         return WSError::WS_OK;
     }
     WSError GetFocusSessionElement(AppExecFwk::ElementName& element, DisplayId displayId) override
+    {
+        return WSError::WS_OK;
+    }
+    WSError IsFocusWindowParent(const sptr<IRemoteObject>& token, bool& isParent) override
     {
         return WSError::WS_OK;
     }
@@ -566,6 +570,22 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetFocusSessionElement1, TestSiz
     MessageParcel reply;
     auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleGetFocusSessionElement(data, reply);
     EXPECT_EQ(ERR_INVALID_DATA, res);
+}
+
+/**
+ * @tc.name: HandleIsFocusWindowParent
+ * @tc.desc: test function : HandleIsFocusWindowParent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleIsFocusWindowParent, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleIsFocusWindowParent(data, reply);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
+    const sptr<IRemoteObject> token = sptr<MockIRemoteObject>::MakeSptr();
+    data.WriteRemoteObject(token);
+    EXPECT_EQ(ERR_NONE, res);
 }
 
 /**
@@ -1096,7 +1116,34 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleNotifyAppUseControlList, TestSiz
     data.WriteInt32(appIndex);
     data.WriteBool(isControl);
 
-    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleNotifyAppUseControlList(data, reply);
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleNotifyAppUseControlList(data, reply);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
+}
+
+/**
+ * @tc.name: HandleNotifyAppUseControlList02
+ * @tc.desc: test function : HandleNotifyAppUseControlList02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleNotifyAppUseControlList02, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    uint8_t typeId = 1;
+    int32_t userId = 1;
+    int32_t size = 1;
+    std::string bundleName = "appbundleName";
+    int32_t appIndex = 1;
+    bool isControl = true;
+    bool isControlRecentOnly = true;
+    data.WriteUint8(typeId);
+    data.WriteInt32(userId);
+    data.WriteInt32(size);
+    AppUseControlInfo controlInfo;
+    data.WriteParcelable(&controlInfo);
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleNotifyAppUseControlList(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 
@@ -1260,16 +1307,14 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleSendPointerEventForHover, Functi
 {
     MessageParcel data;
     MessageParcel reply;
-    const sptr<IRemoteObject> token = sptr<MockIRemoteObject>::MakeSptr();
+    sptr<IRemoteObject> token = sptr<MockIRemoteObject>::MakeSptr();
     data.WriteRemoteObject(token);
-    auto res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleSendPointerEventForHover(data, reply);
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleSendPointerEventForHover(data, reply);
     EXPECT_EQ(ERR_INVALID_DATA, res);
 
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     pointerEvent->WriteToParcel(data);
-    res = sceneSessionManagerLiteStub_->
-        SceneSessionManagerLiteStub::HandleSendPointerEventForHover(data, reply);
+    res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleSendPointerEventForHover(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 } // namespace

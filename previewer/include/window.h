@@ -136,7 +136,7 @@ class WINDOW_EXPORT Window : public RefBase {
 public:
     static sptr<Window> Create(const std::string& windowName,
     sptr<WindowOption>& option, const std::shared_ptr<AbilityRuntime::Context>& context = nullptr,
-    WMError& errCode = DefaultCreateErrCode);
+    WMError& errCode = DefaultCreateErrCode, const std::shared_ptr<RSUIContext>& rsUIContext = nullptr);
     static sptr<Window> Find(const std::string& windowName);
     static sptr<Window> GetTopWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
     static sptr<Window> GetTopWindowWithId(uint32_t mainWinId);
@@ -457,7 +457,7 @@ public:
     virtual bool IsPadWindow() const { return false; }
     virtual bool IsPcOrFreeMultiWindowCapabilityEnabled() const { return false; }
     virtual bool IsPcOrPadFreeMultiWindowMode() const { return false; }
-    virtual bool IsPadAndNotFreeMutiWindowCompatibleMode() const { return false; }
+    virtual bool IsPadAndNotFreeMultiWindowCompatibleMode() const { return false; }
     virtual bool IsSceneBoardEnabled() const { return false; }
     virtual bool GetCompatibleModeInPc() const { return false; }
     virtual WmErrorCode KeepKeyboardOnFocus(bool keepKeyboardFlag) = 0;

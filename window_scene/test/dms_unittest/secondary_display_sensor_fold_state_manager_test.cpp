@@ -236,6 +236,36 @@ HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, HandleAngleOrHallChange07, 
 }
 
 /**
+ * @tc.name: HandleAngleOrHallChange08
+ * @tc.desc: test halls size
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, HandleAngleOrHallChange08, TestSize.Level1)
+{
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        return;
+    }
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    std::vector<float> angles = { 5, 5, 5 };
+    std::vector<uint16_t> halls = { 0, 1 };
+    SecondaryDisplaySensorFoldStateManager manager;
+    g_errLog.clear();
+    manager.HandleAngleOrHallChange(angles, halls, nullptr, false);
+    EXPECT_TRUE(g_errLog.find("hall change but posture not change") != std::string::npos);
+    angles = { 5, 5, 5 };
+    halls = { 0, 0 };
+    g_errLog.clear();
+    manager.HandleAngleOrHallChange(angles, halls, nullptr, false);
+    EXPECT_FALSE(g_errLog.find("hall change but posture not change") != std::string::npos);
+    angles = { 4, 4, 4 };
+    halls = { 1, 1 };
+    g_errLog.clear();
+    manager.HandleAngleOrHallChange(angles, halls, nullptr, false);
+    EXPECT_FALSE(g_errLog.find("hall change but posture not change") != std::string::npos);
+}
+
+/**
  * @tc.name: UpdateSwitchScreenBoundaryForLargeFoldDeviceAB
  * @tc.desc: test function : UpdateSwitchScreenBoundaryForLargeFoldDeviceAB
  * @tc.type: FUNC
@@ -378,6 +408,37 @@ HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, GetNextFoldStateHalf02, Tes
     angel = 130.0F + 0.1;
     auto result8 = manager.GetNextFoldStateHalf(angel, hall, state, allowUserSensorForLargeFoldDevice);
     EXPECT_EQ(static_cast<int>(result8), 3);
+}
+
+/**
+ * @tc.name: GetNextFoldStateHalf03
+ * @tc.desc: test function : GetNextFoldStateHalf
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, GetNextFoldStateHalf03, TestSize.Level1)
+{
+    SecondaryDisplaySensorFoldStateManager manager;
+    int32_t allowUserSensorForLargeFoldDevice = 0;
+    FoldStatus state = FoldStatus::UNKNOWN;
+    float angel = 40.0F;
+    uint16_t hall = 0;
+    auto result = manager.GetNextFoldStateHalf(angel, hall, state, allowUserSensorForLargeFoldDevice);
+    EXPECT_EQ(static_cast<int>(result), 2);
+
+    angel = 60.0F;
+    hall = 0;
+    result = manager.GetNextFoldStateHalf(angel, hall, state, allowUserSensorForLargeFoldDevice);
+    EXPECT_EQ(static_cast<int>(result), 3);
+
+    angel = 40.0F;
+    hall = 1;
+    result = manager.GetNextFoldStateHalf(angel, hall, state, allowUserSensorForLargeFoldDevice);
+    EXPECT_EQ(static_cast<int>(result), 3);
+
+    angel = 60.0F;
+    hall = 1;
+    result = manager.GetNextFoldStateHalf(angel, hall, state, allowUserSensorForLargeFoldDevice);
+    EXPECT_EQ(static_cast<int>(result), 3);
 }
 
 /**

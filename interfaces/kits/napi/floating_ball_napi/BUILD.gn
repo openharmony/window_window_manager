@@ -50,6 +50,7 @@ ohos_shared_library("floatingball_napi") {
   external_deps = [
     "ability_runtime:ability_context_native",
     "ability_runtime:abilitykit_native",
+    "ability_runtime:napi_common",
     "ability_runtime:runtime",
     "c_utils:utils",
     "hilog:libhilog",

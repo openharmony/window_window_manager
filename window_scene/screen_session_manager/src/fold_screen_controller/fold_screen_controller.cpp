@@ -71,6 +71,39 @@ FoldScreenController::~FoldScreenController()
     TLOGI(WmsLogTag::DMS, "FoldScreenController is destructed");
 }
 
+nlohmann::ordered_json FoldScreenController::GetFoldCreaseRegionJson()
+{
+    nlohmann::ordered_json ret = nlohmann::ordered_json::array();
+    if (foldScreenPolicy_ == nullptr) {
+        return ret;
+    }
+    if (foldCreaseRegionItems_.size() == 0) {
+        foldScreenPolicy_->GetAllCreaseRegion(foldCreaseRegionItems_);
+    }
+
+    for (const auto& foldCreaseRegionItem : foldCreaseRegionItems_) {
+        nlohmann::ordered_json capabilityInfo;
+        capabilityInfo["foldDisplayMode"] =
+            std::to_string(static_cast<int32_t>(foldCreaseRegionItem.foldDisplayMode_));
+        capabilityInfo["displayOrientation"] =
+            std::to_string(static_cast<int32_t>(foldCreaseRegionItem.orientation_));
+        capabilityInfo["creaseRects"]["displayId"] =
+            std::to_string(static_cast<int32_t>(foldCreaseRegionItem.region_.GetDisplayId()));
+        auto creaseRects = foldCreaseRegionItem.region_.GetCreaseRects();
+        capabilityInfo["creaseRects"]["rects"] = nlohmann::ordered_json::array();
+        for (const auto& creaseRect : creaseRects) {
+            capabilityInfo["creaseRects"]["rects"].push_back({
+                {"posX", creaseRect.posX_},
+                {"posY", creaseRect.posY_},
+                {"width", creaseRect.width_},
+                {"height", creaseRect.height_}
+            });
+        }
+        ret.push_back(capabilityInfo);
+    }
+    return ret;
+}
+
 sptr<FoldScreenPolicy> FoldScreenController::GetFoldScreenPolicy(DisplayDeviceType productType)
 {
     sptr<FoldScreenPolicy> tempPolicy = nullptr;
@@ -123,8 +156,9 @@ void FoldScreenController::RecoverDisplayMode()
     }
     if (!FoldScreenStateInternel::IsSingleDisplayFoldDevice() &&
         !FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() &&
-        !FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
-        TLOGI(WmsLogTag::DMS, "not single display fold (pocket) device, skip");
+        !FoldScreenStateInternel::IsSecondaryDisplayFoldDevice() &&
+        !FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
+        TLOGI(WmsLogTag::DMS, "current fold device do not need recover, skip");
         return;
     }
     TLOGI(WmsLogTag::DMS, "%{public}d -> %{public}d", currentDisplayMode, displayMode);

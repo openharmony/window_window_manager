@@ -26,7 +26,8 @@ using NotifyWindowRecoverStateChangeFunc = std::function<void(bool isSpecificSes
 
 class WindowSceneSessionImpl : public WindowSessionImpl {
 public:
-    explicit WindowSceneSessionImpl(const sptr<WindowOption>& option);
+    explicit WindowSceneSessionImpl(const sptr<WindowOption>& option,
+        const std::shared_ptr<RSUIContext>& rsUIContext = nullptr);
     ~WindowSceneSessionImpl();
     WMError Create(const std::shared_ptr<AbilityRuntime::Context>& context,
         const sptr<Rosen::ISession>& iSession, const std::string& identityToken = "",
@@ -59,8 +60,7 @@ public:
     WMError GetGlobalScaledRect(Rect& globalScaledRect) override;
     WMError Resize(uint32_t width, uint32_t height,
         const RectAnimationConfig& rectAnimationConfig = {}) override;
-    WMError ResizeAsync(uint32_t width, uint32_t height,
-        const RectAnimationConfig& rectAnimationConfig = {}) override;
+    WMError ResizeAsync(uint32_t width, uint32_t height) override;
     WMError SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo) override;
     WMError SetFollowParentWindowLayoutEnabled(bool isFollow) override;
     WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) override;
@@ -206,7 +206,9 @@ public:
     WmErrorCode StartMoveWindowWithCoordinate(int32_t offsetX, int32_t offsetY) override;
     WmErrorCode StopMoveWindow() override;
     WMError SetSupportedWindowModesInner(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes);
+    void UpdateWindowModeWhenSupportTypeChange(uint32_t windowModeSupportType);
     bool haveSetSupportedWindowModes_ = false;
+    uint32_t pendingWindowModeSupportType_ { WindowModeSupport::WINDOW_MODE_SUPPORT_ALL };
 
     /*
      * Compatible Mode
@@ -214,7 +216,6 @@ public:
     WSError NotifyCompatibleModePropertyChange(const sptr<CompatibleModeProperty> property) override;
     void HookDecorButtonStyleInCompatibleMode(uint32_t contentColor);
     WSError PcAppInPadNormalClose() override;
-    void HandleWindowLimitsInCompatibleMode(WindowSizeLimits& windowSizeLimits);
 
     /*
      * Free Multi Window
@@ -368,6 +369,7 @@ private:
     void UpdateNewSize();
     void fillWindowLimits(WindowLimits& windowLimits);
     void UpdateSupportWindowModesWhenSwitchFreeMultiWindow();
+    void PendingUpdateSupportWindowModesWhenSwitchMultiWindow();
     void ConsumePointerEventInner(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         MMI::PointerEvent::PointerItem& pointerItem, bool isHitTargetDraggable = false);
     void HandleEventForCompatibleMode(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
@@ -411,6 +413,7 @@ private:
      * Window Layout
      */
     void CheckMoveConfiguration(MoveConfiguration& moveConfiguration);
+    void UpdateEnableDragWhenSwitchMultiWindow(bool enable);
     WMError GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo) override;
 
     /*

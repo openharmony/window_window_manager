@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,13 +37,13 @@ public:
         sptr<AAFwk::SessionInfo> sessionInfo);
     static ani_object CreateAniExtensionWindow(ani_env* env, sptr<Rosen::Window> window, int32_t hostWindowId);
     WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea);
-    WMError OnSetWaterMarkFlag(ani_env* env, ani_boolean enable);
-    WMError OnHidePrivacyContentForHost(ani_env* env, ani_boolean shouldHide);
-    WMError GetRect(Rect&);
-    WMError RegisterListener(const std::string& cbType, ani_env* env, ani_object fn, ani_object fnArg);
-    WMError UnregisterListener(const std::string& cbType, ani_env* env, ani_object fn);
+    WmErrorCode OnSetWaterMarkFlag(ani_env* env, ani_boolean enable);
+    WmErrorCode OnHidePrivacyContentForHost(ani_env* env, ani_boolean shouldHide);
+    WmErrorCode GetExtensionWindowRect(Rect& rect);
+    WmErrorCode RegisterListener(const std::string& cbType, ani_env* env, ani_object fn, ani_object fnArg);
+    WmErrorCode UnregisterListener(const std::string& cbType, ani_env* env, ani_object fn);
 private:
-    bool WindowIsValid();
+    bool IsExtensionWindowValid();
     std::shared_ptr<Rosen::ExtensionWindow> extensionWindow_;
     int32_t hostWindowId_ = 0;
     sptr<AAFwk::SessionInfo> sessionInfo_ = nullptr;

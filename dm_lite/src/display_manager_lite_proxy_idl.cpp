@@ -843,9 +843,8 @@ ErrCode DisplayManagerLiteProxy::GetAllScreenInfos(
         TLOGE(WmsLogTag::DMS, "Remote is nullptr!");
         return ERR_INVALID_DATA;
     }
-    int32_t result = remote->SendRequest(
-        static_cast<uint32_t>(IDisplayManagerIpcCode::COMMAND_GET_ALL_SCREEN_INFOS), data, reply, option);
-    if (FAILED(result)) {
+    if (auto result = remote->SendRequest(static_cast<uint32_t>(IDisplayManagerIpcCode::COMMAND_GET_ALL_SCREEN_INFOS),
+        data, reply, option); FAILED(result)) {
         TLOGE(WmsLogTag::DMS, "Send request failed!");
         return result;
     }
@@ -856,8 +855,7 @@ ErrCode DisplayManagerLiteProxy::GetAllScreenInfos(
         return ERR_INVALID_DATA;
     }
     if (FAILED(errCode)) {
-        TLOGE(WmsLogTag::DMS, "Result is: %{public}d, code is: %{public}d.", errCode,
-            static_cast<uint32_t>(IDisplayManagerIpcCode::COMMAND_GET_ALL_SCREEN_INFOS));
+        TLOGE(WmsLogTag::DMS, "Result is: %{public}d", errCode);
         return errCode;
     }
 

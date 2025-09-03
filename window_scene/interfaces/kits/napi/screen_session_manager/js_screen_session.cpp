@@ -84,6 +84,8 @@ napi_value JsScreenSession::Create(napi_env env, const sptr<ScreenSession>& scre
         JsScreenSession::GetScreenUIContext);
     BindNativeFunction(env, objValue, "destroyContent", moduleName,
         JsScreenSession::DestroyContent);
+    BindNativeFunction(env, objValue, "releaseResource", moduleName,
+        JsScreenSession::ReleaseResource);
     return objValue;
 }
 
@@ -419,6 +421,19 @@ napi_value JsScreenSession::OnDestroyContent(napi_env env, napi_callback_info in
         TLOGW(WmsLogTag::DMS, "destroy screen scene, screenId:%{public}" PRIu64 ", sessionId:%{public}" PRIu64,
             screenSession_->GetScreenId(), screenSession_->GetSessionId());
     }
+    return NapiGetUndefined(env);
+}
+
+napi_value JsScreenSession::ReleaseResource(napi_env env, napi_callback_info info)
+{
+    JsScreenSession* me = CheckParamsAndGetThis<JsScreenSession>(env, info);
+    return (me != nullptr) ? me->OnReleaseResource(env, info) : nullptr;
+}
+
+napi_value JsScreenSession::OnReleaseResource(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::DMS, "[NAPI]");
+    mCallback_.clear();
     return NapiGetUndefined(env);
 }
 

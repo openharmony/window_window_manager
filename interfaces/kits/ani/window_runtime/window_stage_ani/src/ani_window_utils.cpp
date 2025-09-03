@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "ani_window_utils.h"
 
 #include <iomanip>
@@ -23,8 +24,8 @@
 #include "ani_window.h"
 #include "bundle_constants.h"
 #include "ipc_skeleton.h"
-#include "window_manager_hilog.h"
 #include "ui_content.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {

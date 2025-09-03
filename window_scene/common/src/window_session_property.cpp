@@ -14,6 +14,7 @@
  */
 
 #include "common/include/window_session_property.h"
+#include "string_util.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
 #include "window_helper.h"
@@ -22,7 +23,7 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr uint32_t TOUCH_HOT_AREA_MAX_NUM = 50;
-constexpr uint32_t TRANSTITION_ANIMATION_MAP_SIZE_MAX_NUM = 100;
+constexpr uint32_t TRANSITION_ANIMATION_MAP_SIZE_MAX_NUM = 100;
 }
 
 const std::map<uint64_t, HandlWritePropertyFunc> WindowSessionProperty::writeFuncMap_ {
@@ -887,13 +888,13 @@ ShadowsInfo WindowSessionProperty::GetWindowShadows() const
     return shadowsInfo_;
 }
 
-void WindowSessionProperty::SetUseControlStateToProperty(bool isUseControlState)
+void WindowSessionProperty::SetUseControlState(bool isUseControlState)
 {
     std::lock_guard<std::mutex> lock(lifecycleUseControlMutex_);
     isUseControlState_ = isUseControlState;
 }
 
-bool WindowSessionProperty::GetUseControlStateFromProperty() const
+bool WindowSessionProperty::GetUseControlState() const
 {
     std::lock_guard<std::mutex> lock(lifecycleUseControlMutex_);
     return isUseControlState_;
@@ -1175,7 +1176,7 @@ bool WindowSessionProperty::UnmarshallingSessionInfo(Parcel& parcel, WindowSessi
 bool WindowSessionProperty::MarshallingTransitionAnimationMap(Parcel& parcel) const
 {
     uint32_t transitionAnimationMapSize = transitionAnimationConfig_.size();
-    if (transitionAnimationMapSize > TRANSTITION_ANIMATION_MAP_SIZE_MAX_NUM ||
+    if (transitionAnimationMapSize > TRANSITION_ANIMATION_MAP_SIZE_MAX_NUM ||
         !parcel.WriteUint32(transitionAnimationMapSize)) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to write transitionAnimationMapSize");
         return false;
@@ -1197,7 +1198,7 @@ bool WindowSessionProperty::UnmarshallingTransitionAnimationMap(Parcel& parcel, 
 {
     uint32_t transitionAnimationMapSize = 0;
     if (!parcel.ReadUint32(transitionAnimationMapSize) ||
-        transitionAnimationMapSize > TRANSTITION_ANIMATION_MAP_SIZE_MAX_NUM) {
+        transitionAnimationMapSize > TRANSITION_ANIMATION_MAP_SIZE_MAX_NUM) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to read transitionAnimationMapSize");
         return false;
     }
@@ -1365,7 +1366,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         MarshallingWindowAnchorInfo(parcel) &&
         parcel.WriteBool(isPcAppInpadSpecificSystemBarInvisible_) &&
         parcel.WriteBool(isPcAppInpadOrientationLandscape_) &&
-        parcel.WriteBool(isPcAppInpadCompatibleMode_);
+        parcel.WriteBool(isPcAppInpadCompatibleMode_) &&
+        parcel.WriteString(ancoRealBundleName_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1480,6 +1482,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetPcAppInpadSpecificSystemBarInvisible(parcel.ReadBool());
     property->SetPcAppInpadOrientationLandscape(parcel.ReadBool());
     property->SetPcAppInpadCompatibleMode(parcel.ReadBool());
+    property->SetAncoRealBundleName(parcel.ReadString());
     return property;
 }
 
@@ -1586,6 +1589,11 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     isPcAppInpadSpecificSystemBarInvisible_ = property->isPcAppInpadSpecificSystemBarInvisible_;
     isPcAppInpadOrientationLandscape_ = property->isPcAppInpadOrientationLandscape_;
     isPcAppInpadCompatibleMode_ = property->isPcAppInpadCompatibleMode_;
+    ancoRealBundleName_ = property->ancoRealBundleName_;
+    {
+        std::lock_guard<std::mutex> lock(missionInfoMutex_);
+        missionInfo_ = property->missionInfo_;
+    }
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)
@@ -2329,6 +2337,16 @@ bool WindowSessionProperty::GetPcAppInpadOrientationLandscape() const
     return isPcAppInpadOrientationLandscape_;
 }
 
+void WindowSessionProperty::SetAncoRealBundleName(const std::string& ancoRealBundleName)
+{
+    ancoRealBundleName_ = ancoRealBundleName;
+}
+
+std::string WindowSessionProperty::GetAncoRealBundleName() const
+{
+    return ancoRealBundleName_;
+}
+
 void CompatibleModeProperty::SetIsAdaptToImmersive(bool isAdaptToImmersive)
 {
     isAdaptToImmersive_ = isAdaptToImmersive;
@@ -2541,6 +2559,18 @@ void WindowSessionProperty::UnmarshallingWindowAnchorInfo(Parcel& parcel, Window
     property->SetWindowAnchorInfo(*windowAnchorInfo);
 }
 
+void WindowSessionProperty::SetMissionInfo(const MissionInfo& missionInfo)
+{
+    std::lock_guard<std::mutex> lock(missionInfoMutex_);
+    missionInfo_ = missionInfo;
+}
+
+MissionInfo WindowSessionProperty::GetMissionInfo() const
+{
+    std::lock_guard<std::mutex> lock(missionInfoMutex_);
+    return missionInfo_;
+}
+
 bool WindowSessionProperty::MarshallingShadowsInfo(Parcel& parcel) const
 {
     return parcel.WriteParcelable(&shadowsInfo_);
@@ -2554,6 +2584,11 @@ void WindowSessionProperty::UnmarshallingShadowsInfo(Parcel& parcel, WindowSessi
         return;
     }
     property->SetWindowShadows(*shadowsInfo);
+}
+
+void SystemSessionConfig::ConvertSupportUIExtensionSubWindow(const std::string& itemValue)
+{
+    supportUIExtensionSubWindow_ = StringUtil::ConvertStringToBool(itemValue);
 }
 } // namespace Rosen
 } // namespace OHOS

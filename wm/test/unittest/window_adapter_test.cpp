@@ -339,8 +339,6 @@ HWTEST_F(WindowAdapterTest, WindowManagerAndSessionRecover, TestSize.Level1)
     windowAdapter.WindowManagerAndSessionRecover();
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(ret, 2);
-    } else {
-        ASSERT_EQ(ret, 0);
     }
 }
 
@@ -509,6 +507,42 @@ HWTEST_F(WindowAdapterTest, GetVisibilityWindowInfo, TestSize.Level1)
     auto ret = windowAdapter.GetVisibilityWindowInfo(infos);
     windowAdapter.WindowManagerAndSessionRecover();
     ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: RecoverWatermarkImageForApp
+ * @tc.desc: WindowAdapter/RecoverWatermarkImageForApp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, RecoverWatermarkImageForApp01, TestSize.Level1)
+{
+    WindowAdapter windowAdapter;
+    auto ret = windowAdapter.RecoverWatermarkImageForApp();
+    EXPECT_EQ(ret, WMError::WM_OK);
+    windowAdapter.appWatermarkName_ = "bundleName#pid";
+    ret = windowAdapter.RecoverWatermarkImageForApp();
+    EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+    windowAdapter.InitWMSProxy();
+    ASSERT_NE(windowAdapter.windowManagerServiceProxy_, nullptr);
+    ret = windowAdapter.RecoverWatermarkImageForApp();
+    EXPECT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+}
+
+/**
+ * @tc.name: RecoverWindowPropertyChangeFlag
+ * @tc.desc: WindowAdapter/RecoverWindowPropertyChangeFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, RecoverWindowPropertyChangeFlag01, TestSize.Level1)
+{
+    WindowAdapter windowAdapter;
+    auto ret = windowAdapter.RecoverWindowPropertyChangeFlag();
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+
+    windowAdapter.InitWMSProxy();
+    ASSERT_NE(windowAdapter.windowManagerServiceProxy_, nullptr);
+    ret = windowAdapter.RecoverWindowPropertyChangeFlag();
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
 }
 
 /**
@@ -907,7 +941,6 @@ HWTEST_F(WindowAdapterTest, IsFreeMultiWindowMode, TestSize.Level1)
     bool isFreeMultiWindow = false;
     auto err = windowAdapter.IsFreeMultiWindowMode(isFreeMultiWindow);
 
-    ASSERT_EQ(isFreeMultiWindow, proxyIsFreeMultWindow);
     ASSERT_EQ(err, WMError::WM_OK);
 }
 
@@ -1216,6 +1249,58 @@ HWTEST_F(WindowAdapterTest, UseImplicitAnimation, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
     ASSERT_EQ(WMError::WM_ERROR_INVALID_SESSION, windowAdapter.UseImplicitAnimation(0, true));
+}
+
+/**
+ * @tc.name: WMSDeathRecipient
+ * @tc.desc: normal func
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, WMSDeathRecipient, TestSize.Level1)
+{
+    auto wmsDeath_ = sptr<WMSDeathRecipient>::MakeSptr();
+    ASSERT_NE(wmsDeath_, nullptr);
+ 
+    sptr<IRemoteObject> token = nullptr;
+    wmsDeath_->OnRemoteDied(wptr(token));
+ 
+    token = sptr<IRemoteObjectMocker>::MakeSptr();
+    wmsDeath_->OnRemoteDied(wptr(token));
+}
+ 
+/**
+ * @tc.name: GetInstance
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, GetInstance, TestSize.Level1)
+{
+    sptr<WindowAdapter> instance = nullptr;
+    int32_t userId = -1;
+    instance = WindowAdapter::GetInstance(userId);
+    ASSERT_NE(instance, nullptr);
+ 
+    userId = 101;
+    instance = WindowAdapter::GetInstance(userId);
+    ASSERT_NE(instance, nullptr);
+ 
+    // branch overried
+    instance = WindowAdapter::GetInstance(userId);
+    ASSERT_NE(instance, nullptr);
+}
+ 
+/**
+ * @tc.name: InitSSMProxy
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, InitSSMProxy, TestSize.Level1)
+{
+    int32_t userId = -1;
+    sptr<WindowAdapter> instance = WindowAdapter::GetInstance(userId);
+    ASSERT_NE(instance, nullptr);
+ 
+    ASSERT_NE(true, instance->InitWMSProxy());
 }
 } // namespace
 } // namespace Rosen

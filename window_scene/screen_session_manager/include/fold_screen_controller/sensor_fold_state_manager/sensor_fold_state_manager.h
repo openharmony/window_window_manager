@@ -47,7 +47,7 @@ protected:
         const std::vector<uint16_t>& halls, sptr<FoldScreenPolicy> foldScreenPolicy);
     FoldStatus GetCurrentState();
     void SetTentMode(int tentType);
-    std::recursive_mutex mutex_;
+    std::recursive_mutex mStateMutex_;
     int tentModeType_ = 0;
     inline static bool isInOneStep_ = false;
     inline static std::condition_variable oneStep_;
@@ -66,7 +66,6 @@ private:
 
     void ProcessNotifyFoldStatusChange(FoldStatus currentStatus, FoldStatus nextStatus,
         const std::vector<float>& angles, sptr<FoldScreenPolicy> foldScreenPolicy);
-    std::shared_ptr<TaskScheduler> taskScheduler_ = nullptr;
 };
 } // namespace OHOS::Rosen
 #endif //OHOS_ROSEN_SMALL_DEVICE_SCREEN_SENSOR_MANAGER_H

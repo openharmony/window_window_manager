@@ -165,6 +165,7 @@ enum class WindowType : uint32_t {
 
     SYSTEM_SUB_WINDOW_BASE = 2500,
     WINDOW_TYPE_SYSTEM_SUB_WINDOW = SYSTEM_SUB_WINDOW_BASE,
+    WINDOW_TYPE_SCB_SUB_WINDOW,
     SYSTEM_SUB_WINDOW_END,
 
     SYSTEM_WINDOW_END = SYSTEM_SUB_WINDOW_END,
@@ -438,6 +439,7 @@ enum class ControlAppType : uint8_t {
     CONTROL_APP_TYPE_BEGIN = 0,
     APP_LOCK = 1,
     PARENT_CONTROL,
+    DLP,
     PRIVACY_WINDOW,
     CONTROL_APP_TYPE_END,
 };
@@ -547,6 +549,7 @@ enum class WindowSizeChangeReason : uint32_t {
     OCCUPIED_AREA_CHANGE = 34,
     SCREEN_RELATIVE_POSITION_CHANGE,
     ROOT_SCENE_CHANGE,
+    SNAPSHOT_ROTATION = 37,
     END,
 };
 
@@ -760,6 +763,15 @@ enum class BackupAndRestoreType : int32_t {
 enum class WindowStyleType : uint8_t {
     WINDOW_STYLE_DEFAULT = 0,
     WINDOW_STYLE_FREE_MULTI_WINDOW = 1,
+};
+
+/**
+ * @brief Enumerates window style status
+ */
+enum class WindowManagementMode : uint32_t {
+    UNDEFINED,
+    FREEFORM,
+    FULLSCREEN
 };
 
 /**
@@ -2849,6 +2861,35 @@ struct ShadowsInfo : public Parcelable {
             return nullptr;
         }
         return shadowsInfo;
+    }
+};
+
+/**
+ * @struct MissionInfo
+ *
+ * @brief infos of mission
+ */
+struct MissionInfo : public Parcelable {
+    bool startupInvisibility_ = false;
+
+    MissionInfo() {}
+    MissionInfo(bool startupInvisibility) : startupInvisibility_(startupInvisibility) {}
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        if (!parcel.WriteBool(startupInvisibility_)) {
+            return false;
+        }
+        return true;
+    }
+
+    static MissionInfo* Unmarshalling(Parcel& parcel)
+    {
+        auto missionInfo = std::make_unique<MissionInfo>();
+        if (!missionInfo || !parcel.ReadBool(missionInfo->startupInvisibility_)) {
+            return nullptr;
+        }
+        return missionInfo.release();
     }
 };
 

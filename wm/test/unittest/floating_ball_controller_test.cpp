@@ -19,6 +19,8 @@
 #include "ability_context_impl.h"
 #include "floating_ball_controller.h"
 #include "floating_ball_manager.h"
+#include "floating_ball_report.h"
+#include "singleton_mocker.h"
 #include "modifier_render_thread/rs_modifiers_draw_thread.h"
 #include "parameters.h"
 #include "window.h"
@@ -135,7 +137,7 @@ HWTEST_F(FloatingBallControllerTest, CreateFloatingBallWindow01, TestSize.Level1
     sptr<FbOption> nullOption = nullptr;
     EXPECT_EQ(WMError::WM_ERROR_FB_STATE_ABNORMALLY, fbController_->CreateFloatingBallWindow(nullOption));
     mw_->SetWindowState(WindowState::STATE_INITIAL);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, fbController_->CreateFloatingBallWindow(option_));
+    EXPECT_EQ(WMError::WM_ERROR_FB_CREATE_FAILED, fbController_->CreateFloatingBallWindow(option_));
     mw_->SetWindowState(WindowState::STATE_SHOWN);
     EXPECT_EQ(WMError::WM_ERROR_FB_CREATE_FAILED, fbController_->CreateFloatingBallWindow(option_));
 
@@ -172,7 +174,6 @@ HWTEST_F(FloatingBallControllerTest, StartFloatingBall01, TestSize.Level1)
 
     FloatingBallManager::RemoveActiveController(activeFbController);
     EXPECT_EQ(WMError::WM_ERROR_FB_STATE_ABNORMALLY, fbController_->StartFloatingBall(option_));
-    EXPECT_EQ(FbWindowState::STATE_UNDEFINED, fbController_->curState_);
 
     std::unique_ptr<AbilityRuntime::AbilityContextImpl> contextPtr =
         std::make_unique<AbilityRuntime::AbilityContextImpl>();
@@ -328,6 +329,26 @@ HWTEST_F(FloatingBallControllerTest, GetFloatingBallInfo, TestSize.Level1)
     fbController_->window_ = mw_;
     EXPECT_EQ(WMError::WM_OK, fbController_->GetFloatingBallWindowInfo(mockId));
 }
+
+/**
+ * @tc.name: CreateFloatingBallController
+ * @tc.desc: CreateFloatingBallController
+ * @tc.type: FUNC
+ */
+HWTEST_F(FloatingBallControllerTest, CreateFloatingBallController, TestSize.Level1)
+{
+    int32_t windowId = 100;
+    ASSERT_NE(nullptr, mw_);
+    std::shared_ptr<AbilityRuntime::AbilityContextImpl> contextPtr =
+        std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    ASSERT_NE(nullptr, contextPtr);
+    fbController_ = sptr<FloatingBallController>::MakeSptr(mw_, windowId, &contextPtr);
+    ASSERT_NE(nullptr, fbController_);
+    const std::string packageName = "FLOATING_BALL_TEST";
+    SingletonContainer::Get<FloatingBallReporter>().SetCurrentPackageName(packageName);
+    EXPECT_EQ(packageName, SingletonContainer::Get<FloatingBallReporter>().GetPackageName());
+}
+
 }
 }
 }

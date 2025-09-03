@@ -64,6 +64,19 @@ HWTEST_F(SceneSessionManagerLiteTest, SendPointerEventForHover, TestSize.Level1)
     EXPECT_EQ(SceneSessionManagerLite::GetInstance().SendPointerEventForHover(pointerEvent),
         WSError::WS_ERROR_INVALID_PERMISSION);
 }
+
+/**
+ * @tc.name: IsFocusWindowParent
+ * @tc.desc: test function : IsFocusWindowParent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteTest, IsFocusWindowParent, TestSize.Level1)
+{
+    sptr<IRemoteObject> token = nullptr;
+    bool isParent = false;
+    EXPECT_EQ(SceneSessionManagerLite::GetInstance().IsFocusWindowParent(token, isParent),
+        WSError::WS_ERROR_INVALID_PERMISSION);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

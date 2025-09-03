@@ -41,7 +41,7 @@ void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
     if (pointerEvent == nullptr) {
         return;
     }
-
+ 
     uint32_t windowId = static_cast<uint32_t>(pointerEvent->GetTargetWindowId());
     TLOGD(WmsLogTag::WMS_EVENT, "point source:%{public}d", pointerEvent->GetSourceType());
     auto actionId = pointerEvent->GetPointerId();
@@ -49,7 +49,7 @@ void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
     if (action == MMI::PointerEvent::POINTER_ACTION_MOVE) {
         return;
     }
-
+ 
     MMI::PointerEvent::PointerItem item;
     if (pointerEvent->GetPointerItem(actionId, item)) {
         TLOGD(WmsLogTag::WMS_EVENT, "action point info:windowid:%{public}d,id:%{public}d,displayx:%{private}d,"
@@ -82,11 +82,11 @@ bool IntentionEventManager::EnableInputEventListener(Ace::UIContent* uiContent,
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler, wptr<Window> window)
 {
     if (uiContent == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "uiContent is null");
+        TLOGE(WmsLogTag::WMS_EVENT, "EnableInputEventListener uiContent is null");
         return false;
     }
     if (eventHandler == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "eventHandler is null");
+        TLOGE(WmsLogTag::WMS_EVENT, "EnableInputEventListener eventHandler is null");
         return false;
     }
     auto listener =
@@ -184,8 +184,8 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
             SetPointerEventStatus(pointerEvent->GetPointerId(), action, sourceType, sceneSession);
         }
         static uint32_t eventId = 0;
-        TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "id:%{public}d,eid:%{public}d,wid:%{public}u"
-            ",wn:%{public}s,ac:%{public}d,sys:%{public}d", eventId++, pointerEvent->GetId(), windowId,
+        TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "eid:%{public}d,InputId:%{public}d,wid:%{public}u"
+            ",wName:%{public}s,ac:%{public}d,sys:%{public}d", eventId++, pointerEvent->GetId(), windowId,
             sceneSession->GetSessionInfo().abilityName_.c_str(), action, sceneSession->GetSessionInfo().isSystem_);
     }
     if (sceneSession->GetSessionInfo().isSystem_) {

@@ -15,38 +15,31 @@
 
 #include "ani_extension_window_listener.h"
 
-#include <hitrace_meter.h>
 #include "ani.h"
 #include "ani_window_utils.h"
 #include "event_handler.h"
 #include "event_runner.h"
+#include <hitrace_meter.h>
 #include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
 namespace {
-const std::string WINDOW_SIZE_CHANGE_CB = "windowSizeChange";
-const std::string SYSTEM_AVOID_AREA_CHANGE_CB = "systemAvoidAreaChange";
-const std::string AVOID_AREA_CHANGE_CB = "avoidAreaChange";
-const std::string LIFECYCLE_EVENT_CB = "lifeCycleEvent";
-const std::string KEYBOARD_HEIGHT_CHANGE_CB = "keyboardHeightChange";
+constexpr const char* ETS_WINDOW_SIZE_CHANGE_CB = "sizeChangeCallback";
+constexpr const char* ETS_AVOID_AREA_CHANGE_CB = "avoidAreaChangeCallback";
+constexpr const char* ETS_KEYBOARD_HEIGHT_CHANGE_CB = "keyboardHeightChangeCallback";
 }
 
 AniExtensionWindowListener::~AniExtensionWindowListener()
 {
-    if (callBack_ != nullptr) {
-        env_->GlobalReference_Delete(callBack_);
+    if (aniCallback_ != nullptr) {
+        env_->GlobalReference_Delete(aniCallback_);
     }
-    if (callBackData_ != nullptr) {
-        env_->GlobalReference_Delete(callBackData_);
+    if (aniCallbackData_ != nullptr) {
+        env_->GlobalReference_Delete(aniCallbackData_);
     }
     TLOGI(WmsLogTag::WMS_UIEXT, "[ANI]~AniExtensionWindowListener");
-}
-
-bool AniExtensionWindowListener::IsSameRef(ani_ref newRef)
-{
-    return true;
 }
 
 void AniExtensionWindowListener::SetMainEventHandler()
@@ -58,21 +51,21 @@ void AniExtensionWindowListener::SetMainEventHandler()
     eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(mainRunner);
 }
 
-void AniExtensionWindowListener::CallBack()
+void AniExtensionWindowListener::CallSizeChangeCallback()
 {
     ani_status ret {};
     ani_function fn {};
     ani_namespace ns {};
-    if ((ret = env_->FindNamespace("L@ohos/uiExtensionHost/uiExtensionHost;", &ns)) != ANI_OK) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]canot find ns %{public}d", ret);
+    if ((ret = env_->FindNamespace(ETS_UIEXTENSION_HOST_NAMESPACE_DESCRIPTOR, &ns)) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Find namespace failed, ret: %{public}u", ret);
         return;
     }
-    if ((ret = env_->Namespace_FindFunction(ns, "callBack", "Lstd/core/Object;Lstd/core/Object;:V", &fn)) != ANI_OK) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]canot find callBack %{public}d", ret);
+    if ((ret = env_->Namespace_FindFunction(ns, ETS_WINDOW_SIZE_CHANGE_CB, nullptr, &fn)) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Find function failed, ret: %{public}u", ret);
         return;
     }
-    if ((ret = env_->Function_Call_Void(fn, callBack_, callBackData_)) != ANI_OK) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]canot find callBack %{public}d", ret);
+    if ((ret = env_->Function_Call_Void(fn, aniCallback_, aniCallbackData_)) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Call function failed, ret: %{public}u", ret);
         return;
     }
 }
@@ -80,14 +73,14 @@ void AniExtensionWindowListener::CallBack()
 void AniExtensionWindowListener::SetSizeInfo(uint32_t width, uint32_t height)
 {
     ani_status ret {};
-    if ((ret = env_->Object_SetFieldByName_Double((ani_object)callBackData_, "<property>width",
-        (double)width)) != ANI_OK) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]canot set width %{public}d", ret);
+    if ((ret = env_->Object_SetFieldByName_Double(static_cast<ani_object>(aniCallbackData_), "<property>width",
+        static_cast<double>(width))) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Set width failed, ret: %{public}u", ret);
         return;
     };
-    if ((ret = env_->Object_SetFieldByName_Double((ani_object)callBackData_, "<property>height",
-        (double)height)) != ANI_OK) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]canot set height %{public}d", ret);
+    if ((ret = env_->Object_SetFieldByName_Double(static_cast<ani_object>(aniCallbackData_), "<property>height",
+        static_cast<double>(height))) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Set height failed, ret: %{public}u", ret);
         return;
     }
 }
@@ -98,27 +91,27 @@ void AniExtensionWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason 
     TLOGI(WmsLogTag::WMS_UIEXT, "[ANI]OnSizeChange, [%{public}u, %{public}u], reason=%{public}u",
         rect.width_, rect.height_, reason);
     if (currentWidth_ == rect.width_ && currentHeight_ == rect.height_ && reason != WindowSizeChangeReason::DRAG_END) {
-        TLOGD(WmsLogTag::WMS_UIEXT, "[ANI]no need to change size");
+        TLOGD(WmsLogTag::WMS_UIEXT, "[ANI]No need to notify size change");
         return;
     }
-    auto aniCallback = [self = weakRef_, rect, eng = env_] () {
+    auto onSizeChangeTask = [self = weakRef_, rect, eng = env_] () {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "AniExtensionWindowListener::OnSizeChange");
         auto thisListener = self.promote();
-        if (thisListener == nullptr || eng == nullptr) {
-            TLOGE(WmsLogTag::WMS_UIEXT, "[NAPI]this listener or eng is nullptr");
+        if (thisListener == nullptr || eng == nullptr || thisListener->aniCallback_ == nullptr) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]thisListener, eng or callback is nullptr");
             return;
         }
         thisListener->SetSizeInfo(rect.width_, rect.height_);
-        thisListener->CallBack();
+        thisListener->CallSizeChangeCallback();
     };
     if (reason == WindowSizeChangeReason::ROTATION) {
-        aniCallback();
+        onSizeChangeTask();
     } else {
         if (!eventHandler_) {
-            TLOGE(WmsLogTag::WMS_UIEXT, "get main event handler failed!");
+            TLOGE(WmsLogTag::WMS_UIEXT, "Get main event handler failed!");
             return;
         }
-        eventHandler_->PostTask(aniCallback, "wms:AniExtensionWindowListener::OnSizeChange", 0,
+        eventHandler_->PostTask(onSizeChangeTask, "wms:AniExtensionWindowListener::SizeChangeCallback", 0,
                                 AppExecFwk::EventQueue::Priority::IMMEDIATE);
     }
     currentWidth_ = rect.width_;
@@ -131,30 +124,45 @@ void AniExtensionWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, A
     TLOGI(WmsLogTag::WMS_UIEXT, "[ANI]");
     auto task = [self = weakRef_, eng = env_, avoidArea, type] {
         auto thisListener = self.promote();
-        if (thisListener == nullptr || eng == nullptr) {
-            TLOGE(WmsLogTag::WMS_UIEXT, "this listener or eng is nullptr");
+        if (thisListener == nullptr || eng == nullptr || thisListener->aniCallback_ == nullptr) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]thisListener, eng or callback is nullptr");
             return;
         }
         auto nativeAvoidArea = AniWindowUtils::CreateAniAvoidArea(eng, avoidArea, type);
-        AniWindowUtils::CallAniFunctionVoid(eng, "L@ohos/uiExtensionHost/uiExtensionHost;", "avoidAreaChangeCallBack",
-            nullptr, thisListener->callBack_, nativeAvoidArea, static_cast<ani_int>(type));
+        AniWindowUtils::CallAniFunctionVoid(eng, ETS_UIEXTENSION_HOST_NAMESPACE_DESCRIPTOR, ETS_AVOID_AREA_CHANGE_CB,
+            nullptr, thisListener->aniCallback_, nativeAvoidArea, static_cast<ani_int>(type));
     };
     if (!eventHandler_) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "get main event handler failed!");
+        TLOGE(WmsLogTag::WMS_UIEXT, "Get main event handler failed!");
         return;
     }
-    eventHandler_->PostTask(task, __func__, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+    eventHandler_->PostTask(task, "wms:AniExtensionWindowListener::AvoidAreaChangeCallback", 0,
+        AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
 void AniExtensionWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
     TLOGI(WmsLogTag::WMS_UIEXT,
-        "[ANI]OccupiedAreaChangeInfo, type: %{public}d, input rect:[%{public}d, %{public}d, %{public}d, %{public}d]",
+        "[ANI]OccupiedAreaChangeInfo, type: %{public}u, input rect:[%{public}d, %{public}d, %{public}u, %{public}u]",
         static_cast<uint32_t>(info->type_), info->rect_.posX_, info->rect_.posY_, info->rect_.width_,
         info->rect_.height_);
-    // js callback should run in js thread
-    CallBack();
+    auto onSizeChangeTask = [self = weakRef_, info, eng = env_] () {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || eng == nullptr || thisListener->aniCallback_ == nullptr) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]thisListener, eng or callback is nullptr");
+            return;
+        }
+        AniWindowUtils::CallAniFunctionVoid(eng, ETS_UIEXTENSION_HOST_NAMESPACE_DESCRIPTOR,
+            ETS_KEYBOARD_HEIGHT_CHANGE_CB, nullptr, thisListener->aniCallback_,
+            static_cast<ani_double>(info->rect_.height_));
+    };
+    if (!eventHandler_) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Get main event handler failed!");
+        return;
+    }
+    eventHandler_->PostTask(onSizeChangeTask, "wms:AniExtensionWindowListener::SizeChangeCallback", 0,
+        AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
 } // namespace Rosen

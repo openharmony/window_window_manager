@@ -15,7 +15,7 @@
 
 #include <cinttypes>
 #include <gtest/gtest.h>
-
+#include "common_test_utils.h"
 #include "display_manager.h"
 #include "display_change_info.h"
 #include "modifier_render_thread/rs_modifiers_draw_thread.h"
@@ -59,6 +59,7 @@ void DisplayUpdateTest::TearDownTestCase()
 
 void DisplayUpdateTest::SetUp()
 {
+    CommonTestUtils::GuaranteeFloatWindowPermission("dms_display_update_test");
 }
 
 void DisplayUpdateTest::TearDown()
@@ -67,8 +68,8 @@ void DisplayUpdateTest::TearDown()
 
 namespace {
 /**
- * @tc.name: RegisterPrivateWindowListener
- * @tc.desc: Register private window listener test
+ * @tc.name: RegisterDisplayUpdateListener
+ * @tc.desc: Register display update listener test
  * @tc.type: FUNC
  */
 HWTEST_F(DisplayUpdateTest, RegisterDisplayUpdateListener, TestSize.Level1)
@@ -78,6 +79,7 @@ HWTEST_F(DisplayUpdateTest, RegisterDisplayUpdateListener, TestSize.Level1)
     auto ret = dm.RegisterDisplayUpdateListener(listener_);
     ASSERT_EQ(DMError::DM_OK, ret);
     sptr<WindowOption> option = new WindowOption();
+    option->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     auto window = Window::Create("private", option);
     if (window == nullptr) {
         WLOGFE("window is null");

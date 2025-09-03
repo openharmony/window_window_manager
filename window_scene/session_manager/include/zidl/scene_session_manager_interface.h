@@ -100,6 +100,8 @@ public:
         TRANS_ID_GET_WINDOW_LAYOUT_INFO,
         TRANS_ID_GET_GLOBAL_WINDOW_MODE,
         TRANS_ID_GET_TOP_NAV_DEST_NAME,
+        TRANS_ID_SET_APP_WATERMARK_IMAGE,
+        TRANS_ID_RECOVER_APP_WATERMARK_IMAGE,
         TRANS_ID_GET_VISIBILITY_WINDOW_INFO_ID,
         TRANS_ID_ADD_EXTENSION_WINDOW_STAGE_TO_SCB,
         TRANS_ID_REMOVE_EXTENSION_WINDOW_STAGE_FROM_SCB,
@@ -153,12 +155,14 @@ public:
         TRANS_ID_ADD_SESSION_BLACK_LIST,
         TRANS_ID_REMOVE_SESSION_BLACK_LIST,
         TRANS_ID_GET_PIP_SWITCH_STATUS,
+        TRANS_ID_RECOVER_WINDOW_PROPERTY_CHANGE_FLAG,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
     virtual WSError SetSessionIcon(const sptr<IRemoteObject>& token, const std::shared_ptr<Media::PixelMap>& icon) = 0;
     virtual WSError IsValidSessionIds(const std::vector<int32_t>& sessionIds, std::vector<bool>& results) = 0;
-    virtual WSError PendingSessionToForeground(const sptr<IRemoteObject>& token) = 0;
+    virtual WSError PendingSessionToForeground(const sptr<IRemoteObject>& token,
+        int32_t windowMode = DEFAULT_INVALID_WINDOW_MODE) = 0;
     virtual WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token,
         bool shouldBackToCaller = true) = 0;
     virtual WSError GetFocusSessionToken(sptr<IRemoteObject>& token, DisplayId displayId = DEFAULT_DISPLAY_ID) = 0;
@@ -275,6 +279,10 @@ public:
         uint32_t interestInfo, const sptr<IWindowManagerAgent>& windowManagerAgent) override { return WMError::WM_OK; }
     WMError UnregisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey,
         uint32_t interestInfo, const sptr<IWindowManagerAgent>& windowManagerAgent) override { return WMError::WM_OK;}
+    WMError RecoverWindowPropertyChangeFlag(uint32_t observedFlags, uint32_t interestedFlags) override
+    {
+        return WMError::WM_OK;
+    }
     WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) override
     {
         return WMError::WM_OK;
@@ -290,6 +298,9 @@ public:
     WMError GetGlobalWindowMode(DisplayId displayId,
         GlobalWindowMode& globalWinMode) override { return WMError::WM_OK; }
     WMError GetTopNavDestinationName(int32_t windowId, std::string& topNavDestName) override { return WMError::WM_OK; }
+    WMError SetWatermarkImageForApp(const std::shared_ptr<Media::PixelMap>& pixelMap,
+        std::string& watermarkName) override { return WMError::WM_OK; }
+    WMError RecoverWatermarkImageForApp(const std::string& watermarkName) override { return WMError::WM_OK; }
     WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) override { return WMError::WM_OK; }
     WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller) override
     {

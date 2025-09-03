@@ -156,10 +156,10 @@ public:
     void ReleaseDisplayNode();
 
     Rotation CalcRotation(Orientation orientation, FoldDisplayMode foldDisplayMode) const;
-    DisplayOrientation CalcDisplayOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode) const;
-    DisplayOrientation CalcDeviceOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode) const;
+    DisplayOrientation CalcDisplayOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode);
+    DisplayOrientation CalcDeviceOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode);
     DisplayOrientation CalcDeviceOrientationWithBounds(Rotation rotation,
-        FoldDisplayMode foldDisplayMode, const RRect& bounds) const;
+        FoldDisplayMode foldDisplayMode, const RRect& bounds);
     void FillScreenInfo(sptr<ScreenInfo> info) const;
     void InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint, bool isExtend = false,
         float positionX = 0, float positionY = 0);
@@ -196,7 +196,7 @@ public:
     bool IsTouchEnabled();
     void SetIsPhysicalMirrorSwitch(bool isPhysicalMirrorSwitch);
     bool GetIsPhysicalMirrorSwitch();
-    void UpdateTouchBoundsAndOffset();
+    void UpdateTouchBoundsAndOffset(FoldDisplayMode foldDisplayMode);
     void UpdateToInputManager(RRect bounds, int rotation, int deviceRotation, FoldDisplayMode foldDisplayMode);
     void UpdatePropertyAfterRotation(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
     void UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
@@ -225,6 +225,9 @@ public:
     VirtualScreenFlag GetVirtualScreenFlag();
     void SetVirtualScreenFlag(VirtualScreenFlag screenFlag);
     void SetSecurity(bool isSecurity);
+
+    VirtualScreenType GetVirtualScreenType();
+    void SetVirtualScreenType(VirtualScreenType screenType);
 
     std::string name_ { "UNKNOWN" };
     ScreenId screenId_ {};
@@ -328,6 +331,9 @@ public:
     void UpdateDisplayNodeRotation(int rotation);
     void BeforeScreenPropertyChange(FoldStatus foldStatus);
     void ScreenModeChange(ScreenModeChangeEvent screenModeChangeEvent);
+    void FreezeScreen(bool isFreeze);
+    std::shared_ptr<Media::PixelMap> GetScreenSnapshotWithAllWindows(float scaleX, float scaleY,
+        bool isNeedCheckDrmAndSurfaceLock);
 
     DisplayId GetDisplayId();
 
@@ -351,6 +357,10 @@ public:
     void SetIsAvailableAreaNeedNotify(bool isAvailableAreaNeedNotify);
     bool GetIsAvailableAreaNeedNotify() const;
     uint64_t GetSessionId() const;
+
+    void SetRotationCorrectionMap(std::unordered_map<FoldDisplayMode, int32_t>& rotationCorrectionMap);
+    std::unordered_map<FoldDisplayMode, int32_t> GetRotationCorrectionMap();
+    Rotation GetRotationCorrection(FoldDisplayMode foldDisplayMode);
 
     /*
      * RS Client Multi Instance
@@ -387,6 +397,7 @@ private:
     ScreenCombination combination_ { ScreenCombination::SCREEN_ALONE };
     mutable std::mutex combinationMutex_; // above guarded by clientProxyMutex_
     VirtualScreenFlag screenFlag_ { VirtualScreenFlag::DEFAULT };
+    VirtualScreenType screenType_ { VirtualScreenType::UNKNOWN };
     bool hasPrivateWindowForeground_ = false;
     bool isFakeInUse_ = false;  // is fakeScreenSession can be used
     bool isBScreenHalf_ = false;
@@ -428,6 +439,10 @@ private:
     uint64_t sessionId_;
     bool lastCloseHdrStatus_ = false;
     mutable std::shared_mutex modesMutex_;
+
+    void RemoveRotationCorrection(Rotation& rotation, FoldDisplayMode foldDisplayMode);
+    std::unordered_map<FoldDisplayMode, int32_t> rotationCorrectionMap_;
+    std::shared_mutex rotationCorrectionMutex_;
 
     /*
      * RS Client Multi Instance

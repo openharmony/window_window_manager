@@ -1139,6 +1139,97 @@ HWTEST_F(SceneSessionManagerTest10, NotifyAppUseControlList, TestSize.Level1)
     appUseControlInfo.isNeedControl_ = true;
     EXPECT_EQ(WSError::WS_ERROR_INVALID_PERMISSION,
               ssm_->NotifyAppUseControlList(ControlAppType::APP_LOCK, -1, controlList));
+    usleep(WAIT_SYNC_IN_NS);
+}
+
+/**
+ * @tc.name: NotifyAppUseControlListInner
+ * @tc.desc: NotifyAppUseControlListInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, NotifyAppUseControlListInner, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    int32_t controlListSize = -1;
+    ssm_->notifyAppUseControlListFunc_ = [&controlListSize]
+        (ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList) {
+            controlListSize = controlList.size();
+        };
+    AppUseControlInfo controlById;
+    controlById.persistentId_ = 100;
+    controlById.bundleName_ = "bundleName";
+    controlById.appIndex_ = 0;
+    std::vector<AppUseControlInfo> controlList;
+    controlList.push_back(controlById);
+    ssm_->NotifyAppUseControlListInner(ControlAppType::DLP, 0, controlList);
+    EXPECT_EQ(controlListSize, -1);
+    ssm_->sceneSessionMap_.emplace(100, nullptr);
+    ssm_->NotifyAppUseControlListInner(ControlAppType::DLP, 0, controlList);
+    EXPECT_EQ(controlListSize, -1);
+
+    SessionInfo sessionInfo;
+    sessionInfo.persistentId_ = 100;
+    sessionInfo.bundleName_ = "bundleName";
+    sessionInfo.appIndex_ = 0;
+    sessionInfo.windowType_ = 1;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ssm_->sceneSessionMap_.emplace(100, sceneSession);
+
+    ssm_->NotifyAppUseControlListInner(ControlAppType::DLP, 0, controlList);
+    EXPECT_EQ(controlListSize, -1);
+
+    AppUseControlInfo controlByBundle;
+    controlByBundle.bundleName_ = "bundleName";
+    controlByBundle.appIndex_ = 0;
+    controlList.push_back(controlByBundle);
+    ssm_->NotifyAppUseControlListInner(ControlAppType::DLP, 0, controlList);
+    EXPECT_EQ(controlListSize, 1);
+
+    ssm_->notifyAppUseControlListFunc_ = nullptr;
+    controlListSize = -1;
+    ssm_->NotifyAppUseControlListInner(ControlAppType::DLP, 0, controlList);
+    EXPECT_EQ(controlListSize, -1);
+}
+
+/**
+ * @tc.name: NotifyAppUseControlListInner02
+ * @tc.desc: NotifyAppUseControlListInner02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, NotifyAppUseControlListInner02, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    int32_t controlListSize = -1;
+    ssm_->notifyAppUseControlListFunc_ = [&controlListSize]
+        (ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList) {
+            controlListSize = controlList.size();
+        };
+    std::vector<AppUseControlInfo> controlList;
+    AppUseControlInfo controlById;
+    controlById.persistentId_ = 100;
+    controlById.bundleName_ = "bundleName";
+    controlById.appIndex_ = 0;
+    controlList.push_back(controlById);
+    AppUseControlInfo controlById2;
+    controlById2.persistentId_ = 100;
+    controlById2.bundleName_ = "errorBundleName";
+    controlById2.appIndex_ = 0;
+    controlList.push_back(controlById2);
+    AppUseControlInfo controlById3;
+    controlById3.persistentId_ = 100;
+    controlById3.bundleName_ = "bundleName";
+    controlById3.appIndex_ = 100;
+    controlList.push_back(controlById3);
+
+    SessionInfo sessionInfo;
+    sessionInfo.persistentId_ = 100;
+    sessionInfo.bundleName_ = "bundleName";
+    sessionInfo.appIndex_ = 0;
+    sessionInfo.windowType_ = 1000;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ssm_->sceneSessionMap_.emplace(100, sceneSession);
+    ssm_->NotifyAppUseControlListInner(ControlAppType::DLP, 0, controlList);
+    EXPECT_EQ(controlListSize, -1);
 }
 
 /**

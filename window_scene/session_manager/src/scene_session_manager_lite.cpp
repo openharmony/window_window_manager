@@ -106,10 +106,10 @@ WSError SceneSessionManagerLite::GetSessionSnapshot(const std::string& deviceId,
     return SceneSessionManager::GetInstance().GetSessionSnapshot(deviceId, persistentId, snapshot, isLowResolution);
 }
 
-WSError SceneSessionManagerLite::PendingSessionToForeground(const sptr<IRemoteObject>& token)
+WSError SceneSessionManagerLite::PendingSessionToForeground(const sptr<IRemoteObject>& token, int32_t windowMode)
 {
     WLOGFD("in");
-    return SceneSessionManager::GetInstance().PendingSessionToForeground(token);
+    return SceneSessionManager::GetInstance().PendingSessionToForeground(token, windowMode);
 }
 
 WSError SceneSessionManagerLite::PendingSessionToBackground(const sptr<IRemoteObject>& token,
@@ -136,6 +136,12 @@ WSError SceneSessionManagerLite::GetFocusSessionElement(AppExecFwk::ElementName&
 {
     WLOGFD("in");
     return SceneSessionManager::GetInstance().GetFocusSessionElement(element, displayId);
+}
+
+WSError SceneSessionManagerLite::IsFocusWindowParent(const sptr<IRemoteObject>& token, bool& isParent)
+{
+    TLOGD(WmsLogTag::WMS_FOCUS, "in");
+    return SceneSessionManager::GetInstance().IsFocusWindowParent(token, isParent);
 }
 
 WSError SceneSessionManagerLite::ClearSession(int32_t persistentId)

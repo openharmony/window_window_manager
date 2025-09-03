@@ -122,7 +122,7 @@ WSError SceneSessionManagerLiteProxy::IsValidSessionIds(
     return static_cast<WSError>(reply.ReadInt32());
 }
 
-WSError SceneSessionManagerLiteProxy::PendingSessionToForeground(const sptr<IRemoteObject>& token)
+WSError SceneSessionManagerLiteProxy::PendingSessionToForeground(const sptr<IRemoteObject>& token, int32_t windowMode)
 {
     WLOGFD("run SceneSessionManagerLiteProxy::PendingSessionToForeground");
     MessageParcel data;
@@ -135,6 +135,11 @@ WSError SceneSessionManagerLiteProxy::PendingSessionToForeground(const sptr<IRem
 
     if (!data.WriteRemoteObject(token)) {
         WLOGFE("Write token failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteInt32(windowMode)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write windowMode failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
@@ -561,6 +566,49 @@ WSError SceneSessionManagerLiteProxy::GetFocusSessionElement(AppExecFwk::Element
         WLOGFD("get element null.");
     }
     return static_cast<WSError>(reply.ReadInt32());
+}
+
+WSError SceneSessionManagerLiteProxy::IsFocusWindowParent(const sptr<IRemoteObject>& token, bool& isParent)
+{
+    TLOGD(WmsLogTag::WMS_FOCUS, "run");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (token == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Token is nullptr");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Write interfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteRemoteObject(token)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Write token failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_IS_FOCUS_WINDOW_PARENT),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    bool value = false;
+    if (!reply.ReadBool(value)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Read result failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Read ret failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    isParent = value;
+    TLOGD(WmsLogTag::WMS_FOCUS, "isParent: %{public}d", isParent);
+    return static_cast<WSError>(ret);
 }
 
 WSError SceneSessionManagerLiteProxy::GetSessionSnapshot(const std::string& deviceId, int32_t persistentId,
@@ -1545,8 +1593,7 @@ WSError SceneSessionManagerLiteProxy::NotifyAppUseControlList(
     }
 
     for (const auto& control : controlList) {
-        if (!data.WriteString(control.bundleName_) || !data.WriteInt32(control.appIndex_) ||
-            !data.WriteBool(control.isNeedControl_) || !data.WriteBool(control.isControlRecentOnly_)) {
+        if (!data.WriteParcelable(&control)) {
             TLOGE(WmsLogTag::WMS_LIFE, "Write controlList failed");
             return WSError::WS_ERROR_INVALID_PARAM;
         }

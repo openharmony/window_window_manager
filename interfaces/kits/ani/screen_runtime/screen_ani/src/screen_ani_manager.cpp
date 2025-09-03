@@ -12,18 +12,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <hitrace_meter.h>
+
+#include "screen_ani_manager.h"
+
 #include <algorithm>
+#include <hitrace_meter.h>
 
 #include "ani.h"
-#include "singleton_container.h"
-#include "window_manager_hilog.h"
+#include "ani_err_utils.h"
 #include "dm_common.h"
 #include "refbase.h"
-#include "screen_ani_manager.h"
-#include "screen_ani_utils.h"
 #include "screen_ani_listener.h"
-#include "ani_err_utils.h"
+#include "screen_ani_utils.h"
+#include "singleton_container.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -34,7 +36,7 @@ ScreenManagerAni::ScreenManagerAni()
 
 void ScreenManagerAni::registerCallback(ani_env* env, ani_string type, ani_ref callback, ani_long nativeObj)
 {
-    TLOGI(WmsLogTag::DMS, "[ANI] start to register screen callback: %{public}lld", nativeObj);
+    TLOGI(WmsLogTag::DMS, "[ANI] start to register screen callback: %{public}" PRId64, nativeObj);
     ScreenManagerAni* screenManagerAni = reinterpret_cast<ScreenManagerAni*>(nativeObj);
     if (screenManagerAni != nullptr) {
         screenManagerAni->onRegisterCallback(env, type, callback);
@@ -61,13 +63,14 @@ void ScreenManagerAni::onRegisterCallback(ani_env* env, ani_string type, ani_ref
     ScreenAniUtils::GetStdString(env, type, typeString);
     if (env->GlobalReference_Create(callback, &cbRef) != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] create global ref fail");
+        return;
     }
+    std::lock_guard<std::mutex> lock(mtx_);
     if (IsCallbackRegistered(env, typeString, cbRef)) {
         TLOGI(WmsLogTag::DMS, "[ANI] type %{public}s callback already registered!", typeString.c_str());
         return;
     }
     TLOGI(WmsLogTag::DMS, "[ANI] begin");
-    std::lock_guard<std::mutex> lock(mtx_);
     ani_boolean callbackUndefined = 0;
     env->Reference_IsUndefined(cbRef, &callbackUndefined);
     DmErrorCode ret;
@@ -168,7 +171,7 @@ DMError ScreenManagerAni::UnRegisterScreenListenerWithType(std::string type, ani
         TLOGE(WmsLogTag::DMS, "[ANI]create global ref fail");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
-    for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
+    for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end(); it++) {
         ani_boolean isEquals = 0;
         env->Reference_StrictEquals(cbRef, it->first, &isEquals);
         if (isEquals) {
@@ -181,8 +184,6 @@ DMError ScreenManagerAni::UnRegisterScreenListenerWithType(std::string type, ani
             }
             jsCbMap_[type].erase(it);
             break;
-        } else {
-            it++;
         }
     }
     if (jsCbMap_[type].empty()) {

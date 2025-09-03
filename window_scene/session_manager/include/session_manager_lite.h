@@ -17,29 +17,56 @@
 #define OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_LITE_H
 
 #include <functional>
+#include <iremote_stub.h>
 #include <shared_mutex>
 
 #include "imock_session_manager_interface.h"
 #include "session_manager_service_interface.h"
+#include "session_manager_service_recover_interface.h"
 #include "wm_common.h"
 #include "wm_single_instance.h"
 #include "zidl/scene_session_manager_lite_interface.h"
 #include "zidl/screen_session_manager_lite_interface.h"
 
 namespace OHOS::Rosen {
+class SessionManagerLite;
+class SessionManagerServiceLiteRecoverListener : public IRemoteStub<ISessionManagerServiceRecoverListener> {
+public:
+    explicit SessionManagerServiceLiteRecoverListener(sptr<SessionManagerLite> sml);
+    int32_t OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
+    void OnSessionManagerServiceRecover(const sptr<IRemoteObject>& sessionManagerService) override;
+    void OnWMSConnectionChanged(int32_t userId,
+                                int32_t screenId,
+                                bool isConnected,
+                                const sptr<IRemoteObject>& sessionManagerService) override;
+
+private:
+    sptr<SessionManagerLite> sessionManagerLite_;
+};
+
 class SSMDeathRecipientLite : public IRemoteObject::DeathRecipient {
 public:
+    explicit SSMDeathRecipientLite(const int32_t userId = INVALID_USER_ID);
     void OnRemoteDied(const wptr<IRemoteObject>& wptrDeath) override;
+
+private:
+    int32_t userId_;
 };
 
 class FoundationDeathRecipientLite : public IRemoteObject::DeathRecipient {
 public:
+    explicit FoundationDeathRecipientLite(const int32_t userId = INVALID_USER_ID);
     void OnRemoteDied(const wptr<IRemoteObject>& wptrDeath) override;
+
+private:
+    int32_t userId_;
 };
 
-class SessionManagerLite {
-WM_DECLARE_SINGLE_INSTANCE_BASE(SessionManagerLite);
+class SessionManagerLite : public RefBase {
+    WM_DECLARE_SINGLE_INSTANCE_BASE(SessionManagerLite);
 public:
+    static sptr<SessionManagerLite> GetInstance(const int32_t userId);
+
     void ClearSessionManagerProxy();
     void Clear();
 
@@ -70,8 +97,8 @@ public:
     void RecoverSessionManagerService(const sptr<ISessionManagerService>& sessionManagerService);
 
 protected:
-    SessionManagerLite() = default;
-    virtual ~SessionManagerLite();
+    SessionManagerLite(const int32_t userId = INVALID_USER_ID);
+    ~SessionManagerLite() override;
 
 private:
     void InitSessionManagerServiceProxy();
@@ -84,8 +111,11 @@ private:
     WMError InitMockSMSProxy();
 
     /*
-     * Multi User
+     * Multi User and multi screen
      */
+    int32_t userId_;
+    static std::unordered_map<int32_t, sptr<SessionManagerLite>> sessionManagerLiteMap_;
+    static std::mutex sessionManagerLiteMapMutex_;
     void OnUserSwitch(const sptr<ISessionManagerService>& sessionManagerService);
     void OnWMSConnectionChangedCallback(int32_t userId, int32_t screenId, bool isConnected, bool isCallbackRegistered);
 

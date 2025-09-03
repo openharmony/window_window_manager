@@ -64,7 +64,8 @@ public:
     WSError IsValidSessionIds(const std::vector<int32_t>& sessionIds, std::vector<bool>& results) override;
     WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) override;
     WMError GetUnreliableWindowInfo(int32_t windowId, std::vector<sptr<UnreliableWindowInfo>>& infos) override;
-    WSError PendingSessionToForeground(const sptr<IRemoteObject>& token) override;
+    WSError PendingSessionToForeground(const sptr<IRemoteObject>& token,
+        int32_t windowMode = DEFAULT_INVALID_WINDOW_MODE) override;
     WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token,
         bool shouldBackToCaller = true) override;
     WMError GetSessionSnapshotById(int32_t persistentId, SessionSnapshot& snapshot) override;
@@ -112,6 +113,9 @@ public:
     WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos) override;
     WMError GetGlobalWindowMode(DisplayId displayId, GlobalWindowMode& globalWinMode) override;
     WMError GetTopNavDestinationName(int32_t windowId, std::string& topNavDestName) override;
+    WMError SetWatermarkImageForApp(const std::shared_ptr<Media::PixelMap>& pixelMap,
+        std::string& watermarkName) override;
+    WMError RecoverWatermarkImageForApp(const std::string& watermarkName) override;
     WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) override;
     WSError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId) override;
     void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage,
@@ -169,6 +173,7 @@ public:
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
     WMError UnregisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey, uint32_t interestInfo,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
+    WMError RecoverWindowPropertyChangeFlag(uint32_t observedFlags, uint32_t interestedFlags) override;
     WMError AnimateTo(int32_t windowId, const WindowAnimationProperty& animationProperty,
         const WindowAnimationOption& animationOption) override;
     WMError CreateUIEffectController(const sptr<IUIEffectControllerClient>& controllerClient,

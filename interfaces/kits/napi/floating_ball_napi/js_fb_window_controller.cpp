@@ -363,40 +363,40 @@ napi_value JsFbController::CheckParams(napi_env env, const FbOption& option)
 {
     if (option.GetTemplate() < static_cast<uint32_t>(FloatingBallTemplate::STATIC) ||
         option.GetTemplate() >= static_cast<uint32_t>(FloatingBallTemplate::END)) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "template %{public}d is invalid.", option.GetTemplate());
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Template %{public}d is invalid", option.GetTemplate());
         napi_throw(env, AbilityRuntime::CreateJsError(env,
-            static_cast<int32_t>(WmErrorCode::WM_ERROR_FB_PARAM_INVALID), "template is invalid."));
+            static_cast<int32_t>(WmErrorCode::WM_ERROR_FB_PARAM_INVALID), "Template is invalid."));
         return nullptr;
     }
     if (option.GetTitle().length() < TITLE_MIN_LEN || option.GetTitle().length() > TITLE_MAX_LEN) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "title length Exceed the limit %{public}zu.", option.GetTitle().length());
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Title length Exceed the limit %{public}zu", option.GetTitle().length());
         napi_throw(env, AbilityRuntime::CreateJsError(env,
-            static_cast<int32_t>(WmErrorCode::WM_ERROR_FB_PARAM_INVALID), "title length Exceed the limit"));
+            static_cast<int32_t>(WmErrorCode::WM_ERROR_FB_PARAM_INVALID), "Title length Exceed the limit"));
         return nullptr;
     }
     if (option.GetContent().length() > CONTENT_MAX_LEN) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "content length Exceed the limit %{public}zu.", option.GetContent().length());
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Content length Exceed the limit %{public}zu", option.GetContent().length());
         napi_throw(env, AbilityRuntime::CreateJsError(env,
-            static_cast<int32_t>(WmErrorCode::WM_ERROR_FB_PARAM_INVALID), "content length Exceed the limit"));
+            static_cast<int32_t>(WmErrorCode::WM_ERROR_FB_PARAM_INVALID), "Content length Exceed the limit"));
         return nullptr;
     }
     if (option.GetIcon() != nullptr && option.GetIcon()->GetByteCount() > PIXEL_MAP_MAX_SIZE) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "icon size Exceed the limit %{public}d.", option.GetIcon()->GetByteCount());
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Icon size Exceed the limit %{public}d", option.GetIcon()->GetByteCount());
         napi_throw(env, AbilityRuntime::CreateJsError(env,
-            static_cast<int32_t>(WmErrorCode::WM_ERROR_FB_PARAM_INVALID), "icon size Exceed the limit"));
+            static_cast<int32_t>(WmErrorCode::WM_ERROR_FB_PARAM_INVALID), "Icon size Exceed the limit"));
         return nullptr;
     }
     if (!option.GetBackgroundColor().empty() && !ColorParser::IsValidColorNoAlpha(option.GetBackgroundColor())) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "backgroundColor is invalid %{public}s.", option.GetBackgroundColor().c_str());
+        TLOGE(WmsLogTag::WMS_SYSTEM, "BackgroundColor is invalid");
         napi_throw(env, AbilityRuntime::CreateJsError(env,
-            static_cast<int32_t>(WmErrorCode::WM_ERROR_FB_PARAM_INVALID), "backgroundColor is invalid"));
+            static_cast<int32_t>(WmErrorCode::WM_ERROR_FB_PARAM_INVALID), "BackgroundColor is invalid"));
         return nullptr;
     }
     if (option.GetTemplate() == static_cast<uint32_t>(FloatingBallTemplate::STATIC) &&
         option.GetIcon() == nullptr) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "template %{public}u need icon.", option.GetTemplate());
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Template %{public}u need icon", option.GetTemplate());
         napi_throw(env, AbilityRuntime::CreateJsError(env,
-            static_cast<int32_t>(WmErrorCode::WM_ERROR_FB_PARAM_INVALID), "current template need icon"));
+            static_cast<int32_t>(WmErrorCode::WM_ERROR_FB_PARAM_INVALID), "Current template need icon"));
         return nullptr;
     }
     return NapiGetUndefined(env);

@@ -207,6 +207,7 @@ public:
      * @brief Provide ability of setting virtual screen as primary for no-screen device.
      *
      * @param screenId ScreenId used in virtual screen.
+     * @return set virtual screen as default screen success or not.
     */
     bool SetVirtualScreenAsDefault(ScreenId screenId);
 
@@ -696,6 +697,13 @@ public:
     void SetFoldDisplayMode(const FoldDisplayMode mode);
 
     /**
+     * @brief Change the display mode of the foldable device asynchronously.
+     *
+     * @param mode target display mode to change.
+     */
+    void SetFoldDisplayModeAsync(const FoldDisplayMode mode);
+
+    /**
      * @brief Change the display mode of the foldable device from js.
      *
      * @param mode target display mode to change.
@@ -748,6 +756,22 @@ public:
     bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId);
 
     /**
+     * @brief get to freeze status with specified pid list
+     *
+     * @param pidList Indicates the calling pid
+     * @param isProxy value is true indicates process status is freeze
+     * @param DM_OK means process status update success, others means update failed.
+    */
+    DMError ProxyForFreeze(std::set<int32_t> pidList, bool isProxy);
+
+    /**
+     * @brief reset all process freeze status
+     *
+     * @param DM_OK means process status update success, others means update failed.
+    */
+    DMError ResetAllFreezeStatus();
+
+    /**
      * @brief Set virtual screen black list to RS.
      *
      * @param screenId ScreenId used in virtual screen.
@@ -772,22 +796,6 @@ public:
      * @param screenId ScreenId used in virtual screen.
     */
     void DisablePowerOffRenderControl(ScreenId screenId);
-
-    /**
-     * @brief get to freeze status with specified pid list
-     *
-     * @param pidList Indicates the calling pid
-     * @param isProxy value is true indicates process status is freeze
-     * @param DM_OK means process status update success, others means update failed.
-    */
-    DMError ProxyForFreeze(std::set<int32_t> pidList, bool isProxy);
-
-    /**
-     * @brief reset all process freeze status
-     *
-     * @param DM_OK means process status update success, others means update failed.
-    */
-    DMError ResetAllFreezeStatus();
 
     /**
      * @brief get all display physical resolution
@@ -900,7 +908,7 @@ public:
      * @brief Convert a relative position to a global position
      *
      * @param relativePosition Position relative to current display
-     * @param position Global position convert from  relativePosition
+     * @param position Global position converted from  relativePosition
      * @return DM_OK means process convert position success, others means convert failed.
      */
     DMError ConvertRelativeCoordinateToGlobal(const RelativePosition& relativePosition, Position& position);
@@ -909,17 +917,17 @@ public:
      * @brief Convert a global position to a relative position
      *
      * @param globalPosition Global position
-     * @param relativePosition Relative position convert from globalPosition
+     * @param relativePosition Relative position converted from globalPosition
      * @return DM_OK means process convert position success, others means convert failed.
      */
     DMError ConvertGlobalCoordinateToRelative(const Position& globalPosition, RelativePosition& relativePosition);
 
     /**
-     * @brief Convert a global position to a relative position
+     * @brief Convert a global position to a relative position based on specifed ID
      *
      * @param globalPosition Global position
      * @param displayId DisplayId of current display
-     * @param relativePosition Relative position convert from globalPosition
+     * @param relativePosition Relative position converted from globalPosition
      * @return DM_OK means process convert position success, others means convert failed.
      */
     DMError ConvertGlobalCoordinateToRelativeWithDisplayId(const Position& globalPosition, DisplayId displayId,
@@ -938,7 +946,6 @@ private:
     class Impl;
     std::recursive_mutex mutex_;
     sptr<Impl> pImpl_;
-    int32_t rotationIndex_ = 0;
 };
 } // namespace OHOS::Rosen
 

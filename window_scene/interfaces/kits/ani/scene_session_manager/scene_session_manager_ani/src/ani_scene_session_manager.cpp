@@ -14,12 +14,14 @@
  */
 
 #include "ani_scene_session_manager.h"
-#include "ani_scene_session_utils.h"
-#include "ani.h"
-#include "root_scene.h"
-#include "wm_common.h"
-#include "window_manager_hilog.h"
+
 #include <ui_content.h>
+
+#include "ani.h"
+#include "ani_scene_session_utils.h"
+#include "root_scene.h"
+#include "window_manager_hilog.h"
+#include "wm_common.h"
 
 namespace OHOS {
 namespace Rosen {

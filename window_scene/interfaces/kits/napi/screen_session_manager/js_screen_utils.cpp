@@ -238,6 +238,29 @@ napi_value JsScreenUtils::CreateJsScreenModeChangeEvent(napi_env env)
     return objValue;
 }
 
+napi_value JsScreenUtils::CreateJsFoldDisplayMode(napi_env env)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::DMS, "Failed to create object!");
+        return NapiGetUndefined(env);
+    }
+    napi_set_named_property(env, objValue, "UNKNOWN", CreateJsValue(env,
+        static_cast<int32_t>(FoldDisplayMode::UNKNOWN)));
+    napi_set_named_property(env, objValue, "FULL", CreateJsValue(env,
+        static_cast<int32_t>(FoldDisplayMode::FULL)));
+    napi_set_named_property(env, objValue, "MAIN", CreateJsValue(env,
+        static_cast<int32_t>(FoldDisplayMode::MAIN)));
+    napi_set_named_property(env, objValue, "SUB", CreateJsValue(env,
+        static_cast<int32_t>(FoldDisplayMode::SUB)));
+    napi_set_named_property(env, objValue, "COORDINATION", CreateJsValue(env,
+        static_cast<int32_t>(FoldDisplayMode::COORDINATION)));
+    napi_set_named_property(env, objValue, "GLOBAL_FULL", CreateJsValue(env,
+        static_cast<int32_t>(FoldDisplayMode::GLOBAL_FULL)));
+    return objValue;
+}
+
 bool ConvertRRectFromJs(napi_env env, napi_value jsObject, RRect& bound)
 {
     napi_value jsLeft = nullptr, jsTop = nullptr, jsWidth = nullptr, jsHeight = nullptr, jsRadius = nullptr;

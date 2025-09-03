@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-
 #include "ani_window_stage.h"
 
 #include <memory>
@@ -22,8 +21,8 @@
 #include "ani_window.h"
 #include "ani_window_manager.h"
 #include "ani_window_utils.h"
-#include "window_manager_hilog.h"
 #include "permission.h"
+#include "window_manager_hilog.h"
 #include "window_scene.h"
 
 using OHOS::Rosen::WindowScene;
@@ -33,7 +32,7 @@ namespace Rosen {
 
 namespace {
 /* used for free, ani has no destructor right now, only free when aniObj freed */
-static std::map<ani_object, AniWindowStage*> localObjs;
+static std::map<ani_object, AniWindowStage*> g_localObjs;
 } // namespace
 
 AniWindowStage::AniWindowStage(const std::shared_ptr<Rosen::WindowScene>& windowScene)
@@ -45,18 +44,44 @@ AniWindowStage::~AniWindowStage()
     TLOGE(WmsLogTag::DEFAULT, "[ANI] Ani WindowStage died");
 }
 
-void AniWindowStage::LoadContent(ani_env* env, const std::string& content)
+void AniWindowStage::LoadContent(ani_env* env, ani_object obj, ani_long nativeObj, ani_string path,
+    ani_object storage)
 {
-    auto weakScene = windowScene_.lock();
-    sptr<Window> win = weakScene ? weakScene->GetMainWindow() : nullptr;
-    if (win == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "[NAPI]Get window failed");
-        return;
+    TLOGI(WmsLogTag::WMS_LIFE, "[ANI]");
+    AniWindowStage* aniWindowStage = reinterpret_cast<AniWindowStage*>(nativeObj);
+    if (aniWindowStage != nullptr) {
+        aniWindowStage->OnLoadContent(env, path, storage);
+    } else {
+        TLOGE(WmsLogTag::WMS_LIFE, "[ANI] aniWindowStage is nullptr");
     }
-    win->NapiSetUIContent(content, env, nullptr);
 }
 
-ani_object AniWindowStage::GetMainWindow(ani_env* env)
+void AniWindowStage::OnLoadContent(ani_env* env, ani_string path, ani_object storage)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "[ANI]");
+    auto windowScene = GetWindowScene().lock();
+    if (windowScene == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[ANI]windowScene is nullptr!");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    auto mainWindow = windowScene->GetMainWindow();
+    if (mainWindow == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[ANI] mainWindow is nullptr!");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    std::string contentPath;
+    AniWindowUtils::GetStdString(env, path, contentPath);
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(mainWindow->NapiSetUIContent(contentPath, env, storage));
+    TLOGI(WmsLogTag::WMS_LIFE, "[ANI] Window [%{public}u, %{public}s] load content end, ret=%{public}d",
+        mainWindow->GetWindowId(), mainWindow->GetWindowName().c_str(), ret);
+    if (ret != WmErrorCode::WM_OK) {
+        AniWindowUtils::AniThrowError(env, ret, "Window load content failed");
+    }
+}
+
+ani_ref AniWindowStage::GetMainWindow(ani_env* env)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI] Get main window");
     std::shared_ptr<WindowScene> weakScene = windowScene_.lock();
@@ -78,29 +103,20 @@ ani_object AniWindowStage::GetMainWindow(ani_env* env)
 
 void DropWindowStageByAni(ani_object aniObj)
 {
-    auto obj = localObjs.find(reinterpret_cast<ani_object>(aniObj));
-    if (obj != localObjs.end()) {
+    auto obj = g_localObjs.find(reinterpret_cast<ani_object>(aniObj));
+    if (obj != g_localObjs.end()) {
         delete obj->second;
     }
-    localObjs.erase(obj);
+    g_localObjs.erase(obj);
 }
 
 AniWindowStage* GetWindowStageFromAni(void* aniObj)
 {
-    auto obj = localObjs.find(reinterpret_cast<ani_object>(aniObj));
-    if (obj == localObjs.end()) {
+    auto obj = g_localObjs.find(reinterpret_cast<ani_object>(aniObj));
+    if (obj == g_localObjs.end()) {
         return nullptr;
     }
     return obj->second;
-}
-
-static void GetStdString(ani_env* env, ani_string str, std::string& result)
-{
-    ani_size sz {};
-    env->String_GetUTF8Size(str, &sz);
-    result.resize(sz + 1);
-    env->String_GetUTF8SubString(str, 0, sz, result.data(), result.size(), &sz);
-    result.resize(sz);
 }
 
 ani_object CreateAniWindowStage(ani_env* env, std::shared_ptr<Rosen::WindowScene>& windowScene)
@@ -120,11 +136,6 @@ __attribute__((no_sanitize("cfi")))
     }
 
     std::unique_ptr<AniWindowStage> windowStage = std::make_unique<AniWindowStage>(windowScene);
-    ani_field contextField;
-    if ((ret = env->Class_FindField(cls, "nativeObj", &contextField)) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] get field fail %{public}u", ret);
-        return nullptr;
-    }
 
     ani_method initFunc = nullptr;
     if ((ret = env->Class_FindMethod(cls, "<ctor>", ":V", &initFunc)) != ANI_OK) {
@@ -138,11 +149,11 @@ __attribute__((no_sanitize("cfi")))
     }
     ani_method setObjFunc = nullptr;
     if ((ret = env->Class_FindMethod(cls, "setNativeObj", "J:V", &setObjFunc)) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] get ctor fail %{public}u", ret);
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] call setNativeObj fail %{public}u", ret);
         return nullptr;
     }
     env->Object_CallMethod_Void(obj, setObjFunc, reinterpret_cast<ani_long>(windowStage.get()));
-    localObjs.insert(std::pair(obj, windowStage.release()));
+    g_localObjs.insert(std::pair(obj, windowStage.release()));
     return obj;
 }
 
@@ -230,17 +241,6 @@ void AniWindowStage::OnSetShowOnLockScreen(ani_env* env, ani_boolean showOnLockS
 }  // namespace Rosen
 }  // namespace OHOS
 
-static ani_int WindowStageLoadContent(ani_env* env, ani_object obj,
-    ani_long nativeObj, ani_string content)
-{
-    using namespace OHOS::Rosen;
-    AniWindowStage* windowStage = reinterpret_cast<AniWindowStage*>(nativeObj);
-    std::string contentStr;
-    GetStdString(env, content, contentStr);
-    windowStage->LoadContent(env, contentStr);
-    return (ani_int)0u;
-}
-
 static ani_object WindowStageCreate(ani_env* env, ani_long scene)
 {
     using namespace OHOS::Rosen;
@@ -248,7 +248,7 @@ static ani_object WindowStageCreate(ani_env* env, ani_long scene)
     return CreateAniWindowStage(env, scenePtr); // just for test
 }
 
-static ani_object WindowGetMainWindow(ani_env* env, ani_object obj, ani_long nativeObj)
+static ani_ref WindowGetMainWindow(ani_env* env, ani_object obj, ani_long nativeObj)
 {
     using namespace OHOS::Rosen;
     TLOGD(WmsLogTag::DEFAULT, "[ANI]");
@@ -277,7 +277,9 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_NOT_FOUND;
     }
     std::array methods = {
-        ani_native_function {"loadContent", "JLstd/core/String;:I", reinterpret_cast<void *>(WindowStageLoadContent)},
+        ani_native_function {"loadContentSync",
+            "JLstd/core/String;Larkui/stateManagement/storages/localStorage/LocalStorage;:V",
+            reinterpret_cast<void *>(AniWindowStage::LoadContent)},
         ani_native_function {"disableWindowDecorSync", nullptr,
             reinterpret_cast<void *>(AniWindowStage::DisableWindowDecor)},
         ani_native_function {"setShowOnLockScreenSync",

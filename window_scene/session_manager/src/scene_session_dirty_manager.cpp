@@ -15,6 +15,7 @@
 
 #include "scene_session_dirty_manager.h"
 
+#include <cmath>
 #include <parameters.h>
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session_manager/include/scene_session_manager.h"
@@ -23,10 +24,11 @@
 
 namespace OHOS::Rosen {
 namespace {
-constexpr float DIRECTION0 = 0 ;
-constexpr float DIRECTION90 = 90 ;
-constexpr float DIRECTION180 = 180 ;
-constexpr float DIRECTION270 = 270 ;
+constexpr float DIRECTION0 = 0;
+constexpr float DIRECTION90 = 90;
+constexpr float DIRECTION180 = 180;
+constexpr float DIRECTION270 = 270;
+constexpr float DIRECTION360 = 360;
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SceneSessionDirtyManager"};
 constexpr unsigned int POINTER_CHANGE_AREA_COUNT = 8;
 constexpr int POINTER_CHANGE_AREA_SIXTEEN = 16;
@@ -39,8 +41,10 @@ static int32_t g_screenRotationOffset = system::GetIntParameter<int32_t>("const.
 constexpr float ZORDER_UIEXTENSION_INDEX = 0.1;
 constexpr int WINDOW_NAME_TYPE_UNKNOWN = 0;
 constexpr int WINDOW_NAME_TYPE_THUMBNAIL = 1;
+constexpr int WINDOW_NAME_TYPE_VOICEINPUT = 2;
 const std::string SCREENSHOT_WINDOW_NAME_PREFIX = "ScreenShotWindow";
 const std::string PREVIEW_WINDOW_NAME_PREFIX = "PreviewWindow";
+const std::string VOICEINPUT_WINDOW_NAME_PREFIX = "__VoiceHardwareInput";
 } // namespace
 
 static bool operator==(const MMI::Rect left, const MMI::Rect right)
@@ -175,6 +179,33 @@ void SceneSessionDirtyManager::CalNotRotateTransform(const sptr<SceneSession>& s
                          .Scale(scale, sceneSession->GetPivotX(), sceneSession->GetPivotY()).Inverse();
 }
 
+inline float PositiveFmod(float x, float y)
+{
+    float result = std::fmod(x, y);
+    return result < 0 ? (result + y) : result;
+}
+
+void SceneSessionDirtyManager::CalSpecialNotRotateTransform(const sptr<SceneSession>& sceneSession,
+    ScreenProperty& screenProperty, Matrix3f& transform, bool useUIExtension) const
+{
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr");
+        return;
+    }
+
+    MMI::Direction displayRotation =
+        ConvertDegreeToMMIRotation(PositiveFmod(screenProperty.GetPhysicalRotation() -
+        screenProperty.GetScreenComponentRotation() - sceneSession->GetCurrentRotation(), DIRECTION360));
+    float width = screenProperty.GetBounds().rect_.GetWidth();
+    float height = screenProperty.GetBounds().rect_.GetHeight();
+    Vector2f scale(sceneSession->GetScaleX(), sceneSession->GetScaleY());
+    Vector2f offset = sceneSession->GetSessionGlobalPosition(useUIExtension);
+    float rotate = 0.0f;
+    Vector2f translate = CalRotationToTranslate(displayRotation, width, height, offset, rotate);
+    transform = transform.Translate(translate).Rotate(rotate)
+                         .Scale(scale, sceneSession->GetPivotX(), sceneSession->GetPivotY()).Inverse();
+}
+
 void SceneSessionDirtyManager::CalTransform(const sptr<SceneSession>& sceneSession, Matrix3f& transform,
     const SingleHandData& singleHandData, bool useUIExtension) const
 {
@@ -189,12 +220,41 @@ void SceneSessionDirtyManager::CalTransform(const sptr<SceneSession>& sceneSessi
         transform = transform.Scale({singleHandData.scaleX, singleHandData.scaleY},
                                     singleHandData.pivotX, singleHandData.pivotY);
     }
-    if (isRotate || !sceneSession->GetSessionInfo().isSystem_ ||
-        static_cast<MMI::DisplayMode>(displayMode) == MMI::DisplayMode::FULL ||
-        displayMode == FoldDisplayMode::GLOBAL_FULL ||
-        (static_cast<MMI::DisplayMode>(displayMode) == MMI::DisplayMode::MAIN &&
-        (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() ||
-        FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()))) {
+ 
+    auto sessionProperty = sceneSession->GetSessionProperty();
+    if (sessionProperty == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "sessionProperty is nullptr");
+        return;
+    }
+    auto displayId = sessionProperty->GetDisplayId();
+    std::map<ScreenId, ScreenProperty> screensProperties =
+        Rosen::ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
+    if (screensProperties.find(displayId) == screensProperties.end()) {
+        TLOGE(WmsLogTag::WMS_EVENT, "screensProperties find displayId failed");
+        return;
+    }
+    auto screenProperty = screensProperties[displayId];
+    bool isRotateWindow = screenProperty.GetPhysicalRotation() - screenProperty.GetScreenComponentRotation() !=
+        sceneSession->GetCurrentRotation();
+    bool isSystem = sceneSession->GetSessionInfo().isSystem_;
+    bool displayModeIsFull = static_cast<MMI::DisplayMode>(displayMode) == MMI::DisplayMode::FULL;
+    bool displayModeIsGlobalFull = displayMode == FoldDisplayMode::GLOBAL_FULL;
+    bool displayModeIsMain = static_cast<MMI::DisplayMode>(displayMode) == MMI::DisplayMode::MAIN;
+    bool foldScreenStateInternel = FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() ||
+        FoldScreenStateInternel::IsSecondaryDisplayFoldDevice();
+    TLOGD(WmsLogTag::WMS_EVENT, "wid:%{public}d, isRotate:%{public}d, isSystem:%{public}d,"
+        " displayModeIsFull:%{public}d, displayModeIsGlobalFull:%{public}d, displayModeIsMain:%{public}d,"
+        " foldScreenStateInternel:%{public}d, isRotateWindow:%{public}d",
+        sceneSession->GetWindowId(), isRotate, isSystem, displayModeIsFull, displayModeIsGlobalFull,
+        displayModeIsMain, foldScreenStateInternel, isRotateWindow);
+
+    if (isRotate || !isSystem || displayModeIsFull || displayModeIsGlobalFull ||
+        (displayModeIsMain && foldScreenStateInternel)) {
+        if (isRotateWindow && isSystem && ((displayModeIsMain && foldScreenStateInternel) ||
+            (displayModeIsFull && FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()))) {
+            CalSpecialNotRotateTransform(sceneSession, screenProperty, transform, useUIExtension);
+            return;
+        }
         Vector2f scale(sceneSession->GetScaleX(), sceneSession->GetScaleY());
         Vector2f translate = sceneSession->GetSessionGlobalPosition(useUIExtension);
         if (useUIExtension && UpdateModalExtensionInCompatStatus(sceneSession, transform)) {
@@ -801,6 +861,8 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
     };
     if (startsWith(windowName, SCREENSHOT_WINDOW_NAME_PREFIX) || startsWith(windowName, PREVIEW_WINDOW_NAME_PREFIX)) {
         windowNameType = WINDOW_NAME_TYPE_THUMBNAIL;
+    } else if (startsWith(windowName, VOICEINPUT_WINDOW_NAME_PREFIX)) {
+        windowNameType = WINDOW_NAME_TYPE_VOICEINPUT;
     }
     auto pixelMap = windowSessionProperty->GetWindowMask();
     MMI::WindowInfo windowInfo = {

@@ -1313,9 +1313,9 @@ HWTEST_F(WindowSceneSessionImplTest2, RaiseMainWindowAboveTarget_SpecialHierarch
     ret = sourceSceneSession->RaiseMainWindowAboveTarget(112);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
 
-    modalitySubWindow->state_ = WindowState::STATE_HIDDEN;
+    sourceSceneSession->subWindowSessionMap_[sourceSceneSession->GetPersistentId()].pop_back();
     ret = sourceSceneSession->RaiseMainWindowAboveTarget(112);
-    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+    EXPECT_EQ(WMError::WM_OK, ret);
 
     WindowSceneSessionImpl::windowSessionMap_.erase(sourceSceneSession->GetWindowName());
     WindowSceneSessionImpl::windowSessionMap_.erase(targetSceneSession->GetWindowName());

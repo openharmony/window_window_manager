@@ -57,6 +57,8 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleGetFocusSessionToken(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_FOCUS_SESSION_ELEMENT):
             return HandleGetFocusSessionElement(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_IS_FOCUS_WINDOW_PARENT):
+            return HandleIsFocusWindowParent(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_REGISTER_SESSION_LISTENER):
             return HandleRegisterSessionListener(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UNREGISTER_SESSION_LISTENER):
@@ -226,7 +228,12 @@ int SceneSessionManagerLiteStub::HandlePendingSessionToForeground(MessageParcel&
         WLOGFE("token is nullptr");
         return ERR_INVALID_DATA;
     }
-    WSError errCode = PendingSessionToForeground(token);
+    int32_t windowMode = 0;
+    if (!data.ReadInt32(windowMode)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "read windowMode fail");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = PendingSessionToForeground(token, windowMode);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -462,6 +469,28 @@ int SceneSessionManagerLiteStub::HandleGetFocusSessionElement(MessageParcel& dat
     WSError errCode = GetFocusSessionElement(element, displayId);
     reply.WriteParcelable(&element);
     reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleIsFocusWindowParent(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_FOCUS, "run");
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    if (token == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Token is nullptr");
+        return ERR_INVALID_DATA;
+    }
+    bool isParent = false;
+    WSError errCode = IsFocusWindowParent(token, isParent);
+    TLOGD(WmsLogTag::WMS_FOCUS, "isParent: %{public}d", isParent);
+    if (!reply.WriteBool(isParent)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Write isParent failed.");
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Write errCode failed.");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 
@@ -1047,13 +1076,12 @@ int SceneSessionManagerLiteStub::HandleNotifyAppUseControlList(MessageParcel& da
     std::vector<AppUseControlInfo> controlList;
     controlList.resize(size);
     for (int32_t i = 0; i < size; i++) {
-        if (!data.ReadString(controlList[i].bundleName_) ||
-            !data.ReadInt32(controlList[i].appIndex_) ||
-            !data.ReadBool(controlList[i].isNeedControl_) ||
-            !data.ReadBool(controlList[i].isControlRecentOnly_)) {
+        std::shared_ptr<AppUseControlInfo> controlInfo(data.ReadParcelable<AppUseControlInfo>());
+        if (controlInfo == nullptr) {
             TLOGE(WmsLogTag::WMS_LIFE, "Read controlList failed");
             return ERR_INVALID_DATA;
         }
+        controlList.push_back(*controlInfo);
     }
 
     WSError ret = NotifyAppUseControlList(type, userId, controlList);

@@ -429,6 +429,8 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
         CreateJsValue(env, static_cast<int32_t>(session->IsSystemKeyboard())));
     napi_set_named_property(env, objValue, "bundleName",
         CreateJsValue(env, session->GetSessionInfo().bundleName_));
+    napi_set_named_property(env, objValue, "windowName",
+        CreateJsValue(env, session->GetWindowName()));
     napi_set_named_property(env, objValue, "zLevel",
         CreateJsValue(env, static_cast<int32_t>(session->GetSubWindowZLevel())));
     napi_set_named_property(env, objValue, "subWindowOutlineEnabled",
@@ -678,13 +680,14 @@ void JsSceneSession::ProcessBatchPendingSceneSessionsActivationRegister()
     }
     const char* const where = __func__;
     session->SetBatchPendingSessionsActivationEventListener(
-        [weakThis = wptr(this), where](std::vector<std::shared_ptr<SessionInfo>>& sessionInfos) {
+        [weakThis = wptr(this), where](std::vector<std::shared_ptr<SessionInfo>>& sessionInfos,
+        const std::vector<std::shared_ptr<PendingSessionActivationConfig>>& configs) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s jsSceneSession is null", where);
             return;
         }
-        jsSceneSession->BatchPendingSessionsActivation(sessionInfos);
+        jsSceneSession->BatchPendingSessionsActivation(sessionInfos, configs);
     });
     TLOGD(WmsLogTag::WMS_LIFE, "success");
 }
@@ -4706,6 +4709,7 @@ void JsSceneSession::PendingSessionActivationInner(std::shared_ptr<SessionInfo> 
                 sessionInfo->persistentId_, LifeCycleTaskType::START);
             return;
         }
+
         napi_value jsSessionInfo = CreateJsSessionInfo(env, *sessionInfo);
         if (jsSessionInfo == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "target session info is nullptr");
@@ -4749,9 +4753,52 @@ napi_value JsSceneSession::CreateSessionInfosNapiValue(
     }
     return arrayValue;
 }
- 
-void JsSceneSession::BatchPendingSessionsActivation(const std::vector<std::shared_ptr<SessionInfo>>& sessionInfos)
+
+napi_value JsSceneSession::CreatePendingInfosNapiValue(napi_env env,
+    const std::vector<std::shared_ptr<SessionInfo>>& sessionInfos,
+    const std::vector<std::shared_ptr<PendingSessionActivationConfig>>& configs)
 {
+    if (configs.empty()) {
+        return CreateSessionInfosNapiValue(env, sessionInfos);
+    }
+
+    if (sessionInfos.size() != configs.size()) {
+        TLOGE(WmsLogTag::WMS_LIFE,
+            "The caller Param is illegal parameters.sessionInfo: %{public}zu configs: %{public}zu",
+            sessionInfos.size(), configs.size());
+        return NapiGetUndefined(env);
+    }
+
+    napi_value arrayValue = nullptr;
+    napi_create_array_with_length(env, sessionInfos.size(), &arrayValue);
+    if (arrayValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to create napi array");
+        return NapiGetUndefined(env);
+    }
+ 
+    int32_t index = 0;
+    for (size_t i = 0; i < sessionInfos.size(); i++) {
+        napi_value objValue = nullptr;
+        napi_create_object(env, &objValue);
+        if (objValue == nullptr) {
+            TLOGE(WmsLogTag::WMS_LIFE, "failed to create napi object");
+            return NapiGetUndefined(env);
+        }
+        napi_set_element(env, arrayValue, index++, CreateJsSessionInfo(env, *(sessionInfos[i]), configs[i]));
+    }
+    return arrayValue;
+}
+ 
+void JsSceneSession::BatchPendingSessionsActivation(const std::vector<std::shared_ptr<SessionInfo>>& sessionInfos,
+    const std::vector<std::shared_ptr<PendingSessionActivationConfig>>& configs)
+{
+    if (!configs.empty() && sessionInfos.size() != configs.size()) {
+        TLOGE(WmsLogTag::WMS_LIFE,
+            "The caller Param is illegal parameters.sessionInfo: %{public}zu configs: %{public}zu",
+            sessionInfos.size(), configs.size());
+        return;
+    }
+
     std::vector<sptr<SceneSession>> sceneSessions;
     for (auto& info : sessionInfos) {
         if (info == nullptr) {
@@ -4772,14 +4819,15 @@ void JsSceneSession::BatchPendingSessionsActivation(const std::vector<std::share
                 "isCalledRightlyByCallerId result is: %{public}d", info->isCalledRightlyByCallerId_);
         }
     }
-    BatchPendingSessionsActivationInner(sessionInfos);
+    BatchPendingSessionsActivationInner(sessionInfos, configs);
 }
 
-void JsSceneSession::BatchPendingSessionsActivationInner(const std::vector<std::shared_ptr<SessionInfo>>& sessionInfos)
+void JsSceneSession::BatchPendingSessionsActivationInner(const std::vector<std::shared_ptr<SessionInfo>>& sessionInfos,
+    const std::vector<std::shared_ptr<PendingSessionActivationConfig>>& configs)
 {
     const char* const where = __func__;
     auto task = [weakThis = wptr(this), persistentId = persistentId_, weakSession = weakSession_,
-        sessionInfos, env = env_, where] {
+        sessionInfos, configs, env = env_, where] {
         auto session = weakSession.promote();
         if (session == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "session is nullptr");
@@ -4795,7 +4843,7 @@ void JsSceneSession::BatchPendingSessionsActivationInner(const std::vector<std::
             TLOGNE(WmsLogTag::WMS_LIFE, "jsCallBack is nullptr");
             return;
         }
-        napi_value jsSessionInfos = CreateSessionInfosNapiValue(env, sessionInfos);
+        napi_value jsSessionInfos = CreatePendingInfosNapiValue(env, sessionInfos, configs);
         if (jsSessionInfos == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "target session info is nullptr");
             return;
@@ -5116,7 +5164,6 @@ void JsSceneSession::PendingSessionToBackground(const SessionInfo& info, const B
 {
     TLOGI(WmsLogTag::WMS_LIFE, "bundleName=%{public}s, abilityName=%{public}s, shouldBackToCaller=%{public}d",
         info.bundleName_.c_str(), info.abilityName_.c_str(), params.shouldBackToCaller);
-
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
     auto task = [weakThis = wptr(this), persistentId = persistentId_, sessionInfo, env = env_, params] {
         auto jsSceneSession = weakThis.promote();
@@ -5147,7 +5194,6 @@ void JsSceneSession::PendingSessionToBackgroundForDelegator(const SessionInfo& i
     TLOGI(WmsLogTag::WMS_LIFE,
         "bundleName=%{public}s, abilityName=%{public}s, shouldBackToCaller=%{public}d",
         info.bundleName_.c_str(), info.abilityName_.c_str(), shouldBackToCaller);
-
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
     auto task = [weakThis = wptr(this), persistentId = persistentId_, sessionInfo, env = env_, shouldBackToCaller] {
         auto jsSceneSession = weakThis.promote();

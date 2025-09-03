@@ -715,54 +715,51 @@ HWTEST_F(WindowPatternSnapshotTest, GetWindowStatus, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetSessionStatus
- * @tc.desc: GetSessionStatus Test
+ * @tc.name: GetSessionSnapshotStatus
+ * @tc.desc: GetSessionSnapshotStatus Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPatternSnapshotTest, GetSessionStatus, TestSize.Level1)
+HWTEST_F(WindowPatternSnapshotTest, GetSessionSnapshotStatus, TestSize.Level1)
 {
     SessionInfo info;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->capacity_ = defaultCapacity;
-    auto ret = sceneSession->GetSessionStatus();
+    auto ret = sceneSession->GetSessionSnapshotStatus();
     EXPECT_EQ(ret, defaultStatus);
 
     sceneSession->capacity_ = maxCapacity;
     sceneSession->state_ = SessionState::STATE_DISCONNECT;
     sceneSession->currentRotation_ = 0;
-    sceneSession->GetSessionStatus();
+    sceneSession->GetSessionSnapshotStatus();
 
     sceneSession->state_ = SessionState::STATE_ACTIVE;
-    ret = sceneSession->GetSessionStatus();
+    ret = sceneSession->GetSessionSnapshotStatus();
     EXPECT_EQ(ret.second, 0);
+
+    BackgroundReason reason = BackgroundReason::EXPAND_TO_FOLD_SINGLE_POCKET;
+    ret = sceneSession->GetSessionSnapshotStatus(reason);
+    EXPECT_EQ(ret.first, 1);
 }
 
 /**
- * @tc.name: GetWindowOrientation
- * @tc.desc: GetWindowOrientation Test
+ * @tc.name: GetWindowSnapshotOrientation
+ * @tc.desc: GetWindowSnapshotOrientation Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPatternSnapshotTest, GetWindowOrientation, TestSize.Level1)
+HWTEST_F(WindowPatternSnapshotTest, GetWindowSnapshotOrientation, TestSize.Level1)
 {
     SessionInfo info;
     info.screenId_ = 0;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    auto ret = sceneSession->GetWindowOrientation();
-    EXPECT_EQ(ret, DisplayOrientation::PORTRAIT);
+    auto ret = sceneSession->GetWindowSnapshotOrientation();
+    EXPECT_EQ(ret, 0);
 
     sceneSession->capacity_ = maxCapacity;
-    ScreenId screenId = 0;
-    sptr<ScreenSession> screenSession = nullptr;
-    screenSession = new ScreenSession(0, ScreenProperty(), 0);
-    ASSERT_NE(screenSession, nullptr);
-    ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(screenId, screenSession);
-
-    sceneSession->GetWindowOrientation();
-    ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
+    sceneSession->GetWindowSnapshotOrientation();
 
     session_->capacity_ = maxCapacity;
-    ret = session_->GetWindowOrientation();
-    EXPECT_EQ(ret, DisplayOrientation::PORTRAIT);
+    ret = session_->GetWindowSnapshotOrientation();
+    EXPECT_EQ(ret, WSSnapshotHelper::GetInstance()->GetWindowRotation());
 }
 
 /**

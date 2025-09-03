@@ -15,6 +15,7 @@
 
 #include "screen_property.h"
 #include <gtest/gtest.h>
+#include "fold_screen_state_internel.h"
 
 // using namespace FRAME_TRACE;
 using namespace testing;
@@ -939,6 +940,35 @@ HWTEST_F(ScreenPropertyTest, SetRotationAndScreenRotationOnly, Function | SmallT
     property->SetRotationAndScreenRotationOnly(Rotation::ROTATION_270);
     ASSERT_EQ(property->GetScreenRotation(), Rotation::ROTATION_270);
     GTEST_LOG_(INFO) << "ScreenPropertyTest: SetRotationAndScreenRotationOnly end";
+}
+
+/**
+ * @tc.name: SetPhysicalTouchBounds
+ * @tc.desc: SetPhysicalTouchBounds
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenPropertyTest, SetPhysicalTouchBounds, TestSize.Level1)
+{
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        GTEST_SKIP();
+    }
+    std::shared_ptr<ScreenProperty> property = std::make_shared<ScreenProperty>();
+    property->physicalTouchBounds_.rect_.width_ = 100;
+    property->physicalTouchBounds_.rect_.height_ = 200;
+    property->rotation_ = 0.0f;
+    property->SetPhysicalTouchBounds(Rotation::ROTATION_0);
+    EXPECT_EQ(property->physicalTouchBounds_.rect_.width_, 200);
+    EXPECT_EQ(property->physicalTouchBounds_.rect_.height_, 100);
+ 
+    property->rotation_ = 90.0f;
+    property->SetPhysicalTouchBounds(Rotation::ROTATION_0);
+    EXPECT_EQ(property->physicalTouchBounds_.rect_.width_, 100);
+    EXPECT_EQ(property->physicalTouchBounds_.rect_.height_, 200);
+ 
+    property->rotation_ = 270.0f;
+    property->SetPhysicalTouchBounds(Rotation::ROTATION_0);
+    EXPECT_EQ(property->physicalTouchBounds_.rect_.width_, 100);
+    EXPECT_EQ(property->physicalTouchBounds_.rect_.height_, 200);
 }
 } // namespace
 } // namespace Rosen

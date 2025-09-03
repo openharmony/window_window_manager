@@ -48,7 +48,7 @@ DMError DisplayManagerLiteProxy::RegisterDisplayManagerAgent(
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    TLOGD(WmsLogTag::DMS, "enter!");
+    TLOGD(WmsLogTag::DMS, "enter");
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
@@ -79,8 +79,7 @@ DMError DisplayManagerLiteProxy::RegisterDisplayManagerAgent(
 }
 
 DMError DisplayManagerLiteProxy::UnregisterDisplayManagerAgent(
-    const sptr<IDisplayManagerAgent>& displayManagerAgent,
-    DisplayManagerAgentType type)
+    const sptr<IDisplayManagerAgent>& displayManagerAgent, DisplayManagerAgentType type)
 {
 #ifdef SCENE_BOARD_ENABLED
     sptr<IRemoteObject> remote = Remote();
@@ -91,7 +90,7 @@ DMError DisplayManagerLiteProxy::UnregisterDisplayManagerAgent(
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    TLOGD(WmsLogTag::DMS, "enter!");
+    TLOGD(WmsLogTag::DMS, "enter");
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
@@ -158,6 +157,32 @@ void DisplayManagerLiteProxy::SetFoldDisplayMode(const FoldDisplayMode displayMo
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken Failed");
+        return;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(displayMode))) {
+        TLOGE(WmsLogTag::DMS, "Write displayMode failed");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCENE_BOARD_SET_FOLD_DISPLAY_MODE),
+                            data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "Send TRANS_ID_SCENE_BOARD_SET_FOLD_DISPLAY_MODE request failed");
+    }
+#endif
+}
+
+void DisplayManagerLiteProxy::SetFoldDisplayModeAsync(const FoldDisplayMode displayMode)
+{
+#ifdef SCENE_BOARD_ENABLED
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGW(WmsLogTag::DMS, "remote is null");
+        return;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::DMS, "WriteInterfaceToken Failed");
         return;
@@ -325,7 +350,7 @@ sptr<CutoutInfo> DisplayManagerLiteProxy::GetCutoutInfo(DisplayId displayId)
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_CUTOUT_INFO),
         data, reply, option) != ERR_NONE) {
-        TLOGW(WmsLogTag::DMS, "GetCutoutInfo failed");
+        TLOGW(WmsLogTag::DMS, "failed");
         return nullptr;
     }
     sptr<CutoutInfo> info = reply.ReadParcelable<CutoutInfo>();
@@ -347,7 +372,7 @@ VirtualScreenFlag DisplayManagerLiteProxy::GetVirtualScreenFlag(ScreenId screenI
 #ifdef SCENE_BOARD_ENABLED
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TLOGE(WmsLogTag::DMS, "GetVirtualScreenFlag: remote is null");
+        TLOGE(WmsLogTag::DMS, "remote is null");
         return VirtualScreenFlag::DEFAULT;
     }
     if (screenId == SCREEN_ID_INVALID) {
@@ -356,12 +381,14 @@ VirtualScreenFlag DisplayManagerLiteProxy::GetVirtualScreenFlag(ScreenId screenI
     MessageOption option(MessageOption::TF_SYNC);
     MessageParcel reply;
     MessageParcel data;
+    TLOGE(WmsLogTag::DMS, "MessageParcel definded");
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DMS, "failed");
         return VirtualScreenFlag::DEFAULT;
     }
+    TLOGE(WmsLogTag::DMS, "WriteInterfaceToken success");
     if (!data.WriteUint64(screenId)) {
-        TLOGE(WmsLogTag::DMS, "Write screenId failed");
+        TLOGE(WmsLogTag::DMS, "Write failed");
         return VirtualScreenFlag::DEFAULT;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_VIRTUAL_SCREEN_FLAG),
@@ -862,7 +889,7 @@ uint32_t DisplayManagerLiteProxy::GetScreenBrightness(uint64_t screenId)
     }
     return reply.ReadUint32();
 #else
-    uint32_t level;
+    uint32_t level = 0;
     ErrCode errCode = GetScreenBrightness(screenId, level);
     if (FAILED(errCode)) {
         TLOGE(WmsLogTag::DMS, "GetScreenBrightness failed, screenId: %{public}" PRIu64 ", errCode: %{public}d",
@@ -967,7 +994,7 @@ DMError DisplayManagerLiteProxy::GetPhysicalScreenIds(std::vector<ScreenId>& scr
         }
     );
     if (!res) {
-        TLOGW(WmsLogTag::DMS, "fail to read SystemBarRegionTints");
+        TLOGW(WmsLogTag::DMS, "read physical screen ids failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     return ret;
@@ -1035,8 +1062,9 @@ sptr<ScreenInfo> DisplayManagerLiteProxy::GetScreenInfoById(ScreenId screenId)
         return nullptr;
     }
     for (auto& mode : info->GetModes()) {
-        TLOGI(WmsLogTag::DMS, "info modes is id: %{public}u, width: %{public}u, height: %{public}u"
-            ", refreshRate: %{public}u", mode->id_, mode->width_, mode->height_, mode->refreshRate_);
+        TLOGI(WmsLogTag::DMS,
+            "info modes is id: %{public}u, width: %{public}u, height: %{public}u, refreshRate: %{public}u",
+            mode->id_, mode->width_, mode->height_, mode->refreshRate_);
     }
     return info;
 #else

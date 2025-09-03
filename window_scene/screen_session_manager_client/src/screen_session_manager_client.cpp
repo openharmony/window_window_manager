@@ -421,7 +421,7 @@ void ScreenSessionManagerClient::UpdateScreenRotationProperty(ScreenId screenId,
     screenSession->SetScreenComponentRotation(directionInfo.screenRotation_);
     screenSession->UpdateToInputManager(bounds, directionInfo.notifyRotation_, directionInfo.rotation_,
         foldDisplayMode);
-    screenSession->UpdateTouchBoundsAndOffset();
+    screenSession->UpdateTouchBoundsAndOffset(foldDisplayMode);
     TLOGW(WmsLogTag::DMS, "superFoldStatus:%{public}d", currentstate_);
     if (currentstate_ != SuperFoldStatus::KEYBOARD) {
         screenSession->SetValidHeight(bounds.rect_.GetHeight());
@@ -562,6 +562,15 @@ void ScreenSessionManagerClient::NotifyFoldToExpandCompletion(bool foldToExpand)
         return;
     }
     screenSessionManager_->NotifyFoldToExpandCompletion(foldToExpand);
+}
+
+void ScreenSessionManagerClient::NotifyScreenConnectCompletion(ScreenId screenId)
+{
+    if (!screenSessionManager_) {
+        TLOGE(WmsLogTag::DMS, "screenSessionManager is null");
+        return;
+    }
+    screenSessionManager_->NotifyScreenConnectCompletion(screenId);
 }
 
 void ScreenSessionManagerClient::RecordEventFromScb(std::string description, bool needRecordEvent)
@@ -994,6 +1003,7 @@ bool ScreenSessionManagerClient::HandleScreenConnection(SessionOption option)
         screenSessionMap_[option.screenId_] = screenSession;
         extraScreenSessionMap_[option.screenId_] = screenSession;
     }
+    screenSession->SetRotationCorrectionMap(option.rotationCorrectionMap_);
     NotifyClientScreenConnect(screenSession);
     return true;
 }
@@ -1311,5 +1321,77 @@ DMError ScreenSessionManagerClient::SetPrimaryDisplaySystemDpi(float dpi)
         return DMError::DM_ERROR_NULLPTR;
     }
     return screenSessionManager_->SetPrimaryDisplaySystemDpi(dpi);
+}
+
+void ScreenSessionManagerClient::FreezeScreen(ScreenId screenId, bool isFreeze)
+{
+    auto screenSession = GetScreenSession(screenId);
+    if (!screenSession) {
+        TLOGE(WmsLogTag::DMS, "get screen session is null, screenId is %{public}" PRIu64, screenId);
+        return;
+    }
+    screenSession->FreezeScreen(isFreeze);
+}
+
+std::shared_ptr<Media::PixelMap> ScreenSessionManagerClient::GetScreenSnapshotWithAllWindows(ScreenId screenId,
+    float scaleX, float scaleY, bool isNeedCheckDrmAndSurfaceLock)
+{
+    auto screenSession = GetScreenSession(screenId);
+    if (!screenSession) {
+        TLOGE(WmsLogTag::DMS, "get screen session is null, screenId is %{public}" PRIu64, screenId);
+        return nullptr;
+    }
+    return screenSession->GetScreenSnapshotWithAllWindows(scaleX, scaleY, isNeedCheckDrmAndSurfaceLock);
+}
+
+void ScreenSessionManagerClient::NotifySwitchUserAnimationFinish(const std::string& description)
+{
+    TLOGI(WmsLogTag::DMS, "description: %{public}s", description.c_str());
+    std::set<std::string> descriptionSetCopy;
+    {
+        std::shared_lock<std::shared_mutex> descriptionLock(animateFinishDescriptionSetMutex_);
+        descriptionSetCopy = animateFinishDescriptionSet_;
+    }
+    {
+        std::lock_guard<std::mutex> notificationLock(animateFinishNotificationSetMutex_);
+        if (descriptionSetCopy.empty()) {
+            return;
+        }
+        auto it = descriptionSetCopy.find(description);
+        if (it == descriptionSetCopy.end()) {
+            TLOGE(WmsLogTag::DMS, "not find description in map");
+            return;
+        }
+        animateFinishNotificationSet_.insert(description);
+        if (animateFinishNotificationSet_.size() != descriptionSetCopy.size()) {
+            return;
+        }
+        // all description notified
+        animateFinishNotificationSet_.clear();
+    }
+    TLOGI(WmsLogTag::DMS, "notify all animate finished");
+    if (!screenSessionManager_) {
+        TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
+        return;
+    }
+    screenSessionManager_->NotifySwitchUserAnimationFinish();
+}
+
+void ScreenSessionManagerClient::RegisterSwitchUserAnimationNotification(const std::string& description)
+{
+    std::unique_lock<std::shared_mutex> lock(animateFinishDescriptionSetMutex_);
+    auto it = animateFinishDescriptionSet_.find(description);
+    if (it != animateFinishDescriptionSet_.end()) {
+        TLOGE(WmsLogTag::DMS, "description: %{public}s already regist", description.c_str());
+        return;
+    }
+    TLOGI(WmsLogTag::DMS, "description: %{public}s regist success", description.c_str());
+    animateFinishDescriptionSet_.insert(description);
+}
+
+void ScreenSessionManagerClient::OnAnimationFinish()
+{
+    std::lock_guard<std::mutex> lock(animateFinishNotificationSetMutex_);
+    animateFinishNotificationSet_.clear();
 }
 } // namespace OHOS::Rosen
