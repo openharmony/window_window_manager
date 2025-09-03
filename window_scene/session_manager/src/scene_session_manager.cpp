@@ -6279,7 +6279,6 @@ void SceneSessionManager::PostBrightnessTask(float brightness)
         if (!isPC) {
             auto task = [] {
                 DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().RestoreBrightness();
-                SetDisplayBrightness(UNDEFINED_BRIGHTNESS); // UNDEFINED_BRIGHTNESS means system default brightness
             };
             postTaskRet = eventHandler_->PostTask(task, "DisplayPowerMgr:RestoreBrightness", 0);
         }
