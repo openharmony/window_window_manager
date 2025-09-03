@@ -451,6 +451,86 @@ ani_object AniWindowUtils::CreateAniAvoidArea(ani_env* env, const AvoidArea& avo
     return aniAvoidArea;
 }
 
+ani_object AniWindowUtils::CreateAniTitleButtonRect(ani_env* env, const TitleButtonRect& rect)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    ani_class aniClass;
+    ani_status ret = env->FindClass("@ohos.window.window.TitleButtonRectInternal", &aniClass);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] class not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_method aniCtor;
+    ret = env->Class_FindMethod(aniClass, "<ctor>", nullptr, &aniCtor);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] ctor not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_object aniRect;
+    ret = env->Object_New(aniClass, aniCtor, &aniRect);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to new obj");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    CallAniMethodVoid(env, aniRect, aniClass, "<set>right", nullptr, ani_int(rect.posX_));
+    CallAniMethodVoid(env, aniRect, aniClass, "<set>top", nullptr, ani_int(rect.posY_));
+    CallAniMethodVoid(env, aniRect, aniClass, "<set>width", nullptr, ani_int(rect.width_));
+    CallAniMethodVoid(env, aniRect, aniClass, "<set>height", nullptr, ani_int(rect.height_));
+    return aniRect;
+}
+
+ani_object AniWindowUtils::CreateAniDecorButtonStyle(ani_env* env, const DecorButtonStyle& style)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    ani_class aniClass;
+    ani_status ret = env->FindClass("@ohos.window.window.DecorButtonStyleInternal", &aniClass);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] class not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_method aniCtor;
+    ret = env->Class_FindMethod(aniClass, "<ctor>", nullptr, &aniCtor);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] ctor not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_object aniStyle;
+    ret = env->Object_New(aniClass, aniCtor, &aniStyle);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to new obj");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_enum aniColorModeType;
+    ret = env->FindEnum("@ohos.app.ability.ConfigurationConstant.ConfigurationConstant.ColorMode", &aniColorModeType);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] failed to FindEnum");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    std::string itemName = "COLOR_MODE_NOT_SET";
+    if (style.colorMode == LIGHT_COLOR_MODE) {
+        itemName = "COLOR_MODE_DARK";
+    } else if (style.colorMode == DARK_COLOR_MODE) {
+        itemName = "COLOR_MODE_LIGHT";
+    }
+    ani_enum_item aniColorMode;
+    ret = env->Enum_GetEnumItemByName(aniColorModeType, itemName.c_str(), &aniColorMode);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Enum_GetEnumItemByName failed");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    CallAniMethodVoid(env, aniStyle, aniClass, "<set>colorMode", nullptr, aniColorMode);
+    CallAniMethodVoid(env, aniStyle, aniClass, "<set>buttonBackgroundSize", nullptr,
+        ani_int(style.buttonBackgroundSize));
+    CallAniMethodVoid(env, aniStyle, aniClass, "<set>spacingBetweenButtons", nullptr,
+        ani_int(style.spacingBetweenButtons));
+    CallAniMethodVoid(env, aniStyle, aniClass, "<set>closeButtonRightMargin", nullptr,
+        ani_int(style.closeButtonRightMargin));
+    CallAniMethodVoid(env, aniStyle, aniClass, "<set>buttonIconSize", nullptr, ani_int(style.buttonIconSize));
+    CallAniMethodVoid(env, aniStyle, aniClass, "<set>buttonBackgroundCornerRadius", nullptr,
+        ani_int(style.buttonBackgroundCornerRadius));
+    return aniStyle;
+}
+
 ani_object AniWindowUtils::CreateAniKeyboardInfo(ani_env* env, const KeyboardPanelInfo& keyboardPanelInfo)
 {
     TLOGI(WmsLogTag::WMS_KEYBOARD, "[ANI]");
@@ -1041,18 +1121,18 @@ bool AniWindowUtils::SetDecorButtonStyleFromAni(ani_env* env, DecorButtonStyle& 
         decorButtonStyle.colorMode = colorMode;
         emptyParam = false;
     }
-    ani_double buttonBackgroundSize;
-    if (ANI_OK == env->Object_GetPropertyByName_Double(decorStyle, "buttonBackgroundSize", &buttonBackgroundSize)) {
+    ani_int buttonBackgroundSize;
+    if (ANI_OK == env->Object_GetPropertyByName_Int(decorStyle, "buttonBackgroundSize", &buttonBackgroundSize)) {
         decorButtonStyle.buttonBackgroundSize = static_cast<uint32_t>(buttonBackgroundSize);
         emptyParam = false;
     }
-    ani_double spacingBetweenButtons;
-    if (ANI_OK == env->Object_GetPropertyByName_Double(decorStyle, "spacingBetweenButtons", &spacingBetweenButtons)) {
+    ani_int spacingBetweenButtons;
+    if (ANI_OK == env->Object_GetPropertyByName_Int(decorStyle, "spacingBetweenButtons", &spacingBetweenButtons)) {
         decorButtonStyle.spacingBetweenButtons = static_cast<uint32_t>(spacingBetweenButtons);
         emptyParam = false;
     }
-    ani_double closeButtonRightMargin;
-    if (ANI_OK == env->Object_GetPropertyByName_Double(decorStyle, "closeButtonRightMargin", &closeButtonRightMargin)) {
+    ani_int closeButtonRightMargin;
+    if (ANI_OK == env->Object_GetPropertyByName_Int(decorStyle, "closeButtonRightMargin", &closeButtonRightMargin)) {
         decorButtonStyle.closeButtonRightMargin = static_cast<uint32_t>(closeButtonRightMargin);
         emptyParam = false;
     }

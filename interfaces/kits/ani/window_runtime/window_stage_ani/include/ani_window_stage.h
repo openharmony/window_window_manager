@@ -38,6 +38,8 @@ class AniWindowStage {
         ani_string path, ani_object storage);
     static void DisableWindowDecor(ani_env* env, ani_object obj, ani_long nativeObj);
     static void SetShowOnLockScreen(ani_env* env, ani_class cls, ani_long nativeObj, ani_boolean showOnLockScreen);
+    static void SetWindowRectAutoSave(ani_env* env, ani_class cls, ani_long nativeObj, ani_boolean enable);
+    static ani_boolean IsWindowRectAutoSave(ani_env* env, ani_class cls, ani_long nativeObj);
     static void RegisterWindowCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
         ani_ref callback);
     static void UnregisterWindowCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
@@ -54,6 +56,8 @@ private:
     void OnLoadContent(ani_env* env, ani_string path, ani_object storage);
     void OnDisableWindowDecor(ani_env* env);
     void OnSetShowOnLockScreen(ani_env* env, ani_boolean showOnLockScreen);
+    void OnSetWindowRectAutoSave(ani_env* env, ani_boolean enable);
+    ani_boolean OnIsWindowRectAutoSave(ani_env* env);
     void OnRegisterWindowCallback(ani_env* env, ani_string type, ani_ref callback);
     void OnUnregisterWindowCallback(ani_env* env, ani_string type, ani_ref callback);
     std::weak_ptr<WindowScene> windowScene_;
