@@ -153,7 +153,7 @@ private:
     void OnSetTopmost(ani_env* env, ani_boolean isTopmost);
     void OnRequestFocus(ani_env* env, ani_boolean isFocused);
     void OnSetSubWindowModal(ani_env* env, ani_boolean isModal);
-    void OnSetSubWindowModalType(ani_env* env, ani_boolean isModal, ani_int modalityType)
+    void OnSetSubWindowModalType(ani_env* env, ani_boolean isModal, ani_int modalityType);
     void OnLoadContent(ani_env* env, ani_string path, ani_object storage);
     void OnSetWindowSystemBarEnable(ani_env* env, ani_object nameAry);
     ani_object OnGetUIContext(ani_env* env);
