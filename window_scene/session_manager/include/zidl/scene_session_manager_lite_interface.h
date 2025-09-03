@@ -119,7 +119,8 @@ public:
     /*
      * Window Lifecycle
      */
-    virtual WSError PendingSessionToForeground(const sptr<IRemoteObject>& token) = 0;
+    virtual WSError PendingSessionToForeground(const sptr<IRemoteObject>& token,
+        int32_t windowMode = DEFAULT_INVALID_WINDOW_MODE) = 0;
     virtual WSError PendingSessionToBackground(const sptr<IRemoteObject>& token, const BackgroundParams& params) = 0;
     virtual WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token,
         bool shouldBackToCaller = true) = 0;
