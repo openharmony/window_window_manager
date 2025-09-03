@@ -311,8 +311,17 @@ bool ParseConfigOption(ani_env* env, ani_object configuration, WindowOption &opt
     }
 
     env->Object_GetPropertyByName_Ref(configuration, "ctx", &result);
-    ani_object aniContextPtr = reinterpret_cast<ani_object>(result);
-    contextPtr = AniWindowUtils::GetAbilityContext(env, aniContextPtr);
+    ani_boolean isCtxUndefined = false;
+    env->Reference_IsUndefined(result, &isCtxUndefined);
+    if (!isCtxUndefined) {
+        ani_object aniContextPtr = reinterpret_cast<ani_object>(result);
+        contextPtr = AniWindowUtils::GetAbilityContext(env, aniContextPtr);
+        auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(contextPtr);
+        if (context == nullptr) {
+            TLOGE(WmsLogTag::DEFAULT, "[ANI] context is nullptr");
+            return AniWindowUtils::AniThrowError(env, WMError::WM_ERROR_NULLPTR, "Stage mode without context");
+        }
+    }
 
     ani_boolean dialogDecorEnable;
     env->Object_GetPropertyByName_Boolean(configuration, "decorEnabled", &dialogDecorEnable);
