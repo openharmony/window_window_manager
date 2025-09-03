@@ -717,6 +717,13 @@ export enum RectType {
   RELATIVE_TO_PARENT_WINDOW = 1
 }
 
+export enum BlurStyle {
+  OFF = 0,
+  THIN = 1,
+  REGULAR = 2,
+  THICK = 3
+}
+
 export interface SystemBarProperties {
     /**
      * The color of the status bar.
@@ -2121,10 +2128,17 @@ export class WindowInternal implements Window {
     private native rotate(nativeObj: long, rotateOptions: RotateOptions): void;
     private native setShadow(nativeObj: long, radius: double, color?: string,
       offsetX?: double, offsetY?: double): void;
+    private native setBlur(nativeObj: long, radius: double): void;
+    private native setBackdropBlurStyle(nativeObj: long, blurStyle: int): void;
+    private native setBackdropBlur(nativeObj: long, radius: double): void;
+    private native getWindowCornerRadius(nativeObj: long): double;
+    private native setWindowCornerRadiusSync(nativeObj: long, cornerRadius: double): void;
+    private native setWindowShadowRadius(nativeObj: long, radius: double): void;
     private native setTouchableAreas(nativeObj: long, rects: Array<Rect>): void;
     private native setCornerRadiusSync(nativeObj: long, cornerRadius: double): void;
     private native setWindowColorSpaceSync(nativeObj: long, colorSpace: int): void;
     private native setPreferredOrientationSync(nativeObj: long, orientation: int): void;
+    private native getPreferredOrientation(nativeObj: long): int;
     private native setWindowPrivacyModeSync(nativeObj: long, isPrivacyMode: boolean): void;
     private native recoverSync(nativeObj: long): void;
     private native setUIContentSync(nativeObj: long, path: string): void;
@@ -2672,6 +2686,10 @@ export class WindowInternal implements Window {
       });
     }
 
+    public getPreferredOrientation(): Orientation {
+      return this.getPreferredOrientation(this.nativeObj) as Orientation;
+    }
+
     public setWindowPrivacyMode(isPrivacyMode: boolean): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
@@ -2940,6 +2958,38 @@ export class WindowInternal implements Window {
       this.setCornerRadiusSync(this.nativeObj, cornerRadius);
     }
 
+    public setBlur(radius: double): void {
+      this.setBlur(this.nativeObj, radius);
+    }
+
+    public setBackdropBlurStyle(blurStyle: BlurStyle): void {
+      this.setBackdropBlurStyle(this.nativeObj, blurStyle);
+    }
+
+    public setBackdropBlur(radius: double): void {
+      this.setBackdropBlur(this.nativeObj, radius);
+    }
+
+    public getWindowCornerRadius(): double {
+      return this.getWindowCornerRadius(this.nativeObj);
+    }
+
+    public setWindowCornerRadius(cornerRadius: double): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.setWindowCornerRadiusSync(this.nativeObj, cornerRadius);
+        }).then((ret: NullishType) => {
+          resolve(undefined);
+        }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
+    public setWindowShadowRadius(radius: double): void {
+      this.setWindowShadowRadius(this.nativeObj, radius);
+    }
+
     public on<T>(type: string, callback: Callback<T>): void {
       this.onSync(this.nativeObj, type, callback);
     }
@@ -3100,6 +3150,7 @@ export interface Window {
     setWindowColorSpace(colorSpace: ColorSpace, callback: AsyncCallback<void>): void;
     setPreferredOrientation(orientation: Orientation): Promise<void>;
     setPreferredOrientation(orientation: Orientation, callback: AsyncCallback<void>): void;
+    getPreferredOrientation(): Orientation;
     setWindowPrivacyMode(isPrivacyMode: boolean): Promise<void>;
     setWindowPrivacyMode(isPrivacyMode: boolean, callback: AsyncCallback<void>): void;
     recover(): Promise<void>;
@@ -3140,6 +3191,12 @@ export interface Window {
     rotate(rotateOptions: RotateOptions): void;
     setShadow(radius: double, color?: string, offsetX?: double, offsetY?: double): void;
     setCornerRadius(cornerRadius: double): void;
+    setBlur(radius: double): void;
+    setBackdropBlurStyle(blurStyle: BlurStyle): void;
+    setBackdropBlur(radius: double): void;
+    getWindowCornerRadius(): double;
+    setWindowCornerRadius(cornerRadius: double): Promise<void>;
+    setWindowShadowRadius(radius: double): void;
     on<T>(type: string, callback: Callback<T>): void;
     on<T>(type: 'noInteractionDetected', timeout: long, callback: Callback<T>): void;
     off<T>(type: string, callback?: Callback<T>): void;
