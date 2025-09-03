@@ -994,7 +994,8 @@ void AniWindow::OnSetSubWindowModal(ani_env* env, ani_boolean isModal)
     }
 }
 
-void AniWindow::SetSubWindowModalType(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isModal, ani_int modalityType)
+void AniWindow::SetSubWindowModalType(ani_env* env, ani_object obj, ani_long nativeObj,
+    ani_boolean isModal, ani_int modalityType)
 {
     TLOGI(WmsLogTag::WMS_HIERARCHY, "[ANI]");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
@@ -2365,9 +2366,7 @@ ani_object AniWindow::SetRaiseByClickEnabled(ani_env* env, ani_boolean enable)
     if (windowToken_ == nullptr) {
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-
     WMError ret = windowToken_->SetRaiseByClickEnabled(static_cast<bool>(enable));
-    
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_IMMS, "[ANI] SetRaiseByClickEnabled set error");
         return AniWindowUtils::CreateAniUndefined(env);
@@ -2943,7 +2942,7 @@ static ani_int WindowSetRaiseByClickEnabled(ani_env* env, ani_object obj,
         TLOGE(WmsLogTag::DEFAULT, "[ANI] windowToken_ is nullptr");
         return ANI_ERROR;
     }
-    aniWindow->setRaiseByClickEnabled(env, enable);
+    aniWindow->SetRaiseByClickEnabled(env, enable);
     TLOGI(WmsLogTag::WMS_IMMS, "[ANI] setRaiseByClickEnabled end");
     return ANI_OK;
 }
@@ -3162,7 +3161,7 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
         ani_native_function {"isWindowSupportWideGamut", "l:z",
             reinterpret_cast<void *>(WindowIsWindowSupportWideGamut)},
         ani_native_function {"setWindowLayoutFullScreen", "lz:i",
-            reinterpret_cast<void *>(WindowSetWindowLayoutFullScreen)},   
+            reinterpret_cast<void *>(WindowSetWindowLayoutFullScreen)},
         ani_native_function {"setWindowSystemBarProperties", "lC{@ohos.window.window.SystemBarProperties}:i",
             reinterpret_cast<void *>(WindowSetSystemBarProperties)},
         ani_native_function {"setRaiseByClickEnabled", "lz:i",
@@ -3200,11 +3199,11 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindow::SetWaterMarkFlag)},
         ani_native_function {"setWindowFocusableSync", "lz:",
             reinterpret_cast<void *>(AniWindow::SetWindowFocusable)},
-        ani_native_function {"getSubWindowZLevel", "l:i",
+        ani_native_function {"getSubWindowZLevelSync", "l:i",
             reinterpret_cast<void *>(AniWindow::GetSubWindowZLevel)},
-        ani_native_function {"isFocused", "l:z",
-            reinterpret_cast<void *>(AniWindow::IsFocused)},    
-        ani_native_function {"setSubWindowZLevel", "li:",
+        ani_native_function {"isFocusedSync", "l:z",
+            reinterpret_cast<void *>(AniWindow::IsFocused)},
+        ani_native_function {"setSubWindowZLevelSync", "li:",
             reinterpret_cast<void *>(AniWindow::SetSubWindowZLevel)},
         ani_native_function {"raiseAboveTargetSync", "li:",
             reinterpret_cast<void *>(AniWindow::RaiseAboveTarget)},
@@ -3218,6 +3217,8 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindow::SetSubWindowModal)},
         ani_native_function {"setSubWindowModalType", "lzi:",
             reinterpret_cast<void *>(AniWindow::SetSubWindowModalType)},
+        ani_native_function {"isWindowHighlightedSync", "l:z",
+            reinterpret_cast<void *>(AniWindow::IsWindowHighlighted)},
         ani_native_function {"keepKeyboardOnFocusSync", "lz:",
             reinterpret_cast<void *>(AniWindow::KeepKeyboardOnFocus)},
         ani_native_function {"setWindowTouchableSync", "lz:",
@@ -3244,8 +3245,6 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindow::DestroyWindow)},
         ani_native_function {"isWindowShowingSync", nullptr,
             reinterpret_cast<void *>(AniWindow::IsWindowShowing)},
-        ani_native_function {"isWindowHighlightedSync", nullptr,
-            reinterpret_cast<void *>(AniWindow::IsWindowHighlighted)},
         ani_native_function {"hideWithAnimationSync", nullptr,
             reinterpret_cast<void *>(AniWindow::HideWithAnimation)},
         ani_native_function {"showWithAnimationSync", nullptr,
