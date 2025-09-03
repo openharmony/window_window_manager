@@ -24,6 +24,8 @@
 #include "refbase.h"
 #include "singleton_container.h"
 #include "window_manager_hilog.h"
+#include "surface_utils.h"
+#include "screen_manager.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -55,6 +57,11 @@ static void CreateAniArrayInt(ani_env* env, ani_size size, ani_array_int *aniArr
 static void CreateAniArrayDouble(ani_env* env, ani_size size, ani_array_double *aniArray, std::vector<float> vec);
 
 static ani_status GetAniString(ani_env* env, const std::string& str, ani_string* result);
+
+static DmErrorCode GetVirtualScreenOptionFromAni(
+    ani_env* env, ani_object virtualScreenConfigObj, VirtualScreenOption& option);
+
+static bool GetSurfaceFromAni(ani_env* env, ani_string surfaceIdAniValue, sptr<Surface>& surface);
 
 static ani_status CallAniFunctionVoid(ani_env* env, const char* ns,
     const char* fn, const char* signature, ...);

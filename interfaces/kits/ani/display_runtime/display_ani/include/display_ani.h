@@ -27,6 +27,7 @@ public:
     explicit DisplayAni(const sptr<Display>& display);
 
     static void GetCutoutInfo(ani_env* env, ani_object obj, ani_object cutoutInfoObj);
+    static ani_string GetDisplayCapability(ani_env* env);
     static void GetAvailableArea(ani_env* env, ani_object obj, ani_object availableAreaObj);
     static ani_boolean HasImmersiveWindow(ani_env* env, ani_object obj);
     static void RegisterCallback(ani_env* env, ani_object obj, ani_string type, ani_ref aniCallback);
