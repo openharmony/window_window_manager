@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+
 #include "ani_window.h"
 
 #include <cstdint>
