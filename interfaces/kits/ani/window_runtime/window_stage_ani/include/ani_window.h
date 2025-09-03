@@ -54,6 +54,9 @@ public:
     static void SetWaterMarkFlag(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean enable);
     static void SetWindowFocusable(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isFocusable);
     static void SetWindowTouchable(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isTouchable);
+    static void SetDialogBackGestureEnabled(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean enabled);
+    static void SetWindowMask(ani_env* env, ani_object obj, ani_long nativeObj, ani_array windowMask);
+    static void SetTouchableAreas(ani_env* env, ani_object obj, ani_long nativeObj, ani_array rects);
     static void LoadContent(ani_env* env, ani_object obj, ani_long nativeObj,
         ani_string path, ani_object storage);
     static void SetWindowSystemBarEnable(ani_env* env, ani_object obj, ani_long nativeObj, ani_object nameAry);
@@ -136,6 +139,9 @@ private:
     ani_int OnGetPreferredOrientation(ani_env* env);
     void OnSetWindowPrivacyMode(ani_env* env, ani_boolean isPrivacyMode);
     void OnSetWindowTouchable(ani_env* env, ani_boolean isTouchable);
+    void OnSetDialogBackGestureEnabled(ani_env* env, ani_boolean enabled);
+    void OnSetWindowMask(ani_env* env, ani_array windowMaskArray);
+    void OnSetTouchableAreas(ani_env* env, ani_array rects);
     void OnRecover(ani_env* env);
     void OnSetUIContent(ani_env* env, ani_string path);
     void OnSetWindowKeepScreenOn(ani_env* env, ani_boolean isKeepScreenOn);
@@ -168,6 +174,7 @@ private:
     ani_double OnGetWindowCornerRadius(ani_env* env);
     void OnSetWindowCornerRadius(ani_env* env, ani_double cornerRadius);
     void OnSetWindowShadowRadius(ani_env* env, ani_double radius);
+    bool CheckWindowMaskParams(ani_env* env, ani_array windowMask);
     bool GetSystemBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProperties,
         std::map<WindowType, SystemBarPropertyFlag>& systemBarpropertyFlags,
         const std::vector<std::string>& names, sptr<Window>& window);
