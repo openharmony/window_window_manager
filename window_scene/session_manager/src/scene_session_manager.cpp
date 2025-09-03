@@ -7635,11 +7635,10 @@ bool SceneSessionManager::CheckRequestFocusSubWindowImmediately(const sptr<Scene
 bool SceneSessionManager::CheckClickFocusIsDownThroughFullScreen(const sptr<SceneSession>& focusedSession,
     const sptr<SceneSession>& sceneSession, FocusChangeReason reason)
 {
-    if (focusedSession->GetWindowType() != WindowType::WINDOW_TYPE_GLOBAL_SEARCH &&
-        focusedSession->GetWindowType() != WindowType::WINDOW_TYPE_NEGATIVE_SCREEN) {
+    if (reason != FocusChangeReason::CLICK) {
         return false;
     }
-    if (reason != FocusChangeReason::CLICK || !focusedSession->GetBlockingFocus()) {
+    if (!focusedSession->IsBlockingFocusFullScreenSystemPanel() && !focusedSession->IsAppMainWindowFullScreen()) {
         return false;
     }
     return sceneSession->GetZOrder() < focusedSession->GetZOrder();
