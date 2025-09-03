@@ -1531,7 +1531,6 @@ HWTEST_F(WindowSessionTest4, SetIsShowDecorWhenLocked01, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     bool isShow = true;
-    bool isShow = true;
     session_->state_ = SessionState::STATE_DISCONNECT;
     WSError result = session_->SetIsShowDecorWhenLocked(isShow);
     EXPECT_EQ(result, WSError::WS_ERROR_INVALID_SESSION);
@@ -1550,7 +1549,6 @@ HWTEST_F(WindowSessionTest4, SetIsShowDecorWhenLocked01, TestSize.Level1)
 HWTEST_F(WindowSessionTest4, SetIsShowDecorWhenLocked02, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
-    bool isShow = true;
     bool isShow = true;
     session_->state_ = SessionState::STATE_CONNECT;
     session_->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
