@@ -87,6 +87,7 @@ public:
     MOCK_METHOD1(GetFloatingBallWindowId, WMError(uint32_t& windowId));
     MOCK_METHOD1(SendFbActionEvent, WSError(const std::string& action));
     MOCK_METHOD1(RestoreFbMainWindow, WMError(const std::shared_ptr<AAFwk::Want>& want));
+    MOCK_METHOD1(UpdateIsShowDecorWhenLocked, WSError(bool& isShow));
 };
 } // namespace Rosen
 } // namespace OHOS

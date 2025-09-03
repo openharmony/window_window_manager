@@ -287,6 +287,16 @@ public:
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError SendFbActionEvent(const std::string& action) = 0;
+
+    /**
+     * @brief update if show decor when screen locked.
+     *
+     * update decor show status. Such as true or false.
+     *
+     * @param isShow Indicates if the decor show.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError UpdateIsShowDecorWhenLocked(bool isShow) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_INTERFACE_H

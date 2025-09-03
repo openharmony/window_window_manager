@@ -1969,6 +1969,20 @@ HWTEST_F(WindowSessionImplTest5, NotifySizeChangeFlag, Function | SmallTest | Le
     window->SetNotifySizeChangeFlag(true);
     ASSERT_EQ(window->notifySizeChangeFlag_, false);
 }
+
+/**
+ * @tc.name: UpdateIsShowDecorWhenLocked
+ * @tc.desc: UpdateIsShowDecorWhenLocked
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, UpdateIsShowDecorWhenLocked, Function | SmallTest | Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateIsShowDecorWhenLocked");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    bool isShow = true;
+    ASSERT_EQ(WSError::WS_OK, window->UpdateIsShowDecorWhenLocked(isShow));
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
