@@ -1866,7 +1866,7 @@ export class WindowStageInternal implements WindowStage {
     public native loadContentSync(nativeObj: long, path: string, storage?: LocalStorage): void;
     public native disableWindowDecorSync(nativeObj:long): void;
     public native setShowOnLockScreenSync(nativeObj:long, showOnLockScreen: boolean): void;
-    public native setWindowModal(nativeObj:long,isModal: boolean): Promise<void>;
+    public native setWindowModal(nativeObj:long,isModal: boolean): void;
     public native getMainWindowSync(nativeObj: long): Window;
     public native createSubWindowSync(nativeObj: long, name: String): Window;
     native onSync(nativeObj: long, eventType: 'windowStageEvent', callback: Object): void;
