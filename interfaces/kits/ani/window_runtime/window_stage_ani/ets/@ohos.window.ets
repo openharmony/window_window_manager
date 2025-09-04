@@ -1876,8 +1876,8 @@ export class WindowStageInternal implements WindowStage {
     public native removeStartingWindow(nativeObj: long): void;
     public native loadContentSync(nativeObj: long, path: string, storage?: LocalStorage): void;
     public native disableWindowDecorSync(nativeObj:long): void;
-    public native setShowOnLockScreenSync(nativeObj:long, showOnLockScreen: boolean): void;
-    public native setWindowModal(nativeObj:long, isModal: boolean): void;
+    public native setShowOnLockScreenSync(nativeObj: long, showOnLockScreen: boolean): void;
+    public native setWindowModal(nativeObj: long, isModal: boolean): void;
     public native getMainWindowSync(nativeObj: long): Window;
     public native createSubWindowSync(nativeObj: long, name: String): Window;
     native onSync(nativeObj: long, eventType: 'windowStageEvent', callback: Object): void;
@@ -2274,7 +2274,7 @@ export class WindowInternal implements Window {
     }
 
     public setWindowTopmost(isWindowTopmost: boolean): Promise<void> {
-      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.setWindowTopmost(this.nativeObj, isWindowTopmost);
         }).then((ret: NullishType): void => {
@@ -2953,7 +2953,7 @@ export class WindowInternal implements Window {
     }
 
     public raiseAboveTarget(windowId: int): Promise<void> {
-      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.raiseAboveTargetSync(this.nativeObj, windowId);
         }).then((ret: NullishType): void => {
@@ -2975,7 +2975,7 @@ export class WindowInternal implements Window {
     }
 
     public raiseToAppTop(): Promise<void> {
-      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.raiseToAppTopSync(this.nativeObj);
         }).then((ret: NullishType): void => {
@@ -2997,7 +2997,7 @@ export class WindowInternal implements Window {
     }
 
     public setTopmost(isTopmost: boolean): Promise<void> {
-      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.setTopmostSync(this.nativeObj, isTopmost);
         }).then((ret: NullishType): void => {
@@ -3009,7 +3009,7 @@ export class WindowInternal implements Window {
     }
 
     public requestFocus(isFocused: boolean): Promise<void> {
-      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.requestFocusSync(this.nativeObj, isFocused);
         }).then((ret: NullishType): void => {
@@ -3545,7 +3545,7 @@ function runAvoidAreaChangeCallback(cb: object, area: object, type: int): void {
 }
 
 export function shiftAppWindowFocus(sourceWindowId: int, targetWindowId: int): Promise<void> {
-  return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
+  return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
       taskpool.execute((): void => {
           return shiftAppWindowFocusSync(nativeObj, sourceWindowId, targetWindowId);
       }).then((ret: NullishType) => {
