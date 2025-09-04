@@ -621,7 +621,8 @@ void AniWindowManager::OnSetGestureNavigationEnabled(ani_env* env, ani_boolean e
     }
 }
 
-void AniWindowManager::SetWaterMarkImage(ani_env* env, ani_long nativeObj, ani_object nativePixelMap, ani_boolean enable)
+void AniWindowManager::SetWaterMarkImage(ani_env* env, ani_long nativeObj,
+    ani_object nativePixelMap, ani_boolean enable)
 {
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
     AniWindowManager* aniWindowManager = reinterpret_cast<AniWindowManager*>(nativeObj);

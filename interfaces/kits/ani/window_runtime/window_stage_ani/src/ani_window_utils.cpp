@@ -467,7 +467,8 @@ ani_object AniWindowUtils::CreateAniWindowSystemBarProperties(ani_env* env,
         TLOGE(WmsLogTag::WMS_IMMS, "[ANI] create string failed");
         return AniWindowUtils::CreateAniUndefined(env);
     }
-    CallAniMethodVoid(env, systemBarProperties, cls, "<set>navigationBarContentColor", nullptr, navigationBarContentColor);
+    CallAniMethodVoid(env, systemBarProperties, cls, "<set>navigationBarContentColor",
+        nullptr, navigationBarContentColor);
     CallAniMethodVoid(env, systemBarProperties, cls, "<set>isNavigationBarLightIcon", nullptr,
         navi.contentColor_ == SYSTEM_COLOR_WHITE);
     CallAniMethodVoid(env, systemBarProperties, cls, "<set>enableStatusBarAnimation", nullptr,
