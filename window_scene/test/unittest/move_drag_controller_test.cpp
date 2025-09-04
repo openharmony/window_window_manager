@@ -914,7 +914,6 @@ HWTEST_F(MoveDragControllerTest, ProcessWindowDragHotAreaFunc, TestSize.Level1)
     auto dragHotAreaFunc = [&isDragHotAreaFuncCalled](DisplayId displayId, int32_t type, SizeChangeReason reason) {
         isDragHotAreaFuncCalled = true;
     };
-    auto preFunc = moveDragController->windowDragHotAreaFunc_;
     moveDragController->windowDragHotAreaFunc_ = dragHotAreaFunc;
     moveDragController->ProcessWindowDragHotAreaFunc(isSendHotAreaMessage, reason);
     EXPECT_TRUE(isDragHotAreaFuncCalled);
