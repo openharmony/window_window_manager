@@ -727,7 +727,8 @@ void DisplayManagerLite::Impl::ClearFoldStatusCallback()
     DMError res = DMError::DM_OK;
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (foldStatusListenerAgent_ != nullptr) {
-        res = SingletonContainer::Get<DisplayManagerAdapterLite>().UnregisterDisplayManagerAgent(foldStatusListenerAgent_,
+        res = SingletonContainer::Get<DisplayManagerAdapterLite>().UnregisterDisplayManagerAgent(
+            foldStatusListenerAgent_,
             DisplayManagerAgentType::FOLD_STATUS_CHANGED_LISTENER);
         foldStatusListenerAgent_ = nullptr;
         TLOGI(WmsLogTag::DMS, "foldStatusListenerAgent_ is nullptr !");
@@ -742,7 +743,8 @@ void DisplayManagerLite::Impl::ClearDisplayModeCallback()
     DMError res = DMError::DM_OK;
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (displayModeListenerAgent_ != nullptr) {
-        res = SingletonContainer::Get<DisplayManagerAdapterLite>().UnregisterDisplayManagerAgent(displayModeListenerAgent_,
+        res = SingletonContainer::Get<DisplayManagerAdapterLite>().UnregisterDisplayManagerAgent(
+            displayModeListenerAgent_,
             DisplayManagerAgentType::DISPLAY_MODE_CHANGED_LISTENER);
         displayModeListenerAgent_ = nullptr;
         TLOGI(WmsLogTag::DMS, "displayModeListenerAgent_ is nullptr !");
