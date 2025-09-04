@@ -3975,7 +3975,7 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(SetWindowBrightness)},
         ani_native_function {"getWindowColorSpace", "l:i",
             reinterpret_cast<void *>(GetWindowColorSpace)},
-        ani_native_function {"SetWakeUpScreen", "lz:",
+        ani_native_function {"setWakeUpScreen", "lz:",
             reinterpret_cast<void *>(SetWakeUpScreen)},
         ani_native_function {"setSnapshotSkip", "lz:",
             reinterpret_cast<void *>(SetSnapshotSkip)},
