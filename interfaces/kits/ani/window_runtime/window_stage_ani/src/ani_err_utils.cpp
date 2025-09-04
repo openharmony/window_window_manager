@@ -14,10 +14,11 @@
  */
 
 #include "ani_err_utils.h"
-#include "ani_window_utils.h"
-#include "window_manager_hilog.h"
 
 #include <map>
+
+#include "ani_window_utils.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
 constexpr const char* WM_ERROR_MSG_OK = "ok";

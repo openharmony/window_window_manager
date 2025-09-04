@@ -20,27 +20,39 @@
 #include "pixel_map.h"
 #include "singleton_container.h"
 #include "screenshot_ani_manager.h"
+#include "pixel_map_taihe_ani.h"
  
 namespace OHOS::Rosen {
  
 class ScreenshotAniUtils {
 public:
-static ani_status GetStdString(ani_env *env, ani_string ani_str, std::string &result);
+static ani_status GetStdString(ani_env* env, ani_string ani_str, std::string& result);
  
 static ani_object CreateAniUndefined(ani_env* env);
+
+static ani_object CreateRectObject(ani_env* env);
+
+static void ConvertRect(ani_env* env, Media::Rect rect, ani_object rectObj);
+
+static ani_object CreateScreenshotPickInfo(ani_env* env, std::unique_ptr<Param>& param);
  
 static ani_status GetAniString(ani_env* env, const std::string& str, ani_string* result);
  
-static ani_status CallAniFunctionVoid(ani_env *env, const char* ns,
+static ani_status CallAniFunctionVoid(ani_env* env, const char* ns,
     const char* fn, const char* signature, ...);
  
-static void ConvertScreenshot(ani_env *env, std::shared_ptr<Media::PixelMap> image, ani_object obj);
+static void ConvertScreenshot(ani_env* env, std::shared_ptr<Media::PixelMap> image, ani_object obj);
  
-static void GetScreenshotParam(ani_env *env, std::unique_ptr<Param> &param, ani_object options);
- 
-static void GetScreenshotSize(ani_env *env, std::unique_ptr<Param> &param, ani_object options);
- 
-static void GetScreenshotRect(ani_env *env, std::unique_ptr<Param> &param, ani_object options);
+static ani_status GetScreenshotParam(ani_env* env, const std::unique_ptr<Param>& param, ani_object options);
+
+static ani_status GetScreenshotSize(ani_env* env, const std::unique_ptr<Param>& param, ani_object options);
+
+static ani_status GetScreenshotRect(ani_env* env, const std::unique_ptr<Param>& param, ani_object options);
+
+static ani_status ReadOptionalField(ani_env* env, ani_object obj, const char* fieldName, ani_ref& ref);
+static ani_status ReadOptionalLongField(ani_env* env, ani_object obj, const char* fieldName, ani_long& value);
+static ani_status ReadOptionalIntField(ani_env* env, ani_object obj, const char* fieldName, int& value);
+static ani_status ReadOptionalBoolField(ani_env* env, ani_object obj, const char* fieldName, bool& value);
 };
 }
 #endif
