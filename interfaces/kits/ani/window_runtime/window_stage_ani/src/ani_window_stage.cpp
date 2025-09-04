@@ -542,7 +542,7 @@ void AniWindowStage::OnSetCustomDensity(ani_env* env, ani_double density)
         return;
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetCustomDensity(static_cast<float>(density), false));
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u,%{public}s] set density=%{public}f, result=%{public}u",
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u,%{public}s] set density=%{public}f, result=%{public}d",
         window->GetWindowId(), window->GetWindowName().c_str(), density, ret);
     if (ret != WmErrorCode::WM_OK) {
         AniWindowUtils::AniThrowError(env, ret);
@@ -576,7 +576,7 @@ void AniWindowStage::OnSetDefaultDensityEnabled(ani_env* env, ani_boolean enable
         return;
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetDefaultDensityEnabled(enabled));
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u,%{public}s] enabled=%{public}u ret=%{public}u",
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u,%{public}s] enabled=%{public}u ret=%{public}d",
         window->GetWindowId(), window->GetWindowName().c_str(), enabled, ret);
 }
 }  // namespace Rosen

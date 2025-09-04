@@ -3052,10 +3052,10 @@ void AniWindow::SetWindowBrightness(ani_env* env, ani_double brightness)
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
-    WMError ret = windowToken_->SetBrightness(static_cast<float>(brightness));
-    if (ret != WMError::WM_OK) {
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetBrightness(static_cast<float>(brightness)));
+    if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "failed");
-        AniWindowUtils::AniThrowError(env, WM_JS_TO_ERROR_CODE_MAP.at(ret), "Window set brightness failed");
+        AniWindowUtils::AniThrowError(env, ret, "Window set brightness failed");
         return;
     }
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "window [%{public}u, %{public}s] set brightness end",
@@ -3128,10 +3128,14 @@ ani_object AniWindow::SnapshotIgnorePrivacy(ani_env* env)
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "get pixelmap failed, code: %{public}d", ret);
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
+    if (pixelMap == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "pixelMap is null");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
     auto nativePixelMap = Media::PixelMapTaiheAni::CreateEtsPixelMap(env, pixelMap);
-    if (nativePixelMap == nullptr || pixelMap == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "native PixelMap is null");
-        return AniWindowUtils::CreateAniUndefined(env);
+    if (nativePixelMap == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "native pixelMap is null");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "windowId:%{public}u, WxH=%{public}dx%{public}d",
         windowToken_->GetWindowId(), pixelMap->GetWidth(), pixelMap->GetHeight());
@@ -3302,11 +3306,13 @@ void AniWindow::SetWindowGrayScale(ani_env* env, ani_double grayScale)
         TLOGE(WmsLogTag::WMS_ATTRIBUTE,
             "grayScale should be greater than or equal to 0.0, and should be smaller than or equal to 1.0");
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return;
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetGrayScale(static_cast<float>(grayScale)));
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Set window gray scale failed %{public}d", ret);
         AniWindowUtils::AniThrowError(env, ret, "Set window gray scale failed");
+        return;
     }
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "end, window [%{public}u, %{public}s] grayScale=%{public}f",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), grayScale);
@@ -3369,7 +3375,7 @@ void AniWindow::SetGestureBackEnabled(ani_env* env, ani_boolean enabled)
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetGestureBackEnabled(enabled));
     if (ret != WmErrorCode::WM_OK) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Set single frame composer enabled failed, ret is %{public}d", ret);
+        TLOGE(WmsLogTag::WMS_IMMS, "set failed ret %{public}d", ret);
         AniWindowUtils::AniThrowError(env, ret, "set failed.");
         return;
     }
@@ -3383,7 +3389,7 @@ void AniWindow::SetSingleFrameComposerEnabled(ani_env* env, ani_boolean enabled)
         return;
     }
     if (windowToken_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "windowToken_ is null");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowToken_ is null");
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
