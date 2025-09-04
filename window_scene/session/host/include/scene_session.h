@@ -838,6 +838,8 @@ public:
     void SetFollowParentRectFunc(NotifyFollowParentRectFunc&& func);
     WSError SetFollowParentWindowLayoutEnabled(bool isFollow) override;
     bool IsDelayFocusChange();
+    virtual bool IsBlockingFocusFullScreenSystemPanel() const;
+    virtual bool IsAppMainWindowFullScreen();
 
     /*
      * Window Property

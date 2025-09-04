@@ -30,6 +30,8 @@ public:
     MOCK_METHOD(void, UpdateCrossAxisOfLayout, (const WSRect& rect), (override));
     MOCK_METHOD(void, UpdateCrossAxis, (), (override));
     MOCK_METHOD(WSError, UpdateGlobalDisplayRect, (const WSRect& rect, SizeChangeReason reason), (override));
+    MOCK_CONST_METHOD0(IsBlockingFocusFullScreenSystemPanel, bool());
+    MOCK_METHOD(bool, IsAppMainWindowFullScreen, (), (override));
 };
 }
 }
