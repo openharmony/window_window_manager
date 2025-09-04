@@ -471,8 +471,7 @@ ani_object AniWindowUtils::CreateAniWindowSystemBarProperties(ani_env* env,
         nullptr, navigationBarContentColor);
     CallAniMethodVoid(env, systemBarProperties, cls, "<set>isNavigationBarLightIcon", nullptr,
         navi.contentColor_ == SYSTEM_COLOR_WHITE);
-    CallAniMethodVoid(env, systemBarProperties, cls, "<set>enableStatusBarAnimation", nullptr,
-        status.enableAnimation_);
+    CallAniMethodVoid(env, systemBarProperties, cls, "<set>enableStatusBarAnimation", nullptr, status.enableAnimation_);
     CallAniMethodVoid(env, systemBarProperties, cls, "<set>enableNavigationBarAnimation", nullptr,
         navi.enableAnimation_);
     return systemBarProperties;
