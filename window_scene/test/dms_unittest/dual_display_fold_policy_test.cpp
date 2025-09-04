@@ -223,6 +223,27 @@ namespace {
     }
 
     /**
+     * @tc.name: ChangeScreenDisplayModeInner02
+     * @tc.desc: ChangeScreenDisplayModeInner02
+     * @tc.type: FUNC
+     */
+    HWTEST_F(DualDisplayFoldPolicyTest, ChangeScreenDisplayModeInner02, TestSize.Level1)
+    {
+        if (FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
+            std::recursive_mutex mutex;
+            std::shared_ptr<TaskScheduler> taskScheduler = std::make_shared<TaskScheduler>("dualTest");
+            DualDisplayFoldPolicy dualDisplayFoldPolicy(mutex, taskScheduler);
+            dualDisplayFoldPolicy.onBootAnimation_ = false;
+            sptr<ScreenSession> screenSession = new ScreenSession();
+            screenSession->SetScreenId(0);
+            ScreenId offScreenId = 0;
+            ScreenId onScreenId = 5;
+            dualDisplayFoldPolicy.ChangeScreenDisplayModeInner(screenSession, offScreenId, onScreenId);
+            ASSERT_FALSE(dualDisplayFoldPolicy.onBootAnimation_);
+        }
+    }
+
+    /**
      * @tc.name: ChangeScreenDisplayModeToCoordination
      * @tc.desc: ChangeScreenDisplayModeToCoordination
      * @tc.type: FUNC
