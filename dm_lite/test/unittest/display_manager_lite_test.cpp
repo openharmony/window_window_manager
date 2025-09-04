@@ -735,6 +735,39 @@ HWTEST_F(DisplayManagerTest, SetSystemKeyboardStatus02, TestSize.Level1)
     auto ret = DisplayManagerLite::GetInstance().SetSystemKeyboardStatus(false);
     ASSERT_NE(ret, DMError::DM_OK);
 }
+
+/**
+ * @tc.name: ClearDisplayStateCallbackLite01
+ * @tc.desc: ClearDisplayStateCallbackLite01 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, ClearDisplayStateCallbackLite01, TestSize.Level1)
+{
+    DisplayManagerLite::GetInstance().pImpl_->ClearDisplayStateCallback();
+    ASSERT_TRUE(DisplayManagerLite::GetInstance().pImpl_->displayStateAgent_ == nullptr);
+}
+
+/**
+ * @tc.name: ClearFoldStatusCallbackLite01
+ * @tc.desc: ClearFoldStatusCallbackLite01 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, ClearFoldStatusCallbackLite01, TestSize.Level1)
+{
+    DisplayManagerLite::GetInstance().pImpl_->ClearFoldStatusCallback();
+    ASSERT_TRUE(DisplayManagerLite::GetInstance().pImpl_->foldStatusListenerAgent_ == nullptr);
+}
+
+/**
+ * @tc.name: ClearDisplayModeCallbackLite01
+ * @tc.desc: ClearDisplayModeCallbackLite01 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, ClearDisplayModeCallbackLite01, TestSize.Level1)
+{
+    DisplayManagerLite::GetInstance().pImpl_->ClearDisplayModeCallbackLite01();
+    ASSERT_TRUE(DisplayManagerLite::GetInstance().pImpl_->displayModeListenerAgent_ == nullptr);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

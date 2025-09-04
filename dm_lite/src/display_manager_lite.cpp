@@ -66,6 +66,8 @@ private:
      */
     void NotifyDisplayStateChanged(DisplayId id, DisplayState state);
     void ClearDisplayStateCallback();
+    void ClearFoldStatusCallback();
+    void ClearDisplayModeCallback();
     void Clear();
 
     std::map<DisplayId, sptr<DisplayLite>> displayMap_;
@@ -236,6 +238,8 @@ void DisplayManagerLite::Impl::Clear()
         TLOGW(WmsLogTag::DMS, "UnregisterDisplayManagerAgent DISPLAY_EVENT_LISTENER failed");
     }
     ClearDisplayStateCallback();
+    ClearFoldStatusCallback();
+    ClearDisplayModeCallback();
 }
 
 DisplayManagerLite::Impl::~Impl()
@@ -578,6 +582,8 @@ void DisplayManagerLite::Impl::OnRemoteDied()
     TLOGI(WmsLogTag::DMS, "dms is died");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     displayManagerListener_ = nullptr;
+    foldStatusListenerAgent_ = nullptr;
+    displayModeListenerAgent_ = nullptr;
 }
 
 void DisplayManagerLite::OnRemoteDied()
@@ -713,6 +719,36 @@ void DisplayManagerLite::Impl::ClearDisplayStateCallback()
         SingletonContainer::Get<DisplayManagerAdapterLite>().UnregisterDisplayManagerAgent(displayStateAgent_,
             DisplayManagerAgentType::DISPLAY_STATE_LISTENER);
         displayStateAgent_ = nullptr;
+    }
+}
+
+void DisplayManagerLite::Impl::ClearFoldStatusCallback()
+{
+    DMError res = DMError::DM_OK;
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (foldStatusListenerAgent_ != nullptr) {
+        res = SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(foldStatusListenerAgent_,
+            DisplayManagerAgentType::FOLD_STATUS_CHANGED_LISTENER);
+        foldStatusListenerAgent_ = nullptr;
+        TLOGI(WmsLogTag::DMS, "foldStatusListenerAgent_ is nullptr !");
+    }
+    if (res != DMError::DM_OK) {
+        TLOGW(WmsLogTag::DMS, "UnregisterDisplayManagerAgent FOLD_STATUS_CHANGED_LISTENER failed !");
+    }
+}
+
+void DisplayManagerLite::Impl::ClearDisplayModeCallback()
+{
+    DMError res = DMError::DM_OK;
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (displayModeListenerAgent_ != nullptr) {
+        res = SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(displayModeListenerAgent_,
+            DisplayManagerAgentType::DISPLAY_MODE_CHANGED_LISTENER);
+        displayModeListenerAgent_ = nullptr;
+        TLOGI(WmsLogTag::DMS, "ClearDisplayModAgent displayModeListenerAgent_ is nullptr !");
+    }
+    if (res != DMError::DM_OK) {
+        TLOGW(WmsLogTag::DMS, "UnregisterDisplayManagerAgent DISPLAY_MODE_CHANGED_LISTENER failed !");
     }
 }
 
