@@ -660,43 +660,6 @@ HWTEST_F(SceneSessionManagerTest9, RequestAllAppSessionUnfocusInner, TestSize.Le
 }
 
 /**
- * @tc.name: UpdateFocus04
- * @tc.desc: UpdateFocus
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest9, UpdateFocus04, TestSize.Level1)
-{
-    ASSERT_NE(nullptr, ssm_);
-    SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "SceneSessionManagerTest9";
-    sessionInfo.abilityName_ = "UpdateFocus04";
-    sessionInfo.isSystem_ = true;
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
-    sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
-    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
-    focusGroup->SetFocusedSessionId(0);
-    sceneSession->UpdateFocus(false);
-    ssm_->UpdateFocus(1, false);
-
-    ssm_->listenerController_ = nullptr;
-    ssm_->UpdateFocus(1, true);
-
-    std::shared_ptr<SessionListenerController> listenerController = std::make_shared<SessionListenerController>();
-    ssm_->listenerController_ = listenerController;
-    ssm_->UpdateFocus(1, true);
-
-    sessionInfo.isSystem_ = false;
-    focusGroup->SetFocusedSessionId(1);
-    sceneSession->UpdateFocus(true);
-    ssm_->UpdateFocus(1, false);
-
-    sceneSession->UpdateFocus(false);
-    ssm_->UpdateFocus(1, true);
-}
-
-/**
  * @tc.name: ProcessFocusWhenForeground
  * @tc.desc: ProcessFocusWhenForeground
  * @tc.type: FUNC

@@ -8253,60 +8253,6 @@ std::string SceneSessionManager::GetAllSessionFocusInfo()
     return os.str();
 }
 
-WSError SceneSessionManager::UpdateFocus(int32_t persistentId, bool isFocused)
-{
-    auto task = [this, persistentId, isFocused]() {
-        // notify session and client
-        auto sceneSession = GetSceneSession(persistentId);
-        if (sceneSession == nullptr) {
-            TLOGNE(WmsLogTag::WMS_FOCUS, "UpdateFocus could not find window, persistentId:%{public}d", persistentId);
-            return WSError::WS_ERROR_INVALID_WINDOW;
-        }
-        TLOGNI(WmsLogTag::WMS_FOCUS, "UpdateFocus, name: %{public}s, id: %{public}d, isFocused: %{public}u",
-            sceneSession->GetWindowName().c_str(), persistentId, static_cast<uint32_t>(isFocused));
-        // focusId change
-        auto displayId = sceneSession->GetSessionProperty()->GetDisplayId();
-        auto focusedSessionId = windowFocusController_->GetFocusedSessionId(displayId);
-        if (isFocused) {
-            SetFocusedSessionId(displayId, persistentId);
-            UpdateBrightness(focusedSessionId);
-            FocusIDChange(persistentId, sceneSession);
-        } else if (persistentId == GetFocusedSessionId()) {
-            SetFocusedSessionId(displayId, INVALID_SESSION_ID);
-        }
-        // notify window manager
-        sptr<FocusChangeInfo> focusChangeInfo = sptr<FocusChangeInfo>::MakeSptr(
-            sceneSession->GetWindowId(),
-            static_cast<DisplayId>(0),
-            sceneSession->GetCallingPid(),
-            sceneSession->GetCallingUid(),
-            sceneSession->GetWindowType(),
-            sceneSession->GetAbilityToken()
-        );
-        SessionManagerAgentController::GetInstance().UpdateFocusChangeInfo(focusChangeInfo, isFocused);
-        WSError res = WSError::WS_OK;
-        res = sceneSession->UpdateFocus(isFocused);
-        if (res != WSError::WS_OK) {
-            return res;
-        }
-        TLOGNI(WmsLogTag::WMS_FOCUS, "UpdateFocus, id: %{public}d, system: %{public}d", sceneSession->GetPersistentId(),
-              sceneSession->GetSessionInfo().isSystem_);
-        if (!sceneSession->GetSessionInfo().isSystem_) {
-            if (isFocused) {
-                TLOGND(WmsLogTag::WMS_FOCUS, "NotifyFocused, id: %{public}d", sceneSession->GetPersistentId());
-                listenerController_->NotifySessionFocused(sceneSession->GetPersistentId());
-            } else {
-                TLOGND(WmsLogTag::WMS_FOCUS, "NotifyUnFocused, id: %{public}d", sceneSession->GetPersistentId());
-                listenerController_->NotifySessionUnfocused(sceneSession->GetPersistentId());
-            }
-        }
-        return WSError::WS_OK;
-    };
-
-    taskScheduler_->PostAsyncTask(task, "UpdateFocus" + std::to_string(persistentId));
-    return WSError::WS_OK;
-}
-
 WSError SceneSessionManager::UpdateWindowMode(int32_t persistentId, int32_t windowMode)
 {
     TLOGD(WmsLogTag::DEFAULT, "id: %{public}d, mode: %{public}d", persistentId, windowMode);
@@ -13425,7 +13371,8 @@ void SceneSessionManager::PostProcessFocus()
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (auto& iter : sceneSessionMap_) {
             auto session = iter.second;
-            if (session == nullptr || !session->GetPostProcessFocusState().enabled_) {
+            if (session == nullptr || !session->GetPostProcessFocusState().enabled_ ||
+                !session->IsVisibleForeground()) {
                 continue;
             }
             processingSessions.push_back(iter);
