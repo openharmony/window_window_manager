@@ -76,6 +76,9 @@ ohos_shared_library("displayani_kit") {
     "runtime_core:ani",
     "napi:ace_napi",
     "runtime_core:ani_helpers",
+    "graphic_2d:librender_service_client",
+    "graphic_2d:librender_service_base",
+    "graphic_surface:surface"
   ]
 
   innerapi_tags = [ "platformsdk" ]

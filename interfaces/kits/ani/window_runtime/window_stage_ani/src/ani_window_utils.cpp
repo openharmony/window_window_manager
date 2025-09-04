@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+ 
 #include "ani_window_utils.h"
 
 #include <iomanip>
@@ -29,6 +30,7 @@
 namespace OHOS {
 namespace Rosen {
 namespace {
+constexpr int32_t MAX_TOUCHABLE_AREAS = 10;
 std::string GetHexColor(uint32_t color)
 {
     std::stringstream ioss;
@@ -65,8 +67,8 @@ ani_status AniWindowUtils::GetStdString(ani_env *env, ani_string ani_str, std::s
 
 ani_status AniWindowUtils::GetStdStringVector(ani_env* env, ani_object ary, std::vector<std::string>& result)
 {
-    ani_double length;
-    ani_status ret = env->Object_GetPropertyByName_Double(ary, "length", &length);
+    ani_int length;
+    ani_status ret = env->Object_GetPropertyByName_Int(ary, "length", &length);
     if (ret != ANI_OK) {
         return ret;
     }
@@ -606,8 +608,18 @@ ani_object AniWindowUtils::CreateAniRotationChangeInfo(ani_env* env, const Rotat
 
 void AniWindowUtils::ParseRotationChangeResult(ani_env* env, ani_object obj, RotationChangeResult& rotationChangeResult)
 {
+    ani_boolean isUndefined;
+    ani_status ret = env->Reference_IsUndefined(obj, &isUndefined);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[ANI] Check rotationChangeResultObj isUndefined failed, ret: %{public}d", ret);
+        return;
+    }
+    if (isUndefined) {
+        TLOGI(WmsLogTag::WMS_ROTATION, "[ANI] RotationChangeResult is undefined");
+        return;
+    }
     ani_ref rectTypeRef;
-    ani_status ret = env->Object_GetPropertyByName_Ref(obj, "rectType", &rectTypeRef);
+    ret = env->Object_GetPropertyByName_Ref(obj, "rectType", &rectTypeRef);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::WMS_ROTATION, "[ANI] Object_GetPropertyByName_Ref failed, ret: %{public}d", ret);
         return;
@@ -938,6 +950,13 @@ uint32_t AniWindowUtils::GetColorFromAni(ani_env* env,
 {
     ani_ref result;
     env->Object_GetPropertyByName_Ref(aniObject, name, &result);
+    ani_boolean isColorUndefined;
+    env->Reference_IsUndefined(result, &isColorUndefined);
+    if (isColorUndefined) {
+        TLOGI(WmsLogTag::WMS_IMMS, "the color is undefined, return default");
+        return defaultColor;
+    }
+
     ani_string aniColor = reinterpret_cast<ani_string>(result);
     std::string colorStr;
     GetStdString(env, aniColor, colorStr);
@@ -1220,6 +1239,139 @@ WmErrorCode AniWindowUtils::ToErrorCode(WMError error, WmErrorCode defaultCode)
         "[ANI] Unknown error: %{public}d, return defaultCode: %{public}d",
         static_cast<int32_t>(error), static_cast<int32_t>(defaultCode));
     return defaultCode;
+}
+
+bool AniWindowUtils::ParseWindowMask(ani_env* env, ani_array windowMaskArray,
+    std::vector<std::vector<uint32_t>>& windowMask)
+{
+    ani_size size;
+    ani_status aniRet = env->Array_GetLength(windowMaskArray, &size);
+    if (aniRet != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_PC, "[ANI]Get windowMask rows failed, ret: %{public}u", aniRet);
+        return false;
+    }
+    TLOGI(WmsLogTag::WMS_PC, "[ANI]windowMask rows: %{public}zu", size);
+    for (ani_size i = 0; i < size; i++) {
+        ani_ref innerArrayRef;
+        aniRet = env->Array_Get(windowMaskArray, i, &innerArrayRef);
+        if (aniRet != ANI_OK) {
+            TLOGE(WmsLogTag::WMS_PC, "[ANI]Get windowMask cols ref failed, ret: %{public}u", aniRet);
+            return false;
+        }
+        std::vector<uint32_t> elementArray;
+        if (!ParseWindowMaskInnerValue(env, static_cast<ani_array_long>(innerArrayRef), elementArray)) {
+            TLOGE(WmsLogTag::WMS_PC, "[ANI]Failed to convert parameter to window mask!");
+            return false;
+        }
+        windowMask.emplace_back(elementArray);
+    }
+    return true;
+}
+
+bool AniWindowUtils::ParseWindowMaskInnerValue(ani_env* env, ani_array_long innerArray,
+    std::vector<uint32_t>& elementArray)
+{
+    ani_size size;
+    ani_status aniRet = env->Array_GetLength(innerArray, &size);
+    if (aniRet != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_PC, "[ANI]Get windowMask cols failed, ret: %{public}u", aniRet);
+        return false;
+    }
+    for (ani_size i = 0; i < size; i++) {
+        ani_ref maskValueRef;
+        aniRet = env->Array_Get(innerArray, i, &maskValueRef);
+        if (aniRet != ANI_OK) {
+            TLOGE(WmsLogTag::WMS_PC, "[ANI]Get maskValueRef failed, ret: %{public}u", aniRet);
+            return false;
+        }
+        ani_long maskValue = 0;
+        aniRet = env->Object_CallMethodByName_Long(static_cast<ani_object>(maskValueRef), "unboxed", ":l", &maskValue);
+        if (aniRet != ANI_OK) {
+            TLOGE(WmsLogTag::WMS_PC, "[ANI]Get maskValue failed, ret: %{public}u", aniRet);
+            return false;
+        }
+        if (maskValue >= 0) {
+            elementArray.emplace_back(static_cast<uint32_t>(maskValue));
+        } else {
+            return false;
+        }
+    }
+    return true;
+}
+
+WmErrorCode AniWindowUtils::ParseTouchableAreas(ani_env* env, ani_array rects, const Rect& windowRect,
+    std::vector<Rect>& touchableAreas)
+{
+    WmErrorCode errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
+    ani_size size;
+    ani_status aniRet = env->Array_GetLength(rects, &size);
+    if (aniRet != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_EVENT, "[ANI]Get rects size failed, ret: %{public}u", aniRet);
+        return errCode;
+    }
+    if (size > static_cast<ani_size>(MAX_TOUCHABLE_AREAS)) {
+        TLOGE(WmsLogTag::WMS_EVENT, "[ANI]Exceed maximum rects limit, rects size: %{public}zu", size);
+        return errCode;
+    }
+    errCode = WmErrorCode::WM_OK;
+    for (ani_size i = 0; i < size; i++) {
+        ani_ref rectRef;
+        aniRet = env->Array_Get(rects, i, &rectRef);
+        if (aniRet != ANI_OK) {
+            TLOGE(WmsLogTag::WMS_EVENT, "[ANI]Get rect ref failed, ret: %{public}u", aniRet);
+            return WmErrorCode::WM_ERROR_INVALID_PARAM;
+        }
+        Rect touchableArea;
+        if (ParseAndCheckRect(env, static_cast<ani_object>(rectRef), windowRect, touchableArea)) {
+            touchableAreas.emplace_back(touchableArea);
+        } else {
+            errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
+            break;
+        }
+    }
+    return errCode;
+}
+
+bool AniWindowUtils::ParseAndCheckRect(ani_env* env, ani_object rect, const Rect& windowRect, Rect& touchableRect)
+{
+    int32_t data = 0;
+    if (AniWindowUtils::GetIntObject(env, "left", rect, data)) {
+        touchableRect.posX_ = data;
+    } else {
+        TLOGE(WmsLogTag::WMS_EVENT, "[ANI]Failed to parse rect:left");
+        return false;
+    }
+    if (AniWindowUtils::GetIntObject(env, "top", rect, data)) {
+        touchableRect.posY_ = data;
+    } else {
+        TLOGE(WmsLogTag::WMS_EVENT, "[ANI]Failed to parse rect:top");
+        return false;
+    }
+    if (AniWindowUtils::GetIntObject(env, "width", rect, data)) {
+        touchableRect.width_ = static_cast<uint32_t>(data);
+    } else {
+        TLOGE(WmsLogTag::WMS_EVENT, "[ANI]Failed to parse rect:width");
+        return false;
+    }
+    if (AniWindowUtils::GetIntObject(env, "height", rect, data)) {
+        touchableRect.height_ = static_cast<uint32_t>(data);
+    } else {
+        TLOGE(WmsLogTag::WMS_EVENT, "[ANI]Failed to parse rect:height");
+        return false;
+    }
+    if ((touchableRect.posX_ < 0) || (touchableRect.posY_ < 0) ||
+        (touchableRect.posX_ > static_cast<int32_t>(windowRect.width_)) ||
+        (touchableRect.posY_ > static_cast<int32_t>(windowRect.height_)) ||
+        (touchableRect.width_ > (windowRect.width_ - static_cast<uint32_t>(touchableRect.posX_))) ||
+        (touchableRect.height_ > (windowRect.height_ - static_cast<uint32_t>(touchableRect.posY_)))) {
+        TLOGE(WmsLogTag::WMS_EVENT, "[ANI]Outside the window area, "
+            "touchRect:[%{public}d %{public}d %{public}u %{public}u], "
+            "windowRect:[%{public}d %{public}d %{public}u %{public}u]",
+            touchableRect.posX_, touchableRect.posY_, touchableRect.width_, touchableRect.height_,
+            windowRect.posX_, windowRect.posY_, windowRect.width_, windowRect.height_);
+        return false;
+    }
+    return true;
 }
 } // namespace Rosen
 } // namespace OHOS

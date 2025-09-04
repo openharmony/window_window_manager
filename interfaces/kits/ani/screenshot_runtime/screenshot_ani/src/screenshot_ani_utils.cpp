@@ -23,7 +23,7 @@
 #include "refbase.h"
  
 namespace OHOS::Rosen {
-ani_status ScreenshotAniUtils::GetStdString(ani_env *env, ani_string ani_str, std::string &result)
+ani_status ScreenshotAniUtils::GetStdString(ani_env* env, ani_string ani_str, std::string& result)
 {
     ani_size strSize;
     ani_status ret = env->String_GetUTF8Size(ani_str, &strSize);
@@ -48,18 +48,80 @@ ani_object ScreenshotAniUtils::CreateAniUndefined(ani_env* env)
     env->GetUndefined(&aniRef);
     return static_cast<ani_object>(aniRef);
 }
+
+ani_object ScreenshotAniUtils::CreateRectObject(ani_env* env)
+{
+    ani_class aniClass{};
+    ani_status status = env->FindClass("@ohos.screenshot.screenshot.RectImpl", &aniClass);
+    if (status != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] class not found, status:%{public}d", static_cast<int32_t>(status));
+        return nullptr;
+    }
+    ani_method aniCtor;
+    auto ret = env->Class_FindMethod(aniClass, "<ctor>", ":V", &aniCtor);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Class_FindMethod failed");
+        return nullptr;
+    }
+    ani_object rectObj;
+    status = env->Object_New(aniClass, aniCtor, &rectObj);
+    if (status != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Object_New failed");
+        return nullptr;
+    }
+    return rectObj;
+}
+ 
+void ScreenshotAniUtils::ConvertRect(ani_env* env, Media::Rect rect, ani_object rectObj)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] rect area info: %{public}d, %{public}d, %{public}u, %{public}u",
+        rect.left, rect.width, rect.top, rect.height);
+    env->Object_SetFieldByName_Long(rectObj, "<property>left", rect.left);
+    env->Object_SetFieldByName_Long(rectObj, "<property>top", rect.top);
+    env->Object_SetFieldByName_Long(rectObj, "<property>width", rect.width);
+    env->Object_SetFieldByName_Long(rectObj, "<property>height", rect.height);
+}
+ 
+ani_object ScreenshotAniUtils::CreateScreenshotPickInfo(ani_env* env, std::unique_ptr<Param>& param)
+{
+    ani_class aniClass{};
+    ani_status status = env->FindClass("@ohos.screenshot.screenshot.PickInfoImpl", &aniClass);
+    if (status != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] class not found, status:%{public}d", static_cast<int32_t>(status));
+        return nullptr;
+    }
+    ani_method aniCtor;
+    auto ret = env->Class_FindMethod(aniClass, "<ctor>", ":V", &aniCtor);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Class_FindMethod failed");
+        return nullptr;
+    }
+    ani_object pickInfoObj;
+    status = env->Object_New(aniClass, aniCtor, &pickInfoObj);
+    if (status != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Object_New failed");
+        return nullptr;
+    }
+    ani_object rectObj = ScreenshotAniUtils::CreateRectObject(env);
+    ScreenshotAniUtils::ConvertRect(env, param->imageRect, rectObj);
+    env->Object_SetFieldByName_Ref(pickInfoObj, "<property>pickRect", static_cast<ani_ref>(rectObj));
+ 
+    auto nativePixelMap = Media::PixelMapTaiheAni::CreateEtsPixelMap(env, param->image);
+    env->Object_SetFieldByName_Ref(pickInfoObj, "<property>pixelMap", static_cast<ani_ref>(nativePixelMap));
+    return pickInfoObj;
+}
  
 ani_status ScreenshotAniUtils::GetAniString(ani_env* env, const std::string& str, ani_string* result)
 {
     return env->String_NewUTF8(str.c_str(), static_cast<ani_size>(str.size()), result);
 }
  
-void ScreenshotAniUtils::ConvertScreenshot(ani_env *env, std::shared_ptr<Media::PixelMap> image, ani_object obj)
+void ScreenshotAniUtils::ConvertScreenshot(ani_env* env, std::shared_ptr<Media::PixelMap> image, ani_object obj)
 {
     return;
 }
  
-ani_status ScreenshotAniUtils::CallAniFunctionVoid(ani_env *env, const char* ns,
+ani_status ScreenshotAniUtils::CallAniFunctionVoid(ani_env* env, const char* ns,
     const char* fn, const char* signature, ...)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI] begin");
@@ -90,32 +152,72 @@ ani_status ScreenshotAniUtils::CallAniFunctionVoid(ani_env *env, const char* ns,
     return ret;
 }
  
-void ScreenshotAniUtils::GetScreenshotParam(ani_env *env, std::unique_ptr<Param> &param, ani_object options)
+ani_status ScreenshotAniUtils::GetScreenshotParam(ani_env* env, const std::unique_ptr<Param>& param,
+    ani_object options)
 {
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
     if (param == nullptr) {
         TLOGI(WmsLogTag::DMS, "[ANI] null param");
-        return;
+        return ANI_INVALID_ARGS;
     }
     ani_long displayId = 0;
-    env->Object_GetPropertyByName_Long(options, "displayId", &displayId);
+    ani_status ret = ReadOptionalLongField(env, options, "displayId", displayId);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] get displayId failed");
+        return ret;
+    }
     param->option.displayId = static_cast<DisplayId>(displayId);
-    ani_int rotation = 0;
-    env->Object_GetPropertyByName_Int(options, "rotation", &rotation);
-    param->option.rotation = static_cast<int32_t>(rotation);
-    ani_boolean isNeedNotify = true;
-    env->Object_GetPropertyByName_Boolean(options, "isNotificationNeeded", &isNeedNotify);
-    param->option.isNeedNotify = static_cast<bool>(isNeedNotify);
-    ani_boolean isCaptureFullOfScreen = false;
-    env->Object_GetPropertyByName_Boolean(options, "isCaptureFullOfScreen", &isCaptureFullOfScreen);
-    param->option.isCaptureFullOfScreen = static_cast<bool>(isCaptureFullOfScreen);
-    GetScreenshotSize(env, param, options);
-    GetScreenshotRect(env, param, options);
+    
+    ret = ReadOptionalIntField(env, options, "rotation", param->option.rotation);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] get rotation failed");
+        return ret;
+    }
+
+    ret = ReadOptionalBoolField(env, options, "isNotificationNeeded", param->option.isNeedNotify);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] get isNotificationNeeded failed");
+        return ret;
+    }
+
+    ret = ReadOptionalBoolField(env, options, "isCaptureFullOfScreen", param->option.isCaptureFullOfScreen);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] get isCaptureFullOfScreen failed");
+        return ret;
+    }
+
+    ret = GetScreenshotSize(env, param, options);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] get screenshot size failed");
+        return ret;
+    }
+    ret = GetScreenshotRect(env, param, options);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] get screenshot rect failed");
+        return ret;
+    }
+    return ANI_OK;
 }
- 
-void ScreenshotAniUtils::GetScreenshotSize(ani_env *env, std::unique_ptr<Param> &param, ani_object options)
+
+ani_status ScreenshotAniUtils::GetScreenshotSize(ani_env* env, const std::unique_ptr<Param>& param, ani_object options)
 {
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
     ani_ref obj;
-    env->Object_GetPropertyByName_Ref(options, "imageSize", &obj);
+    ani_status ret = env->Object_GetPropertyByName_Ref(options, "imageSize", &obj);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] get imageSize failed");
+        return ret;
+    }
+    ani_boolean isUndefRes = false;
+    ret = env->Reference_IsUndefined(obj, &isUndefRes);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] check imageSize is undefined failed");
+        return ret;
+    }
+    if (isUndefRes) {
+        TLOGI(WmsLogTag::DMS, "[ANI] imageSize is undefined");
+        return ANI_OK;
+    }
     ani_long width;
     ani_long height;
     env->Object_GetPropertyByName_Long(static_cast<ani_object>(obj), "width", &width);
@@ -124,12 +226,28 @@ void ScreenshotAniUtils::GetScreenshotSize(ani_env *env, std::unique_ptr<Param> 
     param->option.size.height = static_cast<int32_t>(height);
     TLOGI(WmsLogTag::DMS, "[ANI] get imageSize width = %{public}d, height = %{public}d",
         param->option.size.width, param->option.size.height);
+    return ANI_OK;
 }
- 
-void ScreenshotAniUtils::GetScreenshotRect(ani_env *env, std::unique_ptr<Param> &param, ani_object options)
+
+ani_status ScreenshotAniUtils::GetScreenshotRect(ani_env* env, const std::unique_ptr<Param>& param, ani_object options)
 {
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
     ani_ref obj;
-    env->Object_GetPropertyByName_Ref(options, "screenRect", &obj);
+    ani_status ret = env->Object_GetPropertyByName_Ref(options, "screenRect", &obj);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] get screenRect failed");
+        return ret;
+    }
+    ani_boolean isUndefRes = false;
+    ret = env->Reference_IsUndefined(obj, &isUndefRes);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] check screenRect is undefined failed");
+        return ret;
+    }
+    if (isUndefRes) {
+        TLOGI(WmsLogTag::DMS, "[ANI] screenRect is undefined");
+        return ANI_OK;
+    }
     ani_long left = 0;
     ani_long top = 0;
     ani_long width = 0;
@@ -142,5 +260,65 @@ void ScreenshotAniUtils::GetScreenshotRect(ani_env *env, std::unique_ptr<Param> 
     param->option.rect.top = static_cast<int32_t>(top);
     param->option.rect.width = static_cast<int32_t>(width);
     param->option.rect.height = static_cast<int32_t>(height);
+    TLOGI(WmsLogTag::DMS,
+        "[ANI] get screenRect left = %{public}d, top = %{public}d, width = %{public}d, height = %{public}d",
+        param->option.rect.left, param->option.rect.top, param->option.rect.width, param->option.rect.height);
+    return ANI_OK;
+}
+
+ani_status ScreenshotAniUtils::ReadOptionalField(ani_env* env, ani_object obj, const char* fieldName, ani_ref& ref)
+{
+    ani_status ret = env->Object_GetPropertyByName_Ref(obj, fieldName, &ref);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to get property %{public}s, ret %{public}d", fieldName, ret);
+        return ret;
+    }
+    ani_boolean isUndefRes;
+    ret = env->Reference_IsUndefined(ref, &isUndefRes);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to check ref is undefined, ret %{public}d", ret);
+        ref = nullptr;
+        return ret;
+    }
+    if (isUndefRes) {
+        ref = nullptr;
+    }
+    return ret;
+}
+
+ani_status ScreenshotAniUtils::ReadOptionalLongField(ani_env* env, ani_object obj, const char* fieldName,
+    ani_long& value)
+{
+    ani_ref ref = nullptr;
+    ani_status result = ReadOptionalField(env, obj, fieldName, ref);
+    if (result == ANI_OK && ref != nullptr) {
+        result = env->Object_CallMethodByName_Long(reinterpret_cast<ani_object>(ref), "unboxed", ":l", &value);
+    }
+    return result;
+}
+
+
+ani_status ScreenshotAniUtils::ReadOptionalIntField(ani_env* env, ani_object obj, const char* fieldName, int& value)
+{
+    ani_ref ref = nullptr;
+    ani_status result = ReadOptionalField(env, obj, fieldName, ref);
+    if (result == ANI_OK && ref != nullptr) {
+        result = env->Object_CallMethodByName_Int(reinterpret_cast<ani_object>(ref), "unboxed", ":i", &value);
+    }
+    return result;
+}
+
+ani_status ScreenshotAniUtils::ReadOptionalBoolField(ani_env* env, ani_object obj, const char* fieldName, bool& value)
+{
+    ani_ref ref = nullptr;
+    ani_status result = ReadOptionalField(env, obj, fieldName, ref);
+    if (result == ANI_OK && ref != nullptr) {
+        ani_boolean aniBool;
+        result = env->Object_CallMethodByName_Boolean(reinterpret_cast<ani_object>(ref), "unboxed", ":z", &aniBool);
+        if (result == ANI_OK) {
+            value = static_cast<bool>(aniBool);
+        }
+    }
+    return result;
 }
 }

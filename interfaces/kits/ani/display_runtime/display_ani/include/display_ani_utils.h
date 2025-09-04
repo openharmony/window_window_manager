@@ -14,15 +14,18 @@
  */
 #ifndef OHOS_ANI_DISPLAY_UTILS_H
 #define OHOS_ANI_DISPLAY_UTILS_H
+
 #include <hitrace_meter.h>
 
 #include "ani.h"
 #include "display_ani.h"
-#include "singleton_container.h"
-#include "display_manager.h"
-#include "window_manager_hilog.h"
 #include "dm_common.h"
+#include "display_manager.h"
 #include "refbase.h"
+#include "singleton_container.h"
+#include "window_manager_hilog.h"
+#include "surface_utils.h"
+#include "screen_manager.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -36,6 +39,8 @@ static void ConvertWaterArea(WaterfallDisplayAreaRects waterfallDisplayAreaRects
 
 static void ConvertDisplayPhysicalResolution(std::vector<DisplayPhysicalResolution> &displayPhysicalArray,
     ani_object arrayObj, ani_env *env);
+
+static ani_enum_item CreateAniEnum(ani_env* env, const char* enum_descriptor, ani_size index);
 
 static ani_status CvtDisplay(sptr<Display> display, ani_env* env, ani_object obj);
 
@@ -53,10 +58,19 @@ static void CreateAniArrayDouble(ani_env* env, ani_size size, ani_array_double *
 
 static ani_status GetAniString(ani_env* env, const std::string& str, ani_string* result);
 
-static ani_status CallAniFunctionVoid(ani_env *env, const char* ns,
+static DmErrorCode GetVirtualScreenOptionFromAni(
+    ani_env* env, ani_object virtualScreenConfigObj, VirtualScreenOption& option);
+
+static bool GetSurfaceFromAni(ani_env* env, ani_string surfaceIdAniValue, sptr<Surface>& surface);
+
+static ani_status CallAniFunctionVoid(ani_env* env, const char* ns,
     const char* fn, const char* signature, ...);
 
-static ani_object CreateRectObject(ani_env *env);
+static ani_object CreateRectObject(ani_env* env);
+
+static std::shared_ptr<DisplayAni> FindAniDisplayObject(sptr<Display> display, DisplayId displayId);
+
+static void DisposeAniDisplayObject(DisplayId displayId);
 };
 }
 }

@@ -57,33 +57,63 @@ export function save(options?: ScreenshotOptions): Promise<image.PixelMap> {
 }
  
 native function saveSync(screenshotOptions?: ScreenshotOptions): image.PixelMap;
- 
-export interface ScreenshotOptions {
-    screenRect: Rect;
- 
-    imageSize: Size;
- 
-    rotation: int;
- 
-    displayId: long;
- 
-    isNotificationNeeded: boolean;
- 
-    isCaptureFullOfScreen: boolean;
+
+export function capture(options?: CaptureOption): Promise<image.PixelMap> {
+    return new Promise<image.PixelMap>((resolve: (value: image.PixelMap) => void, reject: (error: BusinessError) => void ) => {
+        taskpool.execute((): image.PixelMap => {
+            let res: image.PixelMap = captureSync(options);
+            return res;
+        }).then((ret: NullishType) => {
+            resolve(ret as image.PixelMap);
+        }).catch((err: NullishType) => {
+            reject(err as BusinessError);
+        });
+    });
 }
  
-export class ScreenshotOptionsImpl implements ScreenshotOptions{
-    screenRect: Rect;
+native function captureSync(options?: CaptureOption): image.PixelMap;
  
-    imageSize: Size;
+export function pick(): Promise<PickInfo> {
+    return new Promise<PickInfo>((resolve: (value: PickInfo) => void, reject: (error: BusinessError) => void ) => {
+        taskpool.execute((): PickInfo => {
+            let res: PickInfo = pickSync();
+            return res;
+        }).then((ret: NullishType) => {
+            resolve(ret as PickInfo);
+        }).catch((err: NullishType) => {
+            reject(err as BusinessError);
+        });
+    });
+}
  
-    rotation: int;
+native function pickSync(): PickInfo;
  
-    displayId: long;
+export interface ScreenshotOptions {
+    screenRect?: Rect;
  
-    isNotificationNeeded: boolean;
+    imageSize?: Size;
+ 
+    rotation?: int;
+ 
+    displayId?: long;
+ 
+    isNotificationNeeded?: boolean;
+ 
+    isCaptureFullOfScreen?: boolean;
+}
+ 
+export class ScreenshotOptionsImpl implements ScreenshotOptions {
+    screenRect?: Rect;
+ 
+    imageSize?: Size;
+ 
+    rotation?: int;
+ 
+    displayId?: long;
+ 
+    isNotificationNeeded?: boolean;
     
-    isCaptureFullOfScreen: boolean;
+    isCaptureFullOfScreen?: boolean;
 }
  
 export interface Size {
@@ -117,5 +147,24 @@ export class RectImpl implements Rect {
  
     height: long;
 }
+
+export interface CaptureOption {
+    displayId?: Long;
+}
  
+export class CaptureOptionImpl implements CaptureOption {
+    displayId?: Long;
+}
+ 
+export interface PickInfo {
+    pickRect: Rect;
+ 
+    pixelMap: image.PixelMap;
+}
+ 
+export class PickInfoImpl implements PickInfo {
+    pickRect: Rect;
+ 
+    pixelMap: image.PixelMap;
+}
 }
