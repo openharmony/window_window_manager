@@ -22,7 +22,6 @@
 #include "window_manager_hilog.h"
 #include "display_manager.h"
 #include "dm_common.h"
-#include "pixel_map_taihe_ani.h"
 #include "refbase.h"
 #include "screenshot_ani_utils.h"
 #include "ani_err_utils.h"
@@ -39,39 +38,38 @@ void ScreenshotManagerAni::InitScreenshotManagerAni(ani_namespace nsp, ani_env* 
  
 ani_object ScreenshotManagerAni::Save(ani_env* env, ani_object options)
 {
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
     auto param = std::make_unique<Param>();
-    if (param == nullptr) {
-        TLOGI(WmsLogTag::DMS, "Create param failed.");
-        return nullptr;
-    }
     param->option.displayId = DisplayManager::GetInstance().GetDefaultDisplayId();
     ani_boolean optionsUndefined = 0;
     env->Reference_IsUndefined(options, &optionsUndefined);
     param->validInputParam = true;
     if (!optionsUndefined) {
         param->useInputOption = true;
-        ScreenshotAniUtils::GetScreenshotParam(env, param, options);
+        ani_status ret = ScreenshotAniUtils::GetScreenshotParam(env, param, options);
+        if (ret != ANI_OK) {
+            AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "get screen shot param failed");
+            return nullptr;
+        }
     }
     param->isPick = false;
-    GetScreenshot(env, param);
+    GetScreenshot(param);
     if (param->wret != DmErrorCode::DM_OK) {
-        if (param->wret == DmErrorCode::DM_ERROR_NO_PERMISSION ||
-            param->wret == DmErrorCode::DM_ERROR_INVALID_PARAM ||
-            param->wret == DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT ||
-            param->wret == DmErrorCode::DM_ERROR_SYSTEM_INNORMAL) {
-            AniErrUtils::ThrowBusinessError(env, param->wret, param->errMessage);
-        }
+        AniErrUtils::ThrowBusinessError(env, param->wret, param->errMessage);
         return ScreenshotAniUtils::CreateAniUndefined(env);
     }
-    if (param->image != nullptr) {
-        TLOGI(WmsLogTag::DMS, "save pixelMap, currentId = %{public}d", static_cast<int>(param->image->currentId));
+    if (param->image == nullptr) {
+        TLOGE(WmsLogTag::DMS, "save pixelMap failed");
+        return ScreenshotAniUtils::CreateAniUndefined(env);
     }
+    TLOGI(WmsLogTag::DMS, "save pixelMap, currentId = %{public}d", static_cast<int>(param->image->currentId));
     auto nativePixelMap = Media::PixelMapTaiheAni::CreateEtsPixelMap(env, param->image);
     return nativePixelMap;
 }
  
-void ScreenshotManagerAni::GetScreenshot(ani_env *env, std::unique_ptr<Param> &param)
+void ScreenshotManagerAni::GetScreenshot(std::unique_ptr<Param>& param)
 {
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
     if (!param->validInputParam) {
         TLOGI(WmsLogTag::DMS, "Get Screenshot invalidInputParam");
         param->image = nullptr;
@@ -108,9 +106,97 @@ void ScreenshotManagerAni::GetScreenshot(ani_env *env, std::unique_ptr<Param> &p
         }
     }
     if (param->image == nullptr && param->wret == DmErrorCode::DM_OK) {
-        TLOGI(WmsLogTag::DMS, "Get Screenshot failed!");
+        TLOGE(WmsLogTag::DMS, "Get Screenshot failed!");
         param->wret = DmErrorCode::DM_ERROR_INVALID_SCREEN;
         param->errMessage = "Get Screenshot failed: Screenshot image is nullptr";
+        return;
+    }
+}
+
+ani_object ScreenshotManagerAni::Capture(ani_env* env, ani_object options)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI]");
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] env is nullptr");
+        return nullptr;
+    }
+    auto param = std::make_unique<Param>();
+    param->option.displayId = DisplayManager::GetInstance().GetDefaultDisplayId();
+    param->option.isNeedNotify = true;
+    param->option.isNeedPointer = true;
+    ani_boolean optionsUndefined = 0;
+    env->Reference_IsUndefined(options, &optionsUndefined);
+    if (!optionsUndefined) {
+        ani_long displayId = 0;
+        ani_status ret = ScreenshotAniUtils::ReadOptionalLongField(env, options, "displayId", displayId);
+        TLOGI(WmsLogTag::DMS, "[ANI] displayId %{public}llu", static_cast<DisplayId>(displayId));
+        if (ret != ANI_OK) {
+            TLOGE(WmsLogTag::DMS, "[ANI] get displayId failed");
+            return nullptr;
+        }
+        param->option.displayId = static_cast<DisplayId>(displayId);
+    }
+    GetScreenshotCapture(param);
+    if (param->wret != DmErrorCode::DM_OK) {
+        AniErrUtils::ThrowBusinessError(env, param->wret, param->errMessage);
+        return ScreenshotAniUtils::CreateAniUndefined(env);
+    }
+    if (param->image == nullptr) {
+        TLOGE(WmsLogTag::DMS, "capture pixelMap failed");
+        return ScreenshotAniUtils::CreateAniUndefined(env);
+    }
+    TLOGI(WmsLogTag::DMS, "capture pixelMap, currentId = %{public}d", static_cast<int>(param->image->currentId));
+    auto nativePixelMap = Media::PixelMapTaiheAni::CreateEtsPixelMap(env, param->image);
+    return nativePixelMap;
+}
+ 
+void ScreenshotManagerAni::GetScreenshotCapture(std::unique_ptr<Param>& param)
+{
+    CaptureOption captureOption;
+    captureOption.displayId_ = param->option.displayId;
+    captureOption.isNeedNotify_ = param->option.isNeedNotify;
+    captureOption.isNeedPointer_ = param->option.isNeedPointer;
+    TLOGI(WmsLogTag::DMS, "capture option isNeedNotify=%{public}d isNeedPointer=%{public}d",
+        captureOption.isNeedNotify_, captureOption.isNeedPointer_);
+    param->image = DisplayManager::GetInstance().GetScreenCapture(captureOption, &param->wret);
+    if (param->image == nullptr && param->wret == DmErrorCode::DM_OK) {
+        TLOGE(WmsLogTag::DMS, "screen capture failed!");
+        param->wret = DmErrorCode::DM_ERROR_SYSTEM_INNORMAL;
+        param->errMessage = "ScreenCapture failed: image is null.";
+        return;
+    }
+}
+ 
+ani_object ScreenshotManagerAni::Pick(ani_env* env)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI]");
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] env is nullptr");
+        return nullptr;
+    }
+    auto param = std::make_unique<Param>();
+    param->isPick = true;
+    GetScreenshotPick(param);
+    if (param->wret != DmErrorCode::DM_OK) {
+        AniErrUtils::ThrowBusinessError(env, param->wret, param->errMessage);
+        return ScreenshotAniUtils::CreateAniUndefined(env);
+    }
+    if (param->image == nullptr) {
+        TLOGE(WmsLogTag::DMS, "pick pixelMap failed");
+        return ScreenshotAniUtils::CreateAniUndefined(env);
+    }
+    TLOGI(WmsLogTag::DMS, "pick pixelMap, currentId = %{public}d", static_cast<int>(param->image->currentId));
+    return ScreenshotAniUtils::CreateScreenshotPickInfo(env, param);
+}
+ 
+void ScreenshotManagerAni::GetScreenshotPick(std::unique_ptr<Param>& param)
+{
+    TLOGI(WmsLogTag::DMS, "Start");
+    param->image = DisplayManager::GetInstance().GetSnapshotByPicker(param->imageRect, &param->wret);
+    if (param->image == nullptr && param->wret == DmErrorCode::DM_OK) {
+        TLOGE(WmsLogTag::DMS, "screen pick failed!");
+        param->wret = DmErrorCode::DM_ERROR_SYSTEM_INNORMAL;
+        param->errMessage = "ScreenshotPick failed: image is null.";
         return;
     }
 }
@@ -135,6 +221,10 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     std::array funcs = {
         ani_native_function {"saveSync", nullptr,
             reinterpret_cast<void *>(ScreenshotManagerAni::Save)},
+        ani_native_function {"captureSync", nullptr,
+            reinterpret_cast<void *>(ScreenshotManagerAni::Capture)},
+        ani_native_function {"pickSync", nullptr,
+            reinterpret_cast<void *>(ScreenshotManagerAni::Pick)},
     };
     if ((ret = env->Namespace_BindNativeFunctions(nsp, funcs.data(), funcs.size()))) {
         TLOGE(WmsLogTag::DMS, "[ANI] bind namespace fail %{public}u", ret);

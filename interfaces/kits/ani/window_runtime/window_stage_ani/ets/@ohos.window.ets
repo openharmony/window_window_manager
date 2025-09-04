@@ -717,6 +717,13 @@ export enum RectType {
   RELATIVE_TO_PARENT_WINDOW = 1
 }
 
+export enum BlurStyle {
+  OFF = 0,
+  THIN = 1,
+  REGULAR = 2,
+  THICK = 3
+}
+
 export interface SystemBarProperties {
     /**
      * The color of the status bar.
@@ -732,7 +739,7 @@ export interface SystemBarProperties {
      * @atomicservice
      * @since 12
      */
-    statusBarColor: string;
+    statusBarColor?: string;
 
     /**
      * The light icon of the status bar.
@@ -748,7 +755,7 @@ export interface SystemBarProperties {
      * @atomicservice
      * @since 12
      */
-    isStatusBarLightIcon: boolean;
+    isStatusBarLightIcon?: boolean;
 
     /**
      * The content color of the status bar
@@ -764,7 +771,7 @@ export interface SystemBarProperties {
      * @atomicservice
      * @since 12
      */
-    statusBarContentColor: string;
+    statusBarContentColor?: string;
 
     /**
      * The color of the navigation bar.
@@ -780,7 +787,7 @@ export interface SystemBarProperties {
      * @atomicservice
      * @since 12
      */
-    navigationBarColor: string;
+    navigationBarColor?: string;
 
     /**
      * The light icon of the navigation bar.
@@ -796,7 +803,7 @@ export interface SystemBarProperties {
      * @atomicservice
      * @since 12
      */
-    isNavigationBarLightIcon: boolean;
+    isNavigationBarLightIcon?: boolean;
 
     /**
      * The content color of the navigation bar
@@ -812,7 +819,7 @@ export interface SystemBarProperties {
      * @atomicservice
      * @since 12
      */
-    navigationBarContentColor: string;
+    navigationBarContentColor?: string;
 
     /**
      * Enable the animation of the status bar.
@@ -822,7 +829,7 @@ export interface SystemBarProperties {
      * @atomicservice
      * @since 12
      */
-    enableStatusBarAnimation: boolean;
+    enableStatusBarAnimation?: boolean;
 
     /**
      * Enable the animation of the navigation bar.
@@ -832,18 +839,18 @@ export interface SystemBarProperties {
      * @atomicservice
      * @since 12
      */
-    enableNavigationBarAnimation: boolean;
+    enableNavigationBarAnimation?: boolean;
 }
 
 export class SystemBarPropertiesInternal implements SystemBarProperties {
-    statusBarColor: string = "";
-    isStatusBarLightIcon: boolean;
-    statusBarContentColor: string = "";
-    navigationBarColor: string = "";
-    isNavigationBarLightIcon: boolean;
-    navigationBarContentColor: string = "";
-    enableStatusBarAnimation: boolean;
-    enableNavigationBarAnimation: boolean;
+    statusBarColor?: string;
+    isStatusBarLightIcon?: boolean;
+    statusBarContentColor?: string;
+    navigationBarColor?: string;
+    isNavigationBarLightIcon?: boolean;
+    navigationBarContentColor?: string;
+    enableStatusBarAnimation?: boolean;
+    enableNavigationBarAnimation?: boolean;
 }
 
 /**
@@ -1301,6 +1308,10 @@ export interface WindowDensityInfo {
     systemDensity: double;
     defaultDensity: double;
     customDensity: double;
+}
+
+export interface SystemBarStyle {
+  statusBarContentColor?: string;
 }
 
 export interface AvoidAreaOptions {
@@ -2125,9 +2136,17 @@ export class WindowInternal implements Window {
     private native rotate(nativeObj: long, rotateOptions: RotateOptions): void;
     private native setShadow(nativeObj: long, radius: double, color?: string,
       offsetX?: double, offsetY?: double): void;
-
+    private native setBlur(nativeObj: long, radius: double): void;
+    private native setBackdropBlurStyle(nativeObj: long, blurStyle: int): void;
+    private native setBackdropBlur(nativeObj: long, radius: double): void;
+    private native getWindowCornerRadius(nativeObj: long): double;
+    private native setWindowCornerRadiusSync(nativeObj: long, cornerRadius: double): void;
+    private native setWindowShadowRadius(nativeObj: long, radius: double): void;
+    private native setTouchableAreas(nativeObj: long, rects: Array<Rect>): void;
+    private native setCornerRadiusSync(nativeObj: long, cornerRadius: double): void;
     private native setWindowColorSpaceSync(nativeObj: long, colorSpace: int): void;
     private native setPreferredOrientationSync(nativeObj: long, orientation: int): void;
+    private native getPreferredOrientation(nativeObj: long): int;
     private native setWindowPrivacyModeSync(nativeObj: long, isPrivacyMode: boolean): void;
     private native recoverSync(nativeObj: long): void;
     private native setUIContentSync(nativeObj: long, path: string): void;
@@ -2154,6 +2173,8 @@ export class WindowInternal implements Window {
     private native isFocusedSync(nativeObj: long): boolean;
     private native setSubWindowZLevelSync(nativeObj: long, zLevel: int): void;
     private native setWindowTouchableSync(nativeObj: long, isTouchable: boolean): void;
+    private native setDialogBackGestureEnabledSync(nativeObj: long, enabled: boolean): void;
+    private native setWindowMaskSync(nativeObj: long, windowMask: Array<Array<long>>): void;
     private native onNoInteractionDetected(nativeObj: long, type: string, timeout: long, callback: Object): void;
     private native keepKeyboardOnFocusSync(nativeObj: long, enable: boolean): void;
     private native onSync(nativeObj: long, type: string, callback: object): void;
@@ -2716,6 +2737,10 @@ export class WindowInternal implements Window {
       });
     }
 
+    public getPreferredOrientation(): Orientation {
+      return this.getPreferredOrientation(this.nativeObj) as Orientation;
+    }
+
     public setWindowPrivacyMode(isPrivacyMode: boolean): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
@@ -3046,6 +3071,34 @@ export class WindowInternal implements Window {
       });
     }
 
+    public setDialogBackGestureEnabled(enabled: boolean): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+         taskpool.execute((): void => {
+           this.setDialogBackGestureEnabledSync(this.nativeObj, enabled);
+         }).then((ret: NullishType) => {
+           resolve(undefined);
+         }).catch((err: NullishType) => {
+           reject(err as BusinessError);
+         });
+       });
+    }
+
+    public setWindowMask(windowMask: Array<Array<long>>): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.setWindowMaskSync(this.nativeObj, windowMask);
+        }).then((ret: NullishType) => {
+          resolve(undefined);
+        }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
+    public setTouchableAreas(rects: Array<Rect>): void {
+      this.setTouchableAreas(this.nativeObj, rects);
+    }
+
     public opacity(opacity: double): void {
       this.opacity(this.nativeObj, opacity);
     }
@@ -3064,6 +3117,42 @@ export class WindowInternal implements Window {
 
     public setShadow(radius: double, color?: string, offsetX?: double, offsetY?: double): void {
       this.setShadow(this.nativeObj, radius, color, offsetX, offsetY);
+    }
+
+    public setCornerRadius(cornerRadius: double): void {
+      this.setCornerRadiusSync(this.nativeObj, cornerRadius);
+    }
+
+    public setBlur(radius: double): void {
+      this.setBlur(this.nativeObj, radius);
+    }
+
+    public setBackdropBlurStyle(blurStyle: BlurStyle): void {
+      this.setBackdropBlurStyle(this.nativeObj, blurStyle);
+    }
+
+    public setBackdropBlur(radius: double): void {
+      this.setBackdropBlur(this.nativeObj, radius);
+    }
+
+    public getWindowCornerRadius(): double {
+      return this.getWindowCornerRadius(this.nativeObj);
+    }
+
+    public setWindowCornerRadius(cornerRadius: double): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.setWindowCornerRadiusSync(this.nativeObj, cornerRadius);
+        }).then((ret: NullishType) => {
+          resolve(undefined);
+        }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
+    public setWindowShadowRadius(radius: double): void {
+      this.setWindowShadowRadius(this.nativeObj, radius);
     }
 
     public on<T>(type: string, callback: Callback<T>): void {
@@ -3233,6 +3322,7 @@ export interface Window {
     setWindowColorSpace(colorSpace: ColorSpace, callback: AsyncCallback<void>): void;
     setPreferredOrientation(orientation: Orientation): Promise<void>;
     setPreferredOrientation(orientation: Orientation, callback: AsyncCallback<void>): void;
+    getPreferredOrientation(): Orientation;
     setWindowPrivacyMode(isPrivacyMode: boolean): Promise<void>;
     setWindowPrivacyMode(isPrivacyMode: boolean, callback: AsyncCallback<void>): void;
     recover(): Promise<void>;
@@ -3276,11 +3366,21 @@ export interface Window {
     keepKeyboardOnFocus(enable: boolean): void;
     setWindowTouchable(isTouchable: boolean): Promise<void>
     setWindowTouchable(isTouchable: boolean, callback: AsyncCallback<void>): void
+    setDialogBackGestureEnabled(enabled: boolean): Promise<void>;
+    setWindowMask(windowMask: Array<Array<long>>): Promise<void>;
+    setTouchableAreas(rects: Array<Rect>): void;
     opacity(opacity: double): void;
     scale(scaleOptions: ScaleOptions): void;
     translate(translateOptions: TranslateOptions): void;
     rotate(rotateOptions: RotateOptions): void;
     setShadow(radius: double, color?: string, offsetX?: double, offsetY?: double): void;
+    setCornerRadius(cornerRadius: double): void;
+    setBlur(radius: double): void;
+    setBackdropBlurStyle(blurStyle: BlurStyle): void;
+    setBackdropBlur(radius: double): void;
+    getWindowCornerRadius(): double;
+    setWindowCornerRadius(cornerRadius: double): Promise<void>;
+    setWindowShadowRadius(radius: double): void;
     on<T>(type: string, callback: Callback<T>): void;
     on<T>(type: 'noInteractionDetected', timeout: long, callback: Callback<T>): void;
     off<T>(type: string, callback?: Callback<T>): void;
@@ -3303,6 +3403,7 @@ native function findWindowSync(nativeObj: long, name: string): Window;
 native function onSync(nativeObj: long, type: string, callback: object): void;
 native function offSync(nativeObj: long, type: string, callback?: object): void;
 native function shiftAppWindowFocusSync(nativeObj: long, sourceWindowId: int, targetWindowId: int): void;
+native function shiftAppWindowPointerEventSync(nativeObj: long, sourceWindowId: int, targetWindowId: int): void;
 native function createWindowSync(nativeObj: long, config: Configuration): Window;
 
 export function getLastWindow(ctx: BaseContext): Promise<Window> {
@@ -3453,6 +3554,18 @@ export function shiftAppWindowFocus(sourceWindowId: int, targetWindowId: int): P
       }).catch((err: NullishType) => {
           reject(err as BusinessError);
       });
+  });
+}
+
+export function shiftAppWindowPointerEvent(sourceWindowId: int, targetWindowId: int): Promise<void> {
+  return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+    taskpool.execute((): void => {
+      return shiftAppWindowPointerEventSync(nativeObj, sourceWindowId, targetWindowId);
+    }).then((ret: NullishType) => {
+      resolve(undefined);
+    }).catch((err: NullishType) => {
+      reject(err as BusinessError);
+    });
   });
 }
 

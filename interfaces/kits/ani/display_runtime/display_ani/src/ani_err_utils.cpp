@@ -14,10 +14,11 @@
  */
 
 #include "ani_err_utils.h"
-#include "display_ani_utils.h"
-#include "window_manager_hilog.h"
 
 #include <map>
+
+#include "display_ani_utils.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
 

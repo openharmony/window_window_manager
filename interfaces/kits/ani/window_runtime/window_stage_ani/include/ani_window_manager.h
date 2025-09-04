@@ -43,6 +43,8 @@ public:
     static void UnregisterWindowManagerCallback(ani_env* env, ani_long nativeObj, ani_string type, ani_ref callback);
     static void ShiftAppWindowFocus(ani_env* env, ani_long nativeObj,
         ani_int sourceWindowId, ani_int targetWindowId);
+    static void ShiftAppWindowPointerEvent(ani_env* env, ani_long nativeObj,
+        ani_int sourceWindowId, ani_int targetWindowId);
 private:
     ani_object OnGetWindowsByCoordinate(ani_env* env, ani_object getWindowsParam);
     ani_ref OnGetLastWindow(ani_env* env, ani_object context);
@@ -50,6 +52,7 @@ private:
     ani_ref OnCreateWindow(ani_env* env, ani_object configuration);
     void OnMinimizeAll(ani_env* env, ani_long displayId);
     void OnShiftAppWindowFocus(ani_env* env, ani_int sourceWindowId, ani_int targetWindowId);
+    void OnShiftAppWindowPointerEvent(ani_env* env, ani_int sourceWindowId, ani_int targetWindowId);
     ani_object GetTopWindowTask(ani_env* env, void* contextPtr, bool newApi);
     void OnRegisterWindowManagerCallback(ani_env* env, ani_string type, ani_ref callback);
     void OnUnregisterWindowManagerCallback(ani_env* env, ani_string type, ani_ref callback);

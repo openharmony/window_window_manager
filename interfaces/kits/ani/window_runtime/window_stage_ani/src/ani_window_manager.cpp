@@ -17,21 +17,18 @@
 
 #include <ability.h>
 
+#include "ability_context.h"
 #include "ani.h"
 #include "ani_window.h"
 #include "ani_window_stage.h"
-#include "ani_window.h"
-#include "ani_window_stage.h"
 #include "ani_window_utils.h"
+#include "permission.h"
 #include "singleton_container.h"
+#include "window_helper.h"
 #include "window_manager.h"
 #include "window_manager_hilog.h"
-#include "window_scene.h"
-#include "ani_window_utils.h"
-#include "ability_context.h"
 #include "window_option.h"
-#include "window_helper.h"
-#include "permission.h"
+#include "window_scene.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -68,6 +65,8 @@ ani_status AniWindowManager::AniWindowManagerInit(ani_env* env)
         ani_native_function {"minimizeAllSync", "ll:", reinterpret_cast<void *>(AniWindowManager::MinimizeAll)},
         ani_native_function {"shiftAppWindowFocusSync", "lii:",
             reinterpret_cast<void *>(AniWindowManager::ShiftAppWindowFocus)},
+        ani_native_function {"shiftAppWindowPointerEventSync", "lii:",
+            reinterpret_cast<void *>(AniWindowManager::ShiftAppWindowPointerEvent)},
         ani_native_function {"onSync", nullptr,
             reinterpret_cast<void *>(AniWindowManager::RegisterWindowManagerCallback)},
         ani_native_function {"offSync", nullptr,
@@ -231,10 +230,10 @@ ani_ref CreateAniSystemWindow(ani_env* env, void* contextPtr, sptr<WindowOption>
     WMError wmError = WMError::WM_OK;
     sptr<Window> window = Window::Create(windowOption->GetWindowName(), windowOption, context->lock(), wmError);
     WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(wmError);
-    if (window == nullptr && wmErrorCode != WmErrorCode::WM_OK) {
-        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-    } else {
+    if (window != nullptr && wmErrorCode == WmErrorCode::WM_OK) {
         return CreateAniWindowObject(env, window);
+    } else {
+        return AniWindowUtils::AniThrowError(env, wmErrorCode, "Create window failed");
     }
 }
 
@@ -301,15 +300,28 @@ bool ParseConfigOption(ani_env* env, ani_object configuration, WindowOption &opt
 
     ani_ref result;
     env->Object_GetPropertyByName_Ref(configuration, "title", &result);
-    ani_string aniDialogTitle = reinterpret_cast<ani_string>(result);
-    std::string dialogTitle;
-    AniWindowUtils::GetStdString(env, aniDialogTitle, dialogTitle);
-    TLOGI(WmsLogTag::DEFAULT, "[ANI] dialogTitle: %{public}s", dialogTitle.c_str());
-    option.SetDialogTitle(dialogTitle);
+    ani_boolean isTitleUndefined = false;
+    env->Reference_IsUndefined(result, &isTitleUndefined);
+    if (!isTitleUndefined) {
+        ani_string aniDialogTitle = reinterpret_cast<ani_string>(result);
+        std::string dialogTitle;
+        AniWindowUtils::GetStdString(env, aniDialogTitle, dialogTitle);
+        TLOGI(WmsLogTag::DEFAULT, "[ANI] dialogTitle: %{public}s", dialogTitle.c_str());
+        option.SetDialogTitle(dialogTitle);
+    }
 
     env->Object_GetPropertyByName_Ref(configuration, "ctx", &result);
-    ani_object aniContextPtr = reinterpret_cast<ani_object>(result);
-    contextPtr = AniWindowUtils::GetAbilityContext(env, aniContextPtr);
+    ani_boolean isCtxUndefined = false;
+    env->Reference_IsUndefined(result, &isCtxUndefined);
+    if (!isCtxUndefined) {
+        ani_object aniContextPtr = reinterpret_cast<ani_object>(result);
+        contextPtr = AniWindowUtils::GetAbilityContext(env, aniContextPtr);
+        auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(contextPtr);
+        if (context == nullptr) {
+            TLOGE(WmsLogTag::DEFAULT, "[ANI] context is nullptr");
+            return AniWindowUtils::AniThrowError(env, WMError::WM_ERROR_NULLPTR, "Stage mode without context");
+        }
+    }
 
     ani_boolean dialogDecorEnable;
     env->Object_GetPropertyByName_Boolean(configuration, "decorEnabled", &dialogDecorEnable);
@@ -321,7 +333,7 @@ bool ParseConfigOption(ani_env* env, ani_object configuration, WindowOption &opt
     if (displayId < 0 ||
         SingletonContainer::Get<DisplayManager>().GetDisplayById(static_cast<uint64_t>(displayId)) == nullptr) {
         TLOGI(WmsLogTag::DEFAULT, "[ANI] DisplayId is invalid");
-        return false;
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     option.SetDisplayId(displayId);
 
@@ -447,6 +459,36 @@ void AniWindowManager::OnShiftAppWindowFocus(ani_env* env, ani_int sourceWindowI
         AniWindowUtils::AniThrowError(env, ret, "ShiftAppWindowFocus failed.");
     }
     return ;
+}
+
+void AniWindowManager::ShiftAppWindowPointerEvent(ani_env* env, ani_long nativeObj,
+    ani_int sourceWindowId, ani_int targetWindowId)
+{
+    AniWindowManager* aniWindowManager = reinterpret_cast<AniWindowManager*>(nativeObj);
+    if (aniWindowManager != nullptr) {
+        aniWindowManager->OnShiftAppWindowPointerEvent(env, sourceWindowId, targetWindowId);
+    } else {
+        TLOGE(WmsLogTag::WMS_PC, "[ANI]aniWindowManager is nullptr!");
+    }
+}
+
+void AniWindowManager::OnShiftAppWindowPointerEvent(ani_env* env, ani_int sourceWindowId, ani_int targetWindowId)
+{
+    TLOGI(WmsLogTag::WMS_PC, "[ANI]sourceWindowId: %{public}d, targetWindowId: %{public}d",
+        sourceWindowId, targetWindowId);
+    if (sourceWindowId == static_cast<int32_t>(INVALID_WINDOW_ID) ||
+        targetWindowId == static_cast<int32_t>(INVALID_WINDOW_ID)) {
+        TLOGE(WmsLogTag::WMS_PC, "[ANI]invalid sourceWindowId or targetWindowId");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return;
+    }
+    WmErrorCode ret = AniWindowUtils::ToErrorCode(
+        SingletonContainer::Get<WindowManager>().ShiftAppWindowPointerEvent(sourceWindowId, targetWindowId));
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_PC, "[ANI]ShiftAppWindowPointerEvent failed, ret: %{public}d", ret);
+        AniWindowUtils::AniThrowError(env, ret, "ShiftAppWindowPointerEvent failed!");
+    }
+    return;
 }
 }  // namespace Rosen
 }  // namespace OHOS
