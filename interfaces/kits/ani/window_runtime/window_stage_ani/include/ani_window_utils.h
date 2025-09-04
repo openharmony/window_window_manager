@@ -59,8 +59,6 @@ public:
     static ani_object CreateAniSize(ani_env* env, int32_t width, int32_t height);
     static ani_object CreateAniRect(ani_env* env, const Rect& rect);
     static ani_object CreateAniAvoidArea(ani_env* env, const AvoidArea& avoidArea, AvoidAreaType type);
-    static ani_object CreateAniTitleButtonRect(ani_env* env, const TitleButtonRect& rect);
-    static ani_object CreateAniDecorButtonStyle(ani_env* env, const DecorButtonStyle& style);
     static ani_object CreateAniKeyboardInfo(ani_env* env, const KeyboardPanelInfo& keyboardPanelInfo);
     static ani_object CreateAniSystemBarTintState(ani_env* env, DisplayId displayId, const SystemBarRegionTints& tints);
     static ani_object CreateAniSystemBarRegionTint(ani_env* env, const SystemBarRegionTint& tint);
