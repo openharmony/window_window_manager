@@ -1409,7 +1409,6 @@ HWTEST_F(MoveDragControllerTest, HasPointDown, TestSize.Level1)
 HWTEST_F(MoveDragControllerTest, ProcessSessionRectChange, TestSize.Level1)
 {
     bool isCallbackCalled = false;
-    auto preCallback = moveDragController->moveDragCallback_;
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;
     MoveDragCallback callBack = [&isCallbackCalled](SizeChangeReason reason) {
         isCallbackCalled = true;
