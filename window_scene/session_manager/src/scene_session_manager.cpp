@@ -12971,10 +12971,10 @@ void SceneSessionManager::NotifyClearSession(int32_t collaboratorType, int32_t p
     TLOGD(WmsLogTag::WMS_LIFE, "id: %{public}d, type: %{public}d", persistentId, collaboratorType);
     if (auto collaborator = GetCollaboratorByType(collaboratorType)) {
         const char* const where = __func__;
-        ffrtQueueHelper_->SubmitTask([this, collaborator, persistentId, where] {
+        ffrtQueueHelper_->SubmitTask([userId = currentUserId_.load(), collaborator, persistentId, where] {
             int timerId = HiviewDFX::XCollie::GetInstance().SetTimer("WMS:SSM:NotifyClearMission",
                 NOTIFY_START_ABILITY_TIMEOUT/1000, nullptr, nullptr, HiviewDFX::XCOLLIE_FLAG_LOG);
-            int32_t ret = collaborator->NotifyClearMission(persistentId, this->currentUserId_);
+            int32_t ret = collaborator->NotifyClearMission(persistentId, userId);
             HiviewDFX::XCollie::GetInstance().CancelTimer(timerId);
             TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s called clear mission ret: %{public}d, persistent id: %{public}d",
                 where, ret, persistentId);
