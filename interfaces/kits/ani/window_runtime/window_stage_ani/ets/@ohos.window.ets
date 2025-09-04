@@ -1435,70 +1435,70 @@ export interface WindowLimits {
     /**
      * The right of the Rect.
      *
-     * @type { number }
+     * @type { int }
      * @syscap SystemCapability.Window.SessionManager
      * @since 11
      */
     /**
      * The right of the Rect.
      *
-     * @type { number }
+     * @type { int }
      * @syscap SystemCapability.Window.SessionManager
      * @atomicservice
      * @since 12
      */
-    right: number;
+    right: int;
 
     /**
      * The top of the Rect.
      *
-     * @type { number }
+     * @type { int }
      * @syscap SystemCapability.Window.SessionManager
      * @since 11
      */
     /**
      * The top of the Rect.
      *
-     * @type { number }
+     * @type { int }
      * @syscap SystemCapability.Window.SessionManager
      * @atomicservice
      * @since 12
      */
-    top: number;
+    top: int;
 
     /**
      * The width of the Rect.
      *
-     * @type { number }
+     * @type { int }
      * @syscap SystemCapability.Window.SessionManager
      * @since 11
      */
     /**
      * The width of the Rect.
      *
-     * @type { number }
+     * @type { int }
      * @syscap SystemCapability.Window.SessionManager
      * @atomicservice
      * @since 12
      */
-    width: number;
+    width: int;
 
     /**
      * The height of the Rect.
      *
-     * @type { number }
+     * @type { int }
      * @syscap SystemCapability.Window.SessionManager
      * @since 11
      */
     /**
      * The height of the Rect.
      *
-     * @type { number }
+     * @type { int }
      * @syscap SystemCapability.Window.SessionManager
      * @atomicservice
      * @since 12
      */
-    height: number;
+    height: int;
   }
 
 /**
@@ -1524,32 +1524,52 @@ export interface DecorButtonStyle {
   /**
    * button background size when hover.
    * 
-   * @type { ?number }
+   * @type { ?int }
    * @syscap SystemCapability.Window.SessionManager
    * @atomicservice
    * @since 14
    */
-  buttonBackgroundSize?: number;
+  buttonBackgroundSize?: int;
 
   /**
    * button spacing.
    * 
-   * @type { ?number }
+   * @type { ?int }
    * @syscap SystemCapability.Window.SessionManager
    * @atomicservice
    * @since 14
    */
-  spacingBetweenButtons?: number;
+  spacingBetweenButtons?: int;
 
   /**
    * close button right margin.
    * 
-   * @type { ?number }
+   * @type { ?int }
    * @syscap SystemCapability.Window.SessionManager
    * @atomicservice
    * @since 14
    */
-  closeButtonRightMargin?: number;
+  closeButtonRightMargin?: int;
+
+  /**
+   * button icon size.
+   *
+   * @type { ?int }
+   * @syscap SystemCapability.Window.SessionManager
+   * @atomicservice
+   * @since 20
+   */
+  buttonIconSize?: int;
+
+  /**
+   * corner radius of button background when hover.
+   *
+   * @type { ?int }
+   * @syscap SystemCapability.Window.SessionManager
+   * @atomicservice
+   * @since 20
+   */
+  buttonBackgroundCornerRadius?: int;
 }
 
 export interface WindowTitleButtonVisibleParam {
@@ -2108,7 +2128,7 @@ export class WindowInternal implements Window {
     private native resize(nativeObj: long, width: int, height: int): void;
     private native moveWindowTo(nativeObj: long, x: int, y: int): void;
     private native getGlobalRect(nativeObj:long): Rect;
-
+    private native setHandwritingFlag(nativeObj: long, enable: boolean): void;
     private native getWindowDecorHeight(nativeObj:long): int;
     private native setWindowBackgroundColor(nativeObj: long, color: string): int;
     private native setImmersiveModeEnabledState(nativeObj: long, enable: boolean): int;
@@ -2432,7 +2452,19 @@ export class WindowInternal implements Window {
        let ret = this.getGlobalRect(this.nativeObj);
        return ret;
     }
-  
+
+    public setHandwritingFlag(enable: boolean): Promise<void> {
+        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) :void => {
+            taskpool.execute((): void => {
+                this.setHandwritingFlag(this.nativeObj, enable);
+            }).then((ret: NullishType) :void => {
+                resolve(undefined);
+            }).catch((err: NullishType) :void => {
+                reject(err as BusinessError);
+            });
+        });
+    }
+
     public getWindowDecorHeight(): int {
        let ret = this.getWindowDecorHeight(this.nativeObj);
        return ret;
@@ -3125,6 +3157,7 @@ export interface Window {
     resize(width: int, height: int, callback: AsyncCallback<void>): void;
     moveWindowTo(x: int, y: int, callback: AsyncCallback<void>): void;
     getGlobalRect(): Rect;
+    setHandwritingFlag(enable: boolean): Promise<void>;
     getWindowDecorHeight(): int;
     setWindowBackgroundColor(color: string | ColorMetrics): void;
     setBackgroundColor(color: string): Promise<void>;

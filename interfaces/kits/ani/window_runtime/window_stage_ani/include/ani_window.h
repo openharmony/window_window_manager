@@ -69,6 +69,7 @@ public:
     static void UnregisterWindowCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
         ani_ref callback);
     static void ShowWindow(ani_env* env, ani_object obj, ani_long nativeObj);
+    static void SetHandwritingFlag(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean enable);
     static void DestroyWindow(ani_env* env, ani_object obj, ani_long nativeObj);
     static ani_boolean IsWindowShowing(ani_env* env, ani_object obj, ani_long nativeObj);
     static void HideWithAnimation(ani_env* env, ani_object obj, ani_long nativeObj);
@@ -154,6 +155,7 @@ private:
     void OnRegisterWindowCallback(ani_env* env, ani_string type, ani_ref callback, ani_long timeout);
     void OnUnregisterWindowCallback(ani_env* env, ani_string type, ani_ref callback);
     void OnShowWindow(ani_env* env);
+    void OnSetHandwritingFlag(ani_env* env, ani_boolean enable);
     void OnDestroyWindow(ani_env* env);
     ani_boolean OnIsWindowShowing(ani_env* env);
     void OnHideWithAnimation(ani_env* env);
