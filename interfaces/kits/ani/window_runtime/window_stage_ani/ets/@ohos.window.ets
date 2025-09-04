@@ -1428,70 +1428,70 @@ export interface WindowLimits {
     /**
      * The right of the Rect.
      *
-     * @type { number }
+     * @type { int }
      * @syscap SystemCapability.Window.SessionManager
      * @since 11
      */
     /**
      * The right of the Rect.
      *
-     * @type { number }
+     * @type { int }
      * @syscap SystemCapability.Window.SessionManager
      * @atomicservice
      * @since 12
      */
-    right: number;
+    right: int;
 
     /**
      * The top of the Rect.
      *
-     * @type { number }
+     * @type { int }
      * @syscap SystemCapability.Window.SessionManager
      * @since 11
      */
     /**
      * The top of the Rect.
      *
-     * @type { number }
+     * @type { int }
      * @syscap SystemCapability.Window.SessionManager
      * @atomicservice
      * @since 12
      */
-    top: number;
+    top: int;
 
     /**
      * The width of the Rect.
      *
-     * @type { number }
+     * @type { int }
      * @syscap SystemCapability.Window.SessionManager
      * @since 11
      */
     /**
      * The width of the Rect.
      *
-     * @type { number }
+     * @type { int }
      * @syscap SystemCapability.Window.SessionManager
      * @atomicservice
      * @since 12
      */
-    width: number;
+    width: int;
 
     /**
      * The height of the Rect.
      *
-     * @type { number }
+     * @type { int }
      * @syscap SystemCapability.Window.SessionManager
      * @since 11
      */
     /**
      * The height of the Rect.
      *
-     * @type { number }
+     * @type { int }
      * @syscap SystemCapability.Window.SessionManager
      * @atomicservice
      * @since 12
      */
-    height: number;
+    height: int;
   }
 
 /**
@@ -1572,95 +1572,6 @@ export class DecorButtonStyleInternal implements DecorButtonStyle {
   closeButtonRightMargin?: int;
   buttonIconSize?: int;
   buttonBackgroundCornerRadius?: int;
-}
-
-/**
- * Rectangular area of the title buttons relative to the upper right corner of the window.
- *
- * @interface TitleButtonRect
- * @syscap SystemCapability.Window.SessionManager
- * @since 11
- */
-/**
- * Rectangular area of the title buttons relative to the upper right corner of the window.
- *
- * @interface TitleButtonRect
- * @syscap SystemCapability.Window.SessionManager
- * @atomicservice
- * @since 12
- */
-export interface TitleButtonRect {
-  /**
-   * The right of the Rect.
-   *
-   * @type { int }
-   * @syscap SystemCapability.Window.SessionManager
-   * @since 11
-   */
-  /**
-   * The right of the Rect.
-   *
-   * @type { int }
-   * @syscap SystemCapability.Window.SessionManager
-   * @atomicservice
-   * @since 12
-   */
-  right: int;
-  /**
-   * The top of the Rect.
-   *
-   * @type { int }
-   * @syscap SystemCapability.Window.SessionManager
-   * @since 11
-   */
-  /**
-   * The top of the Rect.
-   *
-   * @type { int }
-   * @syscap SystemCapability.Window.SessionManager
-   * @atomicservice
-   * @since 12
-   */
-  top: int;
-  /**
-   * The width of the Rect.
-   *
-   * @type { int }
-   * @syscap SystemCapability.Window.SessionManager
-   * @since 11
-   */
-  /**
-   * The width of the Rect.
-   *
-   * @type { int }
-   * @syscap SystemCapability.Window.SessionManager
-   * @atomicservice
-   * @since 12
-   */
-  width: int;
-  /**
-   * The height of the Rect.
-   *
-   * @type { int }
-   * @syscap SystemCapability.Window.SessionManager
-   * @since 11
-   */
-  /**
-   * The height of the Rect.
-   *
-   * @type { int }
-   * @syscap SystemCapability.Window.SessionManager
-   * @atomicservice
-   * @since 12
-   */
-  height: int;
-}
-
-export class TitleButtonRectInternal implements TitleButtonRect {
-  right: int;
-  top: int;
-  width: int;
-  height: int;
 }
 
 export interface WindowTitleButtonVisibleParam {
@@ -2338,6 +2249,10 @@ export class WindowInternal implements Window {
       return this.getDecorButtonStyle(this.nativeObj);
     }
 
+    public getTitleButtonRect(): TitleButtonRect {
+        return this.getTitleButtonRect(this.nativeObj);
+    }
+
     public setTitleButtonVisible(isMaximizeVisible: boolean, isMinimizeVisible: boolean,
                                  isSplitVisible: boolean): void {
       let visibleParam: window.TitleButtonVisibleParam = {
@@ -2542,10 +2457,6 @@ export class WindowInternal implements Window {
         });
     }
 
-    public getTitleButtonRect(): TitleButtonRect {
-        return this.getTitleButtonRect(this.nativeObj);
-    }
-    
     public setHandwritingFlag(enable: boolean): Promise<void> {
         return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) :void => {
             taskpool.execute((): void => {

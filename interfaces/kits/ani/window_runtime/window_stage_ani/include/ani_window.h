@@ -141,15 +141,7 @@ private:
     void OnRegisterWindowCallback(ani_env* env, ani_string type, ani_ref callback, ani_long timeout);
     void OnUnregisterWindowCallback(ani_env* env, ani_string type, ani_ref callback);
     void OnShowWindow(ani_env* env);
-    void OnSetWindowTitle(ani_env* env, ani_string titleName);
-    void OnSetTitleButtonVisible(ani_env* env, ani_boolean isMaximizeVisible,
-        ani_boolean isMinimizeVisible, ani_boolean isSplitVisible, ani_boolean isCloseVisible);
-    void OnSetWindowTitleMoveEnabled(ani_env* env, ani_boolean enabled);
-    ani_object OnGetTitleButtonRect(ani_env* env);
-    void OnSetTitleAndDockHoverShown(ani_env* env, ani_boolean isTitleHoverShown, ani_boolean isDockHoverShown);
     void OnSetHandwritingFlag(ani_env* env, ani_boolean enable);
-    ani_boolean OnGetWindowDecorVisible(ani_env* env);
-    void OnSetWindowDelayRaiseOnDrag(ani_env* env, ani_boolean isEnabled);
     void OnDestroyWindow(ani_env* env);
     ani_boolean OnIsWindowShowing(ani_env* env);
     void OnHideWithAnimation(ani_env* env);

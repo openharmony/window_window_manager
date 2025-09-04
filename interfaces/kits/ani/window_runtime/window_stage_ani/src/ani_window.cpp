@@ -1350,8 +1350,7 @@ void AniWindow::SetWindowTopmost(ani_env* env, ani_boolean isWindowTopmost)
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), isWindowTopmost);
 }
 
-void AniWindow::SetTitleAndDockHoverShown(ani_env* env,
-    ani_boolean isTitleHoverShown, ani_boolean isDockHoverShown)
+void AniWindow::SetTitleAndDockHoverShown(ani_env* env, ani_boolean isTitleHoverShown, ani_boolean isDockHoverShown)
 {
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] window is nullptr");
