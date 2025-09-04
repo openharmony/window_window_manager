@@ -781,16 +781,16 @@ void ScreenSession::Disconnect()
 
 void ScreenSession::PropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason)
 {
-    std::lock_guard<std::mutex> lock(screenChangeListenerListMutex_);
-    property_ = newProperty;
+    SetScreenProperty(newProperty);
     if (reason == ScreenPropertyChangeReason::VIRTUAL_PIXEL_RATIO_CHANGE) {
         return;
     }
-    if (screenChangeListenerList_.empty()) {
+    auto listeners = GetScreenChangeListenerList();
+    if (listeners.empty()) {
         TLOGE(WmsLogTag::DMS, "screenChangeListenerList is empty.");
         return;
     }
-    for (auto& listener : screenChangeListenerList_) {
+    for (auto* listener : listeners) {
         if (!listener) {
             TLOGE(WmsLogTag::DMS, "screenChangeListener is null.");
             continue;
@@ -2798,5 +2798,11 @@ void ScreenSession::SetScreenAreaHeight(uint32_t screenAreaHeight)
 uint32_t ScreenSession::GetScreenAreaHeight() const
 {
     return property_.GetScreenAreaHeight();
+}
+
+std::vector<IScreenChangeListener*> ScreenSession::GetScreenChangeListenerList() const
+{
+    std::lock_guard<std::mutex> lock(screenChangeListenerListMutex_);
+    return screenChangeListenerList_;
 }
 } // namespace OHOS::Rosen
