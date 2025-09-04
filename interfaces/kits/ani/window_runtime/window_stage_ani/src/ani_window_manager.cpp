@@ -507,7 +507,7 @@ void AniWindowManager::OnShiftAppWindowPointerEvent(ani_env* env, ani_int source
     return;
 }
 
-ani_object AniWindowManager::GetAllWindowLayoutInfo(ani_env* env, ani_long nativeObj, ani_int displayId)
+ani_object AniWindowManager::GetAllWindowLayoutInfo(ani_env* env, ani_long nativeObj, ani_long displayId)
 {
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
     AniWindowManager* aniWindowManager = reinterpret_cast<AniWindowManager*>(nativeObj);
