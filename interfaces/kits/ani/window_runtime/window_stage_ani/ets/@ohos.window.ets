@@ -1565,15 +1565,6 @@ export interface DecorButtonStyle {
   buttonBackgroundCornerRadius?: int;
 }
 
-export class DecorButtonStyleInternal implements DecorButtonStyle {
-  colorMode?: ConfigurationConstant.ColorMode;
-  buttonBackgroundSize?: int;
-  spacingBetweenButtons?: int;
-  closeButtonRightMargin?: int;
-  buttonIconSize?: int;
-  buttonBackgroundCornerRadius?: int;
-}
-
 export interface WindowTitleButtonVisibleParam {
   isMaximizeButtonVisible: boolean;
   isMinimizeButtonVisible: boolean;
