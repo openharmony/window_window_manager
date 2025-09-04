@@ -445,9 +445,11 @@ void WindowManagerAgentProxy::NotifyCallingWindowDisplayChanged(const CallingWin
         TLOGE(WmsLogTag::WMS_KEYBOARD, "remote is null");
         return;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_NOTIFY_CALLING_DISPLAY_CHANGE),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "SendRequest calling display info change failed");
+    int sendCode = remote->SendRequest(
+        static_cast<uint32_t>(WindowManagerAgentMsg::TRANS_ID_NOTIFY_CALLING_DISPLAY_CHANGE),
+        data, reply, option);
+    if (sendCode != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "SendRequest calling display info change failed, code: %{public}d", sendCode);
     }
 }
 
