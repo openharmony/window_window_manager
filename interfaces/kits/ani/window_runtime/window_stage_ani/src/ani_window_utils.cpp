@@ -57,13 +57,13 @@ std::string GetHexColor(uint32_t color)
 }
 
 template<typename T>
-ani_status unbox(ani_env *env, ani_object obj, T *result)
+ani_status unbox(ani_env* env, ani_object obj, T* result)
 {
     return ANI_INVALID_TYPE;
 }
 
 template<>
-ani_status unbox<ani_double>(ani_env *env, ani_object obj, ani_double *result)
+ani_status unbox<ani_double>(ani_env* env, ani_object obj, ani_double* result)
 {
     if (g_doubleCls == nullptr) {
         ani_class doubleCls {};
@@ -84,7 +84,7 @@ ani_status unbox<ani_double>(ani_env *env, ani_object obj, ani_double *result)
 }
 
 template<>
-ani_status unbox<ani_boolean>(ani_env *env, ani_object obj, ani_boolean *result)
+ani_status unbox<ani_boolean>(ani_env* env, ani_object obj, ani_boolean* result)
 {
     if (g_booleanCls == nullptr) {
         ani_class booleanCls {};
@@ -105,7 +105,7 @@ ani_status unbox<ani_boolean>(ani_env *env, ani_object obj, ani_boolean *result)
 }
 
 template<>
-ani_status unbox<ani_int>(ani_env *env, ani_object obj, ani_int *result)
+ani_status unbox<ani_int>(ani_env* env, ani_object obj, ani_int* result)
 {
     if (g_intCls == nullptr) {
         ani_class intCls {};
@@ -126,7 +126,7 @@ ani_status unbox<ani_int>(ani_env *env, ani_object obj, ani_int *result)
 }
 
 template<>
-ani_status unbox<ani_long>(ani_env *env, ani_object obj, ani_long *result)
+ani_status unbox<ani_long>(ani_env* env, ani_object obj, ani_long* result)
 {
     if (g_longCls == nullptr) {
         ani_class longCls {};
