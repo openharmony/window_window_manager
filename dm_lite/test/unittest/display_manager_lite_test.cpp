@@ -765,7 +765,7 @@ HWTEST_F(DisplayManagerTest, ClearFoldStatusCallbackLite01, TestSize.Level1)
  */
 HWTEST_F(DisplayManagerTest, ClearDisplayModeCallbackLite01, TestSize.Level1)
 {
-    DisplayManagerLite::GetInstance().pImpl_->ClearDisplayModeCallbackLite01();
+    DisplayManagerLite::GetInstance().pImpl_->ClearDisplayModeCallback();
     ASSERT_TRUE(DisplayManagerLite::GetInstance().pImpl_->displayModeListenerAgent_ == nullptr);
 }
 }
