@@ -1990,8 +1990,6 @@ export class WindowStageInternal implements WindowStage {
     public native setShowOnLockScreenSync(nativeObj:long, showOnLockScreen: boolean): void;
     public native getMainWindowSync(nativeObj: long): Window;
     public native createSubWindowSync(nativeObj: long, name: String): Window;
-    public native setWindowRectAutoSave(nativeObj: long, enabled: boolean): void;
-    public native isWindowRectAutoSave(nativeObj: long): boolean;
     native onSync(nativeObj: long, eventType: 'windowStageEvent', callback: Object): void;
     native offSync(nativeObj: long, eventType: 'windowStageEvent', callback?: Object): void;
 
@@ -2150,30 +2148,6 @@ export class WindowStageInternal implements WindowStage {
         });
     }
 
-    public setWindowRectAutoSave(enabled: boolean): Promise<void> {
-        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) => {
-            taskpool.execute((): void => {
-                this.setWindowRectAutoSave(this.nativeObj, enabled);
-            }).then((ret: NullishType) => {
-                resolve(undefined);
-            }).catch((err: NullishType) => {
-                reject(err as BusinessError);
-            });
-        });
-    }
-
-    public isWindowRectAutoSave(): Promise<boolean> {
-        return new Promise<boolean>((resolve: (value: boolean) => void, reject: (error: BusinessError) => void) => {
-            taskpool.execute((): boolean => {
-                return this.isWindowRectAutoSave(this.nativeObj);
-            }).then((ret: NullishType) => {
-                resolve(ret as boolean);
-            }).catch((err: NullishType) => {
-                reject(err as BusinessError);
-            });
-        });
-    }
-
     public on(eventType: 'windowStageEvent', callback: Callback<WindowStageEventType>): void {
       this.onSync(this.nativeObj, eventType, callback);
     }
@@ -2196,8 +2170,6 @@ export interface WindowStage {
     getMainWindow(callback: AsyncCallback<Window>): void;
     createSubWindow(name: string): Promise<Window>;
     createSubWindow(name: string, callback: AsyncCallback<Window>): void;
-    setWindowRectAutoSave(enabled: boolean): Promise<void>;
-    isWindowRectAutoSave(): Promise<boolean>;
     disableWindowDecor(): void;
     setShowOnLockScreen(showOnLockScreen: boolean): void;
     on(eventType: 'windowStageEvent', callback: Callback<WindowStageEventType>): void;
@@ -2247,17 +2219,7 @@ export class WindowInternal implements Window {
     private native resize(nativeObj: long, width: int, height: int): void;
     private native moveWindowTo(nativeObj: long, x: int, y: int): void;
     private native getGlobalRect(nativeObj:long): Rect;
-    private native setWindowTitle(nativeObj:long, titleName: string): void;
-    private native setTitleButtonVisible(nativeObj: long, isMaximizeVisible: boolean,
-        isMinimizeVisible: boolean, isSplitVisible: boolean, isCloseVisible: boolean): void;
-    private native setWindowTitleMoveEnabled(nativeObj: long, enabled: boolean): void;
-    private native getTitleButtonRect(nativeObj: long): TitleButtonRect;
-    private native getDecorButtonStyle(nativeObj: long): DecorButtonStyle;
-    private native setTitleAndDockHoverShown(nativeObj: long, isTitleHoverShown?: boolean,
-        isDockHoverShown?: boolean): void;
     private native setHandwritingFlag(nativeObj: long, enable: boolean): void;
-    private native getWindowDecorVisible(nativeObj: long): boolean;
-    private native setWindowDelayRaiseOnDrag(nativeObj: long, isEnabled: boolean): void;
     private native getWindowDecorHeight(nativeObj:long): int;
     private native setWindowBackgroundColor(nativeObj: long, color: string): int;
     private native setImmersiveModeEnabledState(nativeObj: long, enable: boolean): int;
@@ -2374,10 +2336,6 @@ export class WindowInternal implements Window {
 
     public getDecorButtonStyle(): DecorButtonStyle {
       return this.getDecorButtonStyle(this.nativeObj);
-    }
-
-    public getTitleButtonRect(): TitleButtonRect {
-      return this.getTitleButtonRect(this.nativeObj);
     }
 
     public setTitleButtonVisible(isMaximizeVisible: boolean, isMinimizeVisible: boolean,
@@ -2584,40 +2542,10 @@ export class WindowInternal implements Window {
         });
     }
 
-    public setTitleButtonVisible(isMaximizeVisible: boolean,
-        isMinimizeVisible: boolean, isSplitVisible: boolean): void {
-        this.setTitleButtonVisible(this.nativeObj, isMaximizeVisible, isMinimizeVisible, isSplitVisible, true);
-    }
-
-    public setTitleButtonVisible(isMaximizeVisible: boolean,
-        isMinimizeVisible: boolean, isSplitVisible: boolean, isCloseVisible: boolean): void {
-        this.setTitleButtonVisible(this.nativeObj, isMaximizeVisible, isMinimizeVisible, isSplitVisible, isCloseVisible);
-    }
-
-    public setWindowTitleMoveEnabled(enabled: boolean): void {
-        this.setWindowTitleMoveEnabled(this.nativeObj, enabled);
-    }
-
     public getTitleButtonRect(): TitleButtonRect {
         return this.getTitleButtonRect(this.nativeObj);
     }
-
-    public getDecorButtonStyle(): DecorButtonStyle {
-        return this.getDecorButtonStyle(this.nativeObj);
-    }
     
-    public setTitleAndDockHoverShown(isTitleHoverShown?: boolean, isDockHoverShown?: boolean): Promise<void> {
-        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) :void => {
-            taskpool.execute((): void => {
-                this.setTitleAndDockHoverShown(this.nativeObj, isTitleHoverShown, isDockHoverShown);
-            }).then((ret: NullishType) :void => {
-                resolve(undefined);
-            }).catch((err: NullishType) :void => {
-                reject(err as BusinessError);
-            });
-        });
-    }
-
     public setHandwritingFlag(enable: boolean): Promise<void> {
         return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) :void => {
             taskpool.execute((): void => {
@@ -2628,14 +2556,6 @@ export class WindowInternal implements Window {
                 reject(err as BusinessError);
             });
         });
-    }
-
-    public getWindowDecorVisible(): boolean {
-        return this.getWindowDecorVisible(this.nativeObj);
-    }
-
-    public setWindowDelayRaiseOnDrag(isEnabled: boolean): void {
-        this.setWindowDelayRaiseOnDrag(this.nativeObj, isEnabled);
     }
 
     public getWindowDecorHeight(): int {
@@ -3266,18 +3186,7 @@ export interface Window {
     resize(width: int, height: int, callback: AsyncCallback<void>): void;
     moveWindowTo(x: int, y: int, callback: AsyncCallback<void>): void;
     getGlobalRect(): Rect;
-    setWindowTitle(titleName: string): Promise<void>;
-    setTitleButtonVisible(isMaximizeVisible: boolean, isMinimizeVisible: boolean,
-        isSplitVisible: boolean): void;
-    setTitleButtonVisible(isMaximizeVisible: boolean, isMinimizeVisible: boolean,
-        isSplitVisible: boolean, isCloseVisible: boolean): void;
-    setWindowTitleMoveEnabled(enabled: boolean): void;
-    getTitleButtonRect(): TitleButtonRect;
-    getDecorButtonStyle(): DecorButtonStyle;
-    setTitleAndDockHoverShown(isTitleHoverShown?: boolean, isDockHoverShown?: boolean): Promise<void>;
     setHandwritingFlag(enable: boolean): Promise<void>;
-    getWindowDecorVisible(): boolean;
-    setWindowDelayRaiseOnDrag(isEnabled: boolean): void;
     getWindowDecorHeight(): int;
     setWindowBackgroundColor(color: string | ColorMetrics): void;
     setBackgroundColor(color: string): Promise<void>;
