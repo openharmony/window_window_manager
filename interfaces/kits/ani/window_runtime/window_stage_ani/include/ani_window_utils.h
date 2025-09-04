@@ -55,6 +55,14 @@ public:
     static ani_object AniThrowError(ani_env* env, WmErrorCode errorCode, std::string msg = "");
     static ani_object CreateAniDecorButtonStyle(ani_env* env, const DecorButtonStyle& decorButtonStyle);
     static ani_object CreateAniTitleButtonRect(ani_env* env, const TitleButtonRect& titleButtonRect);
+    static ani_object CreateAniStatusBarProperty(ani_env* env, const SystemBarProperty& prop);
+    static ani_object CreateAniWindowDensityInfo(ani_env* env, const WindowDensityInfo& info);
+    static ani_object CreateAniWindowSystemBarProperties(ani_env* env, const SystemBarProperty& status,
+        const SystemBarProperty& navigation);
+    static ani_object CreateAniWindowLayoutInfo(ani_env* env, const WindowLayoutInfo& info);
+    static ani_object CreateAniWindowLayoutInfoArray(ani_env* env, const std::vector<sptr<WindowLayoutInfo>>& infos);
+    static ani_object CreateAniWindowInfo(ani_env* env, const WindowVisibilityInfo& info);
+    static ani_object CreateAniWindowInfoArray(ani_env* env, const std::vector<sptr<WindowVisibilityInfo>>& infos);
     static ani_object CreateAniWindowArray(ani_env* env, std::vector<ani_ref>& windows);
     static ani_object CreateAniSize(ani_env* env, int32_t width, int32_t height);
     static ani_object CreateAniRect(ani_env* env, const Rect& rect);
