@@ -782,7 +782,7 @@ ani_boolean AniWindow::IsFocused(ani_env* env, ani_object obj, ani_long nativeOb
     TLOGI(WmsLogTag::WMS_FOCUS, "[ANI]");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow == nullptr || aniWindow->GetWindow() == nullptr) {
-        TLOGD(WmsLogTag::WMS_HIERARCHY, "[ANI] windowToken_ is nullptr");
+        TLOGD(WmsLogTag::WMS_FOCUS, "[ANI] aniWindow is nullptr");
         return ANI_ERROR;
     }
     return aniWindow->OnIsFocused(env);
