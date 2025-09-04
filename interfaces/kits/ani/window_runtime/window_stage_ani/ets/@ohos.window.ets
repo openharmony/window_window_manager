@@ -1877,7 +1877,7 @@ export class WindowStageInternal implements WindowStage {
     public native loadContentSync(nativeObj: long, path: string, storage?: LocalStorage): void;
     public native disableWindowDecorSync(nativeObj:long): void;
     public native setShowOnLockScreenSync(nativeObj:long, showOnLockScreen: boolean): void;
-    public native setWindowModal(nativeObj:long,isModal: boolean): void;
+    public native setWindowModal(nativeObj:long, isModal: boolean): void;
     public native getMainWindowSync(nativeObj: long): Window;
     public native createSubWindowSync(nativeObj: long, name: String): Window;
     native onSync(nativeObj: long, eventType: 'windowStageEvent', callback: Object): void;
@@ -2166,8 +2166,8 @@ export class WindowInternal implements Window {
     private native getSubWindowZLevelSync(nativeObj: long): int;
     private native raiseAboveTargetSync(nativeObj: long, windowId: int): void;
     private native raiseToAppTopSync(nativeObj: long): void;
-    private native setTopmostSync(nativeObj: long,isTopmost: boolean): void;
-    private native requestFocusSync(nativeObj: long,isFocused: boolean): void;
+    private native setTopmostSync(nativeObj: long, isTopmost: boolean): void;
+    private native requestFocusSync(nativeObj: long, isFocused: boolean): void;
     private native setSubWindowModal(nativeObj: long, isModal: boolean): void;
     private native setSubWindowModalType(nativeObj: long, isModal: boolean, modalityType: int): void;
     private native isFocusedSync(nativeObj: long): boolean;
@@ -3000,7 +3000,7 @@ export class WindowInternal implements Window {
     public setTopmost(isTopmost: boolean): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
         taskpool.execute((): void => {
-          this.setTopmostSync(this.nativeObj,isTopmost);
+          this.setTopmostSync(this.nativeObj, isTopmost);
         }).then((ret: NullishType): void => {
           resolve(undefined);
         }).catch((err: NullishType): void => {
@@ -3012,7 +3012,7 @@ export class WindowInternal implements Window {
     public requestFocus(isFocused: boolean): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
         taskpool.execute((): void => {
-          this.requestFocusSync(this.nativeObj,isFocused);
+          this.requestFocusSync(this.nativeObj, isFocused);
         }).then((ret: NullishType): void => {
           resolve(undefined);
         }).catch((err: NullishType): void => {
