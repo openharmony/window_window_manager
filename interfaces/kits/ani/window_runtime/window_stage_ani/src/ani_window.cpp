@@ -2895,7 +2895,7 @@ void AniWindow::SetSystemAvoidAreaEnabled(ani_env* env, ani_boolean enabled)
     }
     if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
         TLOGE(WmsLogTag::WMS_IMMS, "only system window is valid");
-        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
         return;
     }
     uint32_t option = 0;
