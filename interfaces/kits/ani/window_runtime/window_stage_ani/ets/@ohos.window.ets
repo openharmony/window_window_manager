@@ -1947,7 +1947,8 @@ export class WindowStageInternal implements WindowStage {
     public native removeStartingWindow(nativeObj: long): void;
     public native loadContentSync(nativeObj: long, path: string, storage?: LocalStorage): void;
     public native disableWindowDecorSync(nativeObj:long): void;
-    public native setShowOnLockScreenSync(nativeObj:long, showOnLockScreen: boolean): void;
+    public native setShowOnLockScreenSync(nativeObj: long, showOnLockScreen: boolean): void;
+    public native setWindowModal(nativeObj: long, isModal: boolean): void;
     public native getMainWindowSync(nativeObj: long): Window;
     public native createSubWindowSync(nativeObj: long, name: String): Window;
     public native setCustomDensitySync(nativeObj: long, density: double): void;
@@ -2059,6 +2060,10 @@ export class WindowStageInternal implements WindowStage {
         this.setShowOnLockScreenSync(this.nativeObj, showOnLockScreen);
     }
 
+    public setWindowModal(isModal: boolean): Promise<void> {
+        this.setWindowModal(this.nativeObj, isModal);
+    }
+
     public setCustomDensity(density: double): void {
         this.setCustomDensitySync(this.nativeObj, density);
     }
@@ -2066,7 +2071,7 @@ export class WindowStageInternal implements WindowStage {
     public setDefaultDensityEnabled(enabled: boolean): void {
         this.setDefaultDensityEnabledSync(this.nativeObj, enabled);
     }
-
+    
     public getMainWindowSync(): Window {
         let ret = this.getMainWindowSync(this.nativeObj);
         return ret;
@@ -2142,6 +2147,7 @@ export interface WindowStage {
     createSubWindow(name: string, callback: AsyncCallback<Window>): void;
     disableWindowDecor(): void;
     setShowOnLockScreen(showOnLockScreen: boolean): void;
+    setWindowModal(isModal: boolean): Promise<void>;
     setCustomDensity(density: double): void;
     setDefaultDensityEnabled(enabled: boolean): void;
     on(eventType: 'windowStageEvent', callback: Callback<WindowStageEventType>): void;
@@ -2201,7 +2207,9 @@ export class WindowInternal implements Window {
     private native getProperties(nativeObj: long): WindowProperties;
     private native isWindowSupportWideGamut(nativeObj: long): boolean;
     private native setWindowLayoutFullScreen(nativeObj: long, isLayoutFullScreen: boolean): int;
+    private native setRaiseByClickEnabled(nativeObj: long, enable: boolean): int;
     private native setWindowSystemBarProperties(nativeObj: long, systemBarProperties: SystemBarProperties): int;
+    private native setExclusivelyHighlighted(nativeObj: long, exclusivelyHighlighted: boolean): int;
     private native setSpecificSystemBarEnabled(nativeObj: long, name: String, enable: boolean, enableAnimation: boolean): int;
     private native snapshot(nativeObj: long): image.PixelMap;
     private native hideNonSystemFloatingWindows(nativeObj: long, shouldHide: boolean): void;
@@ -2234,10 +2242,19 @@ export class WindowInternal implements Window {
     private native showWindowSync(nativeObj: long): void;
     private native destroyWindowSync(nativeObj: long): void;
     private native isWindowShowingSync(nativeObj: long): boolean;
+    private native isWindowHighlightedSync(nativeObj: long): boolean;
     private native hideWithAnimationSync(nativeObj: long): void;
     private native showWithAnimationSync(nativeObj: long): void;
     private native setWindowFocusableSync(nativeObj: long, isFocusable: boolean): void;
-
+    private native getSubWindowZLevelSync(nativeObj: long): int;
+    private native raiseAboveTargetSync(nativeObj: long, windowId: int): void;
+    private native raiseToAppTopSync(nativeObj: long): void;
+    private native setTopmostSync(nativeObj: long, isTopmost: boolean): void;
+    private native requestFocusSync(nativeObj: long, isFocused: boolean): void;
+    private native setSubWindowModal(nativeObj: long, isModal: boolean): void;
+    private native setSubWindowModalType(nativeObj: long, isModal: boolean, modalityType: int): void;
+    private native isFocusedSync(nativeObj: long): boolean;
+    private native setSubWindowZLevelSync(nativeObj: long, zLevel: int): void;
     private native setWindowBrightness(nativeObj: long, brightness: double): void;
     private native getWindowColorSpace(nativeObj: long): int;
     private native setWakeUpScreen(nativeObj: long, wakeUp: boolean): void;
@@ -2255,7 +2272,6 @@ export class WindowInternal implements Window {
     private native isGestureBackEnabled(nativeObj: long): boolean;
     private native setGestureBackEnabled(nativeObj: long, enabled: boolean): void;
     private native setSingleFrameComposerEnabled(nativeObj: long, enabled: boolean): void;
-
     private native setWindowTouchableSync(nativeObj: long, isTouchable: boolean): void;
     private native setDialogBackGestureEnabledSync(nativeObj: long, enabled: boolean): void;
     private native setWindowMaskSync(nativeObj: long, windowMask: Array<Array<long>>): void;
@@ -2358,7 +2374,7 @@ export class WindowInternal implements Window {
     }
 
     public setWindowTopmost(isWindowTopmost: boolean): Promise<void> {
-      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.setWindowTopmost(this.nativeObj, isWindowTopmost);
         }).then((ret: NullishType): void => {
@@ -2670,6 +2686,40 @@ export class WindowInternal implements Window {
             callback(new BusinessError(), undefined);
         }).catch((err: NullishType) => {
             callback(err as BusinessError, undefined);
+        });
+    }
+
+    public setRaiseByClickEnabled(enable: boolean): Promise<void> {
+        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+            taskpool.execute((): void => {
+                this.setRaiseByClickEnabled(this.nativeObj, enable);
+            }).then((ret: NullishType): void => {
+                resolve(undefined);
+            }).catch((err: NullishType): void => {
+                reject(err as BusinessError);
+            });
+        });
+    }
+
+    public setRaiseByClickEnabled(enable: boolean, callback: AsyncCallback<void>): void {
+        taskpool.execute((): void => {
+            this.setRaiseByClickEnabled(this.nativeObj, enable);
+        }).then((ret: NullishType) => {
+            callback(new BusinessError(), undefined);
+        }).catch((err: NullishType) => {
+            callback(err as BusinessError, undefined);
+        });
+    }
+
+    public setExclusivelyHighlighted(exclusivelyHighlighted: boolean): Promise<void> {
+        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+            taskpool.execute((): void => {
+                this.setExclusivelyHighlighted(this.nativeObj, exclusivelyHighlighted);
+            }).then((ret: NullishType): void => {
+                resolve(undefined);
+            }).catch((err: NullishType): void => {
+                reject(err as BusinessError);
+            });
         });
     }
 
@@ -2993,6 +3043,119 @@ export class WindowInternal implements Window {
       });
     }
 
+    public getSubWindowZLevel(): int {
+      let ret = this.getSubWindowZLevelSync(this.nativeObj);
+      return ret;
+    };
+
+    public isFocused(): boolean {
+      return this.isFocusedSync(this.nativeObj);
+    };
+
+    public setSubWindowZLevel(zLevel: int): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.setSubWindowZLevelSync(this.nativeObj, zLevel);
+        }).then((ret: NullishType) => {
+          resolve(undefined);
+        }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
+    public raiseAboveTarget(windowId: int): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.raiseAboveTargetSync(this.nativeObj, windowId);
+        }).then((ret: NullishType): void => {
+          resolve(undefined);
+        }).catch((err: NullishType): void => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
+    public raiseAboveTarget(windowId: int, callback: AsyncCallback<void>): void {
+      taskpool.execute((): void => {
+        this.raiseAboveTargetSync(this.nativeObj, windowId);
+      }).then((ret: NullishType) => {
+        callback(new BusinessError(), undefined);
+      }).catch((err: NullishType) => {
+        callback(err as BusinessError, undefined);
+      });
+    }
+
+    public raiseToAppTop(): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.raiseToAppTopSync(this.nativeObj);
+        }).then((ret: NullishType): void => {
+          resolve(undefined);
+        }).catch((err: NullishType): void => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
+    public raiseToAppTop(callback: AsyncCallback<void>): void {
+      taskpool.execute((): void => {
+        this.raiseToAppTopSync(this.nativeObj);
+      }).then((ret: NullishType) => {
+        callback(new BusinessError(), undefined);
+      }).catch((err: NullishType) => {
+        callback(err as BusinessError, undefined);
+      });
+    }
+
+    public setTopmost(isTopmost: boolean): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.setTopmostSync(this.nativeObj, isTopmost);
+        }).then((ret: NullishType): void => {
+          resolve(undefined);
+        }).catch((err: NullishType): void => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
+    public requestFocus(isFocused: boolean): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.requestFocusSync(this.nativeObj, isFocused);
+        }).then((ret: NullishType): void => {
+          resolve(undefined);
+        }).catch((err: NullishType): void => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
+    public setSubWindowModal(isModal: boolean): Promise<void> {
+        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+            taskpool.execute((): void => {
+                this.setSubWindowModal(this.nativeObj, isModal);
+            }).then((ret: NullishType): void => {
+                resolve(undefined);
+            }).catch((err: NullishType): void => {
+                reject(err as BusinessError);
+            });
+        });
+    }
+
+    public setSubWindowModal(isModal: boolean, modalityType: ModalityType): Promise<void> {
+        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+            taskpool.execute((): void => {
+                this.setSubWindowModalType(this.nativeObj, isModal, modalityType);
+            }).then((ret: NullishType): void => {
+                resolve(undefined);
+            }).catch((err: NullishType): void => {
+                reject(err as BusinessError);
+            });
+        });
+    }
+
     public keepKeyboardOnFocus(keepKeyboardFlag: boolean): void {
       this.keepKeyboardOnFocusSync(this.nativeObj, keepKeyboardFlag);
     }
@@ -3163,6 +3326,10 @@ export class WindowInternal implements Window {
       return this.isWindowShowingSync(this.nativeObj);
     }
 
+    public isWindowHighlighted(): boolean {
+      return this.isWindowHighlightedSync(this.nativeObj);
+    }
+    
     public hideWithAnimation(callback: AsyncCallback<void>): void {
       taskpool.execute((): void => {
         this.hideWithAnimationSync(this.nativeObj);
@@ -3389,6 +3556,9 @@ export interface Window {
     isWindowSupportWideGamut(callback: AsyncCallback<boolean>): void;
     setWindowLayoutFullScreen(isLayoutFullScreen: boolean): Promise<void>;
     setWindowLayoutFullScreen(isLayoutFullScreen: boolean, callback: AsyncCallback<void>): void;
+    setExclusivelyHighlighted(exclusivelyHighlighted: boolean): Promise<void>;
+    setRaiseByClickEnabled(enable: boolean): Promise<void>;
+    setRaiseByClickEnabled(enable: boolean, callback: AsyncCallback<void>): void;
     setWindowSystemBarProperties(systemBarProperties: SystemBarProperties): Promise<void>;
     setWindowSystemBarProperties(systemBarProperties: SystemBarProperties, callback: AsyncCallback<void>): void;
     setSpecificSystemBarEnabled(name: String, enable: boolean, enableAnimation?: boolean): Promise<void>;
@@ -3423,12 +3593,24 @@ export interface Window {
     destroyWindow(callback: AsyncCallback<void>): void;
     destroyWindow(): Promise<void>;
     isWindowShowing(): boolean;
+    isWindowHighlighted(): boolean;
     hideWithAnimation(callback: AsyncCallback<void>): void;
     hideWithAnimation(): Promise<void>;
     showWithAnimation(callback: AsyncCallback<void>): void;
     showWithAnimation(): Promise<void>;
     setWindowFocusable(isFocusable: boolean): Promise<void>;
     setWindowFocusable(isFocusable: boolean, callback: AsyncCallback<void>): void;
+    getSubWindowZLevel(): int;
+    isFocused(): boolean;
+    setSubWindowZLevel(zLevel: int): Promise<void>;
+    raiseAboveTarget(windowId: int): Promise<void>;
+    raiseAboveTarget(windowId: int, callback: AsyncCallback<void>): void;
+    raiseToAppTop(callback: AsyncCallback<void>): void;
+    raiseToAppTop(): Promise<void>;
+    setTopmost(isTopmost: boolean): Promise<void>;
+    requestFocus(isFocused: boolean): Promise<void>;
+    setSubWindowModal(isModal: boolean): Promise<void>;
+    setSubWindowModal(isModal: boolean, modalityType: ModalityType): Promise<void>;
     keepKeyboardOnFocus(enable: boolean): void;
     setWindowTouchable(isTouchable: boolean): Promise<void>
     setWindowTouchable(isTouchable: boolean, callback: AsyncCallback<void>): void
@@ -3726,7 +3908,7 @@ function runAvoidAreaChangeCallback(cb: object, area: object, type: int): void {
 }
 
 export function shiftAppWindowFocus(sourceWindowId: int, targetWindowId: int): Promise<void> {
-  return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) : void => {
+  return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
       taskpool.execute((): void => {
           return shiftAppWindowFocusSync(nativeObj, sourceWindowId, targetWindowId);
       }).then((ret: NullishType) => {
