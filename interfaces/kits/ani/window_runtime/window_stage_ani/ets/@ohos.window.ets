@@ -717,6 +717,44 @@ export enum RectType {
   RELATIVE_TO_PARENT_WINDOW = 1
 }
 
+export interface StatusBarProperty {
+  contentColor: string;
+}
+
+export class StatusBarPropertyInternal implements StatusBarProperty {
+  contentColor: string;
+}
+
+export interface WindowLayoutInfo {
+  windowRect: Rect;
+}
+
+export class WindowLayoutInfoInternal implements WindowLayoutInfo {
+  windowRect: Rect;
+}
+
+export interface WindowInfo {
+  rect: Rect;
+  globalDisplayRect?: Rect;
+  bundleName: string;
+  abilityName: string;
+  windowId: int;
+  windowStatusType: WindowStatusType;
+  isFocused?: boolean;
+}
+
+export class WindowInfoInternal implements WindowInfo {
+  rect: Rect;
+  globalDisplayRect?: Rect;
+  bundleName: string;
+  abilityName: string;
+  windowId: int;
+  windowStatusType: WindowStatusType;
+  isFocused?: boolean;
+  windowStatusTypeInternal: int;
+  isFocusedInternal: boolean;
+}
+
 export enum BlurStyle {
   OFF = 0,
   THIN = 1,
