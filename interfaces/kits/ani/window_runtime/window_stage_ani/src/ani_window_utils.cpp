@@ -1094,8 +1094,7 @@ void AniWindowUtils::SetSystemPropertiesDisplayId(ani_env* env, const sptr<Windo
 {
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
     uint32_t displayId = window->GetDisplayId();
-    CallAniMethodVoid(env, systemProperties, clsName, "<set>displayIdInternal", nullptr,
-        static_cast<ani_long>(displayId));
+    env->Object_SetFieldByName_Long(systemProperties, "displayIdInternal", ani_long(displayId));
 }
 
 void AniWindowUtils::SetSystemPropertiesWindowName(ani_env* env, const sptr<Window>& window,
