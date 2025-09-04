@@ -265,7 +265,7 @@ void AniWindowStage::OnDisableWindowDecor(ani_env* env)
         return;
     }
 }
-
+    
 void AniWindowStage::SetShowOnLockScreen(ani_env* env, ani_class cls, ani_long nativeObj, ani_boolean showOnLockScreen)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
