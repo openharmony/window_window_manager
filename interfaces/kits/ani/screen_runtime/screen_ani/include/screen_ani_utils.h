@@ -14,6 +14,7 @@
  */
 #ifndef OHOS_ANI_SCREEN_UTILS_H
 #define OHOS_ANI_SCREEN_UTILS_H
+
 #include <hitrace_meter.h>
 
 #include "ani.h"
@@ -45,6 +46,24 @@ static ani_object NewNativeObject(ani_env* env, const std::string& objName);
 static ani_array_ref NewNativeArray(ani_env* env, const std::string& objName, uint32_t size);
 
 static ani_enum_item CreateAniEnum(ani_env* env, const char* enum_descriptor, ani_size index);
+
+static DmErrorCode GetVirtualScreenOption(ani_env* env, ani_object options, VirtualScreenOption& option);
+
+static ani_status GetSurfaceFromAni(ani_env* env, ani_string surfaceIdAniStr, sptr<Surface>& surface);
+
+static ani_status GetMultiScreenPositionOptionsFromAni(ani_env* env, ani_object screenOptionsAni,
+    MultiScreenPositionOptions& mainScreenOptions);
+
+static ani_object CreateDisplayIdVectorAniObject(ani_env* env, std::vector<DisplayId>& displayIds);
+
+static ani_object CreateAniArray(ani_env* env, size_t size);
+
+static ani_status GetRectFromAni(ani_env* env, ani_object mainScreenRegionAni, DMRect& mainScreenRegion);
+
+static ani_status GetScreenIdArrayFromAni(ani_env* env, ani_object mirrorScreen,
+    std::vector<ScreenId>& mirrorScreenIds);
+
+static ani_status GetExpandOptionFromAni(ani_env* env, ani_object optionAniObj, ExpandOption& expandOption);
 };
 }
 }
