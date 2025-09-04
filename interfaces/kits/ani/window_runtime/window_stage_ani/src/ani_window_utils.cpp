@@ -1259,7 +1259,7 @@ bool AniWindowUtils::ParseWindowMask(ani_env* env, ani_array windowMaskArray,
             return false;
         }
         std::vector<uint32_t> elementArray;
-        if (!ParseWindowMaskInnerValue(env, static_cast<ani_array_long>(innerArrayRef), elementArray)) {
+        if (!ParseWindowMaskInnerValue(env, static_cast<ani_array>(innerArrayRef), elementArray)) {
             TLOGE(WmsLogTag::WMS_PC, "[ANI]Failed to convert parameter to window mask!");
             return false;
         }
@@ -1268,7 +1268,7 @@ bool AniWindowUtils::ParseWindowMask(ani_env* env, ani_array windowMaskArray,
     return true;
 }
 
-bool AniWindowUtils::ParseWindowMaskInnerValue(ani_env* env, ani_array_long innerArray,
+bool AniWindowUtils::ParseWindowMaskInnerValue(ani_env* env, ani_array innerArray,
     std::vector<uint32_t>& elementArray)
 {
     ani_size size;
