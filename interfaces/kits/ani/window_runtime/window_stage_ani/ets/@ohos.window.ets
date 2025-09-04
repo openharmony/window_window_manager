@@ -2192,7 +2192,7 @@ export class WindowInternal implements Window {
     private native setSystemAvoidAreaEnabled(nativeObj: long, enabled: boolean): void;
     private native getWindowDensityInfo(nativeObj: long): WindowDensityInfo;
     private native getImmersiveModeEnabledState(nativeObj: long): boolean;
-    private native setWindowGrayScale(nativeObj: LockGrantedCallback, grayScale: double): void;
+    private native setWindowGrayScale(nativeObj: long, grayScale: double): void;
     private native getWindowSystemBarProperties(nativeObj: long): SystemBarProperties;
     private native isGestureBackEnabled(nativeObj: long): boolean;
     private native setGestureBackEnabled(nativeObj: long, enabled: boolean): void;
@@ -3164,7 +3164,7 @@ export class WindowInternal implements Window {
     }
 
     public setWakeUpScreen(wakeUp: boolean): void {
-      return this.getWindowColorSpace(this.nativeObj, wakeUp);
+      return this.setWakeUpScreen(this.nativeObj, wakeUp);
     }
 
     public setSnapshotSkip(isSkip: boolean): void {
@@ -3186,6 +3186,10 @@ export class WindowInternal implements Window {
 
     public setWindowContainerColor(activeColor: string, inactiveColor: string): void {
       return this.setWindowContainerColor(this.nativeObj, activeColor, inactiveColor);
+    }
+
+    public getStatusBarProperty(): StatusBarProperty {
+      return this.getStatusBarProperty(this.nativeObj);
     }
 
     public setStatusBarColor(color: ColorMetrics): Promise<void> {
@@ -3215,6 +3219,10 @@ export class WindowInternal implements Window {
           reject(err as BusinessError);
         });
       });
+    }
+
+    public getWindowDensityInfo(): WindowDensityInfo {
+      return this.getWindowDensityInfo(this.nativeObj) as WindowDensityInfoInternal;
     }
 
     public getImmersiveModeEnabledState(): boolean {
@@ -3369,7 +3377,7 @@ export interface Window {
     setWindowCornerRadius(cornerRadius: double): Promise<void>;
     setWindowShadowRadius(radius: double): void;
     setWindowBrightness(brightness: double): Promise<void>;
-    setWindowBrightness(brightness: DoubleRange, callback: AsyncCallback<void>): void;
+    setWindowBrightness(brightness: double, callback: AsyncCallback<void>): void;
     getWindowColorSpace(): ColorSpace;
     setWakeUpScreen(wakeUp: boolean): void;
     setSnapshotSkip(isSkip: boolean): void;
@@ -3411,10 +3419,10 @@ native function shiftAppWindowFocusSync(nativeObj: long, sourceWindowId: int, ta
 native function shiftAppWindowPointerEventSync(nativeObj: long, sourceWindowId: int, targetWindowId: int): void;
 native function createWindowSync(nativeObj: long, config: Configuration): Window;
 native function getAllWindowLayoutInfo(nativeObj: long, displayId: long): Array<WindowLayoutInfo>;
-native function getSnapshot(nativeObj: long, windowId: number);
-native function getVisibleWindowInfo(native: long): Array<WindowInfoInternal>;
-native function setGestureNavigationEnabled(native: long, enabled: boolean): void;
-native function setWaterMarkImage(native: long, pixelMap: image.PixelMap, enabled: boolean): void;
+native function getSnapshot(nativeObj: long, windowId: number): image.PixelMap;
+native function getVisibleWindowInfo(nativeObj: long): Array<WindowInfoInternal>;
+native function setGestureNavigationEnabled(nativeObj: long, enabled: boolean): void;
+native function setWaterMarkImage(nativeObj: long, pixelMap: image.PixelMap, enabled: boolean): void;
 
 export function getLastWindow(ctx: BaseContext): Promise<Window> {
   return new Promise<Window>((resolve: (value: Window) => void, reject: (error: BusinessError) => void) => {
@@ -3516,7 +3524,7 @@ export function getWindowsByCoordinate(displayId: number, windowNumber?: number,
 export function getAllWindowLayoutInfo(displayId: long): Promise<Array<WindowLayoutInfo>> {
   return new Promise<Array<WindowLayoutInfo>>((
     resolve: (value: Array<WindowLayoutInfo>) => void, reject: (error: BusinessError) => void): void => {
-      taskpool.execute((): void => {
+      taskpool.execute(() => {
           return getAllWindowLayoutInfo(nativeObj, displayId);
       }).then((ret: NullishType) => {
           resolve(ret as Array<WindowLayoutInfo>);
@@ -3529,7 +3537,7 @@ export function getAllWindowLayoutInfo(displayId: long): Promise<Array<WindowLay
 export function getSnapshot(windowId: number): Promise<image.PixelMap> {
   return new Promise<image.PixelMap>((
     resolve: (value: image.PixelMap) => void, reject: (error: BusinessError) => void): void => {
-      taskpool.execute((): void => {
+      taskpool.execute(() => {
           return getSnapshot(nativeObj, windowId);
       }).then((ret: NullishType) => {
           resolve(ret as image.PixelMap);
@@ -3542,7 +3550,7 @@ export function getSnapshot(windowId: number): Promise<image.PixelMap> {
 export function getVisibleWindowInfo(): Promise<Array<WindowInfo>> {
   return new Promise<Array<WindowInfo>>((
     resolve: (value: Array<WindowInfo>) => void, reject: (error: BusinessError) => void): void => {
-      taskpool.execute((): void => {
+      taskpool.execute(() => {
           let visibleWindowInfos = getVisibleWindowInfo(nativeObj);
           for (let i = 0; i < visibleWindowInfos.length; i++) {
             visibleWindowInfos[i].windowStatusType =
