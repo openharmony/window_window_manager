@@ -5859,6 +5859,8 @@ napi_value JsWindow::OnSnapshotIgnorePrivacy(napi_env env, napi_callback_info in
 
             auto nativePixelMap = Media::PixelMapNapi::CreatePixelMap(env, pixelMap);
             if (nativePixelMap == nullptr) {
+                task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                    "[window][snapshotIgnorePrivacy]msg: get nativePixelMap is null"));
                 TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "get nativePixelMap is null");
                 return;
             }

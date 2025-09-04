@@ -462,6 +462,10 @@ HWTEST_F(WindowSceneSessionImplTest2, GetTopNavDestinationName01, TestSize.Level
     windowSceneSession->GetTopNavDestinationName(topNavDestName);
     EXPECT_EQ(topNavDestName, "");
 
+    EXPECT_CALL(*uiContent, GetTopNavDestinationInfo(_, _)).WillOnce(Return("{\"name\":1}"));
+    windowSceneSession->GetTopNavDestinationName(topNavDestName);
+    EXPECT_EQ(topNavDestName, "");
+
     EXPECT_CALL(*uiContent, GetTopNavDestinationInfo(_, _)).WillOnce(Return("{\"name\":\"test\"}"));
     windowSceneSession->GetTopNavDestinationName(topNavDestName);
     EXPECT_EQ(topNavDestName, "test");
