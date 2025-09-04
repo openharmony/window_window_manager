@@ -336,9 +336,10 @@ ani_object AniWindowUtils::CreateAniDecorButtonStyle(ani_env* env, const DecorBu
         "<set>spacingBetweenButtons", nullptr, ani_int(decorButtonStyle.spacingBetweenButtons));
     CallAniMethodVoid(env, aniDecorButtonStyle, aniClass,
         "<set>closeButtonRightMargin", nullptr, ani_int(decorButtonStyle.closeButtonRightMargin));
-    CallAniMethodVoid(env, aniStyle, aniClass, "<set>buttonIconSize", nullptr, ani_int(style.buttonIconSize));
-    CallAniMethodVoid(env, aniStyle, aniClass, "<set>buttonBackgroundCornerRadius", nullptr,
-        ani_int(style.buttonBackgroundCornerRadius));
+    CallAniMethodVoid(env, aniDecorButtonStyle, aniClass,
+        "<set>buttonIconSize", nullptr, ani_int(decorButtonStyle.buttonIconSize));
+    CallAniMethodVoid(env, aniDecorButtonStyle, aniClass,
+        "<set>buttonBackgroundCornerRadius", nullptr, ani_int(decorButtonStyle.buttonBackgroundCornerRadius));
     return aniDecorButtonStyle;
 }
 
