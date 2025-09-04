@@ -113,6 +113,8 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindowStage::DisableWindowDecor)},
         ani_native_function {"setShowOnLockScreenSync",
             nullptr, reinterpret_cast<void *>(AniWindowStage::SetShowOnLockScreen)},
+        ani_native_function {"setWindowModal", "lz:",
+            reinterpret_cast<void *>(AniWindowStage::SetWindowModal)},
         ani_native_function {"setCustomDensitySync", "ld:",
             reinterpret_cast<void *>(AniWindowStage::SetCustomDensity)},
         ani_native_function {"setDefaultDensityEnabledSync", "lz:",

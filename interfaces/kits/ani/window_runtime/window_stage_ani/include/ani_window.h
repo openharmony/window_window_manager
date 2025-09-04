@@ -54,6 +54,16 @@ public:
     static void SetWaterMarkFlag(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean enable);
     static void SetWindowFocusable(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isFocusable);
     static void SetWindowTouchable(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isTouchable);
+    static ani_int GetSubWindowZLevel(ani_env* env, ani_object obj, ani_long nativeObj);
+    static void SetSubWindowZLevel(ani_env* env, ani_object obj, ani_long nativeObj, ani_int zLevel);
+    static void RaiseAboveTarget(ani_env* env, ani_object obj, ani_long nativeObj, ani_int windowId);
+    static void RaiseToAppTop(ani_env* env, ani_object obj, ani_long nativeObj);
+    static void SetTopmost(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isTopmost);
+    static void RequestFocus(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isFocused);
+    static void SetSubWindowModal(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isModal);
+    static void SetSubWindowModalType(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isModal,
+        ani_int modalityType);
+    static ani_boolean IsFocused(ani_env* env, ani_object obj, ani_long nativeObj);
     static void SetDialogBackGestureEnabled(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean enabled);
     static void SetWindowMask(ani_env* env, ani_object obj, ani_long nativeObj, ani_array windowMask);
     static void SetTouchableAreas(ani_env* env, ani_object obj, ani_long nativeObj, ani_array rects);
@@ -72,6 +82,7 @@ public:
     static void SetHandwritingFlag(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean enable);
     static void DestroyWindow(ani_env* env, ani_object obj, ani_long nativeObj);
     static ani_boolean IsWindowShowing(ani_env* env, ani_object obj, ani_long nativeObj);
+    static ani_boolean IsWindowHighlighted(ani_env* env, ani_object obj, ani_long nativeObj);
     static void HideWithAnimation(ani_env* env, ani_object obj, ani_long nativeObj);
     static void ShowWithAnimation(ani_env* env, ani_object obj, ani_long nativeObj);
     static void KeepKeyboardOnFocus(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean keepKeyboardFlag);
@@ -128,6 +139,8 @@ public:
     ani_object GetWindowPropertiesSync(ani_env* env);
     ani_boolean IsWindowSupportWideGamut(ani_env* env);
     ani_object SetWindowLayoutFullScreen(ani_env* env, ani_boolean isLayoutFullScreen);
+    ani_object SetRaiseByClickEnabled(ani_env* env, ani_boolean enable);
+    ani_object SetExclusivelyHighlighted(ani_env* env, ani_boolean exclusivelyHighlighted);
     void SetSystemBarProperties(ani_env* env, ani_object aniSystemBarProperties);
     ani_object SetSpecificSystemBarEnabled(ani_env* env, ani_string, ani_boolean enable,
         ani_boolean enableAnimation);
@@ -166,6 +179,15 @@ private:
     void OnSetWindowKeepScreenOn(ani_env* env, ani_boolean isKeepScreenOn);
     void OnSetWaterMarkFlag(ani_env* env, ani_boolean enable);
     void OnSetWindowFocusable(ani_env* env, ani_boolean isFocusable);
+    ani_int OnGetSubWindowZLevel(ani_env* env);
+    ani_boolean OnIsFocused(ani_env* env);
+    void OnSetSubWindowZLevel(ani_env* env, ani_int zLevel);
+    void OnRaiseAboveTarget(ani_env* env, ani_int windowId);
+    void OnRaiseToAppTop(ani_env* env);
+    void OnSetTopmost(ani_env* env, ani_boolean isTopmost);
+    void OnRequestFocus(ani_env* env, ani_boolean isFocused);
+    void OnSetSubWindowModal(ani_env* env, ani_boolean isModal);
+    void OnSetSubWindowModalType(ani_env* env, ani_boolean isModal, ani_int modalityType);
     void OnLoadContent(ani_env* env, ani_string path, ani_object storage);
     void OnSetWindowSystemBarEnable(ani_env* env, ani_object nameAry);
     ani_object OnGetUIContext(ani_env* env);
@@ -176,6 +198,7 @@ private:
     void OnSetHandwritingFlag(ani_env* env, ani_boolean enable);
     void OnDestroyWindow(ani_env* env);
     ani_boolean OnIsWindowShowing(ani_env* env);
+    ani_boolean OnIsWindowHighlighted(ani_env* env);
     void OnHideWithAnimation(ani_env* env);
     void OnShowWithAnimation(ani_env* env);
     void OnKeepKeyboardOnFocus(ani_env* env, ani_boolean keepKeyboardFlag);
