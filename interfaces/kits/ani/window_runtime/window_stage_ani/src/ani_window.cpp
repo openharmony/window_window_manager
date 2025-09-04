@@ -2865,7 +2865,7 @@ ani_object AniWindow::GetStatusBarProperty(ani_env* env)
 {
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "[ANI] windowToken_ is nullptr");
-        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);;
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     if (!WindowHelper::IsMainWindow(windowToken_->GetType())) {
         TLOGE(WmsLogTag::WMS_IMMS, "only main window is allowed");
@@ -2888,7 +2888,7 @@ void AniWindow::SetStatusBarColor(ani_env* env, ani_long color)
         static_cast<uint32_t>(SystemBarSettingFlag::COLOR_SETTING));
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
         windowToken_->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
-    if (ret != WmErrorCode::WM_OK){
+    if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_IMMS, "set status bar property error: %{public}d", ret);
         AniWindowUtils::AniThrowError(env, ret, "SetStatusBarProperty failed");
     }
@@ -3055,7 +3055,7 @@ void AniWindow::SetGestureBackEnabled(ani_env* env, ani_boolean enabled)
     }
     if (!WindowHelper::IsMainWindow(windowToken_->GetType())) {
         TLOGE(WmsLogTag::WMS_IMMS, "invalid window type");
-         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
         return;
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetGestureBackEnabled(enabled));
