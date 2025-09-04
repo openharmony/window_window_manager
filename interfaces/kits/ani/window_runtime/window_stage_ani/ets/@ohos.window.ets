@@ -2578,12 +2578,12 @@ export class WindowInternal implements Window {
     }
 
     public setRaiseByClickEnabled(enable: boolean): Promise<void> {
-        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) : void => {
+        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
             taskpool.execute((): void => {
                 this.setRaiseByClickEnabled(this.nativeObj, enable);
-            }).then((ret: NullishType) : void => {
+            }).then((ret: NullishType): void => {
                 resolve(undefined);
-            }).catch((err: NullishType) : void => {
+            }).catch((err: NullishType): void => {
                 reject(err as BusinessError);
             });
         });
@@ -2600,12 +2600,12 @@ export class WindowInternal implements Window {
     }
 
     public setExclusivelyHighlighted(exclusivelyHighlighted: boolean): Promise<void> {
-        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) : void => {
+        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
             taskpool.execute((): void => {
                 this.setExclusivelyHighlighted(this.nativeObj, exclusivelyHighlighted);
-            }).then((ret: NullishType) : void => {
+            }).then((ret: NullishType): void => {
                 resolve(undefined);
-            }).catch((err: NullishType) : void => {
+            }).catch((err: NullishType): void => {
                 reject(err as BusinessError);
             });
         });
@@ -3021,24 +3021,24 @@ export class WindowInternal implements Window {
     }
 
     public setSubWindowModal(isModal: boolean): Promise<void> {
-        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) : void => {
+        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
             taskpool.execute((): void => {
                 this.setSubWindowModal(this.nativeObj, isModal);
-            }).then((ret: NullishType) : void => {
+            }).then((ret: NullishType): void => {
                 resolve(undefined);
-            }).catch((err: NullishType) : void => {
+            }).catch((err: NullishType): void => {
                 reject(err as BusinessError);
             });
         });
     }
 
     public setSubWindowModal(isModal: boolean, modalityType: ModalityType): Promise<void> {
-        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) : void => {
+        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
             taskpool.execute((): void => {
                 this.setSubWindowModalType(this.nativeObj, isModal, modalityType);
-            }).then((ret: NullishType) : void => {
+            }).then((ret: NullishType): void => {
                 resolve(undefined);
-            }).catch((err: NullishType) : void => {
+            }).catch((err: NullishType): void => {
                 reject(err as BusinessError);
             });
         });
@@ -3545,7 +3545,7 @@ function runAvoidAreaChangeCallback(cb: object, area: object, type: int): void {
 }
 
 export function shiftAppWindowFocus(sourceWindowId: int, targetWindowId: int): Promise<void> {
-  return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) : void => {
+  return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
       taskpool.execute((): void => {
           return shiftAppWindowFocusSync(nativeObj, sourceWindowId, targetWindowId);
       }).then((ret: NullishType) => {
