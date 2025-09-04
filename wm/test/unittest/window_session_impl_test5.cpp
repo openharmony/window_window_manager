@@ -1971,17 +1971,17 @@ HWTEST_F(WindowSessionImplTest5, NotifySizeChangeFlag, Function | SmallTest | Le
 }
 
 /**
- * @tc.name: UpdateIsShowDecorWhenLocked
- * @tc.desc: UpdateIsShowDecorWhenLocked
+ * @tc.name: UpdateIsShowDecorInFreeMultiWindow
+ * @tc.desc: UpdateIsShowDecorInFreeMultiWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest5, UpdateIsShowDecorWhenLocked, Function | SmallTest | Level1)
+HWTEST_F(WindowSessionImplTest5, UpdateIsShowDecorInFreeMultiWindow, Function | SmallTest | Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("UpdateIsShowDecorWhenLocked");
+    option->SetWindowName("UpdateIsShowDecorInFreeMultiWindow");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     bool isShow = true;
-    ASSERT_EQ(WSError::WS_OK, window->UpdateIsShowDecorWhenLocked(isShow));
+    ASSERT_EQ(WSError::WS_OK, window->UpdateIsShowDecorInFreeMultiWindow(isShow));
 }
 } // namespace
 } // namespace Rosen

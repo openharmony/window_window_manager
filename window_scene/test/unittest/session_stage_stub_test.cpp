@@ -1301,7 +1301,8 @@ HWTEST_F(SessionStageStubTest, HandleUpdateIsShowDecorInFreeMultiWindow, TestSiz
     sptr<IWindowManagerAgent> windowManagerAgent = sptr<WindowManagerAgent>::MakeSptr();
     data.WriteRemoteObject(windowManagerAgent->AsObject());
     ASSERT_TRUE(sessionStageStub_ != nullptr);
-    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_UPDATE_SHOW_DECOR_IN_FREE_MULTI_WINDOW);
+    uint32_t code =
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_UPDATE_SHOW_DECOR_IN_FREE_MULTI_WINDOW);
     EXPECT_EQ(ERR_INVALID_DATA, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
 }
 

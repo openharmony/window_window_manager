@@ -8118,7 +8118,7 @@ void WindowSessionImpl::SetNotifySizeChangeFlag(bool flag)
 
 WSError WindowSessionImpl::UpdateIsShowDecorInFreeMultiWindow(bool isShow)
 {
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "isShow: %{public}d", isShow);
+    TLOGI(WmsLogTag::WMS_DECOR, "id: %{public}d, isShow: %{public}d", GetPersistentId(), isShow);
     property_->SetIsShowDecorInFreeMultiWindow(isShow);
     return WSError::WS_OK;
 }

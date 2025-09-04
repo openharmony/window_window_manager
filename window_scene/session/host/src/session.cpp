@@ -4881,16 +4881,16 @@ std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller)
 WSError Session::SetIsShowDecorInFreeMultiWindow(bool isShow)
 {
     if (!IsSessionValid()) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Session is invalid, id: %{public}d state: %{public}u",
+        TLOGE(WmsLogTag::WMS_DECOR, "Session is invalid, id: %{public}d state: %{public}u",
             GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     if (!sessionStage_) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sessionStage_ is null");
+        TLOGE(WmsLogTag::WMS_DECOR, "sessionStage_ is null");
         return WSError::WS_ERROR_NULLPTR;
     }
     if (WindowHelper::IsMainWindow(GetWindowType())) {
-        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "id: %{public}d isShow: %{public}d",
+        TLOGI(WmsLogTag::WMS_DECOR, "id: %{public}d isShow: %{public}d",
             GetPersistentId(), isShow);
         return sessionStage_->UpdateIsShowDecorInFreeMultiWindow(isShow);
     }
