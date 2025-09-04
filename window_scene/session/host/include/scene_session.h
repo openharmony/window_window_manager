@@ -523,8 +523,6 @@ public:
     bool IsDecorEnable() const;
     bool IsAppSession() const;
     bool IsAppOrLowerSystemSession() const;
-    virtual bool IsBlockingFocusFullScreenSystemPanel() const;
-    virtual bool IsAppMainWindowFullScreen();
     bool IsSystemSessionAboveApp() const;
     bool IsTurnScreenOn() const;
     bool IsKeepScreenOn() const;
@@ -840,6 +838,8 @@ public:
     void SetFollowParentRectFunc(NotifyFollowParentRectFunc&& func);
     WSError SetFollowParentWindowLayoutEnabled(bool isFollow) override;
     bool IsDelayFocusChange();
+    virtual bool IsBlockingFocusFullScreenSystemPanel() const;
+    virtual bool IsAppMainWindowFullScreen();
 
     /*
      * Window Property
