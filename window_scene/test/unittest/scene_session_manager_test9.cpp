@@ -18,11 +18,11 @@
 #include "common/include/session_permission.h"
 #include "interfaces/include/ws_common.h"
 #include "iremote_object_mocker.h"
-#include "session_manager/include/scene_session_manager.h"
-#include "session_info.h"
-#include "session/host/include/scene_session.h"
 #include "mock/mock_scene_session.h"
+#include "session/host/include/scene_session.h"
+#include "session_info.h"
 #include "session_manager.h"
+#include "session_manager/include/scene_session_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1312,6 +1312,7 @@ HWTEST_F(SceneSessionManagerTest9, CheckClickFocusIsDownThroughFullScreen_FullSc
     sceneSession->zOrder_ = 1;
 
     sptr<SceneSessionMocker> focusedSession = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
+    focusedSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     focusedSession->zOrder_ = 2;
 
     FocusChangeReason focusChangeReason = FocusChangeReason::CLICK;
@@ -1345,6 +1346,7 @@ HWTEST_F(SceneSessionManagerTest9, CheckClickFocusIsDownThroughFullScreen_ZOrder
 
     sptr<SceneSessionMocker> sceneSession = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
     sptr<SceneSessionMocker> focusedSession = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
+    focusedSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     EXPECT_CALL(*focusedSession, IsBlockingFocusFullScreenSystemPanel()).WillRepeatedly(Return(false));
     EXPECT_CALL(*focusedSession, IsAppMainWindowFullScreen()).WillRepeatedly(Return(false));
 

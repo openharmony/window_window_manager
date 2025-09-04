@@ -7638,10 +7638,13 @@ bool SceneSessionManager::CheckClickFocusIsDownThroughFullScreen(const sptr<Scen
     if (reason != FocusChangeReason::CLICK) {
         return false;
     }
-    if (!focusedSession->IsBlockingFocusFullScreenSystemPanel() && !focusedSession->IsAppMainWindowFullScreen()) {
-        return false;
+    if (focusedSession->IsBlockingFocusFullScreenSystemPanel()) {
+        return sceneSession->GetZOrder() < focusedSession->GetZOrder();
     }
-    return sceneSession->GetZOrder() < focusedSession->GetZOrder();
+    if (focusedSession->IsAppMainWindowFullScreen()) {
+        return sceneSession->GetZOrder() < focusedSession->GetMainSession()->GetZOrder();
+    }
+    return false;
 }
 
 WSError SceneSessionManager::RequestFocusSpecificCheck(DisplayId displayId, const sptr<SceneSession>& sceneSession,
