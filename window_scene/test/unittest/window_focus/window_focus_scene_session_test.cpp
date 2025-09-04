@@ -144,6 +144,82 @@ HWTEST_F(WindowFocusSceneSessionTest, IsAppOrLowerSystemSession02, TestSize.Leve
 }
 
 /**
+ * @tc.name: IsBlockingFocusFullScreenSystemPanel_SessionConfig
+ * @tc.desc: Check if the session blockingFocus and device type is qualified
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowFocusSceneSessionTest, IsBlockingFocusFullScreenSystemPanel_SessionConfig, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsBlockingFocusFullScreenSystemPanel_SessionConfig";
+    info.bundleName_ = "IsBlockingFocusFullScreenSystemPanel_SessionConfig";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    sceneSession->blockingFocus_ = false;
+    EXPECT_EQ(false, sceneSession->IsBlockingFocusFullScreenSystemPanel());
+
+    sceneSession->blockingFocus_ = true;
+    sceneSession->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    EXPECT_EQ(false, sceneSession->IsBlockingFocusFullScreenSystemPanel());
+}
+
+/**
+ * @tc.name: IsBlockingFocusFullScreenSystemPanel_RectCheck
+ * @tc.desc: Check if the height and width of the current session is full-screen
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowFocusSceneSessionTest, IsBlockingFocusFullScreenSystemPanel_RectCheck, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsBlockingFocusFullScreenSystemPanel_RectCheck";
+    info.bundleName_ = "IsBlockingFocusFullScreenSystemPanel_RectCheck";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    sceneSession->blockingFocus_ = true;
+    sceneSession->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    constexpr DisplayId DISPLAY_ID = 0;
+    sceneSession->GetSessionProperty()->SetDisplayId(DISPLAY_ID);
+
+    const WSRect rect = {0, 0, 0, 0};
+    sceneSession->SetSessionRect(rect);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    EXPECT_EQ(false, sceneSession->IsBlockingFocusFullScreenSystemPanel());
+
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_PANEL);
+    EXPECT_EQ(false, sceneSession->IsBlockingFocusFullScreenSystemPanel());
+}
+
+/**
+ * @tc.name: IsAppMainWindowFullScreen
+ * @tc.desc: Check if main session of the current session is full-screen
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowFocusSceneSessionTest, IsAppMainWindowFullScreen, TestSize.Level1)
+{
+    SessionInfo subSessionInfo;
+    subSessionInfo.abilityName_ = "IsAppMainWindowFullScreen_SubSession";
+    subSessionInfo.bundleName_ = "IsAppMainWindowFullScreen_SubSession";
+    sptr<SceneSession> subSession = sptr<SceneSession>::MakeSptr(subSessionInfo, nullptr);
+
+    subSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    subSession->SetParentSession(nullptr);
+    EXPECT_EQ(false, subSession->IsAppMainWindowFullScreen());
+
+    SessionInfo mainSessionInfo;
+    mainSessionInfo.abilityName_ = "IsAppMainWindowFullScreen_MainSession";
+    mainSessionInfo.bundleName_ = "IsAppMainWindowFullScreen_MainSession";
+    sptr<SceneSession> mainSession = sptr<SceneSession>::MakeSptr(mainSessionInfo, nullptr);
+
+    mainSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    mainSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    subSession->SetParentSession(mainSession);
+    EXPECT_EQ(false, subSession->IsAppMainWindowFullScreen());
+    
+    mainSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    EXPECT_EQ(false, subSession->IsAppMainWindowFullScreen());
+}
+
+/**
  * @tc.name: IsSystemSessionAboveApp
  * @tc.desc: IsSystemSessionAboveApp true
  * @tc.type: FUNC
