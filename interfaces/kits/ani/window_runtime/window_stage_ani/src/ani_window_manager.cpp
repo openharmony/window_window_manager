@@ -543,11 +543,11 @@ ani_object AniWindowManager::OnGetSnapshot(ani_env* env, ani_double windowId)
 {
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
     std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
-    WMError result = SingletonContainer::Get<WindowManager>().GetSnapshotByWindowId(
-        static_cast<int>(windowId), pixelMap);
-    if (result != WMError::WM_OK) {
+    WmErrorCode result = WM_JS_TO_ERROR_CODE_MAP.at(SingletonContainer::Get<WindowManager>().GetSnapshotByWindowId(
+        static_cast<int>(windowId), pixelMap));
+    if (result != WmErrorCode::WM_OK) {
         TLOGW(WmsLogTag::WMS_ATTRIBUTE, "Get snapshot not ok!");
-        return AniWindowUtils::AniThrowError(env, WM_JS_TO_ERROR_CODE_MAP.at(result));
+        return AniWindowUtils::AniThrowError(env, result);
     }
     if (pixelMap == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Get snapshot is nullptr!");
