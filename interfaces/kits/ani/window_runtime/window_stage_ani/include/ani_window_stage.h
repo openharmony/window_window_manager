@@ -42,6 +42,8 @@ class AniWindowStage {
         ani_ref callback);
     static void UnregisterWindowCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
         ani_ref callback);
+    static void SetCustomDensity(ani_env* env, ani_object obj, ani_long nativeObj, ani_double density);
+    static void SetDefaultDensityEnabled(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean enabled);
 
     void SetWindowRectAutoSave(ani_env* env, ani_boolean enabled, ani_boolean isSaveBySpecifiedFlag);
     ani_boolean IsWindowRectAutoSave(ani_env* env);

@@ -77,6 +77,8 @@ ohos_shared_library("windowstageani_kit") {
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "eventhandler:libeventhandler",
+    "graphic_2d:librender_service_base",
+    "graphic_2d:librender_service_client",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "image_framework:image",
