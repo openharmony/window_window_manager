@@ -2255,24 +2255,24 @@ WSError SessionStageProxy::UpdateIsShowDecorInFreeMultiWindow(bool isShow)
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::WMS_DECOR, "WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (!data.WriteBool(isShow)) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write isShow failed");
+        TLOGE(WmsLogTag::WMS_DECOR, "Write isShow failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "remote is null");
+        TLOGE(WmsLogTag::WMS_DECOR, "remote is null");
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
     if (remote->SendRequest(
         static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_UPDATE_SHOW_DECOR_IN_FREE_MULTI_WINDOW),
         data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "SendRequest failed");
+        TLOGE(WmsLogTag::WMS_DECOR, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     int32_t ret = reply.ReadInt32();

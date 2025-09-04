@@ -1229,10 +1229,10 @@ int SessionStageStub::HandleCloseSpecificScene(MessageParcel& data, MessageParce
 
 int SessionStageStub::HandleUpdateIsShowDecorInFreeMultiWindow(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "called!");
+    TLOGD(WmsLogTag::WMS_DECOR, "called!");
     bool isShow = true;
     if (!data.ReadBool(isShow)) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read isShow failed");
+        TLOGE(WmsLogTag::WMS_DECOR, "read isShow failed");
         return ERR_INVALID_DATA;
     }
     WSError errCode = UpdateIsShowDecorInFreeMultiWindow(isShow);
