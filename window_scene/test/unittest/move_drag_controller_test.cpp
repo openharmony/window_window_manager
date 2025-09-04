@@ -192,18 +192,6 @@ HWTEST_F(MoveDragControllerTest, GetTargetRect, TestSize.Level1)
 }
 
 /**
- * @tc.name: InitMoveDragProperty
- * @tc.desc: test function : InitMoveDragProperty
- * @tc.type: FUNC
- */
-HWTEST_F(MoveDragControllerTest, InitMoveDragProperty, TestSize.Level1)
-{
-    int32_t res = 0;
-    moveDragController->InitMoveDragProperty();
-    ASSERT_EQ(0, res);
-}
-
-/**
  * @tc.name: InitCrossDisplayProperty
  * @tc.desc: test function : InitCrossDisplayProperty
  * @tc.type: FUNC
@@ -335,8 +323,7 @@ HWTEST_F(MoveDragControllerTest, CalcMoveTargetRect, TestSize.Level1)
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     WSRect originalRect = { 100, 100, 1000, 1000 };
 
-    moveDragController->CalcMoveTargetRect(pointerEvent, originalRect);
-    ASSERT_EQ(0, res);
+    EXPECT_FALSE(moveDragController->CalcMoveTargetRect(pointerEvent, originalRect));
 
     pointerEvent = MMI::PointerEvent::Create();
     int32_t pointerId = pointerEvent->GetPointerId();
@@ -347,8 +334,7 @@ HWTEST_F(MoveDragControllerTest, CalcMoveTargetRect, TestSize.Level1)
     int32_t pointerWindowY = 10;
     moveDragController->SetOriginalMoveDragPos(
         pointerId, pointerType, pointerPosX, pointerPosY, pointerWindowX, pointerWindowY, originalRect);
-    moveDragController->CalcMoveTargetRect(pointerEvent, originalRect);
-    ASSERT_EQ(0, res);
+    EXPECT_TRUE(moveDragController->CalcMoveTargetRect(pointerEvent, originalRect));
 }
 
 /**
@@ -924,14 +910,17 @@ HWTEST_F(MoveDragControllerTest, TestConsumeMoveEventWithStartMove, TestSize.Lev
 HWTEST_F(MoveDragControllerTest, ProcessWindowDragHotAreaFunc, TestSize.Level1)
 {
     bool isSendHotAreaMessage = true;
+    bool draghotareafunc = false;
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;
     moveDragController->ProcessWindowDragHotAreaFunc(isSendHotAreaMessage, reason);
-    ASSERT_EQ(true, isSendHotAreaMessage);
-    auto dragHotAreaFunc = [](DisplayId displayId, int32_t type, SizeChangeReason reason) { type = 0; };
+    auto dragHotAreaFunc = [&draghotareafunc](DisplayId displayId, int32_t type, SizeChangeReason reason) {
+        draghotareafunc = true;
+        type = 0;
+    };
     auto preFunc = moveDragController->windowDragHotAreaFunc_;
     moveDragController->windowDragHotAreaFunc_ = dragHotAreaFunc;
     moveDragController->ProcessWindowDragHotAreaFunc(isSendHotAreaMessage, reason);
-    ASSERT_EQ(true, isSendHotAreaMessage);
+    ASSERT_EQ(true, draghotareafunc);
     moveDragController->windowDragHotAreaFunc_ = preFunc;
 }
 
@@ -1424,16 +1413,19 @@ HWTEST_F(MoveDragControllerTest, HasPointDown, TestSize.Level1)
  */
 HWTEST_F(MoveDragControllerTest, ProcessSessionRectChange, TestSize.Level1)
 {
-    int32_t res = 0;
+    bool iscallback = false;
     auto preCallback = moveDragController->moveDragCallback_;
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;
-    MoveDragCallback callBack = [](SizeChangeReason reason) { return; };
-    moveDragController->moveDragCallback_ = callBack;
-    moveDragController->ProcessSessionRectChange(reason);
+    MoveDragCallback callBack = [&iscallback](SizeChangeReason reason) {
+        iscallback = true;
+        return;
+    };
     moveDragController->moveDragCallback_ = nullptr;
     moveDragController->ProcessSessionRectChange(reason);
+    moveDragController->moveDragCallback_ = callBack;
+    moveDragController->ProcessSessionRectChange(reason);
+    ASSERT_EQ(iscallback, true);
     moveDragController->moveDragCallback_ = preCallback;
-    ASSERT_EQ(0, res);
 }
 
 /**
