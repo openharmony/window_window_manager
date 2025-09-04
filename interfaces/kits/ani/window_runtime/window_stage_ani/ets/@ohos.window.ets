@@ -2630,8 +2630,6 @@ export class WindowInternal implements Window {
         });
     }
 
-
-
     public getWindowDecorVisible(): boolean {
         return this.getWindowDecorVisible(this.nativeObj);
     }
