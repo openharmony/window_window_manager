@@ -2281,6 +2281,37 @@ void AniWindow::OnShowWindow(ani_env* env)
     }
 }
 
+void AniWindow::SetHandwritingFlag(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean enable)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (aniWindow != nullptr) {
+        aniWindow->OnSetHandwritingFlag(env, enable);
+    } else {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] aniWindow is nullptr");
+    }
+}
+
+void AniWindow::OnSetHandwritingFlag(ani_env* env, ani_boolean enable)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    auto window = GetWindow();
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] window is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    
+    WMError ret = enable ? window->AddWindowFlag(WindowFlag::WINDOW_FLAG_HANDWRITING) :
+        window->RemoveWindowFlag(WindowFlag::WINDOW_FLAG_HANDWRITING);
+    WmErrorCode errCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
+    if (errCode != WmErrorCode::WM_OK) {
+        AniWindowUtils::AniThrowError(env, errCode, "[ANI] SetHandwritingFlag failed.");
+        return;
+    }
+    TLOGI(WmsLogTag::DEFAULT, "Window [%{public}u, %{public}s] set handwriting flag on end",
+        window->GetWindowId(), window->GetWindowName().c_str());
+}
+
 void AniWindow::DestroyWindow(ani_env* env, ani_object obj, ani_long nativeObj)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
@@ -3399,6 +3430,8 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindow::HideWithAnimation)},
         ani_native_function {"showWithAnimationSync", nullptr,
             reinterpret_cast<void *>(AniWindow::ShowWithAnimation)},
+        ani_native_function {"setHandwritingFlag", "lz:",
+            reinterpret_cast<void *>(AniWindow::SetHandwritingFlag)},
         ani_native_function {"nativeTransferStatic", "Lstd/interop/ESValue;:Lstd/core/Object;",
             reinterpret_cast<void *>(AniWindow::NativeTransferStatic)},
         ani_native_function {"nativeTransferDynamic", "J:Lstd/interop/ESValue;",
