@@ -3174,7 +3174,7 @@ export class WindowInternal implements Window {
     public snapshotIgnorePrivacy(): Promise<image.PixelMap> {
       return new Promise<image.PixelMap>((resolve: (value: image.PixelMap) => void,
         reject: (error: BusinessError) => void): void => {
-        taskpool.execute((): void => {
+        taskpool.execute(() => {
           this.snapshotIgnorePrivacy(this.nativeObj);
         }).then((ret: NullishType) => {
           resolve(ret as image.PixelMap);
