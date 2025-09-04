@@ -2250,7 +2250,7 @@ export class WindowInternal implements Window {
     }
 
     public getTitleButtonRect(): TitleButtonRect {
-        return this.getTitleButtonRect(this.nativeObj);
+      return this.getTitleButtonRect(this.nativeObj);
     }
 
     public setTitleButtonVisible(isMaximizeVisible: boolean, isMinimizeVisible: boolean,
@@ -2443,18 +2443,6 @@ export class WindowInternal implements Window {
     public getGlobalRect(): Rect {
        let ret = this.getGlobalRect(this.nativeObj);
        return ret;
-    }
-
-    public setWindowTitle(titleName: string): Promise<void> {
-        return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) :void => {
-            taskpool.execute((): void => {
-                this.setWindowTitle(this.nativeObj, titleName);
-            }).then((ret: NullishType) :void => {
-                resolve(undefined);
-            }).catch((err: NullishType) :void => {
-                reject(err as BusinessError);
-            });
-        });
     }
 
     public setHandwritingFlag(enable: boolean): Promise<void> {
