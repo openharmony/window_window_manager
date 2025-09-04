@@ -318,7 +318,6 @@ HWTEST_F(MoveDragControllerTest, UpdateGravityWhenDrag, TestSize.Level0)
  */
 HWTEST_F(MoveDragControllerTest, CalcMoveTargetRect, TestSize.Level1)
 {
-    int32_t res = 0;
     moveDragController->InitMoveDragProperty();
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     WSRect originalRect = { 100, 100, 1000, 1000 };
@@ -910,18 +909,15 @@ HWTEST_F(MoveDragControllerTest, TestConsumeMoveEventWithStartMove, TestSize.Lev
 HWTEST_F(MoveDragControllerTest, ProcessWindowDragHotAreaFunc, TestSize.Level1)
 {
     bool isSendHotAreaMessage = true;
-    bool draghotareafunc = false;
+    bool isDragHotAreaFuncCalled = false;
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;
-    moveDragController->ProcessWindowDragHotAreaFunc(isSendHotAreaMessage, reason);
-    auto dragHotAreaFunc = [&draghotareafunc](DisplayId displayId, int32_t type, SizeChangeReason reason) {
-        draghotareafunc = true;
-        type = 0;
+    auto dragHotAreaFunc = [&isDragHotAreaFuncCalled](DisplayId displayId, int32_t type, SizeChangeReason reason) {
+        isDragHotAreaFuncCalled = true;
     };
     auto preFunc = moveDragController->windowDragHotAreaFunc_;
     moveDragController->windowDragHotAreaFunc_ = dragHotAreaFunc;
     moveDragController->ProcessWindowDragHotAreaFunc(isSendHotAreaMessage, reason);
-    ASSERT_EQ(true, draghotareafunc);
-    moveDragController->windowDragHotAreaFunc_ = preFunc;
+    EXPECT_TRUE(isDragHotAreaFuncCalled);
 }
 
 /**
@@ -1413,19 +1409,15 @@ HWTEST_F(MoveDragControllerTest, HasPointDown, TestSize.Level1)
  */
 HWTEST_F(MoveDragControllerTest, ProcessSessionRectChange, TestSize.Level1)
 {
-    bool iscallback = false;
+    bool isCallbackCalled = false;
     auto preCallback = moveDragController->moveDragCallback_;
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;
-    MoveDragCallback callBack = [&iscallback](SizeChangeReason reason) {
-        iscallback = true;
-        return;
+    MoveDragCallback callBack = [&isCallbackCalled](SizeChangeReason reason) {
+        isCallbackCalled = true;
     };
-    moveDragController->moveDragCallback_ = nullptr;
-    moveDragController->ProcessSessionRectChange(reason);
     moveDragController->moveDragCallback_ = callBack;
     moveDragController->ProcessSessionRectChange(reason);
-    ASSERT_EQ(iscallback, true);
-    moveDragController->moveDragCallback_ = preCallback;
+    EXPECT_TRUE(isCallbackCalled);
 }
 
 /**
