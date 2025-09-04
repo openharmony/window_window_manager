@@ -46,6 +46,7 @@ public:
 
     static void SetWindowColorSpace(ani_env* env, ani_object obj, ani_long nativeObj, ani_int colorSpace);
     static void SetPreferredOrientation(ani_env* env, ani_object obj, ani_long nativeObj, ani_int orientation);
+    static ani_int GetPreferredOrientation(ani_env* env, ani_object obj, ani_long nativeObj);
     static void SetWindowPrivacyMode(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isPrivacyMode);
     static void Recover(ani_env* env, ani_object obj, ani_long nativeObj);
     static void SetUIContent(ani_env* env, ani_object obj, ani_long nativeObj, ani_string path);
@@ -53,6 +54,9 @@ public:
     static void SetWaterMarkFlag(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean enable);
     static void SetWindowFocusable(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isFocusable);
     static void SetWindowTouchable(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isTouchable);
+    static void SetDialogBackGestureEnabled(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean enabled);
+    static void SetWindowMask(ani_env* env, ani_object obj, ani_long nativeObj, ani_array windowMask);
+    static void SetTouchableAreas(ani_env* env, ani_object obj, ani_long nativeObj, ani_array rects);
     static void LoadContent(ani_env* env, ani_object obj, ani_long nativeObj,
         ani_string path, ani_object storage);
     static void SetWindowSystemBarEnable(ani_env* env, ani_object obj, ani_long nativeObj, ani_object nameAry);
@@ -77,6 +81,12 @@ public:
     static void SetShadow(ani_env* env, ani_object obj, ani_long nativeObj, ani_double radius,
         ani_string color, ani_object offsetX, ani_object offsetY);
     static void SetCornerRadius(ani_env* env, ani_object obj, ani_long nativeObj, ani_double cornerRadius);
+    static void SetBlur(ani_env* env, ani_object obj, ani_long nativeObj, ani_double radius);
+    static void SetBackdropBlurStyle(ani_env* env, ani_object obj, ani_long nativeObj, ani_int blurStyle);
+    static void SetBackdropBlur(ani_env* env, ani_object obj, ani_long nativeObj, ani_double radius);
+    static ani_double GetWindowCornerRadius(ani_env* env, ani_object obj, ani_long nativeObj);
+    static void SetWindowCornerRadius(ani_env* env, ani_object obj, ani_long nativeObj, ani_double cornerRadius);
+    static void SetWindowShadowRadius(ani_env* env, ani_object obj, ani_long nativeObj, ani_double radius);
     static void Finalizer(ani_env* env, ani_long nativeObj);
 
     void SetFollowParentWindowLayoutEnabled(ani_env* env, ani_boolean enabled);
@@ -126,8 +136,12 @@ public:
 private:
     void OnSetWindowColorSpace(ani_env* env, ani_int colorSpace);
     void OnSetPreferredOrientation(ani_env* env, ani_int orientation);
+    ani_int OnGetPreferredOrientation(ani_env* env);
     void OnSetWindowPrivacyMode(ani_env* env, ani_boolean isPrivacyMode);
     void OnSetWindowTouchable(ani_env* env, ani_boolean isTouchable);
+    void OnSetDialogBackGestureEnabled(ani_env* env, ani_boolean enabled);
+    void OnSetWindowMask(ani_env* env, ani_array windowMaskArray);
+    void OnSetTouchableAreas(ani_env* env, ani_array rects);
     void OnRecover(ani_env* env);
     void OnSetUIContent(ani_env* env, ani_string path);
     void OnSetWindowKeepScreenOn(ani_env* env, ani_boolean isKeepScreenOn);
@@ -154,6 +168,13 @@ private:
     static bool ParseScaleOption(ani_env* env, ani_object scaleOptions, Transform& trans);
     static bool ParseTranslateOption(ani_env* env, ani_object translateOptions, Transform& trans);
     static bool ParseRotateOption(ani_env* env, ani_object rotateOptions, Transform& trans);
+    void OnSetBlur(ani_env* env, ani_double radius);
+    void OnSetBackdropBlurStyle(ani_env* env, ani_int blurStyle);
+    void OnSetBackdropBlur(ani_env* env, ani_double radius);
+    ani_double OnGetWindowCornerRadius(ani_env* env);
+    void OnSetWindowCornerRadius(ani_env* env, ani_double cornerRadius);
+    void OnSetWindowShadowRadius(ani_env* env, ani_double radius);
+    bool CheckWindowMaskParams(ani_env* env, ani_array windowMask);
     bool GetSystemBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProperties,
         std::map<WindowType, SystemBarPropertyFlag>& systemBarpropertyFlags,
         const std::vector<std::string>& names, sptr<Window>& window);

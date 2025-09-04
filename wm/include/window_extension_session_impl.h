@@ -32,6 +32,11 @@ struct AccessibilityChildTreeInfo {
     int64_t accessibilityId = -1;
 };
 
+enum class EnvironmentType {
+    NAPI = 0,
+    ANI = 1
+};
+
 class WindowExtensionSessionImpl : public WindowSessionImpl {
 public:
     explicit WindowExtensionSessionImpl(const sptr<WindowOption>& option);
@@ -65,14 +70,17 @@ public:
     WMError SetPrivacyMode(bool isPrivacyMode) override;
     WMError HidePrivacyContentForHost(bool needHide) override;
 
-    std::unique_ptr<Ace::UIContent> UIContentCreate(AppExecFwk::Ability* ability, void* env, int isAni);
-    WMError NapiSetUIContentInner(const std::string& contentInfo, void* env, void* storage,
-        BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability, int isAni);
-    WMError NapiSetUIContent(const std::string& contentInfo, ani_env* env, ani_object storage,
-        BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
     WMError NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
         BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
+    WMError NapiSetUIContent(const std::string& contentInfo, ani_env* env, ani_object storage,
+        BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
+    WMError AniSetUIContent(const std::string& contentInfo, ani_env* env, ani_object storage,
+        BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
     WMError NapiSetUIContentByName(const std::string& contentName, napi_env env, napi_value storage,
+        BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
+    WMError NapiSetUIContentByName(const std::string& contentName, ani_env* env, ani_object storage,
+        BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
+    WMError AniSetUIContentByName(const std::string& contentName, ani_env* env, ani_object storage,
         BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
     void SetUniqueVirtualPixelRatio(bool useUniqueDensity, float virtualPixelRatio) override {}
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
@@ -206,8 +214,10 @@ private:
     void ArkUIFrameworkSupport();
     WMError CheckHideNonSecureWindowsPermission(bool shouldHide);
     void ReportModalUIExtensionMayBeCovered(bool byLoadContent) const;
+    std::unique_ptr<Ace::UIContent> CreateUIContent(AppExecFwk::Ability* ability, void* env, EnvironmentType envType);
     WMError SetUIContentInner(const std::string& contentInfo, void* env, void* storage,
-        sptr<IRemoteObject> token, AppExecFwk::Ability* ability, bool initByName = false, int isAni = 0);
+        sptr<IRemoteObject> token, AppExecFwk::Ability* ability, bool initByName = false,
+        EnvironmentType envType = EnvironmentType::NAPI);
     void RegisterDataConsumer();
     void RegisterConsumer(Extension::Businesscode code,
         const std::function<WMError(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)>& func);
