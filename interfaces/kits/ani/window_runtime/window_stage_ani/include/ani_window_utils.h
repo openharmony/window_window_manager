@@ -107,7 +107,7 @@ public:
         std::map<WindowType, SystemBarProperty>& systemBarProperties);
     static bool ParseWindowMask(ani_env* env, ani_array windowMaskArray,
         std::vector<std::vector<uint32_t>>& windowMask);
-    static bool ParseWindowMaskInnerValue(ani_env* env, ani_array_long innerArray, std::vector<uint32_t>& elementArray);
+    static bool ParseWindowMaskInnerValue(ani_env* env, ani_array innerArray, std::vector<uint32_t>& elementArray);
     static WmErrorCode ParseTouchableAreas(ani_env* env, ani_array rects, const Rect& windowRect,
         std::vector<Rect>& touchableAreas);
     static bool ParseAndCheckRect(ani_env* env, ani_object rect, const Rect& windowRect, Rect& touchableRect);
