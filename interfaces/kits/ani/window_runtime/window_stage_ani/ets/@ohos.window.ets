@@ -2931,12 +2931,12 @@ export class WindowInternal implements Window {
       });
     }
 
-    public getSubWindowZLevel(): int{
+    public getSubWindowZLevel(): int {
       let ret = this.getSubWindowZLevelSync(this.nativeObj);
       return ret;
     };
 
-    public isFocused(): boolean{
+    public isFocused(): boolean {
       return this.isFocusedSync(this.nativeObj);
     };
 
