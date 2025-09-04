@@ -31,6 +31,16 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr int32_t MAX_TOUCHABLE_AREAS = 10;
+ani_ref g_booleanCls {};
+ani_ref g_doubleCls {};
+ani_ref g_intCls {};
+ani_ref g_longCls {};
+
+ani_method unboxBoolean {};
+ani_method unboxDouble {};
+ani_method unboxInt {};
+ani_method unboxLong {};
+
 std::string GetHexColor(uint32_t color)
 {
     std::stringstream ioss;
@@ -44,6 +54,96 @@ std::string GetHexColor(uint32_t color)
     finalColor += tmpColor;
     return finalColor;
 }
+}
+
+template<typename T>
+ani_status unbox(ani_env* env, ani_object obj, T* result)
+{
+    return ANI_INVALID_TYPE;
+}
+
+template<>
+ani_status unbox<ani_double>(ani_env* env, ani_object obj, ani_double* result)
+{
+    if (g_doubleCls == nullptr) {
+        ani_class doubleCls {};
+        auto status = env->FindClass("std.core.Double", &doubleCls);
+        if (status != ANI_OK) {
+            return status;
+        }
+        status = env->GlobalReference_Create(doubleCls, &g_doubleCls);
+        if (status != ANI_OK) {
+            return status;
+        }
+        status = env->Class_FindMethod(doubleCls, "unboxed", ":d", &unboxDouble);
+        if (status != ANI_OK) {
+            return status;
+        }
+    }
+    return env->Object_CallMethod_Double(obj, unboxDouble, result);
+}
+
+template<>
+ani_status unbox<ani_boolean>(ani_env* env, ani_object obj, ani_boolean* result)
+{
+    if (g_booleanCls == nullptr) {
+        ani_class booleanCls {};
+        auto status = env->FindClass("std.core.Boolean", &booleanCls);
+        if (status != ANI_OK) {
+            return status;
+        }
+        status = env->GlobalReference_Create(booleanCls, &g_booleanCls);
+        if (status != ANI_OK) {
+            return status;
+        }
+        status = env->Class_FindMethod(booleanCls, "unboxed", ":z", &unboxBoolean);
+        if (status != ANI_OK) {
+            return status;
+        }
+    }
+    return env->Object_CallMethod_Boolean(obj, unboxBoolean, result);
+}
+
+template<>
+ani_status unbox<ani_int>(ani_env* env, ani_object obj, ani_int* result)
+{
+    if (g_intCls == nullptr) {
+        ani_class intCls {};
+        auto status = env->FindClass("std.core.Integer", &intCls);
+        if (status != ANI_OK) {
+            return status;
+        }
+        status = env->GlobalReference_Create(intCls, &g_intCls);
+        if (status != ANI_OK) {
+            return status;
+        }
+        status = env->Class_FindMethod(intCls, "unboxed", ":i", &unboxInt);
+        if (status != ANI_OK) {
+            return status;
+        }
+    }
+    return env->Object_CallMethod_Int(obj, unboxInt, result);
+}
+
+template<>
+ani_status unbox<ani_long>(ani_env* env, ani_object obj, ani_long* result)
+{
+    if (g_longCls == nullptr) {
+        ani_class longCls {};
+        auto status = env->FindClass("std.core.Long", &longCls);
+        if (status != ANI_OK) {
+            return status;
+        }
+        status = env->GlobalReference_Create(longCls, &g_longCls);
+        if (status != ANI_OK) {
+            return status;
+        }
+        status = env->Class_FindMethod(longCls, "unboxed", ":l", &unboxLong);
+        if (status != ANI_OK) {
+            return status;
+        }
+    }
+    return env->Object_CallMethod_Long(obj, unboxLong, result);
 }
 
 ani_status AniWindowUtils::GetStdString(ani_env *env, ani_string ani_str, std::string &result)
@@ -1263,16 +1363,20 @@ bool AniWindowUtils::ParseWindowMask(ani_env* env, ani_array windowMaskArray,
             return false;
         }
         std::vector<uint32_t> elementArray;
-        if (!ParseWindowMaskInnerValue(env, static_cast<ani_array_long>(innerArrayRef), elementArray)) {
+        if (!ParseWindowMaskInnerValue(env, static_cast<ani_array>(innerArrayRef), elementArray)) {
             TLOGE(WmsLogTag::WMS_PC, "[ANI]Failed to convert parameter to window mask!");
             return false;
         }
         windowMask.emplace_back(elementArray);
     }
+    aniRet = env->GlobalReference_Delete(g_longCls);
+    if (aniRet != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_PC, "[ANI]Failed to delete g_longCls ref, ret: %{public}u", aniRet);
+    }
     return true;
 }
 
-bool AniWindowUtils::ParseWindowMaskInnerValue(ani_env* env, ani_array_long innerArray,
+bool AniWindowUtils::ParseWindowMaskInnerValue(ani_env* env, ani_array innerArray,
     std::vector<uint32_t>& elementArray)
 {
     ani_size size;
@@ -1289,7 +1393,7 @@ bool AniWindowUtils::ParseWindowMaskInnerValue(ani_env* env, ani_array_long inne
             return false;
         }
         ani_long maskValue = 0;
-        aniRet = env->Object_CallMethodByName_Long(static_cast<ani_object>(maskValueRef), "unboxed", ":l", &maskValue);
+        aniRet = unbox(env, static_cast<ani_object>(maskValueRef), &maskValue);
         if (aniRet != ANI_OK) {
             TLOGE(WmsLogTag::WMS_PC, "[ANI]Get maskValue failed, ret: %{public}u", aniRet);
             return false;
