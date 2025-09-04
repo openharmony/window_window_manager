@@ -1350,7 +1350,8 @@ void AniWindow::SetWindowTopmost(ani_env* env, ani_boolean isWindowTopmost)
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), isWindowTopmost);
 }
 
-void AniWindow::SetTitleAndDockHoverShown(ani_env* env, ani_boolean isTitleHoverShown, ani_boolean isDockHoverShown)
+void AniWindow::SetTitleAndDockHoverShown(ani_env* env,
+    ani_boolean isTitleHoverShown, ani_boolean isDockHoverShown)
 {
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] window is nullptr");
@@ -2005,7 +2006,7 @@ void AniWindow::SetTitleAndDockHoverShown(ani_env* env, ani_object obj, ani_long
     if (aniWindow != nullptr) {
         aniWindow->OnSetTitleAndDockHoverShown(env, isTitleHoverShown, isDockHoverShown);
     } else {
-         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] aniWindow is nullptr");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] aniWindow is nullptr");
     }
 }
 
@@ -2066,7 +2067,7 @@ ani_boolean AniWindow::GetWindowDecorVisible(ani_env* env, ani_object obj, ani_l
     if (aniWindow != nullptr) {
         return aniWindow->OnGetWindowDecorVisible(env);
     } else {
-         TLOGE(WmsLogTag::DEFAULT, "[ANI] aniWindow is nullptr");
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] aniWindow is nullptr");
         return ani_boolean(false);
     }
 }
