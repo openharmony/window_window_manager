@@ -1352,7 +1352,9 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteParcelable(&keyboardLayoutParams_) &&
         parcel.WriteBool(isAppSupportPhoneInPc_) &&
         parcel.WriteBool(isPcAppInLargeScreenDevice_) &&
-        parcel.WriteString(appInstanceKey_) && parcel.WriteBool(isSystemKeyboard_) &&
+        parcel.WriteString(appInstanceKey_) &&
+        parcel.WriteInt32(appIndex_) &&
+        parcel.WriteBool(isSystemKeyboard_) &&
         parcel.WriteUint32(avoidAreaOption_) && parcel.WriteBool(isWindowDelayRaiseEnabled_) &&
         parcel.WriteUint8(backgroundAlpha_) && parcel.WriteParcelable(&keyboardEffectOption_) &&
         parcel.WriteFloat(cornerRadius_) && parcel.WriteBool(isExclusivelyHighlighted_) &&
@@ -1454,6 +1456,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetIsAppSupportPhoneInPc(parcel.ReadBool());
     property->SetIsPcAppInPad(parcel.ReadBool());
     property->SetAppInstanceKey(parcel.ReadString());
+    property->SetAppIndex(parcel.ReadInt32());
     property->SetIsSystemKeyboard(parcel.ReadBool());
     property->SetAvoidAreaOption(parcel.ReadUint32());
     property->SetWindowDelayRaiseEnabled(parcel.ReadBool());
@@ -1570,6 +1573,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     isUIExtAnySubWindow_ = property->isUIExtAnySubWindow_;
     parentWindowType_ = property->parentWindowType_;
     appInstanceKey_ = property->appInstanceKey_;
+    appIndex_ = property->appIndex_;
     isSystemKeyboard_ = property->isSystemKeyboard_;
     avoidAreaOption_ = property->avoidAreaOption_;
     isWindowDelayRaiseEnabled_ = property->isWindowDelayRaiseEnabled_;
@@ -2133,6 +2137,16 @@ void WindowSessionProperty::SetAppInstanceKey(const std::string& appInstanceKey)
 std::string WindowSessionProperty::GetAppInstanceKey() const
 {
     return appInstanceKey_;
+}
+
+void WindowSessionProperty::SetAppIndex(int32_t appIndex)
+{
+    appIndex_ = appIndex;
+}
+
+int32_t WindowSessionProperty::GetAppIndex() const
+{
+    return appIndex_;
 }
 
 void WindowSessionProperty::SetIsSystemKeyboard(bool isSystemKeyboard)
