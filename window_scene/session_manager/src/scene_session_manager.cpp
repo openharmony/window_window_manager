@@ -4203,6 +4203,7 @@ void SceneSessionManager::RecoverSessionInfo(const sptr<WindowSessionProperty>& 
                                     : SessionState::STATE_BACKGROUND;
     sessionInfo.isPersistentRecover_ = true;
     sessionInfo.appInstanceKey_ = property->GetAppInstanceKey();
+    sessionInfo.appIndex_ = property->GetAppIndex();
     sessionInfo.screenId_ = property->GetDisplayId();
     sessionInfo.isAbilityHook_ = property->GetIsAbilityHook();
     sessionInfo.supportedWindowModes =
@@ -4210,11 +4211,11 @@ void SceneSessionManager::RecoverSessionInfo(const sptr<WindowSessionProperty>& 
     TLOGI(WmsLogTag::WMS_RECOVER,
         "Recover and reconnect session with: bundleName=%{public}s, moduleName=%{public}s, "
         "abilityName=%{public}s, windowMode=%{public}d, windowType=%{public}u, persistentId=%{public}d, "
-        "windowState=%{public}u, appInstanceKey=%{public}s, isFollowParentMultiScreenPolicy=%{public}d, "
-        "screenId=%{public}" PRIu64 ", isAbilityHook=%{public}d",
+        "windowState=%{public}u, appInstanceKey=%{public}s, appIndex=%{public}d, "
+        "isFollowParentMultiScreenPolicy=%{public}d, screenId=%{public}" PRIu64 ", isAbilityHook=%{public}d",
         sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(), sessionInfo.abilityName_.c_str(),
         sessionInfo.windowMode, sessionInfo.windowType_, sessionInfo.persistentId_, sessionInfo.sessionState_,
-        sessionInfo.appInstanceKey_.c_str(), sessionInfo.isFollowParentMultiScreenPolicy,
+        sessionInfo.appInstanceKey_.c_str(), sessionInfo.appIndex_, sessionInfo.isFollowParentMultiScreenPolicy,
         sessionInfo.screenId_, sessionInfo.isAbilityHook_);
 }
 
