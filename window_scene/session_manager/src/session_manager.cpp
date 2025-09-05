@@ -329,7 +329,7 @@ void SessionManager::RegisterSMSRecoverListener()
             return;
         }
         smsRecoverListener_ = sptr<SessionManagerServiceRecoverListener>::MakeSptr(this);
-        TLOGD(WmsLogTag::WMS_RECOVER, "Register recover listener, userId_: %{public}d", userId_);
+        TLOGI(WmsLogTag::WMS_RECOVER, "Register recover listener, userId_: %{public}d", userId_);
         mockSessionManagerServiceProxy_->RegisterSMSRecoverListener(smsRecoverListener_, userId_);
     }
     {

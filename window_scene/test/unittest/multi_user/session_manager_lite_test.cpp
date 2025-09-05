@@ -14,9 +14,8 @@
  */
 
 #include <gtest/gtest.h>
-
-#include "session_manager_lite.h"
 #include "iremote_object_mocker.h"
+#include "session_manager_lite.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -29,12 +28,12 @@ public:
     void TearDown() override;
 
 private:
-    std::shared_ptr<SessionManagerLite> sml_;
+    sptr<SessionManagerLite> sml_;
 };
 
 void SessionManagerLiteTest::SetUp()
 {
-    sml_ = std::make_shared<SessionManagerLite>();
+    sml_ = SessionManagerLite::GetInstance(-1);
 }
 
 void SessionManagerLiteTest::TearDown()
@@ -70,7 +69,7 @@ HWTEST_F(SessionManagerLiteTest, InitSceneSessionManagerLiteProxy01, Function | 
 {
     ASSERT_NE(nullptr, sml_);
     sml_->InitSceneSessionManagerLiteProxy();
-    ASSERT_EQ(nullptr, sml_->sceneSessionManagerLiteProxy_);
+    ASSERT_NE(nullptr, sml_->sceneSessionManagerLiteProxy_);
 }
 
 /**
