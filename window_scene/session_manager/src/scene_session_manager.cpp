@@ -1086,13 +1086,13 @@ void SceneSessionManager::SetEnableInputEvent(bool enabled)
     if (recoverStateChangeFunc_ == nullptr) {
         return;
     }
-    
+
     if (enabled) {
         recoverStateChangeFunc_(RecoverState::RECOVER_ENABLE_INPUT);
     } else {
         recoverStateChangeFunc_(RecoverState::RECOVER_INITIAL);
     }
-    
+
 }
 
 bool SceneSessionManager::IsInputEventEnabled() const
@@ -4294,7 +4294,7 @@ WSError SceneSessionManager::RecoverAndConnectSpecificSession(const sptr<ISessio
             return errCode;
         }
         sessionRecoverStateChangeFunc_(SessionRecoverState::SESSION_FINISH_RECONNECT, property);
-        AddClientDeathRecipient(sessionStage, sceneSession);    
+        AddClientDeathRecipient(sessionStage, sceneSession);
         session = sceneSession;
         return errCode;
     };
@@ -7379,7 +7379,7 @@ WSError SceneSessionManager::RequestSessionFocusImmediately(int32_t persistentId
     }
     auto needBlockNotifyFocusStatusUntilForeground = focusGroup->GetNeedBlockNotifyFocusStatusUntilForeground();
     focusGroup->SetNeedBlockNotifyUnfocusStatus(needBlockNotifyFocusStatusUntilForeground);
-    if (!sceneSession->GetSessionInfo().isSystem_ && !blockNotifyUntilVisible && systemConfig_.IsPcWindow()) {
+    if (!sceneSession->GetSessionInfo().isSystem_ && !blockNotifyUntilVisible && systemConfig_.isSupportPCMode()) {
         if (!sceneSession->IsSessionForeground()) {
             focusGroup->SetNeedBlockNotifyFocusStatusUntilForeground(true);
         }
@@ -10307,7 +10307,7 @@ void SceneSessionManager::ConfigSupportCreateFloatWindow()
     auto task = [this] {
         systemConfig_.supportCreateFloatWindow_ = true;
     };
-    taskScheduler_->PostAsyncTask(task, "ConfigSupportCreateFloatWindow"); 
+    taskScheduler_->PostAsyncTask(task, "ConfigSupportCreateFloatWindow");
 }
 
 WSError SceneSessionManager::BindDialogSessionTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken)
@@ -10549,7 +10549,7 @@ WMError SceneSessionManager::FlushSessionBlackListInfoMapWhenAdd()
     for (const auto& [screenId, screenBlackListInfo] : screenRSBlackListConfigMap_) {
         for (const auto& info : sessionRSBlackListConfigSet_) {
             if (screenBlackListInfo.find({ .privacyWindowTag = info.privacyWindowTag }) != screenBlackListInfo.end()) {
-                sessionBlackListInfoMap_[screenId].insert(info);   
+                sessionBlackListInfoMap_[screenId].insert(info);
             }
         }
         UpdateVirtualScreenBlackList(screenId);
@@ -10562,7 +10562,7 @@ WMError SceneSessionManager::FlushSessionBlackListInfoMapWhenAdd(ScreenId screen
     auto screenBlackListInfo = screenRSBlackListConfigMap_[screenId];
     for (const auto& info : sessionRSBlackListConfigSet_) {
         if (screenBlackListInfo.find({ .privacyWindowTag = info.privacyWindowTag }) != screenBlackListInfo.end()) {
-            sessionBlackListInfoMap_[screenId].insert(info);   
+            sessionBlackListInfoMap_[screenId].insert(info);
         }
     }
     UpdateVirtualScreenBlackList(screenId);
