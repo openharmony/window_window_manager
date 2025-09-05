@@ -729,6 +729,18 @@ export interface SubWindowOptions {
     outlineEnabled?: boolean;
 }
 
+export class SubWindowOptionsInternal implements SystemBarProperties {
+    title: string;
+    decorEnabled: boolean;
+    isModal?: boolean;
+    isTopmost?: boolean;
+    modalityType?: ModalityType;
+    windowRect?: Rect;
+    maximizeSupported?: boolean;
+    zLevel?: int;
+    outlineEnabled?: boolean;
+}
+
 export enum BlurStyle {
   OFF = 0,
   THIN = 1,
