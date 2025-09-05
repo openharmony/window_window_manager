@@ -92,6 +92,7 @@ public:
     MOCK_METHOD0(NotifyAppHookWindowInfoUpdated, WSError(void));
     MOCK_METHOD1(GetRouterStackInfo, WMError(std::string& routerStackInfo));
     MOCK_METHOD1(SendFbActionEvent, WSError(const std::string& action));
+    MOCK_METHOD1(UpdateIsShowDecorInFreeMultiWindow, WSError(bool isShow));
 };
 } // namespace Rosen
 } // namespace OHOS

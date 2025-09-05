@@ -808,7 +808,6 @@ public:
 
     std::vector<sptr<SceneSession>> GetSceneSessions(ScreenId screenId);
     WMError UpdateScreenLockState(int32_t persistentId);
-    WMError UpdateSystemDecorEnable(bool enable);
 
 protected:
     SceneSessionManager();
@@ -1719,6 +1718,7 @@ private:
     void UpdateAllStartingWindowRdb();
     bool needUpdateRdb_ = true;
     std::string GetCallerSessionColorMode(const SessionInfo& sessionInfo);
+    void NotifySessionScreenLockedChange(bool isScreenLocked);
 };
 } // namespace OHOS::Rosen
 

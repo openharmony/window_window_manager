@@ -1369,7 +1369,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isPcAppInpadSpecificSystemBarInvisible_) &&
         parcel.WriteBool(isPcAppInpadOrientationLandscape_) &&
         parcel.WriteBool(isPcAppInpadCompatibleMode_) &&
-        parcel.WriteString(ancoRealBundleName_);
+        parcel.WriteString(ancoRealBundleName_) &&
+        parcel.WriteBool(isShowDecorInFreeMultiWindow_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1486,6 +1487,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetPcAppInpadOrientationLandscape(parcel.ReadBool());
     property->SetPcAppInpadCompatibleMode(parcel.ReadBool());
     property->SetAncoRealBundleName(parcel.ReadString());
+    property->SetIsShowDecorInFreeMultiWindow(parcel.ReadBool());
     return property;
 }
 
@@ -1598,6 +1600,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
         std::lock_guard<std::mutex> lock(missionInfoMutex_);
         missionInfo_ = property->missionInfo_;
     }
+    isShowDecorInFreeMultiWindow_ = property->isShowDecorInFreeMultiWindow_;
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)
@@ -2603,6 +2606,16 @@ void WindowSessionProperty::UnmarshallingShadowsInfo(Parcel& parcel, WindowSessi
 void SystemSessionConfig::ConvertSupportUIExtensionSubWindow(const std::string& itemValue)
 {
     supportUIExtensionSubWindow_ = StringUtil::ConvertStringToBool(itemValue);
+}
+
+void WindowSessionProperty::SetIsShowDecorInFreeMultiWindow(bool isShow)
+{
+    isShowDecorInFreeMultiWindow_ = isShow;
+}
+
+bool WindowSessionProperty::GetIsShowDecorInFreeMultiWindow() const
+{
+    return isShowDecorInFreeMultiWindow_;
 }
 } // namespace Rosen
 } // namespace OHOS

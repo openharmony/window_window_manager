@@ -344,6 +344,7 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
             return WSError::WS_ERROR_IPC_FAILED;
         }
         property->SetMissionInfo(*missionInfo);
+        property->SetIsShowDecorInFreeMultiWindow(reply.ReadBool());
     }
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
