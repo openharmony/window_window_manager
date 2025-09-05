@@ -165,11 +165,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithNotSystemTouchable, Tes
         sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert(std::make_pair(screenId, screenSession));
     manager_->UpdateWindowFlags(screenId, sceneSessionMainWindow, windowInfo);
-    bool windowFlagResult = false;
-    if (windowInfo.flags == 1) {
-        windowFlagResult = true;
-    }
-    ASSERT_EQ(windowFlagResult, true);
+    ASSERT_EQ(windowInfo.flags, 1);
 }
 
 /**
@@ -206,11 +202,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithNotIsTouchEnable, TestS
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert(std::make_pair(screenId, screenSession));
     manager_->UpdateWindowFlags(screenId, sceneSessionMainWindow, windowInfo);
-    bool windowFlagResult = false;
-    if (windowInfo.flags == MMI::WindowInfo::FLAG_BIT_UNTOUCHABLE) {
-        windowFlagResult = true;
-    }
-    ASSERT_EQ(windowFlagResult, true);
+    ASSERT_EQ(windowInfo.flags, MMI::WindowInfo::FLAG_BIT_UNTOUCHABLE);
 }
 
 /**
@@ -246,11 +238,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithNotIsForceTouchEnable, 
     screenSession->touchEnabled_.store(true);
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert(std::make_pair(screenId, screenSession));
     manager_->UpdateWindowFlags(screenId, sceneSessionMainWindow, windowInfo);
-    bool windowFlagResult = false;
-    if (windowInfo.flags == 1) {
-        windowFlagResult = true;
-    }
-    ASSERT_EQ(windowFlagResult, true);
+    ASSERT_EQ(windowInfo.flags, 1);
 }
 
 /**
@@ -284,11 +272,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithNotForegroundInteractiv
         sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert(std::make_pair(screenId, screenSession));
     manager_->UpdateWindowFlags(screenId, sceneSessionMainWindow, windowInfo);
-    bool windowFlagResult = false;
-    if (windowInfo.flags == 1) {
-        windowFlagResult = true;
-    }
-    ASSERT_EQ(windowFlagResult, true);
+    ASSERT_EQ(windowInfo.flags, 1);
 }
 
 /**
@@ -322,11 +306,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithNotPropertyTouchable, T
         sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert(std::make_pair(screenId, screenSession));
     manager_->UpdateWindowFlags(screenId, sceneSessionMainWindow, windowInfo);
-    bool windowFlagResult = false;
-    if (windowInfo.flags == 1) {
-        windowFlagResult = true;
-    }
-    ASSERT_EQ(windowFlagResult, true);
+    ASSERT_EQ(windowInfo.flags, 1);
 }
 
 /**
