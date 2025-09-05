@@ -729,7 +729,7 @@ export interface SubWindowOptions {
     outlineEnabled?: boolean;
 }
 
-export class SubWindowOptionsInternal implements SystemBarProperties {
+export class SubWindowOptionsInternal implements SubWindowOptions {
     title: string;
     decorEnabled: boolean;
     isModal?: boolean;
