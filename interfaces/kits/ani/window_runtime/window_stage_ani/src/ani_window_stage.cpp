@@ -303,6 +303,47 @@ void AniWindowStage::OnSetShowOnLockScreen(ani_env* env, ani_boolean showOnLockS
     TLOGE(WmsLogTag::DEFAULT, "[ANI] OnSetShowOnLockScreen end!");
 }
 
+void AniWindowStage::SetWindowModal(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isModal)
+{
+    TLOGI(WmsLogTag::WMS_HIERARCHY, "[ANI]");
+    AniWindowStage* aniWindowStage = reinterpret_cast<AniWindowStage*>(nativeObj);
+    if (aniWindowStage != nullptr) {
+        aniWindowStage->OnSetWindowModal(env, isModal);
+    } else {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "[ANI] aniWindowStage is nullptr");
+    }
+}
+
+void AniWindowStage::OnSetWindowModal(ani_env* env, ani_boolean isModal)
+{
+    TLOGI(WmsLogTag::WMS_HIERARCHY, "[ANI]");
+    auto windowScene = GetWindowScene().lock();
+    if (windowScene == nullptr) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "[ANI]windowScene is nullptr!");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    auto window = windowScene->GetMainWindow();
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "[ANI] mainWindow is nullptr!");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    if (!window->IsPcOrPadFreeMultiWindowMode()) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "device not support");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
+        return;
+    }
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetWindowModal(isModal));
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "failed, ret is %{public}d", ret);
+        AniWindowUtils::AniThrowError(env, ret, "Set main window modal failed");
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_HIERARCHY, "id:%{public}u, name:%{public}s, isModal:%{public}d",
+        window->GetWindowId(), window->GetWindowName().c_str(), isModal);
+}
+
 void AniWindowStage::RegisterWindowCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
     ani_ref callback)
 {
@@ -472,6 +513,74 @@ ani_ref AniWindowStage::OnCreateSubWindow(ani_env* env, ani_string name)
         return AniWindowUtils::CreateAniUndefined(env);
     }
     return CreateAniWindowObject(env, window);
+}
+
+void AniWindowStage::SetCustomDensity(ani_env* env, ani_object obj, ani_long nativeObj, ani_double density)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
+    AniWindowStage* aniWindowStage = reinterpret_cast<AniWindowStage*>(nativeObj);
+    if (aniWindowStage != nullptr) {
+        aniWindowStage->OnSetCustomDensity(env, density);
+    } else {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] aniWindowStage is nullptr");
+        return;
+    }
+}
+
+void AniWindowStage::OnSetCustomDensity(ani_env* env, ani_double density)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
+    auto windowScene = GetWindowScene().lock();
+    if (windowScene == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI]windowScene is nullptr!");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    auto window = windowScene->GetMainWindow();
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] mainWindow is nullptr!");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetCustomDensity(static_cast<float>(density), false));
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u,%{public}s] set density=%{public}f, result=%{public}d",
+        window->GetWindowId(), window->GetWindowName().c_str(), density, ret);
+    if (ret != WmErrorCode::WM_OK) {
+        AniWindowUtils::AniThrowError(env, ret);
+        return;
+    }
+}
+
+void AniWindowStage::SetDefaultDensityEnabled(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean enabled)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
+    AniWindowStage* aniWindowStage = reinterpret_cast<AniWindowStage*>(nativeObj);
+    if (aniWindowStage != nullptr) {
+        aniWindowStage->OnSetDefaultDensityEnabled(env, enabled);
+    } else {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] aniWindowStage is nullptr");
+        return;
+    }
+}
+
+void AniWindowStage::OnSetDefaultDensityEnabled(ani_env* env, ani_boolean enabled)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
+    auto windowScene = GetWindowScene().lock();
+    if (windowScene == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI]windowScene is nullptr!");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    auto window = windowScene->GetMainWindow();
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] mainWindow is nullptr!");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetDefaultDensityEnabled(enabled));
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u,%{public}s] enabled=%{public}u ret=%{public}d",
+        window->GetWindowId(), window->GetWindowName().c_str(), enabled, ret);
 }
 }  // namespace Rosen
 }  // namespace OHOS
