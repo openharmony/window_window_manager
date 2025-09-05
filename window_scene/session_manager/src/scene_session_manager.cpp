@@ -8410,6 +8410,7 @@ void SceneSessionManager::SetScreenLocked(const bool isScreenLocked)
         DeleteStateDetectTask();
         NotifyPiPWindowVisibleChange(isScreenLocked);
     }, __func__);
+    NotifySessionScreenLockedChange(isScreenLocked);
 }
 
 void SceneSessionManager::SetUserAuthPassed(bool isUserAuthPassed)
@@ -17506,10 +17507,21 @@ WMError SceneSessionManager::UpdateScreenLockState(int32_t persistentId)
     return WMError::WM_OK;
 }
 
-WMError SceneSessionManager::UpdateSystemDecorEnable(bool enable)
-{
-    TLOGI(WmsLogTag::WMS_DECOR, "set system decor enable: %{public}d", enable);
-    systemConfig_.isSystemDecorEnable_ = enable;
-    return WMError::WM_OK;
+void SceneSessionManager::NotifySessionScreenLockedChange(bool isScreenLocked) {
+    if (!systemConfig_.freeMultiWindowSupport_) {
+        return;
+    }
+    const bool isPcMode = system::GetBoolParameter("persist.sceneboard.ispcmode", false);
+    const bool isShow = !(isScreenLocked && (systemConfig_.IsFreeMultiWindowMode() && !isPcMode));
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    for (const auto& [_, sceneSession] : sceneSessionMap_) {
+        if (sceneSession == nullptr || !(sceneSession->GetSessionProperty()->GetWindowFlags() &
+            static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED)) ||
+            (isScreenLocked && !sceneSession->IsSessionForeground())) {
+            continue;
+        }
+        sceneSession->GetSessionProperty()->SetIsShowDecorInFreeMultiWindow(isShow);
+        sceneSession->SetIsShowDecorInFreeMultiWindow(isShow);
+    }
 }
 } // namespace OHOS::Rosen

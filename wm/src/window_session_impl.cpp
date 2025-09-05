@@ -2337,7 +2337,8 @@ void WindowSessionImpl::UpdateDecorEnableToAce(bool isDecorEnable)
             auto isSubWindow = WindowHelper::IsSubWindow(GetType());
             decorVisible = decorVisible && (windowSystemConfig_.freeMultiWindowEnable_ ||
                 (property_->GetIsPcAppInPad() && isSubWindow)) &&
-                !(mode == WindowMode::WINDOW_MODE_FULLSCREEN && property_->GetCompatibleModeProperty());
+                !(mode == WindowMode::WINDOW_MODE_FULLSCREEN && property_->GetCompatibleModeProperty()) &&
+                property_->GetIsShowDecorInFreeMultiWindow();
         }
         if (mode == WindowMode::WINDOW_MODE_FULLSCREEN && property_->IsDecorFullscreenDisabled()) {
             decorVisible = false;
@@ -2369,7 +2370,8 @@ void WindowSessionImpl::UpdateDecorEnable(bool needNotify, WindowMode mode)
                 auto isSubWindow = WindowHelper::IsSubWindow(GetType());
                 decorVisible = decorVisible && (windowSystemConfig_.freeMultiWindowEnable_ ||
                     (property_->GetIsPcAppInPad() && isSubWindow)) &&
-                    !(mode == WindowMode::WINDOW_MODE_FULLSCREEN && property_->GetCompatibleModeProperty());
+                    !(mode == WindowMode::WINDOW_MODE_FULLSCREEN && property_->GetCompatibleModeProperty()) &&
+                    property_->GetIsShowDecorInFreeMultiWindow();
             }
             if (GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN && property_->IsDecorFullscreenDisabled()) {
                 decorVisible = false;
@@ -8114,5 +8116,11 @@ void WindowSessionImpl::SetNotifySizeChangeFlag(bool flag)
     notifySizeChangeFlag_ = false;
 }
 
+WSError WindowSessionImpl::UpdateIsShowDecorInFreeMultiWindow(bool isShow)
+{
+    TLOGI(WmsLogTag::WMS_DECOR, "id: %{public}d, isShow: %{public}d", GetPersistentId(), isShow);
+    property_->SetIsShowDecorInFreeMultiWindow(isShow);
+    return WSError::WS_OK;
+}
 } // namespace Rosen
 } // namespace OHOS

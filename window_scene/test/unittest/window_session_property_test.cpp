@@ -1654,6 +1654,35 @@ HWTEST_F(WindowSessionPropertyTest, UnmarshallingFbTemplateInfoTest, TestSize.Le
     ASSERT_EQ(property->GetFbTemplateInfo().backgroundColor_, fbTemplateInfo.backgroundColor_);
     ASSERT_EQ(property->GetFbTemplateInfo().icon_, fbTemplateInfo.icon_);
 }
+
+/**
+ * @tc.name: SetIsShowDecorInFreeMultiWindow
+ * @tc.desc: Test SetIsShowDecorInFreeMultiWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetIsShowDecorInFreeMultiWindow, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    bool isShow = true;
+    property->SetIsShowDecorInFreeMultiWindow(isShow);
+    ASSERT_EQ(isShow, property->GetIsShowDecorInFreeMultiWindow());
+    isShow = false;
+    property->SetIsShowDecorInFreeMultiWindow(isShow);
+    ASSERT_EQ(isShow, property->GetIsShowDecorInFreeMultiWindow());
+}
+
+/**
+ * @tc.name: GetIsShowDecorInFreeMultiWindow
+ * @tc.desc: Test GetIsShowDecorInFreeMultiWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, GetIsShowDecorInFreeMultiWindow, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    bool isShow = true;
+    property->SetIsShowDecorInFreeMultiWindow(isShow);
+    ASSERT_EQ(true, property->GetIsShowDecorInFreeMultiWindow());
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
