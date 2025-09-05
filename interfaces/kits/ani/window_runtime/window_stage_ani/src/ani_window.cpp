@@ -3080,6 +3080,7 @@ void AniWindow::SetWakeUpScreen(ani_env* env, ani_boolean wakeUp)
     if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "set wake up screen permission denied!");
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+        return;
     }
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] windowToken_ is nullptr");
@@ -3245,7 +3246,7 @@ void AniWindow::SetSystemAvoidAreaEnabled(ani_env* env, ani_boolean enabled)
     uint32_t option = 0;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->GetAvoidAreaOption(option));
     if (ret != WmErrorCode::WM_OK) {
-        TLOGE(WmsLogTag::WMS_IMMS, "SetSystemAvoidAreaEnabled failed");
+        TLOGE(WmsLogTag::WMS_IMMS, "get failed, ret %{public}d", ret);
         AniWindowUtils::AniThrowError(env, ret);
         return;
     }
@@ -3258,6 +3259,7 @@ void AniWindow::SetSystemAvoidAreaEnabled(ani_env* env, ani_boolean enabled)
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_IMMS, "failed, ret %{public}d", ret);
         AniWindowUtils::AniThrowError(env, ret, "set system avoid area enabled failed.");
+        return;
     }
 }
 
@@ -4407,9 +4409,9 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(SetGestureBackEnabled)},
         ani_native_function {"setSingleFrameComposerEnabled", "lz:",
             reinterpret_cast<void *>(SetSingleFrameComposerEnabled)},
-        ani_native_function {"nativeTransferStatic", "Lstd/interop/ESValue;:Lstd/core/Object;",
+        ani_native_function {"nativeTransferStatic", "C{std.interop.ESValue}:C{std.core.Object}",
             reinterpret_cast<void *>(AniWindow::NativeTransferStatic)},
-        ani_native_function {"nativeTransferDynamic", "J:Lstd/interop/ESValue;",
+        ani_native_function {"nativeTransferDynamic", "l:C{std.interop.ESValue}",
             reinterpret_cast<void *>(AniWindow::NativeTransferDynamic)},
     };
     for (auto method : methods) {

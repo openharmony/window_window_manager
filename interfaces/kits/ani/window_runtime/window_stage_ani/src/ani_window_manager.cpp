@@ -546,7 +546,7 @@ ani_object AniWindowManager::OnGetSnapshot(ani_env* env, ani_double windowId)
     WmErrorCode result = WM_JS_TO_ERROR_CODE_MAP.at(SingletonContainer::Get<WindowManager>().GetSnapshotByWindowId(
         static_cast<int>(windowId), pixelMap));
     if (result != WmErrorCode::WM_OK) {
-        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "Get snapshot not ok!");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Get snapshot not ok!");
         return AniWindowUtils::AniThrowError(env, result);
     }
     if (pixelMap == nullptr) {
@@ -618,6 +618,7 @@ void AniWindowManager::OnSetGestureNavigationEnabled(ani_env* env, ani_boolean e
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
         SingletonContainer::Get<WindowManager>().SetGestureNavigationEnabled(enabled));
     if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_IMMS, "failed, ret %{public}d", ret);
         AniWindowUtils::AniThrowError(env, ret, "SetGestureNavigationEnabled failed");
         return;
     }
