@@ -523,6 +523,7 @@ void AniWindowStage::SetCustomDensity(ani_env* env, ani_object obj, ani_long nat
         aniWindowStage->OnSetCustomDensity(env, density);
     } else {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] aniWindowStage is nullptr");
+        return;
     }
 }
 
@@ -546,6 +547,7 @@ void AniWindowStage::OnSetCustomDensity(ani_env* env, ani_double density)
         window->GetWindowId(), window->GetWindowName().c_str(), density, ret);
     if (ret != WmErrorCode::WM_OK) {
         AniWindowUtils::AniThrowError(env, ret);
+        return;
     }
 }
 
@@ -557,6 +559,7 @@ void AniWindowStage::SetDefaultDensityEnabled(ani_env* env, ani_object obj, ani_
         aniWindowStage->OnSetDefaultDensityEnabled(env, enabled);
     } else {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] aniWindowStage is nullptr");
+        return;
     }
 }
 
