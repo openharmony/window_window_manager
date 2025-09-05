@@ -554,7 +554,7 @@ ani_object AniWindowUtils::CreateAniWindowInfo(ani_env* env, const WindowVisibil
     CallAniMethodVoid(env, windowInfo, cls, "<set>abilityName", nullptr, abilityName);
     CallAniMethodVoid(env, windowInfo, cls, "<set>windowId", nullptr, info.GetWindowId());
     env->Object_SetFieldByName_Int(windowInfo, "windowStatusTypeInternal", ani_int(info.GetWindowStatus()));
-    env->Object_SetFieldByName_Boolean(windowInfo, "<set>isFocusedInternal", ani_boolean(info.IsFocused()));
+    env->Object_SetFieldByName_Boolean(windowInfo, "isFocusedInternal", ani_boolean(info.IsFocused()));
     return windowInfo;
 }
 

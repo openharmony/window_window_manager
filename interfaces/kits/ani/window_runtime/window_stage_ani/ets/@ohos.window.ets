@@ -1636,7 +1636,7 @@ export interface GetWindowsByCoordinateParam {
   y: number;
 }
 
-export class GetWindowsByCoordinateParamInternal implements GetWindowsByCoordinateParam{
+export class GetWindowsByCoordinateParamInternal implements GetWindowsByCoordinateParam {
   displayId: number;
   windowNumber: number;
   x: number;

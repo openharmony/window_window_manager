@@ -578,7 +578,7 @@ ani_object AniWindowManager::OnGetVisibleWindowInfo(ani_env* env)
     } else if (apiVersion >= API_VERSION_18 &&
                !CheckCallingPermission(PermissionConstants::PERMISSION_VISIBLE_WINDOW_INFO)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied! api%{public}u", apiVersion);
-        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_NO_PERMISSION);
     }
     std::vector<sptr<WindowVisibilityInfo>> infos;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
@@ -608,6 +608,7 @@ void AniWindowManager::SetGestureNavigationEnabled(ani_env* env, ani_long native
         aniWindowManager->OnSetGestureNavigationEnabled(env, enabled);
     } else {
         TLOGE(WmsLogTag::WMS_IMMS, "[ANI] aniWindowManager is nullptr");
+        return;
     }
 }
 
@@ -617,7 +618,8 @@ void AniWindowManager::OnSetGestureNavigationEnabled(ani_env* env, ani_boolean e
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
         SingletonContainer::Get<WindowManager>().SetGestureNavigationEnabled(enabled));
     if (ret != WmErrorCode::WM_OK) {
-        AniWindowUtils::AniThrowError(env, ret, "OnGetVisibleWindowInfo failed");
+        AniWindowUtils::AniThrowError(env, ret, "SetGestureNavigationEnabled failed");
+        return;
     }
 }
 
@@ -630,6 +632,7 @@ void AniWindowManager::SetWaterMarkImage(ani_env* env, ani_long nativeObj,
         aniWindowManager->OnSetWaterMarkImage(env, nativePixelMap, enable);
     } else {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] aniWindowManager is nullptr");
+        return;
     }
 }
 
