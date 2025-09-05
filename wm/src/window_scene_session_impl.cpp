@@ -1413,7 +1413,7 @@ void WindowSceneSessionImpl::CalculateNewLimitsByLimits(
     uint32_t displayWidth = static_cast<uint32_t>(displayInfo->GetWidth());
     uint32_t displayHeight = static_cast<uint32_t>(displayInfo->GetHeight());
     if (displayWidth == 0 || displayHeight == 0) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "displayWidth or displayHeight is zero, displayId: %{public}u",
+        TLOGE(WmsLogTag::WMS_LAYOUT, "displayWidth or displayHeight is zero, displayId: %{public}" PRIu64,
             property_->GetDisplayId());
         return;
     }
@@ -6639,7 +6639,7 @@ WMError WindowSceneSessionImpl::SetFollowParentWindowLayoutEnabled(bool isFollow
     }
     WSError ret = GetHostSession()->SetFollowParentWindowLayoutEnabled(isFollow);
     if (ret == WSError::WS_ERROR_DEVICE_NOT_SUPPORT) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "windowId: %{public}u, device not support", GetWindoId());
+        TLOGE(WmsLogTag::WMS_LAYOUT, "windowId: %{public}u, device not support", GetWindowId());
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     return ret != WSError::WS_OK ? WMError::WM_ERROR_SYSTEM_ABNORMALLY : WMError::WM_OK;
