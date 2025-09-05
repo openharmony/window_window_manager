@@ -38,10 +38,13 @@ class AniWindowStage {
         ani_string path, ani_object storage);
     static void DisableWindowDecor(ani_env* env, ani_object obj, ani_long nativeObj);
     static void SetShowOnLockScreen(ani_env* env, ani_class cls, ani_long nativeObj, ani_boolean showOnLockScreen);
+    static void SetWindowModal(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isModal);
     static void RegisterWindowCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
         ani_ref callback);
     static void UnregisterWindowCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
         ani_ref callback);
+    static void SetCustomDensity(ani_env* env, ani_object obj, ani_long nativeObj, ani_double density);
+    static void SetDefaultDensityEnabled(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean enabled);
 
     void SetWindowRectAutoSave(ani_env* env, ani_boolean enabled, ani_boolean isSaveBySpecifiedFlag);
     ani_boolean IsWindowRectAutoSave(ani_env* env);
@@ -51,9 +54,12 @@ class AniWindowStage {
     ani_boolean WindowIsWindowSupportWideGamut(ani_env* env, ani_class cls, ani_object obj);
     ani_ref OnCreateSubWindow(ani_env *env, ani_string name);
 private:
+    void OnSetCustomDensity(ani_env* env, ani_double density);
+    void OnSetDefaultDensityEnabled(ani_env* env, ani_boolean enabled);
     void OnLoadContent(ani_env* env, ani_string path, ani_object storage);
     void OnDisableWindowDecor(ani_env* env);
     void OnSetShowOnLockScreen(ani_env* env, ani_boolean showOnLockScreen);
+    void OnSetWindowModal(ani_env* env, ani_boolean isModal);
     void OnRegisterWindowCallback(ani_env* env, ani_string type, ani_ref callback);
     void OnUnregisterWindowCallback(ani_env* env, ani_string type, ani_ref callback);
     std::weak_ptr<WindowScene> windowScene_;

@@ -31,6 +31,16 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr int32_t MAX_TOUCHABLE_AREAS = 10;
+ani_ref g_booleanCls {};
+ani_ref g_doubleCls {};
+ani_ref g_intCls {};
+ani_ref g_longCls {};
+
+ani_method unboxBoolean {};
+ani_method unboxDouble {};
+ani_method unboxInt {};
+ani_method unboxLong {};
+
 std::string GetHexColor(uint32_t color)
 {
     std::stringstream ioss;
@@ -44,6 +54,96 @@ std::string GetHexColor(uint32_t color)
     finalColor += tmpColor;
     return finalColor;
 }
+}
+
+template<typename T>
+ani_status unbox(ani_env* env, ani_object obj, T* result)
+{
+    return ANI_INVALID_TYPE;
+}
+
+template<>
+ani_status unbox<ani_double>(ani_env* env, ani_object obj, ani_double* result)
+{
+    if (g_doubleCls == nullptr) {
+        ani_class doubleCls {};
+        auto status = env->FindClass("std.core.Double", &doubleCls);
+        if (status != ANI_OK) {
+            return status;
+        }
+        status = env->GlobalReference_Create(doubleCls, &g_doubleCls);
+        if (status != ANI_OK) {
+            return status;
+        }
+        status = env->Class_FindMethod(doubleCls, "unboxed", ":d", &unboxDouble);
+        if (status != ANI_OK) {
+            return status;
+        }
+    }
+    return env->Object_CallMethod_Double(obj, unboxDouble, result);
+}
+
+template<>
+ani_status unbox<ani_boolean>(ani_env* env, ani_object obj, ani_boolean* result)
+{
+    if (g_booleanCls == nullptr) {
+        ani_class booleanCls {};
+        auto status = env->FindClass("std.core.Boolean", &booleanCls);
+        if (status != ANI_OK) {
+            return status;
+        }
+        status = env->GlobalReference_Create(booleanCls, &g_booleanCls);
+        if (status != ANI_OK) {
+            return status;
+        }
+        status = env->Class_FindMethod(booleanCls, "unboxed", ":z", &unboxBoolean);
+        if (status != ANI_OK) {
+            return status;
+        }
+    }
+    return env->Object_CallMethod_Boolean(obj, unboxBoolean, result);
+}
+
+template<>
+ani_status unbox<ani_int>(ani_env* env, ani_object obj, ani_int* result)
+{
+    if (g_intCls == nullptr) {
+        ani_class intCls {};
+        auto status = env->FindClass("std.core.Integer", &intCls);
+        if (status != ANI_OK) {
+            return status;
+        }
+        status = env->GlobalReference_Create(intCls, &g_intCls);
+        if (status != ANI_OK) {
+            return status;
+        }
+        status = env->Class_FindMethod(intCls, "unboxed", ":i", &unboxInt);
+        if (status != ANI_OK) {
+            return status;
+        }
+    }
+    return env->Object_CallMethod_Int(obj, unboxInt, result);
+}
+
+template<>
+ani_status unbox<ani_long>(ani_env* env, ani_object obj, ani_long* result)
+{
+    if (g_longCls == nullptr) {
+        ani_class longCls {};
+        auto status = env->FindClass("std.core.Long", &longCls);
+        if (status != ANI_OK) {
+            return status;
+        }
+        status = env->GlobalReference_Create(longCls, &g_longCls);
+        if (status != ANI_OK) {
+            return status;
+        }
+        status = env->Class_FindMethod(longCls, "unboxed", ":l", &unboxLong);
+        if (status != ANI_OK) {
+            return status;
+        }
+    }
+    return env->Object_CallMethod_Long(obj, unboxLong, result);
 }
 
 ani_status AniWindowUtils::GetStdString(ani_env *env, ani_string ani_str, std::string &result)
@@ -332,11 +432,15 @@ ani_object AniWindowUtils::CreateAniDecorButtonStyle(ani_env* env, const DecorBu
     CallAniMethodVoid(env, aniDecorButtonStyle, aniClass,
         "<set>colorMode", nullptr, ani_long(decorButtonStyle.colorMode));
     CallAniMethodVoid(env, aniDecorButtonStyle, aniClass,
-        "<set>buttonBackgroundSize", nullptr, ani_double(decorButtonStyle.buttonBackgroundSize));
+        "<set>buttonBackgroundSize", nullptr, ani_int(decorButtonStyle.buttonBackgroundSize));
     CallAniMethodVoid(env, aniDecorButtonStyle, aniClass,
-        "<set>spacingBetweenButtons", nullptr, ani_double(decorButtonStyle.spacingBetweenButtons));
+        "<set>spacingBetweenButtons", nullptr, ani_int(decorButtonStyle.spacingBetweenButtons));
     CallAniMethodVoid(env, aniDecorButtonStyle, aniClass,
-        "<set>closeButtonRightMargin", nullptr, ani_double(decorButtonStyle.closeButtonRightMargin));
+        "<set>closeButtonRightMargin", nullptr, ani_int(decorButtonStyle.closeButtonRightMargin));
+    CallAniMethodVoid(env, aniDecorButtonStyle, aniClass,
+        "<set>buttonIconSize", nullptr, ani_int(decorButtonStyle.buttonIconSize));
+    CallAniMethodVoid(env, aniDecorButtonStyle, aniClass,
+        "<set>buttonBackgroundCornerRadius", nullptr, ani_int(decorButtonStyle.buttonBackgroundCornerRadius));
     return aniDecorButtonStyle;
 }
 
@@ -366,6 +470,214 @@ ani_object AniWindowUtils::CreateAniTitleButtonRect(ani_env* env, const TitleBut
     CallAniMethodVoid(env, aniTitleButtonRect, aniClass, "<set>width", nullptr, ani_double(titleButtonRect.width_));
     CallAniMethodVoid(env, aniTitleButtonRect, aniClass, "<set>height", nullptr, ani_double(titleButtonRect.height_));
     return aniTitleButtonRect;
+}
+
+ani_object AniWindowUtils::CreateAniStatusBarProperty(ani_env* env, const SystemBarProperty& prop)
+{
+    ani_class cls;
+    if (env->FindClass("@ohos.window.window.StatusBarPropertyInternal", &cls) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_IMMS, "[ANI] class not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_method ctor;
+    if (env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_IMMS, "[ANI] ctor not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_object statusBarProperty;
+    if (env->Object_New(cls, ctor, &statusBarProperty) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_IMMS, "[ANI] fail to new obj");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_string contentColor;
+    if (GetAniString(env, GetHexColor(prop.contentColor_), &contentColor) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_IMMS, "[ANI] create string failed");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    CallAniMethodVoid(env, statusBarProperty, cls, "<set>contentColor", nullptr, contentColor);
+    return statusBarProperty;
+}
+
+ani_object AniWindowUtils::CreateAniWindowDensityInfo(ani_env* env, const WindowDensityInfo& info)
+{
+    ani_class cls;
+    if (env->FindClass("@ohos.window.window.WindowDensityInfoInternal", &cls) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] class not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_method ctor;
+    if (env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] ctor not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_object windowDensityInfo;
+    if (env->Object_New(cls, ctor, &windowDensityInfo) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] fail to new obj");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    CallAniMethodVoid(env, windowDensityInfo, cls, "<set>systemDensity", nullptr,
+        static_cast<double>(info.systemDensity));
+    CallAniMethodVoid(env, windowDensityInfo, cls, "<set>defaultDensity", nullptr,
+        static_cast<double>(info.defaultDensity));
+    CallAniMethodVoid(env, windowDensityInfo, cls, "<set>customDensity", nullptr,
+        static_cast<double>(info.customDensity));
+    return windowDensityInfo;
+}
+
+ani_object AniWindowUtils::CreateAniWindowSystemBarProperties(ani_env* env,
+    const SystemBarProperty& status, const SystemBarProperty& navi)
+{
+    ani_class cls;
+    if (env->FindClass("@ohos.window.window.SystemBarPropertiesInternal", &cls) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_IMMS, "[ANI] class not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_method ctor;
+    if (env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_IMMS, "[ANI] ctor not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_object systemBarProperties;
+    if (env->Object_New(cls, ctor, &systemBarProperties) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_IMMS, "[ANI] fail to new obj");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_string backgroundColor;
+    if (GetAniString(env, GetHexColor(status.backgroundColor_), &backgroundColor) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_IMMS, "[ANI] create string failed");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    CallAniMethodVoid(env, systemBarProperties, cls, "<set>statusBarColor", nullptr, backgroundColor);
+    ani_string statusBarContentColor;
+    if (GetAniString(env, GetHexColor(status.contentColor_), &statusBarContentColor) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_IMMS, "[ANI] create string failed");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    CallAniMethodVoid(env, systemBarProperties, cls, "<set>statusBarContentColor", nullptr, statusBarContentColor);
+    CallAniMethodVoid(env, systemBarProperties, cls, "<set>isStatusBarLightIcon", nullptr,
+        status.contentColor_ == SYSTEM_COLOR_WHITE);
+    ani_string navigationBarColor;
+    if (GetAniString(env, GetHexColor(navi.backgroundColor_), &navigationBarColor) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_IMMS, "[ANI] create string failed");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    CallAniMethodVoid(env, systemBarProperties, cls, "<set>navigationBarColor", nullptr, navigationBarColor);
+    ani_string navigationBarContentColor;
+    if (GetAniString(env, GetHexColor(navi.contentColor_), &navigationBarContentColor) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_IMMS, "[ANI] create string failed");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    CallAniMethodVoid(env, systemBarProperties, cls, "<set>navigationBarContentColor",
+        nullptr, navigationBarContentColor);
+    CallAniMethodVoid(env, systemBarProperties, cls, "<set>isNavigationBarLightIcon", nullptr,
+        navi.contentColor_ == SYSTEM_COLOR_WHITE);
+    CallAniMethodVoid(env, systemBarProperties, cls, "<set>enableStatusBarAnimation", nullptr, status.enableAnimation_);
+    CallAniMethodVoid(env, systemBarProperties, cls, "<set>enableNavigationBarAnimation", nullptr,
+        navi.enableAnimation_);
+    return systemBarProperties;
+}
+
+ani_object AniWindowUtils::CreateAniWindowLayoutInfo(ani_env* env, const WindowLayoutInfo& info)
+{
+    ani_class cls;
+    if (env->FindClass("@ohos.window.window.WindowLayoutInfoInternal", &cls) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] class not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_method ctor;
+    if (env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] ctor not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_object windowLayoutInfo;
+    if (env->Object_New(cls, ctor, &windowLayoutInfo) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] fail to new obj");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    CallAniMethodVoid(env, windowLayoutInfo, cls, "<set>windowRect", nullptr, CreateAniRect(env, info.rect));
+    return windowLayoutInfo;
+}
+
+ani_object AniWindowUtils::CreateAniWindowLayoutInfoArray(ani_env* env,
+    const std::vector<sptr<WindowLayoutInfo>>& infos)
+{
+    ani_class cls;
+    if (env->FindClass("@ohos.window.window.WindowLayoutInfoInternal", &cls) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] class not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_array_ref windowLayoutInfoArray = nullptr;
+    if (env->Array_New_Ref(cls, infos.size(), CreateAniUndefined(env), &windowLayoutInfoArray) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] create array failed");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    for (size_t i = 0; i < infos.size(); i++) {
+        if (env->Array_Set_Ref(windowLayoutInfoArray, i, CreateAniWindowLayoutInfo(env, *infos[i])) != ANI_OK) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] create windowLayoutInfoArray failed");
+            return AniWindowUtils::CreateAniUndefined(env);
+        }
+    }
+    return windowLayoutInfoArray;
+}
+
+ani_object AniWindowUtils::CreateAniWindowInfo(ani_env* env, const WindowVisibilityInfo& info)
+{
+    ani_class cls;
+    if (env->FindClass("@ohos.window.window.WindowInfoInternal", &cls) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] class not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_method ctor;
+    if (env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] ctor not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_object windowInfo;
+    if (env->Object_New(cls, ctor, &windowInfo) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] fail to new obj");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    CallAniMethodVoid(env, windowInfo, cls, "<set>rect", nullptr, CreateAniRect(env, info.GetRect()));
+    CallAniMethodVoid(env, windowInfo, cls, "<set>globalDisplayRect", nullptr,
+        CreateAniRect(env, info.GetGlobalDisplayRect()));
+    ani_string bundleName;
+    if (GetAniString(env, info.GetBundleName(), &bundleName) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] create string failed");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    CallAniMethodVoid(env, windowInfo, cls, "<set>bundleName", nullptr, bundleName);
+    ani_string abilityName;
+    if (GetAniString(env, info.GetAbilityName(), &abilityName) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] create string failed");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    CallAniMethodVoid(env, windowInfo, cls, "<set>abilityName", nullptr, abilityName);
+    CallAniMethodVoid(env, windowInfo, cls, "<set>windowId", nullptr, info.GetWindowId());
+    env->Object_SetFieldByName_Int(windowInfo, "windowStatusTypeInternal", ani_int(info.GetWindowStatus()));
+    env->Object_SetFieldByName_Boolean(windowInfo, "isFocusedInternal", ani_boolean(info.IsFocused()));
+    return windowInfo;
+}
+
+ani_object AniWindowUtils::CreateAniWindowInfoArray(ani_env* env,
+    const std::vector<sptr<WindowVisibilityInfo>>& infos)
+{
+    ani_class cls;
+    if (env->FindClass("@ohos.window.window.WindowInfoInternal", &cls) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] class not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_array_ref windowInfoArray = nullptr;
+    if (env->Array_New_Ref(cls, infos.size(), CreateAniUndefined(env), &windowInfoArray) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] create array failed");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    for (size_t i = 0; i < infos.size(); i++) {
+        if (env->Array_Set_Ref(windowInfoArray, i, CreateAniWindowInfo(env, *infos[i])) != ANI_OK) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] CreateAniWindowInfo failed");
+            return AniWindowUtils::CreateAniUndefined(env);
+        }
+    }
+    return windowInfoArray;
 }
 
 ani_object AniWindowUtils::CreateAniWindowArray(ani_env* env, std::vector<ani_ref>& windows)
@@ -769,7 +1081,12 @@ void AniWindowUtils::SetSystemPropertiesWindowType(ani_env* env, const sptr<Wind
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     WindowType aniWindowType = window->GetType();
-    env->Object_SetFieldByName_Int(systemProperties, "typeInternal", ani_int(aniWindowType));
+    if (NATIVE_JS_TO_WINDOW_TYPE_MAP.count(aniWindowType) != 0) {
+        env->Object_SetFieldByName_Int(systemProperties, "typeInternal",
+            ani_int(NATIVE_JS_TO_WINDOW_TYPE_MAP.at(aniWindowType)));
+    } else {
+        env->Object_SetFieldByName_Int(systemProperties, "typeInternal", ani_int(aniWindowType));
+    }
 }
 
 void AniWindowUtils::SetSystemPropertiesWindowIsLayoutFullScreen(ani_env* env, const sptr<Window>& window,
@@ -881,8 +1198,7 @@ void AniWindowUtils::SetSystemPropertiesDisplayId(ani_env* env, const sptr<Windo
 {
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
     uint32_t displayId = window->GetDisplayId();
-    CallAniMethodVoid(env, systemProperties, clsName, "<set>displayIdInternal", nullptr,
-        static_cast<ani_long>(displayId));
+    env->Object_SetFieldByName_Long(systemProperties, "displayIdInternal", ani_long(displayId));
 }
 
 void AniWindowUtils::SetSystemPropertiesWindowName(ani_env* env, const sptr<Window>& window,
@@ -1042,18 +1358,18 @@ bool AniWindowUtils::SetDecorButtonStyleFromAni(ani_env* env, DecorButtonStyle& 
         decorButtonStyle.colorMode = colorMode;
         emptyParam = false;
     }
-    ani_double buttonBackgroundSize;
-    if (ANI_OK == env->Object_GetPropertyByName_Double(decorStyle, "buttonBackgroundSize", &buttonBackgroundSize)) {
+    ani_int buttonBackgroundSize;
+    if (ANI_OK == env->Object_GetPropertyByName_Int(decorStyle, "buttonBackgroundSize", &buttonBackgroundSize)) {
         decorButtonStyle.buttonBackgroundSize = static_cast<uint32_t>(buttonBackgroundSize);
         emptyParam = false;
     }
-    ani_double spacingBetweenButtons;
-    if (ANI_OK == env->Object_GetPropertyByName_Double(decorStyle, "spacingBetweenButtons", &spacingBetweenButtons)) {
+    ani_int spacingBetweenButtons;
+    if (ANI_OK == env->Object_GetPropertyByName_Int(decorStyle, "spacingBetweenButtons", &spacingBetweenButtons)) {
         decorButtonStyle.spacingBetweenButtons = static_cast<uint32_t>(spacingBetweenButtons);
         emptyParam = false;
     }
-    ani_double closeButtonRightMargin;
-    if (ANI_OK == env->Object_GetPropertyByName_Double(decorStyle, "closeButtonRightMargin", &closeButtonRightMargin)) {
+    ani_int closeButtonRightMargin;
+    if (ANI_OK == env->Object_GetPropertyByName_Int(decorStyle, "closeButtonRightMargin", &closeButtonRightMargin)) {
         decorButtonStyle.closeButtonRightMargin = static_cast<uint32_t>(closeButtonRightMargin);
         emptyParam = false;
     }
@@ -1259,16 +1575,20 @@ bool AniWindowUtils::ParseWindowMask(ani_env* env, ani_array windowMaskArray,
             return false;
         }
         std::vector<uint32_t> elementArray;
-        if (!ParseWindowMaskInnerValue(env, static_cast<ani_array_long>(innerArrayRef), elementArray)) {
+        if (!ParseWindowMaskInnerValue(env, static_cast<ani_array>(innerArrayRef), elementArray)) {
             TLOGE(WmsLogTag::WMS_PC, "[ANI]Failed to convert parameter to window mask!");
             return false;
         }
         windowMask.emplace_back(elementArray);
     }
+    aniRet = env->GlobalReference_Delete(g_longCls);
+    if (aniRet != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_PC, "[ANI]Failed to delete g_longCls ref, ret: %{public}u", aniRet);
+    }
     return true;
 }
 
-bool AniWindowUtils::ParseWindowMaskInnerValue(ani_env* env, ani_array_long innerArray,
+bool AniWindowUtils::ParseWindowMaskInnerValue(ani_env* env, ani_array innerArray,
     std::vector<uint32_t>& elementArray)
 {
     ani_size size;
@@ -1285,7 +1605,7 @@ bool AniWindowUtils::ParseWindowMaskInnerValue(ani_env* env, ani_array_long inne
             return false;
         }
         ani_long maskValue = 0;
-        aniRet = env->Object_CallMethodByName_Long(static_cast<ani_object>(maskValueRef), "unboxed", ":l", &maskValue);
+        aniRet = unbox(env, static_cast<ani_object>(maskValueRef), &maskValue);
         if (aniRet != ANI_OK) {
             TLOGE(WmsLogTag::WMS_PC, "[ANI]Get maskValue failed, ret: %{public}u", aniRet);
             return false;
