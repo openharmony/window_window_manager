@@ -5419,7 +5419,7 @@ WSError WindowSceneSessionImpl::GetTopNavDestinationName(std::string& topNavDest
             GetWindowId(), navDestInfoJsonStr.c_str());
         return WSError::WS_DO_NOTHING;
     }
-    if (navDestInfoJson.contains("name")) {
+    if (navDestInfoJson.contains("name") && navDestInfoJson["name"].is_string()) {
         navDestInfoJson["name"].get_to(topNavDestName);
     }
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}u, navDestInfoJsonStr=%{public}s, topNavDestName=%{public}s",
