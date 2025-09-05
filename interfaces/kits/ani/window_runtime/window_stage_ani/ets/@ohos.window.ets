@@ -717,6 +717,44 @@ export enum RectType {
   RELATIVE_TO_PARENT_WINDOW = 1
 }
 
+export interface StatusBarProperty {
+  contentColor: string;
+}
+
+export class StatusBarPropertyInternal implements StatusBarProperty {
+  contentColor: string;
+}
+
+export interface WindowLayoutInfo {
+  windowRect: Rect;
+}
+
+export class WindowLayoutInfoInternal implements WindowLayoutInfo {
+  windowRect: Rect;
+}
+
+export interface WindowInfo {
+  rect: Rect;
+  globalDisplayRect?: Rect;
+  bundleName: string;
+  abilityName: string;
+  windowId: int;
+  windowStatusType: WindowStatusType;
+  isFocused?: boolean;
+}
+
+export class WindowInfoInternal implements WindowInfo {
+  rect: Rect;
+  globalDisplayRect?: Rect;
+  bundleName: string;
+  abilityName: string;
+  windowId: int;
+  windowStatusType: WindowStatusType;
+  isFocused?: boolean;
+  windowStatusTypeInternal: int;
+  isFocusedInternal: boolean;
+}
+
 export enum BlurStyle {
   OFF = 0,
   THIN = 1,
@@ -1310,6 +1348,12 @@ export interface WindowDensityInfo {
     customDensity: double;
 }
 
+export class WindowDensityInfoInternal implements WindowDensityInfo {
+    systemDensity: double;
+    defaultDensity: double;
+    customDensity: double;
+}
+
 export interface SystemBarStyle {
   statusBarContentColor?: string;
 }
@@ -1586,6 +1630,13 @@ export interface TitleButtonVisibleParam {
 }
 
 export interface GetWindowsByCoordinateParam {
+  displayId: number;
+  windowNumber: number;
+  x: number;
+  y: number;
+}
+
+export class GetWindowsByCoordinateParamInternal implements GetWindowsByCoordinateParam {
   displayId: number;
   windowNumber: number;
   x: number;
@@ -1900,6 +1951,8 @@ export class WindowStageInternal implements WindowStage {
     public native setWindowModal(nativeObj: long, isModal: boolean): void;
     public native getMainWindowSync(nativeObj: long): Window;
     public native createSubWindowSync(nativeObj: long, name: String): Window;
+    public native setCustomDensitySync(nativeObj: long, density: double): void;
+    public native setDefaultDensityEnabledSync(nativeObj: long, enabled: boolean): void;
     native onSync(nativeObj: long, eventType: 'windowStageEvent', callback: Object): void;
     native offSync(nativeObj: long, eventType: 'windowStageEvent', callback?: Object): void;
 
@@ -2010,6 +2063,14 @@ export class WindowStageInternal implements WindowStage {
     public setWindowModal(isModal: boolean): Promise<void> {
         this.setWindowModal(this.nativeObj, isModal);
     }
+
+    public setCustomDensity(density: double): void {
+        this.setCustomDensitySync(this.nativeObj, density);
+    }
+
+    public setDefaultDensityEnabled(enabled: boolean): void {
+        this.setDefaultDensityEnabledSync(this.nativeObj, enabled);
+    }
     
     public getMainWindowSync(): Window {
         let ret = this.getMainWindowSync(this.nativeObj);
@@ -2087,6 +2148,8 @@ export interface WindowStage {
     disableWindowDecor(): void;
     setShowOnLockScreen(showOnLockScreen: boolean): void;
     setWindowModal(isModal: boolean): Promise<void>;
+    setCustomDensity(density: double): void;
+    setDefaultDensityEnabled(enabled: boolean): void;
     on(eventType: 'windowStageEvent', callback: Callback<WindowStageEventType>): void;
     off(eventType: 'windowStageEvent', callback?: Callback<WindowStageEventType>): void;
 }
@@ -2192,6 +2255,23 @@ export class WindowInternal implements Window {
     private native setSubWindowModalType(nativeObj: long, isModal: boolean, modalityType: int): void;
     private native isFocusedSync(nativeObj: long): boolean;
     private native setSubWindowZLevelSync(nativeObj: long, zLevel: int): void;
+    private native setWindowBrightness(nativeObj: long, brightness: double): void;
+    private native getWindowColorSpace(nativeObj: long): int;
+    private native setWakeUpScreen(nativeObj: long, wakeUp: boolean): void;
+    private native setSnapshotSkip(nativeObj: long, isSkip: boolean): void;
+    private native snapshotIgnorePrivacy(nativeObj: long): image.PixelMap;
+    private native setWindowContainerColor(nativeObj: long, activeColor: string, inactiveColor: string): void;
+    private native getStatusBarProperty(nativeObj: long): StatusBarProperty;
+    private native setStatusBarColor(nativeObj: long, color: long): void;
+    private native isSystemAvoidAreaEnabled(nativeObj: long): boolean;
+    private native setSystemAvoidAreaEnabled(nativeObj: long, enabled: boolean): void;
+    private native getWindowDensityInfo(nativeObj: long): WindowDensityInfo;
+    private native getImmersiveModeEnabledState(nativeObj: long): boolean;
+    private native setWindowGrayScale(nativeObj: long, grayScale: double): void;
+    private native getWindowSystemBarProperties(nativeObj: long): SystemBarProperties;
+    private native isGestureBackEnabled(nativeObj: long): boolean;
+    private native setGestureBackEnabled(nativeObj: long, enabled: boolean): void;
+    private native setSingleFrameComposerEnabled(nativeObj: long, enabled: boolean): void;
     private native setWindowTouchableSync(nativeObj: long, isTouchable: boolean): void;
     private native setDialogBackGestureEnabledSync(nativeObj: long, enabled: boolean): void;
     private native setWindowMaskSync(nativeObj: long, windowMask: Array<Array<long>>): void;
@@ -3293,6 +3373,142 @@ export class WindowInternal implements Window {
         });
       });
     }
+
+    public setWindowBrightness(brightness: double): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.setWindowBrightness(this.nativeObj, brightness);
+        }).then((ret: NullishType) => {
+          resolve(undefined);
+        }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
+    public setWindowBrightness(brightness: double, callback: AsyncCallback<void>): void {
+      taskpool.execute((): void => {
+        this.setWindowBrightness(this.nativeObj, brightness);
+      }).then((ret: NullishType) => {
+        callback(new BusinessError(), undefined);
+      }).catch((err: NullishType) => {
+        callback(err as BusinessError, undefined);
+      });
+    }
+
+    public getWindowColorSpace(): ColorSpace {
+      return this.getWindowColorSpace(this.nativeObj) as ColorSpace;
+    }
+
+    public setWakeUpScreen(wakeUp: boolean): void {
+      return this.setWakeUpScreen(this.nativeObj, wakeUp);
+    }
+
+    public setSnapshotSkip(isSkip: boolean): void {
+      return this.setSnapshotSkip(this.nativeObj, isSkip);
+    }
+
+    public snapshotIgnorePrivacy(): Promise<image.PixelMap> {
+      return new Promise<image.PixelMap>((resolve: (value: image.PixelMap) => void,
+        reject: (error: BusinessError) => void): void => {
+        taskpool.execute(() => {
+          return this.snapshotIgnorePrivacy(this.nativeObj);
+        }).then((ret: NullishType) => {
+          resolve(ret as image.PixelMap);
+        }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
+    public setWindowContainerColor(activeColor: string, inactiveColor: string): void {
+      return this.setWindowContainerColor(this.nativeObj, activeColor, inactiveColor);
+    }
+
+    public getStatusBarProperty(): StatusBarProperty {
+      return this.getStatusBarProperty(this.nativeObj);
+    }
+
+    public setStatusBarColor(color: ColorMetrics): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.setStatusBarColor(
+            this.nativeObj, (color.alpha << 24) | (color.red << 16) | (color.green << 8) | color.blue);
+        }).then((ret: NullishType) => {
+          resolve(undefined);
+        }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
+    public isSystemAvoidAreaEnabled(): boolean {
+      return this.isSystemAvoidAreaEnabled(this.nativeObj);
+    }
+
+    public setSystemAvoidAreaEnabled(enabled: boolean): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.setSystemAvoidAreaEnabled(this.nativeObj, enabled);
+        }).then((ret: NullishType) => {
+          resolve(undefined);
+        }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
+    public getWindowDensityInfo(): WindowDensityInfo {
+      return this.getWindowDensityInfo(this.nativeObj) as WindowDensityInfoInternal;
+    }
+
+    public getImmersiveModeEnabledState(): boolean {
+      return this.getImmersiveModeEnabledState(this.nativeObj);
+    }
+
+    public setWindowGrayScale(grayScale: double): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.setWindowGrayScale(this.nativeObj, grayScale);
+        }).then((ret: NullishType) => {
+          resolve(undefined);
+        }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
+    public getWindowSystemBarProperties(): SystemBarProperties {
+      return this.getWindowSystemBarProperties(this.nativeObj);
+    }
+
+    public isGestureBackEnabled(): boolean {
+      return this.isGestureBackEnabled(this.nativeObj);
+    }
+
+    public setGestureBackEnabled(enabled: boolean): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.setGestureBackEnabled(this.nativeObj, enabled);
+        }).then((ret: NullishType) => {
+          resolve(undefined);
+        }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
+    public setSingleFrameComposerEnabled(enabled: boolean): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.setSingleFrameComposerEnabled(this.nativeObj, enabled);
+        }).then((ret: NullishType) => {
+          resolve(undefined);
+        }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
 }
 
 export interface Window {
@@ -3413,6 +3629,24 @@ export interface Window {
     getWindowCornerRadius(): double;
     setWindowCornerRadius(cornerRadius: double): Promise<void>;
     setWindowShadowRadius(radius: double): void;
+    setWindowBrightness(brightness: double): Promise<void>;
+    setWindowBrightness(brightness: double, callback: AsyncCallback<void>): void;
+    getWindowColorSpace(): ColorSpace;
+    setWakeUpScreen(wakeUp: boolean): void;
+    setSnapshotSkip(isSkip: boolean): void;
+    snapshotIgnorePrivacy(): Promise<image.PixelMap>;
+    setWindowContainerColor(activeColor: string, inactiveColor: string): void;
+    getStatusBarProperty(): StatusBarProperty;
+    setStatusBarColor(color: ColorMetrics): Promise<void>;
+    isSystemAvoidAreaEnabled(): boolean;
+    setSystemAvoidAreaEnabled(enabled: boolean): Promise<void>;
+    getWindowDensityInfo(): WindowDensityInfo;
+    getImmersiveModeEnabledState(): boolean;
+    setWindowGrayScale(grayScale: double): Promise<void>;
+    getWindowSystemBarProperties(): SystemBarProperties;
+    isGestureBackEnabled(): boolean;
+    setGestureBackEnabled(enabled: boolean): Promise<void>;
+    setSingleFrameComposerEnabled(enabled: boolean): Promise<void>;
     on<T>(type: string, callback: Callback<T>): void;
     on<T>(type: 'noInteractionDetected', timeout: long, callback: Callback<T>): void;
     off<T>(type: string, callback?: Callback<T>): void;
@@ -3437,6 +3671,11 @@ native function offSync(nativeObj: long, type: string, callback?: object): void;
 native function shiftAppWindowFocusSync(nativeObj: long, sourceWindowId: int, targetWindowId: int): void;
 native function shiftAppWindowPointerEventSync(nativeObj: long, sourceWindowId: int, targetWindowId: int): void;
 native function createWindowSync(nativeObj: long, config: Configuration): Window;
+native function getAllWindowLayoutInfo(nativeObj: long, displayId: long): Array<WindowLayoutInfo>;
+native function getSnapshot(nativeObj: long, windowId: number): image.PixelMap;
+native function getVisibleWindowInfo(nativeObj: long): Array<WindowInfoInternal>;
+native function setGestureNavigationEnabled(nativeObj: long, enabled: boolean): void;
+native function setWaterMarkImage(nativeObj: long, pixelMap: image.PixelMap, enabled: boolean): void;
 
 export function getLastWindow(ctx: BaseContext): Promise<Window> {
   return new Promise<Window>((resolve: (value: Window) => void, reject: (error: BusinessError) => void) => {
@@ -3516,7 +3755,7 @@ export function getWindowsByCoordinate(displayId: number, windowNumber?: number,
         windowNumber: 0,
         x: -1,
         y: -1
-      };
+      } as GetWindowsByCoordinateParamInternal;
       if (windowNumber != undefined) {
         param.windowNumber = windowNumber;
       }
@@ -3533,6 +3772,97 @@ export function getWindowsByCoordinate(displayId: number, windowNumber?: number,
         reject(err as BusinessError);
     });
   });
+}
+
+export function getAllWindowLayoutInfo(displayId: long): Promise<Array<WindowLayoutInfo>> {
+  return new Promise<Array<WindowLayoutInfo>>((
+    resolve: (value: Array<WindowLayoutInfo>) => void, reject: (error: BusinessError) => void): void => {
+      taskpool.execute(() => {
+          return getAllWindowLayoutInfo(nativeObj, displayId);
+      }).then((ret: NullishType) => {
+          resolve(ret as Array<WindowLayoutInfo>);
+      }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+      });
+  });
+}
+
+export function getSnapshot(windowId: number): Promise<image.PixelMap> {
+  return new Promise<image.PixelMap>((
+    resolve: (value: image.PixelMap) => void, reject: (error: BusinessError) => void): void => {
+      taskpool.execute(() => {
+          return getSnapshot(nativeObj, windowId);
+      }).then((ret: NullishType) => {
+          resolve(ret as image.PixelMap);
+      }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+      });
+  });
+}
+
+export function getVisibleWindowInfo(): Promise<Array<WindowInfo>> {
+  return new Promise<Array<WindowInfo>>((
+    resolve: (value: Array<WindowInfo>) => void, reject: (error: BusinessError) => void): void => {
+      taskpool.execute(() => {
+          let visibleWindowInfos = getVisibleWindowInfo(nativeObj);
+          for (let i = 0; i < visibleWindowInfos.length; i++) {
+            visibleWindowInfos[i].windowStatusType =
+              visibleWindowInfos[i].windowStatusTypeInternal as WindowStatusType;
+            visibleWindowInfos[i].isFocused = visibleWindowInfos[i].isFocusedInternal;
+          }
+          return visibleWindowInfos;
+      }).then((ret: NullishType) => {
+          resolve(ret as Array<WindowInfo>);
+      }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+      });
+  });
+}
+
+export function setGestureNavigationEnabled(enabled: boolean): Promise<void> {
+  return new Promise<void>((
+    resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+      taskpool.execute((): void => {
+          return setGestureNavigationEnabled(nativeObj, enabled);
+      }).then((ret: NullishType) => {
+          resolve(undefined);
+      }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+      });
+  });
+}
+
+export function setGestureNavigationEnabled(enabled: boolean, callback: AsyncCallback<void>): void {
+    taskpool.execute((): void => {
+        setGestureNavigationEnabled(nativeObj, enabled);
+    }).then((ret: NullishType) => {
+        callback(new BusinessError(), undefined);
+    }).catch((err: NullishType) => {
+        callback(err as BusinessError, undefined);
+    });
+}
+
+export function setWaterMarkImage(pixelMap: image.PixelMap, enabled: boolean): Promise<void> {
+  return new Promise<void>((
+    resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+      taskpool.execute((): void => {
+          return setWaterMarkImage(nativeObj, pixelMap, enabled);
+      }).then((ret: NullishType) => {
+          resolve(undefined);
+      }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+      });
+  });
+}
+
+export function setWaterMarkImage(pixelMap: image.PixelMap, enabled: boolean, callback: AsyncCallback<void>): void {
+    taskpool.execute((): void => {
+        setWaterMarkImage(nativeObj, pixelMap, enabled);
+    }).then((ret: NullishType) => {
+        callback(new BusinessError(), undefined);
+    }).catch((err: NullishType) => {
+        callback(err as BusinessError, undefined);
+    });
 }
 
 export function findWindow(name: string): Window {

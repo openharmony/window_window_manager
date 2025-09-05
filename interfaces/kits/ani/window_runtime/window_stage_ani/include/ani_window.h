@@ -147,6 +147,24 @@ public:
     ani_object Snapshot(ani_env* env);
     void HideNonSystemFloatingWindows(ani_env* env, ani_boolean shouldHide);
 
+    void SetWindowBrightness(ani_env* env, ani_double brightness);
+    ani_int GetWindowColorSpace(ani_env* env);
+    void SetWakeUpScreen(ani_env* env, ani_boolean wakeUp);
+    void SetSnapshotSkip(ani_env* env, ani_boolean isSkip);
+    ani_object SnapshotIgnorePrivacy(ani_env* env);
+    void SetWindowContainerColor(ani_env* env, ani_string activeColor, ani_string inactiveColor);
+    ani_object GetStatusBarProperty(ani_env* env);
+    void SetStatusBarColor(ani_env* env, ani_long color);
+    ani_boolean IsSystemAvoidAreaEnabled(ani_env* env);
+    void SetSystemAvoidAreaEnabled(ani_env* env, ani_boolean enabled);
+    ani_object GetWindowDensityInfo(ani_env* env);
+    ani_boolean GetImmersiveModeEnabledState(ani_env* env);
+    void SetWindowGrayScale(ani_env* env, ani_double grayScale);
+    ani_object GetWindowSystemBarProperties(ani_env* env);
+    ani_boolean IsGestureBackEnabled(ani_env* env);
+    void SetGestureBackEnabled(ani_env* env, ani_boolean enabled);
+    void SetSingleFrameComposerEnabled(ani_env* env, ani_boolean enabled);
+
 private:
     void OnSetWindowColorSpace(ani_env* env, ani_int colorSpace);
     void OnSetPreferredOrientation(ani_env* env, ani_int orientation);
