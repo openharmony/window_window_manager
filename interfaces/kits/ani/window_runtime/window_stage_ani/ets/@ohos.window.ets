@@ -739,6 +739,8 @@ export class SubWindowOptionsInternal implements SubWindowOptions {
     maximizeSupported?: boolean;
     zLevel?: int;
     outlineEnabled?: boolean;
+}
+
 export interface StatusBarProperty {
   contentColor: string;
 }
