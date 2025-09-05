@@ -328,6 +328,7 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
         property->SetRequestedOrientation(static_cast<Orientation>(reply.ReadUint32()));
         property->SetUserRequestedOrientation(static_cast<Orientation>(reply.ReadUint32()));
         property->SetAppInstanceKey(reply.ReadString());
+        property->SetAppIndex(reply.ReadInt32());
         property->SetDragEnabled(reply.ReadBool());
         property->SetIsAtomicService(reply.ReadBool());
         property->SetIsAbilityHook(reply.ReadBool());
