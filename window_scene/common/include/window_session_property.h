@@ -301,6 +301,12 @@ public:
     std::string GetAppInstanceKey() const;
 
     /*
+     * App Clone
+     */
+    void SetAppIndex(int32_t appIndex);
+    int32_t GetAppIndex() const;
+
+    /*
      * PC Window
      */
     void SetSupportedWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes);
@@ -539,6 +545,11 @@ private:
      * Multi Instance
      */
     std::string appInstanceKey_;
+
+    /*
+     * App Clone
+     */
+    int32_t appIndex_ = 0;
 
     /*
      * PC Window

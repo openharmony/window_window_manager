@@ -1326,6 +1326,7 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
         static_cast<uint32_t>(winRect.height_)};
     property->SetWindowRect(rect);
     property->SetPersistentId(GetPersistentId());
+    property->SetAppIndex(GetSessionInfo().appIndex_);
     property->SetFullScreenStart(GetSessionInfo().fullScreenStart_);
     property->SetSupportedWindowModes(GetSessionInfo().supportedWindowModes);
     property->SetWindowSizeLimits(GetSessionInfo().windowSizeLimits);
