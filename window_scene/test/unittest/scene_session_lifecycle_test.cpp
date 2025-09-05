@@ -286,13 +286,14 @@ HWTEST_F(SceneSessionLifecycleTest, ForegroundTask01, TestSize.Level0)
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     session->SetSessionState(SessionState::STATE_CONNECT);
     EXPECT_EQ(SessionState::STATE_CONNECT, session->GetSessionState());
-
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     EXPECT_EQ(false, session->isUIFirstEnabled_);
+    EXPECT_EQ(nullptr, session->GetLeashWinShadowSurfaceNode());
     EXPECT_EQ(WSError::WS_OK, session->ForegroundTask(property));
 
     session->isUIFirstEnabled_ = true;
     EXPECT_EQ(true, session->isUIFirstEnabled_);
+    EXPECT_EQ(nullptr, session->GetLeashWinShadowSurfaceNode());
     session->SetSessionState(SessionState::STATE_CONNECT);
     EXPECT_EQ(WSError::WS_OK, session->ForegroundTask(property));
 
@@ -302,11 +303,13 @@ HWTEST_F(SceneSessionLifecycleTest, ForegroundTask01, TestSize.Level0)
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
     EXPECT_NE(nullptr, surfaceNode);
     session->SetLeashWinSurfaceNode(surfaceNode);
+    EXPECT_NE(nullptr, session->GetLeashWinShadowSurfaceNode());
     session->SetSessionState(SessionState::STATE_CONNECT);
     EXPECT_EQ(WSError::WS_OK, session->ForegroundTask(property));
 
     session->isUIFirstEnabled_ = false;
     EXPECT_EQ(false, session->isUIFirstEnabled_);
+    EXPECT_NE(nullptr, session->GetLeashWinShadowSurfaceNode());
     session->SetSessionState(SessionState::STATE_CONNECT);
     EXPECT_EQ(WSError::WS_OK, session->ForegroundTask(property));
 }

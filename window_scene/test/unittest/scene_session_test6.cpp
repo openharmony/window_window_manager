@@ -1147,10 +1147,12 @@ HWTEST_F(SceneSessionTest6, SetFrameRectForPartialZoomInInner, Function | SmallT
     info.bundleName_ = "SetFrameRectForPartialZoomInInner";
     info.abilityName_ = "SetFrameRectForPartialZoomInInner";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession->mainHandler_, nullptr);
+    EXPECT_EQ(sceneSession->GetSurfaceNode(), nullptr);
 
     Rect frameRect = { 10, 10, 10, 10 };  // 10 is valid frame rect param
     WSError ret = sceneSession->SetFrameRectForPartialZoomInInner(frameRect);
-    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_WINDOW);
+    EXPECT_EQ(ret, WSError::WS_OK);
 
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
@@ -1158,6 +1160,10 @@ HWTEST_F(SceneSessionTest6, SetFrameRectForPartialZoomInInner, Function | SmallT
     sceneSession->surfaceNode_ = surfaceNode;
     ret = sceneSession->SetFrameRectForPartialZoomInInner(frameRect);
     EXPECT_EQ(ret, WSError::WS_OK);
+
+    sceneSession->mainHandler_ = nullptr;
+    ret = sceneSession->SetFrameRectForPartialZoomInInner(frameRect);
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_WINDOW);
 }
 
 /**
