@@ -453,8 +453,10 @@ WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property
             TLOGNI(WmsLogTag::WMS_LIFE,
                 "%{public}s foreground specific callback does not take effect, callback function null", where);
         }
-        if (session->isUIFirstEnabled_ && leashWinSurfaceNode) {
-            leashWinSurfaceNode->SetForceUIFirst(false);
+        auto leashWinShadowSurfaceNode = session->GetLeashWinShadowSurfaceNode();
+        if (session->isUIFirstEnabled_ && leashWinShadowSurfaceNode) {
+            AutoRSTransaction trans(session->GetRSLeashWinShadowContext());
+            leashWinShadowSurfaceNode->SetForceUIFirst(false);
             session->isUIFirstEnabled_ = false;
         }
         return WSError::WS_OK;
@@ -3398,15 +3400,15 @@ WSError SceneSession::RequestSessionBack(bool needMoveToBackground)
             return WSError::WS_DO_NOTHING;
         }
         if (g_enableForceUIFirst) {
-            AutoRSTransaction trans(session->GetRSUIContext());
-            auto leashWinSurfaceNode = session->GetLeashWinSurfaceNode();
-            if (leashWinSurfaceNode) {
-                leashWinSurfaceNode->SetForceUIFirst(true);
+            auto leashWinShadowSurfaceNode = session->GetLeashWinShadowSurfaceNode();
+            if (leashWinShadowSurfaceNode) {
+                AutoRSTransaction trans(session->GetRSLeashWinShadowContext());
+                leashWinShadowSurfaceNode->SetForceUIFirst(true);
                 session->isUIFirstEnabled_ = true;
-                TLOGNI(WmsLogTag::WMS_EVENT, "%{public}s leashWinSurfaceNode_ SetForceUIFirst id:%{public}u!",
+                TLOGNI(WmsLogTag::WMS_EVENT, "%{public}s leashWinShadowSurfaceNode_ SetForceUIFirst id:%{public}u!",
                     where, session->GetPersistentId());
             } else {
-                TLOGNI(WmsLogTag::WMS_EVENT, "%{public}s failed, leashWinSurfaceNode_ null id:%{public}u",
+                TLOGNI(WmsLogTag::WMS_EVENT, "%{public}s failed, leashWinShadowSurfaceNode_ null id:%{public}u",
                     where, session->GetPersistentId());
             }
         }
@@ -9404,14 +9406,26 @@ WSError SceneSession::SetFrameRectForPartialZoomIn(const Rect& frameRect)
 
 WSError SceneSession::SetFrameRectForPartialZoomInInner(const Rect& frameRect)
 {
-    auto surfaceNode = GetSurfaceNode();
-    if (surfaceNode == nullptr) {
-        TLOGE(WmsLogTag::WMS_ANIMATION, "surface node is null");
+    if (!mainHandler_) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Main handler is nullptr, id: %{public}d.", GetPersistentId());
         return WSError::WS_ERROR_INVALID_WINDOW;
     }
-    AutoRSTransaction trans(GetRSUIContext(), true);
-    surfaceNode->SetRegionToBeMagnified({ frameRect.posX_, frameRect.posY_, frameRect.width_, frameRect.height_ });
-    TLOGI(WmsLogTag::WMS_ANIMATION, "frameRect: %{public}s", frameRect.ToString().c_str());
+    mainHandler_->PostTask([weakThis = wptr(this), frameRect, where = __func__]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_ANIMATION, "%{public}s, session is null", where);
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        auto surfaceNode = session->GetSurfaceNode();
+        if (surfaceNode == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ANIMATION, "%{public}s, surface node is null", where);
+            return WSError::WS_ERROR_INVALID_WINDOW;
+        }
+        AutoRSTransaction trans(session->GetRSUIContext(), true);
+        surfaceNode->SetRegionToBeMagnified({ frameRect.posX_, frameRect.posY_, frameRect.width_, frameRect.height_ });
+        TLOGNI(WmsLogTag::WMS_ANIMATION, "%{public}s, frameRect: %{public}s", where, frameRect.ToString().c_str());
+        return WSError::WS_OK;
+    }, __func__, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
     return WSError::WS_OK;
 }
 
